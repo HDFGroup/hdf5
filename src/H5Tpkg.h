@@ -287,7 +287,7 @@ typedef herr_t (*H5T_vlen_setnull_func_t)(H5VL_object_t *file, void *_vl, void *
 typedef herr_t (*H5T_vlen_read_func_t)(H5VL_object_t *file, void *_vl, void *buf, size_t len);
 typedef herr_t (*H5T_vlen_write_func_t)(H5VL_object_t *file, const H5T_vlen_alloc_info_t *vl_alloc_info,
                                         void *_vl, void *buf, void *_bg, size_t seq_len, size_t base_size);
-typedef herr_t (*H5T_vlen_delete_func_t)(H5VL_object_t *file, const void *_vl);
+typedef herr_t (*H5T_vlen_delete_func_t)(H5VL_object_t *file, void *_vl);
 
 /* VL datatype callbacks */
 typedef struct H5T_vlen_class_t {
@@ -388,26 +388,22 @@ typedef herr_t (*H5T_operator_t)(H5T_t *dt, void *op_data /*in,out*/);
 H5_DLLVAR const unsigned H5O_dtype_ver_bounds[H5F_LIBVER_NBOUNDS];
 
 /*
- * Alignment information for native types. A value of N indicates that the
- * data must be aligned on an address ADDR such that 0 == ADDR mod N. When
- * N=1 no alignment is required; N=0 implies that alignment constraints were
- * not calculated.  These alignment info is only for H5Tget_native_type.
- * These values are used for structure alignment.
+ * Alignment constraints for HDF5 types.  Accessing objects of these
+ * types with improper alignment invokes C undefined behavior, so the
+ * library lays out objects with correct alignment, always.
+ *
+ * A value of N indicates that the data must be aligned on an address
+ * ADDR such that 0 == ADDR mod N. When N=1 no alignment is required;
+ * N=0 implies that alignment constraints were not calculated.  These
+ * values are used for structure alignment.
+ *
+ * This alignment info is only for H5Tget_native_type.
  */
-H5_DLLVAR size_t H5T_NATIVE_SCHAR_COMP_ALIGN_g;
-H5_DLLVAR size_t H5T_NATIVE_SHORT_COMP_ALIGN_g;
-H5_DLLVAR size_t H5T_NATIVE_INT_COMP_ALIGN_g;
-H5_DLLVAR size_t H5T_NATIVE_LONG_COMP_ALIGN_g;
-H5_DLLVAR size_t H5T_NATIVE_LLONG_COMP_ALIGN_g;
-H5_DLLVAR size_t H5T_NATIVE_FLOAT_COMP_ALIGN_g;
-H5_DLLVAR size_t H5T_NATIVE_DOUBLE_COMP_ALIGN_g;
-H5_DLLVAR size_t H5T_NATIVE_LDOUBLE_COMP_ALIGN_g;
-
-H5_DLLVAR size_t H5T_POINTER_COMP_ALIGN_g;
-H5_DLLVAR size_t H5T_HVL_COMP_ALIGN_g;
-H5_DLLVAR size_t H5T_HOBJREF_COMP_ALIGN_g;
-H5_DLLVAR size_t H5T_HDSETREGREF_COMP_ALIGN_g;
-H5_DLLVAR size_t H5T_REF_COMP_ALIGN_g;
+H5_DLLVAR size_t H5T_POINTER_ALIGN_g;
+H5_DLLVAR size_t H5T_HVL_ALIGN_g;
+H5_DLLVAR size_t H5T_HOBJREF_ALIGN_g;
+H5_DLLVAR size_t H5T_HDSETREGREF_ALIGN_g;
+H5_DLLVAR size_t H5T_REF_ALIGN_g;
 
 /*
  * Alignment information for native types. A value of N indicates that the
@@ -473,6 +469,7 @@ H5FL_EXTERN(H5T_shared_t);
 
 /* Common functions */
 H5_DLL herr_t H5T__init_native(void);
+H5_DLL herr_t H5T__init_native_internal(void);
 H5_DLL H5T_t *H5T__create(H5T_class_t type, size_t size);
 H5_DLL H5T_t *H5T__alloc(void);
 H5_DLL herr_t H5T__free(H5T_t *dt);

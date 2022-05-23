@@ -1222,7 +1222,7 @@ H5S__select_iter_block(const H5S_sel_iter_t *iter, hsize_t *start, hsize_t *end)
 {
     herr_t ret_value; /* return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(iter);
@@ -1300,7 +1300,7 @@ H5S__select_iter_has_next_block(const H5S_sel_iter_t *iter)
 {
     herr_t ret_value; /* return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(iter);
@@ -1384,7 +1384,7 @@ H5S__select_iter_next_block(H5S_sel_iter_t *iter)
 {
     herr_t ret_value; /* return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(iter);
@@ -2170,27 +2170,24 @@ done:
 
     Note that if m > n, it is possible that the starting point in the
     buffer associated with the memory dataspace will have to be
-    adjusted to match the projected dataspace.  If the buf parameter
-    is not NULL, the function must return an adjusted buffer base
-    address in *adj_buf_ptr.
+    adjusted to match the projected dataspace. In this case, the amount
+    of adjustment to be applied to the buffer will be returned via the
+    buf_adj parameter, if supplied.
 
  USAGE
     htri_t H5S_select_construct_projection(base_space,
                                            new_space_ptr,
                                            new_space_rank,
-                                           buf,
-                                           adj_buf_ptr)
+                                           element_size,
+                                           buf_adj)
         const H5S_t *base_space;     IN: Ptr to Dataspace to project
         H5S_t ** new_space_ptr;     OUT: Ptr to location in which to return
                                          the address of the projected space
         int new_space_rank;	     IN: Rank of the projected space.
-        const void * buf;            IN: Base address of the buffer
-                                         associated with the base space.
-                                         May be NULL.
-        void ** adj_buf_ptr;        OUT: If buf != NULL, store the base
-                                         address of the section of buf
-                                         that is described by *new_space_ptr
-                                         in *adj_buf_ptr.
+        hsize_t element_size;        IN: size of each element in the selection
+        ptrdiff_t buf_adj;          OUT: amount of adjustment to be applied
+                                         to buffer associated with memory
+                                         dataspace
 
  RETURNS
     Non-negative on success/Negative on failure.
@@ -2199,9 +2196,6 @@ done:
     Construct a new dataspace and associated selection which is a
     projection of the supplied dataspace and associated selection into
     the specified rank.  Return it in *new_space_ptr.
-
-    If buf is supplied, computes the base address of the projected
-    selection in buf, and stores the base address in *adj_buf_ptr.
 
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
@@ -2214,7 +2208,7 @@ done:
 --------------------------------------------------------------------------*/
 herr_t
 H5S_select_construct_projection(H5S_t *base_space, H5S_t **new_space_ptr, unsigned new_space_rank,
-                                const void *buf, void const **adj_buf_ptr, hsize_t element_size)
+                                hsize_t element_size, ptrdiff_t *buf_adj)
 {
     H5S_t *  new_space = NULL;                         /* New dataspace constructed */
     hsize_t  base_space_dims[H5S_MAX_RANK];            /* Current dimensions of base dataspace */
@@ -2233,7 +2227,6 @@ H5S_select_construct_projection(H5S_t *base_space, H5S_t **new_space_ptr, unsign
     HDassert(new_space_ptr != NULL);
     HDassert((new_space_rank != 0) || (H5S_GET_SELECT_NPOINTS(base_space) <= 1));
     HDassert(new_space_rank <= H5S_MAX_RANK);
-    HDassert((buf == NULL) || (adj_buf_ptr != NULL));
     HDassert(element_size > 0);
 
     /* Get the extent info for the base dataspace */
@@ -2396,26 +2389,15 @@ H5S_select_construct_projection(H5S_t *base_space, H5S_t **new_space_ptr, unsign
     /* load the address of the new space into *new_space_ptr */
     *new_space_ptr = new_space;
 
-    /* now adjust the buffer if required */
-    if (buf != NULL) {
+    /* return the buffer adjustment amount if required */
+    if (buf_adj != NULL) {
         if (new_space_rank < base_space_rank) {
-            /* a bit of pointer magic here:
-             *
-             * Since we can't do pointer arithmetic on void pointers, we first
-             * cast buf to a pointer to byte -- i.e. uint8_t.
-             *
-             * We then multiply the projected space element offset we
-             * calculated earlier by the supplied element size, add this
-             * value to the type cast buf pointer, cast the result back
-             * to a pointer to void, and assign the result to *adj_buf_ptr.
-             */
-            *adj_buf_ptr = (const void *)(((const uint8_t *)buf) +
-                                          ((size_t)(projected_space_element_offset * element_size)));
-        } /* end if */
+            *buf_adj = (ptrdiff_t)(projected_space_element_offset * element_size);
+        }
         else
             /* No adjustment necessary */
-            *adj_buf_ptr = buf;
-    } /* end if */
+            *buf_adj = 0;
+    }
 
 done:
     /* Cleanup on error */

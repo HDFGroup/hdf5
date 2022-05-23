@@ -2314,7 +2314,7 @@ vector_write_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     H5FD_mem_t  types[1];
     haddr_t     addrs[1];
     size_t      sizes[1];
-    void *      bufs[1];
+    const void *bufs[1];
 
     pass = TRUE;
 
@@ -2366,7 +2366,7 @@ vector_write_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
         types[0] = H5FD_MEM_DRAW;
         addrs[0] = (haddr_t)mpi_rank * (haddr_t)INTS_PER_RANK * (haddr_t)(sizeof(int32_t));
         sizes[0] = (size_t)INTS_PER_RANK * sizeof(int32_t);
-        bufs[0]  = (void *)(&(increasing_fi_buf[mpi_rank * INTS_PER_RANK]));
+        bufs[0]  = (const void *)(&(increasing_fi_buf[mpi_rank * INTS_PER_RANK]));
 
         if (H5FDwrite_vector(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
 
@@ -2509,7 +2509,7 @@ vector_write_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     H5FD_mem_t  types[1];
     haddr_t     addrs[1];
     size_t      sizes[1];
-    void *      bufs[1];
+    const void *bufs[1];
 
     pass = TRUE;
 
@@ -2566,7 +2566,7 @@ vector_write_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
             types[0] = H5FD_MEM_DRAW;
             addrs[0] = (haddr_t)mpi_rank * (haddr_t)INTS_PER_RANK * (haddr_t)(sizeof(int32_t));
             sizes[0] = (size_t)INTS_PER_RANK * sizeof(int32_t);
-            bufs[0]  = (void *)(&(increasing_fi_buf[mpi_rank * INTS_PER_RANK]));
+            bufs[0]  = (const void *)(&(increasing_fi_buf[mpi_rank * INTS_PER_RANK]));
 
             if (H5FDwrite_vector(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
 
@@ -2607,7 +2607,7 @@ vector_write_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
             types[0] = H5FD_MEM_DRAW;
             addrs[0] = (haddr_t)mpi_rank * (haddr_t)INTS_PER_RANK * (haddr_t)(sizeof(int32_t));
             sizes[0] = (size_t)INTS_PER_RANK * sizeof(int32_t);
-            bufs[0]  = (void *)(&(negative_fi_buf[mpi_rank * INTS_PER_RANK]));
+            bufs[0]  = (const void *)(&(negative_fi_buf[mpi_rank * INTS_PER_RANK]));
 
             if (H5FDwrite_vector(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
 
@@ -2770,7 +2770,7 @@ vector_write_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     H5FD_mem_t  types[4];
     haddr_t     addrs[4];
     size_t      sizes[4];
-    void *      bufs[4];
+    const void *bufs[4];
 
     pass = TRUE;
 
@@ -2830,22 +2830,22 @@ vector_write_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
         types[0] = H5FD_MEM_DRAW;
         addrs[0] = base_addr;
         sizes[0] = bytes_per_write;
-        bufs[0]  = (void *)(&(increasing_fi_buf[mpi_rank * INTS_PER_RANK]));
+        bufs[0]  = (const void *)(&(increasing_fi_buf[mpi_rank * INTS_PER_RANK]));
 
         types[1] = H5FD_MEM_DRAW;
         addrs[1] = addrs[0] + (haddr_t)(bytes_per_write);
         sizes[1] = bytes_per_write;
-        bufs[1]  = (void *)(&(decreasing_fi_buf[(mpi_rank * INTS_PER_RANK) + (INTS_PER_RANK / 4)]));
+        bufs[1]  = (const void *)(&(decreasing_fi_buf[(mpi_rank * INTS_PER_RANK) + (INTS_PER_RANK / 4)]));
 
         types[2] = H5FD_MEM_DRAW;
         addrs[2] = addrs[1] + (haddr_t)(bytes_per_write);
         sizes[2] = bytes_per_write;
-        bufs[2]  = (void *)(&(negative_fi_buf[(mpi_rank * INTS_PER_RANK) + (INTS_PER_RANK / 2)]));
+        bufs[2]  = (const void *)(&(negative_fi_buf[(mpi_rank * INTS_PER_RANK) + (INTS_PER_RANK / 2)]));
 
         types[3] = H5FD_MEM_DRAW;
         addrs[3] = addrs[2] + (haddr_t)(bytes_per_write);
         sizes[3] = bytes_per_write;
-        bufs[3]  = (void *)(&(zero_fi_buf[(mpi_rank * INTS_PER_RANK) + (3 * (INTS_PER_RANK / 4))]));
+        bufs[3]  = (const void *)(&(zero_fi_buf[(mpi_rank * INTS_PER_RANK) + (3 * (INTS_PER_RANK / 4))]));
 
 #if 0  /* JRM */
         HDfprintf(stdout, "addrs = { %lld, %lld, %lld, %lld}\n", 
@@ -3048,7 +3048,7 @@ vector_write_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     H5FD_mem_t  types[4];
     haddr_t     addrs[4];
     size_t      sizes[4];
-    void *      bufs[4];
+    const void *bufs[4];
 
     pass = TRUE;
 
@@ -3108,22 +3108,23 @@ vector_write_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
         types[0] = H5FD_MEM_DRAW;
         addrs[0] = base_addr;
         sizes[0] = bytes_per_write;
-        bufs[0]  = (void *)(&(zero_fi_buf[mpi_rank * INTS_PER_RANK]));
+        bufs[0]  = (const void *)(&(zero_fi_buf[mpi_rank * INTS_PER_RANK]));
 
         types[1] = H5FD_MEM_DRAW;
         addrs[1] = addrs[0] + (haddr_t)(bytes_per_write);
         sizes[1] = bytes_per_write;
-        bufs[1]  = (void *)(&(negative_fi_buf[(mpi_rank * INTS_PER_RANK) + (INTS_PER_RANK / 4)]));
+        bufs[1]  = (const void *)(&(negative_fi_buf[(mpi_rank * INTS_PER_RANK) + (INTS_PER_RANK / 4)]));
 
         types[2] = H5FD_MEM_DRAW;
         addrs[2] = addrs[1] + (haddr_t)(bytes_per_write);
         sizes[2] = bytes_per_write;
-        bufs[2]  = (void *)(&(decreasing_fi_buf[(mpi_rank * INTS_PER_RANK) + (INTS_PER_RANK / 2)]));
+        bufs[2]  = (const void *)(&(decreasing_fi_buf[(mpi_rank * INTS_PER_RANK) + (INTS_PER_RANK / 2)]));
 
         types[3] = H5FD_MEM_DRAW;
         addrs[3] = addrs[2] + (haddr_t)(bytes_per_write);
         sizes[3] = bytes_per_write;
-        bufs[3]  = (void *)(&(increasing_fi_buf[(mpi_rank * INTS_PER_RANK) + (3 * (INTS_PER_RANK / 4))]));
+        bufs[3] =
+            (const void *)(&(increasing_fi_buf[(mpi_rank * INTS_PER_RANK) + (3 * (INTS_PER_RANK / 4))]));
 
 #if 0  /* JRM */
         HDfprintf(stdout, "addrs = { %lld, %lld, %lld, %lld}\n", 
@@ -3362,7 +3363,7 @@ vector_write_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     H5FD_mem_t  types[4];
     haddr_t     addrs[4];
     size_t      sizes[4];
-    void *      bufs[4];
+    const void *bufs[4];
 
     pass = TRUE;
 
@@ -3413,7 +3414,7 @@ vector_write_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
         types[0] = H5FD_MEM_DRAW;
         addrs[0] = (haddr_t)mpi_rank * (haddr_t)INTS_PER_RANK * (haddr_t)(sizeof(int32_t));
         sizes[0] = (size_t)INTS_PER_RANK * sizeof(int32_t);
-        bufs[0]  = (void *)(&(zero_fi_buf[mpi_rank * INTS_PER_RANK]));
+        bufs[0]  = (const void *)(&(zero_fi_buf[mpi_rank * INTS_PER_RANK]));
 
         if (H5FDwrite_vector(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
 
@@ -3476,17 +3477,17 @@ vector_write_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
             types[0] = H5FD_MEM_DRAW;
             addrs[0] = base_addr + (haddr_t)((size_t)(INTS_PER_RANK / 2) * sizeof(int32_t));
             sizes[0] = (size_t)(INTS_PER_RANK / 4) * sizeof(int32_t);
-            bufs[0]  = (void *)(&(negative_fi_buf[base_index + (INTS_PER_RANK / 2)]));
+            bufs[0]  = (const void *)(&(negative_fi_buf[base_index + (INTS_PER_RANK / 2)]));
 
             types[1] = H5FD_MEM_DRAW;
             addrs[1] = base_addr + (haddr_t)((size_t)(INTS_PER_RANK / 4) * sizeof(int32_t));
             sizes[1] = (size_t)(INTS_PER_RANK / 8) * sizeof(int32_t);
-            bufs[1]  = (void *)(&(decreasing_fi_buf[base_index + (INTS_PER_RANK / 4)]));
+            bufs[1]  = (const void *)(&(decreasing_fi_buf[base_index + (INTS_PER_RANK / 4)]));
 
             types[2] = H5FD_MEM_DRAW;
             addrs[2] = base_addr + (haddr_t)((size_t)(INTS_PER_RANK / 16) * sizeof(int32_t));
             sizes[2] = (size_t)(INTS_PER_RANK / 16) * sizeof(int32_t);
-            bufs[2]  = (void *)(&(increasing_fi_buf[base_index + (INTS_PER_RANK / 16)]));
+            bufs[2]  = (const void *)(&(increasing_fi_buf[base_index + (INTS_PER_RANK / 16)]));
         }
         else if ((mpi_rank % 4) == 1) {
 
@@ -3506,12 +3507,12 @@ vector_write_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
             types[0] = H5FD_MEM_DRAW;
             addrs[0] = base_addr + (haddr_t)(sizeof(int32_t));
             sizes[0] = (size_t)((INTS_PER_RANK / 2) - 2) * sizeof(int32_t);
-            bufs[0]  = (void *)(&(increasing_fi_buf[base_index + 1]));
+            bufs[0]  = (const void *)(&(increasing_fi_buf[base_index + 1]));
 
             types[1] = H5FD_MEM_DRAW;
             addrs[1] = base_addr + (haddr_t)((size_t)((INTS_PER_RANK / 2) + 1) * sizeof(int32_t));
             sizes[1] = (size_t)((INTS_PER_RANK / 2) - 2) * sizeof(int32_t);
-            bufs[1]  = (void *)(&(decreasing_fi_buf[base_index + (INTS_PER_RANK / 2) + 1]));
+            bufs[1]  = (const void *)(&(decreasing_fi_buf[base_index + (INTS_PER_RANK / 2) + 1]));
         }
         else if ((mpi_rank % 4) == 2) {
 
@@ -3527,7 +3528,7 @@ vector_write_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
             types[0] = H5FD_MEM_DRAW;
             addrs[0] = base_addr + (haddr_t)((size_t)(INTS_PER_RANK / 2) * sizeof(int32_t));
             sizes[0] = sizeof(int32_t);
-            bufs[0]  = (void *)(&(negative_fi_buf[base_index + (INTS_PER_RANK / 2)]));
+            bufs[0]  = (const void *)(&(negative_fi_buf[base_index + (INTS_PER_RANK / 2)]));
         }
         else if ((mpi_rank % 4) == 3) {
 
@@ -3814,7 +3815,7 @@ vector_write_test_6(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     H5FD_mem_t  types[(INTS_PER_RANK / 16) + 1];
     haddr_t     addrs[(INTS_PER_RANK / 16) + 1];
     size_t      sizes[2];
-    void *      bufs[(INTS_PER_RANK / 16) + 1];
+    const void *bufs[(INTS_PER_RANK / 16) + 1];
 
     pass = TRUE;
 
@@ -3913,7 +3914,7 @@ vector_write_test_6(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
             types[i] = H5FD_MEM_DRAW;
             addrs[i] = base_addr + ((haddr_t)(16 * i) * (haddr_t)sizeof(int32_t));
-            bufs[i]  = (void *)(&(increasing_fi_buf[base_index + (i * 16)]));
+            bufs[i]  = (const void *)(&(increasing_fi_buf[base_index + (i * 16)]));
         }
 
         if (H5FDwrite_vector(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
@@ -4300,9 +4301,11 @@ vector_write_test_7(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 int
 main(int argc, char **argv)
 {
-    unsigned nerrs    = 0;
+    unsigned nerrs = 0;
+#ifdef H5_HAVE_SUBFILING_VFD
     int      required = MPI_THREAD_MULTIPLE;
     int      provided = 0;
+#endif
     int      mpi_size;
     int      mpi_rank;
 

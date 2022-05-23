@@ -385,7 +385,7 @@ done:
 static herr_t
 H5FD__hdfs_term(void)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
 #if HDFS_DEBUG
     HDfprintf(stdout, "called %s.\n", __func__);
@@ -419,7 +419,7 @@ H5FD__hdfs_handle_open(const char *path, const char *namenode_name, const int32_
     hdfs_t *            handle    = NULL;
     hdfs_t *            ret_value = NULL;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
 #if HDFS_DEBUG
     HDfprintf(stdout, "called %s.\n", __func__);
@@ -504,7 +504,7 @@ H5FD__hdfs_handle_close(hdfs_t *handle)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
 #if HDFS_DEBUG
     HDfprintf(stdout, "called %s.\n", __func__);
@@ -556,7 +556,7 @@ H5FD__hdfs_validate_config(const H5FD_hdfs_fapl_t *fa)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(fa != NULL);
 
@@ -684,7 +684,7 @@ H5FD__hdfs_fapl_get(H5FD_t *_file)
     H5FD_hdfs_fapl_t *fa        = NULL;
     void *            ret_value = NULL;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     fa = (H5FD_hdfs_fapl_t *)H5MM_calloc(sizeof(H5FD_hdfs_fapl_t));
     if (fa == NULL)
@@ -723,7 +723,7 @@ H5FD__hdfs_fapl_copy(const void *_old_fa)
     H5FD_hdfs_fapl_t *      new_fa    = NULL;
     void *                  ret_value = NULL;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     new_fa = (H5FD_hdfs_fapl_t *)H5MM_malloc(sizeof(H5FD_hdfs_fapl_t));
     if (new_fa == NULL)
@@ -756,7 +756,7 @@ H5FD__hdfs_fapl_free(void *_fa)
 {
     H5FD_hdfs_fapl_t *fa = (H5FD_hdfs_fapl_t *)_fa;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(fa != NULL); /* sanity check */
 
@@ -793,7 +793,7 @@ hdfs__reset_stats(H5FD_hdfs_t *file)
     unsigned i         = 0;
     herr_t   ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
 #if HDFS_DEBUG
     HDfprintf(stdout, "called %s.\n", __func__);
@@ -851,7 +851,7 @@ H5FD__hdfs_open(const char *path, unsigned flags, hid_t fapl_id, haddr_t maxaddr
     hdfs_t *         handle    = NULL;
     H5FD_hdfs_fapl_t fa;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
 #if HDFS_DEBUG
     HDfprintf(stdout, "called %s.\n", __func__);
@@ -983,7 +983,7 @@ hdfs__fprint_stats(FILE *stream, const H5FD_hdfs_t *file)
     unsigned           suffix_i     = 0;
     const char         suffixes[]   = {' ', 'K', 'M', 'G', 'T', 'P'};
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     if (stream == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file stream cannot be null")
@@ -1189,7 +1189,7 @@ H5FD__hdfs_close(H5FD_t *_file)
     H5FD_hdfs_t *file      = (H5FD_hdfs_t *)_file;
     herr_t       ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
 #if HDFS_DEBUG
     HDfprintf(stdout, "called %s.\n", __func__);
@@ -1245,7 +1245,7 @@ H5FD__hdfs_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     hdfsFileInfo *     finfo1    = NULL;
     hdfsFileInfo *     finfo2    = NULL;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
 #if HDFS_DEBUG
     HDfprintf(stdout, "called %s.\n", __func__);
@@ -1318,7 +1318,7 @@ done:
 static herr_t
 H5FD__hdfs_query(const H5FD_t H5_ATTR_UNUSED *_file, unsigned long *flags)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
 #if HDFS_DEBUG
     HDfprintf(stdout, "called %s.\n", __func__);
@@ -1356,7 +1356,7 @@ H5FD__hdfs_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 {
     const H5FD_hdfs_t *file = (const H5FD_hdfs_t *)_file;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
 #if HDFS_DEBUG
     HDfprintf(stdout, "called %s.\n", __func__);
@@ -1387,7 +1387,7 @@ H5FD__hdfs_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr)
 {
     H5FD_hdfs_t *file = (H5FD_hdfs_t *)_file;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
 #if HDFS_DEBUG
     HDfprintf(stdout, "called %s.\n", __func__);
@@ -1421,7 +1421,7 @@ H5FD__hdfs_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 {
     const H5FD_hdfs_t *file = (const H5FD_hdfs_t *)_file;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
 #if HDFS_DEBUG
     HDfprintf(stdout, "called %s.\n", __func__);
@@ -1456,7 +1456,7 @@ H5FD__hdfs_get_handle(H5FD_t *_file, hid_t H5_ATTR_UNUSED fapl, void **file_hand
     H5FD_hdfs_t *file      = (H5FD_hdfs_t *)_file;
     herr_t       ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
 #if HDFS_DEBUG
     HDfprintf(stdout, "called %s.\n", __func__);
@@ -1506,7 +1506,7 @@ H5FD__hdfs_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
     unsigned       bin_i = 0;
 #endif /* HDFS_STATS */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
 #if HDFS_DEBUG
     HDfprintf(stdout, "called %s.\n", __func__);
@@ -1578,7 +1578,7 @@ H5FD__hdfs_write(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED type, h
 {
     herr_t ret_value = FAIL;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
 #if HDFS_DEBUG
     HDfprintf(stdout, "called %s.\n", __func__);
@@ -1616,7 +1616,7 @@ H5FD__hdfs_truncate(H5FD_t H5_ATTR_UNUSED *_file, hid_t H5_ATTR_UNUSED dxpl_id,
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
 #if HDFS_DEBUG
     HDfprintf(stdout, "called %s.\n", __func__);

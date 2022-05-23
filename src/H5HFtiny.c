@@ -234,7 +234,7 @@ H5HF__tiny_op_real(H5HF_hdr_t *hdr, const uint8_t *id, H5HF_operator_t op, void 
     size_t enc_obj_size;        /* Encoded object size */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /*
      * Check arguments.

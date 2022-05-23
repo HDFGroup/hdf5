@@ -17,8 +17,6 @@
 using std::cerr;
 using std::endl;
 
-//#include <string>
-
 #include "H5Include.h"
 #include "H5Exception.h"
 #include "H5IdComponent.h"

@@ -25,9 +25,8 @@
  *      reporting macros.
  */
 #define H5T_MODULE
-#define H5_MY_PKG      H5T
-#define H5_MY_PKG_ERR  H5E_DATATYPE
-#define H5_MY_PKG_INIT YES
+#define H5_MY_PKG     H5T
+#define H5_MY_PKG_ERR H5E_DATATYPE
 
 /**\defgroup H5T H5T
  *
@@ -66,16 +65,19 @@
  * \ingroup H5T
  * \defgroup ATOM Atomic Datatypes
  * \ingroup H5T
- * \defgroup COMPOUND Compound Datatypes
- * \ingroup H5T
  * \defgroup CONV Conversion Function
- * \ingroup H5T
- * \defgroup ENUM Enumeration Datatypes
  * \ingroup H5T
  * \defgroup OPAQUE Opaque Datatypes
  * \ingroup H5T
  * \defgroup VLEN Variable-length Sequence Datatypes
  * \ingroup H5T
+ *
+ * \defgroup COMPENUM Compound and Enumeration Datatypes
+ * \ingroup H5T
+ * \defgroup COMPOUND Compound Datatypes
+ * \ingroup COMPENUM
+ * \defgroup ENUM Enumeration Datatypes
+ * \ingroup COMPENUM
  *
  * \defgroup PDT Predefined Datatypes
  * \ingroup H5T

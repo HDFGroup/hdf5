@@ -1912,7 +1912,7 @@ H5T__conv_struct_free(H5T_conv_struct_t *priv)
     hid_t *  src_memb_id = priv->src_memb_id, *dst_memb_id = priv->dst_memb_id;
     unsigned i;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     for (i = 0; i < priv->src_nmembs; i++)
         if (src2dst[i] >= 0) {
@@ -1987,7 +1987,7 @@ H5T__conv_struct_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
     unsigned           i, j;
     herr_t             ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     src_nmembs = src->shared->u.compnd.nmembs;
     dst_nmembs = dst->shared->u.compnd.nmembs;
@@ -2680,7 +2680,7 @@ H5T__conv_enum_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
     unsigned           i, j;                /*counters            */
     herr_t             ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     cdata->need_bkg = H5T_BKG_NO;
     if (NULL == (priv = (H5T_enum_struct_t *)(cdata->priv = H5MM_calloc(sizeof(*priv)))))
@@ -3266,9 +3266,10 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
                     /* If we're down to the last few elements, just wrap up */
                     /* with a "real" reverse copy */
                     if (safe < 2) {
-                        s        = (uint8_t *)buf + (nelmts - 1) * (size_t)s_stride;
-                        d        = (uint8_t *)buf + (nelmts - 1) * (size_t)d_stride;
-                        b        = (uint8_t *)bkg + (nelmts - 1) * (size_t)b_stride;
+                        s = (uint8_t *)buf + (nelmts - 1) * (size_t)s_stride;
+                        d = (uint8_t *)buf + (nelmts - 1) * (size_t)d_stride;
+                        if (bkg)
+                            b = (uint8_t *)bkg + (nelmts - 1) * (size_t)b_stride;
                         s_stride = -s_stride;
                         d_stride = -d_stride;
                         b_stride = -b_stride;
@@ -3278,7 +3279,8 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
                     else {
                         s = (uint8_t *)buf + (nelmts - safe) * (size_t)s_stride;
                         d = (uint8_t *)buf + (nelmts - safe) * (size_t)d_stride;
-                        b = (uint8_t *)bkg + (nelmts - safe) * (size_t)b_stride;
+                        if (bkg)
+                            b = (uint8_t *)bkg + (nelmts - safe) * (size_t)b_stride;
                     } /* end else */
                 }     /* end if */
                 else {
@@ -3406,8 +3408,8 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
                             /* For nested VL case, free leftover heap objects from the deeper level if the
                              * length of new data elements is shorter than the old data elements.*/
                             if (nested && seq_len < bg_seq_len) {
-                                const uint8_t *tmp;
-                                size_t         u;
+                                uint8_t *tmp;
+                                size_t   u;
 
                                 /* Sanity check */
                                 HDassert(write_to_file);
@@ -3426,7 +3428,9 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
                     /* Advance pointers */
                     s += s_stride;
                     d += d_stride;
-                    b += b_stride;
+
+                    if (b)
+                        b += b_stride;
                 } /* end for */
 
                 /* Decrement number of elements left to convert */
@@ -3716,9 +3720,10 @@ H5T__conv_ref(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                     /* If we're down to the last few elements, just wrap up */
                     /* with a "real" reverse copy */
                     if (safe < 2) {
-                        s        = (uint8_t *)buf + (nelmts - 1) * (size_t)s_stride;
-                        d        = (uint8_t *)buf + (nelmts - 1) * (size_t)d_stride;
-                        b        = (uint8_t *)bkg + (nelmts - 1) * (size_t)b_stride;
+                        s = (uint8_t *)buf + (nelmts - 1) * (size_t)s_stride;
+                        d = (uint8_t *)buf + (nelmts - 1) * (size_t)d_stride;
+                        if (bkg)
+                            b = (uint8_t *)bkg + (nelmts - 1) * (size_t)b_stride;
                         s_stride = -s_stride;
                         d_stride = -d_stride;
                         b_stride = -b_stride;
@@ -3728,7 +3733,8 @@ H5T__conv_ref(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                     else {
                         s = (uint8_t *)buf + (nelmts - safe) * (size_t)s_stride;
                         d = (uint8_t *)buf + (nelmts - safe) * (size_t)d_stride;
-                        b = (uint8_t *)bkg + (nelmts - safe) * (size_t)b_stride;
+                        if (bkg)
+                            b = (uint8_t *)bkg + (nelmts - safe) * (size_t)b_stride;
                     } /* end else */
                 }     /* end if */
                 else {
@@ -3796,7 +3802,9 @@ H5T__conv_ref(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                     /* Advance pointers */
                     s += s_stride;
                     d += d_stride;
-                    b += b_stride;
+
+                    if (b)
+                        b += b_stride;
                 } /* end for */
 
                 /* Decrement number of elements left to convert */
@@ -9437,7 +9445,7 @@ H5T__reverse_order(uint8_t *rev, uint8_t *s, size_t size, H5T_order_t order)
 {
     size_t i;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(s);
     HDassert(size);

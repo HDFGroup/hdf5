@@ -190,7 +190,7 @@ H5E__walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
     unsigned     have_desc = 1; /* Flag to indicate whether the error has a "real" description */
     herr_t       ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(err_desc);
@@ -313,7 +313,7 @@ H5E__walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
     unsigned     have_desc = 1; /* Flag to indicate whether the error has a "real" description */
     herr_t       ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(err_desc);
@@ -807,7 +807,7 @@ H5E__clear_entries(H5E_t *estack, size_t nentries)
     unsigned      u;                   /* Local index variable */
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(estack);

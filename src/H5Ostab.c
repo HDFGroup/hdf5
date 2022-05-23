@@ -95,7 +95,7 @@ H5O__stab_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSE
     H5O_stab_t *stab      = NULL;
     void *      ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(f);
@@ -135,7 +135,7 @@ H5O__stab_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, co
 {
     const H5O_stab_t *stab = (const H5O_stab_t *)_mesg;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
     HDassert(f);
@@ -171,7 +171,7 @@ H5O__stab_copy(const void *_mesg, void *_dest)
     H5O_stab_t *      dest      = (H5O_stab_t *)_dest;
     void *            ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(stab);
@@ -209,7 +209,7 @@ H5O__stab_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void
 {
     size_t ret_value = 0; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Set return value */
     ret_value = (size_t)(2 * H5F_SIZEOF_ADDR(f));
@@ -232,7 +232,7 @@ H5O__stab_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void
 static herr_t
 H5O__stab_free(void *mesg)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(mesg);
 
@@ -258,7 +258,7 @@ H5O__stab_delete(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, void *mesg)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(f);
@@ -297,7 +297,7 @@ H5O__stab_copy_file(H5F_t *file_src, void *native_src, H5F_t *file_dst,
     size_t              size_hint;        /* Local heap initial size */
     void *              ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(stab_src);
@@ -358,7 +358,7 @@ H5O__stab_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src, H5O_lo
     H5G_bt_it_cpy_t   udata;               /* B-tree user data */
     herr_t            ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(stab_src);
@@ -403,7 +403,7 @@ H5O__stab_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int in
 {
     const H5O_stab_t *stab = (const H5O_stab_t *)_mesg;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
     HDassert(f);

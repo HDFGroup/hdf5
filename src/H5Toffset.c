@@ -230,7 +230,7 @@ H5T__set_offset(const H5T_t *dt, size_t offset)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(dt);

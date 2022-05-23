@@ -214,7 +214,7 @@ H5G__close_cb(H5VL_object_t *grp_vol_obj, void **request)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(grp_vol_obj);
@@ -531,7 +531,7 @@ H5G__open_oid(H5G_t *grp)
     hbool_t obj_opened = FALSE;
     herr_t  ret_value  = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(grp);
@@ -689,7 +689,7 @@ H5G_oloc(H5G_t *grp)
  *-------------------------------------------------------------------------
  */
 H5G_name_t *
-H5G_nameof(const H5G_t *grp)
+H5G_nameof(H5G_t *grp)
 {
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -841,7 +841,7 @@ H5G__iterate_cb(const H5O_link_t *lnk, void *_udata)
     H5G_iter_appcall_ud_t *udata     = (H5G_iter_appcall_ud_t *)_udata; /* User data for callback */
     herr_t                 ret_value = H5_ITER_ERROR;                   /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(lnk);
@@ -949,7 +949,7 @@ done:
 static herr_t
 H5G__free_visit_visited(void *item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSED *operator_data /*in,out*/)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     item = H5FL_FREE(H5_obj_t, item);
 
@@ -983,7 +983,7 @@ H5G__visit_cb(const H5O_link_t *lnk, void *_udata)
     size_t len_needed;                          /* Length of path string needed */
     herr_t ret_value = H5_ITER_CONT;            /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(lnk);

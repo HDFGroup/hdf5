@@ -167,7 +167,7 @@ H5FD__free_cls(H5FD_class_t *cls, void H5_ATTR_UNUSED **request)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(cls);
@@ -507,7 +507,7 @@ H5FD__sb_decode(H5FD_t *file, const char *name, const uint8_t *buf)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(file);
@@ -1007,7 +1007,7 @@ H5FD__query(const H5FD_t *file, unsigned long *flags /*out*/)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(file);
@@ -2193,7 +2193,7 @@ H5FD_ctl(H5FD_t *file, uint64_t op_code, uint64_t flags, const void *input, void
     else if (flags & H5FD_CTL__FAIL_IF_UNKNOWN_FLAG) {
 
         HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL,
-                    "VFD ctl request failed (no ctl and fail if unknown flag is set)")
+                    "VFD ctl request failed (no ctl callback and fail if unknown flag is set)")
     }
 
 done:
@@ -2261,8 +2261,10 @@ H5FDget_vfd_handle(H5FD_t *file, hid_t fapl_id, void **file_handle /*out*/)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get file handle for file driver")
 
 done:
-    if (FAIL == ret_value)
-        *file_handle = NULL;
+    if (FAIL == ret_value) {
+        if (file_handle)
+            *file_handle = NULL;
+    }
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5FDget_vfd_handle() */

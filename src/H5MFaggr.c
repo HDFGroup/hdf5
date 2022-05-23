@@ -149,7 +149,7 @@ H5MF__aggr_alloc(H5F_t *f, H5F_blk_aggr_t *aggr, H5F_blk_aggr_t *other_aggr, H5F
     haddr_t eoa           = HADDR_UNDEF; /* Initial EOA for the file */
     haddr_t ret_value     = HADDR_UNDEF; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 #ifdef H5MF_AGGR_DEBUG
     HDfprintf(stderr, "%s: type = %u, size = %" PRIuHSIZE "\n", __func__, (unsigned)type, size);
 #endif /* H5MF_AGGR_DEBUG */
@@ -713,7 +713,7 @@ done:
         H5FD_mem_t alloc_type;          /* Type of file memory to work with */
         herr_t     ret_value = SUCCEED; /* Return value */
 
-        FUNC_ENTER_STATIC
+        FUNC_ENTER_PACKAGE
 
         /* Check args */
         HDassert(f);
@@ -838,7 +838,7 @@ done:
         haddr_t eoa       = HADDR_UNDEF; /* EOA for the file */
         htri_t  ret_value = FALSE;       /* Return value */
 
-        FUNC_ENTER_STATIC
+        FUNC_ENTER_PACKAGE
 
         /* Sanity check */
         HDassert(f);
@@ -876,7 +876,7 @@ done:
     {
         herr_t ret_value = SUCCEED; /* Return value */
 
-        FUNC_ENTER_STATIC
+        FUNC_ENTER_PACKAGE
 
         /* Sanity check */
         HDassert(f);

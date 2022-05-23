@@ -1054,7 +1054,7 @@ H5R__encode_obj_token(const H5O_token_t *obj_token, size_t token_size, unsigned 
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(nalloc);
 
@@ -1088,7 +1088,7 @@ H5R__decode_obj_token(const unsigned char *buf, size_t *nbytes, H5O_token_t *obj
     const uint8_t *p         = (const uint8_t *)buf;
     herr_t         ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(buf);
     HDassert(nbytes);
@@ -1132,7 +1132,7 @@ H5R__encode_region(H5S_t *space, unsigned char *buf, size_t *nalloc)
     hssize_t buf_size  = 0;
     herr_t   ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(space);
     HDassert(nalloc);
@@ -1183,7 +1183,7 @@ H5R__decode_region(const unsigned char *buf, size_t *nbytes, H5S_t **space_ptr)
     H5S_t *        space;
     herr_t         ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(buf);
     HDassert(nbytes);
@@ -1235,7 +1235,7 @@ H5R__encode_string(const char *string, unsigned char *buf, size_t *nalloc)
     size_t string_len, buf_size;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(string);
     HDassert(nalloc);
@@ -1278,7 +1278,7 @@ H5R__decode_string(const unsigned char *buf, size_t *nbytes, char **string_ptr)
     char *         string    = NULL;
     herr_t         ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(buf);
     HDassert(nbytes);

@@ -140,7 +140,7 @@ H5T__get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_ali
     unsigned    u;                     /* Local index variable */
     H5T_t *     ret_value = NULL;      /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(dtype);
 
@@ -177,13 +177,13 @@ H5T__get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_ali
 
             if (H5T_IS_VL_STRING(dtype->shared)) {
                 /* Update size, offset and compound alignment for parent. */
-                if (H5T__cmp_offset(comp_size, offset, sizeof(char *), (size_t)1, H5T_POINTER_COMP_ALIGN_g,
+                if (H5T__cmp_offset(comp_size, offset, sizeof(char *), (size_t)1, H5T_POINTER_ALIGN_g,
                                     struct_align) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot compute compound offset")
             } /* end if */
             else {
                 /* Update size, offset and compound alignment for parent. */
-                if (H5T__cmp_offset(comp_size, offset, sizeof(char), size, H5T_NATIVE_SCHAR_COMP_ALIGN_g,
+                if (H5T__cmp_offset(comp_size, offset, sizeof(char), size, H5T_NATIVE_SCHAR_ALIGN_g,
                                     struct_align) < 0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot compute compound offset")
             } /* end else */
@@ -208,7 +208,7 @@ H5T__get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_ali
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot retrieve float type")
 
             /* Update size, offset and compound alignment for parent. */
-            if (H5T__cmp_offset(comp_size, offset, sizeof(char), size, H5T_NATIVE_SCHAR_COMP_ALIGN_g,
+            if (H5T__cmp_offset(comp_size, offset, sizeof(char), size, H5T_NATIVE_SCHAR_ALIGN_g,
                                 struct_align) < 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "cannot compute compound offset")
             break;
@@ -227,7 +227,7 @@ H5T__get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_ali
 
             /* Update size, offset and compound alignment for parent. */
             if (0 == H5T_cmp(ret_value, dt, FALSE)) {
-                align    = H5T_HOBJREF_COMP_ALIGN_g;
+                align    = H5T_HOBJREF_ALIGN_g;
                 ref_size = sizeof(hobj_ref_t);
             } /* end if */
             else {
@@ -236,12 +236,12 @@ H5T__get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_ali
                     HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a data type")
 
                 if (0 == H5T_cmp(ret_value, dt, FALSE)) {
-                    align    = H5T_HDSETREGREF_COMP_ALIGN_g;
+                    align    = H5T_HDSETREGREF_ALIGN_g;
                     ref_size = sizeof(hdset_reg_ref_t);
                 } /* end if */
                 else {
                     /* Only pointers to underlying opaque reference types */
-                    align    = H5T_REF_COMP_ALIGN_g;
+                    align    = H5T_REF_ALIGN_g;
                     ref_size = sizeof(H5R_ref_t);
                 } /* end else */
             }     /* end else */
@@ -479,7 +479,7 @@ H5T__get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_ali
                 HGOTO_ERROR(H5E_ARGS, H5E_CLOSEERROR, NULL, "cannot close datatype")
 
             /* Update size, offset and compound alignment for parent compound type directly. */
-            vl_align = H5T_HVL_COMP_ALIGN_g;
+            vl_align = H5T_HVL_ALIGN_g;
             vl_size  = sizeof(hvl_t);
 
             if (H5T__cmp_offset(comp_size, offset, vl_size, (size_t)1, vl_align, struct_align) < 0)
@@ -566,7 +566,7 @@ H5T__get_native_integer(size_t prec, H5T_sign_t sign, H5T_direction_t direction,
     } match          = H5T_NATIVE_INT_MATCH_UNKNOWN;
     H5T_t *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     if (direction == H5T_DIR_DEFAULT || direction == H5T_DIR_ASCEND) {
         if (prec <= H5T_get_precision((H5T_t *)H5I_object(H5T_NATIVE_SCHAR_g))) {
@@ -625,7 +625,7 @@ H5T__get_native_integer(size_t prec, H5T_sign_t sign, H5T_direction_t direction,
             else
                 tid = H5T_NATIVE_UCHAR;
 
-            align = H5T_NATIVE_SCHAR_COMP_ALIGN_g;
+            align = H5T_NATIVE_SCHAR_ALIGN_g;
             break;
 
         case H5T_NATIVE_INT_MATCH_SHORT:
@@ -633,7 +633,7 @@ H5T__get_native_integer(size_t prec, H5T_sign_t sign, H5T_direction_t direction,
                 tid = H5T_NATIVE_SHORT;
             else
                 tid = H5T_NATIVE_USHORT;
-            align = H5T_NATIVE_SHORT_COMP_ALIGN_g;
+            align = H5T_NATIVE_SHORT_ALIGN_g;
             break;
 
         case H5T_NATIVE_INT_MATCH_INT:
@@ -642,7 +642,7 @@ H5T__get_native_integer(size_t prec, H5T_sign_t sign, H5T_direction_t direction,
             else
                 tid = H5T_NATIVE_UINT;
 
-            align = H5T_NATIVE_INT_COMP_ALIGN_g;
+            align = H5T_NATIVE_INT_ALIGN_g;
             break;
 
         case H5T_NATIVE_INT_MATCH_LONG:
@@ -651,7 +651,7 @@ H5T__get_native_integer(size_t prec, H5T_sign_t sign, H5T_direction_t direction,
             else
                 tid = H5T_NATIVE_ULONG;
 
-            align = H5T_NATIVE_LONG_COMP_ALIGN_g;
+            align = H5T_NATIVE_LONG_ALIGN_g;
             break;
 
         case H5T_NATIVE_INT_MATCH_LLONG:
@@ -660,7 +660,7 @@ H5T__get_native_integer(size_t prec, H5T_sign_t sign, H5T_direction_t direction,
             else
                 tid = H5T_NATIVE_ULLONG;
 
-            align = H5T_NATIVE_LLONG_COMP_ALIGN_g;
+            align = H5T_NATIVE_LLONG_ALIGN_g;
             break;
 
         case H5T_NATIVE_INT_MATCH_UNKNOWN:
@@ -723,7 +723,7 @@ H5T__get_native_float(size_t size, H5T_direction_t direction, size_t *struct_ali
     } match          = H5T_NATIVE_FLOAT_MATCH_UNKNOWN;
     H5T_t *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(size > 0);
 
@@ -764,17 +764,17 @@ H5T__get_native_float(size_t size, H5T_direction_t direction, size_t *struct_ali
     switch (match) {
         case H5T_NATIVE_FLOAT_MATCH_FLOAT:
             tid   = H5T_NATIVE_FLOAT;
-            align = H5T_NATIVE_FLOAT_COMP_ALIGN_g;
+            align = H5T_NATIVE_FLOAT_ALIGN_g;
             break;
 
         case H5T_NATIVE_FLOAT_MATCH_DOUBLE:
             tid   = H5T_NATIVE_DOUBLE;
-            align = H5T_NATIVE_DOUBLE_COMP_ALIGN_g;
+            align = H5T_NATIVE_DOUBLE_ALIGN_g;
             break;
 
         case H5T_NATIVE_FLOAT_MATCH_LDOUBLE:
             tid   = H5T_NATIVE_LDOUBLE;
-            align = H5T_NATIVE_LDOUBLE_COMP_ALIGN_g;
+            align = H5T_NATIVE_LDOUBLE_ALIGN_g;
             break;
 
         case H5T_NATIVE_FLOAT_MATCH_UNKNOWN:
@@ -831,7 +831,7 @@ H5T__get_native_bitfield(size_t prec, H5T_direction_t direction, size_t *struct_
     size_t native_size = 0;    /* Datatype size of the native type */
     H5T_t *ret_value   = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     if (direction == H5T_DIR_DEFAULT || direction == H5T_DIR_ASCEND) {
         if (prec <= H5T_get_precision((H5T_t *)H5I_object(H5T_NATIVE_B8_g))) {
@@ -920,7 +920,7 @@ static herr_t
 H5T__cmp_offset(size_t *comp_size, size_t *offset, size_t elem_size, size_t nelems, size_t align,
                 size_t *struct_align)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     if (offset && comp_size) {
         if (align > 1 && *comp_size % align) {
@@ -940,3 +940,335 @@ H5T__cmp_offset(size_t *comp_size, size_t *offset, size_t elem_size, size_t nele
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5T__cmp_offset() */
+
+#define TAG_ALIGNMENT(tag) (offsetof(alignments_t, tag.x) - offsetof(alignments_t, tag))
+
+/* clang-format off */
+#define NATIVE_ENTRY_INITIALIZER(tag, type, precision, has_sign) {  \
+  .alignmentp = &H5T_NATIVE_##tag##_ALIGN_g                         \
+, .alignment = TAG_ALIGNMENT(tag)                                   \
+, .hidp = &H5T_NATIVE_##tag##_g                                     \
+, .size = sizeof(type)                                              \
+, .atomic = {                                                       \
+      .offset   = 0                                                 \
+    , .prec     = (precision != 0) ? precision : (sizeof(type) * 8) \
+    , .lsb_pad  = H5T_PAD_ZERO                                      \
+    , .msb_pad  = H5T_PAD_ZERO                                      \
+    , .u.i.sign = has_sign ? H5T_SGN_2 : H5T_SGN_NONE               \
+    }                                                               \
+}
+/* clang-format on */
+
+static H5T_order_t
+get_host_byte_order(void)
+{
+    static const union {
+        uint64_t u64;
+        char     byte[8];
+    } endian_exemplar = {.byte = {1}};
+
+    return (endian_exemplar.u64 == 1) ? H5T_ORDER_LE : H5T_ORDER_BE;
+}
+
+/* Establish `H5T_t`s for C99 integer types including fixed- and
+ * minimum-width types (uint16_t, uint_least16_t, uint_fast16_t, ...).
+ *
+ * Also establish alignment for some miscellaneous types: pointers,
+ * HDF5 references, and so on.
+ */
+herr_t
+H5T__init_native_internal(void)
+{
+    /* Here we construct a type that lets us find alignment constraints
+     * without using the alignof operator, which is not available in C99.
+     *
+     * Between each sub-struct's `char` member `c` and member `x`, the
+     * compiler must insert padding to ensure proper alignment of `x`.
+     * We can find the alignment constraint of each `x` by looking at
+     * its offset from the beginning of its sub-struct.
+     */
+    typedef struct {
+        struct {
+            char        c;
+            signed char x;
+        } SCHAR;
+        struct {
+            char          c;
+            unsigned char x;
+        } UCHAR;
+        struct {
+            char  c;
+            short x;
+        } SHORT;
+        struct {
+            char           c;
+            unsigned short x;
+        } USHORT;
+        struct {
+            char c;
+            int  x;
+        } INT;
+        struct {
+            char         c;
+            unsigned int x;
+        } UINT;
+        struct {
+            char c;
+            long x;
+        } LONG;
+        struct {
+            char          c;
+            unsigned long x;
+        } ULONG;
+        struct {
+            char      c;
+            long long x;
+        } LLONG;
+        struct {
+            char               c;
+            unsigned long long x;
+        } ULLONG;
+        struct {
+            char   c;
+            int8_t x;
+        } INT8;
+        struct {
+            char    c;
+            uint8_t x;
+        } UINT8;
+        struct {
+            char         c;
+            int_least8_t x;
+        } INT_LEAST8;
+        struct {
+            char          c;
+            uint_least8_t x;
+        } UINT_LEAST8;
+        struct {
+            char        c;
+            int_fast8_t x;
+        } INT_FAST8;
+        struct {
+            char         c;
+            uint_fast8_t x;
+        } UINT_FAST8;
+        struct {
+            char    c;
+            int16_t x;
+        } INT16;
+        struct {
+            char     c;
+            uint16_t x;
+        } UINT16;
+        struct {
+            char          c;
+            int_least16_t x;
+        } INT_LEAST16;
+        struct {
+            char           c;
+            uint_least16_t x;
+        } UINT_LEAST16;
+        struct {
+            char         c;
+            int_fast16_t x;
+        } INT_FAST16;
+        struct {
+            char          c;
+            uint_fast16_t x;
+        } UINT_FAST16;
+        struct {
+            char    c;
+            int32_t x;
+        } INT32;
+        struct {
+            char     c;
+            uint32_t x;
+        } UINT32;
+        struct {
+            char          c;
+            int_least32_t x;
+        } INT_LEAST32;
+        struct {
+            char           c;
+            uint_least32_t x;
+        } UINT_LEAST32;
+        struct {
+            char         c;
+            int_fast32_t x;
+        } INT_FAST32;
+        struct {
+            char          c;
+            uint_fast32_t x;
+        } UINT_FAST32;
+        struct {
+            char    c;
+            int64_t x;
+        } INT64;
+        struct {
+            char     c;
+            uint64_t x;
+        } UINT64;
+        struct {
+            char          c;
+            int_least64_t x;
+        } INT_LEAST64;
+        struct {
+            char           c;
+            uint_least64_t x;
+        } UINT_LEAST64;
+        struct {
+            char         c;
+            int_fast64_t x;
+        } INT_FAST64;
+        struct {
+            char          c;
+            uint_fast64_t x;
+        } UINT_FAST64;
+        struct {
+            char  c;
+            void *x;
+        } pointer;
+        struct {
+            char  c;
+            hvl_t x;
+        } hvl;
+        struct {
+            char       c;
+            hobj_ref_t x;
+        } hobjref;
+        struct {
+            char            c;
+            hdset_reg_ref_t x;
+        } hdsetregref;
+        struct {
+            char      c;
+            H5R_ref_t x;
+        } ref;
+    } alignments_t;
+
+    /* Describe a C99 type, `type`, and tell where to write its
+     * H5T_t identifier and alignment.  Tables of these descriptions
+     * drive the initialization of `H5T_t`s.
+     */
+    typedef struct {
+        /* Pointer to the global variable that receives the
+         * alignment of `type`:
+         */
+        size_t *alignmentp;
+        size_t  alignment; // natural alignment of `type`
+        /* Pointer to the global variable that receives the
+         * identifier for `type`'s H5T_t:
+         */
+        hid_t *      hidp;
+        size_t       size;   // sizeof(`type`)
+        H5T_atomic_t atomic; // `type` facts such as signedness
+    } native_int_t;
+
+    typedef struct {
+        const native_int_t *table;
+        size_t              nelmts;
+    } native_int_table_t;
+
+    /* clang-format off */
+
+    /* Version 19.10 of the PGI C compiler croaks on the following
+     * tables if they are `static`, so make them `static` only if
+     * some other compiler is used.
+     */
+#if defined(__PGIC__) && __PGIC__ == 19 && __PGIC_MINOR__ == 10
+#   define static_unless_buggy_pgic
+#else
+#   define static_unless_buggy_pgic static
+#endif
+
+    /* The library compiles with a limit on `static` object size, so
+     * I broke this table into three.
+     */
+    static_unless_buggy_pgic const native_int_t table1[] = {
+      NATIVE_ENTRY_INITIALIZER(SCHAR, signed char, 0, true)
+    , NATIVE_ENTRY_INITIALIZER(UCHAR, unsigned char, 0, false)
+    , NATIVE_ENTRY_INITIALIZER(SHORT, short, 0, true)
+    , NATIVE_ENTRY_INITIALIZER(USHORT, unsigned short, 0, false)
+    , NATIVE_ENTRY_INITIALIZER(INT, int, 0, true)
+    , NATIVE_ENTRY_INITIALIZER(UINT, unsigned int, 0, false)
+    , NATIVE_ENTRY_INITIALIZER(INT, int, 0, true)
+    , NATIVE_ENTRY_INITIALIZER(UINT, unsigned int, 0, false)
+    , NATIVE_ENTRY_INITIALIZER(LONG, long, 0, true)
+    , NATIVE_ENTRY_INITIALIZER(ULONG, unsigned long, 0, false)
+    , NATIVE_ENTRY_INITIALIZER(LLONG, long long, 0, true)
+    , NATIVE_ENTRY_INITIALIZER(ULLONG, unsigned long long, 0, false)
+    };
+    static_unless_buggy_pgic const native_int_t table2[] = {
+      NATIVE_ENTRY_INITIALIZER(INT8, int8_t, 0, true)
+    , NATIVE_ENTRY_INITIALIZER(UINT8, uint8_t, 0, false)
+    , NATIVE_ENTRY_INITIALIZER(INT_LEAST8, int_least8_t, 0, true)
+    , NATIVE_ENTRY_INITIALIZER(UINT_LEAST8, uint_least8_t, 0, false)
+    , NATIVE_ENTRY_INITIALIZER(INT_FAST8, int_fast8_t, 0, true)
+    , NATIVE_ENTRY_INITIALIZER(UINT_FAST8, uint_fast8_t, 0, false)
+    , NATIVE_ENTRY_INITIALIZER(INT16, int16_t, 0, true)
+    , NATIVE_ENTRY_INITIALIZER(UINT16, uint16_t, 0, false)
+    , NATIVE_ENTRY_INITIALIZER(INT_LEAST16, int_least16_t, 0, true)
+    , NATIVE_ENTRY_INITIALIZER(UINT_LEAST16, uint_least16_t, 0, false)
+    , NATIVE_ENTRY_INITIALIZER(INT_FAST16, int_fast16_t, 0, true)
+    , NATIVE_ENTRY_INITIALIZER(UINT_FAST16, uint_fast16_t, 0, false)
+    };
+    static_unless_buggy_pgic const native_int_t table3[] = {
+      NATIVE_ENTRY_INITIALIZER(INT32, int32_t, 0, true)
+    , NATIVE_ENTRY_INITIALIZER(UINT32, uint32_t, 0, false)
+    , NATIVE_ENTRY_INITIALIZER(INT_LEAST32, int_least32_t, 0, true)
+    , NATIVE_ENTRY_INITIALIZER(UINT_LEAST32, uint_least32_t, 0, false)
+    , NATIVE_ENTRY_INITIALIZER(INT_FAST32, int_fast32_t, 0, true)
+    , NATIVE_ENTRY_INITIALIZER(UINT_FAST32, uint_fast32_t, 0, false)
+    , NATIVE_ENTRY_INITIALIZER(INT64, int64_t, 0, true)
+    , NATIVE_ENTRY_INITIALIZER(UINT64, uint64_t, 0, false)
+    , NATIVE_ENTRY_INITIALIZER(INT_LEAST64, int_least64_t, 0, true)
+    , NATIVE_ENTRY_INITIALIZER(UINT_LEAST64, uint_least64_t, 0, false)
+    , NATIVE_ENTRY_INITIALIZER(INT_FAST64, int_fast64_t, 0, true)
+    , NATIVE_ENTRY_INITIALIZER(UINT_FAST64, uint_fast64_t, 0, false)
+    };
+    static_unless_buggy_pgic const native_int_table_t table_table[] = {
+      {table1, NELMTS(table1)}
+    , {table2, NELMTS(table2)}
+    , {table3, NELMTS(table3)}
+    };
+#undef static_unless_buggy_pgic
+    /* clang-format on */
+
+    size_t      i, j;
+    H5T_order_t byte_order = get_host_byte_order();
+
+    for (i = 0; i < NELMTS(table_table); i++) {
+        const native_int_t *table  = table_table[i].table;
+        size_t              nelmts = table_table[i].nelmts;
+
+        /* For each C99 type in `table`, create its H5T_t,
+         * register a hid_t for the H5T_t, and record the type's
+         * alignment and hid_t in the variables named by the
+         * table.
+         */
+        for (j = 0; j < nelmts; j++) {
+            H5T_t *dt;
+
+            if (NULL == (dt = H5T__alloc()))
+                return FAIL;
+
+            dt->shared->state          = H5T_STATE_IMMUTABLE;
+            dt->shared->type           = H5T_INTEGER;
+            dt->shared->size           = table[j].size;
+            dt->shared->u.atomic       = table[j].atomic;
+            dt->shared->u.atomic.order = byte_order;
+            *table[j].alignmentp       = table[j].alignment;
+
+            if ((*table[j].hidp = H5I_register(H5I_DATATYPE, dt, FALSE)) < 0)
+                return FAIL;
+        }
+    }
+
+    H5T_POINTER_ALIGN_g     = TAG_ALIGNMENT(pointer);
+    H5T_HVL_ALIGN_g         = TAG_ALIGNMENT(hvl);
+    H5T_HOBJREF_ALIGN_g     = TAG_ALIGNMENT(hobjref);
+    H5T_HDSETREGREF_ALIGN_g = TAG_ALIGNMENT(hdsetregref);
+    H5T_REF_ALIGN_g         = TAG_ALIGNMENT(ref);
+
+    return SUCCEED;
+}

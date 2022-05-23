@@ -97,7 +97,7 @@ H5D__select_io(const H5D_io_info_t *io_info, size_t elmt_size, size_t nelmts, H5
     ssize_t         tmp_file_len;           /* Temporary number of bytes in file sequence */
     herr_t          ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(io_info);
@@ -274,8 +274,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_select_io_mem(void *dst_buf, const H5S_t *dst_space, const void *src_buf, const H5S_t *src_space,
-                  size_t elmt_size, size_t nelmts)
+H5D_select_io_mem(void *dst_buf, H5S_t *dst_space, const void *src_buf, H5S_t *src_space, size_t elmt_size,
+                  size_t nelmts)
 {
     H5S_sel_iter_t *dst_sel_iter      = NULL;  /* Destination dataspace iteration info */
     H5S_sel_iter_t *src_sel_iter      = NULL;  /* Source dataspace iteration info */

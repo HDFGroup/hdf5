@@ -66,7 +66,7 @@ main(void)
 
     /* Push API context */
     if (H5CX_push() < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     api_ctx_pushed = TRUE;
 
     /*
@@ -183,11 +183,11 @@ main(void)
             file                 = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
             if (file >= 0) {
                 if ((dset = H5Dopen2(file, "/Dataset1", H5P_DEFAULT)) < 0)
-                    TEST_ERROR
+                    TEST_ERROR;
                 if (H5Dclose(dset) < 0)
-                    TEST_ERROR
+                    TEST_ERROR;
                 if (H5Fclose(file) < 0)
-                    TEST_ERROR
+                    TEST_ERROR;
             }
             else {
                 H5_FAILED();
@@ -200,11 +200,11 @@ main(void)
 
     /* Verify symbol table messages are cached */
     if (h5_verify_cached_stabs(FILENAME, fapl) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Pop API context */
     if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     api_ctx_pushed = FALSE;
 
     HDputs("All local heap tests passed.");

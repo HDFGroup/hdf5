@@ -282,7 +282,7 @@ H5E_term_package(void)
 static herr_t
 H5E__set_default_auto(H5E_t *stk)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 #ifdef H5_USE_16_API_DEFAULT
@@ -372,7 +372,7 @@ H5E__get_stack(void)
 static herr_t
 H5E__free_class(H5E_cls_t *cls)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(cls);
@@ -443,7 +443,7 @@ H5E__register_class(const char *cls_name, const char *lib_name, const char *vers
     H5E_cls_t *cls       = NULL; /* Pointer to error class */
     H5E_cls_t *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(cls_name);
@@ -525,7 +525,7 @@ H5E__unregister_class(H5E_cls_t *cls, void H5_ATTR_UNUSED **request)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(cls);
@@ -594,7 +594,7 @@ H5E__get_class_name(const H5E_cls_t *cls, char *name, size_t size)
 {
     ssize_t len = -1; /* Length of error class's name */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(cls);
@@ -634,7 +634,7 @@ H5E__close_msg_cb(void *obj_ptr, hid_t obj_id, void *udata)
     H5E_cls_t *cls       = (H5E_cls_t *)udata;
     int        ret_value = H5_ITER_CONT; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(err_msg);
@@ -698,7 +698,7 @@ done:
 static herr_t
 H5E__close_msg(H5E_msg_t *err, void H5_ATTR_UNUSED **request)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(err);
@@ -775,7 +775,7 @@ H5E__create_msg(H5E_cls_t *cls, H5E_type_t msg_type, const char *msg_str)
     H5E_msg_t *msg       = NULL; /* Pointer to new error message */
     H5E_msg_t *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(cls);
@@ -931,7 +931,7 @@ H5E__get_current_stack(void)
     unsigned u;                  /* Local index variable */
     H5E_t *  ret_value = NULL;   /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Get a pointer to the current error stack */
     if (NULL == (current_stack = H5E__get_my_stack())) /*lint !e506 !e774 Make lint 'constant value Boolean'
@@ -1050,7 +1050,7 @@ H5E__set_current_stack(H5E_t *estack)
     unsigned u;                   /* Local index variable */
     herr_t   ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(estack);
@@ -1148,7 +1148,7 @@ done:
 static herr_t
 H5E__close_stack(H5E_t *estack, void H5_ATTR_UNUSED **request)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(estack);
@@ -1224,7 +1224,7 @@ done:
 static ssize_t
 H5E__get_num(const H5E_t *estack)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(estack);
 
@@ -1444,7 +1444,7 @@ H5E__print2(hid_t err_stack, FILE *stream)
     H5E_t *estack;              /* Error stack to operate on */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Need to check for errors */
     if (err_stack == H5E_DEFAULT) {
@@ -1755,7 +1755,7 @@ H5E__append_stack(H5E_t *dst_stack, const H5E_t *src_stack)
     unsigned u;                   /* Local index variable */
     herr_t   ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(dst_stack);

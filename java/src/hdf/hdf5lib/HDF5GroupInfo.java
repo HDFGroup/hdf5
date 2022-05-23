@@ -11,7 +11,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-
 package hdf.hdf5lib;
 
 /**
@@ -41,14 +40,17 @@ public class HDF5GroupInfo {
     long mtime;
     int linklen;
 
-    /** Container for the information reported about an HDF5 Object
-      * from the H5Gget_obj_info() method */
-    public HDF5GroupInfo() {
-        fileno = new long[2];
-        objno = new long[2];
-        nlink = -1;
-        type = -1;
-        mtime = 0;
+    /**
+     * Container for the information reported about an HDF5 Object
+     * from the H5Gget_obj_info() method
+     */
+    public HDF5GroupInfo()
+    {
+        fileno  = new long[2];
+        objno   = new long[2];
+        nlink   = -1;
+        type    = -1;
+        mtime   = 0;
         linklen = 0;
     }
 
@@ -68,84 +70,79 @@ public class HDF5GroupInfo {
      * @param len
      *            Length of link
      **/
-    public void setGroupInfo(long[] fn, long[] on, int nl, int t, long mt,
-            int len) {
-        fileno = fn;
-        objno = on;
-        nlink = nl;
-        type = t;
-        mtime = mt;
+    public void setGroupInfo(long[] fn, long[] on, int nl, int t, long mt, int len)
+    {
+        fileno  = fn;
+        objno   = on;
+        nlink   = nl;
+        type    = t;
+        mtime   = mt;
         linklen = len;
     }
 
     /** Resets all the group information to defaults. */
-    public void reset() {
+    public void reset()
+    {
         fileno[0] = 0;
         fileno[1] = 0;
-        objno[0] = 0;
-        objno[1] = 0;
-        nlink = -1;
-        type = -1;
-        mtime = 0;
-        linklen = 0;
+        objno[0]  = 0;
+        objno[1]  = 0;
+        nlink     = -1;
+        type      = -1;
+        mtime     = 0;
+        linklen   = 0;
     }
 
-    /** fileno accessors
+    /**
+     * fileno accessors
      * @return the file number if successful
      */
-    public long[] getFileno() {
-        return fileno;
-    }
+    public long[] getFileno() { return fileno; }
 
-    /** accessors
+    /**
+     * accessors
      * @return the object number if successful
      */
-    public long[] getObjno() {
-        return objno;
-    }
+    public long[] getObjno() { return objno; }
 
-    /** accessors
+    /**
+     * accessors
      * @return type of group if successful
      */
-    public int getType() {
-        return type;
-    }
+    public int getType() { return type; }
 
-    /** accessors
+    /**
+     * accessors
      * @return the number of links in the group if successful
      */
-    public int getNlink() {
-        return nlink;
-    }
+    public int getNlink() { return nlink; }
 
-    /** accessors
+    /**
+     * accessors
      * @return the modified time value if successful
      */
-    public long getMtime() {
-        return mtime;
-    }
+    public long getMtime() { return mtime; }
 
-    /** accessors
+    /**
+     * accessors
      * @return a length of link name if successful
      */
-    public int getLinklen() {
-        return linklen;
-    }
+    public int getLinklen() { return linklen; }
 
     /**
      * The fileno and objno fields contain four values which uniquely identify
      * an object among those HDF5 files.
      */
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(Object obj)
+    {
         if (!(obj instanceof HDF5GroupInfo)) {
             return false;
         }
 
-        HDF5GroupInfo target = (HDF5GroupInfo) obj;
-        if ((fileno[0] == target.fileno[0]) && (fileno[1] == target.fileno[1])
-                && (objno[0] == target.objno[0])
-                && (objno[1] == target.objno[1])) {
+        HDF5GroupInfo target = (HDF5GroupInfo)obj;
+        if ((fileno[0] == target.fileno[0]) && (fileno[1] == target.fileno[1]) &&
+            (objno[0] == target.objno[0]) && (objno[1] == target.objno[1])) {
             return true;
         }
         else {
@@ -158,9 +155,7 @@ public class HDF5GroupInfo {
      *
      * @return the object id
      */
-    public long getOID() {
-        return objno[0];
-    }
+    public long getOID() { return objno[0]; }
 
     /**
      * /** Converts this object to a String representation.
@@ -168,9 +163,10 @@ public class HDF5GroupInfo {
      * @return a string representation of this object
      */
     @Override
-    public String toString() {
+    public String toString()
+    {
         String fileStr = "fileno=null";
-        String objStr = "objno=null";
+        String objStr  = "objno=null";
 
         if (fileno != null) {
             fileStr = "fileno[0]=" + fileno[0] + ",fileno[1]=" + fileno[1];
@@ -180,9 +176,7 @@ public class HDF5GroupInfo {
             objStr = "objno[0]=" + objno[0] + ",objno[1]=" + objno[1];
         }
 
-        return getClass().getName() + "[" + fileStr + "," + objStr + ",type="
-                + type + ",nlink=" + nlink + ",mtime=" + mtime + ",linklen="
-                + linklen + "]";
+        return getClass().getName() + "[" + fileStr + "," + objStr + ",type=" + type + ",nlink=" + nlink +
+            ",mtime=" + mtime + ",linklen=" + linklen + "]";
     }
-
 }

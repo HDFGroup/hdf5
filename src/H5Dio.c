@@ -174,21 +174,21 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, H5S_t *mem_space, H5S_t *file_space
      */
     if (nelmts > 0 && TRUE == H5S_SELECT_SHAPE_SAME(mem_space, file_space) &&
         H5S_GET_EXTENT_NDIMS(mem_space) != H5S_GET_EXTENT_NDIMS(file_space)) {
-        const void *adj_buf = NULL; /* Pointer to the location in buf corresponding  */
-                                    /* to the beginning of the projected mem space.  */
+        ptrdiff_t buf_adj = 0;
 
         /* Attempt to construct projected dataspace for memory dataspace */
         if (H5S_select_construct_projection(mem_space, &projected_mem_space,
-                                            (unsigned)H5S_GET_EXTENT_NDIMS(file_space), buf, &adj_buf,
-                                            type_info.dst_type_size) < 0)
+                                            (unsigned)H5S_GET_EXTENT_NDIMS(file_space),
+                                            type_info.dst_type_size, &buf_adj) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to construct projected memory dataspace")
         HDassert(projected_mem_space);
-        HDassert(adj_buf);
+
+        /* Adjust the buffer by the given amount */
+        buf = (void *)(((uint8_t *)buf) + buf_adj);
 
         /* Switch to using projected memory dataspace & adjusted buffer */
         mem_space = projected_mem_space;
-        buf       = (void *)adj_buf; /* Casting away 'const' OK -QAK */
-    }                                /* end if */
+    } /* end if */
 
     /* Retrieve dataset properties */
     /* <none needed in the general case> */
@@ -407,20 +407,20 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, H5S_t *mem_space, H5S_t *file_spac
      */
     if (nelmts > 0 && TRUE == H5S_SELECT_SHAPE_SAME(mem_space, file_space) &&
         H5S_GET_EXTENT_NDIMS(mem_space) != H5S_GET_EXTENT_NDIMS(file_space)) {
-        const void *adj_buf = NULL; /* Pointer to the location in buf corresponding  */
-                                    /* to the beginning of the projected mem space.  */
+        ptrdiff_t buf_adj = 0;
 
         /* Attempt to construct projected dataspace for memory dataspace */
         if (H5S_select_construct_projection(mem_space, &projected_mem_space,
-                                            (unsigned)H5S_GET_EXTENT_NDIMS(file_space), buf, &adj_buf,
-                                            type_info.src_type_size) < 0)
+                                            (unsigned)H5S_GET_EXTENT_NDIMS(file_space),
+                                            type_info.src_type_size, &buf_adj) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to construct projected memory dataspace")
         HDassert(projected_mem_space);
-        HDassert(adj_buf);
+
+        /* Adjust the buffer by the given amount */
+        buf = (const void *)(((const uint8_t *)buf) + buf_adj);
 
         /* Switch to using projected memory dataspace & adjusted buffer */
         mem_space = projected_mem_space;
-        buf       = adj_buf;
     } /* end if */
 
     /* Retrieve dataset properties */
@@ -538,7 +538,7 @@ done:
 static herr_t
 H5D__ioinfo_init(H5D_t *dset, const H5D_type_info_t *type_info, H5D_storage_t *store, H5D_io_info_t *io_info)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* check args */
     HDassert(dset);
@@ -609,7 +609,7 @@ H5D__typeinfo_init(const H5D_t *dset, hid_t mem_type_id, hbool_t do_write, H5D_t
     H5Z_data_xform_t *data_transform;      /* Data transform info */
     herr_t            ret_value = SUCCEED; /* Return value	*/
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(type_info);
@@ -779,7 +779,7 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset, const H5S_t *file_
 {
     herr_t ret_value = SUCCEED; /* Return value	*/
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check args */
     HDassert(dset);
@@ -891,7 +891,7 @@ done:
 static herr_t
 H5D__typeinfo_term(const H5D_type_info_t *type_info)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check for releasing datatype conversion & background buffers */
     if (type_info->tconv_buf_allocated) {

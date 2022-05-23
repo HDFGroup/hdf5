@@ -473,35 +473,21 @@ hid_t H5T_NATIVE_INT_FAST64_g   = FAIL;
 hid_t H5T_NATIVE_UINT_FAST64_g  = FAIL;
 
 /*
- * Alignment constraints for native types. These are initialized at run time
- * in H5Tinit.c.  These alignments are mainly for offsets in HDF5 compound
- * datatype or C structures, which are different from the alignments for memory
- * address below this group of variables.
+ * Alignment constraints for HDF5 types.  Accessing objects of these
+ * types with improper alignment invokes C undefined behavior, so the
+ * library lays out objects with correct alignment, always.
+ *
+ * A value of N indicates that the data must be aligned on an address
+ * ADDR such that 0 == ADDR mod N. When N=1 no alignment is required;
+ * N=0 implies that alignment constraints were not calculated.  These
+ * values are used for structure alignment.
  */
-size_t H5T_NATIVE_SCHAR_COMP_ALIGN_g   = 0;
-size_t H5T_NATIVE_UCHAR_COMP_ALIGN_g   = 0;
-size_t H5T_NATIVE_SHORT_COMP_ALIGN_g   = 0;
-size_t H5T_NATIVE_USHORT_COMP_ALIGN_g  = 0;
-size_t H5T_NATIVE_INT_COMP_ALIGN_g     = 0;
-size_t H5T_NATIVE_UINT_COMP_ALIGN_g    = 0;
-size_t H5T_NATIVE_LONG_COMP_ALIGN_g    = 0;
-size_t H5T_NATIVE_ULONG_COMP_ALIGN_g   = 0;
-size_t H5T_NATIVE_LLONG_COMP_ALIGN_g   = 0;
-size_t H5T_NATIVE_ULLONG_COMP_ALIGN_g  = 0;
-size_t H5T_NATIVE_FLOAT_COMP_ALIGN_g   = 0;
-size_t H5T_NATIVE_DOUBLE_COMP_ALIGN_g  = 0;
-size_t H5T_NATIVE_LDOUBLE_COMP_ALIGN_g = 0;
+size_t H5T_POINTER_ALIGN_g     = 0;
+size_t H5T_HVL_ALIGN_g         = 0;
+size_t H5T_HOBJREF_ALIGN_g     = 0;
+size_t H5T_HDSETREGREF_ALIGN_g = 0;
+size_t H5T_REF_ALIGN_g         = 0;
 
-size_t H5T_POINTER_COMP_ALIGN_g     = 0;
-size_t H5T_HVL_COMP_ALIGN_g         = 0;
-size_t H5T_HOBJREF_COMP_ALIGN_g     = 0;
-size_t H5T_HDSETREGREF_COMP_ALIGN_g = 0;
-size_t H5T_REF_COMP_ALIGN_g         = 0;
-
-/*
- * Alignment constraints for native types. These are initialized at run time
- * in H5Tinit.c
- */
 size_t H5T_NATIVE_SCHAR_ALIGN_g   = 0;
 size_t H5T_NATIVE_UCHAR_ALIGN_g   = 0;
 size_t H5T_NATIVE_SHORT_ALIGN_g   = 0;
@@ -621,7 +607,7 @@ H5T__init_inf(void)
     size_t        u;                   /* Local index value        */
     herr_t        ret_value = SUCCEED; /* Return value             */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Get the float datatype */
     if (NULL == (dst_p = (H5T_t *)H5I_object(H5T_NATIVE_FLOAT_g)))
@@ -776,6 +762,9 @@ H5T_init(void)
      */
     if (H5T__init_native() < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to initialize interface")
+
+    if (H5T__init_native_internal() < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to initialize integers")
 
     /* Get the atomic datatype structures needed by the initialization code below */
     if (NULL == (native_schar = (H5T_t *)H5I_object(H5T_NATIVE_SCHAR_g)))
@@ -1462,7 +1451,7 @@ H5T__unlock_cb(void *_dt, hid_t H5_ATTR_UNUSED id, void *_udata)
     H5T_t *dt = (H5T_t *)_dt;
     int *  n  = (int *)_udata;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(dt);
     HDassert(dt->shared);
@@ -1720,7 +1709,7 @@ H5T__close_cb(H5T_t *dt, void **request)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(dt);
@@ -2484,7 +2473,7 @@ H5T__register_int(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T
     H5T_conv_func_t conv_func;           /* Conversion function wrapper */
     herr_t          ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(H5T_PERS_HARD == pers || H5T_PERS_SOFT == pers);
@@ -2535,7 +2524,7 @@ H5T__register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_con
     int         i;                          /*counter                    */
     herr_t      ret_value = SUCCEED;        /*return value               */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(src);
@@ -2769,7 +2758,7 @@ H5T__unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_c
     int         nprint = 0;    /*number of paths shut down   */
     int         i;             /*counter                     */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Remove matching entries from the soft list */
     if (H5T_PERS_DONTCARE == pers || H5T_PERS_SOFT == pers) {
@@ -3424,7 +3413,7 @@ H5T__initiate_copy(const H5T_t *old_dt)
     H5T_t *new_dt    = NULL; /* Copy of datatype */
     H5T_t *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Allocate space */
     if (NULL == (new_dt = H5FL_MALLOC(H5T_t)))
@@ -3477,7 +3466,7 @@ H5T__copy_transient(H5T_t *old_dt)
 {
     H5T_t *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Copy datatype, with correct method */
     if (NULL == (ret_value = H5T_copy(old_dt, H5T_COPY_TRANSIENT)))
@@ -3505,7 +3494,7 @@ H5T__copy_all(H5T_t *old_dt)
 {
     H5T_t *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Copy datatype, with correct method */
     if (NULL == (ret_value = H5T_copy(old_dt, H5T_COPY_ALL)))
@@ -3540,7 +3529,7 @@ H5T__complete_copy(H5T_t *new_dt, const H5T_t *old_dt, H5T_shared_t *reopened_fo
     unsigned i;                   /* Local index variable */
     herr_t   ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Update fields in the new struct, if we aren't sharing an already opened
      * committed datatype */
@@ -4239,7 +4228,7 @@ H5T__set_size(H5T_t *dt, size_t size)
     size_t prec, offset;
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(dt);
@@ -5021,7 +5010,7 @@ H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name, H5T_co
     int         nprint    = 0;            /* lines of output printed */
     H5T_path_t *ret_value = NULL;         /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(src);
@@ -5405,7 +5394,7 @@ H5T__compiler_conv(H5T_t *src, H5T_t *dst)
     H5T_path_t *path;
     htri_t      ret_value = FAIL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Find it */
     if (NULL == (path = H5T_path_find(src, dst)))
@@ -5533,7 +5522,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5G_name_t *
-H5T_nameof(const H5T_t *dt)
+H5T_nameof(H5T_t *dt)
 {
     H5G_name_t *ret_value = NULL;
 
@@ -5977,7 +5966,7 @@ H5T__detect_vlen_ref(const H5T_t *dt)
     unsigned u;                 /* Local index variable */
     hbool_t  ret_value = FALSE; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(dt);
@@ -6080,7 +6069,7 @@ H5T_is_vl_storage(const H5T_t *dt)
 static herr_t
 H5T__upgrade_version_cb(H5T_t *dt, void *op_value)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(dt);

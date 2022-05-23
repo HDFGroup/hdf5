@@ -2,6 +2,9 @@ HDF5 version 1.13.2-1 currently under development
 
 ![HDF5 Logo](doxygen/img/HDF5.png)
 
+[![Build](https://img.shields.io/github/workflow/status/HDFGroup/hdf5/hdf5%20dev%20CI/develop)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Adevelop)
+[![BSD](https://img.shields.io/badge/License-BSD-blue.svg)](https://github.com/HDFGroup/hdf5/blob/develop/COPYING)
+
 *Please refer to the release_docs/INSTALL file for installation instructions.*
 
 THE HDF GROUP
@@ -67,6 +70,26 @@ Posting requires completing a simple registration and allows one to join in the
 conversation.  Please read the following instructions pertaining to the Forum's
 use and configuration
     https://forum.hdfgroup.org/t/quickstart-guide-welcome-to-the-new-hdf-forum
+
+
+RELEASE SCHEDULE
+----------------
+
+![HDF5 release schedule](doc/img/release-schedule.png) 
+
+HDF5 does not release on a regular schedule. Instead, releases are driven by
+new features and bug fixes, though we try to have at least one release of each
+maintenance branch per year. Future HDF5 releases indicated on this schedule
+are tentative. 
+
+| Release | New Features |
+| ------- | ------------ |
+| 1.13.2 | VFD SWMR, Onion VFD, Selection I/O |
+| 1.13.3 | Multi-Dataset I/O |
+| 1.13.4 | Subfiling |
+
+This list of feature release versions is also tentative, and the specific release
+in which a feature is introduced may change.
 
 
 SNAPSHOTS, PREVIOUS RELEASES AND SOURCE CODE

@@ -226,7 +226,7 @@ H5EA__cache_hdr_get_initial_load_size(void *_udata, size_t *image_len)
 {
     H5EA_hdr_cache_ud_t *udata = (H5EA_hdr_cache_ud_t *)_udata; /* User data for callback */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(udata);
@@ -260,7 +260,7 @@ H5EA__cache_hdr_verify_chksum(const void *_image, size_t len, void H5_ATTR_UNUSE
     uint32_t       computed_chksum;                 /* Computed metadata checksum value */
     htri_t         ret_value = TRUE;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(image);
@@ -297,7 +297,7 @@ H5EA__cache_hdr_deserialize(const void *_image, size_t len, void *_udata, hbool_
     uint32_t             stored_chksum;                   /* Stored metadata checksum value */
     void *               ret_value = NULL;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(image);
@@ -418,7 +418,7 @@ H5EA__cache_hdr_image_len(const void *_thing, size_t *image_len)
 {
     const H5EA_hdr_t *hdr = (const H5EA_hdr_t *)_thing; /* Pointer to the object */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(hdr);
@@ -449,7 +449,7 @@ H5EA__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED le
     uint8_t *   image = (uint8_t *)_image;    /* Pointer into raw data buffer */
     uint32_t    metadata_chksum;              /* Computed metadata checksum value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* check arguments */
     HDassert(f);
@@ -519,7 +519,7 @@ H5EA__cache_hdr_notify(H5AC_notify_action_t action, void *_thing)
     H5EA_hdr_t *hdr       = (H5EA_hdr_t *)_thing; /* Pointer to the object */
     herr_t      ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(hdr);
@@ -599,7 +599,7 @@ H5EA__cache_hdr_free_icr(void *thing)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(thing);
@@ -630,7 +630,7 @@ H5EA__cache_iblock_get_initial_load_size(void *_udata, size_t *image_len)
     H5EA_hdr_t *  hdr = (H5EA_hdr_t *)_udata; /* User data for callback */
     H5EA_iblock_t iblock;                     /* Fake index block for computing size */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(hdr);
@@ -670,7 +670,7 @@ H5EA__cache_iblock_verify_chksum(const void *_image, size_t len, void H5_ATTR_UN
     uint32_t       computed_chksum;                 /* Computed metadata checksum value */
     htri_t         ret_value = TRUE;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(image);
@@ -708,7 +708,7 @@ H5EA__cache_iblock_deserialize(const void *_image, size_t len, void *_udata, hbo
     size_t         u;                                /* Local index variable */
     void *         ret_value = NULL;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(image);
@@ -809,7 +809,7 @@ H5EA__cache_iblock_image_len(const void *_thing, size_t *image_len)
 {
     const H5EA_iblock_t *iblock = (const H5EA_iblock_t *)_thing; /* Pointer to the object */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(iblock);
@@ -841,7 +841,7 @@ H5EA__cache_iblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED
     uint32_t       metadata_chksum;                  /* Computed metadata checksum value */
     herr_t         ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check arguments */
     HDassert(f);
@@ -925,7 +925,7 @@ H5EA__cache_iblock_notify(H5AC_notify_action_t action, void *_thing)
     H5EA_iblock_t *iblock    = (H5EA_iblock_t *)_thing; /* Pointer to the object */
     herr_t         ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(iblock);
@@ -1000,7 +1000,7 @@ H5EA__cache_iblock_free_icr(void *thing)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(thing);
@@ -1031,7 +1031,7 @@ H5EA__cache_sblock_get_initial_load_size(void *_udata, size_t *image_len)
     H5EA_sblock_cache_ud_t *udata = (H5EA_sblock_cache_ud_t *)_udata; /* User data */
     H5EA_sblock_t           sblock; /* Fake super block for computing size */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(udata);
@@ -1090,7 +1090,7 @@ H5EA__cache_sblock_verify_chksum(const void *_image, size_t len, void H5_ATTR_UN
     uint32_t       computed_chksum;                 /* Computed metadata checksum value */
     htri_t         ret_value = TRUE;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(image);
@@ -1128,7 +1128,7 @@ H5EA__cache_sblock_deserialize(const void *_image, size_t len, void *_udata, hbo
     size_t                  u;        /* Local index variable */
     void *                  ret_value = NULL;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(udata);
@@ -1226,7 +1226,7 @@ H5EA__cache_sblock_image_len(const void *_thing, size_t *image_len)
 {
     const H5EA_sblock_t *sblock = (const H5EA_sblock_t *)_thing; /* Pointer to the object */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(sblock);
@@ -1258,7 +1258,7 @@ H5EA__cache_sblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED
     uint32_t       metadata_chksum;                  /* Computed metadata checksum value */
     size_t         u;                                /* Local index variable */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* check arguments */
     HDassert(f);
@@ -1329,7 +1329,7 @@ H5EA__cache_sblock_notify(H5AC_notify_action_t action, void *_thing)
     H5EA_sblock_t *sblock    = (H5EA_sblock_t *)_thing; /* Pointer to the object */
     herr_t         ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(sblock);
@@ -1425,7 +1425,7 @@ H5EA__cache_sblock_free_icr(void *thing)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(thing);
@@ -1456,7 +1456,7 @@ H5EA__cache_dblock_get_initial_load_size(void *_udata, size_t *image_len)
     H5EA_dblock_cache_ud_t *udata = (H5EA_dblock_cache_ud_t *)_udata; /* User data */
     H5EA_dblock_t           dblock;                                   /* Fake data block for computing size */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(udata);
@@ -1516,7 +1516,7 @@ H5EA__cache_dblock_verify_chksum(const void *_image, size_t len, void H5_ATTR_UN
     uint32_t       computed_chksum;                 /* Computed metadata checksum value */
     htri_t         ret_value = TRUE;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(image);
@@ -1652,7 +1652,7 @@ H5EA__cache_dblock_image_len(const void *_thing, size_t *image_len)
 {
     const H5EA_dblock_t *dblock = (const H5EA_dblock_t *)_thing; /* Pointer to the object */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(dblock);
@@ -1687,7 +1687,7 @@ H5EA__cache_dblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED
     uint32_t       metadata_chksum;                  /* Computed metadata checksum value */
     herr_t         ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check arguments */
     HDassert(f);
@@ -1755,7 +1755,7 @@ H5EA__cache_dblock_notify(H5AC_notify_action_t action, void *_thing)
     H5EA_dblock_t *dblock    = (H5EA_dblock_t *)_thing; /* Pointer to the object */
     herr_t         ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(dblock);
@@ -1850,7 +1850,7 @@ H5EA__cache_dblock_free_icr(void *thing)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(thing);
@@ -1897,7 +1897,7 @@ H5EA__cache_dblock_fsf_size(const void *_thing, hsize_t *fsf_size)
 {
     const H5EA_dblock_t *dblock = (const H5EA_dblock_t *)_thing; /* Pointer to the object */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(dblock);
@@ -1927,7 +1927,7 @@ H5EA__cache_dblk_page_get_initial_load_size(void *_udata, size_t *image_len)
 {
     H5EA_dblk_page_cache_ud_t *udata = (H5EA_dblk_page_cache_ud_t *)_udata; /* User data */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(udata);
@@ -1961,7 +1961,7 @@ H5EA__cache_dblk_page_verify_chksum(const void *_image, size_t len, void H5_ATTR
     uint32_t       computed_chksum;                 /* Computed metadata checksum value */
     htri_t         ret_value = TRUE;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(image);
@@ -1998,7 +1998,7 @@ H5EA__cache_dblk_page_deserialize(const void *_image, size_t len, void *_udata, 
     uint32_t       stored_chksum;                   /* Stored metadata checksum value */
     void *         ret_value = NULL;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(udata);
@@ -2066,7 +2066,7 @@ H5EA__cache_dblk_page_image_len(const void *_thing, size_t *image_len)
 {
     const H5EA_dblk_page_t *dblk_page = (const H5EA_dblk_page_t *)_thing; /* Pointer to the object */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(dblk_page);
@@ -2099,7 +2099,7 @@ H5EA__cache_dblk_page_serialize(const H5F_t H5_ATTR_NDEBUG_UNUSED *f, void *_ima
     uint32_t          metadata_chksum;                        /* Computed metadata checksum value */
     herr_t            ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(f);
@@ -2148,7 +2148,7 @@ H5EA__cache_dblk_page_notify(H5AC_notify_action_t action, void *_thing)
     H5EA_dblk_page_t *dblk_page = (H5EA_dblk_page_t *)_thing; /* Pointer to the object */
     herr_t            ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(dblk_page);
@@ -2244,7 +2244,7 @@ H5EA__cache_dblk_page_free_icr(void *thing)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(thing);

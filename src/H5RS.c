@@ -108,7 +108,7 @@ H5RS__xstrdup(H5RS_str_t *rs, const char *s)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(rs);
@@ -172,7 +172,7 @@ H5RS__prepare_for_append(H5RS_str_t *rs)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(rs);
@@ -224,7 +224,7 @@ H5RS__resize_for_append(H5RS_str_t *rs, size_t len)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(rs);

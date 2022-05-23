@@ -110,9 +110,9 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
     H5C_auto_size_ctl_t mod_auto_size_ctl;
 
     if (paged)
-        TESTING("MDC/FAPL related API calls for paged aggregation strategy")
+        TESTING("MDC/FAPL related API calls for paged aggregation strategy");
     else
-        TESTING("MDC/FAPL related API calls")
+        TESTING("MDC/FAPL related API calls");
 
     pass = TRUE;
 
@@ -652,9 +652,9 @@ check_file_mdc_api_calls(unsigned paged, hid_t fcpl_id)
         H5AC__DEFAULT_METADATA_WRITE_STRATEGY};
 
     if (paged)
-        TESTING("MDC/FILE related API calls for paged aggregation strategy")
+        TESTING("MDC/FILE related API calls for paged aggregation strategy");
     else
-        TESTING("MDC/FILE related API calls")
+        TESTING("MDC/FILE related API calls");
 
     pass = TRUE;
 
@@ -835,7 +835,7 @@ check_file_mdc_api_calls(unsigned paged, hid_t fcpl_id)
  *              with the cache API calls.
  *
  *              NOTE: This test takes some time to run and checks the
- *                    HDF5TestExpress environment variable.
+ *                    testing express level value.
  *
  * Return:      Test pass status (TRUE/FALSE)
  *
@@ -975,9 +975,9 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
         H5AC__DEFAULT_METADATA_WRITE_STRATEGY};
 
     if (paged)
-        TESTING("MDC API smoke check for paged aggregation strategy")
+        TESTING("MDC API smoke check for paged aggregation strategy");
     else
-        TESTING("MDC API smoke check")
+        TESTING("MDC API smoke check");
 
     pass = TRUE;
 
@@ -1879,9 +1879,9 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
     H5AC_cache_config_t scratch;
 
     if (paged)
-        TESTING("MDC/FILE related API input errors for paged aggregation strategy")
+        TESTING("MDC/FILE related API input errors for paged aggregation strategy");
     else
-        TESTING("MDC/FILE related API input errors")
+        TESTING("MDC/FILE related API input errors");
 
     pass = TRUE;
 

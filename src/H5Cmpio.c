@@ -898,7 +898,11 @@ H5C_clear_coll_entries(H5C_t *cache_ptr, hbool_t partial)
     H5C_cache_entry_t *entry_ptr = NULL;
     herr_t             ret_value = SUCCEED;
 
+#if H5C_DO_SANITY_CHECKS
     FUNC_ENTER_NOAPI_NOINIT
+#else
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+#endif
 
     entry_ptr = cache_ptr->coll_tail_ptr;
     clear_cnt = (partial ? cache_ptr->coll_list_len / 2 : cache_ptr->coll_list_len);
@@ -919,7 +923,7 @@ H5C_clear_coll_entries(H5C_t *cache_ptr, hbool_t partial)
         entry_ptr = prev_ptr;
     } /* end while */
 
-#ifdef H5C_DO_SANITY_CHECKS
+#if H5C_DO_SANITY_CHECKS
 done:
 #endif /* H5C_DO_SANITY_CHECKS */
     FUNC_LEAVE_NOAPI(ret_value)
@@ -955,7 +959,7 @@ H5C__collective_write(H5F_t *f)
     size_t           buf_count;
     herr_t           ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(f != NULL);
@@ -1125,7 +1129,7 @@ H5C__flush_candidate_entries(H5F_t *f, unsigned entries_to_flush[H5C_RING_NTYPES
     H5C_t *    cache_ptr;
     herr_t     ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(f);
     HDassert(f->shared);
@@ -1245,7 +1249,7 @@ H5C__flush_candidates_in_ring(H5F_t *f, H5C_ring_t ring, unsigned entries_to_flu
     H5C_cache_entry_t *entry_ptr;
     herr_t             ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(f);

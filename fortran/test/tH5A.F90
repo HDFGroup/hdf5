@@ -376,7 +376,7 @@ CONTAINS
      ! Open file
      !
      CALL h5fopen_f(fix_filename, H5F_ACC_RDWR_F, file_id, error)
-     CALL check("h5open_f",error,total_error)
+     CALL check("h5fopen_f",error,total_error)
      !
      ! Reopen dataset
      !

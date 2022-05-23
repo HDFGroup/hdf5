@@ -37,7 +37,6 @@
 #include "H5CXprivate.h" /* API Contexts */
 #include "H5Dprivate.h"  /* Datasets */
 #include "H5Eprivate.h"  /* Errors   */
-#include "H5ESprivate.h" /* Event Sets */
 #include "H5Fprivate.h"  /* Files    */
 #include "H5Gprivate.h"  /* Groups   */
 #include "H5Iprivate.h"  /* IDs      */
@@ -151,7 +150,7 @@ H5O__oh_tag(const H5O_loc_t *oloc, haddr_t *tag)
     H5O_t *oh        = NULL;    /* Object header */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(oloc);
@@ -195,8 +194,9 @@ done:
 herr_t
 H5O_refresh_metadata(H5O_loc_t *oloc, hid_t oid)
 {
-    H5VL_object_t *vol_obj   = NULL;    /* VOL object associated with the ID */
-    hbool_t        objs_incr = FALSE;   /* Whether the object count in the file was incremented */
+    H5VL_object_t *vol_obj   = NULL;  /* VOL object associated with the ID */
+    hbool_t        objs_incr = FALSE; /* Whether the object count in the file was incremented */
+    H5F_t *        file      = NULL;
     herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -208,6 +208,11 @@ H5O_refresh_metadata(H5O_loc_t *oloc, hid_t oid)
         H5G_name_t   obj_path;
         H5O_shared_t cached_H5O_shared;
         H5VL_t *     connector = NULL;
+
+        /* Hold a copy of the object's file pointer, since closing the object will
+         * invalidate the file pointer in the oloc.
+         */
+        file = oloc->file;
 
         /* Create empty object location */
         obj_loc.oloc = &obj_oloc;
@@ -257,8 +262,8 @@ H5O_refresh_metadata(H5O_loc_t *oloc, hid_t oid)
     } /* end if */
 
 done:
-    if (objs_incr)
-        H5F_decr_nopen_objs(oloc->file);
+    if (objs_incr && file)
+        H5F_decr_nopen_objs(file);
 
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5O_refresh_metadata() */
@@ -290,7 +295,7 @@ H5O__refresh_metadata_close(H5O_loc_t *oloc, H5G_loc_t *obj_loc, hid_t oid)
     hbool_t corked    = FALSE;   /* Whether object's metadata is corked */
     herr_t  ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Make deep local copy of object's location information */
     if (obj_loc) {
