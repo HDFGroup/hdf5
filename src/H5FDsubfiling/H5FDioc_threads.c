@@ -406,7 +406,7 @@ ioc_main(int64_t context_id)
     atomic_init(&sf_io_ops_pending, 0);
 
     /* tell initialize_ioc_threads() that ioc_main() is ready to enter its main loop */
-    atomic_init(&sf_ioc_ready, 1);
+    atomic_store(&sf_ioc_ready, 1);
 
     shutdown_requested = 0;
 
