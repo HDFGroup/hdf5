@@ -895,7 +895,8 @@ H5D__write(size_t count, H5D_dset_info_t *dset_info, hbool_t is_mdset)
 
         /* Allocate dataspace and initialize it if it hasn't been. */
         should_alloc_space = dset_info[i].dset->shared->dcpl_cache.efl.nused == 0 &&
-                             !(*dset_info[i].dset->shared->layout.ops->is_space_alloc)(&dset_info[i].dset->shared->layout.storage);
+                             !(*dset_info[i].dset->shared->layout.ops->is_space_alloc)(
+                                 &dset_info[i].dset->shared->layout.storage);
 
         /*
          * If not using an MPI-based VFD, we only need to allocate
@@ -1349,7 +1350,8 @@ H5D__ioinfo_adjust(const size_t count, H5D_io_info_t *io_info)
              * with multiple ranks involved; otherwise, there will be metadata
              * inconsistencies in the file.
              */
-            if (io_info->op_type == H5D_IO_OP_WRITE && io_info->dsets_info[0].dset->shared->dcpl_cache.pline.nused > 0) { /*!FIXME -NAF */
+            if (io_info->op_type == H5D_IO_OP_WRITE &&
+                io_info->dsets_info[0].dset->shared->dcpl_cache.pline.nused > 0) { /*!FIXME -NAF */
                 int comm_size = 0;
 
                 /* Retrieve size of MPI communicator used for file */
