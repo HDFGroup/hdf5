@@ -346,7 +346,7 @@ H5FL_EXTERN(H5AC_aux_t);
  *
  * The following field supports the metadata cache image feature.
  *
- * p0_image_len: unsiged integer containing the length of the metadata cache
+ * p0_image_len: unsigned integer containing the length of the metadata cache
  *		image constructed by MPI process 0.  This field should be 0
  *		if the value is unknown, or if cache image is not enabled.
  *

@@ -26,7 +26,7 @@
 
 const char *FILENAME[] = {"flush", "noflush", NULL};
 
-static int data_g[100][100];
+static int *data_g = NULL;
 
 #define N_GROUPS 100
 
@@ -43,7 +43,7 @@ static int data_g[100][100];
  *-------------------------------------------------------------------------
  */
 static herr_t
-check_test_file(char *name, hid_t fapl_id)
+check_test_file(char *name, size_t name_length, hid_t fapl_id)
 {
     hid_t   fid           = H5I_INVALID_HID;
     hid_t   sid           = H5I_INVALID_HID;
@@ -77,9 +77,10 @@ check_test_file(char *name, hid_t fapl_id)
     for (i = 0; i < dims[0]; i++) {
         for (j = 0; j < dims[1]; j++) {
             val = (int)(i + (i * j) + j);
-            if (data_g[i][j] != val) {
+            if (data_g[(i * 100) + j] != val) {
                 H5_FAILED();
-                HDprintf("    data_g[%lu][%lu] = %d\n", (unsigned long)i, (unsigned long)j, data_g[i][j]);
+                HDprintf("    data_g[%lu][%lu] = %d\n", (unsigned long)i, (unsigned long)j,
+                         data_g[(i * 100) + j]);
                 HDprintf("    should be %d\n", val);
             }
         }
@@ -89,7 +90,7 @@ check_test_file(char *name, hid_t fapl_id)
     if ((top_level_gid = H5Gopen2(fid, "some_groups", H5P_DEFAULT)) < 0)
         goto error;
     for (i = 0; i < N_GROUPS; i++) {
-        HDsprintf(name, "grp%02u", (unsigned)i);
+        HDsnprintf(name, name_length, "grp%02u", (unsigned)i);
         if ((gid = H5Gopen2(top_level_gid, name, H5P_DEFAULT)) < 0)
             goto error;
         if (H5Gclose(gid) < 0)
@@ -170,6 +171,9 @@ main(int argc, char *argv[])
         HDexit(EXIT_SUCCESS);
     }
 
+    if (NULL == (data_g = HDmalloc(100 * 100 * sizeof(*data_g))))
+        goto error;
+
     if ((fapl_id1 = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         goto error;
     if (H5Pset_fapl_mpio(fapl_id1, comm, info) < 0)
@@ -182,8 +186,8 @@ main(int argc, char *argv[])
 
     /* Check the case where the file was flushed */
     h5_fixname(FILENAME[0], fapl_id1, name, sizeof(name));
-    if (check_test_file(name, fapl_id1)) {
-        H5_FAILED()
+    if (check_test_file(name, sizeof(name), fapl_id1)) {
+        H5_FAILED();
         goto error;
     }
     else if (mpi_rank == 0) {
@@ -199,12 +203,12 @@ main(int argc, char *argv[])
     H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
     h5_fixname(FILENAME[1], fapl_id2, name, sizeof(name));
-    if (check_test_file(name, fapl_id2)) {
+    if (check_test_file(name, sizeof(name), fapl_id2)) {
         if (mpi_rank == 0)
             PASSED();
     }
     else {
-        H5_FAILED()
+        H5_FAILED();
         goto error;
     }
 
@@ -213,10 +217,18 @@ main(int argc, char *argv[])
     h5_clean_files(&FILENAME[0], fapl_id1);
     h5_clean_files(&FILENAME[1], fapl_id2);
 
+    if (data_g) {
+        HDfree(data_g);
+        data_g = NULL;
+    }
+
     MPI_Finalize();
 
     HDexit(EXIT_SUCCESS);
 
 error:
+    if (data_g)
+        HDfree(data_g);
+
     HDexit(EXIT_FAILURE);
 } /* end main() */

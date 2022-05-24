@@ -64,7 +64,7 @@ SUBROUTINE attribute_test_1_8(cleanup, total_error)
   INTEGER :: ret_total_error
 
 ! ********************
-! test_attr equivelent
+! test_attr equivalent
 ! ********************
 
 !  WRITE(*,*) "TESTING ATTRIBUTES"
@@ -317,7 +317,7 @@ SUBROUTINE test_attr_corder_create_compact(fcpl,fapl, total_error)
   CALL check("h5pclose_f",error,total_error)
 
   CALL h5fopen_f(FileName, H5F_ACC_RDWR_F, fid, error, fapl)
-  CALL check("h5open_f",error,total_error)
+  CALL check("h5fopen_f",error,total_error)
 
   CALL h5dopen_f(fid, DSET1_NAME, dset1, error)
   CALL check("h5dopen_f",error,total_error)
@@ -432,7 +432,7 @@ SUBROUTINE test_attr_null_space(fcpl, fapl, total_error)
 
   !  Re-open file
   CALL h5fopen_f(FileName, H5F_ACC_RDWR_F, fid, error)
-  CALL check("h5open_f",error,total_error)
+  CALL check("h5fopen_f",error,total_error)
   !  Create dataspace for dataset attributes
   CALL h5screate_f(H5S_SCALAR_F, sid, error)
   CALL check("h5screate_f",error,total_error)
@@ -776,8 +776,7 @@ SUBROUTINE test_attr_info_by_idx(new_format, fcpl, fapl, total_error)
 
   INTEGER :: Input1
   INTEGER(HSIZE_T) :: hzero = 0_HSIZE_T
-  INTEGER :: minusone = -1
-  INTEGER(HSIZE_T) :: htmp
+  INTEGER, PARAMETER :: minusone = -1
 
   data_dims = 0
 
@@ -840,10 +839,6 @@ SUBROUTINE test_attr_info_by_idx(new_format, fcpl, fapl, total_error)
            my_dataset = dset3
         END SELECT
 
-        !  Check for query on non-existant attribute
-
-        n = 0
-
         ! -- CHECK PASSING AN INTEGER CONSTANT IN DIFFERENT FORMS --
 
         ! 1) call by passing an integer with the _hsize_t declaration
@@ -896,8 +891,8 @@ SUBROUTINE test_attr_info_by_idx(new_format, fcpl, fapl, total_error)
            !  Verify information for new attribute
 
 !EP        CALL attr_info_by_idx_check(my_dataset, attrname, INT(j,HSIZE_T), use_index(i), total_error )
-           htmp = j
-           CALL attr_info_by_idx_check(my_dataset, attrname, htmp, use_index(i), total_error )
+           n = INT(j, HSIZE_T)
+           CALL attr_info_by_idx_check(my_dataset, attrname, n, use_index(i), total_error )
 
            !CHECK(ret, FAIL, "attr_info_by_idx_check");
         ENDDO
@@ -1111,7 +1106,7 @@ SUBROUTINE test_attr_shared_rename( fcpl, fapl, total_error)
 
   INTEGER :: test_shared
   INTEGER(HSIZE_T), DIMENSION(1) :: adims2 = (/1/) ! Attribute dimension
-  INTEGER     ::   arank = 1                      ! Attribure rank
+  INTEGER     ::   arank = 1                      ! Attribute rank
 
   !  Initialize "big" attribute data
 
@@ -1168,7 +1163,7 @@ SUBROUTINE test_attr_shared_rename( fcpl, fapl, total_error)
 
      !  Re-open file
      CALL h5fopen_f(FileName, H5F_ACC_RDWR_F, fid, error,fapl)
-     CALL check("h5open_f",error,total_error)
+     CALL check("h5fopen_f",error,total_error)
 
      !  Commit datatype to file
      IF(test_shared.EQ.2) THEN
@@ -1427,7 +1422,7 @@ SUBROUTINE test_attr_delete_by_idx(new_format, fcpl, fapl, total_error)
   INTEGER :: u     !  Local index variable
   INTEGER :: Input1
   INTEGER(HSIZE_T) :: hzero = 0_HSIZE_T
-  INTEGER :: minusone = -1
+  INTEGER, PARAMETER :: minusone = -1
 
   data_dims = 0
 
@@ -1497,7 +1492,7 @@ SUBROUTINE test_attr_delete_by_idx(new_format, fcpl, fapl, total_error)
               END SELECT
 
 
-              !  Check for deleting non-existant attribute
+              !  Check for deleting non-existent attribute
 !EP              CALL H5Adelete_by_idx_f(my_dataset, '.', idx_type, order, 0_HSIZE_T,error, lapl_id=H5P_DEFAULT_F)
               CALL H5Adelete_by_idx_f(my_dataset, '.', idx_type, order, hzero,error, lapl_id=H5P_DEFAULT_F)
               CALL verify("H5Adelete_by_idx_f",error,minusone,total_error)
@@ -1773,7 +1768,7 @@ SUBROUTINE test_attr_shared_delete(fcpl, fapl, total_error)
 
   INTEGER :: test_shared
   INTEGER(HSIZE_T), DIMENSION(1) :: adims2 = (/1/) ! Attribute dimension
-  INTEGER     ::   arank = 1                      ! Attribure rank
+  INTEGER     ::   arank = 1                      ! Attribute rank
 
   !  Output message about test being performed
 
@@ -1832,7 +1827,7 @@ SUBROUTINE test_attr_shared_delete(fcpl, fapl, total_error)
 
      !  Re-open file
      CALL h5fopen_f(FileName, H5F_ACC_RDWR_F, fid, error,fapl)
-     CALL check("h5open_f",error,total_error)
+     CALL check("h5fopen_f",error,total_error)
 
      !  Commit datatype to file
 
@@ -2053,7 +2048,7 @@ SUBROUTINE test_attr_dense_open( fcpl, fapl, total_error)
 
   !  Re-open file
   CALL h5fopen_f(FileName, H5F_ACC_RDWR_F, fid, error, fapl)
-  CALL check("h5open_f",error,total_error)
+  CALL check("h5fopen_f",error,total_error)
 
   !  Create dataspace for dataset
   CALL h5screate_f(H5S_SCALAR_F, sid, error)
@@ -2268,7 +2263,7 @@ SUBROUTINE test_attr_corder_create_basic( fcpl, fapl, total_error )
   INTEGER :: error
 
   INTEGER :: crt_order_flags
-  INTEGER :: minusone = -1
+  INTEGER, PARAMETER :: minusone = -1
 
   !  Output message about test being performed
 !  WRITE(*,*) "     - Testing Basic Code for Attributes with Creation Order Info"
@@ -2330,7 +2325,7 @@ SUBROUTINE test_attr_corder_create_basic( fcpl, fapl, total_error )
 
   !  Re-open file
   CALL h5fopen_f(FileName, H5F_ACC_RDWR_F, fid, error, fapl)
-  CALL check("h5open_f",error,total_error)
+  CALL check("h5fopen_f",error,total_error)
 
   !  Open dataset created
   CALL h5dopen_f(fid, DSET1_NAME, dataset, error, H5P_DEFAULT_F )

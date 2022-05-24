@@ -1541,7 +1541,7 @@
   ADD_H5_TEST (bug1814 "TEST" ${FILE_REF})
 
 # test attribute with various references (bug1797 / HDFFV-5932)
-# the references in attribute of compund or vlen datatype
+# the references in attribute of compound or vlen datatype
   ADD_H5_TEST (HDFFV-5932 "TEST" ${FILE_ATTR_REF})
 
 # Add test for memory leak in attribute. This test is verified by CTEST.

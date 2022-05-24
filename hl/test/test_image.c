@@ -219,7 +219,7 @@ test_simple(void)
      *-------------------------------------------------------------------------
      */
 
-    HL_TESTING2("pallete functions");
+    HL_TESTING2("palette functions");
 
     if (H5IMget_npalettes(fid, IMAGE1_NAME, &npals) < 0)
         goto out;
@@ -422,7 +422,7 @@ test_data(void)
 
     /*-------------------------------------------------------------------------
      * palette #4. blue-red
-     * make a palette whith blue to red colors
+     * make a palette with blue to red colors
      *-------------------------------------------------------------------------
      */
     for (i = 0, n = 0; i < 256 * 3; i += 3, n++) {
@@ -650,7 +650,7 @@ test_generate(void)
     HL_TESTING2("make indexed image from land data");
 
     for (i = 0; i < n_elements; i++) {
-        if (data[i] < 0.0f)
+        if (data[i] < 0.0F)
             image_data[i] = 0;
         else
             image_data[i] = (unsigned char)((255 * data[i]) / xmax);
@@ -671,10 +671,10 @@ test_generate(void)
     HL_TESTING2("make indexed image from sea data");
 
     for (i = 0; i < n_elements; i++) {
-        if (data[i] > 0.0f)
+        if (data[i] > 0.0F)
             image_data[i] = 0;
         else {
-            image_data[i] = (unsigned char)((255.0f * (data[i] - xmin)) / (xmax - xmin));
+            image_data[i] = (unsigned char)((255.0F * (data[i] - xmin)) / (xmax - xmin));
         }
     }
 

@@ -292,7 +292,7 @@ build_match_list_attrs(hid_t loc1_id, hid_t loc2_id, table_attrs_t **table_out, 
     }
 
     if (opts->mode_verbose_level >= 1)
-        parallel_print("Attributes status:  %d common, %d only in obj1, %d only in obj2\n",
+        parallel_print("Attributes status:  %zu common, %zu only in obj1, %zu only in obj2\n",
                        table_lp->nattrs - table_lp->nattrs_only1 - table_lp->nattrs_only2,
                        table_lp->nattrs_only1, table_lp->nattrs_only2);
 

@@ -83,10 +83,12 @@
 
 /* Layout operation callbacks */
 static hbool_t H5D__virtual_is_data_cached(const H5D_shared_t *shared_dset);
+static herr_t  H5D__virtual_io_init(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
+                                    H5S_t *file_space, H5S_t *mem_space, H5D_dset_info_t *dinfo);
 static herr_t  H5D__virtual_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
-                                 const H5S_t *file_space, const H5S_t *mem_space, H5D_dset_info_t *dinfo);
+                                 H5S_t *file_space, H5S_t *mem_space, H5D_dset_info_t *dinfo);
 static herr_t  H5D__virtual_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
-                                  const H5S_t *file_space, const H5S_t *mem_space, H5D_dset_info_t *dinfo);
+                                  H5S_t *file_space, H5S_t *mem_space, H5D_dset_info_t *dinfo);
 static herr_t  H5D__virtual_flush(H5D_t *dset);
 
 /* Other functions */
@@ -104,25 +106,36 @@ static herr_t H5D__virtual_build_source_name(char *                             
                                              char **built_name);
 static herr_t H5D__virtual_init_all(const H5D_t *dset);
 static herr_t H5D__virtual_pre_io(H5D_dset_info_t *dset_info, H5O_storage_virtual_t *storage,
-                                  const H5S_t *file_space, const H5S_t *mem_space, hsize_t *tot_nelmts);
+                                  H5S_t *file_space, H5S_t *mem_space, hsize_t *tot_nelmts);
 static herr_t H5D__virtual_post_io(H5O_storage_virtual_t *storage);
 static herr_t H5D__virtual_read_one(H5D_dset_info_t *dset_info, const H5D_type_info_t *type_info,
-                                    const H5S_t *file_space, H5O_storage_virtual_srcdset_t *source_dset);
+                                    H5S_t *file_space, H5O_storage_virtual_srcdset_t *source_dset);
 static herr_t H5D__virtual_write_one(H5D_dset_info_t *dset_info, const H5D_type_info_t *type_info,
-                                     const H5S_t *file_space, H5O_storage_virtual_srcdset_t *source_dset);
+                                     H5S_t *file_space, H5O_storage_virtual_srcdset_t *source_dset);
 
 /*********************/
 /* Package Variables */
 /*********************/
 
 /* Contiguous storage layout I/O ops */
-const H5D_layout_ops_t H5D_LOPS_VIRTUAL[1] = {{NULL, H5D__virtual_init, H5D__virtual_is_space_alloc,
-                                               H5D__virtual_is_data_cached, NULL, H5D__virtual_read,
-                                               H5D__virtual_write,
+const H5D_layout_ops_t H5D_LOPS_VIRTUAL[1] = {{
+    NULL,                        /* construct */
+    H5D__virtual_init,           /* init */
+    H5D__virtual_is_space_alloc, /* is_space_alloc */
+    H5D__virtual_is_data_cached, /* is_data_cached */
+    H5D__virtual_io_init,        /* io_init */
+    H5D__virtual_read,           /* ser_read */
+    H5D__virtual_write,          /* ser_write */
 #ifdef H5_HAVE_PARALLEL
-                                               NULL, NULL,
-#endif /* H5_HAVE_PARALLEL */
-                                               NULL, NULL, H5D__virtual_flush, NULL, NULL}};
+    NULL, /* par_read */
+    NULL, /* par_write */
+#endif
+    NULL,               /* readvv */
+    NULL,               /* writevv */
+    H5D__virtual_flush, /* flush */
+    NULL,               /* io_term */
+    NULL                /* dest */
+}};
 
 /*******************/
 /* Local Variables */
@@ -195,7 +208,7 @@ H5D_virtual_check_mapping_pre(const H5S_t *vspace, const H5S_t *src_space,
                             "can't get number of elements in non-unlimited dimension")
             if (nenu_vs != nenu_ss)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                            "numbers of elemnts in the non-unlimited dimensions is different for source and "
+                            "numbers of elements in the non-unlimited dimensions is different for source and "
                             "virtual spaces")
         } /* end if */
         /* We will handle the printf case after parsing the source names */
@@ -885,7 +898,7 @@ H5D__virtual_open_source_dset(const H5D_t *vdset, H5O_storage_virtual_ent_t *vir
     hbool_t src_file_open = FALSE;   /* Whether we have opened and need to close src_file */
     herr_t  ret_value     = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(vdset);
@@ -977,7 +990,7 @@ H5D__virtual_reset_source_dset(H5O_storage_virtual_ent_t *    virtual_ent,
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(source_dset);
@@ -1059,7 +1072,7 @@ H5D__virtual_str_append(const char *src, size_t src_len, char **p, char **buf, s
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(src);
@@ -1251,7 +1264,7 @@ H5D__virtual_copy_parsed_name(H5O_storage_virtual_name_seg_t **dst, H5O_storage_
     H5O_storage_virtual_name_seg_t **p_dst     = &tmp_dst;
     herr_t                           ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(dst);
@@ -1304,7 +1317,7 @@ H5D_virtual_free_parsed_name(H5O_storage_virtual_name_seg_t *name_seg)
     H5O_storage_virtual_name_seg_t *next_seg;
     herr_t                          ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Walk name segments, freeing them */
     while (name_seg) {
@@ -1314,7 +1327,6 @@ H5D_virtual_free_parsed_name(H5O_storage_virtual_name_seg_t *name_seg)
         name_seg = next_seg;
     } /* end while */
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_virtual_free_parsed_name() */
 
@@ -1337,7 +1349,7 @@ H5D__virtual_build_source_name(char *source_name, const H5O_storage_virtual_name
     char * tmp_name  = NULL;    /* Name buffer */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(source_name);
@@ -1482,7 +1494,7 @@ H5D__virtual_set_extent_unlim(const H5D_t *dset)
                                         storage->list[i].source_dset.dset->shared->space) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "can't copy source dataspace extent")
 
-                    /* Get source space dimenstions */
+                    /* Get source space dimensions */
                     if (H5S_get_simple_extent_dims(storage->list[i].source_select, curr_dims, NULL) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get source space dimensions")
 
@@ -1927,7 +1939,7 @@ H5D__virtual_init_all(const H5D_t *dset)
     size_t                 i, j;
     herr_t                 ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(dset);
@@ -1960,7 +1972,7 @@ H5D__virtual_init_all(const H5D_t *dset)
                                         storage->list[i].source_dset.dset->shared->space) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "can't copy source dataspace extent")
 
-                    /* Get source space dimenstions */
+                    /* Get source space dimensions */
                     if (H5S_get_simple_extent_dims(storage->list[i].source_select, source_dims, NULL) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get source space dimensions")
 
@@ -2332,7 +2344,7 @@ H5D__virtual_is_data_cached(const H5D_shared_t *shared_dset)
     size_t                       i, j;              /* Local index variables */
     hbool_t                      ret_value = FALSE; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(shared_dset);
@@ -2344,7 +2356,7 @@ H5D__virtual_is_data_cached(const H5D_shared_t *shared_dset)
         if (storage->list[i].psfn_nsubs || storage->list[i].psdn_nsubs) {
             /* Iterate over sub-source dsets */
             for (j = storage->list[i].sub_dset_io_start; j < storage->list[i].sub_dset_io_end; j++)
-                /* Check for cahced data in source dset */
+                /* Check for cached data in source dset */
                 if (storage->list[i].sub_dset[j].dset &&
                     storage->list[i].sub_dset[j].dset->shared->layout.ops->is_data_cached &&
                     storage->list[i].sub_dset[j].dset->shared->layout.ops->is_data_cached(
@@ -2362,6 +2374,31 @@ done:
 } /* end H5D__virtual_is_data_cached() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5D__virtual_io_init
+ *
+ * Purpose:     Performs initialization before any sort of I/O on the raw data
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              Sunday, May 22, 2022
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__virtual_io_init(H5D_io_info_t *io_info, const H5D_type_info_t H5_ATTR_UNUSED *type_info,
+                     hsize_t H5_ATTR_UNUSED nelmts, H5S_t H5_ATTR_UNUSED *file_space,
+                     H5S_t H5_ATTR_UNUSED *mem_space, H5D_dset_info_t H5_ATTR_UNUSED *dinfo)
+{
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* Disable selection I/O */
+    io_info->use_select_io = FALSE;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5D__virtual_io_init() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5D__virtual_pre_io
  *
  * Purpose:     Project all virtual mappings onto mem_space, with the
@@ -2377,8 +2414,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__virtual_pre_io(H5D_dset_info_t *dset_info, H5O_storage_virtual_t *storage, const H5S_t *file_space,
-                    const H5S_t *mem_space, hsize_t *tot_nelmts)
+H5D__virtual_pre_io(H5D_dset_info_t *dset_info, H5O_storage_virtual_t *storage, H5S_t *file_space,
+                    H5S_t *mem_space, hsize_t *tot_nelmts)
 {
     const H5D_t *dset = dset_info->dset;     /* Local pointer to dataset info */
     hssize_t     select_nelmts;              /* Number of elements in selection */
@@ -2389,7 +2426,7 @@ H5D__virtual_pre_io(H5D_dset_info_t *dset_info, H5O_storage_virtual_t *storage, 
     size_t       i, j, k;             /* Local index variables */
     herr_t       ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(storage);
@@ -2645,7 +2682,7 @@ H5D__virtual_post_io(H5O_storage_virtual_t *storage)
     size_t i, j;                /* Local index variables */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(storage);
@@ -2679,7 +2716,7 @@ H5D__virtual_post_io(H5O_storage_virtual_t *storage)
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_read_one
  *
- * Purpose:     Read from a singe source dataset in a virtual dataset.
+ * Purpose:     Read from a single source dataset in a virtual dataset.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -2689,14 +2726,14 @@ H5D__virtual_post_io(H5O_storage_virtual_t *storage)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__virtual_read_one(H5D_dset_info_t *dset_info, const H5D_type_info_t *type_info, const H5S_t *file_space,
+H5D__virtual_read_one(H5D_dset_info_t *dset_info, const H5D_type_info_t *type_info, H5S_t *file_space,
                       H5O_storage_virtual_srcdset_t *source_dset)
 {
     H5S_t *          projected_src_space = NULL; /* File space for selection in a single source dataset */
     H5D_dset_info_t *dinfo               = NULL;
     herr_t           ret_value           = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(source_dset);
 
@@ -2763,8 +2800,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__virtual_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
-                  const H5S_t *file_space, const H5S_t *mem_space, H5D_dset_info_t *dset_info)
+H5D__virtual_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts, H5S_t *file_space,
+                  H5S_t *mem_space, H5D_dset_info_t *dset_info)
 {
     H5O_storage_virtual_t *storage;             /* Convenient pointer into layout struct */
     hsize_t                tot_nelmts;          /* Total number of elements mapped to mem_space */
@@ -2772,7 +2809,7 @@ H5D__virtual_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsiz
     size_t                 i, j;                /* Local index variables */
     herr_t                 ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(io_info);
@@ -2886,7 +2923,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5D__virtual_write_one
  *
- * Purpose:     Write to a singe source dataset in a virtual dataset.
+ * Purpose:     Write to a single source dataset in a virtual dataset.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -2896,14 +2933,14 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__virtual_write_one(H5D_dset_info_t *dset_info, const H5D_type_info_t *type_info, const H5S_t *file_space,
+H5D__virtual_write_one(H5D_dset_info_t *dset_info, const H5D_type_info_t *type_info, H5S_t *file_space,
                        H5O_storage_virtual_srcdset_t *source_dset)
 {
     H5S_t *          projected_src_space = NULL; /* File space for selection in a single source dataset */
     H5D_dset_info_t *dinfo               = NULL;
     herr_t           ret_value           = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(source_dset);
 
@@ -2973,14 +3010,14 @@ done:
  */
 static herr_t
 H5D__virtual_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
-                   const H5S_t *file_space, const H5S_t *mem_space, H5D_dset_info_t *dset_info)
+                   H5S_t *file_space, H5S_t *mem_space, H5D_dset_info_t *dset_info)
 {
     H5O_storage_virtual_t *storage;             /* Convenient pointer into layout struct */
     hsize_t                tot_nelmts;          /* Total number of elements mapped to mem_space */
     size_t                 i, j;                /* Local index variables */
     herr_t                 ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(io_info);
@@ -3055,7 +3092,7 @@ H5D__virtual_flush(H5D_t *dset)
     size_t                 i, j;                /* Local index variables */
     herr_t                 ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(dset);
@@ -3175,7 +3212,7 @@ H5D__virtual_refresh_source_dset(H5D_t **dset)
     H5VL_object_t *vol_obj   = NULL;            /* VOL object stored with the ID */
     herr_t         ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(dset && *dset);

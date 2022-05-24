@@ -41,7 +41,7 @@ basic_id_test(void)
     int        num_ref;
     hsize_t    num_members;
 
-    /* Try to register an ID with ficticious types */
+    /* Try to register an ID with fictitious types */
     H5E_BEGIN_TRY
     arrayID = H5Iregister((H5I_type_t)420, testObj);
     H5E_END_TRY
@@ -58,7 +58,7 @@ basic_id_test(void)
     if (arrayID != H5I_INVALID_HID)
         goto out;
 
-    /* Try to access IDs with ficticious types */
+    /* Try to access IDs with fictitious types */
     H5E_BEGIN_TRY
     testPtr = H5Iobject_verify((hid_t)100, (H5I_type_t)0);
     H5E_END_TRY

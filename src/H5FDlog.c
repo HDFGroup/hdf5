@@ -180,41 +180,46 @@ static herr_t  H5FD__log_unlock(H5FD_t *_file);
 static herr_t  H5FD__log_delete(const char *filename, hid_t fapl_id);
 
 static const H5FD_class_t H5FD_log_g = {
-    H5FD_LOG_VALUE,          /* value                */
-    "log",                   /* name                 */
-    MAXADDR,                 /* maxaddr              */
-    H5F_CLOSE_WEAK,          /* fc_degree            */
-    H5FD__log_term,          /* terminate            */
-    NULL,                    /* sb_size              */
-    NULL,                    /* sb_encode            */
-    NULL,                    /* sb_decode            */
-    sizeof(H5FD_log_fapl_t), /* fapl_size            */
-    H5FD__log_fapl_get,      /* fapl_get             */
-    H5FD__log_fapl_copy,     /* fapl_copy            */
-    H5FD__log_fapl_free,     /* fapl_free            */
-    0,                       /* dxpl_size            */
-    NULL,                    /* dxpl_copy            */
-    NULL,                    /* dxpl_free            */
-    H5FD__log_open,          /* open                 */
-    H5FD__log_close,         /* close                */
-    H5FD__log_cmp,           /* cmp                  */
-    H5FD__log_query,         /* query                */
-    NULL,                    /* get_type_map         */
-    H5FD__log_alloc,         /* alloc                */
-    H5FD__log_free,          /* free                 */
-    H5FD__log_get_eoa,       /* get_eoa              */
-    H5FD__log_set_eoa,       /* set_eoa              */
-    H5FD__log_get_eof,       /* get_eof              */
-    H5FD__log_get_handle,    /* get_handle           */
-    H5FD__log_read,          /* read                 */
-    H5FD__log_write,         /* write                */
-    NULL,                    /* flush                */
-    H5FD__log_truncate,      /* truncate             */
-    H5FD__log_lock,          /* lock                 */
-    H5FD__log_unlock,        /* unlock               */
-    H5FD__log_delete,        /* del                  */
-    NULL,                    /* ctl                  */
-    H5FD_FLMAP_DICHOTOMY     /* fl_map               */
+    H5FD_CLASS_VERSION,      /* struct version       */
+    H5FD_LOG_VALUE,          /* value               */
+    "log",                   /* name                */
+    MAXADDR,                 /* maxaddr             */
+    H5F_CLOSE_WEAK,          /*  fc_degree          */
+    H5FD__log_term,          /* terminate           */
+    NULL,                    /* sb_size             */
+    NULL,                    /* sb_encode           */
+    NULL,                    /* sb_decode           */
+    sizeof(H5FD_log_fapl_t), /* fapl_size           */
+    H5FD__log_fapl_get,      /* fapl_get            */
+    H5FD__log_fapl_copy,     /* fapl_copy           */
+    H5FD__log_fapl_free,     /* fapl_free           */
+    0,                       /* dxpl_size           */
+    NULL,                    /* dxpl_copy           */
+    NULL,                    /* dxpl_free           */
+    H5FD__log_open,          /* open                */
+    H5FD__log_close,         /* close               */
+    H5FD__log_cmp,           /* cmp                 */
+    H5FD__log_query,         /* query               */
+    NULL,                    /* get_type_map        */
+    H5FD__log_alloc,         /* alloc               */
+    H5FD__log_free,          /* free                */
+    H5FD__log_get_eoa,       /* get_eoa             */
+    H5FD__log_set_eoa,       /* set_eoa             */
+    H5FD__log_get_eof,       /* get_eof             */
+    H5FD__log_get_handle,    /* get_handle          */
+    H5FD__log_read,          /* read                */
+    H5FD__log_write,         /* write               */
+    NULL,                    /* read vector         */
+    NULL,                    /* write vector        */
+    NULL,                    /* read_selection      */
+    NULL,                    /* write_selection     */
+    NULL,                    /* flush               */
+    H5FD__log_truncate,      /* truncate            */
+    H5FD__log_lock,          /* lock                */
+    H5FD__log_unlock,        /* unlock              */
+    H5FD__log_delete,        /* del                 */
+    NULL,                    /* ctl                 */
+    H5FD_FLMAP_DICHOTOMY     /* fl_map              */
 };
 
 /* Default configuration, if none provided */
@@ -222,39 +227,6 @@ static const H5FD_log_fapl_t H5FD_log_default_config_g = {NULL, H5FD_LOG_LOC_IO 
 
 /* Declare a free list to manage the H5FD_log_t struct */
 H5FL_DEFINE_STATIC(H5FD_log_t);
-
-/*-------------------------------------------------------------------------
- * Function:    H5FD__init_package
- *
- * Purpose:     Initializes any interface-specific data or routines.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5FD__init_package(void)
-{
-    char * lock_env_var = NULL; /* Environment variable pointer */
-    herr_t ret_value    = SUCCEED;
-
-    FUNC_ENTER_STATIC
-
-    /* Check the use disabled file locks environment variable */
-    lock_env_var = HDgetenv(HDF5_USE_FILE_LOCKING);
-    if (lock_env_var && !HDstrcmp(lock_env_var, "BEST_EFFORT"))
-        ignore_disabled_file_locks_s = TRUE; /* Override: Ignore disabled locks */
-    else if (lock_env_var && (!HDstrcmp(lock_env_var, "TRUE") || !HDstrcmp(lock_env_var, "1")))
-        ignore_disabled_file_locks_s = FALSE; /* Override: Don't ignore disabled locks */
-    else
-        ignore_disabled_file_locks_s = FAIL; /* Environment variable not set, or not set correctly */
-
-    if (H5FD_log_init() < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize log VFD")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5FD__init_package() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD_log_init
@@ -273,9 +245,19 @@ done:
 hid_t
 H5FD_log_init(void)
 {
-    hid_t ret_value = H5I_INVALID_HID; /* Return value */
+    char *lock_env_var = NULL;            /* Environment variable pointer */
+    hid_t ret_value    = H5I_INVALID_HID; /* Return value */
 
-    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
+    FUNC_ENTER_NOAPI_NOERR
+
+    /* Check the use disabled file locks environment variable */
+    lock_env_var = HDgetenv(HDF5_USE_FILE_LOCKING);
+    if (lock_env_var && !HDstrcmp(lock_env_var, "BEST_EFFORT"))
+        ignore_disabled_file_locks_s = TRUE; /* Override: Ignore disabled locks */
+    else if (lock_env_var && (!HDstrcmp(lock_env_var, "TRUE") || !HDstrcmp(lock_env_var, "1")))
+        ignore_disabled_file_locks_s = FALSE; /* Override: Don't ignore disabled locks */
+    else
+        ignore_disabled_file_locks_s = FAIL; /* Environment variable not set, or not set correctly */
 
     if (H5I_VFL != H5I_get_type(H5FD_LOG_g))
         H5FD_LOG_g = H5FD_register(&H5FD_log_g, sizeof(H5FD_class_t), FALSE);
@@ -283,7 +265,6 @@ H5FD_log_init(void)
     /* Set return value */
     ret_value = H5FD_LOG_g;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_log_init() */
 
@@ -302,7 +283,7 @@ done:
 static herr_t
 H5FD__log_term(void)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Reset VFL ID */
     H5FD_LOG_g = 0;
@@ -383,7 +364,7 @@ H5FD__log_fapl_get(H5FD_t *_file)
     H5FD_log_t *file      = (H5FD_log_t *)_file;
     void *      ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Set return value */
     ret_value = H5FD__log_fapl_copy(&(file->fa));
@@ -411,7 +392,7 @@ H5FD__log_fapl_copy(const void *_old_fa)
     H5FD_log_fapl_t *      new_fa    = NULL; /* New FAPL info */
     void *                 ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(old_fa);
 
@@ -458,7 +439,7 @@ H5FD__log_fapl_free(void *_fa)
 {
     H5FD_log_fapl_t *fa = (H5FD_log_fapl_t *)_fa;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Free the fapl information */
     if (fa->logfile)
@@ -500,7 +481,7 @@ H5FD__log_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     h5_stat_t  sb;
     H5FD_t *   ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check on file offsets */
     HDcompile_assert(sizeof(HDoff_t) >= sizeof(size_t));
@@ -694,7 +675,7 @@ H5FD__log_close(H5FD_t *_file)
     H5_timer_t  close_timer;         /* Timer for close() call */
     herr_t      ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(file);
@@ -852,7 +833,7 @@ H5FD__log_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     const H5FD_log_t *f2        = (const H5FD_log_t *)_f2;
     int               ret_value = 0;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
 #ifdef H5_HAVE_WIN32_API
     if (f1->dwVolumeSerialNumber < f2->dwVolumeSerialNumber)
@@ -915,7 +896,7 @@ H5FD__log_query(const H5FD_t *_file, unsigned long *flags /* out */)
 {
     const H5FD_log_t *file = (const H5FD_log_t *)_file;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Set the VFL feature flags that this driver supports */
     if (flags) {
@@ -959,7 +940,7 @@ H5FD__log_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, hs
     haddr_t     addr;
     haddr_t     ret_value = HADDR_UNDEF; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Compute the address for the block to allocate */
     addr = file->eoa;
@@ -1004,7 +985,7 @@ H5FD__log_free(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
 {
     H5FD_log_t *file = (H5FD_log_t *)_file;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     if (file->fa.flags != 0) {
         /* Reset the flavor of the information in the file */
@@ -1043,7 +1024,7 @@ H5FD__log_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 {
     const H5FD_log_t *file = (const H5FD_log_t *)_file;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     FUNC_LEAVE_NOAPI(file->eoa)
 } /* end H5FD__log_get_eoa() */
@@ -1067,7 +1048,7 @@ H5FD__log_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr)
 {
     H5FD_log_t *file = (H5FD_log_t *)_file;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     if (file->fa.flags != 0) {
         /* Check for increasing file size */
@@ -1134,7 +1115,7 @@ H5FD__log_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 {
     const H5FD_log_t *file = (const H5FD_log_t *)_file;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     FUNC_LEAVE_NOAPI(file->eof)
 } /* end H5FD__log_get_eof() */
@@ -1157,7 +1138,7 @@ H5FD__log_get_handle(H5FD_t *_file, hid_t H5_ATTR_UNUSED fapl, void **file_handl
     H5FD_log_t *file      = (H5FD_log_t *)_file;
     herr_t      ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     if (!file_handle)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file handle not valid")
@@ -1196,7 +1177,7 @@ H5FD__log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
     HDoff_t       offset    = (HDoff_t)addr;
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(file && file->pub.cls);
     HDassert(buf);
@@ -1410,7 +1391,7 @@ H5FD__log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, ha
     HDoff_t       offset    = (HDoff_t)addr;
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(file && file->pub.cls);
     HDassert(size > 0);
@@ -1567,7 +1548,7 @@ H5FD__log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, ha
         HDfprintf(file->logfp, "%10" PRIuHADDR "-%10" PRIuHADDR " (%10zu bytes) (%s) Written", orig_addr,
                   (orig_addr + orig_size) - 1, orig_size, flavors[type]);
 
-        /* Check if this is the first write into a "default" section, grabbed by the metadata agregation
+        /* Check if this is the first write into a "default" section, grabbed by the metadata aggregation
          * algorithm */
         if (file->fa.flags & H5FD_LOG_FLAVOR) {
             if ((H5FD_mem_t)file->flavor[orig_addr] == H5FD_MEM_DEFAULT) {
@@ -1621,7 +1602,7 @@ H5FD__log_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR_
     H5FD_log_t *file      = (H5FD_log_t *)_file;
     herr_t      ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(file);
 
@@ -1729,7 +1710,7 @@ H5FD__log_lock(H5FD_t *_file, hbool_t rw)
     int         lock_flags;                 /* file locking flags       */
     herr_t      ret_value = SUCCEED;        /* Return value             */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(file);
@@ -1770,7 +1751,7 @@ H5FD__log_unlock(H5FD_t *_file)
     H5FD_log_t *file      = (H5FD_log_t *)_file; /* VFD file struct          */
     herr_t      ret_value = SUCCEED;             /* Return value             */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(file);
 
@@ -1803,7 +1784,7 @@ H5FD__log_delete(const char *filename, hid_t H5_ATTR_UNUSED fapl_id)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(filename);
 

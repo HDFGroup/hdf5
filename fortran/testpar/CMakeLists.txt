@@ -17,9 +17,9 @@ endif ()
 
 #-- Adding test for parallel_test
 add_executable (parallel_test
-    ptest.f90
-    hyper.f90
-    mdset.f90
+    ptest.F90
+    hyper.F90
+    mdset.F90
     multidsetrw.F90
 )
 target_include_directories (parallel_test

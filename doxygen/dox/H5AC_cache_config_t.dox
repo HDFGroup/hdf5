@@ -26,7 +26,7 @@
  *
  *     \Emph{*** DEPRECATED ***} Use \Code{H5Fstart/stop} logging functions instead
  *
- *     The trace file is a debuging feature that allow the capture of
+ *     The trace file is a debugging feature that allow the capture of
  *     top level metadata cache requests for purposes of debugging and/or
  *     optimization.  This field should normally be set to \c FALSE, as
  *     trace file collection imposes considerable overhead.
@@ -82,7 +82,7 @@
  *     H5C_incr__off ) && ( decr_mode == H5C_decr__off )}).  There
  *     is no logical reason why this should be so, but it simplifies
  *     implementation and testing, and I can't think of any reason
- *     why it would be desireable.  If you can think of one, I'll
+ *     why it would be desirable.  If you can think of one, I'll
  *     revisit the issue. (JM)
  * \endparblock
  *
@@ -383,7 +383,7 @@
  *    to disk.\n
  *    When the sync point is reached (or when there is a user generated
  *    flush), process zero flushes sufficient entries to bring it into
- *    complience with its min clean size (or flushes all dirty entries in
+ *    compliance with its min clean size (or flushes all dirty entries in
  *    the case of a user generated flush), broad casts the list of
  *    entries just cleaned to all the other processes, and then exits
  *    the sync point.\n

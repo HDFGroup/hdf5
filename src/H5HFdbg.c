@@ -50,7 +50,7 @@
 /* User data for direct block debugging iterator callback */
 typedef struct {
     FILE *   stream;      /* Stream for output */
-    int      indent;      /* Indention amount */
+    int      indent;      /* Indentation amount */
     int      fwidth;      /* Field width mount */
     haddr_t  dblock_addr; /* Direct block's address */
     hsize_t  dblock_size; /* Direct block's size */
@@ -63,7 +63,7 @@ typedef struct {
 typedef struct {
     H5FS_t *fspace; /* Free space manager */
     FILE *  stream; /* Stream for output */
-    int     indent; /* Indention amount */
+    int     indent; /* Indentation amount */
     int     fwidth; /* Field width mount */
 } H5HF_debug_iter_ud2_t;
 
@@ -175,7 +175,7 @@ done:
 static herr_t
 H5HF__dtable_debug(const H5HF_dtable_t *dtable, FILE *stream, int indent, int fwidth)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /*
      * Check arguments.

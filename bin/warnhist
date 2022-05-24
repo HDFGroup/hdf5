@@ -78,7 +78,7 @@ sub do_help {
     print "\t-S <file string list>\tDisplay warnings for files which contain a string, <file string list>\n";
     print "\t\t<file string list> is a comma separated list, with no spaces\n";
     print "\t\tFor example: 'H5Fint' or 'H5Fint,H5Gnode'\n";
-    print "\t-l\tDisplay line nunbers for file/warning\n";
+    print "\t-l\tDisplay line numbers for file/warning\n";
     print "\t-u\tLeave 'unique' types in warnings, instead of genericizing them\n";
     print "\t-i <name list>\tIgnore named files, <name list>\n";
     print "\t\t<name list> is a comma separated list, with no spaces\n";
@@ -228,6 +228,9 @@ while (<>) {
 
     # Skip variables with the word 'warning' in them
     next if $_ =~ /_warning_/;
+
+    # Skip AMD Optimizing Compiler (aocc) lines "<#> warning(s) generated."
+    next if $_ =~ / warnings? generated\./;
 
     # "Hide" the C++ '::' symbol until we've parsed out the parts of the line
     while($_ =~ /\:\:/) {

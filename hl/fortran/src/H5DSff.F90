@@ -216,7 +216,7 @@ CONTAINS
   END SUBROUTINE H5DSis_attached_f
 
 !
-! H5DSiterate_scales: Impliment in  F2003
+! H5DSiterate_scales: Implement in  F2003
 !
 
 !-------------------------------------------------------------------------

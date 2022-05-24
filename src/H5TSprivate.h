@@ -13,11 +13,9 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5TSprivate.h
- *			May 2 2000
- *			Chee Wai LEE
+ * Created:     H5TSprivate.h
  *
- * Purpose:		Private non-prototype header.
+ * Purpose:     Thread-safety abstractions used by the library
  *
  *-------------------------------------------------------------------------
  */

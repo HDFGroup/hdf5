@@ -665,7 +665,7 @@ H5File::getLocId() const
 ///\exception   H5::IdComponentException when the attempt to close the HDF5
 ///             object fails
 // Description
-//              The underlaying reference counting in the C library ensures
+//              The underlying reference counting in the C library ensures
 //              that the current valid id of this object is properly closed.
 //              Then the object's id is reset to the new id.
 // December 2000

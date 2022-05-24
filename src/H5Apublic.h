@@ -622,7 +622,7 @@ H5_DLL hid_t H5Aget_type(hid_t attr_id);
  *          For example, if \p idx_type, \p order, and \p idx are set to
  *          #H5_INDEX_NAME, #H5_ITER_INC, and 5, respectively, the attribute
  *          in question is the fifth attribute from the beginning of the
- *          alpha-numeric index of attribute names. If \p order were set to
+ *          alphanumeric index of attribute names. If \p order were set to
  *          #H5_ITER_DEC, it would be the fifth attribute from the end of
  *          the index.
  *
@@ -677,7 +677,7 @@ H5_DLL herr_t H5Aiterate2(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t ord
  *          For example, if \p idx_type, \p order, and \p idx are set to
  *          #H5_INDEX_NAME, #H5_ITER_INC, and 5, respectively, the attribute
  *          in question is the fifth attribute from the beginning of the
- *          alpha-numeric index of attribute names. If \p order were set to
+ *          alphanumeric index of attribute names. If \p order were set to
  *          #H5_ITER_DEC, it would be the fifth attribute from the end of
  *          the index.
  *

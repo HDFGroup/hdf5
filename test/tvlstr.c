@@ -293,7 +293,7 @@ test_vlstrings_special(void)
     /* Check data read in */
     for (i = 0; i < SPACE1_DIM1; i++)
         if (rdata[i] != NULL)
-            TestErrPrintf("VL doesn't match!, rdata[%d]=%p\n", (int)i, rdata[i]);
+            TestErrPrintf("VL doesn't match!, rdata[%d]=%s\n", (int)i, rdata[i]);
 
     /* Write dataset to disk */
     ret = H5Dwrite(dataset, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
@@ -352,7 +352,7 @@ test_vlstrings_special(void)
     /* Check data read in */
     for (i = 0; i < SPACE1_DIM1; i++)
         if (rdata[i] != NULL)
-            TestErrPrintf("VL doesn't match!, rdata[%d]=%p\n", (int)i, rdata[i]);
+            TestErrPrintf("VL doesn't match!, rdata[%d]=%s\n", (int)i, rdata[i]);
 
     /* Try to write nil strings to disk. */
     ret = H5Dwrite(dataset, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata2);
@@ -365,7 +365,7 @@ test_vlstrings_special(void)
     /* Check data read in */
     for (i = 0; i < SPACE1_DIM1; i++)
         if (rdata[i] != NULL)
-            TestErrPrintf("VL doesn't match!, rdata[%d]=%p\n", (int)i, rdata[i]);
+            TestErrPrintf("VL doesn't match!, rdata[%d]=%s\n", (int)i, rdata[i]);
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
@@ -817,33 +817,33 @@ test_vl_rewrite(void)
 
     /* Create in file 1 */
     for (i = 0; i < REWRITE_NDATASETS; i++) {
-        HDsprintf(name, "/set_%d", i);
+        HDsnprintf(name, sizeof(name), "/set_%d", i);
         write_scalar_dset(file1, type, space, name, name);
     }
 
     /* Effectively copy data from file 1 to 2 */
     for (i = 0; i < REWRITE_NDATASETS; i++) {
-        HDsprintf(name, "/set_%d", i);
+        HDsnprintf(name, sizeof(name), "/set_%d", i);
         read_scalar_dset(file1, type, space, name, name);
         write_scalar_dset(file2, type, space, name, name);
     }
 
     /* Read back from file 2 */
     for (i = 0; i < REWRITE_NDATASETS; i++) {
-        HDsprintf(name, "/set_%d", i);
+        HDsnprintf(name, sizeof(name), "/set_%d", i);
         read_scalar_dset(file2, type, space, name, name);
     } /* end for */
 
     /* Remove from file 2. */
     for (i = 0; i < REWRITE_NDATASETS; i++) {
-        HDsprintf(name, "/set_%d", i);
+        HDsnprintf(name, sizeof(name), "/set_%d", i);
         ret = H5Ldelete(file2, name, H5P_DEFAULT);
         CHECK(ret, FAIL, "H5Ldelete");
     } /* end for */
 
     /* Effectively copy from file 1 to file 2 */
     for (i = 0; i < REWRITE_NDATASETS; i++) {
-        HDsprintf(name, "/set_%d", i);
+        HDsnprintf(name, sizeof(name), "/set_%d", i);
         read_scalar_dset(file1, type, space, name, name);
         write_scalar_dset(file2, type, space, name, name);
     } /* end for */

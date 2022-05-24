@@ -22,7 +22,7 @@ if (NOT CMAKE_VERSION VERSION_LESS "3.14.0")
 endif ()
 
 #-------------------------------------------------------------------------------
-#  Fix Fortran flags if we are compiling staticly on Windows using
+#  Fix Fortran flags if we are compiling statically on Windows using
 #  Windows_MT.cmake from config/cmake/UserMacros
 #-------------------------------------------------------------------------------
 if (BUILD_STATIC_CRT_LIBS)

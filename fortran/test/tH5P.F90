@@ -349,8 +349,8 @@ SUBROUTINE multi_file_test(cleanup, total_error)
   DO i = 1, 4
      DO j = 1, 6
         IF (data_out(i,j) .NE. dset_data(i, j)) THEN
-           WRITE(*, *) "dataset test error occured"
-           WRITE(*,*) "data read is not the same as the data writen"
+           WRITE(*, *) "dataset test error occurred"
+           WRITE(*,*) "data read is not the same as the data written"
         END IF
      END DO
   END DO
@@ -541,7 +541,7 @@ SUBROUTINE test_chunk_cache(cleanup, total_error)
   CALL H5Dclose_f(dsid, error)
   CALL H5Oopen_f(fid, "dset", dsid, error, dapl1)
 
-  ! Retrieve dapl from dataset, verfiy cache values are the same as on dapl1
+  ! Retrieve dapl from dataset, verify cache values are the same as on dapl1
   !
   ! Note we rely on the knowledge that H5Pget_chunk_cache retrieves these
   ! values directly from the dataset structure, and not from a copy of the
@@ -563,7 +563,7 @@ SUBROUTINE test_chunk_cache(cleanup, total_error)
   CALL H5Oopen_f(fid, "dset", dsid, error)
   CALL check("H5Oopen_f", error, total_error)
 
-  ! Retrieve dapl from dataset, verfiy cache values are the same as on fapl_local
+  ! Retrieve dapl from dataset, verify cache values are the same as on fapl_local
 
   CALL H5Dget_access_plist_f(dsid, dapl2, error)
   CALL check("H5Dget_access_plist_f", error, total_error)
@@ -575,7 +575,7 @@ SUBROUTINE test_chunk_cache(cleanup, total_error)
   CALL H5Pclose_f(dapl2,error)
   CALL check("H5Pclose_f", error, total_error)
 
-  ! Similary, test use of H5Dcreate2 with H5P_DEFAULT
+  ! Similarly, test use of H5Dcreate2 with H5P_DEFAULT
   CALL H5Dclose_f(dsid, error)
   CALL check("H5Dclose_f", error, total_error)
 

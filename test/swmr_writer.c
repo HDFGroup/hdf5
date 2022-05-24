@@ -275,7 +275,7 @@ usage(void)
 }
 
 int
-main(int argc, const char *argv[])
+main(int argc, char *argv[])
 {
     hid_t    fid;                  /* File ID for file opened */
     long     nrecords     = 0;     /* # of records to append */

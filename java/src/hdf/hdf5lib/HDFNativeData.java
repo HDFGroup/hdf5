@@ -95,8 +95,7 @@ public class HDFNativeData {
      *            The input array of bytes
      * @return an array of 'len' int
      */
-    public synchronized static native int[] byteToInt(int start, int len,
-            byte[] data);
+    public synchronized static native int[] byteToInt(int start, int len, byte[] data);
 
     /**
      * Convert 4 bytes from an array of bytes into a single int
@@ -107,9 +106,10 @@ public class HDFNativeData {
      *            The input array of bytes
      * @return The integer value of the bytes.
      */
-    public synchronized static int byteToInt(byte[] data, int start) {
+    public synchronized static int byteToInt(byte[] data, int start)
+    {
         int[] ival = new int[1];
-        ival = byteToInt(start, 1, data);
+        ival       = byteToInt(start, 1, data);
         return (ival[0]);
     }
 
@@ -124,8 +124,7 @@ public class HDFNativeData {
      *            The input array of bytes
      * @return an array of 'len' short
      */
-    public synchronized static native short[] byteToShort(int start, int len,
-            byte[] data);
+    public synchronized static native short[] byteToShort(int start, int len, byte[] data);
 
     /**
      * Convert 2 bytes from an array of bytes into a single short
@@ -136,9 +135,10 @@ public class HDFNativeData {
      *            The input array of bytes
      * @return The short value of the bytes.
      */
-    public synchronized static short byteToShort(byte[] data, int start) {
+    public synchronized static short byteToShort(byte[] data, int start)
+    {
         short[] sval = new short[1];
-        sval = byteToShort(start, 1, data);
+        sval         = byteToShort(start, 1, data);
         return (sval[0]);
     }
 
@@ -164,9 +164,10 @@ public class HDFNativeData {
      *            The input array of bytes
      * @return The float value of the bytes.
      */
-    public synchronized static float byteToFloat(byte[] data, int start) {
+    public synchronized static float byteToFloat(byte[] data, int start)
+    {
         float[] fval = new float[1];
-        fval = byteToFloat(start, 1, data);
+        fval         = byteToFloat(start, 1, data);
         return (fval[0]);
     }
 
@@ -181,8 +182,7 @@ public class HDFNativeData {
      *            The input array of bytes
      * @return an array of 'len' long
      */
-    public synchronized static native long[] byteToLong(int start, int len,
-            byte[] data);
+    public synchronized static native long[] byteToLong(int start, int len, byte[] data);
 
     /**
      * Convert 8 bytes from an array of bytes into a single long
@@ -193,9 +193,10 @@ public class HDFNativeData {
      *            The input array of bytes
      * @return The long value of the bytes.
      */
-    public synchronized static long byteToLong(byte[] data, int start) {
+    public synchronized static long byteToLong(byte[] data, int start)
+    {
         long[] lval = new long[1];
-        lval = byteToLong(start, 1, data);
+        lval        = byteToLong(start, 1, data);
         return (lval[0]);
     }
 
@@ -210,8 +211,7 @@ public class HDFNativeData {
      *            The input array of bytes
      * @return an array of 'len' double
      */
-    public synchronized static native double[] byteToDouble(int start, int len,
-            byte[] data);
+    public synchronized static native double[] byteToDouble(int start, int len, byte[] data);
 
     /**
      * Convert 8 bytes from an array of bytes into a single double
@@ -222,9 +222,10 @@ public class HDFNativeData {
      *            The input array of bytes
      * @return The double value of the bytes.
      */
-    public synchronized static double byteToDouble(byte[] data, int start) {
+    public synchronized static double byteToDouble(byte[] data, int start)
+    {
         double[] dval = new double[1];
-        dval = byteToDouble(start, 1, data);
+        dval          = byteToDouble(start, 1, data);
         return (dval[0]);
     }
 
@@ -239,8 +240,7 @@ public class HDFNativeData {
      *            The input array of int
      * @return an array of bytes
      */
-    public synchronized static native byte[] intToByte(int start, int len,
-            int[] data);
+    public synchronized static native byte[] intToByte(int start, int len, int[] data);
 
     /**
      * Convert a range from an array of short into an array of bytes.
@@ -253,8 +253,7 @@ public class HDFNativeData {
      *            The input array of short
      * @return an array of bytes
      */
-    public synchronized static native byte[] shortToByte(int start, int len,
-            short[] data);
+    public synchronized static native byte[] shortToByte(int start, int len, short[] data);
 
     /**
      * Convert a range from an array of float into an array of bytes.
@@ -267,8 +266,7 @@ public class HDFNativeData {
      *            The input array of float
      * @return an array of bytes
      */
-    public synchronized static native byte[] floatToByte(int start, int len,
-            float[] data);
+    public synchronized static native byte[] floatToByte(int start, int len, float[] data);
 
     /**
      * Convert a range from an array of long into an array of bytes.
@@ -281,8 +279,7 @@ public class HDFNativeData {
      *            The input array of long
      * @return an array of bytes
      */
-    public synchronized static native byte[] longToByte(int start, int len,
-            long[] data);
+    public synchronized static native byte[] longToByte(int start, int len, long[] data);
 
     /**
      * Convert a range from an array of double into an array of bytes.
@@ -295,8 +292,7 @@ public class HDFNativeData {
      *            The input array of double
      * @return an array of bytes
      */
-    public synchronized static native byte[] doubleToByte(int start, int len,
-            double[] data);
+    public synchronized static native byte[] doubleToByte(int start, int len, double[] data);
 
     /**
      * Convert a single byte into an array of one byte.
@@ -318,9 +314,7 @@ public class HDFNativeData {
      *            The input Byte
      * @return an array of bytes
      */
-    public synchronized static byte[] byteToByte(Byte data) {
-        return byteToByte(data.byteValue());
-    }
+    public synchronized static byte[] byteToByte(Byte data) { return byteToByte(data.byteValue()); }
 
     /**
      * Convert a single int into an array of 4 bytes.
@@ -338,9 +332,7 @@ public class HDFNativeData {
      *            The input Integer
      * @return an array of bytes
      */
-    public synchronized static byte[] intToByte(Integer data) {
-        return intToByte(data.intValue());
-    }
+    public synchronized static byte[] intToByte(Integer data) { return intToByte(data.intValue()); }
 
     /**
      * Convert a single short into an array of 2 bytes.
@@ -358,9 +350,7 @@ public class HDFNativeData {
      *            The input Short
      * @return an array of bytes
      */
-    public synchronized static byte[] shortToByte(Short data) {
-        return shortToByte(data.shortValue());
-    }
+    public synchronized static byte[] shortToByte(Short data) { return shortToByte(data.shortValue()); }
 
     /**
      * Convert a single float into an array of 4 bytes.
@@ -378,9 +368,7 @@ public class HDFNativeData {
      *            The input Float
      * @return an array of bytes
      */
-    public synchronized static byte[] floatToByte(Float data) {
-        return floatToByte(data.floatValue());
-    };
+    public synchronized static byte[] floatToByte(Float data) { return floatToByte(data.floatValue()); };
 
     /**
      * Convert a single long into an array of 8 bytes.
@@ -398,9 +386,7 @@ public class HDFNativeData {
      *            The input Long
      * @return an array of bytes
      */
-    public synchronized static byte[] longToByte(Long data) {
-        return longToByte(data.longValue());
-    }
+    public synchronized static byte[] longToByte(Long data) { return longToByte(data.longValue()); }
 
     /**
      * Convert a single double into an array of 8 bytes.
@@ -418,9 +404,7 @@ public class HDFNativeData {
      *            The input Double
      * @return an array of bytes
      */
-    public synchronized static byte[] doubleToByte(Double data) {
-        return doubleToByte(data.doubleValue());
-    }
+    public synchronized static byte[] doubleToByte(Double data) { return doubleToByte(data.doubleValue()); }
 
     /**
      * Create a Number object from an array of bytes.
@@ -435,40 +419,39 @@ public class HDFNativeData {
      * @exception HDF5Exception
      *                - Error unsupported type.
      */
-    public synchronized static Object byteToNumber(byte[] barray, Object obj)
-            throws HDF5Exception
+    public synchronized static Object byteToNumber(byte[] barray, Object obj) throws HDF5Exception
     {
         Class theClass = obj.getClass();
-        String type = theClass.getName();
-        Object retobj = null;
+        String type    = theClass.getName();
+        Object retobj  = null;
 
         if (type.equals("java.lang.Integer")) {
             int[] i = hdf.hdf5lib.HDFNativeData.byteToInt(0, 1, barray);
-            retobj = Integer.valueOf(i[0]);
+            retobj  = Integer.valueOf(i[0]);
         }
         else if (type.equals("java.lang.Byte")) {
             retobj = Byte.valueOf(barray[0]);
         }
         else if (type.equals("java.lang.Short")) {
             short[] f = hdf.hdf5lib.HDFNativeData.byteToShort(0, 1, barray);
-            retobj = Short.valueOf(f[0]);
+            retobj    = Short.valueOf(f[0]);
         }
         else if (type.equals("java.lang.Float")) {
             float[] f = hdf.hdf5lib.HDFNativeData.byteToFloat(0, 1, barray);
-            retobj = Float.valueOf(f[0]);
+            retobj    = Float.valueOf(f[0]);
         }
         else if (type.equals("java.lang.Long")) {
             long[] f = hdf.hdf5lib.HDFNativeData.byteToLong(0, 1, barray);
-            retobj = Long.valueOf(f[0]);
+            retobj   = Long.valueOf(f[0]);
         }
         else if (type.equals("java.lang.Double")) {
             double[] f = hdf.hdf5lib.HDFNativeData.byteToDouble(0, 1, barray);
-            retobj = Double.valueOf(f[0]);
+            retobj     = Double.valueOf(f[0]);
         }
         else {
             /* exception: unsupported type */
             HDF5Exception ex = new HDF5JavaException("byteToNumber: setfield bad type: " + obj + " " + type);
-            throw (ex);
+            throw(ex);
         }
         return (retobj);
     }

@@ -213,7 +213,7 @@ H5D__layout_meta_size(const H5F_t *f, const H5O_layout_t *layout, hbool_t includ
                 ret_value++;
 
                 /* Dimension sizes */
-                ret_value += layout->u.chunk.ndims * layout->u.chunk.enc_bytes_per_dim;
+                ret_value += layout->u.chunk.ndims * (size_t)layout->u.chunk.enc_bytes_per_dim;
 
                 /* Type of chunk index */
                 ret_value++;

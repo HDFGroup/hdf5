@@ -99,7 +99,7 @@ H5B__cache_get_initial_load_size(void *_udata, size_t *image_len)
     H5B_cache_ud_t *udata = (H5B_cache_ud_t *)_udata; /* User data for callback */
     H5B_shared_t *  shared;                           /* Pointer to shared B-tree info */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(udata);
@@ -140,7 +140,7 @@ H5B__cache_deserialize(const void *_image, size_t H5_ATTR_UNUSED len, void *_uda
     unsigned        u;                                /* Local index variable */
     H5B_t *         ret_value = NULL;                 /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check arguments */
     HDassert(image);
@@ -238,7 +238,7 @@ H5B__cache_image_len(const void *_thing, size_t *image_len)
     const H5B_t * bt = (const H5B_t *)_thing; /* Pointer to the B-tree node */
     H5B_shared_t *shared;                     /* Pointer to shared B-tree info */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check arguments */
     HDassert(bt);
@@ -276,7 +276,7 @@ H5B__cache_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED len, vo
     unsigned      u;                         /* Local index counter */
     herr_t        ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* check arguments */
     HDassert(image);
@@ -354,7 +354,7 @@ H5B__cache_free_icr(void *thing)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(thing);

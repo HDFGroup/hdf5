@@ -467,14 +467,12 @@ readIntegerData(FILE *strm, struct Input *in)
     H5DT_INT16  temp16;
     H5DT_INT32 *in32;
     H5DT_INT32  temp32;
-#ifdef H5_SIZEOF_LONG_LONG
     H5DT_INT64 *in64;
     H5DT_INT64  temp64;
     char        buffer[256];
-#endif
-    hsize_t len = 1;
-    hsize_t i;
-    int     j;
+    hsize_t     len = 1;
+    hsize_t     i;
+    int         j;
 
     const char *err1 = "Unable to get integer value from file.\n";
     const char *err2 = "Unrecognized input class type.\n";
@@ -589,7 +587,6 @@ readIntegerData(FILE *strm, struct Input *in)
             }
             break;
 
-#ifdef H5_SIZEOF_LONG_LONG
         case 64:
             in64 = (H5DT_INT64 *)in->data;
             switch (in->inputClass) {
@@ -626,7 +623,6 @@ readIntegerData(FILE *strm, struct Input *in)
                     return (-1);
             }
             break;
-#endif /* ifdef H5_SIZEOF_LONG_LONG */
 
         default:
             (void)HDfprintf(stderr, "%s", err3);
@@ -643,17 +639,15 @@ readUIntegerData(FILE *strm, struct Input *in)
     H5DT_UINT16  temp16;
     H5DT_UINT32 *in32;
     H5DT_UINT32  temp32;
-#ifdef H5_SIZEOF_LONG_LONG
     H5DT_UINT64 *in64;
     H5DT_UINT64  temp64;
     char         buffer[256];
-#endif
-    hsize_t     len = 1;
-    hsize_t     i;
-    int         j;
-    const char *err1 = "Unable to get unsigned integer value from file.\n";
-    const char *err2 = "Unrecognized input class type.\n";
-    const char *err3 = "Invalid input size.\n";
+    hsize_t      len = 1;
+    hsize_t      i;
+    int          j;
+    const char * err1 = "Unable to get unsigned integer value from file.\n";
+    const char * err2 = "Unrecognized input class type.\n";
+    const char * err3 = "Invalid input size.\n";
 
     for (j = 0; j < in->rank; j++)
         len *= in->sizeOfDimension[j];
@@ -760,7 +754,6 @@ readUIntegerData(FILE *strm, struct Input *in)
             }
             break;
 
-#ifdef H5_SIZEOF_LONG_LONG
         case 64:
             in64 = (H5DT_UINT64 *)in->data;
             switch (in->inputClass) {
@@ -797,7 +790,6 @@ readUIntegerData(FILE *strm, struct Input *in)
                     return (-1);
             }
             break;
-#endif /* ifdef H5_SIZEOF_LONG_LONG */
 
         default:
             (void)HDfprintf(stderr, "%s", err3);
@@ -2134,7 +2126,7 @@ processConfigurationFile(char *infile, struct Input *in)
                     }
                 }                              /* while (get_next_prop) */
             }                                  /* else if(!HDstrcmp("SUBSET", key)) */
-            else if (!HDstrcmp("DATA", key)) { /* FINSHED */
+            else if (!HDstrcmp("DATA", key)) { /* FINISHED */
 #ifdef H5DEBUGIMPORT
                 HDprintf("h5dump DATA key\n");
 #endif
@@ -2328,7 +2320,7 @@ processConfigurationFile(char *infile, struct Input *in)
                         (void)HDfprintf(stderr, err12a, infile);
                         goto error;
                     }
-                    /* cant appear before dimension sizes have been provided */
+                    /* can't appear before dimension sizes have been provided */
                     if (in->configOptionVector[DIM] == 0) {
                         (void)HDfprintf(stderr, err12b, infile);
                         goto error;
@@ -2395,7 +2387,7 @@ processConfigurationFile(char *infile, struct Input *in)
                         (void)HDfprintf(stderr, err16a, infile);
                         goto error;
                     }
-                    /* cant appear before dimension sizes have been provided */
+                    /* can't appear before dimension sizes have been provided */
                     if (in->configOptionVector[DIM] == 0) {
                         (void)HDfprintf(stderr, err16b, infile);
                         goto error;
@@ -2457,9 +2449,6 @@ validateConfigurationParameters(struct Input *in)
     const char *err4a = "OUTPUT-ARCHITECTURE cannot be STD if OUTPUT-CLASS is floating point (FP).\n";
     const char *err4b = "OUTPUT-ARCHITECTURE cannot be IEEE if OUTPUT-CLASS is integer (IN).\n";
     const char *err5  = "For OUTPUT-CLASS FP, valid values for OUTPUT-SIZE are (32, 64) .\n";
-#ifndef H5_SIZEOF_LONG_LONG
-    const char *err6 = "No support for reading 64-bit integer (INPUT-CLASS: IN, TEXTIN, UIN, TEXTUIN files\n";
-#endif
 
     /* for class STR other parameters are ignored */
     if (in->inputClass == 5) /* STR */
@@ -2485,14 +2474,14 @@ validateConfigurationParameters(struct Input *in)
         }
     }
 
-    /* Arch cant be STD if O/p class is FP */
+    /* Arch can't be STD if O/p class is FP */
     if (in->outputArchitecture == 1)
         if (in->outputClass == 1) {
             (void)HDfprintf(stderr, "%s", err4a);
             return (-1);
         }
 
-    /* Arch cant be IEEE if O/p class is IN */
+    /* Arch can't be IEEE if O/p class is IN */
     if (in->outputArchitecture == 2)
         if (in->outputClass == 0) {
             (void)HDfprintf(stderr, "%s", err4b);
@@ -2505,13 +2494,6 @@ validateConfigurationParameters(struct Input *in)
             return (-1);
         }
 
-#ifndef H5_SIZEOF_LONG_LONG
-    if (in->inputSize == 64 &&
-        (in->inputClass == 0 || in->inputClass == 4 || in->inputClass == 6 || in->inputClass == 7)) {
-        (void)HDfprintf(stderr, "%s", err6);
-        return -1;
-    }
-#endif
     return (0);
 }
 
@@ -3250,7 +3232,6 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = 3;
     }
-#if H5_SIZEOF_LONG_DOUBLE != 0
     else if (!HDstrcmp(buffer, "H5T_NATIVE_LDOUBLE")) {
         in->inputSize                      = H5_SIZEOF_LONG_DOUBLE;
         in->configOptionVector[INPUT_SIZE] = 1;
@@ -3263,7 +3244,6 @@ getInputClassType(struct Input *in, char *buffer)
 
         kindex = 3;
     }
-#endif
     else if (!HDstrcmp(buffer, "H5T_TIME: not yet implemented")) {
         kindex = -1;
     }
@@ -3745,7 +3725,7 @@ getCompressionParameter(struct Input *in, FILE *strm)
 
     int         ival;
     const char *err1 = "Unable to get integer value.\n";
-    const char *err2 = "Invalid value for compression paramter.\n";
+    const char *err2 = "Invalid value for compression parameter.\n";
     const char *err3 = "Unsupported Compression Type.\n";
 
     switch (in->compressionType) {
@@ -3804,7 +3784,7 @@ setDefaultValues(struct Input *in, int count)
     in->path.count     = 1;
 
     HDstrcpy(temp, "dataset");
-    HDsprintf(num, "%d", count);
+    HDsnprintf(num, sizeof(num), "%d", count);
     HDstrcat(temp, num);
     HDstrcpy(in->path.group[0], temp);
 
@@ -4709,7 +4689,7 @@ process(struct Options *opt)
             }
 
             if (in->configOptionVector[EXTERNALSTORE] == 1) {
-                /* creating the external file if it doesnt exist */
+                /* creating the external file if it doesn't exist */
                 if ((extfile = HDfopen(in->externFilename, "ab")) == NULL) {
                     (void)HDfprintf(stderr, "%s", err4);
                     H5Pclose(proplist);

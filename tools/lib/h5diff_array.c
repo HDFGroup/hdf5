@@ -24,12 +24,8 @@
  *-------------------------------------------------------------------------
  */
 
-#define F_FORMAT "%-15g %-15g %-15g\n"
-
-#if H5_SIZEOF_LONG_DOUBLE != 0
-#define LD_FORMAT "%-15Lg %-15Lg %-15Lg\n"
-#endif
-
+#define F_FORMAT    "%-15g %-15g %-15g\n"
+#define LD_FORMAT   "%-15Lg %-15Lg %-15Lg\n"
 #define I_FORMAT    "%-15d %-15d %-15d\n"
 #define S_FORMAT    "%-16s %-17s\n"
 #define UI_FORMAT   "%-15u %-15u %-15u\n"
@@ -39,12 +35,8 @@
 #define ULLI_FORMAT "%-15" H5_PRINTF_LL_WIDTH "u %-15" H5_PRINTF_LL_WIDTH "u %-15" H5_PRINTF_LL_WIDTH "u\n"
 
 /* with -p option */
-#define F_FORMAT_P "%-15.10g %-15.10g %-15.10g %-14.10g\n"
-
-#if H5_SIZEOF_LONG_DOUBLE != 0
-#define LD_FORMAT_P "%-15.10Lg %-15.10Lg %-15.10Lg %-14.10Lg\n"
-#endif
-
+#define F_FORMAT_P   "%-15.10g %-15.10g %-15.10g %-14.10g\n"
+#define LD_FORMAT_P  "%-15.10Lg %-15.10Lg %-15.10Lg %-14.10Lg\n"
 #define I_FORMAT_P   "%-15d %-15d %-15d %-14f\n"
 #define UI_FORMAT_P  "%-15u %-15u %-15u %-14f\n"
 #define LI_FORMAT_P  "%-15ld %-15ld %-15ld %-14f\n"
@@ -56,12 +48,8 @@
 #define SPACES "          "
 
 /* not comparable */
-#define F_FORMAT_P_NOTCOMP "%-15.10g %-15.10g %-15.10g not comparable\n"
-
-#if H5_SIZEOF_LONG_DOUBLE != 0
-#define LD_FORMAT_P_NOTCOMP "%-15.10Lg %-15.10Lg %-15.10Lg not comparable\n"
-#endif
-
+#define F_FORMAT_P_NOTCOMP   "%-15.10g %-15.10g %-15.10g not comparable\n"
+#define LD_FORMAT_P_NOTCOMP  "%-15.10Lg %-15.10Lg %-15.10Lg not comparable\n"
 #define I_FORMAT_P_NOTCOMP   "%-15d %-15d %-15d not comparable\n"
 #define UI_FORMAT_P_NOTCOMP  "%-15u %-15u %-15u not comparable\n"
 #define LI_FORMAT_P_NOTCOMP  "%-15ld %-15ld %-15ld not comparable\n"
@@ -145,9 +133,7 @@ static hsize_t character_compare_opt(unsigned char *mem1, unsigned char *mem2, h
                                      diff_opt_t *opts);
 static hbool_t equal_float(float value, float expected, diff_opt_t *opts);
 static hbool_t equal_double(double value, double expected, diff_opt_t *opts);
-#if H5_SIZEOF_LONG_DOUBLE != 0
 static hbool_t equal_ldouble(long double value, long double expected, diff_opt_t *opts);
-#endif
 
 static int  print_data(diff_opt_t *opts);
 static void print_pos(diff_opt_t *opts, hsize_t elemtno, size_t u);
@@ -162,10 +148,8 @@ static hsize_t diff_float_element(unsigned char *mem1, unsigned char *mem2, hsiz
                                   diff_opt_t *opts);
 static hsize_t diff_double_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx,
                                    diff_opt_t *opts);
-#if H5_SIZEOF_LONG_DOUBLE != 0
 static hsize_t diff_ldouble_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx,
                                     diff_opt_t *opts);
-#endif
 static hsize_t diff_schar_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx,
                                   diff_opt_t *opts);
 static hsize_t diff_uchar_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx,
@@ -191,12 +175,7 @@ static hsize_t diff_ullong_element(unsigned char *mem1, unsigned char *mem2, hsi
  *-------------------------------------------------------------------------
  */
 
-#if H5_SIZEOF_LONG_DOUBLE != 0
 typedef enum dtype_t { FLT_FLOAT, FLT_DOUBLE, FLT_LDOUBLE } dtype_t;
-#else
-
-typedef enum dtype_t { FLT_FLOAT, FLT_DOUBLE } dtype_t;
-#endif
 
 /*-------------------------------------------------------------------------
  * XCAO, 11/10/2010
@@ -225,7 +204,8 @@ diff_array(void *_mem1, void *_mem2, diff_opt_t *opts, hid_t container1_id, hid_
     mcomp_t        members;
     H5T_class_t    type_class;
 
-    H5TOOLS_START_DEBUG(" - rank:%d hs_nelmts:%lld errstat:%d", opts->rank, opts->hs_nelmts, opts->err_stat);
+    H5TOOLS_START_DEBUG(" - rank:%d hs_nelmts:%" PRIuHSIZE " errstat:%d", opts->rank, opts->hs_nelmts,
+                        opts->err_stat);
     opts->print_header = 1; /* enable print header  */
 
     /* get the size. */
@@ -278,7 +258,6 @@ diff_array(void *_mem1, void *_mem2, diff_opt_t *opts, hid_t container1_id, hid_
                         return nfound;
                 } /* nelmts */
             }
-#if H5_SIZEOF_LONG_DOUBLE != 0
             else if (H5Tequal(opts->m_tid, H5T_NATIVE_LDOUBLE)) {
                 for (i = 0; i < opts->hs_nelmts; i++) {
                     nfound += diff_ldouble_element(mem1, mem2, i, opts);
@@ -289,7 +268,6 @@ diff_array(void *_mem1, void *_mem2, diff_opt_t *opts, hid_t container1_id, hid_
                         return nfound;
                 } /* nelmts */
             }
-#endif
             break;
 
         case H5T_INTEGER:
@@ -411,7 +389,8 @@ diff_array(void *_mem1, void *_mem2, diff_opt_t *opts, hid_t container1_id, hid_
             HDmemset(&members, 0, sizeof(mcomp_t));
             get_member_types(opts->m_tid, &members);
             for (i = 0; i < opts->hs_nelmts; i++) {
-                H5TOOLS_DEBUG("opts->pos[%lld]:%lld - nelmts:%lld", i, opts->pos[i], opts->hs_nelmts);
+                H5TOOLS_DEBUG("opts->pos[%" PRIuHSIZE "]:%" PRIuHSIZE " - nelmts:%" PRIuHSIZE, i,
+                              opts->pos[i], opts->hs_nelmts);
                 nfound += diff_datum(mem1 + i * size, mem2 + i * size, i, opts, container1_id, container2_id,
                                      &members);
                 if (opts->count_bool && nfound >= opts->count)
@@ -419,7 +398,7 @@ diff_array(void *_mem1, void *_mem2, diff_opt_t *opts, hid_t container1_id, hid_
             } /* i */
             close_member_types(&members);
     } /* switch */
-    H5TOOLS_ENDDEBUG(":%lld - errstat:%d", nfound, opts->err_stat);
+    H5TOOLS_ENDDEBUG(":%" PRIuHSIZE " - errstat:%d", nfound, opts->err_stat);
     return nfound;
 }
 
@@ -475,7 +454,8 @@ diff_datum(void *_mem1, void *_mem2, hsize_t elemtno, diff_opt_t *opts, hid_t co
     hsize_t        nfound    = 0; /* differences found */
     diff_err_t     ret_value = opts->err_stat;
 
-    H5TOOLS_START_DEBUG("ph:%d elemtno:%lld - errstat:%d", opts->print_header, elemtno, opts->err_stat);
+    H5TOOLS_START_DEBUG("ph:%d elemtno:%" PRIuHSIZE " - errstat:%d", opts->print_header, elemtno,
+                        opts->err_stat);
 
     type_size  = H5Tget_size(opts->m_tid);
     type_class = H5Tget_class(opts->m_tid);
@@ -725,8 +705,8 @@ diff_datum(void *_mem1, void *_mem2, hsize_t elemtno, diff_opt_t *opts, hid_t co
             H5TOOLS_DEBUG("H5T_ARRAY ph=%d", opts->print_header);
 
             arr_opts = *opts;
-            H5TOOLS_DEBUG("Check opts: hs_nelmts:%lld to %lld rank:%d to %d", opts->hs_nelmts,
-                          arr_opts.hs_nelmts, opts->rank, arr_opts.rank);
+            H5TOOLS_DEBUG("Check opts: hs_nelmts:%" PRIuHSIZE " to %" PRIuHSIZE " rank:%d to %d",
+                          opts->hs_nelmts, arr_opts.hs_nelmts, opts->rank, arr_opts.rank);
             /* get the array's base datatype for each element */
             arr_opts.m_tid = H5Tget_super(opts->m_tid);
             size           = H5Tget_size(arr_opts.m_tid);
@@ -1074,8 +1054,8 @@ diff_datum(void *_mem1, void *_mem2, hsize_t elemtno, diff_opt_t *opts, hid_t co
                         H5TOOLS_INFO("H5Rdestroy H5R_OBJECT1 failed");
                     if (H5Rdestroy(ref1_buf) < 0)
                         H5TOOLS_INFO("H5Rdestroy H5R_OBJECT1 failed");
-                    H5TOOLS_DEBUG("H5T_REFERENCE - H5T_STD_REF complete nfound:%lld - errstat:%d", nfound,
-                                  ref_opts.err_stat);
+                    H5TOOLS_DEBUG("H5T_REFERENCE - H5T_STD_REF complete nfound:%" PRIuHSIZE " - errstat:%d",
+                                  nfound, ref_opts.err_stat);
                 }
                 /*-------------------------------------------------------------------------
                  * H5T_STD_REF_DSETREG
@@ -1286,7 +1266,7 @@ diff_datum(void *_mem1, void *_mem2, hsize_t elemtno, diff_opt_t *opts, hid_t co
 done:
     opts->err_stat = opts->err_stat | ret_value;
 
-    H5TOOLS_ENDDEBUG(":%lld - errstat:%d", nfound, opts->err_stat);
+    H5TOOLS_ENDDEBUG(":%" PRIuHSIZE " - errstat:%d", nfound, opts->err_stat);
     return nfound;
 }
 
@@ -1397,8 +1377,8 @@ diff_region(hid_t obj1_id, hid_t obj2_id, hid_t region1_id, hid_t region2_id, di
         npoints2 = H5Sget_select_elem_npoints(region2_id);
     }
     H5E_END_TRY;
-    H5TOOLS_DEBUG("blocks: 1=%lld-2=%lld", nblocks1, nblocks2);
-    H5TOOLS_DEBUG("points: 1=%lld-2=%lld", npoints1, npoints2);
+    H5TOOLS_DEBUG("blocks: 1=%" PRIdHSIZE "-2=%" PRIdHSIZE, nblocks1, nblocks2);
+    H5TOOLS_DEBUG("points: 1=%" PRIdHSIZE "-2=%" PRIdHSIZE, npoints1, npoints2);
 
     if (nblocks1 != nblocks2 || npoints1 != npoints2 || ndims1 != ndims2) {
         opts->not_cmp = 1;
@@ -1541,10 +1521,10 @@ diff_region(hid_t obj1_id, hid_t obj2_id, hid_t region1_id, hid_t region2_id, di
 
 #if defined(H5DIFF_DEBUG)
             for (i = 0; i < npoints1; i++) {
-                parallel_print("%sPt%lu: ", i ? "," : "", (unsigned long)i);
+                parallel_print("%sPt%d: ", i ? "," : "", i);
 
                 for (j = 0; j < ndims1; j++)
-                    parallel_print("%s%lu", j ? "," : "(", (unsigned long)(ptdata1[i * ndims1 + j]));
+                    parallel_print("%s%" PRIuHSIZE, j ? "," : "(", ptdata1[i * ndims1 + j]);
 
                 parallel_print(")");
             }
@@ -1561,7 +1541,7 @@ diff_region(hid_t obj1_id, hid_t obj2_id, hid_t region1_id, hid_t region2_id, di
     ret_value = nfound_p + nfound_b;
 
 done:
-    H5TOOLS_ENDDEBUG(" with diffs:%lld", ret_value);
+    H5TOOLS_ENDDEBUG(" with diffs:%" PRIuHSIZE, ret_value);
     return ret_value;
 }
 
@@ -1598,7 +1578,7 @@ character_compare(char *mem1, char *mem2, hsize_t elemtno, size_t u, diff_opt_t 
         }
         nfound++;
     }
-    H5TOOLS_ENDDEBUG(": %lld", nfound);
+    H5TOOLS_ENDDEBUG(": %" PRIuHSIZE, nfound);
     return nfound;
 }
 
@@ -1619,6 +1599,9 @@ character_compare_opt(unsigned char *mem1, unsigned char *mem2, hsize_t elemtno,
     unsigned char temp2_uchar;
     hbool_t       both_zero = FALSE;
     double        per;
+
+    /* both_zero is set in the PER_UNSIGN macro but not used in this function */
+    (void)both_zero;
 
     HDmemcpy(&temp1_uchar, mem1, sizeof(unsigned char));
     HDmemcpy(&temp2_uchar, mem2, sizeof(unsigned char));
@@ -1669,7 +1652,7 @@ character_compare_opt(unsigned char *mem1, unsigned char *mem2, hsize_t elemtno,
         nfound++;
     }
 
-    H5TOOLS_ENDDEBUG(": %lld zero:%d", nfound, both_zero);
+    H5TOOLS_ENDDEBUG(": %" PRIuHSIZE " zero:%d", nfound, both_zero);
     return nfound;
 }
 
@@ -1850,7 +1833,7 @@ diff_float_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, d
         }
     }
 
-    H5TOOLS_ENDDEBUG(": %lld zero:%d", nfound, both_zero);
+    H5TOOLS_ENDDEBUG(": %" PRIuHSIZE " zero:%d", nfound, both_zero);
     return nfound;
 }
 
@@ -2021,7 +2004,7 @@ diff_double_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, 
             nfound++;
         }
     }
-    H5TOOLS_ENDDEBUG(":%lld - errstat:%d", nfound, opts->err_stat);
+    H5TOOLS_ENDDEBUG(":%" PRIuHSIZE " - errstat:%d", nfound, opts->err_stat);
 
     return nfound;
 }
@@ -2034,7 +2017,6 @@ diff_double_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, 
  * Return:   number of differences found
  *-------------------------------------------------------------------------
  */
-#if H5_SIZEOF_LONG_DOUBLE != 0
 
 static hsize_t
 diff_ldouble_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, diff_opt_t *opts)
@@ -2084,7 +2066,7 @@ diff_ldouble_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx,
             opts->print_percentage = 0;
             print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
-                parallel_print(F_FORMAT, temp1_double, temp2_double, ABS(temp1_double - temp2_double));
+                parallel_print(LD_FORMAT, temp1_double, temp2_double, ABS(temp1_double - temp2_double));
             }
             nfound++;
         }
@@ -2131,7 +2113,7 @@ diff_ldouble_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx,
             opts->print_percentage = 0;
             print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
-                parallel_print(F_FORMAT, temp1_double, temp2_double, ABS(temp1_double - temp2_double));
+                parallel_print(LD_FORMAT, temp1_double, temp2_double, ABS(temp1_double - temp2_double));
             }
             nfound++;
         }
@@ -2178,7 +2160,7 @@ diff_ldouble_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx,
             opts->print_percentage = 0;
             print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
-                parallel_print(F_FORMAT, temp1_double, temp2_double, ABS(temp1_double - temp2_double));
+                parallel_print(LD_FORMAT, temp1_double, temp2_double, ABS(temp1_double - temp2_double));
             }
             nfound++;
         }
@@ -2196,11 +2178,10 @@ diff_ldouble_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx,
         nfound++;
     }
 
-    H5TOOLS_ENDDEBUG(":%lld - errstat:%d", nfound, opts->err_stat);
+    H5TOOLS_ENDDEBUG(":%" PRIuHSIZE " - errstat:%d", nfound, opts->err_stat);
 
     return nfound;
 }
-#endif /* H5_SIZEOF_LONG_DOUBLE */
 
 /*-------------------------------------------------------------------------
  * Function: diff_schar_element
@@ -2285,7 +2266,7 @@ diff_schar_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, d
         nfound++;
     }
 
-    H5TOOLS_ENDDEBUG(":%lld - errstat:%d", nfound, opts->err_stat);
+    H5TOOLS_ENDDEBUG(":%" PRIuHSIZE " - errstat:%d", nfound, opts->err_stat);
 
     return nfound;
 }
@@ -2373,7 +2354,7 @@ diff_uchar_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, d
         nfound++;
     }
 
-    H5TOOLS_ENDDEBUG(":%lld - errstat:%d", nfound, opts->err_stat);
+    H5TOOLS_ENDDEBUG(":%" PRIuHSIZE " - errstat:%d", nfound, opts->err_stat);
 
     return nfound;
 }
@@ -2461,7 +2442,7 @@ diff_short_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, d
         nfound++;
     }
 
-    H5TOOLS_ENDDEBUG(":%lld - errstat:%d", nfound, opts->err_stat);
+    H5TOOLS_ENDDEBUG(":%" PRIuHSIZE " - errstat:%d", nfound, opts->err_stat);
 
     return nfound;
 }
@@ -2553,7 +2534,7 @@ diff_ushort_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, 
         nfound++;
     }
 
-    H5TOOLS_ENDDEBUG(":%lld - errstat:%d", nfound, opts->err_stat);
+    H5TOOLS_ENDDEBUG(":%" PRIuHSIZE " - errstat:%d", nfound, opts->err_stat);
 
     return nfound;
 }
@@ -2641,7 +2622,7 @@ diff_int_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, dif
         nfound++;
     }
 
-    H5TOOLS_ENDDEBUG(":%lld - errstat:%d", nfound, opts->err_stat);
+    H5TOOLS_ENDDEBUG(":%" PRIuHSIZE " - errstat:%d", nfound, opts->err_stat);
 
     return nfound;
 }
@@ -2729,7 +2710,7 @@ diff_uint_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, di
         nfound++;
     }
 
-    H5TOOLS_ENDDEBUG(":%lld - errstat:%d", nfound, opts->err_stat);
+    H5TOOLS_ENDDEBUG(":%" PRIuHSIZE " - errstat:%d", nfound, opts->err_stat);
 
     return nfound;
 }
@@ -2817,7 +2798,7 @@ diff_long_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, di
         nfound++;
     }
 
-    H5TOOLS_ENDDEBUG(":%lld - errstat:%d", nfound, opts->err_stat);
+    H5TOOLS_ENDDEBUG(":%" PRIuHSIZE " - errstat:%d", nfound, opts->err_stat);
 
     return nfound;
 }
@@ -2907,7 +2888,7 @@ diff_ulong_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, d
         nfound++;
     }
 
-    H5TOOLS_ENDDEBUG(":%lld - errstat:%d", nfound, opts->err_stat);
+    H5TOOLS_ENDDEBUG(":%" PRIuHSIZE " - errstat:%d", nfound, opts->err_stat);
 
     return nfound;
 }
@@ -3000,7 +2981,7 @@ diff_llong_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, d
         }
     }
 
-    H5TOOLS_ENDDEBUG(":%lld - errstat:%d", nfound, opts->err_stat);
+    H5TOOLS_ENDDEBUG(":%" PRIuHSIZE " - errstat:%d", nfound, opts->err_stat);
 
     return nfound;
 }
@@ -3100,7 +3081,7 @@ diff_ullong_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, 
         }
     }
 
-    H5TOOLS_ENDDEBUG(": %lld zero:%d", nfound, both_zero);
+    H5TOOLS_ENDDEBUG(": %" PRIuHSIZE " zero:%d", nfound, both_zero);
     return nfound;
 }
 
@@ -3203,7 +3184,6 @@ equal_double(double value, double expected, diff_opt_t *opts)
  *-------------------------------------------------------------------------
  */
 
-#if H5_SIZEOF_LONG_DOUBLE != 0
 static hbool_t
 equal_ldouble(long double value, long double expected, diff_opt_t *opts)
 {
@@ -3243,8 +3223,6 @@ equal_ldouble(long double value, long double expected, diff_opt_t *opts)
 
     return FALSE;
 }
-
-#endif /* #if H5_SIZEOF_LONG_DOUBLE !=0 */
 
 /*-------------------------------------------------------------------------
  * Function:    equal_float
@@ -3348,7 +3326,7 @@ print_header(diff_opt_t *opts)
 static void
 print_pos(diff_opt_t *opts, hsize_t idx, size_t u)
 {
-    H5TOOLS_START_DEBUG(" -- idx:%lld", idx);
+    H5TOOLS_START_DEBUG(" -- idx:%" PRIuHSIZE, idx);
 
     if (print_data(opts)) {
         hsize_t curr_pos = idx;
@@ -3361,8 +3339,8 @@ print_pos(diff_opt_t *opts, hsize_t idx, size_t u)
         H5TOOLS_DEBUG("rank=%d", opts->rank);
         if (opts->rank > 0) {
             parallel_print("[ ");
-            H5TOOLS_DEBUG("do calc_acc_pos[%lld] nelmts:%lld - errstat:%d", idx, opts->hs_nelmts,
-                          opts->err_stat);
+            H5TOOLS_DEBUG("do calc_acc_pos[%" PRIuHSIZE "] nelmts:%" PRIuHSIZE " - errstat:%d", idx,
+                          opts->hs_nelmts, opts->err_stat);
             if (opts->sset[0] != NULL) {
                 /* Subsetting is used - calculate total position */
                 hsize_t curr_idx = 0; /* current pos in the selection space for each dimension */
@@ -3389,33 +3367,36 @@ print_pos(diff_opt_t *opts, hsize_t idx, size_t u)
                         j = opts->rank - i - 1;
                         prev_total_dim_size *= prev_dim_size;
                         dim_size = opts->dims[j];
-                        H5TOOLS_DEBUG("j=%d, dim_size=%lld, prev_dim_size=%lld, total_dim_size=%lld, "
-                                      "prev_total_dim_size=%lld",
+                        H5TOOLS_DEBUG("j=%d, dim_size=%" PRIuHSIZE ", prev_dim_size=%" PRIuHSIZE
+                                      ", total_dim_size=%" PRIuHSIZE ", "
+                                      "prev_total_dim_size=%" PRIuHSIZE,
                                       j, dim_size, prev_dim_size, total_dim_size, prev_total_dim_size);
                         count  = opts->sset[0]->count.data[j];
                         block  = opts->sset[0]->block.data[j];
                         stride = opts->sset[0]->stride.data[j];
-                        H5TOOLS_DEBUG("stride=%lld, count=%lld, block=%lld", stride, count, block);
+                        H5TOOLS_DEBUG("stride=%" PRIuHSIZE ", count=%" PRIuHSIZE ", block=%" PRIuHSIZE,
+                                      stride, count, block);
                         tmp = count * block;
                         k0  = curr_idx / tmp;
                         k1  = curr_idx % tmp;
                         curr_pos += k1 * stride * prev_total_dim_size;
-                        H5TOOLS_DEBUG("curr_idx=%lld, k0=%lld, k1=%lld, curr_pos=%lld", curr_idx, k0, k1,
-                                      curr_pos);
+                        H5TOOLS_DEBUG("curr_idx=%" PRIuHSIZE ", k0=%" PRIuHSIZE ", k1=%" PRIuHSIZE
+                                      ", curr_pos=%" PRIuHSIZE,
+                                      curr_idx, k0, k1, curr_pos);
                         if (k0 > 0)
                             curr_idx = k0 * total_dim_size;
-                        H5TOOLS_DEBUG("curr_idx=%lld, tmp=%lld", curr_idx, tmp);
+                        H5TOOLS_DEBUG("curr_idx=%" PRIuHSIZE ", tmp=%" PRIuHSIZE, curr_idx, tmp);
                         total_dim_size *= dim_size;
                         /* if last calculation exists within in current dimension */
                         if (k0 == 0)
                             break;
-                        H5TOOLS_DEBUG("j=%d, curr_pos=%lld", j, curr_pos);
+                        H5TOOLS_DEBUG("j=%d, curr_pos=%" PRIuHSIZE, j, curr_pos);
                         prev_dim_size = dim_size;
                     }
                     /* check if there is a final calculation needed for slowest changing dimension */
                     if (k0 > 0)
                         curr_pos += k0 * stride * prev_total_dim_size;
-                    H5TOOLS_DEBUG("4:curr_idx=%lld, curr_pos=%lld", curr_idx, curr_pos);
+                    H5TOOLS_DEBUG("4:curr_idx=%" PRIuHSIZE ", curr_pos=%" PRIuHSIZE, curr_idx, curr_pos);
                 }
             }
             /*
@@ -3425,11 +3406,11 @@ print_pos(diff_opt_t *opts, hsize_t idx, size_t u)
             calc_acc_pos((unsigned)opts->rank, curr_pos, opts->acc, opts->pos);
 
             for (int i = 0; i < opts->rank; i++) {
-                H5TOOLS_DEBUG("pos loop:%d with opts->pos=%lld opts->sm_pos=%lld", i, opts->pos[i],
-                              opts->sm_pos[i]);
+                H5TOOLS_DEBUG("pos loop:%d with opts->pos=%" PRIuHSIZE " opts->sm_pos=%" PRIuHSIZE, i,
+                              opts->pos[i], opts->sm_pos[i]);
                 opts->pos[i] += (unsigned long)opts->sm_pos[i];
-                H5TOOLS_DEBUG("pos loop:%d with opts->pos=%lld", i, opts->pos[i]);
-                parallel_print(HSIZE_T_FORMAT, (unsigned long long)opts->pos[i]);
+                H5TOOLS_DEBUG("pos loop:%d with opts->pos=%" PRIuHSIZE, i, opts->pos[i]);
+                parallel_print("%" PRIuHSIZE, opts->pos[i]);
                 parallel_print(" ");
             }
             parallel_print("]");

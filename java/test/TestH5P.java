@@ -34,40 +34,47 @@ import org.junit.Test;
 import org.junit.rules.TestName;
 
 public class TestH5P {
-    @Rule public TestName testname = new TestName();
+    @Rule
+    public TestName testname = new TestName();
 
     private static final String H5_FILE = "testP.h5";
-    private static final int DIM_X = 4;
-    private static final int DIM_Y = 6;
-    long[] H5dims = { DIM_X, DIM_Y };
-    long H5fid = HDF5Constants.H5I_INVALID_HID;
-    long H5dsid = HDF5Constants.H5I_INVALID_HID;
-    long H5did = HDF5Constants.H5I_INVALID_HID;
-    long lapl_id = HDF5Constants.H5I_INVALID_HID;
-    long fapl_id = HDF5Constants.H5I_INVALID_HID;
-    long fcpl_id = HDF5Constants.H5I_INVALID_HID;
-    long ocpl_id = HDF5Constants.H5I_INVALID_HID;
-    long ocp_plist_id = HDF5Constants.H5I_INVALID_HID;
-    long lcpl_id = HDF5Constants.H5I_INVALID_HID;
-    long plapl_id = HDF5Constants.H5I_INVALID_HID;
-    long plist_id = HDF5Constants.H5I_INVALID_HID;
-    long gapl_id = HDF5Constants.H5I_INVALID_HID;
-    long gcpl_id = HDF5Constants.H5I_INVALID_HID;
-    long acpl_id = HDF5Constants.H5I_INVALID_HID;
+    private static final int DIM_X      = 4;
+    private static final int DIM_Y      = 6;
+    long[] H5dims                       = {DIM_X, DIM_Y};
+    long H5fid                          = HDF5Constants.H5I_INVALID_HID;
+    long H5dsid                         = HDF5Constants.H5I_INVALID_HID;
+    long H5did                          = HDF5Constants.H5I_INVALID_HID;
+    long lapl_id                        = HDF5Constants.H5I_INVALID_HID;
+    long fapl_id                        = HDF5Constants.H5I_INVALID_HID;
+    long fcpl_id                        = HDF5Constants.H5I_INVALID_HID;
+    long ocpl_id                        = HDF5Constants.H5I_INVALID_HID;
+    long ocp_plist_id                   = HDF5Constants.H5I_INVALID_HID;
+    long lcpl_id                        = HDF5Constants.H5I_INVALID_HID;
+    long plapl_id                       = HDF5Constants.H5I_INVALID_HID;
+    long plist_id                       = HDF5Constants.H5I_INVALID_HID;
+    long gapl_id                        = HDF5Constants.H5I_INVALID_HID;
+    long gcpl_id                        = HDF5Constants.H5I_INVALID_HID;
+    long acpl_id                        = HDF5Constants.H5I_INVALID_HID;
 
-    private final void _deleteFile(String filename) {
+    private final void _deleteFile(String filename)
+    {
         File file = new File(filename);
 
         if (file.exists()) {
-            try {file.delete();} catch (SecurityException e) {}
+            try {
+                file.delete();
+            }
+            catch (SecurityException e) {
+            }
         }
     }
 
-    private final long _createDataset(long fid, long dsid, String name, long dapl) {
+    private final long _createDataset(long fid, long dsid, String name, long dapl)
+    {
         long did = HDF5Constants.H5I_INVALID_HID;
         try {
-            did = H5.H5Dcreate(fid, name, HDF5Constants.H5T_STD_I32BE, dsid,
-                    HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, dapl);
+            did = H5.H5Dcreate(fid, name, HDF5Constants.H5T_STD_I32BE, dsid, HDF5Constants.H5P_DEFAULT,
+                               HDF5Constants.H5P_DEFAULT, dapl);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -78,12 +85,12 @@ public class TestH5P {
         return did;
     }
 
-    private final void _createH5File(long fcpl, long fapl) {
+    private final void _createH5File(long fcpl, long fapl)
+    {
         try {
-            H5fid = H5.H5Fcreate(H5_FILE, HDF5Constants.H5F_ACC_TRUNC,
-                    fcpl, fapl);
+            H5fid  = H5.H5Fcreate(H5_FILE, HDF5Constants.H5F_ACC_TRUNC, fcpl, fapl);
             H5dsid = H5.H5Screate_simple(2, H5dims, null);
-            H5did = _createDataset(H5fid, H5dsid, "dset", HDF5Constants.H5P_DEFAULT);
+            H5did  = _createDataset(H5fid, H5dsid, "dset", HDF5Constants.H5P_DEFAULT);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -101,28 +108,26 @@ public class TestH5P {
         }
     }
 
-    public void deleteH5file() throws HDF5LibraryException {
-        _deleteFile(H5_FILE);
-    }
+    public void deleteH5file() throws HDF5LibraryException { _deleteFile(H5_FILE); }
 
     @Before
-    public void createH5fileProperties()
-            throws NullPointerException, HDF5Exception {
-        assertTrue("H5 open ids is 0",H5.getOpenIDCount()==0);
+    public void createH5fileProperties() throws NullPointerException, HDF5Exception
+    {
+        assertTrue("H5 open ids is 0", H5.getOpenIDCount() == 0);
         System.out.print(testname.getMethodName());
 
         try {
-            lapl_id = H5.H5Pcreate(HDF5Constants.H5P_DATASET_ACCESS);
-            fapl_id = H5.H5Pcreate(HDF5Constants.H5P_FILE_ACCESS);
-            fcpl_id = H5.H5Pcreate(HDF5Constants.H5P_FILE_CREATE);
-            ocpl_id = H5.H5Pcreate(HDF5Constants.H5P_DATASET_CREATE);
+            lapl_id      = H5.H5Pcreate(HDF5Constants.H5P_DATASET_ACCESS);
+            fapl_id      = H5.H5Pcreate(HDF5Constants.H5P_FILE_ACCESS);
+            fcpl_id      = H5.H5Pcreate(HDF5Constants.H5P_FILE_CREATE);
+            ocpl_id      = H5.H5Pcreate(HDF5Constants.H5P_DATASET_CREATE);
             ocp_plist_id = H5.H5Pcreate(HDF5Constants.H5P_OBJECT_COPY);
-            lcpl_id = H5.H5Pcreate(HDF5Constants.H5P_LINK_CREATE);
-            plapl_id = H5.H5Pcreate(HDF5Constants.H5P_LINK_ACCESS);
-            plist_id = H5.H5Pcreate(HDF5Constants.H5P_DATASET_XFER);
-            gapl_id = H5.H5Pcreate(HDF5Constants.H5P_GROUP_ACCESS);
-            gcpl_id = H5.H5Pcreate(HDF5Constants.H5P_GROUP_CREATE);
-            acpl_id = H5.H5Pcreate(HDF5Constants.H5P_ATTRIBUTE_CREATE);
+            lcpl_id      = H5.H5Pcreate(HDF5Constants.H5P_LINK_CREATE);
+            plapl_id     = H5.H5Pcreate(HDF5Constants.H5P_LINK_ACCESS);
+            plist_id     = H5.H5Pcreate(HDF5Constants.H5P_DATASET_XFER);
+            gapl_id      = H5.H5Pcreate(HDF5Constants.H5P_GROUP_ACCESS);
+            gcpl_id      = H5.H5Pcreate(HDF5Constants.H5P_GROUP_CREATE);
+            acpl_id      = H5.H5Pcreate(HDF5Constants.H5P_ATTRIBUTE_CREATE);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -134,51 +139,109 @@ public class TestH5P {
         assertTrue(ocpl_id > 0);
         assertTrue(ocp_plist_id > 0);
         assertTrue(lcpl_id > 0);
-        assertTrue(plapl_id>0);
+        assertTrue(plapl_id > 0);
         assertTrue(plist_id > 0);
         assertTrue(gapl_id > 0);
-        assertTrue(gcpl_id >0);
-        assertTrue(acpl_id >0);
+        assertTrue(gcpl_id > 0);
+        assertTrue(acpl_id > 0);
     }
 
     @After
-    public void deleteH5fileProperties() throws HDF5LibraryException {
-        if (lapl_id >0)
-            try {H5.H5Pclose(lapl_id);} catch (Exception ex) {}
-        if (fapl_id >0)
-            try {H5.H5Pclose(fapl_id);} catch (Exception ex) {}
-        if (fcpl_id >0)
-            try {H5.H5Pclose(fcpl_id);} catch (Exception ex) {}
-        if (ocpl_id >0)
-            try {H5.H5Pclose(ocpl_id);} catch (Exception ex) {}
-        if (ocp_plist_id >0)
-            try {H5.H5Pclose(ocp_plist_id);} catch (Exception ex) {}
-        if (lcpl_id >0)
-            try {H5.H5Pclose(lcpl_id);} catch (Exception ex) {}
-        if (plapl_id >0)
-            try {H5.H5Pclose(plapl_id);} catch (Exception ex) {}
-        if (plist_id >0)
-            try {H5.H5Pclose(plist_id);} catch (Exception ex) {}
-        if (gapl_id >0)
-            try {H5.H5Pclose(gapl_id);} catch (Exception ex) {}
-        if (gcpl_id >0)
-            try {H5.H5Pclose(gcpl_id);} catch (Exception ex) {}
-        if (acpl_id >0)
-            try {H5.H5Pclose(acpl_id);} catch (Exception ex) {}
+    public void deleteH5fileProperties() throws HDF5LibraryException
+    {
+        if (lapl_id > 0)
+            try {
+                H5.H5Pclose(lapl_id);
+            }
+            catch (Exception ex) {
+            }
+        if (fapl_id > 0)
+            try {
+                H5.H5Pclose(fapl_id);
+            }
+            catch (Exception ex) {
+            }
+        if (fcpl_id > 0)
+            try {
+                H5.H5Pclose(fcpl_id);
+            }
+            catch (Exception ex) {
+            }
+        if (ocpl_id > 0)
+            try {
+                H5.H5Pclose(ocpl_id);
+            }
+            catch (Exception ex) {
+            }
+        if (ocp_plist_id > 0)
+            try {
+                H5.H5Pclose(ocp_plist_id);
+            }
+            catch (Exception ex) {
+            }
+        if (lcpl_id > 0)
+            try {
+                H5.H5Pclose(lcpl_id);
+            }
+            catch (Exception ex) {
+            }
+        if (plapl_id > 0)
+            try {
+                H5.H5Pclose(plapl_id);
+            }
+            catch (Exception ex) {
+            }
+        if (plist_id > 0)
+            try {
+                H5.H5Pclose(plist_id);
+            }
+            catch (Exception ex) {
+            }
+        if (gapl_id > 0)
+            try {
+                H5.H5Pclose(gapl_id);
+            }
+            catch (Exception ex) {
+            }
+        if (gcpl_id > 0)
+            try {
+                H5.H5Pclose(gcpl_id);
+            }
+            catch (Exception ex) {
+            }
+        if (acpl_id > 0)
+            try {
+                H5.H5Pclose(acpl_id);
+            }
+            catch (Exception ex) {
+            }
         if (H5dsid > 0)
-            try {H5.H5Sclose(H5dsid);} catch (Exception ex) {}
+            try {
+                H5.H5Sclose(H5dsid);
+            }
+            catch (Exception ex) {
+            }
         if (H5did > 0)
-            try {H5.H5Dclose(H5did);} catch (Exception ex) {}
+            try {
+                H5.H5Dclose(H5did);
+            }
+            catch (Exception ex) {
+            }
         if (H5fid > 0)
-            try {H5.H5Fclose(H5fid);} catch (Exception ex) {}
+            try {
+                H5.H5Fclose(H5fid);
+            }
+            catch (Exception ex) {
+            }
         System.out.println();
     }
 
     @Test
-    public void testH5Pget_nlinks() {
+    public void testH5Pget_nlinks()
+    {
         long nlinks = -1;
         try {
-            nlinks = (long) H5.H5Pget_nlinks(lapl_id);
+            nlinks = (long)H5.H5Pget_nlinks(lapl_id);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -190,12 +253,13 @@ public class TestH5P {
     }
 
     @Test
-    public void testH5Pset_nlinks() {
+    public void testH5Pset_nlinks()
+    {
         long nlinks = 20;
         int ret_val = -1;
         try {
             ret_val = H5.H5Pset_nlinks(lapl_id, nlinks);
-            nlinks = (long) H5.H5Pget_nlinks(lapl_id);
+            nlinks  = (long)H5.H5Pget_nlinks(lapl_id);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -207,17 +271,22 @@ public class TestH5P {
     }
 
     @Test(expected = HDF5FunctionArgumentException.class)
-    public void testH5Pset_libver_bounds_invalidlow() throws Throwable {
-        H5.H5Pset_libver_bounds(fapl_id, HDF5Constants.H5F_LIBVER_LATEST+1, HDF5Constants.H5F_LIBVER_LATEST);
+    public void testH5Pset_libver_bounds_invalidlow() throws Throwable
+    {
+        H5.H5Pset_libver_bounds(fapl_id, HDF5Constants.H5F_LIBVER_LATEST + 1,
+                                HDF5Constants.H5F_LIBVER_LATEST);
     }
 
     @Test(expected = HDF5FunctionArgumentException.class)
-    public void testH5Pset_libver_bounds_invalidhigh() throws Throwable {
-        H5.H5Pset_libver_bounds(fapl_id, HDF5Constants.H5F_LIBVER_LATEST, HDF5Constants.H5F_LIBVER_LATEST+1);
+    public void testH5Pset_libver_bounds_invalidhigh() throws Throwable
+    {
+        H5.H5Pset_libver_bounds(fapl_id, HDF5Constants.H5F_LIBVER_LATEST,
+                                HDF5Constants.H5F_LIBVER_LATEST + 1);
     }
 
     @Test
-    public void testH5Pget_link_creation_order() {
+    public void testH5Pget_link_creation_order()
+    {
         int crt_order_flags = 0;
         try {
             crt_order_flags = H5.H5Pget_link_creation_order(fcpl_id);
@@ -230,47 +299,51 @@ public class TestH5P {
     }
 
     @Test
-    public void testH5Pset_link_creation_order_trackedPLUSindexed() {
-        int ret_val = -1;
+    public void testH5Pset_link_creation_order_trackedPLUSindexed()
+    {
+        int ret_val         = -1;
         int crt_order_flags = HDF5Constants.H5P_CRT_ORDER_TRACKED + HDF5Constants.H5P_CRT_ORDER_INDEXED;
-        int crtorderflags = 0;
+        int crtorderflags   = 0;
 
         try {
-            ret_val = H5.H5Pset_link_creation_order(fcpl_id, crt_order_flags);
+            ret_val       = H5.H5Pset_link_creation_order(fcpl_id, crt_order_flags);
             crtorderflags = H5.H5Pget_link_creation_order(fcpl_id);
         }
         catch (Throwable err) {
             err.printStackTrace();
             fail("H5Pset_link_creation_order: " + err);
         }
-        assertTrue("testH5Pset_link_creation_order_trackedPLUSindexed",ret_val >= 0);
+        assertTrue("testH5Pset_link_creation_order_trackedPLUSindexed", ret_val >= 0);
         assertEquals(crt_order_flags, crtorderflags);
     }
 
     @Test
-    public void testH5Pset_link_creation_order_tracked() {
-        int ret_val = -1;
+    public void testH5Pset_link_creation_order_tracked()
+    {
+        int ret_val       = -1;
         int crtorderflags = 0;
 
         try {
-            ret_val = H5.H5Pset_link_creation_order(fcpl_id, HDF5Constants.H5P_CRT_ORDER_TRACKED);
+            ret_val       = H5.H5Pset_link_creation_order(fcpl_id, HDF5Constants.H5P_CRT_ORDER_TRACKED);
             crtorderflags = H5.H5Pget_link_creation_order(fcpl_id);
         }
         catch (Throwable err) {
             err.printStackTrace();
             fail("H5Pset_link_creation_order: " + err);
         }
-        assertTrue("testH5Pset_link_creation_order_tracked",ret_val >= 0);
+        assertTrue("testH5Pset_link_creation_order_tracked", ret_val >= 0);
         assertEquals(HDF5Constants.H5P_CRT_ORDER_TRACKED, crtorderflags);
     }
 
     @Test(expected = HDF5LibraryException.class)
-    public void testH5Pset_link_creation_order_invalidvalue() throws Throwable {
+    public void testH5Pset_link_creation_order_invalidvalue() throws Throwable
+    {
         H5.H5Pset_link_creation_order(fcpl_id, HDF5Constants.H5P_CRT_ORDER_INDEXED);
     }
 
     @Test
-    public void testH5Pget_attr_creation_order() {
+    public void testH5Pget_attr_creation_order()
+    {
         int crt_order_flags = 0;
 
         try {
@@ -284,13 +357,14 @@ public class TestH5P {
     }
 
     @Test
-    public void testH5Pset_attr_creation_order_trackedPLUSindexed() {
-        int ret_val = -1;
+    public void testH5Pset_attr_creation_order_trackedPLUSindexed()
+    {
+        int ret_val         = -1;
         int crt_order_flags = HDF5Constants.H5P_CRT_ORDER_TRACKED + HDF5Constants.H5P_CRT_ORDER_INDEXED;
-        int crtorderflags = 0;
+        int crtorderflags   = 0;
 
         try {
-            ret_val = H5.H5Pset_attr_creation_order(ocpl_id, crt_order_flags);
+            ret_val       = H5.H5Pset_attr_creation_order(ocpl_id, crt_order_flags);
             crtorderflags = H5.H5Pget_attr_creation_order(ocpl_id);
         }
         catch (Throwable err) {
@@ -302,12 +376,13 @@ public class TestH5P {
     }
 
     @Test
-    public void testH5Pset_attr_creation_order_tracked() {
-        int ret_val = -1;
+    public void testH5Pset_attr_creation_order_tracked()
+    {
+        int ret_val       = -1;
         int crtorderflags = 0;
 
         try {
-            ret_val = H5.H5Pset_attr_creation_order(ocpl_id, HDF5Constants.H5P_CRT_ORDER_TRACKED);
+            ret_val       = H5.H5Pset_attr_creation_order(ocpl_id, HDF5Constants.H5P_CRT_ORDER_TRACKED);
             crtorderflags = H5.H5Pget_attr_creation_order(ocpl_id);
         }
         catch (Throwable err) {
@@ -319,12 +394,14 @@ public class TestH5P {
     }
 
     @Test(expected = HDF5LibraryException.class)
-    public void testH5Pset_attr_creation_order_invalidvalue() throws Throwable {
+    public void testH5Pset_attr_creation_order_invalidvalue() throws Throwable
+    {
         H5.H5Pset_attr_creation_order(ocpl_id, HDF5Constants.H5P_CRT_ORDER_INDEXED);
     }
 
     @Test
-    public void testH5Pset_copy_object() {
+    public void testH5Pset_copy_object()
+    {
 
         int cpy_option = -1;
 
@@ -350,12 +427,14 @@ public class TestH5P {
     }
 
     @Test(expected = HDF5LibraryException.class)
-    public void testH5Pset_copy_object_invalidobject() throws Throwable {
+    public void testH5Pset_copy_object_invalidobject() throws Throwable
+    {
         H5.H5Pset_copy_object(HDF5Constants.H5P_DEFAULT, HDF5Constants.H5O_COPY_SHALLOW_HIERARCHY_FLAG);
     }
 
     @Test
-    public void testH5Pset_create_intermediate_group() {
+    public void testH5Pset_create_intermediate_group()
+    {
 
         int ret_val = -1;
         try {
@@ -365,16 +444,18 @@ public class TestH5P {
             err.printStackTrace();
             fail("H5Pset_create_intermediate_group: " + err);
         }
-        assertTrue(ret_val>=0);
+        assertTrue(ret_val >= 0);
     }
 
     @Test(expected = HDF5LibraryException.class)
-    public void testH5Pset_create_intermediate_group_invalidobject() throws Throwable {
+    public void testH5Pset_create_intermediate_group_invalidobject() throws Throwable
+    {
         H5.H5Pset_create_intermediate_group(ocp_plist_id, true);
     }
 
     @Test
-    public void testH5Pget_create_intermediate_group() {
+    public void testH5Pget_create_intermediate_group()
+    {
         boolean flag = false;
         try {
             H5.H5Pset_create_intermediate_group(lcpl_id, true);
@@ -388,7 +469,8 @@ public class TestH5P {
     }
 
     @Test
-    public void testH5Pget_create_intermediate_group_notcreated() {
+    public void testH5Pget_create_intermediate_group_notcreated()
+    {
         boolean flag = true;
         try {
             flag = H5.H5Pget_create_intermediate_group(lcpl_id);
@@ -401,43 +483,48 @@ public class TestH5P {
     }
 
     @Test
-    public void testH5Pset_data_transform() {
+    public void testH5Pset_data_transform()
+    {
 
         String expression = "(5/9.0)*(x-32)";
-        int ret_val = -1;
+        int ret_val       = -1;
 
         try {
-            ret_val= H5.H5Pset_data_transform(plist_id, expression);
+            ret_val = H5.H5Pset_data_transform(plist_id, expression);
         }
         catch (Throwable err) {
             err.printStackTrace();
             fail("H5Pset_data_transform: " + err);
         }
-        assertTrue(ret_val>=0);
+        assertTrue(ret_val >= 0);
     }
 
     @Test(expected = NullPointerException.class)
-    public void testH5Pset_data_transform_NullExpression() throws Throwable {
+    public void testH5Pset_data_transform_NullExpression() throws Throwable
+    {
         H5.H5Pset_data_transform(plist_id, null);
     }
 
     @Test(expected = HDF5LibraryException.class)
-    public void testH5Pset_data_transform_InvalidExpression1() throws Throwable {
+    public void testH5Pset_data_transform_InvalidExpression1() throws Throwable
+    {
         H5.H5Pset_data_transform(plist_id, "");
     }
 
     @Test(expected = HDF5LibraryException.class)
-    public void testH5Pset_data_transform_InvalidExpression2() throws Throwable {
+    public void testH5Pset_data_transform_InvalidExpression2() throws Throwable
+    {
         H5.H5Pset_data_transform(plist_id, "hello");
     }
 
     @Test
-    public void testH5Pget_data_transform() {
+    public void testH5Pget_data_transform()
+    {
 
         String expression = "(5/9.0)*(x-32)";
-        String [] express = {""};
+        String[] express  = {""};
         long express_size = 0;
-        long size = 20;
+        long size         = 20;
 
         try {
             H5.H5Pset_data_transform(plist_id, expression);
@@ -447,25 +534,28 @@ public class TestH5P {
             err.printStackTrace();
             fail("H5Pget_data_transform: " + err);
         }
-        assertTrue(express_size>=0);
+        assertTrue(express_size >= 0);
         assertTrue("The data transform expression: ", expression.equals(express[0]));
     }
 
     @Test(expected = HDF5LibraryException.class)
-    public void testH5Pget_data_transform_ExpressionNotSet() throws Throwable {
-        String [] express = {""};
+    public void testH5Pget_data_transform_ExpressionNotSet() throws Throwable
+    {
+        String[] express = {""};
         H5.H5Pget_data_transform(plist_id, express, 20);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testH5Pget_data_transform_IllegalSize() throws Throwable {
-        String [] express = {""};
+    public void testH5Pget_data_transform_IllegalSize() throws Throwable
+    {
+        String[] express = {""};
         H5.H5Pset_data_transform(plist_id, "(5/9.0)*(x-32)");
         H5.H5Pget_data_transform(plist_id, express, 0);
     }
 
     @Test
-    public void testH5Pget_elink_acc_flags() {
+    public void testH5Pget_elink_acc_flags()
+    {
 
         int get_flags = -1;
         try {
@@ -480,12 +570,13 @@ public class TestH5P {
     }
 
     @Test
-    public void testH5Pset_elink_acc_flags() {
+    public void testH5Pset_elink_acc_flags()
+    {
 
         int get_flags = -1;
-        int ret_val = -1;
+        int ret_val   = -1;
         try {
-            ret_val = H5.H5Pset_elink_acc_flags(lapl_id, HDF5Constants.H5F_ACC_RDWR);
+            ret_val   = H5.H5Pset_elink_acc_flags(lapl_id, HDF5Constants.H5F_ACC_RDWR);
             get_flags = H5.H5Pget_elink_acc_flags(lapl_id);
         }
         catch (Throwable err) {
@@ -497,21 +588,24 @@ public class TestH5P {
     }
 
     @Test(expected = HDF5FunctionArgumentException.class)
-    public void testH5Pset_elink_acc_flags_InvalidFlag1() throws Throwable {
+    public void testH5Pset_elink_acc_flags_InvalidFlag1() throws Throwable
+    {
         H5.H5Pset_elink_acc_flags(lapl_id, HDF5Constants.H5F_ACC_TRUNC);
     }
 
     @Test(expected = HDF5FunctionArgumentException.class)
-    public void testH5Pset_elink_acc_flags_InvalidFlag2() throws Throwable {
+    public void testH5Pset_elink_acc_flags_InvalidFlag2() throws Throwable
+    {
         H5.H5Pset_elink_acc_flags(lapl_id, -1);
     }
 
     @Test
-    public void testH5Pset_link_phase_change() {
+    public void testH5Pset_link_phase_change()
+    {
 
         int ret_val = -1;
         try {
-            ret_val = H5.H5Pset_link_phase_change(fcpl_id , 2, 2);
+            ret_val = H5.H5Pset_link_phase_change(fcpl_id, 2, 2);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -521,17 +615,20 @@ public class TestH5P {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testH5Pset_link_phase_change_Highmax_Compact() throws Throwable {
-        H5.H5Pset_link_phase_change(fcpl_id , 70000000, 3);
+    public void testH5Pset_link_phase_change_Highmax_Compact() throws Throwable
+    {
+        H5.H5Pset_link_phase_change(fcpl_id, 70000000, 3);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testH5Pset_link_phase_change_max_compactLESSTHANmin_dense() throws Throwable {
-        H5.H5Pset_link_phase_change(fcpl_id , 5, 6);
+    public void testH5Pset_link_phase_change_max_compactLESSTHANmin_dense() throws Throwable
+    {
+        H5.H5Pset_link_phase_change(fcpl_id, 5, 6);
     }
 
     @Test
-    public void testH5Pget_link_phase_change() {
+    public void testH5Pget_link_phase_change()
+    {
         int ret_val = -1;
         int[] links = new int[2];
 
@@ -548,10 +645,11 @@ public class TestH5P {
     }
 
     @Test
-    public void testH5Pget_link_phase_change_EqualsSet() {
+    public void testH5Pget_link_phase_change_EqualsSet()
+    {
         int[] links = new int[2];
         try {
-            H5.H5Pset_link_phase_change(fcpl_id , 10, 7);
+            H5.H5Pset_link_phase_change(fcpl_id, 10, 7);
             H5.H5Pget_link_phase_change(fcpl_id, links);
         }
         catch (Throwable err) {
@@ -563,13 +661,15 @@ public class TestH5P {
     }
 
     @Test(expected = NullPointerException.class)
-    public void testH5Pget_link_phase_change_Null() throws Throwable {
+    public void testH5Pget_link_phase_change_Null() throws Throwable
+    {
         H5.H5Pget_link_phase_change(fcpl_id, null);
     }
 
     @Test
-    public void testH5Pget_attr_phase_change() {
-        int ret_val = -1;
+    public void testH5Pget_attr_phase_change()
+    {
+        int ret_val      = -1;
         int[] attributes = new int[2];
 
         try {
@@ -580,7 +680,8 @@ public class TestH5P {
             fail("H5Pget_attr_phase_change: " + err);
         }
         assertTrue("testH5Pget_attr_phase_change", ret_val >= 0);
-        assertEquals("Default value of the max. no. of attributes stored in compact storage", 8, attributes[0]);
+        assertEquals("Default value of the max. no. of attributes stored in compact storage", 8,
+                     attributes[0]);
         assertEquals("Default value of the min. no. of attributes stored in dense storage", 6, attributes[1]);
         try {
             H5.H5Pset_attr_phase_change(ocpl_id, 9, 5);
@@ -597,14 +698,16 @@ public class TestH5P {
             fail("H5Pget_attr_phase_change: " + err);
         }
         assertTrue("testH5Pget_attr_phase_change", ret_val >= 0);
-        assertEquals("Default value of the max. no. of attributes stored in compact storage", 9, attributes[0]);
+        assertEquals("Default value of the max. no. of attributes stored in compact storage", 9,
+                     attributes[0]);
         assertEquals("Default value of the min. no. of attributes stored in dense storage", 5, attributes[1]);
     }
 
     @Test
-    public void testH5Pget_shared_mesg_phase_change() {
+    public void testH5Pget_shared_mesg_phase_change()
+    {
         int ret_val = -1;
-        int[] size = new int[2];
+        int[] size  = new int[2];
 
         try {
             ret_val = H5.H5Pget_shared_mesg_phase_change(fcpl_id, size);
@@ -617,11 +720,12 @@ public class TestH5P {
     }
 
     @Test
-    public void testH5Pget_shared_mesg_phase_change_EqualsSET() {
+    public void testH5Pget_shared_mesg_phase_change_EqualsSET()
+    {
         int[] size = new int[2];
 
         try {
-            H5.H5Pset_shared_mesg_phase_change(fcpl_id,50, 40);
+            H5.H5Pset_shared_mesg_phase_change(fcpl_id, 50, 40);
             H5.H5Pget_shared_mesg_phase_change(fcpl_id, size);
         }
         catch (Throwable err) {
@@ -633,11 +737,12 @@ public class TestH5P {
     }
 
     @Test
-    public void testH5Pset_shared_mesg_phase_change() {
+    public void testH5Pset_shared_mesg_phase_change()
+    {
 
         int ret_val = -1;
         try {
-            ret_val = H5.H5Pset_shared_mesg_phase_change(fcpl_id,2, 1);
+            ret_val = H5.H5Pset_shared_mesg_phase_change(fcpl_id, 2, 1);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -647,22 +752,26 @@ public class TestH5P {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testH5PH5Pset_shared_mesg_phase_change_HighMaxlistValue() throws Throwable {
+    public void testH5PH5Pset_shared_mesg_phase_change_HighMaxlistValue() throws Throwable
+    {
         H5.H5Pset_shared_mesg_phase_change(fcpl_id, 5001, 4000);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testH5PH5Pset_shared_mesg_phase_change_HighMinbtreeValue() throws Throwable {
+    public void testH5PH5Pset_shared_mesg_phase_change_HighMinbtreeValue() throws Throwable
+    {
         H5.H5Pset_shared_mesg_phase_change(fcpl_id, 5000, 5001);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testH5PH5Pset_shared_mesg_phase_change_MinbtreeGreaterThanMaxlist() throws Throwable {
-        H5.H5Pset_link_phase_change(fcpl_id , 3, 7);
+    public void testH5PH5Pset_shared_mesg_phase_change_MinbtreeGreaterThanMaxlist() throws Throwable
+    {
+        H5.H5Pset_link_phase_change(fcpl_id, 3, 7);
     }
 
     @Test
-    public void testH5Pget_shared_mesg_nindexes() {
+    public void testH5Pget_shared_mesg_nindexes()
+    {
 
         int nindexes = -1;
         try {
@@ -676,12 +785,13 @@ public class TestH5P {
     }
 
     @Test
-    public void testH5Pset_shared_mesg_nindexes() {
+    public void testH5Pset_shared_mesg_nindexes()
+    {
 
         int nindexes = -1;
-        int ret_val = -1;
+        int ret_val  = -1;
         try {
-            ret_val = H5.H5Pset_shared_mesg_nindexes(fcpl_id, 7);
+            ret_val  = H5.H5Pset_shared_mesg_nindexes(fcpl_id, 7);
             nindexes = H5.H5Pget_shared_mesg_nindexes(fcpl_id);
         }
         catch (Throwable err) {
@@ -689,21 +799,23 @@ public class TestH5P {
             fail("H5Pset_shared_mesg_nindexes: " + err);
         }
         assertTrue("H5Pset_shared_mesg_nindexes", ret_val >= 0);
-        assertEquals("Value of nindexes is equal to value set",7 ,nindexes);
+        assertEquals("Value of nindexes is equal to value set", 7, nindexes);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testH5Pset_shared_mesg_nindexes_InvalidHIGHnindexes()throws Throwable {
+    public void testH5Pset_shared_mesg_nindexes_InvalidHIGHnindexes() throws Throwable
+    {
         H5.H5Pset_shared_mesg_nindexes(fcpl_id, 9);
     }
 
     @Test
-    public void testH5Pset_shared_mesg_index() {
+    public void testH5Pset_shared_mesg_index()
+    {
 
         int ret_val = -1;
         try {
             H5.H5Pset_shared_mesg_nindexes(fcpl_id, 2);
-            ret_val = H5.H5Pset_shared_mesg_index(fcpl_id, 0,HDF5Constants.H5O_SHMESG_ATTR_FLAG, 10);
+            ret_val = H5.H5Pset_shared_mesg_index(fcpl_id, 0, HDF5Constants.H5O_SHMESG_ATTR_FLAG, 10);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -713,24 +825,27 @@ public class TestH5P {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testH5Pset_shared_mesg_index_Invalid_indexnum() throws Throwable {
-        H5.H5Pset_shared_mesg_index(fcpl_id, 2,HDF5Constants.H5O_SHMESG_ATTR_FLAG, 10);
+    public void testH5Pset_shared_mesg_index_Invalid_indexnum() throws Throwable
+    {
+        H5.H5Pset_shared_mesg_index(fcpl_id, 2, HDF5Constants.H5O_SHMESG_ATTR_FLAG, 10);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testH5Pset_shared_mesg_index_InvalidFlag() throws Throwable {
+    public void testH5Pset_shared_mesg_index_InvalidFlag() throws Throwable
+    {
         H5.H5Pset_shared_mesg_nindexes(fcpl_id, 7);
-        H5.H5Pset_shared_mesg_index(fcpl_id, 2,HDF5Constants.H5O_SHMESG_ALL_FLAG + 1, 10);
+        H5.H5Pset_shared_mesg_index(fcpl_id, 2, HDF5Constants.H5O_SHMESG_ALL_FLAG + 1, 10);
     }
 
     @Test
-    public void testH5Pget_shared_mesg_index() {
+    public void testH5Pget_shared_mesg_index()
+    {
 
-        int ret_val = -1;
+        int ret_val     = -1;
         int[] mesg_info = new int[2];
         try {
             H5.H5Pset_shared_mesg_nindexes(fcpl_id, 2);
-            H5.H5Pset_shared_mesg_index(fcpl_id, 0,HDF5Constants.H5O_SHMESG_ATTR_FLAG, 10);
+            H5.H5Pset_shared_mesg_index(fcpl_id, 0, HDF5Constants.H5O_SHMESG_ATTR_FLAG, 10);
             ret_val = H5.H5Pget_shared_mesg_index(fcpl_id, 0, mesg_info);
         }
         catch (Throwable err) {
@@ -743,13 +858,15 @@ public class TestH5P {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testH5Pget_shared_mesg_index_Invalid_indexnum() throws Throwable {
+    public void testH5Pget_shared_mesg_index_Invalid_indexnum() throws Throwable
+    {
         int[] mesg_info = new int[2];
         H5.H5Pget_shared_mesg_index(fcpl_id, 0, mesg_info);
     }
 
     @Test
-    public void testH5Pset_local_heap_size_hint() {
+    public void testH5Pset_local_heap_size_hint()
+    {
         int ret_val = -1;
         try {
             ret_val = H5.H5Pset_local_heap_size_hint(gcpl_id, 0);
@@ -762,7 +879,8 @@ public class TestH5P {
     }
 
     @Test
-    public void testH5Pget_local_heap_size_hint() {
+    public void testH5Pget_local_heap_size_hint()
+    {
         long size_hint = -1;
         try {
             size_hint = H5.H5Pget_local_heap_size_hint(gcpl_id);
@@ -775,7 +893,8 @@ public class TestH5P {
     }
 
     @Test
-    public void testH5Pset_nbit() {
+    public void testH5Pset_nbit()
+    {
         int ret_val = -1;
         try {
             ret_val = H5.H5Pset_nbit(ocpl_id);
@@ -788,9 +907,10 @@ public class TestH5P {
     }
 
     @Test
-    public void testH5Pset_scaleoffset() {
-        int ret_val = -1;
-        int scale_type = HDF5Constants.H5Z_SO_FLOAT_DSCALE;
+    public void testH5Pset_scaleoffset()
+    {
+        int ret_val      = -1;
+        int scale_type   = HDF5Constants.H5Z_SO_FLOAT_DSCALE;
         int scale_factor = HDF5Constants.H5Z_SO_INT_MINBITS_DEFAULT;
         try {
             ret_val = H5.H5Pset_scaleoffset(ocpl_id, scale_type, scale_factor);
@@ -803,20 +923,23 @@ public class TestH5P {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testH5Pset_scaleoffset_Invalidscale_type() throws Throwable {
+    public void testH5Pset_scaleoffset_Invalidscale_type() throws Throwable
+    {
         H5.H5Pset_scaleoffset(ocpl_id, 3, 1);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testH5Pset_scaleoffset_Invalidscale_factor() throws Throwable {
+    public void testH5Pset_scaleoffset_Invalidscale_factor() throws Throwable
+    {
         H5.H5Pset_scaleoffset(ocpl_id, HDF5Constants.H5Z_SO_INT, -1);
     }
 
     @Test
-    public void testH5Pset_est_link_info() {
+    public void testH5Pset_est_link_info()
+    {
         int ret_val = -1;
         try {
-            ret_val = H5.H5Pset_est_link_info(gcpl_id, 0,10);
+            ret_val = H5.H5Pset_est_link_info(gcpl_id, 0, 10);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -826,13 +949,15 @@ public class TestH5P {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testH5Pset_est_link_info_InvalidValues() throws Throwable {
-        H5.H5Pset_est_link_info(gcpl_id, 100000,10);
+    public void testH5Pset_est_link_info_InvalidValues() throws Throwable
+    {
+        H5.H5Pset_est_link_info(gcpl_id, 100000, 10);
     }
 
     @Test
-    public void testH5Pget_est_link_info() {
-        int ret_val = -1;
+    public void testH5Pget_est_link_info()
+    {
+        int ret_val     = -1;
         int[] link_info = new int[2];
         try {
             ret_val = H5.H5Pget_est_link_info(gcpl_id, link_info);
@@ -845,8 +970,9 @@ public class TestH5P {
     }
 
     @Test
-    public void testH5Pset_elink_prefix() {
-        int ret_val = -1;
+    public void testH5Pset_elink_prefix()
+    {
+        int ret_val   = -1;
         String prefix = "tmp";
         try {
             ret_val = H5.H5Pset_elink_prefix(plapl_id, prefix);
@@ -859,14 +985,16 @@ public class TestH5P {
     }
 
     @Test(expected = NullPointerException.class)
-    public void testH5Pset_elink_prefix_null() throws Throwable{
+    public void testH5Pset_elink_prefix_null() throws Throwable
+    {
         H5.H5Pset_elink_prefix(plapl_id, null);
     }
 
     @Test
-    public void testH5Pget_elink_prefix() {
-        String prefix = "tmp";
-        String[] pre = {""};
+    public void testH5Pget_elink_prefix()
+    {
+        String prefix    = "tmp";
+        String[] pre     = {""};
         long prefix_size = 0;
 
         try {
@@ -877,22 +1005,25 @@ public class TestH5P {
             err.printStackTrace();
             fail("H5Pget_elink_prefix: " + err);
         }
-        assertTrue(prefix_size>=0);
+        assertTrue(prefix_size >= 0);
         assertTrue("The prefix: ", prefix.equals(pre[0]));
     }
 
     @Test(expected = NullPointerException.class)
-    public void testH5Pget_elink_prefix_null() throws Throwable {
+    public void testH5Pget_elink_prefix_null() throws Throwable
+    {
         H5.H5Pget_elink_prefix(plapl_id, null);
     }
 
     @Test(expected = NullPointerException.class)
-    public void testH5Pget_userblock_null() throws Throwable {
+    public void testH5Pget_userblock_null() throws Throwable
+    {
         H5.H5Pget_userblock(fcpl_id, null);
     }
 
     @Test
-    public void testH5P_userblock() {
+    public void testH5P_userblock()
+    {
         long[] size = {0};
 
         try {
@@ -903,13 +1034,13 @@ public class TestH5P {
             H5.H5Pclose(fcpl_id);
 
             /* Get the file's dataset creation property list */
-            fcpl_id =  H5.H5Fget_create_plist(H5fid);
+            fcpl_id = H5.H5Fget_create_plist(H5fid);
 
             /* Get the file's version information */
             H5F_info2_t finfo = H5.H5Fget_info(H5fid);
-            assertTrue("super block version: "+finfo.super_version, finfo.super_version == 0);
-            assertTrue("free-space manager version: "+finfo.free_version, finfo.free_version == 0);
-            assertTrue("shared object header version: "+finfo.sohm_version, finfo.sohm_version == 0);
+            assertTrue("super block version: " + finfo.super_version, finfo.super_version == 0);
+            assertTrue("free-space manager version: " + finfo.free_version, finfo.free_version == 0);
+            assertTrue("shared object header version: " + finfo.sohm_version, finfo.sohm_version == 0);
             H5.H5Pget_userblock(fcpl_id, size);
             deleteH5file();
         }
@@ -917,17 +1048,19 @@ public class TestH5P {
             err.printStackTrace();
             fail("H5Pget_userblock: " + err);
         }
-        assertTrue("user block size: "+size[0], size[0] == 1024);
+        assertTrue("user block size: " + size[0], size[0] == 1024);
     }
 
     @Test(expected = NullPointerException.class)
-    public void testH5Pget_sizes_null() throws Throwable {
+    public void testH5Pget_sizes_null() throws Throwable
+    {
         H5.H5Pget_sizes(fcpl_id, null);
     }
 
     @Test
-    public void testH5P_sizes() {
-        long[] size = {0,0};
+    public void testH5P_sizes()
+    {
+        long[] size = {0, 0};
 
         try {
             H5.H5Pset_sizes(fcpl_id, 4, 8);
@@ -937,13 +1070,13 @@ public class TestH5P {
             H5.H5Pclose(fcpl_id);
 
             /* Get the file's dataset creation property list */
-            fcpl_id =  H5.H5Fget_create_plist(H5fid);
+            fcpl_id = H5.H5Fget_create_plist(H5fid);
 
             /* Get the file's version information */
             H5F_info2_t finfo = H5.H5Fget_info(H5fid);
-            assertTrue("super block version: "+finfo.super_version, finfo.super_version == 0);
-            assertTrue("free-space manager version: "+finfo.free_version, finfo.free_version == 0);
-            assertTrue("shared object header version: "+finfo.sohm_version, finfo.sohm_version == 0);
+            assertTrue("super block version: " + finfo.super_version, finfo.super_version == 0);
+            assertTrue("free-space manager version: " + finfo.free_version, finfo.free_version == 0);
+            assertTrue("shared object header version: " + finfo.sohm_version, finfo.sohm_version == 0);
             H5.H5Pget_sizes(fcpl_id, size);
             deleteH5file();
         }
@@ -951,18 +1084,20 @@ public class TestH5P {
             err.printStackTrace();
             fail("H5Pget_sizes: " + err);
         }
-        assertTrue("sizeof_addr size: "+size[0], size[0] == 4);
-        assertTrue("sizeof_size size: "+size[1], size[1] == 8);
+        assertTrue("sizeof_addr size: " + size[0], size[0] == 4);
+        assertTrue("sizeof_size size: " + size[1], size[1] == 8);
     }
 
     @Test(expected = NullPointerException.class)
-    public void testH5Pget_sym_k_null() throws Throwable {
+    public void testH5Pget_sym_k_null() throws Throwable
+    {
         H5.H5Pget_sym_k(fcpl_id, null);
     }
 
     @Test
-    public void testH5P_sym_k() {
-        int[] size = {0,0};
+    public void testH5P_sym_k()
+    {
+        int[] size = {0, 0};
 
         try {
             H5.H5Pset_sym_k(fcpl_id, 32, 8);
@@ -972,13 +1107,13 @@ public class TestH5P {
             H5.H5Pclose(fcpl_id);
 
             /* Get the file's dataset creation property list */
-            fcpl_id =  H5.H5Fget_create_plist(H5fid);
+            fcpl_id = H5.H5Fget_create_plist(H5fid);
 
             /* Get the file's version information */
             H5F_info2_t finfo = H5.H5Fget_info(H5fid);
-            assertTrue("super block version: "+finfo.super_version, finfo.super_version == 0);
-            assertTrue("free-space manager version: "+finfo.free_version, finfo.free_version == 0);
-            assertTrue("shared object header version: "+finfo.sohm_version, finfo.sohm_version == 0);
+            assertTrue("super block version: " + finfo.super_version, finfo.super_version == 0);
+            assertTrue("free-space manager version: " + finfo.free_version, finfo.free_version == 0);
+            assertTrue("shared object header version: " + finfo.sohm_version, finfo.sohm_version == 0);
             H5.H5Pget_sym_k(fcpl_id, size);
             deleteH5file();
         }
@@ -986,17 +1121,19 @@ public class TestH5P {
             err.printStackTrace();
             fail("H5Pget_sym_k: " + err);
         }
-        assertTrue("symbol table tree rank: "+size[0], size[0] == 32);
-        assertTrue("symbol table node size: "+size[1], size[1] == 8);
+        assertTrue("symbol table tree rank: " + size[0], size[0] == 32);
+        assertTrue("symbol table node size: " + size[1], size[1] == 8);
     }
 
     @Test(expected = NullPointerException.class)
-    public void testH5Pget_istore_k_null() throws Throwable {
+    public void testH5Pget_istore_k_null() throws Throwable
+    {
         H5.H5Pget_istore_k(fcpl_id, null);
     }
 
     @Test
-    public void testH5P_istore_k() {
+    public void testH5P_istore_k()
+    {
         int[] size = {0};
 
         try {
@@ -1007,13 +1144,13 @@ public class TestH5P {
             H5.H5Pclose(fcpl_id);
 
             /* Get the file's dataset creation property list */
-            fcpl_id =  H5.H5Fget_create_plist(H5fid);
+            fcpl_id = H5.H5Fget_create_plist(H5fid);
 
             /* Get the file's version information */
             H5F_info2_t finfo = H5.H5Fget_info(H5fid);
-            assertTrue("super block version: "+finfo.super_version, finfo.super_version == 1);
-            assertTrue("free-space manager version: "+finfo.free_version, finfo.free_version == 0);
-            assertTrue("shared object header version: "+finfo.sohm_version, finfo.sohm_version == 0);
+            assertTrue("super block version: " + finfo.super_version, finfo.super_version == 1);
+            assertTrue("free-space manager version: " + finfo.free_version, finfo.free_version == 0);
+            assertTrue("shared object header version: " + finfo.sohm_version, finfo.sohm_version == 0);
             H5.H5Pget_istore_k(fcpl_id, size);
             deleteH5file();
         }
@@ -1021,13 +1158,14 @@ public class TestH5P {
             err.printStackTrace();
             fail("H5Pget_sym_k: " + err);
         }
-        assertTrue("chunked storage b-tree 1/2-rank: "+size[0], size[0] == 64);
+        assertTrue("chunked storage b-tree 1/2-rank: " + size[0], size[0] == 64);
     }
 
     @Test
-    public void testH5P_obj_track_times() {
+    public void testH5P_obj_track_times()
+    {
         boolean default_ret_val = false;
-        boolean ret_val = true;
+        boolean ret_val         = true;
         try {
             default_ret_val = H5.H5Pget_obj_track_times(ocpl_id);
             H5.H5Pset_obj_track_times(ocpl_id, false);
@@ -1042,7 +1180,8 @@ public class TestH5P {
     }
 
     @Test
-    public void testH5Pget_char_encoding() {
+    public void testH5Pget_char_encoding()
+    {
         int char_encoding = 0;
 
         try {
@@ -1065,18 +1204,19 @@ public class TestH5P {
     }
 
     @Test
-    public void testH5P_fill_time() {
+    public void testH5P_fill_time()
+    {
         int[] fill_time = {0};
 
         try {
             H5.H5Pget_fill_time(ocpl_id, fill_time);
-            assertTrue("fill_time: "+fill_time[0], fill_time[0] == HDF5Constants.H5D_FILL_TIME_IFSET);
+            assertTrue("fill_time: " + fill_time[0], fill_time[0] == HDF5Constants.H5D_FILL_TIME_IFSET);
             H5.H5Pset_fill_time(ocpl_id, HDF5Constants.H5D_FILL_TIME_ALLOC);
             H5.H5Pget_fill_time(ocpl_id, fill_time);
-            assertTrue("fill_time: "+fill_time[0], fill_time[0] == HDF5Constants.H5D_FILL_TIME_ALLOC);
+            assertTrue("fill_time: " + fill_time[0], fill_time[0] == HDF5Constants.H5D_FILL_TIME_ALLOC);
             H5.H5Pset_fill_time(ocpl_id, HDF5Constants.H5D_FILL_TIME_NEVER);
             H5.H5Pget_fill_time(ocpl_id, fill_time);
-            assertTrue("fill_time: "+fill_time[0], fill_time[0] == HDF5Constants.H5D_FILL_TIME_NEVER);
+            assertTrue("fill_time: " + fill_time[0], fill_time[0] == HDF5Constants.H5D_FILL_TIME_NEVER);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -1085,18 +1225,19 @@ public class TestH5P {
     }
 
     @Test
-    public void testH5P_alloc_time() {
+    public void testH5P_alloc_time()
+    {
         int[] alloc_time = {0};
 
         try {
             H5.H5Pget_alloc_time(ocpl_id, alloc_time);
-            assertTrue("alloc_time: "+alloc_time[0], alloc_time[0] == HDF5Constants.H5D_ALLOC_TIME_LATE);
+            assertTrue("alloc_time: " + alloc_time[0], alloc_time[0] == HDF5Constants.H5D_ALLOC_TIME_LATE);
             H5.H5Pset_alloc_time(ocpl_id, HDF5Constants.H5D_ALLOC_TIME_EARLY);
             H5.H5Pget_alloc_time(ocpl_id, alloc_time);
-            assertTrue("alloc_time: "+alloc_time[0], alloc_time[0] == HDF5Constants.H5D_ALLOC_TIME_EARLY);
+            assertTrue("alloc_time: " + alloc_time[0], alloc_time[0] == HDF5Constants.H5D_ALLOC_TIME_EARLY);
             H5.H5Pset_alloc_time(ocpl_id, HDF5Constants.H5D_ALLOC_TIME_INCR);
             H5.H5Pget_alloc_time(ocpl_id, alloc_time);
-            assertTrue("alloc_time: "+alloc_time[0], alloc_time[0] == HDF5Constants.H5D_ALLOC_TIME_INCR);
+            assertTrue("alloc_time: " + alloc_time[0], alloc_time[0] == HDF5Constants.H5D_ALLOC_TIME_INCR);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -1105,21 +1246,24 @@ public class TestH5P {
     }
 
     @Test
-    public void testH5P_fill_value() {
-        int[] fill_value = {-1};
+    public void testH5P_fill_value()
+    {
+        int[] fill_value        = {-1};
         int[] fill_value_status = {-1};
 
         try {
             H5.H5Pfill_value_defined(ocpl_id, fill_value_status);
-            assertTrue("fill_value_status: "+fill_value_status[0], fill_value_status[0] == HDF5Constants.H5D_FILL_VALUE_DEFAULT);
+            assertTrue("fill_value_status: " + fill_value_status[0],
+                       fill_value_status[0] == HDF5Constants.H5D_FILL_VALUE_DEFAULT);
             H5.H5Pget_fill_value(ocpl_id, HDF5Constants.H5T_NATIVE_INT, fill_value);
-            assertTrue("fill_value: "+fill_value[0], fill_value[0] == 0);
+            assertTrue("fill_value: " + fill_value[0], fill_value[0] == 0);
             fill_value[0] = 255;
             H5.H5Pset_fill_value(ocpl_id, HDF5Constants.H5T_NATIVE_INT, fill_value);
             H5.H5Pget_fill_value(ocpl_id, HDF5Constants.H5T_NATIVE_INT, fill_value);
-            assertTrue("fill_value: "+fill_value[0], fill_value[0] == 255);
+            assertTrue("fill_value: " + fill_value[0], fill_value[0] == 255);
             H5.H5Pfill_value_defined(ocpl_id, fill_value_status);
-            assertTrue("fill_value_status: "+fill_value_status[0], fill_value_status[0] == HDF5Constants.H5D_FILL_VALUE_USER_DEFINED);
+            assertTrue("fill_value_status: " + fill_value_status[0],
+                       fill_value_status[0] == HDF5Constants.H5D_FILL_VALUE_USER_DEFINED);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -1128,15 +1272,16 @@ public class TestH5P {
     }
 
     @Test
-    public void testH5P_layout() {
+    public void testH5P_layout()
+    {
         int layout_type = -1;
 
         try {
             layout_type = H5.H5Pget_layout(ocpl_id);
-            assertTrue("layout: "+layout_type, layout_type == HDF5Constants.H5D_CONTIGUOUS);
+            assertTrue("layout: " + layout_type, layout_type == HDF5Constants.H5D_CONTIGUOUS);
             H5.H5Pset_layout(ocpl_id, HDF5Constants.H5D_COMPACT);
             layout_type = H5.H5Pget_layout(ocpl_id);
-            assertTrue("layout: "+layout_type, layout_type == HDF5Constants.H5D_COMPACT);
+            assertTrue("layout: " + layout_type, layout_type == HDF5Constants.H5D_COMPACT);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -1145,18 +1290,19 @@ public class TestH5P {
     }
 
     @Test
-    public void testH5P_chunk() {
-        long[] chunk_size = {0,0};
-        long[] chunk_new_size = {2,3};
-        int layout_type = -1;
+    public void testH5P_chunk()
+    {
+        long[] chunk_size     = {0, 0};
+        long[] chunk_new_size = {2, 3};
+        int layout_type       = -1;
 
         try {
             H5.H5Pset_chunk(ocpl_id, 2, chunk_new_size);
             H5.H5Pget_chunk(ocpl_id, 2, chunk_size);
-            assertTrue("chunk: "+chunk_size[0], chunk_size[0] == chunk_new_size[0]);
-            assertTrue("chunk: "+chunk_size[1], chunk_size[1] == chunk_new_size[1]);
+            assertTrue("chunk: " + chunk_size[0], chunk_size[0] == chunk_new_size[0]);
+            assertTrue("chunk: " + chunk_size[1], chunk_size[1] == chunk_new_size[1]);
             layout_type = H5.H5Pget_layout(ocpl_id);
-            assertTrue("layout: "+layout_type, layout_type == HDF5Constants.H5D_CHUNKED);
+            assertTrue("layout: " + layout_type, layout_type == HDF5Constants.H5D_CHUNKED);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -1165,20 +1311,22 @@ public class TestH5P {
     }
 
     @Test
-    public void testH5P_file_space_strategy() {
-        long[] threshold = {0};
+    public void testH5P_file_space_strategy()
+    {
+        long[] threshold  = {0};
         boolean[] persist = {false};
-        int strategy = 0;
+        int strategy      = 0;
         try {
             strategy = H5.H5Pget_file_space_strategy(fcpl_id, persist, threshold);
-            assertTrue("strategy(default): "+strategy, strategy == HDF5Constants.H5F_FSPACE_STRATEGY_FSM_AGGR);
-            assertTrue("persist(default): "+persist[0], persist[0] == false);
-            assertTrue("theshold(default): "+threshold[0], threshold[0] == 1);
+            assertTrue("strategy(default): " + strategy,
+                       strategy == HDF5Constants.H5F_FSPACE_STRATEGY_FSM_AGGR);
+            assertTrue("persist(default): " + persist[0], persist[0] == false);
+            assertTrue("threshold(default): " + threshold[0], threshold[0] == 1);
             H5.H5Pset_file_space_strategy(fcpl_id, HDF5Constants.H5F_FSPACE_STRATEGY_PAGE, true, 1);
             strategy = H5.H5Pget_file_space_strategy(fcpl_id, persist, threshold);
-            assertTrue("strategy: "+strategy, strategy == HDF5Constants.H5F_FSPACE_STRATEGY_PAGE);
-            assertTrue("persist: "+persist[0], persist[0] == true);
-            assertTrue("theshold: "+threshold[0], threshold[0] == 1);
+            assertTrue("strategy: " + strategy, strategy == HDF5Constants.H5F_FSPACE_STRATEGY_PAGE);
+            assertTrue("persist: " + persist[0], persist[0] == true);
+            assertTrue("threshold: " + threshold[0], threshold[0] == 1);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -1187,23 +1335,25 @@ public class TestH5P {
     }
 
     @Test
-    public void testH5P_file_space_page_size() {
+    public void testH5P_file_space_page_size()
+    {
         long page_size = 0;
         try {
             page_size = H5.H5Pget_file_space_page_size(fcpl_id);
-            assertTrue("page_size(default): "+page_size, page_size == 4096);
+            assertTrue("page_size(default): " + page_size, page_size == 4096);
             H5.H5Pset_file_space_page_size(fcpl_id, 512);
             page_size = H5.H5Pget_file_space_page_size(fcpl_id);
-            assertTrue("page_size: "+page_size, page_size == 512);
+            assertTrue("page_size: " + page_size, page_size == 512);
         }
         catch (Throwable err) {
             err.printStackTrace();
             fail("testH5P_file_space_page_size: " + err);
         }
-   }
+    }
 
     @Test
-    public void testH5Pset_efile_prefix() {
+    public void testH5Pset_efile_prefix()
+    {
         String prefix = "tmp";
         try {
             H5.H5Pset_efile_prefix(lapl_id, prefix);
@@ -1215,14 +1365,16 @@ public class TestH5P {
     }
 
     @Test(expected = NullPointerException.class)
-    public void testH5Pset_efile_prefix_null() throws Throwable{
+    public void testH5Pset_efile_prefix_null() throws Throwable
+    {
         H5.H5Pset_efile_prefix(lapl_id, null);
     }
 
     @Test
-    public void testH5Pget_efile_prefix() {
+    public void testH5Pget_efile_prefix()
+    {
         String prefix = "tmp";
-        String pre = "";
+        String pre    = "";
 
         try {
             H5.H5Pset_efile_prefix(lapl_id, prefix);
@@ -1236,15 +1388,17 @@ public class TestH5P {
     }
 
     @Ignore
-    public void testH5P_chunk_opts() {
+    public void testH5P_chunk_opts()
+    {
         int chunk_opts = -1;
 
         try {
             chunk_opts = H5.H5Pget_chunk_opts(ocpl_id);
-            assertTrue("chunk_opts: "+chunk_opts, chunk_opts == 0);
+            assertTrue("chunk_opts: " + chunk_opts, chunk_opts == 0);
             H5.H5Pset_chunk_opts(ocpl_id, HDF5Constants.H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS);
             chunk_opts = H5.H5Pget_chunk_opts(ocpl_id);
-            assertTrue("chunk_opts: "+chunk_opts, chunk_opts == HDF5Constants.H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS);
+            assertTrue("chunk_opts: " + chunk_opts,
+                       chunk_opts == HDF5Constants.H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS);
         }
         catch (Throwable err) {
             err.printStackTrace();

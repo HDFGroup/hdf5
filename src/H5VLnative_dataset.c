@@ -80,7 +80,7 @@ H5VL__native_dataset_io_setup(H5D_t *dset, hid_t dxpl_id, hid_t file_space_id, h
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(dset);

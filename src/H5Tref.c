@@ -309,8 +309,8 @@ H5T__ref_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
                     HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't get encode size")
 
                 /* Size on disk, memory size is different */
-                dt->shared->size = MAX(H5_SIZEOF_UINT32_T + H5R_ENCODE_HEADER_SIZE + cont_info.blob_id_size,
-                                       ref_encode_size);
+                dt->shared->size =
+                    MAX(sizeof(uint32_t) + H5R_ENCODE_HEADER_SIZE + cont_info.blob_id_size, ref_encode_size);
                 dt->shared->u.atomic.prec = 8 * dt->shared->size;
 
                 /* Set up the function pointers to access the information on
@@ -362,7 +362,7 @@ H5T__ref_mem_isnull(const H5VL_object_t H5_ATTR_UNUSED *src_file, const void *sr
     const unsigned char zeros[H5T_REF_MEM_SIZE] = {0};
     herr_t              ret_value               = SUCCEED;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
     H5T_REF_LOG_DEBUG("");
 
     /* Check parameters */
@@ -388,7 +388,7 @@ H5T__ref_mem_setnull(H5VL_object_t H5_ATTR_UNUSED *dst_file, void *dst_buf, H5_A
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
     H5T_REF_LOG_DEBUG("");
 
     HDmemset(dst_buf, 0, H5T_REF_MEM_SIZE);
@@ -416,7 +416,7 @@ H5T__ref_mem_getsize(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf
     unsigned flags     = 0; /* References flags */
     size_t   ret_value = 0; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
     H5T_REF_LOG_DEBUG("");
 
     /* Sanity check */
@@ -536,7 +536,7 @@ H5T__ref_mem_read(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf, s
     unsigned flags     = 0;       /* References flags */
     herr_t   ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
     H5T_REF_LOG_DEBUG("");
 
     /* Sanity check */
@@ -638,8 +638,8 @@ done:
  */
 static herr_t
 H5T__ref_mem_write(H5VL_object_t *src_file, const void *src_buf, size_t src_size, H5R_type_t src_type,
-                   H5VL_object_t H5_ATTR_UNUSED *dst_file, void *dst_buf, size_t dst_size,
-                   void H5_ATTR_UNUSED *bg_buf)
+                   H5VL_object_t H5_ATTR_UNUSED *dst_file, void *dst_buf,
+                   size_t H5_ATTR_NDEBUG_UNUSED dst_size, void H5_ATTR_UNUSED *bg_buf)
 {
     H5F_t *         src_f   = NULL;
     hid_t           file_id = H5I_INVALID_HID;
@@ -647,7 +647,7 @@ H5T__ref_mem_write(H5VL_object_t *src_file, const void *src_buf, size_t src_size
     H5R_ref_priv_t  tmp_ref; /* Temporary reference to decode into */
     herr_t          ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
     H5T_REF_LOG_DEBUG("");
 
     /* Sanity check */
@@ -753,6 +753,14 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+/*
+ * It is the correct thing to do to have the reference buffer
+ * be const-qualified here, but the VOL "blob specific" routine
+ * needs a non-const pointer since an operation might modify
+ * the "blob". Disable this warning here (at least temporarily)
+ * for this reason.
+ */
+H5_GCC_CLANG_DIAG_OFF("cast-qual")
 static herr_t
 H5T__ref_disk_isnull(const H5VL_object_t *src_file, const void *src_buf, hbool_t *isnull)
 {
@@ -760,7 +768,7 @@ H5T__ref_disk_isnull(const H5VL_object_t *src_file, const void *src_buf, hbool_t
     H5R_type_t     ref_type;
     herr_t         ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
     H5T_REF_LOG_DEBUG("");
 
     /* Check parameters */
@@ -778,7 +786,7 @@ H5T__ref_disk_isnull(const H5VL_object_t *src_file, const void *src_buf, hbool_t
         H5VL_blob_specific_args_t vol_cb_args; /* Arguments to VOL callback */
 
         /* Skip the size / header */
-        p = (const uint8_t *)src_buf + H5R_ENCODE_HEADER_SIZE + H5_SIZEOF_UINT32_T;
+        p = (const uint8_t *)src_buf + H5R_ENCODE_HEADER_SIZE + sizeof(uint32_t);
 
         /* Set up VOL callback arguments */
         vol_cb_args.op_type             = H5VL_BLOB_ISNULL;
@@ -792,6 +800,7 @@ H5T__ref_disk_isnull(const H5VL_object_t *src_file, const void *src_buf, hbool_t
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__ref_disk_isnull() */
+H5_GCC_CLANG_DIAG_ON("cast-qual")
 
 /*-------------------------------------------------------------------------
  * Function:    H5T__ref_disk_setnull
@@ -810,7 +819,7 @@ H5T__ref_disk_setnull(H5VL_object_t *dst_file, void *dst_buf, void *bg_buf)
     uint8_t *                 p_bg      = (uint8_t *)bg_buf;
     herr_t                    ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
     H5T_REF_LOG_DEBUG("");
 
     HDassert(dst_file);
@@ -819,7 +828,7 @@ H5T__ref_disk_setnull(H5VL_object_t *dst_file, void *dst_buf, void *bg_buf)
     /* TODO Should get rid of bg stuff */
     if (p_bg) {
         /* Skip the size / header */
-        p_bg += (H5_SIZEOF_UINT32_T + H5R_ENCODE_HEADER_SIZE);
+        p_bg += (sizeof(uint32_t) + H5R_ENCODE_HEADER_SIZE);
 
         /* Set up VOL callback arguments */
         vol_cb_args.op_type = H5VL_BLOB_DELETE;
@@ -865,7 +874,7 @@ H5T__ref_disk_getsize(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_bu
     H5R_type_t     ref_type;
     size_t         ret_value = 0;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
     H5T_REF_LOG_DEBUG("");
 
     HDassert(src_buf);
@@ -914,7 +923,7 @@ H5T__ref_disk_read(H5VL_object_t *src_file, const void *src_buf, size_t H5_ATTR_
     size_t         blob_size = dst_size;
     herr_t         ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
     H5T_REF_LOG_DEBUG("");
 
     HDassert(src_file);
@@ -929,8 +938,8 @@ H5T__ref_disk_read(H5VL_object_t *src_file, const void *src_buf, size_t H5_ATTR_
     blob_size -= H5R_ENCODE_HEADER_SIZE;
 
     /* Skip the size */
-    p += H5_SIZEOF_UINT32_T;
-    HDassert(src_size > (H5R_ENCODE_HEADER_SIZE + H5_SIZEOF_UINT32_T));
+    p += sizeof(uint32_t);
+    HDassert(src_size > (H5R_ENCODE_HEADER_SIZE + sizeof(uint32_t)));
 
     /* Retrieve blob */
     if (H5VL_blob_get(src_file, p, q, blob_size, NULL) < 0)
@@ -960,7 +969,7 @@ H5T__ref_disk_write(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf,
     uint8_t *      p_bg          = (uint8_t *)bg_buf;
     herr_t         ret_value     = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
     H5T_REF_LOG_DEBUG("");
 
     HDassert(src_buf);
@@ -974,9 +983,9 @@ H5T__ref_disk_write(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf,
         size_t                    p_buf_size_left = dst_size;
 
         /* Skip the size / header */
-        p_bg += (H5_SIZEOF_UINT32_T + H5R_ENCODE_HEADER_SIZE);
-        HDassert(p_buf_size_left > (H5_SIZEOF_UINT32_T + H5R_ENCODE_HEADER_SIZE));
-        p_buf_size_left -= (H5_SIZEOF_UINT32_T + H5R_ENCODE_HEADER_SIZE);
+        p_bg += (sizeof(uint32_t) + H5R_ENCODE_HEADER_SIZE);
+        HDassert(p_buf_size_left > (sizeof(uint32_t) + H5R_ENCODE_HEADER_SIZE));
+        p_buf_size_left -= (sizeof(uint32_t) + H5R_ENCODE_HEADER_SIZE);
 
         /* Set up VOL callback arguments */
         vol_cb_args.op_type = H5VL_BLOB_DELETE;
@@ -991,12 +1000,12 @@ H5T__ref_disk_write(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf,
     p += H5R_ENCODE_HEADER_SIZE;
     q += H5R_ENCODE_HEADER_SIZE;
     src_size -= H5R_ENCODE_HEADER_SIZE;
-    buf_size_left -= H5_SIZEOF_UINT32_T;
+    buf_size_left -= sizeof(uint32_t);
 
     /* Set the size */
     UINT32ENCODE(q, src_size);
-    HDassert(buf_size_left > H5_SIZEOF_UINT32_T);
-    buf_size_left -= H5_SIZEOF_UINT32_T;
+    HDassert(buf_size_left > sizeof(uint32_t));
+    buf_size_left -= sizeof(uint32_t);
 
     /* Store blob */
     if (H5VL_blob_put(dst_file, p, src_size, q, NULL) < 0)
@@ -1023,7 +1032,7 @@ H5T__ref_obj_disk_isnull(const H5VL_object_t *src_file, const void *src_buf, hbo
     haddr_t        addr;
     herr_t         ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
     H5T_REF_LOG_DEBUG("");
 
     /* Check parameters */
@@ -1075,7 +1084,7 @@ H5T__ref_obj_disk_getsize(H5VL_object_t *src_file, const void H5_ATTR_UNUSED *sr
     H5F_t *src_f;
     size_t ret_value = 0;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
     H5T_REF_LOG_DEBUG("");
 
     HDassert(src_file);
@@ -1122,7 +1131,7 @@ H5T__ref_obj_disk_read(H5VL_object_t *src_file, const void *src_buf, size_t src_
     H5F_t *src_f;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
     H5T_REF_LOG_DEBUG("");
 
     HDassert(src_file);
@@ -1175,7 +1184,7 @@ H5T__ref_dsetreg_disk_isnull(const H5VL_object_t *src_file, const void *src_buf,
     haddr_t        addr;
     herr_t         ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
     H5T_REF_LOG_DEBUG("");
 
     /* Check parameters */
@@ -1227,9 +1236,9 @@ H5T__ref_dsetreg_disk_getsize(H5VL_object_t H5_ATTR_UNUSED *src_file, const void
     size_t ret_value = sizeof(struct H5Tref_dsetreg);
 
 #ifndef NDEBUG
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 #else
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 #endif
     H5T_REF_LOG_DEBUG("");
 
@@ -1279,7 +1288,7 @@ H5T__ref_dsetreg_disk_read(H5VL_object_t *src_file, const void *src_buf, size_t 
     struct H5Tref_dsetreg *dst_reg   = (struct H5Tref_dsetreg *)dst_buf;
     herr_t                 ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
     H5T_REF_LOG_DEBUG("");
 
     HDassert(src_file);

@@ -70,11 +70,11 @@ H5TOOLS_DLLVAR unsigned h5tools_nCols; /*max number of columns for outputting  *
 /* Definitions of useful routines */
 H5TOOLS_DLL void   indentation(unsigned);
 H5TOOLS_DLL void   print_version(const char *progname);
-H5TOOLS_DLL void   parallel_print(const char *format, ...);
+H5TOOLS_DLL void   parallel_print(const char *format, ...) H5_ATTR_FORMAT(printf, 1, 2);
 H5TOOLS_DLL herr_t parse_tuple(const char *start, int sep, char **cpy_out, unsigned *nelems,
                                char ***ptrs_out);
-H5TOOLS_DLL void   error_msg(const char *fmt, ...);
-H5TOOLS_DLL void   warn_msg(const char *fmt, ...);
+H5TOOLS_DLL void   error_msg(const char *fmt, ...) H5_ATTR_FORMAT(printf, 1, 2);
+H5TOOLS_DLL void   warn_msg(const char *fmt, ...) H5_ATTR_FORMAT(printf, 1, 2);
 H5TOOLS_DLL void   help_ref_msg(FILE *output);
 H5TOOLS_DLL void   free_table(table_t *table);
 #ifdef H5DUMP_DEBUG
@@ -100,7 +100,7 @@ typedef enum toolname_t {
     TOOL__H5DUMP /* add as necessary */
 } h5tool_toolname_t;
 
-/* this struct can be used to differntiate among tools */
+/* this struct can be used to differentiate among tools */
 typedef struct {
     h5tool_toolname_t toolname;
     int               msg_mode;

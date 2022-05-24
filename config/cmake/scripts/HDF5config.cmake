@@ -37,8 +37,8 @@ cmake_minimum_required (VERSION 3.12)
 #     CTEST_SOURCE_NAME  -  source folder
 ##############################################################################
 
-set (CTEST_SOURCE_VERSION "1.13.0")
-set (CTEST_SOURCE_VERSEXT "-7")
+set (CTEST_SOURCE_VERSION "1.13.2")
+set (CTEST_SOURCE_VERSEXT "-1")
 
 ##############################################################################
 # handle input parameters to script.
@@ -68,7 +68,7 @@ endif ()
 
 # build generator must be defined
 if (NOT DEFINED BUILD_GENERATOR)
-  message (FATAL_ERROR "BUILD_GENERATOR must be defined - Unix, VS2019, VS201964, VS2017, or VS201764, VS2015, VS201564")
+  message (FATAL_ERROR "BUILD_GENERATOR must be defined - Unix, VS2019, VS201964, VS2017, VS201764, VS2015, VS201564")
 endif ()
 
 ###################################################################
@@ -79,7 +79,7 @@ set (CTEST_CONFIGURATION_TYPE "$ENV{CMAKE_CONFIG_TYPE}")
 
 if (NOT DEFINED INSTALLDIR)
   if (WIN32)
-    set (INSTALLDIR "C:/Program Files/HDF_Group/HDF5/${CTEST_SOURCE_VERSION}")
+    set (INSTALLDIR "%ProgramFiles%/HDF_Group/HDF5/${CTEST_SOURCE_VERSION}")
   else ()
     set (INSTALLDIR "${CTEST_SCRIPT_DIRECTORY}/HDF_Group/HDF5/${CTEST_SOURCE_VERSION}")
   endif ()
@@ -105,7 +105,7 @@ endif ()
 #########       Following describes compiler           ############
 if (NOT DEFINED HPC)
   if (NOT DEFINED BUILD_GENERATOR)
-    message (FATAL_ERROR "BUILD_GENERATOR must be defined - Unix, VS2017, or VS201764, VS2015, VS201564, VS2013, VS201364")
+    message (FATAL_ERROR "BUILD_GENERATOR must be defined - Unix, VS2019, VS201964, VS2017, VS201764, VS2015, VS201564")
   endif ()
   if (WIN32 AND NOT MINGW)
     set (SITE_OS_NAME "Windows")
@@ -163,7 +163,7 @@ if (NOT DEFINED HPC)
       set (SITE_COMPILER_NAME "vs2012")
       set (SITE_COMPILER_VERSION "11")
     else ()
-      message (FATAL_ERROR "Invalid BUILD_GENERATOR must be - Unix, VS2019, VS201964, VS2017, or VS201764, VS2015, VS201564")
+      message (FATAL_ERROR "Invalid BUILD_GENERATOR must be - Unix, VS2019, VS201964, VS2017, VS201764, VS2015, VS201564")
     endif ()
   ##  Set the following to unique id your computer  ##
     set (CTEST_SITE "WIN7${BUILD_GENERATOR}.XXXX")

@@ -40,7 +40,7 @@ Gif2Mem(GIFBYTE *MemGif, GIFTOMEM *GifMemoryStruct)
 {
     /*
      * The gif structure outline for passing data to memory is given in gif.h.
-     * These pointers are redunant, should take them out in ver. 2
+     * These pointers are redundant, should take them out in ver. 2
      */
     GIFHEAD *           gifHead;           /* GIF Header structure            */
     GIFIMAGEDESC **     gifImageDesc;      /* Logical Image Descriptor struct */
@@ -49,22 +49,22 @@ Gif2Mem(GIFBYTE *MemGif, GIFTOMEM *GifMemoryStruct)
     GIFCOMMENT **       gifComment;        /* Comment Extension structure     */
     GIFGRAPHICCONTROL **gifGraphicControl; /* Graphic Control Extension strct */
 
-    register GIFWORD i;          /* Loop counter                                 */
-    GIFBYTE          Identifier; /* Extension block identifier holder            */
-    GIFBYTE          Label;      /* Extension block label holder                 */
-    GIFBYTE          ImageCount; /* Count of the number of images in the file    */
-    GIFBYTE          ImageArray; /* Keep the size of the array to store Images   */
-    GIFBYTE          CommentCount;
-    GIFBYTE          CommentArray;
-    GIFBYTE          ApplicationCount;
-    GIFBYTE          ApplicationArray;
-    GIFBYTE          PlainTextCount;
-    GIFBYTE          PlainTextArray;
-    GIFBYTE          GCEflag;
-    GIFBYTE          aTemp;
-    GIFBYTE          j;
-    GIFBYTE          w; /* Two more variables needed only while testing */
-    GIFBYTE *        b; /* Endian Ordering                              */
+    GIFWORD  i;          /* Loop counter                                 */
+    GIFBYTE  Identifier; /* Extension block identifier holder            */
+    GIFBYTE  Label;      /* Extension block label holder                 */
+    GIFBYTE  ImageCount; /* Count of the number of images in the file    */
+    GIFBYTE  ImageArray; /* Keep the size of the array to store Images   */
+    GIFBYTE  CommentCount;
+    GIFBYTE  CommentArray;
+    GIFBYTE  ApplicationCount;
+    GIFBYTE  ApplicationArray;
+    GIFBYTE  PlainTextCount;
+    GIFBYTE  PlainTextArray;
+    GIFBYTE  GCEflag;
+    GIFBYTE  aTemp;
+    GIFBYTE  j;
+    GIFBYTE  w; /* Two more variables needed only while testing */
+    GIFBYTE *b; /* Endian Ordering                              */
 
     /* Allocate memory for the GIF structures           */
     /* Plug the structs into GifMemoryStruct at the end */

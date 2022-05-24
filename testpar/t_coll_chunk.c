@@ -155,7 +155,7 @@ coll_chunk2(void)
  */
 
 /* ------------------------------------------------------------------------
- *  Descriptions for the selection: one singular selection accross many chunks
+ *  Descriptions for the selection: one singular selection across many chunks
  *  Two dimensions, Num of chunks = 2* mpi_size
  *
  *  dim1       = SPACE_DIM1*mpi_size
@@ -209,7 +209,7 @@ coll_chunk3(void)
  */
 
 /* ------------------------------------------------------------------------
- *  Descriptions for the selection: one singular selection accross many chunks
+ *  Descriptions for the selection: one singular selection across many chunks
  *  Two dimensions, Num of chunks = 2* mpi_size
  *
  *  dim1       = SPACE_DIM1*mpi_size
@@ -261,7 +261,7 @@ coll_chunk4(void)
  */
 
 /* ------------------------------------------------------------------------
- *  Descriptions for the selection: one singular selection accross many chunks
+ *  Descriptions for the selection: one singular selection across many chunks
  *  Two dimensions, Num of chunks = 2* mpi_size
  *
  *  dim1       = SPACE_DIM1*mpi_size
@@ -315,7 +315,7 @@ coll_chunk5(void)
  */
 
 /* ------------------------------------------------------------------------
- *  Descriptions for the selection: one singular selection accross many chunks
+ *  Descriptions for the selection: one singular selection across many chunks
  *  Two dimensions, Num of chunks = 2* mpi_size
  *
  *  dim1       = SPACE_DIM1*mpi_size
@@ -367,7 +367,7 @@ coll_chunk6(void)
  */
 
 /* ------------------------------------------------------------------------
- *  Descriptions for the selection: one singular selection accross many chunks
+ *  Descriptions for the selection: one singular selection across many chunks
  *  Two dimensions, Num of chunks = 2* mpi_size
  *
  *  dim1       = SPACE_DIM1*mpi_size
@@ -419,7 +419,7 @@ coll_chunk7(void)
  */
 
 /* ------------------------------------------------------------------------
- *  Descriptions for the selection: one singular selection accross many chunks
+ *  Descriptions for the selection: one singular selection across many chunks
  *  Two dimensions, Num of chunks = 2* mpi_size
  *
  *  dim1       = SPACE_DIM1*mpi_size
@@ -471,7 +471,7 @@ coll_chunk8(void)
  */
 
 /* ------------------------------------------------------------------------
- *  Descriptions for the selection: one singular selection accross many chunks
+ *  Descriptions for the selection: one singular selection across many chunks
  *  Two dimensions, Num of chunks = 2* mpi_size
  *
  *  dim1       = SPACE_DIM1*mpi_size
@@ -523,7 +523,7 @@ coll_chunk9(void)
  */
 
 /* ------------------------------------------------------------------------
- *  Descriptions for the selection: one singular selection accross many chunks
+ *  Descriptions for the selection: one singular selection across many chunks
  *  Two dimensions, Num of chunks = 2* mpi_size
  *
  *  dim1       = SPACE_DIM1*mpi_size
@@ -832,7 +832,10 @@ coll_chunktest(const char *filename, int chunk_factor, int select_factor, int ap
     VRFY((status >= 0), "dataset write succeeded");
 
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
-    if (facc_type == FACC_MPIO) {
+    /* Only check chunk optimization mode if selection I/O is not being used -
+     * selection I/O bypasses this IO mode decision - it's effectively always
+     * multi chunk currently */
+    if (facc_type == FACC_MPIO && !H5_use_selection_io_g) {
         switch (api_option) {
             case API_LINK_HARD:
                 status = H5Pget(xfer_plist, H5D_XFER_COLL_CHUNK_LINK_HARD_NAME, &prop_value);

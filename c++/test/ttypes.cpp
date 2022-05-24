@@ -28,7 +28,7 @@ using namespace H5;
 #include "h5cpputil.h" // C++ utilility header file
 
 /*
- * Offset from alinged memory returned by malloc().  This can be used to test
+ * Offset from aligned memory returned by malloc().  This can be used to test
  * that type conversions handle non-aligned buffers correctly.
  */
 #define ALIGNMENT 1

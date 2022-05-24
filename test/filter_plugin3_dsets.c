@@ -108,7 +108,7 @@ add_sub_value_hdf5(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_
     value = (int)cd_values[0];
 
     if (flags & H5Z_FLAG_REVERSE) {
-        /* READ - Substract the given value from all the data values */
+        /* READ - Subtract the given value from all the data values */
         while (buf_left > 0) {
             *int_ptr++ -= value;
             buf_left -= sizeof(int);

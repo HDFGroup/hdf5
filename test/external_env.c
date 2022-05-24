@@ -61,57 +61,57 @@ test_path_env(hid_t fapl)
 
     h5_fixname(EXT_ENV_FNAME[0], fapl, filename, sizeof(filename));
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Reset the raw data files */
     if (reset_raw_data_files(TRUE) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Create the dataset */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     for (i = 0; i < N_EXT_FILES; i++) {
         HDsnprintf(filename, sizeof(filename), "..%sextern_env_%dr.raw", H5_DIR_SEPS, (int)i + 1);
         if (H5Pset_external(dcpl, filename, (off_t)(i * GARBAGE_PER_FILE), (hsize_t)sizeof(part)) < 0)
-            FAIL_STACK_ERROR
+            FAIL_STACK_ERROR;
     } /* end for */
 
     cur_size = TOTAL_SIZE;
     if ((space = H5Screate_simple(1, &cur_size, NULL)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if ((dapl = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Set prefix to a nonexistent directory, will be overwritten by environment variable */
     if (H5Pset_efile_prefix(dapl, "someprefix") < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Pget_efile_prefix(dapl, buffer, sizeof(buffer)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (HDstrcmp(buffer, "someprefix") != 0)
         FAIL_PUTS_ERROR("efile prefix not set correctly");
 
     /* Create dataset */
     if ((dset = H5Dcreate2(file, "dset1", H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl, dapl)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Read the entire dataset and compare with the original */
     HDmemset(whole, 0, sizeof(whole));
     if (H5Dread(dset, H5T_NATIVE_INT, space, space, H5P_DEFAULT, whole) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     for (i = 0; i < TOTAL_SIZE; i++)
         if (whole[i] != (signed)i)
             FAIL_PUTS_ERROR("Incorrect value(s) read.");
 
     if (H5Dclose(dset) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Pclose(dapl) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Pclose(dcpl) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Sclose(space) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     PASSED();
     return 0;
@@ -158,9 +158,9 @@ main(void)
 
     /* Copy and set up a fapl for the latest file format */
     if ((fapl_id_new = H5Pcopy(fapl_id_old)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Pset_libver_bounds(fapl_id_new, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Test with old & new format groups */
     for (latest_format = FALSE; latest_format <= TRUE; latest_format++) {
@@ -184,7 +184,7 @@ main(void)
 
     /* Close the new ff fapl. h5_cleanup will take care of the old ff fapl */
     if (H5Pclose(fapl_id_new) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     HDputs("All external storage tests passed.");
 

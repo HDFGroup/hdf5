@@ -353,7 +353,7 @@ error:
  * Function:    test_4
  *
  * Purpose:     Tests the H5HG_remove() feature by writing lots of objects
- *              and occassionally removing some.  When we're done they're all
+ *              and occasionally removing some.  When we're done they're all
  *              removed.
  *
  * Return:      Success:    0
@@ -586,7 +586,7 @@ main(void)
 
     /* Push API context */
     if (H5CX_push() < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     api_ctx_pushed = TRUE;
 
     nerrors += test_1(fapl_id);
@@ -605,7 +605,7 @@ main(void)
 
     /* Pop API context */
     if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     api_ctx_pushed = FALSE;
 
     h5_cleanup(FILENAME, fapl_id);

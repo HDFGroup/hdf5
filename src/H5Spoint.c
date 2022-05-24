@@ -59,22 +59,22 @@ static void            H5S__free_pnt_list(H5S_pnt_list_t *pnt_lst);
 static herr_t   H5S__point_copy(H5S_t *dst, const H5S_t *src, hbool_t share_selection);
 static herr_t   H5S__point_release(H5S_t *space);
 static htri_t   H5S__point_is_valid(const H5S_t *space);
-static hssize_t H5S__point_serial_size(const H5S_t *space);
-static herr_t   H5S__point_serialize(const H5S_t *space, uint8_t **p);
+static hssize_t H5S__point_serial_size(H5S_t *space);
+static herr_t   H5S__point_serialize(H5S_t *space, uint8_t **p);
 static herr_t   H5S__point_deserialize(H5S_t **space, const uint8_t **p);
 static herr_t   H5S__point_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
 static herr_t   H5S__point_offset(const H5S_t *space, hsize_t *off);
 static int      H5S__point_unlim_dim(const H5S_t *space);
 static htri_t   H5S__point_is_contiguous(const H5S_t *space);
 static htri_t   H5S__point_is_single(const H5S_t *space);
-static htri_t   H5S__point_is_regular(const H5S_t *space);
-static htri_t   H5S__point_shape_same(const H5S_t *space1, const H5S_t *space2);
-static htri_t   H5S__point_intersect_block(const H5S_t *space, const hsize_t *start, const hsize_t *end);
+static htri_t   H5S__point_is_regular(H5S_t *space);
+static htri_t   H5S__point_shape_same(H5S_t *space1, H5S_t *space2);
+static htri_t   H5S__point_intersect_block(H5S_t *space, const hsize_t *start, const hsize_t *end);
 static herr_t   H5S__point_adjust_u(H5S_t *space, const hsize_t *offset);
 static herr_t   H5S__point_adjust_s(H5S_t *space, const hssize_t *offset);
 static herr_t   H5S__point_project_scalar(const H5S_t *space, hsize_t *offset);
 static herr_t   H5S__point_project_simple(const H5S_t *space, H5S_t *new_space, hsize_t *offset);
-static herr_t   H5S__point_iter_init(const H5S_t *space, H5S_sel_iter_t *iter);
+static herr_t   H5S__point_iter_init(H5S_t *space, H5S_sel_iter_t *iter);
 static herr_t   H5S__point_get_version_enc_size(const H5S_t *space, uint32_t *version, uint8_t *enc_size);
 
 /* Selection iteration callbacks */
@@ -170,11 +170,11 @@ H5FL_DEFINE_STATIC(H5S_pnt_list_t);
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5S__point_iter_init(const H5S_t *space, H5S_sel_iter_t *iter)
+H5S__point_iter_init(H5S_t *space, H5S_sel_iter_t *iter)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(space && H5S_SEL_POINTS == H5S_GET_SELECT_TYPE(space));
@@ -225,7 +225,7 @@ done:
 static herr_t
 H5S__point_iter_coords(const H5S_sel_iter_t *iter, hsize_t *coords)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(iter);
@@ -253,7 +253,7 @@ H5S__point_iter_coords(const H5S_sel_iter_t *iter, hsize_t *coords)
 static herr_t
 H5S__point_iter_block(const H5S_sel_iter_t *iter, hsize_t *start, hsize_t *end)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(iter);
@@ -282,7 +282,7 @@ H5S__point_iter_block(const H5S_sel_iter_t *iter, hsize_t *start, hsize_t *end)
 static hsize_t
 H5S__point_iter_nelmts(const H5S_sel_iter_t *iter)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(iter);
@@ -312,7 +312,7 @@ H5S__point_iter_has_next_block(const H5S_sel_iter_t *iter)
 {
     htri_t ret_value = TRUE; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(iter);
@@ -346,7 +346,7 @@ done:
 static herr_t
 H5S__point_iter_next(H5S_sel_iter_t *iter, size_t nelem)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(iter);
@@ -381,7 +381,7 @@ H5S__point_iter_next(H5S_sel_iter_t *iter, size_t nelem)
 static herr_t
 H5S__point_iter_next_block(H5S_sel_iter_t *iter)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(iter);
@@ -435,7 +435,7 @@ H5S__point_iter_get_seq_list(H5S_sel_iter_t *iter, size_t maxseq, size_t maxelem
     int             i;                   /* Local index variable */
     herr_t          ret_value = SUCCEED; /* return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(iter);
@@ -542,7 +542,7 @@ H5S__point_iter_get_seq_list(H5S_sel_iter_t *iter, size_t maxseq, size_t maxelem
 static herr_t
 H5S__point_iter_release(H5S_sel_iter_t *iter)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(iter);
@@ -580,7 +580,7 @@ H5S__point_add(H5S_t *space, H5S_seloper_t op, size_t num_elem, const hsize_t *c
     unsigned        u;                                          /* Counter */
     herr_t          ret_value = SUCCEED;                        /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(space);
@@ -692,7 +692,7 @@ done:
 static herr_t
 H5S__point_release(H5S_t *space)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(space);
@@ -804,7 +804,7 @@ H5S__copy_pnt_list(const H5S_pnt_list_t *src, unsigned rank)
     H5S_pnt_node_t *curr, *new_tail;  /* Point information nodes */
     H5S_pnt_list_t *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(src);
@@ -879,7 +879,7 @@ H5S__free_pnt_list(H5S_pnt_list_t *pnt_lst)
 {
     H5S_pnt_node_t *curr; /* Point information nodes */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(pnt_lst);
@@ -923,7 +923,7 @@ H5S__point_copy(H5S_t *dst, const H5S_t *src, hbool_t H5_ATTR_UNUSED share_selec
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(src);
@@ -964,7 +964,7 @@ H5S__point_is_valid(const H5S_t *space)
     unsigned u;                /* Counter */
     htri_t   ret_value = TRUE; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(space);
 
@@ -1060,10 +1060,10 @@ H5S__point_get_version_enc_size(const H5S_t *space, uint32_t *version, uint8_t *
     hsize_t      bounds_start[H5S_MAX_RANK]; /* Starting coordinate of bounding box */
     hsize_t      bounds_end[H5S_MAX_RANK];   /* Opposite coordinate of bounding box */
     hsize_t      max_size = 0;               /* Maximum selection size */
-    unsigned     u;                          /* Local index veriable */
+    unsigned     u;                          /* Local index variable */
     herr_t       ret_value = SUCCEED;        /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Get bounding box for the selection */
     HDmemset(bounds_end, 0, sizeof(bounds_end));
@@ -1159,13 +1159,13 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static hssize_t
-H5S__point_serial_size(const H5S_t *space)
+H5S__point_serial_size(H5S_t *space)
 {
     uint32_t version;        /* Version number */
     uint8_t  enc_size;       /* Encoded size of point selection info */
     hssize_t ret_value = -1; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(space);
 
@@ -1204,7 +1204,7 @@ done:
     Serialize the current selection into a user-provided buffer.
  USAGE
     herr_t H5S__point_serialize(space, p)
-        const H5S_t *space;     IN: Dataspace with selection to serialize
+        H5S_t *space;           IN: Dataspace with selection to serialize
         uint8_t **p;            OUT: Pointer to buffer to put serialized
                                 selection.  Will be advanced to end of
                                 serialized selection.
@@ -1219,7 +1219,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S__point_serialize(const H5S_t *space, uint8_t **p)
+H5S__point_serialize(H5S_t *space, uint8_t **p)
 {
     H5S_pnt_node_t *curr;                /* Point information nodes */
     uint8_t *       pp;                  /* Local pointer for encoding */
@@ -1230,7 +1230,7 @@ H5S__point_serialize(const H5S_t *space, uint8_t **p)
     uint8_t         enc_size;            /* Encoded size of point selection info */
     herr_t          ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(space);
@@ -1366,7 +1366,7 @@ H5S__point_deserialize(H5S_t **space, const uint8_t **p)
     unsigned       i, j;                     /* local counting variables */
     herr_t         ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(p);
@@ -1505,7 +1505,7 @@ done:
     dataspace they are located within.  The list of points is formatted as
     follows: <coordinate> followed by the next coordinate, etc. until all the
     point information in the selection have been put into the user's buffer.
-        The points are returned in the order they will be interated through
+        The points are returned in the order they will be iterated through
     when a selection is read/written from/to disk.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
@@ -1519,7 +1519,7 @@ H5S__get_select_elem_pointlist(const H5S_t *space, hsize_t startpoint, hsize_t n
     H5S_pnt_node_t *node;                              /* Point node */
     unsigned        rank;                              /* Dataspace rank */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(space);
     HDassert(buf);
@@ -1579,7 +1579,7 @@ H5S__get_select_elem_pointlist(const H5S_t *space, hsize_t startpoint, hsize_t n
     dataspace they are located within.  The list of points is formatted as
     follows: <coordinate> followed by the next coordinate, etc. until all the
     point information in the selection have been put into the user's buffer.
-        The points are returned in the order they will be interated through
+        The points are returned in the order they will be iterated through
     when a selection is read/written from/to disk.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
@@ -1642,7 +1642,7 @@ H5S__point_bounds(const H5S_t *space, hsize_t *start, hsize_t *end)
     unsigned u;                   /* Local index variable */
     herr_t   ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(space);
@@ -1700,7 +1700,7 @@ H5S__point_offset(const H5S_t *space, hsize_t *offset)
     int             i;                   /* index variable */
     herr_t          ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     HDassert(space);
     HDassert(offset);
@@ -1756,7 +1756,7 @@ done:
 static int
 H5S__point_unlim_dim(const H5S_t H5_ATTR_UNUSED *space)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     FUNC_LEAVE_NOAPI(-1)
 } /* end H5S__point_unlim_dim() */
@@ -1787,7 +1787,7 @@ H5S__point_is_contiguous(const H5S_t *space)
 {
     htri_t ret_value = FAIL; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(space);
 
@@ -1824,7 +1824,7 @@ H5S__point_is_single(const H5S_t *space)
 {
     htri_t ret_value = FAIL; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(space);
 
@@ -1844,7 +1844,7 @@ H5S__point_is_single(const H5S_t *space)
     Check if a point selection is "regular"
  USAGE
     htri_t H5S__point_is_regular(space)
-        const H5S_t *space;     IN: Dataspace pointer to check
+        H5S_t *space;     IN: Dataspace pointer to check
  RETURNS
     TRUE/FALSE/FAIL
  DESCRIPTION
@@ -1859,11 +1859,11 @@ H5S__point_is_single(const H5S_t *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static htri_t
-H5S__point_is_regular(const H5S_t *space)
+H5S__point_is_regular(H5S_t *space)
 {
     htri_t ret_value = FAIL; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(space);
@@ -1884,8 +1884,8 @@ H5S__point_is_regular(const H5S_t *space)
     Check if a two "point" selections are the same shape
  USAGE
     htri_t H5S__point_shape_same(space1, space2)
-        const H5S_t *space1;     IN: First dataspace to check
-        const H5S_t *space2;     IN: Second dataspace to check
+        H5S_t *space1;           IN: First dataspace to check
+        H5S_t *space2;           IN: Second dataspace to check
  RETURNS
     TRUE / FALSE / FAIL
  DESCRIPTION
@@ -1897,7 +1897,7 @@ H5S__point_is_regular(const H5S_t *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static htri_t
-H5S__point_shape_same(const H5S_t *space1, const H5S_t *space2)
+H5S__point_shape_same(H5S_t *space1, H5S_t *space2)
 {
     H5S_pnt_node_t *pnt1, *pnt2;          /* Point information nodes */
     hssize_t        offset[H5S_MAX_RANK]; /* Offset between the selections */
@@ -1907,7 +1907,7 @@ H5S__point_shape_same(const H5S_t *space1, const H5S_t *space2)
     int             space2_dim;           /* Current dimension in second dataspace */
     htri_t          ret_value = TRUE;     /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Check args */
     HDassert(space1);
@@ -1990,7 +1990,7 @@ done:
     Detect intersections of selection with block
  USAGE
     htri_t H5S__point_intersect_block(space, start, end)
-        const H5S_t *space;     IN: Dataspace with selection to use
+        H5S_t *space;           IN: Dataspace with selection to use
         const hsize_t *start;   IN: Starting coordinate for block
         const hsize_t *end;     IN: Ending coordinate for block
  RETURNS
@@ -2003,12 +2003,12 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 htri_t
-H5S__point_intersect_block(const H5S_t *space, const hsize_t *start, const hsize_t *end)
+H5S__point_intersect_block(H5S_t *space, const hsize_t *start, const hsize_t *end)
 {
     H5S_pnt_node_t *pnt;               /* Point information node */
     htri_t          ret_value = FALSE; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(space);
@@ -2064,7 +2064,7 @@ H5S__point_adjust_u(H5S_t *space, const hsize_t *offset)
     unsigned        rank;                    /* Dataspace rank */
     unsigned        u;                       /* Local index variable */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(space);
     HDassert(offset);
@@ -2131,7 +2131,7 @@ H5S__point_adjust_s(H5S_t *space, const hssize_t *offset)
     unsigned        rank;                    /* Dataspace rank */
     unsigned        u;                       /* Local index variable */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(space);
     HDassert(offset);
@@ -2194,7 +2194,7 @@ H5S__point_project_scalar(const H5S_t *space, hsize_t *offset)
     const H5S_pnt_node_t *node;                /* Point node */
     herr_t                ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(space && H5S_SEL_POINTS == H5S_GET_SELECT_TYPE(space));
@@ -2238,7 +2238,7 @@ H5S__point_project_simple(const H5S_t *base_space, H5S_t *new_space, hsize_t *of
     unsigned              u;                   /* Local index variable */
     herr_t                ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(base_space && H5S_SEL_POINTS == H5S_GET_SELECT_TYPE(base_space));

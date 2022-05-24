@@ -2,6 +2,14 @@ cmake_minimum_required (VERSION 3.12)
 project (HDF5_HL C)
 
 #-----------------------------------------------------------------------------
+# Option to use new-style references with dimension scale APIs
+#-----------------------------------------------------------------------------
+option (HDF5_DIMENSION_SCALES_NEW_REF  "Use new-style references with dimension scale APIs" OFF)
+if (HDF5_DIMENSION_SCALES_NEW_REF)
+  set (H5_DIMENSION_SCALES_WITH_NEW_REF 1)
+endif ()
+
+#-----------------------------------------------------------------------------
 # List Source files
 #-----------------------------------------------------------------------------
 

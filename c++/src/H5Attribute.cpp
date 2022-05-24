@@ -11,6 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <cstdlib>
 #include <iostream>
 #include <string>
 
@@ -562,7 +563,7 @@ Attribute::p_read_variable_len(const DataType &mem_type, H5std_string &strg) con
 ///\exception   H5::IdComponentException when the attempt to close the HDF5
 ///             object fails
 // Description:
-//              The underlaying reference counting in the C library ensures
+//              The underlying reference counting in the C library ensures
 //              that the current valid id of this object is properly closed.
 //              Then the object's id is reset to the new id.
 // Programmer   Binh-Minh Ribler - 2000

@@ -319,7 +319,7 @@ H5P__encode_cb(H5P_genprop_t *prop, void *_udata)
     H5P_enc_iter_ud_t *udata     = (H5P_enc_iter_ud_t *)_udata; /* Pointer to user data */
     int                ret_value = H5_ITER_CONT;                /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(prop);
@@ -663,7 +663,7 @@ done:
         on failure.
  DESCRIPTION
      Decodes a property list from a binary buffer. The contents of the buffer
-     contain the values for the correponding properties of the plist. The decode
+     contain the values for the corresponding properties of the plist. The decode
      callback of a certain property decodes its value from the buffer and sets it
      in the property list.
  GLOBAL VARIABLES

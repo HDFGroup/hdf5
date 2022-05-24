@@ -230,7 +230,7 @@ H5C__construct_cache_image_buffer(H5F_t *f, H5C_t *cache_ptr)
     unsigned u;                   /* Local index variable */
     herr_t   ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(f);
@@ -591,7 +591,7 @@ H5C__deserialize_prefetched_entry(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t 
      *
      * Note that at present, dirty can't be set to true with prefetched
      * entries.  However this may change, so include this functionality
-     * against that posibility.
+     * against that possibility.
      *
      * Also, note that it is possible for a prefetched entry to be dirty --
      * hence the value assigned to ds_entry_ptr->is_dirty below.
@@ -814,7 +814,7 @@ done:
 static herr_t
 H5C__free_image_entries_array(H5C_t *cache_ptr)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(cache_ptr);
@@ -977,7 +977,7 @@ H5C__read_cache_image(H5F_t *f, H5C_t *cache_ptr)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(f);
@@ -997,6 +997,9 @@ H5C__read_cache_image(H5F_t *f, H5C_t *cache_ptr)
 #endif /* H5_HAVE_PARALLEL */
 
             /* Read the buffer (if serial access, or rank 0 of parallel access) */
+            /* NOTE: if this block read is being performed on rank 0 only, throwing
+             * an error here will cause other ranks to hang in the following MPI_Bcast.
+             */
             if (H5F_block_read(f, H5FD_MEM_SUPER, cache_ptr->image_addr, cache_ptr->image_len,
                                cache_ptr->image_buffer) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_READERROR, FAIL, "Can't read metadata cache image block")
@@ -1129,7 +1132,7 @@ done:
  *		image superblock extension message must be deleted from
  *		the superblock extension and the image block freed
  *
- *		Contrawise, if the file is openened R/O, the metadata
+ *		Contrawise, if the file is opened R/O, the metadata
  *		cache image superblock extension message and image block
  *		must be left as is.  Further, any dirty entries in the
  *		cache image block must be marked as clean to avoid
@@ -1196,7 +1199,7 @@ H5C__image_entry_cmp(const void *_entry1, const void *_entry2)
         (const H5C_image_entry_t *)_entry2; /* Pointer to second image entry to compare */
     int ret_value = 0;                      /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(entry1);
@@ -1686,7 +1689,7 @@ H5C__cache_image_block_entry_header_size(const H5F_t *f)
 {
     size_t ret_value = 0; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Set return value */
     ret_value = (size_t)(1 +                  /* type                     */
@@ -1722,7 +1725,7 @@ H5C__cache_image_block_header_size(const H5F_t *f)
 {
     size_t ret_value = 0; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Set return value */
     ret_value = (size_t)(4 +                  /* signature           */
@@ -1760,7 +1763,7 @@ H5C__decode_cache_image_header(const H5F_t *f, H5C_t *cache_ptr, const uint8_t *
     const uint8_t *p;
     herr_t         ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(cache_ptr);
@@ -1821,7 +1824,7 @@ done:
  * Purpose:     Decode the metadata cache image entry from the supplied
  *		buffer into the supplied instance of H5C_image_entry_t.
  *		This includes allocating a buffer for the entry image,
- *		loading it, and seting ie_ptr->image_ptr to point to
+ *		loading it, and setting ie_ptr->image_ptr to point to
  *		the buffer.
  *
  *		Advances the buffer pointer to the first byte
@@ -1857,7 +1860,7 @@ H5C__decode_cache_image_entry(const H5F_t *f, const H5C_t *cache_ptr, const uint
     const uint8_t *    p;
     herr_t             ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(f);
@@ -2013,7 +2016,7 @@ H5C__destroy_pf_entry_child_flush_deps(H5C_t *cache_ptr, H5C_cache_entry_t *pf_e
     hbool_t            found;
     herr_t             ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(cache_ptr);
@@ -2129,7 +2132,7 @@ H5C__encode_cache_image_header(const H5F_t *f, const H5C_t *cache_ptr, uint8_t *
     uint8_t *p;                   /* Pointer into cache image buffer */
     herr_t   ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(cache_ptr);
@@ -2205,7 +2208,7 @@ H5C__encode_cache_image_entry(H5F_t *f, H5C_t *cache_ptr, uint8_t **buf, unsigne
     unsigned           u;                   /* Local index value */
     herr_t             ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(f);
@@ -2338,7 +2341,7 @@ done:
  *		also be a flush dependency child.
  *
  *		Finally, note that for purposes of the cache image, flush
- *		dependency height ends when a flush dependecy relation
+ *		dependency height ends when a flush dependency relation
  *		passes off the cache image.
  *
  *		On exit, the flush dependency height of each entry in the
@@ -2365,7 +2368,7 @@ H5C__prep_for_file_close__compute_fd_heights(const H5C_t *cache_ptr)
     unsigned           u; /* Local index variable */
     herr_t             ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* sanity checks */
     HDassert(cache_ptr);
@@ -2500,7 +2503,7 @@ H5C__prep_for_file_close__compute_fd_heights(const H5C_t *cache_ptr)
         entry_ptr = entry_ptr->il_next;
     } /* while (entry_ptr != NULL) */
 
-    /* At present, no extenal parent or child flush dependency links
+    /* At present, no external parent or child flush dependency links
      * should exist -- hence the following assertions.  This will change
      * if we support ageout of entries in the cache image.
      */
@@ -2587,7 +2590,7 @@ done:
 static void
 H5C__prep_for_file_close__compute_fd_heights_real(H5C_cache_entry_t *entry_ptr, uint32_t fd_height)
 {
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity checks */
     HDassert(entry_ptr);
@@ -2639,7 +2642,7 @@ H5C__prep_for_file_close__setup_image_entries_array(H5C_t *cache_ptr)
     unsigned           u;                   /* Local index variable */
     herr_t             ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(cache_ptr);
@@ -2687,10 +2690,11 @@ H5C__prep_for_file_close__setup_image_entries_array(H5C_t *cache_ptr)
              */
             if (entry_ptr->type->id == H5AC_PREFETCHED_ENTRY_ID) {
                 image_entries[u].type_id = entry_ptr->prefetch_type_id;
-                image_entries[u].age     = entry_ptr->age + 1;
 
-                if (image_entries[u].age > H5AC__CACHE_IMAGE__ENTRY_AGEOUT__MAX)
+                if (entry_ptr->age >= H5AC__CACHE_IMAGE__ENTRY_AGEOUT__MAX)
                     image_entries[u].age = H5AC__CACHE_IMAGE__ENTRY_AGEOUT__MAX;
+                else
+                    image_entries[u].age = entry_ptr->age + 1;
             } /* end if */
             else {
                 image_entries[u].type_id = entry_ptr->type->id;
@@ -2783,7 +2787,7 @@ H5C__prep_for_file_close__scan_entries(const H5F_t *f, H5C_t *cache_ptr)
     unsigned           j;
     herr_t             ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(f);
@@ -3019,7 +3023,7 @@ H5C__reconstruct_cache_contents(H5F_t *f, H5C_t *cache_ptr)
     unsigned           u, v;                /* Local index variable */
     herr_t             ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(f);
@@ -3231,7 +3235,7 @@ H5C__reconstruct_cache_entry(const H5F_t *f, H5C_t *cache_ptr, const uint8_t **b
     hbool_t            file_is_rw;
     H5C_cache_entry_t *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(cache_ptr);
@@ -3381,7 +3385,7 @@ done:
  *		creating if specified.
  *
  *		In general, the size and location of the cache image block
- *		will be unknow at the time that the cache image superblock
+ *		will be unknown at the time that the cache image superblock
  *		message is created.  A subsequent call to this routine will
  *		be used to write the correct data.
  *
@@ -3401,7 +3405,7 @@ H5C__write_cache_image_superblock_msg(H5F_t *f, hbool_t create)
     unsigned mesg_flags = H5O_MSG_FLAG_FAIL_IF_UNKNOWN_ALWAYS;
     herr_t   ret_value  = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(f);
@@ -3456,7 +3460,7 @@ H5C__write_cache_image(H5F_t *f, const H5C_t *cache_ptr)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(f);

@@ -89,7 +89,10 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g; /* MPI INFO object for IO */
 /*
  * Print the current location on the standard output stream.
  */
-#define AT() HDprintf("   at %s:%d in %s()...\n", __FILE__, __LINE__, __func__);
+#define AT()                                                                                                 \
+    do {                                                                                                     \
+        HDprintf("   at %s:%d in %s()...\n", __FILE__, __LINE__, __func__);                                  \
+    } while (0)
 
 /*
  * The name of the test is printed by saying TESTING("something") which will
@@ -101,66 +104,66 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g; /* MPI INFO object for IO */
  * the H5_FAILED() macro is invoked automatically when an API function fails.
  */
 #define TESTING(WHAT)                                                                                        \
-    {                                                                                                        \
+    do {                                                                                                     \
         HDprintf("Testing %-62s", WHAT);                                                                     \
         HDfflush(stdout);                                                                                    \
-    }
+    } while (0)
 #define TESTING_2(WHAT)                                                                                      \
-    {                                                                                                        \
+    do {                                                                                                     \
         HDprintf("  Testing %-60s", WHAT);                                                                   \
         HDfflush(stdout);                                                                                    \
-    }
+    } while (0)
 #define PASSED()                                                                                             \
     do {                                                                                                     \
         HDputs(" PASSED");                                                                                   \
         HDfflush(stdout);                                                                                    \
     } while (0)
 #define H5_FAILED()                                                                                          \
-    {                                                                                                        \
+    do {                                                                                                     \
         HDputs("*FAILED*");                                                                                  \
         HDfflush(stdout);                                                                                    \
-    }
+    } while (0)
 #define H5_WARNING()                                                                                         \
-    {                                                                                                        \
+    do {                                                                                                     \
         HDputs("*WARNING*");                                                                                 \
         HDfflush(stdout);                                                                                    \
-    }
+    } while (0)
 #define SKIPPED()                                                                                            \
-    {                                                                                                        \
+    do {                                                                                                     \
         HDputs(" -SKIP-");                                                                                   \
         HDfflush(stdout);                                                                                    \
-    }
+    } while (0)
 #define PUTS_ERROR(s)                                                                                        \
-    {                                                                                                        \
+    do {                                                                                                     \
         HDputs(s);                                                                                           \
         AT();                                                                                                \
         goto error;                                                                                          \
-    }
+    } while (0)
 #define TEST_ERROR                                                                                           \
-    {                                                                                                        \
+    do {                                                                                                     \
         H5_FAILED();                                                                                         \
         AT();                                                                                                \
         goto error;                                                                                          \
-    }
+    } while (0)
 #define STACK_ERROR                                                                                          \
-    {                                                                                                        \
+    do {                                                                                                     \
         H5Eprint2(H5E_DEFAULT, stdout);                                                                      \
         goto error;                                                                                          \
-    }
+    } while (0)
 #define FAIL_STACK_ERROR                                                                                     \
-    {                                                                                                        \
+    do {                                                                                                     \
         H5_FAILED();                                                                                         \
         AT();                                                                                                \
         H5Eprint2(H5E_DEFAULT, stdout);                                                                      \
         goto error;                                                                                          \
-    }
+    } while (0)
 #define FAIL_PUTS_ERROR(s)                                                                                   \
-    {                                                                                                        \
+    do {                                                                                                     \
         H5_FAILED();                                                                                         \
         AT();                                                                                                \
         HDputs(s);                                                                                           \
         goto error;                                                                                          \
-    }
+    } while (0)
 
 /* Number of seconds to wait before killing a test (requires alarm(2)) */
 #define H5_ALARM_SEC 1200 /* default is 20 minutes */
@@ -172,66 +175,34 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g; /* MPI INFO object for IO */
 #define H5_EXCLUDE_MULTIPART_DRIVERS     0x01
 #define H5_EXCLUDE_NON_MULTIPART_DRIVERS 0x02
 
-/* Macros to create and fill 2D arrays with a single heap allocation.
- * These can be used to replace large stack and global arrays which raise
- * warnings.
- *
- * The macros make a single heap allocation large enough to hold all the
- * pointers and the data elements. The first part of the allocation holds
- * the pointers, and the second part holds the data as a contiguous block
- * in row-major order.
- *
- * To pass the data block to calls like H5Dread(), pass a pointer to the
- * first array element as the data pointer (e.g., array[0] in a 2D array).
- *
- * The fill macro just fills the array with an increasing count value.
- *
- * Usage:
- *
- * int **array;
- *
- * H5TEST_ALLOCATE_2D_ARRAY(array, int, 5, 10);
- *
- * H5TEST_FILL_2D_ARRAY(array, int, 5, 10);
- *
- * (do stuff)
- *
- * HDfree(array);
+/* Fill an array on the heap with an increasing count value.  BUF
+ * is expected to point to a `struct { TYPE arr[...][...]; }`.
  */
-#define H5TEST_ALLOCATE_2D_ARRAY(ARR, TYPE, DIMS_I, DIMS_J)                                                  \
-    do {                                                                                                     \
-        /* Prefix with h5taa to avoid shadow warnings */                                                     \
-        size_t h5taa_pointers_size = 0;                                                                      \
-        size_t h5taa_data_size     = 0;                                                                      \
-        int    h5taa_i;                                                                                      \
-                                                                                                             \
-        h5taa_pointers_size = (DIMS_I) * sizeof(TYPE *);                                                     \
-        h5taa_data_size     = (DIMS_I) * (DIMS_J) * sizeof(TYPE);                                            \
-                                                                                                             \
-        ARR = (TYPE **)HDmalloc(h5taa_pointers_size + h5taa_data_size);                                      \
-                                                                                                             \
-        ARR[0] = (TYPE *)(ARR + (DIMS_I));                                                                   \
-                                                                                                             \
-        for (h5taa_i = 1; h5taa_i < (DIMS_I); h5taa_i++)                                                     \
-            ARR[h5taa_i] = ARR[h5taa_i - 1] + (DIMS_J);                                                      \
-    } while (0)
-
-#define H5TEST_FILL_2D_ARRAY(ARR, TYPE, DIMS_I, DIMS_J)                                                      \
+#define H5TEST_FILL_2D_HEAP_ARRAY(BUF, TYPE)                                                                 \
     do {                                                                                                     \
         /* Prefix with h5tfa to avoid shadow warnings */                                                     \
-        int  h5tfa_i     = 0;                                                                                \
-        int  h5tfa_j     = 0;                                                                                \
-        TYPE h5tfa_count = 0;                                                                                \
+        size_t h5tfa_i     = 0;                                                                              \
+        size_t h5tfa_j     = 0;                                                                              \
+        TYPE   h5tfa_count = 0;                                                                              \
                                                                                                              \
-        for (h5tfa_i = 0; h5tfa_i < (DIMS_I); h5tfa_i++)                                                     \
-            for (h5tfa_j = 0; h5tfa_j < (DIMS_J); h5tfa_j++) {                                               \
-                ARR[h5tfa_i][h5tfa_j] = h5tfa_count;                                                         \
+        for (h5tfa_i = 0; h5tfa_i < NELMTS((BUF)->arr); h5tfa_i++)                                           \
+            for (h5tfa_j = 0; h5tfa_j < NELMTS((BUF)->arr[0]); h5tfa_j++) {                                  \
+                (BUF)->arr[h5tfa_i][h5tfa_j] = h5tfa_count;                                                  \
                 h5tfa_count++;                                                                               \
             }                                                                                                \
     } while (0)
 
 #ifdef __cplusplus
 extern "C" {
+#endif
+
+/*
+ * Ugly hack to cast away const for freeing const-qualified pointers.
+ * Should only be used sparingly, where the alternative (like keeping
+ * an equivalent non-const pointer around) is far messier.
+ */
+#ifndef h5_free_const
+#define h5_free_const(mem) HDfree((void *)(uintptr_t)mem)
 #endif
 
 /* Generally useful testing routines */
