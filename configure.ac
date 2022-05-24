@@ -862,7 +862,7 @@ AC_MSG_CHECKING([if the high-level tools are enabled])
 AC_ARG_ENABLE([hltools],
      [AS_HELP_STRING([--enable-hltools],
                      [Enable the high-level tools.
-                     [default=yes)]
+                     [default=yes]
                      ])],
      [HDF5_HL_TOOLS=$enableval])
 
@@ -1129,8 +1129,8 @@ TEST_EXPRESS_LEVEL_DEFAULT=3
 AC_MSG_CHECKING([if HDF5 testing intensity level is set])
 
 AC_ARG_ENABLE([test-express],
-              [AS_HELP_STRING([--enable-test-express],
-                              [Set HDF5 testing intensity level (0-3) [0 = exhaustive testing; 3 = quicker testing; default=3]])],
+              [AS_HELP_STRING([--enable-test-express=(0-3)],
+                              [Set HDF5 testing intensity level (0-3) [0 = exhaustive testing; 3 = quicker testing; default=3] Set environment variable HDF5TestExpress to override configured setting])],
               [TEST_EXPRESS_LEVEL_DEFAULT=$enableval])
 
 case "X-$TEST_EXPRESS_LEVEL_DEFAULT" in
