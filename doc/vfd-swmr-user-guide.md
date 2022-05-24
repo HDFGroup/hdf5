@@ -287,11 +287,10 @@ initialized to `H5F__CURR_VFD_SWMR_CONFIG_VERSION`.
 
 ## Pushing HDF5 raw data to reader visibility
 
-DISCUSS FLUSH DATA END OF TICK HERE
-
-If <flush of raw data at end of tick> is selected, 
-it should not be necessary to call H5Fflush().  In fact, when VFD SWMR is 
-active, H5Fflush() may require up to `max_lag` ticks to complete due to 
+If the `flush_raw_data` field of the `H5F_vfd_swmr_config_t` struct is set
+to `true`, raw dataset data will be flushed as a part of end of tick processing
+and it should not be necessary to call H5Fflush().  In fact, when VFD
+SWMR is active, H5Fflush() may require up to `max_lag` ticks to complete due to 
 metadata consistency issues.
 
 A writer can make its last changes to HDF5 file visible to all
