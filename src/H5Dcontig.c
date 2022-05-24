@@ -103,7 +103,8 @@ static herr_t  H5D__contig_flush(H5D_t *dset);
 
 /* Helper routines */
 static herr_t H5D__contig_write_one(H5D_io_info_t *io_info, hsize_t offset, size_t size);
-static htri_t H5D__contig_may_use_select_io(const H5D_io_info_t *io_info, const H5D_dset_info_t *dset_info, H5D_io_op_type_t op_type);
+static htri_t H5D__contig_may_use_select_io(const H5D_io_info_t *io_info, const H5D_dset_info_t *dset_info,
+                                            H5D_io_op_type_t op_type);
 
 /*********************/
 /* Package Variables */
@@ -585,8 +586,8 @@ H5D__contig_io_init(H5D_io_info_t *io_info, const H5D_type_info_t H5_ATTR_UNUSED
     hssize_t old_offset[H5O_LAYOUT_NDIMS];  /* Old selection offset */
     htri_t   file_space_normalized = FALSE; /* File dataspace was normalized */
 
-    int          sm_ndims;  /* The number of dimensions of the memory buffer's dataspace (signed) */
-    int          sf_ndims;  /* The number of dimensions of the file dataspace (signed) */
+    int sm_ndims; /* The number of dimensions of the memory buffer's dataspace (signed) */
+    int sf_ndims; /* The number of dimensions of the file dataspace (signed) */
 
     htri_t use_selection_io = FALSE;   /* Whether to use selection I/O */
     herr_t ret_value        = SUCCEED; /* Return value */
@@ -762,7 +763,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static htri_t
-H5D__contig_may_use_select_io(const H5D_io_info_t *io_info, const H5D_dset_info_t *dset_info, H5D_io_op_type_t op_type)
+H5D__contig_may_use_select_io(const H5D_io_info_t *io_info, const H5D_dset_info_t *dset_info,
+                              H5D_io_op_type_t op_type)
 {
     const H5D_t *dataset   = NULL; /* Local pointer to dataset info */
     htri_t       ret_value = FAIL; /* Return value */
@@ -839,14 +841,14 @@ H5D__contig_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize
          * already verified it won't be used, and the metadata accumulator
          * because this is raw data) */
         if (H5F_shared_select_read(H5F_SHARED(dinfo->dset->oloc.file), H5FD_MEM_DRAW, nelmts > 0 ? 1 : 0,
-                                   &mem_space, &file_space, &(dinfo->store->contig.dset_addr),
-                                   &dst_type_size, &(dinfo->u.rbuf)) < 0)
+                                   &mem_space, &file_space, &(dinfo->store->contig.dset_addr), &dst_type_size,
+                                   &(dinfo->u.rbuf)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "contiguous selection read failed")
     } /* end if */
     else
         /* Read data through legacy (non-selection I/O) pathway */
         if ((io_info->io_ops.single_read)(io_info, type_info, nelmts, file_space, mem_space) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "contiguous read failed")
+        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "contiguous read failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -895,7 +897,7 @@ H5D__contig_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsiz
     else
         /* Write data through legacy (non-selection I/O) pathway */
         if ((io_info->io_ops.single_write)(io_info, type_info, nelmts, file_space, mem_space) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "contiguous write failed")
+        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "contiguous write failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
