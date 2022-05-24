@@ -696,7 +696,7 @@ H5D__contig_io_init(H5D_io_info_t *io_info, const H5D_type_info_t H5_ATTR_UNUSED
         new_piece_info->mspace = mem_space;
 
         /* set true for sharing mem space with dset, which means
-         * fspace gets free by applicaton H5Sclose(), and
+         * fspace gets free by application H5Sclose(), and
          * doesn't require providing layout_ops.io_term() for H5D_LOPS_CONTIG.
          */
         new_piece_info->mspace_shared = TRUE;

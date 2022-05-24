@@ -521,7 +521,7 @@ error:
  *              flags.
  *
  * Return:      Success:        0
- *              Failue:         1
+ *              Failure:        1
  *
  * Programmer:  Neil Fortner
  *              Monday, March 10, 2014

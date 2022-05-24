@@ -287,7 +287,7 @@ H5D__pre_read(hid_t dxpl_id, size_t count, H5D_dset_info_t *dset_info)
     H5CX_set_dxpl(dxpl_id);
 
     if (broke_mdset) {
-        /* Read raw data from each dataset by iteself */
+        /* Read raw data from each dataset by itself */
         for (u = 0; u < count; u++)
             if (H5D__read(1, &dset_info[u], FALSE) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
@@ -416,7 +416,7 @@ H5D__pre_write(hid_t dxpl_id, size_t count, H5D_dset_info_t *dset_info)
     }
 
     if (broke_mdset) {
-        /* Write raw data to each dataset by iteself */
+        /* Write raw data to each dataset by itself */
         for (u = 0; u < count; u++)
             if (H5D__write(1, &dset_info[u], FALSE) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")

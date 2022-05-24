@@ -18,7 +18,7 @@
  * for parallel I/O and there is no standard pathname for parallel file
  * systems.  In some cases, the parallel file name may even needs some
  * parallel file type prefix such as: "pfs:/GF/...".  Therefore, this
- * example requires an explicite parallel file prefix.  See the usage
+ * example requires an explicit parallel file prefix.  See the usage
  * for more detail.
  */
 
@@ -30,7 +30,7 @@
 #include <time.h>
 #include <unistd.h>
 
-/* Swtich Test type between 'Feature test = 1' or 'Performance test = 0' */
+/* Switch Test type between 'Feature test = 1' or 'Performance test = 0' */
 const int TEST_TYPE = 0;
 
 /*
@@ -41,13 +41,13 @@ const int TEST_TYPE = 0;
 /* note: single-dset is testing on koala or ostrich */
 /* #define TEST_NO_MPI */
 
-/* Test No slection on a last dset from a 2nd process
+/* Test No selection on a last dset from a 2nd process
  * This is not related space selection. relate to dset selection.
  * This applies to all feature tests */
 // MSB#define TEST_MDSET_NO_LAST_DSET_2ND_PROC
 
 /* Test multiple multi-dset Write/Read before H5Dclose
- * If comment cout, only read/write singe time */
+ * If commented out, only read/write single time */
 #define TEST_DOUBLE_WR_BEFORE_CLOSE
 #define TEST_DOUBLE_RD_BEFORE_CLOSE
 
