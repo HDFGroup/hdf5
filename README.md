@@ -1,4 +1,3 @@
-
 HDF5 version 1.10.9 released on 2022-05-25
 
 ![HDF5 Logo](doxygen/img/HDF5.png)
