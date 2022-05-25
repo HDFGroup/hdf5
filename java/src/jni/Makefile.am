@@ -28,7 +28,7 @@ AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/java/src/jni $(JNIFLAGS)
 lib_LTLIBRARIES=libhdf5_java.la
 
 # Add libtool numbers to the HDF5 Java (JNI) library (from config/lt_vers.am)
-libhdf5_java_la_LDFLAGS = -avoid-version -shared -export-dynamic -version-info $(LT_JAVA_VERS_INTERFACE):$(LT_JAVA_VERS_REVISION):$(LT_JAVA_VERS_AGE) $(AM_LDFLAGS)
+libhdf5_java_la_LDFLAGS = -shared -export-dynamic -version-info $(LT_JAVA_VERS_INTERFACE):$(LT_JAVA_VERS_REVISION):$(LT_JAVA_VERS_AGE) $(AM_LDFLAGS)
 
 # Source files for the library
 libhdf5_java_la_SOURCES=exceptionImp.c h5Constants.c nativeData.c h5util.c h5Imp.c \
