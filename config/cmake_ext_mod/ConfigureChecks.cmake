@@ -293,10 +293,10 @@ if (MINGW OR NOT WINDOWS)
         else ()
           set (TEST_LFS_WORKS "" CACHE INTERNAL ${msg})
           if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-            message (VERBOSE "${msg}... no")
+              message (VERBOSE "${msg}... no")
           endif ()
           file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-                "Test TEST_LFS_WORKS Run failed with the following exit code:\n ${TEST_LFS_WORKS_RUN}\n"
+              "Test TEST_LFS_WORKS Run failed with the following exit code:\n ${TEST_LFS_WORKS_RUN}\n"
           )
         endif ()
       else ()
