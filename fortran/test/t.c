@@ -152,6 +152,6 @@ void
 nh5_env_nocleanup_c(int_f *status)
 {
     *status = (int_f)0;
-    if (HDgetenv("HDF5_NOCLEANUP"))
+    if (HDgetenv(HDF5_NOCLEANUP))
         *status = (int_f)1;
 } /* h5_env_nocleanup_c */

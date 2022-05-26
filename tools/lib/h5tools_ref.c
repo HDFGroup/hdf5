@@ -69,7 +69,7 @@ free_ref_path_info(void *item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSED *op
 /*-------------------------------------------------------------------------
  * Function:    init_ref_path_cb
  *
- * Purpose:     Called by interator to create references for
+ * Purpose:     Called by iterator to create references for
  *              all objects and enter them in the table.
  *
  * Return:      Error status.
@@ -94,7 +94,7 @@ init_ref_path_cb(const char *obj_name, const H5O_info_t *oinfo, const char *alre
 /*-------------------------------------------------------------------------
  * Function:    init_ref_path_table
  *
- * Purpose:     Initalize the reference path table
+ * Purpose:     Initialize the reference path table
  *
  * Return:      Non-negative on success, negative on failure
  *
@@ -240,7 +240,7 @@ get_next_xid(void)
 
 /*
  *  This counter is used to create fake object ID's
- *  The idea is to set it to the largest possible offest, which
+ *  The idea is to set it to the largest possible offset, which
  *  minimizes the chance of collision with a real object id.
  *
  */
@@ -311,7 +311,7 @@ lookup_ref_path(haddr_t ref)
 /*-------------------------------------------------------------------------
  * Function:    fill_ref_path_table
  *
- * Purpose:     Called by interator to create references for
+ * Purpose:     Called by iterator to create references for
  *              all objects and enter them in the table.
  *
  * Return:      Error status.

@@ -345,7 +345,7 @@ CHECK_NOUB() {
 #  JAMTEST user_block file.h5 [--clobber] [ofile.h5]
 #
 #    Test the 'jam' tool:
-#      1. figure out the input and output, and the comparision
+#      1. figure out the input and output, and the comparison
 #         that will be done.
 #      2. call 'jam' with the appropriate arguments
 #      3. check the user block is correct in the output (Check_UB)

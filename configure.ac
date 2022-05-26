@@ -1118,7 +1118,7 @@ AC_MSG_CHECKING([if HDF5 testing intensity level is set])
 
 AC_ARG_ENABLE([test-express],
               [AS_HELP_STRING([--enable-test-express=(0-3)],
-                              [Set HDF5 testing intensity level (0-3) [0 = exhaustive testing; 3 = quicker testing; default=3]  Set environment variable HDF5TestExpress to override configured setting])],
+                              [Set HDF5 testing intensity level (0-3) [0 = exhaustive testing; 3 = quicker testing; default=3] Set environment variable HDF5TestExpress to override configured setting])],
               [TEST_EXPRESS_LEVEL_DEFAULT=$enableval])
 
 case "X-$TEST_EXPRESS_LEVEL_DEFAULT" in
@@ -1203,6 +1203,7 @@ if test "X$HDF5_DOXYGEN" = "Xyes"; then
   AC_SUBST([DOXYGEN_EXTERNAL_SEARCH])
   AC_SUBST([DOXYGEN_SEARCHENGINE_URL])
   AC_SUBST([DOXYGEN_STRIP_FROM_PATH])
+  AC_SUBST([DOXYGEN_STRIP_FROM_INC_PATH])
   AC_SUBST([DOXYGEN_PREDEFINED])
 
 # SRCDIR Environment variables used inside doxygen macro for the source location:
@@ -1210,7 +1211,7 @@ if test "X$HDF5_DOXYGEN" = "Xyes"; then
   DOXYGEN_VERSION_STRING=${PACKAGE_VERSION}
   DOXYGEN_INCLUDE_ALIASES='$(SRCDIR)/doxygen/aliases'
   DOXYGEN_PROJECT_LOGO='$(SRCDIR)/doxygen/img/HDFG-logo.png'
-  DOXYGEN_PROJECT_BRIEF='C-API Reference'
+  DOXYGEN_PROJECT_BRIEF=''
   DOXYGEN_INPUT_DIRECTORY='$(SRCDIR) $(SRCDIR)/doxygen/dox'
   DOXYGEN_OPTIMIZE_OUTPUT_FOR_C=YES
   DOXYGEN_MACRO_EXPANSION=YES
@@ -1226,6 +1227,7 @@ if test "X$HDF5_DOXYGEN" = "Xyes"; then
   DOXYGEN_EXTERNAL_SEARCH=NO
   DOXYGEN_SEARCHENGINE_URL=
   DOXYGEN_STRIP_FROM_PATH='$(SRCDIR)'
+  DOXYGEN_STRIP_FROM_INC_PATH='$(SRCDIR)'
   DOXYGEN_PREDEFINED='H5_HAVE_DIRECT H5_HAVE_LIBHDFS H5_HAVE_MAP_API H5_HAVE_PARALLEL H5_HAVE_ROS3_VFD'
 
   DX_INIT_DOXYGEN([HDF5], [./doxygen/Doxyfile], [hdf5lib_docs])
@@ -2017,8 +2019,10 @@ if test "X$THREADSAFE" = "Xyes"; then
     AC_CACHE_VAL([hdf5_cv_system_scope_threads],
       [AC_RUN_IFELSE(
         [AC_LANG_PROGRAM([
+            #if STDC_HEADERS
             #include <stdlib.h>
             #include <pthread.h>
+            #endif
         ],[
               pthread_attr_t attribute;
               int ret;

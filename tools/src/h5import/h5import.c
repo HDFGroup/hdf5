@@ -3745,7 +3745,7 @@ getCompressionParameter(struct Input *in, FILE *strm)
 
     int         ival;
     const char *err1 = "Unable to get integer value.\n";
-    const char *err2 = "Invalid value for compression paramter.\n";
+    const char *err2 = "Invalid value for compression parameter.\n";
     const char *err3 = "Unsupported Compression Type.\n";
 
     switch (in->compressionType) {

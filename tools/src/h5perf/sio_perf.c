@@ -1278,7 +1278,7 @@ usage(const char *prog)
     HDprintf("\n");
     HDprintf("      Example: 2K,2K,3K\n");
     HDprintf("\n");
-    HDprintf("      The example defines an object (dataset, tranfer buffer) with three\n");
+    HDprintf("      The example defines an object (dataset, transfer buffer) with three\n");
     HDprintf("      dimensions. Be aware that as the number of dimensions increases, the\n");
     HDprintf("      the total size of the object increases exponentially.\n");
     HDprintf("\n");

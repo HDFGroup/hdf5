@@ -129,7 +129,7 @@ typedef struct _GifCommentExtension {
 **           in the HDF file.
 **           I have assumed that the ImageDescriptors and GraphicControls follow
 **           one another, ie. I have not associated them with each other. The driver
-**           must assume a 1-1 correspondance. The same discussion with plain text
+**           must assume a 1-1 correspondence. The same discussion with plain text
 **           extension.
 */
 typedef struct _GifToMem {

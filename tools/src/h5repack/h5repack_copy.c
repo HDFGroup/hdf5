@@ -67,7 +67,7 @@ copy_objects(const char *fnamein, const char *fnameout, pack_opt_t *options)
     hid_t                 fcpl    = H5P_DEFAULT;     /* file creation property list ID */
     trav_table_t *        travt   = NULL;
     hsize_t               ub_size = 0;     /* size of user block */
-    H5F_fspace_strategy_t set_strategy;    /* Strategy to be set in outupt file */
+    H5F_fspace_strategy_t set_strategy;    /* Strategy to be set in output file */
     hbool_t               set_persist;     /* Persist free-space status to be set in output file */
     hsize_t               set_threshold;   /* Free-space section threshold to be set in output file */
     hsize_t               set_pagesize;    /* File space page size to be set in output file */
@@ -188,7 +188,7 @@ copy_objects(const char *fnamein, const char *fnameout, pack_opt_t *options)
                     H5TOOLS_GOTO_ERROR((-1), "H5Pset_shared_mesg_nindexes failed to set the number of shared "
                                              "object header message indexes");
 
-                /* msg_size[0]=dataspace, 1=datatype, 2=file value, 3=filter pipleline, 4=attribute */
+                /* msg_size[0]=dataspace, 1=datatype, 2=file value, 3=filter pipeline, 4=attribute */
                 for (i = 0; i < (nindex - 1); i++)
                     if (H5Pset_shared_mesg_index(fcpl, i, mesg_type_flags[i], min_mesg_sizes[i]) < 0)
                         H5TOOLS_GOTO_ERROR((-1), "H5Pset_shared_mesg_index failed to configure the specified "

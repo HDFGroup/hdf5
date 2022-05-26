@@ -828,7 +828,7 @@ dump_group(hid_t gid, const char *name)
     if (!HDstrcmp(name, "/") && unamedtype) {
         unsigned u; /* Local index variable */
 
-        /* dump unamed type in root group */
+        /* dump unnamed type in root group */
         for (u = 0; u < type_table->nobjs; u++)
             if (!type_table->objs[u].recorded) {
                 dset = H5Dopen2(gid, type_table->objs[u].objname, H5P_DEFAULT);
@@ -1934,7 +1934,7 @@ handle_datatypes(hid_t fid, const char *type, void H5_ATTR_UNUSED *data, int pe,
     const char *real_name = display_name ? display_name : type;
 
     if ((type_id = H5Topen2(fid, type, H5P_DEFAULT)) < 0) {
-        /* check if type is unamed datatype */
+        /* check if type is unnamed datatype */
         unsigned idx = 0;
 
         while (idx < type_table->nobjs) {

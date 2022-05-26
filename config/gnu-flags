@@ -254,6 +254,7 @@ if test "X-gcc" = "X-$cc_vendor"; then
     # gcc >= 7
     if test $cc_vers_major -ge 7; then
         H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 7)"
+        H5_ECFLAGS="$H5_ECFLAGS $(load_gnu_arguments error-7)"
         DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS $(load_gnu_arguments developer-7)"
     fi
 

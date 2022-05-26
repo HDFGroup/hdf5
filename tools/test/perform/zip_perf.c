@@ -267,7 +267,7 @@ usage(void)
     HDfprintf(stdout, "                                data you want [default: 0]");
     HDfprintf(stdout, "     -s S, --file-size=S        Maximum size of uncompressed file [default: 64M]\n");
     HDfprintf(stdout, "     -B S, --max-buffer_size=S  Maximum size of buffer [default: 1M]\n");
-    HDfprintf(stdout, "     -b S, --min-buffer_size=S  Minumum size of buffer [default: 128K]\n");
+    HDfprintf(stdout, "     -b S, --min-buffer_size=S  Minimum size of buffer [default: 128K]\n");
     HDfprintf(stdout, "     -p D, --prefix=D           The directory prefix to place the file\n");
     HDfprintf(stdout, "     -r, --random-test          Use random data to write to the file\n");
     HDfprintf(stdout, "                                [default: no]\n");
