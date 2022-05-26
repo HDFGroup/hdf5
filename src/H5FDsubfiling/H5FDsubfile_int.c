@@ -204,8 +204,7 @@ done:
 herr_t
 H5FD__subfiling__get_real_eof(hid_t context_id, int64_t *logical_eof_ptr)
 {
-    subfiling_context_t *sf_context = NULL;
-    MPI_Status           status;
+    subfiling_context_t *sf_context  = NULL;
     int64_t *            sf_eofs     = NULL; /* dynamically allocated array for subfile EOFs */
     int64_t              msg[3]      = {0, 0, 0};
     int64_t              logical_eof = 0;
@@ -264,12 +263,9 @@ H5FD__subfiling__get_real_eof(hid_t context_id, int64_t *logical_eof_ptr)
      */
     reply_count = 0;
     while (reply_count < n_io_concentrators) {
-
         if (MPI_SUCCESS != (mpi_code = MPI_Recv(msg, 3, MPI_INT64_T, MPI_ANY_SOURCE, GET_EOF_COMPLETED,
-                                                sf_context->sf_data_comm, &status))) {
-
+                                                sf_context->sf_eof_comm, MPI_STATUS_IGNORE)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Recv", mpi_code)
-        }
 
         ioc_rank = (int)msg[0];
 

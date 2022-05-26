@@ -795,6 +795,11 @@ H5_free_subfiling_object_int(subfiling_context_t *sf_context)
             return FAIL;
         sf_context->sf_data_comm = MPI_COMM_NULL;
     }
+    if (sf_context->sf_eof_comm != MPI_COMM_NULL) {
+        if (H5_mpi_comm_free(&sf_context->sf_eof_comm) < 0)
+            return FAIL;
+        sf_context->sf_eof_comm = MPI_COMM_NULL;
+    }
     if (sf_context->sf_group_comm != MPI_COMM_NULL) {
         if (H5_mpi_comm_free(&sf_context->sf_group_comm) < 0)
             return FAIL;
@@ -1462,6 +1467,7 @@ init_subfiling_context(subfiling_context_t *sf_context, sf_topology_t *app_topol
     sf_context->sf_file_comm   = file_comm;
     sf_context->sf_msg_comm    = MPI_COMM_NULL;
     sf_context->sf_data_comm   = MPI_COMM_NULL;
+    sf_context->sf_eof_comm    = MPI_COMM_NULL;
     sf_context->sf_group_comm  = MPI_COMM_NULL;
     sf_context->sf_intercomm   = MPI_COMM_NULL;
     sf_context->sf_stripe_size = H5FD_DEFAULT_STRIPE_DEPTH;
@@ -1564,6 +1570,25 @@ init_subfiling_context(subfiling_context_t *sf_context, sf_topology_t *app_topol
     if (MPI_SUCCESS != (mpi_code = MPI_Comm_set_errhandler(sf_context->sf_data_comm, MPI_ERRORS_RETURN))) {
 #ifdef H5_SUBFILING_DEBUG
         HDprintf("%s: couldn't set MPI error handler on IOC data sub-communicator; rc = %d\n", __func__,
+                 mpi_code);
+#endif
+
+        ret_value = FAIL;
+        goto done;
+    }
+
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_dup(file_comm, &sf_context->sf_eof_comm))) {
+#ifdef H5_SUBFILING_DEBUG
+        HDprintf("%s: couldn't create sub-communicator for IOC EOF; rc = %d\n", __func__, mpi_code);
+#endif
+
+        ret_value = FAIL;
+        goto done;
+    }
+
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_set_errhandler(sf_context->sf_eof_comm, MPI_ERRORS_RETURN))) {
+#ifdef H5_SUBFILING_DEBUG
+        HDprintf("%s: couldn't set MPI error handler on IOC EOF sub-communicator; rc = %d\n", __func__,
                  mpi_code);
 #endif
 
@@ -2724,7 +2749,7 @@ H5_close_subfiles(int64_t subfiling_context_id)
             HDassert(0 == atomic_load(&sf_shutdown_flag));
 
             /* Shutdown the main IOC thread */
-            atomic_init(&sf_shutdown_flag, 1);
+            atomic_store(&sf_shutdown_flag, 1);
 
             /* Allow ioc_main to exit.*/
             do {

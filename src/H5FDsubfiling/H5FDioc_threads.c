@@ -34,7 +34,6 @@
  * use mercury for that purpose...
  */
 
-static hg_thread_mutex_t ioc_mutex           = PTHREAD_MUTEX_INITIALIZER;
 static hg_thread_mutex_t ioc_thread_mutex    = PTHREAD_MUTEX_INITIALIZER;
 static hg_thread_mutex_t ioc_serialize_mutex = PTHREAD_MUTEX_INITIALIZER;
 static hg_thread_pool_t *ioc_thread_pool     = NULL;
@@ -196,12 +195,11 @@ initialize_ioc_threads(void *_sf_context)
      * during IO concentrator operations to serialize
      * access to key objects, e.g. reference counting.
      */
-    status = hg_thread_mutex_init(&ioc_mutex);
-    if (status)
-        H5FD_IOC_GOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "couldn't initialize IOC mutex");
+#if 0 /* TODO: Currently initialized by H5_open_subfiles. This needs to be fixed */
     status = hg_thread_mutex_init(&ioc_thread_mutex);
     if (status)
         H5FD_IOC_GOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "couldn't initialize IOC thread mutex");
+#endif
 
     status = hg_thread_mutex_init(&(io_queue_g.q_mutex));
     if (status)
@@ -215,11 +213,6 @@ initialize_ioc_threads(void *_sf_context)
         }
     }
 
-    /* Initialize a thread pool for the I/O Concentrator to use */
-    status = hg_thread_pool_init(thread_pool_count, &ioc_thread_pool);
-    if (status)
-        H5FD_IOC_GOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "couldn't initialize IOC thread pool");
-
     /* Arguments to hg_thread_create are:
      * 1. A pointer to reference the created thread.
      * 2. User function pointer for the new thread to execute.
@@ -230,6 +223,11 @@ initialize_ioc_threads(void *_sf_context)
     status = hg_thread_create(&ioc_thread, ioc_thread_main, (void *)context_id);
     if (status)
         H5FD_IOC_GOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "couldn't create IOC main thread");
+
+    /* Initialize a thread pool for the I/O Concentrator to use */
+    status = hg_thread_pool_init(thread_pool_count, &ioc_thread_pool);
+    if (status)
+        H5FD_IOC_GOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "couldn't initialize IOC thread pool");
 
     /* Wait until ioc_main() reports that it is ready */
     while (atomic_load(&sf_ioc_ready) != 1) {
@@ -490,7 +488,7 @@ ioc_main(int64_t context_id)
     }
 
     /* Reset the shutdown flag */
-    atomic_init(&sf_shutdown_flag, 0);
+    atomic_store(&sf_shutdown_flag, 0);
 
 done:
     H5FD_IOC_FUNC_LEAVE;
@@ -590,10 +588,7 @@ handle_work_request(void *arg)
             break;
 
         case GET_EOF_OP:
-            /* Use of data comm to return EOF to the requesting rank seems a bit odd, but follow existing
-             * convention for now.
-             */
-            op_ret = ioc_file_report_eof(msg, msg->subfile_rank, msg->source, sf_context->sf_data_comm);
+            op_ret = ioc_file_report_eof(msg, msg->subfile_rank, msg->source, sf_context->sf_eof_comm);
             break;
 
         default:

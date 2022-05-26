@@ -188,6 +188,7 @@ typedef struct {
     MPI_Comm       sf_file_comm;            /* MPI comm the file was opened with */
     MPI_Comm       sf_msg_comm;             /* MPI comm used to send RPC msg     */
     MPI_Comm       sf_data_comm;            /* MPI comm used to move data        */
+    MPI_Comm       sf_eof_comm;             /* MPI comm used to communicate EOF  */
     MPI_Comm       sf_group_comm;           /* Not used: for IOC collectives     */
     MPI_Comm       sf_intercomm;            /* Not used: for msgs to all IOC     */
     int            sf_group_size;           /* IOC count (in sf_group_comm)      */
