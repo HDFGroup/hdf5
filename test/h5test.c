@@ -594,11 +594,11 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
             }
             else if (H5FD_MULTI == driver) {
 
-                /* Get the environment variable, if it exists, in case
+                /* Check the HDF5_DRIVER environment variable in case
                  * we are using the split driver since both of those
                  * use the multi VFD under the hood.
                  */
-                env = HDgetenv("HDF5_DRIVER");
+                env = HDgetenv(HDF5_DRIVER);
 #ifdef HDF5_DRIVER
                 /* Use the environment variable, then the compile-time constant */
                 if (!env)
@@ -633,12 +633,12 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
      */
     if (isppdriver) {
 #ifdef H5_HAVE_PARALLEL
-        if (getenv_all(MPI_COMM_WORLD, 0, "HDF5_NOCLEANUP"))
+        if (getenv_all(MPI_COMM_WORLD, 0, HDF5_NOCLEANUP))
             SetTestNoCleanup();
 #endif /* H5_HAVE_PARALLEL */
     }
     else {
-        if (HDgetenv("HDF5_NOCLEANUP"))
+        if (HDgetenv(HDF5_NOCLEANUP))
             SetTestNoCleanup();
     }
 

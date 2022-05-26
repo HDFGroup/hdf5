@@ -102,7 +102,7 @@ fill_databuf(hsize_t start[], hsize_t count[], hsize_t stride[], C_DATATYPE *dat
 static void
 cleanup(char *filename)
 {
-    hbool_t do_cleanup = getenv("HDF5_NOCLEANUP") ? 0 : 1;
+    hbool_t do_cleanup = getenv(HDF5_NOCLEANUP) ? 0 : 1;
 
     if (do_cleanup)
         MPI_File_delete(filename, MPI_INFO_NULL);

@@ -80,6 +80,26 @@ New Features
     -
 
 
+    High-Level APIs:
+    ----------------
+    - 
+
+
+    C Packet Table API:
+    -------------------
+    -
+
+
+    Internal header file:
+    ---------------------
+    -
+
+
+    Documentation:
+    --------------
+    -
+
+
 Support for new platforms, languages and compilers
 ==================================================
     -
@@ -98,6 +118,16 @@ Bug Fixes since HDF5-1.12.1 release
 
 
     Configuration
+    -------------
+    -
+
+
+    Tools
+    -----
+    -
+
+
+    Performance
     -------------
     -
 
@@ -312,10 +342,10 @@ a number of CMake specific files for support of CMake's find_package and support
 for the HDF5 Examples CMake project.
 
 The issues with the gif tool are:
-HDFFV-10592 CVE-2018-17433
-HDFFV-10593 CVE-2018-17436
-HDFFV-11048 CVE-2020-10809
+    HDFFV-10592 CVE-2018-17433
+    HDFFV-10593 CVE-2018-17436
+    HDFFV-11048 CVE-2020-10809
 These CVE issues have not yet been addressed and can be avoided by not building
 the gif tool. Disable building the High-Level tools with these options:
-autotools:   --disable-hltools
-cmake:       HDF5_BUILD_HL_TOOLS=OFF
+    autotools:   --disable-hltools
+    cmake:       HDF5_BUILD_HL_TOOLS=OFF
