@@ -871,11 +871,20 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
                     name)
 
     if (driver->value == H5_VFD_IOC) {
-        /* We've already opened the subfiles... */
-        H5FD_subfiling_t *ioc_file = (H5FD_subfiling_t *)(file_ptr->sf_file);
+        h5_stat_t sb;
+        uint64_t  fid;
+        void *    file_handle = NULL;
+
+        if (H5FDget_vfd_handle(file_ptr->sf_file, file_ptr->fa.ioc_fapl_id, &file_handle) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get file handle")
+
+        if (HDfstat(*(int *)file_handle, &sb) < 0)
+            HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, NULL, "unable to fstat file")
+
+        fid = (uint64_t)sb.st_ino;
 
         /* Get a copy of the context ID for later use */
-        file_ptr->fa.context_id  = ioc_file->fa.context_id;
+        file_ptr->fa.context_id  = H5_subfile_fid_to_context(fid);
         file_ptr->fa.require_ioc = true;
     }
     else if (driver->value == H5_VFD_SEC2) {
