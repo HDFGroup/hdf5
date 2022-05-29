@@ -219,6 +219,7 @@ initialize_ioc_threads(void *_sf_context)
      * 3. Pointer to the input argument that gets passed along to the user
      * function.
      */
+    atomic_init(&sf_work_pending, 0);
     atomic_init(&sf_ioc_ready, 0);
     status = hg_thread_create(&ioc_thread, ioc_thread_main, (void *)context_id);
     if (status)
@@ -388,7 +389,6 @@ ioc_main(int64_t context_id)
     subfile_rank = context->sf_group_rank;
 
     /* Initialize atomic vars */
-    atomic_init(&sf_work_pending, 0);
     atomic_init(&sf_shutdown_flag, 0);
 
     /* this variable is incremented by ioc_io_queue_add_entry() when work
@@ -946,9 +946,13 @@ ioc_file_queue_write_indep(sf_work_request_t *msg, int subfile_rank, int source,
     sf_queue_delay_time += t_queue_delay;
 #endif
 
+    begin_thread_exclusive();
+
     /* Adjust EOF if necessary */
     if (sf_eof > sf_context->sf_eof)
         sf_context->sf_eof = sf_eof;
+
+    end_thread_exclusive();
 
 done:
     if (send_nack) {
