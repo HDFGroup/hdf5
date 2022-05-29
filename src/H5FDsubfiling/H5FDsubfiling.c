@@ -2557,25 +2557,32 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
 
             /* Account for IOCs with uniform segments */
             if (!is_first && !is_last) {
-                hbool_t thin_uniform_section;
+                hbool_t thin_uniform_section = FALSE;
 
-                /*
-                 * When an IOC has an index value that is greater
-                 * than both the starting IOC and ending IOC indices,
-                 * it is a "thinner" section with a smaller I/O vector
-                 * depth.
-                 */
-                thin_uniform_section = (k > ioc_start) && (k > ioc_final);
+                if (ioc_final >= ioc_start) {
+                    /*
+                     * When an IOC has an index value that is greater
+                     * than both the starting IOC and ending IOC indices,
+                     * it is a "thinner" section with a smaller I/O vector
+                     * depth.
+                     */
+                    thin_uniform_section = (k > ioc_start) && (k > ioc_final);
+                }
 
-                /*
-                 * This can also happen when the IOC with the final
-                 * data segment has a smaller IOC index than the IOC
-                 * with the first data segment and the current IOC
-                 * index falls between the two.
-                 */
-                thin_uniform_section = thin_uniform_section || ((ioc_final < k) && (k < ioc_start));
+                if (ioc_final < ioc_start) {
+                    /*
+                     * This can also happen when the IOC with the final
+                     * data segment has a smaller IOC index than the IOC
+                     * with the first data segment and the current IOC
+                     * index falls between the two.
+                     */
+                    thin_uniform_section = thin_uniform_section || ((ioc_final < k) && (k < ioc_start));
+                }
 
                 if (thin_uniform_section) {
+                    HDassert(iovec_depth > 1);
+                    HDassert(num_full_stripes > 1);
+
                     iovec_depth--;
                     num_full_stripes--;
                 }
@@ -2621,7 +2628,8 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
                 if (iovec_fill_last(sf_context, iovec_depth, ioc_bytes, mem_offset, curr_file_offset,
                                     final_length, _mem_buf_offset, _target_file_offset, _io_block_len) < 0)
                     HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "can't fill I/O vectors");
-                /* NOTE: no need to move memory pointer after last IOC request */
+
+                mem_offset += stripe_size;
             }
             else { /* Everything else (uniform) */
                 if (iovec_fill_uniform(sf_context, iovec_depth, ioc_bytes, mem_offset, curr_file_offset,
@@ -3031,7 +3039,7 @@ iovec_fill_uniform(subfiling_context_t *sf_context, int64_t iovec_depth, int64_t
     HDassert(mem_offset_out);
     HDassert(target_file_offset_out);
     HDassert(io_block_len_out);
-    HDassert(iovec_depth > 0);
+    HDassert((iovec_depth > 0) || (target_datasize == 0));
 
     stripe_size = sf_context->sf_stripe_size;
     block_size  = sf_context->sf_blocksize_per_stripe;
