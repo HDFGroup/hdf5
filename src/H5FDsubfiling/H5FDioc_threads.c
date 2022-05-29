@@ -593,7 +593,7 @@ handle_work_request(void *arg)
 
         default:
 #ifdef H5_SUBFILING_DEBUG
-            H5_subfiling_log(file_context_id, "%s: IOC %d received message tag(%x) from rank %d", __func__,
+            H5_subfiling_log(file_context_id, "%s: IOC %d received unknown message with tag %x from rank %d", __func__,
                              msg->subfile_rank, msg->tag, msg->source);
 #endif
 
@@ -749,19 +749,10 @@ send_ack_to_client(int ack_val, int dest_rank, int source_rank, int msg_tag, MPI
 
     HDassert(ack_val > 0);
 
+    (void)source_rank;
+
     if (MPI_SUCCESS != (mpi_code = MPI_Send(&ack_val, 1, MPI_INT, dest_rank, msg_tag, comm)))
         H5FD_IOC_MPI_GOTO_ERROR(FAIL, "MPI_Send", mpi_code);
-
-#ifdef H5FD_IOC_DEBUG
-    if (sf_verbose_flag) {
-        if (sf_logfile) {
-            HDfprintf(sf_logfile, "[ioc(%d) %s]: Sent ACK(%d) to MPI rank %d\n", source_rank, __func__,
-                      ack_val, dest_rank);
-        }
-    }
-#else
-    (void)source_rank;
-#endif
 
 done:
     H5FD_IOC_FUNC_LEAVE;
@@ -774,19 +765,10 @@ send_nack_to_client(int dest_rank, int source_rank, int msg_tag, MPI_Comm comm)
     int    mpi_code;
     herr_t ret_value = SUCCEED;
 
+    (void)source_rank;
+
     if (MPI_SUCCESS != (mpi_code = MPI_Send(&nack, 1, MPI_INT, dest_rank, msg_tag, comm)))
         H5FD_IOC_MPI_GOTO_ERROR(FAIL, "MPI_Send", mpi_code);
-
-#ifdef H5FD_IOC_DEBUG
-    if (sf_verbose_flag) {
-        if (sf_logfile) {
-            HDfprintf(sf_logfile, "[ioc(%d) %s]: Sent NACK(%d) to MPI rank %d\n", source_rank, __func__, nack,
-                      dest_rank);
-        }
-    }
-#else
-    (void)source_rank;
-#endif
 
 done:
     H5FD_IOC_FUNC_LEAVE;
@@ -877,6 +859,8 @@ ioc_file_queue_write_indep(sf_work_request_t *msg, int subfile_rank, int source,
 
     t_start       = MPI_Wtime();
     t_queue_delay = t_start - msg->start_time;
+
+#if 0
     if (sf_verbose_flag) {
         if (sf_logfile) {
             HDfprintf(sf_logfile,
@@ -885,6 +869,7 @@ ioc_file_queue_write_indep(sf_work_request_t *msg, int subfile_rank, int source,
                       subfile_rank, __func__, source, data_size, file_offset, t_queue_delay);
         }
     }
+#endif
 #endif
 
     /* Allocate space to receive data sent from the client */
@@ -927,12 +912,14 @@ ioc_file_queue_write_indep(sf_work_request_t *msg, int subfile_rank, int source,
 
     t_start = t_end;
 
+#if 0
     if (sf_verbose_flag) {
         if (sf_logfile) {
             HDfprintf(sf_logfile, "[ioc(%d) %s] MPI_Recv(%ld bytes, from = %d) status = %d\n", subfile_rank,
                       __func__, data_size, source, mpi_code);
         }
     }
+#endif
 #endif
 
     sf_fid = sf_context->sf_fid;
@@ -1039,12 +1026,15 @@ ioc_file_queue_read_indep(sf_work_request_t *msg, int subfile_rank, int source, 
 
     t_start       = MPI_Wtime();
     t_queue_delay = t_start - msg->start_time;
+
+#if 0
     if (sf_verbose_flag && (sf_logfile != NULL)) {
         HDfprintf(sf_logfile,
                   "[ioc(%d) %s] msg from %d: datasize=%ld\toffset=%ld "
                   "queue_delay=%lf seconds\n",
                   subfile_rank, __func__, source, data_size, file_offset, t_queue_delay);
     }
+#endif
 #endif
 
     /* Allocate space to send data read from file to client */
@@ -1079,9 +1069,11 @@ ioc_file_queue_read_indep(sf_work_request_t *msg, int subfile_rank, int source, 
     sf_pread_time += t_read;
     sf_queue_delay_time += t_queue_delay;
 
+#if 0
     if (sf_verbose_flag && (sf_logfile != NULL)) {
         HDfprintf(sf_logfile, "[ioc(%d)] MPI_Send to source(%d) completed\n", subfile_rank, source);
     }
+#endif
 #endif
 
 done:

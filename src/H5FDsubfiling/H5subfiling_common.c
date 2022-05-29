@@ -2969,6 +2969,8 @@ H5_subfiling_log(int64_t sf_context_id, const char *fmt, ...)
         return;
     }
 
+    begin_thread_exclusive();
+
     if (sf_context->sf_logfile) {
         HDvfprintf(sf_context->sf_logfile, fmt, log_args);
         HDfputs("\n", sf_context->sf_logfile);
@@ -2979,6 +2981,8 @@ H5_subfiling_log(int64_t sf_context_id, const char *fmt, ...)
         HDputs("");
         HDfflush(stdout);
     }
+
+    end_thread_exclusive();
 
 done:
     va_end(log_args);
