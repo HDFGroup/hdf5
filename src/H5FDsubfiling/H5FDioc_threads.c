@@ -593,8 +593,8 @@ handle_work_request(void *arg)
 
         default:
 #ifdef H5_SUBFILING_DEBUG
-            H5_subfiling_log(file_context_id, "%s: IOC %d received unknown message with tag %x from rank %d", __func__,
-                             msg->subfile_rank, msg->tag, msg->source);
+            H5_subfiling_log(file_context_id, "%s: IOC %d received unknown message with tag %x from rank %d",
+                             __func__, msg->subfile_rank, msg->tag, msg->source);
 #endif
 
             op_ret = -1;
