@@ -240,7 +240,7 @@ macro (C_RUN FUNCTION_NAME SOURCE_CODE RETURN_VAR RETURN_OUTPUT_VAR)
         ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCCompiler1.c
         ${SOURCE_CODE}
     )
-    TRY_RUN (RUN_RESULT_VAR COMPILE_RESULT_VAR
+    TRY_RUN (RUN_RESULT_VAR_${RETURN_OUTPUT_VAR} COMPILE_RESULT_VAR
         ${CMAKE_BINARY_DIR}
         ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCCompiler1.c
         COMPILE_DEFINITIONS "-D_SIZEOF___FLOAT128=${H5_SIZEOF___FLOAT128};-D_HAVE_QUADMATH_H=${H5_HAVE_QUADMATH_H}"
@@ -255,12 +255,12 @@ macro (C_RUN FUNCTION_NAME SOURCE_CODE RETURN_VAR RETURN_OUTPUT_VAR)
       message (VERBOSE "Test COMPILE_RESULT_VAR ${COMPILE_RESULT_VAR} ")
       message (VERBOSE "Test COMPILE_OUTPUT ${COMPILEOUT} ")
       message (VERBOSE "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
-      message (VERBOSE "Test RUN_RESULT_VAR ${RUN_RESULT_VAR} ")
+      message (VERBOSE "Test RUN_RESULT_VAR ${RUN_RESULT_VAR_${RETURN_OUTPUT_VAR}} ")
       message (VERBOSE "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
     endif ()
 
     if (COMPILE_RESULT_VAR)
-      if (RUN_RESULT_VAR EQUAL "0")
+      if (${RUN_RESULT_VAR_${RETURN_OUTPUT_VAR}} EQUAL "0")
         set (${RETURN_VAR} 1 CACHE INTERNAL "Have C function ${FUNCTION_NAME}")
         if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
           message (VERBOSE "Testing C ${FUNCTION_NAME} - OK")

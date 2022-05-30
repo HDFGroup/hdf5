@@ -43,7 +43,7 @@ macro (FORTRAN_RUN FUNCTION_NAME SOURCE_CODE RUN_RESULT_VAR1 COMPILE_RESULT_VAR1
         ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testFortranCompiler1.f90
         "${SOURCE_CODE}"
     )
-    TRY_RUN (RUN_RESULT_VAR COMPILE_RESULT_VAR
+    TRY_RUN (RUN_RESULT_VAR_${RETURN_OUTPUT_VAR} COMPILE_RESULT_VAR
         ${CMAKE_BINARY_DIR}
         ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testFortranCompiler1.f90
         LINK_LIBRARIES "${HDF5_REQUIRED_LIBRARIES}"
@@ -52,8 +52,8 @@ macro (FORTRAN_RUN FUNCTION_NAME SOURCE_CODE RUN_RESULT_VAR1 COMPILE_RESULT_VAR1
     set (${RETURN_OUTPUT_VAR} ${OUTPUT_VAR})
 
     if (${COMPILE_RESULT_VAR})
-      set(${RETURN_VAR} ${RUN_RESULT_VAR})
-      if (${RUN_RESULT_VAR} MATCHES 0)
+      set(${RETURN_VAR} ${RUN_RESULT_VAR_${RETURN_OUTPUT_VAR}})
+      if (${RUN_RESULT_VAR_${RETURN_OUTPUT_VAR}} MATCHES 0)
         if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
           message (VERBOSE "Testing Fortran ${FUNCTION_NAME} - OK")
         endif ()
@@ -65,7 +65,7 @@ macro (FORTRAN_RUN FUNCTION_NAME SOURCE_CODE RUN_RESULT_VAR1 COMPILE_RESULT_VAR1
           message (VERBOSE "Testing Fortran ${FUNCTION_NAME} - Fail")
         endif ()
         file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-            "Determining if the Fortran ${FUNCTION_NAME} exists failed: ${RUN_RESULT_VAR}\n"
+            "Determining if the Fortran ${FUNCTION_NAME} exists failed: ${RUN_RESULT_VAR_${RETURN_OUTPUT_VAR}}\n"
         )
       endif ()
     else ()
@@ -194,9 +194,9 @@ foreach (KIND ${VAR})
        END
    "
   )
-  FORTRAN_RUN("INTEGER KIND SIZEOF" ${PROG_SRC_${KIND}} XX YY VALIDINTKINDS_RESULT_${KIND} PROG_OUTPUT1)
-  string (REGEX REPLACE "[\r\n]+" "" PROG_OUTPUT1 "${PROG_OUTPUT1}")
-  set (pack_int_sizeof "${pack_int_sizeof} ${PROG_OUTPUT1},")
+  FORTRAN_RUN("INTEGER KIND SIZEOF" ${PROG_SRC_${KIND}} XX YY VALIDINTKINDS_RESULT_${KIND} PROG_OUTPUT1_${KIND})
+  string (REGEX REPLACE "[\r\n]+" "" PROG_OUTPUT1_${KIND} "${PROG_OUTPUT1_${KIND}}")
+  set (pack_int_sizeof "${pack_int_sizeof} ${PROG_OUTPUT1_${KIND}},")
 endforeach ()
 
 if (pack_int_sizeof STREQUAL "")
@@ -237,9 +237,9 @@ foreach (KIND ${VAR} )
        END
   "
   )
-  FORTRAN_RUN ("REAL KIND SIZEOF" ${PROG_SRC2_${KIND}} XX YY VALIDREALKINDS_RESULT_${KIND} PROG_OUTPUT2)
-  string (REGEX REPLACE "[\r\n]+" "" PROG_OUTPUT2 "${PROG_OUTPUT2}")
-  set (pack_real_sizeof "${pack_real_sizeof} ${PROG_OUTPUT2},")
+  FORTRAN_RUN ("REAL KIND SIZEOF" ${PROG_SRC2_${KIND}} XX YY VALIDREALKINDS_RESULT_${KIND} PROG_OUTPUT2_${KIND})
+  string (REGEX REPLACE "[\r\n]+" "" PROG_OUTPUT2_${KIND} "${PROG_OUTPUT2_${KIND}}")
+  set (pack_real_sizeof "${pack_real_sizeof} ${PROG_OUTPUT2_${KIND}},")
 endforeach ()
 
 if (pack_real_sizeof STREQUAL "")
