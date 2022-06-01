@@ -288,12 +288,11 @@ typedef struct H5D_io_info_t {
 #endif                       /* H5_HAVE_PARALLEL */
     H5D_io_ops_t     io_ops; /* I/O operation function pointers */
     H5D_io_op_type_t op_type;
-    const H5D_t *    dset;         /* Pointer to dataset being operated on */
-    H5D_dset_info_t *dsets_info;   /* dsets info where I/O is done to/from */
-    H5SL_t *         sel_pieces;   /* Skip list containing information for each piece selected */
-    haddr_t          store_faddr;  /* lowest file addr for read/write */
-    const void *     base_maddr_w; /* start mem addr for write */
-    void *           base_maddr_r; /* start mem addr for read */
+    const H5D_t *    dset;        /* Pointer to dataset being operated on */
+    H5D_dset_info_t *dsets_info;  /* dsets info where I/O is done to/from */
+    H5SL_t *         sel_pieces;  /* Skip list containing information for each piece selected */
+    haddr_t          store_faddr; /* lowest file addr for read/write */
+    H5D_dset_buf_t   base_maddr;  /* starting mem address */
     hbool_t is_mdset; /* Is this a multi datasets I/O? Remove once all I/O pathways support multi dataset */
     hbool_t use_select_io; /* Whether to use selection I/O */
 } H5D_io_info_t;

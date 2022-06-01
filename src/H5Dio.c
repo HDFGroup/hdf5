@@ -472,10 +472,10 @@ H5D__read(size_t count, H5D_dset_info_t *dset_info, hbool_t is_mdset)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* init io_info */
-    io_info.sel_pieces   = NULL;
-    io_info.store_faddr  = 0;
-    io_info.base_maddr_r = NULL;
-    io_info.is_mdset     = is_mdset;
+    io_info.sel_pieces      = NULL;
+    io_info.store_faddr     = 0;
+    io_info.base_maddr.rbuf = NULL;
+    io_info.is_mdset        = is_mdset;
 
     /* Create global piece skiplist */
     if (NULL == (io_info.sel_pieces = H5SL_create(H5SL_TYPE_HADDR, NULL)))
@@ -756,10 +756,10 @@ H5D__write(size_t count, H5D_dset_info_t *dset_info, hbool_t is_mdset)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Init io_info */
-    io_info.sel_pieces   = NULL;
-    io_info.store_faddr  = 0;
-    io_info.base_maddr_w = NULL;
-    io_info.is_mdset     = is_mdset;
+    io_info.sel_pieces      = NULL;
+    io_info.store_faddr     = 0;
+    io_info.base_maddr.wbuf = NULL;
+    io_info.is_mdset        = is_mdset;
 
     /* Create global piece skiplist */
     if (NULL == (io_info.sel_pieces = H5SL_create(H5SL_TYPE_HADDR, NULL)))
