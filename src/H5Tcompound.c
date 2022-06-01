@@ -473,7 +473,12 @@ H5T__insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
     parent->shared->u.compnd.memb[idx].name   = H5MM_xstrdup(name);
     parent->shared->u.compnd.memb[idx].offset = offset;
     parent->shared->u.compnd.memb[idx].size   = total_size;
-    parent->shared->u.compnd.memb[idx].type   = H5T_copy(member, H5T_COPY_ALL);
+    {
+        H5T_t* t = H5T_copy(member, H5T_COPY_ALL);
+        if (!t)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, FAIL, "member type cannot be copied")
+        parent->shared->u.compnd.memb[idx].type   = t;
+    }
 
     parent->shared->u.compnd.sorted = H5T_SORT_NONE;
     parent->shared->u.compnd.nmembs++;

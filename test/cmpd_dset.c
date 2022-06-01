@@ -2210,6 +2210,46 @@ error:
     return 1;
 } /* test_ooo_order */
 
+static unsigned
+test_compound_error_member()
+{
+    hid_t tenum = -1;
+    hid_t tcmp  = -1;
+    TESTING("that error on compound member type fail early");
+
+    if ((tenum = H5Tenum_create(H5Tcopy(H5T_NATIVE_INT))) < 0)
+        TEST_ERROR;
+
+    if ((tcmp = H5Tcreate(H5T_COMPOUND, 2 * H5Tget_size(H5T_NATIVE_LONG))) < 0)
+        TEST_ERROR;
+
+    if ((H5Tinsert(tcmp, "long", 0, H5T_NATIVE_LONG)) < 0)
+        TEST_ERROR;
+
+    if ((H5Tinsert(tcmp, "enum", H5Tget_size(H5T_NATIVE_LONG), tenum)) < 0)
+        TEST_ERROR;
+
+    /* Close */
+    if (H5Tclose(tcmp))
+        TEST_ERROR;
+    if (H5Tclose(tenum))
+        TEST_ERROR;
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Tclose(tenum);
+        H5Tclose(tcmp);
+    }
+    H5E_END_TRY
+    HDputs("*** DATASET TESTS FAILED ***");
+    return 1;
+}
+
+
 /*-------------------------------------------------------------------------
  * Function:    main
  *
@@ -2266,6 +2306,9 @@ main(int argc, char *argv[])
 
     HDputs("Testing compound member ordering:");
     nerrors += test_ooo_order(fname, fapl_id);
+
+    HDputs("Testing invalid insert:");
+    nerrors += test_compound_error_member();
 
     /* Verify symbol table messages are cached */
     nerrors += (h5_verify_cached_stabs(FILENAME, fapl_id) < 0 ? 1 : 0);
