@@ -1497,8 +1497,8 @@ H5D__link_piece_collective_io(const size_t count, H5D_io_info_t *io_info, int mp
         H5D_MPIO_DEBUG(mpi_rank, "before coming to final collective I/O");
 #endif
         /* Set up the base storage address for this piece */
-        io_info->store_faddr  = ctg_store.contig.dset_addr;
-        io_info->base_maddr = base_buf_addr;
+        io_info->store_faddr = ctg_store.contig.dset_addr;
+        io_info->base_maddr  = base_buf_addr;
 
         /* Perform final collective I/O operation */
         if (H5D__final_collective_io(io_info, mpi_buf_count, chunk_final_ftype, chunk_final_mtype) < 0)
@@ -1620,9 +1620,9 @@ H5D__link_chunk_filtered_collective_io(H5D_io_info_t *io_info, int mpi_rank, int
     size_t                             chunk_list_num_entries;
     size_t                             i;
     int                                chunk_msg_bufs_len = 0;
-    char                               fake_buf; /* Used as a fake buffer for ranks with no chunks, thus a NULL buf pointer */
-    int                                mpi_code;
-    herr_t                             ret_value = SUCCEED;
+    char   fake_buf; /* Used as a fake buffer for ranks with no chunks, thus a NULL buf pointer */
+    int    mpi_code;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE_TAG(io_info->dsets_info[0].dset->oloc.addr)
 
@@ -1724,7 +1724,7 @@ H5D__link_chunk_filtered_collective_io(H5D_io_info_t *io_info, int mpi_rank, int
         }
         else {
             io_info->base_maddr.wbuf = &fake_buf;
-            io_info->store_faddr = 0;
+            io_info->store_faddr     = 0;
         }
 
         /* Perform I/O */
