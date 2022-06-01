@@ -902,7 +902,7 @@ H5D__mpio_select_read(const H5D_io_info_t *io_info, hsize_t mpi_buf_count, H5S_t
     FUNC_ENTER_PACKAGE
 
     /* memory addr from a piece with lowest file addr */
-    rbuf = io_info->base_maddr_r;
+    rbuf = io_info->base_maddr.rbuf;
 
     /*OKAY: CAST DISCARDS CONST QUALIFIER*/
     H5_CHECK_OVERFLOW(mpi_buf_count, hsize_t, size_t);
@@ -936,7 +936,7 @@ H5D__mpio_select_write(const H5D_io_info_t *io_info, hsize_t mpi_buf_count, H5S_
     FUNC_ENTER_PACKAGE
 
     /* memory addr from a piece with lowest file addr */
-    wbuf = io_info->base_maddr_w;
+    wbuf = io_info->base_maddr.wbuf;
 
     /*OKAY: CAST DISCARDS CONST QUALIFIER*/
     H5_CHECK_OVERFLOW(mpi_buf_count, hsize_t, size_t);
@@ -1319,9 +1319,9 @@ H5D__link_piece_collective_io(const size_t count, H5D_io_info_t *io_info, int mp
         H5SL_node_t *     piece_node; /* Current node in chunk skip list */
         H5D_piece_info_t *piece_info;
 
-        /* local variable for base address for write buffer */
-        const void *base_wbuf_addr = NULL;
-        void *      base_rbuf_addr = NULL;
+        /* local variable for base address for buffer */
+        H5D_dset_buf_t base_buf_addr;
+        base_buf_addr.wbuf = NULL;
 
         /* Get the number of chunks with a selection */
         num_chunk = H5SL_count(io_info->sel_pieces);
@@ -1365,8 +1365,7 @@ H5D__link_piece_collective_io(const size_t count, H5D_io_info_t *io_info, int mp
             ctg_store.contig.dset_addr = piece_info->faddr;
 
             /* save base mem addr of piece for read/write */
-            base_wbuf_addr = piece_info->dset_info->u.wbuf;
-            base_rbuf_addr = piece_info->dset_info->u.rbuf;
+            base_buf_addr = piece_info->dset_info->u;
 
 #ifdef H5Dmpio_DEBUG
             H5D_MPIO_DEBUG(mpi_rank, "before iterate over selected pieces\n");
@@ -1436,11 +1435,11 @@ H5D__link_piece_collective_io(const size_t count, H5D_io_info_t *io_info, int mp
 
                 if (io_info->op_type == H5D_IO_OP_WRITE) {
                     chunk_mem_disp_array[u] =
-                        (MPI_Aint)piece_info->dset_info->u.wbuf - (MPI_Aint)base_wbuf_addr;
+                        (MPI_Aint)piece_info->dset_info->u.wbuf - (MPI_Aint)base_buf_addr.wbuf;
                 }
                 else if (io_info->op_type == H5D_IO_OP_READ) {
                     chunk_mem_disp_array[u] =
-                        (MPI_Aint)piece_info->dset_info->u.rbuf - (MPI_Aint)base_rbuf_addr;
+                        (MPI_Aint)piece_info->dset_info->u.rbuf - (MPI_Aint)base_buf_addr.rbuf;
                 }
 
                 /* Advance to next piece in list */
@@ -1484,8 +1483,7 @@ H5D__link_piece_collective_io(const size_t count, H5D_io_info_t *io_info, int mp
             ctg_store.contig.dset_addr = 0;
 
             /* just provide a valid mem address. no actual IO occur */
-            base_wbuf_addr = io_info->dsets_info[0].u.wbuf;
-            base_rbuf_addr = io_info->dsets_info[0].u.rbuf;
+            base_buf_addr = io_info->dsets_info[0].u;
 
             /* Set the MPI datatype */
             chunk_final_ftype = MPI_BYTE;
@@ -1500,8 +1498,7 @@ H5D__link_piece_collective_io(const size_t count, H5D_io_info_t *io_info, int mp
 #endif
         /* Set up the base storage address for this piece */
         io_info->store_faddr  = ctg_store.contig.dset_addr;
-        io_info->base_maddr_w = base_wbuf_addr;
-        io_info->base_maddr_r = base_rbuf_addr;
+        io_info->base_maddr = base_buf_addr;
 
         /* Perform final collective I/O operation */
         if (H5D__final_collective_io(io_info, mpi_buf_count, chunk_final_ftype, chunk_final_mtype) < 0)
@@ -1623,6 +1620,7 @@ H5D__link_chunk_filtered_collective_io(H5D_io_info_t *io_info, int mpi_rank, int
     size_t                             chunk_list_num_entries;
     size_t                             i;
     int                                chunk_msg_bufs_len = 0;
+    char                               fake_buf; /* Used as a fake buffer for ranks with no chunks, thus a NULL buf pointer */
     int                                mpi_code;
     herr_t                             ret_value = SUCCEED;
 
@@ -1716,7 +1714,7 @@ H5D__link_chunk_filtered_collective_io(H5D_io_info_t *io_info, int mpi_rank, int
              * Override the write buffer to point to the first
              * chunk's data buffer
              */
-            io_info->base_maddr_w = chunk_list[0].buf;
+            io_info->base_maddr.wbuf = chunk_list[0].buf;
 
             /*
              * Setup the base storage address for this operation
@@ -1724,8 +1722,10 @@ H5D__link_chunk_filtered_collective_io(H5D_io_info_t *io_info, int mpi_rank, int
              */
             io_info->store_faddr = chunk_list[0].chunk_new.offset;
         }
-        else
+        else {
+            io_info->base_maddr.wbuf = &fake_buf;
             io_info->store_faddr = 0;
+        }
 
         /* Perform I/O */
         if (H5D__final_collective_io(io_info, mpi_buf_count, file_type, mem_type) < 0)
@@ -1842,8 +1842,7 @@ H5D__multi_chunk_collective_io(H5D_io_info_t *io_info, int mpi_rank, int mpi_siz
         HGOTO_ERROR(H5E_DATASET, H5E_CANTRECV, FAIL, "unable to obtain MPIO mode")
 
     /* Set memory buffers */
-    io_info->base_maddr_r = io_info->dsets_info[0].u.rbuf;
-    io_info->base_maddr_w = io_info->dsets_info[0].u.wbuf;
+    io_info->base_maddr = io_info->dsets_info[0].u;
 
     /* Set dataset storage for I/O info */
     io_info->dsets_info[0].store = &store;
@@ -2197,7 +2196,7 @@ H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, int mpi_rank, in
                  * Override the write buffer to point to the
                  * chunk's data buffer
                  */
-                ctg_io_info.base_maddr_w = chunk_list[i].buf;
+                ctg_io_info.base_maddr.wbuf = chunk_list[i].buf;
 
                 /*
                  * Setup the base storage address for this
@@ -2206,8 +2205,8 @@ H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, int mpi_rank, in
                 ctg_io_info.store_faddr = chunk_list[i].chunk_new.offset;
             }
             else {
-                ctg_io_info.store_faddr  = 0;
-                ctg_io_info.base_maddr_w = io_info->dsets_info[0].u.wbuf;
+                ctg_io_info.store_faddr = 0;
+                ctg_io_info.base_maddr  = io_info->dsets_info[0].u;
             }
 
             /* Perform the I/O */
@@ -4030,9 +4029,9 @@ H5D__mpio_collective_filtered_chunk_common_io(H5D_filtered_collective_io_info_t 
         }
         else {
             if (io_info->op_type == H5D_IO_OP_WRITE)
-                coll_io_info.base_maddr_w = &fake_buf;
+                coll_io_info.base_maddr.wbuf = &fake_buf;
             else
-                coll_io_info.base_maddr_r = &fake_buf;
+                coll_io_info.base_maddr.rbuf = &fake_buf;
         }
     }
 
@@ -4121,8 +4120,8 @@ H5D__mpio_collective_filtered_chunk_read(H5D_filtered_collective_io_info_t *chun
     HDassert(type_info);
 
     /* Initialize temporary I/O info */
-    coll_io_info              = *io_info;
-    coll_io_info.base_maddr_r = NULL;
+    coll_io_info                 = *io_info;
+    coll_io_info.base_maddr.rbuf = NULL;
 
     if (chunk_list_num_entries) {
         /* Retrieve filter settings from API context */
@@ -4236,7 +4235,7 @@ H5D__mpio_collective_filtered_chunk_read(H5D_filtered_collective_io_info_t *chun
          * the first chunk data buffer being read into
          */
         if (base_read_buf)
-            coll_io_info.base_maddr_r = base_read_buf;
+            coll_io_info.base_maddr.rbuf = base_read_buf;
 
         /* Perform collective chunk read */
         if (H5D__mpio_collective_filtered_chunk_common_io(chunk_list, chunk_list_num_entries, &coll_io_info,
@@ -4491,8 +4490,7 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
          * chunk data buffer being read into
          */
         if (base_read_buf) {
-            coll_io_info.base_maddr_r = base_read_buf;
-            coll_io_info.base_maddr_w = (const void *)base_read_buf;
+            coll_io_info.base_maddr.rbuf = base_read_buf;
         }
 
         /* Read all chunks that need to be read from the file */
