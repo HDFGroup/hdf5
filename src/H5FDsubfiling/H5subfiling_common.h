@@ -184,20 +184,20 @@ typedef struct {
     haddr_t        sf_eof;                  /* File eof */
     int64_t        sf_stripe_size;          /* Stripe-depth */
     int64_t        sf_blocksize_per_stripe; /* Stripe-depth X n_IOCs  */
-    int64_t        sf_base_addr;            /* For an IOC, our base address      */
-    MPI_Comm       sf_file_comm;            /* MPI comm the file was opened with */
-    MPI_Comm       sf_msg_comm;             /* MPI comm used to send RPC msg     */
-    MPI_Comm       sf_data_comm;            /* MPI comm used to move data        */
-    MPI_Comm       sf_eof_comm;             /* MPI comm used to communicate EOF  */
-    MPI_Comm       sf_group_comm;           /* Not used: for IOC collectives     */
-    MPI_Comm       sf_intercomm;            /* Not used: for msgs to all IOC     */
-    int            sf_group_size;           /* IOC count (in sf_group_comm)      */
-    int            sf_group_rank;           /* IOC rank  (in sf_group_comm)      */
-    int            sf_intercomm_root;       /* Not used: for IOC comms           */
-    char *         subfile_prefix;          /* If subfiles are node-local        */
-    char *         sf_filename;             /* A generated subfile name          */
-    char *         h5_filename;             /* The user supplied file name       */
-    sf_topology_t *topology;                /* pointer to our topology           */
+    int64_t        sf_base_addr;            /* For an IOC, our base address         */
+    MPI_Comm       sf_msg_comm;             /* MPI comm used to send RPC msg        */
+    MPI_Comm       sf_data_comm;            /* MPI comm used to move data           */
+    MPI_Comm       sf_eof_comm;             /* MPI comm used to communicate EOF     */
+    MPI_Comm       sf_barrier_comm;         /* MPI comm used for barrier operations */
+    MPI_Comm       sf_group_comm;           /* Not used: for IOC collectives        */
+    MPI_Comm       sf_intercomm;            /* Not used: for msgs to all IOC        */
+    int            sf_group_size;           /* IOC count (in sf_group_comm)         */
+    int            sf_group_rank;           /* IOC rank  (in sf_group_comm)         */
+    int            sf_intercomm_root;       /* Not used: for IOC comms              */
+    char *         subfile_prefix;          /* If subfiles are node-local           */
+    char *         sf_filename;             /* A generated subfile name             */
+    char *         h5_filename;             /* The user supplied file name          */
+    sf_topology_t *topology;                /* pointer to our topology              */
 #ifdef H5_SUBFILING_DEBUG
     char  sf_logfile_name[PATH_MAX];
     FILE *sf_logfile;
