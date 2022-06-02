@@ -1762,11 +1762,11 @@ done:
      * successful across the IOC ranks
      */
     if (sf_context->topology->n_io_concentrators > 1) {
-        if (MPI_SUCCESS !=
-                (mpi_code = MPI_Allreduce(&l_errors, &g_errors, 1, MPI_INT, MPI_SUM, sf_context->sf_group_comm))) {
+        if (MPI_SUCCESS != (mpi_code = MPI_Allreduce(&l_errors, &g_errors, 1, MPI_INT, MPI_SUM,
+                                                     sf_context->sf_group_comm))) {
 #ifdef H5_SUBFILING_DEBUG
             HDprintf("[%s %d]: MPI_Allreduce failed with rc %d\n", __func__,
-                    sf_context->topology->app_layout->world_rank, mpi_code);
+                     sf_context->topology->app_layout->world_rank, mpi_code);
 #endif
 
             ret_value = FAIL;
