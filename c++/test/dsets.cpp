@@ -1201,7 +1201,7 @@ test_chunk_cache(const FileAccPropList &fapl)
 
         // Retrieve and verify the raw data chunk cache parameters
         nslots_4 = nbytes_4 = 0;
-        w0_4                = 0.0F;
+        w0_4                = 0.0;
         dapl2.getChunkCache(nslots_4, nbytes_4, w0_4);
         verify_val(nslots_2, nslots_4, "DSetCreatPropList::getChunkCache", __LINE__, __FILE__);
         verify_val(nbytes_2, nbytes_4, "DSetCreatPropList::getChunkCache", __LINE__, __FILE__);
