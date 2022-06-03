@@ -477,12 +477,12 @@ ioc_main(int64_t context_id)
             ioc_io_queue_add_entry(&wk_req);
 
             HDassert(atomic_load(&sf_io_ops_pending) >= 0);
-
-            ioc_io_queue_dispatch_eligible_entries();
         }
         else {
             usleep(delay);
         }
+
+        ioc_io_queue_dispatch_eligible_entries();
 
         shutdown_requested = atomic_load(&sf_shutdown_flag);
     }
