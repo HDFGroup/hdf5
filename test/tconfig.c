@@ -161,11 +161,6 @@ test_config_ctypes(void)
     vrfy_cint_type(int_least64_t, uint_least64_t, H5_SIZEOF_INT_LEAST64_T);
 #endif
 
-    /* pseudo standard basic types */
-#if H5_SIZEOF___INT64 > 0
-    vrfy_cint_type(__int64, unsigned __int64, H5_SIZEOF___INT64);
-#endif
-
 #if H5_SIZEOF_OFF_T > 0
     vrfy_ctype(off_t, H5_SIZEOF_OFF_T);
 #endif
