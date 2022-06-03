@@ -205,6 +205,8 @@ herr_t
 H5FD__subfiling__get_real_eof(hid_t context_id, int64_t *logical_eof_ptr)
 {
     subfiling_context_t *sf_context  = NULL;
+    MPI_Request *        reqs        = NULL;
+    int64_t *            recv_msg    = NULL;
     int64_t *            sf_eofs     = NULL; /* dynamically allocated array for subfile EOFs */
     int64_t              msg[3]      = {0, 0, 0};
     int64_t              logical_eof = 0;
@@ -237,6 +239,11 @@ H5FD__subfiling__get_real_eof(hid_t context_id, int64_t *logical_eof_ptr)
     if (sf_eofs == NULL)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't allocate sub-file EOFs array.");
 
+    if (NULL == (reqs = HDmalloc((size_t)n_io_concentrators * sizeof(*reqs))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate MPI_Request array");
+    if (NULL == (recv_msg = HDmalloc((size_t)n_io_concentrators * 3 * sizeof(*recv_msg))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate message array");
+
     for (i = 0; i < n_io_concentrators; i++) {
 
         sf_eofs[i] = -1;
@@ -253,29 +260,36 @@ H5FD__subfiling__get_real_eof(hid_t context_id, int64_t *logical_eof_ptr)
 
         ioc_rank = sf_context->topology->io_concentrators[i];
 
-        if (MPI_SUCCESS !=
-            (mpi_code = MPI_Send(msg, 3, MPI_INT64_T, ioc_rank, GET_EOF_OP, sf_context->sf_msg_comm)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Send", mpi_code)
+        if (MPI_SUCCESS != (mpi_code = MPI_Isend(msg, 3, MPI_INT64_T, ioc_rank, GET_EOF_OP,
+                sf_context->sf_msg_comm, &reqs[i])))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Isend", mpi_code);
     }
+
+    if (MPI_SUCCESS != (mpi_code = MPI_Waitall(n_io_concentrators, reqs, MPI_STATUSES_IGNORE)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Waitall", mpi_code)
 
     /* 3) Await reply from each IOC, storing the reply in
      *    the appropriate entry in sf_eofs.
      */
-    reply_count = 0;
-    while (reply_count < n_io_concentrators) {
-        if (MPI_SUCCESS != (mpi_code = MPI_Recv(msg, 3, MPI_INT64_T, MPI_ANY_SOURCE, GET_EOF_COMPLETED,
-                                                sf_context->sf_eof_comm, MPI_STATUS_IGNORE)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Recv", mpi_code)
+    for (i = 0; i < n_io_concentrators; i++) {
+        ioc_rank = sf_context->topology->io_concentrators[i];
 
-        ioc_rank = (int)msg[0];
+        if (MPI_SUCCESS != (mpi_code = MPI_Irecv(&recv_msg[3 * i], 3, MPI_INT64_T, ioc_rank,
+                GET_EOF_COMPLETED, sf_context->sf_eof_comm, &reqs[i])))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Irecv", mpi_code);
+    }
+
+    if (MPI_SUCCESS != (mpi_code = MPI_Waitall(n_io_concentrators, reqs, MPI_STATUSES_IGNORE)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Waitall", mpi_code)
+
+    for (i = 0; i < n_io_concentrators; i++) {
+        ioc_rank = (int)recv_msg[3 * i];
 
         HDassert(ioc_rank >= 0);
         HDassert(ioc_rank < n_io_concentrators);
         HDassert(sf_eofs[ioc_rank] == -1);
 
-        sf_eofs[ioc_rank] = msg[1];
-
-        reply_count++;
+        sf_eofs[ioc_rank] = recv_msg[(3 * i) + 1];
     }
 
     /* 4) After all IOCs have replied, compute the offset of
@@ -315,6 +329,8 @@ H5FD__subfiling__get_real_eof(hid_t context_id, int64_t *logical_eof_ptr)
     *logical_eof_ptr = logical_eof;
 
 done:
+    HDfree(recv_msg);
+    HDfree(reqs);
     HDfree(sf_eofs);
 
     FUNC_LEAVE_NOAPI(ret_value)
