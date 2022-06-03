@@ -494,6 +494,7 @@ done:
     H5FD_IOC_FUNC_LEAVE;
 } /* ioc_main() */
 
+#ifdef H5_SUBFILING_DEBUG
 static const char *
 translate_opcode(io_op_t op)
 {
@@ -525,6 +526,7 @@ translate_opcode(io_op_t op)
     }
     return "unknown";
 }
+#endif
 
 /*-------------------------------------------------------------------------
  * Function:    handle_work_request
@@ -629,7 +631,6 @@ handle_work_request(void *arg)
     /* Check the I/O Queue to see if there are any dispatchable entries */
     ioc_io_queue_dispatch_eligible_entries();
 
-done:
     H5FD_IOC_FUNC_LEAVE;
 }
 

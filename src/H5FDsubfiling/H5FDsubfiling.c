@@ -1214,12 +1214,14 @@ static haddr_t
 H5FD__subfiling_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 {
     const H5FD_subfiling_t *file        = (const H5FD_subfiling_t *)_file;
+#if 0
     int64_t                 logical_eof = -1;
+#endif
     haddr_t                 ret_value   = HADDR_UNDEF;
 
+#if 0
     FUNC_ENTER_PACKAGE
 
-#if 0
 #if 0 /* TODO */
     int64_t local_eof = H5FDget_eof(file->sf_file, type);
 
@@ -1237,11 +1239,14 @@ H5FD__subfiling_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 
     /* Return the global max of all the subfile EOF values */
     ret_value = (haddr_t)(logical_eof);
+
+done:
+#else
+    FUNC_ENTER_PACKAGE_NOERR
 #endif
 
     ret_value = file->eof;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__subfiling_get_eof() */
 
@@ -2057,6 +2062,7 @@ H5FD__subfiling_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5
 #if 1 /* Mimic the MPI I/O VFD */
     if (!H5F_addr_eq(file->eoa, file->last_eoa)) {
         int64_t sf_eof;
+        int64_t eoa;
         int     mpi_code;
 
         if (!H5CX_get_mpi_file_flushing())
@@ -2074,13 +2080,15 @@ H5FD__subfiling_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5
         if (sf_eof < 0)
             HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "invalid EOF")
 
+        H5_CHECKED_ASSIGN(eoa, int64_t, file->eoa, haddr_t);
+
         /* truncate sub-files */
         /* This is a hack.  We should be doing the truncate of the sub-files via calls to
          * H5FD_truncate() with the IOC.  However, that system is messed up at present.
          * thus the following hack.
          *                                                 JRM -- 12/18/21
          */
-        if (H5FD__subfiling__truncate_sub_files(file->fa.context_id, file->eoa, file->comm) < 0)
+        if (H5FD__subfiling__truncate_sub_files(file->fa.context_id, eoa, file->comm) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTUPDATE, FAIL, "sub-file truncate request failed")
 
         if (MPI_SUCCESS != (mpi_code = MPI_Barrier(file->comm)))
