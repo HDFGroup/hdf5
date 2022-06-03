@@ -1064,8 +1064,8 @@ done:
  *              The input and output parameters allow op_code specific
  *              input and output
  *
- *              At present, the only op code supported is 
- *              H5FD_CTL__GET_TERMINAL_VFD, which is used in the 
+ *              At present, the only op code supported is
+ *              H5FD_CTL__GET_TERMINAL_VFD, which is used in the
  *              comparison of files under layers of pass through VFDs.
  *
  * Return:      Non-negative on success/Negative on failure

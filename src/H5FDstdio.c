@@ -1262,15 +1262,15 @@ H5FD_stdio_delete(const char *filename, hid_t /*UNUSED*/ fapl_id)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__stdio_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void /* UNUSED */ *input, 
+H5FD__stdio_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void /* UNUSED */ *input,
                 void **output)
 {
     static const char *func = "H5FD__stdio_ctl"; /* Function Name for error reporting    */
-     H5FD_stdio_t *file      = (H5FD_stdio_t *)_file;
+    H5FD_stdio_t *     file = (H5FD_stdio_t *)_file;
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
-   
+
     /* Quiet compiler */
     (void)input;
 
@@ -1284,11 +1284,12 @@ H5FD__stdio_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void /* U
         /* Unknown op code */
         default:
             if (flags & H5FD_CTL__FAIL_IF_UNKNOWN_FLAG)
-                H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_FCNTL, "unknown op_code and fail if unknown flag is set", -1);
+                H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_FCNTL,
+                            "unknown op_code and fail if unknown flag is set", -1);
             break;
     }
 
-    return(0); /* SUCCEED */
+    return (0); /* SUCCEED */
 
 } /* end H5FD__stdio_ctl() */
 

@@ -191,8 +191,8 @@ H5F_vfd_swmr_init(H5F_t *f, hbool_t file_create)
         if (NULL == (shared->md_file_path_name = H5MM_calloc((H5FD_MAX_FILENAME_LEN + 1) * sizeof(char))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate memory for mdc log file name")
 
-        if ( H5F_vfd_swmr_build_md_path_name(&(shared->vfd_swmr_config), f->open_name,
-                                             shared->md_file_path_name) < 0 )
+        if (H5F_vfd_swmr_build_md_path_name(&(shared->vfd_swmr_config), f->open_name,
+                                            shared->md_file_path_name) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to build metadata file name")
 
         if (((shared->vfd_swmr_md_fd = HDopen(shared->md_file_path_name, O_CREAT | O_RDWR | O_TRUNC,
@@ -300,8 +300,8 @@ done:
  * Programmer:  Vailin Choi -- 1/13/2022
  *
  * Changes:     Moved to H5Fvfd_swmr.c from H5FDvfd_swmr.c, and renamed
- *              accordingly.  Changed FUNC_ENTER_PACKAGE to 
- *              FUNC_ENTER_NOAPI.  Converted to a private function so 
+ *              accordingly.  Changed FUNC_ENTER_PACKAGE to
+ *              FUNC_ENTER_NOAPI.  Converted to a private function so
  *              that it can be called in H5FDvfd_swmr.c
  *
  *                                               JRM -- 5/17/22
@@ -309,8 +309,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_vfd_swmr_build_md_path_name(H5F_vfd_swmr_config_t *config, const char *hdf5_filename,
-                                  char *name /*out*/)
+H5F_vfd_swmr_build_md_path_name(H5F_vfd_swmr_config_t *config, const char *hdf5_filename, char *name /*out*/)
 {
     size_t tot_len   = 0;
     size_t tmp_len   = 0;

@@ -1609,7 +1609,7 @@ done:
  */
 static herr_t
 H5FD__family_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void H5_ATTR_UNUSED *input,
-               void **output)
+                 void **output)
 {
     H5FD_family_t *file      = (H5FD_family_t *)_file;
     herr_t         ret_value = SUCCEED;
@@ -1624,7 +1624,7 @@ H5FD__family_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void H5_
         case H5FD_CTL__GET_TERMINAL_VFD:
             /* On can argue as to whether the family VFD should be regarded as terminal.
              * It is treated as such here, as it is the lowest VFD through which all I/O
-             * request pass.  
+             * request pass.
              *
              * For now at least, this works as this is the level at which files are compared.
              */
@@ -1642,5 +1642,3 @@ H5FD__family_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void H5_
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__sec2_ctl() */
-
-

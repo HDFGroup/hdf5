@@ -40,7 +40,7 @@
 
 #if 1 /* JRM */ /* probably want to re-work this */
 #include "H5FDvfd_swmr.h"
-#endif /* JRM */ 
+#endif /* JRM */
 
 #include "H5VLnative_private.h" /* Native VOL connector                     */
 
@@ -1842,10 +1842,9 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     if (NULL == (a_plist = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not file access property list")
 
-
     /* start by testing to see if we are opening the file VFD SWMR reader.  If
      * we are, we must "push" the vfd swrm reader vfd on the vfd "stack" supplied
-     * by the user in the fapl.  Since the user may use the fapl elsewhere, we 
+     * by the user in the fapl.  Since the user may use the fapl elsewhere, we
      * must "pop" the vfd swmr reader vfd off the vfd "stack" before we return.
      *
      * In passing, collect the VFD SWMR configuration info for later use.
@@ -1878,7 +1877,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
          */
 
         /* Legacy SWMR and VFD SWMR are incompatible.  Fail if the legacy SWMR flags are set */
-        if ( (flags & H5F_ACC_SWMR_WRITE) || ( flags & H5F_ACC_SWMR_READ) )
+        if ((flags & H5F_ACC_SWMR_WRITE) || (flags & H5F_ACC_SWMR_READ))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "Legacy and VFD SWMR are incompatible")
 
         /* Verify that file access flags are consistent with VFD SWMR configuration */
@@ -1887,29 +1886,27 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
         if ((flags & H5F_ACC_RDWR) == 0 && vfd_swmr_config_ptr->writer)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "file access is reader but VFD SWMR config is writer")
 
-
-        if ( ((flags & H5F_ACC_RDWR) == 0) && (! vfd_swmr_config_ptr->writer) ) {
+        if (((flags & H5F_ACC_RDWR) == 0) && (!vfd_swmr_config_ptr->writer)) {
 
             vfd_swmr = TRUE;
 
-            /* We are opening a file as a VFD SWMR reader.  Push the vfd swrm reader vfd on the 
-             * vfd stack specified in the fapl.  Set the pop_vfd_swmr_reader flag to trigger a 
+            /* We are opening a file as a VFD SWMR reader.  Push the vfd swrm reader vfd on the
+             * vfd stack specified in the fapl.  Set the pop_vfd_swmr_reader flag to trigger a
              * pop of the vfd swmr reader vfd on exit from this function.
              */
-            if ( H5P_push_vfd_swmr_reader_vfd_on_fapl(fapl_id) < 0 )
-                 HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "can't push VFD SWMR reader VFD on FAPL");
+            if (H5P_push_vfd_swmr_reader_vfd_on_fapl(fapl_id) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "can't push VFD SWMR reader VFD on FAPL");
 
             pop_vfd_swmr_reader_vfd = TRUE;
-        
-        } else if ( ( flags & H5F_ACC_RDWR ) && ( vfd_swmr_config_ptr->writer ) ) {
+        }
+        else if ((flags & H5F_ACC_RDWR) && (vfd_swmr_config_ptr->writer)) {
 
-            vfd_swmr = TRUE;
+            vfd_swmr        = TRUE;
             vfd_swmr_writer = TRUE;
-        } 
+        }
 
         /* if we get to this point, vfd_swmr must be TRUE. */
         HDassert(vfd_swmr);
-
 
         /* Retrieve the private property for VFD SWMR testing */
         if (H5P_get(a_plist, H5F_ACS_GENERATE_MD_CK_CB_NAME, &cb_info) < 0)
@@ -1932,11 +1929,10 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "unable to get file locking flag")
 
     /* turn off file locking unconditionally if the file is being opened VFD SWMR reader */
-    if ( ( vfd_swmr ) && ( ! vfd_swmr_writer ) ) {
+    if ((vfd_swmr) && (!vfd_swmr_writer)) {
 
-         use_file_locking = FALSE;
+        use_file_locking = FALSE;
     }
-
 
     /*
      * Opening a file is a two step process. First we try to open the
@@ -1964,7 +1960,6 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file: name = '%s', tent_flags = %x",
                         name, tent_flags)
     } /* end if */
-
 
     /* Avoid reusing a virtual file opened exclusively by a second virtual
      * file, or opening the same file twice with different parameters.
@@ -2001,13 +1996,13 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
                         "SWMR read access flag not the same for file that is already open")
 
         /* fail if VFD SWMR configurations disagree */
-        if ( HDmemcmp(&(shared->vfd_swmr_config), vfd_swmr_config_ptr, sizeof(H5F_vfd_swmr_config_t)) )
+        if (HDmemcmp(&(shared->vfd_swmr_config), vfd_swmr_config_ptr, sizeof(H5F_vfd_swmr_config_t)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
                         "VFD SWMR configuration not the same for file that is already open")
 
-        /* Arguably, we should fail if there is a page size mismatch.  However, if I read 
+        /* Arguably, we should fail if there is a page size mismatch.  However, if I read
          * the code correctly, the page size and page buffer configuration from the open file
-         * will domininate.  Thus, there probably isn't a functional issue.  That said, 
+         * will domininate.  Thus, there probably isn't a functional issue.  That said,
          * this should be thought about.
          */
 
@@ -2299,7 +2294,7 @@ done:
     if (vfd_swmr_config_ptr)
         H5MM_free(vfd_swmr_config_ptr);
 
-    if ( ( pop_vfd_swmr_reader_vfd ) && ( H5P_pop_vfd_swmr_reader_vfd_off_fapl(fapl_id) < 0 ) )
+    if ((pop_vfd_swmr_reader_vfd) && (H5P_pop_vfd_swmr_reader_vfd_off_fapl(fapl_id) < 0))
         HDONE_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "can't pop vfd swrm reader vfd off vfd stack")
 
     FUNC_LEAVE_NOAPI(ret_value)
