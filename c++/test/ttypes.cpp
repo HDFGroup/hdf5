@@ -28,12 +28,6 @@ using namespace H5;
 #include "h5cpputil.h" // C++ utilility header file
 
 /*
- * Offset from aligned memory returned by malloc().  This can be used to test
- * that type conversions handle non-aligned buffers correctly.
- */
-#define ALIGNMENT 1
-
-/*
  * Define if you want to test alignment code on a machine that doesn't
  * normally require alignment. When set, all native datatypes must be aligned
  * on a byte boundary equal to the data size.
@@ -52,13 +46,6 @@ using namespace H5;
  */
 
 const char *FILENAME[] = {"dtypes1.h5", "dtypes2.h5", "dtypes3.h5", "dtypes4.h5", NULL};
-
-/*
- * Count up or down depending on whether the machine is big endian or little
- * endian.  If local variable `endian' is H5T_ORDER_BE then the result will
- * be I, otherwise the result will be Z-(I+1).
- */
-#define ENDIAN(Z, I) (H5T_ORDER_BE == endian ? (I) : (Z) - ((I) + 1))
 
 typedef enum flt_t { FLT_FLOAT, FLT_DOUBLE, FLT_LDOUBLE, FLT_OTHER } flt_t;
 
