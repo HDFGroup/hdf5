@@ -2180,7 +2180,7 @@ H5FD_ctl(H5FD_t *file, uint64_t op_code, uint64_t flags, const void *input, void
 
     /* Dispatch to driver if the ctl function exists.
      *
-     * If it doesn't, fail if the H5FD_CTL__FAIL_IF_UNKNOWN_FLAG is set.
+     * If it doesn't, fail if the H5FD_CTL_FAIL_IF_UNKNOWN_FLAG is set.
      *
      * Otherwise, report success.
      */
@@ -2190,7 +2190,7 @@ H5FD_ctl(H5FD_t *file, uint64_t op_code, uint64_t flags, const void *input, void
 
             HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL, "VFD ctl request failed")
     }
-    else if (flags & H5FD_CTL__FAIL_IF_UNKNOWN_FLAG) {
+    else if (flags & H5FD_CTL_FAIL_IF_UNKNOWN_FLAG) {
 
         HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL,
                     "VFD ctl request failed (no ctl callback and fail if unknown flag is set)")
