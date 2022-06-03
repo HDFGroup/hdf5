@@ -6283,9 +6283,6 @@ H5Pset_vfd_swmr_config(hid_t plist_id, H5F_vfd_swmr_config_t *config_ptr)
     if (H5P_set(plist, H5F_ACS_VFD_SWMR_CONFIG_NAME, config_ptr) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set metadata cache initial config")
 
-    if (H5P_set_driver(plist, H5FD_VFD_SWMR, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set VFD SWMR driver info");
-
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Pset_vfd_swmr_config() */

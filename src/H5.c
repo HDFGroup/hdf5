@@ -463,6 +463,7 @@ H5_term_library(void)
     do {
         pending = 0;
         for (i = 0; i < NELMTS(terminator); i++) {
+
             if (terminator[i].completed)
                 continue;
             if (pending != 0 && terminator[i].await_prior)

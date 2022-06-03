@@ -38,6 +38,10 @@
 #include "H5Tprivate.h"  /* Datatypes                                */
 #include "H5VLprivate.h" /* Virtual Object Layer                     */
 
+#if 1 /* JRM */ /* probably want to re-work this */
+#include "H5FDvfd_swmr.h"
+#endif /* JRM */ 
+
 #include "H5VLnative_private.h" /* Native VOL connector                     */
 
 /****************/
@@ -1813,6 +1817,12 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     size_t                  page_buf_size;
     unsigned                page_buf_min_meta_perc = 0;
     unsigned                page_buf_min_raw_perc  = 0;
+    hbool_t                 vfd_swmr                = FALSE; /* TRUE iff opening file with VFD SWMR */
+    hbool_t                 vfd_swmr_writer         = FALSE; /* TRUE iff opening file as VFD SWMR   */
+                                                             /* writer.                             */
+    hbool_t                 pop_vfd_swmr_reader_vfd = FALSE; /* Flag set when the VFD SWMR reader VFD */
+                                                             /* has been pushed on the supplied fapl  */
+                                                             /* and must be poped before return.      */
     hbool_t                 set_flag               = FALSE; /* Set the status_flags in the superblock */
     hbool_t                 clear                  = FALSE; /* Clear the status_flags */
     hbool_t                 evict_on_close;                 /* Evict on close value from plist */
@@ -1828,24 +1838,18 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 
     FUNC_ENTER_NOAPI(NULL)
 
-    /*
-     * If the driver has a 'cmp' method then the driver is capable of
-     * determining when two file handles refer to the same file and the
-     * library can insure that when the application opens a file twice
-     * that the two handles coordinate their operations appropriately.
-     * Otherwise it is the application's responsibility to never open the
-     * same file more than once at a time.
-     */
-    if (NULL == (drvr = H5FD_get_class(fapl_id)))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "unable to retrieve VFL class")
-
     /* Get the file access property list, for future queries */
     if (NULL == (a_plist = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not file access property list")
 
-    /* Check if we are using file locking */
-    if (H5F__check_if_using_file_locks(a_plist, &use_file_locking) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "unable to get file locking flag")
+
+    /* start by testing to see if we are opening the file VFD SWMR reader.  If
+     * we are, we must "push" the vfd swrm reader vfd on the vfd "stack" supplied
+     * by the user in the fapl.  Since the user may use the fapl elsewhere, we 
+     * must "pop" the vfd swmr reader vfd off the vfd "stack" before we return.
+     *
+     * In passing, collect the VFD SWMR configuration info for later use.
+     */
 
     /* Allocate space for VFD SWMR configuration info */
     if (NULL == (vfd_swmr_config_ptr = H5MM_calloc(sizeof(H5F_vfd_swmr_config_t))))
@@ -1857,19 +1861,82 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 
     /* When configured with VFD SWMR */
     if (vfd_swmr_config_ptr->version) {
+
+        /* get the page buffer size and verify that it is greater tha zero.  Note
+         * that this get of the page buffer size is redundant -- we do it again 
+         * below.
+         */
+        if (H5P_get(a_plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, &page_buf_size) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get page buffer size");
+
+        if (page_buf_size == 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "page buffering must be enabled")
+
+        /* Paged allocation must also be enabled, but the page buffer
+         * initialization (H5PB_create) will detect a conflicting configuration
+         * and return an error.
+         */
+
+        /* Legacy SWMR and VFD SWMR are incompatible.  Fail if the legacy SWMR flags are set */
+        if ( (flags & H5F_ACC_SWMR_WRITE) || ( flags & H5F_ACC_SWMR_READ) )
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "Legacy and VFD SWMR are incompatible")
+
         /* Verify that file access flags are consistent with VFD SWMR configuration */
         if ((flags & H5F_ACC_RDWR) && !vfd_swmr_config_ptr->writer)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "file access is writer but VFD SWMR config is reader")
         if ((flags & H5F_ACC_RDWR) == 0 && vfd_swmr_config_ptr->writer)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "file access is reader but VFD SWMR config is writer")
 
+
+        if ( ((flags & H5F_ACC_RDWR) == 0) && (! vfd_swmr_config_ptr->writer) ) {
+
+            vfd_swmr = TRUE;
+
+            /* We are opening a file as a VFD SWMR reader.  Push the vfd swrm reader vfd on the 
+             * vfd stack specified in the fapl.  Set the pop_vfd_swmr_reader flag to trigger a 
+             * pop of the vfd swmr reader vfd on exit from this function.
+             */
+            if ( H5P_push_vfd_swmr_reader_vfd_on_fapl(fapl_id) < 0 )
+                 HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "can't push VFD SWMR reader VFD on FAPL");
+
+            pop_vfd_swmr_reader_vfd = TRUE;
+        
+        } else if ( ( flags & H5F_ACC_RDWR ) && ( vfd_swmr_config_ptr->writer ) ) {
+
+            vfd_swmr = TRUE;
+            vfd_swmr_writer = TRUE;
+        } 
+
+        /* if we get to this point, vfd_swmr must be TRUE. */
+        HDassert(vfd_swmr);
+
+
         /* Retrieve the private property for VFD SWMR testing */
         if (H5P_get(a_plist, H5F_ACS_GENERATE_MD_CK_CB_NAME, &cb_info) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get generate_md_ck_cb info")
-
-        if (!vfd_swmr_config_ptr->writer)
-            use_file_locking = FALSE;
     }
+
+    /*
+     * If the driver has a 'cmp' method then the driver is capable of
+     * determining when two file handles refer to the same file and the
+     * library can insure that when the application opens a file twice
+     * that the two handles coordinate their operations appropriately.
+     * Otherwise it is the application's responsibility to never open the
+     * same file more than once at a time.
+     */
+    if (NULL == (drvr = H5FD_get_class(fapl_id)))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "unable to retrieve VFL class")
+
+    /* Check if we are using file locking */
+    if (H5F__check_if_using_file_locks(a_plist, &use_file_locking) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "unable to get file locking flag")
+
+    /* turn off file locking unconditionally if the file is being opened VFD SWMR reader */
+    if ( ( vfd_swmr ) && ( ! vfd_swmr_writer ) ) {
+
+         use_file_locking = FALSE;
+    }
+
 
     /*
      * Opening a file is a two step process. First we try to open the
@@ -1898,11 +1965,10 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
                         name, tent_flags)
     } /* end if */
 
+
     /* Avoid reusing a virtual file opened exclusively by a second virtual
      * file, or opening the same file twice with different parameters.
      */
-    if ((lf = H5FD_deduplicate(lf, fapl_id)) == NULL)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "an already-open file conflicts with '%s'", name)
 
     /* Is the file already open? */
     if ((shared = H5F__sfile_search(lf)) != NULL) {
@@ -1916,6 +1982,8 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
          * readers don't expect the file to change under them), or if the
          * SWMR write/read access flags don't agree.
          */
+        if (H5FD_close(lf) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to close low-level file info")
         if (flags & H5F_ACC_TRUNC)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to truncate a file which is already open")
         if (flags & H5F_ACC_EXCL)
@@ -1931,6 +1999,17 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
               (shared->flags & H5F_ACC_RDWR)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
                         "SWMR read access flag not the same for file that is already open")
+
+        /* fail if VFD SWMR configurations disagree */
+        if ( HDmemcmp(&(shared->vfd_swmr_config), vfd_swmr_config_ptr, sizeof(H5F_vfd_swmr_config_t)) )
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
+                        "VFD SWMR configuration not the same for file that is already open")
+
+        /* Arguably, we should fail if there is a page size mismatch.  However, if I read 
+         * the code correctly, the page size and page buffer configuration from the open file
+         * will domininate.  Thus, there probably isn't a functional issue.  That said, 
+         * this should be thought about.
+         */
 
         /* Allocate new "high-level" file struct */
         if ((file = H5F__new(shared, flags, fcpl_id, fapl_id, NULL)) == NULL)
@@ -2219,6 +2298,9 @@ done:
     }
     if (vfd_swmr_config_ptr)
         H5MM_free(vfd_swmr_config_ptr);
+
+    if ( ( pop_vfd_swmr_reader_vfd ) && ( H5P_pop_vfd_swmr_reader_vfd_off_fapl(fapl_id) < 0 ) )
+        HDONE_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "can't pop vfd swrm reader vfd off vfd stack")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_open() */

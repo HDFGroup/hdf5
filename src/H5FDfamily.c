@@ -109,6 +109,8 @@ static herr_t  H5FD__family_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closi
 static herr_t  H5FD__family_lock(H5FD_t *_file, hbool_t rw);
 static herr_t  H5FD__family_unlock(H5FD_t *_file);
 static herr_t  H5FD__family_delete(const char *filename, hid_t fapl_id);
+static herr_t  H5FD__family_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void *input,
+                                void **output);
 
 /* The class struct */
 static const H5FD_class_t H5FD_family_g = {
@@ -145,7 +147,7 @@ static const H5FD_class_t H5FD_family_g = {
     H5FD__family_lock,          /* lock                 */
     H5FD__family_unlock,        /* unlock               */
     H5FD__family_delete,        /* del                  */
-    NULL,                       /* ctl                  */
+    H5FD__family_ctl,           /* ctl                  */
     H5FD_FLMAP_DICHOTOMY        /* fl_map               */
 };
 
@@ -1580,3 +1582,65 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__family_delete() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__family_ctl
+ *
+ * Purpose:     Family VFD version of the ctl callback.
+ *
+ *              The desired operation is specified by the op_code
+ *              parameter.
+ *
+ *              The flags parameter controls management of op_codes that
+ *              are unknown to the callback
+ *
+ *              The input and output parameters allow op_code specific
+ *              input and output
+ *
+ *              At present, the only op code supported is
+ *              H5FD_CTL__GET_TERMINAL_VFD, which is used to obtain the
+ *              instance of H5FD_t associated with the terminal
+ *              VFD.  This allows comparison of files whose terminal
+ *              VFD may have overlying pass through VFDs.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__family_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void H5_ATTR_UNUSED *input,
+               void **output)
+{
+    H5FD_family_t *file      = (H5FD_family_t *)_file;
+    herr_t         ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity checks */
+    HDassert(file);
+
+    switch (op_code) {
+
+        case H5FD_CTL__GET_TERMINAL_VFD:
+            /* On can argue as to whether the family VFD should be regarded as terminal.
+             * It is treated as such here, as it is the lowest VFD through which all I/O
+             * request pass.  
+             *
+             * For now at least, this works as this is the level at which files are compared.
+             */
+            HDassert(output);
+            *output = (void *)(file);
+            break;
+
+        /* Unknown op code */
+        default:
+            if (flags & H5FD_CTL__FAIL_IF_UNKNOWN_FLAG)
+                HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL, "unknown op_code and fail if unknown flag is set")
+            break;
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD__sec2_ctl() */
+
+

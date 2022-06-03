@@ -5402,7 +5402,7 @@ test_vfds_same_file_opens(hid_t orig_fapl, const char *env_h5_drvr)
     if (H5Pclose(fapl) < 0)
         FAIL_STACK_ERROR;
 
-#if 0 /* Use test cases #4 and #5 when John's changes are merged */
+#if 1 /* Use test cases #4 and #5 when John's changes are merged */
     /* 
      *  Case #4 
      *  --Open the file as writer with both legacy SWMR and VFD SWMR configured .

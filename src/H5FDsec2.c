@@ -1064,15 +1064,20 @@ done:
  *              The input and output parameters allow op_code specific
  *              input and output
  *
- *              At present, no op codes are supported by this VFD.
+ *              At present, the only op code supported is 
+ *              H5FD_CTL__GET_TERMINAL_VFD, which is used in the 
+ *              comparison of files under layers of pass through VFDs.
  *
  * Return:      Non-negative on success/Negative on failure
+ *
+ * Changes:     Added support for H5FD_CTL__GET_TERMINAL_VFD.
+ *                                            JRM -- 5/4/22
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5FD__sec2_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void H5_ATTR_UNUSED *input,
-               void H5_ATTR_UNUSED **output)
+               void **output)
 {
     H5FD_sec2_t *file      = (H5FD_sec2_t *)_file;
     herr_t       ret_value = SUCCEED;
@@ -1083,6 +1088,12 @@ H5FD__sec2_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void H5_AT
     HDassert(file);
 
     switch (op_code) {
+
+        case H5FD_CTL__GET_TERMINAL_VFD:
+            HDassert(output);
+            *output = (void *)(file);
+            break;
+
         /* Unknown op code */
         default:
             if (flags & H5FD_CTL__FAIL_IF_UNKNOWN_FLAG)
