@@ -1822,7 +1822,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
                                                              /* writer.                             */
     hbool_t                 pop_vfd_swmr_reader_vfd = FALSE; /* Flag set when the VFD SWMR reader VFD */
                                                              /* has been pushed on the supplied fapl  */
-                                                             /* and must be poped before return.      */
+                                                             /* and must be popped before return.      */
     hbool_t                 set_flag               = FALSE; /* Set the status_flags in the superblock */
     hbool_t                 clear                  = FALSE; /* Clear the status_flags */
     hbool_t                 evict_on_close;                 /* Evict on close value from plist */
@@ -1862,7 +1862,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     /* When configured with VFD SWMR */
     if (vfd_swmr_config_ptr->version) {
 
-        /* get the page buffer size and verify that it is greater tha zero.  Note
+        /* get the page buffer size and verify that it is greater than zero.  Note
          * that this get of the page buffer size is redundant -- we do it again 
          * below.
          */

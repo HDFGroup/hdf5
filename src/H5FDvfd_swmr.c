@@ -406,7 +406,7 @@ done:
  *                 that this VFD supports vfd swmr.  This will have to 
  *                 wait until after the file is opened.
  *
- *              2) Create a new FAPL, and set the file driver optained 
+ *              2) Create a new FAPL, and set the file driver obtained 
  *                 in 1) in the new FAPL.
  *
  *              3) Allocate a new instance of H5FD_vfd_swmr_reader_config_t,
@@ -449,7 +449,7 @@ H5P_push_vfd_swmr_reader_vfd_on_fapl(hid_t fapl_id)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get init driver ID & info")
 
 
-    /* 2) Create a new FAPL, and set the file driver optained in 1) in the new FAPL. */
+    /* 2) Create a new FAPL, and set the file driver obtained in 1) in the new FAPL. */
 
     /* create a new FAPL */
     if (NULL == (pclass = (H5P_genclass_t *)H5I_object_verify(H5P_FILE_ACCESS, H5I_GENPROP_CLS)))
@@ -656,7 +656,7 @@ H5FD__vfd_swmr_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t max
     /* the fapl id stored in fa_ptr->fapl_id should contain a driver entry that 
      * specifies a VFD that supports VFD SWMR.  Since there may be a stack of 
      * VFDs, we can't check this until after file open.  Further, the vfd swmr
-     * reader vfd is currenty hard coded to use the sec2 vfd as its underlying 
+     * reader vfd is currently hard coded to use the sec2 vfd as its underlying 
      * vfd.  Thus we just save a copy of the H5FD_vfd_swmr_reader_fapl_t for 
      * now.
      */
