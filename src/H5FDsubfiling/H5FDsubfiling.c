@@ -96,6 +96,7 @@ typedef struct H5FD_subfiling_t {
 
     /* MPI Info */
     MPI_Comm comm;
+    MPI_Comm ext_comm;
     MPI_Info info;
     int      mpi_rank;
     int      mpi_size;
@@ -801,6 +802,7 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
     if (NULL == (file_ptr = (H5FD_subfiling_t *)H5FL_CALLOC(H5FD_subfiling_t)))
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to allocate file struct")
     file_ptr->fa.ioc_fapl_id = H5I_INVALID_HID;
+    file_ptr->ext_comm = MPI_COMM_NULL;
 
     /* Get the driver-specific file access properties */
     if (NULL == (plist_ptr = (H5P_genplist_t *)H5I_object(fapl_id)))
@@ -1012,6 +1014,9 @@ H5FD__subfiling_close(H5FD_t *_file)
     /* if set, close the copy of the plist for the underlying VFD. */
     if ((H5I_INVALID_HID != file_ptr->fa.ioc_fapl_id) && (H5I_dec_ref(file_ptr->fa.ioc_fapl_id) < 0))
         HGOTO_ERROR(H5E_VFL, H5E_ARGS, FAIL, "can't close ioc FAPL")
+
+    if (H5_mpi_comm_free(&file_ptr->ext_comm) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free MPI communicator");
 
     /* Release the file info */
     file_ptr = H5FL_FREE(H5FD_subfiling_t, file_ptr);
@@ -2230,7 +2235,17 @@ H5FD__subfiling_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void 
         case H5FD_CTL__GET_MPI_COMMUNICATOR_OPCODE:
             HDassert(output);
             HDassert(*output);
-            **((MPI_Comm **)output) = file->comm;
+
+            /*
+             * Return a separate MPI communicator to the caller so
+             * that our own MPI calls won't have a chance to conflict
+             */
+            if (file->ext_comm == MPI_COMM_NULL) {
+                if (H5_mpi_comm_dup(file->comm, &file->ext_comm) < 0)
+                    HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't duplicate MPI communicator")
+            }
+
+            **((MPI_Comm **)output) = file->ext_comm;
             break;
 
         case H5FD_CTL__GET_MPI_RANK_OPCODE:
