@@ -34,7 +34,7 @@ static hid_t H5FD_VFD_SWMR_g = 0;
 typedef struct H5FD_vfd_swmr_t {
     H5FD_t pub; /* public stuff, must be first      */
 
-    H5FD_vfd_swmr_reader_fapl_t fa;      /* driver-specific file access properties */
+    H5FD_vfd_swmr_reader_fapl_t fa; /* driver-specific file access properties */
 
     /* HDF5 file */
     char    hdf5_filename[H5FD_MAX_FILENAME_LEN]; /* Name of the HDF5 file from open */
@@ -88,8 +88,8 @@ static herr_t  H5FD__vfd_swmr_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_i
 static herr_t  H5FD__vfd_swmr_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 static herr_t  H5FD__vfd_swmr_lock(H5FD_t *_file, hbool_t rw);
 static herr_t  H5FD__vfd_swmr_unlock(H5FD_t *_file);
-static herr_t  H5FD__vfd_swmr_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, 
-                                  const void *input, void **output);
+static herr_t  H5FD__vfd_swmr_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void *input,
+                                  void **output);
 
 /* VFD SWMR */
 static htri_t H5FD__vfd_swmr_header_deserialize(H5FD_vfd_swmr_t *, H5FD_vfd_swmr_md_header *);
@@ -98,41 +98,41 @@ static htri_t H5FD__vfd_swmr_index_deserialize(const H5FD_vfd_swmr_t *file, H5FD
 static herr_t H5FD__vfd_swmr_load_hdr_and_idx(H5FD_vfd_swmr_t *, hbool_t);
 
 static const H5FD_class_t H5FD_vfd_swmr_g = {
-    H5FD_VFD_SWMR_VALUE,                  /* value                */
-    "vfd_swmr",                           /* name                 */
-    MAXADDR,                              /* maxaddr              */
-    H5F_CLOSE_WEAK,                       /* fc_degree            */
-    H5FD__vfd_swmr_term,                  /* terminate            */
-    NULL,                                 /* sb_size              */
-    NULL,                                 /* sb_encode            */
-    NULL,                                 /* sb_decode            */
-    sizeof(H5FD_vfd_swmr_reader_fapl_t),  /* fapl_size            */
-    H5FD__vfd_swmr_fapl_get,              /* fapl_get             */
-    H5FD__vfd_swmr_fapl_copy,             /* fapl_copy            */
-    H5FD__vfd_swmr_fapl_free,             /* fapl_free            */
-    0,                                    /* dxpl_size            */
-    NULL,                                 /* dxpl_copy            */
-    NULL,                                 /* dxpl_free            */
-    H5FD__vfd_swmr_open,                  /* open                 */
-    H5FD__vfd_swmr_close,                 /* close                */
-    H5FD__vfd_swmr_cmp,                   /* cmp                  */
-    H5FD__vfd_swmr_query,                 /* query                */
-    NULL,                                 /* get_type_map         */
-    NULL,                                 /* alloc                */
-    NULL,                                 /* free                 */
-    H5FD__vfd_swmr_get_eoa,               /* get_eoa              */
-    H5FD__vfd_swmr_set_eoa,               /* set_eoa              */
-    H5FD__vfd_swmr_get_eof,               /* get_eof              */
-    H5FD__vfd_swmr_get_handle,            /* get_handle           */
-    H5FD__vfd_swmr_read,                  /* read                 */
-    H5FD__vfd_swmr_write,                 /* write                */
-    NULL,                                 /* flush                */
-    H5FD__vfd_swmr_truncate,              /* truncate             */
-    H5FD__vfd_swmr_lock,                  /* lock                 */
-    H5FD__vfd_swmr_unlock,                /* unlock               */
-    NULL,                                 /* del                  */
-    H5FD__vfd_swmr_ctl,                   /* ctl                  */
-    H5FD_FLMAP_DICHOTOMY                  /* fl_map               */
+    H5FD_VFD_SWMR_VALUE,                 /* value                */
+    "vfd_swmr",                          /* name                 */
+    MAXADDR,                             /* maxaddr              */
+    H5F_CLOSE_WEAK,                      /* fc_degree            */
+    H5FD__vfd_swmr_term,                 /* terminate            */
+    NULL,                                /* sb_size              */
+    NULL,                                /* sb_encode            */
+    NULL,                                /* sb_decode            */
+    sizeof(H5FD_vfd_swmr_reader_fapl_t), /* fapl_size            */
+    H5FD__vfd_swmr_fapl_get,             /* fapl_get             */
+    H5FD__vfd_swmr_fapl_copy,            /* fapl_copy            */
+    H5FD__vfd_swmr_fapl_free,            /* fapl_free            */
+    0,                                   /* dxpl_size            */
+    NULL,                                /* dxpl_copy            */
+    NULL,                                /* dxpl_free            */
+    H5FD__vfd_swmr_open,                 /* open                 */
+    H5FD__vfd_swmr_close,                /* close                */
+    H5FD__vfd_swmr_cmp,                  /* cmp                  */
+    H5FD__vfd_swmr_query,                /* query                */
+    NULL,                                /* get_type_map         */
+    NULL,                                /* alloc                */
+    NULL,                                /* free                 */
+    H5FD__vfd_swmr_get_eoa,              /* get_eoa              */
+    H5FD__vfd_swmr_set_eoa,              /* set_eoa              */
+    H5FD__vfd_swmr_get_eof,              /* get_eof              */
+    H5FD__vfd_swmr_get_handle,           /* get_handle           */
+    H5FD__vfd_swmr_read,                 /* read                 */
+    H5FD__vfd_swmr_write,                /* write                */
+    NULL,                                /* flush                */
+    H5FD__vfd_swmr_truncate,             /* truncate             */
+    H5FD__vfd_swmr_lock,                 /* lock                 */
+    H5FD__vfd_swmr_unlock,               /* unlock               */
+    NULL,                                /* del                  */
+    H5FD__vfd_swmr_ctl,                  /* ctl                  */
+    H5FD_FLMAP_DICHOTOMY                 /* fl_map               */
 };
 
 /* Declare a free list to manage the H5FD_vfd_swmr_t struct */
@@ -191,7 +191,6 @@ H5FD__vfd_swmr_term(void)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FD__vfd_swmr_term() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5FD__vfd_swmr_fapl_get
  *
@@ -218,7 +217,6 @@ H5FD__vfd_swmr_fapl_get(H5FD_t *_file)
 
 } /* end H5FD__vfd_swmr_fapl_get() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5FD__vfd_swmr_fapl_copy
  *
@@ -232,7 +230,7 @@ static void *
 H5FD__vfd_swmr_fapl_copy(const void *_old_fa)
 {
     const H5FD_vfd_swmr_reader_fapl_t *old_fa_ptr = (const H5FD_vfd_swmr_reader_fapl_t *)_old_fa;
-    H5FD_vfd_swmr_reader_fapl_t       *new_fa_ptr = NULL;
+    H5FD_vfd_swmr_reader_fapl_t *      new_fa_ptr = NULL;
     void *                             ret_value  = NULL;
 
     FUNC_ENTER_PACKAGE
@@ -249,19 +247,16 @@ H5FD__vfd_swmr_fapl_copy(const void *_old_fa)
     ret_value = (void *)new_fa_ptr;
 
 done:
-    if (NULL == ret_value)
-    {
-        if (new_fa_ptr)
-        {
+    if (NULL == ret_value) {
+        if (new_fa_ptr) {
             new_fa_ptr->magic = 0;
-            new_fa_ptr = H5FL_FREE(H5FD_vfd_swmr_reader_fapl_t, new_fa_ptr);
+            new_fa_ptr        = H5FL_FREE(H5FD_vfd_swmr_reader_fapl_t, new_fa_ptr);
         }
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* end H5FD__vfd_swmr_fapl_copy() */
-
 
 /*--------------------------------------------------------------------------
  * Function:    H5FD__vfd_swmr_fapl_free
@@ -280,25 +275,24 @@ H5FD__vfd_swmr_fapl_free(void *_fapl)
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    if ( ( NULL == fapl ) || ( fapl->magic != H5FD_VFD_SWMR_READER_MAGIC ) )
+    if ((NULL == fapl) || (fapl->magic != H5FD_VFD_SWMR_READER_MAGIC))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL or invalid H5FD_vfd_swmr_reader_fapl_t *")
 
     /* Free the property list */
     fapl->magic = 0;
-    fapl = H5FL_FREE(H5FD_vfd_swmr_reader_fapl_t, fapl);
+    fapl        = H5FL_FREE(H5FD_vfd_swmr_reader_fapl_t, fapl);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* end H5FD__vfd_swmr_fapl_free() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5P_pop_vfd_swmr_reader_vfd_off_fapl
  *
- * Purpose:     After a file has been opened in VFD SWMR reader mode, we 
- *              must pop the vfd swmr reader driver entry off the supplied 
- *              fapl.  If we don't, and the fapl is used to open a second 
+ * Purpose:     After a file has been opened in VFD SWMR reader mode, we
+ *              must pop the vfd swmr reader driver entry off the supplied
+ *              fapl.  If we don't, and the fapl is used to open a second
  *              file (i.e. via virtual data sets), we would have multiple
  *              vfd swmr reader driver entries pushed on the vfd stack.
  *
@@ -307,9 +301,9 @@ done:
  *              1) Read the file driver entry from the supplied fapl.  Verify
  *                 that it specifies the vfd swmr reader VFD.
  *
- *              2) Read the file driver entry from the sub fapl specified 
- *                 in the vfd swmr reader vfd fapl entry.  Set the file 
- *                 driver entry on the supplied fapl equal to that on 
+ *              2) Read the file driver entry from the sub fapl specified
+ *                 in the vfd swmr reader vfd fapl entry.  Set the file
+ *                 driver entry on the supplied fapl equal to that on
  *                 the sub-fapl.
  *
  *              3) Discard the sub-fapl?  Not sure if this is necessary.
@@ -323,18 +317,17 @@ done:
 herr_t
 H5P_pop_vfd_swmr_reader_vfd_off_fapl(hid_t fapl_id)
 {
-    H5FD_driver_prop_t             driver_prop;         /* Property for driver ID & info */
-    H5P_genplist_t *               plist_ptr = NULL;
-    hid_t                          sub_fapl_id;
-    H5P_genplist_t *               sub_plist_ptr = NULL;
-    herr_t                         ret_value = SUCCEED;
+    H5FD_driver_prop_t driver_prop; /* Property for driver ID & info */
+    H5P_genplist_t *   plist_ptr = NULL;
+    hid_t              sub_fapl_id;
+    H5P_genplist_t *   sub_plist_ptr = NULL;
+    herr_t             ret_value     = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* sanity checks -- get ptr to plist in passing */
     if (NULL == (plist_ptr = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
-
 
     /* 1) Read the file driver entry from the supplied fapl.  Verify
      *    that it specifies the vfd swmr reader VFD.
@@ -345,16 +338,15 @@ H5P_pop_vfd_swmr_reader_vfd_off_fapl(hid_t fapl_id)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get file driver ID & info")
 
     /* verify that it specifies the vfd swrm reader vfd */
-    if ( driver_prop.driver_id != H5FD_VFD_SWMR )
+    if (driver_prop.driver_id != H5FD_VFD_SWMR)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "fapl driver prop not vfd swmr reader")
 
-    if ( ( ((const H5FD_vfd_swmr_reader_fapl_t *)(driver_prop.driver_info)) == NULL ) ||
-         ( ((const H5FD_vfd_swmr_reader_fapl_t *)(driver_prop.driver_info))->magic != 
-           H5FD_VFD_SWMR_READER_MAGIC ) )
+    if ((((const H5FD_vfd_swmr_reader_fapl_t *)(driver_prop.driver_info)) == NULL) ||
+        (((const H5FD_vfd_swmr_reader_fapl_t *)(driver_prop.driver_info))->magic !=
+         H5FD_VFD_SWMR_READER_MAGIC))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "fapl driver info invalid")
 
     sub_fapl_id = ((const H5FD_vfd_swmr_reader_fapl_t *)(driver_prop.driver_info))->fapl_id;
-
 
     /* 2) Read the file driver entry from the sub fapl specified
      *    in the vfd swmr reader vfd fapl entry.  Set the file
@@ -369,19 +361,18 @@ H5P_pop_vfd_swmr_reader_vfd_off_fapl(hid_t fapl_id)
     if (H5P_peek(sub_plist_ptr, H5F_ACS_FILE_DRV_NAME, &driver_prop) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get sub-fapl file driver ID & info")
 
-    /* insert the driver info from the sub-fapl into the supplied fapl.  There is 
-     * some question in my mind as to whether I should be making a copy of the 
+    /* insert the driver info from the sub-fapl into the supplied fapl.  There is
+     * some question in my mind as to whether I should be making a copy of the
      * info and string obtained above.  While I don't think it is necessary,
      * if we get occult failures, this is a good place to look.
      *
-     * Note that for now, the driver info on the sub-fapl should only specify the 
-     * sec2 VFD -- which has NULL info and config string.  Thus, if it is an 
+     * Note that for now, the driver info on the sub-fapl should only specify the
+     * sec2 VFD -- which has NULL info and config string.  Thus, if it is an
      * issue, it may not appear immediately.
      */
-    if ( H5P_set_driver(plist_ptr, driver_prop.driver_id, 
-                        driver_prop.driver_info, driver_prop.driver_config_str) < 0 ) 
+    if (H5P_set_driver(plist_ptr, driver_prop.driver_id, driver_prop.driver_info,
+                       driver_prop.driver_config_str) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "can't set driver on supplied fapl")
-
 
     /* 3) Discard the sub-fapl?  Not sure if this is necessary.  Will wait on this for now. */
 
@@ -391,22 +382,21 @@ done:
 
 } /* end H5P_pop_vfd_swmr_reader_vfd_off_fapl() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5P_push_vfd_swmr_reader_vfd_on_fapl
  *
- * Purpose:     When a file is opened in VFD SWMR reader mode, we must 
- *              adjust the fapl so as to push the VFD SWMR reader vfd on 
- *              the VFD stack specified in the fapl.  
+ * Purpose:     When a file is opened in VFD SWMR reader mode, we must
+ *              adjust the fapl so as to push the VFD SWMR reader vfd on
+ *              the VFD stack specified in the fapl.
  *
  *              Do this as follows:
  *
  *              1) Copy the file driver from the supplied fapl.  Note
- *                 that due to potential VFD stacking, we can't verify 
- *                 that this VFD supports vfd swmr.  This will have to 
+ *                 that due to potential VFD stacking, we can't verify
+ *                 that this VFD supports vfd swmr.  This will have to
  *                 wait until after the file is opened.
  *
- *              2) Create a new FAPL, and set the file driver optained 
+ *              2) Create a new FAPL, and set the file driver optained
  *                 in 1) in the new FAPL.
  *
  *              3) Allocate a new instance of H5FD_vfd_swmr_reader_config_t,
@@ -423,20 +413,19 @@ done:
 herr_t
 H5P_push_vfd_swmr_reader_vfd_on_fapl(hid_t fapl_id)
 {
-    H5FD_driver_prop_t             driver_prop;         /* Property for driver ID & info */
-    H5FD_vfd_swmr_reader_fapl_t *  info      = NULL;
-    H5P_genplist_t *               plist_ptr = NULL;
-    hid_t                          sub_fapl_id;
-    H5P_genplist_t *               sub_plist_ptr = NULL;
-    H5P_genclass_t *               pclass = NULL; 
-    herr_t                         ret_value = SUCCEED;
+    H5FD_driver_prop_t           driver_prop; /* Property for driver ID & info */
+    H5FD_vfd_swmr_reader_fapl_t *info      = NULL;
+    H5P_genplist_t *             plist_ptr = NULL;
+    hid_t                        sub_fapl_id;
+    H5P_genplist_t *             sub_plist_ptr = NULL;
+    H5P_genclass_t *             pclass        = NULL;
+    herr_t                       ret_value     = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* sanity checks -- get ptr to plist in passing */
     if (NULL == (plist_ptr = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
-
 
     /* 1) Copy the file driver from the supplied fapl.  Note
      *    that due to potential VFD stacking, we can't verify
@@ -447,7 +436,6 @@ H5P_push_vfd_swmr_reader_vfd_on_fapl(hid_t fapl_id)
     /* get the driver property from the supplied fapl */
     if (H5P_peek(plist_ptr, H5F_ACS_FILE_DRV_NAME, &driver_prop) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get init driver ID & info")
-
 
     /* 2) Create a new FAPL, and set the file driver optained in 1) in the new FAPL. */
 
@@ -462,19 +450,18 @@ H5P_push_vfd_swmr_reader_vfd_on_fapl(hid_t fapl_id)
     if (NULL == (sub_plist_ptr = (H5P_genplist_t *)H5I_object(sub_fapl_id)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get sub-fapl pointer")
 
-    /* insert the driver info from the base fapl into the sub-fapl.  There is 
-     * some question in my mind as to whether I should be making a copy of the 
+    /* insert the driver info from the base fapl into the sub-fapl.  There is
+     * some question in my mind as to whether I should be making a copy of the
      * info and string obtained above.  While I don't think it is necessary,
      * if we get occult failures, this is a good place to look.
      *
-     * Note that for now, the driver info being inserted in sub-fapl should only specify 
-     * the sec2 VFD -- which has NULL info and config string.  Thus, if it is an 
+     * Note that for now, the driver info being inserted in sub-fapl should only specify
+     * the sec2 VFD -- which has NULL info and config string.  Thus, if it is an
      * issue, it may not appear immediately.
      */
-    if ( H5P_set_driver(sub_plist_ptr, driver_prop.driver_id, 
-                        driver_prop.driver_info, driver_prop.driver_config_str) < 0 ) 
+    if (H5P_set_driver(sub_plist_ptr, driver_prop.driver_id, driver_prop.driver_info,
+                       driver_prop.driver_config_str) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "can't set driver on sub-fapl")
-
 
     /* 3) Allocate a new instance of H5FD_vfd_swmr_reader_config_t,
      *    load it with the ID of the FAPL created in 2, and use
@@ -500,7 +487,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* end H5P_push_vfd_swmr_reader_vfd_on_fapl() */
-
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD__swmr_reader_open
@@ -611,13 +597,13 @@ H5FD__vfd_swmr_create_make_believe_data(H5FD_vfd_swmr_t *_file)
 static H5FD_t *
 H5FD__vfd_swmr_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
-    H5FD_vfd_swmr_t *                   file = NULL;
-    size_t                              page_buf_size;
-    H5P_genplist_t *                    plist;
-    H5F_vfd_swmr_config_t *             vfd_swmr_config;
-    const H5FD_vfd_swmr_reader_fapl_t * fa_ptr    = NULL;
-    H5FD_t *                            ret_value = NULL; /* Return value     */
-    htri_t                              is_hdf5;
+    H5FD_vfd_swmr_t *                  file = NULL;
+    size_t                             page_buf_size;
+    H5P_genplist_t *                   plist;
+    H5F_vfd_swmr_config_t *            vfd_swmr_config;
+    const H5FD_vfd_swmr_reader_fapl_t *fa_ptr    = NULL;
+    H5FD_t *                           ret_value = NULL; /* Return value     */
+    htri_t                             is_hdf5;
 
     FUNC_ENTER_PACKAGE
 
@@ -642,7 +628,6 @@ H5FD__vfd_swmr_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t max
     if (NULL == (file = H5FL_CALLOC(H5FD_vfd_swmr_t)))
         HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, NULL, "unable to allocate file struct")
 
-
     /* get the vfd swrm reader fapl entry. */
     if (H5P_peek_driver(plist) != H5FD_VFD_SWMR)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, NULL, "incorrect VFL driver");
@@ -652,16 +637,15 @@ H5FD__vfd_swmr_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t max
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, NULL, "bad VFL driver info");
 
     HDassert(fa_ptr->magic == H5FD_VFD_SWMR_READER_MAGIC); /* sanity check */
-  
-    /* the fapl id stored in fa_ptr->fapl_id should contain a driver entry that 
-     * specifies a VFD that supports VFD SWMR.  Since there may be a stack of 
+
+    /* the fapl id stored in fa_ptr->fapl_id should contain a driver entry that
+     * specifies a VFD that supports VFD SWMR.  Since there may be a stack of
      * VFDs, we can't check this until after file open.  Further, the vfd swmr
-     * reader vfd is currenty hard coded to use the sec2 vfd as its underlying 
-     * vfd.  Thus we just save a copy of the H5FD_vfd_swmr_reader_fapl_t for 
+     * reader vfd is currenty hard coded to use the sec2 vfd as its underlying
+     * vfd.  Thus we just save a copy of the H5FD_vfd_swmr_reader_fapl_t for
      * now.
      */
     H5MM_memcpy(&(file->fa), fa_ptr, sizeof(H5FD_vfd_swmr_reader_fapl_t));
-    
 
     vfd_swmr_config = &file->config;
 
@@ -707,7 +691,6 @@ H5FD__vfd_swmr_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t max
     if ((file->hdf5_file_lf = H5FD_open(name, flags, H5P_FILE_ACCESS_DEFAULT, maxaddr)) == NULL)
         HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, NULL, "can't set driver info");
 
-
     /* set pb_configured to FALSE.  This field should not exist, but
      * until we modify the file open procedure to create the page buffer
      * before there is any file I/O when opening a file VFD SWMR reader,
@@ -730,7 +713,6 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__vfd_swmr_open() */
-
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD__vfd_swmr_close
@@ -805,7 +787,6 @@ H5FD__vfd_swmr_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__vfd__swmr_cmp() */
-
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD__vfd_swmr_query
@@ -1117,7 +1098,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__vfd_swmr_read() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5FD__vfd_swmr_write
  *
@@ -1128,9 +1108,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__vfd_swmr_write(H5FD_t H5_ATTR_UNUSED * _file, H5FD_mem_t H5_ATTR_UNUSED type, 
+H5FD__vfd_swmr_write(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED type,
                      hid_t H5_ATTR_UNUSED dxpl_id, haddr_t H5_ATTR_UNUSED addr, size_t H5_ATTR_UNUSED size,
-                     const void H5_ATTR_UNUSED * buf)
+                     const void H5_ATTR_UNUSED *buf)
 {
     FUNC_ENTER_PACKAGE_NOERR /* Yes, even though this pushes an error on the stack */
 
@@ -1139,7 +1119,6 @@ H5FD__vfd_swmr_write(H5FD_t H5_ATTR_UNUSED * _file, H5FD_mem_t H5_ATTR_UNUSED ty
     FUNC_LEAVE_NOAPI(FAIL)
 
 } /* end H5FD__vfd_swmr_write() */
-
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD_vfd_swmr_truncate
@@ -1152,7 +1131,7 @@ H5FD__vfd_swmr_write(H5FD_t H5_ATTR_UNUSED * _file, H5FD_mem_t H5_ATTR_UNUSED ty
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__vfd_swmr_truncate(H5FD_t H5_ATTR_UNUSED *_file, hid_t H5_ATTR_UNUSED dxpl_id, 
+H5FD__vfd_swmr_truncate(H5FD_t H5_ATTR_UNUSED *_file, hid_t H5_ATTR_UNUSED dxpl_id,
                         hbool_t H5_ATTR_UNUSED closing)
 {
     FUNC_ENTER_PACKAGE_NOERR /* Yes, even though this pushes an error on the stack */
@@ -1161,7 +1140,6 @@ H5FD__vfd_swmr_truncate(H5FD_t H5_ATTR_UNUSED *_file, hid_t H5_ATTR_UNUSED dxpl_
 
     FUNC_LEAVE_NOAPI(FAIL)
 }
-
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD__vfd_swmr_lock
@@ -1216,7 +1194,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* end H5FD__vfd_swmr_unlock() */
-
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD__vfd_swmr_ctl
@@ -1276,7 +1253,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* end H5FD__vfd_swmr_ctl() */
-
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD__vfd_swmr_load_hdr_and_idx()

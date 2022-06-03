@@ -178,7 +178,7 @@ static herr_t  H5FD__log_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
 static herr_t  H5FD__log_lock(H5FD_t *_file, hbool_t rw);
 static herr_t  H5FD__log_unlock(H5FD_t *_file);
 static herr_t  H5FD__log_delete(const char *filename, hid_t fapl_id);
-static herr_t  H5FD__log_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void *input, 
+static herr_t  H5FD__log_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void *input,
                              void **output);
 
 static const H5FD_class_t H5FD_log_g = {
@@ -1848,4 +1848,3 @@ H5FD__log_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void H5_ATT
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__log_ctl() */
-

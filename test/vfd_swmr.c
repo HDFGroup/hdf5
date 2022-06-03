@@ -5403,11 +5403,11 @@ test_vfds_same_file_opens(hid_t orig_fapl, const char *env_h5_drvr)
         FAIL_STACK_ERROR;
 
 #if 1 /* Use test cases #4 and #5 when John's changes are merged */
-    /* 
-     *  Case #4 
+    /*
+     *  Case #4
      *  --Open the file as writer with both legacy SWMR and VFD SWMR configured .
      *  --NOTE: The open should fail when John's changes are merged but for now it succeeds.
-     */ 
+     */
 
     /*
      * Set up VFD SWMR configuration as writer in fapl
@@ -5416,8 +5416,7 @@ test_vfds_same_file_opens(hid_t orig_fapl, const char *env_h5_drvr)
     /* config, tick_len, max_lag, presume_posix_semantics, writer,
      * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
      * md_file_path, md_file_name, updater_file_path */
-    init_vfd_swmr_config(config, 4, 10, FALSE, TRUE, TRUE, FALSE, TRUE, 2, NULL,
-                         MD_FILENAME, NULL);
+    init_vfd_swmr_config(config, 4, 10, FALSE, TRUE, TRUE, FALSE, TRUE, 2, NULL, MD_FILENAME, NULL);
 
     if ((fapl = H5Pcopy(orig_fapl)) < 0)
         FAIL_STACK_ERROR;
@@ -5442,18 +5441,17 @@ test_vfds_same_file_opens(hid_t orig_fapl, const char *env_h5_drvr)
     if (H5Pclose(fapl) < 0)
         FAIL_STACK_ERROR;
 
-    /* 
+    /*
      *  Case #5:
      *  --Open the file as reader with both legacy SWMR and VFD SWMR configured .
      *  --NOTE: The open should fail when John's changes are merged but for now it succeeds.
-     */ 
+     */
 
     /* config, tick_len, max_lag, presume_posix_semantics, writer,
      * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
      * md_file_path, md_file_name, updater_file_path */
     /* NOTE: Set "presume_posix_semantics" to TRUE and "writer" to FALSE */
-    init_vfd_swmr_config(config, 4, 10, TRUE, FALSE, TRUE, FALSE, TRUE, 2, NULL,
-                         MD_FILENAME, NULL);
+    init_vfd_swmr_config(config, 4, 10, TRUE, FALSE, TRUE, FALSE, TRUE, 2, NULL, MD_FILENAME, NULL);
 
     if ((fapl = H5Pcopy(orig_fapl)) < 0)
         FAIL_STACK_ERROR;
@@ -5469,11 +5467,11 @@ test_vfds_same_file_opens(hid_t orig_fapl, const char *env_h5_drvr)
     }
     H5E_END_TRY;
     /* Change the section of code inside the "for loop" to TEST_ERROR when John's changes are merged */
-    if(fid1 >= 0) {
+    if (fid1 >= 0) {
         printf("The reader open succeeds which shouldn't be\n");
         if (H5Fclose(fid1) < 0)
             FAIL_STACK_ERROR;
-     }
+    }
 
     if (H5Pclose(fapl) < 0)
         FAIL_STACK_ERROR;

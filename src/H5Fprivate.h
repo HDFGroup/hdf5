@@ -1218,8 +1218,8 @@ H5_DLL herr_t  H5F_get_vfd_handle(const H5F_t *file, hid_t fapl, void **file_han
 /* VFD SWMR functions */
 H5_DLL hbool_t H5F_get_use_vfd_swmr(const H5F_t *f);
 H5_DLL herr_t  H5F_vfd_swmr_init(H5F_t *f, hbool_t file_create);
-H5_DLL herr_t H5F_vfd_swmr_build_md_path_name(H5F_vfd_swmr_config_t *config, const char *hdf5_filename,
-                                              char *name /*out*/);
+H5_DLL herr_t  H5F_vfd_swmr_build_md_path_name(H5F_vfd_swmr_config_t *config, const char *hdf5_filename,
+                                               char *name /*out*/);
 H5_DLL herr_t  H5F_vfd_swmr_close_or_flush(H5F_t *f, hbool_t closing);
 H5_DLL herr_t  H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t index_len,
                                                  H5FD_vfd_swmr_idx_entry_t *index);

@@ -149,7 +149,7 @@ static herr_t  H5FD__core_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing
 static herr_t  H5FD__core_lock(H5FD_t *_file, hbool_t rw);
 static herr_t  H5FD__core_unlock(H5FD_t *_file);
 static herr_t  H5FD__core_delete(const char *filename, hid_t fapl_id);
-static herr_t  H5FD__core_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void  *input,
+static herr_t  H5FD__core_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void *input,
                               void **output);
 static inline const H5FD_core_fapl_t *H5FD__core_get_default_config(void);
 
@@ -1773,9 +1773,9 @@ done:
  *              input and output
  *
  *              At present, the only op code supported is
- *              H5FD_CTL__GET_TERMINAL_VFD, which is used to obtain a 
- *              pointer to the instance of H5FD_t associated with the 
- *              terminal VFD.  This allows comparison of files whose 
+ *              H5FD_CTL__GET_TERMINAL_VFD, which is used to obtain a
+ *              pointer to the instance of H5FD_t associated with the
+ *              terminal VFD.  This allows comparison of files whose
  *              terminal VFD may have overlying pass through VFDs.
  *
  * Return:      Non-negative on success/Negative on failure
@@ -1813,4 +1813,3 @@ H5FD__core_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void H5_AT
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__core_ctl() */
-

@@ -83,7 +83,6 @@ static herr_t H5FD__query(const H5FD_t *f, unsigned long *flags /*out*/);
  */
 static unsigned long H5FD_file_serial_no_g;
 
-
 /* File driver ID class */
 static const H5I_class_t H5I_VFL_CLS[1] = {{
     H5I_VFL,                   /* ID class value */
@@ -706,7 +705,6 @@ done:
     FUNC_LEAVE_API(ret_value)
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5FD_open
  *
@@ -721,13 +719,13 @@ done:
 H5FD_t *
 H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
-    H5FD_class_t *         driver;              /* VFD for file */
-    H5FD_t *               file = NULL;         /* VFD file struct */
-    H5FD_driver_prop_t     driver_prop;         /* Property for driver ID & info */
-    H5P_genplist_t *       plist;               /* Property list pointer */
-    unsigned long          driver_flags = 0;    /* File-inspecific driver feature flags */
-    H5FD_file_image_info_t file_image_info;     /* Initial file image */
-    H5FD_t *               ret_value    = NULL; /* Return value */
+    H5FD_class_t *         driver;           /* VFD for file */
+    H5FD_t *               file = NULL;      /* VFD file struct */
+    H5FD_driver_prop_t     driver_prop;      /* Property for driver ID & info */
+    H5P_genplist_t *       plist;            /* Property list pointer */
+    unsigned long          driver_flags = 0; /* File-inspecific driver feature flags */
+    H5FD_file_image_info_t file_image_info;  /* Initial file image */
+    H5FD_t *               ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -924,14 +922,14 @@ done:
  *              Failure:    Must never fail.
  *
  * Changes:     Re-worked function to use H5FD_ctl() to obtain the terminal
- *              VFDs for f1 and f2.  Typically, these are the same thing, 
+ *              VFDs for f1 and f2.  Typically, these are the same thing,
  *              however, if there is an intervening pass through VFD
  *              (i.e. splitter of vfd swrmr reader vfd), using the terminal
  *              VFD for the comparison will avoid some false negatives.
  *
- *              Note, however, that we will still fail to detect the 
+ *              Note, however, that we will still fail to detect the
  *              case in which a give file is opened twice with different
- *              terminal VFDs.  
+ *              terminal VFDs.
  *
  *                                           JRM -- 5/5/22
  *
@@ -941,32 +939,32 @@ done:
 int
 H5FD_cmp(const H5FD_t *f1, const H5FD_t *f2)
 {
-    const H5FD_t * term_f1 = f1;
-    const H5FD_t * term_f2 = f2;
-    herr_t         ctl_result;
-    int            ret_value = -1; /* Return value */
+    const H5FD_t *term_f1 = f1;
+    const H5FD_t *term_f2 = f2;
+    herr_t        ctl_result;
+    int           ret_value = -1; /* Return value */
 
     FUNC_ENTER_NOAPI_NOERR; /* return value is arbitrary */
 
-
     /* For each of f1 and f2, check to see if the ctl call is defined.  If it is,
      * use the ctl call to try to obtain the terminal VFD.  Since this function
-     * is not allowed to fail, discard the error stack if either of the ctl call 
+     * is not allowed to fail, discard the error stack if either of the ctl call
      * fail.
      */
-    if ( ( f1 ) && ( f1->cls ) && ( f1->cls->ctl ) ) {
+    if ((f1) && (f1->cls) && (f1->cls->ctl)) {
 
         H5E_BEGIN_TRY
         {
-           ctl_result = H5FD_ctl(f1, H5FD_CTL__GET_TERMINAL_VFD, H5FD_CTL__FAIL_IF_UNKNOWN_FLAG | 
-                                 H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG, NULL, (void **)(&term_f1));
+            ctl_result = H5FD_ctl(f1, H5FD_CTL__GET_TERMINAL_VFD,
+                                  H5FD_CTL__FAIL_IF_UNKNOWN_FLAG | H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG, NULL,
+                                  (void **)(&term_f1));
         }
         H5E_END_TRY;
 
-        /* if the ctl call failed, set term_f1 equal to f1.  This will probably be 
+        /* if the ctl call failed, set term_f1 equal to f1.  This will probably be
          * wrong -- but it will be no worse than using the top level VFD unconditionally.
          */
-        if ( ctl_result != SUCCEED ) {
+        if (ctl_result != SUCCEED) {
 
             H5E_clear_stack(NULL);
 
@@ -974,19 +972,20 @@ H5FD_cmp(const H5FD_t *f1, const H5FD_t *f2)
         }
     }
 
-    if ( ( f2 ) && ( f2->cls ) && ( f2->cls->ctl ) ) {
+    if ((f2) && (f2->cls) && (f2->cls->ctl)) {
 
         H5E_BEGIN_TRY
         {
-           ctl_result = H5FD_ctl(f2, H5FD_CTL__GET_TERMINAL_VFD, H5FD_CTL__FAIL_IF_UNKNOWN_FLAG | 
-                                 H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG, NULL, (void **)(&term_f2));
+            ctl_result = H5FD_ctl(f2, H5FD_CTL__GET_TERMINAL_VFD,
+                                  H5FD_CTL__FAIL_IF_UNKNOWN_FLAG | H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG, NULL,
+                                  (void **)(&term_f2));
         }
         H5E_END_TRY;
 
-        /* if the ctl call failed, set term_f1 equal to f1.  This will probably be 
+        /* if the ctl call failed, set term_f1 equal to f1.  This will probably be
          * wrong -- but it will be no worse than using the top level VFD unconditionally.
          */
-        if ( ctl_result != SUCCEED ) {
+        if (ctl_result != SUCCEED) {
 
             H5E_clear_stack(NULL);
 
@@ -1020,7 +1019,6 @@ H5FD_cmp(const H5FD_t *f1, const H5FD_t *f2)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_cmp() */
-
 
 /*-------------------------------------------------------------------------
  * Function:    H5FDquery
