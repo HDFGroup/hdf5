@@ -261,7 +261,7 @@ H5FD__subfiling__get_real_eof(hid_t context_id, int64_t *logical_eof_ptr)
         ioc_rank = sf_context->topology->io_concentrators[i];
 
         if (MPI_SUCCESS != (mpi_code = MPI_Isend(msg, 3, MPI_INT64_T, ioc_rank, GET_EOF_OP,
-                sf_context->sf_msg_comm, &reqs[i])))
+                                                 sf_context->sf_msg_comm, &reqs[i])))
             HMPI_GOTO_ERROR(FAIL, "MPI_Isend", mpi_code);
     }
 
@@ -275,7 +275,7 @@ H5FD__subfiling__get_real_eof(hid_t context_id, int64_t *logical_eof_ptr)
         ioc_rank = sf_context->topology->io_concentrators[i];
 
         if (MPI_SUCCESS != (mpi_code = MPI_Irecv(&recv_msg[3 * i], 3, MPI_INT64_T, ioc_rank,
-                GET_EOF_COMPLETED, sf_context->sf_eof_comm, &reqs[i])))
+                                                 GET_EOF_COMPLETED, sf_context->sf_eof_comm, &reqs[i])))
             HMPI_GOTO_ERROR(FAIL, "MPI_Irecv", mpi_code);
     }
 
