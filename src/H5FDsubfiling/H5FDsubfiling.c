@@ -802,7 +802,7 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
     if (NULL == (file_ptr = (H5FD_subfiling_t *)H5FL_CALLOC(H5FD_subfiling_t)))
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to allocate file struct")
     file_ptr->fa.ioc_fapl_id = H5I_INVALID_HID;
-    file_ptr->ext_comm = MPI_COMM_NULL;
+    file_ptr->ext_comm       = MPI_COMM_NULL;
 
     /* Get the driver-specific file access properties */
     if (NULL == (plist_ptr = (H5P_genplist_t *)H5I_object(fapl_id)))
@@ -1213,11 +1213,11 @@ H5FD__subfiling_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t a
 static haddr_t
 H5FD__subfiling_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 {
-    const H5FD_subfiling_t *file        = (const H5FD_subfiling_t *)_file;
+    const H5FD_subfiling_t *file = (const H5FD_subfiling_t *)_file;
 #if 0
     int64_t                 logical_eof = -1;
 #endif
-    haddr_t                 ret_value   = HADDR_UNDEF;
+    haddr_t ret_value = HADDR_UNDEF;
 
 #if 0
     FUNC_ENTER_PACKAGE
