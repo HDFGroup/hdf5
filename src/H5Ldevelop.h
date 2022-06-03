@@ -15,8 +15,8 @@
  *      support routines.
  */
 
-#ifndef _H5Ldevelop_H
-#define _H5Ldevelop_H
+#ifndef H5Ldevelop_H
+#define H5Ldevelop_H
 
 /* Include package's public header */
 #include "H5Lpublic.h"
@@ -311,4 +311,4 @@ typedef struct {
 
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
-#endif /* _H5Ldevelop_H */
+#endif /* H5Ldevelop_H */
