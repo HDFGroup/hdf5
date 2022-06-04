@@ -217,10 +217,6 @@ struct H5FD_t {
     haddr_t             maxaddr;       /* For this file, overrides class */
     haddr_t             base_addr;     /* Base address for HDF5 data w/in file */
 
-    H5FD_t *exc_owner; /* Pointer to an exclusive owner
-                        * or NULL if none.
-                        */
-
     /* Space allocation management fields */
     hsize_t threshold;  /* Threshold for alignment  */
     hsize_t alignment;  /* Allocation alignment     */

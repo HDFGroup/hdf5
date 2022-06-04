@@ -49,8 +49,9 @@
 /* Local Macros */
 /****************/
 
-#define NANOSECS_PER_SECOND    1000000000 /* nanoseconds per second */
-#define NANOSECS_PER_TENTH_SEC 100000000  /* nanoseconds per 0.1 second */
+#define VFD_SWMR_MD_FILE_SUFFIX ".md"
+#define NANOSECS_PER_SECOND     1000000000 /* nanoseconds per second */
+#define NANOSECS_PER_TENTH_SEC  100000000  /* nanoseconds per 0.1 second */
 
 /* Declare an array of string to identify the VFD SMWR Log tags.
  * Note this array is used to generate the entry tag by the log reporting macro
@@ -186,8 +187,13 @@ H5F_vfd_swmr_init(H5F_t *f, hbool_t file_create)
         shared->vfd_swmr_writer = TRUE;
         shared->tick_num        = 0;
 
-        /* Retrieve the metadata filename built with md_file_path and md_file_name */
-        H5FD_vfd_swmr_get_md_path_name(f->shared->lf, &shared->md_file_path_name);
+        /* Allocate space for the (possibly constructed) metadata file name */
+        if (NULL == (shared->md_file_path_name = H5MM_calloc((H5FD_MAX_FILENAME_LEN + 1) * sizeof(char))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate memory for mdc log file name")
+
+        if (H5F_vfd_swmr_build_md_path_name(&(shared->vfd_swmr_config), f->open_name,
+                                            shared->md_file_path_name) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to build metadata file name")
 
         if (((shared->vfd_swmr_md_fd = HDopen(shared->md_file_path_name, O_CREAT | O_RDWR | O_TRUNC,
                                               H5_POSIX_CREATE_MODE_RW))) < 0)
@@ -279,6 +285,66 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* H5F_vfd_swmr_init() */
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:    H5F_vfd_swmr_build_md_path_name
+ *
+ * Purpose:     To construct the metadata file's full name based on config's
+ *              md_file_path and md_file_name.  See RFC for details.
+ *
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  Vailin Choi -- 1/13/2022
+ *
+ * Changes:     Moved to H5Fvfd_swmr.c from H5FDvfd_swmr.c, and renamed
+ *              accordingly.  Changed FUNC_ENTER_PACKAGE to
+ *              FUNC_ENTER_NOAPI.  Converted to a private function so
+ *              that it can be called in H5FDvfd_swmr.c
+ *
+ *                                               JRM -- 5/17/22
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_vfd_swmr_build_md_path_name(H5F_vfd_swmr_config_t *config, const char *hdf5_filename, char *name /*out*/)
+{
+    size_t tot_len   = 0;
+    size_t tmp_len   = 0;
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    if ((tot_len = HDstrlen(config->md_file_path)) != 0) {
+
+        /* md_file_path + '/' */
+        if (++tot_len > H5F__MAX_VFD_SWMR_FILE_NAME_LEN)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTCOPY, FAIL, "md_file_path and md_file_name exceeds maximum");
+        HDstrcat(name, config->md_file_path);
+        HDstrcat(name, "/");
+    }
+
+    if ((tmp_len = HDstrlen(config->md_file_name)) != 0) {
+        if ((tot_len += tmp_len) > H5F__MAX_VFD_SWMR_FILE_NAME_LEN)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTCOPY, FAIL, "md_file_path and md_file_name exceeds maximum");
+        HDstrcat(name, config->md_file_name);
+    }
+    else {
+        /* Automatic generation of metadata file name based on hdf5_filename + '.md' */
+        if ((tot_len += (HDstrlen(hdf5_filename) + 3)) > H5F__MAX_VFD_SWMR_FILE_NAME_LEN)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTCOPY, FAIL, "md_file_path and md_file_name maximum");
+
+        HDstrcat(name, hdf5_filename);
+        HDstrcat(name, VFD_SWMR_MD_FILE_SUFFIX);
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5F_vfd_swmr_build_md_path_name() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5F_vfd_swmr_close_or_flush
