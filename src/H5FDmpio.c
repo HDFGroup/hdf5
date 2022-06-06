@@ -1918,6 +1918,9 @@ done:
  *
  * Programmer:  JRM -- 8/3/21
  *
+ * Changes:     Added support for H5FD_CTL__GET_TERMINAL_VFD.
+ *                                            JRM -- 5/4/22
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1951,6 +1954,11 @@ H5FD__mpio_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void H5_AT
             HDassert(output);
             HDassert(*output);
             **((int **)output) = file->mpi_size;
+            break;
+
+        case H5FD_CTL__GET_TERMINAL_VFD:
+            HDassert(output);
+            *output = (void *)(file);
             break;
 
         default: /* unknown op code */

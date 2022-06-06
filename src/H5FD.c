@@ -51,12 +51,6 @@
 /* Package Typedefs */
 /********************/
 
-/* H5FD wrapper for VFD SWMR. Allows use as a BSD TAILQ element. */
-typedef struct H5FD_wrap_t {
-    TAILQ_ENTRY(H5FD_wrap_t) link; /* Linkage for list of all VFDs. */
-    H5FD_t *file;                  /* Pointer to wrapped VFD struct */
-} H5FD_wrap_t;
-
 /********************/
 /* Local Prototypes */
 /********************/
@@ -88,8 +82,6 @@ static herr_t H5FD__query(const H5FD_t *f, unsigned long *flags /*out*/);
  * be different.
  */
 static unsigned long H5FD_file_serial_no_g;
-
-static TAILQ_HEAD(_all_vfds, H5FD_wrap_t) all_vfds = TAILQ_HEAD_INITIALIZER(all_vfds);
 
 /* File driver ID class */
 static const H5I_class_t H5I_VFL_CLS[1] = {{
@@ -714,104 +706,6 @@ done:
 }
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD__dedup
- *
- * Purpose:     Helper routine for H5FD_deduplicate
- *
- *              Compares `self` and `other` using the dedup callback of
- *              `self` (if it has one); otherwise compares using `H5FDcmp()`.
- *
- *      No `dedup' callback:
- *
- *              If `self` has no de-duplication method, compare `self` and
- *              `other` using `H5FDcmp()` and return `self` if they're equal
- *              and `other` if unequal.
- *
- *      `dedup' callback present:
- *
- *              If `self` does have a de-duplication callback, invoke it and
- *              return the method's result: `other` if it duplicates `self`,
- *              `self` if `other` does NOT duplicate it, NULL if `other`
- *              conflicts with `self` or if there is an error.
- *
- * Return:      Success:    `self' or `other', as described above
- *
- *              Failure:    NULL
- *
- * Note:        Unlike H5FD_deduplicate(), this routine does not free `self`
- *              under any circumstances.
- *
- *-------------------------------------------------------------------------
- *
- */
-
-/*-------------------------------------------------------------------------
- * Function:    H5FD_deduplicate
- *
- * Purpose:     Search the already-opened VFD instances for an instance
- *              similar to the instance `file` newly-opened using file access
- *              properties given by `fapl_id`.
- *
- * Return:      It's complicated...
- *
- *              If there is an already-open instance that is functionally
- *              identical to `file`, close `file` and return the already
- *              open instance.
- *
- *              If there is an already open instance that conflicts with
- *              `file` because, for example, its file-access properties are
- *              incompatible with `fapl_id`'s or, for another example, it is
- *              under exclusive control by a third VFD instance, then close
- *              `file` and return `NULL`.
- *
- *              Otherwise, return `file` to indicate that there are no
- *              identical or conflicting VFD instances already open.
- *-------------------------------------------------------------------------
- */
-H5FD_t *
-H5FD_deduplicate(H5FD_t *file, hid_t fapl_id)
-{
-    H5FD_wrap_t *item;
-    H5FD_t *     ret_value = file;
-
-    FUNC_ENTER_NOAPI(NULL)
-
-    TAILQ_FOREACH(item, &all_vfds, link)
-    {
-        /* Skip "self" */
-        if (item->file == file)
-            continue;
-
-        /* Skip files with exclusive owners, for now */
-        if (item->file->exc_owner != NULL)
-            continue;
-
-        if ((ret_value = H5FD_vfd_swmr_dedup(item->file, file, fapl_id)) != file)
-            goto done;
-    }
-
-    /* If we reach this stage, then we identified neither a conflict nor a
-     * duplicate.  If any lower VFD with an exclusive owner matches `file`,
-     * return NULL to indicate the conflict.
-     */
-    TAILQ_FOREACH(item, &all_vfds, link)
-    {
-        if (item->file == file || item->file->exc_owner == NULL)
-            continue;
-
-        if (H5FD_cmp(file, item->file) == 0)
-            HGOTO_ERROR(H5E_VFL, H5E_FILEOPEN, NULL,
-                        "found a conflicting open file when searching for duplicates")
-    }
-
-done:
-    if (ret_value != file && H5FD_close(file) < 0)
-        HDONE_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, NULL, "could not close file")
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_deduplicate() */
-
-/*-------------------------------------------------------------------------
  * Function:    H5FD_open
  *
  * Purpose:     Private version of H5FDopen()
@@ -825,14 +719,13 @@ done:
 H5FD_t *
 H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
-    H5FD_class_t *         driver;              /* VFD for file */
-    H5FD_t *               file = NULL;         /* VFD file struct */
-    H5FD_driver_prop_t     driver_prop;         /* Property for driver ID & info */
-    H5P_genplist_t *       plist;               /* Property list pointer */
-    unsigned long          driver_flags = 0;    /* File-inspecific driver feature flags */
-    H5FD_file_image_info_t file_image_info;     /* Initial file image */
-    H5FD_wrap_t *          swmr_wrapper = NULL; /* H5FD wrapper for SWMR queue */
-    H5FD_t *               ret_value    = NULL; /* Return value */
+    H5FD_class_t *         driver;           /* VFD for file */
+    H5FD_t *               file = NULL;      /* VFD file struct */
+    H5FD_driver_prop_t     driver_prop;      /* Property for driver ID & info */
+    H5P_genplist_t *       plist;            /* Property list pointer */
+    unsigned long          driver_flags = 0; /* File-inspecific driver feature flags */
+    H5FD_file_image_info_t file_image_info;  /* Initial file image */
+    H5FD_t *               ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -874,8 +767,6 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     if (NULL == (file = (driver->open)(name, flags, fapl_id, maxaddr)))
         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "open failed")
 
-    file->exc_owner = NULL;
-
     /* Set the file access flags */
     file->access_flags = flags;
 
@@ -906,12 +797,6 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     /* Start with base address set to 0 */
     /* (This will be changed later, when the superblock is located) */
     file->base_addr = 0;
-
-    /* Create and insert a SWMR wrapper for the file */
-    if (NULL == (swmr_wrapper = H5MM_calloc(sizeof(H5FD_wrap_t))))
-        HGOTO_ERROR(H5E_VFL, H5E_NOSPACE, NULL, "unable to allocate file wrap struct")
-    swmr_wrapper->file = file;
-    TAILQ_INSERT_TAIL(&all_vfds, swmr_wrapper, link);
 
     /* Set return value */
     ret_value = file;
@@ -969,8 +854,6 @@ herr_t
 H5FD_close(H5FD_t *file)
 {
     const H5FD_class_t *driver;
-    H5FD_wrap_t *       item;
-    H5FD_wrap_t *       temp      = NULL;
     herr_t              ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -983,18 +866,6 @@ H5FD_close(H5FD_t *file)
     driver = file->cls;
     if (H5I_dec_ref(file->driver_id) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTDEC, FAIL, "can't close driver ID")
-
-    TAILQ_FOREACH(item, &all_vfds, link)
-    {
-        if (item->file->exc_owner == file)
-            item->file->exc_owner = NULL;
-        if (item->file == file)
-            temp = item;
-    }
-
-    HDassert(temp);
-    TAILQ_REMOVE(&all_vfds, temp, link);
-    H5MM_xfree(temp);
 
     /* Dispatch to the driver for actual close. If the driver fails to
      * close the file then the file will be in an unusable state.
@@ -1050,37 +921,100 @@ done:
  *
  *              Failure:    Must never fail.
  *
+ * Changes:     Re-worked function to use H5FD_ctl() to obtain the terminal
+ *              VFDs for f1 and f2.  Typically, these are the same thing,
+ *              however, if there is an intervening pass through VFD
+ *              (i.e. splitter of vfd swrmr reader vfd), using the terminal
+ *              VFD for the comparison will avoid some false negatives.
+ *
+ *              Note, however, that we will still fail to detect the
+ *              case in which a give file is opened twice with different
+ *              terminal VFDs.
+ *
+ *                                           JRM -- 5/5/22
+ *
  *-------------------------------------------------------------------------
  */
+
 int
 H5FD_cmp(const H5FD_t *f1, const H5FD_t *f2)
 {
-    int ret_value = -1; /* Return value */
+    const H5FD_t *term_f1 = f1;
+    const H5FD_t *term_f2 = f2;
+    herr_t        ctl_result;
+    int           ret_value = -1; /* Return value */
 
     FUNC_ENTER_NOAPI_NOERR; /* return value is arbitrary */
 
-    if ((!f1 || !f1->cls) && (!f2 || !f2->cls))
+    /* For each of f1 and f2, check to see if the ctl call is defined.  If it is,
+     * use the ctl call to try to obtain the terminal VFD.  Since this function
+     * is not allowed to fail, discard the error stack if either of the ctl call
+     * fail.
+     */
+    if ((f1) && (f1->cls) && (f1->cls->ctl)) {
+
+        H5E_BEGIN_TRY
+        {
+            ctl_result = H5FD_ctl(f1, H5FD_CTL__GET_TERMINAL_VFD,
+                                  H5FD_CTL__FAIL_IF_UNKNOWN_FLAG | H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG, NULL,
+                                  (void **)(&term_f1));
+        }
+        H5E_END_TRY;
+
+        /* if the ctl call failed, set term_f1 equal to f1.  This will probably be
+         * wrong -- but it will be no worse than using the top level VFD unconditionally.
+         */
+        if (ctl_result != SUCCEED) {
+
+            H5E_clear_stack(NULL);
+
+            term_f1 = f1;
+        }
+    }
+
+    if ((f2) && (f2->cls) && (f2->cls->ctl)) {
+
+        H5E_BEGIN_TRY
+        {
+            ctl_result = H5FD_ctl(f2, H5FD_CTL__GET_TERMINAL_VFD,
+                                  H5FD_CTL__FAIL_IF_UNKNOWN_FLAG | H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG, NULL,
+                                  (void **)(&term_f2));
+        }
+        H5E_END_TRY;
+
+        /* if the ctl call failed, set term_f1 equal to f1.  This will probably be
+         * wrong -- but it will be no worse than using the top level VFD unconditionally.
+         */
+        if (ctl_result != SUCCEED) {
+
+            H5E_clear_stack(NULL);
+
+            term_f2 = f2;
+        }
+    }
+
+    if ((!term_f1 || !term_f1->cls) && (!term_f2 || !term_f2->cls))
         HGOTO_DONE(0)
-    if (!f1 || !f1->cls)
+    if (!term_f1 || !term_f1->cls)
         HGOTO_DONE(-1)
-    if (!f2 || !f2->cls)
+    if (!term_f2 || !term_f2->cls)
         HGOTO_DONE(1)
-    if (f1->cls < f2->cls)
+    if (term_f1->cls < term_f2->cls)
         HGOTO_DONE(-1)
-    if (f1->cls > f2->cls)
+    if (term_f1->cls > term_f2->cls)
         HGOTO_DONE(1)
 
     /* Files are same driver; no cmp callback */
-    if (!f1->cls->cmp) {
-        if (f1 < f2)
+    if (!term_f1->cls->cmp) {
+        if (term_f1 < term_f2)
             HGOTO_DONE(-1)
-        if (f1 > f2)
+        if (term_f1 > term_f2)
             HGOTO_DONE(1)
         HGOTO_DONE(0)
     }
 
     /* Dispatch to driver */
-    ret_value = (f1->cls->cmp)(f1, f2);
+    ret_value = (term_f1->cls->cmp)(term_f1, term_f2);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
