@@ -1724,7 +1724,7 @@ H5D__link_chunk_filtered_collective_io(H5D_io_info_t *io_info, int mpi_rank, int
         }
         else {
             io_info->base_maddr.cvp = &fake_buf;
-            io_info->store_faddr     = 0;
+            io_info->store_faddr    = 0;
         }
 
         /* Perform I/O */
@@ -4120,8 +4120,8 @@ H5D__mpio_collective_filtered_chunk_read(H5D_filtered_collective_io_info_t *chun
     HDassert(type_info);
 
     /* Initialize temporary I/O info */
-    coll_io_info                 = *io_info;
-    coll_io_info.base_maddr.vp  = NULL;
+    coll_io_info               = *io_info;
+    coll_io_info.base_maddr.vp = NULL;
 
     if (chunk_list_num_entries) {
         /* Retrieve filter settings from API context */

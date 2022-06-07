@@ -846,15 +846,15 @@ H5D__contig_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize
              * already verified it won't be used, and the metadata accumulator
              * because this is raw data) */
             if (H5F_shared_select_read(H5F_SHARED(dinfo->dset->oloc.file), H5FD_MEM_DRAW, nelmts > 0 ? 1 : 0,
-                                       &mem_space, &file_space, &(dinfo->store->contig.dset_addr), &dst_type_size,
-                                       &(dinfo->buf.vp)) < 0)
+                                       &mem_space, &file_space, &(dinfo->store->contig.dset_addr),
+                                       &dst_type_size, &(dinfo->buf.vp)) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "contiguous selection read failed")
         }
     } /* end if */
     else
         /* Read data through legacy (non-selection I/O) pathway */
         if ((io_info->io_ops.single_read)(io_info, type_info, nelmts, file_space, mem_space) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "contiguous read failed")
+        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "contiguous read failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -908,7 +908,7 @@ H5D__contig_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsiz
     else
         /* Write data through legacy (non-selection I/O) pathway */
         if ((io_info->io_ops.single_write)(io_info, type_info, nelmts, file_space, mem_space) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "contiguous write failed")
+        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "contiguous write failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

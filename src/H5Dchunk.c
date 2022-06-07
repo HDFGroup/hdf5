@@ -2632,7 +2632,8 @@ H5D__chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                 "memory allocation failed for memory space list")
                 if (NULL == (chunk_file_spaces = H5MM_malloc(num_chunks * sizeof(H5S_t *))))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for file space list")
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                "memory allocation failed for file space list")
                 if (NULL == (chunk_addrs = H5MM_malloc(num_chunks * sizeof(haddr_t))))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                 "memory allocation failed for chunk address list")
@@ -2676,7 +2677,7 @@ H5D__chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_
                     chunk_addrs[num_chunks]       = udata.chunk_block.offset;
                     num_chunks++;
                 } /* end if */
-            } /* end if */
+            }     /* end if */
             else if (!skip_missing_chunks) {
                 /* Perform the actual read operation from the nonexistent chunk
                  */
@@ -2705,12 +2706,12 @@ H5D__chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_
             if (chunk_mem_spaces != chunk_mem_spaces_local) {
                 HDassert(chunk_file_spaces != chunk_file_spaces_local);
                 HDassert(chunk_addrs != chunk_addrs_local);
-                chunk_mem_spaces = H5MM_xfree(chunk_mem_spaces);
+                chunk_mem_spaces  = H5MM_xfree(chunk_mem_spaces);
                 chunk_file_spaces = H5MM_xfree(chunk_file_spaces);
-                chunk_addrs = H5MM_xfree(chunk_addrs);
+                chunk_addrs       = H5MM_xfree(chunk_addrs);
             } /* end if */
-        } /* end if */
-    }     /* end if */
+        }     /* end if */
+    }         /* end if */
     else {
         H5D_io_info_t   ctg_io_info;   /* Contiguous I/O info object */
         H5D_dset_info_t ctg_dset_info; /* Contiguous I/O dset info object */
@@ -2852,22 +2853,22 @@ H5D__chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize
                  H5S_t H5_ATTR_UNUSED *file_space, H5S_t H5_ATTR_UNUSED *mem_space,
                  H5D_dset_info_t *dset_info)
 {
-    H5SL_node_t *   chunk_node;                  /* Current node in chunk skip list */
-    H5D_io_info_t   ctg_io_info;                 /* Contiguous I/O info object */
-    H5D_dset_info_t ctg_dset_info;               /* Contiguous I/O dset info object */
-    H5D_storage_t   ctg_store;                   /* Chunk storage information as contiguous dataset */
-    H5D_io_info_t   cpt_io_info;                 /* Compact I/O info object */
-    H5D_dset_info_t cpt_dset_info;               /* Compact I/O dset info object */
-    H5D_storage_t   cpt_store;                   /* Chunk storage information as compact dataset */
-    hbool_t         cpt_dirty;                   /* Temporary placeholder for compact storage "dirty" flag */
-    uint32_t        dst_accessed_bytes = 0;      /* Total accessed size in a chunk */
-    H5S_t **        chunk_mem_spaces   = NULL;   /* Array of chunk memory spaces */
-    H5S_t *         chunk_mem_spaces_local[8];   /* Local buffer for chunk_mem_spaces */
-    H5S_t **        chunk_file_spaces = NULL;    /* Array of chunk file spaces */
-    H5S_t *         chunk_file_spaces_local[8];  /* Local buffer for chunk_file_spaces */
-    haddr_t *       chunk_addrs = NULL;          /* Array of chunk addresses */
-    haddr_t         chunk_addrs_local[8];        /* Local buffer for chunk_addrs */
-    herr_t          ret_value = SUCCEED;         /* Return value        */
+    H5SL_node_t *   chunk_node;                 /* Current node in chunk skip list */
+    H5D_io_info_t   ctg_io_info;                /* Contiguous I/O info object */
+    H5D_dset_info_t ctg_dset_info;              /* Contiguous I/O dset info object */
+    H5D_storage_t   ctg_store;                  /* Chunk storage information as contiguous dataset */
+    H5D_io_info_t   cpt_io_info;                /* Compact I/O info object */
+    H5D_dset_info_t cpt_dset_info;              /* Compact I/O dset info object */
+    H5D_storage_t   cpt_store;                  /* Chunk storage information as compact dataset */
+    hbool_t         cpt_dirty;                  /* Temporary placeholder for compact storage "dirty" flag */
+    uint32_t        dst_accessed_bytes = 0;     /* Total accessed size in a chunk */
+    H5S_t **        chunk_mem_spaces   = NULL;  /* Array of chunk memory spaces */
+    H5S_t *         chunk_mem_spaces_local[8];  /* Local buffer for chunk_mem_spaces */
+    H5S_t **        chunk_file_spaces = NULL;   /* Array of chunk file spaces */
+    H5S_t *         chunk_file_spaces_local[8]; /* Local buffer for chunk_file_spaces */
+    haddr_t *       chunk_addrs = NULL;         /* Array of chunk addresses */
+    haddr_t         chunk_addrs_local[8];       /* Local buffer for chunk_addrs */
+    herr_t          ret_value = SUCCEED;        /* Return value        */
 
     FUNC_ENTER_PACKAGE
 
@@ -2921,7 +2922,8 @@ H5D__chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                 "memory allocation failed for memory space list")
                 if (NULL == (chunk_file_spaces = H5MM_malloc(num_chunks * sizeof(H5S_t *))))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for file space list")
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                "memory allocation failed for file space list")
                 if (NULL == (chunk_addrs = H5MM_malloc(num_chunks * sizeof(haddr_t))))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                 "memory allocation failed for chunk address list")
@@ -3037,7 +3039,7 @@ H5D__chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize
                     chunk_addrs[num_chunks]       = udata.chunk_block.offset;
                     num_chunks++;
                 } /* end if */
-            } /* end else */
+            }     /* end else */
 
             /* Advance to next chunk in list */
             chunk_node = H5D_CHUNK_GET_NEXT_NODE(dset_info, chunk_node);
@@ -3050,20 +3052,20 @@ H5D__chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize
              * already verified it won't be used, and the metadata accumulator
              * because this is raw data) */
             if (H5F_shared_select_write(H5F_SHARED(dset_info->dset->oloc.file), H5FD_MEM_DRAW,
-                                        (uint32_t)num_chunks, chunk_mem_spaces, chunk_file_spaces, chunk_addrs,
-                                        element_sizes, bufs) < 0)
+                                        (uint32_t)num_chunks, chunk_mem_spaces, chunk_file_spaces,
+                                        chunk_addrs, element_sizes, bufs) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "chunk selection write failed")
 
             /* Clean up memory */
             if (chunk_mem_spaces != chunk_mem_spaces_local) {
                 HDassert(chunk_file_spaces != chunk_file_spaces_local);
                 HDassert(chunk_addrs != chunk_addrs_local);
-                chunk_mem_spaces = H5MM_xfree(chunk_mem_spaces);
+                chunk_mem_spaces  = H5MM_xfree(chunk_mem_spaces);
                 chunk_file_spaces = H5MM_xfree(chunk_file_spaces);
-                chunk_addrs = H5MM_xfree(chunk_addrs);
+                chunk_addrs       = H5MM_xfree(chunk_addrs);
             } /* end if */
-        } /* end if */
-    }     /* end if */
+        }     /* end if */
+    }         /* end if */
     else {
         /* Iterate through nodes in chunk skip list */
         chunk_node = H5D_CHUNK_GET_FIRST_NODE(dset_info);

@@ -277,18 +277,18 @@ typedef struct H5D_io_info_t {
     /* QAK: Delete the f_sh field when oloc has a shared file pointer? */
     H5F_shared_t *f_sh; /* Pointer to shared file struct that dataset is within */
 #ifdef H5_HAVE_PARALLEL
-    MPI_Comm comm;           /* MPI communicator for file */
-    hbool_t  using_mpi_vfd;  /* Whether the file is using an MPI-based VFD */
-#endif                       /* H5_HAVE_PARALLEL */
-    H5D_io_ops_t     io_ops; /* I/O operation function pointers */
-    H5D_io_op_type_t op_type;
-    const H5D_t *    dset;        /* Pointer to dataset being operated on */
-    H5D_dset_info_t *dsets_info;  /* dsets info where I/O is done to/from */
-    H5SL_t *         sel_pieces;  /* Skip list containing information for each piece selected */
-    haddr_t          store_faddr; /* lowest file addr for read/write */
-    H5_flexible_const_ptr_t base_maddr; /* starting mem address */
-    hbool_t is_mdset; /* Is this a multi datasets I/O? */
-    hbool_t use_select_io; /* Whether to use selection I/O */
+    MPI_Comm comm;                  /* MPI communicator for file */
+    hbool_t  using_mpi_vfd;         /* Whether the file is using an MPI-based VFD */
+#endif                              /* H5_HAVE_PARALLEL */
+    H5D_io_ops_t            io_ops; /* I/O operation function pointers */
+    H5D_io_op_type_t        op_type;
+    const H5D_t *           dset;          /* Pointer to dataset being operated on */
+    H5D_dset_info_t *       dsets_info;    /* dsets info where I/O is done to/from */
+    H5SL_t *                sel_pieces;    /* Skip list containing information for each piece selected */
+    haddr_t                 store_faddr;   /* lowest file addr for read/write */
+    H5_flexible_const_ptr_t base_maddr;    /* starting mem address */
+    hbool_t                 is_mdset;      /* Is this a multi datasets I/O? */
+    hbool_t                 use_select_io; /* Whether to use selection I/O */
 } H5D_io_info_t;
 
 /* Created to pass both at once for callback func */

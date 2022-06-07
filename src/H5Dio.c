@@ -473,10 +473,10 @@ H5D__read(size_t count, H5D_dset_info_t *dset_info, hbool_t is_mdset)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* init io_info */
-    io_info.sel_pieces      = NULL;
-    io_info.store_faddr     = 0;
-    io_info.base_maddr.vp   = NULL;
-    io_info.is_mdset        = is_mdset;
+    io_info.sel_pieces    = NULL;
+    io_info.store_faddr   = 0;
+    io_info.base_maddr.vp = NULL;
+    io_info.is_mdset      = is_mdset;
 
     /* Create global piece skiplist */
     if (NULL == (io_info.sel_pieces = H5SL_create(H5SL_TYPE_HADDR, NULL)))
@@ -763,10 +763,10 @@ H5D__write(size_t count, H5D_dset_info_t *dset_info, hbool_t is_mdset)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Init io_info */
-    io_info.sel_pieces      = NULL;
-    io_info.store_faddr     = 0;
-    io_info.base_maddr.cvp  = NULL;
-    io_info.is_mdset        = is_mdset;
+    io_info.sel_pieces     = NULL;
+    io_info.store_faddr    = 0;
+    io_info.base_maddr.cvp = NULL;
+    io_info.is_mdset       = is_mdset;
 
     /* Create global piece skiplist */
     if (NULL == (io_info.sel_pieces = H5SL_create(H5SL_TYPE_HADDR, NULL)))
@@ -1418,16 +1418,16 @@ done:
 static herr_t
 H5D__final_mdset_sel_io(H5D_io_info_t *io_info)
 {
-    H5S_t **          mem_spaces   = NULL;  /* Array of chunk memory spaces */
-    H5S_t **          file_spaces = NULL;   /* Array of chunk file spaces */
-    haddr_t *         addrs = NULL;         /* Array of chunk addresses */
+    H5S_t **          mem_spaces    = NULL; /* Array of chunk memory spaces */
+    H5S_t **          file_spaces   = NULL; /* Array of chunk file spaces */
+    haddr_t *         addrs         = NULL; /* Array of chunk addresses */
     size_t *          element_sizes = NULL; /* Array of element sizes */
-    void **           rbufs = NULL;         /* Array of read buffers */
-    const void **     wbufs = NULL;         /* Array of write buffers */
+    void **           rbufs         = NULL; /* Array of read buffers */
+    const void **     wbufs         = NULL; /* Array of write buffers */
     size_t            num_pieces;           /* Number of pieces */
     H5SL_node_t *     piece_node;           /* Skiplist node for piece */
     H5D_piece_info_t *piece_info;           /* Info for current piece */
-    size_t            i = 0;                /* Local index */
+    size_t            i         = 0;        /* Local index */
     herr_t            ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1442,25 +1442,20 @@ H5D__final_mdset_sel_io(H5D_io_info_t *io_info)
         /* Allocate arrays of dataspaces, offsets, sizes, and buffers for use with
          * selection I/O */
         if (NULL == (mem_spaces = H5MM_malloc(num_pieces * sizeof(H5S_t *))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                        "memory allocation failed for memory space list")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for memory space list")
         if (NULL == (file_spaces = H5MM_malloc(num_pieces * sizeof(H5S_t *))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for file space list")
         if (NULL == (addrs = H5MM_malloc(num_pieces * sizeof(haddr_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                        "memory allocation failed for piece address list")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for piece address list")
         if (NULL == (element_sizes = H5MM_malloc(num_pieces * sizeof(size_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                        "memory allocation failed for element size list")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for element size list")
         if (io_info->op_type == H5D_IO_OP_READ) {
             if (NULL == (rbufs = H5MM_malloc(num_pieces * sizeof(void *))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                             "memory allocation failed for read buffer list")
         }
-        else
-            if (NULL == (wbufs = H5MM_malloc(num_pieces * sizeof(void *))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                            "memory allocation failed for write buffer list")
+        else if (NULL == (wbufs = H5MM_malloc(num_pieces * sizeof(void *))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for write buffer list")
 
         /* Iterate through skiplist of pieces */
         piece_node = H5SL_first(io_info->sel_pieces);
@@ -1474,13 +1469,15 @@ H5D__final_mdset_sel_io(H5D_io_info_t *io_info)
             HDassert(piece_info->fspace);
             HDassert(piece_info->faddr);
             HDassert(piece_info->dset_info->type_info.src_type_size);
-            HDassert(piece_info->dset_info->type_info.src_type_size == piece_info->dset_info->type_info.dst_type_size);
-            HDassert(io_info->op_type == H5D_IO_OP_READ ? piece_info->dset_info->buf.vp : piece_info->dset_info->buf.cvp);
+            HDassert(piece_info->dset_info->type_info.src_type_size ==
+                     piece_info->dset_info->type_info.dst_type_size);
+            HDassert(io_info->op_type == H5D_IO_OP_READ ? piece_info->dset_info->buf.vp
+                                                        : piece_info->dset_info->buf.cvp);
 
             /* Add this piece to selection I/O arrays */
-            mem_spaces[i] = piece_info->mspace;
-            file_spaces[i] = piece_info->fspace;
-            addrs[i] = piece_info->faddr;
+            mem_spaces[i]    = piece_info->mspace;
+            file_spaces[i]   = piece_info->fspace;
+            addrs[i]         = piece_info->faddr;
             element_sizes[i] = piece_info->dset_info->type_info.src_type_size;
             if (io_info->op_type == H5D_IO_OP_READ)
                 rbufs[i] = piece_info->dset_info->buf.vp;
@@ -1498,15 +1495,14 @@ H5D__final_mdset_sel_io(H5D_io_info_t *io_info)
      * accumulator because this is raw data) */
     if (io_info->op_type == H5D_IO_OP_READ) {
         if (H5F_shared_select_read(H5F_SHARED(io_info->dsets_info[0].dset->oloc.file), H5FD_MEM_DRAW,
-                                    (uint32_t)num_pieces, mem_spaces, file_spaces, addrs,
-                                    element_sizes, rbufs) < 0)
+                                   (uint32_t)num_pieces, mem_spaces, file_spaces, addrs, element_sizes,
+                                   rbufs) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "chunk selection read failed")
     }
-    else
-        if (H5F_shared_select_write(H5F_SHARED(io_info->dsets_info[0].dset->oloc.file), H5FD_MEM_DRAW,
-                                    (uint32_t)num_pieces, mem_spaces, file_spaces, addrs,
-                                    element_sizes, wbufs) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "chunk selection write failed")
+    else if (H5F_shared_select_write(H5F_SHARED(io_info->dsets_info[0].dset->oloc.file), H5FD_MEM_DRAW,
+                                     (uint32_t)num_pieces, mem_spaces, file_spaces, addrs, element_sizes,
+                                     wbufs) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "chunk selection write failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
