@@ -339,7 +339,7 @@ H5D__compact_readvv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *
 
         /* Set up udata for memory copy operation */
         udata.f_sh   = io_info->f_sh;
-        udata.dstbuf = io_info->dsets_info[0].u.rbuf;
+        udata.dstbuf = io_info->dsets_info[0].buf.vp;
         udata.srcbuf = io_info->dsets_info[0].store->compact.buf;
 
         /* Request that file driver does the memory copy */
@@ -351,7 +351,7 @@ H5D__compact_readvv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *
     else {
         /* Use the vectorized memory copy routine to do actual work */
         if ((ret_value =
-                 H5VM_memcpyvv(io_info->dsets_info[0].u.rbuf, mem_max_nseq, mem_curr_seq, mem_size_arr,
+                 H5VM_memcpyvv(io_info->dsets_info[0].buf.vp, mem_max_nseq, mem_curr_seq, mem_size_arr,
                                mem_offset_arr, io_info->dsets_info[0].store->compact.buf, dset_max_nseq,
                                dset_curr_seq, dset_size_arr, dset_offset_arr)) < 0)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "vectorized memcpy failed")
@@ -400,7 +400,7 @@ H5D__compact_writevv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t 
         /* Set up udata for memory copy operation */
         udata.f_sh   = io_info->f_sh;
         udata.dstbuf = io_info->dsets_info[0].store->compact.buf;
-        udata.srcbuf = io_info->dsets_info[0].u.wbuf;
+        udata.srcbuf = io_info->dsets_info[0].buf.cvp;
 
         /* Request that file driver does the memory copy */
         if ((ret_value = H5VM_opvv(dset_max_nseq, dset_curr_seq, dset_size_arr, dset_offset_arr, mem_max_nseq,
@@ -412,7 +412,7 @@ H5D__compact_writevv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t 
         /* Use the vectorized memory copy routine to do actual work */
         if ((ret_value =
                  H5VM_memcpyvv(io_info->dsets_info[0].store->compact.buf, dset_max_nseq, dset_curr_seq,
-                               dset_size_arr, dset_offset_arr, io_info->dsets_info[0].u.wbuf, mem_max_nseq,
+                               dset_size_arr, dset_offset_arr, io_info->dsets_info[0].buf.cvp, mem_max_nseq,
                                mem_curr_seq, mem_size_arr, mem_offset_arr)) < 0)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "vectorized memcpy failed")
     }

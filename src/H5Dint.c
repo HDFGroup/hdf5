@@ -2635,7 +2635,7 @@ H5D__vlen_get_buf_size_cb(void H5_ATTR_UNUSED *elem, hid_t type_id, unsigned H5_
         dset_info->dset        = vlen_bufsize->dset;
         dset_info->mem_space   = vlen_bufsize->mspace;
         dset_info->file_space  = vlen_bufsize->fspace;
-        dset_info->u.rbuf      = vlen_bufsize->common.fl_tbuf;
+        dset_info->buf.vp      = vlen_bufsize->common.fl_tbuf;
         dset_info->mem_type_id = type_id;
 
         /* Read in the point (with the custom VL memory allocator) */

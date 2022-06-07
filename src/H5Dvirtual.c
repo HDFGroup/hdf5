@@ -2760,7 +2760,7 @@ H5D__virtual_read_one(H5D_dset_info_t *dset_info, const H5D_type_info_t *type_in
             dinfo->dset        = source_dset->dset;
             dinfo->mem_space   = source_dset->projected_mem_space;
             dinfo->file_space  = projected_src_space;
-            dinfo->u.rbuf      = dset_info->u.rbuf;
+            dinfo->buf.vp      = dset_info->buf.vp;
             dinfo->mem_type_id = type_info->dst_type_id;
 
             /* Read in the point (with the custom VL memory allocator) */
@@ -2814,7 +2814,7 @@ H5D__virtual_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsiz
     /* Sanity check */
     HDassert(io_info);
     HDassert(dset_info);
-    HDassert(dset_info->u.rbuf);
+    HDassert(dset_info->buf.vp);
     HDassert(type_info);
     HDassert(dset_info == io_info->dsets_info);
     HDassert(mem_space);
@@ -2884,7 +2884,7 @@ H5D__virtual_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsiz
 
             /* Write fill values to memory buffer */
             if (H5D__fill(dset_info->dset->shared->dcpl_cache.fill.buf, dset_info->dset->shared->type,
-                          dset_info->u.rbuf, type_info->mem_type, fill_space) < 0)
+                          dset_info->buf.vp, type_info->mem_type, fill_space) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "filling buf failed")
 
 #ifndef NDEBUG
@@ -2969,7 +2969,7 @@ H5D__virtual_write_one(H5D_dset_info_t *dset_info, const H5D_type_info_t *type_i
             dinfo->dset        = source_dset->dset;
             dinfo->mem_space   = source_dset->projected_mem_space;
             dinfo->file_space  = projected_src_space;
-            dinfo->u.wbuf      = dset_info->u.wbuf;
+            dinfo->buf.cvp     = dset_info->buf.cvp;
             dinfo->mem_type_id = type_info->dst_type_id;
 
             /* Read in the point (with the custom VL memory allocator) */
@@ -3022,7 +3022,7 @@ H5D__virtual_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsi
     /* Sanity check */
     HDassert(io_info);
     HDassert(dset_info);
-    HDassert(dset_info->u.wbuf);
+    HDassert(dset_info->buf.cvp);
     HDassert(type_info);
     HDassert(mem_space);
     HDassert(file_space);
