@@ -57,6 +57,7 @@ static herr_t H5D__typeinfo_term(const H5D_type_info_t *type_info);
 /* Internal I/O routines */
 static herr_t H5D__pre_read(hid_t dxpl_id, size_t count, H5D_dset_info_t *dset_info);
 static herr_t H5D__pre_write(hid_t dxpl_id, size_t count, H5D_dset_info_t *dset_info);
+static herr_t H5D__final_mdset_sel_io(H5D_io_info_t *io_info);
 
 /*********************/
 /* Package Variables */
@@ -87,7 +88,7 @@ H5FL_DEFINE(H5D_dset_info_t);
  */
 static herr_t
 H5D__init_dset_info(H5D_dset_info_t *dset_info, hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
-                    hid_t dset_space_id, const H5D_dset_buf_t *u_buf)
+                    hid_t dset_space_id, const H5_flexible_const_ptr_t *u_buf)
 {
     H5VL_object_t *vol_obj   = NULL;    /* Object for dset_id */
     herr_t         ret_value = SUCCEED; /* Return value */
@@ -135,7 +136,7 @@ H5D__init_dset_info(H5D_dset_info_t *dset_info, hid_t dset_id, hid_t mem_type_id
     dset_info->mem_type_id = mem_type_id;
 
     /* Get buffer */
-    dset_info->u = *u_buf;
+    dset_info->buf = *u_buf;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -211,7 +212,7 @@ H5Dread_multi(size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t mem_spac
     /* (And check parameters) */
     for (u = 0; u < count; u++) {
         if (H5D__init_dset_info(&dset_info[u], dset_id[u], mem_type_id[u], mem_space_id[u], file_space_id[u],
-                                (const H5D_dset_buf_t *)&(buf[u])) < 0)
+                                (const H5_flexible_const_ptr_t *)&(buf[u])) < 0)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't init dataset info")
     } /* end for */
 
@@ -343,7 +344,7 @@ H5Dwrite_multi(size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t mem_spa
     /* (And check parameters) */
     for (u = 0; u < count; u++) {
         if (H5D__init_dset_info(&dset_info[u], dset_id[u], mem_type_id[u], mem_space_id[u], file_space_id[u],
-                                (const H5D_dset_buf_t *)&(buf[u])) < 0)
+                                (const H5_flexible_const_ptr_t *)&(buf[u])) < 0)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't init dataset info")
     }
 
@@ -472,10 +473,10 @@ H5D__read(size_t count, H5D_dset_info_t *dset_info, hbool_t is_mdset)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* init io_info */
-    io_info.sel_pieces      = NULL;
-    io_info.store_faddr     = 0;
-    io_info.base_maddr.rbuf = NULL;
-    io_info.is_mdset        = is_mdset;
+    io_info.sel_pieces    = NULL;
+    io_info.store_faddr   = 0;
+    io_info.base_maddr.vp = NULL;
+    io_info.is_mdset      = is_mdset;
 
     /* Create global piece skiplist */
     if (NULL == (io_info.sel_pieces = H5SL_create(H5SL_TYPE_HADDR, NULL)))
@@ -532,7 +533,7 @@ H5D__read(size_t count, H5D_dset_info_t *dset_info, hbool_t is_mdset)
                         "src and dest dataspaces have different number of elements selected")
 
         /* Check for a NULL buffer */
-        if (NULL == dset_info[i].u.rbuf) {
+        if (NULL == dset_info[i].buf.vp) {
             /* Check for any elements selected (which is invalid) */
             if (nelmts > 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer")
@@ -541,7 +542,7 @@ H5D__read(size_t count, H5D_dset_info_t *dset_info, hbool_t is_mdset)
              * This is for some MPI package like ChaMPIon on NCSA's tungsten which
              * doesn't support this feature.
              */
-            dset_info[i].u.rbuf = &fake_char;
+            dset_info[i].buf.vp = &fake_char;
         } /* end if */
 
         /* Make sure that both selections have their extents set */
@@ -575,7 +576,7 @@ H5D__read(size_t count, H5D_dset_info_t *dset_info, hbool_t is_mdset)
             HDassert(projected_mem_space[i]);
 
             /* Adjust the buffer by the given amount */
-            dset_info[i].u.rbuf = (void *)(((uint8_t *)dset_info[i].u.rbuf) + buf_adj);
+            dset_info[i].buf.vp = (void *)(((uint8_t *)dset_info[i].buf.vp) + buf_adj);
 
             /* Switch to using projected memory dataspace & adjusted buffer */
             dset_info[i].mem_space = projected_mem_space[i];
@@ -611,7 +612,7 @@ H5D__read(size_t count, H5D_dset_info_t *dset_info, hbool_t is_mdset)
 
             /* Go fill the user's selection with the dataset's fill value */
             if (H5D__fill(dset_info[i].dset->shared->dcpl_cache.fill.buf, dset_info[i].dset->shared->type,
-                          dset_info[i].u.rbuf, dset_info[i].type_info.mem_type, dset_info[i].mem_space) < 0)
+                          dset_info[i].buf.vp, dset_info[i].type_info.mem_type, dset_info[i].mem_space) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "filling buf failed")
             else
                 HGOTO_DONE(SUCCEED)
@@ -678,6 +679,12 @@ H5D__read(size_t count, H5D_dset_info_t *dset_info, hbool_t is_mdset)
             /* Reset metadata tagging */
             H5AC_tag(prev_tag, NULL);
         }
+
+        /* Make final multi dataset selection I/O call if we are using both
+         * features - in this case the multi_read callbacks did not perform the
+         * actual I/O */
+        if (is_mdset && io_info.use_select_io && H5D__final_mdset_sel_io(&io_info) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
     }
 
 done:
@@ -756,10 +763,10 @@ H5D__write(size_t count, H5D_dset_info_t *dset_info, hbool_t is_mdset)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Init io_info */
-    io_info.sel_pieces      = NULL;
-    io_info.store_faddr     = 0;
-    io_info.base_maddr.wbuf = NULL;
-    io_info.is_mdset        = is_mdset;
+    io_info.sel_pieces     = NULL;
+    io_info.store_faddr    = 0;
+    io_info.base_maddr.cvp = NULL;
+    io_info.is_mdset       = is_mdset;
 
     /* Create global piece skiplist */
     if (NULL == (io_info.sel_pieces = H5SL_create(H5SL_TYPE_HADDR, NULL)))
@@ -836,7 +843,7 @@ H5D__write(size_t count, H5D_dset_info_t *dset_info, hbool_t is_mdset)
                         "src and dest dataspaces have different number of elements selected")
 
         /* Check for a NULL buffer */
-        if (NULL == dset_info[i].u.wbuf) {
+        if (NULL == dset_info[i].buf.cvp) {
             /* Check for any elements selected (which is invalid) */
             if (nelmts > 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer")
@@ -845,7 +852,7 @@ H5D__write(size_t count, H5D_dset_info_t *dset_info, hbool_t is_mdset)
              * This is for some MPI package like ChaMPIon on NCSA's tungsten which
              * doesn't support this feature.
              */
-            dset_info[i].u.wbuf = &fake_char;
+            dset_info[i].buf.cvp = &fake_char;
         } /* end if */
 
         /* Make sure that both selections have their extents set */
@@ -879,7 +886,7 @@ H5D__write(size_t count, H5D_dset_info_t *dset_info, hbool_t is_mdset)
             HDassert(projected_mem_space[i]);
 
             /* Adjust the buffer by the given amount */
-            dset_info[i].u.wbuf = (const void *)(((const uint8_t *)dset_info[i].u.wbuf) + buf_adj);
+            dset_info[i].buf.cvp = (const void *)(((const uint8_t *)dset_info[i].buf.cvp) + buf_adj);
 
             /* Switch to using projected memory dataspace & adjusted buffer */
             dset_info[i].mem_space = projected_mem_space[i];
@@ -976,6 +983,12 @@ H5D__write(size_t count, H5D_dset_info_t *dset_info, hbool_t is_mdset)
             /* Reset metadata tagging */
             H5AC_tag(prev_tag, NULL);
         }
+
+        /* Make final multi dataset selection I/O call if we are using both
+         * features - in this case the multi_read callbacks did not perform the
+         * actual I/O */
+        if (is_mdset && io_info.use_select_io && H5D__final_mdset_sel_io(&io_info) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
     }
 
 #ifdef OLD_WAY
@@ -1393,14 +1406,117 @@ done:
 #endif /* H5_HAVE_PARALLEL */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__typeinfo_term
+ * Function:    H5D__final_mdset_sel_io
  *
- * Purpose:	Common logic for terminating a type info object
+ * Purpose:     Routine for determining correct datatype information for
+ *              each I/O action.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Thursday, March  6, 2008
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__final_mdset_sel_io(H5D_io_info_t *io_info)
+{
+    H5S_t **          mem_spaces    = NULL; /* Array of chunk memory spaces */
+    H5S_t **          file_spaces   = NULL; /* Array of chunk file spaces */
+    haddr_t *         addrs         = NULL; /* Array of chunk addresses */
+    size_t *          element_sizes = NULL; /* Array of element sizes */
+    void **           rbufs         = NULL; /* Array of read buffers */
+    const void **     wbufs         = NULL; /* Array of write buffers */
+    size_t            num_pieces;           /* Number of pieces */
+    H5SL_node_t *     piece_node;           /* Skiplist node for piece */
+    H5D_piece_info_t *piece_info;           /* Info for current piece */
+    size_t            i         = 0;        /* Local index */
+    herr_t            ret_value = SUCCEED;  /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* check args */
+    HDassert(io_info);
+
+    /* Count number of pieces in I/O */
+    num_pieces = H5SL_count(io_info->sel_pieces);
+
+    if (num_pieces) {
+        /* Allocate arrays of dataspaces, offsets, sizes, and buffers for use with
+         * selection I/O */
+        if (NULL == (mem_spaces = H5MM_malloc(num_pieces * sizeof(H5S_t *))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for memory space list")
+        if (NULL == (file_spaces = H5MM_malloc(num_pieces * sizeof(H5S_t *))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for file space list")
+        if (NULL == (addrs = H5MM_malloc(num_pieces * sizeof(haddr_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for piece address list")
+        if (NULL == (element_sizes = H5MM_malloc(num_pieces * sizeof(size_t))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for element size list")
+        if (io_info->op_type == H5D_IO_OP_READ) {
+            if (NULL == (rbufs = H5MM_malloc(num_pieces * sizeof(void *))))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                            "memory allocation failed for read buffer list")
+        }
+        else if (NULL == (wbufs = H5MM_malloc(num_pieces * sizeof(void *))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for write buffer list")
+
+        /* Iterate through skiplist of pieces */
+        piece_node = H5SL_first(io_info->sel_pieces);
+        while (piece_node) {
+            /* Get piece info */
+            piece_info = H5SL_item(piece_node);
+            HDassert(piece_info);
+
+            /* Only valid pieces should have been inserted into this list */
+            HDassert(piece_info->mspace);
+            HDassert(piece_info->fspace);
+            HDassert(piece_info->faddr);
+            HDassert(piece_info->dset_info->type_info.src_type_size);
+            HDassert(piece_info->dset_info->type_info.src_type_size ==
+                     piece_info->dset_info->type_info.dst_type_size);
+            HDassert(io_info->op_type == H5D_IO_OP_READ ? piece_info->dset_info->buf.vp
+                                                        : piece_info->dset_info->buf.cvp);
+
+            /* Add this piece to selection I/O arrays */
+            mem_spaces[i]    = piece_info->mspace;
+            file_spaces[i]   = piece_info->fspace;
+            addrs[i]         = piece_info->faddr;
+            element_sizes[i] = piece_info->dset_info->type_info.src_type_size;
+            if (io_info->op_type == H5D_IO_OP_READ)
+                rbufs[i] = piece_info->dset_info->buf.vp;
+            else
+                wbufs[i] = piece_info->dset_info->buf.cvp;
+
+            /* Advance to next piece */
+            piece_node = H5SL_next(piece_node);
+            i++;
+        }
+    }
+
+    /* Issue appropriate lower level selection I/O call (we can skip the page
+     * buffer because we've already verified it won't be used, and the metadata
+     * accumulator because this is raw data) */
+    if (io_info->op_type == H5D_IO_OP_READ) {
+        if (H5F_shared_select_read(H5F_SHARED(io_info->dsets_info[0].dset->oloc.file), H5FD_MEM_DRAW,
+                                   (uint32_t)num_pieces, mem_spaces, file_spaces, addrs, element_sizes,
+                                   rbufs) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "chunk selection read failed")
+    }
+    else if (H5F_shared_select_write(H5F_SHARED(io_info->dsets_info[0].dset->oloc.file), H5FD_MEM_DRAW,
+                                     (uint32_t)num_pieces, mem_spaces, file_spaces, addrs, element_sizes,
+                                     wbufs) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "chunk selection write failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__final_mdset_sel_io() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__typeinfo_term
+ *
+ * Purpose:     Common logic for terminating a type info object
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              Thursday, March  6, 2008
  *
  *-------------------------------------------------------------------------
  */

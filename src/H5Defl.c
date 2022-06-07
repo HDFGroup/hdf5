@@ -458,7 +458,7 @@ H5D__efl_readvv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *dset
     /* Check args */
     HDassert(io_info);
     HDassert(io_info->dsets_info[0].store->efl.nused > 0);
-    HDassert(io_info->dsets_info[0].u.rbuf);
+    HDassert(io_info->dsets_info[0].buf.vp);
     HDassert(io_info->dset);
     HDassert(io_info->dset->shared);
     HDassert(dset_curr_seq);
@@ -471,7 +471,7 @@ H5D__efl_readvv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *dset
     /* Set up user data for H5VM_opvv() */
     udata.efl  = &(io_info->dsets_info[0].store->efl);
     udata.dset = io_info->dset;
-    udata.rbuf = (unsigned char *)io_info->dsets_info[0].u.rbuf;
+    udata.rbuf = (unsigned char *)io_info->dsets_info[0].buf.vp;
 
     /* Call generic sequence operation routine */
     if ((ret_value = H5VM_opvv(dset_max_nseq, dset_curr_seq, dset_len_arr, dset_off_arr, mem_max_nseq,
@@ -538,7 +538,7 @@ H5D__efl_writevv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *dse
     /* Check args */
     HDassert(io_info);
     HDassert(io_info->dsets_info[0].store->efl.nused > 0);
-    HDassert(io_info->dsets_info[0].u.wbuf);
+    HDassert(io_info->dsets_info[0].buf.cvp);
     HDassert(io_info->dset);
     HDassert(io_info->dset->shared);
     HDassert(dset_curr_seq);
@@ -551,7 +551,7 @@ H5D__efl_writevv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *dse
     /* Set up user data for H5VM_opvv() */
     udata.efl  = &(io_info->dsets_info[0].store->efl);
     udata.dset = io_info->dset;
-    udata.wbuf = (const unsigned char *)io_info->dsets_info[0].u.wbuf;
+    udata.wbuf = (const unsigned char *)io_info->dsets_info[0].buf.cvp;
 
     /* Call generic sequence operation routine */
     if ((ret_value = H5VM_opvv(dset_max_nseq, dset_curr_seq, dset_len_arr, dset_off_arr, mem_max_nseq,

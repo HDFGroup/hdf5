@@ -902,7 +902,7 @@ H5D__mpio_select_read(const H5D_io_info_t *io_info, hsize_t mpi_buf_count, H5S_t
     FUNC_ENTER_PACKAGE
 
     /* memory addr from a piece with lowest file addr */
-    rbuf = io_info->base_maddr.rbuf;
+    rbuf = io_info->base_maddr.vp;
 
     /*OKAY: CAST DISCARDS CONST QUALIFIER*/
     H5_CHECK_OVERFLOW(mpi_buf_count, hsize_t, size_t);
@@ -936,7 +936,7 @@ H5D__mpio_select_write(const H5D_io_info_t *io_info, hsize_t mpi_buf_count, H5S_
     FUNC_ENTER_PACKAGE
 
     /* memory addr from a piece with lowest file addr */
-    wbuf = io_info->base_maddr.wbuf;
+    wbuf = io_info->base_maddr.cvp;
 
     /*OKAY: CAST DISCARDS CONST QUALIFIER*/
     H5_CHECK_OVERFLOW(mpi_buf_count, hsize_t, size_t);
@@ -1320,8 +1320,8 @@ H5D__link_piece_collective_io(const size_t count, H5D_io_info_t *io_info, int mp
         H5D_piece_info_t *piece_info;
 
         /* local variable for base address for buffer */
-        H5D_dset_buf_t base_buf_addr;
-        base_buf_addr.wbuf = NULL;
+        H5_flexible_const_ptr_t base_buf_addr;
+        base_buf_addr.cvp = NULL;
 
         /* Get the number of chunks with a selection */
         num_chunk = H5SL_count(io_info->sel_pieces);
@@ -1365,7 +1365,7 @@ H5D__link_piece_collective_io(const size_t count, H5D_io_info_t *io_info, int mp
             ctg_store.contig.dset_addr = piece_info->faddr;
 
             /* save base mem addr of piece for read/write */
-            base_buf_addr = piece_info->dset_info->u;
+            base_buf_addr = piece_info->dset_info->buf;
 
 #ifdef H5Dmpio_DEBUG
             H5D_MPIO_DEBUG(mpi_rank, "before iterate over selected pieces\n");
@@ -1435,11 +1435,11 @@ H5D__link_piece_collective_io(const size_t count, H5D_io_info_t *io_info, int mp
 
                 if (io_info->op_type == H5D_IO_OP_WRITE) {
                     chunk_mem_disp_array[u] =
-                        (MPI_Aint)piece_info->dset_info->u.wbuf - (MPI_Aint)base_buf_addr.wbuf;
+                        (MPI_Aint)piece_info->dset_info->buf.cvp - (MPI_Aint)base_buf_addr.cvp;
                 }
                 else if (io_info->op_type == H5D_IO_OP_READ) {
                     chunk_mem_disp_array[u] =
-                        (MPI_Aint)piece_info->dset_info->u.rbuf - (MPI_Aint)base_buf_addr.rbuf;
+                        (MPI_Aint)piece_info->dset_info->buf.vp - (MPI_Aint)base_buf_addr.vp;
                 }
 
                 /* Advance to next piece in list */
@@ -1483,7 +1483,7 @@ H5D__link_piece_collective_io(const size_t count, H5D_io_info_t *io_info, int mp
             ctg_store.contig.dset_addr = 0;
 
             /* just provide a valid mem address. no actual IO occur */
-            base_buf_addr = io_info->dsets_info[0].u;
+            base_buf_addr = io_info->dsets_info[0].buf;
 
             /* Set the MPI datatype */
             chunk_final_ftype = MPI_BYTE;
@@ -1714,7 +1714,7 @@ H5D__link_chunk_filtered_collective_io(H5D_io_info_t *io_info, int mpi_rank, int
              * Override the write buffer to point to the first
              * chunk's data buffer
              */
-            io_info->base_maddr.wbuf = chunk_list[0].buf;
+            io_info->base_maddr.cvp = chunk_list[0].buf;
 
             /*
              * Setup the base storage address for this operation
@@ -1723,8 +1723,8 @@ H5D__link_chunk_filtered_collective_io(H5D_io_info_t *io_info, int mpi_rank, int
             io_info->store_faddr = chunk_list[0].chunk_new.offset;
         }
         else {
-            io_info->base_maddr.wbuf = &fake_buf;
-            io_info->store_faddr     = 0;
+            io_info->base_maddr.cvp = &fake_buf;
+            io_info->store_faddr    = 0;
         }
 
         /* Perform I/O */
@@ -1842,7 +1842,7 @@ H5D__multi_chunk_collective_io(H5D_io_info_t *io_info, int mpi_rank, int mpi_siz
         HGOTO_ERROR(H5E_DATASET, H5E_CANTRECV, FAIL, "unable to obtain MPIO mode")
 
     /* Set memory buffers */
-    io_info->base_maddr = io_info->dsets_info[0].u;
+    io_info->base_maddr = io_info->dsets_info[0].buf;
 
     /* Set dataset storage for I/O info */
     io_info->dsets_info[0].store = &store;
@@ -2196,7 +2196,7 @@ H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, int mpi_rank, in
                  * Override the write buffer to point to the
                  * chunk's data buffer
                  */
-                ctg_io_info.base_maddr.wbuf = chunk_list[i].buf;
+                ctg_io_info.base_maddr.cvp = chunk_list[i].buf;
 
                 /*
                  * Setup the base storage address for this
@@ -2206,7 +2206,7 @@ H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, int mpi_rank, in
             }
             else {
                 ctg_io_info.store_faddr = 0;
-                ctg_io_info.base_maddr  = io_info->dsets_info[0].u;
+                ctg_io_info.base_maddr  = io_info->dsets_info[0].buf;
             }
 
             /* Perform the I/O */
@@ -3695,7 +3695,7 @@ H5D__mpio_share_chunk_modification_data(H5D_filtered_collective_io_info_t *chunk
 
             /* Collect the modification data into the buffer */
             if (0 ==
-                H5D__gather_mem(io_info->dsets_info[0].u.wbuf, mem_iter, (size_t)iter_nelmts, mod_data_p))
+                H5D__gather_mem(io_info->dsets_info[0].buf.cvp, mem_iter, (size_t)iter_nelmts, mod_data_p))
                 HGOTO_ERROR(H5E_IO, H5E_CANTGATHER, FAIL, "couldn't gather from write buffer")
 
             /*
@@ -4029,9 +4029,9 @@ H5D__mpio_collective_filtered_chunk_common_io(H5D_filtered_collective_io_info_t 
         }
         else {
             if (io_info->op_type == H5D_IO_OP_WRITE)
-                coll_io_info.base_maddr.wbuf = &fake_buf;
+                coll_io_info.base_maddr.cvp = &fake_buf;
             else
-                coll_io_info.base_maddr.rbuf = &fake_buf;
+                coll_io_info.base_maddr.vp = &fake_buf;
         }
     }
 
@@ -4120,8 +4120,8 @@ H5D__mpio_collective_filtered_chunk_read(H5D_filtered_collective_io_info_t *chun
     HDassert(type_info);
 
     /* Initialize temporary I/O info */
-    coll_io_info                 = *io_info;
-    coll_io_info.base_maddr.rbuf = NULL;
+    coll_io_info               = *io_info;
+    coll_io_info.base_maddr.vp = NULL;
 
     if (chunk_list_num_entries) {
         /* Retrieve filter settings from API context */
@@ -4235,7 +4235,7 @@ H5D__mpio_collective_filtered_chunk_read(H5D_filtered_collective_io_info_t *chun
          * the first chunk data buffer being read into
          */
         if (base_read_buf)
-            coll_io_info.base_maddr.rbuf = base_read_buf;
+            coll_io_info.base_maddr.vp = base_read_buf;
 
         /* Perform collective chunk read */
         if (H5D__mpio_collective_filtered_chunk_common_io(chunk_list, chunk_list_num_entries, &coll_io_info,
@@ -4262,7 +4262,7 @@ H5D__mpio_collective_filtered_chunk_read(H5D_filtered_collective_io_info_t *chun
         /* Scatter the chunk data to the read buffer */
         iter_nelmts = H5S_GET_SELECT_NPOINTS(chunk_info->fspace);
 
-        if (H5D_select_io_mem(di->u.rbuf, chunk_info->mspace, chunk_list[i].buf, chunk_info->fspace,
+        if (H5D_select_io_mem(di->buf.vp, chunk_info->mspace, chunk_list[i].buf, chunk_info->fspace,
                               type_info->src_type_size, (size_t)iter_nelmts) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "couldn't copy chunk data to read buffer")
     }
@@ -4490,7 +4490,7 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
          * chunk data buffer being read into
          */
         if (base_read_buf) {
-            coll_io_info.base_maddr.rbuf = base_read_buf;
+            coll_io_info.base_maddr.vp = base_read_buf;
         }
 
         /* Read all chunks that need to be read from the file */
@@ -4524,7 +4524,7 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
 
         iter_nelmts = H5S_GET_SELECT_NPOINTS(chunk_info->mspace);
 
-        if (H5D_select_io_mem(chunk_list[i].buf, chunk_info->fspace, di->u.wbuf, chunk_info->mspace,
+        if (H5D_select_io_mem(chunk_list[i].buf, chunk_info->fspace, di->buf.cvp, chunk_info->mspace,
                               type_info->dst_type_size, (size_t)iter_nelmts) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "couldn't copy chunk data to write buffer")
     }

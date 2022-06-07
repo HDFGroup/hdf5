@@ -298,7 +298,7 @@ H5VL__native_dataset_read(void *obj, hid_t mem_type_id, hid_t mem_space_id, hid_
         dinfo->dset        = dset;
         dinfo->mem_space   = mem_space;
         dinfo->file_space  = file_space;
-        dinfo->u.rbuf      = buf;
+        dinfo->buf.vp      = buf;
         dinfo->mem_type_id = mem_type_id;
 
         /* Read raw data */
@@ -364,7 +364,7 @@ H5VL__native_dataset_write(void *obj, hid_t mem_type_id, hid_t mem_space_id, hid
         dinfo->dset        = dset;
         dinfo->mem_space   = mem_space;
         dinfo->file_space  = file_space;
-        dinfo->u.wbuf      = buf;
+        dinfo->buf.cvp     = buf;
         dinfo->mem_type_id = mem_type_id;
 
         /* Write the data */

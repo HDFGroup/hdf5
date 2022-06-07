@@ -236,18 +236,12 @@ typedef struct H5D_piece_info_t {
     struct H5D_dset_info_t *dset_info; /* Pointer to dset_info */
 } H5D_piece_info_t;
 
-/* Union for read/write dataset buffers */
-typedef union H5D_dset_buf_t {
-    void *      rbuf; /* Pointer to buffer for read */
-    const void *wbuf; /* Pointer to buffer to write */
-} H5D_dset_buf_t;
-
 /* dset info for multiple dsets */
 typedef struct H5D_dset_info_t {
-    H5D_t *          dset;       /* Pointer to dataset being operated on */
-    H5D_storage_t *  store;      /* Dataset storage info */
-    H5D_layout_ops_t layout_ops; /* Dataset layout I/O operation function pointers */
-    H5D_dset_buf_t   u;          /* Buffer pointer */
+    H5D_t *                 dset;       /* Pointer to dataset being operated on */
+    H5D_storage_t *         store;      /* Dataset storage info */
+    H5D_layout_ops_t        layout_ops; /* Dataset layout I/O operation function pointers */
+    H5_flexible_const_ptr_t buf;        /* Buffer pointer */
 
     H5O_layout_t *layout; /* Dataset layout information*/
     hsize_t       nelmts; /* Number of elements selected in file & memory dataspaces */
@@ -283,18 +277,18 @@ typedef struct H5D_io_info_t {
     /* QAK: Delete the f_sh field when oloc has a shared file pointer? */
     H5F_shared_t *f_sh; /* Pointer to shared file struct that dataset is within */
 #ifdef H5_HAVE_PARALLEL
-    MPI_Comm comm;           /* MPI communicator for file */
-    hbool_t  using_mpi_vfd;  /* Whether the file is using an MPI-based VFD */
-#endif                       /* H5_HAVE_PARALLEL */
-    H5D_io_ops_t     io_ops; /* I/O operation function pointers */
-    H5D_io_op_type_t op_type;
-    const H5D_t *    dset;        /* Pointer to dataset being operated on */
-    H5D_dset_info_t *dsets_info;  /* dsets info where I/O is done to/from */
-    H5SL_t *         sel_pieces;  /* Skip list containing information for each piece selected */
-    haddr_t          store_faddr; /* lowest file addr for read/write */
-    H5D_dset_buf_t   base_maddr;  /* starting mem address */
-    hbool_t is_mdset; /* Is this a multi datasets I/O? Remove once all I/O pathways support multi dataset */
-    hbool_t use_select_io; /* Whether to use selection I/O */
+    MPI_Comm comm;                  /* MPI communicator for file */
+    hbool_t  using_mpi_vfd;         /* Whether the file is using an MPI-based VFD */
+#endif                              /* H5_HAVE_PARALLEL */
+    H5D_io_ops_t            io_ops; /* I/O operation function pointers */
+    H5D_io_op_type_t        op_type;
+    const H5D_t *           dset;          /* Pointer to dataset being operated on */
+    H5D_dset_info_t *       dsets_info;    /* dsets info where I/O is done to/from */
+    H5SL_t *                sel_pieces;    /* Skip list containing information for each piece selected */
+    haddr_t                 store_faddr;   /* lowest file addr for read/write */
+    H5_flexible_const_ptr_t base_maddr;    /* starting mem address */
+    hbool_t                 is_mdset;      /* Is this a multi datasets I/O? */
+    hbool_t                 use_select_io; /* Whether to use selection I/O */
 } H5D_io_info_t;
 
 /* Created to pass both at once for callback func */

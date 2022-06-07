@@ -103,7 +103,7 @@ H5D__select_io(const H5D_io_info_t *io_info, size_t elmt_size, size_t nelmts, H5
     HDassert(io_info);
     HDassert(io_info->dsets_info[0].dset);
     HDassert(io_info->dsets_info[0].store);
-    HDassert(io_info->dsets_info[0].u.rbuf);
+    HDassert(io_info->dsets_info[0].buf.vp);
 
     if (elmt_size == 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "invalid elmt_size of 0")

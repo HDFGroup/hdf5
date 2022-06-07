@@ -261,7 +261,7 @@ H5D__contig_fill(const H5D_io_info_t *io_info)
 
     dset_info.dset    = (H5D_t *)dset;
     dset_info.store   = &store;
-    dset_info.u.wbuf  = fb_info.fill_buf;
+    dset_info.buf.cvp = fb_info.fill_buf;
     ioinfo.dsets_info = &dset_info;
     ioinfo.f_sh       = H5F_SHARED(dset_info.dset->oloc.file);
 
@@ -773,7 +773,8 @@ H5D__contig_may_use_select_io(const H5D_io_info_t *io_info, const H5D_dset_info_
 
     /* Sanity check */
     HDassert(io_info);
-    HDassert(io_info->dset);
+    HDassert(dset_info);
+    HDassert(dset_info->dset);
     HDassert(op_type == H5D_IO_OP_READ || op_type == H5D_IO_OP_WRITE);
 
     dataset = dset_info->dset;
@@ -827,7 +828,7 @@ H5D__contig_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize
 
     /* Sanity check */
     HDassert(io_info);
-    HDassert(dinfo->u.rbuf);
+    HDassert(dinfo->buf.vp);
     HDassert(type_info);
     HDassert(mem_space);
     HDassert(file_space);
@@ -835,15 +836,20 @@ H5D__contig_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize
     io_info->dset = io_info->dsets_info[0].dset;
 
     if (io_info->use_select_io) {
-        size_t dst_type_size = type_info->dst_type_size;
+        /* Only perform I/O if not performing multi dataset I/O with selection
+         * I/O, otherwise the higher level will handle it after all datasets
+         * have been processed */
+        if (!io_info->is_mdset) {
+            size_t dst_type_size = type_info->dst_type_size;
 
-        /* Issue selection I/O call (we can skip the page buffer because we've
-         * already verified it won't be used, and the metadata accumulator
-         * because this is raw data) */
-        if (H5F_shared_select_read(H5F_SHARED(dinfo->dset->oloc.file), H5FD_MEM_DRAW, nelmts > 0 ? 1 : 0,
-                                   &mem_space, &file_space, &(dinfo->store->contig.dset_addr), &dst_type_size,
-                                   &(dinfo->u.rbuf)) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "contiguous selection read failed")
+            /* Issue selection I/O call (we can skip the page buffer because we've
+             * already verified it won't be used, and the metadata accumulator
+             * because this is raw data) */
+            if (H5F_shared_select_read(H5F_SHARED(dinfo->dset->oloc.file), H5FD_MEM_DRAW, nelmts > 0 ? 1 : 0,
+                                       &mem_space, &file_space, &(dinfo->store->contig.dset_addr),
+                                       &dst_type_size, &(dinfo->buf.vp)) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "contiguous selection read failed")
+        }
     } /* end if */
     else
         /* Read data through legacy (non-selection I/O) pathway */
@@ -876,7 +882,7 @@ H5D__contig_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsiz
 
     /* Sanity check */
     HDassert(io_info);
-    HDassert(dinfo->u.wbuf);
+    HDassert(dinfo->buf.cvp);
     HDassert(type_info);
     HDassert(mem_space);
     HDassert(file_space);
@@ -884,15 +890,20 @@ H5D__contig_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsiz
     io_info->dset = io_info->dsets_info[0].dset;
 
     if (io_info->use_select_io) {
-        size_t dst_type_size = type_info->dst_type_size;
+        /* Only perform I/O if not performing multi dataset I/O with selection
+         * I/O, otherwise the higher level will handle it after all datasets
+         * have been processed */
+        if (!io_info->is_mdset) {
+            size_t dst_type_size = type_info->dst_type_size;
 
-        /* Issue selection I/O call (we can skip the page buffer because we've
-         * already verified it won't be used, and the metadata accumulator
-         * because this is raw data) */
-        if (H5F_shared_select_write(H5F_SHARED(dinfo->dset->oloc.file), H5FD_MEM_DRAW, nelmts > 0 ? 1 : 0,
-                                    &mem_space, &file_space, &(dinfo->store->contig.dset_addr),
-                                    &dst_type_size, &(dinfo->u.wbuf)) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "contiguous selection write failed")
+            /* Issue selection I/O call (we can skip the page buffer because we've
+             * already verified it won't be used, and the metadata accumulator
+             * because this is raw data) */
+            if (H5F_shared_select_write(H5F_SHARED(dinfo->dset->oloc.file), H5FD_MEM_DRAW, nelmts > 0 ? 1 : 0,
+                                        &mem_space, &file_space, &(dinfo->store->contig.dset_addr),
+                                        &dst_type_size, &(dinfo->buf.cvp)) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "contiguous selection write failed")
+        }
     } /* end if */
     else
         /* Write data through legacy (non-selection I/O) pathway */
@@ -1183,7 +1194,7 @@ H5D__contig_readvv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *d
         udata.f_sh         = io_info->f_sh;
         udata.dset_contig  = &(dset_info.dset->shared->cache.contig);
         udata.store_contig = &(dset_info.store->contig);
-        udata.rbuf         = (unsigned char *)dset_info.u.rbuf;
+        udata.rbuf         = (unsigned char *)dset_info.buf.vp;
 
         /* Call generic sequence operation routine */
         if ((ret_value =
@@ -1197,7 +1208,7 @@ H5D__contig_readvv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *d
         /* Set up user data for H5VM_opvv() */
         udata.f_sh      = io_info->f_sh;
         udata.dset_addr = dset_info.store->contig.dset_addr;
-        udata.rbuf      = (unsigned char *)dset_info.u.rbuf;
+        udata.rbuf      = (unsigned char *)dset_info.buf.vp;
 
         /* Call generic sequence operation routine */
         if ((ret_value = H5VM_opvv(dset_max_nseq, dset_curr_seq, dset_len_arr, dset_off_arr, mem_max_nseq,
@@ -1504,7 +1515,7 @@ H5D__contig_writevv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *
         udata.f_sh         = io_info->f_sh;
         udata.dset_contig  = &(dset_info.dset->shared->cache.contig);
         udata.store_contig = &(dset_info.store->contig);
-        udata.wbuf         = (const unsigned char *)dset_info.u.wbuf;
+        udata.wbuf         = (const unsigned char *)dset_info.buf.cvp;
 
         /* Call generic sequence operation routine */
         if ((ret_value =
@@ -1518,7 +1529,7 @@ H5D__contig_writevv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *
         /* Set up user data for H5VM_opvv() */
         udata.f_sh      = io_info->f_sh;
         udata.dset_addr = dset_info.store->contig.dset_addr;
-        udata.wbuf      = (const unsigned char *)dset_info.u.wbuf;
+        udata.wbuf      = (const unsigned char *)dset_info.buf.cvp;
 
         /* Call generic sequence operation routine */
         if ((ret_value = H5VM_opvv(dset_max_nseq, dset_curr_seq, dset_len_arr, dset_off_arr, mem_max_nseq,
