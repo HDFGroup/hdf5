@@ -688,7 +688,7 @@ H5FD__vfd_swmr_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t max
     /* Hard-wired to open the underlying HDF5 file with SEC2 */
     /* H5FD_SEC2 is the default driver for H5P_FILE_ACCESS_DEFAULT except when
        the environment variable HDF5_DRIVER is set to otherwise */
-    if ((file->hdf5_file_lf = H5FD_open(name, flags, H5P_FILE_ACCESS_DEFAULT, maxaddr)) == NULL)
+    if ((file->hdf5_file_lf = H5FD_open(name, flags, H5P_FILE_ACCESS_DEFAULT, HADDR_UNDEF)) == NULL)
         HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, NULL, "can't set driver info");
 
     /* set pb_configured to FALSE.  This field should not exist, but

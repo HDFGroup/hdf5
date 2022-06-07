@@ -64,7 +64,7 @@
 #define VS_ATTR_NAME_LEN 21
 
 #define TIME_PASSED(X, Y)                                                                                    \
-    ((double)((Y.tv_sec - X.tv_sec) * 1000000000 + (Y.tv_nsec - X.tv_nsec))) / 1000000000.0
+    ((double)((Y.tv_sec - X.tv_sec) * 1000000000LL + (Y.tv_nsec - X.tv_nsec))) / 1000000000.0
 
 typedef struct {
     hid_t        file, filetype, one_by_one_sid;

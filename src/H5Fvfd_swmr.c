@@ -50,8 +50,8 @@
 /****************/
 
 #define VFD_SWMR_MD_FILE_SUFFIX ".md"
-#define NANOSECS_PER_SECOND     1000000000 /* nanoseconds per second */
-#define NANOSECS_PER_TENTH_SEC  100000000  /* nanoseconds per 0.1 second */
+#define NANOSECS_PER_SECOND     1000000000LL /* nanoseconds per second */
+#define NANOSECS_PER_TENTH_SEC  100000000LL  /* nanoseconds per 0.1 second */
 
 /* Declare an array of string to identify the VFD SMWR Log tags.
  * Note this array is used to generate the entry tag by the log reporting macro
@@ -2405,7 +2405,7 @@ H5F__generate_updater_file(H5F_t *f, uint32_t num_entries, uint16_t flags, uint8
     /* Close the updater file and rename the file */
     if (H5FD_close(ud_file) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close updater file")
-    sz = HDsnprintf(newname, H5F__MAX_VFD_SWMR_FILE_NAME_LEN, "%s.%lu",
+    sz = HDsnprintf(newname, H5F__MAX_VFD_SWMR_FILE_NAME_LEN, "%s.%llu",
                     shared->vfd_swmr_config.updater_file_path, shared->updater_seq_num);
     if (sz < 0)
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "error processing snprintf format string")

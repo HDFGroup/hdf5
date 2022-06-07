@@ -46,8 +46,8 @@ below_speed_limit(struct timespec *last, const struct timespec *ival)
     struct timespec now;
     hbool_t         result;
 
-    HDassert(0 <= last->tv_nsec && last->tv_nsec < 1000000000L);
-    HDassert(0 <= ival->tv_nsec && ival->tv_nsec < 1000000000L);
+    HDassert(0 <= last->tv_nsec && last->tv_nsec < 1000000000LL);
+    HDassert(0 <= ival->tv_nsec && ival->tv_nsec < 1000000000LL);
 
     /* NOTE: timespec_get() is C11. This may need further tweaks. */
 #ifdef H5_HAVE_WIN32_API
@@ -59,12 +59,12 @@ below_speed_limit(struct timespec *last, const struct timespec *ival)
         HDexit(EXIT_FAILURE);
     }
 
-    if (now.tv_sec - last->tv_sec > ival->tv_sec)
+    if ((uint64_t)now.tv_sec - (uint64_t)last->tv_sec > (uint64_t)ival->tv_sec)
         result = true;
-    else if (now.tv_sec - last->tv_sec < ival->tv_sec)
+    else if ((uint64_t)now.tv_sec - (uint64_t)last->tv_sec < (uint64_t)ival->tv_sec)
         result = false;
     else
-        result = (now.tv_nsec - last->tv_nsec >= ival->tv_nsec);
+        result = ((uint64_t)now.tv_nsec - (uint64_t)last->tv_nsec >= (uint64_t)ival->tv_nsec);
 
     if (result)
         *last = now;
@@ -245,7 +245,7 @@ timer_function(void *arg)
 void
 await_signal(hid_t fid)
 {
-    struct timespec tick = {.tv_sec = 0, .tv_nsec = 1000000000 / 100};
+    struct timespec tick = {.tv_sec = 0, .tv_nsec = 1000000000LL / 100};
     sigset_t        sleepset;
 
     if (HDsigfillset(&sleepset) == -1) {
