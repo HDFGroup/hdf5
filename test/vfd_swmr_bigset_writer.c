@@ -95,7 +95,7 @@
 #define DEPTH                   1
 #define RANK2                   2
 #define RANK3                   3
-#define NUM_ATTEMPTS            100
+#define NUM_ATTEMPTS            500
 #define SKIP_CHUNK              0
 
 /* Calculate the time passed in seconds.
@@ -103,7 +103,7 @@
  * Expects X, Y to be struct timespec from the function call HDclock_gettime.
  */
 #define TIME_PASSED(X, Y)                                                                                    \
-    ((double)((Y.tv_sec - X.tv_sec) * 1000000000 + (Y.tv_nsec - X.tv_nsec))) / 1000000000.0
+    ((double)(((uint64_t)Y.tv_sec - (uint64_t)X.tv_sec) * 1000000000LL + ((uint64_t)Y.tv_nsec - (uint64_t)X.tv_nsec))) / 1000000000.0
 
 typedef struct _base {
     hsize_t depth, row, col;
