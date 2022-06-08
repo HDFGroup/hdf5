@@ -903,7 +903,7 @@ ioc_file_queue_write_indep(sf_work_request_t *msg, int subfile_rank, int source,
 
     if (data_bytes_received != data_size)
         H5FD_IOC_GOTO_ERROR(H5E_IO, H5E_WRITEERROR, -1,
-                            "message size mismatch -- expected = %ld, actual = %d", data_size,
+                            "message size mismatch -- expected = %" PRId64 ", actual = %d", data_size,
                             data_bytes_received);
 
 #ifdef H5FD_IOC_DEBUG

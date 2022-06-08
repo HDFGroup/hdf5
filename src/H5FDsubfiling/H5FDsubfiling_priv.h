@@ -38,7 +38,6 @@
 #include "H5MMprivate.h"   /* Memory management                        */
 #include "H5Pprivate.h"    /* Property lists                           */
 
-/* TODO: eventually reorganize common header */
 #include "H5subfiling_common.h"
 
 /*

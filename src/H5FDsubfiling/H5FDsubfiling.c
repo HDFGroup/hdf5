@@ -558,6 +558,11 @@ H5FD__subfiling_get_default_config(hid_t fapl_id, H5FD_subfiling_config_t *confi
     }
 
 done:
+    if (H5_mpi_comm_free(&comm) < 0)
+        HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't free MPI Communicator")
+    if (H5_mpi_info_free(&info) < 0)
+        HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't free MPI Info object")
+
     if (ret_value < 0) {
         if (config_out->ioc_fapl_id >= 0 && H5Pclose(config_out->ioc_fapl_id) < 0)
             HDONE_ERROR(H5E_PLIST, H5E_CANTCLOSEOBJ, FAIL, "can't close FAPL")
@@ -801,6 +806,8 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
 
     if (NULL == (file_ptr = (H5FD_subfiling_t *)H5FL_CALLOC(H5FD_subfiling_t)))
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to allocate file struct")
+    file_ptr->comm           = MPI_COMM_NULL;
+    file_ptr->info           = MPI_INFO_NULL;
     file_ptr->fa.ioc_fapl_id = H5I_INVALID_HID;
     file_ptr->ext_comm       = MPI_COMM_NULL;
 
@@ -1015,13 +1022,18 @@ H5FD__subfiling_close(H5FD_t *_file)
     if ((H5I_INVALID_HID != file_ptr->fa.ioc_fapl_id) && (H5I_dec_ref(file_ptr->fa.ioc_fapl_id) < 0))
         HGOTO_ERROR(H5E_VFL, H5E_ARGS, FAIL, "can't close ioc FAPL")
 
+    if (H5_mpi_comm_free(&file_ptr->comm) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI Communicator");
+    if (H5_mpi_info_free(&file_ptr->info) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI Info object");
+
     if (H5_mpi_comm_free(&file_ptr->ext_comm) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free MPI communicator");
 
+done:
     /* Release the file info */
     file_ptr = H5FL_FREE(H5FD_subfiling_t, file_ptr);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__subfiling_close() */
 
@@ -2090,9 +2102,6 @@ H5FD__subfiling_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5
          */
         if (H5FD__subfiling__truncate_sub_files(file->fa.context_id, eoa, file->comm) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTUPDATE, FAIL, "sub-file truncate request failed")
-
-        if (MPI_SUCCESS != (mpi_code = MPI_Barrier(file->comm)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code)
 
         /* Reset last file I/O information */
         file->pos = HADDR_UNDEF;

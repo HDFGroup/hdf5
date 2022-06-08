@@ -785,6 +785,7 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     if (NULL == (file_ptr = (H5FD_ioc_t *)H5FL_CALLOC(H5FD_ioc_t)))
         H5FD_IOC_GOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to allocate file struct");
     file_ptr->comm           = MPI_COMM_NULL;
+    file_ptr->info           = MPI_INFO_NULL;
     file_ptr->fa.ioc_fapl_id = H5I_INVALID_HID;
 
     /* Get the driver-specific file access properties */
@@ -1010,10 +1011,15 @@ H5FD__ioc_close(H5FD_t *_file)
     if (H5_close_subfiles(file->fa.context_id) < 0)
         H5FD_IOC_GOTO_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to close subfiling file(s)");
 
+    if (H5_mpi_comm_free(&file->comm) < 0)
+        H5FD_IOC_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI Communicator");
+    if (H5_mpi_info_free(&file->info) < 0)
+        H5FD_IOC_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI Info object");
+
+done:
     /* Release the file info */
     file = H5FL_FREE(H5FD_ioc_t, file);
 
-done:
     H5FD_IOC_FUNC_LEAVE_API;
 } /* end H5FD__ioc_close() */
 
