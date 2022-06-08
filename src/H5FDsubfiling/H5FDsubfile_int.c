@@ -150,9 +150,10 @@ H5FD__subfiling__truncate_sub_files(hid_t context_id, int64_t logical_file_eof, 
         msg[1] = 0; /* padding -- not used in this message */
         msg[2] = context_id;
 
-        if (MPI_SUCCESS != (mpi_code = MPI_Send(msg, 3, MPI_INT64_T,
-                sf_context->topology->io_concentrators[sf_context->topology->subfile_rank],
-                TRUNC_OP, sf_context->sf_msg_comm)))
+        if (MPI_SUCCESS !=
+            (mpi_code = MPI_Send(msg, 3, MPI_INT64_T,
+                                 sf_context->topology->io_concentrators[sf_context->topology->subfile_rank],
+                                 TRUNC_OP, sf_context->sf_msg_comm)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Send failed", mpi_code)
     }
 
