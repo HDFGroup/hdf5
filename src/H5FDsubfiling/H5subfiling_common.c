@@ -850,7 +850,11 @@ H5_free_subfiling_topology(sf_topology_t *topology)
      * its contents. This will need to be revised if that
      * changes.
      */
-    HDfree(topology->app_layout);
+    if (topology->app_layout) {
+        HDfree(topology->app_layout->layout);
+        HDfree(topology->app_layout->node_ranks);
+        HDfree(topology->app_layout);
+    }
     topology->app_layout = NULL;
 
     /* TODO: */
@@ -1277,19 +1281,11 @@ init_app_topology(ioc_selection_t ioc_selection_type, MPI_Comm comm, sf_topology
     HDassert(io_concentrators);
 
     if (!app_layout) {
-        size_t node_rank_size = ((size_t)comm_size + 1) * sizeof(int);
-        size_t layout_size    = ((size_t)comm_size + 1) * sizeof(layout_t);
-        size_t alloc_size     = sizeof(app_layout_t) + node_rank_size + layout_size;
-
         /* TODO: this is dangerous if a new comm size is greater than what
          * was allocated. Can't reuse app layout.
          */
 
-        /*
-         * Use single allocation to encompass the app layout
-         * structure and all of its elements
-         */
-        if (NULL == (app_layout = HDcalloc(1, alloc_size))) {
+        if (NULL == (app_layout = HDcalloc(1, sizeof(*app_layout)))) {
 #ifdef H5_SUBFILING_DEBUG
             HDprintf("%s: couldn't allocate application layout structure\n", __func__);
 #endif
@@ -1298,8 +1294,23 @@ init_app_topology(ioc_selection_t ioc_selection_type, MPI_Comm comm, sf_topology
             goto done;
         }
 
-        app_layout->node_ranks = (int *)&app_layout[1];
-        app_layout->layout     = (layout_t *)&app_layout->node_ranks[comm_size + 1];
+        if (NULL == (app_layout->node_ranks = HDcalloc(1, ((size_t)comm_size + 1) * sizeof(int)))) {
+#ifdef H5_SUBFILING_DEBUG
+            HDprintf("%s: couldn't allocate application layout node rank array\n", __func__);
+#endif
+
+            ret_value = FAIL;
+            goto done;
+        }
+
+        if (NULL == (app_layout->layout = HDcalloc(1, ((size_t)comm_size + 1) * sizeof(layout_t)))) {
+#ifdef H5_SUBFILING_DEBUG
+            HDprintf("%s: couldn't allocate application layout array\n", __func__);
+#endif
+
+            ret_value = FAIL;
+            goto done;
+        }
     }
 
     app_layout->world_size = comm_size;
@@ -1421,7 +1432,11 @@ init_app_topology(ioc_selection_t ioc_selection_type, MPI_Comm comm, sf_topology
 
 done:
     if (ret_value < 0) {
-        HDfree(app_layout);
+        if (app_layout) {
+            HDfree(app_layout->layout);
+            HDfree(app_layout->node_ranks);
+            HDfree(app_layout);
+        }
         if (app_topology) {
             HDfree(app_topology->subfile_fd);
             HDfree(app_topology->io_concentrators);
@@ -2651,8 +2666,6 @@ H5_close_subfiles(int64_t subfiling_context_id)
     double t1                 = 0.0;
     double t2                 = 0.0;
 #endif
-    int    errors        = 0;
-    int    global_errors = 0;
     int    mpi_code;
     herr_t ret_value = SUCCEED;
 
@@ -2890,10 +2903,6 @@ done:
 #endif
 
         ret_value = FAIL;
-    }
-
-    if (ret_value < 0) {
-        errors = 1;
     }
 
     return ret_value;
