@@ -2011,8 +2011,8 @@ verify_extensible_dset(state_t *s, unsigned int which, mat_t *mat, unsigned fini
     base_t       base, last;
     unsigned int nchunks, step, ofs;
     int          i;
-    h5_retry_t retry;
-    hbool_t    do_try; /* more tries remain */
+    h5_retry_t   retry;
+    hbool_t      do_try; /* more tries remain */
 
     if (which >= s->ndatasets) {
         HDfprintf(stderr, "the dataset order is bigger than the number of datasets");
@@ -2022,8 +2022,7 @@ verify_extensible_dset(state_t *s, unsigned int which, mat_t *mat, unsigned fini
     dset_id = s->dataset[which];
 
     /* Probably can do the same things in other parts that use NUM_ATTEMPTS */
-    for (do_try = H5_retry_init(&retry, NUM_ATTEMPTS, H5_RETRY_DEFAULT_MINIVAL,
-                                H5_RETRY_DEFAULT_MAXIVAL);
+    for (do_try = H5_retry_init(&retry, NUM_ATTEMPTS, H5_RETRY_DEFAULT_MINIVAL, H5_RETRY_DEFAULT_MAXIVAL);
          do_try; do_try = H5_retry_next(&retry)) {
 
         if (H5Drefresh(dset_id) < 0) {

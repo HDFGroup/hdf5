@@ -5527,7 +5527,6 @@ test_vfds_same_file_opens(hid_t orig_fapl, const char *env_h5_drvr)
     if (H5Pclose(fapl) < 0)
         FAIL_STACK_ERROR;
 
-
     /* Free buffers */
     HDfree(config);
 
