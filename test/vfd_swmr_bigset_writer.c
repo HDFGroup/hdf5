@@ -81,6 +81,7 @@
 #include "H5VLprivate.h"
 
 #include "testhdf5.h"
+#include "H5retry_private.h"
 #include "vfd_swmr_common.h"
 
 #ifndef H5_HAVE_WIN32_API
@@ -2008,6 +2009,8 @@ verify_extensible_dset(state_t *s, unsigned int which, mat_t *mat, unsigned fini
     base_t       base, last;
     unsigned int nchunks, step, ofs;
     int          i;
+    h5_retry_t retry;
+    hbool_t    do_try; /* more tries remain */
 
     if (which >= s->ndatasets) {
         HDfprintf(stderr, "the dataset order is bigger than the number of datasets");
@@ -2016,9 +2019,11 @@ verify_extensible_dset(state_t *s, unsigned int which, mat_t *mat, unsigned fini
 
     dset_id = s->dataset[which];
 
-    /* Attempt to check the availability of the chunks for a number times
-     * (NUM_ATTEMPTS) before reporting it as a failure */
-    for (i = 0; i < NUM_ATTEMPTS; i++) {
+    /* Probably can do the same things in other parts that use NUM_ATTEMPTS */
+    for (do_try = H5_retry_init(&retry, NUM_ATTEMPTS, H5_RETRY_DEFAULT_MINIVAL,
+                                H5_RETRY_DEFAULT_MAXIVAL);
+         do_try; do_try = H5_retry_next(&retry)) {
+
         if (H5Drefresh(dset_id) < 0) {
             HDfprintf(stderr, "H5Drefresh failed\n");
             TEST_ERROR;
@@ -2057,11 +2062,8 @@ verify_extensible_dset(state_t *s, unsigned int which, mat_t *mat, unsigned fini
         /* Make sure the chunks show up on the reader side.  Otherwise sleep a while and try again */
         if (nchunks >= last_step)
             break;
-        else
-            decisleep(1);
     }
-
-    if (i == NUM_ATTEMPTS) {
+    if (!do_try) {
         HDfprintf(stderr, "chunk verification reached the maximal number of attempts");
         TEST_ERROR;
     }

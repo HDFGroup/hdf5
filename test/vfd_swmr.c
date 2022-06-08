@@ -5268,15 +5268,11 @@ error:
  *
  *      Case #4:
  *          --Open a file as writer with both legacy SWMR and VFD SWMR configured .
- *          --NOTE: The open should fail when John's changes are merged but for
- *                  now it succeeds.
- *                  This test is #if 0 out for now.
+ *          --The open should fail.
  *
  *      Case #5:
  *          --Open a file as reader with both legacy SWMR and VFD SWMR configured.
- *          --NOTE: The open should fail when John's changes are merged for
- *                  now it succeeds.
- *                  This test is #if 0 out for now.
+ *          --The open should fail.
  *
  *  Return:  0 if test is successful
  *           1 if test fails
@@ -5462,11 +5458,9 @@ test_vfds_same_file_opens(hid_t orig_fapl, const char *env_h5_drvr)
     if (H5Pclose(fapl) < 0)
         FAIL_STACK_ERROR;
 
-#if 1 /* Use test cases #4 and #5 when John's changes are merged */
     /*
      *  Case #4
      *  --Open the file as writer with both legacy SWMR and VFD SWMR configured .
-     *  --NOTE: The open should fail when John's changes are merged but for now it succeeds.
      */
 
     /*
@@ -5491,11 +5485,10 @@ test_vfds_same_file_opens(hid_t orig_fapl, const char *env_h5_drvr)
         fid1 = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl);
     }
     H5E_END_TRY;
-    /* Change the section of code inside "for loop" to TEST_ERROR when John's changes are merged */
     if (fid1 >= 0) {
-        printf("The writer open succeeds which shouldn't be\n");
         if (H5Fclose(fid1) < 0)
             FAIL_STACK_ERROR;
+        TEST_ERROR;
     }
 
     if (H5Pclose(fapl) < 0)
@@ -5504,7 +5497,6 @@ test_vfds_same_file_opens(hid_t orig_fapl, const char *env_h5_drvr)
     /*
      *  Case #5:
      *  --Open the file as reader with both legacy SWMR and VFD SWMR configured .
-     *  --NOTE: The open should fail when John's changes are merged but for now it succeeds.
      */
 
     /* config, tick_len, max_lag, presume_posix_semantics, writer,
@@ -5526,17 +5518,15 @@ test_vfds_same_file_opens(hid_t orig_fapl, const char *env_h5_drvr)
         fid1 = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl);
     }
     H5E_END_TRY;
-    /* Change the section of code inside the "for loop" to TEST_ERROR when John's changes are merged */
     if (fid1 >= 0) {
-        printf("The reader open succeeds which shouldn't be\n");
         if (H5Fclose(fid1) < 0)
             FAIL_STACK_ERROR;
+        TEST_ERROR;
     }
 
     if (H5Pclose(fapl) < 0)
         FAIL_STACK_ERROR;
 
-#endif
 
     /* Free buffers */
     HDfree(config);
