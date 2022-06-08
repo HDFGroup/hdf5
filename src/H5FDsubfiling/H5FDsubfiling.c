@@ -424,6 +424,7 @@ H5Pset_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *vfd_config)
     if (vfd_config == NULL) {
         if (NULL == (subfiling_conf = HDcalloc(1, sizeof(*subfiling_conf))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate subfiling VFD configuration")
+        subfiling_conf->ioc_fapl_id = H5I_INVALID_HID;
 
         /* Get subfiling VFD defaults */
         if (H5FD__subfiling_get_default_config(fapl_id, subfiling_conf) < 0)
@@ -856,10 +857,9 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
         HDfree(path);
     }
 
-    /* Copy the FAPL from the config structure */
-    /* JRM:  Why is this necessary?  If it is necessary, must close the property list on file close. */
-    if (H5FD__copy_plist(config_ptr->ioc_fapl_id, &(file_ptr->fa.ioc_fapl_id)) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "can't copy IOC FAPL");
+    if (H5I_inc_ref(config_ptr->ioc_fapl_id, FALSE) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINC, NULL, "can't increment ref. count on IOC FAPL")
+    file_ptr->fa.ioc_fapl_id = config_ptr->ioc_fapl_id;
 
     file_ptr->sf_file = H5FD_open(name, flags, config_ptr->ioc_fapl_id, HADDR_UNDEF);
     if (!file_ptr->sf_file)
@@ -966,7 +966,7 @@ done:
                 H5FD_close(file_ptr->sf_file);
             H5FL_FREE(H5FD_subfiling_t, file_ptr);
         }
-    } /* end if error */
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__subfiling_open() */
