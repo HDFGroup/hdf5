@@ -95,17 +95,16 @@ static const char *namebases[] = {FILENAME, FILENAME2, FILENAME3, FNAME, NULL};
 /* Size of "flags" field in the updater file header */
 #define UD_SIZE_2 2
 
-#define Swap2Bytes(val) \
-     ( (((val) >> 8) & 0x00FF) | (((val) << 8) & 0xFF00) )
+#define Swap2Bytes(val) ((((val) >> 8) & 0x00FF) | (((val) << 8) & 0xFF00))
 
-#define Swap8Bytes(val) \
-     ( (((val) >> 56) & 0x00000000000000FF) | (((val) >> 40) & 0x000000000000FF00) | \
-       (((val) >> 24) & 0x0000000000FF0000) | (((val) >>  8) & 0x00000000FF000000) | \
-       (((val) <<  8) & 0x000000FF00000000) | (((val) << 24) & 0x0000FF0000000000) | \
-       (((val) << 40) & 0x00FF000000000000) | (((val) << 56) & 0xFF00000000000000) )
-#define Swap4Bytes(val) \
-     ( (((val) >> 24) & 0x000000FF) | (((val) >>  8) & 0x0000FF00) | \
-       (((val) <<  8) & 0x00FF0000) | (((val) << 24) & 0xFF000000) )
+#define Swap8Bytes(val)                                                                                      \
+    ((((val) >> 56) & 0x00000000000000FF) | (((val) >> 40) & 0x000000000000FF00) |                           \
+     (((val) >> 24) & 0x0000000000FF0000) | (((val) >> 8) & 0x00000000FF000000) |                            \
+     (((val) << 8) & 0x000000FF00000000) | (((val) << 24) & 0x0000FF0000000000) |                            \
+     (((val) << 40) & 0x00FF000000000000) | (((val) << 56) & 0xFF00000000000000))
+#define Swap4Bytes(val)                                                                                      \
+    ((((val) >> 24) & 0x000000FF) | (((val) >> 8) & 0x0000FF00) | (((val) << 8) & 0x00FF0000) |              \
+     (((val) << 24) & 0xFF000000))
 
 /* test routines for VFD SWMR */
 static unsigned test_fapl(hid_t orig_fapl);
@@ -143,9 +142,9 @@ static void     clean_chk_ud_files(char *md_file_path, char *updater_file_path);
 static herr_t   verify_ud_chk(char *md_file_path, char *ud_file_path);
 static herr_t   md_ck_cb(char *md_file_path, uint64_t tick_num);
 
-void check_endian(hbool_t *little_endian);
+void       check_endian(hbool_t *little_endian);
 static int vfd_swmr_fapl_augment(hid_t fapl, bool use_latest_format, bool only_meta_pages,
-    size_t page_buf_size, H5F_vfd_swmr_config_t *config);
+                                 size_t page_buf_size, H5F_vfd_swmr_config_t *config);
 
 /*-------------------------------------------------------------------------
  *
@@ -4237,11 +4236,11 @@ error:
 static herr_t
 verify_updater_flags(char *ud_name, uint16_t expected_flags)
 {
-    FILE *   ud_fp = NULL; /* Updater file pointer */
-    uint16_t flags = 0;    /* The "flags" field in the updater file */
-    uint16_t swapped_flags = 0;    /* The "flags" field in the updater file */
-    hbool_t little_endian = FALSE;  /* Endianness of a machine */
-    
+    FILE *   ud_fp         = NULL;  /* Updater file pointer */
+    uint16_t flags         = 0;     /* The "flags" field in the updater file */
+    uint16_t swapped_flags = 0;     /* The "flags" field in the updater file */
+    hbool_t  little_endian = FALSE; /* Endianness of a machine */
+
     check_endian(&little_endian);
 
     /* Open the updater file */
@@ -4256,7 +4255,7 @@ verify_updater_flags(char *ud_name, uint16_t expected_flags)
     if (HDfread(&flags, UD_SIZE_2, 1, ud_fp) != (size_t)1)
         FAIL_STACK_ERROR;
 
-    swapped_flags = little_endian?flags:Swap2Bytes(flags);
+    swapped_flags = little_endian ? flags : Swap2Bytes(flags);
 
     if (swapped_flags != expected_flags)
         TEST_ERROR;
@@ -4630,21 +4629,21 @@ clean_chk_ud_files(char *md_file_path, char *updater_file_path)
 static herr_t
 verify_ud_chk(char *md_file_path, char *ud_file_path)
 {
-    char     chk_name[FILE_NAME_LEN];     /* Checksum file name */
-    char     ud_name[FILE_NAME_LEN];      /* Updater file name */
-    FILE *   chk_fp         = NULL;       /* Checksum file pointer */
-    FILE *   ud_fp          = NULL;       /* Updater file pointer */
-    uint64_t i;                           /* Local index variable */
-    long     size                    = 0; /* Size of the file */
+    char     chk_name[FILE_NAME_LEN]; /* Checksum file name */
+    char     ud_name[FILE_NAME_LEN];  /* Updater file name */
+    FILE *   chk_fp = NULL;           /* Checksum file pointer */
+    FILE *   ud_fp  = NULL;           /* Updater file pointer */
+    uint64_t i;                       /* Local index variable */
+    long     size = 0;                /* Size of the file */
 
-    uint64_t chk_ud_seq_num = 0;          /* Updater sequence number in the checksum file */
+    uint64_t chk_ud_seq_num = 0; /* Updater sequence number in the checksum file */
 
-    uint64_t ud_seq_num     = 0;          /* Sequence number in the updater file */
+    uint64_t ud_seq_num              = 0; /* Sequence number in the updater file */
     uint64_t change_list_len         = 0; /* change_list_len in the updater file header */
     uint32_t num_change_list_entries = 0; /* num_change_list_entries in the updater change list header */
 
-    uint64_t swapped_ud_seq_num = 0;
-    uint64_t swapped_change_list_len = 0;
+    uint64_t swapped_ud_seq_num              = 0;
+    uint64_t swapped_change_list_len         = 0;
     uint32_t swapped_num_change_list_entries = 0;
 
     hbool_t little_endian = FALSE;
@@ -4672,7 +4671,7 @@ verify_ud_chk(char *md_file_path, char *ud_file_path)
             if (HDfread(&ud_seq_num, UD_SIZE_8, 1, ud_fp) != 1)
                 FAIL_STACK_ERROR;
 
-            swapped_ud_seq_num = little_endian?ud_seq_num:Swap8Bytes(ud_seq_num);
+            swapped_ud_seq_num = little_endian ? ud_seq_num : Swap8Bytes(ud_seq_num);
 
             /* Compare the sequence number with i */
             if (swapped_ud_seq_num != i)
@@ -4685,7 +4684,7 @@ verify_ud_chk(char *md_file_path, char *ud_file_path)
             if (HDfread(&change_list_len, UD_SIZE_8, 1, ud_fp) != 1)
                 FAIL_STACK_ERROR;
 
-            swapped_change_list_len = little_endian?change_list_len:Swap8Bytes(change_list_len);
+            swapped_change_list_len = little_endian ? change_list_len : Swap8Bytes(change_list_len);
 
             if (i != 0) {
 
@@ -4696,7 +4695,8 @@ verify_ud_chk(char *md_file_path, char *ud_file_path)
                 if (HDfread(&num_change_list_entries, UD_SIZE_4, 1, ud_fp) != 1)
                     FAIL_STACK_ERROR;
 
-                swapped_num_change_list_entries = little_endian?num_change_list_entries:Swap4Bytes(num_change_list_entries);
+                swapped_num_change_list_entries =
+                    little_endian ? num_change_list_entries : Swap4Bytes(num_change_list_entries);
 
                 if (swapped_num_change_list_entries == 0) {
                     if (swapped_change_list_len != H5F_UD_CL_SIZE(0))

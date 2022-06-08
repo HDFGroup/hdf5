@@ -209,7 +209,7 @@ H5O_refresh_metadata(H5O_loc_t *oloc, hid_t oid)
         H5O_refresh_state_t  state;
         const H5D_t *        ds;
         const H5VL_object_t *vol_obj;
-        const void *object;
+        const void *         object;
         H5VL_t *             connector = NULL;
 
         /* Create empty object location */
@@ -238,7 +238,7 @@ H5O_refresh_metadata(H5O_loc_t *oloc, hid_t oid)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to save datatype state");
                 break;
             case H5I_DATASET:
-                object = H5VL_object_data(vol_obj);
+                object        = H5VL_object_data(vol_obj);
                 ds            = (const H5D_t *)object;
                 state.dapl_id = ds->shared->dapl_id;
                 if (H5I_inc_ref(state.dapl_id, FALSE) < 0)
