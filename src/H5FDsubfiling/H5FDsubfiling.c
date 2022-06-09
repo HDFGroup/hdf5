@@ -791,7 +791,7 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
     H5FD_class_t *                 driver    = NULL; /* VFD for file */
     H5P_genplist_t *               plist_ptr = NULL;
     H5FD_driver_prop_t             driver_prop; /* Property for driver ID & info */
-    int64_t                        sf_eof;
+    int64_t                        sf_eof = -1;
     int                            mpi_code; /* MPI return code */
     H5FD_t *                       ret_value = NULL;
 
@@ -949,8 +949,17 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open subfiling files = %s\n", name)
     }
 
-    if (H5FD__subfiling__get_real_eof(file_ptr->fa.context_id, &sf_eof) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get EOF")
+    if (file_ptr->mpi_rank == 0) {
+        if (H5FD__subfiling__get_real_eof(file_ptr->fa.context_id, &sf_eof) < 0)
+            sf_eof = -1;
+    }
+
+    if (MPI_SUCCESS != (mpi_code = MPI_Bcast(&sf_eof, 1, MPI_INT64_T, 0, file_ptr->comm)))
+        HMPI_GOTO_ERROR(NULL, "MPI_Bcast", mpi_code)
+
+    if (sf_eof < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "lead MPI process failed to get file EOF")
+
     file_ptr->eof       = (haddr_t)sf_eof;
     file_ptr->local_eof = file_ptr->eof;
 
