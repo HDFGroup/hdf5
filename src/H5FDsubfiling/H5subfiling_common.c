@@ -1952,12 +1952,12 @@ ioc_open_file(sf_work_request_t *msg, int file_acc_flags)
     subfiling_context_t *sf_context = NULL;
     int64_t              file_context_id;
     hbool_t              mutex_locked = FALSE;
-    mode_t mode        = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
-    char * filepath    = NULL;
-    char * subfile_dir = NULL;
-    char * base        = NULL;
-    int    fd          = -1;
-    herr_t ret_value   = SUCCEED;
+    mode_t               mode         = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
+    char *               filepath     = NULL;
+    char *               subfile_dir  = NULL;
+    char *               base         = NULL;
+    int                  fd           = -1;
+    herr_t               ret_value    = SUCCEED;
 
     HDassert(msg);
 
@@ -2011,8 +2011,8 @@ ioc_open_file(sf_work_request_t *msg, int file_acc_flags)
     /* Attempt to create/open the subfile for this IOC rank */
     if ((fd = HDopen(filepath, file_acc_flags, mode)) < 0) {
 #ifdef H5_SUBFILING_DEBUG
-        H5_subfiling_log(sf_context->sf_context_id, "%s: failed to open subfile '%s' - %s",
-                __func__, filepath, strerror(errno));
+        H5_subfiling_log(sf_context->sf_context_id, "%s: failed to open subfile '%s' - %s", __func__,
+                         filepath, strerror(errno));
 #endif
 
         ret_value = FAIL;
@@ -2031,7 +2031,7 @@ ioc_open_file(sf_work_request_t *msg, int file_acc_flags)
         if (create_config_file(sf_context, base, subfile_dir, (file_acc_flags & O_TRUNC)) < 0) {
 #ifdef H5_SUBFILING_DEBUG
             H5_subfiling_log(sf_context->sf_context_id, "%s: couldn't create subfiling configuration file\n",
-                    __func__);
+                             __func__);
 #endif
 
             ret_value = FAIL;
