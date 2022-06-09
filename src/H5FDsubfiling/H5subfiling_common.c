@@ -842,6 +842,9 @@ H5_free_subfiling_topology(sf_topology_t *topology)
 {
     HDassert(topology);
 
+    topology->subfile_rank       = -1;
+    topology->n_io_concentrators = 0;
+
     HDfree(topology->subfile_fd);
 
     /*
@@ -1266,6 +1269,7 @@ init_app_topology(ioc_selection_t ioc_selection_type, MPI_Comm comm, sf_topology
         goto done;
     }
 
+    app_topology->subfile_rank   = -1;
     app_topology->selection_type = ioc_selection_type;
 
     if (NULL == (app_topology->io_concentrators = HDcalloc((size_t)comm_size, sizeof(int)))) {
@@ -1907,17 +1911,31 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    ioc_open_file
  *
- * Purpose:     This function gets called when a client invokes a OPEN_OP.
- *              The HDF5 file opening protocol actually attempts to open
- *              a file; first without any truncate other flags which would
- *              modify the file state if it already exists.  A file close
- *              and then the second file open using the user supplied open
- *              flags is invoked.   The OPEN_OP provides the user flags as
- *              part of the RPC message.  The file prefix info doesn't
- *              transmitted as part of the RPC since it is available as
- *              part of the client context which can be utilized by the
- *              IOC thread.  We access the sf_context by reading the
- *              cache of contexts at the index provided with the RPC msg.
+ * Purpose:     This function is called by an I/O concentrator in order to
+ *              open the subfile it is responsible for.
+ *
+ *              The name of the subfile to be opened is generated based on
+ *              values from either:
+ *
+ *              - The corresponding subfiling configuration file, if one
+ *                exists and the HDF5 file isn't being truncated
+ *              - The current subfiling context object for the file, if a
+ *                subfiling configuration file doesn't exist or the HDF5
+ *                file is being truncated
+ *
+ *              After the subfile has been opened, a subfiling
+ *              configuration file will be created if this is a file
+ *              creation operation. If the truncate flag is specified, the
+ *              subfiling configuration file will be re-created in order to
+ *              account for any possible changes in the subfiling
+ *              configuration.
+ *
+ *              Note that the HDF5 file opening protocol may attempt to
+ *              open a file twice. A first open attempt is made without any
+ *              truncate or other flags which would modify the file state
+ *              if it already exists. Then, if this tentative open wasn't
+ *              sufficient, the file is closed and a second file open using
+ *              the user supplied open flags is invoked.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -1928,16 +1946,12 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-/* TODO: revise description */
 static herr_t
 ioc_open_file(sf_work_request_t *msg, int file_acc_flags)
 {
     subfiling_context_t *sf_context = NULL;
     int64_t              file_context_id;
-#ifdef H5_SUBFILING_DEBUG
-    double t_start = 0.0;
-    double t_end   = 0.0;
-#endif
+    hbool_t              mutex_locked = FALSE;
     mode_t mode        = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
     char * filepath    = NULL;
     char * subfile_dir = NULL;
@@ -1946,10 +1960,6 @@ ioc_open_file(sf_work_request_t *msg, int file_acc_flags)
     herr_t ret_value   = SUCCEED;
 
     HDassert(msg);
-
-#ifdef H5_SUBFILING_DEBUG
-    t_start = MPI_Wtime();
-#endif
 
     /* Retrieve subfiling context ID from RPC message */
     file_context_id = msg->header[2];
@@ -1996,18 +2006,13 @@ ioc_open_file(sf_work_request_t *msg, int file_acc_flags)
     }
 
     begin_thread_exclusive();
+    mutex_locked = TRUE;
 
     /* Attempt to create/open the subfile for this IOC rank */
     if ((fd = HDopen(filepath, file_acc_flags, mode)) < 0) {
-        end_thread_exclusive(); /* TODO: try to only unlock in one place? */
-
-        HDperror("ioc_open_file - file open failed");
-
 #ifdef H5_SUBFILING_DEBUG
-        if (sf_verbose_flag) {
-            HDprintf("[%d %s] file open(%s) failed!\n", sf_context->topology->subfile_rank, __func__,
-                     filepath);
-        }
+        H5_subfiling_log(sf_context->sf_context_id, "%s: failed to open subfile '%s' - %s",
+                __func__, filepath, strerror(errno));
 #endif
 
         ret_value = FAIL;
@@ -2018,26 +2023,15 @@ ioc_open_file(sf_work_request_t *msg, int file_acc_flags)
     if (file_acc_flags & O_CREAT)
         sf_context->sf_eof = 0;
 
-#ifdef H5_SUBFILING_DEBUG
-    if (sf_verbose_flag) {
-        if (sf_logfile) {
-            HDfprintf(sf_logfile, "[ioc:%d] Opened subfile %s\n", sf_context->topology->subfile_rank,
-                      filepath);
-        }
-    }
-#endif
-
     /*
      * If subfiles were created (rather than simply opened),
      * check if we also need to create a config file.
      */
     if ((file_acc_flags & O_CREAT) && (sf_context->topology->subfile_rank == 0)) {
         if (create_config_file(sf_context, base, subfile_dir, (file_acc_flags & O_TRUNC)) < 0) {
-            end_thread_exclusive(); /* TODO: try to only unlock in one place? */
-
 #ifdef H5_SUBFILING_DEBUG
-            HDprintf("[%d %s]: couldn't create subfiling configuration file\n",
-                     sf_context->topology->subfile_rank, __func__);
+            H5_subfiling_log(sf_context->sf_context_id, "%s: couldn't create subfiling configuration file\n",
+                    __func__);
 #endif
 
             ret_value = FAIL;
@@ -2045,9 +2039,12 @@ ioc_open_file(sf_work_request_t *msg, int file_acc_flags)
         }
     }
 
-    end_thread_exclusive(); /* TODO: try to only unlock in one place? */
-
 done:
+    if (mutex_locked) {
+        end_thread_exclusive();
+        mutex_locked = FALSE;
+    }
+
     if (ret_value < 0) {
         if (sf_context) {
             HDfree(sf_context->sf_filename);
@@ -2063,14 +2060,6 @@ done:
     HDfree(base);
     HDfree(subfile_dir);
     HDfree(filepath);
-
-#ifdef H5_SUBFILING_DEBUG
-    t_end = MPI_Wtime();
-    if (sf_verbose_flag) {
-        HDprintf("[%s %d] open completed in %lf seconds\n", __func__, sf_context->topology->subfile_rank,
-                 (t_end - t_start));
-    }
-#endif
 
     return ret_value;
 }
