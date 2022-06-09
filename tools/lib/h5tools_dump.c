@@ -3320,7 +3320,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
         } break;
 
         case H5D_VIRTUAL: {
-            char   dsetname[256]; /* virtual datset name       */
+            char   dsetname[256]; /* virtual dataset name       */
             size_t n_vmaps;
 
             H5Pget_virtual_count(dcpl_id, &n_vmaps);

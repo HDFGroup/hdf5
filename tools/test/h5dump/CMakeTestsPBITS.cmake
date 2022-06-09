@@ -158,7 +158,7 @@
   # Limits:
   # Maximum number of packed bits is 8 (for now).
   # Maximum integer size is 8*sizeof(long long).
-  # Maximun Offset is Maximum size - 1.
+  # Maximum Offset is Maximum size - 1.
   # Maximum Offset+Length is Maximum size.
   # Tests:
   # Normal operation on both signed and unsigned int datasets.

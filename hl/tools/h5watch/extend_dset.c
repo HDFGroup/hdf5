@@ -83,7 +83,7 @@ extend_dset_two(const char *file, char *dname, int action1, int action2)
     size_t   dtype_size;  /* size of the dataset's datatype                   */
     unsigned num_elmts;   /* number of elements in the dataset                */
     int *    ibuf = NULL; /* buffer for storing retrieved elements (integer)  */
-    set_t *  cbuf = NULL; /* buffer for storing retrieved elemnets (compound) */
+    set_t *  cbuf = NULL; /* buffer for storing retrieved elements (compound) */
 
     /* Allocate memory */
     if (NULL == (ibuf = (int *)HDcalloc(TEST_BUF_SIZE, sizeof(int))))
@@ -237,7 +237,7 @@ extend_dset_one(const char *file, char *dname, int action)
     hsize_t count[1];    /* dimension sizes of appended data                 */
     size_t  dtype_size;  /* size of the dataset's datatype                   */
     int *   ibuf = NULL; /* buffer for storing retrieved elements (integer)  */
-    set_t * cbuf = NULL; /* buffer for storing retrieved elemnets (compound) */
+    set_t * cbuf = NULL; /* buffer for storing retrieved elements (compound) */
 
     /* Allocate memory */
     if (NULL == (ibuf = (int *)HDcalloc(TEST_BUF_SIZE, sizeof(int))))

@@ -49,17 +49,22 @@ New Features
 
     Configuration:
     -------------
-    - 
+    -
 
 
     Library:
     --------
-    - 
+    -
+
+
+    Parallel Library:
+    -----------------
+    -
 
 
     Fortran Library:
     ----------------
-    - 
+    -
 
 
     C++ Library:
@@ -69,17 +74,17 @@ New Features
 
     Java Library:
     -------------
-    - 
+    -
 
 
     Tools:
     ------
-    - 
+    -
 
 
     High-Level APIs:
     ----------------
-    -
+    - 
 
 
     C Packet Table API:
@@ -106,22 +111,27 @@ Bug Fixes since HDF5-1.10.9 release
 ===================================
     Library
     -------
-    - 
+    -
 
 
     Java Library
     ------------
-    - 
+    -
 
 
     Configuration
     -------------
-    - 
+    -
 
 
     Tools
     -----
-    - 
+    -
+
+
+    Performance
+    -------------
+    -
 
 
     Fortran API
@@ -131,7 +141,7 @@ Bug Fixes since HDF5-1.10.9 release
 
     High-Level Library
     ------------------
-    - 
+    -
 
 
     Fortran High-Level APIs
@@ -141,7 +151,7 @@ Bug Fixes since HDF5-1.10.9 release
 
     Documentation
     -------------
-    - 
+    -
 
 
     F90 APIs

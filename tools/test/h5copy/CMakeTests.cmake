@@ -211,7 +211,7 @@
   endmacro ()
 
   #
-  # Similiar to ADD_H5_TEST macro. Compare to outputs from source & target
+  # Similar to ADD_H5_TEST macro. Compare to outputs from source & target
   # files instead of checking with h5ls.
   #
   macro (ADD_H5_CMP_TEST testname resultcode infile vparam sparam srcname dparam dstname)

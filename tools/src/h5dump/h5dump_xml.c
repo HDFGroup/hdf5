@@ -23,7 +23,7 @@
 const char *xmlnsprefix = "hdf5:";
 
 /*
- *  Alternative formating for data dumped to XML
+ *  Alternative formatting for data dumped to XML
  *  In general, the numbers are the same, but separators
  *  except spaces are not used.
  *
@@ -2782,7 +2782,7 @@ xml_dump_group(hid_t gid, const char *name)
                 if (isRoot && unamedtype) {
                     unsigned u;
 
-                    /* Very special case: dump unamed type in root group */
+                    /* Very special case: dump unnamed type in root group */
                     for (u = 0; u < type_table->nobjs; u++) {
                         if (!type_table->objs[u].recorded) {
                             dset = H5Dopen2(gid, type_table->objs[u].objname, H5P_DEFAULT);
@@ -2869,7 +2869,7 @@ xml_dump_group(hid_t gid, const char *name)
         if (isRoot && unamedtype) {
             unsigned u;
 
-            /* Very special case: dump unamed type in root group */
+            /* Very special case: dump unnamed type in root group */
             for (u = 0; u < type_table->nobjs; u++) {
                 if (!type_table->objs[u].recorded) {
                     dset = H5Dopen2(gid, type_table->objs[u].objname, H5P_DEFAULT);
@@ -2915,7 +2915,7 @@ xml_dump_group(hid_t gid, const char *name)
 /*-------------------------------------------------------------------------
  * Function:    xml_print_refs
  *
- * Purpose:     Print a path to the objects referenced by HDF5 Referneces.
+ * Purpose:     Print a path to the objects referenced by HDF5 References.
  *
  * Return:      void
  *

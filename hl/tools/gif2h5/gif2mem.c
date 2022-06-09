@@ -40,7 +40,7 @@ Gif2Mem(GIFBYTE *MemGif, GIFTOMEM *GifMemoryStruct)
 {
     /*
      * The gif structure outline for passing data to memory is given in gif.h.
-     * These pointers are redunant, should take them out in ver. 2
+     * These pointers are redundant, should take them out in ver. 2
      */
     GIFHEAD *           gifHead;           /* GIF Header structure            */
     GIFIMAGEDESC **     gifImageDesc;      /* Logical Image Descriptor struct */
