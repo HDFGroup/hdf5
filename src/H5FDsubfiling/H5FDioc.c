@@ -786,6 +786,7 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         H5FD_IOC_GOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to allocate file struct");
     file_ptr->comm           = MPI_COMM_NULL;
     file_ptr->info           = MPI_INFO_NULL;
+    file_ptr->fa.context_id  = -1;
     file_ptr->fa.ioc_fapl_id = H5I_INVALID_HID;
 
     /* Get the driver-specific file access properties */
@@ -933,17 +934,6 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     ret_value = (H5FD_t *)file_ptr;
 
 done:
-    if (NULL == ret_value) {
-        if (file_ptr) {
-            if (file_ptr->ioc_file && (H5FD_close(file_ptr->ioc_file) < 0))
-                H5FD_IOC_DONE_ERROR(H5E_VFL, H5E_CANTCLOSEOBJ, NULL, "can't close IOC file");
-
-            /* TODO: close file_ptr->fa.ioc_fapl_id if necessary */
-
-            H5FL_FREE(H5FD_ioc_t, file_ptr);
-        }
-    } /* end if error */
-
     /* run a barrier just before exit.  The objective is to
      * ensure that the IOCs are fully up and running before
      * we proceed.  Note that this barrier is not sufficient
@@ -960,6 +950,17 @@ done:
         if (MPI_SUCCESS != (mpi_code = MPI_Barrier(barrier_comm)))
             H5FD_IOC_MPI_DONE_ERROR(NULL, "MPI_Barrier failed", mpi_code);
     }
+
+    if (NULL == ret_value) {
+        if (file_ptr) {
+            if (file_ptr->ioc_file && (H5FD_close(file_ptr->ioc_file) < 0))
+                H5FD_IOC_DONE_ERROR(H5E_VFL, H5E_CANTCLOSEOBJ, NULL, "can't close IOC file");
+
+            /* TODO: close file_ptr->fa.ioc_fapl_id if necessary */
+
+            H5FL_FREE(H5FD_ioc_t, file_ptr);
+        }
+    } /* end if error */
 
     H5FD_IOC_FUNC_LEAVE_API;
 } /* end H5FD__ioc_open() */
@@ -1008,8 +1009,9 @@ H5FD__ioc_close(H5FD_t *_file)
             H5FD_IOC_GOTO_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to close HDF5 file");
     }
 
-    if (H5_close_subfiles(file->fa.context_id) < 0)
-        H5FD_IOC_GOTO_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to close subfiling file(s)");
+    if (file->fa.context_id >= 0)
+        if (H5_close_subfiles(file->fa.context_id) < 0)
+            H5FD_IOC_GOTO_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to close subfiling file(s)");
 
     if (H5_mpi_comm_free(&file->comm) < 0)
         H5FD_IOC_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI Communicator");
