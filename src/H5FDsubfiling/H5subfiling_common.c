@@ -903,7 +903,10 @@ H5_open_subfiles(const char *base_filename, uint64_t h5_file_id, ioc_selection_t
 {
     subfiling_context_t *sf_context = NULL;
     int64_t              context_id = -1;
-    herr_t               ret_value  = SUCCEED;
+    int                  l_errors   = 0;
+    int                  g_errors   = 0;
+    int                  mpi_code;
+    herr_t               ret_value = SUCCEED;
 
     if (!base_filename) {
 #ifdef H5_SUBFILING_DEBUG
@@ -1017,6 +1020,36 @@ H5_open_subfiles(const char *base_filename, uint64_t h5_file_id, ioc_selection_t
 
 done:
     if (ret_value < 0) {
+        l_errors = 1;
+    }
+
+    /*
+     * Form consensus on whether opening subfiles was
+     * successful
+     */
+    if (MPI_SUCCESS != (mpi_code = MPI_Allreduce(&l_errors, &g_errors, 1, MPI_INT, MPI_SUM,
+                                                 file_comm))) {
+#ifdef H5_SUBFILING_DEBUG
+        HDprintf("[%s %d]: MPI_Allreduce failed with rc %d\n", __func__,
+                 sf_context->topology->app_layout->world_rank, mpi_code);
+#endif
+
+        ret_value = FAIL;
+    }
+
+    if (g_errors > 0) {
+#ifdef H5_SUBFILING_DEBUG
+        if (sf_context->topology->app_layout->world_rank == 0) {
+            HDprintf("%s: one or more IOC ranks couldn't open subfiles\n", __func__);
+        }
+#endif
+
+        ret_value = FAIL;
+    }
+
+    if (ret_value < 0) {
+        clear_fid_map_entry(h5_file_id);
+
         if (context_id >= 0 && H5_free_subfiling_object(context_id) < 0) {
 #ifdef H5_SUBFILING_DEBUG
             HDprintf("%s: couldn't free subfiling object\n", __func__);
@@ -1720,9 +1753,6 @@ static herr_t
 open_subfile_with_context(subfiling_context_t *sf_context, int file_acc_flags)
 {
     double start_time;
-    int    l_errors = 0;
-    int    g_errors = 0;
-    int    mpi_code;
     herr_t ret_value = SUCCEED;
 
     HDassert(sf_context);
@@ -1772,36 +1802,6 @@ open_subfile_with_context(subfiling_context_t *sf_context, int file_acc_flags)
     }
 
 done:
-    if (ret_value < 0) {
-        l_errors = 1;
-    }
-
-    /*
-     * Form consensus on whether opening subfiles was
-     * successful across the IOC ranks
-     */
-    if (sf_context->topology->n_io_concentrators > 1) {
-        if (MPI_SUCCESS != (mpi_code = MPI_Allreduce(&l_errors, &g_errors, 1, MPI_INT, MPI_SUM,
-                                                     sf_context->sf_group_comm))) {
-#ifdef H5_SUBFILING_DEBUG
-            HDprintf("[%s %d]: MPI_Allreduce failed with rc %d\n", __func__,
-                     sf_context->topology->app_layout->world_rank, mpi_code);
-#endif
-
-            ret_value = FAIL;
-        }
-
-        if (g_errors > 0) {
-#ifdef H5_SUBFILING_DEBUG
-            if (sf_context->topology->app_layout->world_rank == 0) {
-                HDprintf("%s: one or more IOC ranks couldn't open subfiles\n", __func__);
-            }
-#endif
-
-            ret_value = FAIL;
-        }
-    }
-
     if (ret_value < 0) {
         clear_fid_map_entry(sf_context->h5_file_id);
     }
