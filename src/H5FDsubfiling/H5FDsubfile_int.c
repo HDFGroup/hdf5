@@ -207,7 +207,6 @@ herr_t
 H5FD__subfiling__get_real_eof(hid_t context_id, int64_t *logical_eof_ptr)
 {
     subfiling_context_t *sf_context  = NULL;
-    MPI_Request *        send_reqs   = NULL;
     MPI_Request *        recv_reqs   = NULL;
     int64_t *            recv_msg    = NULL;
     int64_t *            sf_eofs     = NULL; /* dynamically allocated array for subfile EOFs */
@@ -233,8 +232,6 @@ H5FD__subfiling__get_real_eof(hid_t context_id, int64_t *logical_eof_ptr)
 
     if (NULL == (sf_eofs = HDmalloc((size_t)n_io_concentrators * sizeof(int64_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate sub-file EOFs array");
-    if (NULL == (send_reqs = HDmalloc((size_t)n_io_concentrators * sizeof(*send_reqs))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate send requests array");
     if (NULL == (recv_reqs = HDmalloc((size_t)n_io_concentrators * sizeof(*recv_reqs))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate receive requests array");
     if (NULL == (recv_msg = HDmalloc((size_t)n_io_concentrators * 3 * sizeof(*recv_msg))))
@@ -242,7 +239,6 @@ H5FD__subfiling__get_real_eof(hid_t context_id, int64_t *logical_eof_ptr)
 
     for (int i = 0; i < n_io_concentrators; i++) {
         sf_eofs[i]   = -1;
-        send_reqs[i] = MPI_REQUEST_NULL;
         recv_reqs[i] = MPI_REQUEST_NULL;
     }
 
@@ -264,14 +260,12 @@ H5FD__subfiling__get_real_eof(hid_t context_id, int64_t *logical_eof_ptr)
     for (int i = 0; i < n_io_concentrators; i++) {
         int ioc_rank = sf_context->topology->io_concentrators[i];
 
-        if (MPI_SUCCESS != (mpi_code = MPI_Isend(msg, 3, MPI_INT64_T, ioc_rank, GET_EOF_OP,
-                                                 sf_context->sf_msg_comm, &send_reqs[i])))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Isend", mpi_code);
+        if (MPI_SUCCESS != (mpi_code = MPI_Send(msg, 3, MPI_INT64_T, ioc_rank, GET_EOF_OP,
+                                                sf_context->sf_msg_comm)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Send", mpi_code);
     }
 
     /* Wait for EOF communication to complete */
-    if (MPI_SUCCESS != (mpi_code = MPI_Waitall(n_io_concentrators, send_reqs, MPI_STATUSES_IGNORE)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Waitall", mpi_code)
     if (MPI_SUCCESS != (mpi_code = MPI_Waitall(n_io_concentrators, recv_reqs, MPI_STATUSES_IGNORE)))
         HMPI_GOTO_ERROR(FAIL, "MPI_Waitall", mpi_code)
 
@@ -328,16 +322,11 @@ done:
                 if (MPI_SUCCESS != (mpi_code = MPI_Cancel(&recv_reqs[i])))
                     HMPI_DONE_ERROR(FAIL, "MPI_Cancel", mpi_code);
             }
-            if (send_reqs && (send_reqs[i] != MPI_REQUEST_NULL)) {
-                if (MPI_SUCCESS != (mpi_code = MPI_Cancel(&send_reqs[i])))
-                    HMPI_DONE_ERROR(FAIL, "MPI_Cancel", mpi_code);
-            }
         }
     }
 
     HDfree(recv_msg);
     HDfree(recv_reqs);
-    HDfree(send_reqs);
     HDfree(sf_eofs);
 
     FUNC_LEAVE_NOAPI(ret_value)
