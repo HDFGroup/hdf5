@@ -260,8 +260,8 @@ H5FD__subfiling__get_real_eof(hid_t context_id, int64_t *logical_eof_ptr)
     for (int i = 0; i < n_io_concentrators; i++) {
         int ioc_rank = sf_context->topology->io_concentrators[i];
 
-        if (MPI_SUCCESS != (mpi_code = MPI_Send(msg, 3, MPI_INT64_T, ioc_rank, GET_EOF_OP,
-                                                sf_context->sf_msg_comm)))
+        if (MPI_SUCCESS !=
+            (mpi_code = MPI_Send(msg, 3, MPI_INT64_T, ioc_rank, GET_EOF_OP, sf_context->sf_msg_comm)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Send", mpi_code);
     }
 
