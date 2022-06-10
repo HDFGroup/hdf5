@@ -438,7 +438,11 @@ H5Pset_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *vfd_config)
     ret_value = H5P_set_driver(plist, H5FD_SUBFILING, (void *)vfd_config, NULL);
 
 done:
-    HDfree(subfiling_conf);
+    if (subfiling_conf) {
+        if (subfiling_conf->ioc_fapl_id >= 0 && H5I_dec_ref(subfiling_conf->ioc_fapl_id) < 0)
+            HDONE_ERROR(H5E_PLIST, H5E_CANTDEC, FAIL, "can't close IOC FAPL")
+        HDfree(subfiling_conf);
+    }
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_fapl_subfiling() */
@@ -726,6 +730,10 @@ H5FD__subfiling_fapl_copy(const void *_old_fa)
     }
 
     HDmemcpy(new_fa, old_fa, sizeof(H5FD_subfiling_config_t));
+
+    if (H5FD__copy_plist(old_fa->ioc_fapl_id, &(new_fa->ioc_fapl_id)) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "can't copy the IOC FAPL")
+
     ret_value = new_fa;
 
 done:
@@ -756,15 +764,19 @@ done:
 static herr_t
 H5FD__subfiling_fapl_free(void *_fa)
 {
-    H5FD_subfiling_config_t *fa = (H5FD_subfiling_config_t *)_fa;
+    H5FD_subfiling_config_t *fa        = (H5FD_subfiling_config_t *)_fa;
+    herr_t                   ret_value = SUCCEED;
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_PACKAGE
 
     HDassert(fa != NULL); /* sanity check */
 
+    if (fa->ioc_fapl_id >= 0 && H5I_dec_ref(fa->ioc_fapl_id) < 0)
+        HDONE_ERROR(H5E_PLIST, H5E_CANTDEC, FAIL, "can't close IOC FAPL")
+
     H5MM_xfree(fa);
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__subfiling_fapl_free() */
 
 /*-------------------------------------------------------------------------
@@ -858,16 +870,15 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
         HDfree(path);
     }
 
-    if (H5I_inc_ref(config_ptr->ioc_fapl_id, FALSE) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINC, NULL, "can't increment ref. count on IOC FAPL")
-    file_ptr->fa.ioc_fapl_id = config_ptr->ioc_fapl_id;
+    if (H5FD__copy_plist(config_ptr->ioc_fapl_id, &(file_ptr->fa.ioc_fapl_id)) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "can't copy FAPL");
 
-    file_ptr->sf_file = H5FD_open(name, flags, config_ptr->ioc_fapl_id, HADDR_UNDEF);
+    file_ptr->sf_file = H5FD_open(name, flags, file_ptr->fa.ioc_fapl_id, HADDR_UNDEF);
     if (!file_ptr->sf_file)
         HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, NULL, "unable to open IOC file")
 
     /* Check the "native" driver (IOC/sec2/etc.) */
-    if (NULL == (plist_ptr = H5I_object(config_ptr->ioc_fapl_id)))
+    if (NULL == (plist_ptr = H5I_object(file_ptr->fa.ioc_fapl_id)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, NULL, "invalid IOC FAPL")
 
     if (H5P_peek(plist_ptr, H5F_ACS_FILE_DRV_NAME, &driver_prop) < 0)
@@ -916,7 +927,7 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
                 h5_stat_t sb;
                 void *    file_handle = NULL;
 
-                if (H5FDget_vfd_handle(file_ptr->sf_file, config_ptr->ioc_fapl_id, &file_handle) < 0)
+                if (H5FDget_vfd_handle(file_ptr->sf_file, file_ptr->fa.ioc_fapl_id, &file_handle) < 0)
                     HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get file handle")
 
                 /* We create a new file descriptor for our file structure.

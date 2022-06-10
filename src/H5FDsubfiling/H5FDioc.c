@@ -375,6 +375,7 @@ H5Pset_fapl_ioc(hid_t fapl_id, H5FD_ioc_config_t *vfd_config)
     if (vfd_config == NULL) {
         if (NULL == (ioc_conf = HDcalloc(1, sizeof(*ioc_conf))))
             H5FD_IOC_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate IOC VFD configuration");
+        ioc_conf->ioc_fapl_id = H5I_INVALID_HID;
 
         /* Get IOC VFD defaults */
         if (H5FD__ioc_get_default_config(ioc_conf) < 0)
@@ -389,7 +390,11 @@ H5Pset_fapl_ioc(hid_t fapl_id, H5FD_ioc_config_t *vfd_config)
     ret_value = H5P_set_driver(plist_ptr, H5FD_IOC, vfd_config, NULL);
 
 done:
-    HDfree(ioc_conf);
+    if (ioc_conf) {
+        if (ioc_conf->ioc_fapl_id >= 0 && H5I_dec_ref(ioc_conf->ioc_fapl_id) < 0)
+            H5FD_IOC_DONE_ERROR(H5E_PLIST, H5E_CANTDEC, FAIL, "can't close IOC FAPL");
+        HDfree(ioc_conf);
+    }
 
     H5FD_IOC_FUNC_LEAVE_API;
 } /* end H5Pset_fapl_ioc() */
@@ -738,7 +743,7 @@ H5FD__ioc_fapl_free(void *_fapl)
     /* Check arguments */
     HDassert(fapl);
 
-    if (H5I_dec_ref(fapl->ioc_fapl_id) < 0)
+    if (fapl->ioc_fapl_id >= 0 && H5I_dec_ref(fapl->ioc_fapl_id) < 0)
         H5FD_IOC_GOTO_ERROR(H5E_VFL, H5E_CANTDEC, FAIL, "can't close FAPL ID");
 
     /* Free the property list */
