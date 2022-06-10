@@ -790,6 +790,8 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
     H5FD_class_t *                 driver    = NULL; /* VFD for file */
     H5P_genplist_t *               plist_ptr = NULL;
     H5FD_driver_prop_t             driver_prop; /* Property for driver ID & info */
+    hbool_t                        bcasted_inode = FALSE;
+    hbool_t                        bcasted_eof   = FALSE;
     int64_t                        sf_eof = -1;
     int                            mpi_code; /* MPI return code */
     H5FD_t *                       ret_value = NULL;
@@ -934,6 +936,8 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
             file_ptr->inode = inode_id;
         }
 
+        bcasted_inode = TRUE;
+
         /* All ranks can now detect an error and fail. */
         if (inode_id == (uint64_t)-1)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file = %s\n", name)
@@ -956,6 +960,8 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
     if (MPI_SUCCESS != (mpi_code = MPI_Bcast(&sf_eof, 1, MPI_INT64_T, 0, file_ptr->comm)))
         HMPI_GOTO_ERROR(NULL, "MPI_Bcast", mpi_code)
 
+    bcasted_eof = TRUE;
+
     if (sf_eof < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "lead MPI process failed to get file EOF")
 
@@ -967,6 +973,22 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
 done:
     if (NULL == ret_value) {
         if (file_ptr) {
+            /* Participate in possible MPI collectives on failure */
+            if (file_ptr->comm != MPI_COMM_NULL) {
+                if (!bcasted_inode) {
+                    uint64_t tmp_inode = UINT64_MAX;
+
+                    if (MPI_SUCCESS != (mpi_code = MPI_Bcast(&tmp_inode, 1, MPI_UNSIGNED_LONG_LONG, 0, file_ptr->comm)))
+                        HMPI_DONE_ERROR(NULL, "MPI_Bcast failed", mpi_code)
+                }
+                if (!bcasted_eof) {
+                    sf_eof = -1;
+
+                    if (MPI_SUCCESS != (mpi_code = MPI_Bcast(&sf_eof, 1, MPI_INT64_T, 0, file_ptr->comm)))
+                        HMPI_DONE_ERROR(NULL, "MPI_Bcast failed", mpi_code)
+                }
+            }
+
             /* TODO: FAPL ID will likely never be H5I_INVALID_HID since it's currently initialized to 0 */
             if (H5I_INVALID_HID != file_ptr->fa.ioc_fapl_id)
                 H5I_dec_ref(file_ptr->fa.ioc_fapl_id);
