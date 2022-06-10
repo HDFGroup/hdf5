@@ -303,42 +303,41 @@ H5FD_subfiling_init(void)
 
     /* Register the Subfiling VFD, if it isn't already registered */
     if (H5I_VFL != H5I_get_type(H5FD_SUBFILING_g)) {
-        char *env_var;
+        int mpi_initialized = 0;
+        int provided        = 0;
+        int mpi_code;
 
         if ((H5FD_SUBFILING_g = H5FD_register(&H5FD_subfiling_g, sizeof(H5FD_class_t), FALSE)) < 0)
             HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "can't register subfiling VFD");
 
-        /* Check if Subfiling VFD has been loaded dynamically */
-        env_var = HDgetenv(HDF5_DRIVER);
-        if (env_var && !HDstrcmp(env_var, H5FD_SUBFILING_NAME)) {
-            int mpi_initialized = 0;
-            int provided        = 0;
-            int mpi_code;
+        /* Initialize MPI if not already initialized */
+        if (MPI_SUCCESS != (mpi_code = MPI_Initialized(&mpi_initialized)))
+            HMPI_GOTO_ERROR(H5I_INVALID_HID, "MPI_Initialized failed", mpi_code)
+        if (mpi_initialized) {
+            /* If MPI is initialized, validate that it was initialized with MPI_THREAD_MULTIPLE */
+            if (MPI_SUCCESS != (mpi_code = MPI_Query_thread(&provided)))
+                HMPI_GOTO_ERROR(H5I_INVALID_HID, "MPI_Query_thread failed", mpi_code)
+            if (provided != MPI_THREAD_MULTIPLE)
+                HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID,
+                            "Subfiling VFD requires the use of MPI_Init_thread with MPI_THREAD_MULTIPLE")
+        }
+        else {
+            char *env_var;
+            int   required = MPI_THREAD_MULTIPLE;
 
-            /* Initialize MPI if not already initialized */
-            if (MPI_SUCCESS != (mpi_code = MPI_Initialized(&mpi_initialized)))
-                HMPI_GOTO_ERROR(H5I_INVALID_HID, "MPI_Initialized failed", mpi_code)
-            if (mpi_initialized) {
-                /* If MPI is initialized, validate that it was initialized with MPI_THREAD_MULTIPLE */
-                if (MPI_SUCCESS != (mpi_code = MPI_Query_thread(&provided)))
-                    HMPI_GOTO_ERROR(H5I_INVALID_HID, "MPI_Query_thread failed", mpi_code)
-                if (provided != MPI_THREAD_MULTIPLE)
-                    HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID,
-                                "Subfiling VFD requires the use of MPI_Init_thread with MPI_THREAD_MULTIPLE")
-            }
-            else {
-                int required = MPI_THREAD_MULTIPLE;
+            /* Ensure that Subfiling VFD has been loaded dynamically */
+            env_var = HDgetenv(HDF5_DRIVER);
+            if (!env_var || HDstrcmp(env_var, H5FD_SUBFILING_NAME))
+                HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID, "MPI isn't initialized")
 
-                /* Otherwise, initialize MPI */
-                if (MPI_SUCCESS != (mpi_code = MPI_Init_thread(NULL, NULL, required, &provided)))
-                    HMPI_GOTO_ERROR(H5I_INVALID_HID, "MPI_Init_thread failed", mpi_code)
+            if (MPI_SUCCESS != (mpi_code = MPI_Init_thread(NULL, NULL, required, &provided)))
+                HMPI_GOTO_ERROR(H5I_INVALID_HID, "MPI_Init_thread failed", mpi_code)
 
-                H5FD_mpi_self_initialized = TRUE;
+            H5FD_mpi_self_initialized = TRUE;
 
-                if (provided != required)
-                    HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID,
-                                "MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE")
-            }
+            if (provided != required)
+                HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID,
+                            "MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE")
         }
     }
 
