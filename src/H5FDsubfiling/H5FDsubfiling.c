@@ -792,7 +792,7 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
     H5FD_driver_prop_t             driver_prop; /* Property for driver ID & info */
     hbool_t                        bcasted_inode = FALSE;
     hbool_t                        bcasted_eof   = FALSE;
-    int64_t                        sf_eof = -1;
+    int64_t                        sf_eof        = -1;
     int                            mpi_code; /* MPI return code */
     H5FD_t *                       ret_value = NULL;
 
@@ -978,7 +978,8 @@ done:
                 if (!bcasted_inode) {
                     uint64_t tmp_inode = UINT64_MAX;
 
-                    if (MPI_SUCCESS != (mpi_code = MPI_Bcast(&tmp_inode, 1, MPI_UNSIGNED_LONG_LONG, 0, file_ptr->comm)))
+                    if (MPI_SUCCESS !=
+                        (mpi_code = MPI_Bcast(&tmp_inode, 1, MPI_UNSIGNED_LONG_LONG, 0, file_ptr->comm)))
                         HMPI_DONE_ERROR(NULL, "MPI_Bcast failed", mpi_code)
                 }
                 if (!bcasted_eof) {
