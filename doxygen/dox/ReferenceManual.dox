@@ -1,4 +1,4 @@
-/** \page RM Reference Manual
+/** \page RM HDF5 Reference Manual
 
 The functions provided by the HDF5 C-API are grouped into the following
 \Emph{modules}:
