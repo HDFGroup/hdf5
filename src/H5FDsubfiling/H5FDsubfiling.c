@@ -96,6 +96,7 @@ typedef struct H5FD_subfiling_t {
 
     /* MPI Info */
     MPI_Comm comm;
+    MPI_Comm ext_comm;
     MPI_Info info;
     int      mpi_rank;
     int      mpi_size;
@@ -139,12 +140,13 @@ typedef struct H5FD_subfiling_t {
      *
      * Everything which follows is unique to the H5FD_subfiling_t
      */
-    haddr_t        eoa; /* end of allocated region          */
-    haddr_t        eof; /* end of file; current file size   */
-    haddr_t        pos; /* current file I/O position        */
-    H5FD_file_op_t op;  /* last operation                   */
-                        /* Copy of file name from open operation    */
-    char filename[H5FD_MAX_FILENAME_LEN];
+    haddr_t        eoa;                             /* end of allocated region                    */
+    haddr_t        eof;                             /* end of file; current file size             */
+    haddr_t        last_eoa;                        /* Last known end-of-address marker           */
+    haddr_t        local_eof;                       /* Local end-of-file address for each process */
+    haddr_t        pos;                             /* current file I/O position                  */
+    H5FD_file_op_t op;                              /* last operation                             */
+    char           filename[H5FD_MAX_FILENAME_LEN]; /* Copy of file name from open operation */
 } H5FD_subfiling_t;
 
 /*
@@ -301,42 +303,41 @@ H5FD_subfiling_init(void)
 
     /* Register the Subfiling VFD, if it isn't already registered */
     if (H5I_VFL != H5I_get_type(H5FD_SUBFILING_g)) {
-        char *env_var;
+        int mpi_initialized = 0;
+        int provided        = 0;
+        int mpi_code;
 
         if ((H5FD_SUBFILING_g = H5FD_register(&H5FD_subfiling_g, sizeof(H5FD_class_t), FALSE)) < 0)
             HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "can't register subfiling VFD");
 
-        /* Check if Subfiling VFD has been loaded dynamically */
-        env_var = HDgetenv(HDF5_DRIVER);
-        if (env_var && !HDstrcmp(env_var, H5FD_SUBFILING_NAME)) {
-            int mpi_initialized = 0;
-            int provided        = 0;
-            int mpi_code;
+        /* Initialize MPI if not already initialized */
+        if (MPI_SUCCESS != (mpi_code = MPI_Initialized(&mpi_initialized)))
+            HMPI_GOTO_ERROR(H5I_INVALID_HID, "MPI_Initialized failed", mpi_code)
+        if (mpi_initialized) {
+            /* If MPI is initialized, validate that it was initialized with MPI_THREAD_MULTIPLE */
+            if (MPI_SUCCESS != (mpi_code = MPI_Query_thread(&provided)))
+                HMPI_GOTO_ERROR(H5I_INVALID_HID, "MPI_Query_thread failed", mpi_code)
+            if (provided != MPI_THREAD_MULTIPLE)
+                HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID,
+                            "Subfiling VFD requires the use of MPI_Init_thread with MPI_THREAD_MULTIPLE")
+        }
+        else {
+            char *env_var;
+            int   required = MPI_THREAD_MULTIPLE;
 
-            /* Initialize MPI if not already initialized */
-            if (MPI_SUCCESS != (mpi_code = MPI_Initialized(&mpi_initialized)))
-                HMPI_GOTO_ERROR(H5I_INVALID_HID, "MPI_Initialized failed", mpi_code)
-            if (mpi_initialized) {
-                /* If MPI is initialized, validate that it was initialized with MPI_THREAD_MULTIPLE */
-                if (MPI_SUCCESS != (mpi_code = MPI_Query_thread(&provided)))
-                    HMPI_GOTO_ERROR(H5I_INVALID_HID, "MPI_Query_thread failed", mpi_code)
-                if (provided != MPI_THREAD_MULTIPLE)
-                    HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID,
-                                "Subfiling VFD requires the use of MPI_Init_thread with MPI_THREAD_MULTIPLE")
-            }
-            else {
-                int required = MPI_THREAD_MULTIPLE;
+            /* Ensure that Subfiling VFD has been loaded dynamically */
+            env_var = HDgetenv(HDF5_DRIVER);
+            if (!env_var || HDstrcmp(env_var, H5FD_SUBFILING_NAME))
+                HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID, "MPI isn't initialized")
 
-                /* Otherwise, initialize MPI */
-                if (MPI_SUCCESS != (mpi_code = MPI_Init_thread(NULL, NULL, required, &provided)))
-                    HMPI_GOTO_ERROR(H5I_INVALID_HID, "MPI_Init_thread failed", mpi_code)
+            if (MPI_SUCCESS != (mpi_code = MPI_Init_thread(NULL, NULL, required, &provided)))
+                HMPI_GOTO_ERROR(H5I_INVALID_HID, "MPI_Init_thread failed", mpi_code)
 
-                H5FD_mpi_self_initialized = TRUE;
+            H5FD_mpi_self_initialized = TRUE;
 
-                if (provided != required)
-                    HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID,
-                                "MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE")
-            }
+            if (provided != required)
+                HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID,
+                            "MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE")
         }
     }
 
@@ -422,6 +423,7 @@ H5Pset_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *vfd_config)
     if (vfd_config == NULL) {
         if (NULL == (subfiling_conf = HDcalloc(1, sizeof(*subfiling_conf))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate subfiling VFD configuration")
+        subfiling_conf->ioc_fapl_id = H5I_INVALID_HID;
 
         /* Get subfiling VFD defaults */
         if (H5FD__subfiling_get_default_config(fapl_id, subfiling_conf) < 0)
@@ -436,7 +438,11 @@ H5Pset_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *vfd_config)
     ret_value = H5P_set_driver(plist, H5FD_SUBFILING, (void *)vfd_config, NULL);
 
 done:
-    HDfree(subfiling_conf);
+    if (subfiling_conf) {
+        if (subfiling_conf->ioc_fapl_id >= 0 && H5I_dec_ref(subfiling_conf->ioc_fapl_id) < 0)
+            HDONE_ERROR(H5E_PLIST, H5E_CANTDEC, FAIL, "can't close IOC FAPL")
+        HDfree(subfiling_conf);
+    }
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_fapl_subfiling() */
@@ -556,6 +562,11 @@ H5FD__subfiling_get_default_config(hid_t fapl_id, H5FD_subfiling_config_t *confi
     }
 
 done:
+    if (H5_mpi_comm_free(&comm) < 0)
+        HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't free MPI Communicator")
+    if (H5_mpi_info_free(&info) < 0)
+        HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't free MPI Info object")
+
     if (ret_value < 0) {
         if (config_out->ioc_fapl_id >= 0 && H5Pclose(config_out->ioc_fapl_id) < 0)
             HDONE_ERROR(H5E_PLIST, H5E_CANTCLOSEOBJ, FAIL, "can't close FAPL")
@@ -719,6 +730,10 @@ H5FD__subfiling_fapl_copy(const void *_old_fa)
     }
 
     HDmemcpy(new_fa, old_fa, sizeof(H5FD_subfiling_config_t));
+
+    if (H5FD__copy_plist(old_fa->ioc_fapl_id, &(new_fa->ioc_fapl_id)) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "can't copy the IOC FAPL")
+
     ret_value = new_fa;
 
 done:
@@ -749,15 +764,19 @@ done:
 static herr_t
 H5FD__subfiling_fapl_free(void *_fa)
 {
-    H5FD_subfiling_config_t *fa = (H5FD_subfiling_config_t *)_fa;
+    H5FD_subfiling_config_t *fa        = (H5FD_subfiling_config_t *)_fa;
+    herr_t                   ret_value = SUCCEED;
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_PACKAGE
 
     HDassert(fa != NULL); /* sanity check */
 
+    if (fa->ioc_fapl_id >= 0 && H5I_dec_ref(fa->ioc_fapl_id) < 0)
+        HDONE_ERROR(H5E_PLIST, H5E_CANTDEC, FAIL, "can't close IOC FAPL")
+
     H5MM_xfree(fa);
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__subfiling_fapl_free() */
 
 /*-------------------------------------------------------------------------
@@ -783,7 +802,10 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
     H5FD_class_t *                 driver    = NULL; /* VFD for file */
     H5P_genplist_t *               plist_ptr = NULL;
     H5FD_driver_prop_t             driver_prop; /* Property for driver ID & info */
-    int                            mpi_code;    /* MPI return code */
+    hbool_t                        bcasted_inode = FALSE;
+    hbool_t                        bcasted_eof   = FALSE;
+    int64_t                        sf_eof        = -1;
+    int                            mpi_code; /* MPI return code */
     H5FD_t *                       ret_value = NULL;
 
     FUNC_ENTER_PACKAGE
@@ -798,7 +820,10 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
 
     if (NULL == (file_ptr = (H5FD_subfiling_t *)H5FL_CALLOC(H5FD_subfiling_t)))
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to allocate file struct")
+    file_ptr->comm           = MPI_COMM_NULL;
+    file_ptr->info           = MPI_INFO_NULL;
     file_ptr->fa.ioc_fapl_id = H5I_INVALID_HID;
+    file_ptr->ext_comm       = MPI_COMM_NULL;
 
     /* Get the driver-specific file access properties */
     if (NULL == (plist_ptr = (H5P_genplist_t *)H5I_object(fapl_id)))
@@ -845,17 +870,15 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
         HDfree(path);
     }
 
-    /* Copy the FAPL from the config structure */
-    /* JRM:  Why is this necessary?  If it is necessary, must close the property list on file close. */
     if (H5FD__copy_plist(config_ptr->ioc_fapl_id, &(file_ptr->fa.ioc_fapl_id)) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "can't copy IOC FAPL");
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "can't copy FAPL");
 
-    file_ptr->sf_file = H5FD_open(name, flags, config_ptr->ioc_fapl_id, HADDR_UNDEF);
+    file_ptr->sf_file = H5FD_open(name, flags, file_ptr->fa.ioc_fapl_id, HADDR_UNDEF);
     if (!file_ptr->sf_file)
         HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, NULL, "unable to open IOC file")
 
     /* Check the "native" driver (IOC/sec2/etc.) */
-    if (NULL == (plist_ptr = H5I_object(config_ptr->ioc_fapl_id)))
+    if (NULL == (plist_ptr = H5I_object(file_ptr->fa.ioc_fapl_id)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, NULL, "invalid IOC FAPL")
 
     if (H5P_peek(plist_ptr, H5F_ACS_FILE_DRV_NAME, &driver_prop) < 0)
@@ -869,11 +892,20 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
                     name)
 
     if (driver->value == H5_VFD_IOC) {
-        /* We've already opened the subfiles... */
-        H5FD_subfiling_t *ioc_file = (H5FD_subfiling_t *)(file_ptr->sf_file);
+        h5_stat_t sb;
+        uint64_t  fid;
+        void *    file_handle = NULL;
+
+        if (H5FDget_vfd_handle(file_ptr->sf_file, file_ptr->fa.ioc_fapl_id, &file_handle) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get file handle")
+
+        if (HDfstat(*(int *)file_handle, &sb) < 0)
+            HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, NULL, "unable to fstat file")
+
+        fid = (uint64_t)sb.st_ino;
 
         /* Get a copy of the context ID for later use */
-        file_ptr->fa.context_id  = ioc_file->fa.context_id;
+        file_ptr->fa.context_id  = H5_subfile_fid_to_context(fid);
         file_ptr->fa.require_ioc = true;
     }
     else if (driver->value == H5_VFD_SEC2) {
@@ -895,7 +927,7 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
                 h5_stat_t sb;
                 void *    file_handle = NULL;
 
-                if (H5FDget_vfd_handle(file_ptr->sf_file, config_ptr->ioc_fapl_id, &file_handle) < 0)
+                if (H5FDget_vfd_handle(file_ptr->sf_file, file_ptr->fa.ioc_fapl_id, &file_handle) < 0)
                     HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get file handle")
 
                 /* We create a new file descriptor for our file structure.
@@ -915,6 +947,8 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
             file_ptr->inode = inode_id;
         }
 
+        bcasted_inode = TRUE;
+
         /* All ranks can now detect an error and fail. */
         if (inode_id == (uint64_t)-1)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file = %s\n", name)
@@ -929,11 +963,44 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open subfiling files = %s\n", name)
     }
 
+    if (file_ptr->mpi_rank == 0) {
+        if (H5FD__subfiling__get_real_eof(file_ptr->fa.context_id, &sf_eof) < 0)
+            sf_eof = -1;
+    }
+
+    if (MPI_SUCCESS != (mpi_code = MPI_Bcast(&sf_eof, 1, MPI_INT64_T, 0, file_ptr->comm)))
+        HMPI_GOTO_ERROR(NULL, "MPI_Bcast", mpi_code)
+
+    bcasted_eof = TRUE;
+
+    if (sf_eof < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "lead MPI process failed to get file EOF")
+
+    file_ptr->eof       = (haddr_t)sf_eof;
+    file_ptr->local_eof = file_ptr->eof;
+
     ret_value = (H5FD_t *)file_ptr;
 
 done:
     if (NULL == ret_value) {
         if (file_ptr) {
+            /* Participate in possible MPI collectives on failure */
+            if (file_ptr->comm != MPI_COMM_NULL) {
+                if (!bcasted_inode) {
+                    uint64_t tmp_inode = UINT64_MAX;
+
+                    if (MPI_SUCCESS !=
+                        (mpi_code = MPI_Bcast(&tmp_inode, 1, MPI_UNSIGNED_LONG_LONG, 0, file_ptr->comm)))
+                        HMPI_DONE_ERROR(NULL, "MPI_Bcast failed", mpi_code)
+                }
+                if (!bcasted_eof) {
+                    sf_eof = -1;
+
+                    if (MPI_SUCCESS != (mpi_code = MPI_Bcast(&sf_eof, 1, MPI_INT64_T, 0, file_ptr->comm)))
+                        HMPI_DONE_ERROR(NULL, "MPI_Bcast failed", mpi_code)
+                }
+            }
+
             /* TODO: FAPL ID will likely never be H5I_INVALID_HID since it's currently initialized to 0 */
             if (H5I_INVALID_HID != file_ptr->fa.ioc_fapl_id)
                 H5I_dec_ref(file_ptr->fa.ioc_fapl_id);
@@ -941,7 +1008,7 @@ done:
                 H5FD_close(file_ptr->sf_file);
             H5FL_FREE(H5FD_subfiling_t, file_ptr);
         }
-    } /* end if error */
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__subfiling_open() */
@@ -997,10 +1064,18 @@ H5FD__subfiling_close(H5FD_t *_file)
     if ((H5I_INVALID_HID != file_ptr->fa.ioc_fapl_id) && (H5I_dec_ref(file_ptr->fa.ioc_fapl_id) < 0))
         HGOTO_ERROR(H5E_VFL, H5E_ARGS, FAIL, "can't close ioc FAPL")
 
+    if (H5_mpi_comm_free(&file_ptr->comm) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI Communicator");
+    if (H5_mpi_info_free(&file_ptr->info) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI Info object");
+
+    if (H5_mpi_comm_free(&file_ptr->ext_comm) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free MPI communicator");
+
+done:
     /* Release the file info */
     file_ptr = H5FL_FREE(H5FD_subfiling_t, file_ptr);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__subfiling_close() */
 
@@ -1192,10 +1267,13 @@ H5FD__subfiling_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t a
 static haddr_t
 H5FD__subfiling_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 {
-    const H5FD_subfiling_t *file        = (const H5FD_subfiling_t *)_file;
+    const H5FD_subfiling_t *file = (const H5FD_subfiling_t *)_file;
+#if 0
     int64_t                 logical_eof = -1;
-    haddr_t                 ret_value   = HADDR_UNDEF;
+#endif
+    haddr_t ret_value = HADDR_UNDEF;
 
+#if 0
     FUNC_ENTER_PACKAGE
 
 #if 0 /* TODO */
@@ -1217,6 +1295,12 @@ H5FD__subfiling_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
     ret_value = (haddr_t)(logical_eof);
 
 done:
+#else
+    FUNC_ENTER_PACKAGE_NOERR
+#endif
+
+    ret_value = file->eof;
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__subfiling_get_eof() */
 
@@ -1679,8 +1763,16 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t add
     /* Update current file position and EOF */
     file_ptr->pos = addr;
     file_ptr->op  = OP_WRITE;
+
+#if 1 /* Mimic the MPI I/O VFD */
+    file_ptr->eof = HADDR_UNDEF;
+
+    if (file_ptr->pos > file_ptr->local_eof)
+        file_ptr->local_eof = file_ptr->pos;
+#else
     if (file_ptr->pos > file_ptr->eof)
         file_ptr->eof = file_ptr->pos;
+#endif
 
 done:
     HDfree(io_bufs);
@@ -2021,6 +2113,46 @@ H5FD__subfiling_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5
     HDassert(file);
 
     /* Extend the file to make sure it's large enough */
+#if 1 /* Mimic the MPI I/O VFD */
+    if (!H5F_addr_eq(file->eoa, file->last_eoa)) {
+        int64_t sf_eof;
+        int64_t eoa;
+        int     mpi_code;
+
+        if (!H5CX_get_mpi_file_flushing())
+            if (MPI_SUCCESS != (mpi_code = MPI_Barrier(file->comm)))
+                HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code)
+
+        if (0 == file->mpi_rank) {
+            if (H5FD__subfiling__get_real_eof(file->fa.context_id, &sf_eof) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get EOF")
+        }
+
+        if (MPI_SUCCESS != (mpi_code = MPI_Bcast(&sf_eof, 1, MPI_INT64_T, 0, file->comm)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code)
+
+        if (sf_eof < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "invalid EOF")
+
+        H5_CHECKED_ASSIGN(eoa, int64_t, file->eoa, haddr_t);
+
+        /* truncate sub-files */
+        /* This is a hack.  We should be doing the truncate of the sub-files via calls to
+         * H5FD_truncate() with the IOC.  However, that system is messed up at present.
+         * thus the following hack.
+         *                                                 JRM -- 12/18/21
+         */
+        if (H5FD__subfiling__truncate_sub_files(file->fa.context_id, eoa, file->comm) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTUPDATE, FAIL, "sub-file truncate request failed")
+
+        /* Reset last file I/O information */
+        file->pos = HADDR_UNDEF;
+        file->op  = OP_UNKNOWN;
+
+        /* Update the 'last' eoa value */
+        file->last_eoa = file->eoa;
+    }
+#else
     if (!H5F_addr_eq(file->eoa, file->eof)) {
 
         /* Update the eof value */
@@ -2029,6 +2161,9 @@ H5FD__subfiling_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5
         /* Reset last file I/O information */
         file->pos = HADDR_UNDEF;
         file->op  = OP_UNKNOWN;
+
+        /* Update the 'last' eoa value */
+        file->last_eoa = file->eoa;
     } /* end if */
 
     /* truncate sub-files */
@@ -2039,6 +2174,7 @@ H5FD__subfiling_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5
      */
     if (H5FD__subfiling__truncate_sub_files(file->fa.context_id, file->eof, file->comm) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTUPDATE, FAIL, "sub-file truncate request failed")
+#endif
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2158,7 +2294,17 @@ H5FD__subfiling_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void 
         case H5FD_CTL__GET_MPI_COMMUNICATOR_OPCODE:
             HDassert(output);
             HDassert(*output);
-            **((MPI_Comm **)output) = file->comm;
+
+            /*
+             * Return a separate MPI communicator to the caller so
+             * that our own MPI calls won't have a chance to conflict
+             */
+            if (file->ext_comm == MPI_COMM_NULL) {
+                if (H5_mpi_comm_dup(file->comm, &file->ext_comm) < 0)
+                    HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't duplicate MPI communicator")
+            }
+
+            **((MPI_Comm **)output) = file->ext_comm;
             break;
 
         case H5FD_CTL__GET_MPI_RANK_OPCODE:
@@ -2415,6 +2561,16 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
     *n_iocs_used        = ioc_count;
     *max_io_req_per_ioc = max_iovec_depth;
 
+#ifdef H5_SUBFILING_DEBUG
+    H5_subfiling_log(sf_context->sf_context_id,
+                     "%s: FILE OFFSET = %" PRId64 ", DATA SIZE = %zu, STRIPE SIZE = %" PRId64, __func__,
+                     file_offset, io_nelemts, stripe_size);
+    H5_subfiling_log(sf_context->sf_context_id,
+                     "%s: IOC START = %" PRId64 ", IOC FINAL = %" PRId64 ", "
+                     "MAX IOVEC DEPTH = %" PRId64 ", START LENGTH = %" PRId64 ", FINAL LENGTH = %" PRId64,
+                     __func__, ioc_start, ioc_final, max_iovec_depth, start_length, final_length);
+#endif
+
     /*
      * Loop through the set of I/O concentrators to determine
      * the various vector components for each. I/O concentrators
@@ -2485,25 +2641,32 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
 
             /* Account for IOCs with uniform segments */
             if (!is_first && !is_last) {
-                hbool_t thin_uniform_section;
+                hbool_t thin_uniform_section = FALSE;
 
-                /*
-                 * When an IOC has an index value that is greater
-                 * than both the starting IOC and ending IOC indices,
-                 * it is a "thinner" section with a smaller I/O vector
-                 * depth.
-                 */
-                thin_uniform_section = (k > ioc_start) && (k > ioc_final);
+                if (ioc_final >= ioc_start) {
+                    /*
+                     * When an IOC has an index value that is greater
+                     * than both the starting IOC and ending IOC indices,
+                     * it is a "thinner" section with a smaller I/O vector
+                     * depth.
+                     */
+                    thin_uniform_section = (k > ioc_start) && (k > ioc_final);
+                }
 
-                /*
-                 * This can also happen when the IOC with the final
-                 * data segment has a smaller IOC index than the IOC
-                 * with the first data segment and the current IOC
-                 * index falls between the two.
-                 */
-                thin_uniform_section = thin_uniform_section || ((ioc_final < k) && (k < ioc_start));
+                if (ioc_final < ioc_start) {
+                    /*
+                     * This can also happen when the IOC with the final
+                     * data segment has a smaller IOC index than the IOC
+                     * with the first data segment and the current IOC
+                     * index falls between the two.
+                     */
+                    thin_uniform_section = thin_uniform_section || ((ioc_final < k) && (k < ioc_start));
+                }
 
                 if (thin_uniform_section) {
+                    HDassert(iovec_depth > 1);
+                    HDassert(num_full_stripes > 1);
+
                     iovec_depth--;
                     num_full_stripes--;
                 }
@@ -2549,7 +2712,8 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
                 if (iovec_fill_last(sf_context, iovec_depth, ioc_bytes, mem_offset, curr_file_offset,
                                     final_length, _mem_buf_offset, _target_file_offset, _io_block_len) < 0)
                     HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "can't fill I/O vectors");
-                /* NOTE: no need to move memory pointer after last IOC request */
+
+                mem_offset += stripe_size;
             }
             else { /* Everything else (uniform) */
                 if (iovec_fill_uniform(sf_context, iovec_depth, ioc_bytes, mem_offset, curr_file_offset,
@@ -2627,21 +2791,22 @@ iovec_fill_first(subfiling_context_t *sf_context, int64_t iovec_depth, int64_t t
     stripe_size = sf_context->sf_stripe_size;
     block_size  = sf_context->sf_blocksize_per_stripe;
 
-#ifdef H5FD_SUBFILING_DEBUG
-    HDprintf("%s: start_mem_offset = %" PRId64 ", start_file_offset = %" PRId64 ", first_io_len = %" PRId64
-             "\n",
-             __func__, start_mem_offset, start_file_offset, first_io_len);
-    HDfflush(stdout);
+#ifdef H5_SUBFILING_DEBUG
+    H5_subfiling_log(sf_context->sf_context_id,
+                     "%s: start_mem_offset = %" PRId64 ", start_file_offset = %" PRId64
+                     ", first_io_len = %" PRId64,
+                     __func__, start_mem_offset, start_file_offset, first_io_len);
 #endif
 
     mem_offset_out[0]         = start_mem_offset;
     target_file_offset_out[0] = start_file_offset;
     io_block_len_out[0]       = first_io_len;
 
-#ifdef H5FD_SUBFILING_DEBUG
-    HDprintf("%s: mem_offset[0] = %" PRId64 ", file_offset[0] = %" PRId64 ", io_block_len[0] = %" PRId64 "\n",
-             __func__, mem_offset_out[0], target_file_offset_out[0], io_block_len_out[0]);
-    HDfflush(stdout);
+#ifdef H5_SUBFILING_DEBUG
+    H5_subfiling_log(sf_context->sf_context_id,
+                     "%s: mem_offset[0] = %" PRId64 ", file_offset[0] = %" PRId64
+                     ", io_block_len[0] = %" PRId64,
+                     __func__, mem_offset_out[0], target_file_offset_out[0], io_block_len_out[0]);
 #endif
 
     if (first_io_len == target_datasize)
@@ -2659,11 +2824,12 @@ iovec_fill_first(subfiling_context_t *sf_context, int64_t iovec_depth, int64_t t
             target_file_offset_out[i] = next_file_offset;
             io_block_len_out[i]       = stripe_size;
 
-#ifdef H5FD_SUBFILING_DEBUG
-            HDprintf("%s: mem_offset[%" PRId64 "] = %" PRId64 ", file_offset[%" PRId64 "] = %" PRId64
-                     ", io_block_len[%" PRId64 "] = %" PRId64 "\n",
-                     __func__, i, mem_offset_out[i], i, target_file_offset_out[i], i, io_block_len_out[i]);
-            HDfflush(stdout);
+#ifdef H5_SUBFILING_DEBUG
+            H5_subfiling_log(sf_context->sf_context_id,
+                             "%s: mem_offset[%" PRId64 "] = %" PRId64 ", file_offset[%" PRId64 "] = %" PRId64
+                             ", io_block_len[%" PRId64 "] = %" PRId64,
+                             __func__, i, mem_offset_out[i], i, target_file_offset_out[i], i,
+                             io_block_len_out[i]);
 #endif
 
             next_mem_offset += block_size;
@@ -2725,11 +2891,11 @@ iovec_fill_last(subfiling_context_t *sf_context, int64_t iovec_depth, int64_t ta
     stripe_size = sf_context->sf_stripe_size;
     block_size  = sf_context->sf_blocksize_per_stripe;
 
-#ifdef H5FD_SUBFILING_DEBUG
-    HDprintf("%s: start_mem_offset = %" PRId64 ", start_file_offset = %" PRId64 ", last_io_len = %" PRId64
-             "\n",
-             __func__, start_mem_offset, start_file_offset, last_io_len);
-    HDfflush(stdout);
+#ifdef H5_SUBFILING_DEBUG
+    H5_subfiling_log(sf_context->sf_context_id,
+                     "%s: start_mem_offset = %" PRId64 ", start_file_offset = %" PRId64
+                     ", last_io_len = %" PRId64,
+                     __func__, start_mem_offset, start_file_offset, last_io_len);
 #endif
 
     mem_offset_out[0]         = start_mem_offset;
@@ -2737,11 +2903,11 @@ iovec_fill_last(subfiling_context_t *sf_context, int64_t iovec_depth, int64_t ta
     io_block_len_out[0]       = last_io_len;
 
     if (last_io_len == target_datasize) {
-#ifdef H5FD_SUBFILING_DEBUG
-        HDprintf("%s: mem_offset[0] = %" PRId64 ", file_offset[0] = %" PRId64 ", io_block_len[0] = %" PRId64
-                 "\n",
-                 __func__, mem_offset_out[0], target_file_offset_out[0], io_block_len_out[0]);
-        HDfflush(stdout);
+#ifdef H5_SUBFILING_DEBUG
+        H5_subfiling_log(sf_context->sf_context_id,
+                         "%s: mem_offset[0] = %" PRId64 ", file_offset[0] = %" PRId64
+                         ", io_block_len[0] = %" PRId64,
+                         __func__, mem_offset_out[0], target_file_offset_out[0], io_block_len_out[0]);
 #endif
 
         HGOTO_DONE(SUCCEED);
@@ -2758,11 +2924,11 @@ iovec_fill_last(subfiling_context_t *sf_context, int64_t iovec_depth, int64_t ta
          */
         io_block_len_out[0] = stripe_size;
 
-#ifdef H5FD_SUBFILING_DEBUG
-        HDprintf("%s: mem_offset[0] = %" PRId64 ", file_offset[0] = %" PRId64 ", io_block_len[0] = %" PRId64
-                 "\n",
-                 __func__, mem_offset_out[0], target_file_offset_out[0], io_block_len_out[0]);
-        HDfflush(stdout);
+#ifdef H5_SUBFILING_DEBUG
+        H5_subfiling_log(sf_context->sf_context_id,
+                         "%s: mem_offset[0] = %" PRId64 ", file_offset[0] = %" PRId64
+                         ", io_block_len[0] = %" PRId64,
+                         __func__, mem_offset_out[0], target_file_offset_out[0], io_block_len_out[0]);
 #endif
 
         total_bytes = stripe_size;
@@ -2772,11 +2938,12 @@ iovec_fill_last(subfiling_context_t *sf_context, int64_t iovec_depth, int64_t ta
             target_file_offset_out[i] = next_file_offset;
             io_block_len_out[i]       = stripe_size;
 
-#ifdef H5FD_SUBFILING_DEBUG
-            HDprintf("%s: mem_offset[%" PRId64 "] = %" PRId64 ", file_offset[%" PRId64 "] = %" PRId64
-                     ", io_block_len[%" PRId64 "] = %" PRId64 "\n",
-                     __func__, i, mem_offset_out[i], i, target_file_offset_out[i], i, io_block_len_out[i]);
-            HDfflush(stdout);
+#ifdef H5_SUBFILING_DEBUG
+            H5_subfiling_log(sf_context->sf_context_id,
+                             "%s: mem_offset[%" PRId64 "] = %" PRId64 ", file_offset[%" PRId64 "] = %" PRId64
+                             ", io_block_len[%" PRId64 "] = %" PRId64,
+                             __func__, i, mem_offset_out[i], i, target_file_offset_out[i], i,
+                             io_block_len_out[i]);
 #endif
 
             next_mem_offset += block_size;
@@ -2790,11 +2957,12 @@ iovec_fill_last(subfiling_context_t *sf_context, int64_t iovec_depth, int64_t ta
         target_file_offset_out[i] = next_file_offset;
         io_block_len_out[i]       = last_io_len;
 
-#ifdef H5FD_SUBFILING_DEBUG
-        HDprintf("%s: mem_offset[%" PRId64 "] = %" PRId64 ", file_offset[%" PRId64 "] = %" PRId64
-                 ", io_block_len[%" PRId64 "] = %" PRId64 "\n",
-                 __func__, i, mem_offset_out[i], i, target_file_offset_out[i], i, io_block_len_out[i]);
-        HDfflush(stdout);
+#ifdef H5_SUBFILING_DEBUG
+        H5_subfiling_log(sf_context->sf_context_id,
+                         "%s: mem_offset[%" PRId64 "] = %" PRId64 ", file_offset[%" PRId64 "] = %" PRId64
+                         ", io_block_len[%" PRId64 "] = %" PRId64,
+                         __func__, i, mem_offset_out[i], i, target_file_offset_out[i], i,
+                         io_block_len_out[i]);
 #endif
 
         total_bytes += last_io_len;
@@ -2856,21 +3024,22 @@ iovec_fill_first_last(subfiling_context_t *sf_context, int64_t iovec_depth, int6
     stripe_size = sf_context->sf_stripe_size;
     block_size  = sf_context->sf_blocksize_per_stripe;
 
-#ifdef H5FD_SUBFILING_DEBUG
-    HDprintf("%s: start_mem_offset = %" PRId64 ", start_file_offset = %" PRId64 ", first_io_len = %" PRId64
-             ", last_io_len = %" PRId64 "\n",
-             __func__, start_mem_offset, start_file_offset, first_io_len, last_io_len);
-    HDfflush(stdout);
+#ifdef H5_SUBFILING_DEBUG
+    H5_subfiling_log(sf_context->sf_context_id,
+                     "%s: start_mem_offset = %" PRId64 ", start_file_offset = %" PRId64
+                     ", first_io_len = %" PRId64 ", last_io_len = %" PRId64,
+                     __func__, start_mem_offset, start_file_offset, first_io_len, last_io_len);
 #endif
 
     mem_offset_out[0]         = start_mem_offset;
     target_file_offset_out[0] = start_file_offset;
     io_block_len_out[0]       = first_io_len;
 
-#ifdef H5FD_SUBFILING_DEBUG
-    HDprintf("%s: mem_offset[0] = %" PRId64 ", file_offset[0] = %" PRId64 ", io_block_len[0] = %" PRId64 "\n",
-             __func__, mem_offset_out[0], target_file_offset_out[0], io_block_len_out[0]);
-    HDfflush(stdout);
+#ifdef H5_SUBFILING_DEBUG
+    H5_subfiling_log(sf_context->sf_context_id,
+                     "%s: mem_offset[0] = %" PRId64 ", file_offset[0] = %" PRId64
+                     ", io_block_len[0] = %" PRId64,
+                     __func__, mem_offset_out[0], target_file_offset_out[0], io_block_len_out[0]);
 #endif
 
     if (first_io_len == target_datasize)
@@ -2889,11 +3058,12 @@ iovec_fill_first_last(subfiling_context_t *sf_context, int64_t iovec_depth, int6
             target_file_offset_out[i] = next_file_offset;
             io_block_len_out[i]       = stripe_size;
 
-#ifdef H5FD_SUBFILING_DEBUG
-            HDprintf("%s: mem_offset[%" PRId64 "] = %" PRId64 ", file_offset[%" PRId64 "] = %" PRId64
-                     ", io_block_len[%" PRId64 "] = %" PRId64 "\n",
-                     __func__, i, mem_offset_out[i], i, target_file_offset_out[i], i, io_block_len_out[i]);
-            HDfflush(stdout);
+#ifdef H5_SUBFILING_DEBUG
+            H5_subfiling_log(sf_context->sf_context_id,
+                             "%s: mem_offset[%" PRId64 "] = %" PRId64 ", file_offset[%" PRId64 "] = %" PRId64
+                             ", io_block_len[%" PRId64 "] = %" PRId64,
+                             __func__, i, mem_offset_out[i], i, target_file_offset_out[i], i,
+                             io_block_len_out[i]);
 #endif
 
             next_mem_offset += block_size;
@@ -2907,11 +3077,12 @@ iovec_fill_first_last(subfiling_context_t *sf_context, int64_t iovec_depth, int6
         target_file_offset_out[i] = next_file_offset;
         io_block_len_out[i]       = last_io_len;
 
-#ifdef H5FD_SUBFILING_DEBUG
-        HDprintf("%s: mem_offset[%" PRId64 "] = %" PRId64 ", file_offset[%" PRId64 "] = %" PRId64
-                 ", io_block_len[%" PRId64 "] = %" PRId64 "\n",
-                 __func__, i, mem_offset_out[i], i, target_file_offset_out[i], i, io_block_len_out[i]);
-        HDfflush(stdout);
+#ifdef H5_SUBFILING_DEBUG
+        H5_subfiling_log(sf_context->sf_context_id,
+                         "%s: mem_offset[%" PRId64 "] = %" PRId64 ", file_offset[%" PRId64 "] = %" PRId64
+                         ", io_block_len[%" PRId64 "] = %" PRId64,
+                         __func__, i, mem_offset_out[i], i, target_file_offset_out[i], i,
+                         io_block_len_out[i]);
 #endif
 
         total_bytes += last_io_len;
@@ -2959,32 +3130,32 @@ iovec_fill_uniform(subfiling_context_t *sf_context, int64_t iovec_depth, int64_t
     HDassert(mem_offset_out);
     HDassert(target_file_offset_out);
     HDassert(io_block_len_out);
-    HDassert(iovec_depth > 0);
+    HDassert((iovec_depth > 0) || (target_datasize == 0));
 
     stripe_size = sf_context->sf_stripe_size;
     block_size  = sf_context->sf_blocksize_per_stripe;
 
-#ifdef H5FD_SUBFILING_DEBUG
-    HDprintf("%s: start_mem_offset = %" PRId64 ", start_file_offset = %" PRId64 ", segment size = %" PRId64
-             "\n",
-             __func__, start_mem_offset, start_file_offset, stripe_size);
-    HDfflush(stdout);
+#ifdef H5_SUBFILING_DEBUG
+    H5_subfiling_log(sf_context->sf_context_id,
+                     "%s: start_mem_offset = %" PRId64 ", start_file_offset = %" PRId64
+                     ", segment size = %" PRId64,
+                     __func__, start_mem_offset, start_file_offset, stripe_size);
 #endif
 
     mem_offset_out[0]         = start_mem_offset;
     target_file_offset_out[0] = start_file_offset;
     io_block_len_out[0]       = stripe_size;
 
-#ifdef H5FD_SUBFILING_DEBUG
-    HDprintf("%s: mem_offset[0] = %" PRId64 ", file_offset[0] = %" PRId64 ", io_block_len[0] = %" PRId64 "\n",
-             __func__, mem_offset_out[0], target_file_offset_out[0], io_block_len_out[0]);
-    HDfflush(stdout);
+#ifdef H5_SUBFILING_DEBUG
+    H5_subfiling_log(sf_context->sf_context_id,
+                     "%s: mem_offset[0] = %" PRId64 ", file_offset[0] = %" PRId64
+                     ", io_block_len[0] = %" PRId64,
+                     __func__, mem_offset_out[0], target_file_offset_out[0], io_block_len_out[0]);
 #endif
 
     if (target_datasize == 0) {
-#ifdef H5FD_SUBFILING_DEBUG
-        HDprintf("%s: target_datasize = 0\n", __func__);
-        HDfflush(stdout);
+#ifdef H5_SUBFILING_DEBUG
+        H5_subfiling_log(sf_context->sf_context_id, "%s: target_datasize = 0", __func__);
 #endif
 
         io_block_len_out[0] = 0;
@@ -3002,11 +3173,12 @@ iovec_fill_uniform(subfiling_context_t *sf_context, int64_t iovec_depth, int64_t
             target_file_offset_out[i] = next_file_offset;
             io_block_len_out[i]       = stripe_size;
 
-#ifdef H5FD_SUBFILING_DEBUG
-            HDprintf("%s: mem_offset[%" PRId64 "] = %" PRId64 ", file_offset[%" PRId64 "] = %" PRId64
-                     ", io_block_len[%" PRId64 "] = %" PRId64 "\n",
-                     __func__, i, mem_offset_out[i], i, target_file_offset_out[i], i, io_block_len_out[i]);
-            HDfflush(stdout);
+#ifdef H5_SUBFILING_DEBUG
+            H5_subfiling_log(sf_context->sf_context_id,
+                             "%s: mem_offset[%" PRId64 "] = %" PRId64 ", file_offset[%" PRId64 "] = %" PRId64
+                             ", io_block_len[%" PRId64 "] = %" PRId64,
+                             __func__, i, mem_offset_out[i], i, target_file_offset_out[i], i,
+                             io_block_len_out[i]);
 #endif
 
             next_mem_offset += block_size;

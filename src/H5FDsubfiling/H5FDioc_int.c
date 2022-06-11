@@ -100,8 +100,6 @@ ioc__write_independent_async(int64_t context_id, int n_io_concentrators, int64_t
     int64_t              ioc_offset;
     int64_t              msg[3]           = {0};
     int *                io_concentrators = NULL;
-    int                  active_sends     = 0;
-    int                  n_waiting        = 0;
     int                  data_tag         = 0;
     int                  mpi_code;
     herr_t               ret_value = SUCCEED;
@@ -122,6 +120,22 @@ ioc__write_independent_async(int64_t context_id, int n_io_concentrators, int64_t
     calculate_target_ioc(offset, sf_context->sf_stripe_size, n_io_concentrators, &ioc_start, &ioc_offset);
 
     /*
+     * Wait for memory to be allocated on the target IOC before
+     * beginning send of user data. Once that memory has been
+     * allocated, we will receive an ACK (or NACK) message from
+     * the IOC to allow us to proceed.
+     *
+     * On ACK, the IOC will send the tag to be used for sending
+     * data. This allows us to distinguish between multiple
+     * concurrent writes from a single rank.
+     *
+     * Post an early non-blocking receive for the MPI tag here.
+     */
+    if (MPI_SUCCESS != (mpi_code = MPI_Irecv(&data_tag, 1, MPI_INT, io_concentrators[ioc_start],
+                                             WRITE_INDEP_ACK, sf_context->sf_data_comm, &ack_request)))
+        H5FD_IOC_MPI_GOTO_ERROR(FAIL, "MPI_Irecv failed", mpi_code);
+
+    /*
      * Prepare and send an I/O request to the IOC identified
      * by the file offset
      */
@@ -132,43 +146,12 @@ ioc__write_independent_async(int64_t context_id, int n_io_concentrators, int64_t
                                             sf_context->sf_msg_comm)))
         H5FD_IOC_MPI_GOTO_ERROR(FAIL, "MPI_Send failed", mpi_code);
 
-    active_sends++;
+    /* Wait to receive data tag */
+    if (MPI_SUCCESS != (mpi_code = MPI_Wait(&ack_request, MPI_STATUS_IGNORE)))
+        H5FD_IOC_MPI_GOTO_ERROR(FAIL, "MPI_Wait failed", mpi_code);
 
-    /*
-     * Wait for memory to be allocated on the target IOC before
-     * beginning send of user data. Once that memory has been
-     * allocated, we will receive an ACK (or NACK) message from
-     * the IOC to allow us to proceed.
-     *
-     * On ACK, the IOC will send the tag to be used for sending
-     * data. This allows us to distinguish between multiple
-     * concurrent writes from a single rank.
-     */
-    if (MPI_SUCCESS != (mpi_code = MPI_Irecv(&data_tag, 1, MPI_INT, io_concentrators[ioc_start],
-                                             WRITE_INDEP_ACK, sf_context->sf_data_comm, &ack_request)))
-        H5FD_IOC_MPI_GOTO_ERROR(FAIL, "MPI_Irecv failed", mpi_code);
-
-    n_waiting = active_sends;
-
-    while (n_waiting) {
-        int flag = 0;
-
-        if (MPI_SUCCESS != (mpi_code = MPI_Test(&ack_request, &flag, MPI_STATUS_IGNORE)))
-            H5FD_IOC_MPI_GOTO_ERROR(FAIL, "MPI_Test failed", mpi_code);
-
-        if (flag) {
-            n_waiting--;
-
-#ifdef VERBOSE
-            if (ack == 0) {
-                HDprintf("%s - received NACK!\n", __func__);
-            }
-#endif
-        }
-        else {
-            usleep(0);
-        }
-    }
+    if (data_tag == 0)
+        H5FD_IOC_GOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "received NACK from IOC");
 
     /* At this point in the new implementation, we should queue
      * the async write so that when the top level VFD tells us
@@ -215,6 +198,11 @@ ioc__write_independent_async(int64_t context_id, int n_io_concentrators, int64_t
 
 done:
     if (ret_value < 0) {
+        if (ack_request != MPI_REQUEST_NULL) {
+            if (MPI_SUCCESS != (mpi_code = MPI_Cancel(&ack_request)))
+                H5FD_IOC_MPI_DONE_ERROR(FAIL, "MPI_Cancel failed", mpi_code);
+        }
+
         HDfree(sf_io_request);
         *io_req = NULL;
     }
@@ -281,20 +269,12 @@ ioc__read_independent_async(int64_t context_id, int n_io_concentrators, int64_t 
     calculate_target_ioc(offset, sf_context->sf_stripe_size, n_io_concentrators, &ioc_start, &ioc_offset);
 
     /*
-     * Prepare and send an I/O request to the IOC identified
-     * by the file offset
-     */
-    msg[0] = elements;
-    msg[1] = ioc_offset;
-    msg[2] = context_id;
-    if (MPI_SUCCESS != (mpi_code = MPI_Send(msg, 3, MPI_INT64_T, io_concentrators[ioc_start], READ_INDEP,
-                                            sf_context->sf_msg_comm)))
-        H5FD_IOC_MPI_GOTO_ERROR(FAIL, "MPI_Send failed", mpi_code);
-
-    /* At this point in the new implementation, we should queue
-     * the async recv so that when the top level VFD tells us
-     * to complete all pending IO requests, we have all the info
+     * At this point in the new implementation, we should queue
+     * the non-blocking recv so that when the top level VFD tells
+     * us to complete all pending IO requests, we have all the info
      * we need to accomplish that.
+     *
+     * Post the early non-blocking receive here.
      */
     if (NULL == (sf_io_request = HDmalloc(sizeof(io_req_t))))
         H5FD_IOC_GOTO_ERROR(H5E_RESOURCE, H5E_READERROR, FAIL, "couldn't allocate I/O request");
@@ -311,7 +291,6 @@ ioc__read_independent_async(int64_t context_id, int n_io_concentrators, int64_t 
 
     sf_io_request->prev = sf_io_request->next = NULL;
 
-    /* Start the actual data transfer */
     H5_CHECK_OVERFLOW(elements, int64_t, int);
     if (MPI_SUCCESS !=
         (mpi_code = MPI_Irecv(data, (int)elements, MPI_BYTE, io_concentrators[ioc_start], READ_INDEP_DATA,
@@ -321,8 +300,24 @@ ioc__read_independent_async(int64_t context_id, int n_io_concentrators, int64_t 
     sf_io_request->completion_func.pending = 1;
     *io_req                                = sf_io_request;
 
+    /*
+     * Prepare and send an I/O request to the IOC identified
+     * by the file offset
+     */
+    msg[0] = elements;
+    msg[1] = ioc_offset;
+    msg[2] = context_id;
+    if (MPI_SUCCESS != (mpi_code = MPI_Send(msg, 3, MPI_INT64_T, io_concentrators[ioc_start], READ_INDEP,
+                                            sf_context->sf_msg_comm)))
+        H5FD_IOC_MPI_GOTO_ERROR(FAIL, "MPI_Send failed", mpi_code);
+
 done:
     if (ret_value < 0) {
+        if (sf_io_request && sf_io_request->completion_func.io_args.io_req != MPI_REQUEST_NULL) {
+            if (MPI_SUCCESS != (mpi_code = MPI_Cancel(&sf_io_request->completion_func.io_args.io_req)))
+                H5FD_IOC_MPI_DONE_ERROR(FAIL, "MPI_Cancel failed", mpi_code);
+        }
+
         HDfree(sf_io_request);
         *io_req = NULL;
     }
