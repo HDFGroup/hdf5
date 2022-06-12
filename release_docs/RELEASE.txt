@@ -80,6 +80,26 @@ New Features
     -
 
 
+    High-Level APIs:
+    ----------------
+    - 
+
+
+    C Packet Table API:
+    -------------------
+    -
+
+
+    Internal header file:
+    ---------------------
+    -
+
+
+    Documentation:
+    --------------
+    -
+
+
 Support for new platforms, languages and compilers
 ==================================================
     -
@@ -98,6 +118,16 @@ Bug Fixes since HDF5-1.12.1 release
 
 
     Configuration
+    -------------
+    -
+
+
+    Tools
+    -----
+    -
+
+
+    Performance
     -------------
     -
 
@@ -207,7 +237,7 @@ Platforms Tested
 
     macOS Apple M1 11.6              Apple clang version 12.0.5 (clang-1205.0.22.11)
     Darwin 20.6.0 arm64              gfortran GNU Fortran (Homebrew GCC 11.2.0) 11.1.0
-    (macmini-m1)                     Intel icc/icpc/ifort version 2021.3.0 202106092021.3.0 20210609
+    (macmini-m1)                     Intel icc/icpc/ifort version 2021.3.0 20210609
 
     macOS Big Sur 11.3.1             Apple clang version 12.0.5 (clang-1205.0.22.9)
     Darwin 20.4.0 x86_64             gfortran GNU Fortran (Homebrew GCC 10.2.0_3) 10.2.0
@@ -225,7 +255,6 @@ Platforms Tested
     64-bit                           gfortran GNU Fortran (GCC) 5.2.0
     (osx1011test)                    Intel icc/icpc/ifort version 16.0.2
 
-
     Linux 2.6.32-573.22.1.el6        GNU C (gcc), Fortran (gfortran), C++ (g++)
     #1 SMP x86_64 GNU/Linux          compilers:
     Centos6                              Version 4.4.7 20120313
@@ -239,7 +268,8 @@ Platforms Tested
                                     Visual Studio 2017 w/ Intel C/C++/Fortran 19 (cmake)
                                     Visual Studio 2019 w/ clang 12.0.0
                                         with MSVC-like command-line (C/C++ only - cmake)
-                                    Visual Studio 2019 w/ Intel C/C++/Fortran oneAPI 2021 (cmake)
+                                    Visual Studio 2019 
+                                        w/ Intel C/C++/Fortran oneAPI 2021 (cmake)
                                     Visual Studio 2019 w/ MSMPI 10.1 (C only - cmake)
 
 
@@ -312,10 +342,10 @@ a number of CMake specific files for support of CMake's find_package and support
 for the HDF5 Examples CMake project.
 
 The issues with the gif tool are:
-HDFFV-10592 CVE-2018-17433
-HDFFV-10593 CVE-2018-17436
-HDFFV-11048 CVE-2020-10809
+    HDFFV-10592 CVE-2018-17433
+    HDFFV-10593 CVE-2018-17436
+    HDFFV-11048 CVE-2020-10809
 These CVE issues have not yet been addressed and can be avoided by not building
 the gif tool. Disable building the High-Level tools with these options:
-autotools:   --disable-hltools
-cmake:       HDF5_BUILD_HL_TOOLS=OFF
+    autotools:   --disable-hltools
+    cmake:       HDF5_BUILD_HL_TOOLS=OFF

@@ -400,7 +400,7 @@ echo "***"Version compatibility tests.
 # else if H5_USE_16_API_DEFAULT;
 #      then v16main works.
 # else v18main works and -DH5_USE_16_API_DEFAULT v16main also works.
-# as new versions with versioned functions are added, they will work with and 
+# As new versions with versioned functions are added, they will work with and 
 # should be added to H5_NO_DEPRECATED_SYMBOLS and to the else section, with and 
 # without the -DH5_USE_<N>_API_DEFAULT flag. A new H5_USE_<N>_API_DEFAULT section 
 # should also be added.

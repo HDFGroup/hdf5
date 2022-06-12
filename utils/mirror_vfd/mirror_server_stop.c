@@ -60,7 +60,7 @@ struct mshs_opts {
 static void
 usage(void)
 {
-    HDprintf("mirror_server_halten_sie [options]\n"
+    HDprintf("mirror_server_stop [options]\n"
              "System-independent Mirror Server shutdown program.\n"
              "Sends shutdown message to Mirror Server at given IP:port\n"
              "\n"
