@@ -42,6 +42,7 @@ extern char * h5str_append(h5str_t *str, const char *cstr);
 extern htri_t h5str_detect_vlen(hid_t tid);
 extern size_t h5str_convert(JNIEnv *env, char **in_str, hid_t container, hid_t tid, void *out_buf,
                             size_t out_buf_offset);
+extern int    h5str_sprint_old_reference(JNIEnv *env, h5str_t *out_str, hid_t region_obj, void *ref_buf);
 extern int    h5str_sprint_reference(JNIEnv *env, h5str_t *out_str, void *ref_p);
 extern size_t h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *in_buf,
                             int expand_data);
