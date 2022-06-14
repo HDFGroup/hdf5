@@ -63,7 +63,6 @@ static int    h5str_is_zero(const void *_mem, size_t size);
 static hid_t  h5str_get_native_type(hid_t type);
 static hid_t  h5str_get_little_endian_type(hid_t type);
 static hid_t  h5str_get_big_endian_type(hid_t type);
-static htri_t h5str_detect_vlen(hid_t tid);
 static htri_t h5str_detect_vlen_str(hid_t tid);
 static int    h5str_dump_simple_data(JNIEnv *env, FILE *stream, hid_t container, hid_t type, void *_mem,
                                      hsize_t nelmts);
@@ -1147,8 +1146,29 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                                     if (NULL == (this_str = (char *)HDmalloc(this_len)))
                                         H5_OUT_OF_MEMORY_ERROR(
                                             ENVONLY, "h5str_sprintf: failed to allocate string buffer");
-                                    if (HDsnprintf(this_str, this_len, "%u-", (unsigned)oi.type) < 0)
-                                        H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsnprintf failure");
+                                    switch (oi.type) {
+                                        case H5O_TYPE_GROUP:
+                                            if (HDsnprintf(this_str, this_len, "%s ", H5_TOOLS_GROUP) < 0)
+                                                H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsnprintf failure");
+                                            break;
+
+                                        case H5O_TYPE_DATASET:
+                                            if (HDsnprintf(this_str, this_len, "%s ", H5_TOOLS_DATASET) < 0)
+                                                H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsnprintf failure");
+                                            break;
+
+                                        case H5O_TYPE_NAMED_DATATYPE:
+                                            if (HDsnprintf(this_str, this_len, "%s ", H5_TOOLS_DATATYPE) < 0)
+                                                H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsnprintf failure");
+                                            break;
+
+                                        case H5O_TYPE_UNKNOWN:
+                                        case H5O_TYPE_NTYPES:
+                                        default:
+                                            if (HDsnprintf(this_str, this_len, "%u-", (unsigned)oi.type) < 0)
+                                                H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsnprintf failure");
+                                            break;
+                                    } /* end switch */
                                     if (!h5str_append(out_str, this_str))
                                         H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
                                     HDfree(this_str);
@@ -1761,7 +1781,7 @@ h5str_is_zero(const void *_mem, size_t size)
  *    Negative value: error occurred
  *-------------------------------------------------------------------------
  */
-static htri_t
+htri_t
 h5str_detect_vlen(hid_t tid)
 {
     htri_t ret = FAIL;
@@ -3118,29 +3138,65 @@ done:
     return ret_value;
 }
 
+/*-------------------------------------------------------------------------
+ * Function: H5Tdetect_variable_str
+ *
+ * Purpose:  Recursive check for variable length string of a datatype.
+ *
+ * Return:   TRUE : type contains any variable length string
+ *           FALSE : type doesn't contain any variable length string
+ *           Negative value: failed
+ *-------------------------------------------------------------------------
+ */
 htri_t
 H5Tdetect_variable_str(hid_t tid)
 {
-    htri_t ret_val = 0;
+    H5T_class_t tclass = -1;
+    htri_t      ret    = FALSE;
 
-    if (H5Tget_class(tid) == H5T_COMPOUND) {
-        unsigned i;
-        unsigned nm = (unsigned)H5Tget_nmembers(tid);
-        for (i = 0; i < nm; i++) {
-            htri_t status = 0;
-            hid_t  mtid   = 0;
-            if ((mtid = H5Tget_member_type(tid, i)) < 0)
-                return FAIL; /* exit immediately on error */
-            if ((status = H5Tdetect_variable_str(mtid)) < 0)
-                return status; /* exit immediately on error */
-            ret_val |= status;
+    ret = H5Tis_variable_str(tid);
+    if ((ret == TRUE) || (ret < 0))
+        goto done;
+
+    tclass = H5Tget_class(tid);
+    if (tclass == H5T_ARRAY || tclass == H5T_VLEN) {
+        hid_t btid = H5Tget_super(tid);
+
+        if (btid < 0) {
+            ret = (htri_t)btid;
+            goto done;
+        }
+        ret = H5Tdetect_variable_str(btid);
+        if ((ret == TRUE) || (ret < 0)) {
+            H5Tclose(btid);
+            goto done;
+        }
+    }
+    else if (tclass == H5T_COMPOUND) {
+        unsigned nmembs;
+        int      snmembs = H5Tget_nmembers(tid);
+        unsigned u;
+
+        if (snmembs < 0) {
+            ret = FAIL;
+            goto done;
+        }
+        nmembs = (unsigned)snmembs;
+
+        for (u = 0; u < nmembs; u++) {
+            hid_t mtid = H5Tget_member_type(tid, u);
+
+            ret = H5Tdetect_variable_str(mtid);
+            if ((ret == TRUE) || (ret < 0)) {
+                H5Tclose(mtid);
+                goto done;
+            }
             H5Tclose(mtid);
-        } /* end for */
-    }     /* end if */
-    else
-        ret_val = H5Tis_variable_str(tid);
+        }
+    }
 
-    return ret_val;
+done:
+    return ret;
 } /* end H5Tdetect_variable_str */
 
 static int

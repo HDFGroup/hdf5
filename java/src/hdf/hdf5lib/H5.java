@@ -9356,9 +9356,8 @@ public class H5 implements java.io.Serializable {
         byte[] buf        = theArray.emptyBytes();
 
         int status = H5Pget_fill_value(plist_id, type_id, buf);
-        if (status >= 0) {
+        if (status >= 0)
             obj = theArray.arrayify(buf);
-        }
 
         return status;
     }

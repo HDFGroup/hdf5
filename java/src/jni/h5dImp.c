@@ -183,7 +183,7 @@ Java_hdf_hdf5lib_H5_H5Dread(JNIEnv *env, jclass clss, jlong dataset_id, jlong me
                             jboolean isCriticalPinning)
 {
     jboolean readBufIsCopy;
-    htri_t   data_class;
+    htri_t   vl_data_class;
     jbyte *  readBuf = NULL;
     herr_t   status  = FAIL;
 
@@ -192,18 +192,8 @@ Java_hdf_hdf5lib_H5_H5Dread(JNIEnv *env, jclass clss, jlong dataset_id, jlong me
     if (NULL == buf)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Dread: read buffer is NULL");
 
-    if ((data_class = H5Tdetect_class(mem_type_id, H5T_VLEN)) < 0)
+    if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
-
-    if (data_class)
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Dread: variable length type not supported");
-
-    /* Recursively detect any vlen string in type (compound, array ...) */
-    if ((data_class = H5Tdetect_variable_str(mem_type_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
-
-    if (data_class)
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Dread: variable length type not supported");
 
     if (isCriticalPinning) {
         PIN_BYTE_ARRAY_CRITICAL(ENVONLY, buf, readBuf, &readBufIsCopy,
@@ -219,6 +209,9 @@ Java_hdf_hdf5lib_H5_H5Dread(JNIEnv *env, jclass clss, jlong dataset_id, jlong me
 
 done:
     if (readBuf) {
+        if ((status >= 0) && vl_data_class)
+            H5Treclaim(dataset_id, mem_type_id, H5P_DEFAULT, readBuf);
+
         if (isCriticalPinning) {
             UNPIN_ARRAY_CRITICAL(ENVONLY, buf, readBuf, (status < 0) ? JNI_ABORT : 0);
         }
@@ -241,7 +234,7 @@ Java_hdf_hdf5lib_H5_H5Dwrite(JNIEnv *env, jclass clss, jlong dataset_id, jlong m
                              jboolean isCriticalPinning)
 {
     jboolean writeBufIsCopy;
-    htri_t   data_class;
+    htri_t   vl_data_class;
     jbyte *  writeBuf = NULL;
     herr_t   status   = FAIL;
 
@@ -250,18 +243,8 @@ Java_hdf_hdf5lib_H5_H5Dwrite(JNIEnv *env, jclass clss, jlong dataset_id, jlong m
     if (NULL == buf)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Dwrite: write buffer is NULL");
 
-    if ((data_class = H5Tdetect_class(mem_type_id, H5T_VLEN)) < 0)
+    if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
-
-    if (data_class)
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Dwrite:  variable length type not supported");
-
-    /* Recursively detect any vlen string in type (compound, array ...) */
-    if ((data_class = H5Tdetect_variable_str(mem_type_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
-
-    if (data_class)
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Dwrite: variable length type not supported");
 
     if (isCriticalPinning) {
         PIN_BYTE_ARRAY_CRITICAL(ENVONLY, buf, writeBuf, &writeBufIsCopy,
@@ -277,6 +260,9 @@ Java_hdf_hdf5lib_H5_H5Dwrite(JNIEnv *env, jclass clss, jlong dataset_id, jlong m
 
 done:
     if (writeBuf) {
+        if ((status >= 0) && vl_data_class)
+            H5Treclaim(dataset_id, mem_type_id, H5P_DEFAULT, writeBuf);
+
         if (isCriticalPinning) {
             UNPIN_ARRAY_CRITICAL(ENVONLY, buf, writeBuf, (status < 0) ? JNI_ABORT : 0);
         }
@@ -383,7 +369,7 @@ Java_hdf_hdf5lib_H5_H5Dread_1short(JNIEnv *env, jclass clss, jlong dataset_id, j
 {
     jboolean readBufIsCopy;
     jshort * readBuf = NULL;
-    htri_t   data_class;
+    htri_t   vl_data_class;
     herr_t   status = FAIL;
 
     UNUSED(clss);
@@ -391,18 +377,8 @@ Java_hdf_hdf5lib_H5_H5Dread_1short(JNIEnv *env, jclass clss, jlong dataset_id, j
     if (NULL == buf)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Dread_short: read buffer is NULL");
 
-    if ((data_class = H5Tdetect_class(mem_type_id, H5T_VLEN)) < 0)
+    if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
-
-    if (data_class)
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Dread_short: variable length type not supported");
-
-    /* Recursively detect any vlen string in type (compound, array ...) */
-    if ((data_class = H5Tdetect_variable_str(mem_type_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
-
-    if (data_class)
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Dread_short: variable length type not supported");
 
     if (isCriticalPinning) {
         PIN_SHORT_ARRAY_CRITICAL(ENVONLY, buf, readBuf, &readBufIsCopy,
@@ -418,6 +394,9 @@ Java_hdf_hdf5lib_H5_H5Dread_1short(JNIEnv *env, jclass clss, jlong dataset_id, j
 
 done:
     if (readBuf) {
+        if ((status >= 0) && vl_data_class)
+            H5Treclaim(dataset_id, mem_type_id, H5P_DEFAULT, readBuf);
+
         if (isCriticalPinning) {
             UNPIN_ARRAY_CRITICAL(ENVONLY, buf, readBuf, (status < 0) ? JNI_ABORT : 0);
         }
@@ -441,7 +420,7 @@ Java_hdf_hdf5lib_H5_H5Dwrite_1short(JNIEnv *env, jclass clss, jlong dataset_id, 
 {
     jboolean writeBufIsCopy;
     jshort * writeBuf = NULL;
-    htri_t   data_class;
+    htri_t   vl_data_class;
     herr_t   status = FAIL;
 
     UNUSED(clss);
@@ -449,18 +428,8 @@ Java_hdf_hdf5lib_H5_H5Dwrite_1short(JNIEnv *env, jclass clss, jlong dataset_id, 
     if (NULL == buf)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Dwrite_short: write buffer is NULL");
 
-    if ((data_class = H5Tdetect_class(mem_type_id, H5T_VLEN)) < 0)
+    if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
-
-    if (data_class)
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Dwrite_short: variable length type not supported");
-
-    /* Recursively detect any vlen string in type (compound, array ...) */
-    if ((data_class = H5Tdetect_variable_str(mem_type_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
-
-    if (data_class)
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Dwrite_short: variable length type not supported");
 
     if (isCriticalPinning) {
         PIN_SHORT_ARRAY_CRITICAL(ENVONLY, buf, writeBuf, &writeBufIsCopy,
@@ -476,6 +445,9 @@ Java_hdf_hdf5lib_H5_H5Dwrite_1short(JNIEnv *env, jclass clss, jlong dataset_id, 
 
 done:
     if (writeBuf) {
+        if ((status >= 0) && vl_data_class)
+            H5Treclaim(dataset_id, mem_type_id, H5P_DEFAULT, writeBuf);
+
         if (isCriticalPinning) {
             UNPIN_ARRAY_CRITICAL(ENVONLY, buf, writeBuf, (status < 0) ? JNI_ABORT : 0);
         }
@@ -498,7 +470,7 @@ Java_hdf_hdf5lib_H5_H5Dread_1int(JNIEnv *env, jclass clss, jlong dataset_id, jlo
                                  jboolean isCriticalPinning)
 {
     jboolean readBufIsCopy;
-    htri_t   data_class;
+    htri_t   vl_data_class;
     jint *   readBuf = NULL;
     herr_t   status  = FAIL;
 
@@ -507,18 +479,8 @@ Java_hdf_hdf5lib_H5_H5Dread_1int(JNIEnv *env, jclass clss, jlong dataset_id, jlo
     if (NULL == buf)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Dread_int: read buffer is NULL");
 
-    if ((data_class = H5Tdetect_class(mem_type_id, H5T_VLEN)) < 0)
+    if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
-
-    if (data_class)
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Dread_int: variable length type not supported");
-
-    /* Recursively detect any vlen string in type (compound, array ...) */
-    if ((data_class = H5Tdetect_variable_str(mem_type_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
-
-    if (data_class)
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Dread_int: variable length type not supported");
 
     if (isCriticalPinning) {
         PIN_INT_ARRAY_CRITICAL(ENVONLY, buf, readBuf, &readBufIsCopy,
@@ -534,6 +496,9 @@ Java_hdf_hdf5lib_H5_H5Dread_1int(JNIEnv *env, jclass clss, jlong dataset_id, jlo
 
 done:
     if (readBuf) {
+        if ((status >= 0) && vl_data_class)
+            H5Treclaim(dataset_id, mem_type_id, H5P_DEFAULT, readBuf);
+
         if (isCriticalPinning) {
             UNPIN_ARRAY_CRITICAL(ENVONLY, buf, readBuf, (status < 0) ? JNI_ABORT : 0);
         }
@@ -556,7 +521,7 @@ Java_hdf_hdf5lib_H5_H5Dwrite_1int(JNIEnv *env, jclass clss, jlong dataset_id, jl
                                   jboolean isCriticalPinning)
 {
     jboolean writeBufIsCopy;
-    htri_t   data_class;
+    htri_t   vl_data_class;
     jint *   writeBuf = NULL;
     herr_t   status   = FAIL;
 
@@ -565,18 +530,8 @@ Java_hdf_hdf5lib_H5_H5Dwrite_1int(JNIEnv *env, jclass clss, jlong dataset_id, jl
     if (NULL == buf)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Dwrite_int: write buffer is NULL");
 
-    if ((data_class = H5Tdetect_class(mem_type_id, H5T_VLEN)) < 0)
+    if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
-
-    if (data_class)
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Dwrite_int: variable length type not supported");
-
-    /* Recursively detect any vlen string in type (compound, array ...) */
-    if ((data_class = H5Tdetect_variable_str(mem_type_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
-
-    if (data_class)
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Dwrite_int: variable length type not supported");
 
     if (isCriticalPinning) {
         PIN_INT_ARRAY_CRITICAL(ENVONLY, buf, writeBuf, &writeBufIsCopy,
@@ -592,6 +547,9 @@ Java_hdf_hdf5lib_H5_H5Dwrite_1int(JNIEnv *env, jclass clss, jlong dataset_id, jl
 
 done:
     if (writeBuf) {
+        if ((status >= 0) && vl_data_class)
+            H5Treclaim(dataset_id, mem_type_id, H5P_DEFAULT, writeBuf);
+
         if (isCriticalPinning) {
             UNPIN_ARRAY_CRITICAL(ENVONLY, buf, writeBuf, (status < 0) ? JNI_ABORT : 0);
         }
@@ -614,7 +572,7 @@ Java_hdf_hdf5lib_H5_H5Dread_1long(JNIEnv *env, jclass clss, jlong dataset_id, jl
                                   jlongArray buf, jboolean isCriticalPinning)
 {
     jboolean readBufIsCopy;
-    htri_t   data_class;
+    htri_t   vl_data_class;
     jlong *  readBuf = NULL;
     herr_t   status  = FAIL;
 
@@ -623,18 +581,8 @@ Java_hdf_hdf5lib_H5_H5Dread_1long(JNIEnv *env, jclass clss, jlong dataset_id, jl
     if (NULL == buf)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Dread_long: read buffer is NULL");
 
-    if ((data_class = H5Tdetect_class(mem_type_id, H5T_VLEN)) < 0)
+    if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
-
-    if (data_class)
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Dread_long: variable length type not supported");
-
-    /* Recursively detect any vlen string in type (compound, array ...) */
-    if ((data_class = H5Tdetect_variable_str(mem_type_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
-
-    if (data_class)
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Dread_long: variable length type not supported");
 
     if (isCriticalPinning) {
         PIN_LONG_ARRAY_CRITICAL(ENVONLY, buf, readBuf, &readBufIsCopy,
@@ -650,6 +598,9 @@ Java_hdf_hdf5lib_H5_H5Dread_1long(JNIEnv *env, jclass clss, jlong dataset_id, jl
 
 done:
     if (readBuf) {
+        if ((status >= 0) && vl_data_class)
+            H5Treclaim(dataset_id, mem_type_id, H5P_DEFAULT, readBuf);
+
         if (isCriticalPinning) {
             UNPIN_ARRAY_CRITICAL(ENVONLY, buf, readBuf, (status < 0) ? JNI_ABORT : 0);
         }
@@ -672,7 +623,7 @@ Java_hdf_hdf5lib_H5_H5Dwrite_1long(JNIEnv *env, jclass clss, jlong dataset_id, j
                                    jlongArray buf, jboolean isCriticalPinning)
 {
     jboolean writeBufIsCopy;
-    htri_t   data_class;
+    htri_t   vl_data_class;
     jlong *  writeBuf = NULL;
     herr_t   status   = FAIL;
 
@@ -681,18 +632,8 @@ Java_hdf_hdf5lib_H5_H5Dwrite_1long(JNIEnv *env, jclass clss, jlong dataset_id, j
     if (NULL == buf)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Dwrite_long: write buffer is NULL");
 
-    if ((data_class = H5Tdetect_class(mem_type_id, H5T_VLEN)) < 0)
+    if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
-
-    if (data_class)
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Dwrite_long: variable length type not supported");
-
-    /* Recursively detect any vlen string in type (compound, array ...) */
-    if ((data_class = H5Tdetect_variable_str(mem_type_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
-
-    if (data_class)
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Dwrite_long: variable length type not supported");
 
     if (isCriticalPinning) {
         PIN_LONG_ARRAY_CRITICAL(ENVONLY, buf, writeBuf, &writeBufIsCopy,
@@ -708,6 +649,9 @@ Java_hdf_hdf5lib_H5_H5Dwrite_1long(JNIEnv *env, jclass clss, jlong dataset_id, j
 
 done:
     if (writeBuf) {
+        if ((status >= 0) && vl_data_class)
+            H5Treclaim(dataset_id, mem_type_id, H5P_DEFAULT, writeBuf);
+
         if (isCriticalPinning) {
             UNPIN_ARRAY_CRITICAL(ENVONLY, buf, writeBuf, (status < 0) ? JNI_ABORT : 0);
         }
@@ -730,7 +674,7 @@ Java_hdf_hdf5lib_H5_H5Dread_1float(JNIEnv *env, jclass clss, jlong dataset_id, j
                                    jfloatArray buf, jboolean isCriticalPinning)
 {
     jboolean readBufIsCopy;
-    htri_t   data_class;
+    htri_t   vl_data_class;
     jfloat * readBuf = NULL;
     herr_t   status  = FAIL;
 
@@ -739,18 +683,8 @@ Java_hdf_hdf5lib_H5_H5Dread_1float(JNIEnv *env, jclass clss, jlong dataset_id, j
     if (NULL == buf)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Dread_float: read buffer is NULL");
 
-    if ((data_class = H5Tdetect_class(mem_type_id, H5T_VLEN)) < 0)
+    if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
-
-    if (data_class)
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Dread_float: variable length type not supported");
-
-    /* Recursively detect any vlen string in type (compound, array ...) */
-    if ((data_class = H5Tdetect_variable_str(mem_type_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
-
-    if (data_class)
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Dread_float: variable length type not supported");
 
     if (isCriticalPinning) {
         PIN_FLOAT_ARRAY_CRITICAL(ENVONLY, buf, readBuf, &readBufIsCopy,
@@ -766,6 +700,9 @@ Java_hdf_hdf5lib_H5_H5Dread_1float(JNIEnv *env, jclass clss, jlong dataset_id, j
 
 done:
     if (readBuf) {
+        if ((status >= 0) && vl_data_class)
+            H5Treclaim(dataset_id, mem_type_id, H5P_DEFAULT, readBuf);
+
         if (isCriticalPinning) {
             UNPIN_ARRAY_CRITICAL(ENVONLY, buf, readBuf, (status < 0) ? JNI_ABORT : 0);
         }
@@ -788,7 +725,7 @@ Java_hdf_hdf5lib_H5_H5Dwrite_1float(JNIEnv *env, jclass clss, jlong dataset_id, 
                                     jfloatArray buf, jboolean isCriticalPinning)
 {
     jboolean writeBufIsCopy;
-    htri_t   data_class;
+    htri_t   vl_data_class;
     jfloat * writeBuf = NULL;
     herr_t   status   = FAIL;
 
@@ -797,18 +734,8 @@ Java_hdf_hdf5lib_H5_H5Dwrite_1float(JNIEnv *env, jclass clss, jlong dataset_id, 
     if (NULL == buf)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Dwrite_float: write buffer is NULL");
 
-    if ((data_class = H5Tdetect_class(mem_type_id, H5T_VLEN)) < 0)
+    if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
-
-    if (data_class)
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Dwrite_float: variable length type not supported");
-
-    /* Recursively detect any vlen string in type (compound, array ...) */
-    if ((data_class = H5Tdetect_variable_str(mem_type_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
-
-    if (data_class)
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Dwrite_float: variable length type not supported");
 
     if (isCriticalPinning) {
         PIN_FLOAT_ARRAY_CRITICAL(ENVONLY, buf, writeBuf, &writeBufIsCopy,
@@ -824,6 +751,9 @@ Java_hdf_hdf5lib_H5_H5Dwrite_1float(JNIEnv *env, jclass clss, jlong dataset_id, 
 
 done:
     if (writeBuf) {
+        if ((status >= 0) && vl_data_class)
+            H5Treclaim(dataset_id, mem_type_id, H5P_DEFAULT, writeBuf);
+
         if (isCriticalPinning) {
             UNPIN_ARRAY_CRITICAL(ENVONLY, buf, writeBuf, (status < 0) ? JNI_ABORT : 0);
         }
@@ -847,7 +777,7 @@ Java_hdf_hdf5lib_H5_H5Dread_1double(JNIEnv *env, jclass clss, jlong dataset_id, 
 {
     jboolean readBufIsCopy;
     jdouble *readBuf = NULL;
-    htri_t   data_class;
+    htri_t   vl_data_class;
     herr_t   status = FAIL;
 
     UNUSED(clss);
@@ -855,18 +785,8 @@ Java_hdf_hdf5lib_H5_H5Dread_1double(JNIEnv *env, jclass clss, jlong dataset_id, 
     if (NULL == buf)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Dread_double: read buffer is NULL");
 
-    if ((data_class = H5Tdetect_class(mem_type_id, H5T_VLEN)) < 0)
+    if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
-
-    if (data_class)
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Dread_double: variable length type not supported");
-
-    /* Recursively detect any vlen string in type (compound, array ...) */
-    if ((data_class = H5Tdetect_variable_str(mem_type_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
-
-    if (data_class)
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Dread_double: variable length type not supported");
 
     if (isCriticalPinning) {
         PIN_DOUBLE_ARRAY_CRITICAL(ENVONLY, buf, readBuf, &readBufIsCopy,
@@ -882,6 +802,9 @@ Java_hdf_hdf5lib_H5_H5Dread_1double(JNIEnv *env, jclass clss, jlong dataset_id, 
 
 done:
     if (readBuf) {
+        if ((status >= 0) && vl_data_class)
+            H5Treclaim(dataset_id, mem_type_id, H5P_DEFAULT, readBuf);
+
         if (isCriticalPinning) {
             UNPIN_ARRAY_CRITICAL(ENVONLY, buf, readBuf, (status < 0) ? JNI_ABORT : 0);
         }
@@ -905,7 +828,7 @@ Java_hdf_hdf5lib_H5_H5Dwrite_1double(JNIEnv *env, jclass clss, jlong dataset_id,
 {
     jboolean writeBufIsCopy;
     jdouble *writeBuf = NULL;
-    htri_t   data_class;
+    htri_t   vl_data_class;
     herr_t   status = FAIL;
 
     UNUSED(clss);
@@ -913,18 +836,8 @@ Java_hdf_hdf5lib_H5_H5Dwrite_1double(JNIEnv *env, jclass clss, jlong dataset_id,
     if (NULL == buf)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Dwrite_double: write buffer is NULL");
 
-    if ((data_class = H5Tdetect_class(mem_type_id, H5T_VLEN)) < 0)
+    if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
-
-    if (data_class)
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Dwrite_double: variable length type not supported");
-
-    /* Recursively detect any vlen string in type (compound, array ...) */
-    if ((data_class = H5Tdetect_variable_str(mem_type_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
-
-    if (data_class)
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Dwrite_double: variable length type not supported");
 
     if (isCriticalPinning) {
         PIN_DOUBLE_ARRAY_CRITICAL(ENVONLY, buf, writeBuf, &writeBufIsCopy,
@@ -940,6 +853,9 @@ Java_hdf_hdf5lib_H5_H5Dwrite_1double(JNIEnv *env, jclass clss, jlong dataset_id,
 
 done:
     if (writeBuf) {
+        if ((status >= 0) && vl_data_class)
+            H5Treclaim(dataset_id, mem_type_id, H5P_DEFAULT, writeBuf);
+
         if (isCriticalPinning) {
             UNPIN_ARRAY_CRITICAL(ENVONLY, buf, writeBuf, (status < 0) ? JNI_ABORT : 0);
         }

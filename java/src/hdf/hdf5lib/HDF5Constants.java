@@ -912,11 +912,11 @@ public class HDF5Constants {
     /** */
     public static final int H5R_MAXTYPE = H5R_MAXTYPE();
     /** */
-    public static final int H5R_REF_BUF_SIZE = H5R_REF_BUF_SIZE();
+    public static final int H5R_DSET_REG_REF_BUF_SIZE = H5R_DSET_REG_REF_BUF_SIZE();
     /** */
     public static final int H5R_OBJ_REF_BUF_SIZE = H5R_OBJ_REF_BUF_SIZE();
     /** */
-    public static final int H5R_DSET_REG_REF_BUF_SIZE = H5R_DSET_REG_REF_BUF_SIZE();
+    public static final int H5R_REF_BUF_SIZE = H5R_REF_BUF_SIZE();
     /** */
     public static final int H5R_OBJECT = H5R_OBJECT();
     /** */
@@ -2395,11 +2395,11 @@ public class HDF5Constants {
 
     private static native final int H5R_MAXTYPE();
 
-    private static native final int H5R_REF_BUF_SIZE();
+    private static native final int H5R_DSET_REG_REF_BUF_SIZE();
 
     private static native final int H5R_OBJ_REF_BUF_SIZE();
 
-    private static native final int H5R_DSET_REG_REF_BUF_SIZE();
+    private static native final int H5R_REF_BUF_SIZE();
 
     private static native final int H5R_OBJECT();
 
