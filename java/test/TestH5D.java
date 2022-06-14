@@ -961,8 +961,8 @@ public class TestH5D {
         assertTrue("H5Dvlen_get_buf_size " + vl_size + " == " + str_data_bytes, vl_size == str_data_bytes);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testH5Dvlen_read_invalid_buffer() throws Throwable
+    @Test
+    public void testH5Dvlen_read_default_buffer() throws Throwable
     {
         String[] str_data = {"Parting", "is such", "sweet", "sorrow.", "Testing",  "one", "two",   "three.",
                              "Dog,",    "man's",   "best",  "friend.", "Diamonds", "are", "a",     "girls!",
