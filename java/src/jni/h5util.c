@@ -1149,24 +1149,28 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                                     switch (oi.type) {
                                         case H5O_TYPE_GROUP:
                                             if (HDsnprintf(this_str, this_len, "%s ", H5_TOOLS_GROUP) < 0)
-                                                H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsnprintf failure");
+                                                H5_JNI_FATAL_ERROR(ENVONLY,
+                                                                   "h5str_sprintf: HDsnprintf failure");
                                             break;
 
                                         case H5O_TYPE_DATASET:
                                             if (HDsnprintf(this_str, this_len, "%s ", H5_TOOLS_DATASET) < 0)
-                                                H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsnprintf failure");
+                                                H5_JNI_FATAL_ERROR(ENVONLY,
+                                                                   "h5str_sprintf: HDsnprintf failure");
                                             break;
 
                                         case H5O_TYPE_NAMED_DATATYPE:
                                             if (HDsnprintf(this_str, this_len, "%s ", H5_TOOLS_DATATYPE) < 0)
-                                                H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsnprintf failure");
+                                                H5_JNI_FATAL_ERROR(ENVONLY,
+                                                                   "h5str_sprintf: HDsnprintf failure");
                                             break;
 
                                         case H5O_TYPE_UNKNOWN:
                                         case H5O_TYPE_NTYPES:
                                         default:
                                             if (HDsnprintf(this_str, this_len, "%u-", (unsigned)oi.type) < 0)
-                                                H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsnprintf failure");
+                                                H5_JNI_FATAL_ERROR(ENVONLY,
+                                                                   "h5str_sprintf: HDsnprintf failure");
                                             break;
                                     } /* end switch */
                                     if (!h5str_append(out_str, this_str))
