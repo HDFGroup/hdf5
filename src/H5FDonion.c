@@ -772,6 +772,95 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD__onion_create_truncate_onion() */
 
+static herr_t
+H5FD__onion_remove_unused_symbols(char *s)
+{
+    char *d = s;
+
+    FUNC_ENTER_PACKAGE_NOERR;
+
+    do {
+        while (*d == '{' || *d == '}' || *d == ' ') {
+            ++d;
+        }
+    } while ((*s++ = *d++));
+
+    FUNC_LEAVE_NOAPI(SUCCEED);
+}
+
+static H5FD_onion_fapl_info_t *
+H5FD__onion_parse_config_str(char *config_str)
+{
+    H5FD_onion_fapl_info_t *      ret_value    = NULL;
+
+    FUNC_ENTER_PACKAGE_NOERR;
+
+    ret_value = (H5FD_onion_fapl_info_t *)H5MM_calloc(sizeof(H5FD_onion_fapl_info_t));
+
+    /* Initialize to the default values */
+    ret_value->version = H5FD_ONION_FAPL_INFO_VERSION_CURR;
+    ret_value->backing_fapl_id = H5P_DEFAULT;
+    ret_value->page_size = 4;
+    ret_value->store_target = H5FD_ONION_STORE_TARGET_ONION;
+    ret_value->revision_num = H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST;
+    ret_value->force_write_open = 0;
+    ret_value->creation_flags = 0;
+    HDstrcpy(ret_value->comment, "initial comment");
+
+    /* If a single integer is passed in as a string, it's a shortcut for the tools
+     * (h5repack, h5diff, h5dump).  Otherwise, the string should have curly brackets,
+     * e.g. {revision_num: 2; page_size: 4;}
+     */
+    if (config_str[0] != '{')
+        ret_value->revision_num = (uint64_t)HDstrtoull(config_str, NULL, 10);
+    else {
+        char *token1 = NULL, *token2 = NULL;
+
+        H5FD__onion_remove_unused_symbols(config_str);
+
+        token1 = HDstrtok(config_str, ":");
+        token2 = HDstrtok(NULL, ";");
+
+        do {
+            if (token1 && token2) {
+                if (!HDstrcmp(token1, "version")) {
+                    if (!HDstrcmp(token2, "H5FD_ONION_FAPL_INFO_VERSION_CURR"))
+                        ret_value->version = H5FD_ONION_FAPL_INFO_VERSION_CURR;
+                } else if (!HDstrcmp(token1, "backing_fapl_id")) {
+                    if (!HDstrcmp(token2, "H5P_DEFAULT"))
+                        ret_value->backing_fapl_id = H5P_DEFAULT;
+                    else if (!strcmp(token2, "H5I_INVALID_HID"))
+                        ret_value->backing_fapl_id = H5I_INVALID_HID;
+                    else
+                        ret_value->backing_fapl_id = HDstrtoll(token2, NULL, 10);
+                } else if (!HDstrcmp(token1, "page_size")) {
+                    ret_value->page_size = (uint32_t)HDstrtoul(token2, NULL, 10);
+                } else if (!HDstrcmp(token1, "revision_num")) {
+                    if (!HDstrcmp(token2, "H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST"))
+                        ret_value->revision_num = H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST;
+                    else
+                        ret_value->revision_num = (uint64_t)HDstrtoull(token2, NULL, 10);
+                } else if (!HDstrcmp(token1, "force_write_open")) {
+                    ret_value->force_write_open = (uint8_t)HDstrtoul(token2, NULL, 10);
+                } else if (!HDstrcmp(token1, "creation_flags")) {
+                    ret_value->creation_flags = (uint8_t)HDstrtoul(token2, NULL, 10);
+                } else if (!HDstrcmp(token1, "comment")) {
+                    HDstrcpy(ret_value->comment, token2);
+                }
+            }
+
+            token1 = HDstrtok(NULL, ":");
+            token2 = HDstrtok(NULL, ";");
+        } while (token1);
+    }
+
+    if (H5P_DEFAULT == ret_value->backing_fapl_id || H5I_INVALID_HID == ret_value->backing_fapl_id)
+        ret_value->backing_fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+}
+
 /*-----------------------------------------------------------------------------
  * Function:    H5FD__onion_open
  *
@@ -786,8 +875,8 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
 {
     H5P_genplist_t *              plist = NULL;
     H5FD_onion_t *                file  = NULL;
-    const H5FD_onion_fapl_info_t *fa    = NULL;
-    ;
+    H5FD_onion_fapl_info_t *      fa    = NULL;
+    char *  config_str            = NULL;
     hid_t   backing_fapl_id       = H5I_INVALID_HID;
     char *  name_onion            = NULL;
     char *  recovery_file_nameery = NULL;
@@ -805,8 +894,16 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
     HDassert(H5P_DEFAULT != fapl_id);
     if (NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
-    if (NULL == (fa = (const H5FD_onion_fapl_info_t *)H5P_peek_driver_info(plist)))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, NULL, "bad VFL driver info")
+
+    fa = (H5FD_onion_fapl_info_t *)H5P_peek_driver_info(plist);
+
+    /* This VFD can be invoked by either H5Pset_fapl_onion or H5Pset_driver_by_name */
+    if (NULL == fa) {
+        if (NULL == (config_str = (char *)H5P_peek_driver_config_str(plist)))
+            HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, NULL, "bad VFL driver configure string")
+
+        fa = H5FD__onion_parse_config_str(config_str);
+    }
 
     /* Check for unsupported target values */
     if (H5FD_ONION_STORE_TARGET_H5 == fa->store_target)
@@ -931,6 +1028,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
                 file->logical_eof = canon_eof;
 
                 backing_fapl_id = H5FD__onion_get_legit_fapl_id(file->fa.backing_fapl_id);
+
                 if (H5I_INVALID_HID == backing_fapl_id)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid backing FAPL ID")
 
@@ -1064,6 +1162,10 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
 done:
     H5MM_xfree(name_onion);
     H5MM_xfree(recovery_file_nameery);
+    if (config_str) {
+        H5Pclose(fa->backing_fapl_id);
+        H5MM_xfree(fa);
+    }
 
     if ((NULL == ret_value) && file) {
 
