@@ -872,8 +872,16 @@ H5FD__onion_parse_config_str(char *config_str, H5FD_onion_fapl_info_t **info)
         } while (token1);
     }
 
-    if (H5P_DEFAULT == fa->backing_fapl_id || H5I_INVALID_HID == fa->backing_fapl_id)
-        fa->backing_fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+    if (H5P_DEFAULT == fa->backing_fapl_id || H5I_INVALID_HID == fa->backing_fapl_id) {
+        H5P_genclass_t *pclass;                      /* Property list class to modify */
+
+        if (NULL == (pclass = (H5P_genclass_t *)H5I_object_verify(H5P_FILE_ACCESS, H5I_GENPROP_CLS)))
+            HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a property list class");
+
+        /* Create the new property list */
+        if ((fa->backing_fapl_id = H5P_create_id(pclass, TRUE)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL, "unable to create property list");
+    }
 
     *info = fa;
 
@@ -1186,10 +1194,10 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
 done:
     H5MM_xfree(name_onion);
     H5MM_xfree(recovery_file_nameery);
-    if (config_str) {
-        H5Pclose(fa->backing_fapl_id);
-        H5MM_xfree(fa);
-    }
+
+    if (config_str && fa)
+        if (H5I_GENPROP_LST == H5I_get_type(fa->backing_fapl_id))
+            H5I_dec_app_ref(fa->backing_fapl_id);
 
     if ((NULL == ret_value) && file) {
 
