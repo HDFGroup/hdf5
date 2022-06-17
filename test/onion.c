@@ -4651,8 +4651,7 @@ test_integration_create_by_name(void)
         TEST_ERROR;
 
     /* Use H5Pset_driver_by_name to enable the Onion VFD */
-    if (H5Pset_driver_by_name(fapl_id, "onion", "{revision_num: H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST}") <
-        0)
+    if (H5Pset_driver_by_name(fapl_id, "onion", "{revision_num: H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST}") < 0)
         TEST_ERROR;
 
     if (NULL == (paths = onion_filepaths_init(basename, &onion_info)))

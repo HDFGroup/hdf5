@@ -788,35 +788,44 @@ H5FD__onion_remove_unused_symbols(char *s)
     FUNC_LEAVE_NOAPI(SUCCEED);
 }
 
-static H5FD_onion_fapl_info_t *
-H5FD__onion_parse_config_str(char *config_str)
+static herr_t
+H5FD__onion_parse_config_str(char *config_str, H5FD_onion_fapl_info_t **info)
 {
-    H5FD_onion_fapl_info_t *ret_value = NULL;
+    H5FD_onion_fapl_info_t *fa = NULL;
+    herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_PACKAGE_NOERR;
+    FUNC_ENTER_PACKAGE;
 
-    ret_value = (H5FD_onion_fapl_info_t *)H5MM_calloc(sizeof(H5FD_onion_fapl_info_t));
+    if (!HDstrcmp(config_str, ""))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "configure string can't be empty")
+
+    fa = (H5FD_onion_fapl_info_t *)H5MM_calloc(sizeof(H5FD_onion_fapl_info_t));
 
     /* Initialize to the default values */
-    ret_value->version          = H5FD_ONION_FAPL_INFO_VERSION_CURR;
-    ret_value->backing_fapl_id  = H5P_DEFAULT;
-    ret_value->page_size        = 4;
-    ret_value->store_target     = H5FD_ONION_STORE_TARGET_ONION;
-    ret_value->revision_num     = H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST;
-    ret_value->force_write_open = 0;
-    ret_value->creation_flags   = 0;
-    HDstrcpy(ret_value->comment, "initial comment");
+    fa->version          = H5FD_ONION_FAPL_INFO_VERSION_CURR;
+    fa->backing_fapl_id  = H5P_DEFAULT;
+    fa->page_size        = 4;
+    fa->store_target     = H5FD_ONION_STORE_TARGET_ONION;
+    fa->revision_num     = H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST;
+    fa->force_write_open = 0;
+    fa->creation_flags   = 0;
+    HDstrcpy(fa->comment, "initial comment");
 
     /* If a single integer is passed in as a string, it's a shortcut for the tools
      * (h5repack, h5diff, h5dump).  Otherwise, the string should have curly brackets,
      * e.g. {revision_num: 2; page_size: 4;}
      */
     if (config_str[0] != '{')
-        ret_value->revision_num = (uint64_t)HDstrtoull(config_str, NULL, 10);
+        fa->revision_num = (uint64_t)HDstrtoull(config_str, NULL, 10);
     else {
         char *token1 = NULL, *token2 = NULL;
 
+        /* Remove the curly brackets and space from the configure string */
         H5FD__onion_remove_unused_symbols(config_str);
+
+        /* The configure string can't be empty after removing the curly brackets */
+        if (!HDstrcmp(config_str, ""))
+            HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "configure string can't be empty")
 
         token1 = HDstrtok(config_str, ":");
         token2 = HDstrtok(NULL, ";");
@@ -825,34 +834,36 @@ H5FD__onion_parse_config_str(char *config_str)
             if (token1 && token2) {
                 if (!HDstrcmp(token1, "version")) {
                     if (!HDstrcmp(token2, "H5FD_ONION_FAPL_INFO_VERSION_CURR"))
-                        ret_value->version = H5FD_ONION_FAPL_INFO_VERSION_CURR;
+                        fa->version = H5FD_ONION_FAPL_INFO_VERSION_CURR;
                 }
                 else if (!HDstrcmp(token1, "backing_fapl_id")) {
                     if (!HDstrcmp(token2, "H5P_DEFAULT"))
-                        ret_value->backing_fapl_id = H5P_DEFAULT;
+                        fa->backing_fapl_id = H5P_DEFAULT;
                     else if (!strcmp(token2, "H5I_INVALID_HID"))
-                        ret_value->backing_fapl_id = H5I_INVALID_HID;
+                        fa->backing_fapl_id = H5I_INVALID_HID;
                     else
-                        ret_value->backing_fapl_id = HDstrtoll(token2, NULL, 10);
+                        fa->backing_fapl_id = HDstrtoll(token2, NULL, 10);
                 }
                 else if (!HDstrcmp(token1, "page_size")) {
-                    ret_value->page_size = (uint32_t)HDstrtoul(token2, NULL, 10);
+                    fa->page_size = (uint32_t)HDstrtoul(token2, NULL, 10);
                 }
                 else if (!HDstrcmp(token1, "revision_num")) {
                     if (!HDstrcmp(token2, "H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST"))
-                        ret_value->revision_num = H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST;
+                        fa->revision_num = H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST;
                     else
-                        ret_value->revision_num = (uint64_t)HDstrtoull(token2, NULL, 10);
+                        fa->revision_num = (uint64_t)HDstrtoull(token2, NULL, 10);
                 }
                 else if (!HDstrcmp(token1, "force_write_open")) {
-                    ret_value->force_write_open = (uint8_t)HDstrtoul(token2, NULL, 10);
+                    fa->force_write_open = (uint8_t)HDstrtoul(token2, NULL, 10);
                 }
                 else if (!HDstrcmp(token1, "creation_flags")) {
-                    ret_value->creation_flags = (uint8_t)HDstrtoul(token2, NULL, 10);
+                    fa->creation_flags = (uint8_t)HDstrtoul(token2, NULL, 10);
                 }
                 else if (!HDstrcmp(token1, "comment")) {
-                    HDstrcpy(ret_value->comment, token2);
-                }
+                    HDstrcpy(fa->comment, token2);
+                } else
+                    HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "unknown token in the configure string: %s", token1)
+
             }
 
             token1 = HDstrtok(NULL, ":");
@@ -860,10 +871,15 @@ H5FD__onion_parse_config_str(char *config_str)
         } while (token1);
     }
 
-    if (H5P_DEFAULT == ret_value->backing_fapl_id || H5I_INVALID_HID == ret_value->backing_fapl_id)
-        ret_value->backing_fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+    if (H5P_DEFAULT == fa->backing_fapl_id || H5I_INVALID_HID == fa->backing_fapl_id)
+        fa->backing_fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+
+    *info = fa;
 
 done:
+    if (FAIL == ret_value)
+        H5MM_free(fa);
+
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
@@ -908,7 +924,8 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
         if (NULL == (config_str = (char *)H5P_peek_driver_config_str(plist)))
             HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, NULL, "bad VFL driver configure string")
 
-        fa = H5FD__onion_parse_config_str(config_str);
+        if (H5FD__onion_parse_config_str(config_str, &fa) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, NULL, "failed to parse configure string")
     }
 
     /* Check for unsupported target values */
