@@ -873,7 +873,7 @@ H5FD__onion_parse_config_str(char *config_str, H5FD_onion_fapl_info_t **info)
     }
 
     if (H5P_DEFAULT == fa->backing_fapl_id || H5I_INVALID_HID == fa->backing_fapl_id) {
-        H5P_genclass_t *pclass;                      /* Property list class to modify */
+        H5P_genclass_t *pclass; /* Property list class to modify */
 
         if (NULL == (pclass = (H5P_genclass_t *)H5I_object_verify(H5P_FILE_ACCESS, H5I_GENPROP_CLS)))
             HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a property list class");
