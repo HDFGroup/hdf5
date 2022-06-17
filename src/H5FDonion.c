@@ -791,8 +791,8 @@ H5FD__onion_remove_unused_symbols(char *s)
 static herr_t
 H5FD__onion_parse_config_str(char *config_str, H5FD_onion_fapl_info_t **info)
 {
-    H5FD_onion_fapl_info_t *fa = NULL;
-    herr_t ret_value = SUCCEED;
+    H5FD_onion_fapl_info_t *fa        = NULL;
+    herr_t                  ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE;
 
@@ -861,9 +861,10 @@ H5FD__onion_parse_config_str(char *config_str, H5FD_onion_fapl_info_t **info)
                 }
                 else if (!HDstrcmp(token1, "comment")) {
                     HDstrcpy(fa->comment, token2);
-                } else
-                    HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "unknown token in the configure string: %s", token1)
-
+                }
+                else
+                    HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "unknown token in the configure string: %s",
+                                token1)
             }
 
             token1 = HDstrtok(NULL, ":");
