@@ -3704,9 +3704,9 @@ test_actual_io_mode(int selection_mode)
     /* Test values */
     if (actual_chunk_opt_mode_expected != (H5D_mpio_actual_chunk_opt_mode_t)-1 &&
         actual_io_mode_expected != (H5D_mpio_actual_io_mode_t)-1) {
-        HDsprintf(message, "Actual Chunk Opt Mode has the correct value for %s.\n", test_name);
+        HDsnprintf(message, sizeof(message), "Actual Chunk Opt Mode has the correct value for %s.\n", test_name);
         VRFY((actual_chunk_opt_mode_write == actual_chunk_opt_mode_expected), message);
-        HDsprintf(message, "Actual IO Mode has the correct value for %s.\n", test_name);
+        HDsnprintf(message, sizeof(message), "Actual IO Mode has the correct value for %s.\n", test_name);
         VRFY((actual_io_mode_write == actual_io_mode_expected), message);
     }
     else {
@@ -4100,10 +4100,10 @@ test_no_collective_cause_mode(int selection_mode)
 
     /* Test values */
     HDmemset(message, 0, sizeof(message));
-    HDsprintf(message, "Local cause of Broken Collective I/O has the correct value for %s.\n", test_name);
+    HDsnprintf(message, sizeof(message), "Local cause of Broken Collective I/O has the correct value for %s.\n", test_name);
     VRFY((no_collective_cause_local_write == no_collective_cause_local_expected), message);
     HDmemset(message, 0, sizeof(message));
-    HDsprintf(message, "Global cause of Broken Collective I/O has the correct value for %s.\n", test_name);
+    HDsnprintf(message, sizeof(message), "Global cause of Broken Collective I/O has the correct value for %s.\n", test_name);
     VRFY((no_collective_cause_global_write == no_collective_cause_global_expected), message);
 
     /* Release some resources */

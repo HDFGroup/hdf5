@@ -582,7 +582,7 @@ gent_attribute(void)
     dims[0] = 24;
     space   = H5Screate_simple(1, dims, NULL);
     attr    = H5Acreate2(root, "/attr1", H5T_STD_I8BE, space, H5P_DEFAULT, H5P_DEFAULT);
-    HDsprintf(buf, "attribute of root group");
+    HDsnprintf(buf, sizeof(buf), "attribute of root group");
     H5Awrite(attr, H5T_NATIVE_SCHAR, buf);
     H5Sclose(space);
     H5Aclose(attr);
@@ -1382,7 +1382,7 @@ gent_all(void)
     dims[0] = 10;
     space   = H5Screate_simple(1, dims, NULL);
     attr    = H5Acreate2(group, "attr1", H5T_STD_I8BE, space, H5P_DEFAULT, H5P_DEFAULT);
-    HDsprintf(buf, "abcdefghi");
+    HDsnprintf(buf, sizeof(buf), "abcdefghi");
     H5Awrite(attr, H5T_NATIVE_SCHAR, buf);
     H5Sclose(space);
     H5Aclose(attr);
@@ -1418,7 +1418,7 @@ gent_all(void)
     dims[0] = 27;
     space   = H5Screate_simple(1, dims, NULL);
     attr    = H5Acreate2(dataset, "attr1", H5T_STD_I8BE, space, H5P_DEFAULT, H5P_DEFAULT);
-    HDsprintf(buf, "1st attribute of dset1.1.1");
+    HDsnprintf(buf, sizeof(buf), "1st attribute of dset1.1.1");
     H5Awrite(attr, H5T_NATIVE_SCHAR, buf);
     H5Sclose(space);
     H5Aclose(attr);
@@ -1426,7 +1426,7 @@ gent_all(void)
     dims[0] = 27;
     space   = H5Screate_simple(1, dims, NULL);
     attr    = H5Acreate2(dataset, "attr2", H5T_STD_I8BE, space, H5P_DEFAULT, H5P_DEFAULT);
-    HDsprintf(buf, "2nd attribute of dset1.1.1");
+    HDsnprintf(buf, sizeof(buf), "2nd attribute of dset1.1.1");
     H5Awrite(attr, H5T_NATIVE_SCHAR, buf);
     H5Sclose(space);
     H5Aclose(attr);
@@ -1625,7 +1625,7 @@ gent_many(void)
     dims[0] = 10;
     space2  = H5Screate_simple(1, dims, NULL);
     attr    = H5Acreate2(dataset, "attr1", H5T_STD_I8BE, space2, H5P_DEFAULT, H5P_DEFAULT);
-    HDsprintf(buf, "abcdefghi");
+    HDsnprintf(buf, sizeof(buf), "abcdefghi");
     H5Awrite(attr, H5T_NATIVE_CHAR, buf);
     H5Sclose(space2);
     H5Aclose(attr);
@@ -1977,7 +1977,7 @@ gent_str2(void)
 
     for (i = 0; (hsize_t)i < sdim; i++) {
         start[0] = (hsize_t)i;
-        HDsprintf(buf, "This is row %1d of type H5T_STR_NULLTERM of", i);
+        HDsnprintf(buf, sizeof(buf), "This is row %1d of type H5T_STR_NULLTERM of", i);
         H5Tset_size(memtype, HDstrlen(buf) + 1);
         H5Sselect_hyperslab(hyper_space, H5S_SELECT_SET, start, stride, count, block);
         H5Dwrite(dataset, memtype, mem_space, hyper_space, H5P_DEFAULT, buf);
@@ -1990,7 +1990,7 @@ gent_str2(void)
 
     for (i = 0; (hsize_t)i < sdim; i++) {
         start[0] = (hsize_t)i;
-        HDsprintf(buf, "This is row %1d of type H5T_STR_NULLTERM of string array", i);
+        HDsnprintf(buf, sizeof(buf), "This is row %1d of type H5T_STR_NULLTERM of string array", i);
         H5Tset_size(memtype, HDstrlen(buf) + 1);
         H5Sselect_hyperslab(hyper_space, H5S_SELECT_SET, start, stride, count, block);
         H5Dwrite(dataset, memtype, mem_space, hyper_space, H5P_DEFAULT, buf);
@@ -2009,7 +2009,7 @@ gent_str2(void)
 
     for (i = 0; (hsize_t)i < sdim; i++) {
         start[0] = (hsize_t)i;
-        HDsprintf(buf, "This is row %1d of type H5T_STR_NULLPAD of", i);
+        HDsnprintf(buf, sizeof(buf), "This is row %1d of type H5T_STR_NULLPAD of", i);
         H5Tset_size(memtype, HDstrlen(buf) + 1);
         H5Sselect_hyperslab(hyper_space, H5S_SELECT_SET, start, stride, count, block);
         H5Dwrite(dataset, memtype, mem_space, hyper_space, H5P_DEFAULT, buf);
@@ -2022,7 +2022,7 @@ gent_str2(void)
 
     for (i = 0; (hsize_t)i < sdim; i++) {
         start[0] = (hsize_t)i;
-        HDsprintf(buf, "This is row %1d of type H5T_STR_NULLPAD of string array", i);
+        HDsnprintf(buf, sizeof(buf), "This is row %1d of type H5T_STR_NULLPAD of string array", i);
         H5Tset_size(memtype, HDstrlen(buf) + 1);
         H5Sselect_hyperslab(hyper_space, H5S_SELECT_SET, start, stride, count, block);
         H5Dwrite(dataset, memtype, mem_space, hyper_space, H5P_DEFAULT, buf);
@@ -2041,7 +2041,7 @@ gent_str2(void)
 
     for (i = 0; (hsize_t)i < sdim; i++) {
         start[0] = (hsize_t)i;
-        HDsprintf(buf, "This is row %1d of type H5T_STR_SPACEPAD of", i);
+        HDsnprintf(buf, sizeof(buf), "This is row %1d of type H5T_STR_SPACEPAD of", i);
         H5Tset_size(memtype, HDstrlen(buf) + 1);
         H5Sselect_hyperslab(hyper_space, H5S_SELECT_SET, start, stride, count, block);
         H5Dwrite(dataset, memtype, mem_space, hyper_space, H5P_DEFAULT, buf);
@@ -2054,7 +2054,7 @@ gent_str2(void)
 
     for (i = 0; (hsize_t)i < sdim; i++) {
         start[0] = (hsize_t)i;
-        HDsprintf(buf, "This is row %1d of type H5T_STR_SPACEPAD of string array", i);
+        HDsnprintf(buf, sizeof(buf), "This is row %1d of type H5T_STR_SPACEPAD of string array", i);
         H5Tset_size(memtype, HDstrlen(buf) + 1);
         H5Sselect_hyperslab(hyper_space, H5S_SELECT_SET, start, stride, count, block);
         H5Dwrite(dataset, memtype, mem_space, hyper_space, H5P_DEFAULT, buf);
@@ -3923,7 +3923,7 @@ gent_large_objname(void)
     group = H5Gcreate2(fid, "this_is_a_large_group_name", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     for (i = 0; i < 50; ++i) {
-        HDsprintf(grp_name, "this_is_a_large_group_name%d", i);
+        HDsnprintf(grp_name, sizeof(grp_name), "this_is_a_large_group_name%d", i);
         group2 = H5Gcreate2(group, grp_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         H5Gclose(group2);
     }

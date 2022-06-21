@@ -271,20 +271,20 @@ test_extend(hid_t f, const char *prefix, size_t nx, size_t ny, size_t nz)
         if (!ny) {
             ndims = 1;
             ny = nz = 1;
-            HDsprintf(dims, "%lu", (unsigned long)nx);
+            HDsnprintf(dims, sizeof(dims), "%lu", (unsigned long)nx);
         }
         else {
             ndims = 2;
             nz    = 1;
-            HDsprintf(dims, "%lux%lu", (unsigned long)nx, (unsigned long)ny);
+            HDsnprintf(dims, sizeof(dims), "%lux%lu", (unsigned long)nx, (unsigned long)ny);
         }
     }
     else {
         ndims = 3;
-        HDsprintf(dims, "%lux%lux%lu", (unsigned long)nx, (unsigned long)ny, (unsigned long)nz);
+        HDsnprintf(dims, sizeof(dims), "%lux%lux%lu", (unsigned long)nx, (unsigned long)ny, (unsigned long)nz);
     }
 
-    HDsprintf(s, "istore extend: %s", dims);
+    HDsnprintf(s, sizeof(s), "istore extend: %s", dims);
     TESTING(s);
     buf   = (uint8_t *)HDmalloc(nx * ny * nz);
     check = (uint8_t *)HDmalloc(nx * ny * nz);
@@ -298,7 +298,7 @@ test_extend(hid_t f, const char *prefix, size_t nx, size_t ny, size_t nz)
     max_corner[2] = 0;
 
     /* Build the new empty object */
-    HDsprintf(name, "%s_%s", prefix, dims);
+    HDsnprintf(name, sizeof(name), "%s_%s", prefix, dims);
     if ((dataset = new_object(f, name, ndims, whole_size, whole_size)) < 0) {
         HDfprintf(stderr, "    Cannot create %u-d object `%s'\n", ndims, name);
         goto error;
@@ -468,20 +468,20 @@ test_sparse(hid_t f, const char *prefix, size_t nblocks, size_t nx, size_t ny, s
         if (!ny) {
             ndims = 1;
             ny = nz = 1;
-            HDsprintf(dims, "%lu", (unsigned long)nx);
+            HDsnprintf(dims, sizeof(dims), "%lu", (unsigned long)nx);
         }
         else {
             ndims = 2;
             nz    = 1;
-            HDsprintf(dims, "%lux%lu", (unsigned long)nx, (unsigned long)ny);
+            HDsnprintf(dims, sizeof(dims), "%lux%lu", (unsigned long)nx, (unsigned long)ny);
         }
     }
     else {
         ndims = 3;
-        HDsprintf(dims, "%lux%lux%lu", (unsigned long)nx, (unsigned long)ny, (unsigned long)nz);
+        HDsnprintf(dims, sizeof(dims), "%lux%lux%lu", (unsigned long)nx, (unsigned long)ny, (unsigned long)nz);
     }
 
-    HDsprintf(s, "istore sparse: %s", dims);
+    HDsnprintf(s, sizeof(s), "istore sparse: %s", dims);
     TESTING(s);
     if (skip_test) {
         SKIPPED();
@@ -500,7 +500,7 @@ test_sparse(hid_t f, const char *prefix, size_t nblocks, size_t nx, size_t ny, s
     size[2] = nz;
 
     /* Build the new empty object */
-    HDsprintf(name, "%s_%s", prefix, dims);
+    HDsnprintf(name, sizeof(name), "%s_%s", prefix, dims);
     if ((dataset = new_object(f, name, ndims, whole_size, chunk_dims)) < 0) {
         HDprintf("    Cannot create %u-d object `%s'\n", ndims, name);
         goto error;

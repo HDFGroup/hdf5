@@ -310,7 +310,7 @@ test_large(hid_t fcpl, hid_t fapl, hbool_t new_format)
         if (H5G__has_stab_test(cwg) != FALSE)
             TEST_ERROR;
     for (i = 0; i < LARGE_NOBJS; i++) {
-        HDsprintf(name, "%05d%05d", (HDrandom() % 100000), i);
+        HDsnprintf(name, sizeof(name), "%05d%05d", (HDrandom() % 100000), i);
         if ((dir = H5Gcreate2(cwg, name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR;
         if (H5Gclose(dir) < 0)
@@ -452,7 +452,7 @@ lifecycle(hid_t fcpl, hid_t fapl2)
         TEST_ERROR;
 
     /* Create first "bottom" group */
-    HDsprintf(objname, LIFECYCLE_BOTTOM_GROUP, (unsigned)0);
+    HDsnprintf(objname, sizeof(objname), LIFECYCLE_BOTTOM_GROUP, (unsigned)0);
     if ((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
@@ -475,7 +475,7 @@ lifecycle(hid_t fcpl, hid_t fapl2)
     /* Create several more bottom groups, to push the top group almost to a symbol table */
     /* (Start counting at '1', since we've already created one bottom group */
     for (u = 1; u < LIFECYCLE_MAX_COMPACT; u++) {
-        HDsprintf(objname, LIFECYCLE_BOTTOM_GROUP, u);
+        HDsnprintf(objname, sizeof(objname), LIFECYCLE_BOTTOM_GROUP, u);
         if ((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR;
 
@@ -511,7 +511,7 @@ lifecycle(hid_t fcpl, hid_t fapl2)
         TEST_ERROR;
 
     /* Create one more "bottom" group, which should push top group into using a symbol table */
-    HDsprintf(objname, LIFECYCLE_BOTTOM_GROUP, u);
+    HDsnprintf(objname, sizeof(objname), LIFECYCLE_BOTTOM_GROUP, u);
     if ((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
@@ -545,7 +545,7 @@ lifecycle(hid_t fcpl, hid_t fapl2)
 
     /* Unlink objects from top group */
     while (u >= LIFECYCLE_MIN_DENSE) {
-        HDsprintf(objname, LIFECYCLE_BOTTOM_GROUP, u);
+        HDsnprintf(objname, sizeof(objname), LIFECYCLE_BOTTOM_GROUP, u);
 
         if (H5Ldelete(gid, objname, H5P_DEFAULT) < 0)
             FAIL_STACK_ERROR;
@@ -562,7 +562,7 @@ lifecycle(hid_t fcpl, hid_t fapl2)
         TEST_ERROR;
 
     /* Unlink one more object from the group, which should transform back to using links */
-    HDsprintf(objname, LIFECYCLE_BOTTOM_GROUP, u);
+    HDsnprintf(objname, sizeof(objname), LIFECYCLE_BOTTOM_GROUP, u);
     if (H5Ldelete(gid, objname, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR;
     u--;
@@ -576,11 +576,11 @@ lifecycle(hid_t fcpl, hid_t fapl2)
         TEST_ERROR;
 
     /* Unlink last two objects from top group */
-    HDsprintf(objname, LIFECYCLE_BOTTOM_GROUP, u);
+    HDsnprintf(objname, sizeof(objname), LIFECYCLE_BOTTOM_GROUP, u);
     if (H5Ldelete(gid, objname, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR;
     u--;
-    HDsprintf(objname, LIFECYCLE_BOTTOM_GROUP, u);
+    HDsnprintf(objname, sizeof(objname), LIFECYCLE_BOTTOM_GROUP, u);
     if (H5Ldelete(gid, objname, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR;
 
@@ -841,7 +841,7 @@ read_old(void)
 
     /* Create a bunch of objects in the group */
     for (u = 0; u < READ_OLD_NGROUPS; u++) {
-        HDsprintf(objname, "Group %u", u);
+        HDsnprintf(objname, sizeof(objname), "Group %u", u);
         if ((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR;
 
@@ -865,7 +865,7 @@ read_old(void)
 
     /* Delete new objects from old group */
     for (u = 0; u < READ_OLD_NGROUPS; u++) {
-        HDsprintf(objname, "Group %u", u);
+        HDsnprintf(objname, sizeof(objname), "Group %u", u);
         if (H5Ldelete(gid, objname, H5P_DEFAULT) < 0)
             FAIL_STACK_ERROR;
     } /* end for */
@@ -977,7 +977,7 @@ no_compact(hid_t fcpl, hid_t fapl2)
         TEST_ERROR;
 
     /* Create first "bottom" group */
-    HDsprintf(objname, NO_COMPACT_BOTTOM_GROUP, (unsigned)0);
+    HDsnprintf(objname, sizeof(objname), NO_COMPACT_BOTTOM_GROUP, (unsigned)0);
     if ((gid2 = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
@@ -998,7 +998,7 @@ no_compact(hid_t fcpl, hid_t fapl2)
         TEST_ERROR;
 
     /* Unlink object from top group */
-    HDsprintf(objname, NO_COMPACT_BOTTOM_GROUP, (unsigned)0);
+    HDsnprintf(objname, sizeof(objname), NO_COMPACT_BOTTOM_GROUP, (unsigned)0);
     if (H5Ldelete(gid, objname, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR;
 
