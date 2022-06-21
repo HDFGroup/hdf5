@@ -1538,19 +1538,19 @@ test_multi(void)
     memb_map[H5FD_MEM_BTREE] = H5FD_MEM_BTREE;
     memb_map[H5FD_MEM_GHEAP] = H5FD_MEM_GHEAP;
 
-    HDsprintf(sv[H5FD_MEM_SUPER], "%%s-%c.h5", 's');
+    HDsnprintf(sv[H5FD_MEM_SUPER], 32, "%%s-%c.h5", 's');
     memb_name[H5FD_MEM_SUPER] = sv[H5FD_MEM_SUPER];
     memb_addr[H5FD_MEM_SUPER] = 0;
 
-    HDsprintf(sv[H5FD_MEM_BTREE], "%%s-%c.h5", 'b');
+    HDsnprintf(sv[H5FD_MEM_BTREE], 32, "%%s-%c.h5", 'b');
     memb_name[H5FD_MEM_BTREE] = sv[H5FD_MEM_BTREE];
     memb_addr[H5FD_MEM_BTREE] = HADDR_MAX / 4;
 
-    HDsprintf(sv[H5FD_MEM_DRAW], "%%s-%c.h5", 'r');
+    HDsnprintf(sv[H5FD_MEM_DRAW], 32, "%%s-%c.h5", 'r');
     memb_name[H5FD_MEM_DRAW] = sv[H5FD_MEM_DRAW];
     memb_addr[H5FD_MEM_DRAW] = HADDR_MAX / 2;
 
-    HDsprintf(sv[H5FD_MEM_GHEAP], "%%s-%c.h5", 'g');
+    HDsnprintf(sv[H5FD_MEM_GHEAP], 32, "%%s-%c.h5", 'g');
     memb_name[H5FD_MEM_GHEAP] = sv[H5FD_MEM_GHEAP];
     memb_addr[H5FD_MEM_GHEAP] = (HADDR_MAX / 4) * 3;
 
@@ -1787,12 +1787,12 @@ test_multi_compat(void)
     memb_map[H5FD_MEM_DRAW] = H5FD_MEM_DRAW;
 
     memb_fapl[H5FD_MEM_SUPER] = H5P_DEFAULT;
-    HDsprintf(sv[H5FD_MEM_SUPER], "%%s-%c.h5", 's');
+    HDsnprintf(sv[H5FD_MEM_SUPER], 32, "%%s-%c.h5", 's');
     memb_name[H5FD_MEM_SUPER] = sv[H5FD_MEM_SUPER];
     memb_addr[H5FD_MEM_SUPER] = 0;
 
     memb_fapl[H5FD_MEM_DRAW] = H5P_DEFAULT;
-    HDsprintf(sv[H5FD_MEM_DRAW], "%%s-%c.h5", 'r');
+    HDsnprintf(sv[H5FD_MEM_DRAW], 32, "%%s-%c.h5", 'r');
     memb_name[H5FD_MEM_DRAW] = sv[H5FD_MEM_DRAW];
     memb_addr[H5FD_MEM_DRAW] = HADDR_MAX / 2;
 

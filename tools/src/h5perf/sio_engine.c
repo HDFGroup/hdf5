@@ -1181,7 +1181,7 @@ set_vfd(parameters *param)
             return -1;
         for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {
             memb_fapl[mt] = H5P_DEFAULT;
-            HDsprintf(sv->arr[mt], "%%s-%c.h5", multi_letters[mt]);
+            HDsnprintf(sv->arr[mt], 1024, "%%s-%c.h5", multi_letters[mt]);
             memb_name[mt] = sv->arr[mt];
             memb_addr[mt] = (haddr_t)MAX(mt - 1, 0) * (HADDR_MAX / 10);
         }

@@ -1963,9 +1963,9 @@ gent_str2(void)
     dims[0] = 3;
     space2  = H5Screate_simple(1, dims, NULL);
     attr    = H5Acreate2(dataset, "attr1", fxdlenstr2, space2, H5P_DEFAULT, H5P_DEFAULT);
-    HDsprintf(&(buf2[0 * LENSTR2]), "0123456789");
-    HDsprintf(&(buf2[1 * LENSTR2]), "abcdefghij");
-    HDsprintf(&(buf2[2 * LENSTR2]), "ABCDEFGHIJ");
+    HDsnprintf(&(buf2[0 * LENSTR2]), LENSTR2, "0123456789");
+    HDsnprintf(&(buf2[1 * LENSTR2]), LENSTR2, "abcdefghij");
+    HDsnprintf(&(buf2[2 * LENSTR2]), LENSTR2, "ABCDEFGHIJ");
     H5Awrite(attr, fxdlenstr2, buf2);
     H5Sclose(space2);
     H5Tclose(fxdlenstr2);

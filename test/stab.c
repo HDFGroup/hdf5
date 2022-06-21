@@ -219,8 +219,9 @@ test_long(hid_t fcpl, hid_t fapl, hbool_t new_format)
     for (i = 0; i < LONG_NAME_LEN; i++)
         name1[i] = (char)('A' + i % 26);
     name1[LONG_NAME_LEN - 1] = '\0';
-    name2                    = (char *)HDmalloc((size_t)((2 * LONG_NAME_LEN) + 2));
-    HDsprintf(name2, "%s/%s", name1, name1);
+    size_t name2Len = (2 * LONG_NAME_LEN) + 2;
+    name2                    = (char *)HDmalloc(name2Len);
+    HDsnprintf(name2, name2Len, "%s/%s", name1, name1);
 
     /* Create groups */
     if ((g1 = H5Gcreate2(fid, name1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)

@@ -66,7 +66,7 @@ extern "C" {
 
 H5TEST_DLL symbol_info_t *choose_dataset(void);
 H5TEST_DLL hid_t          create_symbol_datatype(void);
-H5TEST_DLL int            generate_name(char *name_buf, unsigned level, unsigned count);
+H5TEST_DLL int            generate_name(char *name_buf, size_t name_buf_length, unsigned level, unsigned count);
 H5TEST_DLL int            generate_symbols(void);
 H5TEST_DLL int            shutdown_symbols(void);
 H5TEST_DLL int            print_metadata_retries_info(hid_t fid);
