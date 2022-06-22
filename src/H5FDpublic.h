@@ -253,7 +253,6 @@
  */
 #define H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG 0x0002
 
-
 /*******************/
 /* Public Typedefs */
 /*******************/
