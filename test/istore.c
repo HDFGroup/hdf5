@@ -281,7 +281,8 @@ test_extend(hid_t f, const char *prefix, size_t nx, size_t ny, size_t nz)
     }
     else {
         ndims = 3;
-        HDsnprintf(dims, sizeof(dims), "%lux%lux%lu", (unsigned long)nx, (unsigned long)ny, (unsigned long)nz);
+        HDsnprintf(dims, sizeof(dims), "%lux%lux%lu", (unsigned long)nx, (unsigned long)ny,
+                   (unsigned long)nz);
     }
 
     HDsnprintf(s, sizeof(s), "istore extend: %s", dims);
@@ -478,7 +479,8 @@ test_sparse(hid_t f, const char *prefix, size_t nblocks, size_t nx, size_t ny, s
     }
     else {
         ndims = 3;
-        HDsnprintf(dims, sizeof(dims), "%lux%lux%lu", (unsigned long)nx, (unsigned long)ny, (unsigned long)nz);
+        HDsnprintf(dims, sizeof(dims), "%lux%lux%lu", (unsigned long)nx, (unsigned long)ny,
+                   (unsigned long)nz);
     }
 
     HDsnprintf(s, sizeof(s), "istore sparse: %s", dims);

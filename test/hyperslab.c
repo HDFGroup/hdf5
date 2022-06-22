@@ -771,7 +771,8 @@ test_transpose(size_t nx, size_t ny)
     char    s[256];
     hsize_t i, j;
 
-    HDsnprintf(s, sizeof(s), "Testing 2d transpose by stride %4lux%-lud", (unsigned long)nx, (unsigned long)ny);
+    HDsnprintf(s, sizeof(s), "Testing 2d transpose by stride %4lux%-lud", (unsigned long)nx,
+               (unsigned long)ny);
     HDprintf("%-70s", s);
     HDfflush(stdout);
 
@@ -870,7 +871,7 @@ test_sub_super(size_t nx, size_t ny)
     char     s[256];
 
     HDsnprintf(s, sizeof(s), "Testing image sampling %4lux%-4lu to %4lux%-4lu ", (unsigned long)(2 * nx),
-              (unsigned long)(2 * ny), (unsigned long)nx, (unsigned long)ny);
+               (unsigned long)(2 * ny), (unsigned long)nx, (unsigned long)ny);
     HDprintf("%-70s", s);
     HDfflush(stdout);
 
@@ -919,8 +920,8 @@ test_sub_super(size_t nx, size_t ny)
      * Test replicating pixels to produce an image twice as large in each
      * dimension.
      */
-    HDsnprintf(s, sizeof(s), "Testing image sampling %4lux%-4lu to %4lux%-4lu ", (unsigned long)nx, (unsigned long)ny,
-              (unsigned long)(2 * nx), (unsigned long)(2 * ny));
+    HDsnprintf(s, sizeof(s), "Testing image sampling %4lux%-4lu to %4lux%-4lu ", (unsigned long)nx,
+               (unsigned long)ny, (unsigned long)(2 * nx), (unsigned long)(2 * ny));
     HDprintf("%-70s", s);
     HDfflush(stdout);
 
@@ -946,17 +947,17 @@ test_sub_super(size_t nx, size_t ny)
     for (i = 0; i < nx; i++) {
         for (j = 0; j < ny; j++) {
             if (half[i * ny + j] != twice[4 * i * ny + 2 * j])
-                HDsnprintf(s, sizeof(s), "half[%lu][%lu] != twice[%lu][%lu]", (unsigned long)i, (unsigned long)j,
-                          (unsigned long)i * 2, (unsigned long)j * 2);
+                HDsnprintf(s, sizeof(s), "half[%lu][%lu] != twice[%lu][%lu]", (unsigned long)i,
+                           (unsigned long)j, (unsigned long)i * 2, (unsigned long)j * 2);
             else if (half[i * ny + j] != twice[4 * i * ny + 2 * j + 1])
-                HDsnprintf(s, sizeof(s), "half[%lu][%lu] != twice[%lu][%lu]", (unsigned long)i, (unsigned long)j,
-                          (unsigned long)i * 2, (unsigned long)j * 2 + 1);
+                HDsnprintf(s, sizeof(s), "half[%lu][%lu] != twice[%lu][%lu]", (unsigned long)i,
+                           (unsigned long)j, (unsigned long)i * 2, (unsigned long)j * 2 + 1);
             else if (half[i * ny + j] != twice[(2 * i + 1) * 2 * ny + 2 * j])
-                HDsnprintf(s, sizeof(s), "half[%lu][%lu] != twice[%lu][%lu]", (unsigned long)i, (unsigned long)j,
-                          (unsigned long)i * 2 + 1, (unsigned long)j * 2);
+                HDsnprintf(s, sizeof(s), "half[%lu][%lu] != twice[%lu][%lu]", (unsigned long)i,
+                           (unsigned long)j, (unsigned long)i * 2 + 1, (unsigned long)j * 2);
             else if (half[i * ny + j] != twice[(2 * i + 1) * 2 * ny + 2 * j + 1])
-                HDsnprintf(s, sizeof(s), "half[%lu][%lu] != twice[%lu][%lu]", (unsigned long)i, (unsigned long)j,
-                          (unsigned long)i * 2 + 1, (unsigned long)j * 2 + 1);
+                HDsnprintf(s, sizeof(s), "half[%lu][%lu] != twice[%lu][%lu]", (unsigned long)i,
+                           (unsigned long)j, (unsigned long)i * 2 + 1, (unsigned long)j * 2 + 1);
             if (s[0]) {
                 H5_FAILED();
                 if (!HDisatty(1)) {
@@ -1079,7 +1080,7 @@ test_array_offset_n_calc(size_t n, size_t x, size_t y, size_t z)
     char     s[256];
 
     HDsnprintf(s, sizeof(s), "array offset %4lux%4lux%4lu elements", (unsigned long)z, (unsigned long)y,
-              (unsigned long)x);
+               (unsigned long)x);
     TESTING(s);
 
     /* Initialize */

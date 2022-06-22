@@ -650,7 +650,8 @@ H5_timer_get_time_string(double seconds)
         HDsnprintf(s, H5TIMER_TIME_STRING_LEN, "%.f h %.f m %.f s", hours, minutes, remainder_sec);
     else
         /* Print time in d, h, m and s */
-        HDsnprintf(s, H5TIMER_TIME_STRING_LEN, "%.f d %.f h %.f m %.f s", days, hours, minutes, remainder_sec);
+        HDsnprintf(s, H5TIMER_TIME_STRING_LEN, "%.f d %.f h %.f m %.f s", days, hours, minutes,
+                   remainder_sec);
 
     return s;
 } /* end H5_timer_get_time_string() */
