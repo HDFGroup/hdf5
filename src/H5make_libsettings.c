@@ -206,7 +206,7 @@ information about the library build configuration\n";
     HDfputs(FileHeader, rawoutstream); /*the copyright notice--see top of this file */
 
     HDfprintf(rawoutstream, " *\n * Created:\t\t%s %2d, %4d\n", month_name[tm->tm_mon], tm->tm_mday,
-            1900 + tm->tm_year);
+              1900 + tm->tm_year);
     if (pwd || real_name[0] || host_name[0]) {
         HDfprintf(rawoutstream, " *\t\t\t");
         if (real_name[0])
