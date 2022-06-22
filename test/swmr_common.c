@@ -162,6 +162,9 @@ create_symbol_datatype(void)
  *              Buffer for the created name.  Must be pre-allocated.
  *              Since the name is formulaic, this isn't considered an issue.
  *
+ *              size_t name_buf_length
+ *              The length in bytes of the name_buf buffer
+ *
  *              unsigned level
  *              The dataset's level
  *
@@ -175,11 +178,11 @@ create_symbol_datatype(void)
  *-------------------------------------------------------------------------
  */
 int
-generate_name(char *name_buf, unsigned level, unsigned count)
+generate_name(char *name_buf, size_t name_buf_length, unsigned level, unsigned count)
 {
     HDassert(name_buf);
 
-    HDsprintf(name_buf, "%u-%04u", level, count);
+    HDsnprintf(name_buf, name_buf_length, "%u-%04u", level, count);
 
     return 0;
 } /* end generate_name() */
@@ -206,7 +209,7 @@ generate_symbols(void)
         for (v = 0; v < symbol_count[u]; v++) {
             char name_buf[64];
 
-            generate_name(name_buf, u, v);
+            generate_name(name_buf, sizeof(name_buf), u, v);
             symbol_info[u][v].name     = HDstrdup(name_buf);
             symbol_info[u][v].dsid     = -1;
             symbol_info[u][v].nrecords = 0;

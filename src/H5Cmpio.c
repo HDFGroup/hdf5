@@ -199,7 +199,7 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
 
     HDmemset(tbl_buf, 0, sizeof(tbl_buf));
 
-    HDsprintf(&(tbl_buf[0]), "candidate list = ");
+    HDsnprintf(tbl_buf, sizeof(tbl_buf), "candidate list = ");
     for (u = 0; u < num_candidates; u++)
         HDsprintf(&(tbl_buf[HDstrlen(tbl_buf)]), " 0x%llx", (long long)(*(candidates_list_ptr + u)));
     HDsprintf(&(tbl_buf[HDstrlen(tbl_buf)]), "\n");
@@ -266,7 +266,7 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
 #if H5C_APPLY_CANDIDATE_LIST__DEBUG
     for (u = 0; u < 1024; u++)
         tbl_buf[u] = '\0';
-    HDsprintf(&(tbl_buf[0]), "candidate assignment table = ");
+    HDsnprintf(tbl_buf, sizeof(tbl_buf), "candidate assignment table = ");
     for (u = 0; u <= (unsigned)mpi_size; u++)
         HDsprintf(&(tbl_buf[HDstrlen(tbl_buf)]), " %u", candidate_assignment_table[u]);
     HDsprintf(&(tbl_buf[HDstrlen(tbl_buf)]), "\n");
