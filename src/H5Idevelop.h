@@ -15,8 +15,8 @@
  *      support routines.
  */
 
-#ifndef _H5Idevelop_H
-#define _H5Idevelop_H
+#ifndef H5Idevelop_H
+#define H5Idevelop_H
 
 /* Include package's public header */
 #include "H5Ipublic.h" /* ID management */
@@ -136,4 +136,4 @@ H5_DLL hid_t H5Iregister_future(H5I_type_t type, const void *object, H5I_future_
 }
 #endif
 
-#endif /* _H5Idevelop_H */
+#endif /* H5Idevelop_H */

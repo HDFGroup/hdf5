@@ -109,7 +109,7 @@ New Features
 
     Internal header file:
     ---------------------
-    -
+    - All the #defines named H5FD_CTL__* were renamed to H5FD_CTL_*, i.e. the double underscore was reduced to a single underscore.
 
 
     Documentation:

@@ -37,9 +37,10 @@
 
 /* C library header files for things that appear in HDF5 public headers */
 #ifdef __cplusplus
-#define __STDC_FORMAT_MACROS
-#endif
+#include <cinttypes>
+#else
 #include <inttypes.h>
+#endif
 #include <limits.h>
 #include <stdarg.h>
 #include <stdbool.h>

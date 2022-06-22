@@ -163,7 +163,7 @@ class H5_HLCPPDLL FL_PacketTable : virtual public PacketTable {
     /* Destructor
      * Cleans up the packet table
      */
-    virtual ~FL_PacketTable()
+    ~FL_PacketTable() override
     {
     }
 

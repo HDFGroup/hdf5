@@ -211,9 +211,9 @@ h5str_convert(JNIEnv *env, char **in_str, hid_t container, hid_t tid, void *out_
 
     /* Build default formats for long long types */
     if (!fmt_llong[0]) {
-        if (HDsnprintf(fmt_llong, sizeof(fmt_llong), "%%%sd", H5_PRINTF_LL_WIDTH) < 0)
+        if (HDsnprintf(fmt_llong, sizeof(fmt_llong), "%%lld") < 0)
             H5_JNI_FATAL_ERROR(ENVONLY, "h5str_convert: HDsnprintf failure");
-        if (HDsnprintf(fmt_ullong, sizeof(fmt_ullong), "%%%su", H5_PRINTF_LL_WIDTH) < 0)
+        if (HDsnprintf(fmt_ullong, sizeof(fmt_ullong), "%%llu") < 0)
             H5_JNI_FATAL_ERROR(ENVONLY, "h5str_convert: HDsnprintf failure");
     } /* end if */
 
@@ -781,9 +781,9 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
 
     /* Build default formats for long long types */
     if (!fmt_llong[0]) {
-        if (HDsnprintf(fmt_llong, sizeof(fmt_llong), "%%%sd", H5_PRINTF_LL_WIDTH) < 0)
+        if (HDsnprintf(fmt_llong, sizeof(fmt_llong), "%%lld") < 0)
             H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsnprintf failure");
-        if (HDsnprintf(fmt_ullong, sizeof(fmt_ullong), "%%%su", H5_PRINTF_LL_WIDTH) < 0)
+        if (HDsnprintf(fmt_ullong, sizeof(fmt_ullong), "%%llu") < 0)
             H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsnprintf failure");
     } /* end if */
     switch (tclass) {

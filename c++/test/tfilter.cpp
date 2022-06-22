@@ -27,8 +27,10 @@ using namespace H5;
 #include "h5test.h"
 #include "h5cpputil.h" // C++ utilility header file
 
-#define DSET_DIM1         100
-#define DSET_DIM2         200
+#ifdef H5_HAVE_FILTER_SZIP
+#define DSET_DIM1 100
+#define DSET_DIM2 200
+#endif
 #define FILTER_CHUNK_DIM1 2
 #define FILTER_CHUNK_DIM2 25
 
