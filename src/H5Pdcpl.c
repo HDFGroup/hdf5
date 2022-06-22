@@ -2995,6 +2995,15 @@ H5Pget_external(hid_t plist_id, unsigned idx, size_t name_size, char *name /*out
     /* Return values */
     if (name_size > 0 && name)
         HDstrncpy(name, efl.slot[idx].name, name_size);
+    /* XXX: Badness!
+     *
+     * The offset parameter is of type off_t and the offset field of H5O_efl_entry_t
+     * is HDoff_t which is a different type on Windows (off_t is a 32-bit long,
+     * HDoff_t is __int64, a 64-bit type).
+     *
+     * In a future API reboot, we'll either want to make this parameter a haddr_t
+     * or define a 64-bit HDF5-specific offset type that is platform-independent.
+     */
     if (offset)
         *offset = efl.slot[idx].offset;
     if (size)
