@@ -1074,7 +1074,7 @@ test_set_configured_fapl(void)
             &wrong_fa,
         },
         {
-            "(common) should fail: unrecoginzed vfd name",
+            "(common) should fail: unrecognized vfd name",
             0,
             UTIL_TEST_DEFAULT,
             "unknown",
@@ -1206,10 +1206,12 @@ test_set_configured_fapl(void)
         vfd_info.u.name = C.vfdname;
         vfd_info.fname  = "ignore";
         result          = h5tools_get_fapl(H5P_DEFAULT, NULL, &vfd_info);
-        if (C.expected == 0)
+        if (C.expected == 0) {
             JSVERIFY(result, H5I_INVALID_HID, C.message)
-        else
+        }
+        else {
             JSVERIFY_NOT(result, H5I_INVALID_HID, C.message)
+        }
 
 #if UTIL_TEST_DEBUG
         HDfprintf(stderr, "after test\n");

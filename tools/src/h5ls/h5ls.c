@@ -1663,7 +1663,6 @@ list_attr(hid_t obj, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *ain
     hid_t             space = H5I_INVALID_HID;
     hid_t             type  = H5I_INVALID_HID;
     hsize_t           size[H5S_MAX_RANK];
-    hsize_t           nelmts = 1;
     int               ndims;
     int               i;
     H5S_class_t       space_type;
@@ -1705,10 +1704,8 @@ list_attr(hid_t obj, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *ain
             case H5S_SIMPLE:
                 /* simple dataspace */
                 h5tools_str_append(&buffer, " {");
-                for (i = 0; i < ndims; i++) {
+                for (i = 0; i < ndims; i++)
                     h5tools_str_append(&buffer, "%s%" PRIuHSIZE, i ? ", " : "", size[i]);
-                    nelmts *= size[i];
-                }
                 h5tools_str_append(&buffer, "}\n");
                 h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols,
                                        (hsize_t)0, (hsize_t)0);
@@ -2528,7 +2525,7 @@ done:
  *              were borrowed from the GNU less(1).
  *
  * Return:      Success: Number of columns.
- *              Failure: Some default number of columms.
+ *              Failure: Some default number of columns.
  *-------------------------------------------------------------------------
  */
 static int
@@ -2726,9 +2723,9 @@ main(int argc, char *argv[])
         }
         else if (!HDstrcmp(argv[argno], "--enable-error-stack")) {
             enable_error_stack = 1;
-            /* deprecated --errors */
         }
         else if (!HDstrcmp(argv[argno], "--errors")) {
+            /* deprecated --errors */
             enable_error_stack = 1;
         }
         else if (!HDstrcmp(argv[argno], "--follow-symlinks")) {
@@ -2883,6 +2880,8 @@ main(int argc, char *argv[])
                 usage();
                 leave(EXIT_FAILURE);
             }
+
+            vfd_info.info = &ros3_fa;
 #else
             HDfprintf(rawerrorstream, "Error: Read-Only S3 VFD is not enabled\n\n");
             usage();
@@ -2904,6 +2903,8 @@ main(int argc, char *argv[])
                 usage();
                 leave(EXIT_FAILURE);
             }
+
+            vfd_info.info = &hdfs_fa;
 #else
             HDfprintf(rawerrorstream, "Error: The HDFS VFD is not enabled\n\n");
             usage();
