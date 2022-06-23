@@ -196,6 +196,15 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g; /* MPI INFO object for IO */
 extern "C" {
 #endif
 
+/*
+ * Ugly hack to cast away const for freeing const-qualified pointers.
+ * Should only be used sparingly, where the alternative (like keeping
+ * an equivalent non-const pointer around) is far messier.
+ */
+#ifndef h5_free_const
+#define h5_free_const(mem) HDfree((void *)(uintptr_t)mem)
+#endif
+
 /* Generally useful testing routines */
 H5TEST_DLL void        h5_clean_files(const char *base_name[], hid_t fapl);
 H5TEST_DLL int         h5_cleanup(const char *base_name[], hid_t fapl);

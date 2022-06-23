@@ -86,6 +86,60 @@ static int __k;
         HDprintf((__k % 4 == 0) ? "  %02X" : " %02X", (unsigned char)(buf)[__k]);                            \
     } /* end #define HEXPRINT() */
 
+/* Macro SET_SIZE()
+ *
+ * Helper macro to track the sizes of entries in a vector
+ * I/O call when stepping through the vector incrementally.
+ * Assuming that bool_size_fixed is initialized to FALSE
+ * before the scan, this macro will detect the sizes array
+ * optimization for the case in which all remaining entries
+ * are of the same size, and set size_value accordingly.
+ *
+ *                                   JRM -- 3/11/21
+ */
+#define SET_SIZE(bool_size_fixed, sizes_array, size_value, idx)                                              \
+    do {                                                                                                     \
+        if (!(bool_size_fixed)) {                                                                            \
+                                                                                                             \
+            if ((sizes_array)[idx] == 0) {                                                                   \
+                                                                                                             \
+                HDassert((idx) > 0);                                                                         \
+                (bool_size_fixed) = TRUE;                                                                    \
+            }                                                                                                \
+            else {                                                                                           \
+                                                                                                             \
+                (size_value) = (sizes_array)[idx];                                                           \
+            }                                                                                                \
+        }                                                                                                    \
+    } while (FALSE)
+
+/* Macro SET_TYPE()
+ *
+ * Helper macro to track the types of entries in a vector
+ * I/O call when stepping through the vector incrementally.
+ * Assuming that bool_type_fixed is initialized to FALSE
+ * before the scan, this macro will detect the types array
+ * optimization for the case in which all remaining entries
+ * are of the same type, and set type_value accordingly.
+ *
+ *                                   JRM -- 3/11/21
+ */
+#define SET_TYPE(bool_type_fixed, types_array, type_value, idx)                                              \
+    do {                                                                                                     \
+        if (!(bool_type_fixed)) {                                                                            \
+                                                                                                             \
+            if ((types_array)[idx] == H5FD_MEM_NOLIST) {                                                     \
+                                                                                                             \
+                HDassert((idx) > 0);                                                                         \
+                (bool_type_fixed) = TRUE;                                                                    \
+            }                                                                                                \
+            else {                                                                                           \
+                                                                                                             \
+                (type_value) = (types_array)[idx];                                                           \
+            }                                                                                                \
+        }                                                                                                    \
+    } while (FALSE)
+
 /* Helper structure to pass around dataset information.
  */
 struct splitter_dataset_def {

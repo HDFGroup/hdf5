@@ -15,8 +15,8 @@
  *      support routines.
  */
 
-#ifndef _H5ESdevelop_H
-#define _H5ESdevelop_H
+#ifndef H5ESdevelop_H
+#define H5ESdevelop_H
 
 /* Include package's public header */
 #include "H5ESpublic.h"
@@ -49,4 +49,4 @@ H5_DLL herr_t H5ESget_requests(hid_t es_id, H5_iter_order_t order, hid_t *connec
 }
 #endif
 
-#endif /* _H5ESdevelop_H */
+#endif /* H5ESdevelop_H */

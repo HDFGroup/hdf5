@@ -15,8 +15,8 @@
  *      support routines.
  */
 
-#ifndef _H5FDdevelop_H
-#define _H5FDdevelop_H
+#ifndef H5FDdevelop_H
+#define H5FDdevelop_H
 
 /* Include package's public header */
 #include "H5FDpublic.h"
@@ -24,6 +24,9 @@
 /*****************/
 /* Public Macros */
 /*****************/
+
+/* H5FD_class_t struct version */
+#define H5FD_CLASS_VERSION 0x01 /* File driver struct version */
 
 /* Map "fractal heap" header blocks to 'ohdr' type file memory, since its
  * a fair amount of work to add a new kind of file memory and they are similar
@@ -268,4 +271,4 @@ H5_DLL herr_t  H5FDctl(H5FD_t *file, uint64_t op_code, uint64_t flags, const voi
 }
 #endif
 
-#endif /* _H5FDdevelop_H */
+#endif /* H5FDdevelop_H */
