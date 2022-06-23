@@ -214,6 +214,8 @@ H5FDregister(const H5FD_class_t *cls)
     /* Check arguments */
     if (!cls)
         HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID, "null class pointer is disallowed")
+    if (cls->version != H5FD_CLASS_VERSION)
+        HGOTO_ERROR(H5E_ARGS, H5E_VERSION, H5I_INVALID_HID, "wrong file driver version #")
     if (!cls->open || !cls->close)
         HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID,
                     "'open' and/or 'close' methods are not defined")
@@ -935,7 +937,6 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-
 int
 H5FD_cmp(const H5FD_t *f1, const H5FD_t *f2)
 {
@@ -955,8 +956,8 @@ H5FD_cmp(const H5FD_t *f1, const H5FD_t *f2)
 
         H5E_BEGIN_TRY
         {
-            ctl_result = H5FD_ctl(f1, H5FD_CTL__GET_TERMINAL_VFD,
-                                  H5FD_CTL__FAIL_IF_UNKNOWN_FLAG | H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG, NULL,
+            ctl_result = H5FD_ctl(f1, H5FD_CTL_GET_TERMINAL_VFD,
+                                  H5FD_CTL_FAIL_IF_UNKNOWN_FLAG | H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG, NULL,
                                   (void **)(&term_f1));
         }
         H5E_END_TRY;
@@ -976,8 +977,8 @@ H5FD_cmp(const H5FD_t *f1, const H5FD_t *f2)
 
         H5E_BEGIN_TRY
         {
-            ctl_result = H5FD_ctl(f2, H5FD_CTL__GET_TERMINAL_VFD,
-                                  H5FD_CTL__FAIL_IF_UNKNOWN_FLAG | H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG, NULL,
+            ctl_result = H5FD_ctl(f2, H5FD_CTL_GET_TERMINAL_VFD,
+                                  H5FD_CTL_FAIL_IF_UNKNOWN_FLAG | H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG, NULL,
                                   (void **)(&term_f2));
         }
         H5E_END_TRY;
@@ -1877,7 +1878,7 @@ H5FD_ctl(H5FD_t *file, uint64_t op_code, uint64_t flags, const void *input, void
 
     /* Dispatch to driver if the ctl function exists.
      *
-     * If it doesn't, fail if the H5FD_CTL__FAIL_IF_UNKNOWN_FLAG is set.
+     * If it doesn't, fail if the H5FD_CTL_FAIL_IF_UNKNOWN_FLAG is set.
      *
      * Otherwise, report success.
      */
@@ -1887,7 +1888,7 @@ H5FD_ctl(H5FD_t *file, uint64_t op_code, uint64_t flags, const void *input, void
 
             HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL, "VFD ctl request failed")
     }
-    else if (flags & H5FD_CTL__FAIL_IF_UNKNOWN_FLAG) {
+    else if (flags & H5FD_CTL_FAIL_IF_UNKNOWN_FLAG) {
 
         HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL,
                     "VFD ctl request failed (no ctl callback and fail if unknown flag is set)")

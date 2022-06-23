@@ -3592,12 +3592,12 @@ H5FD__ctl_test_vfd_ctl(H5FD_t H5_ATTR_UNUSED *_file, uint64_t op_code, uint64_t 
 
     switch (op_code) {
         /* Op code for testing purposes */
-        case H5FD_CTL__TEST_OPCODE:
+        case H5FD_CTL_TEST_OPCODE:
             break;
 
         /* Unknown op code */
         default:
-            if (flags & H5FD_CTL__FAIL_IF_UNKNOWN_FLAG)
+            if (flags & H5FD_CTL_FAIL_IF_UNKNOWN_FLAG)
                 ret_value = FAIL;
             break;
     }
@@ -3607,6 +3607,7 @@ H5FD__ctl_test_vfd_ctl(H5FD_t H5_ATTR_UNUSED *_file, uint64_t op_code, uint64_t 
 
 /* Minimal VFD for ctl feature tests */
 static const H5FD_class_t H5FD_ctl_test_vfd_g = {
+    H5FD_CLASS_VERSION,         /* struct version        */
     (H5FD_class_value_t)201,    /* value                 */
     "ctl_test_vfd",             /* name                  */
     HADDR_MAX,                  /* maxaddr               */
@@ -3635,6 +3636,10 @@ static const H5FD_class_t H5FD_ctl_test_vfd_g = {
     NULL,                       /* get_handle            */
     H5FD__ctl_test_vfd_read,    /* read                  */
     H5FD__ctl_test_vfd_write,   /* write                 */
+    NULL,                       /* read_vector           */
+    NULL,                       /* write_vector          */
+    NULL,                       /* read_selection        */
+    NULL,                       /* write_selection       */
     NULL,                       /* flush                 */
     NULL,                       /* truncate              */
     NULL,                       /* lock                  */
@@ -3666,8 +3671,8 @@ run_ctl_test(uint64_t op_code, uint64_t flags, ctl_test_opc_type opc_type, hid_t
     char    filename[1024];
 
     /* Check for a few ctl function flags */
-    fail_if_unknown  = (flags & H5FD_CTL__FAIL_IF_UNKNOWN_FLAG);
-    routing_flag_set = (flags & H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG);
+    fail_if_unknown  = (flags & H5FD_CTL_FAIL_IF_UNKNOWN_FLAG);
+    routing_flag_set = (flags & H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG);
 
     /* Determine if the top-level VFD is a passthrough VFD */
     if ((driver_id = H5Pget_driver(fapl_id)) < 0)
@@ -3767,7 +3772,7 @@ test_ctl(void)
 
     TESTING_2("known op code to terminal VFD (without fail on unknown flag)");
 
-    op_code = H5FD_CTL__TEST_OPCODE;
+    op_code = H5FD_CTL_TEST_OPCODE;
     flags   = 0;
 
     /* H5FDctl call should succeed normally */
@@ -3778,8 +3783,8 @@ test_ctl(void)
 
     TESTING_2("known op code to terminal VFD (with fail on unknown flag)");
 
-    op_code = H5FD_CTL__TEST_OPCODE;
-    flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG;
+    op_code = H5FD_CTL_TEST_OPCODE;
+    flags   = H5FD_CTL_FAIL_IF_UNKNOWN_FLAG;
 
     /* H5FDctl call should succeed normally */
     if (run_ctl_test(op_code, flags, CTL_OPC_KNOWN_TERMINAL, fapl_id) < 0)
@@ -3789,8 +3794,8 @@ test_ctl(void)
 
     TESTING_2("known op code to terminal VFD (without fail on unknown flag/route to terminal VFD)");
 
-    op_code = H5FD_CTL__TEST_OPCODE;
-    flags   = H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG;
+    op_code = H5FD_CTL_TEST_OPCODE;
+    flags   = H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG;
 
     /* H5FDctl call should succeed normally */
     if (run_ctl_test(op_code, flags, CTL_OPC_KNOWN_TERMINAL, fapl_id) < 0)
@@ -3800,8 +3805,8 @@ test_ctl(void)
 
     TESTING_2("known op code to terminal VFD (with fail on unknown flag/route to terminal VFD)");
 
-    op_code = H5FD_CTL__TEST_OPCODE;
-    flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG | H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG;
+    op_code = H5FD_CTL_TEST_OPCODE;
+    flags   = H5FD_CTL_FAIL_IF_UNKNOWN_FLAG | H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG;
 
     /* H5FDctl call should succeed normally */
     if (run_ctl_test(op_code, flags, CTL_OPC_KNOWN_TERMINAL, fapl_id) < 0)
@@ -3823,7 +3828,7 @@ test_ctl(void)
     TESTING_2("unknown op code to terminal VFD (with fail on unknown flag)");
 
     op_code = H5FD_CTL_OPC_RESERVED;
-    flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG;
+    flags   = H5FD_CTL_FAIL_IF_UNKNOWN_FLAG;
 
     /* H5FDctl call should fail due to 'fail if unknown' flag being specified */
     if (run_ctl_test(op_code, flags, CTL_OPC_UNKNOWN, fapl_id) < 0)
@@ -3834,7 +3839,7 @@ test_ctl(void)
     TESTING_2("unknown op code to terminal VFD (without fail on unknown flag/route to terminal VFD)");
 
     op_code = H5FD_CTL_OPC_RESERVED;
-    flags   = H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG;
+    flags   = H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG;
 
     /* H5FDctl call should silently ignore unknown op code and succeed */
     if (run_ctl_test(op_code, flags, CTL_OPC_UNKNOWN, fapl_id) < 0)
@@ -3845,7 +3850,7 @@ test_ctl(void)
     TESTING_2("unknown op code to terminal VFD (with fail on unknown flag/route to terminal VFD)");
 
     op_code = H5FD_CTL_OPC_RESERVED;
-    flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG | H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG;
+    flags   = H5FD_CTL_FAIL_IF_UNKNOWN_FLAG | H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG;
 
     /* H5FDctl call should fail due to 'fail if unknown' flag being specified */
     if (run_ctl_test(op_code, flags, CTL_OPC_UNKNOWN, fapl_id) < 0)
@@ -3876,7 +3881,7 @@ test_ctl(void)
     TESTING_2("known op code through passthrough VFD to terminal VFD (without fail on unknown flag/no "
               "routing flag)");
 
-    op_code = H5FD_CTL__TEST_OPCODE;
+    op_code = H5FD_CTL_TEST_OPCODE;
     flags   = 0;
 
     /*
@@ -3892,8 +3897,8 @@ test_ctl(void)
     TESTING_2(
         "known op code through passthrough VFD to terminal VFD (with fail on unknown flag/no routing flag)");
 
-    op_code = H5FD_CTL__TEST_OPCODE;
-    flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG;
+    op_code = H5FD_CTL_TEST_OPCODE;
+    flags   = H5FD_CTL_FAIL_IF_UNKNOWN_FLAG;
 
     /*
      * H5FDctl call should fail since op code is unknown to
@@ -3909,8 +3914,8 @@ test_ctl(void)
     TESTING_2("known op code through passthrough VFD to terminal VFD (without fail on unknown flag/route to "
               "terminal VFD)");
 
-    op_code = H5FD_CTL__TEST_OPCODE;
-    flags   = H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG;
+    op_code = H5FD_CTL_TEST_OPCODE;
+    flags   = H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG;
 
     /*
      * H5Dctl call should succeed since the passthrough VFD
@@ -3925,8 +3930,8 @@ test_ctl(void)
     TESTING_2("known op code through passthrough VFD to terminal VFD (with fail on unknown flag/route to "
               "terminal VFD)");
 
-    op_code = H5FD_CTL__TEST_OPCODE;
-    flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG | H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG;
+    op_code = H5FD_CTL_TEST_OPCODE;
+    flags   = H5FD_CTL_FAIL_IF_UNKNOWN_FLAG | H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG;
 
     /*
      * H5Dctl call should succeed since the passthrough VFD
@@ -3956,7 +3961,7 @@ test_ctl(void)
     TESTING_2("unknown op code to passthrough VFD (with fail on unknown flag)");
 
     op_code = H5FD_CTL_OPC_RESERVED;
-    flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG;
+    flags   = H5FD_CTL_FAIL_IF_UNKNOWN_FLAG;
 
     /*
      * H5FDctl call should fail since op code is unknown to
@@ -3971,7 +3976,7 @@ test_ctl(void)
     TESTING_2("unknown op code to passthrough VFD (without fail on unknown flag/route to terminal VFD)");
 
     op_code = H5FD_CTL_OPC_RESERVED;
-    flags   = H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG;
+    flags   = H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG;
 
     /*
      * H5Dctl call should succeed since the passthrough VFD
@@ -3989,7 +3994,7 @@ test_ctl(void)
     TESTING_2("unknown op code to passthrough VFD (with fail on unknown flag/route to terminal VFD)");
 
     op_code = H5FD_CTL_OPC_RESERVED;
-    flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG | H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG;
+    flags   = H5FD_CTL_FAIL_IF_UNKNOWN_FLAG | H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG;
 
     /*
      * H5Dctl call should fail since the passthrough VFD

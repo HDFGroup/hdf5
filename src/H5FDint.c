@@ -34,6 +34,7 @@
 #include "H5Eprivate.h"  /* Error handling                           */
 #include "H5Fprivate.h"  /* File access                              */
 #include "H5FDpkg.h"     /* File Drivers                             */
+#include "H5FLprivate.h" /* Free Lists                               */
 #include "H5Iprivate.h"  /* IDs                                      */
 #include "H5PLprivate.h" /* Plugins                                  */
 
@@ -41,9 +42,50 @@
 /* Local Macros */
 /****************/
 
+/* Length of sequence lists requested from dataspace selections */
+#define H5FD_SEQ_LIST_LEN 128
+
+/* Length of stack allocated arrays for building vector I/O operations.
+ * Corresponds to the number of contiguous blocks in a selection I/O operation.
+ * If more space is needed dynamic allocation will be used instead. */
+#define H5FD_LOCAL_VECTOR_LEN 8
+
+/* Length of stack allocated arrays for dataspace IDs/structs for selection I/O
+ * operations. Corresponds to the number of file selection/memory selection
+ * pairs (along with addresses, etc.) in a selection I/O operation. If more
+ * space is needed dynamic allocation will be used instead */
+#define H5FD_LOCAL_SEL_ARR_LEN 8
+
 /******************/
 /* Local Typedefs */
 /******************/
+
+/*************************************************************************
+ *
+ * H5FD_vsrt_tmp_t
+ *
+ * Structure used to store vector I/O request addresses and the associated
+ * indexes in the addrs[] array for the purpose of determine the sorted
+ * order.
+ *
+ * This is done by allocating an array of H5FD_vsrt_tmp_t of length
+ * count, loading it with the contents of the addrs[] array and the
+ * associated indices, and then sorting it.
+ *
+ * This sorted array of H5FD_vsrt_tmp_t is then used to populate sorted
+ * versions of the types[], addrs[], sizes[] and bufs[] vectors.
+ *
+ * addr:        haddr_t containing the value of addrs[i],
+ *
+ * index:       integer containing the value of i used to obtain the
+ *              value of the addr field from the addrs[] vector.
+ *
+ *************************************************************************/
+
+typedef struct H5FD_vsrt_tmp_t {
+    haddr_t addr;
+    size_t  index;
+} H5FD_vsrt_tmp_t;
 
 /* Information needed for iterating over the registered VFD hid_t IDs.
  * The name or value of the new VFD that is being registered is stored

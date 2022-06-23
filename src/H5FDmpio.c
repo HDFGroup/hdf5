@@ -95,41 +95,46 @@ static herr_t  H5FD__mpio_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, c
 
 /* The MPIO file driver information */
 static const H5FD_class_t H5FD_mpio_g = {
-    H5_VFD_MPIO,           /* value                 */
-    "mpio",                /* name                  */
-    HADDR_MAX,             /* maxaddr               */
-    H5F_CLOSE_SEMI,        /* fc_degree             */
-    H5FD__mpio_term,       /* terminate             */
-    NULL,                  /* sb_size               */
-    NULL,                  /* sb_encode             */
-    NULL,                  /* sb_decode             */
-    0,                     /* fapl_size             */
-    NULL,                  /* fapl_get              */
-    NULL,                  /* fapl_copy             */
-    NULL,                  /* fapl_free             */
-    0,                     /* dxpl_size             */
-    NULL,                  /* dxpl_copy             */
-    NULL,                  /* dxpl_free             */
-    H5FD__mpio_open,       /* open                  */
-    H5FD__mpio_close,      /* close                 */
-    NULL,                  /* cmp                   */
-    H5FD__mpio_query,      /* query                 */
-    NULL,                  /* get_type_map          */
-    NULL,                  /* alloc                 */
-    NULL,                  /* free                  */
-    H5FD__mpio_get_eoa,    /* get_eoa               */
-    H5FD__mpio_set_eoa,    /* set_eoa               */
-    H5FD__mpio_get_eof,    /* get_eof               */
-    H5FD__mpio_get_handle, /* get_handle            */
-    H5FD__mpio_read,       /* read                  */
-    H5FD__mpio_write,      /* write                 */
-    H5FD__mpio_flush,      /* flush                 */
-    H5FD__mpio_truncate,   /* truncate              */
-    NULL,                  /* lock                  */
-    NULL,                  /* unlock                */
-    H5FD__mpio_delete,     /* del                   */
-    H5FD__mpio_ctl,        /* ctl                   */
-    H5FD_FLMAP_DICHOTOMY   /* fl_map                */
+    H5FD_CLASS_VERSION,      /* struct version       */
+    H5_VFD_MPIO,             /* value                 */
+    "mpio",                  /* name                  */
+    HADDR_MAX,               /* maxaddr               */
+    H5F_CLOSE_SEMI,          /* fc_degree             */
+    H5FD__mpio_term,         /* terminate             */
+    NULL,                    /* sb_size               */
+    NULL,                    /* sb_encode             */
+    NULL,                    /* sb_decode             */
+    0,                       /* fapl_size             */
+    NULL,                    /* fapl_get              */
+    NULL,                    /* fapl_copy             */
+    NULL,                    /* fapl_free             */
+    0,                       /* dxpl_size             */
+    NULL,                    /* dxpl_copy             */
+    NULL,                    /* dxpl_free             */
+    H5FD__mpio_open,         /* open                  */
+    H5FD__mpio_close,        /* close                 */
+    NULL,                    /* cmp                   */
+    H5FD__mpio_query,        /* query                 */
+    NULL,                    /* get_type_map          */
+    NULL,                    /* alloc                 */
+    NULL,                    /* free                  */
+    H5FD__mpio_get_eoa,      /* get_eoa               */
+    H5FD__mpio_set_eoa,      /* set_eoa               */
+    H5FD__mpio_get_eof,      /* get_eof               */
+    H5FD__mpio_get_handle,   /* get_handle            */
+    H5FD__mpio_read,         /* read                  */
+    H5FD__mpio_write,        /* write                 */
+    H5FD__mpio_read_vector,  /* read_vector           */
+    H5FD__mpio_write_vector, /* write_vector          */
+    NULL,                    /* read_selection        */
+    NULL,                    /* write_selection       */
+    H5FD__mpio_flush,        /* flush                 */
+    H5FD__mpio_truncate,     /* truncate              */
+    NULL,                    /* lock                  */
+    NULL,                    /* unlock                */
+    H5FD__mpio_delete,       /* del                   */
+    H5FD__mpio_ctl,          /* ctl                   */
+    H5FD_FLMAP_DICHOTOMY     /* fl_map                */
 };
 
 #ifdef H5FDmpio_DEBUG
@@ -1194,7 +1199,7 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
     MPI_Status   mpi_stat;            /* Status from I/O operation */
     MPI_Datatype buf_type = MPI_BYTE; /* MPI description of the selection in memory */
     int          size_i;              /* Integer copy of 'size' to read */
-#if MPI_VERSION >= 3
+#if H5_CHECK_MPI_VERSION(3, 0)
     MPI_Count bytes_read = 0; /* Number of bytes read in */
     MPI_Count type_size;      /* MPI datatype used for I/O's size */
     MPI_Count io_size;        /* Actual number of bytes requested */
@@ -1365,7 +1370,7 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
     /* Only retrieve bytes read if this rank _actually_ participated in I/O */
     if (!rank0_bcast || (rank0_bcast && file->mpi_rank == 0)) {
         /* How many bytes were actually read? */
-#if MPI_VERSION >= 3
+#if H5_CHECK_MPI_VERSION(3, 0)
         if (MPI_SUCCESS != (mpi_code = MPI_Get_elements_x(&mpi_stat, buf_type, &bytes_read))) {
 #else
         if (MPI_SUCCESS != (mpi_code = MPI_Get_elements(&mpi_stat, MPI_BYTE, &bytes_read))) {
@@ -1390,7 +1395,7 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
      *          of the data.  (QAK - 2019/1/2)
      */
     if (rank0_bcast)
-#if MPI_VERSION >= 3
+#if H5_CHECK_MPI_VERSION(3, 0)
         if (MPI_SUCCESS != MPI_Bcast(&bytes_read, 1, MPI_COUNT, 0, file->comm))
 #else
         if (MPI_SUCCESS != MPI_Bcast(&bytes_read, 1, MPI_INT, 0, file->comm))
@@ -1398,7 +1403,7 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
             HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", 0)
 
             /* Get the type's size */
-#if MPI_VERSION >= 3
+#if H5_CHECK_MPI_VERSION(3, 0)
     if (MPI_SUCCESS != (mpi_code = MPI_Type_size_x(buf_type, &type_size)))
 #else
     if (MPI_SUCCESS != (mpi_code = MPI_Type_size(buf_type, &type_size)))
@@ -1415,7 +1420,7 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_r_flag)
         HDfprintf(stderr, "%s: (%d) mpi_off = %ld  bytes_read = %lld  type = %s\n", __func__, file->mpi_rank,
-                  (long)mpi_off, bytes_read, H5FD__mem_t_to_str(type));
+                  (long)mpi_off, (long long)bytes_read, H5FD__mem_t_to_str(type));
 #endif
 
     /*
@@ -1465,7 +1470,7 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
     MPI_Offset   mpi_off;
     MPI_Status   mpi_stat;            /* Status from I/O operation */
     MPI_Datatype buf_type = MPI_BYTE; /* MPI description of the selection in memory */
-#if MPI_VERSION >= 3
+#if H5_CHECK_MPI_VERSION(3, 0)
     MPI_Count bytes_written;
     MPI_Count type_size; /* MPI datatype used for I/O's size */
     MPI_Count io_size;   /* Actual number of bytes requested */
@@ -1611,7 +1616,7 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
     } /* end else */
 
     /* How many bytes were actually written? */
-#if MPI_VERSION >= 3
+#if H5_CHECK_MPI_VERSION(3, 0)
     if (MPI_SUCCESS != (mpi_code = MPI_Get_elements_x(&mpi_stat, buf_type, &bytes_written)))
 #else
     if (MPI_SUCCESS != (mpi_code = MPI_Get_elements(&mpi_stat, MPI_BYTE, &bytes_written)))
@@ -1619,7 +1624,7 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
         HMPI_GOTO_ERROR(FAIL, "MPI_Get_elements failed", mpi_code)
 
         /* Get the type's size */
-#if MPI_VERSION >= 3
+#if H5_CHECK_MPI_VERSION(3, 0)
     if (MPI_SUCCESS != (mpi_code = MPI_Type_size_x(buf_type, &type_size)))
 #else
     if (MPI_SUCCESS != (mpi_code = MPI_Type_size(buf_type, &type_size)))
@@ -1636,7 +1641,7 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_w_flag)
         HDfprintf(stderr, "%s: (%d) mpi_off = %ld  bytes_written = %lld  type = %s\n", __func__,
-                  file->mpi_rank, (long)mpi_off, bytes_written, H5FD__mem_t_to_str(type));
+                  file->mpi_rank, (long)mpi_off, (long long)bytes_written, H5FD__mem_t_to_str(type));
 #endif
 
     /* Each process will keep track of its perceived EOF value locally, and
@@ -1907,9 +1912,10 @@ done:
  *
  *              At present, the supported op codes are:
  *
- *                  H5FD_CTL__GET_MPI_COMMUNICATOR_OPCODE
- *                  H5FD_CTL__GET_MPI_RANK_OPCODE
- *                  H5FD_CTL__GET_MPI_SIZE_OPCODE
+ *                  H5FD_CTL_GET_MPI_COMMUNICATOR_OPCODE
+ *                  H5FD_CTL_GET_MPI_RANK_OPCODE
+ *                  H5FD_CTL_GET_MPI_SIZE_OPCODE
+ *                  H5FD_CTL_GET_TERMINAL_VFD
  *
  *              Note that these opcodes must be supported by all VFDs that
  *              support MPI.
@@ -1917,9 +1923,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  JRM -- 8/3/21
- *
- * Changes:     Added support for H5FD_CTL__GET_TERMINAL_VFD.
- *                                            JRM -- 5/4/22
  *
  *-------------------------------------------------------------------------
  */
@@ -1938,31 +1941,31 @@ H5FD__mpio_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void H5_AT
 
     switch (op_code) {
 
-        case H5FD_CTL__GET_MPI_COMMUNICATOR_OPCODE:
+        case H5FD_CTL_GET_MPI_COMMUNICATOR_OPCODE:
             HDassert(output);
             HDassert(*output);
             **((MPI_Comm **)output) = file->comm;
             break;
 
-        case H5FD_CTL__GET_MPI_RANK_OPCODE:
+        case H5FD_CTL_GET_MPI_RANK_OPCODE:
             HDassert(output);
             HDassert(*output);
             **((int **)output) = file->mpi_rank;
             break;
 
-        case H5FD_CTL__GET_MPI_SIZE_OPCODE:
+        case H5FD_CTL_GET_MPI_SIZE_OPCODE:
             HDassert(output);
             HDassert(*output);
             **((int **)output) = file->mpi_size;
             break;
 
-        case H5FD_CTL__GET_TERMINAL_VFD:
+        case H5FD_CTL_GET_TERMINAL_VFD:
             HDassert(output);
             *output = (void *)(file);
             break;
 
         default: /* unknown op code */
-            if (flags & H5FD_CTL__FAIL_IF_UNKNOWN_FLAG) {
+            if (flags & H5FD_CTL_FAIL_IF_UNKNOWN_FLAG) {
 
                 HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL, "unknown op_code and fail if unknown")
             }

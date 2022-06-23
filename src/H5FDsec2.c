@@ -143,6 +143,7 @@ static herr_t  H5FD__sec2_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, c
                               void **output);
 
 static const H5FD_class_t H5FD_sec2_g = {
+    H5FD_CLASS_VERSION,    /* struct version       */
     H5FD_SEC2_VALUE,       /* value                */
     "sec2",                /* name                 */
     MAXADDR,               /* maxaddr              */
@@ -171,6 +172,10 @@ static const H5FD_class_t H5FD_sec2_g = {
     H5FD__sec2_get_handle, /* get_handle           */
     H5FD__sec2_read,       /* read                 */
     H5FD__sec2_write,      /* write                */
+    NULL,                  /* read_vector          */
+    NULL,                  /* write_vector         */
+    NULL,                  /* read_selection       */
+    NULL,                  /* write_selection      */
     NULL,                  /* flush                */
     H5FD__sec2_truncate,   /* truncate             */
     H5FD__sec2_lock,       /* lock                 */
@@ -911,7 +916,7 @@ H5FD__sec2_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR
         BOOL  bError;           /* Boolean error flag */
 
         /* Windows uses this odd QuadPart union for 32/64-bit portability */
-        li.QuadPart = (__int64)file->eoa;
+        li.QuadPart = (LONGLONG)file->eoa;
 
         /* Extend the file to make sure it's large enough.
          *
@@ -1065,13 +1070,10 @@ done:
  *              input and output
  *
  *              At present, the only op code supported is
- *              H5FD_CTL__GET_TERMINAL_VFD, which is used in the
+ *              H5FD_CTL_GET_TERMINAL_VFD, which is used in the
  *              comparison of files under layers of pass through VFDs.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Changes:     Added support for H5FD_CTL__GET_TERMINAL_VFD.
- *                                            JRM -- 5/4/22
  *
  *-------------------------------------------------------------------------
  */
@@ -1089,14 +1091,14 @@ H5FD__sec2_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void H5_AT
 
     switch (op_code) {
 
-        case H5FD_CTL__GET_TERMINAL_VFD:
+        case H5FD_CTL_GET_TERMINAL_VFD:
             HDassert(output);
             *output = (void *)(file);
             break;
 
         /* Unknown op code */
         default:
-            if (flags & H5FD_CTL__FAIL_IF_UNKNOWN_FLAG)
+            if (flags & H5FD_CTL_FAIL_IF_UNKNOWN_FLAG)
                 HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL, "unknown op_code and fail if unknown flag is set")
             break;
     }

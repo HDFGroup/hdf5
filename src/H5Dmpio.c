@@ -3467,8 +3467,9 @@ done:
 static herr_t
 H5D__mpio_redistribute_shared_chunks_int(H5D_filtered_collective_io_info_t *chunk_list,
                                          size_t *num_chunks_assigned_map, hbool_t all_ranks_involved,
-                                         const H5D_io_info_t *io_info, const H5D_chunk_map_t *fm,
-                                         int mpi_rank, int mpi_size)
+                                         const H5D_io_info_t * io_info,
+                                         const H5D_chunk_map_t H5_ATTR_NDEBUG_UNUSED *fm, int mpi_rank,
+                                         int mpi_size)
 {
     MPI_Datatype struct_type;
     MPI_Datatype packed_type;
@@ -3797,11 +3798,12 @@ done:
 static herr_t
 H5D__mpio_share_chunk_modification_data(H5D_filtered_collective_io_info_t *chunk_list,
                                         size_t *chunk_list_num_entries, H5D_io_info_t *io_info,
-                                        const H5D_type_info_t *type_info, int mpi_rank, int mpi_size,
+                                        const H5D_type_info_t *type_info, int mpi_rank,
+                                        int H5_ATTR_NDEBUG_UNUSED           mpi_size,
                                         H5D_filtered_collective_io_info_t **chunk_hash_table,
                                         unsigned char ***chunk_msg_bufs, int *chunk_msg_bufs_len)
 {
-#if MPI_VERSION >= 3
+#if H5_CHECK_MPI_VERSION(3, 0)
     H5D_filtered_collective_io_info_t *chunk_table       = NULL;
     H5S_sel_iter_t *                   mem_iter          = NULL;
     unsigned char **                   msg_send_bufs     = NULL;
@@ -4023,7 +4025,7 @@ H5D__mpio_share_chunk_modification_data(H5D_filtered_collective_io_info_t *chunk
          * post a non-blocking receive to receive it
          */
         if (msg_flag) {
-#if MPI_VERSION >= 3
+#if H5_CHECK_MPI_VERSION(3, 0)
             MPI_Count msg_size = 0;
 
             if (MPI_SUCCESS != (mpi_code = MPI_Get_elements_x(&status, MPI_BYTE, &msg_size)))
@@ -4547,7 +4549,7 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
                                            H5D_filtered_collective_io_info_t *chunk_hash_table,
                                            unsigned char **chunk_msg_bufs, int chunk_msg_bufs_len,
                                            const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
-                                           int mpi_rank, int mpi_size)
+                                           int H5_ATTR_NDEBUG_UNUSED mpi_rank, int mpi_size)
 {
     H5D_fill_buf_info_t fb_info;
     H5D_chunk_info_t *  chunk_info = NULL;
@@ -5768,7 +5770,7 @@ H5D__mpio_collective_filtered_io_type(H5D_filtered_collective_io_info_t *chunk_l
              * offset and base chunk data buffer.
              */
             if (op_type == H5D_IO_OP_WRITE) {
-#if MPI_VERSION >= 3
+#if H5_CHECK_MPI_VERSION(3, 0)
                 if (MPI_SUCCESS != (mpi_code = MPI_Get_address(chunk_list[0].buf, &base_buf)))
                     HMPI_GOTO_ERROR(FAIL, "MPI_Get_address failed", mpi_code)
 #else
@@ -5793,7 +5795,7 @@ H5D__mpio_collective_filtered_io_type(H5D_filtered_collective_io_info_t *chunk_l
                      * data buffer if we haven't already
                      */
                     if (!H5F_addr_defined(base_offset)) {
-#if MPI_VERSION >= 3
+#if H5_CHECK_MPI_VERSION(3, 0)
                         if (MPI_SUCCESS != (mpi_code = MPI_Get_address(chunk_list[i].buf, &base_buf)))
                             HMPI_GOTO_ERROR(FAIL, "MPI_Get_address failed", mpi_code)
 #else
@@ -5830,7 +5832,7 @@ H5D__mpio_collective_filtered_io_type(H5D_filtered_collective_io_info_t *chunk_l
                  * Set the displacement of the chunk entry's chunk data buffer,
                  * relative to the first entry's data buffer
                  */
-#if MPI_VERSION >= 3 && MPI_SUBVERSION >= 1
+#if H5_CHECK_MPI_VERSION(3, 1)
                 if (MPI_SUCCESS != (mpi_code = MPI_Get_address(chunk_list[i].buf, &chunk_buf)))
                     HMPI_GOTO_ERROR(FAIL, "MPI_Get_address failed", mpi_code)
 

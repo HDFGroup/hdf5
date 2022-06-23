@@ -1849,7 +1849,6 @@ H5D__create_chunk_file_map_hyper(H5D_chunk_map_t *fm, const H5D_io_info_t
     /* Iterate through each chunk in the dataset */
     while (sel_points) {
         /* Check for intersection of current chunk and file selection */
-        /* (Casting away const OK - QAK) */
         if (TRUE == H5S_SELECT_INTERSECT_BLOCK(fm->file_space, coords, end)) {
             H5D_chunk_info_t *new_chunk_info; /* chunk information to insert into skip list */
             hsize_t           chunk_points;   /* Number of elements in chunk selection */
@@ -5067,7 +5066,7 @@ H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_fill_info_t *chunk_
             if (MPI_SUCCESS != (mpi_code = MPI_Get_address(partial_chunk_fill_buf, &partial_fill_buf_addr)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Get_address failed", mpi_code)
 
-#if MPI_VERSION >= 3 && MPI_SUBVERSION >= 1
+#if H5_CHECK_MPI_VERSION(3, 1)
             partial_fill_buf_disp = MPI_Aint_diff(partial_fill_buf_addr, fill_buf_addr);
 #else
             partial_fill_buf_disp = partial_fill_buf_addr - fill_buf_addr;
