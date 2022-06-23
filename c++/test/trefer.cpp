@@ -395,7 +395,6 @@ test_reference_obj()
 #define GROUPNAME3 "group3"
 #define DSETNAME   "/dset"
 #define DSETNAME2  "dset2"
-#define NAME_SIZE  16
 
 static void
 test_reference_group()
