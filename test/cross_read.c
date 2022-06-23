@@ -111,7 +111,7 @@ check_data_i(const char *dsetname, hid_t fid)
 
     /* Close/release resources. */
     if (H5Dclose(did) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Failure */
     if (nerrors) {
@@ -185,7 +185,7 @@ check_data_f(const char *dsetname, hid_t fid)
 
     /* Close/release resources. */
     if (H5Dclose(did) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Failure */
     if (nerrors) {
@@ -325,7 +325,7 @@ check_file(char *filename)
     nerrors += check_data_f(DATASETNAME23, fid);
 
     if (H5Fclose(fid))
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     return nerrors;
 
 error:

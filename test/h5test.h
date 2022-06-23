@@ -89,7 +89,10 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g; /* MPI INFO object for IO */
 /*
  * Print the current location on the standard output stream.
  */
-#define AT() HDprintf("   at %s:%d in %s()...\n", __FILE__, __LINE__, __func__);
+#define AT()                                                                                                 \
+    do {                                                                                                     \
+        HDprintf("   at %s:%d in %s()...\n", __FILE__, __LINE__, __func__);                                  \
+    } while (0)
 
 /*
  * The name of the test is printed by saying TESTING("something") which will
@@ -101,66 +104,66 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g; /* MPI INFO object for IO */
  * the H5_FAILED() macro is invoked automatically when an API function fails.
  */
 #define TESTING(WHAT)                                                                                        \
-    {                                                                                                        \
+    do {                                                                                                     \
         HDprintf("Testing %-62s", WHAT);                                                                     \
         HDfflush(stdout);                                                                                    \
-    }
+    } while (0)
 #define TESTING_2(WHAT)                                                                                      \
-    {                                                                                                        \
+    do {                                                                                                     \
         HDprintf("  Testing %-60s", WHAT);                                                                   \
         HDfflush(stdout);                                                                                    \
-    }
+    } while (0)
 #define PASSED()                                                                                             \
     do {                                                                                                     \
         HDputs(" PASSED");                                                                                   \
         HDfflush(stdout);                                                                                    \
     } while (0)
 #define H5_FAILED()                                                                                          \
-    {                                                                                                        \
+    do {                                                                                                     \
         HDputs("*FAILED*");                                                                                  \
         HDfflush(stdout);                                                                                    \
-    }
+    } while (0)
 #define H5_WARNING()                                                                                         \
-    {                                                                                                        \
+    do {                                                                                                     \
         HDputs("*WARNING*");                                                                                 \
         HDfflush(stdout);                                                                                    \
-    }
+    } while (0)
 #define SKIPPED()                                                                                            \
-    {                                                                                                        \
+    do {                                                                                                     \
         HDputs(" -SKIP-");                                                                                   \
         HDfflush(stdout);                                                                                    \
-    }
+    } while (0)
 #define PUTS_ERROR(s)                                                                                        \
-    {                                                                                                        \
+    do {                                                                                                     \
         HDputs(s);                                                                                           \
         AT();                                                                                                \
         goto error;                                                                                          \
-    }
+    } while (0)
 #define TEST_ERROR                                                                                           \
-    {                                                                                                        \
+    do {                                                                                                     \
         H5_FAILED();                                                                                         \
         AT();                                                                                                \
         goto error;                                                                                          \
-    }
+    } while (0)
 #define STACK_ERROR                                                                                          \
-    {                                                                                                        \
+    do {                                                                                                     \
         H5Eprint2(H5E_DEFAULT, stdout);                                                                      \
         goto error;                                                                                          \
-    }
+    } while (0)
 #define FAIL_STACK_ERROR                                                                                     \
-    {                                                                                                        \
+    do {                                                                                                     \
         H5_FAILED();                                                                                         \
         AT();                                                                                                \
         H5Eprint2(H5E_DEFAULT, stdout);                                                                      \
         goto error;                                                                                          \
-    }
+    } while (0)
 #define FAIL_PUTS_ERROR(s)                                                                                   \
-    {                                                                                                        \
+    do {                                                                                                     \
         H5_FAILED();                                                                                         \
         AT();                                                                                                \
         HDputs(s);                                                                                           \
         goto error;                                                                                          \
-    }
+    } while (0)
 
 /* Number of seconds to wait before killing a test (requires alarm(2)) */
 #define H5_ALARM_SEC 1200 /* default is 20 minutes */

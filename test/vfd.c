@@ -162,31 +162,31 @@ test_sec2(void)
 
     /* Check that the VFD feature flags are correct */
     if ((driver_id = H5Pget_driver(fapl_id)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5FDdriver_query(driver_id, &driver_flags) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_AGGREGATE_METADATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_ACCUMULATE_METADATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_DATA_SIEVE))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_AGGREGATE_SMALLDATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_POSIX_COMPAT_HANDLE))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_SUPPORTS_SWMR_IO))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_SUPPORTS_VFD_SWMR))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_DEFAULT_VFD_COMPATIBLE))
-        TEST_ERROR
+        TEST_ERROR;
     /* Check for extra flags not accounted for above */
     if (driver_flags !=
         (H5FD_FEAT_AGGREGATE_METADATA | H5FD_FEAT_ACCUMULATE_METADATA | H5FD_FEAT_DATA_SIEVE |
          H5FD_FEAT_AGGREGATE_SMALLDATA | H5FD_FEAT_POSIX_COMPAT_HANDLE | H5FD_FEAT_SUPPORTS_SWMR_IO |
          H5FD_FEAT_SUPPORTS_VFD_SWMR | H5FD_FEAT_DEFAULT_VFD_COMPATIBLE))
-        TEST_ERROR
+        TEST_ERROR;
 
     if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
         TEST_ERROR;
@@ -309,28 +309,28 @@ test_core(void)
      * so backing-store related flags will not be returned here.
      */
     if ((driver_id = H5Pget_driver(fapl_id)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5FDdriver_query(driver_id, &driver_flags) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_AGGREGATE_METADATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_ACCUMULATE_METADATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_DATA_SIEVE))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_AGGREGATE_SMALLDATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_ALLOW_FILE_IMAGE))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_SUPPORTS_VFD_SWMR))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_CAN_USE_FILE_IMAGE_CALLBACKS))
-        TEST_ERROR
+        TEST_ERROR;
     /* Check for extra flags not accounted for above */
     if (driver_flags != (H5FD_FEAT_AGGREGATE_METADATA | H5FD_FEAT_ACCUMULATE_METADATA | H5FD_FEAT_DATA_SIEVE |
                          H5FD_FEAT_AGGREGATE_SMALLDATA | H5FD_FEAT_ALLOW_FILE_IMAGE |
                          H5FD_FEAT_SUPPORTS_VFD_SWMR | H5FD_FEAT_CAN_USE_FILE_IMAGE_CALLBACKS))
-        TEST_ERROR
+        TEST_ERROR;
 
     if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
         TEST_ERROR;
@@ -379,7 +379,7 @@ test_core(void)
      * they are correct.
      */
     if (H5Pget_fapl_core(fapl_id_out, &increment, &backing_store) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (increment != (size_t)CORE_INCREMENT)
         FAIL_PUTS_ERROR("incorrect increment from file fapl");
     if (backing_store != TRUE)
@@ -904,7 +904,7 @@ test_family_opens(char *fname, hid_t fa_pl)
     }
     H5E_END_TRY;
     if (file >= 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Case 2: reopen file with correct name template but default property list */
     H5E_BEGIN_TRY
@@ -913,7 +913,7 @@ test_family_opens(char *fname, hid_t fa_pl)
     }
     H5E_END_TRY;
     if (file >= 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Case 3: reopen file with wrong member size */
     if (H5Pset_fapl_family(fa_pl, (hsize_t)128, H5P_DEFAULT) < 0)
@@ -925,7 +925,7 @@ test_family_opens(char *fname, hid_t fa_pl)
     }
     H5E_END_TRY;
     if (file >= 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Case 4: reopen file with wrong name template */
     HDstrcpy(wrong_name, fname);
@@ -944,7 +944,7 @@ test_family_opens(char *fname, hid_t fa_pl)
     }
     H5E_END_TRY;
     if (file >= 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     return 0;
 
@@ -1000,21 +1000,21 @@ test_family(void)
 
     /* Check that the VFD feature flags are correct */
     if ((driver_id = H5Pget_driver(fapl)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5FDdriver_query(driver_id, &driver_flags) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_AGGREGATE_METADATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_ACCUMULATE_METADATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_DATA_SIEVE))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_AGGREGATE_SMALLDATA))
-        TEST_ERROR
+        TEST_ERROR;
     /* Check for extra flags not accounted for above */
     if (driver_flags != (H5FD_FEAT_AGGREGATE_METADATA | H5FD_FEAT_ACCUMULATE_METADATA | H5FD_FEAT_DATA_SIEVE |
                          H5FD_FEAT_AGGREGATE_SMALLDATA))
-        TEST_ERROR
+        TEST_ERROR;
 
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR;
@@ -1489,19 +1489,19 @@ test_multi(void)
     memb_map[H5FD_MEM_BTREE] = H5FD_MEM_BTREE;
     memb_map[H5FD_MEM_GHEAP] = H5FD_MEM_GHEAP;
 
-    HDsprintf(sv[H5FD_MEM_SUPER], "%%s-%c.h5", 's');
+    HDsnprintf(sv[H5FD_MEM_SUPER], 32, "%%s-%c.h5", 's');
     memb_name[H5FD_MEM_SUPER] = sv[H5FD_MEM_SUPER];
     memb_addr[H5FD_MEM_SUPER] = 0;
 
-    HDsprintf(sv[H5FD_MEM_BTREE], "%%s-%c.h5", 'b');
+    HDsnprintf(sv[H5FD_MEM_BTREE], 32, "%%s-%c.h5", 'b');
     memb_name[H5FD_MEM_BTREE] = sv[H5FD_MEM_BTREE];
     memb_addr[H5FD_MEM_BTREE] = HADDR_MAX / 4;
 
-    HDsprintf(sv[H5FD_MEM_DRAW], "%%s-%c.h5", 'r');
+    HDsnprintf(sv[H5FD_MEM_DRAW], 32, "%%s-%c.h5", 'r');
     memb_name[H5FD_MEM_DRAW] = sv[H5FD_MEM_DRAW];
     memb_addr[H5FD_MEM_DRAW] = HADDR_MAX / 2;
 
-    HDsprintf(sv[H5FD_MEM_GHEAP], "%%s-%c.h5", 'g');
+    HDsnprintf(sv[H5FD_MEM_GHEAP], 32, "%%s-%c.h5", 'g');
     memb_name[H5FD_MEM_GHEAP] = sv[H5FD_MEM_GHEAP];
     memb_addr[H5FD_MEM_GHEAP] = (HADDR_MAX / 4) * 3;
 
@@ -1511,21 +1511,21 @@ test_multi(void)
 
     /* Check that the VFD feature flags are correct */
     if ((driver_id = H5Pget_driver(fapl)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5FDdriver_query(driver_id, &driver_flags) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_DATA_SIEVE))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_AGGREGATE_SMALLDATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_USE_ALLOC_SIZE))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_PAGED_AGGR))
-        TEST_ERROR
+        TEST_ERROR;
     /* Check for extra flags not accounted for above */
     if (driver_flags != (H5FD_FEAT_DATA_SIEVE | H5FD_FEAT_AGGREGATE_SMALLDATA | H5FD_FEAT_USE_ALLOC_SIZE |
                          H5FD_FEAT_PAGED_AGGR))
-        TEST_ERROR
+        TEST_ERROR;
 
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR;
@@ -1612,7 +1612,7 @@ test_multi(void)
 
     /* Create and write attribute for the root group. */
     if ((root = H5Gopen2(file, "/", H5P_DEFAULT)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Attribute string. */
     if ((atype = H5Tcopy(H5T_C_S1)) < 0)
@@ -1738,12 +1738,12 @@ test_multi_compat(void)
     memb_map[H5FD_MEM_DRAW] = H5FD_MEM_DRAW;
 
     memb_fapl[H5FD_MEM_SUPER] = H5P_DEFAULT;
-    HDsprintf(sv[H5FD_MEM_SUPER], "%%s-%c.h5", 's');
+    HDsnprintf(sv[H5FD_MEM_SUPER], 32, "%%s-%c.h5", 's');
     memb_name[H5FD_MEM_SUPER] = sv[H5FD_MEM_SUPER];
     memb_addr[H5FD_MEM_SUPER] = 0;
 
     memb_fapl[H5FD_MEM_DRAW] = H5P_DEFAULT;
-    HDsprintf(sv[H5FD_MEM_DRAW], "%%s-%c.h5", 'r');
+    HDsnprintf(sv[H5FD_MEM_DRAW], 32, "%%s-%c.h5", 'r');
     memb_name[H5FD_MEM_DRAW] = sv[H5FD_MEM_DRAW];
     memb_addr[H5FD_MEM_DRAW] = HADDR_MAX / 2;
 
@@ -1755,12 +1755,12 @@ test_multi_compat(void)
     /* Make copy for the data file in the build directory, to protect the
      * original file in the source directory
      */
-    HDsprintf(filename_s, "%s-%c.h5", MULTI_COMPAT_BASENAME, 's');
-    HDsprintf(newname_s, "%s-%c.h5", FILENAME[9], 's');
+    HDsnprintf(filename_s, sizeof(filename_s), "%s-%c.h5", MULTI_COMPAT_BASENAME, 's');
+    HDsnprintf(newname_s, sizeof(newname_s), "%s-%c.h5", FILENAME[9], 's');
     h5_make_local_copy(filename_s, newname_s);
 
-    HDsprintf(filename_r, "%s-%c.h5", MULTI_COMPAT_BASENAME, 'r');
-    HDsprintf(newname_r, "%s-%c.h5", FILENAME[9], 'r');
+    HDsnprintf(filename_r, sizeof(filename_r), "%s-%c.h5", MULTI_COMPAT_BASENAME, 'r');
+    HDsnprintf(newname_r, sizeof(newname_r), "%s-%c.h5", FILENAME[9], 'r');
     h5_make_local_copy(filename_r, newname_r);
 
     /* Reopen the file for read only.  Verify 1.8 library can open file
@@ -1917,28 +1917,28 @@ test_log(void)
 
     /* Check that the VFD feature flags are correct */
     if ((driver_id = H5Pget_driver(fapl)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5FDdriver_query(driver_id, &driver_flags) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_AGGREGATE_METADATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_ACCUMULATE_METADATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_DATA_SIEVE))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_AGGREGATE_SMALLDATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_POSIX_COMPAT_HANDLE))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_SUPPORTS_SWMR_IO))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_DEFAULT_VFD_COMPATIBLE))
-        TEST_ERROR
+        TEST_ERROR;
     /* Check for extra flags not accounted for above */
     if (driver_flags != (H5FD_FEAT_AGGREGATE_METADATA | H5FD_FEAT_ACCUMULATE_METADATA | H5FD_FEAT_DATA_SIEVE |
                          H5FD_FEAT_AGGREGATE_SMALLDATA | H5FD_FEAT_POSIX_COMPAT_HANDLE |
                          H5FD_FEAT_SUPPORTS_SWMR_IO | H5FD_FEAT_DEFAULT_VFD_COMPATIBLE))
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Create the test file */
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
@@ -2030,26 +2030,26 @@ test_stdio(void)
 
     /* Check that the VFD feature flags are correct */
     if ((driver_id = H5Pget_driver(fapl)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5FDdriver_query(driver_id, &driver_flags) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_AGGREGATE_METADATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_ACCUMULATE_METADATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_DATA_SIEVE))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_SUPPORTS_VFD_SWMR))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_AGGREGATE_SMALLDATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_DEFAULT_VFD_COMPATIBLE))
-        TEST_ERROR
+        TEST_ERROR;
     /* Check for extra flags not accounted for above */
     if (driver_flags !=
         (H5FD_FEAT_AGGREGATE_METADATA | H5FD_FEAT_ACCUMULATE_METADATA | H5FD_FEAT_DATA_SIEVE |
          H5FD_FEAT_SUPPORTS_VFD_SWMR | H5FD_FEAT_AGGREGATE_SMALLDATA | H5FD_FEAT_DEFAULT_VFD_COMPATIBLE))
-        TEST_ERROR
+        TEST_ERROR;
 
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR;
@@ -2151,31 +2151,31 @@ test_windows(void)
 
     /* Check that the VFD feature flags are correct */
     if ((driver_id = H5Pget_driver(fapl)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5FDdriver_query(driver_id, &driver_flags) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_AGGREGATE_METADATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_ACCUMULATE_METADATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_DATA_SIEVE))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_AGGREGATE_SMALLDATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_POSIX_COMPAT_HANDLE))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_SUPPORTS_SWMR_IO))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_SUPPORTS_VFD_SWMR))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_DEFAULT_VFD_COMPATIBLE))
-        TEST_ERROR
+        TEST_ERROR;
     /* Check for extra flags not accounted for above */
     if (driver_flags !=
         (H5FD_FEAT_AGGREGATE_METADATA | H5FD_FEAT_ACCUMULATE_METADATA | H5FD_FEAT_DATA_SIEVE |
          H5FD_FEAT_AGGREGATE_SMALLDATA | H5FD_FEAT_POSIX_COMPAT_HANDLE | H5FD_FEAT_SUPPORTS_SWMR_IO |
          H5FD_FEAT_SUPPORTS_VFD_SWMR | H5FD_FEAT_DEFAULT_VFD_COMPATIBLE))
-        TEST_ERROR
+        TEST_ERROR;
 
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR;
@@ -2308,11 +2308,11 @@ test_ros3(void)
         TEST_ERROR;
 
     if (!(driver_flags & H5FD_FEAT_DATA_SIEVE))
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Check for extra flags not accounted for above */
     if (driver_flags != (H5FD_FEAT_DATA_SIEVE))
-        TEST_ERROR
+        TEST_ERROR;
 
     PASSED();
     return 0;
@@ -2633,7 +2633,7 @@ driver_is_splitter_compatible(hid_t fapl_id)
     }
 
     if (H5Pclose(split_fapl_id) < 0) {
-        FAIL_PUTS_ERROR("Can't close contained FAPL")
+        FAIL_PUTS_ERROR("Can't close contained FAPL");
     }
     split_fapl_id = H5I_INVALID_HID;
 
@@ -3431,6 +3431,60 @@ error:
 
 #undef SPLITTER_TEST_FAULT
 
+/*****************************************************************************
+ *
+ * Function    setup_rand()
+ *
+ * Purpose:    Use gettimeofday() to obtain a seed for rand(), print the
+ *             seed to stdout, and then pass it to srand().
+ *
+ *             This is a version of the same routine in
+ *             testpar/t_cache.c modified for use in serial tests.
+ *
+ * Return:     void.
+ *
+ * Programmer: JRM -- 6/20/20
+ *
+ *****************************************************************************/
+static void
+setup_rand(void)
+{
+    hbool_t        use_predefined_seed = FALSE;
+    unsigned       predefined_seed     = 18669;
+    unsigned       seed;
+    struct timeval tv;
+
+    if (use_predefined_seed) {
+
+        seed = predefined_seed;
+
+        HDfprintf(stdout, "\n%s: predefined_seed = %d.\n\n", __func__, seed);
+        HDfflush(stdout);
+
+        HDsrand(seed);
+    }
+    else {
+
+        if (HDgettimeofday(&tv, NULL) != 0) {
+
+            HDfprintf(stdout, "\n%s: gettimeofday() failed -- srand() not called.\n\n", __func__);
+            HDfflush(stdout);
+        }
+        else {
+
+            seed = (unsigned)tv.tv_usec;
+
+            HDfprintf(stdout, "\n%s: seed = %d.\n\n", __func__, seed);
+            HDfflush(stdout);
+
+            HDsrand(seed);
+        }
+    }
+
+    return;
+
+} /* setup_rand() */
+
 /*
  * Callback implementations for ctl feature testing VFD
  */
@@ -3657,7 +3711,7 @@ test_ctl(void)
     if (H5Pset_driver(fapl_id, driver_id, NULL) < 0)
         PUTS_ERROR("couldn't set testing VFD on FAPL");
 
-    TESTING_2("known op code to terminal VFD (without fail on unknown flag)")
+    TESTING_2("known op code to terminal VFD (without fail on unknown flag)");
 
     op_code = H5FD_CTL__TEST_OPCODE;
     flags   = 0;
@@ -3668,7 +3722,7 @@ test_ctl(void)
 
     PASSED();
 
-    TESTING_2("known op code to terminal VFD (with fail on unknown flag)")
+    TESTING_2("known op code to terminal VFD (with fail on unknown flag)");
 
     op_code = H5FD_CTL__TEST_OPCODE;
     flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG;
@@ -3679,7 +3733,7 @@ test_ctl(void)
 
     PASSED();
 
-    TESTING_2("known op code to terminal VFD (without fail on unknown flag/route to terminal VFD)")
+    TESTING_2("known op code to terminal VFD (without fail on unknown flag/route to terminal VFD)");
 
     op_code = H5FD_CTL__TEST_OPCODE;
     flags   = H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG;
@@ -3690,7 +3744,7 @@ test_ctl(void)
 
     PASSED();
 
-    TESTING_2("known op code to terminal VFD (with fail on unknown flag/route to terminal VFD)")
+    TESTING_2("known op code to terminal VFD (with fail on unknown flag/route to terminal VFD)");
 
     op_code = H5FD_CTL__TEST_OPCODE;
     flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG | H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG;
@@ -3701,7 +3755,7 @@ test_ctl(void)
 
     PASSED();
 
-    TESTING_2("unknown op code to terminal VFD (without fail on unknown flag)")
+    TESTING_2("unknown op code to terminal VFD (without fail on unknown flag)");
 
     op_code = H5FD_CTL_OPC_RESERVED;
     flags   = 0;
@@ -3712,7 +3766,7 @@ test_ctl(void)
 
     PASSED();
 
-    TESTING_2("unknown op code to terminal VFD (with fail on unknown flag)")
+    TESTING_2("unknown op code to terminal VFD (with fail on unknown flag)");
 
     op_code = H5FD_CTL_OPC_RESERVED;
     flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG;
@@ -3723,7 +3777,7 @@ test_ctl(void)
 
     PASSED();
 
-    TESTING_2("unknown op code to terminal VFD (without fail on unknown flag/route to terminal VFD)")
+    TESTING_2("unknown op code to terminal VFD (without fail on unknown flag/route to terminal VFD)");
 
     op_code = H5FD_CTL_OPC_RESERVED;
     flags   = H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG;
@@ -3734,7 +3788,7 @@ test_ctl(void)
 
     PASSED();
 
-    TESTING_2("unknown op code to terminal VFD (with fail on unknown flag/route to terminal VFD)")
+    TESTING_2("unknown op code to terminal VFD (with fail on unknown flag/route to terminal VFD)");
 
     op_code = H5FD_CTL_OPC_RESERVED;
     flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG | H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG;
@@ -3766,7 +3820,7 @@ test_ctl(void)
         PUTS_ERROR("couldn't set splitter VFD on FAPL");
 
     TESTING_2("known op code through passthrough VFD to terminal VFD (without fail on unknown flag/no "
-              "routing flag)")
+              "routing flag)");
 
     op_code = H5FD_CTL__TEST_OPCODE;
     flags   = 0;
@@ -3782,7 +3836,7 @@ test_ctl(void)
     PASSED();
 
     TESTING_2(
-        "known op code through passthrough VFD to terminal VFD (with fail on unknown flag/no routing flag)")
+        "known op code through passthrough VFD to terminal VFD (with fail on unknown flag/no routing flag)");
 
     op_code = H5FD_CTL__TEST_OPCODE;
     flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG;
@@ -3799,7 +3853,7 @@ test_ctl(void)
     PASSED();
 
     TESTING_2("known op code through passthrough VFD to terminal VFD (without fail on unknown flag/route to "
-              "terminal VFD)")
+              "terminal VFD)");
 
     op_code = H5FD_CTL__TEST_OPCODE;
     flags   = H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG;
@@ -3815,7 +3869,7 @@ test_ctl(void)
     PASSED();
 
     TESTING_2("known op code through passthrough VFD to terminal VFD (with fail on unknown flag/route to "
-              "terminal VFD)")
+              "terminal VFD)");
 
     op_code = H5FD_CTL__TEST_OPCODE;
     flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG | H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG;
@@ -3830,7 +3884,7 @@ test_ctl(void)
 
     PASSED();
 
-    TESTING_2("unknown op code to passthrough VFD (without fail on unknown flag)")
+    TESTING_2("unknown op code to passthrough VFD (without fail on unknown flag)");
 
     op_code = H5FD_CTL_OPC_RESERVED;
     flags   = 0;
@@ -3845,7 +3899,7 @@ test_ctl(void)
 
     PASSED();
 
-    TESTING_2("unknown op code to passthrough VFD (with fail on unknown flag)")
+    TESTING_2("unknown op code to passthrough VFD (with fail on unknown flag)");
 
     op_code = H5FD_CTL_OPC_RESERVED;
     flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG;
@@ -3860,7 +3914,7 @@ test_ctl(void)
 
     PASSED();
 
-    TESTING_2("unknown op code to passthrough VFD (without fail on unknown flag/route to terminal VFD)")
+    TESTING_2("unknown op code to passthrough VFD (without fail on unknown flag/route to terminal VFD)");
 
     op_code = H5FD_CTL_OPC_RESERVED;
     flags   = H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG;
@@ -3878,7 +3932,7 @@ test_ctl(void)
 
     PASSED();
 
-    TESTING_2("unknown op code to passthrough VFD (with fail on unknown flag/route to terminal VFD)")
+    TESTING_2("unknown op code to passthrough VFD (with fail on unknown flag/route to terminal VFD)");
 
     op_code = H5FD_CTL_OPC_RESERVED;
     flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG | H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG;
@@ -3896,7 +3950,7 @@ test_ctl(void)
 
     PASSED();
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     HDfree(splitter_config);
 
@@ -3953,6 +4007,8 @@ main(void)
     h5_reset();
 
     HDprintf("Testing basic Virtual File Driver functionality.\n");
+
+    setup_rand();
 
     nerrors += test_sec2() < 0 ? 1 : 0;
     nerrors += test_core() < 0 ? 1 : 0;

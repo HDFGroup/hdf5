@@ -2175,7 +2175,7 @@ closing_on_noflush(bool writer, state_t *s, dsets_state_t *ds, H5F_vfd_swmr_conf
         dbgf(2, "Reader verifies data after writer closes the file (flush of raw data is disabled)\n");
         if (!verify_dsets_operations(s, ds, config, np, true)) {
             HDprintf("verify_dsets_operations() failed\n");
-            TEST_ERROR
+            TEST_ERROR;
         }
 
         if (!close_dsets(ds)) {
@@ -2302,7 +2302,7 @@ main(int argc, char **argv)
     if (!s.flush_raw_data && s.use_np) {
 
         if (!closing_on_noflush(writer, &s, &ds, &config, &np))
-            TEST_ERROR
+            TEST_ERROR;
     }
     else {
 

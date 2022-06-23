@@ -4481,7 +4481,7 @@ check_invalid_tag_application(void)
 
     /* Push API context */
     if (H5CX_push() < 0)
-        TEST_ERROR
+        TEST_ERROR;
     api_ctx_pushed = TRUE;
 
     /* Get internal file pointer*/
@@ -4521,7 +4521,7 @@ check_invalid_tag_application(void)
 
     /* Pop API context */
     if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     api_ctx_pushed = FALSE;
 
     /* Close open objects and file */

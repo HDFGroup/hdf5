@@ -272,7 +272,7 @@ state_init(state_t *s, int argc, char **argv)
 
     if (H5_basename(argv[0], &tfile) < 0) {
         HDprintf("H5_basename failed\n");
-        TEST_ERROR
+        TEST_ERROR;
     }
 
     esnprintf(s->progname, sizeof(s->progname), "%s", tfile);
@@ -1904,13 +1904,13 @@ verify_dset_extent_real(unsigned action, hid_t did, unsigned rows, unsigned cols
 
         case INCR_EXT:
             if (dims[0] != (rows + which) || dims[1] != (cols + which))
-                TEST_ERROR
+                TEST_ERROR;
 
             break;
 
         case DECR_EXT:
             if (dims[0] != (rows - which) || dims[1] != (cols - which))
-                TEST_ERROR
+                TEST_ERROR;
             break;
 
         default:
@@ -2256,7 +2256,7 @@ closing_on_noflush(bool writer, state_t *s, dsets_state_t *ds, H5F_vfd_swmr_conf
         dbgf(2, "Reader verifies data after writer closes the file (flush of raw data is disabled)\n");
         if (!verify_dsets_operations(s, ds, config, np, true)) {
             HDprintf("verify_dsets_operations() failed\n");
-            TEST_ERROR
+            TEST_ERROR;
         }
 
         if (!close_dsets(ds)) {
@@ -2387,7 +2387,7 @@ main(int argc, char **argv)
     if (!s.flush_raw_data && !s.xincrs && !s.ydecrs && s.use_np) {
 
         if (!closing_on_noflush(writer, &s, &ds, &config, &np))
-            TEST_ERROR
+            TEST_ERROR;
     }
     else {
 
