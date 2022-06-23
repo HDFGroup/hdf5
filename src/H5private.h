@@ -557,7 +557,7 @@ typedef struct {
 } H5_timer_t;
 
 /* Returns library bandwidth as a pretty string */
-H5_DLL void H5_bandwidth(char *buf /*out*/, double nbytes, double nseconds);
+H5_DLL void H5_bandwidth(char *buf /*out*/, size_t bufsize, double nbytes, double nseconds);
 
 /* Timer functionality */
 H5_DLL time_t   H5_now(void);
