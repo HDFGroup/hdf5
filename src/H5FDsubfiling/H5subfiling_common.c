@@ -776,6 +776,21 @@ H5_free_subfiling_object_int(subfiling_context_t *sf_context)
 {
     HDassert(sf_context);
 
+#ifdef H5_SUBFILING_DEBUG
+    if (sf_context->sf_logfile) {
+        struct tm *tm = NULL;
+        time_t     cur_time;
+
+        cur_time = time(NULL);
+        tm = localtime(&cur_time);
+
+        H5_subfiling_log(sf_context->sf_context_id, "\n-- LOGGING FINISH - %s", asctime(tm));
+
+        HDfclose(sf_context->sf_logfile);
+        sf_context->sf_logfile = NULL;
+    }
+#endif
+
     sf_context->sf_context_id           = -1;
     sf_context->h5_file_id              = UINT64_MAX;
     sf_context->sf_fid                  = -1;
@@ -833,13 +848,6 @@ H5_free_subfiling_object_int(subfiling_context_t *sf_context)
     if (H5_free_subfiling_topology(sf_context->topology) < 0)
         return FAIL;
     sf_context->topology = NULL;
-
-#ifdef H5_SUBFILING_DEBUG
-    if (sf_context->sf_logfile) {
-        HDfclose(sf_context->sf_logfile);
-        sf_context->sf_logfile = NULL;
-    }
-#endif
 
     return SUCCEED;
 }
@@ -1003,7 +1011,9 @@ H5_open_subfiles(const char *base_filename, uint64_t h5_file_id, ioc_selection_t
 
 #ifdef H5_SUBFILING_DEBUG
     {
-        int mpi_rank;
+        struct tm *tm = NULL;
+        time_t     cur_time;
+        int        mpi_rank;
 
         /* Open debugging logfile */
 
@@ -1015,11 +1025,16 @@ H5_open_subfiles(const char *base_filename, uint64_t h5_file_id, ioc_selection_t
 
         HDsnprintf(sf_context->sf_logfile_name, PATH_MAX, "%s.log.%d", sf_context->h5_filename, mpi_rank);
 
-        if (NULL == (sf_context->sf_logfile = HDfopen(sf_context->sf_logfile_name, "w"))) {
+        if (NULL == (sf_context->sf_logfile = HDfopen(sf_context->sf_logfile_name, "a"))) {
             HDprintf("%s: couldn't open subfiling debug logfile\n", __func__);
             ret_value = FAIL;
             goto done;
         }
+
+        cur_time = time(NULL);
+        tm = localtime(&cur_time);
+
+        H5_subfiling_log(context_id, "-- LOGGING BEGIN - %s", asctime(tm));
     }
 #endif
 
