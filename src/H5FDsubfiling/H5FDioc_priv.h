@@ -50,9 +50,7 @@
 
 /* #define H5FD_IOC_DEBUG */
 /* #define H5FD_IOC_REQUIRE_FLUSH */
-
-/* TODO: conditional compile out stats vars based on this define */
-#define H5FD_IOC__COLLECT_STATS TRUE
+/* #define H5FD_IOC_COLLECT_STATS */
 
 /****************************************************************************
  *
@@ -187,7 +185,7 @@ do {                                                                            
  *
  * Statistics:
  *
- * The following fields are only defined if H5FD_IOC__COLLECT_STATS is TRUE.
+ * The following fields are only defined if H5FD_IOC_COLLECT_STATS is TRUE.
  * They are intended to allow collection of basic statistics on the
  * behaviour of the IOC I/O Queue for purposes of debugging and performance
  * optimization.
@@ -220,12 +218,12 @@ typedef struct ioc_io_queue_entry {
     struct hg_thread_work thread_wk;
 
     /* statistics */
-#if H5FD_IOC__COLLECT_STATS
+#ifdef H5FD_IOC_COLLECT_STATS
 
     uint64_t q_time;
     uint64_t dispatch_time;
 
-#endif /* H5FD_IOC__COLLECT_STATS */
+#endif
 
 } ioc_io_queue_entry_t;
 
@@ -324,7 +322,7 @@ typedef struct ioc_io_queue_entry {
  *
  * Statistics:
  *
- * The following fields are only defined if H5FD_IOC__COLLECT_STATS is TRUE.
+ * The following fields are only defined if H5FD_IOC_COLLECT_STATS is TRUE.
  * They are intended to allow collection of basic statistics on the
  * behaviour of the IOC I/O Queue for purposes of debugging and performance
  * optimization.
@@ -375,7 +373,7 @@ typedef struct ioc_io_queue {
     hg_thread_mutex_t     q_mutex;
 
     /* statistics */
-#if H5FD_IOC__COLLECT_STATS
+#ifdef H5FD_IOC_COLLECT_STATS
     int32_t max_q_len;
     int32_t max_num_pending;
     int32_t max_num_in_progress;
@@ -386,7 +384,7 @@ typedef struct ioc_io_queue {
     int64_t requests_queued;
     int64_t requests_dispatched;
     int64_t requests_completed;
-#endif /* H5FD_IOC__COLLECT_STATS */
+#endif
 
 } ioc_io_queue_t;
 
