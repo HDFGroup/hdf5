@@ -557,7 +557,7 @@ typedef struct {
 } H5_timer_t;
 
 /* Returns library bandwidth as a pretty string */
-H5_DLL void H5_bandwidth(char *buf /*out*/, double nbytes, double nseconds);
+H5_DLL void H5_bandwidth(char *buf /*out*/, size_t bufsize, double nbytes, double nseconds);
 
 /* Timer functionality */
 H5_DLL time_t   H5_now(void);
@@ -1768,6 +1768,15 @@ typedef struct H5_debug_t {
 } H5_debug_t;
 
 #ifdef H5_HAVE_PARALLEL
+
+/*
+ * Check that the MPI library version is at least version
+ * `mpi_version` and subversion `mpi_subversion`
+ */
+#define H5_CHECK_MPI_VERSION(mpi_version, mpi_subversion)                                                    \
+    ((MPI_VERSION > (mpi_version)) ||                                                                        \
+     ((MPI_VERSION == (mpi_version)) && (MPI_SUBVERSION >= (mpi_subversion))))
+
 extern hbool_t H5_coll_api_sanity_check_g;
 #endif /* H5_HAVE_PARALLEL */
 
@@ -2007,6 +2016,14 @@ extern hbool_t H5_libterm_g; /* Is the library being shutdown? */
 #define H5_TERM_GLOBAL (H5_libterm_g)
 
 #endif /* H5_HAVE_THREADSAFE */
+
+/* Extern global to determine if we should use selection I/O if available (this
+ * variable should be removed once selection I/O performs as well as the
+ * previous scalar I/O implementation
+ *
+ * NOTE: Must be exposed via H5_DLLVAR so parallel tests pass on Windows.
+ */
+H5_DLLVAR hbool_t H5_use_selection_io_g;
 
 #ifdef H5_HAVE_CODESTACK
 
@@ -2549,6 +2566,16 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
   #define HDcompile_assert(e)     do { enum { compile_assert__ = 1 / (e) }; } while(0)
   #define HDcompile_assert(e)     do { typedef struct { unsigned int b: (e); } x; } while(0)
 */
+
+/* Private typedefs */
+
+/* Union for const/non-const pointer for use by functions that manipulate
+ * pointers but do not write to their targets or return pointers to const
+ * specified locations.  This helps us avoid compiler warnings. */
+typedef union {
+    void *      vp;
+    const void *cvp;
+} H5_flexible_const_ptr_t;
 
 /* Private functions, not part of the publicly documented API */
 H5_DLL herr_t H5_init_library(void);

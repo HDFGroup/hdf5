@@ -398,10 +398,13 @@ typedef union H5VL_native_file_optional_args_t {
     /* No args */
 
     /* H5VL_NATIVE_FILE_VFD_SWMR_DISABLE_EOT */
+    /* No args */
 
     /* H5VL_NATIVE_FILE_VFD_SWMR_ENABLE_EOT */
+    /* No args */
 
     /* H5VL_NATIVE_FILE_VFD_SWMR_END_TICK */
+    /* No args */
 
 } H5VL_native_file_optional_args_t;
 

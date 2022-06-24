@@ -6991,7 +6991,7 @@ public class H5 implements java.io.Serializable {
     /**
      * H5Oflush causes all buffers associated with an object to be immediately flushed to disk without
      * removing the data from the cache. object_id can be any named object associated with an HDF5 file
-     * ncluding a dataset, a group, or a committed datatype.
+     * including a dataset, a group, or a committed datatype.
      *
      * @param object_id
      *            IN: Identifier of the object to be flushed.

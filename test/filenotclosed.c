@@ -88,51 +88,51 @@ main(void)
 
     /* To exit from the file for SIGABRT signal */
     if (HDsignal(SIGABRT, catch_signal) == SIG_ERR)
-        TEST_ERROR
+        TEST_ERROR;
 
     fapl = h5_fileaccess();
     h5_fixname(FILENAME, fapl, filename, sizeof(filename));
 
     /* Set to latest format */
     if (H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Create the file  */
     if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Create the dcpl and set the chunk size */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     if (H5Pset_chunk(dcpl, 1, chunk_dim) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Create the dataspace */
     if ((sid = H5Screate_simple(1, cur_dim, max_dim)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Create the dataset */
     if ((did = H5Dcreate2(fid, DATASET_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Write to the dataset */
     if (H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Close the dataset */
     if (H5Dclose(did) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Close the dataspace */
     if (H5Sclose(sid) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Close the property lists */
     if (H5Pclose(dcpl) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Pclose(fapl) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* The file is not closed. */
     /* The library will call H5_term_library to shut down the library. */

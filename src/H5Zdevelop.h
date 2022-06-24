@@ -15,8 +15,8 @@
  *      support routines.
  */
 
-#ifndef _H5Zdevelop_H
-#define _H5Zdevelop_H
+#ifndef H5Zdevelop_H
+#define H5Zdevelop_H
 
 /* Include package's public header */
 #include "H5Zpublic.h"
@@ -418,4 +418,4 @@ typedef struct H5Z_class1_t {
 
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
-#endif /* _H5Zdevelop_H */
+#endif /* H5Zdevelop_H */

@@ -160,6 +160,7 @@ static herr_t  H5FD__mirror_unlock(H5FD_t *_file);
 static herr_t H5FD__mirror_verify_reply(H5FD_mirror_t *file);
 
 static const H5FD_class_t H5FD_mirror_g = {
+    H5FD_CLASS_VERSION,     /* struct version       */
     H5FD_MIRROR_VALUE,      /* value                */
     "mirror",               /* name                 */
     MAXADDR,                /* maxaddr              */
@@ -188,6 +189,10 @@ static const H5FD_class_t H5FD_mirror_g = {
     NULL,                   /* get_handle           */
     H5FD__mirror_read,      /* read                 */
     H5FD__mirror_write,     /* write                */
+    NULL,                   /* read_vector          */
+    NULL,                   /* write_vector         */
+    NULL,                   /* read_selection       */
+    NULL,                   /* write_selection      */
     NULL,                   /* flush                */
     H5FD__mirror_truncate,  /* truncate             */
     H5FD__mirror_lock,      /* lock                 */

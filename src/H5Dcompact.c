@@ -63,8 +63,8 @@ typedef struct H5D_compact_iovv_memmanage_ud_t {
 /* Layout operation callbacks */
 static herr_t  H5D__compact_construct(H5F_t *f, H5D_t *dset);
 static hbool_t H5D__compact_is_space_alloc(const H5O_storage_t *storage);
-static herr_t  H5D__compact_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
-                                    hsize_t nelmts, H5S_t *file_space, H5S_t *mem_space, H5D_chunk_map_t *cm);
+static herr_t  H5D__compact_io_init(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
+                                    H5S_t *file_space, H5S_t *mem_space, H5D_chunk_map_t *cm);
 static herr_t  H5D__compact_iovv_memmanage_cb(hsize_t dst_off, hsize_t src_off, size_t len, void *_udata);
 static ssize_t H5D__compact_readvv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *dset_curr_seq,
                                    size_t dset_size_arr[], hsize_t dset_offset_arr[], size_t mem_max_nseq,
@@ -247,7 +247,7 @@ H5D__compact_is_space_alloc(const H5O_storage_t H5_ATTR_UNUSED *storage)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__compact_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t H5_ATTR_UNUSED *type_info,
+H5D__compact_io_init(H5D_io_info_t *io_info, const H5D_type_info_t H5_ATTR_UNUSED *type_info,
                      hsize_t H5_ATTR_UNUSED nelmts, H5S_t H5_ATTR_UNUSED *file_space,
                      H5S_t H5_ATTR_UNUSED *mem_space, H5D_chunk_map_t H5_ATTR_UNUSED *cm)
 {
@@ -285,7 +285,7 @@ H5D__compact_iovv_memmanage_cb(hsize_t dst_off, hsize_t src_off, size_t len, voi
         HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "can't get file handle")
 
     /* Setup operation flags and arguments */
-    op_flags = H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG | H5FD_CTL__FAIL_IF_UNKNOWN_FLAG;
+    op_flags = H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG | H5FD_CTL_FAIL_IF_UNKNOWN_FLAG;
 
     op_args.dstbuf  = udata->dstbuf;
     op_args.dst_off = dst_off;
@@ -294,7 +294,7 @@ H5D__compact_iovv_memmanage_cb(hsize_t dst_off, hsize_t src_off, size_t len, voi
     op_args.len     = len;
 
     /* Make request to file driver */
-    if (H5FD_ctl(file_handle, H5FD_CTL__MEM_COPY, op_flags, &op_args, NULL) < 0)
+    if (H5FD_ctl(file_handle, H5FD_CTL_MEM_COPY, op_flags, &op_args, NULL) < 0)
         HGOTO_ERROR(H5E_IO, H5E_FCNTL, FAIL, "VFD memcpy request failed")
 
 done:

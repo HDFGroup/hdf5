@@ -915,7 +915,7 @@ test_derived_flt(void)
     }
 
     if ((tid1 = H5Topen2(file, "new float type 1", H5P_DEFAULT)) < 0)
-        FAIL_PUTS_ERROR("Can't open datatype")
+        FAIL_PUTS_ERROR("Can't open datatype");
     if (H5Tget_fields(tid1, &spos, &epos, &esize, &mpos, &msize) < 0) {
         H5_FAILED();
         HDprintf("Can't get fields\n");
@@ -1075,7 +1075,7 @@ test_derived_flt(void)
     }
 
     if ((tid2 = H5Topen2(file, "new float type 2", H5P_DEFAULT)) < 0)
-        FAIL_PUTS_ERROR("Can't open datatype")
+        FAIL_PUTS_ERROR("Can't open datatype");
     if (H5Tget_fields(tid2, &spos, &epos, &esize, &mpos, &msize) < 0) {
         H5_FAILED();
         HDprintf("Can't get fields\n");
@@ -1351,7 +1351,7 @@ test_derived_integer(void)
     }
 
     if ((tid1 = H5Topen2(file, "new integer type 1", H5P_DEFAULT)) < 0)
-        FAIL_PUTS_ERROR("Can't open datatype")
+        FAIL_PUTS_ERROR("Can't open datatype");
     if (H5Tget_precision(tid1) != 24) {
         H5_FAILED();
         HDprintf("Can't get precision or wrong precision\n");
@@ -1412,7 +1412,7 @@ test_derived_integer(void)
     }
 
     if ((tid2 = H5Topen2(file, "new integer type 2", H5P_DEFAULT)) < 0)
-        FAIL_PUTS_ERROR("Can't open datatype")
+        FAIL_PUTS_ERROR("Can't open datatype");
     if (H5Tget_precision(tid2) != 48) {
         H5_FAILED();
         HDprintf("Can't get precision or wrong precision\n");
@@ -2462,11 +2462,11 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
                 break;
             case INT_LLONG:
                 HDmemcpy(aligned, saved + j * sizeof(long long), sizeof(long long));
-                HDfprintf(stdout, " %29" H5_PRINTF_LL_WIDTH "d\n", *((long long *)aligned));
+                HDfprintf(stdout, " %29lld\n", *((long long *)aligned));
                 break;
             case INT_ULLONG:
                 HDmemcpy(aligned, saved + j * sizeof(unsigned long long), sizeof(unsigned long long));
-                HDfprintf(stdout, " %29" H5_PRINTF_LL_WIDTH "u\n", *((unsigned long long *)aligned));
+                HDfprintf(stdout, " %29llu\n", *((unsigned long long *)aligned));
                 break;
             case FLT_FLOAT:
             case FLT_DOUBLE:
@@ -2516,11 +2516,11 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
                 break;
             case INT_LLONG:
                 HDmemcpy(aligned, buf + j * sizeof(long long), sizeof(long long));
-                HDfprintf(stdout, " %29" H5_PRINTF_LL_WIDTH "d\n", *((long long *)aligned));
+                HDfprintf(stdout, " %29lld\n", *((long long *)aligned));
                 break;
             case INT_ULLONG:
                 HDmemcpy(aligned, buf + j * sizeof(long long), sizeof(unsigned long long));
-                HDfprintf(stdout, " %29" H5_PRINTF_LL_WIDTH "u\n", *((unsigned long long *)aligned));
+                HDfprintf(stdout, " %29llu\n", *((unsigned long long *)aligned));
                 break;
             case FLT_FLOAT:
             case FLT_DOUBLE:
@@ -2561,10 +2561,10 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
                 HDprintf(" %29lu\n", *((unsigned long *)((void *)hw)));
                 break;
             case INT_LLONG:
-                HDfprintf(stdout, " %29" H5_PRINTF_LL_WIDTH "d\n", *((long long *)((void *)hw)));
+                HDfprintf(stdout, " %29lld\n", *((long long *)((void *)hw)));
                 break;
             case INT_ULLONG:
-                HDfprintf(stdout, " %29" H5_PRINTF_LL_WIDTH "u\n", *((unsigned long long *)((void *)hw)));
+                HDfprintf(stdout, " %29llu\n", *((unsigned long long *)((void *)hw)));
                 break;
             case FLT_FLOAT:
             case FLT_DOUBLE:
@@ -2694,18 +2694,18 @@ my_isnan(dtype_t type, void *val)
     if (FLT_FLOAT == type) {
         float x = 0.0;
         HDmemcpy(&x, val, sizeof(float));
-        retval = (x != x);
+        retval = isnan(x);
     }
     else if (FLT_DOUBLE == type) {
         double x = 0.0;
         HDmemcpy(&x, val, sizeof(double));
-        retval = (x != x);
+        retval = isnan(x);
 #if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
     }
     else if (FLT_LDOUBLE == type) {
         long double x = 0.0L;
         HDmemcpy(&x, val, sizeof(long double));
-        retval = (x != x);
+        retval = isnan(x);
 #endif
     }
     else {
@@ -3668,8 +3668,8 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
     }
 
     /* Allocate and initialize the source buffer through macro INIT_INTEGER if the source is integer,
-     * INIT_FP_NORM if floating-point.  The BUF will be used for the conversion while the SAVED buffer will be
-     * used for the comparison later.
+     * INIT_FP_NORM if floating-point.  The BUF will be used for the conversion while the SAVED buffer
+     * will be used for the comparison later.
      */
     if (src_type == INT_SCHAR) {
         INIT_INTEGER(signed char, SCHAR_MAX, SCHAR_MIN, src_size, dst_size, src_nbits, buf, saved, nelmts);
@@ -4398,11 +4398,11 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 break;
             case INT_LLONG:
                 HDmemcpy(aligned, saved + j * sizeof(long long), sizeof(long long));
-                HDfprintf(stdout, " %29" H5_PRINTF_LL_WIDTH "d\n", *((long long *)aligned));
+                HDfprintf(stdout, " %29lld\n", *((long long *)aligned));
                 break;
             case INT_ULLONG:
                 HDmemcpy(aligned, saved + j * sizeof(unsigned long long), sizeof(unsigned long long));
-                HDfprintf(stdout, " %29" H5_PRINTF_LL_WIDTH "u\n", *((unsigned long long *)aligned));
+                HDfprintf(stdout, " %29llu\n", *((unsigned long long *)aligned));
                 break;
             case FLT_FLOAT:
                 HDmemcpy(aligned, saved + j * sizeof(float), sizeof(float));
@@ -4461,11 +4461,11 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 break;
             case INT_LLONG:
                 HDmemcpy(aligned, buf + j * sizeof(long long), sizeof(long long));
-                HDfprintf(stdout, " %29" H5_PRINTF_LL_WIDTH "d\n", *((long long *)aligned));
+                HDfprintf(stdout, " %29lld\n", *((long long *)aligned));
                 break;
             case INT_ULLONG:
                 HDmemcpy(aligned, buf + j * sizeof(unsigned long long), sizeof(unsigned long long));
-                HDfprintf(stdout, " %29" H5_PRINTF_LL_WIDTH "u\n", *((unsigned long long *)aligned));
+                HDfprintf(stdout, " %29llu\n", *((unsigned long long *)aligned));
                 break;
             case FLT_FLOAT:
                 HDmemcpy(aligned, buf + j * sizeof(float), sizeof(float));
@@ -4515,10 +4515,10 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 HDprintf(" %29lu\n", *((unsigned long *)((void *)hw)));
                 break;
             case INT_LLONG:
-                HDfprintf(stdout, " %29" H5_PRINTF_LL_WIDTH "d\n", *((long long *)((void *)hw)));
+                HDfprintf(stdout, " %29lld\n", *((long long *)((void *)hw)));
                 break;
             case INT_ULLONG:
-                HDfprintf(stdout, " %29" H5_PRINTF_LL_WIDTH "u\n", *((unsigned long long *)((void *)hw)));
+                HDfprintf(stdout, " %29llu\n", *((unsigned long long *)((void *)hw)));
                 break;
             case FLT_FLOAT:
                 HDprintf(" %29f\n", (double)*((float *)((void *)hw)));

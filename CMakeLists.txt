@@ -2,10 +2,13 @@ cmake_minimum_required (VERSION 3.12)
 project (HDF5 C)
 
 if (POLICY CMP0074)
+  # find_package() uses <PackageName>_ROOT variables.
   cmake_policy (SET CMP0074 NEW)
 endif ()
 
 if (POLICY CMP0083)
+  # To control generation of Position Independent Executable (PIE) or not,
+  # some flags are required at link time.
   cmake_policy (SET CMP0083 NEW)
 endif ()
 
@@ -830,15 +833,6 @@ if (HDF5_ENABLE_THREADSAFE)
       message (VERBOSE " **** thread-safety option will not be used building static library **** ")
     endif ()
   endif ()
-  if (HDF5_ENABLE_PARALLEL)
-    if (NOT ALLOW_UNSUPPORTED)
-      message (FATAL_ERROR " **** parallel and thread-safety options are not supported, override with ALLOW_UNSUPPORTED option **** ")
-    else ()
-      if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-        message (VERBOSE " **** Allowing unsupported parallel and thread-safety options **** ")
-      endif ()
-    endif ()
-  endif ()
   if (HDF5_BUILD_FORTRAN)
     if (NOT ALLOW_UNSUPPORTED)
       message (FATAL_ERROR " **** Fortran and thread-safety options are not supported, override with ALLOW_UNSUPPORTED option **** ")
@@ -886,7 +880,6 @@ else()
   set (THREADS_PREFER_PTHREAD_FLAG ON)
   find_package (Threads REQUIRED)
 endif ()
-
 
 #-----------------------------------------------------------------------------
 # Option to build the map API

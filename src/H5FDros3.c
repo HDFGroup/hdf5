@@ -239,6 +239,7 @@ static herr_t  H5FD__ros3_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, c
 static herr_t H5FD__ros3_validate_config(const H5FD_ros3_fapl_t *fa);
 
 static const H5FD_class_t H5FD_ros3_g = {
+    H5FD_CLASS_VERSION,       /* struct version       */
     H5FD_ROS3_VALUE,          /* value                */
     "ros3",                   /* name                 */
     MAXADDR,                  /* maxaddr              */
@@ -267,6 +268,10 @@ static const H5FD_class_t H5FD_ros3_g = {
     H5FD__ros3_get_handle,    /* get_handle           */
     H5FD__ros3_read,          /* read                 */
     H5FD__ros3_write,         /* write                */
+    NULL,                     /* read_vector          */
+    NULL,                     /* write_vector         */
+    NULL,                     /* read_selection       */
+    NULL,                     /* write_selection      */
     NULL,                     /* flush                */
     H5FD__ros3_truncate,      /* truncate             */
     NULL,                     /* lock                 */
@@ -372,7 +377,7 @@ H5FD__ros3_term(void)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_fapl_ros3(hid_t fapl_id, H5FD_ros3_fapl_t *fa)
+H5Pset_fapl_ros3(hid_t fapl_id, const H5FD_ros3_fapl_t *fa)
 {
     H5P_genplist_t *plist     = NULL; /* Property list pointer */
     herr_t          ret_value = FAIL;
@@ -393,7 +398,7 @@ H5Pset_fapl_ros3(hid_t fapl_id, H5FD_ros3_fapl_t *fa)
     if (FAIL == H5FD__ros3_validate_config(fa))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid ros3 config")
 
-    ret_value = H5P_set_driver(plist, H5FD_ROS3, (void *)fa, NULL);
+    ret_value = H5P_set_driver(plist, H5FD_ROS3, (const void *)fa, NULL);
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1580,15 +1585,12 @@ done:
  *              input and output
  *
  *              At present, the only op code supported is
- *              H5FD_CTL__GET_TERMINAL_VFD, which is used to obtain the
+ *              H5FD_CTL_GET_TERMINAL_VFD, which is used to obtain the
  *              instance of H5FD_t associated with the terminal
  *              VFD.  This allows comparison of files whose terminal
  *              VFD may have overlying pass through VFDs.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Changes:     None,
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1605,14 +1607,14 @@ H5FD__ros3_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void H5_AT
 
     switch (op_code) {
 
-        case H5FD_CTL__GET_TERMINAL_VFD:
+        case H5FD_CTL_GET_TERMINAL_VFD:
             HDassert(output);
             *output = (void *)(file);
             break;
 
         /* Unknown op code */
         default:
-            if (flags & H5FD_CTL__FAIL_IF_UNKNOWN_FLAG)
+            if (flags & H5FD_CTL_FAIL_IF_UNKNOWN_FLAG)
                 HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL, "unknown op_code and fail if unknown flag is set")
             break;
     }

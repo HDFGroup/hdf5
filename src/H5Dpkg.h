@@ -121,9 +121,9 @@ typedef herr_t (*H5D_layout_construct_func_t)(H5F_t *f, H5D_t *dset);
 typedef herr_t (*H5D_layout_init_func_t)(H5F_t *f, const H5D_t *dset, hid_t dapl_id);
 typedef hbool_t (*H5D_layout_is_space_alloc_func_t)(const H5O_storage_t *storage);
 typedef hbool_t (*H5D_layout_is_data_cached_func_t)(const H5D_shared_t *shared_dset);
-typedef herr_t (*H5D_layout_io_init_func_t)(const struct H5D_io_info_t *io_info,
-                                            const H5D_type_info_t *type_info, hsize_t nelmts,
-                                            H5S_t *file_space, H5S_t *mem_space, struct H5D_chunk_map_t *cm);
+typedef herr_t (*H5D_layout_io_init_func_t)(struct H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
+                                            hsize_t nelmts, H5S_t *file_space, H5S_t *mem_space,
+                                            struct H5D_chunk_map_t *cm);
 typedef herr_t (*H5D_layout_read_func_t)(struct H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
                                          hsize_t nelmts, H5S_t *file_space, H5S_t *mem_space,
                                          struct H5D_chunk_map_t *fm);
@@ -222,6 +222,7 @@ typedef struct H5D_io_info_t {
     H5D_layout_ops_t layout_ops; /* Dataset layout I/O operation function pointers */
     H5D_io_ops_t     io_ops;     /* I/O operation function pointers */
     H5D_io_op_type_t op_type;
+    hbool_t          use_select_io; /* Whether to use selection I/O */
     union {
         void *      rbuf; /* Pointer to buffer for read */
         const void *wbuf; /* Pointer to buffer to write */
@@ -566,7 +567,7 @@ H5_DLL herr_t  H5D__get_chunk_info(const H5D_t *dset, const H5S_t *space, hsize_
                                    unsigned *filter_mask, haddr_t *offset, hsize_t *size);
 H5_DLL herr_t  H5D__get_chunk_info_by_coord(const H5D_t *dset, const hsize_t *coord, unsigned *filter_mask,
                                             haddr_t *addr, hsize_t *size);
-H5_DLL herr_t  H5D__chunk_iter(const H5D_t *dset, H5D_chunk_iter_op_t cb, void *op_data);
+H5_DLL herr_t  H5D__chunk_iter(H5D_t *dset, H5D_chunk_iter_op_t cb, void *op_data);
 H5_DLL haddr_t H5D__get_offset(const H5D_t *dset);
 H5_DLL herr_t  H5D__vlen_get_buf_size(H5D_t *dset, hid_t type_id, hid_t space_id, hsize_t *size);
 H5_DLL herr_t  H5D__vlen_get_buf_size_gen(H5VL_object_t *vol_obj, hid_t type_id, hid_t space_id,
@@ -594,8 +595,8 @@ H5_DLL herr_t H5D__select_write(const H5D_io_info_t *io_info, const H5D_type_inf
                                 hsize_t nelmts, H5S_t *file_space, H5S_t *mem_space);
 
 /* Functions that perform direct copying between memory buffers */
-H5_DLL herr_t H5D_select_io_mem(void *dst_buf, const H5S_t *dst_space, const void *src_buf,
-                                const H5S_t *src_space, size_t elmt_size, size_t nelmts);
+H5_DLL herr_t H5D_select_io_mem(void *dst_buf, H5S_t *dst_space, const void *src_buf, H5S_t *src_space,
+                                size_t elmt_size, size_t nelmts);
 
 /* Functions that perform scatter-gather serial I/O operations */
 H5_DLL herr_t H5D__scatter_mem(const void *_tscat_buf, H5S_sel_iter_t *iter, size_t nelmts, void *_buf);
@@ -641,8 +642,8 @@ H5_DLL herr_t  H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_ov
                                    const hsize_t old_dim[]);
 H5_DLL herr_t  H5D__chunk_file_alloc(const H5D_chk_idx_info_t *idx_info, const H5F_block_t *old_chunk,
                                      H5F_block_t *new_chunk, hbool_t *need_insert, const hsize_t *scaled);
-H5_DLL void *  H5D__chunk_mem_alloc(size_t size, const H5O_pline_t *pline);
-H5_DLL void    H5D__chunk_mem_free(void *chk, const void *_pline);
+H5_DLL void *  H5D__chunk_mem_alloc(size_t size, void *pline);
+H5_DLL void    H5D__chunk_mem_free(void *chk, void *pline);
 H5_DLL void *  H5D__chunk_mem_xfree(void *chk, const void *pline);
 H5_DLL void *  H5D__chunk_mem_realloc(void *chk, size_t size, const H5O_pline_t *pline);
 H5_DLL herr_t  H5D__chunk_update_old_edge_chunks(H5D_t *dset, hsize_t old_dim[]);

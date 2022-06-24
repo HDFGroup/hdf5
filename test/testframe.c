@@ -413,16 +413,20 @@ SetTestVerbosity(int newval)
  Values:
  0: Exhaustive run
     Tests should take as long as necessary
- 1: Full run.  Default if HDF5TestExpress is not defined
+ 1: Full run.  Default if H5_TEST_EXPRESS_LEVEL_DEFAULT
+    and HDF5TestExpress are not defined
     Tests should take no more than 30 minutes
  2: Quick run
     Tests should take no more than 10 minutes
- 3: Smoke test.  Default if HDF5TestExpress is set to a value other than 0-3
+ 3: Smoke test.
+    Default if HDF5TestExpress is set to a value other than 0-3
     Tests should take less than 1 minute
 
  Design:
  If the environment variable $HDF5TestExpress is defined,
- then test programs should skip some tests so that they
+ or if a default testing level > 1 has been set via
+ H5_TEST_EXPRESS_LEVEL_DEFAULT, then test programs should
+ skip some tests so that they
  complete sooner.
 
  Terms:

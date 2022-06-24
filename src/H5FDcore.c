@@ -154,6 +154,7 @@ static herr_t  H5FD__core_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, c
 static inline const H5FD_core_fapl_t *H5FD__core_get_default_config(void);
 
 static const H5FD_class_t H5FD_core_g = {
+    H5FD_CLASS_VERSION,       /* struct version       */
     H5FD_CORE_VALUE,          /* value                */
     "core",                   /* name                 */
     MAXADDR,                  /* maxaddr              */
@@ -182,6 +183,10 @@ static const H5FD_class_t H5FD_core_g = {
     H5FD__core_get_handle,    /* get_handle           */
     H5FD__core_read,          /* read                 */
     H5FD__core_write,         /* write                */
+    NULL,                     /* read_vector          */
+    NULL,                     /* write_vector         */
+    NULL,                     /* read_selection       */
+    NULL,                     /* write_selection      */
     H5FD__core_flush,         /* flush                */
     H5FD__core_truncate,      /* truncate             */
     H5FD__core_lock,          /* lock                 */
@@ -1606,7 +1611,7 @@ H5FD__core_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closing
                 BOOL  bError;           /* Boolean error flag */
 
                 /* Windows uses this odd QuadPart union for 32/64-bit portability */
-                li.QuadPart = (__int64)file->eoa;
+                li.QuadPart = (LONGLONG)file->eoa;
 
                 /* Extend the file to make sure it's large enough.
                  *
@@ -1773,15 +1778,12 @@ done:
  *              input and output
  *
  *              At present, the only op code supported is
- *              H5FD_CTL__GET_TERMINAL_VFD, which is used to obtain a
+ *              H5FD_CTL_GET_TERMINAL_VFD, which is used to obtain a
  *              pointer to the instance of H5FD_t associated with the
  *              terminal VFD.  This allows comparison of files whose
  *              terminal VFD may have overlying pass through VFDs.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Changes:     None.
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1798,14 +1800,14 @@ H5FD__core_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void H5_AT
 
     switch (op_code) {
 
-        case H5FD_CTL__GET_TERMINAL_VFD:
+        case H5FD_CTL_GET_TERMINAL_VFD:
             HDassert(output);
             *output = (void *)(file);
             break;
 
         /* Unknown op code */
         default:
-            if (flags & H5FD_CTL__FAIL_IF_UNKNOWN_FLAG)
+            if (flags & H5FD_CTL_FAIL_IF_UNKNOWN_FLAG)
                 HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL, "unknown op_code and fail if unknown flag is set")
             break;
     }

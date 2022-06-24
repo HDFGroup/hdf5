@@ -660,8 +660,8 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
     H5TOOLS_START_DEBUG(" ");
     /* Build default formats for long long types */
     if (!fmt_llong[0]) {
-        HDsnprintf(fmt_llong, sizeof(fmt_llong), "%%%sd", H5_PRINTF_LL_WIDTH);
-        HDsnprintf(fmt_ullong, sizeof(fmt_ullong), "%%%su", H5_PRINTF_LL_WIDTH);
+        HDsnprintf(fmt_llong, sizeof(fmt_llong), "%%lld");
+        HDsnprintf(fmt_ullong, sizeof(fmt_ullong), "%%llu");
     }
 
     /* Append value depending on data type */

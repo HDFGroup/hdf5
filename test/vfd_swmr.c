@@ -4920,7 +4920,7 @@ test_updater_generate_md_checksums(hid_t orig_fapl, hbool_t file_create)
 
     /* Get a pointer to the internal file object */
     if (NULL == (f = (H5F_t *)H5VL_object(fid)))
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Get the full metadata file pathname */
     md_file_path_name = HDstrdup(f->shared->md_file_path_name);
@@ -5345,14 +5345,14 @@ test_vfds_same_file_opens(hid_t orig_fapl, const char *env_h5_drvr)
        if the HDF5_DRIVER environment variable is set to "stdio" */
     if (HDstrcmp(env_h5_drvr, "stdio") == 0) {
         if (fid2 < 0)
-            TEST_ERROR
+            TEST_ERROR;
         if (H5Fclose(fid2) < 0)
             FAIL_STACK_ERROR;
     }
     else {
         /* Should fail: due to "driver lock request failed" */
         if (fid2 >= 0)
-            TEST_ERROR
+            TEST_ERROR;
     }
 
     if (H5Fclose(fid1) < 0)
@@ -5607,14 +5607,14 @@ main(void)
 
     if ((fapl = h5_fileaccess()) < 0) {
         nerrors++;
-        PUTS_ERROR("Can't get VFD-dependent fapl")
+        PUTS_ERROR("Can't get VFD-dependent fapl");
     }
 
     /* Get the VFD feature flags for this VFD */
     if ((driver_id = H5Pget_driver(fapl)) < 0)
-        PUTS_ERROR("Can't get driver set in fapl")
+        PUTS_ERROR("Can't get driver set in fapl");
     if (H5FDdriver_query(driver_id, &driver_flags) < 0)
-        PUTS_ERROR("Can't query driver flags")
+        PUTS_ERROR("Can't query driver flags");
 
     /* Check whether the VFD feature flag supports VFD SWMR */
     if (!(driver_flags & H5FD_FEAT_SUPPORTS_VFD_SWMR)) {

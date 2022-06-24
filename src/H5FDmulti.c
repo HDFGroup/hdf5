@@ -176,6 +176,7 @@ static herr_t  H5FD_multi_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, c
 
 /* The class struct */
 static const H5FD_class_t H5FD_multi_g = {
+    H5FD_CLASS_VERSION,        /* struct version       */
     H5_VFD_MULTI,              /* value             */
     "multi",                   /* name              */
     HADDR_MAX,                 /* maxaddr           */
@@ -204,6 +205,10 @@ static const H5FD_class_t H5FD_multi_g = {
     H5FD_multi_get_handle,     /* get_handle        */
     H5FD_multi_read,           /* read              */
     H5FD_multi_write,          /* write             */
+    NULL,                      /*read_vector        */
+    NULL,                      /*write_vector       */
+    NULL,                      /* read_selection    */
+    NULL,                      /* write_selection   */
     H5FD_multi_flush,          /* flush             */
     H5FD_multi_truncate,       /* truncate          */
     H5FD_multi_lock,           /* lock              */
@@ -2243,9 +2248,6 @@ H5_MULTI_GCC_DIAG_ON("format-nonliteral")
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Changes:     Added support for H5FD_CTL__GET_TERMINAL_VFD.
- *                                            JRM -- 5/4/22
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -2265,7 +2267,7 @@ H5FD_multi_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void *inpu
 
     switch (op_code) {
 
-        case H5FD_CTL__GET_TERMINAL_VFD:
+        case H5FD_CTL_GET_TERMINAL_VFD:
             /* One can argue as to whether the multi VFD should be regarded as terminal.
              * It is treated as such here, as it is the lowest VFD through which all I/O
              * request pass.
@@ -2278,7 +2280,7 @@ H5FD_multi_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void *inpu
 
         /* Unknown op code */
         default:
-            if (flags & H5FD_CTL__FAIL_IF_UNKNOWN_FLAG)
+            if (flags & H5FD_CTL_FAIL_IF_UNKNOWN_FLAG)
                 H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_FCNTL,
                             "VFD ctl request failed (unknown op code and fail if unknown flag is set)", -1);
 

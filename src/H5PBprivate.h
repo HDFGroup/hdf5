@@ -667,43 +667,31 @@ typedef struct H5PB_t {
 /***************************************/
 
 /* General routines */
-H5_DLL herr_t H5PB_create(H5F_shared_t *shared, size_t page_buffer_size, unsigned page_buf_min_meta_perc,
+H5_DLL herr_t H5PB_create(H5F_shared_t *f_sh, size_t page_buffer_size, unsigned page_buf_min_meta_perc,
                           unsigned page_buf_min_raw_perc);
-
-H5_DLL herr_t H5PB_flush(H5F_shared_t *);
-
-H5_DLL herr_t H5PB_dest(H5F_shared_t *);
-
-H5_DLL herr_t H5PB_add_new_page(H5F_shared_t *, H5FD_mem_t, haddr_t);
-
-H5_DLL herr_t H5PB_update_entry(H5PB_t *, haddr_t, size_t, const void *);
-
-H5_DLL herr_t H5PB_remove_entry(H5F_shared_t *, haddr_t);
-
-H5_DLL herr_t H5PB_remove_entries(H5F_shared_t *, haddr_t, hsize_t);
-
-H5_DLL herr_t H5PB_read(H5F_shared_t *, H5FD_mem_t, haddr_t, size_t, void * /*out*/);
-
-H5_DLL herr_t H5PB_write(H5F_shared_t *, H5FD_mem_t, haddr_t, size_t, const void *);
+H5_DLL herr_t H5PB_flush(H5F_shared_t *f_sh);
+H5_DLL herr_t H5PB_dest(H5F_shared_t *f_sh);
+H5_DLL herr_t H5PB_add_new_page(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t page_addr);
+H5_DLL herr_t H5PB_update_entry(H5PB_t *page_buf, haddr_t addr, size_t size, const void *buf);
+H5_DLL herr_t H5PB_remove_entry(H5F_shared_t *f_sh, haddr_t addr);
+H5_DLL herr_t H5PB_remove_entries(H5F_shared_t *f_sh, haddr_t addr, hsize_t size);
+H5_DLL herr_t H5PB_read(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, void *buf /*out*/);
+H5_DLL herr_t H5PB_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, const void *buf);
+H5_DLL herr_t H5PB_enabled(H5F_shared_t *f_sh, H5FD_mem_t type, hbool_t *enabled);
 
 /* VFD SWMR specific routines */
-H5_DLL herr_t H5PB_vfd_swmr__release_delayed_writes(H5F_shared_t *);
-
-H5_DLL herr_t H5PB_vfd_swmr__release_tick_list(H5F_shared_t *);
-
-H5_DLL herr_t H5PB_vfd_swmr__set_tick(H5F_shared_t *);
-
+H5_DLL herr_t H5PB_vfd_swmr__release_delayed_writes(H5F_shared_t *f_sh);
+H5_DLL herr_t H5PB_vfd_swmr__release_tick_list(H5F_shared_t *f_sh);
+H5_DLL herr_t H5PB_vfd_swmr__set_tick(H5F_shared_t *f_sh);
 H5_DLL herr_t H5PB_vfd_swmr__update_index(H5F_t *f, uint32_t *idx_ent_added_ptr,
                                           uint32_t *idx_ent_modified_ptr, uint32_t *idx_ent_not_in_tl_ptr,
                                           uint32_t *idx_ent_not_in_tl_flushed_ptr);
 
 /* Statistics routines */
-H5_DLL herr_t H5PB_reset_stats(H5PB_t *);
-
+H5_DLL herr_t H5PB_reset_stats(H5PB_t *page_buf);
 H5_DLL herr_t H5PB_get_stats(const H5PB_t *page_buf, unsigned accesses[2], unsigned hits[2],
                              unsigned misses[2], unsigned evictions[2], unsigned bypasses[2]);
-
-H5_DLL herr_t H5PB_print_stats(const H5PB_t *);
+H5_DLL herr_t H5PB_print_stats(const H5PB_t *page_buf);
 
 /* test & debug functions */
 H5_DLL herr_t H5PB_page_exists(H5F_shared_t *, haddr_t, hbool_t *);

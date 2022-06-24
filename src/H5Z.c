@@ -166,7 +166,7 @@ H5Z_term_package(void)
                  * units of `B/s', `kB/s', `MB/s', `GB/s', or `TB/s' or
                  * the word `Inf' if the elapsed time is zero.
                  */
-                H5_bandwidth(bandwidth, (double)(H5Z_stat_table_g[i].stats[dir].total),
+                H5_bandwidth(bandwidth, sizeof(bandwidth), (double)(H5Z_stat_table_g[i].stats[dir].total),
                              H5Z_stat_table_g[i].stats[dir].times.elapsed);
 
                 /* Print the statistics */

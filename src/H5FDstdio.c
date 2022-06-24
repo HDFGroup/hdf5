@@ -185,41 +185,46 @@ static herr_t  H5FD__stdio_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, 
                                void **output);
 
 static const H5FD_class_t H5FD_stdio_g = {
-    H5_VFD_STDIO,          /* value        */
-    "stdio",               /* name         */
-    MAXADDR,               /* maxaddr      */
-    H5F_CLOSE_WEAK,        /* fc_degree    */
-    H5FD_stdio_term,       /* terminate    */
-    NULL,                  /* sb_size      */
-    NULL,                  /* sb_encode    */
-    NULL,                  /* sb_decode    */
-    0,                     /* fapl_size    */
-    NULL,                  /* fapl_get     */
-    NULL,                  /* fapl_copy    */
-    NULL,                  /* fapl_free    */
-    0,                     /* dxpl_size    */
-    NULL,                  /* dxpl_copy    */
-    NULL,                  /* dxpl_free    */
-    H5FD_stdio_open,       /* open         */
-    H5FD_stdio_close,      /* close        */
-    H5FD_stdio_cmp,        /* cmp          */
-    H5FD_stdio_query,      /* query        */
-    NULL,                  /* get_type_map */
-    H5FD_stdio_alloc,      /* alloc        */
-    NULL,                  /* free         */
-    H5FD_stdio_get_eoa,    /* get_eoa      */
-    H5FD_stdio_set_eoa,    /* set_eoa      */
-    H5FD_stdio_get_eof,    /* get_eof      */
-    H5FD_stdio_get_handle, /* get_handle   */
-    H5FD_stdio_read,       /* read         */
-    H5FD_stdio_write,      /* write        */
-    H5FD_stdio_flush,      /* flush        */
-    H5FD_stdio_truncate,   /* truncate     */
-    H5FD_stdio_lock,       /* lock         */
-    H5FD_stdio_unlock,     /* unlock       */
-    H5FD_stdio_delete,     /* del          */
-    H5FD__stdio_ctl,       /* ctl          */
-    H5FD_FLMAP_DICHOTOMY   /* fl_map       */
+    H5FD_CLASS_VERSION,    /* struct version */
+    H5_VFD_STDIO,          /* value          */
+    "stdio",               /* name           */
+    MAXADDR,               /* maxaddr        */
+    H5F_CLOSE_WEAK,        /* fc_degree      */
+    H5FD_stdio_term,       /* terminate      */
+    NULL,                  /* sb_size        */
+    NULL,                  /* sb_encode      */
+    NULL,                  /* sb_decode      */
+    0,                     /* fapl_size      */
+    NULL,                  /* fapl_get       */
+    NULL,                  /* fapl_copy      */
+    NULL,                  /* fapl_free      */
+    0,                     /* dxpl_size      */
+    NULL,                  /* dxpl_copy      */
+    NULL,                  /* dxpl_free      */
+    H5FD_stdio_open,       /* open           */
+    H5FD_stdio_close,      /* close          */
+    H5FD_stdio_cmp,        /* cmp            */
+    H5FD_stdio_query,      /* query          */
+    NULL,                  /* get_type_map   */
+    H5FD_stdio_alloc,      /* alloc          */
+    NULL,                  /* free           */
+    H5FD_stdio_get_eoa,    /* get_eoa        */
+    H5FD_stdio_set_eoa,    /* set_eoa        */
+    H5FD_stdio_get_eof,    /* get_eof        */
+    H5FD_stdio_get_handle, /* get_handle     */
+    H5FD_stdio_read,       /* read           */
+    H5FD_stdio_write,      /* write          */
+    NULL,                  /* read_vector    */
+    NULL,                  /* write_vector   */
+    NULL,                  /* read_selection  */
+    NULL,                  /* write_selection */
+    H5FD_stdio_flush,      /* flush          */
+    H5FD_stdio_truncate,   /* truncate       */
+    H5FD_stdio_lock,       /* lock           */
+    H5FD_stdio_unlock,     /* unlock         */
+    H5FD_stdio_delete,     /* del            */
+    H5FD__stdio_ctl,       /* ctl            */
+    H5FD_FLMAP_DICHOTOMY   /* fl_map         */
 };
 
 /*-------------------------------------------------------------------------
@@ -1250,15 +1255,12 @@ H5FD_stdio_delete(const char *filename, hid_t /*UNUSED*/ fapl_id)
  *              input and output
  *
  *              At present, the only op code supported is
- *              H5FD_CTL__GET_TERMINAL_VFD, which is used to obtain the
+ *              H5FD_CTL_GET_TERMINAL_VFD, which is used to obtain the
  *              instance of H5FD_t associated with the terminal
  *              VFD.  This allows comparison of files whose terminal
  *              VFD may have overlying pass through VFDs.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- * Changes:     None.
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1276,20 +1278,20 @@ H5FD__stdio_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void /* U
 
     switch (op_code) {
 
-        case H5FD_CTL__GET_TERMINAL_VFD:
+        case H5FD_CTL_GET_TERMINAL_VFD:
             assert(output);
             *output = (void *)(file);
             break;
 
         /* Unknown op code */
         default:
-            if (flags & H5FD_CTL__FAIL_IF_UNKNOWN_FLAG)
+            if (flags & H5FD_CTL_FAIL_IF_UNKNOWN_FLAG)
                 H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_FCNTL,
                             "unknown op_code and fail if unknown flag is set", -1);
             break;
     }
 
-    return (0); /* SUCCEED */
+    return 0; /* SUCCEED */
 
 } /* end H5FD__stdio_ctl() */
 

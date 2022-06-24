@@ -24,6 +24,7 @@
 
 /* Private headers needed by this file */
 #include "H5Pprivate.h" /* Property lists            */
+#include "H5Sprivate.h" /* Dataspaces                */
 
 /*
  * The MPI drivers are needed because there are
@@ -318,6 +319,7 @@ typedef enum H5FD_get_driver_kind_t {
 
 /* Forward declarations for prototype arguments */
 struct H5F_t;
+struct H5S_t;
 union H5PL_key_t;
 
 H5_DLL int    H5FD_term_interface(void);
@@ -336,7 +338,6 @@ H5_DLL htri_t H5FD_is_driver_registered_by_value(H5FD_class_value_t driver_value
 H5_DLL hid_t  H5FD_get_driver_id_by_name(const char *name, hbool_t is_api);
 H5_DLL hid_t  H5FD_get_driver_id_by_value(H5FD_class_value_t value, hbool_t is_api);
 H5_DLL H5FD_t *H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr);
-H5FD_t *       H5FD_deduplicate(H5FD_t *file, hid_t fapl_id);
 H5_DLL herr_t  H5FD_close(H5FD_t *file);
 H5_DLL int     H5FD_cmp(const H5FD_t *f1, const H5FD_t *f2);
 H5_DLL herr_t  H5FD_driver_query(const H5FD_class_t *driver, unsigned long *flags /*out*/);
@@ -355,6 +356,22 @@ H5_DLL herr_t  H5FD_set_feature_flags(H5FD_t *file, unsigned long feature_flags)
 H5_DLL herr_t  H5FD_get_fs_type_map(const H5FD_t *file, H5FD_mem_t *type_map);
 H5_DLL herr_t  H5FD_read(H5FD_t *file, H5FD_mem_t type, haddr_t addr, size_t size, void *buf /*out*/);
 H5_DLL herr_t  H5FD_write(H5FD_t *file, H5FD_mem_t type, haddr_t addr, size_t size, const void *buf);
+H5_DLL herr_t  H5FD_read_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addrs[],
+                                size_t sizes[], void *bufs[] /* out */);
+H5_DLL herr_t  H5FD_write_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addrs[],
+                                 size_t sizes[], const void *bufs[] /* out */);
+H5_DLL herr_t  H5FD_read_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, struct H5S_t **mem_spaces,
+                                   struct H5S_t **file_spaces, haddr_t offsets[], size_t element_sizes[],
+                                   void *bufs[] /* out */);
+H5_DLL herr_t  H5FD_write_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, struct H5S_t **mem_spaces,
+                                    struct H5S_t **file_spaces, haddr_t offsets[], size_t element_sizes[],
+                                    const void *bufs[]);
+H5_DLL herr_t  H5FD_read_selection_id(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem_space_ids[],
+                                      hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[],
+                                      void *bufs[] /* out */);
+H5_DLL herr_t  H5FD_write_selection_id(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem_space_ids[],
+                                       hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[],
+                                       const void *bufs[]);
 H5_DLL herr_t  H5FD_flush(H5FD_t *file, hbool_t closing);
 H5_DLL herr_t  H5FD_truncate(H5FD_t *file, hbool_t closing);
 H5_DLL herr_t  H5FD_lock(H5FD_t *file, hbool_t rw);
@@ -367,6 +384,10 @@ H5_DLL herr_t  H5FD_set_base_addr(H5FD_t *file, haddr_t base_addr);
 H5_DLL haddr_t H5FD_get_base_addr(const H5FD_t *file);
 H5_DLL herr_t  H5FD_set_paged_aggr(H5FD_t *file, hbool_t paged);
 
+H5_DLL herr_t H5FD_sort_vector_io_req(hbool_t *vector_was_sorted, uint32_t count, H5FD_mem_t types[],
+                                      haddr_t addrs[], size_t sizes[], H5_flexible_const_ptr_t bufs[],
+                                      H5FD_mem_t **s_types_ptr, haddr_t **s_addrs_ptr, size_t **s_sizes_ptr,
+                                      H5_flexible_const_ptr_t **s_bufs_ptr);
 H5_DLL herr_t H5FD_init(void);
 
 /* Function prototypes for VFD SWMR */
