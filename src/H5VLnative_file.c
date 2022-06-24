@@ -724,6 +724,27 @@ H5VL__native_file_optional(void *obj, H5VL_optional_args_t *args, hid_t H5_ATTR_
             break;
         }
 
+        /* H5Fvfd_swmr_disable_end_of_tick() */
+        case H5VL_NATIVE_FILE_VFD_SWMR_DISABLE_EOT: {
+            if (H5F__vfd_swmr_disable_end_of_tick(f) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't disable EOT for VFD SWMR")
+            break;
+        }
+
+        /* H5Fvfd_swmr_enable_end_of_tick() */
+        case H5VL_NATIVE_FILE_VFD_SWMR_ENABLE_EOT: {
+            if (H5F__vfd_swmr_enable_end_of_tick(f) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't enable EOT for VFD SWMR")
+            break;
+        }
+
+        /* H5Fvfd_swmr_end_tick() */
+        case H5VL_NATIVE_FILE_VFD_SWMR_END_TICK: {
+            if (H5F__vfd_swmr_end_tick(f) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't trigger EOT processing for VFD SWMR")
+            break;
+        }
+
         default:
             HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "invalid optional operation")
     } /* end switch */

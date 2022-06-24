@@ -751,13 +751,16 @@ H5MF__sect_small_merge(H5FS_section_info_t **_sect1, H5FS_section_info_t *_sect2
         if (H5MF_xfree(udata->f, udata->alloc_type, (*sect1)->sect_info.addr, (*sect1)->sect_info.size) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "can't free merged section")
 
-        /* Need to free possible metadata page in the PB cache */
-        /* This is in response to the data corruption bug from fheap.c with page buffering + page strategy */
-        /* Note: Large metadata page bypasses the PB cache */
-        /* Note: Update of raw data page (large or small sized) is handled by the PB cache */
-        if (udata->f->shared->page_buf != NULL && udata->alloc_type != H5FD_MEM_DRAW)
+        /* Need to free possible raw/metadata page in the page buffer.
+         * This is in response to the data corruption bug from test/fheap.c
+         * when page buffering + page aggregation strategy are used.
+         * Note: Large raw/metadata page bypasses the page buffer.
+         * Note: Update of raw data page (large or small sized) is handled
+         * by the PB cache
+         */
+        if (udata->f->shared->page_buf != NULL)
             if (H5PB_remove_entry(udata->f->shared, (*sect1)->sect_info.addr) < 0)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "can't free merged section")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "can't free merged section from page buffer")
 
         if (H5MF__sect_free((H5FS_section_info_t *)(*sect1)) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't free section node")

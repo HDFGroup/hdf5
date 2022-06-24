@@ -75,6 +75,7 @@ static void * H5F__cache_drvrinfo_deserialize(const void *image, size_t len, voi
 static herr_t H5F__cache_drvrinfo_image_len(const void *thing, size_t *image_len);
 static herr_t H5F__cache_drvrinfo_serialize(const H5F_t *f, void *image, size_t len, void *thing);
 static herr_t H5F__cache_drvrinfo_free_icr(void *thing);
+static herr_t H5F__cache_superblock_refresh(H5F_t *f, void *_thing, const void *_image, size_t *len_ptr);
 
 /* Local encode/decode routines */
 static herr_t H5F__superblock_prefix_decode(H5F_super_t *sblock, const uint8_t **image_ref,
@@ -102,6 +103,7 @@ const H5AC_class_t H5AC_SUPERBLOCK[1] = {{
     NULL,                                        /* 'notify' callback */
     H5F__cache_superblock_free_icr,              /* 'free_icr' callback */
     NULL,                                        /* 'fsf_size' callback */
+    H5F__cache_superblock_refresh,               /* VFD SWMR 'refresh' callback */
 }};
 
 /* H5F driver info block inherits cache-like properties from H5AC */
@@ -120,6 +122,7 @@ const H5AC_class_t H5AC_DRVRINFO[1] = {{
     NULL,                                      /* 'notify' callback */
     H5F__cache_drvrinfo_free_icr,              /* 'free_icr' callback */
     NULL,                                      /* 'fsf_size' callback */
+    NULL,                                      /* VFD SWMR 'refresh' callback */
 }};
 
 /*****************************/
@@ -1043,3 +1046,276 @@ H5F__cache_drvrinfo_free_icr(void *_thing)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5F__cache_drvrinfo_free_icr() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F__cache_superblock_refresh
+ *
+ * Purpose:	Examine the supplied image buffer, and update the
+ *              superblock accordingly.
+ *
+ *              This function is only called when the file is opened in
+ *              VFD SWMR reader mode -- which implies that the file has
+ *              been opened R/O.  Thus the internal representation of
+ *              the superblock must be clean, and may be modified without
+ *              concern for local changes.
+ *
+ *              Further, most of the superblock is fixed once the file
+ *              is created, for the most part, this function simply
+ *              verifies the expected values.
+ *
+ * Return:	Success:	SUCCEED
+ *		Failure:	FAIL
+ *
+ * Programmer:	John Mainzer
+ *		12/21/19
+ *
+ * Changes:     None.
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5F__cache_superblock_refresh(H5F_t *f, void *_thing, const void *_image, size_t *len_ptr)
+{
+    H5F_super_t *  sblock = (H5F_super_t *)_thing;
+    const uint8_t *image  = (const uint8_t *)_image;
+    size_t         expected_image_len;
+    unsigned       super_vers;   /* Superblock version                         */
+    uint8_t        sizeof_addr;  /* Size of addresses in file                  */
+    uint8_t        sizeof_size;  /* Size of offsets in file                    */
+    uint32_t       status_flags; /* File status flags                          */
+    unsigned       sym_leaf_k;   /* Size of leaves in symbol tables            */
+    haddr_t        base_addr;    /* Absolute base address for rel.addrs.       */
+                                 /* (superblock for file is at this offset)    */
+    haddr_t     stored_eof;
+    haddr_t     ext_addr;    /* Relative address of superblock extension   */
+    haddr_t     driver_addr; /* File driver information block address      */
+    haddr_t     root_addr;   /* Root group address                         */
+    H5G_entry_t root_ent;    /* Root group symbol table entry              */
+    herr_t      ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    /* santity checks */
+    HDassert(f);
+    HDassert(sblock);
+    HDassert(sblock == f->shared->sblock);
+    HDassert(image);
+    HDassert(len_ptr);
+    HDassert(*len_ptr >= H5F_SUPERBLOCK_FIXED_SIZE + 6);
+
+    /* skip the signature */
+    image += H5F_SIGNATURE_LEN;
+
+    /* get the superblock version */
+    super_vers = *image++;
+
+    if (sblock->super_vers != super_vers)
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "unexpected superblock vers")
+
+    /* verify sizes of addresses and offsets */
+    if (super_vers < HDF5_SUPERBLOCK_VERSION_2) {
+        sizeof_addr = image[4];
+        sizeof_size = image[5];
+    } /* end if */
+    else {
+        sizeof_addr = image[0];
+        sizeof_size = image[1];
+    } /* end else */
+
+    if (sblock->sizeof_addr != sizeof_addr)
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "unexpected sizeof_addr")
+
+    if (sblock->sizeof_size != sizeof_size)
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "unexpected sizeof_size")
+
+    /* compute expected image len */
+    expected_image_len =
+        H5F_SUPERBLOCK_FIXED_SIZE + (size_t)H5F_SUPERBLOCK_VARLEN_SIZE(super_vers, sizeof_addr, sizeof_size);
+
+    if (expected_image_len != *len_ptr) {
+
+        *len_ptr = expected_image_len;
+        HGOTO_DONE(SUCCEED)
+    }
+
+    /* at this point, we know that the supplied image is of
+     * the correct length.
+     */
+
+    /* validate the older version of the superblock */
+    if (sblock->super_vers < HDF5_SUPERBLOCK_VERSION_2) {
+
+        unsigned snode_btree_k; /* B-tree symbol table internal node 'K' value */
+        unsigned chunk_btree_k; /* B-tree chunk internal node 'K' value */
+
+        /* Freespace version (hard-wired) */
+        if (HDF5_FREESPACE_VERSION != *image++)
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "bad free space version number")
+
+        /* Root group version number (hard-wired) */
+        if (HDF5_OBJECTDIR_VERSION != *image++)
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "bad object directory version number")
+
+        /* Skip over reserved byte */
+        image++;
+
+        /* Shared header version number (hard-wired) */
+        if (HDF5_SHAREDHEADER_VERSION != *image++)
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "bad shared-header format version number")
+
+        /* Skip over size of file addresses (already decoded and checked) */
+        image++;
+
+        /* Skip over size of file sizes (already decoded and checked) */
+        image++;
+
+        /* Skip over reserved byte */
+        image++;
+
+        /* Various B-tree sizes */
+        UINT16DECODE(image, sym_leaf_k);
+        if (sym_leaf_k != sblock->sym_leaf_k)
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "unexpected sym_leaf_k")
+
+        /* Need 'get' call to set other array values */
+        UINT16DECODE(image, snode_btree_k);
+        if (snode_btree_k != sblock->btree_k[H5B_SNODE_ID])
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "unexpected snode_btree_k")
+
+        /* File status flags (not really used yet)
+         *
+         * If the file has closed by the writer, then the status flags will
+         * change to zero.  If the file was opened by the writer, then the
+         * status flags will change to
+         * H5F_SUPER_WRITE_ACCESS|H5F_SUPER_SWMR_WRITE_ACCESS.  Only those
+         * two transitions are allowed.
+         */
+        UINT32DECODE(image, status_flags);
+        if (status_flags != sblock->status_flags && status_flags != 0 &&
+            status_flags != (H5F_SUPER_WRITE_ACCESS | H5F_SUPER_SWMR_WRITE_ACCESS)) {
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL,
+                        "status_flags %" PRIx32 " unexpectedly changed to %" PRIx32, sblock->status_flags,
+                        status_flags)
+        }
+
+        /*
+         * If the superblock version # is greater than 0, read in the indexed
+         * storage B-tree internal 'K' value
+         */
+        if (sblock->super_vers > HDF5_SUPERBLOCK_VERSION_DEF) {
+            UINT16DECODE(image, chunk_btree_k);
+
+            if (chunk_btree_k != sblock->btree_k[H5B_CHUNK_ID])
+                HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "unexpected chunk_btree_k")
+
+            /* Reserved bytes are present only in version 1 */
+            if (sblock->super_vers == HDF5_SUPERBLOCK_VERSION_1)
+                image += 2; /* reserved */
+        }                   /* end if */
+
+        /* Remainder of "variable-sized" portion of superblock */
+        H5F_addr_decode(f, (const uint8_t **)&image, &base_addr /*out*/);
+        H5F_addr_decode(f, (const uint8_t **)&image, &ext_addr /*out*/);
+        H5F_addr_decode(f, (const uint8_t **)&image, &stored_eof /*out*/);
+        H5F_addr_decode(f, (const uint8_t **)&image, &driver_addr /*out*/);
+
+        if (base_addr != sblock->base_addr)
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "unexpected base_addr")
+
+        if (ext_addr != sblock->ext_addr)
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "unexpected ext_addr")
+
+        /* use stored_eof to update EOA below */
+
+        if (driver_addr != sblock->driver_addr)
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "unexpected driver_addr")
+
+        /* decode the root group symbol table entry */
+        if (H5G_ent_decode(f, (const uint8_t **)&image, &root_ent) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTDECODE, FAIL, "can't decode root group symbol table entry")
+
+        /* Set the root group address to the correct value */
+        root_addr = root_ent.header;
+
+        if (root_addr != sblock->root_addr)
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "unexpected root_addr")
+
+        HDassert(root_ent.type == H5G_CACHED_STAB);
+
+        if ((root_ent.type != sblock->root_ent->type) ||
+            (root_ent.cache.stab.btree_addr != sblock->root_ent->cache.stab.btree_addr) ||
+            (root_ent.cache.stab.heap_addr != sblock->root_ent->cache.stab.heap_addr))
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "unexpected root_ent data")
+
+        /* NOTE: Driver info block is decoded separately, later */
+
+    } /* end if */
+    else {
+        uint32_t read_chksum;
+        uint32_t computed_chksum;
+
+        /* Skip over size of file addresses (already decoded and checked) */
+        image++;
+
+        /* Skip over size of file sizes (already decoded and checked) */
+        image++;
+
+        /* File status flags (not really used yet) */
+        status_flags = *image++;
+
+        /* If the file has closed by the writer, then the status flags will
+         * change to zero.  If the file was opened by the writer, then the
+         * status flags will change to
+         * H5F_SUPER_WRITE_ACCESS|H5F_SUPER_SWMR_WRITE_ACCESS.  Only those
+         * two transitions are allowed.
+         */
+        if (status_flags != sblock->status_flags && status_flags != 0 &&
+            status_flags != (H5F_SUPER_WRITE_ACCESS | H5F_SUPER_SWMR_WRITE_ACCESS)) {
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL,
+                        "status_flags %" PRIx32 " unexpectedly changed to %" PRIx32, sblock->status_flags,
+                        status_flags)
+        }
+
+        /* Base, superblock extension, end of file & root group object
+         * header addresses
+         */
+        H5F_addr_decode(f, (const uint8_t **)&image, &base_addr /*out*/);
+        H5F_addr_decode(f, (const uint8_t **)&image, &ext_addr /*out*/);
+        H5F_addr_decode(f, (const uint8_t **)&image, &stored_eof /*out*/);
+        H5F_addr_decode(f, (const uint8_t **)&image, &root_addr /*out*/);
+
+        if (base_addr != sblock->base_addr)
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "unexpected base_addr")
+
+        if (ext_addr != sblock->ext_addr)
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "unexpected ext_addr")
+
+        if (root_addr != sblock->root_addr)
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "unexpected root_addr")
+
+        /* use stored_eof to update EOA below */
+
+        /* Decode checksum */
+        UINT32DECODE(image, read_chksum);
+
+        if (H5F_get_checksums((const uint8_t *)_image, (size_t)(image - (const uint8_t *)_image), NULL,
+                              &computed_chksum) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, "can't compute chksum")
+
+        if (read_chksum != computed_chksum)
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "unexpected checksum")
+
+    } /* end else */
+
+    /* Sanity check */
+    HDassert((size_t)(image - (const uint8_t *)_image) <= *len_ptr);
+
+    /* update the EOA */
+    if (H5F__set_eoa(f, H5FD_MEM_DEFAULT, stored_eof - base_addr) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to update EOA")
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5F__cache_superblock_refresh() */

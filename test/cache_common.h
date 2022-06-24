@@ -549,6 +549,7 @@ struct expected_entry_status {
 /* global variable externs: */
 H5TEST_DLLVAR hbool_t     pass; /* set to false on error */
 H5TEST_DLLVAR const char *failure_mssg;
+H5TEST_DLLVAR const char *last_failure_mssg;
 
 H5TEST_DLLVAR test_entry_t *entries[NUMBER_OF_ENTRY_TYPES];
 H5TEST_DLLVAR const int32_t max_indices[NUMBER_OF_ENTRY_TYPES];

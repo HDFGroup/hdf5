@@ -31,8 +31,10 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h" /* Generic Functions    */
-#include "H5FDpkg.h"   /* File Drivers         */
+#include "H5private.h"   /* Generic Functions    */
+#include "H5FDpkg.h"     /* File Drivers         */
+#include "H5FLprivate.h" /* Free Lists           */
+#include "H5Eprivate.h"  /* Error handling       */
 
 /****************/
 /* Local Macros */
@@ -57,6 +59,8 @@
 /*****************************/
 /* Library Private Variables */
 /*****************************/
+/* Declare external the free list for H5FD_vfd_swmr_idx_entry_t */
+H5FL_SEQ_EXTERN(H5FD_vfd_swmr_idx_entry_t);
 
 /*******************/
 /* Local Variables */
@@ -103,3 +107,70 @@ H5FD__supports_swmr_test(const char *vfd_name)
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__supports_swmr_test() */
+
+/*
+ * Tests for VFD SWMR
+ */
+/*-------------------------------------------------------------------------
+ * Function: H5FD__vfd_swmr_md_test
+ *
+ * Purpose: Verify the info obtained from the driver's local copy is as
+ *          indicated by the parameter: num_entries and index
+ *
+ * Return:  SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD__vfd_swmr_reader_md_test(H5FD_t *file, unsigned num_entries, H5FD_vfd_swmr_idx_entry_t index[])
+{
+    unsigned                   vfd_num_entries = 0;
+    H5FD_vfd_swmr_idx_entry_t *vfd_index       = NULL;
+    unsigned                   i;
+    herr_t                     ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Retrieve index from VFD SWMR driver */
+    /* Initial call to get # of entries */
+    if (H5FD_vfd_swmr_get_tick_and_idx(file, TRUE, NULL, &vfd_num_entries, vfd_index) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Error in retrieving index from driver")
+
+    /* Verify number of index entries */
+    if (vfd_num_entries != num_entries)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Error in retrieving index from driver")
+
+    if (vfd_num_entries) {
+        /* Allocate memory for index entries */
+        if (NULL == (vfd_index = H5FL_SEQ_MALLOC(H5FD_vfd_swmr_idx_entry_t, vfd_num_entries)))
+            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "memory allocation failed for index entries")
+
+        /* Second call to retrieve the index */
+        if (H5FD_vfd_swmr_get_tick_and_idx(file, FALSE, NULL, &vfd_num_entries, vfd_index) < 0)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "Error in retrieving index from driver")
+
+        /* Verify index entries */
+        for (i = 0; i < vfd_num_entries; i++) {
+            if (vfd_index[i].length != index[i].length)
+                HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "incorrect length read from metadata file")
+
+            if (vfd_index[i].hdf5_page_offset != index[i].hdf5_page_offset)
+                HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL,
+                            "incorrect hdf5_page_offset read from metadata file")
+
+            if (vfd_index[i].md_file_page_offset != index[i].md_file_page_offset)
+                HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL,
+                            "incorrect md_file_page_offset read from metadata file")
+
+            if (vfd_index[i].checksum != index[i].checksum)
+                HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "incorrect chksum read from metadata file")
+        }
+    }
+
+done:
+    /* Free local copy of index entries */
+    if (vfd_num_entries && vfd_index)
+        vfd_index = (H5FD_vfd_swmr_idx_entry_t *)H5FL_SEQ_FREE(H5FD_vfd_swmr_idx_entry_t, vfd_index);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5FD__vfd_swmr_reader_md_test() */

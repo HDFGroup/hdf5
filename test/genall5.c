@@ -20,6 +20,7 @@
  */
 
 #include "cache_common.h"
+#include "vfd_swmr_common.h" /* for below_speed_limit() */
 #include "genall5.h"
 
 #define DSET_DIMS         (1024 * 1024)
@@ -27,18 +28,79 @@
 #define DSET_CHUNK_DIMS   1024
 #define DSET_COMPACT_DIMS 4096
 
+typedef enum phase { PHASE_CREATE, PHASE_VALIDATE, PHASE_DELETE, PHASE_VALIDATE_DELETION } phase_t;
+
+static hbool_t rm_ns_grp_0(hid_t, const char *);
+static hbool_t rm_ns_grp_c(hid_t, const char *, unsigned);
+static hbool_t rm_ns_grp_d(hid_t, const char *, unsigned);
+static hbool_t rm_os_grp_0(hid_t, const char *);
+static hbool_t rm_os_grp_n(hid_t, const char *, int, unsigned);
+static hbool_t rm_ds_ctg_i(hid_t, const char *, hbool_t);
+static hbool_t rm_ds_chk_i(hid_t, const char *, hbool_t);
+static hbool_t rm_ds_cpt_i(hid_t, const char *, hbool_t);
+static hbool_t rm_ds_ctg_v(hid_t, const char *, hbool_t);
+
+static hbool_t missing_ns_grp_0(hid_t, const char *);
+static hbool_t missing_ns_grp_c(hid_t, const char *, unsigned);
+static hbool_t missing_ns_grp_d(hid_t, const char *, unsigned);
+static hbool_t missing_os_grp_0(hid_t, const char *);
+static hbool_t missing_os_grp_n(hid_t, const char *, int, unsigned);
+static hbool_t missing_ds_ctg_i(hid_t, const char *, hbool_t);
+static hbool_t missing_ds_chk_i(hid_t, const char *, hbool_t);
+static hbool_t missing_ds_cpt_i(hid_t, const char *, hbool_t);
+static hbool_t missing_ds_ctg_v(hid_t, const char *, hbool_t);
+
+#define FN_ITEM_DEFN(__name, ...)                                                                            \
+    typedef bool (*__name##fn_t)(__VA_ARGS__);                                                               \
+    static const __name##fn_t __name##_fntbl[] = {__name, vrfy_##__name, rm_##__name, missing_##__name}
+
+FN_ITEM_DEFN(ns_grp_0, hid_t, const char *);
+FN_ITEM_DEFN(ns_grp_c, hid_t, const char *, unsigned);
+FN_ITEM_DEFN(ns_grp_d, hid_t, const char *, unsigned);
+FN_ITEM_DEFN(os_grp_0, hid_t, const char *);
+FN_ITEM_DEFN(os_grp_n, hid_t, const char *, int, unsigned);
+FN_ITEM_DEFN(ds_ctg_i, hid_t, const char *, bool);
+FN_ITEM_DEFN(ds_chk_i, hid_t, const char *, bool);
+FN_ITEM_DEFN(ds_cpt_i, hid_t, const char *, bool);
+FN_ITEM_DEFN(ds_ctg_v, hid_t, const char *, bool);
+
+#undef FN_ITEM_DEFN
+
+static hbool_t
+file_has_no_path(hid_t fid, const char *path)
+{
+    switch (H5Lexists(fid, path, H5P_DEFAULT)) {
+        case FALSE:
+            return true;
+        case TRUE:
+            failure_mssg = "H5Lexists unexpectedly true.";
+            return false;
+        default:
+            failure_mssg = "H5Lexists unexpectedly failed.";
+            return false;
+    }
+}
+
+static hbool_t
+remove_from_file_path(hid_t fid, const char *path)
+{
+    if (H5Ldelete(fid, path, H5P_DEFAULT) < 0) {
+        failure_mssg = "H5Ldelete failed.";
+        return false;
+    }
+    return true;
+}
+
 /*-------------------------------------------------------------------------
  * Function:    ns_grp_0
  *
  * Purpose:     Create an empty "new style" group at the specified location
  *              in the specified file.
  *
- *              If pass is false on entry, do nothing.
- *
- *              If an error is detected, set pass to FALSE, and set
+ *              If an error is detected, return false, and set
  *              failure_mssg to point to an appropriate error message.
  *
- * Return:      void
+ * Return:      true on success, false on failure.
  *
  * Programmer:  John Mainzer
  *              9/14/15
@@ -46,64 +108,62 @@
  *-------------------------------------------------------------------------
  */
 
-void
+static hbool_t
+missing_ns_grp_0(hid_t fid, const char *group_name)
+{
+    return file_has_no_path(fid, group_name);
+}
+
+static hbool_t
+rm_ns_grp_0(hid_t fid, const char *group_name)
+{
+    return remove_from_file_path(fid, group_name);
+}
+
+hbool_t
 ns_grp_0(hid_t fid, const char *group_name)
 {
     hid_t  gid  = -1;
     hid_t  gcpl = -1;
     herr_t ret;
 
-    if (pass) {
-        gcpl = H5Pcreate(H5P_GROUP_CREATE);
+    gcpl = H5Pcreate(H5P_GROUP_CREATE);
 
-        if (gcpl <= 0) {
-            pass         = FALSE;
-            failure_mssg = "ns_grp_0: H5Pcreate() failed";
-        }
-        HDassert(gcpl > 0);
+    if (gcpl <= 0) {
+        failure_mssg = "ns_grp_0: H5Pcreate() failed";
+        return false;
     }
 
-    if (pass) {
-        ret = H5Pset_link_creation_order(gcpl, H5P_CRT_ORDER_TRACKED);
+    ret = H5Pset_link_creation_order(gcpl, H5P_CRT_ORDER_TRACKED);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "ns_grp_0: H5Pset_link_creation_order() failed";
-        }
-        HDassert(ret >= 0);
+    if (ret < 0) {
+        failure_mssg = "ns_grp_0: H5Pset_link_creation_order() failed";
+        return false;
     }
 
-    if (pass) {
-        gid = H5Gcreate2(fid, group_name, H5P_DEFAULT, gcpl, H5P_DEFAULT);
+    gid = H5Gcreate2(fid, group_name, H5P_DEFAULT, gcpl, H5P_DEFAULT);
 
-        if (gid <= 0) {
-            pass         = FALSE;
-            failure_mssg = "ns_grp_0: H5Gcreate2() failed";
-        }
-        HDassert(gid > 0);
+    if (gid <= 0) {
+        failure_mssg = "ns_grp_0: H5Gcreate2() failed";
+        return false;
     }
 
-    if (pass) {
-        ret = H5Pclose(gcpl);
+    ret = H5Pclose(gcpl);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "ns_grp_0: H5Pclose(gcpl) failed";
-        }
-        HDassert(ret >= 0);
+    if (ret < 0) {
+        failure_mssg = "ns_grp_0: H5Pclose(gcpl) failed";
+        return false;
     }
 
-    if (pass) {
-        ret = H5Gclose(gid);
+    ret = H5Gclose(gid);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "ns_grp_0: H5Gclose(gid) failed";
-        }
-        HDassert(ret >= 0);
+    if (ret < 0) {
+        failure_mssg = "ns_grp_0: H5Gclose(gid) failed";
+        return false;
     }
 
-} /* ns_grp_0 */
+    return true;
+}
 
 /*-------------------------------------------------------------------------
  * Function:    vrfy_ns_grp_0
@@ -111,12 +171,10 @@ ns_grp_0(hid_t fid, const char *group_name)
  * Purpose:     verify an empty "new style" group at the specified location
  *              in the specified file.
  *
- *              If pass is false on entry, do nothing.
- *
- *              If an error is detected, set pass to FALSE, and set
+ *              If an error is detected, return false, and set
  *              failure_mssg to point to an appropriate error message.
  *
- * Return:      void
+ * Return:      true on success, false on failure.
  *
  * Programmer:  John Mainzer
  *              9/14/15
@@ -124,7 +182,7 @@ ns_grp_0(hid_t fid, const char *group_name)
  *-------------------------------------------------------------------------
  */
 
-void
+hbool_t
 vrfy_ns_grp_0(hid_t fid, const char *group_name)
 {
     hid_t      gid  = -1;
@@ -133,93 +191,70 @@ vrfy_ns_grp_0(hid_t fid, const char *group_name)
     unsigned   crt_order_flags = 0;
     herr_t     ret;
 
-    if (pass) {
-        gid = H5Gopen2(fid, group_name, H5P_DEFAULT);
+    gid = H5Gopen2(fid, group_name, H5P_DEFAULT);
 
-        if (gid <= 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ns_grp_0: H5Gopen2() failed";
-        }
-        HDassert(gid > 0);
+    if (gid <= 0) {
+        failure_mssg = "vrfy_ns_grp_0: H5Gopen2() failed";
+        return false;
     }
 
-    if (pass) {
-        gcpl = H5Gget_create_plist(gid);
+    gcpl = H5Gget_create_plist(gid);
 
-        if (gcpl <= 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ns_grp_0: H5Gget_create_plist() failed";
-        }
-        HDassert(gcpl > 0);
+    if (gcpl <= 0) {
+        failure_mssg = "vrfy_ns_grp_0: H5Gget_create_plist() failed";
+        return false;
     }
 
-    if (pass) {
-        ret = H5Pget_link_creation_order(gcpl, &crt_order_flags);
+    ret = H5Pget_link_creation_order(gcpl, &crt_order_flags);
 
-        if (gcpl <= 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ns_grp_0: H5Pget_link_creation_order() failed";
-        }
-        else if (H5P_CRT_ORDER_TRACKED != crt_order_flags) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ns_grp_0: H5P_CRT_ORDER_TRACKED != crt_order_flags";
-        }
-        HDassert(ret >= 0);
-        HDassert(H5P_CRT_ORDER_TRACKED == crt_order_flags);
+    if (ret < 0) {
+        failure_mssg = "vrfy_ns_grp_0: H5Pget_link_creation_order() failed";
+        return false;
+    }
+    else if (H5P_CRT_ORDER_TRACKED != crt_order_flags) {
+        failure_mssg = "vrfy_ns_grp_0: H5P_CRT_ORDER_TRACKED != crt_order_flags";
+        return false;
     }
 
-    if (pass) {
-        ret = H5Pclose(gcpl);
+    ret = H5Pclose(gcpl);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ns_grp_0: H5Pclose() failed";
-        }
-        HDassert(ret >= 0);
+    if (ret < 0) {
+        failure_mssg = "vrfy_ns_grp_0: H5Pclose() failed";
+        return false;
     }
 
-    if (pass) {
-        HDmemset(&grp_info, 0, sizeof(grp_info));
-        ret = H5Gget_info(gid, &grp_info);
+    HDmemset(&grp_info, 0, sizeof(grp_info));
+    ret = H5Gget_info(gid, &grp_info);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ns_grp_0: H5Gget_info() failed";
-        }
-        else if (H5G_STORAGE_TYPE_COMPACT != grp_info.storage_type) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ns_grp_0: H5G_STORAGE_TYPE_COMPACT != grp_info.storage_type";
-        }
-        else if (0 != grp_info.nlinks) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ns_grp_0: 0 != grp_info.nlinks";
-        }
-        else if (0 != grp_info.max_corder) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ns_grp_0: 0 != grp_info.max_corder";
-        }
-        else if (FALSE != grp_info.mounted) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ns_grp_0: FALSE != grp_info.mounted";
-        }
-
-        HDassert(ret >= 0);
-        HDassert(H5G_STORAGE_TYPE_COMPACT == grp_info.storage_type);
-        HDassert(0 == grp_info.nlinks);
-        HDassert(0 == grp_info.max_corder);
-        HDassert(FALSE == grp_info.mounted);
+    if (ret < 0) {
+        failure_mssg = "vrfy_ns_grp_0: H5Gget_info() failed";
+        return false;
+    }
+    else if (H5G_STORAGE_TYPE_COMPACT != grp_info.storage_type) {
+        failure_mssg = "vrfy_ns_grp_0: H5G_STORAGE_TYPE_COMPACT != grp_info.storage_type";
+        return false;
+    }
+    else if (0 != grp_info.nlinks) {
+        failure_mssg = "vrfy_ns_grp_0: 0 != grp_info.nlinks";
+        return false;
+    }
+    else if (0 != grp_info.max_corder) {
+        failure_mssg = "vrfy_ns_grp_0: 0 != grp_info.max_corder";
+        return false;
+    }
+    else if (FALSE != grp_info.mounted) {
+        failure_mssg = "vrfy_ns_grp_0: FALSE != grp_info.mounted";
+        return false;
     }
 
-    if (pass) {
-        ret = H5Gclose(gid);
+    ret = H5Gclose(gid);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ns_grp_0: H5Gclose() failed";
-        }
-        HDassert(ret >= 0);
+    if (ret < 0) {
+        failure_mssg = "vrfy_ns_grp_0: H5Gclose() failed";
+        return false;
     }
 
+    return true;
 } /* vrfy_ns_grp_0() */
 
 /*-------------------------------------------------------------------------
@@ -228,12 +263,10 @@ vrfy_ns_grp_0(hid_t fid, const char *group_name)
  * Purpose:     Create a compact "new style" group, with 'nlinks'
  *              soft/hard/external links in it in the specified file.
  *
- *              If pass is false on entry, do nothing.
- *
- *              If an error is detected, set pass to FALSE, and set
+ *              If an error is detected, return false, and set
  *              failure_mssg to point to an appropriate error message.
  *
- * Return:      void
+ * Return:      true on success, false on failure.
  *
  * Programmer:  John Mainzer
  *              9/14/15
@@ -241,7 +274,19 @@ vrfy_ns_grp_0(hid_t fid, const char *group_name)
  *-------------------------------------------------------------------------
  */
 
-void
+static hbool_t
+missing_ns_grp_c(hid_t fid, const char *group_name, unsigned H5_ATTR_UNUSED nlinks)
+{
+    return file_has_no_path(fid, group_name);
+}
+
+static hbool_t
+rm_ns_grp_c(hid_t fid, const char *group_name, unsigned H5_ATTR_UNUSED nlinks)
+{
+    return remove_from_file_path(fid, group_name);
+}
+
+hbool_t
 ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks)
 {
     hid_t    gid  = -1;
@@ -250,115 +295,90 @@ ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks)
     unsigned u;
     herr_t   ret;
 
-    if (pass) {
-        gcpl = H5Pcreate(H5P_GROUP_CREATE);
+    gcpl = H5Pcreate(H5P_GROUP_CREATE);
 
-        if (gcpl <= 0) {
-            pass         = FALSE;
-            failure_mssg = "ns_grp_c: H5Pcreate(H5P_GROUP_CREATE) failed";
-        }
-        HDassert(gcpl > 0);
+    if (gcpl <= 0) {
+        failure_mssg = "ns_grp_c: H5Pcreate(H5P_GROUP_CREATE) failed";
+        return false;
     }
 
-    if (pass) {
-        ret = H5Pset_link_creation_order(gcpl, H5P_CRT_ORDER_TRACKED);
+    ret = H5Pset_link_creation_order(gcpl, H5P_CRT_ORDER_TRACKED);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "ns_grp_c:  H5Pset_link_creation_order() failed";
-        }
-        HDassert(ret >= 0);
+    if (ret < 0) {
+        failure_mssg = "ns_grp_c:  H5Pset_link_creation_order() failed";
+        return false;
     }
 
-    if (pass) {
-        gid = H5Gcreate2(fid, group_name, H5P_DEFAULT, gcpl, H5P_DEFAULT);
+    gid = H5Gcreate2(fid, group_name, H5P_DEFAULT, gcpl, H5P_DEFAULT);
 
-        if (gid <= 0) {
-            pass         = FALSE;
-            failure_mssg = "ns_grp_c: H5Gcreate2() failed";
-        }
-        HDassert(gid > 0);
+    if (gid <= 0) {
+        failure_mssg = "ns_grp_c: H5Gcreate2() failed";
+        return false;
     }
 
-    if (pass) {
-        max_compact = 0;
-        ret         = H5Pget_link_phase_change(gcpl, &max_compact, NULL);
+    max_compact = 0;
+    ret         = H5Pget_link_phase_change(gcpl, &max_compact, NULL);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "ns_grp_c: H5Pget_link_phase_change() failed";
-        }
-        else if (nlinks <= 0) {
-            pass         = FALSE;
-            failure_mssg = "ns_grp_c: nlinks <= 0";
-        }
-        else if (nlinks >= max_compact) {
-            pass         = FALSE;
-            failure_mssg = "ns_grp_c: nlinks >= max_compact";
-        }
-
-        HDassert(ret >= 0);
-        HDassert(nlinks > 0);
-        HDassert(nlinks < max_compact);
+    if (ret < 0) {
+        failure_mssg = "ns_grp_c: H5Pget_link_phase_change() failed";
+        return false;
+    }
+    else if (nlinks <= 0) {
+        failure_mssg = "ns_grp_c: nlinks <= 0";
+        return false;
+    }
+    else if (nlinks >= max_compact) {
+        failure_mssg = "ns_grp_c: nlinks >= max_compact";
+        return false;
     }
 
-    u = 0;
-    while ((pass) && (u < nlinks)) {
+    for (u = 0; u < nlinks; u++) {
         char linkname[16];
 
-        HDsnprintf(linkname, sizeof(linkname), "%u", u);
+        HDsprintf(linkname, "%u", u);
 
         if (0 == (u % 3)) {
             ret = H5Lcreate_soft(group_name, gid, linkname, H5P_DEFAULT, H5P_DEFAULT);
 
             if (ret < 0) {
-                pass         = FALSE;
                 failure_mssg = "ns_grp_c: H5Lcreate_soft() failed";
+                return false;
             }
-            HDassert(ret >= 0);
-        } /* end if */
+        }
         else if (1 == (u % 3)) {
             ret = H5Lcreate_hard(fid, "/", gid, linkname, H5P_DEFAULT, H5P_DEFAULT);
 
             if (ret < 0) {
-                pass         = FALSE;
                 failure_mssg = "ns_grp_c: H5Lcreate_hard() failed";
+                return false;
             }
-            HDassert(ret >= 0);
-        } /* end else-if */
+        }
         else {
             HDassert(2 == (u % 3));
             ret = H5Lcreate_external("external.h5", "/ext", gid, linkname, H5P_DEFAULT, H5P_DEFAULT);
 
             if (ret < 0) {
-                pass         = FALSE;
                 failure_mssg = "ns_grp_c: H5Lcreate_external() failed";
+                return false;
             }
-            HDassert(ret >= 0);
-        } /* end else */
-
-        u++;
-    } /* end while() */
-
-    if (pass) {
-        ret = H5Pclose(gcpl);
-
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "ns_grp_c: H5Pclose(gcpl) failed";
         }
-        HDassert(ret >= 0);
     }
 
-    if (pass) {
-        ret = H5Gclose(gid);
+    ret = H5Pclose(gcpl);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "ns_grp_c: H5Gclose(gid) failed";
-        }
-        HDassert(ret >= 0);
+    if (ret < 0) {
+        failure_mssg = "ns_grp_c: H5Pclose(gcpl) failed";
+        return false;
     }
+
+    ret = H5Gclose(gid);
+
+    if (ret < 0) {
+        failure_mssg = "ns_grp_c: H5Gclose(gid) failed";
+        return false;
+    }
+
+    return true;
 
 } /* ns_grp_c() */
 
@@ -368,12 +388,10 @@ ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks)
  * Purpose:     Verify a compact "new style" group, with 'nlinks'
  *              soft/hard/external links in it in the specified file.
  *
- *              If pass is false on entry, do nothing.
- *
- *              If an error is detected, set pass to FALSE, and set
+ *              If an error is detected, return false, and set
  *              failure_mssg to point to an appropriate error message.
  *
- * Return:      void
+ * Return:      true on success, false on failure.
  *
  * Programmer:  John Mainzer
  *              9/14/15
@@ -381,7 +399,7 @@ ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks)
  *-------------------------------------------------------------------------
  */
 
-void
+hbool_t
 vrfy_ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks)
 {
     hid_t      gid  = -1;
@@ -391,189 +409,153 @@ vrfy_ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks)
     unsigned   u;
     herr_t     ret;
 
-    if (pass) {
-        gid = H5Gopen2(fid, group_name, H5P_DEFAULT);
+    gid = H5Gopen2(fid, group_name, H5P_DEFAULT);
 
-        if (gid <= 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ns_grp_c: H5Gopen2() failed";
-        }
-        HDassert(gid > 0);
+    if (gid <= 0) {
+        failure_mssg = "vrfy_ns_grp_c: H5Gopen2 failed";
+        return false;
     }
 
-    if (pass) {
-        gcpl = H5Gget_create_plist(gid);
+    gcpl = H5Gget_create_plist(gid);
 
-        if (gcpl <= 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ns_grp_c: H5Gget_create_plist(gid) failed";
-        }
-        HDassert(gcpl > 0);
+    if (gcpl <= 0) {
+        failure_mssg = "vrfy_ns_grp_c: H5Gget_create_plist(gid) failed";
+        return false;
     }
 
-    if (pass) {
-        ret = H5Pget_link_creation_order(gcpl, &crt_order_flags);
+    ret = H5Pget_link_creation_order(gcpl, &crt_order_flags);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ns_grp_c: H5Pget_link_creation_order() failed";
-        }
-        else if (H5P_CRT_ORDER_TRACKED != crt_order_flags) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ns_grp_c: H5P_CRT_ORDER_TRACKED != crt_order_flags";
-        }
-        HDassert(ret >= 0);
-        HDassert(H5P_CRT_ORDER_TRACKED == crt_order_flags);
+    if (ret < 0) {
+        failure_mssg = "vrfy_ns_grp_c: H5Pget_link_creation_order() failed";
+        return false;
+    }
+    else if (H5P_CRT_ORDER_TRACKED != crt_order_flags) {
+        failure_mssg = "vrfy_ns_grp_c: H5P_CRT_ORDER_TRACKED != crt_order_flags";
+        return false;
     }
 
-    if (pass) {
-        ret = H5Pclose(gcpl);
+    ret = H5Pclose(gcpl);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ns_grp_c: H5Pclose() failed";
-        }
-        HDassert(ret >= 0);
+    if (ret < 0) {
+        failure_mssg = "vrfy_ns_grp_c: H5Pclose() failed";
+        return false;
     }
 
-    if (pass) {
-        HDmemset(&grp_info, 0, sizeof(grp_info));
-        ret = H5Gget_info(gid, &grp_info);
+    HDmemset(&grp_info, 0, sizeof(grp_info));
+    ret = H5Gget_info(gid, &grp_info);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ns_grp_c: H5Gget_info() failed";
-        }
-        else if (H5G_STORAGE_TYPE_COMPACT != grp_info.storage_type) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ns_grp_c: H5G_STORAGE_TYPE_COMPACT != grp_info.storage_type";
-        }
-        else if (nlinks != grp_info.nlinks) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ns_grp_c: nlinks != grp_info.nlinks";
-        }
-        else if (nlinks != grp_info.max_corder) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ns_grp_c: nlinks != grp_info.max_corder";
-        }
-        else if (FALSE != grp_info.mounted) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ns_grp_c: FALSE != grp_info.mounted";
-        }
-
-        HDassert(ret >= 0);
-        HDassert(H5G_STORAGE_TYPE_COMPACT == grp_info.storage_type);
-        HDassert(nlinks == grp_info.nlinks);
-        HDassert(nlinks == grp_info.max_corder);
-        HDassert(FALSE == grp_info.mounted);
+    if (ret < 0) {
+        failure_mssg = "vrfy_ns_grp_c: H5Gget_info() failed";
+        return false;
+    }
+    else if (H5G_STORAGE_TYPE_COMPACT != grp_info.storage_type) {
+        failure_mssg = "vrfy_ns_grp_c: H5G_STORAGE_TYPE_COMPACT != grp_info.storage_type";
+        return false;
+    }
+    else if (nlinks != grp_info.nlinks) {
+        failure_mssg = "vrfy_ns_grp_c: nlinks != grp_info.nlinks";
+        return false;
+    }
+    else if (nlinks != grp_info.max_corder) {
+        failure_mssg = "vrfy_ns_grp_c: nlinks != grp_info.max_corder";
+        return false;
+    }
+    else if (FALSE != grp_info.mounted) {
+        failure_mssg = "vrfy_ns_grp_c: FALSE != grp_info.mounted";
+        return false;
     }
 
-    u = 0;
-    while ((pass) && (u < nlinks)) {
+    for (u = 0; u < nlinks; u++) {
         H5L_info2_t lnk_info;
         char        linkname[16];
         htri_t      link_exists;
 
-        HDsnprintf(linkname, sizeof(linkname), "%u", u);
+        HDsprintf(linkname, "%u", u);
         link_exists = H5Lexists(gid, linkname, H5P_DEFAULT);
 
         if (link_exists < 0) {
-            pass         = FALSE;
             failure_mssg = "vrfy_ns_grp_c: H5Lexists() failed";
+            return false;
         }
-        HDassert(link_exists >= 0);
 
         HDmemset(&lnk_info, 0, sizeof(grp_info));
         ret = H5Lget_info2(gid, linkname, &lnk_info, H5P_DEFAULT);
 
         if (ret < 0) {
-            pass         = FALSE;
             failure_mssg = "vrfy_ns_grp_c: H5Lget_info() failed";
+            return false;
         }
         else if (TRUE != lnk_info.corder_valid) {
-            pass         = FALSE;
             failure_mssg = "vrfy_ns_grp_c: TRUE != lnk_info.corder_valid";
+            return false;
         }
         else if (u != lnk_info.corder) {
-            pass         = FALSE;
             failure_mssg = "vrfy_ns_grp_c: u != lnk_info.corder";
+            return false;
         }
         else if (H5T_CSET_ASCII != lnk_info.cset) {
-            pass         = FALSE;
             failure_mssg = "vrfy_ns_grp_c: H5T_CSET_ASCII != lnk_info.cset";
+            return false;
         }
-        HDassert(ret >= 0);
-        HDassert(TRUE == lnk_info.corder_valid);
-        HDassert(u == lnk_info.corder);
-        HDassert(H5T_CSET_ASCII == lnk_info.cset);
 
         if (0 == (u % 3)) {
             char *slinkval;
 
             if (H5L_TYPE_SOFT != lnk_info.type) {
-                pass         = FALSE;
                 failure_mssg = "vrfy_ns_grp_c: H5L_TYPE_SOFT != lnk_info.type";
+                return false;
             }
             else if ((HDstrlen(group_name) + 1) != lnk_info.u.val_size) {
-                pass         = FALSE;
                 failure_mssg = "vrfy_ns_grp_c: (HDstrlen(group_name) + 1) != lnk_info.u.val_size";
+                return false;
             }
-            HDassert(H5L_TYPE_SOFT == lnk_info.type);
-            HDassert((HDstrlen(group_name) + 1) == lnk_info.u.val_size);
 
-            slinkval = (char *)HDmalloc(lnk_info.u.val_size);
+            slinkval = HDmalloc(lnk_info.u.val_size);
 
             if (!slinkval) {
-                pass         = FALSE;
                 failure_mssg = "vrfy_ns_grp_c: HDmalloc of slinkval failed";
+                return false;
             }
-            HDassert(slinkval);
 
             ret = H5Lget_val(gid, linkname, slinkval, lnk_info.u.val_size, H5P_DEFAULT);
             if (ret < 0) {
-                pass         = FALSE;
                 failure_mssg = "vrfy_ns_grp_c: H5Lget_val() failed";
+                HDfree(slinkval);
+                return false;
             }
             else if (0 != HDstrcmp(slinkval, group_name)) {
-                pass         = FALSE;
                 failure_mssg = "vrfy_ns_grp_c: 0 != HDstrcmp(slinkval, group_name)";
+                HDfree(slinkval);
+                return false;
             }
-            HDassert(ret >= 0);
-            HDassert(0 == HDstrcmp(slinkval, group_name));
 
             HDfree(slinkval);
-        } /* end if */
+        }
         else if (1 == (u % 3)) {
             H5O_info2_t root_oinfo;
             int         token_cmp = 0;
 
             if (H5L_TYPE_HARD != lnk_info.type) {
-                pass         = FALSE;
                 failure_mssg = "vrfy_ns_grp_c: H5L_TYPE_HARD != lnk_info.type";
+                return false;
             }
-            HDassert(H5L_TYPE_HARD == lnk_info.type);
 
             HDmemset(&root_oinfo, 0, sizeof(root_oinfo));
             ret = H5Oget_info3(fid, &root_oinfo, H5O_INFO_BASIC);
 
             if (ret < 0) {
-                pass         = FALSE;
                 failure_mssg = "vrfy_ns_grp_c: H5Oget_info() failed.";
+                return false;
             }
-            else {
-                if (H5Otoken_cmp(fid, &root_oinfo.token, &lnk_info.u.token, &token_cmp) < 0) {
-                    pass         = FALSE;
-                    failure_mssg = "vrfy_ns_grp_c: H5Otoken_cmp() failed.";
-                }
-
-                if (token_cmp) {
-                    pass         = FALSE;
-                    failure_mssg = "vrfy_ns_grp_c: root_oinfo.token != lnk_info.u.token";
-                }
+            else if (H5Otoken_cmp(fid, &root_oinfo.token, &lnk_info.u.token, &token_cmp) < 0) {
+                failure_mssg = "vrfy_ns_grp_c: H5Otoken_cmp() failed.";
+                return false;
             }
-            HDassert(ret >= 0);
-            HDassert(!token_cmp);
-        } /* end else-if */
+            else if (token_cmp) {
+                failure_mssg = "vrfy_ns_grp_c: root_oinfo.token != lnk_info.u.token";
+                return false;
+            }
+        }
         else {
             void *      elinkval;
             const char *file = NULL;
@@ -582,59 +564,51 @@ vrfy_ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks)
             HDassert(2 == (u % 3));
 
             if (H5L_TYPE_EXTERNAL != lnk_info.type) {
-                pass         = FALSE;
                 failure_mssg = "vrfy_ns_grp_c: H5L_TYPE_EXTERNAL != lnk_info.type";
+                return false;
             }
-            HDassert(H5L_TYPE_EXTERNAL == lnk_info.type);
 
             elinkval = HDmalloc(lnk_info.u.val_size);
 
             if (!elinkval) {
-                pass         = FALSE;
                 failure_mssg = "vrfy_ns_grp_c: HDmalloc of elinkval failed.";
+                return false;
             }
-            HDassert(elinkval);
 
             ret = H5Lget_val(gid, linkname, elinkval, lnk_info.u.val_size, H5P_DEFAULT);
             if (ret < 0) {
-                pass         = FALSE;
                 failure_mssg = "vrfy_ns_grp_c: H5Lget_val() failed.";
+                return false;
             }
-            HDassert(ret >= 0);
 
             ret = H5Lunpack_elink_val(elinkval, lnk_info.u.val_size, NULL, &file, &path);
             if (ret < 0) {
-                pass         = FALSE;
                 failure_mssg = "vrfy_ns_grp_c: H5Lunpack_elink_val() failed.";
+                HDfree(elinkval);
+                return false;
             }
             else if (0 != HDstrcmp(file, "external.h5")) {
-                pass         = FALSE;
                 failure_mssg = "vrfy_ns_grp_c: 0 != HDstrcmp(file, \"external.h5\")";
+                HDfree(elinkval);
+                return false;
             }
             else if (0 != HDstrcmp(path, "/ext")) {
-                pass         = FALSE;
                 failure_mssg = "vrfy_ns_grp_c: 0 != HDstrcmp(path, \"/ext\")";
+                HDfree(elinkval);
+                return false;
             }
-            HDassert(ret >= 0);
-            HDassert(0 == HDstrcmp(file, "external.h5"));
-            HDassert(0 == HDstrcmp(path, "/ext"));
-
             HDfree(elinkval);
-        } /* end else */
-
-        u++;
-    } /* end while */
-
-    if (pass) {
-        ret = H5Gclose(gid);
-
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ns_grp_c: H5Gclose() failed.";
         }
-        HDassert(ret >= 0);
     }
 
+    ret = H5Gclose(gid);
+
+    if (ret < 0) {
+        failure_mssg = "vrfy_ns_grp_c: H5Gclose() failed.";
+        return false;
+    }
+
+    return true;
 } /* vrfy_ns_grp_c() */
 
 /*-------------------------------------------------------------------------
@@ -643,12 +617,10 @@ vrfy_ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks)
  * Purpose:     Create a dense "new style" group, with 'nlinks'
  *              (soft/hard/external) links in it in the specified file.
  *
- *              If pass is false on entry, do nothing.
- *
- *              If an error is detected, set pass to FALSE, and set
+ *              If an error is detected, return false, and set
  *              failure_mssg to point to an appropriate error message.
  *
- * Return:      void
+ * Return:      true on success, false on failure.
  *
  * Programmer:  John Mainzer
  *              9/14/15
@@ -656,7 +628,19 @@ vrfy_ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks)
  *-------------------------------------------------------------------------
  */
 
-void
+static hbool_t
+missing_ns_grp_d(hid_t fid, const char *group_name, unsigned H5_ATTR_UNUSED nlinks)
+{
+    return file_has_no_path(fid, group_name);
+}
+
+static hbool_t
+rm_ns_grp_d(hid_t fid, const char *group_name, unsigned H5_ATTR_UNUSED nlinks)
+{
+    return remove_from_file_path(fid, group_name);
+}
+
+hbool_t
 ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks)
 {
     hid_t    gid  = -1;
@@ -665,111 +649,87 @@ ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks)
     unsigned u;
     herr_t   ret;
 
-    if (pass) {
-        gcpl = H5Pcreate(H5P_GROUP_CREATE);
+    gcpl = H5Pcreate(H5P_GROUP_CREATE);
 
-        if (gcpl <= 0) {
-            pass         = FALSE;
-            failure_mssg = "ns_grp_d: H5Pcreate() failed.";
-        }
-        HDassert(gcpl > 0);
+    if (gcpl <= 0) {
+        failure_mssg = "ns_grp_d: H5Pcreate() failed.";
+        return false;
     }
 
-    if (pass) {
-        ret = H5Pset_link_creation_order(gcpl, H5P_CRT_ORDER_TRACKED);
+    ret = H5Pset_link_creation_order(gcpl, H5P_CRT_ORDER_TRACKED);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "ns_grp_d: H5Pset_link_creation_order() failed.";
-        }
-        HDassert(ret >= 0);
+    if (ret < 0) {
+        failure_mssg = "ns_grp_d: H5Pset_link_creation_order() failed.";
+        return false;
     }
 
-    if (pass) {
-        gid = H5Gcreate2(fid, group_name, H5P_DEFAULT, gcpl, H5P_DEFAULT);
+    gid = H5Gcreate2(fid, group_name, H5P_DEFAULT, gcpl, H5P_DEFAULT);
 
-        if (gid <= 0) {
-            pass         = FALSE;
-            failure_mssg = "ns_grp_d: H5Gcreate2() failed.";
-        }
-        HDassert(gid > 0);
+    if (gid <= 0) {
+        failure_mssg = "ns_grp_d: H5Gcreate2() failed.";
+        return false;
     }
 
-    if (pass) {
-        max_compact = 0;
-        ret         = H5Pget_link_phase_change(gcpl, &max_compact, NULL);
+    max_compact = 0;
+    ret         = H5Pget_link_phase_change(gcpl, &max_compact, NULL);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "ns_grp_d: H5Pget_link_phase_change() failed.";
-        }
-        else if (nlinks <= max_compact) {
-            pass         = FALSE;
-            failure_mssg = "ns_grp_d: nlinks <= max_compact";
-        }
-        HDassert(ret >= 0);
-        HDassert(nlinks > max_compact);
+    if (ret < 0) {
+        failure_mssg = "ns_grp_d: H5Pget_link_phase_change() failed.";
+        return false;
+    }
+    else if (nlinks <= max_compact) {
+        failure_mssg = "ns_grp_d: nlinks <= max_compact";
+        return false;
     }
 
-    u = 0;
-    while ((pass) && (u < nlinks)) {
+    for (u = 0; u < nlinks; u++) {
         char linkname[16];
 
-        HDsnprintf(linkname, sizeof(linkname), "%u", u);
+        HDsprintf(linkname, "%u", u);
 
         if (0 == (u % 3)) {
             ret = H5Lcreate_soft(group_name, gid, linkname, H5P_DEFAULT, H5P_DEFAULT);
 
             if (ret < 0) {
-                pass         = FALSE;
                 failure_mssg = "ns_grp_d: H5Lcreate_soft() failed.";
+                return false;
             }
-            HDassert(ret >= 0);
-        } /* end if */
+        }
         else if (1 == (u % 3)) {
             ret = H5Lcreate_hard(fid, "/", gid, linkname, H5P_DEFAULT, H5P_DEFAULT);
 
             if (ret < 0) {
-                pass         = FALSE;
                 failure_mssg = "ns_grp_d: H5Lcreate_hard() failed.";
+                return false;
             }
-            HDassert(ret >= 0);
-        } /* end else-if */
+        }
         else {
             HDassert(2 == (u % 3));
 
             ret = H5Lcreate_external("external.h5", "/ext", gid, linkname, H5P_DEFAULT, H5P_DEFAULT);
 
             if (ret < 0) {
-                pass         = FALSE;
                 failure_mssg = "ns_grp_d: H5Lcreate_external() failed.";
+                return false;
             }
-            HDassert(ret >= 0);
-        } /* end else */
-
-        u++;
-    } /* end while */
-
-    if (pass) {
-        ret = H5Pclose(gcpl);
-
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "ns_grp_d: H5Pclose() failed.";
         }
-        HDassert(ret >= 0);
     }
 
-    if (pass) {
-        ret = H5Gclose(gid);
+    ret = H5Pclose(gcpl);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "ns_grp_d: H5Gclose() failed.";
-        }
-        HDassert(ret >= 0);
+    if (ret < 0) {
+        failure_mssg = "ns_grp_d: H5Pclose() failed.";
+        return false;
     }
 
+    ret = H5Gclose(gid);
+
+    if (ret < 0) {
+        failure_mssg = "ns_grp_d: H5Gclose() failed.";
+        return false;
+    }
+
+    return true;
 } /* ns_grp_d() */
 
 /*-------------------------------------------------------------------------
@@ -778,12 +738,10 @@ ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks)
  * Purpose:     Verify a dense "new style" group, with 'nlinks'
  *              soft/hard/external links in it in the specified file.
  *
- *              If pass is false on entry, do nothing.
- *
- *              If an error is detected, set pass to FALSE, and set
+ *              If an error is detected, return false, and set
  *              failure_mssg to point to an appropriate error message.
  *
- * Return:      void
+ * Return:      true on success, false on failure.
  *
  * Programmer:  John Mainzer
  *              9/14/15
@@ -791,7 +749,7 @@ ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks)
  *-------------------------------------------------------------------------
  */
 
-void
+hbool_t
 vrfy_ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks)
 {
     hid_t      gid  = -1;
@@ -801,187 +759,151 @@ vrfy_ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks)
     unsigned   u;
     herr_t     ret;
 
-    if (pass) {
-        gid = H5Gopen2(fid, group_name, H5P_DEFAULT);
+    gid = H5Gopen2(fid, group_name, H5P_DEFAULT);
 
-        if (gid <= 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ns_grp_d: H5Gopen2() failed.";
-        }
-        HDassert(gid > 0);
+    if (gid <= 0) {
+        failure_mssg = "vrfy_ns_grp_d: H5Gopen2() failed.";
+        return false;
     }
 
-    if (pass) {
-        gcpl = H5Gget_create_plist(gid);
+    gcpl = H5Gget_create_plist(gid);
 
-        if (gcpl <= 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ns_grp_d: H5Gget_create_plist() failed.";
-        }
-        HDassert(gcpl > 0);
+    if (gcpl <= 0) {
+        failure_mssg = "vrfy_ns_grp_d: H5Gget_create_plist() failed.";
+        return false;
     }
 
-    if (pass) {
-        ret = H5Pget_link_creation_order(gcpl, &crt_order_flags);
+    ret = H5Pget_link_creation_order(gcpl, &crt_order_flags);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ns_grp_d: H5Pget_link_creation_order() failed.";
-        }
-        else if (H5P_CRT_ORDER_TRACKED != crt_order_flags) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ns_grp_d: H5P_CRT_ORDER_TRACKED != crt_order_flags";
-        }
-        HDassert(ret >= 0);
-        HDassert(H5P_CRT_ORDER_TRACKED == crt_order_flags);
+    if (ret < 0) {
+        failure_mssg = "vrfy_ns_grp_d: H5Pget_link_creation_order() failed.";
+        return false;
+    }
+    else if (H5P_CRT_ORDER_TRACKED != crt_order_flags) {
+        failure_mssg = "vrfy_ns_grp_d: H5P_CRT_ORDER_TRACKED != crt_order_flags";
+        return false;
     }
 
-    if (pass) {
-        ret = H5Pclose(gcpl);
+    ret = H5Pclose(gcpl);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ns_grp_d: H5Pclose() failed.";
-        }
-        HDassert(ret >= 0);
+    if (ret < 0) {
+        failure_mssg = "vrfy_ns_grp_d: H5Pclose() failed.";
+        return false;
     }
 
-    if (pass) {
-        HDmemset(&grp_info, 0, sizeof(grp_info));
-        ret = H5Gget_info(gid, &grp_info);
+    HDmemset(&grp_info, 0, sizeof(grp_info));
+    ret = H5Gget_info(gid, &grp_info);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ns_grp_d: H5Gget_info() failed.";
-        }
-        else if (H5G_STORAGE_TYPE_DENSE != grp_info.storage_type) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ns_grp_d: H5G_STORAGE_TYPE_DENSE != grp_info.storage_type";
-        }
-        else if (nlinks != grp_info.nlinks) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ns_grp_d: nlinks != grp_info.nlinks";
-        }
-        else if (nlinks != grp_info.max_corder) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ns_grp_d: nlinks != grp_info.max_corder";
-        }
-        else if (FALSE != grp_info.mounted) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ns_grp_d: FALSE != grp_info.mounted";
-        }
-        HDassert(ret >= 0);
-        HDassert(H5G_STORAGE_TYPE_DENSE == grp_info.storage_type);
-        HDassert(nlinks == grp_info.nlinks);
-        HDassert(nlinks == grp_info.max_corder);
-        HDassert(FALSE == grp_info.mounted);
+    if (ret < 0) {
+        failure_mssg = "vrfy_ns_grp_d: H5Gget_info() failed.";
+        return false;
+    }
+    else if (H5G_STORAGE_TYPE_DENSE != grp_info.storage_type) {
+        failure_mssg = "vrfy_ns_grp_d: H5G_STORAGE_TYPE_DENSE != grp_info.storage_type";
+        return false;
+    }
+    else if (nlinks != grp_info.nlinks) {
+        failure_mssg = "vrfy_ns_grp_d: nlinks != grp_info.nlinks";
+        return false;
+    }
+    else if (nlinks != grp_info.max_corder) {
+        failure_mssg = "vrfy_ns_grp_d: nlinks != grp_info.max_corder";
+        return false;
+    }
+    else if (FALSE != grp_info.mounted) {
+        failure_mssg = "vrfy_ns_grp_d: FALSE != grp_info.mounted";
+        return false;
     }
 
-    u = 0;
-    while ((pass) && (u < nlinks)) {
+    for (u = 0; u < nlinks; u++) {
         H5L_info2_t lnk_info;
         char        linkname[16];
         htri_t      link_exists;
 
-        HDsnprintf(linkname, sizeof(linkname), "%u", u);
+        HDsprintf(linkname, "%u", u);
         link_exists = H5Lexists(gid, linkname, H5P_DEFAULT);
 
         if (link_exists < 0) {
-            pass         = FALSE;
             failure_mssg = "vrfy_ns_grp_d: H5Lexists() failed.";
+            return false;
         }
-        HDassert(link_exists >= 0);
 
         HDmemset(&lnk_info, 0, sizeof(grp_info));
         ret = H5Lget_info2(gid, linkname, &lnk_info, H5P_DEFAULT);
 
         if (ret < 0) {
-            pass         = FALSE;
             failure_mssg = "vrfy_ns_grp_d: H5Lget_info() failed.";
+            return false;
         }
         else if (TRUE != lnk_info.corder_valid) {
-            pass         = FALSE;
             failure_mssg = "vrfy_ns_grp_d: TRUE != lnk_info.corder_valid";
+            return false;
         }
         else if (u != lnk_info.corder) {
-            pass         = FALSE;
             failure_mssg = "vrfy_ns_grp_d: u != lnk_info.corder";
+            return false;
         }
         else if (H5T_CSET_ASCII != lnk_info.cset) {
-            pass         = FALSE;
             failure_mssg = "vrfy_ns_grp_d: H5T_CSET_ASCII != lnk_info.cset";
+            return false;
         }
-        HDassert(ret >= 0);
-        HDassert(TRUE == lnk_info.corder_valid);
-        HDassert(u == lnk_info.corder);
-        HDassert(H5T_CSET_ASCII == lnk_info.cset);
 
         if (0 == (u % 3)) {
             char *slinkval;
 
             if (H5L_TYPE_SOFT != lnk_info.type) {
-                pass         = FALSE;
                 failure_mssg = "vrfy_ns_grp_d: H5L_TYPE_SOFT != lnk_info.type";
+                return false;
             }
             else if ((HDstrlen(group_name) + 1) != lnk_info.u.val_size) {
-                pass         = FALSE;
                 failure_mssg = "vrfy_ns_grp_d: H5L_TYPE_SOFT != lnk_info.type";
+                return false;
             }
-            HDassert(H5L_TYPE_SOFT == lnk_info.type);
-            HDassert((HDstrlen(group_name) + 1) == lnk_info.u.val_size);
 
-            slinkval = (char *)HDmalloc(lnk_info.u.val_size);
+            slinkval = HDmalloc(lnk_info.u.val_size);
 
             if (!slinkval) {
-                pass         = FALSE;
                 failure_mssg = "vrfy_ns_grp_d: HDmalloc of slinkval failed";
+                return false;
             }
-            HDassert(slinkval);
 
             ret = H5Lget_val(gid, linkname, slinkval, lnk_info.u.val_size, H5P_DEFAULT);
             if (ret < 0) {
-                pass         = FALSE;
                 failure_mssg = "vrfy_ns_grp_d: H5Lget_val() failed";
+                HDfree(slinkval);
+                return false;
             }
             else if (0 != HDstrcmp(slinkval, group_name)) {
-                pass         = FALSE;
                 failure_mssg = "vrfy_ns_grp_d: 0 != HDstrcmp(slinkval, group_name)";
+                HDfree(slinkval);
+                return false;
             }
-            HDassert(ret >= 0);
-            HDassert(0 == HDstrcmp(slinkval, group_name));
-
             HDfree(slinkval);
-        } /* end if */
+        }
         else if (1 == (u % 3)) {
             H5O_info2_t root_oinfo;
             int         token_cmp = 0;
 
             if (H5L_TYPE_HARD != lnk_info.type) {
-                pass         = FALSE;
                 failure_mssg = "vrfy_ns_grp_d: H5L_TYPE_HARD != lnk_info.type";
+                return false;
             }
-            HDassert(H5L_TYPE_HARD == lnk_info.type);
 
             HDmemset(&root_oinfo, 0, sizeof(root_oinfo));
             ret = H5Oget_info3(fid, &root_oinfo, H5O_INFO_BASIC);
             if (ret < 0) {
-                pass         = FALSE;
                 failure_mssg = "vrfy_ns_grp_d: H5Oget_info() failed.";
+                return false;
             }
-            else {
-                if (H5Otoken_cmp(fid, &root_oinfo.token, &lnk_info.u.token, &token_cmp) < 0) {
-                    pass         = FALSE;
-                    failure_mssg = "vrfy_ns_grp_d: H5Otoken_cmp() failed.";
-                }
-
-                if (token_cmp) {
-                    pass         = FALSE;
-                    failure_mssg = "vrfy_ns_grp_d: root_oinfo.token != lnk_info.u.token";
-                }
+            else if (H5Otoken_cmp(fid, &root_oinfo.token, &lnk_info.u.token, &token_cmp) < 0) {
+                failure_mssg = "vrfy_ns_grp_d: H5Otoken_cmp() failed.";
+                return false;
             }
-            HDassert(ret >= 0);
-            HDassert(!token_cmp);
-        } /* end else-if */
+            else if (token_cmp) {
+                failure_mssg = "vrfy_ns_grp_d: root_oinfo.token != lnk_info.u.token";
+                return false;
+            }
+        }
         else {
             void *      elinkval;
             const char *file = NULL;
@@ -990,58 +912,51 @@ vrfy_ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks)
             HDassert(2 == (u % 3));
 
             if (H5L_TYPE_EXTERNAL != lnk_info.type) {
-                pass         = FALSE;
                 failure_mssg = "vrfy_ns_grp_d: H5L_TYPE_EXTERNAL != lnk_info.type";
+                return false;
             }
-            HDassert(H5L_TYPE_EXTERNAL == lnk_info.type);
 
             elinkval = HDmalloc(lnk_info.u.val_size);
 
             if (!elinkval) {
-                pass         = FALSE;
                 failure_mssg = "vrfy_ns_grp_d: HDmalloc of elinkval failed.";
+                return false;
             }
-            HDassert(elinkval);
 
             ret = H5Lget_val(gid, linkname, elinkval, lnk_info.u.val_size, H5P_DEFAULT);
             if (ret < 0) {
-                pass         = FALSE;
                 failure_mssg = "vrfy_ns_grp_d: H5Lget_val failed.";
+                return false;
             }
-            HDassert(ret >= 0);
 
             ret = H5Lunpack_elink_val(elinkval, lnk_info.u.val_size, NULL, &file, &path);
             if (ret < 0) {
-                pass         = FALSE;
                 failure_mssg = "vrfy_ns_grp_d: H5Lunpack_elink_val failed.";
+                HDfree(elinkval);
+                return false;
             }
             else if (0 != HDstrcmp(file, "external.h5")) {
-                pass         = FALSE;
                 failure_mssg = "vrfy_ns_grp_d: 0 != HDstrcmp(file, \"external.h5\").";
+                HDfree(elinkval);
+                return false;
             }
             else if (0 != HDstrcmp(path, "/ext")) {
-                pass         = FALSE;
                 failure_mssg = "vrfy_ns_grp_d: 0 != HDstrcmp(path, \"/ext\")";
+                HDfree(elinkval);
+                return false;
             }
-            HDassert(ret >= 0);
-            HDassert(0 == HDstrcmp(file, "external.h5"));
-            HDassert(0 == HDstrcmp(path, "/ext"));
-
             HDfree(elinkval);
-        } /* end else */
-
-        u++;
-    } /* end while() */
-
-    if (pass) {
-        ret = H5Gclose(gid);
-
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ns_grp_d: H5Gclose() failed.";
         }
-        HDassert(ret >= 0);
     }
+
+    ret = H5Gclose(gid);
+
+    if (ret < 0) {
+        failure_mssg = "vrfy_ns_grp_d: H5Gclose() failed.";
+        return false;
+    }
+
+    return true;
 
 } /* vrfy_ns_grp_d() */
 
@@ -1050,12 +965,10 @@ vrfy_ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks)
  *
  * Purpose:     Create an empty "old style" group.
  *
- *              If pass is false on entry, do nothing.
- *
- *              If an error is detected, set pass to FALSE, and set
+ *              If an error is detected, return false, and set
  *              failure_mssg to point to an appropriate error message.
  *
- * Return:      void
+ * Return:      true on success, false on failure.
  *
  * Programmer:  John Mainzer
  *              9/14/15
@@ -1063,7 +976,19 @@ vrfy_ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks)
  *-------------------------------------------------------------------------
  */
 
-void
+static hbool_t
+missing_os_grp_0(hid_t fid, const char *group_name)
+{
+    return file_has_no_path(fid, group_name);
+}
+
+static hbool_t
+rm_os_grp_0(hid_t fid, const char *group_name)
+{
+    return remove_from_file_path(fid, group_name);
+}
+
+hbool_t
 os_grp_0(hid_t fid, const char *group_name)
 {
     hid_t        gid  = -1;
@@ -1072,65 +997,52 @@ os_grp_0(hid_t fid, const char *group_name)
 
     herr_t ret;
 
-    if (pass) { /* get the file's file access property list */
-        fapl = H5Fget_access_plist(fid);
-        if (fapl <= 0) {
-            pass         = FALSE;
-            failure_mssg = "os_grp_0: H5Fget_access_plist() failed.";
-        }
-        HDassert(fapl > 0);
+    /* get the file's file access property list */
+    fapl = H5Fget_access_plist(fid);
+    if (fapl <= 0) {
+        failure_mssg = "os_grp_0: H5Fget_access_plist() failed.";
+        return false;
     }
 
-    if (pass) { /* get low and high bounds from fapl */
-        ret = H5Pget_libver_bounds(fapl, &low, &high);
+    /* get low and high bounds from fapl */
+    ret = H5Pget_libver_bounds(fapl, &low, &high);
+    if (ret < 0) {
+        failure_mssg = "os_grp_0: H5Pget_libver_bounds() failed(1).";
+        return false;
+    }
+
+    /* turn file format latest off */
+    if (low >= H5F_LIBVER_V18) {
+        ret = H5Fset_libver_bounds(fid, H5F_LIBVER_EARLIEST, high);
         if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "os_grp_0: H5Pget_libver_bounds() failed(1).";
-        }
-        HDassert(ret >= 0);
-    }
-
-    if (pass) { /* turn file format latest off */
-        if (low >= H5F_LIBVER_V18) {
-            ret = H5Fset_libver_bounds(fid, H5F_LIBVER_EARLIEST, high);
-            if (ret < 0) {
-                pass         = FALSE;
-                failure_mssg = "os_grp_0: H5Fset_libver_bounds() failed(1).";
-            }
-            HDassert(ret >= 0);
+            failure_mssg = "os_grp_0: H5Fset_libver_bounds() failed(1).";
+            return false;
         }
     }
 
-    if (pass) {
-        gid = H5Gcreate2(fid, group_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-        if (gid <= 0) {
-            pass         = FALSE;
-            failure_mssg = "os_grp_0: H5Gcreate2() failed.";
-        }
-        HDassert(gid > 0);
+    gid = H5Gcreate2(fid, group_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (gid <= 0) {
+        failure_mssg = "os_grp_0: H5Gcreate2() failed.";
+        return false;
     }
 
-    if (pass) {
-        ret = H5Gclose(gid);
+    ret = H5Gclose(gid);
 
+    if (ret < 0) {
+        failure_mssg = "os_grp_0: H5Gclose() failed.";
+        return false;
+    }
+
+    /* restore low and high bounds */
+    if (low >= H5F_LIBVER_V18) {
+        ret = H5Fset_libver_bounds(fid, low, high);
         if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "os_grp_0: H5Gclose() failed.";
-        }
-        HDassert(ret >= 0);
-    }
-
-    if (pass) { /* restore low and high bounds */
-        if (low >= H5F_LIBVER_V18) {
-            ret = H5Fset_libver_bounds(fid, low, high);
-            if (ret < 0) {
-                pass         = FALSE;
-                failure_mssg = "os_grp_0: H5Fset_libver_bounds() failed(1).";
-            }
-            HDassert(ret >= 0);
+            failure_mssg = "os_grp_0: H5Fset_libver_bounds() failed(1).";
+            return false;
         }
     }
 
+    return true;
 } /* os_grp_0() */
 
 /*-------------------------------------------------------------------------
@@ -1138,12 +1050,10 @@ os_grp_0(hid_t fid, const char *group_name)
  *
  * Purpose:     Validate an empty "old style" group.
  *
- *              If pass is false on entry, do nothing.
- *
- *              If an error is detected, set pass to FALSE, and set
+ *              If an error is detected, return false, and set
  *              failure_mssg to point to an appropriate error message.
  *
- * Return:      void
+ * Return:      true on success, false on failure.
  *
  * Programmer:  John Mainzer
  *              9/14/15
@@ -1151,7 +1061,7 @@ os_grp_0(hid_t fid, const char *group_name)
  *-------------------------------------------------------------------------
  */
 
-void
+hbool_t
 vrfy_os_grp_0(hid_t fid, const char *group_name)
 {
     hid_t      gid  = -1;
@@ -1160,93 +1070,70 @@ vrfy_os_grp_0(hid_t fid, const char *group_name)
     unsigned   crt_order_flags = 0;
     herr_t     ret;
 
-    if (pass) {
-        gid = H5Gopen2(fid, group_name, H5P_DEFAULT);
+    gid = H5Gopen2(fid, group_name, H5P_DEFAULT);
 
-        if (gid <= 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_os_grp_0: H5Gopen2() failed.";
-        }
-        HDassert(gid > 0);
+    if (gid <= 0) {
+        failure_mssg = "vrfy_os_grp_0: H5Gopen2() failed.";
+        return false;
     }
 
-    if (pass) {
-        gcpl = H5Gget_create_plist(gid);
+    gcpl = H5Gget_create_plist(gid);
 
-        if (gcpl <= 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_os_grp_0: H5Gget_create_plist() failed.";
-        }
-        HDassert(gcpl > 0);
+    if (gcpl <= 0) {
+        failure_mssg = "vrfy_os_grp_0: H5Gget_create_plist() failed.";
+        return false;
     }
 
-    if (pass) {
+    ret = H5Pget_link_creation_order(gcpl, &crt_order_flags);
 
-        ret = H5Pget_link_creation_order(gcpl, &crt_order_flags);
-
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_os_grp_0: H5Pget_link_creation_order() failed";
-        }
-        else if (0 != crt_order_flags) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_os_grp_0: 0 != crt_order_flags";
-        }
-        HDassert(ret >= 0);
-        HDassert(0 == crt_order_flags);
+    if (ret < 0) {
+        failure_mssg = "vrfy_os_grp_0: H5Pget_link_creation_order() failed";
+        return false;
+    }
+    else if (0 != crt_order_flags) {
+        failure_mssg = "vrfy_os_grp_0: 0 != crt_order_flags";
+        return false;
     }
 
-    if (pass) {
-        ret = H5Pclose(gcpl);
+    ret = H5Pclose(gcpl);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_os_grp_0: H5Pclose() failed.";
-        }
-        HDassert(ret >= 0);
+    if (ret < 0) {
+        failure_mssg = "vrfy_os_grp_0: H5Pclose() failed.";
+        return false;
     }
 
-    if (pass) {
-        HDmemset(&grp_info, 0, sizeof(grp_info));
-        ret = H5Gget_info(gid, &grp_info);
+    HDmemset(&grp_info, 0, sizeof(grp_info));
+    ret = H5Gget_info(gid, &grp_info);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_os_grp_0: H5Gget_info() failed.";
-        }
-        else if (H5G_STORAGE_TYPE_SYMBOL_TABLE != grp_info.storage_type) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_os_grp_0: H5G_STORAGE_TYPE_SYMBOL_TABLE != grp_info.storage_type";
-        }
-        else if (0 != grp_info.nlinks) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_os_grp_0: 0 != grp_info.nlinks";
-        }
-        else if (0 != grp_info.max_corder) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_os_grp_0: 0 != grp_info.max_corder";
-        }
-        else if (FALSE != grp_info.mounted) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_os_grp_0: FALSE != grp_info.mounted";
-        }
-        HDassert(ret >= 0);
-        HDassert(H5G_STORAGE_TYPE_SYMBOL_TABLE == grp_info.storage_type);
-        HDassert(0 == grp_info.nlinks);
-        HDassert(0 == grp_info.max_corder);
-        HDassert(FALSE == grp_info.mounted);
+    if (ret < 0) {
+        failure_mssg = "vrfy_os_grp_0: H5Gget_info() failed.";
+        return false;
+    }
+    else if (H5G_STORAGE_TYPE_SYMBOL_TABLE != grp_info.storage_type) {
+        failure_mssg = "vrfy_os_grp_0: H5G_STORAGE_TYPE_SYMBOL_TABLE != grp_info.storage_type";
+        return false;
+    }
+    else if (0 != grp_info.nlinks) {
+        failure_mssg = "vrfy_os_grp_0: 0 != grp_info.nlinks";
+        return false;
+    }
+    else if (0 != grp_info.max_corder) {
+        failure_mssg = "vrfy_os_grp_0: 0 != grp_info.max_corder";
+        return false;
+    }
+    else if (FALSE != grp_info.mounted) {
+        failure_mssg = "vrfy_os_grp_0: FALSE != grp_info.mounted";
+        return false;
     }
 
-    if (pass) {
-        ret = H5Gclose(gid);
+    ret = H5Gclose(gid);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_os_grp_0: H5Gclose() failed.";
-        }
-        HDassert(ret >= 0);
+    if (ret < 0) {
+        failure_mssg = "vrfy_os_grp_0: H5Gclose() failed.";
+        return false;
     }
 
+    return true;
 } /* vrfy_os_grp_0() */
 
 /*-------------------------------------------------------------------------
@@ -1255,12 +1142,10 @@ vrfy_os_grp_0(hid_t fid, const char *group_name)
  * Purpose:     Create an "old style" group, with 'nlinks' soft/hard
  *              links in it.
  *
- *              If pass is false on entry, do nothing.
- *
- *              If an error is detected, set pass to FALSE, and set
+ *              If an error is detected, return false, and set
  *              failure_mssg to point to an appropriate error message.
  *
- * Return:      void
+ * Return:      true on success, false on failure.
  *
  * Programmer:  John Mainzer
  *              9/14/15
@@ -1268,7 +1153,20 @@ vrfy_os_grp_0(hid_t fid, const char *group_name)
  *-------------------------------------------------------------------------
  */
 
-void
+static hbool_t
+missing_os_grp_n(hid_t fid, const char *group_name, int H5_ATTR_UNUSED proc_num,
+                 unsigned H5_ATTR_UNUSED nlinks)
+{
+    return file_has_no_path(fid, group_name);
+}
+
+static hbool_t
+rm_os_grp_n(hid_t fid, const char *group_name, int H5_ATTR_UNUSED proc_num, unsigned H5_ATTR_UNUSED nlinks)
+{
+    return remove_from_file_path(fid, group_name);
+}
+
+hbool_t
 os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks)
 {
     hid_t        gid = -1;
@@ -1277,95 +1175,77 @@ os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks)
     H5F_libver_t low, high;
     herr_t       ret;
 
-    if (pass) { /* get the file's file access property list */
-        fapl = H5Fget_access_plist(fid);
-        if (fapl <= 0) {
-            pass         = FALSE;
-            failure_mssg = "os_grp_n: H5Fget_access_plist() failed.";
-        }
-        HDassert(fapl > 0);
+    /* get the file's file access property list */
+    fapl = H5Fget_access_plist(fid);
+    if (fapl <= 0) {
+        failure_mssg = "os_grp_n: H5Fget_access_plist() failed.";
+        return false;
     }
 
-    if (pass) { /* get low and high bounds from fapl */
-        ret = H5Pget_libver_bounds(fapl, &low, &high);
+    /* get low and high bounds from fapl */
+    ret = H5Pget_libver_bounds(fapl, &low, &high);
+    if (ret < 0) {
+        failure_mssg = "os_grp_0: H5Pget_libver_bounds() failed(1).";
+        return false;
+    }
+
+    /* turn file format latest off */
+    if (low >= H5F_LIBVER_V18) {
+        ret = H5Fset_libver_bounds(fid, H5F_LIBVER_EARLIEST, high);
         if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "os_grp_0: H5Pget_libver_bounds() failed(1).";
-        }
-        HDassert(ret >= 0);
-    }
-
-    if (pass) { /* turn file format latest off */
-        if (low >= H5F_LIBVER_V18) {
-            ret = H5Fset_libver_bounds(fid, H5F_LIBVER_EARLIEST, high);
-            if (ret < 0) {
-                pass         = FALSE;
-                failure_mssg = "os_grp_0: H5Fset_libver_bounds() failed(1).";
-            }
-            HDassert(ret >= 0);
+            failure_mssg = "os_grp_0: H5Fset_libver_bounds() failed(1).";
+            return false;
         }
     }
 
-    if (pass) {
-        gid = H5Gcreate2(fid, group_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-        if (gid <= 0) {
-            pass         = FALSE;
-            failure_mssg = "os_grp_n: H5Gcreate2() failed.";
-        }
-        HDassert(gid > 0);
+    gid = H5Gcreate2(fid, group_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    if (gid <= 0) {
+        failure_mssg = "os_grp_n: H5Gcreate2() failed.";
+        return false;
     }
 
     HDassert(nlinks > 0);
 
-    u = 0;
-    while ((pass) && (u < nlinks)) {
+    for (u = 0; u < nlinks; u++) {
         char linkname[32];
 
-        HDsnprintf(linkname, sizeof(linkname), "ln%d_%u", proc_num, u);
+        HDsprintf(linkname, "ln%d_%u", proc_num, u);
 
         if (0 == (u % 2)) {
             ret = H5Lcreate_soft(group_name, gid, linkname, H5P_DEFAULT, H5P_DEFAULT);
             if (ret < 0) {
-                pass         = FALSE;
                 failure_mssg = "os_grp_n: H5Lcreate_soft() failed.";
+                return false;
             }
-            HDassert(ret >= 0);
-        } /* end if */
+        }
         else {
             HDassert(1 == (u % 2));
 
             ret = H5Lcreate_hard(fid, "/", gid, linkname, H5P_DEFAULT, H5P_DEFAULT);
             if (ret < 0) {
-                pass         = FALSE;
                 failure_mssg = "os_grp_n: H5Lcreate_hard() failed.";
+                return false;
             }
-            HDassert(ret >= 0);
-        } /* end else */
+        }
+    }
 
-        u++;
-    } /* end while */
+    ret = H5Gclose(gid);
 
-    if (pass) {
-        ret = H5Gclose(gid);
+    if (ret < 0) {
+        failure_mssg = "os_grp_n: H5Gclose() failed.";
+        return false;
+    }
 
+    /* restore low and high bounds */
+    if (low >= H5F_LIBVER_V18) {
+        ret = H5Fset_libver_bounds(fid, low, high);
         if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "os_grp_n: H5Gclose() failed.";
-        }
-        HDassert(ret >= 0);
-    }
-
-    if (pass) { /* restore low and high bounds */
-        if (low >= H5F_LIBVER_V18) {
-            ret = H5Fset_libver_bounds(fid, low, high);
-            if (ret < 0) {
-                pass         = FALSE;
-                failure_mssg = "os_grp_n: H5Fset_libver_bounds() failed(2).";
-            }
-            HDassert(ret >= 0);
+            failure_mssg = "os_grp_n: H5Fset_libver_bounds() failed(2).";
+            return false;
         }
     }
 
+    return true;
 } /* os_grp_n() */
 
 /*-------------------------------------------------------------------------
@@ -1374,19 +1254,17 @@ os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks)
  * Purpose:     Validate an "old style" group with 'nlinks' soft/hard
  *              links in it.
  *
- *              If pass is false on entry, do nothing.
- *
- *              If an error is detected, set pass to FALSE, and set
+ *              If an error is detected, return false, and set
  *              failure_mssg to point to an appropriate error message.
  *
- * Return:      void
+ * Return:      true on success, false on failure.
  *
  * Programmer:  John Mainzer
  *              9/14/15
  *
  *-------------------------------------------------------------------------
  */
-void
+hbool_t
 vrfy_os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks)
 {
     hid_t      gid  = -1;
@@ -1396,95 +1274,74 @@ vrfy_os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks)
     unsigned   u;
     herr_t     ret;
 
-    if (pass) {
-        gid = H5Gopen2(fid, group_name, H5P_DEFAULT);
+    gid = H5Gopen2(fid, group_name, H5P_DEFAULT);
 
-        if (gid <= 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_os_grp_n: H5Gopen2() failed";
-        }
-        HDassert(gid > 0);
+    if (gid <= 0) {
+        failure_mssg = "vrfy_os_grp_n: H5Gopen2() failed";
+        return false;
     }
 
-    if (pass) {
-        gcpl = H5Gget_create_plist(gid);
+    gcpl = H5Gget_create_plist(gid);
 
-        if (gcpl <= 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_os_grp_n: H5Gget_create_plist() failed";
-        }
-        HDassert(gcpl > 0);
+    if (gcpl <= 0) {
+        failure_mssg = "vrfy_os_grp_n: H5Gget_create_plist() failed";
+        return false;
     }
 
-    if (pass) {
-        ret = H5Pget_link_creation_order(gcpl, &crt_order_flags);
+    ret = H5Pget_link_creation_order(gcpl, &crt_order_flags);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_os_grp_n: H5Pget_link_creation_order";
-        }
-        else if (0 != crt_order_flags) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_os_grp_n: 0 != crt_order_flags";
-        }
-        HDassert(ret >= 0);
-        HDassert(0 == crt_order_flags);
+    if (ret < 0) {
+        failure_mssg = "vrfy_os_grp_n: H5Pget_link_creation_order";
+        return false;
+    }
+    else if (0 != crt_order_flags) {
+        failure_mssg = "vrfy_os_grp_n: 0 != crt_order_flags";
+        return false;
     }
 
-    if (pass) {
-        ret = H5Pclose(gcpl);
+    ret = H5Pclose(gcpl);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_os_grp_n: H5Pclose() failed";
-        }
-        HDassert(ret >= 0);
+    if (ret < 0) {
+        failure_mssg = "vrfy_os_grp_n: H5Pclose() failed";
+        return false;
     }
 
-    if (pass) {
-        HDmemset(&grp_info, 0, sizeof(grp_info));
+    HDmemset(&grp_info, 0, sizeof(grp_info));
 
-        ret = H5Gget_info(gid, &grp_info);
+    ret = H5Gget_info(gid, &grp_info);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_os_grp_n: H5Gget_info() failed";
-        }
-        else if (H5G_STORAGE_TYPE_SYMBOL_TABLE != grp_info.storage_type) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_os_grp_n: H5G_STORAGE_TYPE_SYMBOL_TABLE != grp_info.storage_type";
-        }
-        else if (nlinks != grp_info.nlinks) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_os_grp_n: nlinks != grp_info.nlinks";
-        }
-        else if (0 != grp_info.max_corder) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_os_grp_n: 0 != grp_info.max_corder";
-        }
-        else if (FALSE != grp_info.mounted) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_os_grp_n: FALSE != grp_info.mounted";
-        }
-        HDassert(ret >= 0);
-        HDassert(H5G_STORAGE_TYPE_SYMBOL_TABLE == grp_info.storage_type);
-        HDassert(nlinks == grp_info.nlinks);
-        HDassert(0 == grp_info.max_corder);
-        HDassert(FALSE == grp_info.mounted);
+    if (ret < 0) {
+        failure_mssg = "vrfy_os_grp_n: H5Gget_info() failed";
+        return false;
+    }
+    else if (H5G_STORAGE_TYPE_SYMBOL_TABLE != grp_info.storage_type) {
+        failure_mssg = "vrfy_os_grp_n: H5G_STORAGE_TYPE_SYMBOL_TABLE != grp_info.storage_type";
+        return false;
+    }
+    else if (nlinks != grp_info.nlinks) {
+        failure_mssg = "vrfy_os_grp_n: nlinks != grp_info.nlinks";
+        return false;
+    }
+    else if (0 != grp_info.max_corder) {
+        failure_mssg = "vrfy_os_grp_n: 0 != grp_info.max_corder";
+        return false;
+    }
+    else if (FALSE != grp_info.mounted) {
+        failure_mssg = "vrfy_os_grp_n: FALSE != grp_info.mounted";
+        return false;
     }
 
-    u = 0;
-    while ((pass) && (u < nlinks)) {
+    for (u = 0; u < nlinks; u++) {
         H5L_info2_t lnk_info;
         char        linkname[32];
         htri_t      link_exists;
 
-        HDsnprintf(linkname, sizeof(linkname), "ln%d_%u", proc_num, u);
+        HDsprintf(linkname, "ln%d_%u", proc_num, u);
         link_exists = H5Lexists(gid, linkname, H5P_DEFAULT);
 
         if (link_exists < 0) {
-            pass         = FALSE;
             failure_mssg = "vrfy_os_grp_n: H5Lexists() failed";
+            return false;
         }
         HDassert(link_exists >= 0);
 
@@ -1492,58 +1349,51 @@ vrfy_os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks)
         ret = H5Lget_info2(gid, linkname, &lnk_info, H5P_DEFAULT);
 
         if (ret < 0) {
-            pass         = FALSE;
             failure_mssg = "vrfy_os_grp_n: H5Lget_info() failed";
+            return false;
         }
         else if (FALSE != lnk_info.corder_valid) {
-            pass         = FALSE;
             failure_mssg = "vrfy_os_grp_n: FALSE != lnk_info.corder_valid";
+            return false;
         }
         else if (H5T_CSET_ASCII != lnk_info.cset) {
-            pass         = FALSE;
             failure_mssg = "vrfy_os_grp_n: H5T_CSET_ASCII != lnk_info.cset";
+            return false;
         }
-        HDassert(ret >= 0);
-        HDassert(FALSE == lnk_info.corder_valid);
-        HDassert(H5T_CSET_ASCII == lnk_info.cset);
 
         if (0 == (u % 2)) {
             char *slinkval;
 
             if (H5L_TYPE_SOFT != lnk_info.type) {
-                pass         = FALSE;
                 failure_mssg = "vrfy_os_grp_n: H5L_TYPE_SOFT != lnk_info.type";
+                return false;
             }
             else if ((HDstrlen(group_name) + 1) != lnk_info.u.val_size) {
-                pass         = FALSE;
                 failure_mssg = "vrfy_os_grp_n: (HDstrlen(group_name) + 1) != lnk_info.u.val_size";
+                return false;
             }
-            HDassert(H5L_TYPE_SOFT == lnk_info.type);
-            HDassert((HDstrlen(group_name) + 1) == lnk_info.u.val_size);
 
-            slinkval = (char *)HDmalloc(lnk_info.u.val_size);
+            slinkval = HDmalloc(lnk_info.u.val_size);
 
             if (!slinkval) {
-                pass         = FALSE;
                 failure_mssg = "vrfy_os_grp_n: HDmalloc of slinkval failed";
+                return false;
             }
-            HDassert(slinkval);
 
             ret = H5Lget_val(gid, linkname, slinkval, lnk_info.u.val_size, H5P_DEFAULT);
 
             if (ret < 0) {
-                pass         = FALSE;
                 failure_mssg = "vrfy_os_grp_n: H5Lget_val() failed";
+                HDfree(slinkval);
+                return false;
             }
             else if (0 != HDstrcmp(slinkval, group_name)) {
-                pass         = FALSE;
                 failure_mssg = "vrfy_os_grp_n: 0 != HDstrcmp(slinkval, group_name)";
+                HDfree(slinkval);
+                return false;
             }
-            HDassert(ret >= 0);
-            HDassert(0 == HDstrcmp(slinkval, group_name));
-
             HDfree(slinkval);
-        } /* end if */
+        }
         else {
             H5O_info2_t root_oinfo;
             int         token_cmp = 0;
@@ -1551,46 +1401,36 @@ vrfy_os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks)
             HDassert(1 == (u % 2));
 
             if (H5L_TYPE_HARD != lnk_info.type) {
-                pass         = FALSE;
                 failure_mssg = "vrfy_os_grp_n: H5L_TYPE_HARD != lnk_info.type";
+                return false;
             }
-            HDassert(H5L_TYPE_HARD == lnk_info.type);
 
             HDmemset(&root_oinfo, 0, sizeof(root_oinfo));
             ret = H5Oget_info3(fid, &root_oinfo, H5O_INFO_BASIC);
 
             if (ret < 0) {
-                pass         = FALSE;
                 failure_mssg = "vrfy_os_grp_n: H5Oget_info() failed.";
+                return false;
             }
-            else {
-                if (H5Otoken_cmp(fid, &root_oinfo.token, &lnk_info.u.token, &token_cmp) < 0) {
-                    pass         = FALSE;
-                    failure_mssg = "vrfy_os_grp_n: H5Otoken_cmp() failed.";
-                }
-
-                if (token_cmp) {
-                    pass         = FALSE;
-                    failure_mssg = "vrfy_os_grp_n: root_oinfo.token != lnk_info.u.token";
-                }
+            else if (H5Otoken_cmp(fid, &root_oinfo.token, &lnk_info.u.token, &token_cmp) < 0) {
+                failure_mssg = "vrfy_os_grp_n: H5Otoken_cmp() failed.";
+                return false;
             }
-            HDassert(ret >= 0);
-            HDassert(!token_cmp);
-        } /* end else */
-
-        u++;
-    } /* end while */
-
-    if (pass) {
-        ret = H5Gclose(gid);
-
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_os_grp_n: H5Gclose() failed.";
+            else if (token_cmp) {
+                failure_mssg = "vrfy_os_grp_n: root_oinfo.token != lnk_info.u.token";
+                return false;
+            }
         }
-        HDassert(ret >= 0);
     }
 
+    ret = H5Gclose(gid);
+
+    if (ret < 0) {
+        failure_mssg = "vrfy_os_grp_n: H5Gclose() failed.";
+        return false;
+    }
+
+    return true;
 } /* vrfy_os_grp_n() */
 
 /*-------------------------------------------------------------------------
@@ -1600,19 +1440,29 @@ vrfy_os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks)
  *              to the data set or not as indicated by the write_data
  *              parameter.
  *
- *              If pass is false on entry, do nothing.
- *
- *              If an error is detected, set pass to FALSE, and set
+ *              If an error is detected, return false, and set
  *              failure_mssg to point to an appropriate error message.
  *
- * Return:      void
+ * Return:      true on success, false on failure.
  *
  * Programmer:  John Mainzer
  *              9/14/15
  *
  *-------------------------------------------------------------------------
  */
-void
+static hbool_t
+missing_ds_ctg_i(hid_t fid, const char *dset_name, hbool_t H5_ATTR_UNUSED write_data)
+{
+    return file_has_no_path(fid, dset_name);
+}
+
+static hbool_t
+rm_ds_ctg_i(hid_t fid, const char *dset_name, hbool_t H5_ATTR_UNUSED write_data)
+{
+    return remove_from_file_path(fid, dset_name);
+}
+
+hbool_t
 ds_ctg_i(hid_t fid, const char *dset_name, hbool_t write_data)
 {
     int *    wdata = NULL;
@@ -1622,71 +1472,56 @@ ds_ctg_i(hid_t fid, const char *dset_name, hbool_t write_data)
     hsize_t  dims[1] = {DSET_DIMS};
     herr_t   ret;
 
-    if (pass) {
-        sid = H5Screate_simple(1, dims, NULL);
+    sid = H5Screate_simple(1, dims, NULL);
 
-        if (sid <= 0) {
-            pass         = FALSE;
-            failure_mssg = "ds_ctg_i: H5Screate_simple() failed";
-        }
-        HDassert(sid > 0);
+    if (sid <= 0) {
+        failure_mssg = "ds_ctg_i: H5Screate_simple() failed";
+        return false;
     }
 
-    if (pass) {
-        dsid = H5Dcreate2(fid, dset_name, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    dsid = H5Dcreate2(fid, dset_name, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-        if (dsid <= 0) {
-            pass         = FALSE;
-            failure_mssg = "ds_ctg_i: H5Dcreate2() failed";
-        }
-        HDassert(dsid > 0);
+    if (dsid <= 0) {
+        failure_mssg = "ds_ctg_i: H5Dcreate2() failed";
+        return false;
     }
 
-    if (pass) {
-        ret = H5Sclose(sid);
+    ret = H5Sclose(sid);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "ds_ctg_i: H5Sclose() failed";
-        }
-        HDassert(ret >= 0);
+    if (ret < 0) {
+        failure_mssg = "ds_ctg_i: H5Sclose() failed";
+        return false;
     }
 
-    if ((pass) && (write_data)) {
-        wdata = (int *)HDmalloc(sizeof(int) * DSET_DIMS);
+    if (write_data) {
+        wdata = HDmalloc(sizeof(int) * DSET_DIMS);
 
         if (!wdata) {
-            pass         = FALSE;
             failure_mssg = "ds_ctg_i: HDmalloc of wdata failed.";
+            return false;
         }
-        HDassert(wdata);
-    }
 
-    if ((pass) && (write_data)) {
         for (u = 0; u < DSET_DIMS; u++)
             wdata[u] = (int)u;
 
         ret = H5Dwrite(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
 
+        HDfree(wdata);
+
         if (ret < 0) {
-            pass         = FALSE;
             failure_mssg = "ds_ctg_i: H5Dwrite() failed.";
+            return false;
         }
-        HDassert(ret >= 0);
     }
 
-    HDfree(wdata);
+    ret = H5Dclose(dsid);
 
-    if (pass) {
-        ret = H5Dclose(dsid);
-
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "ds_ctg_i: H5Dclose() failed";
-        }
-        HDassert(ret >= 0);
+    if (ret < 0) {
+        failure_mssg = "ds_ctg_i: H5Dclose() failed";
+        return false;
     }
 
+    return true;
 } /* ds_ctg_i */
 
 /*-------------------------------------------------------------------------
@@ -1695,19 +1530,17 @@ ds_ctg_i(hid_t fid, const char *dset_name, hbool_t write_data)
  * Purpose:     Validate a contiguous datasets w/int datatypes. Validate
  *              data if indicated via the write_data parameter.
  *
- *              If pass is false on entry, do nothing.
- *
- *              If an error is detected, set pass to FALSE, and set
+ *              If an error is detected, return false, and set
  *              failure_mssg to point to an appropriate error message.
  *
- * Return:      void
+ * Return:      true on success, false on failure.
  *
  * Programmer:  John Mainzer
  *              9/14/15
  *
  *-------------------------------------------------------------------------
  */
-void
+hbool_t
 vrfy_ds_ctg_i(hid_t fid, const char *dset_name, hbool_t write_data)
 {
     int *              rdata = NULL;
@@ -1723,187 +1556,140 @@ vrfy_ds_ctg_i(hid_t fid, const char *dset_name, hbool_t write_data)
     htri_t             type_equal;
     herr_t             ret;
 
-    if (pass) {
-        dsid = H5Dopen2(fid, dset_name, H5P_DEFAULT);
+    dsid = H5Dopen2(fid, dset_name, H5P_DEFAULT);
 
-        if (dsid <= 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_ctg_i: H5Dopen2() failed.";
-        }
-        HDassert(dsid > 0);
+    if (dsid <= 0) {
+        failure_mssg = "vrfy_ds_ctg_i: H5Dopen2() failed.";
+        return false;
     }
 
-    if (pass) {
-        sid = H5Dget_space(dsid);
+    sid = H5Dget_space(dsid);
 
-        if (sid <= 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_ctg_i: H5Dget_space() failed.";
-        }
-        HDassert(sid > 0);
+    if (sid <= 0) {
+        failure_mssg = "vrfy_ds_ctg_i: H5Dget_space() failed.";
+        return false;
     }
 
-    if (pass) {
-        ndims = H5Sget_simple_extent_ndims(sid);
+    ndims = H5Sget_simple_extent_ndims(sid);
 
-        if (1 != ndims) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_ctg_i: 1 != ndims";
-        }
-        HDassert(1 == ndims);
+    if (1 != ndims) {
+        failure_mssg = "vrfy_ds_ctg_i: 1 != ndims";
+        return false;
     }
 
-    if (pass) {
-        ret = H5Sget_simple_extent_dims(sid, dims, max_dims);
+    ret = H5Sget_simple_extent_dims(sid, dims, max_dims);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_ctg_i: H5Sget_simple_extent_dims() failed";
-        }
-        else if (DSET_DIMS != dims[0]) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_ctg_i: DSET_DIMS != dims[0]";
-        }
-        else if (DSET_DIMS != max_dims[0]) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_ctg_i: DSET_DIMS != max_dims[0]";
-        }
-        HDassert(ret >= 0);
-        HDassert(DSET_DIMS == dims[0]);
-        HDassert(DSET_DIMS == max_dims[0]);
+    if (ret < 0) {
+        failure_mssg = "vrfy_ds_ctg_i: H5Sget_simple_extent_dims() failed";
+        return false;
+    }
+    else if (DSET_DIMS != dims[0]) {
+        failure_mssg = "vrfy_ds_ctg_i: DSET_DIMS != dims[0]";
+        return false;
+    }
+    else if (DSET_DIMS != max_dims[0]) {
+        failure_mssg = "vrfy_ds_ctg_i: DSET_DIMS != max_dims[0]";
+        return false;
     }
 
-    if (pass) {
-        ret = H5Sclose(sid);
+    ret = H5Sclose(sid);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_ctg_i: H5Sclose() failed.";
-        }
-        HDassert(ret >= 0);
+    if (ret < 0) {
+        failure_mssg = "vrfy_ds_ctg_i: H5Sclose() failed.";
+        return false;
     }
 
-    if (pass) {
-        tid = H5Dget_type(dsid);
+    tid = H5Dget_type(dsid);
 
-        if (tid <= 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_ctg_i: H5Dget_type() failed.";
-        }
-        HDassert(tid > 0);
+    if (tid <= 0) {
+        failure_mssg = "vrfy_ds_ctg_i: H5Dget_type() failed.";
+        return false;
     }
 
-    if (pass) {
-        type_equal = H5Tequal(tid, H5T_NATIVE_INT);
+    type_equal = H5Tequal(tid, H5T_NATIVE_INT);
 
-        if (1 != type_equal) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_ctg_i: type not H5T_NATIVE_INT";
-        }
-        HDassert(1 == type_equal);
+    if (1 != type_equal) {
+        failure_mssg = "vrfy_ds_ctg_i: type not H5T_NATIVE_INT";
+        return false;
     }
 
-    if (pass) {
-        ret = H5Tclose(tid);
+    ret = H5Tclose(tid);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_ctg_i: H5Tclose() failed.";
-        }
-        HDassert(ret >= 0);
+    if (ret < 0) {
+        failure_mssg = "vrfy_ds_ctg_i: H5Tclose() failed.";
+        return false;
     }
 
-    if (pass) {
-        ret = H5Dget_space_status(dsid, &allocation);
+    ret = H5Dget_space_status(dsid, &allocation);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_ctg_i: H5Dget_space_status() failed.";
-        }
-        else if (write_data && (allocation != H5D_SPACE_STATUS_ALLOCATED)) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_ctg_i: write_data && allocation != H5D_SPACE_STATUS_ALLOCATED";
-        }
-        else if (!write_data && (allocation != H5D_SPACE_STATUS_NOT_ALLOCATED)) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_ctg_i: !write_data && allocation != H5D_SPACE_STATUS_NOT_ALLOCATED";
-        }
-        HDassert(ret >= 0);
-        HDassert((write_data && allocation == H5D_SPACE_STATUS_ALLOCATED) ||
-                 (!write_data && allocation == H5D_SPACE_STATUS_NOT_ALLOCATED));
+    if (ret < 0) {
+        failure_mssg = "vrfy_ds_ctg_i: H5Dget_space_status() failed.";
+        return false;
+    }
+    else if (write_data && (allocation != H5D_SPACE_STATUS_ALLOCATED)) {
+        failure_mssg = "vrfy_ds_ctg_i: "
+                       "write_data && allocation != H5D_SPACE_STATUS_ALLOCATED";
+        return false;
+    }
+    else if (!write_data && (allocation != H5D_SPACE_STATUS_NOT_ALLOCATED)) {
+        failure_mssg = "vrfy_ds_ctg_i: "
+                       "!write_data && allocation != H5D_SPACE_STATUS_NOT_ALLOCATED";
+        return false;
     }
 
-    if (pass) {
-        dcpl = H5Dget_create_plist(dsid);
+    dcpl = H5Dget_create_plist(dsid);
 
-        if (dcpl <= 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_ctg_i: H5Dget_create_plist() failed.";
-        }
-        HDassert(dcpl > 0);
+    if (dcpl <= 0) {
+        failure_mssg = "vrfy_ds_ctg_i: H5Dget_create_plist() failed.";
+        return false;
     }
 
-    if (pass) {
-        layout = H5Pget_layout(dcpl);
+    layout = H5Pget_layout(dcpl);
 
-        if (H5D_CONTIGUOUS != layout) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_ctg_i: H5D_CONTIGUOUS != layout";
-        }
-        HDassert(H5D_CONTIGUOUS == layout);
+    if (H5D_CONTIGUOUS != layout) {
+        failure_mssg = "vrfy_ds_ctg_i: H5D_CONTIGUOUS != layout";
+        return false;
     }
 
-    if (pass) {
-        ret = H5Pclose(dcpl);
+    ret = H5Pclose(dcpl);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_ctg_i: H5Pclose() failed.";
-        }
-        HDassert(ret >= 0);
+    if (ret < 0) {
+        failure_mssg = "vrfy_ds_ctg_i: H5Pclose() failed.";
+        return false;
     }
 
-    if ((pass) && (write_data)) {
-        rdata = (int *)HDmalloc(sizeof(int) * DSET_DIMS);
+    if (write_data) {
+        rdata = HDmalloc(sizeof(int) * DSET_DIMS);
 
         if (!rdata) {
-            pass         = FALSE;
             failure_mssg = "vrfy_ds_ctg_i: HDmalloc of rdata failed.";
+            return false;
         }
-        HDassert(rdata);
-    }
 
-    if ((pass) && (write_data)) {
         ret = H5Dread(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
         if (ret < 0) {
-            pass         = FALSE;
             failure_mssg = "vrfy_ds_ctg_i: H5Dread() failed.";
+            return false;
         }
-        HDassert(ret >= 0);
-    }
 
-    if ((pass) && (write_data)) {
         for (u = 0; u < DSET_DIMS; u++) {
             if ((int)u != rdata[u]) {
-                pass         = FALSE;
                 failure_mssg = "vrfy_ds_ctg_i: u != rdata[u].";
-                break;
+                HDfree(rdata);
+                return false;
             }
-            HDassert((int)u == rdata[u]);
         }
-    } /* end if */
-
-    HDfree(rdata);
-
-    if (pass) {
-        ret = H5Dclose(dsid);
-
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_ctg_i: H5Dclose() failed";
-        }
-        HDassert(ret >= 0);
+        HDfree(rdata);
     }
+
+    ret = H5Dclose(dsid);
+
+    if (ret < 0) {
+        failure_mssg = "vrfy_ds_ctg_i: H5Dclose() failed";
+        return false;
+    }
+
+    return true;
 
 } /* vrfy_ds_ctg_i() */
 
@@ -1914,19 +1700,29 @@ vrfy_ds_ctg_i(hid_t fid, const char *dset_name, hbool_t write_data)
  *              to the data set or not as indicated by the write_data
  *              parameter.
  *
- *              If pass is false on entry, do nothing.
- *
- *              If an error is detected, set pass to FALSE, and set
+ *              If an error is detected, return false, and set
  *              failure_mssg to point to an appropriate error message.
  *
- * Return:      void
+ * Return:      true on success, false on failure.
  *
  * Programmer:  John Mainzer
  *              9/14/15
  *
  *-------------------------------------------------------------------------
  */
-void
+static hbool_t
+missing_ds_chk_i(hid_t fid, const char *dset_name, hbool_t H5_ATTR_UNUSED write_data)
+{
+    return file_has_no_path(fid, dset_name);
+}
+
+static hbool_t
+rm_ds_chk_i(hid_t fid, const char *dset_name, hbool_t H5_ATTR_UNUSED write_data)
+{
+    return remove_from_file_path(fid, dset_name);
+}
+
+hbool_t
 ds_chk_i(hid_t fid, const char *dset_name, hbool_t write_data)
 {
     int *    wdata = NULL;
@@ -1938,99 +1734,75 @@ ds_chk_i(hid_t fid, const char *dset_name, hbool_t write_data)
     hsize_t  chunk_dims[1] = {DSET_CHUNK_DIMS};
     herr_t   ret;
 
-    if (pass) {
-        sid = H5Screate_simple(1, dims, NULL);
+    sid = H5Screate_simple(1, dims, NULL);
 
-        if (sid <= 0) {
-            pass         = FALSE;
-            failure_mssg = "ds_chk_i: H5Screate_simple() failed.";
-        }
-        HDassert(sid > 0);
+    if (sid <= 0) {
+        failure_mssg = "ds_chk_i: H5Screate_simple() failed.";
+        return false;
     }
 
-    if (pass) {
-        dcpl = H5Pcreate(H5P_DATASET_CREATE);
+    dcpl = H5Pcreate(H5P_DATASET_CREATE);
 
-        if (dcpl <= 0) {
-            pass         = FALSE;
-            failure_mssg = "ds_chk_i: H5Pcreate() failed.";
-        }
-        HDassert(dcpl > 0);
+    if (dcpl <= 0) {
+        failure_mssg = "ds_chk_i: H5Pcreate() failed.";
+        return false;
     }
 
-    if (pass) {
-        ret = H5Pset_chunk(dcpl, 1, chunk_dims);
+    ret = H5Pset_chunk(dcpl, 1, chunk_dims);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "ds_chk_i: H5Pset_chunk() failed.";
-        }
-        HDassert(ret >= 0);
+    if (ret < 0) {
+        failure_mssg = "ds_chk_i: H5Pset_chunk() failed.";
+        return false;
     }
 
-    if (pass) {
-        dsid = H5Dcreate2(fid, dset_name, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    dsid = H5Dcreate2(fid, dset_name, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
 
-        if (dsid <= 0) {
-            pass         = FALSE;
-            failure_mssg = "ds_chk_i: H5Dcreate2() failed";
-        }
-        HDassert(dsid > 0);
+    if (dsid <= 0) {
+        failure_mssg = "ds_chk_i: H5Dcreate2() failed";
+        return false;
     }
 
-    if (pass) {
-        ret = H5Pclose(dcpl);
+    ret = H5Pclose(dcpl);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "ds_chk_i: H5Pclose() failed.";
-        }
-        HDassert(ret >= 0);
+    if (ret < 0) {
+        failure_mssg = "ds_chk_i: H5Pclose() failed.";
+        return false;
     }
 
-    if (pass) {
-        ret = H5Sclose(sid);
+    ret = H5Sclose(sid);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "ds_chk_i: H5Sclose() failed.";
-        }
-        HDassert(ret >= 0);
+    if (ret < 0) {
+        failure_mssg = "ds_chk_i: H5Sclose() failed.";
+        return false;
     }
 
-    if ((pass) && (write_data)) {
-        wdata = (int *)HDmalloc(sizeof(int) * DSET_DIMS);
+    if (write_data) {
+        wdata = HDmalloc(sizeof(int) * DSET_DIMS);
 
         if (!wdata) {
-            pass         = FALSE;
             failure_mssg = "ds_chk_i: HDmalloc of wdata failed.";
+            return false;
         }
-        HDassert(wdata);
-    }
 
-    if ((pass) && (write_data)) {
         for (u = 0; u < DSET_DIMS; u++)
             wdata[u] = (int)u;
 
         ret = H5Dwrite(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "ds_chk_i: H5Dwrite() failed.";
-        }
-        HDassert(ret >= 0);
         HDfree(wdata);
-    } /* end if */
-
-    if (pass) {
-        ret = H5Dclose(dsid);
-
         if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "ds_chk_i: H5Dclose() failed.";
+            failure_mssg = "ds_chk_i: H5Dwrite() failed.";
+            return false;
         }
-        HDassert(ret >= 0);
     }
 
+    ret = H5Dclose(dsid);
+
+    if (ret < 0) {
+        failure_mssg = "ds_chk_i: H5Dclose() failed.";
+        return false;
+    }
+
+    return true;
 } /* ds_chk_i */
 
 /*-------------------------------------------------------------------------
@@ -2039,19 +1811,17 @@ ds_chk_i(hid_t fid, const char *dset_name, hbool_t write_data)
  * Purpose:     Validate a chunked datasets w/int datatypes. Validate
  *              data if indicated via the write_data parameter.
  *
- *              If pass is false on entry, do nothing.
- *
- *              If an error is detected, set pass to FALSE, and set
+ *              If an error is detected, return false, and set
  *              failure_mssg to point to an appropriate error message.
  *
- * Return:      void
+ * Return:      true on success, false on failure.
  *
  * Programmer:  John Mainzer
  *              9/14/15
  *
  *-------------------------------------------------------------------------
  */
-void
+hbool_t
 vrfy_ds_chk_i(hid_t fid, const char *dset_name, hbool_t write_data)
 {
     int *              rdata = NULL;
@@ -2067,203 +1837,149 @@ vrfy_ds_chk_i(hid_t fid, const char *dset_name, hbool_t write_data)
     htri_t             type_equal;
     herr_t             ret;
 
-    if (pass) {
-        dsid = H5Dopen2(fid, dset_name, H5P_DEFAULT);
+    dsid = H5Dopen2(fid, dset_name, H5P_DEFAULT);
 
-        if (dsid <= 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_chk_i: H5Dopen2() failed.";
-        }
-        HDassert(dsid > 0);
+    if (dsid <= 0) {
+        failure_mssg = "vrfy_ds_chk_i: H5Dopen2() failed.";
+        return false;
     }
 
-    if (pass) {
-        sid = H5Dget_space(dsid);
+    sid = H5Dget_space(dsid);
 
-        if (sid <= 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_chk_i: H5Dget_space() failed.";
-        }
-        HDassert(sid > 0);
+    if (sid <= 0) {
+        failure_mssg = "vrfy_ds_chk_i: H5Dget_space() failed.";
+        return false;
     }
 
-    if (pass) {
-        ndims = H5Sget_simple_extent_ndims(sid);
+    ndims = H5Sget_simple_extent_ndims(sid);
 
-        if (1 != ndims) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_chk_i: 1 != ndims";
-        }
-        HDassert(1 == ndims);
+    if (1 != ndims) {
+        failure_mssg = "vrfy_ds_chk_i: 1 != ndims";
+        return false;
     }
 
-    if (pass) {
-        ret = H5Sget_simple_extent_dims(sid, dims, max_dims);
+    ret = H5Sget_simple_extent_dims(sid, dims, max_dims);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_chk_i: H5Sget_simple_extent_dims() failed";
-        }
-        else if (DSET_DIMS != dims[0]) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_chk_i: DSET_DIMS != dims[0]";
-        }
-        else if (DSET_DIMS != max_dims[0]) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_chk_i: DSET_DIMS != max_dims[0]";
-        }
-        HDassert(ret >= 0);
-        HDassert(DSET_DIMS == dims[0]);
-        HDassert(DSET_DIMS == max_dims[0]);
+    if (ret < 0) {
+        failure_mssg = "vrfy_ds_chk_i: H5Sget_simple_extent_dims() failed";
+        return false;
+    }
+    else if (DSET_DIMS != dims[0]) {
+        failure_mssg = "vrfy_ds_chk_i: DSET_DIMS != dims[0]";
+        return false;
+    }
+    else if (DSET_DIMS != max_dims[0]) {
+        failure_mssg = "vrfy_ds_chk_i: DSET_DIMS != max_dims[0]";
+        return false;
     }
 
-    if (pass) {
-        ret = H5Sclose(sid);
+    ret = H5Sclose(sid);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_chk_i: H5Sclose() failed.";
-        }
-        HDassert(ret >= 0);
+    if (ret < 0) {
+        failure_mssg = "vrfy_ds_chk_i: H5Sclose() failed.";
+        return false;
     }
 
-    if (pass) {
-        tid = H5Dget_type(dsid);
+    tid = H5Dget_type(dsid);
 
-        if (tid <= 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_chk_i: H5Dget_type() failed.";
-        }
-        HDassert(tid > 0);
+    if (tid <= 0) {
+        failure_mssg = "vrfy_ds_chk_i: H5Dget_type() failed.";
+        return false;
     }
 
-    if (pass) {
-        type_equal = H5Tequal(tid, H5T_NATIVE_INT);
+    type_equal = H5Tequal(tid, H5T_NATIVE_INT);
 
-        if (1 != type_equal) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_chk_i: tid != H5T_NATIVE_INT";
-        }
-        HDassert(1 == type_equal);
+    if (1 != type_equal) {
+        failure_mssg = "vrfy_ds_chk_i: tid != H5T_NATIVE_INT";
+        return false;
     }
 
-    if (pass) {
-        ret = H5Tclose(tid);
+    ret = H5Tclose(tid);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_chk_i: H5Tclose() failed.";
-        }
-        HDassert(ret >= 0);
+    if (ret < 0) {
+        failure_mssg = "vrfy_ds_chk_i: H5Tclose() failed.";
+        return false;
     }
 
-    if (pass) {
-        ret = H5Dget_space_status(dsid, &allocation);
+    ret = H5Dget_space_status(dsid, &allocation);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_chk_i: H5Dget_space_status() failed.";
-        }
-        else if (write_data && (allocation != H5D_SPACE_STATUS_ALLOCATED)) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_chk_i: write_data && allocation != H5D_SPACE_STATUS_ALLOCATED";
-        }
-        else if (!write_data && (allocation != H5D_SPACE_STATUS_NOT_ALLOCATED)) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_chk_i: !write_data && allocation != H5D_SPACE_STATUS_NOT_ALLOCATED";
-        }
-        HDassert(ret >= 0);
-        HDassert((write_data && allocation == H5D_SPACE_STATUS_ALLOCATED) ||
-                 (!write_data && allocation == H5D_SPACE_STATUS_NOT_ALLOCATED));
+    if (ret < 0) {
+        failure_mssg = "vrfy_ds_chk_i: H5Dget_space_status() failed.";
+        return false;
+    }
+    else if (write_data && (allocation != H5D_SPACE_STATUS_ALLOCATED)) {
+        failure_mssg = "vrfy_ds_chk_i: write_data && allocation != H5D_SPACE_STATUS_ALLOCATED";
+        return false;
+    }
+    else if (!write_data && (allocation != H5D_SPACE_STATUS_NOT_ALLOCATED)) {
+        failure_mssg = "vrfy_ds_chk_i: !write_data && allocation != H5D_SPACE_STATUS_NOT_ALLOCATED";
+        return false;
     }
 
-    if (pass) {
-        dcpl = H5Dget_create_plist(dsid);
+    dcpl = H5Dget_create_plist(dsid);
 
-        if (dcpl <= 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_chk_i: H5Dget_create_plist() failed.";
-        }
-        HDassert(dcpl > 0);
+    if (dcpl <= 0) {
+        failure_mssg = "vrfy_ds_chk_i: H5Dget_create_plist() failed.";
+        return false;
     }
 
-    if (pass) {
-        layout = H5Pget_layout(dcpl);
+    layout = H5Pget_layout(dcpl);
 
-        if (H5D_CHUNKED != layout) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_chk_i: H5D_CHUNKED != layout";
-        }
-        HDassert(H5D_CHUNKED == layout);
+    if (H5D_CHUNKED != layout) {
+        failure_mssg = "vrfy_ds_chk_i: H5D_CHUNKED != layout";
+        return false;
     }
 
-    if (pass) {
-        ret = H5Pget_chunk(dcpl, 1, chunk_dims);
+    ret = H5Pget_chunk(dcpl, 1, chunk_dims);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_chk_i: H5Pget_chunk";
-        }
-        else if (DSET_CHUNK_DIMS != chunk_dims[0]) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_chk_i: ";
-        }
-        HDassert(ret >= 0);
-        HDassert(DSET_CHUNK_DIMS == chunk_dims[0]);
+    if (ret < 0) {
+        failure_mssg = "vrfy_ds_chk_i: H5Pget_chunk";
+        return false;
+    }
+    else if (DSET_CHUNK_DIMS != chunk_dims[0]) {
+        failure_mssg = "vrfy_ds_chk_i: ";
+        return false;
     }
 
-    if (pass) {
-        ret = H5Pclose(dcpl);
+    ret = H5Pclose(dcpl);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_chk_i: H5Pclose() failed.";
-        }
-        HDassert(ret >= 0);
+    if (ret < 0) {
+        failure_mssg = "vrfy_ds_chk_i: H5Pclose() failed.";
+        return false;
     }
 
-    if ((pass) && (write_data)) {
-        rdata = (int *)HDmalloc(sizeof(int) * DSET_DIMS);
+    if (write_data) {
+        rdata = HDmalloc(sizeof(int) * DSET_DIMS);
 
         if (!rdata) {
-            pass         = FALSE;
             failure_mssg = "vrfy_ds_chk_i: HDmalloc of rdata failed.";
+            return false;
         }
-        HDassert(rdata);
-    }
 
-    if ((pass) && (write_data)) {
         ret = H5Dread(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
         if (ret < 0) {
-            pass         = FALSE;
             failure_mssg = "vrfy_ds_chk_i: H5Dread() failed.";
+            return false;
         }
-        HDassert(ret >= 0);
-    }
 
-    if ((pass) && (write_data)) {
         for (u = 0; u < DSET_DIMS; u++) {
             if ((int)u != rdata[u]) {
-                pass         = FALSE;
                 failure_mssg = "vrfy_ds_chk_i: u != rdata[u]";
-                break;
+                HDfree(rdata);
+                return false;
             }
-            HDassert((int)u == rdata[u]);
         }
-    } /* end if */
-
-    HDfree(rdata);
-
-    if (pass) {
-        ret = H5Dclose(dsid);
-
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_chk_i: H5Dclose() failed.";
-        }
-        HDassert(ret >= 0);
+        HDfree(rdata);
     }
 
+    ret = H5Dclose(dsid);
+
+    if (ret < 0) {
+        failure_mssg = "vrfy_ds_chk_i: H5Dclose() failed.";
+        return false;
+    }
+
+    return true;
 } /* vrfy_ds_chk_i() */
 
 /*-------------------------------------------------------------------------
@@ -2273,19 +1989,29 @@ vrfy_ds_chk_i(hid_t fid, const char *dset_name, hbool_t write_data)
  *              to the data set or not as indicated by the write_data
  *              parameter.
  *
- *              If pass is false on entry, do nothing.
- *
- *              If an error is detected, set pass to FALSE, and set
+ *              If an error is detected, return false, and set
  *              failure_mssg to point to an appropriate error message.
  *
- * Return:      void
+ * Return:      true on success, false on failure.
  *
  * Programmer:  John Mainzer
  *              9/14/15
  *
  *-------------------------------------------------------------------------
  */
-void
+static hbool_t
+missing_ds_cpt_i(hid_t fid, const char *dset_name, hbool_t H5_ATTR_UNUSED write_data)
+{
+    return file_has_no_path(fid, dset_name);
+}
+
+static hbool_t
+rm_ds_cpt_i(hid_t fid, const char *dset_name, hbool_t H5_ATTR_UNUSED write_data)
+{
+    return remove_from_file_path(fid, dset_name);
+}
+
+hbool_t
 ds_cpt_i(hid_t fid, const char *dset_name, hbool_t write_data)
 {
     int *    wdata = NULL;
@@ -2296,100 +2022,76 @@ ds_cpt_i(hid_t fid, const char *dset_name, hbool_t write_data)
     hsize_t  dims[1] = {DSET_COMPACT_DIMS};
     herr_t   ret;
 
-    if (pass) {
-        sid = H5Screate_simple(1, dims, NULL);
+    sid = H5Screate_simple(1, dims, NULL);
 
-        if (sid <= 0) {
-            pass         = FALSE;
-            failure_mssg = "ds_cpt_i: H5Screate_simple() failed.";
-        }
-        HDassert(sid > 0);
+    if (sid <= 0) {
+        failure_mssg = "ds_cpt_i: H5Screate_simple() failed.";
+        return false;
     }
 
-    if (pass) {
-        dcpl = H5Pcreate(H5P_DATASET_CREATE);
+    dcpl = H5Pcreate(H5P_DATASET_CREATE);
 
-        if (dcpl <= 0) {
-            pass         = FALSE;
-            failure_mssg = "ds_cpt_i: H5Pcreate() failed.";
-        }
-        HDassert(dcpl > 0);
+    if (dcpl <= 0) {
+        failure_mssg = "ds_cpt_i: H5Pcreate() failed.";
+        return false;
     }
 
-    if (pass) {
-        ret = H5Pset_layout(dcpl, H5D_COMPACT);
+    ret = H5Pset_layout(dcpl, H5D_COMPACT);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "ds_cpt_i: H5Pset_layout() failed.";
-        }
-        HDassert(ret >= 0);
+    if (ret < 0) {
+        failure_mssg = "ds_cpt_i: H5Pset_layout() failed.";
+        return false;
     }
 
-    if (pass) {
-        dsid = H5Dcreate2(fid, dset_name, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    dsid = H5Dcreate2(fid, dset_name, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
 
-        if (dsid <= 0) {
-            pass         = FALSE;
-            failure_mssg = "ds_cpt_i: H5Dcreate2() failed.";
-        }
-        HDassert(dsid > 0);
+    if (dsid <= 0) {
+        failure_mssg = "ds_cpt_i: H5Dcreate2() failed.";
+        return false;
     }
 
-    if (pass) {
-        ret = H5Pclose(dcpl);
+    ret = H5Pclose(dcpl);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "ds_cpt_i: H5Pclose() failed.";
-        }
-        HDassert(ret >= 0);
+    if (ret < 0) {
+        failure_mssg = "ds_cpt_i: H5Pclose() failed.";
+        return false;
     }
 
-    if (pass) {
-        ret = H5Sclose(sid);
+    ret = H5Sclose(sid);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "ds_cpt_i: H5Sclose() failed.";
-        }
-        HDassert(ret >= 0);
+    if (ret < 0) {
+        failure_mssg = "ds_cpt_i: H5Sclose() failed.";
+        return false;
     }
 
-    if ((pass) && (write_data)) {
-        wdata = (int *)HDmalloc(sizeof(int) * DSET_COMPACT_DIMS);
+    if (write_data) {
+        wdata = HDmalloc(sizeof(int) * DSET_COMPACT_DIMS);
 
         if (!wdata) {
-            pass         = FALSE;
             failure_mssg = "ds_cpt_i: HDmalloc of wdata failed.";
+            return false;
         }
-        HDassert(wdata);
-    }
 
-    if ((pass) && (write_data)) {
         for (u = 0; u < DSET_COMPACT_DIMS; u++)
             wdata[u] = (int)u;
 
         ret = H5Dwrite(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
-
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "ds_cpt_i: H5Dwrite() failed.";
-        }
-        HDassert(ret >= 0);
-
         HDfree(wdata);
-    } /* end if */
-
-    if (pass) {
-        ret = H5Dclose(dsid);
 
         if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "ds_cpt_i: H5Dclose() failed.";
+            failure_mssg = "ds_cpt_i: H5Dwrite() failed.";
+            return false;
         }
-        HDassert(ret >= 0);
     }
+
+    ret = H5Dclose(dsid);
+
+    if (ret < 0) {
+        failure_mssg = "ds_cpt_i: H5Dclose() failed.";
+        return false;
+    }
+
+    return true;
 
 } /* ds_cpt_i() */
 
@@ -2399,19 +2101,17 @@ ds_cpt_i(hid_t fid, const char *dset_name, hbool_t write_data)
  * Purpose:     Validate a compact datasets w/int datatypes. Validate
  *              data if indicated via the write_data parameter.
  *
- *              If pass is false on entry, do nothing.
- *
- *              If an error is detected, set pass to FALSE, and set
+ *              If an error is detected, return false, and set
  *              failure_mssg to point to an appropriate error message.
  *
- * Return:      void
+ * Return:      true on success, false on failure.
  *
  * Programmer:  John Mainzer
  *              9/14/15
  *
  *-------------------------------------------------------------------------
  */
-void
+hbool_t
 vrfy_ds_cpt_i(hid_t fid, const char *dset_name, hbool_t write_data)
 {
     int *              rdata = NULL;
@@ -2427,183 +2127,134 @@ vrfy_ds_cpt_i(hid_t fid, const char *dset_name, hbool_t write_data)
     htri_t             type_equal;
     herr_t             ret;
 
-    if (pass) {
-        dsid = H5Dopen2(fid, dset_name, H5P_DEFAULT);
+    dsid = H5Dopen2(fid, dset_name, H5P_DEFAULT);
 
-        if (dsid <= 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_cpt_i: H5Dopen2() failed.";
-        }
-        HDassert(dsid > 0);
+    if (dsid <= 0) {
+        failure_mssg = "vrfy_ds_cpt_i: H5Dopen2() failed.";
+        return false;
     }
 
-    if (pass) {
-        sid = H5Dget_space(dsid);
+    sid = H5Dget_space(dsid);
 
-        if (sid <= 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_cpt_i: H5Dget_space() failed.";
-        }
-        HDassert(sid > 0);
+    if (sid <= 0) {
+        failure_mssg = "vrfy_ds_cpt_i: H5Dget_space() failed.";
+        return false;
     }
 
-    if (pass) {
-        ndims = H5Sget_simple_extent_ndims(sid);
+    ndims = H5Sget_simple_extent_ndims(sid);
 
-        if (1 != ndims) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_cpt_i: 1 != ndims";
-        }
-        HDassert(1 == ndims);
+    if (1 != ndims) {
+        failure_mssg = "vrfy_ds_cpt_i: 1 != ndims";
+        return false;
     }
 
-    if (pass) {
-        ret = H5Sget_simple_extent_dims(sid, dims, max_dims);
+    ret = H5Sget_simple_extent_dims(sid, dims, max_dims);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_cpt_i: H5Sget_simple_extent_dims() failed";
-        }
-        else if (DSET_COMPACT_DIMS != dims[0]) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_cpt_i: DSET_COMPACT_DIMS != dims[0]";
-        }
-        else if (DSET_COMPACT_DIMS != max_dims[0]) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_cpt_i: DSET_COMPACT_DIMS != max_dims[0]";
-        }
-        HDassert(ret >= 0);
-        HDassert(DSET_COMPACT_DIMS == dims[0]);
-        HDassert(DSET_COMPACT_DIMS == max_dims[0]);
+    if (ret < 0) {
+        failure_mssg = "vrfy_ds_cpt_i: H5Sget_simple_extent_dims() failed";
+        return false;
+    }
+    else if (DSET_COMPACT_DIMS != dims[0]) {
+        failure_mssg = "vrfy_ds_cpt_i: DSET_COMPACT_DIMS != dims[0]";
+        return false;
+    }
+    else if (DSET_COMPACT_DIMS != max_dims[0]) {
+        failure_mssg = "vrfy_ds_cpt_i: DSET_COMPACT_DIMS != max_dims[0]";
+        return false;
     }
 
-    if (pass) {
-        ret = H5Sclose(sid);
+    ret = H5Sclose(sid);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_cpt_i: H5Sclose() failed.";
-        }
-        HDassert(ret >= 0);
+    if (ret < 0) {
+        failure_mssg = "vrfy_ds_cpt_i: H5Sclose() failed.";
+        return false;
     }
 
-    if (pass) {
-        tid = H5Dget_type(dsid);
+    tid = H5Dget_type(dsid);
 
-        if (tid <= 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_cpt_i: H5Dget_type() failed.";
-        }
-        HDassert(tid > 0);
+    if (tid <= 0) {
+        failure_mssg = "vrfy_ds_cpt_i: H5Dget_type() failed.";
+        return false;
     }
 
-    if (pass) {
-        type_equal = H5Tequal(tid, H5T_NATIVE_INT);
+    type_equal = H5Tequal(tid, H5T_NATIVE_INT);
 
-        if (1 != type_equal) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_cpt_i: type != H5T_NATIVE_INT";
-        }
-        HDassert(1 == type_equal);
+    if (1 != type_equal) {
+        failure_mssg = "vrfy_ds_cpt_i: type != H5T_NATIVE_INT";
+        return false;
     }
 
-    if (pass) {
-        ret = H5Tclose(tid);
+    ret = H5Tclose(tid);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_cpt_i: H5Tclose() failed.";
-        }
-        HDassert(ret >= 0);
+    if (ret < 0) {
+        failure_mssg = "vrfy_ds_cpt_i: H5Tclose() failed.";
+        return false;
     }
 
-    if (pass) {
-        ret = H5Dget_space_status(dsid, &allocation);
+    ret = H5Dget_space_status(dsid, &allocation);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_cpt_i: H5Dget_space_status() failed.";
-        }
-        else if (H5D_SPACE_STATUS_ALLOCATED != allocation) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_cpt_i: H5D_SPACE_STATUS_ALLOCATED != allocation";
-        }
-        HDassert(ret >= 0);
-        HDassert(H5D_SPACE_STATUS_ALLOCATED == allocation);
+    if (ret < 0) {
+        failure_mssg = "vrfy_ds_cpt_i: H5Dget_space_status() failed.";
+        return false;
+    }
+    else if (H5D_SPACE_STATUS_ALLOCATED != allocation) {
+        failure_mssg = "vrfy_ds_cpt_i: H5D_SPACE_STATUS_ALLOCATED != allocation";
+        return false;
     }
 
-    if (pass) {
-        dcpl = H5Dget_create_plist(dsid);
+    dcpl = H5Dget_create_plist(dsid);
 
-        if (dcpl <= 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_cpt_i: H5Dget_create_plist() failed.";
-        }
-        HDassert(dcpl > 0);
+    if (dcpl <= 0) {
+        failure_mssg = "vrfy_ds_cpt_i: H5Dget_create_plist() failed.";
+        return false;
     }
 
-    if (pass) {
-        layout = H5Pget_layout(dcpl);
+    layout = H5Pget_layout(dcpl);
 
-        if (H5D_COMPACT != layout) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_cpt_i: H5D_COMPACT != layout";
-        }
-        HDassert(H5D_COMPACT == layout);
+    if (H5D_COMPACT != layout) {
+        failure_mssg = "vrfy_ds_cpt_i: H5D_COMPACT != layout";
+        return false;
     }
 
-    if (pass) {
-        ret = H5Pclose(dcpl);
+    ret = H5Pclose(dcpl);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_cpt_i: H5Pclose() failed.";
-        }
-        HDassert(ret >= 0);
+    if (ret < 0) {
+        failure_mssg = "vrfy_ds_cpt_i: H5Pclose() failed.";
+        return false;
     }
 
-    if ((pass) && (write_data)) {
-        rdata = (int *)HDmalloc(sizeof(int) * DSET_COMPACT_DIMS);
+    if (write_data) {
+        rdata = HDmalloc(sizeof(int) * DSET_COMPACT_DIMS);
 
         if (!rdata) {
-            pass         = FALSE;
             failure_mssg = "vrfy_ds_cpt_i: HDmalloc of rdata failed.";
+            return false;
         }
-        HDassert(rdata);
-    }
 
-    if ((pass) && (write_data)) {
         ret = H5Dread(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
         if (ret < 0) {
-            pass         = FALSE;
             failure_mssg = "vrfy_ds_cpt_i: H5Dread() failed.";
+            return false;
         }
-        HDassert(ret >= 0);
-    }
 
-    if ((pass) && (write_data)) {
         for (u = 0; u < DSET_COMPACT_DIMS; u++) {
             if ((int)u != rdata[u]) {
-                pass         = FALSE;
                 failure_mssg = "vrfy_ds_cpt_i: (int)u != rdata[u]";
-                break;
+                HDfree(rdata);
+                return false;
             }
-            HDassert((int)u == rdata[u]);
         }
-    } /* end if */
-
-    HDfree(rdata);
-
-    if (pass) {
-        ret = H5Dclose(dsid);
-
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_cpt_i: H5Dclose() failed.";
-        }
-        HDassert(ret >= 0);
+        HDfree(rdata);
     }
 
+    ret = H5Dclose(dsid);
+
+    if (ret < 0) {
+        failure_mssg = "vrfy_ds_cpt_i: H5Dclose() failed.";
+        return false;
+    }
+
+    return true;
 } /* vrfy_ds_cpt_i() */
 
 /*-------------------------------------------------------------------------
@@ -2613,19 +2264,29 @@ vrfy_ds_cpt_i(hid_t fid, const char *dset_name, hbool_t write_data)
  *              Write data to the data set or not as indicated by the
  *              write_data parameter.
  *
- *              If pass is false on entry, do nothing.
- *
- *              If an error is detected, set pass to FALSE, and set
+ *              If an error is detected, return false, and set
  *              failure_mssg to point to an appropriate error message.
  *
- * Return:      void
+ * Return:      true on success, false on failure.
  *
  * Programmer:  John Mainzer
  *              9/14/15
  *
  *-------------------------------------------------------------------------
  */
-void
+static hbool_t
+missing_ds_ctg_v(hid_t fid, const char *dset_name, hbool_t H5_ATTR_UNUSED write_data)
+{
+    return file_has_no_path(fid, dset_name);
+}
+
+static hbool_t
+rm_ds_ctg_v(hid_t fid, const char *dset_name, hbool_t H5_ATTR_UNUSED write_data)
+{
+    return remove_from_file_path(fid, dset_name);
+}
+
+hbool_t
 ds_ctg_v(hid_t fid, const char *dset_name, hbool_t write_data)
 {
     hid_t    dsid    = -1;
@@ -2636,122 +2297,100 @@ ds_ctg_v(hid_t fid, const char *dset_name, hbool_t write_data)
     hvl_t *  wdata = NULL;
     unsigned u;
 
-    if (pass) {
-        sid = H5Screate_simple(1, dims, NULL);
+    sid = H5Screate_simple(1, dims, NULL);
 
-        if (sid <= 0) {
-            pass         = FALSE;
-            failure_mssg = "ds_ctg_v: H5Screate_simple";
-        }
-        HDassert(sid > 0);
+    if (sid <= 0) {
+        failure_mssg = "ds_ctg_v: H5Screate_simple";
+        return false;
     }
 
-    if (pass) {
-        tid = H5Tvlen_create(H5T_NATIVE_INT);
+    tid = H5Tvlen_create(H5T_NATIVE_INT);
 
-        if (tid <= 0) {
-            pass         = FALSE;
-            failure_mssg = "ds_ctg_v: H5Tvlen_create() failed.";
-        }
-        HDassert(tid > 0);
+    if (tid <= 0) {
+        failure_mssg = "ds_ctg_v: H5Tvlen_create() failed.";
+        return false;
     }
 
-    if (pass) {
-        dsid = H5Dcreate2(fid, dset_name, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    dsid = H5Dcreate2(fid, dset_name, tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-        if (dsid <= 0) {
-            pass         = FALSE;
-            failure_mssg = "ds_ctg_v: H5Dcreate2() failed.";
-        }
-        HDassert(dsid > 0);
+    if (dsid <= 0) {
+        failure_mssg = "ds_ctg_v: H5Dcreate2() failed.";
+        return false;
     }
 
-    if ((pass) && (write_data)) {
-        wdata = (hvl_t *)HDmalloc(sizeof(hvl_t) * DSET_SMALL_DIMS);
+    if (write_data) {
+        wdata = HDmalloc(sizeof(hvl_t) * DSET_SMALL_DIMS);
 
         if (!wdata) {
-            pass         = FALSE;
             failure_mssg = "ds_ctg_v: HDmalloc of wdata failed.";
+            return false;
         }
-        HDassert(wdata);
-    }
 
-    if ((pass) && (write_data)) {
         for (u = 0; u < DSET_SMALL_DIMS; u++) {
             int *    tdata;
             unsigned len;
             unsigned v;
 
             len   = (u % 10) + 1;
-            tdata = (int *)HDmalloc(sizeof(int) * len);
+            tdata = HDmalloc(sizeof(int) * len);
 
             if (!tdata) {
-                pass         = FALSE;
                 failure_mssg = "ds_ctg_v: HDmalloc of tdata failed.";
-                break;
+                while (u > 0)
+                    free(wdata[u--].p);
+                HDfree(wdata);
+                return false;
             }
-            HDassert(tdata);
 
             for (v = 0; v < len; v++)
                 tdata[v] = (int)(u + v);
 
             wdata[u].len = len;
             wdata[u].p   = tdata;
-        } /* end for */
-    }
+        }
 
-    if ((pass) && (write_data)) {
         ret = H5Dwrite(dsid, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
 
         if (ret < 0) {
-            pass         = FALSE;
             failure_mssg = "ds_ctg_v: H5Dwrite() failed.";
+            for (u = 0; u < DSET_SMALL_DIMS; u++)
+                free(wdata[u].p);
+            HDfree(wdata);
+            return false;
         }
-        HDassert(ret >= 0);
-    }
 
-    if ((pass) && (write_data)) {
         ret = H5Treclaim(tid, sid, H5P_DEFAULT, wdata);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "ds_ctg_v: H5Treclaim() failed.";
-        }
-        HDassert(ret >= 0);
-
         HDfree(wdata);
-    } /* end if */
-
-    if (pass) {
-        ret = H5Sclose(sid);
-
-        if (sid < 0) {
-            pass         = FALSE;
-            failure_mssg = "ds_ctg_v: H5Sclose() failed.";
-        }
-        HDassert(ret >= 0);
-    }
-
-    if (pass) {
-        ret = H5Tclose(tid);
-
-        if (tid < 0) {
-            pass         = FALSE;
-            failure_mssg = "ds_ctg_v: H5Tclose() failed.";
-        }
-        HDassert(ret >= 0);
-    }
-
-    if (pass) {
-        ret = H5Dclose(dsid);
 
         if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "ds_ctg_v: H5Dclose() failed.";
+            failure_mssg = "ds_ctg_v: H5Treclaim() failed.";
+            return false;
         }
-        HDassert(ret >= 0);
     }
 
+    ret = H5Sclose(sid);
+
+    if (ret < 0) {
+        failure_mssg = "ds_ctg_v: H5Sclose() failed.";
+        return false;
+    }
+
+    ret = H5Tclose(tid);
+
+    if (tid < 0) {
+        failure_mssg = "ds_ctg_v: H5Tclose() failed.";
+        return false;
+    }
+
+    ret = H5Dclose(dsid);
+
+    if (ret < 0) {
+        failure_mssg = "ds_ctg_v: H5Dclose() failed.";
+        return false;
+    }
+
+    return true;
 } /* ds_ctg_v() */
 
 /*-------------------------------------------------------------------------
@@ -2760,19 +2399,17 @@ ds_ctg_v(hid_t fid, const char *dset_name, hbool_t write_data)
  * Purpose:     Validate a contiguous datasets w/variable-length datatypes.
  *              Validate data if indicated via the write_data parameter.
  *
- *              If pass is false on entry, do nothing.
- *
- *              If an error is detected, set pass to FALSE, and set
+ *              If an error is detected, return false, and set
  *              failure_mssg to point to an appropriate error message.
  *
- * Return:      void
+ * Return:      true on success, false on failure.
  *
  * Programmer:  John Mainzer
  *              9/14/15
  *
  *-------------------------------------------------------------------------
  */
-void
+hbool_t
 vrfy_ds_ctg_v(hid_t fid, const char *dset_name, hbool_t write_data)
 {
     hid_t              dsid    = -1;
@@ -2789,167 +2426,121 @@ vrfy_ds_ctg_v(hid_t fid, const char *dset_name, hbool_t write_data)
     unsigned           u;
     herr_t             ret;
 
-    if (pass) {
-        dsid = H5Dopen2(fid, dset_name, H5P_DEFAULT);
+    dsid = H5Dopen2(fid, dset_name, H5P_DEFAULT);
 
-        if (dsid <= 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_ctg_v: H5Dopen2() failed.";
-        }
-        HDassert(dsid > 0);
+    if (dsid <= 0) {
+        failure_mssg = "vrfy_ds_ctg_v: H5Dopen2() failed.";
+        return false;
     }
 
-    if (pass) {
-        sid = H5Dget_space(dsid);
+    sid = H5Dget_space(dsid);
 
-        if (sid <= 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_ctg_v: H5Dget_space() failed";
-        }
-        HDassert(sid > 0);
+    if (sid <= 0) {
+        failure_mssg = "vrfy_ds_ctg_v: H5Dget_space() failed";
+        return false;
     }
 
-    if (pass) {
-        ndims = H5Sget_simple_extent_ndims(sid);
+    ndims = H5Sget_simple_extent_ndims(sid);
 
-        if (1 != ndims) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_ctg_v: 1 != ndims";
-        }
-        HDassert(1 == ndims);
+    if (1 != ndims) {
+        failure_mssg = "vrfy_ds_ctg_v: 1 != ndims";
+        return false;
     }
 
-    if (pass) {
-        ret = H5Sget_simple_extent_dims(sid, dims, max_dims);
+    ret = H5Sget_simple_extent_dims(sid, dims, max_dims);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_ctg_v: H5Sget_simple_extent_dims() failed.";
-        }
-        else if (DSET_SMALL_DIMS != dims[0]) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_ctg_v: DSET_SMALL_DIMS != dims[0]";
-        }
-        else if (DSET_SMALL_DIMS != max_dims[0]) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_ctg_v: DSET_SMALL_DIMS != max_dims[0]";
-        }
-        HDassert(ret >= 0);
-        HDassert(DSET_SMALL_DIMS == dims[0]);
-        HDassert(DSET_SMALL_DIMS == max_dims[0]);
+    if (ret < 0) {
+        failure_mssg = "vrfy_ds_ctg_v: H5Sget_simple_extent_dims() failed.";
+        return false;
+    }
+    else if (DSET_SMALL_DIMS != dims[0]) {
+        failure_mssg = "vrfy_ds_ctg_v: DSET_SMALL_DIMS != dims[0]";
+        return false;
+    }
+    else if (DSET_SMALL_DIMS != max_dims[0]) {
+        failure_mssg = "vrfy_ds_ctg_v: DSET_SMALL_DIMS != max_dims[0]";
+        return false;
     }
 
-    if (pass) {
-        tid = H5Dget_type(dsid);
+    tid = H5Dget_type(dsid);
 
-        if (tid <= 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_ctg_v: H5Dget_type() failed.";
-        }
-        HDassert(tid > 0);
+    if (tid <= 0) {
+        failure_mssg = "vrfy_ds_ctg_v: H5Dget_type() failed.";
+        return false;
     }
 
-    if (pass) {
-        tmp_tid = H5Tvlen_create(H5T_NATIVE_INT);
+    tmp_tid = H5Tvlen_create(H5T_NATIVE_INT);
 
-        if (tmp_tid <= 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_ctg_v: H5Tvlen_create() failed.";
-        }
-        HDassert(tmp_tid > 0);
+    if (tmp_tid <= 0) {
+        failure_mssg = "vrfy_ds_ctg_v: H5Tvlen_create() failed.";
+        return false;
     }
 
-    if (pass) {
-        type_equal = H5Tequal(tid, tmp_tid);
+    type_equal = H5Tequal(tid, tmp_tid);
 
-        if (1 != type_equal) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_ctg_v: type != vlen H5T_NATIVE_INT";
-        }
-        HDassert(1 == type_equal);
+    if (1 != type_equal) {
+        failure_mssg = "vrfy_ds_ctg_v: type != vlen H5T_NATIVE_INT";
+        return false;
     }
 
-    if (pass) {
-        ret = H5Tclose(tmp_tid);
+    ret = H5Tclose(tmp_tid);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_ctg_v: H5Tclose() failed.";
-        }
-        HDassert(ret >= 0);
+    if (ret < 0) {
+        failure_mssg = "vrfy_ds_ctg_v: H5Tclose() failed.";
+        return false;
     }
 
-    if (pass) {
-        ret = H5Dget_space_status(dsid, &allocation);
+    ret = H5Dget_space_status(dsid, &allocation);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_ctg_v: H5Dget_space_status() failed";
-        }
-        else if (write_data && (allocation != H5D_SPACE_STATUS_ALLOCATED)) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_ctg_v: write_data && allocation != H5D_SPACE_STATUS_ALLOCATED";
-        }
-        else if (!write_data && (allocation != H5D_SPACE_STATUS_NOT_ALLOCATED)) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_ctg_v: !write_data && allocation != H5D_SPACE_STATUS_NOT_ALLOCATED";
-        }
-        HDassert(ret >= 0);
-        HDassert((write_data && allocation == H5D_SPACE_STATUS_ALLOCATED) ||
-                 (!write_data && allocation == H5D_SPACE_STATUS_NOT_ALLOCATED));
+    if (ret < 0) {
+        failure_mssg = "vrfy_ds_ctg_v: H5Dget_space_status() failed";
+        return false;
+    }
+    else if (write_data && (allocation != H5D_SPACE_STATUS_ALLOCATED)) {
+        failure_mssg = "vrfy_ds_ctg_v: write_data && allocation != H5D_SPACE_STATUS_ALLOCATED";
+        return false;
+    }
+    else if (!write_data && (allocation != H5D_SPACE_STATUS_NOT_ALLOCATED)) {
+        failure_mssg = "vrfy_ds_ctg_v: !write_data && allocation != H5D_SPACE_STATUS_NOT_ALLOCATED";
+        return false;
     }
 
-    if (pass) {
-        dcpl = H5Dget_create_plist(dsid);
+    dcpl = H5Dget_create_plist(dsid);
 
-        if (dcpl <= 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_ctg_v: H5Dget_create_plist() failed.";
-        }
-        HDassert(dcpl > 0);
+    if (dcpl <= 0) {
+        failure_mssg = "vrfy_ds_ctg_v: H5Dget_create_plist() failed.";
+        return false;
     }
 
-    if (pass) {
-        layout = H5Pget_layout(dcpl);
+    layout = H5Pget_layout(dcpl);
 
-        if (H5D_CONTIGUOUS != layout) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_ctg_v: H5D_CONTIGUOUS != layout";
-        }
-        HDassert(H5D_CONTIGUOUS == layout);
+    if (H5D_CONTIGUOUS != layout) {
+        failure_mssg = "vrfy_ds_ctg_v: H5D_CONTIGUOUS != layout";
+        return false;
     }
 
-    if (pass) {
-        ret = H5Pclose(dcpl);
+    ret = H5Pclose(dcpl);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_ctg_v: H5Pclose() failed.";
-        }
-        HDassert(ret >= 0);
+    if (ret < 0) {
+        failure_mssg = "vrfy_ds_ctg_v: H5Pclose() failed.";
+        return false;
     }
 
-    if ((pass) && (write_data)) {
-        rdata = (hvl_t *)HDmalloc(sizeof(hvl_t) * DSET_SMALL_DIMS);
+    if (write_data) {
+        rdata = HDmalloc(sizeof(hvl_t) * DSET_SMALL_DIMS);
 
         if (!rdata) {
-            pass         = FALSE;
             failure_mssg = "vrfy_ds_ctg_v: HDmalloc of rdata failed.";
+            return false;
         }
-        HDassert(rdata);
-    }
 
-    if ((pass) && (write_data)) {
         ret = H5Dread(dsid, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata);
 
         if (ret < 0) {
-            pass         = FALSE;
             failure_mssg = "vrfy_ds_ctg_v: H5Dread() failed.";
+            return false;
         }
-        HDassert(ret >= 0);
-    }
 
-    if ((pass) && (write_data)) {
         for (u = 0; u < DSET_SMALL_DIMS; u++) {
             unsigned len;
             unsigned v;
@@ -2959,64 +2550,222 @@ vrfy_ds_ctg_v(hid_t fid, const char *dset_name, hbool_t write_data)
                 int *tdata = (int *)rdata[u].p;
 
                 if (!tdata) {
-                    pass         = FALSE;
                     failure_mssg = "vrfy_ds_ctg_v: !tdata";
-                    break;
+                    return false;
                 }
                 else if ((int)(u + v) != tdata[v]) {
-                    pass         = FALSE;
                     failure_mssg = "vrfy_ds_ctg_v: (int)(u + v) != tdata[v]";
-                    break;
+                    return false;
                 }
-                HDassert(tdata);
-                HDassert((int)(u + v) == tdata[v]);
-            } /* end for */
-        }     /* end for */
-    }
+            }
+        }
 
-    if ((pass) && (write_data)) {
         ret = H5Treclaim(tid, sid, H5P_DEFAULT, rdata);
 
+        HDfree(rdata);
+
         if (ret < 0) {
-            pass         = FALSE;
             failure_mssg = "vrfy_ds_ctg_v: H5Treclaim() failed.";
+            return false;
         }
-        HDassert(ret >= 0);
-    } /* end if */
-
-    HDfree(rdata);
-
-    if (pass) {
-        ret = H5Sclose(sid);
-
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_ctg_v: H5Sclose() failed.";
-        }
-        HDassert(ret >= 0);
     }
 
-    if (pass) {
-        ret = H5Tclose(tid);
+    ret = H5Sclose(sid);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_ctg_v: H5Tclose() failed.";
-        }
-        HDassert(ret >= 0);
+    if (ret < 0) {
+        failure_mssg = "vrfy_ds_ctg_v: H5Sclose() failed.";
+        return false;
     }
 
-    if (pass) {
-        ret = H5Dclose(dsid);
+    ret = H5Tclose(tid);
 
-        if (ret < 0) {
-            pass         = FALSE;
-            failure_mssg = "vrfy_ds_ctg_v: H5Dclose() failed.";
-        }
-        HDassert(ret >= 0);
+    if (ret < 0) {
+        failure_mssg = "vrfy_ds_ctg_v: H5Tclose() failed.";
+        return false;
     }
 
+    ret = H5Dclose(dsid);
+
+    if (ret < 0) {
+        failure_mssg = "vrfy_ds_ctg_v: H5Dclose() failed.";
+        return false;
+    }
+
+    return true;
 } /* vrfy_ds_ctg_v() */
+
+/* Create or, if `validate` is true, validate objects in file `fid` under
+ * group `full_path`.  `proc_num` tells the processor number the test runs
+ * on.  The set of objects to create/validate is chosen by `selector`.
+ *
+ * The valid selectors are consecutive and they start at 0.
+ *
+ * If the selected objects cannot be created/validated, `*okp` will be set
+ * to `false`, indicating that the selected objects could not be
+ * created/validated, and `failure_mmsg` set to a description of the error
+ * that occurred.  If the objects can be created/validated, then `*okp`
+ * will be set to `true`.
+ *
+ * The program may also fail an assert()ion if the selected objects cannot
+ * be created/validated.
+ *
+ * Return `true` if the selector was valid, `false` if it was not.
+ */
+
+static hbool_t
+create_or_validate_selection(hid_t fid, const char *full_path, int selector, zoo_config_t config,
+                             phase_t phase, bool *okp)
+{
+    bool ok;
+
+    switch (selector) {
+        case 0: /* Add & verify an empty "new style" group */
+            ok = ns_grp_0_fntbl[phase](fid, full_path);
+            break;
+        case 1: /* Add & verify a compact "new style" group (3 link messages) */
+            ok = ns_grp_c_fntbl[phase](fid, full_path, 3);
+            break;
+        case 2:
+            /* Add & verify a dense "new style" group (w/300 links,
+             * in v2 B-tree & fractal heap)
+             */
+            ok = ns_grp_d_fntbl[phase](fid, full_path, 300);
+            break;
+        case 3: /* Add & verify an empty "old style" group to file */
+            ok = os_grp_0_fntbl[phase](fid, full_path);
+            break;
+        case 4:
+            /* Add & verify an "old style" group (w/300 links, in
+             * v1 B-tree & local heap) to file
+             */
+            ok = os_grp_n_fntbl[phase](fid, full_path, config.proc_num, 300);
+            break;
+        case 5:
+            /* Add & verify a contiguous dataset w/integer datatype (but no data)
+             * to file
+             */
+            ok = ds_ctg_i_fntbl[phase](fid, full_path, false);
+            break;
+        case 6:
+            /* Add & verify a contiguous dataset w/integer datatype (with data)
+             * to file
+             */
+            ok = ds_ctg_i_fntbl[phase](fid, full_path, true);
+            break;
+        case 7:
+            /* Add & verify a chunked dataset w/integer datatype (but no data)
+             * to file
+             */
+            ok = ds_chk_i_fntbl[phase](fid, full_path, false);
+            break;
+        case 8:
+            /* Add & verify a chunked dataset w/integer datatype (and data)
+             * to file
+             */
+            ok = ds_chk_i_fntbl[phase](fid, full_path, true);
+            break;
+        case 9:
+            /* Add & verify a compact dataset w/integer datatype (but no data)
+             * to file
+             */
+            ok = config.skip_compact || ds_cpt_i_fntbl[phase](fid, full_path, false);
+            break;
+        case 10:
+            /* Add & verify a compact dataset w/integer datatype (and data)
+             * to file
+             */
+            ok = config.skip_compact || ds_cpt_i_fntbl[phase](fid, full_path, true);
+            break;
+        case 11:
+            /* Add & verify a contiguous dataset w/variable-length datatype
+             * (but no data) to file
+             */
+            ok = config.skip_varlen || ds_ctg_v_fntbl[phase](fid, full_path, false);
+            break;
+        case 12:
+            /* Add & verify a contiguous dataset w/variable-length datatype
+             * (and data) to file
+             */
+            ok = config.skip_varlen || ds_ctg_v_fntbl[phase](fid, full_path, true);
+            break;
+        default:
+            return false;
+    }
+    *okp = ok;
+    return true;
+}
+
+/* Sleep for no more than `max_pause_msecs` milliseconds. */
+static void
+random_pause(unsigned int max_pause_msecs)
+{
+    uint64_t nsecs_per_msec;
+    uint64_t nsecs;
+
+    if (max_pause_msecs == 0)
+        return;
+
+    nsecs_per_msec = 1 + (uint64_t)HDrandom() % (1000 * 1000);
+    nsecs          = max_pause_msecs * nsecs_per_msec;
+
+    H5_nanosleep(nsecs);
+}
+
+/* Create and validate objects or, if `only_validate` is true, only
+ * validate objects in file `fid` under group `base_path`. `config.proc_num`
+ * tells the processor number the test runs on.  If `config.skip_varlen` is
+ * true, do NOT perform tests that use variable-length data.
+ *
+ * Return true if all tests pass, false if any test fails.
+ */
+
+static hbool_t
+tend_zoo(hid_t fid, const char *base_path, struct timespec *lastmsgtime, zoo_config_t config,
+         const phase_t *phase, size_t nphases)
+{
+    char    full_path[1024];
+    int     i, nwritten;
+    size_t  j;
+    char *  leafp;
+    hbool_t ok = TRUE;
+
+    nwritten = HDsnprintf(full_path, sizeof(full_path), "%s/*", base_path);
+    if (nwritten < 0 || (size_t)nwritten >= sizeof(full_path)) {
+        failure_mssg = "tend_zoo: snprintf failed";
+        return FALSE;
+    }
+
+    if ((leafp = HDstrrchr(full_path, '*')) == NULL) {
+        failure_mssg = "tend_zoo: strrchr failed";
+        return FALSE;
+    }
+
+    for (i = 0; ok; i++) {
+        HDassert('A' + i <= 'Z');
+        *leafp = (char)('A' + i);
+        for (j = 0; j < nphases; j++) {
+            if (!create_or_validate_selection(fid, full_path, i, config, phase[j], &ok))
+                goto out;
+            if (phase[j] == PHASE_CREATE || phase[j] == PHASE_DELETE)
+                zoo_create_hook(fid);
+        }
+        random_pause(config.max_pause_msecs);
+    }
+out:
+    if (!ok) {
+        /* Currently not used: this step makes sure the operation doesn't take too long.
+         * Any test that sets config.msgival or lastmsgtime to 0 will skip this step */
+        if (HDstrcmp(failure_mssg, last_failure_mssg) != 0 &&
+            ((config.msgival.tv_sec || config.msgival.tv_nsec)) &&
+            (lastmsgtime->tv_sec || lastmsgtime->tv_nsec)) {
+            if (below_speed_limit(lastmsgtime, &config.msgival)) {
+                last_failure_mssg = failure_mssg;
+                HDfprintf(stderr, "%s: %s", __func__, failure_mssg);
+            }
+        }
+    }
+    return ok;
+}
 
 /*-------------------------------------------------------------------------
  * Function:    create_zoo
@@ -3026,9 +2775,7 @@ vrfy_ds_ctg_v(hid_t fid, const char *dset_name, hbool_t write_data)
  *              include instances of all on disk data structures used
  *              in the HDF5 library.
  *
- *              If pass is false on entry, do nothing.
- *
- *              If an error is detected, set pass to FALSE, and set
+ *              If an error is detected, return false, and set
  *              failure_mssg to point to an appropriate error message.
  *
  *              This function was initially created to assist in testing
@@ -3038,212 +2785,16 @@ vrfy_ds_ctg_v(hid_t fid, const char *dset_name, hbool_t write_data)
  *              the superblock.
  *
  *              Note the associated validate_zoo() function.
- *
- * Return:      void
- *
- * Programmer:  John Mainzer
- *              9/14/15
- *
  *-------------------------------------------------------------------------
  */
 
-void
-create_zoo(hid_t fid, const char *base_path, int proc_num)
+hbool_t
+create_zoo(hid_t fid, const char *base_path, struct timespec *lastmsgtime, zoo_config_t config)
 {
-    char full_path[1024];
+    const phase_t phase[] = {PHASE_CREATE, PHASE_VALIDATE};
 
-    HDassert(base_path);
-
-    /* Add & verify an empty "new style" group */
-    if (pass) {
-        HDsnprintf(full_path, sizeof(full_path), "%s/A", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        ns_grp_0(fid, full_path);
-    }
-
-    if (pass) {
-        HDsnprintf(full_path, sizeof(full_path), "%s/A", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_ns_grp_0(fid, full_path);
-    }
-
-    /* Add & verify a compact "new style" group (3 link messages) */
-    if (pass) {
-        HDsnprintf(full_path, sizeof(full_path), "%s/B", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        ns_grp_c(fid, full_path, 3);
-    }
-
-    if (pass) {
-        HDsnprintf(full_path, sizeof(full_path), "%s/B", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_ns_grp_c(fid, full_path, 3);
-    }
-
-    /* Add & verify a dense "new style" group (w/300 links, in v2 B-tree &
-     * fractal heap)
-     */
-    if (pass) {
-        HDsnprintf(full_path, sizeof(full_path), "%s/C", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        ns_grp_d(fid, full_path, 300);
-    }
-
-    if (pass) {
-        HDsnprintf(full_path, sizeof(full_path), "%s/C", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_ns_grp_d(fid, full_path, 300);
-    }
-
-    /* Add & verify an empty "old style" group to file */
-    if (pass) {
-        HDsnprintf(full_path, sizeof(full_path), "%s/D", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        os_grp_0(fid, full_path);
-    }
-
-    if (pass) {
-        HDsnprintf(full_path, sizeof(full_path), "%s/D", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_os_grp_0(fid, full_path);
-    }
-
-    /* Add & verify an "old style" group (w/300 links, in v1 B-tree &
-     * local heap) to file
-     */
-    if (pass) {
-        HDsnprintf(full_path, sizeof(full_path), "%s/E", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        os_grp_n(fid, full_path, proc_num, 300);
-    }
-
-    if (pass) {
-        HDsnprintf(full_path, sizeof(full_path), "%s/E", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_os_grp_n(fid, full_path, proc_num, 300);
-    }
-
-    /* Add & verify a contiguous dataset w/integer datatype (but no data)
-     * to file
-     */
-    if (pass) {
-        HDsnprintf(full_path, sizeof(full_path), "%s/F", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        ds_ctg_i(fid, full_path, FALSE);
-    }
-
-    if (pass) {
-        HDsnprintf(full_path, sizeof(full_path), "%s/F", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_ds_ctg_i(fid, full_path, FALSE);
-    }
-
-    /* Add & verify a contiguous dataset w/integer datatype (with data)
-     * to file
-     */
-    if (pass) {
-        HDsnprintf(full_path, sizeof(full_path), "%s/G", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        ds_ctg_i(fid, full_path, TRUE);
-    }
-
-    if (pass) {
-        HDsnprintf(full_path, sizeof(full_path), "%s/G", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_ds_ctg_i(fid, full_path, TRUE);
-    }
-
-    /* Add & verify a chunked dataset w/integer datatype (but no data)
-     * to file
-     */
-    if (pass) {
-        HDsnprintf(full_path, sizeof(full_path), "%s/H", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        ds_chk_i(fid, full_path, FALSE);
-    }
-
-    if (pass) {
-        HDsnprintf(full_path, sizeof(full_path), "%s/H", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_ds_chk_i(fid, full_path, FALSE);
-    }
-
-    /* Add & verify a chunked dataset w/integer datatype (and data)
-     * to file
-     */
-    if (pass) {
-        HDsnprintf(full_path, sizeof(full_path), "%s/I", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        ds_chk_i(fid, full_path, TRUE);
-    }
-
-    if (pass) {
-        HDsnprintf(full_path, sizeof(full_path), "%s/I", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_ds_chk_i(fid, full_path, TRUE);
-    }
-
-    /* Add & verify a compact dataset w/integer datatype (but no data)
-     * to file
-     */
-    if (pass) {
-        HDsnprintf(full_path, sizeof(full_path), "%s/J", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        ds_cpt_i(fid, full_path, FALSE);
-    }
-
-    if (pass) {
-        HDsnprintf(full_path, sizeof(full_path), "%s/J", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_ds_cpt_i(fid, full_path, FALSE);
-    }
-
-    /* Add & verify a compact dataset w/integer datatype (and data)
-     * to file
-     */
-    if (pass) {
-        HDsnprintf(full_path, sizeof(full_path), "%s/K", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        ds_cpt_i(fid, full_path, TRUE);
-    }
-
-    if (pass) {
-        HDsnprintf(full_path, sizeof(full_path), "%s/K", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_ds_cpt_i(fid, full_path, TRUE);
-    }
-
-    /* Add & verify a contiguous dataset w/variable-length datatype
-     * (but no data) to file
-     */
-    if (pass) {
-        HDsnprintf(full_path, sizeof(full_path), "%s/L", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        ds_ctg_v(fid, full_path, FALSE);
-    }
-
-    if (pass) {
-        HDsnprintf(full_path, sizeof(full_path), "%s/L", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_ds_ctg_v(fid, full_path, FALSE);
-    }
-
-    /* Add & verify a contiguous dataset w/variable-length datatype
-     * (and data) to file
-     */
-    if (pass) {
-        HDsnprintf(full_path, sizeof(full_path), "%s/M", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        ds_ctg_v(fid, full_path, TRUE);
-    }
-
-    if (pass) {
-        HDsnprintf(full_path, sizeof(full_path), "%s/M", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_ds_ctg_v(fid, full_path, TRUE);
-    }
-
-} /* create_zoo() */
+    return tend_zoo(fid, base_path, lastmsgtime, config, phase, NELMTS(phase));
+}
 
 /*-------------------------------------------------------------------------
  * Function:    validate_zoo
@@ -3251,9 +2802,7 @@ create_zoo(hid_t fid, const char *base_path, int proc_num)
  * Purpose:     Given the path to a group in which a "zoo" has been
  *              constructed, validate the objects in the "zoo".
  *
- *              If pass is false on entry, do nothing.
- *
- *              If an error is detected, set pass to FALSE, and set
+ *              If an error is detected, return false, and set
  *              failure_mssg to point to an appropriate error message.
  *
  *              This function was initially created to assist in testing
@@ -3262,132 +2811,30 @@ create_zoo(hid_t fid, const char *base_path, int proc_num)
  *              on disk structures that can occur with this version of
  *              the superblock.
  *
- *              Note the associated validate_zoo() function.
- *
- * Return:      void
- *
- * Programmer:  John Mainzer
- *              9/14/15
- *
+ *              Note the associated create_zoo() function.
  *-------------------------------------------------------------------------
  */
 
-void
-validate_zoo(hid_t fid, const char *base_path, int proc_num)
+hbool_t
+validate_zoo(hid_t fid, const char *base_path, struct timespec *lastmsgtime, zoo_config_t config)
 {
-    char full_path[1024];
+    const phase_t phase[] = {PHASE_VALIDATE};
 
-    HDassert(base_path);
+    return tend_zoo(fid, base_path, lastmsgtime, config, phase, NELMTS(phase));
+}
 
-    /* validate an empty "new style" group */
-    if (pass) {
-        HDsnprintf(full_path, sizeof(full_path), "%s/A", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_ns_grp_0(fid, full_path);
-    }
+hbool_t
+delete_zoo(hid_t fid, const char *base_path, struct timespec *lastmsgtime, zoo_config_t config)
+{
+    const phase_t phase[] = {PHASE_DELETE};
 
-    /* validate a compact "new style" group (3 link messages) */
-    if (pass) {
-        HDsnprintf(full_path, sizeof(full_path), "%s/B", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_ns_grp_c(fid, full_path, 3);
-    }
+    return tend_zoo(fid, base_path, lastmsgtime, config, phase, NELMTS(phase));
+}
 
-    /* validate a dense "new style" group (w/300 links, in v2 B-tree &
-     * fractal heap)
-     */
-    if (pass) {
-        HDsnprintf(full_path, sizeof(full_path), "%s/C", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_ns_grp_d(fid, full_path, 300);
-    }
+hbool_t
+validate_deleted_zoo(hid_t fid, const char *base_path, struct timespec *lastmsgtime, zoo_config_t config)
+{
+    const phase_t phase[] = {PHASE_VALIDATE_DELETION};
 
-    /* validate an empty "old style" group in file */
-    if (pass) {
-        HDsnprintf(full_path, sizeof(full_path), "%s/D", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_os_grp_0(fid, full_path);
-    }
-
-    /* validate an "old style" group (w/300 links, in v1 B-tree &
-     * local heap)
-     */
-    if (pass) {
-        HDsnprintf(full_path, sizeof(full_path), "%s/E", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_os_grp_n(fid, full_path, proc_num, 300);
-    }
-
-    /* validate a contiguous dataset w/integer datatype (but no data)
-     * in file.
-     */
-    if (pass) {
-        HDsnprintf(full_path, sizeof(full_path), "%s/F", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_ds_ctg_i(fid, full_path, FALSE);
-    }
-
-    /* validate a contiguous dataset w/integer datatype (with data)
-     * in file.
-     */
-    if (pass) {
-        HDsnprintf(full_path, sizeof(full_path), "%s/G", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_ds_ctg_i(fid, full_path, TRUE);
-    }
-
-    /* validate a chunked dataset w/integer datatype (but no data)
-     * in file
-     */
-    if (pass) {
-        HDsnprintf(full_path, sizeof(full_path), "%s/H", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_ds_chk_i(fid, full_path, FALSE);
-    }
-
-    /* validate a chunked dataset w/integer datatype (and data)
-     * in file
-     */
-    if (pass) {
-        HDsnprintf(full_path, sizeof(full_path), "%s/I", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_ds_chk_i(fid, full_path, TRUE);
-    }
-
-    /* Validate a compact dataset w/integer datatype (but no data)
-     * in file
-     */
-    if (pass) {
-        HDsnprintf(full_path, sizeof(full_path), "%s/J", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_ds_cpt_i(fid, full_path, FALSE);
-    }
-
-    /* validate a compact dataset w/integer datatype (and data)
-     * in file
-     */
-    if (pass) {
-        HDsnprintf(full_path, sizeof(full_path), "%s/K", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_ds_cpt_i(fid, full_path, TRUE);
-    }
-
-    /* validate a contiguous dataset w/variable-length datatype
-     * (but no data) to file
-     */
-    if (pass) {
-        HDsnprintf(full_path, sizeof(full_path), "%s/L", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_ds_ctg_v(fid, full_path, FALSE);
-    }
-
-    /* validate a contiguous dataset w/variable-length datatype
-     * (and data) to file
-     */
-    if (pass) {
-        HDsnprintf(full_path, sizeof(full_path), "%s/M", base_path);
-        HDassert(HDstrlen(full_path) < 1024);
-        vrfy_ds_ctg_v(fid, full_path, TRUE);
-    }
-
-} /* validate_zoo() */
+    return tend_zoo(fid, base_path, lastmsgtime, config, phase, NELMTS(phase));
+}

@@ -113,6 +113,7 @@ const H5AC_class_t H5AC_FSPACE_HDR[1] = {{
     H5FS__cache_hdr_notify,                /* 'notify' callback */
     H5FS__cache_hdr_free_icr,              /* 'free_icr' callback */
     NULL,                                  /* 'fsf_size' callback */
+    NULL,                                  /* VFD SWMR 'refresh' callback */
 }};
 
 /* H5FS section info inherits cache-like properties from H5AC */
@@ -131,6 +132,7 @@ const H5AC_class_t H5AC_FSPACE_SINFO[1] = {{
     H5FS__cache_sinfo_notify,                /* 'notify' callback */
     H5FS__cache_sinfo_free_icr,              /* 'free_icr' callback */
     NULL,                                    /* 'fsf_size' callback */
+    NULL,                                    /* VFD SWMR 'refresh' callback */
 }};
 
 /*****************************/

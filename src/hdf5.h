@@ -68,6 +68,7 @@
 #include "H5FDsec2.h"     /* POSIX unbuffered file I/O                */
 #include "H5FDsplitter.h" /* Twin-channel (R/W & R/O) I/O passthrough */
 #include "H5FDstdio.h"    /* Standard C buffered I/O                  */
+#include "H5FDvfd_swmr.h" /* VFD SWMR reader VFD                      */
 #ifdef H5_HAVE_WINDOWS
 #include "H5FDwindows.h" /* Win32 I/O                                */
 #endif

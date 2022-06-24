@@ -52,9 +52,9 @@
 
 
 /* Cache configuration settings */
-#define H5C__HASH_TABLE_LEN     (64 * 1024) /* must be a power of 2 */
-#define H5C__H5C_T_MAGIC    0x005CAC0E
-
+#define H5C__HASH_TABLE_LEN      (64 * 1024) /* must be a power of 2 */
+#define H5C__PAGE_HASH_TABLE_LEN (4 * 1024)  /* must be a power of 2 */
+#define H5C__H5C_T_MAGIC         0x005CAC0E
 
 /* Initial allocated size of the "flush_dep_parent" array */
 #define H5C_FLUSH_DEP_PARENT_INIT 8
@@ -989,6 +989,14 @@ if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&             \
  *
  *                                              JRM -- 10/15/15
  *
+ *   - Updated the existing index macros to maintain a second
+ *     hash table when cache_ptr->vfd_swrm_writer is true.  This
+ *     hash table bins entries by the page buffer page they reside
+ *     in, thus facilitating the eviction of entries on a given page
+ *     when that page is modified.
+ *
+ *                                              JRM -- 12/14/18
+ *
  ***********************************************************************/
 
 /* H5C__HASH_TABLE_LEN is defined in H5Cpkg.h.  It mut be a power of two. */
@@ -996,6 +1004,13 @@ if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&             \
 #define H5C__HASH_MASK        ((size_t)(H5C__HASH_TABLE_LEN - 1) << 3)
 
 #define H5C__HASH_FCN(x)    (int)((unsigned)((x) & H5C__HASH_MASK) >> 3)
+
+/* H5C__PAGE_HASH_TABLE_LEN is defined in H5Cpkg.h.
+ * It must ve a power of two.
+ */
+#define H5C__PI_HASH_MASK ((uint64_t)(H5C__PAGE_HASH_TABLE_LEN - 1))
+
+#define H5C__PI_HASH_FCN(x) (int)(((uint64_t)(x)) & H5C__PI_HASH_MASK)
 
 #if H5C_DO_SANITY_CHECKS
 
@@ -1006,6 +1021,8 @@ if ( ( (cache_ptr) == NULL ) ||                                         \
      ( ! H5F_addr_defined((entry_ptr)->addr) ) ||                       \
      ( (entry_ptr)->ht_next != NULL ) ||                                \
      ( (entry_ptr)->ht_prev != NULL ) ||                                \
+     ( (entry_ptr)->pi_next != NULL ) ||                                \
+     ( (entry_ptr)->pi_prev != NULL ) ||                                \
      ( (entry_ptr)->size <= 0 ) ||                                      \
      ( H5C__HASH_FCN((entry_ptr)->addr) < 0 ) ||                        \
      ( H5C__HASH_FCN((entry_ptr)->addr) >= H5C__HASH_TABLE_LEN ) ||     \
@@ -1072,6 +1089,13 @@ if ( ( (cache_ptr) == NULL ) ||                                         \
      ( (cache_ptr)->index_size !=                                       \
        ((cache_ptr)->clean_index_size +                                 \
     (cache_ptr)->dirty_index_size) ) ||                                 \
+    (((cache_ptr)->vfd_swmr_reader) &&                                  \
+     ((((cache_ptr)->page_index[(H5C__PI_HASH_FCN((entry_ptr)->page))]  \
+        != (entry_ptr)) &&                                              \
+       ((entry_ptr)->pi_prev == NULL)) ||                               \
+      (((cache_ptr)->page_index[(H5C__PI_HASH_FCN((entry_ptr)->page))]  \
+        == (entry_ptr)) &&                                              \
+       ((entry_ptr)->pi_prev != NULL)))) ||                             \
      ( (cache_ptr)->index_size < ((cache_ptr)->clean_index_size) ) ||   \
      ( (cache_ptr)->index_size < ((cache_ptr)->dirty_index_size) ) ||   \
      ( (entry_ptr)->ring <= H5C_RING_UNDEFINED ) ||                     \
@@ -1088,7 +1112,7 @@ if ( ( (cache_ptr) == NULL ) ||                                         \
         (cache_ptr)->dirty_index_ring_size[(entry_ptr)->ring]) ) ||     \
      ( (cache_ptr)->index_len != (cache_ptr)->il_len ) ||               \
      ( (cache_ptr)->index_size != (cache_ptr)->il_size ) ) {            \
-    HDassert(FALSE);                                                    \
+    HDassert(FALSE && "pre HT remove SC failed");                       \
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "pre HT remove SC failed") \
 }
 
@@ -1099,7 +1123,9 @@ if ( ( (cache_ptr) == NULL ) ||                                          \
      ( ! H5F_addr_defined((entry_ptr)->addr) ) ||                        \
      ( (entry_ptr)->size <= 0 ) ||                                       \
      ( (entry_ptr)->ht_prev != NULL ) ||                                 \
-     ( (entry_ptr)->ht_prev != NULL ) ||                                 \
+     ( (entry_ptr)->ht_next != NULL ) ||                                 \
+     ( (entry_ptr)->pi_prev != NULL ) ||                                 \
+     ( (entry_ptr)->pi_next != NULL ) ||                                 \
      ( (cache_ptr)->index_size !=                                        \
        ((cache_ptr)->clean_index_size +                                  \
     (cache_ptr)->dirty_index_size) ) ||                                  \
@@ -1114,7 +1140,7 @@ if ( ( (cache_ptr) == NULL ) ||                                          \
         (cache_ptr)->dirty_index_ring_size[(entry_ptr)->ring]) ) ||      \
      ( (cache_ptr)->index_len != (cache_ptr)->il_len ) ||                \
      ( (cache_ptr)->index_size != (cache_ptr)->il_size ) ) {             \
-    HDassert(FALSE);                                                     \
+    HDassert(FALSE && "post HT remove SC failed");                       \
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "post HT remove SC failed") \
 }
 
@@ -1336,6 +1362,14 @@ if ( ( (cache_ptr)->index_size !=                                           \
 {                                                                            \
     int k;                                                                   \
     H5C__PRE_HT_INSERT_SC(cache_ptr, entry_ptr, fail_val)                    \
+    if(cache_ptr->vfd_swmr_reader) {                                         \
+        k = H5C__PI_HASH_FCN((entry_ptr)->page);                             \
+        if (((cache_ptr)->page_index)[k] != NULL) {                          \
+            (entry_ptr)->pi_next          = ((cache_ptr)->page_index)[k];    \
+            (entry_ptr)->pi_next->pi_prev = (entry_ptr);                     \
+        }                                                                    \
+        ((cache_ptr)->page_index)[k] = (entry_ptr);                          \
+    }                                                                        \
     k = H5C__HASH_FCN((entry_ptr)->addr);                                    \
     if(((cache_ptr)->index)[k] != NULL) {                                    \
         (entry_ptr)->ht_next = ((cache_ptr)->index)[k];                      \
@@ -1371,6 +1405,17 @@ if ( ( (cache_ptr)->index_size !=                                           \
 {                                                                            \
     int k;                                                                   \
     H5C__PRE_HT_REMOVE_SC(cache_ptr, entry_ptr)                              \
+    if(cache_ptr->vfd_swmr_reader) {                                         \
+        k = H5C__PI_HASH_FCN((entry_ptr)->page);                             \
+        if ((entry_ptr)->pi_next)                                            \
+            (entry_ptr)->pi_next->pi_prev = (entry_ptr)->pi_prev;            \
+        if ((entry_ptr)->pi_prev)                                            \
+            (entry_ptr)->pi_prev->pi_next = (entry_ptr)->pi_next;            \
+        if (((cache_ptr)->page_index)[k] == (entry_ptr))                     \
+            ((cache_ptr)->page_index)[k] = (entry_ptr)->pi_next;             \
+        (entry_ptr)->pi_next = NULL;                                         \
+        (entry_ptr)->pi_prev = NULL;                                         \
+    }                                                                        \
     k = H5C__HASH_FCN((entry_ptr)->addr);                                    \
     if((entry_ptr)->ht_next)                                                 \
         (entry_ptr)->ht_next->ht_prev = (entry_ptr)->ht_prev;                \
@@ -3546,6 +3591,99 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 } /* H5C__MOVE_TO_TOP_IN_COLL_LIST */
 #endif /* H5_HAVE_PARALLEL */
 
+/***************************************/
+/* page buffer hint maintenance macros */
+/***************************************/
+
+/*-------------------------------------------------------------------------
+ *
+ * Macro:	H5C__SET/RESET_PB_READ_HINTS
+ *
+ * Purpose:     Set or reset the fields needed to provide hints to the
+ *              page buffer so that it can disambuate between speculative
+ *              reads that cross page boundaries and read of metadata
+ *              entries that cross page boundaries without starting on
+ *              a page boundary.  This latter behaviour shouldn't happen,
+ *              and the hints allow the page buffer to detect this
+ *              behaviour by un-expected cache client.
+ *
+ *              See the discussion of the PB hint fields in the header
+ *              comment for H5C_t for further details.
+ *
+ * Return:      N/A
+ *
+ * Programmer:  John Mainzer, 3/30/20
+ *
+ * Modifications:
+ *
+ *		None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+#define H5C__SET_PB_READ_HINTS(cache_ptr, type, may_be_speculative)                                          \
+    {                                                                                                        \
+        HDassert(cache_ptr);                                                                                 \
+        HDassert((cache_ptr)->magic == H5C__H5C_T_MAGIC);                                                    \
+        HDassert((cache_ptr)->curr_io_type == NULL);                                                         \
+        HDassert(type);                                                                                      \
+        (cache_ptr)->curr_io_type = (type);                                                                  \
+        (cache_ptr)->curr_read_speculative =                                                                 \
+            (may_be_speculative) && ((cache_ptr)->curr_io_type->flags & H5AC__CLASS_SPECULATIVE_LOAD_FLAG);  \
+                                                                                                             \
+    } /* H5C__SET_PB_READ_HINTS() */
+
+#define H5C__RESET_PB_READ_HINTS(cache_ptr)                                                                  \
+    {                                                                                                        \
+        HDassert(cache_ptr);                                                                                 \
+        HDassert((cache_ptr)->magic == H5C__H5C_T_MAGIC);                                                    \
+        HDassert((cache_ptr)->curr_io_type);                                                                 \
+        (cache_ptr)->curr_io_type          = NULL;                                                           \
+        (cache_ptr)->curr_read_speculative = FALSE;                                                          \
+                                                                                                             \
+    } /* H5C__SET_PB_READ_HINTS() */
+
+/*-------------------------------------------------------------------------
+ *
+ * Macro:	H5C__SET/RESET_PB_WRITE_HINTS
+ *
+ * Purpose:     Set or reset the fields needed to provide hints to the
+ *              page buffer so that it can detect un-expected writes of
+ *              metadata entries that cross page boundaries and do not
+ *              start on page boundaries.
+ *
+ *              See the discussion of the PB hint fields in the header
+ *              comment for H5C_t for further details.
+ *
+ * Return:      N/A
+ *
+ * Programmer:  John Mainzer, 3/30/20
+ *
+ * Modifications:
+ *
+ *		None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+#define H5C__SET_PB_WRITE_HINTS(cache_ptr, type)                                                             \
+    {                                                                                                        \
+        HDassert(cache_ptr);                                                                                 \
+        HDassert((cache_ptr)->magic == H5C__H5C_T_MAGIC);                                                    \
+        HDassert((cache_ptr)->curr_io_type == NULL);                                                         \
+        HDassert(type);                                                                                      \
+        (cache_ptr)->curr_io_type = (type);                                                                  \
+                                                                                                             \
+    } /* H5C__SET_PB_WRITE_HINTS() */
+
+#define H5C__RESET_PB_WRITE_HINTS(cache_ptr)                                                                 \
+    {                                                                                                        \
+        HDassert(cache_ptr);                                                                                 \
+        HDassert((cache_ptr)->magic == H5C__H5C_T_MAGIC);                                                    \
+        HDassert((cache_ptr)->curr_io_type);                                                                 \
+        (cache_ptr)->curr_io_type = NULL;                                                                    \
+                                                                                                             \
+    } /* H5C__SET_PB_WRITE_HINTS() */
 
 /****************************/
 /* Package Private Typedefs */
@@ -3821,6 +3959,36 @@ typedef struct H5C_tag_info_t {
  *              linked by their il_next and il_prev fields.
  *
  *              This field is NULL if the index is empty.
+ *
+ * Page Index:
+ *
+ * For the VFD SWMR reader, it is necessary to map modified pages to
+ * entries contained in that page so that they can be invalidated.  The
+ * page index is a hash table that provides this service.  Note that it
+ * is only maintained for files that are opened in VFD SWMR reader mode.
+ *
+ * Structurally, the page index is identical to the index in the page
+ * buffer.  Specifically, it is a hash table with chaining.  The hash
+ * table size must be a power of two, not the usual prime number.  The
+ * hash function simply clips the high order bits off the page offset
+ * of the entry's base address.
+ *
+ * The page index is maintained by the same macros that maintain the
+ * regular index.  As such, it does not require separate length and
+ * size fields, as it shares them with the regular index.  Instead,
+ * the only ancilary field needed is the vfd_swrm_reader boolean, which
+ * indicates whether the page index must be maintained.
+ *
+ * vfd_swmr_reader: Boolean flag that is TRUE iff the file has been
+ *              opened as a VFD SWMR reader.  The remaining fields in
+ *              the page index section are valid iff this field is TRUE.
+ *
+ * page_index   Array of pointer to H5C_cache_entry_t of size
+ *              H5C__PAGE_HASH_TABLE_LEN.  This size must be a power of
+ *              two, not the usual prime number.
+ *
+ * page_size:   Convenience copy of the page size used by the page
+ *              buffer.
  *
  *
  * With the addition of the take ownership flag, it is possible that
@@ -4480,6 +4648,47 @@ typedef struct H5C_tag_info_t {
  *        managers that are involved in allocating space for free
  *        space managers.
  *
+ * Page Buffer Related Fields:
+ *
+ * Due to the irregular behavior of some of the cache clients, the
+ * page buffer occasionally need hints to manage metadta I/O requests
+ * from the metadata cache -- particularly in the context of VFD SWMR.
+ * The following fields exist to support this.
+ *
+ *
+ * curr_io_type:  Pointer to the instance of H5C_class_t associated with
+ *              the current I/O operation.  This pointer should be set
+ *              just before any I/O operation by the metadata cache, and
+ *              re-set to NULL immediately thereafter.
+ *
+ *              This field exists because the fixed and variable length
+ *              array cache clients allocate numerous entries in a single
+ *              block, and sub-allocate metadata cache entries out of this
+ *              block.  The effect of this is to break the invariant,
+ *              normally maintained by the free space managers in paged
+ *              allocation mode, that no entry of less than a page in
+ *              size crosses page boundaries, and that entries of page
+ *              size or greater are page aligned.  This in turn causes
+ *              problems for the page buffer -- particularly in VFD SWMR
+ *              mode.
+ *
+ *              The correct solution is to modify the fixed and variable
+ *              length array cache client to repair this.  However, in
+ *              the interim, this field exists to detect similar
+ *              behaviour elsewhere.
+ *
+ *              To complicate matters, speculative reads for metadata
+ *              cache entries which must determine their lengths via
+ *              inspection of the on disk image of the entry, may mimic
+ *              the behaviour of the fixed and extensible arrays.  Thus
+ *              the curr_io_type is also needed to dis-ambiguate reads.
+ *
+ * curr_read_speculative: Boolean flag indicating whether the current
+ *              read request is guaranteed to be of the correct length.
+ *              Field is used to distinguish between the initial and final
+ *              read attempts
+ *
+ *
  *
  * Statistics collection fields:
  *
@@ -4811,6 +5020,28 @@ typedef struct H5C_tag_info_t {
  *              called successfully.  This field is only defined when
  *              NDEBUG is not #defined.
  *
+ * curr_io_type:  Pointer to the instance of H5C_class_t associated with
+ *              the current I/O operation.  This pointer should be set
+ *              just before any I/O operation by the metadata cache, and
+ *              re-set to NULL immediately thereafter.  This field is
+ *              only defined when NDEBUG is not #defined.
+ *
+ *              This field exists because the fixed and variable length
+ *              array cache clients allocate numerous entries in a single
+ *              block, and sub-allocate metadata cache entries out of this
+ *              block.  The effect of this is to break the invariant,
+ *              normally maintained by the free space managers in paged
+ *              allocation mode, that no entry of less than a page in
+ *              size crosses page boundaries, and that entries of page
+ *              size or greater are page aligned.  This in turn causes
+ *              problems for the page buffer -- particularly in VFD SWMR
+ *              mode.
+ *
+ *              The correct solution is to modify the fixed and variable
+ *              length array cache client to repair this.  However, in
+ *              the interim, this field exists to detect similar
+ *              behaviour elsewhere.
+ *
  ****************************************************************************/
 
 struct H5C_t {
@@ -4842,6 +5073,11 @@ struct H5C_t {
     size_t                      il_size;
     H5C_cache_entry_t *            il_head;
     H5C_cache_entry_t *            il_tail;
+
+    /* Fields supporting VFD SWMR */
+    hbool_t            vfd_swmr_reader;
+    H5C_cache_entry_t *page_index[H5C__PAGE_HASH_TABLE_LEN];
+    hsize_t            page_size;
 
     /* Fields to detect entries removed during scans */
     int64_t            entries_removed_counter;
@@ -4955,6 +5191,10 @@ struct H5C_t {
     /* Free Space Manager Related fields */
     hbool_t             rdfsm_settled;
     hbool_t            mdfsm_settled;
+
+    /* Fields supporting page buffer hints */
+    const H5C_class_t *curr_io_type;
+    hbool_t            curr_read_speculative;
 
 #if H5C_COLLECT_CACHE_STATS
     /* stats fields */
@@ -5088,6 +5328,7 @@ H5_DLL herr_t H5C__untag_entry(H5C_t *cache, H5C_cache_entry_t *entry);
 /* Testing functions */
 #ifdef H5C_TESTING
 H5_DLL herr_t H5C__verify_cork_tag_test(hid_t fid, H5O_token_t tag_token, hbool_t status);
+H5_DLL void   H5C_set_curr_io_type_splitable(H5C_t *cache_ptr, hbool_t set_splitable);
 #endif /* H5C_TESTING */
 
 #endif /* H5Cpkg_H */

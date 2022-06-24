@@ -147,6 +147,7 @@ struct H5FS_section_info_t {
 typedef enum H5FS_client_t {
     H5FS_CLIENT_FHEAP_ID = 0, /* Free space is used by fractal heap */
     H5FS_CLIENT_FILE_ID,      /* Free space is used by file */
+    H5FS_CLIENT_MD_VFD_ID,    /* Free space is used by the metadata file for VFD SWMR */
     H5FS_NUM_CLIENT_ID        /* Number of free space client IDs (must be last)   */
 } H5FS_client_t;
 

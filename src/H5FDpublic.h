@@ -54,6 +54,7 @@
 #ifdef H5_HAVE_ROS3_VFD
 #define H5_VFD_ROS3 ((H5FD_class_value_t)(11))
 #endif
+#define H5_VFD_SWMR ((H5FD_class_value_t)(12))
 
 /* VFD IDs below this value are reserved for library use. */
 #define H5_VFD_RESERVED 256
@@ -178,6 +179,12 @@
  * operations when appropriate.
  */
 #define H5FD_FEAT_MEMMANAGE 0x00010000
+/*
+ * Defining H5FD_FEAT_SUPPORTS_VFD_SWMR for a VFL driver means that the
+ * driver supports the SWMR feature that is implemented in a more modular
+ * fashion and simplifies maintenance.
+ */
+#define H5FD_FEAT_SUPPORTS_VFD_SWMR 0x00020000
 
 /* ctl function definitions: */
 #define H5FD_CTL_OPC_RESERVED 512 /* Opcodes below this value are reserved for library use */
@@ -196,6 +203,7 @@
 #define H5FD_CTL_MEM_ALLOC                   5
 #define H5FD_CTL_MEM_FREE                    6
 #define H5FD_CTL_MEM_COPY                    7
+#define H5FD_CTL_GET_TERMINAL_VFD            8
 
 /* ctl function flags: */
 

@@ -923,37 +923,99 @@ done:
  *
  *              Failure:    Must never fail.
  *
+ * Changes:     Re-worked function to use H5FD_ctl() to obtain the terminal
+ *              VFDs for f1 and f2.  Typically, these are the same thing,
+ *              however, if there is an intervening pass through VFD
+ *              (i.e. splitter of vfd swrmr reader vfd), using the terminal
+ *              VFD for the comparison will avoid some false negatives.
+ *
+ *              Note, however, that we will still fail to detect the
+ *              case in which a give file is opened twice with different
+ *              terminal VFDs.
+ *
+ *                                           JRM -- 5/5/22
+ *
  *-------------------------------------------------------------------------
  */
 int
 H5FD_cmp(const H5FD_t *f1, const H5FD_t *f2)
 {
-    int ret_value = -1; /* Return value */
+    const H5FD_t *term_f1 = f1;
+    const H5FD_t *term_f2 = f2;
+    herr_t        ctl_result;
+    int           ret_value = -1; /* Return value */
 
     FUNC_ENTER_NOAPI_NOERR; /* return value is arbitrary */
 
-    if ((!f1 || !f1->cls) && (!f2 || !f2->cls))
+    /* For each of f1 and f2, check to see if the ctl call is defined.  If it is,
+     * use the ctl call to try to obtain the terminal VFD.  Since this function
+     * is not allowed to fail, discard the error stack if either of the ctl call
+     * fail.
+     */
+    if ((f1) && (f1->cls) && (f1->cls->ctl)) {
+
+        H5E_BEGIN_TRY
+        {
+            ctl_result = H5FD_ctl(f1, H5FD_CTL_GET_TERMINAL_VFD,
+                                  H5FD_CTL_FAIL_IF_UNKNOWN_FLAG | H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG, NULL,
+                                  (void **)(&term_f1));
+        }
+        H5E_END_TRY;
+
+        /* if the ctl call failed, set term_f1 equal to f1.  This will probably be
+         * wrong -- but it will be no worse than using the top level VFD unconditionally.
+         */
+        if (ctl_result != SUCCEED) {
+
+            H5E_clear_stack(NULL);
+
+            term_f1 = f1;
+        }
+    }
+
+    if ((f2) && (f2->cls) && (f2->cls->ctl)) {
+
+        H5E_BEGIN_TRY
+        {
+            ctl_result = H5FD_ctl(f2, H5FD_CTL_GET_TERMINAL_VFD,
+                                  H5FD_CTL_FAIL_IF_UNKNOWN_FLAG | H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG, NULL,
+                                  (void **)(&term_f2));
+        }
+        H5E_END_TRY;
+
+        /* if the ctl call failed, set term_f1 equal to f1.  This will probably be
+         * wrong -- but it will be no worse than using the top level VFD unconditionally.
+         */
+        if (ctl_result != SUCCEED) {
+
+            H5E_clear_stack(NULL);
+
+            term_f2 = f2;
+        }
+    }
+
+    if ((!term_f1 || !term_f1->cls) && (!term_f2 || !term_f2->cls))
         HGOTO_DONE(0)
-    if (!f1 || !f1->cls)
+    if (!term_f1 || !term_f1->cls)
         HGOTO_DONE(-1)
-    if (!f2 || !f2->cls)
+    if (!term_f2 || !term_f2->cls)
         HGOTO_DONE(1)
-    if (f1->cls < f2->cls)
+    if (term_f1->cls < term_f2->cls)
         HGOTO_DONE(-1)
-    if (f1->cls > f2->cls)
+    if (term_f1->cls > term_f2->cls)
         HGOTO_DONE(1)
 
     /* Files are same driver; no cmp callback */
-    if (!f1->cls->cmp) {
-        if (f1 < f2)
+    if (!term_f1->cls->cmp) {
+        if (term_f1 < term_f2)
             HGOTO_DONE(-1)
-        if (f1 > f2)
+        if (term_f1 > term_f2)
             HGOTO_DONE(1)
         HGOTO_DONE(0)
     }
 
     /* Dispatch to driver */
-    ret_value = (f1->cls->cmp)(f1, f2);
+    ret_value = (term_f1->cls->cmp)(term_f1, term_f2);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2261,10 +2323,8 @@ H5FDget_vfd_handle(H5FD_t *file, hid_t fapl_id, void **file_handle /*out*/)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get file handle for file driver")
 
 done:
-    if (FAIL == ret_value) {
-        if (file_handle)
-            *file_handle = NULL;
-    }
+    if (FAIL == ret_value)
+        *file_handle = NULL;
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5FDget_vfd_handle() */

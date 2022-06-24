@@ -785,6 +785,9 @@ done:
         HDassert(f->shared);
         HDassert(f->shared->lf);
 
+        if (f->shared->closing && H5MF_process_deferred_frees(f, UINT64_MAX) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "could not process deferrals")
+
         /* Retrieve metadata aggregator info, if available */
         if (H5MF__aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't query metadata aggregator stats")

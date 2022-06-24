@@ -3020,6 +3020,7 @@ done:
  *                  H5FD_CTL_GET_MPI_COMMUNICATOR_OPCODE
  *                  H5FD_CTL_GET_MPI_RANK_OPCODE
  *                  H5FD_CTL_GET_MPI_SIZE_OPCODE
+ *                  H5FD_CTL_GET_TERMINAL_VFD
  *
  *              Note that these opcodes must be supported by all VFDs that
  *              support MPI.
@@ -3061,6 +3062,11 @@ H5FD__mpio_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void H5_AT
             HDassert(output);
             HDassert(*output);
             **((int **)output) = file->mpi_size;
+            break;
+
+        case H5FD_CTL_GET_TERMINAL_VFD:
+            HDassert(output);
+            *output = (void *)(file);
             break;
 
         default: /* unknown op code */

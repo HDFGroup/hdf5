@@ -105,6 +105,7 @@ const H5AC_class_t H5AC_OHDR[1] = {{
     H5O__cache_notify,                 /* 'notify' callback */
     H5O__cache_free_icr,               /* 'free_icr' callback */
     NULL,                              /* 'fsf_size' callback */
+    NULL,                              /* VFD SWMR 'refresh' callback */
 }};
 
 /* H5O object header chunk inherits cache-like properties from H5AC */
@@ -123,6 +124,7 @@ const H5AC_class_t H5AC_OHDR_CHK[1] = {{
     H5O__cache_chk_notify,                /* 'notify' callback */
     H5O__cache_chk_free_icr,              /* 'free_icr' callback */
     NULL,                                 /* 'fsf_size' callback */
+    NULL,                                 /* VFD SWMR 'refresh' callback */
 }};
 
 /* Declare external the free list for H5O_unknown_t's */

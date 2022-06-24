@@ -1,4 +1,5 @@
 usage: h5ls [OPTIONS] file[/OBJECT] [file[/[OBJECT]...]
+       h5ls [OPTIONS] --poll file
   OPTIONS
    -h, -?, --help  Print a usage message and exit
    -a, --address   Print raw data address.  If dataset is contiguous, address
@@ -29,6 +30,7 @@ usage: h5ls [OPTIONS] file[/OBJECT] [file[/[OBJECT]...]
    -f, --full      Print full path names instead of base names
    -g, --group     Show information about a group, not its contents
    -l, --label     Label members of compound datasets
+   -p, --poll      Continuously re-read and re-display the input file using VFD SWMR
    -r, --recursive List all groups recursively, avoiding cycles
    -s, --string    Print 1-byte integer datasets as ASCII
    -S, --simple    Use a machine-readable output format

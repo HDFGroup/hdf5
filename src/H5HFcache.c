@@ -134,6 +134,7 @@ const H5AC_class_t H5AC_FHEAP_HDR[1] = {{
     NULL,                                  /* 'notify' callback */
     H5HF__cache_hdr_free_icr,              /* 'free_icr' callback */
     NULL,                                  /* 'fsf_size' callback */
+    NULL,                                  /* VFD SWMR 'refresh' callback */
 }};
 
 /* H5HF indirect block inherits cache-like properties from H5AC */
@@ -152,6 +153,7 @@ const H5AC_class_t H5AC_FHEAP_IBLOCK[1] = {{
     H5HF__cache_iblock_notify,                /* 'notify' callback */
     H5HF__cache_iblock_free_icr,              /* 'free_icr' callback */
     NULL,                                     /* 'fsf_size' callback */
+    NULL,                                     /* VFD SWMR 'refresh' callback */
 }};
 
 /* H5HF direct block inherits cache-like properties from H5AC */
@@ -170,6 +172,7 @@ const H5AC_class_t H5AC_FHEAP_DBLOCK[1] = {{
     H5HF__cache_dblock_notify,                /* 'notify' callback */
     H5HF__cache_dblock_free_icr,              /* 'free_icr' callback */
     H5HF__cache_dblock_fsf_size,              /* 'fsf_size' callback */
+    NULL,                                     /* VFD SWMR 'refresh' callback */
 }};
 
 /*****************************/

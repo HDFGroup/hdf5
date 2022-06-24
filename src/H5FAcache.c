@@ -109,6 +109,7 @@ const H5AC_class_t H5AC_FARRAY_HDR[1] = {{
     H5FA__cache_hdr_notify,                /* 'notify' callback */
     H5FA__cache_hdr_free_icr,              /* 'free_icr' callback */
     NULL,                                  /* 'fsf_size' callback */
+    NULL,                                  /* VFD SWMR 'refresh' callback */
 }};
 
 /* H5FA data block inherits cache-like properties from H5AC */
@@ -127,6 +128,7 @@ const H5AC_class_t H5AC_FARRAY_DBLOCK[1] = {{
     H5FA__cache_dblock_notify,                /* 'notify' callback */
     H5FA__cache_dblock_free_icr,              /* 'free_icr' callback */
     H5FA__cache_dblock_fsf_size,              /* 'fsf_size' callback */
+    NULL,                                     /* VFD SWMR 'refresh' callback */
 }};
 
 /* H5FA data block page inherits cache-like properties from H5AC */
@@ -145,6 +147,7 @@ const H5AC_class_t H5AC_FARRAY_DBLK_PAGE[1] = {{
     H5FA__cache_dblk_page_notify,                /* 'notify' callback */
     H5FA__cache_dblk_page_free_icr,              /* 'free_icr' callback */
     NULL,                                        /* 'fsf_size' callback */
+    NULL,                                        /* VFD SWMR 'refresh' callback */
 }};
 
 /*****************************/

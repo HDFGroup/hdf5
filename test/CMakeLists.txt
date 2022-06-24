@@ -16,6 +16,8 @@ set (TEST_LIB_SOURCES
     ${HDF5_TEST_SOURCE_DIR}/cache_common.c
     ${HDF5_TEST_SOURCE_DIR}/external_common.c
     ${HDF5_TEST_SOURCE_DIR}/swmr_common.c
+    ${HDF5_TEST_SOURCE_DIR}/stubs.c
+    ${HDF5_TEST_SOURCE_DIR}/vfd_swmr_common.c
 )
 
 set (TEST_LIB_HEADERS
@@ -25,6 +27,7 @@ set (TEST_LIB_HEADERS
     ${HDF5_TEST_SOURCE_DIR}/external_common.h
     ${HDF5_TEST_SOURCE_DIR}/external_fname.h
     ${HDF5_TEST_SOURCE_DIR}/swmr_common.h
+    ${HDF5_TEST_SOURCE_DIR}/vfd_swmr_common.h
 )
 
 if (NOT ONLY_SHARED_LIBS)
@@ -34,9 +37,6 @@ if (NOT ONLY_SHARED_LIBS)
       INTERFACE "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
   )
   target_compile_options(${HDF5_TEST_LIB_TARGET} PRIVATE "${HDF5_CMAKE_C_FLAGS}")
-  target_compile_definitions(${HDF5_TEST_LIB_TARGET}
-      PRIVATE "H5_TEST_EXPRESS_LEVEL_DEFAULT=${H5_TEST_EXPRESS_LEVEL_DEFAULT}"
-  )
   TARGET_C_PROPERTIES (${HDF5_TEST_LIB_TARGET} STATIC)
   target_link_libraries (${HDF5_TEST_LIB_TARGET}
       PUBLIC ${LINK_LIBS} ${HDF5_LIB_TARGET}
@@ -47,6 +47,11 @@ if (NOT ONLY_SHARED_LIBS)
   endif ()
   H5_SET_LIB_OPTIONS (${HDF5_TEST_LIB_TARGET} ${HDF5_TEST_LIB_NAME} STATIC 0)
   set_target_properties (${HDF5_TEST_LIB_TARGET} PROPERTIES FOLDER libraries/test)
+
+  # Always link to pthreads for VFD SWMR tests
+  if (NOT WIN32)
+    target_link_libraries (${HDF5_TEST_LIB_TARGET} PRIVATE Threads::Threads)
+  endif ()
 endif ()
 
 if (BUILD_SHARED_LIBS)
@@ -56,10 +61,7 @@ if (BUILD_SHARED_LIBS)
       INTERFACE "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
   )
   target_compile_options(${HDF5_TEST_LIBSH_TARGET} PRIVATE "${HDF5_CMAKE_C_FLAGS}")
-  target_compile_definitions(${HDF5_TEST_LIBSH_TARGET}
-      PUBLIC "H5_BUILT_AS_DYNAMIC_LIB"
-      PRIVATE "H5_TEST_EXPRESS_LEVEL_DEFAULT=${H5_TEST_EXPRESS_LEVEL_DEFAULT}"
-  )
+  target_compile_definitions(${HDF5_TEST_LIBSH_TARGET} PUBLIC "H5_BUILT_AS_DYNAMIC_LIB")
   TARGET_C_PROPERTIES (${HDF5_TEST_LIBSH_TARGET} SHARED)
   target_link_libraries (${HDF5_TEST_LIBSH_TARGET}
       PUBLIC ${LINK_LIBS} ${HDF5_LIBSH_TARGET}
@@ -70,6 +72,9 @@ if (BUILD_SHARED_LIBS)
   endif ()
   H5_SET_LIB_OPTIONS (${HDF5_TEST_LIBSH_TARGET} ${HDF5_TEST_LIB_NAME} SHARED "LIB")
   set_target_properties (${HDF5_TEST_LIBSH_TARGET} PROPERTIES FOLDER libraries/test)
+
+  # Always link to pthreads for VFD SWMR tests
+  target_link_libraries (${HDF5_TEST_LIBSH_TARGET} PRIVATE Threads::Threads)
 endif ()
 
 #-----------------------------------------------------------------------------
@@ -298,6 +303,16 @@ set(mirror_vfd_SOURCES
     ${HDF5_TEST_SOURCE_DIR}/genall5.c
 )
 
+#set(vfd_swmr_zoo_reader_SOURCES
+#    ${HDF5_TEST_SOURCE_DIR}/vfd_swmr_zoo_reader.c
+#    ${HDF5_TEST_SOURCE_DIR}/genall5.c
+#)
+
+#set(vfd_swmr_zoo_writer_SOURCES
+#    ${HDF5_TEST_SOURCE_DIR}/vfd_swmr_zoo_writer.c
+#    ${HDF5_TEST_SOURCE_DIR}/genall5.c
+#)
+
 set (ttsafe_SOURCES
     ${HDF5_TEST_SOURCE_DIR}/ttsafe.h
     ${HDF5_TEST_SOURCE_DIR}/ttsafe.c
@@ -381,6 +396,7 @@ set (H5_TESTS
     timer
     cmpd_dtransform
     event_set
+    vfd_swmr
 )
 if (HDF5_BUILD_UTILS)
   set (H5_TESTS ${H5_TESTS} mirror_vfd)
@@ -662,6 +678,25 @@ endmacro ()
 
 foreach (h5_test ${H5_VDS_SWMR_TESTS})
   ADD_H5_VDS_EXE(${h5_test})
+endforeach ()
+
+#set (H5_VFD_SWMR_TESTS
+#    vfd_swmr_addrem_writer
+#    vfd_swmr_bigset_writer
+#    vfd_swmr_generator
+#    vfd_swmr_group_writer
+#    vfd_swmr_reader
+#    vfd_swmr_remove_reader
+#    vfd_swmr_remove_writer
+#    vfd_swmr_sparse_reader
+#    vfd_swmr_sparse_writer
+#    vfd_swmr_vlstr_reader
+#    vfd_swmr_vlstr_writer
+#    vfd_swmr_writer
+#)
+
+foreach (h5_test ${H5_VFD_SWMR_TESTS})
+  ADD_H5_EXE(${h5_test})
 endforeach ()
 
 #-- Adding test for accum_swmr_reader

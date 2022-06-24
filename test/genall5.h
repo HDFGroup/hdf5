@@ -11,39 +11,72 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  John Mainzer
- *              9/4/15
- *
- *              This file contains declarations of all functions defined
- *		in genall5.c
+/*
+ * This file contains declarations of all functions defined in genall5.c
  */
 
-void create_zoo(hid_t fid, const char *base_path, int proc_num);
-void validate_zoo(hid_t fid, const char *base_path, int proc_num);
+#ifndef GENALL5_H
+#define GENALL5_H
 
-void ns_grp_0(hid_t fid, const char *group_name);
-void vrfy_ns_grp_0(hid_t fid, const char *group_name);
+typedef struct _zoo_config {
+    int             proc_num;
+    bool            continue_on_failure;
+    bool            skip_compact;
+    bool            skip_varlen;
+    unsigned        max_pause_msecs;
+    struct timespec msgival; /* minimum interval between warning-message
+                              * repetitions
+                              */
+} zoo_config_t;
 
-void ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks);
-void vrfy_ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks);
+/**************/
+/* Prototypes */
+/**************/
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-void ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks);
-void vrfy_ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks);
+H5TEST_DLL hbool_t create_zoo(hid_t, const char *, struct timespec *, zoo_config_t);
+H5TEST_DLL hbool_t validate_zoo(hid_t, const char *, struct timespec *, zoo_config_t);
+H5TEST_DLL hbool_t delete_zoo(hid_t, const char *, struct timespec *, zoo_config_t);
+H5TEST_DLL hbool_t validate_deleted_zoo(hid_t, const char *, struct timespec *, zoo_config_t);
 
-void os_grp_0(hid_t fid, const char *group_name);
-void vrfy_os_grp_0(hid_t fid, const char *group_name);
+H5TEST_DLL hbool_t ns_grp_0(hid_t fid, const char *group_name);
+H5TEST_DLL hbool_t vrfy_ns_grp_0(hid_t fid, const char *group_name);
 
-void os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks);
-void vrfy_os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks);
+H5TEST_DLL hbool_t ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks);
+H5TEST_DLL hbool_t vrfy_ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks);
 
-void ds_ctg_i(hid_t fid, const char *dset_name, hbool_t write_data);
-void vrfy_ds_ctg_i(hid_t fid, const char *dset_name, hbool_t write_data);
+H5TEST_DLL hbool_t ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks);
+H5TEST_DLL hbool_t vrfy_ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks);
 
-void ds_chk_i(hid_t fid, const char *dset_name, hbool_t write_data);
-void vrfy_ds_chk_i(hid_t fid, const char *dset_name, hbool_t write_data);
+H5TEST_DLL hbool_t os_grp_0(hid_t fid, const char *group_name);
+H5TEST_DLL hbool_t vrfy_os_grp_0(hid_t fid, const char *group_name);
 
-void ds_cpt_i(hid_t fid, const char *dset_name, hbool_t write_data);
-void vrfy_ds_cpt_i(hid_t fid, const char *dset_name, hbool_t write_data);
+H5TEST_DLL hbool_t os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks);
+H5TEST_DLL hbool_t vrfy_os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks);
 
-void ds_ctg_v(hid_t fid, const char *dset_name, hbool_t write_data);
-void vrfy_ds_ctg_v(hid_t fid, const char *dset_name, hbool_t write_data);
+H5TEST_DLL hbool_t ds_ctg_i(hid_t fid, const char *dset_name, hbool_t write_data);
+H5TEST_DLL hbool_t vrfy_ds_ctg_i(hid_t fid, const char *dset_name, hbool_t write_data);
+
+H5TEST_DLL hbool_t ds_chk_i(hid_t fid, const char *dset_name, hbool_t write_data);
+H5TEST_DLL hbool_t vrfy_ds_chk_i(hid_t fid, const char *dset_name, hbool_t write_data);
+
+H5TEST_DLL hbool_t ds_cpt_i(hid_t fid, const char *dset_name, hbool_t write_data);
+H5TEST_DLL hbool_t vrfy_ds_cpt_i(hid_t fid, const char *dset_name, hbool_t write_data);
+
+H5TEST_DLL hbool_t ds_ctg_v(hid_t fid, const char *dset_name, hbool_t write_data);
+H5TEST_DLL hbool_t vrfy_ds_ctg_v(hid_t fid, const char *dset_name, hbool_t write_data);
+
+/* Individual tests can override zoo_create_hook(), which is called
+ * after each step of create_zoo().  The `hid_t` argument identifies
+ * the file where the step was performed.  The test library provides a
+ * default implementation of zoo_create_hook() that does nothing.
+ */
+H5TEST_DLL void zoo_create_hook(hid_t);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* GENALL5_H */

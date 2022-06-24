@@ -92,6 +92,7 @@ const H5AC_class_t H5AC_PREFETCHED_ENTRY[1] = {{
     /* notify                   = */ H5C__prefetched_entry_notify,
     /* free_icr                 = */ H5C__prefetched_entry_free_icr,
     /* fsf_size                 = */ H5C__prefetched_entry_fsf_size,
+    /* refresh                  = */ NULL,
 }};
 
 /***************************************************************************

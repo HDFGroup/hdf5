@@ -102,6 +102,7 @@ const H5AC_class_t H5AC_BT2_HDR[1] = {{
     H5B2__cache_hdr_notify,                /* 'notify' callback */
     H5B2__cache_hdr_free_icr,              /* 'free_icr' callback */
     NULL,                                  /* 'fsf_size' callback */
+    NULL,                                  /* VFD SWMR 'refresh' callback */
 }};
 
 /* H5B2 inherits cache-like properties from H5AC */
@@ -120,6 +121,7 @@ const H5AC_class_t H5AC_BT2_INT[1] = {{
     H5B2__cache_int_notify,                /* 'notify' callback */
     H5B2__cache_int_free_icr,              /* 'free_icr' callback */
     NULL,                                  /* 'fsf_size' callback */
+    NULL,                                  /* VFD SWMR 'refresh' callback */
 }};
 
 /* H5B2 inherits cache-like properties from H5AC */
@@ -138,6 +140,7 @@ const H5AC_class_t H5AC_BT2_LEAF[1] = {{
     H5B2__cache_leaf_notify,                /* 'notify' callback */
     H5B2__cache_leaf_free_icr,              /* 'free_icr' callback */
     NULL,                                   /* 'fsf_size' callback */
+    NULL,                                   /* VFD SWMR 'refresh' callback */
 }};
 
 /*****************************/

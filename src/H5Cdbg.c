@@ -28,13 +28,15 @@
 
 #include "H5Cmodule.h" /* This source code file is part of the H5C module */
 
+#define H5AC_FRIEND
+
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions            */
-#include "H5ACprivate.h" /* Metadata Cache               */
-#include "H5Cpkg.h"      /* Cache                        */
-#include "H5Eprivate.h"  /* Error Handling               */
+#include "H5private.h"  /* Generic Functions            */
+#include "H5ACpkg.h"    /* Metadata Cache               */
+#include "H5Cpkg.h"     /* Cache                        */
+#include "H5Eprivate.h" /* Error Handling               */
 
 /****************/
 /* Local Macros */
@@ -343,6 +345,99 @@ H5C_dump_cache_skip_list(H5C_t *cache_ptr, char *calling_fcn)
 
 } /* H5C_dump_cache_skip_list() */
 #endif /* NDEBUG */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C_dump_coll_write_list
+ *
+ * Purpose:     Debugging routine that prints a summary of the contents of
+ *		the collective write skip list used by the metadata cache
+ *              in the parallel case to maintain a list of entries to write
+ *              collectively at a sync point.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  John Mainzer
+ *              4/1/17
+ *
+ *-------------------------------------------------------------------------
+ */
+#ifdef H5_HAVE_PARALLEL
+#ifndef NDEBUG
+herr_t
+H5C_dump_coll_write_list(H5C_t *cache_ptr, char *calling_fcn)
+{
+    herr_t             ret_value = SUCCEED; /* Return value */
+    int                i;
+    int                list_len;
+    H5AC_aux_t *       aux_ptr   = NULL;
+    H5C_cache_entry_t *entry_ptr = NULL;
+    H5SL_node_t *      node_ptr  = NULL;
+
+    FUNC_ENTER_NOAPI_NOERR
+
+    HDassert(cache_ptr != NULL);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+    HDassert(cache_ptr->aux_ptr);
+
+    aux_ptr = (H5AC_aux_t *)cache_ptr->aux_ptr;
+
+    HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
+
+    HDassert(calling_fcn != NULL);
+
+    list_len = (int)H5SL_count(cache_ptr->coll_write_list);
+
+    HDfprintf(stdout, "\n\nDumping MDC coll write list from %d:%s.\n", aux_ptr->mpi_rank, calling_fcn);
+    HDfprintf(stdout, "	slist len = %" PRIu32 ".\n", cache_ptr->slist_len);
+
+    if (list_len > 0) {
+
+        /* scan the collective write list generating the desired output */
+        HDfprintf(stdout, "Num:    Addr:               Len: Prot/Pind: Dirty: Type:\n");
+
+        i = 0;
+
+        node_ptr = H5SL_first(cache_ptr->coll_write_list);
+
+        if (node_ptr != NULL)
+
+            entry_ptr = (H5C_cache_entry_t *)H5SL_item(node_ptr);
+
+        else
+
+            entry_ptr = NULL;
+
+        while (entry_ptr != NULL) {
+
+            HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+
+            HDfprintf(stdout, "%s%d       0x%016" PRIxHADDR "  %4zu    %d/%d       %d    %s\n",
+                      cache_ptr->prefix, i, entry_ptr->addr, entry_ptr->size, (int)(entry_ptr->is_protected),
+                      (int)(entry_ptr->is_pinned), (int)(entry_ptr->is_dirty), entry_ptr->type->name);
+
+            node_ptr = H5SL_next(node_ptr);
+
+            if (node_ptr != NULL) {
+
+                entry_ptr = (H5C_cache_entry_t *)H5SL_item(node_ptr);
+            }
+            else {
+
+                entry_ptr = NULL;
+            }
+
+            i++;
+
+        } /* end while */
+    }     /* end if */
+
+    HDfprintf(stdout, "\n\n");
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5C_dump_coll_write_list() */
+#endif /* NDEBUG */
+#endif /* H5_HAVE_PARALLEL */
 
 /*-------------------------------------------------------------------------
  * Function:    H5C_set_prefix
@@ -831,7 +926,80 @@ H5C_stats__reset(H5C_t H5_ATTR_UNUSED *cache_ptr)
 
 #endif /* H5C_COLLECT_CACHE_ENTRY_STATS */
 #endif /* H5C_COLLECT_CACHE_STATS */
+
+    return;
 } /* H5C_stats__reset() */
+
+extern void H5C__dump_entry(H5C_t *cache_ptr, const H5C_cache_entry_t *entry_ptr, hbool_t dump_parents,
+                            const char *prefix, int indent);
+
+static void
+H5C__dump_parents(H5C_t *cache_ptr, const H5C_cache_entry_t *entry_ptr, const char *prefix, int indent)
+{
+    unsigned u;
+
+    for (u = 0; u < entry_ptr->flush_dep_nparents; u++)
+        H5C__dump_entry(cache_ptr, entry_ptr->flush_dep_parent[u], TRUE, prefix, indent + 2);
+}
+
+typedef struct H5C__dump_child_ctx_t {
+    H5C_t *                  cache_ptr;
+    const H5C_cache_entry_t *parent;
+    hbool_t                  dump_parents;
+    const char *             prefix;
+    int                      indent;
+} H5C__dump_child_ctx_t;
+
+static int
+H5C__dump_children_cb(H5C_cache_entry_t *entry_ptr, void *_ctx)
+{
+    H5C__dump_child_ctx_t *ctx = (H5C__dump_child_ctx_t *)_ctx;
+
+    if (entry_ptr->tag_info->tag != entry_ptr->addr) {
+        unsigned u;
+
+        HDassert(entry_ptr->flush_dep_nparents);
+        for (u = 0; u < entry_ptr->flush_dep_nparents; u++)
+            if (ctx->parent == entry_ptr->flush_dep_parent[u])
+                H5C__dump_entry(ctx->cache_ptr, entry_ptr, ctx->dump_parents, ctx->prefix, ctx->indent + 2);
+    } /* end if */
+
+    return (H5_ITER_CONT);
+} /* end H5C__dump_children_cb() */
+
+static void
+H5C__dump_children(H5C_t *cache_ptr, const H5C_cache_entry_t *entry_ptr, hbool_t dump_parents,
+                   const char *prefix, int indent)
+{
+    H5C__dump_child_ctx_t ctx;
+
+    HDassert(entry_ptr->tag_info);
+
+    ctx.cache_ptr    = cache_ptr;
+    ctx.parent       = entry_ptr;
+    ctx.dump_parents = dump_parents;
+    ctx.prefix       = prefix;
+    ctx.indent       = indent;
+    H5C__iter_tagged_entries(cache_ptr, entry_ptr->tag_info->tag, FALSE, H5C__dump_children_cb, &ctx);
+} /* end H5C__dump_children() */
+
+void
+H5C__dump_entry(H5C_t *cache_ptr, const H5C_cache_entry_t *entry_ptr, hbool_t dump_parents,
+                const char *prefix, int indent)
+{
+    HDassert(cache_ptr);
+    HDassert(entry_ptr);
+
+    HDfprintf(stderr, "%*s%s: entry_ptr = (%" PRIxHADDR ", '%s', %" PRIxHADDR ", %d, %u, %u/%u)\n", indent,
+              "", prefix, entry_ptr->addr, entry_ptr->type->name,
+              entry_ptr->tag_info ? entry_ptr->tag_info->tag : HADDR_UNDEF, entry_ptr->is_dirty,
+              entry_ptr->flush_dep_nparents, entry_ptr->flush_dep_nchildren,
+              entry_ptr->flush_dep_ndirty_children);
+    if (dump_parents && entry_ptr->flush_dep_nparents)
+        H5C__dump_parents(cache_ptr, entry_ptr, "Parent", indent);
+    if (entry_ptr->flush_dep_nchildren)
+        H5C__dump_children(cache_ptr, entry_ptr, FALSE, "Child", indent);
+} /* end H5C__dump_entry() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5C_flush_dependency_exists()

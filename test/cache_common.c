@@ -23,8 +23,9 @@
 
 #include "cache_common.h"
 
-hbool_t     pass         = TRUE; /* set to false on error */
-const char *failure_mssg = NULL;
+hbool_t     pass              = TRUE; /* set to false on error */
+const char *failure_mssg      = NULL;
+const char *last_failure_mssg = "";
 
 static test_entry_t *pico_entries = NULL, *orig_pico_entries = NULL;
 static test_entry_t *nano_entries = NULL, *orig_nano_entries = NULL;
@@ -189,6 +190,7 @@ static const H5C_class_t pico_class[1] = {{
     NULL,
     pico_free_icr,
     NULL,
+    NULL,
 }};
 
 static const H5C_class_t nano_class[1] = {{
@@ -205,6 +207,7 @@ static const H5C_class_t nano_class[1] = {{
     nano_serialize,
     NULL,
     nano_free_icr,
+    NULL,
     NULL,
 }};
 
@@ -223,6 +226,7 @@ static const H5C_class_t micro_class[1] = {{
     NULL,
     micro_free_icr,
     NULL,
+    NULL,
 }};
 
 static const H5C_class_t tiny_class[1] = {{
@@ -239,6 +243,7 @@ static const H5C_class_t tiny_class[1] = {{
     tiny_serialize,
     NULL,
     tiny_free_icr,
+    NULL,
     NULL,
 }};
 
@@ -257,6 +262,7 @@ static const H5C_class_t small_class[1] = {{
     NULL,
     small_free_icr,
     NULL,
+    NULL,
 }};
 
 static const H5C_class_t medium_class[1] = {{
@@ -273,6 +279,7 @@ static const H5C_class_t medium_class[1] = {{
     medium_serialize,
     NULL,
     medium_free_icr,
+    NULL,
     NULL,
 }};
 
@@ -291,6 +298,7 @@ static const H5C_class_t large_class[1] = {{
     NULL,
     large_free_icr,
     NULL,
+    NULL,
 }};
 
 static const H5C_class_t huge_class[1] = {{
@@ -307,6 +315,7 @@ static const H5C_class_t huge_class[1] = {{
     huge_serialize,
     NULL,
     huge_free_icr,
+    NULL,
     NULL,
 }};
 
@@ -325,6 +334,7 @@ static const H5C_class_t monster_class[1] = {{
     NULL,
     monster_free_icr,
     NULL,
+    NULL,
 }};
 
 static const H5C_class_t variable_class[1] = {{
@@ -342,6 +352,7 @@ static const H5C_class_t variable_class[1] = {{
     NULL,
     variable_free_icr,
     NULL,
+    NULL,
 }};
 
 static const H5C_class_t notify_class[1] = {{
@@ -358,6 +369,7 @@ static const H5C_class_t notify_class[1] = {{
     notify_serialize,
     notify_notify,
     notify_free_icr,
+    NULL,
     NULL,
 }};
 

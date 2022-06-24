@@ -422,3 +422,107 @@ H5C_get_mdc_image_info(const H5C_t *cache_ptr, haddr_t *image_addr, hsize_t *ima
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C_get_mdc_image_info() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C_get_curr_io_client_type
+ *
+ * Purpose:     Return the type id associated with the metadata cache
+ *              client whose data is currently being read or written.
+ *
+ *              This id is obtained via the curr_io_type field in
+ *              H5C_t, which is set just before most I/O calls from the
+ *              metadata cache, and reset to NULL immediately thereafter.
+ *
+ *              If cache_ptr->curr_io_type is NULL, the function
+ *              returns -1.
+ *
+ *              Note: At present, cache_ptr->curr_io_type should always
+ *              be defined in the serial case with the exception
+ *              of cache image I/O.  In general, it is not defined in
+ *              the parallel case.  This is not a problem for now, as
+ *              this function is used in page buffer sanity checking,
+ *              and for now at least, the page buffer is not enabled in
+ *              the parallel case.
+ *
+ * Return:      ID of cache client whose image is being read or written,
+ *              or H5AC_NTYPES if cache_ptr->curr_io_type is undefined.
+ *
+ * Programmer:  John Mainzer
+ *              3/31/20
+ *
+ * Changes:     None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+int
+H5C_get_curr_io_client_type(H5C_t *cache_ptr)
+{
+    int ret_value = -1; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(cache_ptr);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+
+    if (cache_ptr->curr_io_type) {
+
+        ret_value = cache_ptr->curr_io_type->id;
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5C_get_curr_io_client_type() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C_get_curr_read_speculative
+ *
+ * Purpose:     Return a boolean flag indicating whether the current
+ *              read is speculative.
+ *
+ *              Note that this value is only defined during a read generated
+ *              by the metadatat cache.  At all other times, the return
+ *              value undefined (although the current implementation
+ *              returns FALSE in such cases).
+ *
+ *              Note also that this function exists to provide hints to the
+ *              page buffer, which for now at least, is only available in
+ *              the serial case.  It should not be depended upon in the
+ *              parallel case -- at least until verified, and potential
+ *              interactions with collective metadata reads are investigated
+ *              and dismissed.
+ *
+ * Return:      True if the current call to H5F_block_read() by the
+ *              metadata cache is an initial read attempt for a cache
+ *              client whose speculative read flag is set (in H5AC_class_t),
+ *              and false otherwise.
+ *
+ *              Return value is undefined if a call to H5F_block_read by
+ *              the metadata cache is not in progress.
+ *
+ * Programmer:  John Mainzer
+ *              3/31/20
+ *
+ * Changes:     None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+hbool_t
+H5C_get_curr_read_speculative(H5C_t *cache_ptr)
+{
+    hbool_t ret_value = FALSE; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(cache_ptr);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+
+    if (cache_ptr->curr_io_type) {
+
+        ret_value = cache_ptr->curr_read_speculative;
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5C_get_curr_read_speculative() */

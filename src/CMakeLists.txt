@@ -204,6 +204,7 @@ set (H5F_SOURCES
     ${HDF5_SRC_DIR}/H5Fsuper.c
     ${HDF5_SRC_DIR}/H5Fsuper_cache.c
     ${HDF5_SRC_DIR}/H5Ftest.c
+    ${HDF5_SRC_DIR}/H5Fvfd_swmr.c
 )
 
 set (H5F_HDRS
@@ -248,6 +249,7 @@ set (H5FD_SOURCES
     ${HDF5_SRC_DIR}/H5FDsplitter.c
     ${HDF5_SRC_DIR}/H5FDstdio.c
     ${HDF5_SRC_DIR}/H5FDtest.c
+    ${HDF5_SRC_DIR}/H5FDvfd_swmr.c
     ${HDF5_SRC_DIR}/H5FDwindows.c
 )
 
@@ -268,6 +270,7 @@ set (H5FD_HDRS
     ${HDF5_SRC_DIR}/H5FDsec2.h
     ${HDF5_SRC_DIR}/H5FDsplitter.h
     ${HDF5_SRC_DIR}/H5FDstdio.h
+    ${HDF5_SRC_DIR}/H5FDvfd_swmr.h
     ${HDF5_SRC_DIR}/H5FDwindows.h
 )
 IDE_GENERATED_PROPERTIES ("H5FD" "${H5FD_HDRS}" "${H5FD_SOURCES}" )
@@ -431,6 +434,15 @@ set (H5MM_HDRS
     ${HDF5_SRC_DIR}/H5MMpublic.h
 )
 IDE_GENERATED_PROPERTIES ("H5MM" "${H5MM_HDRS}" "${H5MM_SOURCES}" )
+
+
+set (H5MV_SOURCES
+    ${HDF5_SRC_DIR}/H5MV.c
+    ${HDF5_SRC_DIR}/H5MVsection.c
+)
+set (H5MV_HDRS
+)
+IDE_GENERATED_PROPERTIES ("H5MV" "${H5MV_HDRS}" "${H5MV_SOURCES}" )
 
 
 set (H5O_SOURCES
@@ -773,6 +785,7 @@ set (common_SRCS
     ${H5M_SOURCES}
     ${H5MF_SOURCES}
     ${H5MM_SOURCES}
+    ${H5MV_SOURCES}
     ${H5O_SOURCES}
     ${H5P_SOURCES}
     ${H5PB_SOURCES}
@@ -815,6 +828,7 @@ set (H5_PUBLIC_HEADERS
     ${H5M_HDRS}
     ${H5MF_HDRS}
     ${H5MM_HDRS}
+    ${H5MV_HDRS}
     ${H5O_HDRS}
     ${H5P_HDRS}
     ${H5PB_HDRS}
@@ -830,6 +844,8 @@ set (H5_PUBLIC_HEADERS
 
 set (H5_PRIVATE_HEADERS
     ${HDF5_SRC_DIR}/H5private.h
+    ${HDF5_SRC_DIR}/H5queue.h
+    ${HDF5_SRC_DIR}/H5retry_private.h
 
     ${HDF5_SRC_DIR}/H5Apkg.h
     ${HDF5_SRC_DIR}/H5Aprivate.h
@@ -908,6 +924,9 @@ set (H5_PRIVATE_HEADERS
     ${HDF5_SRC_DIR}/H5MFprivate.h
 
     ${HDF5_SRC_DIR}/H5MMprivate.h
+
+    ${HDF5_SRC_DIR}/H5MVpkg.h
+    ${HDF5_SRC_DIR}/H5MVprivate.h
 
     ${HDF5_SRC_DIR}/H5Opkg.h
     ${HDF5_SRC_DIR}/H5Oprivate.h

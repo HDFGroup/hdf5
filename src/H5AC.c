@@ -197,6 +197,8 @@ H5AC_term_package(void)
  *
  * Programmer:  John Mainzer, 1/10/17
  *
+ * Changes:     None.
+ *
  *-------------------------------------------------------------------------
  */
 hbool_t
@@ -231,6 +233,11 @@ H5AC_cache_image_pending(const H5F_t *f)
  *
  * Programmer:  Robb Matzke
  *              Jul  9 1997
+ *
+ * Changes:     Added code to configure the metadata cache for VFD SWMR
+ *              reader operations when indicated.
+ *
+ *                                              JRM -- 1/15/19
  *
  *-------------------------------------------------------------------------
  */
@@ -359,6 +366,19 @@ H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr, H5AC_cache_image_co
         if (H5C_log_set_up(f->shared->cache, H5F_MDC_LOG_LOCATION(f), H5C_LOG_STYLE_JSON,
                            H5F_START_MDC_LOG_ON_ACCESS(f)) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "mdc logging setup failed")
+
+    /* Configure the metadata cache for VFD SWMR reader operation if
+     * specified.
+     */
+    if ((H5F_VFD_SWMR_CONFIG(f)) && (!f->shared->vfd_swmr_config.writer)) {
+
+        HDassert(!(H5F_INTENT(f) & H5F_ACC_RDWR));
+        HDassert(f->shared->fs_page_size > 0);
+
+        if (H5C_set_vfd_swmr_reader(f->shared->cache, TRUE, f->shared->fs_page_size) < 0)
+
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "can't configure MDC for VFD SWMR reader operations");
+    }
 
     /* Set the cache parameters */
     if (H5AC_set_cache_auto_resize_config(f->shared->cache, config_ptr) < 0)
@@ -2463,6 +2483,40 @@ done:
 } /* H5AC_expunge_tag_type_metadata*/
 
 /*------------------------------------------------------------------------------
+ * Function:    H5AC_expunge_all_tagged_metadata()
+ *
+ * Purpose:     Wrapper for cache level function which expunges all tagged
+ *              entries
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Dana Robinson
+ *              Spring 2022
+ *
+ *------------------------------------------------------------------------------
+ */
+herr_t
+H5AC_expunge_all_tagged_metadata(H5F_t *f, haddr_t tag, int type_id, unsigned flags)
+{
+    /* Variable Declarations */
+    herr_t ret_value = SUCCEED;
+
+    /* Function Enter Macro */
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Assertions */
+    HDassert(f);
+    HDassert(f->shared);
+
+    /* Call cache-level function to expunge all tagged entries */
+    if (H5C_expunge_all_tagged_metadata(f, tag, type_id, flags) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Cannot expunge all entries")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5AC_expunge_all_tagged_metadata*/
+
+/*------------------------------------------------------------------------------
  * Function:    H5AC_get_tag()
  *
  * Purpose:     Get the tag for a metadata cache entry.
@@ -2794,3 +2848,35 @@ H5AC_get_mdc_image_info(const H5AC_t *cache_ptr, haddr_t *image_addr, hsize_t *i
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_get_mdc_image_info() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5AC_set_vfd_swmr_reader
+ *
+ * Purpose:     Wrapper function for H5C_set_vfd_swmr_reader().
+ *
+ * Return:      SUCCEED on success, and FAIL on failure.
+ *
+ * Programmer:  Vailin Choi
+ *              Dec 2021
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_set_vfd_swmr_reader(H5AC_t *cache_ptr, hbool_t vfd_swmr_reader, hsize_t page_size)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(cache_ptr);
+
+    if (cache_ptr->page_size != page_size) {
+
+        if (H5C_set_vfd_swmr_reader((H5C_t *)cache_ptr, vfd_swmr_reader, page_size) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "can't set page_size for VFD SWMR reader")
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5AC_set_vfd_swmr_reader() */

@@ -87,7 +87,8 @@ const H5D_chunk_ops_t H5D_COPS_NONE[1] = {{
     H5D__none_idx_size,           /* size */
     H5D__none_idx_reset,          /* reset */
     H5D__none_idx_dump,           /* dump */
-    NULL                          /* dest */
+    NULL,                         /* dest */
+    NULL                          /* close */
 }};
 
 /*****************************/

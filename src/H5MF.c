@@ -86,6 +86,7 @@ typedef struct {
 /* Local Prototypes */
 /********************/
 
+static herr_t H5MF__xfree_impl(H5F_t *, H5FD_mem_t, haddr_t, hsize_t);
 /* Allocator routines */
 static haddr_t H5MF__alloc_pagefs(H5F_t *f, H5FD_mem_t alloc_type, hsize_t size);
 
@@ -111,6 +112,9 @@ static herr_t H5MF__close_delete_fstype(H5F_t *f, H5F_mem_page_t type);
 /* Callbacks */
 static herr_t H5MF__sects_cb(H5FS_section_info_t *_sect, void *_udata);
 
+/* VFD SWMR */
+static herr_t H5MF__defer_free(H5F_shared_t *shared, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size);
+
 /*********************/
 /* Package Variables */
 /*********************/
@@ -122,6 +126,62 @@ static herr_t H5MF__sects_cb(H5FS_section_info_t *_sect, void *_udata);
 /*******************/
 /* Local Variables */
 /*******************/
+
+static herr_t
+H5MF__defer_free(H5F_shared_t *shared, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
+{
+    lower_defree_t *df        = NULL;
+    herr_t          ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    if ((df = H5MM_malloc(sizeof(*df))) == NULL)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "unable to allocate buffer")
+
+    df->alloc_type      = alloc_type;
+    df->addr            = addr;
+    df->size            = size;
+    df->free_after_tick = shared->tick_num + shared->vfd_swmr_config.max_lag;
+
+    SIMPLEQ_INSERT_TAIL(&shared->lower_defrees, df, link);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5MF__defer_free() */
+
+herr_t
+H5MF_process_deferred_frees(H5F_t *f, const uint64_t tick_num)
+{
+    lower_defree_t *     df;
+    H5F_shared_t *       shared    = f->shared;
+    lower_defree_queue_t defrees   = SIMPLEQ_HEAD_INITIALIZER(defrees);
+    herr_t               ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOERR
+
+    /* Have to empty the queue before processing it because we
+     * could re-enter this routine through H5MF__xfree_impl.  If
+     * items were still on the queue, we would enter
+     * H5MF_process_deferred_frees() recursively until the queue was empty.
+     */
+    SIMPLEQ_CONCAT(&defrees, &shared->lower_defrees);
+
+    while ((df = SIMPLEQ_FIRST(&defrees)) != NULL) {
+        if (tick_num <= df->free_after_tick)
+            break;
+        SIMPLEQ_REMOVE_HEAD(&defrees, link);
+
+        /* Record errors here, but keep trying to free */
+        if (H5MF__xfree_impl(f, df->alloc_type, df->addr, df->size) < 0)
+            ret_value = FAIL;
+        H5MM_xfree(df);
+    }
+
+    /* Save remaining entries for processing, later */
+    SIMPLEQ_CONCAT(&shared->lower_defrees, &defrees);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5MF_process_deferred_frees() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5MF_init_merge_flags
@@ -786,6 +846,11 @@ H5MF_alloc(H5F_t *f, H5FD_mem_t alloc_type, hsize_t size)
     HDassert(f->shared->lf);
     HDassert(size > 0);
 
+    if (!f->shared->vfd_swmr_writer)
+        ; // not a VFD SWMR writer, do not process deferrals
+    else if (H5MF_process_deferred_frees(f, f->shared->tick_num) < 0) {
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, HADDR_UNDEF, "could not process deferrals")
+    }
     H5MF__alloc_to_fs_type(f->shared, alloc_type, size, &fs_type);
 
 #ifdef H5MF_ALLOC_DEBUG_MORE
@@ -1078,12 +1143,7 @@ done:
 herr_t
 H5MF_xfree(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
 {
-    H5F_mem_page_t       fs_type;                   /* Free space type (mapped from allocation type) */
-    H5MF_free_section_t *node = NULL;               /* Free space section pointer */
-    unsigned             ctype;                     /* section class type */
-    H5AC_ring_t          orig_ring = H5AC_RING_INV; /* Original ring value */
-    H5AC_ring_t          fsm_ring;                  /* Ring of FSM */
-    herr_t               ret_value = SUCCEED;       /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(H5AC__FREESPACE_TAG, FAIL)
 #ifdef H5MF_ALLOC_DEBUG
@@ -1096,6 +1156,34 @@ H5MF_xfree(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
     if (!H5F_addr_defined(addr) || 0 == size)
         HGOTO_DONE(SUCCEED)
     HDassert(addr != 0); /* Can't deallocate the superblock :-) */
+
+    if (!f->shared->vfd_swmr_writer || f->shared->closing || alloc_type != H5FD_MEM_DRAW) {
+        /* VFD SWMR writers defer raw-data allocations until the
+         * file starts to close.
+         */
+        ret_value = H5MF__xfree_impl(f, alloc_type, addr, size);
+    }
+    else if (H5MF__defer_free(f->shared, alloc_type, addr, size) < 0)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "could not defer")
+    else if (H5MF_process_deferred_frees(f, f->shared->tick_num) < 0) {
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGC, FAIL, "could not process deferrals")
+    }
+
+done:
+    FUNC_LEAVE_NOAPI_TAG(ret_value)
+}
+
+static herr_t
+H5MF__xfree_inner_impl(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
+{
+    H5F_mem_page_t       fs_type;                   /* Free space type (mapped from allocation type) */
+    H5MF_free_section_t *node = NULL;               /* Free space section pointer */
+    unsigned             ctype;                     /* section class type */
+    H5AC_ring_t          orig_ring = H5AC_RING_INV; /* Original ring value */
+    H5AC_ring_t          fsm_ring;                  /* Ring of FSM */
+    herr_t               ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_PACKAGE_TAG(H5AC__FREESPACE_TAG)
 
     H5MF__alloc_to_fs_type(f->shared, alloc_type, size, &fs_type);
 
@@ -1244,7 +1332,56 @@ done:
     H5MF__sects_dump(f, stderr);
 #endif /* H5MF_ALLOC_DEBUG_DUMP */
     FUNC_LEAVE_NOAPI_TAG(ret_value)
-} /* end H5MF_xfree() */
+}
+
+static herr_t
+H5MF__xfree_impl(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE_TAG(H5AC__FREESPACE_TAG)
+
+    ret_value = H5MF__xfree_inner_impl(f, alloc_type, addr, size);
+
+    /* If the page buffer is enabled, notify it so that it can remove any
+     * pages that lie in the freed region.
+     *
+     * This is necessary in normal (AKA non VFD SWMR mode) as if single large
+     * metadata entry is allocated out of the freed space, writes to the
+     * entry will by-pass the page buffer.  If a dirty intersecting
+     * entry is left in the page buffer, it could introduce corruption
+     * if it is flushed after the large metadata entry is written.
+     *
+     * Further, in the VFD SWMR case, the large metadata entry will typically
+     * be buffered in the page buffer.  If an intersecting entry is left
+     * in the page buffer, in addition to causing potential corruption in
+     * the HDF5 file, it may also result in overlapping entries in the page
+     * buffer and metadata file index.
+     *
+     * It's ok to remove the page from the PB without flushing to
+     * the shadow file or to the underlying HDF5 file because any
+     * writes to the page in this tick have not yet become visible
+     * to the reader, and any writes to the page in previous ticks are
+     * recorded in the shadow file.
+     *
+     * Note: This is not the correct place for this call, as it is
+     *       sometimes bypassed by a HGOTO_DONE earlier in the function.
+     *       This causes the assertion failure in fheap when run at
+     *       express test level 0.  Discuss with Vailin.
+     *
+     *                                    JRM -- 4/28/20
+     */
+    if (ret_value == SUCCEED && f->shared->page_buf && size >= f->shared->fs_page_size) {
+
+        HDassert(H5F_SHARED_PAGED_AGGR(f->shared));
+
+        if (H5PB_remove_entries(f->shared, addr, size) < 0) {
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "can't remove entries from page buffer")
+        }
+    }
+done:
+    FUNC_LEAVE_NOAPI_TAG(ret_value)
+}
 
 /*-------------------------------------------------------------------------
  * Function:	H5MF_try_extend

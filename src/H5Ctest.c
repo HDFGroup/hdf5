@@ -155,3 +155,55 @@ H5C__verify_cork_tag_test(hid_t fid, H5O_token_t tag_token, hbool_t status)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C__verify_cork_tag_test() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C_set_curr_io_type_splitable()
+ *
+ * Purpose:     To test the meta data entry splitting capability in the page
+ *              buffer (needed to deal with H5FA and H5EA's unfortunate
+ *              design choice of sub-allocating multiple metadata entries
+ *              out of a single file space allocation), we must be able
+ *              to configure the metadata cache to report that the
+ *              current I/O request is for such an entry.
+ *
+ *              To do this, we must set cache_ptr->curr_io_type to
+ *              point to the instance of H5C_class_t with one such
+ *              client.
+ *
+ *              This function does this by setting cache_ptr->curr_io_type
+ *              to H5AC_EARRAY_DBLK_PAGE if set_splitable is TRUE, and to
+ *              NULL otherwise.
+ *
+ *              Needless to say, this is purely a testing function, and
+ *              should not be called otherwise.
+ *
+ * Return:      void
+ *
+ * Programmer:  John Mainzer
+ *              4/10/20
+ *
+ * Changes:     None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+void
+H5C_set_curr_io_type_splitable(H5C_t *cache_ptr, hbool_t set_splitable)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    HDassert(cache_ptr);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+
+    if (set_splitable) {
+
+        cache_ptr->curr_io_type = H5AC_EARRAY_DBLK_PAGE;
+    }
+    else {
+
+        cache_ptr->curr_io_type = NULL;
+    }
+
+    FUNC_LEAVE_NOAPI_VOID
+
+} /* H5C_set_curr_io_type_splitable() */

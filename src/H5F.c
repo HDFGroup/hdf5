@@ -2785,3 +2785,119 @@ H5Fset_dset_no_attrs_hint(hid_t file_id, hbool_t minimize)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Fset_dset_no_attrs_hint */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Fvfd_swmr_end_tick()
+ *
+ * Purpose:     To trigger end of tick processing
+ *
+ * Return:      Non-negative on success/Negative on errors
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Fvfd_swmr_end_tick(hid_t file_id)
+{
+    H5VL_object_t *      vol_obj = NULL;      /* File */
+    H5VL_optional_args_t vol_cb_args;         /* Arguments to VOL callback */
+    herr_t               ret_value = SUCCEED; /* Return value */
+
+    /* Note: use the version of FUNC_ENTER_API without EOT processing */
+    FUNC_ENTER_API_NO_EOT(FAIL)
+    H5TRACE1("e", "i", file_id);
+
+    vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE);
+    if (NULL == vol_obj)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+
+    /* TODO: Revisit this when VFD SWMR + parallel works */
+    /* Set up collective metadata if appropriate */
+    if (H5CX_set_loc(file_id) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set collective metadata read info")
+
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type = H5VL_NATIVE_FILE_VFD_SWMR_END_TICK;
+    vol_cb_args.args    = NULL;
+
+    if (H5VL_file_optional(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, "unable to trigger end of tick processing for VFD SWMR")
+
+done:
+    /* Note: use the version of FUNC_LEAVE_API without EOT processing */
+    FUNC_LEAVE_API_NO_EOT(ret_value)
+} /* H5Fvfd_swmr_end_tick() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Fvfd_swmr_disable_end_of_tick()
+ *
+ * Purpose:     Disable end of tick processing
+ *
+ * Return:      Non-negative on success/Negative on errors
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Fvfd_swmr_disable_end_of_tick(hid_t file_id)
+{
+    H5VL_object_t *      vol_obj = NULL;      /* File */
+    H5VL_optional_args_t vol_cb_args;         /* Arguments to VOL callback */
+    herr_t               ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "i", file_id);
+
+    vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE);
+    if (NULL == vol_obj)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+
+    /* TODO: Revisit this when VFD SWMR + parallel works */
+    /* Set up collective metadata if appropriate */
+    if (H5CX_set_loc(file_id) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set collective metadata read info")
+
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type = H5VL_NATIVE_FILE_VFD_SWMR_DISABLE_EOT;
+    vol_cb_args.args    = NULL;
+
+    if (H5VL_file_optional(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, "unable to disable EOT for VFD SWMR")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Fvfd_swmr_disable_end_of_tick() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Fvfd_swmr_enable_end_of_tick()
+ *
+ * Purpose:     Enable end of tick processing
+ *
+ * Return:      Non-negative on success/Negative on errors
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Fvfd_swmr_enable_end_of_tick(hid_t file_id)
+{
+    H5VL_object_t *      vol_obj = NULL;      /* File */
+    H5VL_optional_args_t vol_cb_args;         /* Arguments to VOL callback */
+    herr_t               ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "i", file_id);
+
+    vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE);
+    if (NULL == vol_obj)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier")
+
+    /* TODO: Revisit this when VFD SWMR + parallel works */
+    /* Set up collective metadata if appropriate */
+    if (H5CX_set_loc(file_id) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set collective metadata read info")
+
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type = H5VL_NATIVE_FILE_VFD_SWMR_ENABLE_EOT;
+    vol_cb_args.args    = NULL;
+
+    if (H5VL_file_optional(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, "unable to enable EOT for VFD SWMR")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Fvfd_swmr_enable_end_of_tick() */

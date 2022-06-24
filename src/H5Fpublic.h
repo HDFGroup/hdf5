@@ -243,6 +243,153 @@ typedef struct H5F_retry_info_t {
  */
 typedef herr_t (*H5F_flush_cb_t)(hid_t object_id, void *udata);
 
+/* VFD SWMR configuration data used by H5Pset/get_vfd_swmr_config */
+#define H5F__CURR_VFD_SWMR_CONFIG_VERSION 1
+#define H5F__MAX_VFD_SWMR_FILE_NAME_LEN   1024
+#define H5F__MAX_PB_EXPANSION_THRESHOLD   100
+/*
+ *  struct H5F_vfd_swmr_config_t
+ *
+ *  Instances of H5F_vfd_swmr_config_t are used by VFD SWMR writers and readers
+ *  to pass necessary configuration data to the HDF5 library on file open (or
+ *  creation, in the case of writers).
+ *
+ *  The fields of the structure are discussed below:
+ *      version:
+ *          An integer field indicating the version of the H5F_vfd_swmr_config
+ *          structure used.  This field must always be set to a known version
+ *          number.  The most recent version of the structure will always be
+ *          H5F__CURR_VFD_SWMR_CONFIG_VERSION.
+ *
+ *      tick_len:
+ *          An integer field containing the length of a tick in tenths of
+ *          a second.  If tick_len is zero, end of tick processing may only be
+ *          triggered manually via the H5Fvfd_swmr_end_tick() function.
+ *
+ *      max_lag:
+ *          An integer field indicating the maximum expected lag (in ticks)
+ *          between the writer and the readers.  This value must be at least 3,
+ *          with 10 being the recommended minimum value.
+ *
+ *      presume_posix_semantics
+ *          A boolean flag that is only relevant to the reader.
+ *          This flag should be set to TRUE if both of the following conditions hold:
+ *          1) Both the metadata file and HDF5 file are being written on a POSIX
+ *             file system that is local to the reader.
+ *          2) The metadata file is being maintained directly by the VFD SWMR
+ *             writer (i.e. without use of updater files and the auxiliary process.)
+ *          If this flag is FALSE, the VFD SWMR reader must make the two adjustments:
+ *          1) Per legacy SWMR, the VFD that reads the HDF5 file proper must allow
+ *             reads past EOF without error.
+ *          2) The VFD SWMR reader is not permitted to open an existing HDF5 file
+ *             either before the VFD SWMR writer has opened it, or after it has
+ *             closed it.
+ *
+ *      writer:
+ *          A boolean flag indicating whether the file opened with this FAPL entry
+ *          will be opened R/W. (i.e. as a VFD SWMR writer)
+ *
+ *      maintain_metadata_file
+ *          A boolean flag indicating whether the writer should create and
+ *          maintain the metadata file.  Note that this field is only revelant
+ *          if the above writer flag is TRUE.
+ *          If this flag is TRUE, the writer must create and maintain the
+ *          metadata file in the location specified in the md_file_path.
+ *          Observe that at least one of maintain_metadata_file and
+ *          generate_updater_files fields must be TRUE if writer is TRUE.
+ *
+ *      generate_updater_files
+ *          A boolean flag indicating whether the writer should generate a
+ *          sequence of updater files describing how the metadata file
+ *          should be updated at the end of each tick.
+ *          If the flag is TRUE, all modifications to the metadata file
+ *          (including its creation) are described in an ordered sequence of
+ *          updater files.  These files are read in order by auxiliary processes,
+ *          and used to generate local copies of the metadata file as required.
+ *          This mechanism exists to allow VFD SWMR to operate on storage
+ *          systems that do not support POSIX semantics.
+ *          This field is only used by the VFD SWMR writer.  VFD SWMR readers
+ *          ignore this field, as they always look to the specified metadata
+ *          file, regardless of whether it is generated and maintained
+ *          directly by the VFD SWMR writer, or by an auxiliary process that
+ *          polls for new updater files, and applies them as they appear.
+ *
+ *      flush_raw_data:
+ *          A boolean flag indicating whether raw data should be flushed
+ *          as part of the end of tick processing.  If set to TRUE, raw
+ *          data will be flushed and thus be consistent with the metadata file.
+ *          However, this will also greatly increase end of tick I/O, and will
+ *          likely break any real time guarantees unless a very large tick_len
+ *          is selected.
+ *
+ *      md_pages_reserved:
+ *          The `md_pages_reserved` parameter tells how many pages to reserve
+ *          at the beginning of the shadow file for the shadow-file header
+ *          and the shadow index.  The header has an entire page to itself.
+ *          The remaining `md_pages_reserved - 1` pages are reserved for the
+ *          shadow index.  If the index grows larger than its initial
+ *          allocation, then it will move to a new location in the shadow file,
+ *          and the initial allocation will be reclaimed.  `md_pages_reserved`
+ *          must be at least 2.
+ *
+ *      pb_expansion_threshold:
+ *          An integer field indicating the threshold for the page buffer size.
+ *          During a tick, the page buffer must expand as necessary to retain copies
+ *          of all modified metadata pages and multi-page metadata entries.
+ *          If the page buffer size exceeds this threshold, an early end of tick
+ *          will be triggered.
+ *          Note that this is not a limit on the maximum page buffer size, as the
+ *          metadata cache is flushed as part of end of tick processing.
+ *          This threshold must be in the range [0, 100].  If the threshold is 0,
+ *          the feature is disabled.  For all other values, the page buffer size is
+ *          multiplied by this threshold.  If this value is exceeded, an early end
+ *          of tick is triggered.
+ *
+ *      md_file_path:
+ *          If both the writer and maintain_metadata_file fields are TRUE, this
+ *          field contains the path but not the name of the metadata file.
+ *          If writer is FALSE, this field contains the path (but not the name)
+ *          of the (possibly local copy of the) metadata file.
+ *
+ *      md_file_name:
+ *          If both the writer and maintain_metadata_file fields are TRUE, this
+ *          field is defined, and must contain the name (but not the path) of
+ *          the metadata file, or NULL.
+ *          If writer is FALSE, this field is defined, and must contain either
+ *          the name (but not the path) of the metadata file, or NULL.
+ *          If the field is defined but NULL, the metadata file name is
+ *          generated by adding the ".md" suffix to the HDF5 file name.
+ *          If the field is not NULL, the metadata file name is used as provided.
+ *
+ *      updater_file_path:
+ *          If generate_updater_files is TRUE, the contents of this field depends
+ *          on whether the writer field is TRUE.  If it is, the field contains
+ *          the path and base name of the metadatea file updater files.
+ *          If writer is FALSE, the field is ignored.
+ *
+ *      log_file_path:
+ *          This field contains the path to the log file.  If defined, this path should
+ *          be unique to each process.  If this field contains the empty string, a log
+ *          file will not be created.
+ *
+ */
+typedef struct H5F_vfd_swmr_config_t {
+    int32_t  version;
+    uint32_t tick_len;
+    uint32_t max_lag;
+    hbool_t  presume_posix_semantics;
+    hbool_t  writer;
+    hbool_t  maintain_metadata_file;
+    hbool_t  generate_updater_files;
+    hbool_t  flush_raw_data;
+    uint32_t md_pages_reserved;
+    uint32_t pb_expansion_threshold;
+    char     md_file_path[H5F__MAX_VFD_SWMR_FILE_NAME_LEN + 1];
+    char     md_file_name[H5F__MAX_VFD_SWMR_FILE_NAME_LEN + 1];
+    char     updater_file_path[H5F__MAX_VFD_SWMR_FILE_NAME_LEN + 1];
+    char     log_file_path[H5F__MAX_VFD_SWMR_FILE_NAME_LEN + 1];
+} H5F_vfd_swmr_config_t;
+
 /*********************/
 /* Public Prototypes */
 /*********************/
@@ -1685,6 +1832,20 @@ H5_DLL herr_t H5Fget_dset_no_attrs_hint(hid_t file_id, hbool_t *minimize);
  *
  */
 H5_DLL herr_t H5Fset_dset_no_attrs_hint(hid_t file_id, hbool_t minimize);
+
+/* VFD SWMR */
+/**
+ * \todo Add missing documentation
+ */
+H5_DLL herr_t H5Fvfd_swmr_end_tick(hid_t file_id);
+/**
+ * \todo Add missing documentation
+ */
+H5_DLL herr_t H5Fvfd_swmr_disable_end_of_tick(hid_t file_id);
+/**
+ * \todo Add missing documentation
+ */
+H5_DLL herr_t H5Fvfd_swmr_enable_end_of_tick(hid_t file_id);
 
 #ifdef H5_HAVE_PARALLEL
 /**

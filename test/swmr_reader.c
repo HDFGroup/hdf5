@@ -249,7 +249,7 @@ read_records(const char *filename, hbool_t verbose, FILE *verbose_file, unsigned
             symbol_info_t *sym; /* Symbol to use */
 
             /* Determine the symbol, within all symbols */
-            if (NULL == (sym = choose_dataset()))
+            if (NULL == (sym = choose_dataset(NULL, NULL, verbose)))
                 return -1;
             sym_rand[v] = sym;
 
@@ -275,7 +275,7 @@ read_records(const char *filename, hbool_t verbose, FILE *verbose_file, unsigned
     if ((fapl = h5_fileaccess()) < 0)
         return -1;
 
-    /* Log I/O when verbose output it enabled */
+    /* Log I/O when verbose output it enbabled */
     if (use_log_vfd) {
         char verbose_name[1024];
 

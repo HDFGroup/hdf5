@@ -38,13 +38,25 @@ AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_builddir)/src
 TEST_SCRIPT = test_abort_fail.sh test_check_version.sh test_error.sh \
 	test_flush_refresh.sh test_external_env.sh test_libinfo.sh \
 	test_links_env.sh test_swmr.sh test_vds_env.sh test_vds_swmr.sh \
-	test_use_cases.sh
+	test_use_cases.sh test_vfd_swmr.sh
 SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT) \
     external_env$(EXEEXT) filenotclosed$(EXEEXT) del_many_dense_attrs$(EXEEXT) \
     flushrefresh$(EXEEXT) use_append_chunk$(EXEEXT) use_append_mchunks$(EXEEXT) use_disable_mdc_flushes$(EXEEXT) \
     swmr_generator$(EXEEXT) swmr_reader$(EXEEXT) swmr_writer$(EXEEXT) \
     swmr_remove_reader$(EXEEXT) swmr_remove_writer$(EXEEXT) swmr_addrem_writer$(EXEEXT) \
     swmr_sparse_reader$(EXEEXT) swmr_sparse_writer$(EXEEXT) swmr_start_write$(EXEEXT) \
+    vfd_swmr_generator$(EXEEXT) vfd_swmr_reader$(EXEEXT) vfd_swmr_writer$(EXEEXT)  \
+    vfd_swmr_remove_reader$(EXEEXT) vfd_swmr_remove_writer$(EXEEXT)  \
+    vfd_swmr_addrem_writer$(EXEEXT) vfd_swmr_sparse_reader$(EXEEXT) \
+    vfd_swmr_sparse_writer$(EXEEXT) \
+    vfd_swmr_bigset_reader$(EXEEXT) vfd_swmr_bigset_writer$(EXEEXT) \
+    vfd_swmr_dsetops_reader$(EXEEXT) vfd_swmr_dsetops_writer$(EXEEXT) \
+    vfd_swmr_group_reader$(EXEEXT) vfd_swmr_group_writer$(EXEEXT) \
+    vfd_swmr_vlstr_reader$(EXEEXT) vfd_swmr_vlstr_writer$(EXEEXT) \
+    vfd_swmr_zoo_reader$(EXEEXT) vfd_swmr_zoo_writer$(EXEEXT) \
+    vfd_swmr_gperf_reader$(EXEEXT) vfd_swmr_gperf_writer$(EXEEXT) \
+    vfd_swmr_gfail_reader$(EXEEXT) vfd_swmr_gfail_writer$(EXEEXT) \
+    vfd_swmr_indep_wr_p0$(EXEEXT) vfd_swmr_indep_wr_p1$(EXEEXT) \
     vds_env$(EXEEXT) vds_swmr_gen$(EXEEXT) vds_swmr_reader$(EXEEXT) vds_swmr_writer$(EXEEXT)
 if HAVE_SHARED_CONDITIONAL
   TEST_SCRIPT += test_plugin.sh
@@ -63,7 +75,7 @@ check_SCRIPTS = $(TEST_SCRIPT)
 TEST_PROG= testhdf5 \
            cache cache_api cache_image cache_tagging lheap ohdr \
            stab gheap evict_on_close farray earray btree2 fheap \
-           accum hyperslab istore bittests dt_arith page_buffer \
+           accum hyperslab istore bittests dt_arith page_buffer vfd_swmr \
            dtypes dsets chunk_info cmpd_dset cmpd_dtransform filter_fail extend direct_chunk \
            external efc objcopy objcopy_ref links unlink twriteorder big mtime \
            fillval mount \
@@ -98,6 +110,19 @@ check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version \
     use_append_chunk use_append_chunk_mirror use_append_mchunks use_disable_mdc_flushes \
     swmr_generator swmr_start_write swmr_reader swmr_writer swmr_remove_reader \
     swmr_remove_writer swmr_addrem_writer swmr_sparse_reader swmr_sparse_writer \
+    vfd_swmr_generator vfd_swmr_reader vfd_swmr_writer \
+    vfd_swmr_remove_reader vfd_swmr_remove_writer vfd_swmr_addrem_writer \
+    vfd_swmr_sparse_reader vfd_swmr_sparse_writer \
+    vfd_swmr_bigset_reader vfd_swmr_bigset_writer \
+    vfd_swmr_dsetops_reader vfd_swmr_dsetops_writer \
+    vfd_swmr_group_reader vfd_swmr_group_writer \
+    vfd_swmr_vlstr_reader vfd_swmr_vlstr_writer \
+    vfd_swmr_zoo_reader vfd_swmr_zoo_writer \
+    vfd_swmr_attrdset_reader vfd_swmr_attrdset_writer \
+    vfd_swmr_gperf_reader vfd_swmr_gperf_writer \
+    vfd_swmr_gfail_reader vfd_swmr_gfail_writer \
+    vfd_swmr_indep_wr_p0 vfd_swmr_indep_wr_p1 \
+    vfd_swmr_dsetchks_reader vfd_swmr_dsetchks_writer \
     vds_env vds_swmr_gen vds_swmr_reader vds_swmr_writer
 if HAVE_SHARED_CONDITIONAL
   check_PROGRAMS+= filter_plugin vfd_plugin vol_plugin
@@ -155,7 +180,7 @@ else
   noinst_LTLIBRARIES=libh5test.la
 endif
 
-libh5test_la_SOURCES=h5test.c testframe.c cache_common.c swmr_common.c external_common.c
+libh5test_la_SOURCES=h5test.c testframe.c cache_common.c swmr_common.c external_common.c stubs.c vfd_swmr_common.c
 
 # Use libhd5test.la to compile all of the tests
 LDADD=libh5test.la $(LIBHDF5)
@@ -165,6 +190,24 @@ ttsafe_SOURCES=ttsafe.c ttsafe_dcreate.c ttsafe_error.c ttsafe_cancel.c       \
                ttsafe_acreate.c ttsafe_attr_vlen.c
 cache_image_SOURCES=cache_image.c genall5.c
 mirror_vfd_SOURCES=mirror_vfd.c genall5.c
+
+vfd_swmr_zoo_writer_SOURCES=vfd_swmr_zoo_writer.c genall5.c
+vfd_swmr_zoo_reader_SOURCES=vfd_swmr_zoo_writer.c genall5.c
+
+vfd_swmr_bigset_reader_SOURCES=vfd_swmr_bigset_writer.c
+vfd_swmr_group_reader_SOURCES=vfd_swmr_group_writer.c
+vfd_swmr_gperf_reader_SOURCES=vfd_swmr_gperf_writer.c
+vfd_swmr_gfail_reader_SOURCES=vfd_swmr_gfail_writer.c
+vfd_swmr_indep_wr_p0_SOURCES=vfd_swmr_indep_rw_writer.c
+vfd_swmr_indep_wr_p1_SOURCES=vfd_swmr_indep_rw_writer.c
+
+vfd_swmr_dsetops_reader_SOURCES=vfd_swmr_dsetops_writer.c
+
+vfd_swmr_attrdset_writer_SOURCES=vfd_swmr_attrdset_writer.c
+vfd_swmr_attrdset_reader_SOURCES=vfd_swmr_attrdset_writer.c
+
+vfd_swmr_dsetchks_writer_SOURCES=vfd_swmr_dsetchks_writer.c
+vfd_swmr_dsetchks_reader_SOURCES=vfd_swmr_dsetchks_writer.c
 
 # Additional target for running timing test
 timings _timings: testmeta

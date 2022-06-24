@@ -153,6 +153,62 @@
 /* Size of file consistency flags (status_flags) in the superblock */
 #define H5F_SUPER_STATUS_FLAGS_SIZE(v) (v >= 2 ? 1 : 4)
 
+/* VFD SMWR LOG REPORTING MACROS */
+
+/* H5F_POST_VFD_SWMR_LOG_ENTRY is the macro that can help the developers debug VFD SWMR features.
+ * It calls an internal reporting function H5F_post_vfd_swmr_log_entry() that receives
+ * a log entry_type_code,  which generates a log tag,  and the message log_info, which
+ * the developers want to save into a log file.
+ *
+ * The macro H5F_POST_VFD_SWMR_LOG_ENTRY_PRODUCTION(f, c, number_entry_production, m) is
+ * called by H5F_POST_VFD_SWMR_LOG_ENTRY when the HDF5 library is built with the
+ * production mode. Number_entry_production will control the number of entry tags that
+ * applications can receive. Currently this number is set to 1 and is subject to change
+ * when more tags are useful to be present to applications.
+ *
+ * The first argument of the macro is the HDF5 file pointer(H5F_t *).
+ * Its value needs to be checked to avoid a failure caused by "Low-Level File I/O "
+ * in the testhdf5 program, which involves the test of a non-existing HDF5 file.
+ */
+
+#define H5F_POST_VFD_SWMR_LOG_ENTRY_INTERNAL(fp, entry_type_code, log_info)                                  \
+    do {                                                                                                     \
+        if (fp != NULL) {                                                                                    \
+            if (fp->shared != NULL) {                                                                        \
+                if (fp->shared->vfd_swmr_log_on == TRUE) {                                                   \
+                    H5F__post_vfd_swmr_log_entry(fp, entry_type_code, log_info);                             \
+                }                                                                                            \
+            }                                                                                                \
+        }                                                                                                    \
+    } while (0)
+
+#define H5F_POST_VFD_SWMR_LOG_ENTRY_PRODUCTION(fp, entry_type_code, max_code, log_info)                      \
+    do {                                                                                                     \
+        if (entry_type_code < max_code) {                                                                    \
+            H5F_POST_VFD_SWMR_LOG_ENTRY_INTERNAL(fp, entry_type_code, log_info);                             \
+        }                                                                                                    \
+    } while (0)
+
+/* Note: change H5F_POST_VFD_SWMR_LOG_ENTRY_PRODUCTION(f, c, 1, m) on the following lines to
+ *       H5F_POST_VFD_SWMR_LOG_ENTRY_PRODUCTION(f, c, your_number_entry_production, m)
+ *       as necessary.
+ */
+#ifndef NDEBUG
+#define H5F_POST_VFD_SWMR_LOG_ENTRY(f, c, m) H5F_POST_VFD_SWMR_LOG_ENTRY_INTERNAL(f, c, m)
+#else
+#define H5F_POST_VFD_SWMR_LOG_ENTRY(f, c, m) H5F_POST_VFD_SWMR_LOG_ENTRY_PRODUCTION(f, c, 1, m)
+#endif
+
+/* Macros for VFD SWMR log entry code
+ * Note: this should be consistent with const char *H5Fvfd_swmr_log_tags[] declared at
+ * H5Fvfd_swmr.c .
+ */
+#define EOT_PROCESSING_TIME 0
+#define FILE_OPEN           1
+#define FILE_CLOSE          2
+#define EOT_TRIGGER_TIME    3
+#define EOT_META_FILE_INDEX 4
+
 /* Forward declaration external file cache struct used below (defined in
  * H5Fefc.c) */
 typedef struct H5F_efc_t H5F_efc_t;
@@ -214,6 +270,16 @@ typedef struct H5F_mtab_t {
     H5F_mount_t *child;   /* An array of mount records		*/
 } H5F_mtab_t;
 
+/* Deferred-free record for the shadow file: records a region of bytes in
+ * the shadow file to release after max_lag ticks.
+ */
+typedef struct shadow_defree {
+    uint64_t offset;                 /* offset of the region in *bytes* */
+    uint32_t length;                 /* length of the region in *bytes* */
+    uint64_t tick_num;               /* tick number when the free was deferred */
+    TAILQ_ENTRY(shadow_defree) link; /* deferred-free queue linkage */
+} shadow_defree_t;
+
 /* Structure specifically to store superblock. This was originally
  * maintained entirely within H5F_shared_t, but is now extracted
  * here because the superblock is now handled by the cache */
@@ -232,6 +298,29 @@ typedef struct H5F_super_t {
     haddr_t      root_addr;                /* Root group address                         */
     H5G_entry_t *root_ent;                 /* Root group symbol table entry              */
 } H5F_super_t;
+
+/* Deferred-free record for the lower file: records a region of bytes in
+ * the file below the SWMR VFD to release after a delay.
+ */
+typedef struct lower_defree {
+    SIMPLEQ_ENTRY(lower_defree) link; /* deferred-free queue linkage */
+    H5FD_mem_t alloc_type;            /* type with which the region was allocated */
+    haddr_t    addr;                  /* start of the region *in bytes* */
+    hsize_t    size;                  /* length of the region *in bytes* */
+    uint64_t   free_after_tick;       /* the region may be reused on tick
+                                       * free_after_tick + 1 at the earliest
+                                       */
+} lower_defree_t;
+
+/* Queue of deferred-free records (lower_defree_t) for the lower file, sorted
+ * head-to-tail in increasing `free_after_tick` order.
+ */
+typedef SIMPLEQ_HEAD(lower_defree_queue, lower_defree) lower_defree_queue_t;
+
+/* Queue of deferred-free records (shadow_defree_t) for the shadow file, sorted
+ * head-to-tail in increasing `tick_num` order.
+ */
+typedef TAILQ_HEAD(shadow_defree_queue, shadow_defree) shadow_defree_queue_t;
 
 /*
  * Define the structure to store the file information for HDF5 files. One of
@@ -358,6 +447,122 @@ struct H5F_shared_t {
     H5F_object_flush_t object_flush;           /* Information for object flush callback */
     hbool_t            crt_dset_min_ohdr_flag; /* flag to minimize created dataset object header */
 
+    /* VFD SWMR */
+
+    /* Configuration info */
+    H5F_vfd_swmr_config_t vfd_swmr_config; /* Copy of the VFD SWMR
+                                            * configuration from the
+                                            * FAPL used to open the file
+                                            */
+    haddr_t writer_index_offset;           /* Current byte offset of the
+                                            * shadow index in the shadow file.
+                                            */
+    hbool_t vfd_swmr;                      /* The file is opened with VFD
+                                            * SWMR configured or not
+                                            */
+    hbool_t vfd_swmr_writer;               /* This is the VFD SWMR writer or
+                                            * not
+                                            */
+    uint64_t        tick_num;              /* Number of the current tick */
+    uint64_t        max_jump_ticks;        /* Max # of jumps in tick number */
+    struct timespec end_of_tick;           /* End time of the current tick */
+
+    lower_defree_queue_t lower_defrees; /* Records of lower-file space
+                                         * awaiting reclamation.
+                                         */
+    /* VFD SWMR metadata file index */
+    H5FD_vfd_swmr_idx_entry_t *mdf_idx; /* pointer to an array of instance
+                                         * of H5FD_vfd_swmr_idx_entry_t of
+                                         * length mdf_idx_len.  This array
+                                         * is used by the vfd swmr writer
+                                         * to assemble the metadata file
+                                         * index at the end of each tick,
+                                         * and by the vfd swmr readers to
+                                         * track changes in the index.
+                                         * With one brief exception during
+                                         * writer end of tick processing,
+                                         * this index will always be sorted
+                                         * in increasing HDF5 file page
+                                         * offset order.
+                                         *
+                                         * This field should be NULL unless
+                                         * the index is defined.
+                                         */
+    uint32_t mdf_idx_len;               /* number of entries in the array
+                                         * of instances of
+                                         * H5FD_vfd_swmr_idx_entry_t pointed
+                                         * to by mdf_idx above.  Note that
+                                         * not all entries in the index
+                                         * need be used.
+                                         */
+    uint32_t mdf_idx_entries_used;      /* Number of entries in *mdf_idx
+                                         * that are in use -- these will
+                                         * be contiguous at indices 0
+                                         * through mdf_idx_entries_used - 1.
+                                         */
+
+    /* Old VFD SWMMR metadata file index.  These fields are used only
+     * by the VFD SWMR reader to store the previous version of the
+     * metadata file index so that it can be compared with the current
+     * version to identify page buffer and metadata cache entries that
+     * must be evicted or refreshed to avoid message from the past bugs.
+     */
+    H5FD_vfd_swmr_idx_entry_t *old_mdf_idx;
+    uint32_t                   old_mdf_idx_len;
+    uint32_t                   old_mdf_idx_entries_used;
+
+    /* Metadata file and updater file for VFD SWMR writer */
+    int vfd_swmr_md_fd;      /* POSIX: file descriptor for the
+                              * metadata file or -1 if the metadata file
+                              * is not currently open.
+                              * The vfd_swmr_config.generate_updater_files
+                              * is FALSE.
+                              */
+                             /* NFS:
+                              * The vfd_swmr_config.generate_updater_files
+                              * is TRUE and:
+                              * --if vfd_swmr_config.writer is FALSE,
+                              * this field is the file descriptor of the local
+                              * copy of the metadata file, or -1 if the local
+                              * copy is not currently open.
+                              * --if vfd_swmr_config.writer is TRUE, this field
+                              * is not used and is set to -1.
+                              */
+    char *md_file_path_name; /* Name composed of md_file_path and md_file_name from vfd_swmr_config */
+
+    H5F_generate_md_ck_t generate_md_ck_cb;
+    /* For testing only:
+     * Invoke the user-defined callback if exists to
+     * generate checksum for the metadata file
+     */
+
+    haddr_t vfd_swmr_md_eoa;  /* POSIX: eoa for the metadata
+                               * file
+                               */
+    uint64_t updater_seq_num; /* Sequence number of the next updater file to be
+                               * generated.  This field must be initialized to zero,
+                               * and incremented after each updater file is generated.
+                               */
+
+    /* Free space manager for the metadata file */
+    H5FS_t *       fs_man_md;   /* Free-space manager */
+    H5F_fs_state_t fs_state_md; /* State of the free space
+                                 * manager
+                                 */
+    /* Log file for VFD SWMR */
+    FILE *vfd_swmr_log_file_ptr;        /* File pointer for the
+                                         * log file.
+                                         */
+    hbool_t vfd_swmr_log_on;            /* flag to indicate if
+                                         * the log file is
+                                         * created. */
+    H5_timer_t vfd_swmr_log_start_time; /* The starting time for
+                                         * calculating the time
+                                         * stamp of a log message.
+                                         */
+    /* Delayed free space release doubly linked list */
+    shadow_defree_queue_t shadow_defrees;
+
     char *extpath; /* Path for searching target external link file                 */
 
 #ifdef H5_HAVE_PARALLEL
@@ -418,6 +623,11 @@ H5_DLL herr_t H5F__get_cont_info(const H5F_t *f, H5VL_file_cont_info_t *info);
 H5_DLL herr_t H5F__parse_file_lock_env_var(htri_t *use_locks);
 H5_DLL herr_t H5F__delete(const char *filename, hid_t fapl_id);
 
+/* VFD SWMR routines */
+H5_DLL herr_t H5F__vfd_swmr_end_tick(H5F_t *f);
+H5_DLL herr_t H5F__vfd_swmr_disable_end_of_tick(H5F_t *f);
+H5_DLL herr_t H5F__vfd_swmr_enable_end_of_tick(H5F_t *f);
+
 /* File mount related routines */
 H5_DLL herr_t H5F__close_mounts(H5F_t *f);
 H5_DLL herr_t H5F__mount_count_ids(H5F_t *f, unsigned *nopen_files, unsigned *nopen_objs);
@@ -476,12 +686,20 @@ H5_DLL herr_t H5F__get_max_eof_eoa(const H5F_t *f, haddr_t *max_eof_eoa);
 /* Functions that flush or evict */
 H5_DLL herr_t H5F__evict_cache_entries(H5F_t *f);
 
+/* VFD SWMR log functions */
+H5_DLL void H5F__post_vfd_swmr_log_entry(H5F_t *f, int entry_type_code, const char *log_info);
+
 /* Testing functions */
 #ifdef H5F_TESTING
 H5_DLL herr_t H5F__get_sohm_mesg_count_test(hid_t fid, unsigned type_id, size_t *mesg_count);
 H5_DLL herr_t H5F__check_cached_stab_test(hid_t file_id);
 H5_DLL herr_t H5F__get_maxaddr_test(hid_t file_id, haddr_t *maxaddr);
 H5_DLL herr_t H5F__get_sbe_addr_test(hid_t file_id, haddr_t *sbe_addr);
+
+/* VFD SWMR testing routines */
+H5_DLL herr_t H5F__vfd_swmr_writer_create_open_flush_test(hid_t file_id, hbool_t create);
+H5_DLL herr_t H5F__vfd_swmr_writer_md_test(hid_t, unsigned, struct H5FD_vfd_swmr_idx_entry_t *, unsigned);
+
 H5_DLL htri_t H5F__same_file_test(hid_t file_id1, hid_t file_id2);
 H5_DLL herr_t H5F__reparse_file_lock_variable_test(void);
 #endif /* H5F_TESTING */

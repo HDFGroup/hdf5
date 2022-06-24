@@ -75,6 +75,7 @@ const H5AC_class_t H5AC_BT[1] = {{
     NULL,                             /* 'notify' callback */
     H5B__cache_free_icr,              /* 'free_icr' callback */
     NULL,                             /* 'fsf_size' callback */
+    NULL,                             /* VFD SWMR 'refresh' callback */
 }};
 
 /*******************/

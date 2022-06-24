@@ -1701,6 +1701,8 @@ main(int argc, char *argv[])
     if (parse_command_line(argc, (const char *const *)argv, &hand) < 0)
         goto done;
 
+    fname = argv[H5_optind];
+
     /* enable error reporting if command line option */
     h5tools_error_report();
 
@@ -1710,6 +1712,7 @@ main(int argc, char *argv[])
         vfd_info.type   = VFD_BY_NAME;
         vfd_info.info   = NULL;
         vfd_info.u.name = drivername;
+        vfd_info.fname  = fname;
 
 #ifdef H5_HAVE_ROS3_VFD
         if (!HDstrcmp(drivername, drivernames[ROS3_VFD_IDX]))

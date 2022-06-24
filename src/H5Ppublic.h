@@ -4052,6 +4052,10 @@ H5_DLL herr_t H5Pget_sieve_buf_size(hid_t fapl_id, size_t *size /*out*/);
  */
 H5_DLL herr_t H5Pget_small_data_block_size(hid_t fapl_id, hsize_t *size /*out*/);
 /**
+ * \todo Add missing documentation
+ */
+H5_DLL herr_t H5Pget_vfd_swmr_config(hid_t plist_id, H5F_vfd_swmr_config_t *config_ptr);
+/**
  * \ingroup FAPL
  *
  * \brief Returns the identifier of the current VOL connector
@@ -5599,6 +5603,10 @@ H5_DLL herr_t H5Pset_mdc_image_config(hid_t plist_id, H5AC_cache_image_config_t 
  */
 H5_DLL herr_t H5Pset_page_buffer_size(hid_t plist_id, size_t buf_size, unsigned min_meta_per,
                                       unsigned min_raw_per);
+/**
+ * \todo Add missing documentation
+ */
+H5_DLL herr_t H5Pset_vfd_swmr_config(hid_t plist_id, H5F_vfd_swmr_config_t *config_ptr);
 
 /* Dataset creation property list (DCPL) routines */
 /**

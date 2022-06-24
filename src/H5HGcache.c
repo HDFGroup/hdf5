@@ -86,6 +86,7 @@ const H5AC_class_t H5AC_GHEAP[1] = {{
     NULL,                                   /* 'notify' callback */
     H5HG__cache_heap_free_icr,              /* 'free_icr' callback */
     NULL,                                   /* 'fsf_size' callback */
+    NULL,                                   /* VFD SWMR 'refresh' callback */
 }};
 
 /*****************************/

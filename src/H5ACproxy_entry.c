@@ -77,6 +77,7 @@ const H5AC_class_t H5AC_PROXY_ENTRY[1] = {{
     H5AC__proxy_entry_notify,    /* 'notify' callback */
     H5AC__proxy_entry_free_icr,  /* 'free_icr' callback */
     NULL,                        /* 'fsf_size' callback */
+    NULL,                        /* VFD SWMR 'refresh' callback */
 }};
 
 /*****************************/

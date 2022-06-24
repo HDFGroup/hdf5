@@ -842,6 +842,103 @@ typedef struct H5C_t H5C_t;
  *      push error information on the error stack with the error API
  *      routines.
  *
+ * REFRESH_ENTRY: Pointer to the refresh entry callback.
+ *
+ *      This callback exists to support VFD SWMR readers, and should not
+ *      be used outside this context.
+ *
+ *      At the end of each tick, the VFD SWMR reader is informed of pages
+ *      in the page buffer that have been modified since the last tick.
+ *
+ *      To avoid message from the past bugs, it is necessary to either
+ *      evict or refresh entries that have been modified in the past tick,
+ *      and thus reside in such modified pages.
+ *
+ *      To this end, the metadata cache is informed of all such pages,
+ *      and must either evict, or update all entries contained in these
+ *      pages, or determine that the entry in question has not been modified,
+ *      and thus that no action is required.
+ *
+ *      If the entry is unpinned, it is possible to simply evict it, and
+ *      this is probably the most efficient way to address the issue.
+ *
+ *      If the entry is pinned and tagged, it is possible to evict the
+ *      entire on disk data structure of which it is part via the evict
+ *      tagged entry facility.  This is inefficient, but it is simple and
+ *      uses existing code -- hence this is plan A for the initial
+ *      implementation of VFD SWMR.
+ *
+ *      However, there remains the case of the pinned entry that is not
+ *      tagged, and thus not subject to eviction via the evict tagged
+ *      entries call -- the most important example of this is the super
+ *      block which is pinned and may not be evicted until file close.
+ *
+ *      Another example is free space manager headers -- however, these
+ *      are a non-issue in the context of VFD SWMR readers as such files
+ *      must only be opened R/O and thus will not have active free space
+ *      managers.
+ *
+ *      The refresh entry callback exists to address this issue.  As
+ *      indicated above, it is essential for the superblock, and desirable
+ *      whenever it is not possible to simply evict an entry that resides
+ *      in a modified page cache page.
+ *
+ *      Functionally, the call is similar to the deserialize call, the
+ *      primary difference being that the client receives both a pointer
+ *      to the existing entry, and a buffer containing its image.  The
+ *      client must deserialize this image an update itself as appropriate.
+ *
+ *	The typedef for the VFD SWMR refresh callback is as follows:
+ *
+ * 	   typedef void *(*H5C_vfd_swmr_refresh_func_t)(H5F_t * f,
+ *                                                 void * entry_ptr,
+ *                                                 const void * image_ptr,
+ * 	                                           size_t * len_ptr);
+ *
+ *	The parameters of the deserialize callback are as follows:
+ *
+ *      f:      Pointer to the containing instance of H5F_t.
+ *
+ *      entry_ptr: Pointer to the metadata cache entry that is being
+ *              refreshed.  This entry is place on the protected list
+ *              for the duration of the refresh callback as the client
+ *              will typically modify it during the refresh operation.
+ *
+ *	image_ptr: Pointer to a buffer of length *len_ptr containing the
+ *		most recent version of the entry's on disk image from
+ *              the VFD SWMR metadata file.  The length of the buffer
+ *              is specified in the len parameter below.
+ *
+ *	len_ptr: Pointer to size_t containing the length in
+ *              bytes of the buffer pointed to by *image_ptr.
+ *
+ *              If the supplied buffer is too small, the callback must
+ *              place the correct value in *len_ptr and return success.
+ *              The metadata cache will read the larger image, and call
+ *              the refresh function again.
+ *
+ *	Processing in the refresh function should proceed as follows:
+ *
+ *      The target entry will be protected for the duration of the
+ *      refresh call.  This allows entry resizes if necessary, and
+ *      prevents re-entrant refresh calls.
+ *
+ *      If the supplied image contains valid data, and is of the correct
+ *      length, the refresh function must parse it, and apply updates to
+ *      the in core representatin of the metadata cache entry as required.
+ *      Note that since the file is opened R/O, any updates must not
+ *      cause the entry to be marked dirty.
+ *
+ *      If the image contains valid data, but is too small, the refresh
+ *      callback must copy the correct image length to *len_ptr, and
+ *      return success.  The metadata cache will make a second call with
+ *      the correct image length.  If the entry must change size, the
+ *      refresh callback must call H5C_resize_entry().
+ *
+ *      If the image contains invalid data, or if, for whatever reason,
+ *      the refresh function cannot apply its contents, the refresh
+ *      function must return failure.
+ *
  ***************************************************************************/
 
 /* Actions that can be reported to 'notify' client callback */
@@ -880,6 +977,8 @@ typedef herr_t (*H5C_serialize_func_t)(const H5F_t *f, void *image_ptr, size_t l
 typedef herr_t (*H5C_notify_func_t)(H5C_notify_action_t action, void *thing);
 typedef herr_t (*H5C_free_icr_func_t)(void *thing);
 typedef herr_t (*H5C_get_fsf_size_t)(const void *thing, hsize_t *fsf_size_ptr);
+typedef herr_t (*H5C_vfd_swmr_refresh_func_t)(H5F_t *f, void *entry_ptr, const void *image_ptr,
+                                              size_t *len_ptr);
 
 /* Metadata cache client class definition */
 typedef struct H5C_class_t {
@@ -897,6 +996,7 @@ typedef struct H5C_class_t {
     H5C_notify_func_t                notify;
     H5C_free_icr_func_t              free_icr;
     H5C_get_fsf_size_t               fsf_size;
+    H5C_vfd_swmr_refresh_func_t      refresh;
 } H5C_class_t;
 
 /* Type definitions of callback functions used by the cache as a whole */
@@ -1569,6 +1669,35 @@ typedef int H5C_ring_t;
  * tag_info:    Pointer to the common tag state for all entries belonging to
  *              an object.  NULL for untagged entries.
  *
+ * Fields supporting VFD SWMR
+ *
+ * The following fields exist to support the page index.  These fields are
+ * only defined when the vfd_swmr_reader field in the associated instance of
+ * H5C_t is set to TRUE.
+ *
+ * page:        Page offset of the page containing the base address of the
+ *              metadata cache entry.
+ *
+ * refreshed_in_tick: When an entry is refreshed as part of the VFD SWMR
+ *              reader end of tick processing, this field is used to
+ *              record the tick in which this occurred.  The field is
+ *              used primarily for sanity checking.
+ *
+ * pi_next:     Next pointer used by the page index hash table that maps
+ *              page buffer pages to any metadata cache entries that
+ *              reside in the target page.
+ *
+ *              This field points to the next entry in the doubly linked
+ *              list of entries in the hash bin, or NULL if there is no
+ *              next entry.
+ *
+ * pi_prev:     Prev pointer used by the page index hash table that maps
+ *              page buffer pages to any metadata cache entries that
+ *              reside in the target page.
+ *
+ *              This field points to the next entry in the doubly linked
+ *              list of entries in the hash bin, or NULL if there is no
+ *              next entry
  *
  * Cache entry stats collection fields:
  *
@@ -1667,6 +1796,12 @@ typedef struct H5C_cache_entry_t {
     struct H5C_cache_entry_t *tl_next;
     struct H5C_cache_entry_t *tl_prev;
     struct H5C_tag_info_t *   tag_info;
+
+    /* fields supporting VFD SWMR */
+    uint64_t                  page;
+    uint64_t                  refreshed_in_tick;
+    struct H5C_cache_entry_t *pi_next;
+    struct H5C_cache_entry_t *pi_prev;
 
 #if H5C_COLLECT_CACHE_ENTRY_STATS
     /* cache entry stats fields */
@@ -2230,47 +2365,53 @@ H5_DLL void   H5C_def_auto_resize_rpt_fcn(H5C_t *cache_ptr, int32_t version, dou
                                           size_t new_min_clean_size);
 H5_DLL herr_t H5C_dest(H5F_t *f);
 H5_DLL herr_t H5C_evict(H5F_t *f);
+H5_DLL herr_t H5C_evict_or_refresh_all_entries_in_page(H5F_t *f, uint64_t page, uint32_t length,
+                                                       uint64_t tick);
 H5_DLL herr_t H5C_expunge_entry(H5F_t *f, const H5C_class_t *type, haddr_t addr, unsigned flags);
 H5_DLL herr_t H5C_flush_cache(H5F_t *f, unsigned flags);
 H5_DLL herr_t H5C_flush_tagged_entries(H5F_t *f, haddr_t tag);
 H5_DLL herr_t H5C_evict_tagged_entries(H5F_t *f, haddr_t tag, hbool_t match_global);
 H5_DLL herr_t H5C_expunge_tag_type_metadata(H5F_t *f, haddr_t tag, int type_id, unsigned flags);
+H5_DLL herr_t H5C_expunge_all_tagged_metadata(H5F_t *f, haddr_t tag, int type_id, unsigned flags);
 H5_DLL herr_t H5C_get_tag(const void *thing, /*OUT*/ haddr_t *tag);
 #if H5C_DO_TAGGING_SANITY_CHECKS
 herr_t H5C_verify_tag(int id, haddr_t tag);
 #endif
-H5_DLL herr_t H5C_flush_to_min_clean(H5F_t *f);
-H5_DLL herr_t H5C_get_cache_auto_resize_config(const H5C_t *cache_ptr, H5C_auto_size_ctl_t *config_ptr);
-H5_DLL herr_t H5C_get_cache_image_config(const H5C_t *cache_ptr, H5C_cache_image_ctl_t *config_ptr);
-H5_DLL herr_t H5C_get_cache_size(const H5C_t *cache_ptr, size_t *max_size_ptr, size_t *min_clean_size_ptr,
-                                 size_t *cur_size_ptr, uint32_t *cur_num_entries_ptr);
-H5_DLL herr_t H5C_get_cache_flush_in_progress(const H5C_t *cache_ptr, hbool_t *flush_in_progress_ptr);
-H5_DLL herr_t H5C_get_cache_hit_rate(const H5C_t *cache_ptr, double *hit_rate_ptr);
-H5_DLL herr_t H5C_get_entry_status(const H5F_t *f, haddr_t addr, size_t *size_ptr, hbool_t *in_cache_ptr,
-                                   hbool_t *is_dirty_ptr, hbool_t *is_protected_ptr, hbool_t *is_pinned_ptr,
-                                   hbool_t *is_corked_ptr, hbool_t *is_flush_dep_parent_ptr,
-                                   hbool_t *is_flush_dep_child_ptr, hbool_t *image_up_to_date_ptr);
-H5_DLL herr_t H5C_get_evictions_enabled(const H5C_t *cache_ptr, hbool_t *evictions_enabled_ptr);
-H5_DLL void * H5C_get_aux_ptr(const H5C_t *cache_ptr);
-H5_DLL herr_t H5C_image_stats(H5C_t *cache_ptr, hbool_t print_header);
-H5_DLL herr_t H5C_insert_entry(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *thing,
-                               unsigned int flags);
-H5_DLL herr_t H5C_load_cache_image_on_next_protect(H5F_t *f, haddr_t addr, hsize_t len, hbool_t rw);
-H5_DLL herr_t H5C_mark_entry_dirty(void *thing);
-H5_DLL herr_t H5C_mark_entry_clean(void *thing);
-H5_DLL herr_t H5C_mark_entry_unserialized(void *thing);
-H5_DLL herr_t H5C_mark_entry_serialized(void *thing);
-H5_DLL herr_t H5C_move_entry(H5C_t *cache_ptr, const H5C_class_t *type, haddr_t old_addr, haddr_t new_addr);
-H5_DLL herr_t H5C_pin_protected_entry(void *thing);
-H5_DLL herr_t H5C_prep_for_file_close(H5F_t *f);
-H5_DLL herr_t H5C_create_flush_dependency(void *parent_thing, void *child_thing);
-H5_DLL void * H5C_protect(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *udata, unsigned flags);
-H5_DLL herr_t H5C_reset_cache_hit_rate_stats(H5C_t *cache_ptr);
-H5_DLL herr_t H5C_resize_entry(void *thing, size_t new_size);
-H5_DLL herr_t H5C_set_cache_auto_resize_config(H5C_t *cache_ptr, H5C_auto_size_ctl_t *config_ptr);
+H5_DLL herr_t  H5C_flush_to_min_clean(H5F_t *f);
+H5_DLL herr_t  H5C_get_cache_auto_resize_config(const H5C_t *cache_ptr, H5C_auto_size_ctl_t *config_ptr);
+H5_DLL herr_t  H5C_get_cache_image_config(const H5C_t *cache_ptr, H5C_cache_image_ctl_t *config_ptr);
+H5_DLL herr_t  H5C_get_cache_size(const H5C_t *cache_ptr, size_t *max_size_ptr, size_t *min_clean_size_ptr,
+                                  size_t *cur_size_ptr, uint32_t *cur_num_entries_ptr);
+H5_DLL herr_t  H5C_get_cache_flush_in_progress(const H5C_t *cache_ptr, hbool_t *flush_in_progress_ptr);
+H5_DLL herr_t  H5C_get_cache_hit_rate(const H5C_t *cache_ptr, double *hit_rate_ptr);
+H5_DLL int     H5C_get_curr_io_client_type(H5C_t *cache_ptr);
+H5_DLL hbool_t H5C_get_curr_read_speculative(H5C_t *cache_ptr);
+H5_DLL herr_t  H5C_get_entry_status(const H5F_t *f, haddr_t addr, size_t *size_ptr, hbool_t *in_cache_ptr,
+                                    hbool_t *is_dirty_ptr, hbool_t *is_protected_ptr, hbool_t *is_pinned_ptr,
+                                    hbool_t *is_corked_ptr, hbool_t *is_flush_dep_parent_ptr,
+                                    hbool_t *is_flush_dep_child_ptr, hbool_t *image_up_to_date_ptr);
+H5_DLL herr_t  H5C_get_evictions_enabled(const H5C_t *cache_ptr, hbool_t *evictions_enabled_ptr);
+H5_DLL void *  H5C_get_aux_ptr(const H5C_t *cache_ptr);
+H5_DLL herr_t  H5C_image_stats(H5C_t *cache_ptr, hbool_t print_header);
+H5_DLL herr_t  H5C_insert_entry(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *thing,
+                                unsigned int flags);
+H5_DLL herr_t  H5C_load_cache_image_on_next_protect(H5F_t *f, haddr_t addr, hsize_t len, hbool_t rw);
+H5_DLL herr_t  H5C_mark_entry_dirty(void *thing);
+H5_DLL herr_t  H5C_mark_entry_clean(void *thing);
+H5_DLL herr_t  H5C_mark_entry_unserialized(void *thing);
+H5_DLL herr_t  H5C_mark_entry_serialized(void *thing);
+H5_DLL herr_t  H5C_move_entry(H5C_t *cache_ptr, const H5C_class_t *type, haddr_t old_addr, haddr_t new_addr);
+H5_DLL herr_t  H5C_pin_protected_entry(void *thing);
+H5_DLL herr_t  H5C_prep_for_file_close(H5F_t *f);
+H5_DLL herr_t  H5C_create_flush_dependency(void *parent_thing, void *child_thing);
+H5_DLL void *  H5C_protect(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *udata, unsigned flags);
+H5_DLL herr_t  H5C_reset_cache_hit_rate_stats(H5C_t *cache_ptr);
+H5_DLL herr_t  H5C_resize_entry(void *thing, size_t new_size);
+H5_DLL herr_t  H5C_set_cache_auto_resize_config(H5C_t *cache_ptr, H5C_auto_size_ctl_t *config_ptr);
 H5_DLL herr_t H5C_set_cache_image_config(const H5F_t *f, H5C_t *cache_ptr, H5C_cache_image_ctl_t *config_ptr);
 H5_DLL herr_t H5C_set_evictions_enabled(H5C_t *cache_ptr, hbool_t evictions_enabled);
 H5_DLL herr_t H5C_set_slist_enabled(H5C_t *cache_ptr, hbool_t slist_enabled, hbool_t clear_slist);
+H5_DLL herr_t H5C_set_vfd_swmr_reader(H5C_t *cache_ptr, hbool_t vfd_swmr_reader, hsize_t page_size);
 H5_DLL herr_t H5C_set_prefix(H5C_t *cache_ptr, char *prefix);
 H5_DLL herr_t H5C_stats(H5C_t *cache_ptr, const char *cache_name, hbool_t display_detailed_stats);
 H5_DLL void   H5C_stats__reset(H5C_t *cache_ptr);
@@ -2323,12 +2464,15 @@ H5_DLL herr_t  H5C_dump_cache_LRU(H5C_t *cache_ptr, const char *cache_name);
 H5_DLL hbool_t H5C_get_serialization_in_progress(const H5C_t *cache_ptr);
 H5_DLL hbool_t H5C_cache_is_clean(const H5C_t *cache_ptr, H5C_ring_t inner_ring);
 H5_DLL herr_t  H5C_dump_cache_skip_list(H5C_t *cache_ptr, char *calling_fcn);
-H5_DLL herr_t  H5C_get_entry_ptr_from_addr(H5C_t *cache_ptr, haddr_t addr, void **entry_ptr_ptr);
-H5_DLL herr_t  H5C_flush_dependency_exists(H5C_t *cache_ptr, haddr_t parent_addr, haddr_t child_addr,
-                                           hbool_t *fd_exists_ptr);
-H5_DLL herr_t  H5C_verify_entry_type(H5C_t *cache_ptr, haddr_t addr, const H5C_class_t *expected_type,
-                                     hbool_t *in_cache_ptr, hbool_t *type_ok_ptr);
-H5_DLL herr_t  H5C_validate_index_list(H5C_t *cache_ptr);
+#ifdef H5_HAVE_PARALLEL
+H5_DLL herr_t H5C_dump_coll_write_list(H5C_t *cache_ptr, char *calling_fcn);
+#endif /* H5_HAVE_PARALLEL */
+H5_DLL herr_t H5C_get_entry_ptr_from_addr(H5C_t *cache_ptr, haddr_t addr, void **entry_ptr_ptr);
+H5_DLL herr_t H5C_flush_dependency_exists(H5C_t *cache_ptr, haddr_t parent_addr, haddr_t child_addr,
+                                          hbool_t *fd_exists_ptr);
+H5_DLL herr_t H5C_verify_entry_type(H5C_t *cache_ptr, haddr_t addr, const H5C_class_t *expected_type,
+                                    hbool_t *in_cache_ptr, hbool_t *type_ok_ptr);
+H5_DLL herr_t H5C_validate_index_list(H5C_t *cache_ptr);
 #endif /* NDEBUG */
 
 #endif /* H5Cprivate_H */

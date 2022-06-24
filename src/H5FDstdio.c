@@ -181,6 +181,8 @@ static herr_t  H5FD_stdio_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing
 static herr_t  H5FD_stdio_lock(H5FD_t *_file, hbool_t rw);
 static herr_t  H5FD_stdio_unlock(H5FD_t *_file);
 static herr_t  H5FD_stdio_delete(const char *filename, hid_t fapl_id);
+static herr_t  H5FD__stdio_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void *input,
+                               void **output);
 
 static const H5FD_class_t H5FD_stdio_g = {
     H5FD_CLASS_VERSION,    /* struct version */
@@ -221,7 +223,7 @@ static const H5FD_class_t H5FD_stdio_g = {
     H5FD_stdio_lock,       /* lock           */
     H5FD_stdio_unlock,     /* unlock         */
     H5FD_stdio_delete,     /* del            */
-    NULL,                  /* ctl            */
+    H5FD__stdio_ctl,       /* ctl            */
     H5FD_FLMAP_DICHOTOMY   /* fl_map         */
 };
 
@@ -611,6 +613,7 @@ H5FD_stdio_query(const H5FD_t *_f, unsigned long /*OUT*/ *flags)
         *flags |= H5FD_FEAT_AGGREGATE_SMALLDATA;    /* OK to aggregate "small" raw data allocations    */
         *flags |= H5FD_FEAT_DEFAULT_VFD_COMPATIBLE; /* VFD creates a file which can be opened with the default
                                                        VFD      */
+        *flags |= H5FD_FEAT_SUPPORTS_VFD_SWMR;      /* VFD supports the VFD SWMR */
     }
 
     return 0;
@@ -1066,7 +1069,7 @@ H5FD_stdio_truncate(H5FD_t *_file, hid_t /*UNUSED*/ dxpl_id, hbool_t /*UNUSED*/ 
             rewind(file->fp);
 
             /* Windows uses this odd QuadPart union for 32/64-bit portability */
-            li.QuadPart = (LONGLONG)file->eoa;
+            li.QuadPart = (__int64)file->eoa;
 
             /* Extend the file to make sure it's large enough.
              *
@@ -1236,6 +1239,61 @@ H5FD_stdio_delete(const char *filename, hid_t /*UNUSED*/ fapl_id)
 
     return 0;
 } /* end H5FD_stdio_delete() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__stdio_ctl
+ *
+ * Purpose:     Sec2 VFD version of the ctl callback.
+ *
+ *              The desired operation is specified by the op_code
+ *              parameter.
+ *
+ *              The flags parameter controls management of op_codes that
+ *              are unknown to the callback
+ *
+ *              The input and output parameters allow op_code specific
+ *              input and output
+ *
+ *              At present, the only op code supported is
+ *              H5FD_CTL_GET_TERMINAL_VFD, which is used to obtain the
+ *              instance of H5FD_t associated with the terminal
+ *              VFD.  This allows comparison of files whose terminal
+ *              VFD may have overlying pass through VFDs.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__stdio_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void /* UNUSED */ *input,
+                void **output)
+{
+    static const char *func = "H5FD__stdio_ctl"; /* Function Name for error reporting    */
+    H5FD_stdio_t *     file = (H5FD_stdio_t *)_file;
+
+    /* Clear the error stack */
+    H5Eclear2(H5E_DEFAULT);
+
+    /* Quiet compiler */
+    (void)input;
+
+    switch (op_code) {
+
+        case H5FD_CTL_GET_TERMINAL_VFD:
+            assert(output);
+            *output = (void *)(file);
+            break;
+
+        /* Unknown op code */
+        default:
+            if (flags & H5FD_CTL_FAIL_IF_UNKNOWN_FLAG)
+                H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_FCNTL,
+                            "unknown op_code and fail if unknown flag is set", -1);
+            break;
+    }
+
+    return 0; /* SUCCEED */
+
+} /* end H5FD__stdio_ctl() */
 
 #ifdef H5private_H
 /*

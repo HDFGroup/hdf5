@@ -595,6 +595,9 @@ H5HG_read(H5F_t *f, H5HG_t *hobj, void *object /*out*/, size_t *buf_size)
     if (NULL == (heap = H5HG__protect(f, hobj->addr, H5AC__READ_ONLY_FLAG)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, NULL, "unable to protect global heap")
 
+    if (hobj->idx >= heap->nused)
+        HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, NULL, "address out of bounds")
+
     HDassert(hobj->idx < heap->nused);
     HDassert(heap->obj[hobj->idx].begin);
     size = heap->obj[hobj->idx].size;

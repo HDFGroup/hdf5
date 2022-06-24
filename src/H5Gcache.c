@@ -91,6 +91,7 @@ const H5AC_class_t H5AC_SNODE[1] = {{
     NULL,                                  /* 'notify' callback */
     H5G__cache_node_free_icr,              /* 'free_icr' callback */
     NULL,                                  /* 'fsf_size' callback */
+    NULL,                                  /* VFD SWMR 'refresh' callback */
 }};
 
 /* Declare extern the free list to manage the H5G_node_t struct */

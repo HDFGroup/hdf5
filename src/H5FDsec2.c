@@ -550,6 +550,7 @@ H5FD__sec2_query(const H5FD_t *_file, unsigned long *flags /* out */)
         *flags |= H5FD_FEAT_POSIX_COMPAT_HANDLE; /* get_handle callback returns a POSIX file descriptor */
         *flags |=
             H5FD_FEAT_SUPPORTS_SWMR_IO; /* VFD supports the single-writer/multiple-readers (SWMR) pattern   */
+        *flags |= H5FD_FEAT_SUPPORTS_VFD_SWMR;      /* VFD supports the VFD SWMR */
         *flags |= H5FD_FEAT_DEFAULT_VFD_COMPATIBLE; /* VFD creates a file which can be opened with the default
                                                        VFD      */
 
@@ -1068,26 +1069,39 @@ done:
  *              The input and output parameters allow op_code specific
  *              input and output
  *
- *              At present, no op codes are supported by this VFD.
+ *              At present, the only op code supported is
+ *              H5FD_CTL_GET_TERMINAL_VFD, which is used in the
+ *              comparison of files under layers of pass through VFDs.
  *
  * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__sec2_ctl(H5FD_t *_file, uint64_t H5_ATTR_UNUSED op_code, uint64_t flags,
-               const void H5_ATTR_UNUSED *input, void H5_ATTR_UNUSED **output)
+H5FD__sec2_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void H5_ATTR_UNUSED *input,
+               void **output)
 {
-    herr_t ret_value = SUCCEED;
+    H5FD_sec2_t *file      = (H5FD_sec2_t *)_file;
+    herr_t       ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
-    HDassert(_file);
+    HDassert(file);
 
-    /* No op codes are understood. */
-    if (flags & H5FD_CTL_FAIL_IF_UNKNOWN_FLAG)
-        HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL, "unknown op_code and fail if unknown flag is set")
+    switch (op_code) {
+
+        case H5FD_CTL_GET_TERMINAL_VFD:
+            HDassert(output);
+            *output = (void *)(file);
+            break;
+
+        /* Unknown op code */
+        default:
+            if (flags & H5FD_CTL_FAIL_IF_UNKNOWN_FLAG)
+                HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL, "unknown op_code and fail if unknown flag is set")
+            break;
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

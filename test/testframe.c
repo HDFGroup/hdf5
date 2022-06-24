@@ -446,27 +446,18 @@ GetTestExpress(void)
 
     /* set it here for now.  Should be done in something like h5test_init(). */
     if (TestExpress == -1) {
-        int express_val = 1;
-
-        /* Check if a default test express level is defined (e.g., by build system) */
-#ifdef H5_TEST_EXPRESS_LEVEL_DEFAULT
-        express_val = H5_TEST_EXPRESS_LEVEL_DEFAULT;
-#endif
-
-        /* Check if HDF5TestExpress is set to override the default level */
         env_val = HDgetenv("HDF5TestExpress");
-        if (env_val) {
-            if (HDstrcmp(env_val, "0") == 0)
-                express_val = 0;
-            else if (HDstrcmp(env_val, "1") == 0)
-                express_val = 1;
-            else if (HDstrcmp(env_val, "2") == 0)
-                express_val = 2;
-            else
-                express_val = 3;
-        }
 
-        SetTestExpress(express_val);
+        if (env_val == NULL)
+            SetTestExpress(1);
+        else if (HDstrcmp(env_val, "0") == 0)
+            SetTestExpress(0);
+        else if (HDstrcmp(env_val, "1") == 0)
+            SetTestExpress(1);
+        else if (HDstrcmp(env_val, "2") == 0)
+            SetTestExpress(2);
+        else
+            SetTestExpress(3);
     }
 
     return (TestExpress);

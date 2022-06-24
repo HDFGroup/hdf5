@@ -101,6 +101,13 @@
 #include <dirent.h>
 #endif
 
+/* BSD-style queues
+ *
+ * We use a private copy of netBSD's queues instead of including sys/queue.h
+ * due to irreconcilable differences between different queue implementations.
+ */
+#include "H5queue.h"
+
 /* Define the default VFD for this platform.  Since the removal of the
  * Windows VFD, this is sec2 for all platforms.
  *
@@ -959,6 +966,9 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDgettimeofday
 #define HDgettimeofday(S, P) gettimeofday(S, P)
 #endif
+#ifndef HDclock_gettime
+#define HDclock_gettime(C, T) clock_gettime(C, T)
+#endif
 #ifndef HDgetuid
 #define HDgetuid() getuid()
 #endif
@@ -1320,6 +1330,9 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDsigsetjmp
 #define HDsigsetjmp(J, N) sigsetjmp(J, N)
 #endif
+#ifndef HDsigtimedwait
+#define HDsigtimedwait(S, I, T) sigtimedwait(S, I, T)
+#endif
 #ifndef HDsigsuspend
 #define HDsigsuspend(S) sigsuspend(S)
 #endif
@@ -1397,6 +1410,9 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #endif
 #ifndef HDstrrchr
 #define HDstrrchr(S, C) strrchr(S, C)
+#endif
+#ifndef HDstrsignal
+#define HDstrsignal(S) strsignal(S)
 #endif
 #ifndef HDstrspn
 #define HDstrspn(X, Y) strspn(X, Y)
@@ -1476,6 +1492,19 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDtimes
 #define HDtimes(T) times(T)
 #endif
+#ifndef HDtimespec_get
+#define HDtimespec_get(T, B) timespec_get(T, B)
+#endif
+
+#ifndef HDtimespeccmp
+#ifdef H5_HAVE_TIMESPECCMP
+#define HDtimespeccmp(tsp, usp, cmp) timespeccmp(tsp, usp, cmp)
+#else
+#define HDtimespeccmp(tsp, usp, cmp)                                                                         \
+    (((tsp)->tv_sec == (usp)->tv_sec) ? ((tsp)->tv_nsec cmp(usp)->tv_nsec) : ((tsp)->tv_sec cmp(usp)->tv_sec))
+#endif
+#endif
+
 #ifndef HDtmpfile
 #define HDtmpfile() tmpfile()
 #endif
@@ -2012,6 +2041,16 @@ H5_DLLVAR hbool_t H5_use_selection_io_g;
 extern hbool_t H5_MPEinit_g; /* Has the MPE Library been initialized? */
 #endif
 
+/* Typedef for the VFD SWMR end-of-tick queue */
+typedef TAILQ_HEAD(eot_queue, eot_queue_entry) eot_queue_t;
+
+/* VFD SWMR globals used in FUNC macros */
+H5_DLLVAR unsigned int vfd_swmr_api_entries_g;
+H5_DLLVAR eot_queue_t  eot_queue_g;
+
+/* Forward declaration of H5F_vfd_swmr_process_eot_queue() */
+H5_DLL herr_t H5F_vfd_swmr_process_eot_queue(hbool_t entering_api);
+
 /* Forward declaration of H5CXpush() / H5CXpop() */
 /* (Including H5CXprivate.h creates bad circular dependencies - QAK, 3/18/2018) */
 H5_DLL herr_t H5CX_push(void);
@@ -2081,8 +2120,52 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
                                                                                                              \
     BEGIN_MPE_LOG
 
+#define VFD_SWMR_ENTER(err)                                                                                  \
+    do {                                                                                                     \
+        /* TBD assert that the API lock is held.  The API lock */                                            \
+        /* synchronizes access to `vfd_swmr_api_entries_g`     */                                            \
+        if (vfd_swmr_api_entries_g++ > 0)                                                                    \
+            ; /* Do nothing: we are *re-*entering the API. */                                                \
+        else if (TAILQ_EMPTY(&eot_queue_g))                                                                  \
+            ; /* Nothing to do. */                                                                           \
+        else if (H5F_vfd_swmr_process_eot_queue(true) < 0) {                                                 \
+            /* Report error instead of "err" */                                                              \
+            HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, FALSE, "error processing EOT queue")                          \
+        }                                                                                                    \
+    } while (0)
+
+#define VFD_SWMR_LEAVE(err)                                                                                  \
+    do {                                                                                                     \
+        /* TBD assert that the API lock is held.  The API lock */                                            \
+        /* synchronizes access to `vfd_swmr_api_entries_g`     */                                            \
+        if (--vfd_swmr_api_entries_g > 0)                                                                    \
+            ; /* Do nothing: we are still in an API call. */                                                 \
+        else if (err_occurred)                                                                               \
+            ; /* Do nothing: an error occurred. */                                                           \
+        else if (TAILQ_EMPTY(&eot_queue_g))                                                                  \
+            ; /* Nothing to do. */                                                                           \
+        else if (H5F_vfd_swmr_process_eot_queue(FALSE) < 0) {                                                \
+            /* Report error instead of "err" */                                                              \
+            HDONE_ERROR(H5E_FUNC, H5E_CANTSET, FALSE, "error processing EOT queue")                          \
+        }                                                                                                    \
+    } while (0)
+
 /* Use this macro for all "normal" API functions */
 #define FUNC_ENTER_API(err)                                                                                  \
+    {                                                                                                        \
+        {                                                                                                    \
+            hbool_t api_ctx_pushed = FALSE;                                                                  \
+                                                                                                             \
+            FUNC_ENTER_API_COMMON                                                                            \
+            FUNC_ENTER_API_INIT(err);                                                                        \
+            FUNC_ENTER_API_PUSH(err);                                                                        \
+            VFD_SWMR_ENTER(err);                                                                             \
+            /* Clear thread error stack entering public functions */                                         \
+            H5E_clear_stack(NULL);                                                                           \
+            {
+
+/* Use this macro when VFD SWMR EOT is not used on entering an API function */
+#define FUNC_ENTER_API_NO_EOT(err)                                                                           \
     {                                                                                                        \
         {                                                                                                    \
             hbool_t api_ctx_pushed = FALSE;                                                                  \
@@ -2106,6 +2189,7 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
             FUNC_ENTER_API_COMMON                                                                            \
             FUNC_ENTER_API_INIT(err);                                                                        \
             FUNC_ENTER_API_PUSH(err);                                                                        \
+            VFD_SWMR_ENTER(err);                                                                             \
             {
 
 /*
@@ -2340,6 +2424,24 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
 #define FUNC_LEAVE_API(ret_value)                                                                            \
     ;                                                                                                        \
     } /*end scope from end of FUNC_ENTER*/                                                                   \
+    VFD_SWMR_LEAVE(ret_value);                                                                               \
+    FUNC_LEAVE_API_COMMON(ret_value);                                                                        \
+    if (api_ctx_pushed) {                                                                                    \
+        (void)H5CX_pop(TRUE);                                                                                \
+        api_ctx_pushed = FALSE;                                                                              \
+    }                                                                                                        \
+    H5_POP_FUNC                                                                                              \
+    if (err_occurred)                                                                                        \
+        (void)H5E_dump_api_stack(TRUE);                                                                      \
+    FUNC_LEAVE_API_THREADSAFE                                                                                \
+    return (ret_value);                                                                                      \
+    }                                                                                                        \
+    } /*end scope from beginning of FUNC_ENTER*/
+
+/* Use this macro when VFD SWMR EOT is not used on leaving an API function */
+#define FUNC_LEAVE_API_NO_EOT(ret_value)                                                                     \
+    ;                                                                                                        \
+    } /*end scope from end of FUNC_ENTER*/                                                                   \
     FUNC_LEAVE_API_COMMON(ret_value);                                                                        \
     if (api_ctx_pushed) {                                                                                    \
         (void)H5CX_pop(TRUE);                                                                                \
@@ -2525,6 +2627,8 @@ H5_DLL double H5_get_time(void);
 /* Functions for building paths, etc. */
 H5_DLL herr_t H5_build_extpath(const char *name, char **extpath /*out*/);
 H5_DLL herr_t H5_combine_path(const char *path1, const char *path2, char **full_name /*out*/);
+H5_DLL herr_t H5_dirname(const char *path, char **dirname /*out*/);
+H5_DLL herr_t H5_basename(const char *path, char **basename /*out*/);
 
 /* getopt(3) equivalent that papers over the lack of long options on BSD
  * and lack of Windows support.

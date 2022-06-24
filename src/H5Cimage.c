@@ -997,8 +997,21 @@ H5C__read_cache_image(H5F_t *f, H5C_t *cache_ptr)
 #endif /* H5_HAVE_PARALLEL */
 
             /* Read the buffer (if serial access, or rank 0 of parallel access) */
-            /* NOTE: if this block read is being performed on rank 0 only, throwing
-             * an error here will cause other ranks to hang in the following MPI_Bcast.
+
+            /* No need to set the page buffer hints here, as if paged
+             * allocation is in use, we know that the cache image was allocated
+             * directly from the free space manager, and thus either doesn't
+             * cross page boundaries, or is page aligned.  Between this,
+             * and the fact that the cache image is never read speculatively,
+             * the page buffer should never request hints in this context.
+             *
+             * If for some reason it does, the NULL curr_io_type will trigger
+             * an assertion failure.
+             *
+             * Note that we will have to revisit this if we ever use
+             * cache_ptr->curr_io_type for something other than sanity
+             * checking
+             *                                      JRM -- 3/30/20
              */
             if (H5F_block_read(f, H5FD_MEM_SUPER, cache_ptr->image_addr, cache_ptr->image_len,
                                cache_ptr->image_buffer) < 0)
@@ -2690,11 +2703,10 @@ H5C__prep_for_file_close__setup_image_entries_array(H5C_t *cache_ptr)
              */
             if (entry_ptr->type->id == H5AC_PREFETCHED_ENTRY_ID) {
                 image_entries[u].type_id = entry_ptr->prefetch_type_id;
+                image_entries[u].age     = entry_ptr->age + 1;
 
-                if (entry_ptr->age >= H5AC__CACHE_IMAGE__ENTRY_AGEOUT__MAX)
+                if (image_entries[u].age > H5AC__CACHE_IMAGE__ENTRY_AGEOUT__MAX)
                     image_entries[u].age = H5AC__CACHE_IMAGE__ENTRY_AGEOUT__MAX;
-                else
-                    image_entries[u].age = entry_ptr->age + 1;
             } /* end if */
             else {
                 image_entries[u].type_id = entry_ptr->type->id;
@@ -3478,6 +3490,19 @@ H5C__write_cache_image(H5F_t *f, const H5C_t *cache_ptr)
 #endif /* H5_HAVE_PARALLEL */
 
             /* Write the buffer (if serial access, or rank 0 for parallel access) */
+
+            /* No need to set the page buffer hints here.
+             *
+             * If paged allocation is in use, we know that the cache image
+             * was allocated directly from the free space manager, and thus
+             * either doesn't cross page boundaries, or is page aligned.
+             * Thus it should never trigger the sanity checks in the page buffer.
+             *
+             * If for some reason it does, the NULL curr_io_type will trigger
+             * an assertion failure.
+             *
+             *                                      JRM -- 3/30/20
+             */
             if (H5F_block_write(f, H5FD_MEM_SUPER, cache_ptr->image_addr, cache_ptr->image_len,
                                 cache_ptr->image_buffer) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "can't write metadata cache image block to file")

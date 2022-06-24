@@ -66,6 +66,7 @@
 #ifdef H5_HAVE_WINDOWS
 #include "H5FDwindows.h" /* Win32 I/O                                */
 #endif
+#include "H5FDvfd_swmr.h" /* Posix unbuffered I/O    file driver  */
 
 /* Includes needed to set default VOL connector */
 #include "H5VLnative_private.h" /* Native VOL connector                     */
@@ -331,6 +332,21 @@
 #endif
 #define H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_ENC H5P__encode_hbool_t
 #define H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_DEC H5P__decode_hbool_t
+/* Definitions for the VFD SWMR configuration */
+#define H5F_ACS_VFD_SWMR_CONFIG_SIZE sizeof(H5F_vfd_swmr_config_t)
+#define H5F_ACS_VFD_SWMR_CONFIG_DEF  H5F__DEFAULT_VFD_SWMR_CONFIG
+#define H5F_ACS_VFD_SWMR_CONFIG_ENC  H5P__facc_vfd_swmr_config_enc
+#define H5F_ACS_VFD_SWMR_CONFIG_DEC  H5P__facc_vfd_swmr_config_dec
+
+/*  Private property for VFD SWMR testing:
+ *      Callback function to generate checksum for metadata file
+ */
+#define H5F_ACS_GENERATE_MD_CK_CB_SIZE sizeof(H5F_generate_md_ck_cb_t)
+
+#define H5F_ACS_GENERATE_MD_CK_CB_DEF                                                                        \
+    {                                                                                                        \
+        NULL                                                                                                 \
+    }
 
 /******************/
 /* Local Typedefs */
@@ -376,6 +392,8 @@ static herr_t H5P__facc_multi_type_enc(const void *value, void **_pp, size_t *si
 static herr_t H5P__facc_multi_type_dec(const void **_pp, void *value);
 static herr_t H5P__facc_libver_type_enc(const void *value, void **_pp, size_t *size);
 static herr_t H5P__facc_libver_type_dec(const void **_pp, void *value);
+static herr_t H5P__facc_vfd_swmr_config_enc(const void *value, void **_pp, size_t *size);
+static herr_t H5P__facc_vfd_swmr_config_dec(const void **_pp, void *value);
 
 /* Metadata cache log location property callbacks */
 static herr_t H5P__facc_mdc_log_location_enc(const void *value, void **_pp, size_t *size);
@@ -528,6 +546,10 @@ static const hbool_t H5F_def_use_file_locking_g =
     H5F_ACS_USE_FILE_LOCKING_DEF; /* Default use file locking flag */
 static const hbool_t H5F_def_ignore_disabled_file_locks_g =
     H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_DEF; /* Default ignore disabled file locks flag */
+static const H5F_vfd_swmr_config_t H5F_def_vfd_swmr_config_g =
+    H5F_ACS_VFD_SWMR_CONFIG_DEF; /* Default vfd swmr configuration */
+/* For VFD SWMR testing only: Default to generate checksum for metadata file */
+static const H5F_generate_md_ck_t H5F_def_generate_md_ck_cb_g = H5F_ACS_GENERATE_MD_CK_CB_DEF;
 
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_reg_prop
@@ -643,6 +665,14 @@ H5P__facc_reg_prop(H5P_genclass_t *pclass)
     /* (Note: this property should not have an encode/decode callback -QAK) */
     if (H5P__register_real(pclass, H5F_ACS_FAMILY_TO_SINGLE_NAME, H5F_ACS_FAMILY_TO_SINGLE_SIZE,
                            &H5F_def_family_to_single_g, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+                           NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the private property of whether to generate checksum for metadata file.
+     * It's used for VFD SWMR testing only. */
+    /* (Note: this property should not have an encode/decode callback -QAK) */
+    if (H5P__register_real(pclass, H5F_ACS_GENERATE_MD_CK_CB_NAME, H5F_ACS_GENERATE_MD_CK_CB_SIZE,
+                           &H5F_def_generate_md_ck_cb_g, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
                            NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
@@ -804,6 +834,12 @@ H5P__facc_reg_prop(H5P_genclass_t *pclass)
                            H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_SIZE, &H5F_def_page_buf_min_raw_perc_g, NULL,
                            NULL, NULL, H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_ENC,
                            H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_DEC, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the default VFD SWMR configuration */
+    if (H5P__register_real(pclass, H5F_ACS_VFD_SWMR_CONFIG_NAME, H5F_ACS_VFD_SWMR_CONFIG_SIZE,
+                           &H5F_def_vfd_swmr_config_g, NULL, NULL, NULL, H5F_ACS_VFD_SWMR_CONFIG_ENC,
+                           H5F_ACS_VFD_SWMR_CONFIG_DEC, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the file VOL connector ID & info */
@@ -1185,7 +1221,7 @@ done:
  *
  * Purpose:    Set the file driver (DRIVER_ID) for a file access
  *        property list (PLIST_ID) and supply an optional
- *        struct containing the driver-specific properties
+ *        struct containing the driver-specific properites
  *        (DRIVER_INFO).  The driver properties will be copied into the
  *        property list and the reference count on the driver will be
  *        incremented, allowing the caller to close the driver ID but
@@ -1636,7 +1672,7 @@ H5Pget_driver_config_str(hid_t fapl_id, char *config_buf, size_t buf_size)
         size_t config_str_len = HDstrlen(config_str);
 
         if (config_buf) {
-            HDstrncpy(config_buf, config_str, buf_size);
+            HDstrncpy(config_buf, config_str, MIN(config_str_len + 1, buf_size));
             if (config_str_len >= buf_size)
                 config_buf[buf_size - 1] = '\0';
         }
@@ -4564,6 +4600,124 @@ H5P__facc_libver_type_dec(const void **_pp, void *_value)
 } /* end H5P__facc_libver_type_dec() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5P__facc_vfd_swmr_config_enc
+ *
+ * Purpose:     Callback routine which is called whenever the VFD SWMR config
+ *              property in the file access property list is encoded.
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ * Programmer:  Vailin Choi; July 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__facc_vfd_swmr_config_enc(const void *value, void **_pp, size_t *size)
+{
+    const H5F_vfd_swmr_config_t *config =
+        (const H5F_vfd_swmr_config_t *)value; /* Create local aliases for values */
+    uint8_t **pp = (uint8_t **)_pp;
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* Sanity check */
+    HDassert(value);
+    HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
+
+    if (NULL != *pp) {
+
+        /* int */
+        INT32ENCODE(*pp, (int32_t)config->version);
+        INT32ENCODE(*pp, (int32_t)config->tick_len);
+        INT32ENCODE(*pp, (int32_t)config->max_lag);
+        H5_ENCODE_UNSIGNED(*pp, config->presume_posix_semantics);
+        H5_ENCODE_UNSIGNED(*pp, config->writer);
+        H5_ENCODE_UNSIGNED(*pp, config->maintain_metadata_file);
+        H5_ENCODE_UNSIGNED(*pp, config->generate_updater_files);
+        H5_ENCODE_UNSIGNED(*pp, config->flush_raw_data);
+        INT32ENCODE(*pp, (int32_t)config->md_pages_reserved);
+        INT32ENCODE(*pp, (int32_t)config->pb_expansion_threshold);
+        HDmemcpy(*pp, (const uint8_t *)(config->md_file_path), (size_t)(H5F__MAX_VFD_SWMR_FILE_NAME_LEN + 1));
+        *pp += H5F__MAX_VFD_SWMR_FILE_NAME_LEN + 1;
+        HDmemcpy(*pp, (const uint8_t *)(config->md_file_name), (size_t)(H5F__MAX_VFD_SWMR_FILE_NAME_LEN + 1));
+        *pp += H5F__MAX_VFD_SWMR_FILE_NAME_LEN + 1;
+        HDmemcpy(*pp, (const uint8_t *)(config->updater_file_path),
+                 (size_t)(H5F__MAX_VFD_SWMR_FILE_NAME_LEN + 1));
+        *pp += H5F__MAX_VFD_SWMR_FILE_NAME_LEN + 1;
+        HDmemcpy(*pp, (const uint8_t *)(config->log_file_path),
+                 (size_t)(H5F__MAX_VFD_SWMR_FILE_NAME_LEN + 1));
+        *pp += H5F__MAX_VFD_SWMR_FILE_NAME_LEN + 1;
+
+    } /* end if */
+
+    /* Compute encoded size */
+    *size += ((5 * sizeof(int32_t)) + (5 * sizeof(unsigned)) + (4 * (H5F__MAX_VFD_SWMR_FILE_NAME_LEN + 1)));
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__facc_vfd_swmr_config_enc() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__facc_vfd_swmr_config_dec
+ *
+ * Purpose:     Callback routine which is called whenever the VFD SWMR
+ *              config property in the file access property list is decoded.
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ * Programmer:  Vailin Choi; July 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P__facc_vfd_swmr_config_dec(const void **_pp, void *_value)
+{
+    H5F_vfd_swmr_config_t *config = (H5F_vfd_swmr_config_t *)_value;
+    const uint8_t **       pp     = (const uint8_t **)_pp;
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* Sanity checks */
+    HDassert(pp);
+    HDassert(*pp);
+    HDassert(config);
+    HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
+
+    /* Set property to default value */
+    HDmemcpy(config, &H5F_def_vfd_swmr_config_g, sizeof(H5F_vfd_swmr_config_t));
+
+    /* int */
+    INT32DECODE(*pp, config->version);
+    UINT32DECODE(*pp, config->tick_len);
+    UINT32DECODE(*pp, config->max_lag);
+    UINT32DECODE(*pp, config->presume_posix_semantics);
+
+    H5_DECODE_UNSIGNED(*pp, config->writer);
+    H5_DECODE_UNSIGNED(*pp, config->maintain_metadata_file);
+    H5_DECODE_UNSIGNED(*pp, config->generate_updater_files);
+    H5_DECODE_UNSIGNED(*pp, config->flush_raw_data);
+
+    /* int */
+    UINT32DECODE(*pp, config->md_pages_reserved);
+    UINT32DECODE(*pp, config->pb_expansion_threshold);
+
+    HDstrcpy(config->md_file_path, (const char *)(*pp));
+    *pp += H5F__MAX_VFD_SWMR_FILE_NAME_LEN + 1;
+
+    HDstrcpy(config->md_file_name, (const char *)(*pp));
+    *pp += H5F__MAX_VFD_SWMR_FILE_NAME_LEN + 1;
+
+    HDstrcpy(config->updater_file_path, (const char *)(*pp));
+    *pp += H5F__MAX_VFD_SWMR_FILE_NAME_LEN + 1;
+
+    HDstrcpy(config->log_file_path, (const char *)(*pp));
+    *pp += H5F__MAX_VFD_SWMR_FILE_NAME_LEN + 1;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P__facc_vfd_swmr_config_dec() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5Pset_metadata_read_attempts
  *
  * Purpose:    Sets the # of read attempts in the file access property list
@@ -6048,6 +6202,92 @@ done:
 } /* end H5P_set_vol() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5Pset_vfd_swmr_config
+ *
+ * Purpose:     Set VFD SWMR configuration in the target FAPL.
+ *              Note: Hard-wired to set the driver in the fapl
+ *                    to use the SWMR VFD driver; this will be changed
+ *                    later
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Vailin Choi; July 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_vfd_swmr_config(hid_t plist_id, H5F_vfd_swmr_config_t *config_ptr)
+{
+    H5P_genplist_t *plist; /* Property list pointer */
+    size_t          name_len;
+    herr_t          ret_value = SUCCEED; /* return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*!", plist_id, config_ptr);
+
+    /* Get the plist structure */
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+
+    /* Validate the input configuration */
+
+    /* Check args */
+    if (config_ptr == NULL)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "NULL config_ptr on entry")
+
+    /* This field must always be set to a known version */
+    if (config_ptr->version != H5F__CURR_VFD_SWMR_CONFIG_VERSION)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "Unknown config version")
+
+    /* This field must be at least 3 */
+    if (config_ptr->max_lag < 3)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "max_lag must be at least 3")
+
+    /* This field must be >= 2 */
+    if (config_ptr->md_pages_reserved < 2)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "md_pages_reserved must be at least 2")
+
+    /* This field must be in the range [0, 100] */
+    if (config_ptr->pb_expansion_threshold > H5F__MAX_PB_EXPANSION_THRESHOLD)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "pb_expansion_threshold out of range")
+
+    /* If writer is TRUE, at least one of maintain_metadata_file and generate_updater_files must be TRUE */
+    if (config_ptr->writer) {
+        if (!config_ptr->maintain_metadata_file && !config_ptr->generate_updater_files)
+            HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL,
+                        "either maintain_metadata_file or generate_updater_files must be TRUE")
+    }
+
+    /* md_file_path can be "" or a name (+"/")*/
+    /* md_file_name can be "" (+ ".md") or a name */
+    /* <md_file_path, md_file_name> pattern: <null, null> <null, name> <name, null> <name, name> */
+    /* Can only validate for <null, name>, <name, name> cases */
+    name_len = HDstrlen(config_ptr->md_file_path) + HDstrlen(config_ptr->md_file_name);
+    if (name_len > H5F__MAX_VFD_SWMR_FILE_NAME_LEN)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "md_file_name + md_file_path is too long")
+
+    if (config_ptr->writer && config_ptr->generate_updater_files) {
+        /* Must provide the path and base name of the metadata updater files */
+        name_len = HDstrlen(config_ptr->updater_file_path);
+        if (name_len == 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "updater_file_path is empty")
+        else if (name_len > H5F__MAX_VFD_SWMR_FILE_NAME_LEN)
+            HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "updater_file_path is too long")
+    }
+
+    name_len = HDstrlen(config_ptr->log_file_path);
+    if (name_len > H5F__MAX_VFD_SWMR_FILE_NAME_LEN)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "log_file_path is too long")
+
+    /* Set the modified config */
+    if (H5P_set(plist, H5F_ACS_VFD_SWMR_CONFIG_NAME, config_ptr) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set metadata cache initial config")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Pset_vfd_swmr_config() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5P_reset_vol_class
  *
  * Purpose:     Change the VOL connector for a file access property class.
@@ -6162,6 +6402,42 @@ H5Pget_vol_id(hid_t plist_id, hid_t *vol_id /*out*/)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_vol_id() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pget_vfd_swmr_config
+ *
+ * Purpose:     Retrieve the VFD SWMR configuration from the target FAPL.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Vailin Choi; July 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_vfd_swmr_config(hid_t plist_id, H5F_vfd_swmr_config_t *config_ptr)
+{
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*!", plist_id, config_ptr);
+
+    /* Get the plist structure */
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
+
+    /* Validate the config_ptr */
+    if (config_ptr == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL config_ptr on entry.")
+
+    /* Get the current VFD SWMR configuration */
+    if (H5P_get(plist, H5F_ACS_VFD_SWMR_CONFIG_NAME, config_ptr) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get VFD SWMR config")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Pget_vfd_swmr_config() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_vol_info

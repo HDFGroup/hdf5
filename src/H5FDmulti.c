@@ -2266,6 +2266,18 @@ H5FD_multi_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void *inpu
     H5Eclear2(H5E_DEFAULT);
 
     switch (op_code) {
+
+        case H5FD_CTL_GET_TERMINAL_VFD:
+            /* One can argue as to whether the multi VFD should be regarded as terminal.
+             * It is treated as such here, as it is the lowest VFD through which all I/O
+             * request pass.
+             *
+             * For now at least, this works as this is the level at which files are compared.
+             */
+            assert(output);
+            *output = (void *)(file);
+            break;
+
         /* Unknown op code */
         default:
             if (flags & H5FD_CTL_FAIL_IF_UNKNOWN_FLAG)

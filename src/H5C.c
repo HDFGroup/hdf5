@@ -33,6 +33,8 @@
  *
  *    Code Changes:
  *
+ *     - Remove extra functionality in H5C__flush_single_entry()?
+ *
  *	 - Change protect/unprotect to lock/unlock.
  *
  *     - Flush entries in increasing address order in
@@ -48,6 +50,19 @@
  *	 - Fix nodes in memory to point directly to the skip list node from
  *         the LRU list, eliminating skip list lookups when evicting objects
  *         from the cache.
+ *
+ *     - Create MPI type for dirty objects when flushing in parallel.
+ *
+ *     - Now that TBBT routines aren't used, fix nodes in memory to
+ *         point directly to the skip list node from the LRU list, eliminating
+ *         skip list lookups when evicting objects from the cache.
+ *
+ *  Tests:
+ *
+ *     - Trim execution time.  (This is no longer a major issue with the
+ *       shift from the TBBT to a hash table for indexing.)
+ *
+ *     - Add random tests.
  *
  **************************************************************************/
 
@@ -71,6 +86,8 @@
 #include "H5MFprivate.h" /* File memory management       */
 #include "H5MMprivate.h" /* Memory management            */
 #include "H5Pprivate.h"  /* Property lists               */
+
+#include "H5retry_private.h" /* Retry loops */
 
 /****************/
 /* Local Macros */
@@ -348,6 +365,13 @@ H5C_create(size_t max_cache_size, size_t min_clean_size, int max_type_id,
     cache_ptr->il_head = NULL;
     cache_ptr->il_tail = NULL;
 
+    /* Fields supporting VFD SWMR */
+    cache_ptr->vfd_swmr_reader = FALSE;
+    for (i = 0; i < H5C__PAGE_HASH_TABLE_LEN; i++) {
+        (cache_ptr->page_index)[i] = NULL;
+    }
+    cache_ptr->page_size = 0;
+
     /* Tagging Field Initializations */
     cache_ptr->ignore_tags     = FALSE;
     cache_ptr->num_objs_corked = 0;
@@ -492,6 +516,10 @@ H5C_create(size_t max_cache_size, size_t min_clean_size, int max_type_id,
     cache_ptr->rdfsm_settled = FALSE;
     cache_ptr->mdfsm_settled = FALSE;
 
+    /* fields supporting page buffer hints */
+    cache_ptr->curr_io_type          = NULL;
+    cache_ptr->curr_read_speculative = FALSE;
+
     if (H5C_reset_cache_hit_rate_stats(cache_ptr) < 0)
         /* this should be impossible... */
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, NULL, "H5C_reset_cache_hit_rate_stats failed")
@@ -502,6 +530,7 @@ H5C_create(size_t max_cache_size, size_t min_clean_size, int max_type_id,
 
 #ifndef NDEBUG
     cache_ptr->get_entry_ptr_from_addr_counter = 0;
+    cache_ptr->curr_io_type                    = NULL;
 #endif /* NDEBUG */
 
     /* Set return value */
@@ -954,6 +983,352 @@ done:
 } /* H5C_evict() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5C_evict_or_refresh_all_entries_in_page
+ *
+ * Purpose:     When a file is opened in VFD SWMR reader mode, we must be
+ *              able to ensure that the metadata cache contains no stale
+ *              entries at the end of each tick.
+ *
+ *              To do this, we must identify pages that have changed in
+ *              the last tick, and either evict, or refresh all modified
+ *              entries in the modified pages.  If an evicted entry is
+ *              needed subsequently, it must be reloaded, almost always
+ *              from the metadata file.
+ *
+ *              This function performs this function of a given page buffer
+ *              page.
+ *
+ *              This is done by mapping the supplied page to associated
+ *              hash bucket in the page_index, and then scanning the
+ *              contents of the bucket for entries residing in the
+ *              target page.
+ *
+ *              For each such entry, we test to see if it is pinned.
+ *              If it is not, we simply evict it.
+ *
+ *              Pinned entries may in turn be divided into tagged and
+ *              un-tagged entries.
+ *
+ *              For pinned tagged entries, it would be best if we could
+ *              simply tell the associated cache client to refresh it.
+ *              However, until we have that facility, we look up its tag,
+ *              and evict all entries associated with that on disk object.
+ *
+ *              For pinned, un-tagged entries (i.e. super block, global
+ *              heaps, etc. we must instruct the client to refresh the
+ *              entry.  Fortunately, this is only necessary for the
+ *              super block in the initial VFD SWMR implementation.
+ *
+ *              Note that there is also the possibility that while the
+ *              page was modified, one or more metadata entries in
+ *              that page were not.  Eventually we should write code
+ *              to detect this -- but not for the prototype.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  John Mainzer -- 12/16/18
+ *
+ * Changes:     Added macro calls to maintain the page buffer hints.
+ *
+ *                                           JRM -- 3/20/20
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5C_evict_or_refresh_all_entries_in_page(H5F_t *f, uint64_t page, uint32_t length, uint64_t tick)
+{
+    int                i;
+    size_t             image_len;
+    size_t             original_image_len;
+    void *             image_ptr     = NULL;
+    void *             new_image_ptr = NULL;
+    unsigned           flush_flags   = (H5C__FLUSH_INVALIDATE_FLAG | H5C__FLUSH_CLEAR_ONLY_FLAG);
+    haddr_t            tag;
+    H5C_t *            cache_ptr = NULL;
+    H5C_cache_entry_t *entry_ptr;
+    H5C_cache_entry_t *follow_ptr = NULL;
+    herr_t             ret_value  = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(f->shared);
+
+    cache_ptr = f->shared->cache;
+
+    HDassert(cache_ptr);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+    HDassert(cache_ptr->vfd_swmr_reader);
+
+    /* since file must be opened R/O for a VFD SWMR reader, the skip
+     * list must be empty.  Verify this.
+     */
+    HDassert(cache_ptr->slist_len == 0);
+
+    i = H5C__PI_HASH_FCN(page);
+
+    entry_ptr = (cache_ptr->page_index)[i];
+
+    while (entry_ptr) {
+
+        HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+
+        if (entry_ptr->page == page) {
+
+            HDassert(entry_ptr->addr >= (haddr_t)(page * cache_ptr->page_size));
+            HDassert(entry_ptr->addr < (haddr_t)((page + 1) * cache_ptr->page_size));
+            HDassert(length == cache_ptr->page_size ||
+                     page * cache_ptr->page_size + length <= entry_ptr->addr + entry_ptr->size);
+
+            /* since end of tick occurs only on API call entry in
+             * the VFD SWMR reader case, the entry must not be protected.
+             *
+             * since the VFD SWMR reader must have opened the file R/O,
+             * the entry must be clean.
+             */
+            HDassert(!(entry_ptr->is_protected));
+            HDassert(!(entry_ptr->is_dirty));
+
+            /* we must evict the entry, as page has been modified, and
+             * thus the entry may be out of date.
+             *
+             * Note that we should eventually modify this code to be more
+             * intelligent, and only evict entries if they have in fact changed.
+             * However, no time for that in the first cut.
+             */
+            if (entry_ptr->is_pinned) {
+
+                /* if the entry has tag_info and there is no refresh
+                 * callback, a call to H5C_evict_tagged_entries() is the
+                 * only option available.
+                 */
+                if ((entry_ptr->tag_info) && (entry_ptr->type->refresh == NULL)) {
+
+                    tag = entry_ptr->tag_info->tag;
+
+                    HDassert(!(entry_ptr->tag_info->corked));
+
+                    /* passing TRUE for the match_global parameter.  Look
+                     * into this and verify that it is the right thing to
+                     * do.
+                     */
+                    if (H5C_evict_tagged_entries(f, tag, TRUE) < 0)
+
+                        HGOTO_ERROR(H5E_CACHE, H5E_CANTEXPUNGE, FAIL, "can't evict pinned and tagged entries")
+
+                    /* Both follow_ptr and entry_ptr may have been removed.
+                     * Set both to NULL to force the scan to restart.
+                     */
+                    follow_ptr = entry_ptr = NULL;
+                }
+                else if (entry_ptr->type->refresh) {
+
+                    /* If there is a refresh callback, use it to minimize
+                     * overhead.
+                     *
+                     * At present, the only refresh call is for the
+                     * superblock.  This is essential, as the superblock
+                     * is manually pinned for as long as the file is open,
+                     * and thus cannot be evicted.
+                     *
+                     * there may be other examples of this, but for the
+                     * prototype, we seem to be able to avoid them.
+                     */
+
+                    /* 1) Get the on disk size of the entry.  Since the
+                     *    the entry is already loaded, we can use the
+                     *    size listed in the entry.
+                     *
+                     *    This will almost always be correct, but we
+                     *    allow a second try as it is possible that the
+                     *    version of the entry may change on the writer.
+                     */
+                    image_len          = entry_ptr->size;
+                    original_image_len = image_len;
+
+                    /* 2) Allocate and read the buffer.
+                     *
+                     *    Note that this will be satisfied from the metadata
+                     *    file via the VFD SWMR reade VFD.
+                     *
+                     *    For this reason, we don't need to check for reads
+                     *    past the EOA.  Torn reads and checksums are also
+                     *    not an issue, since pages in the metadata file
+                     *    are checksummed and re-tried if necessary in the
+                     *    VFD SWMR reader VFD.
+                     */
+                    if (NULL == (image_ptr = (uint8_t *)H5MM_malloc(image_len + H5C_IMAGE_EXTRA_SPACE)))
+
+                        HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL,
+                                    "memory allocation failed for image buffer")
+
+#if H5C_DO_MEMORY_SANITY_CHECKS
+                    HDmemcpy(image_ptr + image_len, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
+#endif /* H5C_DO_MEMORY_SANITY_CHECKS */
+
+                    H5C__SET_PB_READ_HINTS(cache_ptr, entry_ptr->type, TRUE)
+
+                    if (H5F_block_read(f, entry_ptr->type->mem_type, entry_ptr->addr, image_len, image_ptr) <
+                        0) {
+
+                        H5C__RESET_PB_READ_HINTS(cache_ptr)
+                        HGOTO_ERROR(H5E_CACHE, H5E_READERROR, FAIL, "Can't read image (1)")
+                    }
+                    H5C__RESET_PB_READ_HINTS(cache_ptr)
+
+                    /* 3) Call the refresh callback.  If it doesn't
+                     *    request a different image size, goto 6)
+                     */
+                    if (entry_ptr->type->refresh(f, (void *)entry_ptr, image_ptr, &image_len) < 0)
+
+                        HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, FAIL, "Can't refresh entry (1)")
+
+                    if (image_len != original_image_len) {
+
+                        /* 4) If image_len has changed, re-allocate and re-read
+                         *    the image.
+                         *
+                         *    Note: Generate a log entry in this case
+                         */
+
+                        if (NULL ==
+                            (new_image_ptr = H5MM_realloc(image_ptr, image_len + H5C_IMAGE_EXTRA_SPACE)))
+
+                            HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, FAIL, "re-alloc of image buffer failed.")
+
+                        image_ptr = new_image_ptr;
+
+#if H5C_DO_MEMORY_SANITY_CHECKS
+                        HDmemcpy(image_ptr + image_len, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
+#endif /* H5C_DO_MEMORY_SANITY_CHECKS */
+
+                        H5C__SET_PB_READ_HINTS(cache_ptr, entry_ptr->type, TRUE)
+
+                        if (H5F_block_read(f, entry_ptr->type->mem_type, entry_ptr->addr, image_len,
+                                           image_ptr) < 0) {
+
+                            H5C__RESET_PB_READ_HINTS(cache_ptr)
+
+                            HGOTO_ERROR(H5E_CACHE, H5E_READERROR, FAIL, "Can't read image (2)")
+                        }
+                        H5C__RESET_PB_READ_HINTS(cache_ptr)
+
+                        /* 5) Call the refresh callback again.  Requesting
+                         *    a different buffer size again is an error.
+                         */
+                        original_image_len = image_len;
+                        if (entry_ptr->type->refresh(f, (void *)entry_ptr, image_ptr, &image_len) < 0)
+
+                            HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, FAIL, "Can't refresh entry (2)")
+
+                        if (image_len != original_image_len)
+
+                            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "2nd refresh call changed image_len.")
+                    }
+
+                    /* 6) Mark the entry as having been looked at this
+                     *    this tick to accooadate later sanity chackes.
+                     */
+                    entry_ptr->refreshed_in_tick = tick;
+
+                    /* 7) Free the old image if it exists, and replace
+                     *    it with the new image.
+                     */
+                    if (entry_ptr->image_ptr) {
+
+                        entry_ptr->image_ptr = H5MM_xfree(entry_ptr->image_ptr);
+                    }
+                    entry_ptr->image_ptr = image_ptr;
+
+                    /* 8) Since *entry_ptr has been refreshed and not
+                     *    evicted, we can leave entry_ptr defined, and
+                     *    and continue the scan of the bucket from
+                     *    that point.
+                     */
+                }
+                else {
+
+                    /* The entry is pinned, is not tagged, and has no
+                     * refresh callback.
+                     *
+                     * This should be un-reachable. If it is reached, we
+                     * probably have another refresh callback to write.
+                     */
+                    HDassert(FALSE);
+                }
+            }
+            else { /* simply evict the entry */
+
+                /* since the entry is clean, it must not be on the
+                 * skip list -- thus no need for the
+                 * H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG.
+                 */
+                if (H5C__flush_single_entry(f, entry_ptr, flush_flags) < 0)
+
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTEXPUNGE, FAIL, "can't evict unpinned entry")
+
+                /* *entry_ptr should be evicted -- set entry_ptr to NULL */
+                entry_ptr = NULL;
+            }
+
+            /* If entry_ptr is NULL, it was evicted, and we must continue
+             * the scan from follow_ptr, or start at the head of the
+             * bucket list it follow_ptr is NULL as well.
+             *
+             * If follow_ptr isn't NULL, set entry_ptr to follow_ptr->pi_next.
+             * Otherwise, set entry_ptr to point to the first item in the hash
+             * bucket.
+             */
+            if (entry_ptr) {
+
+                /* *entry_ptr was refreshed, not evicted.  Continue the
+                 * the scan from that point, and update follow_ptr.
+                 */
+                follow_ptr = entry_ptr;
+                entry_ptr  = entry_ptr->pi_next;
+            }
+            else if (follow_ptr) {
+
+                /* *entry_ptr was evicted.  Since follow_ptr is not NULL,
+                 * we can continue the scan from that point.
+                 */
+                entry_ptr = follow_ptr->pi_next;
+            }
+            else {
+
+                /* follow_ptr is null as well, so we have to re-start
+                 * the scan from the head of the page index bucket list.
+                 */
+
+                entry_ptr = (cache_ptr->page_index)[i];
+            }
+        }
+        else {
+
+            /* entry belongs to another page -- skip it and go on. */
+            follow_ptr = entry_ptr;
+            entry_ptr  = entry_ptr->pi_next;
+        }
+    } /* end while */
+
+    /* at this point, all entries residing in the target page should have
+     * been either evicted or refreshed -- verify this.
+     */
+    entry_ptr = (cache_ptr->page_index)[i];
+
+    while (entry_ptr) {
+        HDassert((entry_ptr->page != page) || (entry_ptr->refreshed_in_tick == tick));
+        entry_ptr = entry_ptr->pi_next;
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5C_evict_or_refresh_all_entries_in_page() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5C_expunge_entry
  *
  * Purpose:     Use this function to tell the cache to expunge an entry
@@ -1295,6 +1670,10 @@ H5C_insert_entry(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *thing, u
 
     HDassert(cache_ptr);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+
+    /* If this is a VFD SWMR reader, verify that the page size is defined */
+    HDassert((!cache_ptr->vfd_swmr_reader) || (cache_ptr->page_size > 0));
+
     HDassert(type);
     HDassert(type->mem_type == cache_ptr->class_table_ptr[type->id]->mem_type);
     HDassert(type->image_len);
@@ -1418,6 +1797,15 @@ H5C_insert_entry(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *thing, u
     entry_ptr->tl_next  = NULL;
     entry_ptr->tl_prev  = NULL;
     entry_ptr->tag_info = NULL;
+
+    /* initialize fields supporting VFD SWMR */
+    if (cache_ptr->vfd_swmr_reader)
+        entry_ptr->page = (addr / cache_ptr->page_size);
+    else
+        entry_ptr->page = 0;
+    entry_ptr->refreshed_in_tick = 0;
+    entry_ptr->pi_next           = NULL;
+    entry_ptr->pi_prev           = NULL;
 
     /* Apply tag to newly inserted entry */
     if (H5C__tag_entry(cache_ptr, entry_ptr) < 0)
@@ -1839,6 +2227,10 @@ done:
  * Programmer:  John Mainzer
  *              6/2/04
  *
+ * Changes:     Added code to update cache entry page field required
+ *              by VFD SWMR.
+ *                                            JRM -- 12/13/18
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1852,6 +2244,10 @@ H5C_move_entry(H5C_t *cache_ptr, const H5C_class_t *type, haddr_t old_addr, hadd
 
     HDassert(cache_ptr);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+
+    /* If this is a VFD SWMR reader, verify that the page size is defined */
+    HDassert((!cache_ptr->vfd_swmr_reader) || (cache_ptr->page_size > 0));
+
     HDassert(type);
     HDassert(H5F_addr_defined(old_addr));
     HDassert(H5F_addr_defined(new_addr));
@@ -1913,6 +2309,12 @@ H5C_move_entry(H5C_t *cache_ptr, const H5C_class_t *type, haddr_t old_addr, hadd
     }     /* end if */
 
     entry_ptr->addr = new_addr;
+
+    /* Update the page in which the entry resides if the file is opened
+     * as a VFD SWMR reader
+     */
+    if (cache_ptr->vfd_swmr_reader)
+        entry_ptr->page = (new_addr / cache_ptr->page_size);
 
     if (!entry_ptr->destroy_in_progress) {
         hbool_t was_dirty; /* Whether the entry was previously dirty */
@@ -2364,8 +2766,22 @@ H5C_protect(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *udata, unsign
 #ifdef H5_HAVE_PARALLEL
                                              coll_access,
 #endif /* H5_HAVE_PARALLEL */
-                                             type, addr, udata)))
+                                             type, addr, udata))) {
+            /* Print out meaningful message for VFD SWMR reader */
+            if (f->shared->vfd_swmr && !f->shared->vfd_swmr_writer) {
+                uint64_t tmp_tick_num = 0;
+
+                if (H5FD_vfd_swmr_get_tick_and_idx(f->shared->lf, TRUE, &tmp_tick_num, NULL, NULL) < 0)
+                    HGOTO_ERROR(H5E_ARGS, H5E_CANTGET, NULL, "error in retrieving tick_num from driver");
+
+                if (tmp_tick_num >= f->shared->tick_num + f->shared->vfd_swmr_config.max_lag)
+                    HDONE_ERROR(
+                        H5E_FILE, H5E_SYSTEM, NULL,
+                        "Reader's API time exceeds max_lag ticks, suggest to increase the value of max_lag.");
+            }
+
             HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "can't load entry")
+        }
 
         entry_ptr = (H5C_cache_entry_t *)thing;
         cache_ptr->entries_loaded_counter++;
@@ -3055,6 +3471,40 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* H5C_set_slist_enabled() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C_set_vfd_swmr_reader()
+ *
+ * Purpose:     Set cache_ptr->vfd_swmr_reader and cache_ptr->page_size to
+ *              the values specified in the parameter list.
+ *
+ * Return:      SUCCEED on success, and FAIL on failure.
+ *
+ * Programmer:  John Mainzer
+ *              1/15/19
+ *
+ * Changes:     None
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5C_set_vfd_swmr_reader(H5C_t *cache_ptr, hbool_t vfd_swmr_reader, hsize_t page_size)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    if ((cache_ptr == NULL) || (cache_ptr->magic != H5C__H5C_T_MAGIC))
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad cache_ptr on entry")
+
+    cache_ptr->vfd_swmr_reader = vfd_swmr_reader;
+    cache_ptr->page_size       = page_size;
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5C_set_vfd_swmr_reader() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5C_unpin_entry()
@@ -4667,11 +5117,10 @@ H5C__autoadjust__ageout__cycle_epoch_marker(H5C_t *cache_ptr)
     cache_ptr->epoch_marker_ringbuf_first =
         (cache_ptr->epoch_marker_ringbuf_first + 1) % (H5C__MAX_EPOCH_MARKERS + 1);
 
-    if (cache_ptr->epoch_marker_ringbuf_size <= 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "ring buffer underflow")
-
     cache_ptr->epoch_marker_ringbuf_size -= 1;
 
+    if (cache_ptr->epoch_marker_ringbuf_size < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "ring buffer underflow")
     if ((cache_ptr->epoch_marker_active)[i] != TRUE)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unused marker in LRU?!?")
 
@@ -4691,10 +5140,10 @@ H5C__autoadjust__ageout__cycle_epoch_marker(H5C_t *cache_ptr)
 
     (cache_ptr->epoch_marker_ringbuf)[cache_ptr->epoch_marker_ringbuf_last] = i;
 
-    if (cache_ptr->epoch_marker_ringbuf_size >= H5C__MAX_EPOCH_MARKERS)
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "ring buffer overflow")
-
     cache_ptr->epoch_marker_ringbuf_size += 1;
+
+    if (cache_ptr->epoch_marker_ringbuf_size > H5C__MAX_EPOCH_MARKERS)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "ring buffer overflow")
 
     H5C__DLL_PREPEND((&((cache_ptr->epoch_markers)[i])), (cache_ptr)->LRU_head_ptr, (cache_ptr)->LRU_tail_ptr,
                      (cache_ptr)->LRU_list_len, (cache_ptr)->LRU_list_size, (FAIL))
@@ -4966,12 +5415,12 @@ H5C__autoadjust__ageout__insert_new_marker(H5C_t *cache_ptr)
 
     (cache_ptr->epoch_marker_ringbuf)[cache_ptr->epoch_marker_ringbuf_last] = i;
 
-    if (cache_ptr->epoch_marker_ringbuf_size >= H5C__MAX_EPOCH_MARKERS) {
+    cache_ptr->epoch_marker_ringbuf_size += 1;
+
+    if (cache_ptr->epoch_marker_ringbuf_size > H5C__MAX_EPOCH_MARKERS) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "ring buffer overflow")
     }
-
-    cache_ptr->epoch_marker_ringbuf_size += 1;
 
     H5C__DLL_PREPEND((&((cache_ptr->epoch_markers)[i])), (cache_ptr)->LRU_head_ptr, (cache_ptr)->LRU_tail_ptr,
                      (cache_ptr)->LRU_list_len, (cache_ptr)->LRU_list_size, (FAIL))
@@ -5020,10 +5469,10 @@ H5C__autoadjust__ageout__remove_all_markers(H5C_t *cache_ptr)
         cache_ptr->epoch_marker_ringbuf_first =
             (cache_ptr->epoch_marker_ringbuf_first + 1) % (H5C__MAX_EPOCH_MARKERS + 1);
 
-        if (cache_ptr->epoch_marker_ringbuf_size <= 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "ring buffer underflow")
-
         cache_ptr->epoch_marker_ringbuf_size -= 1;
+
+        if (cache_ptr->epoch_marker_ringbuf_size < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "ring buffer underflow")
 
         if ((cache_ptr->epoch_marker_active)[i] != TRUE)
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unused marker in LRU?!?")
@@ -5093,11 +5542,10 @@ H5C__autoadjust__ageout__remove_excess_markers(H5C_t *cache_ptr)
         cache_ptr->epoch_marker_ringbuf_first =
             (cache_ptr->epoch_marker_ringbuf_first + 1) % (H5C__MAX_EPOCH_MARKERS + 1);
 
-        if (cache_ptr->epoch_marker_ringbuf_size <= 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "ring buffer underflow")
-
         cache_ptr->epoch_marker_ringbuf_size -= 1;
 
+        if (cache_ptr->epoch_marker_ringbuf_size < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "ring buffer underflow")
         if ((cache_ptr->epoch_marker_active)[i] != TRUE)
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "unused marker in LRU?!?")
 
@@ -5525,8 +5973,8 @@ H5C__flush_invalidate_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
     hbool_t            restart_slist_scan;
     uint32_t           protected_entries = 0;
     int32_t            i;
-    uint32_t           cur_ring_pel_len;
-    uint32_t           old_ring_pel_len;
+    int32_t            cur_ring_pel_len;
+    int32_t            old_ring_pel_len;
     unsigned           cooked_flags;
     unsigned           evict_flags;
     H5SL_node_t *      node_ptr       = NULL;
@@ -6394,7 +6842,10 @@ done:
  *
  *
  *              Missing entries??
+
+ *              Added macro calls to maintain page buffer hints.
  *
+ *                                           JRM -- 3/20/20
  *
  *              JRM -- 5/8/20
  *              Updated sanity checks for the possibility that the slist
@@ -6637,8 +7088,16 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
                     mem_type = entry_ptr->type->mem_type;
                 }
 
-                if (H5F_block_write(f, mem_type, entry_ptr->addr, entry_ptr->size, entry_ptr->image_ptr) < 0)
+                H5C__SET_PB_WRITE_HINTS(cache_ptr, entry_ptr->type)
+
+                if (H5F_block_write(f, mem_type, entry_ptr->addr, entry_ptr->size, entry_ptr->image_ptr) <
+                    0) {
+
+                    H5C__RESET_PB_WRITE_HINTS(cache_ptr)
+
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't write image to file")
+                }
+                H5C__RESET_PB_WRITE_HINTS(cache_ptr)
 #ifdef H5_HAVE_PARALLEL
             }
 #endif /* H5_HAVE_PARALLEL */
@@ -6984,6 +7443,10 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
     /* Check if we have to update the page buffer with cleared entries
      * so it doesn't go out of date
      */
+
+    /* VFD SWMR TODO: Think on this, and decide if we need to extend
+     * this for multi-page metadata entries.
+     */
     if (update_page_buffer) {
 
         /* Sanity check */
@@ -7095,6 +7558,15 @@ done:
  *
  * Programmer:  John Mainzer, 5/18/04
  *
+ * Changes:     Reverted optimization that avoided re-reading the prefix
+ *              of a metadata entry when a speculative read proved too
+ *              small.
+ *                                           JRM -- 3/25/20
+ *
+ *              Added macro calls to maintain the page buffer read hints.
+ *
+ *                                           JRM -- 3/20/20
+ *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -7122,6 +7594,11 @@ H5C__load_entry(H5F_t *f,
     HDassert(f);
     HDassert(f->shared);
     HDassert(f->shared->cache);
+    HDassert(f->shared->cache->magic == H5C__H5C_T_MAGIC);
+
+    /* if this is a VFD SWMR reader, verify that the page size is defined */
+    HDassert((!f->shared->cache->vfd_swmr_reader) || (f->shared->cache->page_size > 0));
+
     HDassert(type);
     HDassert(H5F_addr_defined(addr));
     HDassert(type->get_initial_load_size);
@@ -7164,25 +7641,25 @@ H5C__load_entry(H5F_t *f,
 
     /* Get the on-disk entry image */
     if (0 == (type->flags & H5C__CLASS_SKIP_READS)) {
-        unsigned tries, max_tries;   /* The # of read attempts               */
-        unsigned retries;            /* The # of retries                     */
-        htri_t   chk_ret;            /* return from verify_chksum callback   */
-        size_t   actual_len = len;   /* The actual length, after speculative reads have been resolved */
-        uint64_t nanosec    = 1;     /* # of nanoseconds to sleep between retries */
-        void *   new_image;          /* Pointer to image                     */
-        hbool_t  len_changed = TRUE; /* Whether to re-check speculative entries */
-
-        /* Get the # of read attempts */
-        max_tries = tries = H5F_GET_READ_ATTEMPTS(f);
+        unsigned tries;             /* The # of retries                     */
+        htri_t   chk_ret;           /* return from verify_chksum callback   */
+        size_t   actual_len = len;  /* The actual length, after speculative */
+                                    /* reads have been resolved             */
+        void *  new_image;          /* Pointer to image                     */
+        hbool_t len_changed = TRUE; /* Whether to re-check speculative      */
+                                    /* entries                              */
+        bool       do_try;
+        h5_retry_t retry;
 
         /*
-         * This do/while loop performs the following till the metadata checksum
+         * This for loop performs the following till the metadata checksum
          * is correct or the file's number of allowed read attempts are reached.
          *   --read the metadata
          *   --determine the actual size of the metadata
          *   --perform checksum verification
          */
-        do {
+        for (do_try = H5_retry_init(&retry, H5F_GET_READ_ATTEMPTS(f), 1, H5_RETRY_ONE_HOUR / 3600 / 100);
+             do_try; do_try = H5_retry_next(&retry)) {
             if (actual_len != len) {
                 if (NULL == (new_image = H5MM_realloc(image, len + H5C_IMAGE_EXTRA_SPACE)))
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, NULL, "image null after H5MM_realloc()")
@@ -7196,7 +7673,11 @@ H5C__load_entry(H5F_t *f,
             if (!coll_access || 0 == mpi_rank) {
 #endif /* H5_HAVE_PARALLEL */
 
+                H5C__SET_PB_READ_HINTS(f->shared->cache, type, TRUE)
+
                 if (H5F_block_read(f, type->mem_type, addr, len, image) < 0) {
+
+                    H5C__RESET_PB_READ_HINTS(f->shared->cache)
 
 #ifdef H5_HAVE_PARALLEL
                     if (coll_access) {
@@ -7208,6 +7689,8 @@ H5C__load_entry(H5F_t *f,
 #endif
                         HGOTO_ERROR(H5E_CACHE, H5E_READERROR, NULL, "Can't read image*")
                 }
+
+                H5C__RESET_PB_READ_HINTS(f->shared->cache)
 
 #ifdef H5_HAVE_PARALLEL
             } /* end if */
@@ -7251,11 +7734,45 @@ H5C__load_entry(H5F_t *f,
 #ifdef H5_HAVE_PARALLEL
                         if (!coll_access || 0 == mpi_rank) {
 #endif /* H5_HAVE_PARALLEL */
-                            /* If the thing's image needs to be bigger for a speculatively
-                             * loaded thing, go get the on-disk image again (the extra portion).
+
+                            /* the original version of this code re-read
+                             * the entire buffer.  At some point, someone
+                             * reworked this code to avoid re-reading the
+                             * initial portion of the buffer.
+                             *
+                             * In addition to being of questionable utility,
+                             * this optimization changed the invariant that
+                             * that metadata is read and written atomically.
+                             * While this didn't cause immediate problems,
+                             * the page buffer in VFD SWMR depends on this
+                             * invariant in its management of multi-page
+                             * metadata entries.
+                             *
+                             * To repair this issue, I have reverted to
+                             * the original algorithm for managing the
+                             * speculative load case.  Note that I have
+                             * done so crudely -- before merge, we should
+                             * remove the infrastructure that supports the
+                             * optimization.
+                             *
+                             * We should also verify my impression that the
+                             * that the optimization is of no measurable
+                             * value.  If it is, we will put it back, but
+                             * disable it in the VFD SWMR case.
+                             *
+                             * While this issue was detected in the global
+                             * heap case, note that the super block, the
+                             * local heap, and the fractal heap also use
+                             * speculative loads.
+                             *
+                             *                          JRM -- 3/24/20
                              */
-                            if (H5F_block_read(f, type->mem_type, addr + len, actual_len - len, image + len) <
-                                0) {
+
+                            H5C__SET_PB_READ_HINTS(f->shared->cache, type, FALSE);
+
+                            if (H5F_block_read(f, type->mem_type, addr, actual_len, image) < 0) {
+
+                                H5C__RESET_PB_READ_HINTS(f->shared->cache)
 
 #ifdef H5_HAVE_PARALLEL
                                 if (coll_access) {
@@ -7267,6 +7784,7 @@ H5C__load_entry(H5F_t *f,
 #endif
                                     HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "can't read image")
                             }
+                            H5C__RESET_PB_READ_HINTS(f->shared->cache)
 
 #ifdef H5_HAVE_PARALLEL
                         }
@@ -7304,21 +7822,18 @@ H5C__load_entry(H5F_t *f,
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, NULL, "failure from verify_chksum callback")
             if (chk_ret == TRUE)
                 break;
-
-            /* Sleep for some time */
-            H5_nanosleep(nanosec);
-            nanosec *= 2; /* Double the sleep time next time */
-        } while (--tries);
+        }
 
         /* Check for too many tries */
-        if (tries == 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_READERROR, NULL, "incorrect metadata checksum after all read attempts")
+        if (!do_try)
+            HGOTO_ERROR(H5E_CACHE, H5E_READERROR, NULL,
+                        "incorrect metadata checksum after all read attempts addr %" PRIuHADDR " size %zu",
+                        addr, len)
 
-        /* Calculate and track the # of retries */
-        retries = max_tries - tries;
-        if (retries) /* Does not track 0 retry */
-            if (H5F_track_metadata_read_retries(f, (unsigned)type->mem_type, retries) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "cannot track read tries = %u ", retries)
+        /* Calculate and track the # of retries (does not track 0 retries) */
+        if ((tries = H5_retry_tries(&retry)) > 1)
+            if (H5F_track_metadata_read_retries(f, (unsigned)type->mem_type, tries - 1) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "cannot track read tries = %u ", tries)
 
         /* Set the final length (in case it wasn't set earlier) */
         len = actual_len;
@@ -7423,6 +7938,15 @@ H5C__load_entry(H5F_t *f,
     entry->tl_next  = NULL;
     entry->tl_prev  = NULL;
     entry->tag_info = NULL;
+
+    /* initialize fields supporting VFD SWMR */
+    if (f->shared->cache->vfd_swmr_reader)
+        entry->page = (addr / f->shared->cache->page_size);
+    else
+        entry->page = 0;
+    entry->refreshed_in_tick = 0;
+    entry->pi_next           = NULL;
+    entry->pi_prev           = NULL;
 
     H5C__RESET_CACHE_ENTRY_STATS(entry);
 
@@ -7760,6 +8284,9 @@ done:
  *
  * Programmer:  John Mainzer, 7/14/05
  *
+ * Changes:     Added code to verify that the LRU contains no pinned
+ *              entries.                        JRM -- 4/25/14
+ *
  *-------------------------------------------------------------------------
  */
 #if H5C_DO_EXTREME_SANITY_CHECKS
@@ -7780,28 +8307,31 @@ H5C_validate_lru_list(H5C_t *cache_ptr)
         (cache_ptr->LRU_head_ptr != cache_ptr->LRU_tail_ptr))
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 1 failed")
 
+    if (cache_ptr->LRU_list_len < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 2 failed")
+
     if ((cache_ptr->LRU_list_len == 1) &&
         ((cache_ptr->LRU_head_ptr != cache_ptr->LRU_tail_ptr) || (cache_ptr->LRU_head_ptr == NULL) ||
          (cache_ptr->LRU_head_ptr->size != cache_ptr->LRU_list_size)))
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 2 failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 3 failed")
 
     if ((cache_ptr->LRU_list_len >= 1) &&
         ((cache_ptr->LRU_head_ptr == NULL) || (cache_ptr->LRU_head_ptr->prev != NULL) ||
          (cache_ptr->LRU_tail_ptr == NULL) || (cache_ptr->LRU_tail_ptr->next != NULL)))
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 3 failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 4 failed")
 
     entry_ptr = cache_ptr->LRU_head_ptr;
     while (entry_ptr != NULL) {
         if ((entry_ptr != cache_ptr->LRU_head_ptr) &&
             ((entry_ptr->prev == NULL) || (entry_ptr->prev->next != entry_ptr)))
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 4 failed")
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 5 failed")
 
         if ((entry_ptr != cache_ptr->LRU_tail_ptr) &&
             ((entry_ptr->next == NULL) || (entry_ptr->next->prev != entry_ptr)))
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 5 failed")
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 6 failed")
 
         if ((entry_ptr->is_pinned) || (entry_ptr->pinned_from_client) || (entry_ptr->pinned_from_cache))
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 6 failed")
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 7 failed")
 
         len++;
         size += entry_ptr->size;
@@ -7809,7 +8339,7 @@ H5C_validate_lru_list(H5C_t *cache_ptr)
     }
 
     if ((cache_ptr->LRU_list_len != (uint32_t)len) || (cache_ptr->LRU_list_size != size))
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 7 failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 8 failed")
 
 done:
     if (ret_value != SUCCEED)
@@ -7834,6 +8364,8 @@ done:
  *
  * Programmer:  John Mainzer, 4/25/14
  *
+ * Changes:     None
+ *
  *-------------------------------------------------------------------------
  */
 #if H5C_DO_EXTREME_SANITY_CHECKS
@@ -7854,31 +8386,34 @@ H5C_validate_pinned_entry_list(H5C_t *cache_ptr)
         (cache_ptr->pel_head_ptr != cache_ptr->pel_tail_ptr))
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 1 failed")
 
+    if (cache_ptr->pel_len < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 2 failed")
+
     if ((cache_ptr->pel_len == 1) &&
         ((cache_ptr->pel_head_ptr != cache_ptr->pel_tail_ptr) || (cache_ptr->pel_head_ptr == NULL) ||
          (cache_ptr->pel_head_ptr->size != cache_ptr->pel_size)))
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 2 failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 3 failed")
 
     if ((cache_ptr->pel_len >= 1) &&
         ((cache_ptr->pel_head_ptr == NULL) || (cache_ptr->pel_head_ptr->prev != NULL) ||
          (cache_ptr->pel_tail_ptr == NULL) || (cache_ptr->pel_tail_ptr->next != NULL)))
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 3 failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 4 failed")
 
     entry_ptr = cache_ptr->pel_head_ptr;
     while (entry_ptr != NULL) {
         if ((entry_ptr != cache_ptr->pel_head_ptr) &&
             ((entry_ptr->prev == NULL) || (entry_ptr->prev->next != entry_ptr)))
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 4 failed")
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 5 failed")
 
         if ((entry_ptr != cache_ptr->pel_tail_ptr) &&
             ((entry_ptr->next == NULL) || (entry_ptr->next->prev != entry_ptr)))
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 5 failed")
-
-        if (!entry_ptr->is_pinned)
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 6 failed")
 
-        if (!(entry_ptr->pinned_from_client || entry_ptr->pinned_from_cache))
+        if (!entry_ptr->is_pinned)
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 7 failed")
+
+        if (!(entry_ptr->pinned_from_client || entry_ptr->pinned_from_cache))
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 8 failed")
 
         len++;
         size += entry_ptr->size;
@@ -7886,7 +8421,7 @@ H5C_validate_pinned_entry_list(H5C_t *cache_ptr)
     }
 
     if ((cache_ptr->pel_len != (uint32_t)len) || (cache_ptr->pel_size != size))
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 8 failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 9 failed")
 
 done:
     if (ret_value != SUCCEED)
@@ -7911,6 +8446,8 @@ done:
  *
  * Programmer:  John Mainzer, 4/25/14
  *
+ * Changes:     None
+ *
  *-------------------------------------------------------------------------
  */
 #if H5C_DO_EXTREME_SANITY_CHECKS
@@ -7931,31 +8468,34 @@ H5C_validate_protected_entry_list(H5C_t *cache_ptr)
         (cache_ptr->pl_head_ptr != cache_ptr->pl_tail_ptr))
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 1 failed")
 
+    if (cache_ptr->pl_len < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 2 failed")
+
     if ((cache_ptr->pl_len == 1) &&
         ((cache_ptr->pl_head_ptr != cache_ptr->pl_tail_ptr) || (cache_ptr->pl_head_ptr == NULL) ||
          (cache_ptr->pl_head_ptr->size != cache_ptr->pl_size)))
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 2 failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 3 failed")
 
     if ((cache_ptr->pl_len >= 1) &&
         ((cache_ptr->pl_head_ptr == NULL) || (cache_ptr->pl_head_ptr->prev != NULL) ||
          (cache_ptr->pl_tail_ptr == NULL) || (cache_ptr->pl_tail_ptr->next != NULL)))
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 3 failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 4 failed")
 
     entry_ptr = cache_ptr->pl_head_ptr;
     while (entry_ptr != NULL) {
         if ((entry_ptr != cache_ptr->pl_head_ptr) &&
             ((entry_ptr->prev == NULL) || (entry_ptr->prev->next != entry_ptr)))
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 4 failed")
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 5 failed")
 
         if ((entry_ptr != cache_ptr->pl_tail_ptr) &&
             ((entry_ptr->next == NULL) || (entry_ptr->next->prev != entry_ptr)))
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 5 failed")
-
-        if (!entry_ptr->is_protected)
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 6 failed")
 
-        if (entry_ptr->is_read_only && (entry_ptr->ro_ref_count <= 0))
+        if (!entry_ptr->is_protected)
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 7 failed")
+
+        if (entry_ptr->is_read_only && (entry_ptr->ro_ref_count <= 0))
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 8 failed")
 
         len++;
         size += entry_ptr->size;
@@ -7963,7 +8503,7 @@ H5C_validate_protected_entry_list(H5C_t *cache_ptr)
     }
 
     if ((cache_ptr->pl_len != (uint32_t)len) || (cache_ptr->pl_size != size))
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 8 failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 9 failed")
 
 done:
     if (ret_value != SUCCEED)
@@ -7985,6 +8525,8 @@ done:
  *        if it is.
  *
  * Programmer:  John Mainzer, 11/1/14
+ *
+ * Changes:     None
  *
  *-------------------------------------------------------------------------
  */
@@ -8942,7 +9484,12 @@ done:
  * Programmer:  Mohamad Chaarawi
  *              2/10/16
  *
- * Changes:     Updated sanity checks for the possibility that the skip
+ * Changes:     Added code to update the page field in the VFD SWMR reader
+ *              case.
+ *
+ *                                            JRM -- 12/14/18
+ *
+ *              Updated sanity checks for the possibility that the skip
  *              list is disabled.
  *                                        JRM 5/16/20
  *
@@ -8963,6 +9510,10 @@ H5C__generate_image(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr)
     HDassert(f);
     HDassert(cache_ptr);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+
+    /* if this is a VFD SWMR reader, verify that the page size is defined */
+    HDassert((!cache_ptr->vfd_swmr_reader) || (cache_ptr->page_size > 0));
+
     HDassert(entry_ptr);
     HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
     HDassert(!entry_ptr->image_up_to_date);
@@ -9088,6 +9639,10 @@ H5C__generate_image(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr)
                 /* Update the entry for its new address */
                 entry_ptr->addr = new_addr;
 
+                /* In the VFD SWMR reader case, update the entry page field */
+                if (cache_ptr->vfd_swmr_reader)
+                    entry_ptr->page = (new_addr / cache_ptr->page_size);
+
                 /* And then reinsert in the index and slist */
                 H5C__INSERT_IN_INDEX(cache_ptr, entry_ptr, FAIL);
                 H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, FAIL);
@@ -9096,6 +9651,8 @@ H5C__generate_image(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr)
             else { /* move is already done for us -- just do sanity checks */
 
                 HDassert(entry_ptr->addr == new_addr);
+                HDassert((!cache_ptr->vfd_swmr_reader) ||
+                         (entry_ptr->page == (entry_ptr->addr / cache_ptr->page_size)));
             }
         } /* end if */
     }     /* end if(serialize_flags != H5C__SERIALIZE_NO_FLAGS_SET) */

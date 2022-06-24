@@ -39,6 +39,220 @@
 /* Length of filename buffer */
 #define H5FD_MAX_FILENAME_LEN 1024
 
+/*
+ * VFD SWMR
+ */
+/* Metadata file header */
+#define H5FD_MD_HEADER_OFF   0      /* Header offset in the metadata file */
+#define H5FD_MD_HEADER_MAGIC "VHDR" /* Header magic */
+#define H5FD_SIZEOF_CHKSUM   4      /* Size of checksum */
+
+/* Size of the header in the metadata file */
+#define H5FD_MD_HEADER_SIZE                                                                                  \
+    (H5_SIZEOF_MAGIC      /* Signature */                                                                    \
+     + 4                  /* Page size */                                                                    \
+     + 8                  /* Tick number */                                                                  \
+     + 8                  /* Index offset */                                                                 \
+     + 8                  /* Index length number */                                                          \
+     + H5FD_SIZEOF_CHKSUM /* Metadata header checksum */                                                     \
+    )
+
+/* Size of an index entry in the metadata file */
+#define H5FD_MD_INDEX_ENTRY_SIZE                                                                             \
+    (4                    /* HDF5 file page offset */                                                        \
+     + 4                  /* Metadata file page offset */                                                    \
+     + 4                  /* Length */                                                                       \
+     + H5FD_SIZEOF_CHKSUM /* Index entry checksum */                                                         \
+    )
+
+/* Metadata file index magic */
+#define H5FD_MD_INDEX_MAGIC "VIDX" /* Index magic */
+
+/* Size of the metadata file index */
+#define H5FD_MD_INDEX_SIZE(N)         /* N is number of entries in index */                                  \
+    (H5_SIZEOF_MAGIC                  /* Signature */                                                        \
+     + 8                              /* Tick num */                                                         \
+     + 4                              /* Number of entries */                                                \
+     + (N * H5FD_MD_INDEX_ENTRY_SIZE) /* Index entries */                                                    \
+     + H5FD_SIZEOF_CHKSUM             /* Metadata index checksum */                                          \
+    )
+
+/* Retries for metadata file */
+#define H5FD_VFD_SWMR_MD_FILE_RETRY_MAX 50 /* Maximum retries when opening the MD file */
+#define H5FD_VFD_SWMR_MD_LOAD_RETRY_MAX                                                                      \
+    120 /* Maximum retries when trying to load the MD file header and index */
+#define H5FD_VFD_SWMR_MD_INDEX_RETRY_MAX 5 /* Maximum retries when deserializing the MD file index */
+
+/*  Internal representation of metadata file index entry */
+
+/*----------------------------------------------------------------------------
+ *
+ *  struct H5FD_vfd_swmr_idx_entry_t
+ *
+ * Indices into the VFD SWMR metadata file are maintained in arrays of
+ * instances of H5FD_vfd_swmr_index_t.
+ *
+ * The fields of H5FD_vfd_swmr_idx_entry_t are discussed below.
+ *
+ * hdf5_page_offset: Unsigned 64-bit value containing the base address of the
+ *              metadata page, or multi page metadata entry in the HDF5
+ *              file IN PAGES.
+ *
+ *              To obtain byte offset, multiply this value by the page size.
+ *
+ * md_file_page_offset: Unsigned 64-bit value containing the base address of
+ *              the metadata page, or multi page metadata entry in the metadata
+ *              file IN PAGES.
+ *
+ *              To obtain byte offset, multiply this value by the page size.
+ *
+ * length:      The length of the metadata page or multi- page metadata entry
+ *              in BYTES.
+ *
+ * chksum:      Checksum for the metadata page or multi-page metadata entry.
+ *              For the VFD SWMR writer, this value is undefined until the
+ *              referenced entry has been written to the metadata file.
+ *
+ * entry_ptr:   Used by the VFD SWMR writer only.
+ *
+ *              For the VFD SWMR reader, this field should always be NULL.
+ *              If the referenced metadata page or multi-page metadata
+ *              entry was modified in the current tick, this field points to
+ *              a buffer in the page buffer containing its value.
+ *              This field is used by the metadata file creation/update code
+ *              to access the metadata pages or multi-page metadata entries
+ *              so that their current values can be copied into the metadata
+ *              file.  After this copy, this field should be set to NULL.
+ *
+ * tick_of_last_change: Number of the last tick in which this index entry
+ *              was changed.
+ *
+ *              Used by the VFD SWMR writer only.
+ *
+ *              For the VFD SWMR reader, this field will always be set to 0.
+ *
+ * clean:       Used by the VFD SWMR writer only.
+ *
+ *              Set to TRUE whenever the referenced metadata page or
+ *              multi-page metadata entry is written to the HDF5 file.
+ *              Set to FALSE whenever it is marked dirty in the page buffer.
+ *
+ * tick_of_last_flush: Number of the tick in which this entry was last
+ *              written to the lower file or zero if it has never been flushed.
+ *
+ *              Used by the VFD SWMR writer only.
+ *
+ *              For the VFD SWMR reader, this field should always be 0.
+ *
+ * delayed_flush: If the flush of the referenced metadata page or multi-page
+ *              metadata entry must be delayed, the earliest tick in which
+ *              it may be flushed, or zero if there is no such constraint.
+ *
+ *              Used by the VFD SWMR writer only.
+ *
+ * moved_to_lower_file: Set to TRUE iff the entry referenced is in the
+ *              lower file and is therefore about to be removed from the
+ *              metadata file
+ *
+ * garbage: `true` if the entry is marked for garbage collection and is
+ *              thus invalid.
+ *
+ *              For n the number of entries, deleting an entry is O(n).
+ *              H5PB_dest() deletes all entries.  Instead of deleting
+ *              entries one-by-one at O(n^2) cost, H5PB_dest() marks
+ *              each disused entry for garbage collection and sweeps all
+ *              entries up before it is done.
+ *
+ *----------------------------------------------------------------------------
+ */
+typedef struct H5FD_vfd_swmr_idx_entry_t {
+    uint64_t hdf5_page_offset;
+    uint64_t md_file_page_offset;
+    uint32_t length;
+    uint32_t checksum;
+    void *   entry_ptr;
+    uint64_t tick_of_last_change;
+    hbool_t  clean;
+    uint64_t tick_of_last_flush;
+    uint64_t delayed_flush;
+    bool     moved_to_lower_file;
+    bool     garbage;
+} H5FD_vfd_swmr_idx_entry_t;
+
+/*
+ *  tick_num:       Sequence number of the current tick.
+ *                  Initialized to zero on file creation/open, and incremented
+ *                  by the VFD SWMR writer at the end of each tick.
+ *  num_entries:    The number of entries in the index.
+ *  entries:        The array of index entries
+ */
+typedef struct H5FD_vfd_swmr_md_index {
+    uint64_t                   tick_num;
+    uint32_t                   num_entries;
+    H5FD_vfd_swmr_idx_entry_t *entries;
+} H5FD_vfd_swmr_md_index;
+
+/*
+ *  fs_page_size:   Size of pages in both the HDF5 file and the metadata file IN BYTES
+ *  tick_num:       Sequence number of the current tick.
+ *                  Initialized to zero on file creation/open, and incremented by the
+ *                  VFD SWMR writer at the end of each tick.
+ *  index_offset:   The offset of the current metadata file index in the metadata file
+ *                  IN BYTES.
+ *  index_length:   The length of the current metadata file index IN BYTES.
+ */
+typedef struct H5FD_vfd_swmr_md_header {
+    uint32_t fs_page_size;
+    uint64_t tick_num;
+    uint64_t index_offset;
+    size_t   index_length;
+} H5FD_vfd_swmr_md_header;
+
+/* Lookup the shadow-index entry corresponding to page number `target_page`
+ * in the HDF5 file and return it.  If there is no match, return NULL.
+ *
+ * The lookup is performed by binary search on the `nentries` shadow index
+ * entries at `idx`.  The entries must be sorted by their offset in the
+ * HDF5 file.  Each entry must have a unique HDF5 file offset.
+ *
+ * If `reuse_garbage` is true, then entries marked for garbage collection
+ * are eligible search results.  Return NULL if a matching entry is
+ * found, but the entry is marked for garbage collection and `reuse_garbage`
+ * is false.
+ */
+static inline H5FD_vfd_swmr_idx_entry_t *
+H5FD_vfd_swmr_pageno_to_mdf_idx_entry(H5FD_vfd_swmr_idx_entry_t *idx, uint32_t nentries, uint64_t target_page,
+                                      bool reuse_garbage)
+{
+    uint32_t top;
+    uint32_t bottom;
+    uint32_t probe;
+
+    if (nentries < 1)
+        return NULL;
+
+    bottom = 0;
+    top    = nentries;
+
+    do {
+        probe = (top + bottom) / 2;
+
+        if (idx[probe].hdf5_page_offset < target_page)
+            bottom = probe + 1;
+        else if (idx[probe].hdf5_page_offset > target_page)
+            top = probe;
+        else /* found it */
+            return (reuse_garbage || !idx[probe].garbage) ? &idx[probe] : NULL;
+    } while (bottom < top);
+    /* Previous interval was [top - 1, top] or [bottom, bottom + 1].
+     * The new interval is [top, top] or [bottom, bottom], respectively.
+     * We probed idx[bottom] in the last step, and idx[top] (if it is
+     * not out of bounds) in an earlier round.  So there is nothing
+     * to be found at (top + bottom) / 2.
+     */
+    return NULL;
+}
+
 #ifdef H5_HAVE_PARALLEL
 /* ======== Temporary data transfer properties ======== */
 /* Definitions for memory MPI type property */
@@ -95,9 +309,6 @@ typedef enum H5FD_get_driver_kind_t {
     H5FD_GET_DRIVER_BY_VALUE /* Value field is set */
 } H5FD_get_driver_kind_t;
 
-/* Forward declarations for prototype arguments */
-struct H5S_t;
-
 /*****************************/
 /* Library Private Variables */
 /*****************************/
@@ -108,6 +319,7 @@ struct H5S_t;
 
 /* Forward declarations for prototype arguments */
 struct H5F_t;
+struct H5S_t;
 union H5PL_key_t;
 
 H5_DLL int    H5FD_term_interface(void);
@@ -177,6 +389,18 @@ H5_DLL herr_t H5FD_sort_vector_io_req(hbool_t *vector_was_sorted, uint32_t count
                                       H5FD_mem_t **s_types_ptr, haddr_t **s_addrs_ptr, size_t **s_sizes_ptr,
                                       H5_flexible_const_ptr_t **s_bufs_ptr);
 H5_DLL herr_t H5FD_init(void);
+
+/* Function prototypes for VFD SWMR */
+H5_DLL herr_t  H5FD_vfd_swmr_get_tick_and_idx(H5FD_t *_file, hbool_t read_index, uint64_t *tick_ptr,
+                                              uint32_t *num_entries_ptr, H5FD_vfd_swmr_idx_entry_t index[]);
+H5_DLL void    H5FD_vfd_swmr_dump_status(H5FD_t *file, uint64_t page);
+H5_DLL void    H5FD_vfd_swmr_set_pb_configured(H5FD_t *_file);
+H5_DLL void    H5FD_vfd_swmr_record_elapsed_ticks(H5FD_t *_file, uint64_t elapsed);
+H5_DLL void    H5FD_vfd_swmr_get_md_path_name(H5FD_t *_file, char **name);
+H5_DLL hbool_t H5FD_vfd_swmr_get_make_believe(H5FD_t *_file);
+H5_DLL void    H5FD_vfd_swmr_set_make_believe(H5FD_t *_file, hbool_t make_believe);
+H5_DLL htri_t  H5FD_vfd_swmr_assess_make_believe(H5FD_t *_file);
+H5_DLL H5FD_t *H5FD_vfd_swmr_dedup(H5FD_t *_self, H5FD_t *_other, hid_t fapl_id);
 
 /* Function prototypes for MPI based VFDs*/
 #ifdef H5_HAVE_PARALLEL
