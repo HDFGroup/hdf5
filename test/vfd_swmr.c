@@ -4861,13 +4861,13 @@ error:
 static unsigned
 test_updater_generate_md_checksums(hid_t orig_fapl, hbool_t file_create)
 {
-    char                    filename[FILE_NAME_LEN]; /* Filename to use */
-    hid_t                   fid  = H5I_INVALID_HID;  /* File ID */
-    hid_t                   fcpl = H5I_INVALID_HID;  /* File creation property list ID */
-    hid_t                   fapl = H5I_INVALID_HID;  /* File access property list ID */
-    H5F_vfd_swmr_config_t   config;                  /* Configuration for VFD SWMR */
-    H5F_generate_md_ck_cb_t cb_info;                 /* Callback */
-    H5F_t *                 f = NULL;                /* Internal file object pointer */
+    char                    filename[FILE_NAME_LEN];  /* Filename to use */
+    hid_t                   fid  = H5I_INVALID_HID;   /* File ID */
+    hid_t                   fcpl = H5I_INVALID_HID;   /* File creation property list ID */
+    hid_t                   fapl = H5I_INVALID_HID;   /* File access property list ID */
+    H5F_vfd_swmr_config_t   config;                   /* Configuration for VFD SWMR */
+    H5F_generate_md_ck_cb_t cb_info;                  /* Callback */
+    H5F_t *                 f                 = NULL; /* Internal file object pointer */
     char *                  md_file_path_name = NULL;
 
     if (file_create) {
