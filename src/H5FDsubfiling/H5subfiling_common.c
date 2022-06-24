@@ -17,6 +17,7 @@
 #include <libgen.h>
 
 #include "H5subfiling_common.h"
+#include "H5subfiling_err.h"
 
 typedef struct {            /* Format of a context map entry  */
     uint64_t h5_file_id;    /* key value (linear search of the cache) */
@@ -41,6 +42,12 @@ typedef enum stat_category {
     QUEUE_STAT,
     TOTAL_STAT_COUNT
 } stat_category_t;
+
+/* Identifiers for HDF5's error API */
+hid_t H5subfiling_err_stack_g = H5I_INVALID_HID;
+hid_t H5subfiling_err_class_g = H5I_INVALID_HID;
+char  H5subfiling_mpi_error_str[MPI_MAX_ERROR_STRING];
+int   H5subfiling_mpi_error_str_len;
 
 static subfiling_context_t *sf_context_cache  = NULL;
 static sf_topology_t *      sf_topology_cache = NULL;
@@ -2008,15 +2015,8 @@ ioc_open_file(sf_work_request_t *msg, int file_acc_flags)
     mutex_locked = TRUE;
 
     /* Attempt to create/open the subfile for this IOC rank */
-    if ((fd = HDopen(filepath, file_acc_flags, mode)) < 0) {
-#ifdef H5_SUBFILING_DEBUG
-        H5_subfiling_log(sf_context->sf_context_id, "%s: failed to open subfile '%s' - %s", __func__,
-                         filepath, strerror(errno));
-#endif
-
-        ret_value = FAIL;
-        goto done;
-    }
+    if ((fd = HDopen(filepath, file_acc_flags, mode)) < 0)
+        H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "failed to open subfile");
 
     sf_context->sf_fid = fd;
     if (file_acc_flags & O_CREAT)
@@ -2027,15 +2027,8 @@ ioc_open_file(sf_work_request_t *msg, int file_acc_flags)
      * check if we also need to create a config file.
      */
     if ((file_acc_flags & O_CREAT) && (sf_context->topology->subfile_rank == 0)) {
-        if (create_config_file(sf_context, base, subfile_dir, (file_acc_flags & O_TRUNC)) < 0) {
-#ifdef H5_SUBFILING_DEBUG
-            H5_subfiling_log(sf_context->sf_context_id, "%s: couldn't create subfiling configuration file\n",
-                             __func__);
-#endif
-
-            ret_value = FAIL;
-            goto done;
-        }
+        if (create_config_file(sf_context, base, subfile_dir, (file_acc_flags & O_TRUNC)) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTCREATE, FAIL, "couldn't create subfiling configuration file");
     }
 
 done:
@@ -2945,7 +2938,7 @@ H5_subfiling_log(int64_t sf_context_id, const char *fmt, ...)
     /* Retrieve the subfiling object for the newly-created context ID */
     if (NULL == (sf_context = H5_get_subfiling_object(sf_context_id))) {
         HDprintf("%s: couldn't get subfiling object from context ID\n", __func__);
-        return;
+        goto done;
     }
 
     begin_thread_exclusive();

@@ -33,12 +33,12 @@
 #include "H5Dprivate.h"  /* Datasets                                 */
 #include "H5Eprivate.h"  /* Error handling                           */
 #include "H5FDioc.h"     /* IOC VFD                                  */
-#include "H5FDioc_err.h" /* IOC VFD error handling                   */
 #include "H5Iprivate.h"  /* IDs                                      */
 #include "H5MMprivate.h" /* Memory management                        */
 #include "H5Pprivate.h"  /* Property lists                           */
 
 #include "H5subfiling_common.h"
+#include "H5subfiling_err.h"
 
 #include "mercury_thread.h"
 #include "mercury_thread_mutex.h"

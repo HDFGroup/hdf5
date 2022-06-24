@@ -11,32 +11,22 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Error handling for the HDF5 IOC VFD
+ * Error handling for the HDF5 Subfiling feature
  */
 
-#ifndef H5FDioc_err_h
-#define H5FDioc_err_h
+#ifndef H5SUBFILING_ERR_H
+#define H5SUBFILING_ERR_H
 
 #include <errno.h>
 
 #include "H5Epublic.h"
 
-extern hid_t H5FDioc_err_stack_g;
-extern hid_t H5FDioc_err_class_g;
+extern hid_t H5subfiling_err_stack_g;
+extern hid_t H5subfiling_err_class_g;
 
-#define H5FD_IOC_ERR_CLS_NAME "HDF5 IOC VFD"
-#define H5FD_IOC_ERR_LIB_NAME "HDF5 IOC VFD"
-#define H5FD_IOC_ERR_VER      "1.0.0"
-
-#define SUCCEED 0
-#define FAIL    (-1)
-
-#ifndef FALSE
-#define FALSE false
-#endif
-#ifndef TRUE
-#define TRUE true
-#endif
+#define H5SUBFILING_ERR_CLS_NAME "HDF5 Subfiling"
+#define H5SUBFILING_ERR_LIB_NAME "HDF5 Subfiling"
+#define H5SUBFILING_ERR_VER      "1.0.0"
 
 /* Error macros */
 
@@ -47,16 +37,16 @@ extern hid_t H5FDioc_err_class_g;
  * and then goto the "done" label, which should appear inside the
  * function. (v2 errors only)
  */
-#define H5FD_IOC_GOTO_ERROR(err_major, err_minor, ret_val, ...)                                              \
+#define H5_SUBFILING_GOTO_ERROR(err_major, err_minor, ret_val, ...)                                          \
     do {                                                                                                     \
         H5E_auto2_t err_func;                                                                                \
                                                                                                              \
         /* Check whether automatic error reporting has been disabled */                                      \
         (void)H5Eget_auto2(H5E_DEFAULT, &err_func, NULL);                                                    \
         if (err_func) {                                                                                      \
-            if (H5FDioc_err_stack_g >= 0 && H5FDioc_err_class_g >= 0) {                                      \
-                H5Epush2(H5FDioc_err_stack_g, __FILE__, __func__, __LINE__, H5FDioc_err_class_g, err_major,  \
-                         err_minor, __VA_ARGS__);                                                            \
+            if (H5subfiling_err_stack_g >= 0 && H5subfiling_err_class_g >= 0) {                              \
+                H5Epush2(H5subfiling_err_stack_g, __FILE__, __func__, __LINE__, H5subfiling_err_class_g,     \
+                         err_major, err_minor, __VA_ARGS__);                                                 \
             }                                                                                                \
             else {                                                                                           \
                 fprintf(stderr, __VA_ARGS__);                                                                \
@@ -75,16 +65,16 @@ extern hid_t H5FDioc_err_class_g;
  * function so that an infinite loop does not occur where goto
  * continually branches back to the label. (v2 errors only)
  */
-#define H5FD_IOC_DONE_ERROR(err_major, err_minor, ret_val, ...)                                              \
+#define H5_SUBFILING_DONE_ERROR(err_major, err_minor, ret_val, ...)                                          \
     do {                                                                                                     \
         H5E_auto2_t err_func;                                                                                \
                                                                                                              \
         /* Check whether automatic error reporting has been disabled */                                      \
         (void)H5Eget_auto2(H5E_DEFAULT, &err_func, NULL);                                                    \
         if (err_func) {                                                                                      \
-            if (H5FDioc_err_stack_g >= 0 && H5FDioc_err_class_g >= 0)                                        \
-                H5Epush2(H5FDioc_err_stack_g, __FILE__, __func__, __LINE__, H5FDioc_err_class_g, err_major,  \
-                         err_minor, __VA_ARGS__);                                                            \
+            if (H5subfiling_err_stack_g >= 0 && H5subfiling_err_class_g >= 0)                                \
+                H5Epush2(H5subfiling_err_stack_g, __FILE__, __func__, __LINE__, H5subfiling_err_class_g,     \
+                         err_major, err_minor, __VA_ARGS__);                                                 \
             else {                                                                                           \
                 fprintf(stderr, __VA_ARGS__);                                                                \
                 fprintf(stderr, "\n");                                                                       \
@@ -105,21 +95,21 @@ extern hid_t H5FDioc_err_class_g;
         /* Check whether automatic error reporting has been disabled */                                      \
         (void)H5Eget_auto2(H5E_DEFAULT, &err_func, NULL);                                                    \
         if (err_func) {                                                                                      \
-            if ((H5FDioc_err_stack_g >= 0) && (H5Eget_num(H5FDioc_err_stack_g) > 0)) {                       \
-                H5Eprint2(H5FDioc_err_stack_g, NULL);                                                        \
-                H5Eclear2(H5FDioc_err_stack_g);                                                              \
+            if ((H5subfiling_err_stack_g >= 0) && (H5Eget_num(H5subfiling_err_stack_g) > 0)) {               \
+                H5Eprint2(H5subfiling_err_stack_g, NULL);                                                    \
+                H5Eclear2(H5subfiling_err_stack_g);                                                          \
             }                                                                                                \
         }                                                                                                    \
     } while (0)
 
-#else
+#else /* H5_NO_DEPRECATED_SYMBOLS */
 
 /*
  * Macro to push the current function to the current error stack
  * and then goto the "done" label, which should appear inside the
  * function. (compatible with v1 and v2 errors)
  */
-#define H5FD_IOC_GOTO_ERROR(err_major, err_minor, ret_val, ...)                                              \
+#define H5_SUBFILING_GOTO_ERROR(err_major, err_minor, ret_val, ...)                                          \
     do {                                                                                                     \
         unsigned is_v2_err;                                                                                  \
         union {                                                                                              \
@@ -137,9 +127,9 @@ extern hid_t H5FDioc_err_class_g;
                                                                                                              \
         /* Check whether automatic error reporting has been disabled */                                      \
         if ((is_v2_err && err_func.err_func_v2) || (!is_v2_err && err_func.err_func_v1)) {                   \
-            if (H5FDioc_err_stack_g >= 0 && H5FDioc_err_class_g >= 0) {                                      \
-                H5Epush2(H5FDioc_err_stack_g, __FILE__, __func__, __LINE__, H5FDioc_err_class_g, err_major,  \
-                         err_minor, __VA_ARGS__);                                                            \
+            if (H5subfiling_err_stack_g >= 0 && H5subfiling_err_class_g >= 0) {                              \
+                H5Epush2(H5subfiling_err_stack_g, __FILE__, __func__, __LINE__, H5subfiling_err_class_g,     \
+                         err_major, err_minor, __VA_ARGS__);                                                 \
             }                                                                                                \
             else {                                                                                           \
                 fprintf(stderr, __VA_ARGS__);                                                                \
@@ -159,7 +149,7 @@ extern hid_t H5FDioc_err_class_g;
  * continually branches back to the label. (compatible with v1
  * and v2 errors)
  */
-#define H5FD_IOC_DONE_ERROR(err_major, err_minor, ret_val, ...)                                              \
+#define H5_SUBFILING_DONE_ERROR(err_major, err_minor, ret_val, ...)                                          \
     do {                                                                                                     \
         unsigned is_v2_err;                                                                                  \
         union {                                                                                              \
@@ -177,9 +167,9 @@ extern hid_t H5FDioc_err_class_g;
                                                                                                              \
         /* Check whether automatic error reporting has been disabled */                                      \
         if ((is_v2_err && err_func.err_func_v2) || (!is_v2_err && err_func.err_func_v1)) {                   \
-            if (H5FDioc_err_stack_g >= 0 && H5FDioc_err_class_g >= 0) {                                      \
-                H5Epush2(H5FDioc_err_stack_g, __FILE__, __func__, __LINE__, H5FDioc_err_class_g, err_major,  \
-                         err_minor, __VA_ARGS__);                                                            \
+            if (H5subfiling_err_stack_g >= 0 && H5subfiling_err_class_g >= 0) {                              \
+                H5Epush2(H5subfiling_err_stack_g, __FILE__, __func__, __LINE__, H5subfiling_err_class_g,     \
+                         err_major, err_minor, __VA_ARGS__);                                                 \
             }                                                                                                \
             else {                                                                                           \
                 fprintf(stderr, __VA_ARGS__);                                                                \
@@ -212,38 +202,38 @@ extern hid_t H5FDioc_err_class_g;
                                                                                                              \
         /* Check whether automatic error reporting has been disabled */                                      \
         if ((is_v2_err && err_func.err_func_v2) || (!is_v2_err && err_func.err_func_v1)) {                   \
-            if ((H5FDioc_err_stack_g >= 0) && (H5Eget_num(H5FDioc_err_stack_g) > 0)) {                       \
-                H5Eprint2(H5FDioc_err_stack_g, NULL);                                                        \
-                H5Eclear2(H5FDioc_err_stack_g);                                                              \
+            if ((H5subfiling_err_stack_g >= 0) && (H5Eget_num(H5subfiling_err_stack_g) > 0)) {               \
+                H5Eprint2(H5subfiling_err_stack_g, NULL);                                                    \
+                H5Eclear2(H5subfiling_err_stack_g);                                                          \
             }                                                                                                \
         }                                                                                                    \
     } while (0)
 
-#endif
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
-#define H5FD_IOC_SYS_GOTO_ERROR(err_major, err_minor, ret_val, str)                                          \
+#define H5_SUBFILING_SYS_GOTO_ERROR(err_major, err_minor, ret_val, str)                                      \
     do {                                                                                                     \
         int myerrno = errno;                                                                                 \
-        H5FD_IOC_GOTO_ERROR(err_major, err_minor, ret_val, "%s, errno = %d, error message = '%s'", str,      \
-                            myerrno, strerror(myerrno));                                                     \
+        H5_SUBFILING_GOTO_ERROR(err_major, err_minor, ret_val, "%s, errno = %d, error message = '%s'", str,  \
+                                myerrno, strerror(myerrno));                                                 \
     } while (0)
 
 /* MPI error handling macros. */
 
-extern char H5FD_ioc_mpi_error_str[MPI_MAX_ERROR_STRING];
-extern int  H5FD_ioc_mpi_error_str_len;
+extern char H5subfiling_mpi_error_str[MPI_MAX_ERROR_STRING];
+extern int  H5subfiling_mpi_error_str_len;
 
-#define H5FD_IOC_MPI_DONE_ERROR(retcode, str, mpierr)                                                        \
+#define H5_SUBFILING_MPI_DONE_ERROR(retcode, str, mpierr)                                                    \
     do {                                                                                                     \
-        MPI_Error_string(mpierr, H5FD_ioc_mpi_error_str, &H5FD_ioc_mpi_error_str_len);                       \
-        H5FD_IOC_DONE_ERROR(H5E_INTERNAL, H5E_MPI, retcode, "%s: MPI error string is '%s'", str,             \
-                            H5FD_ioc_mpi_error_str);                                                         \
+        MPI_Error_string(mpierr, H5subfiling_mpi_error_str, &H5subfiling_mpi_error_str_len);                 \
+        H5_SUBFILING_DONE_ERROR(H5E_INTERNAL, H5E_MPI, retcode, "%s: MPI error string is '%s'", str,         \
+                                H5subfiling_mpi_error_str);                                                  \
     } while (0)
-#define H5FD_IOC_MPI_GOTO_ERROR(retcode, str, mpierr)                                                        \
+#define H5_SUBFILING_MPI_GOTO_ERROR(retcode, str, mpierr)                                                    \
     do {                                                                                                     \
-        MPI_Error_string(mpierr, H5FD_ioc_mpi_error_str, &H5FD_ioc_mpi_error_str_len);                       \
-        H5FD_IOC_GOTO_ERROR(H5E_INTERNAL, H5E_MPI, retcode, "%s: MPI error string is '%s'", str,             \
-                            H5FD_ioc_mpi_error_str);                                                         \
+        MPI_Error_string(mpierr, H5subfiling_mpi_error_str, &H5subfiling_mpi_error_str_len);                 \
+        H5_SUBFILING_GOTO_ERROR(H5E_INTERNAL, H5E_MPI, retcode, "%s: MPI error string is '%s'", str,         \
+                                H5subfiling_mpi_error_str);                                                  \
     } while (0)
 
 /*
@@ -251,7 +241,7 @@ extern int  H5FD_ioc_mpi_error_str_len;
  * setting ret_value to the given value. This is often used for
  * short circuiting in functions when certain conditions arise.
  */
-#define H5FD_IOC_GOTO_DONE(ret_val)                                                                          \
+#define H5_SUBFILING_GOTO_DONE(ret_val)                                                                      \
     do {                                                                                                     \
         ret_value = ret_val;                                                                                 \
         goto done;                                                                                           \
@@ -265,7 +255,7 @@ extern int  H5FD_ioc_mpi_error_str_len;
  * operation (e.g. due to calling top-level API functions
  * internally), the error stack will be inconsistent/incoherent.
  */
-#define H5FD_IOC_FUNC_LEAVE_API                                                                              \
+#define H5_SUBFILING_FUNC_LEAVE_API                                                                          \
     do {                                                                                                     \
         PRINT_ERROR_STACK;                                                                                   \
         return ret_value;                                                                                    \
@@ -274,9 +264,9 @@ extern int  H5FD_ioc_mpi_error_str_len;
 /*
  * Macro to return from internal functions.
  */
-#define H5FD_IOC_FUNC_LEAVE                                                                                  \
+#define H5_SUBFILING_FUNC_LEAVE                                                                              \
     do {                                                                                                     \
         return ret_value;                                                                                    \
     } while (0)
 
-#endif /* H5FDioc_err_h */
+#endif /* H5SUBFILING_ERR_H */
