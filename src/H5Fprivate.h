@@ -845,6 +845,7 @@ struct H5O_loc_t;
 struct H5HG_heap_t;
 struct H5VL_class_t;
 struct H5P_genplist_t;
+struct H5S_t;
 struct H5FD_vfd_swmr_idx_entry_t;
 
 /* Forward declarations for anonymous H5F objects */
@@ -1217,12 +1218,13 @@ H5_DLL herr_t  H5F_get_vfd_handle(const H5F_t *file, hid_t fapl, void **file_han
 
 /* VFD SWMR functions */
 H5_DLL hbool_t H5F_get_use_vfd_swmr(const H5F_t *f);
+H5_DLL unsigned H5F_shared_get_use_vfd_swmr(const H5F_shared_t *f_sh);
 H5_DLL herr_t  H5F_vfd_swmr_init(H5F_t *f, hbool_t file_create);
 H5_DLL herr_t  H5F_vfd_swmr_build_md_path_name(H5F_vfd_swmr_config_t *config, const char *hdf5_filename,
                                                char *name /*out*/);
 H5_DLL herr_t  H5F_vfd_swmr_close_or_flush(H5F_t *f, hbool_t closing);
 H5_DLL herr_t  H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t index_len,
-                                                 H5FD_vfd_swmr_idx_entry_t *index);
+                                                 struct H5FD_vfd_swmr_idx_entry_t *index);
 H5_DLL herr_t  H5F_vfd_swmr_writer_delay_write(H5F_shared_t *shared, uint64_t page, uint64_t *untilp);
 H5_DLL herr_t  H5F_vfd_swmr_writer_prep_for_flush_or_close(H5F_t *f);
 H5_DLL herr_t  H5F_vfd_swmr_writer_end_of_tick(H5F_t *f);
@@ -1232,8 +1234,8 @@ H5_DLL herr_t  H5F_vfd_swmr_remove_entry_eot(H5F_t *f);
 H5_DLL herr_t  H5F_vfd_swmr_insert_entry_eot(H5F_t *f);
 H5_DLL void    H5F_vfd_swmr_update_entry_eot(eot_queue_entry_t *entry);
 H5_DLL herr_t  H5F_dump_eot_queue(void);
-H5_DLL herr_t  H5F_shadow_image_defer_free(H5F_shared_t *shared, const H5FD_vfd_swmr_idx_entry_t *entry);
-H5_DLL H5FD_vfd_swmr_idx_entry_t *H5F_vfd_swmr_enlarge_shadow_index(H5F_t *f);
+H5_DLL herr_t  H5F_shadow_image_defer_free(H5F_shared_t *shared, const struct H5FD_vfd_swmr_idx_entry_t *entry);
+H5_DLL struct H5FD_vfd_swmr_idx_entry_t *H5F_vfd_swmr_enlarge_shadow_index(H5F_t *f);
 
 /* File mounting routines */
 H5_DLL herr_t  H5F_mount(const struct H5G_loc_t *loc, const char *name, H5F_t *child, hid_t plist_id);
@@ -1250,6 +1252,14 @@ H5_DLL herr_t H5F_block_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t siz
 H5_DLL herr_t H5F_shared_block_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size,
                                      const void *buf);
 H5_DLL herr_t H5F_block_write(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, const void *buf);
+
+/* Functions that operate on selections of elements in the file */
+H5_DLL herr_t H5F_shared_select_read(H5F_shared_t *f_sh, H5FD_mem_t type, uint32_t count,
+                                     struct H5S_t **mem_spaces, struct H5S_t **file_spaces, haddr_t offsets[],
+                                     size_t element_sizes[], void *bufs[] /* out */);
+H5_DLL herr_t H5F_shared_select_write(H5F_shared_t *f_sh, H5FD_mem_t type, uint32_t count,
+                                      struct H5S_t **mem_spaces, struct H5S_t **file_spaces,
+                                      haddr_t offsets[], size_t element_sizes[], const void *bufs[]);
 
 /* Functions that flush or evict */
 H5_DLL herr_t H5F_flush_tagged_metadata(H5F_t *f, haddr_t tag);

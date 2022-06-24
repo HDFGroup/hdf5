@@ -103,6 +103,7 @@ static herr_t  H5D__contig_flush(H5D_t *dset);
 
 /* Helper routines */
 static herr_t H5D__contig_write_one(H5D_io_info_t *io_info, hsize_t offset, size_t size);
+static htri_t H5D__contig_may_use_select_io(const H5D_io_info_t *io_info, H5D_io_op_type_t op_type);
 
 /*********************/
 /* Package Variables */
@@ -571,13 +572,77 @@ H5D__contig_io_init(H5D_io_info_t *io_info, const H5D_type_info_t H5_ATTR_UNUSED
                     hsize_t H5_ATTR_UNUSED nelmts, H5S_t H5_ATTR_UNUSED *file_space,
                     H5S_t H5_ATTR_UNUSED *mem_space, H5D_chunk_map_t H5_ATTR_UNUSED *cm)
 {
-    FUNC_ENTER_PACKAGE_NOERR
+    htri_t use_selection_io = FALSE;   /* Whether to use selection I/O */
+    htri_t ret_value        = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
 
     io_info->store->contig.dset_addr = io_info->dset->shared->layout.storage.u.contig.addr;
     io_info->store->contig.dset_size = io_info->dset->shared->layout.storage.u.contig.size;
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+    /* Check if we're performing selection I/O */
+    if ((use_selection_io = H5D__contig_may_use_select_io(io_info, H5D_IO_OP_READ)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if selection I/O is possible")
+    io_info->use_select_io = (hbool_t)use_selection_io;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__contig_io_init() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__contig_may_use_select_io
+ *
+ * Purpose:    A small internal function to if it may be possible to use
+ *             selection I/O.
+ *
+ * Return:    TRUE/FALSE/FAIL
+ *
+ * Programmer:    Neil Fortner
+ *        3 August 2021
+ *
+ *-------------------------------------------------------------------------
+ */
+static htri_t
+H5D__contig_may_use_select_io(const H5D_io_info_t *io_info, H5D_io_op_type_t op_type)
+{
+    const H5D_t *dataset   = NULL; /* Local pointer to dataset info */
+    htri_t       ret_value = FAIL; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity check */
+    HDassert(io_info);
+    HDassert(io_info->dset);
+    HDassert(op_type == H5D_IO_OP_READ || op_type == H5D_IO_OP_WRITE);
+
+    dataset = io_info->dset;
+
+    /* Don't use selection I/O if it's globally disabled, if there is a type
+     * conversion, or if it's not a contiguous dataset, or if the sieve buffer
+     * exists (write) or is dirty (read) */
+    if (!H5_use_selection_io_g || io_info->io_ops.single_read != H5D__select_read ||
+        io_info->layout_ops.readvv != H5D__contig_readvv ||
+        (op_type == H5D_IO_OP_READ && dataset->shared->cache.contig.sieve_dirty) ||
+        (op_type == H5D_IO_OP_WRITE && dataset->shared->cache.contig.sieve_buf))
+        ret_value = FALSE;
+    else {
+        hbool_t page_buf_enabled;
+
+        HDassert(io_info->io_ops.single_write == H5D__select_write);
+        HDassert(io_info->layout_ops.writevv == H5D__contig_writevv);
+
+        /* Check if the page buffer is enabled */
+        if (H5PB_enabled(io_info->f_sh, H5FD_MEM_DRAW, &page_buf_enabled) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if page buffer is enabled")
+        if (page_buf_enabled)
+            ret_value = FALSE;
+        else
+            ret_value = TRUE;
+    } /* end else */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__contig_may_use_select_io() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5D__contig_read
@@ -606,8 +671,20 @@ H5D__contig_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize
     HDassert(mem_space);
     HDassert(file_space);
 
-    /* Read data */
-    if ((io_info->io_ops.single_read)(io_info, type_info, nelmts, file_space, mem_space) < 0)
+    if (io_info->use_select_io) {
+        size_t dst_type_size = type_info->dst_type_size;
+
+        /* Issue selection I/O call (we can skip the page buffer because we've
+         * already verified it won't be used, and the metadata accumulator
+         * because this is raw data) */
+        if (H5F_shared_select_read(H5F_SHARED(io_info->dset->oloc.file), H5FD_MEM_DRAW, nelmts > 0 ? 1 : 0,
+                                   &mem_space, &file_space, &(io_info->store->contig.dset_addr),
+                                   &dst_type_size, &(io_info->u.rbuf)) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "contiguous selection read failed")
+    } /* end if */
+    else
+        /* Read data through legacy (non-selection I/O) pathway */
+        if ((io_info->io_ops.single_read)(io_info, type_info, nelmts, file_space, mem_space) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "contiguous read failed")
 
 done:
@@ -641,8 +718,20 @@ H5D__contig_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsiz
     HDassert(mem_space);
     HDassert(file_space);
 
-    /* Write data */
-    if ((io_info->io_ops.single_write)(io_info, type_info, nelmts, file_space, mem_space) < 0)
+    if (io_info->use_select_io) {
+        size_t dst_type_size = type_info->dst_type_size;
+
+        /* Issue selection I/O call (we can skip the page buffer because we've
+         * already verified it won't be used, and the metadata accumulator
+         * because this is raw data) */
+        if (H5F_shared_select_write(H5F_SHARED(io_info->dset->oloc.file), H5FD_MEM_DRAW, nelmts > 0 ? 1 : 0,
+                                    &mem_space, &file_space, &(io_info->store->contig.dset_addr),
+                                    &dst_type_size, &(io_info->u.wbuf)) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "contiguous selection write failed")
+    } /* end if */
+    else
+        /* Write data through legacy (non-selection I/O) pathway */
+        if ((io_info->io_ops.single_write)(io_info, type_info, nelmts, file_space, mem_space) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "contiguous write failed")
 
 done:

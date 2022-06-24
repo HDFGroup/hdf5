@@ -818,12 +818,17 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset, const H5S_t *file_
 
         /* Check if we can use the optimized parallel I/O routines */
         if (opt == TRUE) {
-            /* Override the I/O op pointers to the MPI-specific routines */
-            io_info->io_ops.multi_read   = dset->shared->layout.ops->par_read;
-            io_info->io_ops.multi_write  = dset->shared->layout.ops->par_write;
-            io_info->io_ops.single_read  = H5D__mpio_select_read;
-            io_info->io_ops.single_write = H5D__mpio_select_write;
-        } /* end if */
+            /* Override the I/O op pointers to the MPI-specific routines, unless
+             * selection I/O is to be used - in this case the file driver will
+             * handle collective I/O */
+            /* Check for selection/vector support in file driver? -NAF */
+            if (!io_info->use_select_io) {
+                io_info->io_ops.multi_read   = dset->shared->layout.ops->par_read;
+                io_info->io_ops.multi_write  = dset->shared->layout.ops->par_write;
+                io_info->io_ops.single_read  = H5D__mpio_select_read;
+                io_info->io_ops.single_write = H5D__mpio_select_write;
+            } /* end if */
+        }     /* end if */
         else {
             /* Check if there are any filters in the pipeline. If there are,
              * we cannot break to independent I/O if this is a write operation

@@ -271,6 +271,16 @@ H5_DLL herr_t  H5FDread(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t ad
                         void *buf /*out*/);
 H5_DLL herr_t  H5FDwrite(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
                          const void *buf);
+H5_DLL herr_t  H5FDread_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[],
+                               haddr_t addrs[], size_t sizes[], void *bufs[] /* out */);
+H5_DLL herr_t  H5FDwrite_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[],
+                                haddr_t addrs[], size_t sizes[], const void *bufs[] /* in */);
+H5_DLL herr_t  H5FDread_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count,
+                                  hid_t mem_spaces[], hid_t file_spaces[], haddr_t offsets[],
+                                  size_t element_sizes[], void *bufs[] /* out */);
+H5_DLL herr_t  H5FDwrite_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count,
+                                   hid_t mem_spaces[], hid_t file_spaces[], haddr_t offsets[],
+                                   size_t element_sizes[], const void *bufs[]);
 H5_DLL herr_t  H5FDflush(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
 H5_DLL herr_t  H5FDtruncate(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
 H5_DLL herr_t  H5FDlock(H5FD_t *file, hbool_t rw);
