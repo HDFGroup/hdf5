@@ -34,9 +34,8 @@
  * use mercury for that purpose...
  */
 
-static hg_thread_mutex_t ioc_thread_mutex    = PTHREAD_MUTEX_INITIALIZER;
-static hg_thread_mutex_t ioc_serialize_mutex = PTHREAD_MUTEX_INITIALIZER;
-static hg_thread_pool_t *ioc_thread_pool     = NULL;
+static hg_thread_mutex_t ioc_thread_mutex = PTHREAD_MUTEX_INITIALIZER;
+static hg_thread_pool_t *ioc_thread_pool  = NULL;
 static hg_thread_t       ioc_thread;
 
 #ifdef H5FD_IOC_COLLECT_STATS
