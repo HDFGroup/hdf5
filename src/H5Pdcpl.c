@@ -3005,7 +3005,7 @@ H5Pget_external(hid_t plist_id, unsigned idx, size_t name_size, char *name /*out
      * or define a 64-bit HDF5-specific offset type that is platform-independent.
      */
     if (offset)
-        *offset = efl.slot[idx].offset;
+        *offset = (off_t)efl.slot[idx].offset;
     if (size)
         *size = efl.slot[idx].size;
 
