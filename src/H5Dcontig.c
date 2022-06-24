@@ -43,6 +43,7 @@
 #include "H5FOprivate.h" /* File objects                 */
 #include "H5Oprivate.h"  /* Object headers               */
 #include "H5Pprivate.h"  /* Property lists               */
+#include "H5PBprivate.h" /* Page Buffer	                 */
 #include "H5VMprivate.h" /* Vector and array functions   */
 
 /****************/
@@ -90,8 +91,8 @@ typedef struct H5D_contig_writevv_ud_t {
 /* Layout operation callbacks */
 static herr_t  H5D__contig_construct(H5F_t *f, H5D_t *dset);
 static herr_t  H5D__contig_init(H5F_t *f, const H5D_t *dset, hid_t dapl_id);
-static herr_t  H5D__contig_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
-                                   hsize_t nelmts, H5S_t *file_space, H5S_t *mem_space, H5D_chunk_map_t *cm);
+static herr_t  H5D__contig_io_init(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
+                                   H5S_t *file_space, H5S_t *mem_space, H5D_chunk_map_t *cm);
 static ssize_t H5D__contig_readvv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *dset_curr_seq,
                                   size_t dset_len_arr[], hsize_t dset_offset_arr[], size_t mem_max_nseq,
                                   size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[]);
@@ -566,7 +567,7 @@ H5D__contig_is_data_cached(const H5D_shared_t *shared_dset)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__contig_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t H5_ATTR_UNUSED *type_info,
+H5D__contig_io_init(H5D_io_info_t *io_info, const H5D_type_info_t H5_ATTR_UNUSED *type_info,
                     hsize_t H5_ATTR_UNUSED nelmts, H5S_t H5_ATTR_UNUSED *file_space,
                     H5S_t H5_ATTR_UNUSED *mem_space, H5D_chunk_map_t H5_ATTR_UNUSED *cm)
 {
@@ -594,7 +595,7 @@ herr_t
 H5D__contig_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts, H5S_t *file_space,
                  H5S_t *mem_space, H5D_chunk_map_t H5_ATTR_UNUSED *fm)
 {
-    herr_t ret_value = SUCCEED; /*return value		*/
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -629,7 +630,7 @@ herr_t
 H5D__contig_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts, H5S_t *file_space,
                   H5S_t *mem_space, H5D_chunk_map_t H5_ATTR_UNUSED *fm)
 {
-    herr_t ret_value = SUCCEED; /*return value		*/
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
