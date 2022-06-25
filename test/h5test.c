@@ -2226,7 +2226,7 @@ h5_using_parallel_driver(const char *drv_name)
         drv_name = HDgetenv(HDF5_DRIVER);
 
     if (drv_name)
-        return (!HDstrcmp(drv_name, "mpio"));
+        return (!HDstrcmp(drv_name, "mpio") || !HDstrcmp(drv_name, H5FD_SUBFILING_NAME));
 
     return ret_val;
 }
@@ -2282,6 +2282,9 @@ h5_driver_uses_modified_filename(void)
  *                separate logical files. The splitter driver is an example
  *                of this type of driver.
  *
+ *              Eventually, this should become a VFD feature flag so this
+ *              check is less fragile.
+ *
  * Return:      TRUE/FALSE
  *
  *-------------------------------------------------------------------------
@@ -2296,7 +2299,8 @@ h5_driver_uses_multiple_files(const char *drv_name, unsigned flags)
 
     if (drv_name) {
         if ((flags & H5_EXCLUDE_MULTIPART_DRIVERS) == 0) {
-            if (!HDstrcmp(drv_name, "split") || !HDstrcmp(drv_name, "multi") || !HDstrcmp(drv_name, "family"))
+            if (!HDstrcmp(drv_name, "split") || !HDstrcmp(drv_name, "multi") || !HDstrcmp(drv_name, "family")
+                || !HDstrcmp(drv_name, H5FD_SUBFILING_NAME))
                 return TRUE;
         }
 
