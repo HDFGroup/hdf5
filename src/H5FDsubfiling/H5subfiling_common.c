@@ -1084,6 +1084,8 @@ done:
             HDprintf("%s: couldn't free subfiling object\n", __func__);
 #endif
         }
+
+        *context_id_out = -1;
     }
 
     return ret_value;

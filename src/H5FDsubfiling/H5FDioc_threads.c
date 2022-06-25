@@ -561,17 +561,14 @@ handle_work_request(void *arg)
     sf_work_request_t *   msg             = &(q_entry_ptr->wk_req);
     int64_t               file_context_id = msg->header[2];
     int                   op_ret;
-#ifdef H5FD_IOC_DEBUG
-    int curr_io_ops_pending;
-#endif
-    hg_thread_ret_t ret_value = 0;
+    hg_thread_ret_t       ret_value = 0;
 
     HDassert(q_entry_ptr);
     HDassert(q_entry_ptr->magic == H5FD_IOC__IO_Q_ENTRY_MAGIC);
     HDassert(q_entry_ptr->in_progress);
 
     sf_context = H5_get_subfiling_object(file_context_id);
-    assert(sf_context != NULL);
+    HDassert(sf_context != NULL);
 
     atomic_fetch_add(&sf_work_pending, 1);
 
@@ -611,9 +608,9 @@ handle_work_request(void *arg)
     if (op_ret < 0) {
 #ifdef H5_SUBFILING_DEBUG
         H5_subfiling_log(file_context_id,
-                         "%s: IOC %d request(%s) filename=%s from rank(%d), size=%ld, offset=%ld FAILED",
+                         "%s: IOC %d request(%s) filename=%s from rank(%d), size=%ld, offset=%ld FAILED with ret %d",
                          __func__, msg->subfile_rank, translate_opcode((io_op_t)msg->tag),
-                         sf_context->sf_filename, msg->source, msg->header[0], msg->header[1]);
+                         sf_context->sf_filename, msg->source, msg->header[0], msg->header[1], op_ret);
 #endif
 
         /* TODO: set error value for work request queue entry */
@@ -622,8 +619,10 @@ handle_work_request(void *arg)
     }
 
 #ifdef H5FD_IOC_DEBUG
-    curr_io_ops_pending = atomic_load(&sf_io_ops_pending);
-    HDassert(curr_io_ops_pending > 0);
+    {
+        int curr_io_ops_pending = atomic_load(&sf_io_ops_pending);
+        HDassert(curr_io_ops_pending > 0);
+    }
 #endif
 
     /* complete the I/O request */
@@ -974,7 +973,7 @@ static int
 ioc_file_queue_read_indep(sf_work_request_t *msg, int subfile_rank, int source, MPI_Comm comm)
 {
     subfiling_context_t *sf_context     = NULL;
-    hbool_t              send_empty_buf = FALSE;
+    hbool_t              send_empty_buf = TRUE;
     int64_t              data_size;
     int64_t              file_offset;
     int64_t              file_context_id;
@@ -997,10 +996,8 @@ ioc_file_queue_read_indep(sf_work_request_t *msg, int subfile_rank, int source, 
     file_offset     = msg->header[1];
     file_context_id = msg->header[2];
 
-    if (data_size < 0) {
-        send_empty_buf = TRUE;
+    if (data_size < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_BADVALUE, -1, "invalid data size for read");
-    }
 
     sf_context = H5_get_subfiling_object(file_context_id);
     HDassert(sf_context);
@@ -1027,24 +1024,21 @@ ioc_file_queue_read_indep(sf_work_request_t *msg, int subfile_rank, int source, 
 #endif
 
     /* Allocate space to send data read from file to client */
-    if (NULL == (send_buf = HDmalloc((size_t)data_size))) {
-        send_empty_buf = TRUE;
+    if (NULL == (send_buf = HDmalloc((size_t)data_size)))
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, -1, "couldn't allocate send buffer for data");
-    }
 
     sf_fid = sf_context->sf_fid;
-    if (sf_fid < 0) {
-        send_empty_buf = TRUE;
+    if (sf_fid < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_BADVALUE, -1, "subfile file descriptor %d is invalid", sf_fid);
-    }
 
     /* Read data from the subfile */
     if ((read_ret = ioc_file_read_data(sf_fid, file_offset, send_buf, data_size, subfile_rank)) < 0) {
-        send_empty_buf = TRUE;
-        H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_READERROR, -1,
+        H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_READERROR, read_ret,
                             "read function(FID=%d, Source=%d) returned an error (%d)", sf_fid, source,
                             read_ret);
     }
+
+    send_empty_buf = FALSE;
 
     /* Send read data to the client */
     H5_CHECK_OVERFLOW(data_size, int64_t, int);
@@ -1173,23 +1167,25 @@ ioc_file_read_data(int fd, int64_t file_offset, void *data_buffer, int64_t data_
             file_offset += bytes_read;
         }
         else if (bytes_read == 0) {
+            HDassert(bytes_remaining > 0);
+
+            /* end of file but not end of format address space */
+            HDmemset(this_buffer, 0, (size_t)bytes_remaining);
+            break;
+        }
+        else {
             if (retries == 0) {
 #ifdef H5FD_IOC_DEBUG
                 HDprintf("[ioc(%d) %s]: TIMEOUT: file_offset=%" PRId64 ", data_size=%ld\n", subfile_rank,
                          __func__, file_offset, data_size);
-                HDprintf("[ioc(%d) %s]: ERROR! read of 0 bytes == eof!\n", subfile_rank, __func__);
 #endif
 
-                ret_value = -2;
-                goto done;
+                H5_SUBFILING_SYS_GOTO_ERROR(H5E_IO, H5E_READERROR, -1, "HDpread failed");
             }
 
             retries--;
             usleep(delay);
             delay *= 2;
-        }
-        else {
-            H5_SUBFILING_SYS_GOTO_ERROR(H5E_IO, H5E_WRITEERROR, -1, "HDpread failed");
         }
     }
 
