@@ -66,6 +66,7 @@ static ioc_io_queue_t io_queue_g = {
     /* q_tail              = */ NULL,
     /* num_pending         = */ 0,
     /* num_in_progress     = */ 0,
+    /* num_failed          = */ 0,
     /* q_len               = */ 0,
     /* req_counter         = */ 0,
     /* q_mutex             = */
@@ -203,6 +204,8 @@ initialize_ioc_threads(void *_sf_context)
     status = hg_thread_mutex_init(&(io_queue_g.q_mutex));
     if (status)
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "couldn't initialize IOC thread queue mutex");
+
+    io_queue_g.num_failed = 0;
 
     /* Allow experimentation with the number of helper threads */
     if ((env_value = HDgetenv(H5_IOC_THREAD_POOL_COUNT)) != NULL) {
@@ -613,9 +616,7 @@ handle_work_request(void *arg)
                          sf_context->sf_filename, msg->source, msg->header[0], msg->header[1], op_ret);
 #endif
 
-        /* TODO: set error value for work request queue entry */
-        /* H5FD_IOC_GOTO_ERROR(H5E_IO, H5E_BADVALUE, 0, "work request (%s) operation from rank %d failed",
-                               translate_opcode((io_op_t)msg->tag), msg->subfile_rank); */
+        q_entry_ptr->wk_ret = op_ret;
     }
 
 #ifdef H5FD_IOC_DEBUG
@@ -1342,6 +1343,8 @@ ioc_io_queue_alloc_entry(void)
         /* will memcpy the wk_req field, so don't bother to initialize */
         /* will initialize thread_wk field before use */
 
+        q_entry_ptr->wk_ret = 0;
+
 #ifdef H5FD_IOC_COLLECT_STATS
         q_entry_ptr->q_time        = 0;
         q_entry_ptr->dispatch_time = 0;
@@ -1670,7 +1673,6 @@ ioc_io_queue_dispatch_eligible_entries(void)
  *
  *-------------------------------------------------------------------------
  */
-/* TODO: update function when we decide how to handle error reporting in the IOCs */
 /* TODO: Update for per file I/O Queue */
 static void
 ioc_io_queue_complete_entry(ioc_io_queue_entry_t *entry_ptr)
@@ -1690,6 +1692,9 @@ ioc_io_queue_complete_entry(ioc_io_queue_entry_t *entry_ptr)
     HDassert(io_queue_g.num_pending + io_queue_g.num_in_progress == io_queue_g.q_len);
     HDassert(io_queue_g.num_in_progress > 0);
 
+    if (entry_ptr->wk_ret < 0)
+        io_queue_g.num_failed++;
+
     H5FD_IOC__Q_REMOVE(&io_queue_g, entry_ptr);
 
     io_queue_g.num_in_progress--;
@@ -1701,8 +1706,8 @@ ioc_io_queue_complete_entry(ioc_io_queue_entry_t *entry_ptr)
 #ifdef H5_SUBFILING_DEBUG
     H5_subfiling_log(
         entry_ptr->wk_req.context_id,
-        "%s: request %d completed. op = %d, offset/len = %lld/%lld, q-ed/disp/ops_pend = %d/%d/%d.", __func__,
-        entry_ptr->counter, (entry_ptr->wk_req.tag), (long long)(entry_ptr->wk_req.header[1]),
+        "%s: request %d completed with ret %d. op = %d, offset/len = %lld/%lld, q-ed/disp/ops_pend = %d/%d/%d.",
+        __func__, entry_ptr->counter, entry_ptr->wk_ret, (entry_ptr->wk_req.tag), (long long)(entry_ptr->wk_req.header[1]),
         (long long)(entry_ptr->wk_req.header[0]), io_queue_g.num_pending, io_queue_g.num_in_progress,
         atomic_load(&sf_io_ops_pending));
 

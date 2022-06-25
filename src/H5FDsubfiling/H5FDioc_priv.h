@@ -216,6 +216,7 @@ typedef struct ioc_io_queue_entry {
     /* rework these fields */ /* JRM */
     sf_work_request_t     wk_req;
     struct hg_thread_work thread_wk;
+    int                   wk_ret;
 
     /* statistics */
 #ifdef H5FD_IOC_COLLECT_STATS
@@ -368,6 +369,7 @@ typedef struct ioc_io_queue {
     ioc_io_queue_entry_t *q_tail;
     int32_t               num_pending;
     int32_t               num_in_progress;
+    int32_t               num_failed;
     int32_t               q_len;
     uint32_t              req_counter;
     hg_thread_mutex_t     q_mutex;
