@@ -55,7 +55,7 @@ static sf_topology_t *      sf_topology_cache = NULL;
 static size_t sf_context_cache_limit  = 16;
 static size_t sf_topology_cache_limit = 4;
 
-static app_layout_t *sf_app_layout = NULL;
+app_layout_t *sf_app_layout = NULL;
 
 static file_map_to_context_t *sf_open_file_map = NULL;
 static int                    sf_file_map_size = 0;
@@ -861,24 +861,32 @@ H5_free_subfiling_topology(sf_topology_t *topology)
     topology->n_io_concentrators = 0;
 
     HDfree(topology->subfile_fd);
+    topology->subfile_fd = NULL;
 
     /*
-     * NOTE: This assumes that a single allocation is used
-     * to allocate space for the app layout structure and
-     * its contents. This will need to be revised if that
-     * changes.
+     * The below assumes that the subfiling application layout
+     * is retrieved once and used for subsequent file opens for
+     * the duration that the Subfiling VFD is in use
      */
-    if (topology->app_layout) {
+    HDassert(topology->app_layout == sf_app_layout);
+
+#if 0
+    if (topology->app_layout && (topology->app_layout != sf_app_layout)) {
         HDfree(topology->app_layout->layout);
+        topology->app_layout->layout = NULL;
+
         HDfree(topology->app_layout->node_ranks);
+        topology->app_layout->node_ranks = NULL;
+
         HDfree(topology->app_layout);
     }
+#endif
+
     topology->app_layout = NULL;
 
-    /* TODO: */
-    sf_app_layout = NULL;
-
     HDfree(topology->io_concentrators);
+    topology->io_concentrators = NULL;
+
     HDfree(topology);
 
     return SUCCEED;
@@ -1369,19 +1377,18 @@ init_app_topology(ioc_selection_t ioc_selection_type, MPI_Comm comm, sf_topology
             ret_value = FAIL;
             goto done;
         }
+
+        /*
+         * Once the application layout has been filled once, any additional
+         * file open operations won't be required to gather that information.
+         */
+        sf_app_layout = app_layout;
     }
 
     app_layout->world_size = comm_size;
     app_layout->world_rank = comm_rank;
 
-    /*
-     * Once the application layout has been filled once, any additional
-     * file open operations won't be required to gather that information.
-     */
     app_topology->app_layout = app_layout;
-
-    /* TODO */
-    sf_app_layout = app_layout;
 
     /*
      * Determine which ranks are I/O concentrator ranks, based on the

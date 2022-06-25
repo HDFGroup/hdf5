@@ -369,6 +369,18 @@ H5FD__subfiling_term(void)
     herr_t ret_value = SUCCEED;
 
     if (H5FD_SUBFILING_g >= 0) {
+        /* Free the subfiling application layout information */
+        if (sf_app_layout) {
+            HDfree(sf_app_layout->layout);
+            sf_app_layout->layout = NULL;
+
+            HDfree(sf_app_layout->node_ranks);
+            sf_app_layout->node_ranks = NULL;
+
+            HDfree(sf_app_layout);
+            sf_app_layout = NULL;
+        }
+
         /* Terminate MPI if the driver initialized it */
         if (H5FD_mpi_self_initialized) {
             int mpi_finalized = 0;
