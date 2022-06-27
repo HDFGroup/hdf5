@@ -286,7 +286,7 @@ Platforms Tested
                                     Visual Studio 2017 w/ Intel C/C++/Fortran 19 (cmake)
                                     Visual Studio 2019 w/ clang 12.0.0
                                         with MSVC-like command-line (C/C++ only - cmake)
-                                    Visual Studio 2019 w/ Intel Fortran 19 (cmake)
+                                    Visual Studio 2019 w/ Intel C/C++/Fortran oneAPI 2021 (cmake)
                                     Visual Studio 2019 w/ MSMPI 10.1 (C only - cmake)
 
 
