@@ -188,15 +188,15 @@
     (H5FD_CTL_OPC_RESERVED + 511) /* Maximum opcode value available for experimental use */
 
 /* ctl function op codes: */
-#define H5FD_CTL__INVALID_OPCODE              0
-#define H5FD_CTL__TEST_OPCODE                 1
-#define H5FD_CTL__GET_MPI_COMMUNICATOR_OPCODE 2
-#define H5FD_CTL__GET_MPI_RANK_OPCODE         3
-#define H5FD_CTL__GET_MPI_SIZE_OPCODE         4
-#define H5FD_CTL__MEM_ALLOC                   5
-#define H5FD_CTL__MEM_FREE                    6
-#define H5FD_CTL__MEM_COPY                    7
-#define H5FD_CTL__GET_MPI_FILE_SYNC_OPCODE    8
+#define H5FD_CTL_INVALID_OPCODE              0
+#define H5FD_CTL_TEST_OPCODE                 1
+#define H5FD_CTL_GET_MPI_COMMUNICATOR_OPCODE 2
+#define H5FD_CTL_GET_MPI_RANK_OPCODE         3
+#define H5FD_CTL_GET_MPI_SIZE_OPCODE         4
+#define H5FD_CTL_MEM_ALLOC                   5
+#define H5FD_CTL_MEM_FREE                    6
+#define H5FD_CTL_MEM_COPY                    7
+#define H5FD_CTL_GET_MPI_FILE_SYNC_OPCODE    8
 
 /* ctl function flags: */
 

@@ -3034,10 +3034,10 @@ done:
  *
  *              At present, the supported op codes are:
  *
- *                  H5FD_CTL__GET_MPI_COMMUNICATOR_OPCODE
- *                  H5FD_CTL__GET_MPI_RANK_OPCODE
- *                  H5FD_CTL__GET_MPI_SIZE_OPCODE
- *                  H5FD_CTL__GET_MPI_FILE_SYNC_OPCODE
+ *                  H5FD_CTL_GET_MPI_COMMUNICATOR_OPCODE
+ *                  H5FD_CTL_GET_MPI_RANK_OPCODE
+ *                  H5FD_CTL_GET_MPI_SIZE_OPCODE
+ *                  H5FD_CTL_GET_MPI_FILE_SYNC_OPCODE
  *
  *              Note that these opcodes must be supported by all VFDs that
  *              support MPI.
@@ -3081,7 +3081,7 @@ H5FD__mpio_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void H5_AT
             **((int **)output) = file->mpi_size;
             break;
 
-        case H5FD_CTL__GET_MPI_FILE_SYNC_OPCODE:
+        case H5FD_CTL_GET_MPI_FILE_SYNC_OPCODE:
             HDassert(output);
             HDassert(*output);
             **((hbool_t **)output) = file->mpi_file_sync_required;
