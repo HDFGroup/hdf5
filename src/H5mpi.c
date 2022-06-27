@@ -811,7 +811,7 @@ H5_mpio_get_file_sync_required(MPI_File fh, hbool_t *file_sync_required)
 
     HDassert(file_sync_required);
 
-    *file_sync_required = true;
+    *file_sync_required = FALSE;
 
     if (MPI_SUCCESS != MPI_File_get_info(fh, &info_used))
         HGOTO_ERROR(H5E_LIB, H5E_CANTGET, FAIL, "can't get MPI info")
@@ -820,17 +820,18 @@ H5_mpio_get_file_sync_required(MPI_File fh, hbool_t *file_sync_required)
         MPI_Info_get(info_used, "romio_visibility_immediate", MPI_MAX_INFO_VAL - 1, value, &flag))
         HGOTO_ERROR(H5E_LIB, H5E_CANTGET, FAIL, "can't get MPI info")
 
-    if (flag)
-        if (HDstrcmp(value, "romio_visibility_immediate") == 0 && flag == false)
-            *file_sync_required = FALSE;
+    if (flag && !HDstrcmp(value, "false"))
+        *file_sync_required = TRUE;
 
     if (MPI_SUCCESS != MPI_Info_free(&info_used))
         HGOTO_ERROR(H5E_LIB, H5E_CANTFREE, FAIL, "can't free MPI info")
 
-    /* Tang debug: temporary force setting the flag via env var */
+    /* Force setting the flag via env variable (temp solution before the flag is implemented in MPI) */
     char *sync_env_var = HDgetenv("HDF5_DO_MPI_FILE_SYNC");
     if (sync_env_var && (!HDstrcmp(sync_env_var, "TRUE") || !HDstrcmp(sync_env_var, "1")))
         *file_sync_required = TRUE;
+    if (sync_env_var && (!HDstrcmp(sync_env_var, "FALSE") || !HDstrcmp(sync_env_var, "0")))
+        *file_sync_required = FALSE;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
