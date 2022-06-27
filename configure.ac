@@ -522,7 +522,6 @@ AC_CHECK_SIZEOF([int])
 AC_CHECK_SIZEOF([unsigned])
 AC_CHECK_SIZEOF([long])
 AC_CHECK_SIZEOF([long long])
-AC_CHECK_SIZEOF([__int64])
 AC_CHECK_SIZEOF([float])
 AC_CHECK_SIZEOF([double])
 AC_CHECK_SIZEOF([long double])
@@ -2144,33 +2143,6 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]], [[
                          [Define if the compiler understands C99 designated initialization of structs and unions])
                  AC_MSG_RESULT([yes])],
                [AC_MSG_RESULT([no])])
-
-## ----------------------------------------------------------------------
-## Try to figure out how to print `long long'.  Some machines use `%lld'
-## and others use `%qd'.  There may be more!  The final `l' is a
-## default in case none of the others work.
-##
-AC_MSG_CHECKING([how to print long long])
-AC_CACHE_VAL([hdf5_cv_printf_ll], [
-
-for hdf5_cv_printf_ll in ll l L q unknown; do
-   AC_RUN_IFELSE(
-        [AC_LANG_PROGRAM([
-            #include <stdio.h>
-            #include <stdlib.h>
-            #include <string.h>
-        ],[[
-            char *s = malloc(128);
-            long long x = (long long)1048576 * (long long)1048576;
-            snprintf(s,128,"%${hdf5_cv_printf_ll}d",x);
-            exit(strcmp(s,"1099511627776"));
-        ]])]
-   , [break],,[continue])
-done])
-
-AC_MSG_RESULT([%${hdf5_cv_printf_ll}d and %${hdf5_cv_printf_ll}u])
-AC_DEFINE_UNQUOTED([PRINTF_LL_WIDTH], ["$hdf5_cv_printf_ll"],
-                   [Width for printf() for type `long long' or `__int64', use `ll'])
 
 ## ----------------------------------------------------------------------
 ## Remove old ways of determining debug/production build.

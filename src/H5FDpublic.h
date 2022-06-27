@@ -228,7 +228,7 @@
  */
 
 /* Unknown op codes should be ignored silently unless the
- * H5FD_CTL__FAIL_IF_UNKNOWN_FLAG is set.
+ * H5FD_CTL_FAIL_IF_UNKNOWN_FLAG is set.
  *
  * On terminal VFDs, unknown op codes should generate an
  * error unconditionally if this flag is set.
@@ -238,9 +238,9 @@
  * flags.  In the absence of such flags, the VFD should
  * generate an error.
  */
-#define H5FD_CTL__FAIL_IF_UNKNOWN_FLAG 0x0001
+#define H5FD_CTL_FAIL_IF_UNKNOWN_FLAG 0x0001
 
-/* The H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG is used only
+/* The H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG is used only
  * by non-ternminal VFDs, and only applies to unknown
  * opcodes. (known op codes should be handled as
  * appropriate.)
@@ -250,9 +250,9 @@
  * the VFD stack en-route to the terminal VFD.
  * If that VFD does not support the ctl call, the
  * pass through VFD should fail or succeed as directed
- * by the  H5FD_CTL__FAIL_IF_UNKNOWN_FLAG.
+ * by the  H5FD_CTL_FAIL_IF_UNKNOWN_FLAG.
  */
-#define H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG 0x0002
+#define H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG 0x0002
 
 /*******************/
 /* Public Typedefs */

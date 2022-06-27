@@ -3063,19 +3063,19 @@ H5FD__mpio_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void H5_AT
 
     switch (op_code) {
 
-        case H5FD_CTL__GET_MPI_COMMUNICATOR_OPCODE:
+        case H5FD_CTL_GET_MPI_COMMUNICATOR_OPCODE:
             HDassert(output);
             HDassert(*output);
             **((MPI_Comm **)output) = file->comm;
             break;
 
-        case H5FD_CTL__GET_MPI_RANK_OPCODE:
+        case H5FD_CTL_GET_MPI_RANK_OPCODE:
             HDassert(output);
             HDassert(*output);
             **((int **)output) = file->mpi_rank;
             break;
 
-        case H5FD_CTL__GET_MPI_SIZE_OPCODE:
+        case H5FD_CTL_GET_MPI_SIZE_OPCODE:
             HDassert(output);
             HDassert(*output);
             **((int **)output) = file->mpi_size;
@@ -3088,7 +3088,7 @@ H5FD__mpio_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void H5_AT
             break;
 
         default: /* unknown op code */
-            if (flags & H5FD_CTL__FAIL_IF_UNKNOWN_FLAG) {
+            if (flags & H5FD_CTL_FAIL_IF_UNKNOWN_FLAG) {
 
                 HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL, "unknown op_code and fail if unknown")
             }

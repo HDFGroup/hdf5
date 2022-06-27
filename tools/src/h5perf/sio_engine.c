@@ -179,7 +179,7 @@ do_sio(parameters param, results *res)
 
         if ((param.dset_size[i] % param.buf_size[i]) != 0) {
             HDfprintf(stderr,
-                      "Dataset size[%d] (%" H5_PRINTF_LL_WIDTH "d) must be a multiple of the "
+                      "Dataset size[%d] (%lld) must be a multiple of the "
                       "transfer buffer size[%d] (%zu)\n",
                       param.rank, (long long)param.dset_size[i], param.rank, param.buf_size[i]);
             GOTOERROR(FAIL);
@@ -522,7 +522,7 @@ do_write(results *res, file_descr *fd, parameters *parms, void *buffer)
                 } /* end if */
             }     /* end if */
 
-            HDsprintf(dname, "Dataset_%ld", (unsigned long)parms->num_bytes);
+            HDsnprintf(dname, sizeof(dname), "Dataset_%ld", (unsigned long)parms->num_bytes);
             h5ds_id =
                 H5Dcreate2(fd->h5fd, dname, ELMT_H5_TYPE, h5dset_space_id, H5P_DEFAULT, h5dcpl, H5P_DEFAULT);
 
@@ -851,7 +851,7 @@ do_read(results *res, file_descr *fd, parameters *parms, void *buffer)
             break;
 
         case HDF5:
-            HDsprintf(dname, "Dataset_%ld", (long)parms->num_bytes);
+            HDsnprintf(dname, sizeof(dname), "Dataset_%ld", (long)parms->num_bytes);
             h5ds_id = H5Dopen2(fd->h5fd, dname, H5P_DEFAULT);
             if (h5ds_id < 0) {
                 HDfprintf(stderr, "HDF5 Dataset open failed\n");
@@ -1181,7 +1181,7 @@ set_vfd(parameters *param)
             return -1;
         for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {
             memb_fapl[mt] = H5P_DEFAULT;
-            HDsprintf(sv->arr[mt], "%%s-%c.h5", multi_letters[mt]);
+            HDsnprintf(sv->arr[mt], 1024, "%%s-%c.h5", multi_letters[mt]);
             memb_name[mt] = sv->arr[mt];
             memb_addr[mt] = (haddr_t)MAX(mt - 1, 0) * (HADDR_MAX / 10);
         }

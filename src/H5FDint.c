@@ -84,7 +84,7 @@
 
 typedef struct H5FD_vsrt_tmp_t {
     haddr_t addr;
-    int     index;
+    size_t  index;
 } H5FD_vsrt_tmp_t;
 
 /* Information needed for iterating over the registered VFD hid_t IDs.
@@ -790,25 +790,27 @@ H5FD__read_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uin
     /* Sanity checks */
     HDassert(file);
     HDassert(file->cls);
-    HDassert(mem_spaces);
-    HDassert(file_spaces);
-    HDassert(offsets);
-    HDassert(element_sizes);
-    HDassert(bufs);
-
-    /* Verify that the first elements of the element_sizes and bufs arrays are
-     * valid. */
-    HDassert(element_sizes[0] != 0);
-    HDassert(bufs[0] != NULL);
+    HDassert((mem_spaces) || (count == 0));
+    HDassert((file_spaces) || (count == 0));
+    HDassert((offsets) || (count == 0));
+    HDassert((element_sizes) || (count == 0));
+    HDassert((bufs) || (count == 0));
 
     /* Check if we're using vector I/O */
     use_vector = file->cls->read_vector != NULL;
 
-    /* Allocate sequence lists for memory and file spaces */
-    if (NULL == (file_iter = H5FL_MALLOC(H5S_sel_iter_t)))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate file selection iterator")
-    if (NULL == (mem_iter = H5FL_MALLOC(H5S_sel_iter_t)))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate memory selection iterator")
+    if (count > 0) {
+        /* Verify that the first elements of the element_sizes and bufs arrays are
+         * valid. */
+        HDassert(element_sizes[0] != 0);
+        HDassert(bufs[0] != NULL);
+
+        /* Allocate sequence lists for memory and file spaces */
+        if (NULL == (file_iter = H5FL_MALLOC(H5S_sel_iter_t)))
+            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate file selection iterator")
+        if (NULL == (mem_iter = H5FL_MALLOC(H5S_sel_iter_t)))
+            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate memory selection iterator")
+    }
 
     /* Loop over dataspaces */
     for (i = 0; i < count; i++) {
@@ -1431,25 +1433,27 @@ H5FD__write_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, ui
     /* Sanity checks */
     HDassert(file);
     HDassert(file->cls);
-    HDassert(mem_spaces);
-    HDassert(file_spaces);
-    HDassert(offsets);
-    HDassert(element_sizes);
-    HDassert(bufs);
-
-    /* Verify that the first elements of the element_sizes and bufs arrays are
-     * valid. */
-    HDassert(element_sizes[0] != 0);
-    HDassert(bufs[0] != NULL);
+    HDassert((mem_spaces) || (count == 0));
+    HDassert((file_spaces) || (count == 0));
+    HDassert((offsets) || (count == 0));
+    HDassert((element_sizes) || (count == 0));
+    HDassert((bufs) || (count == 0));
 
     /* Check if we're using vector I/O */
     use_vector = file->cls->write_vector != NULL;
 
-    /* Allocate sequence lists for memory and file spaces */
-    if (NULL == (file_iter = H5FL_MALLOC(H5S_sel_iter_t)))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate file selection iterator")
-    if (NULL == (mem_iter = H5FL_MALLOC(H5S_sel_iter_t)))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate memory selection iterator")
+    if (count > 0) {
+        /* Verify that the first elements of the element_sizes and bufs arrays are
+         * valid. */
+        HDassert(element_sizes[0] != 0);
+        HDassert(bufs[0] != NULL);
+
+        /* Allocate sequence lists for memory and file spaces */
+        if (NULL == (file_iter = H5FL_MALLOC(H5S_sel_iter_t)))
+            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate file selection iterator")
+        if (NULL == (mem_iter = H5FL_MALLOC(H5S_sel_iter_t)))
+            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate memory selection iterator")
+    }
 
     /* Loop over dataspaces */
     for (i = 0; i < count; i++) {
@@ -2256,7 +2260,7 @@ H5FD_sort_vector_io_req(hbool_t *vector_was_sorted, uint32_t _count, H5FD_mem_t 
          * arrays and populate them using the mapping provided by
          * the sorted array of H5FD_vsrt_tmp_t.
          */
-        int    j;
+        size_t j;
         size_t fixed_size_index = count;
         size_t fixed_type_index = count;
         size_t srt_tmp_size;
@@ -2268,10 +2272,8 @@ H5FD_sort_vector_io_req(hbool_t *vector_was_sorted, uint32_t _count, H5FD_mem_t 
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc srt_tmp")
 
         for (i = 0; i < count; i++) {
-            HDassert(i == (size_t)((int)i));
-
             srt_tmp[i].addr  = addrs[i];
-            srt_tmp[i].index = (int)i;
+            srt_tmp[i].index = i;
         }
 
         /* sort the srt_tmp array */
@@ -2315,15 +2317,17 @@ H5FD_sort_vector_io_req(hbool_t *vector_was_sorted, uint32_t _count, H5FD_mem_t 
         HDassert(fixed_size_index <= count);
         HDassert(fixed_type_index <= count);
 
-        /* populate the sorted vectors */
+        /* Populate the sorted vectors.  Note that the index stored in srt_tmp
+         * refers to the index in the unsorted array, while the position of
+         * srt_tmp within the sorted array is the index in the sorted arrays */
         for (i = 0; i < count; i++) {
 
             j = srt_tmp[i].index;
 
-            (*s_types_ptr)[j] = types[MIN(i, fixed_type_index)];
-            (*s_addrs_ptr)[j] = addrs[i];
-            (*s_sizes_ptr)[j] = sizes[MIN(i, fixed_size_index)];
-            (*s_bufs_ptr)[j]  = bufs[i];
+            (*s_types_ptr)[i] = types[MIN(j, fixed_type_index)];
+            (*s_addrs_ptr)[i] = addrs[j];
+            (*s_sizes_ptr)[i] = sizes[MIN(j, fixed_size_index)];
+            (*s_bufs_ptr)[i]  = bufs[j];
         }
     }
 

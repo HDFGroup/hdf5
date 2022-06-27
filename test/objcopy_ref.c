@@ -509,7 +509,7 @@ test_copy_attach_attributes(hid_t loc_id, hid_t type_id)
         goto done;
 
     for (u = 0; u < num_attributes_g; u++) {
-        HDsprintf(attr_name, "%u attr", u);
+        HDsnprintf(attr_name, sizeof(attr_name), "%u attr", u);
 
         /* Set attribute data */
         attr_data[0] = (int)(100 * u);

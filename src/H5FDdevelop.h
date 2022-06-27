@@ -15,8 +15,8 @@
  *      support routines.
  */
 
-#ifndef _H5FDdevelop_H
-#define _H5FDdevelop_H
+#ifndef H5FDdevelop_H
+#define H5FDdevelop_H
 
 /* Include package's public header */
 #include "H5FDpublic.h"
@@ -292,4 +292,4 @@ H5_DLL herr_t  H5FDctl(H5FD_t *file, uint64_t op_code, uint64_t flags, const voi
 }
 #endif
 
-#endif /* _H5FDdevelop_H */
+#endif /* H5FDdevelop_H */

@@ -234,7 +234,7 @@ do_pio(parameters param)
     }
     if ((snbytes % pio_mpi_nprocs_g) != 0) {
         HDfprintf(stderr,
-                  "Dataset size (%" H5_PRINTF_LL_WIDTH "d) must be a multiple of the "
+                  "Dataset size (%lld) must be a multiple of the "
                   "number of processes (%d)\n",
                   (long long)snbytes, pio_mpi_nprocs_g);
         GOTOERROR(FAIL);
@@ -243,7 +243,7 @@ do_pio(parameters param)
     if (!param.dim2d) {
         if (((size_t)(snbytes / pio_mpi_nprocs_g) % buf_size) != 0) {
             HDfprintf(stderr,
-                      "Dataset size/process (%" H5_PRINTF_LL_WIDTH "d) must be a multiple of the "
+                      "Dataset size/process (%lld) must be a multiple of the "
                       "transfer buffer size (%zu)\n",
                       (long long)(snbytes / pio_mpi_nprocs_g), buf_size);
             GOTOERROR(FAIL);
@@ -252,7 +252,7 @@ do_pio(parameters param)
     else {
         if (((size_t)snbytes % buf_size) != 0) {
             HDfprintf(stderr,
-                      "Dataset side size (%" H5_PRINTF_LL_WIDTH "d) must be a multiple of the "
+                      "Dataset side size (%lld) must be a multiple of the "
                       "transfer buffer size (%zu)\n",
                       (long long)snbytes, buf_size);
             GOTOERROR(FAIL);
@@ -625,15 +625,13 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nby
         if (!parms->dim2d) {
             HDfprintf(output,
                       "Debug(do_write): "
-                      "buf_size=%zu, bytes_begin=%" H5_PRINTF_LL_WIDTH "d, bytes_count=%" H5_PRINTF_LL_WIDTH
-                      "d\n",
+                      "buf_size=%zu, bytes_begin=%lld, bytes_count=%lld\n",
                       buf_size, (long long)bytes_begin[0], (long long)bytes_count);
         }
         else {
             HDfprintf(output,
                       "Debug(do_write): "
-                      "linear buf_size=%zu, bytes_begin=(%" H5_PRINTF_LL_WIDTH "d,%" H5_PRINTF_LL_WIDTH
-                      "d), bytes_count=%" H5_PRINTF_LL_WIDTH "d\n",
+                      "linear buf_size=%zu, bytes_begin=(%lld,%lld), bytes_count=%lld\n",
                       buf_size * blk_size, (long long)bytes_begin[0], (long long)bytes_begin[1],
                       (long long)bytes_count);
         }
@@ -1640,15 +1638,13 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nbyt
         if (!parms->dim2d) {
             HDfprintf(output,
                       "Debug(do_write): "
-                      "buf_size=%zu, bytes_begin=%" H5_PRINTF_LL_WIDTH "d, bytes_count=%" H5_PRINTF_LL_WIDTH
-                      "d\n",
+                      "buf_size=%zu, bytes_begin=%lld, bytes_count=%lld\n",
                       buf_size, (long long)bytes_begin[0], (long long)bytes_count);
         }
         else {
             HDfprintf(output,
                       "Debug(do_write): "
-                      "linear buf_size=%zu, bytes_begin=(%" H5_PRINTF_LL_WIDTH "d,%" H5_PRINTF_LL_WIDTH
-                      "d), bytes_count=%" H5_PRINTF_LL_WIDTH "d\n",
+                      "linear buf_size=%zu, bytes_begin=(%lld,%lld), bytes_count=%lld\n",
                       buf_size * blk_size, (long long)bytes_begin[0], (long long)bytes_begin[1],
                       (long long)bytes_count);
         }

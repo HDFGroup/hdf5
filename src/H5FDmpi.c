@@ -57,7 +57,7 @@ int
 H5FD_mpi_get_rank(H5FD_t *file)
 {
     const H5FD_class_t *cls;
-    uint64_t            flags    = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG | H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG;
+    uint64_t            flags    = H5FD_CTL_FAIL_IF_UNKNOWN_FLAG | H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG;
     int                 rank     = -1;
     void *              rank_ptr = (void *)(&rank);
     int                 ret_value;
@@ -70,7 +70,7 @@ H5FD_mpi_get_rank(H5FD_t *file)
     HDassert(cls->ctl); /* All MPI drivers must implement this */
 
     /* Dispatch to driver */
-    if ((cls->ctl)(file, H5FD_CTL__GET_MPI_RANK_OPCODE, flags, NULL, &rank_ptr) < 0)
+    if ((cls->ctl)(file, H5FD_CTL_GET_MPI_RANK_OPCODE, flags, NULL, &rank_ptr) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "driver get_rank request failed")
 
     HDassert(rank >= 0);
@@ -109,7 +109,7 @@ int
 H5FD_mpi_get_size(H5FD_t *file)
 {
     const H5FD_class_t *cls;
-    uint64_t            flags    = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG | H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG;
+    uint64_t            flags    = H5FD_CTL_FAIL_IF_UNKNOWN_FLAG | H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG;
     int                 size     = 0;
     void *              size_ptr = (void *)(&size);
     int                 ret_value;
@@ -122,7 +122,7 @@ H5FD_mpi_get_size(H5FD_t *file)
     HDassert(cls->ctl); /* All MPI drivers must implement this */
 
     /* Dispatch to driver */
-    if ((cls->ctl)(file, H5FD_CTL__GET_MPI_SIZE_OPCODE, flags, NULL, &size_ptr) < 0)
+    if ((cls->ctl)(file, H5FD_CTL_GET_MPI_SIZE_OPCODE, flags, NULL, &size_ptr) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "driver get_size request failed")
 
     if (0 >= size)
@@ -162,7 +162,7 @@ MPI_Comm
 H5FD_mpi_get_comm(H5FD_t *file)
 {
     const H5FD_class_t *cls;
-    uint64_t            flags    = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG | H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG;
+    uint64_t            flags    = H5FD_CTL_FAIL_IF_UNKNOWN_FLAG | H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG;
     MPI_Comm            comm     = MPI_COMM_NULL;
     void *              comm_ptr = (void *)(&comm);
     MPI_Comm            ret_value;
@@ -175,7 +175,7 @@ H5FD_mpi_get_comm(H5FD_t *file)
     HDassert(cls->ctl); /* All MPI drivers must implement this */
 
     /* Dispatch to driver */
-    if ((cls->ctl)(file, H5FD_CTL__GET_MPI_COMMUNICATOR_OPCODE, flags, NULL, &comm_ptr) < 0)
+    if ((cls->ctl)(file, H5FD_CTL_GET_MPI_COMMUNICATOR_OPCODE, flags, NULL, &comm_ptr) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTGET, MPI_COMM_NULL, "driver get_comm request failed")
 
     if (comm == MPI_COMM_NULL)
