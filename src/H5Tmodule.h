@@ -1046,7 +1046,8 @@
  *     </tr>
  *     <tr>
  *       <td>
- * \ref herr_t \ref H5Tcommit (\ref hid_t location, const char *name, hid_t type, #H5P_DEFAULT, #H5P_DEFAULT, #H5P_DEFAULT)
+ * \ref herr_t \ref H5Tcommit (\ref hid_t location, const char *name, hid_t type,
+ *                             #H5P_DEFAULT, #H5P_DEFAULT, #H5P_DEFAULT)
  *       </td>
  *       <td>
  * Commit a transient datatype (not immutable) to a file to become a committed datatype. Committed
@@ -1184,7 +1185,8 @@
  *     </tr>
  *     <tr>
  *       <td>
- * \ref herr_t \ref H5Tget_fields (\ref hid_t type, size_t *spos, size_t *epos, size_t *esize, size_t*mpos, size_t *msize)
+ * \ref herr_t \ref H5Tget_fields (\ref hid_t type, size_t *spos, size_t *epos, size_t *esize,
+ *                                 size_t*mpos, size_t *msize)
  *       </td>
  *       <td>
  * (FLOAT)A floating-point data element has bit fields which are the exponent and mantissa as well as a
