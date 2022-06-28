@@ -57,7 +57,7 @@
  * sub‐sampling, and scatter‐gather access to datasets.
  *
  * \subsection subsec_dataspace_function Dataspace Function Summaries
- * The @see H5S reference manual provides a reference list of dataspace functions, the H5S APIs.
+ * @see H5S reference manual provides a reference list of dataspace functions, the H5S APIs.
  *
  * \subsection subsec_dataspace_program  Definition of Dataspace Objects and the Dataspace Programming Model
  *
@@ -596,7 +596,6 @@
  * In the case of point selections, the points are read and written in the order specified.
  *
  * \subsubsection subsubsec_dataspace_transfer_model Programming Model
- *
  *
  * <h4>Selecting Hyperslabs</h4>
  *
@@ -1516,7 +1515,8 @@
  *
  */
 
-/**\defgroup H5S H5S Dataspaces
+/**
+ * \defgroup H5S H5S Dataspaces
  *
  * Use the functions in this module to manage HDF5 dataspaces \Emph{and} selections.
  *

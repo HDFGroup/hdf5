@@ -870,6 +870,9 @@ FILE_PATTERNS          = H5*public.h \
                          H5FDstdio.h \
                          H5FDwindows.h \
                          H5version.h \
+                         H5*.java \
+                         HDF*.java \
+                         *.F90 \
                          *.dox
 
 # The RECURSIVE tag can be used to specify whether or not subdirectories should
