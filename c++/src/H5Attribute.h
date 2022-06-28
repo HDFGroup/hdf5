@@ -78,6 +78,9 @@ class H5_DLLCPP Attribute : public AbstractDs, public H5Location {
     // Destructor: properly terminates access to this attribute.
     virtual ~Attribute() override;
 
+    // Copy assignment operator.
+    Attribute &operator=(const Attribute &original);
+
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
   protected:
     // Sets the attribute id.
