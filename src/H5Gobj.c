@@ -242,21 +242,20 @@ H5G__obj_create_real(H5F_t *f, const H5O_ginfo_t *ginfo, const H5O_linfo_t *linf
 
     /* Check for format of group to create */
     if (use_at_least_v18) {
+H5_GCC_CLANG_DIAG_OFF("cast-qual")
         /* Insert link info message */
-        /* (Casting away const OK - QAK) */
         if (H5O_msg_create(oloc, H5O_LINFO_ID, 0, H5O_UPDATE_TIME, (void *)linfo) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create message")
 
         /* Insert group info message */
-        /* (Casting away const OK - QAK) */
         if (H5O_msg_create(oloc, H5O_GINFO_ID, H5O_MSG_FLAG_CONSTANT, 0, (void *)ginfo) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create message")
 
         /* Insert pipeline message */
         if (pline && pline->nused)
-            /* (Casting away const OK - QAK) */
             if (H5O_msg_create(oloc, H5O_PLINE_ID, H5O_MSG_FLAG_CONSTANT, 0, (void *)pline) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create message")
+H5_GCC_CLANG_DIAG_ON("cast-qual")
     } /* end if */
     else {
         H5O_stab_t stab; /* Symbol table message	*/
@@ -398,9 +397,10 @@ H5G__obj_stab_to_new_cb(const H5O_link_t *lnk, void *_udata)
     HDassert(udata);
 
     /* Insert link into group */
-    /* (Casting away const OK - QAK) */
+H5_GCC_CLANG_DIAG_OFF("cast-qual")
     if (H5G_obj_insert(udata->grp_oloc, lnk->name, (H5O_link_t *)lnk, FALSE, H5O_TYPE_UNKNOWN, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, H5_ITER_ERROR, "can't insert link into group")
+H5_GCC_CLANG_DIAG_ON("cast-qual")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
