@@ -541,14 +541,4 @@ H5Object::getObjName(H5std_string &obj_name, size_t len) const
     return name_size;
 }
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-//--------------------------------------------------------------------------
-// Function:    H5Object destructor
-///\brief       Noop destructor.
-//--------------------------------------------------------------------------
-H5Object::~H5Object()
-{
-}
-#endif // DOXYGEN_SHOULD_SKIP_THIS
-
 } // namespace H5

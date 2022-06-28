@@ -769,12 +769,4 @@ FileAccPropList::getLibverBounds(H5F_libver_t &libver_low, H5F_libver_t &libver_
     }
 }
 
-//--------------------------------------------------------------------------
-// Function:    FileAccPropList destructor
-///\brief       Noop destructor
-//--------------------------------------------------------------------------
-FileAccPropList::~FileAccPropList()
-{
-}
-
 } // namespace H5

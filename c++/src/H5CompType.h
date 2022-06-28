@@ -113,7 +113,7 @@ class H5_DLLCPP CompType : public DataType {
     }
 
     // Noop destructor.
-    virtual ~CompType() override;
+    virtual ~CompType() override = default;
 
   private:
     // Contains common code that is used by the member functions
