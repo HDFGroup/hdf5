@@ -713,7 +713,7 @@ H5G__traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target, H5G
                         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to hold file open")
 
                 /* Reset any non-default object header messages */
-H5_GCC_CLANG_DIAG_OFF("cast-qual")
+                H5_GCC_CLANG_DIAG_OFF("cast-qual")
                 if (ginfo != &def_ginfo)
                     if (H5O_msg_reset(H5O_GINFO_ID, (void *)ginfo) < 0)
                         HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to reset group info message")
@@ -723,7 +723,7 @@ H5_GCC_CLANG_DIAG_OFF("cast-qual")
                 if (pline != &def_pline)
                     if (H5O_msg_reset(H5O_PLINE_ID, (void *)pline) < 0)
                         HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to reset I/O pipeline message")
-H5_GCC_CLANG_DIAG_ON("cast-qual")
+                H5_GCC_CLANG_DIAG_ON("cast-qual")
             } /* end if */
             else
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "component not found")

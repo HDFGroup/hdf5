@@ -446,9 +446,9 @@ H5G_name_copy(H5G_name_t *dst, const H5G_name_t *src, H5_copy_depth_t depth)
         dst->user_path_r = H5RS_dup(src->user_path_r);
     }
     else {
-H5_GCC_CLANG_DIAG_OFF("cast-qual")
+        H5_GCC_CLANG_DIAG_OFF("cast-qual")
         H5G_name_reset((H5G_name_t *)src);
-H5_GCC_CLANG_DIAG_ON("cast-qual")
+        H5_GCC_CLANG_DIAG_ON("cast-qual")
     }
 
     FUNC_LEAVE_NOAPI(SUCCEED)

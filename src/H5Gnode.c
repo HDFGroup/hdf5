@@ -1228,9 +1228,9 @@ H5G__node_copy(H5F_t *f, const void H5_ATTR_UNUSED *_lt_key, haddr_t addr, const
             /* Set up group location for soft link to start in */
             H5G_name_reset(&grp_path);
             grp_loc.path = &grp_path;
-H5_GCC_CLANG_DIAG_OFF("cast-qual")
+            H5_GCC_CLANG_DIAG_OFF("cast-qual")
             grp_loc.oloc = (H5O_loc_t *)src_oloc;
-H5_GCC_CLANG_DIAG_ON("cast-qual")
+            H5_GCC_CLANG_DIAG_ON("cast-qual")
 
             /* Get pointer to link value in local heap */
             if ((link_name = (char *)H5HL_offset_into(heap, tmp_src_ent.cache.slink.lval_offset)) == NULL)
