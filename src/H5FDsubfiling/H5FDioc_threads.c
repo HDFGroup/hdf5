@@ -790,7 +790,6 @@ ioc_file_queue_write_indep(sf_work_request_t *msg, int subfile_rank, int source,
 {
     subfiling_context_t *sf_context = NULL;
     MPI_Status           msg_status;
-    uint32_t             rcv_tag;
     hbool_t              send_nack = FALSE;
     int64_t              data_size;
     int64_t              file_offset;
@@ -805,6 +804,7 @@ ioc_file_queue_write_indep(sf_work_request_t *msg, int subfile_rank, int source,
     double t_queue_delay;
 #endif
     char *recv_buf = NULL;
+    int   rcv_tag;
     int   sf_fid;
     int   data_bytes_received;
     int   write_ret;
@@ -868,16 +868,16 @@ ioc_file_queue_write_indep(sf_work_request_t *msg, int subfile_rank, int source,
      * allows us to distinguish between multiple concurrent
      * writes from a single rank.
      */
-    rcv_tag = ((counter & 0xFFFF) << 12) | WRITE_INDEP_DATA;
+    HDassert(H5FD_IOC_tag_ub_val_ptr && (*H5FD_IOC_tag_ub_val_ptr >= 0));
+    rcv_tag = (int) ((counter % INT_MAX) % (uint32_t)(*H5FD_IOC_tag_ub_val_ptr)) + 1;
 
-    H5_CHECK_OVERFLOW(rcv_tag, uint32_t, int);
-    if (send_ack_to_client((int)rcv_tag, source, subfile_rank, WRITE_INDEP_ACK, comm) < 0)
+    if (send_ack_to_client(rcv_tag, source, subfile_rank, WRITE_INDEP_ACK, comm) < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_WRITEERROR, -1, "couldn't send ACK to client");
 
     /* Receive data from client */
     H5_CHECK_OVERFLOW(data_size, int64_t, int);
     if (MPI_SUCCESS !=
-        (mpi_code = MPI_Recv(recv_buf, (int)data_size, MPI_BYTE, source, (int)rcv_tag, comm, &msg_status)))
+        (mpi_code = MPI_Recv(recv_buf, (int)data_size, MPI_BYTE, source, rcv_tag, comm, &msg_status)))
         H5_SUBFILING_MPI_GOTO_ERROR(-1, "MPI_Recv failed", mpi_code);
 
     if (MPI_SUCCESS != (mpi_code = MPI_Get_count(&msg_status, MPI_BYTE, &data_bytes_received)))
@@ -908,6 +908,12 @@ ioc_file_queue_write_indep(sf_work_request_t *msg, int subfile_rank, int source,
 
     sf_fid = sf_context->sf_fid;
 
+#ifdef H5FD_IOC_DEBUG
+    if (sf_fid < 0)
+        H5_subfiling_log(file_context_id, "%s: WARNING: attempt to write data to closed subfile FID %d",
+                         __func__, sf_fid);
+#endif
+
     if (sf_fid >= 0) {
         /* Actually write data received from client into subfile */
         if ((write_ret = ioc_file_write_data(sf_fid, file_offset, recv_buf, data_size, subfile_rank)) < 0)
@@ -920,10 +926,6 @@ ioc_file_queue_write_indep(sf_work_request_t *msg, int subfile_rank, int source,
         t_write = t_end - t_start;
         sf_pwrite_time += t_write;
 #endif
-    }
-    else {
-        HDprintf("[ioc(%d) %s]: WARNING: attempt to write data to closed subfile FID %d\n", subfile_rank,
-                 __func__, sf_fid);
     }
 
 #ifdef H5FD_IOC_COLLECT_STATS

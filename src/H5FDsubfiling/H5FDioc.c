@@ -38,6 +38,9 @@ static hid_t H5FD_IOC_g = H5I_INVALID_HID;
 /* Whether the driver initialized MPI on its own */
 static hbool_t H5FD_mpi_self_initialized = FALSE;
 
+/* Pointer to value for MPI_TAG_UB */
+int *H5FD_IOC_tag_ub_val_ptr = NULL;
+
 #if 0 /* JRM */ /* delete if all goes well */
 extern volatile int sf_shutdown_flag;
 #endif          /* JRM */
@@ -234,6 +237,8 @@ H5FD_ioc_init(void)
     /* Register the IOC VFD, if it isn't already registered */
     if (H5I_VFL != H5I_get_type(H5FD_IOC_g)) {
         char *env_var;
+        int   key_val_retrieved = 0;
+        int   mpi_code;
 
         if ((H5FD_IOC_g = H5FD_register(&H5FD_ioc_g, sizeof(H5FD_class_t), FALSE)) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "can't register IOC VFD");
@@ -243,7 +248,6 @@ H5FD_ioc_init(void)
         if (env_var && !HDstrcmp(env_var, H5FD_IOC_NAME)) {
             int mpi_initialized = 0;
             int provided        = 0;
-            int mpi_code;
 
             /* Initialize MPI if not already initialized */
             if (MPI_SUCCESS != (mpi_code = MPI_Initialized(&mpi_initialized)))
@@ -271,6 +275,15 @@ H5FD_ioc_init(void)
                                         "MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE");
             }
         }
+
+        /* Retrieve upper bound for MPI message tag value */
+        if (MPI_SUCCESS != (mpi_code = MPI_Comm_get_attr(MPI_COMM_WORLD, MPI_TAG_UB,
+                &H5FD_IOC_tag_ub_val_ptr, &key_val_retrieved)))
+            H5_SUBFILING_MPI_GOTO_ERROR(H5I_INVALID_HID, "MPI_Comm_get_attr failed", mpi_code);
+
+        if (!key_val_retrieved)
+            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID,
+                    "couldn't retrieve value for MPI_TAG_UB");
     }
 
     ret_value = H5FD_IOC_g;

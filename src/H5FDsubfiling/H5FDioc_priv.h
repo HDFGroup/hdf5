@@ -418,6 +418,8 @@ typedef struct _io_req {
     io_func_t       completion_func; /* are completed */
 } io_req_t;
 
+extern int *H5FD_IOC_tag_ub_val_ptr;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
