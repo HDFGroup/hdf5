@@ -2844,29 +2844,6 @@ H5_DLL htri_t H5Tcompiler_conv(hid_t src_id, hid_t dst_id);
  */
 H5_DLL herr_t H5Tconvert(hid_t src_id, hid_t dst_id, size_t nelmts, void *buf, void *background,
                          hid_t plist_id);
-/**
- * \ingroup VLEN
- *
- * \brief Reclaims the variable length (VL) datatype memory buffers
- *
- * \type_id
- * \space_id
- * \dxpl_id{plist_id} used to create the buffer
- * \param[in] buf Pointer to the buffer to be reclaimed
- *
- * \return \herr_t
- *
- * \details H5Treclaim() reclaims memory buffers created to store VL datatypes.
- *          It only frees the variable length data in the selection defined in
- *          the dataspace specified by \p space_id. The dataset transfer
- *          property list \p plist_id is required to find the correct
- *          allocation and/or free methods for the variable-length data in the
- *          buffer.
- *
- * \since 1.12.0
- *
- */
-H5_DLL herr_t H5Treclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf);
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
  *

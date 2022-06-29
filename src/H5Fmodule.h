@@ -68,7 +68,8 @@
  *
  */
 
-/**\defgroup H5F H5F File
+/**
+ * \defgroup H5F H5F File
  *
  * Use the functions in this module to manage HDF5 files.
  *
