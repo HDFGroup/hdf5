@@ -2299,8 +2299,8 @@ h5_driver_uses_multiple_files(const char *drv_name, unsigned flags)
 
     if (drv_name) {
         if ((flags & H5_EXCLUDE_MULTIPART_DRIVERS) == 0) {
-            if (!HDstrcmp(drv_name, "split") || !HDstrcmp(drv_name, "multi") || !HDstrcmp(drv_name, "family")
-                || !HDstrcmp(drv_name, H5FD_SUBFILING_NAME))
+            if (!HDstrcmp(drv_name, "split") || !HDstrcmp(drv_name, "multi") ||
+                !HDstrcmp(drv_name, "family") || !HDstrcmp(drv_name, H5FD_SUBFILING_NAME))
                 return TRUE;
         }
 

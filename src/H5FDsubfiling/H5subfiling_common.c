@@ -782,7 +782,7 @@ H5_free_subfiling_object_int(subfiling_context_t *sf_context)
         time_t     cur_time;
 
         cur_time = time(NULL);
-        tm = localtime(&cur_time);
+        tm       = localtime(&cur_time);
 
         H5_subfiling_log(sf_context->sf_context_id, "\n-- LOGGING FINISH - %s", asctime(tm));
 
@@ -1040,7 +1040,7 @@ H5_open_subfiles(const char *base_filename, uint64_t h5_file_id, ioc_selection_t
         }
 
         cur_time = time(NULL);
-        tm = localtime(&cur_time);
+        tm       = localtime(&cur_time);
 
         H5_subfiling_log(context_id, "-- LOGGING BEGIN - %s", asctime(tm));
     }
@@ -2052,7 +2052,8 @@ ioc_open_file(sf_work_request_t *msg, int file_acc_flags)
      */
     if ((file_acc_flags & O_CREAT) && (sf_context->topology->subfile_rank == 0)) {
         if (create_config_file(sf_context, base, subfile_dir, (file_acc_flags & O_TRUNC)) < 0)
-            H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTCREATE, FAIL, "couldn't create subfiling configuration file");
+            H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTCREATE, FAIL,
+                                    "couldn't create subfiling configuration file");
     }
 
 done:

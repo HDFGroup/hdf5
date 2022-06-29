@@ -306,15 +306,16 @@ H5FD_subfiling_init(void)
         int mpi_code;
 
         if ((H5FD_SUBFILING_g = H5FD_register(&H5FD_subfiling_g, sizeof(H5FD_class_t), FALSE)) < 0)
-            H5_SUBFILING_GOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "can't register subfiling VFD");
+            H5_SUBFILING_GOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID,
+                                    "can't register subfiling VFD");
 
         /* Initialize error reporting */
         if ((H5subfiling_err_stack_g = H5Ecreate_stack()) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID, "can't create HDF5 error stack");
-        if ((H5subfiling_err_class_g =
-                 H5Eregister_class(H5SUBFILING_ERR_CLS_NAME, H5SUBFILING_ERR_LIB_NAME, H5SUBFILING_ERR_VER)) < 0)
+        if ((H5subfiling_err_class_g = H5Eregister_class(H5SUBFILING_ERR_CLS_NAME, H5SUBFILING_ERR_LIB_NAME,
+                                                         H5SUBFILING_ERR_VER)) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID,
-                                "can't register error class with HDF5 error API");
+                                    "can't register error class with HDF5 error API");
 
         /* Initialize MPI if not already initialized */
         if (MPI_SUCCESS != (mpi_code = MPI_Initialized(&mpi_initialized)))
@@ -324,8 +325,9 @@ H5FD_subfiling_init(void)
             if (MPI_SUCCESS != (mpi_code = MPI_Query_thread(&provided)))
                 H5_SUBFILING_MPI_GOTO_ERROR(H5I_INVALID_HID, "MPI_Query_thread failed", mpi_code);
             if (provided != MPI_THREAD_MULTIPLE)
-                H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID,
-                            "Subfiling VFD requires the use of MPI_Init_thread with MPI_THREAD_MULTIPLE");
+                H5_SUBFILING_GOTO_ERROR(
+                    H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID,
+                    "Subfiling VFD requires the use of MPI_Init_thread with MPI_THREAD_MULTIPLE");
         }
         else {
             char *env_var;
@@ -343,7 +345,7 @@ H5FD_subfiling_init(void)
 
             if (provided != required)
                 H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID,
-                            "MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE");
+                                        "MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE");
         }
     }
 
@@ -400,7 +402,7 @@ H5FD__subfiling_term(void)
         if (H5subfiling_err_class_g >= 0) {
             if (H5Eunregister_class(H5subfiling_err_class_g) < 0)
                 H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CLOSEERROR, FAIL,
-                                    "can't unregister error class from HDF5 error API");
+                                        "can't unregister error class from HDF5 error API");
         }
         if (H5subfiling_err_stack_g >= 0) {
             /* Print the current error stack before destroying it */
@@ -457,12 +459,14 @@ H5Pset_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *vfd_config)
 
     if (vfd_config == NULL) {
         if (NULL == (subfiling_conf = HDcalloc(1, sizeof(*subfiling_conf))))
-            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate subfiling VFD configuration");
+            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                    "can't allocate subfiling VFD configuration");
         subfiling_conf->ioc_fapl_id = H5I_INVALID_HID;
 
         /* Get subfiling VFD defaults */
         if (H5FD__subfiling_get_default_config(fapl_id, subfiling_conf) < 0)
-            H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't get default subfiling VFD configuration");
+            H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL,
+                                    "can't get default subfiling VFD configuration");
 
         vfd_config = subfiling_conf;
     }
@@ -521,7 +525,8 @@ H5Pget_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *config_out)
 
     if (use_default_config) {
         if (H5FD__subfiling_get_default_config(fapl_id, config_out) < 0)
-            H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get default Subfiling VFD configuration");
+            H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL,
+                                    "can't get default Subfiling VFD configuration");
     }
     else {
         /* Copy the subfiling fapl data out */
@@ -873,7 +878,8 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
     config_ptr = H5P_peek_driver_info(plist_ptr);
     if (!config_ptr || (H5P_FILE_ACCESS_DEFAULT == fapl_id)) {
         if (H5FD__subfiling_get_default_config(fapl_id, &default_config) < 0)
-            H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get default subfiling VFD configuration");
+            H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL,
+                                    "can't get default subfiling VFD configuration");
         config_ptr = &default_config;
     }
 
@@ -904,12 +910,13 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
     if (H5P_peek(plist_ptr, H5F_ACS_FILE_DRV_NAME, &driver_prop) < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver ID & info");
     if (NULL == (driver = (H5FD_class_t *)H5I_object(driver_prop.driver_id)))
-        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "invalid driver ID in file access property list");
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL,
+                                "invalid driver ID in file access property list");
 
     if (driver->value != H5_VFD_IOC && driver->value != H5_VFD_SEC2)
-        H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
-                    "unable to open file '%s' - only IOC and Sec2 VFDs are currently supported for subfiles",
-                    name);
+        H5_SUBFILING_GOTO_ERROR(
+            H5E_FILE, H5E_CANTOPENFILE, NULL,
+            "unable to open file '%s' - only IOC and Sec2 VFDs are currently supported for subfiles", name);
 
     if (driver->value == H5_VFD_IOC) {
         h5_stat_t sb;
@@ -980,7 +987,8 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
          */
         if (H5_open_subfiles(file_ptr->fa.file_path, inode_id, file_ptr->fa.ioc_selection, ioc_flags,
                              file_ptr->comm, &file_ptr->fa.context_id) < 0)
-            H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open subfiling files = %s\n", name);
+            H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open subfiling files = %s\n",
+                                    name);
     }
 
     if (file_ptr->mpi_rank == 0) {
@@ -1379,8 +1387,8 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr
     if (!H5F_addr_defined(addr))
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addr undefined, addr = %" PRIuHADDR, addr);
     if (REGION_OVERFLOW(addr, size))
-        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %" PRIuHADDR ", size = %" PRIuHADDR,
-                    addr, size);
+        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL,
+                                "addr overflow, addr = %" PRIuHADDR ", size = %" PRIuHADDR, addr, size);
 
 #if H5FD_SUBFILING_DEBUG_OP_CALLS
     HDprintf("[%s %d] addr=%ld, size=%ld\n", __func__, file_ptr->mpi_rank, addr, size);
@@ -1414,7 +1422,8 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr
 #endif
 
     if (ioc_total == 0) {
-        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid number of I/O concentrators (%d)", ioc_total);
+        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid number of I/O concentrators (%d)",
+                                ioc_total);
     }
     else if (ioc_total == 1) {
         /***********************************
@@ -1448,11 +1457,14 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr
          */
         if (NULL ==
             (source_data_offset = HDcalloc(1, (size_t)ioc_total * max_depth * sizeof(*source_data_offset))))
-            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate source data offset I/O vector");
+            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                    "can't allocate source data offset I/O vector");
         if (NULL == (sf_data_size = HDcalloc(1, (size_t)ioc_total * max_depth * sizeof(*sf_data_size))))
-            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate subfile data size I/O vector");
+            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                    "can't allocate subfile data size I/O vector");
         if (NULL == (sf_offset = HDcalloc(1, (size_t)ioc_total * max_depth * sizeof(*sf_offset))))
-            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate subfile offset I/O vector");
+            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                    "can't allocate subfile offset I/O vector");
 
         H5_CHECKED_ASSIGN(file_offset, int64_t, addr, haddr_t);
 
@@ -1486,13 +1498,17 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr
 
             /* Allocate I/O vectors */
             if (NULL == (io_types = HDmalloc(vector_len * sizeof(*io_types))))
-                H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate subfile I/O types vector");
+                H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                        "can't allocate subfile I/O types vector");
             if (NULL == (io_addrs = HDmalloc(vector_len * sizeof(*io_addrs))))
-                H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate subfile I/O addresses vector");
+                H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                        "can't allocate subfile I/O addresses vector");
             if (NULL == (io_sizes = HDmalloc(vector_len * sizeof(*io_sizes))))
-                H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate subfile I/O sizes vector");
+                H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                        "can't allocate subfile I/O sizes vector");
             if (NULL == (io_bufs = HDmalloc(vector_len * sizeof(*io_bufs))))
-                H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate subfile I/O buffers vector");
+                H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                        "can't allocate subfile I/O buffers vector");
 
             /* TODO: The following is left for future work */
             /*
@@ -1602,8 +1618,8 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t add
     if (!H5F_addr_defined(addr))
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addr undefined, addr = %" PRIuHADDR, addr);
     if (REGION_OVERFLOW(addr, size))
-        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %" PRIuHADDR ", size = %" PRIuHADDR,
-                    addr, size);
+        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL,
+                                "addr overflow, addr = %" PRIuHADDR ", size = %" PRIuHADDR, addr, size);
 
 #if H5FD_SUBFILING_DEBUG_OP_CALLS
     HDprintf("[%s %d] addr=%ld, size=%ld\n", __func__, file_ptr->mpi_rank, addr, size);
@@ -1637,7 +1653,8 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t add
 #endif
 
     if (ioc_total == 0) {
-        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid number of I/O concentrators (%d)", ioc_total);
+        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid number of I/O concentrators (%d)",
+                                ioc_total);
     }
     else if (ioc_total == 1) {
         /***********************************
@@ -1671,11 +1688,14 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t add
          */
         if (NULL ==
             (source_data_offset = HDcalloc(1, (size_t)ioc_total * max_depth * sizeof(*source_data_offset))))
-            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate source data offset I/O vector");
+            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                    "can't allocate source data offset I/O vector");
         if (NULL == (sf_data_size = HDcalloc(1, (size_t)ioc_total * max_depth * sizeof(*sf_data_size))))
-            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate subfile data size I/O vector");
+            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                    "can't allocate subfile data size I/O vector");
         if (NULL == (sf_offset = HDcalloc(1, (size_t)ioc_total * max_depth * sizeof(*sf_offset))))
-            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate subfile offset I/O vector");
+            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                    "can't allocate subfile offset I/O vector");
 
         H5_CHECKED_ASSIGN(file_offset, int64_t, addr, haddr_t);
 
@@ -1709,13 +1729,17 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t add
 
             /* Allocate I/O vectors */
             if (NULL == (io_types = HDmalloc(vector_len * sizeof(*io_types))))
-                H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate subfile I/O types vector");
+                H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                        "can't allocate subfile I/O types vector");
             if (NULL == (io_addrs = HDmalloc(vector_len * sizeof(*io_addrs))))
-                H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate subfile I/O addresses vector");
+                H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                        "can't allocate subfile I/O addresses vector");
             if (NULL == (io_sizes = HDmalloc(vector_len * sizeof(*io_sizes))))
-                H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate subfile I/O sizes vector");
+                H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                        "can't allocate subfile I/O sizes vector");
             if (NULL == (io_bufs = HDmalloc(vector_len * sizeof(*io_bufs))))
-                H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate subfile I/O buffers vector");
+                H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                        "can't allocate subfile I/O buffers vector");
 
             /* TODO: The following is left for future work */
             /*
@@ -1852,16 +1876,20 @@ H5FD__subfiling_read_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_m
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL");
 
     if ((!types) && (count > 0))
-        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "types parameter can't be NULL if count is positive");
+        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                                "types parameter can't be NULL if count is positive");
 
     if ((!addrs) && (count > 0))
-        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addrs parameter can't be NULL if count is positive");
+        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                                "addrs parameter can't be NULL if count is positive");
 
     if ((!sizes) && (count > 0))
-        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sizes parameter can't be NULL if count is positive");
+        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                                "sizes parameter can't be NULL if count is positive");
 
     if ((!bufs) && (count > 0))
-        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bufs parameter can't be NULL if count is positive");
+        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                                "bufs parameter can't be NULL if count is positive");
 
     /* Get the default dataset transfer property list if the user didn't provide one */
     if (H5P_DEFAULT == dxpl_id) {
@@ -1926,9 +1954,9 @@ H5FD__subfiling_read_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_m
 
             if ((addrs[k] + size) > eoa)
                 H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL,
-                            "addr overflow, addrs[%d] = %llu, sizes[%d] = %llu, eoa = %llu", (int)k,
-                            (unsigned long long)(addrs[k]), (int)k, (unsigned long long)size,
-                            (unsigned long long)eoa);
+                                        "addr overflow, addrs[%d] = %llu, sizes[%d] = %llu, eoa = %llu",
+                                        (int)k, (unsigned long long)(addrs[k]), (int)k,
+                                        (unsigned long long)size, (unsigned long long)eoa);
 
             if (H5FD__subfiling_read(_file, type, dxpl_id, addrs[k], size, bufs[k]) != SUCCEED)
                 H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "file vector read request failed");
@@ -2000,16 +2028,20 @@ H5FD__subfiling_write_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL");
 
     if ((!types) && (count > 0))
-        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "types parameter can't be NULL if count is positive");
+        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                                "types parameter can't be NULL if count is positive");
 
     if ((!addrs) && (count > 0))
-        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addrs parameter can't be NULL if count is positive");
+        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                                "addrs parameter can't be NULL if count is positive");
 
     if ((!sizes) && (count > 0))
-        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sizes parameter can't be NULL if count is positive");
+        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                                "sizes parameter can't be NULL if count is positive");
 
     if ((!bufs) && (count > 0))
-        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bufs parameter can't be NULL if count is positive");
+        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                                "bufs parameter can't be NULL if count is positive");
 
     /* Get the default dataset transfer property list if the user didn't provide one */
     if (H5P_DEFAULT == dxpl_id) {
@@ -2070,9 +2102,9 @@ H5FD__subfiling_write_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_
 
             if ((addrs[k] + size) > eoa)
                 H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL,
-                            "addr overflow, addrs[%d] = %llu, sizes[%d] = %llu, eoa = %llu", (int)k,
-                            (unsigned long long)(addrs[k]), (int)k, (unsigned long long)size,
-                            (unsigned long long)eoa);
+                                        "addr overflow, addrs[%d] = %llu, sizes[%d] = %llu, eoa = %llu",
+                                        (int)k, (unsigned long long)(addrs[k]), (int)k,
+                                        (unsigned long long)size, (unsigned long long)eoa);
 
             if (H5FD__subfiling_write(_file, type, dxpl_id, addrs[k], size, bufs[k]) != SUCCEED)
                 H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file vector write request failed");
@@ -2732,8 +2764,8 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
 
     if (total_bytes != data_size)
         H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL,
-                    "total bytes (%" PRId64 ") didn't match data size (%" PRId64 ")!", total_bytes,
-                    data_size);
+                                "total bytes (%" PRId64 ") didn't match data size (%" PRId64 ")!",
+                                total_bytes, data_size);
 
 done:
     return ret_value;
@@ -2828,8 +2860,8 @@ iovec_fill_first(subfiling_context_t *sf_context, int64_t iovec_depth, int64_t t
 
         if (total_bytes != target_datasize)
             H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL,
-                        "total bytes (%" PRId64 ") didn't match target data size (%" PRId64 ")!", total_bytes,
-                        target_datasize);
+                                    "total bytes (%" PRId64 ") didn't match target data size (%" PRId64 ")!",
+                                    total_bytes, target_datasize);
     }
 
 done:
@@ -2957,8 +2989,8 @@ iovec_fill_last(subfiling_context_t *sf_context, int64_t iovec_depth, int64_t ta
 
         if (total_bytes != target_datasize)
             H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL,
-                        "total bytes (%" PRId64 ") didn't match target data size (%" PRId64 ")!", total_bytes,
-                        target_datasize);
+                                    "total bytes (%" PRId64 ") didn't match target data size (%" PRId64 ")!",
+                                    total_bytes, target_datasize);
     }
 
 done:
@@ -3076,8 +3108,8 @@ iovec_fill_first_last(subfiling_context_t *sf_context, int64_t iovec_depth, int6
 
         if (total_bytes != target_datasize)
             H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL,
-                        "total bytes (%" PRId64 ") didn't match target data size (%" PRId64 ")!", total_bytes,
-                        target_datasize);
+                                    "total bytes (%" PRId64 ") didn't match target data size (%" PRId64 ")!",
+                                    total_bytes, target_datasize);
     }
 
 done:
@@ -3174,8 +3206,8 @@ iovec_fill_uniform(subfiling_context_t *sf_context, int64_t iovec_depth, int64_t
 
         if (total_bytes != target_datasize)
             H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL,
-                        "total bytes (%" PRId64 ") didn't match target data size (%" PRId64 ")!", total_bytes,
-                        target_datasize);
+                                    "total bytes (%" PRId64 ") didn't match target data size (%" PRId64 ")!",
+                                    total_bytes, target_datasize);
     }
 
 done:

@@ -272,18 +272,18 @@ H5FD_ioc_init(void)
 
                 if (provided != required)
                     H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID,
-                                        "MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE");
+                                            "MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE");
             }
         }
 
         /* Retrieve upper bound for MPI message tag value */
-        if (MPI_SUCCESS != (mpi_code = MPI_Comm_get_attr(MPI_COMM_WORLD, MPI_TAG_UB,
-                &H5FD_IOC_tag_ub_val_ptr, &key_val_retrieved)))
+        if (MPI_SUCCESS != (mpi_code = MPI_Comm_get_attr(MPI_COMM_WORLD, MPI_TAG_UB, &H5FD_IOC_tag_ub_val_ptr,
+                                                         &key_val_retrieved)))
             H5_SUBFILING_MPI_GOTO_ERROR(H5I_INVALID_HID, "MPI_Comm_get_attr failed", mpi_code);
 
         if (!key_val_retrieved)
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID,
-                    "couldn't retrieve value for MPI_TAG_UB");
+                                    "couldn't retrieve value for MPI_TAG_UB");
     }
 
     ret_value = H5FD_IOC_g;
@@ -354,7 +354,8 @@ H5Pset_fapl_ioc(hid_t fapl_id, H5FD_ioc_config_t *vfd_config)
 
     if (vfd_config == NULL) {
         if (NULL == (ioc_conf = HDcalloc(1, sizeof(*ioc_conf))))
-            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate IOC VFD configuration");
+            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                    "can't allocate IOC VFD configuration");
         ioc_conf->ioc_fapl_id = H5I_INVALID_HID;
 
         /* Get IOC VFD defaults */
@@ -839,11 +840,12 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     if (H5P_peek(plist_ptr, H5F_ACS_FILE_DRV_NAME, &driver_prop) < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver ID & info");
     if (NULL == (driver = (H5FD_class_t *)H5I_object(driver_prop.driver_id)))
-        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "invalid driver ID in file access property list");
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL,
+                                "invalid driver ID in file access property list");
 
     if (driver->value != H5_VFD_SEC2) {
         H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
-                            "unable to open file '%s' - only Sec2 VFD is currently supported", name);
+                                "unable to open file '%s' - only Sec2 VFD is currently supported", name);
     }
     else {
         subfiling_context_t *sf_context = NULL;
@@ -895,7 +897,7 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
             H5_SUBFILING_MPI_GOTO_ERROR(NULL, "MPI_Allreduce failed", mpi_code);
         if (g_error)
             H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
-                                "one or more MPI ranks were unable to open file '%s'", name);
+                                    "one or more MPI ranks were unable to open file '%s'", name);
 
         /*
          * Open the subfiles for this HDF5 file. A subfiling
@@ -905,14 +907,14 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         if (H5_open_subfiles(file_ptr->fa.file_path, inode_id, file_ptr->fa.ioc_selection, ioc_flags,
                              file_ptr->comm, &file_ptr->fa.context_id) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open subfiles for file '%s'",
-                                name);
+                                    name);
 
         /* Initialize I/O concentrator threads if this MPI rank is an I/O concentrator */
         sf_context = H5_get_subfiling_object(file_ptr->fa.context_id);
         if (sf_context && sf_context->topology->rank_is_ioc) {
             if (initialize_ioc_threads(sf_context) < 0)
                 H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL,
-                                    "unable to initialize I/O concentrator threads");
+                                        "unable to initialize I/O concentrator threads");
         }
     }
 
@@ -1369,19 +1371,19 @@ H5FD__ioc_read_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_mem_t t
 
     if ((!types) && (count > 0))
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                            "types parameter can't be NULL if count is positive");
+                                "types parameter can't be NULL if count is positive");
 
     if ((!addrs) && (count > 0))
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                            "addrs parameter can't be NULL if count is positive");
+                                "addrs parameter can't be NULL if count is positive");
 
     if ((!sizes) && (count > 0))
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                            "sizes parameter can't be NULL if count is positive");
+                                "sizes parameter can't be NULL if count is positive");
 
     if ((!bufs) && (count > 0))
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                            "bufs parameter can't be NULL if count is positive");
+                                "bufs parameter can't be NULL if count is positive");
 
     /* Get the default dataset transfer property list if the user didn't provide
      * one */
@@ -1414,19 +1416,19 @@ H5FD__ioc_write_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_mem_t 
 
     if ((!types) && (count > 0))
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                            "types parameter can't be NULL if count is positive");
+                                "types parameter can't be NULL if count is positive");
 
     if ((!addrs) && (count > 0))
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                            "addrs parameter can't be NULL if count is positive");
+                                "addrs parameter can't be NULL if count is positive");
 
     if ((!sizes) && (count > 0))
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                            "sizes parameter can't be NULL if count is positive");
+                                "sizes parameter can't be NULL if count is positive");
 
     if ((!bufs) && (count > 0))
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                            "bufs parameter can't be NULL if count is positive");
+                                "bufs parameter can't be NULL if count is positive");
 
     /* Get the default dataset transfer property list if the user didn't provide
      * one */
@@ -1595,7 +1597,8 @@ H5FD__ioc_write_vector_internal(hid_t h5_fid, uint32_t count, haddr_t addrs[], s
     HDassert(sf_context->topology->n_io_concentrators);
 
     if (NULL == (active_reqs = HDcalloc((size_t)(count + 2), sizeof(struct __mpi_req))))
-        H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate active I/O requests array");
+        H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                "can't allocate active I/O requests array");
 
     if (NULL == (sf_async_reqs = HDcalloc((size_t)count, sizeof(*sf_async_reqs))))
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate I/O request array");
@@ -1686,7 +1689,8 @@ H5FD__ioc_read_vector_internal(hid_t h5_fid, uint32_t count, haddr_t addrs[], si
     HDassert(sf_context->topology->n_io_concentrators);
 
     if (NULL == (active_reqs = HDcalloc((size_t)(count + 2), sizeof(struct __mpi_req))))
-        H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate active I/O requests array");
+        H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                "can't allocate active I/O requests array");
 
     if (NULL == (sf_async_reqs = HDcalloc((size_t)count, sizeof(*sf_async_reqs))))
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate I/O request array");

@@ -149,7 +149,7 @@ initialize_ioc_threads(void *_sf_context)
 
     if (NULL == (context_id = HDmalloc(sizeof(*context_id))))
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                            "couldn't allocate subfiling context ID for IOC main thread");
+                                "couldn't allocate subfiling context ID for IOC main thread");
 
     file_open_count = atomic_load(&sf_file_open_count);
     atomic_fetch_add(&sf_file_open_count, 1);
@@ -184,7 +184,7 @@ initialize_ioc_threads(void *_sf_context)
     if (!pool_request) {
         if (NULL == (pool_request = HDmalloc(pool_req_alloc_size)))
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                "couldn't allocate space for worker threads");
+                                    "couldn't allocate space for worker threads");
 
         pool_concurrent_max = world_size;
     }
@@ -203,7 +203,8 @@ initialize_ioc_threads(void *_sf_context)
 
     status = hg_thread_mutex_init(&(io_queue_g.q_mutex));
     if (status)
-        H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "couldn't initialize IOC thread queue mutex");
+        H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL,
+                                "couldn't initialize IOC thread queue mutex");
 
     io_queue_g.num_failed = 0;
 
@@ -434,18 +435,19 @@ ioc_main(int64_t context_id)
             int    tag    = status.MPI_TAG;
 
             if ((tag != READ_INDEP) && (tag != WRITE_INDEP) && (tag != TRUNC_OP) && (tag != GET_EOF_OP))
-                H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, -1, "invalid work request operation (%d)", tag);
+                H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, -1, "invalid work request operation (%d)",
+                                        tag);
 
             if (MPI_SUCCESS != (mpi_code = MPI_Get_count(&status, MPI_BYTE, &count)))
                 H5_SUBFILING_MPI_GOTO_ERROR(-1, "MPI_Get_count failed", mpi_code);
 
             if (count < 0)
                 H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, -1, "invalid work request message size (%d)",
-                                    count);
+                                        count);
 
             if ((size_t)count > sizeof(sf_work_request_t))
                 H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, -1, "work request message is too large (%d)",
-                                    count);
+                                        count);
 
             /*
              * Zero out work request, since the received message should
@@ -464,8 +466,8 @@ ioc_main(int64_t context_id)
                     H5_SUBFILING_MPI_GOTO_ERROR(-1, "MPI_Get_count failed", mpi_code);
 
                 if (received_count != count)
-                    H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, -1, "MPI_Mrecv only received %d bytes of %d",
-                                        received_count, count);
+                    H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, -1,
+                                            "MPI_Mrecv only received %d bytes of %d", received_count, count);
             }
 #endif
 
@@ -610,10 +612,11 @@ handle_work_request(void *arg)
 
     if (op_ret < 0) {
 #ifdef H5_SUBFILING_DEBUG
-        H5_subfiling_log(file_context_id,
-                         "%s: IOC %d request(%s) filename=%s from rank(%d), size=%ld, offset=%ld FAILED with ret %d",
-                         __func__, msg->subfile_rank, translate_opcode((io_op_t)msg->tag),
-                         sf_context->sf_filename, msg->source, msg->header[0], msg->header[1], op_ret);
+        H5_subfiling_log(
+            file_context_id,
+            "%s: IOC %d request(%s) filename=%s from rank(%d), size=%ld, offset=%ld FAILED with ret %d",
+            __func__, msg->subfile_rank, translate_opcode((io_op_t)msg->tag), sf_context->sf_filename,
+            msg->source, msg->header[0], msg->header[1], op_ret);
 #endif
 
         q_entry_ptr->wk_ret = op_ret;
@@ -869,7 +872,7 @@ ioc_file_queue_write_indep(sf_work_request_t *msg, int subfile_rank, int source,
      * writes from a single rank.
      */
     HDassert(H5FD_IOC_tag_ub_val_ptr && (*H5FD_IOC_tag_ub_val_ptr >= 0));
-    rcv_tag = (int) ((counter % INT_MAX) % (uint32_t)(*H5FD_IOC_tag_ub_val_ptr)) + 1;
+    rcv_tag = (int)((counter % INT_MAX) % (uint32_t)(*H5FD_IOC_tag_ub_val_ptr)) + 1;
 
     if (send_ack_to_client(rcv_tag, source, subfile_rank, WRITE_INDEP_ACK, comm) < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_WRITEERROR, -1, "couldn't send ACK to client");
@@ -885,8 +888,8 @@ ioc_file_queue_write_indep(sf_work_request_t *msg, int subfile_rank, int source,
 
     if (data_bytes_received != data_size)
         H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_WRITEERROR, -1,
-                            "message size mismatch -- expected = %" PRId64 ", actual = %d", data_size,
-                            data_bytes_received);
+                                "message size mismatch -- expected = %" PRId64 ", actual = %d", data_size,
+                                data_bytes_received);
 
 #ifdef H5FD_IOC_COLLECT_STATS
     t_end  = MPI_Wtime();
@@ -918,8 +921,8 @@ ioc_file_queue_write_indep(sf_work_request_t *msg, int subfile_rank, int source,
         /* Actually write data received from client into subfile */
         if ((write_ret = ioc_file_write_data(sf_fid, file_offset, recv_buf, data_size, subfile_rank)) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_WRITEERROR, -1,
-                                "write function(FID=%d, Source=%d) returned an error (%d)", sf_fid, source,
-                                write_ret);
+                                    "write function(FID=%d, Source=%d) returned an error (%d)", sf_fid,
+                                    source, write_ret);
 
 #ifdef H5FD_IOC_COLLECT_STATS
         t_end   = MPI_Wtime();
@@ -1037,8 +1040,8 @@ ioc_file_queue_read_indep(sf_work_request_t *msg, int subfile_rank, int source, 
     /* Read data from the subfile */
     if ((read_ret = ioc_file_read_data(sf_fid, file_offset, send_buf, data_size, subfile_rank)) < 0) {
         H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_READERROR, read_ret,
-                            "read function(FID=%d, Source=%d) returned an error (%d)", sf_fid, source,
-                            read_ret);
+                                "read function(FID=%d, Source=%d) returned an error (%d)", sf_fid, source,
+                                read_ret);
     }
 
     send_empty_buf = FALSE;
@@ -1706,12 +1709,12 @@ ioc_io_queue_complete_entry(ioc_io_queue_entry_t *entry_ptr)
     atomic_fetch_sub(&sf_io_ops_pending, 1);
 
 #ifdef H5_SUBFILING_DEBUG
-    H5_subfiling_log(
-        entry_ptr->wk_req.context_id,
-        "%s: request %d completed with ret %d. op = %d, offset/len = %lld/%lld, q-ed/disp/ops_pend = %d/%d/%d.",
-        __func__, entry_ptr->counter, entry_ptr->wk_ret, (entry_ptr->wk_req.tag), (long long)(entry_ptr->wk_req.header[1]),
-        (long long)(entry_ptr->wk_req.header[0]), io_queue_g.num_pending, io_queue_g.num_in_progress,
-        atomic_load(&sf_io_ops_pending));
+    H5_subfiling_log(entry_ptr->wk_req.context_id,
+                     "%s: request %d completed with ret %d. op = %d, offset/len = %lld/%lld, "
+                     "q-ed/disp/ops_pend = %d/%d/%d.",
+                     __func__, entry_ptr->counter, entry_ptr->wk_ret, (entry_ptr->wk_req.tag),
+                     (long long)(entry_ptr->wk_req.header[1]), (long long)(entry_ptr->wk_req.header[0]),
+                     io_queue_g.num_pending, io_queue_g.num_in_progress, atomic_load(&sf_io_ops_pending));
 
     /*
      * If this I/O request is a truncate or "get eof" op, make sure
@@ -1725,7 +1728,7 @@ ioc_io_queue_complete_entry(ioc_io_queue_entry_t *entry_ptr)
 
 #ifdef H5FD_IOC_COLLECT_STATS
     /* Compute the queued and execution time */
-    queued_time = entry_ptr->dispatch_time - entry_ptr->q_time;
+    queued_time    = entry_ptr->dispatch_time - entry_ptr->q_time;
     execution_time = H5_now_usec() = entry_ptr->dispatch_time;
 
     io_queue_g.requests_completed++;
