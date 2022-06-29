@@ -4602,6 +4602,262 @@ error:
     return -1;
 }
 
+static int
+test_integration_create_by_name(void)
+{
+    const char *            basename   = "integration_by_name.h5";
+    hid_t                   fapl_id    = H5I_INVALID_HID;
+    struct onion_filepaths *paths      = NULL;
+    H5FD_onion_fapl_info_t  onion_info = {
+        H5FD_ONION_FAPL_INFO_VERSION_CURR,
+        H5P_DEFAULT,                   /* backing_fapl_id  */
+        ONION_TEST_PAGE_SIZE_1,        /* page_size        */
+        H5FD_ONION_STORE_TARGET_ONION, /* store_target     */
+        H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST,
+        0,               /* force_write_open */
+        0,               /* creation flags, was H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT */
+        "initial commit" /* comment          */
+    };
+    hid_t   file_id    = H5I_INVALID_HID;
+    hid_t   file       = H5I_INVALID_HID;
+    hid_t   space      = H5I_INVALID_HID;
+    hid_t   dset       = H5I_INVALID_HID;
+    hid_t   dcpl       = H5I_INVALID_HID;
+    hsize_t dims[2]    = {1, ONE_DIM_SIZE};
+    hsize_t maxdims[2] = {1, ONE_DIM_SIZE};
+    int     fillval;
+    struct {
+        int arr[ONE_DIM_SIZE];
+    } *wdata = NULL;
+    struct {
+        int arr[ONE_DIM_SIZE];
+    } *rdata = NULL;
+    struct {
+        int arr[ONE_DIM_SIZE];
+    } *dset_data = NULL;
+
+    TESTING("H5Pset_driver_by_name");
+
+    /* Setup */
+    if (NULL == (wdata = HDcalloc(1, sizeof(*wdata))))
+        TEST_ERROR;
+    if (NULL == (rdata = HDcalloc(1, sizeof(*rdata))))
+        TEST_ERROR;
+    if (NULL == (dset_data = HDcalloc(1, sizeof(*dset_data))))
+        TEST_ERROR;
+
+    onion_info.backing_fapl_id = h5_fileaccess();
+    if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+
+    /* Use H5Pset_driver_by_name to enable the Onion VFD */
+    if (H5Pset_driver_by_name(fapl_id, "onion", "{revision_num: H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST}") <
+        0)
+        TEST_ERROR;
+
+    if (NULL == (paths = onion_filepaths_init(basename, &onion_info)))
+        TEST_ERROR;
+
+    HDremove(paths->canon);
+    HDremove(paths->onion);
+    HDremove(paths->recovery);
+
+    /*----------------------------------------------------------------------
+     * Create the skeleton file (create the file without Onion VFD)
+     *----------------------------------------------------------------------
+     */
+    /* Initialize data */
+    for (int i = 0; i < ONE_DIM_SIZE; i++)
+        wdata->arr[i] = i;
+
+    /* Create a new file using the default properties */
+    if ((file = H5Fcreate(paths->canon, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Create dataspace with unlimited dimensions*/
+    if ((space = H5Screate_simple(2, dims, maxdims)) < 0)
+        TEST_ERROR;
+
+    /* Create the dataset creation property list */
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+
+    /* Set the fill value for the dataset */
+    fillval = 99;
+    if (H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillval) < 0)
+        TEST_ERROR;
+
+    /* Set the allocation time to "early".  This way we can be sure
+     * that reading from the dataset immediately after creation will
+     * return the fill value.
+     */
+    if (H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY) < 0)
+        TEST_ERROR;
+
+    /* Create the dataset using the dataset creation property list */
+    if ((dset = H5Dcreate(file, "DS1", H5T_STD_I32LE, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Write the data to the dataset */
+    if (H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata) < 0)
+        TEST_ERROR;
+
+    /* Close everything */
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR;
+    if (H5Sclose(space) < 0)
+        TEST_ERROR;
+    if (H5Fclose(file) < 0)
+        TEST_ERROR;
+
+    /*----------------------------------------------------------------------
+     * First revision: open the file with Onion VFD and change the data
+     *----------------------------------------------------------------------
+     */
+    if ((file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id)) < 0)
+        TEST_ERROR;
+
+    if ((dset = H5Dopen(file_id, "DS1", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    for (int i = 0; i < ONE_DIM_SIZE; i++)
+        dset_data->arr[i] = i + ONE_DIM_SIZE;
+
+    if (H5Dwrite(dset, H5T_STD_I32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
+        TEST_ERROR;
+
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR;
+    dset = H5I_INVALID_HID;
+    if (H5Fclose(file_id) < 0)
+        TEST_ERROR;
+    file_id = H5I_INVALID_HID;
+
+    /*----------------------------------------------------------------------
+     * Second revision: open the file with Onion VFD and change the data
+     *----------------------------------------------------------------------
+     */
+    if ((file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id)) < 0)
+        TEST_ERROR;
+    if ((dset = H5Dopen(file_id, "DS1", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    for (int i = 0; i < ONE_DIM_SIZE; i++)
+        dset_data->arr[i] = i + 2048;
+
+    if (H5Dwrite(dset, H5T_STD_I32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
+        TEST_ERROR;
+
+    /* CLEANUP */
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR;
+    dset = H5I_INVALID_HID;
+    if (H5Fclose(file_id) < 0)
+        TEST_ERROR;
+    file_id = H5I_INVALID_HID;
+
+    /*----------------------------------------------------------------------
+     * Third revision: open the file with Onion VFD and change the data
+     *----------------------------------------------------------------------
+     */
+    if ((file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id)) < 0)
+        TEST_ERROR;
+    if ((dset = H5Dopen(file_id, "DS1", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    for (int i = 0; i < ONE_DIM_SIZE; i += 20)
+        dset_data->arr[i] = i + 3072;
+
+    if (H5Dwrite(dset, H5T_STD_I32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
+        TEST_ERROR;
+
+    /* CLEANUP */
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR;
+    dset = H5I_INVALID_HID;
+    if (H5Fclose(file_id) < 0)
+        TEST_ERROR;
+    file_id = H5I_INVALID_HID;
+    if (H5Pclose(fapl_id) < 0)
+        TEST_ERROR;
+    fapl_id = H5I_INVALID_HID;
+
+    /*----------------------------------------------------------------------
+     *  Start to verify the revision with H5Pset_driver_by_name
+     *----------------------------------------------------------------------
+     */
+    /*----------------------------------------------------------------------
+     * Verify the second revision
+     *----------------------------------------------------------------------
+     */
+    if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+    if (H5Pset_driver_by_name(fapl_id, "onion", "{revision_num: 2; page_size: 4; }") < 0)
+        TEST_ERROR;
+
+    if ((file_id = H5Fopen(paths->canon, H5F_ACC_RDONLY, fapl_id)) < 0)
+        TEST_ERROR;
+    if ((dset = H5Dopen(file_id, "DS1", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if (H5Dread(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata) < 0)
+        TEST_ERROR;
+
+    for (int i = 0; i < ONE_DIM_SIZE; i += 20) {
+        int expected = i + 2048;
+        if (rdata->arr[i] != expected) {
+            HDprintf("ERROR!!! Expected: %d, Got: %d\n", expected, rdata->arr[i]);
+            TEST_ERROR;
+        }
+    }
+
+    /* Close everything */
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR;
+    if (H5Fclose(file_id) < 0)
+        TEST_ERROR;
+
+    if (H5Pclose(fapl_id) < 0)
+        TEST_ERROR;
+
+    HDremove(paths->canon);
+    HDremove(paths->onion);
+    HDremove(paths->recovery);
+    onion_filepaths_destroy(paths);
+
+    HDfree(wdata);
+    HDfree(rdata);
+    HDfree(dset_data);
+
+    PASSED();
+    return 0;
+
+error:
+
+    if (paths != NULL) {
+        HDremove(paths->canon);
+        HDremove(paths->onion);
+        HDremove(paths->recovery);
+        onion_filepaths_destroy(paths);
+    }
+
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(dset);
+        H5Fclose(file_id);
+        H5Pclose(fapl_id);
+    }
+    H5E_END_TRY;
+
+    HDfree(wdata);
+    HDfree(rdata);
+    HDfree(dset_data);
+
+    return -1;
+} /* end test_integration_create_simple() */
+
 /*-----------------------------------------------------------------------------
  *
  * Function:     main()
@@ -4645,6 +4901,7 @@ main(void)
     nerrors -= test_integration_dset_extension();
     nerrors -= test_integration_ctl();
     nerrors -= test_integration_reference();
+    nerrors -= test_integration_create_by_name();
 
     if (nerrors > 0) {
         HDprintf("***** %d Onion TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
