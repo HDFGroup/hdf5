@@ -1430,11 +1430,13 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t chunk_size, const uint8_t
             oh->nmesgs++;
 
             /* Initialize information about message */
-            mesg->dirty    = FALSE;
-            mesg->flags    = flags;
-            mesg->crt_idx  = crt_idx;
-            mesg->native   = NULL;
-            mesg->raw      = (uint8_t *)chunk_image; /* Casting away const OK - QAK */
+            mesg->dirty   = FALSE;
+            mesg->flags   = flags;
+            mesg->crt_idx = crt_idx;
+            mesg->native  = NULL;
+            H5_GCC_CLANG_DIAG_OFF("cast-qual")
+            mesg->raw = (uint8_t *)chunk_image;
+            H5_GCC_CLANG_DIAG_ON("cast-qual")
             mesg->raw_size = mesg_size;
             mesg->chunkno  = chunkno;
 
@@ -1637,10 +1639,12 @@ H5O__chunk_serialize(const H5F_t *f, H5O_t *oh, unsigned chunkno)
 
     /* Encode any dirty messages in this chunk */
     for (u = 0, curr_msg = &oh->mesg[0]; u < oh->nmesgs; u++, curr_msg++)
-        if (curr_msg->dirty && curr_msg->chunkno == chunkno)
-            /* Casting away const OK -QAK */
+        if (curr_msg->dirty && curr_msg->chunkno == chunkno) {
+            H5_GCC_CLANG_DIAG_OFF("cast-qual")
             if (H5O_msg_flush((H5F_t *)f, oh, curr_msg) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "unable to encode object header message")
+            H5_GCC_CLANG_DIAG_ON("cast-qual")
+        }
 
     /* Sanity checks */
     if (oh->version > H5O_VERSION_1)

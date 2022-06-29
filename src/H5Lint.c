@@ -595,8 +595,9 @@ H5L__link_cb(H5G_loc_t *grp_loc /*in*/, const char *name, const H5O_link_t H5_AT
         udata->lnk->cset = H5F_DEFAULT_CSET; /* Default character encoding for link */
 
     /* Set the link's name correctly */
-    /* Casting away const OK -QAK */
+    H5_GCC_CLANG_DIAG_OFF("cast-qual")
     udata->lnk->name = (char *)name;
+    H5_GCC_CLANG_DIAG_ON("cast-qual")
 
     /* Insert link into group */
     if (H5G_obj_insert(grp_loc->oloc, name, udata->lnk, TRUE,
@@ -1374,9 +1375,10 @@ H5L__move_dest_cb(H5G_loc_t *grp_loc /*in*/, const char *name, const H5O_link_t 
             HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "moving a link across files is not allowed")
 
     /* Give the object its new name */
-    /* Casting away const okay -JML */
     HDassert(udata->lnk->name == NULL);
+    H5_GCC_CLANG_DIAG_OFF("cast-qual")
     udata->lnk->name = (char *)name;
+    H5_GCC_CLANG_DIAG_ON("cast-qual")
 
     /* Insert the link into the group */
     if (H5G_obj_insert(grp_loc->oloc, name, udata->lnk, TRUE, H5O_TYPE_UNKNOWN, NULL) < 0)
@@ -2123,7 +2125,9 @@ H5L__link_copy_file(H5F_t *dst_file, const H5O_link_t *_src_lnk, const H5O_loc_t
         /* Set up group location for link */
         H5G_name_reset(&lnk_grp_path);
         lnk_grp_loc.path = &lnk_grp_path;
-        lnk_grp_loc.oloc = (H5O_loc_t *)src_oloc; /* Casting away const OK -QAK */
+        H5_GCC_CLANG_DIAG_OFF("cast-qual")
+        lnk_grp_loc.oloc = (H5O_loc_t *)src_oloc;
+        H5_GCC_CLANG_DIAG_ON("cast-qual")
 
         /* Check if the target object exists */
         if (H5G_loc_exists(&lnk_grp_loc, src_lnk->name, &tar_exists) < 0)
