@@ -5,7 +5,8 @@ on:
   pull_request:
     branches: [ develop, hdf5_1_12, hdf5_1_10, hdf5_1_8 ]
     paths-ignore:
-    - '.github/**'
+    - '.github/CODEOWNERS'
+    - '.github/FUNDING.yml'
     - 'doc/**'
     - 'release_docs/**'
     - 'ACKNOWLEDGEMENTS'
