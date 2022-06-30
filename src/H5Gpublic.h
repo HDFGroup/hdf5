@@ -167,7 +167,7 @@ H5_DLL hid_t H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcp
  *          H5Gclose() when the group is no longer needed so that resource
  *          leaks will not develop.
  *
- * \see H5Olink(), H5Dcreate(), Using Identifiers
+ * \see H5Olink(), H5Dcreate(), \ref api-compat-macros
  *
  * \since 1.8.0
  *
