@@ -1,25 +1,18 @@
 /* -*- c-file-style: "stroustrup" -*- */
 
-
-//! <!-- [first_declare] -->
-  
-    DATASET "DSET1" {
-    DATATYPE  H5T_STD_I32LE
-    DATASPACE  SIMPLE { ( 4, 13 ) / ( 60, 100 ) }
-    :
-    :
-    }
-
 //! <!-- [first_declare] -->
 
+DATASET "DSET1" {DATATYPE H5T_STD_I32LE DATASPACE SIMPLE{(4, 13) / (60, 100)} : : }
+
+//! <!-- [first_declare] -->
 
 //! <!-- [first_reading] -->
 
-    /* open the HDF5 file */
-    fid = H5Fopen(FILE, H5F_ACC_RDWR, H5P_DEFAULT);
+/* open the HDF5 file */
+fid = H5Fopen(FILE, H5F_ACC_RDWR, H5P_DEFAULT);
 
-    /* open the dataset */
-    did = H5Dopen2(fid, "DSET1", H5P_DEFAULT);
+/* open the dataset */
+did = H5Dopen2(fid, "DSET1", H5P_DEFAULT);
         :
         :
     /* define hsize_t dims[2]; */
@@ -27,16 +20,15 @@
     /* get the dataset's current dimension sizes */
     H5LDget_dset_dims(did, dims);
 
-    /* extend the dataset by 2 */
-    new_dims[0] = dims[0] + 2; 
-    new_dims[1] = dims[1] + 2;
-    H5Dset_extent(did, new_dims) 
-     
-    /* write data to the extended dataset */
-        :
-        :
-    /* get the size of the dataset's data type */
-    type_size = H5LDget_dset_type_size(did, NULL);
+        /* extend the dataset by 2 */
+        new_dims[0] = dims[0] + 2;
+        new_dims[1] = dims[1] + 2;
+        H5Dset_extent(did, new_dims)
+
+            /* write data to the extended dataset */
+            : :
+            /* get the size of the dataset's data type */
+            type_size = H5LDget_dset_type_size(did, NULL);
         :
         :
     /* allocate buffer for storing selected data elements from the dataset */
@@ -49,12 +41,11 @@
         :
         :
     H5Dclose(did);
-    H5Fclose(fid);
+        H5Fclose(fid);
 
-//! <!-- [first_reading] -->
+        //! <!-- [first_reading] -->
 
-
-//! <!-- [first_output] -->
+        //! <!-- [first_output] -->
 
     data for elements (0, 13), (0, 14) 
     data for elements (1, 13), (1, 14) 
@@ -71,27 +62,34 @@
     DATASET "DSET2" {
     DATATYPE  H5T_COMPOUND {
         H5T_STD_I32LE "a";
-        H5T_STD_I32LE "b";
-        H5T_ARRAY { [4] H5T_STD_I32LE } "c";
-        H5T_STD_I32LE "d";
-        H5T_STD_I32LE "e";
-        H5T_COMPOUND {
+    H5T_STD_I32LE "b";
+    H5T_ARRAY
+    {
+        [4] H5T_STD_I32LE
+    }
+    "c";
+    H5T_STD_I32LE "d";
+    H5T_STD_I32LE "e";
+    H5T_COMPOUND
+    {
         H5T_STD_I32LE "a";
         H5T_STD_I32LE "b";
-        H5T_ARRAY {[4] H5T_STD_I32LE} "c";
+        H5T_ARRAY
+        {
+            [4] H5T_STD_I32LE
+        }
+        "c";
         H5T_STD_I32LE "d";
         H5T_STD_I32LE "e";
-        } "s2";
     }
-    DATASPACE  SIMPLE { ( 5 ) / ( 5 ) }
-    :
-    :
+    "s2";
+    }
+    DATASPACE SIMPLE{(5) / (5)} ::
     }
 
-//! <!-- [second_declare] -->
+    //! <!-- [second_declare] -->
 
-
-//! <!-- [second_reading] -->
+    //! <!-- [second_reading] -->
 
     /* open the HDF5 file */
     fid = H5Fopen(FILE, H5F_ACC_RDWR, H5P_DEFAULT);
@@ -106,9 +104,9 @@
     /* get the dataset's current dimension size */
     H5LDget_dset_dims(did, dims);
 
-    /* extend the dataset by 2 */
-    new_dims[0] = dims[0] + 2;
-    H5Dset_extent(did, new_dims);
+        /* extend the dataset by 2 */
+        new_dims[0] = dims[0] + 2;
+        H5Dset_extent(did, new_dims);
         :
         :
     /* write data to the extended part of the dataset */
@@ -129,12 +127,11 @@
         :
         :
     H5Dclose(did);
-    H5Fclose(fid);
+        H5Fclose(fid);
 
-//! <!-- [second_reading] -->
+        //! <!-- [second_reading] -->
 
-
-//! <!-- [second_output] -->
+        //! <!-- [second_output] -->
 
     Data for element (5): integer value for "d", 4 integer values for array "s2.c"
     Data for element (6): integer value for "d", 4 integer values for array "s2.c"
