@@ -73,7 +73,7 @@ extern "C" {
  * - \ref H5PTget_type
  *   \n Returns the backend datatype of this packet table.
  * - \ref H5PTis_valid 
- *   \n Determines whether an indentifier points to a packet table.
+ *   \n Determines whether an identifier points to a packet table.
  * - \ref H5PTis_varlen
  *   \n Determines whether a packet table contains variable-length 
  *      or fixed-length packets.
@@ -327,7 +327,7 @@ H5_HLDLL herr_t H5PTget_num_packets(hid_t table_id, hsize_t *nrecords);
  * --------------------------------------------------------------------------
  * \ingroup H5PT
  *
- * \brief Determines whether an indentifier points to a packet table.
+ * \brief Determines whether an identifier points to a packet table.
  *
  * \param[in] table_id  Identifier to query
  *

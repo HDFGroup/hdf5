@@ -309,7 +309,7 @@ H5_HLRDLL herr_t H5LRcopy_region(hid_t obj_id,
  *
  *          \p index_type specifies the index to be used. 
  *          Valid values include the following:
- *          - #H5_INDEX_NAME        Alpha-numeric index on name
+ *          - #H5_INDEX_NAME        Alphanumeric index on name
  *          - #H5_INDEX_CRT_ORDER   Index on creation order
  *          .
  *

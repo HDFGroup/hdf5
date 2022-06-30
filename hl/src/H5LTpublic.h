@@ -176,7 +176,7 @@ extern "C" {
  *          of <em>signed \e integer datatype</em>.
  *
  * \version 1.10.0 Fortran 2003 subroutine added to accept a C address of the data buffer.
- * \version 1.8.7 Fortran subroutine modified in this release to accomodate arrays 
+ * \version 1.8.7 Fortran subroutine modified in this release to accommodate arrays 
  *                with more than three dimensions.
  *
  */
@@ -253,7 +253,7 @@ H5_HLDLL herr_t H5LTmake_dataset_short(hid_t loc_id, const char *dset_name, int 
  *          The dataset’s datatype will be <em>native signed integer</em>, 
  *          #H5T_NATIVE_INT.
  *
- * \version Fortran subroutine modified in this release to accomodate 
+ * \version Fortran subroutine modified in this release to accommodate 
  *          arrays with more than three dimensions.
  *
  */
@@ -306,7 +306,7 @@ H5_HLDLL herr_t H5LTmake_dataset_long(hid_t loc_id, const char *dset_name, int r
  *          The dataset’s datatype will be <em>native floating point</em>, 
  *          #H5T_NATIVE_FLOAT.
  *
- * \version 1.8.7 Fortran subroutine modified in this release to accomodate 
+ * \version 1.8.7 Fortran subroutine modified in this release to accommodate 
  *                arrays with more than three dimensions.
  *
  */
@@ -334,7 +334,7 @@ H5_HLDLL herr_t H5LTmake_dataset_float(hid_t loc_id, const char *dset_name, int 
  *          The dataset’s datatype will be 
  *          <em>native floating-point double</em>, #H5T_NATIVE_DOUBLE.
  *
- * \version 1.8.7 Fortran subroutine modified in this release to accomodate 
+ * \version 1.8.7 Fortran subroutine modified in this release to accommodate 
  *                arrays with more than three dimensions.
  *
  */
@@ -389,7 +389,7 @@ H5_HLDLL herr_t H5LTmake_dataset_string(hid_t loc_id, const char *dset_name, con
  * \version 1.10.0  Fortran 2003 subroutine added to accept a C 
  *                  address of the data buffer.
  * \version 1.8.7   Fortran subroutine modified in this release to 
- *                  accomodate arrays with more than three dimensions.
+ *                  accommodate arrays with more than three dimensions.
  *
  */
 H5_HLDLL herr_t H5LTread_dataset(hid_t loc_id, const char *dset_name, hid_t type_id, void *buffer);
@@ -449,7 +449,7 @@ H5_HLDLL herr_t H5LTread_dataset_short(hid_t loc_id, const char *dset_name, shor
  *          The HDF5 datatype is #H5T_NATIVE_INT.
  *
  * \version 1.8.7 Fortran subroutine modified in this release to 
- *                accomodate arrays with more than three dimensions.
+ *                accommodate arrays with more than three dimensions.
  *
  */
 H5_HLDLL herr_t H5LTread_dataset_int(hid_t loc_id, const char *dset_name, int *buffer);
@@ -490,7 +490,7 @@ H5_HLDLL herr_t H5LTread_dataset_long(hid_t loc_id, const char *dset_name, long 
  *          The HDF5 datatype is #H5T_NATIVE_FLOAT.
  *
  * \version 1.8.7 Fortran subroutine modified in this release to 
- *                accomodate arrays with more than three dimensions.
+ *                accommodate arrays with more than three dimensions.
  */
 H5_HLDLL herr_t H5LTread_dataset_float(hid_t loc_id, const char *dset_name, float *buffer);
 
@@ -511,7 +511,7 @@ H5_HLDLL herr_t H5LTread_dataset_float(hid_t loc_id, const char *dset_name, floa
  *          The HDF5 datatype is #H5T_NATIVE_DOUBLE.
  *
  * \version 1.8.7 Fortran subroutine modified in this release to 
- *                accomodate arrays with more than three dimensions.
+ *                accommodate arrays with more than three dimensions.
  */
 H5_HLDLL herr_t H5LTread_dataset_double(hid_t loc_id, const char *dset_name, double *buffer);
 
@@ -1538,7 +1538,7 @@ H5_HLDLL herr_t H5LTfind_attribute(hid_t loc_id, const char *name);
  *       A call to H5LTpath_valid() with arguments ‘root’, “/”, and 
  *       \p check_object_valid returns a positive value; 
  *       in other words, H5LTpath_valid(root, "/", check_object_valid)
- *       returns a postive value. 
+ *       returns a positive value. 
  *       In HDF5 version 1.8.16, this function returns 0.
  *
  * \version 1.10.0 Function behavior changed in this release. 
