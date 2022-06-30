@@ -1352,7 +1352,8 @@ esac
 ## Windows
 case "`uname`" in
   MINGW*)
-    AC_HAVE_LIBRARY([ws2_32])
+    # The Winsock library
+    AC_CHECK_LIB([ws2_32], [GetUserName])
     ;;
 esac
 
