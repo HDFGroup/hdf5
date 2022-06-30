@@ -493,7 +493,6 @@ endif ()
 if (MINGW OR NOT WINDOWS)
   foreach (other_test
       HAVE_ATTRIBUTE
-      HAVE_C99_DESIGNATED_INITIALIZER
       SYSTEM_SCOPE_THREADS
       HAVE_SOCKLEN_T
   )

@@ -98,10 +98,6 @@
 /* Define if the __attribute__(()) extension is present */
 #cmakedefine H5_HAVE_ATTRIBUTE @H5_HAVE_ATTRIBUTE@
 
-/* Define if the compiler understands C99 designated initialization of structs
-   and unions */
-#cmakedefine H5_HAVE_C99_DESIGNATED_INITIALIZER @H5_HAVE_C99_DESIGNATED_INITIALIZER@
-
 /* Define to 1 if you have the `clock_gettime' function. */
 #cmakedefine H5_HAVE_CLOCK_GETTIME @H5_HAVE_CLOCK_GETTIME@
 
