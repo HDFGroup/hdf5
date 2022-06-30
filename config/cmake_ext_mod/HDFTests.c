@@ -80,54 +80,6 @@ SIMPLE_TEST(timezone=0);
 
 #endif /* HAVE_TIMEZONE */
 
-#ifdef PRINTF_LL_WIDTH
-
-#ifdef HAVE_LONG_LONG
-#  define LL_TYPE long long
-#else /* HAVE_LONG_LONG */
-#  define LL_TYPE __int64
-#endif /* HAVE_LONG_LONG */
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#if defined(_MSC_VER) && defined(_DEBUG)
-# include <crtdbg.h>
-int DebugReport(int reportType, char* message, int* returnValue)
-{
-  (void)reportType;
-  (void)message;
-  (void)returnValue;
-  return 1; /* no further handling required */
-}
-#endif
-
-int main(void)
-{
-  char *llwidthArgs[] = { "I64", "l64", "ll", "l", "L", "q", NULL };
-  char *s = malloc(128);
-  char **currentArg = NULL;
-  LL_TYPE x = (LL_TYPE)1048576 * (LL_TYPE)1048576;
-  #if defined(_MSC_VER) && defined(_DEBUG)
-    _CrtSetReportHook(DebugReport);
-  #endif
-  for (currentArg = llwidthArgs; *currentArg != NULL; currentArg++)
-    {
-    char formatString[64];
-    snprintf(formatString, sizeof(formatString), "%%%sd", *currentArg);
-    snprintf(s, 128, formatString, x);
-    if (strcmp(s, "1099511627776") == 0)
-      {
-      printf("PRINTF_LL_WIDTH=[%s]\n", *currentArg);
-      return 0;
-      }
-    }
-  return 1;
-}
-
-#endif /* PRINTF_LL_WIDTH */
-
 #ifdef SYSTEM_SCOPE_THREADS
 #include <stdlib.h>
 #include <pthread.h>

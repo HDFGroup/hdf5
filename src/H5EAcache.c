@@ -638,7 +638,7 @@ H5EA__cache_iblock_get_initial_load_size(void *_udata, size_t *image_len)
 
     /* Set up fake index block for computing size on disk */
     HDmemset(&iblock, 0, sizeof(iblock));
-    iblock.hdr         = (H5EA_hdr_t *)hdr; /* Casting away 'const' OK - QAK */
+    iblock.hdr         = (H5EA_hdr_t *)hdr;
     iblock.nsblks      = H5EA_SBLK_FIRST_IDX(hdr->cparam.sup_blk_min_data_ptrs);
     iblock.ndblk_addrs = 2 * ((size_t)hdr->cparam.sup_blk_min_data_ptrs - 1);
     iblock.nsblk_addrs = hdr->nsblks - iblock.nsblks;

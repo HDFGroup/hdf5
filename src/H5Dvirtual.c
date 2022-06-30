@@ -527,8 +527,7 @@ H5D__virtual_store_layout(H5F_t *f, H5O_layout_t *layout)
         UINT32ENCODE(heap_block_p, chksum)
 
         /* Insert block into global heap */
-        if (H5HG_insert(f, block_size, heap_block, &(virt->serial_list_hobjid)) <
-            0) /* Casting away const OK  --NAF */
+        if (H5HG_insert(f, block_size, heap_block, &(virt->serial_list_hobjid)) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "unable to insert virtual dataset heap block")
     } /* end if */
 

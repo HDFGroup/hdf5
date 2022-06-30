@@ -2737,7 +2737,7 @@ test_attr_dense_rename(hid_t fcpl, hid_t fapl)
             CHECK(ret, FAIL, "H5Aclose");
 
             /* Rename attribute */
-            HDsprintf(new_attrname, "new attr %02u", u);
+            HDsnprintf(new_attrname, sizeof(new_attrname), "new attr %02u", u);
 
             /* Rename attribute */
             ret = H5Arename_by_name(fid, DSET1_NAME, attrname, new_attrname, H5P_DEFAULT);
@@ -9015,7 +9015,7 @@ test_attr_shared_rename(hid_t fcpl, hid_t fapl)
                 VERIFY(is_dense, TRUE, "H5O__is_attr_dense_test");
 
             /* Create new attribute name */
-            HDsprintf(attrname2, "new attr %02u", u);
+            HDsnprintf(attrname2, sizeof(attrname2), "new attr %02u", u);
 
             /* Change second dataset's attribute's name */
             ret = H5Arename_by_name(fid, DSET2_NAME, attrname, attrname2, H5P_DEFAULT);
@@ -10126,7 +10126,7 @@ test_attr_bug2(hid_t fcpl, hid_t fapl)
 
     /* Create attributes on group */
     for (i = 0; i < BUG2_NATTR; i++) {
-        HDsprintf(aname, "%03u", i);
+        HDsnprintf(aname, sizeof(aname), "%03u", i);
         aid = H5Acreate2(gid, aname, H5T_STD_I32LE, sid, H5P_DEFAULT, H5P_DEFAULT);
         CHECK(aid, FAIL, "H5Acreate2");
 
@@ -10136,7 +10136,7 @@ test_attr_bug2(hid_t fcpl, hid_t fapl)
 
     /* Delete every other attribute */
     for (i = 1; i < BUG2_NATTR; i += 2) {
-        HDsprintf(aname, "%03u", i);
+        HDsnprintf(aname, sizeof(aname), "%03u", i);
         ret = H5Adelete(gid, aname);
         CHECK(ret, FAIL, "H5Adelete");
     }
@@ -10160,7 +10160,7 @@ test_attr_bug2(hid_t fcpl, hid_t fapl)
 
     /* Open an attribute in the middle */
     i = (BUG2_NATTR / 4) * 2;
-    HDsprintf(aname, "%03u", i);
+    HDsnprintf(aname, sizeof(aname), "%03u", i);
     aid = H5Aopen(gid, aname, H5P_DEFAULT);
     CHECK(aid, FAIL, "H5Aopen");
 
@@ -10203,7 +10203,7 @@ test_attr_bug2(hid_t fcpl, hid_t fapl)
 
     /* Create attributes on group */
     for (i = 0; i < BUG2_NATTR2; i++) {
-        HDsprintf(aname, "%03u", i);
+        HDsnprintf(aname, sizeof(aname), "%03u", i);
         aid = H5Acreate2(gid, aname, H5T_STD_I32LE, sid, H5P_DEFAULT, H5P_DEFAULT);
         CHECK(aid, FAIL, "H5Acreate2");
 
@@ -10213,7 +10213,7 @@ test_attr_bug2(hid_t fcpl, hid_t fapl)
 
     /* Delete every other attribute */
     for (i = 0; i < BUG2_NATTR2; i++) {
-        HDsprintf(aname, "%03u", i);
+        HDsnprintf(aname, sizeof(aname), "%03u", i);
         ret = H5Adelete(gid, aname);
         CHECK(ret, FAIL, "H5Adelete");
     }

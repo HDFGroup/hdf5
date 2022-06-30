@@ -5781,6 +5781,9 @@ H5_DLL herr_t H5Pget_dset_no_attrs_hint(hid_t dcpl_id, hbool_t *minimize);
  *          are null pointers then the corresponding information is not
  *          returned.
  *
+ * \note On Windows, off_t is typically a 32-bit signed long value, which
+ *       limits the valid offset that can be returned to 2 GiB.
+ *
  * \version 1.6.4 \p idx parameter type changed to unsigned.
  * \since 1.0.0
  *

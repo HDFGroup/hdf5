@@ -2462,11 +2462,11 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
                 break;
             case INT_LLONG:
                 HDmemcpy(aligned, saved + j * sizeof(long long), sizeof(long long));
-                HDfprintf(stdout, " %29" H5_PRINTF_LL_WIDTH "d\n", *((long long *)aligned));
+                HDfprintf(stdout, " %29lld\n", *((long long *)aligned));
                 break;
             case INT_ULLONG:
                 HDmemcpy(aligned, saved + j * sizeof(unsigned long long), sizeof(unsigned long long));
-                HDfprintf(stdout, " %29" H5_PRINTF_LL_WIDTH "u\n", *((unsigned long long *)aligned));
+                HDfprintf(stdout, " %29llu\n", *((unsigned long long *)aligned));
                 break;
             case FLT_FLOAT:
             case FLT_DOUBLE:
@@ -2516,11 +2516,11 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
                 break;
             case INT_LLONG:
                 HDmemcpy(aligned, buf + j * sizeof(long long), sizeof(long long));
-                HDfprintf(stdout, " %29" H5_PRINTF_LL_WIDTH "d\n", *((long long *)aligned));
+                HDfprintf(stdout, " %29lld\n", *((long long *)aligned));
                 break;
             case INT_ULLONG:
                 HDmemcpy(aligned, buf + j * sizeof(long long), sizeof(unsigned long long));
-                HDfprintf(stdout, " %29" H5_PRINTF_LL_WIDTH "u\n", *((unsigned long long *)aligned));
+                HDfprintf(stdout, " %29llu\n", *((unsigned long long *)aligned));
                 break;
             case FLT_FLOAT:
             case FLT_DOUBLE:
@@ -2561,10 +2561,10 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
                 HDprintf(" %29lu\n", *((unsigned long *)((void *)hw)));
                 break;
             case INT_LLONG:
-                HDfprintf(stdout, " %29" H5_PRINTF_LL_WIDTH "d\n", *((long long *)((void *)hw)));
+                HDfprintf(stdout, " %29lld\n", *((long long *)((void *)hw)));
                 break;
             case INT_ULLONG:
-                HDfprintf(stdout, " %29" H5_PRINTF_LL_WIDTH "u\n", *((unsigned long long *)((void *)hw)));
+                HDfprintf(stdout, " %29llu\n", *((unsigned long long *)((void *)hw)));
                 break;
             case FLT_FLOAT:
             case FLT_DOUBLE:
@@ -4398,11 +4398,11 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 break;
             case INT_LLONG:
                 HDmemcpy(aligned, saved + j * sizeof(long long), sizeof(long long));
-                HDfprintf(stdout, " %29" H5_PRINTF_LL_WIDTH "d\n", *((long long *)aligned));
+                HDfprintf(stdout, " %29lld\n", *((long long *)aligned));
                 break;
             case INT_ULLONG:
                 HDmemcpy(aligned, saved + j * sizeof(unsigned long long), sizeof(unsigned long long));
-                HDfprintf(stdout, " %29" H5_PRINTF_LL_WIDTH "u\n", *((unsigned long long *)aligned));
+                HDfprintf(stdout, " %29llu\n", *((unsigned long long *)aligned));
                 break;
             case FLT_FLOAT:
                 HDmemcpy(aligned, saved + j * sizeof(float), sizeof(float));
@@ -4461,11 +4461,11 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 break;
             case INT_LLONG:
                 HDmemcpy(aligned, buf + j * sizeof(long long), sizeof(long long));
-                HDfprintf(stdout, " %29" H5_PRINTF_LL_WIDTH "d\n", *((long long *)aligned));
+                HDfprintf(stdout, " %29lld\n", *((long long *)aligned));
                 break;
             case INT_ULLONG:
                 HDmemcpy(aligned, buf + j * sizeof(unsigned long long), sizeof(unsigned long long));
-                HDfprintf(stdout, " %29" H5_PRINTF_LL_WIDTH "u\n", *((unsigned long long *)aligned));
+                HDfprintf(stdout, " %29llu\n", *((unsigned long long *)aligned));
                 break;
             case FLT_FLOAT:
                 HDmemcpy(aligned, buf + j * sizeof(float), sizeof(float));
@@ -4515,10 +4515,10 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 HDprintf(" %29lu\n", *((unsigned long *)((void *)hw)));
                 break;
             case INT_LLONG:
-                HDfprintf(stdout, " %29" H5_PRINTF_LL_WIDTH "d\n", *((long long *)((void *)hw)));
+                HDfprintf(stdout, " %29lld\n", *((long long *)((void *)hw)));
                 break;
             case INT_ULLONG:
-                HDfprintf(stdout, " %29" H5_PRINTF_LL_WIDTH "u\n", *((unsigned long long *)((void *)hw)));
+                HDfprintf(stdout, " %29llu\n", *((unsigned long long *)((void *)hw)));
                 break;
             case FLT_FLOAT:
                 HDprintf(" %29f\n", (double)*((float *)((void *)hw)));
