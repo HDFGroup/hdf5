@@ -17,6 +17,7 @@
 #include <libgen.h>
 
 #include "H5subfiling_common.h"
+#include "H5subfiling_err.h"
 
 typedef struct {            /* Format of a context map entry  */
     uint64_t h5_file_id;    /* key value (linear search of the cache) */
@@ -42,13 +43,19 @@ typedef enum stat_category {
     TOTAL_STAT_COUNT
 } stat_category_t;
 
+/* Identifiers for HDF5's error API */
+hid_t H5subfiling_err_stack_g = H5I_INVALID_HID;
+hid_t H5subfiling_err_class_g = H5I_INVALID_HID;
+char  H5subfiling_mpi_error_str[MPI_MAX_ERROR_STRING];
+int   H5subfiling_mpi_error_str_len;
+
 static subfiling_context_t *sf_context_cache  = NULL;
 static sf_topology_t *      sf_topology_cache = NULL;
 
 static size_t sf_context_cache_limit  = 16;
 static size_t sf_topology_cache_limit = 4;
 
-static app_layout_t *sf_app_layout = NULL;
+app_layout_t *sf_app_layout = NULL;
 
 static file_map_to_context_t *sf_open_file_map = NULL;
 static int                    sf_file_map_size = 0;
@@ -769,6 +776,21 @@ H5_free_subfiling_object_int(subfiling_context_t *sf_context)
 {
     HDassert(sf_context);
 
+#ifdef H5_SUBFILING_DEBUG
+    if (sf_context->sf_logfile) {
+        struct tm *tm = NULL;
+        time_t     cur_time;
+
+        cur_time = time(NULL);
+        tm       = localtime(&cur_time);
+
+        H5_subfiling_log(sf_context->sf_context_id, "\n-- LOGGING FINISH - %s", asctime(tm));
+
+        HDfclose(sf_context->sf_logfile);
+        sf_context->sf_logfile = NULL;
+    }
+#endif
+
     sf_context->sf_context_id           = -1;
     sf_context->h5_file_id              = UINT64_MAX;
     sf_context->sf_fid                  = -1;
@@ -827,13 +849,6 @@ H5_free_subfiling_object_int(subfiling_context_t *sf_context)
         return FAIL;
     sf_context->topology = NULL;
 
-#ifdef H5_SUBFILING_DEBUG
-    if (sf_context->sf_logfile) {
-        HDfclose(sf_context->sf_logfile);
-        sf_context->sf_logfile = NULL;
-    }
-#endif
-
     return SUCCEED;
 }
 
@@ -846,24 +861,32 @@ H5_free_subfiling_topology(sf_topology_t *topology)
     topology->n_io_concentrators = 0;
 
     HDfree(topology->subfile_fd);
+    topology->subfile_fd = NULL;
 
     /*
-     * NOTE: This assumes that a single allocation is used
-     * to allocate space for the app layout structure and
-     * its contents. This will need to be revised if that
-     * changes.
+     * The below assumes that the subfiling application layout
+     * is retrieved once and used for subsequent file opens for
+     * the duration that the Subfiling VFD is in use
      */
-    if (topology->app_layout) {
+    HDassert(topology->app_layout == sf_app_layout);
+
+#if 0
+    if (topology->app_layout && (topology->app_layout != sf_app_layout)) {
         HDfree(topology->app_layout->layout);
+        topology->app_layout->layout = NULL;
+
         HDfree(topology->app_layout->node_ranks);
+        topology->app_layout->node_ranks = NULL;
+
         HDfree(topology->app_layout);
     }
+#endif
+
     topology->app_layout = NULL;
 
-    /* TODO: */
-    sf_app_layout = NULL;
-
     HDfree(topology->io_concentrators);
+    topology->io_concentrators = NULL;
+
     HDfree(topology);
 
     return SUCCEED;
@@ -996,7 +1019,9 @@ H5_open_subfiles(const char *base_filename, uint64_t h5_file_id, ioc_selection_t
 
 #ifdef H5_SUBFILING_DEBUG
     {
-        int mpi_rank;
+        struct tm *tm = NULL;
+        time_t     cur_time;
+        int        mpi_rank;
 
         /* Open debugging logfile */
 
@@ -1008,11 +1033,16 @@ H5_open_subfiles(const char *base_filename, uint64_t h5_file_id, ioc_selection_t
 
         HDsnprintf(sf_context->sf_logfile_name, PATH_MAX, "%s.log.%d", sf_context->h5_filename, mpi_rank);
 
-        if (NULL == (sf_context->sf_logfile = HDfopen(sf_context->sf_logfile_name, "w"))) {
+        if (NULL == (sf_context->sf_logfile = HDfopen(sf_context->sf_logfile_name, "a"))) {
             HDprintf("%s: couldn't open subfiling debug logfile\n", __func__);
             ret_value = FAIL;
             goto done;
         }
+
+        cur_time = time(NULL);
+        tm       = localtime(&cur_time);
+
+        H5_subfiling_log(context_id, "-- LOGGING BEGIN - %s", asctime(tm));
     }
 #endif
 
@@ -1054,6 +1084,8 @@ done:
             HDprintf("%s: couldn't free subfiling object\n", __func__);
 #endif
         }
+
+        *context_id_out = -1;
     }
 
     return ret_value;
@@ -1347,19 +1379,18 @@ init_app_topology(ioc_selection_t ioc_selection_type, MPI_Comm comm, sf_topology
             ret_value = FAIL;
             goto done;
         }
+
+        /*
+         * Once the application layout has been filled once, any additional
+         * file open operations won't be required to gather that information.
+         */
+        sf_app_layout = app_layout;
     }
 
     app_layout->world_size = comm_size;
     app_layout->world_rank = comm_rank;
 
-    /*
-     * Once the application layout has been filled once, any additional
-     * file open operations won't be required to gather that information.
-     */
     app_topology->app_layout = app_layout;
-
-    /* TODO */
-    sf_app_layout = app_layout;
 
     /*
      * Determine which ranks are I/O concentrator ranks, based on the
@@ -2008,15 +2039,8 @@ ioc_open_file(sf_work_request_t *msg, int file_acc_flags)
     mutex_locked = TRUE;
 
     /* Attempt to create/open the subfile for this IOC rank */
-    if ((fd = HDopen(filepath, file_acc_flags, mode)) < 0) {
-#ifdef H5_SUBFILING_DEBUG
-        H5_subfiling_log(sf_context->sf_context_id, "%s: failed to open subfile '%s' - %s", __func__,
-                         filepath, strerror(errno));
-#endif
-
-        ret_value = FAIL;
-        goto done;
-    }
+    if ((fd = HDopen(filepath, file_acc_flags, mode)) < 0)
+        H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "failed to open subfile");
 
     sf_context->sf_fid = fd;
     if (file_acc_flags & O_CREAT)
@@ -2027,15 +2051,9 @@ ioc_open_file(sf_work_request_t *msg, int file_acc_flags)
      * check if we also need to create a config file.
      */
     if ((file_acc_flags & O_CREAT) && (sf_context->topology->subfile_rank == 0)) {
-        if (create_config_file(sf_context, base, subfile_dir, (file_acc_flags & O_TRUNC)) < 0) {
-#ifdef H5_SUBFILING_DEBUG
-            H5_subfiling_log(sf_context->sf_context_id, "%s: couldn't create subfiling configuration file\n",
-                             __func__);
-#endif
-
-            ret_value = FAIL;
-            goto done;
-        }
+        if (create_config_file(sf_context, base, subfile_dir, (file_acc_flags & O_TRUNC)) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTCREATE, FAIL,
+                                    "couldn't create subfiling configuration file");
     }
 
 done:
@@ -2945,7 +2963,7 @@ H5_subfiling_log(int64_t sf_context_id, const char *fmt, ...)
     /* Retrieve the subfiling object for the newly-created context ID */
     if (NULL == (sf_context = H5_get_subfiling_object(sf_context_id))) {
         HDprintf("%s: couldn't get subfiling object from context ID\n", __func__);
-        return;
+        goto done;
     }
 
     begin_thread_exclusive();

@@ -94,8 +94,6 @@ H5_DLL void   H5FD_ioc_wait_thread_main(void);
 H5_DLL void   H5FD_ioc_finalize_threads(void);
 H5_DLL void   begin_thread_exclusive(void);
 H5_DLL void   end_thread_exclusive(void);
-H5_DLL void   ioc__wait_for_serialize(void *msg);
-H5_DLL void   ioc__release_dependency(int qid);
 
 #ifdef __cplusplus
 }

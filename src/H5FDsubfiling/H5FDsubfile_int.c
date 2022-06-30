@@ -79,14 +79,12 @@ H5FD__subfiling__truncate_sub_files(hid_t context_id, int64_t logical_file_eof, 
     };
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
-
     /* Barrier on entry */
     if (MPI_SUCCESS != (mpi_code = MPI_Barrier(comm)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code)
+        H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code);
 
     if (NULL == (sf_context = (subfiling_context_t *)H5_get_subfiling_object(context_id)))
-        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "can't get subfile context")
+        H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "can't get subfile context");
 
     /* Test to see if this rank is running an I/O concentrator. */
 
@@ -154,17 +152,16 @@ H5FD__subfiling__truncate_sub_files(hid_t context_id, int64_t logical_file_eof, 
             (mpi_code = MPI_Send(msg, 3, MPI_INT64_T,
                                  sf_context->topology->io_concentrators[sf_context->topology->subfile_rank],
                                  TRUNC_OP, sf_context->sf_msg_comm)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Send failed", mpi_code)
+            H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Send failed", mpi_code);
     }
 
     /* Barrier on exit */
     if (MPI_SUCCESS != (mpi_code = MPI_Barrier(comm)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code)
+        H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code);
 
 done:
 
-    FUNC_LEAVE_NOAPI(ret_value)
-
+    H5_SUBFILING_FUNC_LEAVE;
 } /* H5FD__subfiling__truncate_sub_files() */
 
 /*-------------------------------------------------------------------------
@@ -217,12 +214,10 @@ H5FD__subfiling__get_real_eof(hid_t context_id, int64_t *logical_eof_ptr)
     int                  mpi_code;               /* MPI return code */
     herr_t               ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
-
     HDassert(logical_eof_ptr);
 
     if (NULL == (sf_context = (subfiling_context_t *)H5_get_subfiling_object(context_id)))
-        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "can't get subfile context")
+        H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "can't get subfile context");
 
     HDassert(sf_context->topology);
 
@@ -231,11 +226,11 @@ H5FD__subfiling__get_real_eof(hid_t context_id, int64_t *logical_eof_ptr)
     HDassert(n_io_concentrators > 0);
 
     if (NULL == (sf_eofs = HDmalloc((size_t)n_io_concentrators * sizeof(int64_t))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate sub-file EOFs array");
+        H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate sub-file EOFs array");
     if (NULL == (recv_reqs = HDmalloc((size_t)n_io_concentrators * sizeof(*recv_reqs))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate receive requests array");
+        H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate receive requests array");
     if (NULL == (recv_msg = HDmalloc((size_t)n_io_concentrators * 3 * sizeof(*recv_msg))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate message array");
+        H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate message array");
 
     for (int i = 0; i < n_io_concentrators; i++) {
         sf_eofs[i]   = -1;
@@ -248,7 +243,7 @@ H5FD__subfiling__get_real_eof(hid_t context_id, int64_t *logical_eof_ptr)
 
         if (MPI_SUCCESS != (mpi_code = MPI_Irecv(&recv_msg[3 * i], 3, MPI_INT64_T, ioc_rank,
                                                  GET_EOF_COMPLETED, sf_context->sf_eof_comm, &recv_reqs[i])))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Irecv", mpi_code);
+            H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Irecv", mpi_code);
     }
 
     /* Send each IOC a message requesting that subfile's EOF */
@@ -262,12 +257,12 @@ H5FD__subfiling__get_real_eof(hid_t context_id, int64_t *logical_eof_ptr)
 
         if (MPI_SUCCESS !=
             (mpi_code = MPI_Send(msg, 3, MPI_INT64_T, ioc_rank, GET_EOF_OP, sf_context->sf_msg_comm)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_Send", mpi_code);
+            H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Send", mpi_code);
     }
 
     /* Wait for EOF communication to complete */
     if (MPI_SUCCESS != (mpi_code = MPI_Waitall(n_io_concentrators, recv_reqs, MPI_STATUSES_IGNORE)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Waitall", mpi_code)
+        H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Waitall", mpi_code);
 
     for (int i = 0; i < n_io_concentrators; i++) {
         int ioc_rank = (int)recv_msg[3 * i];
@@ -320,7 +315,7 @@ done:
         for (int i = 0; i < n_io_concentrators; i++) {
             if (recv_reqs && (recv_reqs[i] != MPI_REQUEST_NULL)) {
                 if (MPI_SUCCESS != (mpi_code = MPI_Cancel(&recv_reqs[i])))
-                    HMPI_DONE_ERROR(FAIL, "MPI_Cancel", mpi_code);
+                    H5_SUBFILING_MPI_DONE_ERROR(FAIL, "MPI_Cancel", mpi_code);
             }
         }
     }
@@ -329,5 +324,5 @@ done:
     HDfree(recv_reqs);
     HDfree(sf_eofs);
 
-    FUNC_LEAVE_NOAPI(ret_value)
+    H5_SUBFILING_FUNC_LEAVE;
 } /* H5FD__subfiling__get_real_eof() */

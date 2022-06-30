@@ -39,6 +39,7 @@
 #include "H5Pprivate.h"    /* Property lists                           */
 
 #include "H5subfiling_common.h"
+#include "H5subfiling_err.h"
 
 /*
  * Some definitions for debugging the Subfiling VFD

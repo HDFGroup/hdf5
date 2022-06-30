@@ -229,6 +229,8 @@ extern int        sf_verbose_flag;
 extern atomic_int sf_file_open_count;
 extern atomic_int sf_shutdown_flag;
 
+extern app_layout_t *sf_app_layout;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
