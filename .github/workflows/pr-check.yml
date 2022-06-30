@@ -5,7 +5,8 @@ on:
   pull_request:
     branches: [ develop, hdf5_1_12, hdf5_1_10, hdf5_1_8 ]
     paths-ignore:
-    - '.github/**'
+    - '.github/CODEOWNERS'
+    - '.github/FUNDING.yml'
     - 'doc/**'
     - 'release_docs/**'
     - 'ACKNOWLEDGEMENTS'
@@ -19,7 +20,7 @@ jobs:
     strategy:
 #      fail-fast: false
       matrix:
-        name: ["Windows Latest MSVC", "Ubuntu Latest GCC", "Ubuntu Debug GCC", "macOS Latest Clang", "Ubuntu Autotools GCC", "Windows TS MSVC", "Ubuntu TS GCC", "TS Debug GCC", "macOS TS Clang", "TS Autotools GCC"]
+        name: ["Windows Latest MSVC", "Ubuntu Latest GCC", "Ubuntu Debug GCC", "macOS Latest Clang", "Ubuntu Autotools GCC", "Ubuntu Debug Autotools GCC", "Windows TS MSVC", "Ubuntu TS GCC", "TS Debug GCC", "macOS TS Clang", "TS Autotools GCC"]
         include:
           - name: "Windows Latest MSVC"
             artifact: "Windows-MSVC.tar.xz"
@@ -72,7 +73,19 @@ jobs:
           - name: "Ubuntu Autotools GCC"
             artifact: "LinuxA.tar.xz"
             os: ubuntu-latest
-            build_type: "Release"
+            build_type: "production"
+            cpp: enable
+            fortran: enable
+            java: enable
+            ts: disable
+            hl: enable
+            parallel: disable
+            toolchain: ""
+            generator: "autogen"
+          - name: "Ubuntu Debug Autotools GCC"
+            artifact: "LinuxA.tar.xz"
+            os: ubuntu-latest
+            build_type: "debug"
             cpp: enable
             fortran: enable
             java: enable
@@ -133,7 +146,7 @@ jobs:
           - name: "TS Autotools GCC"
             artifact: "LinuxATS.tar.xz"
             os: ubuntu-latest
-            build_type: "Release"
+            build_type: "production"
             cpp: disable
             fortran: disable
             java: disable
@@ -142,15 +155,6 @@ jobs:
             parallel: disable
             toolchain: ""
             generator: "autogen"
-#          - name: "Ubuntu Parallel GCC"
-#            artifact: "LinuxPar.tar.xz"
-#            os: ubuntu-latest
-#            build_type: "Release"
-#            cpp: OFF
-#            fortran: OFF
-#            parallel: ON
-#            toolchain: "config/toolchain/GCC.cmake"
-#            generator: "-G Ninja"
 
     name: ${{ matrix.name }}
     # The type of runner that the job will run on
@@ -163,7 +167,11 @@ jobs:
       run: sudo apt-get install ninja-build
       if: matrix.os == 'ubuntu-latest'
     - name: Install Autotools Dependencies (Linux)
-      run: sudo apt-get install automake autoconf libtool libtool-bin
+      run: |
+           sudo apt update
+           sudo apt install automake autoconf libtool libtool-bin
+           sudo apt install gcc-11 g++-11 gfortran-11
+           sudo apt install openmpi-bin openmpi-common
       if: matrix.generator == 'autogen'
     - name: Install Dependencies (Windows)
       run: choco install ninja
@@ -188,8 +196,12 @@ jobs:
         sh ./autogen.sh
         mkdir "${{ runner.workspace }}/build"
         cd "${{ runner.workspace }}/build"
-        $GITHUB_WORKSPACE/configure --enable-shared --${{ matrix.ts }}-threadsafe --${{ matrix.hl }}-hl --${{ matrix.parallel }}-parallel --${{ matrix.cpp }}-cxx --${{ matrix.fortran }}-fortran --${{ matrix.java }}-java
+        $GITHUB_WORKSPACE/configure --enable-build-mode=${{ matrix.build_type }} --enable-shared --${{ matrix.ts }}-threadsafe --${{ matrix.hl }}-hl --${{ matrix.parallel }}-parallel --${{ matrix.cpp }}-cxx --${{ matrix.fortran }}-fortran --${{ matrix.java }}-java
       shell: bash
+      env:
+        CC:   gcc-11
+        CXX:  g++-11
+        FC:   gfortran-11
 
     - name: Configure
       if: matrix.generator != 'autogen'
