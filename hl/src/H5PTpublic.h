@@ -72,7 +72,7 @@ extern "C" {
  *   \n Returns the number of packets in a packet table.
  * - \ref H5PTget_type
  *   \n Returns the backend datatype of this packet table.
- * - \ref H5PTis_valid 
+ * - \ref H5PTis_valid
  *   \n Determines whether an identifier points to a packet table.
  * - \ref H5PTis_varlen
  *   \n Determines whether a packet table contains variable-length

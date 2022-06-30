@@ -84,7 +84,11 @@ did = H5Dopen2(fid, "DSET1", H5P_DEFAULT);
     }
     "s2";
     }
-    DATASPACE SIMPLE{(5) / (5)} ::
+    DATASPACE SIMPLE
+    {
+        (5) / (5)
+    }
+    ::
     }
 
     //! <!-- [second_declare] -->
