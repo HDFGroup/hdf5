@@ -28,6 +28,8 @@
 
 #define H5FD_IOC_NAME "ioc"
 
+#ifdef H5_HAVE_IOC_VFD
+
 #ifndef H5FD_IOC_FAPL_MAGIC
 #define H5FD_CURR_IOC_FAPL_VERSION 1
 #define H5FD_IOC_FAPL_MAGIC        0xFED21331
@@ -98,5 +100,7 @@ H5_DLL void   end_thread_exclusive(void);
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* H5_HAVE_IOC_VFD */
 
 #endif

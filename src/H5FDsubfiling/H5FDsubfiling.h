@@ -24,6 +24,8 @@
 
 #define H5FD_SUBFILING_NAME "subfiling"
 
+#ifdef H5_HAVE_SUBFILING_VFD
+
 #ifndef H5FD_SUBFILING_FAPL_MAGIC
 #define H5FD_CURR_SUBFILING_FAPL_VERSION 1
 #define H5FD_SUBFILING_FAPL_MAGIC        0xFED01331
@@ -193,5 +195,7 @@ H5_DLL herr_t H5Pget_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *conf
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* H5_HAVE_SUBFILING_VFD */
 
 #endif /* H5FDsubfiling_H */

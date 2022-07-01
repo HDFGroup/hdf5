@@ -156,7 +156,7 @@ include_HEADERS = hdf5.h H5api_adpt.h H5overflow.h H5pubconf.h H5public.h H5vers
         H5FDpublic.h H5FDcore.h H5FDdirect.h H5FDfamily.h H5FDhdfs.h \
         H5FDlog.h H5FDmirror.h H5FDmpi.h H5FDmpio.h H5FDmulti.h H5FDros3.h \
         H5FDsec2.h H5FDsplitter.h \
-        H5FDstdio.h H5FDwindows.h \
+        H5FDstdio.h H5FDwindows.h H5FDsubfiling/H5FDsubfiling.h H5FDsubfiling/H5FDioc.h \
         H5Gpublic.h  H5Ipublic.h H5Lpublic.h \
         H5Mpublic.h H5MMpublic.h H5Opublic.h H5Ppublic.h \
         H5PLextern.h H5PLpublic.h \
@@ -170,10 +170,6 @@ include_HEADERS += H5ESdevelop.h H5FDdevelop.h H5Idevelop.h H5Ldevelop.h \
         H5Tdevelop.h H5TSdevelop.h H5Zdevelop.h
 
 if SUBFILING_VFD_CONDITIONAL
-    include_HEADERS += H5FDsubfiling/H5FDsubfiling.h H5FDsubfiling/H5FDioc.h
-
-# TODO: eventually remove
-    include_HEADERS += H5FDsubfiling/H5FDsubfiling_priv.h H5FDsubfiling/H5FDioc_priv.h
 
 # Temporarily use internal Mercury until usage of Mercury is refactored
 if HAVE_MERCURY_CONDITIONAL

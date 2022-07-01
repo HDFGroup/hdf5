@@ -746,6 +746,8 @@ if (H5_HAVE_PARALLEL)
 endif ()
 
 # Determine whether to build the HDF5 Subfiling VFD
+set (H5FD_SUBFILING_DIR ${HDF5_SRC_DIR}/H5FDsubfiling)
+include_directories(${H5FD_SUBFILING_DIR})
 option (HDF5_ENABLE_SUBFILING_VFD "Build Parallel HDF5 Subfiling VFD" OFF)
 if (HDF5_ENABLE_SUBFILING_VFD)
   if (NOT HDF5_ENABLE_PARALLEL)
@@ -758,8 +760,6 @@ if (HDF5_ENABLE_SUBFILING_VFD)
     set (H5_HAVE_STDATOMIC_H 1)
   endif()
 
-  set (H5FD_SUBFILING_DIR ${HDF5_SRC_DIR}/H5FDsubfiling)
-  include_directories(${H5FD_SUBFILING_DIR})
   set (H5_HAVE_SUBFILING_VFD 1)
   # IOC VFD is currently only built when subfiling is enabled
   set (H5_HAVE_IOC_VFD 1)

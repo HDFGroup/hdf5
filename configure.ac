@@ -3189,6 +3189,10 @@ AC_SUBST([HAVE_MERCURY])
 SUBFILING_VFD=no
 HAVE_MERCURY="no"
 
+## Always include subfiling directory so public header files are available
+CPPFLAGS="$CPPFLAGS -I$ac_abs_confdir/src/H5FDsubfiling"
+AM_CPPFLAGS="$AM_CPPFLAGS -I$ac_abs_confdir/src/H5FDsubfiling"
+
 AC_MSG_CHECKING([if the subfiling I/O virtual file driver (VFD) is enabled])
 
 AC_ARG_ENABLE([subfiling-vfd],
@@ -3209,8 +3213,8 @@ if test "X$SUBFILING_VFD" = "Xyes"; then
     mercury_dir="$ac_abs_confdir/src/H5FDsubfiling/mercury"
     mercury_inc="$mercury_dir/include"
 
-    CPPFLAGS="$CPPFLAGS -I$mercury_inc -I$ac_abs_confdir/src/H5FDsubfiling"
-    AM_CPPFLAGS="$AM_CPPFLAGS -I$mercury_inc -I$ac_abs_confdir/src/H5FDsubfiling"
+    CPPFLAGS="$CPPFLAGS -I$mercury_inc"
+    AM_CPPFLAGS="$AM_CPPFLAGS -I$mercury_inc"
 
     if test "X${PARALLEL}" != "Xyes"; then
       AC_MSG_ERROR([--enable-parallel is required for --enable-subfiling-vfd])
