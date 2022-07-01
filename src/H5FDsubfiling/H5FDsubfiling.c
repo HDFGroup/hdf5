@@ -2289,9 +2289,9 @@ done:
  *
  *              At present, the supported op codes are:
  *
- *                  H5FD_CTL__GET_MPI_COMMUNICATOR_OPCODE
- *                  H5FD_CTL__GET_MPI_RANK_OPCODE
- *                  H5FD_CTL__GET_MPI_SIZE_OPCODE
+ *                  H5FD_CTL_GET_MPI_COMMUNICATOR_OPCODE
+ *                  H5FD_CTL_GET_MPI_RANK_OPCODE
+ *                  H5FD_CTL_GET_MPI_SIZE_OPCODE
  *
  *              Note that these opcodes must be supported by all VFDs that
  *              support MPI.
@@ -2315,7 +2315,7 @@ H5FD__subfiling_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void 
 
     switch (op_code) {
 
-        case H5FD_CTL__GET_MPI_COMMUNICATOR_OPCODE:
+        case H5FD_CTL_GET_MPI_COMMUNICATOR_OPCODE:
             HDassert(output);
             HDassert(*output);
 
@@ -2331,20 +2331,20 @@ H5FD__subfiling_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void 
             **((MPI_Comm **)output) = file->ext_comm;
             break;
 
-        case H5FD_CTL__GET_MPI_RANK_OPCODE:
+        case H5FD_CTL_GET_MPI_RANK_OPCODE:
             HDassert(output);
             HDassert(*output);
             **((int **)output) = file->mpi_rank;
             break;
 
-        case H5FD_CTL__GET_MPI_SIZE_OPCODE:
+        case H5FD_CTL_GET_MPI_SIZE_OPCODE:
             HDassert(output);
             HDassert(*output);
             **((int **)output) = file->mpi_size;
             break;
 
         default: /* unknown op code */
-            if (flags & H5FD_CTL__FAIL_IF_UNKNOWN_FLAG) {
+            if (flags & H5FD_CTL_FAIL_IF_UNKNOWN_FLAG) {
                 H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL, "unknown op_code and fail if unknown");
             }
             break;
