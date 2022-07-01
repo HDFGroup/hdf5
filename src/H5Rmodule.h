@@ -26,7 +26,7 @@
 #define H5_MY_PKG_INIT YES
 
 /**
- * \defgroup H5R H5R References
+ * \defgroup H5R H5R
  *
  * Use the functions in this module to manage HDF5 references. Referents can
  * be HDF5 objects, attributes, and selections on datasets a.k.a. dataset
