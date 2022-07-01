@@ -2140,21 +2140,6 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]],[[int __attribute__((unused)) x]])],
                  AC_MSG_RESULT([yes])],
                [AC_MSG_RESULT([no])])
 
-AC_MSG_CHECKING([for C99 designated initialization support])
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]], [[
-                typedef struct {
-                    int x;
-                    union {
-                        int i;
-                        double d;
-                    } u;
-                } di_struct_t;
-                di_struct_t x = {0, { .d = 0.0}}; ]])],
-               [AC_DEFINE([HAVE_C99_DESIGNATED_INITIALIZER], [1],
-                         [Define if the compiler understands C99 designated initialization of structs and unions])
-                 AC_MSG_RESULT([yes])],
-               [AC_MSG_RESULT([no])])
-
 ## ----------------------------------------------------------------------
 ## Remove old ways of determining debug/production build.
 ## These were used in 1.8.x and earlier. We should probably keep these checks

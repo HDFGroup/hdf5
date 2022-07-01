@@ -11,38 +11,6 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 #define SIMPLE_TEST(x) int main(){ x; return 0; }
 
-#ifdef HAVE_C99_DESIGNATED_INITIALIZER
-
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-extern "C"
-#  endif
-int FC_DUMMY_MAIN()
-{ return 1;}
-#endif
-#endif
-int
-main ()
-{
-
-  typedef struct
-  {
-    int x;
-    union
-    {
-      int i;
-      double d;
-    }u;
-  }di_struct_t;
-  di_struct_t x =
-  { 0,
-    { .d = 0.0}};
-  ;
-  return 0;
-}
-
-#endif
 
 #ifdef HAVE_ATTRIBUTE
 
