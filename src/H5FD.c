@@ -919,21 +919,19 @@ done:
  *
  * Purpose:     Private version of H5FDcmp()
  *
+ *              Uses H5FD_ctl() to obtain the terminal VFDs for f1 and f2.
+ *              Typically, these are the same thing, however, if there is an
+ *              intervening pass through VFD (i.e. splitter or VFD SWMR
+ *              reader), using the terminal VFD for the comparison will avoid
+ *              some false negatives.
+ *
+ *              Note, however, that we will still fail to detect the
+ *              case in which a given file is opened twice with different
+ *              terminal VFDs.
+ *
  * Return:      Success:    A value like strcmp()
  *
  *              Failure:    Must never fail.
- *
- * Changes:     Re-worked function to use H5FD_ctl() to obtain the terminal
- *              VFDs for f1 and f2.  Typically, these are the same thing,
- *              however, if there is an intervening pass through VFD
- *              (i.e. splitter of vfd swrmr reader vfd), using the terminal
- *              VFD for the comparison will avoid some false negatives.
- *
- *              Note, however, that we will still fail to detect the
- *              case in which a give file is opened twice with different
- *              terminal VFDs.
- *
- *                                           JRM -- 5/5/22
  *
  *-------------------------------------------------------------------------
  */
@@ -956,9 +954,16 @@ H5FD_cmp(const H5FD_t *f1, const H5FD_t *f2)
 
         H5E_BEGIN_TRY
         {
+            /* Using the generic ctl callback, which takes non-const parameters,
+             * to work with const data is going to cause the compiler to complain.
+             */
+            H5_GCC_CLANG_DIAG_OFF("discarded-qualifiers")
+            H5_GCC_CLANG_DIAG_OFF("cast-qual")
             ctl_result = H5FD_ctl(f1, H5FD_CTL_GET_TERMINAL_VFD,
                                   H5FD_CTL_FAIL_IF_UNKNOWN_FLAG | H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG, NULL,
                                   (void **)(&term_f1));
+            H5_GCC_CLANG_DIAG_ON("discarded-qualifiers")
+            H5_GCC_CLANG_DIAG_ON("cast-qual")
         }
         H5E_END_TRY;
 
@@ -977,9 +982,16 @@ H5FD_cmp(const H5FD_t *f1, const H5FD_t *f2)
 
         H5E_BEGIN_TRY
         {
+            /* Using the generic ctl callback, which takes non-const parameters,
+             * to work with const data is going to cause the compiler to complain.
+             */
+            H5_GCC_CLANG_DIAG_OFF("discarded-qualifiers")
+            H5_GCC_CLANG_DIAG_OFF("cast-qual")
             ctl_result = H5FD_ctl(f2, H5FD_CTL_GET_TERMINAL_VFD,
                                   H5FD_CTL_FAIL_IF_UNKNOWN_FLAG | H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG, NULL,
                                   (void **)(&term_f2));
+            H5_GCC_CLANG_DIAG_ON("discarded-qualifiers")
+            H5_GCC_CLANG_DIAG_ON("cast-qual")
         }
         H5E_END_TRY;
 
@@ -2323,8 +2335,10 @@ H5FDget_vfd_handle(H5FD_t *file, hid_t fapl_id, void **file_handle /*out*/)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get file handle for file driver")
 
 done:
-    if (FAIL == ret_value)
-        *file_handle = NULL;
+    if (FAIL == ret_value) {
+        if (file_handle)
+            *file_handle = NULL;
+    }
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5FDget_vfd_handle() */
