@@ -286,7 +286,7 @@ do_pio(parameters param)
         char base_name[256];
 
         HDsnprintf(base_name, sizeof(base_name), "#pio_tmp_%lu", nf);
-        pio_create_filename(iot, base_name, fname, sizeof(fname));
+        pio_create_filename(iot, base_name, fname, FILENAME_MAX);
         if (pio_debug_level > 0)
             HDfprintf(output, "rank %d: data filename=%s\n", pio_mpi_rank_g, fname);
 
