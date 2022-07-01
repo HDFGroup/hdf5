@@ -2707,10 +2707,13 @@ H5F__build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl, const char *n
             if (NULL == (new_fapl = (H5P_genplist_t *)H5I_object(new_fapl_id)))
                 HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, FAIL, "can't get property list")
 
-            /* Set the character encoding on the new property list */
+            /*
+             * Set the private property for retrieving the backing store
+             * POSIX file descriptor from the Core VFD
+             */
             want_posix_fd = TRUE;
             if (H5P_set(new_fapl, H5F_ACS_WANT_POSIX_FD_NAME, &want_posix_fd) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set character encoding")
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set property for retrieving file descriptor")
 
             /* Retrieve the file handle */
             if (H5F_get_vfd_handle(f, new_fapl_id, (void **)&fd) < 0)
