@@ -355,9 +355,9 @@ main(int argc, char **argv)
         errx(EXIT_FAILURE, "%s.%d H5Pcreate failed", __func__, __LINE__);
     }
 
-    config.version  = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
-    config.tick_len = 4;
-    config.max_lag  = 5;
+    config.version           = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
+    config.tick_len          = 4;
+    config.max_lag           = 5;
     config.writer            = true;
     config.md_pages_reserved = 128;
     strlcpy(config.md_file_path, "./my_md_file", sizeof(config.md_file_path));
