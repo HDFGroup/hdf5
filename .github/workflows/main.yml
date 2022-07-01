@@ -211,6 +211,23 @@ jobs:
         # Set these env vars so cmake picks the correct compiler
         echo "CXX=cl.exe" >> $GITHUB_ENV
         echo "CC=cl.exe" >> $GITHUB_ENV
+    - name: Set Autotools compilers
+      if: matrix.generator == 'autogen'
+      env:
+        CC:   gcc-11
+        CXX:  g++-11
+        FC:   gfortran-11
+    - name: Set Autotools compilers
+      if: matrix.generator == 'autogen' && matrix.parallel != 'enable'
+      env:
+        CC:   gcc-11
+        CXX:  g++-11
+        FC:   gfortran-11
+    - name: Set Autotools parallel compilers
+      if: matrix.generator == 'autogen' && matrix.parallel == 'enable'
+      env:
+        CC:   mpicc
+        FC:   mpifort
     
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - name: Get Sources
@@ -224,10 +241,6 @@ jobs:
         cd "${{ runner.workspace }}/build"
         ${{ matrix.flags }} $GITHUB_WORKSPACE/configure --enable-build-mode=${{ matrix.build_type }} --enable-shared --${{ matrix.ts }}-threadsafe --${{ matrix.hl }}-hl --${{ matrix.parallel }}-parallel --${{ matrix.cpp }}-cxx --${{ matrix.fortran }}-fortran --${{ matrix.java }}-java
       shell: bash
-      env:
-        CC:   gcc-11
-        CXX:  g++-11
-        FC:   gfortran-11
 
     - name: Configure
       if: matrix.generator != 'autogen'
