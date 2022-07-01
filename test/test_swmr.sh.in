@@ -171,7 +171,7 @@ do
         $testdir/swmr_generator -q $compress $index_type
         if test $? -ne 0; then
             echo generator had error
-            nerrors=$((nerrors + 1))
+            nerrors=`expr $nerrors + 1`
         fi
 
         # Launch the Generator with SWMR_WRITE
@@ -179,7 +179,7 @@ do
         $testdir/swmr_generator -q -s $compress $index_type
         if test $? -ne 0; then
             echo generator had error
-            nerrors=$((nerrors + 1))
+            nerrors=`expr $nerrors + 1`
         fi
 
         # Check for error and exit if one occurred
@@ -217,7 +217,7 @@ do
             seed=""
             $testdir/swmr_reader -q $Nsecs_add $seed 2>&1 |tee swmr_reader.out.$n &
             pid_readers="$pid_readers $!"
-            n=$((n + 1))
+            n=`expr $n + 1`
         done
         $DPRINT pid_readers=$pid_readers
         $IFDEBUG ps
@@ -229,7 +229,7 @@ do
             wait $xpid
             if test $? -ne 0; then
                 echo reader had error
-                nerrors=$((nerrors + 1))
+                nerrors=`expr $nerrors + 1`
             fi
         done
 
@@ -238,7 +238,7 @@ do
         wait $pid_writer
         if test $? -ne 0; then
             echo writer had error
-            nerrors=$((nerrors + 1))
+            nerrors=`expr $nerrors + 1`
         fi
 
         # Check for error and exit if one occurred
@@ -263,7 +263,7 @@ do
         $testdir/swmr_generator -q -s $compress $index_type
         if test $? -ne 0; then
             echo generator had error
-            nerrors=$((nerrors + 1))
+            nerrors=`expr $nerrors + 1`
         fi
 
         # Remove any possible writer message file before launching writer
@@ -289,7 +289,7 @@ do
             seed=""
             $testdir/swmr_reader -q $Nsecs_add $seed 2>&1 |tee swmr_reader.out.$n &
             pid_readers="$pid_readers $!"
-            n=$((n + 1))
+            n=`expr $n + 1`
         done
         $DPRINT pid_readers=$pid_readers
         $IFDEBUG ps
@@ -301,7 +301,7 @@ do
             wait $xpid
             if test $? -ne 0; then
                 echo reader had error
-                nerrors=$((nerrors + 1))
+                nerrors=`expr $nerrors + 1`
             fi
         done
 
@@ -310,7 +310,7 @@ do
         wait $pid_writer
         if test $? -ne 0; then
             echo writer had error
-            nerrors=$((nerrors + 1))
+            nerrors=`expr $nerrors + 1`
         fi
 
         # Check for error and exit if one occurred
@@ -352,7 +352,7 @@ do
             seed=""
             $testdir/swmr_remove_reader -q $Nsecs_rem $seed 2>&1 |tee swmr_reader.out.$n &
             pid_readers="$pid_readers $!"
-            n=$((n + 1))
+            n=`expr $n + 1`
         done
         $DPRINT pid_readers=$pid_readers
         $IFDEBUG ps
@@ -364,7 +364,7 @@ do
             wait $xpid
             if test $? -ne 0; then
                 echo reader had error
-                nerrors=$((nerrors + 1))
+                nerrors=`expr $nerrors + 1`
             fi
         done
 
@@ -373,7 +373,7 @@ do
         wait $pid_writer
         if test $? -ne 0; then
             echo writer had error
-            nerrors=$((nerrors + 1))
+            nerrors=`expr $nerrors + 1`
         fi
 
         # Check for error and exit if one occurred
@@ -398,7 +398,7 @@ do
         $testdir/swmr_generator -q $compress $index_type
         if test $? -ne 0; then
             echo generator had error
-            nerrors=$((nerrors + 1))
+            nerrors=`expr $nerrors + 1`
         fi
 
         # Launch the Writer (not in parallel - just to rebuild the datasets)
@@ -407,7 +407,7 @@ do
         $testdir/swmr_writer -q $Nrecords $seed
         if test $? -ne 0; then
             echo writer had error
-            nerrors=$((nerrors + 1))
+            nerrors=`expr $nerrors + 1`
         fi
 
         # Remove any possible writer message file before launching writer
@@ -433,7 +433,7 @@ do
             seed=""
             $testdir/swmr_remove_reader -q $Nsecs_addrem $seed 2>&1 |tee swmr_reader.out.$n &
             pid_readers="$pid_readers $!"
-            n=$((n + 1))
+            n=`expr $n + 1`
         done
         $DPRINT pid_readers=$pid_readers
         $IFDEBUG ps
@@ -445,7 +445,7 @@ do
             wait $xpid
             if test $? -ne 0; then
                 echo reader had error
-                nerrors=$((nerrors + 1))
+                nerrors=`expr $nerrors + 1`
             fi
         done
 
@@ -454,7 +454,7 @@ do
         wait $pid_writer
         if test $? -ne 0; then
             echo writer had error
-            nerrors=$((nerrors + 1))
+            nerrors=`expr $nerrors + 1`
         fi
 
         # Check for error and exit if one occurred
@@ -482,7 +482,7 @@ do
         $testdir/swmr_generator -q $compress $index_type $seed
         if test $? -ne 0; then
             echo generator had error
-            nerrors=$((nerrors + 1))
+            nerrors=`expr $nerrors + 1`
         fi
 
         # Remove any possible writer message file before launching writer
@@ -504,7 +504,7 @@ do
             # The sparse reader spits out a LOT of data so it's set to 'quiet'
             $testdir/swmr_sparse_reader -q $Nrecs_spa 2>&1 |tee swmr_reader.out.$n &
             pid_readers="$pid_readers $!"
-            n=$((n + 1))
+            n=`expr $n + 1`
         done
         $DPRINT pid_readers=$pid_readers
         $IFDEBUG ps
@@ -514,7 +514,7 @@ do
         wait $pid_writer
         if test $? -ne 0; then
             echo writer had error
-            nerrors=$((nerrors + 1))
+            nerrors=`expr $nerrors + 1`
         fi
 
         # Collect exit code of the readers
@@ -523,7 +523,7 @@ do
             wait $xpid
             if test $? -ne 0; then
                 echo reader had error
-                nerrors=$((nerrors + 1))
+                nerrors=`expr $nerrors + 1`
             fi
         done
 

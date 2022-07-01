@@ -203,7 +203,7 @@ do_sio(parameters param, results *res)
     /* Open file for write */
 
     HDstrcpy(base_name, "#sio_tmp");
-    sio_create_filename(iot, base_name, fname, sizeof(fname), &param);
+    sio_create_filename(iot, base_name, fname, FILENAME_MAX, &param);
 
     if (sio_debug_level > 0)
         HDfprintf(output, "data filename=%s\n", fname);
