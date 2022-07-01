@@ -21,7 +21,7 @@ jobs:
     strategy:
 #      fail-fast: false
       matrix:
-        name: ["Windows Latest MSVC", "Ubuntu Latest GCC", "Ubuntu Debug GCC", "macOS Latest Clang", "Ubuntu Autotools GCC", "Ubuntu Debug Autotools GCC", "-Werror Ubuntu Debug Autotools GCC", "Windows TS MSVC", "Ubuntu TS GCC", "TS Debug GCC", "macOS TS Clang", "TS Autotools GCC"]
+        name: ["Windows Latest MSVC", "Ubuntu Latest GCC", "Ubuntu Debug GCC", "macOS Latest Clang", "Ubuntu Parallel Autotools GCC", "Ubuntu Debug Autotools GCC", "-Werror Ubuntu Debug Autotools GCC", "Windows TS MSVC", "Ubuntu TS GCC", "TS Debug GCC", "macOS TS Clang", "TS Autotools GCC"]
         include:
           - name: "Windows Latest MSVC"
             artifact: "Windows-MSVC.tar.xz"
@@ -75,16 +75,16 @@ jobs:
             toolchain: "config/toolchain/GCC.cmake"
             generator: "-G Ninja"
             flags: ""
-          - name: "Ubuntu Autotools GCC"
+          - name: "Ubuntu Parallel Autotools GCC"
             artifact: "LinuxA.tar.xz"
             os: ubuntu-latest
             build_type: "production"
-            cpp: enable
+            cpp: disable
             fortran: enable
-            java: enable
+            java: disable
             ts: disable
             hl: enable
-            parallel: disable
+            parallel: enable
             toolchain: ""
             generator: "autogen"
             flags: ""
