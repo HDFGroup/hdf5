@@ -212,22 +212,16 @@ jobs:
         echo "CXX=cl.exe" >> $GITHUB_ENV
         echo "CC=cl.exe" >> $GITHUB_ENV
     - name: Set Autotools compilers
-      if: matrix.generator == 'autogen'
-      env:
-        CC:   gcc-11
-        CXX:  g++-11
-        FC:   gfortran-11
-    - name: Set Autotools compilers
       if: matrix.generator == 'autogen' && matrix.parallel != 'enable'
-      env:
-        CC:   gcc-11
-        CXX:  g++-11
-        FC:   gfortran-11
+      run: |
+        echo "CC=gcc-11" >> $GITHUB_ENV
+        echo "CXX=g++-11" >> $GITHUB_ENV
+        echo "FC=gfortran-11" >> $GITHUB_ENV
     - name: Set Autotools parallel compilers
       if: matrix.generator == 'autogen' && matrix.parallel == 'enable'
-      env:
-        CC:   mpicc
-        FC:   mpifort
+      run: |
+        echo "CC=mpicc" >> $GITHUB_ENV
+        echo "FC=mpifort" >> $GITHUB_ENV
     
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - name: Get Sources
