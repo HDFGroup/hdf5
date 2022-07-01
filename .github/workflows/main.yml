@@ -222,6 +222,8 @@ jobs:
       run: |
         echo "CC=mpicc" >> $GITHUB_ENV
         echo "FC=mpifort" >> $GITHUB_ENV
+        # Need to use --oversubscribe with OpenMPI
+        echo "RUNPARALLEL='mpiexec -n 6 --oversubscribe'"
     
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - name: Get Sources
