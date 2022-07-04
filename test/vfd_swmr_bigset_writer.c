@@ -2010,7 +2010,6 @@ verify_extensible_dset(state_t *s, unsigned int which, mat_t *mat, unsigned fini
     hsize_t      size2[RANK2], size3[RANK3];
     base_t       base, last;
     unsigned int nchunks, step, ofs;
-    int          i;
     h5_retry_t   retry;
     hbool_t      do_try; /* more tries remain */
 

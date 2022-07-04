@@ -382,6 +382,7 @@ main(int argc, char **argv)
     s->file = H5Fcreate(s->output_file, H5F_ACC_TRUNC, fcpl, fapl);
 
     H5Pclose(fapl);
+    H5Pclose(fcpl);
 
     if (s->file < 0)
         errx(EXIT_FAILURE, "H5Fcreate failed");
