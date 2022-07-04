@@ -138,15 +138,6 @@ typedef struct {
     int          np_verify;
 } state_t;
 
-#define ALL_HID_INITIALIZER                                                                                  \
-    (state_t)                                                                                                \
-    {                                                                                                        \
-        .file = H5I_INVALID_HID, .one_by_one_sid = H5I_INVALID_HID, .filename = "",                          \
-        .filetype = H5T_NATIVE_UINT32, .nsteps = 10000, .use_vfd_swmr = true, .old_style_grp = false,        \
-        .use_named_pipes = true, .w_sleep_len = 112, .tick_len = 4, .max_lag = 7, .ps = 4096, .pbs = 4096,   \
-        .del_grp = false, .np_fd_w_to_r = -1, .np_fd_r_to_w = -1, .np_notify = 0, .np_verify = 0             \
-    }
-
 /*
  * Operator function to be called by H5Literate.
  */

@@ -51,17 +51,6 @@ typedef struct {
     int          np_verify;
 } state_t;
 
-#define ALL_HID_INITIALIZER                                                                                  \
-    (state_t)                                                                                                \
-    {                                                                                                        \
-        .file = H5I_INVALID_HID, .one_by_one_sid = H5I_INVALID_HID, .filename = "",                          \
-        .filetype = H5T_NATIVE_UINT32, .asteps = 10, .csteps = 10, .nsteps = 100,                            \
-        .update_interval = READER_WAIT_TICKS, .use_vfd_swmr = TRUE, .old_style_grp = FALSE,                  \
-        .use_named_pipes = TRUE, .grp_op_pattern = ' ', .grp_op_test = FALSE, .at_pattern = ' ',             \
-        .attr_test = FALSE, .tick_len = 4, .max_lag = 7, .ps = 4096, .pbs = 4096, .np_fd_w_to_r = -1,        \
-        .np_fd_r_to_w = -1, .np_notify = 0, .np_verify = 0                                                   \
-    }
-
 static void
 usage(const char *progname)
 {
@@ -155,7 +144,31 @@ state_init(state_t *s, int argc, char **argv)
     const char *           s_opts   = "SGa:bc:n:Nqu:t:m:B:s:A:O:";
     struct h5_long_options l_opts[] = {{NULL, 0, '\0'}};
 
-    *s = ALL_HID_INITIALIZER;
+    s->file = H5I_INVALID_HID;
+    s->one_by_one_sid = H5I_INVALID_HID;
+    s->filetype = H5T_NATIVE_UINT32;
+    s->asteps = 10;
+    s->csteps = 10;
+    s->nsteps = 100;
+    s->update_interval = READER_WAIT_TICKS;
+    s->use_vfd_swmr = TRUE;
+    s->old_style_grp = FALSE;
+    s->use_named_pipes = TRUE;
+    s->grp_op_pattern = ' ';
+    s->grp_op_test = FALSE;
+    s->at_pattern = ' ';
+    s->attr_test = FALSE;
+    s->tick_len = 4;
+    s->max_lag = 7;
+    s->ps = 4096;
+    s->pbs = 4096;
+    s->np_fd_w_to_r = -1;
+    s->np_fd_r_to_w = -1;
+    s->np_notify = 0;
+    s->np_verify = 0;
+
+    HDmemset(s->filename, 0, PATH_MAX);
+    HDmemset(s->progname, 0, PATH_MAX);
 
     if (H5_basename(argv[0], &tfile) < 0) {
         HDprintf("H5_basename failed\n");
@@ -4977,9 +4990,9 @@ main(int argc, char **argv)
     hid_t                 fapl = H5I_INVALID_HID, fcpl = H5I_INVALID_HID;
     unsigned              step;
     hbool_t               writer = FALSE;
-    state_t               s;
+    state_t               *s = NULL;
     const char *          personality;
-    H5F_vfd_swmr_config_t config;
+    H5F_vfd_swmr_config_t *config = NULL;
     const char *          fifo_writer_to_reader = "./fifo_group_writer_to_reader";
     const char *          fifo_reader_to_writer = "./fifo_group_reader_to_writer";
     int                   fd_writer_to_reader = -1, fd_reader_to_writer = -1;
@@ -4987,12 +5000,17 @@ main(int argc, char **argv)
     hbool_t               wg_ret = FALSE;
     hbool_t               vg_ret = FALSE;
 
-    if (!state_init(&s, argc, argv)) {
+    if (NULL == (s = HDcalloc(1, sizeof(state_t))))
+        TEST_ERROR;
+    if (NULL == (config = HDcalloc(1, sizeof(H5F_vfd_swmr_config_t))))
+        TEST_ERROR;
+
+    if (!state_init(s, argc, argv)) {
         HDprintf("state_init failed\n");
         TEST_ERROR;
     }
 
-    personality = HDstrstr(s.progname, "vfd_swmr_group_");
+    personality = HDstrstr(s->progname, "vfd_swmr_group_");
 
     if (personality != NULL && HDstrcmp(personality, "vfd_swmr_group_writer") == 0)
         writer = TRUE;
@@ -5006,7 +5024,7 @@ main(int argc, char **argv)
     /* config, tick_len, max_lag, presume_posix_semantics, writer,
      * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
      * md_file_path, md_file_name, updater_file_path */
-    init_vfd_swmr_config(&config, s.tick_len, s.max_lag, FALSE, writer, TRUE, FALSE, TRUE, 128, "./",
+    init_vfd_swmr_config(config, s->tick_len, s->max_lag, FALSE, writer, TRUE, FALSE, TRUE, 128, "./",
                          "group-shadow", NULL);
 
     /* If old-style option is chosen, use the earliest file format(H5F_LIBVER_EARLIEST)
@@ -5014,23 +5032,23 @@ main(int argc, char **argv)
      * vfd_swmr_create_fapl. Otherwise, the latest file format(H5F_LIBVER_LATEST)
      * should be used as the second parameter of H5Pset_libver_bound().
      * Also pass the use_vfd_swmr, only_meta_page, page_buf_size, config to vfd_swmr_create_fapl().*/
-    if ((fapl = vfd_swmr_create_fapl(!s.old_style_grp, s.use_vfd_swmr, TRUE, s.pbs, &config)) < 0) {
+    if ((fapl = vfd_swmr_create_fapl(!s->old_style_grp, s->use_vfd_swmr, TRUE, s->pbs, config)) < 0) {
         HDprintf("vfd_swmr_create_fapl failed\n");
         TEST_ERROR;
     }
 
     /* Set fs_strategy (file space strategy) and fs_page_size (file space page size) */
-    if ((fcpl = vfd_swmr_create_fcpl(H5F_FSPACE_STRATEGY_PAGE, s.ps)) < 0) {
+    if ((fcpl = vfd_swmr_create_fcpl(H5F_FSPACE_STRATEGY_PAGE, s->ps)) < 0) {
         HDprintf("vfd_swmr_create_fcpl() failed");
         TEST_ERROR;
     }
 
     if (writer)
-        s.file = H5Fcreate(s.filename, H5F_ACC_TRUNC, fcpl, fapl);
+        s->file = H5Fcreate(s->filename, H5F_ACC_TRUNC, fcpl, fapl);
     else
-        s.file = H5Fopen(s.filename, H5F_ACC_RDONLY, fapl);
+        s->file = H5Fopen(s->filename, H5F_ACC_RDONLY, fapl);
 
-    if (s.file < 0) {
+    if (s->file < 0) {
         HDprintf("H5Fcreate/open failed\n");
         TEST_ERROR;
     }
@@ -5039,7 +5057,7 @@ main(int argc, char **argv)
      * two-way communication so that the two sides can move forward together.
      * One is for the writer to write to the reader.
      * The other one is for the reader to signal the writer.  */
-    if (s.use_named_pipes && writer) {
+    if (s->use_named_pipes && writer) {
         /* Writer creates two named pipes(FIFO) */
         if (HDmkfifo(fifo_writer_to_reader, 0600) < 0) {
             HDprintf("HDmkfifo failed\n");
@@ -5053,22 +5071,22 @@ main(int argc, char **argv)
     }
 
     /* Both the writer and reader open the pipes */
-    if (s.use_named_pipes && (fd_writer_to_reader = HDopen(fifo_writer_to_reader, O_RDWR)) < 0) {
+    if (s->use_named_pipes && (fd_writer_to_reader = HDopen(fifo_writer_to_reader, O_RDWR)) < 0) {
         HDprintf("HDopen failed\n");
         TEST_ERROR;
     }
 
-    if (s.use_named_pipes && (fd_reader_to_writer = HDopen(fifo_reader_to_writer, O_RDWR)) < 0) {
+    if (s->use_named_pipes && (fd_reader_to_writer = HDopen(fifo_reader_to_writer, O_RDWR)) < 0) {
         HDprintf("HDopen failed\n");
         TEST_ERROR;
     }
 
     /* Pass the named pipe information to the struct of state_t s, for attribute tests.*/
-    if (s.use_named_pipes) {
-        s.np_fd_w_to_r = fd_writer_to_reader;
-        s.np_fd_r_to_w = fd_reader_to_writer;
-        s.np_notify    = notify;
-        s.np_verify    = verify;
+    if (s->use_named_pipes) {
+        s->np_fd_w_to_r = fd_writer_to_reader;
+        s->np_fd_r_to_w = fd_reader_to_writer;
+        s->np_notify    = notify;
+        s->np_verify    = verify;
     }
 
     /* For attribute test, force the named pipe to communicate in every step.
@@ -5076,34 +5094,34 @@ main(int argc, char **argv)
      * If the named pipe is not forced to communicate in every step, the reader may go ahead
      * to verify the group and the attribute operations before the writer has a chance to
      * carry out the corresponding operations. */
-    if (s.attr_test && s.use_named_pipes)
-        s.csteps = 1;
+    if (s->attr_test && s->use_named_pipes)
+        s->csteps = 1;
 
     /* For group operation test, force the named pipe to communicate in every step. */
-    if (s.grp_op_test && s.use_named_pipes)
-        s.csteps = 1;
+    if (s->grp_op_test && s->use_named_pipes)
+        s->csteps = 1;
 
     if (writer) {
-        for (step = 0; step < s.nsteps; step++) {
+        for (step = 0; step < s->nsteps; step++) {
             dbgf(2, "writer: step %d\n", step);
 
-            wg_ret = group_operations(&s, step);
+            wg_ret = group_operations(s, step);
 
             if (wg_ret == FALSE) {
 
                 /* At communication interval, notifies the reader about the failure and quit */
-                if (s.use_named_pipes && s.attr_test != TRUE && s.grp_op_test != TRUE && step % s.csteps == 0)
-                    np_send_error(&s, TRUE);
+                if (s->use_named_pipes && s->attr_test != TRUE && s->grp_op_test != TRUE && step % s->csteps == 0)
+                    np_send_error(s, TRUE);
                 HDprintf("write_group failed at step %d\n", step);
                 TEST_ERROR;
             }
             else {
 
                 /* At communication interval, notifies the reader and waits for its response */
-                if (s.use_named_pipes && s.attr_test != TRUE && s.grp_op_test != TRUE &&
-                    step % s.csteps == 0) {
+                if (s->use_named_pipes && s->attr_test != TRUE && s->grp_op_test != TRUE &&
+                    step % s->csteps == 0) {
 
-                    if (np_wr_send_receive(&s) == FALSE) {
+                    if (np_wr_send_receive(s) == FALSE) {
                         HDprintf("writer: write group - verification failed.\n");
                         TEST_ERROR;
                     }
@@ -5112,39 +5130,39 @@ main(int argc, char **argv)
         }
     }
     else {
-        for (step = 0; step < s.nsteps; step++) {
+        for (step = 0; step < s->nsteps; step++) {
             dbgf(1, "reader: step %d\n", step);
 
             /* At communication interval, waits for the writer to finish creation before starting verification
              */
-            if (s.use_named_pipes && s.attr_test != TRUE && s.grp_op_test != TRUE && step % s.csteps == 0) {
-                if (FALSE == np_rd_receive(&s)) {
+            if (s->use_named_pipes && s->attr_test != TRUE && s->grp_op_test != TRUE && step % s->csteps == 0) {
+                if (FALSE == np_rd_receive(s)) {
                     TEST_ERROR;
                 }
             }
 
             /* For the default test, wait for a few ticks for the update to happen */
-            if (s.use_named_pipes && s.attr_test == FALSE)
-                decisleep(config.tick_len * s.update_interval);
+            if (s->use_named_pipes && s->attr_test == FALSE)
+                decisleep(config->tick_len * s->update_interval);
 
-            vg_ret = verify_group_operations(&s, step);
+            vg_ret = verify_group_operations(s, step);
 
             if (vg_ret == FALSE) {
 
                 HDprintf("verify_group_operations failed\n");
 
                 /* At communication interval, tell the writer about the failure and exit */
-                if (s.use_named_pipes && s.attr_test != TRUE && s.grp_op_test != TRUE && step % s.csteps == 0)
-                    np_send_error(&s, FALSE);
+                if (s->use_named_pipes && s->attr_test != TRUE && s->grp_op_test != TRUE && step % s->csteps == 0)
+                    np_send_error(s, FALSE);
                 TEST_ERROR;
             }
             else {
 
                 /* Send back the same notify value for acknowledgement to tell the writer
                  * move to the next step. */
-                if (s.use_named_pipes && s.attr_test != TRUE && s.grp_op_test != TRUE &&
-                    step % s.csteps == 0) {
-                    if (np_rd_send(&s) == FALSE) {
+                if (s->use_named_pipes && s->attr_test != TRUE && s->grp_op_test != TRUE &&
+                    step % s->csteps == 0) {
+                    if (np_rd_send(s) == FALSE) {
                         TEST_ERROR;
                     }
                 }
@@ -5162,29 +5180,29 @@ main(int argc, char **argv)
         TEST_ERROR;
     }
 
-    if (H5Sclose(s.one_by_one_sid) < 0) {
+    if (H5Sclose(s->one_by_one_sid) < 0) {
         HDprintf("H5Sclose failed\n");
         TEST_ERROR;
     }
 
-    if (H5Fclose(s.file) < 0) {
+    if (H5Fclose(s->file) < 0) {
         HDprintf("H5Fclose failed\n");
         TEST_ERROR;
     }
 
     /* Both the writer and reader close the named pipes */
-    if (s.use_named_pipes && HDclose(fd_writer_to_reader) < 0) {
+    if (s->use_named_pipes && HDclose(fd_writer_to_reader) < 0) {
         HDprintf("HDclose failed\n");
         TEST_ERROR;
     }
 
-    if (s.use_named_pipes && HDclose(fd_reader_to_writer) < 0) {
+    if (s->use_named_pipes && HDclose(fd_reader_to_writer) < 0) {
         HDprintf("HDclose failed\n");
         TEST_ERROR;
     }
 
     /* Reader finishes last and deletes the named pipes */
-    if (s.use_named_pipes && !writer) {
+    if (s->use_named_pipes && !writer) {
         if (HDremove(fifo_writer_to_reader) != 0) {
             HDprintf("HDremove failed\n");
             TEST_ERROR;
@@ -5196,6 +5214,9 @@ main(int argc, char **argv)
         }
     }
 
+    HDfree(config);
+    HDfree(s);
+
     return EXIT_SUCCESS;
 
 error:
@@ -5203,21 +5224,24 @@ error:
     {
         H5Pclose(fapl);
         H5Pclose(fcpl);
-        H5Sclose(s.one_by_one_sid);
-        H5Fclose(s.file);
+        H5Sclose(s->one_by_one_sid);
+        H5Fclose(s->file);
     }
     H5E_END_TRY;
 
-    if (s.use_named_pipes && fd_writer_to_reader >= 0)
+    if (s->use_named_pipes && fd_writer_to_reader >= 0)
         HDclose(fd_writer_to_reader);
 
-    if (s.use_named_pipes && fd_reader_to_writer >= 0)
+    if (s->use_named_pipes && fd_reader_to_writer >= 0)
         HDclose(fd_reader_to_writer);
 
-    if (s.use_named_pipes && !writer) {
+    if (s->use_named_pipes && !writer) {
         HDremove(fifo_writer_to_reader);
         HDremove(fifo_reader_to_writer);
     }
+
+    HDfree(config);
+    HDfree(s);
 
     return EXIT_FAILURE;
 }

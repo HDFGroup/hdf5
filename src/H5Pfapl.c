@@ -546,8 +546,13 @@ static const hbool_t H5F_def_use_file_locking_g =
     H5F_ACS_USE_FILE_LOCKING_DEF; /* Default use file locking flag */
 static const hbool_t H5F_def_ignore_disabled_file_locks_g =
     H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_DEF; /* Default ignore disabled file locks flag */
+/* The VFD SWMR struct contains multiple large strings and triggers size
+ * warnings. We'll disable this for now and revisit later.
+ */
+H5_GCC_CLANG_DIAG_OFF("larger-than=")
 static const H5F_vfd_swmr_config_t H5F_def_vfd_swmr_config_g =
     H5F_ACS_VFD_SWMR_CONFIG_DEF; /* Default vfd swmr configuration */
+H5_GCC_CLANG_DIAG_ON("larger-than=")
 /* For VFD SWMR testing only: Default to generate checksum for metadata file */
 static const H5F_generate_md_ck_t H5F_def_generate_md_ck_cb_g = H5F_ACS_GENERATE_MD_CK_CB_DEF;
 
