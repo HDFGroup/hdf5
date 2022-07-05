@@ -97,18 +97,6 @@ typedef struct {
     unsigned int nglevels;
 } state_t;
 
-#define ALL_HID_INITIALIZER                                                                                  \
-    (state_t)                                                                                                \
-    {                                                                                                        \
-        .file = H5I_INVALID_HID, .one_by_one_sid = H5I_INVALID_HID, .filename = "",                          \
-        .filetype = H5T_NATIVE_UINT32, .asteps = 1, .nsteps = 100, .use_vfd_swmr = true,                     \
-        .old_style_grp = false, .grp_op_pattern = ' ', .grp_op_test = false, .at_pattern = ' ',              \
-        .attr_test = false, .tick_len = 4, .max_lag = 7, .gperf = false, .glog = false, .min_gc_time = 100., \
-        .max_gc_time = 0., .mean_gc_time = 0., .total_gc_time = 0., .total_time = 0., .mean_time = 0.,       \
-        .fo_total_time = 0., .fc_total_time = 0., .num_attrs = 1, .vlstr_test = false, .ps = 4096,           \
-        .pbs = 4096, .nglevels = 0                                                                           \
-    }
-
 static void
 usage(const char *progname)
 {
@@ -209,7 +197,37 @@ state_init(state_t *s, int argc, char **argv)
     char *        tfile = NULL;
     char *        end;
 
-    *s = ALL_HID_INITIALIZER;
+    s->file = H5I_INVALID_HID;
+    s->one_by_one_sid = H5I_INVALID_HID;
+    s->filetype = H5T_NATIVE_UINT32;
+    s->asteps = 1;
+    s->nsteps = 100;
+    s->use_vfd_swmr = TRUE;
+    s->old_style_grp = FALSE;
+    s->grp_op_pattern = ' ';
+    s->grp_op_test = FALSE;
+    s->at_pattern = ' ';
+    s->attr_test = FALSE;
+    s->tick_len = 4;
+    s->max_lag = 7;
+    s->gperf = FALSE;
+    s->glog = FALSE;
+    s->min_gc_time = 100;
+    s->max_gc_time = 100;
+    s->mean_gc_time = 0.0;
+    s->total_gc_time = 0.0;
+    s->total_time = 0.0;
+    s->mean_time = 0.0;
+    s->fo_total_time = 0.0;
+    s->fc_total_time = 0.0;
+    s->num_attrs = 1;
+    s->vlstr_test = FALSE;
+    s->ps = 4096;
+    s->pbs = 4096;
+    s->nglevels = 0;
+
+    HDmemset(s->filename, 0, PATH_MAX);
+    HDmemset(s->progname, 0, PATH_MAX);
 
     if (H5_basename(argv[0], &tfile) < 0) {
         HDprintf("H5_basename failed\n");

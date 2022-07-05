@@ -93,17 +93,6 @@ typedef struct {
     unsigned int ydecrs; /* -y <ydecrs> option */
 } state_t;
 
-/* Initializations for state_t */
-#define ALL_HID_INITIALIZER                                                                                  \
-    (state_t)                                                                                                \
-    {                                                                                                        \
-        .filename = "", .file = H5I_INVALID_HID, .filetype = H5T_NATIVE_UINT32,                              \
-        .update_interval = READER_WAIT_TICKS, .csteps = 1, .use_np = true, .use_vfd_swmr = true,             \
-        .use_filter = false, .flush_raw_data = true, .single_index = false, .implicit_index = false,         \
-        .fa_index = false, .ea_index = false, .bt2_index = false, .rows = 10, .cols = 5, .gwrites = 0,       \
-        .pwrites = 0, .twrites = 0, .lwrites = 0, .xincrs = 0, .ydecrs = 0                                   \
-    }
-
 /* Structure to hold info for different dataset types */
 typedef struct {
     hsize_t chunk_dims[2]; /* Chunk dimensions for all datasets except single_did */
@@ -268,7 +257,30 @@ state_init(state_t *s, int argc, char **argv)
     const char *           s_opts   = "siferom:n:x:y:g:p:t:l:bqSNUu:c:";
     struct h5_long_options l_opts[] = {{NULL, 0, '\0'}};
 
-    *s = ALL_HID_INITIALIZER;
+    s->file = H5I_INVALID_HID;
+    s->filetype = H5T_NATIVE_UINT32;
+    s->update_interval = READER_WAIT_TICKS;
+    s->csteps = 1;
+    s->use_np = TRUE;
+    s->use_vfd_swmr = TRUE;
+    s->use_filter = FALSE;
+    s->flush_raw_data = TRUE;
+    s->single_index = FALSE;
+    s->implicit_index = FALSE;
+    s->fa_index = FALSE;
+    s->ea_index = FALSE;
+    s->bt2_index = FALSE;
+    s->rows = 10;
+    s->cols = 5;
+    s->gwrites = 0;
+    s->pwrites = 0;
+    s->twrites = 0;
+    s->lwrites = 0;
+    s->xincrs = 0;
+    s->ydecrs = 0;
+
+    HDmemset(s->filename, 0, PATH_MAX);
+    HDmemset(s->progname, 0, PATH_MAX);
 
     if (H5_basename(argv[0], &tfile) < 0) {
         HDprintf("H5_basename failed\n");

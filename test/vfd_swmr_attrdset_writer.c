@@ -66,16 +66,6 @@ typedef struct {
     hbool_t      use_vfd_swmr;       /* For -S option */
 } state_t;
 
-/* Initializations for state_t */
-#define ALL_HID_INITIALIZER                                                                                  \
-    (state_t)                                                                                                \
-    {                                                                                                        \
-        .file = H5I_INVALID_HID, .one_by_one_sid = H5I_INVALID_HID, .filename = "",                          \
-        .filetype = H5T_NATIVE_UINT32, .asteps = 0, .csteps = 1, .dattrs = 0, .use_np = TRUE,                \
-        .use_vfd_swmr = TRUE, .compact = FALSE, .contig = FALSE, .chunked = FALSE, .vl_attr = FALSE,         \
-        .mod_attr = FALSE, .update_interval = READER_WAIT_TICKS                                              \
-    }
-
 /* Structure to hold info for different dataset types */
 typedef struct {
     hid_t    compact_did;          /* ID for compact dataset */
@@ -226,7 +216,23 @@ state_init(state_t *s, int argc, const char *const *argv)
     const char *           s_opts   = "pgkvmbqSNa:d:u:c:";
     struct h5_long_options l_opts[] = {{NULL, 0, '\0'}};
 
-    *s = ALL_HID_INITIALIZER;
+    s->file = H5I_INVALID_HID;
+    s->one_by_one_sid = H5I_INVALID_HID;
+    s->filetype = H5T_NATIVE_UINT32;
+    s->asteps = 0;
+    s->csteps = 1;
+    s->dattrs = 0;
+    s->use_np = TRUE;
+    s->use_vfd_swmr = TRUE;
+    s->compact = FALSE;
+    s->contig = FALSE;
+    s->chunked = FALSE;
+    s->vl_attr = FALSE;
+    s->mod_attr = FALSE;
+    s->update_interval = READER_WAIT_TICKS;
+
+    HDmemset(s->filename, 0, PATH_MAX);
+    HDmemset(s->progname, 0, PATH_MAX);
 
     if (H5_basename(argv[0], &tfile) < 0) {
         HDprintf("H5_basename failed\n");
