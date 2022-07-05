@@ -2776,19 +2776,28 @@ main(int argc, char **argv)
     hid_t                 fapl = H5I_INVALID_HID, fcpl = H5I_INVALID_HID;
     unsigned              step;
     bool                  writer = false;
-    state_t               s;
+    state_t               *s = NULL;
     const char *          personality;
-    H5F_vfd_swmr_config_t config;
+    H5F_vfd_swmr_config_t *config = NULL;
     bool                  wg_ret = false;
     struct timespec       start_time, end_time;
     unsigned int          num_elems_per_level = 0;
 
-    if (!state_init(&s, argc, argv)) {
+    if (NULL == (s = HDcalloc(1, sizeof(state_t)))) {
+        HDprintf("memory allocation failed");
+        TEST_ERROR;
+    }
+    if (NULL == (config = HDcalloc(1, sizeof(H5F_vfd_swmr_config_t)))) {
+        HDprintf("memory allocation failed");
+        TEST_ERROR;
+    }
+
+    if (!state_init(s, argc, argv)) {
         HDprintf("state_init failed\n");
         TEST_ERROR;
     }
 
-    personality = HDstrstr(s.progname, "vfd_swmr_gperf_");
+    personality = HDstrstr(s->progname, "vfd_swmr_gperf_");
 
     if (personality != NULL && HDstrcmp(personality, "vfd_swmr_gperf_writer") == 0)
         writer = true;
@@ -2807,69 +2816,66 @@ main(int argc, char **argv)
     /* config, tick_len, max_lag, presume_posix_semantics, writer,
      * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
      * md_file_path, md_file_name, updater_file_path */
-    init_vfd_swmr_config(&config, s.tick_len, s.max_lag, FALSE, writer, TRUE, FALSE, FALSE, 128, "./",
+    init_vfd_swmr_config(config, s->tick_len, s->max_lag, FALSE, writer, TRUE, FALSE, FALSE, 128, "./",
                          "group-shadow", NULL);
 
     /* If the log flag is on, create the log file log-test under the current directory. */
-    if (s.glog == true)
-        init_vfd_swmr_log(&config, "./log-test");
+    if (s->glog == true)
+        init_vfd_swmr_log(config, "./log-test");
 
     /* If old-style option is chosen, use the earliest file format(H5F_LIBVER_EARLIEST)
      * as the second parameter of H5Pset_libver_bound() that is called by
      * vfd_swmr_create_fapl. Otherwise, the latest file format(H5F_LIBVER_LATEST)
      * should be used as the second parameter of H5Pset_libver_bound().
      * Also pass the use_vfd_swmr, only_meta_page, page buffer size, config to vfd_swmr_create_fapl().*/
-    if ((fapl = vfd_swmr_create_fapl(!s.old_style_grp, s.use_vfd_swmr, true, s.pbs, &config)) < 0) {
+    if ((fapl = vfd_swmr_create_fapl(!s->old_style_grp, s->use_vfd_swmr, true, s->pbs, config)) < 0) {
         HDprintf("vfd_swmr_create_fapl failed\n");
         TEST_ERROR;
     }
 
     /* Set fs_strategy (file space strategy) and fs_page_size (file space page size) */
-    if ((fcpl = vfd_swmr_create_fcpl(H5F_FSPACE_STRATEGY_PAGE, s.ps)) < 0) {
+    if ((fcpl = vfd_swmr_create_fcpl(H5F_FSPACE_STRATEGY_PAGE, s->ps)) < 0) {
         HDprintf("vfd_swmr_create_fcpl() failed");
         TEST_ERROR;
     }
 
-    if (s.nglevels > 0) {
-        if (s.grp_op_pattern != ' ' || s.at_pattern != ' ') {
+    if (s->nglevels > 0) {
+        if (s->grp_op_pattern != ' ' || s->at_pattern != ' ') {
             HDprintf("For nested group creation test, only the default option is supported.\n");
             HDprintf("Please re-run the tests with the appropriate option.\n");
             TEST_ERROR;
         }
     }
 
-    if (s.gperf) {
-
+    if (s->gperf) {
         if (HDclock_gettime(CLOCK_MONOTONIC, &start_time) == -1) {
             HDfprintf(stderr, "HDclock_gettime failed");
             TEST_ERROR;
         }
     }
 
-    s.file = H5Fcreate(s.filename, H5F_ACC_TRUNC, fcpl, fapl);
+    s->file = H5Fcreate(s->filename, H5F_ACC_TRUNC, fcpl, fapl);
 
-    if (s.gperf) {
-
+    if (s->gperf) {
         if (HDclock_gettime(CLOCK_MONOTONIC, &end_time) == -1) {
             HDfprintf(stderr, "HDclock_gettime failed");
             TEST_ERROR;
         }
 
-        s.fo_total_time = TIME_PASSED(start_time, end_time);
+        s->fo_total_time = TIME_PASSED(start_time, end_time);
     }
 
-    if (s.file < 0) {
+    if (s->file < 0) {
         HDprintf("H5Fcreate failed\n");
         TEST_ERROR;
     }
 
     /* If generating nested groups, calculate the maximum number of
           elements per level.  */
-    if (s.nglevels > 0)
-        num_elems_per_level = obtain_tree_level_elems(s.nsteps, s.nglevels);
+    if (s->nglevels > 0)
+        num_elems_per_level = obtain_tree_level_elems(s->nsteps, s->nglevels);
 
-    if (s.gperf) {
-
+    if (s->gperf) {
         if (HDclock_gettime(CLOCK_MONOTONIC, &start_time) == -1) {
             HDfprintf(stderr, "HDclock_gettime failed");
             TEST_ERROR;
@@ -2877,20 +2883,18 @@ main(int argc, char **argv)
     }
 
     /* If generating nested groups */
-    if (s.nglevels > 0) {
-
+    if (s->nglevels > 0) {
         /* for the recursive call, the groups under the root is treated as one level */
-        wg_ret = gen_tree_struct(&s, s.nglevels + 1, num_elems_per_level, s.file);
+        wg_ret = gen_tree_struct(s, s->nglevels + 1, num_elems_per_level, s->file);
         if (wg_ret == false) {
             HDprintf("write nested group failed at group counter  %u\n", grp_counter);
             TEST_ERROR;
         }
     }
     else {
-        for (step = 0; step < s.nsteps; step++) {
-
+        for (step = 0; step < s->nsteps; step++) {
             dbgf(2, "writer: step %d\n", step);
-            wg_ret = group_operations(&s, step);
+            wg_ret = group_operations(s, step);
             if (wg_ret == false) {
                 HDprintf("write_group failed at step %d\n", step);
                 TEST_ERROR;
@@ -2898,17 +2902,15 @@ main(int argc, char **argv)
         }
     }
 
-    if (s.gperf) {
-
+    if (s->gperf) {
         if (HDclock_gettime(CLOCK_MONOTONIC, &end_time) == -1) {
-
             HDfprintf(stderr, "HDclock_gettime failed");
             TEST_ERROR;
         }
 
-        s.total_time   = TIME_PASSED(start_time, end_time);
-        s.mean_time    = s.total_time / s.nsteps;
-        s.mean_gc_time = s.total_gc_time / s.nsteps;
+        s->total_time   = TIME_PASSED(start_time, end_time);
+        s->mean_time    = s->total_time / s->nsteps;
+        s->mean_gc_time = s->total_gc_time / s->nsteps;
     }
 
     if (H5Pclose(fapl) < 0) {
@@ -2921,68 +2923,61 @@ main(int argc, char **argv)
         TEST_ERROR;
     }
 
-    if (H5Sclose(s.one_by_one_sid) < 0) {
+    if (H5Sclose(s->one_by_one_sid) < 0) {
         HDprintf("H5Sclose failed\n");
         TEST_ERROR;
     }
 
-    if (s.gperf) {
-
+    if (s->gperf) {
         if (HDclock_gettime(CLOCK_MONOTONIC, &start_time) == -1) {
-
             HDfprintf(stderr, "HDclock_gettime failed");
-
             TEST_ERROR;
         }
     }
 
-    if (H5Fclose(s.file) < 0) {
+    if (H5Fclose(s->file) < 0) {
         HDprintf("H5Fclose failed\n");
         TEST_ERROR;
     }
 
-    if (s.gperf) {
-
+    if (s->gperf) {
         if (HDclock_gettime(CLOCK_MONOTONIC, &end_time) == -1) {
-
             HDfprintf(stderr, "HDclock_gettime failed");
-
             TEST_ERROR;
         }
 
-        s.fc_total_time = TIME_PASSED(start_time, end_time);
+        s->fc_total_time = TIME_PASSED(start_time, end_time);
     }
 
     /* Performance statistics summary */
-    if (s.gperf) {
+    if (s->gperf) {
 
         if (verbosity != 0) {
-
             HDfprintf(stdout, "\nPerformance Test Configuration: ");
-            if (s.use_vfd_swmr)
+            if (s->use_vfd_swmr)
                 HDfprintf(stdout, " Using VFD SWMR \n");
             else
                 HDfprintf(stdout, " Not using VFD SWMR \n");
 
-            if (s.old_style_grp)
+            if (s->old_style_grp)
                 HDfprintf(stdout, " Groups: Created via the earliest file format(old-style) \n");
             else
                 HDfprintf(stdout, " Groups: Created via the latest file format(new-style) \n");
 
             HDfprintf(stdout, "\n");
 
-            HDfprintf(stdout, "The length of a tick              = %u\n", s.tick_len);
-            HDfprintf(stdout, "The maximum expected lag(in ticks)= %u\n", s.max_lag);
-            HDfprintf(stdout, "The page size(in bytes)           = %u\n", s.ps);
-            HDfprintf(stdout, "The page buffer size(in bytes)    = %u\n", s.pbs);
+            HDfprintf(stdout, "The length of a tick              = %u\n", s->tick_len);
+            HDfprintf(stdout, "The maximum expected lag(in ticks)= %u\n", s->max_lag);
+            HDfprintf(stdout, "The page size(in bytes)           = %u\n", s->ps);
+            HDfprintf(stdout, "The page buffer size(in bytes)    = %u\n", s->pbs);
             HDfprintf(stdout, "\n");
-            HDfprintf(stdout, "Number of groups                  = %u\n", s.nsteps);
-            HDfprintf(stdout, "Group Nested levels               = %u\n", s.nglevels);
-            HDfprintf(stdout, "Number of attributes              = %u\n", s.num_attrs);
+            HDfprintf(stdout, "Number of groups                  = %u\n", s->nsteps);
+            HDfprintf(stdout, "Group Nested levels               = %u\n", s->nglevels);
+            HDfprintf(stdout, "Number of attributes              = %u\n", s->num_attrs);
             HDfprintf(stdout, "Number of element per attribute   = 1\n");
-            if (s.vlstr_test)
+            if (s->vlstr_test)
                 HDfprintf(stdout, "Attribute datatype is variable length string. \n");
-            else if (s.filetype == H5T_STD_U32BE)
+            else if (s->filetype == H5T_STD_U32BE)
                 HDfprintf(stdout, "Attribute datatype is big-endian unsigned 32-bit integer.\n");
             else
                 HDfprintf(stdout, "Attribute datatype is native unsigned 32-bit integer.\n");
@@ -2990,18 +2985,21 @@ main(int argc, char **argv)
             HDfprintf(stdout, "\n");
             HDfprintf(stdout,
                       "(If the nested level is 0, all the groups are created directly under the root.)\n\n");
-            HDfprintf(stdout, "group creation maximum time                       =%lf\n", s.max_gc_time);
-            HDfprintf(stdout, "group creation minimum time                       =%lf\n", s.min_gc_time);
+            HDfprintf(stdout, "group creation maximum time                       =%lf\n", s->max_gc_time);
+            HDfprintf(stdout, "group creation minimum time                       =%lf\n", s->min_gc_time);
         }
 
-        HDfprintf(stdout, "group creation total time                           = %lf\n", s.total_gc_time);
-        HDfprintf(stdout, "group creation mean time(per group)                 = %lf\n", s.mean_gc_time);
-        HDfprintf(stdout, "group creation and attributes generation total time = %lf\n", s.total_time);
+        HDfprintf(stdout, "group creation total time                           = %lf\n", s->total_gc_time);
+        HDfprintf(stdout, "group creation mean time(per group)                 = %lf\n", s->mean_gc_time);
+        HDfprintf(stdout, "group creation and attributes generation total time = %lf\n", s->total_time);
         HDfprintf(stdout, "group creation and attributes generation mean time(per group) = %lf\n",
-                  s.mean_time);
-        HDfprintf(stdout, "H5Fcreate time = %lf\n", s.fo_total_time);
-        HDfprintf(stdout, "H5Fclose time  = %lf\n", s.fc_total_time);
+                  s->mean_time);
+        HDfprintf(stdout, "H5Fcreate time = %lf\n", s->fo_total_time);
+        HDfprintf(stdout, "H5Fclose time  = %lf\n", s->fc_total_time);
     }
+
+    HDfree(config);
+    HDfree(s);
 
     return EXIT_SUCCESS;
 
@@ -3010,10 +3008,13 @@ error:
     {
         H5Pclose(fapl);
         H5Pclose(fcpl);
-        H5Sclose(s.one_by_one_sid);
-        H5Fclose(s.file);
+        H5Sclose(s->one_by_one_sid);
+        H5Fclose(s->file);
     }
     H5E_END_TRY;
+
+    HDfree(config);
+    HDfree(s);
 
     return EXIT_FAILURE;
 }
