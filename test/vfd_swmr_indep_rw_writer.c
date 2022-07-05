@@ -120,18 +120,18 @@ error:
 
 /* Allocate memory for the 2-D matrix. */
 static mat_t *
-newmat(state_t s)
+newmat(state_t *s)
 {
     mat_t *mat;
 
-    mat = HDmalloc(sizeof(*mat) + (s.rows * s.cols - 1) * sizeof(mat->elt[0]));
+    mat = HDmalloc(sizeof(*mat) + (s->rows * s->cols - 1) * sizeof(mat->elt[0]));
     if (mat == NULL) {
         HDfprintf(stderr, "HDmalloc failed\n");
         TEST_ERROR;
     }
 
-    mat->rows = s.rows;
-    mat->cols = s.cols;
+    mat->rows = s->rows;
+    mat->cols = s->cols;
 
     return mat;
 
@@ -362,16 +362,19 @@ static hbool_t
 indep_init_vfd_swmr_config_plist(state_t *s, hbool_t writer, const char *mdf_name)
 {
 
-    H5F_vfd_swmr_config_t config;
+    H5F_vfd_swmr_config_t *config = NULL;
+
+    if (NULL == (config = HDcalloc(1, sizeof(H5F_vfd_swmr_config_t))))
+        TEST_ERROR;
 
     /* config, tick_len, max_lag, presume_posix_semantics, writer,
      * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
      * md_file_path, md_file_name, updater_file_path */
-    init_vfd_swmr_config(&config, s->tick_len, s->max_lag, FALSE, writer, TRUE, FALSE, TRUE, 128, "./",
+    init_vfd_swmr_config(config, s->tick_len, s->max_lag, FALSE, writer, TRUE, FALSE, TRUE, 128, "./",
                          mdf_name, NULL);
 
     /* Pass the use_vfd_swmr, only_meta_page, page buffer size, config to vfd_swmr_create_fapl().*/
-    if ((s->fapl = vfd_swmr_create_fapl(TRUE, s->use_vfd_swmr, TRUE, s->pbs, &config)) < 0) {
+    if ((s->fapl = vfd_swmr_create_fapl(TRUE, s->use_vfd_swmr, TRUE, s->pbs, config)) < 0) {
         HDprintf("vfd_swmr_create_fapl failed\n");
         TEST_ERROR;
     }
@@ -382,9 +385,12 @@ indep_init_vfd_swmr_config_plist(state_t *s, hbool_t writer, const char *mdf_nam
         TEST_ERROR;
     }
 
+    HDfree(config);
+
     return TRUE;
 
 error:
+    HDfree(config);
     return FALSE;
 }
 
@@ -628,12 +634,14 @@ int
 main(int argc, char **argv)
 {
     hbool_t  writer = TRUE;
-    state_t  s;
-    hbool_t  ret = FALSE;
-    unsigned i;
+    state_t  *s = NULL;
     mat_t *  mat = NULL;
+    hbool_t  ret = FALSE;
 
-    if (!state_init(&s, argc, argv)) {
+    if (NULL == (s = HDcalloc(1, sizeof(state_t))))
+        TEST_ERROR;
+
+    if (!state_init(s, argc, argv)) {
         HDfprintf(stderr, "state_init failed\n");
         TEST_ERROR;
     }
@@ -644,70 +652,70 @@ main(int argc, char **argv)
     }
 
     /* The first process writes a dataset in the first file and then reads a dataset from the second file.*/
-    if (s.first_proc) {
+    if (s->first_proc) {
 
         writer = TRUE;
-        if (FALSE == indep_init_vfd_swmr_config_plist(&s, writer, "file1-shadow")) {
-            HDfprintf(stderr, "Writer: Cannot initialize file property lists for file %s\n", s.filename[0]);
+        if (FALSE == indep_init_vfd_swmr_config_plist(s, writer, "file1-shadow")) {
+            HDfprintf(stderr, "Writer: Cannot initialize file property lists for file %s\n", s->filename[0]);
             TEST_ERROR;
         }
-        s.file[0] = H5Fcreate(s.filename[0], H5F_ACC_TRUNC, s.fcpl, s.fapl);
-        if (s.file[0] < 0) {
-            HDfprintf(stderr, "H5Fcreate failed for the file %s\n", s.filename[0]);
+        s->file[0] = H5Fcreate(s->filename[0], H5F_ACC_TRUNC, s->fcpl, s->fapl);
+        if (s->file[0] < 0) {
+            HDfprintf(stderr, "H5Fcreate failed for the file %s\n", s->filename[0]);
             TEST_ERROR;
         }
 
-        ret = write_dataset(&s, mat);
+        ret = write_dataset(s, mat);
         if (ret == FALSE) {
-            HDfprintf(stderr, "write_dataset failed for the file %s\n", s.filename[0]);
+            HDfprintf(stderr, "write_dataset failed for the file %s\n", s->filename[0]);
             TEST_ERROR;
         }
 
         /* writer makes repeated HDF5 API calls
          * to trigger EOT at approximately the correct time */
-        for (i = 0; i < s.max_lag + 1; i++) {
-            decisleep(s.tick_len);
+        for (unsigned i = 0; i < s->max_lag + 1; i++) {
+            decisleep(s->tick_len);
             H5E_BEGIN_TRY
             {
-                H5Aexists(s.file[0], "nonexistent");
+                H5Aexists(s->file[0], "nonexistent");
             }
             H5E_END_TRY;
         }
 
-        if (FALSE == close_pl(&s)) {
-            HDfprintf(stderr, "Fail to close file property lists for writing the file %s.\n", s.filename[0]);
+        if (FALSE == close_pl(s)) {
+            HDfprintf(stderr, "Fail to close file property lists for writing the file %s.\n", s->filename[0]);
             TEST_ERROR;
         }
 
         writer = FALSE;
-        if (FALSE == indep_init_vfd_swmr_config_plist(&s, writer, "file2-shadow")) {
-            HDfprintf(stderr, "Reader: Cannot initialize file property lists for file %s\n", s.filename[1]);
+        if (FALSE == indep_init_vfd_swmr_config_plist(s, writer, "file2-shadow")) {
+            HDfprintf(stderr, "Reader: Cannot initialize file property lists for file %s\n", s->filename[1]);
             TEST_ERROR;
         }
-        s.file[1] = H5Fopen(s.filename[1], H5F_ACC_RDONLY, s.fapl);
-        if (s.file[1] < 0) {
-            HDfprintf(stderr, "H5Fopen failed for the file %s\n", s.filename[1]);
+        s->file[1] = H5Fopen(s->filename[1], H5F_ACC_RDONLY, s->fapl);
+        if (s->file[1] < 0) {
+            HDfprintf(stderr, "H5Fopen failed for the file %s\n", s->filename[1]);
             TEST_ERROR;
         }
 
-        ret = read_vrfy_dataset(&s, mat);
+        ret = read_vrfy_dataset(s, mat);
         if (ret == FALSE) {
-            HDfprintf(stderr, "read and verify dataset failed for file %s\n", s.filename[1]);
+            HDfprintf(stderr, "read and verify dataset failed for file %s\n", s->filename[1]);
             TEST_ERROR;
         }
 
-        if (FALSE == close_pl(&s)) {
-            HDfprintf(stderr, "Fail to close file property lists for reading the file %s.\n", s.filename[1]);
+        if (FALSE == close_pl(s)) {
+            HDfprintf(stderr, "Fail to close file property lists for reading the file %s.\n", s->filename[1]);
             TEST_ERROR;
         }
 
-        if (H5Fclose(s.file[0]) < 0) {
-            HDfprintf(stderr, "fail to close HDF5 file %s \n", s.filename[0]);
+        if (H5Fclose(s->file[0]) < 0) {
+            HDfprintf(stderr, "fail to close HDF5 file %s \n", s->filename[0]);
             TEST_ERROR;
         }
 
-        if (H5Fclose(s.file[1]) < 0) {
-            HDfprintf(stderr, "fail to close HDF5 file %s \n", s.filename[1]);
+        if (H5Fclose(s->file[1]) < 0) {
+            HDfprintf(stderr, "fail to close HDF5 file %s \n", s->filename[1]);
             TEST_ERROR;
         }
     }
@@ -717,88 +725,88 @@ main(int argc, char **argv)
          * then writes a dataset in the second file for the first process to read.
          */
         writer = FALSE;
-        if (FALSE == indep_init_vfd_swmr_config_plist(&s, writer, "file1-shadow")) {
-            HDfprintf(stderr, "Reader: Cannot initialize file property lists for file %s\n", s.filename[0]);
+        if (FALSE == indep_init_vfd_swmr_config_plist(s, writer, "file1-shadow")) {
+            HDfprintf(stderr, "Reader: Cannot initialize file property lists for file %s\n", s->filename[0]);
             TEST_ERROR;
         }
 
-        s.file[0] = H5Fopen(s.filename[0], H5F_ACC_RDONLY, s.fapl);
-        if (s.file[0] < 0) {
-            HDfprintf(stderr, "H5Fopen failed for the file %s\n", s.filename[0]);
+        s->file[0] = H5Fopen(s->filename[0], H5F_ACC_RDONLY, s->fapl);
+        if (s->file[0] < 0) {
+            HDfprintf(stderr, "H5Fopen failed for the file %s\n", s->filename[0]);
             TEST_ERROR;
         }
-        ret = read_vrfy_dataset(&s, mat);
+        ret = read_vrfy_dataset(s, mat);
         if (ret == FALSE) {
-            HDfprintf(stderr, "read and verify dataset failed for file %s\n", s.filename[0]);
+            HDfprintf(stderr, "read and verify dataset failed for file %s\n", s->filename[0]);
             TEST_ERROR;
         }
 
-        if (FALSE == close_pl(&s)) {
-            HDfprintf(stderr, "Fail to close file property lists for reading the file %s.\n", s.filename[0]);
+        if (FALSE == close_pl(s)) {
+            HDfprintf(stderr, "Fail to close file property lists for reading the file %s.\n", s->filename[0]);
             TEST_ERROR;
         }
 
         writer = TRUE;
-        if (FALSE == indep_init_vfd_swmr_config_plist(&s, writer, "file2-shadow")) {
-            HDfprintf(stderr, "writer: Cannot initialize file property lists for file %s\n", s.filename[1]);
+        if (FALSE == indep_init_vfd_swmr_config_plist(s, writer, "file2-shadow")) {
+            HDfprintf(stderr, "writer: Cannot initialize file property lists for file %s\n", s->filename[1]);
             TEST_ERROR;
         }
 
-        s.file[1] = H5Fcreate(s.filename[1], H5F_ACC_TRUNC, s.fcpl, s.fapl);
-        if (s.file[1] < 0) {
-            HDfprintf(stderr, "H5Fcreate failed for the file %s\n", s.filename[1]);
+        s->file[1] = H5Fcreate(s->filename[1], H5F_ACC_TRUNC, s->fcpl, s->fapl);
+        if (s->file[1] < 0) {
+            HDfprintf(stderr, "H5Fcreate failed for the file %s\n", s->filename[1]);
             TEST_ERROR;
         }
-        ret = write_dataset(&s, mat);
+        ret = write_dataset(s, mat);
         if (ret == FALSE) {
-            HDfprintf(stderr, "write_dataset failed for the file %s\n", s.filename[1]);
+            HDfprintf(stderr, "write_dataset failed for the file %s\n", s->filename[1]);
             TEST_ERROR;
         }
 
         /* writer makes repeated HDF5 API calls
          * to trigger EOT at approximately the correct time */
-        for (i = 0; i < s.max_lag + 1; i++) {
-            decisleep(s.tick_len);
+        for (unsigned i = 0; i < s->max_lag + 1; i++) {
+            decisleep(s->tick_len);
             H5E_BEGIN_TRY
             {
-                H5Aexists(s.file[1], "nonexistent");
+                H5Aexists(s->file[1], "nonexistent");
             }
             H5E_END_TRY;
         }
 
-        if (FALSE == close_pl(&s)) {
-            HDfprintf(stderr, "Fail to close file property lists for writing the file %s.\n", s.filename[1]);
+        if (FALSE == close_pl(s)) {
+            HDfprintf(stderr, "Fail to close file property lists for writing the file %s.\n", s->filename[1]);
             TEST_ERROR;
         }
 
-        if (H5Fclose(s.file[0]) < 0) {
-            HDfprintf(stderr, "fail to close HDF5 file %s \n", s.filename[0]);
+        if (H5Fclose(s->file[0]) < 0) {
+            HDfprintf(stderr, "fail to close HDF5 file %s \n", s->filename[0]);
             TEST_ERROR;
         }
 
-        if (H5Fclose(s.file[1]) < 0) {
-            HDfprintf(stderr, "fail to close HDF5 file %s \n", s.filename[1]);
+        if (H5Fclose(s->file[1]) < 0) {
+            HDfprintf(stderr, "fail to close HDF5 file %s \n", s->filename[1]);
             TEST_ERROR;
         }
     }
 
-    if (mat)
-        HDfree(mat);
+    HDfree(mat);
+    HDfree(s);
 
     return EXIT_SUCCESS;
 
 error:
     H5E_BEGIN_TRY
     {
-        H5Pclose(s.fapl);
-        H5Pclose(s.fcpl);
-        H5Fclose(s.file[0]);
-        H5Fclose(s.file[1]);
+        H5Pclose(s->fapl);
+        H5Pclose(s->fcpl);
+        H5Fclose(s->file[0]);
+        H5Fclose(s->file[1]);
     }
     H5E_END_TRY;
 
-    if (mat)
-        HDfree(mat);
+    HDfree(mat);
+    HDfree(s);
 
     return EXIT_FAILURE;
 }
