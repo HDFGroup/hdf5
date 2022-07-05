@@ -257,27 +257,27 @@ state_init(state_t *s, int argc, char **argv)
     const char *           s_opts   = "siferom:n:x:y:g:p:t:l:bqSNUu:c:";
     struct h5_long_options l_opts[] = {{NULL, 0, '\0'}};
 
-    s->file = H5I_INVALID_HID;
-    s->filetype = H5T_NATIVE_UINT32;
+    s->file            = H5I_INVALID_HID;
+    s->filetype        = H5T_NATIVE_UINT32;
     s->update_interval = READER_WAIT_TICKS;
-    s->csteps = 1;
-    s->use_np = TRUE;
-    s->use_vfd_swmr = TRUE;
-    s->use_filter = FALSE;
-    s->flush_raw_data = TRUE;
-    s->single_index = FALSE;
-    s->implicit_index = FALSE;
-    s->fa_index = FALSE;
-    s->ea_index = FALSE;
-    s->bt2_index = FALSE;
-    s->rows = 10;
-    s->cols = 5;
-    s->gwrites = 0;
-    s->pwrites = 0;
-    s->twrites = 0;
-    s->lwrites = 0;
-    s->xincrs = 0;
-    s->ydecrs = 0;
+    s->csteps          = 1;
+    s->use_np          = TRUE;
+    s->use_vfd_swmr    = TRUE;
+    s->use_filter      = FALSE;
+    s->flush_raw_data  = TRUE;
+    s->single_index    = FALSE;
+    s->implicit_index  = FALSE;
+    s->fa_index        = FALSE;
+    s->ea_index        = FALSE;
+    s->bt2_index       = FALSE;
+    s->rows            = 10;
+    s->cols            = 5;
+    s->gwrites         = 0;
+    s->pwrites         = 0;
+    s->twrites         = 0;
+    s->lwrites         = 0;
+    s->xincrs          = 0;
+    s->ydecrs          = 0;
 
     HDmemset(s->filename, 0, PATH_MAX);
     HDmemset(s->progname, 0, PATH_MAX);
@@ -2295,14 +2295,14 @@ error:
 int
 main(int argc, char **argv)
 {
-    hid_t                 fapl   = H5I_INVALID_HID;
-    hid_t                 fcpl   = H5I_INVALID_HID;
-    bool                  writer = false;
-    state_t               *s = NULL;
-    const char *          personality;
+    hid_t                  fapl   = H5I_INVALID_HID;
+    hid_t                  fcpl   = H5I_INVALID_HID;
+    bool                   writer = false;
+    state_t *              s      = NULL;
+    const char *           personality;
     H5F_vfd_swmr_config_t *config = NULL;
-    np_state_t            np;
-    dsets_state_t         ds;
+    np_state_t             np;
+    dsets_state_t          ds;
 
     if (NULL == (s = HDcalloc(1, sizeof(state_t)))) {
         HDprintf("memory allocation failed");

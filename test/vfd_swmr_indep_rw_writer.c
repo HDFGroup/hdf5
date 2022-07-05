@@ -634,9 +634,9 @@ int
 main(int argc, char **argv)
 {
     hbool_t  writer = TRUE;
-    state_t  *s = NULL;
-    mat_t *  mat = NULL;
-    hbool_t  ret = FALSE;
+    state_t *s      = NULL;
+    mat_t *  mat    = NULL;
+    hbool_t  ret    = FALSE;
 
     if (NULL == (s = HDcalloc(1, sizeof(state_t))))
         TEST_ERROR;

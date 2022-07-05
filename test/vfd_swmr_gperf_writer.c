@@ -197,34 +197,34 @@ state_init(state_t *s, int argc, char **argv)
     char *        tfile = NULL;
     char *        end;
 
-    s->file = H5I_INVALID_HID;
+    s->file           = H5I_INVALID_HID;
     s->one_by_one_sid = H5I_INVALID_HID;
-    s->filetype = H5T_NATIVE_UINT32;
-    s->asteps = 1;
-    s->nsteps = 100;
-    s->use_vfd_swmr = TRUE;
-    s->old_style_grp = FALSE;
+    s->filetype       = H5T_NATIVE_UINT32;
+    s->asteps         = 1;
+    s->nsteps         = 100;
+    s->use_vfd_swmr   = TRUE;
+    s->old_style_grp  = FALSE;
     s->grp_op_pattern = ' ';
-    s->grp_op_test = FALSE;
-    s->at_pattern = ' ';
-    s->attr_test = FALSE;
-    s->tick_len = 4;
-    s->max_lag = 7;
-    s->gperf = FALSE;
-    s->glog = FALSE;
-    s->min_gc_time = 100;
-    s->max_gc_time = 100;
-    s->mean_gc_time = 0.0;
-    s->total_gc_time = 0.0;
-    s->total_time = 0.0;
-    s->mean_time = 0.0;
-    s->fo_total_time = 0.0;
-    s->fc_total_time = 0.0;
-    s->num_attrs = 1;
-    s->vlstr_test = FALSE;
-    s->ps = 4096;
-    s->pbs = 4096;
-    s->nglevels = 0;
+    s->grp_op_test    = FALSE;
+    s->at_pattern     = ' ';
+    s->attr_test      = FALSE;
+    s->tick_len       = 4;
+    s->max_lag        = 7;
+    s->gperf          = FALSE;
+    s->glog           = FALSE;
+    s->min_gc_time    = 100;
+    s->max_gc_time    = 100;
+    s->mean_gc_time   = 0.0;
+    s->total_gc_time  = 0.0;
+    s->total_time     = 0.0;
+    s->mean_time      = 0.0;
+    s->fo_total_time  = 0.0;
+    s->fc_total_time  = 0.0;
+    s->num_attrs      = 1;
+    s->vlstr_test     = FALSE;
+    s->ps             = 4096;
+    s->pbs            = 4096;
+    s->nglevels       = 0;
 
     HDmemset(s->filename, 0, PATH_MAX);
     HDmemset(s->progname, 0, PATH_MAX);
@@ -2791,15 +2791,15 @@ error:
 int
 main(int argc, char **argv)
 {
-    hid_t                 fapl = H5I_INVALID_HID, fcpl = H5I_INVALID_HID;
-    unsigned              step;
-    bool                  writer = false;
-    state_t               *s = NULL;
-    const char *          personality;
+    hid_t                  fapl = H5I_INVALID_HID, fcpl = H5I_INVALID_HID;
+    unsigned               step;
+    bool                   writer = false;
+    state_t *              s      = NULL;
+    const char *           personality;
     H5F_vfd_swmr_config_t *config = NULL;
-    bool                  wg_ret = false;
-    struct timespec       start_time, end_time;
-    unsigned int          num_elems_per_level = 0;
+    bool                   wg_ret = false;
+    struct timespec        start_time, end_time;
+    unsigned int           num_elems_per_level = 0;
 
     if (NULL == (s = HDcalloc(1, sizeof(state_t)))) {
         HDprintf("memory allocation failed");

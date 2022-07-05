@@ -33,14 +33,14 @@ typedef struct _shared_ticks {
     uint64_t reader_tick;
 } shared_ticks_t;
 
-int                          fd_writer_to_reader = -1, fd_reader_to_writer = -1;
-const char *                 fifo_writer_to_reader = "./fifo_writer_to_reader";
-const char *                 fifo_reader_to_writer = "./fifo_reader_to_writer";
-hbool_t                      use_vfd_swmr          = TRUE;
-hbool_t                      use_named_pipe        = TRUE;
-hbool_t                      print_estack          = FALSE;
-static H5F_vfd_swmr_config_t *swmr_config = NULL;
-static hbool_t               writer;
+int                           fd_writer_to_reader = -1, fd_reader_to_writer = -1;
+const char *                  fifo_writer_to_reader = "./fifo_writer_to_reader";
+const char *                  fifo_reader_to_writer = "./fifo_reader_to_writer";
+hbool_t                       use_vfd_swmr          = TRUE;
+hbool_t                       use_named_pipe        = TRUE;
+hbool_t                       print_estack          = FALSE;
+static H5F_vfd_swmr_config_t *swmr_config           = NULL;
+static hbool_t                writer;
 struct timespec ival = {MAX_READ_LEN_IN_SECONDS, 0}; /* Expected maximal time for reader's validation */
 
 zoo_config_t config = {.proc_num        = 0,
@@ -138,10 +138,10 @@ parse_command_line_options(int argc, char **argv)
 
                 {
                     /* Translate the tick number to time represented by the timespec struct */
-                    long     n_ticks = (long)tmpl * TICK_LEN;
-                    float    time = (float)n_ticks / 10.0F;
-                    long     sec  = (long)time;
-                    long     nsec = (long)((time - (float)sec) * 10 * 1000 * 1000);
+                    long  n_ticks = (long)tmpl * TICK_LEN;
+                    float time    = (float)n_ticks / 10.0F;
+                    long  sec     = (long)time;
+                    long  nsec    = (long)((time - (float)sec) * 10 * 1000 * 1000);
 
                     ival.tv_sec  = sec;
                     ival.tv_nsec = nsec;
@@ -444,15 +444,15 @@ error:
 int
 main(int argc, char **argv)
 {
-    hid_t                 fapl = H5I_INVALID_HID, fcpl = H5I_INVALID_HID, fid = H5I_INVALID_HID;
-    H5F_t *               f;
-    H5C_t *               cache;
-    struct timespec       lastmsgtime = {.tv_sec = 0, .tv_nsec = 0};
-    char *                progname    = NULL;
-    char *                personality;
-    estack_state_t        es;
+    hid_t                  fapl = H5I_INVALID_HID, fcpl = H5I_INVALID_HID, fid = H5I_INVALID_HID;
+    H5F_t *                f;
+    H5C_t *                cache;
+    struct timespec        lastmsgtime = {.tv_sec = 0, .tv_nsec = 0};
+    char *                 progname    = NULL;
+    char *                 personality;
+    estack_state_t         es;
     H5F_vfd_swmr_config_t *vfd_swmr_config = NULL;
-    int                   notify = 0, verify = 0;
+    int                    notify = 0, verify = 0;
 
     if (NULL == (vfd_swmr_config = HDcalloc(1, sizeof(H5F_vfd_swmr_config_t)))) {
         H5_FAILED();
@@ -467,7 +467,6 @@ main(int argc, char **argv)
         HDprintf("memory allocation failed");
         goto error;
     }
-
 
     if (H5_basename(argv[0], &progname) < 0) {
         H5_FAILED();

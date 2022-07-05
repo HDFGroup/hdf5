@@ -216,19 +216,19 @@ state_init(state_t *s, int argc, const char *const *argv)
     const char *           s_opts   = "pgkvmbqSNa:d:u:c:";
     struct h5_long_options l_opts[] = {{NULL, 0, '\0'}};
 
-    s->file = H5I_INVALID_HID;
-    s->one_by_one_sid = H5I_INVALID_HID;
-    s->filetype = H5T_NATIVE_UINT32;
-    s->asteps = 0;
-    s->csteps = 1;
-    s->dattrs = 0;
-    s->use_np = TRUE;
-    s->use_vfd_swmr = TRUE;
-    s->compact = FALSE;
-    s->contig = FALSE;
-    s->chunked = FALSE;
-    s->vl_attr = FALSE;
-    s->mod_attr = FALSE;
+    s->file            = H5I_INVALID_HID;
+    s->one_by_one_sid  = H5I_INVALID_HID;
+    s->filetype        = H5T_NATIVE_UINT32;
+    s->asteps          = 0;
+    s->csteps          = 1;
+    s->dattrs          = 0;
+    s->use_np          = TRUE;
+    s->use_vfd_swmr    = TRUE;
+    s->compact         = FALSE;
+    s->contig          = FALSE;
+    s->chunked         = FALSE;
+    s->vl_attr         = FALSE;
+    s->mod_attr        = FALSE;
     s->update_interval = READER_WAIT_TICKS;
 
     HDmemset(s->filename, 0, PATH_MAX);
@@ -1962,14 +1962,14 @@ error:
 int
 main(int argc, char **argv)
 {
-    hid_t                 fapl   = H5I_INVALID_HID;
-    hid_t                 fcpl   = H5I_INVALID_HID;
-    hbool_t               writer = FALSE;
-    state_t               *s = NULL;
-    const char *          personality;
+    hid_t                  fapl   = H5I_INVALID_HID;
+    hid_t                  fcpl   = H5I_INVALID_HID;
+    hbool_t                writer = FALSE;
+    state_t *              s      = NULL;
+    const char *           personality;
     H5F_vfd_swmr_config_t *config = NULL;
-    np_state_t            np;
-    dsets_state_t         ds;
+    np_state_t             np;
+    dsets_state_t          ds;
 
     if (NULL == (s = HDcalloc(1, sizeof(state_t)))) {
         HDprintf("memory allocation failed");

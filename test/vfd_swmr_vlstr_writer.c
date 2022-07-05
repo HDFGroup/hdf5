@@ -90,11 +90,11 @@ usage(const char *progname)
 int
 main(int argc, char **argv)
 {
-    hid_t                  fapl = H5I_INVALID_HID;
-    hid_t fcpl = H5I_INVALID_HID;
-    hid_t  fid = H5I_INVALID_HID;
-    hid_t space = H5I_INVALID_HID;
-    hid_t type = H5I_INVALID_HID;
+    hid_t                  fapl    = H5I_INVALID_HID;
+    hid_t                  fcpl    = H5I_INVALID_HID;
+    hid_t                  fid     = H5I_INVALID_HID;
+    hid_t                  space   = H5I_INVALID_HID;
+    hid_t                  type    = H5I_INVALID_HID;
     hid_t                  dset[2] = {H5I_INVALID_HID, H5I_INVALID_HID};
     char                   content[2][96];
     char                   name[2][96];
@@ -109,9 +109,9 @@ main(int argc, char **argv)
     hbool_t                use_vfd_swmr = TRUE;
     const uint64_t         delay_ns     = 100 * 1000 * 1000; /* 100 ms */
     testsel_t              sel          = TEST_NONE;
-    H5F_vfd_swmr_config_t  *config = NULL;
-    const char *           s_opts   = "SWfn:qt:";
-    struct h5_long_options l_opts[] = {{NULL, 0, '\0'}};
+    H5F_vfd_swmr_config_t *config       = NULL;
+    const char *           s_opts       = "SWfn:qt:";
+    struct h5_long_options l_opts[]     = {{NULL, 0, '\0'}};
 
     HDassert(H5T_C_S1 != H5I_INVALID_HID);
 
