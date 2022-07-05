@@ -180,23 +180,23 @@ state_init(state_t *s, int argc, char **argv)
     char *        tfile = NULL;
     char *        end;
 
-    s->file = H5I_INVALID_HID;
-    s->one_by_one_sid = H5I_INVALID_HID;
-    s->filetype = H5T_NATIVE_UINT32;
-    s->nsteps = 1000;
-    s->use_vfd_swmr = true;
-    s->old_style_grp = false;
+    s->file            = H5I_INVALID_HID;
+    s->one_by_one_sid  = H5I_INVALID_HID;
+    s->filetype        = H5T_NATIVE_UINT32;
+    s->nsteps          = 1000;
+    s->use_vfd_swmr    = true;
+    s->old_style_grp   = false;
     s->use_named_pipes = true;
-    s->w_sleep_len = 112;
-    s->tick_len = 4;
-    s->max_lag = 7;
-    s->ps = 4096;
-    s->pbs = 4096;
-    s->del_grp = false;
-    s->np_fd_w_to_r = -1;
-    s->np_fd_r_to_w = -1;
-    s->np_notify = 0;
-    s->np_verify = 0;
+    s->w_sleep_len     = 112;
+    s->tick_len        = 4;
+    s->max_lag         = 7;
+    s->ps              = 4096;
+    s->pbs             = 4096;
+    s->del_grp         = false;
+    s->np_fd_w_to_r    = -1;
+    s->np_fd_r_to_w    = -1;
+    s->np_notify       = 0;
+    s->np_verify       = 0;
 
     HDmemset(s->filename, 0, PATH_MAX);
     HDmemset(s->progname, 0, PATH_MAX);
@@ -531,18 +531,18 @@ error:
 int
 main(int argc, char **argv)
 {
-    hid_t                 fapl = H5I_INVALID_HID;
-    hid_t                 fcpl = H5I_INVALID_HID;
-    unsigned              step;
-    bool                  writer = false;
-    state_t               *s = NULL;
-    const char *          personality;
-    H5F_vfd_swmr_config_t *config = NULL;
-    const char *          fifo_writer_to_reader = "./fifo_group_writer_to_reader";
-    const char *          fifo_reader_to_writer = "./fifo_group_reader_to_writer";
-    int                   fd_writer_to_reader = -1, fd_reader_to_writer = -1;
-    int                   notify = 0, verify = 0;
-    bool                  wg_ret = false;
+    hid_t                  fapl = H5I_INVALID_HID;
+    hid_t                  fcpl = H5I_INVALID_HID;
+    unsigned               step;
+    bool                   writer = false;
+    state_t *              s      = NULL;
+    const char *           personality;
+    H5F_vfd_swmr_config_t *config                = NULL;
+    const char *           fifo_writer_to_reader = "./fifo_group_writer_to_reader";
+    const char *           fifo_reader_to_writer = "./fifo_group_reader_to_writer";
+    int                    fd_writer_to_reader = -1, fd_reader_to_writer = -1;
+    int                    notify = 0, verify = 0;
+    bool                   wg_ret = false;
 
     struct timespec start_time, end_time;
     double          temp_time;
@@ -643,7 +643,7 @@ main(int argc, char **argv)
 
             wg_ret = create_group(s, step);
             if (wg_ret == false) {
-                if (s->use_named_pipes && !np_send_error(s, true)) 
+                if (s->use_named_pipes && !np_send_error(s, true))
                     HDprintf("Error message send failed\n");
                 HDprintf("create groups failed\n");
                 TEST_ERROR;

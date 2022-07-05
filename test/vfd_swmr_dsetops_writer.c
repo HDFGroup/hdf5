@@ -259,26 +259,26 @@ state_init(state_t *s, int argc, char **argv)
     const char *           s_opts   = "pte:gkm:n:s:r:l:w:bqSNUORu:c:";
     struct h5_long_options l_opts[] = {{NULL, 0, '\0'}};
 
-    s->file = H5I_INVALID_HID;
-    s->filetype = H5T_NATIVE_UINT32;
+    s->file            = H5I_INVALID_HID;
+    s->filetype        = H5T_NATIVE_UINT32;
     s->update_interval = READER_WAIT_TICKS;
-    s->csteps = 1;
-    s->use_np = TRUE;
-    s->use_vfd_swmr = TRUE;
-    s->flush_raw_data = TRUE;
-    s->compact = FALSE;
-    s->compact_write = FALSE;
-    s->compact_elmts = MAX_COMPACT_ELMS;
-    s->contig = FALSE;
-    s->rows = 10;
-    s->cols = 5;
-    s->swrites = 0;
-    s->rwrites = 0;
-    s->lwrites = 0;
-    s->wwrites = 0;
-    s->lastwrite = 0;
-    s->obj_ref = FALSE;
-    s->reg_ref = FALSE;
+    s->csteps          = 1;
+    s->use_np          = TRUE;
+    s->use_vfd_swmr    = TRUE;
+    s->flush_raw_data  = TRUE;
+    s->compact         = FALSE;
+    s->compact_write   = FALSE;
+    s->compact_elmts   = MAX_COMPACT_ELMS;
+    s->contig          = FALSE;
+    s->rows            = 10;
+    s->cols            = 5;
+    s->swrites         = 0;
+    s->rwrites         = 0;
+    s->lwrites         = 0;
+    s->wwrites         = 0;
+    s->lastwrite       = 0;
+    s->obj_ref         = FALSE;
+    s->reg_ref         = FALSE;
 
     HDmemset(s->filename, 0, PATH_MAX);
     HDmemset(s->progname, 0, PATH_MAX);
@@ -2214,14 +2214,14 @@ error:
 int
 main(int argc, char **argv)
 {
-    hid_t                 fapl   = H5I_INVALID_HID;
-    hid_t                 fcpl   = H5I_INVALID_HID;
-    bool                  writer = FALSE;
-    state_t               *s = NULL;
-    const char *          personality;
+    hid_t                  fapl   = H5I_INVALID_HID;
+    hid_t                  fcpl   = H5I_INVALID_HID;
+    bool                   writer = FALSE;
+    state_t *              s      = NULL;
+    const char *           personality;
     H5F_vfd_swmr_config_t *config = NULL;
-    np_state_t            np;
-    dsets_state_t         ds;
+    np_state_t             np;
+    dsets_state_t          ds;
 
     if (NULL == (s = HDcalloc(1, sizeof(state_t))))
         TEST_ERROR;
