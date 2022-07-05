@@ -95,7 +95,10 @@ static const char *namebases[] = {FILENAME, FILENAME2, FILENAME3, FNAME, NULL};
 /* Size of "flags" field in the updater file header */
 #define UD_SIZE_2 2
 
-#define Swap2Bytes(val) ((((val) >> (uint16_t)8) & 0x00FF) | (((val) << (uint16_t)8) & 0xFF00))
+/* Note that bitwise operations often perform integral promotion, so you have
+ * to cast the result to avoid warnings.
+ */
+#define Swap2Bytes(val) (uint16_t)((((val) >> 8) & 0x00FF) | (((val) << 8) & 0xFF00))
 
 #define Swap8Bytes(val)                                                                                      \
     ((((val) >> 56) & 0x00000000000000FF) | (((val) >> 40) & 0x000000000000FF00) |                           \
