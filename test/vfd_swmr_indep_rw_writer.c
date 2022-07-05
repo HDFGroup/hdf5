@@ -231,26 +231,26 @@ state_init(state_t *s, int argc, char **argv)
     const char *           s_opts   = "Sqc:r:t:m:B:s:u:";
     struct h5_long_options l_opts[] = {{NULL, 0, '\0'}};
 
-    s->file[0] = H5I_INVALID_HID;
-    s->file[1] = H5I_INVALID_HID;
-    s->filename[0] = "";
-    s->filename[1] = "";
-    s->r_dsetid = H5I_INVALID_HID;
-    s->dtype = H5T_NATIVE_UINT32;
-    s->fapl = H5I_INVALID_HID;
-    s->fcpl = H5I_INVALID_HID;
-    s->rows = DATA_ROWS;
-    s->cols = DATA_COLS;
-    s->rank = DATA_RANK;
-    s->dims[0] = DATA_ROWS;
-    s->dims[1] = DATA_COLS;
-    s->max_lag = 7;
-    s->tick_len = 4;
-    s->ps = 4096;
-    s->pbs = 4096;
+    s->file[0]        = H5I_INVALID_HID;
+    s->file[1]        = H5I_INVALID_HID;
+    s->filename[0]    = "";
+    s->filename[1]    = "";
+    s->r_dsetid       = H5I_INVALID_HID;
+    s->dtype          = H5T_NATIVE_UINT32;
+    s->fapl           = H5I_INVALID_HID;
+    s->fcpl           = H5I_INVALID_HID;
+    s->rows           = DATA_ROWS;
+    s->cols           = DATA_COLS;
+    s->rank           = DATA_RANK;
+    s->dims[0]        = DATA_ROWS;
+    s->dims[1]        = DATA_COLS;
+    s->max_lag        = 7;
+    s->tick_len       = 4;
+    s->ps             = 4096;
+    s->pbs            = 4096;
     s->check_interval = 1;
-    s->use_vfd_swmr = TRUE;
-    s->first_proc = TRUE;
+    s->use_vfd_swmr   = TRUE;
+    s->first_proc     = TRUE;
 
     if (H5_basename(argv[0], &tfile) < 0) {
         HDprintf("H5_basename failed\n");
