@@ -98,19 +98,19 @@ static int
 swmr_fapl_augment(hid_t fapl, const char *filename, uint32_t max_lag)
 {
     H5F_vfd_swmr_config_t *config = NULL;
-    char *                bname  = NULL;
-    char *                dname  = NULL;
+    char *                 bname  = NULL;
+    char *                 dname  = NULL;
 
     if (NULL == (config = HDcalloc(1, sizeof(H5F_vfd_swmr_config_t))))
         goto error;
 
-    config->version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
-    config->tick_len = 4;
-    config->max_lag = max_lag;
-    config->writer = TRUE;
+    config->version                = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
+    config->tick_len               = 4;
+    config->max_lag                = max_lag;
+    config->writer                 = TRUE;
     config->maintain_metadata_file = TRUE;
     config->generate_updater_files = FALSE;
-    config->md_pages_reserved = 128;
+    config->md_pages_reserved      = 128;
 
     if (H5_dirname(filename, &dname) < 0) {
         HDfprintf(stderr, "H5_dirname() failed\n");

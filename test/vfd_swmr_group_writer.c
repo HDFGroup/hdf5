@@ -144,28 +144,28 @@ state_init(state_t *s, int argc, char **argv)
     const char *           s_opts   = "SGa:bc:n:Nqu:t:m:B:s:A:O:";
     struct h5_long_options l_opts[] = {{NULL, 0, '\0'}};
 
-    s->file = H5I_INVALID_HID;
-    s->one_by_one_sid = H5I_INVALID_HID;
-    s->filetype = H5T_NATIVE_UINT32;
-    s->asteps = 10;
-    s->csteps = 10;
-    s->nsteps = 100;
+    s->file            = H5I_INVALID_HID;
+    s->one_by_one_sid  = H5I_INVALID_HID;
+    s->filetype        = H5T_NATIVE_UINT32;
+    s->asteps          = 10;
+    s->csteps          = 10;
+    s->nsteps          = 100;
     s->update_interval = READER_WAIT_TICKS;
-    s->use_vfd_swmr = TRUE;
-    s->old_style_grp = FALSE;
+    s->use_vfd_swmr    = TRUE;
+    s->old_style_grp   = FALSE;
     s->use_named_pipes = TRUE;
-    s->grp_op_pattern = ' ';
-    s->grp_op_test = FALSE;
-    s->at_pattern = ' ';
-    s->attr_test = FALSE;
-    s->tick_len = 4;
-    s->max_lag = 7;
-    s->ps = 4096;
-    s->pbs = 4096;
-    s->np_fd_w_to_r = -1;
-    s->np_fd_r_to_w = -1;
-    s->np_notify = 0;
-    s->np_verify = 0;
+    s->grp_op_pattern  = ' ';
+    s->grp_op_test     = FALSE;
+    s->at_pattern      = ' ';
+    s->attr_test       = FALSE;
+    s->tick_len        = 4;
+    s->max_lag         = 7;
+    s->ps              = 4096;
+    s->pbs             = 4096;
+    s->np_fd_w_to_r    = -1;
+    s->np_fd_r_to_w    = -1;
+    s->np_notify       = 0;
+    s->np_verify       = 0;
 
     HDmemset(s->filename, 0, PATH_MAX);
     HDmemset(s->progname, 0, PATH_MAX);
@@ -4987,18 +4987,18 @@ verify_group_operations(state_t *s, unsigned int which)
 int
 main(int argc, char **argv)
 {
-    hid_t                 fapl = H5I_INVALID_HID, fcpl = H5I_INVALID_HID;
-    unsigned              step;
-    hbool_t               writer = FALSE;
-    state_t               *s = NULL;
-    const char *          personality;
-    H5F_vfd_swmr_config_t *config = NULL;
-    const char *          fifo_writer_to_reader = "./fifo_group_writer_to_reader";
-    const char *          fifo_reader_to_writer = "./fifo_group_reader_to_writer";
-    int                   fd_writer_to_reader = -1, fd_reader_to_writer = -1;
-    int                   notify = 0, verify = 0;
-    hbool_t               wg_ret = FALSE;
-    hbool_t               vg_ret = FALSE;
+    hid_t                  fapl = H5I_INVALID_HID, fcpl = H5I_INVALID_HID;
+    unsigned               step;
+    hbool_t                writer = FALSE;
+    state_t *              s      = NULL;
+    const char *           personality;
+    H5F_vfd_swmr_config_t *config                = NULL;
+    const char *           fifo_writer_to_reader = "./fifo_group_writer_to_reader";
+    const char *           fifo_reader_to_writer = "./fifo_group_reader_to_writer";
+    int                    fd_writer_to_reader = -1, fd_reader_to_writer = -1;
+    int                    notify = 0, verify = 0;
+    hbool_t                wg_ret = FALSE;
+    hbool_t                vg_ret = FALSE;
 
     if (NULL == (s = HDcalloc(1, sizeof(state_t))))
         TEST_ERROR;
@@ -5110,7 +5110,8 @@ main(int argc, char **argv)
             if (wg_ret == FALSE) {
 
                 /* At communication interval, notifies the reader about the failure and quit */
-                if (s->use_named_pipes && s->attr_test != TRUE && s->grp_op_test != TRUE && step % s->csteps == 0)
+                if (s->use_named_pipes && s->attr_test != TRUE && s->grp_op_test != TRUE &&
+                    step % s->csteps == 0)
                     np_send_error(s, TRUE);
                 HDprintf("write_group failed at step %d\n", step);
                 TEST_ERROR;
@@ -5135,7 +5136,8 @@ main(int argc, char **argv)
 
             /* At communication interval, waits for the writer to finish creation before starting verification
              */
-            if (s->use_named_pipes && s->attr_test != TRUE && s->grp_op_test != TRUE && step % s->csteps == 0) {
+            if (s->use_named_pipes && s->attr_test != TRUE && s->grp_op_test != TRUE &&
+                step % s->csteps == 0) {
                 if (FALSE == np_rd_receive(s)) {
                     TEST_ERROR;
                 }
@@ -5152,7 +5154,8 @@ main(int argc, char **argv)
                 HDprintf("verify_group_operations failed\n");
 
                 /* At communication interval, tell the writer about the failure and exit */
-                if (s->use_named_pipes && s->attr_test != TRUE && s->grp_op_test != TRUE && step % s->csteps == 0)
+                if (s->use_named_pipes && s->attr_test != TRUE && s->grp_op_test != TRUE &&
+                    step % s->csteps == 0)
                     np_send_error(s, FALSE);
                 TEST_ERROR;
             }

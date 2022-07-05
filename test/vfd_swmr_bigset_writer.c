@@ -286,7 +286,6 @@ state_init(state_t *s, int argc, char **argv)
     const char *           s_opts   = "ACFMNPRSTVa:bc:d:e:f:g:j:k:l:m:n:o:p:qr:s:tu:v:w:";
     struct h5_long_options l_opts[] = {{NULL, 0, '\0'}};
 
-   
     s->memspace         = H5I_INVALID_HID;
     s->dapl             = H5I_INVALID_HID;
     s->filetype         = H5T_NATIVE_UINT32;
@@ -301,37 +300,35 @@ state_init(state_t *s, int argc, char **argv)
     s->part_chunk       = 0;
     s->skip_chunk       = SKIP_CHUNK;
     s->over_extend      = 1;
-     s->expand_2d        = false;
-     s->test_3d          = false;
-     s->vds              = vds_off;
-     s->use_vfd_swmr     = true;
-     s->use_legacy_swmr  = false;
-     s->use_named_pipe   = true;
-     s->use_aux_proc     = false;
-     s->do_perf          = false;
-     s->cross_chunk_read = false;
-     s->writer           = true,
-     s->fixed_array      = false,
-     s->one_dee_max_dims[0] = ROWS;
-     s->one_dee_max_dims[1] = H5S_UNLIMITED;
-     s->chunk_dims[0]       = ROWS;
-     s->chunk_dims[1]       = COLS;
-     s->fsp_size         = FSP_SIZE;
-     s->page_buf_size    = PAGE_BUF_SIZE;
-     s->tick_len         = TICK_LEN;
-     s->max_lag          = MAX_LAG;
-     s->flush_raw_data   = false;
-     s->mdc_init_size    = 0;
-     s->chunk_cache_size = 0;
-     s->deflate_level    = 0;
+    s->expand_2d        = false;
+    s->test_3d          = false;
+    s->vds              = vds_off;
+    s->use_vfd_swmr     = true;
+    s->use_legacy_swmr  = false;
+    s->use_named_pipe   = true;
+    s->use_aux_proc     = false;
+    s->do_perf          = false;
+    s->cross_chunk_read = false;
+    s->writer = true, s->fixed_array = false, s->one_dee_max_dims[0] = ROWS;
+    s->one_dee_max_dims[1] = H5S_UNLIMITED;
+    s->chunk_dims[0]       = ROWS;
+    s->chunk_dims[1]       = COLS;
+    s->fsp_size            = FSP_SIZE;
+    s->page_buf_size       = PAGE_BUF_SIZE;
+    s->tick_len            = TICK_LEN;
+    s->max_lag             = MAX_LAG;
+    s->flush_raw_data      = false;
+    s->mdc_init_size       = 0;
+    s->chunk_cache_size    = 0;
+    s->deflate_level       = 0;
 
-     s->ival.tv_sec = MAX_READ_LEN_IN_SECONDS;
-     s->ival.tv_nsec = 0;
+    s->ival.tv_sec  = MAX_READ_LEN_IN_SECONDS;
+    s->ival.tv_nsec = 0;
 
-     for (int i = 0; i < N_FILES; i++) {
-         s->file[i] = H5I_INVALID_HID;
-         s->filename[i] = "";
-     }
+    for (int i = 0; i < N_FILES; i++) {
+        s->file[i]     = H5I_INVALID_HID;
+        s->filename[i] = "";
+    }
 
     if (H5_basename(argv[0], &tfile) < 0) {
         HDfprintf(stderr, "H5_basename failed\n");
@@ -444,9 +441,9 @@ state_init(state_t *s, int argc, char **argv)
                 else if (opt == 'l') {
                     /* Translate the tick number to time represented by the timespec struct */
                     unsigned n_ticks = (unsigned)tmp * TICK_LEN;
-                    float    time = (float)n_ticks / 10.0F;
-                    long     sec  = (long)time;
-                    long     nsec = (long)((time - (float)sec) * 10 * 1000 * 1000);
+                    float    time    = (float)n_ticks / 10.0F;
+                    long     sec     = (long)time;
+                    long     nsec    = (long)((time - (float)sec) * 10 * 1000 * 1000);
 
                     s->ival.tv_sec  = sec;
                     s->ival.tv_nsec = nsec;
@@ -936,10 +933,10 @@ np_init(np_state_t *np, bool writer)
 {
     np->fifo_writer_to_reader = "./fifo_bigset_writer_to_reader";
     np->fifo_reader_to_writer = "./fifo_bigset_reader_to_writer";
-    np->fd_writer_to_reader = -1;
-    np->fd_reader_to_writer = -1;
-    np->notify = 0;
-    np->verify = 0;
+    np->fd_writer_to_reader   = -1;
+    np->fd_reader_to_writer   = -1;
+    np->notify                = 0;
+    np->verify                = 0;
 
     /*
      * Use two named pipes(FIFO) to coordinate the writer and reader for
@@ -1652,7 +1649,7 @@ newmat(state_t *s)
      */
     if (s->test_3d) {
         if (s->part_chunk) {
-            mat        = HDmalloc(sizeof(*mat) + (s->part_chunk * s->rows * s->cols - 1) * sizeof(mat->elt[0]));
+            mat = HDmalloc(sizeof(*mat) + (s->part_chunk * s->rows * s->cols - 1) * sizeof(mat->elt[0]));
             mat->depth = s->part_chunk;
         }
         else {
@@ -2549,10 +2546,10 @@ error:
 int
 main(int argc, char **argv)
 {
-    mat_t *    mat  = NULL;
-    hid_t      fcpl = H5I_INVALID_HID;
-    state_t    *s = NULL;
-    np_state_t *np = NULL;
+    mat_t *                mat    = NULL;
+    hid_t                  fcpl   = H5I_INVALID_HID;
+    state_t *              s      = NULL;
+    np_state_t *           np     = NULL;
     H5F_vfd_swmr_config_t *config = NULL;
 
     if (NULL == (s = HDcalloc(1, sizeof(state_t))))
@@ -2579,8 +2576,8 @@ main(int argc, char **argv)
     }
 
     for (size_t i = 0; i < NELMTS(s->file); i++) {
-        hid_t                 fapl;
-        H5AC_cache_config_t   mdc_config;
+        hid_t               fapl;
+        H5AC_cache_config_t mdc_config;
 
         HDmemset(config, 0, sizeof(H5F_vfd_swmr_config_t));
 
@@ -2659,7 +2656,7 @@ main(int argc, char **argv)
 #endif
 
         s->file[i] = s->writer ? H5Fcreate(s->filename[i], H5F_ACC_TRUNC, fcpl, fapl)
-                             : H5Fopen(s->filename[i], H5F_ACC_RDONLY, fapl);
+                               : H5Fopen(s->filename[i], H5F_ACC_RDONLY, fapl);
 
         if (s->file[i] == H5I_INVALID_HID) {
             HDfprintf(stderr, s->writer ? "H5Fcreate failed" : "H5Fopen failed");

@@ -59,11 +59,11 @@ usage(const char *progname)
 int
 main(int argc, char **argv)
 {
-    hid_t                  fapl = H5I_INVALID_HID;
-    hid_t fid = H5I_INVALID_HID;
-    hid_t  space = H5I_INVALID_HID;
-    hid_t type = H5I_INVALID_HID;
-    hid_t                  dset[2] = {H5I_INVALID_HID, H5I_INVALID_HID};
+    hid_t                  fapl       = H5I_INVALID_HID;
+    hid_t                  fid        = H5I_INVALID_HID;
+    hid_t                  space      = H5I_INVALID_HID;
+    hid_t                  type       = H5I_INVALID_HID;
+    hid_t                  dset[2]    = {H5I_INVALID_HID, H5I_INVALID_HID};
     char *                 content[2] = {NULL, NULL};
     char                   name[2][96];
     int                    opt;
@@ -73,7 +73,7 @@ main(int argc, char **argv)
     char *                 end;
     const uint64_t         delay_ns = 1100 * 1000; /* 1.1 ms */
     testsel_t              sel      = TEST_NONE;
-    H5F_vfd_swmr_config_t  *config;
+    H5F_vfd_swmr_config_t *config;
     const char *           s_opts   = "Sn:qt:";
     struct h5_long_options l_opts[] = {{NULL, 0, '\0'}};
 
@@ -167,7 +167,7 @@ main(int argc, char **argv)
 
         dbgf(2, "iteration %d which %d", i, which);
         (void)HDsnprintf(name[which], sizeof(name[which]), "dset-%d", which);
-        es          = disable_estack();
+        es = disable_estack();
 
         dset[which] = H5Dopen2(fid, name[which], H5P_DEFAULT);
         restore_estack(es);
