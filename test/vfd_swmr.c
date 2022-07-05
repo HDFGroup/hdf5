@@ -95,7 +95,7 @@ static const char *namebases[] = {FILENAME, FILENAME2, FILENAME3, FNAME, NULL};
 /* Size of "flags" field in the updater file header */
 #define UD_SIZE_2 2
 
-#define Swap2Bytes(val) ((((val) >> 8) & 0x00FF) | (((val) << 8) & 0xFF00))
+#define Swap2Bytes(val) ((((val) >> (uint16_t)8) & 0x00FF) | (((val) << (uint16_t)8) & 0xFF00))
 
 #define Swap8Bytes(val)                                                                                      \
     ((((val) >> 56) & 0x00000000000000FF) | (((val) >> 40) & 0x000000000000FF00) |                           \
@@ -4255,10 +4255,7 @@ verify_updater_flags(char *ud_name, uint16_t expected_flags)
     if (HDfread(&flags, UD_SIZE_2, 1, ud_fp) != (size_t)1)
         FAIL_STACK_ERROR;
 
-    if (little_endian)
-        swapped_flags = flags;
-    else
-        swapped_flags = Swap2Bytes(flags);
+    swapped_flags = little_endian ? flags : Swap2Bytes(flags);
 
     if (swapped_flags != expected_flags)
         TEST_ERROR;
