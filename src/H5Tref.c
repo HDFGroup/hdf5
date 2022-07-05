@@ -638,8 +638,8 @@ done:
  */
 static herr_t
 H5T__ref_mem_write(H5VL_object_t *src_file, const void *src_buf, size_t src_size, H5R_type_t src_type,
-                   H5VL_object_t H5_ATTR_UNUSED *dst_file, void *dst_buf, size_t dst_size,
-                   void H5_ATTR_UNUSED *bg_buf)
+                   H5VL_object_t H5_ATTR_UNUSED *dst_file, void *dst_buf,
+                   size_t H5_ATTR_NDEBUG_UNUSED dst_size, void H5_ATTR_UNUSED *bg_buf)
 {
     H5F_t *         src_f   = NULL;
     hid_t           file_id = H5I_INVALID_HID;
@@ -753,6 +753,14 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+/*
+ * It is the correct thing to do to have the reference buffer
+ * be const-qualified here, but the VOL "blob specific" routine
+ * needs a non-const pointer since an operation might modify
+ * the "blob". Disable this warning here (at least temporarily)
+ * for this reason.
+ */
+H5_GCC_CLANG_DIAG_OFF("cast-qual")
 static herr_t
 H5T__ref_disk_isnull(const H5VL_object_t *src_file, const void *src_buf, hbool_t *isnull)
 {
@@ -792,6 +800,7 @@ H5T__ref_disk_isnull(const H5VL_object_t *src_file, const void *src_buf, hbool_t
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__ref_disk_isnull() */
+H5_GCC_CLANG_DIAG_ON("cast-qual")
 
 /*-------------------------------------------------------------------------
  * Function:    H5T__ref_disk_setnull

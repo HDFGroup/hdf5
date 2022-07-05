@@ -202,25 +202,6 @@ matrix_read(state_t *s, int *framenop, float mat[ROWS][COLS])
             *framenop = frameno + 2;
     }
 
-#if 0
-	if (!s->constantrate && (lead < -2 || 2 < lead)) {
-		int gain = 31250 / 4;
-		const struct timespec prior_integral = s->update_integral;
-		struct timespec current_interval;
-		if (lead > 0)
-			gain *= 2;
-		struct timespec adjustment = (struct timespec){.tv_sec = 0,
-			.tv_nsec = gain * MAX(MIN(4, lead), -4)};
-		/* XXX clamp it XXX */
-		timespecadd(&s->update_integral,
-		    &adjustment, &s->update_integral);
-		timespecadd(&s->update_integral,
-		    &s->update_interval, &current_interval);
-		if (timespeccmp(&current_interval, &s->min_interval, <=))
-			s->update_integral = prior_integral;
-	}
-#endif
-
     if (frameno >= dims[0]) {
         int i, j;
         for (i = 0; i < ROWS; i++) {
@@ -565,11 +546,6 @@ matrix_open(state_t *s, bool rw)
     config.writer            = rw;
     config.md_pages_reserved = 128;
 
-#if 0 /* raw-data flushing is not implemented; default open-tries is ok */
-	config.flush_raw_data = true;
-	config.md_open_tries = 1;
-#endif
-
     strlcpy(config.md_file_path, "./my_md_file", sizeof(config.md_file_path));
 
     /* Enable page buffering */
@@ -688,10 +664,6 @@ main(int argc, char **argv)
             case READ:
             case STANDALONE:
                 matrix_draw(w, mat);
-#if 0
-			wmove(topw, ROWS + 3, 0);
-			waddstr(topw, "\"Don't cross the streams.\"");
-#endif
                 break;
             case WRITE:
                 matrix_write(&s, frameno, mat);

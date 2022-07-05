@@ -129,20 +129,22 @@ typedef struct _sources {
     hid_t ul, ur, bl, br;
 } sources_t;
 
-#define MANY_FILES 4
+#define N_FILES 4
 
 typedef struct {
     hid_t *     dataset;
     sources_t * sources;
-    hid_t       file[MANY_FILES];
+    hid_t       file[N_FILES];
     hid_t       dapl, filetype, memspace, one_by_one_sid, quadrant_dcpl;
     unsigned    ndatasets;
-    const char *filename[MANY_FILES];
+    const char *filename[N_FILES];
     char        progname[PATH_MAX];
     struct {
         quadrant_t ul, ur, bl, br, src;
     } quadrants;
-    unsigned int depth, cols, rows;
+    unsigned int depth;
+    unsigned int cols;
+    unsigned int rows;
     unsigned int asteps;
     unsigned int nsteps;
     unsigned int part_chunk;
@@ -187,61 +189,10 @@ typedef struct {
     struct timespec time;
 } exchange_info_t;
 
-/* Initializations for np_state_t */
-#define NP_INITIALIZER                                                                                       \
-    (np_state_t)                                                                                             \
-    {                                                                                                        \
-        .fifo_writer_to_reader = "./fifo_bigset_writer_to_reader",                                           \
-        .fifo_reader_to_writer = "./fifo_bigset_reader_to_writer", .fd_writer_to_reader = -1,                \
-        .fd_reader_to_writer = -1, .notify = 0, .verify = 0                                                  \
-    }
-
-static inline state_t
-state_initializer(void)
-{
-    return (state_t){.memspace         = H5I_INVALID_HID,
-                     .dapl             = H5I_INVALID_HID,
-                     .file             = {H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID, H5I_INVALID_HID},
-                     .filetype         = H5T_NATIVE_UINT32,
-                     .one_by_one_sid   = H5I_INVALID_HID,
-                     .quadrant_dcpl    = H5I_INVALID_HID,
-                     .depth            = DEPTH,
-                     .rows             = ROWS,
-                     .cols             = COLS,
-                     .ndatasets        = 5,
-                     .asteps           = 10,
-                     .nsteps           = 100,
-                     .part_chunk       = 0,
-                     .skip_chunk       = SKIP_CHUNK,
-                     .over_extend      = 1,
-                     .filename         = {"", "", "", ""},
-                     .expand_2d        = false,
-                     .test_3d          = false,
-                     .vds              = vds_off,
-                     .use_vfd_swmr     = true,
-                     .use_legacy_swmr  = false,
-                     .use_named_pipe   = true,
-                     .use_aux_proc     = false,
-                     .do_perf          = false,
-                     .cross_chunk_read = false,
-                     .writer           = true,
-                     .fixed_array      = false,
-                     .one_dee_max_dims = {ROWS, H5S_UNLIMITED},
-                     .chunk_dims       = {ROWS, COLS},
-                     .fsp_size         = FSP_SIZE,
-                     .page_buf_size    = PAGE_BUF_SIZE,
-                     .tick_len         = TICK_LEN,
-                     .max_lag          = MAX_LAG,
-                     .flush_raw_data   = false,
-                     .mdc_init_size    = 0,
-                     .chunk_cache_size = 0,
-                     .deflate_level    = 0,
-                     .ival             = (struct timespec){.tv_sec = MAX_READ_LEN_IN_SECONDS, .tv_nsec = 0}};
-}
-
 static bool state_init(state_t *, int, char **);
 
-static hsize_t two_dee_max_dims[RANK2], three_dee_max_dims[RANK3];
+static hsize_t two_dee_max_dims[RANK2];
+static hsize_t three_dee_max_dims[RANK3];
 
 static void
 usage(const char *progname)
@@ -324,7 +275,6 @@ state_init(state_t *s, int argc, char **argv)
 {
     unsigned long     tmp;
     int               opt;
-    unsigned          i;
     const hsize_t     dims  = 1;
     char *            tfile = NULL;
     char *            end;
@@ -336,7 +286,49 @@ state_init(state_t *s, int argc, char **argv)
     const char *           s_opts   = "ACFMNPRSTVa:bc:d:e:f:g:j:k:l:m:n:o:p:qr:s:tu:v:w:";
     struct h5_long_options l_opts[] = {{NULL, 0, '\0'}};
 
-    *s = state_initializer();
+    s->memspace         = H5I_INVALID_HID;
+    s->dapl             = H5I_INVALID_HID;
+    s->filetype         = H5T_NATIVE_UINT32;
+    s->one_by_one_sid   = H5I_INVALID_HID;
+    s->quadrant_dcpl    = H5I_INVALID_HID;
+    s->depth            = DEPTH;
+    s->rows             = ROWS;
+    s->cols             = COLS;
+    s->ndatasets        = 5;
+    s->asteps           = 10;
+    s->nsteps           = 100;
+    s->part_chunk       = 0;
+    s->skip_chunk       = SKIP_CHUNK;
+    s->over_extend      = 1;
+    s->expand_2d        = false;
+    s->test_3d          = false;
+    s->vds              = vds_off;
+    s->use_vfd_swmr     = true;
+    s->use_legacy_swmr  = false;
+    s->use_named_pipe   = true;
+    s->use_aux_proc     = false;
+    s->do_perf          = false;
+    s->cross_chunk_read = false;
+    s->writer = true, s->fixed_array = false, s->one_dee_max_dims[0] = ROWS;
+    s->one_dee_max_dims[1] = H5S_UNLIMITED;
+    s->chunk_dims[0]       = ROWS;
+    s->chunk_dims[1]       = COLS;
+    s->fsp_size            = FSP_SIZE;
+    s->page_buf_size       = PAGE_BUF_SIZE;
+    s->tick_len            = TICK_LEN;
+    s->max_lag             = MAX_LAG;
+    s->flush_raw_data      = false;
+    s->mdc_init_size       = 0;
+    s->chunk_cache_size    = 0;
+    s->deflate_level       = 0;
+
+    s->ival.tv_sec  = MAX_READ_LEN_IN_SECONDS;
+    s->ival.tv_nsec = 0;
+
+    for (int i = 0; i < N_FILES; i++) {
+        s->file[i]     = H5I_INVALID_HID;
+        s->filename[i] = "";
+    }
 
     if (H5_basename(argv[0], &tfile) < 0) {
         HDfprintf(stderr, "H5_basename failed\n");
@@ -448,9 +440,10 @@ state_init(state_t *s, int argc, char **argv)
                     s->part_chunk = (unsigned)tmp;
                 else if (opt == 'l') {
                     /* Translate the tick number to time represented by the timespec struct */
-                    float    time = (float)(((unsigned)tmp * TICK_LEN) / 10.0);
-                    unsigned sec  = (unsigned)time;
-                    unsigned nsec = (unsigned)((time - sec) * 10 * 1000 * 1000);
+                    unsigned n_ticks = (unsigned)tmp * TICK_LEN;
+                    float    time    = (float)n_ticks / 10.0F;
+                    long     sec     = (long)time;
+                    long     nsec    = (long)((time - (float)sec) * 10 * 1000 * 1000);
 
                     s->ival.tv_sec  = sec;
                     s->ival.tv_nsec = nsec;
@@ -666,7 +659,7 @@ state_init(state_t *s, int argc, char **argv)
         TEST_ERROR;
     }
 
-    for (i = 0; i < s->ndatasets; i++) {
+    for (unsigned i = 0; i < s->ndatasets; i++) {
         s->dataset[i]    = H5I_INVALID_HID;
         s->sources[i].ul = s->sources[i].ur = s->sources[i].bl = s->sources[i].br = H5I_INVALID_HID;
     }
@@ -938,7 +931,12 @@ error:
 static bool
 np_init(np_state_t *np, bool writer)
 {
-    *np = NP_INITIALIZER;
+    np->fifo_writer_to_reader = "./fifo_bigset_writer_to_reader";
+    np->fifo_reader_to_writer = "./fifo_bigset_reader_to_writer";
+    np->fd_writer_to_reader   = -1;
+    np->fd_reader_to_writer   = -1;
+    np->notify                = 0;
+    np->verify                = 0;
 
     /*
      * Use two named pipes(FIFO) to coordinate the writer and reader for
@@ -1028,11 +1026,11 @@ error:
 
 /* Wait for the writer's notice before starting validation */
 static int
-reader_verify(np_state_t np, int verify)
+reader_verify(np_state_t *np, int verify)
 {
     int notify;
 
-    if (HDread(np.fd_writer_to_reader, &notify, sizeof(int)) < 0) {
+    if (HDread(np->fd_writer_to_reader, &notify, sizeof(int)) < 0) {
         HDfprintf(stderr, "HDread failed\n");
         TEST_ERROR;
     }
@@ -1103,7 +1101,7 @@ error:
  * This time period is from the writer finishing dataset creation to the reader finishing
  * the validation of dataset creation */
 static int
-reader_check_time_and_notify_writer(np_state_t *np, state_t s)
+reader_check_time_and_notify_writer(np_state_t *np, state_t *s)
 {
     struct timespec last = {0, 0};
 
@@ -1116,7 +1114,7 @@ reader_check_time_and_notify_writer(np_state_t *np, state_t s)
     /* If the dataset validation takes longer than the expected time, issue a warning.
      * This time period is from the writer finishing dataset creation to the reader finishing
      * the validation of dataset creation */
-    if (below_speed_limit(&last, &(s.ival))) {
+    if (below_speed_limit(&last, &(s->ival))) {
         AT();
         HDfprintf(stderr, "Warning: dataset validation took too long to finish\n");
     }
@@ -1242,14 +1240,13 @@ md_ck_cb(char *md_file_path, uint64_t updater_seq_num)
     if (chk_fp && HDfclose(chk_fp) != 0)
         FAIL_STACK_ERROR;
 
-    if (buf)
-        HDfree(buf);
+    HDfree(buf);
 
     return 0;
 
 error:
-    if (buf)
-        HDfree(buf);
+    HDfree(buf);
+
     if (md_fp)
         HDfclose(md_fp);
     if (chk_fp)
@@ -1580,13 +1577,13 @@ error:
 }
 
 static bool
-create_dsets(state_t s)
+create_dsets(state_t *s)
 {
     struct timespec start_time, end_time;
     unsigned int    which;
 
     /* For checking the time spent in dataset creation.  It's for running the writer alone */
-    if (s.do_perf) {
+    if (s->do_perf) {
         if (HDclock_gettime(CLOCK_MONOTONIC, &start_time) == -1) {
             HDfprintf(stderr, "HDclock_gettime failed");
             TEST_ERROR;
@@ -1596,14 +1593,14 @@ create_dsets(state_t s)
     /* Create NDATASETS datasets as the reader is doing verification.  So no communication with
      * the reader during the creation of datasets.
      */
-    for (which = 0; which < s.ndatasets; which++)
-        if (!create_extensible_dset(&s, which)) {
+    for (which = 0; which < s->ndatasets; which++)
+        if (!create_extensible_dset(s, which)) {
             HDfprintf(stderr, "create_extensible_dset failed: number %u\n", which);
             TEST_ERROR;
         }
 
     /* For checking the time spent in dataset creation.  It's for running the writer alone */
-    if (s.do_perf) {
+    if (s->do_perf) {
         if (HDclock_gettime(CLOCK_MONOTONIC, &end_time) == -1) {
             HDfprintf(stderr, "HDclock_gettime failed");
             TEST_ERROR;
@@ -1642,7 +1639,7 @@ error:
 }
 
 static mat_t *
-newmat(state_t s)
+newmat(state_t *s)
 {
     mat_t *mat;
 
@@ -1650,31 +1647,31 @@ newmat(state_t s)
      * If partial chunk is enabled, the chunk size along the growing dimension
      * is replaced with the partial size
      */
-    if (s.test_3d) {
-        if (s.part_chunk) {
-            mat        = HDmalloc(sizeof(*mat) + (s.part_chunk * s.rows * s.cols - 1) * sizeof(mat->elt[0]));
-            mat->depth = s.part_chunk;
+    if (s->test_3d) {
+        if (s->part_chunk) {
+            mat = HDmalloc(sizeof(*mat) + (s->part_chunk * s->rows * s->cols - 1) * sizeof(mat->elt[0]));
+            mat->depth = s->part_chunk;
         }
         else {
-            mat        = HDmalloc(sizeof(*mat) + (s.depth * s.rows * s.cols - 1) * sizeof(mat->elt[0]));
-            mat->depth = s.depth;
+            mat        = HDmalloc(sizeof(*mat) + (s->depth * s->rows * s->cols - 1) * sizeof(mat->elt[0]));
+            mat->depth = s->depth;
         }
 
-        mat->rows = s.rows;
-        mat->cols = s.cols;
+        mat->rows = s->rows;
+        mat->cols = s->cols;
     }
     else {
-        if (s.part_chunk && !s.expand_2d) {
-            mat        = HDmalloc(sizeof(*mat) + (s.rows * s.part_chunk - 1) * sizeof(mat->elt[0]));
+        if (s->part_chunk && !s->expand_2d) {
+            mat        = HDmalloc(sizeof(*mat) + (s->rows * s->part_chunk - 1) * sizeof(mat->elt[0]));
             mat->depth = 1;
-            mat->rows  = s.rows;
-            mat->cols  = s.part_chunk;
+            mat->rows  = s->rows;
+            mat->cols  = s->part_chunk;
         }
         else {
-            mat        = HDmalloc(sizeof(*mat) + (s.rows * s.cols - 1) * sizeof(mat->elt[0]));
+            mat        = HDmalloc(sizeof(*mat) + (s->rows * s->cols - 1) * sizeof(mat->elt[0]));
             mat->depth = 1;
-            mat->rows  = s.rows;
-            mat->cols  = s.cols;
+            mat->rows  = s->rows;
+            mat->cols  = s->cols;
         }
     }
 
@@ -1771,7 +1768,7 @@ verify_matrix(mat_t *mat, unsigned int which, base_t base)
 }
 
 static unsigned int
-calc_total_steps(state_t s)
+calc_total_steps(state_t *s)
 {
     unsigned int total_steps = 0;
 
@@ -1781,20 +1778,20 @@ calc_total_steps(state_t s)
      * 60.  When the size of the partial chunk along the growing dimension is 5
      * (treated as the new chunk size), the number of steps becomes 12.
      */
-    if (s.test_3d) {
-        if (s.part_chunk)
-            total_steps = s.nsteps * s.depth / s.part_chunk;
+    if (s->test_3d) {
+        if (s->part_chunk)
+            total_steps = s->nsteps * s->depth / s->part_chunk;
         else
-            total_steps = s.nsteps;
+            total_steps = s->nsteps;
     }
-    else if (s.expand_2d) {
-        total_steps = s.nsteps;
+    else if (s->expand_2d) {
+        total_steps = s->nsteps;
     }
     else {
-        if (s.part_chunk)
-            total_steps = s.nsteps * s.cols / s.part_chunk;
+        if (s->part_chunk)
+            total_steps = s->nsteps * s->cols / s->part_chunk;
         else
-            total_steps = s.nsteps;
+            total_steps = s->nsteps;
     }
 
     return total_steps;
@@ -2010,7 +2007,6 @@ verify_extensible_dset(state_t *s, unsigned int which, mat_t *mat, unsigned fini
     hsize_t      size2[RANK2], size3[RANK3];
     base_t       base, last;
     unsigned int nchunks, step, ofs;
-    int          i;
     h5_retry_t   retry;
     hbool_t      do_try; /* more tries remain */
 
@@ -2173,7 +2169,7 @@ error:
 }
 
 static bool
-verify_dsets(state_t s, np_state_t *np, mat_t *mat)
+verify_dsets(state_t *s, np_state_t *np, mat_t *mat)
 {
     unsigned        finished_step = 0;
     unsigned        which;
@@ -2189,16 +2185,16 @@ verify_dsets(state_t s, np_state_t *np, mat_t *mat)
         /* Receive the notice of the writer finishing creation,
          * including the number of chunks finished and the timestamp
          */
-        if (s.use_named_pipe && HDread(np->fd_writer_to_reader, &last, sizeof(last)) < 0) {
+        if (s->use_named_pipe && HDread(np->fd_writer_to_reader, &last, sizeof(last)) < 0) {
             HDfprintf(stderr, "HDread failed\n");
             TEST_ERROR;
         }
 
-        for (which = 0; which < s.ndatasets; which++) {
+        for (which = 0; which < s->ndatasets; which++) {
             /* Verify the chunks starting from the finished one in last round
              * to the ones written in this round
              */
-            if (!verify_extensible_dset(&s, which, mat, finished_step, last.step)) {
+            if (!verify_extensible_dset(s, which, mat, finished_step, last.step)) {
                 HDfprintf(stderr, "verify_extensible_dset failed\n");
                 TEST_ERROR;
             }
@@ -2210,7 +2206,7 @@ verify_dsets(state_t s, np_state_t *np, mat_t *mat)
         /* Make sure the chunk verification doesn't take longer than the expected time.
          * This time period is from the writer finishing chunks to the reader finishing
          * the validation of the chunks */
-        if (s.use_named_pipe && below_speed_limit(&(last.time), &(s.ival))) {
+        if (s->use_named_pipe && below_speed_limit(&(last.time), &(s->ival))) {
             AT();
             HDfprintf(stderr, "Warning: verify_extensible_dset took too long to finish\n");
         }
@@ -2218,7 +2214,7 @@ verify_dsets(state_t s, np_state_t *np, mat_t *mat)
         /* For checking the time lapse between the writer's finishing writing a batch of chunks
          * within a tick and the reader's finishing verifying those chunks
          */
-        if (s.use_named_pipe && s.do_perf) {
+        if (s->use_named_pipe && s->do_perf) {
             if (HDclock_gettime(CLOCK_MONOTONIC, &end_time) == -1) {
                 HDfprintf(stderr, "HDclock_gettime failed");
                 TEST_ERROR;
@@ -2238,7 +2234,7 @@ verify_dsets(state_t s, np_state_t *np, mat_t *mat)
     } while (finished_step < total_steps);
 
     /* Print out the performance information */
-    if (s.use_named_pipe && s.do_perf && counter)
+    if (s->use_named_pipe && s->do_perf && counter)
         HDfprintf(stdout, "Dataset verification: mean time = %lf, max time = %lf, min time = %lf\n",
                   total_time / (double)counter, max_time, min_time);
 
@@ -2456,20 +2452,20 @@ error:
 }
 
 static bool
-write_dsets(state_t s, np_state_t *np, mat_t *mat)
+write_dsets(state_t *s, np_state_t *np, mat_t *mat)
 {
     unsigned           last_step, step, total_steps, which;
     unsigned long long old_tick_num;
     H5F_t *            f = NULL;
     struct timespec    start_time, end_time;
 
-    if (NULL == (f = (H5F_t *)H5VL_object(s.file[0]))) {
+    if (NULL == (f = (H5F_t *)H5VL_object(s->file[0]))) {
         HDfprintf(stderr, "H5VL_object failed\n");
         TEST_ERROR;
     }
 
     /* For checking the time spent in writing data.  It's for running the writer alone */
-    if (s.do_perf) {
+    if (s->do_perf) {
         if (HDclock_gettime(CLOCK_MONOTONIC, &start_time) == -1) {
             HDfprintf(stderr, "HDclock_gettime failed");
             TEST_ERROR;
@@ -2488,10 +2484,10 @@ write_dsets(state_t s, np_state_t *np, mat_t *mat)
     for (step = 0; step < total_steps; step++) {
         /* Write as many as chunks before the tick number changes */
         if (f->shared->tick_num == old_tick_num) {
-            if (!s.skip_chunk || (s.skip_chunk && step % s.skip_chunk != 0)) {
-                for (which = 0; which < s.ndatasets; which++) {
+            if (!s->skip_chunk || (s->skip_chunk && step % s->skip_chunk != 0)) {
+                for (which = 0; which < s->ndatasets; which++) {
                     dbgf(2, "step %d which %d\n", step, which);
-                    if (!write_extensible_dset(&s, which, step, mat)) {
+                    if (!write_extensible_dset(s, which, step, mat)) {
                         HDfprintf(stderr, "write_extensible_dset failed\n");
                         TEST_ERROR;
                     }
@@ -2504,7 +2500,7 @@ write_dsets(state_t s, np_state_t *np, mat_t *mat)
          */
         if (f->shared->tick_num > old_tick_num || step == (total_steps - 1)) {
             last_step = step + 1;
-            if (s.use_named_pipe && notify_reader(np, last_step) < 0) {
+            if (s->use_named_pipe && notify_reader(np, last_step) < 0) {
                 HDfprintf(stderr, "notify_reader failed\n");
                 TEST_ERROR;
             }
@@ -2514,7 +2510,7 @@ write_dsets(state_t s, np_state_t *np, mat_t *mat)
     }
 
     /* For checking the time spent in writing data.  It's for running the writer alone */
-    if (s.do_perf) {
+    if (s->do_perf) {
         double throughput;
         double time_passed;
 
@@ -2526,13 +2522,13 @@ write_dsets(state_t s, np_state_t *np, mat_t *mat)
         time_passed = TIME_PASSED(start_time, end_time);
 
         /* Calculate the write speed */
-        if (s.test_3d)
+        if (s->test_3d)
             throughput =
-                ((double)(sizeof(unsigned int) * s.depth * s.rows * s.cols * s.nsteps * s.ndatasets)) /
+                ((double)(sizeof(unsigned int) * s->depth * s->rows * s->cols * s->nsteps * s->ndatasets)) /
                 time_passed;
         else
             throughput =
-                ((double)(sizeof(unsigned int) * s.rows * s.cols * s.nsteps * s.ndatasets)) / time_passed;
+                ((double)(sizeof(unsigned int) * s->rows * s->cols * s->nsteps * s->ndatasets)) / time_passed;
 
         /* Print out the performance information */
         HDfprintf(stdout,
@@ -2550,14 +2546,20 @@ error:
 int
 main(int argc, char **argv)
 {
-    mat_t *    mat  = NULL;
-    hid_t      fcpl = H5I_INVALID_HID;
-    unsigned   which;
-    state_t    s;
-    np_state_t np;
-    size_t     i;
+    mat_t *                mat    = NULL;
+    hid_t                  fcpl   = H5I_INVALID_HID;
+    state_t *              s      = NULL;
+    np_state_t *           np     = NULL;
+    H5F_vfd_swmr_config_t *config = NULL;
 
-    if (!state_init(&s, argc, argv)) {
+    if (NULL == (s = HDcalloc(1, sizeof(state_t))))
+        TEST_ERROR;
+    if (NULL == (np = HDcalloc(1, sizeof(np_state_t))))
+        TEST_ERROR;
+    if (NULL == (config = HDcalloc(1, sizeof(H5F_vfd_swmr_config_t))))
+        TEST_ERROR;
+
+    if (!state_init(s, argc, argv)) {
         HDfprintf(stderr, "state_init failed\n");
         TEST_ERROR;
     }
@@ -2568,18 +2570,19 @@ main(int argc, char **argv)
     }
 
     /* Set fs_strategy (file space strategy) and fs_page_size (file space page size) */
-    if ((fcpl = vfd_swmr_create_fcpl(H5F_FSPACE_STRATEGY_PAGE, s.fsp_size)) < 0) {
+    if ((fcpl = vfd_swmr_create_fcpl(H5F_FSPACE_STRATEGY_PAGE, s->fsp_size)) < 0) {
         HDfprintf(stderr, "vfd_swmr_create_fcpl failed\n");
         TEST_ERROR;
     }
 
-    for (i = 0; i < NELMTS(s.file); i++) {
-        hid_t                 fapl;
-        H5F_vfd_swmr_config_t config;
-        H5AC_cache_config_t   mdc_config;
+    for (size_t i = 0; i < NELMTS(s->file); i++) {
+        hid_t               fapl;
+        H5AC_cache_config_t mdc_config;
 
-        if (s.vds != vds_multi && i > 0) {
-            s.file[i] = s.file[0];
+        HDmemset(config, 0, sizeof(H5F_vfd_swmr_config_t));
+
+        if (s->vds != vds_multi && i > 0) {
+            s->file[i] = s->file[0];
             continue;
         }
 
@@ -2591,29 +2594,29 @@ main(int argc, char **argv)
 
         /* If using the auxiliary process, the writer creates the updater files.
          * The reader uses the metadata file generated by the auxiliary process. */
-        if (s.writer) {
-            init_vfd_swmr_config(&config, s.tick_len, s.max_lag, FALSE, s.writer, FALSE, TRUE,
-                                 s.flush_raw_data, 128, "./", "bigset-shadow-%zu", "bigset_updater", i);
+        if (s->writer) {
+            init_vfd_swmr_config(config, s->tick_len, s->max_lag, FALSE, s->writer, FALSE, TRUE,
+                                 s->flush_raw_data, 128, "./", "bigset-shadow-%zu", "bigset_updater", i);
         }
         else {
-            init_vfd_swmr_config(&config, s.tick_len, s.max_lag, FALSE, s.writer, TRUE, FALSE,
-                                 s.flush_raw_data, 128, "./", "mdfile", NULL);
+            init_vfd_swmr_config(config, s->tick_len, s->max_lag, FALSE, s->writer, TRUE, FALSE,
+                                 s->flush_raw_data, 128, "./", "mdfile", NULL);
         }
 #else
 
-        if (s.vds == vds_multi || s.vds == vds_single) {
-            init_vfd_swmr_config(&config, s.tick_len, s.max_lag, TRUE, s.writer, TRUE, FALSE,
-                                 s.flush_raw_data, 128, "", "", NULL);
+        if (s->vds == vds_multi || s->vds == vds_single) {
+            init_vfd_swmr_config(config, s->tick_len, s->max_lag, TRUE, s->writer, TRUE, FALSE,
+                                 s->flush_raw_data, 128, "", "%s", NULL, "");
         }
         else {
-            init_vfd_swmr_config(&config, s.tick_len, s.max_lag, FALSE, s.writer, TRUE, FALSE,
-                                 s.flush_raw_data, 128, "./", "bigset-shadow-%zu", NULL, i);
+            init_vfd_swmr_config(config, s->tick_len, s->max_lag, FALSE, s->writer, TRUE, FALSE,
+                                 s->flush_raw_data, 128, "./", "bigset-shadow-%zu", NULL, i);
         }
 
 #endif
 
         /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
-        if ((fapl = vfd_swmr_create_fapl(true, s.use_vfd_swmr, true, s.page_buf_size, &config)) < 0) {
+        if ((fapl = vfd_swmr_create_fapl(true, s->use_vfd_swmr, true, s->page_buf_size, config)) < 0) {
             HDfprintf(stderr, "vfd_swmr_create_fapl failed");
             TEST_ERROR;
         }
@@ -2621,7 +2624,7 @@ main(int argc, char **argv)
         /* Set the initial size for the metadata cache between 1 and 32 in megabytes.
          * Zero means using the default value, which is no-op.
          */
-        if (s.mdc_init_size) {
+        if (s->mdc_init_size) {
             mdc_config.version = H5AC__CURR_CACHE_CONFIG_VERSION;
 
             if (H5Pget_mdc_config(fapl, &mdc_config) < 0) {
@@ -2631,7 +2634,7 @@ main(int argc, char **argv)
 
             /* Convert the value to megabytes */
             mdc_config.set_initial_size = TRUE;
-            mdc_config.initial_size     = s.mdc_init_size * 1024 * 1024;
+            mdc_config.initial_size     = s->mdc_init_size * 1024 * 1024;
 
             if (H5Pset_mdc_config(fapl, &mdc_config) < 0) {
                 HDfprintf(stderr, "H5Pset_mdc_config failed");
@@ -2652,11 +2655,11 @@ main(int argc, char **argv)
         }
 #endif
 
-        s.file[i] = s.writer ? H5Fcreate(s.filename[i], H5F_ACC_TRUNC, fcpl, fapl)
-                             : H5Fopen(s.filename[i], H5F_ACC_RDONLY, fapl);
+        s->file[i] = s->writer ? H5Fcreate(s->filename[i], H5F_ACC_TRUNC, fcpl, fapl)
+                               : H5Fopen(s->filename[i], H5F_ACC_RDONLY, fapl);
 
-        if (s.file[i] == H5I_INVALID_HID) {
-            HDfprintf(stderr, s.writer ? "H5Fcreate failed" : "H5Fopen failed");
+        if (s->file[i] == H5I_INVALID_HID) {
+            HDfprintf(stderr, s->writer ? "H5Fcreate failed" : "H5Fopen failed");
             TEST_ERROR;
         }
 
@@ -2667,15 +2670,15 @@ main(int argc, char **argv)
     }
 
     /* Initiailze named pipes */
-    if (s.use_named_pipe && !np_init(&np, s.writer)) {
+    if (s->use_named_pipe && !np_init(np, s->writer)) {
         HDfprintf(stderr, "np_init() failed\n");
         TEST_ERROR;
     }
 
-    if (s.writer) {
+    if (s->writer) {
         /* Writer tells reader to start */
-        np.notify = 1;
-        if (s.use_named_pipe && HDwrite(np.fd_writer_to_reader, &np.notify, sizeof(int)) < 0) {
+        np->notify = 1;
+        if (s->use_named_pipe && HDwrite(np->fd_writer_to_reader, &(np->notify), sizeof(int)) < 0) {
             HDfprintf(stderr, "HDwrite failed\n");
             TEST_ERROR;
         }
@@ -2687,18 +2690,16 @@ main(int argc, char **argv)
         }
 
         /* Call H5Fvfd_swmr_end_tick to end the tick.  No communication with the reader in this step */
-        if (s.use_vfd_swmr && s.use_named_pipe) {
-            unsigned long j;
-
-            if (s.vds != vds_multi) {
-                if (H5Fvfd_swmr_end_tick(s.file[0]) < 0) {
+        if (s->use_vfd_swmr && s->use_named_pipe) {
+            if (s->vds != vds_multi) {
+                if (H5Fvfd_swmr_end_tick(s->file[0]) < 0) {
                     HDfprintf(stderr, "H5Fvfd_swmr_end_tick failed\n");
                     TEST_ERROR;
                 }
             }
             else {
-                for (j = 0; j < NELMTS(s.file); j++)
-                    if (H5Fvfd_swmr_end_tick(s.file[j]) < 0) {
+                for (unsigned long j = 0; j < NELMTS(s->file); j++)
+                    if (H5Fvfd_swmr_end_tick(s->file[j]) < 0) {
                         HDfprintf(stderr, "H5Fvfd_swmr_end_tick failed\n");
                         TEST_ERROR;
                     }
@@ -2707,29 +2708,29 @@ main(int argc, char **argv)
 
         /* Notify the reader of finishing dataset creation by sending the timestamp
          * and wait for the reader to finish validation before proceeding */
-        np.verify = 2;
-        if (s.use_named_pipe && notify_and_wait_for_reader(&s, &np) < 0) {
+        np->verify = 2;
+        if (s->use_named_pipe && notify_and_wait_for_reader(s, np) < 0) {
             HDfprintf(stderr, "notify_and_wait_for_reader failed\n");
             TEST_ERROR;
         }
 
         /* Enable the Legacy SWMR writing mode if specified */
-        if (s.use_legacy_swmr && H5Fstart_swmr_write(s.file[0]) < 0) {
+        if (s->use_legacy_swmr && H5Fstart_swmr_write(s->file[0]) < 0) {
             HDfprintf(stderr, "failed to start the Legacy SWMR writing mode\n");
             TEST_ERROR;
         }
 
         /* Start to write chunks.  The writer writes as many chunks as possible within a tick, then
          * notify the reader.  But it doesn't receive back the reader's notice. */
-        if (!write_dsets(s, &np, mat)) {
+        if (!write_dsets(s, np, mat)) {
             HDfprintf(stderr, "write_dsets failed");
             TEST_ERROR;
         }
     }
     else {
         /* Wait for the writer's notice before starting the validation of dataset creation */
-        np.verify = 1;
-        if (s.use_named_pipe && reader_verify(np, np.verify) < 0) {
+        np->verify = 1;
+        if (s->use_named_pipe && reader_verify(np, np->verify) < 0) {
             HDfprintf(stderr, "reader_verify failed\n");
             TEST_ERROR;
         }
@@ -2737,7 +2738,7 @@ main(int argc, char **argv)
         /* Open all the datasets as the writer is creating them.  No communication with
          * the writer during this step.
          */
-        if (!open_extensible_dset(&s)) {
+        if (!open_extensible_dset(s)) {
             HDfprintf(stderr, "open_extensible_dset failed\n");
             TEST_ERROR;
         }
@@ -2746,8 +2747,8 @@ main(int argc, char **argv)
          * Make sure the dataset creation doesn't take longer than the expected time.
          * This time period is from the writer finishing dataset creation to the reader finishing
          * the validation of dataset creation */
-        np.notify = 2;
-        if (s.use_named_pipe && reader_check_time_and_notify_writer(&np, s) < 0) {
+        np->notify = 2;
+        if (s->use_named_pipe && reader_check_time_and_notify_writer(np, s) < 0) {
             HDfprintf(stderr, "reader_check_time_and_notify_writer failed\n");
             TEST_ERROR;
         }
@@ -2755,14 +2756,14 @@ main(int argc, char **argv)
         /* Once the reader starts to verify the datasets, it doesn't notify the writer any info.
          * Both the reader and writer finish by themselves.
          */
-        if (!verify_dsets(s, &np, mat)) {
+        if (!verify_dsets(s, np, mat)) {
             HDfprintf(stderr, "verify_dsets failed\n");
             TEST_ERROR;
         }
     }
 
-    for (which = 0; which < s.ndatasets; which++)
-        if (!close_extensible_dset(&s, which)) {
+    for (unsigned which = 0; which < s->ndatasets; which++)
+        if (!close_extensible_dset(s, which)) {
             HDfprintf(stderr, "close_extensible_dset failed\n");
             TEST_ERROR;
         }
@@ -2772,18 +2773,20 @@ main(int argc, char **argv)
         TEST_ERROR;
     }
 
-    if (s.use_named_pipe && !np_close(&np, s.writer)) {
+    if (s->use_named_pipe && !np_close(np, s->writer)) {
         HDfprintf(stderr, "np_close() failed\n");
         TEST_ERROR;
     }
 
-    if (!state_destroy(&s)) {
+    if (!state_destroy(s)) {
         HDfprintf(stderr, "state_destroy failed\n");
         TEST_ERROR;
     }
 
-    if (mat)
-        HDfree(mat);
+    HDfree(mat);
+    HDfree(s);
+    HDfree(np);
+    HDfree(config);
 
     return EXIT_SUCCESS;
 
@@ -2792,24 +2795,26 @@ error:
     {
         H5Pclose(fcpl);
 
-        for (i = 0; i < NELMTS(s.file); i++)
-            H5Fclose(s.file[i]);
+        for (size_t i = 0; i < NELMTS(s->file); i++)
+            H5Fclose(s->file[i]);
     }
     H5E_END_TRY;
 
-    if (s.use_named_pipe && np.fd_writer_to_reader >= 0)
-        HDclose(np.fd_writer_to_reader);
+    if (s->use_named_pipe && np->fd_writer_to_reader >= 0)
+        HDclose(np->fd_writer_to_reader);
 
-    if (s.use_named_pipe && np.fd_reader_to_writer >= 0)
-        HDclose(np.fd_reader_to_writer);
+    if (s->use_named_pipe && np->fd_reader_to_writer >= 0)
+        HDclose(np->fd_reader_to_writer);
 
-    if (s.use_named_pipe && !s.writer) {
-        HDremove(np.fifo_writer_to_reader);
-        HDremove(np.fifo_reader_to_writer);
+    if (s->use_named_pipe && !s->writer) {
+        HDremove(np->fifo_writer_to_reader);
+        HDremove(np->fifo_reader_to_writer);
     }
 
-    if (mat)
-        HDfree(mat);
+    HDfree(mat);
+    HDfree(s);
+    HDfree(np);
+    HDfree(config);
 
     return EXIT_FAILURE;
 }

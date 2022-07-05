@@ -255,11 +255,11 @@ delete_dataset(state_t *s, const int64_t didx)
 
     if (s->verbose > 0)
         fprintf(stderr, "Deleted dataset %s\n", dname);
-#if 1
+
     const hid_t ds = s->dataset[didx % ndatasets];
     if (H5Dclose(ds) < 0)
         errx(EXIT_FAILURE, "H5Dclose failed");
-#endif
+
     s->dataset[didx % ndatasets] = H5I_INVALID_HID;
     s->stats.datasets.deleted++;
 }
@@ -300,22 +300,8 @@ create_dataset(state_t *s, const int64_t didx)
 static void
 create_and_write_dataset(state_t *s, const int64_t didx)
 {
-#if 0
-	const int64_t gidx = didx / 2;
-	const int ngroups = __arraycount(s->group);
-	const hid_t g = s->group[gidx % ngroups];
-
-	if (H5Odisable_mdc_flushes(g) < 0)
-		err(EXIT_FAILURE, "H5Odisable_mdc_flushes failed");
-#endif
-
     create_dataset(s, didx);
     write_dataset(s, didx);
-
-#if 0
-	if (H5Oenable_mdc_flushes(g) < 0)
-		err(EXIT_FAILURE, "H5Oenable_mdc_flushes failed");
-#endif
 }
 
 static void
@@ -369,12 +355,9 @@ main(int argc, char **argv)
         errx(EXIT_FAILURE, "%s.%d H5Pcreate failed", __func__, __LINE__);
     }
 
-    config.version  = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
-    config.tick_len = 4;
-    config.max_lag  = 5;
-#if 0 /* raw-data flushing is not implemented */
-	config.flush_raw_data = true;
-#endif
+    config.version           = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
+    config.tick_len          = 4;
+    config.max_lag           = 5;
     config.writer            = true;
     config.md_pages_reserved = 128;
     strlcpy(config.md_file_path, "./my_md_file", sizeof(config.md_file_path));
@@ -399,6 +382,7 @@ main(int argc, char **argv)
     s->file = H5Fcreate(s->output_file, H5F_ACC_TRUNC, fcpl, fapl);
 
     H5Pclose(fapl);
+    H5Pclose(fcpl);
 
     if (s->file < 0)
         errx(EXIT_FAILURE, "H5Fcreate failed");
@@ -441,23 +425,6 @@ main(int argc, char **argv)
         H5Fvfd_swmr_end_tick(s->file);
         (void)sigsuspend(&mask);
     }
-#if 0
-	fprintf(stderr, "Interrupted.  Cleaning up.\n");
-
-	int j;
-	for (--i, j = 0; j < 4; j++, --i) {
-		if (i % 2 == 1) {
-			delete_dataset(s, i - 1);
-			delete_dataset(s, i);
-			delete_group(s, i / 2);
-		}
-	}
-
-	for (j = 0; j < 4; j++) {
-		assert(s->dataset[j] == H5I_INVALID_HID);
-		assert(s->group[j / 2] == H5I_INVALID_HID);
-	}
-#endif
 
     if (s->print_stats)
         print_stats(&s->stats);

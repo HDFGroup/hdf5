@@ -697,7 +697,7 @@ H5I_subst(hid_t id, const void *new_object)
 
     /* Get the old object pointer to return */
     H5_GCC_CLANG_DIAG_OFF("cast-qual")
-    ret_value = (void *)info->object; /* (Casting away const OK -QAK) */
+    ret_value = (void *)info->object;
     H5_GCC_CLANG_DIAG_ON("cast-qual")
 
     /* Set the new object pointer for the ID */
@@ -731,7 +731,7 @@ H5I_object(hid_t id)
     if (NULL != (info = H5I__find_id(id))) {
         /* Get the object pointer to return */
         H5_GCC_CLANG_DIAG_OFF("cast-qual")
-        ret_value = (void *)info->object; /* (Casting away const OK -QAK) */
+        ret_value = (void *)info->object;
         H5_GCC_CLANG_DIAG_ON("cast-qual")
     }
 
@@ -767,7 +767,7 @@ H5I_object_verify(hid_t id, H5I_type_t type)
     if (type == H5I_TYPE(id) && NULL != (info = H5I__find_id(id))) {
         /* Get the object pointer to return */
         H5_GCC_CLANG_DIAG_OFF("cast-qual")
-        ret_value = (void *)info->object; /* (Casting away const OK -QAK) */
+        ret_value = (void *)info->object;
         H5_GCC_CLANG_DIAG_ON("cast-qual")
     }
 
@@ -930,7 +930,7 @@ H5I__remove_common(H5I_type_info_t *type_info, hid_t id)
         type_info->last_id_info = NULL;
 
     H5_GCC_CLANG_DIAG_OFF("cast-qual")
-    ret_value = (void *)info->object; /* (Casting away const OK -QAK) */
+    ret_value = (void *)info->object;
     H5_GCC_CLANG_DIAG_ON("cast-qual")
 
     if (!H5I_marking_g)
@@ -1032,7 +1032,6 @@ H5I__dec_ref(hid_t id, void **request)
         type_info = H5I_type_info_array_g[H5I_TYPE(id)];
 
         H5_GCC_CLANG_DIAG_OFF("cast-qual")
-        /* (Casting away const OK -QAK) */
         if (!type_info->cls->free_func || (type_info->cls->free_func)((void *)info->object, request) >= 0) {
             /* Remove the node from the type */
             if (NULL == H5I__remove_common(type_info, id))
@@ -1521,7 +1520,7 @@ H5I__iterate_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
          * case we'll need to get the wrapped object struct (H5F_t *, etc.).
          */
         H5_GCC_CLANG_DIAG_OFF("cast-qual")
-        object = H5I__unwrap((void *)info->object, type); /* Casting away const OK */
+        object = H5I__unwrap((void *)info->object, type);
         H5_GCC_CLANG_DIAG_ON("cast-qual")
 
         /* Invoke callback function */
@@ -1713,7 +1712,7 @@ H5I__find_id_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
 
     /* Get a pointer to the VOL connector's data */
     H5_GCC_CLANG_DIAG_OFF("cast-qual")
-    object = H5I__unwrap((void *)info->object, type); /* Casting away const OK */
+    object = H5I__unwrap((void *)info->object, type);
     H5_GCC_CLANG_DIAG_ON("cast-qual")
 
     /* Check for a match */

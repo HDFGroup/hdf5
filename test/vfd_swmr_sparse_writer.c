@@ -34,8 +34,6 @@
 
 #ifndef H5_HAVE_WIN32_API
 
-#include <err.h>
-
 /****************/
 /* Local Macros */
 /****************/

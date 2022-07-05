@@ -33,14 +33,14 @@ typedef struct _shared_ticks {
     uint64_t reader_tick;
 } shared_ticks_t;
 
-int                          fd_writer_to_reader = -1, fd_reader_to_writer = -1;
-const char *                 fifo_writer_to_reader = "./fifo_writer_to_reader";
-const char *                 fifo_reader_to_writer = "./fifo_reader_to_writer";
-hbool_t                      use_vfd_swmr          = TRUE;
-hbool_t                      use_named_pipe        = TRUE;
-hbool_t                      print_estack          = FALSE;
-static H5F_vfd_swmr_config_t swmr_config;
-static hbool_t               writer;
+int                           fd_writer_to_reader = -1, fd_reader_to_writer = -1;
+const char *                  fifo_writer_to_reader = "./fifo_writer_to_reader";
+const char *                  fifo_reader_to_writer = "./fifo_reader_to_writer";
+hbool_t                       use_vfd_swmr          = TRUE;
+hbool_t                       use_named_pipe        = TRUE;
+hbool_t                       print_estack          = FALSE;
+static H5F_vfd_swmr_config_t *swmr_config           = NULL;
+static hbool_t                writer;
 struct timespec ival = {MAX_READ_LEN_IN_SECONDS, 0}; /* Expected maximal time for reader's validation */
 
 zoo_config_t config = {.proc_num        = 0,
@@ -138,9 +138,10 @@ parse_command_line_options(int argc, char **argv)
 
                 {
                     /* Translate the tick number to time represented by the timespec struct */
-                    float    time = (float)(((unsigned)tmpl * TICK_LEN) / 10.0);
-                    unsigned sec  = (unsigned)time;
-                    unsigned nsec = (unsigned)((time - sec) * 10 * 1000 * 1000);
+                    long  n_ticks = (long)tmpl * TICK_LEN;
+                    float time    = (float)n_ticks / 10.0F;
+                    long  sec     = (long)time;
+                    long  nsec    = (long)((time - (float)sec) * 10 * 1000 * 1000);
 
                     ival.tv_sec  = sec;
                     ival.tv_nsec = nsec;
@@ -247,8 +248,8 @@ notify_and_wait_for_reader(hid_t fid, int verify)
 
     /* During the wait, writer makes repeated HDF5 API calls so as to trigger
      * EOT at approximately the correct time */
-    for (i = 0; i < swmr_config.max_lag + 1; i++) {
-        decisleep(swmr_config.tick_len);
+    for (i = 0; i < swmr_config->max_lag + 1; i++) {
+        decisleep(swmr_config->tick_len);
 
         H5E_BEGIN_TRY
         {
@@ -443,15 +444,29 @@ error:
 int
 main(int argc, char **argv)
 {
-    hid_t                 fapl = H5I_INVALID_HID, fcpl = H5I_INVALID_HID, fid = H5I_INVALID_HID;
-    H5F_t *               f;
-    H5C_t *               cache;
-    struct timespec       lastmsgtime = {.tv_sec = 0, .tv_nsec = 0};
-    char *                progname    = NULL;
-    char *                personality;
-    estack_state_t        es;
-    H5F_vfd_swmr_config_t vfd_swmr_config;
-    int                   notify = 0, verify = 0;
+    hid_t                  fapl = H5I_INVALID_HID, fcpl = H5I_INVALID_HID, fid = H5I_INVALID_HID;
+    H5F_t *                f;
+    H5C_t *                cache;
+    struct timespec        lastmsgtime = {.tv_sec = 0, .tv_nsec = 0};
+    char *                 progname    = NULL;
+    char *                 personality;
+    estack_state_t         es;
+    H5F_vfd_swmr_config_t *vfd_swmr_config = NULL;
+    int                    notify = 0, verify = 0;
+
+    if (NULL == (vfd_swmr_config = HDcalloc(1, sizeof(H5F_vfd_swmr_config_t)))) {
+        H5_FAILED();
+        AT();
+        HDprintf("memory allocation failed");
+        goto error;
+    }
+
+    if (NULL == (swmr_config = HDcalloc(1, sizeof(H5F_vfd_swmr_config_t)))) {
+        H5_FAILED();
+        AT();
+        HDprintf("memory allocation failed");
+        goto error;
+    }
 
     if (H5_basename(argv[0], &progname) < 0) {
         H5_FAILED();
@@ -478,19 +493,19 @@ main(int argc, char **argv)
     /* config, tick_len, max_lag, presume_posix_semantics, writer,
      * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
      * md_file_path, md_file_name, updater_file_path */
-    init_vfd_swmr_config(&vfd_swmr_config, TICK_LEN, 7, FALSE, writer, TRUE, FALSE, TRUE, 128, "./",
+    init_vfd_swmr_config(vfd_swmr_config, TICK_LEN, 7, FALSE, writer, TRUE, FALSE, TRUE, 128, "./",
                          "zoo-shadow", NULL);
 
     /* ? turn off use latest format argument via 1st argument? since later on it reset to early format */
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
-    if ((fapl = vfd_swmr_create_fapl(TRUE, use_vfd_swmr, TRUE, 4096, &vfd_swmr_config)) < 0) {
+    if ((fapl = vfd_swmr_create_fapl(TRUE, use_vfd_swmr, TRUE, 4096, vfd_swmr_config)) < 0) {
         H5_FAILED();
         AT();
         HDprintf("vfd_swmr_create_fapl");
         goto error;
     }
 
-    if (use_vfd_swmr && H5Pget_vfd_swmr_config(fapl, &swmr_config) < 0) {
+    if (use_vfd_swmr && H5Pget_vfd_swmr_config(fapl, swmr_config) < 0) {
         H5_FAILED();
         AT();
         HDprintf("H5Pget_vfd_swmr_config failed");
@@ -656,8 +671,9 @@ main(int argc, char **argv)
         goto error;
     }
 
-    if (progname)
-        HDfree(progname);
+    HDfree(progname);
+    HDfree(vfd_swmr_config);
+    HDfree(swmr_config);
 
     if (use_named_pipe && close_named_pipes() < 0) {
         H5_FAILED();
@@ -687,6 +703,9 @@ error:
         HDremove(fifo_writer_to_reader);
         HDremove(fifo_reader_to_writer);
     }
+
+    HDfree(vfd_swmr_config);
+    HDfree(swmr_config);
 
     return EXIT_FAILURE;
 }

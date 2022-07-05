@@ -23,8 +23,6 @@
 
 #ifndef H5_HAVE_WIN32_API
 
-#include <err.h>
-
 typedef enum _step { CREATE = 0, LENGTHEN, SHORTEN, DELETE, NSTEPS } step_t;
 
 static hbool_t caught_out_of_bounds = FALSE;
@@ -61,21 +59,28 @@ usage(const char *progname)
 int
 main(int argc, char **argv)
 {
-    hid_t                  fapl, fid, space, type;
-    hid_t                  dset[2];
-    char *                 content[2];
+    hid_t                  fapl       = H5I_INVALID_HID;
+    hid_t                  fid        = H5I_INVALID_HID;
+    hid_t                  space      = H5I_INVALID_HID;
+    hid_t                  type       = H5I_INVALID_HID;
+    hid_t                  dset[2]    = {H5I_INVALID_HID, H5I_INVALID_HID};
+    char *                 content[2] = {NULL, NULL};
     char                   name[2][96];
-    int                    opt, i, ntimes = 100;
+    int                    opt;
+    int                    ntimes = 100;
     unsigned long          tmp;
     hbool_t                use_vfd_swmr = TRUE;
     char *                 end;
     const uint64_t         delay_ns = 1100 * 1000; /* 1.1 ms */
     testsel_t              sel      = TEST_NONE;
-    H5F_vfd_swmr_config_t  config;
+    H5F_vfd_swmr_config_t *config;
     const char *           s_opts   = "Sn:qt:";
     struct h5_long_options l_opts[] = {{NULL, 0, '\0'}};
 
     HDassert(H5T_C_S1 != H5I_INVALID_HID);
+
+    if (NULL == (config = HDcalloc(1, sizeof(H5F_vfd_swmr_config_t))))
+        PUTS_ERROR("memory allocation failed");
 
     while ((opt = H5_get_option(argc, (const char *const *)argv, s_opts, l_opts)) != EOF) {
         switch (opt) {
@@ -85,12 +90,21 @@ main(int argc, char **argv)
             case 'n':
                 errno = 0;
                 tmp   = HDstrtoul(H5_optarg, &end, 0);
-                if (end == optarg || *end != '\0')
-                    errx(EXIT_FAILURE, "couldn't parse `-n` argument `%s`", H5_optarg);
-                else if (errno != 0)
-                    err(EXIT_FAILURE, "couldn't parse `-n` argument `%s`", H5_optarg);
-                else if (tmp > INT_MAX)
-                    errx(EXIT_FAILURE, "`-n` argument `%lu` too large", tmp);
+                if (end == optarg || *end != '\0') {
+                    HDfprintf(stderr, "couldn't parse `-n` argument `%s`", H5_optarg);
+                    AT();
+                    goto error;
+                }
+                else if (errno != 0) {
+                    HDfprintf(stderr, "couldn't parse `-n` argument `%s`", H5_optarg);
+                    AT();
+                    goto error;
+                }
+                else if (tmp > INT_MAX) {
+                    HDfprintf(stderr, "`-n` argument `%lu` too large", tmp);
+                    AT();
+                    goto error;
+                }
                 ntimes = (int)tmp;
                 break;
             case 'q':
@@ -113,40 +127,34 @@ main(int argc, char **argv)
     argc -= H5_optind;
 
     if (argc > 0)
-        errx(EXIT_FAILURE, "unexpected command-line arguments");
+        PUTS_ERROR("unexpected command-line arguments");
 
     /* config, tick_len, max_lag, presume_posix_semantics, writer,
      * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
      * md_file_path, md_file_name, updater_file_path */
-    init_vfd_swmr_config(&config, 4, 7, FALSE, false, TRUE, FALSE, TRUE, 128, "./", "vlstr-shadow", NULL);
+    init_vfd_swmr_config(config, 4, 7, FALSE, false, TRUE, FALSE, TRUE, 128, "./", "vlstr-shadow", NULL);
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
-    fapl = vfd_swmr_create_fapl(TRUE, use_vfd_swmr, sel == TEST_OOB, 4096, &config);
+    if ((fapl = vfd_swmr_create_fapl(TRUE, use_vfd_swmr, sel == TEST_OOB, 4096, config)) < 0)
+        STACK_ERROR;
 
-    if (fapl < 0)
-        errx(EXIT_FAILURE, "vfd_swmr_create_fapl");
-
-    fid = H5Fopen("vfd_swmr_vlstr.h5", H5F_ACC_RDONLY, fapl);
+    if ((fid = H5Fopen("vfd_swmr_vlstr.h5", H5F_ACC_RDONLY, fapl)) < 0)
+        STACK_ERROR;
 
     /* Create the VL string datatype and a scalar dataspace */
     if ((type = H5Tcopy(H5T_C_S1)) == H5I_INVALID_HID)
-        errx(EXIT_FAILURE, "H5Tcopy");
+        STACK_ERROR;
 
     if (H5Tset_size(type, H5T_VARIABLE) < 0)
-        errx(EXIT_FAILURE, "H5Tset_size");
-    space = H5Screate(H5S_SCALAR);
-
-    if (space == H5I_INVALID_HID)
-        errx(EXIT_FAILURE, "H5Screate");
-
-    if (fid == H5I_INVALID_HID)
-        errx(EXIT_FAILURE, "H5Fcreate");
+        STACK_ERROR;
+    if ((space = H5Screate(H5S_SCALAR)) < 0)
+        STACK_ERROR;
 
     /* content 0 seq 1 short
      * content 1 seq 1 long long long long long long long long
      * content 1 seq 1 medium medium medium
      */
-    for (i = 0; !caught_out_of_bounds && i < ntimes; (i % 2 == 0) ? H5_nanosleep(delay_ns) : 0, i++) {
+    for (int i = 0; !caught_out_of_bounds && i < ntimes; i++) {
         estack_state_t es;
         const int      ndsets = 2;
         const int      which  = i % ndsets;
@@ -159,7 +167,8 @@ main(int argc, char **argv)
 
         dbgf(2, "iteration %d which %d", i, which);
         (void)HDsnprintf(name[which], sizeof(name[which]), "dset-%d", which);
-        es          = disable_estack();
+        es = disable_estack();
+
         dset[which] = H5Dopen2(fid, name[which], H5P_DEFAULT);
         restore_estack(es);
         if (caught_out_of_bounds || dset[which] == H5I_INVALID_HID) {
@@ -185,6 +194,9 @@ main(int argc, char **argv)
             HDfree(content[which]);
             content[which] = NULL;
         }
+
+        if (i % 2 == 0)
+            H5_nanosleep(delay_ns);
     }
 
     if (caught_out_of_bounds)
@@ -194,16 +206,15 @@ main(int argc, char **argv)
         HDfprintf(stderr, "read NULL\n");
 
     if (H5Pclose(fapl) < 0)
-        errx(EXIT_FAILURE, "H5Pclose(fapl)");
-
+        STACK_ERROR;
     if (H5Tclose(type) < 0)
-        errx(EXIT_FAILURE, "H5Tclose");
-
+        STACK_ERROR;
     if (H5Sclose(space) < 0)
-        errx(EXIT_FAILURE, "H5Sclose");
-
+        STACK_ERROR;
     if (H5Fclose(fid) < 0)
-        errx(EXIT_FAILURE, "H5Fclose");
+        STACK_ERROR;
+
+    HDfree(config);
 
     if (sel == TEST_OOB)
         return caught_out_of_bounds ? EXIT_SUCCESS : EXIT_FAILURE;
@@ -211,6 +222,18 @@ main(int argc, char **argv)
         return read_null ? EXIT_SUCCESS : EXIT_FAILURE;
 
     return EXIT_SUCCESS;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(fapl);
+        H5Tclose(type);
+        H5Sclose(space);
+        H5Fclose(fid);
+    }
+    H5E_END_TRY;
+
+    HDfree(config);
 }
 
 #else /* H5_HAVE_WIN32_API */

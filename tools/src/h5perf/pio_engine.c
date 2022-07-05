@@ -146,7 +146,7 @@ do_pio(parameters param)
     file_descr fd;
     iotype     iot;
 
-    char  fname[FILENAME_MAX];
+    char *fname = NULL;
     long  nf;
     long  ndsets;
     off_t nbytes;         /*number of bytes per dataset  */
@@ -167,6 +167,9 @@ do_pio(parameters param)
 
     /* IO type */
     iot = param.io_type;
+
+    if (NULL == (fname = HDcalloc(FILENAME_MAX, sizeof(char))))
+        GOTOERROR(FAIL);
 
     switch (iot) {
         case MPIO:
@@ -283,7 +286,7 @@ do_pio(parameters param)
         char base_name[256];
 
         HDsnprintf(base_name, sizeof(base_name), "#pio_tmp_%lu", nf);
-        pio_create_filename(iot, base_name, fname, sizeof(fname));
+        pio_create_filename(iot, base_name, fname, FILENAME_MAX);
         if (pio_debug_level > 0)
             HDfprintf(output, "rank %d: data filename=%s\n", pio_mpi_rank_g, fname);
 
@@ -365,8 +368,8 @@ done:
     }
 
     /* release generic resources */
-    if (buffer)
-        HDfree(buffer);
+    HDfree(buffer);
+    HDfree(fname);
     res.ret_code = ret_code;
     return res;
 }
