@@ -70,29 +70,6 @@ typedef struct {
     hbool_t      first_proc;
 } state_t;
 
-/* Assign the initialized values to struct state_t declared above */
-static inline state_t
-state_initializer(void)
-{
-    return (state_t){.file           = {H5I_INVALID_HID, H5I_INVALID_HID},
-                     .filename       = {"", ""},
-                     .r_dsetid       = H5I_INVALID_HID,
-                     .dtype          = H5T_NATIVE_UINT32,
-                     .fapl           = H5I_INVALID_HID,
-                     .fcpl           = H5I_INVALID_HID,
-                     .rows           = DATA_ROWS,
-                     .cols           = DATA_COLS,
-                     .rank           = DATA_RANK,
-                     .dims           = {DATA_ROWS, DATA_COLS},
-                     .max_lag        = 7,
-                     .tick_len       = 4,
-                     .ps             = 4096,
-                     .pbs            = 4096,
-                     .check_interval = 1,
-                     .use_vfd_swmr   = TRUE,
-                     .first_proc     = TRUE};
-}
-
 /* Obtain the data value at index [i][j] for the 2D matrix.
    All the routines related to the matrix are adapted from the vfd_swmr_bigset_writer.c. */
 static uint32_t
@@ -254,7 +231,26 @@ state_init(state_t *s, int argc, char **argv)
     const char *           s_opts   = "Sqc:r:t:m:B:s:u:";
     struct h5_long_options l_opts[] = {{NULL, 0, '\0'}};
 
-    *s = state_initializer();
+    s->file[0] = H5I_INVALID_HID;
+    s->file[1] = H5I_INVALID_HID;
+    s->filename[0] = "";
+    s->filename[1] = "";
+    s->r_dsetid = H5I_INVALID_HID;
+    s->dtype = H5T_NATIVE_UINT32;
+    s->fapl = H5I_INVALID_HID;
+    s->fcpl = H5I_INVALID_HID;
+    s->rows = DATA_ROWS;
+    s->cols = DATA_COLS;
+    s->rank = DATA_RANK;
+    s->dims[0] = DATA_ROWS;
+    s->dims[1] = DATA_COLS;
+    s->max_lag = 7;
+    s->tick_len = 4;
+    s->ps = 4096;
+    s->pbs = 4096;
+    s->check_interval = 1;
+    s->use_vfd_swmr = TRUE;
+    s->first_proc = TRUE;
 
     if (H5_basename(argv[0], &tfile) < 0) {
         HDprintf("H5_basename failed\n");

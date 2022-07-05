@@ -4255,7 +4255,10 @@ verify_updater_flags(char *ud_name, uint16_t expected_flags)
     if (HDfread(&flags, UD_SIZE_2, 1, ud_fp) != (size_t)1)
         FAIL_STACK_ERROR;
 
-    swapped_flags = little_endian ? flags : Swap2Bytes(flags);
+    if (little_endian)
+        swapped_flags = flags;
+    else
+        swapped_flags = Swap2Bytes(flags);
 
     if (swapped_flags != expected_flags)
         TEST_ERROR;
