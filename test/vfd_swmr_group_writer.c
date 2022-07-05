@@ -474,16 +474,24 @@ np_rd_send(state_t *s)
  *   A boolean input parameter is used to choose
  *   either reader or writer.
  * Return:
- *     None
+ *   True  if succeed
+ *   False if an error occurs in sending the message.
  */
-static void
-np_send_error(state_t *s, hbool_t writer)
+static bool
+np_send_error(state_t *s, bool writer)
 {
+    int fd = writer ? s->np_fd_w_to_r : s->np_fd_r_to_w;
+
     s->np_notify = -1;
-    if (writer)
-        HDwrite(s->np_fd_w_to_r, &(s->np_notify), sizeof(int));
+
+    if (HDwrite(fd, &(s->np_notify), sizeof(int)) < 0) {
+        H5_FAILED();
+        AT();
+        HDprintf("HDwrite failed\n");
+        return false;
+    }
     else
-        HDwrite(s->np_fd_r_to_w, &(s->np_notify), sizeof(int));
+        return true;
 }
 
 /*-------------------------------------------------------------------------
@@ -905,7 +913,8 @@ del_one_attr(state_t *s, hid_t obj_id, hbool_t is_dense, hbool_t is_vl_or_ohrc, 
 
 error:
     if (s->use_named_pipes && s->attr_test == TRUE)
-        np_send_error(s, TRUE);
+        if (!np_send_error(s, TRUE))
+            HDfprintf(stderr, "Sending error message failed");
 
 error2:
     return FALSE;
