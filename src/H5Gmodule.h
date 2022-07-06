@@ -906,7 +906,8 @@
  * </tr>
  * <tr>
  * <td>
- * \image html Groups_fig10_c.gif "c) dset1 has three names: /group1/dset1, /group2/dset2, and /group1/GXX/dset2."
+ * \image html Groups_fig10_c.gif "c) dset1 has three names: /group1/dset1, /group2/dset2, and
+ * /group1/GXX/dset2."
  * </td>
  * <td>
  * \image html Groups_fig10_d.gif "d) dset1 has an infinite number of available path names."
