@@ -240,7 +240,7 @@
  *
  * op_func is a user-defined operation that adheres to the \ref H5A_operator_t prototype. This prototype and
  * certain requirements imposed on the operator’s behavior are described in the \ref H5Aiterate entry in the
- * HDF5 Reference Manual.
+ * \ref RM.
  *
  * op_data is also user-defined to meet the requirements of op_func. Beyond providing a parameter with which
  * to pass this data, HDF5 provides no tools for its management and imposes no restrictions.
@@ -364,7 +364,7 @@
  * will be ignored by HDF5.
  *
  * The use of ASCII or UTF-8 characters is determined by the character encoding property. See
- * H5Pset_char_encoding in the HDF5 Reference Manual.
+ * #H5Pset_char_encoding in the \ref RM.
  *
  * <h4>No Special I/O or Storage</h4>
  *
