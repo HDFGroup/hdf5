@@ -213,7 +213,6 @@ typedef struct ioc_io_queue_entry {
     hbool_t                    in_progress;
     uint32_t                   counter;
 
-    /* rework these fields */ /* JRM */
     sf_work_request_t     wk_req;
     struct hg_thread_work thread_wk;
     int                   wk_ret;

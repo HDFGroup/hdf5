@@ -41,10 +41,6 @@ static hbool_t H5FD_mpi_self_initialized = FALSE;
 /* Pointer to value for MPI_TAG_UB */
 int *H5FD_IOC_tag_ub_val_ptr = NULL;
 
-#if 0 /* JRM */ /* delete if all goes well */
-extern volatile int sf_shutdown_flag;
-#endif          /* JRM */
-
 /* The information of this ioc */
 typedef struct H5FD_ioc_t {
     H5FD_t            pub; /* public stuff, must be first    */
@@ -1742,28 +1738,6 @@ done:
 
     H5_SUBFILING_FUNC_LEAVE;
 }
-
-#if 0 /* JRM */ /* delete if all goes well */
-/*-------------------------------------------------------------------------
- * Function:    H5FD_ioc_set_shutdown_flag
- *
- * Purpose:     IO Concentrator threads are told to terminate their service
- *              loop and exit by setting 'shutdown_flag' to a non-zero
- *              value.
- *
- * Return:      None
- *
- *-------------------------------------------------------------------------
- */
-void
-H5FD_ioc_set_shutdown_flag(int flag)
-{
-    sf_shutdown_flag = flag;
-    if (H5FD_IOC_g > 0)
-        usleep(100);
-    return;
-} /* end H5FD_ioc_set_shutdown_flag() */
-#endif          /* JRM */
 
 void
 H5FD_ioc_wait_thread_main(void)

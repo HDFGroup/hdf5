@@ -997,11 +997,7 @@ H5_open_subfiles(const char *base_filename, uint64_t h5_file_id, ioc_selection_t
      * Ensure that the IOC service won't exit
      * as we prepare to start up
      */
-#if 0 /* JRM */ /* delete if all goes well */
-    H5FD_ioc_set_shutdown_flag(0);
-#else
     atomic_init(&sf_shutdown_flag, 0);
-#endif
 
     /*
      * If we're actually using the IOCs, we will
@@ -2755,23 +2751,6 @@ H5_close_subfiles(int64_t subfiling_context_id)
          * currently open, we can shutdown the IO concentrator
          * as part of the file close.
          */
-#if 0 /* JRM */ /* delete this if all goes well */
-        if (file_open_count == 1) {
-            /* Shutdown the main IOC thread */
-            H5FD_ioc_set_shutdown_flag(1);
-            /* Allow ioc_main to exit.*/
-            usleep(20);
-
-            t1 = MPI_Wtime();
-            H5FD_ioc_wait_thread_main();
-            t2          = MPI_Wtime();
-            t1          = t2;
-            t_main_exit = t2 - t1;
-            H5FD_ioc_finalize_threads();
-
-            t2 = MPI_Wtime();
-        }
-#else
         if (file_open_count == 1) {
 
             HDassert(0 == atomic_load(&sf_shutdown_flag));
@@ -2804,7 +2783,6 @@ H5_close_subfiles(int64_t subfiling_context_id)
             t2 = MPI_Wtime();
 #endif
         }
-#endif
 
 #ifdef H5_SUBFILING_DEBUG
         t_finalize_threads = t2 - t1;
