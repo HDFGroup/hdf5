@@ -1111,14 +1111,14 @@ test_get_obj_ids(void)
 
     /* creates NGROUPS groups under the root group */
     for (m = 0; m < NGROUPS; m++) {
-        HDsprintf(gname, "group%d", m);
+        HDsnprintf(gname, sizeof(gname), "group%d", m);
         gid[m] = H5Gcreate2(fid, gname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         CHECK(gid[m], FAIL, "H5Gcreate2");
     }
 
     /* create NDSETS datasets under the root group */
     for (n = 0; n < NDSETS; n++) {
-        HDsprintf(dname, "dataset%d", n);
+        HDsnprintf(dname, sizeof(dname), "dataset%d", n);
         dset[n] = H5Dcreate2(fid, dname, H5T_NATIVE_INT, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         CHECK(dset[n], FAIL, "H5Dcreate2");
     }
@@ -1178,7 +1178,7 @@ test_get_obj_ids(void)
 
     /* Open NDSETS datasets under the root group */
     for (n = 0; n < NDSETS; n++) {
-        HDsprintf(dname, "dataset%d", n);
+        HDsnprintf(dname, sizeof(dname), "dataset%d", n);
         dset[n] = H5Dopen2(fid, dname, H5P_DEFAULT);
         CHECK(dset[n], FAIL, "H5Dcreate2");
     }
@@ -4473,7 +4473,7 @@ test_file_freespace(const char *env_h5_drvr)
 
             /* Create datasets in file */
             for (u = 0; u < 10; u++) {
-                HDsprintf(name, "Dataset %u", u);
+                HDsnprintf(name, sizeof(name), "Dataset %u", u);
                 dset = H5Dcreate2(file, name, H5T_STD_U32LE, dspace, H5P_DEFAULT, dcpl, H5P_DEFAULT);
                 CHECK(dset, FAIL, "H5Dcreate2");
 
@@ -4496,7 +4496,7 @@ test_file_freespace(const char *env_h5_drvr)
 
             /* Delete datasets in file */
             for (k = 9; k >= 0; k--) {
-                HDsprintf(name, "Dataset %u", (unsigned)k);
+                HDsnprintf(name, sizeof(name), "Dataset %u", (unsigned)k);
                 ret = H5Ldelete(file, name, H5P_DEFAULT);
                 CHECK(ret, FAIL, "H5Ldelete");
             } /* end for */
@@ -4624,7 +4624,7 @@ test_sects_freespace(const char *env_h5_drvr, hbool_t new_format)
 
         /* Create datasets in file */
         for (u = 0; u < 10; u++) {
-            HDsprintf(name, "Dataset %u", u);
+            HDsnprintf(name, sizeof(name), "Dataset %u", u);
             dset = H5Dcreate2(file, name, H5T_STD_U32LE, dspace, H5P_DEFAULT, dcpl, H5P_DEFAULT);
             CHECK(dset, FAIL, "H5Dcreate2");
 
@@ -4642,7 +4642,7 @@ test_sects_freespace(const char *env_h5_drvr, hbool_t new_format)
 
         /* Delete odd-numbered datasets in file */
         for (u = 0; u < 10; u++) {
-            HDsprintf(name, "Dataset %u", u);
+            HDsnprintf(name, sizeof(name), "Dataset %u", u);
             if (u % 2) {
                 ret = H5Ldelete(file, name, H5P_DEFAULT);
                 CHECK(ret, FAIL, "H5Ldelete");
@@ -7590,7 +7590,7 @@ test_incr_filesize(void)
 
         /* Create datasets in file */
         for (u = 0; u < 10; u++) {
-            HDsprintf(name, "Dataset %u", u);
+            HDsnprintf(name, sizeof(name), "Dataset %u", u);
             dset = H5Dcreate2(fid, name, H5T_STD_U32LE, dspace, H5P_DEFAULT, dcpl, H5P_DEFAULT);
             CHECK(dset, FAIL, "H5Dcreate2");
 

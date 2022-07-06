@@ -839,7 +839,7 @@ check_multi_group_creation_tags(void)
 
     for (i = 0; i < MULTIGROUPS; i++) {
 
-        HDsprintf(gname, "%d", i);
+        HDsnprintf(gname, sizeof(gname), "%d", i);
         if ((gid = H5Gcreate2(fid, gname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR;
         if (H5Gclose(gid) < 0)
@@ -861,7 +861,7 @@ check_multi_group_creation_tags(void)
     for (i = 0; i < MULTIGROUPS; i++) {
 
         /* Re-open the group */
-        HDsprintf(gname, "%d", i);
+        HDsnprintf(gname, sizeof(gname), "%d", i);
         if ((gid = H5Gopen2(fid, gname, H5P_DEFAULT)) < 0)
             TEST_ERROR;
 
@@ -988,7 +988,7 @@ check_link_iteration_tags(void)
     /* Create many datasets in root group */
     for (i = 0; i < 500; i++) {
 
-        HDsprintf(dsetname, "Dset %d", i);
+        HDsnprintf(dsetname, sizeof(dsetname), "Dset %d", i);
         if ((did = H5Dcreate2(fid, dsetname, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) <
             0)
             TEST_ERROR;
@@ -1151,7 +1151,7 @@ check_dense_attribute_tags(void)
 
     for (i = 0; i < 50; i++) {
 
-        HDsprintf(attrname, "attr %d", i);
+        HDsnprintf(attrname, sizeof(attrname), "attr %d", i);
         if ((aid = H5Acreate2(did, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR;
         if (H5Awrite(aid, H5T_NATIVE_UINT, &i) < 0)

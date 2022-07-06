@@ -2,10 +2,13 @@ cmake_minimum_required (VERSION 3.12)
 project (HDF5 C)
 
 if (POLICY CMP0074)
+  # find_package() uses <PackageName>_ROOT variables.
   cmake_policy (SET CMP0074 NEW)
 endif ()
 
 if (POLICY CMP0083)
+  # To control generation of Position Independent Executable (PIE) or not,
+  # some flags are required at link time.
   cmake_policy (SET CMP0083 NEW)
 endif ()
 
@@ -953,8 +956,13 @@ if (BUILD_TESTING)
     mark_as_advanced (HDF5_TEST_FHEAP_PASSTHROUGH VOL)
   endif ()
 
-  option (HDF_TEST_EXPRESS "Control testing framework (0-3)" "0")
+  set (H5_TEST_EXPRESS_LEVEL_DEFAULT "3")
+  set (HDF_TEST_EXPRESS "${H5_TEST_EXPRESS_LEVEL_DEFAULT}"
+      CACHE STRING "Control testing framework (0-3) (0 = exhaustive testing; 3 = quicker testing)")
   mark_as_advanced (HDF_TEST_EXPRESS)
+  if (NOT "${HDF_TEST_EXPRESS}" STREQUAL "")
+    set (H5_TEST_EXPRESS_LEVEL_DEFAULT "${HDF_TEST_EXPRESS}")
+  endif ()
 
   enable_testing ()
   include (CTest)

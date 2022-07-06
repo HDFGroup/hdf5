@@ -26,6 +26,9 @@
  */
 #ifdef H5_HAVE_WIN32_API
 
+/* __int64 is the correct type for the st_size field of the _stati64 struct.
+ * MSDN isn't very clear about this.
+ */
 typedef struct _stati64 h5_stat_t;
 typedef __int64         h5_stat_size_t;
 
@@ -57,7 +60,12 @@ struct timezone {
 #define HDlstat(S, B)        _lstati64(S, B)
 #define HDmemset(X, C, Z)    memset((void *)(X), C, Z) /* Cast avoids MSVC warning */
 #define HDmkdir(S, M)        _mkdir(S)
-#define HDoff_t              __int64
+
+/* off_t exists on Windows, but is always a 32-bit long, even on 64-bit Windows,
+ * so we define HDoff_t to be __int64, which is the type of the st_size field
+ * of the _stati64 struct.
+ */
+#define HDoff_t __int64
 
 /* Note that the variadic HDopen macro is using a VC++ extension
  * where the comma is dropped if nothing is passed to the ellipsis.

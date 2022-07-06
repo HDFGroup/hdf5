@@ -17,6 +17,14 @@
  * recreate the output files.
  */
 
+%top{
+/* Quiet warnings about integer type macro redifinitions on Visual Studio
+ * (MSVC doesn't define STDC_VERSION, but has inttypes.h). This is an
+ * issue that is apparently fixed in flex 2.6.5.
+ */
+#include <stdint.h>
+}
+
 %{
 #include <assert.h>
 #include <stdlib.h>
