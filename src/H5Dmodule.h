@@ -2773,7 +2773,7 @@ allocated if necessary.
  *
  *     // Set parameters for scale-offset compression. Check the
  *     // description of the H5Pset_scaleoffset function in the
- *     // HDF5 Reference Manual for more information [3].
+ *     // HDF5 Reference Manual for more information.
  *     if(H5Pset_scaleoffset (dset_create_props, H5Z_SO_INT, H5Z_SO_INT_MINIMUMBITS_DEFAULT) < 0) {
  *       printf("Error: fail to set scaleoffset filter\n");
  *       return -1;
@@ -2895,7 +2895,7 @@ allocated if necessary.
  *     // Set parameters for scale-offset compression; use variable
  *     // minimum-bits method, set decimal scale factor to 3. Check
  *     // the description of the H5Pset_scaleoffset function in the
- *     // HDF5 Reference Manual for more information [3].
+ *     // HDF5 Reference Manual for more information.
  *     if(H5Pset_scaleoffset (dset_create_props, H5Z_SO_FLOAT_DSCALE, 3) < 0) {
  *       printf("Error: fail to set scaleoffset filter\n");
  *       return -1;

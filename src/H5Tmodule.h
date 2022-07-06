@@ -366,7 +366,7 @@
  * bits, and an indication of the byte order <b>Table 4</b>.
  *
  * <b>Table 5</b> shows examples of predefined datatypes. The full list can be found in the
- * \ref PDT section of the HDF5 Reference Manual.
+ * \ref PDT section of the \ref RM.
  *
  *   <table>
  *     <caption align=top>Table 2. Architectures used in predefined datatypes</caption>

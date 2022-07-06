@@ -762,7 +762,7 @@
  * makes it possible for an application or a driver to create, modify, and manage custom properties,
  * property lists, and property list classes. A comprehensive list of functions for this interface
  * appears under "Generic Property Operations (Advanced)" in the "H5P: Property List Interface"
- * section of the HDF5 Reference Manual.
+ * section of the \ref RM.
  *
  * Further discussion of HDF5’s generic property interface and user-defined properties and
  * property lists is beyond the scope of this document.
