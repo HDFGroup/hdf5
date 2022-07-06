@@ -95,7 +95,10 @@ static const char *namebases[] = {FILENAME, FILENAME2, FILENAME3, FNAME, NULL};
 /* Size of "flags" field in the updater file header */
 #define UD_SIZE_2 2
 
-#define Swap2Bytes(val) ((((val) >> 8) & 0x00FF) | (((val) << 8) & 0xFF00))
+/* Note that bitwise operations often perform integral promotion, so you have
+ * to cast the result to avoid warnings.
+ */
+#define Swap2Bytes(val) (uint16_t)((((val) >> 8) & 0x00FF) | (((val) << 8) & 0xFF00))
 
 #define Swap8Bytes(val)                                                                                      \
     ((((val) >> 56) & 0x00000000000000FF) | (((val) >> 40) & 0x000000000000FF00) |                           \
@@ -4862,10 +4865,10 @@ static unsigned
 test_updater_generate_md_checksums(hid_t orig_fapl, hbool_t file_create)
 {
     char                    filename[FILE_NAME_LEN];  /* Filename to use */
-    hid_t                   fid  = H5I_INVALID_HID;   /* File ID */
-    hid_t                   fcpl = H5I_INVALID_HID;   /* File creation property list ID */
-    hid_t                   fapl = H5I_INVALID_HID;   /* File access property list ID */
-    H5F_vfd_swmr_config_t   config;                   /* Configuration for VFD SWMR */
+    hid_t                   fid    = H5I_INVALID_HID; /* File ID */
+    hid_t                   fcpl   = H5I_INVALID_HID; /* File creation property list ID */
+    hid_t                   fapl   = H5I_INVALID_HID; /* File access property list ID */
+    H5F_vfd_swmr_config_t * config = NULL;            /* Configuration for VFD SWMR */
     H5F_generate_md_ck_cb_t cb_info;                  /* Callback */
     H5F_t *                 f                 = NULL; /* Internal file object pointer */
     char *                  md_file_path_name = NULL;
@@ -4879,16 +4882,19 @@ test_updater_generate_md_checksums(hid_t orig_fapl, hbool_t file_create)
 
     h5_fixname(namebase4, orig_fapl, filename, sizeof(filename));
 
+    if (NULL == (config = HDmalloc(sizeof(H5F_vfd_swmr_config_t))))
+        TEST_ERROR;
+
     /* config, tick_len, max_lag, presume_posix_semantics, writer,
      * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
      * md_file_path, md_file_name, updater_file_path */
-    init_vfd_swmr_config(&config, 4, 7, FALSE, TRUE, TRUE, TRUE, TRUE, 2, NULL, MD_FILE, UD_FILE);
+    init_vfd_swmr_config(config, 4, 7, FALSE, TRUE, TRUE, TRUE, TRUE, 2, NULL, MD_FILE, UD_FILE);
 
     if ((fapl = H5Pcopy(orig_fapl)) < 0)
         FAIL_STACK_ERROR;
 
     /* fapl, use_latest_format, only_meta_page, page_buf_size, config */
-    if (vfd_swmr_fapl_augment(fapl, TRUE, FALSE, 4096, &config) < 0)
+    if (vfd_swmr_fapl_augment(fapl, TRUE, FALSE, 4096, config) < 0)
         FAIL_STACK_ERROR;
 
     if ((fcpl = vfd_swmr_create_fcpl(H5F_FSPACE_STRATEGY_PAGE, 4096)) < 0) {
@@ -4935,11 +4941,13 @@ test_updater_generate_md_checksums(hid_t orig_fapl, hbool_t file_create)
         FAIL_STACK_ERROR;
 
     /* Verify contents of checksum file and updater files */
-    if (verify_ud_chk(md_file_path_name, config.updater_file_path) < 0)
+    if (verify_ud_chk(md_file_path_name, config->updater_file_path) < 0)
         TEST_ERROR;
 
     /*  It's important to clean up the checksum and updater files. */
-    clean_chk_ud_files(md_file_path_name, config.updater_file_path);
+    clean_chk_ud_files(md_file_path_name, config->updater_file_path);
+
+    HDfree(config);
 
     PASSED();
 
@@ -4955,7 +4963,10 @@ error:
     H5E_END_TRY;
 
     /*  It's important to clean up the chechsum and updater files. */
-    clean_chk_ud_files(md_file_path_name, config.updater_file_path);
+    if (md_file_path_name && config)
+        clean_chk_ud_files(md_file_path_name, config->updater_file_path);
+
+    HDfree(config);
 
     return 1;
 

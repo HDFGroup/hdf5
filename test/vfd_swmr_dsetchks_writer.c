@@ -93,17 +93,6 @@ typedef struct {
     unsigned int ydecrs; /* -y <ydecrs> option */
 } state_t;
 
-/* Initializations for state_t */
-#define ALL_HID_INITIALIZER                                                                                  \
-    (state_t)                                                                                                \
-    {                                                                                                        \
-        .filename = "", .file = H5I_INVALID_HID, .filetype = H5T_NATIVE_UINT32,                              \
-        .update_interval = READER_WAIT_TICKS, .csteps = 1, .use_np = true, .use_vfd_swmr = true,             \
-        .use_filter = false, .flush_raw_data = true, .single_index = false, .implicit_index = false,         \
-        .fa_index = false, .ea_index = false, .bt2_index = false, .rows = 10, .cols = 5, .gwrites = 0,       \
-        .pwrites = 0, .twrites = 0, .lwrites = 0, .xincrs = 0, .ydecrs = 0                                   \
-    }
-
 /* Structure to hold info for different dataset types */
 typedef struct {
     hsize_t chunk_dims[2]; /* Chunk dimensions for all datasets except single_did */
@@ -268,7 +257,30 @@ state_init(state_t *s, int argc, char **argv)
     const char *           s_opts   = "siferom:n:x:y:g:p:t:l:bqSNUu:c:";
     struct h5_long_options l_opts[] = {{NULL, 0, '\0'}};
 
-    *s = ALL_HID_INITIALIZER;
+    s->file            = H5I_INVALID_HID;
+    s->filetype        = H5T_NATIVE_UINT32;
+    s->update_interval = READER_WAIT_TICKS;
+    s->csteps          = 1;
+    s->use_np          = TRUE;
+    s->use_vfd_swmr    = TRUE;
+    s->use_filter      = FALSE;
+    s->flush_raw_data  = TRUE;
+    s->single_index    = FALSE;
+    s->implicit_index  = FALSE;
+    s->fa_index        = FALSE;
+    s->ea_index        = FALSE;
+    s->bt2_index       = FALSE;
+    s->rows            = 10;
+    s->cols            = 5;
+    s->gwrites         = 0;
+    s->pwrites         = 0;
+    s->twrites         = 0;
+    s->lwrites         = 0;
+    s->xincrs          = 0;
+    s->ydecrs          = 0;
+
+    HDmemset(s->filename, 0, PATH_MAX);
+    HDmemset(s->progname, 0, PATH_MAX);
 
     if (H5_basename(argv[0], &tfile) < 0) {
         HDprintf("H5_basename failed\n");
@@ -2283,21 +2295,30 @@ error:
 int
 main(int argc, char **argv)
 {
-    hid_t                 fapl   = H5I_INVALID_HID;
-    hid_t                 fcpl   = H5I_INVALID_HID;
-    bool                  writer = false;
-    state_t               s;
-    const char *          personality;
-    H5F_vfd_swmr_config_t config;
-    np_state_t            np;
-    dsets_state_t         ds;
+    hid_t                  fapl   = H5I_INVALID_HID;
+    hid_t                  fcpl   = H5I_INVALID_HID;
+    bool                   writer = false;
+    state_t *              s      = NULL;
+    const char *           personality;
+    H5F_vfd_swmr_config_t *config = NULL;
+    np_state_t             np;
+    dsets_state_t          ds;
 
-    if (!state_init(&s, argc, argv)) {
+    if (NULL == (s = HDcalloc(1, sizeof(state_t)))) {
+        HDprintf("memory allocation failed");
+        TEST_ERROR;
+    }
+    if (NULL == (config = HDcalloc(1, sizeof(H5F_vfd_swmr_config_t)))) {
+        HDprintf("memory allocation failed");
+        TEST_ERROR;
+    }
+
+    if (!state_init(s, argc, argv)) {
         HDprintf("state_init() failed\n");
         TEST_ERROR;
     }
 
-    personality = HDstrstr(s.progname, "vfd_swmr_dsetchks_");
+    personality = HDstrstr(s->progname, "vfd_swmr_dsetchks_");
 
     if (personality != NULL && HDstrcmp(personality, "vfd_swmr_dsetchks_writer") == 0)
         writer = true;
@@ -2311,11 +2332,11 @@ main(int argc, char **argv)
     /* config, tick_len, max_lag, presume_posix_semantics, writer,
      * maintain_metadata_file, generate_updater_files, flush_raw_data, md_pages_reserved,
      * md_file_path, md_file_name, updater_file_path */
-    init_vfd_swmr_config(&config, 4, 7, FALSE, writer, TRUE, FALSE, s.flush_raw_data, 128, "./",
+    init_vfd_swmr_config(config, 4, 7, FALSE, writer, TRUE, FALSE, s->flush_raw_data, 128, "./",
                          "dsetchks-shadow", NULL);
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
-    if ((fapl = vfd_swmr_create_fapl(true, s.use_vfd_swmr, true, 4096, &config)) < 0) {
+    if ((fapl = vfd_swmr_create_fapl(true, s->use_vfd_swmr, true, 4096, config)) < 0) {
         HDprintf("vfd_swmr_create_fapl() failed\n");
         TEST_ERROR;
     }
@@ -2327,43 +2348,43 @@ main(int argc, char **argv)
     }
 
     if (writer) {
-        if ((s.file = H5Fcreate(s.filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0) {
+        if ((s->file = H5Fcreate(s->filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0) {
             HDprintf("H5Fcreate failed\n");
             TEST_ERROR;
         }
 
-        if (!create_dsets(&s, &ds)) {
+        if (!create_dsets(s, &ds)) {
             HDprintf("create_dsets() failed\n");
             TEST_ERROR;
         }
     }
     else {
-        if ((s.file = H5Fopen(s.filename, H5F_ACC_RDONLY, fapl)) < 0) {
+        if ((s->file = H5Fopen(s->filename, H5F_ACC_RDONLY, fapl)) < 0) {
             HDprintf("H5Fopen failed\n");
             TEST_ERROR;
         }
-        if (!open_dsets(&s, &ds)) {
+        if (!open_dsets(s, &ds)) {
             HDprintf("open_dsets() failed\n");
             TEST_ERROR;
         }
     }
 
     /* Initiailze named pipes */
-    if (s.use_np && !np_init(&np, writer)) {
+    if (s->use_np && !np_init(&np, writer)) {
         HDprintf("np_init() failed\n");
         TEST_ERROR;
     }
 
     if (writer) {
 
-        if (!perform_dsets_operations(&s, &ds, &config, &np)) {
+        if (!perform_dsets_operations(s, &ds, config, &np)) {
             HDprintf("perform_dsets_operations() failed\n");
             TEST_ERROR;
         }
     }
     else {
 
-        if (!verify_dsets_operations(&s, &ds, &config, &np, false)) {
+        if (!verify_dsets_operations(s, &ds, config, &np, false)) {
             HDprintf("perform_dsets_operations() failed\n");
             TEST_ERROR;
         }
@@ -2384,9 +2405,9 @@ main(int argc, char **argv)
      * Nothing needs to be done for -x or -y options
      * (increase and decrease dataset dimension sizes).
      */
-    if (!s.flush_raw_data && !s.xincrs && !s.ydecrs && s.use_np) {
+    if (!s->flush_raw_data && !s->xincrs && !s->ydecrs && s->use_np) {
 
-        if (!closing_on_noflush(writer, &s, &ds, &config, &np))
+        if (!closing_on_noflush(writer, s, &ds, config, &np))
             TEST_ERROR;
     }
     else {
@@ -2396,16 +2417,19 @@ main(int argc, char **argv)
             TEST_ERROR;
         }
 
-        if (H5Fclose(s.file) < 0) {
+        if (H5Fclose(s->file) < 0) {
             HDprintf("H5Fclose failed\n");
             TEST_ERROR;
         }
 
-        if (s.use_np && !np_close(&np, writer)) {
+        if (s->use_np && !np_close(&np, writer)) {
             HDprintf("np_close() failed\n");
             TEST_ERROR;
         }
     }
+
+    HDfree(s);
+    HDfree(config);
 
     return EXIT_SUCCESS;
 
@@ -2414,20 +2438,23 @@ error:
     {
         H5Pclose(fapl);
         H5Pclose(fcpl);
-        H5Fclose(s.file);
+        H5Fclose(s->file);
     }
     H5E_END_TRY;
 
-    if (s.use_np && np.fd_writer_to_reader >= 0)
+    if (s->use_np && np.fd_writer_to_reader >= 0)
         HDclose(np.fd_writer_to_reader);
 
-    if (s.use_np && np.fd_reader_to_writer >= 0)
+    if (s->use_np && np.fd_reader_to_writer >= 0)
         HDclose(np.fd_reader_to_writer);
 
-    if (s.use_np && !writer) {
+    if (s->use_np && !writer) {
         HDremove(np.fifo_writer_to_reader);
         HDremove(np.fifo_reader_to_writer);
     }
+
+    HDfree(s);
+    HDfree(config);
 
     return EXIT_FAILURE;
 }

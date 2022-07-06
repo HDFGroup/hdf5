@@ -11544,7 +11544,7 @@ H5S__hyper_proj_int_iterate(H5S_hyper_span_info_t *ss_span_info, const H5S_hyper
         H5S_HYPER_PROJ_INT_ADD_SKIP(
             udata,
             H5S__hyper_spans_nelem_helper((H5S_hyper_span_info_t *)ss_span_info, 0, udata->op_gen) * count,
-            FAIL); /* Casting away const OK -NAF */
+            FAIL);
 
     /* Clean up if we are done */
     if (depth == 0) {

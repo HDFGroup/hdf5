@@ -600,7 +600,7 @@ H5FD__vfd_swmr_create_make_believe_data(H5FD_vfd_swmr_t *_file)
  *-------------------------------------------------------------------------
  */
 static H5FD_t *
-H5FD__vfd_swmr_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
+H5FD__vfd_swmr_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t H5_ATTR_UNUSED maxaddr)
 {
     H5FD_vfd_swmr_t *                  file = NULL;
     size_t                             page_buf_size;
@@ -1802,7 +1802,7 @@ H5FD_vfd_swmr_record_elapsed_ticks(H5FD_t *_file, uint64_t elapsed)
 
     H5FD_vfd_swmr_t *file = (H5FD_vfd_swmr_t *)_file;
 
-    uint32_t elapsed_idx = MIN(elapsed, file->api_elapsed_nbuckets);
+    uint64_t elapsed_idx = MIN(elapsed, file->api_elapsed_nbuckets);
 
     file->api_elapsed_ticks[elapsed_idx]++;
 

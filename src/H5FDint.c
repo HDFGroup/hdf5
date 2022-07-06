@@ -2396,7 +2396,6 @@ H5FD_delete(const char *filename, hid_t fapl_id)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
-
     HDassert(filename);
 
     /* Get file access property list */
