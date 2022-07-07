@@ -346,7 +346,6 @@ ioc_main(ioc_data_t *ioc_data)
 {
     subfiling_context_t *context = NULL;
     sf_work_request_t    wk_req;
-    MPI_Status           msg_status;
     int                  subfile_rank;
     int                  shutdown_requested;
     int                  ret_value = 0;
@@ -372,16 +371,15 @@ ioc_main(ioc_data_t *ioc_data)
 
     while ((!shutdown_requested) || (0 < atomic_load(&ioc_data->sf_io_ops_pending)) ||
            (0 < atomic_load(&ioc_data->sf_work_pending))) {
-        MPI_Message mpi_msg;
-        MPI_Status  status;
-        useconds_t  delay = 20;
-        int         flag  = 0;
-        int         mpi_code;
+        MPI_Status status;
+        useconds_t delay = 20;
+        int        flag  = 0;
+        int        mpi_code;
 
         /* Probe for incoming work requests */
-        if (MPI_SUCCESS != (mpi_code = (MPI_Improbe(MPI_ANY_SOURCE, MPI_ANY_TAG, context->sf_msg_comm, &flag,
-                                                    &mpi_msg, &status))))
-            H5_SUBFILING_MPI_GOTO_ERROR(-1, "MPI_Improbe failed", mpi_code);
+        if (MPI_SUCCESS != (mpi_code = (MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, context->sf_msg_comm, &flag,
+                                                   &status))))
+            H5_SUBFILING_MPI_GOTO_ERROR(-1, "MPI_Iprobe failed", mpi_code);
 
         if (flag) {
             double queue_start_time;
@@ -410,21 +408,9 @@ ioc_main(ioc_data_t *ioc_data)
              */
             HDmemset(&wk_req, 0, sizeof(sf_work_request_t));
 
-            if (MPI_SUCCESS != (mpi_code = MPI_Mrecv(&wk_req, count, MPI_BYTE, &mpi_msg, &msg_status)))
-                H5_SUBFILING_MPI_GOTO_ERROR(-1, "MPI_Mrecv failed", mpi_code);
-
-#ifdef H5FD_IOC_DEBUG
-            {
-                int received_count;
-
-                if (MPI_SUCCESS != (mpi_code = MPI_Get_count(&msg_status, MPI_BYTE, &received_count)))
-                    H5_SUBFILING_MPI_GOTO_ERROR(-1, "MPI_Get_count failed", mpi_code);
-
-                if (received_count != count)
-                    H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, -1,
-                                            "MPI_Mrecv only received %d bytes of %d", received_count, count);
-            }
-#endif
+            if (MPI_SUCCESS != (mpi_code = MPI_Recv(&wk_req, count, MPI_BYTE, source, tag, context->sf_msg_comm,
+                                                    MPI_STATUS_IGNORE)))
+                H5_SUBFILING_MPI_GOTO_ERROR(-1, "MPI_Recv failed", mpi_code);
 
             /* Dispatch work request to worker threads in thread pool */
 
