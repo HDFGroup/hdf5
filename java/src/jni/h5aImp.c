@@ -1140,7 +1140,7 @@ Java_hdf_hdf5lib_H5_H5AreadVL(JNIEnv *env, jclass clss, jlong attr_id, jlong mem
                     } */
                     case H5T_INTEGER: {
                         switch (vlSize) {
-                            case sizeof(jchar): {
+                            case sizeof(jbyte): {
                                 jbyte byteValue;
                                 for (x = 0; x < (int)vlSize; x++) {
                                     ((char *)&byteValue)[x] = ((char *)((hvl_t *)cp_vp)->p)[j * vlSize + x];
