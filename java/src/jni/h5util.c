@@ -1278,15 +1278,15 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                                                 break;
 
                                             case H5O_TYPE_DATASET:
-                                                if (HDsnprintf(this_str, this_len, "%s ", H5_TOOLS_DATASET)
-                                                        < 0)
+                                                if (HDsnprintf(this_str, this_len, "%s ", H5_TOOLS_DATASET) <
+                                                    0)
                                                     H5_JNI_FATAL_ERROR(ENVONLY,
                                                                        "h5str_sprintf: HDsnprintf failure");
                                                 break;
 
                                             case H5O_TYPE_NAMED_DATATYPE:
-                                                if (HDsnprintf(this_str, this_len, "%s ", H5_TOOLS_DATATYPE)
-                                                        < 0)
+                                                if (HDsnprintf(this_str, this_len, "%s ", H5_TOOLS_DATATYPE) <
+                                                    0)
                                                     H5_JNI_FATAL_ERROR(ENVONLY,
                                                                        "h5str_sprintf: HDsnprintf failure");
                                                 break;
@@ -1294,8 +1294,8 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                                             case H5O_TYPE_UNKNOWN:
                                             case H5O_TYPE_NTYPES:
                                             default:
-                                                if (HDsnprintf(this_str, this_len, "%u-", (unsigned)oi.type)
-                                                        < 0)
+                                                if (HDsnprintf(this_str, this_len, "%u-", (unsigned)oi.type) <
+                                                    0)
                                                     H5_JNI_FATAL_ERROR(ENVONLY,
                                                                        "h5str_sprintf: HDsnprintf failure");
                                                 break;
@@ -1318,7 +1318,8 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                                                     "h5str_sprintf: failed to allocate string buffer");
                                             if (HDsnprintf(this_str, that_len, "%lu:%s", oi.fileno,
                                                            token_str) < 0)
-                                                H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsnprintf failure");
+                                                H5_JNI_FATAL_ERROR(ENVONLY,
+                                                                   "h5str_sprintf: HDsnprintf failure");
 
                                             H5free_memory(token_str);
                                         }
