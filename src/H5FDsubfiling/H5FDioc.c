@@ -992,9 +992,18 @@ H5FD__ioc_close(H5FD_t *_file)
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to close HDF5 file");
     }
 
-    if (file->fa.context_id >= 0)
+    if (file->fa.context_id >= 0) {
+        subfiling_context_t *sf_context = H5_get_subfiling_object(file->fa.context_id);
+
+        if (sf_context && sf_context->topology->rank_is_ioc) {
+            if (finalize_ioc_threads(sf_context) < 0)
+                /* Note that closing of subfiles is collective */
+                H5_SUBFILING_DONE_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to finalize IOC threads");
+        }
+
         if (H5_close_subfiles(file->fa.context_id) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to close subfiling file(s)");
+    }
 
     if (H5_mpi_comm_free(&file->comm) < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI Communicator");
@@ -1737,18 +1746,4 @@ done:
     }
 
     H5_SUBFILING_FUNC_LEAVE;
-}
-
-void
-H5FD_ioc_wait_thread_main(void)
-{
-    wait_for_thread_main();
-
-    return;
-}
-
-void
-H5FD_ioc_finalize_threads(void)
-{
-    return;
 }

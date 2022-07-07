@@ -61,9 +61,6 @@ static file_map_to_context_t *sf_open_file_map = NULL;
 static int                    sf_file_map_size = 0;
 #define DEFAULT_FILE_MAP_ENTRIES 8
 
-atomic_int sf_file_open_count = 0;
-atomic_int sf_shutdown_flag   = 0;
-
 /* Definitions for recording subfiling statistics */
 static stat_record_t subfiling_stats[TOTAL_STAT_COUNT];
 #define SF_WRITE_OPS       (subfiling_stats[WRITE_STAT].op_count)
@@ -994,12 +991,6 @@ H5_open_subfiles(const char *base_filename, uint64_t h5_file_id, ioc_selection_t
     }
 
     /*
-     * Ensure that the IOC service won't exit
-     * as we prepare to start up
-     */
-    atomic_init(&sf_shutdown_flag, 0);
-
-    /*
      * If we're actually using the IOCs, we will
      * start the service threads on the identified
      * ranks as part of the subfile opening.
@@ -1557,6 +1548,7 @@ init_subfiling_context(subfiling_context_t *sf_context, sf_topology_t *app_topol
     sf_context->h5_filename     = NULL;
     sf_context->sf_filename     = NULL;
     sf_context->subfile_prefix  = NULL;
+    sf_context->ioc_data        = NULL;
 
 #ifdef H5_SUBFILING_DEBUG
     sf_context->sf_logfile = NULL;
@@ -2662,11 +2654,9 @@ H5_close_subfiles(int64_t subfiling_context_id)
     subfiling_context_t *sf_context  = NULL;
     MPI_Request          barrier_req = MPI_REQUEST_NULL;
 #ifdef H5_SUBFILING_DEBUG
-    double t_finalize_threads = 0.0;
-    double t_main_exit        = 0.0;
-    double t0                 = 0.0;
-    double t1                 = 0.0;
-    double t2                 = 0.0;
+    double t0 = 0.0;
+    double t1 = 0.0;
+    double t2 = 0.0;
 #endif
     int    mpi_code;
     herr_t ret_value = SUCCEED;
@@ -2742,52 +2732,6 @@ H5_close_subfiles(int64_t subfiling_context_id)
     }
 
     if (sf_context->topology->rank_is_ioc) {
-        int file_open_count;
-
-        file_open_count = atomic_load(&sf_file_open_count);
-        atomic_fetch_sub(&sf_file_open_count, 1);
-
-        /* If there's only a single file that is
-         * currently open, we can shutdown the IO concentrator
-         * as part of the file close.
-         */
-        if (file_open_count == 1) {
-
-            HDassert(0 == atomic_load(&sf_shutdown_flag));
-
-            /* Shutdown the main IOC thread */
-            atomic_store(&sf_shutdown_flag, 1);
-
-            /* Allow ioc_main to exit.*/
-            do {
-
-                usleep(20);
-
-            } while (0 != atomic_load(&sf_shutdown_flag));
-
-#ifdef H5_SUBFILING_DEBUG
-            t1 = MPI_Wtime();
-#endif
-
-            H5FD_ioc_wait_thread_main();
-
-#ifdef H5_SUBFILING_DEBUG
-            t2          = MPI_Wtime();
-            t1          = t2;
-            t_main_exit = t2 - t1;
-#endif
-
-            H5FD_ioc_take_down_thread_pool();
-
-#ifdef H5_SUBFILING_DEBUG
-            t2 = MPI_Wtime();
-#endif
-        }
-
-#ifdef H5_SUBFILING_DEBUG
-        t_finalize_threads = t2 - t1;
-#endif
-
         if (sf_context->sf_fid >= 0) {
             errno = 0;
             if (HDclose(sf_context->sf_fid) < 0) {
@@ -2811,8 +2755,6 @@ H5_close_subfiles(int64_t subfiling_context_id)
         if (sf_verbose_flag) {
             t1 = t2;
             if (sf_logfile != NULL) {
-                HDfprintf(sf_logfile, "[%d] main_exit=%lf, finalize_threads=%lf\n", sf_context->sf_group_rank,
-                          t_main_exit, t_finalize_threads);
                 if (SF_WRITE_OPS > 0)
                     HDfprintf(
                         sf_logfile,
