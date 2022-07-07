@@ -870,6 +870,7 @@ FILE_PATTERNS          = H5*public.h \
                          H5FDsplitter.h \
                          H5FDstdio.h \
                          H5FDwindows.h \
+                         H5Tdevelop.h \
                          H5VLconnector.h \
                          H5VLconnector_passthru.h \
                          H5VLnative.h \

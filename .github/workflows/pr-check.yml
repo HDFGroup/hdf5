@@ -20,7 +20,7 @@ jobs:
     strategy:
 #      fail-fast: false
       matrix:
-        name: ["Windows Latest MSVC", "Ubuntu Latest GCC", "Ubuntu Debug GCC", "macOS Latest Clang", "Ubuntu Autotools GCC", "Ubuntu Debug Autotools GCC", "Windows TS MSVC", "Ubuntu TS GCC", "TS Debug GCC", "macOS TS Clang", "TS Autotools GCC"]
+        name: ["Windows Latest MSVC", "Ubuntu Latest GCC", "Ubuntu Debug GCC", "macOS Latest Clang", "Ubuntu Autotools GCC", "Ubuntu Debug Autotools GCC", "-Werror Ubuntu Debug Autotools GCC", "Windows TS MSVC", "Ubuntu TS GCC", "TS Debug GCC", "macOS TS Clang", "TS Autotools GCC"]
         include:
           - name: "Windows Latest MSVC"
             artifact: "Windows-MSVC.tar.xz"
@@ -34,6 +34,7 @@ jobs:
             hl: ON
             parallel: OFF
             generator: "-G \"Visual Studio 17 2022\" -A x64"
+            flags: ""
           - name: "Ubuntu Latest GCC"
             artifact: "Linux.tar.xz"
             os: ubuntu-latest
@@ -46,6 +47,7 @@ jobs:
             parallel: OFF
             toolchain: "config/toolchain/GCC.cmake"
             generator: "-G Ninja"
+            flags: ""
           - name: "macOS Latest Clang"
             artifact: "macOS.tar.xz"
             os: macos-latest
@@ -58,6 +60,7 @@ jobs:
             parallel: OFF
             toolchain: "config/toolchain/clang.cmake"
             generator: "-G Ninja"
+            flags: ""
           - name: "Ubuntu Debug GCC"
             artifact: "LinuxDBG.tar.xz"
             os: ubuntu-latest
@@ -70,6 +73,7 @@ jobs:
             parallel: OFF
             toolchain: "config/toolchain/GCC.cmake"
             generator: "-G Ninja"
+            flags: ""
           - name: "Ubuntu Autotools GCC"
             artifact: "LinuxA.tar.xz"
             os: ubuntu-latest
@@ -82,6 +86,7 @@ jobs:
             parallel: disable
             toolchain: ""
             generator: "autogen"
+            flags: ""
           - name: "Ubuntu Debug Autotools GCC"
             artifact: "LinuxA.tar.xz"
             os: ubuntu-latest
@@ -94,6 +99,21 @@ jobs:
             parallel: disable
             toolchain: ""
             generator: "autogen"
+            flags: ""
+          # Build that ensures no new warnings sneak into the library.
+          - name: "-Werror Ubuntu Debug Autotools GCC"
+            artifact: "LinuxDBG.tar.xz"
+            os: ubuntu-latest
+            build_type: "debug"
+            cpp: disable
+            fortran: disable
+            java: disable
+            ts: disable
+            hl: enable
+            parallel: disable
+            toolchain: ""
+            generator: "autogen"
+            flags: "CFLAGS=-Werror"
 #  Threadsafe runs
           - name: "Windows TS MSVC"
             artifact: "Windows-MSVCTS.tar.xz"
@@ -107,6 +127,7 @@ jobs:
             hl: OFF
             parallel: OFF
             generator: "-G \"Visual Studio 16 2019\" -A x64"
+            flags: ""
           - name: "Ubuntu TS GCC"
             artifact: "LinuxTS.tar.xz"
             os: ubuntu-latest
@@ -119,6 +140,7 @@ jobs:
             parallel: OFF
             toolchain: "config/toolchain/GCC.cmake"
             generator: "-G Ninja"
+            flags: ""
           - name: "macOS TS Clang"
             artifact: "macOSTS.tar.xz"
             os: macos-latest
@@ -131,6 +153,7 @@ jobs:
             parallel: OFF
             toolchain: "config/toolchain/clang.cmake"
             generator: "-G Ninja"
+            flags: ""
           - name: "TS Debug GCC"
             artifact: "LinuxTSDBG.tar.xz"
             os: ubuntu-latest
@@ -143,6 +166,7 @@ jobs:
             parallel: OFF
             toolchain: "config/toolchain/GCC.cmake"
             generator: "-G Ninja"
+            flags: ""
           - name: "TS Autotools GCC"
             artifact: "LinuxATS.tar.xz"
             os: ubuntu-latest
@@ -155,6 +179,7 @@ jobs:
             parallel: disable
             toolchain: ""
             generator: "autogen"
+            flags: ""
 
     name: ${{ matrix.name }}
     # The type of runner that the job will run on
@@ -196,7 +221,7 @@ jobs:
         sh ./autogen.sh
         mkdir "${{ runner.workspace }}/build"
         cd "${{ runner.workspace }}/build"
-        $GITHUB_WORKSPACE/configure --enable-build-mode=${{ matrix.build_type }} --enable-shared --${{ matrix.ts }}-threadsafe --${{ matrix.hl }}-hl --${{ matrix.parallel }}-parallel --${{ matrix.cpp }}-cxx --${{ matrix.fortran }}-fortran --${{ matrix.java }}-java
+        ${{ matrix.flags }} $GITHUB_WORKSPACE/configure --enable-build-mode=${{ matrix.build_type }} --enable-shared --${{ matrix.ts }}-threadsafe --${{ matrix.hl }}-hl --${{ matrix.parallel }}-parallel --${{ matrix.cpp }}-cxx --${{ matrix.fortran }}-fortran --${{ matrix.java }}-java
       shell: bash
       env:
         CC:   gcc-11
