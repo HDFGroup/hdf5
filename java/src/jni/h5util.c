@@ -654,7 +654,6 @@ h5str_sprint_old_reference(JNIEnv *env, h5str_t *out_str, hid_t region_obj, void
 {
     hid_t       region = H5I_INVALID_HID;
     char        ref_name[1024];
-    const char *path;
 
     int ret_value = FAIL;
 

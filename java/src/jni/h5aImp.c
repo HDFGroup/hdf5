@@ -1140,7 +1140,7 @@ Java_hdf_hdf5lib_H5_H5AreadVL(JNIEnv *env, jclass clss, jlong attr_id, jlong mem
                     } */
                     case H5T_INTEGER: {
                         switch (vlSize) {
-                            case sizeof(char): {
+                            case sizeof(jchar): {
                                 jbyte byteValue;
                                 for (x = 0; x < (int)vlSize; x++) {
                                     ((char *)&byteValue)[x] = ((char *)((hvl_t *)cp_vp)->p)[j * vlSize + x];
@@ -1151,7 +1151,7 @@ Java_hdf_hdf5lib_H5_H5AreadVL(JNIEnv *env, jclass clss, jlong attr_id, jlong mem
                                 CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
                                 break;
                             }
-                            case sizeof(short): {
+                            case sizeof(jshort): {
                                 jshort shortValue;
                                 for (x = 0; x < (int)vlSize; x++) {
                                     ((char *)&shortValue)[x] = ((char *)((hvl_t *)cp_vp)->p)[j * vlSize + x];
@@ -1162,7 +1162,7 @@ Java_hdf_hdf5lib_H5_H5AreadVL(JNIEnv *env, jclass clss, jlong attr_id, jlong mem
                                 CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
                                 break;
                             }
-                            case sizeof(int): {
+                            case sizeof(jint): {
                                 jint intValue;
                                 for (x = 0; x < (int)vlSize; x++) {
                                     ((char *)&intValue)[x] = ((char *)((hvl_t *)cp_vp)->p)[j * vlSize + x];
@@ -1172,7 +1172,7 @@ Java_hdf_hdf5lib_H5_H5AreadVL(JNIEnv *env, jclass clss, jlong attr_id, jlong mem
                                 CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
                                 break;
                             }
-                            case sizeof(long): {
+                            case sizeof(jlong): {
                                 jlong longValue;
                                 for (x = 0; x < (int)vlSize; x++) {
                                     ((char *)&longValue)[x] = ((char *)((hvl_t *)cp_vp)->p)[j * vlSize + x];
@@ -1188,7 +1188,7 @@ Java_hdf_hdf5lib_H5_H5AreadVL(JNIEnv *env, jclass clss, jlong attr_id, jlong mem
                     }
                     case H5T_FLOAT: {
                         switch (vlSize) {
-                            case sizeof(float): {
+                            case sizeof(jfloat): {
                                 jfloat floatValue;
                                 for (x = 0; x < (int)vlSize; x++) {
                                     ((char *)&floatValue)[x] = ((char *)((hvl_t *)cp_vp)->p)[j * vlSize + x];
@@ -1199,7 +1199,7 @@ Java_hdf_hdf5lib_H5_H5AreadVL(JNIEnv *env, jclass clss, jlong attr_id, jlong mem
                                 CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
                                 break;
                             }
-                            case sizeof(double): {
+                            case sizeof(jdouble): {
                                 jdouble doubleValue;
                                 for (x = 0; x < (int)vlSize; x++) {
                                     ((char *)&doubleValue)[x] = ((char *)((hvl_t *)cp_vp)->p)[j * vlSize + x];
