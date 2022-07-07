@@ -1163,19 +1163,19 @@ public class TestH5D {
                 vl_readbuf[j] = new ArrayList<Integer>();
 
             try {
-                H5.H5DreadVL(dset_int_id, dtype_int_id, HDF5Constants.H5S_ALL,
-                        HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT, vl_readbuf);
+                H5.H5DreadVL(dset_int_id, dtype_int_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                             HDF5Constants.H5P_DEFAULT, vl_readbuf);
             }
             catch (Exception ex) {
                 ex.printStackTrace();
             }
-            assertTrue("testH5DVLwr:"+vl_readbuf[0].get(0),
+            assertTrue("testH5DVLwr:" + vl_readbuf[0].get(0),
                        vl_int_data[0].get(0).equals(vl_readbuf[0].get(0)));
-            assertTrue("testH5DVLwr:"+vl_readbuf[1].get(0),
+            assertTrue("testH5DVLwr:" + vl_readbuf[1].get(0),
                        vl_int_data[1].get(0).equals(vl_readbuf[1].get(0)));
-            assertTrue("testH5DVLwr:"+vl_readbuf[2].get(0),
+            assertTrue("testH5DVLwr:" + vl_readbuf[2].get(0),
                        vl_int_data[2].get(0).equals(vl_readbuf[2].get(0)));
-            assertTrue("testH5DVLwr:"+vl_readbuf[3].get(0),
+            assertTrue("testH5DVLwr:" + vl_readbuf[3].get(0),
                        vl_int_data[3].get(0).equals(vl_readbuf[3].get(0)));
 
             // Read Double data
@@ -1190,13 +1190,13 @@ public class TestH5D {
             catch (Exception ex) {
                 ex.printStackTrace();
             }
-            assertTrue("testH5DVLwr:"+vl_readbuf[0].get(0),
+            assertTrue("testH5DVLwr:" + vl_readbuf[0].get(0),
                        vl_dbl_data[0].get(0).equals(vl_readbuf[0].get(0)));
-            assertTrue("testH5DVLwr:"+vl_readbuf[1].get(0),
+            assertTrue("testH5DVLwr:" + vl_readbuf[1].get(0),
                        vl_dbl_data[1].get(0).equals(vl_readbuf[1].get(0)));
-            assertTrue("testH5DVLwr:"+vl_readbuf[2].get(0),
+            assertTrue("testH5DVLwr:" + vl_readbuf[2].get(0),
                        vl_dbl_data[2].get(0).equals(vl_readbuf[2].get(0)));
-            assertTrue("testH5DVLwr:"+vl_readbuf[3].get(0),
+            assertTrue("testH5DVLwr:" + vl_readbuf[3].get(0),
                        vl_dbl_data[3].get(0).equals(vl_readbuf[3].get(0)));
         }
         catch (Throwable err) {

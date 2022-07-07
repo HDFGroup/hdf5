@@ -357,7 +357,7 @@ public class TestH5A {
         boolean bool_val     = false;
 
         try {
-            attr_id = 
+            attr_id =
                 H5.H5Acreate(loc_id, old_attr_name, type_id, space_id, HDF5Constants.H5P_DEFAULT, aapl_id);
 
             ret_val = H5.H5Arename(loc_id, old_attr_name, new_attr_name);
@@ -547,7 +547,7 @@ public class TestH5A {
 
         try {
             attr_id      = H5.H5Acreate(H5did, "dset", type_id, space_id, HDF5Constants.H5P_DEFAULT,
-                                    HDF5Constants.H5P_DEFAULT);
+                                   HDF5Constants.H5P_DEFAULT);
             attribute_id = H5.H5Aopen(H5did, "dset", HDF5Constants.H5P_DEFAULT);
             // Calling H5Aget_info with attribute_id returned from H5Aopen.
             attr_info = H5.H5Aget_info(attribute_id);
@@ -588,7 +588,7 @@ public class TestH5A {
 
         try {
             attr_id      = H5.H5Acreate(H5did, ".", type_id, space_id, HDF5Constants.H5P_DEFAULT,
-                                    HDF5Constants.H5P_DEFAULT);
+                                   HDF5Constants.H5P_DEFAULT);
             attribute_id = H5.H5Aopen_by_idx(H5did, ".", HDF5Constants.H5_INDEX_CRT_ORDER, order, 0,
                                              HDF5Constants.H5P_DEFAULT, lapl_id);
             // Calling H5Aget_info with attribute_id returned from
@@ -708,7 +708,7 @@ public class TestH5A {
 
         try {
             attr_id   = H5.H5Acreate_by_name(H5fid, obj_name, attr_name, type_id, space_id,
-                                             HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, lapl_id);
+                                           HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, lapl_id);
             attr_info = H5.H5Aget_info_by_name(H5fid, obj_name, attr_name, lapl_id);
             assertNotNull(attr_info);
         }
@@ -1516,13 +1516,13 @@ public class TestH5A {
             catch (Exception ex) {
                 ex.printStackTrace();
             }
-            assertTrue("testH5AVLwr:"+vl_readbuf[0].get(0),
+            assertTrue("testH5AVLwr:" + vl_readbuf[0].get(0),
                        vl_int_data[0].get(0).equals(vl_readbuf[0].get(0)));
-            assertTrue("testH5AVLwr:"+vl_readbuf[1].get(0),
+            assertTrue("testH5AVLwr:" + vl_readbuf[1].get(0),
                        vl_int_data[1].get(0).equals(vl_readbuf[1].get(0)));
-            assertTrue("testH5AVLwr:"+vl_readbuf[2].get(0),
+            assertTrue("testH5AVLwr:" + vl_readbuf[2].get(0),
                        vl_int_data[2].get(0).equals(vl_readbuf[2].get(0)));
-            assertTrue("testH5AVLwr:"+vl_readbuf[3].get(0),
+            assertTrue("testH5AVLwr:" + vl_readbuf[3].get(0),
                        vl_int_data[3].get(0).equals(vl_readbuf[3].get(0)));
 
             // Read Double data
@@ -1536,13 +1536,13 @@ public class TestH5A {
             catch (Exception ex) {
                 ex.printStackTrace();
             }
-            assertTrue("testH5AVLwr:"+vl_readbuf[0].get(0),
+            assertTrue("testH5AVLwr:" + vl_readbuf[0].get(0),
                        vl_dbl_data[0].get(0).equals(vl_readbuf[0].get(0)));
-            assertTrue("testH5AVLwr:"+vl_readbuf[1].get(0),
+            assertTrue("testH5AVLwr:" + vl_readbuf[1].get(0),
                        vl_dbl_data[1].get(0).equals(vl_readbuf[1].get(0)));
-            assertTrue("testH5AVLwr:"+vl_readbuf[2].get(0),
+            assertTrue("testH5AVLwr:" + vl_readbuf[2].get(0),
                        vl_dbl_data[2].get(0).equals(vl_readbuf[2].get(0)));
-            assertTrue("testH5AVLwr:"+vl_readbuf[3].get(0),
+            assertTrue("testH5AVLwr:" + vl_readbuf[3].get(0),
                        vl_dbl_data[3].get(0).equals(vl_readbuf[3].get(0)));
         }
         catch (Throwable err) {
