@@ -81,7 +81,8 @@ public class HDF5Constants {
         H5AC_METADATA_WRITE_STRATEGY_DISTRIBUTED();
     /** Don't attempt to increase the size of the cache automatically */
     public static final int H5C_incr_off = H5C_incr_off();
-    /** Attempt to increase the size of the cache
+    /**
+     *  Attempt to increase the size of the cache
      *              whenever the average hit rate over the last epoch drops
      *              below the value supplied in the lower_hr_threshold
      *              field
@@ -93,19 +94,22 @@ public class HDF5Constants {
     public static final int H5C_flash_incr_add_space = H5C_flash_incr_add_space();
     /** Don't attempt to decrease the size of the cache automatically */
     public static final int H5C_decr_off = H5C_decr_off();
-    /** Attempt to decrease the size of the cache
+    /**
+     *  Attempt to decrease the size of the cache
      *              whenever the average hit rate over the last epoch rises
      *              above the value supplied in the upper_hr_threshold
      *              field
      */
     public static final int H5C_decr_threshold = H5C_decr_threshold();
-    /** At the end of each epoch, search the cache for
+    /**
+     *  At the end of each epoch, search the cache for
      *              entries that have not been accessed for at least the number
      *              of epochs specified in the epochs_before_eviction field, and
      *              evict these entries
      */
     public static final int H5C_decr_age_out = H5C_decr_age_out();
-    /** Same as age_out, but we only
+    /**
+     *  Same as age_out, but we only
      *              attempt to reduce the cache size when the hit rate observed
      *              over the last epoch exceeds the value provided in the
      *              upper_hr_threshold field

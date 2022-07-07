@@ -650,9 +650,8 @@ done:
 int
 h5str_sprint_reference(JNIEnv *env, h5str_t *out_str, hid_t region_obj, void *ref_buf)
 {
-    hid_t       region = H5I_INVALID_HID;
-    char        ref_name[1024];
-    const char *path;
+    hid_t region = H5I_INVALID_HID;
+    char  ref_name[1024];
 
     int ret_value = FAIL;
 

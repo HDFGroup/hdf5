@@ -1073,8 +1073,7 @@ done:
  */
 JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5DreadVL(JNIEnv *env, jclass clss, jlong dataset_id, jlong mem_type_id,
-        jlong mem_space_id, jlong file_space_id, jlong xfer_plist_id,
-        jobjectArray buf)
+                              jlong mem_space_id, jlong file_space_id, jlong xfer_plist_id, jobjectArray buf)
 {
     H5T_class_t type_class;
     jsize       n;
@@ -1105,10 +1104,10 @@ Java_hdf_hdf5lib_H5_H5DreadVL(JNIEnv *env, jclass clss, jlong dataset_id, jlong 
         H5T_class_t vlClass;
         size_t      vlSize;
         void *      rawBuf = NULL;
-        jobject    *jList = NULL;
+        jobject *   jList  = NULL;
 
         size_t i, j, x;
-        char * cp_vp  = NULL;
+        char * cp_vp = NULL;
 
         if (!(typeSize = H5Tget_size(mem_type_id)))
             H5_LIBRARY_ERROR(ENVONLY);
@@ -1124,28 +1123,33 @@ fprintf(stderr,"read typeSize=%ld vlSize=%ld vlClass=%ld\n", typeSize, vlSize, v
         if (NULL == (rawBuf = HDcalloc((size_t)n, typeSize)))
             H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5DreadVL: failed to allocate raw VL read buffer");
 
-        if ((status = H5Dread((hid_t)dataset_id, (hid_t)mem_type_id, (hid_t)mem_space_id, (hid_t)file_space_id,
-                (hid_t)xfer_plist_id, (void *)rawBuf)) < 0)
+        if ((status = H5Dread((hid_t)dataset_id, (hid_t)mem_type_id, (hid_t)mem_space_id,
+                              (hid_t)file_space_id, (hid_t)xfer_plist_id, (void *)rawBuf)) < 0)
             H5_LIBRARY_ERROR(ENVONLY);
 
         /* Cache class types */
-        jclass cBool = ENVPTR->FindClass(ENVONLY, "java/lang/Boolean");
-        jmethodID boolValueMid = ENVPTR->GetStaticMethodID(ENVONLY, cBool, "valueOf", "(Z)Ljava/lang/Boolean;");
-        jclass cByte = ENVPTR->FindClass(ENVONLY, "java/lang/Byte");
-        jmethodID byteValueMid = ENVPTR->GetStaticMethodID(ENVONLY, cByte, "valueOf", "(B)Ljava/lang/Byte;");
-        jclass cShort = ENVPTR->FindClass(ENVONLY, "java/lang/Short");
-        jmethodID shortValueMid = ENVPTR->GetStaticMethodID(ENVONLY, cShort, "valueOf", "(S)Ljava/lang/Short;");
-        jclass cInt = ENVPTR->FindClass(ENVONLY, "java/lang/Integer");
-        jmethodID intValueMid = ENVPTR->GetStaticMethodID(ENVONLY, cInt, "valueOf", "(I)Ljava/lang/Integer;");
-        jclass cLong = ENVPTR->FindClass(ENVONLY, "java/lang/Long");
-        jmethodID longValueMid = ENVPTR->GetStaticMethodID(ENVONLY, cLong, "valueOf", "(J)Ljava/lang/Long;");
-        jclass cFloat = ENVPTR->FindClass(ENVONLY, "java/lang/Float");
-        jmethodID floatValueMid = ENVPTR->GetStaticMethodID(ENVONLY, cFloat, "valueOf", "(F)Ljava/lang/Float;");
+        jclass cBool   = ENVPTR->FindClass(ENVONLY, "java/lang/Boolean");
+        jclass cByte   = ENVPTR->FindClass(ENVONLY, "java/lang/Byte");
+        jclass cShort  = ENVPTR->FindClass(ENVONLY, "java/lang/Short");
+        jclass cInt    = ENVPTR->FindClass(ENVONLY, "java/lang/Integer");
+        jclass cLong   = ENVPTR->FindClass(ENVONLY, "java/lang/Long");
+        jclass cFloat  = ENVPTR->FindClass(ENVONLY, "java/lang/Float");
         jclass cDouble = ENVPTR->FindClass(ENVONLY, "java/lang/Double");
-        jmethodID doubleValueMid = ENVPTR->GetStaticMethodID(ENVONLY, cDouble, "valueOf", "(D)Ljava/lang/Double;");
+
+        jmethodID boolValueMid =
+            ENVPTR->GetStaticMethodID(ENVONLY, cBool, "valueOf", "(Z)Ljava/lang/Boolean;");
+        jmethodID byteValueMid = ENVPTR->GetStaticMethodID(ENVONLY, cByte, "valueOf", "(B)Ljava/lang/Byte;");
+        jmethodID shortValueMid =
+            ENVPTR->GetStaticMethodID(ENVONLY, cShort, "valueOf", "(S)Ljava/lang/Short;");
+        jmethodID intValueMid = ENVPTR->GetStaticMethodID(ENVONLY, cInt, "valueOf", "(I)Ljava/lang/Integer;");
+        jmethodID longValueMid = ENVPTR->GetStaticMethodID(ENVONLY, cLong, "valueOf", "(J)Ljava/lang/Long;");
+        jmethodID floatValueMid =
+            ENVPTR->GetStaticMethodID(ENVONLY, cFloat, "valueOf", "(F)Ljava/lang/Float;");
+        jmethodID doubleValueMid =
+            ENVPTR->GetStaticMethodID(ENVONLY, cDouble, "valueOf", "(D)Ljava/lang/Double;");
 
         // retrieve the java.util.List interface class
-        jclass cList = ENVPTR->FindClass(ENVONLY, "java/util/List");
+        jclass    cList     = ENVPTR->FindClass(ENVONLY, "java/util/List");
         jmethodID addMethod = ENVPTR->GetMethodID(ENVONLY, cList, "add", "(Ljava/lang/Object;)Z");
 
         /* Convert each element to a list */
@@ -1162,106 +1166,110 @@ fprintf(stderr,"read nelmts[%d]=%ld\n", i, nelmts);
             jobject jobj = NULL;
             for (j = 0; j < nelmts; j++) {
                 switch (vlClass) {
-                /*case H5T_BOOL: {
-                    jboolean boolValue;
-                    for (x = 0; x < (int)vlSize; x++) {
-                        ((char*)&boolValue)[x] = ((char *)((hvl_t *)cp_vp)->p)[j*vlSize+x];
-                    }
+                    /*case H5T_BOOL: {
+                        jboolean boolValue;
+                        for (x = 0; x < (int)vlSize; x++) {
+                            ((char *)&boolValue)[x] = ((char *)((hvl_t *)cp_vp)->p)[j*vlSize+x];
+                        }
 
-                    jobj = ENVPTR->CallStaticObjectMethod(ENVONLY, cBool, boolValueMid, boolValue);
-                    CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-                    break;
-                } */
-                case H5T_INTEGER: {
+                        jobj = ENVPTR->CallStaticObjectMethod(ENVONLY, cBool, boolValueMid, boolValue);
+                        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                        break;
+                    } */
+                    case H5T_INTEGER: {
 fprintf(stderr,"read H5T_INTEGER=%ld\n", vlSize);
-                    switch (vlSize) {
-                        case sizeof(char): {
-                            jbyte byteValue;
-                            for (x = 0; x < (int)vlSize; x++) {
-                                ((char*)&byteValue)[x] = ((char *)((hvl_t *)cp_vp)->p)[j*vlSize+x];
-                            }
+                        switch (vlSize) {
+                            case sizeof(jbyte): {
+                                jbyte byteValue;
+                                for (x = 0; x < (int)vlSize; x++) {
+                                    ((char *)&byteValue)[x] = ((char *)((hvl_t *)cp_vp)->p)[j * vlSize + x];
+                                }
 
-                            jobj = ENVPTR->CallStaticObjectMethod(ENVONLY, cByte, byteValueMid, byteValue);
-                            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-                            break;
-                        }
-                        case sizeof(short): {
-                            jshort shortValue;
-                            for (x = 0; x < (int)vlSize; x++) {
-                                ((char*)&shortValue)[x] = ((char *)((hvl_t *)cp_vp)->p)[j*vlSize+x];
+                                jobj =
+                                    ENVPTR->CallStaticObjectMethod(ENVONLY, cByte, byteValueMid, byteValue);
+                                CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                                break;
                             }
+                            case sizeof(jshort): {
+                                jshort shortValue;
+                                for (x = 0; x < (int)vlSize; x++) {
+                                    ((char *)&shortValue)[x] = ((char *)((hvl_t *)cp_vp)->p)[j * vlSize + x];
+                                }
 
-                            jobj = ENVPTR->CallStaticObjectMethod(ENVONLY, cShort, shortValueMid, shortValue);
-                            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-                            break;
-                        }
-                        case sizeof(int): {
-                            jint intValue;
-                            for (x = 0; x < (int)vlSize; x++) {
-                                ((char*)&intValue)[x] = ((char *)((hvl_t *)cp_vp)->p)[j*vlSize+x];
+                                jobj = ENVPTR->CallStaticObjectMethod(ENVONLY, cShort, shortValueMid,
+                                                                      shortValue);
+                                CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                                break;
+                            }
+                            case sizeof(jint): {
+                                jint intValue;
+                                for (x = 0; x < (int)vlSize; x++) {
+                                    ((char *)&intValue)[x] = ((char *)((hvl_t *)cp_vp)->p)[j * vlSize + x];
 fprintf(stderr,"read vlSize=%ld - vlbuffer[%d:%d][%d]=%x\n", vlSize, i, j, x, ((char *)((hvl_t *)cp_vp)->p)[j*vlSize+x]);
 fprintf(stderr,"read vlSize=%ld - readBuf[%d:%d][%d]=%x\n", vlSize, i, j, x, ((char*)&intValue)[x]);
-                            }
+                                }
 
-                            jobj = ENVPTR->CallStaticObjectMethod(ENVONLY, cInt, intValueMid, intValue);
-                            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-                            break;
-                        }
-                        case sizeof(long): {
-                            jlong longValue;
-                            for (x = 0; x < (int)vlSize; x++) {
-                                ((char*)&longValue)[x] = ((char *)((hvl_t *)cp_vp)->p)[j*vlSize+x];
+                                jobj = ENVPTR->CallStaticObjectMethod(ENVONLY, cInt, intValueMid, intValue);
+                                CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                                break;
                             }
+                            case sizeof(jlong): {
+                                jlong longValue;
+                                for (x = 0; x < (int)vlSize; x++) {
+                                    ((char *)&longValue)[x] = ((char *)((hvl_t *)cp_vp)->p)[j * vlSize + x];
+                                }
 
-                            jobj = ENVPTR->CallStaticObjectMethod(ENVONLY, cLong, longValueMid, longValue);
-                            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-                            break;
+                                jobj =
+                                    ENVPTR->CallStaticObjectMethod(ENVONLY, cLong, longValueMid, longValue);
+                                CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                                break;
+                            }
                         }
+                        break;
                     }
-                    break;
-                }
-                case H5T_FLOAT: {
+                    case H5T_FLOAT: {
 fprintf(stderr,"read H5T_FLOAT=%ld\n", vlSize);
-                    switch (vlSize) {
-                        case sizeof(float): {
-                            jfloat floatValue;
-                            for (x = 0; x < (int)vlSize; x++) {
-                                ((char*)&floatValue)[x] = ((char *)((hvl_t *)cp_vp)->p)[j*vlSize+x];
-                            }
+                        switch (vlSize) {
+                            case sizeof(jfloat): {
+                                jfloat floatValue;
+                                for (x = 0; x < (int)vlSize; x++) {
+                                    ((char *)&floatValue)[x] = ((char *)((hvl_t *)cp_vp)->p)[j * vlSize + x];
+                                }
 
-                            jobj = ENVPTR->CallStaticObjectMethod(ENVONLY, cFloat, floatValueMid, floatValue);
-                            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-                            break;
-                        }
-                        case sizeof(double): {
-                            jdouble doubleValue;
-                            for (x = 0; x < (int)vlSize; x++) {
-                                ((char*)&doubleValue)[x] = ((char *)((hvl_t *)cp_vp)->p)[j*vlSize+x];
+                                jobj = ENVPTR->CallStaticObjectMethod(ENVONLY, cFloat, floatValueMid,
+                                                                      floatValue);
+                                CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                                break;
                             }
+                            case sizeof(jdouble): {
+                                jdouble doubleValue;
+                                for (x = 0; x < (int)vlSize; x++) {
+                                    ((char *)&doubleValue)[x] = ((char *)((hvl_t *)cp_vp)->p)[j * vlSize + x];
+                                }
 
-                            jobj = ENVPTR->CallStaticObjectMethod(ENVONLY, cDouble, doubleValueMid, doubleValue);
-                            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-                            break;
+                                jobj = ENVPTR->CallStaticObjectMethod(ENVONLY, cDouble, doubleValueMid,
+                                                                      doubleValue);
+                                CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                                break;
+                            }
                         }
+                        break;
                     }
-                    break;
-                }
-                case H5T_REFERENCE: {
+                    case H5T_REFERENCE: {
 fprintf(stderr,"read H5T_REFERENCE=%ld\n", vlSize);
-                    switch (vlSize) {
-                    case H5R_OBJ_REF_BUF_SIZE: {
-                            break;
+                        switch (vlSize) {
+                            case H5R_OBJ_REF_BUF_SIZE: {
+                                break;
+                            }
+                            case H5R_DSET_REG_REF_BUF_SIZE: {
+                                break;
+                            }
                         }
-                    case H5R_DSET_REG_REF_BUF_SIZE: {
-                            break;
-                        }
+                        break;
                     }
-                    break;
-                }
-                default:
-fprintf(stderr,"read default=%ld\n", vlSize);
-                    H5_UNIMPLEMENTED(ENVONLY, "H5DreadVL: invalid class type");
-                    break;
+                    default:
+                        H5_UNIMPLEMENTED(ENVONLY, "H5AreadVL: invalid class type");
+                        break;
                 }
 
                 // Add it to the list
@@ -1271,8 +1279,8 @@ fprintf(stderr,"read default=%ld\n", vlSize);
         } /* end for */
     }
     else {
-        if ((status = H5Dread((hid_t)dataset_id, (hid_t)mem_type_id, (hid_t)mem_space_id, (hid_t)file_space_id,
-                (hid_t)xfer_plist_id, (void *)readBuf)) < 0)
+        if ((status = H5Dread((hid_t)dataset_id, (hid_t)mem_type_id, (hid_t)mem_space_id,
+                              (hid_t)file_space_id, (hid_t)xfer_plist_id, (void *)readBuf)) < 0)
             H5_LIBRARY_ERROR(ENVONLY);
     }
 
@@ -1294,8 +1302,7 @@ done:
  */
 JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5DwriteVL(JNIEnv *env, jclass clss, jlong dataset_id, jlong mem_type_id,
-        jlong mem_space_id, jlong file_space_id, jlong xfer_plist_id,
-        jobjectArray buf)
+                               jlong mem_space_id, jlong file_space_id, jlong xfer_plist_id, jobjectArray buf)
 {
     H5T_class_t type_class;
     jsize       n;
@@ -1322,21 +1329,23 @@ fprintf(stderr,"write vl_array_size=%ld\n", n);
     if ((type_class = H5Tget_class((hid_t)mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
     if (type_class == H5T_VLEN) {
-        size_t   typeSize;
-        hid_t    memb = H5I_INVALID_HID;
-        size_t   vlSize;
-        void    *rawBuf = NULL;
-        jobject *jList = NULL;
+        size_t      typeSize;
+        hid_t       memb = H5I_INVALID_HID;
+        H5T_class_t vlClass;
+        size_t      vlSize;
+        void *      rawBuf = NULL;
+        jobject *   jList  = NULL;
 
         size_t i, j, x;
-        char * cp_vp  = NULL;
+        char * cp_vp = NULL;
 
         if (!(typeSize = H5Tget_size(mem_type_id)))
             H5_LIBRARY_ERROR(ENVONLY);
 
         if (!(memb = H5Tget_super(mem_type_id)))
             H5_LIBRARY_ERROR(ENVONLY);
-
+        if ((vlClass = H5Tget_class((hid_t)memb)) < 0)
+            H5_LIBRARY_ERROR(ENVONLY);
         if (!(vlSize = H5Tget_size(memb)))
             H5_LIBRARY_ERROR(ENVONLY);
 fprintf(stderr,"write typeSize=%ld vlSize=%ld\n", typeSize, vlSize);
@@ -1345,19 +1354,20 @@ fprintf(stderr,"write typeSize=%ld vlSize=%ld\n", typeSize, vlSize);
             H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5DwriteVL: failed to allocate raw VL write buffer");
 
         /* Cache class types */
-        jclass cBool = ENVPTR->FindClass(ENVONLY, "java/lang/Boolean");
-        jmethodID boolValueMid = ENVPTR->GetMethodID(ENVONLY, cBool, "booleanValue", "()Z");
-        jclass cByte = ENVPTR->FindClass(ENVONLY, "java/lang/Byte");
-        jmethodID byteValueMid = ENVPTR->GetMethodID(ENVONLY, cByte, "byteValue", "()B");
-        jclass cShort = ENVPTR->FindClass(ENVONLY, "java/lang/Short");
-        jmethodID shortValueMid = ENVPTR->GetMethodID(ENVONLY, cShort, "shortValue", "()S");
-        jclass cInt = ENVPTR->FindClass(ENVONLY, "java/lang/Integer");
-        jmethodID intValueMid = ENVPTR->GetMethodID(ENVONLY, cInt, "intValue", "()I");
-        jclass cLong = ENVPTR->FindClass(ENVONLY, "java/lang/Long");
-        jmethodID longValueMid = ENVPTR->GetMethodID(ENVONLY, cLong, "longValue", "()J");
-        jclass cFloat = ENVPTR->FindClass(ENVONLY, "java/lang/Float");
-        jmethodID floatValueMid = ENVPTR->GetMethodID(ENVONLY, cFloat, "floatValue", "()F");
+        jclass cBool   = ENVPTR->FindClass(ENVONLY, "java/lang/Boolean");
+        jclass cByte   = ENVPTR->FindClass(ENVONLY, "java/lang/Byte");
+        jclass cShort  = ENVPTR->FindClass(ENVONLY, "java/lang/Short");
+        jclass cInt    = ENVPTR->FindClass(ENVONLY, "java/lang/Integer");
+        jclass cLong   = ENVPTR->FindClass(ENVONLY, "java/lang/Long");
+        jclass cFloat  = ENVPTR->FindClass(ENVONLY, "java/lang/Float");
         jclass cDouble = ENVPTR->FindClass(ENVONLY, "java/lang/Double");
+
+        jmethodID boolValueMid   = ENVPTR->GetMethodID(ENVONLY, cBool, "booleanValue", "()Z");
+        jmethodID byteValueMid   = ENVPTR->GetMethodID(ENVONLY, cByte, "byteValue", "()B");
+        jmethodID shortValueMid  = ENVPTR->GetMethodID(ENVONLY, cShort, "shortValue", "()S");
+        jmethodID intValueMid    = ENVPTR->GetMethodID(ENVONLY, cInt, "intValue", "()I");
+        jmethodID longValueMid   = ENVPTR->GetMethodID(ENVONLY, cLong, "longValue", "()J");
+        jmethodID floatValueMid  = ENVPTR->GetMethodID(ENVONLY, cFloat, "floatValue", "()F");
         jmethodID doubleValueMid = ENVPTR->GetMethodID(ENVONLY, cDouble, "doubleValue", "()D");
 
         /* Convert each list to a vlen element */
@@ -1370,13 +1380,13 @@ fprintf(stderr,"write typeSize=%ld vlSize=%ld\n", typeSize, vlSize);
 
             // retrieve the toArray method and invoke it
             jmethodID mToArray = ENVPTR->GetMethodID(ENVONLY, cList, "toArray", "()[Ljava/lang/Object;");
-            if(mToArray == NULL)
+            if (mToArray == NULL)
                 CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-            jobjectArray array = (jobjectArray)ENVPTR->CallObjectMethod(ENVONLY, jList, mToArray);
-            jsize jnelmts = ENVPTR->GetArrayLength(ENVONLY, array);
+            jobjectArray array   = (jobjectArray)ENVPTR->CallObjectMethod(ENVONLY, jList, mToArray);
+            jsize        jnelmts = ENVPTR->GetArrayLength(ENVONLY, array);
 fprintf(stderr,"write jnelmts[%d]=%ld\n", i, jnelmts);
 
-            cp_vp = (char *)rawBuf + i * typeSize;
+            cp_vp                 = (char *)rawBuf + i * typeSize;
             ((hvl_t *)cp_vp)->len = jnelmts;
 
             if (NULL == (((hvl_t *)cp_vp)->p = HDmalloc(jnelmts * vlSize)))
@@ -1386,88 +1396,112 @@ fprintf(stderr,"write jnelmts[%d]=%ld\n", i, jnelmts);
                 if (NULL == (jobj = ENVPTR->GetObjectArrayElement(ENVONLY, (jobjectArray)array, (jsize)j)))
                     CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
-                /* if (ENVPTR->IsInstanceOf(ENVONLY, jobj, cBool)) {
-                    jboolean boolValue = ENVPTR->CallBooleanMethod(ENVONLY, jobj, boolValueMid);
-    fprintf(stderr,"write vlSize=%ld - jobj[%d:%d]=%x\n", vlSize, (int)i, (int)j, boolValue);
-                    for (x = 0; x < (int)vlSize; x++) {
-                        ((char *)((hvl_t *)cp_vp)->p)[j*vlSize+x] = ((char*)&boolValue)[x];
-    fprintf(stderr,"write vlSize=%ld - boolValue[%d:%d][%d]=%x\n", vlSize, i, j, x, ((char*)&boolValue)[x]);
-    fprintf(stderr,"write vlSize=%ld - vlbuffer[%d:%d][%d]=%x\n", vlSize, i, j, x, ((char *)((hvl_t *)cp_vp)->p)[j*vlSize+x]);
-                    }
-                }
-                else */
-                if (ENVPTR->IsInstanceOf(ENVONLY, jobj, cByte)) {
-                    jbyte byteValue = ENVPTR->CallByteMethod(ENVONLY, jobj, byteValueMid);
+                switch (vlClass) {
+                    /* case H5T_BOOL: {
+                            jboolean boolValue = ENVPTR->CallBooleanMethod(ENVONLY, jobj, boolValueMid);
+                            for (x = 0; x < (int)vlSize; x++) {
+                                ((char *)((hvl_t *)cp_vp)->p)[j * vlSize + x] = ((char *)&boolValue)[x];
+                            }
+                            break;
+                    } */
+                    case H5T_INTEGER: {
+                        switch (vlSize) {
+                            case sizeof(jbyte): {
+                                jbyte byteValue = ENVPTR->CallByteMethod(ENVONLY, jobj, byteValueMid);
     fprintf(stderr,"write vlSize=%ld - jobj[%d:%d]=%x\n", vlSize, (int)i, (int)j, byteValue);
-                    for (x = 0; x < (int)vlSize; x++) {
-                        ((char *)((hvl_t *)cp_vp)->p)[j*vlSize+x] = ((char*)&byteValue)[x];
+                                for (x = 0; x < (int)vlSize; x++) {
+                                    ((char *)((hvl_t *)cp_vp)->p)[j * vlSize + x] = ((char *)&byteValue)[x];
     fprintf(stderr,"write vlSize=%ld - byteValue[%d:%d][%d]=%x\n", vlSize, i, j, x, ((char*)&byteValue)[x]);
     fprintf(stderr,"write vlSize=%ld - vlbuffer[%d:%d][%d]=%x\n", vlSize, i, j, x, ((char *)((hvl_t *)cp_vp)->p)[j*vlSize+x]);
-                    }
-                }
-                else if (ENVPTR->IsInstanceOf(ENVONLY, jobj, cShort)) {
-                    jshort shortValue = ENVPTR->CallShortMethod(ENVONLY, jobj, shortValueMid);
+                                }
+                                break;
+                            }
+                            case sizeof(jshort): {
+                                jshort shortValue = ENVPTR->CallShortMethod(ENVONLY, jobj, shortValueMid);
     fprintf(stderr,"write vlSize=%ld - jobj[%d:%d]=%x\n", vlSize, (int)i, (int)j, shortValue);
-                    for (x = 0; x < (int)vlSize; x++) {
-                        ((char *)((hvl_t *)cp_vp)->p)[j*vlSize+x] = ((char*)&shortValue)[x];
+                                for (x = 0; x < (int)vlSize; x++) {
+                                    ((char *)((hvl_t *)cp_vp)->p)[j * vlSize + x] = ((char *)&shortValue)[x];
     fprintf(stderr,"write vlSize=%ld - shortValue[%d:%d][%d]=%x\n", vlSize, i, j, x, ((char*)&shortValue)[x]);
     fprintf(stderr,"write vlSize=%ld - vlbuffer[%d:%d][%d]=%x\n", vlSize, i, j, x, ((char *)((hvl_t *)cp_vp)->p)[j*vlSize+x]);
-                    }
-                }
-                else if (ENVPTR->IsInstanceOf(ENVONLY, jobj, cInt)) {
-                    jint intValue = ENVPTR->CallIntMethod(ENVONLY, jobj, intValueMid);
+                                }
+                                break;
+                            }
+                            case sizeof(jint): {
+                                jint intValue = ENVPTR->CallIntMethod(ENVONLY, jobj, intValueMid);
     fprintf(stderr,"write vlSize=%ld - jobj[%d:%d]=%x\n", vlSize, (int)i, (int)j, intValue);
-                    for (x = 0; x < (int)vlSize; x++) {
-                        ((char *)((hvl_t *)cp_vp)->p)[j*vlSize+x] = ((char*)&intValue)[x];
+                                for (x = 0; x < (int)vlSize; x++) {
+                                    ((char *)((hvl_t *)cp_vp)->p)[j * vlSize + x] = ((char *)&intValue)[x];
     fprintf(stderr,"write vlSize=%ld - intValue[%d:%d][%d]=%x\n", vlSize, i, j, x, ((char*)&intValue)[x]);
     fprintf(stderr,"write vlSize=%ld - vlbuffer[%d:%d][%d]=%x\n", vlSize, i, j, x, ((char *)((hvl_t *)cp_vp)->p)[j*vlSize+x]);
-                    }
-                }
-                else if (ENVPTR->IsInstanceOf(ENVONLY, jobj, cLong)) {
-                    jlong longValue = ENVPTR->CallLongMethod(ENVONLY, jobj, longValueMid);
+                                }
+                                break;
+                            }
+                            case sizeof(jlong): {
+                                jlong longValue = ENVPTR->CallLongMethod(ENVONLY, jobj, longValueMid);
     fprintf(stderr,"write vlSize=%ld - jobj[%d:%d]=%x\n", vlSize, (int)i, (int)j, longValue);
-                    for (x = 0; x < (int)vlSize; x++) {
-                        ((char *)((hvl_t *)cp_vp)->p)[j*vlSize+x] = ((char*)&longValue)[x];
+                                for (x = 0; x < (int)vlSize; x++) {
+                                    ((char *)((hvl_t *)cp_vp)->p)[j * vlSize + x] = ((char *)&longValue)[x];
     fprintf(stderr,"write vlSize=%ld - longValue[%d:%d][%d]=%x\n", vlSize, i, j, x, ((char*)&longValue)[x]);
     fprintf(stderr,"write vlSize=%ld - vlbuffer[%d:%d][%d]=%x\n", vlSize, i, j, x, ((char *)((hvl_t *)cp_vp)->p)[j*vlSize+x]);
+                                }
+                                break;
+                            }
+                        }
+                        break;
                     }
-                }
-                else if (ENVPTR->IsInstanceOf(ENVONLY, jobj, cFloat)) {
-                    jfloat floatValue = ENVPTR->CallFloatMethod(ENVONLY, jobj, floatValueMid);
+                    case H5T_FLOAT: {
+                        switch (vlSize) {
+                            case sizeof(jfloat): {
+                                jfloat floatValue = ENVPTR->CallFloatMethod(ENVONLY, jobj, floatValueMid);
     fprintf(stderr,"write vlSize=%ld - jobj[%d:%d]=%x\n", vlSize, (int)i, (int)j, floatValue);
-                    for (x = 0; x < (int)vlSize; x++) {
-                        ((char *)((hvl_t *)cp_vp)->p)[j*vlSize+x] = ((char*)&floatValue)[x];
+                                for (x = 0; x < (int)vlSize; x++) {
+                                    ((char *)((hvl_t *)cp_vp)->p)[j * vlSize + x] = ((char *)&floatValue)[x];
     fprintf(stderr,"write vlSize=%ld - floatValue[%d:%d][%d]=%x\n", vlSize, i, j, x, ((char*)&floatValue)[x]);
     fprintf(stderr,"write vlSize=%ld - vlbuffer[%d:%d][%d]=%x\n", vlSize, i, j, x, ((char *)((hvl_t *)cp_vp)->p)[j*vlSize+x]);
-                    }
-                }
-                else if (ENVPTR->IsInstanceOf(ENVONLY, jobj, cDouble)) {
-                    jdouble doubleValue = ENVPTR->CallDoubleMethod(ENVONLY, jobj, doubleValueMid);
+                                }
+                                break;
+                            }
+                            case sizeof(jdouble): {
+                                jdouble doubleValue = ENVPTR->CallDoubleMethod(ENVONLY, jobj, doubleValueMid);
     fprintf(stderr,"write vlSize=%ld - jobj[%d:%d]=%x\n", vlSize, (int)i, (int)j, doubleValue);
-                    for (x = 0; x < (int)vlSize; x++) {
-                        ((char *)((hvl_t *)cp_vp)->p)[j*vlSize+x] = ((char*)&doubleValue)[x];
+                                for (x = 0; x < (int)vlSize; x++) {
+                                    ((char *)((hvl_t *)cp_vp)->p)[j * vlSize + x] = ((char *)&doubleValue)[x];
     fprintf(stderr,"write vlSize=%ld - doubleValue[%d:%d][%d]=%x\n", vlSize, i, j, x, ((char*)&doubleValue)[x]);
     fprintf(stderr,"write vlSize=%ld - vlbuffer[%d:%d][%d]=%x\n", vlSize, i, j, x, ((char *)((hvl_t *)cp_vp)->p)[j*vlSize+x]);
+                                }
+                                break;
+                            }
+                        }
+                        break;
                     }
+                    case H5T_REFERENCE: {
+                        switch (vlSize) {
+                            case H5R_OBJ_REF_BUF_SIZE: {
+                                break;
+                            }
+                            case H5R_DSET_REG_REF_BUF_SIZE: {
+                                break;
+                            }
+                        }
+                        break;
+                    }
+                    default:
+                        H5_UNIMPLEMENTED(ENVONLY, "H5DwriteVL: invalid class type");
+                        break;
                 }
-                //else if (ENVPTR->IsInstanceOf(ENVONLY, jobj, [byte)) {
-                //    H5_UNIMPLEMENTED(ENVONLY, "H5AwriteVL: reference class type");
-                //}
-                else
-                    H5_UNIMPLEMENTED(ENVONLY, "H5DwriteVL: invalid class type");
                 ENVPTR->DeleteLocalRef(ENVONLY, jobj);
             }
             ENVPTR->DeleteLocalRef(ENVONLY, jList);
         } /* end for (i = 0; i < n; i++) */
 
-        if ((status = H5Dwrite((hid_t)dataset_id, (hid_t)mem_type_id, (hid_t)mem_space_id, (hid_t)file_space_id,
-                (hid_t)xfer_plist_id, rawBuf)) < 0)
+        if ((status = H5Dwrite((hid_t)dataset_id, (hid_t)mem_type_id, (hid_t)mem_space_id,
+                               (hid_t)file_space_id, (hid_t)xfer_plist_id, rawBuf)) < 0)
             CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
     }
     else {
         PIN_BYTE_ARRAY(ENVONLY, buf, writeBuf, &writeBufIsCopy, "H5DwriteVL: write buffer not pinned");
-        if ((status = H5Dwrite((hid_t)dataset_id, (hid_t)mem_type_id, (hid_t)mem_space_id, (hid_t)file_space_id,
-                (hid_t)xfer_plist_id, writeBuf)) < 0)
+        if ((status = H5Dwrite((hid_t)dataset_id, (hid_t)mem_type_id, (hid_t)mem_space_id,
+                               (hid_t)file_space_id, (hid_t)xfer_plist_id, writeBuf)) < 0)
             H5_LIBRARY_ERROR(ENVONLY);
     }
 
@@ -1490,7 +1524,8 @@ done:
  */
 JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5Dread_1VLStrings(JNIEnv *env, jclass clss, jlong dataset_id, jlong mem_type_id,
-                              jlong mem_space_id, jlong file_space_id, jlong xfer_plist_id, jobjectArray buf)
+                                       jlong mem_space_id, jlong file_space_id, jlong xfer_plist_id,
+                                       jobjectArray buf)
 {
     H5T_class_t type_class;
     htri_t      isStr      = 0;
@@ -1714,7 +1749,8 @@ done:
  */
 JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5Dwrite_1VLStrings(JNIEnv *env, jclass clss, jlong dataset_id, jlong mem_type_id,
-                               jlong mem_space_id, jlong file_space_id, jlong xfer_plist_id, jobjectArray buf)
+                                        jlong mem_space_id, jlong file_space_id, jlong xfer_plist_id,
+                                        jobjectArray buf)
 {
     H5T_class_t type_class;
     htri_t      isStr      = 0;
@@ -1835,8 +1871,8 @@ H5DwriteVL_str(JNIEnv *env, hid_t dataset_id, hid_t mem_type_id, hid_t mem_space
         ENVPTR->DeleteLocalRef(ENVONLY, obj);
     } /* end for (i = 0; i < size; ++i) */
 
-    if ((status = H5Dwrite(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, writeBuf))
-         < 0)
+    if ((status = H5Dwrite(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, writeBuf)) <
+        0)
         H5_LIBRARY_ERROR(ENVONLY);
 
 done:

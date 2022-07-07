@@ -1817,7 +1817,7 @@ public class H5 implements java.io.Serializable {
             status = H5Awrite_string(attr_id, mem_type_id, (String[])obj);
         }
         else if (H5.H5Tget_class(mem_type_id) == HDF5Constants.H5T_VLEN) {
-            status   = H5AwriteVL(attr_id, mem_type_id, (Object[])obj);
+            status = H5AwriteVL(attr_id, mem_type_id, (Object[])obj);
         }
         else {
             HDFArray theArray = new HDFArray(obj);
