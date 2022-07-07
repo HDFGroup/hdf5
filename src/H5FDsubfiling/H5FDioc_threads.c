@@ -85,10 +85,10 @@ static int ioc_file_truncate(int fd, int64_t length, int subfile_rank);
 static int ioc_file_report_eof(sf_work_request_t *msg, int subfile_rank, int source, MPI_Comm comm);
 
 static ioc_io_queue_entry_t *ioc_io_queue_alloc_entry(void);
-static void                  ioc_io_queue_complete_entry(ioc_data_t *ioc_data, ioc_io_queue_entry_t *entry_ptr);
-static void                  ioc_io_queue_dispatch_eligible_entries(ioc_data_t *ioc_data);
-static void                  ioc_io_queue_free_entry(ioc_io_queue_entry_t *q_entry_ptr);
-static void                  ioc_io_queue_add_entry(ioc_data_t *ioc_data, sf_work_request_t *wk_req_ptr);
+static void ioc_io_queue_complete_entry(ioc_data_t *ioc_data, ioc_io_queue_entry_t *entry_ptr);
+static void ioc_io_queue_dispatch_eligible_entries(ioc_data_t *ioc_data);
+static void ioc_io_queue_free_entry(ioc_io_queue_entry_t *q_entry_ptr);
+static void ioc_io_queue_add_entry(ioc_data_t *ioc_data, sf_work_request_t *wk_req_ptr);
 
 /*-------------------------------------------------------------------------
  * Function:    initialize_ioc_threads
@@ -130,31 +130,30 @@ initialize_ioc_threads(void *_sf_context)
      */
     if (NULL == (ioc_data = HDmalloc(sizeof(*ioc_data))))
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, (-1),
-                "can't allocate IOC data for IOC main thread");
+                                "can't allocate IOC data for IOC main thread");
     ioc_data->sf_context_id  = sf_context->sf_context_id;
     ioc_data->io_thread_pool = NULL;
-    ioc_data->io_queue = (ioc_io_queue_t) {
-        /* magic               = */ H5FD_IOC__IO_Q_MAGIC,
-        /* q_head              = */ NULL,
-        /* q_tail              = */ NULL,
-        /* num_pending         = */ 0,
-        /* num_in_progress     = */ 0,
-        /* num_failed          = */ 0,
-        /* q_len               = */ 0,
-        /* req_counter         = */ 0,
-        /* q_mutex             = */
-        PTHREAD_MUTEX_INITIALIZER,
+    ioc_data->io_queue       = (ioc_io_queue_t){/* magic               = */ H5FD_IOC__IO_Q_MAGIC,
+                                          /* q_head              = */ NULL,
+                                          /* q_tail              = */ NULL,
+                                          /* num_pending         = */ 0,
+                                          /* num_in_progress     = */ 0,
+                                          /* num_failed          = */ 0,
+                                          /* q_len               = */ 0,
+                                          /* req_counter         = */ 0,
+                                          /* q_mutex             = */
+                                          PTHREAD_MUTEX_INITIALIZER,
 #ifdef H5FD_IOC_COLLECT_STATS
-        /* max_q_len           = */ 0,
-        /* max_num_pending     = */ 0,
-        /* max_num_in_progress = */ 0,
-        /* ind_read_requests   = */ 0,
-        /* ind_write_requests  = */ 0,
-        /* truncate_requests   = */ 0,
-        /* get_eof_requests    = */ 0,
-        /* requests_queued     = */ 0,
-        /* requests_dispatched = */ 0,
-        /* requests_completed  = */ 0
+                                          /* max_q_len           = */ 0,
+                                          /* max_num_pending     = */ 0,
+                                          /* max_num_in_progress = */ 0,
+                                          /* ind_read_requests   = */ 0,
+                                          /* ind_write_requests  = */ 0,
+                                          /* truncate_requests   = */ 0,
+                                          /* get_eof_requests    = */ 0,
+                                          /* requests_queued     = */ 0,
+                                          /* requests_dispatched = */ 0,
+                                          /* requests_completed  = */ 0
 #endif
     };
 
@@ -377,8 +376,8 @@ ioc_main(ioc_data_t *ioc_data)
         int        mpi_code;
 
         /* Probe for incoming work requests */
-        if (MPI_SUCCESS != (mpi_code = (MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, context->sf_msg_comm, &flag,
-                                                   &status))))
+        if (MPI_SUCCESS !=
+            (mpi_code = (MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, context->sf_msg_comm, &flag, &status))))
             H5_SUBFILING_MPI_GOTO_ERROR(-1, "MPI_Iprobe failed", mpi_code);
 
         if (flag) {
@@ -408,8 +407,8 @@ ioc_main(ioc_data_t *ioc_data)
              */
             HDmemset(&wk_req, 0, sizeof(sf_work_request_t));
 
-            if (MPI_SUCCESS != (mpi_code = MPI_Recv(&wk_req, count, MPI_BYTE, source, tag, context->sf_msg_comm,
-                                                    MPI_STATUS_IGNORE)))
+            if (MPI_SUCCESS != (mpi_code = MPI_Recv(&wk_req, count, MPI_BYTE, source, tag,
+                                                    context->sf_msg_comm, MPI_STATUS_IGNORE)))
                 H5_SUBFILING_MPI_GOTO_ERROR(-1, "MPI_Recv failed", mpi_code);
 
             /* Dispatch work request to worker threads in thread pool */
@@ -1326,9 +1325,10 @@ ioc_io_queue_add_entry(ioc_data_t *ioc_data, sf_work_request_t *wk_req_ptr)
 
 #ifdef H5_SUBFILING_DEBUG
     if (ioc_data->io_queue.q_len != atomic_load(&ioc_data->sf_io_ops_pending)) {
-        H5_subfiling_log(wk_req_ptr->context_id,
-                         "%s: ioc_data->io_queue->q_len = %d != %d = atomic_load(&ioc_data->sf_io_ops_pending).", __func__,
-                         ioc_data->io_queue.q_len, atomic_load(&ioc_data->sf_io_ops_pending));
+        H5_subfiling_log(
+            wk_req_ptr->context_id,
+            "%s: ioc_data->io_queue->q_len = %d != %d = atomic_load(&ioc_data->sf_io_ops_pending).", __func__,
+            ioc_data->io_queue.q_len, atomic_load(&ioc_data->sf_io_ops_pending));
     }
 #endif
 
@@ -1482,7 +1482,8 @@ ioc_io_queue_dispatch_eligible_entries(ioc_data_t *ioc_data)
                 ioc_data->io_queue.num_pending--;
                 ioc_data->io_queue.num_in_progress++;
 
-                HDassert(ioc_data->io_queue.num_pending + ioc_data->io_queue.num_in_progress == ioc_data->io_queue.q_len);
+                HDassert(ioc_data->io_queue.num_pending + ioc_data->io_queue.num_in_progress ==
+                         ioc_data->io_queue.q_len);
 
                 entry_ptr->thread_wk.func = handle_work_request;
                 entry_ptr->thread_wk.args = entry_ptr;
@@ -1494,7 +1495,8 @@ ioc_io_queue_dispatch_eligible_entries(ioc_data_t *ioc_data)
                                  __func__, entry_ptr->counter, (entry_ptr->wk_req.tag),
                                  (long long)(entry_ptr->wk_req.header[1]),
                                  (long long)(entry_ptr->wk_req.header[0]), ioc_data->io_queue.num_pending,
-                                 ioc_data->io_queue.num_in_progress, atomic_load(&ioc_data->sf_io_ops_pending));
+                                 ioc_data->io_queue.num_in_progress,
+                                 atomic_load(&ioc_data->sf_io_ops_pending));
 #endif
 
 #ifdef H5FD_IOC_COLLECT_STATS
