@@ -4,6 +4,7 @@ JUnit version 4.11
 .testH5Dcreate
 .testH5Dget_offset
 .testH5Dget_type
+.testH5DVLwr
 .testH5Dfill
 .testH5Dopen
 .testH5Dcreate_anon
@@ -21,5 +22,5 @@ JUnit version 4.11
 
 Time:  XXXX
 
-OK (19 tests)
+OK (20 tests)
 

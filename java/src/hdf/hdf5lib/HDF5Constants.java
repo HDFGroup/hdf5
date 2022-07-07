@@ -16,7 +16,7 @@ package hdf.hdf5lib;
 import hdf.hdf5lib.structs.H5O_token_t;
 
 /**
- * /** This class contains C constants and enumerated types of HDF5 library. The
+ * This class contains C constants and enumerated types of HDF5 library. The
  * values of these constants are obtained from the library by calling J2C(int
  * jconstant), where jconstant is any of the private constants which start their
  * name with "JH5" need to be converted.
@@ -62,31 +62,58 @@ public class HDF5Constants {
     public static final int H5_ITER_NATIVE = H5_ITER_NATIVE();
     /** Common iteration orders, Number of iteration orders */
     public static final int H5_ITER_N = H5_ITER_N();
-    /** */
+    /** The version of the H5AC_cache_config_t in use */
     public static final int H5AC_CURR_CACHE_CONFIG_VERSION = H5AC_CURR_CACHE_CONFIG_VERSION();
-    /** */
+    /** The maximum length of the trace file path */
     public static final int H5AC_MAX_TRACE_FILE_NAME_LEN = H5AC_MAX_TRACE_FILE_NAME_LEN();
-    /** */
+    /**
+     *    When metadata_write_strategy is set to this value, only process
+     *    zero is allowed to write dirty metadata to disk.  All other
+     *    processes must retain dirty metadata until they are informed at
+     *    a sync point that the dirty metadata in question has been written
+     *    to disk.
+     */
     public static final int H5AC_METADATA_WRITE_STRATEGY_PROCESS_ZERO_ONLY =
         H5AC_METADATA_WRITE_STRATEGY_PROCESS_ZERO_ONLY();
-    /** */
+    /**
+     *    In the distributed metadata write strategy, process zero still makes
+     *    the decisions as to what entries should be flushed, but the actual
+     *    flushes are distributed across the processes in the computation to
+     *    the extent possible.
+     */
     public static final int H5AC_METADATA_WRITE_STRATEGY_DISTRIBUTED =
         H5AC_METADATA_WRITE_STRATEGY_DISTRIBUTED();
-    /** */
+    /** Don't attempt to increase the size of the cache automatically */
     public static final int H5C_incr_off = H5C_incr_off();
-    /** */
+    /** Attempt to increase the size of the cache
+     *              whenever the average hit rate over the last epoch drops
+     *              below the value supplied in the lower_hr_threshold
+     *              field
+     */
     public static final int H5C_incr_threshold = H5C_incr_threshold();
-    /** */
+    /** Don't perform flash increases in the size of the cache */
     public static final int H5C_flash_incr_off = H5C_flash_incr_off();
-    /** */
+    /** increase the current maximum cache size by x * flash_multiple less any free space in the cache */
     public static final int H5C_flash_incr_add_space = H5C_flash_incr_add_space();
-    /** */
+    /** Don't attempt to decrease the size of the cache automatically */
     public static final int H5C_decr_off = H5C_decr_off();
-    /** */
+    /** Attempt to decrease the size of the cache
+     *              whenever the average hit rate over the last epoch rises
+     *              above the value supplied in the upper_hr_threshold
+     *              field
+     */
     public static final int H5C_decr_threshold = H5C_decr_threshold();
-    /** */
+    /** At the end of each epoch, search the cache for
+     *              entries that have not been accessed for at least the number
+     *              of epochs specified in the epochs_before_eviction field, and
+     *              evict these entries
+     */
     public static final int H5C_decr_age_out = H5C_decr_age_out();
-    /** */
+    /** Same as age_out, but we only
+     *              attempt to reduce the cache size when the hit rate observed
+     *              over the last epoch exceeds the value provided in the
+     *              upper_hr_threshold field
+     */
     public static final int H5C_decr_age_out_with_threshold = H5C_decr_age_out_with_threshold();
     /** */
     public static final int H5D_CHUNK_IDX_BTREE = H5D_CHUNK_IDX_BTREE();
