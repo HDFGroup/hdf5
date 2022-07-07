@@ -1243,6 +1243,7 @@ public class H5 implements java.io.Serializable {
             status = H5Aread_string(attr_id, mem_type_id, (String[])obj);
         }
         else if (H5.H5Tget_class(mem_type_id) == HDF5Constants.H5T_VLEN) {
+            log.trace("H5AreadVL type");
             status = H5AreadVL(attr_id, mem_type_id, (Object[])obj);
         }
         else {
@@ -1792,6 +1793,7 @@ public class H5 implements java.io.Serializable {
             status = H5Awrite_string(attr_id, mem_type_id, (String[])obj);
         }
         else if (H5.H5Tget_class(mem_type_id) == HDF5Constants.H5T_VLEN) {
+            log.trace("H5AwriteVL type");
             status = H5AwriteVL(attr_id, mem_type_id, (Object[])obj);
         }
         else {
@@ -2778,6 +2780,11 @@ public class H5 implements java.io.Serializable {
             status = H5Dread_string(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
                                     (String[])obj);
         }
+        else if (H5.H5Tget_class(mem_type_id) == HDF5Constants.H5T_VLEN) {
+            log.trace("H5DreadVL type");
+            status = H5DreadVL(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
+                                    (Object[])obj);
+        }
         else {
             // Create a data buffer to hold the data into a Java Array
             HDFArray theArray = new HDFArray(obj);
@@ -3455,6 +3462,11 @@ public class H5 implements java.io.Serializable {
             log.trace("H5Dwrite_string type");
             status = H5Dwrite_string(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
                                      (String[])obj);
+        }
+        else if (H5.H5Tget_class(mem_type_id) == HDF5Constants.H5T_VLEN) {
+            log.trace("H5DwriteVL type");
+            status = H5Dwrite_string(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
+                                     (Object[])obj);
         }
         else {
             HDFArray theArray = new HDFArray(obj);
