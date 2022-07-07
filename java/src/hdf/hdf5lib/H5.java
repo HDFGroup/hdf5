@@ -246,7 +246,7 @@ public class H5 implements java.io.Serializable {
      *
      * Make sure to update the versions number when a different library is used.
      */
-    public final static int LIB_VERSION[] = {1, 10, 9};
+    public final static int LIB_VERSION[] = {1, 10, 10};
 
     /**
      *  add system property to load library by path
@@ -1267,6 +1267,9 @@ public class H5 implements java.io.Serializable {
             log.trace("H5Aread_string type");
             status = H5Aread_string(attr_id, mem_type_id, (String[])obj);
         }
+        else if (H5.H5Tget_class(mem_type_id) == HDF5Constants.H5T_VLEN) {
+            status = H5AreadVL(attr_id, mem_type_id, (Object[])obj);
+        }
         else {
             // Create a data buffer to hold the data into a Java Array
             HDFArray theArray = new HDFArray(obj);
@@ -1812,6 +1815,9 @@ public class H5 implements java.io.Serializable {
         else if (is1D && (dataClass.getComponentType() == String.class)) {
             log.trace("H5Dwrite_string type");
             status = H5Awrite_string(attr_id, mem_type_id, (String[])obj);
+        }
+        else if (H5.H5Tget_class(mem_type_id) == HDF5Constants.H5T_VLEN) {
+            status   = H5AwriteVL(attr_id, mem_type_id, (Object[])obj);
         }
         else {
             HDFArray theArray = new HDFArray(obj);
@@ -6468,7 +6474,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * H5Oget_info_by_name retrieves the metadata for an object, identifying the object by location and
-     *relative name.
+     * relative name.
      *
      * @param loc_id
      *            IN: File or group identifier specifying location of group in which object is located
