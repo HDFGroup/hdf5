@@ -1178,7 +1178,8 @@ Java_hdf_hdf5lib_H5_H5AreadVL(JNIEnv *env, jclass clss, jlong attr_id, jlong mem
                                     ((char *)&longValue)[x] = ((char *)((hvl_t *)cp_vp)->p)[j * vlSize + x];
                                 }
 
-                                jobj = ENVPTR->CallStaticObjectMethod(ENVONLY, cLong, longValueMid, longValue);
+                                jobj =
+                                    ENVPTR->CallStaticObjectMethod(ENVONLY, cLong, longValueMid, longValue);
                                 CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
                                 break;
                             }
