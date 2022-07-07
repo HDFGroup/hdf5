@@ -1375,9 +1375,9 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
 void
 h5tools_str_sprint_old_reference(h5tools_str_t *str, hid_t container, void *vp)
 {
-    hid_t       obj    = H5I_INVALID_HID;
-    hid_t       region = H5I_INVALID_HID;
-    char        ref_name[1024];
+    hid_t obj    = H5I_INVALID_HID;
+    hid_t region = H5I_INVALID_HID;
+    char  ref_name[1024];
 
     H5TOOLS_START_DEBUG(" ");
 
