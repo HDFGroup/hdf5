@@ -41,10 +41,6 @@ static hbool_t H5FD_mpi_self_initialized = FALSE;
 /* Pointer to value for MPI_TAG_UB */
 int *H5FD_IOC_tag_ub_val_ptr = NULL;
 
-#if 0 /* JRM */ /* delete if all goes well */
-extern volatile int sf_shutdown_flag;
-#endif          /* JRM */
-
 /* The information of this ioc */
 typedef struct H5FD_ioc_t {
     H5FD_t            pub; /* public stuff, must be first    */
@@ -996,9 +992,18 @@ H5FD__ioc_close(H5FD_t *_file)
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to close HDF5 file");
     }
 
-    if (file->fa.context_id >= 0)
+    if (file->fa.context_id >= 0) {
+        subfiling_context_t *sf_context = H5_get_subfiling_object(file->fa.context_id);
+
+        if (sf_context && sf_context->topology->rank_is_ioc) {
+            if (finalize_ioc_threads(sf_context) < 0)
+                /* Note that closing of subfiles is collective */
+                H5_SUBFILING_DONE_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to finalize IOC threads");
+        }
+
         if (H5_close_subfiles(file->fa.context_id) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to close subfiling file(s)");
+    }
 
     if (H5_mpi_comm_free(&file->comm) < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI Communicator");
@@ -1741,40 +1746,4 @@ done:
     }
 
     H5_SUBFILING_FUNC_LEAVE;
-}
-
-#if 0 /* JRM */ /* delete if all goes well */
-/*-------------------------------------------------------------------------
- * Function:    H5FD_ioc_set_shutdown_flag
- *
- * Purpose:     IO Concentrator threads are told to terminate their service
- *              loop and exit by setting 'shutdown_flag' to a non-zero
- *              value.
- *
- * Return:      None
- *
- *-------------------------------------------------------------------------
- */
-void
-H5FD_ioc_set_shutdown_flag(int flag)
-{
-    sf_shutdown_flag = flag;
-    if (H5FD_IOC_g > 0)
-        usleep(100);
-    return;
-} /* end H5FD_ioc_set_shutdown_flag() */
-#endif          /* JRM */
-
-void
-H5FD_ioc_wait_thread_main(void)
-{
-    wait_for_thread_main();
-
-    return;
-}
-
-void
-H5FD_ioc_finalize_threads(void)
-{
-    return;
 }

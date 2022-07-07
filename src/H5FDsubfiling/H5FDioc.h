@@ -91,9 +91,6 @@ extern "C" {
 H5_DLL hid_t  H5FD_ioc_init(void);
 H5_DLL herr_t H5Pset_fapl_ioc(hid_t fapl_id, H5FD_ioc_config_t *config_ptr);
 H5_DLL herr_t H5Pget_fapl_ioc(hid_t fapl_id, H5FD_ioc_config_t *config_ptr);
-H5_DLL void   H5FD_ioc_set_shutdown_flag(int flag);
-H5_DLL void   H5FD_ioc_wait_thread_main(void);
-H5_DLL void   H5FD_ioc_finalize_threads(void);
 H5_DLL void   begin_thread_exclusive(void);
 H5_DLL void   end_thread_exclusive(void);
 

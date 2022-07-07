@@ -1298,14 +1298,6 @@ H5FD__subfiling_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
     haddr_t ret_value = HADDR_UNDEF;
 
 #if 0
-
-#if 0 /* TODO */
-    int64_t local_eof = H5FDget_eof(file->sf_file, type);
-
-    if (MPI_SUCCESS != MPI_Allreduce(&local_eof, &logical_eof, 1, MPI_INT64_t, MPI_MAX, file->comm))
-        H5_SUBFILING_GOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, HADDR_UNDEF, "MPI_Allreduce failed")
-#endif
-
     /*
      * TODO: this is a heavy weight implementation.  We need something like this
      * for file open, and probably for file close.  However, in between, something
