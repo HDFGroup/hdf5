@@ -1386,10 +1386,10 @@ public class TestH5A {
         ArrayList[] vl_dbl_data = new ArrayList[4];
         try {
             // Write Integer data
-            vl_int_data[0]  = new ArrayList<Integer>(List.of(1));
-            vl_int_data[1]  = new ArrayList<Integer>(List.of(2, 3));
-            vl_int_data[2]  = new ArrayList<Integer>(List.of(4, 5, 6));
-            vl_int_data[3]  = new ArrayList<Integer>(List.of(7, 8, 9, 10));
+            vl_int_data[0]  = new ArrayList<Integer>(Arrays.asList(1));
+            vl_int_data[1]  = new ArrayList<Integer>(Arrays.asList(2, 3));
+            vl_int_data[2]  = new ArrayList<Integer>(Arrays.asList(4, 5, 6));
+            vl_int_data[3]  = new ArrayList<Integer>(Arrays.asList(7, 8, 9, 10));
             Class dataClass = vl_int_data.getClass();
             assertTrue("testH5AVLwr.getClass: " + dataClass, dataClass.isArray());
 
@@ -1443,10 +1443,10 @@ public class TestH5A {
             }
 
             // Write Double data
-            vl_dbl_data[0] = new ArrayList<Double>(List.of(1.1));
-            vl_dbl_data[1] = new ArrayList<Double>(List.of(2.2, 3.3));
-            vl_dbl_data[2] = new ArrayList<Double>(List.of(4.4, 5.5, 6.6));
-            vl_dbl_data[3] = new ArrayList<Double>(List.of(7.7, 8.8, 9.9, 10.0));
+            vl_dbl_data[0] = new ArrayList<Double>(Arrays.asList(1.1));
+            vl_dbl_data[1] = new ArrayList<Double>(Arrays.asList(2.2, 3.3));
+            vl_dbl_data[2] = new ArrayList<Double>(Arrays.asList(4.4, 5.5, 6.6));
+            vl_dbl_data[3] = new ArrayList<Double>(Arrays.asList(7.7, 8.8, 9.9, 10.0));
             dataClass      = vl_dbl_data.getClass();
             assertTrue("testH5AVLwr.getClass: " + dataClass, dataClass.isArray());
 
