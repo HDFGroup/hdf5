@@ -7778,30 +7778,30 @@ H5C_validate_lru_list(H5C_t *cache_ptr)
 
     if (((cache_ptr->LRU_head_ptr == NULL) || (cache_ptr->LRU_tail_ptr == NULL)) &&
         (cache_ptr->LRU_head_ptr != cache_ptr->LRU_tail_ptr))
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 1 failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "LRU list head/tail check failed")
 
     if ((cache_ptr->LRU_list_len == 1) &&
         ((cache_ptr->LRU_head_ptr != cache_ptr->LRU_tail_ptr) || (cache_ptr->LRU_head_ptr == NULL) ||
          (cache_ptr->LRU_head_ptr->size != cache_ptr->LRU_list_size)))
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 2 failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "LRU list sanity check failed")
 
     if ((cache_ptr->LRU_list_len >= 1) &&
         ((cache_ptr->LRU_head_ptr == NULL) || (cache_ptr->LRU_head_ptr->prev != NULL) ||
          (cache_ptr->LRU_tail_ptr == NULL) || (cache_ptr->LRU_tail_ptr->next != NULL)))
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 3 failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "LRU list sanity check failed")
 
     entry_ptr = cache_ptr->LRU_head_ptr;
     while (entry_ptr != NULL) {
         if ((entry_ptr != cache_ptr->LRU_head_ptr) &&
             ((entry_ptr->prev == NULL) || (entry_ptr->prev->next != entry_ptr)))
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 4 failed")
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "entry has bad prev/next pointers")
 
         if ((entry_ptr != cache_ptr->LRU_tail_ptr) &&
             ((entry_ptr->next == NULL) || (entry_ptr->next->prev != entry_ptr)))
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 5 failed")
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "entry has bad prev/next pointers")
 
         if ((entry_ptr->is_pinned) || (entry_ptr->pinned_from_client) || (entry_ptr->pinned_from_cache))
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 6 failed")
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "invalid entry 'pin origin' fields")
 
         len++;
         size += entry_ptr->size;
@@ -7809,7 +7809,7 @@ H5C_validate_lru_list(H5C_t *cache_ptr)
     }
 
     if ((cache_ptr->LRU_list_len != (uint32_t)len) || (cache_ptr->LRU_list_size != size))
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 7 failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "LRU list length/size check failed")
 
 done:
     if (ret_value != SUCCEED)
@@ -7852,33 +7852,33 @@ H5C_validate_pinned_entry_list(H5C_t *cache_ptr)
 
     if (((cache_ptr->pel_head_ptr == NULL) || (cache_ptr->pel_tail_ptr == NULL)) &&
         (cache_ptr->pel_head_ptr != cache_ptr->pel_tail_ptr))
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 1 failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "pinned list head/tail check failed")
 
     if ((cache_ptr->pel_len == 1) &&
         ((cache_ptr->pel_head_ptr != cache_ptr->pel_tail_ptr) || (cache_ptr->pel_head_ptr == NULL) ||
          (cache_ptr->pel_head_ptr->size != cache_ptr->pel_size)))
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 2 failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "pinned list sanity check failed")
 
     if ((cache_ptr->pel_len >= 1) &&
         ((cache_ptr->pel_head_ptr == NULL) || (cache_ptr->pel_head_ptr->prev != NULL) ||
          (cache_ptr->pel_tail_ptr == NULL) || (cache_ptr->pel_tail_ptr->next != NULL)))
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 3 failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "pinned list sanity check failed")
 
     entry_ptr = cache_ptr->pel_head_ptr;
     while (entry_ptr != NULL) {
         if ((entry_ptr != cache_ptr->pel_head_ptr) &&
             ((entry_ptr->prev == NULL) || (entry_ptr->prev->next != entry_ptr)))
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 4 failed")
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "entry has bad prev/next pointers")
 
         if ((entry_ptr != cache_ptr->pel_tail_ptr) &&
             ((entry_ptr->next == NULL) || (entry_ptr->next->prev != entry_ptr)))
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 5 failed")
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "entry has bad prev/next pointers")
 
         if (!entry_ptr->is_pinned)
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 6 failed")
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "pinned list contains unpinned entry")
 
         if (!(entry_ptr->pinned_from_client || entry_ptr->pinned_from_cache))
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 7 failed")
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "invalid entry 'pin origin' fields")
 
         len++;
         size += entry_ptr->size;
@@ -7886,7 +7886,7 @@ H5C_validate_pinned_entry_list(H5C_t *cache_ptr)
     }
 
     if ((cache_ptr->pel_len != (uint32_t)len) || (cache_ptr->pel_size != size))
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 8 failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "pinned list length/size check failed")
 
 done:
     if (ret_value != SUCCEED)
@@ -7929,33 +7929,33 @@ H5C_validate_protected_entry_list(H5C_t *cache_ptr)
 
     if (((cache_ptr->pl_head_ptr == NULL) || (cache_ptr->pl_tail_ptr == NULL)) &&
         (cache_ptr->pl_head_ptr != cache_ptr->pl_tail_ptr))
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 1 failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "protected list head/tail check failed")
 
     if ((cache_ptr->pl_len == 1) &&
         ((cache_ptr->pl_head_ptr != cache_ptr->pl_tail_ptr) || (cache_ptr->pl_head_ptr == NULL) ||
          (cache_ptr->pl_head_ptr->size != cache_ptr->pl_size)))
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 2 failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "protected list sanity check failed")
 
     if ((cache_ptr->pl_len >= 1) &&
         ((cache_ptr->pl_head_ptr == NULL) || (cache_ptr->pl_head_ptr->prev != NULL) ||
          (cache_ptr->pl_tail_ptr == NULL) || (cache_ptr->pl_tail_ptr->next != NULL)))
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 3 failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "protected list sanity check failed")
 
     entry_ptr = cache_ptr->pl_head_ptr;
     while (entry_ptr != NULL) {
         if ((entry_ptr != cache_ptr->pl_head_ptr) &&
             ((entry_ptr->prev == NULL) || (entry_ptr->prev->next != entry_ptr)))
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 4 failed")
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "entry has bad prev/next pointers")
 
         if ((entry_ptr != cache_ptr->pl_tail_ptr) &&
             ((entry_ptr->next == NULL) || (entry_ptr->next->prev != entry_ptr)))
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 5 failed")
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "entry has bad prev/next pointers")
 
         if (!entry_ptr->is_protected)
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 6 failed")
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "protected list contains unprotected entry")
 
         if (entry_ptr->is_read_only && (entry_ptr->ro_ref_count <= 0))
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 7 failed")
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "read-only entry has non-positive ref count")
 
         len++;
         size += entry_ptr->size;
@@ -7963,7 +7963,7 @@ H5C_validate_protected_entry_list(H5C_t *cache_ptr)
     }
 
     if ((cache_ptr->pl_len != (uint32_t)len) || (cache_ptr->pl_size != size))
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 8 failed")
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "protected list length/size check failed")
 
 done:
     if (ret_value != SUCCEED)

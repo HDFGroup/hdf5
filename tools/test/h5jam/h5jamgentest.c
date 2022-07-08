@@ -152,7 +152,7 @@ gent_ub(const char *filename, size_t ub_size, size_t ub_fill)
         goto error;
     if ((attr = H5Acreate2(group, "attr1", H5T_STD_I8BE, space, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto error;
-    if (HDsprintf(buf, "abcdefghi") < 0)
+    if (HDsnprintf(buf, sizeof(buf), "abcdefghi") < 0)
         goto error;
     if (H5Awrite(attr, H5T_NATIVE_SCHAR, buf) < 0)
         goto error;
@@ -206,7 +206,7 @@ gent_ub(const char *filename, size_t ub_size, size_t ub_fill)
         goto error;
     if ((attr = H5Acreate2(dataset, "attr1", H5T_STD_I8BE, space, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto error;
-    if (HDsprintf(buf, "1st attribute of dset1.1.1") < 0)
+    if (HDsnprintf(buf, sizeof(buf), "1st attribute of dset1.1.1") < 0)
         goto error;
     if (H5Awrite(attr, H5T_NATIVE_SCHAR, buf) < 0)
         goto error;
@@ -220,7 +220,7 @@ gent_ub(const char *filename, size_t ub_size, size_t ub_fill)
         goto error;
     if ((attr = H5Acreate2(dataset, "attr2", H5T_STD_I8BE, space, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto error;
-    if (HDsprintf(buf, "2nd attribute of dset1.1.1") < 0)
+    if (HDsnprintf(buf, sizeof(buf), "2nd attribute of dset1.1.1") < 0)
         goto error;
     if (H5Awrite(attr, H5T_NATIVE_SCHAR, buf) < 0)
         goto error;

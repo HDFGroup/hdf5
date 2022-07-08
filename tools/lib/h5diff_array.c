@@ -31,33 +31,29 @@
 #define UI_FORMAT   "%-15u %-15u %-15u\n"
 #define LI_FORMAT   "%-15ld %-15ld %-15ld\n"
 #define ULI_FORMAT  "%-15lu %-15lu %-15lu\n"
-#define LLI_FORMAT  "%-15" H5_PRINTF_LL_WIDTH "d %-15" H5_PRINTF_LL_WIDTH "d %-15" H5_PRINTF_LL_WIDTH "d\n"
-#define ULLI_FORMAT "%-15" H5_PRINTF_LL_WIDTH "u %-15" H5_PRINTF_LL_WIDTH "u %-15" H5_PRINTF_LL_WIDTH "u\n"
+#define LLI_FORMAT  "%-15lld %-15lld %-15lld\n"
+#define ULLI_FORMAT "%-15llu %-15llu %-15llu\n"
 
 /* with -p option */
-#define F_FORMAT_P   "%-15.10g %-15.10g %-15.10g %-14.10g\n"
-#define LD_FORMAT_P  "%-15.10Lg %-15.10Lg %-15.10Lg %-14.10Lg\n"
-#define I_FORMAT_P   "%-15d %-15d %-15d %-14f\n"
-#define UI_FORMAT_P  "%-15u %-15u %-15u %-14f\n"
-#define LI_FORMAT_P  "%-15ld %-15ld %-15ld %-14f\n"
-#define ULI_FORMAT_P "%-15lu %-15lu %-15lu %-14f\n"
-#define LLI_FORMAT_P                                                                                         \
-    "%-15" H5_PRINTF_LL_WIDTH "d %-15" H5_PRINTF_LL_WIDTH "d %-15" H5_PRINTF_LL_WIDTH "d %-14f\n"
-#define ULLI_FORMAT_P                                                                                        \
-    "%-15" H5_PRINTF_LL_WIDTH "u %-15" H5_PRINTF_LL_WIDTH "u %-15" H5_PRINTF_LL_WIDTH "d %-14f\n"
-#define SPACES "          "
+#define F_FORMAT_P    "%-15.10g %-15.10g %-15.10g %-14.10g\n"
+#define LD_FORMAT_P   "%-15.10Lg %-15.10Lg %-15.10Lg %-14.10Lg\n"
+#define I_FORMAT_P    "%-15d %-15d %-15d %-14f\n"
+#define UI_FORMAT_P   "%-15u %-15u %-15u %-14f\n"
+#define LI_FORMAT_P   "%-15ld %-15ld %-15ld %-14f\n"
+#define ULI_FORMAT_P  "%-15lu %-15lu %-15lu %-14f\n"
+#define LLI_FORMAT_P  "%-15lld %-15lld %-15lld %-14f\n"
+#define ULLI_FORMAT_P "%-15llu %-15llu %-15lld %-14f\n"
+#define SPACES        "          "
 
 /* not comparable */
-#define F_FORMAT_P_NOTCOMP   "%-15.10g %-15.10g %-15.10g not comparable\n"
-#define LD_FORMAT_P_NOTCOMP  "%-15.10Lg %-15.10Lg %-15.10Lg not comparable\n"
-#define I_FORMAT_P_NOTCOMP   "%-15d %-15d %-15d not comparable\n"
-#define UI_FORMAT_P_NOTCOMP  "%-15u %-15u %-15u not comparable\n"
-#define LI_FORMAT_P_NOTCOMP  "%-15ld %-15ld %-15ld not comparable\n"
-#define ULI_FORMAT_P_NOTCOMP "%-15lu %-15lu %-15lu not comparable\n"
-#define LLI_FORMAT_P_NOTCOMP                                                                                 \
-    "%-15" H5_PRINTF_LL_WIDTH "d %-15" H5_PRINTF_LL_WIDTH "d %-15" H5_PRINTF_LL_WIDTH "d not comparable\n"
-#define ULLI_FORMAT_P_NOTCOMP                                                                                \
-    "%-15" H5_PRINTF_LL_WIDTH "u %-15" H5_PRINTF_LL_WIDTH "u %-15" H5_PRINTF_LL_WIDTH "d not comparable\n"
+#define F_FORMAT_P_NOTCOMP    "%-15.10g %-15.10g %-15.10g not comparable\n"
+#define LD_FORMAT_P_NOTCOMP   "%-15.10Lg %-15.10Lg %-15.10Lg not comparable\n"
+#define I_FORMAT_P_NOTCOMP    "%-15d %-15d %-15d not comparable\n"
+#define UI_FORMAT_P_NOTCOMP   "%-15u %-15u %-15u not comparable\n"
+#define LI_FORMAT_P_NOTCOMP   "%-15ld %-15ld %-15ld not comparable\n"
+#define ULI_FORMAT_P_NOTCOMP  "%-15lu %-15lu %-15lu not comparable\n"
+#define LLI_FORMAT_P_NOTCOMP  "%-15lld %-15lld %-15lld not comparable\n"
+#define ULLI_FORMAT_P_NOTCOMP "%-15llu %-15llu %-15lld not comparable\n"
 
 /* if system EPSILON is defined, use the system EPSILON; otherwise, use
  constants that are close to most EPSILON values */

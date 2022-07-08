@@ -156,7 +156,7 @@ test_iter_group(hid_t fapl, hbool_t new_format)
     CHECK(filespace, FAIL, "H5Screate");
 
     for (i = 0; i < NDATASETS; i++) {
-        HDsprintf(name, "Dataset %d", i);
+        HDsnprintf(name, sizeof(name), "Dataset %d", i);
         dataset = H5Dcreate2(file, name, datatype, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         CHECK(dataset, FAIL, "H5Dcreate2");
 
@@ -436,7 +436,7 @@ test_iter_attr(hid_t fapl, hbool_t new_format)
     CHECK(dataset, FAIL, "H5Dcreate2");
 
     for (i = 0; i < NATTR; i++) {
-        HDsprintf(name, "Attribute %02d", i);
+        HDsnprintf(name, sizeof(name), "Attribute %02d", i);
         attribute = H5Acreate2(dataset, name, H5T_NATIVE_INT, filespace, H5P_DEFAULT, H5P_DEFAULT);
         CHECK(attribute, FAIL, "H5Acreate2");
 
@@ -649,7 +649,7 @@ test_iter_group_large(hid_t fapl)
 
     /* Create a bunch of groups */
     for (i = 0; i < ITER_NGROUPS; i++) {
-        HDsprintf(gname, "Group_%d", i);
+        HDsnprintf(gname, sizeof(gname), "Group_%d", i);
 
         /* Add the name to the list of objects in the root group */
         HDstrcpy(names[i].name, gname);
@@ -766,7 +766,7 @@ test_grp_memb_funcs(hid_t fapl)
     CHECK(filespace, FAIL, "H5Screate");
 
     for (i = 0; i < NDATASETS; i++) {
-        HDsprintf(name, "Dataset %d", i);
+        HDsnprintf(name, sizeof(name), "Dataset %d", i);
         dataset = H5Dcreate2(file, name, datatype, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         CHECK(dataset, FAIL, "H5Dcreate2");
 
