@@ -50,7 +50,7 @@ The functions provided by the HDF5 C-API are grouped into the following
 </td></tr>
 <tr>
 <td><a href="./deprecated.html">Deprecated functions</a></td>
-<td>Functions with \ref ASYNC "asynchronous variants"</td>
+<td>Functions with \ref ASYNC</td>
 <td>\ref api-compat-macros</td>
 </tr>
 </table>
