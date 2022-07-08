@@ -126,7 +126,16 @@ Bug Fixes since HDF5-1.13.1 release
 ===================================
     Library
     -------
-    -
+    - Converted an assertion on (possibly corrupt) file contents to a normal
+      error check
+
+      Previously, the library contained an assertion check that a read superblock
+      doesn't contain a superblock extension message when the superblock
+      version < 2. When a corrupt HDF5 file is read, this assertion can be triggered
+      in debug builds of HDF5. In production builds, this situation could cause
+      either a library error or a crash, depending on the platform.
+
+      (JTH - 2022/07/08)
 
 
     Java Library
