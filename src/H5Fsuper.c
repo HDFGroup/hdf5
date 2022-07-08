@@ -688,7 +688,8 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
          *      superblock version >= 2.
          */
         if (sblock->super_vers < HDF5_SUPERBLOCK_VERSION_2)
-            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "invalid superblock - extension message should not be defined for version < 2")
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL,
+                        "invalid superblock - extension message should not be defined for version < 2")
 
         /* Check for superblock extension being located "outside" the stored
          *      'eoa' value, which can occur with the split/multi VFD.
