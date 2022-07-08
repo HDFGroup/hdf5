@@ -1083,7 +1083,6 @@ Java_hdf_hdf5lib_H5_H5AreadVL(JNIEnv *env, jclass clss, jlong attr_id, jlong mem
             H5_LIBRARY_ERROR(ENVONLY);
         if (!(vlSize = H5Tget_size(memb)))
             H5_LIBRARY_ERROR(ENVONLY);
-fprintf(stderr,"read typeSize=%ld vlSize=%ld vlClass=%ld\n", typeSize, vlSize, vlClass);
 
         if (NULL == (rawBuf = HDcalloc((size_t)n, typeSize)))
             H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5AreadVL: failed to allocate raw VL read buffer");
@@ -1125,7 +1124,6 @@ fprintf(stderr,"read typeSize=%ld vlSize=%ld vlClass=%ld\n", typeSize, vlSize, v
             cp_vp = (char *)rawBuf + i * typeSize;
             /* Get the number of sequence elements */
             jsize nelmts = ((hvl_t *)cp_vp)->len;
-fprintf(stderr,"read nelmts[%d]=%ld\n", i, nelmts);
 
             jobject jobj = NULL;
             for (j = 0; j < nelmts; j++) {
@@ -1141,7 +1139,6 @@ fprintf(stderr,"read nelmts[%d]=%ld\n", i, nelmts);
                         break;
                     } */
                     case H5T_INTEGER: {
-fprintf(stderr,"read H5T_INTEGER=%ld\n", vlSize);
                         switch (vlSize) {
                             case sizeof(jbyte): {
                                 jbyte byteValue;
@@ -1190,7 +1187,6 @@ fprintf(stderr,"read H5T_INTEGER=%ld\n", vlSize);
                         break;
                     }
                     case H5T_FLOAT: {
-fprintf(stderr,"read H5T_FLOAT=%ld\n", vlSize);
                         switch (vlSize) {
                             case sizeof(jfloat): {
                                 jfloat floatValue;
@@ -1218,7 +1214,6 @@ fprintf(stderr,"read H5T_FLOAT=%ld\n", vlSize);
                         break;
                     }
                     case H5T_REFERENCE: {
-fprintf(stderr,"read H5T_REFERENCE=%ld\n", vlSize);
                         switch (vlSize) {
                             case H5R_OBJ_REF_BUF_SIZE: {
                                 break;
@@ -1283,7 +1278,6 @@ Java_hdf_hdf5lib_H5_H5AwriteVL(JNIEnv *env, jclass clss, jlong attr_id, jlong me
         CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5AwriteVL: readBuf length < 0");
     }
-fprintf(stderr,"write vl_array_size=%ld\n", n);
 
     dims[0] = (hsize_t)n;
     if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
@@ -1314,7 +1308,6 @@ fprintf(stderr,"write vl_array_size=%ld\n", n);
             H5_LIBRARY_ERROR(ENVONLY);
         if (!(vlSize = H5Tget_size(memb)))
             H5_LIBRARY_ERROR(ENVONLY);
-fprintf(stderr,"write typeSize=%ld vlSize=%ld\n", typeSize, vlSize);
 
         if (NULL == (rawBuf = HDcalloc((size_t)n, typeSize)))
             H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5AwriteVL: failed to allocate raw VL write buffer");
@@ -1350,7 +1343,6 @@ fprintf(stderr,"write typeSize=%ld vlSize=%ld\n", typeSize, vlSize);
                 CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
             jobjectArray array   = (jobjectArray)ENVPTR->CallObjectMethod(ENVONLY, jList, mToArray);
             jsize        jnelmts = ENVPTR->GetArrayLength(ENVONLY, array);
-fprintf(stderr,"write jnelmts[%d]=%ld\n", i, jnelmts);
 
             cp_vp                 = (char *)rawBuf + i * typeSize;
             ((hvl_t *)cp_vp)->len = jnelmts;
@@ -1375,41 +1367,29 @@ fprintf(stderr,"write jnelmts[%d]=%ld\n", i, jnelmts);
                         switch (vlSize) {
                             case sizeof(jbyte): {
                                 jbyte byteValue = ENVPTR->CallByteMethod(ENVONLY, jobj, byteValueMid);
-    fprintf(stderr,"write vlSize=%ld - jobj[%d:%d]=%x\n", vlSize, (int)i, (int)j, byteValue);
                                 for (x = 0; x < (int)vlSize; x++) {
                                     ((char *)((hvl_t *)cp_vp)->p)[j * vlSize + x] = ((char *)&byteValue)[x];
-    fprintf(stderr,"write vlSize=%ld - byteValue[%d:%d][%d]=%x\n", vlSize, i, j, x, ((char*)&byteValue)[x]);
-    fprintf(stderr,"write vlSize=%ld - vlbuffer[%d:%d][%d]=%x\n", vlSize, i, j, x, ((char *)((hvl_t *)cp_vp)->p)[j*vlSize+x]);
                                 }
                                 break;
                             }
                             case sizeof(jshort): {
                                 jshort shortValue = ENVPTR->CallShortMethod(ENVONLY, jobj, shortValueMid);
-    fprintf(stderr,"write vlSize=%ld - jobj[%d:%d]=%x\n", vlSize, (int)i, (int)j, shortValue);
                                 for (x = 0; x < (int)vlSize; x++) {
                                     ((char *)((hvl_t *)cp_vp)->p)[j * vlSize + x] = ((char *)&shortValue)[x];
-    fprintf(stderr,"write vlSize=%ld - shortValue[%d:%d][%d]=%x\n", vlSize, i, j, x, ((char*)&shortValue)[x]);
-    fprintf(stderr,"write vlSize=%ld - vlbuffer[%d:%d][%d]=%x\n", vlSize, i, j, x, ((char *)((hvl_t *)cp_vp)->p)[j*vlSize+x]);
                                 }
                                 break;
                             }
                             case sizeof(jint): {
                                 jint intValue = ENVPTR->CallIntMethod(ENVONLY, jobj, intValueMid);
-    fprintf(stderr,"write vlSize=%ld - jobj[%d:%d]=%x\n", vlSize, (int)i, (int)j, intValue);
                                 for (x = 0; x < (int)vlSize; x++) {
                                     ((char *)((hvl_t *)cp_vp)->p)[j * vlSize + x] = ((char *)&intValue)[x];
-    fprintf(stderr,"write vlSize=%ld - shortValue[%d:%d][%d]=%x\n", vlSize, i, j, x, ((char*)&intValue)[x]);
-    fprintf(stderr,"write vlSize=%ld - vlbuffer[%d:%d][%d]=%x\n", vlSize, i, j, x, ((char *)((hvl_t *)cp_vp)->p)[j*vlSize+x]);
                                 }
                                 break;
                             }
                             case sizeof(jlong): {
                                 jlong longValue = ENVPTR->CallLongMethod(ENVONLY, jobj, longValueMid);
-    fprintf(stderr,"write vlSize=%ld - jobj[%d:%d]=%x\n", vlSize, (int)i, (int)j, longValue);
                                 for (x = 0; x < (int)vlSize; x++) {
                                     ((char *)((hvl_t *)cp_vp)->p)[j * vlSize + x] = ((char *)&longValue)[x];
-    fprintf(stderr,"write vlSize=%ld - longValue[%d:%d][%d]=%x\n", vlSize, i, j, x, ((char*)&longValue)[x]);
-    fprintf(stderr,"write vlSize=%ld - vlbuffer[%d:%d][%d]=%x\n", vlSize, i, j, x, ((char *)((hvl_t *)cp_vp)->p)[j*vlSize+x]);
                                 }
                                 break;
                             }
@@ -1420,21 +1400,15 @@ fprintf(stderr,"write jnelmts[%d]=%ld\n", i, jnelmts);
                         switch (vlSize) {
                             case sizeof(jfloat): {
                                 jfloat floatValue = ENVPTR->CallFloatMethod(ENVONLY, jobj, floatValueMid);
-    fprintf(stderr,"write vlSize=%ld - jobj[%d:%d]=%x\n", vlSize, (int)i, (int)j, floatValue);
                                 for (x = 0; x < (int)vlSize; x++) {
                                     ((char *)((hvl_t *)cp_vp)->p)[j * vlSize + x] = ((char *)&floatValue)[x];
-    fprintf(stderr,"write vlSize=%ld - floatValue[%d:%d][%d]=%x\n", vlSize, i, j, x, ((char*)&floatValue)[x]);
-    fprintf(stderr,"write vlSize=%ld - vlbuffer[%d:%d][%d]=%x\n", vlSize, i, j, x, ((char *)((hvl_t *)cp_vp)->p)[j*vlSize+x]);
                                 }
                                 break;
                             }
                             case sizeof(jdouble): {
                                 jdouble doubleValue = ENVPTR->CallDoubleMethod(ENVONLY, jobj, doubleValueMid);
-    fprintf(stderr,"write vlSize=%ld - jobj[%d:%d]=%x\n", vlSize, (int)i, (int)j, doubleValue);
                                 for (x = 0; x < (int)vlSize; x++) {
                                     ((char *)((hvl_t *)cp_vp)->p)[j * vlSize + x] = ((char *)&doubleValue)[x];
-    fprintf(stderr,"write vlSize=%ld - doubleValue[%d:%d][%d]=%x\n", vlSize, i, j, x, ((char*)&doubleValue)[x]);
-    fprintf(stderr,"write vlSize=%ld - vlbuffer[%d:%d][%d]=%x\n", vlSize, i, j, x, ((char *)((hvl_t *)cp_vp)->p)[j*vlSize+x]);
                                 }
                                 break;
                             }
