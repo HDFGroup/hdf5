@@ -1353,6 +1353,7 @@ main(void)
 {
     int      errors = 0;
     hid_t    fapl;
+    hbool_t  driver_is_default_compatible;
     unsigned user;
 
     h5_reset();
@@ -1362,7 +1363,9 @@ main(void)
     errors += test_properties();
     errors += test_callbacks();
 
-    if (!h5_driver_uses_modified_filename()) {
+    if (h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &driver_is_default_compatible) < 0)
+        errors++;
+    else if (driver_is_default_compatible) {
         errors += test_core();
     }
 

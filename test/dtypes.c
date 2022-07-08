@@ -3661,6 +3661,7 @@ test_compound_18(void)
     hsize_t     dim      = 1;
     const char *testfile = H5_get_srcdir_filename(TESTFILE); /* Corrected test file name */
     char        filename[1024];
+    hbool_t     driver_is_default_compatible;
     herr_t      ret;
 
     TESTING("accessing objects with compound datatypes that have no fields");
@@ -3725,7 +3726,10 @@ test_compound_18(void)
     if (H5Fclose(file) < 0)
         FAIL_STACK_ERROR;
 
-    if (!h5_driver_uses_modified_filename()) {
+    if (h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &driver_is_default_compatible) < 0)
+        FAIL_PUTS_ERROR("can't check if VFD is default VFD compatible");
+
+    if (driver_is_default_compatible) {
         /* Open Generated File */
         /* (generated with gen_bad_compound.c) */
         if ((file = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)

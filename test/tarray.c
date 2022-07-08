@@ -1919,6 +1919,7 @@ test_compat(void)
     size_t      off;                  /* Offset of compound field         */
     hid_t       mtid;                 /* Datatype ID for field            */
     int         i;                    /* Index variables                  */
+    hbool_t     driver_is_default_compatible;
     herr_t      ret;                  /* Generic return value             */
 
     /* Output message about test being performed */
@@ -1933,6 +1934,13 @@ test_compat(void)
      *  changed, follow the instructions in gen_old_array.c for regenerating
      *  the tarrold.h5 file.
      */
+
+    if (h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &driver_is_default_compatible) < 0)
+        TestErrPrintf("can't check if VFD is default VFD compatible\n");
+    if (!driver_is_default_compatible) {
+        HDprintf(" -- SKIPPED --\n");
+        return;
+    }
 
     /* Open the testfile */
     fid1 = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
@@ -2217,10 +2225,8 @@ test_array(void)
 
     test_array_bkg(); /* Read compound datatype with array fields and background fields read  */
 
-    if (!h5_driver_uses_modified_filename()) {
-        /* This test uses a custom file */
-        test_compat(); /* Test compatibility changes for compound datatype fields              */
-    }
+    /* This test uses a custom file */
+    test_compat(); /* Test compatibility changes for compound datatype fields              */
 
 } /* end test_array() */
 

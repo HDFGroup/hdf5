@@ -5536,9 +5536,18 @@ test_libver_bounds_copy(void)
     hid_t       fapl    = -1; /* File access property list ID */
     const char *src_fname;    /* Source file name */
     herr_t      ret;          /* Generic return value */
+    hbool_t     driver_is_default_compatible;
 
     /* Output message about the test being performed */
     MESSAGE(5, ("Testing H5Ocopy a dataset in a 1.8 library file to a 1.10 library file\n"));
+
+    ret = h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &driver_is_default_compatible);
+    CHECK_I(ret, "h5_driver_is_default_vfd_compatible");
+
+    if (!driver_is_default_compatible) {
+        HDprintf("-- SKIPPED --\n");
+        return;
+    }
 
     /* Get the test file name */
     src_fname = H5_get_srcdir_filename(SRC_FILE);
@@ -5598,10 +5607,7 @@ test_libver_bounds(void)
     test_libver_bounds_real(H5F_LIBVER_EARLIEST, 1, H5F_LIBVER_LATEST, 2);
     test_libver_bounds_real(H5F_LIBVER_LATEST, 2, H5F_LIBVER_EARLIEST, 2);
     test_libver_bounds_open();
-
-    if (!h5_driver_uses_modified_filename()) {
-        test_libver_bounds_copy();
-    }
+    test_libver_bounds_copy();
 } /* end test_libver_bounds() */
 
 /**************************************************************************************
@@ -8017,9 +8023,9 @@ test_deprec(const char *env_h5_drvr)
 void
 test_file(void)
 {
-    const char *env_h5_drvr;                                     /* File Driver value from environment */
-    hid_t       fapl_id                       = H5I_INVALID_HID; /* VFD-dependent fapl ID */
-    hbool_t     driver_uses_modified_filename = h5_driver_uses_modified_filename();
+    const char *env_h5_drvr;               /* File Driver value from environment */
+    hid_t       fapl_id = H5I_INVALID_HID; /* VFD-dependent fapl ID */
+    hbool_t     driver_is_default_compatible;
     herr_t      ret;
 
     /* Output message about test being performed */
@@ -8033,6 +8039,9 @@ test_file(void)
     /* Improved version of VFD-dependent checks */
     fapl_id = h5_fileaccess();
     CHECK(fapl_id, H5I_INVALID_HID, "h5_fileaccess");
+
+    ret = h5_driver_is_default_vfd_compatible(fapl_id, &driver_is_default_compatible);
+    CHECK(ret, FAIL, "h5_driver_is_default_vfd_compatible");
 
     test_file_create();                   /* Test file creation(also creation templates)*/
     test_file_open(env_h5_drvr);          /* Test file opening */
@@ -8057,7 +8066,7 @@ test_file(void)
         env_h5_drvr);        /* Tests that files created with a userblock have the correct size */
     test_cached_stab_info(); /* Tests that files are created with cached stab info in the superblock */
 
-    if (!driver_uses_modified_filename) {
+    if (driver_is_default_compatible) {
         test_rw_noupdate(); /* Test to ensure that RW permissions don't write the file unless dirtied */
     }
 
@@ -8078,7 +8087,7 @@ test_file(void)
     test_sects_freespace(env_h5_drvr, FALSE); /* Test file public routine H5Fget_free_sections() */
                                               /* Skipped testing for multi/split drivers */
 
-    if (!driver_uses_modified_filename) {
+    if (driver_is_default_compatible) {
         test_filespace_compatible(); /* Test compatibility for file space management */
 
         test_filespace_round_compatible();  /* Testing file space compatibility for files from trunk to 1_8 to

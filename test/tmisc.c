@@ -1783,10 +1783,19 @@ test_misc10(void)
     hid_t       dcpl;                                               /* Dataset creation property list */
     hid_t       space, type;                                        /* Old dataset's dataspace & datatype */
     const char *testfile = H5_get_srcdir_filename(MISC10_FILE_OLD); /* Corrected test file name */
+    hbool_t     driver_is_default_compatible;
     herr_t      ret;
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing using old dataset creation property list\n"));
+
+    ret = h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &driver_is_default_compatible);
+    CHECK(ret, FAIL, "h5_driver_is_default_vfd_compatible");
+
+    if (!driver_is_default_compatible) {
+        HDprintf("-- SKIPPED --\n");
+        return;
+    }
 
     /*
      * Open the old file and the dataset and get old settings.
@@ -3670,10 +3679,19 @@ test_misc20(void)
     unsigned version;     /* Version of storage layout info */
     hsize_t  contig_size; /* Size of contiguous storage size from layout into */
     const char *testfile = H5_get_srcdir_filename(MISC20_FILE_OLD); /* Corrected test file name */
+    hbool_t     driver_is_default_compatible;
     herr_t      ret;                                                /* Generic return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing large dimension truncation fix\n"));
+
+    ret = h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &driver_is_default_compatible);
+    CHECK(ret, FAIL, "h5_driver_is_default_vfd_compatible");
+
+    if (!driver_is_default_compatible) {
+        HDprintf("-- SKIPPED --\n");
+        return;
+    }
 
     /* Verify that chunks with dimensions that are too large get rejected */
 
@@ -4957,10 +4975,19 @@ test_misc25b(void)
     hid_t       fid;                                             /* File ID */
     hid_t       gid;                                             /* Group ID */
     const char *testfile = H5_get_srcdir_filename(MISC25B_FILE); /* Corrected test file name */
+    hbool_t     driver_is_default_compatible;
     herr_t      ret;                                             /* Generic return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Exercise null object header message bug\n"));
+
+    ret = h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &driver_is_default_compatible);
+    CHECK(ret, FAIL, "h5_driver_is_default_vfd_compatible");
+
+    if (!driver_is_default_compatible) {
+        HDprintf("-- SKIPPED --\n");
+        return;
+    }
 
     /* Open file */
     fid = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
@@ -5209,10 +5236,19 @@ test_misc27(void)
     hid_t       fid;                                            /* File ID */
     hid_t       gid;                                            /* Group ID */
     const char *testfile = H5_get_srcdir_filename(MISC27_FILE); /* Corrected test file name */
+    hbool_t     driver_is_default_compatible;
     herr_t      ret;                                            /* Generic return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Corrupt object header handling\n"));
+
+    ret = h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &driver_is_default_compatible);
+    CHECK(ret, FAIL, "h5_driver_is_default_vfd_compatible");
+
+    if (!driver_is_default_compatible) {
+        HDprintf("-- SKIPPED --\n");
+        return;
+    }
 
     /* Open the file */
     fid = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
@@ -5423,11 +5459,20 @@ test_misc28(void)
 static void
 test_misc29(void)
 {
-    hid_t  fid; /* File ID */
-    herr_t ret; /* Generic return value */
+    hbool_t driver_is_default_compatible;
+    hid_t   fid; /* File ID */
+    herr_t  ret; /* Generic return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Speculative metadata reads\n"));
+
+    ret = h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &driver_is_default_compatible);
+    CHECK(ret, FAIL, "h5_driver_is_default_vfd_compatible");
+
+    if (!driver_is_default_compatible) {
+        HDprintf("-- SKIPPED --\n");
+        return;
+    }
 
     /* Make a copy of the data file from svn. */
     ret = h5_make_local_copy(MISC29_ORIG_FILE, MISC29_COPY_FILE);
@@ -5706,10 +5751,19 @@ test_misc33(void)
     hid_t       fid      = -1;                                  /* File ID */
     const char *testfile = H5_get_srcdir_filename(MISC33_FILE); /* Corrected test file name */
     H5O_info2_t oinfo; /* Structure for object metadata information */
+    hbool_t     driver_is_default_compatible;
     herr_t      ret;   /* Generic return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing that bad offset into the heap returns error"));
+
+    ret = h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &driver_is_default_compatible);
+    CHECK(ret, FAIL, "h5_driver_is_default_vfd_compatible");
+
+    if (!driver_is_default_compatible) {
+        HDprintf("-- SKIPPED --\n");
+        return;
+    }
 
     /* Open the test file */
     fid = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
@@ -6026,8 +6080,7 @@ test_misc36(void)
 void
 test_misc(void)
 {
-    hbool_t driver_uses_modified_filename = h5_driver_uses_modified_filename();
-    hbool_t default_driver                = h5_using_default_driver(NULL);
+    hbool_t default_driver = h5_using_default_driver(NULL);
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Miscellaneous Routines\n"));
@@ -6041,10 +6094,7 @@ test_misc(void)
     test_misc7(); /* Test for sensible datatypes stored on disk */
     test_misc8(); /* Test storage sizes of various types of dataset storage */
     test_misc9(); /* Test for opening (not creating) core files */
-
-    if (!driver_uses_modified_filename) {
-        test_misc10(); /* Test for using dataset creation property lists from old files */
-    }
+    test_misc10(); /* Test for using dataset creation property lists from old files */
 
     if (default_driver) {
         test_misc11(); /* Test for all properties of a file creation property list being stored */
@@ -6057,19 +6107,12 @@ test_misc(void)
     }
 
     test_misc14(); /* Test that deleted dataset's data is removed from sieve buffer correctly */
-
-    if (!driver_uses_modified_filename) {
-        test_misc15(); /* Test that checking a file's access property list more than once works */
-    }
-
+    test_misc15(); /* Test that checking a file's access property list more than once works */
     test_misc16(); /* Test array of fixed-length string */
     test_misc17(); /* Test array of ASCII character */
     test_misc18(); /* Test new object header information in H5O_info_t struct */
     test_misc19(); /* Test incrementing & decrementing ref count on IDs */
-
-    if (!driver_uses_modified_filename) {
-        test_misc20(); /* Test problems with truncated dimensions in version 2 of storage layout message */
-    }
+    test_misc20(); /* Test problems with truncated dimensions in version 2 of storage layout message */
 
 #ifdef H5_HAVE_FILTER_SZIP
     test_misc21();  /* Test that "late" allocation time is treated the same as "incremental", for chunked
@@ -6079,24 +6122,12 @@ test_misc(void)
     test_misc23();  /* Test intermediate group creation */
     test_misc24();  /* Test inappropriate API opens of objects */
     test_misc25a(); /* Exercise null object header message merge bug */
-
-    if (!driver_uses_modified_filename) {
-        test_misc25b(); /* Exercise null object header message merge bug on existing file */
-    }
-
+    test_misc25b(); /* Exercise null object header message merge bug on existing file */
     test_misc25c(); /* Exercise another null object header message merge bug */
     test_misc26();  /* Test closing property lists with long filter pipelines */
-
-    if (!driver_uses_modified_filename) {
-        test_misc27(); /* Test opening file with object that has bad # of object header messages */
-    }
-
+    test_misc27(); /* Test opening file with object that has bad # of object header messages */
     test_misc28(); /* Test that chunks are cached appropriately */
-
-    if (!driver_uses_modified_filename) {
-        test_misc29(); /* Test that speculative metadata reads are handled correctly */
-    }
-
+    test_misc29(); /* Test that speculative metadata reads are handled correctly */
     test_misc30(); /* Exercise local heap loading bug where free lists were getting dropped */
 
     if (default_driver) {
@@ -6104,11 +6135,7 @@ test_misc(void)
     }
 
     test_misc32(); /* Test filter memory allocation functions */
-
-    if (!driver_uses_modified_filename) {
-        test_misc33(); /* Test to verify that H5HL_offset_into() returns error if offset exceeds heap block */
-    }
-
+    test_misc33(); /* Test to verify that H5HL_offset_into() returns error if offset exceeds heap block */
     test_misc34(); /* Test behavior of 0 and NULL in H5MM API calls */
     test_misc35(); /* Test behavior of free-list & allocation statistics API calls */
     test_misc36(); /* Exercise H5atclose and H5is_library_terminating */

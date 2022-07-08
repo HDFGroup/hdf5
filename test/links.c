@@ -22554,7 +22554,7 @@ main(void)
     unsigned    minimize_dset_oh;
     unsigned    efc;         /* Whether to use the external file cache */
     const char *env_h5_drvr; /* File Driver value from environment */
-    hbool_t     driver_uses_modified_filename = h5_driver_uses_modified_filename();
+    hbool_t     driver_is_default_compatible;
 
     env_h5_drvr = HDgetenv(HDF5_DRIVER);
     if (env_h5_drvr == NULL)
@@ -22562,6 +22562,9 @@ main(void)
 
     h5_reset();
     fapl = h5_fileaccess();
+
+    if (h5_driver_is_default_vfd_compatible(fapl, &driver_is_default_compatible) < 0)
+        TEST_ERROR;
 
     /* fapl2 uses "latest version bounds" */
     if ((fapl2 = H5Pcopy(fapl)) < 0)
@@ -22676,7 +22679,7 @@ main(void)
                     nerrors += external_link_closing_deprec(my_fapl, new_format) < 0 ? 1 : 0;
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
-                    if (!driver_uses_modified_filename) {
+                    if (driver_is_default_compatible) {
                         nerrors += external_link_endian(new_format) < 0 ? 1 : 0;
                     }
 
@@ -22691,7 +22694,7 @@ main(void)
                     nerrors += external_link_reltar(my_fapl, new_format) < 0 ? 1 : 0;
                     nerrors += external_link_chdir(my_fapl, new_format) < 0 ? 1 : 0;
 
-                    if (!driver_uses_modified_filename) {
+                    if (driver_is_default_compatible) {
                         nerrors += external_set_elink_fapl1(my_fapl, new_format) < 0 ? 1 : 0;
                     }
 

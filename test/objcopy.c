@@ -17313,6 +17313,7 @@ main(void)
     int         ExpressMode;
     const char *env_h5_drvr; /* File Driver value from environment */
     hbool_t     same_file;   /* Whether to run tests that only use one file */
+    hbool_t     driver_is_default_compatible;
 
     env_h5_drvr = HDgetenv(HDF5_DRIVER);
     if (env_h5_drvr == NULL)
@@ -17321,6 +17322,9 @@ main(void)
     /* Setup */
     h5_reset();
     fapl = h5_fileaccess();
+
+    if (h5_driver_is_default_vfd_compatible(fapl, &driver_is_default_compatible) < 0)
+        TEST_ERROR;
 
     ExpressMode = GetTestExpress();
     if (ExpressMode > 1)
@@ -17558,10 +17562,7 @@ main(void)
 
             nerrors += test_copy_same_file_named_datatype(fcpl_src, src_fapl);
 
-            /* Check if current driver might modify the filename. Skip these tests
-             * if so, since the file is pre-generated.
-             */
-            if (!h5_driver_uses_modified_filename()) {
+            if (driver_is_default_compatible) {
                 /* Test with dataset opened in the file or not */
                 nerrors += test_copy_old_layout(fcpl_dst, dst_fapl, FALSE);
                 nerrors += test_copy_old_layout(fcpl_dst, dst_fapl, TRUE);

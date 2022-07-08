@@ -231,7 +231,7 @@ H5TEST_DLL int           h5_duplicate_file_by_bytes(const char *orig, const char
 H5TEST_DLL herr_t        h5_check_if_file_locking_enabled(hbool_t *are_enabled);
 H5TEST_DLL hbool_t       h5_using_default_driver(const char *drv_name);
 H5TEST_DLL hbool_t       h5_using_parallel_driver(const char *drv_name);
-H5TEST_DLL hbool_t       h5_driver_uses_modified_filename(void);
+H5TEST_DLL herr_t        h5_driver_is_default_vfd_compatible(hid_t fapl_id, hbool_t *default_vfd_compatible);
 H5TEST_DLL hbool_t       h5_driver_uses_multiple_files(const char *drv_name, unsigned flags);
 
 /* Functions that will replace components of a FAPL */
