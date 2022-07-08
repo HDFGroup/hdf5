@@ -237,6 +237,8 @@ static herr_t iovec_fill_uniform(subfiling_context_t *sf_context, int64_t iovec_
                                  int64_t *mem_offset_out, int64_t *target_file_offset_out,
                                  int64_t *io_block_len_out);
 
+void H5FD__subfiling_mpi_finalize(void);
+
 static const H5FD_class_t H5FD_subfiling_g = {
     H5FD_CLASS_VERSION,              /* VFD interface version */
     H5_VFD_SUBFILING,                /* value                 */
@@ -283,6 +285,18 @@ static const H5FD_class_t H5FD_subfiling_g = {
 /* Declare a free list to manage the H5FD_subfiling_t struct */
 H5FL_DEFINE_STATIC(H5FD_subfiling_t);
 
+/*
+ * If this VFD initialized MPI, this routine will be registered
+ * as an atexit handler in order to finalize MPI before the
+ * application exits.
+ */
+void
+H5FD__subfiling_mpi_finalize(void)
+{
+    H5close();
+    MPI_Finalize();
+}
+
 /*-------------------------------------------------------------------------
  * Function:    H5FD_subfiling_init
  *
@@ -304,7 +318,6 @@ H5FD_subfiling_init(void)
     /* Register the Subfiling VFD, if it isn't already registered */
     if (H5I_VFL != H5I_get_type(H5FD_SUBFILING_g)) {
         int mpi_initialized = 0;
-        int mpi_finalized   = 0;
         int provided        = 0;
         int mpi_code;
 
@@ -323,36 +336,36 @@ H5FD_subfiling_init(void)
         /* Initialize MPI if not already initialized */
         if (MPI_SUCCESS != (mpi_code = MPI_Initialized(&mpi_initialized)))
             H5_SUBFILING_MPI_GOTO_ERROR(H5I_INVALID_HID, "MPI_Initialized failed", mpi_code);
-        if (MPI_SUCCESS != (mpi_code = MPI_Finalized(&mpi_finalized)))
-            H5_SUBFILING_MPI_GOTO_ERROR(H5I_INVALID_HID, "MPI_Finalized failed", mpi_code);
-        if (!mpi_finalized) {
-            if (mpi_initialized) {
-                /* If MPI is initialized, validate that it was initialized with MPI_THREAD_MULTIPLE */
-                if (MPI_SUCCESS != (mpi_code = MPI_Query_thread(&provided)))
-                    H5_SUBFILING_MPI_GOTO_ERROR(H5I_INVALID_HID, "MPI_Query_thread failed", mpi_code);
-                if (provided != MPI_THREAD_MULTIPLE)
-                    H5_SUBFILING_GOTO_ERROR(
+        if (mpi_initialized) {
+            /* If MPI is initialized, validate that it was initialized with MPI_THREAD_MULTIPLE */
+            if (MPI_SUCCESS != (mpi_code = MPI_Query_thread(&provided)))
+                H5_SUBFILING_MPI_GOTO_ERROR(H5I_INVALID_HID, "MPI_Query_thread failed", mpi_code);
+            if (provided != MPI_THREAD_MULTIPLE)
+                H5_SUBFILING_GOTO_ERROR(
                         H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID,
                         "Subfiling VFD requires the use of MPI_Init_thread with MPI_THREAD_MULTIPLE");
-            }
-            else {
-                char *env_var;
-                int   required = MPI_THREAD_MULTIPLE;
+        }
+        else {
+            char *env_var;
+            int   required = MPI_THREAD_MULTIPLE;
 
-                /* Ensure that Subfiling VFD has been loaded dynamically */
-                env_var = HDgetenv(HDF5_DRIVER);
-                if (!env_var || HDstrcmp(env_var, H5FD_SUBFILING_NAME))
-                    H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID, "MPI isn't initialized");
+            /* Ensure that Subfiling VFD has been loaded dynamically */
+            env_var = HDgetenv(HDF5_DRIVER);
+            if (!env_var || HDstrcmp(env_var, H5FD_SUBFILING_NAME))
+                H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID, "MPI isn't initialized");
 
-                if (MPI_SUCCESS != (mpi_code = MPI_Init_thread(NULL, NULL, required, &provided)))
-                    H5_SUBFILING_MPI_GOTO_ERROR(H5I_INVALID_HID, "MPI_Init_thread failed", mpi_code);
+            if (MPI_SUCCESS != (mpi_code = MPI_Init_thread(NULL, NULL, required, &provided)))
+                H5_SUBFILING_MPI_GOTO_ERROR(H5I_INVALID_HID, "MPI_Init_thread failed", mpi_code);
 
-                H5FD_mpi_self_initialized = TRUE;
+            H5FD_mpi_self_initialized = TRUE;
 
-                if (provided != required)
-                    H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID,
-                                            "MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE");
-            }
+            if (provided != required)
+                H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID,
+                        "MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE");
+
+            if (HDatexit(H5FD__subfiling_mpi_finalize) < 0)
+                H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID,
+                        "can't register atexit handler for MPI_Finalize");
         }
     }
 
@@ -360,7 +373,7 @@ H5FD_subfiling_init(void)
     ret_value = H5FD_SUBFILING_g;
 
 done:
-    H5_SUBFILING_FUNC_LEAVE;
+    H5_SUBFILING_FUNC_LEAVE_API;
 } /* end H5FD_subfiling_init() */
 
 /*---------------------------------------------------------------------------
@@ -388,21 +401,6 @@ H5FD__subfiling_term(void)
 
             HDfree(sf_app_layout);
             sf_app_layout = NULL;
-        }
-
-        /* Terminate MPI if the driver initialized it */
-        if (H5FD_mpi_self_initialized) {
-            int mpi_finalized = 0;
-            int mpi_code;
-
-            if (MPI_SUCCESS != (mpi_code = MPI_Finalized(&mpi_finalized)))
-                H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Finalized failed", mpi_code);
-            if (!mpi_finalized) {
-                if (MPI_SUCCESS != (mpi_code = MPI_Finalize()))
-                    H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Finalize failed", mpi_code);
-            }
-
-            H5FD_mpi_self_initialized = FALSE;
         }
 
         /* Unregister from HDF5 error API */
