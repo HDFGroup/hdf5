@@ -102,7 +102,7 @@ static herr_t open_config_file(subfiling_context_t *sf_context, const char *base
 static void        initialize_statistics(void);
 static int         numDigits(int n);
 static int         active_file_map_entries(void);
-static void        clear_fid_map_entry(uint64_t sf_fid);
+static void        clear_fid_map_entry(uint64_t sf_fid, int64_t sf_context_id);
 static int         compare_hostid(const void *h1, const void *h2);
 static herr_t      get_ioc_selection_criteria_from_env(ioc_selection_t *ioc_selection_type,
                                                        char **          ioc_sel_info_str);
@@ -229,12 +229,13 @@ active_file_map_entries(void)
  *-------------------------------------------------------------------------
  */
 static void
-clear_fid_map_entry(uint64_t sf_fid)
+clear_fid_map_entry(uint64_t sf_fid, int64_t sf_context_id)
 {
     if (sf_open_file_map) {
         int i;
         for (i = 0; i < sf_file_map_size; i++) {
-            if (sf_open_file_map[i].h5_file_id == sf_fid) {
+            if ((sf_open_file_map[i].h5_file_id == sf_fid)
+                    && (sf_open_file_map[i].sf_context_id == sf_context_id)) {
                 sf_open_file_map[i].h5_file_id    = UINT64_MAX;
                 sf_open_file_map[i].sf_context_id = -1;
                 return;
@@ -1064,7 +1065,7 @@ done:
     }
 
     if (ret_value < 0) {
-        clear_fid_map_entry(h5_file_id);
+        clear_fid_map_entry(h5_file_id, context_id);
 
         if (context_id >= 0 && H5_free_subfiling_object(context_id) < 0) {
 #ifdef H5_SUBFILING_DEBUG
@@ -1821,7 +1822,7 @@ open_subfile_with_context(subfiling_context_t *sf_context, int file_acc_flags)
 
 done:
     if (ret_value < 0) {
-        clear_fid_map_entry(sf_context->h5_file_id);
+        clear_fid_map_entry(sf_context->h5_file_id, sf_context->sf_context_id);
     }
 
     return ret_value;
@@ -1882,6 +1883,9 @@ record_fid_to_subfile(uint64_t h5_file_id, int64_t subfile_context_id, int *next
     }
 
     for (index = 0; index < sf_file_map_size; index++) {
+        if (sf_open_file_map[index].h5_file_id == h5_file_id)
+            goto done;
+
         if (sf_open_file_map[index].h5_file_id == UINT64_MAX) {
             sf_open_file_map[index].h5_file_id    = h5_file_id;
             sf_open_file_map[index].sf_context_id = subfile_context_id;
@@ -2728,7 +2732,7 @@ H5_close_subfiles(int64_t subfiling_context_id)
 
     /* The map from FID to subfiling context can now be cleared */
     if (sf_context->h5_file_id != UINT64_MAX) {
-        clear_fid_map_entry(sf_context->h5_file_id);
+        clear_fid_map_entry(sf_context->h5_file_id, sf_context->sf_context_id);
     }
 
     if (sf_context->topology->rank_is_ioc) {

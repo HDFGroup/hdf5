@@ -159,9 +159,9 @@ static herr_t H5FD__ioc_get_default_config(H5FD_ioc_config_t *config_out);
 static herr_t H5FD__ioc_validate_config(const H5FD_ioc_config_t *fa);
 static int    H5FD__copy_plist(hid_t fapl_id, hid_t *id_out_ptr);
 
-static herr_t H5FD__ioc_write_vector_internal(hid_t h5_fid, uint32_t count, haddr_t addrs[], size_t sizes[],
+static herr_t H5FD__ioc_write_vector_internal(H5FD_t *_file, uint32_t count, haddr_t addrs[], size_t sizes[],
                                               const void *bufs[] /* data_in */);
-static herr_t H5FD__ioc_read_vector_internal(hid_t h5_fid, uint32_t count, haddr_t addrs[], size_t sizes[],
+static herr_t H5FD__ioc_read_vector_internal(H5FD_t *_file, uint32_t count, haddr_t addrs[], size_t sizes[],
                                              void *bufs[] /* data_out */);
 
 static const H5FD_class_t H5FD_ioc_g = {
@@ -985,11 +985,13 @@ H5FD__ioc_close(H5FD_t *_file)
 
     if (file->fa.ioc_fapl_id >= 0 && H5I_dec_ref(file->fa.ioc_fapl_id) < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_ARGS, FAIL, "can't close FAPL");
+    file->fa.ioc_fapl_id = H5I_INVALID_HID;
 
     /* Close underlying file */
     if (file->ioc_file) {
         if (H5FD_close(file->ioc_file) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to close HDF5 file");
+        file->ioc_file = NULL;
     }
 
     if (file->fa.context_id >= 0) {
@@ -1003,6 +1005,7 @@ H5FD__ioc_close(H5FD_t *_file)
 
         if (H5_close_subfiles(file->fa.context_id) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to close subfiling file(s)");
+        file->fa.context_id = -1;
     }
 
     if (H5_mpi_comm_free(&file->comm) < 0)
@@ -1346,17 +1349,15 @@ static herr_t
 H5FD__ioc_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t dxpl_id, haddr_t addr, size_t size,
                 const void *buf)
 {
-    H5FD_ioc_t *    file_ptr  = (H5FD_ioc_t *)_file;
     H5P_genplist_t *plist_ptr = NULL;
     herr_t          ret_value = SUCCEED;
-    hid_t           h5_fid;
 
     if (NULL == (plist_ptr = (H5P_genplist_t *)H5I_object(dxpl_id)))
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
     addr += _file->base_addr;
-    h5_fid    = (hid_t)file_ptr->inode;
-    ret_value = H5FD__ioc_write_vector_internal(h5_fid, 1, &addr, &size, &buf);
+
+    ret_value = H5FD__ioc_write_vector_internal(_file, 1, &addr, &size, &buf);
 
 done:
     H5_SUBFILING_FUNC_LEAVE;
@@ -1368,7 +1369,6 @@ H5FD__ioc_read_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_mem_t t
 {
     H5FD_ioc_t *file_ptr  = (H5FD_ioc_t *)_file;
     herr_t      ret_value = SUCCEED; /* Return value */
-    hid_t       h5_fid;
 
     /* Check arguments */
     if (!file_ptr)
@@ -1400,8 +1400,7 @@ H5FD__ioc_read_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_mem_t t
             H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list");
     }
 
-    h5_fid    = (hid_t)file_ptr->inode;
-    ret_value = H5FD__ioc_read_vector_internal(h5_fid, count, addrs, sizes, bufs);
+    ret_value = H5FD__ioc_read_vector_internal(_file, count, addrs, sizes, bufs);
 
 done:
     H5_SUBFILING_FUNC_LEAVE;
@@ -1413,7 +1412,6 @@ H5FD__ioc_write_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_mem_t 
 {
     H5FD_ioc_t *file      = (H5FD_ioc_t *)_file;
     herr_t      ret_value = SUCCEED; /* Return value */
-    hid_t       h5_fid;
 
     /* Check arguments */
     if (!file)
@@ -1444,8 +1442,8 @@ H5FD__ioc_write_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_mem_t 
         if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list");
     }
-    h5_fid    = (hid_t)file->inode;
-    ret_value = H5FD__ioc_write_vector_internal(h5_fid, count, addrs, sizes, bufs);
+
+    ret_value = H5FD__ioc_write_vector_internal(_file, count, addrs, sizes, bufs);
 
 done:
     H5_SUBFILING_FUNC_LEAVE;
@@ -1571,11 +1569,12 @@ done:
  *--------------------------------------------------------------------------
  */
 static herr_t
-H5FD__ioc_write_vector_internal(hid_t h5_fid, uint32_t count, haddr_t addrs[], size_t sizes[],
+H5FD__ioc_write_vector_internal(H5FD_t *_file, uint32_t count, haddr_t addrs[], size_t sizes[],
                                 const void *bufs[] /* in */)
 {
     subfiling_context_t *sf_context    = NULL;
     MPI_Request *        active_reqs   = NULL;
+    H5FD_ioc_t *         file_ptr      = (H5FD_ioc_t *)_file;
     io_req_t **          sf_async_reqs = NULL;
     int64_t              sf_context_id = -1;
     herr_t               ret_value     = SUCCEED;
@@ -1584,17 +1583,15 @@ H5FD__ioc_write_vector_internal(hid_t h5_fid, uint32_t count, haddr_t addrs[], s
         MPI_Request *active_reqs;
     } *mpi_reqs = NULL;
 
+    HDassert(_file);
     HDassert(addrs);
     HDassert(sizes);
     HDassert(bufs);
 
-    H5_CHECK_OVERFLOW(h5_fid, hid_t, uint64_t);
-
     if (count == 0)
         H5_SUBFILING_GOTO_DONE(SUCCEED);
 
-    if ((sf_context_id = H5_subfile_fid_to_context((uint64_t)h5_fid)) < 0)
-        H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "can't map file ID to subfiling context ID");
+    sf_context_id = file_ptr->fa.context_id;
 
     if (NULL == (sf_context = H5_get_subfiling_object(sf_context_id)))
         H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "can't get subfiling context from ID");
@@ -1663,11 +1660,12 @@ done:
 }
 
 static herr_t
-H5FD__ioc_read_vector_internal(hid_t h5_fid, uint32_t count, haddr_t addrs[], size_t sizes[],
+H5FD__ioc_read_vector_internal(H5FD_t *_file, uint32_t count, haddr_t addrs[], size_t sizes[],
                                void *bufs[] /* out */)
 {
     subfiling_context_t *sf_context    = NULL;
     MPI_Request *        active_reqs   = NULL;
+    H5FD_ioc_t *         file_ptr      = (H5FD_ioc_t *)_file;
     io_req_t **          sf_async_reqs = NULL;
     int64_t              sf_context_id = -1;
     herr_t               ret_value     = SUCCEED;
@@ -1676,17 +1674,15 @@ H5FD__ioc_read_vector_internal(hid_t h5_fid, uint32_t count, haddr_t addrs[], si
         MPI_Request *active_reqs;
     } *mpi_reqs = NULL;
 
+    HDassert(_file);
     HDassert(addrs);
     HDassert(sizes);
     HDassert(bufs);
 
-    H5_CHECK_OVERFLOW(h5_fid, hid_t, uint64_t);
-
     if (count == 0)
         H5_SUBFILING_GOTO_DONE(SUCCEED);
 
-    if ((sf_context_id = H5_subfile_fid_to_context((uint64_t)h5_fid)) < 0)
-        H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "can't map file ID to subfiling context ID");
+    sf_context_id = file_ptr->fa.context_id;
 
     if (NULL == (sf_context = H5_get_subfiling_object(sf_context_id)))
         H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "can't get subfiling context from ID");

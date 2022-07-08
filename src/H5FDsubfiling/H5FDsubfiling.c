@@ -213,6 +213,8 @@ static herr_t H5FD__subfiling_get_default_config(hid_t fapl_id, H5FD_subfiling_c
 static herr_t H5FD__subfiling_validate_config(const H5FD_subfiling_config_t *fa);
 static int    H5FD__copy_plist(hid_t fapl_id, hid_t *id_out_ptr);
 
+static herr_t H5FD__subfiling_close_int(H5FD_subfiling_t *file_ptr);
+
 static herr_t init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_nelemts,
                             size_t dtype_extent, size_t max_iovec_len, int64_t *mem_buf_offset,
                             int64_t *target_file_offset, int64_t *io_block_len, int *first_ioc_index,
@@ -423,7 +425,7 @@ done:
     /* Reset VFL ID */
     H5FD_SUBFILING_g = H5I_INVALID_HID;
 
-    H5_SUBFILING_FUNC_LEAVE;
+    H5_SUBFILING_FUNC_LEAVE_API;
 } /* end H5FD__subfiling_term() */
 
 /*-------------------------------------------------------------------------
@@ -607,6 +609,7 @@ done:
     if (ret_value < 0) {
         if (config_out->ioc_fapl_id >= 0 && H5Pclose(config_out->ioc_fapl_id) < 0)
             H5_SUBFILING_DONE_ERROR(H5E_PLIST, H5E_CANTCLOSEOBJ, FAIL, "can't close FAPL");
+        config_out->ioc_fapl_id = H5I_INVALID_HID;
     }
 
     H5_SUBFILING_FUNC_LEAVE;
@@ -692,7 +695,7 @@ done:
         }
     }
 
-    H5_SUBFILING_FUNC_LEAVE;
+    H5_SUBFILING_FUNC_LEAVE_API;
 } /* end H5FD__subfiling_fapl_get() */
 
 /*-------------------------------------------------------------------------
@@ -773,7 +776,7 @@ done:
         }
     }
 
-    H5_SUBFILING_FUNC_LEAVE;
+    H5_SUBFILING_FUNC_LEAVE_API;
 } /* end H5FD__subfiling_fapl_copy() */
 
 /*-------------------------------------------------------------------------
@@ -803,7 +806,7 @@ H5FD__subfiling_fapl_free(void *_fa)
 
     H5MM_xfree(fa);
 
-    H5_SUBFILING_FUNC_LEAVE;
+    H5_SUBFILING_FUNC_LEAVE_API;
 } /* end H5FD__subfiling_fapl_free() */
 
 /*-------------------------------------------------------------------------
@@ -847,6 +850,7 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to allocate file struct");
     file_ptr->comm           = MPI_COMM_NULL;
     file_ptr->info           = MPI_INFO_NULL;
+    file_ptr->fa.context_id  = -1;
     file_ptr->fa.ioc_fapl_id = H5I_INVALID_HID;
     file_ptr->ext_comm       = MPI_COMM_NULL;
 
@@ -1029,17 +1033,63 @@ done:
                 }
             }
 
-            /* TODO: FAPL ID will likely never be H5I_INVALID_HID since it's currently initialized to 0 */
-            if (H5I_INVALID_HID != file_ptr->fa.ioc_fapl_id)
-                H5I_dec_ref(file_ptr->fa.ioc_fapl_id);
-            if (file_ptr->sf_file)
-                H5FD_close(file_ptr->sf_file);
-            H5FL_FREE(H5FD_subfiling_t, file_ptr);
+            if (H5FD__subfiling_close_int(file_ptr) < 0)
+                H5_SUBFILING_DONE_ERROR(H5E_FILE, H5E_CLOSEERROR, NULL, "couldn't close file");
         }
     }
 
-    H5_SUBFILING_FUNC_LEAVE;
+    H5_SUBFILING_FUNC_LEAVE_API;
 } /* end H5FD__subfiling_open() */
+
+static herr_t
+H5FD__subfiling_close_int(H5FD_subfiling_t *file_ptr)
+{
+    herr_t ret_value = SUCCEED;
+
+    HDassert(file_ptr);
+
+#if H5FD_SUBFILING_DEBUG_OP_CALLS
+    {
+        subfiling_context_t *sf_context = H5_get_subfiling_object(file_ptr->fa.context_id);
+
+        HDassert(sf_context);
+        HDassert(sf_context->topology);
+
+        if (sf_context->topology->rank_is_ioc)
+            HDprintf("[%s %d] fd=%d\n", __func__, file_ptr->mpi_rank, sf_context->sf_fid);
+        else
+            HDprintf("[%s %d] fd=*\n", __func__, file_ptr->mpi_rank);
+        HDfflush(stdout);
+    }
+#endif
+
+    if (file_ptr->sf_file && H5FD_close(file_ptr->sf_file) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close subfile");
+
+    if (!file_ptr->fa.require_ioc) {
+        if (file_ptr->fa.context_id >= 0 && H5_free_subfiling_object(file_ptr->fa.context_id) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free subfiling context object");
+    }
+
+    /* if set, close the copy of the plist for the underlying VFD. */
+    if ((file_ptr->fa.ioc_fapl_id >= 0) && (H5I_dec_ref(file_ptr->fa.ioc_fapl_id) < 0))
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_ARGS, FAIL, "can't close IOC FAPL");
+    file_ptr->fa.ioc_fapl_id = H5I_INVALID_HID;
+
+    if (H5_mpi_comm_free(&file_ptr->comm) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI Communicator");
+    if (H5_mpi_info_free(&file_ptr->info) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI Info object");
+
+    if (H5_mpi_comm_free(&file_ptr->ext_comm) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free MPI communicator");
+
+done:
+    /* Release the file info */
+    file_ptr = H5FL_FREE(H5FD_subfiling_t, file_ptr);
+
+    H5_SUBFILING_FUNC_LEAVE;
+}
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD__subfiling_close
@@ -1059,50 +1109,11 @@ H5FD__subfiling_close(H5FD_t *_file)
     H5FD_subfiling_t *file_ptr  = (H5FD_subfiling_t *)_file;
     herr_t            ret_value = SUCCEED;
 
-    /* Sanity check */
-    HDassert(file_ptr);
-
-#if H5FD_SUBFILING_DEBUG_OP_CALLS
-    {
-        subfiling_context_t *sf_context = H5_get_subfiling_object(file_ptr->fa.context_id);
-
-        HDassert(sf_context);
-        HDassert(sf_context->topology);
-
-        if (sf_context->topology->rank_is_ioc)
-            HDprintf("[%s %d] fd=%d\n", __func__, file_ptr->mpi_rank, sf_context->sf_fid);
-        else
-            HDprintf("[%s %d] fd=*\n", __func__, file_ptr->mpi_rank);
-        HDfflush(stdout);
-    }
-#endif
-
-    if (H5FD_close(file_ptr->sf_file) != SUCCEED) {
-        H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close file");
-    }
-
-    if (!file_ptr->fa.require_ioc) {
-        if (H5_free_subfiling_object(file_ptr->fa.context_id) < 0)
-            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free subfiling context object");
-    }
-
-    /* if set, close the copy of the plist for the underlying VFD. */
-    if ((H5I_INVALID_HID != file_ptr->fa.ioc_fapl_id) && (H5I_dec_ref(file_ptr->fa.ioc_fapl_id) < 0))
-        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_ARGS, FAIL, "can't close ioc FAPL");
-
-    if (H5_mpi_comm_free(&file_ptr->comm) < 0)
-        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI Communicator");
-    if (H5_mpi_info_free(&file_ptr->info) < 0)
-        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI Info object");
-
-    if (H5_mpi_comm_free(&file_ptr->ext_comm) < 0)
-        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free MPI communicator");
+    if (H5FD__subfiling_close_int(file_ptr) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close file");
 
 done:
-    /* Release the file info */
-    file_ptr = H5FL_FREE(H5FD_subfiling_t, file_ptr);
-
-    H5_SUBFILING_FUNC_LEAVE;
+    H5_SUBFILING_FUNC_LEAVE_API;
 } /* end H5FD__subfiling_close() */
 
 /*-------------------------------------------------------------------------
@@ -1131,7 +1142,7 @@ H5FD__subfiling_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 
     ret_value = H5FD_cmp(f1->sf_file, f2->sf_file);
 
-    H5_SUBFILING_FUNC_LEAVE;
+    H5_SUBFILING_FUNC_LEAVE_API;
 } /* end H5FD__subfiling_cmp() */
 
 /*-------------------------------------------------------------------------
@@ -1163,9 +1174,6 @@ H5FD__subfiling_query(const H5FD_t H5_ATTR_UNUSED *_file, unsigned long *flags /
         *flags |= H5FD_FEAT_AGGREGATE_SMALLDATA;    /* OK to aggregate "small" raw data allocations */
         *flags |= H5FD_FEAT_HAS_MPI;                /* This driver uses MPI */
         *flags |= H5FD_FEAT_ALLOCATE_EARLY;         /* Allocate space early instead of late  */
-        *flags |= H5FD_FEAT_DEFAULT_VFD_COMPATIBLE; /* VFD creates a file which can be opened with the default
-                                                       VFD */
-                                                    /* TODO: this is false -- delete the flag eventually */
     }
 
     H5_SUBFILING_FUNC_LEAVE_API;
@@ -1314,7 +1322,7 @@ done:
 
     ret_value = file->eof;
 
-    H5_SUBFILING_FUNC_LEAVE;
+    H5_SUBFILING_FUNC_LEAVE_API;
 } /* end H5FD__subfiling_get_eof() */
 
 /*-------------------------------------------------------------------------
@@ -1338,7 +1346,7 @@ H5FD__subfiling_get_handle(H5FD_t *_file, hid_t H5_ATTR_UNUSED fapl, void **file
     *file_handle = &(file->fd);
 
 done:
-    H5_SUBFILING_FUNC_LEAVE;
+    H5_SUBFILING_FUNC_LEAVE_API;
 } /* end H5FD__subfiling_get_handle() */
 
 /*-------------------------------------------------------------------------
@@ -1571,7 +1579,7 @@ done:
         file_ptr->op  = OP_UNKNOWN;
     } /* end if */
 
-    H5_SUBFILING_FUNC_LEAVE;
+    H5_SUBFILING_FUNC_LEAVE_API;
 } /* end H5FD__subfiling_read() */
 
 /*-------------------------------------------------------------------------
@@ -1812,7 +1820,7 @@ done:
         file_ptr->op  = OP_UNKNOWN;
     } /* end if */
 
-    H5_SUBFILING_FUNC_LEAVE;
+    H5_SUBFILING_FUNC_LEAVE_API;
 } /* end H5FD__subfiling_write() */
 
 /*-------------------------------------------------------------------------
@@ -1964,7 +1972,7 @@ H5FD__subfiling_read_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_m
     }
 
 done:
-    H5_SUBFILING_FUNC_LEAVE;
+    H5_SUBFILING_FUNC_LEAVE_API;
 } /* end H5FD__subfiling_read_vector() */
 
 /*-------------------------------------------------------------------------
@@ -2111,7 +2119,7 @@ H5FD__subfiling_write_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file vector write request failed");
     }
 done:
-    H5_SUBFILING_FUNC_LEAVE;
+    H5_SUBFILING_FUNC_LEAVE_API;
 } /* end H5FDsubfile__write_vector() */
 
 /*-------------------------------------------------------------------------
@@ -2199,7 +2207,7 @@ H5FD__subfiling_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5
 #endif
 
 done:
-    H5_SUBFILING_FUNC_LEAVE;
+    H5_SUBFILING_FUNC_LEAVE_API;
 } /* end H5FD__subfiling_truncate() */
 
 /*-------------------------------------------------------------------------
@@ -2236,7 +2244,7 @@ H5FD__subfiling_lock(H5FD_t *_file, hbool_t rw)
     } /* end if */
 
 done:
-    H5_SUBFILING_FUNC_LEAVE;
+    H5_SUBFILING_FUNC_LEAVE_API;
 } /* end H5FD__subfiling_lock() */
 
 /*-------------------------------------------------------------------------
@@ -2262,7 +2270,7 @@ H5FD__subfiling_unlock(H5FD_t *_file)
         H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to lock file");
 
 done:
-    H5_SUBFILING_FUNC_LEAVE;
+    H5_SUBFILING_FUNC_LEAVE_API;
 } /* end H5FD__subfiling_unlock() */
 
 /*-------------------------------------------------------------------------
@@ -2343,7 +2351,7 @@ H5FD__subfiling_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void 
     }
 
 done:
-    H5_SUBFILING_FUNC_LEAVE;
+    H5_SUBFILING_FUNC_LEAVE_API;
 } /* end H5FD__subfiling_ctl() */
 
 /*-------------------------------------------------------------------------
