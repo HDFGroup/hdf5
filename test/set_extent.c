@@ -230,8 +230,12 @@ do_ranks(hid_t fapl, hbool_t new_format)
     hid_t         dcpl      = -1;
     int           fillvalue = FILL_VALUE;
     unsigned      config;
+    hbool_t       driver_is_parallel;
 
     TESTING_2("datasets with ranks 1 to 4 (all configurations)");
+
+    if (h5_using_parallel_driver(fapl, &driver_is_parallel) < 0)
+        TEST_ERROR;
 
     /* Loop over different configurations for tests */
     for (config = 0; config <= CONFIG_ALL; config++) {
@@ -343,7 +347,7 @@ do_ranks(hid_t fapl, hbool_t new_format)
                 goto error;
             } /* end if */
 
-            if (!h5_using_parallel_driver(NULL)) {
+            if (!driver_is_parallel) {
                 /* VL test */
                 if (test_random_rank4_vl(fapl, dcpl, do_fillvalue, disable_edge_filters, FALSE, index_type) <
                     0) {
@@ -367,7 +371,7 @@ do_ranks(hid_t fapl, hbool_t new_format)
                     goto error;
                 } /* end if */
 
-                if (!h5_using_parallel_driver(NULL)) {
+                if (!driver_is_parallel) {
                     if (test_random_rank4_vl(fapl, dcpl, do_fillvalue, disable_edge_filters, TRUE,
                                              index_type) < 0) {
                         DO_RANKS_PRINT_CONFIG("Randomized rank 4 variable length with sparse allocation")

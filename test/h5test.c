@@ -2205,9 +2205,8 @@ h5_using_default_driver(const char *drv_name)
 /*-------------------------------------------------------------------------
  * Function:    h5_using_parallel_driver
  *
- * Purpose:     Checks if the specified VFD name matches a parallel-enabled
- *              VFD (usually `mpio`). If `drv_name` is NULL, the
- *              HDF5_DRIVER environment is checked instead (if it is set).
+ * Purpose:     Checks if the current VFD set on the given FAPL is a
+ *              parallel-enabled VFD (The MPI I/O VFD, for example).
  *
  *              This is mostly useful for avoiding tests that use features
  *              which are not currently supported for parallel HDF5, such
@@ -2217,18 +2216,28 @@ h5_using_default_driver(const char *drv_name)
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
-h5_using_parallel_driver(const char *drv_name)
+herr_t
+h5_using_parallel_driver(hid_t fapl_id, hbool_t *driver_is_parallel)
 {
-    hbool_t ret_val = FALSE;
+    unsigned long feat_flags = 0;
+    hid_t         driver_id  = H5I_INVALID_HID;
+    herr_t        ret_value  = SUCCEED;
 
-    if (!drv_name)
-        drv_name = HDgetenv(HDF5_DRIVER);
+    HDassert(fapl_id >= 0);
+    HDassert(driver_is_parallel);
 
-    if (drv_name)
-        return (!HDstrcmp(drv_name, "mpio") || !HDstrcmp(drv_name, H5FD_SUBFILING_NAME));
+    if (fapl_id == H5P_DEFAULT)
+        fapl_id = H5P_FILE_ACCESS_DEFAULT;
 
-    return ret_val;
+    if ((driver_id = H5Pget_driver(fapl_id)) < 0)
+        return FAIL;
+
+    if (H5FDdriver_query(driver_id, &feat_flags) < 0)
+        return FAIL;
+
+    *driver_is_parallel = (feat_flags & H5FD_FEAT_HAS_MPI);
+
+    return ret_value;
 }
 
 /*-------------------------------------------------------------------------

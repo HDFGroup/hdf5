@@ -3757,15 +3757,19 @@ error:
 int
 main(void)
 {
-    hid_t file_id = (-1);
-    int   nerrors = 0;
-    hid_t fapl;
-    char  filename0[1024];
+    hid_t   file_id = (-1);
+    int     nerrors = 0;
+    hid_t   fapl;
+    char    filename0[1024];
+    hbool_t driver_is_parallel;
 
     /* Reset the library and get the file access property list */
     h5_reset();
     fapl = h5_fileaccess();
     h5_fixname(FILENAME[0], fapl, filename0, sizeof filename0);
+
+    if (h5_using_parallel_driver(fapl, &driver_is_parallel) < 0)
+        TEST_ERROR;
 
     /* Create a new file_id using default create property but vfd access
      * property.
@@ -3776,7 +3780,7 @@ main(void)
     /* Call "main" test routine */
     nerrors += test_main(file_id, fapl);
 
-    if (!h5_using_parallel_driver(NULL)) {
+    if (!driver_is_parallel) {
         nerrors += test_obj_ref(fapl);
         nerrors += test_reg_ref(fapl);
     }
