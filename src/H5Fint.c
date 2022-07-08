@@ -3687,8 +3687,8 @@ H5F__start_swmr_write(H5F_t *f)
         /* Gather information about opened objects (groups, datasets) in the file */
         /* (For refresh later on) */
         for (u = 0; u < grp_dset_count; u++) {
-            void *     obj       = NULL;    /* VOL object   */
-            H5I_type_t type;                /* Type of object for the ID */
+            void *     obj = NULL; /* VOL object   */
+            H5I_type_t type;       /* Type of object for the ID */
             H5G_loc_t  tmp_loc;
 
             /* Get object's type */
@@ -3714,7 +3714,8 @@ H5F__start_swmr_write(H5F_t *f)
 
                     /* Get dataset access properties */
                     if ((obj_apl_ids[u] = H5D_get_access_plist(obj)) < 0)
-                        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get dataset access property list")
+                        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
+                                    "unable to get dataset access property list")
                     break;
 
                 case H5I_MAP:

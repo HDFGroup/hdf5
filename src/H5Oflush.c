@@ -358,7 +358,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_refresh_metadata_reopen(hid_t oid, hid_t apl_id, H5G_loc_t *obj_loc, H5VL_t *vol_connector, hbool_t start_swmr)
+H5O_refresh_metadata_reopen(hid_t oid, hid_t apl_id, H5G_loc_t *obj_loc, H5VL_t *vol_connector,
+                            hbool_t start_swmr)
 {
     void *     object = NULL;       /* Object for this operation */
     H5I_type_t type;                /* Type of object for the ID */
@@ -388,7 +389,8 @@ H5O_refresh_metadata_reopen(hid_t oid, hid_t apl_id, H5G_loc_t *obj_loc, H5VL_t 
 
         case H5I_DATASET:
             /* Re-open the dataset */
-            if (NULL == (object = H5D_open(obj_loc, apl_id == H5P_DEFAULT ? H5P_DATASET_ACCESS_DEFAULT : apl_id)))
+            if (NULL ==
+                (object = H5D_open(obj_loc, apl_id == H5P_DEFAULT ? H5P_DATASET_ACCESS_DEFAULT : apl_id)))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to open dataset")
             if (!start_swmr) /* No need to handle multiple opens when H5Fstart_swmr_write() */
                 if (H5D_mult_refresh_reopen((H5D_t *)object) < 0)
