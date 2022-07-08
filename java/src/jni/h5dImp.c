@@ -184,7 +184,7 @@ Java_hdf_hdf5lib_H5_H5Dread(JNIEnv *env, jclass clss, jlong dataset_id, jlong me
 {
     jboolean readBufIsCopy;
     htri_t   data_class;
-    jbyte *  readBuf = NULL;
+    jbyte   *readBuf = NULL;
     herr_t   status  = FAIL;
 
     UNUSED(clss);
@@ -242,7 +242,7 @@ Java_hdf_hdf5lib_H5_H5Dwrite(JNIEnv *env, jclass clss, jlong dataset_id, jlong m
 {
     jboolean writeBufIsCopy;
     htri_t   data_class;
-    jbyte *  writeBuf = NULL;
+    jbyte   *writeBuf = NULL;
     herr_t   status   = FAIL;
 
     UNUSED(clss);
@@ -340,7 +340,7 @@ Java_hdf_hdf5lib_H5_H5Dvlen_1reclaim(JNIEnv *env, jclass clss, jlong type_id, jl
 {
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     jboolean vlenBufIsCopy;
-    jbyte *  vlenBuf = NULL;
+    jbyte   *vlenBuf = NULL;
 #endif
     herr_t status = FAIL;
 
@@ -382,7 +382,7 @@ Java_hdf_hdf5lib_H5_H5Dread_1short(JNIEnv *env, jclass clss, jlong dataset_id, j
                                    jshortArray buf, jboolean isCriticalPinning)
 {
     jboolean readBufIsCopy;
-    jshort * readBuf = NULL;
+    jshort  *readBuf = NULL;
     htri_t   data_class;
     herr_t   status = FAIL;
 
@@ -440,7 +440,7 @@ Java_hdf_hdf5lib_H5_H5Dwrite_1short(JNIEnv *env, jclass clss, jlong dataset_id, 
                                     jshortArray buf, jboolean isCriticalPinning)
 {
     jboolean writeBufIsCopy;
-    jshort * writeBuf = NULL;
+    jshort  *writeBuf = NULL;
     htri_t   data_class;
     herr_t   status = FAIL;
 
@@ -499,7 +499,7 @@ Java_hdf_hdf5lib_H5_H5Dread_1int(JNIEnv *env, jclass clss, jlong dataset_id, jlo
 {
     jboolean readBufIsCopy;
     htri_t   data_class;
-    jint *   readBuf = NULL;
+    jint    *readBuf = NULL;
     herr_t   status  = FAIL;
 
     UNUSED(clss);
@@ -557,7 +557,7 @@ Java_hdf_hdf5lib_H5_H5Dwrite_1int(JNIEnv *env, jclass clss, jlong dataset_id, jl
 {
     jboolean writeBufIsCopy;
     htri_t   data_class;
-    jint *   writeBuf = NULL;
+    jint    *writeBuf = NULL;
     herr_t   status   = FAIL;
 
     UNUSED(clss);
@@ -615,7 +615,7 @@ Java_hdf_hdf5lib_H5_H5Dread_1long(JNIEnv *env, jclass clss, jlong dataset_id, jl
 {
     jboolean readBufIsCopy;
     htri_t   data_class;
-    jlong *  readBuf = NULL;
+    jlong   *readBuf = NULL;
     herr_t   status  = FAIL;
 
     UNUSED(clss);
@@ -673,7 +673,7 @@ Java_hdf_hdf5lib_H5_H5Dwrite_1long(JNIEnv *env, jclass clss, jlong dataset_id, j
 {
     jboolean writeBufIsCopy;
     htri_t   data_class;
-    jlong *  writeBuf = NULL;
+    jlong   *writeBuf = NULL;
     herr_t   status   = FAIL;
 
     UNUSED(clss);
@@ -731,7 +731,7 @@ Java_hdf_hdf5lib_H5_H5Dread_1float(JNIEnv *env, jclass clss, jlong dataset_id, j
 {
     jboolean readBufIsCopy;
     htri_t   data_class;
-    jfloat * readBuf = NULL;
+    jfloat  *readBuf = NULL;
     herr_t   status  = FAIL;
 
     UNUSED(clss);
@@ -789,7 +789,7 @@ Java_hdf_hdf5lib_H5_H5Dwrite_1float(JNIEnv *env, jclass clss, jlong dataset_id, 
 {
     jboolean writeBufIsCopy;
     htri_t   data_class;
-    jfloat * writeBuf = NULL;
+    jfloat  *writeBuf = NULL;
     herr_t   status   = FAIL;
 
     UNUSED(clss);
@@ -965,8 +965,8 @@ Java_hdf_hdf5lib_H5_H5Dread_1string(JNIEnv *env, jclass clss, jlong dataset_id, 
     size_t  str_len;
     size_t  pos;
     jsize   i, n;
-    char *  c_buf  = NULL;
-    char *  cstr   = NULL;
+    char   *c_buf  = NULL;
+    char   *cstr   = NULL;
     herr_t  status = FAIL;
 
     UNUSED(clss);
@@ -1033,7 +1033,7 @@ Java_hdf_hdf5lib_H5_H5Dwrite_1string(JNIEnv *env, jclass clss, jlong dataset_id,
     jstring     obj;
     size_t      i, str_len;
     jsize       n;
-    char *      c_buf  = NULL;
+    char       *c_buf  = NULL;
     herr_t      status = FAIL;
 
     UNUSED(clss);
@@ -1176,7 +1176,7 @@ H5DreadVL_str(JNIEnv *env, hid_t did, hid_t tid, hid_t mem_sid, hid_t file_sid, 
 {
     jstring jstr;
     jsize   i, n;
-    char ** strs   = NULL;
+    char  **strs   = NULL;
     herr_t  status = FAIL;
 
     if ((n = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0) {
@@ -1241,7 +1241,7 @@ H5DreadVL_asstr(JNIEnv *env, hid_t did, hid_t tid, hid_t mem_sid, hid_t file_sid
     size_t      i;
     hid_t       mem_space = mem_sid;
     jsize       n;
-    void *      readBuf = NULL;
+    void       *readBuf = NULL;
     herr_t      status  = FAIL;
 
     HDmemset(&h5str, 0, sizeof(h5str_t));
@@ -1441,7 +1441,7 @@ H5DwriteVL_str(JNIEnv *env, hid_t dataset_id, hid_t mem_type_id, hid_t mem_space
     jstring     obj;
     jsize       size;
     jsize       i;
-    char **     writeBuf = NULL;
+    char      **writeBuf = NULL;
     herr_t      status   = FAIL;
 
     if ((size = ENVPTR->GetArrayLength(ENVONLY, (jarray)buf)) < 0) {
@@ -1518,7 +1518,7 @@ H5DwriteVL_asstr(JNIEnv *env, hid_t did, hid_t tid, hid_t mem_sid, hid_t file_si
     size_t      i;
     hid_t       mem_space = mem_sid;
     jsize       n;
-    void *      writeBuf = NULL;
+    void       *writeBuf = NULL;
     herr_t      status   = FAIL;
 
     if (mem_space == H5S_ALL) {
@@ -1859,8 +1859,8 @@ Java_hdf_hdf5lib_H5_H5Dfill(JNIEnv *env, jclass clss, jbyteArray fill, jlong fil
     jboolean isCopy1;
     jboolean isCopy2;
     herr_t   status = FAIL;
-    jbyte *  fillP  = NULL;
-    jbyte *  buffP  = NULL;
+    jbyte   *fillP  = NULL;
+    jbyte   *buffP  = NULL;
 
     UNUSED(clss);
 
@@ -1901,7 +1901,7 @@ Java_hdf_hdf5lib_H5_H5Dset_1extent(JNIEnv *env, jclass clss, jlong loc_id, jlong
     hsize_t *dims = NULL;
     herr_t   status;
     jsize    rank;
-    jlong *  dimsBuf = NULL;
+    jlong   *dimsBuf = NULL;
     int      i       = 0;
 
     UNUSED(clss);
@@ -1941,10 +1941,10 @@ H5D_iterate_cb(void *elem, hid_t elem_id, unsigned ndim, const hsize_t *point, v
     jmethodID   mid;
     jobject     visit_callback = wrapper->visit_callback;
     jclass      cls;
-    JNIEnv *    cbenv  = NULL;
+    JNIEnv     *cbenv  = NULL;
     jint        status = FAIL;
     jsize       size;
-    void *      op_data = (void *)wrapper->op_data;
+    void       *op_data = (void *)wrapper->op_data;
 
     if (JVMPTR->AttachCurrentThread(JVMPAR, (void **)&cbenv, NULL) < 0) {
         CHECK_JNI_EXCEPTION(CBENVONLY, JNI_TRUE);
@@ -2003,7 +2003,7 @@ Java_hdf_hdf5lib_H5_H5Diterate(JNIEnv *env, jclass clss, jbyteArray buf, jlong b
 {
     cb_wrapper wrapper = {callback_op, op_data};
     jboolean   isCopy;
-    jbyte *    iterBuf = NULL;
+    jbyte     *iterBuf = NULL;
     herr_t     status  = FAIL;
 
     UNUSED(clss);

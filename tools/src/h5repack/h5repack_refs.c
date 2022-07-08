@@ -53,7 +53,7 @@ do_copy_refobjs(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
     hsize_t      dims[H5S_MAX_RANK];         /* dimensions of dataset */
     unsigned int i, j;
     int          k;
-    named_dt_t * named_dt_head = NULL; /* Pointer to the stack of named datatypes copied */
+    named_dt_t  *named_dt_head = NULL; /* Pointer to the stack of named datatypes copied */
     int          ret_value     = 0;
 
     /*-------------------------------------------------------------------------
@@ -227,7 +227,7 @@ do_copy_refobjs(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                         hid_t            refobj_id = H5I_INVALID_HID;
                         hdset_reg_ref_t *refbuf    = NULL; /* input buffer for region references */
                         hdset_reg_ref_t *buf       = NULL; /* output buffer */
-                        const char *     refname;
+                        const char      *refname;
                         unsigned         u;
 
                         /*-------------------------------------------------------------------------
@@ -453,10 +453,10 @@ copy_refs_attr(hid_t loc_in, hid_t loc_out, trav_table_t *travt, hid_t fidout) /
     int         rank;
     H5T_class_t type_class = -1;
     hbool_t     is_ref = 0, is_ref_vlen = 0, is_ref_array = 0, is_ref_comp = 0;
-    void *      refbuf           = NULL;
-    void *      buf              = NULL;
-    unsigned *  ref_comp_index   = NULL;
-    size_t *    ref_comp_size    = NULL;
+    void       *refbuf           = NULL;
+    void       *buf              = NULL;
+    unsigned   *ref_comp_index   = NULL;
+    size_t     *ref_comp_size    = NULL;
     int         ref_comp_field_n = 0;
     int         ret_value        = 0;
 
@@ -812,7 +812,7 @@ static const char *
 MapIdToName(hid_t refobj_id, trav_table_t *travt)
 {
     unsigned int u;
-    const char * ret = NULL;
+    const char  *ret = NULL;
 
     /* linear search */
     for (u = 0; u < travt->nobjs; u++) {

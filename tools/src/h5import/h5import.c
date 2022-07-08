@@ -78,7 +78,7 @@ main(int argc, char *argv[])
     int             token;
     int             i;
     int             state = 0;
-    struct Input *  in    = NULL;
+    struct Input   *in    = NULL;
 
     const char *err1  = "Invalid number of arguments:  %d.\n";
     const char *err2  = "Error in state table.\n";
@@ -352,7 +352,7 @@ gtoken(char *s)
 static int
 processDataFile(char *infile, struct Input *in, hid_t file_id)
 {
-    FILE *      strm   = NULL;
+    FILE       *strm   = NULL;
     const char *err1   = "Unable to open the input file  %s for reading.\n";
     const char *err2   = "Error in allocating integer data storage.\n";
     const char *err3   = "Error in allocating floating-point data storage.\n";
@@ -462,7 +462,7 @@ error:
 static int
 readIntegerData(FILE *strm, struct Input *in)
 {
-    H5DT_INT8 * in08;
+    H5DT_INT8  *in08;
     H5DT_INT16 *in16;
     H5DT_INT16  temp16;
     H5DT_INT32 *in32;
@@ -634,7 +634,7 @@ readIntegerData(FILE *strm, struct Input *in)
 static int
 readUIntegerData(FILE *strm, struct Input *in)
 {
-    H5DT_UINT8 * in08;
+    H5DT_UINT8  *in08;
     H5DT_UINT16 *in16;
     H5DT_UINT16  temp16;
     H5DT_UINT32 *in32;
@@ -645,9 +645,9 @@ readUIntegerData(FILE *strm, struct Input *in)
     hsize_t      len = 1;
     hsize_t      i;
     int          j;
-    const char * err1 = "Unable to get unsigned integer value from file.\n";
-    const char * err2 = "Unrecognized input class type.\n";
-    const char * err3 = "Invalid input size.\n";
+    const char  *err1 = "Unable to get unsigned integer value from file.\n";
+    const char  *err2 = "Unrecognized input class type.\n";
+    const char  *err3 = "Invalid input size.\n";
 
     for (j = 0; j < in->rank; j++)
         len *= in->sizeOfDimension[j];
@@ -802,10 +802,10 @@ static int
 readFloatData(FILE *strm, struct Input *in)
 {
     H5DT_FLOAT32 *fp32;
-    uint32_t *    bfp32;
+    uint32_t     *bfp32;
     uint32_t      temp32;
     H5DT_FLOAT64 *fp64;
-    uint64_t *    bfp64;
+    uint64_t     *bfp64;
     uint64_t      temp64;
 
     hsize_t     len = 1;
@@ -1037,7 +1037,7 @@ processStrData(FILE *strm, struct Input *in, hid_t file_id)
         i++;
 
         if (c == 10) { /* eol */
-            char *  str2 = str;
+            char   *str2 = str;
             hid_t   fspace_id;
             hsize_t start[1];
             hsize_t count[1] = {1};
@@ -1095,9 +1095,9 @@ processStrHDFData(FILE *strm, struct Input *in, hid_t file_id)
     hid_t   mspace_id = H5I_INVALID_HID;
     hid_t   type_id   = H5I_INVALID_HID;
     hid_t   handle    = H5I_INVALID_HID;
-    char *  str1      = NULL;
-    char *  str2      = NULL;
-    char *  str3      = NULL;
+    char   *str1      = NULL;
+    char   *str2      = NULL;
+    char   *str3      = NULL;
     char    str[1024] = "";
     int     j;
     hsize_t line;
@@ -2512,7 +2512,7 @@ static int
 parsePathInfo(struct path_info *path, char *temp)
 {
     const char  delimiter[] = "/\"";
-    char *      token;
+    char       *token;
     int         i    = 0;
     const char *err1 = "Path string larger than MAX_PATH_NAME_LENGTH.\n";
 
@@ -2542,7 +2542,7 @@ parseDimensions(struct Input *in, char *strm)
 {
     const char  delimiter[] = ",";
     char        temp[255];
-    char *      token;
+    char       *token;
     int         i    = 0;
     const char *err1 = "Unable to allocate dynamic memory.\n";
 
@@ -4589,7 +4589,7 @@ static int
 process(struct Options *opt)
 {
     struct Input *in;
-    FILE *        extfile;
+    FILE         *extfile;
     hid_t         file_id;
     hid_t         group_id;
     hid_t         handle;

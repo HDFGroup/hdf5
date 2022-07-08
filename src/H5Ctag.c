@@ -52,7 +52,7 @@
 
 /* Typedef for tagged entry iterator callback context - evict tagged entries */
 typedef struct {
-    H5F_t * f;                           /* File pointer for evicting entry */
+    H5F_t  *f;                           /* File pointer for evicting entry */
     hbool_t evicted_entries_last_pass;   /* Flag to indicate that an entry
                                           * was evicted when iterating over
                                           * cache
@@ -69,7 +69,7 @@ typedef struct {
 
 /* Typedef for tagged entry iterator callback context - expunge tag type metadata */
 typedef struct {
-    H5F_t *  f;       /* File pointer for evicting entry */
+    H5F_t   *f;       /* File pointer for evicting entry */
     int      type_id; /* Cache entry type to expunge */
     unsigned flags;   /* Flags for expunging entry */
 } H5C_tag_iter_ettm_ctx_t;
@@ -505,7 +505,7 @@ done:
 herr_t
 H5C_evict_tagged_entries(H5F_t *f, haddr_t tag, hbool_t match_global)
 {
-    H5C_t *                  cache;               /* Pointer to cache structure */
+    H5C_t                   *cache;               /* Pointer to cache structure */
     H5C_tag_iter_evict_ctx_t ctx;                 /* Context for iterator callback */
     herr_t                   ret_value = SUCCEED; /* Return value */
 
@@ -842,7 +842,7 @@ done:
 herr_t
 H5C_expunge_tag_type_metadata(H5F_t *f, haddr_t tag, int type_id, unsigned flags)
 {
-    H5C_t *                 cache;               /* Pointer to cache structure */
+    H5C_t                  *cache;               /* Pointer to cache structure */
     H5C_tag_iter_ettm_ctx_t ctx;                 /* Context for iterator callback */
     herr_t                  ret_value = SUCCEED; /* Return value */
 

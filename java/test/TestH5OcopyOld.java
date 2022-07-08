@@ -98,7 +98,7 @@ public class TestH5OcopyOld {
         System.out.print(testname.getMethodName());
         try {
             H5fid   = H5.H5Fcreate(FILENAME, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
-                                 HDF5Constants.H5P_DEFAULT);
+                                   HDF5Constants.H5P_DEFAULT);
             H5dsid2 = H5.H5Screate(HDF5Constants.H5S_SCALAR);
             H5did1  = _createDataset(H5fid, H5dsid2, "DS2", HDF5Constants.H5P_DEFAULT);
             H5dsid  = H5.H5Screate_simple(1, dims, null);

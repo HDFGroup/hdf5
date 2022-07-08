@@ -283,14 +283,14 @@ const char *FILENAME[] = {"dataset",             /* 0 */
 /* Shared global arrays */
 #define DSET_DIM1 100
 #define DSET_DIM2 200
-int **   points               = NULL;
-int *    points_data          = NULL;
+int    **points               = NULL;
+int     *points_data          = NULL;
 double **points_dbl           = NULL;
-double * points_dbl_data      = NULL;
-int **   check                = NULL;
-int *    check_data           = NULL;
+double  *points_dbl_data      = NULL;
+int    **check                = NULL;
+int     *check_data           = NULL;
 double **check_dbl            = NULL;
-double * check_dbl_data       = NULL;
+double  *check_dbl_data       = NULL;
 size_t   count_nbytes_read    = 0;
 size_t   count_nbytes_written = 0;
 
@@ -539,11 +539,11 @@ test_simple_io(const char *env_h5_drvr, hid_t fapl)
     hid_t   file = -1, dataset = -1, space = -1, xfer = -1;
     int     i, j, n;
     hsize_t dims[2];
-    void *  tconv_buf = NULL;
+    void   *tconv_buf = NULL;
     int     f         = -1;
     haddr_t offset;
-    int **  rdata       = NULL;
-    int *   rdata_bytes = NULL;
+    int   **rdata       = NULL;
+    int    *rdata_bytes = NULL;
 
     TESTING("simple I/O");
 
@@ -703,8 +703,8 @@ test_userblock_offset(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
     hsize_t dims[2];
     int     f = -1;
     haddr_t offset;
-    int **  rdata       = NULL;
-    int *   rdata_bytes = NULL;
+    int   **rdata       = NULL;
+    int    *rdata_bytes = NULL;
 
     TESTING("dataset offset with user block");
 
@@ -845,8 +845,8 @@ test_compact_io(hid_t fapl)
     int          wbuf[16][8], rbuf[16][8];
     char         filename[FILENAME_BUF_SIZE];
     H5F_libver_t low, high; /* File format bounds */
-    H5F_t *      fp;        /* Internal file pointer */
-    H5D_t *      dsetp;     /* Internal dataset pointer */
+    H5F_t       *fp;        /* Internal file pointer */
+    H5D_t       *dsetp;     /* Internal dataset pointer */
     int          i, j, n;   /* Indices */
     herr_t       ret;       /* Generic return value */
 
@@ -1063,8 +1063,8 @@ test_max_compact(hid_t fapl)
     hid_t   plist   = -1;
     hsize_t dims[1];
     size_t  compact_size;
-    int *   wbuf = NULL;
-    int *   rbuf = NULL;
+    int    *wbuf = NULL;
+    int    *rbuf = NULL;
     char    filename[FILENAME_BUF_SIZE];
     int     n;
     size_t  u;
@@ -1374,7 +1374,7 @@ test_conv_buffer(hid_t fid)
     herr_t status = -1;
     int    j, k, l;
 
-    CmpField * cf   = NULL;
+    CmpField  *cf   = NULL;
     CmpFieldR *cfrR = NULL;
 
     hid_t dataset = H5I_INVALID_HID;                          /* dataset ID             */
@@ -1545,7 +1545,7 @@ error:
 static herr_t
 test_tconv(hid_t file)
 {
-    char *  out = NULL, *in = NULL;
+    char   *out = NULL, *in = NULL;
     hsize_t dims[1];
     hid_t   space = -1, dataset = -1;
     int     i;
@@ -1748,7 +1748,7 @@ filter_bogus2(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_value
         /* "Compressing" */
         else {
             unsigned add_on   = cd_values[3]; /* Get "add on" value */
-            int *    int_ptr  = (int *)*buf;  /* Pointer to the data values */
+            int     *int_ptr  = (int *)*buf;  /* Pointer to the data values */
             size_t   buf_left = *buf_size;    /* Amount of data buffer left to process */
 
             /* Add the "add on" value to all the data values */
@@ -1808,7 +1808,7 @@ static size_t
 filter_corrupt(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values, size_t nbytes,
                size_t *buf_size, void **buf)
 {
-    void *         data = NULL;
+    void          *data = NULL;
     unsigned char *dst  = (unsigned char *)(*buf);
     unsigned int   offset;
     unsigned int   length;
@@ -1909,7 +1909,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
     const hsize_t size[2]      = {DSET_DIM1, DSET_DIM2}; /* Dataspace dimensions */
     const hsize_t hs_offset[2] = {FILTER_HS_OFFSET1, FILTER_HS_OFFSET2}; /* Hyperslab offset */
     const hsize_t hs_size[2]   = {FILTER_HS_SIZE1, FILTER_HS_SIZE2};     /* Hyperslab size */
-    void *        tconv_buf    = NULL;                                   /* Temporary conversion buffer */
+    void         *tconv_buf    = NULL;                                   /* Temporary conversion buffer */
     size_t        i, j, n;                                               /* Local index variables */
     herr_t        status;                                                /* Error status */
 
@@ -2852,7 +2852,7 @@ test_missing_filter(hid_t file)
     hsize_t       dset_size;                              /* Dataset size */
     size_t        i, j;                                   /* Local index variables */
     herr_t        ret;                                    /* Generic return value */
-    const char *  testfile       = H5_get_srcdir_filename(FILE_DEFLATE_NAME); /* Corrected test file name */
+    const char   *testfile       = H5_get_srcdir_filename(FILE_DEFLATE_NAME); /* Corrected test file name */
     hbool_t       api_ctx_pushed = FALSE;                                     /* Whether API context pushed */
 
     TESTING("dataset access with missing filter");
@@ -4275,7 +4275,7 @@ test_nbit_compound_3(hid_t file)
     typedef struct {           /* Struct with some no-op type fields */
         int           i;       /* integer field, NOT a no-op type */
         char          str[30]; /* fixed-length string, no-op type */
-        char *        vl_str;  /* varible-length string, no-op type */
+        char         *vl_str;  /* varible-length string, no-op type */
         hvl_t         v;       /* VL datatype field, no-op type */
         hobj_ref_t    r;       /* Object reference field, no-op type */
         unsigned char o[5];    /* Opaque field, no-op type */
@@ -4479,8 +4479,8 @@ test_nbit_int_size(hid_t file)
     hid_t   dataspace, dataset, datatype, mem_datatype, dset_create_props;
     hsize_t dims[2], chunk_size[2];
     hsize_t dset_size = 0;
-    int **  orig      = NULL;
-    int *   orig_data = NULL;
+    int   **orig      = NULL;
+    int    *orig_data = NULL;
     double  power;
     int     i, j;
     size_t  precision, offset;
@@ -4660,7 +4660,7 @@ test_nbit_flt_size(hid_t file)
     hsize_t dims[2], chunk_size[2];
     hsize_t dset_size = 0;
     float **orig      = NULL;
-    float * orig_data = NULL;
+    float  *orig_data = NULL;
     int     i, j;
     size_t  precision, offset;
     size_t  spos, epos, esize, mpos, msize;
@@ -7201,7 +7201,7 @@ auxread_fdata(hid_t fid, const char *name)
     hid_t   ftype_id = -1;      /* file data type ID */
     hid_t   mtype_id = -1;      /* memory data type ID */
     size_t  msize;              /* memory size of memory type */
-    void *  buf = NULL;         /* data buffer */
+    void   *buf = NULL;         /* data buffer */
     hsize_t nelmts;             /* number of elements in dataset */
     int     rank;               /* rank of dataset */
     hsize_t dims[H5S_MAX_RANK]; /* dimensions of dataset */
@@ -7575,12 +7575,12 @@ test_missing_chunk(hid_t file)
     hsize_t hs_start2[2], hs_stride2[2], hs_count2[2], hs_block2[2]; /* Hyperslab setting */
 
     /* Buffers for reading/writing dataset */
-    int * wdata        = NULL;
-    int * rdata        = NULL;
+    int  *wdata        = NULL;
+    int  *rdata        = NULL;
     int **wdata2       = NULL;
     int **rdata2       = NULL;
-    int * wdata2_bytes = NULL;
-    int * rdata2_bytes = NULL;
+    int  *wdata2_bytes = NULL;
+    int  *rdata2_bytes = NULL;
 
     /* Setting for 1-D dataset */
     hsize_t dsize = 100, dmax = H5S_UNLIMITED;
@@ -9057,12 +9057,12 @@ test_big_chunks_bypass_cache(hid_t fapl)
     /* Buffers for reading and writing data (1-D) */
     int *wdata = NULL, *rdata1 = NULL, *rdata2 = NULL;
     /* Buffers for reading and writing data (2-D) */
-    int **            t_wdata        = NULL;
-    int **            t_rdata1       = NULL;
-    int **            t_rdata2       = NULL;
-    int *             t_wdata_bytes  = NULL;
-    int *             t_rdata1_bytes = NULL;
-    int *             t_rdata2_bytes = NULL;
+    int             **t_wdata        = NULL;
+    int             **t_rdata1       = NULL;
+    int             **t_rdata2       = NULL;
+    int              *t_wdata_bytes  = NULL;
+    int              *t_rdata1_bytes = NULL;
+    int              *t_rdata2_bytes = NULL;
     int               i, j;                 /* Local index variables */
     H5F_libver_t      low;                  /* File format low bound */
     H5D_chunk_index_t idx_type, t_idx_type; /* Dataset chunk index types */
@@ -9983,8 +9983,8 @@ test_chunk_fast_bug1(hid_t fapl)
 
     unsigned **wbuf       = NULL;
     unsigned **rbuf       = NULL;
-    unsigned * wbuf_bytes = NULL;
-    unsigned * rbuf_bytes = NULL;
+    unsigned  *wbuf_bytes = NULL;
+    unsigned  *rbuf_bytes = NULL;
 
     unsigned i, j; /* Local index variables */
 
@@ -10758,16 +10758,16 @@ test_fixed_array(hid_t fapl)
 
     int **chunks           = NULL; /* # of chunks for dataset dimensions */
     int **chunks_big       = NULL; /* # of chunks for big dataset dimensions */
-    int * chunks_bytes     = NULL;
-    int * chunks_big_bytes = NULL;
+    int  *chunks_bytes     = NULL;
+    int  *chunks_big_bytes = NULL;
 
     int chunk_row; /* chunk row index */
     int chunk_col; /* chunk column index */
 
     hsize_t **coord           = NULL; /* datdaset coordinates */
     hsize_t **coord_big       = NULL; /* big datdaset coordinates */
-    hsize_t * coord_bytes     = NULL;
-    hsize_t * coord_big_bytes = NULL;
+    hsize_t  *coord_bytes     = NULL;
+    hsize_t  *coord_big_bytes = NULL;
 
     H5D_chunk_index_t idx_type;   /* Dataset chunk index type */
     H5F_libver_t      low, high;  /* File format bounds */
@@ -11275,10 +11275,10 @@ test_single_chunk(hid_t fapl)
     hid_t   did = -1, did_max = -1;                     /* Dataset ID for dataset with fixed dimensions */
     hsize_t dim2[2]   = {DSET_DIM1, DSET_DIM2};         /* Dataset dimensions */
     hsize_t t_dim2[2] = {DSET_TMP_DIM1, DSET_TMP_DIM2}; /* Dataset dimensions */
-    int *   wbuf      = NULL;                           /* write buffer */
-    int *   t_wbuf    = NULL;                           /* write buffer */
-    int *   rbuf      = NULL;                           /* read buffer */
-    int *   t_rbuf    = NULL;                           /* read buffer */
+    int    *wbuf      = NULL;                           /* write buffer */
+    int    *t_wbuf    = NULL;                           /* write buffer */
+    int    *rbuf      = NULL;                           /* read buffer */
+    int    *t_rbuf    = NULL;                           /* read buffer */
 
     H5D_chunk_index_t idx_type;   /* Dataset chunk index type */
     H5F_libver_t      low, high;  /* File format bounds */
@@ -11548,7 +11548,7 @@ test_idx_compatible(void)
 {
     hid_t             fid      = -1;   /* File id */
     hid_t             did      = -1;   /* Dataset id */
-    const char *      filename = NULL; /* old test file name */
+    const char       *filename = NULL; /* old test file name */
     unsigned          j;               /* Local index variable */
     H5D_chunk_index_t idx_type;        /* Chunked dataset index type */
 
@@ -13235,7 +13235,7 @@ error:
  *-------------------------------------------------------------------------
  */
 typedef struct scatter_info_t {
-    int *  src_buf; /* Source data buffer */
+    int   *src_buf; /* Source data buffer */
     size_t block;   /* Maximum number of elements to return to H5Dscatter() */
     size_t size;    /* Remaining number of elements to return */
 } scatter_info_t;
@@ -13547,7 +13547,7 @@ error:
  *-------------------------------------------------------------------------
  */
 typedef struct gather_info_t {
-    int *   expect_dst_buf; /* Expected destination data buffer */
+    int    *expect_dst_buf; /* Expected destination data buffer */
     size_t  max_nelmts;     /* Maximum number of elements passed to callback */
     hbool_t last_call;      /* Whether this should be the last time the callback is called */
 } gather_info_t;
@@ -14520,7 +14520,7 @@ dls_01_main(void)
     int         status = 0;
     hid_t       fapl = 0, fid = 0;
     const char *strings[DLS_01_DIMS] = {"String 1", "Test string 2", "Another string", "Final String"};
-    char *      buffer               = NULL;
+    char       *buffer               = NULL;
 
     TESTING("Testing DLS bugfix 1");
 
@@ -15211,7 +15211,7 @@ test_h5s_plist(void)
         /* Bad stride value (stride of NULL is OK) */
         stride = 0;
         ret    = H5Pset_dataset_io_hyperslab_selection(dxpl_id, 1, H5S_SELECT_SET, &start, &stride, &count,
-                                                    &block);
+                                                       &block);
         stride = 1;
     }
     H5E_END_TRY;

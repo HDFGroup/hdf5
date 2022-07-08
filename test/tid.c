@@ -32,8 +32,8 @@ basic_id_test(void)
 {
     H5I_type_t myType  = H5I_BADID;
     hid_t      arrayID = H5I_INVALID_HID;
-    void *     testObj = NULL;
-    void *     testPtr = NULL;
+    void      *testObj = NULL;
+    void      *testPtr = NULL;
     char       nameString[10];
     hid_t      testID;
     ssize_t    testSize = -1;
@@ -254,10 +254,10 @@ test_search_func(void H5_ATTR_UNUSED *ptr1, hid_t H5_ATTR_UNUSED id, void H5_ATT
 static int
 id_predefined_test(void)
 {
-    void * testObj;
+    void  *testObj;
     hid_t  testID;
     hid_t  typeID = H5I_INVALID_HID;
-    void * testPtr;
+    void  *testPtr;
     herr_t testErr;
 
     testObj = HDmalloc(sizeof(int));
@@ -691,7 +691,7 @@ test_remove_clear_type(void)
 {
     H5I_type_t     obj_type;
     rct_obj_list_t obj_list;
-    rct_obj_t *    objects = NULL; /* Convenience pointer to objects stored in master list */
+    rct_obj_t     *objects = NULL; /* Convenience pointer to objects stored in master list */
     size_t         list_size;
     long           i, j;
     herr_t         ret; /* return value */
@@ -894,7 +894,7 @@ static herr_t
 realize_future_cb(void *_future_obj, hid_t *actual_id)
 {
     future_obj_t *future_obj = (future_obj_t *)_future_obj; /* Future object */
-    int *         actual_obj;                               /* Pointer to the actual object */
+    int          *actual_obj;                               /* Pointer to the actual object */
 
     /* Check for bad future object */
     if (NULL == future_obj)
@@ -948,7 +948,7 @@ static herr_t
 realize_future_generate_cb(void *_future_obj, hid_t *actual_id)
 {
     future_obj_t *future_obj = (future_obj_t *)_future_obj; /* Future object */
-    int *         actual_obj;                               /* Pointer to the actual object */
+    int          *actual_obj;                               /* Pointer to the actual object */
 
     if (NULL != future_obj)
         return FAIL;
@@ -984,8 +984,8 @@ test_future_ids(void)
     hid_t         future_id;       /* ID for future object */
     int           fake_future_obj; /* "Fake" future object for tests */
     future_obj_t *future_obj;      /* Future object */
-    int *         actual_obj;      /* Actual object */
-    int *         actual_obj2;     /* Another actual object */
+    int          *actual_obj;      /* Actual object */
+    int          *actual_obj2;     /* Another actual object */
     H5I_type_t    id_type;         /* Type of ID */
     H5T_class_t   type_class;      /* Datatype class */
     herr_t        ret;             /* Return value */

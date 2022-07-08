@@ -28,9 +28,9 @@
  *    This tool uses H5LD_memb_t data structure declared in H5LDprivate.h
  */
 
-const char *         progname         = "h5watch"; /* tool name */
-static char *        g_list_of_fields = NULL;      /* command line input for "list_of_fields" */
-static char *        g_dup_fields     = NULL;      /* copy of "list_of_fields" */
+const char          *progname         = "h5watch"; /* tool name */
+static char         *g_list_of_fields = NULL;      /* command line input for "list_of_fields" */
+static char         *g_dup_fields     = NULL;      /* copy of "list_of_fields" */
 static H5LD_memb_t **g_listv          = NULL;      /* vector info for "list_of_fields" */
 
 static hbool_t  g_monitor_size_only = FALSE; /* monitor changes in dataset dimension sizes */
@@ -58,7 +58,7 @@ static void   parse_command_line(int argc, const char *const *argv);
  * The long-named ones can be partially spelled. When
  * adding more, make sure that they don't clash with each other.
  */
-static const char *           s_opts   = "?";
+static const char            *s_opts   = "?";
 static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},         {"hel", no_arg, 'h'},
                                           {"dim", no_arg, 'd'},          {"di", no_arg, 'd'},
                                           {"label", no_arg, 'l'},        {"labe", no_arg, 'l'},
@@ -498,7 +498,7 @@ check_dataset(hid_t fid, char *dsetname)
     hsize_t      cur_dims[H5S_MAX_RANK]; /* size of dataspace dimensions */
     hsize_t      max_dims[H5S_MAX_RANK]; /* maximum size of dataspace dimensions */
     hbool_t      unlim_max_dims = FALSE; /* whether dataset has unlimited or max. dimension setting */
-    void *       edata;
+    void        *edata;
     H5E_auto2_t  func;
     H5D_layout_t layout;
     herr_t       ret_value = SUCCEED; /* Return value */

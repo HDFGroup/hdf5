@@ -285,7 +285,7 @@ test_vlstring_array_dataset()
 
         // Create and write another dataset.
         DataSet dataset2(file1->createDataSet("Dataset2", vlst, scalar_space));
-        char *  wdata2 = static_cast<char *>(HDcalloc(65534, sizeof(char)));
+        char   *wdata2 = static_cast<char *>(HDcalloc(65534, sizeof(char)));
         HDmemset(wdata2, 'A', 65533);
         dataset2.write(&wdata2, vlst);
 
@@ -334,7 +334,7 @@ test_vlstrings_special()
 {
     const char *wdata[SPACE1_DIM1]  = {"one", "two", "", "four"};
     const char *wdata2[SPACE1_DIM1] = {NULL, NULL, NULL, NULL};
-    char *      rdata[SPACE1_DIM1]; // Information read in
+    char       *rdata[SPACE1_DIM1]; // Information read in
 
     // Output message about test being performed.
     SUBTEST("Special VL Strings");
@@ -396,7 +396,7 @@ test_vlstrings_special()
         // Create the property list and set the fill value for the second
         // dataset.
         DSetCreatPropList dcpl;
-        char *            fill = NULL; // Fill value
+        char             *fill = NULL; // Fill value
         dcpl.setFillValue(vlst, &fill);
         dataset = file1.createDataSet("Dataset4", vlst, sid1, dcpl);
 
@@ -627,7 +627,7 @@ test_compact_vlstring()
  *
  *-------------------------------------------------------------------------
  */
-static char *      string_att_write = NULL;
+static char       *string_att_write = NULL;
 const H5std_string ATTRSTR_NAME("String_attr");
 const H5std_string ATTRSTR_DATA("String Attribute");
 
@@ -860,7 +860,7 @@ write_scalar_dset(H5File &file, DataType &type, DataSpace &space, char *name, ch
 static void
 read_scalar_dset(H5File &file, DataType &type, DataSpace &space, char *name, char *data)
 {
-    char *  data_read;
+    char   *data_read;
     DataSet dset;
     try {
         dset = file.openDataSet(name);

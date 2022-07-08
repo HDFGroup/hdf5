@@ -90,8 +90,8 @@ typedef struct H5I_type_info_t {
     unsigned           init_count;   /* # of times this type has been initialized */
     uint64_t           id_count;     /* Current number of IDs held */
     uint64_t           nextid;       /* ID to use for the next object */
-    H5I_id_info_t *    last_id_info; /* Info for most recent ID looked up */
-    H5I_id_info_t *    hash_table;   /* Hash table pointer for this ID type */
+    H5I_id_info_t     *last_id_info; /* Info for most recent ID looked up */
+    H5I_id_info_t     *hash_table;   /* Hash table pointer for this ID type */
 } H5I_type_info_t;
 
 /*****************************/
@@ -114,12 +114,12 @@ H5_DLLVAR int H5I_next_type_g;
 /* Package Private Prototypes */
 /******************************/
 
-H5_DLL hid_t H5I__register(H5I_type_t type, const void *object, hbool_t app_ref,
-                           H5I_future_realize_func_t realize_cb, H5I_future_discard_func_t discard_cb);
-H5_DLL int   H5I__destroy_type(H5I_type_t type);
-H5_DLL void *H5I__remove_verify(hid_t id, H5I_type_t type);
-H5_DLL int   H5I__inc_type_ref(H5I_type_t type);
-H5_DLL int   H5I__get_type_ref(H5I_type_t type);
+H5_DLL hid_t          H5I__register(H5I_type_t type, const void *object, hbool_t app_ref,
+                                    H5I_future_realize_func_t realize_cb, H5I_future_discard_func_t discard_cb);
+H5_DLL int            H5I__destroy_type(H5I_type_t type);
+H5_DLL void          *H5I__remove_verify(hid_t id, H5I_type_t type);
+H5_DLL int            H5I__inc_type_ref(H5I_type_t type);
+H5_DLL int            H5I__get_type_ref(H5I_type_t type);
 H5_DLL H5I_id_info_t *H5I__find_id(hid_t id);
 
 /* Testing functions */

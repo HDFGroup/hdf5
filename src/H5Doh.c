@@ -41,11 +41,11 @@
 /********************/
 /* Local Prototypes */
 /********************/
-static void *     H5O__dset_get_copy_file_udata(void);
+static void      *H5O__dset_get_copy_file_udata(void);
 static void       H5O__dset_free_copy_file_udata(void *);
 static htri_t     H5O__dset_isa(const H5O_t *loc);
-static void *     H5O__dset_open(const H5G_loc_t *obj_loc, H5I_type_t *opened_type);
-static void *     H5O__dset_create(H5F_t *f, void *_crt_info, H5G_loc_t *obj_loc);
+static void      *H5O__dset_open(const H5G_loc_t *obj_loc, H5I_type_t *opened_type);
+static void      *H5O__dset_create(H5F_t *f, void *_crt_info, H5G_loc_t *obj_loc);
 static H5O_loc_t *H5O__dset_get_oloc(hid_t obj_id);
 static herr_t     H5O__dset_bh_info(const H5O_loc_t *loc, H5O_t *oh, H5_ih_info_t *bh_info);
 static herr_t     H5O__dset_flush(void *_obj_ptr);
@@ -211,7 +211,7 @@ H5O__dset_open(const H5G_loc_t *obj_loc, H5I_type_t *opened_type)
 {
     H5D_t *dset = NULL;      /* Dataset opened */
     hid_t  dapl_id;          /* dapl to use to open this dataset */
-    void * ret_value = NULL; /* Return value */
+    void  *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -273,8 +273,8 @@ static void *
 H5O__dset_create(H5F_t *f, void *_crt_info, H5G_loc_t *obj_loc)
 {
     H5D_obj_create_t *crt_info  = (H5D_obj_create_t *)_crt_info; /* Dataset creation parameters */
-    H5D_t *           dset      = NULL;                          /* New dataset created */
-    void *            ret_value = NULL;                          /* Return value */
+    H5D_t            *dset      = NULL;                          /* New dataset created */
+    void             *ret_value = NULL;                          /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -321,7 +321,7 @@ done:
 static H5O_loc_t *
 H5O__dset_get_oloc(hid_t obj_id)
 {
-    H5D_t *    dset;             /* Dataset opened */
+    H5D_t     *dset;             /* Dataset opened */
     H5O_loc_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -438,7 +438,7 @@ done:
 static herr_t
 H5O__dset_flush(void *_obj_ptr)
 {
-    H5D_t *    dset = (H5D_t *)_obj_ptr; /* Pointer to dataset object */
+    H5D_t     *dset = (H5D_t *)_obj_ptr; /* Pointer to dataset object */
     H5O_type_t obj_type;                 /* Type of object at location */
     herr_t     ret_value = SUCCEED;      /* Return value */
 

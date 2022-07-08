@@ -241,7 +241,7 @@ done:
 herr_t
 H5Fset_mpi_atomicity(hid_t file_id, hbool_t flag)
 {
-    H5VL_object_t *                  vol_obj;             /* File info */
+    H5VL_object_t                   *vol_obj;             /* File info */
     H5VL_optional_args_t             vol_cb_args;         /* Arguments to VOL callback */
     H5VL_native_file_optional_args_t file_opt_args;       /* Arguments for optional operation */
     herr_t                           ret_value = SUCCEED; /* Return value */
@@ -315,7 +315,7 @@ done:
 herr_t
 H5Fget_mpi_atomicity(hid_t file_id, hbool_t *flag /*out*/)
 {
-    H5VL_object_t *                  vol_obj;             /* File info */
+    H5VL_object_t                   *vol_obj;             /* File info */
     H5VL_optional_args_t             vol_cb_args;         /* Arguments to VOL callback */
     H5VL_native_file_optional_args_t file_opt_args;       /* Arguments for optional operation */
     herr_t                           ret_value = SUCCEED; /* Return value */
@@ -373,7 +373,7 @@ H5F_mpi_retrieve_comm(hid_t loc_id, hid_t acspl_id, MPI_Comm *mpi_comm)
        attached to the loc_id */
     if (H5I_INVALID_HID != loc_id) {
         H5G_loc_t loc;
-        H5F_t *   f = NULL;
+        H5F_t    *f = NULL;
 
         /* Retrieve the file structure */
         if (H5G_loc(loc_id, &loc) < 0)

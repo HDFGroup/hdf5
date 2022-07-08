@@ -96,7 +96,7 @@
 #endif /* FALSE */
 
 /* global variables */
-FILE *   output;              /* output file                          */
+FILE    *output;              /* output file                          */
 int      comm_world_rank_g;   /* my rank in MPI_COMM_RANK             */
 int      comm_world_nprocs_g; /* num. of processes of MPI_COMM_WORLD  */
 MPI_Comm pio_comm_g;          /* Communicator to run the PIO          */
@@ -116,7 +116,7 @@ static const char *progname = "h5perf";
 #ifndef HDF5_PARAPREFIX
 #define HDF5_PARAPREFIX ""
 #endif
-char *   paraprefix   = NULL;          /* for command line option para-prefix */
+char    *paraprefix   = NULL;          /* for command line option para-prefix */
 MPI_Info h5_io_info_g = MPI_INFO_NULL; /* MPI INFO object for IO */
 
 /*
@@ -773,7 +773,7 @@ h5_set_info_object(void)
 
         do {
             size_t len;
-            char * key_val, *endp, *namep;
+            char  *key_val, *endp, *namep;
 
             if (*valp == ';')
                 valp++;

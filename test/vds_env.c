@@ -45,12 +45,12 @@ static int
 test_vds_prefix_second(unsigned config, hid_t fapl)
 {
     const char *srcfilenamepct_map_orig = "vds%%%%_src";
-    char *      srcfilename             = NULL;
-    char *      srcfilename_map         = NULL;
-    char *      vfilename               = NULL;
-    char *      vfilename2              = NULL;
-    char *      srcfilenamepct          = NULL;
-    char *      srcfilenamepct_map      = NULL;
+    char       *srcfilename             = NULL;
+    char       *srcfilename_map         = NULL;
+    char       *vfilename               = NULL;
+    char       *vfilename2              = NULL;
+    char       *srcfilenamepct          = NULL;
+    char       *srcfilenamepct_map      = NULL;
     hid_t       srcfile[4]              = {-1, -1, -1, -1}; /* Files with source dsets */
     hid_t       vfile                   = -1;               /* File with virtual dset */
     hid_t       dcpl                    = -1;               /* Dataset creation property list */
@@ -326,7 +326,7 @@ main(void)
     hid_t        fapl, my_fapl;
     unsigned     bit_config;
     H5F_libver_t low, high;   /* Low and high bounds */
-    const char * env_h5_drvr; /* File Driver value from environment */
+    const char  *env_h5_drvr; /* File Driver value from environment */
     int          nerrors = 0;
 
     env_h5_drvr = HDgetenv(HDF5_DRIVER);

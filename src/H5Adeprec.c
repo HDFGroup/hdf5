@@ -106,8 +106,8 @@
 hid_t
 H5Acreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id, hid_t acpl_id)
 {
-    void *            attr    = NULL; /* attr object from VOL connector */
-    H5VL_object_t *   vol_obj = NULL; /* Object of loc_id */
+    void             *attr    = NULL; /* attr object from VOL connector */
+    H5VL_object_t    *vol_obj = NULL; /* Object of loc_id */
     H5VL_loc_params_t loc_params;
     hid_t             ret_value = H5I_INVALID_HID; /* Return value */
 
@@ -180,8 +180,8 @@ done:
 hid_t
 H5Aopen_name(hid_t loc_id, const char *name)
 {
-    void *            attr    = NULL; /* attr object from VOL connector */
-    H5VL_object_t *   vol_obj = NULL; /* Object of loc_id */
+    void             *attr    = NULL; /* attr object from VOL connector */
+    H5VL_object_t    *vol_obj = NULL; /* Object of loc_id */
     H5VL_loc_params_t loc_params;
     hid_t             ret_value = H5I_INVALID_HID; /* Return value */
 
@@ -245,8 +245,8 @@ done:
 hid_t
 H5Aopen_idx(hid_t loc_id, unsigned idx)
 {
-    void *            attr    = NULL; /* attr object from VOL connector */
-    H5VL_object_t *   vol_obj = NULL; /* Object of loc_id */
+    void             *attr    = NULL; /* attr object from VOL connector */
+    H5VL_object_t    *vol_obj = NULL; /* Object of loc_id */
     H5VL_loc_params_t loc_params;
     hid_t             ret_value = H5I_INVALID_HID; /* Return value */
 
@@ -309,7 +309,7 @@ done:
 int
 H5Aget_num_attrs(hid_t loc_id)
 {
-    H5VL_object_t *        vol_obj = NULL; /* Object of loc_id */
+    H5VL_object_t         *vol_obj = NULL; /* Object of loc_id */
     H5VL_object_get_args_t vol_cb_args;    /* Arguments to VOL callback */
     H5VL_loc_params_t      loc_params;
     H5O_info2_t            oinfo;
@@ -380,7 +380,7 @@ done:
 herr_t
 H5Aiterate1(hid_t loc_id, unsigned *attr_num /*in,out*/, H5A_operator1_t op, void *op_data)
 {
-    H5VL_object_t *                  vol_obj = NULL; /* Object of loc_id */
+    H5VL_object_t                   *vol_obj = NULL; /* Object of loc_id */
     H5VL_optional_args_t             vol_cb_args;    /* Arguments to VOL callback */
     H5VL_native_attr_optional_args_t attr_opt_args;  /* Arguments for optional operation */
     herr_t                           ret_value;      /* Return value */

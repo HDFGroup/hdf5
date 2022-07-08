@@ -38,7 +38,7 @@ Java_hdf_hdf5lib_H5_H5Rcreate_1object(JNIEnv *env, jclass clss, jlong loc_id, js
 {
     const char *refName = NULL;
     jbyteArray  ref     = NULL;
-    jbyte *     refBuf  = NULL;
+    jbyte      *refBuf  = NULL;
     herr_t      status  = FAIL;
 
     UNUSED(clss);
@@ -80,7 +80,7 @@ Java_hdf_hdf5lib_H5_H5Rcreate_1region(JNIEnv *env, jclass clss, jlong loc_id, js
 {
     const char *refName = NULL;
     jbyteArray  ref     = NULL;
-    jbyte *     refBuf  = NULL;
+    jbyte      *refBuf  = NULL;
     herr_t      status  = FAIL;
 
     UNUSED(clss);
@@ -124,7 +124,7 @@ Java_hdf_hdf5lib_H5_H5Rcreate_1attr(JNIEnv *env, jclass clss, jlong loc_id, jstr
     const char *refName  = NULL;
     const char *attrName = NULL;
     jbyteArray  ref      = NULL;
-    jbyte *     refBuf   = NULL;
+    jbyte      *refBuf   = NULL;
     herr_t      status   = FAIL;
 
     UNUSED(clss);
@@ -171,7 +171,7 @@ JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Rdestroy(JNIEnv *env, jclass clss, jbyteArray ref)
 {
     jboolean isCopy;
-    jbyte *  refBuf = NULL;
+    jbyte   *refBuf = NULL;
     jsize    refBufLen;
     herr_t   status = FAIL;
 
@@ -204,7 +204,7 @@ JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5Rget_1type(JNIEnv *env, jclass clss, jbyteArray ref)
 {
     jboolean   isCopy;
-    jbyte *    refBuf = NULL;
+    jbyte     *refBuf = NULL;
     jsize      refBufLen;
     H5R_type_t ref_type = -1;
 
@@ -239,8 +239,8 @@ JNIEXPORT jboolean JNICALL
 Java_hdf_hdf5lib_H5_H5Requal(JNIEnv *env, jclass clss, jbyteArray ref1, jbyteArray ref2)
 {
     jboolean isCopy;
-    jbyte *  refBuf1 = NULL;
-    jbyte *  refBuf2 = NULL;
+    jbyte   *refBuf1 = NULL;
+    jbyte   *refBuf2 = NULL;
     jsize    refBufLen;
     htri_t   bval   = JNI_FALSE;
     herr_t   status = FAIL;
@@ -291,10 +291,10 @@ JNIEXPORT jbyteArray JNICALL
 Java_hdf_hdf5lib_H5_H5Rcopy(JNIEnv *env, jclass clss, jbyteArray src_ref)
 {
     jboolean   isCopy;
-    jbyte *    src_refBuf = NULL;
+    jbyte     *src_refBuf = NULL;
     jsize      refBufLen;
     jbyteArray dst_ref    = NULL;
-    jbyte *    dst_refBuf = NULL;
+    jbyte     *dst_refBuf = NULL;
     herr_t     status     = FAIL;
 
     UNUSED(clss);
@@ -339,7 +339,7 @@ JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_H5__1H5Ropen_1object(JNIEnv *env, jclass clss, jbyteArray ref, jlong rapl_id, jlong oapl_id)
 {
     jboolean isCopy;
-    jbyte *  refBuf = NULL;
+    jbyte   *refBuf = NULL;
     jsize    refBufLen;
     hid_t    retVal = H5I_INVALID_HID;
 
@@ -374,7 +374,7 @@ JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_H5__1H5Ropen_1region(JNIEnv *env, jclass clss, jbyteArray ref, jlong rapl_id, jlong oapl_id)
 {
     jboolean isCopy;
-    jbyte *  refBuf = NULL;
+    jbyte   *refBuf = NULL;
     jsize    refBufLen;
     hid_t    retVal = H5I_INVALID_HID;
 
@@ -409,7 +409,7 @@ JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_H5__1H5Ropen_1attr(JNIEnv *env, jclass clss, jbyteArray ref, jlong rapl_id, jlong aapl_id)
 {
     jboolean isCopy;
-    jbyte *  refBuf = NULL;
+    jbyte   *refBuf = NULL;
     jsize    refBufLen;
     hid_t    retVal = H5I_INVALID_HID;
 
@@ -445,7 +445,7 @@ Java_hdf_hdf5lib_H5_H5Rget_1obj_1type3(JNIEnv *env, jclass clss, jbyteArray ref,
 {
     H5O_type_t object_info = -1;
     jboolean   isCopy;
-    jbyte *    refBuf = NULL;
+    jbyte     *refBuf = NULL;
     int        retVal = -1;
 
     UNUSED(clss);
@@ -477,11 +477,11 @@ JNIEXPORT jstring JNICALL
 Java_hdf_hdf5lib_H5_H5Rget_1file_1name(JNIEnv *env, jclass clss, jbyteArray ref)
 {
     jboolean isCopy;
-    jbyte *  refBuf = NULL;
+    jbyte   *refBuf = NULL;
     jstring  str    = NULL;
     ssize_t  buf_size;
     ssize_t  check_size = -1;
-    char *   namePtr    = NULL;
+    char    *namePtr    = NULL;
 
     UNUSED(clss);
 
@@ -522,11 +522,11 @@ JNIEXPORT jstring JNICALL
 Java_hdf_hdf5lib_H5_H5Rget_1obj_1name(JNIEnv *env, jclass clss, jbyteArray ref, jlong rapl_id)
 {
     jboolean isCopy;
-    jbyte *  refBuf = NULL;
+    jbyte   *refBuf = NULL;
     jstring  str    = NULL;
     ssize_t  buf_size;
     ssize_t  check_size = -1;
-    char *   namePtr    = NULL;
+    char    *namePtr    = NULL;
 
     UNUSED(clss);
 
@@ -568,11 +568,11 @@ JNIEXPORT jstring JNICALL
 Java_hdf_hdf5lib_H5_H5Rget_1attr_1name(JNIEnv *env, jclass clss, jbyteArray ref)
 {
     jboolean isCopy;
-    jbyte *  refBuf = NULL;
+    jbyte   *refBuf = NULL;
     jstring  str    = NULL;
     ssize_t  buf_size;
     ssize_t  check_size = -1;
-    char *   namePtr    = NULL;
+    char    *namePtr    = NULL;
 
     UNUSED(clss);
 
@@ -617,7 +617,7 @@ Java_hdf_hdf5lib_H5_H5Rcreate(JNIEnv *env, jclass clss, jbyteArray ref, jlong lo
 {
     const char *refName = NULL;
     jboolean    isCopy;
-    jbyte *     refBuf = NULL;
+    jbyte      *refBuf = NULL;
     jsize       refBufLen;
     herr_t      status = FAIL;
 
@@ -667,7 +667,7 @@ Java_hdf_hdf5lib_H5__1H5Rdereference(JNIEnv *env, jclass clss, jlong dataset, jl
                                      jint ref_type, jbyteArray ref)
 {
     jboolean isCopy;
-    jbyte *  refBuf = NULL;
+    jbyte   *refBuf = NULL;
     jsize    refBufLen;
     hid_t    retVal = H5I_INVALID_HID;
 
@@ -711,7 +711,7 @@ JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_H5__1H5Rget_1region(JNIEnv *env, jclass clss, jlong dataset, jint ref_type, jbyteArray ref)
 {
     jboolean isCopy;
-    jbyte *  refBuf = NULL;
+    jbyte   *refBuf = NULL;
     jsize    refBufLen;
     hid_t    retVal = H5I_INVALID_HID;
 
@@ -753,7 +753,7 @@ Java_hdf_hdf5lib_H5_H5Rget_1obj_1type(JNIEnv *env, jclass clss, jlong loc_id, ji
 {
     H5O_type_t object_info;
     jboolean   isCopy;
-    jbyte *    refBuf = NULL;
+    jbyte     *refBuf = NULL;
     int        retVal = -1;
 
     UNUSED(clss);
@@ -786,8 +786,8 @@ Java_hdf_hdf5lib_H5_H5Rget_1obj_1type2(JNIEnv *env, jclass clss, jlong loc_id, j
                                        jintArray ref_obj)
 {
     jboolean isCopy, isCopy2;
-    jbyte *  refBuf   = NULL;
-    jint *   ref_objP = NULL;
+    jbyte   *refBuf   = NULL;
+    jint    *ref_objP = NULL;
     jint     status   = -1;
     int      retVal   = -1;
 
@@ -828,8 +828,8 @@ Java_hdf_hdf5lib_H5_H5Rget_1name(JNIEnv *env, jclass clss, jlong loc_id, jint re
     jboolean isCopy;
     jstring  str;
     jsize    refBufLen;
-    jbyte *  refBuf  = NULL;
-    char *   aName   = NULL;
+    jbyte   *refBuf  = NULL;
+    char    *aName   = NULL;
     jlong    ret_val = -1;
 
     UNUSED(clss);

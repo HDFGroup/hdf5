@@ -38,7 +38,7 @@ typedef struct H5PL_vol_key_t {
     H5VL_get_connector_kind_t kind; /* Kind of VOL lookup to do */
     union {
         H5VL_class_value_t value; /* VOL connector value */
-        const char *       name;  /* VOL connector name */
+        const char        *name;  /* VOL connector name */
     } u;
 } H5PL_vol_key_t;
 
@@ -47,7 +47,7 @@ typedef struct H5PL_vfd_key_t {
     H5FD_get_driver_kind_t kind; /* Kind of VFD lookup to do */
     union {
         H5FD_class_value_t value; /* VFD value */
-        const char *       name;  /* VFD name */
+        const char        *name;  /* VFD name */
     } u;
 } H5PL_vfd_key_t;
 

@@ -2494,7 +2494,7 @@ make_szip(hid_t loc_id)
         /* WARNING? SZIP is decoder only, can't generate test files */
 
         if (H5Sclose(sid) < 0)
-        goto error;
+            goto error;
     if (H5Pclose(dcpl) < 0)
         goto error;
 
@@ -4138,7 +4138,7 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
     {
 
         hsize_t  TEST_BUFSIZE = (128 * 1024 * 1024); /* 128MB */
-        double * dbuf;                               /* information to write */
+        double  *dbuf;                               /* information to write */
         size_t   size;
         hsize_t  sdims[] = {1};
         hsize_t  tdims[] = {TEST_BUFSIZE / sizeof(double) + 1};
@@ -4642,7 +4642,7 @@ make_dset_reg_ref(hid_t loc_id)
     hsize_t          count[SPACE2_RANK];  /* Element count of hyperslab */
     hsize_t          block[SPACE2_RANK];  /* Block size of hyperslab */
     hdset_reg_ref_t *wbuf  = NULL;        /* buffer to write to disk */
-    int *            dwbuf = NULL;        /* Buffer for writing numeric data to disk */
+    int             *dwbuf = NULL;        /* Buffer for writing numeric data to disk */
     int              i;                   /* counting variables */
     int              retval = -1;         /* return value */
 

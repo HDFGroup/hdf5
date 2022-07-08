@@ -29,7 +29,7 @@
 void
 mirror_log(struct mirror_log_info *info, unsigned int level, const char *format, ...)
 {
-    FILE *       stream    = MIRROR_LOG_DEFAULT_STREAM;
+    FILE        *stream    = MIRROR_LOG_DEFAULT_STREAM;
     unsigned int verbosity = MIRROR_LOG_DEFAULT_VERBOSITY;
     hbool_t      custom    = FALSE;
 
@@ -80,7 +80,7 @@ mirror_log(struct mirror_log_info *info, unsigned int level, const char *format,
 void
 mirror_log_bytes(struct mirror_log_info *info, unsigned int level, size_t n_bytes, const unsigned char *buf)
 {
-    FILE *       stream    = MIRROR_LOG_DEFAULT_STREAM;
+    FILE        *stream    = MIRROR_LOG_DEFAULT_STREAM;
     unsigned int verbosity = MIRROR_LOG_DEFAULT_VERBOSITY;
 
     if (buf == NULL) {

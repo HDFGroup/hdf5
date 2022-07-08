@@ -117,7 +117,7 @@ const char *LIBVER_NAMES[] = {"earliest", /* H5F_LIBVER_EARLIEST = 0  */
 static H5E_auto2_t err_func = NULL;
 
 static herr_t h5_errors(hid_t estack, void *client_data);
-static char * h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fullname,
+static char  *h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fullname,
                               size_t size, hbool_t nest_printf, hbool_t subst_for_superblock);
 
 /*-------------------------------------------------------------------------
@@ -524,7 +524,7 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
 {
     const char *prefix         = NULL;
     const char *driver_env_var = NULL; /* HDF5_DRIVER environment variable     */
-    char *      ptr, last = '\0';
+    char       *ptr, last = '\0';
     const char *suffix = _suffix;
     size_t      i, j;
     hid_t       driver     = -1;
@@ -865,7 +865,7 @@ h5_get_libver_fapl(hid_t fapl)
 {
     const char *env   = NULL; /* HDF5_DRIVER environment variable     */
     const char *tok   = NULL; /* strtok pointer                       */
-    char *      lasts = NULL; /* Context pointer for strtok_r() call */
+    char       *lasts = NULL; /* Context pointer for strtok_r() call */
     char        buf[1024];    /* buffer for tokenizing HDF5_DRIVER    */
 
     /* Get the environment variable, if it exists */
@@ -1038,7 +1038,7 @@ h5_set_info_object(void)
 
         do {
             size_t len;
-            char * key_val, *endp, *namep;
+            char  *key_val, *endp, *namep;
 
             if (*valp == ';')
                 valp++;
@@ -1190,7 +1190,7 @@ h5_get_file_size(const char *filename, hid_t fapl)
         else if (driver == H5FD_MULTI) {
             H5FD_mem_t     mt;
             h5_stat_size_t tot_size       = 0;
-            char *         driver_env_var = NULL;
+            char          *driver_env_var = NULL;
 
             driver_env_var = HDgetenv(HDF5_DRIVER);
             if (driver_env_var && !HDstrcmp(driver_env_var, "split")) {
@@ -1470,7 +1470,7 @@ h5_make_local_copy(const char *origfilename, const char *local_copy_name)
 {
     int         fd_old = (-1), fd_new = (-1);                    /* File descriptors for copying data */
     ssize_t     nread;                                           /* Number of bytes read in */
-    void *      buf      = NULL;                                 /* Buffer for copying data */
+    void       *buf      = NULL;                                 /* Buffer for copying data */
     const char *filename = H5_get_srcdir_filename(origfilename); /* Get the test file name to copy */
 
     if (!filename)
@@ -1679,7 +1679,7 @@ h5_send_message(const char *send, const char *arg1, const char *arg2)
 herr_t
 h5_wait_message(const char *waitfor)
 {
-    FILE * returnfile;
+    FILE  *returnfile;
     time_t t0, t1;
 
     /* Start timer. If this function runs for too long (i.e.,
@@ -2064,12 +2064,12 @@ H5_get_srcdir(void)
 int
 h5_duplicate_file_by_bytes(const char *orig, const char *dest)
 {
-    FILE *  orig_ptr  = NULL;
-    FILE *  dest_ptr  = NULL;
+    FILE   *orig_ptr  = NULL;
+    FILE   *dest_ptr  = NULL;
     hsize_t fsize     = 0;
     hsize_t read_size = 0;
     hsize_t max_buf   = 0;
-    void *  dup_buf   = NULL;
+    void   *dup_buf   = NULL;
     int     ret_value = 0;
 
     max_buf = 4096 * sizeof(char);
@@ -2253,7 +2253,7 @@ hbool_t
 h5_driver_uses_modified_filename(void)
 {
     hbool_t ret_val = FALSE;
-    char *  driver  = HDgetenv(HDF5_DRIVER);
+    char   *driver  = HDgetenv(HDF5_DRIVER);
 
     if (driver) {
         ret_val = !HDstrcmp(driver, "multi") || !HDstrcmp(driver, "split") || !HDstrcmp(driver, "family") ||

@@ -97,7 +97,7 @@ static const char *progname = "h5perf_serial";
  * It seems that only the options that accept additional information
  * such as dataset size (-e) require the colon next to it.
  */
-static const char *           s_opts   = "a:A:B:c:Cd:D:e:F:ghi:Imno:p:P:r:stT:v:wx:X:";
+static const char            *s_opts   = "a:A:B:c:Cd:D:e:F:ghi:Imno:p:P:r:stT:v:wx:X:";
 static struct h5_long_options l_opts[] = {{"align", require_arg, 'a'},
                                           {"api", require_arg, 'A'},
 #if 0
@@ -1187,7 +1187,7 @@ static hsize_t
 parse_size_directive(const char *size)
 {
     hsize_t s;
-    char *  endptr;
+    char   *endptr;
 
     s = HDstrtoull(size, &endptr, 10);
 

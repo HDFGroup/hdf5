@@ -443,8 +443,8 @@ test_misc2_write_attribute(void)
     hid_t        type;
     herr_t       ret;
     misc2_struct data, data_check;
-    char *       string_att1 = HDstrdup("string attribute in file one");
-    char *       string_att2 = HDstrdup("string attribute in file two");
+    char        *string_att1 = HDstrdup("string attribute in file one");
+    char        *string_att2 = HDstrdup("string attribute in file two");
 
     type = misc2_create_type();
 
@@ -1248,8 +1248,8 @@ test_misc8(void)
     hsize_t dims[MISC8_RANK]       = {MISC8_DIM0, MISC8_DIM1};
     hsize_t chunk_dims[MISC8_RANK] = {MISC8_CHUNK_DIM0, MISC8_CHUNK_DIM1};
     hsize_t storage_size; /* Number of bytes of raw data storage used */
-    int *   wdata;        /* Data to write */
-    int *   tdata;        /* Temporary pointer to data write */
+    int    *wdata;        /* Data to write */
+    int    *tdata;        /* Temporary pointer to data write */
 #ifdef VERIFY_DATA
     int *rdata;                 /* Data to read */
     int *tdata2;                /* Temporary pointer to data to read */
@@ -2016,7 +2016,7 @@ test_misc12(void)
         "bien germina ya! Ceso la horrible noche, La libertad sublime",
         "derrama las auroras de su invencible luz.", "La humanidad entera, que entre cadenas gime, comprende",
         "las palabras del que murio en la cruz."};
-    char *  rdata[MISC12_SPACE1_DIM1 + MISC12_APPEND_SIZE]; /* Information read in */
+    char   *rdata[MISC12_SPACE1_DIM1 + MISC12_APPEND_SIZE]; /* Information read in */
     hid_t   fid1;
     hid_t   dataset;
     hid_t   sid1, space, memspace;
@@ -2299,10 +2299,10 @@ misc13_create_hdf_file(const char *name, const unsigned *data)
 static void
 misc13_insert_user_block(const char *old_name, const char *new_name, const char *str, size_t size)
 {
-    FILE * new_fp     = NULL; /* Pointers to new & old files */
-    FILE * old_fp     = NULL;
-    void * user_block = NULL; /* Pointer to user block to write to file */
-    void * copy_buf   = NULL; /* Pointer to buffer for copying data */
+    FILE  *new_fp     = NULL; /* Pointers to new & old files */
+    FILE  *old_fp     = NULL;
+    void  *user_block = NULL; /* Pointer to user block to write to file */
+    void  *copy_buf   = NULL; /* Pointer to buffer for copying data */
     size_t written;           /* Amount of data written to new file */
     size_t read_in;           /* Amount of data read in from old file */
     int    ret;               /* Generic status value */
@@ -3835,7 +3835,7 @@ static void
 test_misc21(void)
 {
     hid_t   fid, sid, dcpl, dsid;
-    char *  buf;
+    char   *buf;
     hsize_t dims[2]       = {MISC21_SPACE_DIM0, MISC21_SPACE_DIM1},
             chunk_size[2] = {MISC21_CHUNK_DIM0, MISC21_CHUNK_DIM1};
     herr_t ret; /* Generic return value */
@@ -3901,7 +3901,7 @@ static void
 test_misc22(void)
 {
     hid_t   fid, sid, dcpl, dsid, dcpl2;
-    char *  buf;
+    char   *buf;
     hsize_t dims[2]       = {MISC22_SPACE_DIM0, MISC22_SPACE_DIM1},
             chunk_size[2] = {MISC22_CHUNK_DIM0, MISC22_CHUNK_DIM1};
     herr_t ret; /* Generic return value */
@@ -5633,8 +5633,8 @@ test_misc31(void)
 static void
 test_misc32(void)
 {
-    void * buffer;
-    void * resized;
+    void  *buffer;
+    void  *resized;
     size_t size;
 
     /* Output message about test being performed */
@@ -5753,8 +5753,8 @@ test_misc33(void)
 static void
 test_misc34(void)
 {
-    void * mem = NULL; /* allocated buffer     */
-    char * dup = NULL; /* 'duplicated' string  */
+    void  *mem = NULL; /* allocated buffer     */
+    char  *dup = NULL; /* 'duplicated' string  */
     size_t sz  = 0;    /* buffer size          */
 
     /* Output message about test being performed */
@@ -5912,7 +5912,7 @@ static int test_misc36_context;
 static void
 test_misc36_cb1(void *_ctx)
 {
-    int *   ctx = (int *)_ctx; /* Set up context pointer */
+    int    *ctx = (int *)_ctx; /* Set up context pointer */
     hbool_t is_terminating;    /* Flag indicating the library is terminating */
     herr_t  ret;               /* Return value */
 
@@ -5933,7 +5933,7 @@ test_misc36_cb1(void *_ctx)
 static void
 test_misc36_cb2(void *_ctx)
 {
-    int *   ctx = (int *)_ctx; /* Set up context pointer */
+    int    *ctx = (int *)_ctx; /* Set up context pointer */
     hbool_t is_terminating;    /* Flag indicating the library is terminating */
     herr_t  ret;               /* Return value */
 

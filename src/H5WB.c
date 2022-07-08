@@ -50,9 +50,9 @@
 
 /* Typedef for buffer wrapper */
 struct H5WB_t {
-    void * wrapped_buf;  /* Pointer to wrapped buffer */
+    void  *wrapped_buf;  /* Pointer to wrapped buffer */
     size_t wrapped_size; /* Size of wrapped buffer */
-    void * actual_buf;   /* Pointer to actual buffer */
+    void  *actual_buf;   /* Pointer to actual buffer */
     size_t actual_size;  /* Size of actual buffer used */
     size_t alloc_size;   /* Size of actual buffer allocated */
 };

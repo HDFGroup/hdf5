@@ -1096,7 +1096,7 @@ test_get_obj_ids(void)
     hid_t   filespace;
     hsize_t file_dims[F2_RANK] = {F2_DIM0, F2_DIM1};
     ssize_t oid_count, ret_count;
-    hid_t * oid_list = NULL;
+    hid_t  *oid_list = NULL;
     herr_t  ret;
     int     i, m, n;
     ssize_t oid_list_size = NDSETS;
@@ -2524,7 +2524,7 @@ test_file_double_file_dataset_open(hbool_t new_format)
     const char *data[]   = {"String 1", "String 2", "String 3", "String 4", "String 5"}; /* Input Data */
     const char *e_data[] = {"String 1", "String 2", "String 3", "String 4",
                             "String 5", "String 6", "String 7"}; /* Input Data */
-    char *      buffer[5];                                       /* Output buffer */
+    char       *buffer[5];                                       /* Output buffer */
     int         wbuf[4] = {1, 2, 3, 4};                          /* Input data */
     herr_t      ret;                                             /* Generic return value */
 
@@ -3081,7 +3081,7 @@ cal_chksum(const char *file, uint32_t *chksum)
 {
     int       curr_num_errs = GetTestNumErrs(); /* Retrieve the current # of errors */
     int       fdes          = -1;               /* File descriptor */
-    void *    file_data     = NULL;             /* Copy of file data */
+    void     *file_data     = NULL;             /* Copy of file data */
     ssize_t   bytes_read;                       /* # of bytes read */
     h5_stat_t sb;                               /* Stat buffer for file */
     herr_t    ret;                              /* Generic return value */
@@ -4315,7 +4315,7 @@ set_multi_split(hid_t fapl, hsize_t pagesize, hbool_t split)
 {
     H5FD_mem_t memb_map[H5FD_MEM_NTYPES];
     hid_t      memb_fapl_arr[H5FD_MEM_NTYPES];
-    char *     memb_name[H5FD_MEM_NTYPES];
+    char      *memb_name[H5FD_MEM_NTYPES];
     haddr_t    memb_addr[H5FD_MEM_NTYPES];
     hbool_t    relax;
     H5FD_mem_t mt;
@@ -5853,7 +5853,7 @@ static void
 test_libver_bounds_super_create(hid_t fapl, hid_t fcpl, htri_t is_swmr, htri_t non_def_fsm)
 {
     hid_t        fid = H5I_INVALID_HID; /* File ID */
-    H5F_t *      f   = NULL;            /* Internal file pointer */
+    H5F_t       *f   = NULL;            /* Internal file pointer */
     H5F_libver_t low, high;             /* Low and high bounds */
     hbool_t      ok;                    /* The result is ok or not */
     herr_t       ret;                   /* The return value */
@@ -6019,7 +6019,7 @@ static void
 test_libver_bounds_super_open(hid_t fapl, hid_t fcpl, htri_t is_swmr, htri_t non_def_fsm)
 {
     hid_t        fid      = H5I_INVALID_HID; /* File ID */
-    H5F_t *      f        = NULL;            /* Internal file pointer */
+    H5F_t       *f        = NULL;            /* Internal file pointer */
     hid_t        new_fapl = H5I_INVALID_HID; /* File access property list */
     unsigned     super_vers;                 /* Superblock version */
     H5F_libver_t low, high;                  /* Low and high bounds */
@@ -6178,7 +6178,7 @@ test_libver_bounds_obj(hid_t fapl)
     hid_t             gid      = H5I_INVALID_HID; /* Group ID */
     hid_t             fcpl     = H5I_INVALID_HID; /* File creation property list */
     hid_t             new_fapl = H5I_INVALID_HID; /* File access property list */
-    H5F_t *           f        = NULL;            /* Internal file pointer */
+    H5F_t            *f        = NULL;            /* Internal file pointer */
     H5F_libver_t      low, high;                  /* Low and high bounds */
     H5O_native_info_t ninfo;                      /* Object info */
     H5G_info_t        ginfo;                      /* Group info */
@@ -6343,8 +6343,8 @@ test_libver_bounds_dataset(hid_t fapl)
     hid_t        did      = H5I_INVALID_HID;                      /* Dataset ID */
     hid_t        sid      = H5I_INVALID_HID;                      /* Dataspace ID */
     hid_t        dcpl     = H5I_INVALID_HID;                      /* Dataset creation property list */
-    H5D_t *      dset     = NULL;                                 /* Internal dataset pointer */
-    H5F_t *      f        = NULL;                                 /* Internal file pointer */
+    H5D_t       *dset     = NULL;                                 /* Internal dataset pointer */
+    H5F_t       *f        = NULL;                                 /* Internal file pointer */
     H5F_libver_t low, high;                                       /* Low and high bounds */
     herr_t       ret;                                             /* Return value */
     hsize_t      fix_dims2[2]   = {10, 4};                        /* Dimension sizes */
@@ -6581,8 +6581,8 @@ test_libver_bounds_dataspace(hid_t fapl)
     hid_t sid_compact = H5I_INVALID_HID, sid_contig = H5I_INVALID_HID;   /* Dataspace IDs */
     hid_t dcpl         = H5I_INVALID_HID;                                /* Dataset creation property list */
     hid_t dcpl_compact = H5I_INVALID_HID, dcpl_contig = H5I_INVALID_HID; /* Dataset creation property lists */
-    H5S_t *      space = NULL, *space_null = NULL;                       /* Internal dataspace pointers */
-    H5F_t *      f = NULL;                                               /* Internal file pointer */
+    H5S_t       *space = NULL, *space_null = NULL;                       /* Internal dataspace pointers */
+    H5F_t       *f = NULL;                                               /* Internal file pointer */
     H5F_libver_t low, high;                                              /* Low and high bounds */
     hsize_t      dims[1]     = {1};                                      /* Dimension sizes */
     hsize_t      dims2[2]    = {5, 4};                                   /* Dimension sizes */
@@ -6922,9 +6922,9 @@ test_libver_bounds_datatype_check(hid_t fapl, hid_t tid)
     hsize_t      dims2[2]     = {5, 4};                         /* Dimension sizes */
     hsize_t      max_dims2[2] = {H5S_UNLIMITED, H5S_UNLIMITED}; /* Maximum dimension sizes */
     hsize_t      chunks[2]    = {2, 3};                         /* Chunk dimension sizes */
-    H5T_t *      dtype        = NULL;                           /* Internal datatype pointer */
-    H5T_t *      str_dtype    = NULL; /* Internal datatype pointer for the string datatype */
-    H5F_t *      f            = NULL; /* Internal file pointer */
+    H5T_t       *dtype        = NULL;                           /* Internal datatype pointer */
+    H5T_t       *str_dtype    = NULL; /* Internal datatype pointer for the string datatype */
+    H5F_t       *f            = NULL; /* Internal file pointer */
     H5F_libver_t low, high;           /* Low and high bounds */
     herr_t       ret;                 /* Return value */
 
@@ -7159,8 +7159,8 @@ test_libver_bounds_attributes(hid_t fapl)
     hid_t        sid      = H5I_INVALID_HID; /* Dataspace ID */
     hid_t        aid      = H5I_INVALID_HID; /* Attribute ID */
     hid_t        attr_cpl = H5I_INVALID_HID; /* Attribute creation property list */
-    H5A_t *      attr     = NULL;            /* Internal attribute pointer */
-    H5F_t *      f        = NULL;            /* Internal file pointer */
+    H5A_t       *attr     = NULL;            /* Internal attribute pointer */
+    H5F_t       *f        = NULL;            /* Internal file pointer */
     H5F_libver_t low, high;                  /* Low and high bounds */
     herr_t       ret;                        /* Return value */
 

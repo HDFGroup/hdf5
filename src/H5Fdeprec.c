@@ -89,7 +89,7 @@
 herr_t
 H5Fget_info1(hid_t obj_id, H5F_info1_t *finfo /*out*/)
 {
-    H5VL_object_t *                  vol_obj = NULL;
+    H5VL_object_t                   *vol_obj = NULL;
     H5VL_optional_args_t             vol_cb_args;   /* Arguments to VOL callback */
     H5VL_native_file_optional_args_t file_opt_args; /* Arguments for optional operation */
     H5I_type_t                       type;
@@ -213,7 +213,7 @@ done:
 herr_t
 H5Fset_latest_format(hid_t file_id, hbool_t latest_format)
 {
-    H5VL_object_t *                  vol_obj;                       /* File as VOL object           */
+    H5VL_object_t                   *vol_obj;                       /* File as VOL object           */
     H5VL_optional_args_t             vol_cb_args;                   /* Arguments to VOL callback */
     H5VL_native_file_optional_args_t file_opt_args;                 /* Arguments for optional operation */
     H5F_libver_t                     low       = H5F_LIBVER_LATEST; /* Low bound 		    */

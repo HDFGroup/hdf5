@@ -52,7 +52,7 @@
 /* internal variables */
 static const char *prog             = NULL;
 static const char *option_prefix    = NULL;
-static char *      filename         = NULL;
+static char       *filename         = NULL;
 static int         compress_percent = 0;
 static int         compress_level   = Z_DEFAULT_COMPRESSION;
 static int         output, random_test = FALSE;
@@ -64,7 +64,7 @@ static void error(const char *fmt, ...);
 static void compress_buffer(Bytef *dest, uLongf *destLen, const Bytef *source, uLong sourceLen);
 
 /* commandline options : long and short form */
-static const char *           s_opts   = "hB:b:c:p:rs:0123456789";
+static const char            *s_opts   = "hB:b:c:p:rs:0123456789";
 static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},
                                           {"compressability", require_arg, 'c'},
                                           {"file-size", require_arg, 's'},
@@ -111,7 +111,7 @@ cleanup(void)
 static void
 write_file(Bytef *source, uLongf sourceLen)
 {
-    Bytef *        d_ptr, *dest;
+    Bytef         *d_ptr, *dest;
     uLongf         d_len, destLen;
     struct timeval timer_start, timer_stop;
 
@@ -303,7 +303,7 @@ static unsigned long
 parse_size_directive(const char *size)
 {
     unsigned long s;
-    char *        endptr;
+    char         *endptr;
 
     s = HDstrtoul(size, &endptr, 10);
 
@@ -383,7 +383,7 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size, unsigned long
     uLongf         src_len, total_len;
     struct timeval timer_start, timer_stop;
     double         total_time;
-    Bytef *        src;
+    Bytef         *src;
 
     for (src_len = min_buf_size; src_len <= max_buf_size; src_len <<= 1) {
         unsigned long i, iters;

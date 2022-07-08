@@ -157,7 +157,7 @@ Java_hdf_hdf5lib_H5_H5Aread(JNIEnv *env, jclass clss, jlong attr_id, jlong mem_t
                             jboolean isCriticalPinning)
 {
     jboolean readBufIsCopy;
-    jbyte *  readBuf = NULL;
+    jbyte   *readBuf = NULL;
     htri_t   data_class;
     herr_t   status = FAIL;
 
@@ -213,7 +213,7 @@ Java_hdf_hdf5lib_H5_H5Awrite(JNIEnv *env, jclass clss, jlong attr_id, jlong mem_
                              jboolean isCriticalPinning)
 {
     jboolean writeBufIsCopy;
-    jbyte *  writeBuf = NULL;
+    jbyte   *writeBuf = NULL;
     htri_t   data_class;
     herr_t   status = FAIL;
 
@@ -269,7 +269,7 @@ Java_hdf_hdf5lib_H5_H5Aread_1short(JNIEnv *env, jclass clss, jlong attr_id, jlon
                                    jshortArray buf, jboolean isCriticalPinning)
 {
     jboolean readBufIsCopy;
-    jshort * readBuf = NULL;
+    jshort  *readBuf = NULL;
     htri_t   data_class;
     herr_t   status = FAIL;
 
@@ -325,7 +325,7 @@ Java_hdf_hdf5lib_H5_H5Awrite_1short(JNIEnv *env, jclass clss, jlong attr_id, jlo
                                     jshortArray buf, jboolean isCriticalPinning)
 {
     jboolean writeBufIsCopy;
-    jshort * writeBuf = NULL;
+    jshort  *writeBuf = NULL;
     htri_t   data_class;
     herr_t   status = FAIL;
 
@@ -382,7 +382,7 @@ Java_hdf_hdf5lib_H5_H5Aread_1int(JNIEnv *env, jclass clss, jlong attr_id, jlong 
 {
     jboolean readBufIsCopy;
     htri_t   data_class;
-    jint *   readBuf = NULL;
+    jint    *readBuf = NULL;
     herr_t   status  = FAIL;
 
     UNUSED(clss);
@@ -437,7 +437,7 @@ Java_hdf_hdf5lib_H5_H5Awrite_1int(JNIEnv *env, jclass clss, jlong attr_id, jlong
                                   jboolean isCriticalPinning)
 {
     jboolean writeBufIsCopy;
-    jint *   writeBuf = NULL;
+    jint    *writeBuf = NULL;
     htri_t   data_class;
     herr_t   status = FAIL;
 
@@ -493,7 +493,7 @@ Java_hdf_hdf5lib_H5_H5Aread_1long(JNIEnv *env, jclass clss, jlong attr_id, jlong
                                   jboolean isCriticalPinning)
 {
     jboolean readBufIsCopy;
-    jlong *  readBuf = NULL;
+    jlong   *readBuf = NULL;
     htri_t   data_class;
     herr_t   status = FAIL;
 
@@ -549,7 +549,7 @@ Java_hdf_hdf5lib_H5_H5Awrite_1long(JNIEnv *env, jclass clss, jlong attr_id, jlon
                                    jboolean isCriticalPinning)
 {
     jboolean writeBufIsCopy;
-    jlong *  writeBuf = NULL;
+    jlong   *writeBuf = NULL;
     htri_t   data_class;
     herr_t   status = FAIL;
 
@@ -605,7 +605,7 @@ Java_hdf_hdf5lib_H5_H5Aread_1float(JNIEnv *env, jclass clss, jlong attr_id, jlon
                                    jfloatArray buf, jboolean isCriticalPinning)
 {
     jboolean readBufIsCopy;
-    jfloat * readBuf = NULL;
+    jfloat  *readBuf = NULL;
     htri_t   data_class;
     herr_t   status = FAIL;
 
@@ -661,7 +661,7 @@ Java_hdf_hdf5lib_H5_H5Awrite_1float(JNIEnv *env, jclass clss, jlong attr_id, jlo
                                     jfloatArray buf, jboolean isCriticalPinning)
 {
     jboolean writeBufIsCopy;
-    jfloat * writeBuf = NULL;
+    jfloat  *writeBuf = NULL;
     htri_t   data_class;
     herr_t   status = FAIL;
 
@@ -832,8 +832,8 @@ Java_hdf_hdf5lib_H5_H5Aread_1string(JNIEnv *env, jclass clss, jlong attr_id, jlo
     size_t  str_len;
     size_t  pos;
     jsize   i, n;
-    char *  c_buf  = NULL;
-    char *  cstr   = NULL;
+    char   *c_buf  = NULL;
+    char   *cstr   = NULL;
     herr_t  status = FAIL;
 
     UNUSED(clss);
@@ -898,7 +898,7 @@ Java_hdf_hdf5lib_H5_H5Awrite_1string(JNIEnv *env, jclass clss, jlong attr_id, jl
     jstring     obj;
     size_t      i, str_len;
     jsize       n;
-    char *      c_buf  = NULL;
+    char       *c_buf  = NULL;
     herr_t      status = FAIL;
 
     UNUSED(clss);
@@ -1036,7 +1036,7 @@ H5AreadVL_str(JNIEnv *env, hid_t aid, hid_t tid, jobjectArray buf)
 {
     jstring jstr;
     jsize   i, n;
-    char ** strs   = NULL;
+    char  **strs   = NULL;
     herr_t  status = FAIL;
 
     if ((n = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0) {
@@ -1099,7 +1099,7 @@ H5AreadVL_asstr(JNIEnv *env, hid_t aid, hid_t tid, jobjectArray buf)
     size_t  i;
     hid_t   sid = H5I_INVALID_HID;
     jsize   n;
-    void *  readBuf = NULL;
+    void   *readBuf = NULL;
     herr_t  status  = FAIL;
 
     HDmemset(&h5str, 0, sizeof(h5str_t));
@@ -1240,7 +1240,7 @@ H5AwriteVL_str(JNIEnv *env, hid_t aid, hid_t tid, jobjectArray buf)
     jstring     obj;
     jsize       size;
     jint        i;
-    char **     writeBuf = NULL;
+    char      **writeBuf = NULL;
     herr_t      status   = FAIL;
 
     if ((size = ENVPTR->GetArrayLength(ENVONLY, (jarray)buf)) < 0) {
@@ -1315,7 +1315,7 @@ H5AwriteVL_asstr(JNIEnv *env, hid_t aid, hid_t tid, jobjectArray buf)
     size_t      i;
     hid_t       sid = H5I_INVALID_HID;
     jsize       n;
-    void *      writeBuf = NULL;
+    void       *writeBuf = NULL;
     herr_t      status   = FAIL;
 
     if ((n = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0) {
@@ -1494,7 +1494,7 @@ Java_hdf_hdf5lib_H5_H5Aget_1name(JNIEnv *env, jclass clss, jlong attr_id)
 {
     jstring str = NULL;
     ssize_t buf_size;
-    char *  attrName = NULL;
+    char   *attrName = NULL;
 
     UNUSED(clss);
 
@@ -1842,7 +1842,7 @@ Java_hdf_hdf5lib_H5_H5Aget_1name_1by_1idx(JNIEnv *env, jclass clss, jlong loc_id
     const char *objName     = NULL;
     jstring     str         = NULL;
     ssize_t     status_size = -1;
-    char *      attrName    = NULL;
+    char       *attrName    = NULL;
 
     UNUSED(clss);
 
@@ -2165,10 +2165,10 @@ H5A_iterate_cb(hid_t g_id, const char *name, const H5A_info_t *info, void *cb_da
     jobject     cb_info_t      = NULL;
     jobject     visit_callback = wrapper->visit_callback;
     jstring     str;
-    JNIEnv *    cbenv = NULL;
+    JNIEnv     *cbenv = NULL;
     jclass      cbcls;
     jvalue      args[4];
-    void *      op_data = (void *)wrapper->op_data;
+    void       *op_data = (void *)wrapper->op_data;
     jint        status  = -1;
 
     if (JVMPTR->AttachCurrentThread(JVMPAR, (void **)&cbenv, NULL) < 0) {

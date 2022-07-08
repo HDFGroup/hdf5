@@ -350,11 +350,11 @@ typedef struct h5tool_format_t {
      *
      *   listv:    h5watch: vector containing info about the list of compound fields to be printed.
      */
-    const char *                     cmpd_name;
-    const char *                     cmpd_sep;
-    const char *                     cmpd_pre;
-    const char *                     cmpd_suf;
-    const char *                     cmpd_end;
+    const char                      *cmpd_name;
+    const char                      *cmpd_sep;
+    const char                      *cmpd_pre;
+    const char                      *cmpd_suf;
+    const char                      *cmpd_end;
     const struct H5LD_memb_t *const *cmpd_listv;
 
     /*
@@ -510,7 +510,7 @@ typedef struct h5tool_format_t {
 } h5tool_format_t;
 
 typedef struct subset_d {
-    hsize_t *    data;
+    hsize_t     *data;
     unsigned int len;
 } subset_d;
 
@@ -560,7 +560,7 @@ typedef struct h5tools_vol_info_t {
 
     /* Field specifying either the connector's name or value (ID) */
     union {
-        const char *       name;
+        const char        *name;
         H5VL_class_value_t value;
     } u;
 } h5tools_vol_info_t;
@@ -573,7 +573,7 @@ typedef struct h5tools_vfd_info_t {
 
     /* Field specifying either the driver's name or value (ID) */
     union {
-        const char *       name;
+        const char        *name;
         H5FD_class_value_t value;
     } u;
 } h5tools_vfd_info_t;
@@ -615,29 +615,29 @@ extern "C" {
 H5TOOLS_DLLVAR const char *volnames[];
 H5TOOLS_DLLVAR const char *drivernames[];
 
-H5TOOLS_DLLVAR h5tool_format_t             h5tools_dataformat;
-H5TOOLS_DLLVAR const h5tools_dump_header_t h5tools_standardformat;
+H5TOOLS_DLLVAR h5tool_format_t              h5tools_dataformat;
+H5TOOLS_DLLVAR const h5tools_dump_header_t  h5tools_standardformat;
 H5TOOLS_DLLVAR const h5tools_dump_header_t *h5tools_dump_header_format;
 H5TOOLS_DLLVAR H5E_auto2_t                  lib_func;
 H5TOOLS_DLLVAR H5E_auto2_t                  tools_func;
-H5TOOLS_DLLVAR void *                       lib_edata;
-H5TOOLS_DLLVAR void *                       tools_edata;
+H5TOOLS_DLLVAR void                        *lib_edata;
+H5TOOLS_DLLVAR void                        *tools_edata;
 
 H5TOOLS_DLLVAR unsigned           packed_bits_num;    /* number of packed bits to display */
 H5TOOLS_DLLVAR unsigned           packed_data_offset; /* offset of packed bits to display */
 H5TOOLS_DLLVAR unsigned           packed_data_length; /* length of packed bits to display */
 H5TOOLS_DLLVAR unsigned long long packed_data_mask;   /* mask in which packed bits to display */
-H5TOOLS_DLLVAR FILE *rawattrstream;                   /* output stream for raw attribute data */
-H5TOOLS_DLLVAR FILE *rawdatastream;                   /* output stream for raw data */
-H5TOOLS_DLLVAR FILE *rawinstream;                     /* input stream for raw input */
-H5TOOLS_DLLVAR FILE *rawoutstream;                    /* output stream for raw output */
-H5TOOLS_DLLVAR FILE *rawerrorstream;                  /* output stream for raw error */
-H5TOOLS_DLLVAR int   bin_output;                      /* binary output */
-H5TOOLS_DLLVAR int   bin_form;                        /* binary form */
-H5TOOLS_DLLVAR int   region_output;                   /* region output */
-H5TOOLS_DLLVAR int   oid_output;                      /* oid output */
-H5TOOLS_DLLVAR int   data_output;                     /* data output */
-H5TOOLS_DLLVAR int   attr_data_output;                /* attribute data output */
+H5TOOLS_DLLVAR FILE              *rawattrstream;      /* output stream for raw attribute data */
+H5TOOLS_DLLVAR FILE              *rawdatastream;      /* output stream for raw data */
+H5TOOLS_DLLVAR FILE              *rawinstream;        /* input stream for raw input */
+H5TOOLS_DLLVAR FILE              *rawoutstream;       /* output stream for raw output */
+H5TOOLS_DLLVAR FILE              *rawerrorstream;     /* output stream for raw error */
+H5TOOLS_DLLVAR int                bin_output;         /* binary output */
+H5TOOLS_DLLVAR int                bin_form;           /* binary form */
+H5TOOLS_DLLVAR int                region_output;      /* region output */
+H5TOOLS_DLLVAR int                oid_output;         /* oid output */
+H5TOOLS_DLLVAR int                data_output;        /* data output */
+H5TOOLS_DLLVAR int                attr_data_output;   /* attribute data output */
 
 /* sort parameters */
 H5TOOLS_DLLVAR H5_index_t      sort_by;    /* sort_by [creation_order | name]  */

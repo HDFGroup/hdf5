@@ -309,7 +309,7 @@ H5FD__sec2_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
 #endif
     h5_stat_t       sb;
     H5P_genplist_t *plist;            /* Property list pointer */
-    H5FD_t *        ret_value = NULL; /* Return value */
+    H5FD_t         *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_PACKAGE
 

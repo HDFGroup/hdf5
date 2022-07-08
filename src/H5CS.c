@@ -244,10 +244,10 @@ H5CS_pop(void)
 H5CS_t *
 H5CS_copy_stack(void)
 {
-    H5CS_t * old_stack = H5CS_get_my_stack(); /* Existing function stack for library */
-    H5CS_t * new_stack;                       /* New function stack, for copy */
+    H5CS_t  *old_stack = H5CS_get_my_stack(); /* Existing function stack for library */
+    H5CS_t  *new_stack;                       /* New function stack, for copy */
     unsigned u;                               /* Local index variable */
-    H5CS_t * ret_value = NULL;                /* Return value */
+    H5CS_t  *ret_value = NULL;                /* Return value */
 
     /* Don't push this function on the function stack... :-) */
     FUNC_ENTER_NOAPI_NOFS
