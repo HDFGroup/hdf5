@@ -101,7 +101,7 @@ static herr_t open_config_file(subfiling_context_t *sf_context, const char *base
 
 static void        initialize_statistics(void);
 static int         numDigits(int n);
-static int         active_file_map_entries(void);
+static int         get_next_fid_map_index(void);
 static void        clear_fid_map_entry(uint64_t sf_fid, int64_t sf_context_id);
 static int         compare_hostid(const void *h1, const void *h2);
 static herr_t      get_ioc_selection_criteria_from_env(ioc_selection_t *ioc_selection_type,
@@ -184,33 +184,26 @@ set_verbose_flag(int subfile_rank, int new_value)
     return;
 }
 
-/*-------------------------------------------------------------------------
- * Function:    active_file_map_entries
- *
- * Purpose:     Count the number of entries that have valid h5_file_id
- *              values.
- *
- * Return:      The number of active file map entries (can be zero).
- * Errors:      Cannot fail.
- *
- * Programmer:  Richard Warren
- *              7/17/2020
- *
- * Changes:     Initial Version/None.
- *
- *-------------------------------------------------------------------------
- */
 static int
-active_file_map_entries(void)
+get_next_fid_map_index(void)
 {
-    int map_entries = 0;
+    int index = 0;
+
+    HDassert(sf_open_file_map || (sf_file_map_size == 0));
+
     for (int i = 0; i < sf_file_map_size; i++) {
-        if (sf_open_file_map[i].h5_file_id != UINT64_MAX) {
-            map_entries++;
+        if (sf_open_file_map[i].h5_file_id == UINT64_MAX) {
+            index = i;
+            break;
         }
     }
-    return map_entries;
-} /* end active_map_entries() */
+
+    /* A valid index should always be found here */
+    HDassert(index >= 0);
+    HDassert((sf_file_map_size == 0) || (index < sf_file_map_size));
+
+    return index;
+}
 
 /*-------------------------------------------------------------------------
  * Function:    clear_fid_map_entry
@@ -1110,7 +1103,7 @@ init_subfiling(ioc_selection_t ioc_selection_type, MPI_Comm comm, int64_t *conte
 
     HDassert(context_id_out);
 
-    file_index = active_file_map_entries();
+    file_index = get_next_fid_map_index();
     HDassert(file_index >= 0);
 
     /* Use the file's index to create a new subfiling context ID */
