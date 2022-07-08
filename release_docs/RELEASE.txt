@@ -101,7 +101,7 @@ New Features
       structures. It uses the specified datatype for reads and the List type for
       write functions.
 
-      (ADB - 2022/07/07)
+      (ADB - 2022/07/07, HDFFV-11310)
 
     - H5A and H5D read write JNI functions had flawed vlen datatype check.
     
