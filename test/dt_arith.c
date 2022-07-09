@@ -3069,12 +3069,12 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
                 hw   = (unsigned char *)&hw_f;
             }
             else if (FLT_DOUBLE == dst_type) {
-                hw_d = *((float *)aligned);
+                hw_d = (double)*((float *)aligned);
                 hw   = (unsigned char *)&hw_d;
 #if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
             }
             else {
-                hw_ld = *((float *)aligned);
+                hw_ld = (long double)*((float *)aligned);
                 hw    = (unsigned char *)&hw_ld;
 #endif
             }
@@ -3093,7 +3093,7 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
 #if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
             }
             else {
-                hw_ld = *((double *)aligned);
+                hw_ld = (long double)*((double *)aligned);
                 hw    = (unsigned char *)&hw_ld;
 #endif
             }
