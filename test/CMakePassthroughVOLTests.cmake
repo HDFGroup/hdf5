@@ -142,7 +142,7 @@ add_custom_target(HDF5_VOLTEST_LIB_files ALL COMMENT "Copying files needed by HD
               -P "${HDF_RESOURCES_DIR}/volTest.cmake"
       )
       set_tests_properties (VOL-${volname}-${voltest} PROPERTIES
-          ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${volname};HDF5TestExpress=${HDF_TEST_EXPRESS}"
+          ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${volname}"
           WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${volname}
       )
     endif ()
@@ -199,7 +199,7 @@ add_custom_target(HDF5_VOLTEST_LIB_files ALL COMMENT "Copying files needed by HD
       )
       set_tests_properties (VOL-${volname}-fheap PROPERTIES
           TIMEOUT ${CTEST_VERY_LONG_TIMEOUT}
-          ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${volname};HDF5TestExpress=${HDF_TEST_EXPRESS}"
+          ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/${volname}"
           WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/${volname}
       )
     endif ()

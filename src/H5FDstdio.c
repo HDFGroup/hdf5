@@ -1066,7 +1066,7 @@ H5FD_stdio_truncate(H5FD_t *_file, hid_t /*UNUSED*/ dxpl_id, hbool_t /*UNUSED*/ 
             rewind(file->fp);
 
             /* Windows uses this odd QuadPart union for 32/64-bit portability */
-            li.QuadPart = (__int64)file->eoa;
+            li.QuadPart = (LONGLONG)file->eoa;
 
             /* Extend the file to make sure it's large enough.
              *

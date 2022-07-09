@@ -1883,7 +1883,7 @@ main(void)
             /* Display info about testing */
             low_string  = h5_get_version_string(low);
             high_string = h5_get_version_string(high);
-            HDsprintf(msg, "Using file format version: (%s, %s)", low_string, high_string);
+            HDsnprintf(msg, sizeof(msg), "Using file format version: (%s, %s)", low_string, high_string);
             HDputs(msg);
 
             /* test on object continuation block */

@@ -7669,7 +7669,7 @@ test_man_incr_insert_remove(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
             if (H5HF_remove(fh, heap_id[j]) < 0)
                 FAIL_STACK_ERROR;
 
-            HDsprintf(obj2.b, "%s%2d", "ABCDEFGHIJKLMNOPQRSTUVWXYZ", j);
+            HDsnprintf(obj2.b, sizeof(obj2.b), "%s%2d", "ABCDEFGHIJKLMNOPQRSTUVWXYZ", j);
             if (H5HF_insert(fh, (sizeof(obj2)), &obj2, heap_id[j]) < 0)
                 FAIL_STACK_ERROR;
         } /* end for */
@@ -7680,7 +7680,7 @@ test_man_incr_insert_remove(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
 
         /* Insert object */
         HDmemset(heap_id[i], 0, id_len);
-        HDsprintf(obj1.b, "%s%2d", "ABCDEFGHIJKLMNOPQRSTUVWXYZ", i);
+        HDsnprintf(obj1.b, sizeof(obj1.b), "%s%2d", "ABCDEFGHIJKLMNOPQRSTUVWXYZ", i);
         if (H5HF_insert(fh, (sizeof(obj1)), &obj1, heap_id[i]) < 0)
             FAIL_STACK_ERROR;
     } /* end for */

@@ -457,7 +457,7 @@ parse_args(int argc, char **argv)
         }
     }
 
-    return (0);
+    return 0;
 }
 /*-------------------------------------------------------------------------
  * Function:  getenv_all
@@ -478,14 +478,9 @@ parse_args(int argc, char **argv)
  * Programmer:  Leon Arber
  *              4/4/05
  *
- * Modifications:
- *    Use original getenv if MPI is not initialized. This happens
- *    one uses the PHDF5 library to build a serial nature code.
- *    Albert 2006/04/07
- *
  *-------------------------------------------------------------------------
  */
-char *
+static char *
 getenv_all(MPI_Comm comm, int root, const char *name)
 {
     int          mpi_size, mpi_rank, mpi_initialized, mpi_finalized;
@@ -539,7 +534,9 @@ getenv_all(MPI_Comm comm, int root, const char *name)
 #endif
     }
     else {
-        /* use original getenv */
+        /* Use the original getenv if MPI is not initialized. This happens
+         * if you use the parallel HDF5 library to build a serial program.
+         */
         if (env)
             HDfree(env);
         env = HDgetenv(name);

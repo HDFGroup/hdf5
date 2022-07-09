@@ -189,14 +189,14 @@
     (H5FD_CTL_OPC_RESERVED + 511) /* Maximum opcode value available for experimental use */
 
 /* ctl function op codes: */
-#define H5FD_CTL__INVALID_OPCODE              0
-#define H5FD_CTL__TEST_OPCODE                 1
-#define H5FD_CTL__GET_MPI_COMMUNICATOR_OPCODE 2
-#define H5FD_CTL__GET_MPI_RANK_OPCODE         3
-#define H5FD_CTL__GET_MPI_SIZE_OPCODE         4
-#define H5FD_CTL__MEM_ALLOC                   5
-#define H5FD_CTL__MEM_FREE                    6
-#define H5FD_CTL__MEM_COPY                    7
+#define H5FD_CTL_INVALID_OPCODE              0
+#define H5FD_CTL_TEST_OPCODE                 1
+#define H5FD_CTL_GET_MPI_COMMUNICATOR_OPCODE 2
+#define H5FD_CTL_GET_MPI_RANK_OPCODE         3
+#define H5FD_CTL_GET_MPI_SIZE_OPCODE         4
+#define H5FD_CTL_MEM_ALLOC                   5
+#define H5FD_CTL_MEM_FREE                    6
+#define H5FD_CTL_MEM_COPY                    7
 
 /* ctl function flags: */
 
@@ -228,7 +228,7 @@
  */
 
 /* Unknown op codes should be ignored silently unless the
- * H5FD_CTL__FAIL_IF_UNKNOWN_FLAG is set.
+ * H5FD_CTL_FAIL_IF_UNKNOWN_FLAG is set.
  *
  * On terminal VFDs, unknown op codes should generate an
  * error unconditionally if this flag is set.
@@ -238,9 +238,9 @@
  * flags.  In the absence of such flags, the VFD should
  * generate an error.
  */
-#define H5FD_CTL__FAIL_IF_UNKNOWN_FLAG 0x0001
+#define H5FD_CTL_FAIL_IF_UNKNOWN_FLAG 0x0001
 
-/* The H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG is used only
+/* The H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG is used only
  * by non-ternminal VFDs, and only applies to unknown
  * opcodes. (known op codes should be handled as
  * appropriate.)
@@ -250,9 +250,9 @@
  * the VFD stack en-route to the terminal VFD.
  * If that VFD does not support the ctl call, the
  * pass through VFD should fail or succeed as directed
- * by the  H5FD_CTL__FAIL_IF_UNKNOWN_FLAG.
+ * by the  H5FD_CTL_FAIL_IF_UNKNOWN_FLAG.
  */
-#define H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG 0x0002
+#define H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG 0x0002
 
 /*******************/
 /* Public Typedefs */

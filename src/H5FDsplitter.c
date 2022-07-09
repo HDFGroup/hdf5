@@ -1325,16 +1325,16 @@ H5FD__splitter_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void *
     switch (op_code) {
         /* Unknown op code */
         default:
-            if (flags & H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG) {
+            if (flags & H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG) {
                 /* Pass ctl call down to R/W channel VFD */
                 if (H5FDctl(file->rw_file, op_code, flags, input, output) < 0)
                     HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL, "VFD ctl request failed")
             }
             else {
                 /* If no valid VFD routing flag is specified, fail for unknown op code
-                 * if H5FD_CTL__FAIL_IF_UNKNOWN_FLAG flag is set.
+                 * if H5FD_CTL_FAIL_IF_UNKNOWN_FLAG flag is set.
                  */
-                if (flags & H5FD_CTL__FAIL_IF_UNKNOWN_FLAG)
+                if (flags & H5FD_CTL_FAIL_IF_UNKNOWN_FLAG)
                     HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL,
                                 "VFD ctl request failed (unknown op code and fail if unknown flag is set)")
             }

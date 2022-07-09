@@ -1171,10 +1171,20 @@ H5T__init_native_internal(void)
 
     /* clang-format off */
 
+    /* Version 19.10 of the PGI C compiler croaks on the following
+     * tables if they are `static`, so make them `static` only if
+     * some other compiler is used.
+     */
+#if defined(__PGIC__) && __PGIC__ == 19 && __PGIC_MINOR__ == 10
+#   define static_unless_buggy_pgic
+#else
+#   define static_unless_buggy_pgic static
+#endif
+
     /* The library compiles with a limit on `static` object size, so
      * I broke this table into three.
      */
-    static const native_int_t table1[] = {
+    static_unless_buggy_pgic const native_int_t table1[] = {
       NATIVE_ENTRY_INITIALIZER(SCHAR, signed char, 0, true)
     , NATIVE_ENTRY_INITIALIZER(UCHAR, unsigned char, 0, false)
     , NATIVE_ENTRY_INITIALIZER(SHORT, short, 0, true)
@@ -1188,7 +1198,7 @@ H5T__init_native_internal(void)
     , NATIVE_ENTRY_INITIALIZER(LLONG, long long, 0, true)
     , NATIVE_ENTRY_INITIALIZER(ULLONG, unsigned long long, 0, false)
     };
-    static const native_int_t table2[] = {
+    static_unless_buggy_pgic const native_int_t table2[] = {
       NATIVE_ENTRY_INITIALIZER(INT8, int8_t, 0, true)
     , NATIVE_ENTRY_INITIALIZER(UINT8, uint8_t, 0, false)
     , NATIVE_ENTRY_INITIALIZER(INT_LEAST8, int_least8_t, 0, true)
@@ -1202,7 +1212,7 @@ H5T__init_native_internal(void)
     , NATIVE_ENTRY_INITIALIZER(INT_FAST16, int_fast16_t, 0, true)
     , NATIVE_ENTRY_INITIALIZER(UINT_FAST16, uint_fast16_t, 0, false)
     };
-    static const native_int_t table3[] = {
+    static_unless_buggy_pgic const native_int_t table3[] = {
       NATIVE_ENTRY_INITIALIZER(INT32, int32_t, 0, true)
     , NATIVE_ENTRY_INITIALIZER(UINT32, uint32_t, 0, false)
     , NATIVE_ENTRY_INITIALIZER(INT_LEAST32, int_least32_t, 0, true)
@@ -1216,11 +1226,12 @@ H5T__init_native_internal(void)
     , NATIVE_ENTRY_INITIALIZER(INT_FAST64, int_fast64_t, 0, true)
     , NATIVE_ENTRY_INITIALIZER(UINT_FAST64, uint_fast64_t, 0, false)
     };
-    static const native_int_table_t table_table[] = {
+    static_unless_buggy_pgic const native_int_table_t table_table[] = {
       {table1, NELMTS(table1)}
     , {table2, NELMTS(table2)}
     , {table3, NELMTS(table3)}
     };
+#undef static_unless_buggy_pgic
     /* clang-format on */
 
     size_t      i, j;

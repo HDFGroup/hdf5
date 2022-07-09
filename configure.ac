@@ -160,6 +160,8 @@ AM_JNIFLAGS="${AM_JNIFLAGS}"
 AM_JAVACFLAGS="${AM_JAVACFLAGS}"
 AM_JAVAFLAGS="${AM_JAVAFLAGS}"
 AM_LDFLAGS="${AM_LDFLAGS}"
+
+## Flags passed in by the user
 CFLAGS="${CFLAGS}"
 CXXFLAGS="${CXXFLAGS}"
 FCFLAGS="${FCFLAGS}"
@@ -180,6 +182,14 @@ saved_user_JAVACFLAGS="$JAVACFLAGS"
 saved_user_JAVAFLAGS="$JAVAFLAGS"
 saved_user_LDFLAGS="$LDFLAGS"
 saved_user_CPPFLAGS="$CPPFLAGS"
+
+## Strip out -Werror from CFLAGS since that can cause checks to fail when
+## compiling the test program fails due to warnings
+CFLAGS="`echo $CFLAGS | sed -e 's/-Werror//g'`"
+CXXFLAGS="`echo $CXXFLAGS | sed -e 's/-Werror//g'`"
+FCFLAGS="`echo $FCFLAGS | sed -e 's/-Werror//g'`"
+JAVACFLAGS="`echo $JAVACFLAGS | sed -e 's/-Werror//g'`"
+CPPFLAGS="`echo $CPPFLAGS | sed -e 's/-Werror//g'`"
 
 ## Support F9X variable to define Fortran compiler if FC variable is
 ## not used.  This should be deprecated in the future.
@@ -522,7 +532,6 @@ AC_CHECK_SIZEOF([int])
 AC_CHECK_SIZEOF([unsigned])
 AC_CHECK_SIZEOF([long])
 AC_CHECK_SIZEOF([long long])
-AC_CHECK_SIZEOF([__int64])
 AC_CHECK_SIZEOF([float])
 AC_CHECK_SIZEOF([double])
 AC_CHECK_SIZEOF([long double])
@@ -783,7 +792,7 @@ HDF_CXX=no
 ## AC_PROG_CXX defines some macros that Automake 1.9.x uses and will
 ## miss even if c++ is not enabled.
 AC_PROG_CXX
-AC_PROG_CXXCPP    ## this is checked for when AC_HEADER_STDC is done
+AC_PROG_CXXCPP
 
 AC_MSG_CHECKING([if c++ interface enabled])
 
@@ -862,7 +871,7 @@ AC_MSG_CHECKING([if the high-level tools are enabled])
 AC_ARG_ENABLE([hltools],
      [AS_HELP_STRING([--enable-hltools],
                      [Enable the high-level tools.
-                     [default=yes)]
+                     [default=yes]
                      ])],
      [HDF5_HL_TOOLS=$enableval])
 
@@ -908,7 +917,7 @@ esac
 
 ## ----------------------------------------------------------------------
 ## Check which archiving tool to use. This needs to be done before
-## the AM_PROG_LIBTOOL macro.
+## the LT_INIT macro.
 ##
 if test -z "$AR"; then
   AC_CHECK_PROGS([AR], [ar xar], [:], [$PATH])
@@ -1120,6 +1129,32 @@ AC_SUBST([H5_TEST_BUILDDIR])
 H5_TEST_BUILDDIR='test'
 
 ## ----------------------------------------------------------------------
+## Check what level of testing should be enabled
+##
+
+## Default is quickest testing
+TEST_EXPRESS_LEVEL_DEFAULT=3
+
+AC_MSG_CHECKING([if HDF5 testing intensity level is set])
+
+AC_ARG_ENABLE([test-express],
+              [AS_HELP_STRING([--enable-test-express=(0-3)],
+                              [Set HDF5 testing intensity level (0-3) [0 = exhaustive testing; 3 = quicker testing; default=3] Set environment variable HDF5TestExpress to override configured setting])],
+              [TEST_EXPRESS_LEVEL_DEFAULT=$enableval])
+
+case "X-$TEST_EXPRESS_LEVEL_DEFAULT" in
+  X-0|X-1|X-2|X-3)
+    AC_MSG_RESULT([$TEST_EXPRESS_LEVEL_DEFAULT])
+    ;;
+  *)
+    AC_MSG_RESULT([error])
+    AC_MSG_ERROR([$TEST_EXPRESS_LEVEL_DEFAULT is not a valid test express level])
+    ;;
+esac
+
+AC_DEFINE_UNQUOTED([TEST_EXPRESS_LEVEL_DEFAULT], [$TEST_EXPRESS_LEVEL_DEFAULT], [HDF5 testing intensity level])
+
+## ----------------------------------------------------------------------
 ## Check if they would like to disable building tools
 ##
 
@@ -1327,7 +1362,8 @@ esac
 ## Windows
 case "`uname`" in
   MINGW*)
-    AC_HAVE_LIBRARY([ws2_32])
+    # The Winsock library
+    AC_CHECK_LIB([ws2_32], [GetUserName])
     ;;
 esac
 
@@ -2104,48 +2140,6 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]],[[int __attribute__((unused)) x]])],
                  AC_MSG_RESULT([yes])],
                [AC_MSG_RESULT([no])])
 
-AC_MSG_CHECKING([for C99 designated initialization support])
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]], [[
-                typedef struct {
-                    int x;
-                    union {
-                        int i;
-                        double d;
-                    } u;
-                } di_struct_t;
-                di_struct_t x = {0, { .d = 0.0}}; ]])],
-               [AC_DEFINE([HAVE_C99_DESIGNATED_INITIALIZER], [1],
-                         [Define if the compiler understands C99 designated initialization of structs and unions])
-                 AC_MSG_RESULT([yes])],
-               [AC_MSG_RESULT([no])])
-
-## ----------------------------------------------------------------------
-## Try to figure out how to print `long long'.  Some machines use `%lld'
-## and others use `%qd'.  There may be more!  The final `l' is a
-## default in case none of the others work.
-##
-AC_MSG_CHECKING([how to print long long])
-AC_CACHE_VAL([hdf5_cv_printf_ll], [
-
-for hdf5_cv_printf_ll in ll l L q unknown; do
-   AC_RUN_IFELSE(
-        [AC_LANG_PROGRAM([
-            #include <stdio.h>
-            #include <stdlib.h>
-            #include <string.h>
-        ],[[
-            char *s = malloc(128);
-            long long x = (long long)1048576 * (long long)1048576;
-            snprintf(s,128,"%${hdf5_cv_printf_ll}d",x);
-            exit(strcmp(s,"1099511627776"));
-        ]])]
-   , [break],,[continue])
-done])
-
-AC_MSG_RESULT([%${hdf5_cv_printf_ll}d and %${hdf5_cv_printf_ll}u])
-AC_DEFINE_UNQUOTED([PRINTF_LL_WIDTH], ["$hdf5_cv_printf_ll"],
-                   [Width for printf() for type `long long' or `__int64', use `ll'])
-
 ## ----------------------------------------------------------------------
 ## Remove old ways of determining debug/production build.
 ## These were used in 1.8.x and earlier. We should probably keep these checks
@@ -2752,14 +2746,6 @@ fi
 if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
   if test "X${HDF_JAVA}" = "Xyes" -a "X${enable_parallel}" = "Xyes"; then
     AC_MSG_ERROR([--enable-java and --enable-parallel flags are incompatible. Use --enable-unsupported to override this error.])
-  fi
-fi
-
-## --enable-parallel is also incompatible with --enable-threadsafe, unless
-## --enable-unsupported has been specified on the configure line.
-if test "X${ALLOW_UNSUPPORTED}" != "Xyes"; then
-  if test "X${THREADSAFE}" = "Xyes" -a "X${enable_parallel}" = "Xyes"; then
-    AC_MSG_ERROR([--enable-threadsafe and --enable-parallel flags are incompatible. Use --enable-unsupported to override this error.])
   fi
 fi
 

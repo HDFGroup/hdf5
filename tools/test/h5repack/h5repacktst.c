@@ -3157,7 +3157,7 @@ make_early(void)
             goto out;
         if ((tid = H5Tcopy(H5T_NATIVE_DOUBLE)) < 0)
             goto out;
-        HDsprintf(name, "%d", i);
+        HDsnprintf(name, sizeof(name), "%d", i);
         if ((H5Tcommit2(fid, name, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             goto out;
         if (H5Tclose(tid) < 0)
@@ -3181,7 +3181,7 @@ make_early(void)
     for (i = 0; i < iter; i++) {
         if ((tid = H5Tcopy(H5T_NATIVE_DOUBLE)) < 0)
             goto out;
-        HDsprintf(name, "%d", i);
+        HDsnprintf(name, sizeof(name), "%d", i);
         if ((H5Tcommit2(fid, name, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             goto out;
         if (H5Tclose(tid) < 0)
@@ -3240,7 +3240,7 @@ make_layout(hid_t loc_id)
      *-------------------------------------------------------------------------
      */
     for (i = 0; i < 4; i++) {
-        HDsprintf(name, "dset%d", i + 1);
+        HDsnprintf(name, sizeof(name), "dset%d", i + 1);
         if (write_dset(loc_id, RANK, dims, name, H5T_NATIVE_INT, buf) < 0)
             goto error;
     }

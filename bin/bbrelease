@@ -28,15 +28,17 @@
 USAGE()
 {
 cat << EOF
-Usage: $0 -d <dir> [--docver BRANCHNAME] [-h] [--private] [--revision] <methods> ...
+Usage: $0 -d <dir> [-h] [--private] [--revision [--branch BRANCHNAME]] <methods> ...
    -d DIR       The name of the directory where the release(s) should be
                 placed.
-   --docver BRANCHNAME  This is added for 1.8 and beyond to get the correct
-                        version of documentation files from the hdf5docs
+   --branch BRANCHNAME  This is to get the correct version of the branch name from the
                         repository.  BRANCHNAME for v1.8 should be hdf5_1_8.
    -h           print the help page.
    --private    Make a private release with today's date in version information.
    --revision   Make a private release with the code revision number in version information.
+                This allows --branch to be used for the file name.
+   --branch BRANCHNAME  This is to get the correct version of the branch name from the
+                        repository.  BRANCHNAME for v1.8 should be hdf5_1_8.
 
 This must be run at the top level of the source directory.
 The other command-line options are the names of the programs to use
@@ -47,7 +49,6 @@ for compressing the resulting tar archive (if none are given then
     gzip        -- use gzip with "-9" and append ".gz" to the output name.
     bzip2       -- use bzip2 with "-9" and append ".bz2" to the output name.
     zip         -- convert all text files to DOS style and form a zip file for Windows use.
-    doc         -- produce the latest doc tree in addition to the archive.
 
 An md5 checksum is produced for each archive created and stored in the md5 file.
 
@@ -154,7 +155,6 @@ today=`date +%Y%m%d`
 pmode='no'
 revmode='no'
 tmpdir="../#release_tmp.$$"     # tmp work directory
-DOC_URL=https://git@bitbucket.hdfgroup.org/scm/hdffv/hdf5doc.git
 CPPLUS_RM_NAME=cpplus_RM
 
 # Restore previous Version information
@@ -189,8 +189,8 @@ while [ -n "$1" ]; do
         --revision)
             revmode=yes
             ;;
-        --docver)
-            DOCVERSION=$1
+        --branch)
+            BRANCHNAME=$1
             shift
             ;;
         -*)
@@ -239,13 +239,15 @@ if [ X$revmode = Xyes ]; then
     # Copy old version of config/lt_vers.am, since it's hard to
     # "undo" changes to it.
     cp config/lt_vers.am $tmpdir
-    branch=`git symbolic-ref -q --short HEAD`
+    if [ "${BRANCHNAME}" = "" ]; then
+        BRANCHNAME=`git symbolic-ref -q --short HEAD`
+    fi
     revision=`git rev-parse --short HEAD`
     # Set version information to m.n.r-r$revision.
     # (h5vers does not correctly handle just m.n.r-$today.)
     VERS=`echo $VERS | sed -e s/-.*//`-$revision
     echo Private release of $VERS
-    HDF5_VERS=hdf5-$branch-$revision
+    HDF5_VERS=hdf5-$BRANCHNAME-$revision
     echo file base of $HDF5_VERS
     bin/h5vers -s $VERS
     # use a generic directory name for revision releases
@@ -281,11 +283,6 @@ for f in README.md release_docs/RELEASE.txt; do
     chmod 644 $f
 done
 
-# develop is different than branches.
-if [ "${DOCVERSION}" ]; then
-    DOC_URL=https://git@bitbucket.hdfgroup.org/scm/hdffv/hdf5doc.git -b ${DOCVERSION}
-fi
-
 # Create the tar file
 test "$verbose" && echo "   Running tar..." 1>&2
 (cd "$tmpdir" && exec tar -ch --exclude-vcs -f "$HDF5_VERS.tar" "./$HDF5_IN_VERS" || exit 1 )
@@ -313,23 +310,6 @@ for comp in $methods; do
             test "$verbose" && echo "   Creating zip ball..." 1>&2
             tar2zip $HDF5_IN_VERS $tmpdir/$HDF5_VERS.tar $DEST/$HDF5_VERS.zip 1>&2
             (cd $DEST; md5sum $HDF5_VERS.zip >> $MD5file)
-            ;;
-        doc)
-            if [ "${DOCVERSION}" = "" ]; then
-                DOCVERSION=master
-            fi
-            test "$verbose" && echo "   Creating docs..." 1>&2
-            # Check out docs from git repo
-            (cd $tmpdir; git clone $DOC_URL > /dev/null) || exit 1
-            # Create doxygen C++ RM
-            (cd c++/src && doxygen cpp_doc_config > /dev/null ) || exit 1
-            # Replace version of C++ RM with just-created version
-            rm -rf $tmpdir/${DOCVERSION}/html/$CPPLUS_RM_NAME
-            mv c++/src/$CPPLUS_RM_NAME $tmpdir/${DOCVERSION}/html/$CPPLUS_RM_NAME
-            # Compress the docs and move them to the release area
-            mv $tmpdir/$DOCVERSION $tmpdir/${HDF5_VERS}_docs
-            (cd $tmpdir && tar cf ${HDF5_VERS}_docs.tar ${HDF5_VERS}_docs)
-            mv $tmpdir/${HDF5_VERS}_docs.tar $DEST
             ;;
         *)
             echo "***Error*** Unknown method $comp"
