@@ -38,7 +38,6 @@ extern "C" {
  *       - H5LDget_dset_dims()
  *       - H5LDget_dset_elmts()
  *       - H5LDget_dset_type_size()
- *       .
  *
  * \par Example:
  * See the example code in H5LDget_dset_elmts() for usage of this routine.
@@ -76,7 +75,6 @@ H5_HLDLL herr_t H5LDget_dset_dims(hid_t did, hsize_t *cur_dims);
  *       - H5LDget_dset_dims()
  *       - H5LDget_dset_elmts()
  *       - H5LDget_dset_type_size()
- *       .
  *
  * \par Example:
  * See the example code in H5LDget_dset_elmts() for usage of this routine.
@@ -129,7 +127,6 @@ H5_HLDLL size_t H5LDget_dset_type_size(hid_t did, const char *fields);
  *       - H5LDget_dset_dims()
  *       - H5LDget_dset_elmts()
  *       - H5LDget_dset_type_size()
- *       .
  *
  * \par Examples:
  *
