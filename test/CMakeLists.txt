@@ -381,6 +381,7 @@ set (H5_TESTS
     timer
     cmpd_dtransform
     event_set
+    onion
 )
 if (HDF5_BUILD_UTILS)
   set (H5_TESTS ${H5_TESTS} mirror_vfd)
