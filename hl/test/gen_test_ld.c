@@ -156,23 +156,27 @@ done:
 int
 main(void)
 {
-    hid_t   fid;                             /* File id */
-    hid_t   fapl;                            /* File access property list */
+    hid_t   fid  = H5I_INVALID_HID;          /* File ID */
+    hid_t   fapl = H5I_INVALID_HID;          /* File access property list */
     hsize_t cur_dims[1];                     /* Dimension sizes */
     hsize_t max_dims[1];                     /* Maximum dimension sizes */
     hsize_t cur2_dims[2];                    /* Current dimension sizes */
     hsize_t max2_dims[2];                    /* Maximum dimension sizes */
-    hid_t   set_tid, esc_set_tid;            /* Compound type id */
-    hid_t   sub22_tid;                       /* Compound type id */
-    hid_t   sub2_tid, esc_sub2_tid;          /* Compound type id */
-    hid_t   sub4_tid, esc_sub4_tid;          /* Compound type id */
-    hid_t   null_did, null_sid;              /* H5S_NULL dataset & dataspace ids */
-    hid_t   scalar_did, scalar_sid;          /* H5S_SCALAR dataset & dataspace ids */
+    hid_t   set_tid      = H5I_INVALID_HID;  /* Compound type ID */
+    hid_t   esc_set_tid  = H5I_INVALID_HID;  /* Compound type ID */
+    hid_t   sub22_tid    = H5I_INVALID_HID;  /* Compound type ID */
+    hid_t   sub2_tid     = H5I_INVALID_HID;  /* Compound type ID */
+    hid_t   esc_sub2_tid = H5I_INVALID_HID;  /* Compound type ID */
+    hid_t   sub4_tid     = H5I_INVALID_HID;  /* Compound type ID */
+    hid_t   esc_sub4_tid = H5I_INVALID_HID;  /* Compound type ID */
+    hid_t   null_did     = H5I_INVALID_HID;  /* H5S_NULL dataset ID */
+    hid_t   null_sid     = H5I_INVALID_HID;  /* H5S_NULL dataspace ID */
+    hid_t   scalar_did   = H5I_INVALID_HID;  /* H5S_SCALAR dataset ID */
+    hid_t   scalar_sid   = H5I_INVALID_HID;  /* H5S_SCALAR dataspace ID */
     int     one_data[ONE_DIMS0];             /* Buffer for data */
     int     two_data[TWO_DIMS0 * TWO_DIMS1]; /* Buffer for data */
     set_t   one_cbuf[ONE_DIMS0];             /* Buffer for data with compound type */
     set_t   two_cbuf[TWO_DIMS0 * TWO_DIMS1]; /* Buffer for data with compound type */
-    int     i;                               /* Local index variable */
 
     /* Create a file access property list */
     if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -189,7 +193,7 @@ main(void)
     /* Initialization for one-dimensional dataset */
     cur_dims[0] = ONE_DIMS0;
     max_dims[0] = MAX_ONE_DIMS0;
-    for (i = 0; i < ONE_DIMS0; i++)
+    for (int i = 0; i < ONE_DIMS0; i++)
         one_data[i] = i;
 
     /* Generate DSET_ONE, DSET_NONE, DSET_NOMAX, DSET_ALLOC_LATE, DSET_EARLY */
@@ -210,7 +214,7 @@ main(void)
     max2_dims[0] = MAX_TWO_DIMS0;
     max2_dims[1] = MAX_TWO_DIMS1;
 
-    for (i = 0; i < (TWO_DIMS0 * TWO_DIMS1); i++)
+    for (int i = 0; i < (TWO_DIMS0 * TWO_DIMS1); i++)
         two_data[i] = i;
 
     /* Generate DSET_TWO */
@@ -221,17 +225,17 @@ main(void)
     cur_dims[0] = ONE_DIMS0;
     max_dims[0] = MAX_ONE_DIMS0;
 
-    for (i = 0; i < ONE_DIMS0; i++) {
+    for (int i = 0; i < ONE_DIMS0; i++) {
         one_cbuf[i].field1     = 1;
         one_cbuf[i].field2.a   = 2;
         one_cbuf[i].field2.c   = 4;
         one_cbuf[i].field2.b.a = 20;
         one_cbuf[i].field2.b.b = 40;
         one_cbuf[i].field2.b.c = 80;
-        one_cbuf[i].field3     = 3.0f;
+        one_cbuf[i].field3     = 3.0;
         one_cbuf[i].field4.a   = 4;
         one_cbuf[i].field4.b   = 8;
-    } /* end for */
+    }
 
     /* Create the compound type */
     if ((sub22_tid = H5Tcreate(H5T_COMPOUND, sizeof(sub22_t))) < 0)
@@ -310,17 +314,17 @@ main(void)
     max2_dims[0] = MAX_TWO_DIMS0;
     max2_dims[0] = MAX_TWO_DIMS1;
 
-    for (i = 0; i < (TWO_DIMS0 * TWO_DIMS1); i++) {
+    for (int i = 0; i < (TWO_DIMS0 * TWO_DIMS1); i++) {
         two_cbuf[i].field1     = 1;
         two_cbuf[i].field2.a   = 2;
         two_cbuf[i].field2.c   = 4;
         two_cbuf[i].field2.b.a = 20;
         two_cbuf[i].field2.b.b = 40;
         two_cbuf[i].field2.b.c = 80;
-        two_cbuf[i].field3     = 3.0f;
+        two_cbuf[i].field3     = 3.0;
         two_cbuf[i].field4.a   = 4;
         two_cbuf[i].field4.b   = 8;
-    } /* end for */
+    }
 
     /* Generate DSET_CMPD_TWO */
     if (generate_dset(fid, DSET_CMPD_TWO, 2, cur2_dims, max2_dims, set_tid, two_cbuf) < 0)
