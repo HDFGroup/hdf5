@@ -648,8 +648,15 @@ h5diff(const char *fname1, const char *fname2, const char *objname1, const char 
      *-------------------------------------------------------------------------
      */
     /* open file 1 */
+    if (opts->vfd_info[0].u.name) {
+        if ((fapl1_id = h5tools_get_fapl(H5P_DEFAULT, NULL, &(opts->vfd_info[0]))) < 0) {
+            parallel_print("h5diff: unable to create fapl for input file\n");
+            H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "unable to create input fapl\n");
+        }
+    }
+
     if (opts->custom_vol[0] || opts->custom_vfd[0]) {
-        if ((fapl1_id = h5tools_get_fapl(H5P_DEFAULT, opts->custom_vol[0] ? &(opts->vol_info[0]) : NULL,
+        if ((fapl1_id = h5tools_get_fapl(fapl1_id, opts->custom_vol[0] ? &(opts->vol_info[0]) : NULL,
                                          opts->custom_vfd[0] ? &(opts->vfd_info[0]) : NULL)) < 0) {
             parallel_print("h5diff: unable to create fapl for input file\n");
             H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "unable to create input fapl\n");
@@ -664,9 +671,15 @@ h5diff(const char *fname1, const char *fname2, const char *objname1, const char 
     H5TOOLS_DEBUG("file1_id = %s", fname1);
 
     /* open file 2 */
+    if (opts->vfd_info[1].u.name) {
+        if ((fapl2_id = h5tools_get_fapl(H5P_DEFAULT, NULL, &(opts->vfd_info[1]))) < 0) {
+            parallel_print("h5diff: unable to create fapl for output file\n");
+            H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "unable to create output fapl\n");
+        }
+    }
 
     if (opts->custom_vol[1] || opts->custom_vfd[1]) {
-        if ((fapl2_id = h5tools_get_fapl(H5P_DEFAULT, opts->custom_vol[1] ? &(opts->vol_info[1]) : NULL,
+        if ((fapl2_id = h5tools_get_fapl(fapl2_id, opts->custom_vol[1] ? &(opts->vol_info[1]) : NULL,
                                          opts->custom_vfd[1] ? &(opts->vfd_info[1]) : NULL)) < 0) {
             parallel_print("h5diff: unable to create fapl for output file\n");
             H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "unable to create output fapl\n");

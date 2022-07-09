@@ -54,6 +54,7 @@
 #ifdef H5_HAVE_ROS3_VFD
 #define H5_VFD_ROS3 ((H5FD_class_value_t)(11))
 #endif
+#define H5_VFD_ONION ((H5FD_class_value_t)(12))
 
 /* VFD IDs below this value are reserved for library use. */
 #define H5_VFD_RESERVED 256

@@ -23,10 +23,13 @@ static hbool_t     doxml_g       = FALSE;
 static hbool_t     useschema_g   = TRUE;
 static const char *xml_dtd_uri_g = NULL;
 
-static hbool_t            use_custom_vol_g = FALSE;
-static hbool_t            use_custom_vfd_g = FALSE;
-static h5tools_vol_info_t vol_info_g       = {0};
-static h5tools_vfd_info_t vfd_info_g       = {0};
+static hbool_t use_custom_vol_g = FALSE;
+static hbool_t use_custom_vfd_g = FALSE;
+
+static h5tools_vol_info_t vol_info_g = {0};
+static h5tools_vfd_info_t vfd_info_g = {0};
+
+static hbool_t get_onion_revision_count = FALSE;
 
 #ifdef H5_HAVE_ROS3_VFD
 /* Default "anonymous" S3 configuration */
@@ -50,6 +53,17 @@ static H5FD_hdfs_fapl_t hdfs_fa_g = {
     2048,        /* Stream buffer size    */
 };
 #endif /* H5_HAVE_LIBHDFS */
+
+static H5FD_onion_fapl_info_t onion_fa_g = {
+    H5FD_ONION_FAPL_INFO_VERSION_CURR,
+    H5P_DEFAULT,                   /* backing_fapl_id                */
+    32,                            /* page_size                      */
+    H5FD_ONION_STORE_TARGET_ONION, /* store_target                   */
+    H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST,
+    0,            /* force_write_open               */
+    0,            /* creation_flags                 */
+    "input file", /* comment                        */
+};
 
 /* module-scoped variables for XML option */
 #define DEFAULT_XSD "http://www.hdfgroup.org/HDF5/XML/schema/HDF5-File.xsd"
@@ -1305,6 +1319,29 @@ end_collect:
         }
     }
 
+    /* If the file uses the onion VFD, get the revision number */
+    if (vfd_info_g.u.name && !HDstrcmp(vfd_info_g.u.name, "onion")) {
+
+        if (vfd_info_g.info) {
+            if (!HDstrcmp(vfd_info_g.info, "revision_count"))
+                get_onion_revision_count = TRUE;
+            else {
+                errno                   = 0;
+                onion_fa_g.revision_num = HDstrtoull(vfd_info_g.info, NULL, 10);
+                if (errno == ERANGE) {
+                    HDprintf("Invalid onion revision specified\n");
+                    goto error;
+                }
+
+                HDprintf("Using revision %" PRIu64 "\n", onion_fa_g.revision_num);
+            }
+        }
+        else
+            onion_fa_g.revision_num = 0;
+
+        vfd_info_g.info = &onion_fa_g;
+    }
+
 parse_end:
     /* check for file name to be processed */
     if (argc <= H5_optind) {
@@ -1424,7 +1461,21 @@ main(int argc, char *argv[])
     while (H5_optind < argc) {
         fname = HDstrdup(argv[H5_optind++]);
 
-        fid = h5tools_fopen(fname, H5F_ACC_RDONLY, fapl_id, (fapl_id != H5P_DEFAULT), NULL, 0);
+        /* A short cut to get the revision count of an onion file without opening the file */
+        if (get_onion_revision_count && H5FD_ONION == H5Pget_driver(fapl_id)) {
+            size_t revision_count = 0;
+
+            if (H5FDonion_get_revision_count(fname, fapl_id, &revision_count) < 0) {
+                error_msg("unable to create FAPL for file access\n");
+                h5tools_setstatus(EXIT_FAILURE);
+                goto done;
+            }
+
+            printf("The number of revisions for the onion file is %lu\n", revision_count);
+            goto done;
+        }
+        else
+            fid = h5tools_fopen(fname, H5F_ACC_RDONLY, fapl_id, (fapl_id != H5P_DEFAULT), NULL, 0);
 
         if (fid < 0) {
             error_msg("unable to open file \"%s\"\n", fname);
