@@ -69,7 +69,7 @@ New Features
 
     Library:
     --------
-    - 
+    -
 
 
     Parallel Library:
@@ -84,12 +84,12 @@ New Features
 
     C++ Library:
     ------------
-    - 
+    -
 
 
     Java Library:
     -------------
-    - 
+    -
 
 
     Tools:
@@ -109,7 +109,7 @@ New Features
 
     Internal header file:
     ---------------------
-    -
+    - All the #defines named H5FD_CTL__* were renamed to H5FD_CTL_*, i.e. the double underscore was reduced to a single underscore.
 
 
     Documentation:
@@ -126,22 +126,31 @@ Bug Fixes since HDF5-1.13.1 release
 ===================================
     Library
     -------
-    - 
+    - Converted an assertion on (possibly corrupt) file contents to a normal
+      error check
+
+      Previously, the library contained an assertion check that a read superblock
+      doesn't contain a superblock extension message when the superblock
+      version < 2. When a corrupt HDF5 file is read, this assertion can be triggered
+      in debug builds of HDF5. In production builds, this situation could cause
+      either a library error or a crash, depending on the platform.
+
+      (JTH - 2022/07/08)
 
 
     Java Library
     ------------
-    - 
+    -
 
 
     Configuration
     -------------
-    - 
+    -
 
 
     Tools
     -----
-    - 
+    -
 
 
     Performance
@@ -161,7 +170,7 @@ Bug Fixes since HDF5-1.13.1 release
 
     High-Level Library
     ------------------
-    - 
+    -
 
 
     Fortran High-Level APIs
@@ -182,6 +191,11 @@ Bug Fixes since HDF5-1.13.1 release
     C++ APIs
     --------
     - 
+
+
+    Testing
+    -------
+    -
 
 
 Platforms Tested
@@ -286,7 +300,7 @@ Platforms Tested
                                     Visual Studio 2017 w/ Intel C/C++/Fortran 19 (cmake)
                                     Visual Studio 2019 w/ clang 12.0.0
                                         with MSVC-like command-line (C/C++ only - cmake)
-                                    Visual Studio 2019 w/ Intel Fortran 19 (cmake)
+                                    Visual Studio 2019 w/ Intel C/C++/Fortran oneAPI 2021 (cmake)
                                     Visual Studio 2019 w/ MSMPI 10.1 (C only - cmake)
 
 

@@ -150,7 +150,7 @@ H5FL_DEFINE_STATIC(H5FD_onion_t);
 
 #define MAXADDR (((haddr_t)1 << (8 * sizeof(HDoff_t) - 1)) - 1)
 
-#define H5FD_CTL__GET_NUM_REVISIONS 20001
+#define H5FD_CTL_GET_NUM_REVISIONS 20001
 
 /* Prototypes */
 static herr_t  H5FD__onion_close(H5FD_t *);
@@ -1619,7 +1619,7 @@ H5FD__onion_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void H5_A
     HDassert(file);
 
     switch (op_code) {
-        case H5FD_CTL__GET_NUM_REVISIONS:
+        case H5FD_CTL_GET_NUM_REVISIONS:
             if (!output || !*output)
                 HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL, "the output parameter is null")
 
@@ -1627,7 +1627,7 @@ H5FD__onion_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void H5_A
             break;
         /* Unknown op code */
         default:
-            if (flags & H5FD_CTL__FAIL_IF_UNKNOWN_FLAG)
+            if (flags & H5FD_CTL_FAIL_IF_UNKNOWN_FLAG)
                 HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL, "unknown op_code and fail if unknown flag is set")
             break;
     }
@@ -1702,8 +1702,8 @@ H5FD__get_onion_revision_count(H5FD_t *file, size_t *revision_count)
     HDassert(file);
     HDassert(revision_count);
 
-    op_code = H5FD_CTL__GET_NUM_REVISIONS;
-    flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG;
+    op_code = H5FD_CTL_GET_NUM_REVISIONS;
+    flags   = H5FD_CTL_FAIL_IF_UNKNOWN_FLAG;
 
     /* Get the number of revisions via the ctl callback */
     if (H5FD_ctl(file, op_code, flags, NULL, (void **)&revision_count) < 0)

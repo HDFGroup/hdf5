@@ -1564,7 +1564,7 @@ done:
     vds_prefix     = (char *)H5MM_xfree(vds_prefix);
 
     if (ret_value == NULL) {
-        /* Free the location--casting away const*/
+        /* Free the location */
         if (dataset) {
             if (shared_fo == NULL && dataset->shared) { /* Need to free shared fo */
                 dataset->shared->extfile_prefix = (char *)H5MM_xfree(dataset->shared->extfile_prefix);
@@ -3502,7 +3502,7 @@ H5D_flush_all(H5F_t *f)
     HDassert(f);
 
     /* Iterate over all the open datasets */
-    if (H5I_iterate(H5I_DATASET, H5D__flush_all_cb, f, FALSE) < 0) /* Casting away const OK -QAK */
+    if (H5I_iterate(H5I_DATASET, H5D__flush_all_cb, f, FALSE) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_BADITER, FAIL, "unable to flush cached dataset info")
 
 done:
