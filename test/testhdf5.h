@@ -56,7 +56,7 @@
     {                                                                                                        \
         if (VERBOSE_HI) {                                                                                    \
             print_func("   Call to routine: %15s at line %4d in %s returned %p\n", (where), (int)__LINE__,   \
-                       __FILE__, ((const void *)ret));                                                                     \
+                       __FILE__, ((const void *)ret));                                                       \
         }                                                                                                    \
         if (!(ret)) {                                                                                        \
             TestErrPrintf("*** UNEXPECTED RETURN from %s is NULL line %4d in %s\n", (where), (int)__LINE__,  \
@@ -70,7 +70,7 @@
     {                                                                                                        \
         if (VERBOSE_HI) {                                                                                    \
             print_func("   Call to routine: %15s at line %4d in %s returned %p\n", (where), (int)__LINE__,   \
-                       __FILE__, ((const void *)ret));                                                                     \
+                       __FILE__, ((const void *)ret));                                                       \
         }                                                                                                    \
         if (ret) {                                                                                           \
             TestErrPrintf("*** UNEXPECTED RETURN from %s is not NULL line %4d in %s\n", (where),             \
