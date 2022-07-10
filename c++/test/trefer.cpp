@@ -80,10 +80,10 @@ test_reference_params()
             *tbuf;        // temp. buffer read from disk
 
         // Allocate write & read buffers
-        int temp_size = MAX(sizeof(unsigned), sizeof(hobj_ref_t));
-        wbuf          = static_cast<hobj_ref_t *>(HDmalloc(temp_size * SPACE1_DIM1));
-        rbuf          = static_cast<hobj_ref_t *>(HDmalloc(temp_size * SPACE1_DIM1));
-        tbuf          = static_cast<hobj_ref_t *>(HDmalloc(temp_size * SPACE1_DIM1));
+        size_t temp_size = MAX(sizeof(unsigned), sizeof(hobj_ref_t));
+        wbuf             = static_cast<hobj_ref_t *>(HDmalloc(temp_size * SPACE1_DIM1));
+        rbuf             = static_cast<hobj_ref_t *>(HDmalloc(temp_size * SPACE1_DIM1));
+        tbuf             = static_cast<hobj_ref_t *>(HDmalloc(temp_size * SPACE1_DIM1));
 
         // Create file FILE1
         file1 = new H5File(FILE1, H5F_ACC_TRUNC);
@@ -102,7 +102,7 @@ test_reference_params()
         DataSet dataset = group.createDataSet(DSET1_NAME, PredType::NATIVE_UINT, sid1);
 
         unsigned *tu32; // Temporary pointer to uint32 data
-        int       i;
+        unsigned i;
         for (tu32 = reinterpret_cast<unsigned *>(wbuf), i = 0; i < SPACE1_DIM1; i++)
             *tu32++ = i * 3; // from C test
 
@@ -194,7 +194,6 @@ test_reference_params()
 static void
 test_reference_obj()
 {
-    int                i;                      // counting variables
     const H5std_string write_comment = "Foo!"; // Comments for group
 
     // Output message about test being performed
@@ -207,10 +206,10 @@ test_reference_obj()
             *tbuf;        // temp. buffer read from disk
 
         // Allocate write & read buffers
-        int temp_size = MAX(sizeof(unsigned), sizeof(hobj_ref_t));
-        wbuf          = static_cast<hobj_ref_t *>(HDmalloc(temp_size * SPACE1_DIM1));
-        rbuf          = static_cast<hobj_ref_t *>(HDmalloc(temp_size * SPACE1_DIM1));
-        tbuf          = static_cast<hobj_ref_t *>(HDmalloc(temp_size * SPACE1_DIM1));
+        size_t temp_size = MAX(sizeof(unsigned), sizeof(hobj_ref_t));
+        wbuf             = static_cast<hobj_ref_t *>(HDmalloc(temp_size * SPACE1_DIM1));
+        rbuf             = static_cast<hobj_ref_t *>(HDmalloc(temp_size * SPACE1_DIM1));
+        tbuf             = static_cast<hobj_ref_t *>(HDmalloc(temp_size * SPACE1_DIM1));
 
         // Create file FILE1
         file1 = new H5File(FILE1, H5F_ACC_TRUNC);
@@ -232,6 +231,7 @@ test_reference_obj()
         DataSet dataset = group.createDataSet(DSET1_NAME, PredType::NATIVE_UINT, sid1);
 
         unsigned *tu32; // Temporary pointer to uint32 data
+        unsigned  i;
         for (tu32 = reinterpret_cast<unsigned *>(wbuf), i = 0; i < SPACE1_DIM1; i++)
             *tu32++ = i * 3; // from C test
 
@@ -714,7 +714,7 @@ test_reference_region_1D()
         verify_val(static_cast<long>(nelms), 15, "DataSpace::getSelectNpoints", __LINE__, __FILE__);
 
         /* Allocate space for the hyperslab blocks */
-        coords = static_cast<hsize_t *>(HDmalloc(nelms * SPACE3_RANK * sizeof(hsize_t) * 2));
+        coords = static_cast<hsize_t *>(HDmalloc(static_cast<size_t>(nelms) * SPACE3_RANK * sizeof(hsize_t) * 2));
 
         // Get the list of hyperslab blocks currently selected
         reg_sp.getSelectHyperBlocklist(0, static_cast<hsize_t>(nelms), coords);
@@ -773,7 +773,7 @@ test_reference_region_1D()
         verify_val(static_cast<long>(nelmspts), 10, "DataSpace::getSelectNpoints", __LINE__, __FILE__);
 
         /* Allocate space for the hyperslab blocks */
-        coords = static_cast<hsize_t *>(HDmalloc(nelmspts * SPACE3_RANK * sizeof(hsize_t)));
+        coords = static_cast<hsize_t *>(HDmalloc(static_cast<size_t>(nelmspts) * SPACE3_RANK * sizeof(hsize_t)));
 
         // Get the list of element points currently selected
         elm_sp.getSelectElemPointlist(0, static_cast<hsize_t>(nelmspts), coords);
