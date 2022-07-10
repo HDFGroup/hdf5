@@ -509,4 +509,3 @@ main(int argc, char *argv[])
     return EXIT_SUCCESS;
 } /* end main */
 H5_GCC_CLANG_DIAG_ON("format-nonliteral")
-
