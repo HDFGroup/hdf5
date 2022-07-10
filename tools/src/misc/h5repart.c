@@ -151,6 +151,7 @@ get_size(const char *progname, int *argno, int argc, char *argv[])
  *
  *-------------------------------------------------------------------------
  */
+H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
 int
 main(int argc, char *argv[])
 {
@@ -507,3 +508,5 @@ main(int argc, char *argv[])
     HDfree(buf);
     return EXIT_SUCCESS;
 } /* end main */
+H5_GCC_CLANG_DIAG_ON("format-nonliteral")
+

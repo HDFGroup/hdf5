@@ -91,6 +91,8 @@ main(int argc, char *argv[])
     const char *err9  = "Cannot specify more than 30 input files in one call to h5import.\n";
     const char *err10 = "Length of output file name limited to 255 chars.\n";
 
+    H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
+
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
 
@@ -236,6 +238,8 @@ main(int argc, char *argv[])
     if (process(opt) == -1)
         goto err;
 
+    H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
+
     for (i = 0; i < opt->fcount; i++) {
         in = &(opt->infiles[i].in);
         if (in->sizeOfDimension)
@@ -364,6 +368,8 @@ processDataFile(char *infile, struct Input *in, hid_t file_id)
     const char *err11  = "Error in reading string data.\n";
     int         retval = -1;
 
+    H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
+
     /*-------------------------------------------------------------------------
      * special case for opening binary classes in H5_HAVE_WIN32_API
      * "FP" denotes a floating point binary file,
@@ -450,13 +456,15 @@ processDataFile(char *infile, struct Input *in, hid_t file_id)
             goto error;
     }
 
+    H5_GCC_CLANG_DIAG_ON("format-nonliteral")
+
     /* Set success return value */
     retval = 0;
 
 error:
     if (strm)
         HDfclose(strm);
-    return (retval);
+    return retval;
 }
 
 static int
@@ -1429,10 +1437,12 @@ processConfigurationFile(char *infile, struct Input *in)
     const char *err19  = "Unable to get integer value.\n";
     const char *err20  = "Unable to get subset values.\n";
 
-    /* create vector to map which keywords have been found
-     check vector after each keyword to check for violation
-     at the end check vector to see if required fields have been provided
-     process the output file according to the options
+    H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
+
+    /* - create vector to map which keywords have been found
+     * - check vector after each keyword to check for violation
+     * - at the end check vector to see if required fields have been provided
+     * - process the output file according to the options
      */
 
     /* Initialize machine endian */
@@ -2429,13 +2439,15 @@ processConfigurationFile(char *infile, struct Input *in)
         }
     }
 
+    H5_GCC_CLANG_DIAG_ON("format-nonliteral")
+
     /* Set success return value */
     retval = 0;
 
 error:
     if (strm)
         HDfclose(strm);
-    return (retval);
+    return retval;
 }
 
 static int
@@ -4610,6 +4622,8 @@ process(struct Options *opt)
         "Error in creating the output data set. Dataset with the same name may exist at the specified path\n";
     const char *err6 = "Error in writing the output data set.\n";
 
+    H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
+
     H5E_BEGIN_TRY
     {
         if ((file_id = H5Fopen(opt->outfile, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) {
@@ -4742,8 +4756,10 @@ process(struct Options *opt)
 
     } /* STR */
 
+    H5_GCC_CLANG_DIAG_ON("format-nonliteral")
+
     H5Fclose(file_id);
-    return (0);
+    return 0;
 }
 
 uint16_t

@@ -264,7 +264,9 @@ h5tools_str_fmt(h5tools_str_t *str /*in,out*/, size_t start, const char *fmt)
 
     /* Reset the output string and append a formatted version */
     h5tools_str_trunc(str, start);
+    H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
     h5tools_str_append(str, fmt, temp);
+    H5_GCC_CLANG_DIAG_ON("format-nonliteral")
 
     /* Free the temp buffer if we allocated one */
     if (temp != _temp)
@@ -300,11 +302,18 @@ h5tools_str_prefix(h5tools_str_t *str /*in,out*/, const h5tool_format_t *info, h
             if (i)
                 h5tools_str_append(str, "%s", OPT(info->idx_sep, ","));
 
+            H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
             h5tools_str_append(str, OPT(info->idx_n_fmt, "%" PRIuHSIZE), (hsize_t)ctx->pos[i]);
+            H5_GCC_CLANG_DIAG_ON("format-nonliteral")
         }
     }
-    else /* Scalar */
+    else {
+        /* Scalar */
+        H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
         h5tools_str_append(str, OPT(info->idx_n_fmt, "%" PRIuHSIZE), (hsize_t)elmtno);
+        H5_GCC_CLANG_DIAG_ON("format-nonliteral")
+    }
+
     H5TOOLS_DEBUG("str=%s", str->s);
 
     H5TOOLS_ENDDEBUG(" ");
@@ -341,11 +350,18 @@ h5tools_str_region_prefix(h5tools_str_t *str /*in,out*/, const h5tool_format_t *
             if (i)
                 h5tools_str_append(str, "%s", OPT(info->idx_sep, ","));
 
+            H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
             h5tools_str_append(str, OPT(info->idx_n_fmt, "%" PRIuHSIZE), (hsize_t)ctx->pos[i]);
+            H5_GCC_CLANG_DIAG_ON("format-nonliteral")
         }
     }
-    else /* Scalar */
+    else {
+        /* Scalar */
+        H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
         h5tools_str_append(str, OPT(info->idx_n_fmt, "%" PRIuHSIZE), (hsize_t)0);
+        H5_GCC_CLANG_DIAG_ON("format-nonliteral")
+    }
+
     H5TOOLS_DEBUG("str=%s", str->s);
 
     H5TOOLS_ENDDEBUG(" ");
@@ -463,6 +479,7 @@ h5tools_str_dump_space_blocks(h5tools_str_t *str, hid_t rspace, const h5tool_for
         for (u = 0; u < nblocks; u++) {
             unsigned v;
 
+            H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
             h5tools_str_append(str, info->dset_blockformat_pre, u ? "," OPTIONAL_LINE_BREAK " " : "",
                                (unsigned long)u);
 
@@ -474,6 +491,7 @@ h5tools_str_dump_space_blocks(h5tools_str_t *str, hid_t rspace, const h5tool_for
                 h5tools_str_append(str, "%s%" PRIuHSIZE, v ? "," : ")-(", ptdata[u * 2 * ndims + v + ndims]);
 
             h5tools_str_append(str, ")");
+            H5_GCC_CLANG_DIAG_ON("format-nonliteral")
         }
 
         HDfree(ptdata);
@@ -522,6 +540,7 @@ h5tools_str_dump_space_points(h5tools_str_t *str, hid_t rspace, const h5tool_for
         for (u = 0; u < npoints; u++) {
             unsigned v;
 
+            H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
             h5tools_str_append(str, info->dset_ptformat_pre, u ? "," OPTIONAL_LINE_BREAK " " : "",
                                (unsigned long)u);
 
@@ -529,6 +548,7 @@ h5tools_str_dump_space_points(h5tools_str_t *str, hid_t rspace, const h5tool_for
                 h5tools_str_append(str, "%s%" PRIuHSIZE, v ? "," : "(", (ptdata[u * ndims + v]));
 
             h5tools_str_append(str, ")");
+            H5_GCC_CLANG_DIAG_ON("format-nonliteral")
         }
 
         HDfree(ptdata);
@@ -656,6 +676,8 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
     H5T_str_t      pad;
     H5T_class_t    type_class;
     char *         ret_value = NULL;
+
+    H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
 
     H5TOOLS_START_DEBUG(" ");
     /* Build default formats for long long types */
@@ -1319,6 +1341,8 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
     }
 
     ret_value = h5tools_str_fmt(str, start, OPT(info->elmt_fmt, "%s"));
+
+    H5_GCC_CLANG_DIAG_ON("format-nonliteral")
 
     H5TOOLS_ENDDEBUG(" with %s", ret_value);
     return ret_value;
