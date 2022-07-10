@@ -34,6 +34,8 @@ jobs:
             ts: OFF
             hl: ON
             parallel: OFF
+            mirror_vfd: OFF
+            direct_vfd: OFF
             generator: "-G \"Visual Studio 17 2022\" -A x64"
             flags: ""
           - name: "Ubuntu Latest GCC"
@@ -46,6 +48,8 @@ jobs:
             ts: OFF
             hl: ON
             parallel: OFF
+            mirror_vfd: ON
+            direct_vfd: ON
             toolchain: "config/toolchain/GCC.cmake"
             generator: "-G Ninja"
             flags: ""
@@ -59,6 +63,8 @@ jobs:
             ts: OFF
             hl: ON
             parallel: OFF
+            mirror_vfd: ON
+            direct_vfd: OFF
             toolchain: "config/toolchain/clang.cmake"
             generator: "-G Ninja"
             flags: ""
@@ -72,6 +78,8 @@ jobs:
             ts: OFF
             hl: ON
             parallel: OFF
+            mirror_vfd: ON
+            direct_vfd: ON
             toolchain: "config/toolchain/GCC.cmake"
             generator: "-G Ninja"
             flags: ""
@@ -85,6 +93,8 @@ jobs:
             ts: disable
             hl: enable
             parallel: disable
+            mirror_vfd: enable
+            direct_vfd: enable
             toolchain: ""
             generator: "autogen"
             flags: ""
@@ -98,6 +108,8 @@ jobs:
             ts: disable
             hl: enable
             parallel: disable
+            mirror_vfd: enable
+            direct_vfd: enable
             toolchain: ""
             generator: "autogen"
             flags: ""
@@ -106,12 +118,14 @@ jobs:
             artifact: "LinuxA.tar.xz"
             os: ubuntu-latest
             build_type: "debug"
-            cpp: disable
+            cpp: enable
             fortran: disable
             java: disable
             ts: disable
             hl: enable
             parallel: disable
+            mirror_vfd: disable
+            direct_vfd: enable
             toolchain: ""
             generator: "autogen"
             flags: "CFLAGS=-Werror"
@@ -127,6 +141,8 @@ jobs:
             ts: ON
             hl: OFF
             parallel: OFF
+            mirror_vfd: OFF
+            direct_vfd: OFF
             generator: "-G \"Visual Studio 16 2019\" -A x64"
             flags: ""
           - name: "Ubuntu TS GCC"
@@ -139,6 +155,8 @@ jobs:
             ts: ON
             hl: OFF
             parallel: OFF
+            mirror_vfd: ON
+            direct_vfd: ON
             toolchain: "config/toolchain/GCC.cmake"
             generator: "-G Ninja"
             flags: ""
@@ -152,6 +170,8 @@ jobs:
             ts: ON
             hl: OFF
             parallel: OFF
+            mirror_vfd: ON
+            direct_vfd: OFF
             toolchain: "config/toolchain/clang.cmake"
             generator: "-G Ninja"
             flags: ""
@@ -165,6 +185,8 @@ jobs:
             ts: ON
             hl: OFF
             parallel: OFF
+            mirror_vfd: ON
+            direct_vfd: ON
             toolchain: "config/toolchain/GCC.cmake"
             generator: "-G Ninja"
             flags: ""
@@ -178,6 +200,8 @@ jobs:
             ts: enable
             hl: disable
             parallel: disable
+            mirror_vfd: enable
+            direct_vfd: enable
             toolchain: ""
             generator: "autogen"
             flags: ""
@@ -222,7 +246,7 @@ jobs:
         sh ./autogen.sh
         mkdir "${{ runner.workspace }}/build"
         cd "${{ runner.workspace }}/build"
-        ${{ matrix.flags }} $GITHUB_WORKSPACE/configure --enable-build-mode=${{ matrix.build_type }} --enable-shared --${{ matrix.ts }}-threadsafe --${{ matrix.hl }}-hl --${{ matrix.parallel }}-parallel --${{ matrix.cpp }}-cxx --${{ matrix.fortran }}-fortran --${{ matrix.java }}-java
+        ${{ matrix.flags }} $GITHUB_WORKSPACE/configure --enable-build-mode=${{ matrix.build_type }} --enable-shared --${{ matrix.ts }}-threadsafe --${{ matrix.hl }}-hl --${{ matrix.parallel }}-parallel --${{ matrix.cpp }}-cxx --${{ matrix.fortran }}-fortran --${{ matrix.java }}-java --${{ matrix.mirror_vfd }}-mirror-vfd --${{ matrix.direct_vfd }}-direct-vfd
       shell: bash
       env:
         CC:   gcc-11
@@ -234,7 +258,7 @@ jobs:
       run: |
         mkdir "${{ runner.workspace }}/build"
         cd "${{ runner.workspace }}/build"
-        cmake ${{ matrix.generator }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain }} -DBUILD_SHARED_LIBS=ON -DHDF5_ENABLE_ALL_WARNINGS=ON -DHDF5_ENABLE_THREADSAFE:BOOL=${{ matrix.ts }} -DHDF5_BUILD_HL_LIB:BOOL=${{ matrix.hl }} -DHDF5_ENABLE_PARALLEL:BOOL=${{ matrix.parallel }} -DHDF5_BUILD_CPP_LIB:BOOL=${{ matrix.cpp }} -DHDF5_BUILD_FORTRAN=${{ matrix.fortran }} -DHDF5_BUILD_JAVA=${{ matrix.java }} $GITHUB_WORKSPACE
+        cmake ${{ matrix.generator }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain }} -DBUILD_SHARED_LIBS=ON -DHDF5_ENABLE_ALL_WARNINGS=ON -DHDF5_ENABLE_THREADSAFE:BOOL=${{ matrix.ts }} -DHDF5_BUILD_HL_LIB:BOOL=${{ matrix.hl }} -DHDF5_ENABLE_PARALLEL:BOOL=${{ matrix.parallel }} -DHDF5_BUILD_CPP_LIB:BOOL=${{ matrix.cpp }} -DHDF5_BUILD_FORTRAN=${{ matrix.fortran }} -DHDF5_BUILD_JAVA=${{ matrix.java }} -DHDF5_ENABLE_MIRROR_VFD:BOOL={{ matrix.mirror_vfd }} -DHDF5_ENABLE_DIRECT_VFD:BOOL=${{ matrix.direct_vfd }} $GITHUB_WORKSPACE
       shell: bash
 
     - name: Autotools Build
