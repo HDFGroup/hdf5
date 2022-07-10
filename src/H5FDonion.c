@@ -791,8 +791,8 @@ H5FD__onion_remove_unused_symbols(char *s)
 static herr_t
 H5FD__onion_parse_config_str(const char *config_str, H5FD_onion_fapl_info_t *fa)
 {
-    char                   *config_str_copy = NULL;
-    herr_t                  ret_value       = SUCCEED;
+    char * config_str_copy = NULL;
+    herr_t ret_value       = SUCCEED;
 
     FUNC_ENTER_PACKAGE;
 
@@ -929,7 +929,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
     /* This VFD can be invoked by either H5Pset_fapl_onion() or
      * H5Pset_driver_by_name(). When invoked by the former, there will be
      * driver info to peek at.
-    */
+     */
     fa = (const H5FD_onion_fapl_info_t *)H5P_peek_driver_info(plist);
 
     if (NULL == fa) {
@@ -1224,7 +1224,6 @@ done:
 
         H5MM_xfree(file->recovery_file_name);
         H5MM_xfree(file->curr_rev_record.comment);
-
 
         H5FL_FREE(H5FD_onion_t, file);
     }
