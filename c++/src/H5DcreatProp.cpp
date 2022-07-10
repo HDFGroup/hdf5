@@ -444,8 +444,8 @@ DSetCreatPropList::getFilter(int filter_number, unsigned int &flags, size_t &cd_
     if (filter_number < 0)
         throw PropListIException("DSetCreatPropList::getFilter", "filter_number can't be negative");
 
-    H5Z_filter_t filter_id =
-        H5Pget_filter2(id, static_cast<unsigned>(filter_number), &flags, &cd_nelmts, cd_values, namelen, name, &filter_config);
+    H5Z_filter_t filter_id = H5Pget_filter2(id, static_cast<unsigned>(filter_number), &flags, &cd_nelmts,
+                                            cd_values, namelen, name, &filter_config);
     if (filter_id == H5Z_FILTER_ERROR)
         throw PropListIException("DSetCreatPropList::getFilter", "H5Pget_filter2 returned H5Z_FILTER_ERROR");
     else

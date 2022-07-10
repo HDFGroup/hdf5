@@ -228,7 +228,8 @@ test_simple_io(H5File &file)
         // Check that the values read are the same as the values written
         for (i = 0; i < 100; i++)
             for (j = 0; j < 200; j++) {
-                int status = check_values(static_cast<hsize_t>(i), static_cast<hsize_t>(j), points[i][j], check[i][j]);
+                int status =
+                    check_values(static_cast<hsize_t>(i), static_cast<hsize_t>(j), points[i][j], check[i][j]);
                 if (status == -1)
                     throw Exception("DataSet::read");
             }

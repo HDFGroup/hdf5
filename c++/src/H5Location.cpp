@@ -2051,8 +2051,8 @@ H5Location::getObjnameByIdx(hsize_t idx) const
     // Create buffer for C string
     char *name_C = new char[actual_name_len]();
 
-    name_len =
-        H5Lget_name_by_idx(getId(), ".", H5_INDEX_NAME, H5_ITER_INC, idx, name_C, actual_name_len, H5P_DEFAULT);
+    name_len = H5Lget_name_by_idx(getId(), ".", H5_INDEX_NAME, H5_ITER_INC, idx, name_C, actual_name_len,
+                                  H5P_DEFAULT);
 
     if (name_len < 0) {
         delete[] name_C;
