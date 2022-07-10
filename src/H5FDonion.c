@@ -789,17 +789,15 @@ H5FD__onion_remove_unused_symbols(char *s)
 }
 
 static herr_t
-H5FD__onion_parse_config_str(char *config_str, H5FD_onion_fapl_info_t **info)
+H5FD__onion_parse_config_str(const char *config_str, H5FD_onion_fapl_info_t *fa)
 {
-    H5FD_onion_fapl_info_t *fa        = NULL;
-    herr_t                  ret_value = SUCCEED;
+    char                   *config_str_copy = NULL;
+    herr_t                  ret_value       = SUCCEED;
 
     FUNC_ENTER_PACKAGE;
 
     if (!HDstrcmp(config_str, ""))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "configure string can't be empty")
-
-    fa = (H5FD_onion_fapl_info_t *)H5MM_calloc(sizeof(H5FD_onion_fapl_info_t));
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "configure string can't be empty")
 
     /* Initialize to the default values */
     fa->version          = H5FD_ONION_FAPL_INFO_VERSION_CURR;
@@ -820,14 +818,18 @@ H5FD__onion_parse_config_str(char *config_str, H5FD_onion_fapl_info_t **info)
     else {
         char *token1 = NULL, *token2 = NULL;
 
+        /* Duplicate the configure string since strtok will mess with it */
+        if (NULL == (config_str_copy = H5MM_strdup(config_str)))
+            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "can't duplicate configure string")
+
         /* Remove the curly brackets and space from the configure string */
-        H5FD__onion_remove_unused_symbols(config_str);
+        H5FD__onion_remove_unused_symbols(config_str_copy);
 
         /* The configure string can't be empty after removing the curly brackets */
-        if (!HDstrcmp(config_str, ""))
+        if (!HDstrcmp(config_str_copy, ""))
             HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "configure string can't be empty")
 
-        token1 = HDstrtok(config_str, ":");
+        token1 = HDstrtok(config_str_copy, ":");
         token2 = HDstrtok(NULL, ";");
 
         do {
@@ -883,11 +885,8 @@ H5FD__onion_parse_config_str(char *config_str, H5FD_onion_fapl_info_t **info)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL, "unable to create property list");
     }
 
-    *info = fa;
-
 done:
-    if (FAIL == ret_value)
-        H5MM_free(fa);
+    H5MM_free(config_str_copy);
 
     FUNC_LEAVE_NOAPI(ret_value);
 }
@@ -904,16 +903,17 @@ done:
 static H5FD_t *
 H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
-    H5P_genplist_t *        plist                 = NULL;
-    H5FD_onion_t *          file                  = NULL;
-    H5FD_onion_fapl_info_t *fa                    = NULL;
-    char *                  config_str            = NULL;
-    hid_t                   backing_fapl_id       = H5I_INVALID_HID;
-    char *                  name_onion            = NULL;
-    char *                  recovery_file_nameery = NULL;
-    H5FD_t *                ret_value             = NULL;
-    bool                    new_open              = false;
-    haddr_t                 canon_eof             = 0;
+    H5P_genplist_t *              plist                 = NULL;
+    H5FD_onion_t *                file                  = NULL;
+    const H5FD_onion_fapl_info_t *fa                    = NULL;
+    H5FD_onion_fapl_info_t *      new_fa                = NULL;
+    const char *                  config_str            = NULL;
+    hid_t                         backing_fapl_id       = H5I_INVALID_HID;
+    char *                        name_onion            = NULL;
+    char *                        recovery_file_nameery = NULL;
+    bool                          new_open              = false;
+    haddr_t                       canon_eof             = 0;
+    H5FD_t *                      ret_value             = NULL;
 
     FUNC_ENTER_PACKAGE
 
@@ -926,15 +926,25 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
     if (NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
 
-    fa = (H5FD_onion_fapl_info_t *)H5P_peek_driver_info(plist);
+    /* This VFD can be invoked by either H5Pset_fapl_onion() or
+     * H5Pset_driver_by_name(). When invoked by the former, there will be
+     * driver info to peek at.
+    */
+    fa = (const H5FD_onion_fapl_info_t *)H5P_peek_driver_info(plist);
 
-    /* This VFD can be invoked by either H5Pset_fapl_onion or H5Pset_driver_by_name */
     if (NULL == fa) {
-        if (NULL == (config_str = (char *)H5P_peek_driver_config_str(plist)))
-            HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, NULL, "bad VFL driver configure string")
+        if (NULL == (config_str = H5P_peek_driver_config_str(plist)))
+            HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, NULL, "missing VFL driver configure string")
 
-        if (H5FD__onion_parse_config_str(config_str, &fa) < 0)
+        /* Allocate a new onion fapl info struct and fill it from the
+         * configuration string
+         */
+        if (NULL == (new_fa = H5MM_calloc(sizeof(H5FD_onion_fapl_info_t))))
+            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "can't allocate memory for onion fapl info struct")
+        if (H5FD__onion_parse_config_str(config_str, new_fa) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, NULL, "failed to parse configure string")
+
+        fa = new_fa;
     }
 
     /* Check for unsupported target values */
@@ -983,11 +993,6 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "page size is not a power of two")
 
     /* Assign the page size */
-    /* TODO: Is this really the best way to do this? Why not just store the
-     *       page size directly? It looks like this is so we can do bit shifts
-     *       instead of division, which is some severely premature optimization
-     *       with a major hit on maintainability.
-     */
     double log2_page_size                               = HDlog2((double)(fa->page_size));
     file->curr_rev_record.archival_index.page_size_log2 = (uint32_t)log2_page_size;
 
@@ -1195,7 +1200,7 @@ done:
     H5MM_xfree(name_onion);
     H5MM_xfree(recovery_file_nameery);
 
-    if (config_str && fa)
+    if (config_str && new_fa)
         if (H5I_GENPROP_LST == H5I_get_type(fa->backing_fapl_id))
             H5I_dec_app_ref(fa->backing_fapl_id);
 
@@ -1220,8 +1225,11 @@ done:
         H5MM_xfree(file->recovery_file_name);
         H5MM_xfree(file->curr_rev_record.comment);
 
+
         H5FL_FREE(H5FD_onion_t, file);
     }
+
+    H5MM_xfree(new_fa);
 
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD__onion_open() */
