@@ -1249,8 +1249,8 @@ H5FD__family_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, s
          * is 4 bytes, to prevent overflow when user application is trying to
          * write files bigger than 4GB. */
         tempreq = file->memb_size - sub;
-        if (tempreq > SIZET_MAX)
-            tempreq = SIZET_MAX;
+        if (tempreq > SIZE_MAX)
+            tempreq = SIZE_MAX;
         req = MIN(size, (size_t)tempreq);
 
         HDassert(u < file->nmembs);
@@ -1314,8 +1314,8 @@ H5FD__family_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, 
          * is 4 bytes, to prevent overflow when user application is trying to
          * write files bigger than 4GB. */
         tempreq = file->memb_size - sub;
-        if (tempreq > SIZET_MAX)
-            tempreq = SIZET_MAX;
+        if (tempreq > SIZE_MAX)
+            tempreq = SIZE_MAX;
         req = MIN(size, (size_t)tempreq);
 
         HDassert(u < file->nmembs);
