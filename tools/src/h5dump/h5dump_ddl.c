@@ -1713,7 +1713,7 @@ handle_datasets(hid_t fid, const char *dset, void *data, int pe, const char *dis
                     sset->start.data = (hsize_t *)HDcalloc((size_t)ndims, sizeof(hsize_t));
                 else
                     sset->start.data = NULL;
-                sset->start.len  = ndims;
+                sset->start.len = ndims;
             }
 
             if (!sset->stride.data) {
@@ -1721,7 +1721,7 @@ handle_datasets(hid_t fid, const char *dset, void *data, int pe, const char *dis
                     sset->stride.data = (hsize_t *)HDcalloc((size_t)ndims, sizeof(hsize_t));
                 else
                     sset->stride.data = NULL;
-                sset->stride.len  = ndims;
+                sset->stride.len = ndims;
                 for (i = 0; i < ndims; i++)
                     sset->stride.data[i] = 1;
             }
@@ -1731,7 +1731,7 @@ handle_datasets(hid_t fid, const char *dset, void *data, int pe, const char *dis
                     sset->count.data = (hsize_t *)HDcalloc((size_t)ndims, sizeof(hsize_t));
                 else
                     sset->count.data = NULL;
-                sset->count.len  = ndims;
+                sset->count.len = ndims;
                 for (i = 0; i < ndims; i++)
                     sset->count.data[i] = 1;
             }
@@ -1741,7 +1741,7 @@ handle_datasets(hid_t fid, const char *dset, void *data, int pe, const char *dis
                     sset->block.data = (hsize_t *)HDcalloc((size_t)ndims, sizeof(hsize_t));
                 else
                     sset->block.data = NULL;
-                sset->block.len  = ndims;
+                sset->block.len = ndims;
                 for (i = 0; i < ndims; i++)
                     sset->block.data[i] = 1;
             }
