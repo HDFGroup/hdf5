@@ -793,7 +793,7 @@ done:
  *              MPI_File_sync in order to make the written data available
  *              to all ranks.
  *
- * Return:      True when MPI_File_sync is not needed/False otherwise
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Houjun Tang,  April 7, 2022
  *
@@ -802,10 +802,10 @@ done:
 herr_t
 H5_mpio_get_file_sync_required(MPI_File fh, hbool_t *file_sync_required)
 {
-    herr_t   ret_value = SUCCEED;
     MPI_Info info_used;
     int      flag;
     char     value[MPI_MAX_INFO_VAL];
+    herr_t   ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 

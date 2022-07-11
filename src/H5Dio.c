@@ -834,11 +834,11 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset, const H5S_t *file_
             if (io_info->op_type == H5D_IO_OP_WRITE) {
                 hbool_t mpi_file_sync_required = FALSE;
                 if (H5F_shared_get_mpi_file_sync_required(io_info->f_sh, &mpi_file_sync_required) < 0)
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get MPI file_sync_required flag")
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get MPI file_sync_required flag")
 
                 if (mpi_file_sync_required)
                     HGOTO_ERROR(
-                        H5E_IO, H5E_NO_INDEPENDENT, FAIL,
+                        H5E_DATASET, H5E_NO_INDEPENDENT, FAIL,
                         "Can't perform independent write when MPI_File_sync is required by ROMIO driver.")
             }
 

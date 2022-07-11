@@ -587,36 +587,4 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_mpi_get_file_block_type() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5F_shared_get_mpi_file_sync_required
- *
- * Purpose:     Returns the mpi_file_sync_required flag
- *
- * Return:      Success:    Non-negative
- *              Failure:    Negative
- *
- * Programmer:  Houjun Tang
- *              May 19, 2022
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5F_shared_get_mpi_file_sync_required(const H5F_shared_t *f_sh, hbool_t *flag /*out*/)
-{
-    herr_t ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    HDassert(f_sh);
-    HDassert(flag);
-
-    /* Dispatch to driver */
-    if ((ret_value = H5FD_mpi_get_file_sync_required(f_sh->lf, flag)) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, (-1), "driver get_file_sync_required request failed")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_shared_get_mpi_file_sync_required() */
-
 #endif /* H5_HAVE_PARALLEL */
