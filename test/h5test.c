@@ -1997,7 +1997,7 @@ done:
  *
  * Purpose:     Append the test file name to the srcdir path and return the whole string
  *
- * Return:      The string or NULL (errors or not enought space)
+ * Return:      The string or NULL (errors or not enough space)
  *
  *-------------------------------------------------------------------------
  */
