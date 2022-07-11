@@ -1075,15 +1075,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__sec2_ctl(H5FD_t *_file, uint64_t H5_ATTR_UNUSED op_code, uint64_t flags,
+H5FD__sec2_ctl(H5FD_t H5_ATTR_UNUSED *_file, uint64_t H5_ATTR_UNUSED op_code, uint64_t flags,
                const void H5_ATTR_UNUSED *input, void H5_ATTR_UNUSED **output)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
-
-    /* Sanity checks */
-    HDassert(_file);
 
     /* No op codes are understood. */
     if (flags & H5FD_CTL_FAIL_IF_UNKNOWN_FLAG)

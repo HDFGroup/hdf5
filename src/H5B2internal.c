@@ -637,26 +637,26 @@ H5B2__update_internal(H5B2_hdr_t *hdr, uint16_t depth, unsigned *parent_cache_in
                     if (idx == 0) { /* Left-most child */
                         /* Check for left-most child and its neighbor being close to full */
                         if ((internal->node_ptrs[idx].node_nrec + internal->node_ptrs[idx + 1].node_nrec) >=
-                            ((hdr->node_info[depth - 1].split_nrec * 2) - 1))
+                            (unsigned)((hdr->node_info[depth - 1].split_nrec * 2) - 1))
                             could_split = TRUE;
-                    }                                 /* end if */
+                    }
                     else if (idx == internal->nrec) { /* Right-most child */
                         /* Check for right-most child and its neighbor being close to full */
                         if ((internal->node_ptrs[idx - 1].node_nrec + internal->node_ptrs[idx].node_nrec) >=
-                            ((hdr->node_info[depth - 1].split_nrec * 2) - 1))
+                            (unsigned)((hdr->node_info[depth - 1].split_nrec * 2) - 1))
                             could_split = TRUE;
-                    }      /* end else-if */
+                    }
                     else { /* Middle child */
                         /* Check for middle child and its left neighbor being close to full */
                         if ((internal->node_ptrs[idx - 1].node_nrec + internal->node_ptrs[idx].node_nrec) >=
-                            ((hdr->node_info[depth - 1].split_nrec * 2) - 1))
+                            (unsigned)((hdr->node_info[depth - 1].split_nrec * 2) - 1))
                             could_split = TRUE;
                         /* Check for middle child and its right neighbor being close to full */
                         else if ((internal->node_ptrs[idx].node_nrec +
                                   internal->node_ptrs[idx + 1].node_nrec) >=
-                                 ((hdr->node_info[depth - 1].split_nrec * 2) - 1))
+                                 (unsigned)((hdr->node_info[depth - 1].split_nrec * 2) - 1))
                             could_split = TRUE;
-                    } /* end if */
+                    }
 
                     /* If this node is full and the child node insertion could
                      *  cause a split, punt back up to caller, leaving the
@@ -672,8 +672,8 @@ H5B2__update_internal(H5B2_hdr_t *hdr, uint16_t depth, unsigned *parent_cache_in
 
                         /* Punt back to caller */
                         HGOTO_DONE(SUCCEED);
-                    } /* end if */
-                }     /* end if */
+                    }
+                }
 
                 /* Release the internal B-tree node */
                 if (H5AC_unprotect(hdr->f, H5AC_BT2_INT, curr_node_ptr->addr, internal, internal_flags) < 0)
