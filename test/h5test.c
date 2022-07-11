@@ -99,10 +99,10 @@ static const char *multi_letters = "msbrglo";
 #define MESSAGE_TIMEOUT 300 /* Timeout in seconds */
 
 /* Buffer to construct path in and return pointer to */
-static char srcdir_path[1024] = "";
+static char srcdir_path[1024];
 
 /* Buffer to construct file in and return pointer to */
-static char srcdir_testpath[1024] = "";
+static char srcdir_testpath[1024];
 
 /*  The strings that correspond to library version bounds H5F_libver_t in H5Fpublic.h */
 /*  This is used by h5_get_version_string() */
@@ -1997,7 +1997,7 @@ done:
  *
  * Purpose:     Append the test file name to the srcdir path and return the whole string
  *
- * Return:      The string
+ * Return:      The string or NULL (errors or not enought space)
  *
  *-------------------------------------------------------------------------
  */
@@ -2008,16 +2008,20 @@ H5_get_srcdir_filename(const char *filename)
 
     /* Check for error */
     if (NULL == srcdir)
-        return (NULL);
-    else {
-        /* Build path to test file */
-        if ((HDstrlen(srcdir) + HDstrlen(filename) + 1) < sizeof(srcdir_testpath)) {
-            HDsnprintf(srcdir_testpath, sizeof(srcdir_testpath), "%s%s", srcdir, filename);
-            return (srcdir_testpath);
-        } /* end if */
-        else
-            return (NULL);
-    } /* end else */
+        return NULL;
+
+    /* Build path to test file. We're checking the length so suppress
+     * the gcc format-truncation warning.
+     */
+    if ((HDstrlen(srcdir) + HDstrlen(filename) + 1) < sizeof(srcdir_testpath)) {
+        H5_GCC_DIAG_OFF("format-truncation")
+        HDsnprintf(srcdir_testpath, sizeof(srcdir_testpath), "%s%s", srcdir, filename);
+        H5_GCC_DIAG_ON("format-truncation")
+        return srcdir_testpath;
+    }
+
+    /* If not enough space, just return NULL */
+    return NULL;
 } /* end H5_get_srcdir_filename() */
 
 /*-------------------------------------------------------------------------

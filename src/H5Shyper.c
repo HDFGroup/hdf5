@@ -6612,8 +6612,9 @@ H5S__hyper_project_simple_lower(const H5S_t *base_space, H5S_t *new_space)
 {
     H5S_hyper_span_info_t *down;     /* Pointer to list of spans */
     unsigned               curr_dim; /* Current dimension being operated on */
+    herr_t                 ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(base_space && H5S_SEL_HYPERSLABS == H5S_GET_SELECT_TYPE(base_space));
@@ -6631,13 +6632,15 @@ H5S__hyper_project_simple_lower(const H5S_t *base_space, H5S_t *new_space)
         down = down->head->down;
         curr_dim++;
     } /* end while */
-    HDassert(down);
+    if (NULL == down)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "NULL span list pointer")
 
     /* Share the underlying hyperslab span information */
     new_space->select.sel_info.hslab->span_lst = down;
     new_space->select.sel_info.hslab->span_lst->count++;
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_project_simple_lower() */
 
 /*-------------------------------------------------------------------------
@@ -6723,7 +6726,8 @@ H5S__hyper_project_simple_higher(const H5S_t *base_space, H5S_t *new_space)
         /* Advance to next dimension */
         curr_dim++;
     } /* end while */
-    HDassert(new_space->select.sel_info.hslab->span_lst);
+    if (NULL == new_space->select.sel_info.hslab->span_lst)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "NULL span list pointer")
     HDassert(prev_span);
 
     /* Share the underlying hyperslab span information */

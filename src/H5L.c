@@ -95,8 +95,8 @@ H5Lmove(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, const char *ds
         hid_t lapl_id)
 {
     H5VL_object_t *   vol_obj1 = NULL; /* Object of src_id */
-    H5VL_loc_params_t loc_params1;
     H5VL_object_t *   vol_obj2 = NULL; /* Object of dst_id */
+    H5VL_loc_params_t loc_params1;
     H5VL_loc_params_t loc_params2;
     H5VL_object_t     tmp_vol_obj;         /* Temporary object */
     herr_t            ret_value = SUCCEED; /* Return value */
@@ -157,19 +157,20 @@ H5Lmove(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, const char *ds
         if (same_connector)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
                         "Objects are accessed through different VOL connectors and can't be linked")
-    } /* end if */
+    }
 
     /* Construct a temporary source VOL object */
     if (vol_obj1) {
         tmp_vol_obj.connector = vol_obj1->connector;
         tmp_vol_obj.data      = vol_obj1->data;
-    } /* end if */
+    }
     else {
-        HDassert(vol_obj2);
+        if (NULL == vol_obj2)
+            HGOTO_ERROR(H5E_LINK, H5E_BADVALUE, FAIL, "NULL VOL object")
 
         tmp_vol_obj.connector = vol_obj2->connector;
         tmp_vol_obj.data      = NULL;
-    } /* end else */
+    }
 
     /* Move the link */
     if (H5VL_link_move(&tmp_vol_obj, &loc_params1, vol_obj2, &loc_params2, lcpl_id, lapl_id,
@@ -269,7 +270,8 @@ H5Lcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, const char *ds
         tmp_vol_obj.data      = vol_obj1->data;
     } /* end if */
     else {
-        HDassert(vol_obj2);
+        if (NULL == vol_obj2)
+            HGOTO_ERROR(H5E_LINK, H5E_BADVALUE, FAIL, "NULL VOL object pointer")
 
         tmp_vol_obj.connector = vol_obj2->connector;
         tmp_vol_obj.data      = NULL;
@@ -505,7 +507,8 @@ H5L__create_hard_api_common(hid_t cur_loc_id, const char *cur_name, hid_t link_l
     if (curr_vol_obj)
         (*tmp_vol_obj_ptr_ptr)->connector = curr_vol_obj->connector;
     else {
-        HDassert(link_vol_obj);
+        if (NULL == link_vol_obj)
+            HGOTO_ERROR(H5E_LINK, H5E_BADVALUE, FAIL, "NULL VOL object pointer")
 
         (*tmp_vol_obj_ptr_ptr)->connector = link_vol_obj->connector;
     } /* end else */
