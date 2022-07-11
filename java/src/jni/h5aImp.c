@@ -1272,7 +1272,7 @@ Java_hdf_hdf5lib_H5_H5AreadVL(JNIEnv *env, jclass clss, jlong attr_id, jlong mem
             }
         } /* end for */
 
-        if(rawBuf)
+        if (rawBuf)
             HDfree(rawBuf);
     }
     else {
@@ -1478,7 +1478,7 @@ Java_hdf_hdf5lib_H5_H5AwriteVL(JNIEnv *env, jclass clss, jlong attr_id, jlong me
         if ((status = H5Awrite((hid_t)attr_id, (hid_t)mem_type_id, rawBuf)) < 0)
             CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
-        if(rawBuf)
+        if (rawBuf)
             HDfree(rawBuf);
     }
     else {

@@ -1276,7 +1276,7 @@ Java_hdf_hdf5lib_H5_H5DreadVL(JNIEnv *env, jclass clss, jlong dataset_id, jlong 
             }
         } /* end for */
 
-        if(rawBuf)
+        if (rawBuf)
             HDfree(rawBuf);
     }
     else {
@@ -1475,7 +1475,7 @@ Java_hdf_hdf5lib_H5_H5DwriteVL(JNIEnv *env, jclass clss, jlong dataset_id, jlong
                                (hid_t)file_space_id, (hid_t)xfer_plist_id, rawBuf)) < 0)
             CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
-        if(rawBuf)
+        if (rawBuf)
             HDfree(rawBuf);
     }
     else {
