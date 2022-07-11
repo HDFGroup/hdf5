@@ -361,6 +361,8 @@ H5HL__cache_prefix_get_final_load_size(const void *_image, size_t H5_ATTR_NDEBUG
     HDassert(actual_len);
     HDassert(*actual_len == image_len);
 
+    HDmemset(&heap, 0, sizeof(H5HL_t));
+
     /* Deserialize the heap's header */
     if (H5HL__hdr_deserialize(&heap, (const uint8_t *)image, udata) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTDECODE, FAIL, "can't decode local heap header")

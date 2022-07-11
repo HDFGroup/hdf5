@@ -740,8 +740,10 @@ h5tools_dump_region_data_blocks(hid_t region_space, hid_t region_id, FILE *strea
     for (indx = 0; indx < nblocks; indx++) {
         unsigned loop_indx;
 
+        H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
         h5tools_str_append(buffer, outputformat.dset_blockformat_pre, indx ? "," OPTIONAL_LINE_BREAK " " : "",
                            (unsigned long)indx);
+        H5_GCC_CLANG_DIAG_ON("format-nonliteral")
 
         /* Start coordinates and opposite corner */
         for (loop_indx = 0; loop_indx < ndims; loop_indx++)
@@ -1097,8 +1099,10 @@ h5tools_dump_region_data_points(hid_t region_space, hid_t region_id, FILE *strea
     for (indx = 0; indx < npoints; indx++) {
         unsigned loop_indx;
 
+        H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
         h5tools_str_append(buffer, outputformat.dset_ptformat_pre, indx ? "," OPTIONAL_LINE_BREAK " " : "",
                            (unsigned long)indx);
+        H5_GCC_CLANG_DIAG_ON("format-nonliteral")
 
         for (loop_indx = 0; loop_indx < ndims; loop_indx++)
             h5tools_str_append(buffer, "%s%" PRIuHSIZE, loop_indx ? "," : "(",

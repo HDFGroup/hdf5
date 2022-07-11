@@ -81,7 +81,10 @@ const char *volnames[] = {
  *
  */
 const char *drivernames[] = {
-    "sec2", "direct", "log", "windows", "stdio", "core", "family", "split", "multi", "mpio", "ros3", "hdfs",
+    [SEC2_VFD_IDX] = "sec2",       [DIRECT_VFD_IDX] = "direct", [LOG_VFD_IDX] = "log",
+    [WINDOWS_VFD_IDX] = "windows", [STDIO_VFD_IDX] = "stdio",   [CORE_VFD_IDX] = "core",
+    [FAMILY_VFD_IDX] = "family",   [SPLIT_VFD_IDX] = "split",   [MULTI_VFD_IDX] = "multi",
+    [MPIO_VFD_IDX] = "mpio",       [ROS3_VFD_IDX] = "ros3",     [HDFS_VFD_IDX] = "hdfs",
 };
 
 #define NUM_VOLS    (sizeof(volnames) / sizeof(volnames[0]))

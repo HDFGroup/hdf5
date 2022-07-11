@@ -268,8 +268,10 @@ DataSet::getInMemDataSize() const
     }
 
     // Calculate and return the size of the data
-    size_t data_size = type_size * num_elements;
-    return (data_size);
+    // Note that large datasets can overflow a size_t
+    size_t data_size = type_size * static_cast<size_t>(num_elements);
+
+    return data_size;
 }
 
 //--------------------------------------------------------------------------
