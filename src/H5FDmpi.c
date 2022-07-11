@@ -252,6 +252,43 @@ H5FD_mpi_haddr_to_MPIOff(haddr_t addr, MPI_Offset *mpi_off /*out*/)
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_mpi_get_file_sync_required
+ *
+ * Purpose:	Retrieves the mpi_file_sync_required used for the file
+ *
+ * Return:	Success:	Non-negative
+ *
+ *              Failure:	Negative
+ *
+ * Programmer:	Houjun Tang
+ *              May 19, 2022
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD_mpi_get_file_sync_required(H5FD_t *file, hbool_t *file_sync_required)
+{
+    const H5FD_class_t *cls;
+    uint64_t            flags                  = H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG;
+    void *              file_sync_required_ptr = (void *)(&file_sync_required);
+    herr_t              ret_value              = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    HDassert(file);
+    cls = (const H5FD_class_t *)(file->cls);
+    HDassert(cls);
+    HDassert(cls->ctl); /* All MPI drivers must implement this */
+
+    /* Dispatch to driver */
+    if ((cls->ctl)(file, H5FD_CTL_GET_MPI_FILE_SYNC_OPCODE, flags, NULL, file_sync_required_ptr) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "driver get_mpi_file_synce request failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_mpi_get_file_sync_required() */
+
 #ifdef NOT_YET
 
 /*-------------------------------------------------------------------------
