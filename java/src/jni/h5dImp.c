@@ -1275,6 +1275,9 @@ Java_hdf_hdf5lib_H5_H5DreadVL(JNIEnv *env, jclass clss, jlong dataset_id, jlong 
                 CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
             }
         } /* end for */
+
+        if(rawBuf)
+            HDfree(rawBuf);
     }
     else {
         if ((status = H5Dread((hid_t)dataset_id, (hid_t)mem_type_id, (hid_t)mem_space_id,
@@ -1471,6 +1474,9 @@ Java_hdf_hdf5lib_H5_H5DwriteVL(JNIEnv *env, jclass clss, jlong dataset_id, jlong
         if ((status = H5Dwrite((hid_t)dataset_id, (hid_t)mem_type_id, (hid_t)mem_space_id,
                                (hid_t)file_space_id, (hid_t)xfer_plist_id, rawBuf)) < 0)
             CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+        if(rawBuf)
+            HDfree(rawBuf);
     }
     else {
         PIN_BYTE_ARRAY(ENVONLY, buf, writeBuf, &writeBufIsCopy, "H5DwriteVL: write buffer not pinned");
