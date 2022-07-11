@@ -22,7 +22,7 @@ extern "C" {
 
 /*
  * Class:     hdf_hdf5lib_H5
- * Method:    H5Acreate
+ * Method:    _H5Acreate
  * Signature: (JLjava/lang/String;JJJ)J
  */
 JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_H5__1H5Acreate(JNIEnv *, jclass, jlong, jstring, jlong, jlong,
@@ -30,14 +30,14 @@ JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_H5__1H5Acreate(JNIEnv *, jclass, jlong,
 
 /*
  * Class:     hdf_hdf5lib_H5
- * Method:    H5Aopen_name
+ * Method:    _H5Aopen_name
  * Signature: (JLjava/lang/String;)J
  */
 JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_H5__1H5Aopen_1name(JNIEnv *, jclass, jlong, jstring);
 
 /*
  * Class:     hdf_hdf5lib_H5
- * Method:    H5Aopen_idx
+ * Method:    _H5Aopen_idx
  * Signature: (JI)J
  */
 JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_H5__1H5Aopen_1idx(JNIEnv *, jclass, jlong, jint);
@@ -137,14 +137,14 @@ JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Awrite_1double(JNIEnv *, jclass, jl
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5AreadVL
- * Signature: (JJ[Ljava/lang/String;)I
+ * Signature: (JJ[Ljava/util/ArrayList;)I
  */
 JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5AreadVL(JNIEnv *, jclass, jlong, jlong, jobjectArray);
 
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5AwriteVL
- * Signature: (JJ[Ljava/lang/String;)I
+ * Signature: (JJ[Ljava/util/ArrayList;)I
  */
 JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5AwriteVL(JNIEnv *, jclass, jlong, jlong, jobjectArray);
 
@@ -185,14 +185,14 @@ JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Aread_1reg_1ref(JNIEnv *, jclass, j
 
 /*
  * Class:     hdf_hdf5lib_H5
- * Method:    H5Aget_space
+ * Method:    _H5Aget_space
  * Signature: (J)J
  */
 JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_H5__1H5Aget_1space(JNIEnv *, jclass, jlong);
 
 /*
  * Class:     hdf_hdf5lib_H5
- * Method:    H5Aget_type
+ * Method:    _H5Aget_type
  * Signature: (J)J
  */
 JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_H5__1H5Aget_1type(JNIEnv *, jclass, jlong);
@@ -220,7 +220,7 @@ JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Adelete(JNIEnv *, jclass, jlong, js
 
 /*
  * Class:     hdf_hdf5lib_H5
- * Method:    H5Aclose
+ * Method:    _H5Aclose
  * Signature: (J)I
  */
 JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5__1H5Aclose(JNIEnv *, jclass, jlong);
@@ -350,7 +350,7 @@ JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_H5__1H5Aopen_1by_1name(JNIEnv *, jclass
 
 /*
  * Class:     hdf_hdf5lib_H5
- * Method:    H5Aget_create_plist
+ * Method:    _H5Aget_create_plist
  * Signature: (J)J
  */
 JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_H5__1H5Aget_1create_1plist(JNIEnv *, jclass, jlong);
