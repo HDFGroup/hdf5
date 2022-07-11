@@ -1531,8 +1531,11 @@ H5FD__family_delete(const char *filename, hid_t fapl_id)
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "unable to allocate temporary member name")
 
     /* Sanity check to make sure that generated names are unique */
+    H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
     HDsnprintf(member_name, H5FD_FAM_MEMB_NAME_BUF_SIZE, filename, 0);
     HDsnprintf(temp, H5FD_FAM_MEMB_NAME_BUF_SIZE, filename, 1);
+    H5_GCC_CLANG_DIAG_ON("format-nonliteral")
+
     if (!HDstrcmp(member_name, temp)) {
         if (default_config) {
             temp = H5MM_xfree(temp);
@@ -1549,7 +1552,9 @@ H5FD__family_delete(const char *filename, hid_t fapl_id)
     current_member = 0;
     while (1) {
         /* Fix up the filename with the current member's number */
+        H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
         HDsnprintf(member_name, H5FD_FAM_MEMB_NAME_BUF_SIZE, filename, current_member);
+        H5_GCC_CLANG_DIAG_ON("format-nonliteral")
 
         /* Attempt to delete the member files. If the first file throws an error
          * we always consider this an error. With subsequent member files, however,
