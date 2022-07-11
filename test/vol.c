@@ -948,7 +948,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_basic_group_operation(const char *env_h5_drvr)
+test_basic_group_operation(void)
 {
     hid_t      fid     = H5I_INVALID_HID;
     hid_t      fapl_id = H5I_INVALID_HID;
@@ -1055,7 +1055,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_basic_dataset_operation(const char *env_h5_drvr)
+test_basic_dataset_operation(void)
 {
     hid_t fid     = H5I_INVALID_HID;
     hid_t fapl_id = H5I_INVALID_HID;
@@ -1515,7 +1515,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_basic_datatype_operation(const char *env_h5_drvr)
+test_basic_datatype_operation(void)
 {
     hid_t   fid      = H5I_INVALID_HID;
     hid_t   fapl_id  = H5I_INVALID_HID;
@@ -2143,12 +2143,12 @@ main(void)
     nerrors += test_register_opt_operation() < 0 ? 1 : 0;
     nerrors += test_native_vol_init() < 0 ? 1 : 0;
     nerrors += test_basic_file_operation(env_h5_drvr) < 0 ? 1 : 0;
-    nerrors += test_basic_group_operation(env_h5_drvr) < 0 ? 1 : 0;
-    nerrors += test_basic_dataset_operation(env_h5_drvr) < 0 ? 1 : 0;
+    nerrors += test_basic_group_operation() < 0 ? 1 : 0;
+    nerrors += test_basic_dataset_operation() < 0 ? 1 : 0;
     nerrors += test_basic_attribute_operation() < 0 ? 1 : 0;
     nerrors += test_basic_object_operation() < 0 ? 1 : 0;
     nerrors += test_basic_link_operation() < 0 ? 1 : 0;
-    nerrors += test_basic_datatype_operation(env_h5_drvr) < 0 ? 1 : 0;
+    nerrors += test_basic_datatype_operation() < 0 ? 1 : 0;
     nerrors += test_async_vol_props() < 0 ? 1 : 0;
 
     if (nerrors) {
