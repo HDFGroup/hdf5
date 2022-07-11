@@ -6610,8 +6610,8 @@ H5S__hyper_project_scalar(const H5S_t *space, hsize_t *offset)
 static herr_t
 H5S__hyper_project_simple_lower(const H5S_t *base_space, H5S_t *new_space)
 {
-    H5S_hyper_span_info_t *down;     /* Pointer to list of spans */
-    unsigned               curr_dim; /* Current dimension being operated on */
+    H5S_hyper_span_info_t *down;                /* Pointer to list of spans */
+    unsigned               curr_dim;            /* Current dimension being operated on */
     herr_t                 ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
