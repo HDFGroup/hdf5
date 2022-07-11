@@ -270,7 +270,7 @@ herr_t
 H5FD_mpi_get_file_sync_required(H5FD_t *file, hbool_t *file_sync_required)
 {
     const H5FD_class_t *cls;
-    uint64_t            flags     = H5FD_CTL_FAIL_IF_UNKNOWN_FLAG | H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG;
+    uint64_t            flags     = H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG;
     void *              file_sync_required_ptr = (void *)(&file_sync_required);
     herr_t              ret_value = SUCCEED;
 
