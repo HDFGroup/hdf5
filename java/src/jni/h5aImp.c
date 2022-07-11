@@ -1480,7 +1480,7 @@ Java_hdf_hdf5lib_H5_H5AwriteVL(JNIEnv *env, jclass clss, jlong attr_id, jlong me
 
         if(rawBuf)
             HDfree(rawBuf);
-   }
+    }
     else {
         PIN_BYTE_ARRAY(ENVONLY, buf, writeBuf, &writeBufIsCopy, "H5AwriteVL: write buffer not pinned");
         if ((status = H5Awrite((hid_t)attr_id, (hid_t)mem_type_id, writeBuf)) < 0)
