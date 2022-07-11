@@ -240,7 +240,8 @@ H5VL__native_datatype_specific(void *obj, H5VL_datatype_specific_args_t *args, h
             /* Currently, H6Oflush causes H5Fclose to trigger an assertion failure in metadata cache.
              * Leave this situation for the future solution */
             if (H5FD_MPIO == H5F_get_driver_id(dt->oloc.file))
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "H5Oflush doesn't work properly with MPIO driver for the current design")
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL,
+                            "H5Oflush doesn't work properly with MPIO driver for the current design")
 
             if (H5O_flush_common(&dt->oloc, args->args.flush.type_id) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFLUSH, FAIL, "unable to flush datatype")

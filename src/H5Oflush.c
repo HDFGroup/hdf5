@@ -78,7 +78,8 @@ H5O_flush(H5O_loc_t *oloc, hid_t obj_id)
     /* Currently, H5Oflush causes H5Fclose to trigger an assertion failure in metadata cache.
      * Leave this situation for the future solution */
     if (H5FD_MPIO == H5F_get_driver_id(oloc->file))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "H5Oflush doesn't work properly with MPIO driver for the current design")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL,
+                    "H5Oflush doesn't work properly with MPIO driver for the current design")
 
     /* Get the object pointer */
     if (NULL == (obj_ptr = H5VL_object(obj_id)))

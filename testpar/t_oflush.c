@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /* Test for H5Oflush.  For the current design, H5Oflush doesn't work correctly
- * with parallel.  It causes an assertion failure in metadata cache during 
+ * with parallel.  It causes an assertion failure in metadata cache during
  * H5Fclose.  This test makes sure H5Oflush fails for dataset, group, and named
  * datatype properly until the problem is solved. */
 
@@ -28,16 +28,16 @@
 void
 test_oflush(void)
 {
-    int     mpi_size, mpi_rank;
-    hid_t   file, dataset;
-    hid_t   dataspace;
-    hid_t   fapl_id;
+    int         mpi_size, mpi_rank;
+    hid_t       file, dataset;
+    hid_t       dataspace;
+    hid_t       fapl_id;
     const char *filename;
-    hid_t   gid, dtype_flush;
-    hsize_t dimsf[2];
-    herr_t  ret;
-    int     data[NX][NY];
-    int     i, j;
+    hid_t       gid, dtype_flush;
+    hsize_t     dimsf[2];
+    herr_t      ret;
+    int         data[NX][NY];
+    int         i, j;
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
@@ -58,8 +58,8 @@ test_oflush(void)
 
     /* Describe the size of the array and create the data space for fixed
      * size dataset */
-    dimsf[0]  = NX;
-    dimsf[1]  = NY;
+    dimsf[0] = NX;
+    dimsf[1] = NY;
 
     dataspace = H5Screate_simple(RANK, dimsf, NULL);
     VRFY((dataspace >= 0), "data space creation succeeded");
