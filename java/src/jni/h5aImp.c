@@ -198,7 +198,7 @@ Java_hdf_hdf5lib_H5_H5Aread(JNIEnv *env, jclass clss, jlong attr_id, jlong mem_t
 done:
     if (readBuf) {
         if ((status >= 0) && vl_data_class) {
-            H5Treclaim(attr_id, sid, H5P_DEFAULT, readBuf);
+            H5Dvlen_reclaim(attr_id, sid, H5P_DEFAULT, readBuf);
             if (sid >= 0)
                 H5Sclose(sid);
         }
@@ -327,7 +327,7 @@ Java_hdf_hdf5lib_H5_H5Aread_1short(JNIEnv *env, jclass clss, jlong attr_id, jlon
 done:
     if (readBuf) {
         if ((status >= 0) && vl_data_class) {
-            H5Treclaim(attr_id, sid, H5P_DEFAULT, readBuf);
+            H5Dvlen_reclaim(attr_id, sid, H5P_DEFAULT, readBuf);
             if (sid >= 0)
                 H5Sclose(sid);
         }
@@ -456,7 +456,7 @@ Java_hdf_hdf5lib_H5_H5Aread_1int(JNIEnv *env, jclass clss, jlong attr_id, jlong 
 done:
     if (readBuf) {
         if ((status >= 0) && vl_data_class) {
-            H5Treclaim(attr_id, sid, H5P_DEFAULT, readBuf);
+            H5Dvlen_reclaim(attr_id, sid, H5P_DEFAULT, readBuf);
             if (sid >= 0)
                 H5Sclose(sid);
         }
@@ -585,7 +585,7 @@ Java_hdf_hdf5lib_H5_H5Aread_1long(JNIEnv *env, jclass clss, jlong attr_id, jlong
 done:
     if (readBuf) {
         if ((status >= 0) && vl_data_class) {
-            H5Treclaim(attr_id, sid, H5P_DEFAULT, readBuf);
+            H5Dvlen_reclaim(attr_id, sid, H5P_DEFAULT, readBuf);
             if (sid >= 0)
                 H5Sclose(sid);
         }
@@ -714,7 +714,7 @@ Java_hdf_hdf5lib_H5_H5Aread_1float(JNIEnv *env, jclass clss, jlong attr_id, jlon
 done:
     if (readBuf) {
         if ((status >= 0) && vl_data_class) {
-            H5Treclaim(attr_id, sid, H5P_DEFAULT, readBuf);
+            H5Dvlen_reclaim(attr_id, sid, H5P_DEFAULT, readBuf);
             if (sid >= 0)
                 H5Sclose(sid);
         }
@@ -843,7 +843,7 @@ Java_hdf_hdf5lib_H5_H5Aread_1double(JNIEnv *env, jclass clss, jlong attr_id, jlo
 done:
     if (readBuf) {
         if ((status >= 0) && vl_data_class) {
-            H5Treclaim(attr_id, sid, H5P_DEFAULT, readBuf);
+            H5Dvlen_reclaim(attr_id, sid, H5P_DEFAULT, readBuf);
             if (sid >= 0)
                 H5Sclose(sid);
         }
@@ -1283,7 +1283,7 @@ Java_hdf_hdf5lib_H5_H5AreadVL(JNIEnv *env, jclass clss, jlong attr_id, jlong mem
 done:
     if (readBuf) {
         if ((status >= 0) && vl_data_class) {
-            H5Treclaim(attr_id, sid, H5P_DEFAULT, readBuf);
+            H5Dvlen_reclaim(attr_id, sid, H5P_DEFAULT, readBuf);
             if (sid >= 0)
                 H5Sclose(sid);
         }
@@ -1490,7 +1490,7 @@ Java_hdf_hdf5lib_H5_H5AwriteVL(JNIEnv *env, jclass clss, jlong attr_id, jlong me
 done:
     if (writeBuf) {
         if ((status >= 0) && vl_data_class)
-            H5Treclaim(attr_id, sid, H5P_DEFAULT, writeBuf);
+            H5Dvlen_reclaim(attr_id, sid, H5P_DEFAULT, writeBuf);
 
         if (type_class != H5T_VLEN)
             UNPIN_BYTE_ARRAY(ENVONLY, buf, writeBuf, (status < 0) ? JNI_ABORT : 0);
