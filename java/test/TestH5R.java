@@ -931,7 +931,7 @@ public class TestH5R {
 
             try {
                 H5.H5DreadVL(dset_obj_id, dtype_obj_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                        HDF5Constants.H5P_DEFAULT, vl_readbuf);
+                             HDF5Constants.H5P_DEFAULT, vl_readbuf);
             }
             catch (Exception ex) {
                 ex.printStackTrace();
@@ -952,7 +952,7 @@ public class TestH5R {
 
             try {
                 H5.H5DreadVL(dset_reg_id, dtype_reg_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                        HDF5Constants.H5P_DEFAULT, vl_readbuf);
+                             HDF5Constants.H5P_DEFAULT, vl_readbuf);
             }
             catch (Exception ex) {
                 ex.printStackTrace();
