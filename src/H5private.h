@@ -381,23 +381,16 @@
 #endif
 
 /*
- * Maximum and minimum values.  These should be defined in <limits.h> for the
- * most part.
+ * The max value for ssize_t.
+ *
+ * Only needed where ssize_t isn't a thing (e.g., Windows)
  */
-#ifndef LLONG_MAX
-#define LLONG_MAX ((long long)(((unsigned long long)1 << (8 * sizeof(long long) - 1)) - 1))
-#define LLONG_MIN ((long long)(-LLONG_MAX) - 1)
-#endif
-#ifndef ULLONG_MAX
-#define ULLONG_MAX ((unsigned long long)((long long)(-1)))
-#endif
-#ifndef SIZET_MAX
-#define SIZET_MAX  ((size_t)(ssize_t)(-1))
-#define SSIZET_MAX ((ssize_t)(((size_t)1 << (8 * sizeof(ssize_t) - 1)) - 1))
+#ifndef SSIZE_MAX
+#define SSIZE_MAX ((ssize_t)(((size_t)1 << (8 * sizeof(ssize_t) - 1)) - 1))
 #endif
 
 /*
- * Maximum & minimum values for our typedefs.
+ * Maximum & minimum values for HDF5 typedefs.
  */
 #define HSIZET_MAX  ((hsize_t)ULLONG_MAX)
 #define HSSIZET_MAX ((hssize_t)LLONG_MAX)
@@ -437,7 +430,7 @@
 #else
 #define h5_posix_io_t         size_t
 #define h5_posix_io_ret_t     ssize_t
-#define H5_POSIX_MAX_IO_BYTES SSIZET_MAX
+#define H5_POSIX_MAX_IO_BYTES SSIZE_MAX
 #endif
 
 /* POSIX I/O mode used as the third parameter to open/_open

@@ -255,7 +255,7 @@ H5D__efl_read(const H5O_efl_t *efl, const H5D_t *dset, haddr_t addr, size_t size
     /* Check args */
     HDassert(efl && efl->nused > 0);
     HDassert(H5F_addr_defined(addr));
-    HDassert(size < SIZET_MAX);
+    HDassert(size < SIZE_MAX);
     HDassert(buf || 0 == size);
 
     /* Find the first efl member from which to read */
@@ -343,7 +343,7 @@ H5D__efl_write(const H5O_efl_t *efl, const H5D_t *dset, haddr_t addr, size_t siz
     /* Check args */
     HDassert(efl && efl->nused > 0);
     HDassert(H5F_addr_defined(addr));
-    HDassert(size < SIZET_MAX);
+    HDassert(size < SIZE_MAX);
     HDassert(buf || 0 == size);
 
     /* Find the first efl member in which to write */
