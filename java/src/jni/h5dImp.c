@@ -1262,18 +1262,22 @@ Java_hdf_hdf5lib_H5_H5DreadVL(JNIEnv *env, jclass clss, jlong dataset_id, jlong 
                         break;
                     }
                     case H5T_REFERENCE: {
-                        switch (vlSize) {
-                            case H5R_OBJ_REF_BUF_SIZE: {
-                                break;
-                            }
-                            case H5R_DSET_REG_REF_BUF_SIZE: {
-                                break;
-                            }
+                        jboolean bb;
+                        jbyte *  barray = NULL;
+                        if (NULL == (jobj = ENVPTR->NewByteArray(ENVONLY, vlSize)))
+                            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+                        PIN_BYTE_ARRAY(ENVONLY, (jbyteArray)jobj, barray, &bb, "readVL reference: byte array not pinned");
+
+                        for (x = 0; x < (int)vlSize; x++) {
+                            barray[x] = ((jbyte *)((hvl_t *)cp_vp)->p)[j * vlSize + x];
                         }
+                        if (barray)
+                            UNPIN_BYTE_ARRAY(ENVONLY, (jbyteArray)jobj, barray, jobj ? 0 : JNI_ABORT);
                         break;
                     }
                     default:
-                        H5_UNIMPLEMENTED(ENVONLY, "H5AreadVL: invalid class type");
+                        H5_UNIMPLEMENTED(ENVONLY, "H5DreadVL: invalid class type");
                         break;
                 }
 
@@ -1459,14 +1463,11 @@ Java_hdf_hdf5lib_H5_H5DwriteVL(JNIEnv *env, jclass clss, jlong dataset_id, jlong
                         break;
                     }
                     case H5T_REFERENCE: {
-                        switch (vlSize) {
-                            case H5R_OBJ_REF_BUF_SIZE: {
-                                break;
-                            }
-                            case H5R_DSET_REG_REF_BUF_SIZE: {
-                                break;
-                            }
+                        jbyte *barray = (jbyte *)ENVPTR->GetByteArrayElements(ENVONLY, jobj, 0);
+                        for (x = 0; x < (int)vlSize; x++) {
+                            ((char *)((hvl_t *)cp_vp)->p)[j * vlSize + x] = ((char *)barray)[x];
                         }
+                        ENVPTR->ReleaseByteArrayElements(ENVONLY, jobj, barray, 0);
                         break;
                     }
                     default:
