@@ -1393,6 +1393,18 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL,
                                 "addr overflow, addr = %" PRIuHADDR ", size = %" PRIuHADDR, addr, size);
 
+    /* TODO: Temporarily reject collective I/O until support is implemented */
+    {
+        H5FD_mpio_xfer_t xfer_mode;
+
+        if (H5CX_get_io_xfer_mode(&xfer_mode) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL,
+                    "can't determine I/O collectivity setting");
+
+        if (xfer_mode == H5FD_MPIO_COLLECTIVE)
+            H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "collective I/O is currently unsupported");
+    }
+
 #if H5FD_SUBFILING_DEBUG_OP_CALLS
     HDprintf("[%s %d] addr=%ld, size=%ld\n", __func__, file_ptr->mpi_rank, addr, size);
     HDfflush(stdout);
@@ -1623,6 +1635,18 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t add
     if (REGION_OVERFLOW(addr, size))
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL,
                                 "addr overflow, addr = %" PRIuHADDR ", size = %" PRIuHADDR, addr, size);
+
+    /* TODO: Temporarily reject collective I/O until support is implemented */
+    {
+        H5FD_mpio_xfer_t xfer_mode;
+
+        if (H5CX_get_io_xfer_mode(&xfer_mode) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL,
+                    "can't determine I/O collectivity setting");
+
+        if (xfer_mode == H5FD_MPIO_COLLECTIVE)
+            H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "collective I/O is currently unsupported");
+    }
 
 #if H5FD_SUBFILING_DEBUG_OP_CALLS
     HDprintf("[%s %d] addr=%ld, size=%ld\n", __func__, file_ptr->mpi_rank, addr, size);
