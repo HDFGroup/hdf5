@@ -39,8 +39,8 @@
 /*
  * Library prototypes...
  */
-H5_DLL void * H5MM_malloc(size_t size);
-H5_DLL void * H5MM_calloc(size_t size);
+H5_DLL void * H5MM_malloc(size_t size) H5_ATTR_MALLOC;
+H5_DLL void * H5MM_calloc(size_t size) H5_ATTR_MALLOC;
 H5_DLL void * H5MM_realloc(void *mem, size_t size);
 H5_DLL char * H5MM_xstrdup(const char *s);
 H5_DLL char * H5MM_strdup(const char *s);
