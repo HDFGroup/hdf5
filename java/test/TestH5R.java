@@ -566,7 +566,7 @@ public class TestH5R {
             err.printStackTrace();
             fail("testH5RVLattr_ref: " + err);
         }
-        
+
         ArrayList[] vl_obj_data = new ArrayList[4];
         ArrayList[] vl_reg_data = new ArrayList[4];
         try {
@@ -702,13 +702,13 @@ public class TestH5R {
                 ex.printStackTrace();
             }
             assertTrue("testH5RVLattr_ref:" + ((byte[])vl_readbuf[0].get(0))[0],
-                    ((byte[])vl_obj_data[0].get(0))[0] == ((byte[])vl_readbuf[0].get(0))[0]);
+                       ((byte[])vl_obj_data[0].get(0))[0] == ((byte[])vl_readbuf[0].get(0))[0]);
             assertTrue("testH5RVLattr_ref:" + ((byte[])vl_readbuf[1].get(0))[0],
-                    ((byte[])vl_obj_data[1].get(0))[0] == ((byte[])vl_readbuf[1].get(0))[0]);
+                       ((byte[])vl_obj_data[1].get(0))[0] == ((byte[])vl_readbuf[1].get(0))[0]);
             assertTrue("testH5RVLattr_ref:" + ((byte[])vl_readbuf[2].get(0))[0],
-                    ((byte[])vl_obj_data[2].get(0))[0] == ((byte[])vl_readbuf[2].get(0))[0]);
+                       ((byte[])vl_obj_data[2].get(0))[0] == ((byte[])vl_readbuf[2].get(0))[0]);
             assertTrue("testH5RVLattr_ref:" + ((byte[])vl_readbuf[3].get(0))[0],
-                    ((byte[])vl_obj_data[3].get(0))[0] == ((byte[])vl_readbuf[3].get(0))[0]);
+                       ((byte[])vl_obj_data[3].get(0))[0] == ((byte[])vl_readbuf[3].get(0))[0]);
 
             // Read Region Reference data
             vl_readbuf = new ArrayList[4];
@@ -722,13 +722,13 @@ public class TestH5R {
                 ex.printStackTrace();
             }
             assertTrue("testH5RVLattr_ref:" + ((byte[])vl_readbuf[0].get(0))[0],
-                    ((byte[])vl_reg_data[0].get(0))[0] == ((byte[])vl_readbuf[0].get(0))[0]);
+                       ((byte[])vl_reg_data[0].get(0))[0] == ((byte[])vl_readbuf[0].get(0))[0]);
             assertTrue("testH5RVLattr_ref:" + ((byte[])vl_readbuf[1].get(0))[0],
-                    ((byte[])vl_reg_data[1].get(0))[0] == ((byte[])vl_readbuf[1].get(0))[0]);
+                       ((byte[])vl_reg_data[1].get(0))[0] == ((byte[])vl_readbuf[1].get(0))[0]);
             assertTrue("testH5RVLattr_ref:" + ((byte[])vl_readbuf[2].get(0))[0],
-                    ((byte[])vl_reg_data[2].get(0))[0] == ((byte[])vl_readbuf[2].get(0))[0]);
+                       ((byte[])vl_reg_data[2].get(0))[0] == ((byte[])vl_readbuf[2].get(0))[0]);
             assertTrue("testH5RVLattr_ref:" + ((byte[])vl_readbuf[3].get(0))[0],
-                    ((byte[])vl_reg_data[3].get(0))[0] == ((byte[])vl_readbuf[3].get(0))[0]);
+                       ((byte[])vl_reg_data[3].get(0))[0] == ((byte[])vl_readbuf[3].get(0))[0]);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -796,7 +796,7 @@ public class TestH5R {
             err.printStackTrace();
             fail("testH5RVLattr_ref: " + err);
         }
-        
+
         ArrayList[] vl_obj_data = new ArrayList[4];
         ArrayList[] vl_reg_data = new ArrayList[4];
         try {
@@ -826,12 +826,13 @@ public class TestH5R {
             try {
                 dspace_id = H5.H5Screate_simple(1, dims, null);
                 assertTrue(dspace_id > 0);
-                dset_obj_id = H5.H5Dcreate(H5fid, dset_obj_name, dtype_obj_id, dspace_id, HDF5Constants.H5P_DEFAULT,
-                        HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                dset_obj_id =
+                    H5.H5Dcreate(H5fid, dset_obj_name, dtype_obj_id, dspace_id, HDF5Constants.H5P_DEFAULT,
+                                 HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
                 assertTrue("testH5RVLdset_ref: ", dset_obj_id >= 0);
 
                 H5.H5DwriteVL(dset_obj_id, dtype_obj_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                        HDF5Constants.H5P_DEFAULT, vl_obj_data);
+                              HDF5Constants.H5P_DEFAULT, vl_obj_data);
             }
             catch (Exception err) {
                 if (dset_obj_id > 0)
@@ -884,12 +885,13 @@ public class TestH5R {
             try {
                 dspace_id = H5.H5Screate_simple(1, dims, null);
                 assertTrue(dspace_id > 0);
-                dset_reg_id = H5.H5Dcreate(H5fid, dset_reg_name, dtype_reg_id, dspace_id, HDF5Constants.H5P_DEFAULT,
-                                           HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                dset_reg_id =
+                    H5.H5Dcreate(H5fid, dset_reg_name, dtype_reg_id, dspace_id, HDF5Constants.H5P_DEFAULT,
+                                 HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
                 assertTrue("testH5RVLdset_ref: ", dset_reg_id >= 0);
 
                 H5.H5DwriteVL(dset_reg_id, dtype_reg_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                        HDF5Constants.H5P_DEFAULT, vl_reg_data);
+                              HDF5Constants.H5P_DEFAULT, vl_reg_data);
             }
             catch (Exception err) {
                 if (dset_reg_id > 0)
@@ -935,13 +937,13 @@ public class TestH5R {
                 ex.printStackTrace();
             }
             assertTrue("testH5RVLdset_ref:" + ((byte[])vl_readbuf[0].get(0))[0],
-                    ((byte[])vl_obj_data[0].get(0))[0] == ((byte[])vl_readbuf[0].get(0))[0]);
+                       ((byte[])vl_obj_data[0].get(0))[0] == ((byte[])vl_readbuf[0].get(0))[0]);
             assertTrue("testH5RVLdset_ref:" + ((byte[])vl_readbuf[1].get(0))[0],
-                    ((byte[])vl_obj_data[1].get(0))[0] == ((byte[])vl_readbuf[1].get(0))[0]);
+                       ((byte[])vl_obj_data[1].get(0))[0] == ((byte[])vl_readbuf[1].get(0))[0]);
             assertTrue("testH5RVLdset_ref:" + ((byte[])vl_readbuf[2].get(0))[0],
-                    ((byte[])vl_obj_data[2].get(0))[0] == ((byte[])vl_readbuf[2].get(0))[0]);
+                       ((byte[])vl_obj_data[2].get(0))[0] == ((byte[])vl_readbuf[2].get(0))[0]);
             assertTrue("testH5RVLdset_ref:" + ((byte[])vl_readbuf[3].get(0))[0],
-                    ((byte[])vl_obj_data[3].get(0))[0] == ((byte[])vl_readbuf[3].get(0))[0]);
+                       ((byte[])vl_obj_data[3].get(0))[0] == ((byte[])vl_readbuf[3].get(0))[0]);
 
             // Read Region Reference data
             vl_readbuf = new ArrayList[4];
@@ -956,13 +958,13 @@ public class TestH5R {
                 ex.printStackTrace();
             }
             assertTrue("testH5RVLdset_ref:" + ((byte[])vl_readbuf[0].get(0))[0],
-                    ((byte[])vl_reg_data[0].get(0))[0] == ((byte[])vl_readbuf[0].get(0))[0]);
+                       ((byte[])vl_reg_data[0].get(0))[0] == ((byte[])vl_readbuf[0].get(0))[0]);
             assertTrue("testH5RVLdset_ref:" + ((byte[])vl_readbuf[1].get(0))[0],
-                    ((byte[])vl_reg_data[1].get(0))[0] == ((byte[])vl_readbuf[1].get(0))[0]);
+                       ((byte[])vl_reg_data[1].get(0))[0] == ((byte[])vl_readbuf[1].get(0))[0]);
             assertTrue("testH5RVLdset_ref:" + ((byte[])vl_readbuf[2].get(0))[0],
-                    ((byte[])vl_reg_data[2].get(0))[0] == ((byte[])vl_readbuf[2].get(0))[0]);
+                       ((byte[])vl_reg_data[2].get(0))[0] == ((byte[])vl_readbuf[2].get(0))[0]);
             assertTrue("testH5RVLdset_ref:" + ((byte[])vl_readbuf[3].get(0))[0],
-                    ((byte[])vl_reg_data[3].get(0))[0] == ((byte[])vl_readbuf[3].get(0))[0]);
+                       ((byte[])vl_reg_data[3].get(0))[0] == ((byte[])vl_readbuf[3].get(0))[0]);
         }
         catch (Throwable err) {
             err.printStackTrace();

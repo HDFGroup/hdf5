@@ -1219,7 +1219,8 @@ Java_hdf_hdf5lib_H5_H5AreadVL(JNIEnv *env, jclass clss, jlong attr_id, jlong mem
                         if (NULL == (jobj = ENVPTR->NewByteArray(ENVONLY, vlSize)))
                             CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
-                        PIN_BYTE_ARRAY(ENVONLY, (jbyteArray)jobj, barray, &bb, "readVL reference: byte array not pinned");
+                        PIN_BYTE_ARRAY(ENVONLY, (jbyteArray)jobj, barray, &bb,
+                                       "readVL reference: byte array not pinned");
 
                         for (x = 0; x < (int)vlSize; x++) {
                             barray[x] = ((jbyte *)((hvl_t *)cp_vp)->p)[j * vlSize + x];
