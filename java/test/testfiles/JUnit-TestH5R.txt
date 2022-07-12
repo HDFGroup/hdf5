@@ -2,6 +2,8 @@ JUnit version 4.11
 .testH5Rgetregion_Nullreference
 .testH5Rget_obj_type2_Invalidreftype
 .testH5Rdereference
+.testH5RVLdset_ref
+.testH5RVLattr_ref
 .testH5Rget_name
 .testH5Rcreate_Invalidreftype
 .testH5Rget_name_NULLreference
@@ -19,5 +21,5 @@ JUnit version 4.11
 
 Time:  XXXX
 
-OK (17 tests)
+OK (19 tests)
 
