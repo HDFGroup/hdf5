@@ -75,6 +75,11 @@ H5O_flush(H5O_loc_t *oloc, hid_t obj_id)
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    /* Currently, H5Oflush causes H5Fclose to trigger an assertion failure in metadata cache.
+     * Leave this situation for the future solution */
+    if (H5F_HAS_FEATURE(oloc->file, H5FD_FEAT_HAS_MPI))
+        HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "H5Oflush isn't supported for parallel")
+
     /* Get the object pointer */
     if (NULL == (obj_ptr = H5VL_object(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
