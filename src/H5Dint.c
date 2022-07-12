@@ -3225,9 +3225,8 @@ H5D__flush(H5D_t *dset, hid_t dset_id)
 
     /* Currently, H5Oflush causes H5Fclose to trigger an assertion failure in metadata cache.
      * Leave this situation for the future solution */
-    if (H5FD_MPIO == H5F_get_driver_id(dset->oloc.file))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL,
-                    "H5Oflush doesn't work properly with MPIO driver for the current design")
+    if (H5F_HAS_FEATURE(dset->oloc.file, H5FD_FEAT_HAS_MPI))
+        HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "H5Oflush isn't supported for parallel")
 
     /* Flush any dataset information still cached in memory */
     if (H5D__flush_real(dset) < 0)
