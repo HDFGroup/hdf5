@@ -163,9 +163,6 @@ create_subfiling_ioc_fapl(const char *base_filename)
 
     subfiling_conf->ioc_fapl_id = ioc_fapl;
 
-    /* TODO: build_test_filename uses fapl ID for h5_fixname, but we haven't
-     * set subfiling VFD yet because we can't until filenames are filled in
-     */
     if (build_test_filename(base_filename, SUBFILING_TEST_DIR, ret_value, subfiling_conf) < 0)
         TEST_ERROR;
 
@@ -201,6 +198,7 @@ static void
 test_create_and_close(void)
 {
     H5FD_subfiling_config_t subfiling_config;
+    const char *            test_filenames[2];
     hid_t                   file_id = H5I_INVALID_HID;
     hid_t                   fapl_id = H5I_INVALID_HID;
 
@@ -215,10 +213,14 @@ test_create_and_close(void)
     file_id = H5Fcreate(subfiling_config.file_path, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
     VRFY((file_id >= 0), "H5Fcreate succeeded");
 
+    VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
+
+    test_filenames[0] = subfiling_config.file_path;
+    test_filenames[1] = NULL;
+    h5_clean_files(test_filenames, fapl_id);
+
     if (H5P_DEFAULT != subfiling_config.ioc_fapl_id)
         VRFY((H5Pclose(subfiling_config.ioc_fapl_id) >= 0), "FAPL close succeeded");
-    VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
-    VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
     return;
 }
@@ -293,10 +295,6 @@ exit:
     }
 
     TestAlarmOff();
-
-#if 0 /* TODO */
-    h5_clean_files(FILENAME, fapl);
-#endif
 
     H5close();
 

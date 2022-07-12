@@ -1072,7 +1072,6 @@ done:
     return ret_value;
 }
 
-/* TODO: revise */
 /*
 -------------------------------------------------------------------------
   Programmer:  Richard Warren
@@ -1172,7 +1171,6 @@ done:
     return ret_value;
 }
 
-/* TODO: revise */
 /*-------------------------------------------------------------------------
  * Function:    init_app_topology
  *
@@ -1510,7 +1508,6 @@ done:
  * Changes:     Initial Version/None.
  *-------------------------------------------------------------------------
  */
-/* TODO: revise description */
 static herr_t
 init_subfiling_context(subfiling_context_t *sf_context, sf_topology_t *app_topology, MPI_Comm file_comm)
 {
@@ -1711,11 +1708,6 @@ init_subfiling_context(subfiling_context_t *sf_context, sf_topology_t *app_topol
             ret_value = FAIL;
             goto done;
         }
-
-        /*
-         * TODO: There may be additional functionality we need for the IOCs...
-         *       If so, then can probably initialize those things here!
-         */
     }
 
 done:
@@ -1760,7 +1752,6 @@ done:
  * Changes:     Initial Version/None.
  *-------------------------------------------------------------------------
  */
-/* TODO: revise description */
 static herr_t
 open_subfile_with_context(subfiling_context_t *sf_context, int file_acc_flags)
 {
@@ -2644,7 +2635,6 @@ done:
  * Changes:     Initial Version/None.
  *-------------------------------------------------------------------------
  */
-/* TODO: revise description */
 herr_t
 H5_close_subfiles(int64_t subfiling_context_id)
 {

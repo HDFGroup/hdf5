@@ -159,6 +159,8 @@ static herr_t H5FD__ioc_get_default_config(H5FD_ioc_config_t *config_out);
 static herr_t H5FD__ioc_validate_config(const H5FD_ioc_config_t *fa);
 static int    H5FD__copy_plist(hid_t fapl_id, hid_t *id_out_ptr);
 
+static herr_t H5FD__ioc_close_int(H5FD_ioc_t *file_ptr);
+
 static herr_t H5FD__ioc_write_vector_internal(H5FD_t *_file, uint32_t count, haddr_t addrs[], size_t sizes[],
                                               const void *bufs[] /* data_in */);
 static herr_t H5FD__ioc_read_vector_internal(H5FD_t *_file, uint32_t count, haddr_t addrs[], size_t sizes[],
@@ -936,17 +938,72 @@ done:
 
     if (NULL == ret_value) {
         if (file_ptr) {
-            if (file_ptr->ioc_file && (H5FD_close(file_ptr->ioc_file) < 0))
-                H5_SUBFILING_DONE_ERROR(H5E_VFL, H5E_CANTCLOSEOBJ, NULL, "can't close IOC file");
-
-            /* TODO: close file_ptr->fa.ioc_fapl_id if necessary */
-
-            H5FL_FREE(H5FD_ioc_t, file_ptr);
+            if (H5FD__ioc_close_int(file_ptr) < 0)
+                H5_SUBFILING_DONE_ERROR(H5E_FILE, H5E_CLOSEERROR, NULL, "can't close IOC file");
         }
     } /* end if error */
 
     H5_SUBFILING_FUNC_LEAVE;
 } /* end H5FD__ioc_open() */
+
+static herr_t
+H5FD__ioc_close_int(H5FD_ioc_t *file_ptr)
+{
+    herr_t ret_value = SUCCEED;
+
+    HDassert(file_ptr);
+
+#ifdef H5FD_IOC_DEBUG
+    {
+        subfiling_context_t *sf_context = H5_get_subfiling_object(file_ptr->fa.context_id);
+        if (sf_context) {
+            if (sf_context->topology->rank_is_ioc)
+                HDprintf("[%s %d] fd=%d\n", __func__, file_ptr->mpi_rank, sf_context->sf_fid);
+            else
+                HDprintf("[%s %d] fd=*\n", __func__, file_ptr->mpi_rank);
+        }
+        else
+            HDprintf("[%s %d] invalid subfiling context", __func__, file_ptr->mpi_rank);
+        HDfflush(stdout);
+    }
+#endif
+
+    if (file_ptr->fa.ioc_fapl_id >= 0 && H5I_dec_ref(file_ptr->fa.ioc_fapl_id) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_ARGS, FAIL, "can't close FAPL");
+    file_ptr->fa.ioc_fapl_id = H5I_INVALID_HID;
+
+    /* Close underlying file */
+    if (file_ptr->ioc_file) {
+        if (H5FD_close(file_ptr->ioc_file) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to close HDF5 file");
+        file_ptr->ioc_file = NULL;
+    }
+
+    if (file_ptr->fa.context_id >= 0) {
+        subfiling_context_t *sf_context = H5_get_subfiling_object(file_ptr->fa.context_id);
+
+        if (sf_context && sf_context->topology->rank_is_ioc) {
+            if (finalize_ioc_threads(sf_context) < 0)
+                /* Note that closing of subfiles is collective */
+                H5_SUBFILING_DONE_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to finalize IOC threads");
+        }
+
+        if (H5_close_subfiles(file_ptr->fa.context_id) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to close subfiling file(s)");
+        file_ptr->fa.context_id = -1;
+    }
+
+    if (H5_mpi_comm_free(&file_ptr->comm) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI Communicator");
+    if (H5_mpi_info_free(&file_ptr->info) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI Info object");
+
+done:
+    /* Release the file info */
+    file_ptr = H5FL_FREE(H5FD_ioc_t, file_ptr);
+
+    H5_SUBFILING_FUNC_LEAVE;
+}
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD__ioc_close
@@ -965,58 +1022,10 @@ H5FD__ioc_close(H5FD_t *_file)
 
     H5FD_IOC_LOG_CALL(__func__);
 
-    /* Sanity check */
-    HDassert(file);
-
-#ifdef H5FD_IOC_DEBUG
-    {
-        subfiling_context_t *sf_context = H5_get_subfiling_object(file->fa.context_id);
-        if (sf_context) {
-            if (sf_context->topology->rank_is_ioc)
-                HDprintf("[%s %d] fd=%d\n", __func__, file->mpi_rank, sf_context->sf_fid);
-            else
-                HDprintf("[%s %d] fd=*\n", __func__, file->mpi_rank);
-        }
-        else
-            HDprintf("[%s %d] invalid subfiling context", __func__, file->mpi_rank);
-        HDfflush(stdout);
-    }
-#endif
-
-    if (file->fa.ioc_fapl_id >= 0 && H5I_dec_ref(file->fa.ioc_fapl_id) < 0)
-        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_ARGS, FAIL, "can't close FAPL");
-    file->fa.ioc_fapl_id = H5I_INVALID_HID;
-
-    /* Close underlying file */
-    if (file->ioc_file) {
-        if (H5FD_close(file->ioc_file) < 0)
-            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to close HDF5 file");
-        file->ioc_file = NULL;
-    }
-
-    if (file->fa.context_id >= 0) {
-        subfiling_context_t *sf_context = H5_get_subfiling_object(file->fa.context_id);
-
-        if (sf_context && sf_context->topology->rank_is_ioc) {
-            if (finalize_ioc_threads(sf_context) < 0)
-                /* Note that closing of subfiles is collective */
-                H5_SUBFILING_DONE_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to finalize IOC threads");
-        }
-
-        if (H5_close_subfiles(file->fa.context_id) < 0)
-            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to close subfiling file(s)");
-        file->fa.context_id = -1;
-    }
-
-    if (H5_mpi_comm_free(&file->comm) < 0)
-        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI Communicator");
-    if (H5_mpi_info_free(&file->info) < 0)
-        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI Info object");
+    if (H5FD__ioc_close_int(file) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close IOC file");
 
 done:
-    /* Release the file info */
-    file = H5FL_FREE(H5FD_ioc_t, file);
-
     H5_SUBFILING_FUNC_LEAVE;
 } /* end H5FD__ioc_close() */
 

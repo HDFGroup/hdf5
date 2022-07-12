@@ -372,7 +372,6 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
                 failure_mssg = "Can't set MPI communicator and info in subfiling fapl.";
             }
 
-#if 1 /* JRM */ /* this is temporary -- rework for programmatic control later */
             memset(&ioc_config, 0, sizeof(ioc_config));
             memset(&subfiling_conf, 0, sizeof(subfiling_conf));
 
@@ -413,13 +412,9 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
 
             if (pass) { /* setup the paths in the subfiling fapl. */
 
-                HDassert(strlen(filename) < sizeof(subfiling_conf.file_dir));
-                strcpy(subfiling_conf.file_dir, dirname(filename));
-                strcpy(subfiling_conf.file_path, basename(filename));
-#if 0  /* JRM */
-                HDfprintf(stdout, "\nfilename = \"%s\"\nfile_dir = \"%s\"\nfile_path = \"%s\"\n",
-                          filename, subfiling_conf.file_dir, subfiling_conf.file_path);
-#endif /* JRM */
+                HDassert(HDstrlen(filename) < sizeof(subfiling_conf.file_dir));
+                HDstrcpy(subfiling_conf.file_dir, dirname(filename));
+                HDstrcpy(subfiling_conf.file_path, basename(filename));
             }
 
             /* Now we can set the SUBFILING fapl before returning. */
@@ -428,8 +423,6 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
                 pass         = FALSE;
                 failure_mssg = "Can't set subfiling fapl.";
             }
-
-#endif /* JRM */
         }
 #endif
         else {
@@ -2871,16 +2864,6 @@ vector_write_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
         sizes[3] = bytes_per_write;
         bufs[3]  = (const void *)(&(zero_fi_buf[(mpi_rank * INTS_PER_RANK) + (3 * (INTS_PER_RANK / 4))]));
 
-#if 0  /* JRM */
-        HDfprintf(stdout, "addrs = { %lld, %lld, %lld, %lld}\n", 
-                  (long long)addrs[0], (long long)addrs[1], (long long)addrs[2], (long long)addrs[3]);
-        HDfprintf(stdout, "sizes = { %lld, %lld, %lld, %lld}\n", 
-                  (long long)sizes[0], (long long)sizes[1], (long long)sizes[2], (long long)sizes[3]);
-        HDfprintf(stdout, "bufs = { 0x%llx, 0x%llx, 0x%llx, 0x%llx}\n", 
-                  (unsigned long long)bufs[0], (unsigned long long)bufs[1], 
-                  (unsigned long long)bufs[2], (unsigned long long)bufs[3]);
-#endif /* JRM */
-
         if (H5FDwrite_vector(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
 
             pass         = FALSE;
@@ -3152,16 +3135,6 @@ vector_write_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
         sizes[3] = bytes_per_write;
         bufs[3] =
             (const void *)(&(increasing_fi_buf[(mpi_rank * INTS_PER_RANK) + (3 * (INTS_PER_RANK / 4))]));
-
-#if 0  /* JRM */
-        HDfprintf(stdout, "addrs = { %lld, %lld, %lld, %lld}\n", 
-                  (long long)addrs[0], (long long)addrs[1], (long long)addrs[2], (long long)addrs[3]);
-        HDfprintf(stdout, "sizes = { %lld, %lld, %lld, %lld}\n", 
-                  (long long)sizes[0], (long long)sizes[1], (long long)sizes[2], (long long)sizes[3]);
-        HDfprintf(stdout, "bufs = { 0x%llx, 0x%llx, 0x%llx, 0x%llx}\n", 
-                  (unsigned long long)bufs[0], (unsigned long long)bufs[1], 
-                  (unsigned long long)bufs[2], (unsigned long long)bufs[3]);
-#endif /* JRM */
 
         if (H5FDwrite_vector(lf, dxpl_id, count, types, addrs, sizes, bufs) < 0) {
 
@@ -3621,10 +3594,9 @@ vector_write_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
                                 pass         = FALSE;
                                 failure_mssg = "unexpected data read from file (1.1)";
-#if 1 /* JRM */
+
                                 HDprintf("\nread_fi_buf[%d] = %d, %d expected.\n", j, read_fi_buf[j],
                                          negative_fi_buf[j]);
-#endif /* JRM */
                             }
                         }
                         else if (((INTS_PER_RANK / 4) <= k) && (k < (3 * (INTS_PER_RANK / 8)))) {
@@ -3633,10 +3605,9 @@ vector_write_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
                                 pass         = FALSE;
                                 failure_mssg = "unexpected data read from file (1.2)";
-#if 1 /* JRM */
+
                                 HDprintf("\nread_fi_buf[%d] = %d, %d expected.\n", j, read_fi_buf[j],
                                          decreasing_fi_buf[j]);
-#endif /* JRM */
                             }
                         }
                         else if (((INTS_PER_RANK / 16) <= k) && (k < (INTS_PER_RANK / 8))) {
@@ -3645,10 +3616,9 @@ vector_write_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
                                 pass         = FALSE;
                                 failure_mssg = "unexpected data read from file (1.3)";
-#if 1 /* JRM */
+
                                 HDprintf("\nread_fi_buf[%d] = %d, %d expected.\n", j, read_fi_buf[j],
                                          increasing_fi_buf[j]);
-#endif /* JRM */
                             }
                         }
                         else {
@@ -3668,10 +3638,9 @@ vector_write_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
                                 pass         = FALSE;
                                 failure_mssg = "unexpected data read from file (2.1)";
-#if 1 /* JRM */
+
                                 HDprintf("\nread_fi_buf[%d] = %d, %d expected.\n", j, read_fi_buf[j],
                                          increasing_fi_buf[j]);
-#endif /* JRM */
                             }
                         }
                         else if ((((INTS_PER_RANK / 2) + 1) <= k) && (k <= (INTS_PER_RANK - 2))) {
@@ -3680,10 +3649,9 @@ vector_write_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
                                 pass         = FALSE;
                                 failure_mssg = "unexpected data read from file (2.2)";
-#if 1 /* JRM */
+
                                 HDprintf("\nread_fi_buf[%d] = %d, %d expected.\n", j, read_fi_buf[j],
                                          decreasing_fi_buf[j]);
-#endif /* JRM */
                             }
                         }
                         else {
@@ -3703,10 +3671,9 @@ vector_write_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
                                 pass         = FALSE;
                                 failure_mssg = "unexpected data read from file (3.1)";
-#if 1 /* JRM */
+
                                 HDprintf("\nread_fi_buf[%d] = %d, %d expected.\n", j, read_fi_buf[j],
                                          negative_fi_buf[j]);
-#endif /* JRM */
                             }
                         }
                         else {
@@ -4261,10 +4228,9 @@ vector_write_test_7(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
                         pass         = FALSE;
                         failure_mssg = "unexpected data read from file (1)";
-#if 1 /* JRM */
+
                         HDprintf("\nread_fi_buf[%d] = %d, %d expected.\n", j, read_fi_buf[j],
                                  increasing_fi_buf[j]);
-#endif /* JRM */
                     }
                 }
                 else {
@@ -4273,9 +4239,8 @@ vector_write_test_7(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
                         pass         = FALSE;
                         failure_mssg = "unexpected data read from file (2)";
-#if 1 /* JRM */
+
                         HDprintf("\nread_fi_buf[%d] = %d, 0 expected.\n", j, read_fi_buf[j]);
-#endif /* JRM */
                     }
                 }
             }

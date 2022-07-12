@@ -1199,7 +1199,6 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-/* TODO: update function when we decide how to handle error reporting in the IOCs */
 static ioc_io_queue_entry_t *
 ioc_io_queue_alloc_entry(void)
 {
@@ -1255,7 +1254,6 @@ ioc_io_queue_alloc_entry(void)
  *
  *-------------------------------------------------------------------------
  */
-/* TODO: update function when we decide how to handle error reporting in the IOCs */
 static void
 ioc_io_queue_add_entry(ioc_data_t *ioc_data, sf_work_request_t *wk_req_ptr)
 {
@@ -1378,7 +1376,6 @@ ioc_io_queue_add_entry(ioc_data_t *ioc_data, sf_work_request_t *wk_req_ptr)
  *
  *-------------------------------------------------------------------------
  */
-/* TODO: update function when we decide how to handle error reporting in the IOCs */
 /* TODO: Keep an eye on statistics and optimize this algorithm if necessary.  While it is O(N)
  *       where N is the number of elements in the I/O Queue if there are are no-overlaps, it
  *       can become O(N**2) in the worst case.
@@ -1631,7 +1628,6 @@ ioc_io_queue_complete_entry(ioc_data_t *ioc_data, ioc_io_queue_entry_t *entry_pt
  *
  *-------------------------------------------------------------------------
  */
-/* TODO: update function when we decide how to handle error reporting in the IOCs */
 static void
 ioc_io_queue_free_entry(ioc_io_queue_entry_t *q_entry_ptr)
 {

@@ -60,7 +60,7 @@ cast_to_void(const void *data)
 /*-------------------------------------------------------------------------
  * Function:    ioc__write_independent_async
  *
- * Purpose:     TODO: revise. The IO operations can be striped across a selection of
+ * Purpose:     The IO operations can be striped across a selection of
  *              IO concentrators.  The read and write independent calls
  *              compute the group of 1 or more IOCs and further create
  *              derived MPI datatypes when required by the size of the
@@ -213,7 +213,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    Internal ioc__read_independent_async
  *
- * Purpose:     TODO: revise. The IO operations can be striped across a selection of
+ * Purpose:     The IO operations can be striped across a selection of
  *              IO concentrators.  The read and write independent calls
  *              compute the group of 1 or more IOCs and further create
  *              derived MPI datatypes when required by the size of the
