@@ -1201,8 +1201,9 @@ done:
     H5MM_xfree(recovery_file_nameery);
 
     if (config_str && new_fa)
-        if (H5I_GENPROP_LST == H5I_get_type(fa->backing_fapl_id))
-            H5I_dec_app_ref(fa->backing_fapl_id);
+        if (fa && fa->backing_fapl_id)
+            if (H5I_GENPROP_LST == H5I_get_type(fa->backing_fapl_id))
+                H5I_dec_app_ref(fa->backing_fapl_id);
 
     if ((NULL == ret_value) && file) {
 

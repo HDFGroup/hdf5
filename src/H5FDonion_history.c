@@ -202,7 +202,7 @@ H5FD__onion_history_decode(unsigned char *buf, H5FD_onion_history_t *history)
 
             HDmemcpy(&ui32, ptr, 4);
             ui8p = (uint8_t *)&ui32;
-            UINT64DECODE(ui8p, rloc->checksum);
+            UINT32DECODE(ui8p, rloc->checksum);
             ptr += 4;
         }
     }
