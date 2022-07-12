@@ -18,24 +18,21 @@ hg_event_create(void)
 #elif defined(HG_UTIL_HAS_SYSEVENTFD_H)
     /* Create local signal event on self address */
     fd = eventfd(0, EFD_NONBLOCK | EFD_SEMAPHORE);
-    HG_UTIL_CHECK_ERROR_NORET(
-        fd == -1, done, "eventfd() failed (%s)", strerror(errno));
+    HG_UTIL_CHECK_ERROR_NORET(fd == -1, done, "eventfd() failed (%s)", strerror(errno));
 #elif defined(HG_UTIL_HAS_SYSEVENT_H)
-    struct kevent kev;
+    struct kevent   kev;
     struct timespec timeout = {0, 0};
-    int rc;
+    int             rc;
 
     /* Create kqueue */
     fd = kqueue();
-    HG_UTIL_CHECK_ERROR_NORET(
-        fd == -1, done, "kqueue() failed (%s)", strerror(errno));
+    HG_UTIL_CHECK_ERROR_NORET(fd == -1, done, "kqueue() failed (%s)", strerror(errno));
 
     EV_SET(&kev, HG_EVENT_IDENT, EVFILT_USER, EV_ADD | EV_CLEAR, 0, 0, NULL);
 
     /* Add user-defined event to kqueue */
     rc = kevent(fd, &kev, 1, NULL, 0, &timeout);
-    HG_UTIL_CHECK_ERROR_NORET(
-        rc == -1, error, "kevent() failed (%s)", strerror(errno));
+    HG_UTIL_CHECK_ERROR_NORET(rc == -1, error, "kevent() failed (%s)", strerror(errno));
 #else
 
 #endif
@@ -61,8 +58,7 @@ hg_event_destroy(int fd)
 
 #else
     rc = close(fd);
-    HG_UTIL_CHECK_ERROR(rc == -1, done, ret, HG_UTIL_FAIL,
-        "close() failed (%s)", strerror(errno));
+    HG_UTIL_CHECK_ERROR(rc == -1, done, ret, HG_UTIL_FAIL, "close() failed (%s)", strerror(errno));
 #endif
     HG_UTIL_LOG_DEBUG("Destroyed event fd=%d", fd);
 

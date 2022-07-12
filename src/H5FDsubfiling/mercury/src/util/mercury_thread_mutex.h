@@ -12,13 +12,13 @@
 #include "mercury_thread_annotation.h"
 
 #ifdef _WIN32
-#    define _WINSOCKAPI_
-#    include <windows.h>
-#    define HG_THREAD_MUTEX_INITIALIZER NULL
+#define _WINSOCKAPI_
+#include <windows.h>
+#define HG_THREAD_MUTEX_INITIALIZER NULL
 typedef CRITICAL_SECTION hg_thread_mutex_t;
 #else
-#    include <pthread.h>
-#    define HG_THREAD_MUTEX_INITIALIZER PTHREAD_MUTEX_INITIALIZER
+#include <pthread.h>
+#define HG_THREAD_MUTEX_INITIALIZER PTHREAD_MUTEX_INITIALIZER
 typedef pthread_mutex_t HG_LOCK_CAPABILITY("mutex") hg_thread_mutex_t;
 #endif
 
@@ -33,8 +33,7 @@ extern "C" {
  *
  * \return Non-negative on success or negative on failure
  */
-HG_UTIL_PUBLIC int
-hg_thread_mutex_init(hg_thread_mutex_t *mutex);
+HG_UTIL_PUBLIC int hg_thread_mutex_init(hg_thread_mutex_t *mutex);
 
 /**
  * Initialize the mutex, asking for "fast" mutex.
@@ -43,8 +42,7 @@ hg_thread_mutex_init(hg_thread_mutex_t *mutex);
  *
  * \return Non-negative on success or negative on failure
  */
-HG_UTIL_PUBLIC int
-hg_thread_mutex_init_fast(hg_thread_mutex_t *mutex);
+HG_UTIL_PUBLIC int hg_thread_mutex_init_fast(hg_thread_mutex_t *mutex);
 
 /**
  * Destroy the mutex.
@@ -53,16 +51,14 @@ hg_thread_mutex_init_fast(hg_thread_mutex_t *mutex);
  *
  * \return Non-negative on success or negative on failure
  */
-HG_UTIL_PUBLIC int
-hg_thread_mutex_destroy(hg_thread_mutex_t *mutex);
+HG_UTIL_PUBLIC int hg_thread_mutex_destroy(hg_thread_mutex_t *mutex);
 
 /**
  * Lock the mutex.
  *
  * \param mutex [IN/OUT]        pointer to mutex object
  */
-static HG_UTIL_INLINE void
-hg_thread_mutex_lock(hg_thread_mutex_t *mutex) HG_LOCK_ACQUIRE(*mutex);
+static HG_UTIL_INLINE void hg_thread_mutex_lock(hg_thread_mutex_t *mutex) HG_LOCK_ACQUIRE(*mutex);
 
 /**
  * Try locking the mutex.
@@ -71,8 +67,7 @@ hg_thread_mutex_lock(hg_thread_mutex_t *mutex) HG_LOCK_ACQUIRE(*mutex);
  *
  * \return Non-negative on success or negative on failure
  */
-static HG_UTIL_INLINE int
-hg_thread_mutex_try_lock(hg_thread_mutex_t *mutex)
+static HG_UTIL_INLINE int hg_thread_mutex_try_lock(hg_thread_mutex_t *mutex)
     HG_LOCK_TRY_ACQUIRE(HG_UTIL_SUCCESS, *mutex);
 
 /**
@@ -80,8 +75,7 @@ hg_thread_mutex_try_lock(hg_thread_mutex_t *mutex)
  *
  * \param mutex [IN/OUT]        pointer to mutex object
  */
-static HG_UTIL_INLINE void
-hg_thread_mutex_unlock(hg_thread_mutex_t *mutex) HG_LOCK_RELEASE(*mutex);
+static HG_UTIL_INLINE void hg_thread_mutex_unlock(hg_thread_mutex_t *mutex) HG_LOCK_RELEASE(*mutex);
 
 /*---------------------------------------------------------------------------*/
 static HG_UTIL_INLINE void
@@ -90,14 +84,13 @@ hg_thread_mutex_lock(hg_thread_mutex_t *mutex) HG_LOCK_NO_THREAD_SAFETY_ANALYSIS
 #ifdef _WIN32
     EnterCriticalSection(mutex);
 #else
-    (void) pthread_mutex_lock(mutex);
+    (void)pthread_mutex_lock(mutex);
 #endif
 }
 
 /*---------------------------------------------------------------------------*/
 static HG_UTIL_INLINE int
-hg_thread_mutex_try_lock(
-    hg_thread_mutex_t *mutex) HG_LOCK_NO_THREAD_SAFETY_ANALYSIS
+hg_thread_mutex_try_lock(hg_thread_mutex_t *mutex) HG_LOCK_NO_THREAD_SAFETY_ANALYSIS
 {
 #ifdef _WIN32
     if (!TryEnterCriticalSection(mutex))
@@ -112,13 +105,12 @@ hg_thread_mutex_try_lock(
 
 /*---------------------------------------------------------------------------*/
 static HG_UTIL_INLINE void
-hg_thread_mutex_unlock(
-    hg_thread_mutex_t *mutex) HG_LOCK_NO_THREAD_SAFETY_ANALYSIS
+hg_thread_mutex_unlock(hg_thread_mutex_t *mutex) HG_LOCK_NO_THREAD_SAFETY_ANALYSIS
 {
 #ifdef _WIN32
     LeaveCriticalSection(mutex);
 #else
-    (void) pthread_mutex_unlock(mutex);
+    (void)pthread_mutex_unlock(mutex);
 #endif
 }
 

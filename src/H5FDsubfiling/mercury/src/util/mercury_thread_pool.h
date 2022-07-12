@@ -20,14 +20,14 @@ typedef struct hg_thread_pool hg_thread_pool_t;
 struct hg_thread_pool {
     unsigned int sleeping_worker_count;
     HG_QUEUE_HEAD(hg_thread_work) queue;
-    int shutdown;
+    int               shutdown;
     hg_thread_mutex_t mutex;
-    hg_thread_cond_t cond;
+    hg_thread_cond_t  cond;
 };
 
 struct hg_thread_work {
     hg_thread_func_t func;
-    void *args;
+    void *           args;
     HG_QUEUE_ENTRY(hg_thread_work) entry; /* Internal */
 };
 
@@ -52,8 +52,7 @@ extern "C" {
  *
  * \return Non-negative on success or negative on failure
  */
-HG_UTIL_PUBLIC int
-hg_thread_pool_init(unsigned int thread_count, hg_thread_pool_t **pool);
+HG_UTIL_PUBLIC int hg_thread_pool_init(unsigned int thread_count, hg_thread_pool_t **pool);
 
 /**
  * Destroy the thread pool.
@@ -62,8 +61,7 @@ hg_thread_pool_init(unsigned int thread_count, hg_thread_pool_t **pool);
  *
  * \return Non-negative on success or negative on failure
  */
-HG_UTIL_PUBLIC int
-hg_thread_pool_destroy(hg_thread_pool_t *pool);
+HG_UTIL_PUBLIC int hg_thread_pool_destroy(hg_thread_pool_t *pool);
 
 /**
  * Post work to the pool. Note that the operation may be queued depending on
@@ -74,8 +72,7 @@ hg_thread_pool_destroy(hg_thread_pool_t *pool);
  *
  * \return Non-negative on success or negative on failure
  */
-static HG_UTIL_INLINE int
-hg_thread_pool_post(hg_thread_pool_t *pool, struct hg_thread_work *work);
+static HG_UTIL_INLINE int hg_thread_pool_post(hg_thread_pool_t *pool, struct hg_thread_work *work);
 
 /*---------------------------------------------------------------------------*/
 static HG_UTIL_INLINE int
@@ -101,8 +98,7 @@ hg_thread_pool_post(hg_thread_pool_t *pool, struct hg_thread_work *work)
     HG_QUEUE_PUSH_TAIL(&pool->queue, work, entry);
 
     /* Wake up sleeping worker */
-    if (pool->sleeping_worker_count &&
-        (hg_thread_cond_signal(&pool->cond) != HG_UTIL_SUCCESS))
+    if (pool->sleeping_worker_count && (hg_thread_cond_signal(&pool->cond) != HG_UTIL_SUCCESS))
         ret = HG_UTIL_FAIL;
 
 unlock:

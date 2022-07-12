@@ -16,12 +16,11 @@ hg_thread_cond_init(hg_thread_cond_t *cond)
     pthread_condattr_t attr;
 
     pthread_condattr_init(&attr);
-#    if defined(HG_UTIL_HAS_PTHREAD_CONDATTR_SETCLOCK) &&                      \
-        defined(HG_UTIL_HAS_CLOCK_MONOTONIC_COARSE)
+#if defined(HG_UTIL_HAS_PTHREAD_CONDATTR_SETCLOCK) && defined(HG_UTIL_HAS_CLOCK_MONOTONIC_COARSE)
     /* Must set clock ID if using different clock
      * (CLOCK_MONOTONIC_COARSE not supported here) */
     pthread_condattr_setclock(&attr, CLOCK_MONOTONIC);
-#    endif
+#endif
     if (pthread_cond_init(cond, &attr))
         return HG_UTIL_FAIL;
     pthread_condattr_destroy(&attr);

@@ -10,7 +10,7 @@
 #include "mercury_util_config.h"
 
 #ifdef HG_UTIL_HAS_SYSPARAM_H
-#    include <sys/param.h>
+#include <sys/param.h>
 #endif
 
 /*************************************/
@@ -22,14 +22,14 @@
 /*****************/
 
 #ifndef MAX
-#    define MAX(a, b) (((a) > (b)) ? (a) : (b))
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
 #endif
 #ifndef MIN
-#    define MIN(a, b) (((a) < (b)) ? (a) : (b))
+#define MIN(a, b) (((a) < (b)) ? (a) : (b))
 #endif
 
 #ifndef powerof2
-#    define powerof2(x) ((((x) -1) & (x)) == 0)
+#define powerof2(x) ((((x)-1) & (x)) == 0)
 #endif
 
 /*********************/

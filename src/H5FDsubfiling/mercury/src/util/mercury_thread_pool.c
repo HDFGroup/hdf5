@@ -20,8 +20,8 @@
 
 struct hg_thread_pool_private {
     struct hg_thread_pool pool;
-    unsigned int thread_count;
-    hg_thread_t *threads;
+    unsigned int          thread_count;
+    hg_thread_t *         threads;
 };
 
 /********************/
@@ -31,8 +31,7 @@ struct hg_thread_pool_private {
 /**
  * Worker thread run by the thread pool
  */
-static HG_THREAD_RETURN_TYPE
-hg_thread_pool_worker(void *args);
+static HG_THREAD_RETURN_TYPE hg_thread_pool_worker(void *args);
 
 /*******************/
 /* Local Variables */
@@ -42,8 +41,8 @@ hg_thread_pool_worker(void *args);
 static HG_THREAD_RETURN_TYPE
 hg_thread_pool_worker(void *args)
 {
-    hg_thread_ret_t ret = 0;
-    hg_thread_pool_t *pool = (hg_thread_pool_t *) args;
+    hg_thread_ret_t        ret  = 0;
+    hg_thread_pool_t *     pool = (hg_thread_pool_t *)args;
     struct hg_thread_work *work;
 
     while (1) {
@@ -57,7 +56,7 @@ hg_thread_pool_worker(void *args)
 
             rc = hg_thread_cond_wait(&pool->cond, &pool->mutex);
             HG_UTIL_CHECK_ERROR_NORET(rc != HG_UTIL_SUCCESS, unlock,
-                "Thread cannot wait on condition variable");
+                                      "Thread cannot wait on condition variable");
 
             pool->sleeping_worker_count--;
         }
@@ -86,52 +85,45 @@ unlock:
 int
 hg_thread_pool_init(unsigned int thread_count, hg_thread_pool_t **pool_ptr)
 {
-    int ret = HG_UTIL_SUCCESS, rc;
+    int                            ret       = HG_UTIL_SUCCESS, rc;
     struct hg_thread_pool_private *priv_pool = NULL;
-    unsigned int i;
+    unsigned int                   i;
 
-    HG_UTIL_CHECK_ERROR(
-        pool_ptr == NULL, error, ret, HG_UTIL_FAIL, "NULL pointer");
+    HG_UTIL_CHECK_ERROR(pool_ptr == NULL, error, ret, HG_UTIL_FAIL, "NULL pointer");
 
-    priv_pool = (struct hg_thread_pool_private *) malloc(
-        sizeof(struct hg_thread_pool_private));
-    HG_UTIL_CHECK_ERROR(priv_pool == NULL, error, ret, HG_UTIL_FAIL,
-        "Could not allocate thread pool");
+    priv_pool = (struct hg_thread_pool_private *)malloc(sizeof(struct hg_thread_pool_private));
+    HG_UTIL_CHECK_ERROR(priv_pool == NULL, error, ret, HG_UTIL_FAIL, "Could not allocate thread pool");
 
     priv_pool->pool.sleeping_worker_count = 0;
-    priv_pool->thread_count = thread_count;
-    priv_pool->threads = NULL;
+    priv_pool->thread_count               = thread_count;
+    priv_pool->threads                    = NULL;
     HG_QUEUE_INIT(&priv_pool->pool.queue);
     priv_pool->pool.shutdown = 0;
 
     rc = hg_thread_mutex_init(&priv_pool->pool.mutex);
-    HG_UTIL_CHECK_ERROR(rc != HG_UTIL_SUCCESS, error, ret, HG_UTIL_FAIL,
-        "Could not initialize mutex");
+    HG_UTIL_CHECK_ERROR(rc != HG_UTIL_SUCCESS, error, ret, HG_UTIL_FAIL, "Could not initialize mutex");
 
     rc = hg_thread_cond_init(&priv_pool->pool.cond);
     HG_UTIL_CHECK_ERROR(rc != HG_UTIL_SUCCESS, error, ret, HG_UTIL_FAIL,
-        "Could not initialize thread condition");
+                        "Could not initialize thread condition");
 
-    priv_pool->threads =
-        (hg_thread_t *) malloc(thread_count * sizeof(hg_thread_t));
+    priv_pool->threads = (hg_thread_t *)malloc(thread_count * sizeof(hg_thread_t));
     HG_UTIL_CHECK_ERROR(!priv_pool->threads, error, ret, HG_UTIL_FAIL,
-        "Could not allocate thread pool array");
+                        "Could not allocate thread pool array");
 
     /* Start worker threads */
     for (i = 0; i < thread_count; i++) {
-        rc = hg_thread_create(
-            &priv_pool->threads[i], hg_thread_pool_worker, (void *) priv_pool);
-        HG_UTIL_CHECK_ERROR(rc != HG_UTIL_SUCCESS, error, ret, HG_UTIL_FAIL,
-            "Could not create thread");
+        rc = hg_thread_create(&priv_pool->threads[i], hg_thread_pool_worker, (void *)priv_pool);
+        HG_UTIL_CHECK_ERROR(rc != HG_UTIL_SUCCESS, error, ret, HG_UTIL_FAIL, "Could not create thread");
     }
 
-    *pool_ptr = (struct hg_thread_pool *) priv_pool;
+    *pool_ptr = (struct hg_thread_pool *)priv_pool;
 
     return ret;
 
 error:
     if (priv_pool)
-        hg_thread_pool_destroy((struct hg_thread_pool *) priv_pool);
+        hg_thread_pool_destroy((struct hg_thread_pool *)priv_pool);
 
     return ret;
 }
@@ -140,10 +132,9 @@ error:
 int
 hg_thread_pool_destroy(hg_thread_pool_t *pool)
 {
-    struct hg_thread_pool_private *priv_pool =
-        (struct hg_thread_pool_private *) pool;
-    int ret = HG_UTIL_SUCCESS, rc;
-    unsigned int i;
+    struct hg_thread_pool_private *priv_pool = (struct hg_thread_pool_private *)pool;
+    int                            ret       = HG_UTIL_SUCCESS, rc;
+    unsigned int                   i;
 
     if (!priv_pool)
         goto done;
@@ -155,24 +146,21 @@ hg_thread_pool_destroy(hg_thread_pool_t *pool)
 
         rc = hg_thread_cond_broadcast(&priv_pool->pool.cond);
         HG_UTIL_CHECK_ERROR(rc != HG_UTIL_SUCCESS, error, ret, HG_UTIL_FAIL,
-            "Could not broadcast condition signal");
+                            "Could not broadcast condition signal");
 
         hg_thread_mutex_unlock(&priv_pool->pool.mutex);
 
         for (i = 0; i < priv_pool->thread_count; i++) {
             rc = hg_thread_join(priv_pool->threads[i]);
-            HG_UTIL_CHECK_ERROR(rc != HG_UTIL_SUCCESS, done, ret, HG_UTIL_FAIL,
-                "Could not join thread");
+            HG_UTIL_CHECK_ERROR(rc != HG_UTIL_SUCCESS, done, ret, HG_UTIL_FAIL, "Could not join thread");
         }
     }
 
     rc = hg_thread_mutex_destroy(&priv_pool->pool.mutex);
-    HG_UTIL_CHECK_ERROR(rc != HG_UTIL_SUCCESS, done, ret, HG_UTIL_FAIL,
-        "Could not destroy mutex");
+    HG_UTIL_CHECK_ERROR(rc != HG_UTIL_SUCCESS, done, ret, HG_UTIL_FAIL, "Could not destroy mutex");
 
     rc = hg_thread_cond_destroy(&priv_pool->pool.cond);
-    HG_UTIL_CHECK_ERROR(rc != HG_UTIL_SUCCESS, done, ret, HG_UTIL_FAIL,
-        "Could not destroy thread condition");
+    HG_UTIL_CHECK_ERROR(rc != HG_UTIL_SUCCESS, done, ret, HG_UTIL_FAIL, "Could not destroy thread condition");
 
     free(priv_pool->threads);
     free(priv_pool);

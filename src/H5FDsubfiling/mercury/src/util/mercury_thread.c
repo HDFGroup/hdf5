@@ -7,7 +7,7 @@
 #include "mercury_thread.h"
 
 #if !defined(_WIN32) && !defined(__APPLE__)
-#    include <sched.h>
+#include <sched.h>
 #endif
 
 /*---------------------------------------------------------------------------*/
@@ -133,8 +133,8 @@ hg_thread_getaffinity(hg_thread_t thread, hg_cpu_set_t *cpu_mask)
 #if defined(_WIN32)
     return HG_UTIL_FAIL;
 #elif defined(__APPLE__)
-    (void) thread;
-    (void) cpu_mask;
+    (void)thread;
+    (void)cpu_mask;
     return HG_UTIL_FAIL;
 #else
     if (pthread_getaffinity_np(thread, sizeof(hg_cpu_set_t), cpu_mask))
@@ -151,8 +151,8 @@ hg_thread_setaffinity(hg_thread_t thread, const hg_cpu_set_t *cpu_mask)
     if (!SetThreadAffinityMask(thread, *cpu_mask))
         return HG_UTIL_FAIL;
 #elif defined(__APPLE__)
-    (void) thread;
-    (void) cpu_mask;
+    (void)thread;
+    (void)cpu_mask;
     return HG_UTIL_FAIL;
 #else
     if (pthread_setaffinity_np(thread, sizeof(hg_cpu_set_t), cpu_mask))

@@ -33,8 +33,7 @@ extern "C" {
  *
  * \return page size on success or negative on failure
  */
-HG_UTIL_PUBLIC long
-hg_mem_get_page_size(void);
+HG_UTIL_PUBLIC long hg_mem_get_page_size(void);
 
 /**
  * Allocate size bytes and return a pointer to the allocated memory.
@@ -46,16 +45,14 @@ hg_mem_get_page_size(void);
  *
  * \return a pointer to the allocated memory, or NULL in case of failure
  */
-HG_UTIL_PUBLIC void *
-hg_mem_aligned_alloc(size_t alignment, size_t size);
+HG_UTIL_PUBLIC void *hg_mem_aligned_alloc(size_t alignment, size_t size);
 
 /**
  * Free memory allocated from hg_aligned_alloc().
  *
  * \param mem_ptr [IN]          pointer to allocated memory
  */
-HG_UTIL_PUBLIC void
-hg_mem_aligned_free(void *mem_ptr);
+HG_UTIL_PUBLIC void hg_mem_aligned_free(void *mem_ptr);
 
 /**
  * Allocate a buffer with a `size`-bytes, `alignment`-aligned payload
@@ -72,8 +69,7 @@ hg_mem_aligned_free(void *mem_ptr);
  *
  * \return a pointer to the payload or NULL on failure
  */
-HG_UTIL_PUBLIC void *
-hg_mem_header_alloc(size_t header_size, size_t alignment, size_t size);
+HG_UTIL_PUBLIC void *hg_mem_header_alloc(size_t header_size, size_t alignment, size_t size);
 
 /**
  * Free the memory that was returned previously by a call to
@@ -83,8 +79,7 @@ hg_mem_header_alloc(size_t header_size, size_t alignment, size_t size);
  * \param alignment [IN]        alignment size
  * \param mem_ptr [IN]          memory pointer
  */
-HG_UTIL_PUBLIC void
-hg_mem_header_free(size_t header_size, size_t alignment, void *mem_ptr);
+HG_UTIL_PUBLIC void hg_mem_header_free(size_t header_size, size_t alignment, void *mem_ptr);
 
 /**
  * Create/open a shared-memory mapped file of size \size with name \name.
@@ -95,8 +90,7 @@ hg_mem_header_free(size_t header_size, size_t alignment, void *mem_ptr);
  *
  * \return a pointer to the mapped memory region, or NULL in case of failure
  */
-HG_UTIL_PUBLIC void *
-hg_mem_shm_map(const char *name, size_t size, bool create);
+HG_UTIL_PUBLIC void *hg_mem_shm_map(const char *name, size_t size, bool create);
 
 /**
  * Unmap a previously mapped region and close the file.
@@ -107,8 +101,7 @@ hg_mem_shm_map(const char *name, size_t size, bool create);
  *
  * \return non-negative on success, or negative in case of failure
  */
-HG_UTIL_PUBLIC int
-hg_mem_shm_unmap(const char *name, void *mem_ptr, size_t size);
+HG_UTIL_PUBLIC int hg_mem_shm_unmap(const char *name, void *mem_ptr, size_t size);
 
 #ifdef __cplusplus
 }

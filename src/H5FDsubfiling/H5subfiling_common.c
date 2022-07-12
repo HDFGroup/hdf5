@@ -227,8 +227,8 @@ clear_fid_map_entry(uint64_t sf_fid, int64_t sf_context_id)
     if (sf_open_file_map) {
         int i;
         for (i = 0; i < sf_file_map_size; i++) {
-            if ((sf_open_file_map[i].h5_file_id == sf_fid)
-                    && (sf_open_file_map[i].sf_context_id == sf_context_id)) {
+            if ((sf_open_file_map[i].h5_file_id == sf_fid) &&
+                (sf_open_file_map[i].sf_context_id == sf_context_id)) {
                 sf_open_file_map[i].h5_file_id    = UINT64_MAX;
                 sf_open_file_map[i].sf_context_id = -1;
                 return;

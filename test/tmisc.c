@@ -3680,7 +3680,7 @@ test_misc20(void)
     hsize_t  contig_size; /* Size of contiguous storage size from layout into */
     const char *testfile = H5_get_srcdir_filename(MISC20_FILE_OLD); /* Corrected test file name */
     hbool_t     driver_is_default_compatible;
-    herr_t      ret;                                                /* Generic return value */
+    herr_t      ret; /* Generic return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing large dimension truncation fix\n"));
@@ -4976,7 +4976,7 @@ test_misc25b(void)
     hid_t       gid;                                             /* Group ID */
     const char *testfile = H5_get_srcdir_filename(MISC25B_FILE); /* Corrected test file name */
     hbool_t     driver_is_default_compatible;
-    herr_t      ret;                                             /* Generic return value */
+    herr_t      ret; /* Generic return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Exercise null object header message bug\n"));
@@ -5237,7 +5237,7 @@ test_misc27(void)
     hid_t       gid;                                            /* Group ID */
     const char *testfile = H5_get_srcdir_filename(MISC27_FILE); /* Corrected test file name */
     hbool_t     driver_is_default_compatible;
-    herr_t      ret;                                            /* Generic return value */
+    herr_t      ret; /* Generic return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Corrupt object header handling\n"));
@@ -5752,7 +5752,7 @@ test_misc33(void)
     const char *testfile = H5_get_srcdir_filename(MISC33_FILE); /* Corrected test file name */
     H5O_info2_t oinfo; /* Structure for object metadata information */
     hbool_t     driver_is_default_compatible;
-    herr_t      ret;   /* Generic return value */
+    herr_t      ret; /* Generic return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing that bad offset into the heap returns error"));
@@ -6085,15 +6085,15 @@ test_misc(void)
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Miscellaneous Routines\n"));
 
-    test_misc1(); /* Test unlinking a dataset & immediately re-using name */
-    test_misc2(); /* Test storing a VL-derived datatype in two different files */
-    test_misc3(); /* Test reading from chunked dataset with non-zero fill value */
-    test_misc4(); /* Test retrieving the fileno for various objects with H5Oget_info() */
-    test_misc5(); /* Test several level deep nested compound & VL datatypes */
-    test_misc6(); /* Test object header continuation code */
-    test_misc7(); /* Test for sensible datatypes stored on disk */
-    test_misc8(); /* Test storage sizes of various types of dataset storage */
-    test_misc9(); /* Test for opening (not creating) core files */
+    test_misc1();  /* Test unlinking a dataset & immediately re-using name */
+    test_misc2();  /* Test storing a VL-derived datatype in two different files */
+    test_misc3();  /* Test reading from chunked dataset with non-zero fill value */
+    test_misc4();  /* Test retrieving the fileno for various objects with H5Oget_info() */
+    test_misc5();  /* Test several level deep nested compound & VL datatypes */
+    test_misc6();  /* Test object header continuation code */
+    test_misc7();  /* Test for sensible datatypes stored on disk */
+    test_misc8();  /* Test storage sizes of various types of dataset storage */
+    test_misc9();  /* Test for opening (not creating) core files */
     test_misc10(); /* Test for using dataset creation property lists from old files */
 
     if (default_driver) {
@@ -6125,10 +6125,10 @@ test_misc(void)
     test_misc25b(); /* Exercise null object header message merge bug on existing file */
     test_misc25c(); /* Exercise another null object header message merge bug */
     test_misc26();  /* Test closing property lists with long filter pipelines */
-    test_misc27(); /* Test opening file with object that has bad # of object header messages */
-    test_misc28(); /* Test that chunks are cached appropriately */
-    test_misc29(); /* Test that speculative metadata reads are handled correctly */
-    test_misc30(); /* Exercise local heap loading bug where free lists were getting dropped */
+    test_misc27();  /* Test opening file with object that has bad # of object header messages */
+    test_misc28();  /* Test that chunks are cached appropriately */
+    test_misc29();  /* Test that speculative metadata reads are handled correctly */
+    test_misc30();  /* Exercise local heap loading bug where free lists were getting dropped */
 
     if (default_driver) {
         test_misc31(); /* Test Reentering library through deprecated routines after H5close() */

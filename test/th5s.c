@@ -125,7 +125,7 @@ test_h5s_basic(void)
     hsize_t  max2[] = {SPACE2_MAX1, SPACE2_MAX2, SPACE2_MAX3, SPACE2_MAX4};
     hsize_t  tdims[4]; /* Dimension array to test with */
     hsize_t  tmax[4];
-    hssize_t n;   /* Number of dataspace elements */
+    hssize_t n; /* Number of dataspace elements */
     hbool_t  driver_is_default_compatible;
     herr_t   ret; /* Generic return value        */
 

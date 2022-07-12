@@ -86,16 +86,16 @@ typedef void *hg_hash_table_value_t;
  */
 
 struct hg_hash_table_iter {
-    hg_hash_table_t *hash_table;
+    hg_hash_table_t *      hash_table;
     hg_hash_table_entry_t *next_entry;
-    unsigned int next_chain;
+    unsigned int           next_chain;
 };
 
 /**
  * A null \ref HashTableValue.
  */
 
-#define HG_HASH_TABLE_NULL ((void *) 0)
+#define HG_HASH_TABLE_NULL ((void *)0)
 
 /**
  * Hash function used to generate hash values for keys used in a hash
@@ -114,8 +114,7 @@ typedef unsigned int (*hg_hash_table_hash_func_t)(hg_hash_table_key_t value);
  *           not equal.
  */
 
-typedef int (*hg_hash_table_equal_func_t)(
-    hg_hash_table_key_t value1, hg_hash_table_key_t value2);
+typedef int (*hg_hash_table_equal_func_t)(hg_hash_table_key_t value1, hg_hash_table_key_t value2);
 
 /**
  * Type of function used to free keys when entries are removed from a
@@ -142,17 +141,15 @@ typedef void (*hg_hash_table_value_free_func_t)(hg_hash_table_value_t value);
  *                             was not possible to allocate the new hash
  *                             table.
  */
-HG_UTIL_PUBLIC hg_hash_table_t *
-hg_hash_table_new(
-    hg_hash_table_hash_func_t hash_func, hg_hash_table_equal_func_t equal_func);
+HG_UTIL_PUBLIC hg_hash_table_t *hg_hash_table_new(hg_hash_table_hash_func_t  hash_func,
+                                                  hg_hash_table_equal_func_t equal_func);
 
 /**
  * Destroy a hash table.
  *
  * \param hash_table           The hash table to destroy.
  */
-HG_UTIL_PUBLIC void
-hg_hash_table_free(hg_hash_table_t *hash_table);
+HG_UTIL_PUBLIC void hg_hash_table_free(hg_hash_table_t *hash_table);
 
 /**
  * Register functions used to free the key and value when an entry is
@@ -162,10 +159,9 @@ hg_hash_table_free(hg_hash_table_t *hash_table);
  * \param key_free_func        Function used to free keys.
  * \param value_free_func      Function used to free values.
  */
-HG_UTIL_PUBLIC void
-hg_hash_table_register_free_functions(hg_hash_table_t *hash_table,
-    hg_hash_table_key_free_func_t key_free_func,
-    hg_hash_table_value_free_func_t value_free_func);
+HG_UTIL_PUBLIC void hg_hash_table_register_free_functions(hg_hash_table_t *               hash_table,
+                                                          hg_hash_table_key_free_func_t   key_free_func,
+                                                          hg_hash_table_value_free_func_t value_free_func);
 
 /**
  * Insert a value into a hash table, overwriting any existing entry
@@ -178,9 +174,8 @@ hg_hash_table_register_free_functions(hg_hash_table_t *hash_table,
  *                             or zero if it was not possible to allocate
  *                             memory for the new entry.
  */
-HG_UTIL_PUBLIC int
-hg_hash_table_insert(hg_hash_table_t *hash_table, hg_hash_table_key_t key,
-    hg_hash_table_value_t value);
+HG_UTIL_PUBLIC int hg_hash_table_insert(hg_hash_table_t *hash_table, hg_hash_table_key_t key,
+                                        hg_hash_table_value_t value);
 
 /**
  * Look up a value in a hash table by key.
@@ -190,8 +185,8 @@ hg_hash_table_insert(hg_hash_table_t *hash_table, hg_hash_table_key_t key,
  * \return                    The value, or \ref HASH_TABLE_NULL if there
  *                            is no value with that key in the hash table.
  */
-HG_UTIL_PUBLIC hg_hash_table_value_t
-hg_hash_table_lookup(hg_hash_table_t *hash_table, hg_hash_table_key_t key);
+HG_UTIL_PUBLIC hg_hash_table_value_t hg_hash_table_lookup(hg_hash_table_t *   hash_table,
+                                                          hg_hash_table_key_t key);
 
 /**
  * Remove a value from a hash table.
@@ -201,8 +196,7 @@ hg_hash_table_lookup(hg_hash_table_t *hash_table, hg_hash_table_key_t key);
  * \return                    Non-zero if a key was removed, or zero if the
  *                            specified key was not found in the hash table.
  */
-HG_UTIL_PUBLIC int
-hg_hash_table_remove(hg_hash_table_t *hash_table, hg_hash_table_key_t key);
+HG_UTIL_PUBLIC int hg_hash_table_remove(hg_hash_table_t *hash_table, hg_hash_table_key_t key);
 
 /**
  * Retrieve the number of entries in a hash table.
@@ -210,8 +204,7 @@ hg_hash_table_remove(hg_hash_table_t *hash_table, hg_hash_table_key_t key);
  * \param hash_table          The hash table.
  * \return                    The number of entries in the hash table.
  */
-HG_UTIL_PUBLIC unsigned int
-hg_hash_table_num_entries(hg_hash_table_t *hash_table);
+HG_UTIL_PUBLIC unsigned int hg_hash_table_num_entries(hg_hash_table_t *hash_table);
 
 /**
  * Initialise a \ref HashTableIterator to iterate over a hash table.
@@ -220,8 +213,7 @@ hg_hash_table_num_entries(hg_hash_table_t *hash_table);
  * \param iter                Pointer to an iterator structure to
  *                            initialise.
  */
-HG_UTIL_PUBLIC void
-hg_hash_table_iterate(hg_hash_table_t *hash_table, hg_hash_table_iter_t *iter);
+HG_UTIL_PUBLIC void hg_hash_table_iterate(hg_hash_table_t *hash_table, hg_hash_table_iter_t *iter);
 
 /**
  * Determine if there are more keys in the hash table to iterate over.
@@ -231,8 +223,7 @@ hg_hash_table_iterate(hg_hash_table_t *hash_table, hg_hash_table_iter_t *iter);
  *                            over, non-zero if there are more values to
  *                            iterate over.
  */
-HG_UTIL_PUBLIC int
-hg_hash_table_iter_has_more(hg_hash_table_iter_t *iterator);
+HG_UTIL_PUBLIC int hg_hash_table_iter_has_more(hg_hash_table_iter_t *iterator);
 
 /**
  * Using a hash table iterator, retrieve the next key.
@@ -242,8 +233,7 @@ hg_hash_table_iter_has_more(hg_hash_table_iter_t *iterator);
  *                            \ref HG_HASH_TABLE_NULL if there are no more
  *                            keys to iterate over.
  */
-HG_UTIL_PUBLIC hg_hash_table_value_t
-hg_hash_table_iter_next(hg_hash_table_iter_t *iterator);
+HG_UTIL_PUBLIC hg_hash_table_value_t hg_hash_table_iter_next(hg_hash_table_iter_t *iterator);
 
 #ifdef __cplusplus
 }

@@ -16,15 +16,15 @@
 typedef struct hg_poll_set hg_poll_set_t;
 
 typedef union hg_poll_data {
-    void *ptr;
-    int fd;
+    void *   ptr;
+    int      fd;
     uint32_t u32;
     uint64_t u64;
 } hg_poll_data_t;
 
 struct hg_poll_event {
-    uint32_t events;     /* Poll events */
-    hg_poll_data_t data; /* User data variable */
+    uint32_t       events; /* Poll events */
+    hg_poll_data_t data;   /* User data variable */
 };
 
 /*****************/
@@ -53,8 +53,7 @@ extern "C" {
  *
  * \return Pointer to poll set or NULL in case of failure
  */
-HG_UTIL_PUBLIC hg_poll_set_t *
-hg_poll_create(void);
+HG_UTIL_PUBLIC hg_poll_set_t *hg_poll_create(void);
 
 /**
  * Destroy a poll set.
@@ -63,8 +62,7 @@ hg_poll_create(void);
  *
  * \return Non-negative on success or negative on failure
  */
-HG_UTIL_PUBLIC int
-hg_poll_destroy(hg_poll_set_t *poll_set);
+HG_UTIL_PUBLIC int hg_poll_destroy(hg_poll_set_t *poll_set);
 
 /**
  * Get a file descriptor from an existing poll set.
@@ -73,8 +71,7 @@ hg_poll_destroy(hg_poll_set_t *poll_set);
  *
  * \return Non-negative on success or negative on failure
  */
-HG_UTIL_PUBLIC int
-hg_poll_get_fd(hg_poll_set_t *poll_set);
+HG_UTIL_PUBLIC int hg_poll_get_fd(hg_poll_set_t *poll_set);
 
 /**
  * Add file descriptor to poll set.
@@ -85,8 +82,7 @@ hg_poll_get_fd(hg_poll_set_t *poll_set);
  *
  * \return Non-negative on success or negative on failure
  */
-HG_UTIL_PUBLIC int
-hg_poll_add(hg_poll_set_t *poll_set, int fd, struct hg_poll_event *event);
+HG_UTIL_PUBLIC int hg_poll_add(hg_poll_set_t *poll_set, int fd, struct hg_poll_event *event);
 
 /**
  * Remove file descriptor from poll set.
@@ -96,8 +92,7 @@ hg_poll_add(hg_poll_set_t *poll_set, int fd, struct hg_poll_event *event);
  *
  * \return Non-negative on success or negative on failure
  */
-HG_UTIL_PUBLIC int
-hg_poll_remove(hg_poll_set_t *poll_set, int fd);
+HG_UTIL_PUBLIC int hg_poll_remove(hg_poll_set_t *poll_set, int fd);
 
 /**
  * Wait on a poll set for timeout ms, and return at most max_events.
@@ -110,10 +105,8 @@ hg_poll_remove(hg_poll_set_t *poll_set, int fd);
  *
  * \return Non-negative on success or negative on failure
  */
-HG_UTIL_PUBLIC int
-hg_poll_wait(hg_poll_set_t *poll_set, unsigned int timeout,
-    unsigned int max_events, struct hg_poll_event events[],
-    unsigned int *actual_events);
+HG_UTIL_PUBLIC int hg_poll_wait(hg_poll_set_t *poll_set, unsigned int timeout, unsigned int max_events,
+                                struct hg_poll_event events[], unsigned int *actual_events);
 
 #ifdef __cplusplus
 }

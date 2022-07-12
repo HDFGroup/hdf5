@@ -24,20 +24,20 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <string.h>
 
 struct hg_hash_table_entry {
-    hg_hash_table_key_t key;
-    hg_hash_table_value_t value;
+    hg_hash_table_key_t    key;
+    hg_hash_table_value_t  value;
     hg_hash_table_entry_t *next;
 };
 
 struct hg_hash_table {
-    hg_hash_table_entry_t **table;
-    unsigned int table_size;
-    hg_hash_table_hash_func_t hash_func;
-    hg_hash_table_equal_func_t equal_func;
-    hg_hash_table_key_free_func_t key_free_func;
+    hg_hash_table_entry_t **        table;
+    unsigned int                    table_size;
+    hg_hash_table_hash_func_t       hash_func;
+    hg_hash_table_equal_func_t      equal_func;
+    hg_hash_table_key_free_func_t   key_free_func;
     hg_hash_table_value_free_func_t value_free_func;
-    unsigned int entries;
-    unsigned int prime_index;
+    unsigned int                    entries;
+    unsigned int                    prime_index;
 };
 
 /* This is a set of good hash table prime numbers, from:
@@ -46,34 +46,12 @@ struct hg_hash_table {
  * possible from the nearest powers of two. */
 
 static const unsigned int hash_table_primes[] = {
-    193,
-    389,
-    769,
-    1543,
-    3079,
-    6151,
-    12289,
-    24593,
-    49157,
-    98317,
-    196613,
-    393241,
-    786433,
-    1572869,
-    3145739,
-    6291469,
-    12582917,
-    25165843,
-    50331653,
-    100663319,
-    201326611,
-    402653189,
-    805306457,
-    1610612741,
+    193,      389,      769,      1543,      3079,      6151,      12289,     24593,
+    49157,    98317,    196613,   393241,    786433,    1572869,   3145739,   6291469,
+    12582917, 25165843, 50331653, 100663319, 201326611, 402653189, 805306457, 1610612741,
 };
 
-static const unsigned int hash_table_num_primes =
-    sizeof(hash_table_primes) / sizeof(int);
+static const unsigned int hash_table_num_primes = sizeof(hash_table_primes) / sizeof(int);
 
 /* Internal function used to allocate the table on hash table creation
  * and when enlarging the table */
@@ -95,8 +73,8 @@ hash_table_allocate_table(hg_hash_table_t *hash_table)
     hash_table->table_size = new_table_size;
 
     /* Allocate the table and initialise to NULL for all entries */
-    hash_table->table = (hg_hash_table_entry_t **) calloc(
-        hash_table->table_size, sizeof(hg_hash_table_entry_t *));
+    hash_table->table =
+        (hg_hash_table_entry_t **)calloc(hash_table->table_size, sizeof(hg_hash_table_entry_t *));
     if (hash_table->table == NULL)
         return 0;
 
@@ -121,24 +99,23 @@ hash_table_free_entry(hg_hash_table_t *hash_table, hg_hash_table_entry_t *entry)
 }
 
 hg_hash_table_t *
-hg_hash_table_new(
-    hg_hash_table_hash_func_t hash_func, hg_hash_table_equal_func_t equal_func)
+hg_hash_table_new(hg_hash_table_hash_func_t hash_func, hg_hash_table_equal_func_t equal_func)
 {
     hg_hash_table_t *hash_table;
 
     /* Allocate a new hash table structure */
 
-    hash_table = (hg_hash_table_t *) malloc(sizeof(hg_hash_table_t));
+    hash_table = (hg_hash_table_t *)malloc(sizeof(hg_hash_table_t));
 
     if (hash_table == NULL)
         return NULL;
 
-    hash_table->hash_func = hash_func;
-    hash_table->equal_func = equal_func;
-    hash_table->key_free_func = NULL;
+    hash_table->hash_func       = hash_func;
+    hash_table->equal_func      = equal_func;
+    hash_table->key_free_func   = NULL;
     hash_table->value_free_func = NULL;
-    hash_table->entries = 0;
-    hash_table->prime_index = 0;
+    hash_table->entries         = 0;
+    hash_table->prime_index     = 0;
 
     /* Allocate the table */
     if (!hash_table_allocate_table(hash_table)) {
@@ -155,7 +132,7 @@ hg_hash_table_free(hg_hash_table_t *hash_table)
 {
     hg_hash_table_entry_t *rover;
     hg_hash_table_entry_t *next;
-    unsigned int i;
+    unsigned int           i;
 
     /* Free all entries in all chains */
 
@@ -176,11 +153,11 @@ hg_hash_table_free(hg_hash_table_t *hash_table)
 }
 
 void
-hg_hash_table_register_free_functions(hg_hash_table_t *hash_table,
-    hg_hash_table_key_free_func_t key_free_func,
-    hg_hash_table_value_free_func_t value_free_func)
+hg_hash_table_register_free_functions(hg_hash_table_t *               hash_table,
+                                      hg_hash_table_key_free_func_t   key_free_func,
+                                      hg_hash_table_value_free_func_t value_free_func)
 {
-    hash_table->key_free_func = key_free_func;
+    hash_table->key_free_func   = key_free_func;
     hash_table->value_free_func = value_free_func;
 }
 
@@ -188,16 +165,16 @@ static int
 hash_table_enlarge(hg_hash_table_t *hash_table)
 {
     hg_hash_table_entry_t **old_table;
-    unsigned int old_table_size;
-    unsigned int old_prime_index;
-    hg_hash_table_entry_t *rover;
-    hg_hash_table_entry_t *next;
-    unsigned int entry_index;
-    unsigned int i;
+    unsigned int            old_table_size;
+    unsigned int            old_prime_index;
+    hg_hash_table_entry_t * rover;
+    hg_hash_table_entry_t * next;
+    unsigned int            entry_index;
+    unsigned int            i;
 
     /* Store a copy of the old table */
-    old_table = hash_table->table;
-    old_table_size = hash_table->table_size;
+    old_table       = hash_table->table;
+    old_table_size  = hash_table->table_size;
     old_prime_index = hash_table->prime_index;
 
     /* Allocate a new, larger table */
@@ -205,8 +182,8 @@ hash_table_enlarge(hg_hash_table_t *hash_table)
 
     if (!hash_table_allocate_table(hash_table)) {
         /* Failed to allocate the new table */
-        hash_table->table = old_table;
-        hash_table->table_size = old_table_size;
+        hash_table->table       = old_table;
+        hash_table->table_size  = old_table_size;
         hash_table->prime_index = old_prime_index;
 
         return 0;
@@ -221,11 +198,10 @@ hash_table_enlarge(hg_hash_table_t *hash_table)
             next = rover->next;
 
             /* Find the index into the new table */
-            entry_index =
-                hash_table->hash_func(rover->key) % hash_table->table_size;
+            entry_index = hash_table->hash_func(rover->key) % hash_table->table_size;
 
             /* Link this entry into the chain */
-            rover->next = hash_table->table[entry_index];
+            rover->next                    = hash_table->table[entry_index];
             hash_table->table[entry_index] = rover;
 
             /* Advance to next in the chain */
@@ -240,12 +216,11 @@ hash_table_enlarge(hg_hash_table_t *hash_table)
 }
 
 int
-hg_hash_table_insert(hg_hash_table_t *hash_table, hg_hash_table_key_t key,
-    hg_hash_table_value_t value)
+hg_hash_table_insert(hg_hash_table_t *hash_table, hg_hash_table_key_t key, hg_hash_table_value_t value)
 {
     hg_hash_table_entry_t *rover;
     hg_hash_table_entry_t *newentry;
-    unsigned int entry_index;
+    unsigned int           entry_index;
 
     /* If there are too many items in the table with respect to the table
      * size, the number of hash collisions increases and performance
@@ -284,7 +259,7 @@ hg_hash_table_insert(hg_hash_table_t *hash_table, hg_hash_table_key_t key,
             if (hash_table->key_free_func != NULL)
                 hash_table->key_free_func(rover->key);
 
-            rover->key = key;
+            rover->key   = key;
             rover->value = value;
 
             /* Finished */
@@ -294,16 +269,16 @@ hg_hash_table_insert(hg_hash_table_t *hash_table, hg_hash_table_key_t key,
     }
 
     /* Not in the hash table yet.  Create a new entry */
-    newentry = (hg_hash_table_entry_t *) malloc(sizeof(hg_hash_table_entry_t));
+    newentry = (hg_hash_table_entry_t *)malloc(sizeof(hg_hash_table_entry_t));
 
     if (newentry == NULL)
         return 0;
 
-    newentry->key = key;
+    newentry->key   = key;
     newentry->value = value;
 
     /* Link into the list */
-    newentry->next = hash_table->table[entry_index];
+    newentry->next                 = hash_table->table[entry_index];
     hash_table->table[entry_index] = newentry;
 
     /* Maintain the count of the number of entries */
@@ -317,7 +292,7 @@ hg_hash_table_value_t
 hg_hash_table_lookup(hg_hash_table_t *hash_table, hg_hash_table_key_t key)
 {
     hg_hash_table_entry_t *rover;
-    unsigned int entry_index;
+    unsigned int           entry_index;
 
     /* Generate the hash of the key and hence the index into the table */
     entry_index = hash_table->hash_func(key) % hash_table->table_size;
@@ -342,9 +317,9 @@ int
 hg_hash_table_remove(hg_hash_table_t *hash_table, hg_hash_table_key_t key)
 {
     hg_hash_table_entry_t **rover;
-    hg_hash_table_entry_t *entry;
-    unsigned int entry_index;
-    int result;
+    hg_hash_table_entry_t * entry;
+    unsigned int            entry_index;
+    int                     result;
 
     /* Generate the hash of the key and hence the index into the table */
     entry_index = hash_table->hash_func(key) % hash_table->table_size;
@@ -354,7 +329,7 @@ hg_hash_table_remove(hg_hash_table_t *hash_table, hg_hash_table_key_t key)
      * the "next" pointer of the previous entry in the chain.  This
      * allows us to unlink the entry when we find it. */
     result = 0;
-    rover = &hash_table->table[entry_index];
+    rover  = &hash_table->table[entry_index];
 
     while (*rover != NULL) {
         if (hash_table->equal_func(key, (*rover)->key) != 0) {
@@ -387,8 +362,7 @@ hg_hash_table_num_entries(hg_hash_table_t *hash_table)
 }
 
 void
-hg_hash_table_iterate(
-    hg_hash_table_t *hash_table, hg_hash_table_iter_t *iterator)
+hg_hash_table_iterate(hg_hash_table_t *hash_table, hg_hash_table_iter_t *iterator)
 {
     unsigned int chain;
 
@@ -417,9 +391,9 @@ hg_hash_table_value_t
 hg_hash_table_iter_next(hg_hash_table_iter_t *iterator)
 {
     hg_hash_table_entry_t *current_entry;
-    hg_hash_table_t *hash_table;
-    hg_hash_table_value_t result;
-    unsigned int chain;
+    hg_hash_table_t *      hash_table;
+    hg_hash_table_value_t  result;
+    unsigned int           chain;
 
     hash_table = iterator->hash_table;
 
@@ -429,13 +403,14 @@ hg_hash_table_iter_next(hg_hash_table_iter_t *iterator)
 
     /* Result is immediately available */
     current_entry = iterator->next_entry;
-    result = current_entry->value;
+    result        = current_entry->value;
 
     /* Find the next entry */
     if (current_entry->next != NULL) {
         /* Next entry in current chain */
         iterator->next_entry = current_entry->next;
-    } else {
+    }
+    else {
         /* None left in this chain, so advance to the next chain */
         chain = iterator->next_chain + 1;
 

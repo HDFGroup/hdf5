@@ -20,8 +20,7 @@ hg_thread_rwlock_init(hg_thread_rwlock_t *rwlock)
     InitializeSRWLock(rwlock);
 #else
     int rc = pthread_rwlock_init(rwlock, NULL);
-    HG_UTIL_CHECK_ERROR(rc != 0, done, ret, HG_UTIL_FAIL,
-        "pthread_rwlock_init() failed (%s)", strerror(rc));
+    HG_UTIL_CHECK_ERROR(rc != 0, done, ret, HG_UTIL_FAIL, "pthread_rwlock_init() failed (%s)", strerror(rc));
 
 done:
 #endif
@@ -39,8 +38,8 @@ hg_thread_rwlock_destroy(hg_thread_rwlock_t *rwlock)
     /* nothing to do */
 #else
     int rc = pthread_rwlock_destroy(rwlock);
-    HG_UTIL_CHECK_ERROR(rc != 0, done, ret, HG_UTIL_FAIL,
-        "pthread_rwlock_destroy() failed (%s)", strerror(rc));
+    HG_UTIL_CHECK_ERROR(rc != 0, done, ret, HG_UTIL_FAIL, "pthread_rwlock_destroy() failed (%s)",
+                        strerror(rc));
 
 done:
 #endif

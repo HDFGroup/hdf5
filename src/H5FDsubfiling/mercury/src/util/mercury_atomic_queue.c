@@ -50,13 +50,11 @@ hg_atomic_queue_alloc(unsigned int count)
 {
     struct hg_atomic_queue *hg_atomic_queue = NULL;
 
-    HG_UTIL_CHECK_ERROR_NORET(
-        !powerof2(count), done, "atomic queue size must be power of 2");
+    HG_UTIL_CHECK_ERROR_NORET(!powerof2(count), done, "atomic queue size must be power of 2");
 
-    hg_atomic_queue = hg_mem_aligned_alloc(HG_MEM_CACHE_LINE_SIZE,
-        sizeof(struct hg_atomic_queue) + count * sizeof(hg_atomic_int64_t));
-    HG_UTIL_CHECK_ERROR_NORET(
-        hg_atomic_queue == NULL, done, "Could not allocate atomic queue");
+    hg_atomic_queue = hg_mem_aligned_alloc(HG_MEM_CACHE_LINE_SIZE, sizeof(struct hg_atomic_queue) +
+                                                                       count * sizeof(hg_atomic_int64_t));
+    HG_UTIL_CHECK_ERROR_NORET(hg_atomic_queue == NULL, done, "Could not allocate atomic queue");
 
     hg_atomic_queue->prod_size = hg_atomic_queue->cons_size = count;
     hg_atomic_queue->prod_mask = hg_atomic_queue->cons_mask = count - 1;

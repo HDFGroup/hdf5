@@ -32,9 +32,7 @@ extern "C" {
  * \param minor [OUT]           pointer to unsigned integer
  * \param patch [OUT]           pointer to unsigned integer
  */
-HG_UTIL_PUBLIC void
-HG_Util_version_get(
-    unsigned int *major, unsigned int *minor, unsigned int *patch);
+HG_UTIL_PUBLIC void HG_Util_version_get(unsigned int *major, unsigned int *minor, unsigned int *patch);
 
 /**
  * Set the log level for HG util. That setting is valid for all HG classes.
@@ -42,8 +40,7 @@ HG_Util_version_get(
  * \param level [IN]            level string, valid values are:
  *                                "none", "error", "warning", "debug"
  */
-HG_UTIL_PUBLIC void
-HG_Util_set_log_level(const char *level);
+HG_UTIL_PUBLIC void HG_Util_set_log_level(const char *level);
 
 #ifdef __cplusplus
 }

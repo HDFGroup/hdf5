@@ -37,9 +37,9 @@
 
 /* Inline macro */
 #ifdef _WIN32
-#    define HG_UTIL_INLINE __inline
+#define HG_UTIL_INLINE __inline
 #else
-#    define HG_UTIL_INLINE __inline__
+#define HG_UTIL_INLINE __inline__
 #endif
 
 /* Alignment */
@@ -51,15 +51,15 @@
 /* Shared libraries */
 /* #undef HG_UTIL_BUILD_SHARED_LIBS */
 #ifdef HG_UTIL_BUILD_SHARED_LIBS
-#    ifdef mercury_util_EXPORTS
-#        define HG_UTIL_PUBLIC HG_ATTR_ABI_EXPORT
-#    else
-#        define HG_UTIL_PUBLIC HG_ATTR_ABI_IMPORT
-#    endif
-#    define HG_UTIL_PRIVATE HG_ATTR_ABI_HIDDEN
+#ifdef mercury_util_EXPORTS
+#define HG_UTIL_PUBLIC HG_ATTR_ABI_EXPORT
 #else
-#    define HG_UTIL_PUBLIC
-#    define HG_UTIL_PRIVATE
+#define HG_UTIL_PUBLIC HG_ATTR_ABI_IMPORT
+#endif
+#define HG_UTIL_PRIVATE HG_ATTR_ABI_HIDDEN
+#else
+#define HG_UTIL_PUBLIC
+#define HG_UTIL_PRIVATE
 #endif
 
 /* Define if has __attribute__((constructor(priority))) */

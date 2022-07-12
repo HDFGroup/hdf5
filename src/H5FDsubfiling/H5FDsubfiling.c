@@ -347,8 +347,8 @@ H5FD_subfiling_init(void)
                 H5_SUBFILING_MPI_GOTO_ERROR(H5I_INVALID_HID, "MPI_Query_thread failed", mpi_code);
             if (provided != MPI_THREAD_MULTIPLE)
                 H5_SUBFILING_GOTO_ERROR(
-                        H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID,
-                        "Subfiling VFD requires the use of MPI_Init_thread with MPI_THREAD_MULTIPLE");
+                    H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID,
+                    "Subfiling VFD requires the use of MPI_Init_thread with MPI_THREAD_MULTIPLE");
         }
         else {
             char *env_var;
@@ -366,11 +366,11 @@ H5FD_subfiling_init(void)
 
             if (provided != required)
                 H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID,
-                        "MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE");
+                                        "MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE");
 
             if (HDatexit(H5FD__subfiling_mpi_finalize) < 0)
                 H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID,
-                        "can't register atexit handler for MPI_Finalize");
+                                        "can't register atexit handler for MPI_Finalize");
         }
     }
 
@@ -902,7 +902,8 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTCOPY, NULL, "can't copy subfiling subfile path");
         if (NULL == (file_ptr->file_dir = HDstrdup(directory))) {
             HDfree(path);
-            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTCOPY, NULL, "can't copy subfiling subfile directory path");
+            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTCOPY, NULL,
+                                    "can't copy subfiling subfile directory path");
         }
 
         HDfree(path);
@@ -1194,10 +1195,10 @@ H5FD__subfiling_query(const H5FD_t H5_ATTR_UNUSED *_file, unsigned long *flags /
     /* Set the VFL feature flags that this driver supports */
     if (flags) {
         *flags = 0;
-        *flags |= H5FD_FEAT_AGGREGATE_METADATA;     /* OK to aggregate metadata allocations  */
-        *flags |= H5FD_FEAT_AGGREGATE_SMALLDATA;    /* OK to aggregate "small" raw data allocations */
-        *flags |= H5FD_FEAT_HAS_MPI;                /* This driver uses MPI */
-        *flags |= H5FD_FEAT_ALLOCATE_EARLY;         /* Allocate space early instead of late  */
+        *flags |= H5FD_FEAT_AGGREGATE_METADATA;  /* OK to aggregate metadata allocations  */
+        *flags |= H5FD_FEAT_AGGREGATE_SMALLDATA; /* OK to aggregate "small" raw data allocations */
+        *flags |= H5FD_FEAT_HAS_MPI;             /* This driver uses MPI */
+        *flags |= H5FD_FEAT_ALLOCATE_EARLY;      /* Allocate space early instead of late  */
     }
 
     H5_SUBFILING_FUNC_LEAVE_API;
@@ -1420,7 +1421,7 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr
 
         if (H5CX_get_io_xfer_mode(&xfer_mode) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL,
-                    "can't determine I/O collectivity setting");
+                                    "can't determine I/O collectivity setting");
 
         if (xfer_mode == H5FD_MPIO_COLLECTIVE)
             H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "collective I/O is currently unsupported");
@@ -1663,7 +1664,7 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t add
 
         if (H5CX_get_io_xfer_mode(&xfer_mode) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL,
-                    "can't determine I/O collectivity setting");
+                                    "can't determine I/O collectivity setting");
 
         if (xfer_mode == H5FD_MPIO_COLLECTIVE)
             H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "collective I/O is currently unsupported");

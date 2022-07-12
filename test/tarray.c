@@ -1920,7 +1920,7 @@ test_compat(void)
     hid_t       mtid;                 /* Datatype ID for field            */
     int         i;                    /* Index variables                  */
     hbool_t     driver_is_default_compatible;
-    herr_t      ret;                  /* Generic return value             */
+    herr_t      ret; /* Generic return value             */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Array Datatypes Compatibility Functionality\n"));
