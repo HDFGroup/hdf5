@@ -360,7 +360,7 @@ test_vlstrings_special()
         hsize_t ii; // counting variable
         for (ii = 0; ii < SPACE1_DIM1; ii++)
             if (rdata[ii] != NULL)
-                TestErrPrintf("VL doesn't match!, rdata[%d]=%p\n", static_cast<int>(ii), rdata[ii]);
+                TestErrPrintf("VL doesn't match!, rdata[%d]=%s\n", static_cast<int>(ii), rdata[ii]);
 
         // Write dataset to disk, then read it back.
         dataset.write(wdata, vlst);
@@ -409,7 +409,7 @@ test_vlstrings_special()
         // Check data read in.
         for (ii = 0; ii < SPACE1_DIM1; ii++)
             if (rdata[ii] != NULL)
-                TestErrPrintf("VL doesn't match!, rdata[%d]=%p\n", static_cast<int>(ii), rdata[ii]);
+                TestErrPrintf("VL doesn't match!, rdata[%d]=%s\n", static_cast<int>(ii), rdata[ii]);
 
         // Try to write nil strings to disk.
         dataset.write(wdata2, vlst);
@@ -420,7 +420,7 @@ test_vlstrings_special()
         // Check data read in.
         for (ii = 0; ii < SPACE1_DIM1; ii++)
             if (rdata[ii] != NULL)
-                TestErrPrintf("VL doesn't match!, rdata[%d]=%p\n", static_cast<int>(ii), rdata[ii]);
+                TestErrPrintf("VL doesn't match!, rdata[%d]=%s\n", static_cast<int>(ii), rdata[ii]);
 
         // Close objects and file.
         dataset.close();

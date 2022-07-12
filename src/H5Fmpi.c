@@ -587,5 +587,4 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_mpi_get_file_block_type() */
-
 #endif /* H5_HAVE_PARALLEL */

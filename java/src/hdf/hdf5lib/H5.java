@@ -1242,6 +1242,10 @@ public class H5 implements java.io.Serializable {
             log.trace("H5Aread_string type");
             status = H5Aread_string(attr_id, mem_type_id, (String[])obj);
         }
+        else if (H5.H5Tget_class(mem_type_id) == HDF5Constants.H5T_VLEN) {
+            log.trace("H5AreadVL type");
+            status = H5AreadVL(attr_id, mem_type_id, (Object[])obj);
+        }
         else {
             // Create a data buffer to hold the data into a Java Array
             HDFArray theArray = new HDFArray(obj);
@@ -1787,6 +1791,10 @@ public class H5 implements java.io.Serializable {
         else if (is1D && (dataClass.getComponentType() == String.class)) {
             log.trace("H5Dwrite_string type");
             status = H5Awrite_string(attr_id, mem_type_id, (String[])obj);
+        }
+        else if (H5.H5Tget_class(mem_type_id) == HDF5Constants.H5T_VLEN) {
+            log.trace("H5AwriteVL type");
+            status = H5AwriteVL(attr_id, mem_type_id, (Object[])obj);
         }
         else {
             HDFArray theArray = new HDFArray(obj);
@@ -2772,6 +2780,11 @@ public class H5 implements java.io.Serializable {
             status = H5Dread_string(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
                                     (String[])obj);
         }
+        else if (H5.H5Tget_class(mem_type_id) == HDF5Constants.H5T_VLEN) {
+            log.trace("H5DreadVL type");
+            status =
+                H5DreadVL(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, (Object[])obj);
+        }
         else {
             // Create a data buffer to hold the data into a Java Array
             HDFArray theArray = new HDFArray(obj);
@@ -3449,6 +3462,11 @@ public class H5 implements java.io.Serializable {
             log.trace("H5Dwrite_string type");
             status = H5Dwrite_string(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
                                      (String[])obj);
+        }
+        else if (H5.H5Tget_class(mem_type_id) == HDF5Constants.H5T_VLEN) {
+            log.trace("H5DwriteVL type");
+            status = H5DwriteVL(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
+                                (Object[])obj);
         }
         else {
             HDFArray theArray = new HDFArray(obj);
@@ -9356,9 +9374,8 @@ public class H5 implements java.io.Serializable {
         byte[] buf        = theArray.emptyBytes();
 
         int status = H5Pget_fill_value(plist_id, type_id, buf);
-        if (status >= 0) {
+        if (status >= 0)
             obj = theArray.arrayify(buf);
-        }
 
         return status;
     }
@@ -11018,8 +11035,6 @@ public class H5 implements java.io.Serializable {
     public synchronized static native void H5Rdestroy(byte[] ref_ptr)
         throws HDF5LibraryException, NullPointerException, IllegalArgumentException;
 
-    // Info //
-
     /**
      * H5Rget_type retrieves the type of a reference.
      *
@@ -11075,8 +11090,6 @@ public class H5 implements java.io.Serializable {
      **/
     public synchronized static native byte[] H5Rcopy(byte[] src_ref_ptr)
         throws HDF5LibraryException, NullPointerException, IllegalArgumentException;
-
-    // Dereference //
 
     /**
      * H5Ropen_object opens that object and returns an identifier.
@@ -11223,8 +11236,6 @@ public class H5 implements java.io.Serializable {
      **/
     public synchronized static native int H5Rget_obj_type3(byte[] ref_ptr, long rapl_id)
         throws HDF5LibraryException, NullPointerException, IllegalArgumentException;
-
-    // Get name //
 
     /**
      * H5Rget_file_name retrieves the file name for the object, region or attribute reference pointed to.
