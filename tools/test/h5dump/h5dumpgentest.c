@@ -11589,7 +11589,7 @@ gent_onion_create_delete_objects(void)
 {
     struct onion_filepaths *paths = NULL;
 
-    H5FD_onion_fapl_info_t  onion_info = {
+    H5FD_onion_fapl_info_t onion_info = {
         H5FD_ONION_FAPL_INFO_VERSION_CURR,
         H5I_INVALID_HID,               /* backing_fapl_id  */
         ONION_TEST_PAGE_SIZE,          /* page_size        */
