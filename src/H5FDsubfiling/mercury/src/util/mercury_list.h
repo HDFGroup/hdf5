@@ -1,11 +1,7 @@
-/*
- * Copyright (C) 2013-2020 Argonne National Laboratory, Department of Energy,
- *                    UChicago Argonne, LLC and The HDF Group.
- * All rights reserved.
+/**
+ * Copyright (c) 2013-2021 UChicago Argonne, LLC and The HDF Group.
  *
- * The full copyright notice, including terms governing use, modification,
- * and redistribution, is contained in the COPYING file that can be
- * found at the root of the source code distribution tree.
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 
 /* Code below is derived from sys/queue.h which follows the below notice:
@@ -43,75 +39,84 @@
 #ifndef MERCURY_LIST_H
 #define MERCURY_LIST_H
 
-#define HG_LIST_HEAD_INITIALIZER(name)                                                                       \
-    {                                                                                                        \
-        NULL                                                                                                 \
+#define HG_LIST_HEAD_INITIALIZER(name)                                         \
+    {                                                                          \
+        NULL                                                                   \
     }
 
-#define HG_LIST_HEAD_INIT(struct_head_name, var_name)                                                        \
+#define HG_LIST_HEAD_INIT(struct_head_name, var_name)                          \
     struct struct_head_name var_name = HG_LIST_HEAD_INITIALIZER(var_name)
 
-#define HG_LIST_HEAD_DECL(struct_head_name, struct_entry_name)                                               \
-    struct struct_head_name {                                                                                \
-        struct struct_entry_name *head;                                                                      \
+#define HG_LIST_HEAD_DECL(struct_head_name, struct_entry_name)                 \
+    struct struct_head_name {                                                  \
+        struct struct_entry_name *head;                                        \
     }
 
-#define HG_LIST_HEAD(struct_entry_name)                                                                      \
-    struct {                                                                                                 \
-        struct struct_entry_name *head;                                                                      \
+#define HG_LIST_HEAD(struct_entry_name)                                        \
+    struct {                                                                   \
+        struct struct_entry_name *head;                                        \
     }
 
-#define HG_LIST_ENTRY(struct_entry_name)                                                                     \
-    struct {                                                                                                 \
-        struct struct_entry_name * next;                                                                     \
-        struct struct_entry_name **prev;                                                                     \
+#define HG_LIST_ENTRY(struct_entry_name)                                       \
+    struct {                                                                   \
+        struct struct_entry_name *next;                                        \
+        struct struct_entry_name **prev;                                       \
     }
 
-#define HG_LIST_INIT(head_ptr)                                                                               \
-    do {                                                                                                     \
-        (head_ptr)->head = NULL;                                                                             \
+#define HG_LIST_INIT(head_ptr)                                                 \
+    do {                                                                       \
+        (head_ptr)->head = NULL;                                               \
     } while (/*CONSTCOND*/ 0)
 
 #define HG_LIST_IS_EMPTY(head_ptr) ((head_ptr)->head == NULL)
 
 #define HG_LIST_FIRST(head_ptr) ((head_ptr)->head)
 
-#define HG_LIST_NEXT(entry_ptr, entry_field_name) ((entry_ptr)->entry_field_name.next)
+#define HG_LIST_NEXT(entry_ptr, entry_field_name)                              \
+    ((entry_ptr)->entry_field_name.next)
 
-#define HG_LIST_INSERT_AFTER(list_entry_ptr, entry_ptr, entry_field_name)                                    \
-    do {                                                                                                     \
-        if (((entry_ptr)->entry_field_name.next = (list_entry_ptr)->entry_field_name.next) != NULL)          \
-            (list_entry_ptr)->entry_field_name.next->entry_field_name.prev =                                 \
-                &(entry_ptr)->entry_field_name.next;                                                         \
-        (list_entry_ptr)->entry_field_name.next = (entry_ptr);                                               \
-        (entry_ptr)->entry_field_name.prev      = &(list_entry_ptr)->entry_field_name.next;                  \
+#define HG_LIST_INSERT_AFTER(list_entry_ptr, entry_ptr, entry_field_name)      \
+    do {                                                                       \
+        if (((entry_ptr)->entry_field_name.next =                              \
+                    (list_entry_ptr)->entry_field_name.next) != NULL)          \
+            (list_entry_ptr)->entry_field_name.next->entry_field_name.prev =   \
+                &(entry_ptr)->entry_field_name.next;                           \
+        (list_entry_ptr)->entry_field_name.next = (entry_ptr);                 \
+        (entry_ptr)->entry_field_name.prev =                                   \
+            &(list_entry_ptr)->entry_field_name.next;                          \
     } while (/*CONSTCOND*/ 0)
 
-#define HG_LIST_INSERT_BEFORE(list_entry_ptr, entry_ptr, entry_field_name)                                   \
-    do {                                                                                                     \
-        (entry_ptr)->entry_field_name.prev       = (list_entry_ptr)->entry_field_name.prev;                  \
-        (entry_ptr)->entry_field_name.next       = (list_entry_ptr);                                         \
-        *(list_entry_ptr)->entry_field_name.prev = (entry_ptr);                                              \
-        (list_entry_ptr)->entry_field_name.prev  = &(entry_ptr)->entry_field_name.next;                      \
+#define HG_LIST_INSERT_BEFORE(list_entry_ptr, entry_ptr, entry_field_name)     \
+    do {                                                                       \
+        (entry_ptr)->entry_field_name.prev =                                   \
+            (list_entry_ptr)->entry_field_name.prev;                           \
+        (entry_ptr)->entry_field_name.next = (list_entry_ptr);                 \
+        *(list_entry_ptr)->entry_field_name.prev = (entry_ptr);                \
+        (list_entry_ptr)->entry_field_name.prev =                              \
+            &(entry_ptr)->entry_field_name.next;                               \
     } while (/*CONSTCOND*/ 0)
 
-#define HG_LIST_INSERT_HEAD(head_ptr, entry_ptr, entry_field_name)                                           \
-    do {                                                                                                     \
-        if (((entry_ptr)->entry_field_name.next = (head_ptr)->head) != NULL)                                 \
-            (head_ptr)->head->entry_field_name.prev = &(entry_ptr)->entry_field_name.next;                   \
-        (head_ptr)->head                   = (entry_ptr);                                                    \
-        (entry_ptr)->entry_field_name.prev = &(head_ptr)->head;                                              \
+#define HG_LIST_INSERT_HEAD(head_ptr, entry_ptr, entry_field_name)             \
+    do {                                                                       \
+        if (((entry_ptr)->entry_field_name.next = (head_ptr)->head) != NULL)   \
+            (head_ptr)->head->entry_field_name.prev =                          \
+                &(entry_ptr)->entry_field_name.next;                           \
+        (head_ptr)->head = (entry_ptr);                                        \
+        (entry_ptr)->entry_field_name.prev = &(head_ptr)->head;                \
     } while (/*CONSTCOND*/ 0)
 
 /* TODO would be nice to not have any condition */
-#define HG_LIST_REMOVE(entry_ptr, entry_field_name)                                                          \
-    do {                                                                                                     \
-        if ((entry_ptr)->entry_field_name.next != NULL)                                                      \
-            (entry_ptr)->entry_field_name.next->entry_field_name.prev = (entry_ptr)->entry_field_name.prev;  \
-        *(entry_ptr)->entry_field_name.prev = (entry_ptr)->entry_field_name.next;                            \
+#define HG_LIST_REMOVE(entry_ptr, entry_field_name)                            \
+    do {                                                                       \
+        if ((entry_ptr)->entry_field_name.next != NULL)                        \
+            (entry_ptr)->entry_field_name.next->entry_field_name.prev =        \
+                (entry_ptr)->entry_field_name.prev;                            \
+        *(entry_ptr)->entry_field_name.prev =                                  \
+            (entry_ptr)->entry_field_name.next;                                \
     } while (/*CONSTCOND*/ 0)
 
-#define HG_LIST_FOREACH(var, head_ptr, entry_field_name)                                                     \
-    for ((var) = ((head_ptr)->head); (var); (var) = ((var)->entry_field_name.next))
+#define HG_LIST_FOREACH(var, head_ptr, entry_field_name)                       \
+    for ((var) = ((head_ptr)->head); (var);                                    \
+         (var) = ((var)->entry_field_name.next))
 
 #endif /* MERCURY_LIST_H */

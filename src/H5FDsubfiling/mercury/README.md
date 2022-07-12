@@ -1,54 +1,67 @@
 Mercury
 =======
-[![Build status][travis-ci-svg]][travis-ci-link]
+[![Build status][github-ci-svg]][github-ci-link]
 [![Latest version][mercury-release-svg]][mercury-release-link]
+[![Spack version][spack-release-svg]][spack-release-link]
 
-   Mercury is an RPC framework specifically designed for use in HPC systems
-   that allows asynchronous transfer of parameters and execution requests,
-   as well as direct support of large data arguments. The network implementation
-   is abstracted, allowing easy porting to future systems and efficient use
-   of existing native transport mechanisms. Mercury's interface is generic
-   and allows any function call to be serialized.
+Mercury is an RPC framework specifically designed for use in HPC systems
+that allows asynchronous transfer of parameters and execution requests,
+as well as direct support of large data arguments. The network implementation
+is abstracted, allowing easy porting to future systems and efficient use
+of existing native transport mechanisms. Mercury's interface is generic
+and allows any function call to be serialized.
+Mercury is a core component of the [Mochi][mochi-link] ecosystem of
+microservices.
 
-   Please see the accompanying COPYING file for license details.
+Please see the accompanying LICENSE.txt file for license details.
 
-   Contributions and patches are welcomed but require a Contributor License
-   Agreement (CLA) to be filled out. Please contact us if you are interested
-   in contributing to Mercury by subscribing to the [mailing lists][mailing-lists].
+Contributions and patches are welcomed but require a Contributor License
+Agreement (CLA) to be filled out. Please contact us if you are interested
+in contributing to Mercury by subscribing to the
+[mailing lists][mailing-lists].
 
 Architectures supported
 =======================
 
-   Architectures supported by MPI implementations are generally supported by the
-   network abstraction layer. The OFI libfabric plugin as well as the SM plugin
-   are stable and provide the best performance in most workloads. Libfabric
-   providers currently supported are: `tcp`, `verbs`, `psm2`, `gni`.
-   MPI and BMI (tcp) plugins are still supported but gradually being moved as
-   deprecated, therefore should only be used as fallback methods.
-   The CCI plugin is deprecated and underlying CCI transport plugins
-   (`tcp`, `sm`, `verbs`, `gni`) are no longer supported.
+Architectures supported by MPI implementations are generally supported by the
+network abstraction layer.
 
-   See the [plugin requirements](#plugin-requirements) section for
-   plugin requirement details.
+The OFI libfabric plugin as well as the SM plugin
+are stable and provide the best performance in most workloads. Libfabric
+providers currently supported are: `tcp`, `verbs`, `psm2`, `gni`.
+
+The UCX plugin is also available as an alternative transport on platforms
+for which libfabric is either not available or not recommended to use,
+currently supported protocols are tcp and verbs.
+
+MPI and BMI (tcp) plugins are still supported but gradually being moved as
+deprecated, therefore should only be used as fallback methods.
+The CCI plugin is deprecated and no longer supported.
+
+See the [plugin requirements](#plugin-requirements) section for
+plugin requirement details.
 
 Documentation
 =============
 
-   Please see the documentation available on the mercury [website][documentation]
-   for a quick introduction to Mercury.
+Please see the documentation available on the mercury [website][documentation]
+for a quick introduction to Mercury.
 
 Software requirements
 =====================
 
-   Compiling and running Mercury requires up-to-date versions of various
-   software packages. Beware that using excessively old versions of these
-   packages can cause indirect errors that are very difficult to track down.
+Compiling and running Mercury requires up-to-date versions of various
+software packages. Beware that using excessively old versions of these
+packages can cause indirect errors that are very difficult to track down.
 
 Plugin requirements
 -------------------
 
-To make use of the libfabric/OFI plugin, please refer to the libfabric build
+To make use of the OFI libfabric plugin, please refer to the libfabric build
 instructions available on this [page][libfabric].
+
+To make use of the UCX plugin, please refer to the UCX build
+instructions available on this [page][ucx].
 
 To make use of the native NA SM (shared-memory) plugin on Linux,
 the cross-memory attach (CMA) feature introduced in kernel v3.2 is required.
@@ -60,7 +73,7 @@ memory to be accessed.
 To make use of the BMI plugin, the most convenient way is to install it through
 spack or one can also do:
 
-    git clone https://xgitlab.cels.anl.gov/sds/bmi.git && cd bmi
+    git clone https://github.com/radix-io/bmi.git && cd bmi
     ./prepare && ./configure --enable-shared --enable-bmi-only
     make && make install
 
@@ -69,9 +82,6 @@ implementation (MPICH2 v1.4.1 or higher / OpenMPI v1.6 or higher) with
 `MPI_THREAD_MULTIPLE` available on targets that will accept remote
 connections. Processes that are _not_ accepting incoming connections are
 _not_ required to have a multithreaded level of execution.
-
-To make use of the CCI plugin, please refer to the CCI build instructions
-available on this [page][cci].
 
 Optional requirements
 ---------------------
@@ -83,19 +93,11 @@ The library itself is therefore not necessary since only the header is used.
 Mercury includes those headers if one does not have BOOST installed and
 wants to make use of this feature.
 
-On Linux OpenPA v1.0.3 or higher is required (the version that is included
-with MPICH can also be used) for systems that do not have `stdatomic.h`
-(GCC version less than 4.9).
-
 Building
 ========
 
 If you install the full sources, put the tarball in a directory where you
 have permissions (e.g., your home directory) and unpack it:
-
-    gzip -cd mercury-X.tar.gz | tar xvf -
-
-   or
 
     bzip2 -dc mercury-X.tar.bz2 | tar xvf -
 
@@ -136,6 +138,7 @@ Type `'c'` multiple times and choose suitable options. Recommended options are:
     NA_USE_CCI                       ON/OFF
     NA_USE_OFI                       ON/OFF
     NA_USE_SM                        ON/OFF
+    NA_USE_UCX                       ON/OFF
 
 Setting include directory and library paths may require you to toggle to
 the advanced mode by typing `'t'`. Once you are done and do not see any
@@ -205,17 +208,23 @@ Below is a list of the most common questions.
 
 - _Q: Is there any logging mechanism?_
 
-  A: To turn on error/warning/debug logs, the `HG_LOG_LEVEL` or
-  `HG_NA_LOG_LEVEL` environment variables can be set to either `error`,
-  `warning` or `debug` values. Note that for debugging output to be printed,
-  the CMake variable `MERCURY_ENABLE_DEBUG` must also be set at compile time.
+  A: To turn on error/warning/debug logs, the `HG_LOG_LEVEL` environment
+  variable can be set to either `error`, `warning` or `debug` values. Note that
+  for debugging output to be printed, the CMake variable `MERCURY_ENABLE_DEBUG`
+  must also be set at compile time. Specific subsystems can be selected using
+  the `HG_LOG_SUBSYS` environment variable.
 
 [mailing-lists]: http://mercury-hpc.github.io/help#mailing-lists
 [documentation]: http://mercury-hpc.github.io/documentation/
 [cci]: http://cci-forum.com/?page_id=46
 [libfabric]: https://github.com/ofiwg/libfabric
-[travis-ci-svg]: https://travis-ci.org/mercury-hpc/mercury.svg
-[travis-ci-link]: https://travis-ci.org/mercury-hpc/mercury
-[mercury-release-svg]: https://img.shields.io/github/release/mercury-hpc/mercury.svg
-[mercury-release-link]: https://github.com/mercury-hpc/mercury/releases/latest
+[ucx]: https://openucx.readthedocs.io/en/master/running.html#ucx-build-and-install
+[github-ci-svg]: https://github.com/mercury-hpc/mercury/actions/workflows/ci.yml/badge.svg?branch=master
+[github-ci-link]: https://github.com/mercury-hpc/mercury/actions/workflows/ci.yml
+[mercury-release-svg]: https://img.shields.io/github/release/mercury-hpc/mercury/all.svg
+[mercury-release-link]: https://github.com/mercury-hpc/mercury/releases
+[spack-release-svg]: https://img.shields.io/spack/v/mercury.svg
+[spack-release-link]: https://spack.readthedocs.io/en/latest/package_list.html#mercury
 [yama]: https://www.kernel.org/doc/Documentation/security/Yama.txt
+[mochi-link]: https://github.com/mochi-hpc/
+

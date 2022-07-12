@@ -1,11 +1,7 @@
-/*
- * Copyright (C) 2013-2020 Argonne National Laboratory, Department of Energy,
- *                    UChicago Argonne, LLC and The HDF Group.
- * All rights reserved.
+/**
+ * Copyright (c) 2013-2021 UChicago Argonne, LLC and The HDF Group.
  *
- * The full copyright notice, including terms governing use, modification,
- * and redistribution, is contained in the COPYING file that can be
- * found at the root of the source code distribution tree.
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #include "mercury_thread_mutex.h"
@@ -19,24 +15,26 @@ static int
 hg_thread_mutex_init_posix(hg_thread_mutex_t *mutex, int kind)
 {
     pthread_mutexattr_t mutex_attr;
-    int                 ret = HG_UTIL_SUCCESS;
-    int                 rc;
+    int ret = HG_UTIL_SUCCESS;
+    int rc;
 
     rc = pthread_mutexattr_init(&mutex_attr);
-    HG_UTIL_CHECK_ERROR(rc != 0, done, ret, HG_UTIL_FAIL, "pthread_mutexattr_init() failed (%s)",
-                        strerror(rc));
+    HG_UTIL_CHECK_ERROR(rc != 0, done, ret, HG_UTIL_FAIL,
+        "pthread_mutexattr_init() failed (%s)", strerror(rc));
 
     /* Keep mutex mode as normal and do not expect error checking */
     rc = pthread_mutexattr_settype(&mutex_attr, kind);
-    HG_UTIL_CHECK_ERROR(rc != 0, done, ret, HG_UTIL_FAIL, "pthread_mutexattr_settype() failed (%s)",
-                        strerror(rc));
+    HG_UTIL_CHECK_ERROR(rc != 0, done, ret, HG_UTIL_FAIL,
+        "pthread_mutexattr_settype() failed (%s)", strerror(rc));
 
     rc = pthread_mutex_init(mutex, &mutex_attr);
-    HG_UTIL_CHECK_ERROR(rc != 0, done, ret, HG_UTIL_FAIL, "pthread_mutex_init() failed (%s)", strerror(rc));
+    HG_UTIL_CHECK_ERROR(rc != 0, done, ret, HG_UTIL_FAIL,
+        "pthread_mutex_init() failed (%s)", strerror(rc));
 
 done:
     rc = pthread_mutexattr_destroy(&mutex_attr);
-    HG_UTIL_CHECK_ERROR_DONE(rc != 0, "pthread_mutexattr_destroy() failed (%s)", strerror(rc));
+    HG_UTIL_CHECK_ERROR_DONE(
+        rc != 0, "pthread_mutexattr_destroy() failed (%s)", strerror(rc));
 
     return ret;
 }
@@ -63,7 +61,9 @@ hg_thread_mutex_init_fast(hg_thread_mutex_t *mutex)
 {
     int ret = HG_UTIL_SUCCESS;
 
-#ifdef HG_UTIL_HAS_PTHREAD_MUTEX_ADAPTIVE_NP
+#if defined(_WIN32)
+    ret = hg_thread_mutex_init(mutex);
+#elif defined(HG_UTIL_HAS_PTHREAD_MUTEX_ADAPTIVE_NP)
     /* Set type to PTHREAD_MUTEX_ADAPTIVE_NP to improve performance */
     ret = hg_thread_mutex_init_posix(mutex, PTHREAD_MUTEX_ADAPTIVE_NP);
 #else
@@ -85,8 +85,8 @@ hg_thread_mutex_destroy(hg_thread_mutex_t *mutex)
     int rc;
 
     rc = pthread_mutex_destroy(mutex);
-    HG_UTIL_CHECK_ERROR(rc != 0, done, ret, HG_UTIL_FAIL, "pthread_mutex_destroy() failed (%s)",
-                        strerror(rc));
+    HG_UTIL_CHECK_ERROR(rc != 0, done, ret, HG_UTIL_FAIL,
+        "pthread_mutex_destroy() failed (%s)", strerror(rc));
 
 done:
 #endif

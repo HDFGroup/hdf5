@@ -14,10 +14,6 @@
 
 #include "H5FDsubfiling.h"
 
-#include "mercury_thread.h"
-#include "mercury_thread_mutex.h"
-#include "mercury_thread_pool.h"
-
 #ifndef HG_TEST_NUM_THREADS_DEFAULT
 #define HG_TEST_NUM_THREADS_DEFAULT 4
 #endif

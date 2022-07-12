@@ -1,11 +1,7 @@
-/*
- * Copyright (C) 2013-2020 Argonne National Laboratory, Department of Energy,
- *                    UChicago Argonne, LLC and The HDF Group.
- * All rights reserved.
+/**
+ * Copyright (c) 2013-2021 UChicago Argonne, LLC and The HDF Group.
  *
- * The full copyright notice, including terms governing use, modification,
- * and redistribution, is contained in the COPYING file that can be
- * found at the root of the source code distribution tree.
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #ifndef MERCURY_MEM_POOL_H
@@ -27,7 +23,8 @@
  *
  * \return HG_UTIL_SUCCESS if successful / error code otherwise
  */
-typedef int (*hg_mem_pool_register_func_t)(const void *buf, size_t size, void **handle, void *arg);
+typedef int (*hg_mem_pool_register_func_t)(
+    const void *buf, size_t size, void **handle, void *arg);
 
 /**
  * Deregister memory block.
@@ -65,11 +62,10 @@ extern "C" {
  *
  * \return HG_UTIL_SUCCESS if successful / error code otherwise
  */
-HG_UTIL_PUBLIC struct hg_mem_pool *hg_mem_pool_create(size_t chunk_size, size_t chunk_count,
-                                                      size_t                        block_count,
-                                                      hg_mem_pool_register_func_t   register_func,
-                                                      hg_mem_pool_deregister_func_t deregister_func,
-                                                      void *                        arg);
+HG_UTIL_PUBLIC struct hg_mem_pool *
+hg_mem_pool_create(size_t chunk_size, size_t chunk_count, size_t block_count,
+    hg_mem_pool_register_func_t register_func,
+    hg_mem_pool_deregister_func_t deregister_func, void *arg);
 
 /**
  * Destroy a memory pool.
@@ -77,7 +73,8 @@ HG_UTIL_PUBLIC struct hg_mem_pool *hg_mem_pool_create(size_t chunk_size, size_t 
  * \param hg_mem_pool [IN/OUT]  pointer to memory pool
  *
  */
-HG_UTIL_PUBLIC void hg_mem_pool_destroy(struct hg_mem_pool *hg_mem_pool);
+HG_UTIL_PUBLIC void
+hg_mem_pool_destroy(struct hg_mem_pool *hg_mem_pool);
 
 /**
  * Allocate \size bytes and optionally return a memory handle
@@ -89,7 +86,9 @@ HG_UTIL_PUBLIC void hg_mem_pool_destroy(struct hg_mem_pool *hg_mem_pool);
  *
  * \return pointer to memory block
  */
-HG_UTIL_PUBLIC void *hg_mem_pool_alloc(struct hg_mem_pool *hg_mem_pool, size_t size, void **mr_handle);
+HG_UTIL_PUBLIC void *
+hg_mem_pool_alloc(
+    struct hg_mem_pool *hg_mem_pool, size_t size, void **mr_handle);
 
 /**
  * Release memory at address \mem_ptr.
@@ -99,7 +98,9 @@ HG_UTIL_PUBLIC void *hg_mem_pool_alloc(struct hg_mem_pool *hg_mem_pool, size_t s
  * \param mr_handle [INT]       pointer to memory handle
  *
  */
-HG_UTIL_PUBLIC void hg_mem_pool_free(struct hg_mem_pool *hg_mem_pool, void *mem_ptr, void *mr_handle);
+HG_UTIL_PUBLIC void
+hg_mem_pool_free(
+    struct hg_mem_pool *hg_mem_pool, void *mem_ptr, void *mr_handle);
 
 /**
  * Retrieve chunk offset relative to the address used for registering
@@ -111,8 +112,9 @@ HG_UTIL_PUBLIC void hg_mem_pool_free(struct hg_mem_pool *hg_mem_pool, void *mem_
  *
  * \return offset within registered block.
  */
-HG_UTIL_PUBLIC size_t hg_mem_pool_chunk_offset(struct hg_mem_pool *hg_mem_pool, void *mem_ptr,
-                                               void *mr_handle);
+HG_UTIL_PUBLIC size_t
+hg_mem_pool_chunk_offset(
+    struct hg_mem_pool *hg_mem_pool, void *mem_ptr, void *mr_handle);
 
 #ifdef __cplusplus
 }

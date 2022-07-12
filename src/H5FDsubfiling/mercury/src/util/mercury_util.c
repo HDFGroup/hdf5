@@ -1,11 +1,7 @@
-/*
- * Copyright (C) 2013-2020 Argonne National Laboratory, Department of Energy,
- *                    UChicago Argonne, LLC and The HDF Group.
- * All rights reserved.
+/**
+ * Copyright (c) 2013-2021 UChicago Argonne, LLC and The HDF Group.
  *
- * The full copyright notice, including terms governing use, modification,
- * and redistribution, is contained in the COPYING file that can be
- * found at the root of the source code distribution tree.
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #include "mercury_util.h"
@@ -33,7 +29,21 @@ HG_LOG_SUBSYS_DECL_REGISTER(HG_UTIL_SUBSYS_NAME, hg);
 
 /*---------------------------------------------------------------------------*/
 void
+HG_Util_version_get(
+    unsigned int *major, unsigned int *minor, unsigned int *patch)
+{
+    if (major)
+        *major = HG_UTIL_VERSION_MAJOR;
+    if (minor)
+        *minor = HG_UTIL_VERSION_MINOR;
+    if (patch)
+        *patch = HG_UTIL_VERSION_PATCH;
+}
+
+/*---------------------------------------------------------------------------*/
+void
 HG_Util_set_log_level(const char *level)
 {
-    hg_log_set_subsys_level(HG_UTIL_SUBSYS_NAME_STRING, hg_log_name_to_level(level));
+    hg_log_set_subsys_level(
+        HG_UTIL_SUBSYS_NAME_STRING, hg_log_name_to_level(level));
 }

@@ -1,11 +1,7 @@
-/*
- * Copyright (C) 2013-2020 Argonne National Laboratory, Department of Energy,
- *                    UChicago Argonne, LLC and The HDF Group.
- * All rights reserved.
+/**
+ * Copyright (c) 2013-2021 UChicago Argonne, LLC and The HDF Group.
  *
- * The full copyright notice, including terms governing use, modification,
- * and redistribution, is contained in the COPYING file that can be
- * found at the root of the source code distribution tree.
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 
 /* Generated file. Only edit mercury_util_config.h.in. */
@@ -18,87 +14,53 @@
 /*************************************/
 
 /* Type definitions */
-#ifdef _WIN32
-typedef signed __int64   hg_util_int64_t;
-typedef signed __int32   hg_util_int32_t;
-typedef signed __int16   hg_util_int16_t;
-typedef signed __int8    hg_util_int8_t;
-typedef unsigned __int64 hg_util_uint64_t;
-typedef unsigned __int32 hg_util_uint32_t;
-typedef unsigned __int16 hg_util_uint16_t;
-typedef unsigned __int8  hg_util_uint8_t;
-#else
 #include <stddef.h>
 #include <stdint.h>
-typedef int64_t  hg_util_int64_t;
-typedef int32_t  hg_util_int32_t;
-typedef int16_t  hg_util_int16_t;
-typedef int8_t   hg_util_int8_t;
-typedef uint64_t hg_util_uint64_t;
-typedef uint32_t hg_util_uint32_t;
-typedef uint16_t hg_util_uint16_t;
-typedef uint8_t  hg_util_uint8_t;
-#endif
-typedef hg_util_uint8_t  hg_util_bool_t;
-typedef hg_util_uint64_t hg_util_ptr_t;
-
-/* True / false */
-#define HG_UTIL_TRUE  1
-#define HG_UTIL_FALSE 0
-
-/* Return codes */
-#define HG_UTIL_SUCCESS 0
-#define HG_UTIL_FAIL    -1
+#include <stdbool.h>
 
 /*****************/
 /* Public Macros */
 /*****************/
 
-/* Visibility of symbols */
-#if defined(_WIN32)
-#define HG_UTIL_ABI_IMPORT __declspec(dllimport)
-#define HG_UTIL_ABI_EXPORT __declspec(dllexport)
-#define HG_UTIL_ABI_HIDDEN
-#elif defined(__GNUC__) && (__GNUC__ >= 4)
-#define HG_UTIL_ABI_IMPORT __attribute__((visibility("default")))
-#define HG_UTIL_ABI_EXPORT __attribute__((visibility("default")))
-#define HG_UTIL_ABI_HIDDEN __attribute__((visibility("hidden")))
-#else
-#define HG_UTIL_ABI_IMPORT
-#define HG_UTIL_ABI_EXPORT
-#define HG_UTIL_ABI_HIDDEN
-#endif
+/* Reflects any major or incompatible public API changes */
+#define HG_UTIL_VERSION_MAJOR 3
+/* Reflects any minor backwards compatible API or functionality addition */
+#define HG_UTIL_VERSION_MINOR 0
+/* Reflects any backwards compatible bug fixes */
+#define HG_UTIL_VERSION_PATCH 0
+
+/* Return codes */
+#define HG_UTIL_SUCCESS 0
+#define HG_UTIL_FAIL    -1
+
+#include <mercury_compiler_attributes.h>
 
 /* Inline macro */
 #ifdef _WIN32
-#define HG_UTIL_INLINE __inline
+#    define HG_UTIL_INLINE __inline
 #else
-#define HG_UTIL_INLINE __inline__
+#    define HG_UTIL_INLINE __inline__
 #endif
 
+/* Alignment */
+#define HG_UTIL_ALIGNED(x, a) HG_ATTR_ALIGNED(x, a)
+
 /* Check format arguments */
-#if defined(__GNUC__)
-#define HG_UTIL_PRINTF_LIKE(_fmt, _firstarg) __attribute__((format(printf, _fmt, _firstarg)))
-#else
-#define HG_UTIL_PRINTF_LIKE(_fmt, _firstarg)
-#endif
+#define HG_UTIL_PRINTF(_fmt, _firstarg) HG_ATTR_PRINTF(_fmt, _firstarg)
 
 /* Shared libraries */
 /* #undef HG_UTIL_BUILD_SHARED_LIBS */
 #ifdef HG_UTIL_BUILD_SHARED_LIBS
-#ifdef mercury_util_EXPORTS
-#define HG_UTIL_PUBLIC HG_UTIL_ABI_EXPORT
+#    ifdef mercury_util_EXPORTS
+#        define HG_UTIL_PUBLIC HG_ATTR_ABI_EXPORT
+#    else
+#        define HG_UTIL_PUBLIC HG_ATTR_ABI_IMPORT
+#    endif
+#    define HG_UTIL_PRIVATE HG_ATTR_ABI_HIDDEN
 #else
-#define HG_UTIL_PUBLIC HG_UTIL_ABI_IMPORT
+#    define HG_UTIL_PUBLIC
+#    define HG_UTIL_PRIVATE
 #endif
-#define HG_UTIL_PRIVATE HG_UTIL_ABI_HIDDEN
-#else
-#define HG_UTIL_PUBLIC
-#define HG_UTIL_PRIVATE
-#endif
-
-/* Define if has __attribute__((constructor)) */
-#define HG_UTIL_HAS_ATTR_CONSTRUCTOR
 
 /* Define if has __attribute__((constructor(priority))) */
 #define HG_UTIL_HAS_ATTR_CONSTRUCTOR_PRIORITY
@@ -117,9 +79,6 @@ typedef hg_util_uint64_t hg_util_ptr_t;
 
 /* Define if has colored output */
 /* #undef HG_UTIL_HAS_LOG_COLOR */
-
-/* Define if has <opa_primitives.h> */
-/* #undef HG_UTIL_HAS_OPA_PRIMITIVES_H */
 
 /* Define if has 'pthread_condattr_setclock()' */
 #define HG_UTIL_HAS_PTHREAD_CONDATTR_SETCLOCK
@@ -144,6 +103,9 @@ typedef hg_util_uint64_t hg_util_ptr_t;
 
 /* Define if has <sys/eventfd.h> */
 #define HG_UTIL_HAS_SYSEVENTFD_H
+
+/* Define if has <sys/param.h> */
+#define HG_UTIL_HAS_SYSPARAM_H
 
 /* Define if has <sys/time.h> */
 #define HG_UTIL_HAS_SYSTIME_H

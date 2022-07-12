@@ -765,9 +765,9 @@ if (HDF5_ENABLE_SUBFILING_VFD)
   set (H5_HAVE_IOC_VFD 1)
 
   message (STATUS "Setting up to use Mercury components")
-  include_directories(${H5FD_SUBFILING_DIR}/mercury/include)
+  include_directories(${H5FD_SUBFILING_DIR}/mercury/src/util)
   set (H5_HAVE_MERCURY_H 1)
-  set (CMAKE_REQUIRED_INCLUDES "${H5FD_SUBFILING_DIR}/mercury/include")
+  set (CMAKE_REQUIRED_INCLUDES "${H5FD_SUBFILING_DIR}/mercury/src/util")
 endif()
 
 #option (DEFAULT_API_VERSION "Enable v1.14 API (v16, v18, v110, v112, v114)" "v114")

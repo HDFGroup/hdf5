@@ -1,14 +1,14 @@
-/*
- * Copyright (C) 2013-2020 Argonne National Laboratory, Department of Energy,
- *                    UChicago Argonne, LLC and The HDF Group.
- * All rights reserved.
+/**
+ * Copyright (c) 2013-2021 UChicago Argonne, LLC and The HDF Group.
  *
- * The full copyright notice, including terms governing use, modification,
- * and redistribution, is contained in the COPYING file that can be
- * found at the root of the source code distribution tree.
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #include "mercury_thread.h"
+
+#if !defined(_WIN32) && !defined(__APPLE__)
+#    include <sched.h>
+#endif
 
 /*---------------------------------------------------------------------------*/
 void
@@ -87,7 +87,7 @@ hg_thread_yield(void)
 #elif defined(__APPLE__)
     pthread_yield_np();
 #else
-    pthread_yield();
+    sched_yield();
 #endif
 
     return HG_UTIL_SUCCESS;
@@ -133,8 +133,8 @@ hg_thread_getaffinity(hg_thread_t thread, hg_cpu_set_t *cpu_mask)
 #if defined(_WIN32)
     return HG_UTIL_FAIL;
 #elif defined(__APPLE__)
-    (void)thread;
-    (void)cpu_mask;
+    (void) thread;
+    (void) cpu_mask;
     return HG_UTIL_FAIL;
 #else
     if (pthread_getaffinity_np(thread, sizeof(hg_cpu_set_t), cpu_mask))
@@ -151,8 +151,8 @@ hg_thread_setaffinity(hg_thread_t thread, const hg_cpu_set_t *cpu_mask)
     if (!SetThreadAffinityMask(thread, *cpu_mask))
         return HG_UTIL_FAIL;
 #elif defined(__APPLE__)
-    (void)thread;
-    (void)cpu_mask;
+    (void) thread;
+    (void) cpu_mask;
     return HG_UTIL_FAIL;
 #else
     if (pthread_setaffinity_np(thread, sizeof(hg_cpu_set_t), cpu_mask))

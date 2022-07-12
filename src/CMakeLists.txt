@@ -276,21 +276,14 @@ set (H5FD_HDRS
 # Append Subfiling VFD and Mercury sources to H5FD interface if Subfiling VFD is built
 if (HDF5_ENABLE_SUBFILING_VFD)
   set (MERCURY_UTIL_SOURCES
-      ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_atomic_queue.c
       ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_dlog.c
       ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_event.c
-      ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_hash_table.c
       ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_log.c
       ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_mem.c
-      ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_mem_pool.c
-      ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_poll.c
-      ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_request.c
       ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_thread.c
       ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_thread_condition.c
       ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_thread_pool.c
       ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_thread_mutex.c
-      ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_thread_rwlock.c
-      ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_thread_spin.c
       ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_util.c
   )
 

@@ -1,11 +1,7 @@
-/*
- * Copyright (C) 2013-2020 Argonne National Laboratory, Department of Energy,
- *                    UChicago Argonne, LLC and The HDF Group.
- * All rights reserved.
+/**
+ * Copyright (c) 2013-2021 UChicago Argonne, LLC and The HDF Group.
  *
- * The full copyright notice, including terms governing use, modification,
- * and redistribution, is contained in the COPYING file that can be
- * found at the root of the source code distribution tree.
+ * SPDX-License-Identifier: BSD-3-Clause
  */
 
 /* Implementation derived from:
@@ -39,6 +35,7 @@
  */
 
 #include "mercury_atomic_queue.h"
+#include "mercury_param.h"
 #include "mercury_util_error.h"
 
 #include <stdlib.h>
@@ -47,20 +44,19 @@
 /* Local Macros */
 /****************/
 
-/* From <sys/param.h> */
-#define powerof2(x) ((((x)-1) & (x)) == 0)
-
 /*---------------------------------------------------------------------------*/
 struct hg_atomic_queue *
 hg_atomic_queue_alloc(unsigned int count)
 {
     struct hg_atomic_queue *hg_atomic_queue = NULL;
 
-    HG_UTIL_CHECK_ERROR_NORET(!powerof2(count), done, "atomic queue size must be power of 2");
+    HG_UTIL_CHECK_ERROR_NORET(
+        !powerof2(count), done, "atomic queue size must be power of 2");
 
-    hg_atomic_queue = hg_mem_aligned_alloc(HG_MEM_CACHE_LINE_SIZE, sizeof(struct hg_atomic_queue) +
-                                                                       count * sizeof(hg_atomic_int64_t));
-    HG_UTIL_CHECK_ERROR_NORET(hg_atomic_queue == NULL, done, "Could not allocate atomic queue");
+    hg_atomic_queue = hg_mem_aligned_alloc(HG_MEM_CACHE_LINE_SIZE,
+        sizeof(struct hg_atomic_queue) + count * sizeof(hg_atomic_int64_t));
+    HG_UTIL_CHECK_ERROR_NORET(
+        hg_atomic_queue == NULL, done, "Could not allocate atomic queue");
 
     hg_atomic_queue->prod_size = hg_atomic_queue->cons_size = count;
     hg_atomic_queue->prod_mask = hg_atomic_queue->cons_mask = count - 1;
