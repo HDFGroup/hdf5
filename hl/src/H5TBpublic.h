@@ -72,7 +72,7 @@ extern "C" {
  * - Query
  *   - \ref H5TBget_table_info
  *   - \ref H5TBget_field_info
- * 
+ *
  * - Query Table Attributes
  *   - \ref H5TBAget_fill
  *   - \ref H5TBAget_title
