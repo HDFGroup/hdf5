@@ -11588,8 +11588,8 @@ error:
 static int
 gent_onion_create_delete_objects(void)
 {
-    hid_t                   fapl_id    = H5I_INVALID_HID;
-    struct onion_filepaths *paths      = NULL;
+    struct onion_filepaths *paths = NULL;
+
     H5FD_onion_fapl_info_t  onion_info = {
         H5FD_ONION_FAPL_INFO_VERSION_CURR,
         H5I_INVALID_HID,               /* backing_fapl_id  */
@@ -11600,9 +11600,23 @@ gent_onion_create_delete_objects(void)
         0,               /* creation flags, was H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT */
         "initial commit" /* comment          */
     };
-    hid_t   group_id      = H5I_INVALID_HID;
-    hid_t   attr_space_id = H5I_INVALID_HID, attr_id = H5I_INVALID_HID;
+
+    hid_t fapl_id       = H5I_INVALID_HID;
+    hid_t group_id      = H5I_INVALID_HID;
+    hid_t attr_space_id = H5I_INVALID_HID;
+    hid_t attr_id       = H5I_INVALID_HID;
+    hid_t file          = H5I_INVALID_HID;
+    hid_t space         = H5I_INVALID_HID;
+    hid_t dset          = H5I_INVALID_HID;
+    hid_t dcpl          = H5I_INVALID_HID;
+
     hsize_t attr_dim[1] = {4};
+    hsize_t dims[2]     = {4, 4};
+    hsize_t maxdims[2]  = {H5S_UNLIMITED, H5S_UNLIMITED};
+    hsize_t chunk[2]    = {4, 4};
+    int     wdata[4][4];
+
+    int fillval;
 
     /* Set up */
     if ((onion_info.backing_fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -11620,16 +11634,11 @@ gent_onion_create_delete_objects(void)
      *----------------------------------------------------------------------
      */
 
-    hid_t   file, space, dset, dcpl; /* Handles */
-    hsize_t dims[2] = {4, 4}, maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED}, chunk[2] = {4, 4};
-    int     wdata[4][4], /* Write buffer */
-        fillval, i, j;
-
     /*
      * Initialize data.
      */
-    for (i = 0; i < 4; i++)
-        for (j = 0; j < 4; j++)
+    for (int i = 0; i < 4; i++)
+        for (int j = 0; j < 4; j++)
             wdata[i][j] = i + j;
 
     /*
