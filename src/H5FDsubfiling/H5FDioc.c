@@ -55,6 +55,11 @@ typedef struct H5FD_ioc_t {
 
     H5FD_t *ioc_file; /* native HDF5 file pointer (sec2) */
 
+    int64_t context_id; /* The value used to lookup a subfiling context for the file */
+
+    char *file_dir;  /* Directory where we find files */
+    char *file_path; /* The user defined filename */
+
 #ifndef H5_HAVE_WIN32_API
     /* On most systems the combination of device and i-node number uniquely
      * identify a file.  Note that Cygwin, MinGW and other Windows POSIX
@@ -212,7 +217,7 @@ static const H5FD_class_t H5FD_ioc_g = {
 /* Declare a free list to manage the H5FD_ioc_t struct */
 H5FL_DEFINE_STATIC(H5FD_ioc_t);
 
-/* Declare a free list to manage the H5FD_ioc_fapl_t struct */
+/* Declare a free list to manage the H5FD_ioc_config_t struct */
 H5FL_DEFINE_STATIC(H5FD_ioc_config_t);
 
 /*-------------------------------------------------------------------------
@@ -687,7 +692,6 @@ H5FD__ioc_fapl_copy(const void *_old_fa)
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to allocate log file FAPL");
 
     HDmemcpy(new_fa_ptr, old_fa_ptr, sizeof(H5FD_ioc_config_t));
-    HDstrncpy(new_fa_ptr->file_path, old_fa_ptr->file_path, H5FD_IOC_PATH_MAX);
 
     /* Copy the FAPL */
     if (H5FD__copy_plist(old_fa_ptr->ioc_fapl_id, &(new_fa_ptr->ioc_fapl_id)) < 0)
@@ -770,7 +774,7 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to allocate file struct");
     file_ptr->comm           = MPI_COMM_NULL;
     file_ptr->info           = MPI_INFO_NULL;
-    file_ptr->fa.context_id  = -1;
+    file_ptr->context_id     = -1;
     file_ptr->fa.ioc_fapl_id = H5I_INVALID_HID;
 
     /* Get the driver-specific file access properties */
@@ -816,15 +820,28 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     /* Fill in the file config values */
     HDmemcpy(&file_ptr->fa, config_ptr, sizeof(H5FD_ioc_config_t));
 
-    /*
-     * Extend the config info with file_path and file_dir
-     * TODO: revise how this is handled
-     */
-    if (HDrealpath(name, file_ptr->fa.file_path) != NULL) {
-        char *path      = HDstrdup(file_ptr->fa.file_path);
+    if (NULL != (file_ptr->file_path = HDrealpath(name, NULL))) {
+        char *path      = NULL;
         char *directory = dirname(path);
-        HDstrcpy(file_ptr->fa.file_dir, directory);
+
+        if (NULL == (path = HDstrdup(file_ptr->file_path)))
+            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTCOPY, NULL, "can't copy subfiling subfile path");
+        if (NULL == (file_ptr->file_dir = HDstrdup(directory))) {
+            HDfree(path);
+            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTCOPY, NULL, "can't copy subfiling subfile directory path");
+        }
+
         HDfree(path);
+    }
+    else {
+        if (ENOENT == errno) {
+            if (NULL == (file_ptr->file_path = HDstrdup(name)))
+                H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTCOPY, NULL, "can't copy file name");
+            if (NULL == (file_ptr->file_dir = HDstrdup(".")))
+                H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, NULL, "can't set subfile directory path");
+        }
+        else
+            H5_SUBFILING_SYS_GOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't resolve subfile path");
     }
 
     /* Copy the ioc FAPL. */
@@ -861,7 +878,7 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         if (H5F_ACC_EXCL & flags)
             ioc_flags |= O_EXCL;
 
-        file_ptr->ioc_file = H5FD_open(file_ptr->fa.file_path, flags, config_ptr->ioc_fapl_id, HADDR_UNDEF);
+        file_ptr->ioc_file = H5FD_open(file_ptr->file_path, flags, config_ptr->ioc_fapl_id, HADDR_UNDEF);
         if (file_ptr->ioc_file) {
             h5_stat_t sb;
             void *    file_handle = NULL;
@@ -902,13 +919,13 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
          * context ID will be returned, which is used for
          * further interactions with this file's subfiles.
          */
-        if (H5_open_subfiles(file_ptr->fa.file_path, inode_id, file_ptr->fa.ioc_selection, ioc_flags,
-                             file_ptr->comm, &file_ptr->fa.context_id) < 0)
+        if (H5_open_subfiles(file_ptr->file_path, inode_id, file_ptr->fa.ioc_selection, ioc_flags,
+                             file_ptr->comm, &file_ptr->context_id) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open subfiles for file '%s'",
                                     name);
 
         /* Initialize I/O concentrator threads if this MPI rank is an I/O concentrator */
-        sf_context = H5_get_subfiling_object(file_ptr->fa.context_id);
+        sf_context = H5_get_subfiling_object(file_ptr->context_id);
         if (sf_context && sf_context->topology->rank_is_ioc) {
             if (initialize_ioc_threads(sf_context) < 0)
                 H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL,
@@ -979,8 +996,8 @@ H5FD__ioc_close_int(H5FD_ioc_t *file_ptr)
         file_ptr->ioc_file = NULL;
     }
 
-    if (file_ptr->fa.context_id >= 0) {
-        subfiling_context_t *sf_context = H5_get_subfiling_object(file_ptr->fa.context_id);
+    if (file_ptr->context_id >= 0) {
+        subfiling_context_t *sf_context = H5_get_subfiling_object(file_ptr->context_id);
 
         if (sf_context && sf_context->topology->rank_is_ioc) {
             if (finalize_ioc_threads(sf_context) < 0)
@@ -988,9 +1005,9 @@ H5FD__ioc_close_int(H5FD_ioc_t *file_ptr)
                 H5_SUBFILING_DONE_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to finalize IOC threads");
         }
 
-        if (H5_close_subfiles(file_ptr->fa.context_id) < 0)
+        if (H5_close_subfiles(file_ptr->context_id) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to close subfiling file(s)");
-        file_ptr->fa.context_id = -1;
+        file_ptr->context_id = -1;
     }
 
     if (H5_mpi_comm_free(&file_ptr->comm) < 0)
@@ -999,6 +1016,12 @@ H5FD__ioc_close_int(H5FD_ioc_t *file_ptr)
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI Info object");
 
 done:
+    HDfree(file_ptr->file_path);
+    file_ptr->file_path = NULL;
+
+    HDfree(file_ptr->file_dir);
+    file_ptr->file_dir = NULL;
+
     /* Release the file info */
     file_ptr = H5FL_FREE(H5FD_ioc_t, file_ptr);
 
@@ -1262,7 +1285,7 @@ H5FD__ioc_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
     HDassert(file);
     HDassert(file->ioc_file);
 
-    sf_context = H5_get_subfiling_object(file->fa.context_id);
+    sf_context = H5_get_subfiling_object(file->context_id);
     if (sf_context) {
         ret_value = sf_context->sf_eof;
         goto done;
@@ -1600,7 +1623,7 @@ H5FD__ioc_write_vector_internal(H5FD_t *_file, uint32_t count, haddr_t addrs[], 
     if (count == 0)
         H5_SUBFILING_GOTO_DONE(SUCCEED);
 
-    sf_context_id = file_ptr->fa.context_id;
+    sf_context_id = file_ptr->context_id;
 
     if (NULL == (sf_context = H5_get_subfiling_object(sf_context_id)))
         H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "can't get subfiling context from ID");
@@ -1691,7 +1714,7 @@ H5FD__ioc_read_vector_internal(H5FD_t *_file, uint32_t count, haddr_t addrs[], s
     if (count == 0)
         H5_SUBFILING_GOTO_DONE(SUCCEED);
 
-    sf_context_id = file_ptr->fa.context_id;
+    sf_context_id = file_ptr->context_id;
 
     if (NULL == (sf_context = H5_get_subfiling_object(sf_context_id)))
         H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "can't get subfiling context from ID");

@@ -35,10 +35,6 @@
 #define H5FD_IOC_FAPL_MAGIC        0xFED21331
 #endif
 
-/* Maximum length of a filename/path string in the Write-Only channel,
- * including the NULL-terminator.
- */
-#define H5FD_IOC_PATH_MAX         4096
 #define H5FD_IOC_THREAD_POOL_SIZE 4
 
 /*
@@ -72,15 +68,12 @@ typedef enum {
  */
 
 typedef struct H5FD_ioc_config_t {
-    uint32_t        magic;                            /* set to H5FD_IOC_FAPL_MAGIC */
-    uint32_t        version;                          /* set to H5FD_CURR_IOC_FAPL_VERSION */
-    int32_t         stripe_count;                     /* How many io concentrators */
-    int64_t         stripe_depth;                     /* Max # of bytes in contiguous IO to an IOC */
-    ioc_selection_t ioc_selection;                    /* Method to select IO Concentrators */
-    hid_t           ioc_fapl_id;                      /* The hid_t value of the stacked VFD  */
-    int64_t         context_id;                       /* The value used to lookup an IOC context */
-    char            file_dir[H5FD_IOC_PATH_MAX + 1];  /* Directory where we find files */
-    char            file_path[H5FD_IOC_PATH_MAX + 1]; /* The user defined filename */
+    uint32_t        magic;         /* set to H5FD_IOC_FAPL_MAGIC */
+    uint32_t        version;       /* set to H5FD_CURR_IOC_FAPL_VERSION */
+    int32_t         stripe_count;  /* How many io concentrators */
+    int64_t         stripe_depth;  /* Max # of bytes in contiguous IO to an IOC */
+    ioc_selection_t ioc_selection; /* Method to select IO Concentrators */
+    hid_t           ioc_fapl_id;   /* The hid_t value of the stacked VFD  */
     int32_t         thread_pool_count;
 } H5FD_ioc_config_t;
 

@@ -31,8 +31,6 @@
 #define H5FD_SUBFILING_FAPL_MAGIC        0xFED01331
 #endif
 
-#define H5FD_SUBFILING_PATH_MAX 4096
-
 /****************************************************************************
  *
  * Structure: H5FD_subfiling_config_t
@@ -103,19 +101,6 @@
  *     these may actually be node-local and thus not directly
  *     accessible to remote ranks.
  *
- ***   Subfiling file Info
- *
- * `subfile_dir`  char[]
- *
- *     A file directory name where subfiling files should be
- *     placed. Under normal circumstances, this directory name
- *     should match the directory path of the user defined HDF5
- *     file.
- *
- * `subfile_path` char[]
- *
- *     The full pathname of the user HDF5 file.
- *
  ****************************************************************************/
 
 /*
@@ -142,9 +127,6 @@ typedef struct H5FD_subfiling_config_t {
     int64_t         stripe_depth;                       /* Max # of bytes in contiguous IO to an IOC */
     ioc_selection_t ioc_selection;                      /* Method to select IO Concentrators */
     hid_t           ioc_fapl_id;                        /* The hid_t value of the stacked VFD  */
-    int64_t         context_id;                         /* The value used to lookup an IOC context */
-    char            file_dir[H5FD_SUBFILING_PATH_MAX];  /* Directory where we find files */
-    char            file_path[H5FD_SUBFILING_PATH_MAX]; /* The user defined filename */
     hbool_t         require_ioc;
 } H5FD_subfiling_config_t;
 //! <!-- [H5FD_subfiling_config_t_snip] -->

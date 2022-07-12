@@ -103,6 +103,11 @@ typedef struct H5FD_subfiling_t {
 
     H5FD_t *sf_file;
 
+    int64_t context_id; /* The value used to lookup a subfiling context for the file */
+
+    char *file_dir;  /* Directory where we find files */
+    char *file_path; /* The user defined filename */
+
 #ifndef H5_HAVE_WIN32_API
     /* On most systems the combination of device and i-node number uniquely
      * identify a file.  Note that Cygwin, MinGW and other Windows POSIX
@@ -564,11 +569,7 @@ H5FD__subfiling_get_default_config(hid_t fapl_id, H5FD_subfiling_config_t *confi
     config_out->stripe_count  = 0;
     config_out->stripe_depth  = H5FD_DEFAULT_STRIPE_DEPTH;
     config_out->ioc_selection = SELECT_IOC_ONE_PER_NODE;
-    config_out->context_id    = -1;
-
-    HDsnprintf(config_out->file_dir, H5FD_SUBFILING_PATH_MAX, ".");
-
-    config_out->require_ioc = TRUE;
+    config_out->require_ioc   = TRUE;
 
     if ((h5_require_ioc = HDgetenv("H5_REQUIRE_IOC")) != NULL) {
         int value_check = HDatoi(h5_require_ioc);
@@ -717,7 +718,7 @@ H5FD__copy_plist(hid_t fapl_id, hid_t *id_out_ptr)
     int             ret_value = 0;
     H5P_genplist_t *plist_ptr = NULL;
 
-    H5FD_SUBFILING_LOG_CALL(FUNC);
+    H5FD_SUBFILING_LOG_CALL(__func__);
 
     HDassert(id_out_ptr != NULL);
 
@@ -806,6 +807,7 @@ H5FD__subfiling_fapl_free(void *_fa)
 
     if (fa->ioc_fapl_id >= 0 && H5I_dec_ref(fa->ioc_fapl_id) < 0)
         H5_SUBFILING_DONE_ERROR(H5E_PLIST, H5E_CANTDEC, FAIL, "can't close IOC FAPL");
+    fa->ioc_fapl_id = H5I_INVALID_HID;
 
     H5MM_xfree(fa);
 
@@ -853,7 +855,7 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to allocate file struct");
     file_ptr->comm           = MPI_COMM_NULL;
     file_ptr->info           = MPI_INFO_NULL;
-    file_ptr->fa.context_id  = -1;
+    file_ptr->context_id     = -1;
     file_ptr->fa.ioc_fapl_id = H5I_INVALID_HID;
     file_ptr->ext_comm       = MPI_COMM_NULL;
 
@@ -892,15 +894,28 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
 
     HDmemcpy(&file_ptr->fa, config_ptr, sizeof(H5FD_subfiling_config_t));
 
-    /*
-     * Extend the config info with file_path and file_dir
-     * TODO: revise how this is handled
-     */
-    if (HDrealpath(name, file_ptr->fa.file_path) != NULL) {
-        char *path      = HDstrdup(file_ptr->fa.file_path);
+    if (NULL != (file_ptr->file_path = HDrealpath(name, NULL))) {
+        char *path      = NULL;
         char *directory = dirname(path);
-        HDstrcpy(file_ptr->fa.file_dir, directory);
+
+        if (NULL == (path = HDstrdup(file_ptr->file_path)))
+            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTCOPY, NULL, "can't copy subfiling subfile path");
+        if (NULL == (file_ptr->file_dir = HDstrdup(directory))) {
+            HDfree(path);
+            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTCOPY, NULL, "can't copy subfiling subfile directory path");
+        }
+
         HDfree(path);
+    }
+    else {
+        if (ENOENT == errno) {
+            if (NULL == (file_ptr->file_path = HDstrdup(name)))
+                H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTCOPY, NULL, "can't copy file name");
+            if (NULL == (file_ptr->file_dir = HDstrdup(".")))
+                H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, NULL, "can't set subfile directory path");
+        }
+        else
+            H5_SUBFILING_SYS_GOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't resolve subfile path");
     }
 
     if (H5FD__copy_plist(config_ptr->ioc_fapl_id, &(file_ptr->fa.ioc_fapl_id)) < 0)
@@ -939,7 +954,7 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
         fid = (uint64_t)sb.st_ino;
 
         /* Get a copy of the context ID for later use */
-        file_ptr->fa.context_id  = H5_subfile_fid_to_context(fid);
+        file_ptr->context_id     = H5_subfile_fid_to_context(fid);
         file_ptr->fa.require_ioc = true;
     }
     else if (driver->value == H5_VFD_SEC2) {
@@ -992,14 +1007,14 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
          * context ID will be returned, which is used for
          * further interactions with this file's subfiles.
          */
-        if (H5_open_subfiles(file_ptr->fa.file_path, inode_id, file_ptr->fa.ioc_selection, ioc_flags,
-                             file_ptr->comm, &file_ptr->fa.context_id) < 0)
+        if (H5_open_subfiles(file_ptr->file_path, inode_id, file_ptr->fa.ioc_selection, ioc_flags,
+                             file_ptr->comm, &file_ptr->context_id) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open subfiling files = %s\n",
                                     name);
     }
 
     if (file_ptr->mpi_rank == 0) {
-        if (H5FD__subfiling__get_real_eof(file_ptr->fa.context_id, &sf_eof) < 0)
+        if (H5FD__subfiling__get_real_eof(file_ptr->context_id, &sf_eof) < 0)
             sf_eof = -1;
     }
 
@@ -1053,7 +1068,7 @@ H5FD__subfiling_close_int(H5FD_subfiling_t *file_ptr)
 
 #if H5FD_SUBFILING_DEBUG_OP_CALLS
     {
-        subfiling_context_t *sf_context = H5_get_subfiling_object(file_ptr->fa.context_id);
+        subfiling_context_t *sf_context = H5_get_subfiling_object(file_ptr->context_id);
 
         HDassert(sf_context);
         HDassert(sf_context->topology);
@@ -1070,7 +1085,7 @@ H5FD__subfiling_close_int(H5FD_subfiling_t *file_ptr)
         H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close subfile");
 
     if (!file_ptr->fa.require_ioc) {
-        if (file_ptr->fa.context_id >= 0 && H5_free_subfiling_object(file_ptr->fa.context_id) < 0)
+        if (file_ptr->context_id >= 0 && H5_free_subfiling_object(file_ptr->context_id) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free subfiling context object");
     }
 
@@ -1088,6 +1103,12 @@ H5FD__subfiling_close_int(H5FD_subfiling_t *file_ptr)
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free MPI communicator");
 
 done:
+    HDfree(file_ptr->file_path);
+    file_ptr->file_path = NULL;
+
+    HDfree(file_ptr->file_dir);
+    file_ptr->file_dir = NULL;
+
     /* Release the file info */
     file_ptr = H5FL_FREE(H5FD_subfiling_t, file_ptr);
 
@@ -1422,7 +1443,7 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr
      * to size the vectors that will be used to invoke the
      * underlying I/O operations.
      */
-    sf_context = (subfiling_context_t *)H5_get_subfiling_object(file_ptr->fa.context_id);
+    sf_context = (subfiling_context_t *)H5_get_subfiling_object(file_ptr->context_id);
     HDassert(sf_context);
     HDassert(sf_context->topology);
 
@@ -1665,7 +1686,7 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t add
      * to size the vectors that will be used to invoke the
      * underlying I/O operations.
      */
-    sf_context = (subfiling_context_t *)H5_get_subfiling_object(file_ptr->fa.context_id);
+    sf_context = (subfiling_context_t *)H5_get_subfiling_object(file_ptr->context_id);
     HDassert(sf_context);
     HDassert(sf_context->topology);
 
@@ -2181,7 +2202,7 @@ H5FD__subfiling_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5
                 H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code);
 
         if (0 == file->mpi_rank) {
-            if (H5FD__subfiling__get_real_eof(file->fa.context_id, &sf_eof) < 0)
+            if (H5FD__subfiling__get_real_eof(file->context_id, &sf_eof) < 0)
                 H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get EOF");
         }
 
@@ -2199,7 +2220,7 @@ H5FD__subfiling_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5
          * thus the following hack.
          *                                                 JRM -- 12/18/21
          */
-        if (H5FD__subfiling__truncate_sub_files(file->fa.context_id, eoa, file->comm) < 0)
+        if (H5FD__subfiling__truncate_sub_files(file->context_id, eoa, file->comm) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTUPDATE, FAIL, "sub-file truncate request failed");
 
         /* Reset last file I/O information */
@@ -2229,7 +2250,7 @@ H5FD__subfiling_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5
      * thus the following hack.
      *                                                 JRM -- 12/18/21
      */
-    if (H5FD__subfiling__truncate_sub_files(file->fa.context_id, file->eof, file->comm) < 0)
+    if (H5FD__subfiling__truncate_sub_files(file->context_id, file->eof, file->comm) < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTUPDATE, FAIL, "sub-file truncate request failed");
 #endif
 

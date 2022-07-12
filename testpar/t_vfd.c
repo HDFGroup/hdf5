@@ -318,7 +318,7 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
 
     if (pass) {
 
-        if (strcmp(vfd_name, "mpio") == 0) {
+        if (HDstrcmp(vfd_name, "mpio") == 0) {
 
             if (H5Pset_fapl_mpio(fapl_id, comm, info) < 0) {
 
@@ -327,19 +327,17 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
             }
         }
 #ifdef H5_HAVE_SUBFILING_VFD
-        else if (strcmp(vfd_name, H5FD_SUBFILING_NAME) == 0) {
+        else if (HDstrcmp(vfd_name, H5FD_SUBFILING_NAME) == 0) {
 
             hid_t                   ioc_fapl;
-            H5FD_ioc_config_t       ioc_config     = {/* magic         = */ H5FD_IOC_FAPL_MAGIC,
-                                            /* version       = */ H5FD_CURR_IOC_FAPL_VERSION,
-                                            /* stripe_count  = */ 0, /* will over write */
-                                            /* stripe_depth  = */ (INTS_PER_RANK / 2),
-                                            /* ioc_selection = */ SELECT_IOC_ONE_PER_NODE,
-                                            /* ioc_fapl_id   = */ H5P_DEFAULT, /* will over write? */
-                                            /* context_id    = */ 0,           /* will overwrite */
-                                            /* file_dir      = */ "",          /* will overwrite */
-                                            /* file_path     = */ "",          /* will overwrite */
-                                            /* thread_pool_count = */ H5FD_IOC_THREAD_POOL_SIZE};
+            H5FD_ioc_config_t       ioc_config     = {
+                /* magic         = */     H5FD_IOC_FAPL_MAGIC,
+                /* version       = */     H5FD_CURR_IOC_FAPL_VERSION,
+                /* stripe_count  = */     0, /* will over write */
+                /* stripe_depth  = */     (INTS_PER_RANK / 2),
+                /* ioc_selection = */     SELECT_IOC_ONE_PER_NODE,
+                /* ioc_fapl_id   = */     H5P_DEFAULT, /* will over write? */
+                /* thread_pool_count = */ H5FD_IOC_THREAD_POOL_SIZE};
             H5FD_subfiling_config_t subfiling_conf = {
                 /* magic         = */ H5FD_IOC_FAPL_MAGIC,
                 /* version       = */ H5FD_CURR_IOC_FAPL_VERSION,
@@ -347,9 +345,6 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
                 /* stripe_depth  = */ (INTS_PER_RANK / 2),
                 /* ioc_selection = */ SELECT_IOC_ONE_PER_NODE,
                 /* ioc_fapl_id   = */ H5P_DEFAULT, /* will over write? */
-                /* context_id    = */ 0,           /* will overwrite */
-                /* file_dir      = */ "",          /* will overwrite */
-                /* file_path     = */ "",          /* will overwrite */
                 /* require_ioc   = */ TRUE};
 
             if ((pass) && ((ioc_fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)) {
@@ -372,8 +367,8 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
                 failure_mssg = "Can't set MPI communicator and info in subfiling fapl.";
             }
 
-            memset(&ioc_config, 0, sizeof(ioc_config));
-            memset(&subfiling_conf, 0, sizeof(subfiling_conf));
+            HDmemset(&ioc_config, 0, sizeof(ioc_config));
+            HDmemset(&subfiling_conf, 0, sizeof(subfiling_conf));
 
             /* Get subfiling VFD defaults */
             if ((pass) && (H5Pget_fapl_subfiling(fapl_id, &subfiling_conf) == FAIL)) {
@@ -409,13 +404,6 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
 
             /* Assign the IOC fapl as the underlying VPD */
             subfiling_conf.ioc_fapl_id = ioc_fapl;
-
-            if (pass) { /* setup the paths in the subfiling fapl. */
-
-                HDassert(HDstrlen(filename) < sizeof(subfiling_conf.file_dir));
-                HDstrcpy(subfiling_conf.file_dir, dirname(filename));
-                HDstrcpy(subfiling_conf.file_path, basename(filename));
-            }
 
             /* Now we can set the SUBFILING fapl before returning. */
             if ((pass) && (H5Pset_fapl_subfiling(fapl_id, &subfiling_conf) == FAIL)) {
@@ -516,7 +504,7 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
 
     if (pass) { /* setup pointers with return values */
 
-        strncpy(file_name, filename, 512);
+        HDstrncpy(file_name, filename, 512);
         *lf_ptr      = lf;
         *fapl_id_ptr = fapl_id;
         *dxpl_id_ptr = dxpl_id;
@@ -704,20 +692,20 @@ vector_read_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
         if (xfer_mode == H5FD_MPIO_INDEPENDENT) {
 
-            snprintf(test_title, sizeof(test_title), "parallel vector read test 1 -- %s / independent",
-                     vfd_name);
+            HDsnprintf(test_title, sizeof(test_title), "parallel vector read test 1 -- %s / independent",
+                       vfd_name);
         }
         else if (coll_opt_mode == H5FD_MPIO_INDIVIDUAL_IO) {
 
-            snprintf(test_title, sizeof(test_title), "parallel vector read test 1 -- %s / col op / ind I/O",
-                     vfd_name);
+            HDsnprintf(test_title, sizeof(test_title), "parallel vector read test 1 -- %s / col op / ind I/O",
+                       vfd_name);
         }
         else {
 
             HDassert(coll_opt_mode == H5FD_MPIO_COLLECTIVE_IO);
 
-            snprintf(test_title, sizeof(test_title), "parallel vector read test 1 -- %s / col op / col I/O",
-                     vfd_name);
+            HDsnprintf(test_title, sizeof(test_title), "parallel vector read test 1 -- %s / col op / col I/O",
+                       vfd_name);
         }
 
         TESTING(test_title);
@@ -949,20 +937,20 @@ vector_read_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
         if (xfer_mode == H5FD_MPIO_INDEPENDENT) {
 
-            snprintf(test_title, sizeof(test_title), "parallel vector read test 2 -- %s / independent",
-                     vfd_name);
+            HDsnprintf(test_title, sizeof(test_title), "parallel vector read test 2 -- %s / independent",
+                       vfd_name);
         }
         else if (coll_opt_mode == H5FD_MPIO_INDIVIDUAL_IO) {
 
-            snprintf(test_title, sizeof(test_title), "parallel vector read test 2 -- %s / col op / ind I/O",
-                     vfd_name);
+            HDsnprintf(test_title, sizeof(test_title), "parallel vector read test 2 -- %s / col op / ind I/O",
+                       vfd_name);
         }
         else {
 
             HDassert(coll_opt_mode == H5FD_MPIO_COLLECTIVE_IO);
 
-            snprintf(test_title, sizeof(test_title), "parallel vector read test 2 -- %s / col op / col I/O",
-                     vfd_name);
+            HDsnprintf(test_title, sizeof(test_title), "parallel vector read test 2 -- %s / col op / col I/O",
+                       vfd_name);
         }
 
         TESTING(test_title);
@@ -1269,20 +1257,20 @@ vector_read_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
         if (xfer_mode == H5FD_MPIO_INDEPENDENT) {
 
-            snprintf(test_title, sizeof(test_title), "parallel vector read test 3 -- %s / independent",
-                     vfd_name);
+            HDsnprintf(test_title, sizeof(test_title), "parallel vector read test 3 -- %s / independent",
+                       vfd_name);
         }
         else if (coll_opt_mode == H5FD_MPIO_INDIVIDUAL_IO) {
 
-            snprintf(test_title, sizeof(test_title), "parallel vector read test 3 -- %s / col op / ind I/O",
-                     vfd_name);
+            HDsnprintf(test_title, sizeof(test_title), "parallel vector read test 3 -- %s / col op / ind I/O",
+                       vfd_name);
         }
         else {
 
             HDassert(coll_opt_mode == H5FD_MPIO_COLLECTIVE_IO);
 
-            snprintf(test_title, sizeof(test_title), "parallel vector read test 3 -- %s / col op / col I/O",
-                     vfd_name);
+            HDsnprintf(test_title, sizeof(test_title), "parallel vector read test 3 -- %s / col op / col I/O",
+                       vfd_name);
         }
 
         TESTING(test_title);
@@ -1637,20 +1625,20 @@ vector_read_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
         if (xfer_mode == H5FD_MPIO_INDEPENDENT) {
 
-            snprintf(test_title, sizeof(test_title), "parallel vector read test 4 -- %s / independent",
-                     vfd_name);
+            HDsnprintf(test_title, sizeof(test_title), "parallel vector read test 4 -- %s / independent",
+                       vfd_name);
         }
         else if (coll_opt_mode == H5FD_MPIO_INDIVIDUAL_IO) {
 
-            snprintf(test_title, sizeof(test_title), "parallel vector read test 4 -- %s / col op / ind I/O",
-                     vfd_name);
+            HDsnprintf(test_title, sizeof(test_title), "parallel vector read test 4 -- %s / col op / ind I/O",
+                       vfd_name);
         }
         else {
 
             HDassert(coll_opt_mode == H5FD_MPIO_COLLECTIVE_IO);
 
-            snprintf(test_title, sizeof(test_title), "parallel vector read test 4 -- %s / col op / col I/O",
-                     vfd_name);
+            HDsnprintf(test_title, sizeof(test_title), "parallel vector read test 4 -- %s / col op / col I/O",
+                       vfd_name);
         }
 
         TESTING(test_title);
@@ -2079,20 +2067,20 @@ vector_read_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
 
         if (xfer_mode == H5FD_MPIO_INDEPENDENT) {
 
-            snprintf(test_title, sizeof(test_title), "parallel vector read test 5 -- %s / independent",
-                     vfd_name);
+            HDsnprintf(test_title, sizeof(test_title), "parallel vector read test 5 -- %s / independent",
+                       vfd_name);
         }
         else if (coll_opt_mode == H5FD_MPIO_INDIVIDUAL_IO) {
 
-            snprintf(test_title, sizeof(test_title), "parallel vector read test 5 -- %s / col op / ind I/O",
-                     vfd_name);
+            HDsnprintf(test_title, sizeof(test_title), "parallel vector read test 5 -- %s / col op / ind I/O",
+                       vfd_name);
         }
         else {
 
             HDassert(coll_opt_mode == H5FD_MPIO_COLLECTIVE_IO);
 
-            snprintf(test_title, sizeof(test_title), "parallel vector read test 5 -- %s / col op / col I/O",
-                     vfd_name);
+            HDsnprintf(test_title, sizeof(test_title), "parallel vector read test 5 -- %s / col op / col I/O",
+                       vfd_name);
         }
 
         TESTING(test_title);
@@ -2330,20 +2318,20 @@ vector_write_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
         if (xfer_mode == H5FD_MPIO_INDEPENDENT) {
 
-            snprintf(test_title, sizeof(test_title), "parallel vector write test 1 -- %s / independent",
-                     vfd_name);
+            HDsnprintf(test_title, sizeof(test_title), "parallel vector write test 1 -- %s / independent",
+                       vfd_name);
         }
         else if (coll_opt_mode == H5FD_MPIO_INDIVIDUAL_IO) {
 
-            snprintf(test_title, sizeof(test_title), "parallel vector write test 1 -- %s / col op / ind I/O",
-                     vfd_name);
+            HDsnprintf(test_title, sizeof(test_title), "parallel vector write test 1 -- %s / col op / ind I/O",
+                       vfd_name);
         }
         else {
 
             HDassert(coll_opt_mode == H5FD_MPIO_COLLECTIVE_IO);
 
-            snprintf(test_title, sizeof(test_title), "parallel vector write test 1 -- %s / col op / col I/O",
-                     vfd_name);
+            HDsnprintf(test_title, sizeof(test_title), "parallel vector write test 1 -- %s / col op / col I/O",
+                       vfd_name);
         }
 
         TESTING(test_title);
@@ -2528,20 +2516,20 @@ vector_write_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
         if (xfer_mode == H5FD_MPIO_INDEPENDENT) {
 
-            snprintf(test_title, sizeof(test_title), "parallel vector write test 2 -- %s / independent",
-                     vfd_name);
+            HDsnprintf(test_title, sizeof(test_title), "parallel vector write test 2 -- %s / independent",
+                       vfd_name);
         }
         else if (coll_opt_mode == H5FD_MPIO_INDIVIDUAL_IO) {
 
-            snprintf(test_title, sizeof(test_title), "parallel vector write test 2 -- %s / col op / ind I/O",
-                     vfd_name);
+            HDsnprintf(test_title, sizeof(test_title), "parallel vector write test 2 -- %s / col op / ind I/O",
+                       vfd_name);
         }
         else {
 
             HDassert(coll_opt_mode == H5FD_MPIO_COLLECTIVE_IO);
 
-            snprintf(test_title, sizeof(test_title), "parallel vector write test 2 -- %s / col op / col I/O",
-                     vfd_name);
+            HDsnprintf(test_title, sizeof(test_title), "parallel vector write test 2 -- %s / col op / col I/O",
+                       vfd_name);
         }
 
         TESTING(test_title);
@@ -2792,20 +2780,20 @@ vector_write_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
         if (xfer_mode == H5FD_MPIO_INDEPENDENT) {
 
-            snprintf(test_title, sizeof(test_title), "parallel vector write test 3 -- %s / independent",
-                     vfd_name);
+            HDsnprintf(test_title, sizeof(test_title), "parallel vector write test 3 -- %s / independent",
+                       vfd_name);
         }
         else if (coll_opt_mode == H5FD_MPIO_INDIVIDUAL_IO) {
 
-            snprintf(test_title, sizeof(test_title), "parallel vector write test 3 -- %s / col op / ind I/O",
-                     vfd_name);
+            HDsnprintf(test_title, sizeof(test_title), "parallel vector write test 3 -- %s / col op / ind I/O",
+                       vfd_name);
         }
         else {
 
             HDassert(coll_opt_mode == H5FD_MPIO_COLLECTIVE_IO);
 
-            snprintf(test_title, sizeof(test_title), "parallel vector write test 3 -- %s / col op / col I/O",
-                     vfd_name);
+            HDsnprintf(test_title, sizeof(test_title), "parallel vector write test 3 -- %s / col op / col I/O",
+                       vfd_name);
         }
 
         TESTING(test_title);
@@ -3063,20 +3051,20 @@ vector_write_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
         if (xfer_mode == H5FD_MPIO_INDEPENDENT) {
 
-            snprintf(test_title, sizeof(test_title), "parallel vector write test 4 -- %s / independent",
-                     vfd_name);
+            HDsnprintf(test_title, sizeof(test_title), "parallel vector write test 4 -- %s / independent",
+                       vfd_name);
         }
         else if (coll_opt_mode == H5FD_MPIO_INDIVIDUAL_IO) {
 
-            snprintf(test_title, sizeof(test_title), "parallel vector write test 4 -- %s / col op / ind I/O",
-                     vfd_name);
+            HDsnprintf(test_title, sizeof(test_title), "parallel vector write test 4 -- %s / col op / ind I/O",
+                       vfd_name);
         }
         else {
 
             HDassert(coll_opt_mode == H5FD_MPIO_COLLECTIVE_IO);
 
-            snprintf(test_title, sizeof(test_title), "parallel vector write test 4 -- %s / col op / col I/O",
-                     vfd_name);
+            HDsnprintf(test_title, sizeof(test_title), "parallel vector write test 4 -- %s / col op / col I/O",
+                       vfd_name);
         }
 
         TESTING(test_title);
@@ -3371,20 +3359,20 @@ vector_write_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
         if (xfer_mode == H5FD_MPIO_INDEPENDENT) {
 
-            snprintf(test_title, sizeof(test_title), "parallel vector write test 5 -- %s / independent",
-                     vfd_name);
+            HDsnprintf(test_title, sizeof(test_title), "parallel vector write test 5 -- %s / independent",
+                       vfd_name);
         }
         else if (coll_opt_mode == H5FD_MPIO_INDIVIDUAL_IO) {
 
-            snprintf(test_title, sizeof(test_title), "parallel vector write test 5 -- %s / col op / ind I/O",
-                     vfd_name);
+            HDsnprintf(test_title, sizeof(test_title), "parallel vector write test 5 -- %s / col op / ind I/O",
+                       vfd_name);
         }
         else {
 
             HDassert(coll_opt_mode == H5FD_MPIO_COLLECTIVE_IO);
 
-            snprintf(test_title, sizeof(test_title), "parallel vector write test 5 -- %s / col op / col I/O",
-                     vfd_name);
+            HDsnprintf(test_title, sizeof(test_title), "parallel vector write test 5 -- %s / col op / col I/O",
+                       vfd_name);
         }
 
         TESTING(test_title);
@@ -3820,20 +3808,20 @@ vector_write_test_6(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
         if (xfer_mode == H5FD_MPIO_INDEPENDENT) {
 
-            snprintf(test_title, sizeof(test_title), "parallel vector write test 6 -- %s / independent",
-                     vfd_name);
+            HDsnprintf(test_title, sizeof(test_title), "parallel vector write test 6 -- %s / independent",
+                       vfd_name);
         }
         else if (coll_opt_mode == H5FD_MPIO_INDIVIDUAL_IO) {
 
-            snprintf(test_title, sizeof(test_title), "parallel vector write test 6 -- %s / col op / ind I/O",
-                     vfd_name);
+            HDsnprintf(test_title, sizeof(test_title), "parallel vector write test 6 -- %s / col op / ind I/O",
+                       vfd_name);
         }
         else {
 
             HDassert(coll_opt_mode == H5FD_MPIO_COLLECTIVE_IO);
 
-            snprintf(test_title, sizeof(test_title), "parallel vector write test 6 -- %s / col op / col I/O",
-                     vfd_name);
+            HDsnprintf(test_title, sizeof(test_title), "parallel vector write test 6 -- %s / col op / col I/O",
+                       vfd_name);
         }
 
         TESTING(test_title);
@@ -4096,17 +4084,17 @@ vector_write_test_7(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
         if (xfer_mode == H5FD_MPIO_INDEPENDENT) {
 
-            sprintf(test_title, "parallel vector write test 7 -- %s / independent", vfd_name);
+            HDsprintf(test_title, "parallel vector write test 7 -- %s / independent", vfd_name);
         }
         else if (coll_opt_mode == H5FD_MPIO_INDIVIDUAL_IO) {
 
-            sprintf(test_title, "parallel vector write test 7 -- %s / col op / ind I/O", vfd_name);
+            HDsprintf(test_title, "parallel vector write test 7 -- %s / col op / ind I/O", vfd_name);
         }
         else {
 
             HDassert(coll_opt_mode == H5FD_MPIO_COLLECTIVE_IO);
 
-            sprintf(test_title, "parallel vector write test 7 -- %s / col op / col I/O", vfd_name);
+            HDsprintf(test_title, "parallel vector write test 7 -- %s / col op / col I/O", vfd_name);
         }
 
         TESTING(test_title);

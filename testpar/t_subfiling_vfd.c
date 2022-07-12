@@ -44,9 +44,7 @@ int nerrors = 0;
 typedef void (*test_func)(void);
 
 /* Utility functions */
-static herr_t build_test_filename(const char *base_filename, const char *test_dirname, hid_t fapl_id,
-                                  H5FD_subfiling_config_t *subfiling_config);
-static hid_t  create_subfiling_ioc_fapl(const char *base_filename);
+static hid_t create_subfiling_ioc_fapl(void);
 
 /* Test functions */
 static void test_create_and_close(void);
@@ -54,55 +52,6 @@ static void test_create_and_close(void);
 static test_func tests[] = {
     test_create_and_close,
 };
-
-static herr_t
-build_test_filename(const char *base_filename, const char *test_dirname, hid_t fapl_id,
-                    H5FD_subfiling_config_t *subfiling_config)
-{
-    char * path      = NULL;
-    char * real_dir  = NULL;
-    char * full_name = NULL;
-    herr_t ret_value = SUCCEED;
-
-    if (!base_filename || *base_filename == '\0')
-        TEST_ERROR;
-
-    if (NULL == (path = HDmalloc(H5FD_SUBFILING_PATH_MAX)))
-        TEST_ERROR;
-    if (NULL == (full_name = HDmalloc(H5FD_SUBFILING_PATH_MAX)))
-        TEST_ERROR;
-
-    errno = 0;
-
-    if (NULL == (real_dir = HDrealpath(test_dirname, NULL))) {
-        HDperror("HDrealpath failed");
-        TEST_ERROR;
-    }
-
-    if (HDsnprintf(path, H5FD_SUBFILING_PATH_MAX, "%s%s%s", real_dir,
-                   (real_dir[HDstrlen(real_dir)] == '/') ? "" : "/", /* add slash if needed */
-                   base_filename) < 0)
-        TEST_ERROR;
-
-    if (!h5_fixname(path, fapl_id, full_name, H5FD_SUBFILING_PATH_MAX))
-        TEST_ERROR;
-
-    HDstrncpy(subfiling_config->file_path, full_name, H5FD_SUBFILING_PATH_MAX);
-    HDstrncpy(subfiling_config->file_dir, dirname(full_name), H5FD_SUBFILING_PATH_MAX);
-
-    HDfree(full_name);
-    HDfree(real_dir);
-    HDfree(path);
-
-    return ret_value;
-
-error:
-    HDfree(full_name);
-    HDfree(real_dir);
-    HDfree(path);
-
-    return FAIL;
-}
 
 /* ---------------------------------------------------------------------------
  * Function:    create_subfiling_ioc_fapl
@@ -116,15 +65,12 @@ error:
  * ---------------------------------------------------------------------------
  */
 static hid_t
-create_subfiling_ioc_fapl(const char *base_filename)
+create_subfiling_ioc_fapl(void)
 {
     H5FD_subfiling_config_t *subfiling_conf = NULL;
     H5FD_ioc_config_t *      ioc_conf       = NULL;
     hid_t                    ioc_fapl       = H5I_INVALID_HID;
     hid_t                    ret_value      = H5I_INVALID_HID;
-
-    if (base_filename == NULL || *base_filename == '\0')
-        TEST_ERROR;
 
     if (NULL == (subfiling_conf = HDcalloc(1, sizeof(*subfiling_conf))))
         TEST_ERROR;
@@ -162,9 +108,6 @@ create_subfiling_ioc_fapl(const char *base_filename)
     }
 
     subfiling_conf->ioc_fapl_id = ioc_fapl;
-
-    if (build_test_filename(base_filename, SUBFILING_TEST_DIR, ret_value, subfiling_conf) < 0)
-        TEST_ERROR;
 
     if (H5Pset_fapl_subfiling(ret_value, subfiling_conf) < 0)
         TEST_ERROR;
@@ -205,17 +148,17 @@ test_create_and_close(void)
     if (MAINPROCESS)
         TESTING("File creation and immediate close");
 
-    fapl_id = create_subfiling_ioc_fapl("basic_create");
+    fapl_id = create_subfiling_ioc_fapl();
     VRFY((fapl_id >= 0), "FAPL creation succeeded");
 
     VRFY((H5Pget_fapl_subfiling(fapl_id, &subfiling_config) >= 0), "H5Pget_fapl_subfiling succeeded");
 
-    file_id = H5Fcreate(subfiling_config.file_path, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+    file_id = H5Fcreate("basic_create.h5", H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
     VRFY((file_id >= 0), "H5Fcreate succeeded");
 
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
-    test_filenames[0] = subfiling_config.file_path;
+    test_filenames[0] = "basic_create.h5";
     test_filenames[1] = NULL;
     h5_clean_files(test_filenames, fapl_id);
 
