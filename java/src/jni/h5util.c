@@ -1181,7 +1181,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
             }
             else if (H5R_OBJ_REF_BUF_SIZE == typeSize) {
                 H5O_info2_t oi;
-                hid_t       obj = H5I_INVALID_HID;
+                hid_t       obj         = H5I_INVALID_HID;
                 char *      obj_tok_str = NULL;
 
                 /*
