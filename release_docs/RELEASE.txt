@@ -74,6 +74,13 @@ New Features
 
     Java Library:
     -------------
+    - Added version of H5Rget_name to return the name string.
+
+      Other functions that get_name process the get_size then get the name
+      within the JNI implementation. Now H5Rget_name has a H5Rget_name_string.
+
+      (ADB - 2022/07/12)
+
     - Added reference support to H5A and H5D read write vlen JNI functions.
 
       Added the implementation to handle VL references as an Array of Lists

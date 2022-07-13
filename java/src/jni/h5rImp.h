@@ -66,6 +66,13 @@ JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Rget_1obj_1type2(JNIEnv *, jclass, 
 JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_H5_H5Rget_1name(JNIEnv *, jclass, jlong, jint, jbyteArray,
                                                          jobjectArray, jlong);
 
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Rget_name_string
+ * Signature: (JI[B)[Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_hdf_hdf5lib_H5_H5Rget_1name_1string(JNIEnv *, jclass, jlong, jint, jbyteArray);
+
 #ifdef __cplusplus
 } /* end extern "C" */
 #endif /* __cplusplus */
