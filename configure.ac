@@ -3206,7 +3206,7 @@ if test "X$SUBFILING_VFD" = "Xyes"; then
     # Set-up mercury
     HAVE_MERCURY="yes"
     mercury_dir="$ac_abs_confdir/src/H5FDsubfiling/mercury"
-    mercury_inc="$mercury_dir/include"
+    mercury_inc="$mercury_dir/src/util"
 
     CPPFLAGS="$CPPFLAGS -I$mercury_inc"
     AM_CPPFLAGS="$AM_CPPFLAGS -I$mercury_inc"
