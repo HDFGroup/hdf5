@@ -215,7 +215,7 @@ H5_HLDLL int H5DSget_num_scales(hid_t did, unsigned int idx);
  *
  *          Fails if:
  *          - Bad arguments
- * 
+ *
  */
 H5_HLDLL herr_t H5DSset_label(hid_t did, unsigned int idx, const char *label);
 
