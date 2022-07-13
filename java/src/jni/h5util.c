@@ -1180,8 +1180,9 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                     CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
             }
             else if (H5R_OBJ_REF_BUF_SIZE == typeSize) {
-                H5O_info1_t oi;
-                hid_t       obj = H5I_INVALID_HID;
+                H5O_info2_t oi;
+                hid_t       obj         = H5I_INVALID_HID;
+                char *      obj_tok_str = NULL;
 
                 /*
                  * Object references -- show the type and OID of the referenced
@@ -1194,33 +1195,40 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                 if ((obj = H5Rdereference2(container, H5P_DEFAULT, H5R_OBJECT, cptr)) < 0)
                     H5_LIBRARY_ERROR(ENVONLY);
 
-                if (H5Oget_info2(obj, &oi, H5O_INFO_ALL) < 0)
+                if (H5Oget_info3(obj, &oi, H5O_INFO_ALL) < 0)
                     H5_LIBRARY_ERROR(ENVONLY);
 
                 /* Print object data and close object */
+                H5Otoken_to_str(obj, &oi.token, &obj_tok_str);
+
                 switch (oi.type) {
                     case H5O_TYPE_GROUP:
-                        if (HDsprintf(this_str, "%s %llu", H5_TOOLS_GROUP, oi.addr) < 0)
+                        if (HDsprintf(this_str, "%s %s", H5_TOOLS_GROUP, obj_tok_str) < 0)
                             H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
                         break;
 
                     case H5O_TYPE_DATASET:
-                        if (HDsprintf(this_str, "%s %llu", H5_TOOLS_DATASET, oi.addr) < 0)
+                        if (HDsprintf(this_str, "%s %s", H5_TOOLS_DATASET, obj_tok_str) < 0)
                             H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
                         break;
 
                     case H5O_TYPE_NAMED_DATATYPE:
-                        if (HDsprintf(this_str, "%s %llu", H5_TOOLS_DATATYPE, oi.addr) < 0)
+                        if (HDsprintf(this_str, "%s %s", H5_TOOLS_DATATYPE, obj_tok_str) < 0)
                             H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
                         break;
 
                     case H5O_TYPE_UNKNOWN:
                     case H5O_TYPE_NTYPES:
                     default:
-                        if (HDsprintf(this_str, "%u-%llu", (unsigned)oi.type, oi.addr) < 0)
+                        if (HDsprintf(this_str, "%u-%s", (unsigned)oi.type, obj_tok_str) < 0)
                             H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
                         break;
-                } /* end switch */
+                }
+
+                if (obj_tok_str) {
+                    H5free_memory(obj_tok_str);
+                    obj_tok_str = NULL;
+                }
 
                 if (H5Oclose(obj) < 0)
                     H5_LIBRARY_ERROR(ENVONLY);
