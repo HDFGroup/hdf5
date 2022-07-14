@@ -11430,7 +11430,7 @@ public class H5 implements java.io.Serializable {
      * @exception IllegalArgumentException
      *            Argument is illegal.
      **/
-    public synchronized static native String[] H5Rget_name_string(long loc_id, int ref_type, byte[] ref)
+    public synchronized static native String H5Rget_name_string(long loc_id, int ref_type, byte[] ref)
         throws HDF5LibraryException, NullPointerException, IllegalArgumentException;
 
     /**
