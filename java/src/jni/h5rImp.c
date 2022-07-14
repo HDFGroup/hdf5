@@ -883,15 +883,16 @@ done:
  * Signature: (JI[B)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL
-Java_hdf_hdf5lib_H5_H5Rget_1name_1string(JNIEnv *env, jclass clss, jlong loc_id, jint ref_type, jbyteArray ref)
+Java_hdf_hdf5lib_H5_H5Rget_1name_1string(JNIEnv *env, jclass clss, jlong loc_id, jint ref_type,
+                                         jbyteArray ref)
 {
     jboolean isCopy;
     jstring  str;
     jsize    refBufLen;
-    jbyte *  refBuf  = NULL;
-    char *   aName   = NULL;
+    jbyte *  refBuf   = NULL;
+    char *   aName    = NULL;
     ssize_t  buf_size = -1;
-    jlong    ret_val = -1;
+    jlong    ret_val  = -1;
 
     UNUSED(clss);
 
@@ -920,8 +921,8 @@ Java_hdf_hdf5lib_H5_H5Rget_1name_1string(JNIEnv *env, jclass clss, jlong loc_id,
     if (NULL == (aName = HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Rget_name: failed to allocate referenced object name buffer");
 
-    if ((ret_val = (jlong)H5Rget_name((hid_t)loc_id, (H5R_type_t)ref_type, refBuf, aName, (size_t)buf_size + 1)) <
-        0)
+    if ((ret_val = (jlong)H5Rget_name((hid_t)loc_id, (H5R_type_t)ref_type, refBuf, aName,
+                                      (size_t)buf_size + 1)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
     aName[(size_t)buf_size] = '\0';
 
