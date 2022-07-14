@@ -305,7 +305,7 @@ done:
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Rget_name_string
- * Signature: (JI[B)[Ljava/lang/String;
+ * Signature: (JI[B)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL
 Java_hdf_hdf5lib_H5_H5Rget_1name_1string(JNIEnv *env, jclass clss, jlong loc_id, jint ref_type, jbyteArray ref)
