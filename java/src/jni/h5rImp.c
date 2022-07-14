@@ -877,6 +877,67 @@ done:
     return ret_val;
 } /* end Java_hdf_hdf5lib_H5_H5Rget_1name */
 
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Rget_name_string
+ * Signature: (JI[B)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL
+Java_hdf_hdf5lib_H5_H5Rget_1name_1string(JNIEnv *env, jclass clss, jlong loc_id, jint ref_type,
+                                         jbyteArray ref)
+{
+    jboolean isCopy;
+    jstring  str;
+    jsize    refBufLen;
+    jbyte *  refBuf   = NULL;
+    char *   aName    = NULL;
+    ssize_t  buf_size = -1;
+    jlong    ret_val  = -1;
+
+    UNUSED(clss);
+
+    if (NULL == ref)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Rget_name: reference buffer is NULL");
+
+    if ((refBufLen = ENVPTR->GetArrayLength(ENVONLY, ref)) < 0) {
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Rget_name: ref array length < 0");
+    }
+
+    if ((H5R_OBJECT == ref_type) && (refBufLen != H5R_OBJ_REF_BUF_SIZE))
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Rget_name: reference input array length != H5R_OBJ_REF_BUF_SIZE");
+    else if ((H5R_DATASET_REGION == ref_type) && (refBufLen != H5R_DSET_REG_REF_BUF_SIZE))
+        H5_BAD_ARGUMENT_ERROR(
+            ENVONLY, "H5Rget_name: region reference input array length != H5R_DSET_REG_REF_BUF_SIZE");
+    else if ((H5R_OBJECT != ref_type) && (H5R_DATASET_REGION != ref_type))
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Rget_name: unknown reference type");
+
+    PIN_BYTE_ARRAY(ENVONLY, ref, refBuf, &isCopy, "H5Rget_name: reference buffer not pinned");
+
+    /* Get the length of the name */
+    if ((buf_size = H5Rget_name((hid_t)loc_id, (H5R_type_t)ref_type, refBuf, NULL, 0)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+    if (NULL == (aName = HDmalloc(sizeof(char) * (size_t)buf_size + 1)))
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Rget_name: failed to allocate referenced object name buffer");
+
+    if ((ret_val = (jlong)H5Rget_name((hid_t)loc_id, (H5R_type_t)ref_type, refBuf, aName,
+                                      (size_t)buf_size + 1)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+    aName[(size_t)buf_size] = '\0';
+
+    if (NULL == (str = ENVPTR->NewStringUTF(ENVONLY, aName)))
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+done:
+    if (aName)
+        HDfree(aName);
+    if (refBuf)
+        UNPIN_BYTE_ARRAY(ENVONLY, ref, refBuf, JNI_ABORT);
+
+    return str;
+} /* end Java_hdf_hdf5lib_H5_H5Rget_1name_1string */
+
 #ifdef __cplusplus
 } /* end extern "C" */
 #endif /* __cplusplus */
