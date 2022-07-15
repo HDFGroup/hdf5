@@ -3703,9 +3703,11 @@ H5D_get_access_plist(const H5D_t *dset)
 {
     H5P_genplist_t *   old_plist;                   /* Stored DAPL from dset */
     H5P_genplist_t *   new_plist;                   /* New DAPL */
-    H5P_genplist_t *   def_fapl;                    /* Default FAPL */
+    H5P_genplist_t *   def_dapl = NULL;             /* Default DAPL */
     H5D_append_flush_t def_append_flush_info = {0}; /* Default append flush property */
     H5D_rdcc_t         def_chunk_info;              /* Default chunk cache property */
+    H5D_vds_view_t     def_vds_view;                /* Default virtual view property */
+    hsize_t            def_vds_gap;                 /* Default virtual printf gap property */
     hid_t              new_dapl_id = FAIL;
     hid_t              ret_value   = FAIL;
 
@@ -3734,23 +3736,23 @@ H5D_get_access_plist(const H5D_t *dset)
     }
     else {
         /* Get the default FAPL */
-        if (NULL == (def_fapl = (H5P_genplist_t *)H5I_object(H5P_LST_FILE_ACCESS_ID_g)))
+        if (NULL == (def_dapl = (H5P_genplist_t *)H5I_object(H5P_LST_DATASET_ACCESS_ID_g)))
             HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "not a property list")
 
         /* Set the data cache number of slots to the value of the default FAPL */
-        if (H5P_get(def_fapl, H5D_ACS_DATA_CACHE_NUM_SLOTS_NAME, &def_chunk_info.nslots) < 0)
+        if (H5P_get(def_dapl, H5D_ACS_DATA_CACHE_NUM_SLOTS_NAME, &def_chunk_info.nslots) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get data number of slots");
         if (H5P_set(new_plist, H5D_ACS_DATA_CACHE_NUM_SLOTS_NAME, &def_chunk_info.nslots) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set data cache number of slots")
 
         /* Set the data cache byte size to the value of the default FAPL */
-        if (H5P_get(def_fapl, H5D_ACS_DATA_CACHE_BYTE_SIZE_NAME, &def_chunk_info.nbytes_max) < 0)
+        if (H5P_get(def_dapl, H5D_ACS_DATA_CACHE_BYTE_SIZE_NAME, &def_chunk_info.nbytes_max) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get data cache byte size");
         if (H5P_set(new_plist, H5D_ACS_DATA_CACHE_BYTE_SIZE_NAME, &def_chunk_info.nbytes_max) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set data cache byte size")
 
         /* Set the preempt read chunks property to the value of the default FAPL */
-        if (H5P_get(def_fapl, H5D_ACS_PREEMPT_READ_CHUNKS_NAME, &def_chunk_info.w0) < 0)
+        if (H5P_get(def_dapl, H5D_ACS_PREEMPT_READ_CHUNKS_NAME, &def_chunk_info.w0) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get preempt read chunks");
         if (H5P_set(new_plist, H5D_ACS_PREEMPT_READ_CHUNKS_NAME, &def_chunk_info.w0) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set preempt read chunks")
@@ -3760,12 +3762,32 @@ H5D_get_access_plist(const H5D_t *dset)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set append flush property")
     } /* end if-else */
 
-    /* Set the VDS view & printf gap options */
-    if (H5P_set(new_plist, H5D_ACS_VDS_VIEW_NAME, &(dset->shared->layout.storage.u.virt.view)) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set VDS view")
-    if (H5P_set(new_plist, H5D_ACS_VDS_PRINTF_GAP_NAME, &(dset->shared->layout.storage.u.virt.printf_gap)) <
-        0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set VDS printf gap")
+    /* If the dataset is virtual then copy the VDS view & printf gap options.
+     * Otherwise, use the default values. */
+    if (dset->shared->layout.type == H5D_VIRTUAL) {
+        if (H5P_set(new_plist, H5D_ACS_VDS_VIEW_NAME, &(dset->shared->layout.storage.u.virt.view)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set VDS view")
+        if (H5P_set(new_plist, H5D_ACS_VDS_PRINTF_GAP_NAME, &(dset->shared->layout.storage.u.virt.printf_gap)) <
+            0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set VDS printf gap")
+    }
+    else {
+        /* Get the default FAPL if necessary */
+        if (!def_dapl && NULL == (def_dapl = (H5P_genplist_t *)H5I_object(H5P_LST_DATASET_ACCESS_ID_g)))
+            HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "not a property list")
+
+        /* Set the data cache number of slots to the value of the default FAPL */
+        if (H5P_get(def_dapl, H5D_ACS_VDS_VIEW_NAME, &def_vds_view) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get VDS view");
+        if (H5P_set(new_plist, H5D_ACS_VDS_VIEW_NAME, &def_vds_view) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set VDS view")
+
+        /* Set the data cache byte size to the value of the default FAPL */
+        if (H5P_get(def_dapl, H5D_ACS_VDS_PRINTF_GAP_NAME, &def_vds_gap) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get VDS printf gap");
+        if (H5P_set(new_plist, H5D_ACS_VDS_PRINTF_GAP_NAME, &def_vds_gap) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set VDS printf gap")
+    }
 
     /* Set the vds prefix option */
     if (H5P_set(new_plist, H5D_ACS_VDS_PREFIX_NAME, &(dset->shared->vds_prefix)) < 0)

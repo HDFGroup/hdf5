@@ -388,6 +388,10 @@ H5O_refresh_metadata_reopen(hid_t oid, hid_t apl_id, H5G_loc_t *obj_loc, H5VL_t 
             break;
 
         case H5I_DATASET:
+            /* Set dataset access property list in API context if appropriate */
+            if (H5CX_set_apl(&apl_id, H5P_CLS_DACC, oid, TRUE) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
+
             /* Re-open the dataset */
             if (NULL ==
                 (object = H5D_open(obj_loc, apl_id == H5P_DEFAULT ? H5P_DATASET_ACCESS_DEFAULT : apl_id)))
