@@ -3191,29 +3191,31 @@ error:
  *
  */
 static herr_t
-dummy_append_flush_cb(hid_t H5_ATTR_UNUSED dataset_id, hsize_t H5_ATTR_UNUSED *cur_dims, void H5_ATTR_UNUSED *user_data)
+dummy_append_flush_cb(hid_t H5_ATTR_UNUSED dataset_id, hsize_t H5_ATTR_UNUSED *cur_dims,
+                      void H5_ATTR_UNUSED *user_data)
 {
     return SUCCEED;
 }
 
 static herr_t
-tssw_persist_dapl_verify(hid_t did, hid_t vdsid1, hid_t vdsid2, hsize_t boundary, H5D_append_cb_t append_func, void *append_func_ud,
-                         size_t rdcc_nslots, size_t rdcc_nbytes, double_t rdcc_w0, const char *efile_prefix,
-                         const char *virtual_prefix, hsize_t gap_size, H5D_vds_view_t virtual_view)
+tssw_persist_dapl_verify(hid_t did, hid_t vdsid1, hid_t vdsid2, hsize_t boundary, H5D_append_cb_t append_func,
+                         void *append_func_ud, size_t rdcc_nslots, size_t rdcc_nbytes, double_t rdcc_w0,
+                         const char *efile_prefix, const char *virtual_prefix, hsize_t gap_size,
+                         H5D_vds_view_t virtual_view)
 {
-    hid_t             dapl = H5I_INVALID_HID;
-    hid_t             vds_dapl1 = H5I_INVALID_HID;
-    hid_t             vds_dapl2 = H5I_INVALID_HID;
-    hsize_t           boundary_out = 0;
-    H5D_append_cb_t   append_func_out = NULL;
-    void             *append_func_ud_out = NULL;
-    size_t            rdcc_nslots_out = 0;
-    size_t            rdcc_nbytes_out = 0;
-    double_t          rdcc_w0_out = 0.;
-    char              efile_prefix_out[64];
-    char              virtual_prefix_out[64];
-    hsize_t           gap_size_out = 0;
-    H5D_vds_view_t    virtual_view_out = H5D_VDS_LAST_AVAILABLE;
+    hid_t           dapl               = H5I_INVALID_HID;
+    hid_t           vds_dapl1          = H5I_INVALID_HID;
+    hid_t           vds_dapl2          = H5I_INVALID_HID;
+    hsize_t         boundary_out       = 0;
+    H5D_append_cb_t append_func_out    = NULL;
+    void *          append_func_ud_out = NULL;
+    size_t          rdcc_nslots_out    = 0;
+    size_t          rdcc_nbytes_out    = 0;
+    double_t        rdcc_w0_out        = 0.;
+    char            efile_prefix_out[64];
+    char            virtual_prefix_out[64];
+    hsize_t         gap_size_out     = 0;
+    H5D_vds_view_t  virtual_view_out = H5D_VDS_LAST_AVAILABLE;
 
     /* Get dataset access property lists */
     if ((dapl = H5Dget_access_plist(did)) < 0)
@@ -3294,30 +3296,30 @@ error:
 static int
 test_start_swmr_write_persist_dapl(hid_t in_fapl)
 {
-    hid_t             fid       = H5I_INVALID_HID;                  /* File ID */
-    hid_t             fapl      = H5I_INVALID_HID;                  /* File access property */
-    hid_t             dcpl      = H5I_INVALID_HID;                  /* Dataset creation property */
-    hid_t             vds_dcpl  = H5I_INVALID_HID;                  /* Virtual dataset creation property */
-    hid_t             dapl1     = H5I_INVALID_HID;                  /* Dataset access property */
-    hid_t             dapl2     = H5I_INVALID_HID;                  /* Dataset access property */
-    hid_t             did = H5I_INVALID_HID; /* Dataset ID */
-    hid_t             vdsid1 = H5I_INVALID_HID; /* Virtual Dataset ID */
-    hid_t             vdsid2 = H5I_INVALID_HID; /* Virtual Dataset ID */
-    hid_t             sid = H5I_INVALID_HID;                /* Dataspace IDs*/
-    hsize_t           dim[1]        = {1};                            /* Dimension sizes */
-    hsize_t           max_dim[1]    = {H5S_UNLIMITED};                /* Maximum dimension sizes */
-    hsize_t           chunk_dim[1]  = {2};                            /* Chunk dimension sizes */
-    hsize_t boundary = 23;
-    H5D_append_cb_t   append_func = dummy_append_flush_cb;
-    void             *append_func_ud = &boundary;
-    size_t            rdcc_nslots = 125;
-    size_t            rdcc_nbytes = 23434;
-    double_t          rdcc_w0 = 0.68419;
-    const char       *efile_prefix = "dummy_efile_prefix";
-    const char       *virtual_prefix = "dummy_virtual_prefix";
-    hsize_t           gap_size = 421;
-    H5D_vds_view_t    virtual_view = H5D_VDS_FIRST_MISSING;
-    char              filename[NAME_BUF_SIZE];                        /* File name */
+    hid_t           fid            = H5I_INVALID_HID; /* File ID */
+    hid_t           fapl           = H5I_INVALID_HID; /* File access property */
+    hid_t           dcpl           = H5I_INVALID_HID; /* Dataset creation property */
+    hid_t           vds_dcpl       = H5I_INVALID_HID; /* Virtual dataset creation property */
+    hid_t           dapl1          = H5I_INVALID_HID; /* Dataset access property */
+    hid_t           dapl2          = H5I_INVALID_HID; /* Dataset access property */
+    hid_t           did            = H5I_INVALID_HID; /* Dataset ID */
+    hid_t           vdsid1         = H5I_INVALID_HID; /* Virtual Dataset ID */
+    hid_t           vdsid2         = H5I_INVALID_HID; /* Virtual Dataset ID */
+    hid_t           sid            = H5I_INVALID_HID; /* Dataspace IDs*/
+    hsize_t         dim[1]         = {1};             /* Dimension sizes */
+    hsize_t         max_dim[1]     = {H5S_UNLIMITED}; /* Maximum dimension sizes */
+    hsize_t         chunk_dim[1]   = {2};             /* Chunk dimension sizes */
+    hsize_t         boundary       = 23;
+    H5D_append_cb_t append_func    = dummy_append_flush_cb;
+    void *          append_func_ud = &boundary;
+    size_t          rdcc_nslots    = 125;
+    size_t          rdcc_nbytes    = 23434;
+    double_t        rdcc_w0        = 0.68419;
+    const char *    efile_prefix   = "dummy_efile_prefix";
+    const char *    virtual_prefix = "dummy_virtual_prefix";
+    hsize_t         gap_size       = 421;
+    H5D_vds_view_t  virtual_view   = H5D_VDS_FIRST_MISSING;
+    char            filename[NAME_BUF_SIZE]; /* File name */
 
     /* Get a copy of the parameter fapl (non-latest-format) */
     if ((fapl = H5Pcopy(in_fapl)) < 0)
@@ -3333,8 +3335,7 @@ test_start_swmr_write_persist_dapl(hid_t in_fapl)
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
 
     /* Create the file with SWMR write + non-latest-format */
-    if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT,
-                         fapl)) < 0)
+    if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR;
 
     /* Create dapl with custom properties */
@@ -3402,7 +3403,9 @@ test_start_swmr_write_persist_dapl(hid_t in_fapl)
         TEST_ERROR;
 
     /* Verify dataset still has correct access properties */
-    if(tssw_persist_dapl_verify(did, vdsid1, vdsid2, boundary, append_func, append_func_ud, rdcc_nslots, rdcc_nbytes, rdcc_w0 , efile_prefix, virtual_prefix, gap_size, virtual_view) < 0)
+    if (tssw_persist_dapl_verify(did, vdsid1, vdsid2, boundary, append_func, append_func_ud, rdcc_nslots,
+                                 rdcc_nbytes, rdcc_w0, efile_prefix, virtual_prefix, gap_size,
+                                 virtual_view) < 0)
         TEST_ERROR;
 
     /* Close "dataset1" */
@@ -3446,7 +3449,9 @@ test_start_swmr_write_persist_dapl(hid_t in_fapl)
         TEST_ERROR;
 
     /* Verify dataset still has correct access properties */
-    if(tssw_persist_dapl_verify(did, vdsid1, vdsid2, boundary, append_func, append_func_ud, rdcc_nslots, rdcc_nbytes, rdcc_w0 , efile_prefix, virtual_prefix, gap_size, virtual_view) < 0)
+    if (tssw_persist_dapl_verify(did, vdsid1, vdsid2, boundary, append_func, append_func_ud, rdcc_nslots,
+                                 rdcc_nbytes, rdcc_w0, efile_prefix, virtual_prefix, gap_size,
+                                 virtual_view) < 0)
         TEST_ERROR;
 
     /* Close "dataset1" */
@@ -3490,7 +3495,9 @@ test_start_swmr_write_persist_dapl(hid_t in_fapl)
         TEST_ERROR;
 
     /* Verify dataset still has correct access properties */
-    if(tssw_persist_dapl_verify(did, vdsid1, vdsid2, boundary, append_func, append_func_ud, rdcc_nslots, rdcc_nbytes, rdcc_w0 , efile_prefix, virtual_prefix, gap_size, virtual_view) < 0)
+    if (tssw_persist_dapl_verify(did, vdsid1, vdsid2, boundary, append_func, append_func_ud, rdcc_nslots,
+                                 rdcc_nbytes, rdcc_w0, efile_prefix, virtual_prefix, gap_size,
+                                 virtual_view) < 0)
         TEST_ERROR;
 
     /* Close "dataset1" */

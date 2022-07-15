@@ -3701,13 +3701,13 @@ done:
 hid_t
 H5D_get_access_plist(const H5D_t *dset)
 {
-    H5P_genplist_t *   old_plist;                   /* Stored DAPL from dset */
-    H5P_genplist_t *   new_plist;                   /* New DAPL */
-    H5P_genplist_t *   def_dapl = NULL;             /* Default DAPL */
-    H5D_append_flush_t def_append_flush_info = {0}; /* Default append flush property */
-    H5D_rdcc_t         def_chunk_info;              /* Default chunk cache property */
-    H5D_vds_view_t     def_vds_view;                /* Default virtual view property */
-    hsize_t            def_vds_gap;                 /* Default virtual printf gap property */
+    H5P_genplist_t *   old_plist;                    /* Stored DAPL from dset */
+    H5P_genplist_t *   new_plist;                    /* New DAPL */
+    H5P_genplist_t *   def_dapl              = NULL; /* Default DAPL */
+    H5D_append_flush_t def_append_flush_info = {0};  /* Default append flush property */
+    H5D_rdcc_t         def_chunk_info;               /* Default chunk cache property */
+    H5D_vds_view_t     def_vds_view;                 /* Default virtual view property */
+    hsize_t            def_vds_gap;                  /* Default virtual printf gap property */
     hid_t              new_dapl_id = FAIL;
     hid_t              ret_value   = FAIL;
 
@@ -3767,8 +3767,8 @@ H5D_get_access_plist(const H5D_t *dset)
     if (dset->shared->layout.type == H5D_VIRTUAL) {
         if (H5P_set(new_plist, H5D_ACS_VDS_VIEW_NAME, &(dset->shared->layout.storage.u.virt.view)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set VDS view")
-        if (H5P_set(new_plist, H5D_ACS_VDS_PRINTF_GAP_NAME, &(dset->shared->layout.storage.u.virt.printf_gap)) <
-            0)
+        if (H5P_set(new_plist, H5D_ACS_VDS_PRINTF_GAP_NAME,
+                    &(dset->shared->layout.storage.u.virt.printf_gap)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set VDS printf gap")
     }
     else {
