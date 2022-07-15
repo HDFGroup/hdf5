@@ -575,20 +575,20 @@ takedown_vfd_test_file(int mpi_rank, char *filename, H5FD_t **lf_ptr, hid_t *fap
     /* 6) On rank 0, delete the test file.
      */
 
-    if (pass) {
+    /* wait for everyone to close the file */
+    MPI_Barrier(comm);
 
-        /* wait for everyone to close the file */
-        MPI_Barrier(comm);
+    if (pass) {
 
         if ((mpi_rank == 0) && (HDremove(filename) < 0)) {
 
             pass         = FALSE;
             failure_mssg = "HDremove() failed.\n";
         }
-
-        /* wait for the file delete to complete */
-        MPI_Barrier(comm);
     }
+
+    /* wait for the file delete to complete */
+    MPI_Barrier(comm);
 
     if (show_progress)
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
@@ -746,11 +746,7 @@ vector_read_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
     }
 
     /* 3) Barrier */
-
-    if (pass) {
-
-        MPI_Barrier(comm);
-    }
+    MPI_Barrier(comm);
 
     if (show_progress)
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
@@ -814,11 +810,7 @@ vector_read_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 5) Barrier */
-
-    if (pass) {
-
-        MPI_Barrier(comm);
-    }
+    MPI_Barrier(comm);
 
     if (show_progress)
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
@@ -991,11 +983,7 @@ vector_read_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
     }
 
     /* 3) Barrier */
-
-    if (pass) {
-
-        MPI_Barrier(comm);
-    }
+    MPI_Barrier(comm);
 
     if (show_progress)
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
@@ -1046,11 +1034,7 @@ vector_read_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 6) Barrier */
-
-    if (pass) {
-
-        MPI_Barrier(comm);
-    }
+    MPI_Barrier(comm);
 
     if (show_progress)
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
@@ -1124,11 +1108,7 @@ vector_read_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 9) Barrier */
-
-    if (pass) {
-
-        MPI_Barrier(comm);
-    }
+    MPI_Barrier(comm);
 
     if (show_progress)
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
@@ -1311,11 +1291,7 @@ vector_read_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
     }
 
     /* 3) Barrier */
-
-    if (pass) {
-
-        MPI_Barrier(comm);
-    }
+    MPI_Barrier(comm);
 
     if (show_progress)
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
@@ -1467,11 +1443,7 @@ vector_read_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 7) Barrier */
-
-    if (pass) {
-
-        MPI_Barrier(comm);
-    }
+    MPI_Barrier(comm);
 
     if (show_progress)
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
@@ -1679,11 +1651,7 @@ vector_read_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
     }
 
     /* 3) Barrier */
-
-    if (pass) {
-
-        MPI_Barrier(comm);
-    }
+    MPI_Barrier(comm);
 
     if (show_progress)
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
@@ -1941,11 +1909,7 @@ vector_read_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 7) Barrier */
-
-    if (pass) {
-
-        MPI_Barrier(comm);
-    }
+    MPI_Barrier(comm);
 
     if (show_progress)
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
@@ -2121,11 +2085,7 @@ vector_read_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
     }
 
     /* 3) Barrier */
-
-    if (pass) {
-
-        MPI_Barrier(comm);
-    }
+    MPI_Barrier(comm);
 
     if (show_progress)
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
@@ -2220,11 +2180,7 @@ vector_read_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 7) Barrier */
-
-    if (pass) {
-
-        MPI_Barrier(comm);
-    }
+    MPI_Barrier(comm);
 
     if (show_progress)
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
@@ -2378,11 +2334,7 @@ vector_write_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
     /* 3) Barrier
      */
-
-    if (pass) {
-
-        MPI_Barrier(comm);
-    }
+    MPI_Barrier(comm);
 
     if (show_progress)
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
@@ -2623,11 +2575,7 @@ vector_write_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
     /* 4) Barrier
      */
-
-    if (pass) {
-
-        MPI_Barrier(comm);
-    }
+    MPI_Barrier(comm);
 
     if (show_progress)
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
@@ -2863,11 +2811,7 @@ vector_write_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
     /* 3) Barrier
      */
-
-    if (pass) {
-
-        MPI_Barrier(comm);
-    }
+    MPI_Barrier(comm);
 
     if (show_progress)
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
@@ -3135,11 +3079,7 @@ vector_write_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
     /* 3) Barrier
      */
-
-    if (pass) {
-
-        MPI_Barrier(comm);
-    }
+    MPI_Barrier(comm);
 
     if (show_progress)
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
@@ -3418,11 +3358,7 @@ vector_write_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
     /* 3) Barrier
      */
-
-    if (pass) {
-
-        MPI_Barrier(comm);
-    }
+    MPI_Barrier(comm);
 
     if (show_progress)
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
@@ -3538,11 +3474,7 @@ vector_write_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 5) Barrier */
-
-    if (pass) {
-
-        MPI_Barrier(comm);
-    }
+    MPI_Barrier(comm);
 
     if (show_progress)
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
@@ -3861,11 +3793,7 @@ vector_write_test_6(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     }
 
     /* 3) Barrier */
-
-    if (pass) {
-
-        MPI_Barrier(comm);
-    }
+    MPI_Barrier(comm);
 
     if (show_progress)
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
@@ -3915,11 +3843,7 @@ vector_write_test_6(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 5) Barrier */
-
-    if (pass) {
-
-        MPI_Barrier(comm);
-    }
+    MPI_Barrier(comm);
 
     if (show_progress)
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
@@ -3961,11 +3885,7 @@ vector_write_test_6(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 7) Barrier */
-
-    if (pass) {
-
-        MPI_Barrier(comm);
-    }
+    MPI_Barrier(comm);
 
     if (show_progress)
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
@@ -4140,11 +4060,7 @@ vector_write_test_7(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
 
     /* 3) Barrier
      */
-
-    if (pass) {
-
-        MPI_Barrier(comm);
-    }
+    MPI_Barrier(comm);
 
     if (show_progress)
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
@@ -4176,11 +4092,7 @@ vector_write_test_7(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
 
     /* 5) Barrier */
-
-    if (pass) {
-
-        MPI_Barrier(comm);
-    }
+    MPI_Barrier(comm);
 
     if (show_progress)
         HDfprintf(stdout, "%s: cp = %d, pass = %d.\n", fcn_name, cp++, pass);
