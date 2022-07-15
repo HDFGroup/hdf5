@@ -139,6 +139,13 @@ New Features
 
       (ADB - 2022/06/22)
 
+    - The perf tool has been removed
+
+      The small `perf` tool didn't really do anything special and the name
+      conflicts with gnu's perf tool.
+
+      (DER - 2022/07/15, GitHub #1787)
+
 
     High-Level APIs:
     ----------------
