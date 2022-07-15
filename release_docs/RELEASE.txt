@@ -132,19 +132,19 @@ New Features
 
     Tools:
     ------
-    - 1.10 References in containers were not displayed properly by h5dump.
-
-      Ported 1.10 tools display function to provide ability to inspect and
-      display 1.10 reference data. 
-
-      (ADB - 2022/06/22)
-
     - The perf tool has been removed
 
       The small `perf` tool didn't really do anything special and the name
       conflicts with gnu's perf tool.
 
       (DER - 2022/07/15, GitHub #1787)
+
+    - 1.10 References in containers were not displayed properly by h5dump.
+
+      Ported 1.10 tools display function to provide ability to inspect and
+      display 1.10 reference data. 
+
+      (ADB - 2022/06/22)
 
 
     High-Level APIs:

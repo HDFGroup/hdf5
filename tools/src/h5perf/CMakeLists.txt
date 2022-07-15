@@ -30,7 +30,6 @@ endif ()
 # h5perf
 # --------------------------------------------------------------------
 if (H5_HAVE_PARALLEL)
-  #-- Adding test for h5perf
   set (h5perf_SOURCES
       ${HDF5_TOOLS_SRC_H5PERF_SOURCE_DIR}/pio_perf.c
       ${HDF5_TOOLS_SRC_H5PERF_SOURCE_DIR}/pio_engine.c
