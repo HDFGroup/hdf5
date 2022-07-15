@@ -688,6 +688,10 @@ H5FD__subfiling_fapl_get(H5FD_t *_file)
     /* Copy the fields of the structure */
     HDmemcpy(fa, &(file->fa), sizeof(H5FD_subfiling_config_t));
 
+    /* Copy the driver info value */
+    if (H5FD__copy_plist(file->fa.ioc_fapl_id, &(fa->ioc_fapl_id)) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "can't copy IOC FAPL");
+
     /* Set return value */
     ret_value = fa;
 
