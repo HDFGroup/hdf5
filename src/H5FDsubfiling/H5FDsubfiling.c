@@ -1406,6 +1406,7 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr
     int64_t *            source_data_offset = NULL;
     int64_t *            sf_data_size       = NULL;
     int64_t *            sf_offset          = NULL;
+    hbool_t              rank0_bcast        = FALSE;
     int                  ioc_total;
     herr_t               ret_value = SUCCEED;
 
@@ -1419,7 +1420,7 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL,
                                 "addr overflow, addr = %" PRIuHADDR ", size = %" PRIuHADDR, addr, size);
 
-    /* TODO: Temporarily reject collective I/O until support is implemented */
+    /* TODO: Temporarily reject collective I/O until support is implemented (unless types are simple MPI_BYTE) */
     {
         H5FD_mpio_xfer_t xfer_mode;
 
@@ -1427,8 +1428,23 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr
             H5_SUBFILING_GOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL,
                                     "can't determine I/O collectivity setting");
 
-        if (xfer_mode == H5FD_MPIO_COLLECTIVE)
-            H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "collective I/O is currently unsupported");
+        if (xfer_mode == H5FD_MPIO_COLLECTIVE) {
+            MPI_Datatype btype, ftype;
+
+            if (H5CX_get_mpi_coll_datatypes(&btype, &ftype) < 0)
+                H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI-I/O datatypes");
+            if (MPI_BYTE != btype || MPI_BYTE != ftype)
+                H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "collective I/O is currently unsupported");
+        }
+
+        /* Determine whether a rank 0 bcast approach has been requested */
+        rank0_bcast = H5CX_get_mpio_rank0_bcast();
+
+        /*
+         * If we reached here, we're still doing independent I/O regardless
+         * of collectivity setting, so set that.
+         */
+        H5CX_set_io_xfer_mode(H5FD_MPIO_INDEPENDENT);
     }
 
 #if H5FD_SUBFILING_DEBUG_OP_CALLS
@@ -1587,10 +1603,18 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr
                     vec_idx++;
                 }
 
-                /* Make vector read call to subfile */
-                if (H5FDread_vector(file_ptr->sf_file, dxpl_id, final_vec_len, io_types, io_addrs, io_sizes,
-                                    io_bufs) < 0)
-                    H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "read from subfile failed");
+                if (!rank0_bcast || (file_ptr->mpi_rank == 0)) {
+                    /* Make vector read call to subfile */
+                    if (H5FDread_vector(file_ptr->sf_file, dxpl_id, final_vec_len, io_types, io_addrs, io_sizes,
+                                        io_bufs) < 0)
+                        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "read from subfile failed");
+                }
+            }
+
+            if (rank0_bcast) {
+                H5_CHECK_OVERFLOW(size, size_t, int);
+                if (MPI_SUCCESS != MPI_Bcast(buf, (int)size, MPI_BYTE, 0, file_ptr->comm))
+                    H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "can't broadcast data from rank 0");
             }
 
             /* TODO: The following is left for future work */
@@ -1662,7 +1686,7 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t add
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL,
                                 "addr overflow, addr = %" PRIuHADDR ", size = %" PRIuHADDR, addr, size);
 
-    /* TODO: Temporarily reject collective I/O until support is implemented */
+    /* TODO: Temporarily reject collective I/O until support is implemented (unless types are simple MPI_BYTE) */
     {
         H5FD_mpio_xfer_t xfer_mode;
 
@@ -1670,8 +1694,20 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t add
             H5_SUBFILING_GOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL,
                                     "can't determine I/O collectivity setting");
 
-        if (xfer_mode == H5FD_MPIO_COLLECTIVE)
-            H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "collective I/O is currently unsupported");
+        if (xfer_mode == H5FD_MPIO_COLLECTIVE) {
+            MPI_Datatype btype, ftype;
+
+            if (H5CX_get_mpi_coll_datatypes(&btype, &ftype) < 0)
+                H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI-I/O datatypes");
+            if (MPI_BYTE != btype || MPI_BYTE != ftype)
+                H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "collective I/O is currently unsupported");
+        }
+
+        /*
+         * If we reached here, we're still doing independent I/O regardless
+         * of collectivity setting, so set that.
+         */
+        H5CX_set_io_xfer_mode(H5FD_MPIO_INDEPENDENT);
     }
 
 #if H5FD_SUBFILING_DEBUG_OP_CALLS
