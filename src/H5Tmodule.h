@@ -3859,7 +3859,7 @@ filled according to the value of this property. The padding can be:
  */
 
 /**
- * \defgroup H5T H5T Datatypes
+ * \defgroup H5T H5T
  *
  * Use the functions in this module to manage HDF5 datatypes.
  *
