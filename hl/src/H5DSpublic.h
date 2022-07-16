@@ -79,7 +79,7 @@ extern "C" {
 /**
  *  --------------------------------------------------------------------------
  *  \ingroup H5DS
- *  
+ *
  *  \brief Determines if new references are used with dimension scales.
  *
  *  \param[in] obj_id        Object identifier

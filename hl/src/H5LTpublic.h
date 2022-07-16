@@ -78,7 +78,7 @@ extern "C" {
  *     - \ref H5LTread_dataset_float
  *     - \ref H5LTread_dataset_double
  *     - \ref H5LTread_dataset_string
- *    
+ *
  *   - Query dataset functions
  *     - \ref H5LTfind_dataset
  *     - \ref H5LTget_dataset_ndims
@@ -107,7 +107,7 @@ extern "C" {
  *     - \ref H5LTset_attribute_float
  *     - \ref H5LTset_attribute_double
  *     - <code>H5LTset_attribute_f</code> (fortran ONLY)
- *  
+ *
  *   - Get attribute functions
  *     - \ref H5LTget_attribute
  *     - \ref H5LTget_attribute_string
@@ -123,7 +123,7 @@ extern "C" {
  *     - \ref H5LTget_attribute_ullong
  *     - \ref H5LTget_attribute_float
  *     - \ref H5LTget_attribute_double
- * 
+ *
  *   - Query attribute functions
  *     - \ref H5LTfind_attribute
  *     - \ref H5LTget_attribute_info
@@ -1597,7 +1597,7 @@ H5_HLDLL htri_t H5LTpath_valid(hid_t loc_id, const char *path, hbool_t check_obj
  *          - #H5LT_FILE_IMAGE_OPEN_RW
  *            - Specifies opening the file image in read/write mode.
  *            - Default without this flag: File image will be opened read-only.
- * 
+ *
  *          - #H5LT_FILE_IMAGE_DONT_COPY
  *            - Specifies to not copy the provided file image buffer;
  *              the buffer will be used directly. HDF5 will release the
