@@ -37,6 +37,11 @@ jobs:
         # Learn more about CodeQL language support at https://aka.ms/codeql-docs/language-support
 
     steps:
+    - name: Install dependencies
+      run: |
+           sudo apt update
+           sudo apt install automake autoconf libtool libtool-bin
+    
     - name: Checkout repository
       uses: actions/checkout@v3
 
