@@ -2570,10 +2570,10 @@ gent_nestcomp(void)
 static void
 gent_opaque(void)
 {
-    hid_t   file    = H5I_INVALID_HID;
-    hid_t   type    = H5I_INVALID_HID;
-    hid_t   dataset = H5I_INVALID_HID;
-    hid_t   space   = H5I_INVALID_HID;
+    hid_t file    = H5I_INVALID_HID;
+    hid_t type    = H5I_INVALID_HID;
+    hid_t dataset = H5I_INVALID_HID;
+    hid_t space   = H5I_INVALID_HID;
 
     const uint8_t OPAQUE_NBYTES = 100;
     const int     N_ELEMENTS    = 2;
