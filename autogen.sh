@@ -236,10 +236,7 @@ ${automake_cmd} || exit 1
 echo
 
 # AUTOCONF
-# The "obsolete" warnings category flags our Java macros as obsolete.
-# Since there is no clear way to upgrade them (Java support in the Autotools
-# is not great) and they work well enough for now, we suppress those warnings.
-autoconf_cmd="${HDF5_AUTOCONF} --force --warnings=no-obsolete"
+autoconf_cmd="${HDF5_AUTOCONF} --force"
 echo "${autoconf_cmd}"
 if [ "$verbose" = true ] ; then
     ${HDF5_AUTOCONF} --version

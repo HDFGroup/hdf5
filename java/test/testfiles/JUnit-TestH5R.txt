@@ -4,8 +4,6 @@ JUnit version 4.11
 .testH5Ropen_region_Nullref
 .testH5Requal_Nullref1
 .testH5Requal_Nullref2
-.testH5RVLdset_ref
-.testH5RVLattr_ref
 .testH5Rget_object
 .testH5Rget_obj_type3_Nullref
 .testH5Ropen_object_Nullref
@@ -26,5 +24,5 @@ JUnit version 4.11
 
 Time:  XXXX
 
-OK (24 tests)
+OK (22 tests)
 

@@ -4,7 +4,6 @@ JUnit version 4.11
 .testH5Dcreate
 .testH5Dget_offset
 .testH5Dget_type
-.testH5DVLwr
 .testH5Dfill
 .testH5Dopen
 .testH5Dcreate_anon
@@ -12,15 +11,15 @@ JUnit version 4.11
 .testH5Dget_storage_size_empty
 .testH5Diterate
 .testH5Dget_access_plist
+.testH5Dvlen_read_invalid_buffer
 .testH5Dvlen_get_buf_size
 .testH5Dget_space_closed
 .testH5Dget_space_status
 .testH5Dvlen_write_read
 .testH5Dget_space
 .testH5Dget_type_closed
-.testH5Dvlen_read_default_buffer
 
 Time:  XXXX
 
-OK (20 tests)
+OK (19 tests)
 

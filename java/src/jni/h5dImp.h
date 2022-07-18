@@ -177,7 +177,7 @@ JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Dwrite_1double(JNIEnv *, jclass, jl
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5DreadVL
- * Signature: (JJJJJ[Ljava/util/ArrayList;)I
+ * Signature: (JJJJJ[Ljava/lang/String;)I
  */
 JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5DreadVL(JNIEnv *, jclass, jlong, jlong, jlong, jlong, jlong,
                                                      jobjectArray);
@@ -185,7 +185,7 @@ JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5DreadVL(JNIEnv *, jclass, jlong, jl
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5DwriteVL
- * Signature: (JJJJJ[Ljava/util/ArrayList;)I
+ * Signature: (JJJJJ[Ljava/lang/String;)I
  */
 JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5DwriteVL(JNIEnv *, jclass, jlong, jlong, jlong, jlong, jlong,
                                                       jobjectArray);

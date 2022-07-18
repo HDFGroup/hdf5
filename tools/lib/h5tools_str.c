@@ -1182,7 +1182,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                         /* if(nsize == H5R_DSET_REG_REF_BUF_SIZE) */
                         H5TOOLS_DEBUG("H5T_REFERENCE:H5T_STD_REF_DSETREG");
                         h5tools_str_append(str, H5_TOOLS_DATASET);
-                        h5tools_str_sprint_old_reference(str, container, vp);
+                        h5tools_str_sprint_old_reference(str, container, H5R_DATASET_REGION, vp);
                     }
                     else if (H5Tequal(type, H5T_STD_REF_OBJ)) {
                         /* if (nsize == H5R_OBJ_REF_BUF_SIZE) */
@@ -1231,7 +1231,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                             obj_tok_str = NULL;
                         }
 
-                        h5tools_str_sprint_old_reference(str, container, vp);
+                        h5tools_str_sprint_old_reference(str, container, H5R_OBJECT, vp);
                     } /* end else if (H5Tequal(type, H5T_STD_REF_OBJ)) */
                 }
                 break;
@@ -1382,7 +1382,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
  *-------------------------------------------------------------------------
  */
 void
-h5tools_str_sprint_old_reference(h5tools_str_t *str, hid_t container, void *vp)
+h5tools_str_sprint_old_reference(h5tools_str_t *str, hid_t container, H5R_type_t ref_type, void *vp)
 {
     hid_t obj    = H5I_INVALID_HID;
     hid_t region = H5I_INVALID_HID;
@@ -1391,21 +1391,23 @@ h5tools_str_sprint_old_reference(h5tools_str_t *str, hid_t container, void *vp)
     H5TOOLS_START_DEBUG(" ");
 
     h5tools_str_append(str, " \"");
-    obj = H5Rdereference2(container, H5P_DEFAULT, H5R_DATASET_REGION, vp);
-    if (obj >= 0) {
-        region = H5Rget_region(container, H5R_DATASET_REGION, vp);
-        if (region >= 0) {
-            H5Rget_name(obj, H5R_DATASET_REGION, vp, (char *)ref_name, 1024);
-            h5tools_str_append(str, "%s", ref_name);
-
-            H5Sclose(region);
-        } /* end if (region >= 0) */
-        H5Dclose(obj);
-    } /* end if (obj >= 0) */
-    else {
-        obj = H5Rdereference2(container, H5P_DEFAULT, H5R_OBJECT, vp);
+    if (ref_type == H5R_DATASET_REGION) {
+        obj = H5Rdereference2(container, H5P_DEFAULT, ref_type, vp);
         if (obj >= 0) {
-            H5Rget_name(obj, H5R_OBJECT, vp, (char *)ref_name, 1024);
+            region = H5Rget_region(container, ref_type, vp);
+            if (region >= 0) {
+                H5Rget_name(obj, ref_type, vp, (char *)ref_name, 1024);
+                h5tools_str_append(str, "%s", ref_name);
+
+                H5Sclose(region);
+            } /* end if (region >= 0) */
+            H5Dclose(obj);
+        } /* end if (obj >= 0) */
+    }
+    else if (ref_type == H5R_OBJECT) {
+        obj = H5Rdereference2(container, H5P_DEFAULT, ref_type, vp);
+        if (obj >= 0) {
+            H5Rget_name(obj, ref_type, vp, (char *)ref_name, 1024);
             h5tools_str_append(str, "%s", ref_name);
             H5Dclose(obj);
         }
