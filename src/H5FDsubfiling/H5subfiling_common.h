@@ -98,14 +98,14 @@
 #define WRITE_INDEP (WRITE_OP)
 #define WRITE_COLL  (COLL_FUNC | WRITE_OP)
 
-#define WRITE_INDEP_ACK  (ACK_PART | WRITE_OP)
-#define WRITE_INDEP_DATA (DATA_PART | WRITE_OP)
-
-#define READ_INDEP_DATA (DATA_PART | READ_OP)
-
 #define GET_EOF_COMPLETED (COMPLETED | GET_EOF_OP)
 
 #define SET_LOGGING (LOGGING_OP)
+
+/* MPI tag values for data communicator */
+#define WRITE_INDEP_ACK 0
+#define READ_INDEP_DATA 1
+#define WRITE_TAG_BASE  2
 
 /*
  * Object type definitions for subfiling objects.

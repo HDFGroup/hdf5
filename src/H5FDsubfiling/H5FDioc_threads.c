@@ -766,8 +766,10 @@ ioc_file_queue_write_indep(sf_work_request_t *msg, int subfile_rank, int source,
      * allows us to distinguish between multiple concurrent
      * writes from a single rank.
      */
-    HDassert(H5FD_IOC_tag_ub_val_ptr && (*H5FD_IOC_tag_ub_val_ptr >= 0));
-    rcv_tag = (int)((counter % INT_MAX) % (uint32_t)(*H5FD_IOC_tag_ub_val_ptr)) + 1;
+    HDassert(H5FD_IOC_tag_ub_val_ptr && (*H5FD_IOC_tag_ub_val_ptr >= WRITE_TAG_BASE));
+    rcv_tag = (int) (counter % (INT_MAX - WRITE_TAG_BASE));
+    rcv_tag %= (*H5FD_IOC_tag_ub_val_ptr - WRITE_TAG_BASE);
+    rcv_tag += WRITE_TAG_BASE;
 
     if (send_ack_to_client(rcv_tag, source, subfile_rank, WRITE_INDEP_ACK, comm) < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_WRITEERROR, -1, "couldn't send ACK to client");
