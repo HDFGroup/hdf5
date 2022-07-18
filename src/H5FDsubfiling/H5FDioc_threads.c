@@ -767,7 +767,7 @@ ioc_file_queue_write_indep(sf_work_request_t *msg, int subfile_rank, int source,
      * writes from a single rank.
      */
     HDassert(H5FD_IOC_tag_ub_val_ptr && (*H5FD_IOC_tag_ub_val_ptr >= WRITE_TAG_BASE));
-    rcv_tag = (int) (counter % (INT_MAX - WRITE_TAG_BASE));
+    rcv_tag = (int)(counter % (INT_MAX - WRITE_TAG_BASE));
     rcv_tag %= (*H5FD_IOC_tag_ub_val_ptr - WRITE_TAG_BASE);
     rcv_tag += WRITE_TAG_BASE;
 
