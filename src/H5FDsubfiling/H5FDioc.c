@@ -166,8 +166,9 @@ static int    H5FD__copy_plist(hid_t fapl_id, hid_t *id_out_ptr);
 
 static herr_t H5FD__ioc_close_int(H5FD_ioc_t *file_ptr);
 
-static herr_t H5FD__ioc_write_vector_internal(H5FD_t *_file, uint32_t count, H5FD_mem_t types[], haddr_t addrs[],
-                                              size_t sizes[], const void *bufs[] /* data_in */);
+static herr_t H5FD__ioc_write_vector_internal(H5FD_t *_file, uint32_t count, H5FD_mem_t types[],
+                                              haddr_t addrs[], size_t sizes[],
+                                              const void *bufs[] /* data_in */);
 static herr_t H5FD__ioc_read_vector_internal(H5FD_t *_file, uint32_t count, haddr_t addrs[], size_t sizes[],
                                              void *bufs[] /* data_out */);
 
@@ -1379,8 +1380,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__ioc_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
-                const void *buf)
+H5FD__ioc_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size, const void *buf)
 {
     H5P_genplist_t *plist_ptr = NULL;
     herr_t          ret_value = SUCCEED;
@@ -1677,7 +1677,8 @@ H5FD__ioc_write_vector_internal(H5FD_t *_file, uint32_t count, H5FD_mem_t types[
     for (size_t i = 0; i < (size_t)count; i++) {
         if (types[i] == H5FD_MEM_SUPER) {
             if (H5FDwrite(file_ptr->ioc_file, H5FD_MEM_SUPER, H5P_DEFAULT, addrs[i], sizes[i], bufs[i]) < 0)
-                H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "couldn't write superblock information to stub file");
+                H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
+                                        "couldn't write superblock information to stub file");
         }
     }
 
