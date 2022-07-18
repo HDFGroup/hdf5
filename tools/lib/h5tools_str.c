@@ -1052,7 +1052,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
 
                 H5TOOLS_DEBUG("H5T_ENUM");
                 if (H5Tenum_nameof(type, vp, enum_name, sizeof enum_name) >= 0)
-                    h5tools_str_append(str, h5tools_escape(enum_name, sizeof(enum_name)));
+                    h5tools_str_append(str, "%s", h5tools_escape(enum_name, sizeof(enum_name)));
                 else {
                     size_t i;
                     if (1 == nsize)
@@ -1175,7 +1175,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                             case H5R_MAXTYPE:
                             default:
                                 break;
-                        } /* end switch */
+                        }
                         H5TOOLS_DEBUG("H5T_REFERENCE:H5T_STD_REF end");
                     }
                     else if (H5Tequal(type, H5T_STD_REF_DSETREG)) {
@@ -1215,7 +1215,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                             default:
                                 h5tools_str_append(str, "%u-", (unsigned)oi.type);
                                 break;
-                        } /* end switch */
+                        }
                         H5Oclose(obj);
 
                         /* Print OID */
@@ -1312,6 +1312,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                 nelmts = ((hvl_t *)((void *)cp_vp))->len;
 
                 for (i = 0; i < nelmts; i++) {
+                    H5TOOLS_DEBUG("H5T_VLEN %d of %ld", i, nelmts);
                     if (i)
                         h5tools_str_append(str, "%s", OPT(info->vlen_sep, "," OPTIONAL_LINE_BREAK));
 
