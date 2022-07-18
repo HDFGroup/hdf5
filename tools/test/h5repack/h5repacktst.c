@@ -2526,10 +2526,10 @@ error:
 static int
 make_deflate(hid_t loc_id)
 {
-    hid_t      dcpl             = H5I_INVALID_HID; /* dataset creation property list */
-    hid_t      sid              = H5I_INVALID_HID; /* dataspace ID */
-    hsize_t    dims[RANK]       = {DIM1, DIM2};
-    hsize_t    chunk_dims[RANK] = {CDIM1, CDIM2};
+    hid_t   dcpl             = H5I_INVALID_HID; /* dataset creation property list */
+    hid_t   sid              = H5I_INVALID_HID; /* dataspace ID */
+    hsize_t dims[RANK]       = {DIM1, DIM2};
+    hsize_t chunk_dims[RANK] = {CDIM1, CDIM2};
 #if defined(H5_HAVE_FILTER_DEFLATE)
     hobj_ref_t bufref[1]; /* reference */
     hsize_t    dims1r[1] = {1};
