@@ -1047,7 +1047,8 @@ H5FL_blk_free(H5FL_blk_head_t *head, void *block)
     if (NULL == (free_list = H5FL__blk_find_list(&(head->head), free_size)))
         /* No free list available, create a new list node and insert it to the queue */
         free_list = H5FL__blk_create_list(&(head->head), free_size);
-    HDassert(free_list);
+    if (NULL == free_list)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "couldn't create new list node")
 
     /* Prepend the free'd native block to the front of the free list */
     temp->next      = free_list->list; /* Note: Overwrites the size field in union */

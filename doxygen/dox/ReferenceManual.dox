@@ -9,7 +9,7 @@ The functions provided by the HDF5 C-API are grouped into the following
 <td>
 
 <table>
-<tr><td style="border: none;">
+<tr valign="top"><td style="border: none;">
 \li \ref H5A "Attributes (H5A)"
 \li \ref H5D "Datasets (H5D)"
 \li \ref H5S "Dataspaces (H5S)"
@@ -29,10 +29,7 @@ The functions provided by the HDF5 C-API are grouped into the following
 \li \ref H5PL "Dynamically-loaded Plugins (H5PL)"
 \li \ref H5R "References (H5R)"
 \li \ref H5VL "Virtual Object Layer (H5VL)"
-</td><td style="border: none;vertical-align: top;">
-\li Functions with \ref ASYNC "asynchronous variants"
-\li \ref api-compat-macros
-\li <a href="./deprecated.html">Deprecated functions</a>
+</td><td style="border: none;">
 \li \ref high_level
     <ul>
     <li>\ref H5LT "Lite (H5LT, H5LD)"
@@ -48,11 +45,14 @@ The functions provided by the HDF5 C-API are grouped into the following
 \a Core \a library: \ref H5 \ref H5A \ref H5D \ref H5E \ref H5ES \ref H5F \ref H5G \ref H5I \ref H5L
 \ref H5M \ref H5O \ref H5P \ref H5PL \ref H5R \ref H5S \ref H5T \ref H5VL \ref H5Z
 </td></tr>
-
 <tr><td colspan="3" style="border: none;">
 \a High-level \a library: \ref H5LT \ref H5IM \ref H5TB \ref H5PT \ref H5DS \ref H5DO \ref H5LR
 </td></tr>
-
+<tr>
+<td><a href="./deprecated.html">Deprecated functions</a></td>
+<td>Functions with \ref ASYNC</td>
+<td>\ref api-compat-macros</td>
+</tr>
 </table>
 
 </td></tr>

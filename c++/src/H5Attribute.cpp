@@ -235,8 +235,9 @@ Attribute::getInMemDataSize() const
     }
 
     // Calculate and return the size of the data
-    size_t data_size = type_size * num_elements;
-    return (data_size);
+    size_t data_size = type_size * static_cast<size_t>(num_elements);
+
+    return data_size;
 }
 
 //--------------------------------------------------------------------------
@@ -324,11 +325,15 @@ Attribute::getName() const
     }
     // Attribute's name exists, retrieve it
     else if (name_size > 0) {
+        // The actual size is the cast value + 1 for the terminal ASCII NUL
+        // (unfortunate in/out type sign mismatch)
+        size_t actual_name_size = static_cast<size_t>(name_size) + 1;
+
         // Create buffer for C string
-        char *name_C = new char[name_size + 1]();
+        char *name_C = new char[actual_name_size]();
 
         // Use overloaded function
-        name_size = getName(name_C, name_size + 1);
+        name_size = getName(name_C, actual_name_size);
 
         // Convert the C attribute name to return
         attr_name = name_C;
@@ -338,7 +343,7 @@ Attribute::getName() const
     }
 
     // Return attribute's name
-    return (attr_name);
+    return attr_name;
 }
 
 //--------------------------------------------------------------------------
@@ -390,7 +395,7 @@ Attribute::getName(H5std_string &attr_name, size_t len) const
     // If no length is provided, get the entire attribute name
     if (len == 0) {
         attr_name = getName();
-        name_size = attr_name.length();
+        name_size = static_cast<ssize_t>(attr_name.length());
     }
     // If length is provided, get that number of characters in name
     else {
@@ -409,7 +414,7 @@ Attribute::getName(H5std_string &attr_name, size_t len) const
     // Otherwise, keep attr_name intact
 
     // Return name size
-    return (name_size);
+    return name_size;
 }
 
 //--------------------------------------------------------------------------

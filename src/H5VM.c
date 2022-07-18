@@ -605,7 +605,7 @@ H5VM_stride_fill(unsigned n, hsize_t elmt_size, const hsize_t *size, const hsize
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    HDassert(elmt_size < SIZET_MAX);
+    HDassert(elmt_size < SIZE_MAX);
 
     H5VM_vector_cpy(n, idx, size);
     nelmts = H5VM_vector_reduce_product(n, size);
@@ -663,7 +663,7 @@ H5VM_stride_copy(unsigned n, hsize_t elmt_size, const hsize_t *size, const hsize
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    HDassert(elmt_size < SIZET_MAX);
+    HDassert(elmt_size < SIZE_MAX);
 
     if (n) {
         H5VM_vector_cpy(n, idx, size);
@@ -729,7 +729,7 @@ H5VM_stride_copy_s(unsigned n, hsize_t elmt_size, const hsize_t *size, const hss
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    HDassert(elmt_size < SIZET_MAX);
+    HDassert(elmt_size < SIZE_MAX);
 
     if (n) {
         H5VM_vector_cpy(n, idx, size);
@@ -794,7 +794,7 @@ H5VM__stride_copy2(hsize_t nelmts, hsize_t elmt_size, unsigned dst_n, const hsiz
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    HDassert(elmt_size < SIZET_MAX);
+    HDassert(elmt_size < SIZE_MAX);
     HDassert(dst_n > 0);
     HDassert(src_n > 0);
 
@@ -858,8 +858,8 @@ H5VM_array_fill(void *_dst, const void *src, size_t size, size_t count)
 
     HDassert(dst);
     HDassert(src);
-    HDassert(size < SIZET_MAX && size > 0);
-    HDassert(count < SIZET_MAX && count > 0);
+    HDassert(size < SIZE_MAX && size > 0);
+    HDassert(count < SIZE_MAX && count > 0);
 
     H5MM_memcpy(dst, src, size); /* copy first item */
 

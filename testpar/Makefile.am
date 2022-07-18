@@ -45,7 +45,7 @@ check_PROGRAMS = $(TEST_PROG_PARA) t_pflush1 t_pflush2
 
 testphdf5_SOURCES=testphdf5.c t_dset.c t_file.c t_file_image.c t_mdset.c \
 	t_ph5basic.c t_coll_chunk.c t_span_tree.c t_chunk_alloc.c t_filter_read.c \
-	t_prop.c t_coll_md_read.c
+	t_prop.c t_coll_md_read.c t_oflush.c
 
 # The tests all depend on the hdf5 library and the test library
 LDADD = $(LIBH5TEST) $(LIBHDF5)

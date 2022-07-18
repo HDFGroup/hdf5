@@ -399,33 +399,33 @@ typedef struct H5FL_fac_head_t {
  * Library prototypes.
  */
 /* Block free lists */
-H5_DLL void * H5FL_blk_malloc(H5FL_blk_head_t *head, size_t size H5FL_TRACK_PARAMS);
-H5_DLL void * H5FL_blk_calloc(H5FL_blk_head_t *head, size_t size H5FL_TRACK_PARAMS);
+H5_DLL void * H5FL_blk_malloc(H5FL_blk_head_t *head, size_t size H5FL_TRACK_PARAMS) H5_ATTR_MALLOC;
+H5_DLL void * H5FL_blk_calloc(H5FL_blk_head_t *head, size_t size H5FL_TRACK_PARAMS) H5_ATTR_MALLOC;
 H5_DLL void * H5FL_blk_free(H5FL_blk_head_t *head, void *block);
 H5_DLL void * H5FL_blk_realloc(H5FL_blk_head_t *head, void *block, size_t new_size H5FL_TRACK_PARAMS);
 H5_DLL htri_t H5FL_blk_free_block_avail(H5FL_blk_head_t *head, size_t size);
 
 /* Regular free lists */
-H5_DLL void *H5FL_reg_malloc(H5FL_reg_head_t *head H5FL_TRACK_PARAMS);
-H5_DLL void *H5FL_reg_calloc(H5FL_reg_head_t *head H5FL_TRACK_PARAMS);
+H5_DLL void *H5FL_reg_malloc(H5FL_reg_head_t *head H5FL_TRACK_PARAMS) H5_ATTR_MALLOC;
+H5_DLL void *H5FL_reg_calloc(H5FL_reg_head_t *head H5FL_TRACK_PARAMS) H5_ATTR_MALLOC;
 H5_DLL void *H5FL_reg_free(H5FL_reg_head_t *head, void *obj);
 
 /* Array free lists */
-H5_DLL void *H5FL_arr_malloc(H5FL_arr_head_t *head, size_t elem H5FL_TRACK_PARAMS);
-H5_DLL void *H5FL_arr_calloc(H5FL_arr_head_t *head, size_t elem H5FL_TRACK_PARAMS);
+H5_DLL void *H5FL_arr_malloc(H5FL_arr_head_t *head, size_t elem H5FL_TRACK_PARAMS) H5_ATTR_MALLOC;
+H5_DLL void *H5FL_arr_calloc(H5FL_arr_head_t *head, size_t elem H5FL_TRACK_PARAMS) H5_ATTR_MALLOC;
 H5_DLL void *H5FL_arr_free(H5FL_arr_head_t *head, void *obj);
 H5_DLL void *H5FL_arr_realloc(H5FL_arr_head_t *head, void *obj, size_t new_elem H5FL_TRACK_PARAMS);
 
 /* Sequence free lists */
-H5_DLL void *H5FL_seq_malloc(H5FL_seq_head_t *head, size_t elem H5FL_TRACK_PARAMS);
-H5_DLL void *H5FL_seq_calloc(H5FL_seq_head_t *head, size_t elem H5FL_TRACK_PARAMS);
+H5_DLL void *H5FL_seq_malloc(H5FL_seq_head_t *head, size_t elem H5FL_TRACK_PARAMS) H5_ATTR_MALLOC;
+H5_DLL void *H5FL_seq_calloc(H5FL_seq_head_t *head, size_t elem H5FL_TRACK_PARAMS) H5_ATTR_MALLOC;
 H5_DLL void *H5FL_seq_free(H5FL_seq_head_t *head, void *obj);
 H5_DLL void *H5FL_seq_realloc(H5FL_seq_head_t *head, void *obj, size_t new_elem H5FL_TRACK_PARAMS);
 
 /* Factory free lists */
 H5_DLL H5FL_fac_head_t *H5FL_fac_init(size_t size);
-H5_DLL void *           H5FL_fac_malloc(H5FL_fac_head_t *head H5FL_TRACK_PARAMS);
-H5_DLL void *           H5FL_fac_calloc(H5FL_fac_head_t *head H5FL_TRACK_PARAMS);
+H5_DLL void *           H5FL_fac_malloc(H5FL_fac_head_t *head H5FL_TRACK_PARAMS) H5_ATTR_MALLOC;
+H5_DLL void *           H5FL_fac_calloc(H5FL_fac_head_t *head H5FL_TRACK_PARAMS) H5_ATTR_MALLOC;
 H5_DLL void *           H5FL_fac_free(H5FL_fac_head_t *head, void *obj);
 H5_DLL herr_t           H5FL_fac_term(H5FL_fac_head_t *head);
 

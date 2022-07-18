@@ -42,6 +42,9 @@ extern "C" {
  *       any HDF5 calls to initialize global variables and \ref H5close
  *       after all HDF5 calls to close the Fortran interface.
  *
+ * <table>
+ * <tr valign="top"><td style="border: none;">
+ *
  * - Creation
  *   - \ref H5TBmake_table
  * - Storage
@@ -49,7 +52,7 @@ extern "C" {
  *   - \ref H5TBwrite_records (No Fortran)
  *   - \ref H5TBwrite_fields_name
  *   - \ref H5TBwrite_fields_index
- *   .
+ *
  * - Modification
  *   - \ref H5TBdelete_record (No Fortran)
  *   - \ref H5TBinsert_record (No Fortran)
@@ -57,22 +60,25 @@ extern "C" {
  *   - \ref H5TBcombine_tables (No Fortran)
  *   - \ref H5TBinsert_field
  *   - \ref H5TBdelete_field
- *   .
+ *
+ * </td><td style="border: none;">
+ *
  * - Retrieval
  *   - \ref H5TBread_table
  *   - \ref H5TBread_records (No Fortran)
  *   - \ref H5TBread_fields_name
  *   - \ref H5TBread_fields_index
- *   .
+ *
  * - Query
  *   - \ref H5TBget_table_info
  *   - \ref H5TBget_field_info
- *   .
+ *
  * - Query Table Attributes
  *   - \ref H5TBAget_fill
  *   - \ref H5TBAget_title
- *   .
- * .
+ *
+ * </td></tr>
+ * </table>
  *
  */
 

@@ -188,6 +188,7 @@
 #define H5FD_CTL_MEM_ALLOC                   5
 #define H5FD_CTL_MEM_FREE                    6
 #define H5FD_CTL_MEM_COPY                    7
+#define H5FD_CTL_GET_MPI_FILE_SYNC_OPCODE    8
 
 /* ctl function flags: */
 

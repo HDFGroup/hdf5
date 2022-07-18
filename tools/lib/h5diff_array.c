@@ -2734,7 +2734,7 @@ diff_long_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, di
     HDmemcpy(&temp2_long, mem2, sizeof(long));
     /* -d and !-p */
     if (opts->delta_bool && !opts->percent_bool) {
-        if (ABS(temp1_long - temp2_long) > opts->delta) {
+        if (ABS(temp1_long - temp2_long) > (long)opts->delta) {
             opts->print_percentage = 0;
             print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
@@ -2776,7 +2776,7 @@ diff_long_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, di
             }
             nfound++;
         }
-        else if (per > opts->percent && ABS(temp1_long - temp2_long) > opts->delta) {
+        else if (per > opts->percent && ABS(temp1_long - temp2_long) > (long)opts->delta) {
             opts->print_percentage = 1;
             print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
@@ -2822,7 +2822,7 @@ diff_ulong_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, d
     HDmemcpy(&temp2_ulong, mem2, sizeof(unsigned long));
     /* -d and !-p */
     if (opts->delta_bool && !opts->percent_bool) {
-        if (PDIFF(temp1_ulong, temp2_ulong) > opts->delta) {
+        if (PDIFF(temp1_ulong, temp2_ulong) > (unsigned long)opts->delta) {
             opts->print_percentage = 0;
             print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
@@ -2866,7 +2866,7 @@ diff_ulong_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, d
             }
             nfound++;
         }
-        else if (per > opts->percent && PDIFF(temp1_ulong, temp2_ulong) > opts->delta) {
+        else if (per > opts->percent && PDIFF(temp1_ulong, temp2_ulong) > (unsigned long)opts->delta) {
             opts->print_percentage = 1;
             print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
@@ -2913,7 +2913,7 @@ diff_llong_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, d
 
     /* -d and !-p */
     if (opts->delta_bool && !opts->percent_bool) {
-        if (ABS(temp1_llong - temp2_llong) > opts->delta) {
+        if (ABS(temp1_llong - temp2_llong) > (long long)opts->delta) {
             opts->print_percentage = 0;
             print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
@@ -2957,7 +2957,7 @@ diff_llong_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, d
             }
             nfound++;
         }
-        else if (per > opts->percent && ABS(temp1_llong - temp2_llong) > opts->delta) {
+        else if (per > opts->percent && ABS(temp1_llong - temp2_llong) > (long long)opts->delta) {
             opts->print_percentage = 1;
             print_pos(opts, elem_idx, 0);
             if (print_data(opts)) {
