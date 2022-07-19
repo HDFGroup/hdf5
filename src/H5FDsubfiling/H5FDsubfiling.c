@@ -950,13 +950,21 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
         uint64_t  fid;
         void *    file_handle = NULL;
 
-        if (H5FDget_vfd_handle(file_ptr->sf_file, file_ptr->fa.ioc_fapl_id, &file_handle) < 0)
-            H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get file handle");
+        if (file_ptr->mpi_rank == 0) {
+            if (H5FDget_vfd_handle(file_ptr->sf_file, file_ptr->fa.ioc_fapl_id, &file_handle) < 0)
+                H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get file handle");
 
-        if (HDfstat(*(int *)file_handle, &sb) < 0)
-            H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, NULL, "unable to fstat file");
+            if (HDfstat(*(int *)file_handle, &sb) < 0)
+                H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, NULL, "unable to fstat file");
 
-        fid = (uint64_t)sb.st_ino;
+            HDcompile_assert(sizeof(uint64_t) >= sizeof(ino_t));
+            fid = (uint64_t)sb.st_ino;
+        }
+
+        if (MPI_SUCCESS != (mpi_code = MPI_Bcast(&fid, 1, MPI_UINT64_T, 0, file_ptr->comm)))
+            H5_SUBFILING_MPI_GOTO_ERROR(NULL, "MPI_Bcast failed", mpi_code);
+
+        bcasted_inode = TRUE;
 
         /* Get a copy of the context ID for later use */
         file_ptr->context_id     = H5_subfile_fid_to_context(fid);

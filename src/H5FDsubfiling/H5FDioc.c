@@ -866,7 +866,7 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     }
     else {
         subfiling_context_t *sf_context = NULL;
-        uint64_t             inode_id   = (uint64_t)-1;
+        uint64_t             inode_id   = UINT64_MAX;
         int                  ioc_flags;
         int                  l_error = 0;
         int                  g_error = 0;
@@ -885,20 +885,23 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
             h5_stat_t sb;
             void *    file_handle = NULL;
 
-            if (H5FDget_vfd_handle(file_ptr->ioc_file, config_ptr->ioc_fapl_id, &file_handle) < 0)
-                H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get file handle");
+            if (file_ptr->mpi_rank == 0) {
+                if (H5FDget_vfd_handle(file_ptr->ioc_file, config_ptr->ioc_fapl_id, &file_handle) < 0)
+                    H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get file handle");
 
-            if (HDfstat(*(int *)file_handle, &sb) < 0)
-                H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, NULL, "unable to fstat file");
+                if (HDfstat(*(int *)file_handle, &sb) < 0)
+                    H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, NULL, "unable to fstat file");
 
-            /* Get the inode info and copy the open file descriptor
-             * The latter is used to pass to the subfiling code to use
-             * as an alternative to opening a new subfiling file, e.g. nnn_0_of_N.h5
-             */
-            file_ptr->inode = sb.st_ino;
+                HDcompile_assert(sizeof(uint64_t) >= sizeof(ino_t));
+                file_ptr->inode = sb.st_ino;
+                inode_id = (uint64_t)sb.st_ino;
+            }
 
-            HDcompile_assert(sizeof(uint64_t) >= sizeof(ino_t));
-            inode_id = (uint64_t)file_ptr->inode;
+            if (MPI_SUCCESS != (mpi_code = MPI_Bcast(&inode_id, 1, MPI_UINT64_T, 0, file_ptr->comm)))
+                H5_SUBFILING_MPI_GOTO_ERROR(NULL, "MPI_Bcast failed", mpi_code);
+
+            if (file_ptr->mpi_rank != 0)
+                file_ptr->inode = (ino_t)inode_id;
         }
         else {
             /* The two-step file opening approach may be
