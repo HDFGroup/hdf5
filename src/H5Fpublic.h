@@ -1550,12 +1550,6 @@ H5_DLL herr_t H5Fstop_mdc_logging(hid_t file_id);
  */
 H5_DLL herr_t H5Fget_mdc_logging_status(hid_t file_id, hbool_t *is_enabled, hbool_t *is_currently_logging);
 /**
- * \ingroup SWMR
- *
- * \todo UFO?
- */
-H5_DLL herr_t H5Fformat_convert(hid_t fid);
-/**
  * \ingroup H5F
  *
  * \brief Resets the page buffer statistics
@@ -1776,6 +1770,11 @@ H5_DLL herr_t H5Fset_mpi_atomicity(hid_t file_id, hbool_t flag);
  */
 H5_DLL herr_t H5Fget_mpi_atomicity(hid_t file_id, hbool_t *flag);
 #endif /* H5_HAVE_PARALLEL */
+
+/// \cond DEV
+/* Internal API routines */
+H5_DLL herr_t H5Fformat_convert(hid_t fid);
+/// \endcond
 
 /// \cond DEV
 /* API Wrappers for async routines */
