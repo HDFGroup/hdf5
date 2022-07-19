@@ -3199,7 +3199,7 @@ dummy_append_flush_cb(hid_t H5_ATTR_UNUSED dataset_id, hsize_t H5_ATTR_UNUSED *c
 
 static herr_t
 tssw_persist_dapl_verify(hid_t did, hid_t vdsid1, hid_t vdsid2, hsize_t boundary, H5D_append_cb_t append_func,
-                         void *append_func_ud, size_t rdcc_nslots, size_t rdcc_nbytes, double_t rdcc_w0,
+                         void *append_func_ud, size_t rdcc_nslots, size_t rdcc_nbytes, double rdcc_w0,
                          const char *efile_prefix, const char *virtual_prefix, hsize_t gap_size,
                          H5D_vds_view_t virtual_view)
 {
@@ -3211,7 +3211,7 @@ tssw_persist_dapl_verify(hid_t did, hid_t vdsid1, hid_t vdsid2, hsize_t boundary
     void *          append_func_ud_out = NULL;
     size_t          rdcc_nslots_out    = 0;
     size_t          rdcc_nbytes_out    = 0;
-    double_t        rdcc_w0_out        = 0.;
+    double          rdcc_w0_out        = 0.;
     char            efile_prefix_out[64];
     char            virtual_prefix_out[64];
     hsize_t         gap_size_out     = 0;
@@ -3314,7 +3314,7 @@ test_start_swmr_write_persist_dapl(hid_t in_fapl)
     void *          append_func_ud = &boundary;
     size_t          rdcc_nslots    = 125;
     size_t          rdcc_nbytes    = 23434;
-    double_t        rdcc_w0        = 0.68419;
+    double          rdcc_w0        = 0.68419;
     const char *    efile_prefix   = "dummy_efile_prefix";
     const char *    virtual_prefix = "dummy_virtual_prefix";
     hsize_t         gap_size       = 421;
