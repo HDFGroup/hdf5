@@ -633,7 +633,7 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
      */
     if (isppdriver) {
 #ifdef H5_HAVE_PARALLEL
-        if (getenv_all(MPI_COMM_WORLD, 0, HDF5_NOCLEANUP))
+        if (getenv_all(MPI_COMM_WORLD, 0, "HDF5_NOCLEANUP"))
             SetTestNoCleanup();
 #endif /* H5_HAVE_PARALLEL */
     }
