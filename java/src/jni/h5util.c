@@ -52,6 +52,7 @@ void *      edata;
 /* Local Prototypes */
 /********************/
 
+int h5str_old_region_dataset(JNIEnv *env, h5str_t *out_str, hid_t container, void *ref_buf, int expand_data);
 int h5str_region_dataset(JNIEnv *env, h5str_t *out_str, H5R_ref_t *ref_vp, int expand_data);
 
 static int    h5str_dump_region_blocks(JNIEnv *env, h5str_t *str, hid_t region, hid_t region_obj,
@@ -63,7 +64,6 @@ static int    h5str_is_zero(const void *_mem, size_t size);
 static hid_t  h5str_get_native_type(hid_t type);
 static hid_t  h5str_get_little_endian_type(hid_t type);
 static hid_t  h5str_get_big_endian_type(hid_t type);
-static htri_t h5str_detect_vlen(hid_t tid);
 static htri_t h5str_detect_vlen_str(hid_t tid);
 static int    h5str_dump_simple_data(JNIEnv *env, FILE *stream, hid_t container, hid_t type, void *_mem,
                                      hsize_t nelmts);
@@ -642,6 +642,33 @@ done:
 } /* end h5str_convert */
 
 /*-------------------------------------------------------------------------
+ * Function:    h5str_sprint_old_reference
+ *
+ * Purpose: Object reference -- show the name of the 1.10 referenced object.
+ *
+ * Return:  SUCCEED or FAIL
+ *-------------------------------------------------------------------------
+ */
+int
+h5str_sprint_old_reference(JNIEnv *env, h5str_t *out_str, hid_t region_obj, void *ref_buf)
+{
+    hid_t region = H5I_INVALID_HID;
+    char  ref_name[1024];
+
+    int ret_value = FAIL;
+
+    if ((H5Rget_name(region_obj, H5R_DATASET_REGION, ref_buf, (char *)ref_name, 1024)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+    if (!h5str_append(out_str, ref_name))
+        H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
+
+    ret_value = SUCCEED;
+done:
+
+    return ret_value;
+} /* h5str_sprint_reference */
+
+/*-------------------------------------------------------------------------
  * Function:    h5str_sprint_reference
  *
  * Purpose: Object reference -- show the name of the referenced object.
@@ -703,6 +730,48 @@ done:
 
     return ret_value;
 } /* h5str_sprint_reference */
+
+int
+h5str_old_region_dataset(JNIEnv *env, h5str_t *out_str, hid_t container, void *ref_buf, int expand_data)
+{
+    H5S_sel_type region_type = H5S_SEL_ERROR;
+    hid_t        region_obj  = H5I_INVALID_HID;
+    hid_t        region_sid  = H5I_INVALID_HID;
+
+    int ret_value = FAIL;
+
+    if ((region_obj = H5Rdereference2(container, H5P_DEFAULT, H5R_DATASET_REGION, ref_buf)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+    if ((region_sid = H5Rget_region(container, H5R_DATASET_REGION, ref_buf)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+    if (expand_data == 0)
+        if (h5str_sprint_old_reference(ENVONLY, out_str, region_obj, ref_buf) < 0)
+            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+
+    if ((region_type = H5Sget_select_type(region_sid)) > H5S_SEL_ERROR) {
+        if (H5S_SEL_POINTS == region_type) {
+            if (h5str_dump_region_points(ENVONLY, out_str, region_sid, region_obj, expand_data) < 0)
+                CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+        }
+        else if (H5S_SEL_HYPERSLABS == region_type) {
+            if (h5str_dump_region_blocks(ENVONLY, out_str, region_sid, region_obj, expand_data) < 0)
+                CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+        }
+    }
+
+    ret_value = SUCCEED;
+done:
+    if (region_sid >= 0)
+        if (H5Sclose(region_sid) < 0)
+            H5_LIBRARY_ERROR(ENVONLY);
+    if (region_obj >= 0)
+        if (H5Dclose(region_obj) < 0)
+            H5_LIBRARY_ERROR(ENVONLY);
+
+    return ret_value;
+}
 
 int
 h5str_region_dataset(JNIEnv *env, h5str_t *out_str, H5R_ref_t *ref_vp, int expand_data)
@@ -1106,125 +1175,217 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
         }
 
         case H5T_REFERENCE: {
-            /* H5T_STD_REF */
-            hid_t      new_obj_id = H5I_INVALID_HID;
-            H5O_type_t obj_type   = -1; /* Object type */
-            H5R_type_t ref_type;        /* Reference type */
+            if (H5R_DSET_REG_REF_BUF_SIZE == typeSize) {
+                if (h5str_old_region_dataset(ENVONLY, out_str, container, cptr, expand_data) < 0)
+                    CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+            }
+            else if (H5R_OBJ_REF_BUF_SIZE == typeSize) {
+                H5O_info2_t oi;
+                hid_t       obj         = H5I_INVALID_HID;
+                char *      obj_tok_str = NULL;
 
-            H5R_ref_t *ref_vp = (H5R_ref_t *)cptr;
+                /*
+                 * Object references -- show the type and OID of the referenced
+                 * object.
+                 */
 
-            ref_type = H5Rget_type(ref_vp);
-            if (!h5str_is_zero(ref_vp, H5Tget_size(H5T_STD_REF))) {
-                switch (ref_type) {
-                    case H5R_OBJECT1:
-                        if (H5Rget_obj_type3(ref_vp, H5P_DEFAULT, &obj_type) >= 0) {
-                            switch (obj_type) {
-                                case H5O_TYPE_DATASET:
-                                    if (h5str_region_dataset(ENVONLY, out_str, ref_vp, expand_data) < 0)
-                                        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-                                    break;
+                if (NULL == (this_str = (char *)HDmalloc(64)))
+                    H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
 
-                                case H5O_TYPE_GROUP:
-                                case H5O_TYPE_NAMED_DATATYPE:
-                                case H5O_TYPE_MAP:
-                                case H5O_TYPE_UNKNOWN:
-                                case H5O_TYPE_NTYPES:
-                                default: {
-                                    /* Object references -- show the type and OID of the referenced object. */
-                                    H5O_info2_t oi;
-                                    char *      obj_tok_str = NULL;
-                                    if ((new_obj_id = H5Ropen_object(ref_vp, H5P_DEFAULT, H5P_DEFAULT)) >=
-                                        0) {
-                                        H5Oget_info3(new_obj_id, &oi, H5O_INFO_BASIC);
-                                        H5Otoken_to_str(new_obj_id, &oi.token, &obj_tok_str);
-                                        if (H5Dclose(new_obj_id) < 0)
+                if ((obj = H5Rdereference2(container, H5P_DEFAULT, H5R_OBJECT, cptr)) < 0)
+                    H5_LIBRARY_ERROR(ENVONLY);
+
+                if (H5Oget_info3(obj, &oi, H5O_INFO_ALL) < 0)
+                    H5_LIBRARY_ERROR(ENVONLY);
+
+                /* Print object data and close object */
+                H5Otoken_to_str(obj, &oi.token, &obj_tok_str);
+
+                switch (oi.type) {
+                    case H5O_TYPE_GROUP:
+                        if (HDsprintf(this_str, "%s %s", H5_TOOLS_GROUP, obj_tok_str) < 0)
+                            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
+                        break;
+
+                    case H5O_TYPE_DATASET:
+                        if (HDsprintf(this_str, "%s %s", H5_TOOLS_DATASET, obj_tok_str) < 0)
+                            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
+                        break;
+
+                    case H5O_TYPE_NAMED_DATATYPE:
+                        if (HDsprintf(this_str, "%s %s", H5_TOOLS_DATATYPE, obj_tok_str) < 0)
+                            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
+                        break;
+
+                    case H5O_TYPE_UNKNOWN:
+                    case H5O_TYPE_NTYPES:
+                    default:
+                        if (HDsprintf(this_str, "%u-%s", (unsigned)oi.type, obj_tok_str) < 0)
+                            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsprintf failure");
+                        break;
+                }
+
+                if (obj_tok_str) {
+                    H5free_memory(obj_tok_str);
+                    obj_tok_str = NULL;
+                }
+
+                if (H5Oclose(obj) < 0)
+                    H5_LIBRARY_ERROR(ENVONLY);
+                obj = H5I_INVALID_HID;
+            }
+            else {
+                /* H5T_STD_REF */
+                hid_t      new_obj_id = H5I_INVALID_HID;
+                H5O_type_t obj_type   = -1; /* Object type */
+                H5R_type_t ref_type;        /* Reference type */
+
+                H5R_ref_t *ref_vp = (H5R_ref_t *)cptr;
+
+                ref_type = H5Rget_type(ref_vp);
+                if (!h5str_is_zero(ref_vp, H5Tget_size(H5T_STD_REF))) {
+                    switch (ref_type) {
+                        case H5R_OBJECT1:
+                            if (H5Rget_obj_type3(ref_vp, H5P_DEFAULT, &obj_type) >= 0) {
+                                switch (obj_type) {
+                                    case H5O_TYPE_DATASET:
+                                        if (h5str_region_dataset(ENVONLY, out_str, ref_vp, expand_data) < 0)
+                                            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                                        break;
+
+                                    case H5O_TYPE_GROUP:
+                                    case H5O_TYPE_NAMED_DATATYPE:
+                                    case H5O_TYPE_MAP:
+                                    case H5O_TYPE_UNKNOWN:
+                                    case H5O_TYPE_NTYPES:
+                                    default: {
+                                        /* Object references -- show the type and
+                                         * OID of the referenced object. */
+                                        H5O_info2_t oi;
+                                        char *      obj_tok_str = NULL;
+                                        if ((new_obj_id = H5Ropen_object(ref_vp, H5P_DEFAULT, H5P_DEFAULT)) >=
+                                            0) {
+                                            H5Oget_info3(new_obj_id, &oi, H5O_INFO_BASIC);
+                                            H5Otoken_to_str(new_obj_id, &oi.token, &obj_tok_str);
+                                            if (H5Dclose(new_obj_id) < 0)
+                                                H5_LIBRARY_ERROR(ENVONLY);
+                                        }
+                                        else
                                             H5_LIBRARY_ERROR(ENVONLY);
-                                    }
-                                    else
-                                        H5_LIBRARY_ERROR(ENVONLY);
 
-                                    size_t this_len = 14;
-                                    if (NULL == (this_str = (char *)HDmalloc(this_len)))
-                                        H5_OUT_OF_MEMORY_ERROR(
-                                            ENVONLY, "h5str_sprintf: failed to allocate string buffer");
-                                    if (HDsnprintf(this_str, this_len, "%u-", (unsigned)oi.type) < 0)
-                                        H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsnprintf failure");
-                                    if (!h5str_append(out_str, this_str))
-                                        H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
-                                    HDfree(this_str);
-                                    this_str = NULL;
-
-                                    /* Print OID */
-                                    {
-                                        char *token_str;
-
-                                        H5Otoken_to_str(tid, &oi.token, &token_str);
-
-                                        size_t that_len = 64 + strlen(token_str) + 1;
-                                        if (NULL == (this_str = HDmalloc(that_len)))
+                                        size_t this_len = 14;
+                                        if (NULL == (this_str = (char *)HDmalloc(this_len)))
                                             H5_OUT_OF_MEMORY_ERROR(
                                                 ENVONLY, "h5str_sprintf: failed to allocate string buffer");
-                                        if (HDsnprintf(this_str, that_len, "%lu:%s", oi.fileno, token_str) <
-                                            0)
-                                            H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsnprintf failure");
+                                        switch (oi.type) {
+                                            case H5O_TYPE_GROUP:
+                                                if (HDsnprintf(this_str, this_len, "%s ", H5_TOOLS_GROUP) < 0)
+                                                    H5_JNI_FATAL_ERROR(ENVONLY,
+                                                                       "h5str_sprintf: HDsnprintf failure");
+                                                break;
 
-                                        H5free_memory(token_str);
-                                    }
-                                } break;
-                            } /* end switch */
-                        }
-                        else
-                            H5_LIBRARY_ERROR(ENVONLY);
-                        break;
-                    case H5R_DATASET_REGION1:
-                        if (h5str_region_dataset(ENVONLY, out_str, ref_vp, expand_data) < 0)
-                            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-                        break;
-                    case H5R_OBJECT2:
-                        if (H5Rget_obj_type3(ref_vp, H5P_DEFAULT, &obj_type) >= 0) {
-                            switch (obj_type) {
-                                case H5O_TYPE_GROUP:
-                                    break;
+                                            case H5O_TYPE_DATASET:
+                                                if (HDsnprintf(this_str, this_len, "%s ", H5_TOOLS_DATASET) <
+                                                    0)
+                                                    H5_JNI_FATAL_ERROR(ENVONLY,
+                                                                       "h5str_sprintf: HDsnprintf failure");
+                                                break;
 
-                                case H5O_TYPE_DATASET:
-                                    if (h5str_region_dataset(ENVONLY, out_str, ref_vp, expand_data) < 0)
-                                        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-                                    break;
+                                            case H5O_TYPE_NAMED_DATATYPE:
+                                                if (HDsnprintf(this_str, this_len, "%s ", H5_TOOLS_DATATYPE) <
+                                                    0)
+                                                    H5_JNI_FATAL_ERROR(ENVONLY,
+                                                                       "h5str_sprintf: HDsnprintf failure");
+                                                break;
 
-                                case H5O_TYPE_NAMED_DATATYPE:
-                                    break;
+                                            case H5O_TYPE_UNKNOWN:
+                                            case H5O_TYPE_NTYPES:
+                                            default:
+                                                if (HDsnprintf(this_str, this_len, "%u-", (unsigned)oi.type) <
+                                                    0)
+                                                    H5_JNI_FATAL_ERROR(ENVONLY,
+                                                                       "h5str_sprintf: HDsnprintf failure");
+                                                break;
+                                        } /* end switch */
+                                        if (!h5str_append(out_str, this_str))
+                                            H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
+                                        HDfree(this_str);
+                                        this_str = NULL;
 
-                                case H5O_TYPE_MAP:
-                                case H5O_TYPE_UNKNOWN:
-                                case H5O_TYPE_NTYPES:
-                                default:
-                                    break;
-                            } /* end switch */
-                        }
-                        else
-                            H5_ASSERTION_ERROR(ENVONLY, "h5str_sprintf: H5R_OBJECT2 failed");
-                        break;
-                    case H5R_DATASET_REGION2:
-                        if (h5str_region_dataset(ENVONLY, out_str, ref_vp, expand_data) < 0)
-                            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-                        break;
-                    case H5R_ATTR:
-                        if ((new_obj_id = H5Ropen_attr(ref_vp, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
-                            if (h5str_dump_region_attribute(ENVONLY, out_str, new_obj_id) < 0)
-                                CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-                            if (H5Aclose(new_obj_id) < 0)
+                                        /* Print OID */
+                                        {
+                                            char *token_str;
+
+                                            H5Otoken_to_str(tid, &oi.token, &token_str);
+
+                                            size_t that_len = 64 + strlen(token_str) + 1;
+                                            if (NULL == (this_str = HDmalloc(that_len)))
+                                                H5_OUT_OF_MEMORY_ERROR(
+                                                    ENVONLY,
+                                                    "h5str_sprintf: failed to allocate string buffer");
+                                            if (HDsnprintf(this_str, that_len, "%lu:%s", oi.fileno,
+                                                           token_str) < 0)
+                                                H5_JNI_FATAL_ERROR(ENVONLY,
+                                                                   "h5str_sprintf: HDsnprintf failure");
+
+                                            H5free_memory(token_str);
+                                        }
+                                    } break;
+                                } /* end switch */
+                            }
+                            else
                                 H5_LIBRARY_ERROR(ENVONLY);
-                        }
-                        break;
-                    case H5R_BADTYPE:
-                    case H5R_MAXTYPE:
-                    default:
-                        break;
-                } /* end switch */
-            }
+                            break;
+                        case H5R_DATASET_REGION1:
+                            if (h5str_region_dataset(ENVONLY, out_str, ref_vp, expand_data) < 0)
+                                CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                            break;
+                        case H5R_OBJECT2:
+                            if (H5Rget_obj_type3(ref_vp, H5P_DEFAULT, &obj_type) >= 0) {
+                                switch (obj_type) {
+                                    case H5O_TYPE_GROUP:
+                                        break;
 
-            if (H5Rdestroy(ref_vp) < 0)
-                H5_LIBRARY_ERROR(ENVONLY);
+                                    case H5O_TYPE_DATASET:
+                                        if (h5str_region_dataset(ENVONLY, out_str, ref_vp, expand_data) < 0)
+                                            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                                        break;
+
+                                    case H5O_TYPE_NAMED_DATATYPE:
+                                        break;
+
+                                    case H5O_TYPE_MAP:
+                                    case H5O_TYPE_UNKNOWN:
+                                    case H5O_TYPE_NTYPES:
+                                    default:
+                                        break;
+                                } /* end switch */
+                            }
+                            else
+                                H5_ASSERTION_ERROR(ENVONLY, "h5str_sprintf: H5R_OBJECT2 failed");
+                            break;
+                        case H5R_DATASET_REGION2:
+                            if (h5str_region_dataset(ENVONLY, out_str, ref_vp, expand_data) < 0)
+                                CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                            break;
+                        case H5R_ATTR:
+                            if ((new_obj_id = H5Ropen_attr(ref_vp, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                                if (h5str_dump_region_attribute(ENVONLY, out_str, new_obj_id) < 0)
+                                    CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                                if (H5Aclose(new_obj_id) < 0)
+                                    H5_LIBRARY_ERROR(ENVONLY);
+                            }
+                            break;
+                        case H5R_BADTYPE:
+                        case H5R_MAXTYPE:
+                        default:
+                            break;
+                    } /* end switch */
+                }
+
+                if (H5Rdestroy(ref_vp) < 0)
+                    H5_LIBRARY_ERROR(ENVONLY);
+            }
 
             break;
         }
@@ -1761,7 +1922,7 @@ h5str_is_zero(const void *_mem, size_t size)
  *    Negative value: error occurred
  *-------------------------------------------------------------------------
  */
-static htri_t
+htri_t
 h5str_detect_vlen(hid_t tid)
 {
     htri_t ret = FAIL;
@@ -3118,29 +3279,65 @@ done:
     return ret_value;
 }
 
+/*-------------------------------------------------------------------------
+ * Function: H5Tdetect_variable_str
+ *
+ * Purpose:  Recursive check for variable length string of a datatype.
+ *
+ * Return:   TRUE : type contains any variable length string
+ *           FALSE : type doesn't contain any variable length string
+ *           Negative value: failed
+ *-------------------------------------------------------------------------
+ */
 htri_t
 H5Tdetect_variable_str(hid_t tid)
 {
-    htri_t ret_val = 0;
+    H5T_class_t tclass = -1;
+    htri_t      ret    = FALSE;
 
-    if (H5Tget_class(tid) == H5T_COMPOUND) {
-        unsigned i;
-        unsigned nm = (unsigned)H5Tget_nmembers(tid);
-        for (i = 0; i < nm; i++) {
-            htri_t status = 0;
-            hid_t  mtid   = 0;
-            if ((mtid = H5Tget_member_type(tid, i)) < 0)
-                return FAIL; /* exit immediately on error */
-            if ((status = H5Tdetect_variable_str(mtid)) < 0)
-                return status; /* exit immediately on error */
-            ret_val |= status;
+    ret = H5Tis_variable_str(tid);
+    if ((ret == TRUE) || (ret < 0))
+        goto done;
+
+    tclass = H5Tget_class(tid);
+    if (tclass == H5T_ARRAY || tclass == H5T_VLEN) {
+        hid_t btid = H5Tget_super(tid);
+
+        if (btid < 0) {
+            ret = (htri_t)btid;
+            goto done;
+        }
+        ret = H5Tdetect_variable_str(btid);
+        if ((ret == TRUE) || (ret < 0)) {
+            H5Tclose(btid);
+            goto done;
+        }
+    }
+    else if (tclass == H5T_COMPOUND) {
+        unsigned nmembs;
+        int      snmembs = H5Tget_nmembers(tid);
+        unsigned u;
+
+        if (snmembs < 0) {
+            ret = FAIL;
+            goto done;
+        }
+        nmembs = (unsigned)snmembs;
+
+        for (u = 0; u < nmembs; u++) {
+            hid_t mtid = H5Tget_member_type(tid, u);
+
+            ret = H5Tdetect_variable_str(mtid);
+            if ((ret == TRUE) || (ret < 0)) {
+                H5Tclose(mtid);
+                goto done;
+            }
             H5Tclose(mtid);
-        } /* end for */
-    }     /* end if */
-    else
-        ret_val = H5Tis_variable_str(tid);
+        }
+    }
 
-    return ret_val;
+done:
+    return ret;
 } /* end H5Tdetect_variable_str */
 
 static int

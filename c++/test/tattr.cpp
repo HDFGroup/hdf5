@@ -727,13 +727,12 @@ test_attr_compound_read()
 
         // Verify that the fields have the same names as when the type
         // was created
-        int j;
-        for (j = 0; j < fields; j++) {
-            H5std_string fieldname = datatype.getMemberName(j);
+        for (int j = 0; j < fields; j++) {
+            H5std_string fieldname = datatype.getMemberName(static_cast<unsigned>(j));
             if (!((fieldname == ATTR4_FIELDNAME1) || (fieldname == ATTR4_FIELDNAME2) ||
                   (fieldname == ATTR4_FIELDNAME3)))
                 TestErrPrintf("%d:invalid field name for field #%d: %s\n", __LINE__, j, fieldname.c_str());
-        } /* end for */
+        }
 
         offset = datatype.getMemberOffset(0);
         verify_val(offset, attr4_field1_off, "DataType::getMemberOffset", __LINE__, __FILE__);

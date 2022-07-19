@@ -138,7 +138,7 @@ H5G__compact_build_table(const H5O_loc_t *oloc, const H5O_linfo_t *linfo, H5_ind
         H5O_mesg_operator_t op;    /* Message operator */
 
         /* Allocate the link table */
-        if ((ltable->lnks = (H5O_link_t *)H5MM_malloc(sizeof(H5O_link_t) * ltable->nlinks)) == NULL)
+        if ((ltable->lnks = (H5O_link_t *)H5MM_calloc(sizeof(H5O_link_t) * ltable->nlinks)) == NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
         /* Set up user data for iteration */

@@ -57,7 +57,7 @@
  *        to the application provided buffer.
  * - \ref H5LTread_region
  *        \n Reads selected data to an application buffer.
- * .
+ *
  */
 
 /*-------------------------------------------------------------------------
@@ -311,7 +311,6 @@ H5_HLRDLL herr_t H5LRcopy_region(hid_t obj_id,
  *          Valid values include the following:
  *          - #H5_INDEX_NAME        Alphanumeric index on name
  *          - #H5_INDEX_CRT_ORDER   Index on creation order
- *          .
  *
  *          \p order specifies the order in which objects are to be 
  *          inspected along the index specified in \p index_type. 
@@ -319,7 +318,6 @@ H5_HLRDLL herr_t H5LRcopy_region(hid_t obj_id,
  *          - #H5_ITER_INC      Increasing order
  *          - #H5_ITER_DEC      Decreasing order
  *          - #H5_ITER_NATIVE   Fastest available order
- *          .
  *
  *          For more detailed information on these two parameters, 
  *          see H5Lvisit().
@@ -328,7 +326,6 @@ H5_HLRDLL herr_t H5LRcopy_region(hid_t obj_id,
  *          Valid values include the following:
  *          - #H5R_DATASET_REGION   Dataset region reference
  *          - #H5R_OBJECT           Object reference
- *          .
  *
  * \version 1.1 Fortran wrapper introduced in this release.
  *

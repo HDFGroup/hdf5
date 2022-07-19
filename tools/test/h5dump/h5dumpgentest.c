@@ -2570,41 +2570,42 @@ gent_nestcomp(void)
 static void
 gent_opaque(void)
 {
-    hid_t   file, type, dataset, space;
-    char    test[100][2];
-    int     x;
-    hsize_t dim = 2;
+    hid_t file    = H5I_INVALID_HID;
+    hid_t type    = H5I_INVALID_HID;
+    hid_t dataset = H5I_INVALID_HID;
+    hid_t space   = H5I_INVALID_HID;
 
-    for (x = 0; x < 100; x++) {
-        test[x][0] = (char)x;
-        test[x][1] = (char)(99 - x);
-    }
+    const uint8_t OPAQUE_NBYTES = 100;
+    const int     N_ELEMENTS    = 2;
 
-    /*
-     * Create the data space.
-     */
-    space = H5Screate_simple(1, &dim, NULL);
+    /* The dataset contains N_ELEMENTS elements of OPAQUE_NBYTES bytes */
+    uint8_t data[OPAQUE_NBYTES][N_ELEMENTS];
+    hsize_t dim = N_ELEMENTS;
 
-    /*
-     * Create the file.
-     */
     file = H5Fcreate(FILE19, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
-    /*
-     * Create the memory datatype.
-     */
-    type = H5Tcreate(H5T_OPAQUE, sizeof(char) * 100 * 2);
+    /* The opaque datatype is OPAQUE_NBYTES bytes in size */
+    type = H5Tcreate(H5T_OPAQUE, sizeof(uint8_t) * OPAQUE_NBYTES);
     H5Tset_tag(type, "test opaque type");
 
-    /*
-     * Create the dataset.
-     */
+    space   = H5Screate_simple(1, &dim, NULL);
     dataset = H5Dcreate2(file, "opaque test", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-    /*
-     * Write data to the dataset;
+    /* Given the data fill algorithm, make sure that the number of bytes
+     * in the opaque type isn't so big that i or (OPAQUE_NBYTES - 1) - i
+     * don't fit in a uint8_t value..
      */
-    H5Dwrite(dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, test);
+    HDcompile_assert(OPAQUE_NBYTES < UINT8_MAX);
+
+    /* Write out two opaque data elements with predictable data to
+     * the file.
+     */
+    for (uint8_t i = 0; i < OPAQUE_NBYTES; i++) {
+        data[i][0] = i;
+        data[i][1] = (OPAQUE_NBYTES - 1) - i;
+    }
+
+    H5Dwrite(dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
 
     H5Tclose(type);
     H5Sclose(space);

@@ -172,7 +172,7 @@ static void            get_minmax(minmax *mm, double val);
 static void            accumulate_minmax_stuff(const minmax *mm, int count, minmax *total_mm);
 static void output_results(const struct options *options, const char *name, minmax *table, int table_size,
                            off_t data_size);
-static void output_report(const char *fmt, ...);
+static void output_report(const char *fmt, ...) H5_ATTR_FORMAT(printf, 1, 2);
 static void print_indent(int indent);
 static void usage(const char *prog);
 static void report_parameters(struct options *opts);
@@ -647,7 +647,9 @@ output_report(const char *fmt, ...)
     va_list ap;
 
     HDva_start(ap, fmt);
+    H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
     HDvfprintf(output, fmt, ap);
+    H5_GCC_CLANG_DIAG_ON("format-nonliteral")
     HDva_end(ap);
 }
 

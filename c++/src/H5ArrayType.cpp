@@ -70,8 +70,11 @@ ArrayType::ArrayType(const ArrayType &original) : DataType(original)
 //--------------------------------------------------------------------------
 ArrayType::ArrayType(const DataType &base_type, int ndims, const hsize_t *dims) : DataType()
 {
+    if (ndims < 0 || ndims > H5S_MAX_RANK)
+        throw DataTypeIException("ArrayType constructor", "ndims not in range [0..H5S_MAX_RANK]");
+
     // Call C API to create an array data type
-    hid_t new_type_id = H5Tarray_create2(base_type.getId(), ndims, dims);
+    hid_t new_type_id = H5Tarray_create2(base_type.getId(), static_cast<unsigned>(ndims), dims);
     if (new_type_id < 0)
         throw DataTypeIException("ArrayType constructor", "H5Tarray_create2 failed");
 

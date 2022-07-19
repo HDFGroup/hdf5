@@ -6,6 +6,7 @@ JUnit version 4.11
 .testH5Aiterate
 .testH5Aopen_by_idx
 .testH5Aopen_invalidname
+.testH5AVLwr
 .testH5Aopen
 .testH5Aget_info_by_name
 .testH5Aget_create_plist
@@ -30,5 +31,5 @@ JUnit version 4.11
 
 Time:  XXXX
 
-OK (28 tests)
+OK (29 tests)
 

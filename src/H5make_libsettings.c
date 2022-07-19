@@ -71,6 +71,7 @@ insert_libhdf5_settings(FILE *flibinfo)
      */
     HDfprintf(flibinfo, "#include \"H5private.h\"\n");
     HDfprintf(flibinfo, "H5_GCC_DIAG_OFF(\"larger-than=\")\n\n");
+    HDfprintf(flibinfo, "H5_CLANG_DIAG_OFF(\"overlength-strings\")\n\n");
 
     /* Print variable definition and the string. Do not use const or some
      * platforms (AIX?) will have issues.
@@ -110,6 +111,7 @@ insert_libhdf5_settings(FILE *flibinfo)
 
     /* Re-enable warnings for large arrays */
     HDfprintf(rawoutstream, "H5_GCC_DIAG_ON(\"larger-than=\")\n");
+    HDfprintf(rawoutstream, "H5_CLANG_DIAG_OFF(\"overlength-strings\")\n");
 #else
     /* Print variable definition and an empty string. Do not use const or some
      * platforms (AIX?) will have issues.

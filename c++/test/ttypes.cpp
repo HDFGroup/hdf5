@@ -241,7 +241,7 @@ test_detect_type_class()
          */
 
         // Create an array datatype with an atomic base type
-        unsigned  rank    = 2;      // Rank for array datatype
+        int       rank    = 2;      // Rank for array datatype
         hsize_t   dims[2] = {3, 3}; // Dimensions for array datatype
         ArrayType atom_arr(PredType::STD_REF_OBJ, rank, dims);
 

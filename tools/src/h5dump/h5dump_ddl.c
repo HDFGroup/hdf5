@@ -1709,27 +1709,39 @@ handle_datasets(hid_t fid, const char *dset, void *data, int pe, const char *dis
              * dimensions */
             if (!sset->start.data) {
                 /* default to (0, 0, ...) for the start coord */
-                sset->start.data = (hsize_t *)HDcalloc((size_t)ndims, sizeof(hsize_t));
-                sset->start.len  = ndims;
+                if (ndims > 0)
+                    sset->start.data = (hsize_t *)HDcalloc((size_t)ndims, sizeof(hsize_t));
+                else
+                    sset->start.data = NULL;
+                sset->start.len = ndims;
             }
 
             if (!sset->stride.data) {
-                sset->stride.data = (hsize_t *)HDcalloc((size_t)ndims, sizeof(hsize_t));
-                sset->stride.len  = ndims;
+                if (ndims > 0)
+                    sset->stride.data = (hsize_t *)HDcalloc((size_t)ndims, sizeof(hsize_t));
+                else
+                    sset->stride.data = NULL;
+                sset->stride.len = ndims;
                 for (i = 0; i < ndims; i++)
                     sset->stride.data[i] = 1;
             }
 
             if (!sset->count.data) {
-                sset->count.data = (hsize_t *)HDcalloc((size_t)ndims, sizeof(hsize_t));
-                sset->count.len  = ndims;
+                if (ndims > 0)
+                    sset->count.data = (hsize_t *)HDcalloc((size_t)ndims, sizeof(hsize_t));
+                else
+                    sset->count.data = NULL;
+                sset->count.len = ndims;
                 for (i = 0; i < ndims; i++)
                     sset->count.data[i] = 1;
             }
 
             if (!sset->block.data) {
-                sset->block.data = (hsize_t *)HDcalloc((size_t)ndims, sizeof(hsize_t));
-                sset->block.len  = ndims;
+                if (ndims > 0)
+                    sset->block.data = (hsize_t *)HDcalloc((size_t)ndims, sizeof(hsize_t));
+                else
+                    sset->block.data = NULL;
+                sset->block.len = ndims;
                 for (i = 0; i < ndims; i++)
                     sset->block.data[i] = 1;
             }

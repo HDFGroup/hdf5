@@ -4977,13 +4977,17 @@ check_and_validate_cache_hit_rate(hid_t file_id, double *hit_rate_ptr, hbool_t d
         else {
 
             cache_ptr = file_ptr->shared->cache;
+            if (NULL == cache_ptr) {
+                pass         = FALSE;
+                failure_mssg = "NULL cache pointer";
+            }
         }
     }
 
     /* verify that we can access the cache data structure */
     if (pass) {
 
-        if ((cache_ptr == NULL) || (cache_ptr->magic != H5C__H5C_T_MAGIC)) {
+        if (cache_ptr->magic != H5C__H5C_T_MAGIC) {
 
             pass         = FALSE;
             failure_mssg = "Can't access cache resize_ctl.";
@@ -5102,13 +5106,17 @@ check_and_validate_cache_size(hid_t file_id, size_t *max_size_ptr, size_t *min_c
         else {
 
             cache_ptr = file_ptr->shared->cache;
+            if (NULL == cache_ptr) {
+                pass         = FALSE;
+                failure_mssg = "NULL cache pointer";
+            }
         }
     }
 
     /* verify that we can access the cache data structure */
     if (pass) {
 
-        if ((cache_ptr == NULL) || (cache_ptr->magic != H5C__H5C_T_MAGIC)) {
+        if (cache_ptr->magic != H5C__H5C_T_MAGIC) {
 
             pass         = FALSE;
             failure_mssg = "Can't access cache data structure.";
