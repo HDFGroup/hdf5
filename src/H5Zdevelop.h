@@ -356,10 +356,11 @@ extern "C" {
  *          Note that the HDF5 library enabled memory sanity checks by default
  *          in debug builds for many years. The heap canaries introduced to
  *          buffers by this mechanism would cause problems when filters
- *          attempted to reallocate these buffers. This is no longer the
- *          case and memory sanity checking can be disabled by configuring with
- *          `--disable-memory-alloc-sanity-check` in the Autotools or setting
- *          `HDF5_MEMORY_ALLOC_SANITY_CHECK` to `OFF` in CMake.
+ *          attempted to reallocate these buffers. The sanity checks are no
+ *          longer enabled by default in any configuration. When in doubt,
+ *          memory sanity checking can be disabled explicitly by configuring
+ *          with `--disable-memory-alloc-sanity-check` in the Autotools or
+ *          setting `HDF5_MEMORY_ALLOC_SANITY_CHECK` to `OFF` in CMake.
  *
  *          The library does provide H5allocate_memory() and H5free_memory()
  *          functions that will use the library's allocation and free functions,
