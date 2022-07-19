@@ -3211,7 +3211,7 @@ tssw_persist_dapl_verify(hid_t did, hid_t vdsid1, hid_t vdsid2, hsize_t boundary
     void           *append_func_ud_out = NULL;
     size_t          rdcc_nslots_out    = 0;
     size_t          rdcc_nbytes_out    = 0;
-    double          rdcc_w0_out        = 0.;
+    double          rdcc_w0_out        = 0.0;
     char            efile_prefix_out[64];
     char            virtual_prefix_out[64];
     hsize_t         gap_size_out     = 0;
