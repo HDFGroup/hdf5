@@ -1511,7 +1511,6 @@ H5_HLDLL herr_t H5LTfind_attribute(hid_t loc_id, const char *name);
  *          - A relative path with respect to \p loc_id
  *          - A dot (\c .), if \p loc_id is the object identifier for
  *            the object itself
- *          .
  *
  *          If \p path is an absolute path, then \p loc_id can be an
  *          identifier for any object in the file as it is used only to
@@ -1591,14 +1590,14 @@ H5_HLDLL htri_t H5LTpath_valid(hid_t loc_id, const char *path, hbool_t check_obj
  *          - #H5LT_FILE_IMAGE_OPEN_RW
  *            - Specifies opening the file image in read/write mode.
  *            - Default without this flag: File image will be opened read-only.
- *            .
+ *
  *          - #H5LT_FILE_IMAGE_DONT_COPY
  *            - Specifies to not copy the provided file image buffer;
  *              the buffer will be used directly. HDF5 will release the
  *              file image when finished.
  *            - Default without this flag: Copy the file image buffer and
  *              open the copied file image.
- *            .
+ *
  *          - #H5LT_FILE_IMAGE_DONT_RELEASE
  *            - Specifies that HDF5 is not to release the buffer when
  *              the file opened with H5LTopen_file_image() is closed;

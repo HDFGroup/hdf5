@@ -37,7 +37,6 @@ extern "C" {
  *   \n Reads a raw data chunk directly from a dataset in a file into a buffer (DEPRECATED)
  * - \ref H5DOwrite_chunk
  *   \n  Writes a raw data chunk from a buffer directly to a dataset in a file (DEPRECATED)
- * .
  *
  */
 

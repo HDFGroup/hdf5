@@ -1196,25 +1196,26 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                             case H5R_MAXTYPE:
                             default:
                                 break;
-                        } /* end switch */
+                        }
                         H5TOOLS_DEBUG("H5T_REFERENCE:H5T_STD_REF end");
                     }
                     else if (H5Tequal(type, H5T_STD_REF_DSETREG)) {
                         /* if(nsize == H5R_DSET_REG_REF_BUF_SIZE) */
                         H5TOOLS_DEBUG("H5T_REFERENCE:H5T_STD_REF_DSETREG");
                         h5tools_str_append(str, H5_TOOLS_DATASET);
-                        h5tools_str_sprint_old_reference(str, container, vp);
+                        h5tools_str_sprint_old_reference(str, container, H5R_DATASET_REGION, vp);
                     }
                     else if (H5Tequal(type, H5T_STD_REF_OBJ)) {
                         /* if (nsize == H5R_OBJ_REF_BUF_SIZE) */
                         /*
                          * Object references -- show the type and OID of the referenced object.
                          */
-                        H5O_info1_t oi;
+                        H5O_info2_t oi;
+                        char *      obj_tok_str = NULL;
 
                         H5TOOLS_DEBUG("H5T_REFERENCE:H5T_STD_REF_OBJ");
                         obj = H5Rdereference2(container, H5P_DEFAULT, H5R_OBJECT, vp);
-                        H5Oget_info2(obj, &oi, H5O_INFO_BASIC);
+                        H5Oget_info3(obj, &oi, H5O_INFO_BASIC);
 
                         /* Print object type and close object */
                         switch (oi.type) {
@@ -1235,16 +1236,23 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                             default:
                                 h5tools_str_append(str, "%u-", (unsigned)oi.type);
                                 break;
-                        } /* end switch */
+                        }
                         H5Oclose(obj);
 
                         /* Print OID */
-                        if (info->obj_hidefileno)
-                            h5tools_str_append(str, info->obj_format, oi.addr);
-                        else
-                            h5tools_str_append(str, info->obj_format, oi.fileno, oi.addr);
+                        H5Otoken_to_str(obj, &oi.token, &obj_tok_str);
 
-                        h5tools_str_sprint_old_reference(str, container, vp);
+                        if (info->obj_hidefileno)
+                            h5tools_str_append(str, info->obj_format, obj_tok_str);
+                        else
+                            h5tools_str_append(str, info->obj_format, oi.fileno, obj_tok_str);
+
+                        if (obj_tok_str) {
+                            H5free_memory(obj_tok_str);
+                            obj_tok_str = NULL;
+                        }
+
+                        h5tools_str_sprint_old_reference(str, container, H5R_OBJECT, vp);
                     } /* end else if (H5Tequal(type, H5T_STD_REF_OBJ)) */
                 }
                 break;
@@ -1397,7 +1405,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
  *-------------------------------------------------------------------------
  */
 void
-h5tools_str_sprint_old_reference(h5tools_str_t *str, hid_t container, void *vp)
+h5tools_str_sprint_old_reference(h5tools_str_t *str, hid_t container, H5R_type_t ref_type, void *vp)
 {
     hid_t obj    = H5I_INVALID_HID;
     hid_t region = H5I_INVALID_HID;
@@ -1406,21 +1414,23 @@ h5tools_str_sprint_old_reference(h5tools_str_t *str, hid_t container, void *vp)
     H5TOOLS_START_DEBUG(" ");
 
     h5tools_str_append(str, " \"");
-    obj = H5Rdereference2(container, H5P_DEFAULT, H5R_DATASET_REGION, vp);
-    if (obj >= 0) {
-        region = H5Rget_region(container, H5R_DATASET_REGION, vp);
-        if (region >= 0) {
-            H5Rget_name(obj, H5R_DATASET_REGION, vp, (char *)ref_name, 1024);
-            h5tools_str_append(str, "%s", ref_name);
-
-            H5Sclose(region);
-        } /* end if (region >= 0) */
-        H5Dclose(obj);
-    } /* end if (obj >= 0) */
-    else {
-        obj = H5Rdereference2(container, H5P_DEFAULT, H5R_OBJECT, vp);
+    if (ref_type == H5R_DATASET_REGION) {
+        obj = H5Rdereference2(container, H5P_DEFAULT, ref_type, vp);
         if (obj >= 0) {
-            H5Rget_name(obj, H5R_OBJECT, vp, (char *)ref_name, 1024);
+            region = H5Rget_region(container, ref_type, vp);
+            if (region >= 0) {
+                H5Rget_name(obj, ref_type, vp, (char *)ref_name, 1024);
+                h5tools_str_append(str, "%s", ref_name);
+
+                H5Sclose(region);
+            } /* end if (region >= 0) */
+            H5Dclose(obj);
+        } /* end if (obj >= 0) */
+    }
+    else if (ref_type == H5R_OBJECT) {
+        obj = H5Rdereference2(container, H5P_DEFAULT, ref_type, vp);
+        if (obj >= 0) {
+            H5Rget_name(obj, ref_type, vp, (char *)ref_name, 1024);
             h5tools_str_append(str, "%s", ref_name);
             H5Dclose(obj);
         }
