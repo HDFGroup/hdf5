@@ -21,6 +21,13 @@
 #define MIN_READ_RETRIES 10
 
 /*
+ * The amount of time (in nanoseconds) for the IOC main
+ * thread to sleep when there are no incoming I/O requests
+ * to process
+ */
+#define IOC_MAIN_SLEEP_DELAY (20000)
+
+/*
  * IOC data for a file that is stored in that
  * file's subfiling context object
  */
@@ -82,7 +89,7 @@ static int ioc_file_report_eof(sf_work_request_t *msg, int subfile_rank, int sou
 
 static ioc_io_queue_entry_t *ioc_io_queue_alloc_entry(void);
 static void ioc_io_queue_complete_entry(ioc_data_t *ioc_data, ioc_io_queue_entry_t *entry_ptr);
-static void ioc_io_queue_dispatch_eligible_entries(ioc_data_t *ioc_data);
+static void ioc_io_queue_dispatch_eligible_entries(ioc_data_t *ioc_data, hbool_t try_lock);
 static void ioc_io_queue_free_entry(ioc_io_queue_entry_t *q_entry_ptr);
 static void ioc_io_queue_add_entry(ioc_data_t *ioc_data, sf_work_request_t *wk_req_ptr);
 
@@ -367,8 +374,7 @@ ioc_main(ioc_data_t *ioc_data)
     while ((!shutdown_requested) || (0 < atomic_load(&ioc_data->sf_io_ops_pending)) ||
            (0 < atomic_load(&ioc_data->sf_work_pending))) {
         MPI_Status status;
-        useconds_t delay = 20;
-        int        flag  = 0;
+        int        flag = 0;
         int        mpi_code;
 
         /* Probe for incoming work requests */
@@ -423,10 +429,14 @@ ioc_main(ioc_data_t *ioc_data)
             HDassert(atomic_load(&ioc_data->sf_io_ops_pending) >= 0);
         }
         else {
-            usleep(delay);
+            struct timespec sleep_spec = {
+                0, IOC_MAIN_SLEEP_DELAY
+            };
+
+            HDnanosleep(&sleep_spec, NULL);
         }
 
-        ioc_io_queue_dispatch_eligible_entries(ioc_data);
+        ioc_io_queue_dispatch_eligible_entries(ioc_data, flag ? 0 : 1);
 
         shutdown_requested = atomic_load(&ioc_data->sf_shutdown_flag);
     }
@@ -575,7 +585,7 @@ handle_work_request(void *arg)
     HDassert(atomic_load(&ioc_data->sf_io_ops_pending) >= 0);
 
     /* Check the I/O Queue to see if there are any dispatchable entries */
-    ioc_io_queue_dispatch_eligible_entries(ioc_data);
+    ioc_io_queue_dispatch_eligible_entries(ioc_data, 1);
 
     H5_SUBFILING_FUNC_LEAVE;
 }
@@ -1379,7 +1389,7 @@ ioc_io_queue_add_entry(ioc_data_t *ioc_data, sf_work_request_t *wk_req_ptr)
  *       can become O(N**2) in the worst case.
  */
 static void
-ioc_io_queue_dispatch_eligible_entries(ioc_data_t *ioc_data)
+ioc_io_queue_dispatch_eligible_entries(ioc_data_t *ioc_data, hbool_t try_lock)
 {
     hbool_t               conflict_detected;
     int64_t               entry_offset;
@@ -1392,8 +1402,12 @@ ioc_io_queue_dispatch_eligible_entries(ioc_data_t *ioc_data)
     HDassert(ioc_data);
     HDassert(ioc_data->io_queue.magic == H5FD_IOC__IO_Q_MAGIC);
 
-    if (hg_thread_mutex_try_lock(&ioc_data->io_queue.q_mutex) < 0)
-        return;
+    if (try_lock) {
+        if (hg_thread_mutex_try_lock(&ioc_data->io_queue.q_mutex) < 0)
+            return;
+    }
+    else
+        hg_thread_mutex_lock(&ioc_data->io_queue.q_mutex);
 
     entry_ptr = ioc_data->io_queue.q_head;
 
