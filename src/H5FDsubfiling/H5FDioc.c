@@ -1003,6 +1003,11 @@ H5FD__ioc_close_int(H5FD_ioc_t *file_ptr)
 
     if (file_ptr->context_id >= 0) {
         subfiling_context_t *sf_context = H5_get_subfiling_object(file_ptr->context_id);
+        int                  mpi_code;
+
+        /* Don't allow IOC threads to be finalized until everyone gets here */
+        if (MPI_SUCCESS != (mpi_code = MPI_Barrier(file_ptr->comm)))
+            H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code);
 
         if (sf_context && sf_context->topology->rank_is_ioc) {
             if (finalize_ioc_threads(sf_context) < 0)
