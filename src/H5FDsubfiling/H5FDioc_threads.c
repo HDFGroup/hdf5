@@ -1392,7 +1392,8 @@ ioc_io_queue_dispatch_eligible_entries(ioc_data_t *ioc_data)
     HDassert(ioc_data);
     HDassert(ioc_data->io_queue.magic == H5FD_IOC__IO_Q_MAGIC);
 
-    hg_thread_mutex_lock(&ioc_data->io_queue.q_mutex);
+    if (hg_thread_mutex_try_lock(&ioc_data->io_queue.q_mutex) < 0)
+        return;
 
     entry_ptr = ioc_data->io_queue.q_head;
 
