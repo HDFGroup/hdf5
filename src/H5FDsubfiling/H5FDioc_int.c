@@ -347,11 +347,9 @@ done:
 static int
 async_completion(void *arg)
 {
-    useconds_t delay = 5;
-    int        n_reqs;
-    int        n_waiting;
-    int *      indices   = NULL;
-    int        ret_value = 0;
+    int n_reqs;
+    int mpi_code;
+    int ret_value = 0;
     struct async_arg {
         int          n_reqs;
         MPI_Request *sf_reqs;
@@ -359,8 +357,7 @@ async_completion(void *arg)
 
     HDassert(arg);
 
-    n_reqs    = in_progress->n_reqs;
-    n_waiting = n_reqs;
+    n_reqs = in_progress->n_reqs;
 
     if (n_reqs < 0) {
 #ifdef H5FD_IOC_DEBUG
@@ -371,40 +368,15 @@ async_completion(void *arg)
         goto done;
     }
 
-    if (NULL == (indices = HDmalloc((size_t)n_reqs * sizeof(*indices)))) {
+    if (MPI_SUCCESS != (mpi_code = MPI_Waitall(n_reqs, in_progress->sf_reqs, MPI_STATUSES_IGNORE))) {
 #ifdef H5FD_IOC_DEBUG
-        HDprintf("%s: couldn't allocate MPI request array\n", __func__);
+        HDprintf("%s: MPI_Waitall failed with rc %d\n", __func__, mpi_code);
 #endif
 
         ret_value = -1;
         goto done;
     }
 
-    while (n_waiting) {
-        int ready = 0;
-        int mpi_code;
-
-        if (MPI_SUCCESS !=
-            (mpi_code = MPI_Testsome(n_reqs, in_progress->sf_reqs, &ready, indices, MPI_STATUSES_IGNORE))) {
-#ifdef H5FD_IOC_DEBUG
-            HDprintf("%s: MPI_Testsome failed with rc %d\n", __func__, mpi_code);
-#endif
-
-            ret_value = -1;
-            goto done;
-        }
-
-        if (ready == 0) {
-            usleep(delay);
-        }
-
-        for (int i = 0; i < ready; i++) {
-            n_waiting--;
-        }
-    }
-
 done:
-    HDfree(indices);
-
     H5_SUBFILING_FUNC_LEAVE;
 }
