@@ -2567,6 +2567,9 @@ gent_nestcomp(void)
     H5Fclose(file);
 }
 
+#define N_OPAQUE_BYTES_PER_ELEMENT ((uint8_t)100)
+#define N_OPAQUE_ELEMENTS          2
+
 static void
 gent_opaque(void)
 {
@@ -2575,17 +2578,14 @@ gent_opaque(void)
     hid_t dataset = H5I_INVALID_HID;
     hid_t space   = H5I_INVALID_HID;
 
-    const uint8_t OPAQUE_NBYTES = 100;
-    const int     N_ELEMENTS    = 2;
-
     /* The dataset contains N_ELEMENTS elements of OPAQUE_NBYTES bytes */
-    uint8_t data[OPAQUE_NBYTES][N_ELEMENTS];
-    hsize_t dim = N_ELEMENTS;
+    uint8_t data[N_OPAQUE_BYTES_PER_ELEMENT][N_OPAQUE_ELEMENTS];
+    hsize_t dim = N_OPAQUE_ELEMENTS;
 
     file = H5Fcreate(FILE19, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     /* The opaque datatype is OPAQUE_NBYTES bytes in size */
-    type = H5Tcreate(H5T_OPAQUE, sizeof(uint8_t) * OPAQUE_NBYTES);
+    type = H5Tcreate(H5T_OPAQUE, sizeof(uint8_t) * N_OPAQUE_BYTES_PER_ELEMENT);
     H5Tset_tag(type, "test opaque type");
 
     space   = H5Screate_simple(1, &dim, NULL);
@@ -2595,14 +2595,14 @@ gent_opaque(void)
      * in the opaque type isn't so big that i or (OPAQUE_NBYTES - 1) - i
      * don't fit in a uint8_t value..
      */
-    HDcompile_assert(OPAQUE_NBYTES < UINT8_MAX);
+    HDcompile_assert(N_OPAQUE_BYTES_PER_ELEMENT < UINT8_MAX);
 
     /* Write out two opaque data elements with predictable data to
      * the file.
      */
-    for (uint8_t i = 0; i < OPAQUE_NBYTES; i++) {
+    for (uint8_t i = 0; i < N_OPAQUE_BYTES_PER_ELEMENT; i++) {
         data[i][0] = i;
-        data[i][1] = (OPAQUE_NBYTES - 1) - i;
+        data[i][1] = (N_OPAQUE_BYTES_PER_ELEMENT - 1) - i;
     }
 
     H5Dwrite(dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
