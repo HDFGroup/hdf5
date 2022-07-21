@@ -132,6 +132,21 @@ New Features
 
     Tools:
     ------
+    - Building h5perf/h5perf_serial in "standalone mode" has been removed
+
+      Building h5perf separately from the library was added circa 2008
+      in HDF5 1.6.8. It's unclear what purpose this serves and the current
+      implementation is currently broken. The existing files require
+      H5private.h and the symbols we use to determine how the copied
+      platform-independence scheme should be used come from H5pubconf.h,
+      which may not match the compiler being used to build standalone h5perf.
+
+      Due to the maintenance overhead and lack of a clear use case, support
+      for building h5perf and h5perf_serial separately from the HDF5 library
+      has been removed.
+
+      (DER - 2022/07/15)
+
     - The perf tool has been removed
 
       The small `perf` tool didn't really do anything special and the name

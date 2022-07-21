@@ -56,6 +56,9 @@ const char *FILENAME[] = {"swmr0", /* 0 */
 
 #define NAME_BUF_SIZE 1024 /* Length of file name */
 
+/* Epsilon for floating-point comparisons */
+#define FP_EPSILON 0.000001F
+
 /* Tests for H5Pget/set_metadata_read_attempts(), H5Fget_metadata_read_retry_info */
 static int test_metadata_read_attempts(hid_t in_fapl);
 static int test_metadata_read_retry_info(hid_t in_fapl);
@@ -65,6 +68,7 @@ static int test_start_swmr_write(hid_t in_fapl, hbool_t new_format);
 static int test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format);
 static int test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format);
 static int test_start_swmr_write_stress_ohdr(hid_t in_fapl);
+static int test_start_swmr_write_persist_dapl(hid_t in_fapl);
 
 /* Tests for H5Pget/set_object_flush_cb() */
 static herr_t flush_cb(hid_t obj_id, void *_udata);
@@ -3178,6 +3182,374 @@ error:
 
     return -1;
 } /* test_start_swmr_write_stress_ohdr() */
+
+/*
+ *  test_start_swmr_write_persist_dapl():
+ *
+ *  Verify H5Fstart_swmr_write() doesn't wipe out dataset access properties for
+ *  open datasets.
+ *
+ */
+static herr_t
+dummy_append_flush_cb(hid_t H5_ATTR_UNUSED dataset_id, hsize_t H5_ATTR_UNUSED *cur_dims,
+                      void H5_ATTR_UNUSED *user_data)
+{
+    return SUCCEED;
+}
+
+static herr_t
+tssw_persist_dapl_verify(hid_t did, hid_t vdsid1, hid_t vdsid2, hsize_t boundary, H5D_append_cb_t append_func,
+                         void *append_func_ud, size_t rdcc_nslots, size_t rdcc_nbytes, double rdcc_w0,
+                         const char *efile_prefix, const char *virtual_prefix, hsize_t gap_size,
+                         H5D_vds_view_t virtual_view)
+{
+    hid_t           dapl               = H5I_INVALID_HID;
+    hid_t           vds_dapl1          = H5I_INVALID_HID;
+    hid_t           vds_dapl2          = H5I_INVALID_HID;
+    hsize_t         boundary_out       = 0;
+    H5D_append_cb_t append_func_out    = NULL;
+    void *          append_func_ud_out = NULL;
+    size_t          rdcc_nslots_out    = 0;
+    size_t          rdcc_nbytes_out    = 0;
+    double          rdcc_w0_out        = 0.;
+    char            efile_prefix_out[64];
+    char            virtual_prefix_out[64];
+    hsize_t         gap_size_out     = 0;
+    H5D_vds_view_t  virtual_view_out = H5D_VDS_LAST_AVAILABLE;
+
+    /* Get dataset access property lists */
+    if ((dapl = H5Dget_access_plist(did)) < 0)
+        TEST_ERROR;
+    if ((vds_dapl1 = H5Dget_access_plist(vdsid1)) < 0)
+        TEST_ERROR;
+    if ((vds_dapl2 = H5Dget_access_plist(vdsid2)) < 0)
+        TEST_ERROR;
+
+    /* Get append flush property and verify */
+    if (H5Pget_append_flush(dapl, 1, &boundary_out, &append_func_out, &append_func_ud_out) < 0)
+        TEST_ERROR;
+    if (boundary != boundary_out)
+        TEST_ERROR;
+    if (append_func != append_func_out)
+        TEST_ERROR;
+    if (append_func_ud != append_func_ud_out)
+        TEST_ERROR;
+
+    /* Get chunk cache property and verify */
+    if (H5Pget_chunk_cache(dapl, &rdcc_nslots_out, &rdcc_nbytes_out, &rdcc_w0_out) < 0)
+        TEST_ERROR;
+    if (rdcc_nslots != rdcc_nslots_out)
+        TEST_ERROR;
+    if (rdcc_nbytes != rdcc_nbytes_out)
+        TEST_ERROR;
+    if (HDfabs(rdcc_w0 - rdcc_w0_out) > (double)FP_EPSILON)
+        TEST_ERROR;
+
+    /* Get efile prefix property and verify */
+    if (H5Pget_efile_prefix(dapl, efile_prefix_out, sizeof(efile_prefix_out)) < 0)
+        TEST_ERROR;
+    if (HDstrncmp(efile_prefix, efile_prefix_out, sizeof(efile_prefix_out)))
+        TEST_ERROR;
+
+    /* Get virtual prefix property and verify */
+    if (H5Pget_virtual_prefix(vds_dapl1, virtual_prefix_out, sizeof(virtual_prefix_out)) < 0)
+        TEST_ERROR;
+    if (HDstrncmp(virtual_prefix, virtual_prefix_out, sizeof(virtual_prefix_out)))
+        TEST_ERROR;
+
+    /* Get virtual printf gap property and verify */
+    if (H5Pget_virtual_printf_gap(vds_dapl1, &gap_size_out) < 0)
+        TEST_ERROR;
+    if (gap_size != gap_size_out)
+        TEST_ERROR;
+
+    /* Get virtual view property and verify.  Use vds_dapl2 since a VDS can't
+     * have both LAST_AVAILABLE and a printf gap set.  vds1 has a printf gap and
+     * vds2 has LAST_AVAILABLE. */
+    if (H5Pget_virtual_view(vds_dapl2, &virtual_view_out) < 0)
+        TEST_ERROR;
+    if (virtual_view != virtual_view_out)
+        TEST_ERROR;
+
+    /* Close DAPLs */
+    if (H5Pclose(dapl) < 0)
+        TEST_ERROR;
+    if (H5Pclose(vds_dapl1) < 0)
+        TEST_ERROR;
+    if (H5Pclose(vds_dapl2) < 0)
+        TEST_ERROR;
+
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dapl);
+        H5Pclose(vds_dapl1);
+        H5Pclose(vds_dapl2);
+    }
+    H5E_END_TRY;
+
+    return FAIL;
+} /* tssw_persist_dapl_verify() */
+
+static int
+test_start_swmr_write_persist_dapl(hid_t in_fapl)
+{
+    hid_t           fid            = H5I_INVALID_HID; /* File ID */
+    hid_t           fapl           = H5I_INVALID_HID; /* File access property */
+    hid_t           dcpl           = H5I_INVALID_HID; /* Dataset creation property */
+    hid_t           vds_dcpl       = H5I_INVALID_HID; /* Virtual dataset creation property */
+    hid_t           dapl1          = H5I_INVALID_HID; /* Dataset access property */
+    hid_t           dapl2          = H5I_INVALID_HID; /* Dataset access property */
+    hid_t           did            = H5I_INVALID_HID; /* Dataset ID */
+    hid_t           vdsid1         = H5I_INVALID_HID; /* Virtual Dataset ID */
+    hid_t           vdsid2         = H5I_INVALID_HID; /* Virtual Dataset ID */
+    hid_t           sid            = H5I_INVALID_HID; /* Dataspace IDs*/
+    hsize_t         dim[1]         = {1};             /* Dimension sizes */
+    hsize_t         max_dim[1]     = {H5S_UNLIMITED}; /* Maximum dimension sizes */
+    hsize_t         chunk_dim[1]   = {2};             /* Chunk dimension sizes */
+    hsize_t         boundary       = 23;
+    H5D_append_cb_t append_func    = dummy_append_flush_cb;
+    void *          append_func_ud = &boundary;
+    size_t          rdcc_nslots    = 125;
+    size_t          rdcc_nbytes    = 23434;
+    double          rdcc_w0        = 0.68419;
+    const char *    efile_prefix   = "dummy_efile_prefix";
+    const char *    virtual_prefix = "dummy_virtual_prefix";
+    hsize_t         gap_size       = 421;
+    H5D_vds_view_t  virtual_view   = H5D_VDS_FIRST_MISSING;
+    char            filename[NAME_BUF_SIZE]; /* File name */
+
+    /* Get a copy of the parameter fapl (non-latest-format) */
+    if ((fapl = H5Pcopy(in_fapl)) < 0)
+        FAIL_STACK_ERROR;
+
+    TESTING("H5Fstart_swmr_write() persists DAPL settings");
+
+    /* Set to use the latest library format */
+    if (H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+        TEST_ERROR;
+
+    /* Set the filename to use for this test (dependent on fapl) */
+    h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
+
+    /* Create the file with SWMR write + non-latest-format */
+    if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        TEST_ERROR;
+
+    /* Create dapl with custom properties */
+    if ((dapl1 = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
+        TEST_ERROR;
+
+    /* Set append flush property */
+    boundary = 23;
+    if (H5Pset_append_flush(dapl1, 1, &boundary, dummy_append_flush_cb, append_func_ud) < 0)
+        TEST_ERROR;
+
+    /* Set chunk cache property */
+    if (H5Pset_chunk_cache(dapl1, rdcc_nslots, rdcc_nbytes, rdcc_w0) < 0)
+        TEST_ERROR;
+
+    /* Set efile prefix property */
+    if (H5Pset_efile_prefix(dapl1, efile_prefix) < 0)
+        TEST_ERROR;
+
+    /* Set virtual prefix property */
+    if (H5Pset_virtual_prefix(dapl1, virtual_prefix) < 0)
+        TEST_ERROR;
+
+    /* Set virtual printf gap property */
+    if (H5Pset_virtual_printf_gap(dapl1, gap_size) < 0)
+        TEST_ERROR;
+
+    /* Must create separate dapl2 for a different view, since the non-default
+     * view of FIRST_MISSING wipes out the printf gap setting */
+    if ((dapl2 = H5Pcopy(dapl1)) < 0)
+        TEST_ERROR;
+
+    /* Set virtual view property */
+    if (H5Pset_virtual_view(dapl2, virtual_view) < 0)
+        TEST_ERROR;
+
+    /*
+     * Case A: create file, create dataset
+     */
+
+    /* Create "dataset1" */
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pset_chunk(dcpl, 1, chunk_dim) < 0)
+        TEST_ERROR;
+    if ((sid = H5Screate_simple(1, dim, max_dim)) < 0)
+        TEST_ERROR;
+    if ((did = H5Dcreate2(fid, "dataset1", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, dapl1)) < 0)
+        TEST_ERROR;
+
+    /* Create "vds1" */
+    if ((vds_dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+    if (H5Pset_layout(vds_dcpl, H5D_VIRTUAL) < 0)
+        TEST_ERROR;
+    if ((vdsid1 = H5Dcreate2(fid, "vds1", H5T_NATIVE_INT, sid, H5P_DEFAULT, vds_dcpl, dapl1)) < 0)
+        TEST_ERROR;
+
+    /* Create "vds2" */
+    if ((vdsid2 = H5Dcreate2(fid, "vds2", H5T_NATIVE_INT, sid, H5P_DEFAULT, vds_dcpl, dapl2)) < 0)
+        TEST_ERROR;
+
+    /* Enable swmr write */
+    if (H5Fstart_swmr_write(fid) < 0)
+        TEST_ERROR;
+
+    /* Verify dataset still has correct access properties */
+    if (tssw_persist_dapl_verify(did, vdsid1, vdsid2, boundary, append_func, append_func_ud, rdcc_nslots,
+                                 rdcc_nbytes, rdcc_w0, efile_prefix, virtual_prefix, gap_size,
+                                 virtual_view) < 0)
+        TEST_ERROR;
+
+    /* Close "dataset1" */
+    if (H5Dclose(did) < 0)
+        TEST_ERROR;
+
+    /* Close "vds1" */
+    if (H5Dclose(vdsid1) < 0)
+        TEST_ERROR;
+
+    /* Close "vds2" */
+    if (H5Dclose(vdsid2) < 0)
+        TEST_ERROR;
+
+    /* Close the file */
+    if (H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR;
+
+    /*
+     * Case B: opened file, open dataset
+     */
+
+    /* Open the file again with write */
+    if ((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+        TEST_ERROR;
+
+    /* Open "dataset1", keep it open */
+    if ((did = H5Dopen2(fid, "dataset1", dapl1)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Open "vds1", keep it open */
+    if ((vdsid1 = H5Dopen2(fid, "vds1", dapl1)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Open "vds1", keep it open */
+    if ((vdsid2 = H5Dopen2(fid, "vds2", dapl2)) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Enable swmr write */
+    if (H5Fstart_swmr_write(fid) < 0)
+        TEST_ERROR;
+
+    /* Verify dataset still has correct access properties */
+    if (tssw_persist_dapl_verify(did, vdsid1, vdsid2, boundary, append_func, append_func_ud, rdcc_nslots,
+                                 rdcc_nbytes, rdcc_w0, efile_prefix, virtual_prefix, gap_size,
+                                 virtual_view) < 0)
+        TEST_ERROR;
+
+    /* Close "dataset1" */
+    if (H5Dclose(did) < 0)
+        TEST_ERROR;
+
+    /* Close "vds1" */
+    if (H5Dclose(vdsid1) < 0)
+        TEST_ERROR;
+
+    /* Close "vds2" */
+    if (H5Dclose(vdsid2) < 0)
+        TEST_ERROR;
+
+    /* Close the file */
+    if (H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR;
+
+    /*
+     * Case C: opened file, create dataset
+     */
+
+    /* Open the file again with write */
+    if ((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+        TEST_ERROR;
+
+    /* Create "dataset2" */
+    if ((did = H5Dcreate2(fid, "dataset2", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, dapl1)) < 0)
+        TEST_ERROR;
+
+    /* Create "vds3" */
+    if ((vdsid1 = H5Dcreate2(fid, "vds3", H5T_NATIVE_INT, sid, H5P_DEFAULT, vds_dcpl, dapl1)) < 0)
+        TEST_ERROR;
+
+    /* Create "vds4" */
+    if ((vdsid2 = H5Dcreate2(fid, "vds4", H5T_NATIVE_INT, sid, H5P_DEFAULT, vds_dcpl, dapl2)) < 0)
+        TEST_ERROR;
+
+    /* Enable swmr write */
+    if (H5Fstart_swmr_write(fid) < 0)
+        TEST_ERROR;
+
+    /* Verify dataset still has correct access properties */
+    if (tssw_persist_dapl_verify(did, vdsid1, vdsid2, boundary, append_func, append_func_ud, rdcc_nslots,
+                                 rdcc_nbytes, rdcc_w0, efile_prefix, virtual_prefix, gap_size,
+                                 virtual_view) < 0)
+        TEST_ERROR;
+
+    /* Close "dataset1" */
+    if (H5Dclose(did) < 0)
+        TEST_ERROR;
+
+    /* Close "vds1" */
+    if (H5Dclose(vdsid1) < 0)
+        TEST_ERROR;
+
+    /* Close "vds2" */
+    if (H5Dclose(vdsid2) < 0)
+        TEST_ERROR;
+
+    /* Close the file */
+    if (H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Close dataspace, dapl, dcpl*/
+    if (H5Sclose(sid) < 0)
+        TEST_ERROR;
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR;
+    if (H5Pclose(vds_dcpl) < 0)
+        TEST_ERROR;
+    if (H5Pclose(dapl1) < 0)
+        TEST_ERROR;
+    if (H5Pclose(dapl2) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(fid);
+        H5Pclose(fapl);
+        H5Pclose(dcpl);
+        H5Pclose(vds_dcpl);
+        H5Pclose(dapl1);
+        H5Pclose(dapl2);
+        H5Dclose(did);
+        H5Dclose(vdsid1);
+        H5Dclose(vdsid2);
+        H5Sclose(sid);
+    }
+    H5E_END_TRY;
+
+    return -1;
+} /* test_start_swmr_write_persist_dapl() */
 
 /*
  * Tests for H5Pset/get_object_flush_cb()
@@ -7421,6 +7793,7 @@ main(void)
     nerrors += test_start_swmr_write_concur(fapl, TRUE);
     nerrors += test_start_swmr_write_concur(fapl, FALSE);
     nerrors += test_start_swmr_write_stress_ohdr(fapl);
+    nerrors += test_start_swmr_write_persist_dapl(fapl);
 
     /* Tests for H5Pget/set_object_flush_cb() */
     nerrors += test_object_flush_cb(fapl);
