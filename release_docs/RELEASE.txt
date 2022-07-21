@@ -56,7 +56,7 @@ New Features
       arch dependent, and not easily readable by a human being. They are
       nevertheless searched for in the includes directories by gfortran
       (in directories specified with -I).
-      
+
       Autotools configure uses the -fmoddir option to specify the folder.
       CMake will use "mod" folder by default unless overridden by the CMake
       variable; HDF5_INSTALL_MODULE_DIR.
