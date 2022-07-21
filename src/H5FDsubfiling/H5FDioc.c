@@ -155,6 +155,7 @@ static herr_t  H5FD__ioc_flush(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 static herr_t  H5FD__ioc_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 static herr_t  H5FD__ioc_lock(H5FD_t *_file, hbool_t rw);
 static herr_t  H5FD__ioc_unlock(H5FD_t *_file);
+static herr_t  H5FD__ioc_del(const char *name, hid_t fapl);
 /*
 static herr_t H5FD__ioc_ctl(H5FD_t *file, uint64_t op_code, uint64_t flags,
                             const void *input, void **result);
@@ -210,7 +211,7 @@ static const H5FD_class_t H5FD_ioc_g = {
     H5FD__ioc_truncate,        /* truncate              */
     H5FD__ioc_lock,            /* lock                  */
     H5FD__ioc_unlock,          /* unlock                */
-    NULL,                      /* del                   */
+    H5FD__ioc_del,             /* del                   */
     NULL,                      /* ctl                   */
     H5FD_FLMAP_DICHOTOMY       /* fl_map                */
 };
@@ -1592,6 +1593,19 @@ H5FD__ioc_unlock(H5FD_t *_file)
 done:
     H5_SUBFILING_FUNC_LEAVE;
 } /* end H5FD__ioc_unlock */
+
+static herr_t
+H5FD__ioc_del(const char *name, hid_t fapl)
+{
+    herr_t ret_value = SUCCEED;
+
+    (void)name;
+    (void)fapl;
+
+    /* TODO: implement later */
+
+    H5_SUBFILING_FUNC_LEAVE;
+}
 
 /*--------------------------------------------------------------------------
  * Function:   H5FD__ioc_write_vector_internal

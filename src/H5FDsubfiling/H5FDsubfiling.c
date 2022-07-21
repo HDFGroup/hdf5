@@ -211,6 +211,7 @@ static herr_t  H5FD__subfiling_write_vector(H5FD_t *file, hid_t dxpl_id, uint32_
 static herr_t  H5FD__subfiling_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 static herr_t  H5FD__subfiling_lock(H5FD_t *_file, hbool_t rw);
 static herr_t  H5FD__subfiling_unlock(H5FD_t *_file);
+static herr_t  H5FD__subfiling_del(const char *name, hid_t fapl);
 static herr_t  H5FD__subfiling_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void *input,
                                    void **output);
 
@@ -282,7 +283,7 @@ static const H5FD_class_t H5FD_subfiling_g = {
     H5FD__subfiling_truncate,        /* truncate              */
     H5FD__subfiling_lock,            /* lock                  */
     H5FD__subfiling_unlock,          /* unlock                */
-    NULL,                            /* del                   */
+    H5FD__subfiling_del,             /* del                   */
     H5FD__subfiling_ctl,             /* ctl                   */
     H5FD_FLMAP_DICHOTOMY             /* fl_map                */
 };
@@ -2406,6 +2407,34 @@ H5FD__subfiling_unlock(H5FD_t *_file)
 done:
     H5_SUBFILING_FUNC_LEAVE_API;
 } /* end H5FD__subfiling_unlock() */
+
+static herr_t
+H5FD__subfiling_del(const char *name, hid_t fapl)
+{
+    const H5FD_subfiling_config_t *subfiling_config = NULL;
+    H5FD_subfiling_config_t        default_config;
+    H5P_genplist_t *               plist     = NULL;
+    herr_t                         ret_value = SUCCEED;
+
+    if (NULL == (plist = H5P_object_verify(fapl, H5P_FILE_ACCESS)))
+        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
+
+    if (H5FD_SUBFILING != H5P_peek_driver(plist))
+        H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect driver set on FAPL");
+
+    if (NULL == (subfiling_config = H5P_peek_driver_info(plist))) {
+        if (H5FD__subfiling_get_default_config(fapl, &default_config) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL,
+                                    "can't get default Subfiling VFD configuration");
+        subfiling_config = &default_config;
+    }
+
+    if (H5FD_delete(name, subfiling_config->ioc_fapl_id) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTDELETE, FAIL, "unable to delete file");
+
+done:
+    H5_SUBFILING_FUNC_LEAVE_API;
+}
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD__subfiling_ctl
