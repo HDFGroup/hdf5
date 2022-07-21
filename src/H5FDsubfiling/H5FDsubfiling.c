@@ -1967,6 +1967,7 @@ H5FD__subfiling_read_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_m
                             size_t sizes[], void *bufs[] /* out */)
 {
     H5FD_subfiling_t *file_ptr  = (H5FD_subfiling_t *)_file;
+    H5FD_mpio_xfer_t  xfer_mode = H5FD_MPIO_INDEPENDENT;
     herr_t            ret_value = SUCCEED; /* Return value             */
 
     /* Check arguments
@@ -2016,6 +2017,16 @@ H5FD__subfiling_read_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_m
 
         HDassert((count == 0) || (sizes[0] != 0));
         HDassert((count == 0) || (types[0] != H5FD_MEM_NOLIST));
+
+        if (H5CX_get_io_xfer_mode(&xfer_mode) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL,
+                                    "can't determine I/O collectivity setting");
+
+        /* Currently, treat collective calls as independent */
+        if (xfer_mode != H5FD_MPIO_INDEPENDENT)
+            if (H5CX_set_io_xfer_mode(H5FD_MPIO_INDEPENDENT) < 0)
+                H5_SUBFILING_GOTO_ERROR(H5E_CONTEXT, H5E_CANTSET, FAIL,
+                                        "can't set I/O collectivity setting");
 
         /* Note that the following code does not let the sub-filing VFD participate
          * in collective calls when there is no data to write.  This is not an issue
@@ -2073,6 +2084,11 @@ H5FD__subfiling_read_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_m
     }
 
 done:
+    if (xfer_mode != H5FD_MPIO_INDEPENDENT)
+        if (H5CX_set_io_xfer_mode(xfer_mode) < 0)
+            H5_SUBFILING_DONE_ERROR(H5E_CONTEXT, H5E_CANTSET, FAIL,
+                                    "can't set I/O collectivity setting");
+
     H5_SUBFILING_FUNC_LEAVE_API;
 } /* end H5FD__subfiling_read_vector() */
 
@@ -2117,6 +2133,7 @@ H5FD__subfiling_write_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_
                              haddr_t addrs[], size_t sizes[], const void *bufs[] /* in */)
 {
     H5FD_subfiling_t *file_ptr  = (H5FD_subfiling_t *)_file;
+    H5FD_mpio_xfer_t  xfer_mode = H5FD_MPIO_INDEPENDENT;
     herr_t            ret_value = SUCCEED; /* Return value             */
 
     HDassert(file_ptr != NULL); /* sanity check */
@@ -2164,6 +2181,16 @@ H5FD__subfiling_write_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_
 
         HDassert((count == 0) || (sizes[0] != 0));
         HDassert((count == 0) || (types[0] != H5FD_MEM_NOLIST));
+
+        if (H5CX_get_io_xfer_mode(&xfer_mode) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL,
+                                    "can't determine I/O collectivity setting");
+
+        /* Currently, treat collective calls as independent */
+        if (xfer_mode != H5FD_MPIO_INDEPENDENT)
+            if (H5CX_set_io_xfer_mode(H5FD_MPIO_INDEPENDENT) < 0)
+                H5_SUBFILING_GOTO_ERROR(H5E_CONTEXT, H5E_CANTSET, FAIL,
+                                        "can't set I/O collectivity setting");
 
         /* Note that the following code does not let the sub-filing VFD participate
          * in collective calls when there is no data to write.  This is not an issue
@@ -2219,7 +2246,13 @@ H5FD__subfiling_write_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_
         if (H5FD_write_vector(_file, count, types, addrs, sizes, bufs) != SUCCEED)
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file vector write request failed");
     }
+
 done:
+    if (xfer_mode != H5FD_MPIO_INDEPENDENT)
+        if (H5CX_set_io_xfer_mode(xfer_mode) < 0)
+            H5_SUBFILING_DONE_ERROR(H5E_CONTEXT, H5E_CANTSET, FAIL,
+                                    "can't set I/O collectivity setting");
+
     H5_SUBFILING_FUNC_LEAVE_API;
 } /* end H5FDsubfile__write_vector() */
 
