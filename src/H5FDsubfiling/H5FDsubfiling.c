@@ -889,6 +889,18 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
     if (MPI_SUCCESS != (mpi_code = MPI_Comm_size(file_ptr->comm, &file_ptr->mpi_size)))
         H5_SUBFILING_MPI_GOTO_ERROR(NULL, "MPI_Comm_size failed", mpi_code);
 
+    /* Work around an HDF5 metadata cache bug with distributed metadata writes when MPI size == 1 */
+    if (file_ptr->mpi_size == 1) {
+        H5AC_cache_config_t mdc_config;
+
+        /* Get the current initial metadata cache resize configuration */
+        if (H5P_get(plist_ptr, H5F_ACS_META_CACHE_INIT_CONFIG_NAME, &mdc_config) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get metadata cache initial config");
+        mdc_config.metadata_write_strategy = H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY;
+        if (H5P_set(plist_ptr, H5F_ACS_META_CACHE_INIT_CONFIG_NAME, &mdc_config) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "can't set metadata cache initial config");
+    }
+
     config_ptr = H5P_peek_driver_info(plist_ptr);
     if (!config_ptr || (H5P_FILE_ACCESS_DEFAULT == fapl_id)) {
         if (H5FD__subfiling_get_default_config(fapl_id, &default_config) < 0)
