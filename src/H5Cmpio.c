@@ -947,10 +947,10 @@ H5C__collective_write(H5F_t *f)
 {
     H5AC_t *         cache_ptr;
     H5FD_mpio_xfer_t orig_xfer_mode = H5FD_MPIO_COLLECTIVE;
-    const void **    bufs  = NULL;
-    H5FD_mem_t *     types = NULL;
-    haddr_t *        addrs = NULL;
-    size_t *         sizes = NULL;
+    const void **    bufs           = NULL;
+    H5FD_mem_t *     types          = NULL;
+    haddr_t *        addrs          = NULL;
+    size_t *         sizes          = NULL;
     uint32_t         count32;
     size_t           count;
     herr_t           ret_value = SUCCEED;

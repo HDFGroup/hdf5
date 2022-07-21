@@ -328,8 +328,8 @@ done:
 } /* end H5F_shared_select_write() */
 
 herr_t
-H5F_shared_vector_read(H5F_shared_t *f_sh, uint32_t count, H5FD_mem_t types[],
-                       haddr_t addrs[], size_t sizes[], void *bufs[])
+H5F_shared_vector_read(H5F_shared_t *f_sh, uint32_t count, H5FD_mem_t types[], haddr_t addrs[],
+                       size_t sizes[], void *bufs[])
 {
     herr_t ret_value = SUCCEED;
 
@@ -373,8 +373,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_shared_vector_write(H5F_shared_t *f_sh, uint32_t count, H5FD_mem_t types[],
-                        haddr_t addrs[], size_t sizes[], const void *bufs[])
+H5F_shared_vector_write(H5F_shared_t *f_sh, uint32_t count, H5FD_mem_t types[], haddr_t addrs[],
+                        size_t sizes[], const void *bufs[])
 {
     herr_t ret_value = SUCCEED;
 
