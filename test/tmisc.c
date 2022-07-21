@@ -191,6 +191,7 @@ typedef struct {
 
 /* Definitions for misc. test #15 */
 #define MISC15_FILE "tmisc15.h5"
+#define MISC15_BUF_SIZE 1024
 
 /* Definitions for misc. test #16 */
 #define MISC16_FILE       "tmisc16.h5"
@@ -2745,13 +2746,20 @@ test_misc14(void)
 static void
 test_misc15(void)
 {
+    char   filename[MISC15_BUF_SIZE];
     hid_t  file; /* File ID */
     hid_t  fapl; /* File access property list */
     herr_t ret;  /* Generic return value */
 
+    fapl = h5_fileaccess();
+    h5_fixname(MISC15_FILE, fapl, filename, MISC15_BUF_SIZE);
+
     /* Create the file & get it's FAPL */
-    file = H5Fcreate(MISC15_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
     CHECK(file, FAIL, "H5Fcreate");
+
+    ret = H5Pclose(fapl);
+    CHECK(ret, FAIL, "H5Pclose");
 
     fapl = H5Fget_access_plist(file);
     CHECK(fapl, FAIL, "H5Fget_access_plist");
@@ -2763,7 +2771,7 @@ test_misc15(void)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Open the file & get it's FAPL again */
-    file = H5Fopen(MISC15_FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+    file = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
     CHECK(file, FAIL, "H5Fopen");
 
     fapl = H5Fget_access_plist(file);
@@ -2773,13 +2781,13 @@ test_misc15(void)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Verify that the file is still OK */
-    ret = H5Fis_accessible(MISC15_FILE, fapl);
-    CHECK(ret, FAIL, "H5Fis_hdf5");
+    ret = H5Fis_accessible(filename, fapl);
+    CHECK(ret, FAIL, "H5Fis_accessible");
 
     ret = H5Pclose(fapl);
     CHECK(ret, FAIL, "H5Pclose");
 
-    file = H5Fopen(MISC15_FILE, H5F_ACC_RDONLY, H5P_DEFAULT);
+    file = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
     CHECK(file, FAIL, "H5Fopen");
 
     ret = H5Fclose(file);

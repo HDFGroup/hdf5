@@ -9898,7 +9898,8 @@ external_set_elink_cb(hid_t fapl, hbool_t new_format)
        would report FALSE, causing problems */
     base_driver       = H5Pget_driver(fapl);
     op_data.base_fapl = (base_driver == H5FD_FAMILY || base_driver == H5FD_MULTI ||
-                         base_driver == H5FD_MPIO || base_driver == H5FD_CORE || base_driver == H5FD_DIRECT)
+                         base_driver == H5FD_MPIO || base_driver == H5FD_CORE || base_driver == H5FD_DIRECT ||
+                         base_driver == H5FD_SUBFILING)
                             ? H5P_DEFAULT
                             : fapl;
     op_data.fam_size = ELINK_CB_FAM_SIZE;

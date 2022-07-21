@@ -1280,6 +1280,22 @@ h5_get_file_size(const char *filename, hid_t fapl)
             /* Return total size */
             return (tot_size);
         } /* end if */
+        else if (driver == H5FD_SUBFILING) {
+            hsize_t size;
+            hid_t   fid = H5I_INVALID_HID;
+
+            if ((fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+                return -1;
+            if (H5Fget_filesize(fid, &size) < 0) {
+                H5Fclose(fid);
+                return -1;
+            }
+
+            if (H5Fclose(fid) < 0)
+                return -1;
+
+            return (h5_stat_size_t)size;
+        }
         else {
             /* Get the file's statistics */
             if (0 == HDstat(filename, &sb))

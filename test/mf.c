@@ -875,8 +875,7 @@ test_mf_tmp(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
         TESTING("'temporary' file space allocation with old library format");
 
     /* Can't run this test with multi-file VFDs */
-    if (HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
-        HDstrcmp(env_h5_drvr, "family") != 0) {
+    if (!h5_driver_uses_multiple_files(env_h5_drvr, 0)) {
         char           filename[FILENAME_LEN];   /* Filename to use */
         H5F_t *        f = NULL;                 /* Internal file object pointer */
         h5_stat_size_t file_size, new_file_size; /* file size */

@@ -245,6 +245,7 @@ main(void)
     char        filename[1024];    /* filename                                 */
     hbool_t     check_second_dset; /* whether or not to check the second dset  */
     H5E_auto2_t func;              /* for shutting off error reporting         */
+    hbool_t     driver_is_default_vfd_compatible;
 
     h5_reset();
     if ((fapl_id = h5_fileaccess()) < 0)
@@ -253,6 +254,16 @@ main(void)
     /* Check if the current VFD supports SWMR */
     driver            = HDgetenv(HDF5_DRIVER);
     vfd_supports_swmr = H5FD__supports_swmr_test(driver);
+
+    if (h5_driver_is_default_vfd_compatible(fapl_id, &driver_is_default_vfd_compatible) < 0) {
+        HDprintf("Can't check if VFD is compatible with default VFD\n");
+        HDexit(EXIT_FAILURE);
+    }
+
+    if (!driver_is_default_vfd_compatible) {
+        HDprintf("Skipping SWMR tests for VFD incompatible with default VFD\n");
+        HDexit(EXIT_SUCCESS);
+    }
 
     /* TEST 1 */
     /* Check the case where the file was flushed */

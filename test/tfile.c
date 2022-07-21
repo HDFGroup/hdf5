@@ -1647,6 +1647,7 @@ test_file_is_accessible(const char *env_h5_drvr)
     unsigned char buf[1024];                          /* Buffer of data to write */
     htri_t        is_hdf5;                            /* Whether a file is an HDF5 file */
     int           posix_ret;                          /* Return value from POSIX calls */
+    hbool_t       driver_is_default_compatible;
     herr_t        ret;                                /* Return value from HDF5 calls */
 
     /* Output message about test being performed */
@@ -1655,6 +1656,11 @@ test_file_is_accessible(const char *env_h5_drvr)
     /* Get FAPL */
     fapl_id = h5_fileaccess();
     CHECK(fapl_id, H5I_INVALID_HID, "H5Pcreate");
+
+    if (h5_driver_is_default_vfd_compatible(fapl_id, &driver_is_default_compatible) < 0) {
+        TestErrPrintf("Can't check if VFD is compatible with default VFD");
+        return;
+    }
 
     /* Fix up filenames */
     h5_fixname(FILE_IS_ACCESSIBLE, fapl_id, filename, sizeof(filename));
@@ -1733,10 +1739,7 @@ test_file_is_accessible(const char *env_h5_drvr)
         VERIFY(is_hdf5, TRUE, "H5Fis_accessible");
     } /* end if */
 
-    /* Don't run the below tests for drivers that use multiple
-     * logical files, like the splitter driver.
-     */
-    if (!h5_driver_uses_multiple_files(env_h5_drvr, H5_EXCLUDE_MULTIPART_DRIVERS)) {
+    if (driver_is_default_compatible) {
         /***********************/
         /* EMPTY non-HDF5 file */
         /***********************/
@@ -6497,30 +6500,32 @@ test_libver_bounds_dataset(hid_t fapl)
                 dset = (H5D_t *)H5VL_object(did);
                 CHECK_PTR(dset, "H5VL_object");
 
-                /* Verify the dataset's layout, fill value and filter pipeline message versions */
-                /* Also verify the chunk indexing type */
-                if (f->shared->low_bound == H5F_LIBVER_EARLIEST) {
-                    /* For layout message: the earliest version the library will set is 3 */
-                    /* For fill value message: the earliest version the library will set is 2 */
-                    VERIFY(dset->shared->layout.version, H5O_LAYOUT_VERSION_DEFAULT, "H5O_layout_ver_bounds");
-                    VERIFY(dset->shared->dcpl_cache.fill.version, H5O_FILL_VERSION_2, "H5O_fill_ver_bounds");
-                }
-                else {
-                    VERIFY(dset->shared->layout.version, H5O_layout_ver_bounds[f->shared->low_bound],
-                           "H5O_layout_ver_bounds");
-                    VERIFY(dset->shared->dcpl_cache.fill.version, H5O_fill_ver_bounds[f->shared->low_bound],
-                           "H5O_fill_ver_bounds");
-                }
+                if (dset) {
+                    /* Verify the dataset's layout, fill value and filter pipeline message versions */
+                    /* Also verify the chunk indexing type */
+                    if (f->shared->low_bound == H5F_LIBVER_EARLIEST) {
+                        /* For layout message: the earliest version the library will set is 3 */
+                        /* For fill value message: the earliest version the library will set is 2 */
+                        VERIFY(dset->shared->layout.version, H5O_LAYOUT_VERSION_DEFAULT, "H5O_layout_ver_bounds");
+                        VERIFY(dset->shared->dcpl_cache.fill.version, H5O_FILL_VERSION_2, "H5O_fill_ver_bounds");
+                    }
+                    else {
+                        VERIFY(dset->shared->layout.version, H5O_layout_ver_bounds[f->shared->low_bound],
+                               "H5O_layout_ver_bounds");
+                        VERIFY(dset->shared->dcpl_cache.fill.version, H5O_fill_ver_bounds[f->shared->low_bound],
+                               "H5O_fill_ver_bounds");
+                    }
 
-                /* Verify the filter pipeline message version */
-                VERIFY(dset->shared->dcpl_cache.pline.version, H5O_pline_ver_bounds[f->shared->low_bound],
-                       "H5O_pline_ver_bounds");
+                    /* Verify the filter pipeline message version */
+                    VERIFY(dset->shared->dcpl_cache.pline.version, H5O_pline_ver_bounds[f->shared->low_bound],
+                           "H5O_pline_ver_bounds");
 
-                /* Verify the dataset's chunk indexing type */
-                if (dset->shared->layout.version == H5O_LAYOUT_VERSION_LATEST)
-                    VERIFY(dset->shared->layout.u.chunk.idx_type, H5D_CHUNK_IDX_BT2, "chunk_index_type");
-                else
-                    VERIFY(dset->shared->layout.u.chunk.idx_type, H5D_CHUNK_IDX_BTREE, "chunk_index_type");
+                    /* Verify the dataset's chunk indexing type */
+                    if (dset->shared->layout.version == H5O_LAYOUT_VERSION_LATEST)
+                        VERIFY(dset->shared->layout.u.chunk.idx_type, H5D_CHUNK_IDX_BT2, "chunk_index_type");
+                    else
+                        VERIFY(dset->shared->layout.u.chunk.idx_type, H5D_CHUNK_IDX_BTREE, "chunk_index_type");
+                }
 
                 /* Close the dataset */
                 ret = H5Dclose(did);
@@ -6745,13 +6750,19 @@ test_libver_bounds_dataspace(hid_t fapl)
                 tmp_space_contig = (H5S_t *)H5I_object(tmp_sid_contig);
                 CHECK_PTR(tmp_space_contig, "H5I_object");
 
-                /* Verify versions for the three dataspaces */
-                VERIFY(tmp_space->extent.version, H5O_sdspace_ver_bounds[f->shared->low_bound],
-                       "H5O_sdspace_ver_bounds");
-                VERIFY(tmp_space_compact->extent.version, H5O_sdspace_ver_bounds[f->shared->low_bound],
-                       "H5O_sdspace_ver_bounds");
-                VERIFY(tmp_space_contig->extent.version, H5O_sdspace_ver_bounds[f->shared->low_bound],
-                       "H5O_sdspace_ver_bounds");
+                if (tmp_space) {
+                    /* Verify versions for the three dataspaces */
+                    VERIFY(tmp_space->extent.version, H5O_sdspace_ver_bounds[f->shared->low_bound],
+                           "H5O_sdspace_ver_bounds");
+                }
+                if (tmp_space_compact) {
+                    VERIFY(tmp_space_compact->extent.version, H5O_sdspace_ver_bounds[f->shared->low_bound],
+                           "H5O_sdspace_ver_bounds");
+                }
+                if (tmp_space_contig) {
+                    VERIFY(tmp_space_contig->extent.version, H5O_sdspace_ver_bounds[f->shared->low_bound],
+                           "H5O_sdspace_ver_bounds");
+                }
 
                 /* Close the three datasets */
                 ret = H5Dclose(did);
@@ -7069,24 +7080,26 @@ test_libver_bounds_datatype_check(hid_t fapl, hid_t tid)
                 dtype = (H5T_t *)H5I_object(dtid);
                 CHECK_PTR(dtype, "H5I_object");
 
-                /* Verify the dataset's datatype message version */
-                /* H5T_COMPOUND, H5T_ENUM, H5T_ARRAY:
-                 *  --the library will set version according to low_bound
-                 *  --H5T_ARRAY: the earliest version the library will set is 2
-                 * H5T_INTEGER, H5T_FLOAT, H5T_TIME, H5T_STRING, H5T_BITFIELD, H5T_OPAQUE, H5T_REFERENCE:
-                 *  --the library will only use basic version
-                 */
-                if (dtype->shared->type == H5T_COMPOUND || dtype->shared->type == H5T_ENUM ||
-                    dtype->shared->type == H5T_ARRAY) {
-                    if (dtype->shared->type == H5T_ARRAY && f->shared->low_bound == H5F_LIBVER_EARLIEST)
-                        VERIFY(dtype->shared->version, H5O_DTYPE_VERSION_2, "H5O_dtype_ver_bounds");
+                if (dtype) {
+                    /* Verify the dataset's datatype message version */
+                    /* H5T_COMPOUND, H5T_ENUM, H5T_ARRAY:
+                     *  --the library will set version according to low_bound
+                     *  --H5T_ARRAY: the earliest version the library will set is 2
+                     * H5T_INTEGER, H5T_FLOAT, H5T_TIME, H5T_STRING, H5T_BITFIELD, H5T_OPAQUE, H5T_REFERENCE:
+                     *  --the library will only use basic version
+                     */
+                    if (dtype->shared->type == H5T_COMPOUND || dtype->shared->type == H5T_ENUM ||
+                        dtype->shared->type == H5T_ARRAY) {
+                        if (dtype->shared->type == H5T_ARRAY && f->shared->low_bound == H5F_LIBVER_EARLIEST)
+                            VERIFY(dtype->shared->version, H5O_DTYPE_VERSION_2, "H5O_dtype_ver_bounds");
+                        else
+                            VERIFY(dtype->shared->version, H5O_dtype_ver_bounds[f->shared->low_bound],
+                                   "H5O_dtype_ver_bounds");
+                    }
                     else
-                        VERIFY(dtype->shared->version, H5O_dtype_ver_bounds[f->shared->low_bound],
+                        VERIFY(dtype->shared->version, H5O_dtype_ver_bounds[H5F_LIBVER_EARLIEST],
                                "H5O_dtype_ver_bounds");
                 }
-                else
-                    VERIFY(dtype->shared->version, H5O_dtype_ver_bounds[H5F_LIBVER_EARLIEST],
-                           "H5O_dtype_ver_bounds");
 
                 /* Close the dataset */
                 ret = H5Dclose(did);
