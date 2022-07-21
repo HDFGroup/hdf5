@@ -277,9 +277,7 @@ set (H5FD_HDRS
 if (HDF5_ENABLE_SUBFILING_VFD)
   set (MERCURY_UTIL_SOURCES
       ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_dlog.c
-      ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_event.c
       ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_log.c
-      ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_mem.c
       ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_thread.c
       ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_thread_condition.c
       ${H5FD_SUBFILING_DIR}/mercury/src/util/mercury_thread_pool.c

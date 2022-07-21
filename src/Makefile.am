@@ -177,8 +177,7 @@ if HAVE_MERCURY_CONDITIONAL
     H5FDsubfiling/mercury/src/util/mercury_thread_mutex.h H5FDsubfiling/mercury/src/util/mercury_thread_pool.h
 
     libhdf5_la_SOURCES += H5FDsubfiling/mercury/src/util/mercury_dlog.c \
-    H5FDsubfiling/mercury/src/util/mercury_event.c H5FDsubfiling/mercury/src/util/mercury_log.c \
-    H5FDsubfiling/mercury/src/util/mercury_mem.c H5FDsubfiling/mercury/src/util/mercury_thread.c \
+    H5FDsubfiling/mercury/src/util/mercury_log.c H5FDsubfiling/mercury/src/util/mercury_thread.c \
     H5FDsubfiling/mercury/src/util/mercury_thread_condition.c H5FDsubfiling/mercury/src/util/mercury_thread_pool.c \
     H5FDsubfiling/mercury/src/util/mercury_thread_mutex.c H5FDsubfiling/mercury/src/util/mercury_util.c
 endif
