@@ -895,7 +895,7 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 
                 HDcompile_assert(sizeof(uint64_t) >= sizeof(ino_t));
                 file_ptr->inode = sb.st_ino;
-                inode_id = (uint64_t)sb.st_ino;
+                inode_id        = (uint64_t)sb.st_ino;
             }
 
             if (MPI_SUCCESS != (mpi_code = MPI_Bcast(&inode_id, 1, MPI_UINT64_T, 0, file_ptr->comm)))

@@ -9896,12 +9896,12 @@ external_set_elink_cb(hid_t fapl, hbool_t new_format)
     /* Family file driver cannot be used with family or multi drivers for member files */
     /* Also disable parallel member drivers, because H5F_HAS_FEATURE(H5FD_FEAT_HAS_MPI)
        would report FALSE, causing problems */
-    base_driver       = H5Pget_driver(fapl);
-    op_data.base_fapl = (base_driver == H5FD_FAMILY || base_driver == H5FD_MULTI ||
-                         base_driver == H5FD_MPIO || base_driver == H5FD_CORE || base_driver == H5FD_DIRECT ||
-                         base_driver == H5FD_SUBFILING)
-                            ? H5P_DEFAULT
-                            : fapl;
+    base_driver = H5Pget_driver(fapl);
+    op_data.base_fapl =
+        (base_driver == H5FD_FAMILY || base_driver == H5FD_MULTI || base_driver == H5FD_MPIO ||
+         base_driver == H5FD_CORE || base_driver == H5FD_DIRECT || base_driver == H5FD_SUBFILING)
+            ? H5P_DEFAULT
+            : fapl;
     op_data.fam_size = ELINK_CB_FAM_SIZE;
     op_data.code     = 0;
 

@@ -190,7 +190,7 @@ typedef struct {
 #define MISC14_METADATA_SIZE 4096
 
 /* Definitions for misc. test #15 */
-#define MISC15_FILE "tmisc15.h5"
+#define MISC15_FILE     "tmisc15.h5"
 #define MISC15_BUF_SIZE 1024
 
 /* Definitions for misc. test #16 */

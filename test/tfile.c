@@ -1648,7 +1648,7 @@ test_file_is_accessible(const char *env_h5_drvr)
     htri_t        is_hdf5;                            /* Whether a file is an HDF5 file */
     int           posix_ret;                          /* Return value from POSIX calls */
     hbool_t       driver_is_default_compatible;
-    herr_t        ret;                                /* Return value from HDF5 calls */
+    herr_t        ret; /* Return value from HDF5 calls */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Detection of HDF5 Files\n"));
@@ -6506,14 +6506,16 @@ test_libver_bounds_dataset(hid_t fapl)
                     if (f->shared->low_bound == H5F_LIBVER_EARLIEST) {
                         /* For layout message: the earliest version the library will set is 3 */
                         /* For fill value message: the earliest version the library will set is 2 */
-                        VERIFY(dset->shared->layout.version, H5O_LAYOUT_VERSION_DEFAULT, "H5O_layout_ver_bounds");
-                        VERIFY(dset->shared->dcpl_cache.fill.version, H5O_FILL_VERSION_2, "H5O_fill_ver_bounds");
+                        VERIFY(dset->shared->layout.version, H5O_LAYOUT_VERSION_DEFAULT,
+                               "H5O_layout_ver_bounds");
+                        VERIFY(dset->shared->dcpl_cache.fill.version, H5O_FILL_VERSION_2,
+                               "H5O_fill_ver_bounds");
                     }
                     else {
                         VERIFY(dset->shared->layout.version, H5O_layout_ver_bounds[f->shared->low_bound],
                                "H5O_layout_ver_bounds");
-                        VERIFY(dset->shared->dcpl_cache.fill.version, H5O_fill_ver_bounds[f->shared->low_bound],
-                               "H5O_fill_ver_bounds");
+                        VERIFY(dset->shared->dcpl_cache.fill.version,
+                               H5O_fill_ver_bounds[f->shared->low_bound], "H5O_fill_ver_bounds");
                     }
 
                     /* Verify the filter pipeline message version */
@@ -6524,7 +6526,8 @@ test_libver_bounds_dataset(hid_t fapl)
                     if (dset->shared->layout.version == H5O_LAYOUT_VERSION_LATEST)
                         VERIFY(dset->shared->layout.u.chunk.idx_type, H5D_CHUNK_IDX_BT2, "chunk_index_type");
                     else
-                        VERIFY(dset->shared->layout.u.chunk.idx_type, H5D_CHUNK_IDX_BTREE, "chunk_index_type");
+                        VERIFY(dset->shared->layout.u.chunk.idx_type, H5D_CHUNK_IDX_BTREE,
+                               "chunk_index_type");
                 }
 
                 /* Close the dataset */

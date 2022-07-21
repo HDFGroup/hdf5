@@ -2038,8 +2038,7 @@ H5FD__subfiling_read_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_m
         /* Currently, treat collective calls as independent */
         if (xfer_mode != H5FD_MPIO_INDEPENDENT)
             if (H5CX_set_io_xfer_mode(H5FD_MPIO_INDEPENDENT) < 0)
-                H5_SUBFILING_GOTO_ERROR(H5E_CONTEXT, H5E_CANTSET, FAIL,
-                                        "can't set I/O collectivity setting");
+                H5_SUBFILING_GOTO_ERROR(H5E_CONTEXT, H5E_CANTSET, FAIL, "can't set I/O collectivity setting");
 
         /* Note that the following code does not let the sub-filing VFD participate
          * in collective calls when there is no data to write.  This is not an issue
@@ -2099,8 +2098,7 @@ H5FD__subfiling_read_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_m
 done:
     if (xfer_mode != H5FD_MPIO_INDEPENDENT)
         if (H5CX_set_io_xfer_mode(xfer_mode) < 0)
-            H5_SUBFILING_DONE_ERROR(H5E_CONTEXT, H5E_CANTSET, FAIL,
-                                    "can't set I/O collectivity setting");
+            H5_SUBFILING_DONE_ERROR(H5E_CONTEXT, H5E_CANTSET, FAIL, "can't set I/O collectivity setting");
 
     H5_SUBFILING_FUNC_LEAVE_API;
 } /* end H5FD__subfiling_read_vector() */
@@ -2202,8 +2200,7 @@ H5FD__subfiling_write_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_
         /* Currently, treat collective calls as independent */
         if (xfer_mode != H5FD_MPIO_INDEPENDENT)
             if (H5CX_set_io_xfer_mode(H5FD_MPIO_INDEPENDENT) < 0)
-                H5_SUBFILING_GOTO_ERROR(H5E_CONTEXT, H5E_CANTSET, FAIL,
-                                        "can't set I/O collectivity setting");
+                H5_SUBFILING_GOTO_ERROR(H5E_CONTEXT, H5E_CANTSET, FAIL, "can't set I/O collectivity setting");
 
         /* Note that the following code does not let the sub-filing VFD participate
          * in collective calls when there is no data to write.  This is not an issue
@@ -2263,8 +2260,7 @@ H5FD__subfiling_write_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_
 done:
     if (xfer_mode != H5FD_MPIO_INDEPENDENT)
         if (H5CX_set_io_xfer_mode(xfer_mode) < 0)
-            H5_SUBFILING_DONE_ERROR(H5E_CONTEXT, H5E_CANTSET, FAIL,
-                                    "can't set I/O collectivity setting");
+            H5_SUBFILING_DONE_ERROR(H5E_CONTEXT, H5E_CANTSET, FAIL, "can't set I/O collectivity setting");
 
     H5_SUBFILING_FUNC_LEAVE_API;
 } /* end H5FDsubfile__write_vector() */

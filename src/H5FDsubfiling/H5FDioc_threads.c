@@ -429,9 +429,7 @@ ioc_main(ioc_data_t *ioc_data)
             HDassert(atomic_load(&ioc_data->sf_io_ops_pending) >= 0);
         }
         else {
-            struct timespec sleep_spec = {
-                0, IOC_MAIN_SLEEP_DELAY
-            };
+            struct timespec sleep_spec = {0, IOC_MAIN_SLEEP_DELAY};
 
             HDnanosleep(&sleep_spec, NULL);
         }
@@ -1465,8 +1463,7 @@ ioc_io_queue_dispatch_eligible_entries(ioc_data_t *ioc_data, hbool_t try_lock)
                 /* at present, I/O requests are scalar -- i.e. single blocks specified by offset and length.
                  * when this changes, this if statement will have to be updated accordingly.
                  */
-                if ( ((scan_offset + scan_len) > entry_offset) &&
-                     ((entry_offset + entry_len) > scan_offset) ) {
+                if (((scan_offset + scan_len) > entry_offset) && ((entry_offset + entry_len) > scan_offset)) {
 
                     /* the two request overlap -- unless they are both reads, we have detected a conflict */
 
