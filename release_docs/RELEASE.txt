@@ -47,6 +47,18 @@ New Features
 
     Configuration:
     -------------
+    - Correct the usage of CMAKE_Fortran_MODULE_DIRECTORY and how to
+      install Fortran mod files.
+
+      The fortran modules files, ending in .mod are files describing a
+      fortran 90 (and above) module API and ABI. These are not like C
+      header files describing an API, they are compiler dependent and
+      arch dependent, and not easily readable by a human being. They are
+      nevertheless searched for in the includes directories by gfortran
+      (in directories specified with -I).
+
+      (ADB - 2022/07/21)
+
     - HDF5 memory allocation sanity checking is now off by default for
       Autotools debug builds
 
