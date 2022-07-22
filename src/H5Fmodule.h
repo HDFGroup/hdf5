@@ -866,7 +866,7 @@
  * systems, environments, and applications. The drivers are listed in the table below.
  *
  * <table>
- * <caption>Supported file drivers</caption>
+ * <caption id="table_file_drivers">Supported file drivers</caption>
  * <tr>
  * <th>Driver Name</th>
  * <th>Driver Identifier</th>

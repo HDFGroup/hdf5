@@ -128,7 +128,7 @@
  * a property lists class for each of the following situations.
  *
  * <table>
- *     <caption align=top>Property list classes in HDF5</caption>
+ * <caption align=top id="table_plist">Property list classes in HDF5</caption>
  * <tr><th>Property List Class</th><th></th><th>For further discussion</th></tr>
  * <tr valign="top">
  *   <td>
@@ -323,7 +323,7 @@
  * property list classes, in gray above, are not user-accessible. The red empty set symbol indicates
  * that the \ref FMPL (FMPL) is an empty class; that is, it has no set table
  * properties. For more information, see \ref FileMountProps "File Mount Properties". Abbreviations
- * used in this figure are defined in the preceding table, “Property list classes in HDF5”.
+ * used in this figure are defined in the preceding table, \ref table_plist "Property list classes in HDF5".
  *
  * \subsubsection subsubsec_plist_lists Property Lists
  *
@@ -601,7 +601,7 @@
  * The new dataset creation property list’s identifier is returned in dcplA_id and the property list is
  * initialized with default dataset creation property values.
  *
- * A list of valid classes appears in the table "Property list classes in HDF5".
+ * A list of valid classes appears in the table \ref table_plist "Property list classes in HDF5".
  *
  * \code
  *     dcplB_id = H5Pcopy (dcplA_id);
