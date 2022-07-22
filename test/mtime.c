@@ -60,12 +60,15 @@ main(void)
     signed char buf1[32], buf2[32];
     char        filename[1024];
     int         token_cmp;
-    hbool_t     driver_uses_modified_filename = h5_driver_uses_modified_filename();
+    hbool_t     driver_is_default_compatible;
 
     h5_reset();
     fapl = h5_fileaccess();
 
     TESTING("modification time messages");
+
+    if (h5_driver_is_default_vfd_compatible(fapl, &driver_is_default_compatible) < 0)
+        TEST_ERROR;
 
     /* Create the file, create a dataset, then close the file */
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
@@ -132,7 +135,7 @@ main(void)
     }
     PASSED();
 
-    if (!driver_uses_modified_filename) {
+    if (driver_is_default_compatible) {
         /* Check opening existing file with old-style modification time information
          * and make certain that the time is correct
          */
@@ -164,7 +167,7 @@ main(void)
         PASSED();
     }
 
-    if (!driver_uses_modified_filename) {
+    if (driver_is_default_compatible) {
         /* Check opening existing file with new-style modification time information
          * and make certain that the time is correct
          */

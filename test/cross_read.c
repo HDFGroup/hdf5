@@ -354,15 +354,20 @@ error:
 int
 main(void)
 {
-    char filename[1024];
-    int  nerrors = 0;
+    hbool_t driver_is_default_compatible;
+    char    filename[1024];
+    int     nerrors = 0;
 
     h5_reset();
 
     /*
-     * Skip tests for VFDs that need modified filenames.
+     * Skip tests for VFDs that aren't compatible with default VFD.
      */
-    if (h5_driver_uses_modified_filename()) {
+    if (h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &driver_is_default_compatible) < 0) {
+        HDputs(" -- couldn't check if VFD is compatible with default VFD --");
+        HDexit(EXIT_SUCCESS);
+    }
+    if (!driver_is_default_compatible) {
         HDputs(" -- SKIPPED for incompatible VFD --");
         HDexit(EXIT_SUCCESS);
     }

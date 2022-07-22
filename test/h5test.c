@@ -1280,6 +1280,22 @@ h5_get_file_size(const char *filename, hid_t fapl)
             /* Return total size */
             return (tot_size);
         } /* end if */
+        else if (driver == H5FD_SUBFILING) {
+            hsize_t size;
+            hid_t   fid = H5I_INVALID_HID;
+
+            if ((fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+                return -1;
+            if (H5Fget_filesize(fid, &size) < 0) {
+                H5Fclose(fid);
+                return -1;
+            }
+
+            if (H5Fclose(fid) < 0)
+                return -1;
+
+            return (h5_stat_size_t)size;
+        }
         else {
             /* Get the file's statistics */
             if (0 == HDstat(filename, &sb))
@@ -2209,9 +2225,8 @@ h5_using_default_driver(const char *drv_name)
 /*-------------------------------------------------------------------------
  * Function:    h5_using_parallel_driver
  *
- * Purpose:     Checks if the specified VFD name matches a parallel-enabled
- *              VFD (usually `mpio`). If `drv_name` is NULL, the
- *              HDF5_DRIVER environment is checked instead (if it is set).
+ * Purpose:     Checks if the current VFD set on the given FAPL is a
+ *              parallel-enabled VFD (The MPI I/O VFD, for example).
  *
  *              This is mostly useful for avoiding tests that use features
  *              which are not currently supported for parallel HDF5, such
@@ -2221,51 +2236,72 @@ h5_using_default_driver(const char *drv_name)
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
-h5_using_parallel_driver(const char *drv_name)
+herr_t
+h5_using_parallel_driver(hid_t fapl_id, hbool_t *driver_is_parallel)
 {
-    hbool_t ret_val = FALSE;
+    unsigned long feat_flags = 0;
+    hid_t         driver_id  = H5I_INVALID_HID;
+    herr_t        ret_value  = SUCCEED;
 
-    if (!drv_name)
-        drv_name = HDgetenv(HDF5_DRIVER);
+    HDassert(fapl_id >= 0);
+    HDassert(driver_is_parallel);
 
-    if (drv_name)
-        return (!HDstrcmp(drv_name, "mpio"));
+    if (fapl_id == H5P_DEFAULT)
+        fapl_id = H5P_FILE_ACCESS_DEFAULT;
 
-    return ret_val;
+    if ((driver_id = H5Pget_driver(fapl_id)) < 0)
+        return FAIL;
+
+    if (H5FDdriver_query(driver_id, &feat_flags) < 0)
+        return FAIL;
+
+    *driver_is_parallel = (feat_flags & H5FD_FEAT_HAS_MPI);
+
+    return ret_value;
 }
 
 /*-------------------------------------------------------------------------
- * Function:    h5_driver_uses_modified_filename
+ * Function:    h5_driver_is_default_vfd_compatible
  *
- * Purpose:     Checks if the current VFD set by use of the HDF5_DRIVER
- *              environment variable uses a modified filename. Examples
- *              are the multi and family drivers.
+ * Purpose:     Checks if the current VFD set on the given FAPL creates a
+ *              file that is compatible with the default VFD. Some examples
+ *              are the core and MPI I/O drivers. Some counterexamples are
+ *              the multi and family drivers, which split the HDF5 file
+ *              into several different files.
  *
  *              This routine is helpful for skipping tests that use
- *              pre-generated files. VFDs that use a modified filename will
- *              not be able to find these files and those tests will fail.
- *              Eventually, HDF5's testing framework should be modified to
- *              not run VFD testing against tests that use pre-generated
- *              files.
+ *              pre-generated files. VFDs that create files which aren't
+ *              compatible with the default VFD will generally not be able
+ *              to open these pre-generated files and those particular
+ *              tests will fail.
  *
- * Return:      TRUE/FALSE
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
-h5_driver_uses_modified_filename(void)
+herr_t
+h5_driver_is_default_vfd_compatible(hid_t fapl_id, hbool_t *default_vfd_compatible)
 {
-    hbool_t ret_val = FALSE;
-    char *  driver  = HDgetenv(HDF5_DRIVER);
+    unsigned long feat_flags = 0;
+    hid_t         driver_id  = H5I_INVALID_HID;
+    herr_t        ret_value  = SUCCEED;
 
-    if (driver) {
-        ret_val = !HDstrcmp(driver, "multi") || !HDstrcmp(driver, "split") || !HDstrcmp(driver, "family") ||
-                  !HDstrcmp(driver, "splitter");
-    }
+    HDassert(fapl_id >= 0);
+    HDassert(default_vfd_compatible);
 
-    return ret_val;
-} /* end h5_driver_uses_modified_filename() */
+    if (fapl_id == H5P_DEFAULT)
+        fapl_id = H5P_FILE_ACCESS_DEFAULT;
+
+    if ((driver_id = H5Pget_driver(fapl_id)) < 0)
+        return FAIL;
+
+    if (H5FDdriver_query(driver_id, &feat_flags) < 0)
+        return FAIL;
+
+    *default_vfd_compatible = (feat_flags & H5FD_FEAT_DEFAULT_VFD_COMPATIBLE);
+
+    return ret_value;
+} /* end h5_driver_is_default_vfd_compatible() */
 
 /*-------------------------------------------------------------------------
  * Function:    h5_driver_uses_multiple_files
@@ -2286,6 +2322,9 @@ h5_driver_uses_modified_filename(void)
  *                separate logical files. The splitter driver is an example
  *                of this type of driver.
  *
+ *              Eventually, this should become a VFD feature flag so this
+ *              check is less fragile.
+ *
  * Return:      TRUE/FALSE
  *
  *-------------------------------------------------------------------------
@@ -2300,7 +2339,8 @@ h5_driver_uses_multiple_files(const char *drv_name, unsigned flags)
 
     if (drv_name) {
         if ((flags & H5_EXCLUDE_MULTIPART_DRIVERS) == 0) {
-            if (!HDstrcmp(drv_name, "split") || !HDstrcmp(drv_name, "multi") || !HDstrcmp(drv_name, "family"))
+            if (!HDstrcmp(drv_name, "split") || !HDstrcmp(drv_name, "multi") ||
+                !HDstrcmp(drv_name, "family") || !HDstrcmp(drv_name, H5FD_SUBFILING_NAME))
                 return TRUE;
         }
 

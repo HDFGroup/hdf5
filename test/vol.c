@@ -948,7 +948,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_basic_group_operation(const char *env_h5_drvr)
+test_basic_group_operation(void)
 {
     hid_t      fid     = H5I_INVALID_HID;
     hid_t      fapl_id = H5I_INVALID_HID;
@@ -957,6 +957,7 @@ test_basic_group_operation(const char *env_h5_drvr)
     hid_t      gcpl_id = H5I_INVALID_HID;
     char       filename[1024];
     H5G_info_t info;
+    hbool_t    driver_is_parallel;
 
     TESTING("Basic VOL group operations");
 
@@ -991,8 +992,10 @@ test_basic_group_operation(const char *env_h5_drvr)
     if (H5Gget_info_by_idx(fid, "/", H5_INDEX_NAME, H5_ITER_NATIVE, 0, &info, H5P_DEFAULT) < 0)
         TEST_ERROR;
 
-    /* H5Gflush - skip for MPIO file driver as flush calls cause assertions in the library */
-    if (HDstrcmp(env_h5_drvr, "mpio") != 0)
+    /* H5Gflush - skip for parallel file drivers as flush calls cause assertions in the library */
+    if (h5_using_parallel_driver(fapl_id, &driver_is_parallel) < 0)
+        TEST_ERROR;
+    if (!driver_is_parallel)
         if (H5Gflush(gid) < 0)
             TEST_ERROR;
 
@@ -1052,7 +1055,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_basic_dataset_operation(const char *env_h5_drvr)
+test_basic_dataset_operation(void)
 {
     hid_t fid     = H5I_INVALID_HID;
     hid_t fapl_id = H5I_INVALID_HID;
@@ -1071,6 +1074,8 @@ test_basic_dataset_operation(const char *env_h5_drvr)
     hsize_t            storage_size;
     haddr_t            offset;
     H5D_space_status_t status;
+
+    hbool_t driver_is_parallel;
 
     int in_buf[N_ELEMENTS];
     int out_buf[N_ELEMENTS];
@@ -1117,8 +1122,10 @@ test_basic_dataset_operation(const char *env_h5_drvr)
     if (H5Dset_extent(did, &curr_dims) < 0)
         TEST_ERROR;
 
-    /* H5Dflush - skip for MPIO file driver as flush calls cause assertions in the library */
-    if (HDstrcmp(env_h5_drvr, "mpio") != 0)
+    /* H5Dflush - skip for parallel file drivers as flush calls cause assertions in the library */
+    if (h5_using_parallel_driver(fapl_id, &driver_is_parallel) < 0)
+        TEST_ERROR;
+    if (!driver_is_parallel)
         if (H5Dflush(did) < 0)
             TEST_ERROR;
 
@@ -1508,14 +1515,15 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_basic_datatype_operation(const char *env_h5_drvr)
+test_basic_datatype_operation(void)
 {
-    hid_t fid      = H5I_INVALID_HID;
-    hid_t fapl_id  = H5I_INVALID_HID;
-    hid_t tid      = H5I_INVALID_HID;
-    hid_t tid_anon = H5I_INVALID_HID;
-    hid_t tcpl_id  = H5I_INVALID_HID;
-    char  filename[1024];
+    hid_t   fid      = H5I_INVALID_HID;
+    hid_t   fapl_id  = H5I_INVALID_HID;
+    hid_t   tid      = H5I_INVALID_HID;
+    hid_t   tid_anon = H5I_INVALID_HID;
+    hid_t   tcpl_id  = H5I_INVALID_HID;
+    char    filename[1024];
+    hbool_t driver_is_parallel;
 
     TESTING("Basic VOL datatype operations");
 
@@ -1532,8 +1540,10 @@ test_basic_datatype_operation(const char *env_h5_drvr)
     if (H5Tcommit2(fid, NATIVE_VOL_TEST_DATATYPE_NAME, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
         TEST_ERROR;
 
-    /* H5Tflush - skip for MPIO file driver as flush calls cause assertions in the library */
-    if (HDstrcmp(env_h5_drvr, "mpio") != 0)
+    /* H5Tflush - skip for parallel file drivers as flush calls cause assertions in the library */
+    if (h5_using_parallel_driver(fapl_id, &driver_is_parallel) < 0)
+        TEST_ERROR;
+    if (!driver_is_parallel)
         if (H5Tflush(tid) < 0)
             TEST_ERROR;
 
@@ -2133,12 +2143,12 @@ main(void)
     nerrors += test_register_opt_operation() < 0 ? 1 : 0;
     nerrors += test_native_vol_init() < 0 ? 1 : 0;
     nerrors += test_basic_file_operation(env_h5_drvr) < 0 ? 1 : 0;
-    nerrors += test_basic_group_operation(env_h5_drvr) < 0 ? 1 : 0;
-    nerrors += test_basic_dataset_operation(env_h5_drvr) < 0 ? 1 : 0;
+    nerrors += test_basic_group_operation() < 0 ? 1 : 0;
+    nerrors += test_basic_dataset_operation() < 0 ? 1 : 0;
     nerrors += test_basic_attribute_operation() < 0 ? 1 : 0;
     nerrors += test_basic_object_operation() < 0 ? 1 : 0;
     nerrors += test_basic_link_operation() < 0 ? 1 : 0;
-    nerrors += test_basic_datatype_operation(env_h5_drvr) < 0 ? 1 : 0;
+    nerrors += test_basic_datatype_operation() < 0 ? 1 : 0;
     nerrors += test_async_vol_props() < 0 ? 1 : 0;
 
     if (nerrors) {

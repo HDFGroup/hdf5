@@ -46,7 +46,7 @@ static hid_t H5FD_MPIO_g = 0;
 hbool_t H5FD_mpi_opt_types_g = TRUE;
 
 /* Whether the driver initialized MPI on its own */
-hbool_t H5FD_mpi_self_initialized = FALSE;
+static hbool_t H5FD_mpi_self_initialized = FALSE;
 
 /*
  * The view is set to this value
@@ -108,7 +108,7 @@ static herr_t H5FD__mpio_vector_build_types(
 
 /* The MPIO file driver information */
 static const H5FD_class_t H5FD_mpio_g = {
-    H5FD_CLASS_VERSION,      /* struct version       */
+    H5FD_CLASS_VERSION,      /* struct version        */
     H5_VFD_MPIO,             /* value                 */
     "mpio",                  /* name                  */
     HADDR_MAX,               /* maxaddr               */

@@ -177,6 +177,9 @@
    optimization operation */
 #cmakedefine H5_HAVE_INSTRUMENTED_LIBRARY @H5_HAVE_INSTRUMENTED_LIBRARY@
 
+/* Define if IOC VFD is built */
+#cmakedefine H5_HAVE_IOC_VFD @H5_HAVE_IOC_VFD@
+
 /* Define to 1 if you have the `ioctl' function. */
 #cmakedefine H5_HAVE_IOCTL @H5_HAVE_IOCTL@
 
@@ -324,6 +327,12 @@
 
 /* Define if struct videoconfig is defined */
 #cmakedefine H5_HAVE_STRUCT_VIDEOCONFIG @H5_HAVE_STRUCT_VIDEOCONFIG@
+
+/* Define if Subfiling VFD is built */
+#cmakedefine H5_HAVE_SUBFILING_VFD @H5_HAVE_SUBFILING_VFD@
+
+/* Define if have stdatomic.h for Subfiling VFD */
+#cmakedefine H5_HAVE_STDATOMIC_H @H5_HAVE_STDATOMIC_H@
 
 /* Define to 1 if you have the `symlink' function. */
 #cmakedefine H5_HAVE_SYMLINK @H5_HAVE_SYMLINK@

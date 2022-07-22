@@ -59,6 +59,7 @@ main(void)
     char        buf[1024];              /* the value to store       */
     const char *s;                      /* value to read            */
     hbool_t     api_ctx_pushed = FALSE; /* Whether API context pushed */
+    hbool_t     driver_is_default_compatible;
 
     /* Reset library */
     h5_reset();
@@ -174,7 +175,10 @@ main(void)
         goto error;
     PASSED();
 
-    if (!h5_driver_uses_modified_filename()) {
+    if (h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &driver_is_default_compatible) < 0)
+        TEST_ERROR;
+
+    if (driver_is_default_compatible) {
         /* Check opening existing file non-default sizes of lengths and addresses */
         TESTING("opening pre-created file with non-default sizes");
         {

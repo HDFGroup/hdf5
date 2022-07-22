@@ -237,6 +237,8 @@ set (HDF5_JAVA_LOGGING_NOP_JAR     ${HDF5_SOURCE_DIR}/java/lib/ext/slf4j-nop-1.7
 set (HDF5_JAVA_LOGGING_SIMPLE_JAR  ${HDF5_SOURCE_DIR}/java/lib/ext/slf4j-simple-1.7.33.jar)
 set (HDF5_DOXYGEN_DIR              ${HDF5_SOURCE_DIR}/doxygen)
 
+set (HDF5_SRC_INCLUDE_DIRS ${HDF5_SRC_DIR})
+
 #-----------------------------------------------------------------------------
 # parse the full version number from H5public.h and include in H5_VERS_INFO
 #-----------------------------------------------------------------------------
@@ -744,6 +746,38 @@ if (H5_HAVE_PARALLEL)
     set (CMAKE_EXE_LINKER_FLAGS "${MPI_C_LINK_FLAGS} ${CMAKE_EXE_LINKER_FLAGS}")
   endif ()
 endif ()
+
+# Determine whether to build the HDF5 Subfiling VFD
+set (H5FD_SUBFILING_DIR ${HDF5_SRC_DIR}/H5FDsubfiling)
+set (HDF5_SRC_INCLUDE_DIRS
+    ${HDF5_SRC_INCLUDE_DIRS}
+    ${H5FD_SUBFILING_DIR}
+)
+option (HDF5_ENABLE_SUBFILING_VFD "Build Parallel HDF5 Subfiling VFD" OFF)
+if (HDF5_ENABLE_SUBFILING_VFD)
+  if (NOT HDF5_ENABLE_PARALLEL)
+    message (FATAL_ERROR "Subfiling VFD requires a parallel HDF5 build")
+  endif()
+  CHECK_INCLUDE_FILE("stdatomic.h" HAVE_STDATOMIC_H)
+  if (NOT HAVE_STDATOMIC_H)
+    message (FATAL_ERROR "Subfiling VFD requires atomic operations support. C11 stdatomic.h NOT available.")
+  else()
+    set (H5_HAVE_STDATOMIC_H 1)
+  endif()
+
+  set (H5_HAVE_SUBFILING_VFD 1)
+  # IOC VFD is currently only built when subfiling is enabled
+  set (H5_HAVE_IOC_VFD 1)
+
+  message (STATUS "Setting up to use Mercury components")
+  set (H5FD_SUBFILING_MERCURY_DIR ${H5FD_SUBFILING_DIR}/mercury/src/util)
+  set (HDF5_SRC_INCLUDE_DIRS
+      ${HDF5_SRC_INCLUDE_DIRS}
+      ${H5FD_SUBFILING_MERCURY_DIR}
+  )
+  set (H5_HAVE_MERCURY_H 1)
+  set (CMAKE_REQUIRED_INCLUDES "${H5FD_SUBFILING_MERCURY_DIR}")
+endif()
 
 #option (DEFAULT_API_VERSION "Enable v1.14 API (v16, v18, v110, v112, v114)" "v114")
 set (DEFAULT_API_VERSION "v114" CACHE STRING "Enable v1.14 API (v16, v18, v110, v112, v114)")

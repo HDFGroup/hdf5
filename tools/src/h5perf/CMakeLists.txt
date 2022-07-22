@@ -9,7 +9,7 @@ set (h5perf_serial_SOURCES
     ${HDF5_TOOLS_SRC_H5PERF_SOURCE_DIR}/sio_engine.c
 )
 add_executable (h5perf_serial ${h5perf_serial_SOURCES})
-target_include_directories (h5perf_serial PRIVATE "${HDF5_TEST_SRC_DIR};${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+target_include_directories (h5perf_serial PRIVATE "${HDF5_TEST_SRC_DIR};${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
 if (NOT ONLY_SHARED_LIBS)
   TARGET_C_PROPERTIES (h5perf_serial STATIC)
   target_link_libraries (h5perf_serial PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
@@ -35,7 +35,7 @@ if (H5_HAVE_PARALLEL)
       ${HDF5_TOOLS_SRC_H5PERF_SOURCE_DIR}/pio_engine.c
   )
   add_executable (h5perf ${h5perf_SOURCES})
-  target_include_directories (h5perf PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  target_include_directories (h5perf PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   if (NOT ONLY_SHARED_LIBS)
     TARGET_C_PROPERTIES (h5perf STATIC)
     target_link_libraries (h5perf PRIVATE ${LINK_LIBS} ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET}  "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_LIBRARIES}>")
