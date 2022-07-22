@@ -50,8 +50,8 @@ New Features
     - Correct the usage of CMAKE_Fortran_MODULE_DIRECTORY and where to
       install Fortran mod files.
 
-      The fortran modules files, ending in .mod are files describing a
-      fortran 90 (and above) module API and ABI. These are not like C
+      The Fortran modules files, ending in .mod are files describing a
+      Fortran 90 (and above) module API and ABI. These are not like C
       header files describing an API, they are compiler dependent and
       arch dependent, and not easily readable by a human being. They are
       nevertheless searched for in the includes directories by gfortran
