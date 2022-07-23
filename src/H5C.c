@@ -8120,7 +8120,6 @@ H5C_cork(H5C_t *cache_ptr, haddr_t obj_addr, unsigned action, hbool_t *corked)
             /* Set the corked status for the entire object */
             tag_info->corked = TRUE;
             cache_ptr->num_objs_corked++;
-
         }
         else {
             /* Sanity check */
