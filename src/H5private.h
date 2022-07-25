@@ -146,6 +146,7 @@
  */
 #define uthash_malloc(sz)    H5MM_malloc(sz)
 #define uthash_free(ptr, sz) H5MM_free(ptr) /* Ignoring sz is intentional */
+#define HASH_NONFATAL_OOM 1                 /* Don't abort() on out-of-memory */
 #include "uthash.h"
 
 /*
