@@ -405,13 +405,15 @@ Previous Chapter \ref sec_plist
 </td><td style="border: none;vertical-align: top;">
 \li \ref api-compat-macros
 \li <a href="./deprecated.html">Deprecated functions</a>
-\li High-level Extensions
+\li \ref high_level
     <ul>
-    <li><a href="https://portal.hdfgroup.org/display/HDF5/Lite">\Bold{HDF5 Lite} (H5LT)</a></li>
-    <li><a href="https://portal.hdfgroup.org/display/HDF5/Images">\Bold{HDF5 Image} (H5IM)</a></li>
-    <li><a href="https://portal.hdfgroup.org/display/HDF5/Tables">\Bold{HDF5 Table} (H5TB)</a></li>
-    <li><a href="https://portal.hdfgroup.org/display/HDF5/Packet+Tables">\Bold{HDF5 Packet Table} (H5TB)</a></li>
-    <li><a href="https://portal.hdfgroup.org/display/HDF5/Dimension+Scales">\Bold{HDF5 Dimension Scale} (H5DS)</a></li>
+    <li>\ref H5LT "Lite (H5LT, H5LD)"
+    <li>\ref H5IM "Images (H5IM)"
+    <li>\ref H5TB "Table (H5TB)"
+    <li>\ref H5PT "Packet Table (H5PT)"
+    <li>\ref H5DS "Dimension Scale (H5DS)"
+    <li>\ref H5DO "Optimizations (H5DO)"
+    <li>\ref H5LR "Extensions (H5LR, H5LT)"
     </ul>
 </td></tr>
 <tr><td colspan="3" style="border: none;">
