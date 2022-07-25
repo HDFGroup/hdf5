@@ -5764,6 +5764,7 @@ test_misc34(void)
     mem = H5MM_xfree(mem);
     CHECK_PTR_NULL(mem, "H5MM_xfree");
 
+#if defined H5_MEMORY_ALLOC_SANITY_CHECK
     /* H5MM_malloc(): Ensure that size 0 returns NULL */
     mem = H5MM_malloc(sz);
     CHECK_PTR_NULL(mem, "H5MM_malloc");
@@ -5773,6 +5774,7 @@ test_misc34(void)
     mem = H5MM_calloc(sz);
     CHECK_PTR_NULL(mem, "H5MM_calloc");
     mem = H5MM_xfree(mem);
+#endif
 
     /* H5MM_realloc(): Check behavior:
      *
@@ -5787,6 +5789,7 @@ test_misc34(void)
     CHECK_PTR(mem, "H5MM_realloc (case 1)");
     /* Don't free mem here! */
 
+#if defined H5_MEMORY_ALLOC_SANITY_CHECK
     sz  = 0;
     mem = H5MM_realloc(mem, sz);
     CHECK_PTR_NULL(mem, "H5MM_realloc (case 2)");
@@ -5794,6 +5797,8 @@ test_misc34(void)
 
     mem = H5MM_realloc(mem, sz);
     CHECK_PTR_NULL(mem, "H5MM_realloc (case 3)");
+#endif
+
     mem = H5MM_xfree(mem);
 
     /* H5MM_xstrdup(): Ensure NULL returns NULL */

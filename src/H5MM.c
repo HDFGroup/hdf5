@@ -232,7 +232,6 @@ H5MM_final_sanity_check(void)
     HDfprintf(stderr, "%s: H5MM_peak_alloc_blocks_count_s = %zu\n", __func__, H5MM_peak_alloc_blocks_count_s);
 #endif /* H5MM_PRINT_MEMORY_STATS */
 }
-#endif /* H5_MEMORY_ALLOC_SANITY_CHECK */
 
 /*-------------------------------------------------------------------------
  * Function:    H5MM_malloc
@@ -261,7 +260,6 @@ H5MM_malloc(size_t size)
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-#if defined H5_MEMORY_ALLOC_SANITY_CHECK
     /* Initialize block list head singleton */
     if (!H5MM_init_s) {
         H5MM_memcpy(H5MM_block_head_s.sig, H5MM_block_signature_s, H5MM_SIG_SIZE);
@@ -271,11 +269,9 @@ H5MM_malloc(size_t size)
         H5MM_block_head_s.u.info.in_use = TRUE;
 
         H5MM_init_s = TRUE;
-    }  /* end if */
-#endif /* H5_MEMORY_ALLOC_SANITY_CHECK */
+    } /* end if */
 
     if (size) {
-#if defined H5_MEMORY_ALLOC_SANITY_CHECK
         H5MM_block_t *block;
         size_t        alloc_size = sizeof(H5MM_block_t) + size + H5MM_HEAD_GUARD_SIZE + H5MM_TAIL_GUARD_SIZE;
 
@@ -309,10 +305,7 @@ H5MM_malloc(size_t size)
         } /* end if */
         else
             ret_value = NULL;
-#else  /* H5_MEMORY_ALLOC_SANITY_CHECK */
-        ret_value = HDmalloc(size);
-#endif /* H5_MEMORY_ALLOC_SANITY_CHECK */
-    }  /* end if */
+    } /* end if */
     else
         ret_value = NULL;
 
@@ -349,13 +342,9 @@ H5MM_calloc(size_t size)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     if (size) {
-#if defined H5_MEMORY_ALLOC_SANITY_CHECK
         if (NULL != (ret_value = H5MM_malloc(size)))
             HDmemset(ret_value, 0, size);
-#else  /* H5_MEMORY_ALLOC_SANITY_CHECK */
-        ret_value = HDcalloc((size_t)1, size);
-#endif /* H5_MEMORY_ALLOC_SANITY_CHECK */
-    }  /* end if */
+    } /* end if */
     else
         ret_value = NULL;
 
@@ -396,7 +385,6 @@ H5MM_realloc(void *mem, size_t size)
         /* Not defined in the standard, return NULL */
         ret_value = NULL;
     else {
-#if defined H5_MEMORY_ALLOC_SANITY_CHECK
         if (size > 0) {
             if (mem) {
                 if (H5MM__is_our_block(mem)) {
@@ -417,17 +405,11 @@ H5MM_realloc(void *mem, size_t size)
         }
         else
             ret_value = H5MM_xfree(mem);
-#else  /* H5_MEMORY_ALLOC_SANITY_CHECK */
-        ret_value = HDrealloc(mem, size);
-
-        /* Some platforms do not return NULL if size is zero. */
-        if (0 == size)
-            ret_value = NULL;
-#endif /* H5_MEMORY_ALLOC_SANITY_CHECK */
-    }  /* end else */
+    } /* end else */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MM_realloc() */
+#endif /* H5_MEMORY_ALLOC_SANITY_CHECK */
 
 /*-------------------------------------------------------------------------
  * Function:    H5MM_xstrdup
@@ -465,6 +447,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MM_xstrdup() */
 
+#if defined H5_MEMORY_ALLOC_SANITY_CHECK
 /*-------------------------------------------------------------------------
  * Function:    H5MM_strdup
  *
@@ -490,18 +473,14 @@ H5MM_strdup(const char *s)
 
     if (!s)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "NULL string not allowed")
-#if defined H5_MEMORY_ALLOC_SANITY_CHECK
     if (NULL == (ret_value = (char *)H5MM_malloc(HDstrlen(s) + 1)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     HDstrcpy(ret_value, s);
-#else
-    if (NULL == (ret_value = HDstrdup(s)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "string duplication failed")
-#endif
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MM_strdup() */
+#endif /* H5_MEMORY_ALLOC_SANITY_CHECK */
 
 /*-------------------------------------------------------------------------
  * Function:    H5MM_xfree
@@ -585,6 +564,7 @@ H5MM_xfree_const(const void *mem)
     FUNC_LEAVE_NOAPI(NULL)
 } /* end H5MM_xfree_const() */
 
+#if defined H5_MEMORY_ALLOC_SANITY_CHECK
 /*-------------------------------------------------------------------------
  * Function:    H5MM_memcpy
  *
@@ -619,6 +599,7 @@ H5MM_memcpy(void *dest, const void *src, size_t n)
     FUNC_LEAVE_NOAPI(ret)
 
 } /* end H5MM_memcpy() */
+#endif /* H5_MEMORY_ALLOC_SANITY_CHECK */
 
 /*-------------------------------------------------------------------------
  * Function:	H5MM_get_alloc_stats
