@@ -87,6 +87,7 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, H5S_t *mem_space, H5S_t *file_space
     H5D_chunk_map_t *fm = NULL;                   /* Chunk file<->memory mapping */
     H5D_io_info_t    io_info;                     /* Dataset I/O info     */
     H5D_type_info_t  type_info;                   /* Datatype info for operation */
+    H5D_layout_t     layout_type;                 /* Dataset's layout type (contig, chunked, compact, etc.) */
     hbool_t          type_info_init      = FALSE; /* Whether the datatype info has been initialized */
     H5S_t *          projected_mem_space = NULL;  /* If not NULL, ptr to dataspace containing a     */
                                                   /* projection of the supplied mem_space to a new  */
@@ -113,6 +114,8 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, H5S_t *mem_space, H5S_t *file_space
     HDassert(dataset && dataset->oloc.file);
     HDassert(file_space);
     HDassert(mem_space);
+
+    layout_type = dataset->shared->layout.type;
 
     /* Set up datatype info for operation */
     if (H5D__typeinfo_init(dataset, mem_type_id, FALSE, &type_info) < 0)
@@ -239,11 +242,13 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, H5S_t *mem_space, H5S_t *file_space
         HDassert((*dataset->shared->layout.ops->is_space_alloc)(&dataset->shared->layout.storage) ||
                  (dataset->shared->layout.ops->is_data_cached &&
                   (*dataset->shared->layout.ops->is_data_cached)(dataset->shared)) ||
-                 dataset->shared->dcpl_cache.efl.nused > 0 || dataset->shared->layout.type == H5D_COMPACT);
+                 dataset->shared->dcpl_cache.efl.nused > 0 || layout_type == H5D_COMPACT);
 
     /* Allocate the chunk map */
-    if (NULL == (fm = H5FL_CALLOC(H5D_chunk_map_t)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate chunk map")
+    if (H5D_CONTIGUOUS != layout_type && H5D_COMPACT != layout_type) {
+        if (NULL == (fm = H5FL_CALLOC(H5D_chunk_map_t)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate chunk map")
+    }
 
     /* Call storage method's I/O initialization routine */
     if (io_info.layout_ops.io_init &&
@@ -299,6 +304,7 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, H5S_t *mem_space, H5S_t *file_spac
     H5D_chunk_map_t *fm = NULL;                   /* Chunk file<->memory mapping */
     H5D_io_info_t    io_info;                     /* Dataset I/O info     */
     H5D_type_info_t  type_info;                   /* Datatype info for operation */
+    H5D_layout_t     layout_type;                 /* Dataset's layout type (contig, chunked, compact, etc.) */
     hbool_t          type_info_init      = FALSE; /* Whether the datatype info has been initialized */
     hbool_t          should_alloc_space  = FALSE; /* Whether or not to initialize dataset's storage */
     H5S_t *          projected_mem_space = NULL;  /* If not NULL, ptr to dataspace containing a     */
@@ -326,6 +332,8 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, H5S_t *mem_space, H5S_t *file_spac
     HDassert(dataset && dataset->oloc.file);
     HDassert(file_space);
     HDassert(mem_space);
+
+    layout_type = dataset->shared->layout.type;
 
     /* All filters in the DCPL must have encoding enabled. */
     if (!dataset->shared->checked_filters) {
@@ -466,8 +474,10 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, H5S_t *mem_space, H5S_t *file_spac
     } /* end if */
 
     /* Allocate the chunk map */
-    if (NULL == (fm = H5FL_CALLOC(H5D_chunk_map_t)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate chunk map")
+    if (H5D_CONTIGUOUS != layout_type && H5D_COMPACT != layout_type) {
+        if (NULL == (fm = H5FL_CALLOC(H5D_chunk_map_t)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate chunk map")
+    }
 
     /* Call storage method's I/O initialization routine */
     if (io_info.layout_ops.io_init &&
