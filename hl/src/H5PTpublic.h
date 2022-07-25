@@ -210,7 +210,7 @@ H5_HLDLL herr_t H5PTclose(hid_t table_id);
  *          Level 0 is faster but offers the least compression;
  *          level 9 is slower but offers maximum compression.
  *          A setting of -1 indicates that no compression is desired.
-
+ *
  */
 /* This function may be removed from the packet table in release 1.8.19. */
 H5_HLDLL hid_t H5PTcreate_fl(hid_t loc_id, const char *dset_name, hid_t dtype_id, hsize_t chunk_size,
