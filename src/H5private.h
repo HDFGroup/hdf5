@@ -139,6 +139,15 @@
 #define R_OK 04
 #endif
 
+/* uthash is an external, header-only hash table implementation.
+ *
+ * We include the file directly in src/ and #define a few functions
+ * to use our internal memory calls.
+ */
+#define uthash_malloc(sz)    H5MM_malloc(sz)
+#define uthash_free(ptr, sz) H5MM_free(ptr) /* Ignoring sz is intentional */
+#include "uthash.h"
+
 /*
  * MPE Instrumentation support
  */
