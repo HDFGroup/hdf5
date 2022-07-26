@@ -1464,7 +1464,7 @@ H5_HLDLL herr_t H5LTfind_attribute(hid_t loc_id, const char *name);
  *            indicating the file’s root group, followed by the members
  *          - A relative path with respect to \p loc_id
  *          - A dot (\c .), if \p loc_id is the object identifier for
- *            the object itself
+ *            the object itself.
  *
  *          If \p path is an absolute path, then \p loc_id can be an
  *          identifier for any object in the file as it is used only to
