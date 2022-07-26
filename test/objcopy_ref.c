@@ -1390,11 +1390,17 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
                     case H5O_TYPE_MAP:
                         HDassert(0 && "maps not supported in native VOL connector");
 
+                    /* clang complains about implicit fallthrough here and
+                     * our usual attributes and fall-through comments don't
+                     * quiet the compiler.
+                     */
+                    H5_CLANG_DIAG_OFF("implicit-fallthrough")
                     case H5O_TYPE_UNKNOWN:
                     case H5O_TYPE_NTYPES:
                     default:
                         HDassert(0 && "Unknown type of object");
                         break;
+                    H5_CLANG_DIAG_ON("implicit-fallthrough")
                 } /* end switch */
 
                 /* Close objects */
