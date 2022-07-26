@@ -1,0 +1,29 @@
+/** \page high_level High-level library
+ * The high-level HDF5 library includes several sets of convenience and standard-use APIs to 
+ * facilitate common HDF5 operations.
+ *
+ * <ul>
+ * <li>\ref H5LT "Lite (H5LT, H5LD)"
+ * \n
+ * Functions to simplify creating and manipulating datasets, attributes and other features
+ * <li>\ref H5IM "Image (H5IM)"
+ * \n
+ * Creating and manipulating HDF5 datasets intended to be interpreted as images
+ * <li>\ref H5TB "Table (H5TB)"
+ * \n
+ * Creating and manipulating HDF5 datasets intended to be interpreted as tables
+ * <li>\ref H5PT "Packet Table (H5PT)"
+ * \n
+ * Creating and manipulating HDF5 datasets to support append- and read-only operations on table data
+ * <li>\ref H5DS "Dimension Scale (H5DS)"
+ * \n
+ * Creating and manipulating HDF5 datasets that are associated with the dimension of another HDF5 dataset
+ * <li>\ref H5DO "Optimizations (H5DO)"
+ * \n
+ * Bypassing default HDF5 behavior in order to optimize for specific use cases
+ * <li>\ref H5LR "Extensions (H5LR, H5LT)"
+ * \n
+ * Working with region references, hyperslab selections, and bit-fields
+ * </ul>
+ * 
+ */

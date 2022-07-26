@@ -1366,8 +1366,9 @@ case "`uname`" in
     UNAME_CYGWIN="yes"
     ;;
   MINGW*)
+    # The Winsock library
     AC_CHECK_HEADERS([io.h winsock2.h sys/timeb.h])
-    AC_HAVE_LIBRARY([ws2_32])
+    AC_CHECK_LIB([ws2_32], [GetUserName])
     ;;
   *)
     AC_CHECK_HEADERS([io.h winsock2.h sys/timeb.h])
