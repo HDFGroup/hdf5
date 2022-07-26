@@ -261,7 +261,7 @@ hid_t
 H5FD_mpio_init(void)
 {
     static int H5FD_mpio_Debug_inited = 0;
-    char *     env                    = NULL;
+    char      *env                    = NULL;
     hid_t      ret_value              = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_NOAPI(H5I_INVALID_HID)
@@ -836,7 +836,7 @@ done:
 static H5FD_t *
 H5FD__mpio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t H5_ATTR_UNUSED maxaddr)
 {
-    H5FD_mpio_t *   file = NULL;          /* VFD File struct for new file */
+    H5FD_mpio_t    *file = NULL;          /* VFD File struct for new file */
     H5P_genplist_t *plist;                /* Property list pointer */
     MPI_Comm        comm = MPI_COMM_NULL; /* MPI Communicator, from plist */
     MPI_Info        info = MPI_INFO_NULL; /* MPI Info, from plist */
@@ -1386,7 +1386,7 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
                 /* Perform collective read operation */
                 if (MPI_SUCCESS !=
                     (mpi_code = MPI_File_read_at_all(file->f, mpi_off, buf, size_i, buf_type, &mpi_stat)))
-                HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at_all failed", mpi_code)
+                    HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at_all failed", mpi_code)
         } /* end if */
         else {
 #ifdef H5FDmpio_DEBUG
@@ -1765,13 +1765,13 @@ H5FD__mpio_vector_build_types(uint32_t count, H5FD_mem_t types[], haddr_t addrs[
     hsize_t       bigio_count; /* Transition point to create derived type */
     hbool_t       fixed_size = FALSE;
     size_t        size;
-    H5FD_mem_t *  s_types           = NULL;
-    int *         mpi_block_lengths = NULL;
+    H5FD_mem_t   *s_types           = NULL;
+    int          *mpi_block_lengths = NULL;
     MPI_Aint      mpi_bufs_base_Aint;
-    MPI_Aint *    mpi_bufs          = NULL;
-    MPI_Aint *    mpi_displacements = NULL;
+    MPI_Aint     *mpi_bufs          = NULL;
+    MPI_Aint     *mpi_displacements = NULL;
     MPI_Datatype *sub_types         = NULL;
-    uint8_t *     sub_types_created = NULL;
+    uint8_t      *sub_types_created = NULL;
     int           i;
     int           j;
     int           mpi_code; /* MPI return code */
@@ -2119,13 +2119,13 @@ static herr_t
 H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t count, H5FD_mem_t types[],
                        haddr_t addrs[], size_t sizes[], void *bufs[])
 {
-    H5FD_mpio_t *              file              = (H5FD_mpio_t *)_file;
+    H5FD_mpio_t               *file              = (H5FD_mpio_t *)_file;
     hbool_t                    vector_was_sorted = TRUE;
-    haddr_t *                  s_addrs           = NULL;
-    size_t *                   s_sizes           = NULL;
-    void **                    s_bufs            = NULL;
+    haddr_t                   *s_addrs           = NULL;
+    size_t                    *s_sizes           = NULL;
+    void                     **s_bufs            = NULL;
     char                       unused            = 0; /* Unused, except for non-NULL pointer value */
-    void *                     mpi_bufs_base     = NULL;
+    void                      *mpi_bufs_base     = NULL;
     MPI_Datatype               buf_type          = MPI_BYTE; /* MPI description of the selection in memory */
     hbool_t                    buf_type_created  = FALSE;
     MPI_Datatype               file_type         = MPI_BYTE; /* MPI description of the selection in file */
@@ -2522,13 +2522,13 @@ static herr_t
 H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t count, H5FD_mem_t types[],
                         haddr_t addrs[], size_t sizes[], const void *bufs[])
 {
-    H5FD_mpio_t *              file              = (H5FD_mpio_t *)_file;
+    H5FD_mpio_t               *file              = (H5FD_mpio_t *)_file;
     hbool_t                    vector_was_sorted = TRUE;
-    haddr_t *                  s_addrs           = NULL;
-    size_t *                   s_sizes           = NULL;
-    const void **              s_bufs            = NULL;
+    haddr_t                   *s_addrs           = NULL;
+    size_t                    *s_sizes           = NULL;
+    const void               **s_bufs            = NULL;
     char                       unused            = 0; /* Unused, except for non-NULL pointer value */
-    const void *               mpi_bufs_base     = NULL;
+    const void                *mpi_bufs_base     = NULL;
     MPI_Datatype               buf_type          = MPI_BYTE; /* MPI description of the selection in memory */
     hbool_t                    buf_type_created  = FALSE;
     MPI_Datatype               file_type         = MPI_BYTE; /* MPI description of the selection in file */

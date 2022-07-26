@@ -29,9 +29,9 @@ const char *FILENAME[] = {"extend", NULL};
 
 /* Data buffers */
 static int **buf1      = NULL;
-static int * buf1_data = NULL;
+static int  *buf1_data = NULL;
 static int **buf2      = NULL;
-static int * buf2_data = NULL;
+static int  *buf2_data = NULL;
 
 /*-------------------------------------------------------------------------
  * Function:	write_data

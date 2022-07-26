@@ -62,7 +62,7 @@ Java_hdf_hdf5lib_H5_H5Iget_1name_1long(JNIEnv *env, jclass clss, jlong obj_id, j
 {
     ssize_t size = -1;
     jstring str;
-    char *  aName = NULL;
+    char   *aName = NULL;
 
     UNUSED(clss);
 
@@ -99,7 +99,7 @@ Java_hdf_hdf5lib_H5_H5Iget_1name(JNIEnv *env, jclass clss, jlong obj_id)
 {
     jstring str      = NULL;
     ssize_t buf_size = -1;
-    char *  aName    = NULL;
+    char   *aName    = NULL;
 
     UNUSED(clss);
 

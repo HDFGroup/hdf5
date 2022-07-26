@@ -787,8 +787,8 @@ compare_attribute(hid_t aid, hid_t aid2, hid_t pid, const void *wbuf, hid_t obj_
     H5A_info_t ainfo;               /* Attribute info */
     H5A_info_t ainfo2;              /* Attribute info */
     hssize_t   nelmts;              /* # of elements in dataspace */
-    void *     rbuf  = NULL;        /* Buffer for reading raw data */
-    void *     rbuf2 = NULL;        /* Buffer for reading raw data */
+    void      *rbuf  = NULL;        /* Buffer for reading raw data */
+    void      *rbuf2 = NULL;        /* Buffer for reading raw data */
 
     /* Check the character sets are equal */
     if (H5Aget_info(aid, &ainfo) < 0)
@@ -1358,8 +1358,8 @@ compare_datasets(hid_t did, hid_t did2, hid_t pid, const void *wbuf)
     htri_t             is_committed2;         /* If the datatype is committed */
     int                nfilters;              /* Number of filters applied to dataset */
     hssize_t           nelmts;                /* # of elements in dataspace */
-    void *             rbuf  = NULL;          /* Buffer for reading raw data */
-    void *             rbuf2 = NULL;          /* Buffer for reading raw data */
+    void              *rbuf  = NULL;          /* Buffer for reading raw data */
+    void              *rbuf2 = NULL;          /* Buffer for reading raw data */
     H5D_space_status_t space_status;          /* Dataset's raw dataspace status */
     H5D_space_status_t space_status2;         /* Dataset's raw dataspace status */
 
@@ -2472,7 +2472,7 @@ test_copy_dataset_versionbounds(hid_t fcpl_src, hid_t fapl_src)
     H5F_libver_t low, high;                   /* File format bounds */
     unsigned     srcdset_layoutversion;       /* Layout version of source dataset */
     int          i, j;                        /* Local index variables */
-    H5D_t *      dsetp = NULL;                /* Pointer to internal dset structure */
+    H5D_t       *dsetp = NULL;                /* Pointer to internal dset structure */
     herr_t       ret;                         /* Generic return value */
 
     TESTING("H5Ocopy(): simple dataset with version bounds");
@@ -6001,7 +6001,7 @@ test_copy_dataset_multi_ohdr_chunks(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fa
     else
         /* open the group for copy */
         if ((gid = H5Gopen2(fid_src, NAME_GROUP_TOP, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+            FAIL_STACK_ERROR;
 
     /* open the destination group */
     if ((gid2 = H5Gopen2(fid_dst, NAME_GROUP_TOP, H5P_DEFAULT)) < 0)
@@ -10239,7 +10239,7 @@ test_copy_dataset_compact_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, 
     unsigned int i, j, k;                    /* Local index variables */
     hsize_t      dim1d[1];                   /* Dataset dimensions */
     hvl_t        buf[DIM_SIZE_1];            /* Buffer for writing data */
-    hvl_t *      tvl;                        /* Temporary pointer to VL information */
+    hvl_t       *tvl;                        /* Temporary pointer to VL information */
     char         src_filename[NAME_BUF_SIZE];
     char         dst_filename[NAME_BUF_SIZE];
 
@@ -10435,7 +10435,7 @@ test_copy_dataset_contig_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, h
     unsigned int i, j, k;                    /* Local index variables */
     hsize_t      dim1d[1];                   /* Dataset dimensions */
     hvl_t        buf[DIM_SIZE_1];            /* Buffer for writing data */
-    hvl_t *      tvl;                        /* Temporary pointer to VL information */
+    hvl_t       *tvl;                        /* Temporary pointer to VL information */
     char         src_filename[NAME_BUF_SIZE];
     char         dst_filename[NAME_BUF_SIZE];
 
@@ -10634,7 +10634,7 @@ test_copy_dataset_chunked_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, 
     unsigned int i, j, k;                         /* Local index variables */
     hsize_t      dim1d[1];                        /* Dataset dimensions */
     hvl_t        buf[DIM_SIZE_1];                 /* Buffer for writing data */
-    hvl_t *      tvl;                             /* Temporary pointer to VL information */
+    hvl_t       *tvl;                             /* Temporary pointer to VL information */
     hsize_t      chunk_dim1d[1] = {CHUNK_SIZE_1}; /* Chunk dimensions */
     char         src_filename[NAME_BUF_SIZE];
     char         dst_filename[NAME_BUF_SIZE];
@@ -10873,7 +10873,7 @@ test_copy_dataset_compressed_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
     unsigned int i, j, k;                         /* Local index variables */
     hsize_t      dim1d[1];                        /* Dataset dimensions */
     hvl_t        buf[DIM_SIZE_1];                 /* Buffer for writing data */
-    hvl_t *      tvl;                             /* Temporary pointer to VL information */
+    hvl_t       *tvl;                             /* Temporary pointer to VL information */
     hsize_t      chunk_dim1d[1] = {CHUNK_SIZE_1}; /* Chunk dimensions */
     char         src_filename[NAME_BUF_SIZE];
     char         dst_filename[NAME_BUF_SIZE];

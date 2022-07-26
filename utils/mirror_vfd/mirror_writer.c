@@ -88,8 +88,8 @@ struct mirror_session {
     int                      sockfd;
     uint32_t                 token;
     uint32_t                 xmit_count;
-    H5FD_t *                 file;
-    loginfo_t *              loginfo;
+    H5FD_t                  *file;
+    loginfo_t               *loginfo;
     H5FD_mirror_xmit_reply_t reply;
 };
 
@@ -127,7 +127,7 @@ struct sock_comm {
     uint32_t            magic;
     int                 recd_die;
     H5FD_mirror_xmit_t *xmit_recd;
-    char *              raw;
+    char               *raw;
     size_t              raw_size;
 };
 
@@ -151,7 +151,7 @@ struct sock_comm {
  */
 struct mirror_writer_opts {
     uint32_t magic;
-    char *   logpath;
+    char    *logpath;
 };
 
 static void mybzero(void *dest, size_t size);
@@ -171,7 +171,7 @@ static void
 mybzero(void *dest, size_t size)
 {
     size_t i = 0;
-    char * s = NULL;
+    char  *s = NULL;
     HDassert(dest);
     s = (char *)dest;
     for (i = 0; i < size; i++) {
@@ -289,7 +289,7 @@ session_stop(struct mirror_session *session)
 static struct mirror_session *
 session_start(int socketfd, const H5FD_mirror_xmit_open_t *xmit_open)
 {
-    struct mirror_session *   session = NULL;
+    struct mirror_session    *session = NULL;
     struct mirror_writer_opts opts;
 #if 0 /* TODO: behaviro option */
     char logpath[H5FD_MIRROR_XMIT_FILEPATH_MAX] = "";
@@ -731,7 +731,7 @@ do_write(struct mirror_session *session, const unsigned char *xmit_buf)
     haddr_t                  addr              = 0;
     haddr_t                  sum_bytes_written = 0;
     H5FD_mem_t               type              = 0;
-    char *                   buf               = NULL;
+    char                    *buf               = NULL;
     ssize_t                  nbytes_in_packet  = 0;
     H5FD_mirror_xmit_write_t xmit_write;
 

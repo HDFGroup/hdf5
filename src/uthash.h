@@ -534,7 +534,7 @@ typedef unsigned char uint8_t;
         if (head) {                                                                                          \
             unsigned _bkt_i;                                                                                 \
             unsigned _count = 0;                                                                             \
-            char *   _prev;                                                                                  \
+            char    *_prev;                                                                                  \
             for (_bkt_i = 0; _bkt_i < (head)->hh.tbl->num_buckets; ++_bkt_i) {                               \
                 unsigned _bkt_count = 0;                                                                     \
                 _thh                = (head)->hh.tbl->buckets[_bkt_i].hh_head;                               \
@@ -876,7 +876,7 @@ typedef unsigned char uint8_t;
         unsigned               _he_bkt;                                                                      \
         unsigned               _he_bkt_i;                                                                    \
         struct UT_hash_handle *_he_thh, *_he_hh_nxt;                                                         \
-        UT_hash_bucket *       _he_new_buckets, *_he_newbkt;                                                 \
+        UT_hash_bucket        *_he_new_buckets, *_he_newbkt;                                                 \
         _he_new_buckets =                                                                                    \
             (UT_hash_bucket *)uthash_malloc(sizeof(struct UT_hash_bucket) * (tbl)->num_buckets * 2U);        \
         if (!_he_new_buckets) {                                                                              \
@@ -1019,7 +1019,7 @@ typedef unsigned char uint8_t;
 #define HASH_SELECT(hh_dst, dst, hh_src, src, cond)                                                          \
     do {                                                                                                     \
         unsigned        _src_bkt, _dst_bkt;                                                                  \
-        void *          _last_elt = NULL, *_elt;                                                             \
+        void           *_last_elt = NULL, *_elt;                                                             \
         UT_hash_handle *_src_hh, *_dst_hh, *_last_elt_hh = NULL;                                             \
         ptrdiff_t       _dst_hho = ((char *)(&(dst)->hh_dst) - (char *)(dst));                               \
         if ((src) != NULL) {                                                                                 \
@@ -1127,7 +1127,7 @@ typedef struct UT_hash_bucket {
 #define HASH_BLOOM_SIGNATURE 0xb12220f2u
 
 typedef struct UT_hash_table {
-    UT_hash_bucket *       buckets;
+    UT_hash_bucket        *buckets;
     unsigned               num_buckets, log2_num_buckets;
     unsigned               num_items;
     struct UT_hash_handle *tail; /* tail hh in app order, for fast append    */
@@ -1160,12 +1160,12 @@ typedef struct UT_hash_table {
 } UT_hash_table;
 
 typedef struct UT_hash_handle {
-    struct UT_hash_table * tbl;
-    void *                 prev;    /* prev element in app order      */
-    void *                 next;    /* next element in app order      */
+    struct UT_hash_table  *tbl;
+    void                  *prev;    /* prev element in app order      */
+    void                  *next;    /* next element in app order      */
     struct UT_hash_handle *hh_prev; /* previous hh in bucket order    */
     struct UT_hash_handle *hh_next; /* next hh in bucket order        */
-    const void *           key;     /* ptr to enclosing struct's key  */
+    const void            *key;     /* ptr to enclosing struct's key  */
     unsigned               keylen;  /* enclosing struct's key len     */
     unsigned               hashv;   /* result of hash-fcn(key)        */
 } UT_hash_handle;

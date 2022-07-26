@@ -127,7 +127,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1fapl_1core(JNIEnv *env, jclass clss, jlong fapl_id, 
 {
     jboolean  isCopy;
     jboolean *backArray = NULL;
-    jlong *   incArray  = NULL;
+    jlong    *incArray  = NULL;
     herr_t    status    = FAIL;
 
     UNUSED(clss);
@@ -208,7 +208,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1fapl_1direct(JNIEnv *env, jclass clss, jlong fapl_id
 {
 #ifdef H5_HAVE_DIRECT
     jboolean isCopy;
-    jlong *  theArray   = NULL;
+    jlong   *theArray   = NULL;
     size_t   alignment  = 0;
     size_t   block_size = 0;
     size_t   cbuf_size  = 0;
@@ -283,8 +283,8 @@ Java_hdf_hdf5lib_H5_H5Pget_1fapl_1family(JNIEnv *env, jclass clss, jlong tid, jl
     jboolean isCopy;
     hsize_t *sa = NULL;
     size_t   i;
-    jlong *  sizeArray  = NULL;
-    jlong *  plistArray = NULL;
+    jlong   *sizeArray  = NULL;
+    jlong   *plistArray = NULL;
     jsize    rank;
     herr_t   status = FAIL;
 
@@ -433,7 +433,7 @@ Java_hdf_hdf5lib_H5_H5Pset_1fapl_1hdfs(JNIEnv *env, jclass clss, jlong fapl_id, 
 {
 #ifdef H5_HAVE_LIBHDFS
     H5FD_hdfs_fapl_t instance;
-    const char *     str = NULL;
+    const char      *str = NULL;
     jfieldID         fid;
     jstring          j_str;
     jclass           cls;
@@ -591,7 +591,7 @@ Java_hdf_hdf5lib_H5_H5Pset_1fapl_1multi(JNIEnv *env, jclass clss, jlong tid, jin
                                         jboolean relax)
 {
     const char *const *mName = NULL;
-    const char *       utf8  = NULL;
+    const char        *utf8  = NULL;
     jboolean           isCopy;
     jboolean           bb;
     jobject            o;
@@ -599,10 +599,10 @@ Java_hdf_hdf5lib_H5_H5Pset_1fapl_1multi(JNIEnv *env, jclass clss, jlong tid, jin
     jstring            obj;
     jclass             Sjc;
     size_t             i;
-    jlong *            thefaplArray = NULL;
-    jlong *            theaddrArray = NULL;
-    jint *             themapArray  = NULL;
-    char *             member_name[H5FD_MEM_NTYPES];
+    jlong             *thefaplArray = NULL;
+    jlong             *theaddrArray = NULL;
+    jint              *themapArray  = NULL;
+    char              *member_name[H5FD_MEM_NTYPES];
     herr_t             status = FAIL;
 
     UNUSED(clss);
@@ -725,10 +725,10 @@ Java_hdf_hdf5lib_H5_H5Pget_1fapl_1multi(JNIEnv *env, jclass clss, jlong tid, jin
     jstring  str;
     herr_t   status = FAIL;
     size_t   i;
-    jlong *  thefaplArray = NULL;
-    jlong *  theaddrArray = NULL;
-    jint *   themapArray  = NULL;
-    char **  mName        = NULL;
+    jlong   *thefaplArray = NULL;
+    jlong   *theaddrArray = NULL;
+    jint    *themapArray  = NULL;
+    char   **mName        = NULL;
     int      relax        = 0;
     int      retVal       = 0;
 
@@ -853,7 +853,7 @@ Java_hdf_hdf5lib_H5_H5Pset_1fapl_1ros3(JNIEnv *env, jclass clss, jlong fapl_id, 
 {
 #ifdef H5_HAVE_ROS3_VFD
     H5FD_ros3_fapl_t instance;
-    const char *     str = NULL;
+    const char      *str = NULL;
     jfieldID         fid;
     jstring          j_str;
     jclass           cls;
@@ -1175,7 +1175,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1alignment(JNIEnv *env, jclass clss, jlong plist, jlo
     hsize_t  t = 0;
     hsize_t  a = 0;
     jsize    arrLen;
-    jlong *  theArray = NULL;
+    jlong   *theArray = NULL;
     herr_t   status   = FAIL;
 
     UNUSED(clss);
@@ -1237,8 +1237,8 @@ Java_hdf_hdf5lib_H5_H5Pget_1cache(JNIEnv *env, jclass clss, jlong plist, jintArr
 {
     jboolean isCopy;
     jdouble *w0Array          = NULL;
-    jlong *  rdcc_nelmtsArray = NULL;
-    jlong *  nbytesArray      = NULL;
+    jlong   *rdcc_nelmtsArray = NULL;
+    jlong   *nbytesArray      = NULL;
     herr_t   status           = FAIL;
 
     UNUSED(clss);
@@ -1479,7 +1479,7 @@ JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Pset_1mdc_1config(JNIEnv *env, jclass clss, jlong plist, jobject cache_config)
 {
     H5AC_cache_config_t cacheinfo;
-    const char *        str = NULL;
+    const char         *str = NULL;
     jfieldID            fid;
     jstring             j_str;
     jclass              cls;
@@ -1817,7 +1817,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1mdc_1log_1options(JNIEnv *env, jclass clss, jlong fa
     ssize_t   status = -1;
     size_t    location_size;
     jsize     arrLen;
-    char *    lname = NULL;
+    char     *lname = NULL;
     jstring   str   = NULL;
 
     UNUSED(clss);
@@ -1997,7 +1997,7 @@ JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5Pget_1libver_1bounds(JNIEnv *env, jclass clss, jlong fapl_id, jintArray libver)
 {
     jboolean isCopy;
-    jint *   theArray = NULL;
+    jint    *theArray = NULL;
     herr_t   retVal   = FAIL;
 
     UNUSED(clss);

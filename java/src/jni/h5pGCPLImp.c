@@ -142,7 +142,7 @@ JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5Pget_1est_1link_1info(JNIEnv *env, jclass clss, jlong gcpl_id, jintArray link_info)
 {
     jboolean isCopy;
-    jint *   theArray = NULL;
+    jint    *theArray = NULL;
     herr_t   retVal   = FAIL;
 
     UNUSED(clss);
@@ -200,7 +200,7 @@ JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5Pget_1link_1phase_1change(JNIEnv *env, jclass clss, jlong gcpl_id, jintArray links)
 {
     jboolean isCopy;
-    jint *   theArray = NULL;
+    jint    *theArray = NULL;
     herr_t   retVal   = FAIL;
 
     UNUSED(clss);

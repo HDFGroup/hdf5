@@ -43,7 +43,7 @@ int dxfer_coll_type = DXFER_COLLECTIVE_IO;
 #define NFILENAME    2
 #define PARATESTFILE filenames[0]
 const char *FILENAME[NFILENAME] = {"ParaTest", NULL};
-char *      filenames[NFILENAME];
+char       *filenames[NFILENAME];
 hid_t       fapl; /* file access property list */
 
 #ifdef USE_PAUSE

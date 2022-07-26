@@ -51,8 +51,8 @@ typedef struct H5WB_t H5WB_t;
 
 /* General routines for wrapped buffer operations */
 H5_DLL H5WB_t *H5WB_wrap(void *buf, size_t buf_size);
-H5_DLL void *  H5WB_actual(H5WB_t *wb, size_t need);
-H5_DLL void *  H5WB_actual_clear(H5WB_t *wb, size_t need);
+H5_DLL void   *H5WB_actual(H5WB_t *wb, size_t need);
+H5_DLL void   *H5WB_actual_clear(H5WB_t *wb, size_t need);
 H5_DLL herr_t  H5WB_unwrap(H5WB_t *wb);
 
 #endif /* H5WBprivate_H */

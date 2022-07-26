@@ -173,9 +173,9 @@ h5gget_obj_info_idx_c(hid_t_f *loc_id, _fcd name, int_f *namelen, int_f *idx, _f
 {
     H5O_info2_t oinfo;
     hid_t       c_loc_id = (hid_t)*loc_id;
-    char *      c_name   = NULL;
+    char       *c_name   = NULL;
     size_t      c_obj_namelen;
-    char *      c_obj_name = NULL;
+    char       *c_obj_name = NULL;
     hsize_t     c_idx      = (hsize_t)*idx;
     hid_t       gid        = (-1); /* Temporary group ID */
     int         ret_value  = -1;
@@ -251,7 +251,7 @@ int_f
 h5gn_members_c(hid_t_f *loc_id, _fcd name, int_f *namelen, int_f *nmembers)
 /******/
 {
-    char *     c_name = NULL;
+    char      *c_name = NULL;
     H5G_info_t ginfo;
     int        ret_value = -1;
 
@@ -750,7 +750,7 @@ int_f
 h5gget_comment_c(hid_t_f *loc_id, _fcd name, int_f *namelen, size_t_f *bufsize, _fcd comment)
 /******/
 {
-    char * c_name = NULL, *c_comment = NULL;
+    char  *c_name = NULL, *c_comment = NULL;
     size_t c_bufsize;
     int    ret_value = -1;
 
@@ -954,7 +954,7 @@ h5gget_info_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen, 
                      int_f *max_corder, int_f *mounted)
 /******/
 {
-    char *     c_group_name = NULL; /* Buffer to hold group name C string */
+    char      *c_group_name = NULL; /* Buffer to hold group name C string */
     int_f      ret_value    = 0;    /* Return value */
     H5G_info_t ginfo;
     /*
@@ -1024,7 +1024,7 @@ h5gget_info_by_name_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen,
                       int_f *storage_type, int_f *nlinks, int_f *max_corder, int_f *mounted)
 /******/
 {
-    char *     c_group_name = NULL; /* Buffer to hold group name C string */
+    char      *c_group_name = NULL; /* Buffer to hold group name C string */
     int_f      ret_value    = 0;    /* Return value */
     H5G_info_t ginfo;
     /*

@@ -46,8 +46,8 @@
 
 /* Private typedefs & structs */
 struct H5RS_str_t {
-    char *   s;       /* String to be reference counted */
-    char *   end;     /* Pointer to terminating NUL character at the end of the string */
+    char    *s;       /* String to be reference counted */
+    char    *end;     /* Pointer to terminating NUL character at the end of the string */
     size_t   len;     /* Current length of the string */
     size_t   max;     /* Size of allocated buffer */
     hbool_t  wrapped; /* Indicates that the string to be ref-counted is not copied */

@@ -286,7 +286,7 @@ herr_t
 H5VL_native_get_file_addr_len(hid_t loc_id, size_t *addr_len)
 {
     H5I_type_t vol_obj_type = H5I_BADID; /* Object type of loc_id */
-    void *     vol_obj      = NULL;      /* VOL Object of loc_id */
+    void      *vol_obj      = NULL;      /* VOL Object of loc_id */
     herr_t     ret_value    = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -357,7 +357,7 @@ herr_t
 H5VLnative_addr_to_token(hid_t loc_id, haddr_t addr, H5O_token_t *token)
 {
     H5I_type_t vol_obj_type = H5I_BADID; /* Object type of loc_id */
-    void *     vol_obj      = NULL;      /* VOL Object of loc_id */
+    void      *vol_obj      = NULL;      /* VOL Object of loc_id */
     herr_t     ret_value    = SUCCEED;   /* Return value         */
 
     FUNC_ENTER_API(FAIL)
@@ -451,7 +451,7 @@ herr_t
 H5VLnative_token_to_addr(hid_t loc_id, H5O_token_t token, haddr_t *addr)
 {
     H5I_type_t vol_obj_type = H5I_BADID; /* Object type of loc_id */
-    void *     vol_obj      = NULL;      /* VOL Object of loc_id */
+    void      *vol_obj      = NULL;      /* VOL Object of loc_id */
     herr_t     ret_value    = SUCCEED;   /* Return value         */
 
     FUNC_ENTER_API(FAIL)

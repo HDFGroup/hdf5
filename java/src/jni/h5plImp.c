@@ -205,7 +205,7 @@ Java_hdf_hdf5lib_H5_H5PLget(JNIEnv *env, jclass clss, jint idx)
 {
     jstring str = NULL;
     ssize_t buf_size;
-    char *  aName = NULL;
+    char   *aName = NULL;
 
     UNUSED(clss);
 

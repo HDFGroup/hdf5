@@ -136,7 +136,7 @@ test_iter_group(FileAccPropList &fapl)
 {
     hsize_t   idx;                   /* Index in the group */
     char      name[NAMELEN];         /* temporary name buffer */
-    char *    lnames[NDATASETS + 2]; /* Names of the links created */
+    char     *lnames[NDATASETS + 2]; /* Names of the links created */
     iter_info info;                  /* Custom iteration information */
     herr_t    ret;                   /* Generic return value */
 

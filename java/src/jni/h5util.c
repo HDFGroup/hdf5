@@ -46,7 +46,7 @@ jobject set_callback;
 jobject delete_callback;
 
 H5E_auto2_t efunc;
-void *      edata;
+void       *edata;
 
 /********************/
 /* Local Prototypes */
@@ -190,9 +190,9 @@ h5str_convert(JNIEnv *env, char **in_str, hid_t container, hid_t tid, void *out_
     size_t retVal   = 0;
     size_t typeSize = 0;
     hid_t  mtid     = H5I_INVALID_HID;
-    char * this_str = NULL;
-    char * cptr     = NULL;
-    char * token;
+    char  *this_str = NULL;
+    char  *cptr     = NULL;
+    char  *token;
     int    n;
 
     if (!in_str)
@@ -680,7 +680,7 @@ int
 h5str_sprint_reference(JNIEnv *env, h5str_t *out_str, void *ref_p)
 {
     ssize_t    buf_size;
-    char *     ref_name = NULL;
+    char      *ref_name = NULL;
     H5R_ref_t *ref_vp   = (H5R_ref_t *)ref_p;
 
     int ret_value = FAIL;
@@ -833,8 +833,8 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
     size_t         typeSize = 0;
     H5T_sign_t     nsign    = H5T_SGN_ERROR;
     hid_t          mtid     = H5I_INVALID_HID;
-    char *         cptr     = (char *)in_buf;
-    char *         this_str = NULL;
+    char          *cptr     = (char *)in_buf;
+    char          *this_str = NULL;
     int            n;
     size_t         retVal = 0;
 
@@ -916,7 +916,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
 
         case H5T_STRING: {
             htri_t is_variable;
-            char * tmp_str;
+            char  *tmp_str;
 
             typeSize = 0;
 
@@ -1182,7 +1182,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
             else if (H5R_OBJ_REF_BUF_SIZE == typeSize) {
                 H5O_info2_t oi;
                 hid_t       obj         = H5I_INVALID_HID;
-                char *      obj_tok_str = NULL;
+                char       *obj_tok_str = NULL;
 
                 /*
                  * Object references -- show the type and OID of the referenced
@@ -1262,7 +1262,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                                         /* Object references -- show the type and
                                          * OID of the referenced object. */
                                         H5O_info2_t oi;
-                                        char *      obj_tok_str = NULL;
+                                        char       *obj_tok_str = NULL;
                                         if ((new_obj_id = H5Ropen_object(ref_vp, H5P_DEFAULT, H5P_DEFAULT)) >=
                                             0) {
                                             H5Oget_info3(new_obj_id, &oi, H5O_INFO_BASIC);
@@ -1435,7 +1435,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
         case H5T_VLEN: {
             unsigned int i;
             size_t       baseSize;
-            hvl_t *      vl_buf = (hvl_t *)in_buf;
+            hvl_t       *vl_buf = (hvl_t *)in_buf;
 
             if ((mtid = H5Tget_super(tid)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
@@ -1541,7 +1541,7 @@ h5str_print_region_data_blocks(JNIEnv *env, hid_t region_id, h5str_t *str, int n
     size_t   type_size;
     hid_t    mem_space  = H5I_INVALID_HID;
     hid_t    sid1       = H5I_INVALID_HID;
-    void *   region_buf = NULL;
+    void    *region_buf = NULL;
     int      ret_value  = FAIL;
 
     if (ndims < 0)
@@ -1753,7 +1753,7 @@ h5str_print_region_data_points(JNIEnv *env, hid_t region_space, hid_t region_id,
     size_t   jndx;
     size_t   type_size;
     hid_t    mem_space  = H5I_INVALID_HID;
-    void *   region_buf = NULL;
+    void    *region_buf = NULL;
     int      ret_value  = FAIL;
 
     UNUSED(ptdata);
@@ -2276,7 +2276,7 @@ h5str_render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem, hs
             unsigned char tempuchar;
             unsigned int  i;
             H5T_str_t     pad;
-            char *        s;
+            char         *s;
 
             if ((pad = H5Tget_strpad(tid)) < 0) {
                 ret_value = FAIL;
@@ -2492,7 +2492,7 @@ render_bin_output_region_data_blocks(FILE *stream, hid_t region_id, hid_t contai
     size_t   type_size;
     hid_t    sid1       = H5I_INVALID_HID;
     hid_t    mem_space  = H5I_INVALID_HID;
-    void *   region_buf = NULL;
+    void    *region_buf = NULL;
     int      blkndx;
     int      jndx;
     int      ret_value = SUCCEED;
@@ -2681,7 +2681,7 @@ render_bin_output_region_data_points(FILE *stream, hid_t region_space, hid_t reg
     hsize_t *dims1 = NULL;
     size_t   type_size;
     hid_t    mem_space  = H5I_INVALID_HID;
-    void *   region_buf = NULL;
+    void    *region_buf = NULL;
     int      ret_value  = SUCCEED;
 
     UNUSED(ptdata);
@@ -2878,7 +2878,7 @@ h5str_dump_region_attribute(JNIEnv *env, h5str_t *str, hid_t region_id)
 
             for (i = 0; i < p_nelmts; i++) {
                 size_t bytes_in = 0; /* # of bytes to write  */
-                void * memref   = buf + i * size;
+                void  *memref   = buf + i * size;
 
                 if (!(bytes_in = h5str_sprintf(ENVONLY, str, region_id, type_id, memref, 1)))
                     CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
@@ -2928,7 +2928,7 @@ h5str_dump_simple_dset(JNIEnv *env, FILE *stream, hid_t dset, int binary_order)
     size_t  p_type_nbytes; /* size of memory type */
 
     /* Stripmine info */
-    void *  sm_buf = NULL;              /* buffer for raw data */
+    void   *sm_buf = NULL;              /* buffer for raw data */
     hsize_t sm_size[H5S_MAX_RANK];      /* stripmine size */
     hsize_t sm_nbytes;                  /* bytes per stripmine */
     hsize_t sm_nelmts;                  /* elements per stripmine */
@@ -3147,7 +3147,7 @@ h5str_dump_simple_mem(JNIEnv *env, FILE *stream, hid_t attr_id, int binary_order
     hsize_t  total_size[H5S_MAX_RANK]; /* total size of dataset*/
     hsize_t  p_nelmts;                 /* total selected elmts */
 
-    void *  sm_buf = NULL;         /* buffer for raw data */
+    void   *sm_buf = NULL;         /* buffer for raw data */
     hsize_t sm_size[H5S_MAX_RANK]; /* stripmine size */
 
     int ret_value = 0;
@@ -3355,7 +3355,7 @@ h5str_dump_simple_data(JNIEnv *env, FILE *stream, hid_t container, hid_t type, v
 
     for (i = 0, line_count = 0; i < nelmts; i++, line_count++) {
         size_t bytes_in = 0; /* # of bytes to write  */
-        void * memref   = mem + i * size;
+        void  *memref   = mem + i * size;
 
         /* Render the data element*/
         h5str_new(&buffer, 32 * size);
@@ -3413,7 +3413,7 @@ Java_hdf_hdf5lib_H5_H5AreadComplex(JNIEnv *env, jclass clss, jlong attr_id, jlon
     size_t  i;
     hid_t   p_type = H5I_INVALID_HID;
     jsize   n;
-    char *  readBuf = NULL;
+    char   *readBuf = NULL;
     herr_t  status  = FAIL;
 
     UNUSED(clss);
@@ -3480,7 +3480,7 @@ Java_hdf_hdf5lib_H5_H5Acopy(JNIEnv *env, jclass clss, jlong src_id, jlong dst_id
     hssize_t npoints;
     hsize_t  total_size = 0;
     size_t   type_size;
-    jbyte *  buf    = NULL;
+    jbyte   *buf    = NULL;
     hid_t    tid    = H5I_INVALID_HID;
     hid_t    sid    = H5I_INVALID_HID;
     herr_t   retVal = FAIL;
@@ -3538,7 +3538,7 @@ Java_hdf_hdf5lib_H5_H5Dcopy(JNIEnv *env, jclass clss, jlong src_id, jlong dst_id
     hssize_t npoints;
     hsize_t  total_size = 0, total_allocated_size;
     size_t   type_size;
-    jbyte *  buf    = NULL;
+    jbyte   *buf    = NULL;
     hid_t    tid    = H5I_INVALID_HID;
     hid_t    sid    = H5I_INVALID_HID;
     herr_t   retVal = FAIL;
@@ -3613,10 +3613,10 @@ static int    H5Gget_obj_info_full(hid_t loc_id, char **objname, int *otype, int
 #endif
 
 typedef struct info_all {
-    char **        objname;
-    int *          otype;
-    int *          ltype;
-    H5O_token_t *  obj_token;
+    char         **objname;
+    int           *otype;
+    int           *ltype;
+    H5O_token_t   *obj_token;
     unsigned long *fno;
     unsigned long  idxnum;
     int            count;
@@ -3639,15 +3639,15 @@ Java_hdf_hdf5lib_H5_H5Gget_1obj_1info_1full(JNIEnv *env, jclass clss, jlong loc_
                                             jint indx_order)
 {
     unsigned long *fnos   = NULL;
-    H5O_token_t *  tokens = NULL;
-    const char *   gName  = NULL;
-    char **        oName  = NULL;
+    H5O_token_t   *tokens = NULL;
+    const char    *gName  = NULL;
+    char         **oName  = NULL;
     jboolean       isCopy;
     jstring        str;
     jobject        token;
-    jint *         otarr = NULL;
-    jint *         ltarr = NULL;
-    jlong *        fnoP  = NULL;
+    jint          *otarr = NULL;
+    jint          *ltarr = NULL;
+    jlong         *fnoP  = NULL;
     hid_t          gid   = (hid_t)loc_id;
     int            i;
     int            indexType  = indx_type;
@@ -3753,9 +3753,9 @@ Java_hdf_hdf5lib_H5_H5Gget_1obj_1info_1max(JNIEnv *env, jclass clss, jlong loc_i
     jboolean     isCopy;
     jstring      str;
     jobject      token;
-    char **      oName = NULL;
-    jint *       otarr = NULL;
-    jint *       ltarr = NULL;
+    char       **oName = NULL;
+    jint        *otarr = NULL;
+    jint        *ltarr = NULL;
     int          i;
     herr_t       ret_val = FAIL;
 
@@ -3947,7 +3947,7 @@ Java_hdf_hdf5lib_H5_H5export_1dataset(JNIEnv *env, jclass clss, jstring file_exp
     jboolean    isCopy;
     herr_t      ret_val    = FAIL;
     hid_t       dataset_id = H5I_INVALID_HID;
-    FILE *      stream     = NULL;
+    FILE       *stream     = NULL;
 
     UNUSED(clss);
 
@@ -4001,7 +4001,7 @@ Java_hdf_hdf5lib_H5_H5export_1attribute(JNIEnv *env, jclass clss, jstring file_e
     jboolean    isCopy;
     herr_t      ret_val = FAIL;
     hid_t       attr_id = H5I_INVALID_HID;
-    FILE *      stream  = NULL;
+    FILE       *stream  = NULL;
 
     UNUSED(clss);
 

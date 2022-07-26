@@ -19,18 +19,18 @@
 #define H5TOOLS_STR_H
 
 typedef struct h5tools_str_t {
-    char * s;      /*allocate string       */
+    char  *s;      /*allocate string       */
     size_t len;    /*length of actual value    */
     size_t nalloc; /*allocated size of string  */
 } h5tools_str_t;
 
 H5TOOLS_DLL void   h5tools_str_close(h5tools_str_t *str);
 H5TOOLS_DLL size_t h5tools_str_len(h5tools_str_t *str);
-H5TOOLS_DLL char * h5tools_str_append(h5tools_str_t *str, const char *fmt, ...) H5_ATTR_FORMAT(printf, 2, 3);
-H5TOOLS_DLL char * h5tools_str_reset(h5tools_str_t *str);
-H5TOOLS_DLL char * h5tools_str_trunc(h5tools_str_t *str, size_t size);
-H5TOOLS_DLL char * h5tools_str_fmt(h5tools_str_t *str, size_t start, const char *fmt);
-H5TOOLS_DLL char * h5tools_str_prefix(h5tools_str_t *str, const h5tool_format_t *info, hsize_t elmtno,
+H5TOOLS_DLL char  *h5tools_str_append(h5tools_str_t *str, const char *fmt, ...) H5_ATTR_FORMAT(printf, 2, 3);
+H5TOOLS_DLL char  *h5tools_str_reset(h5tools_str_t *str);
+H5TOOLS_DLL char  *h5tools_str_trunc(h5tools_str_t *str, size_t size);
+H5TOOLS_DLL char  *h5tools_str_fmt(h5tools_str_t *str, size_t start, const char *fmt);
+H5TOOLS_DLL char  *h5tools_str_prefix(h5tools_str_t *str, const h5tool_format_t *info, hsize_t elmtno,
                                       h5tools_context_t *ctx);
 /*
  * new functions needed to display region reference data

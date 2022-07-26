@@ -63,8 +63,8 @@ Java_hdf_hdf5lib_H5__1H5Screate_1simple(JNIEnv *env, jclass clss, jint rank, jlo
     hsize_t *sa    = NULL;
     hsize_t *msa   = NULL;
     hsize_t *lp    = NULL;
-    jlong *  dimsP = NULL, *maxdimsP = NULL;
-    jlong *  jlp   = NULL;
+    jlong   *dimsP = NULL, *maxdimsP = NULL;
+    jlong   *jlp   = NULL;
     jsize    drank = 0, mrank = 0;
     int      i;
     hid_t    retVal = H5I_INVALID_HID;
@@ -180,7 +180,7 @@ Java_hdf_hdf5lib_H5_H5Sselect_1elements(JNIEnv *env, jclass clss, jlong space_id
 {
     jboolean  isCopy;
     hssize_t *sa = NULL;
-    jlong *   P  = NULL;
+    jlong    *P  = NULL;
     jint      i;
     int       rank;
     herr_t    status = FAIL;
@@ -224,8 +224,8 @@ Java_hdf_hdf5lib_H5_H5Sselect_1elements(JNIEnv *env, jclass clss, jlong space_id
     jboolean isCopy;
     hsize_t *lp  = NULL;
     hsize_t *llp = NULL;
-    jlong *  jlp = NULL;
-    jbyte *  P   = NULL;
+    jlong   *jlp = NULL;
+    jbyte   *P   = NULL;
     jsize    size;
     int      ii;
     int      nlongs;
@@ -416,7 +416,7 @@ Java_hdf_hdf5lib_H5_H5Sget_1simple_1extent_1dims(JNIEnv *env, jclass clss, jlong
     jboolean isCopy;
     hsize_t *sa    = NULL;
     hsize_t *msa   = NULL;
-    jlong *  dimsP = NULL, *maxdimsP = NULL;
+    jlong   *dimsP = NULL, *maxdimsP = NULL;
     int      i;
     int      rank = -1;
     int      mrank;
@@ -525,8 +525,8 @@ Java_hdf_hdf5lib_H5_H5Sset_1extent_1simple(JNIEnv *env, jclass clss, jlong space
     hsize_t *sa    = NULL;
     hsize_t *msa   = NULL;
     hsize_t *lp    = NULL;
-    jlong *  dimsP = NULL, *maxdimsP = NULL;
-    jlong *  jlp = NULL;
+    jlong   *dimsP = NULL, *maxdimsP = NULL;
+    jlong   *jlp = NULL;
     jsize    drank, mrank;
     int      i;
     herr_t   status = FAIL;
@@ -635,8 +635,8 @@ Java_hdf_hdf5lib_H5_H5Soffset_1simple(JNIEnv *env, jclass clss, jlong space_id, 
     hssize_t *lp = NULL;
     size_t    rank;
     jsize     i;
-    jbyte *   P      = NULL;
-    jlong *   jlp    = NULL;
+    jbyte    *P      = NULL;
+    jlong    *jlp    = NULL;
     herr_t    status = FAIL;
 
     UNUSED(clss);
@@ -749,8 +749,8 @@ Java_hdf_hdf5lib_H5_H5Sselect_1hyperslab(JNIEnv *env, jclass clss, jlong space_i
     jboolean isCopy;
     hsize_t *strt = NULL, *strd = NULL, *cnt = NULL, *blk = NULL;
     hsize_t *lp     = NULL;
-    jlong *  startP = NULL, *strideP = NULL, *countP = NULL, *blockP = NULL;
-    jlong *  jlp = NULL;
+    jlong   *startP = NULL, *strideP = NULL, *countP = NULL, *blockP = NULL;
+    jlong   *jlp = NULL;
     jsize    start_rank, stride_rank, count_rank, block_rank;
     int      i;
     herr_t   status = FAIL;
@@ -944,7 +944,7 @@ Java_hdf_hdf5lib_H5_H5Sget_1select_1hyper_1blocklist(JNIEnv *env, jclass clss, j
     jboolean isCopy;
     hsize_t *ba = NULL;
     size_t   i, buf_size;
-    jlong *  bufP = NULL;
+    jlong   *bufP = NULL;
     jsize    buflen;
     int      rank;
     herr_t   status = FAIL;
@@ -1005,7 +1005,7 @@ Java_hdf_hdf5lib_H5_H5Sget_1select_1elem_1pointlist(JNIEnv *env, jclass clss, jl
 {
     jboolean isCopy;
     hsize_t *ba   = NULL;
-    jlong *  bufP = NULL;
+    jlong   *bufP = NULL;
     jsize    buflen;
     int      i, rank;
     herr_t   status = FAIL;
@@ -1064,7 +1064,7 @@ Java_hdf_hdf5lib_H5_H5Sget_1select_1bounds(JNIEnv *env, jclass clss, jlong space
     hsize_t *strt = NULL;
     hsize_t *en   = NULL;
     size_t   i;
-    jlong *  startP = NULL, *endP = NULL;
+    jlong   *startP = NULL, *endP = NULL;
     jsize    rank;
     herr_t   status = FAIL;
 
@@ -1163,7 +1163,7 @@ JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_H5_H5Sdecode(JNIEnv *env, jclass clss, jbyteArray buf)
 {
     jboolean isCopy;
-    jbyte *  bufP = NULL;
+    jbyte   *bufP = NULL;
     hid_t    sid  = H5I_INVALID_HID;
 
     UNUSED(clss);
@@ -1215,7 +1215,7 @@ Java_hdf_hdf5lib_H5_H5Sget_1regular_1hyperslab(JNIEnv *env, jclass clss, jlong s
 {
     jboolean isCopy;
     hsize_t *strt = NULL, *strd = NULL, *cnt = NULL, *blk = NULL;
-    jlong *  startP = NULL, *strideP = NULL, *countP = NULL, *blockP = NULL;
+    jlong   *startP = NULL, *strideP = NULL, *countP = NULL, *blockP = NULL;
     jsize    start_rank = -1, stride_rank = -1, count_rank = -1, block_rank = -1;
     int      i, rank = -1;
     herr_t   status = FAIL;
@@ -1390,7 +1390,7 @@ Java_hdf_hdf5lib_H5_H5Sselect_1adjust(JNIEnv *env, jclass clss, jlong space_id, 
 {
     jboolean  isCopy;
     hssize_t *offst       = NULL;
-    jlong *   offsetP     = NULL;
+    jlong    *offsetP     = NULL;
     jsize     offset_rank = -1;
     int       i, rank = -1;
     herr_t    status = FAIL;
@@ -1450,7 +1450,7 @@ Java_hdf_hdf5lib_H5_H5Sselect_1intersect_1block(JNIEnv *env, jclass clss, jlong 
     htri_t   bval = JNI_FALSE;
     jboolean isCopy;
     hsize_t *strt = NULL, *nd = NULL;
-    jlong *  startP = NULL, *endP = NULL;
+    jlong   *startP = NULL, *endP = NULL;
     jsize    start_rank = -1, end_rank = -1;
     int      i, rank                   = -1;
 
@@ -1558,8 +1558,8 @@ Java_hdf_hdf5lib_H5_H5Scombine_1hyperslab(JNIEnv *env, jclass clss, jlong space_
     jboolean isCopy;
     hsize_t *strt = NULL, *strd = NULL, *cnt = NULL, *blk = NULL;
     hsize_t *lp     = NULL;
-    jlong *  startP = NULL, *strideP = NULL, *countP = NULL, *blockP = NULL;
-    jlong *  jlp = NULL;
+    jlong   *startP = NULL, *strideP = NULL, *countP = NULL, *blockP = NULL;
+    jlong   *jlp = NULL;
     jsize    start_rank, stride_rank, count_rank, block_rank;
     int      i;
     hid_t    sid = H5I_INVALID_HID;

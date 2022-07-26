@@ -507,7 +507,7 @@ static const hbool_t H5F_def_null_fsm_addr_g =
 
 static const hbool_t H5F_def_use_mdc_logging_g =
     H5F_ACS_USE_MDC_LOGGING_DEF; /* Default metadata cache logging flag */
-static const char *  H5F_def_mdc_log_location_g = H5F_ACS_MDC_LOG_LOCATION_DEF; /* Default mdc log location */
+static const char   *H5F_def_mdc_log_location_g = H5F_ACS_MDC_LOG_LOCATION_DEF; /* Default mdc log location */
 static const hbool_t H5F_def_start_mdc_log_on_access_g =
     H5F_ACS_START_MDC_LOG_ON_ACCESS_DEF; /* Default mdc log start on access flag */
 static const hbool_t H5F_def_evict_on_close_flag_g =
@@ -860,9 +860,9 @@ H5P__facc_set_def_driver(void)
     /* Only parse VFL driver string if it's set */
     if (driver_env_var && *driver_env_var) {
         H5FD_driver_prop_t driver_prop;
-        H5P_genplist_t *   def_fapl;     /* Default file access property list */
-        H5P_genclass_t *   def_fapclass; /* Default file access property class */
-        const char *       driver_config_env_var;
+        H5P_genplist_t    *def_fapl;     /* Default file access property list */
+        H5P_genclass_t    *def_fapclass; /* Default file access property class */
+        const char        *driver_config_env_var;
         htri_t             driver_is_registered;
 
         /* Check to see if the driver is already registered */
@@ -1554,7 +1554,7 @@ const void *
 H5Pget_driver_info(hid_t plist_id)
 {
     H5P_genplist_t *plist     = NULL; /* Property list pointer            */
-    const void *    ret_value = NULL; /* Return value                     */
+    const void     *ret_value = NULL; /* Return value                     */
 
     FUNC_ENTER_API(NULL)
     H5TRACE1("*x", "i", plist_id);
@@ -1628,7 +1628,7 @@ ssize_t
 H5Pget_driver_config_str(hid_t fapl_id, char *config_buf, size_t buf_size)
 {
     H5P_genplist_t *plist; /* Property list pointer */
-    const char *    config_str = NULL;
+    const char     *config_str = NULL;
     ssize_t         ret_value  = -1;
 
     FUNC_ENTER_API((-1))
@@ -1697,7 +1697,7 @@ H5P__file_driver_copy(void *value)
             /* Copy driver info, if it exists */
             if (info->driver_info) {
                 H5FD_class_t *driver; /* Pointer to driver */
-                void *        new_pl; /* Copy of driver info */
+                void         *new_pl; /* Copy of driver info */
 
                 /* Retrieve the driver for the ID */
                 if (NULL == (driver = (H5FD_class_t *)H5I_object(info->driver_id)))
@@ -3123,7 +3123,7 @@ done:
 herr_t
 H5Pset_file_image(hid_t fapl_id, void *buf_ptr, size_t buf_len)
 {
-    H5P_genplist_t *       fapl;                /* Property list pointer */
+    H5P_genplist_t        *fapl;                /* Property list pointer */
     H5FD_file_image_info_t image_info;          /* File image info */
     herr_t                 ret_value = SUCCEED; /* Return value */
 
@@ -3220,7 +3220,7 @@ done:
 herr_t
 H5Pget_file_image(hid_t fapl_id, void **buf /*out*/, size_t *buf_len /*out*/)
 {
-    H5P_genplist_t *       fapl;                /* Property list pointer */
+    H5P_genplist_t        *fapl;                /* Property list pointer */
     H5FD_file_image_info_t image_info;          /* File image info */
     herr_t                 ret_value = SUCCEED; /* Return value */
 
@@ -3295,7 +3295,7 @@ done:
 herr_t
 H5Pset_file_image_callbacks(hid_t fapl_id, H5FD_file_image_callbacks_t *callbacks_ptr)
 {
-    H5P_genplist_t *       fapl;                /* Property list pointer */
+    H5P_genplist_t        *fapl;                /* Property list pointer */
     H5FD_file_image_info_t info;                /* File image info */
     herr_t                 ret_value = SUCCEED; /* Return value */
 
@@ -3371,7 +3371,7 @@ done:
 herr_t
 H5Pget_file_image_callbacks(hid_t fapl_id, H5FD_file_image_callbacks_t *callbacks /*out*/)
 {
-    H5P_genplist_t *       fapl;                /* Property list pointer */
+    H5P_genplist_t        *fapl;                /* Property list pointer */
     H5FD_file_image_info_t info;                /* File image info */
     herr_t                 ret_value = SUCCEED; /* Return value */
 
@@ -3659,7 +3659,7 @@ static herr_t
 H5P__facc_cache_image_config_dec(const void **_pp, void *_value)
 {
     H5AC_cache_image_config_t *config = (H5AC_cache_image_config_t *)_value;
-    const uint8_t **           pp     = (const uint8_t **)_pp;
+    const uint8_t            **pp     = (const uint8_t **)_pp;
     unsigned                   enc_size;
     herr_t                     ret_value = SUCCEED; /* Return value */
 
@@ -4247,7 +4247,7 @@ static herr_t
 H5P__facc_cache_config_dec(const void **_pp, void *_value)
 {
     H5AC_cache_config_t *config = (H5AC_cache_config_t *)_value;
-    const uint8_t **     pp     = (const uint8_t **)_pp;
+    const uint8_t      **pp     = (const uint8_t **)_pp;
     unsigned             enc_size;
     uint64_t             enc_value;
     herr_t               ret_value = SUCCEED; /* Return value */
@@ -4419,7 +4419,7 @@ static herr_t
 H5P__facc_fclose_degree_dec(const void **_pp, void *_value)
 {
     H5F_close_degree_t *fclose_degree = (H5F_close_degree_t *)_value; /* File close degree */
-    const uint8_t **    pp            = (const uint8_t **)_pp;
+    const uint8_t     **pp            = (const uint8_t **)_pp;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -4453,7 +4453,7 @@ static herr_t
 H5P__facc_multi_type_enc(const void *value, void **_pp, size_t *size)
 {
     const H5FD_mem_t *type = (const H5FD_mem_t *)value; /* Create local alias for values */
-    uint8_t **        pp   = (uint8_t **)_pp;
+    uint8_t         **pp   = (uint8_t **)_pp;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -4489,7 +4489,7 @@ H5P__facc_multi_type_enc(const void *value, void **_pp, size_t *size)
 static herr_t
 H5P__facc_multi_type_dec(const void **_pp, void *_value)
 {
-    H5FD_mem_t *    type = (H5FD_mem_t *)_value; /* File close degree */
+    H5FD_mem_t     *type = (H5FD_mem_t *)_value; /* File close degree */
     const uint8_t **pp   = (const uint8_t **)_pp;
 
     FUNC_ENTER_PACKAGE_NOERR
@@ -4523,7 +4523,7 @@ static herr_t
 H5P__facc_libver_type_enc(const void *value, void **_pp, size_t *size)
 {
     const H5F_libver_t *type = (const H5F_libver_t *)value; /* Create local alias for values */
-    uint8_t **          pp   = (uint8_t **)_pp;
+    uint8_t           **pp   = (uint8_t **)_pp;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -4558,7 +4558,7 @@ H5P__facc_libver_type_enc(const void *value, void **_pp, size_t *size)
 static herr_t
 H5P__facc_libver_type_dec(const void **_pp, void *_value)
 {
-    H5F_libver_t *  type = (H5F_libver_t *)_value;
+    H5F_libver_t   *type = (H5F_libver_t *)_value;
     const uint8_t **pp   = (const uint8_t **)_pp;
 
     FUNC_ENTER_PACKAGE_NOERR
@@ -4672,7 +4672,7 @@ done:
 herr_t
 H5Pset_object_flush_cb(hid_t plist_id, H5F_flush_cb_t func, void *udata)
 {
-    H5P_genplist_t *   plist; /* Property list pointer */
+    H5P_genplist_t    *plist; /* Property list pointer */
     H5F_object_flush_t flush_info;
     herr_t             ret_value = SUCCEED; /* return value */
 
@@ -4715,7 +4715,7 @@ done:
 herr_t
 H5Pget_object_flush_cb(hid_t plist_id, H5F_flush_cb_t *func /*out*/, void **udata /*out*/)
 {
-    H5P_genplist_t *   plist; /* Property list pointer */
+    H5P_genplist_t    *plist; /* Property list pointer */
     H5F_object_flush_t flush_info;
     herr_t             ret_value = SUCCEED; /* return value */
 
@@ -4753,7 +4753,7 @@ herr_t
 H5Pset_mdc_log_options(hid_t plist_id, hbool_t is_enabled, const char *location, hbool_t start_on_access)
 {
     H5P_genplist_t *plist;               /* Property list pointer */
-    char *          new_location;        /* Working location pointer */
+    char           *new_location;        /* Working location pointer */
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -4799,7 +4799,7 @@ H5Pget_mdc_log_options(hid_t plist_id, hbool_t *is_enabled /*out*/, char *locati
                        size_t *location_size /*out*/, hbool_t *start_on_access /*out*/)
 {
     H5P_genplist_t *plist;                  /* Property list pointer */
-    char *          location_ptr = NULL;    /* Pointer to location string */
+    char           *location_ptr = NULL;    /* Pointer to location string */
     herr_t          ret_value    = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -4854,7 +4854,7 @@ static herr_t
 H5P__facc_mdc_log_location_enc(const void *value, void **_pp, size_t *size)
 {
     const char *log_location = *(const char *const *)value;
-    uint8_t **  pp           = (uint8_t **)_pp;
+    uint8_t   **pp           = (uint8_t **)_pp;
     size_t      len          = 0;
     uint64_t    enc_value;
     unsigned    enc_size;
@@ -4905,7 +4905,7 @@ H5P__facc_mdc_log_location_enc(const void *value, void **_pp, size_t *size)
 static herr_t
 H5P__facc_mdc_log_location_dec(const void **_pp, void *_value)
 {
-    char **         log_location = (char **)_value;
+    char          **log_location = (char **)_value;
     const uint8_t **pp           = (const uint8_t **)_pp;
     size_t          len;
     uint64_t        enc_value; /* Decoded property value */
@@ -5238,7 +5238,7 @@ herr_t
 H5P__encode_coll_md_read_flag_t(const void *value, void **_pp, size_t *size)
 {
     const H5P_coll_md_read_flag_t *coll_md_read_flag = (const H5P_coll_md_read_flag_t *)value;
-    uint8_t **                     pp                = (uint8_t **)_pp;
+    uint8_t                      **pp                = (uint8_t **)_pp;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -5275,7 +5275,7 @@ herr_t
 H5P__decode_coll_md_read_flag_t(const void **_pp, void *_value)
 {
     H5P_coll_md_read_flag_t *coll_md_read_flag = (H5P_coll_md_read_flag_t *)_value; /* File close degree */
-    const uint8_t **         pp                = (const uint8_t **)_pp;
+    const uint8_t          **pp                = (const uint8_t **)_pp;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -5314,7 +5314,7 @@ H5P__decode_coll_md_read_flag_t(const void **_pp, void *_value)
 herr_t
 H5Pset_all_coll_metadata_ops(hid_t plist_id, hbool_t is_collective)
 {
-    H5P_genplist_t *        plist;               /* Property list pointer */
+    H5P_genplist_t         *plist;               /* Property list pointer */
     H5P_coll_md_read_flag_t coll_meta_read;      /* Property value */
     herr_t                  ret_value = SUCCEED; /* return value */
 
@@ -6200,7 +6200,7 @@ H5Pget_vol_info(hid_t plist_id, void **vol_info /*out*/)
 
     /* Get the current VOL info */
     if (TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
-        void *                new_connector_info = NULL; /* Copy of connector info */
+        void                 *new_connector_info = NULL; /* Copy of connector info */
         H5VL_connector_prop_t connector_prop;            /* Property for VOL connector ID & info */
 
         /* Get the connector property */
@@ -6265,7 +6265,7 @@ H5Pget_vol_cap_flags(hid_t plist_id, unsigned *cap_flags)
     /* Get the 'cap_flags' from the connector */
     if (cap_flags) {
         if (TRUE == H5P_isa_class(plist_id, H5P_FILE_ACCESS)) {
-            H5P_genplist_t *      plist;          /* Property list pointer */
+            H5P_genplist_t       *plist;          /* Property list pointer */
             H5VL_connector_prop_t connector_prop; /* Property for VOL connector ID & info */
 
             /* Get property list for ID */
@@ -6441,7 +6441,7 @@ H5P__facc_vol_cmp(const void *_info1, const void *_info2, size_t H5_ATTR_UNUSED 
     const H5VL_connector_prop_t *info1 =
         (const H5VL_connector_prop_t *)_info1; /* Create local aliases for values */
     const H5VL_connector_prop_t *info2 = (const H5VL_connector_prop_t *)_info2;
-    H5VL_class_t *               cls1, *cls2;   /* connector class for each property */
+    H5VL_class_t                *cls1, *cls2;   /* connector class for each property */
     int                          cmp_value = 0; /* Value from comparison */
     herr_t H5_ATTR_NDEBUG_UNUSED status;        /* Status from info comparison */
     int                          ret_value = 0; /* Return value */

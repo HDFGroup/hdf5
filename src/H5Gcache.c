@@ -58,7 +58,7 @@
 
 /* Metadata cache (H5AC) callbacks */
 static herr_t H5G__cache_node_get_initial_load_size(void *udata, size_t *image_len);
-static void * H5G__cache_node_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty);
+static void  *H5G__cache_node_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty);
 static herr_t H5G__cache_node_image_len(const void *thing, size_t *image_len);
 static herr_t H5G__cache_node_serialize(const H5F_t *f, void *image, size_t len, void *thing);
 static herr_t H5G__cache_node_free_icr(void *thing);
@@ -154,11 +154,11 @@ H5G__cache_node_get_initial_load_size(void *_udata, size_t *image_len)
 static void *
 H5G__cache_node_deserialize(const void *_image, size_t len, void *_udata, hbool_t H5_ATTR_UNUSED *dirty)
 {
-    H5F_t *        f         = (H5F_t *)_udata;         /* User data for callback */
-    H5G_node_t *   sym       = NULL;                    /* Symbol table node created */
+    H5F_t         *f         = (H5F_t *)_udata;         /* User data for callback */
+    H5G_node_t    *sym       = NULL;                    /* Symbol table node created */
     const uint8_t *image     = (const uint8_t *)_image; /* Pointer to image to deserialize */
     const uint8_t *image_end = image + len - 1;         /* Pointer to end of image buffer */
-    void *         ret_value = NULL;                    /* Return value */
+    void          *ret_value = NULL;                    /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -257,7 +257,7 @@ static herr_t
 H5G__cache_node_serialize(const H5F_t *f, void *_image, size_t len, void *_thing)
 {
     H5G_node_t *sym       = (H5G_node_t *)_thing; /* Pointer to object */
-    uint8_t *   image     = (uint8_t *)_image;    /* Pointer into raw data buffer */
+    uint8_t    *image     = (uint8_t *)_image;    /* Pointer into raw data buffer */
     herr_t      ret_value = SUCCEED;              /* Return value */
 
     FUNC_ENTER_PACKAGE

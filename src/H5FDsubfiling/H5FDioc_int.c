@@ -51,7 +51,7 @@ cast_to_void(const void *data)
 {
     union {
         const void *const_ptr_to_data;
-        void *      ptr_to_data;
+        void       *ptr_to_data;
     } eliminate_const_warning;
     eliminate_const_warning.const_ptr_to_data = data;
     return eliminate_const_warning.ptr_to_data;
@@ -95,11 +95,11 @@ ioc__write_independent_async(int64_t context_id, int n_io_concentrators, int64_t
 {
     subfiling_context_t *sf_context    = NULL;
     MPI_Request          ack_request   = MPI_REQUEST_NULL;
-    io_req_t *           sf_io_request = NULL;
+    io_req_t            *sf_io_request = NULL;
     int64_t              ioc_start;
     int64_t              ioc_offset;
     int64_t              msg[3]           = {0};
-    int *                io_concentrators = NULL;
+    int                 *io_concentrators = NULL;
     int                  data_tag         = 0;
     int                  mpi_code;
     herr_t               ret_value = SUCCEED;
@@ -245,11 +245,11 @@ ioc__read_independent_async(int64_t context_id, int n_io_concentrators, int64_t 
                             void *data, io_req_t **io_req)
 {
     subfiling_context_t *sf_context    = NULL;
-    io_req_t *           sf_io_request = NULL;
+    io_req_t            *sf_io_request = NULL;
     int64_t              ioc_start;
     int64_t              ioc_offset;
     int64_t              msg[3]           = {0};
-    int *                io_concentrators = NULL;
+    int                 *io_concentrators = NULL;
     int                  mpi_code;
     herr_t               ret_value = SUCCEED;
 

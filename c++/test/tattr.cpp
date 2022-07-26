@@ -297,7 +297,7 @@ test_attr_getname()
 
         // 1. With arbitrary buf_size that is larger than the name size
         size_t buf_size    = FATTR1_NAME.length() + 10;
-        char * fattr1_name = new char[buf_size + 1];
+        char  *fattr1_name = new char[buf_size + 1];
         HDmemset(fattr1_name, 0, buf_size + 1);
         ssize_t name_size = 0; // actual length of attribute name
         name_size         = fattr1.getName(fattr1_name, buf_size + 1);
@@ -1585,7 +1585,7 @@ test_string_attr()
         // Read and verify the attribute string as a string of chars; buffer
         // is dynamically allocated.
         size_t attr_size = gr_flattr1.getInMemDataSize();
-        char * fl_dyn_string_att_check;
+        char  *fl_dyn_string_att_check;
         fl_dyn_string_att_check = new char[attr_size + 1];
         gr_flattr1.read(fls_type, fl_dyn_string_att_check);
         if (HDstrcmp(fl_dyn_string_att_check, ATTRSTR_DATA.c_str()) != 0)

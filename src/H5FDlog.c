@@ -44,7 +44,7 @@ static htri_t ignore_disabled_file_locks_s = FAIL;
 
 /* Driver-specific file access properties */
 typedef struct H5FD_log_fapl_t {
-    char *             logfile; /* Allocated log file name */
+    char              *logfile; /* Allocated log file name */
     unsigned long long flags;   /* Flags for logging behavior */
     size_t buf_size; /* Size of buffers for track flavor and number of times each byte is accessed */
 } H5FD_log_fapl_t;
@@ -118,9 +118,9 @@ typedef struct H5FD_log_t {
     hbool_t fam_to_single;
 
     /* Fields for tracking I/O operations */
-    unsigned char *    nread;               /* Number of reads from a file location             */
-    unsigned char *    nwrite;              /* Number of write to a file location               */
-    unsigned char *    flavor;              /* Flavor of information written to file location   */
+    unsigned char     *nread;               /* Number of reads from a file location             */
+    unsigned char     *nwrite;              /* Number of write to a file location               */
+    unsigned char     *flavor;              /* Flavor of information written to file location   */
     unsigned long long total_read_ops;      /* Total number of read operations                  */
     unsigned long long total_write_ops;     /* Total number of write operations                 */
     unsigned long long total_seek_ops;      /* Total number of seek operations                  */
@@ -130,7 +130,7 @@ typedef struct H5FD_log_t {
     double             total_seek_time;     /* Total time spent in seek operations              */
     double             total_truncate_time; /* Total time spent in truncate operations              */
     size_t             iosize;              /* Size of I/O information buffers                  */
-    FILE *             logfp;               /* Log file pointer                                 */
+    FILE              *logfp;               /* Log file pointer                                 */
     H5FD_log_fapl_t    fa;                  /* Driver-specific file access properties           */
 } H5FD_log_t;
 
@@ -157,8 +157,8 @@ typedef struct H5FD_log_t {
 
 /* Prototypes */
 static herr_t  H5FD__log_term(void);
-static void *  H5FD__log_fapl_get(H5FD_t *file);
-static void *  H5FD__log_fapl_copy(const void *_old_fa);
+static void   *H5FD__log_fapl_get(H5FD_t *file);
+static void   *H5FD__log_fapl_copy(const void *_old_fa);
 static herr_t  H5FD__log_fapl_free(void *_fa);
 static H5FD_t *H5FD__log_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr);
 static herr_t  H5FD__log_close(H5FD_t *_file);
@@ -362,7 +362,7 @@ static void *
 H5FD__log_fapl_get(H5FD_t *_file)
 {
     H5FD_log_t *file      = (H5FD_log_t *)_file;
-    void *      ret_value = NULL; /* Return value */
+    void       *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -389,8 +389,8 @@ static void *
 H5FD__log_fapl_copy(const void *_old_fa)
 {
     const H5FD_log_fapl_t *old_fa    = (const H5FD_log_fapl_t *)_old_fa;
-    H5FD_log_fapl_t *      new_fa    = NULL; /* New FAPL info */
-    void *                 ret_value = NULL; /* Return value */
+    H5FD_log_fapl_t       *new_fa    = NULL; /* New FAPL info */
+    void                  *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -467,8 +467,8 @@ H5FD__log_fapl_free(void *_fa)
 static H5FD_t *
 H5FD__log_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
-    H5FD_log_t *           file = NULL;
-    H5P_genplist_t *       plist; /* Property list */
+    H5FD_log_t            *file = NULL;
+    H5P_genplist_t        *plist; /* Property list */
     const H5FD_log_fapl_t *fa;    /* File access property list information */
     H5FD_log_fapl_t        default_fa = H5FD_log_default_config_g;
     int                    fd         = -1; /* File descriptor */
@@ -479,7 +479,7 @@ H5FD__log_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     H5_timer_t open_timer; /* Timer for open() call */
     H5_timer_t stat_timer; /* Timer for stat() call */
     h5_stat_t  sb;
-    H5FD_t *   ret_value = NULL; /* Return value */
+    H5FD_t    *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1169,7 +1169,7 @@ static herr_t
 H5FD__log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr, size_t size,
                void *buf /*out*/)
 {
-    H5FD_log_t *  file      = (H5FD_log_t *)_file;
+    H5FD_log_t   *file      = (H5FD_log_t *)_file;
     size_t        orig_size = size; /* Save the original size for later */
     haddr_t       orig_addr = addr;
     H5_timer_t    read_timer; /* Timer for read operation */
@@ -1383,7 +1383,7 @@ static herr_t
 H5FD__log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr, size_t size,
                 const void *buf)
 {
-    H5FD_log_t *  file      = (H5FD_log_t *)_file;
+    H5FD_log_t   *file      = (H5FD_log_t *)_file;
     size_t        orig_size = size; /* Save the original size for later */
     haddr_t       orig_addr = addr;
     H5_timer_t    write_timer; /* Timer for write operation */

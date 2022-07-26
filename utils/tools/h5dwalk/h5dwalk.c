@@ -85,7 +85,7 @@ struct distribute_option {
     uint64_t separators[MAX_DISTRIBUTE_SEPARATORS];
 };
 
-static const char *           s_opts   = "hl*E*i:o:T:";
+static const char            *s_opts   = "hl*E*i:o:T:";
 static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},
                                           {"log_text", optional_arg, 'l'},
                                           {"error", optional_arg, 'E'},
@@ -309,10 +309,10 @@ distribute_separator_add(struct distribute_option *option, uint64_t separator)
 static int
 distribution_parse(struct distribute_option *option, const char *string)
 {
-    char *             ptr;
-    char *             next;
+    char              *ptr;
+    char              *next;
     unsigned long long separator;
-    char *             str;
+    char              *str;
     int                status = 0;
 
     if (strncmp(string, "size", strlen("size")) != 0) {
@@ -456,7 +456,7 @@ print_file(mfu_flist flist, uint64_t idx)
     else {
         /* get type */
         mfu_filetype type     = mfu_flist_file_get_type(flist, idx);
-        char *       type_str = type_str_unknown;
+        char        *type_str = type_str_unknown;
         if (type == MFU_TYPE_DIR) {
             type_str = type_str_dir;
         }
@@ -527,7 +527,7 @@ print_file_text(mfu_flist flist, uint64_t idx, char *buffer, size_t bufsize)
     else {
         /* get type */
         mfu_filetype type     = mfu_flist_file_get_type(flist, idx);
-        char *       type_str = type_str_unknown;
+        char        *type_str = type_str_unknown;
         if (type == MFU_TYPE_DIR) {
             type_str = type_str_dir;
         }
@@ -581,7 +581,7 @@ dh5tool_flist_write_text(const char *name, mfu_flist bflist)
     }
 
     uint64_t idx = 0;
-    char *   ptr = NULL;
+    char    *ptr = NULL;
 
     /* if we block things up into 128MB chunks, how many iterations
      * to write everything? */
@@ -763,7 +763,7 @@ fill_file_list(mfu_flist new_flist, const char *config_filename, int myrank, int
         return -1;
     while (HDfgets(linebuf, sizeof(linebuf), config) != NULL) {
         struct stat statbuf;
-        char *      eol = HDstrchr(linebuf, '\n');
+        char       *eol = HDstrchr(linebuf, '\n');
         if (eol)
             *eol = '\0';
         if (HDstat(linebuf, &statbuf) == 0) {
@@ -784,7 +784,7 @@ count_dirpaths(int argc, int startcnt, const char *argv[], int **index_out)
     int         k;
     int         path_cnt  = 0;
     int         idx_count = (argc - startcnt);
-    int *       index     = NULL;
+    int        *index     = NULL;
     struct stat pathcheck;
 
     if (idx_count > 0) {
@@ -850,7 +850,7 @@ copy_args(int argc, const char *argv[], int *mfu_argc, int *copy_len)
 
 typedef struct hash_entry {
     int                hash;
-    char *             name;
+    char              *name;
     struct hash_entry *next; /* table Collision */
     int                nextCount;
 } hash_entry_t;
@@ -934,7 +934,7 @@ run_command(int argc __attribute__((unused)), char **argv, char *cmdline, const 
     if (log_output_in_single_file || use_stdout) {
         pid_t   pid;
         int     pipefd[2];
-        buf_t * thisbuft = NULL;
+        buf_t  *thisbuft = NULL;
         buf_t **bufs     = buf_cache;
 
         if (bufs == NULL) {
@@ -1061,8 +1061,8 @@ run_command(int argc __attribute__((unused)), char **argv, char *cmdline, const 
         char   logpath[2048];
         char   logErrors[2048];
         char   current_dir[2048];
-        char * logbase = HDstrdup(basename(filepath));
-        char * thisapp = HDstrdup(basename(toolname));
+        char  *logbase = HDstrdup(basename(filepath));
+        char  *thisapp = HDstrdup(basename(toolname));
 
         if (processing_inputfile == 0)
             log_instance = get_copy_count(logbase, thisapp);
@@ -1153,7 +1153,7 @@ MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg)
     size_t b_offset;
 
     /* get pointer to encoded argc count and argv array */
-    int * count_ptr = arg;
+    int  *count_ptr = arg;
     char *buf       = (char *)arg + sizeof(int);
 
     /* get number of argv parameters */
@@ -1182,7 +1182,7 @@ MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg)
         if (buf[0] == '&') {
             const char *fname_arg = NULL;
             mfu_flist   flist_arg;
-            void *      check_ptr[2] = {NULL, NULL};
+            void       *check_ptr[2] = {NULL, NULL};
 
             HDmemcpy(check_ptr, &buf[1], sizeof(void *));
             flist_arg = (mfu_flist)check_ptr[0];
@@ -1257,7 +1257,7 @@ process_input_file(char *inputname, int myrank, int size)
     char linebuf[PATH_MAX] = {
         '\0',
     };
-    FILE *    config = HDfopen(inputname, "r");
+    FILE     *config = HDfopen(inputname, "r");
     mfu_flist flist1 = NULL;
 
     if (config == NULL)
@@ -1272,10 +1272,10 @@ process_input_file(char *inputname, int myrank, int size)
 
     while (HDfgets(linebuf, sizeof(linebuf), config) != NULL) {
         const char *delim   = " \n";
-        char *      cmdline = NULL;
-        char *      cmd     = NULL;
-        char *      arg     = NULL;
-        char *      argv[256];
+        char       *cmdline = NULL;
+        char       *cmd     = NULL;
+        char       *arg     = NULL;
+        char       *argv[256];
         int         fileindex[256];
         int         filecount = 0;
         int         token     = 0;
@@ -1368,7 +1368,7 @@ main(int argc, char *argv[])
 
     int    args_byte_length = -1;
     int    mfu_argc         = argc;
-    char * args_buf         = NULL;
+    char  *args_buf         = NULL;
     char **h5tool_argv      = copy_args(argc, argv, &mfu_argc, &args_byte_length);
 
     char *inputname    = NULL;

@@ -758,6 +758,18 @@ if (HDF5_ENABLE_SUBFILING_VFD)
   if (NOT HDF5_ENABLE_PARALLEL)
     message (FATAL_ERROR "Subfiling VFD requires a parallel HDF5 build")
   endif()
+
+  if (NOT DEFINED Threads_FOUND)
+    set (THREADS_PREFER_PTHREAD_FLAG ON)
+    find_package (Threads REQUIRED)
+  endif ()
+
+  # For now, make sure we're using pthreads. Once Subfiling can be
+  # supported on Windows, we should allow Win32 threads as well
+  if (NOT ${Threads_FOUND} OR NOT ${CMAKE_USE_PTHREADS_INIT})
+    message (FATAL_ERROR "Subfiling requires pthreads for system thread library")
+  endif ()
+
   CHECK_INCLUDE_FILE("stdatomic.h" HAVE_STDATOMIC_H)
   if (NOT HAVE_STDATOMIC_H)
     message (FATAL_ERROR "Subfiling VFD requires atomic operations support. C11 stdatomic.h NOT available.")
