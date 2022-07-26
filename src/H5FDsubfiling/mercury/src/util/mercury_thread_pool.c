@@ -21,7 +21,7 @@
 struct hg_thread_pool_private {
     struct hg_thread_pool pool;
     unsigned int          thread_count;
-    hg_thread_t *         threads;
+    hg_thread_t          *threads;
 };
 
 /********************/
@@ -42,7 +42,7 @@ static HG_THREAD_RETURN_TYPE
 hg_thread_pool_worker(void *args)
 {
     hg_thread_ret_t        ret  = 0;
-    hg_thread_pool_t *     pool = (hg_thread_pool_t *)args;
+    hg_thread_pool_t      *pool = (hg_thread_pool_t *)args;
     struct hg_thread_work *work;
 
     while (1) {

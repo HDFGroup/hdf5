@@ -35,7 +35,7 @@
 
 typedef struct {
     H5O_token_t obj_token; /* Object token */
-    char *      path;      /* Object path */
+    char       *path;      /* Object path */
 } ref_path_node_t;
 
 static H5SL_t *ref_path_table = NULL; /* the "table" (implemented with a skip list) */

@@ -102,7 +102,7 @@ static unsigned H5PL_path_capacity_g = H5PL_INITIAL_PATH_CAPACITY;
 static herr_t
 H5PL__insert_at(const char *path, unsigned int idx)
 {
-    char * path_copy = NULL;    /* copy of path string (for storing) */
+    char  *path_copy = NULL;    /* copy of path string (for storing) */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -183,7 +183,7 @@ H5PL__make_space_at(unsigned int idx)
 static herr_t
 H5PL__replace_at(const char *path, unsigned int idx)
 {
-    char * path_copy = NULL;    /* copy of path string (for storing) */
+    char  *path_copy = NULL;    /* copy of path string (for storing) */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -233,8 +233,8 @@ H5PL__create_path_table(void)
     char *paths   = NULL;       /* Delimited paths string. Either from the
                                  * environment variable or the default.
                                  */
-    char * next_path = NULL;    /* A path tokenized from the paths string */
-    char * lasts     = NULL;    /* Context pointer for strtok_r() call */
+    char  *next_path = NULL;    /* A path tokenized from the paths string */
+    char  *lasts     = NULL;    /* Context pointer for strtok_r() call */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -603,10 +603,10 @@ H5PL__path_table_iterate_process_path(const char *plugin_path, H5PL_iterate_type
                                       H5PL_iterate_t iter_op, void *op_data)
 {
     H5PL_type_t    plugin_type;
-    const void *   plugin_info = NULL;
+    const void    *plugin_info = NULL;
     hbool_t        plugin_loaded;
-    char *         path      = NULL;
-    DIR *          dirp      = NULL; /* Directory stream */
+    char          *path      = NULL;
+    DIR           *dirp      = NULL; /* Directory stream */
     struct dirent *dp        = NULL; /* Directory entry */
     herr_t         ret_value = H5_ITER_CONT;
 
@@ -695,9 +695,9 @@ H5PL__path_table_iterate_process_path(const char *plugin_path, H5PL_iterate_type
     WIN32_FIND_DATAA fdFile;
     HANDLE           hFind = INVALID_HANDLE_VALUE;
     H5PL_type_t      plugin_type;
-    const void *     plugin_info = NULL;
+    const void      *plugin_info = NULL;
     hbool_t          plugin_loaded;
-    char *           path = NULL;
+    char            *path = NULL;
     char             service[2048];
     herr_t           ret_value = H5_ITER_CONT;
 
@@ -836,8 +836,8 @@ static herr_t
 H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, hbool_t *found, const char *dir,
                           const void **plugin_info)
 {
-    char *         path      = NULL;
-    DIR *          dirp      = NULL; /* Directory stream */
+    char          *path      = NULL;
+    DIR           *dirp      = NULL; /* Directory stream */
     struct dirent *dp        = NULL; /* Directory entry */
     herr_t         ret_value = SUCCEED;
 
@@ -918,7 +918,7 @@ H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, hbool_t *fo
 {
     WIN32_FIND_DATAA fdFile;
     HANDLE           hFind = INVALID_HANDLE_VALUE;
-    char *           path  = NULL;
+    char            *path  = NULL;
     char             service[2048];
     herr_t           ret_value = SUCCEED;
 

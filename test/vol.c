@@ -772,7 +772,7 @@ test_basic_file_operation(const char *env_h5_drvr)
     hid_t       obj_id_list[1];
     hsize_t     file_size;
     unsigned    intent;
-    void *      os_file_handle = NULL;
+    void       *os_file_handle = NULL;
     H5F_info2_t finfo;
     char        name[32];
 
@@ -1627,7 +1627,7 @@ exercise_reg_opt_oper(hid_t fake_vol_id, hid_t reg_opt_vol_id, H5VL_subclass_t s
 {
     char                 op_name[256]; /* Operation name to register */
     hid_t                obj_id = H5I_INVALID_HID;
-    H5VL_object_t *      vol_obj;
+    H5VL_object_t       *vol_obj;
     H5VL_optional_args_t vol_cb_args;
     int                  fake_obj, fake_arg;
     int                  op_val = -1, op_val2 = -1;
@@ -1831,7 +1831,7 @@ test_register_opt_operation(void)
     hid_t reg_opt_vol_id = H5I_INVALID_HID;
     struct {
         H5VL_subclass_t subcls;
-        const char *    subcls_name;
+        const char     *subcls_name;
         H5I_type_t      id_type;
         reg_opt_oper_t  reg_opt_op;
     } test_params[] = {{H5VL_SUBCLS_ATTR, "attr", H5I_ATTR, {.obj_op = H5VLattr_optional_op}},
@@ -1980,7 +1980,7 @@ test_async_vol_props(void)
     hid_t                    vol_id  = H5I_INVALID_HID;
     H5VL_pass_through_info_t passthru_info;
     unsigned                 cap_flags    = 0;
-    char *                   conn_env_str = NULL;
+    char                    *conn_env_str = NULL;
 
     TESTING("Async VOL props");
 

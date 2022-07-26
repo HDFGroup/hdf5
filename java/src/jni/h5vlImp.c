@@ -211,7 +211,7 @@ JNIEXPORT jobject JNICALL
 Java_hdf_hdf5lib_H5_H5VLget_1connector_1name(JNIEnv *env, jclass clss, jlong object_id)
 {
     ssize_t buf_size, status;
-    char *  volName = NULL;
+    char   *volName = NULL;
     jstring str     = NULL;
 
     UNUSED(clss);

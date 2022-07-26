@@ -49,11 +49,11 @@
  * hg_dlog_entry: an entry in the dlog
  */
 struct hg_dlog_entry {
-    const char * file; /* file name */
+    const char  *file; /* file name */
     unsigned int line; /* line number */
-    const char * func; /* function name */
-    const char * msg;  /* entry message (optional) */
-    const void * data; /* user data (optional) */
+    const char  *func; /* function name */
+    const char  *msg;  /* entry message (optional) */
+    const void  *data; /* user data (optional) */
     hg_time_t    time; /* time added to log */
 };
 
@@ -61,8 +61,8 @@ struct hg_dlog_entry {
  * hg_dlog_dcount32: 32-bit debug counter in the dlog
  */
 struct hg_dlog_dcount32 {
-    const char *      name;            /* counter name (short) */
-    const char *      descr;           /* description of counter */
+    const char       *name;            /* counter name (short) */
+    const char       *descr;           /* description of counter */
     hg_atomic_int32_t c;               /* the counter itself */
     HG_LIST_ENTRY(hg_dlog_dcount32) l; /* linkage */
 };
@@ -71,8 +71,8 @@ struct hg_dlog_dcount32 {
  * hg_dlog_dcount64: 64-bit debug counter in the dlog
  */
 struct hg_dlog_dcount64 {
-    const char *      name;            /* counter name (short) */
-    const char *      descr;           /* description of counter */
+    const char       *name;            /* counter name (short) */
+    const char       *descr;           /* description of counter */
     hg_atomic_int64_t c;               /* the counter itself */
     HG_LIST_ENTRY(hg_dlog_dcount64) l; /* linkage */
 };

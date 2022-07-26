@@ -101,8 +101,8 @@ verify_old_dset_cork(void)
     hsize_t     dims[2]       = {100, 20};            /* Dataset dimension sizes */
     hsize_t     max_dims[2]   = {100, H5S_UNLIMITED}; /* Dataset maximum dimension sizes */
     hsize_t     chunk_dims[2] = {2, 5};               /* Dataset chunked dimension sizes */
-    int **      buf           = NULL;                 /* Data buffer (pointers to fake 2D array) */
-    int *       buf_data      = NULL;                 /* Data buffer (actual data) */
+    int       **buf           = NULL;                 /* Data buffer (pointers to fake 2D array) */
+    int        *buf_data      = NULL;                 /* Data buffer (actual data) */
     int         i = 0, j = 0;                         /* Local index variables */
     H5O_info2_t oinfo, oinfo2, oinfo3;                /* Object metadata information */
     hsize_t     dims2[2] = {8, 16};                   /* Dataset dimension sizes */
@@ -513,8 +513,8 @@ verify_dset_cork(hbool_t swmr, hbool_t new_format)
     hsize_t     dims[2]       = {100, 20};            /* Dataset dimension sizes */
     hsize_t     max_dims[2]   = {100, H5S_UNLIMITED}; /* Dataset maximum dimension sizes */
     hsize_t     chunk_dims[2] = {2, 5};               /* Dataset chunked dimension sizes */
-    int **      buf           = NULL;                 /* Data buffer (pointers to fake 2D array) */
-    int *       buf_data      = NULL;                 /* Data buffer (actual data) */
+    int       **buf           = NULL;                 /* Data buffer (pointers to fake 2D array) */
+    int        *buf_data      = NULL;                 /* Data buffer (actual data) */
     int         i = 0, j = 0;                         /* Local index variables */
     H5O_info2_t oinfo, oinfo2, oinfo3;                /* Object metadata information */
     unsigned    flags;                                /* File access flags */
@@ -1897,9 +1897,9 @@ test_dset_cork(hbool_t swmr, hbool_t new_format)
     hsize_t  cdims[RANK] = {2, 2};                           /* Chunk dimensions */
     int      fillval     = 0;                                /* Fill value */
     int      i, j, k = 0;                                    /* Local index variables */
-    int **   wbuf      = NULL; /* Data buffer for writes (pointers to fake 2D array) */
-    int *    wbuf_data = NULL; /* Data buffer for writes (real data) */
-    int *    rbuf_data = NULL; /* Data buffer for reads (real data) */
+    int    **wbuf      = NULL; /* Data buffer for writes (pointers to fake 2D array) */
+    int     *wbuf_data = NULL; /* Data buffer for writes (real data) */
+    int     *rbuf_data = NULL; /* Data buffer for reads (real data) */
     hbool_t  corked;           /* Cork status of an object */
     unsigned flags;            /* File access flags */
 

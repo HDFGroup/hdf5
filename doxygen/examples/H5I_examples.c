@@ -129,7 +129,7 @@ fail_dcpl:;
     {
         __label__ fail_id, fail_obj, fail_register;
         H5I_type_t type;
-        int *      obj;
+        int       *obj;
         hid_t      obj_id;
 
         // register a new ID type

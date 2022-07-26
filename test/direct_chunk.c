@@ -142,11 +142,11 @@ test_direct_chunk_write(hid_t file)
     size_t   buf_size  = CHUNK_NX * CHUNK_NY * sizeof(int);
 
     const Bytef *z_src        = (const Bytef *)(direct_buf);
-    Bytef *      z_dst        = NULL; /*destination buffer        */
+    Bytef       *z_dst        = NULL; /*destination buffer        */
     uLongf       z_dst_nbytes = (uLongf)DEFLATE_SIZE_ADJUST(buf_size);
     uLong        z_src_nbytes = (uLong)buf_size;
     int          aggression   = 9;    /* Compression aggression setting */
-    void *       outbuf       = NULL; /* Pointer to new buffer */
+    void        *outbuf       = NULL; /* Pointer to new buffer */
 
     hsize_t start[2];  /* Start of hyperslab */
     hsize_t stride[2]; /* Stride of hyperslab */
@@ -682,7 +682,7 @@ static size_t
 filter_bogus1(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
               const unsigned int H5_ATTR_UNUSED *cd_values, size_t nbytes, size_t *buf_size, void **buf)
 {
-    int *  int_ptr  = (int *)*buf; /* Pointer to the data values */
+    int   *int_ptr  = (int *)*buf; /* Pointer to the data values */
     size_t buf_left = *buf_size;   /* Amount of data buffer left to process */
 
     if (flags & H5Z_FLAG_REVERSE) { /* read */
@@ -718,7 +718,7 @@ static size_t
 filter_bogus2(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
               const unsigned int H5_ATTR_UNUSED *cd_values, size_t nbytes, size_t *buf_size, void **buf)
 {
-    int *  int_ptr  = (int *)*buf; /* Pointer to the data values */
+    int   *int_ptr  = (int *)*buf; /* Pointer to the data values */
     size_t buf_left = *buf_size;   /* Amount of data buffer left to process */
 
     if (flags & H5Z_FLAG_REVERSE) { /* read */
@@ -1463,7 +1463,7 @@ test_direct_chunk_read_no_cache(hid_t file)
     Bytef *z_dst        = (Bytef *)(direct_buf);
     uLong  z_dst_nbytes = (uLong)buf_size;
     int    aggression   = 9;    /* Compression aggression setting */
-    void * outbuf       = NULL; /* Pointer to new buffer */
+    void  *outbuf       = NULL; /* Pointer to new buffer */
 
     hsize_t start[2];  /* Start of hyperslab */
     hsize_t stride[2]; /* Stride of hyperslab */
@@ -1636,12 +1636,12 @@ test_direct_chunk_read_cache(hid_t file, hbool_t flush)
     hsize_t  offset[2];                       /* chunk offset used for H5Dread_chunk */
     size_t   buf_size = CHUNK_NX * CHUNK_NY * sizeof(int);
 
-    Bytef * z_src         = NULL; /* source buffer        */
+    Bytef  *z_src         = NULL; /* source buffer        */
     uLongf  z_src_nbytes  = (uLongf)DEFLATE_SIZE_ADJUST(buf_size);
-    Bytef * z_dst         = (Bytef *)(direct_buf);
+    Bytef  *z_dst         = (Bytef *)(direct_buf);
     uLong   z_dst_nbytes  = (uLong)buf_size;
     int     aggression    = 9;    /* Compression aggression setting */
-    void *  outbuf        = NULL; /* Pointer to new buffer */
+    void   *outbuf        = NULL; /* Pointer to new buffer */
     hsize_t read_buf_size = 0;
 
     hsize_t start[2];  /* Start of hyperslab */
@@ -2167,7 +2167,7 @@ test_single_chunk(unsigned config)
     else
         /* Write the data to the dataset */
         if (H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, (void *)wdata) < 0)
-        FAIL_STACK_ERROR;
+            FAIL_STACK_ERROR;
 
     /*
      * Close and release resources.
@@ -2209,7 +2209,7 @@ test_single_chunk(unsigned config)
     else
         /* Read the data */
         if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata) < 0)
-        FAIL_STACK_ERROR;
+            FAIL_STACK_ERROR;
 
     /* Verify that the data read was correct.  */
     for (i = 0; i < DIM0; i++)

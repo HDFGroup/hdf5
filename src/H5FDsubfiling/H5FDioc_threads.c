@@ -117,9 +117,9 @@ int
 initialize_ioc_threads(void *_sf_context)
 {
     subfiling_context_t *sf_context        = _sf_context;
-    ioc_data_t *         ioc_data          = NULL;
+    ioc_data_t          *ioc_data          = NULL;
     unsigned             thread_pool_count = HG_TEST_NUM_THREADS_DEFAULT;
-    char *               env_value;
+    char                *env_value;
     int                  ret_value = 0;
 #ifdef H5FD_IOC_COLLECT_STATS
     double t_start = 0.0, t_end = 0.0;
@@ -218,7 +218,7 @@ int
 finalize_ioc_threads(void *_sf_context)
 {
     subfiling_context_t *sf_context = _sf_context;
-    ioc_data_t *         ioc_data   = NULL;
+    ioc_data_t          *ioc_data   = NULL;
     int                  ret_value  = 0;
 
     HDassert(sf_context);
@@ -273,7 +273,7 @@ static HG_THREAD_RETURN_TYPE
 ioc_thread_main(void *arg)
 {
     hg_thread_ret_t thread_ret = (hg_thread_ret_t)0;
-    ioc_data_t *    ioc_data   = (ioc_data_t *)arg;
+    ioc_data_t     *ioc_data   = (ioc_data_t *)arg;
 
     /* Pass along the ioc_data_t */
     ioc_main(ioc_data);
@@ -506,9 +506,9 @@ static HG_THREAD_RETURN_TYPE
 handle_work_request(void *arg)
 {
     ioc_io_queue_entry_t *q_entry_ptr     = (ioc_io_queue_entry_t *)arg;
-    subfiling_context_t * sf_context      = NULL;
-    sf_work_request_t *   msg             = &(q_entry_ptr->wk_req);
-    ioc_data_t *          ioc_data        = NULL;
+    subfiling_context_t  *sf_context      = NULL;
+    sf_work_request_t    *msg             = &(q_entry_ptr->wk_req);
+    ioc_data_t           *ioc_data        = NULL;
     int64_t               file_context_id = msg->header[2];
     int                   op_ret;
     hg_thread_ret_t       ret_value = 0;
@@ -1000,7 +1000,7 @@ ioc_file_write_data(int fd, int64_t file_offset, void *data_buffer, int64_t data
 {
     ssize_t bytes_remaining = (ssize_t)data_size;
     ssize_t bytes_written   = 0;
-    char *  this_data       = (char *)data_buffer;
+    char   *this_data       = (char *)data_buffer;
     int     ret_value       = 0;
 
 #ifndef H5FD_IOC_DEBUG
@@ -1047,7 +1047,7 @@ ioc_file_read_data(int fd, int64_t file_offset, void *data_buffer, int64_t data_
     useconds_t delay           = 100;
     ssize_t    bytes_remaining = (ssize_t)data_size;
     ssize_t    bytes_read      = 0;
-    char *     this_buffer     = (char *)data_buffer;
+    char      *this_buffer     = (char *)data_buffer;
     int        retries         = MIN_READ_RETRIES;
     int        ret_value       = 0;
 

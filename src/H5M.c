@@ -206,8 +206,8 @@ static hid_t
 H5M__create_api_common(hid_t loc_id, const char *name, hid_t key_type_id, hid_t val_type_id, hid_t lcpl_id,
                        hid_t mcpl_id, hid_t mapl_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr)
 {
-    void *          map         = NULL; /* New map's info */
-    H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
+    void           *map         = NULL; /* New map's info */
+    H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
     H5VL_optional_args_t vol_cb_args;                 /* Arguments to VOL callback */
@@ -323,8 +323,8 @@ H5Mcreate_async(const char *app_file, const char *app_func, unsigned app_line, h
                 hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
-    void *         token     = NULL;            /* Request token for async operation        */
-    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    void          *token     = NULL;            /* Request token for async operation        */
+    void         **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
     hid_t          ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -382,8 +382,8 @@ done:
 hid_t
 H5Mcreate_anon(hid_t loc_id, hid_t key_type_id, hid_t val_type_id, hid_t mcpl_id, hid_t mapl_id)
 {
-    void *               map     = NULL;              /* map object from VOL connector */
-    H5VL_object_t *      vol_obj = NULL;              /* object of loc_id */
+    void                *map     = NULL;              /* map object from VOL connector */
+    H5VL_object_t       *vol_obj = NULL;              /* object of loc_id */
     H5VL_optional_args_t vol_cb_args;                 /* Arguments to VOL callback */
     H5VL_map_args_t      map_args;                    /* Arguments for map operations */
     hid_t                ret_value = H5I_INVALID_HID; /* Return value */
@@ -458,8 +458,8 @@ static hid_t
 H5M__open_api_common(hid_t loc_id, const char *name, hid_t mapl_id, void **token_ptr,
                      H5VL_object_t **_vol_obj_ptr)
 {
-    void *          map         = NULL; /* map object from VOL connector */
-    H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
+    void           *map         = NULL; /* map object from VOL connector */
+    H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
     H5VL_optional_args_t vol_cb_args;                 /* Arguments to VOL callback */
@@ -554,8 +554,8 @@ H5Mopen_async(const char *app_file, const char *app_func, unsigned app_line, hid
               hid_t mapl_id, hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
-    void *         token     = NULL;            /* Request token for async operation        */
-    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    void          *token     = NULL;            /* Request token for async operation        */
+    void         **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
     hid_t          ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -629,10 +629,10 @@ done:
 herr_t
 H5Mclose_async(const char *app_file, const char *app_func, unsigned app_line, hid_t map_id, hid_t es_id)
 {
-    void *         token     = NULL;            /* Request token for async operation            */
-    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation */
+    void          *token     = NULL;            /* Request token for async operation            */
+    void         **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation */
     H5VL_object_t *vol_obj   = NULL;            /* VOL object of dset_id */
-    H5VL_t *       connector = NULL;            /* VOL connector */
+    H5VL_t        *connector = NULL;            /* VOL connector */
     herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -694,7 +694,7 @@ done:
 hid_t
 H5Mget_key_type(hid_t map_id)
 {
-    H5VL_object_t *      vol_obj;                     /* Map structure    */
+    H5VL_object_t       *vol_obj;                     /* Map structure    */
     H5VL_optional_args_t vol_cb_args;                 /* Arguments to VOL callback */
     H5VL_map_args_t      map_args;                    /* Arguments for map operations */
     hid_t                ret_value = H5I_INVALID_HID; /* Return value         */
@@ -739,7 +739,7 @@ done:
 hid_t
 H5Mget_val_type(hid_t map_id)
 {
-    H5VL_object_t *      vol_obj;                     /* Map structure    */
+    H5VL_object_t       *vol_obj;                     /* Map structure    */
     H5VL_optional_args_t vol_cb_args;                 /* Arguments to VOL callback */
     H5VL_map_args_t      map_args;                    /* Arguments for map operations */
     hid_t                ret_value = H5I_INVALID_HID; /* Return value         */
@@ -784,7 +784,7 @@ done:
 hid_t
 H5Mget_create_plist(hid_t map_id)
 {
-    H5VL_object_t *      vol_obj;                     /* Map structure    */
+    H5VL_object_t       *vol_obj;                     /* Map structure    */
     H5VL_optional_args_t vol_cb_args;                 /* Arguments to VOL callback */
     H5VL_map_args_t      map_args;                    /* Arguments for map operations */
     hid_t                ret_value = H5I_INVALID_HID; /* Return value         */
@@ -832,7 +832,7 @@ done:
 hid_t
 H5Mget_access_plist(hid_t map_id)
 {
-    H5VL_object_t *      vol_obj;                     /* Map structure    */
+    H5VL_object_t       *vol_obj;                     /* Map structure    */
     H5VL_optional_args_t vol_cb_args;                 /* Arguments to VOL callback */
     H5VL_map_args_t      map_args;                    /* Arguments for map operations */
     hid_t                ret_value = H5I_INVALID_HID; /* Return value         */
@@ -876,7 +876,7 @@ done:
 herr_t
 H5Mget_count(hid_t map_id, hsize_t *count /*out*/, hid_t dxpl_id)
 {
-    H5VL_object_t *      vol_obj;             /* Map structure    */
+    H5VL_object_t       *vol_obj;             /* Map structure    */
     H5VL_optional_args_t vol_cb_args;         /* Arguments to VOL callback */
     H5VL_map_args_t      map_args;            /* Arguments for map operations */
     herr_t               ret_value = SUCCEED; /* Return value         */
@@ -928,7 +928,7 @@ static herr_t
 H5M__put_api_common(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_type_id,
                     const void *value, hid_t dxpl_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr)
 {
-    H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
+    H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
     H5VL_optional_args_t vol_cb_args;                 /* Arguments to VOL callback */
@@ -1021,8 +1021,8 @@ H5Mput_async(const char *app_file, const char *app_func, unsigned app_line, hid_
              hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
-    void *         token     = NULL;            /* Request token for async operation        */
-    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    void          *token     = NULL;            /* Request token for async operation        */
+    void         **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
     herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1063,7 +1063,7 @@ static herr_t
 H5M__get_api_common(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_type_id, void *value,
                     hid_t dxpl_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr)
 {
-    H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
+    H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
     H5VL_optional_args_t vol_cb_args;                 /* Arguments to VOL callback */
@@ -1159,8 +1159,8 @@ H5Mget_async(const char *app_file, const char *app_func, unsigned app_line, hid_
              hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
-    void *         token     = NULL;            /* Request token for async operation        */
-    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    void          *token     = NULL;            /* Request token for async operation        */
+    void         **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
     herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1204,7 +1204,7 @@ done:
 herr_t
 H5Mexists(hid_t map_id, hid_t key_mem_type_id, const void *key, hbool_t *exists, hid_t dxpl_id)
 {
-    H5VL_object_t *      vol_obj = NULL;
+    H5VL_object_t       *vol_obj = NULL;
     H5VL_optional_args_t vol_cb_args;         /* Arguments to VOL callback */
     H5VL_map_args_t      map_args;            /* Arguments for map operations */
     herr_t               ret_value = SUCCEED; /* Return value */
@@ -1282,7 +1282,7 @@ done:
 herr_t
 H5Miterate(hid_t map_id, hsize_t *idx, hid_t key_mem_type_id, H5M_iterate_t op, void *op_data, hid_t dxpl_id)
 {
-    H5VL_object_t *      vol_obj = NULL;
+    H5VL_object_t       *vol_obj = NULL;
     H5VL_optional_args_t vol_cb_args;         /* Arguments to VOL callback */
     H5VL_map_args_t      map_args;            /* Arguments for map operations */
     herr_t               ret_value = SUCCEED; /* Return value */
@@ -1367,7 +1367,7 @@ herr_t
 H5Miterate_by_name(hid_t loc_id, const char *map_name, hsize_t *idx, hid_t key_mem_type_id, H5M_iterate_t op,
                    void *op_data, hid_t dxpl_id, hid_t lapl_id)
 {
-    H5VL_object_t *      vol_obj = NULL;
+    H5VL_object_t       *vol_obj = NULL;
     H5VL_optional_args_t vol_cb_args;         /* Arguments to VOL callback */
     H5VL_map_args_t      map_args;            /* Arguments for map operations */
     herr_t               ret_value = SUCCEED; /* Return value */
@@ -1441,7 +1441,7 @@ done:
 herr_t
 H5Mdelete(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t dxpl_id)
 {
-    H5VL_object_t *      vol_obj = NULL;
+    H5VL_object_t       *vol_obj = NULL;
     H5VL_optional_args_t vol_cb_args;         /* Arguments to VOL callback */
     H5VL_map_args_t      map_args;            /* Arguments for map operations */
     herr_t               ret_value = SUCCEED; /* Return value */

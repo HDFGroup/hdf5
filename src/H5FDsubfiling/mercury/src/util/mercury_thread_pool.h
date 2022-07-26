@@ -27,7 +27,7 @@ struct hg_thread_pool {
 
 struct hg_thread_work {
     hg_thread_func_t func;
-    void *           args;
+    void            *args;
     HG_QUEUE_ENTRY(hg_thread_work) entry; /* Internal */
 };
 

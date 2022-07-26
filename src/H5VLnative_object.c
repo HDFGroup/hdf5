@@ -75,7 +75,7 @@ H5VL__native_object_open(void *obj, const H5VL_loc_params_t *loc_params, H5I_typ
                          hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
 {
     H5G_loc_t loc;
-    void *    ret_value = NULL;
+    void     *ret_value = NULL;
 
     FUNC_ENTER_PACKAGE
 

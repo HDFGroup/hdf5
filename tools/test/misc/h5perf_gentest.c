@@ -42,7 +42,7 @@ typedef struct {
     phase_t            e;
     float              f_array[FIXED_LEN];
     hvl_t              i_vlen;
-    char *             s_vlen;
+    char              *s_vlen;
 } test_comp_t;
 
 typedef struct {
@@ -140,19 +140,19 @@ create_perf_test_file(const char *fname, int ngrps, int ndsets, int nattrs, hsiz
         tid_vlen_i, tid_vlen_s;
     char    name[32], tmp_name1[32], tmp_name2[32], tmp_name3[32];
     hsize_t dims[1] = {dim0}, dims2d[2] = {dim0, (dim0 / 4 + 1)}, dims_array[1] = {FIXED_LEN}, dim1[1] = {2};
-    char *  enum_names[4] = {"SOLID", "LIQUID", "GAS", "PLASMA"};
+    char   *enum_names[4] = {"SOLID", "LIQUID", "GAS", "PLASMA"};
     test_comp_t *buf_comp = NULL, *buf_comp_large = NULL;
-    int *        buf_int           = NULL;
+    int         *buf_int           = NULL;
     float(*buf_float_a)[FIXED_LEN] = NULL;
     double **buf_double2d          = NULL;
-    hvl_t *  buf_vlen_i            = NULL;
+    hvl_t   *buf_vlen_i            = NULL;
     char(*buf_str)[FIXED_LEN];
-    char **         buf_vlen_s = NULL;
+    char          **buf_vlen_s = NULL;
     hobj_ref_t      buf_ref[2];
     hdset_reg_ref_t buf_reg_ref[2];
     size_t          offset, len;
     herr_t          status;
-    char *          names[NTYPES] = {"int",
+    char           *names[NTYPES] = {"int",
                            "ulong",
                            "float",
                            "double",
@@ -543,9 +543,9 @@ add_attrs(hid_t oid, int idx)
     long long    l          = -2147483647;
     float        f          = 123456789.987654321;
     double       d          = 987654321.123456789;
-    char *       s[7]       = {"Parting", "is such", "sweeter", "sorrow."};
+    char        *s[7]       = {"Parting", "is such", "sweeter", "sorrow."};
     float        f_array[4] = {1.0, 2.22, 3.333, 4.444};
-    char *       s_vlen[4]  = {"Parting", "is such", "sweet", "sorrow."};
+    char        *s_vlen[4]  = {"Parting", "is such", "sweet", "sorrow."};
     hsize_t      dims1[1] = {1}, dims2[1] = {4}, dims3[2] = {3, 5};
     int          int3d[4][3][5];
     size_t       offset = 0;

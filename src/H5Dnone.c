@@ -301,7 +301,7 @@ done:
  */
 static herr_t
 H5D__none_idx_remove(const H5D_chk_idx_info_t H5_ATTR_UNUSED *idx_info,
-                     H5D_chunk_common_ud_t H5_ATTR_UNUSED *udata)
+                     H5D_chunk_common_ud_t H5_ATTR_UNUSED    *udata)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -363,7 +363,7 @@ done:
  */
 static herr_t
 H5D__none_idx_copy_setup(const H5D_chk_idx_info_t H5_ATTR_NDEBUG_UNUSED *idx_info_src,
-                         const H5D_chk_idx_info_t *                      idx_info_dst)
+                         const H5D_chk_idx_info_t                       *idx_info_dst)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 

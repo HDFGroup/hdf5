@@ -235,7 +235,7 @@ H5C_get_entry_status(const H5F_t *f, haddr_t addr, size_t *size_ptr, hbool_t *in
                      hbool_t *is_corked_ptr, hbool_t *is_flush_dep_parent_ptr,
                      hbool_t *is_flush_dep_child_ptr, hbool_t *image_up_to_date_ptr)
 {
-    H5C_t *            cache_ptr;
+    H5C_t             *cache_ptr;
     H5C_cache_entry_t *entry_ptr = NULL;
     herr_t             ret_value = SUCCEED; /* Return value */
 
@@ -367,7 +367,7 @@ H5C_get_aux_ptr(const H5C_t *cache_ptr)
 herr_t
 H5C_get_entry_ring(const H5F_t *f, haddr_t addr, H5C_ring_t *ring)
 {
-    H5C_t *            cache_ptr;           /* Pointer to cache */
+    H5C_t             *cache_ptr;           /* Pointer to cache */
     H5C_cache_entry_t *entry_ptr;           /* Pointer to cache entry at address */
     herr_t             ret_value = SUCCEED; /* Return value */
 

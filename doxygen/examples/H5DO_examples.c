@@ -9,7 +9,7 @@
                 :
 size_t       buf_size = CHUNK_NX*CHUNK_NY*sizeof(int);
                 const Bytef *z_src = (const Bytef *)(direct_buf);
-                Bytef *      z_dst; /* Destination buffer            */
+                Bytef       *z_dst; /* Destination buffer            */
                 uLongf       z_dst_nbytes = (uLongf)DEFLATE_SIZE_ADJUST(buf_size);
                 uLong        z_src_nbytes = (uLong)buf_size;
                 int          aggression   = 9; /* Compression aggression setting */
@@ -103,14 +103,14 @@ size_t       buf_size = CHUNK_NX*CHUNK_NY*sizeof(int);
                 :
 size_t       buf_size = CHUNK_NX*CHUNK_NY*sizeof(int);
             const Bytef *z_src = (const Bytef *)(direct_buf);
-            Bytef *      z_dst; /* Destination buffer            */
+            Bytef       *z_dst; /* Destination buffer            */
             uLongf       z_dst_nbytes = (uLongf)DEFLATE_SIZE_ADJUST(buf_size);
             uLong        z_src_nbytes = (uLong)buf_size;
             int          aggression   = 9; /* Compression aggression setting */
             uint32_t     filter_mask  = 0;
             size_t       buf_size     = CHUNK_NX * CHUNK_NY * sizeof(int);
             /* For H5DOread_chunk() */
-            void *       readbuf = NULL;                   /* Buffer for reading data */
+            void        *readbuf = NULL;                   /* Buffer for reading data */
             const Bytef *pt_readbuf;                       /* Point to the buffer for data read */
             hsize_t      read_chunk_nbytes;                /* Size of chunk on disk */
             int          read_dst_buf[CHUNK_NX][CHUNK_NY]; /* Buffer to hold un-compressed data */

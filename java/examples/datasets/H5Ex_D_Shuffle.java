@@ -277,7 +277,7 @@ public class H5Ex_D_Shuffle {
                     int[] filter_config  = {0};
                     int filter_type      = -1;
                     filter_type          = H5.H5Pget_filter(dcpl_id, indx, flags, cd_nelmts, cd_values, 120,
-                                                   filter_name, filter_config);
+                                                            filter_name, filter_config);
                     System.out.print("Filter " + indx + ": Type is: ");
                     switch (H5Z_filter.get(filter_type)) {
                     case H5Z_FILTER_DEFLATE:

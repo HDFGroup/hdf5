@@ -50,7 +50,7 @@ create_H5O_token_t(JNIEnv *envptr, const H5O_token_t *token, hbool_t is_critical
     jbyteArray tokenByteBuf;
     jboolean   token_buf_is_copy;
     jvalue     constructor_args[1];
-    jbyte *    token_buf     = NULL;
+    jbyte     *token_buf     = NULL;
     jobject    ret_token_obj = NULL;
 
     if (NULL == (tokenByteBuf = (*envptr)->NewByteArray(envptr, H5O_MAX_TOKEN_SIZE)))
@@ -386,7 +386,7 @@ Java_hdf_hdf5lib_H5_H5Oget_1native_1info_1by_1name(JNIEnv *env, jclass clss, jlo
                                                    jint fields, jlong access_id)
 {
     H5O_native_info_t infobuf;
-    const char *      objName = NULL;
+    const char       *objName = NULL;
     jobject           hdrinfobuf;
     jobject           obj_ihinfobuf;
     jobject           attr_ihinfobuf;
@@ -458,7 +458,7 @@ Java_hdf_hdf5lib_H5_H5Oget_1native_1info_1by_1idx(JNIEnv *env, jclass clss, jlon
                                                   jlong access_id)
 {
     H5O_native_info_t infobuf;
-    const char *      grpName = NULL;
+    const char       *grpName = NULL;
     jobject           hdrinfobuf;
     jobject           obj_ihinfobuf;
     jobject           attr_ihinfobuf;
@@ -557,10 +557,10 @@ H5O_iterate_cb(hid_t g_id, const char *name, const H5O_info2_t *info, void *cb_d
     jobject     visit_callback = wrapper->visit_callback;
     jobject     token;
     jstring     str;
-    JNIEnv *    cbenv = NULL;
+    JNIEnv     *cbenv = NULL;
     jclass      cbcls;
     jvalue      args[12];
-    void *      op_data = (void *)wrapper->op_data;
+    void       *op_data = (void *)wrapper->op_data;
     jint        status  = FAIL;
 
     if (JVMPTR->AttachCurrentThread(JVMPAR, (void **)&cbenv, NULL) < 0) {
@@ -747,7 +747,7 @@ Java_hdf_hdf5lib_H5_H5Oget_1comment(JNIEnv *env, jclass clss, jlong loc_id)
     jstring str = NULL;
     ssize_t buf_size;
     ssize_t status   = -1;
-    char *  oComment = NULL;
+    char   *oComment = NULL;
 
     UNUSED(clss);
 
@@ -787,7 +787,7 @@ Java_hdf_hdf5lib_H5_H5Oget_1comment_1by_1name(JNIEnv *env, jclass clss, jlong lo
     jstring     str     = NULL;
     ssize_t     buf_size;
     ssize_t     status;
-    char *      objComment = NULL;
+    char       *objComment = NULL;
 
     UNUSED(clss);
 
@@ -899,7 +899,7 @@ Java_hdf_hdf5lib_H5__1H5Oopen_1by_1token(JNIEnv *env, jclass clss, jlong loc_id,
     jboolean    token_buf_is_copy;
     jfieldID    token_data_field_id;
     jclass      token_cls;
-    jbyte *     token_buf = NULL;
+    jbyte      *token_buf = NULL;
     jobject     token_data;
     hid_t       retVal = H5I_INVALID_HID;
 

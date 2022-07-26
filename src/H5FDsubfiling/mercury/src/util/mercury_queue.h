@@ -49,13 +49,13 @@
 
 #define HG_QUEUE_HEAD_DECL(struct_head_name, struct_entry_name)                                              \
     struct struct_head_name {                                                                                \
-        struct struct_entry_name * head;                                                                     \
+        struct struct_entry_name  *head;                                                                     \
         struct struct_entry_name **tail;                                                                     \
     }
 
 #define HG_QUEUE_HEAD(struct_entry_name)                                                                     \
     struct {                                                                                                 \
-        struct struct_entry_name * head;                                                                     \
+        struct struct_entry_name  *head;                                                                     \
         struct struct_entry_name **tail;                                                                     \
     }
 

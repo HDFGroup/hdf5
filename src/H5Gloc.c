@@ -93,7 +93,7 @@ typedef struct {
 /* User data for getting an object's comment in a group */
 typedef struct {
     /* downward */
-    char * comment; /* Object comment buffer */
+    char  *comment; /* Object comment buffer */
     size_t bufsize; /* Size of object comment buffer */
 
     /* upward */
@@ -255,7 +255,7 @@ done:
 herr_t
 H5G_loc(hid_t loc_id, H5G_loc_t *loc)
 {
-    void * obj       = NULL;    /* VOL object   */
+    void  *obj       = NULL;    /* VOL object   */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)

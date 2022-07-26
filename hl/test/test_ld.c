@@ -130,13 +130,13 @@ char g_tmp_buf[TMP_BUF_SIZE];
         }                                                                                                    \
         else if (type == TWO_CMPD_VALID1) {                                                                  \
             test_valid_fields1 *vb1 = (test_valid_fields1 *)_ldbuf;                                          \
-            set_t *             cb  = (set_t *)_buf;                                                         \
+            set_t              *cb  = (set_t *)_buf;                                                         \
                                                                                                              \
             VERIFY_ELMTS_VALID1(vb1[k], cb[ind + n])                                                         \
         }                                                                                                    \
         else if (type == TWO_CMPD_VALID2) {                                                                  \
             test_valid_fields2 *vb2 = (test_valid_fields2 *)_ldbuf;                                          \
-            set_t *             cb  = (set_t *)_buf;                                                         \
+            set_t              *cb  = (set_t *)_buf;                                                         \
                                                                                                              \
             VERIFY_ELMTS_VALID2(vb2[k], cb[ind + n])                                                         \
         }                                                                                                    \
@@ -211,10 +211,10 @@ typedef struct test_valid_fields2 {
 
 /* Temporary buffers for tests: test_LD_elmts_one() & test_LD_elmts_two() */
 #define TEST_BUF_SIZE 100
-int *               iibuf; /* buffer for storing retrieved elements */
-int *               ibuf;  /* buffer for storing retrieved elements (integer) */
-set_t *             cbuf;  /* buffer for storing retrieved elements (compound) */
-set_t *             ccbuf; /* buffer for storing retrieved elements (compound) */
+int                *iibuf; /* buffer for storing retrieved elements */
+int                *ibuf;  /* buffer for storing retrieved elements (integer) */
+set_t              *cbuf;  /* buffer for storing retrieved elements (compound) */
+set_t              *ccbuf; /* buffer for storing retrieved elements (compound) */
 test_valid_fields1 *vbuf1; /* buffer for storing retrieved elements (FIELDS1) */
 test_valid_fields2 *vbuf2; /* buffer for storing retrieved elements (FIELDS2) */
 

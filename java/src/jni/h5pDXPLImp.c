@@ -41,8 +41,8 @@ Java_hdf_hdf5lib_H5_H5Pset_1buffer(JNIEnv *env, jclass clss, jlong plist, jlong 
 {
 #ifdef notdef
     jboolean isCopy;
-    jbyte *  tconvP = NULL;
-    jbyte *  bkgP   = NULL;
+    jbyte   *tconvP = NULL;
+    jbyte   *bkgP   = NULL;
 #endif
     herr_t status = FAIL;
 
@@ -88,8 +88,8 @@ Java_hdf_hdf5lib_H5_H5Pget_1buffer(JNIEnv *env, jclass clss, jlong plist, jbyteA
 {
 #ifdef notdef
     jboolean isCopy;
-    jbyte *  tconvP = NULL;
-    jbyte *  bkgP   = NULL;
+    jbyte   *tconvP = NULL;
+    jbyte   *bkgP   = NULL;
 #endif
     herr_t status = FAIL;
 
@@ -290,7 +290,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1data_1transform(JNIEnv *env, jclass clss, jlong plis
                                             jlong size)
 {
     jstring str          = NULL;
-    char *  express      = NULL;
+    char   *express      = NULL;
     ssize_t express_size = -1;
 
     UNUSED(clss);
@@ -361,7 +361,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1hyper_1vector_1size(JNIEnv *env, jclass clss, jlong 
 {
     jboolean isCopy;
     size_t   size;
-    jlong *  theArray = NULL;
+    jlong   *theArray = NULL;
     herr_t   retVal   = FAIL;
 
     UNUSED(clss);
