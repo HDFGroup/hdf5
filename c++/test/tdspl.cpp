@@ -61,7 +61,7 @@ test_transfplist()
         // Find out the length of the transform expression, allocate the buffer
         // for it, then read and verify the expression from the copied plist
         size_t tran_len    = static_cast<size_t>(dxpl_c_to_f_copy.getDataTransform(NULL));
-        char * c_to_f_read = static_cast<char *>(HDmalloc(tran_len + 1));
+        char  *c_to_f_read = static_cast<char *>(HDmalloc(tran_len + 1));
         HDmemset(c_to_f_read, 0, tran_len + 1);
         dxpl_c_to_f_copy.getDataTransform(c_to_f_read, tran_len + 1);
         verify_val(const_cast<const char *>(c_to_f_read), const_cast<const char *>(c_to_f),

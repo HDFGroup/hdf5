@@ -36,7 +36,7 @@ typedef struct {
  */
 /* linked list to keep exclude path list */
 struct exclude_path_list {
-    const char *              obj_path;
+    const char               *obj_path;
     h5trav_type_t             obj_type;
     struct exclude_path_list *next;
 };
@@ -86,8 +86,8 @@ typedef struct {
     hsize_t                   acc[H5S_MAX_RANK];       /* accumulator position */
     hsize_t                   pos[H5S_MAX_RANK];       /* matrix position */
     hsize_t                   sm_pos[H5S_MAX_RANK];    /* stripmine position */
-    char *                    obj_name[2];             /* name for object */
-    struct subset_t *         sset[2];                 /* subsetting parameters */
+    char                     *obj_name[2];             /* name for object */
+    struct subset_t          *sset[2];                 /* subsetting parameters */
     h5tools_vol_info_t        vol_info[2];             /* VOL information for input file, output file */
     h5tools_vfd_info_t        vfd_info[2];             /* VFD information for input file, output file */
     hbool_t                   custom_vol[2];           /* Using a custom input, output VOL? */

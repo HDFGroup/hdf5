@@ -342,7 +342,7 @@ test_refstr_acat(void)
     H5RS_str_t *rs;                     /* Ref-counted string created */
     const char *s;                      /* Pointer to raw string in ref-counted string */
     char        buf[256];               /* Buffer to compare against */
-    char *      large_str, *large_str2; /* Large strings to append */
+    char       *large_str, *large_str2; /* Large strings to append */
     int         cmp;                    /* Comparison value */
     herr_t      ret;                    /* Generic return value */
 

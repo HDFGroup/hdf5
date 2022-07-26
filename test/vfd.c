@@ -143,8 +143,8 @@ static int __k;
 /* Helper structure to pass around dataset information.
  */
 struct splitter_dataset_def {
-    void *         buf;         /* contents of dataset */
-    const char *   dset_name;   /* dataset name, always added to root group */
+    void          *buf;         /* contents of dataset */
+    const char    *dset_name;   /* dataset name, always added to root group */
     hid_t          mem_type_id; /* datatype */
     const hsize_t *dims;        /* dimensions */
     int            n_dims;      /* rank */
@@ -202,7 +202,7 @@ test_sec2(void)
     hid_t         driver_id    = -1;     /* ID for this VFD              */
     unsigned long driver_flags = 0;      /* VFD feature flags            */
     char          filename[1024];        /* filename                     */
-    void *        os_file_handle = NULL; /* OS file handle               */
+    void         *os_file_handle = NULL; /* OS file handle               */
     hsize_t       file_size;             /* file size                    */
 
     TESTING("SEC2 file driver");
@@ -319,16 +319,16 @@ test_core(void)
     hid_t         did          = -1;        /* dataset ID                   */
     hid_t         sid          = -1;        /* dataspace ID                 */
     char          filename[1024];           /* filename                     */
-    void *        os_file_handle = NULL;    /* OS file handle               */
+    void         *os_file_handle = NULL;    /* OS file handle               */
     hsize_t       file_size;                /* file size                    */
     size_t        increment;                /* core VFD increment           */
     hbool_t       backing_store;            /* use backing store?           */
     hbool_t       use_write_tracking;       /* write tracking flag          */
     size_t        write_tracking_page_size; /* write tracking page size     */
-    int *         data_w = NULL;            /* data written to the dataset  */
-    int *         data_r = NULL;            /* data read from the dataset   */
+    int          *data_w = NULL;            /* data written to the dataset  */
+    int          *data_r = NULL;            /* data read from the dataset   */
     int           val;                      /* data value                   */
-    int *         pw = NULL, *pr = NULL;    /* pointers for iterating over
+    int          *pw = NULL, *pr = NULL;    /* pointers for iterating over
                                                data arrays (write & read)   */
     hsize_t dims[2];                        /* dataspace dimensions         */
     int     i, j;                           /* iterators                    */
@@ -707,14 +707,14 @@ test_direct(void)
     hid_t   file = -1, fapl = -1, access_fapl = -1;
     hid_t   dset1 = -1, dset2 = -1, space1 = -1, space2 = -1;
     char    filename[1024];
-    int *   fhandle = NULL;
+    int    *fhandle = NULL;
     hsize_t file_size;
     hsize_t dims1[2], dims2[1];
     size_t  mbound;
     size_t  fbsize;
     size_t  cbsize;
-    void *  proto_points = NULL, *proto_check = NULL;
-    int *   points = NULL, *check = NULL, *p1 = NULL, *p2 = NULL;
+    void   *proto_points = NULL, *proto_check = NULL;
+    int    *points = NULL, *check = NULL, *p1 = NULL, *p2 = NULL;
     int     wdata2[DSET2_DIM] = {11, 12, 13, 14};
     int     rdata2[DSET2_DIM];
     int     i, j, n;
@@ -1024,9 +1024,9 @@ test_family(void)
     char          filename[1024];
     char          dname[] = "dataset";
     unsigned int  i, j;
-    int *         fhandle = NULL, *fhandle2 = NULL;
-    int **        buf      = NULL;
-    int *         buf_data = NULL;
+    int          *fhandle = NULL, *fhandle2 = NULL;
+    int         **buf      = NULL;
+    int          *buf_data = NULL;
     hsize_t       dims[2]  = {FAMILY_NUMBER, FAMILY_SIZE};
     hsize_t       file_size;
 
@@ -1338,8 +1338,8 @@ test_family_member_fapl(void)
     char     dname[]  = "dataset";
     unsigned i        = 0;
     unsigned j        = 0;
-    int **   buf      = NULL;
-    int *    buf_data = NULL;
+    int    **buf      = NULL;
+    int     *buf_data = NULL;
     hsize_t  dims[2]  = {FAMILY_NUMBER, FAMILY_SIZE};
 
     TESTING("Family member FAPL");
@@ -1495,20 +1495,20 @@ test_multi(void)
     hid_t         driver_id    = -1; /* ID for this VFD              */
     unsigned long driver_flags = 0;  /* VFD feature flags            */
     char          filename[1024];
-    int *         fhandle2 = NULL, *fhandle = NULL;
+    int          *fhandle2 = NULL, *fhandle = NULL;
     hsize_t       file_size;
     H5FD_mem_t    mt, memb_map[H5FD_MEM_NTYPES];
     hid_t         memb_fapl[H5FD_MEM_NTYPES];
     haddr_t       memb_addr[H5FD_MEM_NTYPES];
-    const char *  memb_name[H5FD_MEM_NTYPES];
+    const char   *memb_name[H5FD_MEM_NTYPES];
     char          sv[H5FD_MEM_NTYPES][32];
     hsize_t       dims[2]  = {MULTI_SIZE, MULTI_SIZE};
     hsize_t       adims[1] = {1};
     char          dname[]  = "dataset";
     char          meta[]   = "this is some metadata on this file";
     int           i, j;
-    int **        buf      = NULL;
-    int *         buf_data = NULL;
+    int         **buf      = NULL;
+    int          *buf_data = NULL;
 
     TESTING("MULTI file driver");
 
@@ -1759,8 +1759,8 @@ test_multi_compat(void)
     char        sv[H5FD_MEM_NTYPES][32];
     hsize_t     dims[2] = {MULTI_SIZE, MULTI_SIZE};
     int         i, j;
-    int **      buf      = NULL;
-    int *       buf_data = NULL;
+    int       **buf      = NULL;
+    int        *buf_data = NULL;
 
     TESTING("MULTI file driver backward compatibility");
 
@@ -1939,7 +1939,7 @@ test_log(void)
     hid_t         driver_id    = -1; /* ID for this VFD              */
     unsigned long driver_flags = 0;  /* VFD feature flags            */
     char          filename[1024];
-    int *         fhandle   = NULL;
+    int          *fhandle   = NULL;
     hsize_t       file_size = 0;
     unsigned int  flags     = H5FD_LOG_ALL;
     size_t        buf_size  = 4 * KB;
@@ -2065,7 +2065,7 @@ test_stdio(void)
     hid_t         driver_id    = -1; /* ID for this VFD              */
     unsigned long driver_flags = 0;  /* VFD feature flags            */
     char          filename[1024];
-    FILE *        fhandle   = NULL;
+    FILE         *fhandle   = NULL;
     hsize_t       file_size = 0;
 
     TESTING("STDIO file driver");
@@ -2174,7 +2174,7 @@ test_windows(void)
     hid_t         driver_id    = -1; /* ID for this VFD              */
     unsigned long driver_flags = 0;  /* VFD feature flags            */
     char          filename[1024];
-    int *         fhandle   = NULL;
+    int          *fhandle   = NULL;
     hsize_t       file_size = 0;
 
 #endif /*H5_HAVE_WINDOWS*/
@@ -2482,8 +2482,8 @@ run_splitter_test(const struct splitter_dataset_def *data, hbool_t ignore_wo_err
     hid_t                       fapl_id_out = H5I_INVALID_HID;
     hid_t                       fapl_id_cpy = H5I_INVALID_HID;
     H5FD_splitter_vfd_config_t *vfd_config  = NULL;
-    char *                      filename_rw = NULL;
-    FILE *                      logfile     = NULL;
+    char                       *filename_rw = NULL;
+    FILE                       *logfile     = NULL;
     int                         ret_value   = 0;
 
     if (NULL == (vfd_config = HDcalloc(1, sizeof(H5FD_splitter_vfd_config_t))))
@@ -2712,7 +2712,7 @@ error:
 static int
 splitter_RO_test(const struct splitter_dataset_def *data, hid_t child_fapl_id)
 {
-    char *                      filename_rw = NULL;
+    char                       *filename_rw = NULL;
     H5FD_splitter_vfd_config_t *vfd_config  = NULL;
     hid_t                       fapl_id     = H5I_INVALID_HID;
     hid_t                       file_id     = H5I_INVALID_HID;
@@ -3055,8 +3055,8 @@ done:
 static int
 splitter_tentative_open_test(hid_t child_fapl_id)
 {
-    const char *                filename_tmp = "splitter_tmp.h5";
-    char *                      filename_rw  = NULL;
+    const char                 *filename_tmp = "splitter_tmp.h5";
+    char                       *filename_rw  = NULL;
     H5FD_splitter_vfd_config_t *vfd_config   = NULL;
     hid_t                       fapl_id      = H5I_INVALID_HID;
     hid_t                       file_id      = H5I_INVALID_HID;
@@ -4057,7 +4057,7 @@ test_vector_io__setup_v(uint32_t count, H5FD_mem_t types[], haddr_t addrs[], siz
 {
     hbool_t    result    = TRUE; /* will set to FALSE on failure */
     char       fill_char = base_fill_char;
-    void *     temp_buf  = NULL;
+    void      *temp_buf  = NULL;
     uint32_t   i;
     uint32_t   j;
     H5FD_mem_t mem_types[6] = {H5FD_MEM_SUPER, H5FD_MEM_BTREE, H5FD_MEM_DRAW,
@@ -4163,7 +4163,7 @@ test_vector_io__setup_fixed_size_v(uint32_t count, H5FD_mem_t types[], haddr_t a
 {
     hbool_t    result    = TRUE; /* will set to FALSE on failure */
     char       fill_char = base_fill_char;
-    void *     temp_buf  = NULL;
+    void      *temp_buf  = NULL;
     uint32_t   fix_point;
     uint32_t   i;
     uint32_t   j;
@@ -4411,7 +4411,7 @@ test_vector_io__verify_v(uint32_t count, H5FD_mem_t types[], size_t sizes[], con
     uint32_t    i;
     size_t      j;
     const char *w_buf;
-    char *      r_buf;
+    char       *r_buf;
     const char *mem_type_names[7] = {"H5FD_MEM_DEFAULT", "H5FD_MEM_SUPER", "H5FD_MEM_BTREE", "H5FD_MEM_DRAW",
                                      "H5FD_MEM_GHEAP",   "H5FD_MEM_LHEAP", "H5FD_MEM_OHDR"};
     size_t      size              = SIZE_MAX;
@@ -4484,7 +4484,7 @@ test_vector_io__dump_test_vectors(uint32_t count, H5FD_mem_t types[], haddr_t ad
     H5FD_mem_t  type              = H5FD_MEM_NTYPES;
 
     const char *w_buf;
-    char *      r_buf;
+    char       *r_buf;
 
     HDfprintf(stdout, "\n\nDumping test vector \"%s\" of length %d\n\n", name, count);
 
@@ -4562,9 +4562,9 @@ test_vector_io(const char *vfd_name)
     hid_t       fapl_id      = -1;          /* file access property list ID */
     haddr_t     eoa;                        /* file eoa                     */
     char        filename[1024];             /* filename                     */
-    char *      buf;                        /* tmp ptr to buf               */
+    char       *buf;                        /* tmp ptr to buf               */
     unsigned    flags = 0;                  /* file open flags              */
-    H5FD_t *    lf    = NULL;               /* VFD struct ptr               */
+    H5FD_t     *lf    = NULL;               /* VFD struct ptr               */
     uint32_t    i;                          /* index                        */
     uint32_t    j;                          /* index                        */
     uint32_t    count = VECTOR_LEN;         /* length of vectors            */
@@ -4598,12 +4598,12 @@ test_vector_io(const char *vfd_name)
     const void *f_write_bufs_0[VECTOR_LEN]; /* fixed write bufs vector      */
     const void *f_write_bufs_1[VECTOR_LEN]; /* fixed write bufs vector      */
     const void *f_write_bufs_2[VECTOR_LEN]; /* fixed write bufs vector      */
-    void *      read_bufs_0[VECTOR_LEN];    /* read bufs vector             */
-    void *      read_bufs_1[VECTOR_LEN];    /* read bufs vector             */
-    void *      read_bufs_2[VECTOR_LEN];    /* read bufs vector             */
-    void *      f_read_bufs_0[VECTOR_LEN];  /* fixed read bufs vector       */
-    void *      f_read_bufs_1[VECTOR_LEN];  /* fixed read bufs vector       */
-    void *      f_read_bufs_2[VECTOR_LEN];  /* fixed read bufs vector       */
+    void       *read_bufs_0[VECTOR_LEN];    /* read bufs vector             */
+    void       *read_bufs_1[VECTOR_LEN];    /* read bufs vector             */
+    void       *read_bufs_2[VECTOR_LEN];    /* read bufs vector             */
+    void       *f_read_bufs_0[VECTOR_LEN];  /* fixed read bufs vector       */
+    void       *f_read_bufs_1[VECTOR_LEN];  /* fixed read bufs vector       */
+    void       *f_read_bufs_2[VECTOR_LEN];  /* fixed read bufs vector       */
 
     HDsnprintf(test_title, sizeof(test_title), "vector I/O with %s VFD", vfd_name);
 
@@ -5118,7 +5118,7 @@ test_selection_io(const char *vfd_name)
     hid_t      fapl_id = -1;                                        /* file access property list ID */
     char       filename[1024];                                      /* filename                     */
     unsigned   flags = 0;                                           /* file open flags              */
-    H5FD_t *   lf    = NULL;                                        /* VFD struct ptr               */
+    H5FD_t    *lf    = NULL;                                        /* VFD struct ptr               */
     int        i;                                                   /* index                        */
     int        j;                                                   /* index                        */
     int        i2;                                                  /* index                        */
@@ -5136,13 +5136,13 @@ test_selection_io(const char *vfd_name)
     size_t     element_sizes[2] = {sizeof(int), sizeof(int)};       /* element sizes vector */
     int        wbuf1[SEL_IO_DIM0 * SEL_IO_DIM1];                    /* 1D write buffer        */
     int        wbuf2[SEL_IO_DIM0][SEL_IO_DIM1];                     /* 2D write buffer         */
-    int *      wbufs[2] = {wbuf1, wbuf2[0]};                        /* Array of write buffers    */
+    int       *wbufs[2] = {wbuf1, wbuf2[0]};                        /* Array of write buffers    */
     int        fbuf1[SEL_IO_DIM0 * SEL_IO_DIM1];                    /* 1D file buffer         */
     int        fbuf2[SEL_IO_DIM0][SEL_IO_DIM1];                     /* 2D file buffer          */
-    int *      fbufs[2] = {fbuf1, fbuf2[0]};                        /* Array of file buffers     */
+    int       *fbufs[2] = {fbuf1, fbuf2[0]};                        /* Array of file buffers     */
     int        erbuf1[SEL_IO_DIM0 * SEL_IO_DIM1];                   /* 1D expected read buffer */
     int        erbuf2[SEL_IO_DIM0][SEL_IO_DIM1];                    /* 2D expected read buffer */
-    int *      erbufs[2] = {erbuf1, erbuf2[0]};                     /* Array of expected read buffers */
+    int       *erbufs[2] = {erbuf1, erbuf2[0]};                     /* Array of expected read buffers */
     int        shorten_element_sizes; /* Whether to shorten the element sizes array */
 
     HDsnprintf(test_title, sizeof(test_title), "selection I/O with %s VFD", vfd_name);

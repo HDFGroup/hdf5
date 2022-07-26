@@ -90,8 +90,8 @@ static hid_t
 H5D__create_api_common(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id, hid_t lcpl_id,
                        hid_t dcpl_id, hid_t dapl_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr)
 {
-    void *          dset        = NULL; /* New dataset's info */
-    H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
+    void           *dset        = NULL; /* New dataset's info */
+    H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
     H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
@@ -204,8 +204,8 @@ H5Dcreate_async(const char *app_file, const char *app_func, unsigned app_line, h
                 hid_t type_id, hid_t space_id, hid_t lcpl_id, hid_t dcpl_id, hid_t dapl_id, hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
-    void *         token     = NULL;            /* Request token for async operation        */
-    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    void          *token     = NULL;            /* Request token for async operation        */
+    void         **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
     hid_t          ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -271,8 +271,8 @@ done:
 hid_t
 H5Dcreate_anon(hid_t loc_id, hid_t type_id, hid_t space_id, hid_t dcpl_id, hid_t dapl_id)
 {
-    void *            dset    = NULL;              /* dset object from VOL connector */
-    H5VL_object_t *   vol_obj = NULL;              /* Object for loc_id */
+    void             *dset    = NULL;              /* dset object from VOL connector */
+    H5VL_object_t    *vol_obj = NULL;              /* Object for loc_id */
     H5VL_loc_params_t loc_params;                  /* Location parameters for object access */
     hid_t             ret_value = H5I_INVALID_HID; /* Return value */
 
@@ -333,8 +333,8 @@ static hid_t
 H5D__open_api_common(hid_t loc_id, const char *name, hid_t dapl_id, void **token_ptr,
                      H5VL_object_t **_vol_obj_ptr)
 {
-    void *          dset        = NULL; /* dset object from VOL connector */
-    H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
+    void           *dset        = NULL; /* dset object from VOL connector */
+    H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
     H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
@@ -415,8 +415,8 @@ H5Dopen_async(const char *app_file, const char *app_func, unsigned app_line, hid
               hid_t dapl_id, hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
-    void *         token     = NULL;            /* Request token for async operation        */
-    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    void          *token     = NULL;            /* Request token for async operation        */
+    void         **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
     hid_t          ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -490,10 +490,10 @@ done:
 herr_t
 H5Dclose_async(const char *app_file, const char *app_func, unsigned app_line, hid_t dset_id, hid_t es_id)
 {
-    void *         token     = NULL;            /* Request token for async operation        */
-    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    void          *token     = NULL;            /* Request token for async operation        */
+    void         **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
     H5VL_object_t *vol_obj   = NULL;            /* VOL object of dset_id */
-    H5VL_t *       connector = NULL;            /* VOL connector */
+    H5VL_t        *connector = NULL;            /* VOL connector */
     herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -552,7 +552,7 @@ done:
 static hid_t
 H5D__get_space_api_common(hid_t dset_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr)
 {
-    H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
+    H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj);    /* Ptr to object ptr for loc_id */
     H5VL_dataset_get_args_t vol_cb_args;                 /* Arguments to VOL callback */
@@ -625,8 +625,8 @@ hid_t
 H5Dget_space_async(const char *app_file, const char *app_func, unsigned app_line, hid_t dset_id, hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
-    void *         token     = NULL;            /* Request token for async operation        */
-    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    void          *token     = NULL;            /* Request token for async operation        */
+    void         **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
     hid_t          ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -668,7 +668,7 @@ done:
 herr_t
 H5Dget_space_status(hid_t dset_id, H5D_space_status_t *allocation /*out*/)
 {
-    H5VL_object_t *         vol_obj;             /* Object for loc_id */
+    H5VL_object_t          *vol_obj;             /* Object for loc_id */
     H5VL_dataset_get_args_t vol_cb_args;         /* Arguments to VOL callback */
     herr_t                  ret_value = SUCCEED; /* Return value         */
 
@@ -707,7 +707,7 @@ done:
 hid_t
 H5Dget_type(hid_t dset_id)
 {
-    H5VL_object_t *         vol_obj;                     /* Object for loc_id */
+    H5VL_object_t          *vol_obj;                     /* Object for loc_id */
     H5VL_dataset_get_args_t vol_cb_args;                 /* Arguments to VOL callback */
     hid_t                   ret_value = H5I_INVALID_HID; /* Return value         */
 
@@ -752,7 +752,7 @@ done:
 hid_t
 H5Dget_create_plist(hid_t dset_id)
 {
-    H5VL_object_t *         vol_obj;                     /* Object for loc_id */
+    H5VL_object_t          *vol_obj;                     /* Object for loc_id */
     H5VL_dataset_get_args_t vol_cb_args;                 /* Arguments to VOL callback */
     hid_t                   ret_value = H5I_INVALID_HID; /* Return value         */
 
@@ -814,7 +814,7 @@ done:
 hid_t
 H5Dget_access_plist(hid_t dset_id)
 {
-    H5VL_object_t *         vol_obj;                     /* Object for loc_id */
+    H5VL_object_t          *vol_obj;                     /* Object for loc_id */
     H5VL_dataset_get_args_t vol_cb_args;                 /* Arguments to VOL callback */
     hid_t                   ret_value = H5I_INVALID_HID; /* Return value         */
 
@@ -858,7 +858,7 @@ done:
 hsize_t
 H5Dget_storage_size(hid_t dset_id)
 {
-    H5VL_object_t *         vol_obj;          /* Object for loc_id */
+    H5VL_object_t          *vol_obj;          /* Object for loc_id */
     H5VL_dataset_get_args_t vol_cb_args;      /* Arguments to VOL callback */
     hsize_t                 storage_size = 0; /* Storage size of dataset */
     hsize_t                 ret_value    = 0; /* Return value                 */
@@ -899,7 +899,7 @@ done:
 haddr_t
 H5Dget_offset(hid_t dset_id)
 {
-    H5VL_object_t *                     vol_obj;                   /* Dataset for this operation   */
+    H5VL_object_t                      *vol_obj;                   /* Dataset for this operation   */
     H5VL_optional_args_t                vol_cb_args;               /* Arguments to VOL callback */
     H5VL_native_dataset_optional_args_t dset_opt_args;             /* Arguments for optional operation */
     haddr_t                             dset_offset = HADDR_UNDEF; /* Dataset's offset */
@@ -941,7 +941,7 @@ static herr_t
 H5D__read_api_common(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id,
                      void *buf, void **token_ptr, H5VL_object_t **_vol_obj_ptr)
 {
-    H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
+    H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
     herr_t ret_value = SUCCEED;                       /* Return value */
@@ -1041,8 +1041,8 @@ H5Dread_async(const char *app_file, const char *app_func, unsigned app_line, hid
               hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id, void *buf /*out*/, hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Dataset VOL object */
-    void *         token     = NULL;            /* Request token for async operation        */
-    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    void          *token     = NULL;            /* Request token for async operation        */
+    void         **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
     herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1085,7 +1085,7 @@ done:
 herr_t
 H5Dread_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, uint32_t *filters, void *buf /*out*/)
 {
-    H5VL_object_t *                     vol_obj;             /* Dataset for this operation   */
+    H5VL_object_t                      *vol_obj;             /* Dataset for this operation   */
     H5VL_optional_args_t                vol_cb_args;         /* Arguments to VOL callback */
     H5VL_native_dataset_optional_args_t dset_opt_args;       /* Arguments for optional operation */
     herr_t                              ret_value = SUCCEED; /* Return value */
@@ -1140,7 +1140,7 @@ static herr_t
 H5D__write_api_common(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id,
                       hid_t dxpl_id, const void *buf, void **token_ptr, H5VL_object_t **_vol_obj_ptr)
 {
-    H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
+    H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
     herr_t ret_value = SUCCEED;                       /* Return value */
@@ -1243,8 +1243,8 @@ H5Dwrite_async(const char *app_file, const char *app_func, unsigned app_line, hi
                hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Dataset VOL object */
-    void *         token     = NULL;            /* Request token for async operation        */
-    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    void          *token     = NULL;            /* Request token for async operation        */
+    void         **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
     herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1288,7 +1288,7 @@ herr_t
 H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, const hsize_t *offset, size_t data_size,
                const void *buf)
 {
-    H5VL_object_t *                     vol_obj;       /* Dataset for this operation   */
+    H5VL_object_t                      *vol_obj;       /* Dataset for this operation   */
     H5VL_optional_args_t                vol_cb_args;   /* Arguments to VOL callback */
     H5VL_native_dataset_optional_args_t dset_opt_args; /* Arguments for optional operation */
     uint32_t                            data_size_32;  /* Chunk data size (limited to 32-bits currently) */
@@ -1353,11 +1353,11 @@ done:
 herr_t
 H5Dscatter(H5D_scatter_func_t op, void *op_data, hid_t type_id, hid_t dst_space_id, void *dst_buf /*out*/)
 {
-    H5T_t *         type;                     /* Datatype */
-    H5S_t *         dst_space;                /* Dataspace */
+    H5T_t          *type;                     /* Datatype */
+    H5S_t          *dst_space;                /* Dataspace */
     H5S_sel_iter_t *iter           = NULL;    /* Selection iteration info*/
     hbool_t         iter_init      = FALSE;   /* Selection iteration info has been initialized */
-    const void *    src_buf        = NULL;    /* Source (contiguous) data buffer */
+    const void     *src_buf        = NULL;    /* Source (contiguous) data buffer */
     size_t          src_buf_nbytes = 0;       /* Size of src_buf */
     size_t          type_size;                /* Datatype element size */
     hssize_t        nelmts;                   /* Number of remaining elements in selection */
@@ -1450,8 +1450,8 @@ herr_t
 H5Dgather(hid_t src_space_id, const void *src_buf, hid_t type_id, size_t dst_buf_size, void *dst_buf /*out*/,
           H5D_gather_func_t op, void *op_data)
 {
-    H5T_t *         type;                /* Datatype */
-    H5S_t *         src_space;           /* Dataspace */
+    H5T_t          *type;                /* Datatype */
+    H5S_t          *src_space;           /* Dataspace */
     H5S_sel_iter_t *iter      = NULL;    /* Selection iteration info*/
     hbool_t         iter_init = FALSE;   /* Selection iteration info has been initialized */
     size_t          type_size;           /* Datatype element size */
@@ -1643,8 +1643,8 @@ done:
 herr_t
 H5Diterate(void *buf, hid_t type_id, hid_t space_id, H5D_operator_t op, void *operator_data)
 {
-    H5T_t *           type;      /* Datatype */
-    H5S_t *           space;     /* Dataspace for iteration */
+    H5T_t            *type;      /* Datatype */
+    H5S_t            *space;     /* Dataspace for iteration */
     H5S_sel_iter_op_t dset_op;   /* Operator for iteration */
     herr_t            ret_value; /* Return value */
 
@@ -1754,7 +1754,7 @@ static herr_t
 H5D__set_extent_api_common(hid_t dset_id, const hsize_t size[], void **token_ptr,
                            H5VL_object_t **_vol_obj_ptr)
 {
-    H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
+    H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
     H5VL_dataset_specific_args_t vol_cb_args;         /* Arguments to VOL callback */
@@ -1824,8 +1824,8 @@ H5Dset_extent_async(const char *app_file, const char *app_func, unsigned app_lin
                     const hsize_t size[], hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
-    void *         token     = NULL;            /* Request token for async operation        */
-    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    void          *token     = NULL;            /* Request token for async operation        */
+    void         **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
     herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1863,7 +1863,7 @@ done:
 herr_t
 H5Dflush(hid_t dset_id)
 {
-    H5VL_object_t *              vol_obj;             /* Object for loc_id */
+    H5VL_object_t               *vol_obj;             /* Object for loc_id */
     H5VL_dataset_specific_args_t vol_cb_args;         /* Arguments to VOL callback */
     herr_t                       ret_value = SUCCEED; /* Return value                 */
 
@@ -1905,7 +1905,7 @@ done:
 herr_t
 H5Drefresh(hid_t dset_id)
 {
-    H5VL_object_t *              vol_obj;             /* Object for loc_id */
+    H5VL_object_t               *vol_obj;             /* Object for loc_id */
     H5VL_dataset_specific_args_t vol_cb_args;         /* Arguments to VOL callback */
     herr_t                       ret_value = SUCCEED; /* Return value                 */
 
@@ -1952,7 +1952,7 @@ done:
 herr_t
 H5Dformat_convert(hid_t dset_id)
 {
-    H5VL_object_t *      vol_obj;             /* Dataset for this operation   */
+    H5VL_object_t       *vol_obj;             /* Dataset for this operation   */
     H5VL_optional_args_t vol_cb_args;         /* Arguments to VOL callback */
     herr_t               ret_value = SUCCEED; /* Return value                 */
 
@@ -1994,7 +1994,7 @@ done:
 herr_t
 H5Dget_chunk_index_type(hid_t dset_id, H5D_chunk_index_t *idx_type /*out*/)
 {
-    H5VL_object_t *                     vol_obj;             /* Dataset for this operation   */
+    H5VL_object_t                      *vol_obj;             /* Dataset for this operation   */
     H5VL_optional_args_t                vol_cb_args;         /* Arguments to VOL callback */
     H5VL_native_dataset_optional_args_t dset_opt_args;       /* Arguments for optional operation */
     herr_t                              ret_value = SUCCEED; /* Return value                 */
@@ -2039,7 +2039,7 @@ done:
 herr_t
 H5Dget_chunk_storage_size(hid_t dset_id, const hsize_t *offset, hsize_t *chunk_nbytes /*out*/)
 {
-    H5VL_object_t *                     vol_obj;             /* Dataset for this operation   */
+    H5VL_object_t                      *vol_obj;             /* Dataset for this operation   */
     H5VL_optional_args_t                vol_cb_args;         /* Arguments to VOL callback */
     H5VL_native_dataset_optional_args_t dset_opt_args;       /* Arguments for optional operation */
     herr_t                              ret_value = SUCCEED; /* Return value                 */
@@ -2093,7 +2093,7 @@ done:
 herr_t
 H5Dget_num_chunks(hid_t dset_id, hid_t fspace_id, hsize_t *nchunks /*out*/)
 {
-    H5VL_object_t *                     vol_obj = NULL; /* Dataset for this operation */
+    H5VL_object_t                      *vol_obj = NULL; /* Dataset for this operation */
     H5VL_optional_args_t                vol_cb_args;    /* Arguments to VOL callback */
     H5VL_native_dataset_optional_args_t dset_opt_args;  /* Arguments for optional operation */
     herr_t                              ret_value = SUCCEED;
@@ -2147,7 +2147,7 @@ herr_t
 H5Dget_chunk_info(hid_t dset_id, hid_t fspace_id, hsize_t chk_index, hsize_t *offset /*out*/,
                   unsigned *filter_mask /*out*/, haddr_t *addr /*out*/, hsize_t *size /*out*/)
 {
-    H5VL_object_t *                     vol_obj = NULL; /* Dataset for this operation */
+    H5VL_object_t                      *vol_obj = NULL; /* Dataset for this operation */
     H5VL_optional_args_t                vol_cb_args;    /* Arguments to VOL callback */
     H5VL_native_dataset_optional_args_t dset_opt_args;  /* Arguments for optional operation */
     hsize_t                             nchunks   = 0;  /* Number of chunks */
@@ -2220,7 +2220,7 @@ herr_t
 H5Dget_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset, unsigned *filter_mask /*out*/,
                            haddr_t *addr /*out*/, hsize_t *size /*out*/)
 {
-    H5VL_object_t *                     vol_obj = NULL; /* Dataset for this operation */
+    H5VL_object_t                      *vol_obj = NULL; /* Dataset for this operation */
     H5VL_optional_args_t                vol_cb_args;    /* Arguments to VOL callback */
     H5VL_native_dataset_optional_args_t dset_opt_args;  /* Arguments for optional operation */
     herr_t                              ret_value = SUCCEED;
@@ -2300,7 +2300,7 @@ done:
 herr_t
 H5Dchunk_iter(hid_t dset_id, hid_t dxpl_id, H5D_chunk_iter_op_t op, void *op_data)
 {
-    H5VL_object_t *                     vol_obj = NULL; /* Dataset for this operation */
+    H5VL_object_t                      *vol_obj = NULL; /* Dataset for this operation */
     H5VL_optional_args_t                vol_cb_args;    /* Arguments to VOL callback */
     H5VL_native_dataset_optional_args_t dset_opt_args;  /* Arguments for optional operation */
     herr_t                              ret_value = SUCCEED;

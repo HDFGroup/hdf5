@@ -180,15 +180,15 @@ ensure_filter_works(hid_t fid, const char *name, hid_t dcpl_id)
     hid_t   dxpl_id       = -1;           /* Dataset xfer property list ID                */
     hid_t   write_dxpl_id = -1;           /* Dataset xfer property list ID for writing    */
     hid_t   sid           = -1;           /* Dataspace ID                                 */
-    void *  tconv_buf     = NULL;         /* Temporary conversion buffer                  */
-    int **  orig          = NULL;         /* Data written to the dataset                  */
-    int **  read          = NULL;         /* Data read from the dataset                   */
+    void   *tconv_buf     = NULL;         /* Temporary conversion buffer                  */
+    int   **orig          = NULL;         /* Data written to the dataset                  */
+    int   **read          = NULL;         /* Data read from the dataset                   */
     size_t  r, c;                         /* Data rows and columns                        */
     size_t  hs_r, hs_c, hs_offr, hs_offc; /* Hypserslab sizes and offsets                 */
     size_t  i, j;                         /* Local index variables                        */
     int     n = 0;                        /* Value written to point array                 */
     hbool_t are_same;                     /* Output from dataset compare function         */
-    int *** save_array = NULL;            /* (Global) array where the final data go       */
+    int  ***save_array = NULL;            /* (Global) array where the final data go       */
 
     /* initialize */
     r = (size_t)sizes_g[0];
@@ -589,8 +589,8 @@ error:
 static herr_t
 test_read_data(hid_t did, int *origin_data)
 {
-    int ** check  = NULL;
-    int *  data_p = origin_data;
+    int  **check  = NULL;
+    int   *data_p = origin_data;
     size_t i, j; /* Local index variables */
 
     if (allocate_and_init_2D_array(&check, sizes_g, NULL) < 0)
@@ -729,7 +729,7 @@ error:
 static herr_t
 ensure_data_read_fails(hid_t did)
 {
-    int ** check = NULL;
+    int  **check = NULL;
     herr_t ret   = FAIL;
 
     if (allocate_and_init_2D_array(&check, sizes_g, NULL) < 0)

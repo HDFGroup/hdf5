@@ -5360,7 +5360,7 @@ public class H5 implements java.io.Serializable {
         String n[] = new String[1];
         n[0]       = new String("");
         oname[0]   = H5Lget_name_by_idx(loc_id, name, HDF5Constants.H5_INDEX_NAME, HDF5Constants.H5_ITER_INC,
-                                      idx, HDF5Constants.H5P_DEFAULT);
+                                        idx, HDF5Constants.H5P_DEFAULT);
         H5L_info_t info = H5Lget_info_by_idx(loc_id, name, HDF5Constants.H5_INDEX_NAME,
                                              HDF5Constants.H5_ITER_INC, idx, HDF5Constants.H5P_DEFAULT);
         type[0]         = info.type;

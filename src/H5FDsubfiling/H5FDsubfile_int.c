@@ -204,9 +204,9 @@ herr_t
 H5FD__subfiling__get_real_eof(hid_t context_id, int64_t *logical_eof_ptr)
 {
     subfiling_context_t *sf_context  = NULL;
-    MPI_Request *        recv_reqs   = NULL;
-    int64_t *            recv_msg    = NULL;
-    int64_t *            sf_eofs     = NULL; /* dynamically allocated array for subfile EOFs */
+    MPI_Request         *recv_reqs   = NULL;
+    int64_t             *recv_msg    = NULL;
+    int64_t             *sf_eofs     = NULL; /* dynamically allocated array for subfile EOFs */
     int64_t              msg[3]      = {0, 0, 0};
     int64_t              logical_eof = 0;
     int64_t              sf_logical_eof;

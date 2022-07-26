@@ -86,9 +86,9 @@ H5FL_DEFINE_STATIC(H5ES_event_t);
 H5ES_event_t *
 H5ES__event_new(H5VL_t *connector, void *token)
 {
-    H5ES_event_t * ev        = NULL; /* New event */
+    H5ES_event_t  *ev        = NULL; /* New event */
     H5VL_object_t *request   = NULL; /* Async request token VOL object */
-    H5ES_event_t * ret_value = NULL; /* Return value */
+    H5ES_event_t  *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_PACKAGE
 

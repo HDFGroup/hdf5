@@ -66,8 +66,8 @@ Java_hdf_hdf5lib_H5_H5Pget_1chunk_1cache(JNIEnv *env, jclass clss, jlong dapl, j
 {
     jboolean isCopy;
     jdouble *w0Array          = NULL;
-    jlong *  rdcc_nslotsArray = NULL;
-    jlong *  nbytesArray      = NULL;
+    jlong   *rdcc_nslotsArray = NULL;
+    jlong   *nbytesArray      = NULL;
     herr_t   status           = FAIL;
 
     UNUSED(clss);
@@ -140,7 +140,7 @@ JNIEXPORT jstring JNICALL
 Java_hdf_hdf5lib_H5_H5Pget_1efile_1prefix(JNIEnv *env, jclass clss, jlong dapl_id)
 {
     ssize_t prefix_size = -1;
-    char *  pre         = NULL;
+    char   *pre         = NULL;
     jstring str         = NULL;
 
     UNUSED(clss);
@@ -282,8 +282,8 @@ H5D_append_cb(hid_t dataset_id, hsize_t *cur_dims, void *cb_data)
     jmethodID   mid;
     jobject     visit_callback = wrapper->visit_callback;
     jclass      cls;
-    JNIEnv *    cbenv   = NULL;
-    void *      op_data = (void *)wrapper->op_data;
+    JNIEnv     *cbenv   = NULL;
+    void       *op_data = (void *)wrapper->op_data;
     jint        status  = -1;
 
     if (JVMPTR->AttachCurrentThread(JVMPAR, (void **)&cbenv, NULL) < 0) {

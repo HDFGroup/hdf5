@@ -76,16 +76,16 @@ static void test_write_filtered_dataset_no_overlap_partial(const char *parent_gr
                                                            hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id);
 static void test_write_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filter_id,
                                                 hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id);
-static void test_write_filtered_dataset_single_unlim_dim_no_overlap(const char * parent_group,
+static void test_write_filtered_dataset_single_unlim_dim_no_overlap(const char  *parent_group,
                                                                     H5Z_filter_t filter_id, hid_t fapl_id,
                                                                     hid_t dcpl_id, hid_t dxpl_id);
-static void test_write_filtered_dataset_single_unlim_dim_overlap(const char * parent_group,
+static void test_write_filtered_dataset_single_unlim_dim_overlap(const char  *parent_group,
                                                                  H5Z_filter_t filter_id, hid_t fapl_id,
                                                                  hid_t dcpl_id, hid_t dxpl_id);
-static void test_write_filtered_dataset_multi_unlim_dim_no_overlap(const char * parent_group,
+static void test_write_filtered_dataset_multi_unlim_dim_no_overlap(const char  *parent_group,
                                                                    H5Z_filter_t filter_id, hid_t fapl_id,
                                                                    hid_t dcpl_id, hid_t dxpl_id);
-static void test_write_filtered_dataset_multi_unlim_dim_overlap(const char * parent_group,
+static void test_write_filtered_dataset_multi_unlim_dim_overlap(const char  *parent_group,
                                                                 H5Z_filter_t filter_id, hid_t fapl_id,
                                                                 hid_t dcpl_id, hid_t dxpl_id);
 static void test_write_filtered_dataset_single_no_selection(const char *parent_group, H5Z_filter_t filter_id,
@@ -96,27 +96,27 @@ static void test_write_filtered_dataset_point_selection(const char *parent_group
                                                         hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id);
 static void test_write_filtered_dataset_interleaved_write(const char *parent_group, H5Z_filter_t filter_id,
                                                           hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id);
-static void test_write_transformed_filtered_dataset_no_overlap(const char * parent_group,
+static void test_write_transformed_filtered_dataset_no_overlap(const char  *parent_group,
                                                                H5Z_filter_t filter_id, hid_t fapl_id,
                                                                hid_t dcpl_id, hid_t dxpl_id);
-static void test_write_3d_filtered_dataset_no_overlap_separate_pages(const char * parent_group,
+static void test_write_3d_filtered_dataset_no_overlap_separate_pages(const char  *parent_group,
                                                                      H5Z_filter_t filter_id, hid_t fapl_id,
                                                                      hid_t dcpl_id, hid_t dxpl_id);
-static void test_write_3d_filtered_dataset_no_overlap_same_pages(const char * parent_group,
+static void test_write_3d_filtered_dataset_no_overlap_same_pages(const char  *parent_group,
                                                                  H5Z_filter_t filter_id, hid_t fapl_id,
                                                                  hid_t dcpl_id, hid_t dxpl_id);
 static void test_write_3d_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filter_id,
                                                    hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id);
-static void test_write_cmpd_filtered_dataset_no_conversion_unshared(const char * parent_group,
+static void test_write_cmpd_filtered_dataset_no_conversion_unshared(const char  *parent_group,
                                                                     H5Z_filter_t filter_id, hid_t fapl_id,
                                                                     hid_t dcpl_id, hid_t dxpl_id);
-static void test_write_cmpd_filtered_dataset_no_conversion_shared(const char * parent_group,
+static void test_write_cmpd_filtered_dataset_no_conversion_shared(const char  *parent_group,
                                                                   H5Z_filter_t filter_id, hid_t fapl_id,
                                                                   hid_t dcpl_id, hid_t dxpl_id);
-static void test_write_cmpd_filtered_dataset_type_conversion_unshared(const char * parent_group,
+static void test_write_cmpd_filtered_dataset_type_conversion_unshared(const char  *parent_group,
                                                                       H5Z_filter_t filter_id, hid_t fapl_id,
                                                                       hid_t dcpl_id, hid_t dxpl_id);
-static void test_write_cmpd_filtered_dataset_type_conversion_shared(const char * parent_group,
+static void test_write_cmpd_filtered_dataset_type_conversion_shared(const char  *parent_group,
                                                                     H5Z_filter_t filter_id, hid_t fapl_id,
                                                                     hid_t dcpl_id, hid_t dxpl_id);
 #endif
@@ -136,27 +136,27 @@ static void test_read_filtered_dataset_point_selection(const char *parent_group,
                                                        hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id);
 static void test_read_filtered_dataset_interleaved_read(const char *parent_group, H5Z_filter_t filter_id,
                                                         hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id);
-static void test_read_transformed_filtered_dataset_no_overlap(const char * parent_group,
+static void test_read_transformed_filtered_dataset_no_overlap(const char  *parent_group,
                                                               H5Z_filter_t filter_id, hid_t fapl_id,
                                                               hid_t dcpl_id, hid_t dxpl_id);
-static void test_read_3d_filtered_dataset_no_overlap_separate_pages(const char * parent_group,
+static void test_read_3d_filtered_dataset_no_overlap_separate_pages(const char  *parent_group,
                                                                     H5Z_filter_t filter_id, hid_t fapl_id,
                                                                     hid_t dcpl_id, hid_t dxpl_id);
-static void test_read_3d_filtered_dataset_no_overlap_same_pages(const char * parent_group,
+static void test_read_3d_filtered_dataset_no_overlap_same_pages(const char  *parent_group,
                                                                 H5Z_filter_t filter_id, hid_t fapl_id,
                                                                 hid_t dcpl_id, hid_t dxpl_id);
 static void test_read_3d_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filter_id,
                                                   hid_t fapl_id, hid_t dcpl_id, hid_t dxpl_id);
-static void test_read_cmpd_filtered_dataset_no_conversion_unshared(const char * parent_group,
+static void test_read_cmpd_filtered_dataset_no_conversion_unshared(const char  *parent_group,
                                                                    H5Z_filter_t filter_id, hid_t fapl_id,
                                                                    hid_t dcpl_id, hid_t dxpl_id);
-static void test_read_cmpd_filtered_dataset_no_conversion_shared(const char * parent_group,
+static void test_read_cmpd_filtered_dataset_no_conversion_shared(const char  *parent_group,
                                                                  H5Z_filter_t filter_id, hid_t fapl_id,
                                                                  hid_t dcpl_id, hid_t dxpl_id);
-static void test_read_cmpd_filtered_dataset_type_conversion_unshared(const char * parent_group,
+static void test_read_cmpd_filtered_dataset_type_conversion_unshared(const char  *parent_group,
                                                                      H5Z_filter_t filter_id, hid_t fapl_id,
                                                                      hid_t dcpl_id, hid_t dxpl_id);
-static void test_read_cmpd_filtered_dataset_type_conversion_shared(const char * parent_group,
+static void test_read_cmpd_filtered_dataset_type_conversion_shared(const char  *parent_group,
                                                                    H5Z_filter_t filter_id, hid_t fapl_id,
                                                                    hid_t dcpl_id, hid_t dxpl_id);
 
@@ -966,9 +966,10 @@ test_write_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filte
         data[i] = (C_DATATYPE)GEN_DATA(i);
 
     for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
-        correct_buf[i] = (C_DATATYPE)(
-            (dataset_dims[1] * (i / ((hsize_t)mpi_size * dataset_dims[1]))) + (i % dataset_dims[1]) +
-            (((i % ((hsize_t)mpi_size * dataset_dims[1])) / dataset_dims[1]) % dataset_dims[1]));
+        correct_buf[i] =
+            (C_DATATYPE)((dataset_dims[1] * (i / ((hsize_t)mpi_size * dataset_dims[1]))) +
+                         (i % dataset_dims[1]) +
+                         (((i % ((hsize_t)mpi_size * dataset_dims[1])) / dataset_dims[1]) % dataset_dims[1]));
 
     VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, data) >= 0),
          "Dataset write succeeded");
@@ -1957,7 +1958,7 @@ test_write_filtered_dataset_point_selection(const char *parent_group, H5Z_filter
     C_DATATYPE *data        = NULL;
     C_DATATYPE *correct_buf = NULL;
     C_DATATYPE *read_buf    = NULL;
-    hsize_t *   coords      = NULL;
+    hsize_t    *coords      = NULL;
     hsize_t     dataset_dims[WRITE_POINT_SELECTION_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     chunk_dims[WRITE_POINT_SELECTION_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     sel_dims[WRITE_POINT_SELECTION_FILTERED_CHUNKS_DATASET_DIMS];
@@ -2042,9 +2043,10 @@ test_write_filtered_dataset_point_selection(const char *parent_group, H5Z_filter
         data[i] = (C_DATATYPE)GEN_DATA(i);
 
     for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
-        correct_buf[i] = (C_DATATYPE)(
-            (dataset_dims[1] * (i / ((hsize_t)mpi_size * dataset_dims[1]))) + (i % dataset_dims[1]) +
-            (((i % ((hsize_t)mpi_size * dataset_dims[1])) / dataset_dims[1]) % dataset_dims[1]));
+        correct_buf[i] =
+            (C_DATATYPE)((dataset_dims[1] * (i / ((hsize_t)mpi_size * dataset_dims[1]))) +
+                         (i % dataset_dims[1]) +
+                         (((i % ((hsize_t)mpi_size * dataset_dims[1])) / dataset_dims[1]) % dataset_dims[1]));
 
     VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, data) >= 0),
          "Dataset write succeeded");
@@ -2869,19 +2871,21 @@ test_write_3d_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t fi
 
     for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
         /* Add the Column Index */
-        correct_buf[i] = (C_DATATYPE)(
-            (i % (hsize_t)(WRITE_SHARED_FILTERED_CHUNKS_3D_DEPTH * WRITE_SHARED_FILTERED_CHUNKS_3D_NCOLS))
+        correct_buf[i] = (C_DATATYPE)((i % (hsize_t)(WRITE_SHARED_FILTERED_CHUNKS_3D_DEPTH *
+                                                     WRITE_SHARED_FILTERED_CHUNKS_3D_NCOLS))
 
-            /* Add the Row Index */
-            + ((i % (hsize_t)(mpi_size * WRITE_SHARED_FILTERED_CHUNKS_3D_DEPTH *
-                              WRITE_SHARED_FILTERED_CHUNKS_3D_NCOLS)) /
-               (hsize_t)(WRITE_SHARED_FILTERED_CHUNKS_3D_DEPTH * WRITE_SHARED_FILTERED_CHUNKS_3D_NCOLS))
+                                      /* Add the Row Index */
+                                      + ((i % (hsize_t)(mpi_size * WRITE_SHARED_FILTERED_CHUNKS_3D_DEPTH *
+                                                        WRITE_SHARED_FILTERED_CHUNKS_3D_NCOLS)) /
+                                         (hsize_t)(WRITE_SHARED_FILTERED_CHUNKS_3D_DEPTH *
+                                                   WRITE_SHARED_FILTERED_CHUNKS_3D_NCOLS))
 
-            /* Add the amount that gets added when a rank moves down to its next
-               section vertically in the dataset */
-            + ((hsize_t)(WRITE_SHARED_FILTERED_CHUNKS_3D_DEPTH * WRITE_SHARED_FILTERED_CHUNKS_3D_NCOLS) *
-               (i / (hsize_t)(mpi_size * WRITE_SHARED_FILTERED_CHUNKS_3D_DEPTH *
-                              WRITE_SHARED_FILTERED_CHUNKS_3D_NCOLS))));
+                                      /* Add the amount that gets added when a rank moves down to its next
+                                         section vertically in the dataset */
+                                      + ((hsize_t)(WRITE_SHARED_FILTERED_CHUNKS_3D_DEPTH *
+                                                   WRITE_SHARED_FILTERED_CHUNKS_3D_NCOLS) *
+                                         (i / (hsize_t)(mpi_size * WRITE_SHARED_FILTERED_CHUNKS_3D_DEPTH *
+                                                        WRITE_SHARED_FILTERED_CHUNKS_3D_NCOLS))));
 
     VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, data) >= 0),
          "Dataset write succeeded");
@@ -3719,8 +3723,8 @@ test_read_one_chunk_filtered_dataset(const char *parent_group, H5Z_filter_t filt
     hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
     hid_t       group_id  = H5I_INVALID_HID;
     hid_t       filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
-    int *       recvcounts = NULL;
-    int *       displs     = NULL;
+    int        *recvcounts = NULL;
+    int        *displs     = NULL;
 
     if (MAINPROCESS)
         HDputs("Testing read from one-chunk filtered dataset");
@@ -3920,8 +3924,8 @@ test_read_filtered_dataset_no_overlap(const char *parent_group, H5Z_filter_t fil
     hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
     hid_t       group_id  = H5I_INVALID_HID;
     hid_t       filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
-    int *       recvcounts = NULL;
-    int *       displs     = NULL;
+    int        *recvcounts = NULL;
+    int        *displs     = NULL;
 
     if (MAINPROCESS)
         HDputs("Testing read from unshared filtered chunks");
@@ -4121,8 +4125,8 @@ test_read_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filter
     hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
     hid_t       group_id  = H5I_INVALID_HID;
     hid_t       filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
-    int *       recvcounts = NULL;
-    int *       displs     = NULL;
+    int        *recvcounts = NULL;
+    int        *displs     = NULL;
 
     if (MAINPROCESS)
         HDputs("Testing read from shared filtered chunks");
@@ -4137,9 +4141,10 @@ test_read_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t filter
     VRFY((NULL != correct_buf), "HDcalloc succeeded");
 
     for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
-        correct_buf[i] = (C_DATATYPE)(
-            (dataset_dims[1] * (i / ((hsize_t)mpi_size * dataset_dims[1]))) + (i % dataset_dims[1]) +
-            (((i % ((hsize_t)mpi_size * dataset_dims[1])) / dataset_dims[1]) % dataset_dims[1]));
+        correct_buf[i] =
+            (C_DATATYPE)((dataset_dims[1] * (i / ((hsize_t)mpi_size * dataset_dims[1]))) +
+                         (i % dataset_dims[1]) +
+                         (((i % ((hsize_t)mpi_size * dataset_dims[1])) / dataset_dims[1]) % dataset_dims[1]));
 
     if (MAINPROCESS) {
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -4339,8 +4344,8 @@ test_read_filtered_dataset_single_no_selection(const char *parent_group, H5Z_fil
     hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
     hid_t       group_id  = H5I_INVALID_HID;
     hid_t       filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
-    int *       recvcounts = NULL;
-    int *       displs     = NULL;
+    int        *recvcounts = NULL;
+    int        *displs     = NULL;
 
     if (MAINPROCESS)
         HDputs("Testing read from filtered chunks with a single process having no selection");
@@ -4691,7 +4696,7 @@ test_read_filtered_dataset_point_selection(const char *parent_group, H5Z_filter_
     C_DATATYPE *correct_buf = NULL;
     C_DATATYPE *read_buf    = NULL;
     C_DATATYPE *global_buf  = NULL;
-    hsize_t *   coords      = NULL;
+    hsize_t    *coords      = NULL;
     hsize_t     dataset_dims[READ_POINT_SELECTION_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     chunk_dims[READ_POINT_SELECTION_FILTERED_CHUNKS_DATASET_DIMS];
     hsize_t     sel_dims[READ_POINT_SELECTION_FILTERED_CHUNKS_DATASET_DIMS];
@@ -4701,8 +4706,8 @@ test_read_filtered_dataset_point_selection(const char *parent_group, H5Z_filter_
     hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
     hid_t       group_id  = H5I_INVALID_HID;
     hid_t       filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
-    int *       recvcounts = NULL;
-    int *       displs     = NULL;
+    int        *recvcounts = NULL;
+    int        *displs     = NULL;
 
     if (MAINPROCESS)
         HDputs("Testing read from filtered chunks with point selection");
@@ -4717,9 +4722,10 @@ test_read_filtered_dataset_point_selection(const char *parent_group, H5Z_filter_
     VRFY((NULL != correct_buf), "HDcalloc succeeded");
 
     for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
-        correct_buf[i] = (C_DATATYPE)(
-            (dataset_dims[1] * (i / ((hsize_t)mpi_size * dataset_dims[1]))) + (i % dataset_dims[1]) +
-            (((i % ((hsize_t)mpi_size * dataset_dims[1])) / dataset_dims[1]) % dataset_dims[1]));
+        correct_buf[i] =
+            (C_DATATYPE)((dataset_dims[1] * (i / ((hsize_t)mpi_size * dataset_dims[1]))) +
+                         (i % dataset_dims[1]) +
+                         (((i % ((hsize_t)mpi_size * dataset_dims[1])) / dataset_dims[1]) % dataset_dims[1]));
 
     if (MAINPROCESS) {
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -4916,8 +4922,8 @@ test_read_filtered_dataset_interleaved_read(const char *parent_group, H5Z_filter
     hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
     hid_t       group_id  = H5I_INVALID_HID;
     hid_t       filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
-    int *       recvcounts = NULL;
-    int *       displs     = NULL;
+    int        *recvcounts = NULL;
+    int        *displs     = NULL;
 
     if (MAINPROCESS)
         HDputs("Testing interleaved read from filtered chunks");
@@ -5131,9 +5137,9 @@ test_read_3d_filtered_dataset_no_overlap_separate_pages(const char *parent_group
 {
     MPI_Datatype vector_type;
     MPI_Datatype resized_vector_type;
-    C_DATATYPE * read_buf    = NULL;
-    C_DATATYPE * correct_buf = NULL;
-    C_DATATYPE * global_buf  = NULL;
+    C_DATATYPE  *read_buf    = NULL;
+    C_DATATYPE  *correct_buf = NULL;
+    C_DATATYPE  *global_buf  = NULL;
     hsize_t      dataset_dims[READ_UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_DATASET_DIMS];
     hsize_t      chunk_dims[READ_UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_DATASET_DIMS];
     hsize_t      sel_dims[READ_UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_DATASET_DIMS];
@@ -5363,8 +5369,8 @@ test_read_transformed_filtered_dataset_no_overlap(const char *parent_group, H5Z_
     hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
     hid_t       group_id  = H5I_INVALID_HID;
     hid_t       filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
-    int *       recvcounts = NULL;
-    int *       displs     = NULL;
+    int        *recvcounts = NULL;
+    int        *displs     = NULL;
 
     if (MAINPROCESS)
         HDputs("Testing read from unshared transformed and filtered chunks");
@@ -5588,8 +5594,8 @@ test_read_3d_filtered_dataset_no_overlap_same_pages(const char *parent_group, H5
     hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
     hid_t       group_id  = H5I_INVALID_HID;
     hid_t       filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
-    int *       recvcounts = NULL;
-    int *       displs     = NULL;
+    int        *recvcounts = NULL;
+    int        *displs     = NULL;
 
     if (MAINPROCESS)
         HDputs("Testing read from unshared filtered chunks on the same pages in 3D dataset");
@@ -5786,9 +5792,9 @@ test_read_3d_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t fil
 {
     MPI_Datatype vector_type;
     MPI_Datatype resized_vector_type;
-    C_DATATYPE * read_buf    = NULL;
-    C_DATATYPE * correct_buf = NULL;
-    C_DATATYPE * global_buf  = NULL;
+    C_DATATYPE  *read_buf    = NULL;
+    C_DATATYPE  *correct_buf = NULL;
+    C_DATATYPE  *global_buf  = NULL;
     hsize_t      dataset_dims[READ_SHARED_FILTERED_CHUNKS_3D_DATASET_DIMS];
     hsize_t      chunk_dims[READ_SHARED_FILTERED_CHUNKS_3D_DATASET_DIMS];
     hsize_t      sel_dims[READ_SHARED_FILTERED_CHUNKS_3D_DATASET_DIMS];
@@ -5817,19 +5823,21 @@ test_read_3d_filtered_dataset_overlap(const char *parent_group, H5Z_filter_t fil
 
     for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
         /* Add the Column Index */
-        correct_buf[i] = (C_DATATYPE)(
-            (i % (hsize_t)(READ_SHARED_FILTERED_CHUNKS_3D_DEPTH * READ_SHARED_FILTERED_CHUNKS_3D_NCOLS))
+        correct_buf[i] = (C_DATATYPE)((i % (hsize_t)(READ_SHARED_FILTERED_CHUNKS_3D_DEPTH *
+                                                     READ_SHARED_FILTERED_CHUNKS_3D_NCOLS))
 
-            /* Add the Row Index */
-            + ((i % (hsize_t)(mpi_size * READ_SHARED_FILTERED_CHUNKS_3D_DEPTH *
-                              READ_SHARED_FILTERED_CHUNKS_3D_NCOLS)) /
-               (hsize_t)(READ_SHARED_FILTERED_CHUNKS_3D_DEPTH * READ_SHARED_FILTERED_CHUNKS_3D_NCOLS))
+                                      /* Add the Row Index */
+                                      + ((i % (hsize_t)(mpi_size * READ_SHARED_FILTERED_CHUNKS_3D_DEPTH *
+                                                        READ_SHARED_FILTERED_CHUNKS_3D_NCOLS)) /
+                                         (hsize_t)(READ_SHARED_FILTERED_CHUNKS_3D_DEPTH *
+                                                   READ_SHARED_FILTERED_CHUNKS_3D_NCOLS))
 
-            /* Add the amount that gets added when a rank moves down to its next
-               section vertically in the dataset */
-            + ((hsize_t)(READ_SHARED_FILTERED_CHUNKS_3D_DEPTH * READ_SHARED_FILTERED_CHUNKS_3D_NCOLS) *
-               (i / (hsize_t)(mpi_size * READ_SHARED_FILTERED_CHUNKS_3D_DEPTH *
-                              READ_SHARED_FILTERED_CHUNKS_3D_NCOLS))));
+                                      /* Add the amount that gets added when a rank moves down to its next
+                                         section vertically in the dataset */
+                                      + ((hsize_t)(READ_SHARED_FILTERED_CHUNKS_3D_DEPTH *
+                                                   READ_SHARED_FILTERED_CHUNKS_3D_NCOLS) *
+                                         (i / (hsize_t)(mpi_size * READ_SHARED_FILTERED_CHUNKS_3D_DEPTH *
+                                                        READ_SHARED_FILTERED_CHUNKS_3D_NCOLS))));
 
     if (MAINPROCESS) {
         plist_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -6030,8 +6038,8 @@ test_read_cmpd_filtered_dataset_no_conversion_unshared(const char *parent_group,
           memtype   = H5I_INVALID_HID;
     hid_t group_id  = H5I_INVALID_HID;
     hid_t filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
-    int * recvcounts = NULL;
-    int * displs     = NULL;
+    int  *recvcounts = NULL;
+    int  *displs     = NULL;
 
     if (MAINPROCESS)
         HDputs("Testing read from unshared filtered chunks in Compound Datatype dataset without Datatype "
@@ -6257,8 +6265,8 @@ test_read_cmpd_filtered_dataset_no_conversion_shared(const char *parent_group, H
           memtype   = H5I_INVALID_HID;
     hid_t group_id  = H5I_INVALID_HID;
     hid_t filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
-    int * recvcounts = NULL;
-    int * displs     = NULL;
+    int  *recvcounts = NULL;
+    int  *displs     = NULL;
 
     if (MAINPROCESS)
         HDputs("Testing read from shared filtered chunks in Compound Datatype dataset without Datatype "
@@ -6490,8 +6498,8 @@ test_read_cmpd_filtered_dataset_type_conversion_unshared(const char *parent_grou
     hid_t                filetype = H5I_INVALID_HID, memtype = H5I_INVALID_HID;
     hid_t                group_id  = H5I_INVALID_HID;
     hid_t                filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
-    int *                recvcounts = NULL;
-    int *                displs     = NULL;
+    int                 *recvcounts = NULL;
+    int                 *displs     = NULL;
 
     if (MAINPROCESS)
         HDputs("Testing read from unshared filtered chunks in Compound Datatype dataset with Datatype "
@@ -6726,8 +6734,8 @@ test_read_cmpd_filtered_dataset_type_conversion_shared(const char *parent_group,
     hid_t                filetype = H5I_INVALID_HID, memtype = H5I_INVALID_HID;
     hid_t                group_id  = H5I_INVALID_HID;
     hid_t                filespace = H5I_INVALID_HID, memspace = H5I_INVALID_HID;
-    int *                recvcounts = NULL;
-    int *                displs     = NULL;
+    int                 *recvcounts = NULL;
+    int                 *displs     = NULL;
 
     if (MAINPROCESS)
         HDputs(
@@ -7815,7 +7823,7 @@ test_edge_chunks_overlap(const char *parent_group, H5Z_filter_t filter_id, hid_t
  * edge chunk and writes to just a portion of the edge chunk.
  */
 static void
-test_edge_chunks_partial_write(const char H5_ATTR_PARALLEL_UNUSED * parent_group,
+test_edge_chunks_partial_write(const char H5_ATTR_PARALLEL_UNUSED  *parent_group,
                                H5Z_filter_t H5_ATTR_PARALLEL_UNUSED filter_id,
                                hid_t H5_ATTR_PARALLEL_UNUSED fapl_id, hid_t H5_ATTR_PARALLEL_UNUSED dcpl_id,
                                hid_t H5_ATTR_PARALLEL_UNUSED dxpl_id)
@@ -7847,8 +7855,8 @@ test_fill_values(const char *parent_group, H5Z_filter_t filter_id, hid_t fapl_id
     hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
     hid_t       group_id   = H5I_INVALID_HID;
     hid_t       filespace  = H5I_INVALID_HID;
-    int *       recvcounts = NULL;
-    int *       displs     = NULL;
+    int        *recvcounts = NULL;
+    int        *displs     = NULL;
 
     if (MAINPROCESS)
         HDputs("Testing fill values");
@@ -8198,8 +8206,8 @@ test_fill_value_undefined(const char *parent_group, H5Z_filter_t filter_id, hid_
                           hid_t dxpl_id)
 {
     H5D_alloc_time_t alloc_time;
-    C_DATATYPE *     data     = NULL;
-    C_DATATYPE *     read_buf = NULL;
+    C_DATATYPE      *data     = NULL;
+    C_DATATYPE      *read_buf = NULL;
     hsize_t          dataset_dims[FILL_VALUE_UNDEFINED_TEST_DATASET_DIMS];
     hsize_t          chunk_dims[FILL_VALUE_UNDEFINED_TEST_DATASET_DIMS];
     hsize_t          sel_dims[FILL_VALUE_UNDEFINED_TEST_DATASET_DIMS];
@@ -8412,8 +8420,8 @@ test_fill_time_never(const char *parent_group, H5Z_filter_t filter_id, hid_t fap
     hid_t       file_id = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, plist_id = H5I_INVALID_HID;
     hid_t       group_id   = H5I_INVALID_HID;
     hid_t       filespace  = H5I_INVALID_HID;
-    int *       recvcounts = NULL;
-    int *       displs     = NULL;
+    int        *recvcounts = NULL;
+    int        *displs     = NULL;
 
     if (MAINPROCESS)
         HDputs("Testing fill time H5D_FILL_TIME_NEVER");

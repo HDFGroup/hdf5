@@ -156,7 +156,7 @@ static hid_t
 H5A__create_api_common(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id, hid_t acpl_id,
                        hid_t aapl_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr)
 {
-    H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
+    H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
     H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
@@ -255,8 +255,8 @@ H5Acreate_async(const char *app_file, const char *app_func, unsigned app_line, h
                 hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
-    void *         token     = NULL;            /* Request token for async operation        */
-    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    void          *token     = NULL;            /* Request token for async operation        */
+    void         **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
     hid_t          ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -302,7 +302,7 @@ H5A__create_by_name_api_common(hid_t loc_id, const char *obj_name, const char *a
                                hid_t space_id, hid_t acpl_id, hid_t aapl_id, hid_t lapl_id, void **token_ptr,
                                H5VL_object_t **_vol_obj_ptr)
 {
-    H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
+    H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
     H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
@@ -404,8 +404,8 @@ H5Acreate_by_name_async(const char *app_file, const char *app_func, unsigned app
                         hid_t acpl_id, hid_t aapl_id, hid_t lapl_id, hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
-    void *         token     = NULL;            /* Request token for async operation        */
-    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    void          *token     = NULL;            /* Request token for async operation        */
+    void         **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
     hid_t          ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -491,7 +491,7 @@ static hid_t
 H5A__open_api_common(hid_t loc_id, const char *attr_name, hid_t aapl_id, void **token_ptr,
                      H5VL_object_t **_vol_obj_ptr)
 {
-    H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
+    H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
     H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
@@ -569,8 +569,8 @@ H5Aopen_async(const char *app_file, const char *app_func, unsigned app_line, hid
               const char *attr_name, hid_t aapl_id, hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
-    void *         token     = NULL;            /* Request token for async operation        */
-    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    void          *token     = NULL;            /* Request token for async operation        */
+    void         **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
     hid_t          ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -613,7 +613,7 @@ static hid_t
 H5A__open_by_name_api_common(hid_t loc_id, const char *obj_name, const char *attr_name, hid_t aapl_id,
                              hid_t lapl_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr)
 {
-    H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
+    H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
     H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
@@ -698,8 +698,8 @@ H5Aopen_by_name_async(const char *app_file, const char *app_func, unsigned app_l
                       const char *obj_name, const char *attr_name, hid_t aapl_id, hid_t lapl_id, hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
-    void *         token     = NULL;            /* Request token for async operation        */
-    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    void          *token     = NULL;            /* Request token for async operation        */
+    void         **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
     hid_t          ret_value = H5I_INVALID_HID;
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -745,7 +745,7 @@ H5A__open_by_idx_api_common(hid_t loc_id, const char *obj_name, H5_index_t idx_t
                             hsize_t n, hid_t aapl_id, hid_t lapl_id, void **token_ptr,
                             H5VL_object_t **_vol_obj_ptr)
 {
-    H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
+    H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
     H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
@@ -838,8 +838,8 @@ H5Aopen_by_idx_async(const char *app_file, const char *app_func, unsigned app_li
                      hid_t aapl_id, hid_t lapl_id, hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
-    void *         token     = NULL;            /* Request token for async operation        */
-    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    void          *token     = NULL;            /* Request token for async operation        */
+    void         **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
     hid_t          ret_value = H5I_INVALID_HID;
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -882,7 +882,7 @@ static herr_t
 H5A__write_api_common(hid_t attr_id, hid_t type_id, const void *buf, void **token_ptr,
                       H5VL_object_t **_vol_obj_ptr)
 {
-    H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
+    H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
     herr_t ret_value = SUCCEED;                       /* Return value */
@@ -952,8 +952,8 @@ H5Awrite_async(const char *app_file, const char *app_func, unsigned app_line, hi
                const void *buf, hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object for attr_id */
-    void *         token     = NULL;            /* Request token for async operation        */
-    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    void          *token     = NULL;            /* Request token for async operation        */
+    void         **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
     herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -990,7 +990,7 @@ done:
 static herr_t
 H5A__read_api_common(hid_t attr_id, hid_t dtype_id, void *buf, void **token_ptr, H5VL_object_t **_vol_obj_ptr)
 {
-    H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
+    H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
     herr_t ret_value = SUCCEED;                       /* Return value */
@@ -1060,8 +1060,8 @@ H5Aread_async(const char *app_file, const char *app_func, unsigned app_line, hid
               void *buf /*out*/, hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object for attr_id */
-    void *         token     = NULL;            /* Request token for async operation        */
-    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    void          *token     = NULL;            /* Request token for async operation        */
+    void         **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
     herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1106,7 +1106,7 @@ done:
 hid_t
 H5Aget_space(hid_t attr_id)
 {
-    H5VL_object_t *      vol_obj = NULL;              /* Attribute object for ID */
+    H5VL_object_t       *vol_obj = NULL;              /* Attribute object for ID */
     H5VL_attr_get_args_t vol_cb_args;                 /* Arguments to VOL callback */
     hid_t                ret_value = H5I_INVALID_HID; /* Return value */
 
@@ -1151,7 +1151,7 @@ done:
 hid_t
 H5Aget_type(hid_t attr_id)
 {
-    H5VL_object_t *      vol_obj = NULL;              /* Attribute object for ID */
+    H5VL_object_t       *vol_obj = NULL;              /* Attribute object for ID */
     H5VL_attr_get_args_t vol_cb_args;                 /* Arguments to VOL callback */
     hid_t                ret_value = H5I_INVALID_HID; /* Return value */
 
@@ -1199,7 +1199,7 @@ done:
 hid_t
 H5Aget_create_plist(hid_t attr_id)
 {
-    H5VL_object_t *      vol_obj = NULL;              /* Attribute object for ID */
+    H5VL_object_t       *vol_obj = NULL;              /* Attribute object for ID */
     H5VL_attr_get_args_t vol_cb_args;                 /* Arguments to VOL callback */
     hid_t                ret_value = H5I_INVALID_HID; /* Return value */
 
@@ -1252,7 +1252,7 @@ done:
 ssize_t
 H5Aget_name(hid_t attr_id, size_t buf_size, char *buf /*out*/)
 {
-    H5VL_object_t *      vol_obj = NULL;     /* Attribute object for ID */
+    H5VL_object_t       *vol_obj = NULL;     /* Attribute object for ID */
     H5VL_attr_get_args_t vol_cb_args;        /* Arguments to VOL callback */
     size_t               attr_name_len = 0;  /* Length of attribute name */
     ssize_t              ret_value     = -1; /* Return value */
@@ -1306,7 +1306,7 @@ ssize_t
 H5Aget_name_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
                    char *name /*out*/, size_t size, hid_t lapl_id)
 {
-    H5VL_object_t *      vol_obj = NULL;    /* Attribute object for ID */
+    H5VL_object_t       *vol_obj = NULL;    /* Attribute object for ID */
     H5VL_attr_get_args_t vol_cb_args;       /* Arguments to VOL callback */
     size_t               attr_name_len = 0; /* Length of attribute name */
     ssize_t              ret_value;         /* Return value */
@@ -1378,7 +1378,7 @@ done:
 hsize_t
 H5Aget_storage_size(hid_t attr_id)
 {
-    H5VL_object_t *      vol_obj = NULL;   /* Attribute object for ID */
+    H5VL_object_t       *vol_obj = NULL;   /* Attribute object for ID */
     H5VL_attr_get_args_t vol_cb_args;      /* Arguments to VOL callback */
     hsize_t              storage_size = 0; /* Storage size of attribute */
     hsize_t              ret_value;        /* Return value */
@@ -1421,7 +1421,7 @@ done:
 herr_t
 H5Aget_info(hid_t attr_id, H5A_info_t *ainfo /*out*/)
 {
-    H5VL_object_t *      vol_obj = NULL;      /* Attribute object for ID */
+    H5VL_object_t       *vol_obj = NULL;      /* Attribute object for ID */
     H5VL_attr_get_args_t vol_cb_args;         /* Arguments to VOL callback */
     herr_t               ret_value = SUCCEED; /* Return value */
 
@@ -1466,7 +1466,7 @@ herr_t
 H5Aget_info_by_name(hid_t loc_id, const char *obj_name, const char *attr_name, H5A_info_t *ainfo /*out*/,
                     hid_t lapl_id)
 {
-    H5VL_object_t *      vol_obj = NULL;      /* Attribute object for ID */
+    H5VL_object_t       *vol_obj = NULL;      /* Attribute object for ID */
     H5VL_attr_get_args_t vol_cb_args;         /* Arguments to VOL callback */
     herr_t               ret_value = SUCCEED; /* Return value */
 
@@ -1526,7 +1526,7 @@ herr_t
 H5Aget_info_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
                    H5A_info_t *ainfo /*out*/, hid_t lapl_id)
 {
-    H5VL_object_t *      vol_obj = NULL;      /* Attribute object for ID */
+    H5VL_object_t       *vol_obj = NULL;      /* Attribute object for ID */
     H5VL_attr_get_args_t vol_cb_args;         /* Arguments to VOL callback */
     herr_t               ret_value = SUCCEED; /* Return value */
 
@@ -1626,7 +1626,7 @@ static herr_t
 H5A__rename_api_common(hid_t loc_id, const char *old_name, const char *new_name, void **token_ptr,
                        H5VL_object_t **_vol_obj_ptr)
 {
-    H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
+    H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
     H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
@@ -1700,8 +1700,8 @@ H5Arename_async(const char *app_file, const char *app_func, unsigned app_line, h
                 const char *old_name, const char *new_name, hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
-    void *         token     = NULL;            /* Request token for async operation        */
-    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    void          *token     = NULL;            /* Request token for async operation        */
+    void         **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
     herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1739,7 +1739,7 @@ static herr_t
 H5A__rename_by_name_api_common(hid_t loc_id, const char *obj_name, const char *old_name, const char *new_name,
                                hid_t lapl_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr)
 {
-    H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
+    H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
     H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
@@ -1818,8 +1818,8 @@ H5Arename_by_name_async(const char *app_file, const char *app_func, unsigned app
                         hid_t lapl_id, hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
-    void *         token     = NULL;            /* Request token for async operation        */
-    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    void          *token     = NULL;            /* Request token for async operation        */
+    void         **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
     herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1892,7 +1892,7 @@ herr_t
 H5Aiterate2(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx /*in,out */,
             H5A_operator2_t op, void *op_data)
 {
-    H5VL_object_t *           vol_obj = NULL; /* Object for loc_id */
+    H5VL_object_t            *vol_obj = NULL; /* Object for loc_id */
     H5VL_loc_params_t         loc_params;     /* Location parameters for object access */
     H5VL_attr_specific_args_t vol_cb_args;    /* Arguments to VOL callback */
     herr_t                    ret_value;      /* Return value */
@@ -1980,7 +1980,7 @@ herr_t
 H5Aiterate_by_name(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_iter_order_t order,
                    hsize_t *idx /*in,out */, H5A_operator2_t op, void *op_data, hid_t lapl_id)
 {
-    H5VL_object_t *           vol_obj = NULL;      /* Object for loc_id */
+    H5VL_object_t            *vol_obj = NULL;      /* Object for loc_id */
     H5VL_loc_params_t         loc_params;          /* Location parameters for object access */
     H5VL_attr_specific_args_t vol_cb_args;         /* Arguments to VOL callback */
     herr_t                    ret_value = SUCCEED; /* Return value */
@@ -2046,7 +2046,7 @@ done:
 herr_t
 H5Adelete(hid_t loc_id, const char *name)
 {
-    H5VL_object_t *           vol_obj = NULL;      /* Object for loc_id */
+    H5VL_object_t            *vol_obj = NULL;      /* Object for loc_id */
     H5VL_loc_params_t         loc_params;          /* Location parameters for object access */
     H5VL_attr_specific_args_t vol_cb_args;         /* Arguments to VOL callback */
     herr_t                    ret_value = SUCCEED; /* Return value */
@@ -2105,7 +2105,7 @@ done:
 herr_t
 H5Adelete_by_name(hid_t loc_id, const char *obj_name, const char *attr_name, hid_t lapl_id)
 {
-    H5VL_object_t *           vol_obj = NULL;      /* Object for loc_id */
+    H5VL_object_t            *vol_obj = NULL;      /* Object for loc_id */
     H5VL_loc_params_t         loc_params;          /* Location parameters for object access */
     H5VL_attr_specific_args_t vol_cb_args;         /* Arguments to VOL callback */
     herr_t                    ret_value = SUCCEED; /* Return value */
@@ -2175,7 +2175,7 @@ herr_t
 H5Adelete_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
                  hid_t lapl_id)
 {
-    H5VL_object_t *           vol_obj = NULL;      /* Object for loc_id */
+    H5VL_object_t            *vol_obj = NULL;      /* Object for loc_id */
     H5VL_loc_params_t         loc_params;          /* Location parameters for object access */
     H5VL_attr_specific_args_t vol_cb_args;         /* Arguments to VOL callback */
     herr_t                    ret_value = SUCCEED; /* Return value */
@@ -2267,9 +2267,9 @@ herr_t
 H5Aclose_async(const char *app_file, const char *app_func, unsigned app_line, hid_t attr_id, hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
-    H5VL_t *       connector = NULL;            /* VOL connector */
-    void *         token     = NULL;            /* Request token for async operation        */
-    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    H5VL_t        *connector = NULL;            /* VOL connector */
+    void          *token     = NULL;            /* Request token for async operation        */
+    void         **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
     herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -2365,7 +2365,7 @@ static herr_t
 H5A__exists_api_common(hid_t obj_id, const char *attr_name, hbool_t *attr_exists, void **token_ptr,
                        H5VL_object_t **_vol_obj_ptr)
 {
-    H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
+    H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
     H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
@@ -2441,8 +2441,8 @@ H5Aexists_async(const char *app_file, const char *app_func, unsigned app_line, h
                 const char *attr_name, hbool_t *attr_exists, hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
-    void *         token     = NULL;            /* Request token for async operation        */
-    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    void          *token     = NULL;            /* Request token for async operation        */
+    void         **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
     herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -2481,7 +2481,7 @@ H5A__exists_by_name_api_common(hid_t loc_id, const char *obj_name, const char *a
                                hbool_t *attr_exists, hid_t lapl_id, void **token_ptr,
                                H5VL_object_t **_vol_obj_ptr)
 {
-    H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
+    H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
     H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
@@ -2558,8 +2558,8 @@ H5Aexists_by_name_async(const char *app_file, const char *app_func, unsigned app
                         hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
-    void *         token     = NULL;            /* Request token for async operation        */
-    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    void          *token     = NULL;            /* Request token for async operation        */
+    void         **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
     herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)

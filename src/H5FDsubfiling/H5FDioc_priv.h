@@ -400,7 +400,7 @@ typedef struct _client_io_args {
     int64_t     context_id; /* The context id provided for the read or write */
     int64_t     offset;     /* The file offset for the IO operation          */
     int64_t     elements;   /* How many bytes                                */
-    void *      data;       /* A pointer to the (contiguous) data segment    */
+    void       *data;       /* A pointer to the (contiguous) data segment    */
     MPI_Request io_req;     /* An MPI request to allow the code to loop while */
                             /* making progress on multiple IOs               */
 } io_args_t;

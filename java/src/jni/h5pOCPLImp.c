@@ -141,7 +141,7 @@ JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5Pget_1attr_1phase_1change(JNIEnv *env, jclass clss, jlong ocpl_id, jintArray attributes)
 {
     jboolean isCopy;
-    jint *   theArray = NULL;
+    jint    *theArray = NULL;
     herr_t   retVal   = FAIL;
 
     UNUSED(clss);

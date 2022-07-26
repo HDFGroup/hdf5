@@ -1171,7 +1171,7 @@ test_cmp_scalename(hid_t fid, hid_t did, const char *name, const char *scalename
     herr_t  ret_value = FAIL;
     hid_t   dsid      = -1;
     ssize_t name_len;
-    char *  name_out = NULL;
+    char   *name_out = NULL;
 
     if ((dsid = H5Dopen2(fid, name, H5P_DEFAULT)) >= 0) {
         if (H5DSis_attached(did, dsid, idx) == 1) {
@@ -1204,7 +1204,7 @@ test_detachscales(void)
     int     rank1  = 1;
     int     rank3  = 3;
     hsize_t dims[] = {1, 2, 3}; /*some bogus numbers, not important for the test*/
-    int *   buf    = NULL;
+    int    *buf    = NULL;
     char    dname[16];
     int     i;
 
@@ -2358,8 +2358,8 @@ test_simple(void)
     int          s22_wbuf[DIM2_SIZE] = {5, 10, 50, 300};
     char         dim0_label[16];
     char         dim1_label[16];
-    char *       dim0_labeld;
-    char *       dim1_labeld;
+    char        *dim0_labeld;
+    char        *dim1_labeld;
     char         dim0_labels[3];
     char         dim1_labels[3];
     ssize_t      dim0_label_size;
@@ -2368,7 +2368,7 @@ test_simple(void)
     int          scale_idx;
     int          nscales;
     ssize_t      name_len;
-    char *       name_out = NULL;
+    char        *name_out = NULL;
     char         snames[3];
     int          i, j;
 
@@ -3602,10 +3602,10 @@ read_scale(hid_t dset, unsigned dim, hid_t scale_id, void *visitor_data)
     hid_t    tid  = -1; /* file type ID */
     hid_t    mtid = -1; /* memory type ID */
     hssize_t nelmts;    /* number of data elements */
-    char *   buf = NULL; /* data buffer */
+    char    *buf = NULL; /* data buffer */
     size_t   size;
     int      i;
-    char *   data = (char *)visitor_data;
+    char    *data = (char *)visitor_data;
 
     /* unused */
     (void)dset;
@@ -4608,8 +4608,8 @@ test_types(void)
     hsize_t        s2_dim[1]            = {DIM2_SIZE};                             /* size of DS 2 dataset */
     float          s1_float[DIM1_SIZE]  = {10, 20, 30};                            /* data of DS 1 dataset */
     unsigned short s2_ushort[DIM2_SIZE] = {10, 20, 30, 40};                        /* data of DS 2 dataset */
-    const char *   s1_str               = "ABC";
-    const char *   s2_str               = "ABCD";
+    const char    *s1_str               = "ABC";
+    const char    *s2_str               = "ABCD";
 
     HDprintf("Testing scales with several datatypes\n");
 
@@ -4781,9 +4781,9 @@ test_data(void)
     hid_t   dsid = -1;     /* DS dataset ID */
     hid_t   dcpl;          /* dataset creation property list */
     hid_t   sid;           /* dataspace ID */
-    float * vals   = NULL; /* array to hold data values */
-    float * latbuf = NULL; /* array to hold the latitude values */
-    float * lonbuf = NULL; /* array to hold the longitude values */
+    float  *vals   = NULL; /* array to hold data values */
+    float  *latbuf = NULL; /* array to hold the latitude values */
+    float  *lonbuf = NULL; /* array to hold the longitude values */
     hsize_t dims[2];       /* array to hold dimensions */
     hsize_t latdims[1];    /* array to hold dimensions */
     hsize_t londims[1];    /* array to hold dimensions */
@@ -4953,7 +4953,7 @@ read_data(const char *fname, int ndims, hsize_t *dims, float **buf)
     unsigned    j;
     char        str[20];
     size_t      nelms;
-    FILE *      f;
+    FILE       *f;
     float       val;
     const char *data_file = H5_get_srcdir_filename(fname);
 

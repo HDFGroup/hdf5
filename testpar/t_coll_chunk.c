@@ -591,8 +591,8 @@ coll_chunktest(const char *filename, int chunk_factor, int select_factor, int ap
     hid_t acc_plist, xfer_plist, crp_plist;
 
     hsize_t dims[RANK], chunk_dims[RANK];
-    int *   data_array1  = NULL;
-    int *   data_origin1 = NULL;
+    int    *data_array1  = NULL;
+    int    *data_origin1 = NULL;
 
     hsize_t start[RANK], count[RANK], stride[RANK], block[RANK];
 

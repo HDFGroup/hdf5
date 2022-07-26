@@ -164,7 +164,7 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
     unsigned           last_entry_to_flush;
     unsigned           total_entries_to_clear     = 0;
     unsigned           total_entries_to_flush     = 0;
-    unsigned *         candidate_assignment_table = NULL;
+    unsigned          *candidate_assignment_table = NULL;
     unsigned           entries_to_flush[H5C_RING_NTYPES];
     unsigned           entries_to_clear[H5C_RING_NTYPES];
     haddr_t            addr;
@@ -673,7 +673,7 @@ done:
 herr_t
 H5C_mark_entries_as_clean(H5F_t *f, unsigned ce_array_len, haddr_t *ce_array_ptr)
 {
-    H5C_t *  cache_ptr;
+    H5C_t   *cache_ptr;
     unsigned entries_cleared;
     unsigned pinned_entries_cleared;
     hbool_t  progress;
@@ -945,12 +945,12 @@ done:
 static herr_t
 H5C__collective_write(H5F_t *f)
 {
-    H5AC_t *         cache_ptr;
+    H5AC_t          *cache_ptr;
     H5FD_mpio_xfer_t orig_xfer_mode = H5FD_MPIO_COLLECTIVE;
-    const void **    bufs           = NULL;
-    H5FD_mem_t *     types          = NULL;
-    haddr_t *        addrs          = NULL;
-    size_t *         sizes          = NULL;
+    const void     **bufs           = NULL;
+    H5FD_mem_t      *types          = NULL;
+    haddr_t         *addrs          = NULL;
+    size_t          *sizes          = NULL;
     uint32_t         count32;
     size_t           count;
     herr_t           ret_value = SUCCEED;
@@ -976,9 +976,9 @@ H5C__collective_write(H5F_t *f)
     H5_CHECKED_ASSIGN(count32, uint32_t, count, size_t);
 
     if (count > 0) {
-        H5SL_node_t *      node;
+        H5SL_node_t       *node;
         H5C_cache_entry_t *entry_ptr;
-        void *             base_buf;
+        void              *base_buf;
         int                i;
 
         if (NULL == (addrs = H5MM_malloc(count * sizeof(*addrs))))
@@ -1099,7 +1099,7 @@ H5C__flush_candidate_entries(H5F_t *f, unsigned entries_to_flush[H5C_RING_NTYPES
     uint32_t slist_len        = 0;
 #endif /* H5C_DO_SANITY_CHECKS */
     H5C_ring_t ring;
-    H5C_t *    cache_ptr;
+    H5C_t     *cache_ptr;
     herr_t     ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
@@ -1206,7 +1206,7 @@ done:
 static herr_t
 H5C__flush_candidates_in_ring(H5F_t *f, H5C_ring_t ring, unsigned entries_to_flush, unsigned entries_to_clear)
 {
-    H5C_t *  cache_ptr;
+    H5C_t   *cache_ptr;
     hbool_t  progress;
     hbool_t  restart_scan    = FALSE;
     unsigned entries_flushed = 0;

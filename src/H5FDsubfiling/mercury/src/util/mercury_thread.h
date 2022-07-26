@@ -25,7 +25,7 @@ typedef DWORD_PTR hg_cpu_set_t;
 #include <pthread.h>
 typedef pthread_t hg_thread_t;
 typedef void *(*hg_thread_func_t)(void *);
-typedef void *        hg_thread_ret_t;
+typedef void         *hg_thread_ret_t;
 #define HG_THREAD_RETURN_TYPE hg_thread_ret_t
 typedef pthread_key_t hg_thread_key_t;
 #ifdef __APPLE__

@@ -61,7 +61,7 @@ main(void)
     hid_t       string_type;
     hid_t       file_id;
     hsize_t     chunk_size = 10;
-    int *       fill_data  = NULL;
+    int        *fill_data  = NULL;
     int         compress   = 0;
     int         i;
 

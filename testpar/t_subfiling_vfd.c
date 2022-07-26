@@ -68,7 +68,7 @@ static hid_t
 create_subfiling_ioc_fapl(void)
 {
     H5FD_subfiling_config_t *subfiling_conf = NULL;
-    H5FD_ioc_config_t *      ioc_conf       = NULL;
+    H5FD_ioc_config_t       *ioc_conf       = NULL;
     hid_t                    ioc_fapl       = H5I_INVALID_HID;
     hid_t                    ret_value      = H5I_INVALID_HID;
 
@@ -141,7 +141,7 @@ static void
 test_create_and_close(void)
 {
     H5FD_subfiling_config_t subfiling_config;
-    const char *            test_filenames[2];
+    const char             *test_filenames[2];
     hid_t                   file_id = H5I_INVALID_HID;
     hid_t                   fapl_id = H5I_INVALID_HID;
 
