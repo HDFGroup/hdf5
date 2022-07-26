@@ -963,10 +963,10 @@ H5T__ref_disk_write(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf,
                     H5R_type_t H5_ATTR_UNUSED src_type, H5VL_object_t *dst_file, void *dst_buf,
                     size_t H5_ATTR_NDEBUG_UNUSED dst_size, void *bg_buf)
 {
-    const uint8_t *p             = (const uint8_t *)src_buf;
-    uint8_t *      q             = (uint8_t *)dst_buf;
-    uint8_t *      p_bg          = (uint8_t *)bg_buf;
-    herr_t         ret_value     = SUCCEED;
+    const uint8_t *p         = (const uint8_t *)src_buf;
+    uint8_t *      q         = (uint8_t *)dst_buf;
+    uint8_t *      p_bg      = (uint8_t *)bg_buf;
+    herr_t         ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
     H5T_REF_LOG_DEBUG("");

@@ -57,8 +57,9 @@
 #define H5_MULTI_DIAG_DO_PRAGMA(x)  _Pragma(#x)
 #define H5_MULTI_DIAG_PRAGMA(x)     H5_MULTI_DIAG_DO_PRAGMA(GCC diagnostic x)
 
-#define H5_MULTI_DIAG_OFF(x) H5_MULTI_DIAG_PRAGMA(push) H5_MULTI_DIAG_PRAGMA(ignored H5_MULTI_DIAG_JOINSTR("-W", x))
-#define H5_MULTI_DIAG_ON(x)  H5_MULTI_DIAG_PRAGMA(pop)
+#define H5_MULTI_DIAG_OFF(x)                                                                                 \
+    H5_MULTI_DIAG_PRAGMA(push) H5_MULTI_DIAG_PRAGMA(ignored H5_MULTI_DIAG_JOINSTR("-W", x))
+#define H5_MULTI_DIAG_ON(x) H5_MULTI_DIAG_PRAGMA(pop)
 
 /* Macros for enabling/disabling particular GCC / clang warnings.
  * These macros should be used for warnings supported by both gcc and clang.
