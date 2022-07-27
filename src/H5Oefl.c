@@ -26,13 +26,13 @@
 #include "H5Opkg.h"      /* Object headers			*/
 
 /* PRIVATE PROTOTYPES */
-static void * H5O__efl_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags, size_t p_size,
+static void  *H5O__efl_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags, size_t p_size,
                               const uint8_t *p);
 static herr_t H5O__efl_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
-static void * H5O__efl_copy(const void *_mesg, void *_dest);
+static void  *H5O__efl_copy(const void *_mesg, void *_dest);
 static size_t H5O__efl_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
 static herr_t H5O__efl_reset(void *_mesg);
-static void * H5O__efl_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst, hbool_t *recompute_size,
+static void  *H5O__efl_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst, hbool_t *recompute_size,
                                  unsigned *mesg_flags, H5O_copy_t *cpy_info, void *udata);
 static herr_t H5O__efl_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent, int fwidth);
 
@@ -86,12 +86,12 @@ static void *
 H5O__efl_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
                 unsigned H5_ATTR_UNUSED *ioflags, size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
 {
-    H5O_efl_t * mesg = NULL;
+    H5O_efl_t  *mesg = NULL;
     int         version;
     const char *s = NULL;
-    H5HL_t *    heap;
+    H5HL_t     *heap;
     size_t      u;                /* Local index variable */
-    void *      ret_value = NULL; /* Return value */
+    void       *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -251,10 +251,10 @@ static void *
 H5O__efl_copy(const void *_mesg, void *_dest)
 {
     const H5O_efl_t *mesg = (const H5O_efl_t *)_mesg;
-    H5O_efl_t *      dest = (H5O_efl_t *)_dest;
+    H5O_efl_t       *dest = (H5O_efl_t *)_dest;
     size_t           u;                      /* Local index variable */
     hbool_t          slot_allocated = FALSE; /* Flag to indicate that dynamic allocation has begun */
-    void *           ret_value      = NULL;  /* Return value */
+    void            *ret_value      = NULL;  /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -435,9 +435,9 @@ H5O__efl_copy_file(H5F_t H5_ATTR_UNUSED *file_src, void *mesg_src, H5F_t *file_d
 {
     H5O_efl_t *efl_src = (H5O_efl_t *)mesg_src;
     H5O_efl_t *efl_dst = NULL;
-    H5HL_t *   heap    = NULL; /* Pointer to local heap for EFL file names */
+    H5HL_t    *heap    = NULL; /* Pointer to local heap for EFL file names */
     size_t     idx, size, name_offset, heap_size;
-    void *     ret_value = NULL; /* Return value */
+    void      *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_STATIC_TAG(H5AC__COPIED_TAG)
 

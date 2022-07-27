@@ -68,7 +68,7 @@ static size_t
 H5Z__filter_deflate(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], size_t nbytes,
                     size_t *buf_size, void **buf)
 {
-    void * outbuf = NULL; /* Pointer to new buffer */
+    void  *outbuf = NULL; /* Pointer to new buffer */
     int    status;        /* Status from zlib operation */
     size_t ret_value = 0; /* Return value */
 
@@ -157,7 +157,7 @@ H5Z__filter_deflate(unsigned flags, size_t cd_nelmts, const unsigned cd_values[]
          * must allocate a separate buffer for the result.
          */
         const Bytef *z_src = (const Bytef *)(*buf);
-        Bytef *      z_dst; /*destination buffer		*/
+        Bytef       *z_dst; /*destination buffer		*/
         uLongf       z_dst_nbytes = (uLongf)H5Z_DEFLATE_SIZE_ADJUST(nbytes);
         uLong        z_src_nbytes = (uLong)nbytes;
         int          aggression; /* Compression aggression setting */

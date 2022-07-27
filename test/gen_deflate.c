@@ -51,7 +51,7 @@ main(void)
     hsize_t dims[SPACE_RANK]       = {SPACE_DIM1, SPACE_DIM2};
     hsize_t chunk_dims[SPACE_RANK] = {CHUNK_DIM1, CHUNK_DIM2};
     size_t  i, j;        /* Local index variables */
-    int *   data = NULL; /* Dataset data */
+    int    *data = NULL; /* Dataset data */
 
     /* Initialize the data */
     /* (Try for something easily compressible) */

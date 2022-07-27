@@ -817,7 +817,7 @@ test_derived_flt(void)
     size_t         spos, epos, esize, mpos, msize, size;
     size_t         src_size, dst_size;
     unsigned char *buf = NULL, *saved_buf = NULL;
-    int *          aligned = NULL;
+    int           *aligned = NULL;
     int            endian; /*endianness            */
     size_t         nelmts          = NTESTELEM;
     unsigned int   fails_this_test = 0;
@@ -1589,21 +1589,21 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
     size_t             fails_this_test;      /*fails for this test    */
     char               str[256];             /*hello string        */
     dtype_t            src_type, dst_type;   /*data types        */
-    const char *       src_type_name = NULL; /*source type name    */
-    const char *       dst_type_name = NULL; /*destination type name    */
+    const char        *src_type_name = NULL; /*source type name    */
+    const char        *dst_type_name = NULL; /*destination type name    */
     int                endian;               /*machine endianness    */
     size_t             src_size, dst_size;   /*type sizes        */
-    unsigned char *    buf   = NULL;         /*buffer for conversion    */
-    unsigned char *    saved = NULL;         /*original values    */
+    unsigned char     *buf   = NULL;         /*buffer for conversion    */
+    unsigned char     *saved = NULL;         /*original values    */
     size_t             j, k;                 /*counters        */
-    unsigned char *    hw = NULL;            /*hardware conv result    */
+    unsigned char     *hw = NULL;            /*hardware conv result    */
     unsigned char      src_bits[32];         /*src value in LE order    */
     unsigned char      dst_bits[32];         /*dest value in LE order*/
     size_t             src_nbits;            /*source length in bits    */
     size_t             dst_nbits;            /*dst length in bits    */
     H5T_sign_t         src_sign;             /*source sign type      */
     H5T_sign_t         dst_sign;             /*dst sign type         */
-    void *             aligned = NULL;       /*aligned temp buffer    */
+    void              *aligned = NULL;       /*aligned temp buffer    */
     signed char        hw_char;
     unsigned char      hw_uchar;
     short              hw_short;
@@ -2814,13 +2814,13 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
     const size_t   max_fails       = 8;  /*max number of failures*/
     size_t         fails_all_tests = 0;  /*number of failures    */
     size_t         fails_this_test;      /*fails for this test    */
-    const char *   src_type_name = NULL; /*source type name    */
-    const char *   dst_type_name = NULL; /*destination type name    */
+    const char    *src_type_name = NULL; /*source type name    */
+    const char    *dst_type_name = NULL; /*destination type name    */
     size_t         src_size, dst_size;   /*type sizes        */
     unsigned char *buf   = NULL;         /*buffer for conversion    */
     unsigned char *saved = NULL;         /*original values    */
     char           str[256];             /*hello string        */
-    void *         aligned = NULL;       /*aligned buffer    */
+    void          *aligned = NULL;       /*aligned buffer    */
     float          hw_f;                 /*hardware-converted     */
     double         hw_d;                 /*hardware-converted    */
 #if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
@@ -3415,7 +3415,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
     hid_t                  dxpl_id;        /*dataset transfer property list*/
     int                    fill_value = 9; /*fill value for conversion exception*/
     H5T_conv_except_func_t op;             /*returned callback function for conversion exception*/
-    void *                 user_data;      /*returned pointer to user data passed in to the callback*/
+    void                  *user_data;      /*returned pointer to user data passed in to the callback*/
     hbool_t                except_set      = FALSE; /*whether user's exception handling is set*/
     size_t                 nelmts          = 0;     /*num values per test    */
     const size_t           max_fails       = 40;    /*max number of failures*/
@@ -3424,20 +3424,20 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
     char                   str[256];                /*hello string        */
     dtype_t                src_type;                /*data types        */
     dtype_t                dst_type;                /*data types        */
-    const char *           src_type_name = NULL;    /*source type name    */
-    const char *           dst_type_name = NULL;    /*destination type name    */
+    const char            *src_type_name = NULL;    /*source type name    */
+    const char            *dst_type_name = NULL;    /*destination type name    */
     int                    sendian;                 /*source endianness    */
     int                    dendian;                 /*destination endianness    */
     size_t                 src_size, dst_size;      /*type sizes        */
-    unsigned char *        buf   = NULL;            /*buffer for conversion    */
-    unsigned char *        saved = NULL;            /*original values    */
+    unsigned char         *buf   = NULL;            /*buffer for conversion    */
+    unsigned char         *saved = NULL;            /*original values    */
     size_t                 j, k;                    /*counters        */
-    unsigned char *        hw = NULL;               /*hardware conv result    */
+    unsigned char         *hw = NULL;               /*hardware conv result    */
     unsigned char          src_bits[32];            /*src value in LE order    */
     unsigned char          dst_bits[32];            /*dest value in LE order*/
     size_t                 src_nbits;               /*source length in bits    */
     size_t                 dst_nbits;               /*dst length in bits    */
-    void *                 aligned    = NULL;       /*aligned temp buffer    */
+    void                  *aligned    = NULL;       /*aligned temp buffer    */
     float                  hw_float   = 0;
     double                 hw_double  = 0;
     long double            hw_ldouble = 0;

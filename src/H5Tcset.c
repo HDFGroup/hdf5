@@ -42,7 +42,7 @@
 H5T_cset_t
 H5Tget_cset(hid_t type_id)
 {
-    H5T_t *    dt;
+    H5T_t     *dt;
     H5T_cset_t ret_value;
 
     FUNC_ENTER_API(H5T_CSET_ERROR)

@@ -73,12 +73,12 @@ int facc_type       = FACC_MPIO; /*Test file access type */
 int dxfer_coll_type = DXFER_COLLECTIVE_IO;
 
 H5E_auto2_t old_func;        /* previous error handler */
-void *      old_client_data; /* previous error handler arg.*/
+void       *old_client_data; /* previous error handler arg.*/
 
 #define NFILENAME    3
 #define PARATESTFILE filenames[0]
 const char *FILENAME[NFILENAME] = {"ParaTest", "Hugefile", NULL};
-char *      filenames[NFILENAME];
+char       *filenames[NFILENAME];
 hid_t       fapl; /* file access property list */
 MPI_Comm    test_comm = MPI_COMM_WORLD;
 
@@ -554,7 +554,7 @@ MpioTest2G(MPI_Comm comm)
     hid_t  file_id, dset_id; /* file and dataset identifiers */
     hid_t  plist_id;         /* property list identifier */
     hid_t  filespace;        /* file and memory dataspace identifiers */
-    int *  data;             /* pointer to data buffer to write */
+    int   *data;             /* pointer to data buffer to write */
     size_t tot_size_bytes;
     hid_t  dcpl_id;
     hid_t  memorydataspace;
@@ -714,7 +714,7 @@ dataset_writeInd(void)
         1,
     }; /* dataset dim sizes */
     hsize_t     data_size;
-    DATATYPE *  data_array1 = NULL; /* data buffer */
+    DATATYPE   *data_array1 = NULL; /* data buffer */
     const char *filename;
 
     hsize_t start[MAX_RANK]; /* for hyperslab setting */
@@ -854,8 +854,8 @@ dataset_readInd(void)
     hid_t       file_dataspace;      /* File dataspace ID */
     hid_t       mem_dataspace;       /* memory dataspace ID */
     hid_t       dataset1, dataset2;  /* Dataset ID */
-    DATATYPE *  data_array1  = NULL; /* data buffer */
-    DATATYPE *  data_origin1 = NULL; /* expected data buffer */
+    DATATYPE   *data_array1  = NULL; /* data buffer */
+    DATATYPE   *data_origin1 = NULL; /* expected data buffer */
     const char *filename;
 
     hsize_t start[MAX_RANK];                   /* for hyperslab setting */
@@ -983,7 +983,7 @@ dataset_writeAll(void)
     hsize_t dims[MAX_RANK] = {
         1,
     };                              /* dataset dim sizes */
-    DATATYPE *  data_array1 = NULL; /* data buffer */
+    DATATYPE   *data_array1 = NULL; /* data buffer */
     const char *filename;
 
     hsize_t start[MAX_RANK]; /* for hyperslab setting */
@@ -1499,8 +1499,8 @@ dataset_readAll(void)
     hid_t       file_dataspace;                                   /* File dataspace ID */
     hid_t       mem_dataspace;                                    /* memory dataspace ID */
     hid_t       dataset1, dataset2, dataset5, dataset6, dataset7; /* Dataset ID */
-    DATATYPE *  data_array1  = NULL;                              /* data buffer */
-    DATATYPE *  data_origin1 = NULL;                              /* expected data buffer */
+    DATATYPE   *data_array1  = NULL;                              /* data buffer */
+    DATATYPE   *data_origin1 = NULL;                              /* expected data buffer */
     const char *filename;
 
     hsize_t start[MAX_RANK];                   /* for hyperslab setting */
@@ -1857,7 +1857,7 @@ dataset_readAll(void)
     start[0] = (hsize_t)dim0 / (hsize_t)mpi_size * (hsize_t)mpi_rank;
     start[1] = 0;
     ret      = dataset_vrfy(start, count, stride, block, data_array1 + (dim0 / mpi_size * dim1 * mpi_rank),
-                       data_origin1);
+                            data_origin1);
     if (ret)
         nerrors++;
 
@@ -1916,7 +1916,7 @@ extend_writeInd(void)
     const char *filename;
     hsize_t     dims[MAX_RANK];                                      /* dataset dim sizes */
     hsize_t     max_dims[MAX_RANK] = {H5S_UNLIMITED, H5S_UNLIMITED}; /* dataset maximum dim sizes */
-    DATATYPE *  data_array1        = NULL;                           /* data buffer */
+    DATATYPE   *data_array1        = NULL;                           /* data buffer */
     hsize_t     chunk_dims[MAX_RANK];                                /* chunk sizes */
     hid_t       dataset_pl;                                          /* dataset create prop. list */
 
@@ -2294,9 +2294,9 @@ extend_readInd(void)
     hid_t       mem_dataspace;       /* memory dataspace ID */
     hid_t       dataset1, dataset2;  /* Dataset ID */
     hsize_t     dims[MAX_RANK];      /* dataset dim sizes */
-    DATATYPE *  data_array1  = NULL; /* data buffer */
-    DATATYPE *  data_array2  = NULL; /* data buffer */
-    DATATYPE *  data_origin1 = NULL; /* expected data buffer */
+    DATATYPE   *data_array1  = NULL; /* data buffer */
+    DATATYPE   *data_array2  = NULL; /* data buffer */
+    DATATYPE   *data_origin1 = NULL; /* expected data buffer */
     const char *filename;
 
     hsize_t start[MAX_RANK];                   /* for hyperslab setting */
@@ -2476,7 +2476,7 @@ extend_writeAll(void)
     const char *filename;
     hsize_t     dims[MAX_RANK];                                      /* dataset dim sizes */
     hsize_t     max_dims[MAX_RANK] = {H5S_UNLIMITED, H5S_UNLIMITED}; /* dataset maximum dim sizes */
-    DATATYPE *  data_array1        = NULL;                           /* data buffer */
+    DATATYPE   *data_array1        = NULL;                           /* data buffer */
     hsize_t     chunk_dims[MAX_RANK];                                /* chunk sizes */
     hid_t       dataset_pl;                                          /* dataset create prop. list */
 
@@ -2715,9 +2715,9 @@ extend_readAll(void)
     hid_t       dataset1, dataset2; /* Dataset ID */
     const char *filename;
     hsize_t     dims[MAX_RANK];      /* dataset dim sizes */
-    DATATYPE *  data_array1  = NULL; /* data buffer */
-    DATATYPE *  data_array2  = NULL; /* data buffer */
-    DATATYPE *  data_origin1 = NULL; /* expected data buffer */
+    DATATYPE   *data_array1  = NULL; /* data buffer */
+    DATATYPE   *data_array2  = NULL; /* data buffer */
+    DATATYPE   *data_origin1 = NULL; /* expected data buffer */
 
     hsize_t start[MAX_RANK];                   /* for hyperslab setting */
     hsize_t count[MAX_RANK], stride[MAX_RANK]; /* for hyperslab setting */
@@ -2912,8 +2912,8 @@ compress_readAll(void)
     unsigned    u;                             /* Local index variable */
     unsigned    chunk_opts;                    /* Chunk options */
     unsigned    disable_partial_chunk_filters; /* Whether filters are disabled on partial chunks */
-    DATATYPE *  data_read = NULL;              /* data buffer */
-    DATATYPE *  data_orig = NULL;              /* expected data buffer */
+    DATATYPE   *data_read = NULL;              /* data buffer */
+    DATATYPE   *data_orig = NULL;              /* expected data buffer */
     const char *filename;
     MPI_Comm    comm = test_comm;
     MPI_Info    info = MPI_INFO_NULL;
@@ -3095,8 +3095,8 @@ none_selection_chunk(void)
     hid_t       dataset1, dataset2; /* Dataset ID */
     const char *filename;
     hsize_t     dims[MAX_RANK];       /* dataset dim sizes */
-    DATATYPE *  data_origin = NULL;   /* data buffer */
-    DATATYPE *  data_array  = NULL;   /* data buffer */
+    DATATYPE   *data_origin = NULL;   /* data buffer */
+    DATATYPE   *data_array  = NULL;   /* data buffer */
     hsize_t     chunk_dims[MAX_RANK]; /* chunk sizes */
     hid_t       dataset_pl;           /* dataset create prop. list */
 
@@ -3353,8 +3353,8 @@ test_actual_io_mode(int selection_mode)
     H5D_mpio_actual_io_mode_t        actual_io_mode_write           = H5D_MPIO_NO_COLLECTIVE;
     H5D_mpio_actual_io_mode_t        actual_io_mode_read            = H5D_MPIO_NO_COLLECTIVE;
     H5D_mpio_actual_io_mode_t        actual_io_mode_expected        = H5D_MPIO_NO_COLLECTIVE;
-    const char *                     filename;
-    const char *                     test_name;
+    const char                      *filename;
+    const char                      *test_name;
     hbool_t                          direct_multi_chunk_io;
     hbool_t                          multi_chunk_io;
     hbool_t                          is_chunked;
@@ -3362,7 +3362,7 @@ test_actual_io_mode(int selection_mode)
     int                              mpi_size = -1;
     int                              mpi_rank = -1;
     int                              length;
-    int *                            buffer;
+    int                             *buffer;
     int                              i;
     MPI_Comm                         mpi_comm   = MPI_COMM_NULL;
     MPI_Info                         mpi_info   = MPI_INFO_NULL;
@@ -3875,7 +3875,7 @@ test_no_collective_cause_mode(int selection_mode)
     int         mpi_size       = -1;
     int         mpi_rank       = -1;
     int         length;
-    int *       buffer;
+    int        *buffer;
     int         i;
     MPI_Comm    mpi_comm;
     MPI_Info    mpi_info;
@@ -4185,8 +4185,8 @@ dataset_atomicity(void)
     hid_t       sid;              /* Dataspace ID */
     hid_t       dataset1;         /* Dataset IDs */
     hsize_t     dims[MAX_RANK];   /* dataset dim sizes */
-    int *       write_buf = NULL; /* data buffer */
-    int *       read_buf  = NULL; /* data buffer */
+    int        *write_buf = NULL; /* data buffer */
+    int        *read_buf  = NULL; /* data buffer */
     int         buf_size;
     hid_t       dataset2;
     hid_t       file_dataspace; /* File dataspace ID */

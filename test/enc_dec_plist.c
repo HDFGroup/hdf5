@@ -27,7 +27,7 @@ test_encode_decode(hid_t orig_pl, H5F_libver_t low, H5F_libver_t high, hbool_t s
 {
     hid_t  pl        = (-1); /* Decoded property list */
     hid_t  fapl      = -1;   /* File access property list */
-    void * temp_buf  = NULL; /* Pointer to encoding buffer */
+    void  *temp_buf  = NULL; /* Pointer to encoding buffer */
     size_t temp_size = 0;    /* Size of encoding buffer */
     herr_t ret;              /* Return value */
 
@@ -148,7 +148,7 @@ main(void)
     double       w0     = 0.5;
     unsigned     max_compact;
     unsigned     min_dense;
-    const char * c_to_f = "x+32";
+    const char  *c_to_f = "x+32";
     H5F_libver_t low, high; /* Low and high bounds */
 
     H5AC_cache_config_t my_cache_config = {H5AC__CURR_CACHE_CONFIG_VERSION,

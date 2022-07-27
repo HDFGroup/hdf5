@@ -116,7 +116,7 @@ static void
 mybzero(void *dest, size_t size)
 {
     size_t i = 0;
-    char * s = NULL;
+    char  *s = NULL;
     HDassert(dest != NULL);
     s = (char *)dest;
     for (i = 0; i < size; i++) {
@@ -1898,7 +1898,7 @@ test_basic_dataset_write(void)
     hid_t                       dspace_id = H5I_INVALID_HID;
     hid_t                       dtype_id  = H5T_NATIVE_INT;
     hsize_t                     dims[2]   = {DATABUFFER_SIZE, DATABUFFER_SIZE};
-    int *                       buf       = NULL;
+    int                        *buf       = NULL;
     int                         i         = 0;
     int                         j         = 0;
 
@@ -2430,7 +2430,7 @@ test_concurrent_access(void)
     hid_t   dspace_id = H5I_INVALID_HID;
     hid_t   dtype_id  = H5T_NATIVE_INT;
     hsize_t dims[2]   = {DATABUFFER_SIZE, DATABUFFER_SIZE};
-    int *   buf       = NULL;
+    int    *buf       = NULL;
     int     i         = 0;
     int     j         = 0;
 

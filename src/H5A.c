@@ -260,8 +260,8 @@ H5A_term_package(void)
 hid_t
 H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id, hid_t acpl_id, hid_t aapl_id)
 {
-    void *            attr    = NULL; /* Attribute created            */
-    H5VL_object_t *   vol_obj = NULL; /* Object of loc_id             */
+    void             *attr    = NULL; /* Attribute created            */
+    H5VL_object_t    *vol_obj = NULL; /* Object of loc_id             */
     H5VL_loc_params_t loc_params;
     hid_t             ret_value = H5I_INVALID_HID; /* Return value                 */
 
@@ -344,8 +344,8 @@ hid_t
 H5Acreate_by_name(hid_t loc_id, const char *obj_name, const char *attr_name, hid_t type_id, hid_t space_id,
                   hid_t acpl_id, hid_t aapl_id, hid_t lapl_id)
 {
-    void *            attr    = NULL; /* attr object from VOL connector */
-    H5VL_object_t *   vol_obj = NULL; /* object of loc_id */
+    void             *attr    = NULL; /* attr object from VOL connector */
+    H5VL_object_t    *vol_obj = NULL; /* object of loc_id */
     H5VL_loc_params_t loc_params;
     hid_t             ret_value = H5I_INVALID_HID; /* Return value */
 
@@ -420,8 +420,8 @@ done:
 hid_t
 H5Aopen(hid_t loc_id, const char *attr_name, hid_t aapl_id)
 {
-    void *            attr    = NULL; /* attr object from VOL connector */
-    H5VL_object_t *   vol_obj = NULL; /* object of loc_id */
+    void             *attr    = NULL; /* attr object from VOL connector */
+    H5VL_object_t    *vol_obj = NULL; /* object of loc_id */
     H5VL_loc_params_t loc_params;
     hid_t             ret_value = H5I_INVALID_HID;
 
@@ -490,8 +490,8 @@ done:
 hid_t
 H5Aopen_by_name(hid_t loc_id, const char *obj_name, const char *attr_name, hid_t aapl_id, hid_t lapl_id)
 {
-    void *            attr    = NULL; /* attr object from VOL connector */
-    H5VL_object_t *   vol_obj = NULL; /* object of loc_id */
+    void             *attr    = NULL; /* attr object from VOL connector */
+    H5VL_object_t    *vol_obj = NULL; /* object of loc_id */
     H5VL_loc_params_t loc_params;
     hid_t             ret_value = H5I_INVALID_HID;
 
@@ -568,8 +568,8 @@ hid_t
 H5Aopen_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
                hid_t aapl_id, hid_t lapl_id)
 {
-    void *            attr    = NULL; /* Attribute opened */
-    H5VL_object_t *   vol_obj = NULL; /* object of loc_id */
+    void             *attr    = NULL; /* Attribute opened */
+    H5VL_object_t    *vol_obj = NULL; /* object of loc_id */
     H5VL_loc_params_t loc_params;
     hid_t             ret_value = H5I_INVALID_HID; /* Return value */
 
@@ -851,7 +851,7 @@ done:
 ssize_t
 H5Aget_name(hid_t attr_id, size_t buf_size, char *buf /*out*/)
 {
-    H5VL_object_t *   vol_obj = NULL; /* Attribute object for ID */
+    H5VL_object_t    *vol_obj = NULL; /* Attribute object for ID */
     H5VL_loc_params_t loc_params;
     ssize_t           ret_value = -1;
 
@@ -898,7 +898,7 @@ ssize_t
 H5Aget_name_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
                    char *name /*out*/, size_t size, hid_t lapl_id)
 {
-    H5VL_object_t *   vol_obj;
+    H5VL_object_t    *vol_obj;
     H5VL_loc_params_t loc_params;
     ssize_t           ret_value; /* Return value */
 
@@ -997,7 +997,7 @@ done:
 herr_t
 H5Aget_info(hid_t attr_id, H5A_info_t *ainfo /*out*/)
 {
-    H5VL_object_t *   vol_obj;
+    H5VL_object_t    *vol_obj;
     H5VL_loc_params_t loc_params;
     herr_t            ret_value = SUCCEED; /* Return value */
 
@@ -1039,7 +1039,7 @@ herr_t
 H5Aget_info_by_name(hid_t loc_id, const char *obj_name, const char *attr_name, H5A_info_t *ainfo /*out*/,
                     hid_t lapl_id)
 {
-    H5VL_object_t *   vol_obj;
+    H5VL_object_t    *vol_obj;
     H5VL_loc_params_t loc_params;
     herr_t            ret_value = SUCCEED; /* Return value */
 
@@ -1096,7 +1096,7 @@ herr_t
 H5Aget_info_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
                    H5A_info_t *ainfo /*out*/, hid_t lapl_id)
 {
-    H5VL_object_t *   vol_obj;
+    H5VL_object_t    *vol_obj;
     H5VL_loc_params_t loc_params;
     herr_t            ret_value = SUCCEED; /* Return value */
 
@@ -1175,7 +1175,7 @@ H5Arename(hid_t loc_id, const char *old_name, const char *new_name)
 
     /* Avoid thrashing things if the names are the same */
     if (HDstrcmp(old_name, new_name)) {
-        H5VL_object_t *   vol_obj;
+        H5VL_object_t    *vol_obj;
         H5VL_loc_params_t loc_params;
 
         loc_params.type     = H5VL_OBJECT_BY_SELF;
@@ -1232,7 +1232,7 @@ H5Arename_by_name(hid_t loc_id, const char *obj_name, const char *old_attr_name,
 
     /* Avoid thrashing things if the names are the same */
     if (HDstrcmp(old_attr_name, new_attr_name)) {
-        H5VL_object_t *   vol_obj;
+        H5VL_object_t    *vol_obj;
         H5VL_loc_params_t loc_params;
 
         /* Verify access property list and set up collective metadata if appropriate */
@@ -1303,7 +1303,7 @@ herr_t
 H5Aiterate2(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx /*in_out */,
             H5A_operator2_t op, void *op_data)
 {
-    H5VL_object_t *   vol_obj = NULL; /* Object for loc_id */
+    H5VL_object_t    *vol_obj = NULL; /* Object for loc_id */
     H5VL_loc_params_t loc_params;
     herr_t            ret_value; /* Return value */
 
@@ -1382,7 +1382,7 @@ herr_t
 H5Aiterate_by_name(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_iter_order_t order,
                    hsize_t *idx /*in_out */, H5A_operator2_t op, void *op_data, hid_t lapl_id)
 {
-    H5VL_object_t *   vol_obj = NULL; /* Object location */
+    H5VL_object_t    *vol_obj = NULL; /* Object location */
     H5VL_loc_params_t loc_params;
     herr_t            ret_value = SUCCEED; /* Return value */
 
@@ -1439,7 +1439,7 @@ done:
 herr_t
 H5Adelete(hid_t loc_id, const char *name)
 {
-    H5VL_object_t *   vol_obj = NULL;
+    H5VL_object_t    *vol_obj = NULL;
     H5VL_loc_params_t loc_params;
     herr_t            ret_value = SUCCEED; /* Return value */
 
@@ -1494,7 +1494,7 @@ done:
 herr_t
 H5Adelete_by_name(hid_t loc_id, const char *obj_name, const char *attr_name, hid_t lapl_id)
 {
-    H5VL_object_t *   vol_obj;
+    H5VL_object_t    *vol_obj;
     H5VL_loc_params_t loc_params;
     herr_t            ret_value = SUCCEED; /* Return value */
 
@@ -1560,7 +1560,7 @@ herr_t
 H5Adelete_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
                  hid_t lapl_id)
 {
-    H5VL_object_t *   vol_obj;
+    H5VL_object_t    *vol_obj;
     H5VL_loc_params_t loc_params;
     herr_t            ret_value = SUCCEED; /* Return value */
 
@@ -1650,7 +1650,7 @@ done:
 htri_t
 H5Aexists(hid_t obj_id, const char *attr_name)
 {
-    H5VL_object_t *   vol_obj;
+    H5VL_object_t    *vol_obj;
     H5VL_loc_params_t loc_params;
     htri_t            ret_value; /* Return value */
 
@@ -1695,7 +1695,7 @@ done:
 htri_t
 H5Aexists_by_name(hid_t loc_id, const char *obj_name, const char *attr_name, hid_t lapl_id)
 {
-    H5VL_object_t *   vol_obj;
+    H5VL_object_t    *vol_obj;
     H5VL_loc_params_t loc_params;
     htri_t            ret_value; /* Return value */
 

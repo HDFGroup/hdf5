@@ -57,7 +57,7 @@ H5TS_mutex_simple_t error_mutex_g;
 /* Prototypes */
 static herr_t error_callback(hid_t, void *);
 static herr_t walk_error_callback(unsigned, const H5E_error2_t *, void *);
-static void * tts_error_thread(void *);
+static void  *tts_error_thread(void *);
 
 void
 tts_error(void)
@@ -172,7 +172,7 @@ tts_error_thread(void H5_ATTR_UNUSED *arg)
     hid_t       dataset   = H5I_INVALID_HID;
     hsize_t     dimsf[1]; /* dataset dimensions */
     H5E_auto2_t old_error_cb;
-    void *      old_error_client_data;
+    void       *old_error_client_data;
     int         value;
     herr_t      status;
 

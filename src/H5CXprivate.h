@@ -38,7 +38,7 @@ typedef struct H5CX_state_t {
     hid_t                 dxpl_id;            /* DXPL for operation */
     hid_t                 lapl_id;            /* LAPL for operation */
     hid_t                 lcpl_id;            /* LCPL for operation */
-    void *                vol_wrap_ctx;       /* VOL connector's "wrap context" for creating IDs */
+    void                 *vol_wrap_ctx;       /* VOL connector's "wrap context" for creating IDs */
     H5VL_connector_prop_t vol_connector_prop; /* VOL connector property */
 
 #ifdef H5_HAVE_PARALLEL

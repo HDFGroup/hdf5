@@ -700,8 +700,8 @@ done:
 hid_t
 H5VLget_file_type(void *file_obj, hid_t connector_id, hid_t dtype_id)
 {
-    H5T_t *        dtype;               /* unatomized type         */
-    H5T_t *        file_type    = NULL; /* copied file type        */
+    H5T_t         *dtype;               /* unatomized type         */
+    H5T_t         *file_type    = NULL; /* copied file type        */
     hid_t          file_type_id = -1;   /* copied file type id     */
     H5VL_object_t *file_vol_obj = NULL; /* VOL object for file     */
     hid_t          ret_value    = -1;   /* Return value            */

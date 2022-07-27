@@ -108,9 +108,9 @@ H5FL_BLK_DEFINE(fa_native_elmt);
 static H5FA_t *
 H5FA__new(H5F_t *f, haddr_t fa_addr, hbool_t from_open, void *ctx_udata)
 {
-    H5FA_t *    fa        = NULL; /* Pointer to new fixed array */
+    H5FA_t     *fa        = NULL; /* Pointer to new fixed array */
     H5FA_hdr_t *hdr       = NULL; /* The fixed array header information */
-    H5FA_t *    ret_value = NULL;
+    H5FA_t     *ret_value = NULL;
 
     FUNC_ENTER_STATIC
 
@@ -316,8 +316,8 @@ H5FA_get_addr(const H5FA_t *fa, haddr_t *addr)
 herr_t
 H5FA_set(const H5FA_t *fa, hsize_t idx, const void *elmt)
 {
-    H5FA_hdr_t *      hdr       = fa->hdr;            /* Header for fixed array */
-    H5FA_dblock_t *   dblock    = NULL;               /* Pointer to fixed array Data block */
+    H5FA_hdr_t       *hdr       = fa->hdr;            /* Header for fixed array */
+    H5FA_dblock_t    *dblock    = NULL;               /* Pointer to fixed array Data block */
     H5FA_dblk_page_t *dblk_page = NULL;               /* Pointer to fixed array Data block page */
     unsigned dblock_cache_flags = H5AC__NO_FLAGS_SET; /* Flags to unprotecting fixed array Data block */
     unsigned dblk_page_cache_flags =
@@ -431,8 +431,8 @@ done:
 herr_t
 H5FA_get(const H5FA_t *fa, hsize_t idx, void *elmt)
 {
-    H5FA_hdr_t *      hdr       = fa->hdr; /* Header for FA */
-    H5FA_dblock_t *   dblock    = NULL;    /* Pointer to data block for FA */
+    H5FA_hdr_t       *hdr       = fa->hdr; /* Header for FA */
+    H5FA_dblock_t    *dblock    = NULL;    /* Pointer to data block for FA */
     H5FA_dblk_page_t *dblk_page = NULL;    /* Pointer to data block page for FA */
     herr_t            ret_value = SUCCEED;
 

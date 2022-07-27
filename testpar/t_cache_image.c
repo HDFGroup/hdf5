@@ -143,8 +143,8 @@ construct_test_file(int test_file_index)
     char        filename[512];
     hbool_t     show_progress = FALSE;
     hid_t       file_id       = -1;
-    H5F_t *     file_ptr      = NULL;
-    H5C_t *     cache_ptr     = NULL;
+    H5F_t      *file_ptr      = NULL;
+    H5C_t      *cache_ptr     = NULL;
     int         cp            = 0;
     int         min_dset      = 0;
     int         max_dset      = 0;
@@ -846,7 +846,7 @@ open_hdf5_file(const hbool_t create_file, const hbool_t mdci_sbem_expected, cons
                const hbool_t all_coll_metadata_ops, const hbool_t coll_metadata_write,
                const int md_write_strat)
 {
-    const char *              fcn_name      = "open_hdf5_file()";
+    const char               *fcn_name      = "open_hdf5_file()";
     hbool_t                   show_progress = FALSE;
     hbool_t                   verbose       = FALSE;
     int                       cp            = 0;
@@ -854,8 +854,8 @@ open_hdf5_file(const hbool_t create_file, const hbool_t mdci_sbem_expected, cons
     hid_t                     fcpl_id       = -1;
     hid_t                     file_id       = -1;
     herr_t                    result;
-    H5F_t *                   file_ptr  = NULL;
-    H5C_t *                   cache_ptr = NULL;
+    H5F_t                    *file_ptr  = NULL;
+    H5C_t                    *cache_ptr = NULL;
     H5C_cache_image_ctl_t     image_ctl;
     H5AC_cache_image_config_t cache_image_config = {H5AC__CURR_CACHE_IMAGE_CONFIG_VERSION, TRUE, FALSE,
                                                     H5AC__CACHE_IMAGE__ENTRY_AGEOUT__NONE};
@@ -2153,8 +2153,8 @@ serial_insert_cache_image(int file_name_idx, int mpi_size)
     int         i;
     int         num_dsets  = PAR_NUM_DSETS;
     hid_t       file_id    = -1;
-    H5F_t *     file_ptr   = NULL;
-    H5C_t *     cache_ptr  = NULL;
+    H5F_t      *file_ptr   = NULL;
+    H5C_t      *cache_ptr  = NULL;
     MPI_Comm    dummy_comm = MPI_COMM_WORLD;
     MPI_Info    dummy_info = MPI_INFO_NULL;
 
@@ -2912,8 +2912,8 @@ verify_cache_image_RO(int file_name_id, int md_write_strat, int mpi_rank)
     char        filename[512];
     hbool_t     show_progress = FALSE;
     hid_t       file_id       = -1;
-    H5F_t *     file_ptr      = NULL;
-    H5C_t *     cache_ptr     = NULL;
+    H5F_t      *file_ptr      = NULL;
+    H5C_t      *cache_ptr     = NULL;
     int         cp            = 0;
 
     pass = TRUE;
@@ -3179,8 +3179,8 @@ verify_cache_image_RW(int file_name_id, int md_write_strat, int mpi_rank)
     char        filename[512];
     hbool_t     show_progress = FALSE;
     hid_t       file_id       = -1;
-    H5F_t *     file_ptr      = NULL;
-    H5C_t *     cache_ptr     = NULL;
+    H5F_t      *file_ptr      = NULL;
+    H5C_t      *cache_ptr     = NULL;
     int         cp            = 0;
 
     pass = TRUE;
@@ -3439,12 +3439,12 @@ verify_cache_image_RW(int file_name_id, int md_write_strat, int mpi_rank)
 static hbool_t
 smoke_check_1(MPI_Comm mpi_comm, MPI_Info mpi_info, int mpi_rank, int mpi_size)
 {
-    const char *   fcn_name = "smoke_check_1()";
+    const char    *fcn_name = "smoke_check_1()";
     char           filename[512];
     hbool_t        show_progress = FALSE;
     hid_t          file_id       = -1;
-    H5F_t *        file_ptr      = NULL;
-    H5C_t *        cache_ptr     = NULL;
+    H5F_t         *file_ptr      = NULL;
+    H5C_t         *cache_ptr     = NULL;
     int            cp            = 0;
     int            i;
     int            num_dsets       = PAR_NUM_DSETS;

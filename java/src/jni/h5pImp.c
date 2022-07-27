@@ -232,7 +232,7 @@ Java_hdf_hdf5lib_H5_H5Pregister2(JNIEnv *env, jclass clss, jlong cls_id, jstring
     const char *cstr = NULL;
     jboolean    isCopy;
     herr_t      status     = FAIL;
-    jbyte *     propValBuf = NULL;
+    jbyte      *propValBuf = NULL;
 
     UNUSED(clss);
 
@@ -279,7 +279,7 @@ Java_hdf_hdf5lib_H5_H5Pregister2_1nocb(JNIEnv *env, jclass clss, jlong cls_id, j
     const char *cstr = NULL;
     jboolean    isCopy;
     herr_t      status     = FAIL;
-    jbyte *     propValBuf = NULL;
+    jbyte      *propValBuf = NULL;
 
     UNUSED(clss);
 
@@ -316,7 +316,7 @@ Java_hdf_hdf5lib_H5_H5Pinsert2(JNIEnv *env, jclass clss, jlong cls_id, jstring n
     const char *cstr = NULL;
     jboolean    isCopy;
     herr_t      status     = FAIL;
-    jbyte *     propValBuf = NULL;
+    jbyte      *propValBuf = NULL;
 
     UNUSED(clss);
 
@@ -360,7 +360,7 @@ Java_hdf_hdf5lib_H5_H5Pinsert2_1nocb(JNIEnv *env, jclass clss, jlong cls_id, jst
     const char *cstr = NULL;
     jboolean    isCopy;
     herr_t      status     = FAIL;
-    jbyte *     propValBuf = NULL;
+    jbyte      *propValBuf = NULL;
 
     UNUSED(clss);
 
@@ -497,7 +497,7 @@ done:
 JNIEXPORT jstring JNICALL
 Java_hdf_hdf5lib_H5_H5Pget_1class_1name(JNIEnv *env, jclass clss, jlong plid)
 {
-    char *  c_str = NULL;
+    char   *c_str = NULL;
     jstring j_str = NULL;
 
     UNUSED(clss);
@@ -615,7 +615,7 @@ Java_hdf_hdf5lib_H5_H5Piterate(JNIEnv *env, jclass clss, jlong prop_id, jintArra
 {
     cb_wrapper wrapper = {callback_op, op_data};
     jboolean   isCopy;
-    jint *     theArray = NULL;
+    jint      *theArray = NULL;
     herr_t     status   = FAIL;
 
     UNUSED(clss);
@@ -754,7 +754,7 @@ static herr_t
 H5P_cls_create_cb(hid_t prop_id, void *create_data)
 {
     jmethodID mid;
-    JNIEnv *  cbenv = NULL;
+    JNIEnv   *cbenv = NULL;
     jclass    cls;
     jint      status = -1;
 
@@ -784,7 +784,7 @@ static herr_t
 H5P_cls_copy_cb(hid_t new_prop_id, hid_t old_prop_id, void *copy_data)
 {
     jmethodID mid;
-    JNIEnv *  cbenv = NULL;
+    JNIEnv   *cbenv = NULL;
     jclass    cls;
     jint      status = -1;
 
@@ -814,7 +814,7 @@ static herr_t
 H5P_cls_close_cb(hid_t prop_id, void *close_data)
 {
     jmethodID mid;
-    JNIEnv *  cbenv = NULL;
+    JNIEnv   *cbenv = NULL;
     jclass    cls;
     jint      status = -1;
 
@@ -846,7 +846,7 @@ H5P_prp_create_cb(const char *name, size_t size, void *value)
     jmethodID mid;
     jstring   str;
     jclass    cls;
-    JNIEnv *  cbenv  = NULL;
+    JNIEnv   *cbenv  = NULL;
     jint      status = -1;
 
     if (JVMPTR->AttachCurrentThread(JVMPAR, (void **)&cbenv, NULL) < 0) {
@@ -879,7 +879,7 @@ H5P_prp_set_cb(hid_t prop_id, const char *name, size_t size, void *value)
     jmethodID mid;
     jstring   str;
     jclass    cls;
-    JNIEnv *  cbenv  = NULL;
+    JNIEnv   *cbenv  = NULL;
     jint      status = -1;
 
     if (JVMPTR->AttachCurrentThread(JVMPAR, (void **)&cbenv, NULL) < 0) {
@@ -912,7 +912,7 @@ H5P_prp_get_cb(hid_t prop_id, const char *name, size_t size, void *value)
     jmethodID mid;
     jstring   str;
     jclass    cls;
-    JNIEnv *  cbenv  = NULL;
+    JNIEnv   *cbenv  = NULL;
     jint      status = -1;
 
     if (JVMPTR->AttachCurrentThread(JVMPAR, (void **)&cbenv, NULL) < 0) {
@@ -945,7 +945,7 @@ H5P_prp_delete_cb(hid_t prop_id, const char *name, size_t size, void *value)
     jmethodID mid;
     jstring   str;
     jclass    cls;
-    JNIEnv *  cbenv  = NULL;
+    JNIEnv   *cbenv  = NULL;
     jint      status = -1;
 
     if (JVMPTR->AttachCurrentThread(JVMPAR, (void **)&cbenv, NULL) < 0) {
@@ -978,7 +978,7 @@ H5P_prp_copy_cb(const char *name, size_t size, void *value)
     jmethodID mid;
     jstring   str;
     jclass    cls;
-    JNIEnv *  cbenv  = NULL;
+    JNIEnv   *cbenv  = NULL;
     jint      status = -1;
 
     if (JVMPTR->AttachCurrentThread(JVMPAR, (void **)&cbenv, NULL) < 0) {
@@ -1010,7 +1010,7 @@ H5P_prp_compare_cb(void *value1, void *value2, size_t size)
 {
     jmethodID mid;
     jclass    cls;
-    JNIEnv *  cbenv  = NULL;
+    JNIEnv   *cbenv  = NULL;
     jint      status = -1;
 
     if (JVMPTR->AttachCurrentThread(JVMPAR, (void **)&cbenv, NULL) < 0) {
@@ -1040,7 +1040,7 @@ H5P_prp_close_cb(const char *name, size_t size, void *value)
     jmethodID mid;
     jstring   str;
     jclass    cls;
-    JNIEnv *  cbenv  = NULL;
+    JNIEnv   *cbenv  = NULL;
     jint      status = -1;
 
     if (JVMPTR->AttachCurrentThread(JVMPAR, (void **)&cbenv, NULL) < 0) {
@@ -1075,8 +1075,8 @@ H5P_iterate_cb(hid_t prop_id, const char *name, void *cb_data)
     jobject     visit_callback = wrapper->visit_callback;
     jstring     str;
     jclass      cls;
-    JNIEnv *    cbenv   = NULL;
-    void *      op_data = (void *)wrapper->op_data;
+    JNIEnv     *cbenv   = NULL;
+    void       *op_data = (void *)wrapper->op_data;
     jint        status  = -1;
 
     if (JVMPTR->AttachCurrentThread(JVMPAR, (void **)&cbenv, NULL) < 0) {

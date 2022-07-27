@@ -266,7 +266,7 @@ hid_t
 H5FD_register(const void *_cls, size_t size, hbool_t app_ref)
 {
     const H5FD_class_t *cls   = (const H5FD_class_t *)_cls;
-    H5FD_class_t *      saved = NULL;
+    H5FD_class_t       *saved = NULL;
     H5FD_mem_t          type;
     hid_t               ret_value = H5I_INVALID_HID; /* Return value */
 
@@ -674,13 +674,13 @@ done:
 H5FD_t *
 H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
-    H5FD_class_t *         driver;           /* VFD for file */
-    H5FD_t *               file = NULL;      /* VFD file struct */
+    H5FD_class_t          *driver;           /* VFD for file */
+    H5FD_t                *file = NULL;      /* VFD file struct */
     H5FD_driver_prop_t     driver_prop;      /* Property for driver ID & info */
-    H5P_genplist_t *       plist;            /* Property list pointer */
+    H5P_genplist_t        *plist;            /* Property list pointer */
     unsigned long          driver_flags = 0; /* File-inspecific driver feature flags */
     H5FD_file_image_info_t file_image_info;  /* Initial file image */
-    H5FD_t *               ret_value = NULL; /* Return value */
+    H5FD_t                *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 

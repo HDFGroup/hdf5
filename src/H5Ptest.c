@@ -57,7 +57,7 @@ char *
 H5P__get_class_path_test(hid_t pclass_id)
 {
     H5P_genclass_t *pclass;           /* Property class to query */
-    char *          ret_value = NULL; /* Return value */
+    char           *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_PACKAGE
 

@@ -62,7 +62,7 @@ static size_t
 H5Z_filter_dynlibud(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values, size_t nbytes,
                     size_t *buf_size, void **buf)
 {
-    char * int_ptr  = (char *)*buf; /* Pointer to the data values */
+    char  *int_ptr  = (char *)*buf; /* Pointer to the data values */
     size_t buf_left = *buf_size;    /* Amount of data buffer left to process */
 
     /* Check for the correct number of parameters */

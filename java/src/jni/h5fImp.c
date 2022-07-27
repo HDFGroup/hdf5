@@ -119,7 +119,7 @@ Java_hdf_hdf5lib_H5_H5Fget_1name(JNIEnv *env, jclass clss, jlong file_id)
 {
     jstring str = NULL;
     ssize_t buf_size;
-    char *  namePtr = NULL;
+    char   *namePtr = NULL;
 
     UNUSED(clss);
 
@@ -416,8 +416,8 @@ Java_hdf_hdf5lib_H5_H5Fget_1obj_1ids(JNIEnv *env, jclass clss, jlong file_id, ji
     ssize_t  ret_val = -1;
     size_t   i;
     jsize    rank;
-    jlong *  obj_id_listP = NULL;
-    hid_t *  id_list      = NULL;
+    jlong   *obj_id_listP = NULL;
+    hid_t   *id_list      = NULL;
 
     UNUSED(clss);
 
@@ -517,7 +517,7 @@ Java_hdf_hdf5lib_H5_H5Fget_1mdc_1size(JNIEnv *env, jclass clss, jlong file_id, j
 {
     jboolean isCopy;
     size_t   max_size = 0, min_clean_size = 0, cur_size = 0;
-    jlong *  metadata_cache_ptr = NULL;
+    jlong   *metadata_cache_ptr = NULL;
     jsize    size               = 0;
     int      cur_num_entries    = -1;
 

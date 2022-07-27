@@ -63,7 +63,7 @@
 /* For region compatibility support */
 struct H5Tref_dsetreg {
     H5O_token_t token; /* Object token */
-    H5S_t *     space; /* Dataspace */
+    H5S_t      *space; /* Dataspace */
 };
 
 /********************/
@@ -405,9 +405,9 @@ static size_t
 H5T__ref_mem_getsize(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf,
                      size_t H5_ATTR_UNUSED src_size, H5VL_object_t *dst_file, hbool_t *dst_copy)
 {
-    H5VL_object_t *       vol_obj = NULL; /* VOL object for src ref's location */
+    H5VL_object_t        *vol_obj = NULL; /* VOL object for src ref's location */
     const H5R_ref_priv_t *src_ref = (const H5R_ref_priv_t *)src_buf;
-    char *                file_name_buf_dyn =
+    char                 *file_name_buf_dyn =
         NULL; /* Pointer to dynamically allocated buffer for file name, if static buffer is too small */
     unsigned flags     = 0; /* References flags */
     size_t   ret_value = 0; /* Return value */
@@ -503,11 +503,11 @@ static herr_t
 H5T__ref_mem_read(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf, size_t H5_ATTR_UNUSED src_size,
                   H5VL_object_t *dst_file, void *dst_buf, size_t dst_size)
 {
-    H5VL_object_t *       vol_obj; /* VOL object for src ref's location */
+    H5VL_object_t        *vol_obj; /* VOL object for src ref's location */
     const H5R_ref_priv_t *src_ref     = (const H5R_ref_priv_t *)src_buf;
     hbool_t               files_equal = TRUE; /* Whether src & dst references are in same file */
     char                  file_name_buf_static[256] = {'\0'}; /* File name */
-    char *                file_name_buf_dyn =
+    char                 *file_name_buf_dyn =
         NULL; /* Pointer to dynamically allocated buffer for file name, if static buffer is too small */
     ssize_t  file_name_len;       /* Size of file name buffer */
     unsigned flags     = 0;       /* References flags */
@@ -597,7 +597,7 @@ H5T__ref_mem_write(H5VL_object_t *src_file, const void *src_buf, size_t src_size
                    H5VL_object_t H5_ATTR_UNUSED *dst_file, void *dst_buf,
                    size_t H5_ATTR_NDEBUG_UNUSED dst_size, void H5_ATTR_UNUSED *bg_buf)
 {
-    H5F_t *         src_f   = NULL;
+    H5F_t          *src_f   = NULL;
     hid_t           file_id = H5I_INVALID_HID;
     H5R_ref_priv_t *dst_ref = (H5R_ref_priv_t *)dst_buf;
     H5R_ref_priv_t  tmp_ref; /* Temporary reference to decode into */
@@ -862,7 +862,7 @@ H5T__ref_disk_read(H5VL_object_t *src_file, const void *src_buf, size_t H5_ATTR_
                    H5VL_object_t H5_ATTR_UNUSED *dst_file, void *dst_buf, size_t dst_size)
 {
     const uint8_t *p         = (const uint8_t *)src_buf;
-    uint8_t *      q         = (uint8_t *)dst_buf;
+    uint8_t       *q         = (uint8_t *)dst_buf;
     size_t         blob_size = dst_size;
     herr_t         ret_value = SUCCEED;
 
@@ -907,9 +907,9 @@ H5T__ref_disk_write(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf,
                     size_t dst_size, void *bg_buf)
 {
     const uint8_t *p             = (const uint8_t *)src_buf;
-    uint8_t *      q             = (uint8_t *)dst_buf;
+    uint8_t       *q             = (uint8_t *)dst_buf;
     size_t         buf_size_left = dst_size;
-    uint8_t *      p_bg          = (uint8_t *)bg_buf;
+    uint8_t       *p_bg          = (uint8_t *)bg_buf;
     herr_t         ret_value     = SUCCEED;
 
     FUNC_ENTER_STATIC
@@ -966,7 +966,7 @@ done:
 static herr_t
 H5T__ref_obj_disk_isnull(const H5VL_object_t *src_file, const void *src_buf, hbool_t *isnull)
 {
-    H5F_t *        src_f;
+    H5F_t         *src_f;
     const uint8_t *p = (const uint8_t *)src_buf;
     haddr_t        addr;
     herr_t         ret_value = SUCCEED;
@@ -1118,7 +1118,7 @@ done:
 static herr_t
 H5T__ref_dsetreg_disk_isnull(const H5VL_object_t *src_file, const void *src_buf, hbool_t *isnull)
 {
-    H5F_t *        src_f;
+    H5F_t         *src_f;
     const uint8_t *p = (const uint8_t *)src_buf;
     haddr_t        addr;
     herr_t         ret_value = SUCCEED;
@@ -1185,7 +1185,7 @@ H5T__ref_dsetreg_disk_getsize(H5VL_object_t H5_ATTR_UNUSED *src_file, const void
 
 #ifndef NDEBUG
     {
-        H5F_t * src_f;
+        H5F_t  *src_f;
         hbool_t is_native = FALSE; /* Whether the src file is using the native VOL connector */
 
         /* Check if using native VOL connector */
@@ -1223,7 +1223,7 @@ H5T__ref_dsetreg_disk_read(H5VL_object_t *src_file, const void *src_buf, size_t 
                            H5VL_object_t H5_ATTR_UNUSED *dst_file, void *dst_buf,
                            size_t H5_ATTR_UNUSED dst_size)
 {
-    H5F_t *                src_f;
+    H5F_t                 *src_f;
     struct H5Tref_dsetreg *dst_reg   = (struct H5Tref_dsetreg *)dst_buf;
     herr_t                 ret_value = SUCCEED;
 

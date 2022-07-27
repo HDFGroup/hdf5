@@ -19,7 +19,7 @@
 #define PROGRAMNAME "h5dump"
 
 static const char *driver_name_g = NULL; /* The driver to open the file with. */
-const char *       outfname_g    = NULL;
+const char        *outfname_g    = NULL;
 static hbool_t     doxml_g       = FALSE;
 static hbool_t     useschema_g   = TRUE;
 static const char *xml_dtd_uri_g = NULL;
@@ -69,7 +69,7 @@ static void init_prefix(char **prfx, size_t prfx_len);
 /* a structure for handling the order command-line parameters come in */
 struct handler_t {
     void (*func)(hid_t, const char *, void *, int, const char *);
-    char *           obj;
+    char            *obj;
     struct subset_t *subset_info;
 };
 
@@ -80,7 +80,7 @@ struct handler_t {
  */
 /* The following initialization makes use of C language concatenating */
 /* "xxx" "yyy" into "xxxyyy". */
-static const char *        s_opts   = "a:b*c:d:ef:g:hik:l:m:n*o*pq:rs:t:uvw:xyz:A*BCD:E*F:G:HM:N:O*RS:VX:";
+static const char         *s_opts   = "a:b*c:d:ef:g:hik:l:m:n*o*pq:rs:t:uvw:xyz:A*BCD:E*F:G:HM:N:O*RS:VX:";
 static struct long_options l_opts[] = {{"attribute", require_arg, 'a'},
                                        {"binary", optional_arg, 'b'},
                                        {"count", require_arg, 'c'},
@@ -557,8 +557,8 @@ set_sort_order(const char *form)
 static void
 parse_hsize_list(const char *h_list, subset_d *d)
 {
-    hsize_t *    p_list;
-    const char * ptr;
+    hsize_t     *p_list;
+    const char  *ptr;
     unsigned int size_count = 0;
     unsigned int i          = 0;
     unsigned int last_digit = 0;
@@ -611,7 +611,7 @@ static struct subset_t *
 parse_subset_params(const char *dset)
 {
     struct subset_t *s = NULL;
-    char *           brace;
+    char            *brace;
 
     if (!dump_opts.disable_compact_subset && ((brace = HDstrrchr(dset, '[')) != NULL)) {
         *brace++ = '\0';
@@ -666,7 +666,7 @@ parse_mask_list(const char *h_list)
     int                slength_value;
     unsigned           length_value;
     unsigned long long temp_mask;
-    const char *       ptr = NULL;
+    const char        *ptr = NULL;
 
     /* sanity check */
     if (h_list) {
@@ -1309,7 +1309,7 @@ main(int argc, char *argv[])
     struct handler_t *hand = NULL;
     int               i;
     unsigned          u;
-    char *            fname = NULL;
+    char             *fname = NULL;
 
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);

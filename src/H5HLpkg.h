@@ -101,7 +101,7 @@ struct H5HL_t {
     H5HL_dblk_t *dblk;       /* The data block object for the heap                   */
     haddr_t      dblk_addr;  /* address of data block                                */
     size_t       dblk_size;  /* size of heap data block on disk and in mem           */
-    uint8_t *    dblk_image; /* The data block image                                 */
+    uint8_t     *dblk_image; /* The data block image                                 */
 };
 
 /* Struct for heap data block */

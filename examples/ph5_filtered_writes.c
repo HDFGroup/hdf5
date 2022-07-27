@@ -383,7 +383,7 @@ main(int argc, char **argv)
     hid_t    file_id    = H5I_INVALID_HID;
     hid_t    fapl_id    = H5I_INVALID_HID;
     hid_t    dxpl_id    = H5I_INVALID_HID;
-    char *   par_prefix = NULL;
+    char    *par_prefix = NULL;
     char     filename[PATH_MAX];
 
     MPI_Init(&argc, &argv);

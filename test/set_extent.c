@@ -178,7 +178,7 @@ main(void)
                 /* Set the "use the earliest version of the format" bounds for
                  * creating objects in the file */
                 if (H5Pset_libver_bounds(my_fapl, H5F_LIBVER_EARLIEST, H5F_LIBVER_LATEST) < 0)
-                TEST_ERROR
+                    TEST_ERROR
 
             /* Tests which use chunked datasets */
             if (!new_format || (new_format && contig_addr_vfd))
@@ -2242,7 +2242,7 @@ test_random_rank4(hid_t fapl, hid_t dcpl, hbool_t do_fillvalue, hbool_t disable_
     hsize_t       max_dims[4] = {10, 10, 10, 10}; /* Maximum dimensions */
     hsize_t       old_dims[4];                    /* Old dataset dimensions */
     hsize_t       min_unwritten_dims[4];          /* Minimum dimensions since last write */
-    hsize_t *     valid_dims = old_dims;          /* Dimensions of region still containing written data */
+    hsize_t      *valid_dims = old_dims;          /* Dimensions of region still containing written data */
     hsize_t       cdims[4];                       /* Chunk dimensions */
     const hsize_t mdims[4] = {10, 10, 10, 10};    /* Memory buffer dimensions */
     const hsize_t start[4] = {0, 0, 0, 0};        /* Start for hyperslabe operations on memory */
@@ -2291,8 +2291,9 @@ test_random_rank4(hid_t fapl, hid_t dcpl, hbool_t do_fillvalue, hbool_t disable_
     /* Generate initial dataset size, 1-10, unless using fixed array index or
      * scalar_iter is 0 */
     for (i = 0; i < 4; i++) {
-        dims[i] = (hsize_t)(
-            index_type != RANK4_INDEX_FARRAY ? (0 == scalar_iter ? 1 : ((HDrandom() % 10) + 1)) : 10);
+        dims[i] =
+            (hsize_t)(index_type != RANK4_INDEX_FARRAY ? (0 == scalar_iter ? 1 : ((HDrandom() % 10) + 1))
+                                                       : 10);
         dim_log->arr[0][i] = dims[i];
     } /* end for */
 
@@ -2462,7 +2463,7 @@ test_random_rank4_vl(hid_t fapl, hid_t dcpl, hbool_t do_fillvalue, hbool_t disab
     hsize_t       max_dims[4] = {10, 10, 10, 10}; /* Maximum dimensions */
     hsize_t       old_dims[4];                    /* Old dataset dimensions */
     hsize_t       min_unwritten_dims[4];          /* Minimum dimensions since last write */
-    hsize_t *     valid_dims = old_dims;          /* Dimensions of region still containing written data */
+    hsize_t      *valid_dims = old_dims;          /* Dimensions of region still containing written data */
     hsize_t       cdims[4];                       /* Chunk dimensions */
     const hsize_t mdims[4] = {10, 10, 10, 10};    /* Memory buffer dimensions */
     const hsize_t start[4] = {0, 0, 0, 0};        /* Start for hyperslab operations on memory */
@@ -2540,8 +2541,9 @@ test_random_rank4_vl(hid_t fapl, hid_t dcpl, hbool_t do_fillvalue, hbool_t disab
     /* Generate initial dataset size, 1-10, unless using fixed array index or
      * scalar_iter is 0 */
     for (i = 0; i < 4; i++) {
-        dims[i] = (hsize_t)(
-            index_type != RANK4_INDEX_FARRAY ? (0 == scalar_iter ? 1 : ((HDrandom() % 10) + 1)) : 10);
+        dims[i] =
+            (hsize_t)(index_type != RANK4_INDEX_FARRAY ? (0 == scalar_iter ? 1 : ((HDrandom() % 10) + 1))
+                                                       : 10);
         dim_log->arr[0][i] = dims[i];
     }
 

@@ -52,7 +52,7 @@
 typedef struct H5O_visit1_adapter_t {
     H5O_iterate1_t real_op;      /* Application callback to invoke */
     unsigned       fields;       /* Original fields passed to H5Ovisit */
-    void *         real_op_data; /* Application op_data */
+    void          *real_op_data; /* Application op_data */
 } H5O_visit1_adapter_t;
 
 /********************/
@@ -122,7 +122,7 @@ H5O__iterate1_adapter(hid_t obj_id, const char *name, const H5O_info2_t *oinfo2,
     H5O_info1_t           oinfo;                    /* Deprecated object info struct */
     unsigned              dm_fields;                /* Fields for data model query */
     unsigned              nat_fields;               /* Fields for native query */
-    H5VL_object_t *       vol_obj;                  /* Object of obj_id */
+    H5VL_object_t        *vol_obj;                  /* Object of obj_id */
     H5VL_loc_params_t     loc_params;               /* Location parameters for VOL callback */
     herr_t                ret_value = H5_ITER_CONT; /* Return value */
 
@@ -323,10 +323,10 @@ done:
 hid_t
 H5Oopen_by_addr(hid_t loc_id, haddr_t addr)
 {
-    H5VL_object_t *   vol_obj;                  /* Object of loc_id */
+    H5VL_object_t    *vol_obj;                  /* Object of loc_id */
     H5I_type_t        vol_obj_type = H5I_BADID; /* Object type of loc_id */
     H5I_type_t        opened_type;              /* Opened object type */
-    void *            opened_obj = NULL;        /* Opened object */
+    void             *opened_obj = NULL;        /* Opened object */
     H5VL_loc_params_t loc_params;               /* Location parameters */
     H5O_token_t       obj_token = {0};          /* Object token */
     hbool_t           is_native_vol_obj;
@@ -387,7 +387,7 @@ done:
 herr_t
 H5Oget_info1(hid_t loc_id, H5O_info1_t *oinfo)
 {
-    H5VL_object_t *   vol_obj = NULL; /* Object of loc_id */
+    H5VL_object_t    *vol_obj = NULL; /* Object of loc_id */
     H5VL_loc_params_t loc_params;
     herr_t            ret_value = SUCCEED; /* Return value */
 
@@ -427,7 +427,7 @@ done:
 herr_t
 H5Oget_info_by_name1(hid_t loc_id, const char *name, H5O_info1_t *oinfo, hid_t lapl_id)
 {
-    H5VL_object_t *   vol_obj = NULL; /* object of loc_id */
+    H5VL_object_t    *vol_obj = NULL; /* object of loc_id */
     H5VL_loc_params_t loc_params;
     herr_t            ret_value = SUCCEED; /* Return value */
 
@@ -482,7 +482,7 @@ herr_t
 H5Oget_info_by_idx1(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_iter_order_t order,
                     hsize_t n, H5O_info1_t *oinfo, hid_t lapl_id)
 {
-    H5VL_object_t *   vol_obj = NULL; /* object of loc_id */
+    H5VL_object_t    *vol_obj = NULL; /* object of loc_id */
     H5VL_loc_params_t loc_params;
     herr_t            ret_value = SUCCEED; /* Return value */
 
@@ -540,7 +540,7 @@ done:
 herr_t
 H5Oget_info2(hid_t loc_id, H5O_info1_t *oinfo, unsigned fields)
 {
-    H5VL_object_t *   vol_obj; /* Object of loc_id */
+    H5VL_object_t    *vol_obj; /* Object of loc_id */
     H5VL_loc_params_t loc_params;
     hbool_t           is_native_vol_obj;
     herr_t            ret_value = SUCCEED; /* Return value */
@@ -595,7 +595,7 @@ done:
 herr_t
 H5Oget_info_by_name2(hid_t loc_id, const char *name, H5O_info1_t *oinfo, unsigned fields, hid_t lapl_id)
 {
-    H5VL_object_t *   vol_obj; /* Object of loc_id */
+    H5VL_object_t    *vol_obj; /* Object of loc_id */
     H5VL_loc_params_t loc_params;
     hbool_t           is_native_vol_obj;
     herr_t            ret_value = SUCCEED; /* Return value */
@@ -663,7 +663,7 @@ herr_t
 H5Oget_info_by_idx2(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_iter_order_t order,
                     hsize_t n, H5O_info1_t *oinfo, unsigned fields, hid_t lapl_id)
 {
-    H5VL_object_t *   vol_obj; /* Object of loc_id */
+    H5VL_object_t    *vol_obj; /* Object of loc_id */
     H5VL_loc_params_t loc_params;
     hbool_t           is_native_vol_obj;
     herr_t            ret_value = SUCCEED; /* Return value */
@@ -750,7 +750,7 @@ done:
 herr_t
 H5Ovisit1(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order, H5O_iterate1_t op, void *op_data)
 {
-    H5VL_object_t *      vol_obj = NULL; /* Object of loc_id */
+    H5VL_object_t       *vol_obj = NULL; /* Object of loc_id */
     H5VL_loc_params_t    loc_params;
     H5O_visit1_adapter_t shim_data; /* Adapter for passing app callback & user data */
     herr_t               ret_value; /* Return value */
@@ -825,7 +825,7 @@ herr_t
 H5Ovisit_by_name1(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_iter_order_t order,
                   H5O_iterate1_t op, void *op_data, hid_t lapl_id)
 {
-    H5VL_object_t *      vol_obj = NULL; /* Object of loc_id */
+    H5VL_object_t       *vol_obj = NULL; /* Object of loc_id */
     H5VL_loc_params_t    loc_params;
     H5O_visit1_adapter_t shim_data; /* Adapter for passing app callback & user data */
     herr_t               ret_value; /* Return value */
@@ -913,7 +913,7 @@ herr_t
 H5Ovisit2(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order, H5O_iterate1_t op, void *op_data,
           unsigned fields)
 {
-    H5VL_object_t *      vol_obj; /* Object of loc_id */
+    H5VL_object_t       *vol_obj; /* Object of loc_id */
     H5VL_loc_params_t    loc_params;
     H5O_visit1_adapter_t shim_data; /* Adapter for passing app callback & user data */
     hbool_t              is_native_vol_obj;
@@ -1002,7 +1002,7 @@ herr_t
 H5Ovisit_by_name2(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_iter_order_t order,
                   H5O_iterate1_t op, void *op_data, unsigned fields, hid_t lapl_id)
 {
-    H5VL_object_t *      vol_obj; /* Object of loc_id */
+    H5VL_object_t       *vol_obj; /* Object of loc_id */
     H5VL_loc_params_t    loc_params;
     H5O_visit1_adapter_t shim_data; /* Adapter for passing app callback & user data */
     hbool_t              is_native_vol_obj;

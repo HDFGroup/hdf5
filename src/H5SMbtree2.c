@@ -40,7 +40,7 @@
 /********************/
 
 /* v2 B-tree callbacks */
-static void * H5SM__bt2_crt_context(void *udata);
+static void  *H5SM__bt2_crt_context(void *udata);
 static herr_t H5SM__bt2_dst_context(void *ctx);
 static herr_t H5SM__bt2_store(void *native, const void *udata);
 static herr_t H5SM__bt2_debug(FILE *stream, int indent, int fwidth, const void *record, const void *_udata);
@@ -86,9 +86,9 @@ H5FL_DEFINE_STATIC(H5SM_bt2_ctx_t);
 static void *
 H5SM__bt2_crt_context(void *_f)
 {
-    H5F_t *         f = (H5F_t *)_f;  /* User data for building callback context */
+    H5F_t          *f = (H5F_t *)_f;  /* User data for building callback context */
     H5SM_bt2_ctx_t *ctx;              /* Callback context structure */
-    void *          ret_value = NULL; /* Return value */
+    void           *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_STATIC
 

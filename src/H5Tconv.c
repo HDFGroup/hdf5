@@ -712,11 +712,11 @@
         {                                                                                                    \
             size_t elmtno;                    /*element number        */                                     \
             H5T_CONV_DECL_PREC(PREC)          /*declare precision variables, or not */                       \
-            void *        src_buf;            /*'raw' source buffer        */                                \
-            void *        dst_buf;            /*'raw' destination buffer    */                               \
-            ST *          src, *s;            /*source buffer            */                                  \
-            DT *          dst, *d;            /*destination buffer        */                                 \
-            H5T_t *       st, *dt;            /*datatype descriptors        */                               \
+            void         *src_buf;            /*'raw' source buffer        */                                \
+            void         *dst_buf;            /*'raw' destination buffer    */                               \
+            ST           *src, *s;            /*source buffer            */                                  \
+            DT           *dst, *d;            /*destination buffer        */                                 \
+            H5T_t        *st, *dt;            /*datatype descriptors        */                               \
             ST            src_aligned;        /*source aligned type        */                                \
             DT            dst_aligned;        /*destination aligned type    */                               \
             hbool_t       s_mv, d_mv;         /*move data to align it?    */                                 \
@@ -1038,10 +1038,10 @@ done:                                                                           
 
 /* Conversion data for H5T__conv_struct() */
 typedef struct H5T_conv_struct_t {
-    int *             src2dst;     /*mapping from src to dst member num */
-    hid_t *           src_memb_id; /*source member type ID's         */
-    hid_t *           dst_memb_id; /*destination member type ID's         */
-    H5T_path_t **     memb_path;   /*conversion path for each member    */
+    int              *src2dst;     /*mapping from src to dst member num */
+    hid_t            *src_memb_id; /*source member type ID's         */
+    hid_t            *dst_memb_id; /*destination member type ID's         */
+    H5T_path_t      **memb_path;   /*conversion path for each member    */
     H5T_subset_info_t subset_info; /*info related to compound subsets   */
     unsigned          src_nmembs;  /*needed by free function            */
 } H5T_conv_struct_t;
@@ -1050,7 +1050,7 @@ typedef struct H5T_conv_struct_t {
 typedef struct H5T_enum_struct_t {
     int      base;    /*lowest `in' value             */
     unsigned length;  /*num elements in arrays         */
-    int *    src2dst; /*map from src to dst index         */
+    int     *src2dst; /*map from src to dst index         */
 } H5T_enum_struct_t;
 
 /* Conversion data for the hardware conversion functions */
@@ -1157,8 +1157,8 @@ H5T__conv_order_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmt
                     size_t H5_ATTR_UNUSED bkg_stride, void *_buf, void H5_ATTR_UNUSED *background)
 {
     uint8_t *buf = (uint8_t *)_buf;
-    H5T_t *  src = NULL;
-    H5T_t *  dst = NULL;
+    H5T_t   *src = NULL;
+    H5T_t   *dst = NULL;
     size_t   i;
     herr_t   ret_value = SUCCEED; /* Return value */
 
@@ -1566,8 +1566,8 @@ H5T__conv_order(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, s
                 size_t H5_ATTR_UNUSED bkg_stride, void *_buf, void H5_ATTR_UNUSED *background)
 {
     uint8_t *buf = (uint8_t *)_buf;
-    H5T_t *  src = NULL;
-    H5T_t *  dst = NULL;
+    H5T_t   *src = NULL;
+    H5T_t   *dst = NULL;
     size_t   i;
     size_t   j, md;
     herr_t   ret_value = SUCCEED; /* Return value */
@@ -1661,17 +1661,17 @@ herr_t
 H5T__conv_b_b(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
               size_t H5_ATTR_UNUSED bkg_stride, void *_buf, void H5_ATTR_UNUSED *background)
 {
-    uint8_t *      buf = (uint8_t *)_buf;
-    H5T_t *        src = NULL, *dst = NULL; /*source and dest datatypes    */
+    uint8_t       *buf = (uint8_t *)_buf;
+    H5T_t         *src = NULL, *dst = NULL; /*source and dest datatypes    */
     ssize_t        direction;               /*direction of traversal    */
     size_t         elmtno;                  /*element number        */
     size_t         olap;                    /*num overlapping elements    */
     size_t         half_size;               /*1/2 of total size for swapping*/
-    uint8_t *      s, *sp, *d, *dp;         /*source and dest traversal ptrs*/
+    uint8_t       *s, *sp, *d, *dp;         /*source and dest traversal ptrs*/
     uint8_t        dbuf[256] = {0};         /*temp destination buffer    */
     size_t         msb_pad_offset;          /*offset for dest MSB padding    */
     size_t         i;
-    uint8_t *      src_rev   = NULL;         /*order-reversed source buffer  */
+    uint8_t       *src_rev   = NULL;         /*order-reversed source buffer  */
     H5T_conv_cb_t  cb_struct = {NULL, NULL}; /*conversion callback structure */
     H5T_conv_ret_t except_ret;               /*return of callback function   */
     hbool_t        reverse;                  /*if reverse the order of destination        */
@@ -1908,8 +1908,8 @@ done:
 static H5T_conv_struct_t *
 H5T__conv_struct_free(H5T_conv_struct_t *priv)
 {
-    int *    src2dst     = priv->src2dst;
-    hid_t *  src_memb_id = priv->src_memb_id, *dst_memb_id = priv->dst_memb_id;
+    int     *src2dst     = priv->src2dst;
+    hid_t   *src_memb_id = priv->src_memb_id, *dst_memb_id = priv->dst_memb_id;
     unsigned i;
 
     FUNC_ENTER_STATIC_NOERR
@@ -1982,7 +1982,7 @@ static herr_t
 H5T__conv_struct_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
 {
     H5T_conv_struct_t *priv    = (H5T_conv_struct_t *)(cdata->priv);
-    int *              src2dst = NULL;
+    int               *src2dst = NULL;
     unsigned           src_nmembs, dst_nmembs;
     unsigned           i, j;
     herr_t             ret_value = SUCCEED; /* Return value */
@@ -2201,14 +2201,14 @@ herr_t
 H5T__conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
                  size_t bkg_stride, void *_buf, void *_bkg)
 {
-    uint8_t *          buf  = (uint8_t *)_buf;  /*cast for pointer arithmetic    */
-    uint8_t *          bkg  = (uint8_t *)_bkg;  /*background pointer arithmetic    */
-    uint8_t *          xbuf = buf, *xbkg = bkg; /*temp pointers into buf and bkg*/
-    H5T_t *            src      = NULL;         /*source datatype        */
-    H5T_t *            dst      = NULL;         /*destination datatype        */
-    int *              src2dst  = NULL;         /*maps src member to dst member    */
-    H5T_cmemb_t *      src_memb = NULL;         /*source struct member descript.*/
-    H5T_cmemb_t *      dst_memb = NULL;         /*destination struct memb desc.    */
+    uint8_t           *buf  = (uint8_t *)_buf;  /*cast for pointer arithmetic    */
+    uint8_t           *bkg  = (uint8_t *)_bkg;  /*background pointer arithmetic    */
+    uint8_t           *xbuf = buf, *xbkg = bkg; /*temp pointers into buf and bkg*/
+    H5T_t             *src      = NULL;         /*source datatype        */
+    H5T_t             *dst      = NULL;         /*destination datatype        */
+    int               *src2dst  = NULL;         /*maps src member to dst member    */
+    H5T_cmemb_t       *src_memb = NULL;         /*source struct member descript.*/
+    H5T_cmemb_t       *dst_memb = NULL;         /*destination struct memb desc.    */
     size_t             offset;                  /*byte offset wrt struct    */
     ssize_t            src_delta;               /*source stride    */
     ssize_t            bkg_delta;               /*background stride    */
@@ -2428,15 +2428,15 @@ herr_t
 H5T__conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
                      size_t bkg_stride, void *_buf, void *_bkg)
 {
-    uint8_t *          buf      = (uint8_t *)_buf; /*cast for pointer arithmetic    */
-    uint8_t *          bkg      = (uint8_t *)_bkg; /*background pointer arithmetic    */
-    uint8_t *          xbuf     = NULL;            /*temporary pointer into `buf'    */
-    uint8_t *          xbkg     = NULL;            /*temporary pointer into `bkg'    */
-    H5T_t *            src      = NULL;            /*source datatype        */
-    H5T_t *            dst      = NULL;            /*destination datatype        */
-    int *              src2dst  = NULL;            /*maps src member to dst member    */
-    H5T_cmemb_t *      src_memb = NULL;            /*source struct member descript.*/
-    H5T_cmemb_t *      dst_memb = NULL;            /*destination struct memb desc.    */
+    uint8_t           *buf      = (uint8_t *)_buf; /*cast for pointer arithmetic    */
+    uint8_t           *bkg      = (uint8_t *)_bkg; /*background pointer arithmetic    */
+    uint8_t           *xbuf     = NULL;            /*temporary pointer into `buf'    */
+    uint8_t           *xbkg     = NULL;            /*temporary pointer into `bkg'    */
+    H5T_t             *src      = NULL;            /*source datatype        */
+    H5T_t             *dst      = NULL;            /*destination datatype        */
+    int               *src2dst  = NULL;            /*maps src member to dst member    */
+    H5T_cmemb_t       *src_memb = NULL;            /*source struct member descript.*/
+    H5T_cmemb_t       *dst_memb = NULL;            /*destination struct memb desc.    */
     size_t             offset;                     /*byte offset wrt struct    */
     size_t             elmtno;                     /*element counter        */
     size_t             copy_size;                  /*size of element for copying   */
@@ -2675,7 +2675,7 @@ H5T__conv_enum_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
     H5T_enum_struct_t *priv = NULL;         /*private conversion data    */
     int                n;                   /*src value cast as native int    */
     int                domain[2] = {0, 0};  /*min and max source values    */
-    int *              map       = NULL;    /*map from src value to dst idx    */
+    int               *map       = NULL;    /*map from src value to dst idx    */
     unsigned           length;              /*nelmts in map array        */
     unsigned           i, j;                /*counters            */
     herr_t             ret_value = SUCCEED; /* Return value */
@@ -2815,9 +2815,9 @@ herr_t
 H5T__conv_enum(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
                size_t H5_ATTR_UNUSED bkg_stride, void *_buf, void H5_ATTR_UNUSED *bkg)
 {
-    uint8_t *          buf = (uint8_t *)_buf;   /*cast for pointer arithmetic    */
-    H5T_t *            src = NULL, *dst = NULL; /*src and dst datatypes    */
-    uint8_t *          s = NULL, *d = NULL;     /*src and dst BUF pointers    */
+    uint8_t           *buf = (uint8_t *)_buf;   /*cast for pointer arithmetic    */
+    H5T_t             *src = NULL, *dst = NULL; /*src and dst datatypes    */
+    uint8_t           *s = NULL, *d = NULL;     /*src and dst BUF pointers    */
     ssize_t            src_delta, dst_delta;    /*conversion strides        */
     int                n;                       /*src value cast as native int    */
     H5T_enum_struct_t *priv = (H5T_enum_struct_t *)(cdata->priv);
@@ -3013,8 +3013,8 @@ H5T__conv_enum_numeric(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
                        size_t H5_ATTR_UNUSED buf_stride, size_t H5_ATTR_UNUSED bkg_stride, void *_buf,
                        void H5_ATTR_UNUSED *bkg)
 {
-    H5T_t *     src, *dst;           /*src and dst datatypes    */
-    H5T_t *     src_parent;          /*parent type for src           */
+    H5T_t      *src, *dst;           /*src and dst datatypes    */
+    H5T_t      *src_parent;          /*parent type for src           */
     hid_t       src_parent_id = -1;  /*ID for parent of the source   */
     H5T_path_t *tpath;               /* Conversion information       */
     herr_t      ret_value = SUCCEED; /* Return value                 */
@@ -3104,24 +3104,24 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
                size_t bkg_stride, void *buf, void *bkg)
 {
     H5T_vlen_alloc_info_t vl_alloc_info;              /* VL allocation info */
-    H5T_path_t *          tpath         = NULL;       /* Type conversion path             */
+    H5T_path_t           *tpath         = NULL;       /* Type conversion path             */
     hbool_t               noop_conv     = FALSE;      /* Flag to indicate a noop conversion */
     hbool_t               write_to_file = FALSE;      /* Flag to indicate writing to file */
     htri_t                parent_is_vlen;             /* Flag to indicate parent is vlen datatyp */
     size_t                bg_seq_len = 0;             /* The number of elements in the background sequence */
     hid_t                 tsrc_id = -1, tdst_id = -1; /*temporary type atoms         */
-    H5T_t *               src = NULL;                 /*source datatype             */
-    H5T_t *               dst = NULL;                 /*destination datatype             */
-    uint8_t *             s   = NULL;                 /*source buffer            */
-    uint8_t *             d   = NULL;                 /*destination buffer        */
-    uint8_t *             b   = NULL;                 /*background buffer        */
+    H5T_t                *src = NULL;                 /*source datatype             */
+    H5T_t                *dst = NULL;                 /*destination datatype             */
+    uint8_t              *s   = NULL;                 /*source buffer            */
+    uint8_t              *d   = NULL;                 /*destination buffer        */
+    uint8_t              *b   = NULL;                 /*background buffer        */
     ssize_t               s_stride, d_stride;         /*src and dst strides        */
     ssize_t               b_stride;                   /*bkg stride            */
     size_t                safe;                       /*how many elements are safe to process in each pass */
     size_t                src_base_size, dst_base_size; /*source & destination base size*/
-    void *                conv_buf      = NULL;         /*temporary conversion buffer          */
+    void                 *conv_buf      = NULL;         /*temporary conversion buffer          */
     size_t                conv_buf_size = 0;            /*size of conversion buffer in bytes */
-    void *                tmp_buf       = NULL;         /*temporary background buffer          */
+    void                 *tmp_buf       = NULL;         /*temporary background buffer          */
     size_t                tmp_buf_size  = 0;            /*size of temporary bkg buffer         */
     hbool_t               nested        = FALSE;        /*flag of nested VL case             */
     size_t                elmtno;                       /*element number counter         */
@@ -3477,14 +3477,14 @@ H5T__conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, s
 {
     H5T_path_t *tpath;                      /* Type conversion path             */
     hid_t       tsrc_id = -1, tdst_id = -1; /*temporary type atoms         */
-    H5T_t *     src = NULL;                 /*source datatype             */
-    H5T_t *     dst = NULL;                 /*destination datatype             */
-    uint8_t *   sp, *dp;                    /*source and dest traversal ptrs     */
+    H5T_t      *src = NULL;                 /*source datatype             */
+    H5T_t      *dst = NULL;                 /*destination datatype             */
+    uint8_t    *sp, *dp;                    /*source and dest traversal ptrs     */
     ssize_t     src_delta, dst_delta;       /*source & destination stride         */
     int         direction;                  /*direction of traversal         */
     size_t      elmtno;                     /*element number counter         */
     unsigned    u;                          /* local index variable */
-    void *      bkg_buf   = NULL;           /*temporary background buffer          */
+    void       *bkg_buf   = NULL;           /*temporary background buffer          */
     herr_t      ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -3625,15 +3625,15 @@ herr_t
 H5T__conv_ref(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
               size_t bkg_stride, void *buf, void *bkg)
 {
-    H5T_t *  src = NULL;           /* source datatype                      */
-    H5T_t *  dst = NULL;           /* destination datatype                 */
+    H5T_t   *src = NULL;           /* source datatype                      */
+    H5T_t   *dst = NULL;           /* destination datatype                 */
     uint8_t *s   = NULL;           /* source buffer                        */
     uint8_t *d   = NULL;           /* destination buffer                   */
     uint8_t *b   = NULL;           /* background buffer                    */
     ssize_t  s_stride, d_stride;   /* src and dst strides                  */
     ssize_t  b_stride;             /* bkg stride                           */
     size_t   safe;                 /* how many elements are safe to process in each pass */
-    void *   conv_buf      = NULL; /* temporary conversion buffer          */
+    void    *conv_buf      = NULL; /* temporary conversion buffer          */
     size_t   conv_buf_size = 0;    /* size of conversion buffer in bytes   */
     size_t   elmtno;               /* element number counter               */
     herr_t   ret_value = SUCCEED;  /* return value                         */
@@ -3835,15 +3835,15 @@ herr_t
 H5T__conv_i_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
               size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
 {
-    H5T_t *        src = NULL;           /*source datatype        */
-    H5T_t *        dst = NULL;           /*destination datatype        */
+    H5T_t         *src = NULL;           /*source datatype        */
+    H5T_t         *dst = NULL;           /*destination datatype        */
     ssize_t        src_delta, dst_delta; /*source & destination stride    */
     int            direction;            /*direction of traversal    */
     size_t         elmtno;               /*element number        */
     size_t         half_size;            /*half the type size        */
     size_t         olap;                 /*num overlapping elements    */
-    uint8_t *      s, *sp, *d, *dp;      /*source and dest traversal ptrs*/
-    uint8_t *      src_rev  = NULL;      /*order-reversed source buffer  */
+    uint8_t       *s, *sp, *d, *dp;      /*source and dest traversal ptrs*/
+    uint8_t       *src_rev  = NULL;      /*order-reversed source buffer  */
     uint8_t        dbuf[64] = {0};       /*temp destination buffer    */
     size_t         first;
     ssize_t        sfirst;                   /*a signed version of `first'    */
@@ -4274,8 +4274,8 @@ H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
               size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
 {
     /* Traversal-related variables */
-    H5T_t *      src_p;                /*source datatype        */
-    H5T_t *      dst_p;                /*destination datatype        */
+    H5T_t       *src_p;                /*source datatype        */
+    H5T_t       *dst_p;                /*destination datatype        */
     H5T_atomic_t src;                  /*atomic source info        */
     H5T_atomic_t dst;                  /*atomic destination info    */
     ssize_t      src_delta, dst_delta; /*source & destination stride    */
@@ -4285,8 +4285,8 @@ H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
     size_t       tsize;                /*type size for swapping bytes  */
     size_t       olap;                 /*num overlapping elements    */
     ssize_t      bitno = 0;            /*bit number            */
-    uint8_t *    s, *sp, *d, *dp;      /*source and dest traversal ptrs*/
-    uint8_t *    src_rev  = NULL;      /*order-reversed source buffer  */
+    uint8_t     *s, *sp, *d, *dp;      /*source and dest traversal ptrs*/
+    uint8_t     *src_rev  = NULL;      /*order-reversed source buffer  */
     uint8_t      dbuf[64] = {0};       /*temp destination buffer    */
     uint8_t      tmp1, tmp2;           /*temp variables for swapping bytes*/
 
@@ -4859,8 +4859,8 @@ herr_t
 H5T__conv_s_s(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
               size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
 {
-    H5T_t *  src = NULL;           /*source datatype        */
-    H5T_t *  dst = NULL;           /*destination datatype        */
+    H5T_t   *src = NULL;           /*source datatype        */
+    H5T_t   *dst = NULL;           /*destination datatype        */
     ssize_t  src_delta, dst_delta; /*source & destination stride    */
     int      direction;            /*direction of traversal    */
     size_t   elmtno;               /*element number        */
@@ -8383,8 +8383,8 @@ H5T__conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
               size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
 {
     /* Traversal-related variables */
-    H5T_t *      src_p;           /*source datatype        */
-    H5T_t *      dst_p;           /*destination datatype        */
+    H5T_t       *src_p;           /*source datatype        */
+    H5T_t       *dst_p;           /*destination datatype        */
     H5T_atomic_t src;             /*atomic source info        */
     H5T_atomic_t dst;             /*atomic destination info    */
     int          direction;       /*forward or backward traversal    */
@@ -8392,15 +8392,15 @@ H5T__conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
     size_t       half_size;       /*half the type size        */
     size_t       tsize;           /*type size for swapping bytes  */
     size_t       olap;            /*num overlapping elements    */
-    uint8_t *    s, *sp, *d, *dp; /*source and dest traversal ptrs*/
-    uint8_t *    src_rev  = NULL; /*order-reversed source buffer  */
+    uint8_t     *s, *sp, *d, *dp; /*source and dest traversal ptrs*/
+    uint8_t     *src_rev  = NULL; /*order-reversed source buffer  */
     uint8_t      dbuf[64] = {0};  /*temp destination buffer    */
     uint8_t      tmp1, tmp2;      /*temp variables for swapping bytes*/
 
     /* Conversion-related variables */
     hssize_t       expo;                     /*source exponent        */
     hssize_t       sign;                     /*source sign bit value         */
-    uint8_t *      int_buf = NULL;           /*buffer for temporary value    */
+    uint8_t       *int_buf = NULL;           /*buffer for temporary value    */
     size_t         buf_size;                 /*buffer size for temporary value */
     size_t         i;                        /*miscellaneous counters    */
     size_t         first;                    /*first bit(MSB) in an integer  */
@@ -9009,8 +9009,8 @@ H5T__conv_i_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
               size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
 {
     /* Traversal-related variables */
-    H5T_t *      src_p;           /*source datatype        */
-    H5T_t *      dst_p;           /*destination datatype        */
+    H5T_t       *src_p;           /*source datatype        */
+    H5T_t       *dst_p;           /*destination datatype        */
     H5T_atomic_t src;             /*atomic source info        */
     H5T_atomic_t dst;             /*atomic destination info    */
     int          direction;       /*forward or backward traversal    */
@@ -9018,8 +9018,8 @@ H5T__conv_i_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
     size_t       half_size;       /*half the type size        */
     size_t       tsize;           /*type size for swapping bytes  */
     size_t       olap;            /*num overlapping elements    */
-    uint8_t *    s, *sp, *d, *dp; /*source and dest traversal ptrs*/
-    uint8_t *    src_rev  = NULL; /*order-reversed source buffer  */
+    uint8_t     *s, *sp, *d, *dp; /*source and dest traversal ptrs*/
+    uint8_t     *src_rev  = NULL; /*order-reversed source buffer  */
     uint8_t      dbuf[64] = {0};  /*temp destination buffer    */
     uint8_t      tmp1, tmp2;      /*temp variables for swapping bytes*/
 
@@ -9029,7 +9029,7 @@ H5T__conv_i_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
     size_t         sign;                     /*source sign bit value         */
     hbool_t        is_max_neg;               /*source is maximal negative value*/
     hbool_t        do_round;                 /*whether there is roundup      */
-    uint8_t *      int_buf = NULL;           /*buffer for temporary value    */
+    uint8_t       *int_buf = NULL;           /*buffer for temporary value    */
     size_t         buf_size;                 /*buffer size for temporary value */
     size_t         i;                        /*miscellaneous counters    */
     size_t         first;                    /*first bit(MSB) in an integer  */
@@ -9474,7 +9474,7 @@ H5T__reverse_order(uint8_t *rev, uint8_t *s, size_t size, H5T_order_t order)
 herr_t
 H5T_reclaim(hid_t type_id, H5S_t *space, void *buf)
 {
-    H5T_t *               type;             /* Datatype */
+    H5T_t                *type;             /* Datatype */
     H5S_sel_iter_op_t     dset_op;          /* Operator for iteration */
     H5T_vlen_alloc_info_t vl_alloc_info;    /* VL allocation info */
     herr_t                ret_value = FAIL; /* Return value */

@@ -91,7 +91,7 @@ main(void)
     hid_t    fid            = -1;
     hid_t    fapl           = -1; /* File access property list */
     char     filename[1024];
-    H5F_t *  f = NULL; /* File for all tests */
+    H5F_t   *f = NULL; /* File for all tests */
 
     /* Test Setup */
     HDputs("Testing the metadata accumulator");
@@ -1942,8 +1942,8 @@ test_random_write(H5F_t *f)
 {
     uint8_t *wbuf, *rbuf; /* Buffers for reading & writing */
     unsigned seed = 0;    /* Random # seed */
-    size_t * off;         /* Offset of buffer segments to write */
-    size_t * len;         /* Size of buffer segments to write */
+    size_t  *off;         /* Offset of buffer segments to write */
+    size_t  *len;         /* Size of buffer segments to write */
     size_t   cur_off;     /* Current offset */
     size_t   nsegments;   /* Number of segments to write */
     size_t   swap;        /* Position to swap with */
@@ -2096,13 +2096,13 @@ test_swmr_write_big(hbool_t newest_format)
 
     hid_t    fid  = -1;   /* File ID */
     hid_t    fapl = -1;   /* File access property list */
-    H5F_t *  rf   = NULL; /* File pointer */
+    H5F_t   *rf   = NULL; /* File pointer */
     char     filename[1024];
     uint8_t *wbuf2 = NULL, *rbuf = NULL; /* Buffers for reading & writing */
     uint8_t  wbuf[1024];                 /* Buffer for reading & writing */
     unsigned u;                          /* Local index variable */
     hbool_t  process_success = FALSE;
-    char *   driver          = NULL;  /* VFD string (from env variable) */
+    char    *driver          = NULL;  /* VFD string (from env variable) */
     hbool_t  api_ctx_pushed  = FALSE; /* Whether API context pushed */
 
     if (newest_format)

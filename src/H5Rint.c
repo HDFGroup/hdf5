@@ -542,10 +542,10 @@ H5R__get_loc_id(const H5R_ref_priv_t *ref)
 hid_t
 H5R__reopen_file(H5R_ref_priv_t *ref, hid_t fapl_id)
 {
-    H5P_genplist_t *      plist;           /* Property list for FAPL */
-    void *                new_file = NULL; /* File object opened */
+    H5P_genplist_t       *plist;           /* Property list for FAPL */
+    void                 *new_file = NULL; /* File object opened */
     H5VL_connector_prop_t connector_prop;  /* Property for VOL connector ID & info     */
-    H5VL_object_t *       vol_obj = NULL;  /* VOL object for file */
+    H5VL_object_t        *vol_obj = NULL;  /* VOL object for file */
     hbool_t               supported;       /* Whether 'post open' operation is supported by VOL connector */
     hid_t                 ret_value = H5I_INVALID_HID;
 
@@ -1255,7 +1255,7 @@ H5R__decode_region(const unsigned char *buf, size_t *nbytes, H5S_t **space_ptr)
     const uint8_t *p        = (const uint8_t *)buf;
     size_t         buf_size = 0;
     unsigned       rank;
-    H5S_t *        space;
+    H5S_t         *space;
     herr_t         ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
@@ -1350,7 +1350,7 @@ H5R__decode_string(const unsigned char *buf, size_t *nbytes, char **string_ptr)
 {
     const uint8_t *p = (const uint8_t *)buf;
     size_t         string_len;
-    char *         string    = NULL;
+    char          *string    = NULL;
     herr_t         ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
@@ -1549,7 +1549,7 @@ H5R__decode_token_region_compat(H5F_t *f, const unsigned char *buf, size_t *nbyt
     H5O_token_t    token = {0};
     size_t         data_size;
     const uint8_t *p;
-    H5S_t *        space     = NULL;
+    H5S_t         *space     = NULL;
     herr_t         ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE

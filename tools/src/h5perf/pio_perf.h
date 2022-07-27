@@ -76,7 +76,7 @@ typedef struct results_ {
 #define FAIL -1
 #endif /* !FAIL */
 
-extern FILE *     output;              /* output file                          */
+extern FILE      *output;              /* output file                          */
 extern io_time_t *timer_g;             /* timer: global for stub functions     */
 extern int        comm_world_rank_g;   /* my rank in MPI_COMM_RANK             */
 extern int        comm_world_nprocs_g; /* num. of processes of MPI_COMM_WORLD  */

@@ -32,8 +32,8 @@ basic_id_test(void)
 {
     H5I_type_t myType  = H5I_BADID;
     hid_t      arrayID = H5I_INVALID_HID;
-    void *     testObj = NULL;
-    void *     testPtr = NULL;
+    void      *testObj = NULL;
+    void      *testPtr = NULL;
     char       nameString[10];
     hid_t      testID;
     ssize_t    testSize = -1;
@@ -254,10 +254,10 @@ test_search_func(void H5_ATTR_UNUSED *ptr1, hid_t H5_ATTR_UNUSED id, void H5_ATT
 static int
 id_predefined_test(void)
 {
-    void * testObj;
+    void  *testObj;
     hid_t  testID;
     hid_t  typeID = H5I_INVALID_HID;
-    void * testPtr;
+    void  *testPtr;
     herr_t testErr;
 
     testObj = HDmalloc(sizeof(int));
@@ -691,7 +691,7 @@ test_remove_clear_type(void)
 {
     H5I_type_t     obj_type;
     rct_obj_list_t obj_list;
-    rct_obj_t *    objects = NULL; /* Convenience pointer to objects stored in master list */
+    rct_obj_t     *objects = NULL; /* Convenience pointer to objects stored in master list */
     size_t         list_size;
     long           i, j;
     herr_t         ret; /* return value */

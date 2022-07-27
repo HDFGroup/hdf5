@@ -240,14 +240,14 @@ main(int argc, char *argv[])
     hid_t          fid  = H5I_INVALID_HID;
     hid_t          fapl = H5I_INVALID_HID;
     H5VL_object_t *vol_obj;
-    H5F_t *        f;
+    H5F_t         *f;
     haddr_t        addr        = 0;
     int            extra_count = 0; /* Number of extra arguments */
     haddr_t        extra[10];
     uint8_t        sig[H5F_SIGNATURE_LEN];
     size_t         u;
     H5E_auto2_t    func           = NULL;
-    void *         edata          = NULL;
+    void          *edata          = NULL;
     hbool_t        api_ctx_pushed = FALSE; /* Whether API context pushed */
     herr_t         status         = SUCCEED;
     int            exit_value     = 0;

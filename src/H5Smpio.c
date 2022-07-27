@@ -204,11 +204,11 @@ H5S__mpio_create_point_datatype(size_t elmt_size, hsize_t num_points, MPI_Aint *
 {
     MPI_Datatype  elmt_type;                 /* MPI datatype for individual element */
     hbool_t       elmt_type_created = FALSE; /* Whether the element MPI datatype was created */
-    int *         inner_blocks      = NULL;  /* Arrays for MPI datatypes when "large" datatype needed */
-    MPI_Aint *    inner_disps       = NULL;
+    int          *inner_blocks      = NULL;  /* Arrays for MPI datatypes when "large" datatype needed */
+    MPI_Aint     *inner_disps       = NULL;
     MPI_Datatype *inner_types       = NULL;
 #if MPI_VERSION < 3
-    int *   blocks = NULL; /* Array of block sizes for MPI hindexed create call */
+    int    *blocks = NULL; /* Array of block sizes for MPI hindexed create call */
     hsize_t u;             /* Local index variable */
 #endif
     hsize_t bigio_count;         /* Transition point to create derived type */
@@ -371,7 +371,7 @@ static herr_t
 H5S__mpio_point_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *new_type, int *count,
                      hbool_t *is_derived_type, hbool_t do_permute, hsize_t **permute, hbool_t *is_permuted)
 {
-    MPI_Aint *      disp = NULL;         /* Datatype displacement for each point*/
+    MPI_Aint       *disp = NULL;         /* Datatype displacement for each point*/
     H5S_pnt_node_t *curr = NULL;         /* Current point being operated on in from the selection */
     hssize_t        snum_points;         /* Signed number of elements in selection */
     hsize_t         num_points;          /* Sumber of points in the selection */
@@ -507,13 +507,13 @@ static herr_t
 H5S__mpio_permute_type(H5S_t *space, size_t elmt_size, hsize_t **permute, MPI_Datatype *new_type, int *count,
                        hbool_t *is_derived_type)
 {
-    MPI_Aint *      disp          = NULL;  /* Datatype displacement for each point*/
+    MPI_Aint       *disp          = NULL;  /* Datatype displacement for each point*/
     H5S_sel_iter_t *sel_iter      = NULL;  /* Selection iteration info */
     hbool_t         sel_iter_init = FALSE; /* Selection iteration info has been initialized */
     hssize_t        snum_points;           /* Signed number of elements in selection */
     hsize_t         num_points;            /* Number of points in the selection */
-    hsize_t *       off = NULL;
-    size_t *        len = NULL;
+    hsize_t        *off = NULL;
+    size_t         *len = NULL;
     size_t          max_elem;            /* Maximum number of elements allowed in sequences */
     hsize_t         u;                   /* Local index variable */
     herr_t          ret_value = SUCCEED; /* Return value */
@@ -826,8 +826,8 @@ H5S__mpio_reg_hyper_type(H5S_t *space, size_t elmt_size, MPI_Datatype *new_type,
     else
         /* Create the compound datatype for this operation (> 2GB) */
         if (H5_mpio_create_large_type(elmt_size, 0, MPI_BYTE, &inner_type) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,
-                    "couldn't create a large inner datatype in hyper selection")
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADTYPE, FAIL,
+                        "couldn't create a large inner datatype in hyper selection")
 
     /*******************************************************
      *  Construct the type by walking the hyperslab dims
@@ -1141,10 +1141,10 @@ H5S__obtain_datatype(H5S_hyper_span_info_t *spans, const hsize_t *down, size_t e
     hsize_t           bigio_count;           /* Transition point to create derived type */
     size_t            alloc_count       = 0; /* Number of span tree nodes allocated at this level */
     size_t            outercount        = 0; /* Number of span tree nodes at this level */
-    MPI_Datatype *    inner_type        = NULL;
+    MPI_Datatype     *inner_type        = NULL;
     hbool_t           inner_types_freed = FALSE; /* Whether the inner_type MPI datatypes have been freed */
-    int *             blocklen          = NULL;
-    MPI_Aint *        disp              = NULL;
+    int              *blocklen          = NULL;
+    MPI_Aint         *disp              = NULL;
     size_t            u;                   /* Local index variable */
     int               mpi_code;            /* MPI return status code */
     herr_t            ret_value = SUCCEED; /* Return value */
@@ -1179,7 +1179,7 @@ H5S__obtain_datatype(H5S_hyper_span_info_t *spans, const hsize_t *down, size_t e
                 /* Check if we need to increase the size of the buffers */
                 if (outercount >= alloc_count) {
                     MPI_Aint *tmp_disp;     /* Temporary pointer to new displacement buffer */
-                    int *     tmp_blocklen; /* Temporary pointer to new block length buffer */
+                    int      *tmp_blocklen; /* Temporary pointer to new block length buffer */
 
                     /* Double the allocation count */
                     alloc_count *= 2;
@@ -1271,8 +1271,8 @@ H5S__obtain_datatype(H5S_hyper_span_info_t *spans, const hsize_t *down, size_t e
 
                 /* Check if we need to increase the size of the buffers */
                 if (outercount >= alloc_count) {
-                    MPI_Aint *    tmp_disp;       /* Temporary pointer to new displacement buffer */
-                    int *         tmp_blocklen;   /* Temporary pointer to new block length buffer */
+                    MPI_Aint     *tmp_disp;       /* Temporary pointer to new displacement buffer */
+                    int          *tmp_blocklen;   /* Temporary pointer to new block length buffer */
                     MPI_Datatype *tmp_inner_type; /* Temporary pointer to inner MPI datatype buffer */
 
                     /* Double the allocation count */

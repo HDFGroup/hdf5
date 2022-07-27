@@ -286,9 +286,9 @@ H5EA__dblock_sblk_idx(const H5EA_hdr_t *hdr, hsize_t idx)
 H5EA_dblock_t *
 H5EA__dblock_protect(H5EA_hdr_t *hdr, void *parent, haddr_t dblk_addr, size_t dblk_nelmts, unsigned flags)
 {
-    H5EA_dblock_t *        dblock; /* Extensible array data block */
+    H5EA_dblock_t         *dblock; /* Extensible array data block */
     H5EA_dblock_cache_ud_t udata;  /* Information needed for loading data block */
-    H5EA_dblock_t *        ret_value = NULL;
+    H5EA_dblock_t         *ret_value = NULL;
 
     FUNC_ENTER_PACKAGE
 
