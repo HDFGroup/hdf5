@@ -49,7 +49,7 @@ hsize_t H5TOOLS_BUFSIZE = (32 * 1024 * 1024); /* 32 MB */
 unsigned char g_Parallel = 0; /*0 for serial, 1 for parallel */
 char          outBuff[OUTBUFF_SIZE];
 unsigned      outBuffOffset;
-FILE *        overflow_file = NULL;
+FILE         *overflow_file = NULL;
 
 /* local functions */
 static void init_table(hid_t fid, table_t **tbl);
@@ -196,7 +196,7 @@ get_option(int argc, const char *const *argv, const char *opts, const struct lon
         /* long command line option */
         int        i;
         const char ch      = '=';
-        char *     arg     = HDstrdup(&argv[opt_ind][2]);
+        char      *arg     = HDstrdup(&argv[opt_ind][2]);
         size_t     arg_len = 0;
 
         opt_arg = strchr(&argv[opt_ind][2], ch);
@@ -389,12 +389,12 @@ get_option(int argc, const char *const *argv, const char *opts, const struct lon
 herr_t
 parse_tuple(const char *start, int sep, char **cpy_out, unsigned *nelems, char ***ptrs_out)
 {
-    char *   elem_ptr    = NULL;
-    char *   dest_ptr    = NULL;
+    char    *elem_ptr    = NULL;
+    char    *dest_ptr    = NULL;
     unsigned elems_count = 0;
-    char **  elems       = NULL; /* more like *elems[], but compiler... */
-    char **  elems_re    = NULL; /* temporary pointer, for realloc */
-    char *   cpy         = NULL;
+    char   **elems       = NULL; /* more like *elems[], but compiler... */
+    char   **elems_re    = NULL; /* temporary pointer, for realloc */
+    char    *cpy         = NULL;
     herr_t   ret_value   = SUCCEED;
     unsigned init_slots  = 2;
 
@@ -632,7 +632,7 @@ static void
 dump_table(hid_t fid, char *tablename, table_t *table)
 {
     unsigned u;
-    char *   obj_tok_str = NULL;
+    char    *obj_tok_str = NULL;
 
     PRINTSTREAM(rawoutstream, "%s: # of entries = %d\n", tablename, table->nobjs);
     for (u = 0; u < table->nobjs; u++) {
@@ -673,7 +673,7 @@ dump_tables(find_objs_t *info)
  *-------------------------------------------------------------------------
  */
 H5_ATTR_PURE obj_t *
-             search_obj(table_t *table, const H5O_token_t *obj_token)
+search_obj(table_t *table, const H5O_token_t *obj_token)
 {
     unsigned u;
     int      token_cmp;
@@ -1076,8 +1076,8 @@ h5tools_parse_ros3_fapl_tuple(const char *tuple_str, int delim, H5FD_ros3_fapl_t
 {
     const char *ccred[3];
     unsigned    nelems     = 0;
-    char *      s3cred_src = NULL;
-    char **     s3cred     = NULL;
+    char       *s3cred_src = NULL;
+    char      **s3cred     = NULL;
     herr_t      ret_value  = SUCCEED;
 
     /* Attempt to parse S3 credentials tuple */
@@ -1295,8 +1295,8 @@ h5tools_parse_hdfs_fapl_tuple(const char *tuple_str, int delim, H5FD_hdfs_fapl_t
 {
     unsigned long k         = 0;
     unsigned      nelems    = 0;
-    char *        props_src = NULL;
-    char **       props     = NULL;
+    char         *props_src = NULL;
+    char        **props     = NULL;
     herr_t        ret_value = SUCCEED;
 
     /* Attempt to parse HDFS configuration tuple */

@@ -92,7 +92,7 @@ typedef struct H5D_type_info_t {
     /* Initial values */
     const H5T_t *mem_type;    /* Pointer to memory datatype */
     const H5T_t *dset_type;   /* Pointer to dataset datatype */
-    H5T_path_t * tpath;       /* Datatype conversion path */
+    H5T_path_t  *tpath;       /* Datatype conversion path */
     hid_t        src_type_id; /* Source datatype ID */
     hid_t        dst_type_id; /* Destination datatype ID */
 
@@ -105,9 +105,9 @@ typedef struct H5D_type_info_t {
     const H5T_subset_info_t *cmpd_subset;    /* Info related to the compound subset conversion functions */
     H5T_bkg_t                need_bkg;       /* Type of background buf needed */
     size_t                   request_nelmts; /* Requested strip mine */
-    uint8_t *                tconv_buf;      /* Datatype conv buffer */
+    uint8_t                 *tconv_buf;      /* Datatype conv buffer */
     hbool_t                  tconv_buf_allocated; /* Whether the type conversion buffer was allocated */
-    uint8_t *                bkg_buf;             /* Background buffer */
+    uint8_t                 *bkg_buf;             /* Background buffer */
     hbool_t                  bkg_buf_allocated;   /* Whether the background buffer was allocated */
 } H5D_type_info_t;
 
@@ -193,7 +193,7 @@ typedef struct {
 } H5D_chunk_storage_t;
 
 typedef struct {
-    void *   buf;   /* Buffer for compact dataset */
+    void    *buf;   /* Buffer for compact dataset */
     hbool_t *dirty; /* Pointer to dirty flag to mark */
 } H5D_compact_storage_t;
 
@@ -218,12 +218,12 @@ typedef struct H5D_io_info_t {
     MPI_Comm comm;               /* MPI communicator for file */
     hbool_t  using_mpi_vfd;      /* Whether the file is using an MPI-based VFD */
 #endif                           /* H5_HAVE_PARALLEL */
-    H5D_storage_t *  store;      /* Dataset storage info */
+    H5D_storage_t   *store;      /* Dataset storage info */
     H5D_layout_ops_t layout_ops; /* Dataset layout I/O operation function pointers */
     H5D_io_ops_t     io_ops;     /* I/O operation function pointers */
     H5D_io_op_type_t op_type;
     union {
-        void *      rbuf; /* Pointer to buffer for read */
+        void       *rbuf; /* Pointer to buffer for read */
         const void *wbuf; /* Pointer to buffer to write */
     } u;
 } H5D_io_info_t;
@@ -234,9 +234,9 @@ typedef struct H5D_io_info_t {
 
 /* Typedef for chunked dataset index operation info */
 typedef struct H5D_chk_idx_info_t {
-    H5F_t *              f;       /* File pointer for operation */
-    const H5O_pline_t *  pline;   /* I/O pipeline info */
-    H5O_layout_chunk_t * layout;  /* Chunk layout description */
+    H5F_t               *f;       /* File pointer for operation */
+    const H5O_pline_t   *pline;   /* I/O pipeline info */
+    H5O_layout_chunk_t  *layout;  /* Chunk layout description */
     H5O_storage_chunk_t *storage; /* Chunk storage description */
 } H5D_chk_idx_info_t;
 
@@ -264,9 +264,9 @@ typedef struct H5D_chunk_rec_t {
  * to which the index points.
  */
 typedef struct H5D_chunk_common_ud_t {
-    const H5O_layout_chunk_t * layout;  /* Chunk layout description */
+    const H5O_layout_chunk_t  *layout;  /* Chunk layout description */
     const H5O_storage_chunk_t *storage; /* Chunk storage description */
-    const hsize_t *            scaled;  /* Scaled coordinates for a chunk */
+    const hsize_t             *scaled;  /* Scaled coordinates for a chunk */
 } H5D_chunk_common_ud_t;
 
 /* B-tree callback info for various operations */
@@ -334,9 +334,9 @@ typedef struct H5D_chunk_info_t {
     hsize_t  index;                    /* "Index" of chunk in dataset */
     uint32_t chunk_points;             /* Number of elements selected in chunk */
     hsize_t  scaled[H5O_LAYOUT_NDIMS]; /* Scaled coordinates of chunk (in file dataset's dataspace) */
-    H5S_t *  fspace;                   /* Dataspace describing chunk & selection in it */
+    H5S_t   *fspace;                   /* Dataspace describing chunk & selection in it */
     hbool_t  fspace_shared; /* Indicate that the file space for a chunk is shared and shouldn't be freed */
-    H5S_t *  mspace;        /* Dataspace describing selection in memory corresponding to this chunk */
+    H5S_t   *mspace;        /* Dataspace describing selection in memory corresponding to this chunk */
     hbool_t  mspace_shared; /* Indicate that the memory space for a chunk is shared and shouldn't be freed */
 } H5D_chunk_info_t;
 
@@ -345,11 +345,11 @@ typedef struct H5D_chunk_map_t {
     H5O_layout_t *layout; /* Dataset layout information*/
     hsize_t       nelmts; /* Number of elements selected in file & memory dataspaces */
 
-    H5S_t *  file_space; /* Pointer to the file dataspace */
+    H5S_t   *file_space; /* Pointer to the file dataspace */
     unsigned f_ndims;    /* Number of dimensions for file dataspace */
 
-    H5S_t *        mem_space;   /* Pointer to the memory dataspace */
-    H5S_t *        mchunk_tmpl; /* Dataspace template for new memory chunks */
+    H5S_t         *mem_space;   /* Pointer to the memory dataspace */
+    H5S_t         *mchunk_tmpl; /* Dataspace template for new memory chunks */
     H5S_sel_iter_t mem_iter;    /* Iterator for elements in memory selection */
     unsigned       m_ndims;     /* Number of dimensions for memory dataspace */
     H5S_sel_type   msel_type;   /* Selection type in memory */
@@ -357,7 +357,7 @@ typedef struct H5D_chunk_map_t {
 
     H5SL_t *sel_chunks; /* Skip list containing information for each chunk selected */
 
-    H5S_t *           single_space;      /* Dataspace for single chunk */
+    H5S_t            *single_space;      /* Dataspace for single chunk */
     H5D_chunk_info_t *single_chunk_info; /* Pointer to single chunk's info */
     hbool_t           use_single;        /* Whether I/O is on a single element */
 
@@ -387,7 +387,7 @@ typedef struct H5D_chunk_cached_t {
 
 /* List of files held open during refresh operations */
 typedef struct H5D_virtual_held_file_t {
-    H5F_t *                         file; /* Pointer to file held open */
+    H5F_t                          *file; /* Pointer to file held open */
     struct H5D_virtual_held_file_t *next; /* Pointer to next node in list */
 } H5D_virtual_held_file_t;
 
@@ -412,9 +412,9 @@ typedef struct H5D_rdcc_t {
     int                     nused;             /* Number of chunk slots in use        */
     H5D_chunk_cached_t      last;              /* Cached copy of last chunk information */
     struct H5D_rdcc_ent_t **slot;              /* Chunk slots, each points to a chunk*/
-    H5SL_t *                sel_chunks;        /* Skip list containing information for each chunk selected */
-    H5S_t *                 single_space;      /* Dataspace for single element I/O on chunks */
-    H5D_chunk_info_t *      single_chunk_info; /* Pointer to single chunk's info */
+    H5SL_t                 *sel_chunks;        /* Skip list containing information for each chunk selected */
+    H5S_t                  *single_space;      /* Dataspace for single element I/O on chunks */
+    H5D_chunk_info_t       *single_chunk_info; /* Pointer to single chunk's info */
 
     /* Cached information about scaled dataspace dimensions */
     hsize_t  scaled_dims[H5S_MAX_RANK];        /* The scaled dim sizes */
@@ -441,8 +441,8 @@ struct H5D_shared_t {
     size_t           fo_count;        /* Reference count */
     hbool_t          closing;         /* Flag to indicate dataset is closing */
     hid_t            type_id;         /* ID for dataset's datatype    */
-    H5T_t *          type;            /* Datatype for this dataset     */
-    H5S_t *          space;           /* Dataspace of this dataset    */
+    H5T_t           *type;            /* Datatype for this dataset     */
+    H5S_t           *space;           /* Dataspace of this dataset    */
     hid_t            dcpl_id;         /* Dataset creation property id */
     hid_t            dapl_id;         /* Dataset access property id */
     H5D_dcpl_cache_t dcpl_cache;      /* Cached DCPL values */
@@ -466,8 +466,8 @@ struct H5D_shared_t {
     } cache;
 
     H5D_append_flush_t append_flush;   /* Append flush property information */
-    char *             extfile_prefix; /* expanded external file prefix */
-    char *             vds_prefix;     /* expanded vds prefix */
+    char              *extfile_prefix; /* expanded external file prefix */
+    char              *vds_prefix;     /* expanded vds prefix */
 };
 
 struct H5D_t {
@@ -495,21 +495,21 @@ typedef struct {
 /* Typedef for filling a buffer with a fill value */
 typedef struct H5D_fill_buf_info_t {
     H5MM_allocate_t fill_alloc_func; /* Routine to call for allocating fill buffer */
-    void *          fill_alloc_info; /* Extra info for allocation routine */
+    void           *fill_alloc_info; /* Extra info for allocation routine */
     H5MM_free_t     fill_free_func;  /* Routine to call for freeing fill buffer */
-    void *          fill_free_info;  /* Extra info for free routine */
+    void           *fill_free_info;  /* Extra info for free routine */
     H5T_path_t
         *fill_to_mem_tpath; /* Datatype conversion path for converting the fill value to the memory buffer */
     H5T_path_t *mem_to_dset_tpath; /* Datatype conversion path for converting the memory buffer to the dataset
                                       elements */
     const H5O_fill_t *fill;        /* Pointer to fill value */
-    void *            fill_buf;    /* Fill buffer */
+    void             *fill_buf;    /* Fill buffer */
     size_t            fill_buf_size;                 /* Size of fill buffer */
     hbool_t           use_caller_fill_buf;           /* Whether the caller provided the fill buffer */
-    void *            bkg_buf;                       /* Background conversion buffer */
+    void             *bkg_buf;                       /* Background conversion buffer */
     size_t            bkg_buf_size;                  /* Size of background buffer */
-    H5T_t *           mem_type;                      /* Pointer to memory datatype */
-    const H5T_t *     file_type;                     /* Pointer to file datatype */
+    H5T_t            *mem_type;                      /* Pointer to memory datatype */
+    const H5T_t      *file_type;                     /* Pointer to file datatype */
     hid_t             mem_tid;                       /* ID for memory version of disk datatype */
     hid_t             file_tid;                      /* ID for disk datatype */
     size_t            mem_elmt_size, file_elmt_size; /* Size of element in memory and on disk */
@@ -548,10 +548,10 @@ H5_DLLVAR const unsigned H5O_layout_ver_bounds[H5F_LIBVER_NBOUNDS];
 /* Package Private Prototypes */
 /******************************/
 
-H5_DLL H5D_t *H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t dapl_id);
-H5_DLL H5D_t *H5D__create_named(const H5G_loc_t *loc, const char *name, hid_t type_id, const H5S_t *space,
-                                hid_t lcpl_id, hid_t dcpl_id, hid_t dapl_id);
-H5_DLL H5D_t * H5D__open_name(const H5G_loc_t *loc, const char *name, hid_t dapl_id);
+H5_DLL H5D_t  *H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t dapl_id);
+H5_DLL H5D_t  *H5D__create_named(const H5G_loc_t *loc, const char *name, hid_t type_id, const H5S_t *space,
+                                 hid_t lcpl_id, hid_t dcpl_id, hid_t dapl_id);
+H5_DLL H5D_t  *H5D__open_name(const H5G_loc_t *loc, const char *name, hid_t dapl_id);
 H5_DLL hid_t   H5D__get_space(const H5D_t *dset);
 H5_DLL hid_t   H5D__get_type(const H5D_t *dset);
 H5_DLL herr_t  H5D__get_space_status(const H5D_t *dset, H5D_space_status_t *allocation);
@@ -639,10 +639,10 @@ H5_DLL herr_t  H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_ov
                                    const hsize_t old_dim[]);
 H5_DLL herr_t  H5D__chunk_file_alloc(const H5D_chk_idx_info_t *idx_info, const H5F_block_t *old_chunk,
                                      H5F_block_t *new_chunk, hbool_t *need_insert, const hsize_t *scaled);
-H5_DLL void *  H5D__chunk_mem_alloc(size_t size, void *pline);
+H5_DLL void   *H5D__chunk_mem_alloc(size_t size, void *pline);
 H5_DLL void    H5D__chunk_mem_free(void *chk, void *pline);
-H5_DLL void *  H5D__chunk_mem_xfree(void *chk, const void *pline);
-H5_DLL void *  H5D__chunk_mem_realloc(void *chk, size_t size, const H5O_pline_t *pline);
+H5_DLL void   *H5D__chunk_mem_xfree(void *chk, const void *pline);
+H5_DLL void   *H5D__chunk_mem_realloc(void *chk, size_t size, const H5O_pline_t *pline);
 H5_DLL herr_t  H5D__chunk_update_old_edge_chunks(H5D_t *dset, hsize_t old_dim[]);
 H5_DLL hbool_t H5D__chunk_is_partial_edge_chunk(unsigned dset_ndims, const uint32_t *chunk_dims,
                                                 const hsize_t *chunk_scaled, const hsize_t *dset_dims);

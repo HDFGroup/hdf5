@@ -69,8 +69,8 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
     hid_t               fapl_id        = -1;
     hid_t               test_fapl_id   = -1;
     hid_t               file_id        = -1;
-    H5F_t *             file_ptr       = NULL;
-    H5C_t *             cache_ptr      = NULL;
+    H5F_t              *file_ptr       = NULL;
+    H5C_t              *cache_ptr      = NULL;
     H5AC_cache_config_t default_config = H5AC__DEFAULT_CACHE_CONFIG;
     H5AC_cache_config_t mod_config     = {
         /* int         version                = */ H5AC__CURR_CACHE_CONFIG_VERSION,

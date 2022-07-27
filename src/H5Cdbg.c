@@ -79,7 +79,7 @@ herr_t
 H5C_dump_cache(H5C_t *cache_ptr, const char *cache_name)
 {
     H5C_cache_entry_t *entry_ptr;
-    H5SL_t *           slist_ptr = NULL;
+    H5SL_t            *slist_ptr = NULL;
     int                i;                   /* Local index variable */
     herr_t             ret_value = SUCCEED; /* Return value */
 
@@ -275,7 +275,7 @@ H5C_dump_cache_skip_list(H5C_t *cache_ptr, char *calling_fcn)
     herr_t             ret_value = SUCCEED; /* Return value */
     int                i;
     H5C_cache_entry_t *entry_ptr = NULL;
-    H5SL_node_t *      node_ptr  = NULL;
+    H5SL_node_t       *node_ptr  = NULL;
 
     FUNC_ENTER_NOAPI_NOERR
 

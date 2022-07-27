@@ -68,7 +68,7 @@ static herr_t H5O__refresh_metadata_close(hid_t oid, H5O_loc_t oloc, H5G_loc_t *
 herr_t
 H5Oflush(hid_t obj_id)
 {
-    H5VL_object_t *   vol_obj = NULL; /* Object of obj_id     */
+    H5VL_object_t    *vol_obj = NULL; /* Object of obj_id     */
     H5VL_loc_params_t loc_params;
     herr_t            ret_value = SUCCEED; /* Return value     */
 
@@ -112,7 +112,7 @@ done:
 herr_t
 H5O_flush(H5O_loc_t *oloc, hid_t obj_id)
 {
-    void *                 obj_ptr;             /* Pointer to object */
+    void                  *obj_ptr;             /* Pointer to object */
     const H5O_obj_class_t *obj_class;           /* Class of object */
     herr_t                 ret_value = SUCCEED; /* Return value */
 
@@ -229,7 +229,7 @@ done:
 herr_t
 H5Orefresh(hid_t oid)
 {
-    H5VL_object_t *   vol_obj = NULL; /* Object of oid     */
+    H5VL_object_t    *vol_obj = NULL; /* Object of oid     */
     H5VL_loc_params_t loc_params;
     herr_t            ret_value = SUCCEED; /* Return value     */
 
@@ -282,7 +282,7 @@ H5O_refresh_metadata(hid_t oid, H5O_loc_t oloc)
 {
     H5VL_object_t *vol_obj   = NULL;  /* VOL object associated with the ID */
     hbool_t        objs_incr = FALSE; /* Whether the object count in the file was incremented */
-    H5F_t *        file      = NULL;
+    H5F_t         *file      = NULL;
     herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -293,7 +293,7 @@ H5O_refresh_metadata(hid_t oid, H5O_loc_t oloc)
         H5O_loc_t    obj_oloc;
         H5G_name_t   obj_path;
         H5O_shared_t cached_H5O_shared;
-        H5VL_t *     connector = NULL;
+        H5VL_t      *connector = NULL;
 
         /* Hold a copy of the object's file pointer, since closing the object will
          * invalidate the file pointer in the oloc.
@@ -441,7 +441,7 @@ done:
 herr_t
 H5O_refresh_metadata_reopen(hid_t oid, H5G_loc_t *obj_loc, H5VL_t *vol_connector, hbool_t start_swmr)
 {
-    void *     object = NULL;       /* Object for this operation */
+    void      *object = NULL;       /* Object for this operation */
     H5I_type_t type;                /* Type of object for the ID */
     herr_t     ret_value = SUCCEED; /* Return value */
 

@@ -73,7 +73,7 @@ static hbool_t H5_ntzset = FALSE;
 int
 HDvasprintf(char **bufp, const char *fmt, va_list _ap)
 {
-    char * buf;   /* buffer to receive formatted string */
+    char  *buf;   /* buffer to receive formatted string */
     size_t bufsz; /* size of buffer to allocate */
 
     for (bufsz = 32; (buf = HDmalloc(bufsz)) != NULL;) {
@@ -784,9 +784,9 @@ done:
 herr_t
 H5_build_extpath(const char *name, char **extpath /*out*/)
 {
-    char * full_path = NULL;    /* Pointer to the full path, as built or passed in */
-    char * cwdpath   = NULL;    /* Pointer to the current working directory path */
-    char * new_name  = NULL;    /* Pointer to the name of the file */
+    char  *full_path = NULL;    /* Pointer to the full path, as built or passed in */
+    char  *cwdpath   = NULL;    /* Pointer to the current working directory path */
+    char  *new_name  = NULL;    /* Pointer to the name of the file */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -807,7 +807,7 @@ H5_build_extpath(const char *name, char **extpath /*out*/)
             HGOTO_ERROR(H5E_INTERNAL, H5E_NOSPACE, FAIL, "memory allocation failed")
     }      /* end if */
     else { /* relative pathname */
-        char * retcwd;
+        char  *retcwd;
         size_t name_len;
         int    drive;
 
@@ -1034,7 +1034,7 @@ herr_t
 H5_expand_windows_env_vars(char **env_var)
 {
     long   n_chars   = 0;
-    char * temp_buf  = NULL;
+    char  *temp_buf  = NULL;
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1101,7 +1101,7 @@ H5_get_option(int argc, const char *const *argv, const char *opts, const struct 
         /* long command line option */
         int        i;
         const char ch      = '=';
-        char *     arg     = HDstrdup(&argv[H5_optind][2]);
+        char      *arg     = HDstrdup(&argv[H5_optind][2]);
         size_t     arg_len = 0;
 
         H5_optarg = strchr(&argv[H5_optind][2], ch);

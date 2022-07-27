@@ -135,7 +135,7 @@ H5PL__set_plugin_control_mask(unsigned int mask)
 herr_t
 H5PL__init_package(void)
 {
-    char * env_var   = NULL;
+    char  *env_var   = NULL;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
@@ -225,8 +225,8 @@ H5PL_load(H5PL_type_t type, const H5PL_key_t *key)
 {
     H5PL_search_params_t search_params;       /* Plugin search parameters     */
     hbool_t              found       = FALSE; /* Whether the plugin was found */
-    const void *         plugin_info = NULL;  /* Information from the plugin  */
-    const void *         ret_value   = NULL;
+    const void          *plugin_info = NULL;  /* Information from the plugin  */
+    const void          *ret_value   = NULL;
 
     FUNC_ENTER_NOAPI(NULL)
 

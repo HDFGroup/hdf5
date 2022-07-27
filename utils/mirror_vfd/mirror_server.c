@@ -146,7 +146,7 @@ static void
 mybzero(void *dest, size_t size)
 {
     size_t i = 0;
-    char * s = NULL;
+    char  *s = NULL;
     HDassert(dest);
     s = (char *)dest;
     for (i = 0; i < size; i++) {
@@ -406,8 +406,8 @@ accept_connection(struct server_run *run)
 {
     struct sockaddr_in client_addr;      /**/
     socklen_t          clilen;           /**/
-    struct hostent *   host_port = NULL; /**/
-    char *             hostaddrp;        /**/
+    struct hostent    *host_port = NULL; /**/
+    char              *hostaddrp;        /**/
     int                connfd = -1;      /* connection file descriptor */
 
     if (run == NULL || run->magic != SERVER_RUN_MAGIC) {

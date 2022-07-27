@@ -458,7 +458,7 @@ tts_rw_lock_smoke_check_test_thread(void *_udata)
     int32_t                          rd_locks_remaining;
     int32_t                          wr_locks_remaining;
     herr_t                           result;
-    H5TS_rw_lock_t *                 rw_lock;
+    H5TS_rw_lock_t                  *rw_lock;
     struct rec_rw_lock_test_udata_t *udata;
 
     HDassert(_udata);

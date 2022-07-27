@@ -2652,7 +2652,7 @@ int
 main(void)
 {
     unsigned              nerrors = 0;            /* track errors */
-    H5P_genplist_t *      plist;                  /* Property list pointer for FAPL */
+    H5P_genplist_t       *plist;                  /* Property list pointer for FAPL */
     H5VL_connector_prop_t connector_prop;         /* Property for VOL connector ID & info */
     hbool_t               api_ctx_pushed = FALSE; /* Whether API context pushed */
     int                   i;                      /* iterator */

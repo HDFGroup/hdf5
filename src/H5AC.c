@@ -232,7 +232,7 @@ H5AC_term_package(void)
 hbool_t
 H5AC_cache_image_pending(const H5F_t *f)
 {
-    H5C_t * cache_ptr;
+    H5C_t  *cache_ptr;
     hbool_t ret_value = FALSE; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -908,7 +908,7 @@ herr_t
 H5AC_mark_entry_dirty(void *thing)
 {
     H5AC_info_t *entry_ptr = NULL;    /* Pointer to the cache entry */
-    H5C_t *      cache_ptr = NULL;    /* Pointer to the entry's associated metadata cache */
+    H5C_t       *cache_ptr = NULL;    /* Pointer to the entry's associated metadata cache */
     herr_t       ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -962,7 +962,7 @@ herr_t
 H5AC_mark_entry_clean(void *thing)
 {
     H5AC_info_t *entry_ptr = NULL;    /* Pointer to the cache entry */
-    H5C_t *      cache_ptr = NULL;    /* Pointer to the entry's associated metadata cache */
+    H5C_t       *cache_ptr = NULL;    /* Pointer to the entry's associated metadata cache */
     herr_t       ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1015,7 +1015,7 @@ herr_t
 H5AC_mark_entry_unserialized(void *thing)
 {
     H5AC_info_t *entry_ptr = NULL;    /* Pointer to the cache entry */
-    H5C_t *      cache_ptr = NULL;    /* Pointer to the entry's associated metadata cache */
+    H5C_t       *cache_ptr = NULL;    /* Pointer to the entry's associated metadata cache */
     herr_t       ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1057,7 +1057,7 @@ herr_t
 H5AC_mark_entry_serialized(void *thing)
 {
     H5AC_info_t *entry_ptr = NULL;    /* Pointer to the cache entry */
-    H5C_t *      cache_ptr = NULL;    /* Pointer to the entry's associated metadata cache */
+    H5C_t       *cache_ptr = NULL;    /* Pointer to the entry's associated metadata cache */
     herr_t       ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1155,7 +1155,7 @@ herr_t
 H5AC_pin_protected_entry(void *thing)
 {
     H5AC_info_t *entry_ptr = NULL;    /* Pointer to the cache entry */
-    H5C_t *      cache_ptr = NULL;    /* Pointer to the entry's associated metadata cache */
+    H5C_t       *cache_ptr = NULL;    /* Pointer to the entry's associated metadata cache */
     herr_t       ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1336,7 +1336,7 @@ herr_t
 H5AC_create_flush_dependency(void *parent_thing, void *child_thing)
 {
     H5AC_info_t *entry_ptr = NULL;    /* Pointer to the cache entry */
-    H5C_t *      cache_ptr = NULL;    /* Pointer to the entry's associated metadata cache */
+    H5C_t       *cache_ptr = NULL;    /* Pointer to the entry's associated metadata cache */
     herr_t       ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1458,7 +1458,7 @@ herr_t
 H5AC_resize_entry(void *thing, size_t new_size)
 {
     H5AC_info_t *entry_ptr = NULL;    /* Pointer to the cache entry */
-    H5C_t *      cache_ptr = NULL;    /* Pointer to the entry's associated metadata cache */
+    H5C_t       *cache_ptr = NULL;    /* Pointer to the entry's associated metadata cache */
     herr_t       ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1573,7 +1573,7 @@ herr_t
 H5AC_unpin_entry(void *thing)
 {
     H5AC_info_t *entry_ptr = NULL;    /* Pointer to the cache entry */
-    H5C_t *      cache_ptr = NULL;    /* Pointer to the entry's associated metadata cache */
+    H5C_t       *cache_ptr = NULL;    /* Pointer to the entry's associated metadata cache */
     herr_t       ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1615,7 +1615,7 @@ herr_t
 H5AC_destroy_flush_dependency(void *parent_thing, void *child_thing)
 {
     H5AC_info_t *entry_ptr = NULL;    /* Pointer to the cache entry */
-    H5C_t *      cache_ptr = NULL;    /* Pointer to the entry's associated metadata cache */
+    H5C_t       *cache_ptr = NULL;    /* Pointer to the entry's associated metadata cache */
     herr_t       ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -2776,7 +2776,7 @@ herr_t
 H5AC_remove_entry(void *_entry)
 {
     H5AC_info_t *entry     = (H5AC_info_t *)_entry; /* Entry to remove */
-    H5C_t *      cache     = NULL;                  /* Pointer to the entry's associated metadata cache */
+    H5C_t       *cache     = NULL;                  /* Pointer to the entry's associated metadata cache */
     herr_t       ret_value = SUCCEED;               /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)

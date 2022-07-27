@@ -87,8 +87,8 @@ static int __k;
 /* Helper structure to pass around dataset information.
  */
 struct splitter_dataset_def {
-    void *         buf;         /* contents of dataset */
-    const char *   dset_name;   /* dataset name, always added to root group */
+    void          *buf;         /* contents of dataset */
+    const char    *dset_name;   /* dataset name, always added to root group */
     hid_t          mem_type_id; /* datatype */
     const hsize_t *dims;        /* dimensions */
     int            n_dims;      /* rank */
@@ -126,7 +126,7 @@ test_sec2(void)
     hid_t         driver_id    = -1;     /* ID for this VFD              */
     unsigned long driver_flags = 0;      /* VFD feature flags            */
     char          filename[1024];        /* filename                     */
-    void *        os_file_handle = NULL; /* OS file handle               */
+    void         *os_file_handle = NULL; /* OS file handle               */
     hsize_t       file_size;             /* file size                    */
 
     TESTING("SEC2 file driver");
@@ -243,16 +243,16 @@ test_core(void)
     hid_t         did          = -1;        /* dataset ID                   */
     hid_t         sid          = -1;        /* dataspace ID                 */
     char          filename[1024];           /* filename                     */
-    void *        os_file_handle = NULL;    /* OS file handle               */
+    void         *os_file_handle = NULL;    /* OS file handle               */
     hsize_t       file_size;                /* file size                    */
     size_t        increment;                /* core VFD increment           */
     hbool_t       backing_store;            /* use backing store?           */
     hbool_t       use_write_tracking;       /* write tracking flag          */
     size_t        write_tracking_page_size; /* write tracking page size     */
-    int *         data_w = NULL;            /* data written to the dataset  */
-    int *         data_r = NULL;            /* data read from the dataset   */
+    int          *data_w = NULL;            /* data written to the dataset  */
+    int          *data_r = NULL;            /* data read from the dataset   */
     int           val;                      /* data value                   */
-    int *         pw = NULL, *pr = NULL;    /* pointers for iterating over
+    int          *pw = NULL, *pr = NULL;    /* pointers for iterating over
                                                data arrays (write & read)   */
     hsize_t dims[2];                        /* dataspace dimensions         */
     int     i, j;                           /* iterators                    */
@@ -599,14 +599,14 @@ test_direct(void)
     hid_t   file = -1, fapl = -1, access_fapl = -1;
     hid_t   dset1 = -1, dset2 = -1, space1 = -1, space2 = -1;
     char    filename[1024];
-    int *   fhandle = NULL;
+    int    *fhandle = NULL;
     hsize_t file_size;
     hsize_t dims1[2], dims2[1];
     size_t  mbound;
     size_t  fbsize;
     size_t  cbsize;
-    void *  proto_points = NULL, *proto_check = NULL;
-    int *   points = NULL, *check = NULL, *p1 = NULL, *p2 = NULL;
+    void   *proto_points = NULL, *proto_check = NULL;
+    int    *points = NULL, *check = NULL, *p1 = NULL, *p2 = NULL;
     int     wdata2[DSET2_DIM] = {11, 12, 13, 14};
     int     rdata2[DSET2_DIM];
     int     i, j, n;
@@ -916,9 +916,9 @@ test_family(void)
     char          filename[1024];
     char          dname[] = "dataset";
     unsigned int  i, j;
-    int *         fhandle = NULL, *fhandle2 = NULL;
-    int **        buf      = NULL;
-    int *         buf_data = NULL;
+    int          *fhandle = NULL, *fhandle2 = NULL;
+    int         **buf      = NULL;
+    int          *buf_data = NULL;
     hsize_t       dims[2]  = {FAMILY_NUMBER, FAMILY_SIZE};
     hsize_t       file_size;
 
@@ -1230,8 +1230,8 @@ test_family_member_fapl(void)
     char     dname[]  = "dataset";
     unsigned i        = 0;
     unsigned j        = 0;
-    int **   buf      = NULL;
-    int *    buf_data = NULL;
+    int    **buf      = NULL;
+    int     *buf_data = NULL;
     hsize_t  dims[2]  = {FAMILY_NUMBER, FAMILY_SIZE};
 
     TESTING("Family member FAPL");
@@ -1387,20 +1387,20 @@ test_multi(void)
     hid_t         driver_id    = -1; /* ID for this VFD              */
     unsigned long driver_flags = 0;  /* VFD feature flags            */
     char          filename[1024];
-    int *         fhandle2 = NULL, *fhandle = NULL;
+    int          *fhandle2 = NULL, *fhandle = NULL;
     hsize_t       file_size;
     H5FD_mem_t    mt, memb_map[H5FD_MEM_NTYPES];
     hid_t         memb_fapl[H5FD_MEM_NTYPES];
     haddr_t       memb_addr[H5FD_MEM_NTYPES];
-    const char *  memb_name[H5FD_MEM_NTYPES];
+    const char   *memb_name[H5FD_MEM_NTYPES];
     char          sv[H5FD_MEM_NTYPES][32];
     hsize_t       dims[2]  = {MULTI_SIZE, MULTI_SIZE};
     hsize_t       adims[1] = {1};
     char          dname[]  = "dataset";
     char          meta[]   = "this is some metadata on this file";
     int           i, j;
-    int **        buf      = NULL;
-    int *         buf_data = NULL;
+    int         **buf      = NULL;
+    int          *buf_data = NULL;
 
     TESTING("MULTI file driver");
 
@@ -1651,8 +1651,8 @@ test_multi_compat(void)
     char        sv[H5FD_MEM_NTYPES][32];
     hsize_t     dims[2] = {MULTI_SIZE, MULTI_SIZE};
     int         i, j;
-    int **      buf      = NULL;
-    int *       buf_data = NULL;
+    int       **buf      = NULL;
+    int        *buf_data = NULL;
 
     TESTING("MULTI file driver backward compatibility");
 
@@ -1831,7 +1831,7 @@ test_log(void)
     hid_t         driver_id    = -1; /* ID for this VFD              */
     unsigned long driver_flags = 0;  /* VFD feature flags            */
     char          filename[1024];
-    int *         fhandle   = NULL;
+    int          *fhandle   = NULL;
     hsize_t       file_size = 0;
     unsigned int  flags     = H5FD_LOG_ALL;
     size_t        buf_size  = 4 * KB;
@@ -1957,7 +1957,7 @@ test_stdio(void)
     hid_t         driver_id    = -1; /* ID for this VFD              */
     unsigned long driver_flags = 0;  /* VFD feature flags            */
     char          filename[1024];
-    FILE *        fhandle   = NULL;
+    FILE         *fhandle   = NULL;
     hsize_t       file_size = 0;
 
     TESTING("STDIO file driver");
@@ -2066,7 +2066,7 @@ test_windows(void)
     hid_t         driver_id    = -1; /* ID for this VFD              */
     unsigned long driver_flags = 0;  /* VFD feature flags            */
     char          filename[1024];
-    int *         fhandle   = NULL;
+    int          *fhandle   = NULL;
     hsize_t       file_size = 0;
 
 #endif /*H5_HAVE_WINDOWS*/
@@ -2374,8 +2374,8 @@ run_splitter_test(const struct splitter_dataset_def *data, hbool_t ignore_wo_err
     hid_t                       fapl_id_out = H5I_INVALID_HID;
     hid_t                       fapl_id_cpy = H5I_INVALID_HID;
     H5FD_splitter_vfd_config_t *vfd_config  = NULL;
-    char *                      filename_rw = NULL;
-    FILE *                      logfile     = NULL;
+    char                       *filename_rw = NULL;
+    FILE                       *logfile     = NULL;
     int                         ret_value   = 0;
 
     if (NULL == (vfd_config = HDcalloc(1, sizeof(H5FD_splitter_vfd_config_t))))
@@ -2604,7 +2604,7 @@ error:
 static int
 splitter_RO_test(const struct splitter_dataset_def *data, hid_t child_fapl_id)
 {
-    char *                      filename_rw = NULL;
+    char                       *filename_rw = NULL;
     H5FD_splitter_vfd_config_t *vfd_config  = NULL;
     hid_t                       fapl_id     = H5I_INVALID_HID;
     hid_t                       file_id     = H5I_INVALID_HID;
@@ -2947,8 +2947,8 @@ done:
 static int
 splitter_tentative_open_test(hid_t child_fapl_id)
 {
-    const char *                filename_tmp = "splitter_tmp.h5";
-    char *                      filename_rw  = NULL;
+    const char                 *filename_tmp = "splitter_tmp.h5";
+    char                       *filename_rw  = NULL;
     H5FD_splitter_vfd_config_t *vfd_config   = NULL;
     hid_t                       fapl_id      = H5I_INVALID_HID;
     hid_t                       file_id      = H5I_INVALID_HID;

@@ -164,7 +164,7 @@ typedef struct {
     int             stop;      /* # of iterations to stop after */
     hsize_t         curr;      /* Current creation order value */
     size_t          max_visit; /* Size of "visited attribute" flag array */
-    hbool_t *       visited;   /* Pointer to array of "visited attribute" flags */
+    hbool_t        *visited;   /* Pointer to array of "visited attribute" flags */
 } attr_iter_info_t;
 
 static herr_t attr_op1(hid_t loc_id, const char *name, const H5A_info_t *ainfo, void *op_data);
@@ -191,7 +191,7 @@ test_attr_basic_write(hid_t fapl)
     hid_t   attr, attr2;                   /* Attribute ID */
     hsize_t attr_size;                     /* storage size for attribute */
     ssize_t attr_name_size;                /* size of attribute name */
-    char *  attr_name              = NULL; /* name of attribute */
+    char   *attr_name              = NULL; /* name of attribute */
     hsize_t dims1[]                = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
     hsize_t dims2[]                = {ATTR1_DIM1};
     hsize_t dims3[]                = {ATTR2_DIM1, ATTR2_DIM2};
@@ -806,7 +806,7 @@ test_attr_compound_read(hid_t fapl)
     H5T_order_t         order;                              /* Attribute datatype order */
     size_t              size;                               /* Attribute datatype size as stored in file */
     int                 fields;                             /* # of Attribute datatype fields */
-    char *              fieldname;                          /* Name of a field */
+    char               *fieldname;                          /* Name of a field */
     size_t              offset;                             /* Attribute datatype field offset */
     hid_t               field;                              /* Attribute field datatype */
     struct attr4_struct read_data4[ATTR4_DIM1][ATTR4_DIM2]; /* Buffer for reading 4th attribute */
@@ -1430,7 +1430,7 @@ test_attr_mult_read(hid_t fapl)
 static herr_t
 attr_op1(hid_t H5_ATTR_UNUSED loc_id, const char *name, const H5A_info_t H5_ATTR_UNUSED *ainfo, void *op_data)
 {
-    int *  count = (int *)op_data;
+    int   *count = (int *)op_data;
     herr_t ret   = 0;
 
     switch (*count) {
@@ -7178,10 +7178,10 @@ test_attr_iterate2(hbool_t new_format, hid_t fcpl, hid_t fapl)
     H5_index_t       idx_type;                /* Type of index to operate on */
     H5_iter_order_t  order;                   /* Order within in the index */
     attr_iter_info_t iter_info;               /* Iterator info */
-    hbool_t *        visited = NULL;          /* Array of flags for visiting links */
+    hbool_t         *visited = NULL;          /* Array of flags for visiting links */
     hsize_t          idx;                     /* Start index for iteration */
     unsigned         use_index;               /* Use index on creation order values */
-    const char *     dsetname;                /* Name of dataset for attributes */
+    const char      *dsetname;                /* Name of dataset for attributes */
     char             attrname[NAME_BUF_SIZE]; /* Name of attribute */
     unsigned         curr_dset;               /* Current dataset to work on */
     unsigned         u;                       /* Local index variable */
@@ -8413,7 +8413,7 @@ test_attr_shared_write(hid_t fcpl, hid_t fapl)
     htri_t         is_shared;               /* Is attributes shared? */
     hsize_t        shared_refcount;         /* Reference count of shared attribute */
     unsigned       attr_value;              /* Attribute value */
-    unsigned *     big_value;               /* Data for "big" attribute */
+    unsigned      *big_value;               /* Data for "big" attribute */
     size_t         mesg_count;              /* # of shared messages */
     unsigned       test_shared;             /* Index over shared component type */
     unsigned       u;                       /* Local index variable */
@@ -8748,7 +8748,7 @@ test_attr_shared_rename(hid_t fcpl, hid_t fapl)
     htri_t         is_shared;                /* Is attributes shared? */
     hsize_t        shared_refcount;          /* Reference count of shared attribute */
     unsigned       attr_value;               /* Attribute value */
-    unsigned *     big_value;                /* Data for "big" attribute */
+    unsigned      *big_value;                /* Data for "big" attribute */
     size_t         mesg_count;               /* # of shared messages */
     unsigned       test_shared;              /* Index over shared component type */
     unsigned       u;                        /* Local index variable */
@@ -9193,7 +9193,7 @@ test_attr_shared_delete(hid_t fcpl, hid_t fapl)
     htri_t         is_shared;               /* Is attributes shared? */
     hsize_t        shared_refcount;         /* Reference count of shared attribute */
     unsigned       attr_value;              /* Attribute value */
-    unsigned *     big_value;               /* Data for "big" attribute */
+    unsigned      *big_value;               /* Data for "big" attribute */
     size_t         mesg_count;              /* # of shared messages */
     unsigned       test_shared;             /* Index over shared component type */
     unsigned       u;                       /* Local index variable */
@@ -9563,7 +9563,7 @@ test_attr_shared_unlink(hid_t fcpl, hid_t fapl)
     htri_t         is_shared;               /* Is attributes shared? */
     hsize_t        shared_refcount;         /* Reference count of shared attribute */
     unsigned       attr_value;              /* Attribute value */
-    unsigned *     big_value;               /* Data for "big" attribute */
+    unsigned      *big_value;               /* Data for "big" attribute */
     size_t         mesg_count;              /* # of shared messages */
     unsigned       test_shared;             /* Index over shared component type */
     unsigned       u;                       /* Local index variable */

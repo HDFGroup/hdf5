@@ -1452,7 +1452,7 @@ done:
 htri_t
 H5MF_try_shrink(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
 {
-    H5MF_free_section_t *       node = NULL;               /* Free space section pointer */
+    H5MF_free_section_t        *node = NULL;               /* Free space section pointer */
     H5MF_sect_ud_t              udata;                     /* User data for callback */
     const H5FS_section_class_t *sect_cls;                  /* Section class */
     H5AC_ring_t                 orig_ring = H5AC_RING_INV; /* Original ring value */
@@ -2135,8 +2135,9 @@ H5MF__close_shrink_eoa(H5F_t *f)
                         curr_ring = needed_ring;
                     } /* end if */
 
-                    udata.alloc_type = (H5FD_mem_t)(
-                        (H5FD_mem_t)ptype < H5FD_MEM_NTYPES ? ptype : ((ptype % H5FD_MEM_NTYPES) + 1));
+                    udata.alloc_type =
+                        (H5FD_mem_t)((H5FD_mem_t)ptype < H5FD_MEM_NTYPES ? ptype
+                                                                         : ((ptype % H5FD_MEM_NTYPES) + 1));
 
                     if ((status = H5FS_sect_try_shrink_eoa(f, f->shared->fs_man[ptype], &udata)) < 0)
                         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSHRINK, FAIL, "can't check for shrinking eoa")
@@ -3097,10 +3098,10 @@ H5MF_settle_meta_data_fsm(H5F_t *f, hbool_t *fsm_settled)
     H5F_mem_page_t sm_fssinfo_fs_type;                        /* small fs sinfo fsm */
     H5F_mem_page_t lg_fshdr_fs_type   = H5F_MEM_PAGE_DEFAULT; /* large fs hdr fsm */
     H5F_mem_page_t lg_fssinfo_fs_type = H5F_MEM_PAGE_DEFAULT; /* large fs sinfo fsm */
-    H5FS_t *       sm_hdr_fspace      = NULL;                 /* ptr to sm FSM hdr alloc FSM */
-    H5FS_t *       sm_sinfo_fspace    = NULL;                 /* ptr to sm FSM sinfo alloc FSM */
-    H5FS_t *       lg_hdr_fspace      = NULL;                 /* ptr to lg FSM hdr alloc FSM */
-    H5FS_t *       lg_sinfo_fspace    = NULL;                 /* ptr to lg FSM sinfo alloc FSM */
+    H5FS_t        *sm_hdr_fspace      = NULL;                 /* ptr to sm FSM hdr alloc FSM */
+    H5FS_t        *sm_sinfo_fspace    = NULL;                 /* ptr to sm FSM sinfo alloc FSM */
+    H5FS_t        *lg_hdr_fspace      = NULL;                 /* ptr to lg FSM hdr alloc FSM */
+    H5FS_t        *lg_sinfo_fspace    = NULL;                 /* ptr to lg FSM sinfo alloc FSM */
     haddr_t        eoa_fsm_fsalloc;                           /* eoa after file space allocation */
                                                               /* for self referential FSMs */
     hbool_t     continue_alloc_fsm = FALSE;         /* Continue allocating addr and sect_addr for FSMs */

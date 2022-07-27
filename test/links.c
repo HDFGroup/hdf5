@@ -161,7 +161,7 @@ typedef struct {
     int             stop;      /* # of iterations to stop after */
     int64_t         curr;      /* Current creation order value */
     size_t          max_visit; /* Size of "visited link" flag array */
-    hbool_t *       visited;   /* Pointer to array of "visited link" flags */
+    hbool_t        *visited;   /* Pointer to array of "visited link" flags */
 } link_iter_info_t;
 
 /* Link visit structs */
@@ -866,7 +866,7 @@ long_links(hid_t fapl, hbool_t new_format)
     hid_t  fid     = -1;   /* File ID */
     hid_t  gid     = -1;   /* Group ID */
     hid_t  gid2    = -1;   /* Datatype ID */
-    char * objname = NULL; /* Name of object [Long] */
+    char  *objname = NULL; /* Name of object [Long] */
     size_t u;              /* Local index variable */
     char   filename[NAME_BUF_SIZE];
 
@@ -6464,7 +6464,7 @@ link_iterate_deprec(hid_t fapl)
     char             objname[NAME_BUF_SIZE];  /* Object name */
     char             filename[NAME_BUF_SIZE]; /* File name */
     link_iter_info_t iter_info;               /* Iterator info */
-    hbool_t *        visited = NULL;          /* Array of flags for visiting links */
+    hbool_t         *visited = NULL;          /* Array of flags for visiting links */
     hsize_t          skip;                    /* # of links to skip in group */
     unsigned         u;                       /* Local index variable */
     herr_t           ret;                     /* Generic return value */
@@ -6955,7 +6955,7 @@ link_iterate_old_deprec(hid_t fapl)
     char             objname[NAME_BUF_SIZE];  /* Object name */
     char             filename[NAME_BUF_SIZE]; /* File name */
     link_iter_info_t iter_info;               /* Iterator info */
-    hbool_t *        visited = NULL;          /* Array of flags for visiting links */
+    hbool_t         *visited = NULL;          /* Array of flags for visiting links */
     hsize_t          skip;                    /* # of links to skip in group */
     unsigned         u;                       /* Local index variable */
     herr_t           ret;                     /* Generic return value */
@@ -9225,13 +9225,13 @@ external_set_elink_fapl2(hid_t fapl, hbool_t new_format)
     hid_t          did       = H5I_INVALID_HID;
     hid_t          dapl_id   = H5I_INVALID_HID;
     hid_t          dcpl      = H5I_INVALID_HID;
-    char *         filename1 = NULL;
-    char *         filename2 = NULL;
-    char *         tmpname   = NULL;
-    char *         cwdpath   = NULL;
+    char          *filename1 = NULL;
+    char          *filename2 = NULL;
+    char          *tmpname   = NULL;
+    char          *cwdpath   = NULL;
     hsize_t        dims[2];
-    int **         points      = NULL;
-    int *          points_data = NULL;
+    int          **points      = NULL;
+    int           *points_data = NULL;
     int            i, j, n;
     h5_stat_size_t filesize;
     h5_stat_size_t new_filesize;
@@ -9898,8 +9898,8 @@ external_set_elink_cb(hid_t fapl, hbool_t new_format)
                          base_driver == H5FD_MPIO || base_driver == H5FD_CORE)
                             ? H5P_DEFAULT
                             : fapl;
-    op_data.fam_size = ELINK_CB_FAM_SIZE;
-    op_data.code     = 0;
+    op_data.fam_size  = ELINK_CB_FAM_SIZE;
+    op_data.code      = 0;
 
     /* Create family fapl */
     if ((fam_fapl = H5Pcopy(fapl)) < 0)
@@ -12441,17 +12441,17 @@ external_symlink(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
     hid_t   group3     = H5I_INVALID_HID;
     hid_t   group4     = H5I_INVALID_HID;
     hid_t   group5     = H5I_INVALID_HID;
-    char *  filename1  = NULL;
-    char *  filename2a = NULL;
-    char *  filename2b = NULL;
-    char *  filename3a = NULL;
-    char *  filename3b = NULL;
-    char *  filename4a = NULL;
-    char *  filename4b = NULL;
-    char *  filename5a = NULL;
-    char *  filename5b = NULL;
-    char *  tmpname    = NULL;
-    char *  cwdpath    = NULL;
+    char   *filename1  = NULL;
+    char   *filename2a = NULL;
+    char   *filename2b = NULL;
+    char   *filename3a = NULL;
+    char   *filename3b = NULL;
+    char   *filename4a = NULL;
+    char   *filename4b = NULL;
+    char   *filename5a = NULL;
+    char   *filename5b = NULL;
+    char   *tmpname    = NULL;
+    char   *cwdpath    = NULL;
     hbool_t have_posix_compat_vfd; /* Whether VFD used is compatible w/POSIX I/O calls */
 #endif                             /* H5_HAVE_SYMLINK */
 
@@ -18320,14 +18320,14 @@ link_info_by_idx_old(hid_t fapl)
 {
     hid_t       file_id  = -1;                 /* File ID */
     hid_t       group_id = -1, group_id2 = -1; /* Group IDs */
-    H5F_t *     f = NULL;
+    H5F_t      *f = NULL;
     unsigned    hard_link;               /* Create hard or soft link? */
     H5L_info2_t linfo;                   /* Link info struct */
     char        objname[NAME_BUF_SIZE];  /* Object name */
     char        valname[NAME_BUF_SIZE];  /* Link value name */
     char        filename[NAME_BUF_SIZE]; /* File name */
     H5O_token_t objtoken[CORDER_NLINKS]; /* Tokens (Addresses) of the objects created */
-    void *      vol_obj_file = NULL;     /* Object of file_id */
+    void       *vol_obj_file = NULL;     /* Object of file_id */
     char        tmpname[NAME_BUF_SIZE];  /* Temporary link name */
     char        tmpval[NAME_BUF_SIZE];   /* Temporary link value */
     unsigned    u;                       /* Local index variable */
@@ -18950,10 +18950,10 @@ delete_by_idx_old(hid_t fapl)
 {
     hid_t           file_id  = -1;                 /* File ID */
     hid_t           group_id = -1, group_id2 = -1; /* Group IDs */
-    H5F_t *         f = NULL;
+    H5F_t          *f = NULL;
     H5L_info2_t     linfo;                   /* Link info struct */
     H5_iter_order_t order;                   /* Order within in the index */
-    void *          vol_obj_file = NULL;     /* Object of file_id */
+    void           *vol_obj_file = NULL;     /* Object of file_id */
     char            objname[NAME_BUF_SIZE];  /* Object name */
     char            filename[NAME_BUF_SIZE]; /* File name */
     H5O_token_t     objtoken[CORDER_NLINKS]; /* Tokens (Addresses) of the objects created */
@@ -19538,7 +19538,7 @@ link_iterate(hid_t fapl)
     char             objname[NAME_BUF_SIZE];  /* Object name */
     char             filename[NAME_BUF_SIZE]; /* File name */
     link_iter_info_t iter_info;               /* Iterator info */
-    hbool_t *        visited = NULL;          /* Array of flags for visiting links */
+    hbool_t         *visited = NULL;          /* Array of flags for visiting links */
     hsize_t          skip;                    /* # of links to skip in group */
     unsigned         u;                       /* Local index variable */
     herr_t           ret;                     /* Generic return value */
@@ -20045,7 +20045,7 @@ link_iterate_old(hid_t fapl)
     char             objname[NAME_BUF_SIZE];  /* Object name */
     char             filename[NAME_BUF_SIZE]; /* File name */
     link_iter_info_t iter_info;               /* Iterator info */
-    hbool_t *        visited = NULL;          /* Array of flags for visiting links */
+    hbool_t         *visited = NULL;          /* Array of flags for visiting links */
     hsize_t          skip;                    /* # of links to skip in group */
     unsigned         u;                       /* Local index variable */
     herr_t           ret;                     /* Generic return value */
@@ -20298,7 +20298,7 @@ open_by_idx(hid_t fapl)
     char            filename[NAME_BUF_SIZE];    /* File name */
     char            objname[NAME_BUF_SIZE];     /* Object name */
     char            valname[2 * NAME_BUF_SIZE]; /* Link value */
-    H5O_token_t *   objno = NULL;               /* Tokens (addresses) of the objects created */
+    H5O_token_t    *objno = NULL;               /* Tokens (addresses) of the objects created */
     unsigned        u;                          /* Local index variable */
     hid_t           ret;                        /* Generic return value */
 
@@ -20916,7 +20916,7 @@ object_info(hid_t fapl)
     char            objname[NAME_BUF_SIZE];     /* Object name */
     char            valname[2 * NAME_BUF_SIZE]; /* Link value */
     char            attrname[NAME_BUF_SIZE];    /* Attribute name */
-    H5O_token_t *   objno = NULL;               /* Tokens (addresses) of the objects created */
+    H5O_token_t    *objno = NULL;               /* Tokens (addresses) of the objects created */
     herr_t          ret;                        /* Generic return value */
     unsigned        u, v;                       /* Local index variables */
 

@@ -2432,7 +2432,7 @@ make_szip(hid_t loc_id)
     unsigned szip_pixels_per_block = 8;
     hsize_t  dims[RANK]            = {DIM1, DIM2};
     hsize_t  chunk_dims[RANK]      = {CDIM1, CDIM2};
-    int **   buf                   = NULL;
+    int    **buf                   = NULL;
     int      szip_can_encode       = 0;
 
     /* Create and fill array */
@@ -2470,7 +2470,7 @@ make_szip(hid_t loc_id)
         /* WARNING? SZIP is decoder only, can't generate test files */
 
         if (H5Sclose(sid) < 0)
-        goto error;
+            goto error;
     if (H5Pclose(dcpl) < 0)
         goto error;
 
@@ -2506,7 +2506,7 @@ make_deflate(hid_t loc_id)
     hid_t      sid              = H5I_INVALID_HID; /* dataspace ID */
     hsize_t    dims[RANK]       = {DIM1, DIM2};
     hsize_t    chunk_dims[RANK] = {CDIM1, CDIM2};
-    int **     buf              = NULL;
+    int      **buf              = NULL;
     hobj_ref_t bufref[1]; /* reference */
     hsize_t    dims1r[1] = {1};
 
@@ -2585,7 +2585,7 @@ make_shuffle(hid_t loc_id)
     hid_t   sid              = H5I_INVALID_HID; /* dataspace ID */
     hsize_t dims[RANK]       = {DIM1, DIM2};
     hsize_t chunk_dims[RANK] = {CDIM1, CDIM2};
-    int **  buf              = NULL;
+    int   **buf              = NULL;
 
     /* Create and fill array */
     H5TEST_ALLOCATE_2D_ARRAY(buf, int, DIM1, DIM2);
@@ -2654,7 +2654,7 @@ make_fletcher32(hid_t loc_id)
     hid_t   sid              = H5I_INVALID_HID; /* dataspace ID */
     hsize_t dims[RANK]       = {DIM1, DIM2};
     hsize_t chunk_dims[RANK] = {CDIM1, CDIM2};
-    int **  buf              = NULL;
+    int   **buf              = NULL;
 
     /* Create and fill array */
     H5TEST_ALLOCATE_2D_ARRAY(buf, int, DIM1, DIM2);
@@ -2728,7 +2728,7 @@ make_nbit(hid_t loc_id)
     hid_t   dsid             = H5I_INVALID_HID;
     hsize_t dims[RANK]       = {DIM1, DIM2};
     hsize_t chunk_dims[RANK] = {CDIM1, CDIM2};
-    int **  buf              = NULL;
+    int   **buf              = NULL;
 
     /* Create and fill array */
     H5TEST_ALLOCATE_2D_ARRAY(buf, int, DIM1, DIM2);
@@ -2815,7 +2815,7 @@ make_scaleoffset(hid_t loc_id)
     hid_t   dsid             = H5I_INVALID_HID;
     hsize_t dims[RANK]       = {DIM1, DIM2};
     hsize_t chunk_dims[RANK] = {CDIM1, CDIM2};
-    int **  buf              = NULL;
+    int   **buf              = NULL;
 
     /* Create and fill array */
     H5TEST_ALLOCATE_2D_ARRAY(buf, int, DIM1, DIM2);
@@ -2900,7 +2900,7 @@ make_all_filters(hid_t loc_id)
 #endif /* H5_HAVE_FILTER_SZIP */
     hsize_t dims[RANK]       = {DIM1, DIM2};
     hsize_t chunk_dims[RANK] = {CDIM1, CDIM2};
-    int **  buf              = NULL;
+    int   **buf              = NULL;
 #if defined(H5_HAVE_FILTER_SZIP)
     int szip_can_encode = 0;
 #endif
@@ -3152,7 +3152,7 @@ make_layout(hid_t loc_id)
     hid_t   sid              = H5I_INVALID_HID; /* dataspace ID */
     hsize_t dims[RANK]       = {DIM1, DIM2};
     hsize_t chunk_dims[RANK] = {CDIM1, CDIM2};
-    int **  buf              = NULL;
+    int   **buf              = NULL;
     int     i;
     char    name[16];
 
@@ -3343,8 +3343,8 @@ make_layout3(hid_t loc_id)
     hsize_t chunk_dims1[RANK] = {DIM1_L3 * 2, 5};
     hsize_t chunk_dims2[RANK] = {SDIM1_L3 + 2, SDIM2_L3 / 2};
     hsize_t chunk_dims3[RANK] = {SDIM1_L3 - 2, SDIM2_L3 / 2};
-    int **  buf1              = NULL;
-    int **  buf2              = NULL;
+    int   **buf1              = NULL;
+    int   **buf2              = NULL;
 
     /* Create and fill arrays */
     H5TEST_ALLOCATE_2D_ARRAY(buf1, int, DIM1_L3, DIM2_L3);
@@ -4063,7 +4063,7 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
     {
 
         hsize_t  TEST_BUFSIZE = (128 * 1024 * 1024); /* 128MB */
-        double * dbuf;                               /* information to write */
+        double  *dbuf;                               /* information to write */
         size_t   size;
         hsize_t  sdims[] = {1};
         hsize_t  tdims[] = {TEST_BUFSIZE / sizeof(double) + 1};
@@ -4567,7 +4567,7 @@ make_dset_reg_ref(hid_t loc_id)
     hsize_t          count[SPACE2_RANK];  /* Element count of hyperslab */
     hsize_t          block[SPACE2_RANK];  /* Block size of hyperslab */
     hdset_reg_ref_t *wbuf  = NULL;        /* buffer to write to disk */
-    int *            dwbuf = NULL;        /* Buffer for writing numeric data to disk */
+    int             *dwbuf = NULL;        /* Buffer for writing numeric data to disk */
     int              i;                   /* counting variables */
     int              retval = -1;         /* return value */
 

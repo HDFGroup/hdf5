@@ -73,7 +73,7 @@ typedef struct H5FD_mpio_t {
 
 /* Callbacks */
 static herr_t   H5FD__mpio_term(void);
-static H5FD_t * H5FD__mpio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr);
+static H5FD_t  *H5FD__mpio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr);
 static herr_t   H5FD__mpio_close(H5FD_t *_file);
 static herr_t   H5FD__mpio_query(const H5FD_t *_f1, unsigned long *flags);
 static haddr_t  H5FD__mpio_get_eoa(const H5FD_t *_file, H5FD_mem_t type);
@@ -819,7 +819,7 @@ done:
 static H5FD_t *
 H5FD__mpio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t H5_ATTR_UNUSED maxaddr)
 {
-    H5FD_mpio_t *   file = NULL;          /* VFD File struct for new file */
+    H5FD_mpio_t    *file = NULL;          /* VFD File struct for new file */
     H5P_genplist_t *plist;                /* Property list pointer */
     MPI_Comm        comm = MPI_COMM_NULL; /* MPI Communicator, from plist */
     MPI_Info        info = MPI_INFO_NULL; /* MPI Info, from plist */
@@ -1317,7 +1317,7 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
                 /* Perform collective read operation */
                 if (MPI_SUCCESS !=
                     (mpi_code = MPI_File_read_at_all(file->f, mpi_off, buf, size_i, buf_type, &mpi_stat)))
-                HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at_all failed", mpi_code)
+                    HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at_all failed", mpi_code)
         } /* end if */
         else {
 #ifdef H5FDmpio_DEBUG

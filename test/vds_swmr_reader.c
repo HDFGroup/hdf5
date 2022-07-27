@@ -29,7 +29,7 @@ main(void)
 
     int    n_elements = 0;    /* size of buffer (elements)        */
     size_t size       = 0;    /* size of buffer (bytes)           */
-    int *  buffer     = NULL; /* data buffer                      */
+    int   *buffer     = NULL; /* data buffer                      */
 
     int     n_dims = -1;    /* # dimensions in dataset          */
     hsize_t dims[RANK];     /* current size of dataset          */

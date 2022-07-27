@@ -35,7 +35,7 @@
 
 typedef struct mirror_log_info {
     uint32_t     magic;
-    FILE *       stream;
+    FILE        *stream;
     unsigned int verbosity;
     char         prefix[MIRROR_LOG_PREFIX_MAX + 1];
 } loginfo_t;

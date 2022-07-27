@@ -90,8 +90,8 @@ test_unregister_filters(hid_t fapl_id)
     char          filename[FILENAME_BUF_SIZE];
     const hsize_t chunk_dims[2] = {FILTER_CHUNK_DIM1, FILTER_CHUNK_DIM2}; /* Chunk dimensions */
     hsize_t       dims[2];
-    int **        buf      = NULL;
-    int *         buf_data = NULL;
+    int         **buf      = NULL;
+    int          *buf_data = NULL;
     herr_t        ret;
 
     TESTING("Unregistering filter");

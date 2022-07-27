@@ -193,7 +193,7 @@ typedef struct H5FD_ros3_t {
     H5FD_t           pub;
     H5FD_ros3_fapl_t fa;
     haddr_t          eoa;
-    s3r_t *          s3r_handle;
+    s3r_t           *s3r_handle;
 #if ROS3_STATS
     ros3_statsbin meta[ROS3_STATS_BIN_COUNT + 1];
     ros3_statsbin raw[ROS3_STATS_BIN_COUNT + 1];
@@ -215,8 +215,8 @@ typedef struct H5FD_ros3_t {
 
 /* Prototypes */
 static herr_t  H5FD__ros3_term(void);
-static void *  H5FD__ros3_fapl_get(H5FD_t *_file);
-static void *  H5FD__ros3_fapl_copy(const void *_old_fa);
+static void   *H5FD__ros3_fapl_get(H5FD_t *_file);
+static void   *H5FD__ros3_fapl_copy(const void *_old_fa);
 static herr_t  H5FD__ros3_fapl_free(void *_fa);
 static H5FD_t *H5FD__ros3_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr);
 static herr_t  H5FD__ros3_close(H5FD_t *_file);
@@ -479,7 +479,7 @@ herr_t
 H5Pget_fapl_ros3(hid_t fapl_id, H5FD_ros3_fapl_t *fa_dst)
 {
     const H5FD_ros3_fapl_t *fa_src    = NULL;
-    H5P_genplist_t *        plist     = NULL;
+    H5P_genplist_t         *plist     = NULL;
     herr_t                  ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
@@ -528,9 +528,9 @@ done:
 static void *
 H5FD__ros3_fapl_get(H5FD_t *_file)
 {
-    H5FD_ros3_t *     file      = (H5FD_ros3_t *)_file;
+    H5FD_ros3_t      *file      = (H5FD_ros3_t *)_file;
     H5FD_ros3_fapl_t *fa        = NULL;
-    void *            ret_value = NULL;
+    void             *ret_value = NULL;
 
     FUNC_ENTER_STATIC
 
@@ -570,8 +570,8 @@ static void *
 H5FD__ros3_fapl_copy(const void *_old_fa)
 {
     const H5FD_ros3_fapl_t *old_fa    = (const H5FD_ros3_fapl_t *)_old_fa;
-    H5FD_ros3_fapl_t *      new_fa    = NULL;
-    void *                  ret_value = NULL;
+    H5FD_ros3_fapl_t       *new_fa    = NULL;
+    void                   *ret_value = NULL;
 
     FUNC_ENTER_STATIC
 
@@ -704,13 +704,13 @@ done:
 static H5FD_t *
 H5FD__ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
-    H5FD_ros3_t *    file = NULL;
-    struct tm *      now  = NULL;
+    H5FD_ros3_t     *file = NULL;
+    struct tm       *now  = NULL;
     char             iso8601now[ISO8601_SIZE];
     unsigned char    signing_key[SHA256_DIGEST_LENGTH];
-    s3r_t *          handle = NULL;
+    s3r_t           *handle = NULL;
     H5FD_ros3_fapl_t fa;
-    H5FD_t *         ret_value = NULL;
+    H5FD_t          *ret_value = NULL;
 
     FUNC_ENTER_STATIC
 
@@ -853,7 +853,7 @@ static herr_t
 ros3_fprint_stats(FILE *stream, const H5FD_ros3_t *file)
 {
     herr_t             ret_value    = SUCCEED;
-    parsed_url_t *     purl         = NULL;
+    parsed_url_t      *purl         = NULL;
     unsigned           i            = 0;
     unsigned long      count_meta   = 0;
     unsigned long      count_raw    = 0;
@@ -1160,8 +1160,8 @@ done:
 static int
 H5FD__ros3_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 {
-    const H5FD_ros3_t * f1        = (const H5FD_ros3_t *)_f1;
-    const H5FD_ros3_t * f2        = (const H5FD_ros3_t *)_f2;
+    const H5FD_ros3_t  *f1        = (const H5FD_ros3_t *)_f1;
+    const H5FD_ros3_t  *f2        = (const H5FD_ros3_t *)_f2;
     const parsed_url_t *purl1     = NULL;
     const parsed_url_t *purl2     = NULL;
     int                 ret_value = 0;

@@ -1819,7 +1819,7 @@ H5std_string
 H5Location::getLinkval(const char *name, size_t size) const
 {
     H5L_info2_t  linkinfo;
-    char *       value_C; // value in C string
+    char        *value_C; // value in C string
     size_t       val_size = size;
     H5std_string value;
     herr_t       ret_value;

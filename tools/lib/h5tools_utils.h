@@ -34,7 +34,7 @@ H5TOOLS_DLLVAR int           g_nTasks;
 H5TOOLS_DLLVAR unsigned char g_Parallel;
 H5TOOLS_DLLVAR char          outBuff[];
 H5TOOLS_DLLVAR unsigned      outBuffOffset;
-H5TOOLS_DLLVAR FILE *overflow_file;
+H5TOOLS_DLLVAR FILE         *overflow_file;
 
 /* Maximum size used in a call to malloc for a dataset */
 H5TOOLS_DLLVAR hsize_t H5TOOLS_MALLOCSIZE;
@@ -91,7 +91,7 @@ H5TOOLS_DLL int get_option(int argc, const char *const *argv, const char *opt,
 /*struct taken from the dumper. needed in table struct*/
 typedef struct obj_t {
     H5O_token_t obj_token;
-    char *      objname;
+    char       *objname;
     hbool_t     displayed; /* Flag to indicate that the object has been displayed */
     hbool_t     recorded;  /* Flag for named datatypes to indicate they were found in the group hierarchy */
 } obj_t;
@@ -156,7 +156,7 @@ typedef struct {
 /* obtain link info from H5tools_get_symlink_info() */
 typedef struct {
     H5O_type_t trg_type;     /* OUT: target type */
-    char *     trg_path;     /* OUT: target obj path. This must be freed
+    char      *trg_path;     /* OUT: target obj path. This must be freed
                               *      when used with H5tools_get_symlink_info() */
     H5O_token_t   obj_token; /* OUT: target object token */
     unsigned long fileno;    /* OUT: File number that target object is located in */

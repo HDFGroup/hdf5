@@ -364,7 +364,7 @@ test_basic_file_operation(const char *env_h5_drvr)
     hid_t       obj_id_list[1];
     hsize_t     file_size;
     unsigned    intent;
-    void *      os_file_handle = NULL;
+    void       *os_file_handle = NULL;
     H5F_info2_t finfo;
     char        name[32];
 

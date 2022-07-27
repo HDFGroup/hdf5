@@ -51,7 +51,7 @@
 /* Shim data for using native H5Literate/visit callbacks with the VOL */
 typedef struct H5L_shim_data_t {
     H5L_iterate1_t real_op;
-    void *         real_op_data;
+    void          *real_op_data;
 } H5L_shim_data_t;
 
 /********************/
@@ -141,7 +141,7 @@ herr_t
 H5Literate1(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx_p, H5L_iterate1_t op,
             void *op_data)
 {
-    H5VL_object_t *   vol_obj = NULL; /* Object of loc_id */
+    H5VL_object_t    *vol_obj = NULL; /* Object of loc_id */
     H5VL_loc_params_t loc_params;
     H5I_type_t        id_type; /* Type of ID */
     H5L_shim_data_t   shim_data;
@@ -219,7 +219,7 @@ herr_t
 H5Literate_by_name1(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_iter_order_t order,
                     hsize_t *idx_p, H5L_iterate1_t op, void *op_data, hid_t lapl_id)
 {
-    H5VL_object_t *   vol_obj = NULL; /* Object of loc_id */
+    H5VL_object_t    *vol_obj = NULL; /* Object of loc_id */
     H5VL_loc_params_t loc_params;
     H5L_shim_data_t   shim_data;
     hbool_t           is_native_vol_obj;
@@ -293,7 +293,7 @@ done:
 herr_t
 H5Lget_info1(hid_t loc_id, const char *name, H5L_info1_t *linfo /*out*/, hid_t lapl_id)
 {
-    H5VL_object_t *   vol_obj = NULL; /* object of loc_id */
+    H5VL_object_t    *vol_obj = NULL; /* object of loc_id */
     H5VL_loc_params_t loc_params;
     H5L_info2_t       linfo2; /* New-style link info */
     hbool_t           is_native_vol_obj;
@@ -376,7 +376,7 @@ herr_t
 H5Lget_info_by_idx1(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_iter_order_t order,
                     hsize_t n, H5L_info1_t *linfo /*out*/, hid_t lapl_id)
 {
-    H5VL_object_t *   vol_obj = NULL; /* object of loc_id */
+    H5VL_object_t    *vol_obj = NULL; /* object of loc_id */
     H5VL_loc_params_t loc_params;
     H5L_info2_t       linfo2; /* New-style link info */
     hbool_t           is_native_vol_obj;
@@ -479,7 +479,7 @@ done:
 herr_t
 H5Lvisit1(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, H5L_iterate1_t op, void *op_data)
 {
-    H5VL_object_t *   vol_obj = NULL; /* Object of loc_id */
+    H5VL_object_t    *vol_obj = NULL; /* Object of loc_id */
     H5VL_loc_params_t loc_params;
     H5I_type_t        id_type; /* Type of ID */
     H5L_shim_data_t   shim_data;
@@ -563,7 +563,7 @@ herr_t
 H5Lvisit_by_name1(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_iter_order_t order,
                   H5L_iterate1_t op, void *op_data, hid_t lapl_id)
 {
-    H5VL_object_t *   vol_obj = NULL; /* Object of loc_id */
+    H5VL_object_t    *vol_obj = NULL; /* Object of loc_id */
     H5VL_loc_params_t loc_params;
     H5L_shim_data_t   shim_data;
     hbool_t           is_native_vol_obj;

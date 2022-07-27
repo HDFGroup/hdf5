@@ -22,7 +22,7 @@
 int d_status = EXIT_SUCCESS;
 
 /* command-line options: short and long-named parameters */
-static const char *        s_opts   = "hlpvV";
+static const char         *s_opts   = "hlpvV";
 static struct long_options l_opts[] = {
     {"help", no_arg, 'h'},          {"latest", no_arg, 'l'},        {"parents", no_arg, 'p'},
     {"verbose", no_arg, 'v'},       {"version", no_arg, 'V'},       {"vol-value", require_arg, '1'},
@@ -30,12 +30,12 @@ static struct long_options l_opts[] = {
 
 /* Command line parameter settings */
 typedef struct mkgrp_opt_t {
-    char *  fname;   /* File name to operate on */
+    char   *fname;   /* File name to operate on */
     hbool_t latest;  /* Whether file should use latest format versions */
     hbool_t verbose; /* Whether output should be verbose */
     hbool_t parents; /* Whether to create intermediate groups */
     size_t  ngroups; /* Number of groups to create */
-    char ** groups;  /* Pointer to array of group names */
+    char  **groups;  /* Pointer to array of group names */
     hid_t   fapl_id; /* fapl to use when opening the file */
 } mkgrp_opt_t;
 

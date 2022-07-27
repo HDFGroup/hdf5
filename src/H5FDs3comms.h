@@ -249,10 +249,10 @@
  */
 typedef struct hrb_node_t {
     unsigned long      magic;
-    char *             name;
-    char *             value;
-    char *             cat;
-    char *             lowername;
+    char              *name;
+    char              *value;
+    char              *cat;
+    char              *lowername;
     struct hrb_node_t *next;
 } hrb_node_t;
 #define S3COMMS_HRB_NODE_MAGIC 0x7F5757UL
@@ -325,12 +325,12 @@ typedef struct hrb_node_t {
  */
 typedef struct {
     unsigned long magic;
-    char *        body;
+    char         *body;
     size_t        body_len;
-    hrb_node_t *  first_header;
-    char *        resource;
-    char *        verb;
-    char *        version;
+    hrb_node_t   *first_header;
+    char         *resource;
+    char         *verb;
+    char         *version;
 } hrb_t;
 #define S3COMMS_HRB_MAGIC 0x6DCC84UL
 
@@ -388,11 +388,11 @@ typedef struct {
  */
 typedef struct {
     unsigned long magic;
-    char *        scheme; /* required */
-    char *        host;   /* required */
-    char *        port;
-    char *        path;
-    char *        query;
+    char         *scheme; /* required */
+    char         *host;   /* required */
+    char         *port;
+    char         *path;
+    char         *query;
 } parsed_url_t;
 #define S3COMMS_PARSED_URL_MAGIC 0x21D0DFUL
 
@@ -476,12 +476,12 @@ typedef struct {
  */
 typedef struct {
     unsigned long  magic;
-    CURL *         curlhandle;
+    CURL          *curlhandle;
     size_t         filesize;
-    char *         httpverb;
-    parsed_url_t * purl;
-    char *         region;
-    char *         secret_id;
+    char          *httpverb;
+    parsed_url_t  *purl;
+    char          *region;
+    char          *secret_id;
     unsigned char *signing_key;
 } s3r_t;
 

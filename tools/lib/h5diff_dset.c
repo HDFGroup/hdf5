@@ -182,10 +182,10 @@ diff_datasetid(hid_t did1, hid_t did2, const char *obj1_name, const char *obj2_n
     hsize_t      storage_size2;
     hsize_t      nfound      = 0; /* number of differences found */
     int          can_compare = 1; /* do diff or not */
-    void *       buf1        = NULL;
-    void *       buf2        = NULL;
-    void *       sm_buf1     = NULL;
-    void *       sm_buf2     = NULL;
+    void        *buf1        = NULL;
+    void        *buf2        = NULL;
+    void        *sm_buf1     = NULL;
+    void        *sm_buf2     = NULL;
     hid_t        sm_space1   = H5I_INVALID_HID; /*stripmine data space */
     hid_t        sm_space2   = H5I_INVALID_HID; /*stripmine data space */
     size_t       need;                          /* bytes needed for malloc */

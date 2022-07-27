@@ -130,13 +130,13 @@
 /* "user data" for iterating over B-tree (collects B-tree metadata size) */
 typedef struct H5B_iter_ud_t {
     H5B_info_t *bt_info; /* Information about B-tree */
-    void *      udata;   /* Node type's 'udata' for loading & iterator callback */
+    void       *udata;   /* Node type's 'udata' for loading & iterator callback */
 } H5B_info_ud_t;
 
 /* Convenience struct for the arguments needed to unprotect a b-tree after a
  * call to H5B__iterate_helper() or H5B__split() */
 typedef struct H5B_ins_ud_t {
-    H5B_t *  bt;          /* B-tree */
+    H5B_t   *bt;          /* B-tree */
     haddr_t  addr;        /* B-tree address */
     unsigned cache_flags; /* Cache flags for H5AC_unprotect() */
 } H5B_ins_ud_t;
@@ -206,7 +206,7 @@ H5FL_SEQ_DEFINE_STATIC(size_t);
 herr_t
 H5B_create(H5F_t *f, const H5B_class_t *type, void *udata, haddr_t *addr_p /*out*/)
 {
-    H5B_t *       bt        = NULL;
+    H5B_t        *bt        = NULL;
     H5B_shared_t *shared    = NULL; /* Pointer to shared B-tree info */
     herr_t        ret_value = SUCCEED;
 
@@ -289,9 +289,9 @@ done:
 htri_t
 H5B_find(H5F_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
 {
-    H5B_t *        bt = NULL;
-    H5UC_t *       rc_shared;           /* Ref-counted shared info */
-    H5B_shared_t * shared;              /* Pointer to shared B-tree info */
+    H5B_t         *bt = NULL;
+    H5UC_t        *rc_shared;           /* Ref-counted shared info */
+    H5B_shared_t  *shared;              /* Pointer to shared B-tree info */
     H5B_cache_ud_t cache_udata;         /* User-data for metadata cache callback */
     unsigned       idx = 0, lt = 0, rt; /* Final, left & right key indices */
     int            cmp       = 1;       /* Key comparison value */
@@ -383,7 +383,7 @@ done:
 static herr_t
 H5B__split(H5F_t *f, H5B_ins_ud_t *bt_ud, unsigned idx, void *udata, H5B_ins_ud_t *split_bt_ud /*out*/)
 {
-    H5B_shared_t * shared;              /* Pointer to shared B-tree info */
+    H5B_shared_t  *shared;              /* Pointer to shared B-tree info */
     H5B_cache_ud_t cache_udata;         /* User-data for metadata cache callback */
     unsigned       nleft, nright;       /* Number of keys in left & right halves */
     double         split_ratios[3];     /* B-tree split ratios */
@@ -548,9 +548,9 @@ H5B_insert(H5F_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
     unsigned       level;
     H5B_ins_ud_t   bt_ud       = H5B_INS_UD_T_NULL; /* (Old) root node */
     H5B_ins_ud_t   split_bt_ud = H5B_INS_UD_T_NULL; /* Split B-tree node */
-    H5B_t *        new_root_bt = NULL;              /* New root node */
-    H5UC_t *       rc_shared;                       /* Ref-counted shared info */
-    H5B_shared_t * shared;                          /* Pointer to shared B-tree info */
+    H5B_t         *new_root_bt = NULL;              /* New root node */
+    H5UC_t        *rc_shared;                       /* Ref-counted shared info */
+    H5B_shared_t  *shared;                          /* Pointer to shared B-tree info */
     H5B_cache_ud_t cache_udata;                     /* User-data for metadata cache callback */
     H5B_ins_t      my_ins    = H5B_INS_ERROR;
     herr_t         ret_value = SUCCEED;
@@ -692,7 +692,7 @@ H5B__insert_child(H5B_t *bt, unsigned *bt_flags, unsigned idx, haddr_t child, H5
                   const void *md_key)
 {
     H5B_shared_t *shared; /* Pointer to shared B-tree info */
-    uint8_t *     base;   /* Base offset for move */
+    uint8_t      *base;   /* Base offset for move */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -777,9 +777,9 @@ H5B__insert_helper(H5F_t *f, H5B_ins_ud_t *bt_ud, const H5B_class_t *type, uint8
                    hbool_t *lt_key_changed, uint8_t *md_key, void *udata, uint8_t *rt_key,
                    hbool_t *rt_key_changed, H5B_ins_ud_t *split_bt_ud /*out*/)
 {
-    H5B_t *        bt;                                  /* Convenience pointer to B-tree */
-    H5UC_t *       rc_shared;                           /* Ref-counted shared info */
-    H5B_shared_t * shared;                              /* Pointer to shared B-tree info */
+    H5B_t         *bt;                                  /* Convenience pointer to B-tree */
+    H5UC_t        *rc_shared;                           /* Ref-counted shared info */
+    H5B_shared_t  *shared;                              /* Pointer to shared B-tree info */
     H5B_cache_ud_t cache_udata;                         /* User-data for metadata cache callback */
     unsigned       lt = 0, idx = 0, rt;                 /* Left, final & right index values */
     int            cmp             = -1;                /* Key comparison value */
@@ -1038,7 +1038,7 @@ H5B__insert_helper(H5F_t *f, H5B_ins_ud_t *bt_ud, const H5B_class_t *type, uint8
     }
     else if (H5B_INS_LEFT == my_ins || H5B_INS_RIGHT == my_ins) {
         unsigned *tmp_bt_flags_ptr = NULL;
-        H5B_t *   tmp_bt;
+        H5B_t    *tmp_bt;
 
         /*
          * If this node is full then split it before inserting the new child.
@@ -1114,9 +1114,9 @@ done:
 static herr_t
 H5B__iterate_helper(H5F_t *f, const H5B_class_t *type, haddr_t addr, H5B_operator_t op, void *udata)
 {
-    H5B_t *        bt = NULL;                /* Pointer to current B-tree node */
-    H5UC_t *       rc_shared;                /* Ref-counted shared info */
-    H5B_shared_t * shared;                   /* Pointer to shared B-tree info */
+    H5B_t         *bt = NULL;                /* Pointer to current B-tree node */
+    H5UC_t        *rc_shared;                /* Ref-counted shared info */
+    H5B_shared_t  *shared;                   /* Pointer to shared B-tree info */
     H5B_cache_ud_t cache_udata;              /* User-data for metadata cache callback */
     unsigned       u;                        /* Local index variable */
     herr_t         ret_value = H5_ITER_CONT; /* Return value */
@@ -1227,10 +1227,10 @@ H5B__remove_helper(H5F_t *f, haddr_t addr, const H5B_class_t *type, int level, u
                    hbool_t *lt_key_changed /*out*/, void *udata, uint8_t *rt_key /*out*/,
                    hbool_t *rt_key_changed /*out*/)
 {
-    H5B_t *        bt = NULL, *sibling = NULL;
+    H5B_t         *bt = NULL, *sibling = NULL;
     unsigned       bt_flags = H5AC__NO_FLAGS_SET;
-    H5UC_t *       rc_shared;           /* Ref-counted shared info */
-    H5B_shared_t * shared;              /* Pointer to shared B-tree info */
+    H5UC_t        *rc_shared;           /* Ref-counted shared info */
+    H5B_shared_t  *shared;              /* Pointer to shared B-tree info */
     H5B_cache_ud_t cache_udata;         /* User-data for metadata cache callback */
     unsigned       idx = 0, lt = 0, rt; /* Final, left & right indices */
     int            cmp       = 1;       /* Key comparison value */
@@ -1598,9 +1598,9 @@ done:
 herr_t
 H5B_delete(H5F_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
 {
-    H5B_t *        bt = NULL;           /* B-tree node being operated on */
-    H5UC_t *       rc_shared;           /* Ref-counted shared info */
-    H5B_shared_t * shared;              /* Pointer to shared B-tree info */
+    H5B_t         *bt = NULL;           /* B-tree node being operated on */
+    H5UC_t        *rc_shared;           /* Ref-counted shared info */
+    H5B_shared_t  *shared;              /* Pointer to shared B-tree info */
     H5B_cache_ud_t cache_udata;         /* User-data for metadata cache callback */
     unsigned       u;                   /* Local index variable */
     herr_t         ret_value = SUCCEED; /* Return value */
@@ -1775,9 +1775,9 @@ H5B_shared_free(void *_shared)
 static H5B_t *
 H5B__copy(const H5B_t *old_bt)
 {
-    H5B_t *       new_node = NULL;
+    H5B_t        *new_node = NULL;
     H5B_shared_t *shared;           /* Pointer to shared B-tree info */
-    H5B_t *       ret_value = NULL; /* Return value */
+    H5B_t        *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -1839,9 +1839,9 @@ done:
 static herr_t
 H5B__get_info_helper(H5F_t *f, const H5B_class_t *type, haddr_t addr, const H5B_info_ud_t *info_udata)
 {
-    H5B_t *        bt = NULL;           /* Pointer to current B-tree node */
-    H5UC_t *       rc_shared;           /* Ref-counted shared info */
-    H5B_shared_t * shared;              /* Pointer to shared B-tree info */
+    H5B_t         *bt = NULL;           /* Pointer to current B-tree node */
+    H5UC_t        *rc_shared;           /* Ref-counted shared info */
+    H5B_shared_t  *shared;              /* Pointer to shared B-tree info */
     H5B_cache_ud_t cache_udata;         /* User-data for metadata cache callback */
     unsigned       level;               /* Node level                 */
     size_t         sizeof_rnode;        /* Size of raw (disk) node         */
@@ -1994,8 +1994,8 @@ done:
 htri_t
 H5B_valid(H5F_t *f, const H5B_class_t *type, haddr_t addr)
 {
-    H5B_t *        bt = NULL;           /* The B-tree */
-    H5UC_t *       rc_shared;           /* Ref-counted shared info */
+    H5B_t         *bt = NULL;           /* The B-tree */
+    H5UC_t        *rc_shared;           /* Ref-counted shared info */
     H5B_cache_ud_t cache_udata;         /* User-data for metadata cache callback */
     htri_t         ret_value = SUCCEED; /* Return value */
 

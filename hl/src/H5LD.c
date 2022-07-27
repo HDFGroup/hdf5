@@ -157,7 +157,7 @@ H5LD_construct_vector(char *fields, H5LD_memb_t *listv[] /*OUT*/, hid_t par_tid)
 {
     int     nfields;               /* The # of comma-separated fields in "fields" */
     hbool_t end_of_fields = FALSE; /* end of "fields" */
-    char *  fields_ptr;            /* Pointer to "fields" */
+    char   *fields_ptr;            /* Pointer to "fields" */
     int     ret_value = FAIL;      /* Return value */
 
     HDassert(listv);
@@ -169,7 +169,7 @@ H5LD_construct_vector(char *fields, H5LD_memb_t *listv[] /*OUT*/, hid_t par_tid)
     /* Process till end of "fields" */
     while (!end_of_fields) {
         H5LD_memb_t *memb = NULL;       /* Pointer to structure for storing a field's info */
-        char *       cur;               /* Pointer to a member in a field */
+        char        *cur;               /* Pointer to a member in a field */
         size_t       len;               /* Estimated # of members in a field */
         hbool_t      gotcomma  = FALSE; /* A comma encountered */
         hbool_t      gotmember = FALSE; /* Getting member in a field */
@@ -335,7 +335,7 @@ H5LD_get_dset_type_size(hid_t did, const char *fields)
     hid_t         dset_tid   = -1;   /* Dataset's type identifier */
     hid_t         tid        = -1;   /* Native Type identifier */
     H5LD_memb_t **listv      = NULL; /* Vector for storing information in "fields" */
-    char *        dup_fields = NULL; /* A copy of "fields" */
+    char         *dup_fields = NULL; /* A copy of "fields" */
     size_t        ret_value  = 0;    /* Return value */
 
     /* Get the datatype of the dataset */
@@ -421,8 +421,8 @@ H5LD_get_dset_elmts(hid_t did, const hsize_t *prev_dims, const hsize_t *cur_dims
     hsize_t       start[H5S_MAX_RANK]; /* Starting offset */
     hsize_t       count[H5S_MAX_RANK]; /* ??offset */
     H5LD_memb_t **listv      = NULL;   /* Vector for storing information in "fields" */
-    char *        dup_fields = NULL;   /* A copy of "fields" */
-    char *        sav_buf    = NULL;   /* Saved pointer temporary buffer */
+    char         *dup_fields = NULL;   /* A copy of "fields" */
+    char         *sav_buf    = NULL;   /* Saved pointer temporary buffer */
     unsigned      ctr;                 /* Counter for # of curr_dims > prev_dims */
     int           ndims;               /* Number of dimensions for the dataset */
     int           i;                   /* Local index variable */
@@ -494,7 +494,7 @@ H5LD_get_dset_elmts(hid_t did, const hsize_t *prev_dims, const hsize_t *cur_dims
     }                                                /* end if */
     else {                                           /* "fields" is specified */
         unsigned char *buf_p = (unsigned char *)buf; /* Pointer to the destination buffer */
-        char *         tmp_buf;                      /* Temporary buffer for data read */
+        char          *tmp_buf;                      /* Temporary buffer for data read */
         size_t         tot_tsize;                    /* Total datatype size */
         size_t         len; /* Estimate the number of comma-separated fields in "fields" */
 

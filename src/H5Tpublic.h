@@ -178,7 +178,7 @@ typedef struct H5T_cdata_t {
     H5T_cmd_t command;  /**< what should the conversion function do?    */
     H5T_bkg_t need_bkg; /**< is the background buffer needed?	     */
     hbool_t   recalc;   /**< recalculate private data		     */
-    void *    priv;     /**< private data				     */
+    void     *priv;     /**< private data				     */
 } H5T_cdata_t;
 //! <!-- [H5T_cdata_t_snip] -->
 
@@ -237,7 +237,7 @@ typedef enum H5T_conv_ret_t {
  */
 typedef struct {
     size_t len; /**< Length of VL data (in base type units) */
-    void * p;   /**< Pointer to VL data */
+    void  *p;   /**< Pointer to VL data */
 } hvl_t;
 
 /* Variable Length String information */

@@ -45,12 +45,12 @@ static int
 test_vds_prefix_second(unsigned config, hid_t fapl)
 {
     const char *srcfilenamepct_map_orig = "vds%%%%_src";
-    char *      srcfilename             = NULL;
-    char *      srcfilename_map         = NULL;
-    char *      vfilename               = NULL;
-    char *      vfilename2              = NULL;
-    char *      srcfilenamepct          = NULL;
-    char *      srcfilenamepct_map      = NULL;
+    char       *srcfilename             = NULL;
+    char       *srcfilename_map         = NULL;
+    char       *vfilename               = NULL;
+    char       *vfilename2              = NULL;
+    char       *srcfilenamepct          = NULL;
+    char       *srcfilenamepct_map      = NULL;
     hid_t       srcfile[4]              = {-1, -1, -1, -1}; /* Files with source dsets */
     hid_t       vfile                   = -1;               /* File with virtual dset */
     hid_t       dcpl                    = -1;               /* Dataset creation property list */

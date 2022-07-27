@@ -221,7 +221,7 @@ typedef struct H5VL_loc_by_name {
 } H5VL_loc_by_name_t;
 
 typedef struct H5VL_loc_by_idx {
-    const char *    name;
+    const char     *name;
     H5_index_t      idx_type;
     H5_iter_order_t order;
     hsize_t         n;
@@ -268,7 +268,7 @@ typedef struct H5VL_info_class_t {
     herr_t (*free)(void *info);                     /* Callback to release a VOL info               */
     herr_t (*to_str)(const void *info, char **str); /* Callback to serialize connector's info into a string */
     herr_t (*from_str)(const char *str,
-                       void **     info); /* Callback to deserialize a string into connector's info */
+                       void      **info); /* Callback to deserialize a string into connector's info */
 } H5VL_info_class_t;
 
 /* VOL object wrap / retrieval callbacks */
@@ -277,7 +277,7 @@ typedef struct H5VL_wrap_class_t {
     void *(*get_object)(const void *obj); /* Callback to retrieve underlying object       */
     herr_t (*get_wrap_ctx)(
         const void *obj,
-        void **     wrap_ctx); /* Callback to retrieve the object wrapping context for the connector */
+        void      **wrap_ctx); /* Callback to retrieve the object wrapping context for the connector */
     void *(*wrap_object)(void *obj, H5I_type_t obj_type,
                          void *wrap_ctx); /* Callback to wrap a library object */
     void *(*unwrap_object)(void *obj);    /* Callback to unwrap a library object */
@@ -447,7 +447,7 @@ typedef struct H5VL_class_t {
     /* Overall connector fields & callbacks */
     unsigned           version;          /**< VOL connector class struct version #     */
     H5VL_class_value_t value;            /**< Value to identify connector              */
-    const char *       name;             /**< Connector name (MUST be unique!)         */
+    const char        *name;             /**< Connector name (MUST be unique!)         */
     unsigned           cap_flags;        /**< Capability flags for connector           */
     herr_t (*initialize)(hid_t vipl_id); /**< Connector initialization callback        */
     herr_t (*terminate)(void);           /**< Connector termination callback           */

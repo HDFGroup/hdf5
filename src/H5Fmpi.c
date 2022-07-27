@@ -362,7 +362,7 @@ H5F_mpi_retrieve_comm(hid_t loc_id, hid_t acspl_id, MPI_Comm *mpi_comm)
        attached to the loc_id */
     if (H5I_INVALID_HID != loc_id) {
         H5G_loc_t loc;
-        H5F_t *   f = NULL;
+        H5F_t    *f = NULL;
 
         /* Retrieve the file structure */
         if (H5G_loc(loc_id, &loc) < 0)

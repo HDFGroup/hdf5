@@ -76,7 +76,7 @@ tts_is_threadsafe(void)
 char *
 gen_name(int value)
 {
-    char *   temp;
+    char    *temp;
     unsigned length;
     int      i;
 

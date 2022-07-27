@@ -20,7 +20,7 @@
 #define TMP_LEN   256
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 size_t input_len;
-char * myinput;
+char  *myinput;
 size_t indent = 0;
 
 /* File Image operations
@@ -57,12 +57,12 @@ size_t indent = 0;
 
 /* Data structure to pass application data to callbacks. */
 typedef struct {
-    void *   app_image_ptr;   /* Pointer to application buffer */
+    void    *app_image_ptr;   /* Pointer to application buffer */
     size_t   app_image_size;  /* Size of application buffer */
-    void *   fapl_image_ptr;  /* Pointer to FAPL buffer */
+    void    *fapl_image_ptr;  /* Pointer to FAPL buffer */
     size_t   fapl_image_size; /* Size of FAPL buffer */
     int      fapl_ref_count;  /* Reference counter for FAPL buffer */
-    void *   vfd_image_ptr;   /* Pointer to VFD buffer */
+    void    *vfd_image_ptr;   /* Pointer to VFD buffer */
     size_t   vfd_image_size;  /* Size of VFD buffer */
     int      vfd_ref_count;   /* Reference counter for VFD buffer */
     unsigned flags;           /* Flags indicate how the file image will */
@@ -71,12 +71,12 @@ typedef struct {
 } H5LT_file_image_ud_t;
 
 /* callbacks prototypes for file image ops */
-static void * image_malloc(size_t size, H5FD_file_image_op_t file_image_op, void *udata);
-static void * image_memcpy(void *dest, const void *src, size_t size, H5FD_file_image_op_t file_image_op,
+static void  *image_malloc(size_t size, H5FD_file_image_op_t file_image_op, void *udata);
+static void  *image_memcpy(void *dest, const void *src, size_t size, H5FD_file_image_op_t file_image_op,
                            void *udata);
-static void * image_realloc(void *ptr, size_t size, H5FD_file_image_op_t file_image_op, void *udata);
+static void  *image_realloc(void *ptr, size_t size, H5FD_file_image_op_t file_image_op, void *udata);
 static herr_t image_free(void *ptr, H5FD_file_image_op_t file_image_op, void *udata);
-static void * udata_copy(void *udata);
+static void  *udata_copy(void *udata);
 static herr_t udata_free(void *udata);
 
 /* Definition of callbacks for file image operations. */
@@ -102,7 +102,7 @@ static void *
 image_malloc(size_t size, H5FD_file_image_op_t file_image_op, void *_udata)
 {
     H5LT_file_image_ud_t *udata        = (H5LT_file_image_ud_t *)_udata;
-    void *                return_value = NULL;
+    void                 *return_value = NULL;
 
     /* callback is only used if the application buffer is not actually copied */
     if (!(udata->flags & H5LT_FILE_IMAGE_DONT_COPY))
@@ -282,7 +282,7 @@ static void *
 image_realloc(void *ptr, size_t size, H5FD_file_image_op_t file_image_op, void *_udata)
 {
     H5LT_file_image_ud_t *udata        = (H5LT_file_image_ud_t *)_udata;
-    void *                return_value = NULL;
+    void                 *return_value = NULL;
 
     /* callback is only used if the application buffer is not actually copied */
     if (!(udata->flags & H5LT_FILE_IMAGE_DONT_COPY))
@@ -2224,7 +2224,7 @@ out:
 static char *
 print_enum(hid_t type, char *str, size_t *str_len, hbool_t no_ubuf, size_t indt)
 {
-    char **        name  = NULL; /*member names                   */
+    char         **name  = NULL; /*member names                   */
     unsigned char *value = NULL; /*value array                    */
     int            nmembs;       /*number of members              */
     char           tmp_str[TMP_LEN];
@@ -2360,7 +2360,7 @@ herr_t
 H5LTdtype_to_text(hid_t dtype, char *str, H5LT_lang_t lang_type, size_t *len)
 {
     size_t str_len  = INCREMENT;
-    char * text_str = NULL;
+    char  *text_str = NULL;
     herr_t ret      = SUCCEED;
 
     if (lang_type <= H5LT_LANG_ERR || lang_type >= H5LT_NO_LANG)
@@ -2751,7 +2751,7 @@ next:
         case H5T_ENUM: {
             hid_t  super;
             size_t super_len;
-            char * stmp = NULL;
+            char  *stmp = NULL;
 
             /* Print lead-in */
             HDsnprintf(dt_str, *slen, "H5T_ENUM {\n");
@@ -2798,7 +2798,7 @@ next:
         case H5T_VLEN: {
             hid_t  super;
             size_t super_len;
-            char * stmp = NULL;
+            char  *stmp = NULL;
 
             /* Print lead-in */
             HDsnprintf(dt_str, *slen, "H5T_VLEN {\n");
@@ -2841,7 +2841,7 @@ next:
         case H5T_ARRAY: {
             hid_t   super;
             size_t  super_len;
-            char *  stmp = NULL;
+            char   *stmp = NULL;
             hsize_t dims[H5S_MAX_RANK];
             int     ndims;
 
@@ -2899,12 +2899,12 @@ next:
             break;
         }
         case H5T_COMPOUND: {
-            char *      mname = NULL;
+            char       *mname = NULL;
             hid_t       mtype;
             size_t      moffset;
             H5T_class_t mclass;
             size_t      mlen;
-            char *      mtmp = NULL;
+            char       *mtmp = NULL;
             int         nmembs;
 
             if ((nmembs = H5Tget_nmembers(dtype)) < 0)
@@ -3604,9 +3604,9 @@ out:
 htri_t
 H5LTpath_valid(hid_t loc_id, const char *path, hbool_t check_object_valid)
 {
-    char *     tmp_path = NULL; /* Temporary copy of the path */
-    char *     curr_name;       /* Pointer to current component of path name */
-    char *     delimit;         /* Pointer to path delimiter during traversal */
+    char      *tmp_path = NULL; /* Temporary copy of the path */
+    char      *curr_name;       /* Pointer to current component of path name */
+    char      *delimit;         /* Pointer to path delimiter during traversal */
     H5I_type_t obj_type;
     htri_t     link_exists, obj_exists;
     size_t     path_length;

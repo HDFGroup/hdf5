@@ -457,10 +457,10 @@ gent_dataset(void)
 {
     hid_t    fid, dataset, space;
     hsize_t  dims[2];
-    int **   dset1      = NULL;
-    int *    dset1_data = NULL;
+    int    **dset1      = NULL;
+    int     *dset1_data = NULL;
     double **dset2      = NULL;
-    double * dset2_data = NULL;
+    double  *dset2_data = NULL;
     int      i, j;
 
     /* Set up data arrays */
@@ -1798,7 +1798,7 @@ gent_str(void)
     } compound_t;
 
     compound_t **comp1      = NULL;
-    compound_t * comp1_data = NULL;
+    compound_t  *comp1_data = NULL;
     hsize_t      mdims[2];
 
     /* Set up data array */
@@ -2114,7 +2114,7 @@ gent_objref(void)
     hobj_ref_t *wbuf,                       /* buffer to write to disk */
         *rbuf,                              /* buffer read from disk */
         *tbuf;                              /* temp. buffer read from disk */
-    uint32_t *  tu32;                       /* Temporary pointer to uint32 data */
+    uint32_t   *tu32;                       /* Temporary pointer to uint32 data */
     int         i;                          /* counting variables */
     const char *write_comment     = "Foo!"; /* Comments for group */
     hbool_t     supports_comments = FALSE;
@@ -2352,9 +2352,9 @@ gent_attrreg(void)
     hsize_t          coord1[POINT1_NPOINTS][SPACE2_RANK]; /* Coordinates for point selection */
     hdset_reg_ref_t *wbuf;                                /* buffer to write to disk */
     hdset_reg_ref_t *rbuf;                                /* buffer read from disk */
-    uint8_t *        dwbuf;                               /* Buffer for writing numeric data to disk */
-    uint8_t *        drbuf;                               /* Buffer for reading numeric data from disk */
-    uint8_t *        tu8;                                 /* Temporary pointer to uint8 data */
+    uint8_t         *dwbuf;                               /* Buffer for writing numeric data to disk */
+    uint8_t         *drbuf;                               /* Buffer for reading numeric data from disk */
+    uint8_t         *tu8;                                 /* Temporary pointer to uint8 data */
     int              i;                                   /* counting variables */
 
     /* Allocate write & read buffers */
@@ -2768,7 +2768,7 @@ static void
 gent_vldatatypes2(void)
 {
     hvl_t                        wdata[SPACE1_DIM1]; /* Information to write */
-    hvl_t *                      t1;                 /* Temporary pointer to VL information */
+    hvl_t                       *t1;                 /* Temporary pointer to VL information */
     hid_t                        fid1;               /* HDF5 File IDs  */
     hid_t                        dataset;            /* Dataset ID   */
     hid_t                        sid1;               /* Dataspace ID   */
@@ -3046,7 +3046,7 @@ gent_vldatatypes5(void)
 static void
 gent_array1_big(void)
 {
-    int *                        wdata;   /* Information to write */
+    int                         *wdata;   /* Information to write */
     hid_t                        fid1;    /* HDF5 File IDs  */
     hid_t                        dataset; /* Dataset ID   */
     hid_t                        sid1;    /* Dataspace ID   */
@@ -3566,7 +3566,7 @@ gent_array8(void)
     herr_t H5_ATTR_NDEBUG_UNUSED status   = -1;
     hsize_t                      sdims[]  = {F64_DIM0};
     hsize_t                      tdims[]  = {F64_DIM1};
-    int *                        wdata; /* Write buffer */
+    int                         *wdata; /* Write buffer */
     unsigned int                 i;
 
     /* Allocate data buffer */
@@ -3858,8 +3858,8 @@ gent_multi(void)
     H5FD_mem_t  mt, memb_map[H5FD_MEM_NTYPES];
     hid_t       memb_fapl[H5FD_MEM_NTYPES];
     const char *memb_name[H5FD_MEM_NTYPES];
-    char **     sv      = NULL;
-    char *      sv_data = NULL;
+    char      **sv      = NULL;
+    char       *sv_data = NULL;
     haddr_t     memb_addr[H5FD_MEM_NTYPES];
 
     sv_data = (char *)HDcalloc(H5FD_MEM_NTYPES * 1024, sizeof(char));
@@ -3989,10 +3989,10 @@ gent_char(void)
                         "men are created equal. Now we are engaged in a great "
                         "civil war, testing whether that nation or any nation "
                         "so conceived and so dedicated can long endure.";
-    hid_t   fid1;    /* HDF5 File IDs    */
-    hid_t   dataset; /* Dataset ID       */
-    hid_t   sid1;    /* Dataspace ID     */
-    hsize_t dims1[1];
+    hid_t       fid1;    /* HDF5 File IDs    */
+    hid_t       dataset; /* Dataset ID       */
+    hid_t       sid1;    /* Dataspace ID     */
+    hsize_t     dims1[1];
 
     dims1[0] = HDstrlen(wdata);
 
@@ -6257,7 +6257,7 @@ gent_longlinks(void)
     hid_t                       fid     = (-1); /* File ID */
     hid_t                       gid     = (-1); /* Group ID */
     hid_t H5_ATTR_NDEBUG_UNUSED gid2    = (-1); /* Datatype ID */
-    char *                      objname = NULL; /* Name of object [Long] */
+    char                       *objname = NULL; /* Name of object [Long] */
     size_t                      u;              /* Local index variable */
 
     /* Create files */
@@ -6479,7 +6479,7 @@ gent_bigdims(void)
     hsize_t                   hs_size[1]; /* hyperslab dimensions */
     size_t                    size;
     char                      fillvalue = 0;
-    char *                    buf       = NULL;
+    char                     *buf       = NULL;
     hsize_t                   i;
     char                      c;
     size_t                    nelmts;
@@ -7264,15 +7264,15 @@ gent_packedbits(void)
     hid_t   space   = H5I_INVALID_HID;
     hsize_t dims[2];
 
-    uint8_t ** dsetu8  = NULL;
+    uint8_t  **dsetu8  = NULL;
     uint16_t **dsetu16 = NULL;
     uint32_t **dsetu32 = NULL;
     uint64_t **dsetu64 = NULL;
-    int8_t **  dset8   = NULL;
-    int16_t ** dset16  = NULL;
-    int32_t ** dset32  = NULL;
-    int64_t ** dset64  = NULL;
-    double **  dsetdbl = NULL;
+    int8_t   **dset8   = NULL;
+    int16_t  **dset16  = NULL;
+    int32_t  **dset32  = NULL;
+    int64_t  **dset64  = NULL;
+    double   **dsetdbl = NULL;
 
     uint8_t  valu8bits;
     uint16_t valu16bits;
@@ -7489,15 +7489,15 @@ gent_attr_intsize(void)
     hid_t   root  = H5I_INVALID_HID;
     hsize_t dims[2];
 
-    uint8_t ** dsetu8  = NULL;
+    uint8_t  **dsetu8  = NULL;
     uint16_t **dsetu16 = NULL;
     uint32_t **dsetu32 = NULL;
     uint64_t **dsetu64 = NULL;
-    int8_t **  dset8   = NULL;
-    int16_t ** dset16  = NULL;
-    int32_t ** dset32  = NULL;
-    int64_t ** dset64  = NULL;
-    double **  dsetdbl = NULL;
+    int8_t   **dset8   = NULL;
+    int16_t  **dset16  = NULL;
+    int32_t  **dset32  = NULL;
+    int64_t  **dset64  = NULL;
+    double   **dsetdbl = NULL;
 
     uint8_t  valu8bits;
     uint16_t valu16bits;
@@ -8586,15 +8586,15 @@ gent_intscalars(void)
     hid_t   tid     = H5I_INVALID_HID;
     hsize_t dims[2];
 
-    uint8_t ** dsetu8  = NULL;
+    uint8_t  **dsetu8  = NULL;
     uint16_t **dsetu16 = NULL;
     uint32_t **dsetu32 = NULL;
     uint64_t **dsetu64 = NULL;
-    int8_t **  dset8   = NULL;
-    int16_t ** dset16  = NULL;
-    int32_t ** dset32  = NULL;
-    int64_t ** dset64  = NULL;
-    double **  dsetdbl = NULL;
+    int8_t   **dset8   = NULL;
+    int16_t  **dset16  = NULL;
+    int32_t  **dset32  = NULL;
+    int64_t  **dset64  = NULL;
+    double   **dsetdbl = NULL;
 
     uint8_t  valu8bits;
     uint16_t valu16bits;
@@ -8829,15 +8829,15 @@ gent_attr_intscalars(void)
     hid_t   tid   = H5I_INVALID_HID;
     hsize_t dims[2];
 
-    uint8_t ** dsetu8  = NULL;
+    uint8_t  **dsetu8  = NULL;
     uint16_t **dsetu16 = NULL;
     uint32_t **dsetu32 = NULL;
     uint64_t **dsetu64 = NULL;
-    int8_t **  dset8   = NULL;
-    int16_t ** dset16  = NULL;
-    int32_t ** dset32  = NULL;
-    int64_t ** dset64  = NULL;
-    double **  dsetdbl = NULL;
+    int8_t   **dset8   = NULL;
+    int16_t  **dset16  = NULL;
+    int32_t  **dset32  = NULL;
+    int64_t  **dset64  = NULL;
+    double   **dsetdbl = NULL;
 
     uint8_t  valu8bits;
     uint16_t valu16bits;
@@ -9618,15 +9618,15 @@ gent_intattrscalars(void)
     hid_t   tid     = H5I_INVALID_HID;
     hsize_t dims[2];
 
-    uint8_t ** dsetu8  = NULL;
+    uint8_t  **dsetu8  = NULL;
     uint16_t **dsetu16 = NULL;
     uint32_t **dsetu32 = NULL;
     uint64_t **dsetu64 = NULL;
-    int8_t **  dset8   = NULL;
-    int16_t ** dset16  = NULL;
-    int32_t ** dset32  = NULL;
-    int64_t ** dset64  = NULL;
-    double **  dsetdbl = NULL;
+    int8_t   **dset8   = NULL;
+    int16_t  **dset16  = NULL;
+    int32_t  **dset32  = NULL;
+    int64_t  **dset64  = NULL;
+    double   **dsetdbl = NULL;
 
     uint8_t  valu8bits;
     uint16_t valu16bits;
@@ -9896,25 +9896,25 @@ gent_intsattrs(void)
     hid_t   aspace  = H5I_INVALID_HID;
     hsize_t dims[2], adims[1];
 
-    uint8_t ** dsetu8  = NULL;
+    uint8_t  **dsetu8  = NULL;
     uint16_t **dsetu16 = NULL;
     uint32_t **dsetu32 = NULL;
     uint64_t **dsetu64 = NULL;
-    int8_t **  dset8   = NULL;
-    int16_t ** dset16  = NULL;
-    int32_t ** dset32  = NULL;
-    int64_t ** dset64  = NULL;
-    double **  dsetdbl = NULL;
+    int8_t   **dset8   = NULL;
+    int16_t  **dset16  = NULL;
+    int32_t  **dset32  = NULL;
+    int64_t  **dset64  = NULL;
+    double   **dsetdbl = NULL;
 
-    uint8_t * asetu8  = NULL;
+    uint8_t  *asetu8  = NULL;
     uint16_t *asetu16 = NULL;
     uint32_t *asetu32 = NULL;
     uint64_t *asetu64 = NULL;
-    int8_t *  aset8   = NULL;
-    int16_t * aset16  = NULL;
-    int32_t * aset32  = NULL;
-    int64_t * aset64  = NULL;
-    double *  asetdbl = NULL;
+    int8_t   *aset8   = NULL;
+    int16_t  *aset16  = NULL;
+    int32_t  *aset32  = NULL;
+    int64_t  *aset64  = NULL;
+    double   *asetdbl = NULL;
 
     uint8_t  valu8bits;
     uint16_t valu16bits;
@@ -10238,12 +10238,12 @@ gent_floatsattrs(void)
     hid_t   aspace  = H5I_INVALID_HID;
     hsize_t dims[2], adims[1];
 
-    float **      dset32  = NULL;
-    double **     dset64  = NULL;
+    float       **dset32  = NULL;
+    double      **dset64  = NULL;
     long double **dset128 = NULL;
 
-    float *      aset32  = NULL;
-    double *     aset64  = NULL;
+    float       *aset32  = NULL;
+    double      *aset64  = NULL;
     long double *aset128 = NULL;
 
     float       val32bits;
@@ -11069,7 +11069,7 @@ static size_t
 H5Z_filter_dynlibud(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values, size_t nbytes,
                     size_t *buf_size, void **buf)
 {
-    char * int_ptr  = (char *)*buf; /* Pointer to the data values */
+    char  *int_ptr  = (char *)*buf; /* Pointer to the data values */
     size_t buf_left = *buf_size;    /* Amount of data buffer left to process */
 
     /* Check for the correct number of parameters */

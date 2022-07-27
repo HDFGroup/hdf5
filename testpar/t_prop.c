@@ -26,7 +26,7 @@ test_encode_decode(hid_t orig_pl, int mpi_rank, int recv_proc)
     MPI_Status  status;
     hid_t       pl; /* Decoded property list */
     size_t      buf_size = 0;
-    void *      sbuf     = NULL;
+    void       *sbuf     = NULL;
     herr_t      ret; /* Generic return value */
 
     if (mpi_rank == 0) {
@@ -105,7 +105,7 @@ test_plist_ed(void)
     unsigned            max_compact;
     unsigned            min_dense;
     hsize_t             max_size[1]; /*data space maximum size */
-    const char *        c_to_f          = "x+32";
+    const char         *c_to_f          = "x+32";
     H5AC_cache_config_t my_cache_config = {H5AC__CURR_CACHE_CONFIG_VERSION,
                                            TRUE,
                                            FALSE,

@@ -218,9 +218,9 @@ typedef struct H5CX_t {
     /* Cached DXPL properties */
     size_t    max_temp_buf;            /* Maximum temporary buffer size */
     hbool_t   max_temp_buf_valid;      /* Whether maximum temporary buffer size is valid */
-    void *    tconv_buf;               /* Temporary conversion buffer (H5D_XFER_TCONV_BUF_NAME) */
+    void     *tconv_buf;               /* Temporary conversion buffer (H5D_XFER_TCONV_BUF_NAME) */
     hbool_t   tconv_buf_valid;         /* Whether temporary conversion buffer is valid */
-    void *    bkgr_buf;                /* Background conversion buffer (H5D_XFER_BKGR_BUF_NAME) */
+    void     *bkgr_buf;                /* Background conversion buffer (H5D_XFER_BKGR_BUF_NAME) */
     hbool_t   bkgr_buf_valid;          /* Whether background conversion buffer is valid */
     H5T_bkg_t bkgr_buf_type;           /* Background buffer type (H5D_XFER_BKGR_BUF_NAME) */
     hbool_t   bkgr_buf_type_valid;     /* Whether background buffer type is valid */
@@ -246,7 +246,7 @@ typedef struct H5CX_t {
     hbool_t               err_detect_valid;     /* Whether error detection info is valid */
     H5Z_cb_t              filter_cb;            /* Filter callback function (H5D_XFER_FILTER_CB_NAME) */
     hbool_t               filter_cb_valid;      /* Whether filter callback function is valid */
-    H5Z_data_xform_t *    data_transform;       /* Data transform info (H5D_XFER_XFORM_NAME) */
+    H5Z_data_xform_t     *data_transform;       /* Data transform info (H5D_XFER_XFORM_NAME) */
     hbool_t               data_transform_valid; /* Whether data transform info is valid */
     H5T_vlen_alloc_info_t vl_alloc_info;        /* VL datatype alloc info (H5D_XFER_VLEN_*_NAME) */
     hbool_t               vl_alloc_info_valid;  /* Whether VL datatype alloc info is valid */
@@ -332,7 +332,7 @@ typedef struct H5CX_t {
     /* Cached VOL settings */
     H5VL_connector_prop_t vol_connector_prop; /* Property for VOL connector ID & info */
     hbool_t vol_connector_prop_valid;         /* Whether property for VOL connector ID & info is valid */
-    void *  vol_wrap_ctx;                     /* VOL connector's "wrap context" for creating IDs */
+    void   *vol_wrap_ctx;                     /* VOL connector's "wrap context" for creating IDs */
     hbool_t vol_wrap_ctx_valid; /* Whether VOL connector's "wrap context" for creating IDs is valid */
 } H5CX_t;
 
@@ -356,8 +356,8 @@ typedef struct H5CX_node_t {
  */
 typedef struct H5CX_dxpl_cache_t {
     size_t    max_temp_buf;         /* Maximum temporary buffer size (H5D_XFER_MAX_TEMP_BUF_NAME) */
-    void *    tconv_buf;            /* Temporary conversion buffer (H5D_XFER_TCONV_BUF_NAME) */
-    void *    bkgr_buf;             /* Background conversion buffer (H5D_XFER_BKGR_BUF_NAME) */
+    void     *tconv_buf;            /* Temporary conversion buffer (H5D_XFER_TCONV_BUF_NAME) */
+    void     *bkgr_buf;             /* Background conversion buffer (H5D_XFER_BKGR_BUF_NAME) */
     H5T_bkg_t bkgr_buf_type;        /* Background buffer type (H5D_XFER_BKGR_BUF_NAME) */
     double    btree_split_ratio[3]; /* B-tree split ratios (H5D_XFER_BTREE_SPLIT_RATIO_NAME) */
     size_t    vec_size;             /* Size of hyperslab vector (H5D_XFER_HYPER_VECTOR_SIZE_NAME) */
@@ -376,7 +376,7 @@ typedef struct H5CX_dxpl_cache_t {
 #endif                                    /* H5_HAVE_PARALLEL */
     H5Z_EDC_t             err_detect;     /* Error detection info (H5D_XFER_EDC_NAME) */
     H5Z_cb_t              filter_cb;      /* Filter callback function (H5D_XFER_FILTER_CB_NAME) */
-    H5Z_data_xform_t *    data_transform; /* Data transform info (H5D_XFER_XFORM_NAME) */
+    H5Z_data_xform_t     *data_transform; /* Data transform info (H5D_XFER_XFORM_NAME) */
     H5T_vlen_alloc_info_t vl_alloc_info;  /* VL datatype alloc info (H5D_XFER_VLEN_*_NAME) */
     H5T_conv_cb_t         dt_conv_cb;     /* Datatype conversion struct (H5D_XFER_CONV_CB_NAME) */
 } H5CX_dxpl_cache_t;
@@ -949,7 +949,7 @@ H5CX_retrieve_state(H5CX_state_t **api_state)
             /* Copy connector info, if it exists */
             if ((*api_state)->vol_connector_prop.connector_info) {
                 H5VL_class_t *connector;                 /* Pointer to connector */
-                void *        new_connector_info = NULL; /* Copy of connector info */
+                void         *new_connector_info = NULL; /* Copy of connector info */
 
                 /* Retrieve the connector for the ID */
                 if (NULL ==
@@ -1366,7 +1366,7 @@ H5CX_set_apl(hid_t *acspl_id, const H5P_libclass_t *libclass,
          * specified a collective metadata read for just this operation.
          */
         if (!is_collective) {
-            H5P_genplist_t *        plist;        /* Property list pointer */
+            H5P_genplist_t         *plist;        /* Property list pointer */
             H5P_coll_md_read_flag_t md_coll_read; /* Collective metadata read flag */
 
             /* Get the plist structure for the access property list */
