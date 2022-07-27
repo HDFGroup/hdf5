@@ -583,7 +583,7 @@ test_compound_1(void)
     H5T_str_t   strpad;
     H5T_order_t order;
     H5T_sign_t  sign;
-    char *      tag = NULL;
+    char       *tag = NULL;
     int         offset;
     herr_t      ret;
     int         retval = 1;
@@ -1161,8 +1161,8 @@ test_compound_5(void)
     src_type_t src[2] = {{"one", 102, {104, 105, 106, 107}}, {"two", 202, {204, 205, 206, 207}}};
 
     dst_type_t *dst;
-    void *      buf    = HDcalloc((size_t)2, sizeof(dst_type_t));
-    void *      bkg    = HDcalloc((size_t)2, sizeof(dst_type_t));
+    void       *buf    = HDcalloc((size_t)2, sizeof(dst_type_t));
+    void       *bkg    = HDcalloc((size_t)2, sizeof(dst_type_t));
     int         retval = 1;
 
     TESTING("optimized struct converter");
@@ -2042,7 +2042,7 @@ test_compound_10(void)
     hid_t       dset_id;
     hsize_t     arr_dim[1] = {ARRAY_DIM}; /* Array dimensions */
     hsize_t     dim1[1];
-    void *      t1, *t2;
+    void       *t1, *t2;
     char        filename[1024];
     size_t      len;
     int         i;
@@ -2244,7 +2244,7 @@ test_compound_11(void)
     typedef struct {
         double d1;
         int    i1;
-        char * s1;
+        char  *s1;
         int    i2;
         double d2;
         double d3;
@@ -2253,7 +2253,7 @@ test_compound_11(void)
     typedef struct {
         double d1;
         int    i1;
-        char * s1;
+        char  *s1;
     } little_t;
 
     hid_t   var_string_tid;             /* Datatype IDs for type conversion */
@@ -2262,9 +2262,9 @@ test_compound_11(void)
     hid_t   opaq_src_tid, opaq_dst_tid; /* Datatype IDs for type conversion */
     hid_t   space_id;                   /* Dataspace for buffer elements */
     hsize_t dim[1];                     /* Dimensions for dataspace */
-    void *  buf      = NULL;            /* Conversion buffer */
-    void *  buf_orig = NULL;            /* Copy of original conversion buffer */
-    void *  bkg      = NULL;            /* Background buffer */
+    void   *buf      = NULL;            /* Conversion buffer */
+    void   *buf_orig = NULL;            /* Copy of original conversion buffer */
+    void   *bkg      = NULL;            /* Background buffer */
     size_t  u;                          /* Local index variable */
     int     retval = 1;
 
@@ -4944,7 +4944,7 @@ error:
 static int
 test_conv_str_2(void)
 {
-    char *       buf    = NULL, s[80];
+    char        *buf    = NULL, s[80];
     hid_t        c_type = -1;
     hid_t        f_type = -1;
     const size_t nelmts = NTESTELEM;
@@ -5016,7 +5016,7 @@ error:
 static int
 test_conv_str_3(void)
 {
-    char *       buf    = NULL;
+    char        *buf    = NULL;
     hid_t        type   = -1;
     hid_t        super  = -1;
     const size_t nelmts = NTESTELEM;
@@ -5025,7 +5025,7 @@ test_conv_str_3(void)
     size_t       size;
     H5T_pad_t    inpad;
     H5T_sign_t   sign;
-    char *       tag = NULL;
+    char        *tag = NULL;
     herr_t       ret;
 
     TESTING("some type functions for string");
@@ -5235,7 +5235,7 @@ static int
 test_conv_enum_2(void)
 {
     hid_t       srctype = -1, dsttype = -1, oddsize = -1;
-    int *       data = NULL, i, nerrors = 0;
+    int        *data = NULL, i, nerrors = 0;
     const char *mname[] = {"RED", "GREEN", "BLUE", "YELLOW", "PINK", "PURPLE", "ORANGE", "WHITE"};
 
     TESTING("non-native enumeration type conversion");
@@ -5408,7 +5408,7 @@ test_bitfield_funcs(void)
 {
     hid_t      type = -1, ntype = -1, super = -1;
     size_t     size;
-    char *     tag = 0;
+    char      *tag = 0;
     H5T_pad_t  inpad;
     H5T_cset_t cset;
     H5T_str_t  strpad;
@@ -5692,7 +5692,7 @@ error:
 static int
 opaque_long(void)
 {
-    char * long_tag = NULL;
+    char  *long_tag = NULL;
     hid_t  dt       = -1;
     herr_t ret;
 
@@ -6687,7 +6687,7 @@ test_int_float_except(void)
                                (float)4.5F};
     int    buf_int[CONVERT_SIZE]   = {INT_MIN, INT_MAX, INT_MAX - 127, 4};
     float  buf_float[CONVERT_SIZE] = {(float)INT_MIN, (float)INT_MAX + 1.0F, (float)INT_MAX - 127.0F, 4};
-    int *  intp; /* Pointer to buffer, as integers */
+    int   *intp; /* Pointer to buffer, as integers */
     int    buf2[CONVERT_SIZE]       = {INT_MIN, INT_MAX, INT_MAX - 72, 0};
     float  buf2_float[CONVERT_SIZE] = {(float)INT_MIN, (float)INT_MAX, (float)INT_MAX - 127.0F, (float)0.0F};
     int    buf2_int[CONVERT_SIZE]   = {INT_MIN, INT_MAX, INT_MAX - 127, 0};
@@ -7249,8 +7249,8 @@ test_named_indirect_reopen(hid_t fapl)
     static hsize_t dims[1] = {3};
     size_t         dt_size;
     int            enum_value;
-    const char *   tag     = "opaque_tag";
-    char *         tag_ret = NULL;
+    const char    *tag     = "opaque_tag";
+    char          *tag_ret = NULL;
     char           filename[1024];
 
     TESTING("indirectly reopening committed datatypes");
@@ -8116,9 +8116,9 @@ test_utf_ascii_conv(void)
     hid_t       ascii_tid  = -1;
     hid_t       sid        = -1;
     const char *utf8_w     = "foo!";
-    char *      ascii_r    = NULL;
+    char       *ascii_r    = NULL;
     const char *ascii_w    = "bar!";
-    char *      utf8_r     = NULL;
+    char       *utf8_r     = NULL;
     char        filename[1024];
     char        ascii2[4], utf8_2[4];
     herr_t      status;
@@ -8374,7 +8374,7 @@ verify_version(hid_t dtype, H5F_libver_t low, unsigned *highest_version)
 {
     hid_t       base_dtype = -1;
     hid_t       mem_dtype  = -1;
-    H5T_t *     dtypep     = NULL;         /* Internal structure of a datatype */
+    H5T_t      *dtypep     = NULL;         /* Internal structure of a datatype */
     H5T_class_t type_cls   = H5T_NO_CLASS; /* Temporary var for datatype class */
     int         nmembers   = 0;
     unsigned    i;
@@ -8556,8 +8556,8 @@ test_versionbounds(void)
     hid_t        simple_cmp_type = -1;          /* Simple cmpd dtype, contains no other cmpd */
     hid_t        outer_arr_type  = -1;          /* Outermost array datatype */
     hid_t        inner_arr_type  = -1;          /* Inner array datatype */
-    H5F_t *      filep           = NULL;        /* Pointer to internal structure of a file */
-    H5T_t *      dtypep          = NULL;        /* Pointer to internal structure of a datatype */
+    H5F_t       *filep           = NULL;        /* Pointer to internal structure of a file */
+    H5T_t       *dtypep          = NULL;        /* Pointer to internal structure of a datatype */
     hsize_t      arr_dim[]       = {ARRAY_LEN}; /* Length of the array */
     H5F_libver_t low, high;                     /* File format bounds */
     unsigned     highest_version;               /* Highest version in nested datatypes */

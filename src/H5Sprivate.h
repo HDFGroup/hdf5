@@ -104,7 +104,7 @@ typedef struct {
     /* Irregular hyperslab selection fields */
     hsize_t loc_off[H5S_MAX_RANK]; /* Byte offset in buffer, for each dimension's current offset */
     H5S_hyper_span_info_t *spans;  /* Pointer to copy of the span tree */
-    H5S_hyper_span_t *     span[H5S_MAX_RANK]; /* Array of pointers to span nodes */
+    H5S_hyper_span_t      *span[H5S_MAX_RANK]; /* Array of pointers to span nodes */
 } H5S_hyper_iter_t;
 
 /* "All" selection iteration container */
@@ -232,7 +232,7 @@ struct H5O_loc_t;
 typedef struct H5S_t H5S_t;
 
 /* Operations on dataspaces */
-H5_DLL H5S_t *     H5S_copy(const H5S_t *src, hbool_t share_selection, hbool_t copy_max);
+H5_DLL H5S_t      *H5S_copy(const H5S_t *src, hbool_t share_selection, hbool_t copy_max);
 H5_DLL herr_t      H5S_close(H5S_t *ds);
 H5_DLL H5S_class_t H5S_get_simple_extent_type(const H5S_t *ds);
 H5_DLL hssize_t    H5S_get_simple_extent_npoints(const H5S_t *ds);
@@ -316,7 +316,7 @@ H5_DLL hsize_t H5S_hyper_get_clip_extent(const H5S_t *clip_space, const H5S_t *m
                                          hbool_t incl_trail);
 H5_DLL hsize_t H5S_hyper_get_clip_extent_match(const H5S_t *clip_space, const H5S_t *match_space,
                                                hsize_t match_clip_size, hbool_t incl_trail);
-H5_DLL H5S_t * H5S_hyper_get_unlim_block(const H5S_t *space, hsize_t block_index);
+H5_DLL H5S_t  *H5S_hyper_get_unlim_block(const H5S_t *space, hsize_t block_index);
 H5_DLL hsize_t H5S_hyper_get_first_inc_block(const H5S_t *space, hsize_t clip_size, hbool_t *partial);
 
 /* Operations on selection iterators */

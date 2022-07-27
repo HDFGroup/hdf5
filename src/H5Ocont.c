@@ -88,7 +88,7 @@ H5O__cont_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSE
                  unsigned H5_ATTR_UNUSED *ioflags, size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
 {
     H5O_cont_t *cont      = NULL;
-    void *      ret_value = NULL; /* Return value */
+    void       *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_STATIC
 

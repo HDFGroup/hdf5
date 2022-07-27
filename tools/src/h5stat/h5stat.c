@@ -84,7 +84,7 @@ typedef struct iter_t {
     unsigned long  dset_layouts[H5D_NLAYOUTS];      /* Type of storage for each dataset */
     unsigned long  dset_comptype[H5_NFILTERS_IMPL]; /* Number of currently implemented filters */
     unsigned long  dset_ntypes;                     /* Number of diff. dataset datatypes found */
-    dtype_info_t * dset_type_info;                  /* Pointer to dataset datatype information found */
+    dtype_info_t  *dset_type_info;                  /* Pointer to dataset datatype information found */
     unsigned       dset_dim_nbins;                  /* Number of bins for dataset dimensions */
     unsigned long *dset_dim_bins;                   /* Pointer to array of bins for dataset dimensions */
     ohdr_info_t    dset_ohdr_info;                  /* Object header information for datasets */
@@ -109,7 +109,7 @@ typedef struct iter_t {
     hsize_t               free_hdr;                 /* Size of free space manager metadata in the file */
     unsigned long         num_small_sects[SIZE_SMALL_SECTS]; /* Size of small free-space sections */
     unsigned              sect_nbins;                        /* Number of bins for free-space section sizes */
-    unsigned long *       sect_bins; /* Pointer to array of bins for free-space section sizes */
+    unsigned long        *sect_bins; /* Pointer to array of bins for free-space section sizes */
     hsize_t               datasets_index_storage_size; /* meta size for chunked dataset's indexing type */
     hsize_t               datasets_heap_storage_size;  /* heap size for dataset with external storage */
     unsigned long         nexternal;                   /* Number of external files for a dataset */
@@ -1679,7 +1679,7 @@ int
 main(int argc, char *argv[])
 {
     iter_t            iter;
-    const char *      fname   = NULL;
+    const char       *fname   = NULL;
     hid_t             fid     = H5I_INVALID_HID;
     struct handler_t *hand    = NULL;
     hid_t             fapl_id = H5P_DEFAULT;

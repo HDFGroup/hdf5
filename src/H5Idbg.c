@@ -74,7 +74,7 @@ static int H5I__id_dump_cb(void *_item, void *_key, void *_udata);
 static int
 H5I__id_dump_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
 {
-    H5I_id_info_t *   info = (H5I_id_info_t *)_item; /* Pointer to the ID node */
+    H5I_id_info_t    *info = (H5I_id_info_t *)_item; /* Pointer to the ID node */
     H5I_type_t        type = *(H5I_type_t *)_udata;  /* User data */
     const H5G_name_t *path = NULL;                   /* Path to file object */
 

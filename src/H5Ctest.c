@@ -122,8 +122,8 @@ done:
 herr_t
 H5C__verify_cork_tag_test(hid_t fid, haddr_t tag, hbool_t status)
 {
-    H5F_t *                f;                   /* File Pointer */
-    H5C_t *                cache;               /* Cache Pointer */
+    H5F_t                 *f;                   /* File Pointer */
+    H5C_t                 *cache;               /* Cache Pointer */
     H5C_tag_iter_vct_ctx_t ctx;                 /* Context for iterator callback */
     herr_t                 ret_value = SUCCEED; /* Return value */
 

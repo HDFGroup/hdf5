@@ -50,16 +50,16 @@ typedef int (*visit_operator_t)(H5Object &obj, const H5std_string attr_name, con
 class UserData4Aiterate {
   public:
     attr_operator_t op;
-    void *          opData;
-    H5Object *      location; // Consider changing to H5Location
+    void           *opData;
+    H5Object       *location; // Consider changing to H5Location
 };
 
 // User data for visit iteration
 class UserData4Visit {
   public:
     visit_operator_t op;
-    void *           opData;
-    H5Object *       obj;
+    void            *opData;
+    H5Object        *obj;
 };
 
 class H5_DLLCPP H5Object : public H5Location {

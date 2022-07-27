@@ -85,7 +85,7 @@ H5EA__hdr_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, co
 {
     /* Local variables */
     H5EA_hdr_t *hdr       = NULL;    /* Shared extensible array header */
-    void *      dbg_ctx   = NULL;    /* Extensible array debugging context */
+    void       *dbg_ctx   = NULL;    /* Extensible array debugging context */
     herr_t      ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -166,9 +166,9 @@ H5EA__iblock_debug(H5F_t *f, haddr_t H5_ATTR_UNUSED addr, FILE *stream, int inde
                    const H5EA_class_t *cls, haddr_t hdr_addr, haddr_t obj_addr)
 {
     /* Local variables */
-    H5EA_hdr_t *   hdr       = NULL;    /* Shared extensible array header */
+    H5EA_hdr_t    *hdr       = NULL;    /* Shared extensible array header */
     H5EA_iblock_t *iblock    = NULL;    /* Extensible array index block */
-    void *         dbg_ctx   = NULL;    /* Extensible array context */
+    void          *dbg_ctx   = NULL;    /* Extensible array context */
     herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -286,9 +286,9 @@ H5EA__sblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
                    haddr_t hdr_addr, unsigned sblk_idx, haddr_t obj_addr)
 {
     /* Local variables */
-    H5EA_hdr_t *   hdr       = NULL;    /* Shared extensible array header */
+    H5EA_hdr_t    *hdr       = NULL;    /* Shared extensible array header */
     H5EA_sblock_t *sblock    = NULL;    /* Extensible array super block */
-    void *         dbg_ctx   = NULL;    /* Extensible array context */
+    void          *dbg_ctx   = NULL;    /* Extensible array context */
     herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -375,9 +375,9 @@ H5EA__dblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
                    haddr_t hdr_addr, size_t dblk_nelmts, haddr_t obj_addr)
 {
     /* Local variables */
-    H5EA_hdr_t *   hdr     = NULL;      /* Shared extensible array header */
+    H5EA_hdr_t    *hdr     = NULL;      /* Shared extensible array header */
     H5EA_dblock_t *dblock  = NULL;      /* Extensible array data block */
-    void *         dbg_ctx = NULL;      /* Extensible array context */
+    void          *dbg_ctx = NULL;      /* Extensible array context */
     size_t         u;                   /* Local index variable */
     herr_t         ret_value = SUCCEED; /* Return value */
 

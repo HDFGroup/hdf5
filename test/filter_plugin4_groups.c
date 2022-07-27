@@ -82,7 +82,7 @@ append_to_group_name(unsigned int flags, size_t cd_nelmts, const unsigned int *c
     }
     else {
         /* WRITE - Append the suffix to the group name */
-        void *         outbuf = NULL; /* Pointer to new buffer                    */
+        void          *outbuf = NULL; /* Pointer to new buffer                    */
         unsigned char *dst    = NULL; /* Temporary pointer to destination buffer  */
 
         /* Get memory for the new, larger string buffer using the

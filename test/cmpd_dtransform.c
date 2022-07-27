@@ -41,10 +41,10 @@ main(void)
     hid_t       att_attr_id = H5I_INVALID_HID;
     hid_t       dxpl_id     = H5I_INVALID_HID;
     const char *expr        = "2*x";
-    int *       data        = NULL;
-    int *       data_res    = NULL;
-    att_t *     atts        = NULL;
-    att_t *     atts_res    = NULL;
+    int        *data        = NULL;
+    int        *data_res    = NULL;
+    att_t      *atts        = NULL;
+    att_t      *atts_res    = NULL;
 
     /* Compound datatype */
     if (NULL == (atts = HDmalloc(sizeof(att_t))))

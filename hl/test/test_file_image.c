@@ -53,7 +53,7 @@
 static int
 test_file_image(size_t open_images, size_t nflags, const unsigned *flags)
 {
-    hid_t * file_id = NULL, *dset_id = NULL, file_space, plist; /* HDF5 ids */
+    hid_t  *file_id = NULL, *dset_id = NULL, file_space, plist; /* HDF5 ids */
     hsize_t dims1[RANK]    = {2, 3};                            /* original dimension of datasets */
     hsize_t max_dims[RANK] = {H5S_UNLIMITED, H5S_UNLIMITED};
     int     data1[6]       = {1, 2, 3, 4, 5, 6};    /* original contents of dataset */
@@ -63,13 +63,13 @@ test_file_image(size_t open_images, size_t nflags, const unsigned *flags)
     hsize_t dims4[RANK] = {3, 5};                   /* extended dimensions of datasets */
     int     data4[15]   = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
     /* extended contents of dataset */
-    ssize_t *       buf_size    = NULL; /* pointer to array of buffer sizes */
-    void **         buf_ptr     = NULL; /* pointer to array of pointers to image buffers */
-    char **         filename    = NULL; /* pointer to array of pointers to filenames */
-    unsigned *      input_flags = NULL; /* pointer to array of flag combinations */
+    ssize_t        *buf_size    = NULL; /* pointer to array of buffer sizes */
+    void          **buf_ptr     = NULL; /* pointer to array of pointers to image buffers */
+    char          **filename    = NULL; /* pointer to array of pointers to filenames */
+    unsigned       *input_flags = NULL; /* pointer to array of flag combinations */
     size_t          i, j, k, nrow, n_values;
     herr_t          status1;
-    void *          handle_ptr       = NULL; /* pointers to driver buffer */
+    void           *handle_ptr       = NULL; /* pointers to driver buffer */
     unsigned char **core_buf_ptr_ptr = NULL;
 
     VERIFY(open_images > 1, "The number of open images must be greater than 1");

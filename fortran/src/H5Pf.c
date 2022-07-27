@@ -1433,8 +1433,8 @@ h5pset_fapl_split_c(hid_t_f *prp_id, int_f *meta_len, _fcd meta_ext, hid_t_f *me
     hid_t  c_meta_plist;
     hid_t  c_raw_plist;
     herr_t ret = -1;
-    char * c_meta_ext;
-    char * c_raw_ext;
+    char  *c_meta_ext;
+    char  *c_raw_ext;
 
     c_meta_ext = (char *)HD5f2cstring(meta_ext, (size_t)*meta_len);
     if (c_meta_ext == NULL)
@@ -1812,7 +1812,7 @@ h5pget_filter_c(hid_t_f *prp_id, int_f *filter_number, int_f *flags, size_t_f *c
     size_t        c_cd_nelmts = 0;
     H5Z_filter_t  c_filter;
     unsigned int *c_cd_values = NULL;
-    char *        c_name      = NULL;
+    char         *c_name      = NULL;
     unsigned      i;
     int           ret_value = -1;
 
@@ -1880,7 +1880,7 @@ h5pset_external_c(hid_t_f *prp_id, _fcd name, int_f *namelen, off_t_f *offset, h
     hid_t   c_prp_id;
     herr_t  ret;
     hsize_t c_bytes;
-    char *  c_name;
+    char   *c_name;
     size_t  c_namelen = (size_t)*namelen;
     off_t   c_offset;
     c_bytes  = (hsize_t)*bytes;
@@ -1977,7 +1977,7 @@ h5pget_external_c(hid_t_f *prp_id, int_f *idx, size_t_f *name_size, _fcd name, o
     unsigned c_idx;
     herr_t   status;
     size_t   c_namelen;
-    char *   c_name = NULL;
+    char    *c_name = NULL;
     off_t    c_offset;
     hsize_t  size;
 
@@ -2854,7 +2854,7 @@ h5pexist_c(hid_t_f *cls, _fcd name, int_f *name_len)
 {
     int_f  ret_value = -1;
     hid_t  c_class;
-    char * c_name;
+    char  *c_name;
     htri_t status;
 
     c_name = (char *)HD5f2cstring(name, (size_t)*name_len);
@@ -2936,7 +2936,7 @@ h5pget_size_c(hid_t_f *plist, _fcd name, int_f *name_len, size_t_f *size)
 {
     int_f  ret_value = -1;
     hid_t  c_plist;
-    char * c_name;
+    char  *c_name;
     size_t c_size;
 
     c_name = (char *)HD5f2cstring(name, (size_t)*name_len);
@@ -3532,11 +3532,11 @@ h5pset_fapl_multi_c(hid_t_f *prp_id, int_f *memb_map, hid_t_f *memb_fapl, _fcd m
     hid_t       c_prp_id;
     H5FD_mem_t  c_memb_map[H5FD_MEM_NTYPES];
     hid_t       c_memb_fapl[H5FD_MEM_NTYPES];
-    char *      c_memb_name[H5FD_MEM_NTYPES];
+    char       *c_memb_name[H5FD_MEM_NTYPES];
     haddr_t     c_memb_addr[H5FD_MEM_NTYPES];
     hbool_t     relax;
     herr_t      status;
-    char *      tmp, *tmp_p, *tmp_pp;
+    char       *tmp, *tmp_p, *tmp_pp;
     int         i;
     int         c_lenmax;
     long double tmp_max_addr;
@@ -3665,11 +3665,11 @@ h5pget_fapl_multi_c(hid_t_f *prp_id, int_f *memb_map, hid_t_f *memb_fapl, _fcd m
     hid_t      c_prp_id;
     H5FD_mem_t c_memb_map[H5FD_MEM_NTYPES];
     hid_t      c_memb_fapl[H5FD_MEM_NTYPES];
-    char *     c_memb_name[H5FD_MEM_NTYPES];
+    char      *c_memb_name[H5FD_MEM_NTYPES];
     haddr_t    c_memb_addr[H5FD_MEM_NTYPES];
     hbool_t    relax;
     herr_t     status;
-    char *     tmp, *tmp_p;
+    char      *tmp, *tmp_p;
     int        i;
     size_t     c_lenmax;
     size_t     length = 0;
@@ -3838,7 +3838,7 @@ h5pget_filter_by_id_c(hid_t_f *prp_id, int_f *filter_id, int_f *flags, size_t_f 
     size_t        c_cd_nelmts    = (size_t)*cd_nelmts;
     size_t        c_cd_nelmts_in = (size_t)*cd_nelmts;
     unsigned int *c_cd_values    = NULL;
-    char *        c_name         = NULL;
+    char         *c_name         = NULL;
     unsigned      i;
     int_f         ret_value = -1;
 
@@ -4623,7 +4623,7 @@ int_f
 h5pget_data_transform_c(hid_t_f *plist_id, _fcd expression, int_f *expression_len, size_t_f *size)
 /******/
 {
-    char *  c_expression     = NULL; /* Buffer to hold C string */
+    char   *c_expression     = NULL; /* Buffer to hold C string */
     size_t  c_expression_len = (size_t)*expression_len + 1;
     ssize_t ret;
     int_f   ret_value = 0;
@@ -5365,7 +5365,7 @@ h5pget_file_image_c(hid_t_f *fapl_id, void **buf_ptr, size_t_f *buf_len_ptr)
 {
     int    ret_value = -1;
     size_t c_buf_len_ptr;
-    void * c_buf_ptr = NULL;
+    void  *c_buf_ptr = NULL;
 
     c_buf_len_ptr = (size_t)*buf_len_ptr;
 

@@ -556,8 +556,8 @@ public class H5 implements java.io.Serializable {
     {
         _H5export_dataset_string(file_export_name, file_name, object_path, binary_order);
     }
-    private synchronized static native void _H5export_dataset_string(String file_export_name, String file_name,
-                                                              String object_path, int binary_order)
+    private synchronized static native void
+    _H5export_dataset_string(String file_export_name, String file_name, String object_path, int binary_order)
         throws HDF5LibraryException;
 
     /**

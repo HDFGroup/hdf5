@@ -17,7 +17,7 @@
 
 GIFWORD       iWIDE, iHIGH, eWIDE, eHIGH, expand, numcols, strip, nostrip;
 unsigned long cols[256];
-char *        cmd;
+char         *cmd;
 
 FILE *fp;
 

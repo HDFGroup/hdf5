@@ -47,7 +47,7 @@ void
 dump_datatype(hid_t type)
 {
     h5tools_context_t ctx; /* print context  */
-    h5tool_format_t * outputformat = &h5tools_dataformat;
+    h5tool_format_t  *outputformat = &h5tools_dataformat;
 
     HDmemset(&ctx, 0, sizeof(ctx));
     ctx.indent_level = dump_indent / COL;
@@ -71,7 +71,7 @@ void
 dump_dataspace(hid_t space)
 {
     h5tools_context_t ctx; /* print context  */
-    h5tool_format_t * outputformat = &h5tools_dataformat;
+    h5tool_format_t  *outputformat = &h5tools_dataformat;
 
     HDmemset(&ctx, 0, sizeof(ctx));
     ctx.indent_level = dump_indent / COL;
@@ -94,7 +94,7 @@ dump_attr_cb(hid_t oid, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *
              void H5_ATTR_UNUSED *_op_data)
 {
     h5tools_context_t ctx; /* print context  */
-    h5tool_format_t * outputformat = &h5tools_dataformat;
+    h5tool_format_t  *outputformat = &h5tools_dataformat;
     h5tool_format_t   string_dataformat;
 
     hid_t  attr_id;
@@ -156,10 +156,10 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_ATTR
     hid_t             obj;
     hid_t             dapl_id  = H5P_DEFAULT; /* dataset access property list ID */
     herr_t            ret      = SUCCEED;
-    char *            obj_path = NULL; /* Full path of object */
+    char             *obj_path = NULL; /* Full path of object */
     h5tools_str_t     buffer;          /* string into which to render   */
     h5tools_context_t ctx;             /* print context  */
-    h5tool_format_t * outputformat = &h5tools_dataformat;
+    h5tool_format_t  *outputformat = &h5tools_dataformat;
     h5tool_format_t   string_dataformat;
     hsize_t           curr_pos = 0; /* total data element position   */
 
@@ -630,7 +630,7 @@ dump_named_datatype(hid_t tid, const char *name)
     hsize_t           curr_pos = 0;               /* total data element position   */
     h5tools_str_t     buffer;                     /* string into which to render   */
     h5tools_context_t ctx;                        /* print context  */
-    h5tool_format_t * outputformat = &h5tools_dataformat;
+    h5tool_format_t  *outputformat = &h5tools_dataformat;
     h5tool_format_t   string_dataformat;
 
     /* setup */
@@ -763,7 +763,7 @@ dump_group(hid_t gid, const char *name)
     char              type_name[1024];
     h5tools_str_t     buffer; /* string into which to render   */
     h5tools_context_t ctx;    /* print context  */
-    h5tool_format_t * outputformat = &h5tools_dataformat;
+    h5tool_format_t  *outputformat = &h5tools_dataformat;
     h5tool_format_t   string_dataformat;
     hsize_t           curr_pos = 0; /* total data element position   */
 
@@ -911,7 +911,7 @@ void
 dump_dataset(hid_t did, const char *name, struct subset_t *sset)
 {
     h5tools_context_t ctx; /* print context  */
-    h5tool_format_t * outputformat = &h5tools_dataformat;
+    h5tool_format_t  *outputformat = &h5tools_dataformat;
     h5tool_format_t   string_dataformat;
     hid_t             type, space;
     unsigned          attr_crt_order_flags;
@@ -1085,7 +1085,7 @@ void
 dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int display_index)
 {
     h5tools_context_t ctx; /* print context  */
-    h5tool_format_t * outputformat = &h5tools_dataformat;
+    h5tool_format_t  *outputformat = &h5tools_dataformat;
     h5tool_format_t   string_dataformat;
     int               print_dataset = FALSE;
 
@@ -1286,11 +1286,11 @@ attr_search(hid_t oid, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *a
 {
     herr_t             ret = SUCCEED;
     int                j;
-    char *             obj_op_name;
-    char *             obj_name;
+    char              *obj_op_name;
+    char              *obj_name;
     trav_attr_udata_t *attr_data = (trav_attr_udata_t *)_op_data;
-    const char *       buf       = attr_data->path;
-    const char *       op_name   = attr_data->op_name;
+    const char        *buf       = attr_data->path;
+    const char        *op_name   = attr_data->op_name;
 
     j = (int)HDstrlen(op_name) - 1;
     /* find the last / */
@@ -1349,7 +1349,7 @@ static herr_t
 obj_search(const char *path, const H5O_info_t *oi, const char H5_ATTR_UNUSED *already_visited, void *_op_data)
 {
     trav_handle_udata_t *handle_data = (trav_handle_udata_t *)_op_data;
-    const char *         op_name     = handle_data->op_name;
+    const char          *op_name     = handle_data->op_name;
     trav_attr_udata_t    attr_data;
 
     attr_data.path    = path;
@@ -1387,9 +1387,9 @@ lnk_search(const char *path, const H5L_info_t *li, void *_op_data)
 {
     size_t               search_len;
     size_t               k;
-    char *               search_name;
+    char                *search_name;
     trav_handle_udata_t *handle_data = (trav_handle_udata_t *)_op_data;
-    const char *         op_name     = handle_data->op_name;
+    const char          *op_name     = handle_data->op_name;
 
     search_len = HDstrlen(op_name);
     if (search_len > 0 && op_name[0] != '/')
@@ -1500,12 +1500,12 @@ handle_attributes(hid_t fid, const char *attr, void H5_ATTR_UNUSED *data, int H5
 {
     hid_t             oid       = H5I_INVALID_HID;
     hid_t             attr_id   = H5I_INVALID_HID;
-    char *            obj_name  = NULL;
-    char *            attr_name = NULL;
+    char             *obj_name  = NULL;
+    char             *attr_name = NULL;
     int               j;
     h5tools_str_t     buffer; /* string into which to render   */
     h5tools_context_t ctx;    /* print context  */
-    h5tool_format_t * outputformat = &h5tools_dataformat;
+    h5tool_format_t  *outputformat = &h5tools_dataformat;
     h5tool_format_t   string_dataformat;
     hsize_t           curr_pos = 0; /* total data element position   */
 
@@ -1644,7 +1644,7 @@ handle_datasets(hid_t fid, const char *dset, void *data, int pe, const char *dis
     hid_t            dsetid;
     hid_t            dapl_id   = H5P_DEFAULT; /* dataset access property list ID */
     struct subset_t *sset      = (struct subset_t *)data;
-    const char *     real_name = display_name ? display_name : dset;
+    const char      *real_name = display_name ? display_name : dset;
 
     if (dump_opts.display_data) {
         if ((dapl_id = H5Pcreate(H5P_DATASET_ACCESS)) < 0) {
@@ -2002,9 +2002,9 @@ dump_extlink(hid_t group, const char *linkname, const char *objname)
 {
     hid_t      oid;
     H5O_info_t oi;
-    table_t *  old_group_table = group_table;
-    table_t *  old_dset_table  = dset_table;
-    table_t *  old_type_table  = type_table;
+    table_t   *old_group_table = group_table;
+    table_t   *old_dset_table  = dset_table;
+    table_t   *old_type_table  = type_table;
     hbool_t    old_hit_elink;
     ssize_t    idx;
 

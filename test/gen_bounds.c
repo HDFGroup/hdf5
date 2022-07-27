@@ -64,8 +64,8 @@ gen_earliest_latest(void)
     hid_t   dcpl             = -1;                   /* Dataset creation property list ID */
     hid_t   space            = -1;                   /* Dataspace ID */
     hid_t   dset             = -1;                   /* Dataset ID */
-    float * buf              = NULL;                 /* Buffer for writing data */
-    float * bufp             = NULL;                 /* Pointer to data buffer */
+    float  *buf              = NULL;                 /* Buffer for writing data */
+    float  *bufp             = NULL;                 /* Pointer to data buffer */
     hsize_t dims[RANK]       = {DIM1, DIM2};         /* Dimensions */
     hsize_t chunk_dims[RANK] = {CHK_DIM1, CHK_DIM2}; /* Dimensions of chunk */
     int     i, j;
@@ -208,8 +208,8 @@ gen_earliest_v18(void)
     hid_t   dcpl             = -1;                   /* Dataset creation property list ID */
     hid_t   space            = -1;                   /* Dataspace ID */
     hid_t   dset             = -1;                   /* Dataset ID */
-    float * buf              = NULL;                 /* Buffer for writing data */
-    float * bufp             = NULL;                 /* Pointer to data buffer */
+    float  *buf              = NULL;                 /* Buffer for writing data */
+    float  *bufp             = NULL;                 /* Pointer to data buffer */
     hsize_t dims[RANK]       = {DIM1, DIM2};         /* Dimensions */
     hsize_t chunk_dims[RANK] = {CHK_DIM1, CHK_DIM2}; /* Dimensions of chunk */
     int     i, j;
@@ -326,8 +326,8 @@ gen_latest_latest(void)
     hid_t   dcpl             = -1;                   /* Dataset creation property list ID */
     hid_t   space            = -1;                   /* Dataspace ID */
     hid_t   dset             = -1;                   /* Dataset ID */
-    float * buf              = NULL;                 /* Buffer for writing data */
-    float * bufp             = NULL;                 /* Pointer to data buffer */
+    float  *buf              = NULL;                 /* Buffer for writing data */
+    float  *bufp             = NULL;                 /* Pointer to data buffer */
     hsize_t dims[RANK]       = {DIM1, DIM2};         /* Dimensions */
     hsize_t chunk_dims[RANK] = {CHK_DIM1, CHK_DIM2}; /* Dimensions of chunk */
     int     i, j;
@@ -435,8 +435,8 @@ gen_v18_latest(void)
     hid_t   dcpl             = -1;                   /* Dataset creation property list ID */
     hid_t   space            = -1;                   /* Dataspace ID */
     hid_t   dset             = -1;                   /* Dataset ID */
-    float * buf              = NULL;                 /* Buffer for writing data */
-    float * bufp             = NULL;                 /* Pointer to data buffer */
+    float  *buf              = NULL;                 /* Buffer for writing data */
+    float  *bufp             = NULL;                 /* Pointer to data buffer */
     hsize_t dims[RANK]       = {DIM1, DIM2};         /* Dimensions */
     hsize_t chunk_dims[RANK] = {CHK_DIM1, CHK_DIM2}; /* Dimensions of chunk */
     int     i, j;
@@ -550,8 +550,8 @@ gen_v18_v18(void)
     hid_t   dcpl             = -1;                   /* Dataset creation property list ID */
     hid_t   space            = -1;                   /* Dataspace ID */
     hid_t   dset             = -1;                   /* Dataset ID */
-    float * buf              = NULL;                 /* Buffer for writing data */
-    float * bufp             = NULL;                 /* Pointer to data buffer */
+    float  *buf              = NULL;                 /* Buffer for writing data */
+    float  *bufp             = NULL;                 /* Pointer to data buffer */
     hsize_t dims[RANK]       = {DIM1, DIM2};         /* Dimensions */
     hsize_t chunk_dims[RANK] = {CHK_DIM1, CHK_DIM2}; /* Dimensions of chunk */
     int     i, j;

@@ -342,8 +342,8 @@ build_match_list(const char *objname1, trav_info_t *info1, const char *objname2,
     size_t        curr1 = 0;
     size_t        curr2 = 0;
     unsigned      infile[2];
-    char *        path1_lp = NULL;
-    char *        path2_lp = NULL;
+    char         *path1_lp = NULL;
+    char         *path2_lp = NULL;
     h5trav_type_t type1_l;
     h5trav_type_t type2_l;
     size_t        path1_offset = 0;
@@ -476,11 +476,11 @@ trav_grp_objs(const char *path, const H5O_info_t *oinfo, const char *already_vis
 static herr_t
 trav_grp_symlinks(const char *path, const H5L_info_t *linfo, void *udata)
 {
-    trav_info_t *      tinfo = (trav_info_t *)udata;
-    diff_opt_t *       opts  = (diff_opt_t *)tinfo->opts;
+    trav_info_t       *tinfo = (trav_info_t *)udata;
+    diff_opt_t        *opts  = (diff_opt_t *)tinfo->opts;
     h5tool_link_info_t lnk_info;
-    const char *       ext_fname;
-    const char *       ext_path;
+    const char        *ext_fname;
+    const char        *ext_path;
     herr_t             ret_value = SUCCEED;
 
     H5TOOLS_START_DEBUG(" ");
@@ -589,8 +589,8 @@ h5diff(const char *fname1, const char *fname2, const char *objname1, const char 
     hsize_t nfound        = 0;
     int     l_ret1        = -1;
     int     l_ret2        = -1;
-    char *  obj1fullname  = NULL;
-    char *  obj2fullname  = NULL;
+    char   *obj1fullname  = NULL;
+    char   *obj2fullname  = NULL;
     int     both_objs_grp = 0;
     /* init to group type */
     h5trav_type_t obj1type = H5TRAV_TYPE_GROUP;
@@ -1072,8 +1072,8 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id,
     unsigned    i;
     const char *grp1_path     = "";
     const char *grp2_path     = "";
-    char *      obj1_fullpath = NULL;
-    char *      obj2_fullpath = NULL;
+    char       *obj1_fullpath = NULL;
+    char       *obj2_fullpath = NULL;
     diff_args_t argdata;
     size_t      idx1      = 0;
     size_t      idx2      = 0;
@@ -1122,7 +1122,7 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id,
      */
 #ifdef H5_HAVE_PARALLEL
     {
-        char *               workerTasks = (char *)HDmalloc((size_t)(g_nTasks - 1) * sizeof(char));
+        char                *workerTasks = (char *)HDmalloc((size_t)(g_nTasks - 1) * sizeof(char));
         int                  n;
         int                  busyTasks = 0;
         struct diffs_found   nFoundbyWorker;

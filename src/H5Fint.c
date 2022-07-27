@@ -48,13 +48,13 @@
 /* Struct only used by functions H5F__get_objects and H5F__get_objects_cb */
 typedef struct H5F_olist_t {
     H5I_type_t obj_type;     /* Type of object to look for */
-    hid_t *    obj_id_list;  /* Pointer to the list of open IDs to return */
-    size_t *   obj_id_count; /* Number of open IDs */
+    hid_t     *obj_id_list;  /* Pointer to the list of open IDs to return */
+    size_t    *obj_id_count; /* Number of open IDs */
     struct {
         hbool_t local; /* Set flag for "local" file searches */
         union {
             H5F_shared_t *shared; /* Pointer to shared file to look inside */
-            const H5F_t * file;   /* Pointer to file to look inside */
+            const H5F_t  *file;   /* Pointer to file to look inside */
         } ptr;
     } file_info;
     size_t list_index; /* Current index in open ID array */
@@ -73,7 +73,7 @@ static herr_t H5F__get_objects(const H5F_t *f, unsigned types, size_t max_index,
                                hbool_t app_ref, size_t *obj_id_count_ptr);
 static int    H5F__get_objects_cb(void *obj_ptr, hid_t obj_id, void *key);
 static herr_t H5F__build_name(const char *prefix, const char *file_name, char **full_name /*out*/);
-static char * H5F__getenv_prefix_name(char **env_prefix /*in,out*/);
+static char  *H5F__getenv_prefix_name(char **env_prefix /*in,out*/);
 static herr_t H5F__check_if_using_file_locks(H5P_genplist_t *fapl, hbool_t *use_file_locking);
 static herr_t H5F__build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl, const char *name,
                                      char ** /*out*/ actual_name);
@@ -241,8 +241,8 @@ H5F__parse_file_lock_env_var(htri_t *use_locks)
 hid_t
 H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
 {
-    H5P_genplist_t *   new_plist;                  /* New property list */
-    H5P_genplist_t *   old_plist;                  /* Old property list */
+    H5P_genplist_t    *new_plist;                  /* New property list */
+    H5P_genplist_t    *old_plist;                  /* Old property list */
     H5FD_driver_prop_t driver_prop;                /* Property for driver ID & info */
     hbool_t            driver_prop_copied = FALSE; /* Whether the driver property has been set up */
     unsigned           efc_size           = 0;
@@ -693,9 +693,9 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
                      const char *file_name, unsigned file_intent, hid_t fapl_id)
 {
     H5F_t *src_file         = NULL; /* Source file */
-    char * full_name        = NULL; /* File name with prefix */
-    char * actual_file_name = NULL; /* File's actual name */
-    char * temp_file_name   = NULL; /* Temporary pointer to file name */
+    char  *full_name        = NULL; /* File name with prefix */
+    char  *actual_file_name = NULL; /* File's actual name */
+    char  *temp_file_name   = NULL; /* Temporary pointer to file name */
     size_t temp_file_name_len;      /* Length of temporary file name */
     H5F_t *ret_value = NULL;        /* Return value  */
 
@@ -918,7 +918,7 @@ done:
 htri_t
 H5F__is_hdf5(const char *name)
 {
-    H5FD_t *      file      = NULL;        /* Low-level file struct            */
+    H5FD_t       *file      = NULL;        /* Low-level file struct            */
     H5F_shared_t *shared    = NULL;        /* Shared part of file              */
     haddr_t       sig_addr  = HADDR_UNDEF; /* Addess of hdf5 file signature    */
     htri_t        ret_value = FAIL;        /* Return value                     */
@@ -1593,12 +1593,12 @@ done:
 H5F_t *
 H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
-    H5F_t *            file   = NULL; /*the success return value      */
-    H5F_shared_t *     shared = NULL; /*shared part of `file'         */
-    H5FD_t *           lf     = NULL; /*file driver part of `shared'  */
+    H5F_t             *file   = NULL; /*the success return value      */
+    H5F_shared_t      *shared = NULL; /*shared part of `file'         */
+    H5FD_t            *lf     = NULL; /*file driver part of `shared'  */
     unsigned           tent_flags;    /*tentative flags               */
-    H5FD_class_t *     drvr;          /*file driver class info        */
-    H5P_genplist_t *   a_plist;       /*file access property list     */
+    H5FD_class_t      *drvr;          /*file driver class info        */
+    H5P_genplist_t    *a_plist;       /*file access property list     */
     H5F_close_degree_t fc_degree;     /*file close degree             */
     size_t             page_buf_size;
     unsigned           page_buf_min_meta_perc = 0;
@@ -1609,7 +1609,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     hbool_t            use_file_locking = TRUE;        /* Using file locks? */
     hbool_t            ci_load          = FALSE;       /* whether MDC ci load requested */
     hbool_t            ci_write         = FALSE;       /* whether MDC CI write requested */
-    H5F_t *            ret_value        = NULL;        /*actual return value           */
+    H5F_t             *ret_value        = NULL;        /*actual return value           */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -2506,7 +2506,7 @@ H5F__build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl, const char *n
         /* Check for symbolic link */
         if (S_IFLNK == (lst.st_mode & S_IFMT)) {
             H5P_genplist_t *new_fapl;      /* Duplicated FAPL */
-            int *           fd;            /* POSIX I/O file descriptor */
+            int            *fd;            /* POSIX I/O file descriptor */
             h5_stat_t       st;            /* Stat info from stat() call */
             h5_stat_t       fst;           /* Stat info from fstat() call */
             hbool_t         want_posix_fd; /* Flag for retrieving file descriptor from VFD */
@@ -3437,9 +3437,9 @@ H5F__start_swmr_write(H5F_t *f)
     hbool_t     ci_write       = FALSE; /* whether MDC CI write requested */
     size_t      grp_dset_count = 0;     /* # of open objects: groups & datasets */
     size_t      nt_attr_count  = 0;     /* # of opened named datatypes  + opened attributes */
-    hid_t *     obj_ids        = NULL;  /* List of ids */
-    H5G_loc_t * obj_glocs      = NULL;  /* Group location of the object */
-    H5O_loc_t * obj_olocs      = NULL;  /* Object location */
+    hid_t      *obj_ids        = NULL;  /* List of ids */
+    H5G_loc_t  *obj_glocs      = NULL;  /* Group location of the object */
+    H5O_loc_t  *obj_olocs      = NULL;  /* Object location */
     H5G_name_t *obj_paths      = NULL;  /* Group hierarchy path */
     size_t      u;                      /* Local index variable */
     hbool_t     setup     = FALSE;      /* Boolean flag to indicate whether SWMR setting is enabled */

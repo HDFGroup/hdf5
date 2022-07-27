@@ -81,7 +81,7 @@ static ssize_t    H5E__get_class_name(const H5E_cls_t *cls, char *name, size_t s
 static int        H5E__close_msg_cb(void *obj_ptr, hid_t obj_id, void *udata);
 static herr_t     H5E__close_msg(H5E_msg_t *err);
 static H5E_msg_t *H5E__create_msg(H5E_cls_t *cls, H5E_type_t msg_type, const char *msg);
-static H5E_t *    H5E__get_current_stack(void);
+static H5E_t     *H5E__get_current_stack(void);
 static herr_t     H5E__set_current_stack(H5E_t *estack);
 static herr_t     H5E__close_stack(H5E_t *err_stack);
 static ssize_t    H5E__get_num(const H5E_t *err_stack);
@@ -946,10 +946,10 @@ done:
 static H5E_t *
 H5E__get_current_stack(void)
 {
-    H5E_t *  current_stack;      /* Pointer to the current error stack */
-    H5E_t *  estack_copy = NULL; /* Pointer to new error stack to return */
+    H5E_t   *current_stack;      /* Pointer to the current error stack */
+    H5E_t   *estack_copy = NULL; /* Pointer to new error stack to return */
     unsigned u;                  /* Local index variable */
-    H5E_t *  ret_value = NULL;   /* Return value */
+    H5E_t   *ret_value = NULL;   /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -1065,7 +1065,7 @@ done:
 static herr_t
 H5E__set_current_stack(H5E_t *estack)
 {
-    H5E_t *  current_stack;       /* Default error stack */
+    H5E_t   *current_stack;       /* Default error stack */
     unsigned u;                   /* Local index variable */
     herr_t   ret_value = SUCCEED; /* Return value */
 
@@ -1196,7 +1196,7 @@ H5E__close_stack(H5E_t *estack)
 ssize_t
 H5Eget_num(hid_t error_stack_id)
 {
-    H5E_t * estack;    /* Error stack to operate on */
+    H5E_t  *estack;    /* Error stack to operate on */
     ssize_t ret_value; /* Return value */
 
     /* Don't clear the error stack! :-) */
@@ -1324,12 +1324,12 @@ H5Epush2(hid_t err_stack, const char *file, const char *func, unsigned line, hid
          hid_t min_id, const char *fmt, ...)
 {
     va_list ap;     /* Varargs info */
-    H5E_t * estack; /* Pointer to error stack to modify */
+    H5E_t  *estack; /* Pointer to error stack to modify */
 #ifndef H5_HAVE_VASPRINTF
     int tmp_len;                  /* Current size of description buffer */
     int desc_len;                 /* Actual length of description when formatted */
 #endif                            /* H5_HAVE_VASPRINTF */
-    char *  tmp        = NULL;    /* Buffer to place formatted description in */
+    char   *tmp        = NULL;    /* Buffer to place formatted description in */
     hbool_t va_started = FALSE;   /* Whether the variable argument list is open */
     herr_t  ret_value  = SUCCEED; /* Return value */
 
@@ -1532,7 +1532,7 @@ done:
 herr_t
 H5Ewalk2(hid_t err_stack, H5E_direction_t direction, H5E_walk2_t stack_func, void *client_data)
 {
-    H5E_t *       estack;              /* Error stack to operate on */
+    H5E_t        *estack;              /* Error stack to operate on */
     H5E_walk_op_t op;                  /* Operator for walking error stack */
     herr_t        ret_value = SUCCEED; /* Return value */
 
@@ -1582,7 +1582,7 @@ done:
 herr_t
 H5Eget_auto2(hid_t estack_id, H5E_auto2_t *func, void **client_data)
 {
-    H5E_t *       estack;              /* Error stack to operate on */
+    H5E_t        *estack;              /* Error stack to operate on */
     H5E_auto_op_t op;                  /* Error stack function */
     herr_t        ret_value = SUCCEED; /* Return value */
 
@@ -1639,7 +1639,7 @@ done:
 herr_t
 H5Eset_auto2(hid_t estack_id, H5E_auto2_t func, void *client_data)
 {
-    H5E_t *       estack;              /* Error stack to operate on */
+    H5E_t        *estack;              /* Error stack to operate on */
     H5E_auto_op_t op;                  /* Error stack operator */
     herr_t        ret_value = SUCCEED; /* Return value */
 

@@ -136,8 +136,8 @@ done:
 static herr_t
 H5O__flush(hid_t obj_id)
 {
-    H5O_loc_t *            oloc;                /* Object location */
-    void *                 obj_ptr;             /* Pointer to object */
+    H5O_loc_t             *oloc;                /* Object location */
+    void                  *obj_ptr;             /* Pointer to object */
     const H5O_obj_class_t *obj_class;           /* Class of object */
     herr_t                 ret_value = SUCCEED; /* Return value */
 
@@ -392,7 +392,7 @@ done:
 herr_t
 H5O_refresh_metadata_reopen(hid_t oid, H5G_loc_t *obj_loc, hbool_t start_swmr)
 {
-    void *     object = NULL;       /* Object for this operation */
+    void      *object = NULL;       /* Object for this operation */
     H5I_type_t type;                /* Type of object for the ID */
     herr_t     ret_value = SUCCEED; /* Return value */
 

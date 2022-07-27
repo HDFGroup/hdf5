@@ -65,10 +65,10 @@ main(void)
     H5D_layout_t layout;          /* Storage layout */
     size_t       num_map;         /* Number of mappings */
     ssize_t      len;             /* Length of the string; also a return value */
-    char *       filename;
-    char *       dsetname;
+    char        *filename;
+    char        *dsetname;
     hsize_t      nblocks;
-    hsize_t *    buf; /* Buffer to hold hyperslab coordinates */
+    hsize_t     *buf; /* Buffer to hold hyperslab coordinates */
 
     /*
      * Create source files and datasets. This step is optional.

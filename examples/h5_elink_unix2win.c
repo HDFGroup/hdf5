@@ -43,7 +43,7 @@ elink_unix2win_trav(const char *link_name, hid_t cur_group, const void *udata, s
     hid_t       fid;
     const char *file_name;
     const char *obj_name;
-    char *      new_fname = NULL; /* Buffer allocated to hold Unix file path */
+    char       *new_fname = NULL; /* Buffer allocated to hold Unix file path */
     ssize_t     prefix_len;       /* External link prefix length */
     size_t      fname_len;
     size_t      start_pos; /* Initial position in new_fname buffer */

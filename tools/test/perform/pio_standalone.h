@@ -446,7 +446,7 @@ H5_DLL int64_t HDstrtoll(const char *s, const char **rest, int base);
 #else /* H5_HAVE_WIN32_API */
 
 #if !defined strdup && !defined H5_HAVE_STRDUP
-extern char *         strdup(const char *s);
+extern char          *strdup(const char *s);
 #endif
 
 #define HDstrdup(S) strdup(S)
@@ -476,7 +476,7 @@ enum h5_arg_level {
 };
 
 struct long_options {
-    const char *      name;     /* Name of the long option */
+    const char       *name;     /* Name of the long option */
     enum h5_arg_level has_arg;  /* Whether we should look for an arg */
     char              shortval; /* The shortname equivalent of long arg
                                  * this gets returned from get_option

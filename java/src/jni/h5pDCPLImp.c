@@ -82,8 +82,8 @@ Java_hdf_hdf5lib_H5_H5Pset_1chunk(JNIEnv *env, jclass clss, jlong plist, jint nd
     size_t   i;
     size_t   rank;
     jsize    arrLen;
-    jbyte *  theArray = NULL;
-    jlong *  jlp      = NULL;
+    jbyte   *theArray = NULL;
+    jlong   *jlp      = NULL;
     herr_t   status   = FAIL;
 
     UNUSED(clss);
@@ -136,7 +136,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1chunk(JNIEnv *env, jclass clss, jlong plist, jint ma
 {
     jboolean isCopy;
     hsize_t *da       = NULL;
-    jlong *  theArray = NULL;
+    jlong   *theArray = NULL;
     jsize    arrLen;
     int      i;
     herr_t   status = FAIL;
@@ -285,7 +285,7 @@ Java_hdf_hdf5lib_H5_H5Pset_1fill_1value(JNIEnv *env, jclass clss, jlong plist_id
                                         jbyteArray value)
 {
     jboolean isCopy;
-    jbyte *  byteP  = NULL;
+    jbyte   *byteP  = NULL;
     herr_t   status = FAIL;
 
     UNUSED(clss);
@@ -319,7 +319,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1fill_1value(JNIEnv *env, jclass clss, jlong plist_id
 {
     jboolean isCopy;
     herr_t   status = FAIL;
-    jbyte *  byteP  = NULL;
+    jbyte   *byteP  = NULL;
 
     UNUSED(clss);
 
@@ -348,7 +348,7 @@ Java_hdf_hdf5lib_H5_H5Pfill_1value_1defined(JNIEnv *env, jclass clss, jlong plis
 {
     H5D_fill_value_t value = H5D_FILL_VALUE_ERROR;
     jboolean         isCopy;
-    jint *           theArray = NULL;
+    jint            *theArray = NULL;
     herr_t           retVal   = FAIL;
 
     UNUSED(clss);
@@ -399,7 +399,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1fill_1time(JNIEnv *env, jclass clss, jlong plist, ji
 {
     H5D_fill_time_t time = H5D_FILL_TIME_ERROR;
     jboolean        isCopy;
-    jint *          theArray = NULL;
+    jint           *theArray = NULL;
     herr_t          retVal   = FAIL;
 
     UNUSED(clss);
@@ -450,7 +450,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1alloc_1time(JNIEnv *env, jclass clss, jlong plist, j
 {
     H5D_alloc_time_t time = H5D_ALLOC_TIME_ERROR;
     jboolean         isCopy;
-    jint *           theArray = NULL;
+    jint            *theArray = NULL;
     herr_t           retVal   = FAIL;
 
     UNUSED(clss);
@@ -482,7 +482,7 @@ Java_hdf_hdf5lib_H5_H5Pset_1filter(JNIEnv *env, jclass clss, jlong plist, jint f
                                    jlong cd_nelmts, jintArray cd_values)
 {
     jboolean isCopy;
-    jint *   theArray = NULL;
+    jint    *theArray = NULL;
     herr_t   status   = FAIL;
 
     UNUSED(clss);
@@ -559,10 +559,10 @@ Java_hdf_hdf5lib_H5_H5Pget_1filter(JNIEnv *env, jclass clss, jlong plist, jint f
 {
     jboolean isCopy;
     jstring  str;
-    jint *   flagsArray     = NULL;
-    jlong *  cd_nelmtsArray = NULL;
-    jint *   cd_valuesArray = NULL;
-    char *   filter         = NULL;
+    jint    *flagsArray     = NULL;
+    jlong   *cd_nelmtsArray = NULL;
+    jint    *cd_valuesArray = NULL;
+    char    *filter         = NULL;
     herr_t   status         = FAIL;
 
     UNUSED(clss);
@@ -633,11 +633,11 @@ Java_hdf_hdf5lib_H5_H5Pget_1filter2(JNIEnv *env, jclass clss, jlong plist, jint 
 {
     jboolean isCopy;
     jstring  str;
-    jint *   flagsArray         = NULL;
-    jlong *  cd_nelmtsArray     = NULL;
-    jint *   cd_valuesArray     = NULL;
-    jint *   filter_configArray = NULL;
-    char *   filter             = NULL;
+    jint    *flagsArray         = NULL;
+    jlong   *cd_nelmtsArray     = NULL;
+    jint    *cd_valuesArray     = NULL;
+    jint    *filter_configArray = NULL;
+    char    *filter             = NULL;
     herr_t   status             = FAIL;
 
     UNUSED(clss);
@@ -731,10 +731,10 @@ Java_hdf_hdf5lib_H5_H5Pget_1filter_1by_1id(JNIEnv *env, jclass clss, jlong plist
 {
     jboolean isCopy;
     jstring  str;
-    jlong *  cd_nelmtsArray = NULL;
-    jint *   cd_valuesArray = NULL;
-    jint *   flagsArray     = NULL;
-    char *   aName          = NULL;
+    jlong   *cd_nelmtsArray = NULL;
+    jint    *cd_valuesArray = NULL;
+    jint    *flagsArray     = NULL;
+    char    *aName          = NULL;
     long     bs;
     int      rank;
     herr_t   status = FAIL;
@@ -817,12 +817,12 @@ Java_hdf_hdf5lib_H5_H5Pget_1filter_1by_1id2(JNIEnv *env, jclass clss, jlong plis
 {
     jboolean isCopy;
     jstring  str;
-    jlong *  cd_nelmtsArray     = NULL;
-    jint *   cd_valuesArray     = NULL;
-    jint *   flagsArray         = NULL;
-    jint *   filter_configArray = NULL;
+    jlong   *cd_nelmtsArray     = NULL;
+    jint    *cd_valuesArray     = NULL;
+    jint    *flagsArray         = NULL;
+    jint    *filter_configArray = NULL;
     long     bs;
-    char *   aName  = NULL;
+    char    *aName  = NULL;
     herr_t   status = FAIL;
 
     UNUSED(clss);
@@ -901,7 +901,7 @@ Java_hdf_hdf5lib_H5_H5Pmodify_1filter(JNIEnv *env, jclass clss, jlong plist, jin
                                       jlong cd_nelmts, jintArray cd_values)
 {
     jboolean isCopy;
-    jint *   cd_valuesP = NULL;
+    jint    *cd_valuesP = NULL;
     herr_t   status     = FAIL;
 
     UNUSED(clss);
@@ -1086,8 +1086,8 @@ Java_hdf_hdf5lib_H5_H5Pget_1external(JNIEnv *env, jclass clss, jlong plist, jint
     hsize_t  s;
     off_t    o;
     jsize    arrLen;
-    jlong *  theArray = NULL;
-    char *   file     = NULL;
+    jlong   *theArray = NULL;
+    char    *file     = NULL;
     herr_t   status   = FAIL;
 
     UNUSED(clss);
@@ -1219,7 +1219,7 @@ JNIEXPORT jstring JNICALL
 Java_hdf_hdf5lib_H5_H5Pget_1virtual_1dsetname(JNIEnv *env, jclass clss, jlong dcpl_id, jlong idx)
 {
     ssize_t buf_size;
-    char *  dname = NULL;
+    char   *dname = NULL;
     jstring str   = NULL;
 
     UNUSED(clss);
@@ -1258,7 +1258,7 @@ JNIEXPORT jstring JNICALL
 Java_hdf_hdf5lib_H5_H5Pget_1virtual_1filename(JNIEnv *env, jclass clss, jlong dcpl_id, jlong idx)
 {
     ssize_t buf_size;
-    char *  fname = NULL;
+    char   *fname = NULL;
     jstring str   = NULL;
 
     UNUSED(clss);
@@ -1361,7 +1361,7 @@ JNIEXPORT jstring JNICALL
 Java_hdf_hdf5lib_H5_H5Pget_1virtual_1prefix(JNIEnv *env, jclass clss, jlong dapl_id)
 {
     ssize_t prefix_size = -1;
-    char *  pre         = NULL;
+    char   *pre         = NULL;
     jstring str         = NULL;
 
     UNUSED(clss);

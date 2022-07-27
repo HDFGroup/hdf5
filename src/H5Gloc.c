@@ -90,7 +90,7 @@ typedef struct {
 /* User data for getting an object's comment in a group */
 typedef struct {
     /* downward */
-    char * comment; /* Object comment buffer */
+    char  *comment; /* Object comment buffer */
     size_t bufsize; /* Size of object comment buffer */
 
     /* upward */

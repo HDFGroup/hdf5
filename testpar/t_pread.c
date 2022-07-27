@@ -110,7 +110,7 @@ generate_test_file(MPI_Comm comm, int mpi_rank, int group_id)
     hid_t       dcpl_id    = H5P_DEFAULT;
     hsize_t     chunk[1];
     float       nextValue;
-    float *     data_slice = NULL;
+    float      *data_slice = NULL;
 
     pass = true;
 
@@ -514,7 +514,7 @@ test_parallel_read(MPI_Comm comm, int mpi_rank, int mpi_size, int group_id)
     hsize_t     count   = COUNT;
     hsize_t     dims[1] = {0};
     float       nextValue;
-    float *     data_slice = NULL;
+    float      *data_slice = NULL;
 
     pass = TRUE;
 

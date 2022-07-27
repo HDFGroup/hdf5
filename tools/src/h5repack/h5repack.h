@@ -125,7 +125,7 @@ typedef struct {
     int            grp_indexed; /* Set the minimum number of links to store in the indexed format */
     int            msg_size[8]; /* Minimum size of shared messages: dataspace,
                                    datatype, fill value, filter pipeline, attribute */
-    const char *          ublock_filename; /* user block file name */
+    const char           *ublock_filename; /* user block file name */
     hsize_t               ublock_size;     /* user block size */
     hsize_t               meta_block_size; /* metadata aggregation block size (for H5Pset_meta_block_size) */
     hsize_t               threshold;       /* alignment threshold for H5Pset_alignment */
@@ -201,13 +201,13 @@ void init_packobject(pack_info_t *obj);
  *-------------------------------------------------------------------------
  */
 
-int apply_filters(const char *   name,    /* object name from traverse list */
+int apply_filters(const char    *name,    /* object name from traverse list */
                   int            rank,    /* rank of dataset */
                   const hsize_t *dims,    /* dimensions of dataset */
                   size_t         msize,   /* size of type */
                   hid_t          dcpl_id, /* dataset creation property list */
-                  pack_opt_t *   options, /* repack options */
-                  int *          has_filter);       /* (OUT) object NAME has a filter */
+                  pack_opt_t    *options, /* repack options */
+                  int           *has_filter);       /* (OUT) object NAME has a filter */
 
 /*-------------------------------------------------------------------------
  * options table

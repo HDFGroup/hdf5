@@ -333,7 +333,7 @@ test_compound_VL_VLtype(void)
     hsize_t    count;                  /* Number of records in the table */
     compVLVL_t writeBuf[NRECORDS];     /* Buffer to hold data to be written */
     compVLVL_t readBuf[NRECORDS];      /* Buffer to hold read data */
-    hvl_t *    t1, *t2;
+    hvl_t     *t1, *t2;
     unsigned   uu, vv, ww; /* Loop variables */
     char       msg[80];    /* For error message */
     herr_t     ret;        /* Returned status from a callee */
@@ -516,7 +516,7 @@ test_VLof_VLtype(void)
     hid_t    vlatomic = H5I_INVALID_HID; /* Variable length datatype */
     hid_t    vlofvl   = H5I_INVALID_HID; /* VL datatype of VL datatypes */
     hsize_t  count;                      /* Number of records in the table */
-    hvl_t *  t1;                         /* pointer to advance */
+    hvl_t   *t1;                         /* pointer to advance */
     unsigned uu, vv, ww;                 /* Loop variables */
     hvl_t    writeBuf[NRECORDS];         /* Buffer to hold data to be written */
     hvl_t    readBuf[NRECORDS];          /* Buffer to hold read data */
@@ -1368,7 +1368,7 @@ testfl_compound_VL_VLtype(void)
     hsize_t    count;                  /* Number of records in the table */
     compVLVL_t writeBuf[NRECORDS];     /* Buffer to hold data to be written */
     compVLVL_t readBuf[NRECORDS];      /* Buffer to hold read data */
-    hvl_t *    t1, *t2;
+    hvl_t     *t1, *t2;
     unsigned   uu, vv, ww; /* Loop variables */
     char       msg[80];    /* For error message */
     herr_t     ret;        /* Returned status from a callee */
@@ -1551,7 +1551,7 @@ testfl_VLof_VLtype(void)
     hid_t    vlatomic = H5I_INVALID_HID; /* Variable length datatype */
     hid_t    vlofvl   = H5I_INVALID_HID; /* VL datatype of VL datatypes */
     hsize_t  count;                      /* Number of records in the table */
-    hvl_t *  t1;                         /* pointer to advance */
+    hvl_t   *t1;                         /* pointer to advance */
     unsigned uu, vv, ww;                 /* Loop variables */
     hvl_t    writeBuf[NRECORDS];         /* Buffer to hold data to be written */
     hvl_t    readBuf[NRECORDS];          /* Buffer to hold read data */

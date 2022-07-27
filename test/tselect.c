@@ -455,8 +455,8 @@ static herr_t
 test_select_point_iter1(void *_elem, hid_t H5_ATTR_UNUSED type_id, unsigned H5_ATTR_UNUSED ndim,
                         const hsize_t H5_ATTR_UNUSED *point, void *_operator_data)
 {
-    uint8_t *        elem = (uint8_t *)_elem; /* Pointer to the element to examine */
-    uint8_t *        tmp;                     /* temporary ptr to element in operator data */
+    uint8_t         *elem = (uint8_t *)_elem; /* Pointer to the element to examine */
+    uint8_t         *tmp;                     /* temporary ptr to element in operator data */
     struct pnt_iter *pnt_info = (struct pnt_iter *)_operator_data;
 
     tmp = pnt_info->buf + (pnt_info->coord[pnt_info->offset][0] * SPACE2_DIM2) +
@@ -1958,10 +1958,10 @@ test_select_hyper_contig_dr__run_test(int test_num, const uint16_t *cube_buf, co
     hsize_t   stride[SS_DR_MAX_RANK];           /* Shared hyperslab stride */
     hsize_t   count[SS_DR_MAX_RANK];            /* Shared hyperslab count */
     hsize_t   block[SS_DR_MAX_RANK];            /* Shared hyperslab block size */
-    hsize_t * start_ptr;                        /* Actual hyperslab start offset */
-    hsize_t * stride_ptr;                       /* Actual hyperslab stride */
-    hsize_t * count_ptr;                        /* Actual hyperslab count */
-    hsize_t * block_ptr;                        /* Actual hyperslab block size */
+    hsize_t  *start_ptr;                        /* Actual hyperslab start offset */
+    hsize_t  *stride_ptr;                       /* Actual hyperslab stride */
+    hsize_t  *count_ptr;                        /* Actual hyperslab count */
+    hsize_t  *block_ptr;                        /* Actual hyperslab block size */
     size_t    small_cube_size;                  /* Number of elements in small cube */
     size_t    large_cube_size;                  /* Number of elements in large cube */
     unsigned  u, v, w, x;                       /* Local index variables */
@@ -2811,7 +2811,7 @@ test_select_hyper_checker_board_dr__verify_data(uint16_t *buf_ptr, unsigned rank
     hbool_t        in_checker;
     hbool_t        start_in_checker[5];
     uint16_t       expected_value;
-    uint16_t *     val_ptr;
+    uint16_t      *val_ptr;
     unsigned       i, j, k, l, m;     /* to track position in n-cube */
     unsigned       v, w, x, y, z;     /* to track position in checker */
     const unsigned test_max_rank = 5; /* code changes needed if this is increased */
@@ -2936,9 +2936,9 @@ test_select_hyper_checker_board_dr__run_test(int test_num, const uint16_t *cube_
     size_t         start_index;                      /* Offset within buffer to begin inspecting */
     size_t         stop_index;                       /* Offset within buffer to end inspecting */
     uint16_t       expected_value;
-    uint16_t *     small_cube_buf_1;
-    uint16_t *     large_cube_buf_1;
-    uint16_t *     ptr_1;
+    uint16_t      *small_cube_buf_1;
+    uint16_t      *large_cube_buf_1;
+    uint16_t      *ptr_1;
     size_t         small_cube_size; /* Number of elements in small cube */
     size_t         large_cube_size; /* Number of elements in large cube */
     hsize_t        dims[SS_DR_MAX_RANK];
@@ -6248,7 +6248,7 @@ test_select_hyper_union_random_5d(hid_t read_plist)
     hsize_t dims2[] = {SPACE6_DIM1};
     hsize_t start[SPACE5_RANK]; /* Starting location of hyperslab */
     hsize_t count[SPACE5_RANK]; /* Element count of hyperslab */
-    int *   wbuf,               /* buffer to write to disk */
+    int    *wbuf,               /* buffer to write to disk */
         *rbuf,                  /* buffer read from disk */
         *tbuf;                  /* temporary buffer pointer */
     int      i, j, k, l, m;     /* Counters */
@@ -6390,8 +6390,8 @@ test_select_hyper_chunk(hid_t fapl_plist, hid_t xfer_plist)
 {
     hsize_t dimsf[3];                                     /* dataset dimensions */
     hsize_t chunk_dimsf[3] = {CHUNK_X, CHUNK_Y, CHUNK_Z}; /* chunk sizes */
-    short * data;                                         /* data to write */
-    short * tmpdata;                                      /* data to write */
+    short  *data;                                         /* data to write */
+    short  *tmpdata;                                      /* data to write */
 
     /*
      * Data  and output buffer initialization.
@@ -7349,7 +7349,7 @@ test_select_combine(void)
 typedef struct {
     unsigned short fill_value; /* The fill value to check */
     size_t         curr_coord; /* Current coordinate to examine */
-    hsize_t *      coords;     /* Pointer to selection's coordinates */
+    hsize_t       *coords;     /* Pointer to selection's coordinates */
 } fill_iter_info;
 
 /****************************************************************
@@ -7361,7 +7361,7 @@ static herr_t
 test_select_hyper_iter3(void *_elem, hid_t H5_ATTR_UNUSED type_id, unsigned ndim, const hsize_t *point,
                         void *_operator_data)
 {
-    unsigned *      tbuf = (unsigned *)_elem; /* temporary buffer pointer */
+    unsigned       *tbuf = (unsigned *)_elem; /* temporary buffer pointer */
     fill_iter_info *iter_info =
         (fill_iter_info *)_operator_data; /* Get the pointer to the iterator information */
     hsize_t *coord_ptr;                   /* Pointer to the coordinate information for a point*/
@@ -7401,7 +7401,7 @@ test_select_fill_all(void)
     unsigned       fill_value;                                     /* Fill value */
     fill_iter_info iter_info;                                      /* Iterator information structure */
     hsize_t        points[SPACE7_DIM1 * SPACE7_DIM2][SPACE7_RANK]; /* Coordinates of selection */
-    unsigned *     wbuf,                                           /* buffer to write to disk */
+    unsigned      *wbuf,                                           /* buffer to write to disk */
         *tbuf;                                                     /* temporary buffer pointer */
     unsigned u, v;                                                 /* Counters */
     herr_t   ret;                                                  /* Generic return value    */
@@ -7477,7 +7477,7 @@ test_select_fill_point(hssize_t *offset)
     size_t         num_points             = 5; /* Number of points selected */
     int            fill_value;                 /* Fill value */
     fill_iter_info iter_info;                  /* Iterator information structure */
-    unsigned *     wbuf,                       /* buffer to write to disk */
+    unsigned      *wbuf,                       /* buffer to write to disk */
         *tbuf;                                 /* temporary buffer pointer */
     unsigned u, v, w;                          /* Counters */
     herr_t   ret;                              /* Generic return value    */
@@ -7577,7 +7577,7 @@ test_select_fill_hyper_simple(hssize_t *offset)
     hsize_t        points[16][SPACE7_RANK];  /* Coordinates selected */
     int            fill_value;               /* Fill value */
     fill_iter_info iter_info;                /* Iterator information structure */
-    unsigned *     wbuf,                     /* buffer to write to disk */
+    unsigned      *wbuf,                     /* buffer to write to disk */
         *tbuf;                               /* temporary buffer pointer */
     unsigned u, v;                           /* Counters */
     herr_t   ret;                            /* Generic return value    */
@@ -7688,7 +7688,7 @@ test_select_fill_hyper_regular(hssize_t *offset)
     size_t         num_points = 16; /* Number of points selected */
     int            fill_value;      /* Fill value */
     fill_iter_info iter_info;       /* Iterator information structure */
-    unsigned *     wbuf,            /* buffer to write to disk */
+    unsigned      *wbuf,            /* buffer to write to disk */
         *tbuf;                      /* temporary buffer pointer */
     unsigned u, v, w;               /* Counters */
     herr_t   ret;                   /* Generic return value    */
@@ -7808,7 +7808,7 @@ test_select_fill_hyper_irregular(hssize_t *offset)
     size_t         num_iter_points = 28; /* Number of resulting points */
     int            fill_value;           /* Fill value */
     fill_iter_info iter_info;            /* Iterator information structure */
-    unsigned *     wbuf,                 /* buffer to write to disk */
+    unsigned      *wbuf,                 /* buffer to write to disk */
         *tbuf;                           /* temporary buffer pointer */
     unsigned u, v, w;                    /* Counters */
     herr_t   ret;                        /* Generic return value    */
@@ -13496,8 +13496,8 @@ test_select_hyper_chunk_offset(void)
     const hsize_t mem_dims[1] = {SPACE10_DIM1};     /* Dataspace dimensions for memory */
     const hsize_t dims[1]     = {0};                /* Dataspace initial dimensions */
     const hsize_t maxdims[1]  = {H5S_UNLIMITED};    /* Dataspace mam dims */
-    int *         wbuf;                             /* Buffer for writing data */
-    int *         rbuf;                             /* Buffer for reading data */
+    int          *wbuf;                             /* Buffer for writing data */
+    int          *rbuf;                             /* Buffer for reading data */
     hid_t         dcpl;                             /* Dataset creation property list ID */
     hsize_t       chunks[1] = {SPACE10_CHUNK_SIZE}; /* Chunk size */
     hsize_t       start[1]  = {0};                  /* The start of the hyperslab */

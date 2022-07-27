@@ -331,9 +331,9 @@ static herr_t H5T__close_cb(H5T_t *dt);
 static H5T_path_t *H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name,
                                        H5T_conv_func_t *conv);
 static hbool_t     H5T__detect_reg_ref(const H5T_t *dt);
-static H5T_t *     H5T__initiate_copy(const H5T_t *old_dt);
-static H5T_t *     H5T__copy_transient(H5T_t *old_dt);
-static H5T_t *     H5T__copy_all(H5T_t *old_dt);
+static H5T_t      *H5T__initiate_copy(const H5T_t *old_dt);
+static H5T_t      *H5T__copy_transient(H5T_t *old_dt);
+static H5T_t      *H5T__copy_all(H5T_t *old_dt);
 static herr_t      H5T__complete_copy(H5T_t *new_dt, const H5T_t *old_dt, H5T_shared_t *reopened_fo,
                                       hbool_t set_memory_type, H5T_copy_func_t copyfn);
 
@@ -568,7 +568,7 @@ static struct {
     H5T_path_t **path;   /*sorted array of path pointers         */
     int          nsoft;  /*number of soft conversions defined    */
     size_t       asoft;  /*number of soft conversions allocated  */
-    H5T_soft_t * soft;   /*unsorted array of soft conversions    */
+    H5T_soft_t  *soft;   /*unsorted array of soft conversions    */
 } H5T_g;
 
 /* Declare the free list for H5T_path_t's */
@@ -627,9 +627,9 @@ done:
 static herr_t
 H5T__init_inf(void)
 {
-    H5T_t *       dst_p;               /* Datatype type operate on */
+    H5T_t        *dst_p;               /* Datatype type operate on */
     H5T_atomic_t *dst;                 /* Datatype's atomic info   */
-    uint8_t *     d;                   /* Pointer to value to set  */
+    uint8_t      *d;                   /* Pointer to value to set  */
     size_t        half_size;           /* Half the type size       */
     size_t        u;                   /* Local index value        */
     herr_t        ret_value = SUCCEED; /* Return value             */
@@ -751,24 +751,24 @@ H5T__init_package(void)
 #if H5_SIZEOF_LONG_DOUBLE != 0
     H5T_t *native_ldouble = NULL; /* Datatype structure for native long double */
 #endif
-    H5T_t * std_u8le  = NULL; /* Datatype structure for unsigned 8-bit little-endian integer */
-    H5T_t * std_u8be  = NULL; /* Datatype structure for unsigned 8-bit big-endian integer */
-    H5T_t * std_u16le = NULL; /* Datatype structure for unsigned 16-bit little-endian integer */
-    H5T_t * std_u16be = NULL; /* Datatype structure for unsigned 16-bit big-endian integer */
-    H5T_t * std_u32le = NULL; /* Datatype structure for unsigned 32-bit little-endian integer */
-    H5T_t * std_u32be = NULL; /* Datatype structure for unsigned 32-bit big-endian integer */
-    H5T_t * std_u64le = NULL; /* Datatype structure for unsigned 64-bit little-endian integer */
-    H5T_t * std_u64be = NULL; /* Datatype structure for unsigned 64-bit big-endian integer */
-    H5T_t * dt        = NULL;
-    H5T_t * fixedpt   = NULL; /* Datatype structure for native int */
-    H5T_t * floatpt   = NULL; /* Datatype structure for native float */
-    H5T_t * string    = NULL; /* Datatype structure for C string */
-    H5T_t * bitfield  = NULL; /* Datatype structure for bitfield */
-    H5T_t * compound  = NULL; /* Datatype structure for compound objects */
-    H5T_t * enum_type = NULL; /* Datatype structure for enum objects */
-    H5T_t * vlen      = NULL; /* Datatype structure for vlen objects */
-    H5T_t * array     = NULL; /* Datatype structure for array objects */
-    H5T_t * objref    = NULL; /* Datatype structure for object reference objects */
+    H5T_t  *std_u8le  = NULL; /* Datatype structure for unsigned 8-bit little-endian integer */
+    H5T_t  *std_u8be  = NULL; /* Datatype structure for unsigned 8-bit big-endian integer */
+    H5T_t  *std_u16le = NULL; /* Datatype structure for unsigned 16-bit little-endian integer */
+    H5T_t  *std_u16be = NULL; /* Datatype structure for unsigned 16-bit big-endian integer */
+    H5T_t  *std_u32le = NULL; /* Datatype structure for unsigned 32-bit little-endian integer */
+    H5T_t  *std_u32be = NULL; /* Datatype structure for unsigned 32-bit big-endian integer */
+    H5T_t  *std_u64le = NULL; /* Datatype structure for unsigned 64-bit little-endian integer */
+    H5T_t  *std_u64be = NULL; /* Datatype structure for unsigned 64-bit big-endian integer */
+    H5T_t  *dt        = NULL;
+    H5T_t  *fixedpt   = NULL; /* Datatype structure for native int */
+    H5T_t  *floatpt   = NULL; /* Datatype structure for native float */
+    H5T_t  *string    = NULL; /* Datatype structure for C string */
+    H5T_t  *bitfield  = NULL; /* Datatype structure for bitfield */
+    H5T_t  *compound  = NULL; /* Datatype structure for compound objects */
+    H5T_t  *enum_type = NULL; /* Datatype structure for enum objects */
+    H5T_t  *vlen      = NULL; /* Datatype structure for vlen objects */
+    H5T_t  *array     = NULL; /* Datatype structure for array objects */
+    H5T_t  *objref    = NULL; /* Datatype structure for object reference objects */
     hsize_t dim[1]    = {1};  /* Dimension info for array datatype */
     herr_t  status;
     hbool_t copied_dtype =
@@ -1465,7 +1465,7 @@ static int
 H5T__unlock_cb(void *_dt, hid_t H5_ATTR_UNUSED id, void *_udata)
 {
     H5T_t *dt = (H5T_t *)_dt;
-    int *  n  = (int *)_udata;
+    int   *n  = (int *)_udata;
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -1977,7 +1977,7 @@ done:
 H5T_class_t
 H5Tget_class(hid_t type_id)
 {
-    H5T_t *     dt;        /* Pointer to datatype */
+    H5T_t      *dt;        /* Pointer to datatype */
     H5T_class_t ret_value; /* Return value */
 
     FUNC_ENTER_API(H5T_NO_CLASS)
@@ -2607,8 +2607,8 @@ done:
 herr_t
 H5Tregister(H5T_pers_t pers, const char *name, hid_t src_id, hid_t dst_id, H5T_conv_t func)
 {
-    H5T_t *         src;                 /*source data type descriptor    */
-    H5T_t *         dst;                 /*destination data type desc     */
+    H5T_t          *src;                 /*source data type descriptor    */
+    H5T_t          *dst;                 /*destination data type desc     */
     H5T_conv_func_t conv_func;           /* Conversion function wrapper */
     herr_t          ret_value = SUCCEED; /*return value                   */
 
@@ -2802,7 +2802,7 @@ done:
 H5T_conv_t
 H5Tfind(hid_t src_id, hid_t dst_id, H5T_cdata_t **pcdata)
 {
-    H5T_t *     src, *dst;
+    H5T_t      *src, *dst;
     H5T_path_t *path;
     H5T_conv_t  ret_value; /* Return value */
 
@@ -2896,7 +2896,7 @@ herr_t
 H5Tconvert(hid_t src_id, hid_t dst_id, size_t nelmts, void *buf, void *background, hid_t dxpl_id)
 {
     H5T_path_t *tpath;               /* type conversion info    */
-    H5T_t *     src, *dst;           /* unatomized types        */
+    H5T_t      *src, *dst;           /* unatomized types        */
     herr_t      ret_value = SUCCEED; /* Return value            */
 
     FUNC_ENTER_API(FAIL)
@@ -3363,8 +3363,8 @@ static herr_t
 H5T__complete_copy(H5T_t *new_dt, const H5T_t *old_dt, H5T_shared_t *reopened_fo, hbool_t set_memory_type,
                    H5T_copy_func_t copyfn)
 {
-    H5T_t *  tmp = NULL;          /* Temporary copy of compound field's datatype */
-    char *   s;                   /* Temporary copy of compound field name / enum value name */
+    H5T_t   *tmp = NULL;          /* Temporary copy of compound field's datatype */
+    char    *s;                   /* Temporary copy of compound field name / enum value name */
     unsigned i;                   /* Local index variable */
     herr_t   ret_value = SUCCEED; /* Return value */
 
@@ -3559,9 +3559,9 @@ done:
 H5T_t *
 H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
 {
-    H5T_t *         new_dt = NULL;    /* New datatype */
+    H5T_t          *new_dt = NULL;    /* New datatype */
     H5T_copy_func_t copyfn;           /* Pointer to correct copy routine */
-    H5T_t *         ret_value = NULL; /* Return value */
+    H5T_t          *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -3633,9 +3633,9 @@ done:
 H5T_t *
 H5T_copy_reopen(H5T_t *old_dt)
 {
-    H5T_t *       new_dt      = NULL; /* New datatype */
+    H5T_t        *new_dt      = NULL; /* New datatype */
     H5T_shared_t *reopened_fo = NULL; /* Pointer to reopened existing named datatype */
-    H5T_t *       ret_value   = NULL; /* Return value */
+    H5T_t        *ret_value   = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -3699,7 +3699,7 @@ H5T_copy_reopen(H5T_t *old_dt)
     else
         /* Downgrade immutable datatypes to read-only */
         if (H5T_STATE_IMMUTABLE == old_dt->shared->state)
-        new_dt->shared->state = H5T_STATE_RDONLY;
+            new_dt->shared->state = H5T_STATE_RDONLY;
 
     /* Finish making the copy of the datatype */
     if (H5T__complete_copy(new_dt, old_dt, reopened_fo, TRUE, H5T_copy_reopen) < 0)
@@ -4033,7 +4033,7 @@ H5T_close(H5T_t *dt)
             else
                 /* Free object location (i.e. "unhold" the file if appropriate) */
                 if (H5O_loc_free(&(dt->oloc)) < 0)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "problem attempting to free location")
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "problem attempting to free location")
         } /* end else */
     }     /* end if */
 
@@ -4157,7 +4157,7 @@ H5T__set_size(H5T_t *dt, size_t size)
             case H5T_STRING:
                 /* Convert string to variable-length datatype */
                 if (size == H5T_VARIABLE) {
-                    H5T_t *    base = NULL; /* base data type */
+                    H5T_t     *base = NULL; /* base data type */
                     H5T_cset_t tmp_cset;    /* Temp. cset info */
                     H5T_str_t  tmp_strpad;  /* Temp. strpad info */
 
@@ -4780,7 +4780,7 @@ H5T_path_t *
 H5T_path_find(const H5T_t *src, const H5T_t *dst)
 {
     H5T_conv_func_t conv_func;        /* Conversion function wrapper */
-    H5T_path_t *    ret_value = NULL; /* Return value */
+    H5T_path_t     *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 

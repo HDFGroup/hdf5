@@ -51,7 +51,7 @@ static herr_t H5C__prefetched_entry_get_initial_load_size(void *udata_ptr, size_
 static herr_t H5C__prefetched_entry_get_final_load_size(const void *image_ptr, size_t image_len,
                                                         void *udata_ptr, size_t *actual_len_ptr);
 static htri_t H5C__prefetched_entry_verify_chksum(const void *image_ptr, size_t len, void *udata_ptr);
-static void * H5C__prefetched_entry_deserialize(const void *image_ptr, size_t len, void *udata,
+static void  *H5C__prefetched_entry_deserialize(const void *image_ptr, size_t len, void *udata,
                                                 hbool_t *dirty_ptr);
 static herr_t H5C__prefetched_entry_image_len(const void *thing, size_t *image_len_ptr);
 static herr_t H5C__prefetched_entry_pre_serialize(H5F_t *f, void *thing, haddr_t addr, size_t len,
@@ -106,7 +106,7 @@ const H5AC_class_t H5AC_PREFETCHED_ENTRY[1] = {{
  ***************************************************************************/
 
 static herr_t
-H5C__prefetched_entry_get_initial_load_size(void H5_ATTR_UNUSED *udata_ptr,
+H5C__prefetched_entry_get_initial_load_size(void H5_ATTR_UNUSED   *udata_ptr,
                                             size_t H5_ATTR_UNUSED *image_len_ptr)
 {
     FUNC_ENTER_STATIC_NOERR /* Yes, even though this pushes an error on the stack */

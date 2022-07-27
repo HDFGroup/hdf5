@@ -84,7 +84,7 @@ herr_t
 H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type, hid_t space_id)
 {
     H5G_loc_t loc;          /* File location */
-    H5S_t *   space = NULL; /* Pointer to dataspace containing region */
+    H5S_t    *space = NULL; /* Pointer to dataspace containing region */
     herr_t    ret_value;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -149,7 +149,7 @@ hid_t
 H5Rdereference2(hid_t obj_id, hid_t oapl_id, H5R_type_t ref_type, const void *_ref)
 {
     H5G_loc_t loc;                         /* Group location */
-    H5F_t *   file      = NULL;            /* File object */
+    H5F_t    *file      = NULL;            /* File object */
     hid_t     ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -207,7 +207,7 @@ hid_t
 H5Rget_region(hid_t id, H5R_type_t ref_type, const void *ref)
 {
     H5G_loc_t loc;                         /* Object's group location */
-    H5S_t *   space     = NULL;            /* Dataspace object */
+    H5S_t    *space     = NULL;            /* Dataspace object */
     hid_t     ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -318,7 +318,7 @@ ssize_t
 H5Rget_name(hid_t id, H5R_type_t ref_type, const void *_ref, char *name, size_t size)
 {
     H5G_loc_t loc;       /* Group location */
-    H5F_t *   file;      /* File object */
+    H5F_t    *file;      /* File object */
     ssize_t   ret_value; /* Return value */
 
     FUNC_ENTER_API((-1))

@@ -106,8 +106,8 @@ vds_select_equal(hid_t space1, hid_t space2)
 {
     H5S_sel_type type1;
     H5S_sel_type type2;
-    hsize_t *    buf1 = NULL;
-    hsize_t *    buf2 = NULL;
+    hsize_t     *buf1 = NULL;
+    hsize_t     *buf2 = NULL;
     size_t       i;
     htri_t       ret_value = TRUE;
 
@@ -349,7 +349,7 @@ test_api_get_ex_dcpl(test_api_config_t config, hid_t fapl, hid_t dcpl, hid_t *ex
     hid_t              file = -1;        /* File */
     hid_t              dset = -1;        /* Virtual dataset */
     H5D_space_status_t space_status;     /* Dataset space status */
-    void *             plist_buf = NULL; /* Serialized property list buffer */
+    void              *plist_buf = NULL; /* Serialized property list buffer */
     H5O_info_t         oinfo;            /* Object info struct */
     htri_t             tri_ret;
 
@@ -1168,11 +1168,11 @@ error:
 static int
 test_vds_prefix_first(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 {
-    char *      srcfilename             = NULL;
-    char *      srcfilename_map         = NULL;
-    char *      vfilename               = NULL;
-    char *      srcfilenamepct          = NULL;
-    char *      srcfilenamepct_map      = NULL;
+    char       *srcfilename             = NULL;
+    char       *srcfilename_map         = NULL;
+    char       *vfilename               = NULL;
+    char       *srcfilenamepct          = NULL;
+    char       *srcfilenamepct_map      = NULL;
     const char *srcfilenamepct_map_orig = "vds%%%%_src";
     hid_t       srcfile[4]              = {-1, -1, -1, -1}; /* Files with source dsets */
     hid_t       vfile                   = -1;               /* File with virtual dset */
@@ -1446,12 +1446,12 @@ error:
 static int
 test_basic_io(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 {
-    char *      srcfilename             = NULL;
-    char *      srcfilename_map         = NULL;
-    char *      vfilename               = NULL;
-    char *      vfilename2              = NULL;
-    char *      srcfilenamepct          = NULL;
-    char *      srcfilenamepct_map      = NULL;
+    char       *srcfilename             = NULL;
+    char       *srcfilename_map         = NULL;
+    char       *vfilename               = NULL;
+    char       *vfilename2              = NULL;
+    char       *srcfilenamepct          = NULL;
+    char       *srcfilenamepct_map      = NULL;
     const char *srcfilenamepct_map_orig = "vds%%%%_src";
     hid_t       srcfile[4]              = {-1, -1, -1, -1}; /* Files with source dsets */
     hid_t       vfile                   = -1;               /* File with virtual dset */
@@ -6655,14 +6655,14 @@ error:
 static int
 test_printf(unsigned config, hid_t vds_fapl, hid_t src_fapl)
 {
-    char *      srcfilename                 = NULL;
-    char *      srcfilename_map             = NULL;
-    char *      srcfilename2                = NULL;
-    char *      srcfilename2_map            = NULL;
-    char *      vfilename                   = NULL;
-    char *      printf_srcfilename_map      = NULL;
-    char *      srcfilenamepct              = NULL;
-    char *      srcfilenamepct_map          = NULL;
+    char       *srcfilename                 = NULL;
+    char       *srcfilename_map             = NULL;
+    char       *srcfilename2                = NULL;
+    char       *srcfilename2_map            = NULL;
+    char       *vfilename                   = NULL;
+    char       *printf_srcfilename_map      = NULL;
+    char       *srcfilenamepct              = NULL;
+    char       *srcfilenamepct_map          = NULL;
     const char *printf_srcfilename_map_orig = "vds_src_%b";
     const char *srcfilenamepct_map_orig     = "vds%%%%_src";
     hid_t       srcfile[4]                  = {-1, -1, -1, -1};         /* Files with source dsets */

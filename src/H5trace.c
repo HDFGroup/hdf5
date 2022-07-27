@@ -110,12 +110,12 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
 {
     va_list           ap;
     char              buf[64], *rest;
-    const char *      argname;
+    const char       *argname;
     int               argno = 0, ptr, asize_idx;
     hssize_t          asize[16];
     hssize_t          i;
-    void *            vp                  = NULL;
-    FILE *            out                 = H5_debug_g.trace;
+    void             *vp                  = NULL;
+    FILE             *out                 = H5_debug_g.trace;
     static hbool_t    is_first_invocation = TRUE;
     H5_timer_t        function_timer;
     H5_timevals_t     function_times = {0.0, 0.0, 0.0};
@@ -1798,7 +1798,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                 } /* end if */
                 else {
                     hid_t           pclass_id  = HDva_arg(ap, hid_t);
-                    char *          class_name = NULL;
+                    char           *class_name = NULL;
                     H5P_genclass_t *pclass;
 
                     /* Get the class name and print it */

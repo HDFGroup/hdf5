@@ -60,7 +60,7 @@ static size_t
 filter_fail(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts, const unsigned int H5_ATTR_UNUSED *cd_values,
             size_t nbytes, size_t *buf_size, void **buf)
 {
-    int *  dst       = (int *)(*buf);
+    int   *dst       = (int *)(*buf);
     size_t ret_value = 0;
 
     if (flags & H5Z_FLAG_REVERSE) { /* do nothing during read */

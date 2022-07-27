@@ -39,7 +39,7 @@
 
 /* String for testing attributes */
 static const char *string_att       = "This is the string for the attribute";
-static char *      string_att_write = NULL;
+static char       *string_att_write = NULL;
 
 void *test_vlstr_alloc_custom(size_t size, void *info);
 void  test_vlstr_free_custom(void *mem, void *info);
@@ -55,7 +55,7 @@ void  test_vlstr_free_custom(void *mem, void *info);
 void *
 test_vlstr_alloc_custom(size_t size, void *info)
 {
-    void *  ret_value = NULL;           /* Pointer to return */
+    void   *ret_value = NULL;           /* Pointer to return */
     size_t *mem_used  = (size_t *)info; /* Get the pointer to the memory used */
     size_t  extra;                      /* Extra space needed */
 
@@ -85,7 +85,7 @@ void
 test_vlstr_free_custom(void *_mem, void *info)
 {
     unsigned char *mem;
-    size_t *       mem_used = (size_t *)info; /* Get the pointer to the memory used */
+    size_t        *mem_used = (size_t *)info; /* Get the pointer to the memory used */
     size_t         extra;                     /* Extra space needed */
 
     /*
@@ -117,8 +117,8 @@ test_vlstrings_basic(void)
         "Now we are engaged in a great civil war,",
         "testing whether that nation or any nation so conceived and so dedicated can long endure."};
 
-    char *   rdata[SPACE1_DIM1]; /* Information read in */
-    char *   wdata2;
+    char    *rdata[SPACE1_DIM1]; /* Information read in */
+    char    *wdata2;
     hid_t    dataspace, dataset2;
     hid_t    fid1;     /* HDF5 File IDs        */
     hid_t    dataset;  /* Dataset ID            */
@@ -253,8 +253,8 @@ test_vlstrings_special(void)
 {
     const char *wdata[SPACE1_DIM1]  = {"", "two", "three", "\0"};
     const char *wdata2[SPACE1_DIM1] = {NULL, NULL, NULL, NULL};
-    char *      rdata[SPACE1_DIM1]; /* Information read in */
-    char *      fill;               /* Fill value */
+    char       *rdata[SPACE1_DIM1]; /* Information read in */
+    char       *fill;               /* Fill value */
     hid_t       fid1;               /* HDF5 File IDs        */
     hid_t       dataset;            /* Dataset ID            */
     hid_t       sid1;               /* Dataspace ID            */
@@ -486,7 +486,7 @@ static void
 test_compact_vlstring(void)
 {
     const char *wdata[SPACE1_DIM1] = {"one", "two", "three", "four"};
-    char *      rdata[SPACE1_DIM1]; /* Information read in */
+    char       *rdata[SPACE1_DIM1]; /* Information read in */
     hid_t       fid1;               /* HDF5 File IDs        */
     hid_t       dataset;            /* Dataset ID            */
     hid_t       sid1;               /* Dataspace ID            */
@@ -583,7 +583,7 @@ test_write_vl_string_attribute(void)
     hid_t  file, root, dataspace, att;
     hid_t  type;
     herr_t ret;
-    char * string_att_check = NULL;
+    char  *string_att_check = NULL;
 
     /* Open the file */
     file = H5Fopen(DATAFILE, H5F_ACC_RDWR, H5P_DEFAULT);
@@ -673,7 +673,7 @@ test_read_vl_string_attribute(void)
     hid_t  file, root, att;
     hid_t  type;
     herr_t ret;
-    char * string_att_check = NULL;
+    char  *string_att_check = NULL;
 
     /* Open file */
     file = H5Fopen(DATAFILE, H5F_ACC_RDONLY, H5P_DEFAULT);
@@ -762,7 +762,7 @@ read_scalar_dset(hid_t file, hid_t type, hid_t space, char *name, char *data)
 {
     hid_t  dset;
     herr_t ret;
-    char * data_read;
+    char  *data_read;
 
     dset = H5Dopen2(file, name, H5P_DEFAULT);
     CHECK(dset, FAIL, "H5Dopen2");

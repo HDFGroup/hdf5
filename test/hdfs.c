@@ -428,7 +428,7 @@ test_fapl_config_validation(void)
      *************************/
 
     struct testcase {
-        const char *     msg;
+        const char      *msg;
         herr_t           expected;
         H5FD_hdfs_fapl_t config;
     };

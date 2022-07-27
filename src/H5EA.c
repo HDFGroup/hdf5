@@ -119,9 +119,9 @@ H5FL_BLK_DEFINE(ea_native_elmt);
 static H5EA_t *
 H5EA__new(H5F_t *f, haddr_t ea_addr, hbool_t from_open, void *ctx_udata)
 {
-    H5EA_t *    ea        = NULL; /* Pointer to new extensible array */
+    H5EA_t     *ea        = NULL; /* Pointer to new extensible array */
     H5EA_hdr_t *hdr       = NULL; /* The extensible array header information */
-    H5EA_t *    ret_value = NULL;
+    H5EA_t     *ret_value = NULL;
 
     FUNC_ENTER_STATIC
 
@@ -331,10 +331,10 @@ H5EA__lookup_elmt(const H5EA_t *ea, hsize_t idx, hbool_t will_extend, unsigned t
                   uint8_t **thing_elmt_buf, hsize_t *thing_elmt_idx,
                   H5EA__unprotect_func_t *thing_unprot_func)
 {
-    H5EA_hdr_t *      hdr                = ea->hdr;            /* Header for EA */
-    H5EA_iblock_t *   iblock             = NULL;               /* Pointer to index block for EA */
-    H5EA_sblock_t *   sblock             = NULL;               /* Pointer to super block for EA */
-    H5EA_dblock_t *   dblock             = NULL;               /* Pointer to data block for EA */
+    H5EA_hdr_t       *hdr                = ea->hdr;            /* Header for EA */
+    H5EA_iblock_t    *iblock             = NULL;               /* Pointer to index block for EA */
+    H5EA_sblock_t    *sblock             = NULL;               /* Pointer to super block for EA */
+    H5EA_dblock_t    *dblock             = NULL;               /* Pointer to data block for EA */
     H5EA_dblk_page_t *dblk_page          = NULL;               /* Pointer to data block page for EA */
     unsigned          iblock_cache_flags = H5AC__NO_FLAGS_SET; /* Flags to unprotecting index block */
     unsigned          sblock_cache_flags = H5AC__NO_FLAGS_SET; /* Flags to unprotecting super block */
@@ -672,7 +672,7 @@ herr_t
 H5EA_set(const H5EA_t *ea, hsize_t idx, const void *elmt)
 {
     H5EA_hdr_t *hdr = ea->hdr; /* Header for EA */
-    void *   thing = NULL; /* Pointer to the array metadata containing the array index we are interested in */
+    void    *thing = NULL; /* Pointer to the array metadata containing the array index we are interested in */
     uint8_t *thing_elmt_buf; /* Pointer to the element buffer for the array metadata */
     hsize_t  thing_elmt_idx; /* Index of the element in the element buffer for the array metadata */
     H5EA__unprotect_func_t thing_unprot_func; /* Function pointer for unprotecting the array metadata */

@@ -396,7 +396,7 @@ H5R__dereference(H5F_t *file, hid_t oapl_id, H5R_type_t ref_type, const void *_r
 
         case H5R_DATASET_REGION: {
             H5HG_t         hobjid; /* Heap object ID */
-            uint8_t *      buf;    /* Buffer to store serialized selection in */
+            uint8_t       *buf;    /* Buffer to store serialized selection in */
             const uint8_t *p;      /* Pointer to OID to store */
 
             /* Get the heap ID for the dataset region */
@@ -527,9 +527,9 @@ H5R__get_region(H5F_t *file, const void *_ref)
     H5O_loc_t      oloc;             /* Object location */
     const uint8_t *p;                /* Pointer to OID to store */
     H5HG_t         hobjid;           /* Heap object ID */
-    uint8_t *      buf       = NULL; /* Buffer to store serialized selection in */
-    H5S_t *        ds        = NULL; /* Temporary pointer to dataspace */
-    H5S_t *        ret_value = NULL; /* Return value */
+    uint8_t       *buf       = NULL; /* Buffer to store serialized selection in */
+    H5S_t         *ds        = NULL; /* Temporary pointer to dataspace */
+    H5S_t         *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -624,7 +624,7 @@ H5R__get_obj_type(H5F_t *file, H5R_type_t ref_type, const void *_ref, H5O_type_t
         case H5R_DATASET_REGION: {
             H5HG_t         hobjid; /* Heap object ID */
             const uint8_t *p;      /* Pointer to reference to decode */
-            uint8_t *      buf;    /* Buffer to store serialized selection in */
+            uint8_t       *buf;    /* Buffer to store serialized selection in */
 
             /* Get the heap ID for the dataset region */
             p = (const uint8_t *)_ref;
@@ -712,7 +712,7 @@ H5R__get_name(H5F_t *f, H5R_type_t ref_type, const void *_ref, char *name, size_
 
         case H5R_DATASET_REGION: {
             H5HG_t         hobjid; /* Heap object ID */
-            uint8_t *      buf;    /* Buffer to store serialized selection in */
+            uint8_t       *buf;    /* Buffer to store serialized selection in */
             const uint8_t *p;      /* Pointer to OID to store */
 
             /* Get the heap ID for the dataset region */

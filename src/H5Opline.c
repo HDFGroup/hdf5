@@ -31,9 +31,9 @@
 
 /* PRIVATE PROTOTYPES */
 static herr_t H5O_pline_encode(H5F_t *f, uint8_t *p, const void *mesg);
-static void * H5O__pline_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags,
+static void  *H5O__pline_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags,
                                 size_t p_size, const uint8_t *p);
-static void * H5O_pline_copy(const void *_mesg, void *_dest);
+static void  *H5O_pline_copy(const void *_mesg, void *_dest);
 static size_t H5O_pline_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O__pline_reset(void *_mesg);
 static herr_t H5O__pline_free(void *_mesg);
@@ -113,12 +113,12 @@ static void *
 H5O__pline_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
                   unsigned H5_ATTR_UNUSED *ioflags, size_t p_size, const uint8_t *p)
 {
-    H5O_pline_t *      pline = NULL;               /* Pipeline message */
+    H5O_pline_t       *pline = NULL;               /* Pipeline message */
     H5Z_filter_info_t *filter;                     /* Filter to decode */
     size_t             name_length;                /* Length of filter name */
     size_t             i;                          /* Local index variable */
-    const uint8_t *    p_end     = p + p_size - 1; /* End of the p buffer */
-    void *             ret_value = NULL;           /* Return value */
+    const uint8_t     *p_end     = p + p_size - 1; /* End of the p buffer */
+    void              *ret_value = NULL;           /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -254,7 +254,7 @@ done:
 static herr_t
 H5O_pline_encode(H5F_t H5_ATTR_UNUSED *f, uint8_t *p /*out*/, const void *mesg)
 {
-    const H5O_pline_t *      pline = (const H5O_pline_t *)mesg; /* Pipeline message to encode */
+    const H5O_pline_t       *pline = (const H5O_pline_t *)mesg; /* Pipeline message to encode */
     const H5Z_filter_info_t *filter;                            /* Filter to encode */
     size_t                   i, j;                              /* Local index variables */
 
@@ -356,9 +356,9 @@ static void *
 H5O_pline_copy(const void *_src, void *_dst /*out*/)
 {
     const H5O_pline_t *src = (const H5O_pline_t *)_src; /* Source pipeline message */
-    H5O_pline_t *      dst = (H5O_pline_t *)_dst;       /* Destination pipeline message */
+    H5O_pline_t       *dst = (H5O_pline_t *)_dst;       /* Destination pipeline message */
     size_t             i;                               /* Local index variable */
-    H5O_pline_t *      ret_value = NULL;                /* Return value */
+    H5O_pline_t       *ret_value = NULL;                /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -591,7 +591,7 @@ static herr_t
 H5O_pline_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void *mesg_src, hbool_t H5_ATTR_UNUSED *deleted,
                         const H5O_copy_t *cpy_info, void *_udata)
 {
-    const H5O_pline_t *        pline_src = (const H5O_pline_t *)mesg_src;       /* Source pline */
+    const H5O_pline_t         *pline_src = (const H5O_pline_t *)mesg_src;       /* Source pline */
     H5O_copy_file_ud_common_t *udata     = (H5O_copy_file_ud_common_t *)_udata; /* Object copying user data */
     herr_t                     ret_value = SUCCEED;                             /* Return value */
 

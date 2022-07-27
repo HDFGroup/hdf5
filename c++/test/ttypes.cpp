@@ -657,7 +657,7 @@ test_named()
 {
     static hsize_t ds_size[2] = {10, 20};
     unsigned       attr_data[10][20];
-    DataType *     ds_type = NULL;
+    DataType      *ds_type = NULL;
 
     SUBTEST("Named datatypes");
     try {
@@ -988,7 +988,7 @@ test_encode_decode()
         verify_val(inttyp.hasBinaryDesc(), true, "DataType::encode", __LINE__, __FILE__);
 
         // Create an IntType instance from the decoded pointer and verify it
-        IntType *  decoded_int_ptr(static_cast<IntType *>(inttyp.decode()));
+        IntType   *decoded_int_ptr(static_cast<IntType *>(inttyp.decode()));
         H5T_sign_t int_sign = decoded_int_ptr->getSign();
         verify_val(int_sign, H5T_SGN_NONE, "DataType::decode", __LINE__, __FILE__);
         verify_val(inttyp == *decoded_int_ptr, true, "DataType::decode", __LINE__, __FILE__);

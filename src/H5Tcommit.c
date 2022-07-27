@@ -88,7 +88,7 @@ herr_t
 H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id)
 {
     H5G_loc_t loc;                 /* Location to create datatype */
-    H5T_t *   type;                /* Datatype for ID */
+    H5T_t    *type;                /* Datatype for ID */
     herr_t    ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -233,7 +233,7 @@ herr_t
 H5Tcommit_anon(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
 {
     H5G_loc_t loc;                 /* Group location for location */
-    H5T_t *   type      = NULL;    /* Datatype created */
+    H5T_t    *type      = NULL;    /* Datatype created */
     herr_t    ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -534,7 +534,7 @@ done:
 hid_t
 H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id)
 {
-    H5T_t *   type = NULL;                 /* Datatype opened in file */
+    H5T_t    *type = NULL;                 /* Datatype opened in file */
     H5G_loc_t loc;                         /* Group location of object to open */
     hid_t     ret_value = H5I_INVALID_HID; /* Return value */
 
@@ -769,13 +769,13 @@ done:
 H5T_t *
 H5T__open_name(const H5G_loc_t *loc, const char *name)
 {
-    H5T_t *    dt = NULL;         /* Datatype opened in file */
+    H5T_t     *dt = NULL;         /* Datatype opened in file */
     H5G_name_t path;              /* Datatype group hier. path */
     H5O_loc_t  oloc;              /* Datatype object location */
     H5G_loc_t  type_loc;          /* Group object for datatype */
     H5O_type_t obj_type;          /* Type of object at location */
     hbool_t    obj_found = FALSE; /* Object at 'name' found */
-    H5T_t *    ret_value = NULL;  /* Return value */
+    H5T_t     *ret_value = NULL;  /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -836,8 +836,8 @@ H5T_t *
 H5T_open(const H5G_loc_t *loc)
 {
     H5T_shared_t *shared_fo = NULL;
-    H5T_t *       dt        = NULL;
-    H5T_t *       ret_value = NULL; /* Return value */
+    H5T_t        *dt        = NULL;
+    H5T_t        *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 

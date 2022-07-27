@@ -284,7 +284,7 @@ Java_hdf_hdf5lib_H5_H5Eget_1class_1name(JNIEnv *env, jclass clss, jlong cls_id)
 {
     jstring str = NULL;
     ssize_t buf_size;
-    char *  namePtr = NULL;
+    char   *namePtr = NULL;
 
     UNUSED(clss);
 
@@ -435,8 +435,8 @@ Java_hdf_hdf5lib_H5_H5Eget_1msg(JNIEnv *env, jclass clss, jlong msg_id, jintArra
     H5E_type_t error_msg_type;
     jstring    str = NULL;
     ssize_t    buf_size;
-    jint *     theArray = NULL;
-    char *     namePtr  = NULL;
+    jint      *theArray = NULL;
+    char      *namePtr  = NULL;
 
     UNUSED(clss);
 
@@ -506,9 +506,9 @@ H5E_walk_cb(int nindx, const H5E_error2_t *info, void *cb_data)
     jstring     str1, str2, str3;
     jobject     cb_info_t = NULL;
     jvalue      args[7];
-    JNIEnv *    cbenv = NULL;
+    JNIEnv     *cbenv = NULL;
     jclass      cbcls;
-    void *      op_data = (void *)wrapper->op_data;
+    void       *op_data = (void *)wrapper->op_data;
     jint        status  = FAIL;
 
     if (JVMPTR->AttachCurrentThread(JVMPAR, (void **)&cbenv, NULL) < 0) {

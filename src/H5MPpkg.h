@@ -57,7 +57,7 @@
 typedef struct H5MP_page_blk_t {
     size_t                  size;        /* Size of block (includes this H5MP_page_blk_t info) */
     unsigned                is_free : 1; /* Flag to indicate the block is free */
-    struct H5MP_page_t *    page;        /* Pointer to page block is located in */
+    struct H5MP_page_t     *page;        /* Pointer to page block is located in */
     struct H5MP_page_blk_t *prev;        /* Pointer to previous block in page */
     struct H5MP_page_blk_t *next;        /* Pointer to next block in page */
 } H5MP_page_blk_t;
@@ -66,7 +66,7 @@ typedef struct H5MP_page_blk_t {
 typedef struct H5MP_page_t {
     size_t              free_size;     /* Total amount of free space in page */
     unsigned            fac_alloc : 1; /* Flag to indicate the page was allocated by the pool's factory */
-    H5MP_page_blk_t *   free_blk;      /* Pointer to first free block in page */
+    H5MP_page_blk_t    *free_blk;      /* Pointer to first free block in page */
     struct H5MP_page_t *next;          /* Pointer to next page in pool */
     struct H5MP_page_t *prev;          /* Pointer to previous page in pool */
 } H5MP_page_t;
@@ -77,7 +77,7 @@ struct H5MP_pool_t {
     size_t           page_size; /* Page size for pool */
     size_t           free_size; /* Total amount of free space in pool */
     size_t           max_size;  /* Maximum block that will fit in a standard page */
-    H5MP_page_t *    first;     /* Pointer to first page in pool */
+    H5MP_page_t     *first;     /* Pointer to first page in pool */
     unsigned         flags;     /* Bit flags for pool settings */
 };
 

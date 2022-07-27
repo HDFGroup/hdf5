@@ -163,8 +163,8 @@ typedef struct H5T_conv_func_t {
 /* The datatype conversion database */
 struct H5T_path_t {
     char            name[H5T_NAMELEN]; /*name for debugging only	     */
-    H5T_t *         src;               /*source datatype 		     */
-    H5T_t *         dst;               /*destination datatype		     */
+    H5T_t          *src;               /*source datatype 		     */
+    H5T_t          *dst;               /*destination datatype		     */
     H5T_conv_func_t conv;              /* Conversion function  */
     hbool_t         is_hard;           /*is it a hard function?	     */
     hbool_t         is_noop;           /*is it the noop conversion?	     */
@@ -216,7 +216,7 @@ typedef enum H5T_sort_t {
 
 /* A compound datatype member */
 typedef struct H5T_cmemb_t {
-    char *        name;   /*name of this member		     */
+    char         *name;   /*name of this member		     */
     size_t        offset; /*offset from beginning of struct    */
     size_t        size;   /*size of this member		     */
     struct H5T_t *type;   /*type of this member		     */
@@ -237,8 +237,8 @@ typedef struct H5T_enum_t {
     unsigned   nalloc; /*num entries allocated		     */
     unsigned   nmembs; /*number of members defined in enum  */
     H5T_sort_t sorted; /*how are members sorted?	     */
-    void *     value;  /*array of values		     */
-    char **    name;   /*array of symbol names		     */
+    void      *value;  /*array of values		     */
+    char     **name;   /*array of symbol names		     */
 } H5T_enum_t;
 
 /* VL function pointers */
@@ -265,7 +265,7 @@ typedef struct H5T_vlen_t {
     H5T_cset_t      cset;           /* For VL string: character set */
     H5T_str_t       pad;            /* For VL string:  space or null padding of
                                      * extra bytes */
-    H5F_t *                f;       /* File ID (if VL data is on disk) */
+    H5F_t                 *f;       /* File ID (if VL data is on disk) */
     H5T_vlen_getptrfunc_t  getptr;  /* Function to get VL sequence pointer */
     H5T_vlen_getlenfunc_t  getlen;  /* Function to get VL sequence size (in element units, not bytes) */
     H5T_vlen_isnullfunc_t  isnull;  /* Function to check if VL value is NIL */
@@ -302,7 +302,7 @@ typedef struct H5T_shared_t {
     size_t      size;     /*total size of an instance of this type     */
     unsigned    version;  /* Version of object header message to encode this object with */
     hbool_t
-                  force_conv; /* Set if this type always needs to be converted and H5T__conv_noop cannot be called */
+        force_conv; /* Set if this type always needs to be converted and H5T__conv_noop cannot be called */
     struct H5T_t *parent; /*parent type for derived datatypes	     */
     union {
         H5T_atomic_t atomic; /* an atomic datatype              */
@@ -824,9 +824,9 @@ H5_DLL int    H5T__get_array_ndims(const H5T_t *dt);
 H5_DLL int    H5T__get_array_dims(const H5T_t *dt, hsize_t dims[]);
 
 /* Compound functions */
-H5_DLL herr_t H5T__insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member);
-H5_DLL size_t H5T__get_member_size(const H5T_t *dt, unsigned membno);
-H5_DLL void   H5T__update_packed(const H5T_t *dt);
+H5_DLL herr_t             H5T__insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member);
+H5_DLL size_t             H5T__get_member_size(const H5T_t *dt, unsigned membno);
+H5_DLL void               H5T__update_packed(const H5T_t *dt);
 H5_DLL H5T_subset_info_t *H5T__conv_struct_subset(const H5T_cdata_t *cdata);
 
 /* Enumerated type functions */
@@ -835,7 +835,7 @@ H5_DLL herr_t H5T__enum_insert(const H5T_t *dt, const char *name, const void *va
 H5_DLL herr_t H5T__get_member_value(const H5T_t *dt, unsigned membno, void *value);
 
 /* Field functions (for both compound & enumerated types) */
-H5_DLL char * H5T__get_member_name(H5T_t const *dt, unsigned membno);
+H5_DLL char  *H5T__get_member_name(H5T_t const *dt, unsigned membno);
 H5_DLL herr_t H5T__sort_value(const H5T_t *dt, int *map);
 H5_DLL herr_t H5T__sort_name(const H5T_t *dt, int *map);
 

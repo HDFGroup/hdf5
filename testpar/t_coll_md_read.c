@@ -56,7 +56,7 @@ void
 test_partial_no_selection_coll_md_read(void)
 {
     const char *filename;
-    hsize_t *   dataset_dims = NULL;
+    hsize_t    *dataset_dims = NULL;
     hsize_t     max_dataset_dims[PARTIAL_NO_SELECTION_DATASET_NDIMS];
     hsize_t     sel_dims[1];
     hsize_t     chunk_dims[PARTIAL_NO_SELECTION_DATASET_NDIMS] = {PARTIAL_NO_SELECTION_Y_DIM_SCALE,
@@ -73,8 +73,8 @@ test_partial_no_selection_coll_md_read(void)
     hid_t       fspace_id = H5I_INVALID_HID;
     hid_t       mspace_id = H5I_INVALID_HID;
     int         mpi_rank, mpi_size;
-    void *      data     = NULL;
-    void *      read_buf = NULL;
+    void       *data     = NULL;
+    void       *read_buf = NULL;
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
@@ -255,7 +255,7 @@ test_multi_chunk_io_addrmap_issue(void)
     hid_t       dcpl_id                                       = H5I_INVALID_HID;
     hid_t       dxpl_id                                       = H5I_INVALID_HID;
     hid_t       space_id                                      = H5I_INVALID_HID;
-    void *      read_buf                                      = NULL;
+    void       *read_buf                                      = NULL;
     int         mpi_rank;
     int data[5][5] = {{0, 1, 2, 3, 4}, {0, 1, 2, 3, 4}, {0, 1, 2, 3, 4}, {0, 1, 2, 3, 4}, {0, 1, 2, 3, 4}};
 
@@ -402,8 +402,8 @@ test_link_chunk_io_sort_chunk_issue(void)
     hid_t       fspace_id = H5I_INVALID_HID;
     hid_t       mspace_id = H5I_INVALID_HID;
     int         mpi_rank, mpi_size;
-    void *      data     = NULL;
-    void *      read_buf = NULL;
+    void       *data     = NULL;
+    void       *read_buf = NULL;
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);

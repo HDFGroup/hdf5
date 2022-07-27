@@ -68,7 +68,7 @@ static int
 test_1(hid_t fapl)
 {
     hid_t   file = H5I_INVALID_HID;
-    H5F_t * f    = NULL;
+    H5F_t  *f    = NULL;
     H5HG_t *obj  = NULL;
     uint8_t out[GHEAP_TEST_NOBJS];
     uint8_t in[GHEAP_TEST_NOBJS];
@@ -177,7 +177,7 @@ static int
 test_2(hid_t fapl)
 {
     hid_t   file = H5I_INVALID_HID;
-    H5F_t * f    = NULL;
+    H5F_t  *f    = NULL;
     H5HG_t *obj  = NULL;
     uint8_t out[GHEAP_TEST_NOBJS];
     uint8_t in[GHEAP_TEST_NOBJS];
@@ -277,7 +277,7 @@ static int
 test_3(hid_t fapl)
 {
     hid_t   file = H5I_INVALID_HID;
-    H5F_t * f    = NULL;
+    H5F_t  *f    = NULL;
     H5HG_t *obj  = NULL;
     uint8_t out[GHEAP_TEST_NOBJS];
     size_t  u;
@@ -368,7 +368,7 @@ static int
 test_4(hid_t fapl)
 {
     hid_t   file = H5I_INVALID_HID;
-    H5F_t * f    = NULL;
+    H5F_t  *f    = NULL;
     H5HG_t *obj  = NULL;
     uint8_t out[GHEAP_TEST_NOBJS];
     size_t  u;
@@ -465,9 +465,9 @@ static int
 test_ooo_indices(hid_t fapl)
 {
     hid_t    file = H5I_INVALID_HID;
-    H5F_t *  f    = NULL;
+    H5F_t   *f    = NULL;
     unsigned i, j;
-    H5HG_t * obj = NULL;
+    H5HG_t  *obj = NULL;
     herr_t   status;
     int      nerrors = 0;
     char     filename[1024];

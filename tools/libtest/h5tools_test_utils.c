@@ -32,7 +32,7 @@ typedef struct fapl_testcase_t {
     herr_t        expected_result;
     fapl_choice_e fapl_choice;
     const char    vfd_name[12];
-    void *        fa;
+    void         *fa;
 } fapl_testcase_t;
 
 /* Generic "incorrect" VFD struct */
@@ -342,8 +342,8 @@ test_parse_tuple(void)
     unsigned         u       = 0;
     unsigned         count   = 0;
     unsigned         elem_u  = 0;
-    char **          parsed  = NULL;
-    char *           cpy     = NULL;
+    char           **parsed  = NULL;
+    char            *cpy     = NULL;
     herr_t           ret;
 
     TESTING("arbitrary-count tuple parsing");
@@ -445,7 +445,7 @@ test_populate_ros3_fa(void)
     /* all-empty values yields default fapl */
     {
         H5FD_ros3_fapl_t fa       = {bad_version, TRUE, "u", "v", "w"};
-        const char *     values[] = {"", "", ""};
+        const char      *values[] = {"", "", ""};
 
         /* Should PASS */
         if (FAIL == h5tools_populate_ros3_fapl(&fa, values))
@@ -468,7 +468,7 @@ test_populate_ros3_fa(void)
      */
     {
         H5FD_ros3_fapl_t fa       = {bad_version, FALSE, "a", "b", "c"};
-        const char *     values[] = {"x", "y", "z", "a"};
+        const char      *values[] = {"x", "y", "z", "a"};
 
         /* Should PASS */
         if (FAIL == h5tools_populate_ros3_fapl(&fa, values))
@@ -491,7 +491,7 @@ test_populate_ros3_fa(void)
      */
     {
         H5FD_ros3_fapl_t fa       = {bad_version, FALSE, "a", "b", "c"};
-        const char *     values[] = {NULL, "y", "z", NULL};
+        const char      *values[] = {NULL, "y", "z", NULL};
 
         /* Should FAIL */
         if (SUCCEED == h5tools_populate_ros3_fapl(&fa, values))
@@ -514,7 +514,7 @@ test_populate_ros3_fa(void)
      */
     {
         H5FD_ros3_fapl_t fa       = {bad_version, FALSE, "a", "b", "c"};
-        const char *     values[] = {"", "y", "z", NULL};
+        const char      *values[] = {"", "y", "z", NULL};
 
         /* Should FAIL */
         if (SUCCEED == h5tools_populate_ros3_fapl(&fa, values))
@@ -537,8 +537,8 @@ test_populate_ros3_fa(void)
      */
     {
         H5FD_ros3_fapl_t fa       = {bad_version, FALSE, "a", "b", "c"};
-        const char *     values[] = {"somewhere over the rainbow not too high "
-                                "there is another rainbow bounding some darkened sky",
+        const char      *values[] = {"somewhere over the rainbow not too high "
+                                     "there is another rainbow bounding some darkened sky",
                                 "y", "z"};
 
         HDassert(HDstrlen(values[0]) > H5FD_ROS3_MAX_REGION_LEN);
@@ -564,7 +564,7 @@ test_populate_ros3_fa(void)
      */
     {
         H5FD_ros3_fapl_t fa       = {bad_version, FALSE, "a", "b", "c"};
-        const char *     values[] = {"x", NULL, "z", NULL};
+        const char      *values[] = {"x", NULL, "z", NULL};
 
         /* Should FAIL */
         if (SUCCEED == h5tools_populate_ros3_fapl(&fa, values))
@@ -587,7 +587,7 @@ test_populate_ros3_fa(void)
      */
     {
         H5FD_ros3_fapl_t fa       = {bad_version, FALSE, "a", "b", "c"};
-        const char *     values[] = {"x", "", "z", NULL};
+        const char      *values[] = {"x", "", "z", NULL};
 
         /* Should FAIL */
         if (SUCCEED == h5tools_populate_ros3_fapl(&fa, values))
@@ -610,17 +610,17 @@ test_populate_ros3_fa(void)
      */
     {
         H5FD_ros3_fapl_t fa       = {bad_version, FALSE, "a", "b", "c"};
-        const char *     values[] = {"x",
+        const char      *values[] = {"x",
                                 "Why is it necessary to solve the problem? "
-                                "What benefits will you receive by solving the problem? "
-                                "What is the unknown? "
-                                "What is it you don't yet understand? "
-                                "What is the information you have? "
-                                "What isn't the problem? "
-                                "Is the information insufficient, redundant, or contradictory? "
-                                "Should you draw a diagram or figure of the problem? "
-                                "What are the boundaries of the problem? "
-                                "Can you separate the various parts of the problem?",
+                                     "What benefits will you receive by solving the problem? "
+                                     "What is the unknown? "
+                                     "What is it you don't yet understand? "
+                                     "What is the information you have? "
+                                     "What isn't the problem? "
+                                     "Is the information insufficient, redundant, or contradictory? "
+                                     "Should you draw a diagram or figure of the problem? "
+                                     "What are the boundaries of the problem? "
+                                     "Can you separate the various parts of the problem?",
                                 "z"};
 
         HDassert(HDstrlen(values[1]) > H5FD_ROS3_MAX_SECRET_ID_LEN);
@@ -646,7 +646,7 @@ test_populate_ros3_fa(void)
      */
     {
         H5FD_ros3_fapl_t fa       = {bad_version, FALSE, "a", "b", "c"};
-        const char *     values[] = {"x", "y", NULL, NULL};
+        const char      *values[] = {"x", "y", NULL, NULL};
 
         /* Should FAIL */
         if (SUCCEED == h5tools_populate_ros3_fapl(&fa, values))
@@ -669,7 +669,7 @@ test_populate_ros3_fa(void)
      */
     {
         H5FD_ros3_fapl_t fa       = {bad_version, FALSE, "a", "b", "c"};
-        const char *     values[] = {"x", "y", "", NULL};
+        const char      *values[] = {"x", "y", "", NULL};
 
         /* Should PASS */
         if (FAIL == h5tools_populate_ros3_fapl(&fa, values))
@@ -692,7 +692,7 @@ test_populate_ros3_fa(void)
      */
     {
         H5FD_ros3_fapl_t fa       = {bad_version, FALSE, "a", "b", "c"};
-        const char *     values[] = {"", "y", "", NULL};
+        const char      *values[] = {"", "y", "", NULL};
 
         /* Should FAIL */
         if (SUCCEED == h5tools_populate_ros3_fapl(&fa, values))
@@ -715,7 +715,7 @@ test_populate_ros3_fa(void)
      */
     {
         H5FD_ros3_fapl_t fa       = {bad_version, FALSE, "a", "b", "c"};
-        const char *     values[] = {"x", "", "", NULL};
+        const char      *values[] = {"x", "", "", NULL};
 
         /* Should FAIL */
         if (SUCCEED == h5tools_populate_ros3_fapl(&fa, values))
@@ -738,17 +738,17 @@ test_populate_ros3_fa(void)
      */
     {
         H5FD_ros3_fapl_t fa       = {bad_version, FALSE, "a", "b", "c"};
-        const char *     values[] = {"x", "y",
+        const char      *values[] = {"x", "y",
                                 "Why is it necessary to solve the problem? "
-                                "What benefits will you receive by solving the problem? "
-                                "What is the unknown? "
-                                "What is it you don't yet understand? "
-                                "What is the information you have? "
-                                "What isn't the problem? "
-                                "Is the information insufficient, redundant, or contradictory? "
-                                "Should you draw a diagram or figure of the problem? "
-                                "What are the boundaries of the problem? "
-                                "Can you separate the various parts of the problem?"};
+                                     "What benefits will you receive by solving the problem? "
+                                     "What is the unknown? "
+                                     "What is it you don't yet understand? "
+                                     "What is the information you have? "
+                                     "What isn't the problem? "
+                                     "Is the information insufficient, redundant, or contradictory? "
+                                     "Should you draw a diagram or figure of the problem? "
+                                     "What are the boundaries of the problem? "
+                                     "Can you separate the various parts of the problem?"};
 
         HDassert(HDstrlen(values[2]) > H5FD_ROS3_MAX_SECRET_KEY_LEN);
 
@@ -772,7 +772,7 @@ test_populate_ros3_fa(void)
      */
     {
         H5FD_ros3_fapl_t fa       = {0, 0, "", "", ""};
-        const char *     values[] = {"us-east-2", "AKIAIMC3D3XLYXLN5COA",
+        const char      *values[] = {"us-east-2", "AKIAIMC3D3XLYXLN5COA",
                                 "ugs5aVVnLFCErO/8uW14iWE3K5AgXMpsMlWneO/+"};
 
         /* Should PASS */

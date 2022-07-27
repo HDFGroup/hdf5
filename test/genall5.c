@@ -567,7 +567,7 @@ vrfy_ns_grp_c(hid_t fid, const char *group_name, unsigned nlinks)
             HDassert(root_oinfo.addr == lnk_info.u.address);
         } /* end else-if */
         else {
-            void *      elinkval;
+            void       *elinkval;
             const char *file = NULL;
             const char *path = NULL;
 
@@ -967,7 +967,7 @@ vrfy_ns_grp_d(hid_t fid, const char *group_name, unsigned nlinks)
             HDassert(root_oinfo.addr == lnk_info.u.address);
         } /* end else-if */
         else {
-            void *      elinkval;
+            void       *elinkval;
             const char *file = NULL;
             const char *path = NULL;
 
@@ -1591,7 +1591,7 @@ vrfy_os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks)
 void
 ds_ctg_i(hid_t fid, const char *dset_name, hbool_t write_data)
 {
-    int *    wdata = NULL;
+    int     *wdata = NULL;
     unsigned u;
     hid_t    dsid    = -1;
     hid_t    sid     = -1;
@@ -1686,7 +1686,7 @@ ds_ctg_i(hid_t fid, const char *dset_name, hbool_t write_data)
 void
 vrfy_ds_ctg_i(hid_t fid, const char *dset_name, hbool_t write_data)
 {
-    int *              rdata = NULL;
+    int               *rdata = NULL;
     unsigned           u;
     hid_t              dsid = -1;
     hid_t              sid  = -1;
@@ -1905,7 +1905,7 @@ vrfy_ds_ctg_i(hid_t fid, const char *dset_name, hbool_t write_data)
 void
 ds_chk_i(hid_t fid, const char *dset_name, hbool_t write_data)
 {
-    int *    wdata = NULL;
+    int     *wdata = NULL;
     unsigned u;
     hid_t    dsid          = -1;
     hid_t    dcpl          = -1;
@@ -2030,7 +2030,7 @@ ds_chk_i(hid_t fid, const char *dset_name, hbool_t write_data)
 void
 vrfy_ds_chk_i(hid_t fid, const char *dset_name, hbool_t write_data)
 {
-    int *              rdata = NULL;
+    int               *rdata = NULL;
     unsigned           u;
     hid_t              dsid = -1;
     hid_t              sid  = -1;
@@ -2264,7 +2264,7 @@ vrfy_ds_chk_i(hid_t fid, const char *dset_name, hbool_t write_data)
 void
 ds_cpt_i(hid_t fid, const char *dset_name, hbool_t write_data)
 {
-    int *    wdata = NULL;
+    int     *wdata = NULL;
     unsigned u;
     hid_t    dsid    = -1;
     hid_t    dcpl    = -1;
@@ -2390,7 +2390,7 @@ ds_cpt_i(hid_t fid, const char *dset_name, hbool_t write_data)
 void
 vrfy_ds_cpt_i(hid_t fid, const char *dset_name, hbool_t write_data)
 {
-    int *              rdata = NULL;
+    int               *rdata = NULL;
     unsigned           u;
     hid_t              dsid = -1;
     hid_t              sid  = -1;
@@ -2609,7 +2609,7 @@ ds_ctg_v(hid_t fid, const char *dset_name, hbool_t write_data)
     hid_t    tid     = -1;
     hsize_t  dims[1] = {DSET_SMALL_DIMS};
     herr_t   ret;
-    hvl_t *  wdata = NULL;
+    hvl_t   *wdata = NULL;
     unsigned u;
 
     if (pass) {
@@ -2654,7 +2654,7 @@ ds_ctg_v(hid_t fid, const char *dset_name, hbool_t write_data)
 
     if ((pass) && (write_data)) {
         for (u = 0; u < DSET_SMALL_DIMS; u++) {
-            int *    tdata;
+            int     *tdata;
             unsigned len;
             unsigned v;
 
@@ -2761,7 +2761,7 @@ vrfy_ds_ctg_v(hid_t fid, const char *dset_name, hbool_t write_data)
     int                ndims;
     hsize_t            dims[1], max_dims[1];
     htri_t             type_equal;
-    hvl_t *            rdata = NULL;
+    hvl_t             *rdata = NULL;
     unsigned           u;
     herr_t             ret;
 

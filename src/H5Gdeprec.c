@@ -56,7 +56,7 @@
 typedef struct {
     H5G_stat_t *statbuf;     /* Stat buffer about object */
     hbool_t     follow_link; /* Whether we are following a link or not */
-    H5F_t *     loc_file;    /* Pointer to the file the location is in */
+    H5F_t      *loc_file;    /* Pointer to the file the location is in */
 } H5G_trav_goi_t;
 
 /********************/
@@ -165,7 +165,7 @@ hid_t
 H5Gcreate1(hid_t loc_id, const char *name, size_t size_hint)
 {
     H5G_loc_t loc;             /* Location to create group */
-    H5G_t *   grp      = NULL; /* New group created */
+    H5G_t    *grp      = NULL; /* New group created */
     hid_t     tmp_gcpl = (-1); /* Temporary group creation property list */
     hid_t     ret_value;       /* Return value */
 
@@ -251,7 +251,7 @@ done:
 hid_t
 H5Gopen1(hid_t loc_id, const char *name)
 {
-    H5G_t *   grp = NULL; /* Group opened */
+    H5G_t    *grp = NULL; /* Group opened */
     H5G_loc_t loc;        /* Location of parent for group */
     hid_t     ret_value;  /* Return value */
 

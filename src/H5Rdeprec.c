@@ -139,7 +139,7 @@ hid_t
 H5Rdereference1(hid_t obj_id, H5R_type_t ref_type, const void *_ref)
 {
     H5G_loc_t loc;                         /* Group location */
-    H5F_t *   file      = NULL;            /* File object */
+    H5F_t    *file      = NULL;            /* File object */
     hid_t     ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)

@@ -198,7 +198,7 @@ test_table(hid_t fid, int do_write)
     hid_t      fid2;
     hsize_t    chunk_size   = 10;
     int        compress     = 0;
-    int *      fill         = NULL;
+    int       *fill         = NULL;
     particle_t fill1[1]     = {{"no data", -1, -99.0, -99.0, -1}};
     int        fill1_new[1] = {-100};
     hsize_t    position;

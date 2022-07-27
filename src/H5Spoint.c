@@ -992,7 +992,7 @@ done:
 hssize_t
 H5Sget_select_elem_npoints(hid_t spaceid)
 {
-    H5S_t *  space;     /* Dataspace to modify selection of */
+    H5S_t   *space;     /* Dataspace to modify selection of */
     hssize_t ret_value; /* return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1152,8 +1152,8 @@ static herr_t
 H5S__point_serialize(H5S_t *space, uint8_t **p)
 {
     H5S_pnt_node_t *curr;                /* Point information nodes */
-    uint8_t *       pp;                  /* Local pointer for encoding */
-    uint8_t *       lenp = NULL;         /* pointer to length location for later storage */
+    uint8_t        *pp;                  /* Local pointer for encoding */
+    uint8_t        *lenp = NULL;         /* pointer to length location for later storage */
     uint32_t        len  = 0;            /* number of bytes used */
     unsigned        u;                   /* local counting variable */
     uint32_t        version;             /* Version number */
@@ -1242,7 +1242,7 @@ H5S__point_deserialize(H5S_t **space, const uint8_t **p)
                                              either *space or a newly allocated one */
     hsize_t        dims[H5S_MAX_RANK];    /* Dimension sizes */
     uint32_t       version;               /* Version number */
-    hsize_t *      coord = NULL, *tcoord; /* Pointer to array of elements */
+    hsize_t       *coord = NULL, *tcoord; /* Pointer to array of elements */
     const uint8_t *pp;                    /* Local pointer for decoding */
     uint64_t       num_elem = 0;          /* Number of elements in selection */
     unsigned       rank;                  /* Rank of points */
@@ -1289,8 +1289,8 @@ H5S__point_deserialize(H5S_t **space, const uint8_t **p)
     else
         /* Verify the rank of the provided dataspace */
         if (rank != tmp_space->extent.rank)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL,
-                    "rank of serialized selection does not match dataspace")
+            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL,
+                        "rank of serialized selection does not match dataspace")
 
     /* Deserialize points to select */
     UINT32DECODE(pp, num_elem); /* decode the number of points */
@@ -1537,9 +1537,9 @@ done:
 static herr_t
 H5S__point_offset(const H5S_t *space, hsize_t *offset)
 {
-    const hsize_t * pnt;                 /* Pointer to a selected point's coordinates */
+    const hsize_t  *pnt;                 /* Pointer to a selected point's coordinates */
     const hssize_t *sel_offset;          /* Pointer to the selection's offset */
-    const hsize_t * dim_size;            /* Pointer to a dataspace's extent */
+    const hsize_t  *dim_size;            /* Pointer to a dataspace's extent */
     hsize_t         accum;               /* Accumulator for dimension sizes */
     int             i;                   /* index variable */
     herr_t          ret_value = SUCCEED; /* Return value */
@@ -2076,8 +2076,8 @@ static herr_t
 H5S__point_project_simple(const H5S_t *base_space, H5S_t *new_space, hsize_t *offset)
 {
     const H5S_pnt_node_t *base_node;           /* Point node in base space */
-    H5S_pnt_node_t *      new_node;            /* Point node in new space */
-    H5S_pnt_node_t *      prev_node;           /* Previous point node in new space */
+    H5S_pnt_node_t       *new_node;            /* Point node in new space */
+    H5S_pnt_node_t       *prev_node;           /* Previous point node in new space */
     unsigned              rank_diff;           /* Difference in ranks between spaces */
     unsigned              u;                   /* Local index variable */
     herr_t                ret_value = SUCCEED; /* Return value */

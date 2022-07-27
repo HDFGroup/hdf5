@@ -291,7 +291,7 @@ static void
 test_refstr_own(void)
 {
     H5RS_str_t *rs;  /* Ref-counted string created */
-    char *      s;   /* Pointer to string to transfer */
+    char       *s;   /* Pointer to string to transfer */
     const char *t;   /* Temporary pointers to string */
     int         cmp; /* Comparison value */
     herr_t      ret; /* Generic return value */

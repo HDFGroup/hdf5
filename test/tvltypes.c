@@ -55,7 +55,7 @@ void  test_vltypes_free_custom(void *mem, void *info);
 void *
 test_vltypes_alloc_custom(size_t size, void *mem_used)
 {
-    void *       ret_value;                                   /* Pointer to return */
+    void        *ret_value;                                   /* Pointer to return */
     const size_t extra = MAX(sizeof(void *), sizeof(size_t)); /* Extra space needed */
                                                               /* (This weird contortion is required on the
                                                                *      DEC Alpha to keep the alignment correct - QAK)
@@ -1034,15 +1034,15 @@ test_vltypes_compound_vlen_vlen(void)
         float f;
         hvl_t v;
     } s1;
-    s1 *     wdata;            /* data to write */
-    s1 *     rdata;            /* data to read */
+    s1      *wdata;            /* data to write */
+    s1      *rdata;            /* data to read */
     hid_t    fid1;             /* HDF5 File IDs        */
     hid_t    dataset;          /* Dataset ID            */
     hid_t    sid1;             /* Dataspace ID            */
     hid_t    tid1, tid2, tid3; /* Datatype IDs         */
     hsize_t  dims1[] = {SPACE3_DIM1};
     unsigned i, j, k; /* counting variables */
-    hvl_t *  t1, *t2; /* Temporary pointer to VL information */
+    hvl_t   *t1, *t2; /* Temporary pointer to VL information */
     herr_t   ret;     /* Generic return value        */
 
     /* Output message about test being performed */
@@ -1230,7 +1230,7 @@ test_vltypes_compound_vlstr(void)
     hsize_t  size[]       = {SPACE1_DIM1};
     hsize_t  offset[]     = {0};
     unsigned i, j;    /* counting variables */
-    s2 *     t1, *t2; /* Temporary pointer to VL information */
+    s2      *t1, *t2; /* Temporary pointer to VL information */
     int      val;
     herr_t   ret; /* Generic return value        */
 
@@ -1918,7 +1918,7 @@ test_vltypes_vlen_vlen_atomic(void)
 {
     hvl_t    wdata[SPACE1_DIM1]; /* Information to write */
     hvl_t    rdata[SPACE1_DIM1]; /* Information read in */
-    hvl_t *  t1, *t2;            /* Temporary pointer to VL information */
+    hvl_t   *t1, *t2;            /* Temporary pointer to VL information */
     hid_t    fid1;               /* HDF5 File IDs        */
     hid_t    dataset;            /* Dataset ID            */
     hid_t    sid1;               /* Dataspace ID            */
@@ -2119,7 +2119,7 @@ rewrite_longer_vltypes_vlen_vlen_atomic(void)
 {
     hvl_t    wdata[SPACE1_DIM1]; /* Information to write */
     hvl_t    rdata[SPACE1_DIM1]; /* Information read in */
-    hvl_t *  t1, *t2;            /* Temporary pointer to VL information */
+    hvl_t   *t1, *t2;            /* Temporary pointer to VL information */
     hid_t    fid1;               /* HDF5 File IDs                */
     hid_t    dataset;            /* Dataset ID                   */
     hid_t    sid1;               /* Dataspace ID                     */
@@ -2299,7 +2299,7 @@ rewrite_shorter_vltypes_vlen_vlen_atomic(void)
 {
     hvl_t    wdata[SPACE1_DIM1]; /* Information to write */
     hvl_t    rdata[SPACE1_DIM1]; /* Information read in */
-    hvl_t *  t1, *t2;            /* Temporary pointer to VL information */
+    hvl_t   *t1, *t2;            /* Temporary pointer to VL information */
     hid_t    fid1;               /* HDF5 File IDs                */
     hid_t    dataset;            /* Dataset ID                   */
     hid_t    sid1;               /* Dataspace ID                     */
@@ -2487,17 +2487,17 @@ test_vltypes_fill_value(void)
     typedef struct dtype1_struct {
         unsigned int gui;
         unsigned int pgui;
-        const char * str_id;
-        const char * str_name;
-        const char * str_desc;
-        const char * str_orig;
-        const char * str_stat;
+        const char  *str_id;
+        const char  *str_name;
+        const char  *str_desc;
+        const char  *str_orig;
+        const char  *str_stat;
         unsigned int ver;
         double       val;
         double       ma;
         double       mi;
-        const char * str_form;
-        const char * str_unit;
+        const char  *str_form;
+        const char  *str_unit;
     } dtype1_struct;
 
     herr_t              ret;
@@ -2529,7 +2529,7 @@ test_vltypes_fill_value(void)
     const dtype1_struct fill1        = {1, 2,    "foobar", "",   NULL,     "\0",   "dead",
                                  3, 4.0F, 100.0F,   1.0F, "liquid", "meter"};
     const dtype1_struct wdata = {3, 4, "", NULL, "\0", "foo", "two", 6, 8.0F, 200.0F, 2.0F, "solid", "yard"};
-    dtype1_struct *     rbuf  = NULL;                   /* Buffer for reading data */
+    dtype1_struct      *rbuf  = NULL;                   /* Buffer for reading data */
     size_t              mem_used = 0;                   /* Memory used during allocation */
     H5D_layout_t        layout;                         /* Dataset storage layout */
     char                dset_name1[64], dset_name2[64]; /* Dataset names */

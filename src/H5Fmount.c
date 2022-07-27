@@ -98,9 +98,9 @@ done:
 herr_t
 H5F__mount(H5G_loc_t *loc, const char *name, H5F_t *child, hid_t H5_ATTR_UNUSED plist_id)
 {
-    H5G_t *    mount_point = NULL;  /*mount point group		*/
-    H5F_t *    ancestor    = NULL;  /*ancestor files		*/
-    H5F_t *    parent      = NULL;  /*file containing mount point	*/
+    H5G_t     *mount_point = NULL;  /*mount point group		*/
+    H5F_t     *ancestor    = NULL;  /*ancestor files		*/
+    H5F_t     *parent      = NULL;  /*file containing mount point	*/
     unsigned   lt, rt, md;          /*binary search indices		*/
     int        cmp;                 /*binary search comparison value*/
     H5G_loc_t  mp_loc;              /* entry of moint point to be opened */
@@ -262,9 +262,9 @@ done:
 herr_t
 H5F__unmount(H5G_loc_t *loc, const char *name)
 {
-    H5G_t *    child_group = NULL;   /* Child's group in parent mtab	*/
-    H5F_t *    child       = NULL;   /*mounted file			*/
-    H5F_t *    parent      = NULL;   /*file where mounted		*/
+    H5G_t     *child_group = NULL;   /* Child's group in parent mtab	*/
+    H5F_t     *child       = NULL;   /*mounted file			*/
+    H5F_t     *parent      = NULL;   /*file where mounted		*/
     H5O_loc_t *mnt_oloc;             /* symbol table entry for root of mounted file */
     H5G_name_t mp_path;              /* Mount point group hier. path */
     H5O_loc_t  mp_oloc;              /* Mount point object location  */
@@ -436,7 +436,7 @@ herr_t
 H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
 {
     H5G_loc_t  loc;                 /* Parent location      */
-    H5F_t *    child = NULL;        /* Child object         */
+    H5F_t     *child = NULL;        /* Child object         */
     H5I_type_t loc_type;            /* ID type of location  */
     H5I_type_t child_type;          /* ID type of child     */
     herr_t     ret_value = SUCCEED; /* Return value         */

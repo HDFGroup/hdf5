@@ -300,7 +300,7 @@ H5D__create_named(const H5G_loc_t *loc, const char *name, hid_t type_id, const H
 {
     H5O_obj_create_t ocrt_info;        /* Information for object creation */
     H5D_obj_create_t dcrt_info;        /* Information for dataset creation */
-    H5D_t *          ret_value = NULL; /* Return value */
+    H5D_t           *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -398,9 +398,9 @@ done:
 static H5D_shared_t *
 H5D__new(hid_t dcpl_id, hid_t dapl_id, hbool_t creating, hbool_t vl_type)
 {
-    H5D_shared_t *  new_dset = NULL;  /* New dataset object */
+    H5D_shared_t   *new_dset = NULL;  /* New dataset object */
     H5P_genplist_t *plist;            /* Property list created */
-    H5D_shared_t *  ret_value = NULL; /* Return value */
+    H5D_shared_t   *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -668,7 +668,7 @@ done:
 static size_t
 H5D__calculate_minimum_header_size(H5F_t *file, H5D_t *dset, H5O_t *ohdr)
 {
-    H5T_t *     type             = NULL;
+    H5T_t      *type             = NULL;
     H5O_fill_t *fill_prop        = NULL;
     hbool_t     use_at_least_v18 = FALSE;
     const char  continuation[1]  = ""; /* requred for work-around */
@@ -827,12 +827,12 @@ done:
 static herr_t
 H5D__update_oh_info(H5F_t *file, H5D_t *dset, hid_t dapl_id)
 {
-    H5O_t *          oh        = NULL;            /* Pointer to dataset's object header */
+    H5O_t           *oh        = NULL;            /* Pointer to dataset's object header */
     size_t           ohdr_size = H5D_MINHDR_SIZE; /* Size of dataset's object header */
-    H5O_loc_t *      oloc      = NULL;            /* Dataset's object location */
-    H5O_layout_t *   layout;                      /* Dataset's layout information */
-    H5T_t *          type;                        /* Dataset's datatype */
-    H5O_fill_t *     fill_prop;                   /* Pointer to dataset's fill value information */
+    H5O_loc_t       *oloc      = NULL;            /* Dataset's object location */
+    H5O_layout_t    *layout;                      /* Dataset's layout information */
+    H5T_t           *type;                        /* Dataset's datatype */
+    H5O_fill_t      *fill_prop;                   /* Pointer to dataset's fill value information */
     H5D_fill_value_t fill_status;                 /* Fill value status */
     hbool_t          fill_changed = FALSE;        /* Flag indicating the fill value was changed */
     hbool_t          layout_init  = FALSE; /* Flag to indicate that chunk information was initialized */
@@ -1036,7 +1036,7 @@ static herr_t
 H5D__build_file_prefix(const H5D_t *dset, H5F_prefix_open_t prefix_type, char **file_prefix /*out*/)
 {
     const char *prefix   = NULL;     /* prefix used to look for the file               */
-    char *      filepath = NULL;     /* absolute path of directory the HDF5 file is in */
+    char       *filepath = NULL;     /* absolute path of directory the HDF5 file is in */
     size_t      filepath_len;        /* length of file path                            */
     size_t      prefix_len;          /* length of prefix                               */
     size_t      file_prefix_len;     /* length of expanded prefix                      */
@@ -1120,8 +1120,8 @@ done:
 H5D_t *
 H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t dapl_id)
 {
-    H5T_t *         type; /* Datatype for dataset */
-    H5D_t *         new_dset      = NULL;
+    H5T_t          *type; /* Datatype for dataset */
+    H5D_t          *new_dset      = NULL;
     H5P_genplist_t *dc_plist      = NULL;  /* New Property list */
     hbool_t         has_vl_type   = FALSE; /* Flag to indicate a VL-type for dataset */
     hbool_t         layout_init   = FALSE; /* Flag to indicate that chunk information was initialized */
@@ -1130,7 +1130,7 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t
     hbool_t         pline_copied  = FALSE; /* Flag to indicate that pipeline message was copied */
     hbool_t         efl_copied    = FALSE; /* Flag to indicate that external file list message was copied */
     H5G_loc_t       dset_loc;              /* Dataset location */
-    H5D_t *         ret_value = NULL;      /* Return value */
+    H5D_t          *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1183,9 +1183,9 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t
     /* Check if the dataset has a non-default DCPL & get important values, if so */
     if (new_dset->shared->dcpl_id != H5P_DATASET_CREATE_DEFAULT) {
         H5O_layout_t *layout;                 /* Dataset's layout information */
-        H5O_pline_t * pline;                  /* Dataset's I/O pipeline information */
-        H5O_fill_t *  fill;                   /* Dataset's fill value info */
-        H5O_efl_t *   efl;                    /* Dataset's external file list info */
+        H5O_pline_t  *pline;                  /* Dataset's I/O pipeline information */
+        H5O_fill_t   *fill;                   /* Dataset's fill value info */
+        H5O_efl_t    *efl;                    /* Dataset's external file list info */
         htri_t        ignore_filters = FALSE; /* Ignore optional filters or not */
 
         if ((ignore_filters = H5Z_ignore_filters(new_dset->shared->dcpl_id, type, space)) < 0)
@@ -1378,13 +1378,13 @@ done:
 H5D_t *
 H5D__open_name(const H5G_loc_t *loc, const char *name, hid_t dapl_id)
 {
-    H5D_t *    dset = NULL;
+    H5D_t     *dset = NULL;
     H5G_loc_t  dset_loc;          /* Object location of dataset */
     H5G_name_t path;              /* Dataset group hier. path */
     H5O_loc_t  oloc;              /* Dataset object location */
     H5O_type_t obj_type;          /* Type of object at location */
     hbool_t    loc_found = FALSE; /* Location at 'name' found */
-    H5D_t *    ret_value = NULL;  /* Return value */
+    H5D_t     *ret_value = NULL;  /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1438,10 +1438,10 @@ H5D_t *
 H5D_open(const H5G_loc_t *loc, hid_t dapl_id)
 {
     H5D_shared_t *shared_fo      = NULL;
-    H5D_t *       dataset        = NULL;
-    char *        extfile_prefix = NULL; /* Expanded external file prefix */
-    char *        vds_prefix     = NULL; /* Expanded vds prefix */
-    H5D_t *       ret_value      = NULL; /* Return value */
+    H5D_t        *dataset        = NULL;
+    char         *extfile_prefix = NULL; /* Expanded external file prefix */
+    char         *vds_prefix     = NULL; /* Expanded vds prefix */
+    H5D_t        *ret_value      = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -1649,7 +1649,7 @@ static herr_t
 H5D__open_oid(H5D_t *dataset, hid_t dapl_id)
 {
     H5P_genplist_t *plist;                 /* Property list */
-    H5O_fill_t *    fill_prop;             /* Pointer to dataset's fill value info */
+    H5O_fill_t     *fill_prop;             /* Pointer to dataset's fill value info */
     unsigned        alloc_time_state;      /* Allocation time state */
     htri_t          msg_exists;            /* Whether a particular type of message exists */
     hbool_t         layout_init = FALSE;   /* Flag to indicate that chunk information was initialized */
@@ -2025,7 +2025,7 @@ H5D_close(H5D_t *dataset)
         else
             /* Free object location (i.e. "unhold" the file if appropriate) */
             if (H5O_loc_free(&(dataset->oloc)) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "problem attempting to free location")
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "problem attempting to free location")
     } /* end else */
 
     /* Release the dataset's path info */
@@ -2242,8 +2242,8 @@ herr_t
 H5D__alloc_storage(const H5D_io_info_t *io_info, H5D_time_alloc_t time_alloc, hbool_t full_overwrite,
                    hsize_t old_dim[])
 {
-    const H5D_t * dset = io_info->dset;      /* The dataset object */
-    H5F_t *       f    = dset->oloc.file;    /* The dataset's file pointer */
+    const H5D_t  *dset = io_info->dset;      /* The dataset object */
+    H5F_t        *f    = dset->oloc.file;    /* The dataset's file pointer */
     H5O_layout_t *layout;                    /* The dataset's layout information */
     hbool_t       must_init_space = FALSE;   /* Flag to indicate that space should be initialized */
     hbool_t       addr_set        = FALSE;   /* Flag to indicate that the dataset's storage address was set */
@@ -2590,7 +2590,7 @@ done:
 herr_t
 H5D_vlen_reclaim(hid_t type_id, H5S_t *space, void *buf)
 {
-    H5T_t *               type;             /* Datatype */
+    H5T_t                *type;             /* Datatype */
     H5S_sel_iter_op_t     dset_op;          /* Operator for iteration */
     H5T_vlen_alloc_info_t vl_alloc_info;    /* VL allocation info */
     herr_t                ret_value = FAIL; /* Return value */
@@ -2635,7 +2635,7 @@ void *
 H5D__vlen_get_buf_size_alloc(size_t size, void *info)
 {
     H5D_vlen_bufsize_t *vlen_bufsize = (H5D_vlen_bufsize_t *)info;
-    void *              ret_value    = NULL; /* Return value */
+    void               *ret_value    = NULL; /* Return value */
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -2675,7 +2675,7 @@ H5D__vlen_get_buf_size(void H5_ATTR_UNUSED *elem, hid_t type_id, unsigned H5_ATT
                        const hsize_t *point, void *op_data)
 {
     H5D_vlen_bufsize_t *vlen_bufsize = (H5D_vlen_bufsize_t *)op_data;
-    H5T_t *             dt;                  /* Datatype for operation */
+    H5T_t              *dt;                  /* Datatype for operation */
     herr_t              ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -3061,7 +3061,7 @@ H5D__format_convert(H5D_t *dataset)
 {
     H5D_chk_idx_info_t new_idx_info;                /* Index info for the new layout */
     H5D_chk_idx_info_t idx_info;                    /* Index info for the current layout */
-    H5O_layout_t *     newlayout         = NULL;    /* The new layout */
+    H5O_layout_t      *newlayout         = NULL;    /* The new layout */
     hbool_t            init_new_index    = FALSE;   /* Indicate that the new chunk index is initialized */
     hbool_t            delete_old_layout = FALSE;   /* Indicate that the old layout message is deleted */
     hbool_t            add_new_layout    = FALSE;   /* Indicate that the new layout message is added */
@@ -3512,9 +3512,9 @@ done:
 hid_t
 H5D_get_access_plist(const H5D_t *dset)
 {
-    H5P_genplist_t *   old_plist;                   /* Stored DAPL from dset */
-    H5P_genplist_t *   new_plist;                   /* New DAPL */
-    H5P_genplist_t *   def_fapl;                    /* Default FAPL */
+    H5P_genplist_t    *old_plist;                   /* Stored DAPL from dset */
+    H5P_genplist_t    *new_plist;                   /* New DAPL */
+    H5P_genplist_t    *def_fapl;                    /* Default FAPL */
     H5D_append_flush_t def_append_flush_info = {0}; /* Default append flush property */
     H5D_rdcc_t         def_chunk_info;              /* Default chunk cache property */
     hid_t              new_dapl_id = FAIL;

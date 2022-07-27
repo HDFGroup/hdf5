@@ -467,7 +467,7 @@ dataset_big_write(void)
     hsize_t     start[RANK];               /* for hyperslab setting */
     hsize_t     count[RANK], stride[RANK]; /* for hyperslab setting */
     hsize_t     block[RANK];               /* for hyperslab setting */
-    hsize_t *   coords = NULL;
+    hsize_t    *coords = NULL;
     herr_t      ret;     /* Generic return value */
     hid_t       fid;     /* HDF5 file ID */
     hid_t       acc_tpl; /* File access templates */
@@ -776,7 +776,7 @@ dataset_big_read(void)
     hsize_t     count[RANK], stride[RANK]; /* for hyperslab setting */
     hsize_t     block[RANK];               /* for hyperslab setting */
     size_t      num_points;
-    hsize_t *   coords = NULL;
+    hsize_t    *coords = NULL;
     herr_t      ret; /* Generic return value */
 
     /* allocate memory for data buffer */
@@ -1338,8 +1338,8 @@ coll_chunktest(const char *filename, int chunk_factor, int select_factor, int ap
     hid_t acc_plist, xfer_plist, crp_plist;
 
     hsize_t dims[RANK], chunk_dims[RANK];
-    int *   data_array1  = NULL;
-    int *   data_origin1 = NULL;
+    int    *data_array1  = NULL;
+    int    *data_origin1 = NULL;
 
     hsize_t start[RANK], count[RANK], stride[RANK], block[RANK];
 

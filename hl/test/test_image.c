@@ -519,11 +519,11 @@ test_generate(void)
 {
     hid_t       fid;
     hsize_t     pal_dims[2] = {256, 3};
-    float *     data        = NULL;
+    float      *data        = NULL;
     int         imax, jmax, kmax;
     int         n_elements;
     float       valex, xmin, xmax, value;
-    FILE *      f         = NULL;
+    FILE       *f         = NULL;
     const char *data_file = H5_get_srcdir_filename(DATA_FILE4);
     int         i;
     int         retval = FAIL;
@@ -757,13 +757,13 @@ out:
 
 static int
 read_data(const char *fname, /*IN*/
-          hsize_t *   width, /*OUT*/
-          hsize_t *   height /*OUT*/)
+          hsize_t    *width, /*OUT*/
+          hsize_t    *height /*OUT*/)
 {
     int         i, n;
     int         color_planes;
     char        str[20];
-    FILE *      f = NULL;
+    FILE       *f = NULL;
     int         w, h;
     int         n_elements;
     const char *data_file = H5_get_srcdir_filename(fname);
@@ -876,14 +876,14 @@ out:
 static int
 read_palette(const char *fname, rgb_t *palette, size_t palette_size)
 {
-    FILE *       file;
+    FILE        *file;
     char         buffer[80];
     unsigned     u;
     unsigned int red;
     unsigned int green;
     unsigned int blue;
     unsigned     nentries;
-    const char * data_file = H5_get_srcdir_filename(fname);
+    const char  *data_file = H5_get_srcdir_filename(fname);
 
     /* ensure the given palette is valid */
     if (!palette)
