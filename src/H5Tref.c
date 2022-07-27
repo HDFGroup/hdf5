@@ -961,13 +961,12 @@ done:
 static herr_t
 H5T__ref_disk_write(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf, size_t src_size,
                     H5R_type_t H5_ATTR_UNUSED src_type, H5VL_object_t *dst_file, void *dst_buf,
-                    size_t dst_size, void *bg_buf)
+                    size_t H5_ATTR_NDEBUG_UNUSED dst_size, void *bg_buf)
 {
-    const uint8_t *p             = (const uint8_t *)src_buf;
-    uint8_t       *q             = (uint8_t *)dst_buf;
-    size_t         buf_size_left = dst_size;
-    uint8_t       *p_bg          = (uint8_t *)bg_buf;
-    herr_t         ret_value     = SUCCEED;
+    const uint8_t *p         = (const uint8_t *)src_buf;
+    uint8_t       *q         = (uint8_t *)dst_buf;
+    uint8_t       *p_bg      = (uint8_t *)bg_buf;
+    herr_t         ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
     H5T_REF_LOG_DEBUG("");
@@ -980,12 +979,14 @@ H5T__ref_disk_write(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf,
     /* TODO Should get rid of bg stuff */
     if (p_bg) {
         H5VL_blob_specific_args_t vol_cb_args; /* Arguments to VOL callback */
-        size_t                    p_buf_size_left = dst_size;
 
         /* Skip the size / header */
         p_bg += (sizeof(uint32_t) + H5R_ENCODE_HEADER_SIZE);
+
+#ifndef NDEBUG
+        size_t p_buf_size_left = dst_size;
         HDassert(p_buf_size_left > (sizeof(uint32_t) + H5R_ENCODE_HEADER_SIZE));
-        p_buf_size_left -= (sizeof(uint32_t) + H5R_ENCODE_HEADER_SIZE);
+#endif
 
         /* Set up VOL callback arguments */
         vol_cb_args.op_type = H5VL_BLOB_DELETE;
@@ -1000,12 +1001,14 @@ H5T__ref_disk_write(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf,
     p += H5R_ENCODE_HEADER_SIZE;
     q += H5R_ENCODE_HEADER_SIZE;
     src_size -= H5R_ENCODE_HEADER_SIZE;
-    buf_size_left -= sizeof(uint32_t);
+
+#ifndef NDEBUG
+    size_t buf_size_left = dst_size - sizeof(uint32_t);
+    HDassert(buf_size_left > sizeof(uint32_t));
+#endif
 
     /* Set the size */
     UINT32ENCODE(q, src_size);
-    HDassert(buf_size_left > sizeof(uint32_t));
-    buf_size_left -= sizeof(uint32_t);
 
     /* Store blob */
     if (H5VL_blob_put(dst_file, p, src_size, q, NULL) < 0)

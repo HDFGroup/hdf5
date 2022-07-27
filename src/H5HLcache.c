@@ -541,7 +541,6 @@ H5HL__cache_prefix_serialize(const H5_ATTR_NDEBUG_UNUSED H5F_t *f, void *_image,
     H5HL_prfx_t *prfx = (H5HL_prfx_t *)_thing; /* Pointer to local heap prefix to query */
     H5HL_t      *heap;                         /* Pointer to the local heap */
     uint8_t     *image = (uint8_t *)_image;    /* Pointer into image buffer */
-    size_t       buf_size;                     /* expected size of the image buffer */
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -558,11 +557,13 @@ H5HL__cache_prefix_serialize(const H5_ATTR_NDEBUG_UNUSED H5F_t *f, void *_image,
     heap = prfx->heap;
     HDassert(heap);
 
+#ifndef NDEBUG
     /* Compute the buffer size */
-    buf_size = heap->prfx_size;
+    size_t buf_size = heap->prfx_size; /* expected size of the image buffer */
     if (heap->single_cache_obj)
         buf_size += heap->dblk_size;
     HDassert(len == buf_size);
+#endif
 
     /* Update the free block value from the free list */
     heap->free_block = heap->freelist ? heap->freelist->offset : H5HL_FREE_NULL;
