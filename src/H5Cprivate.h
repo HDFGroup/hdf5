@@ -494,7 +494,7 @@ typedef struct H5C_cache_entry_t {
 #ifndef NDEBUG
     uint32_t magic;
 #endif /* NDEBUG */
-    H5C_t *            cache_ptr;
+    H5C_t             *cache_ptr;
     haddr_t            addr;
     size_t             size;
     const H5C_class_t *type;
@@ -986,7 +986,7 @@ H5_DLL herr_t H5C_get_evictions_enabled(const H5C_t *cache_ptr, hbool_t *evictio
 
 H5_DLL herr_t H5C_get_trace_file_ptr(const H5C_t *cache_ptr, FILE **trace_file_ptr_ptr);
 H5_DLL herr_t H5C_get_trace_file_ptr_from_entry(const H5C_cache_entry_t *entry_ptr,
-                                                FILE **                  trace_file_ptr_ptr);
+                                                FILE                   **trace_file_ptr_ptr);
 
 H5_DLL herr_t H5C_insert_entry(H5F_t *f, hid_t primary_dxpl_id, hid_t secondary_dxpl_id,
                                const H5C_class_t *type, haddr_t addr, void *thing, unsigned int flags);

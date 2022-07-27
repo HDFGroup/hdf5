@@ -108,13 +108,13 @@ H5FL_SEQ_EXTERN(H5G_entry_t);
 static H5G_node_t *
 H5G_node_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata)
 {
-    H5G_node_t *   sym = NULL;
-    H5WB_t *       wb  = NULL;                  /* Wrapped buffer for node data */
+    H5G_node_t    *sym = NULL;
+    H5WB_t        *wb  = NULL;                  /* Wrapped buffer for node data */
     uint8_t        node_buf[H5G_NODE_BUF_SIZE]; /* Buffer for node */
-    uint8_t *      node;                        /* Pointer to node buffer */
+    uint8_t       *node;                        /* Pointer to node buffer */
     const uint8_t *p;
     const uint8_t *p_end;
-    H5G_node_t *   ret_value; /* Return value */
+    H5G_node_t    *ret_value; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

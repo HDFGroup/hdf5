@@ -359,7 +359,7 @@ static hbool_t serve_rw_count_reset_request(struct mssg_t *mssg_ptr);
 static herr_t clear_datum(H5F_t *f, void *thing, hbool_t dest);
 static herr_t destroy_datum(H5F_t H5_ATTR_UNUSED *f, void *thing);
 static herr_t flush_datum(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t dest, haddr_t addr, void *thing);
-static void * load_datum(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr,
+static void  *load_datum(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr,
                          void H5_ATTR_UNUSED *udata);
 static herr_t size_datum(H5F_t H5_ATTR_UNUSED *f, void *thing, size_t *size_ptr);
 
@@ -1065,7 +1065,7 @@ send_mssg(struct mssg_t *mssg_ptr, hbool_t add_req_to_tag)
 static hbool_t
 setup_derived_types(void)
 {
-    const char *  fcn_name = "setup_derived_types()";
+    const char   *fcn_name = "setup_derived_types()";
     hbool_t       success  = TRUE;
     int           i;
     int           result;
@@ -1262,7 +1262,7 @@ reset_server_counters(void)
 static hbool_t
 server_main(void)
 {
-    const char *  fcn_name   = "server_main()";
+    const char   *fcn_name   = "server_main()";
     hbool_t       done       = FALSE;
     hbool_t       success    = TRUE;
     int           done_count = 0;
@@ -1404,7 +1404,7 @@ server_main(void)
 static hbool_t
 serve_read_request(struct mssg_t *mssg_ptr)
 {
-    const char *  fcn_name    = "serve_read_request()";
+    const char   *fcn_name    = "serve_read_request()";
     hbool_t       report_mssg = FALSE;
     hbool_t       success     = TRUE;
     int           target_index;
@@ -1523,7 +1523,7 @@ serve_read_request(struct mssg_t *mssg_ptr)
 static hbool_t
 serve_sync_request(struct mssg_t *mssg_ptr)
 {
-    const char *  fcn_name    = "serve_sync_request()";
+    const char   *fcn_name    = "serve_sync_request()";
     hbool_t       report_mssg = FALSE;
     hbool_t       success     = TRUE;
     struct mssg_t reply;
@@ -1724,7 +1724,7 @@ serve_write_request(struct mssg_t *mssg_ptr)
 static hbool_t
 serve_total_writes_request(struct mssg_t *mssg_ptr)
 {
-    const char *  fcn_name    = "serve_total_writes_request()";
+    const char   *fcn_name    = "serve_total_writes_request()";
     hbool_t       report_mssg = FALSE;
     hbool_t       success     = TRUE;
     struct mssg_t reply;
@@ -1795,7 +1795,7 @@ serve_total_writes_request(struct mssg_t *mssg_ptr)
 static hbool_t
 serve_total_reads_request(struct mssg_t *mssg_ptr)
 {
-    const char *  fcn_name    = "serve_total_reads_request()";
+    const char   *fcn_name    = "serve_total_reads_request()";
     hbool_t       report_mssg = FALSE;
     hbool_t       success     = TRUE;
     struct mssg_t reply;
@@ -1866,7 +1866,7 @@ serve_total_reads_request(struct mssg_t *mssg_ptr)
 static hbool_t
 serve_entry_writes_request(struct mssg_t *mssg_ptr)
 {
-    const char *  fcn_name    = "serve_entry_writes_request()";
+    const char   *fcn_name    = "serve_entry_writes_request()";
     hbool_t       report_mssg = FALSE;
     hbool_t       success     = TRUE;
     int           target_index;
@@ -1956,7 +1956,7 @@ serve_entry_writes_request(struct mssg_t *mssg_ptr)
 static hbool_t
 serve_entry_reads_request(struct mssg_t *mssg_ptr)
 {
-    const char *  fcn_name    = "serve_entry_reads_request()";
+    const char   *fcn_name    = "serve_entry_reads_request()";
     hbool_t       report_mssg = FALSE;
     hbool_t       success     = TRUE;
     int           target_index;
@@ -2045,7 +2045,7 @@ serve_entry_reads_request(struct mssg_t *mssg_ptr)
 static hbool_t
 serve_rw_count_reset_request(struct mssg_t *mssg_ptr)
 {
-    const char *  fcn_name    = "serve_rw_count_reset_request()";
+    const char   *fcn_name    = "serve_rw_count_reset_request()";
     hbool_t       report_mssg = FALSE;
     hbool_t       success     = TRUE;
     struct mssg_t reply;
@@ -2225,13 +2225,13 @@ destroy_datum(H5F_t H5_ATTR_UNUSED *f, void *thing)
 static herr_t
 flush_datum(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t dest, haddr_t H5_ATTR_UNUSED addr, void *thing)
 {
-    const char *       fcn_name  = "flush_datum()";
+    const char        *fcn_name  = "flush_datum()";
     hbool_t            was_dirty = FALSE;
     herr_t             ret_value = SUCCEED;
     int                idx;
-    struct datum *     entry_ptr;
+    struct datum      *entry_ptr;
     struct mssg_t      mssg;
-    H5C_t *            cache_ptr;
+    H5C_t             *cache_ptr;
     struct H5AC_aux_t *aux_ptr;
 
     HDassert(thing);
@@ -2368,7 +2368,7 @@ flush_datum(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t dest, haddr_t H5_ATT
 static void *
 load_datum(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr, void H5_ATTR_UNUSED *udata)
 {
-    const char *  fcn_name = "load_datum()";
+    const char   *fcn_name = "load_datum()";
     hbool_t       success  = TRUE;
     int           idx;
     struct datum *entry_ptr = NULL;
@@ -2574,7 +2574,7 @@ size_datum(H5F_t H5_ATTR_UNUSED *f, void *thing, size_t *size_ptr)
 static void
 expunge_entry(H5F_t *file_ptr, int32_t idx)
 {
-    const char *  fcn_name = "expunge_entry()";
+    const char   *fcn_name = "expunge_entry()";
     hbool_t       in_cache;
     herr_t        result;
     struct datum *entry_ptr;
@@ -2651,7 +2651,7 @@ expunge_entry(H5F_t *file_ptr, int32_t idx)
 static void
 insert_entry(H5C_t *cache_ptr, H5F_t *file_ptr, int32_t idx, unsigned int flags)
 {
-    const char *  fcn_name = "insert_entry()";
+    const char   *fcn_name = "insert_entry()";
     hbool_t       insert_pinned;
     herr_t        result;
     struct datum *entry_ptr;
@@ -3026,8 +3026,8 @@ lock_and_unlock_random_entry(H5F_t *file_ptr, int min_idx, int max_idx)
 static void
 lock_entry(H5F_t *file_ptr, int32_t idx)
 {
-    const char *       fcn_name = "lock_entry()";
-    struct datum *     entry_ptr;
+    const char        *fcn_name = "lock_entry()";
+    struct datum      *entry_ptr;
     H5C_cache_entry_t *cache_entry_ptr;
 
     if (nerrors == 0) {
@@ -3080,7 +3080,7 @@ lock_entry(H5F_t *file_ptr, int32_t idx)
 static void
 mark_entry_dirty(int32_t idx)
 {
-    const char *  fcn_name = "mark_entry_dirty()";
+    const char   *fcn_name = "mark_entry_dirty()";
     herr_t        result;
     struct datum *entry_ptr;
 
@@ -3195,7 +3195,7 @@ pin_entry(H5F_t *file_ptr, int32_t idx, hbool_t global, hbool_t dirty)
 static void
 pin_protected_entry(int32_t idx, hbool_t global)
 {
-    const char *  fcn_name = "pin_protected_entry()";
+    const char   *fcn_name = "pin_protected_entry()";
     herr_t        result;
     struct datum *entry_ptr;
 
@@ -3261,7 +3261,7 @@ pin_protected_entry(int32_t idx, hbool_t global)
 static void
 move_entry(H5F_t *file_ptr, int32_t old_idx, int32_t new_idx)
 {
-    const char *  fcn_name = "move_entry()";
+    const char   *fcn_name = "move_entry()";
     herr_t        result;
     int           tmp;
     size_t        tmp_len;
@@ -3378,7 +3378,7 @@ move_entry(H5F_t *file_ptr, int32_t old_idx, int32_t new_idx)
 static hbool_t
 reset_server_counts(void)
 {
-    const char *  fcn_name = "reset_server_counts()";
+    const char   *fcn_name = "reset_server_counts()";
     hbool_t       success  = TRUE; /* will set to FALSE if appropriate. */
     struct mssg_t mssg;
 
@@ -3450,7 +3450,7 @@ reset_server_counts(void)
 static void
 resize_entry(int32_t idx, size_t new_size)
 {
-    const char *  fcn_name = "resize_entry()";
+    const char   *fcn_name = "resize_entry()";
     herr_t        result;
     struct datum *entry_ptr;
 
@@ -3519,14 +3519,14 @@ resize_entry(int32_t idx, size_t new_size)
 static hbool_t
 setup_cache_for_test(hid_t *fid_ptr, H5F_t **file_ptr_ptr, H5C_t **cache_ptr_ptr, int metadata_write_strategy)
 {
-    const char *        fcn_name       = "setup_cache_for_test()";
+    const char         *fcn_name       = "setup_cache_for_test()";
     hbool_t             success        = FALSE; /* will set to TRUE if appropriate. */
     hbool_t             enable_rpt_fcn = FALSE;
     hid_t               fid            = -1;
     H5AC_cache_config_t config;
     H5AC_cache_config_t test_config;
-    H5F_t *             file_ptr  = NULL;
-    H5C_t *             cache_ptr = NULL;
+    H5F_t              *file_ptr  = NULL;
+    H5C_t              *cache_ptr = NULL;
 
     HDassert(fid_ptr != NULL);
     HDassert(file_ptr_ptr != NULL);
@@ -3723,7 +3723,7 @@ setup_cache_for_test(hid_t *fid_ptr, H5F_t **file_ptr_ptr, H5C_t **cache_ptr_ptr
 static void
 verify_writes(int num_writes, haddr_t *written_entries_tbl)
 {
-    const char *  fcn_name = "verify_writes()";
+    const char   *fcn_name = "verify_writes()";
     const hbool_t report   = FALSE;
     hbool_t       proceed  = TRUE;
     int           i        = 0;
@@ -3832,7 +3832,7 @@ verify_writes(int num_writes, haddr_t *written_entries_tbl)
 static void
 setup_rand(void)
 {
-    const char *   fcn_name             = "setup_rand()";
+    const char    *fcn_name             = "setup_rand()";
     hbool_t        use_predefined_seeds = FALSE;
     int            num_predefined_seeds = 3;
     unsigned       predefined_seeds[3]  = {33402, 33505, 33422};
@@ -3948,7 +3948,7 @@ take_down_cache(hid_t fid)
 static hbool_t
 verify_entry_reads(haddr_t addr, int expected_entry_reads)
 {
-    const char *  fcn_name = "verify_entry_reads()";
+    const char   *fcn_name = "verify_entry_reads()";
     hbool_t       success  = TRUE;
     int           reported_entry_reads;
     struct mssg_t mssg;
@@ -4046,7 +4046,7 @@ verify_entry_reads(haddr_t addr, int expected_entry_reads)
 static hbool_t
 verify_entry_writes(haddr_t addr, int expected_entry_writes)
 {
-    const char *  fcn_name = "verify_entry_writes()";
+    const char   *fcn_name = "verify_entry_writes()";
     hbool_t       success  = TRUE;
     int           reported_entry_writes;
     struct mssg_t mssg;
@@ -4143,7 +4143,7 @@ verify_entry_writes(haddr_t addr, int expected_entry_writes)
 static hbool_t
 verify_total_reads(int expected_total_reads)
 {
-    const char *  fcn_name = "verify_total_reads()";
+    const char   *fcn_name = "verify_total_reads()";
     hbool_t       success  = TRUE; /* will set to FALSE if appropriate. */
     long          reported_total_reads;
     struct mssg_t mssg;
@@ -4236,7 +4236,7 @@ verify_total_reads(int expected_total_reads)
 static hbool_t
 verify_total_writes(int expected_total_writes)
 {
-    const char *  fcn_name = "verify_total_writes()";
+    const char   *fcn_name = "verify_total_writes()";
     hbool_t       success  = TRUE; /* will set to FALSE if appropriate. */
     long          reported_total_writes;
     struct mssg_t mssg;
@@ -4329,7 +4329,7 @@ verify_total_writes(int expected_total_writes)
 void
 unlock_entry(H5F_t *file_ptr, int32_t idx, unsigned int flags)
 {
-    const char *  fcn_name = "unlock_entry()";
+    const char   *fcn_name = "unlock_entry()";
     herr_t        dirtied;
     herr_t        result;
     struct datum *entry_ptr;
@@ -4405,7 +4405,7 @@ unlock_entry(H5F_t *file_ptr, int32_t idx, unsigned int flags)
 static void
 unpin_entry(H5F_t *file_ptr, int32_t idx, hbool_t global, hbool_t dirty, hbool_t via_unprotect)
 {
-    const char *  fcn_name = "unpin_entry()";
+    const char   *fcn_name = "unpin_entry()";
     herr_t        result;
     unsigned int  flags = H5AC__UNPIN_ENTRY_FLAG;
     struct datum *entry_ptr;
@@ -4488,7 +4488,7 @@ unpin_entry(H5F_t *file_ptr, int32_t idx, hbool_t global, hbool_t dirty, hbool_t
 static hbool_t
 server_smoke_check(void)
 {
-    const char *  fcn_name = "server_smoke_check()";
+    const char   *fcn_name = "server_smoke_check()";
     hbool_t       success  = TRUE;
     int           max_nerrors;
     struct mssg_t mssg;
@@ -4816,13 +4816,13 @@ server_smoke_check(void)
 static hbool_t
 smoke_check_1(int metadata_write_strategy)
 {
-    const char *  fcn_name = "smoke_check_1()";
+    const char   *fcn_name = "smoke_check_1()";
     hbool_t       success  = TRUE;
     int           i;
     int           max_nerrors;
     hid_t         fid       = -1;
-    H5F_t *       file_ptr  = NULL;
-    H5C_t *       cache_ptr = NULL;
+    H5F_t        *file_ptr  = NULL;
+    H5C_t        *cache_ptr = NULL;
     struct mssg_t mssg;
 
     switch (metadata_write_strategy) {
@@ -4981,13 +4981,13 @@ smoke_check_1(int metadata_write_strategy)
 static hbool_t
 smoke_check_2(int metadata_write_strategy)
 {
-    const char *  fcn_name = "smoke_check_2()";
+    const char   *fcn_name = "smoke_check_2()";
     hbool_t       success  = TRUE;
     int           i;
     int           max_nerrors;
     hid_t         fid       = -1;
-    H5F_t *       file_ptr  = NULL;
-    H5C_t *       cache_ptr = NULL;
+    H5F_t        *file_ptr  = NULL;
+    H5C_t        *cache_ptr = NULL;
     struct mssg_t mssg;
 
     switch (metadata_write_strategy) {
@@ -5183,7 +5183,7 @@ smoke_check_2(int metadata_write_strategy)
 static hbool_t
 smoke_check_3(int metadata_write_strategy)
 {
-    const char *  fcn_name = "smoke_check_3()";
+    const char   *fcn_name = "smoke_check_3()";
     hbool_t       success  = TRUE;
     int           cp       = 0;
     int           i;
@@ -5193,8 +5193,8 @@ smoke_check_3(int metadata_write_strategy)
     int           min_idx;
     int           max_idx;
     hid_t         fid       = -1;
-    H5F_t *       file_ptr  = NULL;
-    H5C_t *       cache_ptr = NULL;
+    H5F_t        *file_ptr  = NULL;
+    H5C_t        *cache_ptr = NULL;
     struct mssg_t mssg;
 
     switch (metadata_write_strategy) {
@@ -5545,7 +5545,7 @@ smoke_check_3(int metadata_write_strategy)
 static hbool_t
 smoke_check_4(int metadata_write_strategy)
 {
-    const char *  fcn_name = "smoke_check_4()";
+    const char   *fcn_name = "smoke_check_4()";
     hbool_t       success  = TRUE;
     int           i;
     int           max_nerrors;
@@ -5554,8 +5554,8 @@ smoke_check_4(int metadata_write_strategy)
     int           min_idx;
     int           max_idx;
     hid_t         fid       = -1;
-    H5F_t *       file_ptr  = NULL;
-    H5C_t *       cache_ptr = NULL;
+    H5F_t        *file_ptr  = NULL;
+    H5C_t        *cache_ptr = NULL;
     struct mssg_t mssg;
 
     switch (metadata_write_strategy) {
@@ -5825,14 +5825,14 @@ smoke_check_4(int metadata_write_strategy)
 static hbool_t
 smoke_check_5(int metadata_write_strategy)
 {
-    const char *  fcn_name = "smoke_check_5()";
+    const char   *fcn_name = "smoke_check_5()";
     hbool_t       success  = TRUE;
     int           cp       = 0;
     int           i;
     int           max_nerrors;
     hid_t         fid       = -1;
-    H5F_t *       file_ptr  = NULL;
-    H5C_t *       cache_ptr = NULL;
+    H5F_t        *file_ptr  = NULL;
+    H5C_t        *cache_ptr = NULL;
     struct mssg_t mssg;
 
     switch (metadata_write_strategy) {
@@ -6113,8 +6113,8 @@ trace_file_check(int metadata_write_strategy)
     const char *expected_output_0[]    = {
         "### HDF5 metadata cache trace file version 1 ###\n",
         "H5AC_set_cache_auto_resize_config 1 0 1 0 \"t_cache_trace.txt\" 1 0 2097152 0.300000 33554432 "
-        "1048576 50000 1 0.900000 2.000000 1 1.000000 0.250000 1 4194304 3 0.999000 0.900000 1 1048576 3 1 "
-        "0.100000 262144 0 0\n",
+           "1048576 50000 1 0.900000 2.000000 1 1.000000 0.250000 1 4194304 3 0.999000 0.900000 1 1048576 3 1 "
+           "0.100000 262144 0 0\n",
         "H5AC_insert_entry 0x200 25 0x0 2 0\n",
         "H5AC_insert_entry 0x202 25 0x0 2 0\n",
         "H5AC_insert_entry 0x204 25 0x0 4 0\n",
@@ -6174,9 +6174,9 @@ trace_file_check(int metadata_write_strategy)
     int                 expected_line_len;
     int                 actual_line_len;
     hid_t               fid            = -1;
-    H5F_t *             file_ptr       = NULL;
-    H5C_t *             cache_ptr      = NULL;
-    FILE *              trace_file_ptr = NULL;
+    H5F_t              *file_ptr       = NULL;
+    H5C_t              *cache_ptr      = NULL;
+    FILE               *trace_file_ptr = NULL;
     H5AC_cache_config_t config;
     struct mssg_t       mssg;
 

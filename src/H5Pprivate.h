@@ -116,10 +116,10 @@ H5_DLL herr_t H5P_insert(H5P_genplist_t *plist, const char *name, size_t size, v
 H5_DLL herr_t H5P_remove(hid_t plist_id, H5P_genplist_t *plist, const char *name);
 H5_DLL htri_t H5P_exist_plist(const H5P_genplist_t *plist, const char *name);
 H5_DLL htri_t H5P_class_isa(const H5P_genclass_t *pclass1, const H5P_genclass_t *pclass2);
-H5_DLL char * H5P_get_class_name(H5P_genclass_t *pclass);
+H5_DLL char  *H5P_get_class_name(H5P_genclass_t *pclass);
 H5_DLL herr_t H5P_get_nprops_pclass(const H5P_genclass_t *pclass, size_t *nprops, hbool_t recurse);
 H5_DLL hid_t  H5P_get_driver(H5P_genplist_t *plist);
-H5_DLL void * H5P_get_driver_info(H5P_genplist_t *plist);
+H5_DLL void  *H5P_get_driver_info(H5P_genplist_t *plist);
 H5_DLL herr_t H5P_set_driver(H5P_genplist_t *plist, hid_t new_driver_id, const void *new_driver_info);
 H5_DLL herr_t H5P_set_vlen_mem_manager(H5P_genplist_t *plist, H5MM_allocate_t alloc_func, void *alloc_info,
                                        H5MM_free_t free_func, void *free_info);
@@ -133,17 +133,17 @@ H5_DLL herr_t H5P_get_filter_by_id(H5P_genplist_t *plist, H5Z_filter_t id, unsig
 H5_DLL htri_t H5P_filter_in_pline(H5P_genplist_t *plist, H5Z_filter_t id);
 
 /* Query internal fields of the property list struct */
-H5_DLL hid_t H5P_get_plist_id(const H5P_genplist_t *plist);
+H5_DLL hid_t           H5P_get_plist_id(const H5P_genplist_t *plist);
 H5_DLL H5P_genclass_t *H5P_get_class(const H5P_genplist_t *plist);
 
 /* *SPECIAL* Don't make more of these! -QAK */
-H5_DLL htri_t H5P_isa_class(hid_t plist_id, hid_t pclass_id);
+H5_DLL htri_t          H5P_isa_class(hid_t plist_id, hid_t pclass_id);
 H5_DLL H5P_genplist_t *H5P_object_verify(hid_t plist_id, hid_t pclass_id);
 
 /* Private functions to "peek" at properties of a certain type */
 H5_DLL unsigned H5P_peek_unsigned(H5P_genplist_t *plist, const char *name);
 H5_DLL hid_t    H5P_peek_hid_t(H5P_genplist_t *plist, const char *name);
-H5_DLL void *   H5P_peek_voidp(H5P_genplist_t *plist, const char *name);
+H5_DLL void    *H5P_peek_voidp(H5P_genplist_t *plist, const char *name);
 H5_DLL size_t   H5P_peek_size_t(H5P_genplist_t *plist, const char *name);
 
 /* Private DCPL routines */

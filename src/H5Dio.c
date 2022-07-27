@@ -115,12 +115,12 @@ herr_t
 H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t plist_id,
         void *buf /*out*/)
 {
-    H5D_t *         dset = NULL;
+    H5D_t          *dset = NULL;
     H5P_genplist_t *plist; /* Property list pointer */
-    const H5S_t *   mem_space      = NULL;
-    const H5S_t *   file_space     = NULL;
+    const H5S_t    *mem_space      = NULL;
+    const H5S_t    *file_space     = NULL;
     herr_t          ret_value      = SUCCEED; /* Return value */
-    hsize_t *       direct_offset  = NULL;
+    hsize_t        *direct_offset  = NULL;
     hbool_t         direct_read    = FALSE;
     uint32_t        direct_filters = 0;
 
@@ -251,10 +251,10 @@ herr_t
 H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id,
          const void *buf)
 {
-    H5D_t *         dset = NULL;
+    H5D_t          *dset = NULL;
     H5P_genplist_t *plist; /* Property list pointer */
-    const H5S_t *   mem_space    = NULL;
-    const H5S_t *   file_space   = NULL;
+    const H5S_t    *mem_space    = NULL;
+    const H5S_t    *file_space   = NULL;
     hbool_t         direct_write = FALSE;
     herr_t          ret_value    = SUCCEED; /* Return value */
 
@@ -335,7 +335,7 @@ H5D__pre_write(H5D_t *dset, hbool_t direct_write, hid_t mem_type_id, const H5S_t
     if (direct_write) {
         H5P_genplist_t *plist; /* Property list pointer */
         uint32_t        direct_filters;
-        hsize_t *       direct_offset;
+        hsize_t        *direct_offset;
         uint32_t        direct_datasize;
         int             ndims = 0;
         hsize_t         dims[H5O_LAYOUT_NDIMS];
@@ -412,7 +412,7 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space, const H5S_t
     H5D_io_info_t   io_info;                     /* Dataset I/O info     */
     H5D_type_info_t type_info;                   /* Datatype info for operation */
     hbool_t         type_info_init      = FALSE; /* Whether the datatype info has been initialized */
-    H5S_t *         projected_mem_space = NULL;  /* If not NULL, ptr to dataspace containing a     */
+    H5S_t          *projected_mem_space = NULL;  /* If not NULL, ptr to dataspace containing a     */
                                                  /* projection of the supplied mem_space to a new  */
                                                  /* data space with rank equal to that of          */
                                                  /* file_space.                                    */
@@ -637,7 +637,7 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space, const H5S_
     H5D_io_info_t   io_info;                     /* Dataset I/O info     */
     H5D_type_info_t type_info;                   /* Datatype info for operation */
     hbool_t         type_info_init      = FALSE; /* Whether the datatype info has been initialized */
-    H5S_t *         projected_mem_space = NULL;  /* If not NULL, ptr to dataspace containing a     */
+    H5S_t          *projected_mem_space = NULL;  /* If not NULL, ptr to dataspace containing a     */
                                                  /* projection of the supplied mem_space to a new  */
                                                  /* data space with rank equal to that of          */
                                                  /* file_space.                                    */
@@ -1117,7 +1117,7 @@ static herr_t
 H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset, hid_t dxpl_id, const H5S_t *file_space,
                    const H5S_t *mem_space, const H5D_type_info_t *type_info, const H5D_chunk_map_t *fm)
 {
-    H5P_genplist_t *                 dx_plist;              /* Data transer property list */
+    H5P_genplist_t                  *dx_plist;              /* Data transer property list */
     H5D_mpio_actual_chunk_opt_mode_t actual_chunk_opt_mode; /* performed chunk optimization */
     H5D_mpio_actual_io_mode_t        actual_io_mode;        /* performed io mode */
     herr_t                           ret_value = SUCCEED;   /* Return value    */

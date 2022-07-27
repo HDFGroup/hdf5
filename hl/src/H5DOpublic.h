@@ -38,8 +38,8 @@ H5_HLDLL herr_t H5DOwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, 
 H5_HLDLL herr_t H5DOread_chunk(hid_t          dset_id, /*in*/
                                hid_t          dxpl_id, /*in*/
                                const hsize_t *offset,  /*in*/
-                               uint32_t *     filters, /*out*/
-                               void *         buf);             /*out*/
+                               uint32_t      *filters, /*out*/
+                               void          *buf);             /*out*/
 
 #ifdef __cplusplus
 }

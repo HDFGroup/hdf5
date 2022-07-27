@@ -133,12 +133,12 @@ typedef struct _GifCommentExtension {
 **           extension.
 */
 typedef struct _GifToMem {
-    GIFHEAD *           GifHeader;
-    GIFIMAGEDESC **     GifImageDesc;
+    GIFHEAD            *GifHeader;
+    GIFIMAGEDESC      **GifImageDesc;
     GIFGRAPHICCONTROL **GifGraphicControlExtension;
-    GIFPLAINTEXT **     GifPlainTextExtension;
-    GIFAPPLICATION **   GifApplicationExtension;
-    GIFCOMMENT **       GifCommentExtension;
+    GIFPLAINTEXT      **GifPlainTextExtension;
+    GIFAPPLICATION    **GifApplicationExtension;
+    GIFCOMMENT        **GifCommentExtension;
 } GIFTOMEM;
 
 /*

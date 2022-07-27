@@ -78,7 +78,7 @@ H5SM_get_mesg_count_test(H5F_t *f, hid_t dxpl_id, unsigned type_id, size_t *mesg
 
     /* Check for shared messages being enabled */
     if (H5F_addr_defined(H5F_SOHM_ADDR(f))) {
-        H5SM_index_header_t * header;      /* Index header for message type */
+        H5SM_index_header_t  *header;      /* Index header for message type */
         H5SM_table_cache_ud_t cache_udata; /* User-data for callback */
         ssize_t               index_num;   /* Table index for message type */
 

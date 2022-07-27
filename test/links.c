@@ -152,7 +152,7 @@ typedef struct {
     int             stop;      /* # of iterations to stop after */
     int64_t         curr;      /* Current creation order value */
     size_t          max_visit; /* Size of "visited link" flag array */
-    hbool_t *       visited;   /* Pointer to array of "visited link" flags */
+    hbool_t        *visited;   /* Pointer to array of "visited link" flags */
 } link_iter_info_t;
 
 /* Link visit structs */
@@ -746,7 +746,7 @@ long_links(hid_t fapl, hbool_t new_format)
     hid_t  fid     = -1;   /* File ID */
     hid_t  gid     = -1;   /* Group ID */
     hid_t  gid2    = -1;   /* Datatype ID */
-    char * objname = NULL; /* Name of object [Long] */
+    char  *objname = NULL; /* Name of object [Long] */
     size_t u;              /* Local index variable */
     char   filename[NAME_BUF_SIZE];
 
@@ -4659,8 +4659,8 @@ external_set_elink_cb(hid_t fapl, hbool_t new_format)
                          base_driver == H5FD_MPIO || base_driver == H5FD_CORE)
                             ? H5P_DEFAULT
                             : fapl;
-    op_data.fam_size = ELINK_CB_FAM_SIZE;
-    op_data.code     = 0;
+    op_data.fam_size  = ELINK_CB_FAM_SIZE;
+    op_data.code      = 0;
 
     /* Create family fapl */
     if ((fam_fapl = H5Pcopy(fapl)) < 0)
@@ -14207,7 +14207,7 @@ link_iterate(hid_t fapl)
     char             objname[NAME_BUF_SIZE];  /* Object name */
     char             filename[NAME_BUF_SIZE]; /* File name */
     link_iter_info_t iter_info;               /* Iterator info */
-    hbool_t *        visited = NULL;          /* Array of flags for visiting links */
+    hbool_t         *visited = NULL;          /* Array of flags for visiting links */
     hsize_t          skip;                    /* # of links to skip in group */
     unsigned         u;                       /* Local index variable */
     herr_t           ret;                     /* Generic return value */
@@ -14710,7 +14710,7 @@ link_iterate_old(hid_t fapl)
     char             objname[NAME_BUF_SIZE];  /* Object name */
     char             filename[NAME_BUF_SIZE]; /* File name */
     link_iter_info_t iter_info;               /* Iterator info */
-    hbool_t *        visited = NULL;          /* Array of flags for visiting links */
+    hbool_t         *visited = NULL;          /* Array of flags for visiting links */
     hsize_t          skip;                    /* # of links to skip in group */
     unsigned         u;                       /* Local index variable */
     herr_t           ret;                     /* Generic return value */
@@ -14954,7 +14954,7 @@ open_by_idx(hid_t fapl)
     char            filename[NAME_BUF_SIZE];    /* File name */
     char            objname[NAME_BUF_SIZE];     /* Object name */
     char            valname[2 * NAME_BUF_SIZE]; /* Link value */
-    haddr_t *       objno = NULL;               /* Addresses of the objects created */
+    haddr_t        *objno = NULL;               /* Addresses of the objects created */
     unsigned        u;                          /* Local index variable */
     hid_t           ret;                        /* Generic return value */
 
@@ -15451,7 +15451,7 @@ object_info(hid_t fapl)
     char            objname[NAME_BUF_SIZE];     /* Object name */
     char            valname[2 * NAME_BUF_SIZE]; /* Link value */
     char            attrname[NAME_BUF_SIZE];    /* Attribute name */
-    haddr_t *       objno = NULL;               /* Addresses of the objects created */
+    haddr_t        *objno = NULL;               /* Addresses of the objects created */
     herr_t          ret;                        /* Generic return value */
     unsigned        u, v;                       /* Local index variables */
 

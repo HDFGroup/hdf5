@@ -827,7 +827,7 @@ done:
 static herr_t
 H5HF_man_iblock_root_revert(H5HF_indirect_t *root_iblock, hid_t dxpl_id)
 {
-    H5HF_hdr_t *   hdr;                 /* Pointer to heap's header */
+    H5HF_hdr_t    *hdr;                 /* Pointer to heap's header */
     H5HF_direct_t *dblock = NULL;       /* Pointer to new root indirect block */
     haddr_t        dblock_addr;         /* Direct block's address in the file */
     size_t         dblock_size;         /* Direct block's size */
@@ -908,7 +908,7 @@ done:
 herr_t
 H5HF_man_iblock_alloc_row(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t **sec_node)
 {
-    H5HF_indirect_t *    iblock       = NULL;      /* Pointer to indirect block */
+    H5HF_indirect_t     *iblock       = NULL;      /* Pointer to indirect block */
     H5HF_free_section_t *old_sec_node = *sec_node; /* Pointer to old indirect section node */
     unsigned             dblock_entry;             /* Entry for direct block */
     hbool_t              iblock_held = FALSE;      /* Flag to indicate that indirect block is held */

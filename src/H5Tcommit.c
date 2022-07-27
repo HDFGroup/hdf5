@@ -108,7 +108,7 @@ herr_t
 H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id)
 {
     H5G_loc_t loc;                 /* Location to create datatype */
-    H5T_t *   type;                /* Datatype for ID */
+    H5T_t    *type;                /* Datatype for ID */
     herr_t    ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -253,7 +253,7 @@ herr_t
 H5Tcommit_anon(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
 {
     H5G_loc_t loc;                 /* Group location for location */
-    H5T_t *   type      = NULL;    /* Datatype created */
+    H5T_t    *type      = NULL;    /* Datatype created */
     herr_t    ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -529,7 +529,7 @@ done:
 hid_t
 H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id)
 {
-    H5T_t *    type = NULL;                  /* Datatype opened in file */
+    H5T_t     *type = NULL;                  /* Datatype opened in file */
     H5G_loc_t  loc;                          /* Group location of object to open */
     H5G_name_t path;                         /* Datatype group hier. path */
     H5O_loc_t  oloc;                         /* Datatype object location */
@@ -616,7 +616,7 @@ done:
 hid_t
 H5Tget_create_plist(hid_t dtype_id)
 {
-    H5T_t *         type;                        /* Datatype object for ID */
+    H5T_t          *type;                        /* Datatype object for ID */
     H5P_genplist_t *tcpl_plist;                  /* Existing datatype creation propertty list */
     hid_t           new_tcpl_id = FAIL;          /* New datatype creation property list */
     herr_t          status;                      /* Generic status value */
@@ -682,8 +682,8 @@ H5T_t *
 H5T_open(const H5G_loc_t *loc, hid_t dxpl_id)
 {
     H5T_shared_t *shared_fo = NULL;
-    H5T_t *       dt        = NULL;
-    H5T_t *       ret_value = NULL; /* Return value */
+    H5T_t        *dt        = NULL;
+    H5T_t        *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 

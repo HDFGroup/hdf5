@@ -153,7 +153,7 @@ main(void)
                 /* Set the "use the earliest version of the format" bounds for
                  * creating objects in the file */
                 if (H5Pset_libver_bounds(my_fapl, H5F_LIBVER_EARLIEST, H5F_LIBVER_LATEST) < 0)
-                TEST_ERROR
+                    TEST_ERROR
 
             /* Tests which use chunked datasets */
             nerrors += do_ranks(my_fapl) < 0 ? 1 : 0;
@@ -2127,7 +2127,7 @@ test_random_rank4(hid_t fapl, hid_t dcpl, hbool_t do_fillvalue, hbool_t do_spars
     hsize_t           dims[4];                     /* Dataset's dimensions */
     hsize_t           old_dims[4];                 /* Old dataset dimensions */
     hsize_t           min_unwritten_dims[4];       /* Minimum dimensions since last write */
-    hsize_t *         valid_dims = old_dims;       /* Dimensions of region still containing written data */
+    hsize_t          *valid_dims = old_dims;       /* Dimensions of region still containing written data */
     hsize_t           cdims[4];                    /* Chunk dimensions */
     const hsize_t     mdims[4] = {10, 10, 10, 10}; /* Memory buffer dimensions */
     const hsize_t     start[4] = {0, 0, 0, 0};     /* Start for hyperslabe operations on memory */

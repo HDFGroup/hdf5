@@ -57,7 +57,7 @@ main(void)
     hid_t       fapl, file, space, dset;
     hsize_t     size[1] = {2};
     time_t      now;
-    struct tm * tm;
+    struct tm  *tm;
     H5O_info_t  oi1, oi2;
     signed char buf1[32], buf2[32];
     char        filename[1024];

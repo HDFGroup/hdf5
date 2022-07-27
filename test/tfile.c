@@ -995,7 +995,7 @@ test_get_obj_ids(void)
     hid_t   filespace;
     hsize_t file_dims[F2_RANK] = {F2_DIM0, F2_DIM1};
     ssize_t oid_count, ret_count;
-    hid_t * oid_list = NULL;
+    hid_t  *oid_list = NULL;
     herr_t  ret;
     int     i, m, n;
     ssize_t oid_list_size = NDSETS;
@@ -2176,7 +2176,7 @@ CheckRead(hid_t did)
 {
     hid_t   mtid = -1;
     hid_t   sid  = -1;
-    hvl_t * read = NULL;
+    hvl_t  *read = NULL;
     herr_t  ret;
     int     ndims;
     hsize_t dims[1] = {1};

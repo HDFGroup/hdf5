@@ -189,7 +189,7 @@ H5F_term_interface(void)
 hid_t
 H5Fget_create_plist(hid_t file_id)
 {
-    H5F_t *         file;                        /* File info */
+    H5F_t          *file;                        /* File info */
     H5P_genplist_t *plist;                       /* Property list */
     hid_t           ret_value = H5I_INVALID_HID; /* Return value */
 
@@ -260,7 +260,7 @@ done:
 ssize_t
 H5Fget_obj_count(hid_t file_id, unsigned types)
 {
-    H5F_t * f         = NULL; /* File to query */
+    H5F_t  *f         = NULL; /* File to query */
     size_t  obj_count = 0;    /* Number of opened objects */
     ssize_t ret_value = 0;    /* Return value */
 
@@ -296,7 +296,7 @@ done:
 ssize_t
 H5Fget_obj_ids(hid_t file_id, unsigned types, size_t max_objs, hid_t *oid_list)
 {
-    H5F_t * f            = NULL; /* File to query */
+    H5F_t  *f            = NULL; /* File to query */
     size_t  obj_id_count = 0;    /* Number of open objects */
     ssize_t ret_value    = 0;    /* Return value */
 
@@ -544,7 +544,7 @@ done:
 herr_t
 H5Fflush(hid_t object_id, H5F_scope_t scope)
 {
-    H5F_t *    f         = NULL;    /* File to flush */
+    H5F_t     *f         = NULL;    /* File to flush */
     H5O_loc_t *oloc      = NULL;    /* Object location for ID */
     herr_t     ret_value = SUCCEED; /* Return value     */
 
@@ -794,7 +794,7 @@ done:
 hssize_t
 H5Fget_freespace(hid_t file_id)
 {
-    H5F_t *  file;      /* File object for file ID */
+    H5F_t   *file;      /* File object for file ID */
     hsize_t  tot_space; /* Amount of free space in the file */
     hssize_t ret_value; /* Return value */
 
@@ -829,7 +829,7 @@ done:
 herr_t
 H5Fget_filesize(hid_t file_id, hsize_t *size)
 {
-    H5F_t * file;                /* File object for file ID */
+    H5F_t  *file;                /* File object for file ID */
     haddr_t eof;                 /* End of file address */
     haddr_t base_addr;           /* Base address for the file */
     herr_t  ret_value = SUCCEED; /* Return value */
@@ -894,7 +894,7 @@ done:
 ssize_t
 H5Fget_file_image(hid_t file_id, void *buf_ptr, size_t buf_len)
 {
-    H5F_t * file;      /* File object for file ID */
+    H5F_t  *file;      /* File object for file ID */
     ssize_t ret_value; /* Return value             */
 
     FUNC_ENTER_API((-1))
@@ -1033,7 +1033,7 @@ herr_t
 H5Fget_mdc_size(hid_t file_id, size_t *max_size_ptr, size_t *min_clean_size_ptr, size_t *cur_size_ptr,
                 int *cur_num_entries_ptr)
 {
-    H5F_t * file; /* File object for file ID */
+    H5F_t  *file; /* File object for file ID */
     int32_t cur_num_entries;
     herr_t  ret_value = SUCCEED; /* Return value */
 
@@ -1114,7 +1114,7 @@ done:
 ssize_t
 H5Fget_name(hid_t obj_id, char *name /*out*/, size_t size)
 {
-    H5F_t * f; /* Top file in mount hierarchy */
+    H5F_t  *f; /* Top file in mount hierarchy */
     size_t  len;
     ssize_t ret_value = -1; /* Return value */
 

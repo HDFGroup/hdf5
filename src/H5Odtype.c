@@ -37,7 +37,7 @@ static herr_t H5O_dtype_set_share(void *_mesg, const H5O_shared_t *sh);
 static htri_t H5O_dtype_can_share(const void *_mesg);
 static herr_t H5O_dtype_pre_copy_file(H5F_t *file_src, const void *mesg_src, hbool_t *deleted,
                                       const H5O_copy_t *cpy_info, void *_udata);
-static void * H5O_dtype_copy_file(H5F_t *file_src, const H5O_msg_class_t *mesg_type, void *native_src,
+static void  *H5O_dtype_copy_file(H5F_t *file_src, const H5O_msg_class_t *mesg_type, void *native_src,
                                   H5F_t *file_dst, hbool_t *recompute_size, H5O_copy_t *cpy_info, void *udata,
                                   hid_t dxpl_id);
 static herr_t H5O_dtype_shared_post_copy_upd(const H5O_loc_t *src_oloc, const void *mesg_src,
@@ -280,8 +280,8 @@ H5O_dtype_decode_helper(H5F_t *f, unsigned *ioflags /*in,out*/, const uint8_t **
                 unsigned ndims = 0;             /* Number of dimensions of the array field */
                 htri_t   can_upgrade;           /* Whether we can upgrade this type's version */
                 hsize_t  dim[H5O_LAYOUT_NDIMS]; /* Dimensions of the array */
-                H5T_t *  array_dt;              /* Temporary pointer to the array datatype */
-                H5T_t *  temp_type;             /* Temporary pointer to the field's datatype */
+                H5T_t   *array_dt;              /* Temporary pointer to the array datatype */
+                H5T_t   *temp_type;             /* Temporary pointer to the field's datatype */
 
                 /* Decode the field name */
                 dt->shared->u.compnd.memb[i].name = H5MM_xstrdup((const char *)*pp);
@@ -1108,7 +1108,7 @@ H5O_dtype_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *o
                  size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
 {
     H5T_t *dt = NULL;
-    void * ret_value; /* Return value */
+    void  *ret_value; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1189,8 +1189,8 @@ static void *
 H5O_dtype_copy(const void *_src, void *_dst)
 {
     const H5T_t *src = (const H5T_t *)_src;
-    H5T_t *      dst;
-    void *       ret_value; /* Return value */
+    H5T_t       *dst;
+    void        *ret_value; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1516,7 +1516,7 @@ static herr_t
 H5O_dtype_pre_copy_file(H5F_t *file_src, const void *mesg_src, hbool_t H5_ATTR_UNUSED *deleted,
                         const H5O_copy_t H5_ATTR_UNUSED *cpy_info, void *_udata)
 {
-    const H5T_t *       dt_src    = (const H5T_t *)mesg_src;      /* Source datatype */
+    const H5T_t        *dt_src    = (const H5T_t *)mesg_src;      /* Source datatype */
     H5D_copy_file_ud_t *udata     = (H5D_copy_file_ud_t *)_udata; /* Dataset copying user data */
     herr_t              ret_value = SUCCEED;                      /* Return value */
 
@@ -1567,7 +1567,7 @@ H5O_dtype_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const H5O_msg_class_t *mesg_
                     hid_t H5_ATTR_UNUSED dxpl_id)
 {
     H5T_t *dst_mesg;  /* Destination datatype */
-    void * ret_value; /* Return value */
+    void  *ret_value; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1643,7 +1643,7 @@ static herr_t
 H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream, int indent, int fwidth)
 {
     const H5T_t *dt = (const H5T_t *)mesg;
-    const char * s;
+    const char  *s;
     char         buf[256];
     unsigned     i;
     size_t       k;

@@ -495,7 +495,7 @@ done:
 herr_t
 H5O_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int fwidth)
 {
-    H5O_t *   oh = NULL;           /* Object header to display */
+    H5O_t    *oh = NULL;           /* Object header to display */
     H5O_loc_t loc;                 /* Object location for object to delete */
     herr_t    ret_value = SUCCEED; /* Return value */
 

@@ -109,7 +109,7 @@ HDfprintf(FILE *stream, const char *fmt, ...)
     int         prefix;
     char        modifier[8];
     int         conv;
-    char *      rest, format_templ[128];
+    char       *rest, format_templ[128];
     int         len;
     const char *s;
     va_list     ap;
@@ -1027,9 +1027,9 @@ done:
 herr_t
 H5_build_extpath(const char *name, char **extpath /*out*/)
 {
-    char * full_path = NULL;    /* Pointer to the full path, as built or passed in */
-    char * cwdpath   = NULL;    /* Pointer to the current working directory path */
-    char * new_name  = NULL;    /* Pointer to the name of the file */
+    char  *full_path = NULL;    /* Pointer to the full path, as built or passed in */
+    char  *cwdpath   = NULL;    /* Pointer to the current working directory path */
+    char  *new_name  = NULL;    /* Pointer to the name of the file */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1050,7 +1050,7 @@ H5_build_extpath(const char *name, char **extpath /*out*/)
             HGOTO_ERROR(H5E_INTERNAL, H5E_NOSPACE, FAIL, "memory allocation failed")
     }      /* end if */
     else { /* relative pathname */
-        char * retcwd;
+        char  *retcwd;
         size_t name_len;
         int    drive;
 
@@ -1277,7 +1277,7 @@ herr_t
 H5_expand_windows_env_vars(char **env_var)
 {
     long   n_chars   = 0;
-    char * temp_buf  = NULL;
+    char  *temp_buf  = NULL;
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT

@@ -323,7 +323,7 @@ H5O_alloc_null(H5F_t *f, hid_t dxpl_id, H5O_t *oh, size_t null_idx, const H5O_ms
 {
     H5O_chunk_proxy_t *chk_proxy   = NULL;  /* Chunk that message is in */
     hbool_t            chk_dirtied = FALSE; /* Flags for unprotecting chunk */
-    H5O_mesg_t *       alloc_msg;           /* Pointer to null message to allocate out of */
+    H5O_mesg_t        *alloc_msg;           /* Pointer to null message to allocate out of */
     herr_t             ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -493,7 +493,7 @@ H5O_alloc_extend_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned chunkno, siz
     hbool_t            chk_dirtied = FALSE; /* Flag for unprotecting chunk */
     size_t             delta;               /* Change in chunk's size */
     size_t             aligned_size = H5O_ALIGN_OH(oh, size);
-    uint8_t *          old_image;                 /* Old address of chunk's image in memory */
+    uint8_t           *old_image;                 /* Old address of chunk's image in memory */
     size_t             old_size;                  /* Old size of chunk */
     htri_t             was_extended;              /* If chunk can be extended */
     size_t             extend_msg        = 0;     /* Index of null message to extend */
@@ -731,7 +731,7 @@ H5O_alloc_new_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, size_t size, size_t *new
         unsigned null_msgno; /* Message index of null message immediately after message */
     } alloc_info;
 
-    H5O_mesg_t *       curr_msg;                       /* Pointer to current message to operate on */
+    H5O_mesg_t        *curr_msg;                       /* Pointer to current message to operate on */
     H5O_chunk_proxy_t *chk_proxy;                      /* Chunk that message is in */
     size_t             cont_size;                      /*continuation message size     */
     size_t             multi_size  = 0;                /* Size of all the messages in the last chunk */
@@ -739,8 +739,8 @@ H5O_alloc_new_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, size_t size, size_t *new
     alloc_info         found_attr  = {-1, 0, 0, 0, 0}; /* Best fit attribute message    */
     alloc_info         found_other = {-1, 0, 0, 0, 0}; /* Best fit other message        */
     size_t             idx;                            /* Message number */
-    uint8_t *          p    = NULL;                    /*ptr into new chunk            */
-    H5O_cont_t *       cont = NULL;                    /*native continuation message   */
+    uint8_t           *p    = NULL;                    /*ptr into new chunk            */
+    H5O_cont_t        *cont = NULL;                    /*native continuation message   */
     size_t             chunkno;                        /* Chunk allocated */
     haddr_t            new_chunk_addr;
     unsigned           u;                   /* Local index variable */
@@ -1260,7 +1260,7 @@ static htri_t
 H5O_move_cont(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned cont_u)
 {
     H5O_chunk_proxy_t *chk_proxy = NULL;    /* Chunk that continuation message is in */
-    H5O_mesg_t *       cont_msg;            /* Pointer to the continuation message */
+    H5O_mesg_t        *cont_msg;            /* Pointer to the continuation message */
     unsigned           deleted_chunkno;     /* Chunk # to delete */
     hbool_t            chk_dirtied = FALSE; /* Flags for unprotecting chunk */
     htri_t             ret_value   = TRUE;  /* Return value */
@@ -2138,10 +2138,10 @@ done:
 static herr_t
 H5O_alloc_shrink_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned chunkno)
 {
-    H5O_chunk_t *      chunk     = &oh->chunk[chunkno];      /* Chunk to shrink */
+    H5O_chunk_t       *chunk     = &oh->chunk[chunkno];      /* Chunk to shrink */
     H5O_chunk_proxy_t *chk_proxy = NULL;                     /* Metadata cache proxy for chunk to shrink */
-    H5O_mesg_t *       curr_msg;                             /* Current message to examine */
-    uint8_t *          old_image = chunk->image;             /* Old address of chunk's image in memory */
+    H5O_mesg_t        *curr_msg;                             /* Current message to examine */
+    uint8_t           *old_image = chunk->image;             /* Old address of chunk's image in memory */
     size_t             old_size  = chunk->size;              /* Old size of chunk */
     size_t             new_size  = chunk->size - chunk->gap; /* Size of shrunk chunk */
     size_t             total_msg_size;                       /* Size of the messages in this chunk */
@@ -2178,7 +2178,7 @@ H5O_alloc_shrink_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned chunkno)
             if (curr_msg->raw + curr_msg->raw_size < old_image + new_size - sizeof_chksum) {
                 unsigned    v; /* Index */
                 H5O_mesg_t *curr_msg2;
-                uint8_t *   src = curr_msg->raw + curr_msg->raw_size; /* Source location */
+                uint8_t    *src = curr_msg->raw + curr_msg->raw_size; /* Source location */
 
                 /* Slide down the raw data */
                 HDmemmove(curr_msg->raw - sizeof_msghdr, src,

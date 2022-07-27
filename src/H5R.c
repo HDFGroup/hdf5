@@ -50,7 +50,7 @@ static herr_t  H5R_create(void *ref, H5G_loc_t *loc, const char *name, H5R_type_
                           hid_t dxpl_id);
 static hid_t   H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, const void *_ref,
                                hbool_t app_ref);
-static H5S_t * H5R_get_region(H5F_t *file, hid_t dxpl_id, const void *_ref);
+static H5S_t  *H5R_get_region(H5F_t *file, hid_t dxpl_id, const void *_ref);
 static ssize_t H5R_get_name(H5F_t *file, hid_t lapl_id, hid_t dxpl_id, hid_t id, H5R_type_t ref_type,
                             const void *_ref, char *name, size_t size);
 
@@ -343,7 +343,7 @@ herr_t
 H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type, hid_t space_id)
 {
     H5G_loc_t loc;          /* File location */
-    H5S_t *   space = NULL; /* Pointer to dataspace containing region */
+    H5S_t    *space = NULL; /* Pointer to dataspace containing region */
     herr_t    ret_value;    /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -428,7 +428,7 @@ H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, const void *_re
 
         case H5R_DATASET_REGION: {
             H5HG_t         hobjid; /* Heap object ID */
-            uint8_t *      buf;    /* Buffer to store serialized selection in */
+            uint8_t       *buf;    /* Buffer to store serialized selection in */
             const uint8_t *p;      /* Pointer to OID to store */
 
             /* Get the heap ID for the dataset region */
@@ -551,7 +551,7 @@ hid_t
 H5Rdereference(hid_t id, H5R_type_t ref_type, const void *_ref)
 {
     H5G_loc_t loc;                         /* Group location */
-    H5F_t *   file      = NULL;            /* File object */
+    H5F_t    *file      = NULL;            /* File object */
     hid_t     ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -603,9 +603,9 @@ H5R_get_region(H5F_t *file, hid_t dxpl_id, const void *_ref)
     H5O_loc_t      oloc;             /* Object location */
     const uint8_t *p;                /* Pointer to OID to store */
     H5HG_t         hobjid;           /* Heap object ID */
-    uint8_t *      buf       = NULL; /* Buffer to store serialized selection in */
-    H5S_t *        ds        = NULL; /* Temporary pointer to dataspace */
-    H5S_t *        ret_value = NULL;
+    uint8_t       *buf       = NULL; /* Buffer to store serialized selection in */
+    H5S_t         *ds        = NULL; /* Temporary pointer to dataspace */
+    H5S_t         *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -679,7 +679,7 @@ hid_t
 H5Rget_region(hid_t id, H5R_type_t ref_type, const void *ref)
 {
     H5G_loc_t loc;                         /* Object's group location */
-    H5S_t *   space     = NULL;            /* Dataspace object */
+    H5S_t    *space     = NULL;            /* Dataspace object */
     hid_t     ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -752,7 +752,7 @@ H5R_get_obj_type(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, const void *_r
         case H5R_DATASET_REGION: {
             H5HG_t         hobjid; /* Heap object ID */
             const uint8_t *p;      /* Pointer to reference to decode */
-            uint8_t *      buf;    /* Buffer to store serialized selection in */
+            uint8_t       *buf;    /* Buffer to store serialized selection in */
 
             /* Get the heap ID for the dataset region */
             p = (const uint8_t *)_ref;
@@ -891,7 +891,7 @@ H5R_get_name(H5F_t *f, hid_t lapl_id, hid_t dxpl_id, hid_t id, H5R_type_t ref_ty
 
         case H5R_DATASET_REGION: {
             H5HG_t         hobjid; /* Heap object ID */
-            uint8_t *      buf;    /* Buffer to store serialized selection in */
+            uint8_t       *buf;    /* Buffer to store serialized selection in */
             const uint8_t *p;      /* Pointer to OID to store */
 
             /* Get the heap ID for the dataset region */
@@ -964,7 +964,7 @@ ssize_t
 H5Rget_name(hid_t id, H5R_type_t ref_type, const void *_ref, char *name, size_t size)
 {
     H5G_loc_t loc;       /* Group location */
-    H5F_t *   file;      /* File object */
+    H5F_t    *file;      /* File object */
     ssize_t   ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)

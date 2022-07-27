@@ -53,12 +53,12 @@ static herr_t
 test_cont(char *filename, hid_t fapl)
 {
     hid_t          file = -1;
-    H5F_t *        f    = NULL;
+    H5F_t         *f    = NULL;
     H5O_hdr_info_t hdr_info;
     H5O_loc_t      oh_locA, oh_locB;
     time_t         time_new;
-    const char *   short_name = "T";
-    const char *   long_name  = "This is the message";
+    const char    *short_name = "T";
+    const char    *long_name  = "This is the message";
     size_t         nchunks;
 
     TESTING("object header continuation block");
@@ -162,8 +162,8 @@ test_ohdr_cache(char *filename, hid_t fapl)
     hid_t               my_fapl;                              /* FAPL ID */
     hid_t               my_dxpl;                              /* DXPL ID */
     H5AC_cache_config_t mdc_config;                           /* Metadata cache configuration info */
-    H5F_t *             f = NULL;                             /* File handle */
-    H5HL_t *            lheap, *lheap2, *lheap3;              /* Pointer to local heaps */
+    H5F_t              *f = NULL;                             /* File handle */
+    H5HL_t             *lheap, *lheap2, *lheap3;              /* Pointer to local heaps */
     haddr_t             lheap_addr, lheap_addr2, lheap_addr3; /* Local heap addresses */
     H5O_loc_t           oh_loc;                               /* Object header location */
     time_t              time_new;                             /* Time value for modification time message */
@@ -601,7 +601,7 @@ main(void)
 {
     hid_t          fapl = -1, file = -1;
     hid_t          dset = -1;
-    H5F_t *        f    = NULL;
+    H5F_t         *f    = NULL;
     char           filename[1024];
     H5O_hdr_info_t hdr_info;        /* Object info */
     H5O_loc_t      oh_loc, oh_loc2; /* Object header locations */

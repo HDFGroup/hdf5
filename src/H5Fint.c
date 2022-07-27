@@ -62,12 +62,12 @@
 /* Struct only used by functions H5F_get_objects and H5F_get_objects_cb */
 typedef struct H5F_olist_t {
     H5I_type_t obj_type;     /* Type of object to look for */
-    hid_t *    obj_id_list;  /* Pointer to the list of open IDs to return */
-    size_t *   obj_id_count; /* Number of open IDs */
+    hid_t     *obj_id_list;  /* Pointer to the list of open IDs to return */
+    size_t    *obj_id_count; /* Number of open IDs */
     struct {
         hbool_t local; /* Set flag for "local" file searches */
         union {
-            H5F_file_t * shared; /* Pointer to shared file to look inside */
+            H5F_file_t  *shared; /* Pointer to shared file to look inside */
             const H5F_t *file;   /* Pointer to file to look inside */
         } ptr;
     } file_info;
@@ -150,7 +150,7 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
 {
     H5P_genplist_t *new_plist; /* New property list */
     H5P_genplist_t *old_plist; /* Old property list */
-    void *          driver_info = NULL;
+    void           *driver_info = NULL;
     unsigned        efc_size    = 0;
     hid_t           ret_value   = H5I_INVALID_HID; /* Return value */
 
@@ -894,14 +894,14 @@ H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush)
 H5F_t *
 H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id)
 {
-    H5F_t *            file   = NULL; /*the success return value      */
-    H5F_file_t *       shared = NULL; /*shared part of `file'         */
-    H5FD_t *           lf     = NULL; /*file driver part of `shared'  */
+    H5F_t             *file   = NULL; /*the success return value      */
+    H5F_file_t        *shared = NULL; /*shared part of `file'         */
+    H5FD_t            *lf     = NULL; /*file driver part of `shared'  */
     unsigned           tent_flags;    /*tentative flags               */
-    H5FD_class_t *     drvr;          /*file driver class info        */
-    H5P_genplist_t *   a_plist;       /*file access property list     */
+    H5FD_class_t      *drvr;          /*file driver class info        */
+    H5P_genplist_t    *a_plist;       /*file access property list     */
     H5F_close_degree_t fc_degree;     /*file close degree             */
-    H5F_t *            ret_value;     /*actual return value           */
+    H5F_t             *ret_value;     /*actual return value           */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -1499,7 +1499,7 @@ H5F_build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl, const char *na
         /* Check for symbolic link */
         if (S_IFLNK == (lst.st_mode & S_IFMT)) {
             H5P_genplist_t *new_fapl;           /* Duplicated FAPL */
-            int *           fd;                 /* POSIX I/O file descriptor */
+            int            *fd;                 /* POSIX I/O file descriptor */
             h5_stat_t       st;                 /* Stat info from stat() call */
             h5_stat_t       fst;                /* Stat info from fstat() call */
             char            realname[PATH_MAX]; /* Fully resolved path name of file */

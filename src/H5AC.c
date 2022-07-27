@@ -783,7 +783,7 @@ H5AC_insert_entry(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t add
 #if H5AC__TRACE_FILE_ENABLED
     char   trace[128]       = "";
     size_t trace_entry_size = 0;
-    FILE * trace_file_ptr   = NULL;
+    FILE  *trace_file_ptr   = NULL;
 #endif                          /* H5AC__TRACE_FILE_ENABLED */
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -894,7 +894,7 @@ H5AC_mark_entry_dirty(void *thing)
 #ifdef H5_HAVE_PARALLEL
     {
         H5AC_info_t *entry_ptr = (H5AC_info_t *)thing;
-        H5C_t *      cache_ptr = entry_ptr->cache_ptr;
+        H5C_t       *cache_ptr = entry_ptr->cache_ptr;
 
         HDassert(cache_ptr);
         HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
@@ -1069,11 +1069,11 @@ void *
 H5AC_protect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, void *udata, H5AC_protect_t rw)
 {
     unsigned protect_flags = H5C__NO_FLAGS_SET;
-    void *   thing         = (void *)NULL;
+    void    *thing         = (void *)NULL;
 #if H5AC__TRACE_FILE_ENABLED
     char   trace[128]       = "";
     size_t trace_entry_size = 0;
-    FILE * trace_file_ptr   = NULL;
+    FILE  *trace_file_ptr   = NULL;
 #endif               /* H5AC__TRACE_FILE_ENABLED */
     void *ret_value; /* Return value */
 
@@ -1198,7 +1198,7 @@ H5AC_resize_entry(void *thing, size_t new_size)
 #ifdef H5_HAVE_PARALLEL
     {
         H5AC_info_t *entry_ptr = (H5AC_info_t *)thing;
-        H5C_t *      cache_ptr = entry_ptr->cache_ptr;
+        H5C_t       *cache_ptr = entry_ptr->cache_ptr;
 
         HDassert(cache_ptr);
         HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
@@ -1735,7 +1735,7 @@ H5AC_set_cache_auto_resize_config(H5AC_t *cache_ptr, H5AC_cache_config_t *config
     H5C_auto_size_ctl_t internal_config;
 #if H5AC__TRACE_FILE_ENABLED
     H5AC_cache_config_t trace_config   = H5AC__DEFAULT_CACHE_CONFIG;
-    FILE *              trace_file_ptr = NULL;
+    FILE               *trace_file_ptr = NULL;
 #endif /* H5AC__TRACE_FILE_ENABLED */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -1971,7 +1971,7 @@ H5AC_close_trace_file(H5AC_t *cache_ptr)
 
 {
     herr_t ret_value      = SUCCEED; /* Return value */
-    FILE * trace_file_ptr = NULL;
+    FILE  *trace_file_ptr = NULL;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -2025,7 +2025,7 @@ H5AC_open_trace_file(H5AC_t *cache_ptr, const char *trace_file_name)
 {
     herr_t ret_value = SUCCEED; /* Return value */
     char   file_name[H5AC__MAX_TRACE_FILE_NAME_LEN + H5C__PREFIX_LEN + 2];
-    FILE * file_ptr = NULL;
+    FILE  *file_ptr = NULL;
 #ifdef H5_HAVE_PARALLEL
     H5AC_aux_t *aux_ptr = NULL;
 #endif /* H5_HAVE_PARALLEL */
@@ -2130,7 +2130,7 @@ done:
 herr_t
 H5AC_add_candidate(H5AC_t *cache_ptr, haddr_t addr)
 {
-    H5AC_aux_t *        aux_ptr;
+    H5AC_aux_t         *aux_ptr;
     H5AC_slist_entry_t *slist_entry_ptr = NULL;
     herr_t              ret_value       = SUCCEED; /* Return value */
 
@@ -2203,7 +2203,7 @@ H5AC_broadcast_candidate_list(H5AC_t *cache_ptr, int *num_entries_ptr, haddr_t *
 {
     hbool_t     success            = FALSE;
     H5AC_aux_t *aux_ptr            = NULL;
-    haddr_t *   haddr_buf_ptr      = NULL;
+    haddr_t    *haddr_buf_ptr      = NULL;
     MPI_Offset *MPI_Offset_buf_ptr = NULL;
     size_t      buf_size           = 0;
     int         mpi_result;
@@ -2311,11 +2311,11 @@ H5AC_broadcast_clean_list(H5AC_t *cache_ptr)
 {
     herr_t              ret_value = SUCCEED; /* Return value */
     haddr_t             addr;
-    haddr_t *           addr_buf_ptr    = NULL;
-    H5AC_aux_t *        aux_ptr         = NULL;
-    H5SL_node_t *       slist_node_ptr  = NULL;
+    haddr_t            *addr_buf_ptr    = NULL;
+    H5AC_aux_t         *aux_ptr         = NULL;
+    H5SL_node_t        *slist_node_ptr  = NULL;
     H5AC_slist_entry_t *slist_entry_ptr = NULL;
-    MPI_Offset *        buf_ptr         = NULL;
+    MPI_Offset         *buf_ptr         = NULL;
     size_t              buf_size;
     int                 i = 0;
     int                 mpi_result;
@@ -2628,11 +2628,11 @@ H5AC_copy_candidate_list_to_buffer(H5AC_t *cache_ptr, int *num_entries_ptr, hadd
     herr_t              ret_value = SUCCEED; /* Return value */
     hbool_t             success   = FALSE;
     haddr_t             addr;
-    H5AC_aux_t *        aux_ptr            = NULL;
-    H5SL_node_t *       slist_node_ptr     = NULL;
+    H5AC_aux_t         *aux_ptr            = NULL;
+    H5SL_node_t        *slist_node_ptr     = NULL;
     H5AC_slist_entry_t *slist_entry_ptr    = NULL;
-    MPI_Offset *        MPI_Offset_buf_ptr = NULL;
-    haddr_t *           haddr_buf_ptr      = NULL;
+    MPI_Offset         *MPI_Offset_buf_ptr = NULL;
+    haddr_t            *haddr_buf_ptr      = NULL;
     size_t              buf_size;
     int                 i           = 0;
     int                 num_entries = 0;
@@ -2823,7 +2823,7 @@ done:
 static herr_t
 H5AC_log_deleted_entry(H5AC_t *cache_ptr, H5AC_info_t *entry_ptr, haddr_t addr, unsigned int flags)
 {
-    H5AC_aux_t *        aux_ptr;
+    H5AC_aux_t         *aux_ptr;
     H5AC_slist_entry_t *slist_entry_ptr = NULL;
     herr_t              ret_value       = SUCCEED; /* Return value */
 
@@ -2913,7 +2913,7 @@ done:
 static herr_t
 H5AC_log_dirtied_entry(const H5AC_info_t *entry_ptr, haddr_t addr)
 {
-    H5AC_t *    cache_ptr;
+    H5AC_t     *cache_ptr;
     H5AC_aux_t *aux_ptr;
     herr_t      ret_value = SUCCEED; /* Return value */
 
@@ -3030,7 +3030,7 @@ H5AC_log_flushed_entry(H5C_t *cache_ptr, haddr_t addr, hbool_t was_dirty, unsign
 {
     herr_t              ret_value = SUCCEED; /* Return value */
     hbool_t             cleared;
-    H5AC_aux_t *        aux_ptr;
+    H5AC_aux_t         *aux_ptr;
     H5AC_slist_entry_t *slist_entry_ptr = NULL;
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -3249,11 +3249,11 @@ done:
 static herr_t
 H5AC_log_moved_entry(const H5F_t *f, haddr_t old_addr, haddr_t new_addr)
 {
-    H5AC_t *            cache_ptr;
+    H5AC_t             *cache_ptr;
     hbool_t             entry_in_cache;
     hbool_t             entry_dirty;
     size_t              entry_size;
-    H5AC_aux_t *        aux_ptr         = NULL;
+    H5AC_aux_t         *aux_ptr         = NULL;
     H5AC_slist_entry_t *slist_entry_ptr = NULL;
     herr_t              ret_value       = SUCCEED; /* Return value */
 
@@ -3488,7 +3488,7 @@ H5AC_propagate_and_apply_candidate_list(H5F_t *f, hid_t dxpl_id, H5AC_t *cache_p
 {
     int         mpi_code;
     int         num_candidates      = 0;
-    haddr_t *   candidates_list_ptr = NULL;
+    haddr_t    *candidates_list_ptr = NULL;
     H5AC_aux_t *aux_ptr;
     herr_t      ret_value = SUCCEED; /* Return value */
 
@@ -3695,7 +3695,7 @@ static herr_t
 H5AC_receive_and_apply_clean_list(H5F_t *f, hid_t primary_dxpl_id, hid_t secondary_dxpl_id, H5AC_t *cache_ptr)
 {
     H5AC_aux_t *aux_ptr;
-    haddr_t *   haddr_buf_ptr      = NULL;
+    haddr_t    *haddr_buf_ptr      = NULL;
     MPI_Offset *MPI_Offset_buf_ptr = NULL;
     int         mpi_result;
     int         num_entries = 0;
@@ -3804,7 +3804,7 @@ H5AC_receive_candidate_list(H5AC_t *cache_ptr, int *num_entries_ptr, haddr_t **h
 {
     hbool_t     success = FALSE;
     H5AC_aux_t *aux_ptr;
-    haddr_t *   haddr_buf_ptr      = NULL;
+    haddr_t    *haddr_buf_ptr      = NULL;
     MPI_Offset *MPI_Offset_buf_ptr = NULL;
     int         mpi_result;
     int         num_entries;
@@ -3948,7 +3948,7 @@ H5AC_rsp__dist_md_write__flush(H5F_t *f, hid_t dxpl_id, H5AC_t *cache_ptr)
 {
     int         mpi_code;
     int         num_entries   = 0;
-    haddr_t *   haddr_buf_ptr = NULL;
+    haddr_t    *haddr_buf_ptr = NULL;
     H5AC_aux_t *aux_ptr;
     herr_t      ret_value = SUCCEED; /* Return value */
 
@@ -4373,7 +4373,7 @@ done:
 herr_t
 H5AC_run_sync_point(H5F_t *f, hid_t dxpl_id, int sync_point_op)
 {
-    H5AC_t *    cache_ptr;
+    H5AC_t     *cache_ptr;
     H5AC_aux_t *aux_ptr;
     herr_t      ret_value = SUCCEED; /* Return value */
 

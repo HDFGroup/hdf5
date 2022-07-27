@@ -145,8 +145,8 @@ typedef struct fheap_heap_ids_t {
     size_t         num_ids;   /* # of heap IDs in array */
     size_t         alloc_ids; /* # of heap IDs allocated in array */
     unsigned char *ids;       /* Array of object heap IDs */
-    size_t *       lens;      /* Array of object lengths */
-    size_t *       offs;      /* Array of object offsets (in global shared write buffer) */
+    size_t        *lens;      /* Array of object lengths */
+    size_t        *offs;      /* Array of object offsets (in global shared write buffer) */
 } fheap_heap_ids_t;
 
 /* Local variables */
@@ -154,8 +154,8 @@ unsigned char *shared_wobj_g;             /* Pointer to shared write buffer for 
 unsigned char *shared_robj_g;             /* Pointer to shared read buffer for objects */
 size_t         shared_obj_size_g;         /* Size of shared objects */
 unsigned char *shared_ids_g       = NULL; /* Array of shared object heap IDs */
-size_t *       shared_lens_g      = NULL; /* Array of shared object lengths */
-size_t *       shared_offs_g      = NULL; /* Array of shared object offsets */
+size_t        *shared_lens_g      = NULL; /* Array of shared object lengths */
+size_t        *shared_offs_g      = NULL; /* Array of shared object offsets */
 size_t         shared_alloc_ids_g = 0;    /* # of shared heap IDs allocated in array */
 
 /* Local routines */
@@ -421,8 +421,8 @@ add_obj(H5HF_t *fh, hid_t dxpl, size_t obj_off, size_t obj_size, fheap_heap_stat
         /* Check for needing to increase size of heap ID array */
         if (keep_ids->num_ids + 1 > keep_ids->alloc_ids) {
             unsigned char *tmp_ids;
-            size_t *       tmp_lens;
-            size_t *       tmp_offs;
+            size_t        *tmp_lens;
+            size_t        *tmp_offs;
 
             keep_ids->alloc_ids = MAX(1024, (keep_ids->alloc_ids * 2));
             if (NULL ==
@@ -1032,8 +1032,8 @@ fill_heap(H5HF_t *fh, hid_t dxpl, unsigned block_row, size_t obj_size, fheap_hea
 {
     unsigned char *wobj;         /* Buffer for object to insert */
     unsigned char *curr_id_ptr;  /* Pointer into shared ID array */
-    size_t *       curr_len_ptr; /* Pointer into shared length array */
-    size_t *       curr_off_ptr; /* Pointer into shared offset array */
+    size_t        *curr_len_ptr; /* Pointer into shared length array */
+    size_t        *curr_off_ptr; /* Pointer into shared offset array */
     size_t         num_ids = 0;  /* # of heap IDs in array */
     size_t         data_size;    /* Size of data portion of heap block */
     size_t         last_obj_len; /* Size of last object inserted into heap */
@@ -1810,9 +1810,9 @@ test_create(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t H5_ATTR_UNUSED
 {
     hid_t              file = -1;                    /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
-    H5F_t *            f = NULL;                     /* Internal file object pointer */
+    H5F_t             *f = NULL;                     /* Internal file object pointer */
     H5HF_create_t      test_cparam;                  /* Creation parameters for heap */
-    H5HF_t *           fh = NULL;                    /* Fractal heap wrapper */
+    H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
     haddr_t            fh_addr;                      /* Heap address in file */
     h5_stat_size_t     empty_size;                   /* File size, w/o heap */
     h5_stat_size_t     file_size;                    /* File size, after deleting heap */
@@ -1925,9 +1925,9 @@ test_reopen(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t H5_ATTR_UNUSED
 {
     hid_t              file = -1;                    /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
-    H5F_t *            f = NULL;                     /* Internal file object pointer */
+    H5F_t             *f = NULL;                     /* Internal file object pointer */
     H5HF_create_t      test_cparam;                  /* Creation parameters for heap */
-    H5HF_t *           fh = NULL;                    /* Fractal heap wrapper */
+    H5HF_t            *fh = NULL;                    /* Fractal heap wrapper */
     haddr_t            fh_addr;                      /* Address of fractal heap */
     size_t             id_len;                       /* Size of fractal heap IDs */
     fheap_heap_state_t state;                        /* State of fractal heap */
@@ -2024,11 +2024,11 @@ test_open_twice(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t H5_ATTR_UN
     hid_t              file  = -1;                   /* File ID */
     hid_t              file2 = -1;                   /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
-    H5F_t *            f  = NULL;                    /* Internal file object pointer */
-    H5F_t *            f2 = NULL;                    /* Internal file object pointer */
+    H5F_t             *f  = NULL;                    /* Internal file object pointer */
+    H5F_t             *f2 = NULL;                    /* Internal file object pointer */
     H5HF_create_t      test_cparam;                  /* Creation parameters for heap */
-    H5HF_t *           fh  = NULL;                   /* Fractal heap wrapper */
-    H5HF_t *           fh2 = NULL;                   /* 2nd fractal heap wrapper */
+    H5HF_t            *fh  = NULL;                   /* Fractal heap wrapper */
+    H5HF_t            *fh2 = NULL;                   /* 2nd fractal heap wrapper */
     haddr_t            fh_addr;                      /* Address of fractal heap */
     size_t             id_len;                       /* Size of fractal heap IDs */
     fheap_heap_state_t state;                        /* State of fractal heap */
@@ -2159,10 +2159,10 @@ test_delete_open(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t H5_ATTR_U
 {
     hid_t              file = -1;                    /* File ID */
     char               filename[FHEAP_FILENAME_LEN]; /* Filename to use */
-    H5F_t *            f = NULL;                     /* Internal file object pointer */
+    H5F_t             *f = NULL;                     /* Internal file object pointer */
     H5HF_create_t      test_cparam;                  /* Creation parameters for heap */
-    H5HF_t *           fh  = NULL;                   /* Fractal heap wrapper */
-    H5HF_t *           fh2 = NULL;                   /* 2nd fractal heap wrapper */
+    H5HF_t            *fh  = NULL;                   /* Fractal heap wrapper */
+    H5HF_t            *fh2 = NULL;                   /* 2nd fractal heap wrapper */
     haddr_t            fh_addr;                      /* Address of fractal heap */
     size_t             id_len;                       /* Size of fractal heap IDs */
     h5_stat_size_t     empty_size;                   /* Size of a file with an empty heap */
@@ -2299,8 +2299,8 @@ test_id_limits(hid_t fapl, H5HF_create_t *cparam)
     hid_t         file = -1;                       /* File ID */
     hid_t         dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char          filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *       f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *      fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t        *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t       *fh = NULL;                       /* Fractal heap wrapper */
     H5HF_create_t tmp_cparam;                      /* Local heap creation parameters */
     unsigned      deflate_level;                   /* Deflation level */
     size_t        id_len;                          /* Size of fractal heap IDs */
@@ -2634,8 +2634,8 @@ test_filtered_create(hid_t fapl, H5HF_create_t *cparam)
     hid_t         file = -1;                       /* File ID */
     hid_t         dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char          filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *       f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *      fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t        *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t       *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t       fh_addr;                         /* Address of fractal heap */
     H5HF_create_t tmp_cparam;                      /* Local heap creation parameters */
     H5HF_create_t test_cparam;                     /* Temporary local heap creation parameters */
@@ -2749,7 +2749,7 @@ test_size(hid_t fapl, H5HF_create_t *cparam)
     hid_t   file = -1;                       /* File ID */
     hid_t   dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char    filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t * f  = NULL;                       /* Internal file object pointer */
+    H5F_t  *f  = NULL;                       /* Internal file object pointer */
     H5HF_t *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t fh_addr;                         /* Address of fractal heap */
     hsize_t empty_heap_size;                 /* Total size of empty heap on disk */
@@ -2885,7 +2885,7 @@ test_reopen_hdr(hid_t fapl, H5HF_create_t *cparam)
     hid_t   file2 = -2;                       /* File ID */
     hid_t   dxpl  = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char    filename[FHEAP_FILENAME_LEN];     /* Filename to use */
-    H5F_t * f  = NULL;                        /* Internal file object pointer */
+    H5F_t  *f  = NULL;                        /* Internal file object pointer */
     H5HF_t *fh = NULL;                        /* Fractal heap wrapper */
     haddr_t fh_addr;                          /* Address of fractal heap */
     hsize_t heap_size;                        /* Total size of heap on disk */
@@ -3011,8 +3011,8 @@ test_man_insert_weird(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     unsigned char      heap_id[HEAP_ID_LEN];            /* Heap ID for object */
     size_t             id_len;                          /* Size of fractal heap IDs */
@@ -3123,8 +3123,8 @@ test_man_insert_first(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     size_t             id_len;                          /* Size of fractal heap IDs */
     fheap_heap_state_t state;                           /* State of fractal heap */
@@ -3221,8 +3221,8 @@ test_man_insert_second(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tp
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     size_t             id_len;                          /* Size of fractal heap IDs */
     fheap_heap_state_t state;                           /* State of fractal heap */
@@ -3314,8 +3314,8 @@ test_man_insert_root_mult(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t 
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     size_t             id_len;                          /* Size of fractal heap IDs */
     size_t             fill_size;                       /* Size of objects for "bulk" filled blocks */
@@ -3410,8 +3410,8 @@ test_man_insert_force_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_par
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     size_t             id_len;                          /* Size of fractal heap IDs */
     size_t             fill_size;                       /* Size of objects for "bulk" filled blocks */
@@ -3513,8 +3513,8 @@ test_man_insert_fill_second(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     size_t             id_len;                          /* Size of fractal heap IDs */
     size_t             fill_size;                       /* Size of objects for "bulk" filled blocks */
@@ -3617,8 +3617,8 @@ test_man_insert_third_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     size_t             id_len;                          /* Size of fractal heap IDs */
     size_t             fill_size;                       /* Size of objects for "bulk" filled blocks */
@@ -3725,8 +3725,8 @@ test_man_fill_first_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *t
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     size_t             id_len;                          /* Size of fractal heap IDs */
     size_t             fill_size;                       /* Size of objects for "bulk" filled blocks */
@@ -3818,8 +3818,8 @@ test_man_start_second_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t 
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     size_t             id_len;                          /* Size of fractal heap IDs */
     size_t             fill_size;                       /* Size of objects for "bulk" filled blocks */
@@ -3918,8 +3918,8 @@ test_man_fill_second_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     size_t             id_len;                          /* Size of fractal heap IDs */
     size_t             fill_size;                       /* Size of objects for "bulk" filled blocks */
@@ -4016,8 +4016,8 @@ test_man_start_third_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     size_t             id_len;                          /* Size of fractal heap IDs */
     size_t             fill_size;                       /* Size of objects for "bulk" filled blocks */
@@ -4123,8 +4123,8 @@ test_man_fill_fourth_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     size_t             id_len;                          /* Size of fractal heap IDs */
     size_t             fill_size;                       /* Size of objects for "bulk" filled blocks */
@@ -4218,8 +4218,8 @@ test_man_fill_all_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_para
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     size_t             id_len;                          /* Size of fractal heap IDs */
     size_t             fill_size;                       /* Size of objects for "bulk" filled blocks */
@@ -4311,8 +4311,8 @@ test_man_first_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     size_t             id_len;                          /* Size of fractal heap IDs */
     size_t             fill_size;                       /* Size of objects for "bulk" filled blocks */
@@ -4410,8 +4410,8 @@ test_man_second_direct_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fhe
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     size_t             id_len;                          /* Size of fractal heap IDs */
     size_t             fill_size;                       /* Size of objects for "bulk" filled blocks */
@@ -4517,8 +4517,8 @@ test_man_fill_first_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     size_t             id_len;                          /* Size of fractal heap IDs */
     size_t             fill_size;                       /* Size of objects for "bulk" filled blocks */
@@ -4617,8 +4617,8 @@ test_man_second_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     size_t             id_len;                          /* Size of fractal heap IDs */
     size_t             fill_size;                       /* Size of objects for "bulk" filled blocks */
@@ -4725,8 +4725,8 @@ test_man_fill_second_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     size_t             id_len;                          /* Size of fractal heap IDs */
     size_t             fill_size;                       /* Size of objects for "bulk" filled blocks */
@@ -4830,8 +4830,8 @@ test_man_fill_recursive_indirect_row(hid_t fapl, H5HF_create_t *cparam, fheap_te
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     size_t             id_len;                          /* Size of fractal heap IDs */
     size_t             fill_size;                       /* Size of objects for "bulk" filled blocks */
@@ -4929,8 +4929,8 @@ test_man_start_2nd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_t
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     size_t             id_len;                          /* Size of fractal heap IDs */
     size_t             fill_size;                       /* Size of objects for "bulk" filled blocks */
@@ -5035,8 +5035,8 @@ test_man_recursive_indirect_two_deep(hid_t fapl, H5HF_create_t *cparam, fheap_te
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     size_t             id_len;                          /* Size of fractal heap IDs */
     size_t             fill_size;                       /* Size of objects for "bulk" filled blocks */
@@ -5135,8 +5135,8 @@ test_man_start_3rd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_t
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     size_t             id_len;                          /* Size of fractal heap IDs */
     size_t             fill_size;                       /* Size of objects for "bulk" filled blocks */
@@ -5242,8 +5242,8 @@ test_man_fill_first_3rd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fh
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     size_t             id_len;                          /* Size of fractal heap IDs */
     size_t             fill_size;                       /* Size of objects for "bulk" filled blocks */
@@ -5350,8 +5350,8 @@ test_man_fill_3rd_recursive_indirect_row(hid_t fapl, H5HF_create_t *cparam, fhea
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     size_t             id_len;                          /* Size of fractal heap IDs */
     size_t             fill_size;                       /* Size of objects for "bulk" filled blocks */
@@ -5455,8 +5455,8 @@ test_man_fill_all_3rd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fhea
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     size_t             id_len;                          /* Size of fractal heap IDs */
     size_t             fill_size;                       /* Size of objects for "bulk" filled blocks */
@@ -5561,8 +5561,8 @@ test_man_start_4th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_t
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     size_t             id_len;                          /* Size of fractal heap IDs */
     size_t             fill_size;                       /* Size of objects for "bulk" filled blocks */
@@ -5673,8 +5673,8 @@ test_man_fill_first_4th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fh
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     size_t             id_len;                          /* Size of fractal heap IDs */
     size_t             fill_size;                       /* Size of objects for "bulk" filled blocks */
@@ -5791,8 +5791,8 @@ test_man_fill_4th_recursive_indirect_row(hid_t fapl, H5HF_create_t *cparam, fhea
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     size_t             id_len;                          /* Size of fractal heap IDs */
     size_t             fill_size;                       /* Size of objects for "bulk" filled blocks */
@@ -5900,8 +5900,8 @@ test_man_fill_all_4th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fhea
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     size_t             id_len;                          /* Size of fractal heap IDs */
     size_t             fill_size;                       /* Size of objects for "bulk" filled blocks */
@@ -6013,8 +6013,8 @@ test_man_start_5th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_t
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     size_t             id_len;                          /* Size of fractal heap IDs */
     size_t             fill_size;                       /* Size of objects for "bulk" filled blocks */
@@ -6140,8 +6140,8 @@ test_man_remove_bogus(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     unsigned char      heap_id[HEAP_ID_LEN];            /* Heap ID for object */
     unsigned long      seed = 0;                        /* Random # seed */
@@ -6297,8 +6297,8 @@ test_man_remove_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpara
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     unsigned char      heap_id[HEAP_ID_LEN];            /* Heap ID for object */
     unsigned char      obj[SMALL_OBJ_SIZE1];            /* Buffer for object to insert */
@@ -6454,8 +6454,8 @@ test_man_remove_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpara
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     unsigned char      heap_id1[HEAP_ID_LEN];           /* Heap ID for first object */
     unsigned char      heap_id2[HEAP_ID_LEN];           /* Heap ID for second object */
@@ -6641,11 +6641,11 @@ test_man_remove_one_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     unsigned char      heap_id[HEAP_ID_LEN];            /* Heap ID for object */
-    unsigned char *    obj;                             /* Buffer for object to insert */
+    unsigned char     *obj;                             /* Buffer for object to insert */
     size_t             obj_len;                         /* Length of object to insert */
     size_t             id_len;                          /* Size of fractal heap IDs */
     h5_stat_size_t     empty_size;                      /* Size of a file with an empty heap */
@@ -6803,12 +6803,12 @@ test_man_remove_two_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     unsigned char      heap_id1[HEAP_ID_LEN];           /* Heap ID for first object */
     unsigned char      heap_id2[HEAP_ID_LEN];           /* Heap ID for second object */
-    unsigned char *    obj;                             /* Buffer for object to insert */
+    unsigned char     *obj;                             /* Buffer for object to insert */
     size_t             obj_len;                         /* Length of object to insert */
     size_t             id_len;                          /* Size of fractal heap IDs */
     h5_stat_size_t     empty_size;                      /* Size of a file with an empty heap */
@@ -7040,13 +7040,13 @@ test_man_remove_three_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     unsigned char      heap_id1[HEAP_ID_LEN];           /* Heap ID for first object */
     unsigned char      heap_id2[HEAP_ID_LEN];           /* Heap ID for second object */
     unsigned char      heap_id3[HEAP_ID_LEN];           /* Heap ID for third object */
-    unsigned char *    obj;                             /* Buffer for object to insert */
+    unsigned char     *obj;                             /* Buffer for object to insert */
     size_t             obj_len;                         /* Length of object to insert */
     size_t             id_len;                          /* Size of fractal heap IDs */
     h5_stat_size_t     empty_size;                      /* Size of a file with an empty heap */
@@ -7335,8 +7335,8 @@ test_man_incr_insert_remove(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
     hid_t         file = -1;                       /* File ID */
     hid_t         dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char          filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *       f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *      fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t        *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t       *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t       fh_addr;                         /* Address of fractal heap */
     unsigned char heap_id[100][MAX_HEAP_ID_LEN];   /* Heap ID for object inserted */
     struct a_type_t1 {
@@ -7449,8 +7449,8 @@ test_man_remove_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     fheap_heap_ids_t   keep_ids;                        /* Structure to retain heap IDs */
     h5_stat_size_t     empty_size;                      /* Size of a file with an empty heap */
@@ -7523,8 +7523,8 @@ test_man_remove_two_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     fheap_heap_ids_t   keep_ids;                        /* Structure to retain heap IDs */
     h5_stat_size_t     empty_size;                      /* Size of a file with an empty heap */
@@ -7612,8 +7612,8 @@ test_man_remove_first_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t 
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     fheap_heap_ids_t   keep_ids;                        /* Structure to retain heap IDs */
     h5_stat_size_t     empty_size;                      /* Size of a file with an empty heap */
@@ -7683,8 +7683,8 @@ test_man_remove_first_two_rows(hid_t fapl, H5HF_create_t *cparam, fheap_test_par
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     fheap_heap_ids_t   keep_ids;                        /* Structure to retain heap IDs */
     h5_stat_size_t     empty_size;                      /* Size of a file with an empty heap */
@@ -7756,8 +7756,8 @@ test_man_remove_first_four_rows(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     fheap_heap_ids_t   keep_ids;                        /* Structure to retain heap IDs */
     h5_stat_size_t     empty_size;                      /* Size of a file with an empty heap */
@@ -7833,8 +7833,8 @@ test_man_remove_all_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     fheap_heap_ids_t   keep_ids;                        /* Structure to retain heap IDs */
     h5_stat_size_t     empty_size;                      /* Size of a file with an empty heap */
@@ -7904,8 +7904,8 @@ test_man_remove_2nd_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     fheap_heap_ids_t   keep_ids;                        /* Structure to retain heap IDs */
     h5_stat_size_t     empty_size;                      /* Size of a file with an empty heap */
@@ -7979,8 +7979,8 @@ test_man_remove_3rd_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     fheap_heap_ids_t   keep_ids;                        /* Structure to retain heap IDs */
     h5_stat_size_t     empty_size;                      /* Size of a file with an empty heap */
@@ -8064,8 +8064,8 @@ test_man_skip_start_block(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t 
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     fheap_heap_ids_t   keep_ids;                        /* Structure to retain heap IDs */
     h5_stat_size_t     empty_size;                      /* Size of a file with an empty heap */
@@ -8144,8 +8144,8 @@ test_man_skip_start_block_add_back(hid_t fapl, H5HF_create_t *cparam, fheap_test
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     fheap_heap_ids_t   keep_ids;                        /* Structure to retain heap IDs */
     h5_stat_size_t     empty_size;                      /* Size of a file with an empty heap */
@@ -8244,8 +8244,8 @@ test_man_skip_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_t
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     fheap_heap_ids_t   keep_ids;                        /* Structure to retain heap IDs */
     h5_stat_size_t     empty_size;                      /* Size of a file with an empty heap */
@@ -8355,8 +8355,8 @@ test_man_skip_2nd_block(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *t
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     fheap_heap_ids_t   keep_ids;                        /* Structure to retain heap IDs */
     h5_stat_size_t     empty_size;                      /* Size of a file with an empty heap */
@@ -8453,8 +8453,8 @@ test_man_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_tes
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     fheap_heap_ids_t   keep_ids;                        /* Structure to retain heap IDs */
     h5_stat_size_t     empty_size;                      /* Size of a file with an empty heap */
@@ -8600,8 +8600,8 @@ test_man_fill_one_partial_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     fheap_heap_ids_t   keep_ids;                        /* Structure to retain heap IDs */
     h5_stat_size_t     empty_size;                      /* Size of a file with an empty heap */
@@ -8767,8 +8767,8 @@ test_man_fill_row_skip_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     fheap_heap_ids_t   keep_ids;                        /* Structure to retain heap IDs */
     h5_stat_size_t     empty_size;                      /* Size of a file with an empty heap */
@@ -8896,8 +8896,8 @@ test_man_skip_direct_skip_indirect_two_rows_add_skipped(hid_t fapl, H5HF_create_
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     fheap_heap_ids_t   keep_ids;                        /* Structure to retain heap IDs */
     unsigned           num_direct_rows; /* Number of rows (of direct blocks) in root indirect block */
@@ -9025,8 +9025,8 @@ test_man_fill_direct_skip_indirect_start_block_add_skipped(hid_t fapl, H5HF_crea
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     fheap_heap_ids_t   keep_ids;                        /* Structure to retain heap IDs */
     h5_stat_size_t     empty_size;                      /* Size of a file with an empty heap */
@@ -9151,13 +9151,13 @@ test_man_fill_direct_skip_2nd_indirect_start_block_add_skipped(hid_t fapl, H5HF_
     hid_t            file = -1;                       /* File ID */
     hid_t            dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char             filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *          f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *         fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t           *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t          *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t          fh_addr;                         /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;                        /* Structure to retain heap IDs */
     unsigned
-                       num_first_indirect_rows; /* Number of rows (of direct blocks) in each of the first indirect blocks */
-    unsigned           row;                     /* Current row in indirect block */
+        num_first_indirect_rows; /* Number of rows (of direct blocks) in each of the first indirect blocks */
+    unsigned           row;      /* Current row in indirect block */
     h5_stat_size_t     empty_size; /* Size of a file with an empty heap */
     size_t             obj_size;   /* Size of object */
     size_t             fill_size;  /* Size of objects for "bulk" filled blocks */
@@ -9284,12 +9284,12 @@ test_man_fill_2nd_direct_less_one_wrap_start_block_add_skipped(hid_t fapl, H5HF_
     hid_t            file = -1;                       /* File ID */
     hid_t            dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char             filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *          f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *         fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t           *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t          *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t          fh_addr;                         /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;                        /* Structure to retain heap IDs */
     unsigned
-                       num_first_indirect_rows; /* Number of rows (of direct blocks) in each of the first indirect blocks */
+        num_first_indirect_rows; /* Number of rows (of direct blocks) in each of the first indirect blocks */
     h5_stat_size_t     empty_size; /* Size of a file with an empty heap */
     size_t             obj_size;   /* Size of object */
     size_t             fill_size;  /* Size of objects for "bulk" filled blocks */
@@ -9434,13 +9434,13 @@ test_man_fill_direct_skip_2nd_indirect_skip_2nd_block_add_skipped(hid_t fapl, H5
     hid_t            file = -1;                       /* File ID */
     hid_t            dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char             filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *          f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *         fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t           *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t          *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t          fh_addr;                         /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;                        /* Structure to retain heap IDs */
     unsigned
-                       num_first_indirect_rows; /* Number of rows (of direct blocks) in each of the first indirect blocks */
-    unsigned           row;                     /* Current row in indirect block */
+        num_first_indirect_rows; /* Number of rows (of direct blocks) in each of the first indirect blocks */
+    unsigned           row;      /* Current row in indirect block */
     h5_stat_size_t     empty_size; /* Size of a file with an empty heap */
     size_t             obj_size;   /* Size of object */
     size_t             fill_size;  /* Size of objects for "bulk" filled blocks */
@@ -9607,12 +9607,12 @@ test_man_fill_direct_skip_indirect_two_rows_add_skipped(hid_t fapl, H5HF_create_
     hid_t            file = -1;                       /* File ID */
     hid_t            dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char             filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *          f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *         fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t           *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t          *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t          fh_addr;                         /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;                        /* Structure to retain heap IDs */
     unsigned
-                       num_first_indirect_rows; /* Number of rows (of direct blocks) in each of the first indirect blocks */
+        num_first_indirect_rows; /* Number of rows (of direct blocks) in each of the first indirect blocks */
     unsigned           max_dblock_rows; /* Max. # of rows (of direct blocks) in the root indirect block */
     h5_stat_size_t     empty_size;      /* Size of a file with an empty heap */
     size_t             obj_size;        /* Size of object */
@@ -9764,12 +9764,12 @@ test_man_fill_direct_skip_indirect_two_rows_skip_indirect_row_add_skipped(hid_t 
     hid_t            file = -1;                       /* File ID */
     hid_t            dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char             filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *          f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *         fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t           *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t          *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t          fh_addr;                         /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;                        /* Structure to retain heap IDs */
     unsigned
-                       num_first_indirect_rows; /* Number of rows (of direct blocks) in each of the first indirect blocks */
+        num_first_indirect_rows; /* Number of rows (of direct blocks) in each of the first indirect blocks */
     unsigned           max_dblock_rows; /* Max. # of rows (of direct blocks) in the root indirect block */
     h5_stat_size_t     empty_size;      /* Size of a file with an empty heap */
     size_t             obj_size;        /* Size of object */
@@ -9949,8 +9949,8 @@ test_man_fill_2nd_direct_skip_start_block_add_skipped(hid_t fapl, H5HF_create_t 
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     fheap_heap_ids_t   keep_ids;                        /* Structure to retain heap IDs */
     h5_stat_size_t     empty_size;                      /* Size of a file with an empty heap */
@@ -10081,8 +10081,8 @@ test_man_fill_2nd_direct_skip_2nd_indirect_start_block_add_skipped(hid_t fapl, H
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     fheap_heap_ids_t   keep_ids;                        /* Structure to retain heap IDs */
     h5_stat_size_t     empty_size;                      /* Size of a file with an empty heap */
@@ -10218,18 +10218,18 @@ error:
  */
 static int
 test_man_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_block_add_skipped(hid_t               fapl,
-                                                                               H5HF_create_t *     cparam,
+                                                                               H5HF_create_t      *cparam,
                                                                                fheap_test_param_t *tparam)
 {
     hid_t            file = -1;                       /* File ID */
     hid_t            dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char             filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *          f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *         fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t           *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t          *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t          fh_addr;                         /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;                        /* Structure to retain heap IDs */
     unsigned
-                       num_first_indirect_rows; /* Number of rows (of direct blocks) in each of the first indirect blocks */
+        num_first_indirect_rows; /* Number of rows (of direct blocks) in each of the first indirect blocks */
     h5_stat_size_t     empty_size; /* Size of a file with an empty heap */
     size_t             obj_size;   /* Size of object */
     size_t             fill_size;  /* Size of objects for "bulk" filled blocks */
@@ -10375,18 +10375,18 @@ error:
  */
 static int
 test_man_fill_2nd_direct_fill_direct_skip2_3rd_indirect_start_block_add_skipped(hid_t               fapl,
-                                                                                H5HF_create_t *     cparam,
+                                                                                H5HF_create_t      *cparam,
                                                                                 fheap_test_param_t *tparam)
 {
     hid_t            file = -1;                       /* File ID */
     hid_t            dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char             filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *          f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *         fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t           *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t          *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t          fh_addr;                         /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;                        /* Structure to retain heap IDs */
     unsigned
-                       num_first_indirect_rows; /* Number of rows (of direct blocks) in each of the first indirect blocks */
+        num_first_indirect_rows; /* Number of rows (of direct blocks) in each of the first indirect blocks */
     h5_stat_size_t     empty_size; /* Size of a file with an empty heap */
     size_t             obj_size;   /* Size of object */
     size_t             fill_size;  /* Size of objects for "bulk" filled blocks */
@@ -10548,12 +10548,12 @@ test_man_fill_3rd_direct_less_one_fill_direct_wrap_start_block_add_skipped(hid_t
     hid_t            file = -1;                       /* File ID */
     hid_t            dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char             filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *          f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *         fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t           *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t          *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t          fh_addr;                         /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;                        /* Structure to retain heap IDs */
     unsigned
-                       num_first_indirect_rows; /* Number of rows (of direct blocks) in each of the first indirect blocks */
+        num_first_indirect_rows; /* Number of rows (of direct blocks) in each of the first indirect blocks */
     h5_stat_size_t     empty_size; /* Size of a file with an empty heap */
     size_t             obj_size;   /* Size of object */
     size_t             fill_size;  /* Size of objects for "bulk" filled blocks */
@@ -10716,18 +10716,18 @@ test_man_fill_1st_row_3rd_direct_fill_2nd_direct_less_one_wrap_start_block_add_s
     hid_t            file = -1;                       /* File ID */
     hid_t            dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char             filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *          f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *         fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t           *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t          *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t          fh_addr;                         /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;                        /* Structure to retain heap IDs */
     unsigned
-                       num_first_indirect_rows; /* Number of rows (of direct blocks) in each of the first indirect blocks */
+        num_first_indirect_rows; /* Number of rows (of direct blocks) in each of the first indirect blocks */
     h5_stat_size_t     empty_size;                    /* Size of a file with an empty heap */
     size_t             obj_size;                      /* Size of object */
     size_t             fill_size;                     /* Size of objects for "bulk" filled blocks */
     fheap_heap_state_t state;                         /* State of fractal heap */
     unsigned           u; /* Local index variables */ /* Test description */
-    const char *       base_desc =
+    const char        *base_desc =
         "filling direct blocks, filling 2nd level indirect blocks, filling first row of 3rd level indirect "
         "blocks, fill all direct blocks in next 3rd level indirect block, fill all 1st row of 2nd level "
         "indirect blocks, except last one, and insert object too large for 2nd level indirect block, then "
@@ -10888,12 +10888,12 @@ test_man_fill_3rd_direct_fill_direct_skip_start_block_add_skipped(hid_t fapl, H5
     hid_t            file = -1;                       /* File ID */
     hid_t            dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char             filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *          f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *         fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t           *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t          *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t          fh_addr;                         /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;                        /* Structure to retain heap IDs */
     unsigned
-                       num_first_indirect_rows; /* Number of rows (of direct blocks) in each of the first indirect blocks */
+        num_first_indirect_rows; /* Number of rows (of direct blocks) in each of the first indirect blocks */
     h5_stat_size_t     empty_size; /* Size of a file with an empty heap */
     size_t             obj_size;   /* Size of object */
     size_t             fill_size;  /* Size of objects for "bulk" filled blocks */
@@ -11055,12 +11055,12 @@ test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_blo
     hid_t            file = -1;                       /* File ID */
     hid_t            dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char             filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *          f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *         fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t           *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t          *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t          fh_addr;                         /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;                        /* Structure to retain heap IDs */
     unsigned
-                       num_first_indirect_rows; /* Number of rows (of direct blocks) in each of the first indirect blocks */
+        num_first_indirect_rows; /* Number of rows (of direct blocks) in each of the first indirect blocks */
     h5_stat_size_t     empty_size; /* Size of a file with an empty heap */
     size_t             obj_size;   /* Size of object */
     size_t             fill_size;  /* Size of objects for "bulk" filled blocks */
@@ -11242,12 +11242,12 @@ test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_two_rows_
     hid_t            file = -1;                       /* File ID */
     hid_t            dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char             filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *          f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *         fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t           *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t          *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t          fh_addr;                         /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;                        /* Structure to retain heap IDs */
     unsigned
-                       num_first_indirect_rows; /* Number of rows (of direct blocks) in each of the first indirect blocks */
+        num_first_indirect_rows; /* Number of rows (of direct blocks) in each of the first indirect blocks */
     h5_stat_size_t     empty_size; /* Size of a file with an empty heap */
     size_t             obj_size;   /* Size of object */
     size_t             fill_size;  /* Size of objects for "bulk" filled blocks */
@@ -11466,12 +11466,12 @@ test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_wrap_star
     hid_t            file = -1;                       /* File ID */
     hid_t            dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char             filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *          f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *         fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t           *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t          *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t          fh_addr;                         /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;                        /* Structure to retain heap IDs */
     unsigned
-                       num_first_indirect_rows; /* Number of rows (of direct blocks) in each of the first indirect blocks */
+        num_first_indirect_rows; /* Number of rows (of direct blocks) in each of the first indirect blocks */
     h5_stat_size_t     empty_size; /* Size of a file with an empty heap */
     size_t             obj_size;   /* Size of object */
     size_t             fill_size;  /* Size of objects for "bulk" filled blocks */
@@ -11670,12 +11670,12 @@ test_man_fill_4th_direct_less_one_fill_2nd_direct_fill_direct_skip_3rd_indirect_
     hid_t            file = -1;                       /* File ID */
     hid_t            dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char             filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *          f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *         fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t           *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t          *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t          fh_addr;                         /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;                        /* Structure to retain heap IDs */
     unsigned
-                       num_first_indirect_rows; /* Number of rows (of direct blocks) in each of the first indirect blocks */
+        num_first_indirect_rows; /* Number of rows (of direct blocks) in each of the first indirect blocks */
     h5_stat_size_t     empty_size; /* Size of a file with an empty heap */
     size_t             obj_size;   /* Size of object */
     size_t             fill_size;  /* Size of objects for "bulk" filled blocks */
@@ -11906,8 +11906,8 @@ test_man_frag_simple(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     fheap_heap_ids_t   keep_ids;                        /* Structure to retain heap IDs */
     h5_stat_size_t     empty_size;                      /* Size of a file with an empty heap */
@@ -12038,8 +12038,8 @@ test_man_frag_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     fheap_heap_ids_t   keep_ids;                        /* Structure to retain heap IDs */
     unsigned           root_direct_rows;                /* Number of rows in root indirect block */
@@ -12210,12 +12210,12 @@ test_man_frag_2nd_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
     hid_t            file = -1;                       /* File ID */
     hid_t            dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char             filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *          f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *         fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t           *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t          *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t          fh_addr;                         /* Address of fractal heap */
     fheap_heap_ids_t keep_ids;                        /* Structure to retain heap IDs */
     unsigned
-                       num_first_indirect_rows; /* Number of rows (of direct blocks) in each of the first indirect blocks */
+        num_first_indirect_rows; /* Number of rows (of direct blocks) in each of the first indirect blocks */
     h5_stat_size_t     empty_size; /* Size of a file with an empty heap */
     size_t             obj_size;   /* Size of object */
     size_t             fill_size;  /* Size of objects for "bulk" filled blocks */
@@ -12326,8 +12326,8 @@ test_man_frag_3rd_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     fheap_heap_ids_t   keep_ids;                        /* Structure to retain heap IDs */
     unsigned           root_direct_rows;                /* Number of rows in root indirect block */
@@ -12444,14 +12444,14 @@ test_huge_insert_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     fheap_heap_ids_t   keep_ids;                        /* Structure to retain heap IDs */
     size_t             id_len;                          /* Size of fractal heap IDs */
     h5_stat_size_t     empty_size;                      /* Size of a file with an empty heap */
     h5_stat_size_t     file_size;                       /* Size of file currently */
-    unsigned char *    heap_id = NULL;                  /* Heap ID for object */
+    unsigned char     *heap_id = NULL;                  /* Heap ID for object */
     size_t             obj_size;                        /* Size of object */
     size_t             robj_size;                       /* Size of object read */
     unsigned char      obj_type;                        /* Type of storage for object */
@@ -12598,15 +12598,15 @@ test_huge_insert_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     fheap_heap_ids_t   keep_ids;                        /* Structure to retain heap IDs */
     size_t             id_len;                          /* Size of fractal heap IDs */
     h5_stat_size_t     empty_size;                      /* Size of a file with an empty heap */
     h5_stat_size_t     file_size;                       /* Size of file currently */
-    unsigned char *    heap_id  = NULL;                 /* Heap ID for first object */
-    unsigned char *    heap_id2 = NULL;                 /* Heap ID for second object */
+    unsigned char     *heap_id  = NULL;                 /* Heap ID for first object */
+    unsigned char     *heap_id2 = NULL;                 /* Heap ID for second object */
     size_t             obj_size;                        /* Size of object */
     size_t             robj_size;                       /* Size of object read */
     unsigned char      obj_type;                        /* Type of storage for object */
@@ -12832,16 +12832,16 @@ test_huge_insert_three(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tp
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     fheap_heap_ids_t   keep_ids;                        /* Structure to retain heap IDs */
     size_t             id_len;                          /* Size of fractal heap IDs */
     h5_stat_size_t     empty_size;                      /* Size of a file with an empty heap */
     h5_stat_size_t     file_size;                       /* Size of file currently */
-    unsigned char *    heap_id  = NULL;                 /* Heap ID for first object */
-    unsigned char *    heap_id2 = NULL;                 /* Heap ID for second object */
-    unsigned char *    heap_id3 = NULL;                 /* Heap ID for third object */
+    unsigned char     *heap_id  = NULL;                 /* Heap ID for first object */
+    unsigned char     *heap_id2 = NULL;                 /* Heap ID for second object */
+    unsigned char     *heap_id3 = NULL;                 /* Heap ID for third object */
     size_t             obj_size;                        /* Size of object */
     size_t             robj_size;                       /* Size of object read */
     unsigned char      obj_type;                        /* Type of storage for object */
@@ -13141,18 +13141,18 @@ test_huge_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     fheap_heap_ids_t   keep_ids;                        /* Structure to retain heap IDs */
     size_t             id_len;                          /* Size of fractal heap IDs */
     h5_stat_size_t     empty_size;                      /* Size of a file with an empty heap */
     h5_stat_size_t     file_size;                       /* Size of file currently */
-    unsigned char *    heap_id  = NULL;                 /* Heap ID for first object */
-    unsigned char *    heap_id2 = NULL;                 /* Heap ID for second object */
-    unsigned char *    heap_id3 = NULL;                 /* Heap ID for third object */
-    unsigned char *    heap_id4 = NULL;                 /* Heap ID for fourth object */
-    unsigned char *    heap_id5 = NULL;                 /* Heap ID for fifth object */
+    unsigned char     *heap_id  = NULL;                 /* Heap ID for first object */
+    unsigned char     *heap_id2 = NULL;                 /* Heap ID for second object */
+    unsigned char     *heap_id3 = NULL;                 /* Heap ID for third object */
+    unsigned char     *heap_id4 = NULL;                 /* Heap ID for fourth object */
+    unsigned char     *heap_id5 = NULL;                 /* Heap ID for fifth object */
     size_t             obj_size;                        /* Size of object */
     size_t             robj_size;                       /* Size of object read */
     unsigned char      obj_type;                        /* Type of storage for object */
@@ -13568,15 +13568,15 @@ test_filtered_huge(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     H5HF_create_t      tmp_cparam;                      /* Local heap creation parameters */
     fheap_heap_ids_t   keep_ids;                        /* Structure to retain heap IDs */
     size_t             id_len;                          /* Size of fractal heap IDs */
     h5_stat_size_t     empty_size;                      /* Size of a file with an empty heap */
     h5_stat_size_t     file_size;                       /* Size of file currently */
-    unsigned char *    heap_id = NULL;                  /* Heap ID for object */
+    unsigned char     *heap_id = NULL;                  /* Heap ID for object */
     size_t             obj_size;                        /* Size of object */
     size_t             robj_size;                       /* Size of object read */
     unsigned char      obj_type;                        /* Type of storage for object */
@@ -13784,14 +13784,14 @@ test_tiny_insert_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     fheap_heap_ids_t   keep_ids;                        /* Structure to retain heap IDs */
     size_t             id_len;                          /* Size of fractal heap IDs */
     h5_stat_size_t     empty_size;                      /* Size of a file with an empty heap */
     h5_stat_size_t     file_size;                       /* Size of file currently */
-    unsigned char *    heap_id = NULL;                  /* Heap ID for object */
+    unsigned char     *heap_id = NULL;                  /* Heap ID for object */
     size_t             obj_size;                        /* Size of object */
     size_t             robj_size;                       /* Size of object read */
     unsigned char      obj_type;                        /* Type of storage for object */
@@ -13938,15 +13938,15 @@ test_tiny_insert_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     fheap_heap_ids_t   keep_ids;                        /* Structure to retain heap IDs */
     size_t             id_len;                          /* Size of fractal heap IDs */
     h5_stat_size_t     empty_size;                      /* Size of a file with an empty heap */
     h5_stat_size_t     file_size;                       /* Size of file currently */
-    unsigned char *    heap_id  = NULL;                 /* Heap ID for first object */
-    unsigned char *    heap_id2 = NULL;                 /* Heap ID for second object */
+    unsigned char     *heap_id  = NULL;                 /* Heap ID for first object */
+    unsigned char     *heap_id2 = NULL;                 /* Heap ID for second object */
     size_t             obj_size;                        /* Size of object */
     size_t             robj_size;                       /* Size of object read */
     unsigned char      obj_type;                        /* Type of storage for object */
@@ -14173,20 +14173,20 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     fheap_heap_ids_t   keep_ids;                        /* Structure to retain heap IDs */
     size_t             id_len;                          /* Size of fractal heap IDs */
     h5_stat_size_t     empty_size;                      /* Size of a file with an empty heap */
     h5_stat_size_t     file_size;                       /* Size of file currently */
-    unsigned char *    heap_id  = NULL;                 /* Heap ID for first object */
-    unsigned char *    heap_id2 = NULL;                 /* Heap ID for second object */
-    unsigned char *    heap_id3 = NULL;                 /* Heap ID for third object */
-    unsigned char *    heap_id4 = NULL;                 /* Heap ID for fourth object */
-    unsigned char *    heap_id5 = NULL;                 /* Heap ID for fifth object */
-    unsigned char *    heap_id6 = NULL;                 /* Heap ID for sixth object */
-    unsigned char *    heap_id7 = NULL;                 /* Heap ID for seventh object */
+    unsigned char     *heap_id  = NULL;                 /* Heap ID for first object */
+    unsigned char     *heap_id2 = NULL;                 /* Heap ID for second object */
+    unsigned char     *heap_id3 = NULL;                 /* Heap ID for third object */
+    unsigned char     *heap_id4 = NULL;                 /* Heap ID for fourth object */
+    unsigned char     *heap_id5 = NULL;                 /* Heap ID for fifth object */
+    unsigned char     *heap_id6 = NULL;                 /* Heap ID for sixth object */
+    unsigned char     *heap_id7 = NULL;                 /* Heap ID for seventh object */
     size_t             obj_size;                        /* Size of object */
     size_t             robj_size;                       /* Size of object read */
     unsigned char      obj_type;                        /* Type of storage for object */
@@ -14785,8 +14785,8 @@ test_filtered_man_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_para
     hid_t            file = -1;                       /* File ID */
     hid_t            dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char             filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *          f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *         fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t           *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t          *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t          fh_addr;                         /* Address of fractal heap */
     H5HF_create_t    tmp_cparam;                      /* Local heap creation parameters */
     fheap_heap_ids_t keep_ids;                        /* Structure to retain heap IDs */
@@ -14960,8 +14960,8 @@ test_filtered_man_root_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
     hid_t            file = -1;                       /* File ID */
     hid_t            dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char             filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *          f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *         fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t           *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t          *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t          fh_addr;                         /* Address of fractal heap */
     H5HF_create_t    tmp_cparam;                      /* Local heap creation parameters */
     fheap_heap_ids_t keep_ids;                        /* Structure to retain heap IDs */
@@ -15279,8 +15279,8 @@ test_random(hsize_t size_limit, hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     H5HF_create_t      tmp_cparam;                      /* Local heap creation parameters */
     size_t             id_len;                          /* Size of fractal heap IDs */
@@ -15489,8 +15489,8 @@ test_random_pow2(hsize_t size_limit, hid_t fapl, H5HF_create_t *cparam, fheap_te
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     H5HF_create_t      tmp_cparam;                      /* Local heap creation parameters */
     size_t             id_len;                          /* Size of fractal heap IDs */
@@ -15725,15 +15725,15 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     H5HF_create_t      tmp_cparam;                      /* Local heap creation parameters */
     size_t             id_len;                          /* Size of fractal heap IDs */
     unsigned char      tiny_heap_id[HEAP_ID_LEN];       /* Heap ID for 'tiny' object */
     unsigned char      huge_heap_id[HEAP_ID_LEN];       /* Heap ID for 'huge' object */
     hbool_t            id_changed  = FALSE;             /* Whether the heap ID changed */
-    unsigned char *    rewrite_obj = NULL;              /* Pointer to re-write buffer for objects */
+    unsigned char     *rewrite_obj = NULL;              /* Pointer to re-write buffer for objects */
     fheap_heap_ids_t   keep_ids;                        /* Structure to retain heap IDs */
     h5_stat_size_t     empty_size;                      /* Size of a file with an empty heap */
     size_t             obj_size;                        /* Size of object */
@@ -16002,8 +16002,8 @@ test_bug1(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
     hid_t              file = -1;                       /* File ID */
     hid_t              dxpl = H5P_DATASET_XFER_DEFAULT; /* DXPL to use */
     char               filename[FHEAP_FILENAME_LEN];    /* Filename to use */
-    H5F_t *            f  = NULL;                       /* Internal file object pointer */
-    H5HF_t *           fh = NULL;                       /* Fractal heap wrapper */
+    H5F_t             *f  = NULL;                       /* Internal file object pointer */
+    H5HF_t            *fh = NULL;                       /* Fractal heap wrapper */
     haddr_t            fh_addr;                         /* Address of fractal heap */
     size_t             id_len;                          /* Size of fractal heap IDs */
     fheap_heap_ids_t   keep_ids;                        /* Structure to retain heap IDs */

@@ -233,8 +233,8 @@ struct H5O_mesg_t {
     uint8_t                flags;    /* message flags                    */
     H5O_msg_crt_idx_t      crt_idx;  /* message creation index           */
     unsigned               chunkno;  /* chunk number for this mesg       */
-    void *                 native;   /* native format message            */
-    uint8_t *              raw;      /* pointer to raw data              */
+    void                  *native;   /* native format message            */
+    uint8_t               *raw;      /* pointer to raw data              */
     size_t                 raw_size; /* size with alignment              */
 };
 
@@ -321,7 +321,7 @@ typedef struct H5O_addr_map_t {
     hbool_t                is_locked;     /* Indicate that the destination object is locked currently */
     hsize_t                inc_ref_count; /* Number of deferred increments to reference count */
     const H5O_obj_class_t *obj_class;     /* Object class */
-    void *                 udata;         /* Object class copy file udata */
+    void                  *udata;         /* Object class copy file udata */
 } H5O_addr_map_t;
 
 /* Stack of continuation messages to interpret */
@@ -333,7 +333,7 @@ typedef struct H5O_cont_msgs_t {
 
 /* Common callback information for loading object header prefix from disk */
 typedef struct H5O_common_cache_ud_t {
-    H5F_t *  f;                /* Pointer to file for object header/chunk */
+    H5F_t   *f;                /* Pointer to file for object header/chunk */
     hid_t    dxpl_id;          /* DXPL for operation */
     unsigned file_intent;      /* Read/write intent for file */
     unsigned merged_null_msgs; /* Number of null messages merged together */
@@ -354,14 +354,14 @@ typedef struct H5O_chunk_proxy_t {
     H5AC_info_t cache_info; /* Information for metadata cache functions, _must_ be */
                             /* first field in structure */
 
-    H5O_t *  oh;      /* Object header for this chunk */
+    H5O_t   *oh;      /* Object header for this chunk */
     unsigned chunkno; /* Chunk number for this chunk */
 } H5O_chunk_proxy_t;
 
 /* Callback information for loading object header chunk from disk */
 typedef struct H5O_chk_cache_ud_t {
     hbool_t               decoding; /* Whether the object header is being decoded */
-    H5O_t *               oh;       /* Object header for this chunk */
+    H5O_t                *oh;       /* Object header for this chunk */
     unsigned              chunkno;  /* Index of chunk being brought in (for re-loads) */
     size_t                size;     /* Size of chunk in the file */
     H5O_common_cache_ud_t common;   /* Common object header cache callback info */
@@ -523,19 +523,19 @@ H5_DLL herr_t   H5O_msg_append_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5
                                     unsigned mesg_flags, unsigned update_flags, void *mesg);
 H5_DLL herr_t   H5O_msg_write_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_msg_class_t *type,
                                    unsigned mesg_flags, unsigned update_flags, void *mesg);
-H5_DLL void *   H5O_msg_free_real(const H5O_msg_class_t *type, void *mesg);
+H5_DLL void    *H5O_msg_free_real(const H5O_msg_class_t *type, void *mesg);
 H5_DLL herr_t   H5O_msg_free_mesg(H5O_mesg_t *mesg);
 H5_DLL unsigned H5O_msg_count_real(const H5O_t *oh, const H5O_msg_class_t *type);
 H5_DLL herr_t   H5O_msg_remove_real(H5F_t *f, H5O_t *oh, const H5O_msg_class_t *type, int sequence,
                                     H5O_operator_t op, void *op_data, hbool_t adj_link, hid_t dxpl_id);
-H5_DLL void * H5O_msg_copy_file(const H5O_msg_class_t *type, H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
+H5_DLL void  *H5O_msg_copy_file(const H5O_msg_class_t *type, H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
                                 hbool_t *recompute_size, unsigned *mesg_flags, H5O_copy_t *cpy_info,
                                 void *udata, hid_t dxpl_id);
 H5_DLL herr_t H5O_msg_iterate_real(H5F_t *f, H5O_t *oh, const H5O_msg_class_t *type,
                                    const H5O_mesg_operator_t *op, void *op_data, hid_t dxpl_id);
 
 /* Object header chunk routines */
-H5_DLL herr_t H5O_chunk_add(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx);
+H5_DLL herr_t             H5O_chunk_add(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx);
 H5_DLL H5O_chunk_proxy_t *H5O_chunk_protect(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx);
 H5_DLL herr_t H5O_chunk_unprotect(H5F_t *f, hid_t dxpl_id, H5O_chunk_proxy_t *chk_proxy, hbool_t chk_dirtied);
 H5_DLL herr_t H5O_chunk_update_idx(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx);

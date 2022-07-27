@@ -217,16 +217,16 @@ static herr_t
 H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
 {
     size_t    def_max_temp_buf  = H5D_XFER_MAX_TEMP_BUF_DEF; /* Default value for maximum temp buffer size */
-    void *    def_tconv_buf     = H5D_XFER_TCONV_BUF_DEF;    /* Default value for type conversion buffer */
-    void *    def_bkgr_buf      = H5D_XFER_BKGR_BUF_DEF;     /* Default value for background buffer */
+    void     *def_tconv_buf     = H5D_XFER_TCONV_BUF_DEF;    /* Default value for type conversion buffer */
+    void     *def_bkgr_buf      = H5D_XFER_BKGR_BUF_DEF;     /* Default value for background buffer */
     H5T_bkg_t def_bkgr_buf_type = H5D_XFER_BKGR_BUF_TYPE_DEF;
     double    def_btree_split_ratio[3] =
         H5D_XFER_BTREE_SPLIT_RATIO_DEF;                       /* Default value for B-tree node split ratios */
     H5MM_allocate_t def_vlen_alloc = H5D_XFER_VLEN_ALLOC_DEF; /* Default value for vlen allocation function */
-    void *          def_vlen_alloc_info =
+    void           *def_vlen_alloc_info =
         H5D_XFER_VLEN_ALLOC_INFO_DEF;                   /* Default value for vlen allocation information */
     H5MM_free_t def_vlen_free = H5D_XFER_VLEN_FREE_DEF; /* Default value for vlen free function */
-    void * def_vlen_free_info = H5D_XFER_VLEN_FREE_INFO_DEF;    /* Default value for vlen free information */
+    void  *def_vlen_free_info = H5D_XFER_VLEN_FREE_INFO_DEF;    /* Default value for vlen free information */
     size_t def_hyp_vec_size   = H5D_XFER_HYPER_VECTOR_SIZE_DEF; /* Default value for vector size */
 #ifdef H5_HAVE_PARALLEL
     H5FD_mpio_xfer_t def_io_xfer_mode = H5D_XFER_IO_XFER_MODE_DEF; /* Default value for I/O transfer mode */
@@ -243,7 +243,7 @@ H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
     H5Z_EDC_t     enable_edc     = H5D_XFER_EDC_DEF;       /* Default value for EDC property */
     H5Z_cb_t      filter_cb      = H5D_XFER_FILTER_CB_DEF; /* Default value for filter callback */
     H5T_conv_cb_t conv_cb        = H5D_XFER_CONV_CB_DEF; /* Default value for datatype conversion callback */
-    void *        def_xfer_xform = H5D_XFER_XFORM_DEF;   /* Default value for data transform */
+    void         *def_xfer_xform = H5D_XFER_XFORM_DEF;   /* Default value for data transform */
     hbool_t       direct_chunk_flag =
         H5D_XFER_DIRECT_CHUNK_WRITE_FLAG_DEF; /* Default value for the flag of direct chunk write */
     uint32_t direct_chunk_filters =
@@ -602,7 +602,7 @@ done:
 herr_t
 H5Pset_data_transform(hid_t plist_id, const char *expression)
 {
-    H5P_genplist_t *  plist;                     /* Property list pointer */
+    H5P_genplist_t   *plist;                     /* Property list pointer */
     H5Z_data_xform_t *data_xform_prop = NULL;    /* New data xform property */
     herr_t            ret_value       = SUCCEED; /* return value */
 
@@ -666,10 +666,10 @@ done:
 ssize_t
 H5Pget_data_transform(hid_t plist_id, char *expression /*out*/, size_t size)
 {
-    H5P_genplist_t *  plist;                  /* Property list pointer */
+    H5P_genplist_t   *plist;                  /* Property list pointer */
     H5Z_data_xform_t *data_xform_prop = NULL; /* New data xform property */
     size_t            len;
-    const char *      pexp;
+    const char       *pexp;
     ssize_t           ret_value; /* return value */
 
     FUNC_ENTER_API(FAIL)

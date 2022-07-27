@@ -121,8 +121,8 @@ static herr_t
 H5Z_set_local_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id)
 {
     H5P_genplist_t *dcpl_plist;                       /* Property list pointer */
-    const H5T_t *   type;                             /* Datatype */
-    const H5S_t *   ds;                               /* Dataspace */
+    const H5T_t    *type;                             /* Datatype */
+    const H5S_t    *ds;                               /* Dataspace */
     unsigned        flags;                            /* Filter flags */
     size_t          cd_nelmts = H5Z_SZIP_USER_NPARMS; /* Number of filter parameters */
     unsigned        cd_values[H5Z_SZIP_TOTAL_NPARMS]; /* Filter parameters */

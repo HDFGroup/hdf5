@@ -862,7 +862,7 @@ H5Pget_filter2(hid_t plist_id, unsigned idx, unsigned int *flags /*out*/, size_t
                unsigned cd_values[] /*out*/, size_t namelen, char name[] /*out*/,
                unsigned *filter_config /*out*/)
 {
-    H5P_genplist_t *         plist;     /* Property list */
+    H5P_genplist_t          *plist;     /* Property list */
     H5O_pline_t              pline;     /* Filter pipeline */
     const H5Z_filter_info_t *filter;    /* Pointer to filter information */
     H5Z_filter_t             ret_value; /* return value */
@@ -994,7 +994,7 @@ H5Pget_filter_by_id2(hid_t plist_id, H5Z_filter_t id, unsigned int *flags /*out*
                      size_t *cd_nelmts /*in_out*/, unsigned cd_values[] /*out*/, size_t namelen,
                      char name[] /*out*/, unsigned *filter_config)
 {
-    H5P_genplist_t *         plist;               /* Property list */
+    H5P_genplist_t          *plist;               /* Property list */
     H5O_pline_t              pline;               /* Filter pipeline */
     const H5Z_filter_info_t *filter;              /* Pointer to filter information */
     herr_t                   ret_value = SUCCEED; /* Return value */
@@ -1454,7 +1454,7 @@ H5Pget_filter1(hid_t plist_id, unsigned idx, unsigned int *flags /*out*/, size_t
 {
     H5O_pline_t              pline;     /* Filter pipeline */
     const H5Z_filter_info_t *filter;    /* Pointer to filter information */
-    H5P_genplist_t *         plist;     /* Property list pointer */
+    H5P_genplist_t          *plist;     /* Property list pointer */
     H5Z_filter_t             ret_value; /* return value */
 
     FUNC_ENTER_API(H5Z_FILTER_ERROR)

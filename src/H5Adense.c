@@ -68,11 +68,11 @@
  */
 typedef struct H5A_bt2_od_wrt_t {
     /* downward */
-    H5F_t * f;               /* Pointer to file that fractal heap is in */
+    H5F_t  *f;               /* Pointer to file that fractal heap is in */
     hid_t   dxpl_id;         /* DXPL for operation */
     H5HF_t *fheap;           /* Fractal heap handle to operate on */
     H5HF_t *shared_fheap;    /* Fractal heap handle for shared messages */
-    H5A_t * attr;            /* Attribute to write */
+    H5A_t  *attr;            /* Attribute to write */
     haddr_t corder_bt2_addr; /* v2 B-tree address of creation order index */
 } H5A_bt2_od_wrt_t;
 
@@ -82,7 +82,7 @@ typedef struct H5A_bt2_od_wrt_t {
  */
 typedef struct {
     /* downward (internal) */
-    H5F_t * f;            /* Pointer to file that fractal heap is in */
+    H5F_t  *f;            /* Pointer to file that fractal heap is in */
     hid_t   dxpl_id;      /* DXPL for operation                */
     H5HF_t *fheap;        /* Fractal heap handle               */
     H5HF_t *shared_fheap; /* Fractal heap handle for shared messages */
@@ -92,7 +92,7 @@ typedef struct {
     hid_t                     loc_id;  /* Object ID for application callback */
     hsize_t                   skip;    /* Number of attributes to skip      */
     const H5A_attr_iter_op_t *attr_op; /* Callback for each attribute       */
-    void *                    op_data; /* Callback data for each attribute  */
+    void                     *op_data; /* Callback data for each attribute  */
 
     /* upward */
     int op_ret; /* Return value from callback        */
@@ -105,7 +105,7 @@ typedef struct {
  */
 typedef struct {
     /* downward (internal) */
-    H5F_t *                         f;       /* Pointer to file that fractal heap is in */
+    H5F_t                          *f;       /* Pointer to file that fractal heap is in */
     hid_t                           dxpl_id; /* DXPL for operation                */
     const H5A_dense_bt2_name_rec_t *record;  /* v2 B-tree record for attribute */
 
@@ -129,10 +129,10 @@ typedef struct H5A_bt2_ud_rm_t {
  */
 typedef struct H5A_bt2_ud_rmbi_t {
     /* downward */
-    H5F_t *    f;              /* Pointer to file that fractal heap is in */
+    H5F_t     *f;              /* Pointer to file that fractal heap is in */
     hid_t      dxpl_id;        /* DXPL for operation                */
-    H5HF_t *   fheap;          /* Fractal heap handle               */
-    H5HF_t *   shared_fheap;   /* Fractal heap handle for shared messages */
+    H5HF_t    *fheap;          /* Fractal heap handle               */
+    H5HF_t    *shared_fheap;   /* Fractal heap handle for shared messages */
     H5_index_t idx_type;       /* Index type for operation */
     haddr_t    other_bt2_addr; /* v2 B-tree address of "other" index */
 } H5A_bt2_ud_rmbi_t;
@@ -174,9 +174,9 @@ H5A_dense_create(H5F_t *f, hid_t dxpl_id, H5O_ainfo_t *ainfo)
 {
     H5HF_create_t fheap_cparam;         /* Fractal heap creation parameters */
     H5B2_create_t bt2_cparam;           /* v2 B-tree creation parameters */
-    H5HF_t *      fheap      = NULL;    /* Fractal heap handle */
-    H5B2_t *      bt2_name   = NULL;    /* v2 B-tree handle for names */
-    H5B2_t *      bt2_corder = NULL;    /* v2 B-tree handle for creation order */
+    H5HF_t       *fheap      = NULL;    /* Fractal heap handle */
+    H5B2_t       *bt2_name   = NULL;    /* v2 B-tree handle for names */
+    H5B2_t       *bt2_corder = NULL;    /* v2 B-tree handle for creation order */
     herr_t        ret_value  = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -309,12 +309,12 @@ H5A_t *
 H5A_dense_open(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, const char *name)
 {
     H5A_bt2_ud_common_t udata;               /* User data for v2 B-tree modify */
-    H5HF_t *            fheap        = NULL; /* Fractal heap handle */
-    H5HF_t *            shared_fheap = NULL; /* Fractal heap handle for shared header messages */
-    H5B2_t *            bt2_name     = NULL; /* v2 B-tree handle for name index */
+    H5HF_t             *fheap        = NULL; /* Fractal heap handle */
+    H5HF_t             *shared_fheap = NULL; /* Fractal heap handle for shared header messages */
+    H5B2_t             *bt2_name     = NULL; /* v2 B-tree handle for name index */
     htri_t              attr_sharable;       /* Flag indicating attributes are sharable */
     htri_t              attr_exists;         /* Attribute exists in v2 B-tree */
-    H5A_t *             ret_value = NULL;    /* Return value */
+    H5A_t              *ret_value = NULL;    /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -397,11 +397,11 @@ herr_t
 H5A_dense_insert(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, H5A_t *attr)
 {
     H5A_bt2_ud_ins_t udata;                       /* User data for v2 B-tree insertion */
-    H5HF_t *         fheap        = NULL;         /* Fractal heap handle for attributes */
-    H5HF_t *         shared_fheap = NULL;         /* Fractal heap handle for shared header messages */
-    H5B2_t *         bt2_name     = NULL;         /* v2 B-tree handle for name index */
-    H5B2_t *         bt2_corder   = NULL;         /* v2 B-tree handle for creation order index */
-    H5WB_t *         wb           = NULL;         /* Wrapped buffer for attribute data */
+    H5HF_t          *fheap        = NULL;         /* Fractal heap handle for attributes */
+    H5HF_t          *shared_fheap = NULL;         /* Fractal heap handle for shared header messages */
+    H5B2_t          *bt2_name     = NULL;         /* v2 B-tree handle for name index */
+    H5B2_t          *bt2_corder   = NULL;         /* v2 B-tree handle for creation order index */
+    H5WB_t          *wb           = NULL;         /* Wrapped buffer for attribute data */
     uint8_t          attr_buf[H5A_ATTR_BUF_SIZE]; /* Buffer for serializing message */
     unsigned         mesg_flags = 0;              /* Flags for storing message */
     htri_t           attr_sharable;               /* Flag indicating attributes are sharable */
@@ -463,7 +463,7 @@ H5A_dense_insert(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, H5A_t *attr)
         udata.id = attr->sh_loc.u.heap_id;
     } /* end if */
     else {
-        void * attr_ptr;  /* Pointer to serialized message */
+        void  *attr_ptr;  /* Pointer to serialized message */
         size_t attr_size; /* Size of serialized attribute in the heap */
 
         /* Find out the size of buffer needed for serialized message */
@@ -587,9 +587,9 @@ static herr_t
 H5A__dense_write_bt2_cb(void *_record, void *_op_data, hbool_t *changed)
 {
     H5A_dense_bt2_name_rec_t *record     = (H5A_dense_bt2_name_rec_t *)_record; /* Record from B-tree */
-    H5A_bt2_od_wrt_t *        op_data    = (H5A_bt2_od_wrt_t *)_op_data; /* "op data" from v2 B-tree modify */
-    H5B2_t *                  bt2_corder = NULL;           /* v2 B-tree handle for creation order index */
-    H5WB_t *                  wb         = NULL;           /* Wrapped buffer for attribute data */
+    H5A_bt2_od_wrt_t         *op_data    = (H5A_bt2_od_wrt_t *)_op_data; /* "op data" from v2 B-tree modify */
+    H5B2_t                   *bt2_corder = NULL;           /* v2 B-tree handle for creation order index */
+    H5WB_t                   *wb         = NULL;           /* Wrapped buffer for attribute data */
     uint8_t                   attr_buf[H5A_ATTR_BUF_SIZE]; /* Buffer for serializing attribute */
     herr_t                    ret_value = SUCCEED;         /* Return value */
 
@@ -640,7 +640,7 @@ H5A__dense_write_bt2_cb(void *_record, void *_op_data, hbool_t *changed)
         *changed = TRUE;
     } /* end if */
     else {
-        void * attr_ptr;  /* Pointer to serialized message */
+        void  *attr_ptr;  /* Pointer to serialized message */
         size_t attr_size; /* Size of serialized attribute in the heap */
 
         /* Find out the size of buffer needed for serialized attribute */
@@ -702,9 +702,9 @@ H5A_dense_write(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, H5A_t *attr)
 {
     H5A_bt2_ud_common_t udata;               /* User data for v2 B-tree modify */
     H5A_bt2_od_wrt_t    op_data;             /* "Op data" for v2 B-tree modify */
-    H5HF_t *            fheap        = NULL; /* Fractal heap handle */
-    H5HF_t *            shared_fheap = NULL; /* Fractal heap handle for shared header messages */
-    H5B2_t *            bt2_name     = NULL; /* v2 B-tree handle for name index */
+    H5HF_t             *fheap        = NULL; /* Fractal heap handle */
+    H5HF_t             *shared_fheap = NULL; /* Fractal heap handle for shared header messages */
+    H5B2_t             *bt2_name     = NULL; /* v2 B-tree handle for name index */
     htri_t              attr_sharable;       /* Flag indicating attributes are sharable */
     herr_t              ret_value = SUCCEED; /* Return value */
 
@@ -841,11 +841,11 @@ H5A_dense_rename(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, const char *
                  const char *new_name)
 {
     H5A_bt2_ud_common_t udata;               /* User data for v2 B-tree modify */
-    H5HF_t *            fheap        = NULL; /* Fractal heap handle */
-    H5HF_t *            shared_fheap = NULL; /* Fractal heap handle for shared header messages */
-    H5B2_t *            bt2_name     = NULL; /* v2 B-tree handle for name index */
-    H5B2_t *            bt2_corder   = NULL; /* v2 B-tree handle for creation order ndex */
-    H5A_t *             attr_copy    = NULL; /* Copy of attribute to rename */
+    H5HF_t             *fheap        = NULL; /* Fractal heap handle */
+    H5HF_t             *shared_fheap = NULL; /* Fractal heap handle for shared header messages */
+    H5B2_t             *bt2_name     = NULL; /* v2 B-tree handle for name index */
+    H5B2_t             *bt2_corder   = NULL; /* v2 B-tree handle for creation order ndex */
+    H5A_t              *attr_copy    = NULL; /* Copy of attribute to rename */
     htri_t              attr_sharable;       /* Flag indicating attributes are sharable */
     htri_t              shared_mesg;         /* Should this message be stored in the Shared Message table? */
     htri_t              attr_exists;         /* Attribute exists in v2 B-tree */
@@ -1033,7 +1033,7 @@ H5A__dense_iterate_bt2_cb(const void *_record, void *_bt2_udata)
         --bt2_udata->skip;
     else {
         H5A_fh_ud_cp_t fh_udata; /* User data for fractal heap 'op' callback */
-        H5HF_t *       fheap;    /* Fractal heap handle for attribute storage */
+        H5HF_t        *fheap;    /* Fractal heap handle for attribute storage */
 
         /* Check for iterating over shared attribute */
         if (record->flags & H5O_MSG_FLAG_SHARED)
@@ -1120,10 +1120,10 @@ H5A_dense_iterate(H5F_t *f, hid_t dxpl_id, hid_t loc_id, const H5O_ainfo_t *ainf
                   H5_iter_order_t order, hsize_t skip, hsize_t *last_attr, const H5A_attr_iter_op_t *attr_op,
                   void *op_data)
 {
-    H5HF_t *         fheap        = NULL;      /* Fractal heap handle */
-    H5HF_t *         shared_fheap = NULL;      /* Fractal heap handle for shared header messages */
+    H5HF_t          *fheap        = NULL;      /* Fractal heap handle */
+    H5HF_t          *shared_fheap = NULL;      /* Fractal heap handle for shared header messages */
     H5A_attr_table_t atable       = {0, NULL}; /* Table of attributes */
-    H5B2_t *         bt2          = NULL;      /* v2 B-tree handle for index */
+    H5B2_t          *bt2          = NULL;      /* v2 B-tree handle for index */
     haddr_t          bt2_addr;                 /* Address of v2 B-tree to use for lookup */
     herr_t           ret_value;                /* Return value */
 
@@ -1253,8 +1253,8 @@ static herr_t
 H5A__dense_remove_bt2_cb(const void *_record, void *_udata)
 {
     const H5A_dense_bt2_name_rec_t *record = (const H5A_dense_bt2_name_rec_t *)_record;
-    H5A_bt2_ud_rm_t *               udata  = (H5A_bt2_ud_rm_t *)_udata; /* User data for callback */
-    H5A_t * attr       = *(H5A_t **)udata->common.found_op_data;        /* Pointer to attribute to remove */
+    H5A_bt2_ud_rm_t                *udata  = (H5A_bt2_ud_rm_t *)_udata; /* User data for callback */
+    H5A_t  *attr       = *(H5A_t **)udata->common.found_op_data;        /* Pointer to attribute to remove */
     H5B2_t *bt2_corder = NULL;    /* v2 B-tree handle for creation order index */
     herr_t  ret_value  = SUCCEED; /* Return value */
 
@@ -1317,10 +1317,10 @@ herr_t
 H5A_dense_remove(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, const char *name)
 {
     H5A_bt2_ud_rm_t udata;               /* User data for v2 B-tree record removal */
-    H5HF_t *        fheap        = NULL; /* Fractal heap handle */
-    H5HF_t *        shared_fheap = NULL; /* Fractal heap handle for shared header messages */
-    H5B2_t *        bt2_name     = NULL; /* v2 B-tree handle for name index */
-    H5A_t *         attr_copy    = NULL; /* Copy of attribute to remove */
+    H5HF_t         *fheap        = NULL; /* Fractal heap handle */
+    H5HF_t         *shared_fheap = NULL; /* Fractal heap handle for shared header messages */
+    H5B2_t         *bt2_name     = NULL; /* v2 B-tree handle for name index */
+    H5A_t          *attr_copy    = NULL; /* Copy of attribute to remove */
     htri_t          attr_sharable;       /* Flag indicating attributes are sharable */
     herr_t          ret_value = SUCCEED; /* Return value */
 
@@ -1403,10 +1403,10 @@ done:
 static herr_t
 H5A__dense_remove_by_idx_bt2_cb(const void *_record, void *_bt2_udata)
 {
-    H5HF_t *                        fheap;         /* Fractal heap handle */
-    H5B2_t *                        bt2    = NULL; /* v2 B-tree handle for index */
+    H5HF_t                         *fheap;         /* Fractal heap handle */
+    H5B2_t                         *bt2    = NULL; /* v2 B-tree handle for index */
     const H5A_dense_bt2_name_rec_t *record = (const H5A_dense_bt2_name_rec_t *)_record; /* v2 B-tree record */
-    H5A_bt2_ud_rmbi_t *             bt2_udata = (H5A_bt2_ud_rmbi_t *)_bt2_udata; /* User data for callback */
+    H5A_bt2_ud_rmbi_t              *bt2_udata = (H5A_bt2_ud_rmbi_t *)_bt2_udata; /* User data for callback */
     H5A_fh_ud_cp_t                  fh_udata; /* User data for fractal heap 'op' callback */
     H5O_shared_t                    sh_loc;   /* Shared message info for attribute */
     hbool_t use_sh_loc;          /* Whether to use the attribute's shared location or the separate one */
@@ -1532,10 +1532,10 @@ herr_t
 H5A_dense_remove_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, H5_index_t idx_type,
                         H5_iter_order_t order, hsize_t n)
 {
-    H5HF_t *         fheap        = NULL;      /* Fractal heap handle */
-    H5HF_t *         shared_fheap = NULL;      /* Fractal heap handle for shared header messages */
+    H5HF_t          *fheap        = NULL;      /* Fractal heap handle */
+    H5HF_t          *shared_fheap = NULL;      /* Fractal heap handle for shared header messages */
     H5A_attr_table_t atable       = {0, NULL}; /* Table of attributes */
-    H5B2_t *         bt2          = NULL;      /* v2 B-tree handle for index */
+    H5B2_t          *bt2          = NULL;      /* v2 B-tree handle for index */
     haddr_t          bt2_addr;                 /* Address of v2 B-tree to use for operation */
     herr_t           ret_value = SUCCEED;      /* Return value */
 
@@ -1659,9 +1659,9 @@ htri_t
 H5A_dense_exists(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, const char *name)
 {
     H5A_bt2_ud_common_t udata;               /* User data for v2 B-tree modify */
-    H5HF_t *            fheap        = NULL; /* Fractal heap handle */
-    H5HF_t *            shared_fheap = NULL; /* Fractal heap handle for shared header messages */
-    H5B2_t *            bt2_name     = NULL; /* v2 B-tree handle for name index */
+    H5HF_t             *fheap        = NULL; /* Fractal heap handle */
+    H5HF_t             *shared_fheap = NULL; /* Fractal heap handle for shared header messages */
+    H5B2_t             *bt2_name     = NULL; /* v2 B-tree handle for name index */
     htri_t              attr_sharable;       /* Flag indicating attributes are sharable */
     htri_t              ret_value = TRUE;    /* Return value */
 
@@ -1746,7 +1746,7 @@ H5A__dense_delete_bt2_cb(const void *_record, void *_bt2_udata)
     const H5A_dense_bt2_name_rec_t *record =
         (const H5A_dense_bt2_name_rec_t *)_record;                      /* Record from B-tree */
     H5A_bt2_ud_common_t *bt2_udata = (H5A_bt2_ud_common_t *)_bt2_udata; /* User data for callback */
-    H5A_t *              attr      = NULL;                              /* Attribute being removed */
+    H5A_t               *attr      = NULL;                              /* Attribute being removed */
     herr_t               ret_value = SUCCEED;                           /* Return value */
 
     FUNC_ENTER_STATIC
@@ -1808,7 +1808,7 @@ herr_t
 H5A_dense_delete(H5F_t *f, hid_t dxpl_id, H5O_ainfo_t *ainfo)
 {
     H5A_bt2_ud_common_t udata;               /* v2 B-tree user data for deleting attributes */
-    H5HF_t *            fheap     = NULL;    /* Fractal heap handle */
+    H5HF_t             *fheap     = NULL;    /* Fractal heap handle */
     herr_t              ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)

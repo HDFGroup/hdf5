@@ -537,7 +537,7 @@ Attribute::p_read_fixed_len(const DataType &mem_type, H5std_string &strg) const
 
     // If there is data, allocate buffer and read it.
     if (attr_size > 0) {
-        char * strg_C    = new char[attr_size + 1];
+        char  *strg_C    = new char[attr_size + 1];
         herr_t ret_value = H5Aread(id, mem_type.getId(), strg_C);
         if (ret_value < 0) {
             delete[] strg_C; // de-allocate for fixed-len string

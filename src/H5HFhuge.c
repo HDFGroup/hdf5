@@ -289,7 +289,7 @@ H5HF_huge_insert(H5HF_hdr_t *hdr, hid_t dxpl_id, size_t obj_size, void *obj, voi
 {
     uint8_t *id = (uint8_t *)_id;   /* Pointer to ID buffer */
     haddr_t  obj_addr;              /* Address of object in the file */
-    void *   write_buf;             /* Pointer to buffer to write */
+    void    *write_buf;             /* Pointer to buffer to write */
     size_t   write_size;            /* Size of [possibly filtered] object written to file */
     unsigned filter_mask = 0;       /* Filter mask for object (only used for filtered objects) */
     herr_t   ret_value   = SUCCEED; /* Return value */
@@ -408,7 +408,7 @@ H5HF_huge_insert(H5HF_hdr_t *hdr, hid_t dxpl_id, size_t obj_size, void *obj, voi
     else {
         H5HF_huge_bt2_filt_indir_rec_t filt_indir_rec; /* Record for tracking filtered object */
         H5HF_huge_bt2_indir_rec_t      indir_rec;      /* Record for tracking non-filtered object */
-        void *                         ins_rec;        /* Pointer to record to insert */
+        void                          *ins_rec;        /* Pointer to record to insert */
         hsize_t                        new_id;         /* New ID for object */
 
         /* Get new ID for object */
@@ -564,7 +564,7 @@ static herr_t
 H5HF_huge_op_real(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id, hbool_t is_read, H5HF_operator_t op,
                   void *op_data)
 {
-    void *   read_buf = NULL;       /* Pointer to buffer for reading */
+    void    *read_buf = NULL;       /* Pointer to buffer for reading */
     haddr_t  obj_addr;              /* Object's address in the file */
     size_t   obj_size    = 0;       /* Object's size in the file */
     unsigned filter_mask = 0;       /* Filter mask for object (only used for filtered objects) */

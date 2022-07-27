@@ -54,12 +54,12 @@
 /* User data for recursive traversal over objects from a group */
 typedef struct {
     hid_t         obj_id;    /* The ID for the starting group */
-    H5G_loc_t *   start_loc; /* Location of starting group */
+    H5G_loc_t    *start_loc; /* Location of starting group */
     hid_t         lapl_id;   /* LAPL for walking across links */
     hid_t         dxpl_id;   /* DXPL for operations */
-    H5SL_t *      visited;   /* Skip list for tracking visited nodes */
+    H5SL_t       *visited;   /* Skip list for tracking visited nodes */
     H5O_iterate_t op;        /* Application callback */
-    void *        op_data;   /* Application's op data */
+    void         *op_data;   /* Application's op data */
 } H5O_iter_visit_ud_t;
 
 /********************/
@@ -1072,7 +1072,7 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, size_t initial_rc, hid_t o
            H5O_loc_t *loc /*out*/)
 {
     H5P_genplist_t *oc_plist;                          /* Object creation property list */
-    H5O_t *         oh = NULL;                         /* Object header created */
+    H5O_t          *oh = NULL;                         /* Object header created */
     haddr_t         oh_addr;                           /* Address of initial object header */
     size_t          oh_size;                           /* Size of initial object header */
     uint8_t         oh_flags;                          /* Object header's initial status flags */
@@ -1158,9 +1158,9 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, size_t initial_rc, hid_t o
         else
 #endif /* H5_SIZEOF_SIZE_T > H5_SIZEOF_INT32_T */
             if (size_hint > 65535)
-            oh->flags |= H5O_HDR_CHUNK0_4;
-        else if (size_hint > 255)
-            oh->flags |= H5O_HDR_CHUNK0_2;
+                oh->flags |= H5O_HDR_CHUNK0_4;
+            else if (size_hint > 255)
+                oh->flags |= H5O_HDR_CHUNK0_2;
     } /* end if */
     else {
         /* Reset unused time fields */
@@ -1555,7 +1555,7 @@ done:
 int
 H5O_link(const H5O_loc_t *loc, int adjust, hid_t dxpl_id)
 {
-    H5O_t * oh      = NULL;
+    H5O_t  *oh      = NULL;
     hbool_t deleted = FALSE; /* Whether the object was deleted */
     int     ret_value;       /* Return value */
 
@@ -1602,11 +1602,11 @@ done:
 H5O_t *
 H5O_protect(const H5O_loc_t *loc, hid_t dxpl_id, H5AC_protect_t prot)
 {
-    H5O_t *         oh = NULL;     /* Object header protected */
+    H5O_t          *oh = NULL;     /* Object header protected */
     H5O_cache_ud_t  udata;         /* User data for protecting object header */
     H5O_cont_msgs_t cont_msg_info; /* Continuation message info */
     unsigned        file_intent;   /* R/W intent on file */
-    H5O_t *         ret_value;     /* Return value */
+    H5O_t          *ret_value;     /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -2033,7 +2033,7 @@ done:
 herr_t
 H5O_touch(const H5O_loc_t *loc, hbool_t force, hid_t dxpl_id)
 {
-    H5O_t *  oh        = NULL;               /* Object header to modify */
+    H5O_t   *oh        = NULL;               /* Object header to modify */
     unsigned oh_flags  = H5AC__NO_FLAGS_SET; /* Flags for unprotecting object header */
     herr_t   ret_value = SUCCEED;            /* Return value */
 
@@ -2147,7 +2147,7 @@ done:
 herr_t
 H5O_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr)
 {
-    H5O_t *   oh = NULL;                      /* Object header information */
+    H5O_t    *oh = NULL;                      /* Object header information */
     H5O_loc_t loc;                            /* Object location for object to delete */
     unsigned  oh_flags  = H5AC__NO_FLAGS_SET; /* Flags for unprotecting object header */
     herr_t    ret_value = SUCCEED;            /* Return value */
@@ -2316,7 +2316,7 @@ H5O_obj_type_real(H5O_t *oh, H5O_type_t *obj_type)
 const H5O_obj_class_t *
 H5O_obj_class(const H5O_loc_t *loc, hid_t dxpl_id)
 {
-    H5O_t *                oh = NULL; /* Object header for location */
+    H5O_t                 *oh = NULL; /* Object header for location */
     const H5O_obj_class_t *ret_value; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -2642,7 +2642,7 @@ done:
 static herr_t
 H5O_get_hdr_info_real(const H5O_t *oh, H5O_hdr_info_t *hdr)
 {
-    const H5O_mesg_t * curr_msg;   /* Pointer to current message being operated on */
+    const H5O_mesg_t  *curr_msg;   /* Pointer to current message being operated on */
     const H5O_chunk_t *curr_chunk; /* Pointer to current message being operated on */
     unsigned           u;          /* Local index variable */
 
@@ -2720,7 +2720,7 @@ herr_t
 H5O_get_info(const H5O_loc_t *loc, hid_t dxpl_id, hbool_t want_ih_info, H5O_info_t *oinfo)
 {
     const H5O_obj_class_t *obj_class;           /* Class of object for header */
-    H5O_t *                oh        = NULL;    /* Object header */
+    H5O_t                 *oh        = NULL;    /* Object header */
     herr_t                 ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -2936,7 +2936,7 @@ void *
 H5O_obj_create(H5F_t *f, H5O_type_t obj_type, void *crt_info, H5G_loc_t *obj_loc, hid_t dxpl_id)
 {
     size_t u;                /* Local index variable */
-    void * ret_value = NULL; /* Return value */
+    void  *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 

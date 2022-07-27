@@ -95,7 +95,7 @@ typedef struct {
 typedef struct {
     /* downward */
     hid_t  dxpl_id; /* DXPL to use for operation */
-    char * comment; /* Object comment buffer */
+    char  *comment; /* Object comment buffer */
     size_t bufsize; /* Size of object comment buffer */
 
     /* upward */

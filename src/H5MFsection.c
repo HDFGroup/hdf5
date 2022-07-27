@@ -278,7 +278,7 @@ htri_t
 H5MF_sect_simple_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
 {
     const H5MF_free_section_t *sect  = (const H5MF_free_section_t *)_sect; /* File free section */
-    H5MF_sect_ud_t *           udata = (H5MF_sect_ud_t *)_udata;           /* User data for callback */
+    H5MF_sect_ud_t            *udata = (H5MF_sect_ud_t *)_udata;           /* User data for callback */
     haddr_t                    eoa;              /* End of address space in the file */
     haddr_t                    end;              /* End of section to extend */
     htri_t                     ret_value = FAIL; /* Return value */
@@ -381,7 +381,7 @@ herr_t
 H5MF_sect_simple_shrink(H5FS_section_info_t **_sect, void *_udata)
 {
     H5MF_free_section_t **sect      = (H5MF_free_section_t **)_sect; /* File free section */
-    H5MF_sect_ud_t *      udata     = (H5MF_sect_ud_t *)_udata;      /* User data for callback */
+    H5MF_sect_ud_t       *udata     = (H5MF_sect_ud_t *)_udata;      /* User data for callback */
     herr_t                ret_value = SUCCEED;                       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT

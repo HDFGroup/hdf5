@@ -604,7 +604,7 @@ H5S_hyper_iter_has_next_block(const H5S_sel_iter_t *iter)
     /* Check for a single "regular" hyperslab */
     if (iter->u.hyp.diminfo_valid) {
         const H5S_hyper_dim_t *tdiminfo; /* Temporary pointer to diminfo information */
-        const hsize_t *        toff;     /* Temporary offset in selection */
+        const hsize_t         *toff;     /* Temporary offset in selection */
 
         /* Check if the offset of the iterator is at the last location in all dimensions */
         tdiminfo = iter->u.hyp.diminfo;
@@ -745,9 +745,9 @@ H5S_hyper_iter_next(H5S_sel_iter_t *iter, size_t nelem)
     } /* end if */
     /* Must be an irregular hyperslab selection */
     else {
-        H5S_hyper_span_t * curr_span = NULL; /* Current hyperslab span node */
+        H5S_hyper_span_t  *curr_span = NULL; /* Current hyperslab span node */
         H5S_hyper_span_t **ispan;            /* Iterator's hyperslab span nodes */
-        hsize_t *          abs_arr;          /* Absolute hyperslab span position */
+        hsize_t           *abs_arr;          /* Absolute hyperslab span position */
         int                curr_dim;         /* Temporary rank holder */
 
         /* Set the rank of the fastest changing dimension */
@@ -946,9 +946,9 @@ H5S_hyper_iter_next_block(H5S_sel_iter_t *iter)
     } /* end if */
     /* Must be an irregular hyperslab selection */
     else {
-        H5S_hyper_span_t * curr_span = NULL; /* Current hyperslab span node */
+        H5S_hyper_span_t  *curr_span = NULL; /* Current hyperslab span node */
         H5S_hyper_span_t **ispan;            /* Iterator's hyperslab span nodes */
-        hsize_t *          abs_arr;          /* Absolute hyperslab span position */
+        hsize_t           *abs_arr;          /* Absolute hyperslab span position */
         int                curr_dim;         /* Temporary rank holder */
 
         /* Set the rank of the fastest changing dimension */
@@ -1277,9 +1277,9 @@ H5S_hyper_span_scratch(H5S_hyper_span_info_t *spans, void *scr_value)
 static H5S_hyper_span_info_t *
 H5S_hyper_copy_span_helper(H5S_hyper_span_info_t *spans)
 {
-    H5S_hyper_span_t *     span;      /* Hyperslab span */
-    H5S_hyper_span_t *     new_span;  /* Temporary hyperslab span */
-    H5S_hyper_span_t *     prev_span; /* Previous hyperslab span */
+    H5S_hyper_span_t      *span;      /* Hyperslab span */
+    H5S_hyper_span_t      *new_span;  /* Temporary hyperslab span */
+    H5S_hyper_span_t      *prev_span; /* Previous hyperslab span */
     H5S_hyper_span_info_t *new_down;  /* New down span tree */
     H5S_hyper_span_info_t *ret_value;
 
@@ -1605,7 +1605,7 @@ done:
 static herr_t
 H5S_hyper_copy(H5S_t *dst, const H5S_t *src, hbool_t share_selection)
 {
-    H5S_hyper_sel_t *      dst_hslab;           /* Pointer to destination hyperslab info */
+    H5S_hyper_sel_t       *dst_hslab;           /* Pointer to destination hyperslab info */
     const H5S_hyper_sel_t *src_hslab;           /* Pointer to source hyperslab info */
     herr_t                 ret_value = SUCCEED; /* return value */
 
@@ -1887,7 +1887,7 @@ H5S_get_select_hyper_nblocks(H5S_t *space)
 hssize_t
 H5Sget_select_hyper_nblocks(hid_t spaceid)
 {
-    H5S_t *  space;     /* Dataspace to modify selection of */
+    H5S_t   *space;     /* Dataspace to modify selection of */
     hssize_t ret_value; /* return value */
 
     FUNC_ENTER_API(FAIL)
@@ -2065,7 +2065,7 @@ H5S_hyper_serialize(const H5S_t *space, uint8_t *buf)
     hsize_t                bounds_start[H5S_MAX_RANK];  /* Selection bounds */
     hsize_t                bounds_end[H5S_MAX_RANK];    /* Selection bounds */
     hsize_t                temp_off;                    /* Offset in a given dimension */
-    uint8_t *              lenp;                        /* pointer to length location for later storage */
+    uint8_t               *lenp;                        /* pointer to length location for later storage */
     uint32_t               len = 0;                     /* number of bytes used */
     hsize_t                block_count;                 /* block counter for regular hyperslabs */
     unsigned               fast_dim;            /* Rank of the fastest changing dimension for the dataspace */
@@ -2794,7 +2794,7 @@ static herr_t
 H5S_hyper_offset(const H5S_t *space, hsize_t *offset)
 {
     const hssize_t *sel_offset;          /* Pointer to the selection's offset */
-    const hsize_t * dim_size;            /* Pointer to a dataspace's extent */
+    const hsize_t  *dim_size;            /* Pointer to a dataspace's extent */
     hsize_t         accum;               /* Accumulator for dimension sizes */
     unsigned        rank;                /* Dataspace rank */
     int             i;                   /* index variable */
@@ -2965,7 +2965,7 @@ H5S_hyper_is_contiguous(const H5S_t *space)
     } /* end if */
     else {
         H5S_hyper_span_info_t *spans; /* Hyperslab span info node */
-        H5S_hyper_span_t *     span;  /* Hyperslab span node */
+        H5S_hyper_span_t      *span;  /* Hyperslab span node */
 
         /*
          * For a hyperslab to be contiguous, it must have only one block and
@@ -3089,7 +3089,7 @@ static htri_t
 H5S_hyper_is_single(const H5S_t *space)
 {
     H5S_hyper_span_info_t *spans;            /* Hyperslab span info node */
-    H5S_hyper_span_t *     span;             /* Hyperslab span node */
+    H5S_hyper_span_t      *span;             /* Hyperslab span node */
     unsigned               u;                /* index variable */
     htri_t                 ret_value = TRUE; /* return value */
 
@@ -3282,9 +3282,9 @@ H5S_hyper_recover_span(unsigned *recover, H5S_hyper_span_t **curr_span, H5S_hype
 static H5S_hyper_span_t *
 H5S_hyper_coord_to_span(unsigned rank, hsize_t *coords)
 {
-    H5S_hyper_span_t *     new_span;         /* Pointer to new span tree for coordinate */
+    H5S_hyper_span_t      *new_span;         /* Pointer to new span tree for coordinate */
     H5S_hyper_span_info_t *down      = NULL; /* Pointer to new span tree for next level down */
-    H5S_hyper_span_t *     ret_value = NULL; /* Return value */
+    H5S_hyper_span_t      *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -3349,9 +3349,9 @@ H5S_hyper_add_span_element_helper(H5S_hyper_span_info_t *span_tree, unsigned ran
 {
     H5S_hyper_span_info_t *tspan_info;          /* Temporary pointer to span info */
     H5S_hyper_span_info_t *prev_span_info;      /* Pointer to span info for level above current position */
-    H5S_hyper_span_t *     tmp_span;            /* Temporary pointer to a span */
-    H5S_hyper_span_t *     tmp2_span;           /* Another temporary pointer to a span */
-    H5S_hyper_span_t *     new_span;            /* New span created for element */
+    H5S_hyper_span_t      *tmp_span;            /* Temporary pointer to a span */
+    H5S_hyper_span_t      *tmp2_span;           /* Another temporary pointer to a span */
+    H5S_hyper_span_t      *new_span;            /* New span created for element */
     herr_t                 ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -4200,7 +4200,7 @@ H5S_hyper_project_simple_higher(const H5S_t *base_space, H5S_t *new_space)
     curr_dim                                   = 0;
     while (curr_dim < (new_space->extent.rank - base_space->extent.rank)) {
         H5S_hyper_span_info_t *new_span_info; /* Pointer to list of spans */
-        H5S_hyper_span_t *     new_span;      /* Temporary hyperslab span */
+        H5S_hyper_span_t      *new_span;      /* Temporary hyperslab span */
 
         /* Allocate a new span_info node */
         if (NULL == (new_span_info = H5FL_MALLOC(H5S_hyper_span_info_t))) {
@@ -4777,7 +4777,7 @@ H5S_hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_sp
     H5S_hyper_span_info_t
         *down_a_and_b; /* Temporary pointer to a_and_b span tree of down spans for overlapping nodes */
     H5S_hyper_span_info_t
-        *    down_b_not_a; /* Temporary pointer to b_and_a span tree of down spans for overlapping nodes */
+            *down_b_not_a; /* Temporary pointer to b_and_a span tree of down spans for overlapping nodes */
     unsigned recover_a, recover_b; /* Flags to indicate when to recover temporary spans */
     herr_t   ret_value = SUCCEED;  /* Return value */
 
@@ -5305,10 +5305,10 @@ H5S_hyper_merge_spans_helper(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info
 {
     H5S_hyper_span_info_t *merged_spans = NULL;  /* Pointer to the merged span tree */
     H5S_hyper_span_info_t *tmp_spans;            /* Pointer to temporary new span tree */
-    H5S_hyper_span_t *     tmp_span;             /* Pointer to temporary new span */
-    H5S_hyper_span_t *     span_a;               /* Pointer to current span 'a' working on */
-    H5S_hyper_span_t *     span_b;               /* Pointer to current span 'b' working on */
-    H5S_hyper_span_t *     prev_span_merge;      /* Pointer to previous merged span */
+    H5S_hyper_span_t      *tmp_span;             /* Pointer to temporary new span */
+    H5S_hyper_span_t      *span_a;               /* Pointer to current span 'a' working on */
+    H5S_hyper_span_t      *span_b;               /* Pointer to current span 'b' working on */
+    H5S_hyper_span_t      *prev_span_merge;      /* Pointer to previous merged span */
     unsigned               recover_a, recover_b; /* Flags to indicate when to recover temporary spans */
     H5S_hyper_span_info_t *ret_value;
 
@@ -5754,8 +5754,8 @@ H5S_hyper_make_spans(unsigned rank, const hsize_t *start, const hsize_t *stride,
                      const hsize_t *block)
 {
     H5S_hyper_span_info_t *down = NULL; /* Pointer to spans in next dimension down */
-    H5S_hyper_span_t *     last_span;   /* Current position in hyperslab span list */
-    H5S_hyper_span_t *     head = NULL; /* Head of new hyperslab span list */
+    H5S_hyper_span_t      *last_span;   /* Current position in hyperslab span list */
+    H5S_hyper_span_t      *head = NULL; /* Head of new hyperslab span list */
     hsize_t                stride_iter; /* Iterator over the stride values */
     int                    i;           /* Counters */
     unsigned               u;           /* Counters */
@@ -6654,7 +6654,7 @@ herr_t
 H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op, const hsize_t start[], const hsize_t stride[],
                     const hsize_t count[], const hsize_t block[])
 {
-    H5S_t *  space;               /* Dataspace to modify selection of */
+    H5S_t   *space;               /* Dataspace to modify selection of */
     unsigned u;                   /* Local index variable */
     herr_t   ret_value = SUCCEED; /* Return value */
 
@@ -7362,9 +7362,9 @@ done:
 static H5S_t *
 H5S_combine_select(H5S_t *space1, H5S_seloper_t op, H5S_t *space2)
 {
-    H5S_t * new_space   = NULL;  /* New dataspace generated */
+    H5S_t  *new_space   = NULL;  /* New dataspace generated */
     hbool_t span2_owned = FALSE; /* Flag to indicate that span2 was used in H5S_operate_hyperslab() */
-    H5S_t * ret_value;           /* return value */
+    H5S_t  *ret_value;           /* return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -7626,14 +7626,14 @@ static herr_t
 H5S_hyper_get_seq_list_gen(const H5S_t *space, H5S_sel_iter_t *iter, size_t maxseq, size_t maxelem,
                            size_t *nseq, size_t *nelem, hsize_t *off, size_t *len)
 {
-    H5S_hyper_span_t * curr_span;              /* Current hyperslab span node */
+    H5S_hyper_span_t  *curr_span;              /* Current hyperslab span node */
     H5S_hyper_span_t **ispan;                  /* Iterator's hyperslab span nodes */
     hsize_t            slab[H5O_LAYOUT_NDIMS]; /* Cumulative size of each dimension in bytes */
     hsize_t            acc;                    /* Accumulator for computing cumulative sizes */
     hsize_t            loc_off;                /* Element offset in the dataspace */
     hsize_t            last_span_end = 0;      /* The offset of the end of the last span */
-    hsize_t *          abs_arr;                /* Absolute hyperslab span position */
-    const hssize_t *   off_arr;                /* Offset within the dataspace extent */
+    hsize_t           *abs_arr;                /* Absolute hyperslab span position */
+    const hssize_t    *off_arr;                /* Offset within the dataspace extent */
     size_t             span_size = 0;          /* Number of bytes in current span to actually process */
     size_t             io_left;                /* Number of elements left to process */
     size_t             io_bytes_left;          /* Number of bytes left to process */
@@ -8048,9 +8048,9 @@ static herr_t
 H5S_hyper_get_seq_list_opt(const H5S_t *space, H5S_sel_iter_t *iter, size_t maxseq, size_t maxelem,
                            size_t *nseq, size_t *nelem, hsize_t *off, size_t *len)
 {
-    hsize_t *              mem_size;                    /* Size of the source buffer */
+    hsize_t               *mem_size;                    /* Size of the source buffer */
     hsize_t                slab[H5O_LAYOUT_NDIMS];      /* Hyperslab size */
-    const hssize_t *       sel_off;                     /* Selection offset in dataspace */
+    const hssize_t        *sel_off;                     /* Selection offset in dataspace */
     hsize_t                offset[H5O_LAYOUT_NDIMS];    /* Coordinate offset in dataspace */
     hsize_t                tmp_count[H5O_LAYOUT_NDIMS]; /* Temporary block count */
     hsize_t                tmp_block[H5O_LAYOUT_NDIMS]; /* Temporary block offset */
@@ -8494,8 +8494,8 @@ H5S_hyper_get_seq_list_single(const H5S_t *space, H5S_sel_iter_t *iter, size_t m
                               size_t *nseq, size_t *nelem, hsize_t *off, size_t *len)
 {
     const H5S_hyper_dim_t *tdiminfo;                      /* Temporary pointer to diminfo information */
-    const hssize_t *       sel_off;                       /* Selection offset in dataspace */
-    hsize_t *              mem_size;                      /* Size of the source buffer */
+    const hssize_t        *sel_off;                       /* Selection offset in dataspace */
+    hsize_t               *mem_size;                      /* Size of the source buffer */
     hsize_t                base_offset[H5O_LAYOUT_NDIMS]; /* Base coordinate offset in dataspace */
     hsize_t                offset[H5O_LAYOUT_NDIMS];      /* Coordinate offset in dataspace */
     hsize_t                slab[H5O_LAYOUT_NDIMS];        /* Hyperslab size */
@@ -8795,8 +8795,8 @@ H5S_hyper_get_seq_list(const H5S_t *space, unsigned H5_ATTR_UNUSED flags, H5S_se
     /* Check for the special case of just one H5Sselect_hyperslab call made */
     if (space->select.sel_info.hslab->diminfo_valid) {
         const H5S_hyper_dim_t *tdiminfo;     /* Temporary pointer to diminfo information */
-        const hssize_t *       sel_off;      /* Selection offset in dataspace */
-        hsize_t *              mem_size;     /* Size of the source buffer */
+        const hssize_t        *sel_off;      /* Selection offset in dataspace */
+        hsize_t               *mem_size;     /* Size of the source buffer */
         unsigned               ndims;        /* Number of dimensions of dataset */
         unsigned               fast_dim;     /* Rank of the fastest changing dimension for the dataspace */
         hbool_t                single_block; /* Whether the selection is a single block */

@@ -26,8 +26,8 @@ basic_id_test(void)
 {
     H5I_type_t myType  = H5I_BADID;
     hid_t      arrayID = H5I_INVALID_HID;
-    void *     testObj = NULL;
-    void *     testPtr = NULL;
+    void      *testObj = NULL;
+    void      *testPtr = NULL;
     char       nameString[10];
     hid_t      testID;
     ssize_t    testSize = -1;
@@ -244,10 +244,10 @@ test_search_func(void H5_ATTR_UNUSED *ptr1, void H5_ATTR_UNUSED *ptr2)
 static int
 id_predefined_test(void)
 {
-    void * testObj;
+    void  *testObj;
     hid_t  testID;
     hid_t  typeID = H5I_INVALID_HID;
-    void * testPtr;
+    void  *testPtr;
     herr_t testErr;
 
     testObj = HDmalloc(sizeof(int));
@@ -574,9 +574,9 @@ static int
 test_id_wrap(void)
 {
     H5I_type_t testType; /* ID class for testing */
-    hid_t *    id_array; /* Array of IDs allocated */
+    hid_t     *id_array; /* Array of IDs allocated */
     hid_t      test_id;  /* Test ID */
-    void *     obj;      /* Object pointer returned for ID */
+    void      *obj;      /* Object pointer returned for ID */
     unsigned   u;        /* Local index variable */
     hsize_t    nids;     /* Number of IDs registered for type */
     herr_t     status;   /* Status from routine */

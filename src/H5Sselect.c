@@ -277,7 +277,7 @@ H5S_select_serialize(const H5S_t *space, uint8_t *buf)
 hssize_t
 H5Sget_select_npoints(hid_t spaceid)
 {
-    H5S_t *  space;     /* Dataspace to modify selection of */
+    H5S_t   *space;     /* Dataspace to modify selection of */
     hssize_t ret_value; /* return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1321,7 +1321,7 @@ done:
 H5S_sel_type
 H5Sget_select_type(hid_t space_id)
 {
-    H5S_t *      space;     /* dataspace to modify */
+    H5S_t       *space;     /* dataspace to modify */
     H5S_sel_type ret_value; /* Return value */
 
     FUNC_ENTER_API(H5S_SEL_ERROR)
@@ -1732,7 +1732,7 @@ herr_t
 H5S_select_construct_projection(const H5S_t *base_space, H5S_t **new_space_ptr, unsigned new_space_rank,
                                 const void *buf, void const **adj_buf_ptr, hsize_t element_size)
 {
-    H5S_t *  new_space = NULL;                         /* New dataspace constructed */
+    H5S_t   *new_space = NULL;                         /* New dataspace constructed */
     hsize_t  base_space_dims[H5S_MAX_RANK];            /* Current dimensions of base dataspace */
     hsize_t  base_space_maxdims[H5S_MAX_RANK];         /* Maximum dimensions of base dataspace */
     int      sbase_space_rank;                         /* Signed # of dimensions of base dataspace */

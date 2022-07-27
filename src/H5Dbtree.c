@@ -80,7 +80,7 @@ typedef struct H5D_btree_key_t {
 typedef struct H5D_btree_it_ud_t {
     H5D_chunk_common_ud_t common; /* Common info for B-tree user data (must be first) */
     H5D_chunk_cb_func_t   cb;     /* Chunk callback routine */
-    void *                udata;  /* User data for chunk callback routine */
+    void                 *udata;  /* User data for chunk callback routine */
 } H5D_btree_it_ud_t;
 
 /* B-tree callback info for debugging */
@@ -100,7 +100,7 @@ static int H5D__btree_idx_iterate_cb(H5F_t *f, hid_t dxpl_id, const void *left_k
                                      const void *right_key, void *_udata);
 
 /* B-tree callbacks */
-static H5RC_t *  H5D__btree_get_shared(const H5F_t *f, const void *_udata);
+static H5RC_t   *H5D__btree_get_shared(const H5F_t *f, const void *_udata);
 static herr_t    H5D__btree_new_node(H5F_t *f, hid_t dxpl_id, H5B_ins_t, void *_lt_key, void *_udata,
                                      void *_rt_key, haddr_t *addr_p /*out*/);
 static int       H5D__btree_cmp2(void *_lt_key, void *_udata, void *_rt_key);
@@ -229,7 +229,7 @@ H5D__btree_new_node(H5F_t *f, hid_t dxpl_id, H5B_ins_t op, void *_lt_key, void *
 {
     H5D_btree_key_t *lt_key = (H5D_btree_key_t *)_lt_key;
     H5D_btree_key_t *rt_key = (H5D_btree_key_t *)_rt_key;
-    H5D_chunk_ud_t * udata  = (H5D_chunk_ud_t *)_udata;
+    H5D_chunk_ud_t  *udata  = (H5D_chunk_ud_t *)_udata;
     unsigned         u;
     herr_t           ret_value = SUCCEED; /* Return value */
 
@@ -298,8 +298,8 @@ done:
 static int
 H5D__btree_cmp2(void *_lt_key, void *_udata, void *_rt_key)
 {
-    H5D_btree_key_t *      lt_key    = (H5D_btree_key_t *)_lt_key;
-    H5D_btree_key_t *      rt_key    = (H5D_btree_key_t *)_rt_key;
+    H5D_btree_key_t       *lt_key    = (H5D_btree_key_t *)_lt_key;
+    H5D_btree_key_t       *rt_key    = (H5D_btree_key_t *)_rt_key;
     H5D_chunk_common_ud_t *udata     = (H5D_chunk_common_ud_t *)_udata;
     int                    ret_value = -1; /* Return value */
 
@@ -346,8 +346,8 @@ H5D__btree_cmp2(void *_lt_key, void *_udata, void *_rt_key)
 static int
 H5D__btree_cmp3(void *_lt_key, void *_udata, void *_rt_key)
 {
-    H5D_btree_key_t *      lt_key    = (H5D_btree_key_t *)_lt_key;
-    H5D_btree_key_t *      rt_key    = (H5D_btree_key_t *)_rt_key;
+    H5D_btree_key_t       *lt_key    = (H5D_btree_key_t *)_lt_key;
+    H5D_btree_key_t       *rt_key    = (H5D_btree_key_t *)_rt_key;
     H5D_chunk_common_ud_t *udata     = (H5D_chunk_common_ud_t *)_udata;
     int                    ret_value = 0;
 
@@ -410,7 +410,7 @@ static htri_t
 H5D__btree_found(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr, const void *_lt_key,
                  void *_udata)
 {
-    H5D_chunk_ud_t *       udata  = (H5D_chunk_ud_t *)_udata;
+    H5D_chunk_ud_t        *udata  = (H5D_chunk_ud_t *)_udata;
     const H5D_btree_key_t *lt_key = (const H5D_btree_key_t *)_lt_key;
     unsigned               u;
     htri_t                 ret_value = TRUE; /* Return value */
@@ -474,7 +474,7 @@ H5D__btree_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key, hbool_t 
     H5D_btree_key_t *lt_key = (H5D_btree_key_t *)_lt_key;
     H5D_btree_key_t *md_key = (H5D_btree_key_t *)_md_key;
     H5D_btree_key_t *rt_key = (H5D_btree_key_t *)_rt_key;
-    H5D_chunk_ud_t * udata  = (H5D_chunk_ud_t *)_udata;
+    H5D_chunk_ud_t  *udata  = (H5D_chunk_ud_t *)_udata;
     int              cmp;
     unsigned         u;
     H5B_ins_t        ret_value = H5B_INS_ERROR; /* Return value */
@@ -960,7 +960,7 @@ static int
 H5D__btree_idx_iterate_cb(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const void *_lt_key,
                           haddr_t addr, const void H5_ATTR_UNUSED *_rt_key, void *_udata)
 {
-    H5D_btree_it_ud_t *    udata  = (H5D_btree_it_ud_t *)_udata;      /* User data */
+    H5D_btree_it_ud_t     *udata  = (H5D_btree_it_ud_t *)_udata;      /* User data */
     const H5D_btree_key_t *lt_key = (const H5D_btree_key_t *)_lt_key; /* B-tree key for chunk */
     H5D_chunk_rec_t        chunk_rec;                                 /* Generic chunk record for callback */
     int                    ret_value = -1;                            /* Return value */

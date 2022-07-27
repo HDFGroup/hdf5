@@ -81,13 +81,13 @@ H5D__select_io(const H5D_io_info_t *io_info, size_t elmt_size, size_t nelmts, co
     H5S_sel_iter_t file_iter;                     /* File selection iteration info */
     hbool_t        file_iter_init = 0;            /* File selection iteration info has been initialized */
     hsize_t        _mem_off[H5D_IO_VECTOR_SIZE];  /* Array to store sequence offsets in memory */
-    hsize_t *      mem_off = NULL;                /* Pointer to sequence offsets in memory */
+    hsize_t       *mem_off = NULL;                /* Pointer to sequence offsets in memory */
     hsize_t        _file_off[H5D_IO_VECTOR_SIZE]; /* Array to store sequence offsets in the file */
-    hsize_t *      file_off = NULL;               /* Pointer to sequence offsets in the file */
+    hsize_t       *file_off = NULL;               /* Pointer to sequence offsets in the file */
     size_t         _mem_len[H5D_IO_VECTOR_SIZE];  /* Array to store sequence lengths in memory */
-    size_t *       mem_len = NULL;                /* Pointer to sequence lengths in memory */
+    size_t        *mem_len = NULL;                /* Pointer to sequence lengths in memory */
     size_t         _file_len[H5D_IO_VECTOR_SIZE]; /* Array to store sequence lengths in the file */
-    size_t *       file_len = NULL;               /* Pointer to sequence lengths in the file */
+    size_t        *file_len = NULL;               /* Pointer to sequence lengths in the file */
     size_t         curr_mem_seq;                  /* Current memory sequence to operate on */
     size_t         curr_file_seq;                 /* Current file sequence to operate on */
     size_t         mem_nseq;                      /* Number of sequences generated in the file */

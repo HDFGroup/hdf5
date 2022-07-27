@@ -118,8 +118,8 @@ typedef struct H5D_t H5D_t;
 /* Typedef for cached dataset transfer property list information */
 typedef struct H5D_dxpl_cache_t {
     size_t    max_temp_buf;         /* Maximum temporary buffer size (H5D_XFER_MAX_TEMP_BUF_NAME) */
-    void *    tconv_buf;            /* Temporary conversion buffer (H5D_XFER_TCONV_BUF_NAME) */
-    void *    bkgr_buf;             /* Background conversion buffer (H5D_XFER_BKGR_BUF_NAME) */
+    void     *tconv_buf;            /* Temporary conversion buffer (H5D_XFER_TCONV_BUF_NAME) */
+    void     *bkgr_buf;             /* Background conversion buffer (H5D_XFER_BKGR_BUF_NAME) */
     H5T_bkg_t bkgr_buf_type;        /* Background buffer type (H5D_XFER_BKGR_BUF_NAME) */
     H5Z_EDC_t err_detect;           /* Error detection info (H5D_XFER_EDC_NAME) */
     double    btree_split_ratio[3]; /* B-tree split ratios (H5D_XFER_BTREE_SPLIT_RATIO_NAME) */
@@ -143,8 +143,8 @@ typedef struct H5D_dcpl_cache_t {
 /* Callback information for copying datasets */
 typedef struct H5D_copy_file_ud_t {
     H5O_copy_file_ud_common_t common;           /* Shared information (must be first) */
-    struct H5S_extent_t *     src_space_extent; /* Copy of dataspace extent for dataset */
-    H5T_t *                   src_dtype;        /* Copy of datatype for dataset */
+    struct H5S_extent_t      *src_space_extent; /* Copy of dataspace extent for dataset */
+    H5T_t                    *src_dtype;        /* Copy of datatype for dataset */
 } H5D_copy_file_ud_t;
 
 /*****************************/
@@ -155,17 +155,17 @@ typedef struct H5D_copy_file_ud_t {
 /* Library Private Prototypes */
 /******************************/
 
-H5_DLL herr_t H5D_init(void);
-H5_DLL H5D_t *H5D_open(const H5G_loc_t *loc, hid_t dapl_id, hid_t dxpl_id);
-H5_DLL herr_t H5D_close(H5D_t *dataset);
-H5_DLL H5O_loc_t *H5D_oloc(H5D_t *dataset);
+H5_DLL herr_t      H5D_init(void);
+H5_DLL H5D_t      *H5D_open(const H5G_loc_t *loc, hid_t dapl_id, hid_t dxpl_id);
+H5_DLL herr_t      H5D_close(H5D_t *dataset);
+H5_DLL H5O_loc_t  *H5D_oloc(H5D_t *dataset);
 H5_DLL H5G_name_t *H5D_nameof(H5D_t *dataset);
-H5_DLL H5T_t *H5D_typeof(const H5D_t *dset);
-H5_DLL herr_t H5D_flush(const H5F_t *f, hid_t dxpl_id);
-H5_DLL hid_t  H5D_get_create_plist(H5D_t *dset);
-H5_DLL hid_t  H5D_get_access_plist(H5D_t *dset);
-H5_DLL hid_t  H5D_get_space(H5D_t *dset);
-H5_DLL hid_t  H5D_get_type(H5D_t *dset);
+H5_DLL H5T_t      *H5D_typeof(const H5D_t *dset);
+H5_DLL herr_t      H5D_flush(const H5F_t *f, hid_t dxpl_id);
+H5_DLL hid_t       H5D_get_create_plist(H5D_t *dset);
+H5_DLL hid_t       H5D_get_access_plist(H5D_t *dset);
+H5_DLL hid_t       H5D_get_space(H5D_t *dset);
+H5_DLL hid_t       H5D_get_type(H5D_t *dset);
 
 /* Functions that operate on vlen data */
 H5_DLL herr_t H5D_vlen_reclaim(hid_t type_id, H5S_t *space, hid_t plist_id, void *buf);

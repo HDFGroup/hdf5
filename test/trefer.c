@@ -74,7 +74,7 @@ test_reference_params(void)
     hobj_ref_t *wbuf,                   /* buffer to write to disk */
         *rbuf,                          /* buffer read from disk */
         *tbuf;                          /* temp. buffer read from disk */
-    unsigned *  tu32;                   /* Temporary pointer to uint32 data */
+    unsigned   *tu32;                   /* Temporary pointer to uint32 data */
     int         i;                      /* counting variables */
     const char *write_comment = "Foo!"; /* Comments for group */
     hid_t       ret_id;                 /* Generic hid_t return value    */
@@ -245,7 +245,7 @@ test_reference_obj(void)
         *rbuf,                                    /* buffer read from disk */
         *tbuf;                                    /* temp. buffer read from disk */
     hobj_ref_t  nvrbuf[3] = {0, 101, 1000000000}; /* buffer with non-valid refs */
-    unsigned *  tu32;                             /* Temporary pointer to uint32 data */
+    unsigned   *tu32;                             /* Temporary pointer to uint32 data */
     int         i, j;                             /* counting variables */
     const char *write_comment = "Foo!";           /* Comments for group */
     char        read_comment[10];
@@ -491,15 +491,15 @@ test_reference_region(void)
     hsize_t          count[SPACE2_RANK];                  /* Element count of hyperslab */
     hsize_t          block[SPACE2_RANK];                  /* Block size of hyperslab */
     hsize_t          coord1[POINT1_NPOINTS][SPACE2_RANK]; /* Coordinates for point selection */
-    hsize_t *        coords;                              /* Coordinate buffer */
+    hsize_t         *coords;                              /* Coordinate buffer */
     hsize_t          low[SPACE2_RANK];                    /* Selection bounds */
     hsize_t          high[SPACE2_RANK];                   /* Selection bounds */
     hdset_reg_ref_t *wbuf,                                /* buffer to write to disk */
         *rbuf;                                            /* buffer read from disk */
     hdset_reg_ref_t nvrbuf[3] = {{0}, {101}, {255}};      /* buffer with non-valid refs */
-    uint8_t *       dwbuf,                                /* Buffer for writing numeric data to disk */
+    uint8_t        *dwbuf,                                /* Buffer for writing numeric data to disk */
         *drbuf;                                           /* Buffer for reading numeric data from disk */
-    uint8_t *       tu8;                                  /* Temporary pointer to uint8 data */
+    uint8_t        *tu8;                                  /* Temporary pointer to uint8 data */
     H5O_type_t      obj_type;                             /* Type of object */
     int             i, j;                                 /* counting variables */
     hssize_t        hssize_ret;                           /* hssize_t return value */
@@ -862,14 +862,14 @@ test_reference_region_1D(void)
     hsize_t          count[SPACE3_RANK];                  /* Element count of hyperslab */
     hsize_t          block[SPACE3_RANK];                  /* Block size of hyperslab */
     hsize_t          coord1[POINT1_NPOINTS][SPACE3_RANK]; /* Coordinates for point selection */
-    hsize_t *        coords;                              /* Coordinate buffer */
+    hsize_t         *coords;                              /* Coordinate buffer */
     hsize_t          low[SPACE3_RANK];                    /* Selection bounds */
     hsize_t          high[SPACE3_RANK];                   /* Selection bounds */
     hdset_reg_ref_t *wbuf,                                /* buffer to write to disk */
         *rbuf;                                            /* buffer read from disk */
     uint8_t *dwbuf,                                       /* Buffer for writing numeric data to disk */
         *drbuf;                                           /* Buffer for reading numeric data from disk */
-    uint8_t *  tu8;                                       /* Temporary pointer to uint8 data */
+    uint8_t   *tu8;                                       /* Temporary pointer to uint8 data */
     H5O_type_t obj_type;                                  /* Object type */
     int        i;                                         /* counting variables */
     herr_t     ret;                                       /* Generic return value */
@@ -1229,7 +1229,7 @@ static herr_t
 test_deref_iter_op(hid_t H5_ATTR_UNUSED group, const char *name, const H5L_info_t H5_ATTR_UNUSED *info,
                    void *op_data)
 {
-    int *  count = (int *)op_data; /* Pointer to name counter */
+    int   *count = (int *)op_data; /* Pointer to name counter */
     herr_t ret_value;
 
     /* Simple check for correct names */

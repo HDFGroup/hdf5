@@ -60,7 +60,7 @@ main(void)
     hid_t       file_id;
     hsize_t     chunk_size = 10;
     int         compress   = 0;
-    int *       fill_data  = NULL;
+    int        *fill_data  = NULL;
     hsize_t     nfields_out;
     hsize_t     nrecords_out;
     int         i;

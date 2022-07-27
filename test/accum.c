@@ -1917,8 +1917,8 @@ test_random_write(const H5F_io_info_t *fio_info)
 {
     uint8_t *wbuf, *rbuf; /* Buffers for reading & writing */
     unsigned seed = 0;    /* Random # seed */
-    size_t * off;         /* Offset of buffer segments to write */
-    size_t * len;         /* Size of buffer segments to write */
+    size_t  *off;         /* Offset of buffer segments to write */
+    size_t  *len;         /* Size of buffer segments to write */
     size_t   cur_off;     /* Current offset */
     size_t   nsegments;   /* Number of segments to write */
     size_t   swap;        /* Position to swap with */

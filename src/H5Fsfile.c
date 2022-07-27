@@ -24,7 +24,7 @@
 
 /* Struct for tracking "shared" file structs */
 typedef struct H5F_sfile_node_t {
-    H5F_file_t *             shared; /* Pointer to "shared" file struct */
+    H5F_file_t              *shared; /* Pointer to "shared" file struct */
     struct H5F_sfile_node_t *next;   /* Pointer to next node */
 } H5F_sfile_node_t;
 
@@ -136,7 +136,7 @@ H5F_file_t *
 H5F_sfile_search(H5FD_t *lf)
 {
     H5F_sfile_node_t *curr;             /* Current shared file node */
-    H5F_file_t *      ret_value = NULL; /* Return value */
+    H5F_file_t       *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

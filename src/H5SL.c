@@ -538,14 +538,14 @@
 
 /* Skip list node data structure */
 struct H5SL_node_t {
-    const void *         key;        /* Pointer to node's key */
-    void *               item;       /* Pointer to node's item */
+    const void          *key;        /* Pointer to node's key */
+    void                *item;       /* Pointer to node's item */
     size_t               level;      /* The level of this node */
     size_t               log_nalloc; /* log2(Number of slots allocated in forward) */
     uint32_t             hashval;    /* Hash value for key (only for strings, currently) */
     hbool_t              removed;    /* Whether the node is "removed" (actual removal deferred) */
     struct H5SL_node_t **forward;    /* Array of forward pointers from this node */
-    struct H5SL_node_t * backward;   /* Backward pointer from this node */
+    struct H5SL_node_t  *backward;   /* Backward pointer from this node */
 };
 
 /* Main skip list data structure */
@@ -924,9 +924,9 @@ done:
 H5SL_t *
 H5SL_create(H5SL_type_t type, H5SL_cmp_t cmp)
 {
-    H5SL_t *     new_slist = NULL; /* Pointer to new skip list object created */
+    H5SL_t      *new_slist = NULL; /* Pointer to new skip list object created */
     H5SL_node_t *header;           /* Pointer to skip list header node */
-    H5SL_t *     ret_value = NULL; /* Return value */
+    H5SL_t      *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -1128,7 +1128,7 @@ H5SL_remove(H5SL_t *slist, const void *key)
 {
     H5SL_node_t *x;                /* Current node to examine */
     uint32_t     hashval   = 0;    /* Hash value for key */
-    void *       ret_value = NULL; /* Return value */
+    void        *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1211,7 +1211,7 @@ done:
 void *
 H5SL_remove_first(H5SL_t *slist)
 {
-    void *       ret_value = NULL;                      /* Return value */
+    void        *ret_value = NULL;                      /* Return value */
     H5SL_node_t *head      = slist->header;             /* Skip list header */
     H5SL_node_t *tmp       = slist->header->forward[0]; /* Temporary node pointer */
     H5SL_node_t *next;                                  /* Next node to search for */
@@ -1318,7 +1318,7 @@ H5SL_search(H5SL_t *slist, const void *key)
 {
     H5SL_node_t *x;                /* Current node to examine */
     uint32_t     hashval   = 0;    /* Hash value for key */
-    void *       ret_value = NULL; /* Return value */
+    void        *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -1410,7 +1410,7 @@ H5SL_less(H5SL_t *slist, const void *key)
 {
     H5SL_node_t *x;                /* Current node to examine */
     uint32_t     hashval   = 0;    /* Hash value for key */
-    void *       ret_value = NULL; /* Return value */
+    void        *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -1518,7 +1518,7 @@ H5SL_greater(H5SL_t *slist, const void *key)
 {
     H5SL_node_t *x;                /* Current node to examine */
     uint32_t     hashval   = 0;    /* Hash value for key */
-    void *       ret_value = NULL; /* Return value */
+    void        *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

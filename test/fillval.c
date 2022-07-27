@@ -298,8 +298,8 @@ test_getset_vl(hid_t fapl)
     hid_t   fileid = (-1), spaceid = (-1), dtypeid = (-1), datasetid = (-1), plistid = (-1);
     char    fill_value[]      = "aaaa";
     char    orig_fill_value[] = "aaaa";
-    char *  f1                = fill_value;
-    char *  f2;
+    char   *f1                = fill_value;
+    char   *f2;
     char    filename[1024];
 
     TESTING("property lists, with variable-length datatype");
@@ -886,7 +886,7 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval, H5D_f
     int                i, j, *buf = NULL, odd;
     unsigned           u;
     comp_datatype      rd_c, fill_c, should_be_c;
-    comp_datatype *    buf_c = NULL;
+    comp_datatype     *buf_c = NULL;
     H5D_space_status_t allocation;
 
     if (datatype == H5T_INTEGER) {
@@ -1409,7 +1409,7 @@ error:
 static int
 test_extend_init_integer(void *_buf, size_t nelmts, const void *_val)
 {
-    int *      buf = (int *)_buf;       /* Buffer to initialize */
+    int       *buf = (int *)_buf;       /* Buffer to initialize */
     const int *val = (const int *)_val; /* Value to use */
 
     while (nelmts) {
@@ -1492,7 +1492,7 @@ test_extend_release_integer(void H5_ATTR_UNUSED *_elmt)
 static int
 test_extend_init_cmpd_vl(void *_buf, size_t nelmts, const void *_val)
 {
-    comp_vl_datatype *      buf = (comp_vl_datatype *)_buf;       /* Buffer to initialize */
+    comp_vl_datatype       *buf = (comp_vl_datatype *)_buf;       /* Buffer to initialize */
     const comp_vl_datatype *val = (const comp_vl_datatype *)_val; /* Value to use */
 
     while (nelmts) {
@@ -1604,12 +1604,12 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, hsize_t *ch_si
     int (*verify_rtn)(unsigned, const hsize_t *, const void *, const void *);
     int (*release_rtn)(void *);
     size_t           val_size; /* Size of element */
-    void *           val_rd, *odd_val;
-    const void *     init_val, *should_be, *even_val;
+    void            *val_rd, *odd_val;
+    const void      *init_val, *should_be, *even_val;
     int              val_rd_i, init_val_i = 9999;
     comp_vl_datatype init_val_c = {87, "baz", "mumble", 129};
     comp_vl_datatype val_rd_c;
-    void *           buf = NULL;
+    void            *buf = NULL;
     unsigned         odd;  /* Whether an odd or even coord. was read */
     unsigned         i, j; /* Local index variables */
 
@@ -2212,7 +2212,7 @@ test_compatible(void)
     hsize_t          dims[2], one[2] = {1, 1};
     hsize_t          hs_offset[2] = {3, 4};
     H5D_fill_value_t status;
-    const char *     testfile = H5_get_srcdir_filename(FILE_COMPATIBLE); /* Corrected test file name */
+    const char      *testfile = H5_get_srcdir_filename(FILE_COMPATIBLE); /* Corrected test file name */
 
     TESTING("contiguous dataset compatibility with v. 1.4");
 

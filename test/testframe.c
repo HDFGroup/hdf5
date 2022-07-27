@@ -645,7 +645,7 @@ SetTest(const char *testname, int action)
 void
 TestAlarmOn(void)
 {
-    char *        env_val   = HDgetenv("HDF5_ALARM_SECONDS"); /* Alarm environment */
+    char         *env_val   = HDgetenv("HDF5_ALARM_SECONDS"); /* Alarm environment */
     unsigned long alarm_sec = H5_ALARM_SEC;                   /* Number of seconds before alarm goes off */
 
     /* Get the alarm value from the environment variable, if set */

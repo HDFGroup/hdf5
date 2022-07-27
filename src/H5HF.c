@@ -135,10 +135,10 @@ H5HF_op_write(const void *obj, size_t obj_len, void *op_data)
 H5HF_t *
 H5HF_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam)
 {
-    H5HF_t *    fh  = NULL;       /* Pointer to new fractal heap */
+    H5HF_t     *fh  = NULL;       /* Pointer to new fractal heap */
     H5HF_hdr_t *hdr = NULL;       /* The fractal heap header information */
     haddr_t     fh_addr;          /* Heap header address */
-    H5HF_t *    ret_value = NULL; /* Return value */
+    H5HF_t     *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -201,9 +201,9 @@ done:
 H5HF_t *
 H5HF_open(H5F_t *f, hid_t dxpl_id, haddr_t fh_addr)
 {
-    H5HF_t *    fh        = NULL; /* Pointer to new fractal heap */
+    H5HF_t     *fh        = NULL; /* Pointer to new fractal heap */
     H5HF_hdr_t *hdr       = NULL; /* The fractal heap header information */
-    H5HF_t *    ret_value = NULL; /* Return value */
+    H5HF_t     *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 

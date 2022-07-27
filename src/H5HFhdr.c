@@ -517,8 +517,8 @@ H5HF_hdr_t *
 H5HF_hdr_protect(H5F_t *f, hid_t dxpl_id, haddr_t addr, H5AC_protect_t rw)
 {
     H5HF_hdr_cache_ud_t cache_udata;      /* User-data for callback */
-    H5HF_hdr_t *        hdr;              /* Fractal heap header */
-    H5HF_hdr_t *        ret_value = NULL; /* Return value */
+    H5HF_hdr_t         *hdr;              /* Fractal heap header */
+    H5HF_hdr_t         *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

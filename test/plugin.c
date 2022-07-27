@@ -83,7 +83,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl)
     const hsize_t size[2]      = {DSET_DIM1, DSET_DIM2}; /* Dataspace dimensions */
     const hsize_t hs_offset[2] = {FILTER_HS_OFFSET1, FILTER_HS_OFFSET2}; /* Hyperslab offset */
     const hsize_t hs_size[2]   = {FILTER_HS_SIZE1, FILTER_HS_SIZE2};     /* Hyperslab size */
-    void *        tconv_buf    = NULL;                                   /* Temporary conversion buffer */
+    void         *tconv_buf    = NULL;                                   /* Temporary conversion buffer */
     int           points[DSET_DIM1][DSET_DIM2], check[DSET_DIM1][DSET_DIM2];
     size_t        i, j; /* Local index variables */
     int           n = 0;
@@ -456,7 +456,7 @@ test_read_data(hid_t dataset, int *origin_data)
     herr_t        ret_value = -1;
     int           check[DSET_DIM1][DSET_DIM2];
     const hsize_t size[2] = {DSET_DIM1, DSET_DIM2}; /* Dataspace dimensions */
-    int *         data_p  = origin_data;
+    int          *data_p  = origin_data;
     size_t        i, j; /* Local index variables */
 
     /* Read the dataset back */

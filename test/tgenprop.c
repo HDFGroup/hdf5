@@ -71,7 +71,7 @@ test_genprop_basic_class(void)
     hid_t  cid1; /* Generic Property class ID */
     hid_t  cid2; /* Generic Property class ID */
     hid_t  cid3; /* Generic Property class ID */
-    char * name; /* Name of class */
+    char  *name; /* Name of class */
     herr_t ret;  /* Generic return value	*/
 
     /* Output message about test being performed */
@@ -1796,7 +1796,7 @@ test_genprop_path(void)
     hid_t  cid1; /* Generic Property class ID */
     hid_t  cid2; /* Generic Property class ID */
     hid_t  cid3; /* Generic Property class ID */
-    char * path; /* Class path */
+    char  *path; /* Class path */
     herr_t ret;  /* Generic return value	*/
 
     /* Output message about test being performed */
@@ -1869,7 +1869,7 @@ test_genprop_refcount(void)
 {
     hid_t  cid1; /* Generic Property class ID */
     hid_t  lid1; /* Generic Property class ID */
-    char * name; /* Name of class */
+    char  *name; /* Name of class */
     herr_t ret;  /* Generic return value	*/
 
     /* Output message about test being performed */

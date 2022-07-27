@@ -82,7 +82,7 @@
 herr_t
 H5FS_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int fwidth)
 {
-    H5FS_t *            fspace = NULL;       /* Free space header info */
+    H5FS_t             *fspace = NULL;       /* Free space header info */
     H5FS_hdr_cache_ud_t cache_udata;         /* User-data for cache callback */
     herr_t              ret_value = SUCCEED; /* Return value */
 
@@ -203,7 +203,7 @@ herr_t
 H5FS_sects_debug(H5F_t *f, hid_t dxpl_id, haddr_t H5_ATTR_UNUSED addr, FILE *stream, int indent, int fwidth,
                  haddr_t fs_addr, haddr_t client_addr)
 {
-    H5FS_t *            fspace = NULL;       /* Free space header info */
+    H5FS_t             *fspace = NULL;       /* Free space header info */
     H5FS_client_t       client;              /* The client of the free space */
     H5FS_hdr_cache_ud_t cache_udata;         /* User-data for cache callback */
     herr_t              ret_value = SUCCEED; /* Return value */

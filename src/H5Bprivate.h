@@ -93,8 +93,8 @@ typedef struct H5B_shared_t {
     size_t                    sizeof_keys;  /* Size of native (memory) key node  */
     size_t                    sizeof_addr;  /* Size of file address (in bytes)   */
     size_t                    sizeof_len;   /* Size of file lengths (in bytes)   */
-    uint8_t *                 page;         /* Disk page */
-    size_t *                  nkey;         /* Offsets of each native key in native key buffer */
+    uint8_t                  *page;         /* Disk page */
+    size_t                   *nkey;         /* Offsets of each native key in native key buffer */
 } H5B_shared_t;
 
 /*

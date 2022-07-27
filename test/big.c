@@ -347,9 +347,9 @@ writer(char *filename, hid_t fapl, fsizes_t testsize, int wrt_n)
     hsize_t hs_start[1];
     hsize_t hs_size[1];
     hid_t   file = -1, space1 = -1, space2 = -1, mem_space = -1, d1 = -1, d2 = -1;
-    int *   buf = (int *)HDmalloc(sizeof(int) * WRT_SIZE);
+    int    *buf = (int *)HDmalloc(sizeof(int) * WRT_SIZE);
     int     i, j;
-    FILE *  out = HDfopen(DNAME, "w");
+    FILE   *out = HDfopen(DNAME, "w");
     hid_t   dcpl;
 
     switch (testsize) {
@@ -493,12 +493,12 @@ error:
 static int
 reader(char *filename, hid_t fapl)
 {
-    FILE *  script = NULL;
+    FILE   *script = NULL;
     hid_t   file = -1, mspace = -1, fspace = -1, d2 = -1;
     char    ln[128], *s;
     hsize_t hs_offset[1];
     hsize_t hs_size[1] = {WRT_SIZE};
-    int *   buf        = (int *)HDmalloc(sizeof(int) * WRT_SIZE);
+    int    *buf        = (int *)HDmalloc(sizeof(int) * WRT_SIZE);
     int     i, j, zero, wrong, nerrors = 0;
 
     /* Open script file */

@@ -3804,7 +3804,7 @@ test_sohm_external_dtype(void)
         int a;
         int b;
     } s1_t;
-    s1_t *      s_ptr, *orig;
+    s1_t       *s_ptr, *orig;
     hid_t       fcpl, file1, file2;
     hid_t       dataset1, dataset2;
     hid_t       s1_tid, dset1_tid, dset2_tid, space;

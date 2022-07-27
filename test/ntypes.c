@@ -79,7 +79,7 @@ test_atomic_dtype(hid_t file)
     hid_t   dtype = -1, native_type = -1;
     int     i, j, n;
     hsize_t dims[2];
-    void *  tmp = NULL;
+    void   *tmp = NULL;
 
     TESTING("atomic datatype");
 
@@ -325,9 +325,9 @@ test_compound_dtype2(hid_t file)
           nest_mem_id = -1;
     int     i, j, n;
     hsize_t dims[2];
-    s1 *    temp_point = NULL, *temp_check = NULL;
-    s1 *    points = NULL, *check = NULL;
-    void *  tmp = NULL, *bkg = NULL;
+    s1     *temp_point = NULL, *temp_check = NULL;
+    s1     *points = NULL, *check = NULL;
+    void   *tmp = NULL, *bkg = NULL;
 
     TESTING("nested compound datatype");
 
@@ -648,12 +648,12 @@ test_compound_dtype(hid_t file)
     hid_t   dtype = -1, native_type = -1, tid = -1, tid2 = -1, mem_id = -1;
     int     i, j, n;
     hsize_t dims[2];
-    s1 *    temp_point = NULL;
-    s1 *    temp_check = NULL;
-    s1 *    points     = NULL;
-    s1 *    check      = NULL;
-    void *  tmp        = NULL;
-    void *  bkg        = NULL;
+    s1     *temp_point = NULL;
+    s1     *temp_check = NULL;
+    s1     *points     = NULL;
+    s1     *check      = NULL;
+    void   *tmp        = NULL;
+    void   *bkg        = NULL;
 
     TESTING("compound datatype");
 
@@ -863,9 +863,9 @@ test_compound_dtype3(hid_t file)
     hsize_t array_dims[1] = {5};
     int     i, j, k, n;
     hsize_t dims[2];
-    s1 *    temp_point = NULL, *temp_check = NULL;
-    s1 *    points = NULL, *check = NULL;
-    void *  tmp = NULL, *bkg = NULL;
+    s1     *temp_point = NULL, *temp_check = NULL;
+    s1     *points = NULL, *check = NULL;
+    void   *tmp = NULL, *bkg = NULL;
 
     TESTING("compound datatype with array as field");
 
@@ -1102,9 +1102,9 @@ test_compound_opaque(hid_t file)
     hid_t   dtype = -1, native_type = -1, tid = -1, tid2 = -1, tid_m = -1, mem_id = -1;
     int     i, j, k, n;
     hsize_t dims[2];
-    s1 *    temp_point = NULL, *temp_check = NULL;
-    s1 *    points = NULL, *check = NULL;
-    void *  tmp = NULL, *bkg = NULL;
+    s1     *temp_point = NULL, *temp_check = NULL;
+    s1     *points = NULL, *check = NULL;
+    void   *tmp = NULL, *bkg = NULL;
 
     TESTING("compound datatype with opaque field");
 
@@ -1324,10 +1324,10 @@ test_enum_dtype(hid_t file)
     hid_t         tid = -1, tid_m = -1, dtype = -1, native_type = -1;
     int           i, j, n;
     hsize_t       dims[2];
-    void *        tmp = NULL;
+    void         *tmp = NULL;
     short         colors[8];
     unsigned char sub_colors[16];
-    const char *  mname[] = {"RED", "GREEN", "BLUE", "YELLOW", "PINK", "PURPLE", "ORANGE", "WHITE"};
+    const char   *mname[] = {"RED", "GREEN", "BLUE", "YELLOW", "PINK", "PURPLE", "ORANGE", "WHITE"};
 
     TESTING("enum datatype");
 
@@ -1473,9 +1473,9 @@ test_array_dtype(hid_t file)
     hid_t   dtype = -1, native_type = -1, tid = -1, tid2 = -1, tid3 = -1, tid_m = -1;
     int     i, j, k, n;
     hsize_t space_dims[2], array_dims[1] = {5};
-    s1 *    temp_point = NULL, *temp_check = NULL;
-    s1 *    points = NULL, *check = NULL;
-    void *  tmp = NULL;
+    s1     *temp_point = NULL, *temp_check = NULL;
+    s1     *points = NULL, *check = NULL;
+    void   *tmp = NULL;
 
     TESTING("array of compound datatype");
 
@@ -1656,7 +1656,7 @@ test_array_dtype2(hid_t file)
     hid_t   dtype = -1, native_type = -1, tid = -1, tid_m = -1;
     int     i, j, k, n;
     hsize_t space_dims[2], array_dims[1] = {5};
-    void *  tmp = NULL;
+    void   *tmp = NULL;
 
     TESTING("array of atomic datatype");
 
@@ -1789,12 +1789,12 @@ test_vl_dtype(hid_t file)
 {
     hvl_t   wdata[SPACE1_DIM1]; /* Information to write */
     hvl_t   rdata[SPACE1_DIM1]; /* Information read in */
-    hvl_t * t1, *t2;            /* Temporary pointer to VL information */
+    hvl_t  *t1, *t2;            /* Temporary pointer to VL information */
     hsize_t dims1[] = {SPACE1_DIM1};
     hid_t   dataset = -1, space = -1;
     hid_t   dtype = -1, native_type = -1, nat_super_type = -1, tid = -1, tid2 = -1, tid_m = -1, tid_m2 = -1;
     size_t  i, j, k;
-    void ** tmp = NULL;
+    void  **tmp = NULL;
 
     TESTING("variable length datatype");
 
@@ -1999,7 +1999,7 @@ test_vlstr_dtype(hid_t file)
         "conceived in liberty and dedicated to the proposition that all men are created equal.",
         "Now we are engaged in a great civil war,",
         "testing whether that nation or any nation so conceived and so dedicated can long endure."};
-    char *   rdata[SPACE1_DIM1];                      /* Information read in */
+    char    *rdata[SPACE1_DIM1];                      /* Information read in */
     hbool_t  rdata_alloc = FALSE;                     /* Whether the read data is allocated */
     hid_t    dataset     = -1;                        /* Dataset ID			*/
     hid_t    sid1        = -1;                        /* Dataspace ID			*/
@@ -2442,7 +2442,7 @@ test_refer_dtype2(hid_t file)
         rbuf;                            /* buffer read from disk */
     uint8_t *dwbuf = NULL,               /* Buffer for writing numeric data to disk */
         *drbuf     = NULL;               /* Buffer for reading numeric data from disk */
-    uint8_t *  tu8 = NULL;               /* Temporary pointer to uint8 data */
+    uint8_t   *tu8 = NULL;               /* Temporary pointer to uint8 data */
     H5O_type_t obj_type;                 /* Object type */
     int        i;                        /* counting variables */
 
@@ -2749,7 +2749,7 @@ test_bitfield_dtype(hid_t file)
     size_t         ntype_size, i;
     unsigned char  wbuf[BITFIELD_ENUMB * sizeof(int)];
     unsigned char *p    = NULL;
-    void *         rbuf = NULL;
+    void          *rbuf = NULL;
     unsigned int   intw[BITFIELD_ENUMB], intr[BITFIELD_ENUMB];
     hsize_t        nelmts;
 

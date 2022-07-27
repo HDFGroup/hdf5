@@ -118,10 +118,10 @@ static H5SM_master_table_t *
 H5SM_table_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void H5_ATTR_UNUSED *udata)
 {
     H5SM_master_table_t *table = NULL;
-    H5WB_t *             wb    = NULL;               /* Wrapped buffer for table data */
+    H5WB_t              *wb    = NULL;               /* Wrapped buffer for table data */
     uint8_t              tbl_buf[H5SM_TBL_BUF_SIZE]; /* Buffer for table */
-    uint8_t *            buf;                        /* Reading buffer */
-    const uint8_t *      p;                          /* Pointer into input buffer */
+    uint8_t             *buf;                        /* Reading buffer */
+    const uint8_t       *p;                          /* Pointer into input buffer */
     uint32_t             stored_chksum;              /* Stored metadata checksum value */
     uint32_t             computed_chksum;            /* Computed metadata checksum value */
     size_t               x;                          /* Counter variable for index headers */
@@ -452,17 +452,17 @@ H5SM_table_size(const H5F_t H5_ATTR_UNUSED *f, const H5SM_master_table_t *table,
 static H5SM_list_t *
 H5SM_list_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 {
-    H5SM_list_t *         list;                                   /* The SOHM list being read in */
+    H5SM_list_t          *list;                                   /* The SOHM list being read in */
     H5SM_list_cache_ud_t *udata = (H5SM_list_cache_ud_t *)_udata; /* User data for callback */
     H5SM_bt2_ctx_t        ctx;                                    /* Message encoding context */
-    H5WB_t *              wb = NULL;                              /* Wrapped buffer for list index data */
+    H5WB_t               *wb = NULL;                              /* Wrapped buffer for list index data */
     uint8_t               lst_buf[H5SM_LST_BUF_SIZE];             /* Buffer for list index */
-    uint8_t *             buf;                                    /* Reading buffer */
-    uint8_t *             p;                                      /* Pointer into input buffer */
+    uint8_t              *buf;                                    /* Reading buffer */
+    uint8_t              *p;                                      /* Pointer into input buffer */
     uint32_t              stored_chksum;                          /* Stored metadata checksum value */
     uint32_t              computed_chksum;                        /* Computed metadata checksum value */
     size_t                x;                                      /* Counter variable for messages in list */
-    H5SM_list_t *         ret_value;                              /* Return value */
+    H5SM_list_t          *ret_value;                              /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -570,8 +570,8 @@ H5SM_list_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_lis
 
     if (list->cache_info.is_dirty) {
         H5SM_bt2_ctx_t ctx;             /* Message encoding context */
-        uint8_t *      buf;             /* Temporary buffer */
-        uint8_t *      p;               /* Pointer into raw data buffer */
+        uint8_t       *buf;             /* Temporary buffer */
+        uint8_t       *p;               /* Pointer into raw data buffer */
         uint32_t       computed_chksum; /* Computed metadata checksum value */
         size_t         mesgs_written;   /* Number of messages written to list */
         size_t         x;               /* Local index variable */

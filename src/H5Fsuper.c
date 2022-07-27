@@ -241,7 +241,7 @@ herr_t
 H5F_super_read(H5F_t *f, hid_t dxpl_id)
 {
     H5P_genplist_t *dxpl;                              /* DXPL object */
-    H5F_super_t *   sblock       = NULL;               /* superblock structure                         */
+    H5F_super_t    *sblock       = NULL;               /* superblock structure                         */
     unsigned        sblock_flags = H5AC__NO_FLAGS_SET; /* flags used in superblock unprotect call      */
     haddr_t         super_addr;                        /* Absolute address of superblock */
     H5AC_protect_t  rw;                                /* read/write permissions for file              */
@@ -553,7 +553,7 @@ done:
             else
                 /* Free superblock */
                 if (H5F_super_free(sblock) < 0)
-                HDONE_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "unable to destroy superblock")
+                    HDONE_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "unable to destroy superblock")
 
             /* Reset variables in file structure */
             f->shared->sblock = NULL;

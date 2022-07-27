@@ -248,17 +248,17 @@ H5HF_dtable_encode(H5F_t *f, uint8_t **pp, const H5HF_dtable_t *dtable)
 static H5HF_hdr_t *
 H5HF_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 {
-    H5HF_hdr_t *         hdr   = NULL; /* Fractal heap info */
+    H5HF_hdr_t          *hdr   = NULL; /* Fractal heap info */
     H5HF_hdr_cache_ud_t *udata = (H5HF_hdr_cache_ud_t *)_udata;
     size_t               size;                       /* Header size */
-    H5WB_t *             wb = NULL;                  /* Wrapped buffer for header data */
+    H5WB_t              *wb = NULL;                  /* Wrapped buffer for header data */
     uint8_t              hdr_buf[H5HF_HDR_BUF_SIZE]; /* Buffer for header */
-    uint8_t *            buf;                        /* Pointer to header buffer */
-    const uint8_t *      p;                          /* Pointer into raw data buffer */
+    uint8_t             *buf;                        /* Pointer to header buffer */
+    const uint8_t       *p;                          /* Pointer into raw data buffer */
     uint32_t             stored_chksum;              /* Stored metadata checksum value */
     uint32_t             computed_chksum;            /* Computed metadata checksum value */
     uint8_t              heap_flags;                 /* Status flags for heap */
-    H5HF_hdr_t *         ret_value;                  /* Return value */
+    H5HF_hdr_t          *ret_value;                  /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -682,18 +682,18 @@ H5HF_cache_hdr_size(const H5F_t H5_ATTR_UNUSED *f, const H5HF_hdr_t *hdr, size_t
 static H5HF_indirect_t *
 H5HF_cache_iblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 {
-    H5HF_hdr_t *            hdr;                                       /* Shared fractal heap information */
+    H5HF_hdr_t             *hdr;                                       /* Shared fractal heap information */
     H5HF_iblock_cache_ud_t *udata  = (H5HF_iblock_cache_ud_t *)_udata; /* user data for callback */
-    H5HF_indirect_t *       iblock = NULL;                             /* Indirect block info */
-    H5WB_t *                wb     = NULL;                    /* Wrapped buffer for indirect block data */
+    H5HF_indirect_t        *iblock = NULL;                             /* Indirect block info */
+    H5WB_t                 *wb     = NULL;                    /* Wrapped buffer for indirect block data */
     uint8_t                 iblock_buf[H5HF_IBLOCK_BUF_SIZE]; /* Buffer for indirect block */
-    uint8_t *               buf;                              /* Temporary buffer */
-    const uint8_t *         p;                                /* Pointer into raw data buffer */
+    uint8_t                *buf;                              /* Temporary buffer */
+    const uint8_t          *p;                                /* Pointer into raw data buffer */
     haddr_t                 heap_addr;                        /* Address of heap header in the file */
     uint32_t                stored_chksum;                    /* Stored metadata checksum value */
     uint32_t                computed_chksum;                  /* Computed metadata checksum value */
     unsigned                u;                                /* Local index variable */
-    H5HF_indirect_t *       ret_value;                        /* Return value */
+    H5HF_indirect_t        *ret_value;                        /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -900,8 +900,8 @@ H5HF_cache_iblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, 
 
     if (iblock->cache_info.is_dirty) {
         H5HF_hdr_t *hdr; /* Shared fractal heap information */
-        uint8_t *   buf; /* Temporary buffer */
-        uint8_t *   p;   /* Pointer into raw data buffer */
+        uint8_t    *buf; /* Temporary buffer */
+        uint8_t    *p;   /* Pointer into raw data buffer */
 #ifndef NDEBUG
         unsigned nchildren = 0;   /* Track # of children */
         unsigned max_child = 0;   /* Track max. child entry used */
@@ -1190,12 +1190,12 @@ static H5HF_direct_t *
 H5HF_cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 {
     H5HF_dblock_cache_ud_t *udata = (H5HF_dblock_cache_ud_t *)_udata; /* pointer to user data */
-    H5HF_hdr_t *            hdr;                                      /* Shared fractal heap information */
-    H5HF_parent_t *         par_info;                                 /* Pointer to parent information */
-    H5HF_direct_t *         dblock = NULL;                            /* Direct block info */
-    const uint8_t *         p;                                        /* Pointer into raw data buffer */
+    H5HF_hdr_t             *hdr;                                      /* Shared fractal heap information */
+    H5HF_parent_t          *par_info;                                 /* Pointer to parent information */
+    H5HF_direct_t          *dblock = NULL;                            /* Direct block info */
+    const uint8_t          *p;                                        /* Pointer into raw data buffer */
     haddr_t                 heap_addr;                                /* Address of heap header in the file */
-    H5HF_direct_t *         ret_value;                                /* Return value */
+    H5HF_direct_t          *ret_value;                                /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1237,7 +1237,7 @@ H5HF_cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
     if (hdr->filter_len > 0) {
         H5Z_cb_t filter_cb = {NULL, NULL}; /* Filter callback structure */
         size_t   nbytes;      /* Number of bytes used in buffer, after applying reverse filters */
-        void *   read_buf;    /* Pointer to buffer to read in */
+        void    *read_buf;    /* Pointer to buffer to read in */
         size_t   read_size;   /* Size of filtered direct block to read */
         unsigned filter_mask; /* Excluded filters for direct block */
 
@@ -1381,7 +1381,7 @@ H5HF_cache_dblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, 
         H5HF_hdr_t *hdr; /* Shared fractal heap information */
         hbool_t     at_tmp_addr =
             H5F_IS_TMP_ADDR(f, addr); /* Flag to indicate direct block is at temporary address */
-        void *   write_buf;           /* Pointer to buffer to write out */
+        void    *write_buf;           /* Pointer to buffer to write out */
         size_t   write_size;          /* Size of buffer to write out */
         uint8_t *p;                   /* Pointer into raw data buffer */
 

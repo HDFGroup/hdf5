@@ -44,7 +44,7 @@ int_f
 nh5rcreate_object_c(haddr_t_f *ref, hid_t_f *loc_id, _fcd name, int_f *namelen)
 /******/
 {
-    char *     c_name = NULL;
+    char      *c_name = NULL;
     hobj_ref_t ref_c;
     int_f      ret_value = 0;
 
@@ -95,7 +95,7 @@ int_f
 nh5rcreate_region_c(int_f *ref, hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *space_id)
 /******/
 {
-    char *          c_name = NULL;
+    char           *c_name = NULL;
     hdset_reg_ref_t ref_c;
     int_f           ret_value = 0;
 
@@ -439,7 +439,7 @@ nh5rget_name_object_c(hid_t_f *loc_id, haddr_t_f *ref, _fcd name, size_t_f *name
     hobj_ref_t ref_c = (hobj_ref_t)*ref;
     ssize_t    c_size;
     size_t     c_bufsize = (size_t)*name_len + 1;
-    char *     c_buf     = NULL; /* Buffer to hold C string */
+    char      *c_buf     = NULL; /* Buffer to hold C string */
     int_f      ret_value = 0;
 
     /*
@@ -496,7 +496,7 @@ nh5rget_name_region_c(hid_t_f *loc_id, int_f *ref, _fcd name, size_t_f *name_len
     hdset_reg_ref_t ref_c;
     ssize_t         c_size;
     size_t          c_bufsize = (size_t)*name_len + 1;
-    char *          c_buf     = NULL; /* Buffer to hold C string */
+    char           *c_buf     = NULL; /* Buffer to hold C string */
     int_f           ret_value = 0;
 
     /* Copy the reference to query */
@@ -558,7 +558,7 @@ h5rget_name_ptr_c(hid_t_f *loc_id, int_f *ref_type, void *ref, _fcd name, size_t
     int_f   ret_value = -1;
     ssize_t c_size;
     size_t  c_bufsize;
-    char *  c_buf = NULL; /* Buffer to hold C string */
+    char   *c_buf = NULL; /* Buffer to hold C string */
 
     c_bufsize = (size_t)*name_len + 1;
     /*

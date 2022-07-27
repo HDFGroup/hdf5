@@ -120,7 +120,7 @@ typedef union _file_descr {
 } file_descr;
 
 /* local functions */
-static char * pio_create_filename(iotype iot, const char *base_name, char *fullname, size_t size);
+static char  *pio_create_filename(iotype iot, const char *base_name, char *fullname, size_t size);
 static herr_t do_write(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nelmts,
                        size_t buf_size, void *buffer);
 static herr_t do_read(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nelmts,
@@ -155,7 +155,7 @@ do_pio(parameters param)
     off_t snbytes;        /*general dataset size          */
                           /*for 1D, it is the actual dataset size */
                           /*for 2D, it is the size of a side of the dataset square */
-    char * buffer = NULL; /*data buffer pointer           */
+    char  *buffer = NULL; /*data buffer pointer           */
     size_t buf_size;      /*general buffer size in bytes     */
                           /*for 1D, it is the actual buffer size */
                           /*for 2D, it is the length of the buffer rectangle */
@@ -387,7 +387,7 @@ static char *
 pio_create_filename(iotype iot, const char *base_name, char *fullname, size_t size)
 {
     const char *prefix, *suffix = "";
-    char *      ptr, last       = '\0';
+    char       *ptr, last       = '\0';
     size_t      i, j;
 
     if (!base_name || !fullname || size < 1)
@@ -1223,15 +1223,14 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nby
                             /* Interleaved access pattern */
                             else {
                                 /* Compute offset in file */
-                                mpi_offset =
-                                    mpi_file_offset +
-                                    (MPI_Offset)(
-                                        ((((size_t)nbytes_xfer / buf_size) * (size_t)pio_mpi_nprocs_g) /
-                                         (size_t)snbytes) *
-                                        (buf_size * (size_t)snbytes)) +
-                                    (MPI_Offset)(
-                                        (((size_t)nbytes_xfer / buf_size) * (size_t)pio_mpi_nprocs_g) %
-                                        (size_t)snbytes);
+                                mpi_offset = mpi_file_offset +
+                                             (MPI_Offset)(((((size_t)nbytes_xfer / buf_size) *
+                                                            (size_t)pio_mpi_nprocs_g) /
+                                                           (size_t)snbytes) *
+                                                          (buf_size * (size_t)snbytes)) +
+                                             (MPI_Offset)((((size_t)nbytes_xfer / buf_size) *
+                                                           (size_t)pio_mpi_nprocs_g) %
+                                                          (size_t)snbytes);
 
                                 /* Number of bytes to be transferred per I/O operation */
                                 nbytes_xfer_advance = blk_size;
@@ -2194,15 +2193,14 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nbyt
                             /* Interleaved access pattern */
                             else {
                                 /* Compute offset in file */
-                                mpi_offset =
-                                    mpi_file_offset +
-                                    (MPI_Offset)(
-                                        ((((size_t)nbytes_xfer / buf_size) * (size_t)pio_mpi_nprocs_g) /
-                                         (size_t)snbytes) *
-                                        (buf_size * (size_t)snbytes)) +
-                                    (MPI_Offset)(
-                                        (((size_t)nbytes_xfer / buf_size) * (size_t)pio_mpi_nprocs_g) %
-                                        (size_t)snbytes);
+                                mpi_offset = mpi_file_offset +
+                                             (MPI_Offset)(((((size_t)nbytes_xfer / buf_size) *
+                                                            (size_t)pio_mpi_nprocs_g) /
+                                                           (size_t)snbytes) *
+                                                          (buf_size * (size_t)snbytes)) +
+                                             (MPI_Offset)((((size_t)nbytes_xfer / buf_size) *
+                                                           (size_t)pio_mpi_nprocs_g) %
+                                                          (size_t)snbytes);
 
                                 /* Number of bytes to be transferred per I/O operation */
                                 nbytes_xfer_advance = blk_size;

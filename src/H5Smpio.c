@@ -147,7 +147,7 @@ H5S_mpio_create_point_datatype(size_t elmt_size, hsize_t num_points, MPI_Aint *d
     MPI_Datatype elmt_type;                 /* MPI datatype for individual element */
     hbool_t      elmt_type_created = FALSE; /* Whether the element MPI datatype was created */
     int          mpi_code;                  /* MPI error code */
-    int *        blocks = NULL;             /* Array of block sizes for MPI hindexed create call */
+    int         *blocks = NULL;             /* Array of block sizes for MPI hindexed create call */
     hsize_t      u;                         /* Local index variable */
     herr_t       ret_value = SUCCEED;       /* Return value */
 
@@ -208,7 +208,7 @@ static herr_t
 H5S_mpio_point_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *new_type, int *count,
                     hbool_t *is_derived_type, hbool_t do_permute, hsize_t **permute, hbool_t *is_permuted)
 {
-    MPI_Aint *      disp = NULL;         /* Datatype displacement for each point*/
+    MPI_Aint       *disp = NULL;         /* Datatype displacement for each point*/
     H5S_pnt_node_t *curr = NULL;         /* Current point being operated on in from the selection */
     hssize_t        snum_points;         /* Signed number of elements in selection */
     hsize_t         num_points;          /* Sumber of points in the selection */
@@ -341,7 +341,7 @@ static herr_t
 H5S_mpio_permute_type(const H5S_t *space, size_t elmt_size, hsize_t **permute, MPI_Datatype *new_type,
                       int *count, hbool_t *is_derived_type)
 {
-    MPI_Aint *     disp = NULL;             /* Datatype displacement for each point*/
+    MPI_Aint      *disp = NULL;             /* Datatype displacement for each point*/
     H5S_sel_iter_t sel_iter;                /* Selection iteration info */
     hbool_t        sel_iter_init = FALSE;   /* Selection iteration info has been initialized */
     hsize_t        off[H5D_IO_VECTOR_SIZE]; /* Array to store sequence offsets */
@@ -813,11 +813,11 @@ H5S_obtain_datatype(const hsize_t *down, H5S_hyper_span_t *span, const MPI_Datat
 {
     size_t            alloc_count       = 0; /* Number of span tree nodes allocated at this level */
     size_t            outercount        = 0; /* Number of span tree nodes at this level */
-    MPI_Datatype *    inner_type        = NULL;
+    MPI_Datatype     *inner_type        = NULL;
     hbool_t           inner_types_freed = FALSE; /* Whether the inner_type MPI datatypes have been freed */
     hbool_t           span_type_valid   = FALSE; /* Whether the span_type MPI datatypes is valid */
-    int *             blocklen          = NULL;
-    MPI_Aint *        disp              = NULL;
+    int              *blocklen          = NULL;
+    MPI_Aint         *disp              = NULL;
     H5S_hyper_span_t *tspan;               /* Temporary pointer to span tree node */
     int               mpi_code;            /* MPI return status code */
     herr_t            ret_value = SUCCEED; /* Return value */
@@ -842,7 +842,7 @@ H5S_obtain_datatype(const hsize_t *down, H5S_hyper_span_t *span, const MPI_Datat
             /* Check if we need to increase the size of the buffers */
             if (outercount >= alloc_count) {
                 MPI_Aint *tmp_disp;     /* Temporary pointer to new displacement buffer */
-                int *     tmp_blocklen; /* Temporary pointer to new block length buffer */
+                int      *tmp_blocklen; /* Temporary pointer to new block length buffer */
 
                 /* Double the allocation count */
                 alloc_count *= 2;
@@ -884,8 +884,8 @@ H5S_obtain_datatype(const hsize_t *down, H5S_hyper_span_t *span, const MPI_Datat
 
             /* Check if we need to increase the size of the buffers */
             if (outercount >= alloc_count) {
-                MPI_Aint *    tmp_disp;       /* Temporary pointer to new displacement buffer */
-                int *         tmp_blocklen;   /* Temporary pointer to new block length buffer */
+                MPI_Aint     *tmp_disp;       /* Temporary pointer to new displacement buffer */
+                int          *tmp_blocklen;   /* Temporary pointer to new block length buffer */
                 MPI_Datatype *tmp_inner_type; /* Temporary pointer to inner MPI datatype buffer */
 
                 /* Double the allocation count */

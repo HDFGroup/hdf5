@@ -152,7 +152,7 @@ hid_t
 H5Dcreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id, hid_t dcpl_id)
 {
     H5G_loc_t    loc;                         /* Object location to insert dataset into */
-    H5D_t *      dset = NULL;                 /* New dataset's info */
+    H5D_t       *dset = NULL;                 /* New dataset's info */
     const H5S_t *space;                       /* Dataspace for dataset */
     hid_t        ret_value = H5I_INVALID_HID; /* Return value */
 
@@ -210,7 +210,7 @@ done:
 hid_t
 H5Dopen1(hid_t loc_id, const char *name)
 {
-    H5D_t *    dset = NULL;
+    H5D_t     *dset = NULL;
     H5G_loc_t  loc;                                    /* Object location of group */
     H5G_loc_t  dset_loc;                               /* Object location of dataset */
     H5G_name_t path;                                   /* Dataset group hier. path */
@@ -324,7 +324,7 @@ static herr_t
 H5D__extend(H5D_t *dataset, const hsize_t *size, hid_t dxpl_id)
 {
     htri_t      changed; /* Flag to indicate that the dataspace was successfully extended */
-    H5S_t *     space;   /* Dataset's dataspace */
+    H5S_t      *space;   /* Dataset's dataspace */
     int         rank;    /* Dataspace # of dimensions */
     hsize_t     curr_dims[H5O_LAYOUT_NDIMS]; /* Current dimension sizes */
     H5O_fill_t *fill;                        /* Dataset's fill value */

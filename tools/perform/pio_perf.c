@@ -96,7 +96,7 @@
 #endif /* FALSE */
 
 /* global variables */
-FILE *   output;              /* output file                          */
+FILE    *output;              /* output file                          */
 int      comm_world_rank_g;   /* my rank in MPI_COMM_RANK             */
 int      comm_world_nprocs_g; /* num. of processes of MPI_COMM_WORLD  */
 MPI_Comm pio_comm_g;          /* Communicator to run the PIO          */
@@ -525,18 +525,18 @@ run_test(iotype iot, parameters parms, struct options *opts)
     register int i, ret_value = SUCCESS;
     int          comm_size;
     off_t        raw_size;
-    minmax *     write_mpi_mm_table   = NULL;
-    minmax *     write_mm_table       = NULL;
-    minmax *     write_gross_mm_table = NULL;
-    minmax *     write_raw_mm_table   = NULL;
-    minmax *     read_mpi_mm_table    = NULL;
-    minmax *     read_mm_table        = NULL;
-    minmax *     read_gross_mm_table  = NULL;
-    minmax *     read_raw_mm_table    = NULL;
-    minmax *     read_open_mm_table   = NULL;
-    minmax *     read_close_mm_table  = NULL;
-    minmax *     write_open_mm_table  = NULL;
-    minmax *     write_close_mm_table = NULL;
+    minmax      *write_mpi_mm_table   = NULL;
+    minmax      *write_mm_table       = NULL;
+    minmax      *write_gross_mm_table = NULL;
+    minmax      *write_raw_mm_table   = NULL;
+    minmax      *read_mpi_mm_table    = NULL;
+    minmax      *read_mm_table        = NULL;
+    minmax      *read_gross_mm_table  = NULL;
+    minmax      *read_raw_mm_table    = NULL;
+    minmax      *read_open_mm_table   = NULL;
+    minmax      *read_close_mm_table  = NULL;
+    minmax      *write_open_mm_table  = NULL;
+    minmax      *write_close_mm_table = NULL;
     minmax       write_mpi_mm         = {0.0, 0.0, 0.0, 0};
     minmax       write_mm             = {0.0, 0.0, 0.0, 0};
     minmax       write_gross_mm       = {0.0, 0.0, 0.0, 0};

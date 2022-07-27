@@ -84,12 +84,12 @@ H5D__scatter_file(const H5D_io_info_t *_io_info, const H5S_t *space, H5S_sel_ite
 {
     H5D_io_info_t tmp_io_info;              /* Temporary I/O info object */
     hsize_t       _off[H5D_IO_VECTOR_SIZE]; /* Array to store sequence offsets */
-    hsize_t *     off = NULL;               /* Pointer to sequence offsets */
+    hsize_t      *off = NULL;               /* Pointer to sequence offsets */
     hsize_t       mem_off;                  /* Offset in memory */
     size_t        mem_curr_seq;             /* "Current sequence" in memory */
     size_t        dset_curr_seq;            /* "Current sequence" in dataset */
     size_t        _len[H5D_IO_VECTOR_SIZE]; /* Array to store sequence lengths */
-    size_t *      len = NULL;               /* Array to store sequence lengths */
+    size_t       *len = NULL;               /* Array to store sequence lengths */
     size_t        orig_mem_len, mem_len;    /* Length of sequence in memory */
     size_t        nseq;                     /* Number of sequences generated */
     size_t        nelem;                    /* Number of elements used in sequences */
@@ -182,12 +182,12 @@ H5D__gather_file(const H5D_io_info_t *_io_info, const H5S_t *space, H5S_sel_iter
 {
     H5D_io_info_t tmp_io_info;              /* Temporary I/O info object */
     hsize_t       _off[H5D_IO_VECTOR_SIZE]; /* Array to store sequence offsets */
-    hsize_t *     off = NULL;               /* Pointer to sequence offsets */
+    hsize_t      *off = NULL;               /* Pointer to sequence offsets */
     hsize_t       mem_off;                  /* Offset in memory */
     size_t        mem_curr_seq;             /* "Current sequence" in memory */
     size_t        dset_curr_seq;            /* "Current sequence" in dataset */
     size_t        _len[H5D_IO_VECTOR_SIZE]; /* Array to store sequence lengths */
-    size_t *      len = NULL;               /* Pointer to sequence lengths */
+    size_t       *len = NULL;               /* Pointer to sequence lengths */
     size_t        orig_mem_len, mem_len;    /* Length of sequence in memory */
     size_t        nseq;                     /* Number of sequences generated */
     size_t        nelem;                    /* Number of elements used in sequences */
@@ -274,12 +274,12 @@ herr_t
 H5D__scatter_mem(const void *_tscat_buf, const H5S_t *space, H5S_sel_iter_t *iter, size_t nelmts,
                  const H5D_dxpl_cache_t *dxpl_cache, void *_buf /*out*/)
 {
-    uint8_t *      buf       = (uint8_t *)_buf; /* Get local copies for address arithmetic */
+    uint8_t       *buf       = (uint8_t *)_buf; /* Get local copies for address arithmetic */
     const uint8_t *tscat_buf = (const uint8_t *)_tscat_buf;
     hsize_t        _off[H5D_IO_VECTOR_SIZE]; /* Array to store sequence offsets */
-    hsize_t *      off = NULL;               /* Pointer to sequence offsets */
+    hsize_t       *off = NULL;               /* Pointer to sequence offsets */
     size_t         _len[H5D_IO_VECTOR_SIZE]; /* Array to store sequence lengths */
-    size_t *       len = NULL;               /* Pointer to sequence lengths */
+    size_t        *len = NULL;               /* Pointer to sequence lengths */
     size_t         curr_len;                 /* Length of bytes left to process in sequence */
     size_t         nseq;                     /* Number of sequences generated */
     size_t         curr_seq;                 /* Current sequence being processed */
@@ -361,11 +361,11 @@ H5D__gather_mem(const void *_buf, const H5S_t *space, H5S_sel_iter_t *iter, size
                 const H5D_dxpl_cache_t *dxpl_cache, void *_tgath_buf /*out*/)
 {
     const uint8_t *buf       = (const uint8_t *)_buf; /* Get local copies for address arithmetic */
-    uint8_t *      tgath_buf = (uint8_t *)_tgath_buf;
+    uint8_t       *tgath_buf = (uint8_t *)_tgath_buf;
     hsize_t        _off[H5D_IO_VECTOR_SIZE]; /* Array to store sequence offsets */
-    hsize_t *      off = NULL;               /* Pointer to sequence offsets */
+    hsize_t       *off = NULL;               /* Pointer to sequence offsets */
     size_t         _len[H5D_IO_VECTOR_SIZE]; /* Array to store sequence lengths */
-    size_t *       len = NULL;               /* Pointer to sequence lengths */
+    size_t        *len = NULL;               /* Pointer to sequence lengths */
     size_t         curr_len;                 /* Length of bytes left to process in sequence */
     size_t         nseq;                     /* Number of sequences generated */
     size_t         curr_seq;                 /* Current sequence being processed */
@@ -442,7 +442,7 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
                    const H5S_t *file_space, const H5S_t *mem_space)
 {
     const H5D_dxpl_cache_t *dxpl_cache = io_info->dxpl_cache; /* Local pointer to dataset transfer info */
-    void *                  buf        = io_info->u.rbuf;     /* Local pointer to application buffer */
+    void                   *buf        = io_info->u.rbuf;     /* Local pointer to application buffer */
     H5S_sel_iter_t          mem_iter;                         /*memory selection iteration info*/
     hbool_t                 mem_iter_init = FALSE;  /*memory selection iteration info has been initialized */
     H5S_sel_iter_t          bkg_iter;               /*background iteration info*/
@@ -573,7 +573,7 @@ H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_type_info_t *type_in
                     const H5S_t *file_space, const H5S_t *mem_space)
 {
     const H5D_dxpl_cache_t *dxpl_cache = io_info->dxpl_cache; /* Local pointer to dataset transfer info */
-    const void *            buf        = io_info->u.wbuf;     /* Local pointer to application buffer */
+    const void             *buf        = io_info->u.wbuf;     /* Local pointer to application buffer */
     H5S_sel_iter_t          mem_iter;                         /*memory selection iteration info*/
     hbool_t                 mem_iter_init = FALSE;  /*memory selection iteration info has been initialized */
     H5S_sel_iter_t          bkg_iter;               /*background iteration info*/
@@ -728,7 +728,7 @@ H5D__compound_opt_read(size_t nelmts, const H5S_t *space, H5S_sel_iter_t *iter,
     hsize_t  _off[H5D_IO_VECTOR_SIZE];   /* Array to store sequence offsets */
     hsize_t *off = NULL;                 /* Pointer to sequence offsets */
     size_t   _len[H5D_IO_VECTOR_SIZE];   /* Array to store sequence lengths */
-    size_t * len = NULL;                 /* Pointer to sequence lengths */
+    size_t  *len = NULL;                 /* Pointer to sequence lengths */
     size_t   src_stride, dst_stride, copy_size;
     herr_t   ret_value = SUCCEED; /*return value		*/
 
@@ -900,11 +900,11 @@ H5D__compound_opt_write(size_t nelmts, const H5D_type_info_t *type_info)
 herr_t
 H5Dscatter(H5D_scatter_func_t op, void *op_data, hid_t type_id, hid_t dst_space_id, void *dst_buf)
 {
-    H5T_t *           type;                      /* Datatype */
-    H5S_t *           dst_space;                 /* Dataspace */
+    H5T_t            *type;                      /* Datatype */
+    H5S_t            *dst_space;                 /* Dataspace */
     H5S_sel_iter_t    iter;                      /* Selection iteration info*/
     hbool_t           iter_init      = FALSE;    /* Selection iteration info has been initialized */
-    const void *      src_buf        = NULL;     /* Source (contiguous) data buffer */
+    const void       *src_buf        = NULL;     /* Source (contiguous) data buffer */
     size_t            src_buf_nbytes = 0;        /* Size of src_buf */
     size_t            type_size;                 /* Datatype element size */
     hssize_t          nelmts;                    /* Number of remaining elements in selection */
@@ -999,8 +999,8 @@ herr_t
 H5Dgather(hid_t src_space_id, const void *src_buf, hid_t type_id, size_t dst_buf_size, void *dst_buf,
           H5D_gather_func_t op, void *op_data)
 {
-    H5T_t *           type;                      /* Datatype */
-    H5S_t *           src_space;                 /* Dataspace */
+    H5T_t            *type;                      /* Datatype */
+    H5S_t            *src_space;                 /* Dataspace */
     H5S_sel_iter_t    iter;                      /* Selection iteration info*/
     hbool_t           iter_init = FALSE;         /* Selection iteration info has been initialized */
     size_t            type_size;                 /* Datatype element size */

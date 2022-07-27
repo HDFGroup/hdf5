@@ -51,7 +51,7 @@
 /* User data for free space section iterator callback */
 typedef struct {
     H5FS_t *fspace; /* Free space manager */
-    FILE *  stream; /* Stream for output */
+    FILE   *stream; /* Stream for output */
     int     indent; /* Indention amount */
     int     fwidth; /* Field width amount */
 } H5MF_debug_iter_ud_t;
@@ -91,7 +91,7 @@ typedef struct {
 static herr_t
 H5MF_sects_debug_cb(H5FS_section_info_t *_sect, void *_udata)
 {
-    H5MF_free_section_t * sect      = (H5MF_free_section_t *)_sect;   /* Section to dump info */
+    H5MF_free_section_t  *sect      = (H5MF_free_section_t *)_sect;   /* Section to dump info */
     H5MF_debug_iter_ud_t *udata     = (H5MF_debug_iter_ud_t *)_udata; /* User data for callbacks */
     herr_t                ret_value = SUCCEED;                        /* Return value */
 

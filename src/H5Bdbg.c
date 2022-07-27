@@ -52,9 +52,9 @@ herr_t
 H5B_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int fwidth,
           const H5B_class_t *type, void *udata)
 {
-    H5B_t *        bt = NULL;
-    H5RC_t *       rc_shared;           /* Ref-counted shared info */
-    H5B_shared_t * shared;              /* Pointer to shared B-tree info */
+    H5B_t         *bt = NULL;
+    H5RC_t        *rc_shared;           /* Ref-counted shared info */
+    H5B_shared_t  *shared;              /* Pointer to shared B-tree info */
     H5B_cache_ud_t cache_udata;         /* User-data for metadata cache callback */
     unsigned       u;                   /* Local index variable */
     herr_t         ret_value = SUCCEED; /* Return value */
@@ -151,9 +151,9 @@ done:
 herr_t
 H5B_assert(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type, void *udata)
 {
-    H5B_t *        bt = NULL;
-    H5RC_t *       rc_shared;   /* Ref-counted shared info */
-    H5B_shared_t * shared;      /* Pointer to shared B-tree info */
+    H5B_t         *bt = NULL;
+    H5RC_t        *rc_shared;   /* Ref-counted shared info */
+    H5B_shared_t  *shared;      /* Pointer to shared B-tree info */
     H5B_cache_ud_t cache_udata; /* User-data for metadata cache callback */
     int            ncell, cmp;
     static int     ncalls = 0;

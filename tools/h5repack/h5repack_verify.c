@@ -54,7 +54,7 @@ h5repack_verify(const char *in_fname, const char *out_fname, pack_opt_t *options
         H5TOOLS_GOTO_ERROR((-1), "H5Fopen failed on <%s>", out_fname);
 
     for (i = 0; i < options->op_tbl->nelems; i++) {
-        char *       name = options->op_tbl->objs[i].path;
+        char        *name = options->op_tbl->objs[i].path;
         pack_info_t *obj  = &options->op_tbl->objs[i];
 
         /*-------------------------------------------------------------------------

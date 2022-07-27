@@ -795,7 +795,7 @@ H5P__init_def_layout(void)
 herr_t
 H5Pset_layout(hid_t plist_id, H5D_layout_t layout_type)
 {
-    H5P_genplist_t *    plist;               /* Property list pointer */
+    H5P_genplist_t     *plist;               /* Property list pointer */
     const H5O_layout_t *layout;              /* Pointer to default layout information for type specified */
     herr_t              ret_value = SUCCEED; /* Return value */
 
@@ -1462,7 +1462,7 @@ H5Pset_fill_value(hid_t plist_id, hid_t type_id, const void *value)
     H5O_fill_reset_dyn(&fill);
 
     if (value) {
-        H5T_t *     type;  /* Datatype for fill value */
+        H5T_t      *type;  /* Datatype for fill value */
         H5T_path_t *tpath; /* Conversion information */
 
         /* Retrieve pointer to datatype */
@@ -1535,8 +1535,8 @@ H5P_get_fill_value(H5P_genplist_t *plist, const H5T_t *type, void *value /*out*/
 {
     H5O_fill_t  fill;                /* Fill value to retrieve */
     H5T_path_t *tpath;               /*type conversion info	*/
-    void *      buf       = NULL;    /*conversion buffer	*/
-    void *      bkg       = NULL;    /*conversion buffer	*/
+    void       *buf       = NULL;    /*conversion buffer	*/
+    void       *bkg       = NULL;    /*conversion buffer	*/
     hid_t       src_id    = -1;      /*source datatype id	*/
     hid_t       dst_id    = -1;      /*destination datatype id	*/
     herr_t      ret_value = SUCCEED; /* Return value */
@@ -1627,7 +1627,7 @@ herr_t
 H5Pget_fill_value(hid_t plist_id, hid_t type_id, void *value /*out*/)
 {
     H5P_genplist_t *plist;               /* Property list pointer */
-    H5T_t *         type;                /* Datatype		*/
+    H5T_t          *type;                /* Datatype		*/
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)

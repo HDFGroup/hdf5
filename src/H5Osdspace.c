@@ -24,10 +24,10 @@
 #include "H5Spkg.h"      /* Dataspaces 				*/
 
 /* PRIVATE PROTOTYPES */
-static void * H5O_sdspace_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned mesg_flags,
+static void  *H5O_sdspace_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned mesg_flags,
                                  unsigned *ioflags, size_t p_size, const uint8_t *p);
 static herr_t H5O_sdspace_encode(H5F_t *f, uint8_t *p, const void *_mesg);
-static void * H5O_sdspace_copy(const void *_mesg, void *_dest);
+static void  *H5O_sdspace_copy(const void *_mesg, void *_dest);
 static size_t H5O_sdspace_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_sdspace_reset(void *_mesg);
 static herr_t H5O_sdspace_free(void *_mesg);
@@ -114,7 +114,7 @@ H5O_sdspace_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED 
     H5S_extent_t *sdim = NULL; /* New extent dimensionality structure */
     unsigned      flags, version;
     unsigned      i;                /* Local counting variable */
-    void *        ret_value = NULL; /* Return value */
+    void         *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -296,8 +296,8 @@ static void *
 H5O_sdspace_copy(const void *_mesg, void *_dest)
 {
     const H5S_extent_t *mesg      = (const H5S_extent_t *)_mesg;
-    H5S_extent_t *      dest      = (H5S_extent_t *)_dest;
-    void *              ret_value = NULL; /* Return value */
+    H5S_extent_t       *dest      = (H5S_extent_t *)_dest;
+    void               *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

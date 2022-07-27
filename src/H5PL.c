@@ -162,7 +162,7 @@ static size_t        H5PL_table_used_g  = 0;
 static H5PL_table_t *H5PL_table_g       = NULL;
 
 /* Table of location paths for plugin libraries */
-static char *  H5PL_path_table_g[H5PL_MAX_PATH_NUM];
+static char   *H5PL_path_table_g[H5PL_MAX_PATH_NUM];
 static size_t  H5PL_num_paths_g  = 0;
 static hbool_t H5PL_path_found_g = FALSE;
 
@@ -222,7 +222,7 @@ H5PL__init_interface(void)
 herr_t
 H5PLset_loading_state(unsigned int plugin_type)
 {
-    char * preload_path;
+    char  *preload_path;
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -406,7 +406,7 @@ herr_t
 H5PLappend(const char *plugin_path)
 {
     herr_t ret_value = SUCCEED; /* Return value */
-    char * dl_path   = NULL;
+    char  *dl_path   = NULL;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "*s", plugin_path);
@@ -440,7 +440,7 @@ herr_t
 H5PLprepend(const char *plugin_path)
 {
     herr_t       ret_value = SUCCEED; /* Return value */
-    char *       dl_path   = NULL;
+    char        *dl_path   = NULL;
     unsigned int plindex;
 
     FUNC_ENTER_API(FAIL)
@@ -477,7 +477,7 @@ herr_t
 H5PLreplace(const char *plugin_path, unsigned int index)
 {
     herr_t ret_value = SUCCEED; /* Return value */
-    char * dl_path   = NULL;
+    char  *dl_path   = NULL;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "*sIu", plugin_path, index);
@@ -513,7 +513,7 @@ herr_t
 H5PLinsert(const char *plugin_path, unsigned int index)
 {
     herr_t       ret_value = SUCCEED; /* Return value */
-    char *       dl_path   = NULL;
+    char        *dl_path   = NULL;
     unsigned int plindex;
 
     FUNC_ENTER_API(FAIL)
@@ -603,7 +603,7 @@ H5PLget(unsigned int index, char *pathname /*out*/, size_t size)
 {
     ssize_t ret_value = 0; /* Return value */
     size_t  len       = 0; /* Length of pathname */
-    char *  dl_path   = NULL;
+    char   *dl_path   = NULL;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("Zs", "Iuxz", index, pathname, size);
@@ -665,9 +665,9 @@ done:
 static herr_t
 H5PL__init_path_table(void)
 {
-    char * dl_path = NULL;
-    char * origin_dl_path;
-    char * dir;
+    char  *dl_path = NULL;
+    char  *origin_dl_path;
+    char  *dir;
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
@@ -727,8 +727,8 @@ done:
 static htri_t
 H5PL__find(H5PL_type_t plugin_type, int type_id, char *dir, const void **info)
 {
-    char *         pathname = NULL;
-    DIR *          dirp     = NULL;
+    char          *pathname = NULL;
+    DIR           *dirp     = NULL;
     struct dirent *dp;
     htri_t         ret_value = FALSE;
 
@@ -791,7 +791,7 @@ H5PL__find(H5PL_type_t plugin_type, int type_id, char *dir, const void **info)
 {
     WIN32_FIND_DATAA fdFile;
     HANDLE           hFind;
-    char *           pathname = NULL;
+    char            *pathname = NULL;
     char             service[2048];
     htri_t           ret_value = FALSE;
 
@@ -966,7 +966,7 @@ H5PL__search_table(H5PL_type_t plugin_type, int type_id, const void **info)
         for (i = 0; i < H5PL_table_used_g; i++) {
             if ((plugin_type == (H5PL_table_g[i]).pl_type) && (type_id == (H5PL_table_g[i]).pl_id)) {
                 H5PL_get_plugin_info_t get_plugin_info;
-                const H5Z_class2_t *   plugin_info;
+                const H5Z_class2_t    *plugin_info;
 
                 if (NULL == (get_plugin_info = (H5PL_get_plugin_info_t)H5PL_GET_LIB_FUNC(
                                  (H5PL_table_g[i]).handle, "H5PLget_plugin_info")))

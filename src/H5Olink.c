@@ -36,16 +36,16 @@
 #include "H5Opkg.h"      /* Object headers			*/
 
 /* PRIVATE PROTOTYPES */
-static void * H5O_link_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags,
+static void  *H5O_link_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags,
                               size_t p_size, const uint8_t *p);
 static herr_t H5O_link_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
-static void * H5O_link_copy(const void *_mesg, void *_dest);
+static void  *H5O_link_copy(const void *_mesg, void *_dest);
 static size_t H5O_link_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
 static herr_t H5O_link_reset(void *_mesg);
 static herr_t H5O_link_free(void *_mesg);
 static herr_t H5O_link_pre_copy_file(H5F_t *file_src, const void *mesg_src, hbool_t *deleted,
                                      const H5O_copy_t *cpy_info, void *udata);
-static void * H5O_link_copy_file(H5F_t *file_src, void *native_src, H5F_t *file_dst, hbool_t *recompute_size,
+static void  *H5O_link_copy_file(H5F_t *file_src, void *native_src, H5F_t *file_dst, hbool_t *recompute_size,
                                  unsigned *mesg_flags, H5O_copy_t *cpy_info, void *udata, hid_t dxpl_id);
 static herr_t H5O_link_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src, H5O_loc_t *dst_oloc,
                                       void *mesg_dst, unsigned *mesg_flags, hid_t dxpl_id,
@@ -117,11 +117,11 @@ H5O_link_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *op
                 unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags, size_t p_size,
                 const uint8_t *p)
 {
-    H5O_link_t *   lnk = NULL;         /* Pointer to link message */
+    H5O_link_t    *lnk = NULL;         /* Pointer to link message */
     size_t         len = 0;            /* Length of a string in the message */
     unsigned char  link_flags;         /* Flags for encoding link info */
     const uint8_t *p_end = p + p_size; /* End of the p buffer */
-    void *         ret_value;          /* Return value */
+    void          *ret_value;          /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -417,8 +417,8 @@ static void *
 H5O_link_copy(const void *_mesg, void *_dest)
 {
     const H5O_link_t *lnk  = (const H5O_link_t *)_mesg;
-    H5O_link_t *      dest = (H5O_link_t *)_dest;
-    void *            ret_value; /* Return value */
+    H5O_link_t       *dest = (H5O_link_t *)_dest;
+    void             *ret_value; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -728,7 +728,7 @@ H5O_link_copy_file(H5F_t H5_ATTR_UNUSED *file_src, void *native_src, H5F_t H5_AT
                    hid_t H5_ATTR_UNUSED dxpl_id)
 {
     H5O_link_t *link_src = (H5O_link_t *)native_src;
-    void *      ret_value; /* Return value */
+    void       *ret_value; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -767,7 +767,7 @@ H5O_link_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src, H5O_loc
                         unsigned H5_ATTR_UNUSED *mesg_flags, hid_t dxpl_id, H5O_copy_t *cpy_info)
 {
     const H5O_link_t *link_src  = (const H5O_link_t *)mesg_src;
-    H5O_link_t *      link_dst  = (H5O_link_t *)mesg_dst;
+    H5O_link_t       *link_dst  = (H5O_link_t *)mesg_dst;
     herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT

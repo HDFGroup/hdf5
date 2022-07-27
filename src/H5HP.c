@@ -195,7 +195,7 @@ static herr_t
 H5HP_sink_max(H5HP_t *heap, size_t loc)
 {
     int    val;                 /* Temporary copy value of object to move in heap */
-    void * obj;                 /* Temporary pointer to object to move in heap */
+    void  *obj;                 /* Temporary pointer to object to move in heap */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -263,7 +263,7 @@ static herr_t
 H5HP_sink_min(H5HP_t *heap, size_t loc)
 {
     int    val;                 /* Temporary copy value of object to move in heap */
-    void * obj;                 /* Temporary pointer to object to move in heap */
+    void  *obj;                 /* Temporary pointer to object to move in heap */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR

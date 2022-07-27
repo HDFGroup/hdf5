@@ -454,7 +454,7 @@ H5D__contig_collective_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_
                             H5D_chunk_map_t H5_ATTR_UNUSED *fm)
 {
     H5D_mpio_actual_io_mode_t actual_io_mode = H5D_MPIO_CONTIGUOUS_COLLECTIVE;
-    H5P_genplist_t *          dx_plist;            /* Pointer to DXPL */
+    H5P_genplist_t           *dx_plist;            /* Pointer to DXPL */
     herr_t                    ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -500,7 +500,7 @@ H5D__contig_collective_write(H5D_io_info_t *io_info, const H5D_type_info_t *type
                              H5D_chunk_map_t H5_ATTR_UNUSED *fm)
 {
     H5D_mpio_actual_io_mode_t actual_io_mode = H5D_MPIO_CONTIGUOUS_COLLECTIVE;
-    H5P_genplist_t *          dx_plist;            /* Pointer to DXPL */
+    H5P_genplist_t           *dx_plist;            /* Pointer to DXPL */
     herr_t                    ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -566,7 +566,7 @@ done:
 static herr_t
 H5D__chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, H5D_chunk_map_t *fm)
 {
-    H5P_genplist_t *      dx_plist; /* Pointer to DXPL */
+    H5P_genplist_t       *dx_plist; /* Pointer to DXPL */
     H5FD_mpio_chunk_opt_t chunk_opt_mode;
     int                   io_option = H5D_MULTI_CHUNK_IO_MORE_OPT;
     int                   sum_chunk = -1;
@@ -771,12 +771,12 @@ H5D__link_chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *typ
     hbool_t                chunk_final_ftype_is_derived = FALSE;
     H5D_storage_t          ctg_store; /* Storage info for "fake" contiguous dataset */
     size_t                 total_chunks;
-    haddr_t *              total_chunk_addr_array = NULL;
-    MPI_Datatype *         chunk_mtype            = NULL;
-    MPI_Datatype *         chunk_ftype            = NULL;
-    MPI_Aint *             chunk_disp_array       = NULL;
-    MPI_Aint *             chunk_mem_disp_array   = NULL;
-    hbool_t *              chunk_mft_is_derived_array =
+    haddr_t               *total_chunk_addr_array = NULL;
+    MPI_Datatype          *chunk_mtype            = NULL;
+    MPI_Datatype          *chunk_ftype            = NULL;
+    MPI_Aint              *chunk_disp_array       = NULL;
+    MPI_Aint              *chunk_mem_disp_array   = NULL;
+    hbool_t               *chunk_mft_is_derived_array =
         NULL; /* Flags to indicate each chunk's MPI file datatype is derived */
     hbool_t *chunk_mbt_is_derived_array =
         NULL;                          /* Flags to indicate each chunk's MPI memory datatype is derived */
@@ -814,8 +814,8 @@ H5D__link_chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *typ
      */
     if (total_chunks == 1) {
         H5SL_node_t *chunk_node; /* Pointer to chunk node for selection */
-        H5S_t *      fspace;     /* Dataspace describing chunk & selection in it */
-        H5S_t *      mspace;     /* Dataspace describing selection in memory corresponding to this chunk */
+        H5S_t       *fspace;     /* Dataspace describing chunk & selection in it */
+        H5S_t       *mspace;     /* Dataspace describing selection in memory corresponding to this chunk */
 
         /* Check for this process having selection in this chunk */
         chunk_node = H5SL_first(fm->sel_chunks);
@@ -1107,8 +1107,8 @@ H5D__multi_chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *ty
     H5D_io_info_t    cpt_io_info; /* Compact I/O info object */
     H5D_storage_t    cpt_store;   /* Chunk storage information as compact dataset */
     hbool_t          cpt_dirty;   /* Temporary placeholder for compact storage "dirty" flag */
-    uint8_t *        chunk_io_option = NULL;
-    haddr_t *        chunk_addr      = NULL;
+    uint8_t         *chunk_io_option = NULL;
+    haddr_t         *chunk_addr      = NULL;
     H5D_storage_t    store; /* union of EFL and chunk pointer in file space */
     H5FD_mpio_xfer_t last_xfer_mode =
         H5FD_MPIO_COLLECTIVE; /* Last parallel transfer for this request (H5D_XFER_IO_XFER_MODE_NAME) */
@@ -1174,8 +1174,8 @@ H5D__multi_chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *ty
     /* Loop over _all_ the chunks */
     for (u = 0; u < total_chunk; u++) {
         H5D_chunk_info_t *chunk_info; /* Chunk info for current chunk */
-        H5S_t *           fspace;     /* Dataspace describing chunk & selection in it */
-        H5S_t *           mspace; /* Dataspace describing selection in memory corresponding to this chunk */
+        H5S_t            *fspace;     /* Dataspace describing chunk & selection in it */
+        H5S_t            *mspace; /* Dataspace describing selection in memory corresponding to this chunk */
 
 #ifdef H5D_DEBUG
         if (H5DEBUG(D))
@@ -1501,7 +1501,7 @@ static herr_t
 H5D__sort_chunk(H5D_io_info_t *io_info, const H5D_chunk_map_t *fm,
                 H5D_chunk_addr_info_t chunk_addr_info_array[], int sum_chunk)
 {
-    H5SL_node_t *     chunk_node;            /* Current node in chunk skip list */
+    H5SL_node_t      *chunk_node;            /* Current node in chunk skip list */
     H5D_chunk_info_t *chunk_info;            /* Current chunking info. of this node. */
     haddr_t           chunk_addr;            /* Current chunking address of this node */
     haddr_t *total_chunk_addr_array = NULL;  /* The array of chunk address for the total number of chunk */
@@ -1661,11 +1661,11 @@ H5D__obtain_mpio_mode(H5D_io_info_t *io_info, H5D_chunk_map_t *fm, H5P_genplist_
 {
     int               total_chunks;
     unsigned          percent_nproc_per_chunk, threshold_nproc_per_chunk;
-    uint8_t *         io_mode_info      = NULL;
-    uint8_t *         recv_io_mode_info = NULL;
-    uint8_t *         mergebuf          = NULL;
-    uint8_t *         tempbuf;
-    H5SL_node_t *     chunk_node;
+    uint8_t          *io_mode_info      = NULL;
+    uint8_t          *recv_io_mode_info = NULL;
+    uint8_t          *mergebuf          = NULL;
+    uint8_t          *tempbuf;
+    H5SL_node_t      *chunk_node;
     H5D_chunk_info_t *chunk_info;
     int               mpi_size, mpi_rank;
     MPI_Comm          comm;

@@ -40,10 +40,10 @@
 
 /* Udata struct for calls to H5SM_read_iter_op */
 typedef struct H5SM_read_udata_t {
-    H5F_t *           file;         /* File in which sharing is happening (in) */
+    H5F_t            *file;         /* File in which sharing is happening (in) */
     H5O_msg_crt_idx_t idx;          /* Creation index of this message (in) */
     size_t            buf_size;     /* Size of the encoded message (out) */
-    void *            encoding_buf; /* The encoded message (out) */
+    void             *encoding_buf; /* The encoded message (out) */
 } H5SM_read_udata_t;
 
 /********************/
@@ -63,7 +63,7 @@ static herr_t  H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, H5SM_ind
 static herr_t  H5SM_decr_ref(void *record, void *op_data, hbool_t *changed);
 static herr_t  H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, H5SM_index_header_t *header,
                                       const H5O_shared_t *mesg, unsigned *cache_flags,
-                                      size_t * /*out*/ mesg_size, void ** /*out*/ encoded_mesg);
+                                      size_t  */*out*/ mesg_size, void  **/*out*/ encoded_mesg);
 static herr_t  H5SM_type_to_flag(unsigned type_id, unsigned *type_flag);
 static herr_t  H5SM_read_iter_op(H5O_t *oh, H5O_mesg_t *mesg, unsigned sequence, unsigned *oh_modified,
                                  void *_udata);
@@ -384,7 +384,7 @@ done:
 herr_t
 H5SM_get_fheap_addr(H5F_t *f, hid_t dxpl_id, unsigned type_id, haddr_t *fheap_addr)
 {
-    H5SM_master_table_t * table = NULL;        /* Shared object master table */
+    H5SM_master_table_t  *table = NULL;        /* Shared object master table */
     H5SM_table_cache_ud_t cache_udata;         /* User-data for callback */
     ssize_t               index_num;           /* Which index */
     herr_t                ret_value = SUCCEED; /* Return value */
@@ -434,8 +434,8 @@ static herr_t
 H5SM_create_index(H5F_t *f, H5SM_index_header_t *header, hid_t dxpl_id)
 {
     H5HF_create_t fheap_cparam;     /* Fractal heap creation parameters */
-    H5HF_t *      fheap     = NULL; /* Fractal heap handle */
-    H5B2_t *      bt2       = NULL; /* v2 B-tree handle for index */
+    H5HF_t       *fheap     = NULL; /* Fractal heap handle */
+    H5B2_t       *bt2       = NULL; /* v2 B-tree handle for index */
     herr_t        ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -684,14 +684,14 @@ static herr_t
 H5SM_convert_list_to_btree(H5F_t *f, H5SM_index_header_t *header, H5SM_list_t **_list, H5HF_t *fheap,
                            H5O_t *open_oh, hid_t dxpl_id)
 {
-    H5SM_list_t *   list;         /* Pointer to the existing message list */
+    H5SM_list_t    *list;         /* Pointer to the existing message list */
     H5SM_mesg_key_t key;          /* Key for inserting records in v2 B-tree */
     H5B2_create_t   bt2_cparam;   /* v2 B-tree creation parameters */
-    H5B2_t *        bt2 = NULL;   /* v2 B-tree handle for index */
+    H5B2_t         *bt2 = NULL;   /* v2 B-tree handle for index */
     haddr_t         tree_addr;    /* New v2 B-tree's address */
     size_t          num_messages; /* Number of messages being tracked */
     size_t          x;
-    void *          encoding_buf = NULL;
+    void           *encoding_buf = NULL;
     herr_t          ret_value    = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -792,7 +792,7 @@ done:
 static herr_t
 H5SM_convert_btree_to_list(H5F_t *f, H5SM_index_header_t *header, hid_t dxpl_id)
 {
-    H5SM_list_t *        list = NULL;
+    H5SM_list_t         *list = NULL;
     H5SM_list_cache_ud_t cache_udata; /* User-data for metadata cache callback */
     haddr_t              btree_addr;
     herr_t               ret_value = SUCCEED;
@@ -1019,7 +1019,7 @@ htri_t
 H5SM_try_share(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned defer_flags, unsigned type_id, void *mesg,
                unsigned *mesg_flags)
 {
-    H5SM_master_table_t * table = NULL;
+    H5SM_master_table_t  *table = NULL;
     H5SM_table_cache_ud_t cache_udata; /* User-data for callback */
     unsigned              cache_flags = H5AC__NO_FLAGS_SET;
     ssize_t               index_num;
@@ -1131,7 +1131,7 @@ done:
 static herr_t
 H5SM_incr_ref(void *record, void *_op_data, hbool_t *changed)
 {
-    H5SM_sohm_t *         message   = (H5SM_sohm_t *)record;
+    H5SM_sohm_t          *message   = (H5SM_sohm_t *)record;
     H5SM_incr_ref_opdata *op_data   = (H5SM_incr_ref_opdata *)_op_data;
     herr_t                ret_value = SUCCEED;
 
@@ -1208,15 +1208,15 @@ static herr_t
 H5SM_write_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, H5SM_index_header_t *header, hbool_t defer,
                 unsigned type_id, void *mesg, unsigned *cache_flags_ptr)
 {
-    H5SM_list_t *        list = NULL;          /* List index */
+    H5SM_list_t         *list = NULL;          /* List index */
     H5SM_mesg_key_t      key;                  /* Key used to search the index */
     H5SM_list_cache_ud_t cache_udata;          /* User-data for metadata cache callback */
     H5O_shared_t         shared;               /* Shared H5O message */
     hbool_t              found = FALSE;        /* Was the message in the index? */
-    H5HF_t *             fheap = NULL;         /* Fractal heap handle */
-    H5B2_t *             bt2   = NULL;         /* v2 B-tree handle for index */
+    H5HF_t              *fheap = NULL;         /* Fractal heap handle */
+    H5B2_t              *bt2   = NULL;         /* v2 B-tree handle for index */
     size_t               buf_size;             /* Size of the encoded message */
-    void *               encoding_buf = NULL;  /* Buffer for encoded message */
+    void                *encoding_buf = NULL;  /* Buffer for encoded message */
     size_t               empty_pos    = UFAIL; /* Empty entry in list */
     herr_t               ret_value    = SUCCEED;
 
@@ -1501,13 +1501,13 @@ done:
 herr_t
 H5SM_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, H5O_shared_t *sh_mesg)
 {
-    H5SM_master_table_t * table       = NULL;
+    H5SM_master_table_t  *table       = NULL;
     unsigned              cache_flags = H5AC__NO_FLAGS_SET;
     H5SM_table_cache_ud_t cache_udata; /* User-data for callback */
     ssize_t               index_num;
     size_t                mesg_size   = 0;
-    void *                mesg_buf    = NULL;
-    void *                native_mesg = NULL;
+    void                 *mesg_buf    = NULL;
+    void                 *native_mesg = NULL;
     unsigned              type_id; /* Message type ID to operate on */
     herr_t                ret_value = SUCCEED;
 
@@ -1735,14 +1735,14 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, H5SM_index_heade
                        const H5O_shared_t *mesg, unsigned *cache_flags, size_t * /*out*/ mesg_size,
                        void ** /*out*/ encoded_mesg)
 {
-    H5SM_list_t *   list = NULL;
+    H5SM_list_t    *list = NULL;
     H5SM_mesg_key_t key;
     H5SM_sohm_t     message;             /* Deleted message returned from index */
-    H5SM_sohm_t *   message_ptr;         /* Pointer to deleted message returned from index */
-    H5HF_t *        fheap = NULL;        /* Fractal heap that contains the message */
-    H5B2_t *        bt2   = NULL;        /* v2 B-tree handle for index */
+    H5SM_sohm_t    *message_ptr;         /* Pointer to deleted message returned from index */
+    H5HF_t         *fheap = NULL;        /* Fractal heap that contains the message */
+    H5B2_t         *bt2   = NULL;        /* v2 B-tree handle for index */
     size_t          buf_size;            /* Size of the encoded message (out) */
-    void *          encoding_buf = NULL; /* The encoded message (out) */
+    void           *encoding_buf = NULL; /* The encoded message (out) */
     unsigned        type_id;             /* Message type to operate on */
     herr_t          ret_value = SUCCEED;
 
@@ -1931,7 +1931,7 @@ done:
 herr_t
 H5SM_get_info(const H5O_loc_t *ext_loc, H5P_genplist_t *fc_plist, hid_t dxpl_id)
 {
-    H5F_t *              f = ext_loc->file;   /* File pointer (convenience variable) */
+    H5F_t               *f = ext_loc->file;   /* File pointer (convenience variable) */
     H5O_shmesg_table_t   sohm_table;          /* SOHM message from superblock extension */
     H5SM_master_table_t *table = NULL;        /* SOHM master table */
     unsigned             tmp_sohm_nindexes;   /* Number of shared messages indexes in the table */
@@ -2079,7 +2079,7 @@ static herr_t
 H5SM_get_refcount_bt2_cb(const void *_record, void *_op_data)
 {
     const H5SM_sohm_t *record  = (const H5SM_sohm_t *)_record; /* v2 B-tree record for message */
-    H5SM_sohm_t *      op_data = (H5SM_sohm_t *)_op_data;      /* "op data" from v2 B-tree find */
+    H5SM_sohm_t       *op_data = (H5SM_sohm_t *)_op_data;      /* "op data" from v2 B-tree find */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -2110,17 +2110,17 @@ H5SM_get_refcount_bt2_cb(const void *_record, void *_op_data)
 herr_t
 H5SM_get_refcount(H5F_t *f, hid_t dxpl_id, unsigned type_id, const H5O_shared_t *sh_mesg, hsize_t *ref_count)
 {
-    H5HF_t *              fheap = NULL;           /* Fractal heap that contains shared messages */
-    H5B2_t *              bt2   = NULL;           /* v2 B-tree handle for index */
-    H5SM_master_table_t * table = NULL;           /* SOHM master table */
+    H5HF_t               *fheap = NULL;           /* Fractal heap that contains shared messages */
+    H5B2_t               *bt2   = NULL;           /* v2 B-tree handle for index */
+    H5SM_master_table_t  *table = NULL;           /* SOHM master table */
     H5SM_table_cache_ud_t tbl_cache_udata;        /* User-data for callback */
-    H5SM_list_t *         list   = NULL;          /* SOHM index list for message type (if in list form) */
-    H5SM_index_header_t * header = NULL;          /* Index header for message type */
+    H5SM_list_t          *list   = NULL;          /* SOHM index list for message type (if in list form) */
+    H5SM_index_header_t  *header = NULL;          /* Index header for message type */
     H5SM_mesg_key_t       key;                    /* Key for looking up message */
     H5SM_sohm_t           message;                /* Shared message returned from callback */
     ssize_t               index_num;              /* Table index for message type */
     size_t                buf_size;               /* Size of the encoded message */
-    void *                encoding_buf = NULL;    /* Buffer for encoded message */
+    void                 *encoding_buf = NULL;    /* Buffer for encoded message */
     herr_t                ret_value    = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -2338,7 +2338,7 @@ H5SM_read_mesg(H5F_t *f, const H5SM_sohm_t *mesg, H5HF_t *fheap, H5O_t *open_oh,
 {
     H5SM_read_udata_t udata;            /* User data for callbacks */
     H5O_loc_t         oloc;             /* Object location for message in object header */
-    H5O_t *           oh        = NULL; /* Object header for message in object header */
+    H5O_t            *oh        = NULL; /* Object header for message in object header */
     herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -2492,7 +2492,7 @@ herr_t
 H5SM_table_debug(H5F_t *f, hid_t dxpl_id, haddr_t table_addr, FILE *stream, int indent, int fwidth,
                  unsigned table_vers, unsigned num_indexes)
 {
-    H5SM_master_table_t * table = NULL;        /* SOHM master table */
+    H5SM_master_table_t  *table = NULL;        /* SOHM master table */
     H5SM_table_cache_ud_t cache_udata;         /* User-data for callback */
     unsigned              x;                   /* Counter variable */
     herr_t                ret_value = SUCCEED; /* Return value */
@@ -2582,7 +2582,7 @@ H5SM_list_debug(H5F_t *f, hid_t dxpl_id, haddr_t list_addr, FILE *stream, int in
                 unsigned table_vers, size_t num_messages)
 {
 
-    H5SM_list_t *        list = NULL;         /* SOHM index list for message type (if in list form) */
+    H5SM_list_t         *list = NULL;         /* SOHM index list for message type (if in list form) */
     H5SM_index_header_t  header;              /* A "false" header used to read the list */
     H5SM_list_cache_ud_t cache_udata;         /* User-data for metadata cache callback */
     unsigned             x;                   /* Counter variable */
@@ -2669,10 +2669,10 @@ done:
 herr_t
 H5SM_ih_size(H5F_t *f, hid_t dxpl_id, H5F_info_t *finfo)
 {
-    H5SM_master_table_t * table = NULL;        /* SOHM master table */
+    H5SM_master_table_t  *table = NULL;        /* SOHM master table */
     H5SM_table_cache_ud_t cache_udata;         /* User-data for callback */
-    H5HF_t *              fheap = NULL;        /* Fractal heap handle */
-    H5B2_t *              bt2   = NULL;        /* v2 B-tree handle for index */
+    H5HF_t               *fheap = NULL;        /* Fractal heap handle */
+    H5B2_t               *bt2   = NULL;        /* v2 B-tree handle for index */
     unsigned              u;                   /* Local index variable */
     herr_t                ret_value = SUCCEED; /* Return value */
 

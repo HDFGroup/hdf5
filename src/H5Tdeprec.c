@@ -137,7 +137,7 @@ herr_t
 H5Tcommit1(hid_t loc_id, const char *name, hid_t type_id)
 {
     H5G_loc_t loc;                 /* Location to create datatype */
-    H5T_t *   type;                /* Datatype for ID */
+    H5T_t    *type;                /* Datatype for ID */
     herr_t    ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -179,7 +179,7 @@ done:
 hid_t
 H5Topen1(hid_t loc_id, const char *name)
 {
-    H5T_t *    type = NULL;
+    H5T_t     *type = NULL;
     H5G_loc_t  loc;
     H5G_name_t path;                         /* Datatype group hier. path */
     H5O_loc_t  oloc;                         /* Datatype object location */

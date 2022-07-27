@@ -85,9 +85,9 @@
 htri_t
 H5O_is_attr_dense_test(hid_t oid)
 {
-    H5O_t *     oh = NULL;        /* Object header */
+    H5O_t      *oh = NULL;        /* Object header */
     H5O_ainfo_t ainfo;            /* Attribute information for object */
-    H5O_loc_t * loc;              /* Pointer to object's location */
+    H5O_loc_t  *loc;              /* Pointer to object's location */
     htri_t      ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -146,11 +146,11 @@ done:
 htri_t
 H5O_is_attr_empty_test(hid_t oid)
 {
-    H5O_t *     oh       = NULL;      /* Object header */
-    H5B2_t *    bt2_name = NULL;      /* v2 B-tree handle for name index */
+    H5O_t      *oh       = NULL;      /* Object header */
+    H5B2_t     *bt2_name = NULL;      /* v2 B-tree handle for name index */
     H5O_ainfo_t ainfo;                /* Attribute information for object */
     htri_t      ainfo_exists = FALSE; /* Whether the attribute info exists in the file */
-    H5O_loc_t * loc;                  /* Pointer to object's location */
+    H5O_loc_t  *loc;                  /* Pointer to object's location */
     hsize_t     nattrs;               /* Number of attributes */
     htri_t      ret_value = FAIL;     /* Return value */
 
@@ -234,10 +234,10 @@ done:
 herr_t
 H5O_num_attrs_test(hid_t oid, hsize_t *nattrs)
 {
-    H5O_t *     oh       = NULL;     /* Object header */
-    H5B2_t *    bt2_name = NULL;     /* v2 B-tree handle for name index */
+    H5O_t      *oh       = NULL;     /* Object header */
+    H5B2_t     *bt2_name = NULL;     /* v2 B-tree handle for name index */
     H5O_ainfo_t ainfo;               /* Attribute information for object */
-    H5O_loc_t * loc;                 /* Pointer to object's location */
+    H5O_loc_t  *loc;                 /* Pointer to object's location */
     hsize_t     obj_nattrs;          /* Number of attributes */
     herr_t      ret_value = SUCCEED; /* Return value */
 
@@ -319,11 +319,11 @@ done:
 herr_t
 H5O_attr_dense_info_test(hid_t oid, hsize_t *name_count, hsize_t *corder_count)
 {
-    H5O_t *     oh         = NULL;   /* Object header */
-    H5B2_t *    bt2_name   = NULL;   /* v2 B-tree handle for name index */
-    H5B2_t *    bt2_corder = NULL;   /* v2 B-tree handle for creation order index */
+    H5O_t      *oh         = NULL;   /* Object header */
+    H5B2_t     *bt2_name   = NULL;   /* v2 B-tree handle for name index */
+    H5B2_t     *bt2_corder = NULL;   /* v2 B-tree handle for creation order index */
     H5O_ainfo_t ainfo;               /* Attribute information for object */
-    H5O_loc_t * loc;                 /* Pointer to object's location */
+    H5O_loc_t  *loc;                 /* Pointer to object's location */
     herr_t      ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -408,8 +408,8 @@ done:
 herr_t
 H5O_check_msg_marked_test(hid_t oid, hbool_t flag_val)
 {
-    H5O_t *     oh = NULL;           /* Object header */
-    H5O_loc_t * loc;                 /* Pointer to object's location */
+    H5O_t      *oh = NULL;           /* Object header */
+    H5O_loc_t  *loc;                 /* Pointer to object's location */
     H5O_mesg_t *idx_msg;             /* Pointer to message */
     unsigned    idx;                 /* Index of message */
     herr_t      ret_value = SUCCEED; /* Return value */
@@ -471,7 +471,7 @@ done:
 herr_t
 H5O_expunge_chunks_test(const H5O_loc_t *loc, hid_t dxpl_id)
 {
-    H5O_t * oh = NULL;           /* Object header */
+    H5O_t  *oh = NULL;           /* Object header */
     haddr_t chk_addr[16];        /* Array of chunk addresses */
     size_t  nchunks;             /* Number of chunks in object header */
     size_t  u;                   /* Local index variable */

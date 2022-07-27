@@ -76,7 +76,7 @@ static hid_t H5FD_MULTI_g = 0;
 typedef struct H5FD_multi_fapl_t {
     H5FD_mem_t memb_map[H5FD_MEM_NTYPES];  /*memory usage map              */
     hid_t      memb_fapl[H5FD_MEM_NTYPES]; /*member access properties      */
-    char *     memb_name[H5FD_MEM_NTYPES]; /*name generators               */
+    char      *memb_name[H5FD_MEM_NTYPES]; /*name generators               */
     haddr_t    memb_addr[H5FD_MEM_NTYPES]; /*starting addr per member      */
     hbool_t    relax;                      /*less stringent error checking */
 } H5FD_multi_fapl_t;
@@ -91,14 +91,14 @@ typedef struct H5FD_multi_t {
     H5FD_t            pub;                        /*public stuff, must be first               */
     H5FD_multi_fapl_t fa;                         /*driver-specific file access properties    */
     haddr_t           memb_next[H5FD_MEM_NTYPES]; /*addr of next member                       */
-    H5FD_t *          memb[H5FD_MEM_NTYPES];      /*member pointers                           */
+    H5FD_t           *memb[H5FD_MEM_NTYPES];      /*member pointers                           */
     haddr_t           memb_eoa[H5FD_MEM_NTYPES];  /*EOA for individual files,
                                                    *end of allocated addresses.  v1.6 library
                                                    *have the EOA for the entire file. But it's
                                                    *meaningless for MULTI file.  We replaced it
                                                    *with the EOAs for individual files        */
     unsigned flags;                               /*file open flags saved for debugging       */
-    char *   name;                                /*name passed to H5Fopen or H5Fcreate       */
+    char    *name;                                /*name passed to H5Fopen or H5Fcreate       */
 } H5FD_multi_t;
 
 /* Driver specific data transfer properties */
@@ -115,8 +115,8 @@ static int   open_members(H5FD_multi_t *file);
 static hsize_t H5FD_multi_sb_size(H5FD_t *file);
 static herr_t  H5FD_multi_sb_encode(H5FD_t *file, char *name /*out*/, unsigned char *buf /*out*/);
 static herr_t  H5FD_multi_sb_decode(H5FD_t *file, const char *name, const unsigned char *buf);
-static void *  H5FD_multi_fapl_get(H5FD_t *file);
-static void *  H5FD_multi_fapl_copy(const void *_old_fa);
+static void   *H5FD_multi_fapl_get(H5FD_t *file);
+static void   *H5FD_multi_fapl_copy(const void *_old_fa);
 static herr_t  H5FD_multi_fapl_free(void *_fa);
 static H5FD_t *H5FD_multi_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr);
 static herr_t  H5FD_multi_close(H5FD_t *_file);
@@ -188,7 +188,7 @@ static const H5FD_class_t H5FD_multi_g = {
 static char *
 my_strdup(const char *s)
 {
-    char * x;
+    char  *x;
     size_t str_len;
 
     if (!s)
@@ -422,7 +422,7 @@ H5Pset_fapl_multi(hid_t fapl_id, const H5FD_mem_t *memb_map, const hid_t *memb_f
     H5FD_mem_t         _memb_map[H5FD_MEM_NTYPES];
     hid_t              _memb_fapl[H5FD_MEM_NTYPES];
     char               _memb_name[H5FD_MEM_NTYPES][16];
-    const char *       _memb_name_ptrs[H5FD_MEM_NTYPES];
+    const char        *_memb_name_ptrs[H5FD_MEM_NTYPES];
     haddr_t            _memb_addr[H5FD_MEM_NTYPES];
     static const char *letters = "Xsbrglo";
     static const char *func    = "H5FDset_fapl_multi"; /* Function Name for error reporting */
@@ -519,7 +519,7 @@ H5Pget_fapl_multi(hid_t fapl_id, H5FD_mem_t *memb_map /*out*/, hid_t *memb_fapl 
 {
     const H5FD_multi_fapl_t *fa;
     H5FD_mem_t               mt;
-    static const char *      func = "H5FDget_fapl_multi"; /* Function Name for error reporting */
+    static const char       *func = "H5FDget_fapl_multi"; /* Function Name for error reporting */
 
     /*NO TRACE*/
 
@@ -629,9 +629,9 @@ H5FD_multi_sb_size(H5FD_t *_file)
 static herr_t
 H5FD_multi_sb_encode(H5FD_t *_file, char *name /*out*/, unsigned char *buf /*out*/)
 {
-    H5FD_multi_t *     file = (H5FD_multi_t *)_file;
+    H5FD_multi_t      *file = (H5FD_multi_t *)_file;
     haddr_t            memb_eoa;
-    unsigned char *    p;
+    unsigned char     *p;
     size_t             nseen;
     size_t             i;
     H5FD_mem_t         m;
@@ -710,17 +710,17 @@ H5FD_multi_sb_encode(H5FD_t *_file, char *name /*out*/, unsigned char *buf /*out
 static herr_t
 H5FD_multi_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
 {
-    H5FD_multi_t *     file = (H5FD_multi_t *)_file;
+    H5FD_multi_t      *file = (H5FD_multi_t *)_file;
     char               x[2 * H5FD_MEM_NTYPES * 8];
     H5FD_mem_t         map[H5FD_MEM_NTYPES];
     int                i;
     size_t             nseen       = 0;
     hbool_t            map_changed = FALSE;
     hbool_t            in_use[H5FD_MEM_NTYPES];
-    const char *       memb_name[H5FD_MEM_NTYPES];
+    const char        *memb_name[H5FD_MEM_NTYPES];
     haddr_t            memb_addr[H5FD_MEM_NTYPES];
     haddr_t            memb_eoa[H5FD_MEM_NTYPES];
-    haddr_t *          ap;
+    haddr_t           *ap;
     static const char *func = "H5FD_multi_sb_decode"; /* Function Name for error reporting */
 
     /* Clear the error stack */
@@ -884,9 +884,9 @@ static void *
 H5FD_multi_fapl_copy(const void *_old_fa)
 {
     const H5FD_multi_fapl_t *old_fa  = (const H5FD_multi_fapl_t *)_old_fa;
-    H5FD_multi_fapl_t *      new_fa  = (H5FD_multi_fapl_t *)malloc(sizeof(H5FD_multi_fapl_t));
+    H5FD_multi_fapl_t       *new_fa  = (H5FD_multi_fapl_t *)malloc(sizeof(H5FD_multi_fapl_t));
     int                      nerrors = 0;
-    static const char *      func    = "H5FD_multi_fapl_copy"; /* Function Name for error reporting */
+    static const char       *func    = "H5FD_multi_fapl_copy"; /* Function Name for error reporting */
 
     assert(new_fa);
 
@@ -976,11 +976,11 @@ H5FD_multi_fapl_free(void *_fa)
 static H5FD_t *
 H5FD_multi_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
-    H5FD_multi_t *           file       = NULL;
+    H5FD_multi_t            *file       = NULL;
     hid_t                    close_fapl = -1;
     const H5FD_multi_fapl_t *fa;
     H5FD_mem_t               m;
-    static const char *      func = "H5FD_multi_open"; /* Function Name for error reporting */
+    static const char       *func = "H5FD_multi_open"; /* Function Name for error reporting */
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
@@ -1078,7 +1078,7 @@ error:
 static herr_t
 H5FD_multi_close(H5FD_t *_file)
 {
-    H5FD_multi_t *     file    = (H5FD_multi_t *)_file;
+    H5FD_multi_t      *file    = (H5FD_multi_t *)_file;
     int                nerrors = 0;
     static const char *func    = "H5FD_multi_close"; /* Function Name for error reporting */
 
@@ -1239,7 +1239,7 @@ H5FD_multi_get_eoa(const H5FD_t *_file, H5FD_mem_t type)
     const H5FD_multi_t *file     = (const H5FD_multi_t *)_file;
     haddr_t             eoa      = 0;
     haddr_t             memb_eoa = 0;
-    static const char * func     = "H5FD_multi_get_eoa"; /* Function Name for error reporting */
+    static const char  *func     = "H5FD_multi_get_eoa"; /* Function Name for error reporting */
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
@@ -1336,7 +1336,7 @@ H5FD_multi_get_eoa(const H5FD_t *_file, H5FD_mem_t type)
 static herr_t
 H5FD_multi_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t eoa)
 {
-    H5FD_multi_t *     file = (H5FD_multi_t *)_file;
+    H5FD_multi_t      *file = (H5FD_multi_t *)_file;
     H5FD_mem_t         mmt;
     herr_t             status;
     static const char *func = "H5FD_multi_set_eoa"; /* Function Name for error reporting */
@@ -1398,7 +1398,7 @@ H5FD_multi_get_eof(const H5FD_t *_file)
     const H5FD_multi_t *file = (const H5FD_multi_t *)_file;
     haddr_t             eof  = 0, tmp_eof;
     haddr_t             eoa  = 0, tmp_eoa;
-    static const char * func = "H5FD_multi_get_eof"; /* Function Name for error reporting */
+    static const char  *func = "H5FD_multi_get_eof"; /* Function Name for error reporting */
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
@@ -1471,7 +1471,7 @@ H5FD_multi_get_eof(const H5FD_t *_file)
 static herr_t
 H5FD_multi_get_handle(H5FD_t *_file, hid_t fapl, void **file_handle)
 {
-    H5FD_multi_t *     file = (H5FD_multi_t *)_file;
+    H5FD_multi_t      *file = (H5FD_multi_t *)_file;
     H5FD_mem_t         type, mmt;
     static const char *func = "H5FD_multi_get_handle"; /* Function Name for error reporting */
 
@@ -1505,7 +1505,7 @@ H5FD_multi_get_handle(H5FD_t *_file, hid_t fapl, void **file_handle)
 static haddr_t
 H5FD_multi_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
 {
-    H5FD_multi_t *     file = (H5FD_multi_t *)_file;
+    H5FD_multi_t      *file = (H5FD_multi_t *)_file;
     H5FD_mem_t         mmt;
     haddr_t            addr;
     static const char *func = "H5FD_multi_alloc"; /* Function Name for error reporting */
@@ -1587,7 +1587,7 @@ H5FD_multi_free(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsi
 static herr_t
 H5FD_multi_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size, void *_buf /*out*/)
 {
-    H5FD_multi_t *    file = (H5FD_multi_t *)_file;
+    H5FD_multi_t     *file = (H5FD_multi_t *)_file;
     H5FD_multi_dxpl_t dx;
     htri_t            prop_exists = FALSE; /* Whether the multi VFD DXPL property already exists */
     H5FD_mem_t        mt, mmt, hi = H5FD_MEM_DEFAULT;
@@ -1636,7 +1636,7 @@ H5FD_multi_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, siz
 static herr_t
 H5FD_multi_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size, const void *_buf)
 {
-    H5FD_multi_t *    file = (H5FD_multi_t *)_file;
+    H5FD_multi_t     *file = (H5FD_multi_t *)_file;
     H5FD_multi_dxpl_t dx;
     htri_t            prop_exists = FALSE; /* Whether the multi VFD DXPL property already exists */
     H5FD_mem_t        mt, mmt, hi = H5FD_MEM_DEFAULT;
@@ -1683,7 +1683,7 @@ H5FD_multi_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, si
 static herr_t
 H5FD_multi_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing)
 {
-    H5FD_multi_t *     file = (H5FD_multi_t *)_file;
+    H5FD_multi_t      *file = (H5FD_multi_t *)_file;
     H5FD_mem_t         mt;
     int                nerrors = 0;
     static const char *func    = "H5FD_multi_flush"; /* Function Name for error reporting */
@@ -1756,7 +1756,7 @@ H5FD_multi_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing)
 static herr_t
 H5FD_multi_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
 {
-    H5FD_multi_t *     file = (H5FD_multi_t *)_file;
+    H5FD_multi_t      *file = (H5FD_multi_t *)_file;
     H5FD_mem_t         mt;
     int                nerrors = 0;
     static const char *func    = "H5FD_multi_truncate"; /* Function Name for error reporting */

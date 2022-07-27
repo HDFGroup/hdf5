@@ -48,10 +48,10 @@ main(void)
 {
     hid_t       fapl = H5P_DEFAULT; /* file access properties   */
     hid_t       file = -1;          /* hdf5 file                */
-    H5F_t *     f    = NULL;        /* hdf5 file pointer        */
+    H5F_t      *f    = NULL;        /* hdf5 file pointer        */
     char        filename[1024];     /* file name                */
     haddr_t     heap_addr;          /* local heap address       */
-    H5HL_t *    heap = NULL;        /* local heap               */
+    H5HL_t     *heap = NULL;        /* local heap               */
     size_t      obj[NOBJS];         /* offsets within the heap  */
     int         i, j;               /* miscellaneous counters   */
     char        buf[1024];          /* the value to store       */

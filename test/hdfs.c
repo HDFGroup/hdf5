@@ -419,7 +419,7 @@ test_fapl_config_validation(void)
      *************************/
 
     struct testcase {
-        const char *     msg;
+        const char      *msg;
         herr_t           expected;
         H5FD_hdfs_fapl_t config;
     };
@@ -794,7 +794,7 @@ test_vfd_open(void)
     };
     unsigned i                        = 0;
     unsigned failing_conditions_count = 10;
-    H5FD_t * fd                       = NULL;
+    H5FD_t  *fd                       = NULL;
     hid_t    fapl_hdfs                = -1;
     hid_t    fapl_unconfigured        = -1;
 
@@ -1030,7 +1030,7 @@ test_H5FDread_without_eoa_set_fails(void)
 {
     char         buffer[HDFS_TEST_MAX_BUF_SIZE];
     unsigned int i                = 0;
-    H5FD_t *     file_shakespeare = NULL;
+    H5FD_t      *file_shakespeare = NULL;
     hid_t        fapl_id          = -1;
 
     TESTING("HDFS VFD read-eoa temporal coupling library limitation");
@@ -1194,7 +1194,7 @@ test_read(void)
     herr_t          open_return = FAIL;
     char            buffer[HDFS_TEST_MAX_BUF_SIZE];
     unsigned int    i          = 0;
-    H5FD_t *        file_raven = NULL;
+    H5FD_t         *file_raven = NULL;
     hid_t           fapl_id    = -1;
 
     TESTING("HDFS VFD read/range-gets");
@@ -1326,7 +1326,7 @@ test_noops_and_autofails(void)
      ************************/
 
     hid_t      fapl_id  = -1;
-    H5FD_t *   file     = NULL;
+    H5FD_t    *file     = NULL;
     const char data[36] = "The Force shall be with you, always";
 
     TESTING("HDFS VFD always-fail and no-op routines");

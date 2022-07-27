@@ -44,8 +44,8 @@ FILE *fpGif = NULL;
 int
 main(int argc, char **argv)
 {
-    GIFBYTE *   Image;
-    void *      edata;
+    GIFBYTE    *Image;
+    void       *edata;
     H5E_auto2_t func;
 
     /* compression structs */

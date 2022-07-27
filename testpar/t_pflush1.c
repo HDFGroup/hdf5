@@ -117,7 +117,7 @@ main(int argc, char *argv[])
     hid_t       fid1    = H5I_INVALID_HID;
     hid_t       fid2    = H5I_INVALID_HID;
     hid_t       fapl_id = H5I_INVALID_HID;
-    MPI_File *  mpifh_p = NULL;
+    MPI_File   *mpifh_p = NULL;
     char        name[1024];
     const char *envval = NULL;
     int         mpi_size;

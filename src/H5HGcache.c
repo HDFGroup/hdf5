@@ -102,7 +102,7 @@ static H5HG_heap_t *
 H5HG_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata)
 {
     H5HG_heap_t *heap = NULL;
-    uint8_t *    p;
+    uint8_t     *p;
     size_t       nalloc, need;
     size_t       max_idx   = 0;    /* The maximum index seen */
     H5HG_heap_t *ret_value = NULL; /* Return value */

@@ -25,7 +25,7 @@
 #include "H5MMprivate.h" /* Memory management			*/
 #include "H5Opkg.h"      /* Object headers			*/
 
-static void * H5O_mtime_new_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned mesg_flags,
+static void  *H5O_mtime_new_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned mesg_flags,
                                    unsigned *ioflags, size_t p_size, const uint8_t *p);
 static herr_t H5O_mtime_new_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
 static size_t H5O_mtime_new_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
@@ -33,7 +33,7 @@ static size_t H5O_mtime_new_size(const H5F_t *f, hbool_t disable_shared, const v
 static void *H5O_mtime_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags,
                               size_t p_size, const uint8_t *p);
 static herr_t H5O_mtime_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
-static void * H5O_mtime_copy(const void *_mesg, void *_dest);
+static void  *H5O_mtime_copy(const void *_mesg, void *_dest);
 static size_t H5O_mtime_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
 static herr_t H5O_mtime_reset(void *_mesg);
 static herr_t H5O_mtime_free(void *_mesg);
@@ -121,9 +121,9 @@ H5O_mtime_new_decode(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_
                      unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags,
                      size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
 {
-    time_t * mesg;
+    time_t  *mesg;
     uint32_t tmp_time;         /* Temporary copy of the time */
-    void *   ret_value = NULL; /* Return value */
+    void    *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -176,10 +176,10 @@ H5O_mtime_decode(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5
                  unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags,
                  size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
 {
-    time_t *  mesg, the_time;
+    time_t   *mesg, the_time;
     struct tm tm;
     int       i;                /* Local index variable */
-    void *    ret_value = NULL; /* Return value */
+    void     *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -272,7 +272,7 @@ H5O_mtime_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared,
                  const void *_mesg)
 {
     const time_t *mesg = (const time_t *)_mesg;
-    struct tm *   tm;
+    struct tm    *tm;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -308,8 +308,8 @@ static void *
 H5O_mtime_copy(const void *_mesg, void *_dest)
 {
     const time_t *mesg      = (const time_t *)_mesg;
-    time_t *      dest      = (time_t *)_dest;
-    void *        ret_value = NULL; /* Return value */
+    time_t       *dest      = (time_t *)_dest;
+    void         *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -452,7 +452,7 @@ H5O_mtime_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const voi
                 int indent, int fwidth)
 {
     const time_t *mesg = (const time_t *)_mesg;
-    struct tm *   tm;
+    struct tm    *tm;
     char          buf[128];
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR

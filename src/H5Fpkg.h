@@ -186,12 +186,12 @@ typedef struct H5F_super_t {
  * pointing to this struct.
  */
 struct H5F_file_t {
-    H5FD_t *     lf;     /* Lower level file handle for I/O	*/
+    H5FD_t      *lf;     /* Lower level file handle for I/O	*/
     H5F_super_t *sblock; /* Pointer to (pinned) superblock for file */
     unsigned     nrefs;  /* Ref count for times file is opened	*/
     unsigned     flags;  /* Access Permissions for file          */
     H5F_mtab_t   mtab;   /* File mount table                     */
-    H5F_efc_t *  efc;    /* External file cache                  */
+    H5F_efc_t   *efc;    /* External file cache                  */
 
     /* Cached values from FCPL/superblock */
     uint8_t       sizeof_addr;   /* Size of addresses in file            */
@@ -202,7 +202,7 @@ struct H5F_file_t {
     unsigned long feature_flags; /* VFL Driver feature Flags            */
     haddr_t       maxaddr;       /* Maximum address for file             */
 
-    H5AC_t *            cache;              /* The object cache	 		*/
+    H5AC_t             *cache;              /* The object cache	 		*/
     H5AC_cache_config_t mdc_initCacheCfg;   /* initial configuration for the      */
                                             /* metadata cache.  This structure is   */
                                             /* fixed at creation time and should    */
@@ -220,9 +220,9 @@ struct H5F_file_t {
     hbool_t              store_msg_crt_idx; /* Store creation index for object header messages?	*/
     unsigned             ncwfs;             /* Num entries on cwfs list		*/
     struct H5HG_heap_t **cwfs;              /* Global heap cache			*/
-    struct H5G_t *       root_grp;          /* Open root group			*/
-    H5FO_t *             open_objs;         /* Open objects in file                 */
-    H5RC_t *             grp_btree_shared;  /* Ref-counted group B-tree node info   */
+    struct H5G_t        *root_grp;          /* Open root group			*/
+    H5FO_t              *open_objs;         /* Open objects in file                 */
+    H5RC_t              *grp_btree_shared;  /* Ref-counted group B-tree node info   */
 
     /* File space allocation information */
     hbool_t  use_tmp_space;                   /* Whether temp. file space allocation is allowed */
@@ -230,7 +230,7 @@ struct H5F_file_t {
     unsigned fs_aggr_merge[H5FD_MEM_NTYPES];  /* Flags for whether free space can merge with aggregator(s) */
     H5F_fs_state_t fs_state[H5FD_MEM_NTYPES]; /* State of free space manager for each type */
     haddr_t        fs_addr[H5FD_MEM_NTYPES];  /* Address of free space manager info for each type */
-    H5FS_t *       fs_man[H5FD_MEM_NTYPES];   /* Free space manager for each file space type */
+    H5FS_t        *fs_man[H5FD_MEM_NTYPES];   /* Free space manager for each file space type */
     H5FD_mem_t     fs_type_map[H5FD_MEM_NTYPES]; /* Mapping of "real" file space type into tracked type */
     H5F_blk_aggr_t meta_aggr;                    /* Metadata aggregation info */
                                                  /* (if aggregating metadata allocations) */
@@ -247,12 +247,12 @@ struct H5F_file_t {
  * to shared H5F_file_t structs.
  */
 struct H5F_t {
-    char *        open_name;   /* Name used to open file */
-    char *        actual_name; /* Actual name of the file, after resolving symlinks, etc. */
-    char *        extpath;     /* Path for searching target external link file */
-    H5F_file_t *  shared;      /* The shared file info */
+    char         *open_name;   /* Name used to open file */
+    char         *actual_name; /* Actual name of the file, after resolving symlinks, etc. */
+    char         *extpath;     /* Path for searching target external link file */
+    H5F_file_t   *shared;      /* The shared file info */
     unsigned      nopen_objs;  /* Number of open object headers*/
-    H5FO_t *      obj_count;   /* # of time each object is opened through top file structure */
+    H5FO_t       *obj_count;   /* # of time each object is opened through top file structure */
     hid_t         file_id;     /* ID of this file */
     hbool_t       closing;     /* File is in the process of being closed */
     struct H5F_t *parent;      /* Parent file that this file is mounted to */
@@ -278,7 +278,7 @@ H5_DLLVAR const H5AC_class_t H5AC_SUPERBLOCK[1];
 /* General routines */
 H5_DLL herr_t H5F_init(void);
 H5_DLL herr_t H5F__term_deprec_interface(void);
-H5F_t *       H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf);
+H5F_t        *H5F_new(H5F_file_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf);
 herr_t        H5F_dest(H5F_t *f, hid_t dxpl_id, hbool_t flush);
 H5_DLL herr_t H5F_flush(H5F_t *f, hid_t dxpl_id, hbool_t closing);
 H5_DLL htri_t H5F_is_hdf5(const char *name);
@@ -312,7 +312,7 @@ H5_DLL herr_t H5F__accum_flush(const H5F_io_info_t *fio_info);
 H5_DLL herr_t H5F__accum_reset(const H5F_io_info_t *fio_info, hbool_t flush);
 
 /* Shared file list related routines */
-H5_DLL herr_t H5F_sfile_add(H5F_file_t *shared);
+H5_DLL herr_t      H5F_sfile_add(H5F_file_t *shared);
 H5_DLL H5F_file_t *H5F_sfile_search(H5FD_t *lf);
 H5_DLL herr_t      H5F_sfile_remove(H5F_file_t *shared);
 

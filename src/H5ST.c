@@ -358,7 +358,7 @@ void *
 H5ST_locate(H5ST_tree_t *tree, const char *s)
 {
     H5ST_ptr_t node;      /* Pointer to node located */
-    void *     ret_value; /* Return value */
+    void      *ret_value; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -680,7 +680,7 @@ void *
 H5ST_remove(H5ST_tree_t *tree, const char *s)
 {
     H5ST_ptr_t node;      /* Pointer to node to remove */
-    void *     ret_value; /* Return value */
+    void      *ret_value; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 

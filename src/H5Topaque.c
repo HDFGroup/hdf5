@@ -108,7 +108,7 @@ char *
 H5Tget_tag(hid_t type_id)
 {
     H5T_t *dt = NULL;
-    char * ret_value;
+    char  *ret_value;
 
     FUNC_ENTER_API(NULL)
     H5TRACE1("*s", "i", type_id);

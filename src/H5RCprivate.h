@@ -38,7 +38,7 @@ typedef herr_t (*H5RC_free_func_t)(void *o);
 
 /* Typedef for reference counted objects */
 typedef struct H5RC_t {
-    void *           o;         /* Object to be reference counted */
+    void            *o;         /* Object to be reference counted */
     size_t           n;         /* Reference count of number of pointers sharing object */
     H5RC_free_func_t free_func; /* Function to free object */
 } H5RC_t;

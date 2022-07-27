@@ -42,20 +42,20 @@ typedef struct h5dump_table_list_t {
     struct {
         unsigned long fileno;      /* File number that these tables refer to */
         hid_t         oid;         /* ID of an object in this file, held open so fileno is consistent */
-        table_t *     group_table; /* Table of groups */
-        table_t *     dset_table;  /* Table of datasets */
-        table_t *     type_table;  /* Table of datatypes */
+        table_t      *group_table; /* Table of groups */
+        table_t      *dset_table;  /* Table of datasets */
+        table_t      *type_table;  /* Table of datatypes */
     } * tables;
 } h5dump_table_list_t;
 
 extern h5dump_table_list_t table_list;
-extern table_t *           group_table, *dset_table, *type_table;
+extern table_t            *group_table, *dset_table, *type_table;
 
 extern unsigned    dump_indent; /* how far in to indent the line */
 extern int         unamedtype;  /* shared datatype with no name */
 extern hbool_t     hit_elink;   /* whether we have traversed an external link */
 extern size_t      prefix_len;
-extern char *      prefix;
+extern char       *prefix;
 extern const char *fp_format;
 
 /* things to display or which are set via command line parameters */

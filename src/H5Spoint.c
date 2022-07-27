@@ -710,7 +710,7 @@ done:
 hssize_t
 H5Sget_select_elem_npoints(hid_t spaceid)
 {
-    H5S_t *  space;     /* Dataspace to modify selection of */
+    H5S_t   *space;     /* Dataspace to modify selection of */
     hssize_t ret_value; /* return value */
 
     FUNC_ENTER_API(FAIL)
@@ -797,7 +797,7 @@ static herr_t
 H5S_point_serialize(const H5S_t *space, uint8_t *buf)
 {
     H5S_pnt_node_t *curr;                       /* Point information nodes */
-    uint8_t *       lenp;                       /* pointer to length location for later storage */
+    uint8_t        *lenp;                       /* pointer to length location for later storage */
     uint32_t        len = 0;                    /* number of bytes used */
     unsigned        u;                          /* local counting variable */
     hsize_t         bounds_start[H5S_MAX_RANK]; /* Selection bounding box */
@@ -882,10 +882,10 @@ H5S_point_deserialize(H5S_t *space, const uint8_t *buf)
     H5S_seloper_t op = H5S_SELECT_SET;      /* Selection operation */
     uint32_t      rank;                     /* Rank of points */
     size_t        num_elem = 0;             /* Number of elements in selection */
-    hsize_t *     coord    = NULL, *tcoord; /* Pointer to array of elements */
+    hsize_t      *coord    = NULL, *tcoord; /* Pointer to array of elements */
     unsigned      i, j;                     /* local counting variables */
     uint32_t      version;                  /* Decoded version */
-    uint8_t *     p;                        /* Temporary pointer to buf */
+    uint8_t      *p;                        /* Temporary pointer to buf */
     herr_t        ret_value = SUCCEED;      /* return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1146,9 +1146,9 @@ done:
 static herr_t
 H5S_point_offset(const H5S_t *space, hsize_t *offset)
 {
-    const hsize_t * pnt;                 /* Pointer to a selected point's coordinates */
+    const hsize_t  *pnt;                 /* Pointer to a selected point's coordinates */
     const hssize_t *sel_offset;          /* Pointer to the selection's offset */
-    const hsize_t * dim_size;            /* Pointer to a dataspace's extent */
+    const hsize_t  *dim_size;            /* Pointer to a dataspace's extent */
     hsize_t         accum;               /* Accumulator for dimension sizes */
     int             i;                   /* index variable */
     herr_t          ret_value = SUCCEED; /* Return value */
@@ -1410,8 +1410,8 @@ static herr_t
 H5S_point_project_simple(const H5S_t *base_space, H5S_t *new_space, hsize_t *offset)
 {
     const H5S_pnt_node_t *base_node;           /* Point node in base space */
-    H5S_pnt_node_t *      new_node;            /* Point node in new space */
-    H5S_pnt_node_t *      prev_node;           /* Previous point node in new space */
+    H5S_pnt_node_t       *new_node;            /* Point node in new space */
+    H5S_pnt_node_t       *prev_node;           /* Previous point node in new space */
     unsigned              rank_diff;           /* Difference in ranks between spaces */
     herr_t                ret_value = SUCCEED; /* Return value */
 

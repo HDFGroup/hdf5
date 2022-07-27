@@ -48,7 +48,7 @@ nh5fcreate_c(_fcd name, int_f *namelen, int_f *access_flags, hid_t_f *crt_prp, h
 /******/
 {
     int      ret_value = -1;
-    char *   c_name;
+    char    *c_name;
     int_f    c_namelen;
     hid_t    c_file_id;
     unsigned c_access_flags;
@@ -156,7 +156,7 @@ nh5fmount_c(hid_t_f *loc_id, _fcd dsetname, int_f *namelen, hid_t_f *file_id, hi
 /******/
 {
     int    ret_value = -1;
-    char * c_name;
+    char  *c_name;
     int_f  c_namelen;
     hid_t  c_loc_id;
     hid_t  c_file_id;
@@ -214,7 +214,7 @@ nh5funmount_c(hid_t_f *loc_id, _fcd dsetname, int_f *namelen)
 /******/
 {
     int    ret_value = -1;
-    char * c_name;
+    char  *c_name;
     int_f  c_namelen;
     hid_t  c_loc_id;
     htri_t status;
@@ -265,7 +265,7 @@ nh5fopen_c(_fcd name, int_f *namelen, int_f *access_flags, hid_t_f *acc_prp, hid
 /******/
 {
     int      ret_value = -1;
-    char *   c_name;
+    char    *c_name;
     int_f    c_namelen;
     hid_t    c_file_id;
     unsigned c_access_flags;
@@ -433,7 +433,7 @@ nh5fis_hdf5_c(_fcd name, int_f *namelen, int_f *flag)
 /******/
 {
     int    ret_value = -1;
-    char * c_name;
+    char  *c_name;
     int_f  c_namelen;
     htri_t status;
 
@@ -554,7 +554,7 @@ nh5fget_obj_ids_c(hid_t_f *file_id, int_f *obj_type, size_t_f *max_objs, hid_t_f
     size_t   u;
     size_t   c_max_objs;
     ssize_t  c_num_objs;
-    hid_t *  c_obj_ids;
+    hid_t   *c_obj_ids;
 
     c_file_id  = (hid_t)*file_id;
     c_obj_type = (unsigned)*obj_type;
@@ -626,7 +626,7 @@ int_f
 nh5fget_name_c(hid_t_f *obj_id, size_t_f *size, _fcd buf, size_t_f *buflen)
 /******/
 {
-    char *  c_buf     = NULL; /* Buffer to hold C string */
+    char   *c_buf     = NULL; /* Buffer to hold C string */
     ssize_t size_c    = -1;
     int_f   ret_value = 0; /* Return value */
 

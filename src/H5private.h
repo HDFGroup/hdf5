@@ -1482,7 +1482,7 @@ H5_DLL int64_t HDstrtoll(const char *s, const char **rest, int base);
  * define these in terms of macros.
  */
 #if !defined strdup && !defined H5_HAVE_STRDUP
-extern char *                   strdup(const char *s);
+extern char                    *strdup(const char *s);
 #endif
 
 #ifndef HDstrdup
@@ -1667,17 +1667,17 @@ typedef enum {
 } H5_pkg_t;
 
 typedef struct H5_debug_open_stream_t {
-    FILE *                         stream; /* Open output stream */
+    FILE                          *stream; /* Open output stream */
     struct H5_debug_open_stream_t *next;   /* Next open output stream */
 } H5_debug_open_stream_t;
 
 typedef struct H5_debug_t {
-    FILE *  trace;  /*API trace output stream  */
+    FILE   *trace;  /*API trace output stream  */
     hbool_t ttop;   /*Show only top-level calls?    */
     hbool_t ttimes; /*Show trace event times?       */
     struct {
         const char *name;   /*package name      */
-        FILE *      stream; /*output stream  or NULL    */
+        FILE       *stream; /*output stream  or NULL    */
     } pkg[H5_NPKGS];
     H5_debug_open_stream_t *open_stream; /* Stack of open output streams */
 } H5_debug_t;

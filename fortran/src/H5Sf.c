@@ -1253,7 +1253,7 @@ nh5sselect_elements_c(hid_t_f *space_id, int_f *op, size_t_f *nelements, hsize_t
     int           rank;
     size_t        i;
     int           j;
-    hsize_t *     c_coord;
+    hsize_t      *c_coord;
     size_t        c_nelements;
 
     c_op = (H5S_seloper_t)*op;

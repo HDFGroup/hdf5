@@ -467,7 +467,7 @@ make_attributes(hid_t loc_id, const char *obj_name)
 {
 
     int         rank_out;
-    hsize_t *   dims_out = 0;
+    hsize_t    *dims_out = 0;
     H5T_class_t type_class;
     size_t      type_size;
     int         i;
@@ -1028,7 +1028,7 @@ static int
 test_integers(void)
 {
     hid_t  dtype;
-    char * dt_str;
+    char  *dt_str;
     size_t str_len;
 
     HL_TESTING3("\n        text for integer types");
@@ -1086,7 +1086,7 @@ static int
 test_fps(void)
 {
     hid_t  dtype;
-    char * dt_str;
+    char  *dt_str;
     size_t str_len;
 
     HL_TESTING3("        text for floating-point types");
@@ -1148,7 +1148,7 @@ test_strings(void)
     H5T_str_t   str_pad;
     H5T_cset_t  str_cset;
     H5T_class_t type_class;
-    char *      dt_str = NULL;
+    char       *dt_str = NULL;
     size_t      str_len;
 
     HL_TESTING3("        text for string types");
@@ -1293,7 +1293,7 @@ test_opaques(void)
     hid_t       dtype;
     size_t      opq_size;
     H5T_class_t type_class;
-    char *      dt_str;
+    char       *dt_str;
     size_t      str_len;
 
     HL_TESTING3("        text for opaque types");
@@ -1355,7 +1355,7 @@ test_enums(void)
     const char *name2  = "WHITE";
     int         value2;
     H5T_class_t type_class;
-    char *      dt_str;
+    char       *dt_str;
     size_t      str_len;
 
     HL_TESTING3("        text for enum types");
@@ -1431,7 +1431,7 @@ test_variables(void)
 {
     hid_t       dtype;
     H5T_class_t type_class;
-    char *      dt_str;
+    char       *dt_str;
     size_t      str_len;
 
     HL_TESTING3("        text for variable types");
@@ -1493,7 +1493,7 @@ test_arrays(void)
     int         ndims;
     hsize_t     dims[3];
     H5T_class_t type_class;
-    char *      dt_str;
+    char       *dt_str;
     size_t      str_len;
 
     HL_TESTING3("        text for array types");
@@ -1556,10 +1556,10 @@ test_compounds(void)
 {
     hid_t       dtype;
     int         nmembs;
-    char *      memb_name = NULL;
+    char       *memb_name = NULL;
     H5T_class_t memb_class;
     H5T_class_t type_class;
-    char *      dt_str;
+    char       *dt_str;
     size_t      str_len;
 
     HL_TESTING3("        text for compound types");
@@ -1637,41 +1637,41 @@ test_compound_bug(void)
     hid_t       dtype;
     H5T_class_t type_class;
     int         nmembs;
-    char *      memb_name = NULL;
-    char *      dt_str;
+    char       *memb_name = NULL;
+    char       *dt_str;
     size_t      str_len;
-    char        text[] = "H5T_COMPOUND { H5T_STD_I32LE "
-                  "\"state_________________________________________________________________________________"
-                  "\"; H5T_STD_I32LE "
-                  "\"desc____________________________________________________________________________________"
-                  "_____\"; H5T_VLEN { H5T_COMPOUND { H5T_ENUM { H5T_STD_I16LE; \"ZERO\" 0; \"ONE\" 1; "
-                  "\"TWO\" 2;  \"THREE\" 3; } \"type____\"; H5T_STD_I32LE "
-                  "\"sub_____________________________________________________________________________________"
-                  "__________________________\"; H5T_STRING { STRSIZE H5T_VARIABLE; STRPAD H5T_STR_SPACEPAD; "
-                  "CSET H5T_CSET_ASCII; CTYPE H5T_C_S1; } \"sub_desc\"; H5T_STD_I32LE "
-                  "\"final___________________________________________________________________________________"
-                  "________________\"; } } \"sub\"; }";
-    char text2[] = "H5T_COMPOUND {\n"
-                   "  H5T_STD_I16LE \"state___________________________"
-                   "__________________________________________________"
-                   "____\" : 0;\n"
-                   "  H5T_STD_I16LE \"desc____________________________"
-                   "__________________________________________________"
-                   "___________\" : 2;\n"
-                   "  H5T_VLEN { H5T_COMPOUND {\n"
-                   "    H5T_ENUM { H5T_STD_I16LE; \"ZERO\" 0; \"ONE\" "
-                   "1; \"TWO\" 2;  \"THREE\" 3; } \"type____\" : 0;\n"
-                   "    H5T_STD_I32LE \"sub___________________________"
-                   "__________________________________________________"
-                   "__________________________________1\" : 4;\n"
-                   "    H5T_STRING { STRSIZE H5T_VARIABLE; STRPAD H5T_"
-                   "STR_SPACEPAD; CSET H5T_CSET_ASCII; CTYPE H5T_C_S1;"
-                   " } \"sub_desc\" : 8;\n"
-                   "    H5T_STD_I32LE \"final_________________________"
-                   "__________________________________________________"
-                   "________________________\" : 16;\n"
-                   "  } } \"sub\" : 8;\n"
-                   "}\n";
+    char        text[]  = "H5T_COMPOUND { H5T_STD_I32LE "
+                          "\"state_________________________________________________________________________________"
+                          "\"; H5T_STD_I32LE "
+                          "\"desc____________________________________________________________________________________"
+                          "_____\"; H5T_VLEN { H5T_COMPOUND { H5T_ENUM { H5T_STD_I16LE; \"ZERO\" 0; \"ONE\" 1; "
+                          "\"TWO\" 2;  \"THREE\" 3; } \"type____\"; H5T_STD_I32LE "
+                          "\"sub_____________________________________________________________________________________"
+                          "__________________________\"; H5T_STRING { STRSIZE H5T_VARIABLE; STRPAD H5T_STR_SPACEPAD; "
+                          "CSET H5T_CSET_ASCII; CTYPE H5T_C_S1; } \"sub_desc\"; H5T_STD_I32LE "
+                          "\"final___________________________________________________________________________________"
+                          "________________\"; } } \"sub\"; }";
+    char        text2[] = "H5T_COMPOUND {\n"
+                          "  H5T_STD_I16LE \"state___________________________"
+                          "__________________________________________________"
+                          "____\" : 0;\n"
+                          "  H5T_STD_I16LE \"desc____________________________"
+                          "__________________________________________________"
+                          "___________\" : 2;\n"
+                          "  H5T_VLEN { H5T_COMPOUND {\n"
+                          "    H5T_ENUM { H5T_STD_I16LE; \"ZERO\" 0; \"ONE\" "
+                          "1; \"TWO\" 2;  \"THREE\" 3; } \"type____\" : 0;\n"
+                          "    H5T_STD_I32LE \"sub___________________________"
+                          "__________________________________________________"
+                          "__________________________________1\" : 4;\n"
+                          "    H5T_STRING { STRSIZE H5T_VARIABLE; STRPAD H5T_"
+                          "STR_SPACEPAD; CSET H5T_CSET_ASCII; CTYPE H5T_C_S1;"
+                          " } \"sub_desc\" : 8;\n"
+                          "    H5T_STD_I32LE \"final_________________________"
+                          "__________________________________________________"
+                          "________________________\" : 16;\n"
+                          "  } } \"sub\" : 8;\n"
+                          "}\n";
 
     HL_TESTING3("        text for compound type of bug fix");
 
@@ -1761,8 +1761,8 @@ test_complicated_compound(void)
     hid_t       dtype;
     int         nmembs;
     H5T_class_t type_class;
-    char *      line     = NULL;
-    FILE *      fp       = NULL;
+    char       *line     = NULL;
+    FILE       *fp       = NULL;
     size_t      size     = 1024;
     const char *filename = H5_get_srcdir_filename(INPUT_FILE);
 

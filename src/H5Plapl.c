@@ -145,7 +145,7 @@ static herr_t
 H5P_lacc_reg_prop(H5P_genclass_t *pclass)
 {
     size_t   nlinks       = H5L_ACS_NLINKS_DEF;       /* Default number of soft links to traverse */
-    char *   elink_prefix = H5L_ACS_ELINK_PREFIX_DEF; /* Default external link prefix string */
+    char    *elink_prefix = H5L_ACS_ELINK_PREFIX_DEF; /* Default external link prefix string */
     hid_t    def_fapl_id  = H5L_ACS_ELINK_FAPL_DEF;   /* Default fapl for external link access */
     unsigned elink_flags =
         H5L_ACS_ELINK_FLAGS_DEF; /* Default file access flags for external link traversal */
@@ -283,8 +283,8 @@ done:
 static int
 H5P_lacc_elink_fapl_cmp(const void *value1, const void *value2, size_t H5_ATTR_UNUSED size)
 {
-    const hid_t *   fapl1 = (const hid_t *)value1;
-    const hid_t *   fapl2 = (const hid_t *)value2;
+    const hid_t    *fapl1 = (const hid_t *)value1;
+    const hid_t    *fapl2 = (const hid_t *)value2;
     H5P_genplist_t *obj1, *obj2; /* Property lists to compare */
     int             ret_value = 0;
 
@@ -564,7 +564,7 @@ herr_t
 H5Pset_elink_prefix(hid_t plist_id, const char *prefix)
 {
     H5P_genplist_t *plist;               /* Property list pointer */
-    char *          my_prefix;           /* Copy of prefix string */
+    char           *my_prefix;           /* Copy of prefix string */
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -613,7 +613,7 @@ ssize_t
 H5Pget_elink_prefix(hid_t plist_id, char *prefix, size_t size)
 {
     H5P_genplist_t *plist;     /* Property list pointer */
-    char *          my_prefix; /* Library's copy of the prefix */
+    char           *my_prefix; /* Library's copy of the prefix */
     size_t          len;       /* Length of prefix string */
     ssize_t         ret_value; /* Return value */
 

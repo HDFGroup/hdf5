@@ -99,7 +99,7 @@ typedef struct H5E_cls_t {
 
 /* Major or minor message */
 typedef struct H5E_msg_t {
-    char *     msg;  /* Message for error */
+    char      *msg;  /* Message for error */
     H5E_type_t type; /* Type of error (major or minor) */
     H5E_cls_t *cls;  /* Which error class this message belongs to */
 } H5E_msg_t;
@@ -109,7 +109,7 @@ struct H5E_t {
     size_t        nused;            /* Num slots currently used in stack  */
     H5E_error2_t  slot[H5E_NSLOTS]; /* Array of error records	     */
     H5E_auto_op_t auto_op;          /* Operator for 'automatic' error reporting */
-    void *        auto_data;        /* Callback data for 'automatic error reporting */
+    void         *auto_data;        /* Callback data for 'automatic error reporting */
 };
 
 /*****************************/

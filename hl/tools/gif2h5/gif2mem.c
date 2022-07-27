@@ -42,11 +42,11 @@ Gif2Mem(GIFBYTE *MemGif, GIFTOMEM *GifMemoryStruct)
      * The gif structure outline for passing data to memory is given in gif.h.
      * These pointers are redunant, should take them out in ver. 2
      */
-    GIFHEAD *           gifHead;           /* GIF Header structure            */
-    GIFIMAGEDESC **     gifImageDesc;      /* Logical Image Descriptor struct */
-    GIFPLAINTEXT **     gifPlainText;      /* Plain Text Extension structure  */
-    GIFAPPLICATION **   gifApplication;    /* Application Extension structure */
-    GIFCOMMENT **       gifComment;        /* Comment Extension structure     */
+    GIFHEAD            *gifHead;           /* GIF Header structure            */
+    GIFIMAGEDESC      **gifImageDesc;      /* Logical Image Descriptor struct */
+    GIFPLAINTEXT      **gifPlainText;      /* Plain Text Extension structure  */
+    GIFAPPLICATION    **gifApplication;    /* Application Extension structure */
+    GIFCOMMENT        **gifComment;        /* Comment Extension structure     */
     GIFGRAPHICCONTROL **gifGraphicControl; /* Graphic Control Extension strct */
 
     register GIFWORD i;          /* Loop counter                                 */
@@ -64,7 +64,7 @@ Gif2Mem(GIFBYTE *MemGif, GIFTOMEM *GifMemoryStruct)
     GIFBYTE          aTemp;
     GIFBYTE          j;
     GIFBYTE          w; /* Two more variables needed only while testing */
-    GIFBYTE *        b; /* Endian Ordering                              */
+    GIFBYTE         *b; /* Endian Ordering                              */
 
     /* Allocate memory for the GIF structures           */
     /* Plug the structs into GifMemoryStruct at the end */
