@@ -929,25 +929,33 @@ static int
 process_instructions(struct mirror_session *session)
 {
     struct sock_comm   comm;
-    char               xmit_buf[H5FD_MIRROR_XMIT_BUFFER_MAX]; /* raw bytes */
-    H5FD_mirror_xmit_t xmit_recd;                             /* for decoded xmit header */
+    char              *xmit_buf = NULL; /* raw bytes */
+    size_t             buf_size;
+    H5FD_mirror_xmit_t xmit_recd; /* for decoded xmit header */
 
     HDassert(session && (session->magic == MW_SESSION_MAGIC));
 
     mirror_log(session->loginfo, V_INFO, "process_instructions()");
 
+    buf_size = H5FD_MIRROR_XMIT_BUFFER_MAX * sizeof(char);
+
+    if (NULL == (xmit_buf = HDmalloc(buf_size))) {
+        mirror_log(session->loginfo, V_ERR, "out of memory");
+        goto error;
+    }
+
     comm.magic     = MW_SOCK_COMM_MAGIC;
     comm.recd_die  = 0; /* Flag for program to terminate */
     comm.xmit_recd = &xmit_recd;
     comm.raw       = xmit_buf;
-    comm.raw_size  = sizeof(xmit_buf);
+    comm.raw_size  = buf_size;
 
     while (1) { /* sill-listening infinite loop */
 
         /* Use convenience structure for raw/decoded info in/out */
         if (receive_communique(session, &comm) < 0) {
             mirror_log(session->loginfo, V_ERR, "problem reading socket");
-            return -1;
+            goto error;
         }
 
         if (comm.recd_die) {
@@ -957,42 +965,42 @@ process_instructions(struct mirror_session *session)
         switch (xmit_recd.op) {
             case H5FD_MIRROR_OP_CLOSE:
                 if (do_close(session) < 0) {
-                    return -1;
+                    goto error;
                 }
                 goto done;
             case H5FD_MIRROR_OP_LOCK:
                 if (do_lock(session, (const unsigned char *)xmit_buf) < 0) {
-                    return -1;
+                    goto error;
                 }
                 break;
             case H5FD_MIRROR_OP_OPEN:
                 mirror_log(session->loginfo, V_ERR, "OPEN xmit during session");
                 reply_error(session, "illegal OPEN xmit during session");
-                return -1;
+                goto error;
             case H5FD_MIRROR_OP_SET_EOA:
                 if (do_set_eoa(session, (const unsigned char *)xmit_buf) < 0) {
-                    return -1;
+                    goto error;
                 }
                 break;
             case H5FD_MIRROR_OP_TRUNCATE:
                 if (do_truncate(session) < 0) {
-                    return -1;
+                    goto error;
                 }
                 break;
             case H5FD_MIRROR_OP_UNLOCK:
                 if (do_unlock(session) < 0) {
-                    return -1;
+                    goto error;
                 }
                 break;
             case H5FD_MIRROR_OP_WRITE:
                 if (do_write(session, (const unsigned char *)xmit_buf) < 0) {
-                    return -1;
+                    goto error;
                 }
                 break;
             default:
                 mirror_log(session->loginfo, V_ERR, "unrecognized transmission");
                 reply_error(session, "unrecognized transmission");
-                return -1;
+                goto error;
         } /* end switch (xmit_recd.op) */
 
     } /* end while still listening */
@@ -1000,7 +1008,12 @@ process_instructions(struct mirror_session *session)
 done:
     comm.magic      = 0; /* invalidate structure, on principle */
     xmit_recd.magic = 0; /* invalidate structure, on principle */
+    HDfree(xmit_buf);
     return 0;
+
+error:
+    HDfree(xmit_buf);
+    return -1;
 } /* end process_instructions() */
 
 /* ---------------------------------------------------------------------------
