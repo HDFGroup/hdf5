@@ -39,10 +39,10 @@
 herr_t
 H5HL_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int fwidth)
 {
-    H5HL_t *     h = NULL;
+    H5HL_t      *h = NULL;
     int          free_block;
     H5HL_free_t *freelist;
-    uint8_t *    marker      = NULL;
+    uint8_t     *marker      = NULL;
     size_t       amount_free = 0;
     herr_t       ret_value   = SUCCEED; /* Return value */
 

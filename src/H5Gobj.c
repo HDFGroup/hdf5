@@ -53,7 +53,7 @@
  * link storage
  */
 typedef struct {
-    H5F_t *      f;       /* Pointer to file for insertion */
+    H5F_t       *f;       /* Pointer to file for insertion */
     hid_t        dxpl_id; /* DXPL during insertion */
     H5O_linfo_t *linfo;   /* Pointer to link info */
 } H5G_obj_oh_it_ud1_t;
@@ -356,7 +356,7 @@ done:
 static herr_t
 H5G_obj_compact_to_dense_cb(const void *_mesg, unsigned H5_ATTR_UNUSED idx, void *_udata)
 {
-    const H5O_link_t *   lnk       = (const H5O_link_t *)_mesg;     /* Pointer to link */
+    const H5O_link_t    *lnk       = (const H5O_link_t *)_mesg;     /* Pointer to link */
     H5G_obj_oh_it_ud1_t *udata     = (H5G_obj_oh_it_ud1_t *)_udata; /* 'User data' passed in */
     herr_t               ret_value = H5_ITER_CONT;                  /* Return value */
 
@@ -696,7 +696,7 @@ done:
 herr_t
 H5G__obj_info(H5O_loc_t *oloc, H5G_info_t *grp_info, hid_t dxpl_id)
 {
-    H5G_t *     grp = NULL;          /* Group to query */
+    H5G_t      *grp = NULL;          /* Group to query */
     H5G_loc_t   grp_loc;             /* Entry of group to be queried */
     H5G_name_t  grp_path;            /* Group hier. path */
     H5O_loc_t   grp_oloc;            /* Group object location */
@@ -872,7 +872,7 @@ H5G_obj_remove_update_linfo(const H5O_loc_t *oloc, H5O_linfo_t *linfo, hid_t dxp
 
             /* Check if we should switch from dense storage back to link messages */
             if (linfo->nlinks < ginfo.min_dense) {
-                struct H5O_t *   oh = NULL;          /* Pointer to group's object header */
+                struct H5O_t    *oh = NULL;          /* Pointer to group's object header */
                 H5G_link_table_t ltable;             /* Table of links */
                 hbool_t          can_convert = TRUE; /* Whether converting to link messages is possible */
                 size_t           u;                  /* Local index */
@@ -1120,7 +1120,7 @@ H5G__obj_lookup(const H5O_loc_t *grp_oloc, const char *name, H5O_link_t *lnk, hi
     else
         /* Get the object's info from the symbol table */
         if ((ret_value = H5G__stab_lookup(grp_oloc, name, lnk, dxpl_id)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't locate object")
+            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't locate object")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

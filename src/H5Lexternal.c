@@ -168,26 +168,26 @@ static hid_t
 H5L_extern_traverse(const char H5_ATTR_UNUSED *link_name, hid_t cur_group, const void *_udata,
                     size_t H5_ATTR_UNUSED udata_size, hid_t lapl_id)
 {
-    H5P_genplist_t *   plist;                              /* Property list pointer */
-    char *             my_prefix;                          /* Library's copy of the prefix */
+    H5P_genplist_t    *plist;                              /* Property list pointer */
+    char              *my_prefix;                          /* Library's copy of the prefix */
     H5G_loc_t          root_loc;                           /* Location of root group in external file */
     H5G_loc_t          loc;                                /* Location of object */
-    H5F_t *            ext_file = NULL;                    /* File struct for external file */
-    const uint8_t *    p        = (const uint8_t *)_udata; /* Pointer into external link buffer */
-    const char *       file_name;                /* Name of file containing external link's object */
-    char *             full_name = NULL;         /* File name with prefix */
-    const char *       obj_name;                 /* Name external link's object */
+    H5F_t             *ext_file = NULL;                    /* File struct for external file */
+    const uint8_t     *p        = (const uint8_t *)_udata; /* Pointer into external link buffer */
+    const char        *file_name;                /* Name of file containing external link's object */
+    char              *full_name = NULL;         /* File name with prefix */
+    const char        *obj_name;                 /* Name external link's object */
     size_t             fname_len;                /* Length of external link file name */
     unsigned           intent;                   /* File access permissions */
     H5L_elink_cb_t     cb_info;                  /* Callback info struct */
     hid_t              fapl_id           = -1;   /* File access property list for external link's file */
     hid_t              ext_obj           = -1;   /* ID for external link's object */
-    char *             parent_group_name = NULL; /* Temporary pointer to group name */
+    char              *parent_group_name = NULL; /* Temporary pointer to group name */
     char               local_group_name[H5L_EXT_TRAVERSE_BUF_SIZE]; /* Local buffer to hold group name */
-    char *             temp_file_name = NULL;                       /* Temporary pointer to file name */
+    char              *temp_file_name = NULL;                       /* Temporary pointer to file name */
     size_t             temp_file_name_len;                          /* Length of temporary file name */
-    char *             actual_file_name = NULL;                     /* Parent file's actual name */
-    H5P_genplist_t *   fa_plist;                                    /* File access property list pointer */
+    char              *actual_file_name = NULL;                     /* Parent file's actual name */
+    H5P_genplist_t    *fa_plist;                                    /* File access property list pointer */
     H5F_close_degree_t fc_degree = H5F_CLOSE_WEAK;                  /* File close degree for target file */
     hid_t              ret_value = H5I_INVALID_HID;                 /* Return value */
 
@@ -351,7 +351,7 @@ H5L_extern_traverse(const char H5_ATTR_UNUSED *link_name, hid_t cur_group, const
                     } /* end if */
 
                     ext_file  = H5F_efc_open(loc.oloc->file, full_name, intent, H5P_FILE_CREATE_DEFAULT,
-                                            fapl_id, H5AC_dxpl_id);
+                                             fapl_id, H5AC_dxpl_id);
                     full_name = (char *)H5MM_xfree(full_name);
                     if (ext_file != NULL)
                         break;
@@ -538,12 +538,12 @@ H5Lcreate_external(const char *file_name, const char *obj_name, hid_t link_loc_i
                    hid_t lcpl_id, hid_t lapl_id)
 {
     H5G_loc_t link_loc;             /* Group location to create link */
-    char *    norm_obj_name = NULL; /* Pointer to normalized current name */
-    void *    ext_link_buf  = NULL; /* Buffer to contain external link */
+    char     *norm_obj_name = NULL; /* Pointer to normalized current name */
+    void     *ext_link_buf  = NULL; /* Buffer to contain external link */
     size_t    buf_size;             /* Size of buffer to hold external link */
     size_t    file_name_len;        /* Length of file name string */
     size_t    norm_obj_name_len;    /* Length of normalized object name string */
-    uint8_t * p;                    /* Pointer into external link buffer */
+    uint8_t  *p;                    /* Pointer into external link buffer */
     herr_t    ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_API(FAIL)

@@ -133,7 +133,7 @@ H5DSattach_scale(hid_t did, hid_t dsid, unsigned int idx)
     ds_list_t *dsbuf = NULL; /* array of attribute data in the DS pointing to the dataset */
     hobj_ref_t ref_to_ds;    /* reference to the DS */
     hobj_ref_t ref_j;        /* iterator reference */
-    hvl_t *    buf = NULL;   /* VL buffer to store in the attribute */
+    hvl_t     *buf = NULL;   /* VL buffer to store in the attribute */
     hid_t      dsid_j;       /* DS dataset ID in DIMENSION_LIST */
     H5O_info_t oi1, oi2;
     H5I_type_t it1, it2;
@@ -575,7 +575,7 @@ H5DSdetach_scale(hid_t did, hid_t dsid, unsigned int idx)
     ds_list_t *dsbuf = NULL; /* array of attribute data in the DS pointing to the dataset */
     hsize_t    dims[1];      /* dimension of the "REFERENCE_LIST" array */
     hobj_ref_t ref;          /* reference to the DS */
-    hvl_t *    buf = NULL;   /* VL buffer to store in the attribute */
+    hvl_t     *buf = NULL;   /* VL buffer to store in the attribute */
     int        i;
     size_t     j;
     hssize_t   ii;
@@ -938,7 +938,7 @@ H5DSis_attached(hid_t did, hid_t dsid, unsigned int idx)
     int        rank;         /* rank of dataset */
     ds_list_t *dsbuf = NULL; /* array of attribute data in the DS pointing to the dataset */
     hobj_ref_t ref;          /* reference to the DS */
-    hvl_t *    buf = NULL;   /* VL buffer to store in the attribute */
+    hvl_t     *buf = NULL;   /* VL buffer to store in the attribute */
     hid_t      dsid_j;       /* DS dataset ID in DIMENSION_LIST */
     hid_t      did_i;        /* dataset ID in REFERENCE_LIST */
     H5O_info_t oi1, oi2, oi3, oi4;
@@ -1235,7 +1235,7 @@ H5DSiterate_scales(hid_t did, unsigned int dim, int *ds_idx, H5DS_iterate_t visi
     hid_t      sid;        /* space ID */
     hid_t      tid = -1;   /* attribute type ID */
     hid_t      aid = -1;   /* attribute ID */
-    hvl_t *    buf = NULL; /* VL buffer to store in the attribute */
+    hvl_t     *buf = NULL; /* VL buffer to store in the attribute */
     H5I_type_t it;         /* ID type */
     herr_t     ret_value = 0;
     int        j_idx;
@@ -1408,7 +1408,7 @@ H5DSset_label(hid_t did, unsigned int idx, const char *label)
     H5I_type_t   it;       /* ID type */
     unsigned int i;
     union {                     /* union is needed to eliminate compiler warnings about */
-        char **      buf;       /* discarding the 'const' qualifier in the free */
+        char       **buf;       /* discarding the 'const' qualifier in the free */
         char const **const_buf; /* buf calls */
     } u;
     /*-------------------------------------------------------------------------
@@ -1610,7 +1610,7 @@ H5DSget_label(hid_t did, unsigned int idx, char *label, size_t size)
     hid_t      tid = -1;   /* attribute type ID */
     hid_t      aid = -1;   /* attribute ID */
     int        rank;       /* rank of dataset */
-    char **    buf = NULL; /* buffer to store in the attribute */
+    char     **buf = NULL; /* buffer to store in the attribute */
     H5I_type_t it;         /* ID type */
     size_t     nbytes = 0;
     size_t     copy_len;
@@ -1768,7 +1768,7 @@ H5DSget_scale_name(hid_t did, char *name, size_t size)
     size_t     nbytes;
     size_t     copy_len;
     int        has_name;
-    char *     buf = NULL;
+    char      *buf = NULL;
 
     /*-------------------------------------------------------------------------
      * parameter checking
@@ -1888,7 +1888,7 @@ H5DSis_scale(hid_t did)
     herr_t     has_class;    /* has the "CLASS" attribute */
     htri_t     is_ds;        /* boolean return value */
     H5I_type_t it;           /* ID type */
-    char *     buf;          /* Name of attribute */
+    char      *buf;          /* Name of attribute */
     hsize_t    storage_size; /* Size of storage for attribute */
 
     /*-------------------------------------------------------------------------
@@ -1992,7 +1992,7 @@ H5DSget_num_scales(hid_t did, unsigned int idx)
     hid_t      tid = -1;   /* attribute type ID */
     hid_t      aid = -1;   /* attribute ID */
     int        rank;       /* rank of dataset */
-    hvl_t *    buf = NULL; /* VL buffer to store in the attribute */
+    hvl_t     *buf = NULL; /* VL buffer to store in the attribute */
     H5I_type_t it;         /* ID type */
     int        nscales;
 
@@ -2113,7 +2113,7 @@ H5DS_is_reserved(hid_t did)
     int     has_class;
     hid_t   tid = -1;
     hid_t   aid = -1;
-    char *  buf;          /* Name of attribute */
+    char   *buf;          /* Name of attribute */
     hsize_t storage_size; /* Size of storage for attribute */
     herr_t  ret;
 

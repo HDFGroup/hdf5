@@ -144,7 +144,7 @@ typedef union {
 
 /* The object location information for an object */
 typedef struct H5O_loc_t {
-    H5F_t * file;         /* File that object header is located within */
+    H5F_t  *file;         /* File that object header is located within */
     haddr_t addr;         /* File address of object header */
     hbool_t holding_file; /* True if this object header has incremented
                            * its file's count of open objects. */
@@ -152,14 +152,14 @@ typedef struct H5O_loc_t {
 
 /* Typedef for linked list of datatype merge suggestions */
 typedef struct H5O_copy_dtype_merge_list_t {
-    char *                              path; /* Path to datatype in destination file */
+    char                               *path; /* Path to datatype in destination file */
     struct H5O_copy_dtype_merge_list_t *next; /* Next object in list */
 } H5O_copy_dtype_merge_list_t;
 
 /* Structure for callback property before searching the global list of committed datatypes at destination */
 typedef struct H5O_mcdt_cb_info_t {
     H5O_mcdt_search_cb_t func;
-    void *               user_data;
+    void                *user_data;
 } H5O_mcdt_cb_info_t;
 
 /* Settings/flags for copying an object */
@@ -174,12 +174,12 @@ typedef struct H5O_copy_t {
     H5O_copy_dtype_merge_list_t *dst_dt_suggestion_list; /* Suggestions for merging committed datatypes */
     int                          curr_depth;             /* Current depth in hierarchy copied */
     int                          max_depth;              /* Maximum depth in hierarchy to copy */
-    H5SL_t *                     map_list;               /* Skip list to hold address mappings */
-    H5SL_t *                     dst_dt_list; /* Skip list to hold committed datatypes in dest file */
+    H5SL_t                      *map_list;               /* Skip list to hold address mappings */
+    H5SL_t                      *dst_dt_list; /* Skip list to hold committed datatypes in dest file */
     hbool_t dst_dt_list_complete;   /* Whether the destination datatype list is complete (i.e. not only
                                        populated with "suggestions" from H5Padd_merge_committed_dtype_path) */
-    H5O_t *              oh_dst;    /* The destination object header */
-    void *               shared_fo; /* The shared pointer for the object */
+    H5O_t               *oh_dst;    /* The destination object header */
+    void                *shared_fo; /* The shared pointer for the object */
     H5O_mcdt_search_cb_t mcdt_cb;   /* The callback to invoke before searching the global list of committed
                                        datatypes at destination */
     void *mcdt_ud;                  /* User data passed to callback */
@@ -254,7 +254,7 @@ typedef struct H5O_mesg_loc_t {
  */
 typedef struct H5O_shared_t {
     unsigned type;        /* Type describing how message is shared */
-    H5F_t *  file;        /* File that message is located within */
+    H5F_t   *file;        /* File that message is located within */
     unsigned msg_type_id; /* Message's type ID */
     union {
         H5O_mesg_loc_t loc;     /* Object location info		     */
@@ -312,9 +312,9 @@ typedef struct H5O_fill_t {
     H5O_shared_t sh_loc; /* Shared message info (must be first) */
 
     unsigned         version;      /* Encoding version number           */
-    H5T_t *          type;         /*type. Null implies same as dataset */
+    H5T_t           *type;         /*type. Null implies same as dataset */
     ssize_t          size;         /*number of bytes in the fill value  */
-    void *           buf;          /*the fill value		     */
+    void            *buf;          /*the fill value		     */
     H5D_alloc_time_t alloc_time;   /* time to allocate space	     */
     H5D_fill_time_t  fill_time;    /* time to write fill value	     */
     hbool_t          fill_defined; /* whether fill value is defined     */
@@ -333,7 +333,7 @@ typedef struct H5O_link_soft_t {
 } H5O_link_soft_t;
 
 typedef struct H5O_link_ud_t {
-    void * udata; /* Opaque data supplied by the user */
+    void  *udata; /* Opaque data supplied by the user */
     size_t size;  /* Size of udata */
 } H5O_link_ud_t;
 
@@ -342,7 +342,7 @@ typedef struct H5O_link_t {
     hbool_t    corder_valid; /* Creation order for link is valid (not stored) */
     int64_t    corder;       /* Creation order for link (stored if it's valid) */
     H5T_cset_t cset;         /* Character set of link name	*/
-    char *     name;         /* Link name */
+    char      *name;         /* Link name */
     union {
         H5O_link_hard_t hard; /* Information for hard links */
         H5O_link_soft_t soft; /* Information for soft links */
@@ -359,7 +359,7 @@ typedef struct H5O_link_t {
 
 typedef struct H5O_efl_entry_t {
     size_t  name_offset; /*offset of name within heap	     */
-    char *  name;        /*malloc'd name			     */
+    char   *name;        /*malloc'd name			     */
     off_t   offset;      /*offset of data within file	     */
     hsize_t size;        /*size allocated within file	     */
 } H5O_efl_entry_t;
@@ -416,7 +416,7 @@ typedef struct H5O_storage_chunk_t {
 typedef struct H5O_storage_compact_t {
     hbool_t dirty; /* Dirty flag for compact dataset    */
     size_t  size;  /* Size of buffer in bytes           */
-    void *  buf;   /* Buffer for compact dataset        */
+    void   *buf;   /* Buffer for compact dataset        */
 } H5O_storage_compact_t;
 
 typedef struct H5O_storage_t {
@@ -635,8 +635,8 @@ typedef struct {
 /* Typedef for abstract object creation */
 typedef struct {
     H5O_type_t obj_type; /* Type of object to create */
-    void *     crt_info; /* Information for object creation callback */
-    void *     new_obj;  /* Pointer to new object created */
+    void      *crt_info; /* Information for object creation callback */
+    void      *new_obj;  /* Pointer to new object created */
 } H5O_obj_create_t;
 
 /* Forward declarations for prototype arguments */
@@ -679,11 +679,11 @@ H5_DLL herr_t H5O_msg_write(const H5O_loc_t *loc, unsigned type_id, unsigned mes
                             unsigned update_flags, void *mesg, hid_t dxpl_id);
 H5_DLL herr_t H5O_msg_write_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned type_id, unsigned mesg_flags,
                                unsigned update_flags, void *mesg);
-H5_DLL void * H5O_msg_read(const H5O_loc_t *loc, unsigned type_id, void *mesg, hid_t dxpl_id);
-H5_DLL void * H5O_msg_read_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned type_id, void *mesg);
+H5_DLL void  *H5O_msg_read(const H5O_loc_t *loc, unsigned type_id, void *mesg, hid_t dxpl_id);
+H5_DLL void  *H5O_msg_read_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned type_id, void *mesg);
 H5_DLL herr_t H5O_msg_reset(unsigned type_id, void *native);
-H5_DLL void * H5O_msg_free(unsigned type_id, void *mesg);
-H5_DLL void * H5O_msg_copy(unsigned type_id, const void *mesg, void *dst);
+H5_DLL void  *H5O_msg_free(unsigned type_id, void *mesg);
+H5_DLL void  *H5O_msg_copy(unsigned type_id, const void *mesg, void *dst);
 H5_DLL int    H5O_msg_count(const H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id);
 H5_DLL htri_t H5O_msg_exists(const H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id);
 H5_DLL htri_t H5O_msg_exists_oh(const H5O_t *oh, unsigned type_id);
@@ -706,7 +706,7 @@ H5_DLL herr_t H5O_msg_reset_share(unsigned type_id, void *mesg);
 H5_DLL herr_t H5O_msg_get_crt_index(unsigned type_id, const void *mesg, H5O_msg_crt_idx_t *crt_idx);
 H5_DLL herr_t H5O_msg_encode(H5F_t *f, unsigned type_id, hbool_t disable_shared, unsigned char *buf,
                              const void *obj);
-H5_DLL void * H5O_msg_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned type_id, size_t buf_size,
+H5_DLL void  *H5O_msg_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned type_id, size_t buf_size,
                              const unsigned char *buf);
 H5_DLL herr_t H5O_msg_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned type_id, void *mesg);
 H5_DLL int    H5O_msg_get_chunkno(const H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id);

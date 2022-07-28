@@ -49,7 +49,7 @@
 
 /* User data for iteration when converting attributes to dense storage */
 typedef struct {
-    H5F_t *      f;       /* Pointer to file for insertion */
+    H5F_t       *f;       /* Pointer to file for insertion */
     hid_t        dxpl_id; /* DXPL during iteration */
     H5O_ainfo_t *ainfo;   /* Attribute info struct */
 } H5O_iter_cvt_t;
@@ -77,7 +77,7 @@ typedef struct {
 /* User data for iteration when renaming an attribute */
 typedef struct {
     /* down */
-    H5F_t *     f;        /* Pointer to file attribute is in */
+    H5F_t      *f;        /* Pointer to file attribute is in */
     hid_t       dxpl_id;  /* DXPL for operation */
     const char *old_name; /* Old name of attribute */
     const char *new_name; /* New name of attribute */
@@ -89,12 +89,12 @@ typedef struct {
 /* User data for iteration when iterating over attributes */
 typedef struct {
     /* down */
-    H5F_t *        f;       /* Pointer to file attribute is in */
+    H5F_t         *f;       /* Pointer to file attribute is in */
     hid_t          dxpl_id; /* DXPL for operation */
     hid_t          loc_id;  /* ID of object being iterated over */
     unsigned       skip;    /* # of attributes to skip over */
     H5A_operator_t op;      /* Callback routine for each attribute */
-    void *         op_data; /* User data for callback */
+    void          *op_data; /* User data for callback */
 
     /* up */
     unsigned count; /* Count of attributes examined */
@@ -103,7 +103,7 @@ typedef struct {
 /* User data for iteration when removing an attribute */
 typedef struct {
     /* down */
-    H5F_t *     f;       /* Pointer to file attribute is in */
+    H5F_t      *f;       /* Pointer to file attribute is in */
     hid_t       dxpl_id; /* DXPL for operation */
     const char *name;    /* Name of attribute to open */
 
@@ -159,7 +159,7 @@ H5O_attr_to_dense_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned H5_ATTR_UN
                      unsigned *oh_modified, void *_udata /*in,out*/)
 {
     H5O_iter_cvt_t *udata     = (H5O_iter_cvt_t *)_udata; /* Operator user data */
-    H5A_t *         attr      = (H5A_t *)mesg->native;    /* Pointer to attribute to insert */
+    H5A_t          *attr      = (H5A_t *)mesg->native;    /* Pointer to attribute to insert */
     herr_t          ret_value = H5_ITER_CONT;             /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -203,7 +203,7 @@ done:
 herr_t
 H5O_attr_create(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr)
 {
-    H5O_t *     oh = NULL;           /* Pointer to actual object header */
+    H5O_t      *oh = NULL;           /* Pointer to actual object header */
     H5O_ainfo_t ainfo;               /* Attribute information for object */
     htri_t      shared_mesg;         /* Should this message be stored in the Shared Message table? */
     herr_t      ret_value = SUCCEED; /* Return value */
@@ -448,12 +448,12 @@ done:
 H5A_t *
 H5O_attr_open_by_name(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
 {
-    H5O_t *     oh = NULL;               /* Pointer to actual object header */
+    H5O_t      *oh = NULL;               /* Pointer to actual object header */
     H5O_ainfo_t ainfo;                   /* Attribute information for object */
-    H5A_t *     exist_attr      = NULL;  /* Existing opened attribute object */
-    H5A_t *     opened_attr     = NULL;  /* Newly opened attribute object */
+    H5A_t      *exist_attr      = NULL;  /* Existing opened attribute object */
+    H5A_t      *opened_attr     = NULL;  /* Newly opened attribute object */
     htri_t      found_open_attr = FALSE; /* Whether opened object is found */
-    H5A_t *     ret_value;               /* Return value */
+    H5A_t      *ret_value;               /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -582,12 +582,12 @@ H5A_t *
 H5O_attr_open_by_idx(const H5O_loc_t *loc, H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
                      hid_t dxpl_id)
 {
-    H5O_t *            oh = NULL;               /* Object header */
+    H5O_t             *oh = NULL;               /* Object header */
     H5A_attr_iter_op_t attr_op;                 /* Attribute operator */
-    H5A_t *            exist_attr      = NULL;  /* Existing opened attribute object */
-    H5A_t *            opened_attr     = NULL;  /* Newly opened attribute object */
+    H5A_t             *exist_attr      = NULL;  /* Existing opened attribute object */
+    H5A_t             *opened_attr     = NULL;  /* Newly opened attribute object */
     htri_t             found_open_attr = FALSE; /* Whether opened object is found */
-    H5A_t *            ret_value;               /* Return value */
+    H5A_t             *ret_value;               /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -662,7 +662,7 @@ done:
 static htri_t
 H5O_attr_find_opened_attr(const H5O_loc_t *loc, H5A_t **attr, const char *name_to_open)
 {
-    hid_t *       attr_id_list = NULL; /* List of IDs for opened attributes */
+    hid_t        *attr_id_list = NULL; /* List of IDs for opened attributes */
     unsigned long loc_fnum;            /* File serial # for object */
     size_t        num_open_attr;       /* Number of opened attributes */
     htri_t        ret_value = FALSE;   /* Return value */
@@ -818,7 +818,7 @@ static herr_t
 H5O_attr_write_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned H5_ATTR_UNUSED sequence,
                   unsigned *oh_modified, void *_udata /*in,out*/)
 {
-    H5O_iter_wrt_t *   udata       = (H5O_iter_wrt_t *)_udata; /* Operator user data */
+    H5O_iter_wrt_t    *udata       = (H5O_iter_wrt_t *)_udata; /* Operator user data */
     H5O_chunk_proxy_t *chk_proxy   = NULL;                     /* Chunk that message is in */
     hbool_t            chk_dirtied = FALSE;                    /* Flag for unprotecting chunk */
     herr_t             ret_value   = H5_ITER_CONT;             /* Return value */
@@ -900,7 +900,7 @@ done:
 herr_t
 H5O_attr_write(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr)
 {
-    H5O_t *     oh = NULL;           /* Pointer to actual object header */
+    H5O_t      *oh = NULL;           /* Pointer to actual object header */
     H5O_ainfo_t ainfo;               /* Attribute information for object */
     herr_t      ret_value = SUCCEED; /* Return value */
 
@@ -1022,7 +1022,7 @@ static herr_t
 H5O_attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned H5_ATTR_UNUSED sequence,
                        unsigned *oh_modified, void *_udata /*in,out*/)
 {
-    H5O_iter_ren_t *   udata       = (H5O_iter_ren_t *)_udata; /* Operator user data */
+    H5O_iter_ren_t    *udata       = (H5O_iter_ren_t *)_udata; /* Operator user data */
     H5O_chunk_proxy_t *chk_proxy   = NULL;                     /* Chunk that message is in */
     hbool_t            chk_dirtied = FALSE;                    /* Flag for unprotecting chunk */
     herr_t             ret_value   = H5_ITER_CONT;             /* Return value */
@@ -1146,7 +1146,7 @@ done:
 herr_t
 H5O_attr_rename(const H5O_loc_t *loc, hid_t dxpl_id, const char *old_name, const char *new_name)
 {
-    H5O_t *     oh = NULL;           /* Pointer to actual object header */
+    H5O_t      *oh = NULL;           /* Pointer to actual object header */
     H5O_ainfo_t ainfo;               /* Attribute information for object */
     herr_t      ret_value = SUCCEED; /* Return value */
 
@@ -1235,7 +1235,7 @@ H5O_attr_iterate_real(hid_t loc_id, const H5O_loc_t *loc, hid_t dxpl_id, H5_inde
                       H5_iter_order_t order, hsize_t skip, hsize_t *last_attr,
                       const H5A_attr_iter_op_t *attr_op, void *op_data)
 {
-    H5O_t *          oh = NULL;          /* Pointer to actual object header */
+    H5O_t           *oh = NULL;          /* Pointer to actual object header */
     H5O_ainfo_t      ainfo;              /* Attribute information for object */
     H5A_attr_table_t atable = {0, NULL}; /* Table of attributes */
     herr_t           ret_value;          /* Return value */
@@ -1529,7 +1529,7 @@ done:
 herr_t
 H5O_attr_remove(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
 {
-    H5O_t *     oh = NULL;              /* Pointer to actual object header */
+    H5O_t      *oh = NULL;              /* Pointer to actual object header */
     H5O_ainfo_t ainfo;                  /* Attribute information for object */
     htri_t      ainfo_exists = FALSE;   /* Whether the attribute info exists in the file */
     herr_t      ret_value    = SUCCEED; /* Return value */
@@ -1612,7 +1612,7 @@ herr_t
 H5O_attr_remove_by_idx(const H5O_loc_t *loc, H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
                        hid_t dxpl_id)
 {
-    H5O_t *          oh = NULL;                /* Pointer to actual object header */
+    H5O_t           *oh = NULL;                /* Pointer to actual object header */
     H5O_ainfo_t      ainfo;                    /* Attribute information for object */
     htri_t           ainfo_exists = FALSE;     /* Whether the attribute info exists in the file */
     H5A_attr_table_t atable       = {0, NULL}; /* Table of attributes */
@@ -1794,7 +1794,7 @@ H5O_attr_exists_cb(H5O_t H5_ATTR_UNUSED *oh, H5O_mesg_t *mesg /*in,out*/, unsign
 htri_t
 H5O_attr_exists(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
 {
-    H5O_t *     oh = NULL; /* Pointer to actual object header */
+    H5O_t      *oh = NULL; /* Pointer to actual object header */
     H5O_ainfo_t ainfo;     /* Attribute information for object */
     htri_t      ret_value; /* Return value */
 
@@ -1949,7 +1949,7 @@ done:
 int
 H5O_attr_count(const H5O_loc_t *loc, hid_t dxpl_id)
 {
-    H5O_t * oh = NULL; /* Pointer to actual object header */
+    H5O_t  *oh = NULL; /* Pointer to actual object header */
     hsize_t nattrs;    /* Number of attributes */
     int     ret_value; /* Return value */
 

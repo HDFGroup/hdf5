@@ -565,8 +565,8 @@ test_filespace(hid_t fapl)
                                            FILESPACE_CHUNK2}; /* Chunk dimensions */
     hsize_t attr_dims[FILESPACE_ATTR_NDIMS] = {FILESPACE_ATTR_DIM0,
                                                FILESPACE_ATTR_DIM1}; /* Attribute dimensions */
-    int *   data                            = NULL;                  /* Pointer to dataset buffer */
-    int *   tmp_data;                                                /* Temporary pointer to dataset buffer */
+    int    *data                            = NULL;                  /* Pointer to dataset buffer */
+    int    *tmp_data;                                                /* Temporary pointer to dataset buffer */
     h5_stat_size_t empty_size;                                       /* Size of an empty file */
     h5_stat_size_t file_size;                                        /* Size of each file created */
     herr_t         status;                                           /* Function status return value */

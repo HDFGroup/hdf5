@@ -25,10 +25,10 @@
 #include "H5Opkg.h"      /* Object headers			*/
 #include "H5MMprivate.h" /* Memory management			*/
 
-static void * H5O_shmesg_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned mesg_flags,
+static void  *H5O_shmesg_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned mesg_flags,
                                 unsigned *ioflags, size_t p_size, const uint8_t *p);
 static herr_t H5O_shmesg_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
-static void * H5O_shmesg_copy(const void *_mesg, void *_dest);
+static void  *H5O_shmesg_copy(const void *_mesg, void *_dest);
 static size_t H5O_shmesg_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
 static herr_t H5O_shmesg_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream, int indent,
                                int fwidth);
@@ -77,7 +77,7 @@ H5O_shmesg_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *
                   size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
 {
     H5O_shmesg_table_t *mesg;      /* Native message */
-    void *              ret_value; /* Return value */
+    void               *ret_value; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -151,8 +151,8 @@ static void *
 H5O_shmesg_copy(const void *_mesg, void *_dest)
 {
     const H5O_shmesg_table_t *mesg      = (const H5O_shmesg_table_t *)_mesg;
-    H5O_shmesg_table_t *      dest      = (H5O_shmesg_table_t *)_dest;
-    void *                    ret_value = NULL; /* Return value */
+    H5O_shmesg_table_t       *dest      = (H5O_shmesg_table_t *)_dest;
+    void                     *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

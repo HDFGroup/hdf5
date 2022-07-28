@@ -242,7 +242,7 @@ smoke_check_1(void)
     hbool_t     display_stats    = FALSE;
     int32_t     lag              = 10;
     int         mile_stone       = 1;
-    H5F_t *     file_ptr         = NULL;
+    H5F_t      *file_ptr         = NULL;
 
     TESTING("smoke check #1 -- all clean, ins, dest, ren, 4/2 MB cache");
 
@@ -418,7 +418,7 @@ smoke_check_2(void)
     hbool_t     display_stats    = FALSE;
     int32_t     lag              = 10;
     int         mile_stone       = 1;
-    H5F_t *     file_ptr         = NULL;
+    H5F_t      *file_ptr         = NULL;
 
     TESTING("smoke check #2 -- ~1/2 dirty, ins, dest, ren, 4/2 MB cache");
 
@@ -593,7 +593,7 @@ smoke_check_3(void)
     hbool_t     display_stats    = FALSE;
     int32_t     lag              = 10;
     int         mile_stone       = 1;
-    H5F_t *     file_ptr         = NULL;
+    H5F_t      *file_ptr         = NULL;
 
     TESTING("smoke check #3 -- all clean, ins, dest, ren, 2/1 KB cache");
 
@@ -769,7 +769,7 @@ smoke_check_4(void)
     hbool_t     display_stats    = FALSE;
     int32_t     lag              = 10;
     int         mile_stone       = 1;
-    H5F_t *     file_ptr         = NULL;
+    H5F_t      *file_ptr         = NULL;
 
     TESTING("smoke check #4 -- ~1/2 dirty, ins, dest, ren, 2/1 KB cache");
 
@@ -938,15 +938,15 @@ smoke_check_4(void)
 static unsigned
 smoke_check_5(void)
 {
-    const char *        fcn_name = "smoke_check_5";
+    const char         *fcn_name = "smoke_check_5";
     herr_t              result;
     hbool_t             show_progress    = FALSE;
     int                 dirty_unprotects = FALSE;
     hbool_t             display_stats    = FALSE;
     int32_t             max_index        = 1024;
     int                 mile_stone       = 1;
-    H5F_t *             file_ptr         = NULL;
-    H5C_t *             cache_ptr        = NULL;
+    H5F_t              *file_ptr         = NULL;
+    H5C_t              *cache_ptr        = NULL;
     H5C_auto_size_ctl_t auto_size_ctl    = {
         /* int32_t     version                = */ H5C__CURR_AUTO_SIZE_CTL_VER,
 #if 1
@@ -1162,15 +1162,15 @@ smoke_check_5(void)
 static unsigned
 smoke_check_6(void)
 {
-    const char *        fcn_name = "smoke_check_6";
+    const char         *fcn_name = "smoke_check_6";
     herr_t              result;
     hbool_t             show_progress    = FALSE;
     int                 dirty_unprotects = FALSE;
     hbool_t             display_stats    = FALSE;
     int                 mile_stone       = 1;
     int32_t             max_index        = 1024;
-    H5F_t *             file_ptr         = NULL;
-    H5C_t *             cache_ptr        = NULL;
+    H5F_t              *file_ptr         = NULL;
+    H5C_t              *cache_ptr        = NULL;
     H5C_auto_size_ctl_t auto_size_ctl    = {
         /* int32_t     version                = */ H5C__CURR_AUTO_SIZE_CTL_VER,
 #if 1
@@ -1383,15 +1383,15 @@ smoke_check_6(void)
 static unsigned
 smoke_check_7(void)
 {
-    const char *        fcn_name = "smoke_check_7";
+    const char         *fcn_name = "smoke_check_7";
     herr_t              result;
     hbool_t             show_progress    = FALSE;
     int                 dirty_unprotects = FALSE;
     hbool_t             display_stats    = FALSE;
     int                 mile_stone       = 1;
     int32_t             max_index        = 1024;
-    H5F_t *             file_ptr         = NULL;
-    H5C_t *             cache_ptr        = NULL;
+    H5F_t              *file_ptr         = NULL;
+    H5C_t              *cache_ptr        = NULL;
     H5C_auto_size_ctl_t auto_size_ctl    = {
         /* int32_t     version                = */ H5C__CURR_AUTO_SIZE_CTL_VER,
 #if 1
@@ -1605,15 +1605,15 @@ smoke_check_7(void)
 static unsigned
 smoke_check_8(void)
 {
-    const char *        fcn_name = "smoke_check_8";
+    const char         *fcn_name = "smoke_check_8";
     herr_t              result;
     hbool_t             show_progress    = FALSE;
     int                 dirty_unprotects = FALSE;
     hbool_t             display_stats    = FALSE;
     int                 mile_stone       = 1;
     int32_t             max_index        = 1024;
-    H5F_t *             file_ptr         = NULL;
-    H5C_t *             cache_ptr        = NULL;
+    H5F_t              *file_ptr         = NULL;
+    H5C_t              *cache_ptr        = NULL;
     H5C_auto_size_ctl_t auto_size_ctl    = {
         /* int32_t     version                = */ H5C__CURR_AUTO_SIZE_CTL_VER,
 #if 1
@@ -1837,8 +1837,8 @@ smoke_check_9(void)
     hbool_t     display_detailed_stats = FALSE;
     int32_t     lag                    = 10;
     int         mile_stone             = 1;
-    H5F_t *     file_ptr               = NULL;
-    H5C_t *     cache_ptr              = NULL;
+    H5F_t      *file_ptr               = NULL;
+    H5C_t      *cache_ptr              = NULL;
 
     TESTING("smoke check #9 -- all clean, ins, dest, ren, 4/2 MB, corked");
 
@@ -2127,8 +2127,8 @@ smoke_check_10(void)
     hbool_t     display_detailed_stats = FALSE;
     int32_t     lag                    = 10;
     int         mile_stone             = 1;
-    H5F_t *     file_ptr               = NULL;
-    H5C_t *     cache_ptr              = NULL;
+    H5F_t      *file_ptr               = NULL;
+    H5C_t      *cache_ptr              = NULL;
 
     TESTING("smoke check #10 -- ~1/2 dirty, ins, dest, ren, 4/2 MB, corked");
 
@@ -2409,7 +2409,7 @@ write_permitted_check(void)
     hbool_t     display_stats = FALSE;
     int32_t     lag           = 10;
     int         mile_stone    = 1;
-    H5F_t *     file_ptr      = NULL;
+    H5F_t      *file_ptr      = NULL;
 
 #endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
@@ -2581,7 +2581,7 @@ write_permitted_check(void)
 static unsigned
 check_insert_entry(void)
 {
-    const char *              fcn_name   = "check_insert_entry";
+    const char               *fcn_name   = "check_insert_entry";
     int                       entry_type = PICO_ENTRY_TYPE;
     int                       i;
     herr_t                    result;
@@ -2590,10 +2590,10 @@ check_insert_entry(void)
     hbool_t                   is_protected;
     hbool_t                   is_pinned;
     size_t                    entry_size;
-    H5F_t *                   file_ptr  = NULL;
-    H5C_t *                   cache_ptr = NULL;
-    test_entry_t *            base_addr;
-    test_entry_t *            entry_ptr;
+    H5F_t                    *file_ptr  = NULL;
+    H5C_t                    *cache_ptr = NULL;
+    test_entry_t             *base_addr;
+    test_entry_t             *entry_ptr;
     struct H5C_cache_entry_t *search_ptr;
 
     TESTING("H5C_insert_entry() functionality");
@@ -2854,7 +2854,7 @@ check_flush_cache(void)
 {
     const char *fcn_name      = "check_flush_cache";
     hbool_t     show_progress = FALSE;
-    H5F_t *     file_ptr      = NULL;
+    H5F_t      *file_ptr      = NULL;
 
     TESTING("H5C_flush_cache() functionality");
 
@@ -4375,7 +4375,7 @@ check_flush_cache__multi_entry_test(H5F_t *file_ptr, int test_num, unsigned int 
                                     struct flush_cache_test_spec spec[])
 {
     /* const char *   fcn_name = "check_flush_cache__multi_entry_test"; */
-    H5C_t *       cache_ptr = file_ptr->shared->cache;
+    H5C_t        *cache_ptr = file_ptr->shared->cache;
     static char   msg[128];
     herr_t        result;
     int           i;
@@ -4560,7 +4560,7 @@ check_flush_cache__pe_multi_entry_test(H5F_t *file_ptr, int test_num, unsigned i
                                        struct pe_flush_cache_test_spec spec[])
 {
     /* const char *   fcn_name = "check_flush_cache__pe_multi_entry_test"; */
-    H5C_t *       cache_ptr = file_ptr->shared->cache;
+    H5C_t        *cache_ptr = file_ptr->shared->cache;
     static char   msg[128];
     herr_t        result;
     int           i;
@@ -8048,8 +8048,8 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
                                  size_t expected_index_size, int check_size,
                                  struct fo_flush_entry_check check[])
 {
-    const char *  fcn_name  = "check_flush_cache__flush_op_test";
-    H5C_t *       cache_ptr = file_ptr->shared->cache;
+    const char   *fcn_name  = "check_flush_cache__flush_op_test";
+    H5C_t        *cache_ptr = file_ptr->shared->cache;
     static char   msg[128];
     hbool_t       show_progress = FALSE;
     hbool_t       verbose       = FALSE;
@@ -8503,14 +8503,14 @@ static void
 check_flush_cache__flush_op_eviction_test(H5F_t *file_ptr)
 {
     /* const char *   fcn_name = "check_flush_cache__flush_op_eviction_test"; */
-    H5C_t *                      cache_ptr = file_ptr->shared->cache;
+    H5C_t                       *cache_ptr = file_ptr->shared->cache;
     int                          i;
     int                          num_variable_entries = 8;
     int                          num_monster_entries  = 31;
     int                          num_large_entries    = 0;
     herr_t                       result;
-    test_entry_t *               entry_ptr;
-    test_entry_t *               base_addr;
+    test_entry_t                *entry_ptr;
+    test_entry_t                *base_addr;
     struct expected_entry_status expected[8 + 31 + 14] = {
         /* the expected array is used to maintain a table of the expected status of every
          * entry used in this test.  Note that since the function that processes this
@@ -9570,7 +9570,7 @@ check_flush_cache__single_entry(H5F_t *file_ptr)
 {
     const char *fcn_name      = "check_flush_cache__single_entry";
     hbool_t     show_progress = FALSE;
-    H5C_t *     cache_ptr     = file_ptr->shared->cache;
+    H5C_t      *cache_ptr     = file_ptr->shared->cache;
 
     if (cache_ptr == NULL) {
 
@@ -11804,7 +11804,7 @@ check_flush_cache__single_entry_test(H5F_t *file_ptr, int test_num, int entry_ty
                                      hbool_t expected_flushed, hbool_t expected_destroyed)
 {
     /* const char *   fcn_name = "check_flush_cache__single_entry_test"; */
-    H5C_t *       cache_ptr = file_ptr->shared->cache;
+    H5C_t        *cache_ptr = file_ptr->shared->cache;
     static char   msg[128];
     herr_t        result;
     test_entry_t *base_addr;
@@ -11955,7 +11955,7 @@ check_flush_cache__pinned_single_entry_test(H5F_t *file_ptr, int test_num, int e
                                             hbool_t expected_destroyed)
 {
     /* const char *fcn_name = "check_flush_cache__pinned_single_entry_test"; */
-    H5C_t *       cache_ptr = file_ptr->shared->cache;
+    H5C_t        *cache_ptr = file_ptr->shared->cache;
     static char   msg[128];
     hbool_t       expected_loaded = TRUE;
     herr_t        result;
@@ -12116,7 +12116,7 @@ check_flush_cache__pinned_single_entry_test(H5F_t *file_ptr, int test_num, int e
 static unsigned
 check_get_entry_status(void)
 {
-    const char *  fcn_name = "check_get_entry_status";
+    const char   *fcn_name = "check_get_entry_status";
     static char   msg[128];
     herr_t        result;
     hbool_t       in_cache;
@@ -12124,7 +12124,7 @@ check_get_entry_status(void)
     hbool_t       is_protected;
     hbool_t       is_pinned;
     size_t        entry_size;
-    H5F_t *       file_ptr  = NULL;
+    H5F_t        *file_ptr  = NULL;
     test_entry_t *base_addr = NULL;
     test_entry_t *entry_ptr = NULL;
 
@@ -12336,7 +12336,7 @@ check_get_entry_status(void)
 static unsigned
 check_expunge_entry(void)
 {
-    const char *  fcn_name = "check_expunge_entry";
+    const char   *fcn_name = "check_expunge_entry";
     static char   msg[128];
     herr_t        result;
     hbool_t       in_cache;
@@ -12344,7 +12344,7 @@ check_expunge_entry(void)
     hbool_t       is_protected;
     hbool_t       is_pinned;
     size_t        entry_size;
-    H5F_t *       file_ptr = NULL;
+    H5F_t        *file_ptr = NULL;
     test_entry_t *base_addr;
     test_entry_t *entry_ptr;
 
@@ -12623,7 +12623,7 @@ static unsigned
 check_multiple_read_protect(void)
 {
     const char *fcn_name = "check_multiple_read_protect()";
-    H5F_t *     file_ptr = NULL;
+    H5F_t      *file_ptr = NULL;
 #if H5C_COLLECT_CACHE_STATS
     H5C_t *cache_ptr = NULL;
 #endif /* H5C_COLLECT_CACHE_STATS */
@@ -13011,9 +13011,9 @@ check_multiple_read_protect(void)
 static unsigned
 check_move_entry(void)
 {
-    const char *                fcn_name = "check_move_entry";
+    const char                 *fcn_name = "check_move_entry";
     int                         i;
-    H5F_t *                     file_ptr      = NULL;
+    H5F_t                      *file_ptr      = NULL;
     struct move_entry_test_spec test_specs[4] = {{/* int     entry_type  = */ PICO_ENTRY_TYPE,
                                                   /* int     entry_index = */ 10,
                                                   /* hbool_t is_dirty    = */ FALSE,
@@ -13117,11 +13117,11 @@ static void
 check_move_entry__run_test(H5F_t *file_ptr, int test_num, struct move_entry_test_spec *spec_ptr)
 {
     /* const char *   fcn_name = "check_move_entry__run_test"; */
-    H5C_t *            cache_ptr = file_ptr->shared->cache;
+    H5C_t             *cache_ptr = file_ptr->shared->cache;
     static char        msg[128];
     unsigned int       flags = H5C__NO_FLAGS_SET;
-    test_entry_t *     base_addr;
-    test_entry_t *     entry_ptr = NULL;
+    test_entry_t      *base_addr;
+    test_entry_t      *entry_ptr = NULL;
     H5C_cache_entry_t *test_ptr  = NULL;
 
     assert(cache_ptr);
@@ -13235,10 +13235,10 @@ check_move_entry__run_test(H5F_t *file_ptr, int test_num, struct move_entry_test
 static unsigned
 check_pin_protected_entry(void)
 {
-    const char *  fcn_name = "check_pin_protected_entry";
+    const char   *fcn_name = "check_pin_protected_entry";
     static char   msg[128];
     herr_t        result;
-    H5F_t *       file_ptr = NULL;
+    H5F_t        *file_ptr = NULL;
     test_entry_t *base_addr;
     test_entry_t *entry_ptr;
 
@@ -13334,7 +13334,7 @@ check_pin_protected_entry(void)
 static unsigned
 check_resize_entry(void)
 {
-    const char *  fcn_name = "check_resize_entry";
+    const char   *fcn_name = "check_resize_entry";
     static char   msg[128];
     herr_t        result;
     hbool_t       in_cache;
@@ -13343,8 +13343,8 @@ check_resize_entry(void)
     hbool_t       is_pinned;
     size_t        entry_size;
     size_t        reported_entry_size;
-    H5F_t *       file_ptr  = NULL;
-    H5C_t *       cache_ptr = NULL;
+    H5F_t        *file_ptr  = NULL;
+    H5C_t        *cache_ptr = NULL;
     test_entry_t *base_addr;
     test_entry_t *entry_ptr;
 
@@ -14204,7 +14204,7 @@ check_resize_entry(void)
 static unsigned
 check_evictions_enabled(void)
 {
-    const char *  fcn_name = "check_evictions_enabled";
+    const char   *fcn_name = "check_evictions_enabled";
     static char   msg[128];
     herr_t        result;
     hbool_t       show_progress = FALSE;
@@ -14212,8 +14212,8 @@ check_evictions_enabled(void)
     hbool_t       in_cache;
     int           i;
     int           mile_stone = 1;
-    H5F_t *       file_ptr   = NULL;
-    H5C_t *       cache_ptr  = NULL;
+    H5F_t        *file_ptr   = NULL;
+    H5C_t        *cache_ptr  = NULL;
     test_entry_t *base_addr  = NULL;
     test_entry_t *entry_ptr;
 
@@ -14839,7 +14839,7 @@ static unsigned
 check_flush_protected_err(void)
 {
     const char *fcn_name = "check_flush_protected_err";
-    H5F_t *     file_ptr = NULL;
+    H5F_t      *file_ptr = NULL;
 
     TESTING("flush cache with protected entry error");
 
@@ -14918,7 +14918,7 @@ static unsigned
 check_destroy_pinned_err(void)
 {
     const char *fcn_name = "check_destroy_pinned_err()";
-    H5F_t *     file_ptr = NULL;
+    H5F_t      *file_ptr = NULL;
 
     TESTING("destroy cache with permanently pinned entry error");
 
@@ -15006,7 +15006,7 @@ static unsigned
 check_destroy_protected_err(void)
 {
     const char *fcn_name = "check_destroy_protected_err";
-    H5F_t *     file_ptr = NULL;
+    H5F_t      *file_ptr = NULL;
 
     TESTING("destroy cache with protected entry error");
 
@@ -15092,9 +15092,9 @@ check_destroy_protected_err(void)
 static unsigned
 check_duplicate_insert_err(void)
 {
-    const char *  fcn_name = "check_duplicate_insert_err";
+    const char   *fcn_name = "check_duplicate_insert_err";
     herr_t        result   = -1;
-    H5F_t *       file_ptr = NULL;
+    H5F_t        *file_ptr = NULL;
     test_entry_t *base_addr;
     test_entry_t *entry_ptr;
 
@@ -15172,10 +15172,10 @@ check_duplicate_insert_err(void)
 static unsigned
 check_move_err(void)
 {
-    const char *  fcn_name = "check_move_err()";
+    const char   *fcn_name = "check_move_err()";
     herr_t        result;
-    H5F_t *       file_ptr  = NULL;
-    H5C_t *       cache_ptr = NULL;
+    H5F_t        *file_ptr  = NULL;
+    H5C_t        *cache_ptr = NULL;
     test_entry_t *entry_0_0_ptr;
     test_entry_t *entry_0_1_ptr;
     test_entry_t *entry_1_0_ptr;
@@ -15269,9 +15269,9 @@ check_move_err(void)
 static unsigned
 check_double_pin_err(void)
 {
-    const char *  fcn_name = "check_double_pin_err()";
+    const char   *fcn_name = "check_double_pin_err()";
     herr_t        result;
-    H5F_t *       file_ptr = NULL;
+    H5F_t        *file_ptr = NULL;
     test_entry_t *entry_ptr;
 
     TESTING("pin a pinned entry error");
@@ -15357,9 +15357,9 @@ check_double_pin_err(void)
 static unsigned
 check_double_unpin_err(void)
 {
-    const char *  fcn_name = "check_double_unpin_err()";
+    const char   *fcn_name = "check_double_unpin_err()";
     herr_t        result;
-    H5F_t *       file_ptr = NULL;
+    H5F_t        *file_ptr = NULL;
     test_entry_t *entry_ptr;
 
     TESTING("unpin an unpinned entry error");
@@ -15454,9 +15454,9 @@ check_double_unpin_err(void)
 static unsigned
 check_pin_entry_errs(void)
 {
-    const char *  fcn_name = "check_pin_entry_errs()";
+    const char   *fcn_name = "check_pin_entry_errs()";
     herr_t        result;
-    H5F_t *       file_ptr = NULL;
+    H5F_t        *file_ptr = NULL;
     test_entry_t *entry_ptr;
 
     TESTING("pin entry related errors");
@@ -15560,9 +15560,9 @@ check_pin_entry_errs(void)
 static unsigned
 check_double_protect_err(void)
 {
-    const char *       fcn_name = "check_double_protect_err()";
-    H5F_t *            file_ptr = NULL;
-    test_entry_t *     entry_ptr;
+    const char        *fcn_name = "check_double_protect_err()";
+    H5F_t             *file_ptr = NULL;
+    test_entry_t      *entry_ptr;
     H5C_cache_entry_t *cache_entry_ptr;
 
     TESTING("protect a protected entry error");
@@ -15641,9 +15641,9 @@ check_double_protect_err(void)
 static unsigned
 check_double_unprotect_err(void)
 {
-    const char *  fcn_name = "check_double_unprotect_err()";
+    const char   *fcn_name = "check_double_unprotect_err()";
     herr_t        result;
-    H5F_t *       file_ptr = NULL;
+    H5F_t        *file_ptr = NULL;
     test_entry_t *entry_ptr;
 
     TESTING("unprotect an unprotected entry error");
@@ -15721,9 +15721,9 @@ check_double_unprotect_err(void)
 static unsigned
 check_mark_entry_dirty_errs(void)
 {
-    const char *  fcn_name = "check_mark_entry_dirty_errs()";
+    const char   *fcn_name = "check_mark_entry_dirty_errs()";
     herr_t        result;
-    H5F_t *       file_ptr = NULL;
+    H5F_t        *file_ptr = NULL;
     test_entry_t *entry_ptr;
 
     TESTING("mark entry dirty related errors");
@@ -15802,9 +15802,9 @@ check_mark_entry_dirty_errs(void)
 static unsigned
 check_expunge_entry_errs(void)
 {
-    const char *  fcn_name = "check_expunge_entry_errs()";
+    const char   *fcn_name = "check_expunge_entry_errs()";
     herr_t        result;
-    H5F_t *       file_ptr = NULL;
+    H5F_t        *file_ptr = NULL;
     test_entry_t *entry_ptr;
 
     TESTING("expunge entry related errors");
@@ -15916,9 +15916,9 @@ check_expunge_entry_errs(void)
 static unsigned
 check_resize_entry_errs(void)
 {
-    const char *  fcn_name = "check_resize_entry_errs()";
+    const char   *fcn_name = "check_resize_entry_errs()";
     herr_t        result;
-    H5F_t *       file_ptr = NULL;
+    H5F_t        *file_ptr = NULL;
     test_entry_t *entry_ptr;
 
     TESTING("resize entry related errors");
@@ -16015,9 +16015,9 @@ check_resize_entry_errs(void)
 static unsigned
 check_unprotect_ro_dirty_err(void)
 {
-    const char *  fcn_name = "check_unprotect_ro_dirty_err()";
+    const char   *fcn_name = "check_unprotect_ro_dirty_err()";
     herr_t        result;
-    H5F_t *       file_ptr = NULL;
+    H5F_t        *file_ptr = NULL;
     test_entry_t *entry_ptr;
 
     TESTING("unprotect a read only entry dirty error");
@@ -16140,10 +16140,10 @@ check_unprotect_ro_dirty_err(void)
 static unsigned
 check_protect_ro_rw_err(void)
 {
-    const char *  fcn_name = "check_protect_ro_rw_err()";
-    H5F_t *       file_ptr = NULL;
+    const char   *fcn_name = "check_protect_ro_rw_err()";
+    H5F_t        *file_ptr = NULL;
     test_entry_t *entry_ptr;
-    void *        thing_ptr = NULL;
+    void         *thing_ptr = NULL;
 
     TESTING("protect a read only entry rw error");
 
@@ -16229,8 +16229,8 @@ check_check_evictions_enabled_err(void)
     const char *fcn_name = "check_evictions_enabled_err()";
     herr_t      result;
     hbool_t     evictions_enabled;
-    H5F_t *     file_ptr  = NULL;
-    H5C_t *     cache_ptr = NULL;
+    H5F_t      *file_ptr  = NULL;
+    H5C_t      *cache_ptr = NULL;
 
     TESTING("get/set evictions enabled errors");
 
@@ -16381,13 +16381,13 @@ test_rpt_fcn(H5_ATTR_UNUSED H5C_t *cache_ptr, H5_ATTR_UNUSED int32_t version, H5
 static unsigned
 check_auto_cache_resize(void)
 {
-    const char *        fcn_name      = "check_auto_cache_resize()";
+    const char         *fcn_name      = "check_auto_cache_resize()";
     hbool_t             show_progress = FALSE;
     herr_t              result;
     int32_t             i;
     int32_t             checkpoint    = 0;
-    H5F_t *             file_ptr      = NULL;
-    H5C_t *             cache_ptr     = NULL;
+    H5F_t              *file_ptr      = NULL;
+    H5C_t              *cache_ptr     = NULL;
     H5C_auto_size_ctl_t auto_size_ctl = {
         /* int32_t     version                = */ H5C__CURR_AUTO_SIZE_CTL_VER,
         /* H5C_auto_resize_report_fcn rpt_fcn = */ test_rpt_fcn,
@@ -20363,13 +20363,13 @@ check_auto_cache_resize(void)
 static unsigned
 check_auto_cache_resize_disable(void)
 {
-    const char *        fcn_name      = "check_auto_cache_resize_disable()";
+    const char         *fcn_name      = "check_auto_cache_resize_disable()";
     hbool_t             show_progress = FALSE;
     herr_t              result;
     int32_t             i;
     int32_t             checkpoint    = 0;
-    H5F_t *             file_ptr      = NULL;
-    H5C_t *             cache_ptr     = NULL;
+    H5F_t              *file_ptr      = NULL;
+    H5C_t              *cache_ptr     = NULL;
     H5C_auto_size_ctl_t auto_size_ctl = {
         /* int32_t     version                = */ H5C__CURR_AUTO_SIZE_CTL_VER,
         /* H5C_auto_resize_report_fcn rpt_fcn = */ test_rpt_fcn,
@@ -22959,14 +22959,14 @@ check_auto_cache_resize_disable(void)
 static unsigned
 check_auto_cache_resize_epoch_markers(void)
 {
-    const char *        fcn_name      = "check_auto_cache_resize_epoch_markers()";
+    const char         *fcn_name      = "check_auto_cache_resize_epoch_markers()";
     hbool_t             show_progress = FALSE;
     herr_t              result;
     int32_t             i;
     int32_t             j;
     int32_t             checkpoint    = 0;
-    H5F_t *             file_ptr      = NULL;
-    H5C_t *             cache_ptr     = NULL;
+    H5F_t              *file_ptr      = NULL;
+    H5C_t              *cache_ptr     = NULL;
     H5C_auto_size_ctl_t auto_size_ctl = {
         /* int32_t     version                = */ H5C__CURR_AUTO_SIZE_CTL_VER,
         /* H5C_auto_resize_report_fcn rpt_fcn = */ test_rpt_fcn,
@@ -23649,10 +23649,10 @@ check_auto_cache_resize_epoch_markers(void)
 static unsigned
 check_auto_cache_resize_input_errs(void)
 {
-    const char *        fcn_name = "check_auto_cache_resize_input_errs()";
+    const char         *fcn_name = "check_auto_cache_resize_input_errs()";
     herr_t              result;
-    H5F_t *             file_ptr          = NULL;
-    H5C_t *             cache_ptr         = NULL;
+    H5F_t              *file_ptr          = NULL;
+    H5C_t              *cache_ptr         = NULL;
     H5C_auto_size_ctl_t ref_auto_size_ctl = {
         /* int32_t     version                = */ H5C__CURR_AUTO_SIZE_CTL_VER,
         /* H5C_auto_resize_report_fcn rpt_fcn = */ test_rpt_fcn,
@@ -25879,11 +25879,11 @@ check_auto_cache_resize_input_errs(void)
 static unsigned
 check_auto_cache_resize_aux_fcns(void)
 {
-    const char *        fcn_name = "check_auto_cache_resize_aux_fcns()";
+    const char         *fcn_name = "check_auto_cache_resize_aux_fcns()";
     herr_t              result;
     int32_t             i;
-    H5F_t *             file_ptr  = NULL;
-    H5C_t *             cache_ptr = NULL;
+    H5F_t              *file_ptr  = NULL;
+    H5C_t              *cache_ptr = NULL;
     double              hit_rate;
     size_t              max_size;
     size_t              min_clean_size;
@@ -26383,8 +26383,8 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
     const char *fcn_name      = "check_metadata_blizzard_absence";
     int         entry_type    = HUGE_ENTRY_TYPE;
     size_t      entry_size    = HUGE_ENTRY_SIZE; /* 16 KB */
-    H5F_t *     file_ptr      = NULL;
-    H5C_t *     cache_ptr     = NULL;
+    H5F_t      *file_ptr      = NULL;
+    H5C_t      *cache_ptr     = NULL;
     hbool_t     show_progress = FALSE;
     int32_t     checkpoint    = 0;
     int32_t     entry_idx     = 0;
@@ -27261,9 +27261,9 @@ setup_cache(size_t max_cache_size, size_t min_clean_size)
     hbool_t     verbose       = TRUE;
     int         mile_stone    = 1;
     hid_t       fid           = -1;
-    H5F_t *     file_ptr      = NULL;
-    H5C_t *     cache_ptr     = NULL;
-    H5F_t *     ret_val       = NULL;
+    H5F_t      *file_ptr      = NULL;
+    H5C_t      *cache_ptr     = NULL;
+    H5F_t      *ret_val       = NULL;
     haddr_t     actual_base_addr;
     hid_t       fapl_id = H5P_DEFAULT;
 

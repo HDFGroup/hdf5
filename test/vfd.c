@@ -95,7 +95,7 @@ test_sec2(void)
     hid_t         driver_id    = -1;     /* ID for this VFD              */
     unsigned long driver_flags = 0;      /* VFD feature flags            */
     char          filename[1024];        /* filename                     */
-    void *        os_file_handle = NULL; /* OS file handle               */
+    void         *os_file_handle = NULL; /* OS file handle               */
     hsize_t       file_size;             /* file size                    */
 
     TESTING("SEC2 file driver");
@@ -207,16 +207,16 @@ test_core(void)
     hid_t         did          = -1;        /* dataset ID                   */
     hid_t         sid          = -1;        /* dataspace ID                 */
     char          filename[1024];           /* filename                     */
-    void *        os_file_handle = NULL;    /* OS file handle               */
+    void         *os_file_handle = NULL;    /* OS file handle               */
     hsize_t       file_size;                /* file size                    */
     size_t        increment;                /* core VFD increment           */
     hbool_t       backing_store;            /* use backing store?           */
     hbool_t       use_write_tracking;       /* write tracking flag          */
     size_t        write_tracking_page_size; /* write tracking page size     */
-    int *         data_w = NULL;            /* data written to the dataset  */
-    int *         data_r = NULL;            /* data read from the dataset   */
+    int          *data_w = NULL;            /* data written to the dataset  */
+    int          *data_r = NULL;            /* data read from the dataset   */
     int           val;                      /* data value                   */
-    int *         pw = NULL, *pr = NULL;    /* pointers for iterating over
+    int          *pw = NULL, *pr = NULL;    /* pointers for iterating over
                                                data arrays (write & read)   */
     hsize_t dims[2];                        /* dataspace dimensions         */
     int     i, j;                           /* iterators                    */
@@ -563,13 +563,13 @@ test_direct(void)
     hid_t   file = -1, fapl = -1, access_fapl = -1;
     hid_t   dset1 = -1, dset2 = -1, space1 = -1, space2 = -1;
     char    filename[1024];
-    int *   fhandle = NULL;
+    int    *fhandle = NULL;
     hsize_t file_size;
     hsize_t dims1[2], dims2[1];
     size_t  mbound;
     size_t  fbsize;
     size_t  cbsize;
-    int *   points = NULL, *check = NULL, *p1 = NULL, *p2 = NULL;
+    int    *points = NULL, *check = NULL, *p1 = NULL, *p2 = NULL;
     int     wdata2[DSET2_DIM] = {11, 12, 13, 14};
     int     rdata2[DSET2_DIM];
     int     i, j, n;
@@ -878,7 +878,7 @@ test_family(void)
     char          filename[1024];
     char          dname[] = "dataset";
     unsigned int  i, j;
-    int *         fhandle = NULL, *fhandle2 = NULL;
+    int          *fhandle = NULL, *fhandle2 = NULL;
     int           buf[FAMILY_NUMBER][FAMILY_SIZE];
     hsize_t       dims[2] = {FAMILY_NUMBER, FAMILY_SIZE};
     hsize_t       file_size;
@@ -1214,12 +1214,12 @@ test_multi(void)
     hid_t         driver_id    = -1; /* ID for this VFD              */
     unsigned long driver_flags = 0;  /* VFD feature flags            */
     char          filename[1024];
-    int *         fhandle2 = NULL, *fhandle = NULL;
+    int          *fhandle2 = NULL, *fhandle = NULL;
     hsize_t       file_size;
     H5FD_mem_t    mt, memb_map[H5FD_MEM_NTYPES];
     hid_t         memb_fapl[H5FD_MEM_NTYPES];
     haddr_t       memb_addr[H5FD_MEM_NTYPES];
-    const char *  memb_name[H5FD_MEM_NTYPES];
+    const char   *memb_name[H5FD_MEM_NTYPES];
     char          sv[H5FD_MEM_NTYPES][32];
     hsize_t       dims[2]  = {MULTI_SIZE, MULTI_SIZE};
     hsize_t       adims[1] = {1};
@@ -1621,7 +1621,7 @@ test_log(void)
     hid_t         driver_id    = -1; /* ID for this VFD              */
     unsigned long driver_flags = 0;  /* VFD feature flags            */
     char          filename[1024];
-    int *         fhandle   = NULL;
+    int          *fhandle   = NULL;
     hsize_t       file_size = 0;
     unsigned int  flags     = H5FD_LOG_ALL;
     size_t        buf_size  = 4 * KB;
@@ -1731,7 +1731,7 @@ test_stdio(void)
     hid_t         driver_id    = -1; /* ID for this VFD              */
     unsigned long driver_flags = 0;  /* VFD feature flags            */
     char          filename[1024];
-    FILE *        fhandle   = NULL;
+    FILE         *fhandle   = NULL;
     hsize_t       file_size = 0;
 
     TESTING("STDIO file driver");
@@ -1838,7 +1838,7 @@ test_windows(void)
     hid_t         driver_id    = -1; /* ID for this VFD              */
     unsigned long driver_flags = 0;  /* VFD feature flags            */
     char          filename[1024];
-    int *         fhandle   = NULL;
+    int          *fhandle   = NULL;
     hsize_t       file_size = 0;
 
 #endif /*H5_HAVE_WINDOWS*/
@@ -1964,7 +1964,7 @@ test_ros3(void)
     hid_t            driver_id    = -1;     /* ID for this VFD              */
     unsigned long    driver_flags = 0;      /* VFD feature flags            */
     char             filename[1024];        /* filename                     */
-    void *           os_file_handle = NULL; /* OS file handle               */
+    void            *os_file_handle = NULL; /* OS file handle               */
     hsize_t          file_size;             /* file size                    */
     H5FD_ros3_fapl_t test_ros3_fa;
     H5FD_ros3_fapl_t ros3_fa_0 = {

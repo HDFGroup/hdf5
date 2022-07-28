@@ -49,11 +49,11 @@
  */
 typedef struct H5G_fh_ud_cmp_t {
     /* downward */
-    H5F_t *      f;             /* Pointer to file that fractal heap is in */
+    H5F_t       *f;             /* Pointer to file that fractal heap is in */
     hid_t        dxpl_id;       /* DXPL for operation                */
-    const char * name;          /* Name of link to compare           */
+    const char  *name;          /* Name of link to compare           */
     H5B2_found_t found_op;      /* Callback when correct link is found */
-    void *       found_op_data; /* Callback data when correct link is found */
+    void        *found_op_data; /* Callback data when correct link is found */
 
     /* upward */
     int cmp; /* Comparison of two link names      */
@@ -150,7 +150,7 @@ static herr_t
 H5G_dense_fh_name_cmp(const void *obj, size_t obj_len, void *_udata)
 {
     H5G_fh_ud_cmp_t *udata = (H5G_fh_ud_cmp_t *)_udata; /* User data for 'op' callback */
-    H5O_link_t *     lnk;                               /* Pointer to link created from heap object */
+    H5O_link_t      *lnk;                               /* Pointer to link created from heap object */
     herr_t           ret_value = SUCCEED;               /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -192,7 +192,7 @@ done:
 static herr_t
 H5G_dense_btree2_name_store(void *_nrecord, const void *_udata)
 {
-    const H5G_bt2_ud_ins_t *  udata   = (const H5G_bt2_ud_ins_t *)_udata;
+    const H5G_bt2_ud_ins_t   *udata   = (const H5G_bt2_ud_ins_t *)_udata;
     H5G_dense_bt2_name_rec_t *nrecord = (H5G_dense_bt2_name_rec_t *)_nrecord;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -221,7 +221,7 @@ H5G_dense_btree2_name_store(void *_nrecord, const void *_udata)
 static herr_t
 H5G_dense_btree2_name_compare(const void *_bt2_udata, const void *_bt2_rec, int *result)
 {
-    const H5G_bt2_ud_common_t *     bt2_udata = (const H5G_bt2_ud_common_t *)_bt2_udata;
+    const H5G_bt2_ud_common_t      *bt2_udata = (const H5G_bt2_ud_common_t *)_bt2_udata;
     const H5G_dense_bt2_name_rec_t *bt2_rec   = (const H5G_dense_bt2_name_rec_t *)_bt2_rec;
     herr_t                          ret_value = SUCCEED; /* Return value */
 
@@ -364,7 +364,7 @@ H5G_dense_btree2_name_debug(FILE *stream, const H5F_t H5_ATTR_UNUSED *f, hid_t H
 static herr_t
 H5G_dense_btree2_corder_store(void *_nrecord, const void *_udata)
 {
-    const H5G_bt2_ud_ins_t *    udata   = (const H5G_bt2_ud_ins_t *)_udata;
+    const H5G_bt2_ud_ins_t     *udata   = (const H5G_bt2_ud_ins_t *)_udata;
     H5G_dense_bt2_corder_rec_t *nrecord = (H5G_dense_bt2_corder_rec_t *)_nrecord;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -393,7 +393,7 @@ H5G_dense_btree2_corder_store(void *_nrecord, const void *_udata)
 static herr_t
 H5G_dense_btree2_corder_compare(const void *_bt2_udata, const void *_bt2_rec, int *result)
 {
-    const H5G_bt2_ud_common_t *       bt2_udata = (const H5G_bt2_ud_common_t *)_bt2_udata;
+    const H5G_bt2_ud_common_t        *bt2_udata = (const H5G_bt2_ud_common_t *)_bt2_udata;
     const H5G_dense_bt2_corder_rec_t *bt2_rec   = (const H5G_dense_bt2_corder_rec_t *)_bt2_rec;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR

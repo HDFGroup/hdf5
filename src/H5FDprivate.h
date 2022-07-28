@@ -66,7 +66,7 @@ typedef enum {
 
 /* Define structure to hold initial file image and other relevant information */
 typedef struct {
-    void *                      buffer;
+    void                       *buffer;
     size_t                      size;
     H5FD_file_image_callbacks_t callbacks;
 } H5FD_file_image_info_t;
@@ -105,33 +105,33 @@ typedef struct {
 struct H5P_genplist_t;
 struct H5F_t;
 
-H5_DLL int    H5FD_term_interface(void);
-H5_DLL herr_t H5FD_locate_signature(H5FD_t *file, const H5P_genplist_t *dxpl, haddr_t *sig_addr);
+H5_DLL int           H5FD_term_interface(void);
+H5_DLL herr_t        H5FD_locate_signature(H5FD_t *file, const H5P_genplist_t *dxpl, haddr_t *sig_addr);
 H5_DLL H5FD_class_t *H5FD_get_class(hid_t id);
 H5_DLL hsize_t       H5FD_sb_size(H5FD_t *file);
 H5_DLL herr_t        H5FD_sb_encode(H5FD_t *file, char *name /*out*/, uint8_t *buf);
 H5_DLL herr_t        H5FD_sb_decode(H5FD_t *file, const char *name, const uint8_t *buf);
-H5_DLL void *        H5FD_fapl_get(H5FD_t *file);
+H5_DLL void         *H5FD_fapl_get(H5FD_t *file);
 H5_DLL herr_t        H5FD_fapl_open(struct H5P_genplist_t *plist, hid_t driver_id, const void *driver_info);
 H5_DLL herr_t        H5FD_fapl_close(hid_t driver_id, void *fapl);
 H5_DLL hid_t         H5FD_register(const void *cls, size_t size, hbool_t app_ref);
-H5_DLL H5FD_t *H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr);
-H5_DLL herr_t  H5FD_close(H5FD_t *file);
-H5_DLL int     H5FD_cmp(const H5FD_t *f1, const H5FD_t *f2);
-H5_DLL haddr_t H5FD_alloc(H5FD_t *file, hid_t dxpl_id, H5FD_mem_t type, struct H5F_t *f, hsize_t size,
-                          haddr_t *align_addr, hsize_t *align_size);
-H5_DLL herr_t  H5FD_free(H5FD_t *file, hid_t dxpl_id, H5FD_mem_t type, struct H5F_t *f, haddr_t addr,
-                         hsize_t size);
-H5_DLL htri_t  H5FD_try_extend(H5FD_t *file, H5FD_mem_t type, struct H5F_t *f, haddr_t blk_end,
-                               hsize_t extra_requested);
-H5_DLL haddr_t H5FD_get_eoa(const H5FD_t *file, H5FD_mem_t type);
-H5_DLL herr_t  H5FD_set_eoa(H5FD_t *file, H5FD_mem_t type, haddr_t addr);
-H5_DLL haddr_t H5FD_get_eof(const H5FD_t *file);
-H5_DLL haddr_t H5FD_get_maxaddr(const H5FD_t *file);
-H5_DLL herr_t  H5FD_get_feature_flags(const H5FD_t *file, unsigned long *feature_flags);
-H5_DLL herr_t  H5FD_get_fs_type_map(const H5FD_t *file, H5FD_mem_t *type_map);
-H5_DLL herr_t  H5FD_read(H5FD_t *file, const H5P_genplist_t *dxpl, H5FD_mem_t type, haddr_t addr, size_t size,
-                         void *buf /*out*/);
+H5_DLL H5FD_t       *H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr);
+H5_DLL herr_t        H5FD_close(H5FD_t *file);
+H5_DLL int           H5FD_cmp(const H5FD_t *f1, const H5FD_t *f2);
+H5_DLL haddr_t       H5FD_alloc(H5FD_t *file, hid_t dxpl_id, H5FD_mem_t type, struct H5F_t *f, hsize_t size,
+                                haddr_t *align_addr, hsize_t *align_size);
+H5_DLL herr_t        H5FD_free(H5FD_t *file, hid_t dxpl_id, H5FD_mem_t type, struct H5F_t *f, haddr_t addr,
+                               hsize_t size);
+H5_DLL htri_t        H5FD_try_extend(H5FD_t *file, H5FD_mem_t type, struct H5F_t *f, haddr_t blk_end,
+                                     hsize_t extra_requested);
+H5_DLL haddr_t       H5FD_get_eoa(const H5FD_t *file, H5FD_mem_t type);
+H5_DLL herr_t        H5FD_set_eoa(H5FD_t *file, H5FD_mem_t type, haddr_t addr);
+H5_DLL haddr_t       H5FD_get_eof(const H5FD_t *file);
+H5_DLL haddr_t       H5FD_get_maxaddr(const H5FD_t *file);
+H5_DLL herr_t        H5FD_get_feature_flags(const H5FD_t *file, unsigned long *feature_flags);
+H5_DLL herr_t        H5FD_get_fs_type_map(const H5FD_t *file, H5FD_mem_t *type_map);
+H5_DLL herr_t H5FD_read(H5FD_t *file, const H5P_genplist_t *dxpl, H5FD_mem_t type, haddr_t addr, size_t size,
+                        void *buf /*out*/);
 H5_DLL herr_t H5FD_write(H5FD_t *file, const H5P_genplist_t *dxpl, H5FD_mem_t type, haddr_t addr, size_t size,
                          const void *buf);
 H5_DLL herr_t H5FD_flush(H5FD_t *file, hid_t dxpl_id, unsigned closing);

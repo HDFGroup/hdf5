@@ -28,8 +28,8 @@ typedef void (*attr_operator_t)(H5Location &loc /*in*/, const H5std_string attr_
 class UserData4Aiterate { // user data for attribute iteration
   public:
     attr_operator_t op;
-    void *          opData;
-    H5Location *    location;
+    void           *opData;
+    H5Location     *location;
 };
 
 /*! \class H5Location
@@ -117,26 +117,26 @@ class H5_DLLCPP H5Location : public IdComponent {
     // Creates a soft link from link_name to target_name.
     void link(const char *target_name, const char *link_name,
               const LinkCreatPropList &lcpl = LinkCreatPropList::DEFAULT,
-              const LinkAccPropList &  lapl = LinkAccPropList::DEFAULT) const;
+              const LinkAccPropList   &lapl = LinkAccPropList::DEFAULT) const;
     void link(const H5std_string &target_name, const H5std_string &link_name,
               const LinkCreatPropList &lcpl = LinkCreatPropList::DEFAULT,
-              const LinkAccPropList &  lapl = LinkAccPropList::DEFAULT) const;
+              const LinkAccPropList   &lapl = LinkAccPropList::DEFAULT) const;
 
     // Creates a hard link from new_name to curr_name.
     void link(const char *curr_name, const H5Location &new_loc, const char *new_name,
               const LinkCreatPropList &lcpl = LinkCreatPropList::DEFAULT,
-              const LinkAccPropList &  lapl = LinkAccPropList::DEFAULT) const;
+              const LinkAccPropList   &lapl = LinkAccPropList::DEFAULT) const;
     void link(const H5std_string &curr_name, const H5Location &new_loc, const H5std_string &new_name,
               const LinkCreatPropList &lcpl = LinkCreatPropList::DEFAULT,
-              const LinkAccPropList &  lapl = LinkAccPropList::DEFAULT) const;
+              const LinkAccPropList   &lapl = LinkAccPropList::DEFAULT) const;
 
     // Creates a hard link from new_name to curr_name in same location.
     void link(const char *curr_name, const hid_t same_loc, const char *new_name,
               const LinkCreatPropList &lcpl = LinkCreatPropList::DEFAULT,
-              const LinkAccPropList &  lapl = LinkAccPropList::DEFAULT) const;
+              const LinkAccPropList   &lapl = LinkAccPropList::DEFAULT) const;
     void link(const H5std_string &curr_name, const hid_t same_loc, const H5std_string &new_name,
               const LinkCreatPropList &lcpl = LinkCreatPropList::DEFAULT,
-              const LinkAccPropList &  lapl = LinkAccPropList::DEFAULT) const;
+              const LinkAccPropList   &lapl = LinkAccPropList::DEFAULT) const;
 
     // Removes the specified link from this location.
     void unlink(const char *link_name, const LinkAccPropList &lapl = LinkAccPropList::DEFAULT) const;
@@ -145,39 +145,39 @@ class H5_DLLCPP H5Location : public IdComponent {
     // Copies a link from this location to another.
     void copyLink(const char *src_name, const H5Location &dst, const char *dst_name,
                   const LinkCreatPropList &lcpl = LinkCreatPropList::DEFAULT,
-                  const LinkAccPropList &  lapl = LinkAccPropList::DEFAULT) const;
+                  const LinkAccPropList   &lapl = LinkAccPropList::DEFAULT) const;
     void copyLink(const H5std_string &src_name, const H5Location &dst, const H5std_string &dst_name,
                   const LinkCreatPropList &lcpl = LinkCreatPropList::DEFAULT,
-                  const LinkAccPropList &  lapl = LinkAccPropList::DEFAULT) const;
+                  const LinkAccPropList   &lapl = LinkAccPropList::DEFAULT) const;
 
     // Makes a copy of a link in the same location.
     void copyLink(const char *src_name, const char *dst_name,
                   const LinkCreatPropList &lcpl = LinkCreatPropList::DEFAULT,
-                  const LinkAccPropList &  lapl = LinkAccPropList::DEFAULT) const;
+                  const LinkAccPropList   &lapl = LinkAccPropList::DEFAULT) const;
     void copyLink(const H5std_string &src_name, const H5std_string &dst_name,
                   const LinkCreatPropList &lcpl = LinkCreatPropList::DEFAULT,
-                  const LinkAccPropList &  lapl = LinkAccPropList::DEFAULT) const;
+                  const LinkAccPropList   &lapl = LinkAccPropList::DEFAULT) const;
 
     // Renames a link in this location and moves to a new location.
     void moveLink(const char *src_name, const H5Location &dst, const char *dst_name,
                   const LinkCreatPropList &lcpl = LinkCreatPropList::DEFAULT,
-                  const LinkAccPropList &  lapl = LinkAccPropList::DEFAULT) const;
+                  const LinkAccPropList   &lapl = LinkAccPropList::DEFAULT) const;
     void moveLink(const H5std_string &src_name, const H5Location &dst, const H5std_string &dst_name,
                   const LinkCreatPropList &lcpl = LinkCreatPropList::DEFAULT,
-                  const LinkAccPropList &  lapl = LinkAccPropList::DEFAULT) const;
+                  const LinkAccPropList   &lapl = LinkAccPropList::DEFAULT) const;
 
     // Renames a link in this location.
     void moveLink(const char *src_name, const char *dst_name,
                   const LinkCreatPropList &lcpl = LinkCreatPropList::DEFAULT,
-                  const LinkAccPropList &  lapl = LinkAccPropList::DEFAULT) const;
+                  const LinkAccPropList   &lapl = LinkAccPropList::DEFAULT) const;
     void moveLink(const H5std_string &src_name, const H5std_string &dst_name,
                   const LinkCreatPropList &lcpl = LinkCreatPropList::DEFAULT,
-                  const LinkAccPropList &  lapl = LinkAccPropList::DEFAULT) const;
+                  const LinkAccPropList   &lapl = LinkAccPropList::DEFAULT) const;
 
     // Returns the information of the named link.
-    H5L_info_t getLinkInfo(const char *           link_name,
+    H5L_info_t getLinkInfo(const char            *link_name,
                            const LinkAccPropList &lapl = LinkAccPropList::DEFAULT) const;
-    H5L_info_t getLinkInfo(const H5std_string &   link_name,
+    H5L_info_t getLinkInfo(const H5std_string    &link_name,
                            const LinkAccPropList &lapl = LinkAccPropList::DEFAULT) const;
 
     // Returns the value of a symbolic link.

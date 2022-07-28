@@ -88,7 +88,7 @@ hid_t   dataset;        /* Dataset ID */
 hsize_t opt_alignment = 1;
 hsize_t opt_threshold = 1;
 int     opt_split_vfd = 0;
-char *  meta_ext, *raw_ext; /* holds the meta and raw file extension if */
+char   *meta_ext, *raw_ext; /* holds the meta and raw file extension if */
                             /* opt_split_vfd is set */
 
 /* DEFAULT VALUES FOR OPTIONS */
@@ -114,7 +114,7 @@ extern char *optarg;
 int
 main(int argc, char **argv)
 {
-    char *  buf, *tmp, *buf2 = NULL, *tmp2 = NULL, *check;
+    char   *buf, *tmp, *buf2 = NULL, *tmp2 = NULL, *check;
     int     i, j, mynod = 0, nprocs = 1, my_correct = 1, correct, myerrno;
     double  stim, etim;
     double  write_tim = 0;

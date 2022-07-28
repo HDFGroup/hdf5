@@ -162,9 +162,9 @@ herr_t
 H5D__fill(const void *fill, const H5T_t *fill_type, void *buf, const H5T_t *buf_type, const H5S_t *space,
           hid_t dxpl_id)
 {
-    H5WB_t * elem_wb = NULL;                  /* Wrapped buffer for element data */
+    H5WB_t  *elem_wb = NULL;                  /* Wrapped buffer for element data */
     uint8_t  elem_buf[H5T_ELEM_BUF_SIZE];     /* Buffer for element data */
-    H5WB_t * bkg_elem_wb = NULL;              /* Wrapped buffer for background data */
+    H5WB_t  *bkg_elem_wb = NULL;              /* Wrapped buffer for background data */
     uint8_t  bkg_elem_buf[H5T_ELEM_BUF_SIZE]; /* Buffer for background data */
     uint8_t *bkg_buf = NULL;                  /* Background conversion buffer */
     uint8_t *tmp_buf = NULL;                  /* Temp conversion buffer */
@@ -562,7 +562,7 @@ herr_t
 H5D__fill_refill_vl(H5D_fill_buf_info_t *fb_info, size_t nelmts, hid_t dxpl_id)
 {
     herr_t ret_value = SUCCEED; /* Return value */
-    void * buf       = NULL;    /* Temporary fill buffer */
+    void  *buf       = NULL;    /* Temporary fill buffer */
 
     FUNC_ENTER_PACKAGE
 

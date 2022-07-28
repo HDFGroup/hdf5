@@ -33,21 +33,21 @@
 /* Local functions */
 static herr_t  H5T_vlen_reclaim_recurse(void *elem, const H5T_t *dt, H5MM_free_t free_func, void *free_info);
 static ssize_t H5T_vlen_seq_mem_getlen(const void *_vl);
-static void *  H5T_vlen_seq_mem_getptr(void *_vl);
+static void   *H5T_vlen_seq_mem_getptr(void *_vl);
 static htri_t  H5T_vlen_seq_mem_isnull(const H5F_t *f, void *_vl);
 static herr_t  H5T_vlen_seq_mem_read(H5F_t *f, hid_t dxpl_id, void *_vl, void *_buf, size_t len);
 static herr_t  H5T_vlen_seq_mem_write(H5F_t *f, hid_t dxpl_id, const H5T_vlen_alloc_info_t *vl_alloc_info,
                                       void *_vl, void *_buf, void *_bg, size_t seq_len, size_t base_size);
 static herr_t  H5T_vlen_seq_mem_setnull(H5F_t *f, hid_t dxpl_id, void *_vl, void *_bg);
 static ssize_t H5T_vlen_str_mem_getlen(const void *_vl);
-static void *  H5T_vlen_str_mem_getptr(void *_vl);
+static void   *H5T_vlen_str_mem_getptr(void *_vl);
 static htri_t  H5T_vlen_str_mem_isnull(const H5F_t *f, void *_vl);
 static herr_t  H5T_vlen_str_mem_read(H5F_t *f, hid_t dxpl_id, void *_vl, void *_buf, size_t len);
 static herr_t  H5T_vlen_str_mem_write(H5F_t *f, hid_t dxpl_id, const H5T_vlen_alloc_info_t *vl_alloc_info,
                                       void *_vl, void *_buf, void *_bg, size_t seq_len, size_t base_size);
 static herr_t  H5T_vlen_str_mem_setnull(H5F_t *f, hid_t dxpl_id, void *_vl, void *_bg);
 static ssize_t H5T_vlen_disk_getlen(const void *_vl);
-static void *  H5T_vlen_disk_getptr(void *_vl);
+static void   *H5T_vlen_disk_getptr(void *_vl);
 static htri_t  H5T_vlen_disk_isnull(const H5F_t *f, void *_vl);
 static herr_t  H5T_vlen_disk_read(H5F_t *f, hid_t dxpl_id, void *_vl, void *_buf, size_t len);
 static herr_t  H5T_vlen_disk_write(H5F_t *f, hid_t dxpl_id, const H5T_vlen_alloc_info_t *vl_alloc_info,
@@ -685,7 +685,7 @@ H5T_vlen_str_mem_write(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id,
                        const H5T_vlen_alloc_info_t *vl_alloc_info, void *_vl, void *buf,
                        void H5_ATTR_UNUSED *_bg, size_t seq_len, size_t base_size)
 {
-    char * t;                   /* Pointer to temporary buffer allocated */
+    char  *t;                   /* Pointer to temporary buffer allocated */
     size_t len;                 /* Maximum length of the string to copy */
     herr_t ret_value = SUCCEED; /* Return value */
 

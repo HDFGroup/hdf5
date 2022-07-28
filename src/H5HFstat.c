@@ -116,7 +116,7 @@ herr_t
 H5HF_size(const H5HF_t *fh, hid_t dxpl_id, hsize_t *heap_size)
 {
     H5HF_hdr_t *hdr;                 /* Fractal heap header */
-    H5B2_t *    bt2       = NULL;    /* v2 B-tree handle for index */
+    H5B2_t     *bt2       = NULL;    /* v2 B-tree handle for index */
     hsize_t     meta_size = 0;       /* free space storage size */
     herr_t      ret_value = SUCCEED; /* Return value */
 

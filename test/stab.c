@@ -198,7 +198,7 @@ test_long(hid_t fapl, hbool_t new_format)
 {
     hid_t  fid = (-1); /* File ID */
     hid_t  g1 = (-1), g2 = (-1);
-    char * name1 = NULL, *name2 = NULL;
+    char  *name1 = NULL, *name2 = NULL;
     char   filename[NAME_BUF_SIZE];
     size_t i;
 
@@ -646,7 +646,7 @@ long_compact(hid_t fapl2)
     hid_t          fid     = (-1); /* File ID */
     hid_t          gid     = (-1); /* Group ID */
     hid_t          gid2    = (-1); /* Group ID */
-    char *         objname = NULL; /* Object name */
+    char          *objname = NULL; /* Object name */
     char           filename[NAME_BUF_SIZE];
     h5_stat_size_t empty_size; /* Size of an empty file */
     h5_stat_size_t file_size;  /* Size of each file created */

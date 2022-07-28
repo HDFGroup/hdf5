@@ -172,9 +172,9 @@ H5B2_split1(H5B2_hdr_t *hdr, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *cur
 {
     const H5AC_class_t *child_class;                             /* Pointer to child node's class info */
     haddr_t   left_addr = HADDR_UNDEF, right_addr = HADDR_UNDEF; /* Addresses of left & right child nodes */
-    void *    left_child = NULL, *right_child = NULL;            /* Pointers to child nodes */
+    void     *left_child = NULL, *right_child = NULL;            /* Pointers to child nodes */
     uint16_t *left_nrec, *right_nrec;                            /* Pointers to child # of records */
-    uint8_t * left_native, *right_native;                        /* Pointers to childs' native records */
+    uint8_t  *left_native, *right_native;                        /* Pointers to childs' native records */
     H5B2_node_ptr_t *left_node_ptrs  = NULL,
                     *right_node_ptrs = NULL; /* Pointers to childs' node pointer info */
     uint16_t mid_record;                     /* Index of "middle" record in current node */
@@ -452,9 +452,9 @@ H5B2_redistribute2(H5B2_hdr_t *hdr, hid_t dxpl_id, unsigned depth, H5B2_internal
 {
     const H5AC_class_t *child_class;                             /* Pointer to child node's class info */
     haddr_t   left_addr = HADDR_UNDEF, right_addr = HADDR_UNDEF; /* Addresses of left & right child nodes */
-    void *    left_child = NULL, *right_child = NULL;            /* Pointers to child nodes */
+    void     *left_child = NULL, *right_child = NULL;            /* Pointers to child nodes */
     uint16_t *left_nrec, *right_nrec;                            /* Pointers to child # of records */
-    uint8_t * left_native, *right_native;                        /* Pointers to childs' native records */
+    uint8_t  *left_native, *right_native;                        /* Pointers to childs' native records */
     H5B2_node_ptr_t *left_node_ptrs  = NULL,
                     *right_node_ptrs = NULL;            /* Pointers to childs' node pointer info */
     hssize_t left_moved_nrec = 0, right_moved_nrec = 0; /* Number of records moved, for internal redistrib */
@@ -710,16 +710,16 @@ H5B2_redistribute3(H5B2_hdr_t *hdr, hid_t dxpl_id, unsigned depth, H5B2_internal
 {
     H5B2_node_ptr_t *left_node_ptrs      = NULL,
                     *right_node_ptrs     = NULL;                 /* Pointers to childs' node pointer info */
-    H5B2_node_ptr_t *   middle_node_ptrs = NULL;                 /* Pointers to childs' node pointer info */
+    H5B2_node_ptr_t    *middle_node_ptrs = NULL;                 /* Pointers to childs' node pointer info */
     const H5AC_class_t *child_class;                             /* Pointer to child node's class info */
     haddr_t   left_addr = HADDR_UNDEF, right_addr = HADDR_UNDEF; /* Addresses of left & right child nodes */
     haddr_t   middle_addr = HADDR_UNDEF;                         /* Address of middle child node */
-    void *    left_child = NULL, *right_child = NULL;            /* Pointers to child nodes */
-    void *    middle_child = NULL;                               /* Pointers to middle child node */
+    void     *left_child = NULL, *right_child = NULL;            /* Pointers to child nodes */
+    void     *middle_child = NULL;                               /* Pointers to middle child node */
     uint16_t *left_nrec, *right_nrec;                            /* Pointers to child # of records */
     uint16_t *middle_nrec;                                       /* Pointers to middle child # of records */
-    uint8_t * left_native, *right_native;                        /* Pointers to childs' native records */
-    uint8_t * middle_native;                             /* Pointers to middle child's native records */
+    uint8_t  *left_native, *right_native;                        /* Pointers to childs' native records */
+    uint8_t  *middle_native;                             /* Pointers to middle child's native records */
     hssize_t  left_moved_nrec = 0, right_moved_nrec = 0; /* Number of records moved, for internal split */
     hssize_t  middle_moved_nrec = 0;                     /* Number of records moved, for internal split */
     unsigned  left_child_flags  = H5AC__NO_FLAGS_SET,
@@ -1109,9 +1109,9 @@ H5B2_merge2(H5B2_hdr_t *hdr, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *cur
 {
     const H5AC_class_t *child_class;                             /* Pointer to child node's class info */
     haddr_t   left_addr = HADDR_UNDEF, right_addr = HADDR_UNDEF; /* Addresses of left & right child nodes */
-    void *    left_child = NULL, *right_child = NULL;            /* Pointers to left & right child nodes */
+    void     *left_child = NULL, *right_child = NULL;            /* Pointers to left & right child nodes */
     uint16_t *left_nrec, *right_nrec;     /* Pointers to left & right child # of records */
-    uint8_t * left_native, *right_native; /* Pointers to left & right children's native records */
+    uint8_t  *left_native, *right_native; /* Pointers to left & right children's native records */
     H5B2_node_ptr_t *left_node_ptrs  = NULL,
                     *right_node_ptrs = NULL; /* Pointers to childs' node pointer info */
     unsigned left_child_flags        = H5AC__NO_FLAGS_SET,
@@ -1276,12 +1276,12 @@ H5B2_merge3(H5B2_hdr_t *hdr, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *cur
     const H5AC_class_t *child_class;                             /* Pointer to child node's class info */
     haddr_t   left_addr = HADDR_UNDEF, right_addr = HADDR_UNDEF; /* Addresses of left & right child nodes */
     haddr_t   middle_addr = HADDR_UNDEF;                         /* Address of middle child node */
-    void *    left_child = NULL, *right_child = NULL;            /* Pointers to left & right child nodes */
-    void *    middle_child = NULL;                               /* Pointer to middle child node */
+    void     *left_child = NULL, *right_child = NULL;            /* Pointers to left & right child nodes */
+    void     *middle_child = NULL;                               /* Pointer to middle child node */
     uint16_t *left_nrec, *right_nrec;     /* Pointers to left & right child # of records */
     uint16_t *middle_nrec;                /* Pointer to middle child # of records */
-    uint8_t * left_native, *right_native; /* Pointers to left & right children's native records */
-    uint8_t * middle_native;              /* Pointer to middle child's native records */
+    uint8_t  *left_native, *right_native; /* Pointers to left & right children's native records */
+    uint8_t  *middle_native;              /* Pointer to middle child's native records */
     H5B2_node_ptr_t *left_node_ptrs   = NULL,
                     *right_node_ptrs  = NULL; /* Pointers to childs' node pointer info */
     H5B2_node_ptr_t *middle_node_ptrs = NULL; /* Pointer to child's node pointer info */
@@ -1527,8 +1527,8 @@ H5B2_swap_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id, unsigned depth, H5B2_internal_t *
 {
     const H5AC_class_t *child_class;         /* Pointer to child node's class info */
     haddr_t             child_addr;          /* Address of child node */
-    void *              child = NULL;        /* Pointer to child node */
-    uint8_t *           child_native;        /* Pointer to child's native records */
+    void               *child = NULL;        /* Pointer to child node */
+    uint8_t            *child_native;        /* Pointer to child's native records */
     herr_t              ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1943,7 +1943,7 @@ H5B2_leaf_t *
 H5B2_protect_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id, haddr_t addr, unsigned nrec, H5AC_protect_t rw)
 {
     H5B2_leaf_cache_ud_t udata;     /* User-data for callback */
-    H5B2_leaf_t *        ret_value; /* Return value */
+    H5B2_leaf_t         *ret_value; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -2063,7 +2063,7 @@ H5B2_protect_internal(H5B2_hdr_t *hdr, hid_t dxpl_id, haddr_t addr, unsigned nre
                       H5AC_protect_t rw)
 {
     H5B2_internal_cache_ud_t udata;     /* User data to pass through to cache 'deserialize' callback */
-    H5B2_internal_t *        ret_value; /* Return value */
+    H5B2_internal_t         *ret_value; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -2108,10 +2108,10 @@ H5B2_iterate_node(H5B2_hdr_t *hdr, hid_t dxpl_id, unsigned depth, const H5B2_nod
                   H5B2_operator_t op, void *op_data)
 {
     const H5AC_class_t *curr_node_class = NULL;   /* Pointer to current node's class info */
-    void *              node            = NULL;   /* Pointers to current node */
-    uint8_t *           node_native;              /* Pointers to node's native records */
-    uint8_t *           native    = NULL;         /* Pointers to copy of node's native records */
-    H5B2_node_ptr_t *   node_ptrs = NULL;         /* Pointers to node's node pointers */
+    void               *node            = NULL;   /* Pointers to current node */
+    uint8_t            *node_native;              /* Pointers to node's native records */
+    uint8_t            *native    = NULL;         /* Pointers to copy of node's native records */
+    H5B2_node_ptr_t    *node_ptrs = NULL;         /* Pointers to node's node pointers */
     unsigned            u;                        /* Local index */
     herr_t              ret_value = H5_ITER_CONT; /* Iterator return value */
 
@@ -2325,8 +2325,8 @@ H5B2_remove_internal(H5B2_hdr_t *hdr, hid_t dxpl_id, hbool_t *depth_decreased, v
                      H5B2_nodepos_t curr_pos, H5B2_node_ptr_t *curr_node_ptr, void *udata, H5B2_remove_t op,
                      void *op_data)
 {
-    H5AC_info_t *    new_cache_info; /* Pointer to new cache info */
-    unsigned *       new_cache_info_flags_ptr = NULL;
+    H5AC_info_t     *new_cache_info; /* Pointer to new cache info */
+    unsigned        *new_cache_info_flags_ptr = NULL;
     H5B2_node_ptr_t *new_node_ptr;                     /* Pointer to new node pointer */
     H5B2_internal_t *internal;                         /* Pointer to internal node */
     H5B2_nodepos_t   next_pos       = H5B2_POS_MIDDLE; /* Position of next node */
@@ -2650,8 +2650,8 @@ H5B2_remove_internal_by_idx(H5B2_hdr_t *hdr, hid_t dxpl_id, hbool_t *depth_decre
                             unsigned *parent_cache_info_flags_ptr, H5B2_node_ptr_t *curr_node_ptr,
                             H5B2_nodepos_t curr_pos, hsize_t n, H5B2_remove_t op, void *op_data)
 {
-    H5AC_info_t *    new_cache_info; /* Pointer to new cache info */
-    unsigned *       new_cache_info_flags_ptr = NULL;
+    H5AC_info_t     *new_cache_info; /* Pointer to new cache info */
+    unsigned        *new_cache_info_flags_ptr = NULL;
     H5B2_node_ptr_t *new_node_ptr;                     /* Pointer to new node pointer */
     H5B2_internal_t *internal;                         /* Pointer to internal node */
     H5B2_nodepos_t   next_pos       = H5B2_POS_MIDDLE; /* Position of next node */
@@ -3103,8 +3103,8 @@ H5B2_delete_node(H5B2_hdr_t *hdr, hid_t dxpl_id, unsigned depth, const H5B2_node
                  H5B2_remove_t op, void *op_data)
 {
     const H5AC_class_t *curr_node_class = NULL; /* Pointer to current node's class info */
-    void *              node            = NULL; /* Pointers to current node */
-    uint8_t *           native;                 /* Pointers to node's native records */
+    void               *node            = NULL; /* Pointers to current node */
+    uint8_t            *native;                 /* Pointers to node's native records */
     herr_t              ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT

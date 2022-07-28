@@ -54,7 +54,7 @@ GetByte(GIFBYTE *MemGif)
  *           otherwise 0 if no error occured.
  */
 int
-ReadGifHeader(GIFHEAD * GifHead, /* Pointer to GIF header structure  */
+ReadGifHeader(GIFHEAD  *GifHead, /* Pointer to GIF header structure  */
               GIFBYTE **MemGif2) /* GIF image file input FILE stream */
 {
     GIFWORD i;         /* Loop counter                                */
@@ -121,7 +121,7 @@ ReadGifHeader(GIFHEAD * GifHead, /* Pointer to GIF header structure  */
 */
 int
 ReadGifImageDesc(GIFIMAGEDESC *GifImageDesc, /* Pointer to GIF image descriptor structure  */
-                 GIFBYTE **    MemGif2       /* GIF image file input FILE stream           */
+                 GIFBYTE     **MemGif2       /* GIF image file input FILE stream           */
 )
 {
     GIFWORD i;               /* Loop counter                               */
@@ -210,7 +210,7 @@ ReadGifImageDesc(GIFIMAGEDESC *GifImageDesc, /* Pointer to GIF image descriptor 
 */
 int
 ReadGifGraphicControl(GIFGRAPHICCONTROL *GifGraphicControl, /* Pointer to GC Extension structure */
-                      GIFBYTE **         MemGif2            /* GIF image file input FILE stream  */
+                      GIFBYTE          **MemGif2            /* GIF image file input FILE stream  */
 )
 {
     int i;
@@ -233,7 +233,7 @@ ReadGifGraphicControl(GIFGRAPHICCONTROL *GifGraphicControl, /* Pointer to GC Ext
 */
 int
 ReadGifPlainText(GIFPLAINTEXT *GifPlainText, /* Pointer to Plain Text Extension structure */
-                 GIFBYTE **    MemGif2       /* GIF image file input FILE stream          */
+                 GIFBYTE     **MemGif2       /* GIF image file input FILE stream          */
 )
 {
     int i;
@@ -270,7 +270,7 @@ ReadGifPlainText(GIFPLAINTEXT *GifPlainText, /* Pointer to Plain Text Extension 
 */
 int
 ReadGifApplication(GIFAPPLICATION *GifApplication, /* Pointer to Application Extension structure */
-                   GIFBYTE **      MemGif2         /* GIF image file input FILE stream           */
+                   GIFBYTE       **MemGif2         /* GIF image file input FILE stream           */
 )
 {
     int i;
@@ -306,7 +306,7 @@ ReadGifApplication(GIFAPPLICATION *GifApplication, /* Pointer to Application Ext
 */
 int
 ReadGifComment(GIFCOMMENT *GifComment, /* Pointer to GIF Comment Extension structure */
-               GIFBYTE **  MemGif2     /* GIF image file input FILE stream           */
+               GIFBYTE   **MemGif2     /* GIF image file input FILE stream           */
 )
 {
 
@@ -331,7 +331,7 @@ ReadGifComment(GIFCOMMENT *GifComment, /* Pointer to GIF Comment Extension struc
 */
 static GIFBYTE *
 ReadDataSubBlocks(GIFBYTE **MemGif2, /* GIF image file input FILE stream              */
-                  GIFWORD * DSize)
+                  GIFWORD  *DSize)
 {
     GIFBYTE *ptr1;     /* Pointer used to "walk the heap"               */
     GIFBYTE *ptr2;     /* Pointer used to mark the top of the heap      */

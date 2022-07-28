@@ -174,7 +174,7 @@ H5T_get_member_offset(const H5T_t *dt, unsigned membno)
 H5T_class_t
 H5Tget_member_class(hid_t type_id, unsigned membno)
 {
-    H5T_t *     dt;        /* Datatype to query */
+    H5T_t      *dt;        /* Datatype to query */
     H5T_class_t ret_value; /* Return value */
 
     FUNC_ENTER_API(H5T_NO_CLASS)

@@ -1461,12 +1461,12 @@ lower_dim_size_comp_test__run_test(const int chunk_edge_size, const hbool_t use_
     size_t      large_ds_size;
     size_t      large_ds_slice_size;
     uint32_t    expected_value;
-    uint32_t *  small_ds_buf_0 = NULL;
-    uint32_t *  small_ds_buf_1 = NULL;
-    uint32_t *  large_ds_buf_0 = NULL;
-    uint32_t *  large_ds_buf_1 = NULL;
-    uint32_t *  ptr_0;
-    uint32_t *  ptr_1;
+    uint32_t   *small_ds_buf_0 = NULL;
+    uint32_t   *small_ds_buf_1 = NULL;
+    uint32_t   *large_ds_buf_0 = NULL;
+    uint32_t   *large_ds_buf_1 = NULL;
+    uint32_t   *ptr_0;
+    uint32_t   *ptr_1;
     hsize_t     small_chunk_dims[LDSCT_DS_RANK];
     hsize_t     large_chunk_dims[LDSCT_DS_RANK];
     hsize_t     small_dims[LDSCT_DS_RANK];

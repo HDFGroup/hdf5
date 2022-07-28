@@ -153,7 +153,7 @@ static herr_t H5C_verify_not_in_index(H5C_t *cache_ptr, H5C_cache_entry_t *entry
 
 #define H5C__EPOCH_MARKER_TYPE H5C__MAX_NUM_TYPE_IDS
 
-static void * H5C_epoch_marker_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
+static void  *H5C_epoch_marker_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
 static herr_t H5C_epoch_marker_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr, void *thing,
                                      unsigned *flags_ptr);
 static herr_t H5C_epoch_marker_dest(H5F_t *f, void *thing);
@@ -372,7 +372,7 @@ H5C_apply_candidate_list(H5F_t *f, hid_t primary_dxpl_id, hid_t secondary_dxpl_i
     int                entries_flushed  = 0;
     int                entries_examined = 0;
     int                initial_list_len;
-    int *              candidate_assignment_table = NULL;
+    int               *candidate_assignment_table = NULL;
     haddr_t            addr;
     H5C_cache_entry_t *clear_ptr = NULL;
     H5C_cache_entry_t *entry_ptr = NULL;
@@ -1282,7 +1282,7 @@ herr_t
 H5C_expunge_entry(H5F_t *f, hid_t primary_dxpl_id, hid_t secondary_dxpl_id, const H5C_class_t *type,
                   haddr_t addr, unsigned flags)
 {
-    H5C_t *            cache_ptr;
+    H5C_t             *cache_ptr;
     herr_t             result;
     hbool_t            first_flush = TRUE;
     H5C_cache_entry_t *entry_ptr   = NULL;
@@ -1388,7 +1388,7 @@ done:
 herr_t
 H5C_flush_cache(H5F_t *f, hid_t primary_dxpl_id, hid_t secondary_dxpl_id, unsigned flags)
 {
-    H5C_t *            cache_ptr = f->shared->cache;
+    H5C_t             *cache_ptr = f->shared->cache;
     herr_t             status;
     herr_t             ret_value = SUCCEED;
     hbool_t            destroy;
@@ -1399,7 +1399,7 @@ H5C_flush_cache(H5F_t *f, hid_t primary_dxpl_id, hid_t secondary_dxpl_id, unsign
     hbool_t            tried_to_flush_protected_entry = FALSE;
     int32_t            passes                         = 0;
     int32_t            protected_entries              = 0;
-    H5SL_node_t *      node_ptr                       = NULL;
+    H5SL_node_t       *node_ptr                       = NULL;
     H5C_cache_entry_t *entry_ptr                      = NULL;
     H5C_cache_entry_t *next_entry_ptr                 = NULL;
 #if H5C_DO_SANITY_CHECKS
@@ -1557,12 +1557,12 @@ H5C_flush_cache(H5F_t *f, hid_t primary_dxpl_id, hid_t secondary_dxpl_id, unsign
 #endif /* NDEBUG */
                     if ((!entry_ptr->is_dirty) || (!entry_ptr->in_slist)) {
 
-                    /* the s-list has been modified out from under us.
-                     * set node_ptr to NULL and break out of the loop.
-                     */
-                    node_ptr = NULL;
-                    break;
-                }
+                        /* the s-list has been modified out from under us.
+                         * set node_ptr to NULL and break out of the loop.
+                         */
+                        node_ptr = NULL;
+                        break;
+                    }
 
                 /* increment node pointer now, before we delete its target
                  * from the slist.
@@ -1715,7 +1715,7 @@ done:
 herr_t
 H5C_flush_to_min_clean(H5F_t *f, hid_t primary_dxpl_id, hid_t secondary_dxpl_id)
 {
-    H5C_t * cache_ptr;
+    H5C_t  *cache_ptr;
     herr_t  result;
     hbool_t first_flush = TRUE;
     hbool_t write_permitted;
@@ -2038,7 +2038,7 @@ herr_t
 H5C_get_entry_status(const H5F_t *f, haddr_t addr, size_t *size_ptr, hbool_t *in_cache_ptr,
                      hbool_t *is_dirty_ptr, hbool_t *is_protected_ptr, hbool_t *is_pinned_ptr)
 {
-    H5C_t *            cache_ptr;
+    H5C_t             *cache_ptr;
     H5C_cache_entry_t *entry_ptr = NULL;
     herr_t             ret_value = SUCCEED; /* Return value */
 
@@ -2231,7 +2231,7 @@ herr_t
 H5C_insert_entry(H5F_t *f, hid_t primary_dxpl_id, hid_t secondary_dxpl_id, const H5C_class_t *type,
                  haddr_t addr, void *thing, unsigned int flags)
 {
-    H5C_t *            cache_ptr;
+    H5C_t             *cache_ptr;
     herr_t             result;
     herr_t             ret_value   = SUCCEED; /* Return value */
     hbool_t            first_flush = TRUE;
@@ -2504,7 +2504,7 @@ herr_t
 H5C_mark_entries_as_clean(H5F_t *f, hid_t primary_dxpl_id, hid_t secondary_dxpl_id, int32_t ce_array_len,
                           haddr_t *ce_array_ptr)
 {
-    H5C_t * cache_ptr;
+    H5C_t  *cache_ptr;
     hbool_t first_flush = TRUE;
     int     entries_cleared;
     int     entries_examined;
@@ -2762,7 +2762,7 @@ done:
      */
     herr_t H5C_mark_entry_dirty(void *thing)
     {
-        H5C_t *            cache_ptr;
+        H5C_t             *cache_ptr;
         H5C_cache_entry_t *entry_ptr = (H5C_cache_entry_t *)thing;
         herr_t             ret_value = SUCCEED; /* Return value */
 
@@ -2995,7 +2995,7 @@ done:
      */
     herr_t H5C_resize_entry(void *thing, size_t new_size)
     {
-        H5C_t *            cache_ptr;
+        H5C_t             *cache_ptr;
         H5C_cache_entry_t *entry_ptr = (H5C_cache_entry_t *)thing;
         herr_t             ret_value = SUCCEED; /* Return value */
 
@@ -3092,7 +3092,7 @@ done:
      */
     herr_t H5C_pin_protected_entry(void *thing)
     {
-        H5C_t *            cache_ptr;
+        H5C_t             *cache_ptr;
         H5C_cache_entry_t *entry_ptr = (H5C_cache_entry_t *)thing; /* Pointer to entry to pin */
         herr_t             ret_value = SUCCEED;                    /* Return value */
 
@@ -3178,7 +3178,7 @@ done:
     void *H5C_protect(H5F_t * f, hid_t primary_dxpl_id, hid_t secondary_dxpl_id, const H5C_class_t *type,
                       haddr_t addr, void *udata, unsigned flags)
     {
-        H5C_t *            cache_ptr;
+        H5C_t             *cache_ptr;
         hbool_t            hit;
         hbool_t            first_flush;
         hbool_t            have_write_permitted = FALSE;
@@ -3186,9 +3186,9 @@ done:
         hbool_t            write_permitted      = FALSE;
         herr_t             result;
         size_t             empty_space;
-        void *             thing;
+        void              *thing;
         H5C_cache_entry_t *entry_ptr;
-        void *             ret_value = NULL; /* Return value */
+        void              *ret_value = NULL; /* Return value */
 
         FUNC_ENTER_NOAPI(NULL)
 
@@ -3779,9 +3779,10 @@ done:
                     break;
 
                 case H5C_flash_incr__add_space:
-                    cache_ptr->flash_size_increase_possible  = TRUE;
-                    cache_ptr->flash_size_increase_threshold = (size_t)(
-                        ((double)(cache_ptr->max_cache_size)) * ((cache_ptr->resize_ctl).flash_threshold));
+                    cache_ptr->flash_size_increase_possible = TRUE;
+                    cache_ptr->flash_size_increase_threshold =
+                        (size_t)(((double)(cache_ptr->max_cache_size)) *
+                                 ((cache_ptr->resize_ctl).flash_threshold));
                     break;
 
                 default: /* should be unreachable */
@@ -4268,7 +4269,7 @@ done:
      */
     void
 #ifndef NDEBUG
-        H5C_stats__reset(H5C_t * cache_ptr)
+    H5C_stats__reset(H5C_t * cache_ptr)
 #else /* NDEBUG */
 #if H5C_COLLECT_CACHE_STATS
 H5C_stats__reset(H5C_t *cache_ptr)
@@ -4374,8 +4375,8 @@ H5C_stats__reset(H5C_t H5_ATTR_UNUSED *cache_ptr)
         herr_t             ret_value = SUCCEED; /* Return value */
         int                i;
         H5C_cache_entry_t *entry_ptr = NULL;
-        H5SL_t *           slist_ptr = NULL;
-        H5SL_node_t *      node_ptr  = NULL;
+        H5SL_t            *slist_ptr = NULL;
+        H5SL_node_t       *node_ptr  = NULL;
 
         FUNC_ENTER_NOAPI(FAIL)
 
@@ -4497,7 +4498,7 @@ done:
      */
     herr_t H5C_unpin_entry(void *_entry_ptr)
     {
-        H5C_t *            cache_ptr;
+        H5C_t             *cache_ptr;
         H5C_cache_entry_t *entry_ptr = (H5C_cache_entry_t *)_entry_ptr; /* Pointer to entry to unpin */
         herr_t             ret_value = SUCCEED;                         /* Return value */
 
@@ -4569,7 +4570,7 @@ done:
     herr_t H5C_unprotect(H5F_t * f, hid_t primary_dxpl_id, hid_t secondary_dxpl_id, const H5C_class_t *type,
                          haddr_t addr, void *thing, unsigned int flags)
     {
-        H5C_t * cache_ptr;
+        H5C_t  *cache_ptr;
         hbool_t deleted;
         hbool_t dirtied;
         hbool_t set_flush_marker;
@@ -5116,7 +5117,7 @@ done:
     static herr_t H5C__auto_adjust_cache_size(H5F_t * f, hid_t primary_dxpl_id, hid_t secondary_dxpl_id,
                                               hbool_t write_permitted, hbool_t * first_flush_ptr)
     {
-        H5C_t *                cache_ptr = f->shared->cache;
+        H5C_t                 *cache_ptr = f->shared->cache;
         herr_t                 result;
         hbool_t                inserted_epoch_marker = FALSE;
         size_t                 new_max_cache_size    = 0;
@@ -5639,7 +5640,7 @@ done:
         H5F_t * f, hid_t primary_dxpl_id, hid_t secondary_dxpl_id, hbool_t write_permitted,
         hbool_t * first_flush_ptr)
     {
-        H5C_t *            cache_ptr = f->shared->cache;
+        H5C_t             *cache_ptr = f->shared->cache;
         herr_t             result;
         size_t             eviction_size_limit;
         size_t             bytes_evicted = 0;
@@ -5720,15 +5721,15 @@ done:
                         if ((prev_ptr->is_dirty != prev_is_dirty) || (prev_ptr->next != next_ptr) ||
                             (prev_ptr->is_protected) || (prev_ptr->is_pinned)) {
 
-                        /* something has happened to the LRU -- start over
-                         * from the tail.
-                         */
-                        entry_ptr = cache_ptr->LRU_tail_ptr;
-                    }
-                    else {
+                            /* something has happened to the LRU -- start over
+                             * from the tail.
+                             */
+                            entry_ptr = cache_ptr->LRU_tail_ptr;
+                        }
+                        else {
 
-                        entry_ptr = prev_ptr;
-                    }
+                            entry_ptr = prev_ptr;
+                        }
                 }
                 else {
 
@@ -6124,8 +6125,9 @@ done:
                     break;
 
                 case H5C_flash_incr__add_space:
-                    cache_ptr->flash_size_increase_threshold = (size_t)(
-                        ((double)(cache_ptr->max_cache_size)) * ((cache_ptr->resize_ctl).flash_threshold));
+                    cache_ptr->flash_size_increase_threshold =
+                        (size_t)(((double)(cache_ptr->max_cache_size)) *
+                                 ((cache_ptr->resize_ctl).flash_threshold));
                     break;
 
                 default: /* should be unreachable */
@@ -6206,7 +6208,7 @@ done:
     static herr_t H5C_flush_invalidate_cache(H5F_t * f, hid_t primary_dxpl_id, hid_t secondary_dxpl_id,
                                              unsigned flags)
     {
-        H5C_t *            cache_ptr = f->shared->cache;
+        H5C_t             *cache_ptr = f->shared->cache;
         herr_t             status;
         hbool_t            first_flush       = TRUE;
         int32_t            protected_entries = 0;
@@ -6215,7 +6217,7 @@ done:
         int32_t            old_pel_len;
         int32_t            passes = 0;
         unsigned           cooked_flags;
-        H5SL_node_t *      node_ptr       = NULL;
+        H5SL_node_t       *node_ptr       = NULL;
         H5C_cache_entry_t *entry_ptr      = NULL;
         H5C_cache_entry_t *next_entry_ptr = NULL;
 #if H5C_DO_SANITY_CHECKS
@@ -6384,11 +6386,11 @@ done:
 #endif /* NDEBUG */
                     if ((!entry_ptr->is_dirty) || (!entry_ptr->in_slist)) {
 
-                    /* the s-list has been modified out from under us.
-                     * break out of the loop.
-                     */
-                    break;
-                }
+                        /* the s-list has been modified out from under us.
+                         * break out of the loop.
+                         */
+                        break;
+                    }
 
                 /* increment node pointer now, before we delete its target
                  * from the slist.
@@ -6698,7 +6700,7 @@ done:
                                          const H5C_class_t *type_ptr, haddr_t addr, unsigned flags,
                                          hbool_t *first_flush_ptr, hbool_t del_entry_from_slist_on_destroy)
     {
-        H5C_t *            cache_ptr = f->shared->cache;
+        H5C_t             *cache_ptr = f->shared->cache;
         hbool_t            destroy;
         hbool_t            clear_only;
         hbool_t            take_ownership;
@@ -7076,9 +7078,9 @@ done:
      */
     static void *H5C_load_entry(H5F_t * f, hid_t dxpl_id, const H5C_class_t *type, haddr_t addr, void *udata)
     {
-        void *             thing = NULL; /* Pointer to thing loaded */
+        void              *thing = NULL; /* Pointer to thing loaded */
         H5C_cache_entry_t *entry;        /* Alias for thing loaded, as cache entry */
-        void *             ret_value;    /* Return value */
+        void              *ret_value;    /* Return value */
 
         FUNC_ENTER_NOAPI_NOINIT
 

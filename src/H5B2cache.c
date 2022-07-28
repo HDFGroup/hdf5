@@ -74,7 +74,7 @@ static herr_t           H5B2__cache_internal_flush(H5F_t *f, hid_t dxpl_id, hboo
 static herr_t           H5B2__cache_internal_dest(H5F_t *f, H5B2_internal_t *internal);
 static herr_t           H5B2__cache_internal_clear(H5F_t *f, H5B2_internal_t *i, hbool_t destroy);
 static herr_t           H5B2__cache_internal_size(const H5F_t *f, const H5B2_internal_t *i, size_t *size_ptr);
-static H5B2_leaf_t *    H5B2__cache_leaf_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
+static H5B2_leaf_t     *H5B2__cache_leaf_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
 static herr_t H5B2__cache_leaf_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B2_leaf_t *l,
                                      unsigned H5_ATTR_UNUSED *flags_ptr);
 static herr_t H5B2__cache_leaf_dest(H5F_t *f, H5B2_leaf_t *leaf);
@@ -139,18 +139,18 @@ const H5AC_class_t H5AC_BT2_LEAF[1] = {{
 static H5B2_hdr_t *
 H5B2__cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 {
-    H5B2_hdr_t *         hdr   = NULL; /* B-tree header */
+    H5B2_hdr_t          *hdr   = NULL; /* B-tree header */
     H5B2_hdr_cache_ud_t *udata = (H5B2_hdr_cache_ud_t *)_udata;
     H5B2_create_t        cparam;                     /* B-tree creation parameters */
     H5B2_subid_t         id;                         /* ID of B-tree class, as found in file */
     uint16_t             depth;                      /* Depth of B-tree */
     uint32_t             stored_chksum;              /* Stored metadata checksum value */
     uint32_t             computed_chksum;            /* Computed metadata checksum value */
-    H5WB_t *             wb = NULL;                  /* Wrapped buffer for header data */
+    H5WB_t              *wb = NULL;                  /* Wrapped buffer for header data */
     uint8_t              hdr_buf[H5B2_HDR_BUF_SIZE]; /* Buffer for header */
-    uint8_t *            buf;                        /* Pointer to header buffer */
-    const uint8_t *      p;                          /* Pointer into raw data buffer */
-    H5B2_hdr_t *         ret_value;                  /* Return value */
+    uint8_t             *buf;                        /* Pointer to header buffer */
+    const uint8_t       *p;                          /* Pointer into raw data buffer */
+    H5B2_hdr_t          *ret_value;                  /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -474,14 +474,14 @@ static H5B2_internal_t *
 H5B2__cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 {
     H5B2_internal_cache_ud_t *udata    = (H5B2_internal_cache_ud_t *)_udata; /* Pointer to user data */
-    H5B2_internal_t *         internal = NULL;                               /* Internal node read */
-    const uint8_t *           p;               /* Pointer into raw data buffer */
-    uint8_t *                 native;          /* Pointer to native record info */
-    H5B2_node_ptr_t *         int_node_ptr;    /* Pointer to node pointer info */
+    H5B2_internal_t          *internal = NULL;                               /* Internal node read */
+    const uint8_t            *p;               /* Pointer into raw data buffer */
+    uint8_t                  *native;          /* Pointer to native record info */
+    H5B2_node_ptr_t          *int_node_ptr;    /* Pointer to node pointer info */
     uint32_t                  stored_chksum;   /* Stored metadata checksum value */
     uint32_t                  computed_chksum; /* Computed metadata checksum value */
     unsigned                  u;               /* Local index variable */
-    H5B2_internal_t *         ret_value;       /* Return value */
+    H5B2_internal_t          *ret_value;       /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -620,8 +620,8 @@ H5B2__cache_internal_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t add
     HDassert(internal->hdr);
 
     if (internal->cache_info.is_dirty) {
-        uint8_t *        p;               /* Pointer into raw data buffer */
-        uint8_t *        native;          /* Pointer to native record info */
+        uint8_t         *p;               /* Pointer into raw data buffer */
+        uint8_t         *native;          /* Pointer to native record info */
         H5B2_node_ptr_t *int_node_ptr;    /* Pointer to node pointer info */
         uint32_t         metadata_chksum; /* Computed metadata checksum value */
         unsigned         u;               /* Local index variable */
@@ -818,13 +818,13 @@ static H5B2_leaf_t *
 H5B2__cache_leaf_load(H5F_t H5_ATTR_UNUSED *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 {
     H5B2_leaf_cache_ud_t *udata = (H5B2_leaf_cache_ud_t *)_udata;
-    H5B2_leaf_t *         leaf  = NULL;    /* Pointer to lead node loaded */
-    const uint8_t *       p;               /* Pointer into raw data buffer */
-    uint8_t *             native;          /* Pointer to native keys */
+    H5B2_leaf_t          *leaf  = NULL;    /* Pointer to lead node loaded */
+    const uint8_t        *p;               /* Pointer into raw data buffer */
+    uint8_t              *native;          /* Pointer to native keys */
     uint32_t              stored_chksum;   /* Stored metadata checksum value */
     uint32_t              computed_chksum; /* Computed metadata checksum value */
     unsigned              u;               /* Local index variable */
-    H5B2_leaf_t *         ret_value;       /* Return value */
+    H5B2_leaf_t          *ret_value;       /* Return value */
 
     FUNC_ENTER_STATIC
 

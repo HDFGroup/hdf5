@@ -133,7 +133,7 @@ gent_ub(const char *filename, size_t ub_size, size_t ub_fill)
     size_t  u;
     float   dset2_1[10], dset2_2[3][5];
     int     fd;
-    char *  bp;
+    char   *bp;
 
     if (ub_size > 0) {
         create_plist = H5Pcreate(H5P_FILE_CREATE);
@@ -291,10 +291,10 @@ gent_ub(const char *filename, size_t ub_size, size_t ub_fill)
 static void
 create_textfile(const char *name, size_t size)
 {
-    char * buf;
+    char  *buf;
     int    fd;
     size_t i;
-    char * bp;
+    char  *bp;
 
     fd = HDcreat(name, 0777);
     HDassert(fd >= 0);

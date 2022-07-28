@@ -372,10 +372,10 @@ done:
 herr_t
 H5G__new_dense_info_test(hid_t gid, hsize_t *name_count, hsize_t *corder_count)
 {
-    H5B2_t *    bt2_name   = NULL;            /* v2 B-tree handle for name index */
-    H5B2_t *    bt2_corder = NULL;            /* v2 B-tree handle for creation order index */
+    H5B2_t     *bt2_name   = NULL;            /* v2 B-tree handle for name index */
+    H5B2_t     *bt2_corder = NULL;            /* v2 B-tree handle for creation order index */
     H5O_linfo_t linfo;                        /* Link info message */
-    H5G_t *     grp       = NULL;             /* Pointer to group */
+    H5G_t      *grp       = NULL;             /* Pointer to group */
     hid_t       dxpl_id   = H5AC_ind_dxpl_id; /* transfer property list used for this operation */
     herr_t      ret_value = SUCCEED;          /* Return value */
 
@@ -449,7 +449,7 @@ done:
 herr_t
 H5G__lheap_size_test(hid_t gid, size_t *lheap_size)
 {
-    H5G_t *    grp = NULL;                   /* Pointer to group */
+    H5G_t     *grp = NULL;                   /* Pointer to group */
     H5O_stab_t stab;                         /* Symbol table message	*/
     hid_t      dxpl_id   = H5AC_ind_dxpl_id; /* transfer property list used for this operation */
     herr_t     ret_value = SUCCEED;          /* Return value */
@@ -497,7 +497,7 @@ done:
 herr_t
 H5G__user_path_test(hid_t obj_id, char *user_path, size_t *user_path_len, unsigned *obj_hidden)
 {
-    void *      obj_ptr;             /* Pointer to object for ID */
+    void       *obj_ptr;             /* Pointer to object for ID */
     H5G_name_t *obj_path;            /* Pointer to group hier. path for obj */
     herr_t      ret_value = SUCCEED; /* Return value */
 
@@ -589,7 +589,7 @@ herr_t
 H5G__verify_cached_stab_test(H5O_loc_t *grp_oloc, H5G_entry_t *ent)
 {
     H5O_stab_t stab;                         /* Symbol table */
-    H5HL_t *   heap      = NULL;             /* Pointer to local heap */
+    H5HL_t    *heap      = NULL;             /* Pointer to local heap */
     hid_t      dxpl_id   = H5AC_ind_dxpl_id; /* transfer property list used for this operation */
     herr_t     ret_value = SUCCEED;          /* Return value */
 
@@ -645,7 +645,7 @@ H5G_verify_cached_stabs_test_cb(H5F_t *f, hid_t dxpl_id, const void H5_ATTR_UNUS
 {
     H5G_node_t *sn = NULL;
     H5O_loc_t   targ_oloc;
-    H5O_t *     targ_oh = NULL;
+    H5O_t      *targ_oh = NULL;
     htri_t      stab_exists;
     H5O_stab_t  stab;
     unsigned    i;
@@ -736,7 +736,7 @@ done:
 herr_t
 H5G__verify_cached_stabs_test(hid_t gid)
 {
-    H5G_t *         grp = NULL; /* Group */
+    H5G_t          *grp = NULL; /* Group */
     htri_t          stab_exists;
     H5O_stab_t      stab;                         /* Symbol table message */
     H5G_bt_common_t udata     = {NULL, NULL};     /* Dummy udata so H5B_iterate doesn't freak out */

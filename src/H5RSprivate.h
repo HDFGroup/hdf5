@@ -52,7 +52,7 @@ H5_DLL H5RS_str_t *H5RS_dup(H5RS_str_t *s);
 H5_DLL H5RS_str_t *H5RS_dup_str(const char *s);
 H5_DLL int         H5RS_cmp(const H5RS_str_t *rs1, const H5RS_str_t *rs2);
 H5_DLL ssize_t     H5RS_len(const H5RS_str_t *rs);
-H5_DLL char *      H5RS_get_str(const H5RS_str_t *rs);
+H5_DLL char       *H5RS_get_str(const H5RS_str_t *rs);
 H5_DLL unsigned    H5RS_get_count(const H5RS_str_t *rs);
 
 #endif /* H5RSprivate_H */

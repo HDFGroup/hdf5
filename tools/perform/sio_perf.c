@@ -98,7 +98,7 @@ static const char *progname = "h5perf_serial";
  * It seems that only the options that accept additional information
  * such as dataset size (-e) require the colon next to it.
  */
-static const char *        s_opts   = "a:A:B:c:Cd:D:e:F:ghi:Imno:p:P:r:stT:v:wx:X:";
+static const char         *s_opts   = "a:A:B:c:Cd:D:e:F:ghi:Imno:p:P:r:stT:v:wx:X:";
 static struct long_options l_opts[] = {{"align", require_arg, 'a'},
                                        {"alig", require_arg, 'a'},
                                        {"ali", require_arg, 'a'},
@@ -439,14 +439,14 @@ run_test(iotype iot, parameters parms, struct options *opts)
     results      res;
     register int i, ret_value = SUCCESS;
     off_t        raw_size;
-    minmax *     write_sys_mm_table   = NULL;
-    minmax *     write_mm_table       = NULL;
-    minmax *     write_gross_mm_table = NULL;
-    minmax *     write_raw_mm_table   = NULL;
-    minmax *     read_sys_mm_table    = NULL;
-    minmax *     read_mm_table        = NULL;
-    minmax *     read_gross_mm_table  = NULL;
-    minmax *     read_raw_mm_table    = NULL;
+    minmax      *write_sys_mm_table   = NULL;
+    minmax      *write_mm_table       = NULL;
+    minmax      *write_gross_mm_table = NULL;
+    minmax      *write_raw_mm_table   = NULL;
+    minmax      *read_sys_mm_table    = NULL;
+    minmax      *read_mm_table        = NULL;
+    minmax      *read_gross_mm_table  = NULL;
+    minmax      *read_raw_mm_table    = NULL;
     minmax       write_sys_mm         = {0.0F, 0.0F, 0.0F, 0};
     minmax       write_mm             = {0.0F, 0.0F, 0.0F, 0};
     minmax       write_gross_mm       = {0.0F, 0.0F, 0.0F, 0};
@@ -1325,7 +1325,7 @@ static hsize_t
 parse_size_directive(const char *size)
 {
     hsize_t s;
-    char *  endptr;
+    char   *endptr;
 
     s = HDstrtoull(size, &endptr, 10);
 

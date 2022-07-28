@@ -39,11 +39,11 @@
 /* Local Prototypes */
 /********************/
 
-static void *     H5O_group_get_copy_file_udata(void);
+static void      *H5O_group_get_copy_file_udata(void);
 static void       H5O_group_free_copy_file_udata(void *udata);
 static htri_t     H5O_group_isa(H5O_t *loc);
 static hid_t      H5O_group_open(const H5G_loc_t *obj_loc, hid_t lapl_id, hid_t dxpl_id, hbool_t app_ref);
-static void *     H5O_group_create(H5F_t *f, void *_crt_info, H5G_loc_t *obj_loc, hid_t dxpl_id);
+static void      *H5O_group_create(H5F_t *f, void *_crt_info, H5G_loc_t *obj_loc, hid_t dxpl_id);
 static H5O_loc_t *H5O_group_get_oloc(hid_t obj_id);
 static herr_t     H5O_group_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *bh_info);
 
@@ -236,8 +236,8 @@ static void *
 H5O_group_create(H5F_t *f, void *_crt_info, H5G_loc_t *obj_loc, hid_t dxpl_id)
 {
     H5G_obj_create_t *crt_info  = (H5G_obj_create_t *)_crt_info; /* Group creation parameters */
-    H5G_t *           grp       = NULL;                          /* New group created */
-    void *            ret_value = NULL;                          /* Return value */
+    H5G_t            *grp       = NULL;                          /* New group created */
+    void             *ret_value = NULL;                          /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -283,7 +283,7 @@ done:
 static H5O_loc_t *
 H5O_group_get_oloc(hid_t obj_id)
 {
-    H5G_t *    grp;              /* Group opened */
+    H5G_t     *grp;              /* Group opened */
     H5O_loc_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT

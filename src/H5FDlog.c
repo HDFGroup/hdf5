@@ -42,7 +42,7 @@ static hid_t H5FD_LOG_g = 0;
 
 /* Driver-specific file access properties */
 typedef struct H5FD_log_fapl_t {
-    char *             logfile; /* Allocated log file name */
+    char              *logfile; /* Allocated log file name */
     unsigned long long flags;   /* Flags for logging behavior */
     size_t buf_size; /* Size of buffers for track flavor and number of times each byte is accessed */
 } H5FD_log_fapl_t;
@@ -115,9 +115,9 @@ typedef struct H5FD_log_t {
     hbool_t fam_to_sec2;
 
     /* Fields for tracking I/O operations */
-    unsigned char *    nread;              /* Number of reads from a file location             */
-    unsigned char *    nwrite;             /* Number of write to a file location               */
-    unsigned char *    flavor;             /* Flavor of information written to file location   */
+    unsigned char     *nread;              /* Number of reads from a file location             */
+    unsigned char     *nwrite;             /* Number of write to a file location               */
+    unsigned char     *flavor;             /* Flavor of information written to file location   */
     unsigned long long total_read_ops;     /* Total number of read operations                  */
     unsigned long long total_write_ops;    /* Total number of write operations                 */
     unsigned long long total_seek_ops;     /* Total number of seek operations                  */
@@ -126,7 +126,7 @@ typedef struct H5FD_log_t {
     double             total_write_time;   /* Total time spent in write operations             */
     double             total_seek_time;    /* Total time spent in seek operations              */
     size_t             iosize;             /* Size of I/O information buffers                  */
-    FILE *             logfp;              /* Log file pointer                                 */
+    FILE              *logfp;              /* Log file pointer                                 */
     H5FD_log_fapl_t    fa;                 /* Driver-specific file access properties           */
 } H5FD_log_t;
 
@@ -152,8 +152,8 @@ typedef struct H5FD_log_t {
     (ADDR_OVERFLOW(A) || SIZE_OVERFLOW(Z) || HADDR_UNDEF == (A) + (Z) || (HDoff_t)((A) + (Z)) < (HDoff_t)(A))
 
 /* Prototypes */
-static void *  H5FD_log_fapl_get(H5FD_t *file);
-static void *  H5FD_log_fapl_copy(const void *_old_fa);
+static void   *H5FD_log_fapl_get(H5FD_t *file);
+static void   *H5FD_log_fapl_copy(const void *_old_fa);
 static herr_t  H5FD_log_fapl_free(void *_fa);
 static H5FD_t *H5FD_log_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr);
 static herr_t  H5FD_log_close(H5FD_t *_file);
@@ -339,7 +339,7 @@ static void *
 H5FD_log_fapl_get(H5FD_t *_file)
 {
     H5FD_log_t *file      = (H5FD_log_t *)_file;
-    void *      ret_value = NULL; /* Return value */
+    void       *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -366,8 +366,8 @@ static void *
 H5FD_log_fapl_copy(const void *_old_fa)
 {
     const H5FD_log_fapl_t *old_fa    = (const H5FD_log_fapl_t *)_old_fa;
-    H5FD_log_fapl_t *      new_fa    = NULL; /* New FAPL info */
-    void *                 ret_value = NULL; /* Return value */
+    H5FD_log_fapl_t       *new_fa    = NULL; /* New FAPL info */
+    void                  *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -444,8 +444,8 @@ H5FD_log_fapl_free(void *_fa)
 static H5FD_t *
 H5FD_log_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
-    H5FD_log_t *           file = NULL;
-    H5P_genplist_t *       plist;   /* Property list */
+    H5FD_log_t            *file = NULL;
+    H5P_genplist_t        *plist;   /* Property list */
     const H5FD_log_fapl_t *fa;      /* File access property list information */
     int                    fd = -1; /* File descriptor */
     int                    o_flags; /* Flags for open() call */
@@ -458,7 +458,7 @@ H5FD_log_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     struct timeval stat_timeval_diff;
 #endif /* H5_HAVE_GETTIMEOFDAY */
     h5_stat_t sb;
-    H5FD_t *  ret_value = NULL; /* Return value */
+    H5FD_t   *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

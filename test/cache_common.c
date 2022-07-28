@@ -162,7 +162,7 @@ static herr_t clear(H5F_t *f, void *thing, hbool_t dest);
 static herr_t destroy(H5F_t *f, void *thing);
 static herr_t flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr, void *thing,
                     unsigned H5_ATTR_UNUSED *flags_ptr);
-static void * load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
+static void  *load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *udata);
 static herr_t size(H5F_t *f, void *thing, size_t *size_ptr);
 static void   execute_flush_op(H5F_t *file_ptr, struct test_entry_t *entry_ptr, struct flush_op *op_ptr,
                                unsigned *flags_ptr);
@@ -1246,8 +1246,8 @@ hbool_t
 entry_in_cache(H5C_t *cache_ptr, int32_t type, int32_t idx)
 {
     hbool_t            in_cache = FALSE; /* will set to TRUE if necessary */
-    test_entry_t *     base_addr;
-    test_entry_t *     entry_ptr;
+    test_entry_t      *base_addr;
+    test_entry_t      *entry_ptr;
     H5C_cache_entry_t *test_ptr = NULL;
 
     HDassert(cache_ptr);
@@ -1924,7 +1924,7 @@ flush_cache(H5F_t *file_ptr, hbool_t destroy_entries, hbool_t dump_stats, hbool_
 void
 insert_entry(H5F_t *file_ptr, int32_t type, int32_t idx, unsigned int flags)
 {
-    H5C_t *       cache_ptr;
+    H5C_t        *cache_ptr;
     herr_t        result;
     hbool_t       insert_pinned;
     test_entry_t *base_addr;
@@ -2165,9 +2165,9 @@ move_entry(H5C_t *cache_ptr, int32_t type, int32_t idx, hbool_t main_addr)
 void
 protect_entry(H5F_t *file_ptr, int32_t type, int32_t idx)
 {
-    H5C_t *            cache_ptr;
-    test_entry_t *     base_addr;
-    test_entry_t *     entry_ptr;
+    H5C_t             *cache_ptr;
+    test_entry_t      *base_addr;
+    test_entry_t      *entry_ptr;
     H5C_cache_entry_t *cache_entry_ptr;
 
     if (pass) {
@@ -2253,9 +2253,9 @@ protect_entry(H5F_t *file_ptr, int32_t type, int32_t idx)
 void
 protect_entry_ro(H5F_t *file_ptr, int32_t type, int32_t idx)
 {
-    H5C_t *            cache_ptr;
-    test_entry_t *     base_addr;
-    test_entry_t *     entry_ptr;
+    H5C_t             *cache_ptr;
+    test_entry_t      *base_addr;
+    test_entry_t      *entry_ptr;
     H5C_cache_entry_t *cache_entry_ptr;
 
     if (pass) {
@@ -2484,7 +2484,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t lag, hbool_t verbose, hbool_t re
                        hbool_t do_mult_ro_protects, int dirty_destroys, int dirty_unprotects)
 {
     const char *fcn_name = "row_major_scan_forward";
-    H5C_t *     cache_ptr;
+    H5C_t      *cache_ptr;
     int32_t     type = 0;
     int32_t     idx;
 
@@ -2741,7 +2741,7 @@ hl_row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, hbool_t verbose, h
                           hbool_t display_stats, hbool_t display_detailed_stats, hbool_t do_inserts)
 {
     const char *fcn_name = "hl_row_major_scan_forward";
-    H5C_t *     cache_ptr;
+    H5C_t      *cache_ptr;
     int32_t     type = 0;
     int32_t     idx;
     int32_t     i;
@@ -2838,7 +2838,7 @@ row_major_scan_backward(H5F_t *file_ptr, int32_t lag, hbool_t verbose, hbool_t r
                         hbool_t do_mult_ro_protects, int dirty_destroys, int dirty_unprotects)
 {
     const char *fcn_name = "row_major_scan_backward";
-    H5C_t *     cache_ptr;
+    H5C_t      *cache_ptr;
     int32_t     type = NUMBER_OF_ENTRY_TYPES - 1;
     int32_t     idx;
 
@@ -3089,7 +3089,7 @@ hl_row_major_scan_backward(H5F_t *file_ptr, int32_t max_index, hbool_t verbose, 
                            hbool_t display_stats, hbool_t display_detailed_stats, hbool_t do_inserts)
 {
     const char *fcn_name = "hl_row_major_scan_backward";
-    H5C_t *     cache_ptr;
+    H5C_t      *cache_ptr;
     int32_t     type = NUMBER_OF_ENTRY_TYPES - 1;
     int32_t     idx;
     int32_t     i;
@@ -3185,7 +3185,7 @@ col_major_scan_forward(H5F_t *file_ptr, int32_t lag, hbool_t verbose, hbool_t re
                        int dirty_unprotects)
 {
     const char *fcn_name = "col_major_scan_forward()";
-    H5C_t *     cache_ptr;
+    H5C_t      *cache_ptr;
     int32_t     type = 0;
     int32_t     idx;
 
@@ -3275,7 +3275,7 @@ hl_col_major_scan_forward(H5F_t *file_ptr, int32_t max_index, hbool_t verbose, h
                           int dirty_unprotects)
 {
     const char *fcn_name = "hl_col_major_scan_forward()";
-    H5C_t *     cache_ptr;
+    H5C_t      *cache_ptr;
     int32_t     type = 0;
     int32_t     idx;
     int32_t     lag = 200;
@@ -3381,7 +3381,7 @@ col_major_scan_backward(H5F_t *file_ptr, int32_t lag, hbool_t verbose, hbool_t r
                         int dirty_unprotects)
 {
     const char *fcn_name = "col_major_scan_backward()";
-    H5C_t *     cache_ptr;
+    H5C_t      *cache_ptr;
     int         mile_stone = 1;
     int32_t     type;
     int32_t     idx;
@@ -3483,7 +3483,7 @@ hl_col_major_scan_backward(H5F_t *file_ptr, int32_t max_index, hbool_t verbose, 
                            int dirty_unprotects)
 {
     const char *fcn_name = "hl_col_major_scan_backward()";
-    H5C_t *     cache_ptr;
+    H5C_t      *cache_ptr;
     int32_t     type = 0;
     int32_t     idx;
     int32_t     lag = 50;
@@ -3606,8 +3606,8 @@ check_and_validate_cache_hit_rate(hid_t file_id, double *hit_rate_ptr, hbool_t d
     int64_t cache_accesses = 0;
     double  expected_hit_rate;
     double  hit_rate;
-    H5F_t * file_ptr  = NULL;
-    H5C_t * cache_ptr = NULL;
+    H5F_t  *file_ptr  = NULL;
+    H5C_t  *cache_ptr = NULL;
 
     /* get a pointer to the files internal data structure */
     if (pass) {
@@ -3734,8 +3734,8 @@ check_and_validate_cache_size(hid_t file_id, size_t *max_size_ptr, size_t *min_c
     size_t  cur_size;
     int32_t expected_cur_num_entries;
     int     cur_num_entries;
-    H5F_t * file_ptr  = NULL;
-    H5C_t * cache_ptr = NULL;
+    H5F_t  *file_ptr  = NULL;
+    H5C_t  *cache_ptr = NULL;
 
     /* get a pointer to the files internal data structure */
     if (pass) {
@@ -3896,8 +3896,8 @@ validate_mdc_config(hid_t file_id, H5AC_cache_config_t *ext_config_ptr, hbool_t 
 {
     /* const char * fcn_name = "validate_mdc_config()"; */
     static char         msg[256];
-    H5F_t *             file_ptr  = NULL;
-    H5C_t *             cache_ptr = NULL;
+    H5F_t              *file_ptr  = NULL;
+    H5C_t              *cache_ptr = NULL;
     H5AC_cache_config_t scratch;
     H5C_auto_size_ctl_t int_config;
 

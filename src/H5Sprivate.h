@@ -83,7 +83,7 @@ typedef struct {
 
     /* Irregular hyperslab selection fields */
     H5S_hyper_span_info_t *spans;              /* Pointer to copy of the span tree */
-    H5S_hyper_span_t *     span[H5S_MAX_RANK]; /* Array of pointers to span nodes */
+    H5S_hyper_span_t      *span[H5S_MAX_RANK]; /* Array of pointers to span nodes */
 } H5S_hyper_iter_t;
 
 /* "All" selection iteration container */
@@ -198,7 +198,7 @@ typedef struct H5S_sel_iter_op_t {
 #define H5S_SELECT_DESERIALIZE(S, BUF)   (H5S_select_deserialize(S, BUF))
 
 /* Operations on dataspaces */
-H5_DLL H5S_t *     H5S_copy(const H5S_t *src, hbool_t share_selection, hbool_t copy_max);
+H5_DLL H5S_t      *H5S_copy(const H5S_t *src, hbool_t share_selection, hbool_t copy_max);
 H5_DLL herr_t      H5S_close(H5S_t *ds);
 H5_DLL H5S_class_t H5S_get_simple_extent_type(const H5S_t *ds);
 H5_DLL hssize_t    H5S_get_simple_extent_npoints(const H5S_t *ds);

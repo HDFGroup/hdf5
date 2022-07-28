@@ -80,7 +80,7 @@ typedef struct {
  */
 typedef struct {
     /* downward (internal) */
-    H5F_t * f;       /* Pointer to file that fractal heap is in */
+    H5F_t  *f;       /* Pointer to file that fractal heap is in */
     hid_t   dxpl_id; /* DXPL for operation                */
     H5HF_t *fheap;   /* Fractal heap handle               */
     hsize_t count;   /* # of links examined               */
@@ -88,7 +88,7 @@ typedef struct {
     /* downward (from application) */
     hsize_t           skip;    /* Number of links to skip           */
     H5G_lib_iterate_t op;      /* Callback for each link            */
-    void *            op_data; /* Callback data for each link       */
+    void             *op_data; /* Callback data for each link       */
 
     /* upward */
     int op_ret; /* Return value from callback        */
@@ -116,7 +116,7 @@ typedef struct {
     H5G_bt2_ud_common_t common;          /* Common info for B-tree user data (must be first) */
     hbool_t             rem_from_fheap;  /* Whether to remove the link from the fractal heap */
     haddr_t             corder_bt2_addr; /* Address of v2 B-tree indexing creation order */
-    H5RS_str_t *        grp_full_path_r; /* Full path of group where link is removed */
+    H5RS_str_t         *grp_full_path_r; /* Full path of group where link is removed */
     hbool_t             replace_names;   /* Whether to replace the names of open objects */
 } H5G_bt2_ud_rm_t;
 
@@ -126,7 +126,7 @@ typedef struct {
  */
 typedef struct {
     /* downward */
-    H5F_t *     f;               /* Pointer to file that fractal heap is in */
+    H5F_t      *f;               /* Pointer to file that fractal heap is in */
     hid_t       dxpl_id;         /* DXPL for operation                */
     haddr_t     corder_bt2_addr; /* Address of v2 B-tree indexing creation order */
     H5RS_str_t *grp_full_path_r; /* Full path of group where link is removed */
@@ -139,9 +139,9 @@ typedef struct {
  */
 typedef struct {
     /* downward */
-    H5F_t *     f;               /* Pointer to file that fractal heap is in */
+    H5F_t      *f;               /* Pointer to file that fractal heap is in */
     hid_t       dxpl_id;         /* DXPL for operation                */
-    H5HF_t *    fheap;           /* Fractal heap handle               */
+    H5HF_t     *fheap;           /* Fractal heap handle               */
     H5_index_t  idx_type;        /* Primary index for removing link */
     haddr_t     other_bt2_addr;  /* Address of "other" v2 B-tree indexing link */
     H5RS_str_t *grp_full_path_r; /* Full path of group where link is removed */
@@ -166,12 +166,12 @@ typedef struct {
  */
 typedef struct {
     /* downward (internal) */
-    H5F_t * f;       /* Pointer to file that fractal heap is in */
+    H5F_t  *f;       /* Pointer to file that fractal heap is in */
     hid_t   dxpl_id; /* DXPL for operation                */
     H5HF_t *fheap;   /* Fractal heap handle               */
 
     /* downward (from application) */
-    char * name;      /* Name buffer to fill               */
+    char  *name;      /* Name buffer to fill               */
     size_t name_size; /* Size of name buffer to fill       */
 
     /* upward */
@@ -188,7 +188,7 @@ typedef struct {
     hid_t  dxpl_id; /* DXPL for operation                */
 
     /* downward (from application) */
-    char * name;      /* Name buffer to fill               */
+    char  *name;      /* Name buffer to fill               */
     size_t name_size; /* Size of name buffer to fill       */
 
     /* upward */
@@ -201,7 +201,7 @@ typedef struct {
  */
 typedef struct {
     /* downward (internal) */
-    H5F_t * f;       /* Pointer to file that fractal heap is in */
+    H5F_t  *f;       /* Pointer to file that fractal heap is in */
     hid_t   dxpl_id; /* DXPL for operation                */
     H5HF_t *fheap;   /* Fractal heap handle               */
 
@@ -259,9 +259,9 @@ H5G__dense_create(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo, const H5O_pline_t
 {
     H5HF_create_t fheap_cparam;        /* Fractal heap creation parameters */
     H5B2_create_t bt2_cparam;          /* v2 B-tree creation parameters */
-    H5HF_t *      fheap      = NULL;   /* Fractal heap handle */
-    H5B2_t *      bt2_name   = NULL;   /* v2 B-tree handle for names */
-    H5B2_t *      bt2_corder = NULL;   /* v2 B-tree handle for creation order */
+    H5HF_t       *fheap      = NULL;   /* Fractal heap handle */
+    H5B2_t       *bt2_name   = NULL;   /* v2 B-tree handle for names */
+    H5B2_t       *bt2_corder = NULL;   /* v2 B-tree handle for creation order */
     size_t        fheap_id_len;        /* Fractal heap ID length */
     herr_t        ret_value = SUCCEED; /* Return value */
 
@@ -360,13 +360,13 @@ herr_t
 H5G__dense_insert(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo, const H5O_link_t *lnk)
 {
     H5G_bt2_ud_ins_t udata;                       /* User data for v2 B-tree insertion */
-    H5HF_t *         fheap      = NULL;           /* Fractal heap handle */
-    H5B2_t *         bt2_name   = NULL;           /* v2 B-tree handle for name index */
-    H5B2_t *         bt2_corder = NULL;           /* v2 B-tree handle for creation order index */
+    H5HF_t          *fheap      = NULL;           /* Fractal heap handle */
+    H5B2_t          *bt2_name   = NULL;           /* v2 B-tree handle for name index */
+    H5B2_t          *bt2_corder = NULL;           /* v2 B-tree handle for creation order index */
     size_t           link_size;                   /* Size of serialized link in the heap */
-    H5WB_t *         wb = NULL;                   /* Wrapped buffer for link data */
+    H5WB_t          *wb = NULL;                   /* Wrapped buffer for link data */
     uint8_t          link_buf[H5G_LINK_BUF_SIZE]; /* Buffer for serializing link */
-    void *           link_ptr  = NULL;            /* Pointer to serialized link */
+    void            *link_ptr  = NULL;            /* Pointer to serialized link */
     herr_t           ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -463,7 +463,7 @@ static herr_t
 H5G_dense_lookup_cb(const void *_lnk, void *_user_lnk)
 {
     const H5O_link_t *lnk       = (const H5O_link_t *)_lnk; /* Record from B-tree */
-    H5O_link_t *      user_lnk  = (H5O_link_t *)_user_lnk;  /* User data from v2 B-tree link lookup */
+    H5O_link_t       *user_lnk  = (H5O_link_t *)_user_lnk;  /* User data from v2 B-tree link lookup */
     herr_t            ret_value = SUCCEED;                  /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -498,8 +498,8 @@ htri_t
 H5G__dense_lookup(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo, const char *name, H5O_link_t *lnk)
 {
     H5G_bt2_ud_common_t udata;            /* User data for v2 B-tree link lookup */
-    H5HF_t *            fheap     = NULL; /* Fractal heap handle */
-    H5B2_t *            bt2_name  = NULL; /* v2 B-tree handle for name index */
+    H5HF_t             *fheap     = NULL; /* Fractal heap handle */
+    H5B2_t             *bt2_name  = NULL; /* v2 B-tree handle for name index */
     htri_t              ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -560,7 +560,7 @@ static herr_t
 H5G_dense_lookup_by_idx_fh_cb(const void *obj, size_t obj_len, void *_udata)
 {
     H5G_fh_ud_lbi_t *udata     = (H5G_fh_ud_lbi_t *)_udata; /* User data for fractal heap 'op' callback */
-    H5O_link_t *     tmp_lnk   = NULL;                      /* Temporary pointer to link */
+    H5O_link_t      *tmp_lnk   = NULL;                      /* Temporary pointer to link */
     herr_t           ret_value = SUCCEED;                   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -598,7 +598,7 @@ static herr_t
 H5G_dense_lookup_by_idx_bt2_cb(const void *_record, void *_bt2_udata)
 {
     const H5G_dense_bt2_name_rec_t *record    = (const H5G_dense_bt2_name_rec_t *)_record;
-    H5G_bt2_ud_lbi_t *              bt2_udata = (H5G_bt2_ud_lbi_t *)_bt2_udata; /* User data for callback */
+    H5G_bt2_ud_lbi_t               *bt2_udata = (H5G_bt2_ud_lbi_t *)_bt2_udata; /* User data for callback */
     H5G_fh_ud_lbi_t                 fh_udata;                 /* User data for fractal heap 'op' callback */
     int                             ret_value = H5_ITER_CONT; /* Return value */
 
@@ -636,9 +636,9 @@ herr_t
 H5G__dense_lookup_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo, H5_index_t idx_type,
                          H5_iter_order_t order, hsize_t n, H5O_link_t *lnk)
 {
-    H5HF_t *         fheap  = NULL;       /* Fractal heap handle */
+    H5HF_t          *fheap  = NULL;       /* Fractal heap handle */
     H5G_link_table_t ltable = {0, NULL};  /* Table of links */
-    H5B2_t *         bt2    = NULL;       /* v2 B-tree handle for index */
+    H5B2_t          *bt2    = NULL;       /* v2 B-tree handle for index */
     haddr_t          bt2_addr;            /* Address of v2 B-tree to use for lookup */
     herr_t           ret_value = SUCCEED; /* Return value */
 
@@ -878,7 +878,7 @@ static herr_t
 H5G_dense_iterate_bt2_cb(const void *_record, void *_bt2_udata)
 {
     const H5G_dense_bt2_name_rec_t *record    = (const H5G_dense_bt2_name_rec_t *)_record;
-    H5G_bt2_ud_it_t *               bt2_udata = (H5G_bt2_ud_it_t *)_bt2_udata; /* User data for callback */
+    H5G_bt2_ud_it_t                *bt2_udata = (H5G_bt2_ud_it_t *)_bt2_udata; /* User data for callback */
     herr_t                          ret_value = H5_ITER_CONT;                  /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -934,9 +934,9 @@ H5G__dense_iterate(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo, H5_index_t
                    H5_iter_order_t order, hsize_t skip, hsize_t *last_lnk, H5G_lib_iterate_t op,
                    void *op_data)
 {
-    H5HF_t *         fheap  = NULL;      /* Fractal heap handle */
+    H5HF_t          *fheap  = NULL;      /* Fractal heap handle */
     H5G_link_table_t ltable = {0, NULL}; /* Table of links */
-    H5B2_t *         bt2    = NULL;      /* v2 B-tree handle for index */
+    H5B2_t          *bt2    = NULL;      /* v2 B-tree handle for index */
     haddr_t          bt2_addr;           /* Address of v2 B-tree to use for lookup */
     herr_t           ret_value = FAIL;   /* Return value */
 
@@ -1049,7 +1049,7 @@ static herr_t
 H5G_dense_get_name_by_idx_fh_cb(const void *obj, size_t obj_len, void *_udata)
 {
     H5G_fh_ud_gnbi_t *udata = (H5G_fh_ud_gnbi_t *)_udata; /* User data for fractal heap 'op' callback */
-    H5O_link_t *      lnk;                                /* Pointer to link created from heap object */
+    H5O_link_t       *lnk;                                /* Pointer to link created from heap object */
     herr_t            ret_value = SUCCEED;                /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1092,7 +1092,7 @@ static herr_t
 H5G_dense_get_name_by_idx_bt2_cb(const void *_record, void *_bt2_udata)
 {
     const H5G_dense_bt2_name_rec_t *record    = (const H5G_dense_bt2_name_rec_t *)_record;
-    H5G_bt2_ud_gnbi_t *             bt2_udata = (H5G_bt2_ud_gnbi_t *)_bt2_udata; /* User data for callback */
+    H5G_bt2_ud_gnbi_t              *bt2_udata = (H5G_bt2_ud_gnbi_t *)_bt2_udata; /* User data for callback */
     H5G_fh_ud_gnbi_t                fh_udata;            /* User data for fractal heap 'op' callback */
     herr_t                          ret_value = SUCCEED; /* Return value */
 
@@ -1134,9 +1134,9 @@ ssize_t
 H5G__dense_get_name_by_idx(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo, H5_index_t idx_type,
                            H5_iter_order_t order, hsize_t n, char *name, size_t size)
 {
-    H5HF_t *         fheap  = NULL;      /* Fractal heap handle */
+    H5HF_t          *fheap  = NULL;      /* Fractal heap handle */
     H5G_link_table_t ltable = {0, NULL}; /* Table of links */
-    H5B2_t *         bt2    = NULL;      /* v2 B-tree handle for index */
+    H5B2_t          *bt2    = NULL;      /* v2 B-tree handle for index */
     haddr_t          bt2_addr;           /* Address of v2 B-tree to use for lookup */
     ssize_t          ret_value = -1;     /* Return value */
 
@@ -1250,8 +1250,8 @@ static herr_t
 H5G_dense_remove_fh_cb(const void *obj, size_t obj_len, void *_udata)
 {
     H5G_fh_ud_rm_t *udata     = (H5G_fh_ud_rm_t *)_udata; /* User data for fractal heap 'op' callback */
-    H5O_link_t *    lnk       = NULL;                     /* Pointer to link created from heap object */
-    H5B2_t *        bt2       = NULL;                     /* v2 B-tree handle for index */
+    H5O_link_t     *lnk       = NULL;                     /* Pointer to link created from heap object */
+    H5B2_t         *bt2       = NULL;                     /* v2 B-tree handle for index */
     herr_t          ret_value = SUCCEED;                  /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1315,7 +1315,7 @@ static herr_t
 H5G_dense_remove_bt2_cb(const void *_record, void *_bt2_udata)
 {
     const H5G_dense_bt2_name_rec_t *record    = (const H5G_dense_bt2_name_rec_t *)_record;
-    H5G_bt2_ud_rm_t *               bt2_udata = (H5G_bt2_ud_rm_t *)_bt2_udata; /* User data for callback */
+    H5G_bt2_ud_rm_t                *bt2_udata = (H5G_bt2_ud_rm_t *)_bt2_udata; /* User data for callback */
     H5G_fh_ud_rm_t                  fh_udata;            /* User data for fractal heap 'op' callback */
     herr_t                          ret_value = SUCCEED; /* Return value */
 
@@ -1358,9 +1358,9 @@ herr_t
 H5G__dense_remove(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo, H5RS_str_t *grp_full_path_r,
                   const char *name)
 {
-    H5HF_t *        fheap = NULL;        /* Fractal heap handle */
+    H5HF_t         *fheap = NULL;        /* Fractal heap handle */
     H5G_bt2_ud_rm_t udata;               /* User data for v2 B-tree record removal */
-    H5B2_t *        bt2       = NULL;    /* v2 B-tree handle for index */
+    H5B2_t         *bt2       = NULL;    /* v2 B-tree handle for index */
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1455,8 +1455,8 @@ H5G_dense_remove_by_idx_bt2_cb(const void *_record, void *_bt2_udata)
 {
     H5G_bt2_ud_rmbi_t *bt2_udata = (H5G_bt2_ud_rmbi_t *)_bt2_udata; /* User data for callback */
     H5G_fh_ud_rmbi_t   fh_udata;            /* User data for fractal heap 'op' callback */
-    H5B2_t *           bt2 = NULL;          /* v2 B-tree handle for index */
-    const uint8_t *    heap_id;             /* Heap ID for link */
+    H5B2_t            *bt2 = NULL;          /* v2 B-tree handle for index */
+    const uint8_t     *heap_id;             /* Heap ID for link */
     herr_t             ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1564,9 +1564,9 @@ herr_t
 H5G__dense_remove_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo, H5RS_str_t *grp_full_path_r,
                          H5_index_t idx_type, H5_iter_order_t order, hsize_t n)
 {
-    H5HF_t *         fheap  = NULL;       /* Fractal heap handle */
+    H5HF_t          *fheap  = NULL;       /* Fractal heap handle */
     H5G_link_table_t ltable = {0, NULL};  /* Table of links */
-    H5B2_t *         bt2    = NULL;       /* v2 B-tree handle for index */
+    H5B2_t          *bt2    = NULL;       /* v2 B-tree handle for index */
     haddr_t          bt2_addr;            /* Address of v2 B-tree to use for lookup */
     herr_t           ret_value = SUCCEED; /* Return value */
 
@@ -1686,7 +1686,7 @@ H5G__dense_delete(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo, hbool_t adj_link)
      *  the ref. count when transitioning back to compact storage)
      */
     if (adj_link) {
-        H5HF_t *        fheap = NULL; /* Fractal heap handle */
+        H5HF_t         *fheap = NULL; /* Fractal heap handle */
         H5G_bt2_ud_rm_t udata;        /* User data for v2 B-tree record removal */
 
         /* Open the fractal heap */

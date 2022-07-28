@@ -112,7 +112,7 @@ H5O_bogus_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *o
                  size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
 {
     H5O_bogus_t *mesg = NULL;
-    void *       ret_value; /* Return value */
+    void        *ret_value; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

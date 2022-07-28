@@ -30,15 +30,15 @@
 #include "H5Pprivate.h"  /* Property lists       */
 #include "H5Sprivate.h"  /* Dataspaces           */
 
-static void * H5O_fill_old_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned mesg_flags,
+static void  *H5O_fill_old_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned mesg_flags,
                                   unsigned *ioflags, size_t p_size, const uint8_t *p);
 static herr_t H5O_fill_old_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static size_t H5O_fill_old_size(const H5F_t *f, const void *_mesg);
-static void * H5O_fill_new_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned mesg_flags,
+static void  *H5O_fill_new_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned mesg_flags,
                                   unsigned *ioflags, size_t p_size, const uint8_t *p);
 static herr_t H5O_fill_new_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static size_t H5O_fill_new_size(const H5F_t *f, const void *_mesg);
-static void * H5O_fill_copy(const void *_mesg, void *_dest);
+static void  *H5O_fill_copy(const void *_mesg, void *_dest);
 static herr_t H5O_fill_reset(void *_mesg);
 static herr_t H5O_fill_free(void *_mesg);
 static herr_t H5O_fill_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream, int indent,
@@ -186,9 +186,9 @@ H5O_fill_new_decode(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t
                     unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags, size_t p_size,
                     const uint8_t *p)
 {
-    H5O_fill_t *   fill      = NULL;
+    H5O_fill_t    *fill      = NULL;
     const uint8_t *p_end     = p + p_size - 1; /* End of the p buffer */
-    void *         ret_value = NULL;           /* Return value */
+    void          *ret_value = NULL;           /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -307,9 +307,9 @@ H5O_fill_old_decode(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t
                     unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags, size_t p_size,
                     const uint8_t *p)
 {
-    H5O_fill_t *   fill  = NULL;           /* Decoded fill value message */
+    H5O_fill_t    *fill  = NULL;           /* Decoded fill value message */
     const uint8_t *p_end = p + p_size - 1; /* End of the p buffer */
-    void *         ret_value;              /* Return value */
+    void          *ret_value;              /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -502,8 +502,8 @@ static void *
 H5O_fill_copy(const void *_src, void *_dst)
 {
     const H5O_fill_t *src = (const H5O_fill_t *)_src;
-    H5O_fill_t *      dst = (H5O_fill_t *)_dst;
-    void *            ret_value;
+    H5O_fill_t       *dst = (H5O_fill_t *)_dst;
+    void             *ret_value;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -916,7 +916,7 @@ herr_t
 H5O_fill_convert(H5O_fill_t *fill, H5T_t *dset_type, hbool_t *fill_changed, hid_t dxpl_id)
 {
     H5T_path_t *tpath;                    /* Type conversion info    */
-    void *      buf = NULL, *bkg = NULL;  /* Conversion buffers    */
+    void       *buf = NULL, *bkg = NULL;  /* Conversion buffers    */
     hid_t       src_id = -1, dst_id = -1; /* Datatype identifiers    */
     herr_t      ret_value = SUCCEED;      /* Return value */
 

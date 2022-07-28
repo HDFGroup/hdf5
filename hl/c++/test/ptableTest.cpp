@@ -599,7 +599,7 @@ error:
  *-------------------------------------------------------------------------
  */
 #pragma pack() // default alignment
-const char *  ABHI_PT("/abhiTest");
+const char   *ABHI_PT("/abhiTest");
 const hsize_t NUM_PACKETS   = 5;
 const int     STRING_LENGTH = 19; // including terminating NULL
 int

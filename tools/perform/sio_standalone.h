@@ -461,7 +461,7 @@ H5_DLL int64_t HDstrtoll(const char *s, const char **rest, int base);
 #else /* H5_HAVE_WIN32_API */
 
 #if !defined strdup && !defined H5_HAVE_STRDUP
-extern char *         strdup(const char *s);
+extern char          *strdup(const char *s);
 #endif
 
 #define HDstrdup(S) strdup(S)

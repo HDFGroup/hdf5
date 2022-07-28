@@ -69,7 +69,7 @@ static void
 test_tst_init(void)
 {
     time_t curr_time; /* Current time, for seeding random number generator */
-    char * tmp_word;  /* Temporary pointer to word in word set */
+    char  *tmp_word;  /* Temporary pointer to word in word set */
     size_t u, v, w;   /* Local index variables */
 
     /* Compute the number of words in the test set */
@@ -176,7 +176,7 @@ test_tst_insert(void)
 {
     H5ST_tree_t *tree;  /* TST created */
     H5ST_ptr_t   found; /* Pointer to TST node found */
-    void *       obj;   /* Pointer to object located in TST */
+    void        *obj;   /* Pointer to object located in TST */
     size_t       u;     /* Local index counter */
     htri_t       check; /* Is string in TST? */
     herr_t       ret;   /* Generic return value */
@@ -287,7 +287,7 @@ test_tst_remove(void)
 {
     H5ST_tree_t *tree;  /* TST created */
     H5ST_ptr_t   found; /* Pointer to TST node found */
-    void *       obj;   /* Pointer to object removed from TST */
+    void        *obj;   /* Pointer to object removed from TST */
     htri_t       check; /* Is string in TST? */
     size_t       u;     /* Local index counter */
     herr_t       ret;   /* Generic return value */

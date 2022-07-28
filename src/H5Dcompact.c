@@ -383,9 +383,9 @@ H5D__compact_copy(H5F_t *f_src, H5O_storage_compact_t *_storage_src, H5F_t *f_ds
     hid_t         tid_src     = -1;                    /* Datatype ID for source datatype */
     hid_t         tid_dst     = -1;                    /* Datatype ID for destination datatype */
     hid_t         tid_mem     = -1;                    /* Datatype ID for memory datatype */
-    void *        buf         = NULL;                  /* Buffer for copying data */
-    void *        bkg         = NULL;                  /* Temporary buffer for copying data */
-    void *        reclaim_buf = NULL;                  /* Buffer for reclaiming data */
+    void         *buf         = NULL;                  /* Buffer for copying data */
+    void         *bkg         = NULL;                  /* Temporary buffer for copying data */
+    void         *reclaim_buf = NULL;                  /* Buffer for reclaiming data */
     hid_t         buf_sid     = -1;                    /* ID for buffer dataspace */
     H5D_shared_t *shared_fo   = cpy_info->shared_fo;   /* Pointer to the shared struct for dataset object */
     H5O_storage_compact_t *storage_src = _storage_src; /* Pointer to storage_src */
@@ -415,9 +415,9 @@ H5D__compact_copy(H5F_t *f_src, H5O_storage_compact_t *_storage_src, H5F_t *f_ds
     /* If there's a VLEN source datatype, do type conversion information */
     if (H5T_detect_class(dt_src, H5T_VLEN, FALSE) > 0) {
         H5T_path_t *tpath_src_mem, *tpath_mem_dst; /* Datatype conversion paths */
-        H5T_t *     dt_dst;                        /* Destination datatype */
-        H5T_t *     dt_mem;                        /* Memory datatype */
-        H5S_t *     buf_space;                     /* Dataspace describing buffer */
+        H5T_t      *dt_dst;                        /* Destination datatype */
+        H5T_t      *dt_mem;                        /* Memory datatype */
+        H5S_t      *buf_space;                     /* Dataspace describing buffer */
         size_t      buf_size;                      /* Size of copy buffer */
         size_t      nelmts;                        /* Number of elements in buffer */
         size_t      src_dt_size;                   /* Source datatype size */

@@ -133,10 +133,10 @@ xml_dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void H5_
 {
     hid_t             obj;
     herr_t            ret      = SUCCEED;
-    char *            obj_path = NULL; /* Full path of object */
+    char             *obj_path = NULL; /* Full path of object */
     h5tools_str_t     buffer;          /* string into which to render */
     h5tools_context_t ctx;             /* print context */
-    h5tool_format_t * outputformat = &xml_dataformat;
+    h5tool_format_t  *outputformat = &xml_dataformat;
     h5tool_format_t   string_dataformat;
     hsize_t           curr_pos = 0; /* total data element position */
 
@@ -643,8 +643,8 @@ xml_escape_the_name(const char *str)
     size_t      len;
     size_t      i;
     const char *cp;
-    char *      ncp;
-    char *      rcp;
+    char       *ncp;
+    char       *rcp;
     size_t      ncp_len;
 
     if (!str)
@@ -733,8 +733,8 @@ xml_escape_the_string(const char *str, int slen)
     size_t      len;
     size_t      i;
     const char *cp  = NULL;
-    char *      ncp = NULL;
-    char *      rcp = NULL;
+    char       *ncp = NULL;
+    char       *rcp = NULL;
     size_t      ncp_len;
 
     if (!str)
@@ -835,7 +835,7 @@ xml_escape_the_string(const char *str, int slen)
 static void
 xml_print_datatype(hid_t type, unsigned in_group)
 {
-    char *            mname;
+    char             *mname;
     hid_t             mtype;
     unsigned          nmembers;
     unsigned          ndims;
@@ -857,7 +857,7 @@ xml_print_datatype(hid_t type, unsigned in_group)
     htri_t            is_vlstr = FALSE;
     h5tools_str_t     buffer; /* string into which to render   */
     h5tools_context_t ctx;    /* print context  */
-    h5tool_format_t * outputformat = &xml_dataformat;
+    h5tool_format_t  *outputformat = &xml_dataformat;
     h5tool_format_t   string_dataformat;
     hsize_t           curr_pos = 0; /* total data element position   */
 
@@ -887,7 +887,7 @@ xml_print_datatype(hid_t type, unsigned in_group)
 
     if (!in_group && H5Tcommitted(type) > 0) {
         H5O_info_t oinfo;
-        obj_t *    found_obj; /* Found object */
+        obj_t     *found_obj; /* Found object */
 
         /* detect a shared datatype, output only once */
         H5Oget_info(type, &oinfo);
@@ -1555,7 +1555,7 @@ xml_dump_datatype(hid_t type)
 {
     h5tools_str_t     buffer; /* string into which to render   */
     h5tools_context_t ctx;    /* print context  */
-    h5tool_format_t * outputformat = &xml_dataformat;
+    h5tool_format_t  *outputformat = &xml_dataformat;
     h5tool_format_t   string_dataformat;
     hsize_t           curr_pos = 0; /* total data element position   */
 
@@ -1588,7 +1588,7 @@ xml_dump_datatype(hid_t type)
 
     if (H5Tcommitted(type) > 0) {
         H5O_info_t oinfo;
-        obj_t *    found_obj; /* Found object */
+        obj_t     *found_obj; /* Found object */
 
         /* Datatype is a shared or named datatype */
         H5Oget_info(type, &oinfo);
@@ -1687,7 +1687,7 @@ xml_dump_dataspace(hid_t space)
     int               i;
     h5tools_str_t     buffer; /* string into which to render   */
     h5tools_context_t ctx;    /* print context  */
-    h5tool_format_t * outputformat = &xml_dataformat;
+    h5tool_format_t  *outputformat = &xml_dataformat;
     h5tool_format_t   string_dataformat;
     hsize_t           curr_pos = 0; /* total data element position   */
 
@@ -1866,7 +1866,7 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t H5_ATTR_UNUSED *sset, 
     hsize_t           curr_pos = 0; /* total data element position   */
     h5tools_str_t     buffer;       /* string into which to render   */
     h5tools_context_t ctx;          /* print context  */
-    h5tool_format_t * outputformat = &xml_dataformat;
+    h5tool_format_t  *outputformat = &xml_dataformat;
     h5tool_format_t   string_dataformat;
 
     HDmemset(&ctx, 0, sizeof(ctx));
@@ -2033,7 +2033,7 @@ xml_dump_attr(hid_t attr, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED
     hsize_t           curr_pos = 0; /* total data element position   */
     h5tools_str_t     buffer;       /* string into which to render   */
     h5tools_context_t ctx;          /* print context  */
-    h5tool_format_t * outputformat = &xml_dataformat;
+    h5tool_format_t  *outputformat = &xml_dataformat;
     h5tool_format_t   string_dataformat;
 
     char *t_aname = xml_escape_the_name(attr_name);
@@ -2349,14 +2349,14 @@ xml_dump_named_datatype(hid_t type, const char *name)
     hsize_t           curr_pos = 0; /* total data element position   */
     h5tools_str_t     buffer;       /* string into which to render   */
     h5tools_context_t ctx;          /* print context  */
-    h5tool_format_t * outputformat = &xml_dataformat;
+    h5tool_format_t  *outputformat = &xml_dataformat;
     h5tool_format_t   string_dataformat;
-    char *            tmp;
-    char *            dtxid;
-    char *            parentxid;
-    char *            t_tmp;
-    char *            t_prefix;
-    char *            t_name;
+    char             *tmp;
+    char             *dtxid;
+    char             *parentxid;
+    char             *t_tmp;
+    char             *t_prefix;
+    char             *t_name;
 
     tmp = (char *)HDmalloc(HDstrlen(prefix) + HDstrlen(name) + 2);
     HDstrcpy(tmp, prefix);
@@ -2550,14 +2550,14 @@ xml_dump_group(hid_t gid, const char *name)
     unsigned          attr_crt_order_flags;
     int               isRoot = 0;
     char              type_name[1024];
-    char *            t_objname = NULL;
-    char *            par_name  = NULL;
-    char *            cp        = NULL;
-    char *            tmp       = NULL;
-    char *            par       = NULL;
+    char             *t_objname = NULL;
+    char             *par_name  = NULL;
+    char             *cp        = NULL;
+    char             *tmp       = NULL;
+    char             *par       = NULL;
     h5tools_str_t     buffer; /* string into which to render   */
     h5tools_context_t ctx;    /* print context  */
-    h5tool_format_t * outputformat = &xml_dataformat;
+    h5tool_format_t  *outputformat = &xml_dataformat;
     h5tool_format_t   string_dataformat;
     hsize_t           curr_pos = 0; /* total data element position   */
 
@@ -2914,11 +2914,11 @@ xml_print_refs(hid_t did, int source)
     hssize_t          ssiz  = -1;
     hsize_t           i;
     size_t            tsiz;
-    hobj_ref_t *      refbuf = NULL;
-    char *            buf    = NULL;
+    hobj_ref_t       *refbuf = NULL;
+    char             *buf    = NULL;
     h5tools_str_t     buffer; /* string into which to render   */
     h5tools_context_t ctx;    /* print context  */
-    h5tool_format_t * outputformat = &xml_dataformat;
+    h5tool_format_t  *outputformat = &xml_dataformat;
     h5tool_format_t   string_dataformat;
     hsize_t           curr_pos = 0; /* total data element position   */
 
@@ -3069,12 +3069,12 @@ xml_print_strs(hid_t did, int source)
     size_t            tsiz     = 0;
     hsize_t           i;
     size_t            str_size  = 0;
-    char *            bp        = NULL;
-    char *            onestring = NULL;
-    void *            buf       = NULL;
+    char             *bp        = NULL;
+    char             *onestring = NULL;
+    void             *buf       = NULL;
     h5tools_str_t     buffer; /* string into which to render   */
     h5tools_context_t ctx;    /* print context  */
-    h5tool_format_t * outputformat = &xml_dataformat;
+    h5tool_format_t  *outputformat = &xml_dataformat;
     h5tool_format_t   string_dataformat;
     hsize_t           curr_pos = 0; /* total data element position   */
 
@@ -3238,7 +3238,7 @@ check_filters(hid_t dcpl)
     unsigned int      flags;
     h5tools_str_t     buffer; /* string into which to render   */
     h5tools_context_t ctx;    /* print context  */
-    h5tool_format_t * outputformat = &xml_dataformat;
+    h5tool_format_t  *outputformat = &xml_dataformat;
     h5tool_format_t   string_dataformat;
     hsize_t           curr_pos = 0; /* total data element position   */
 
@@ -3375,11 +3375,11 @@ xml_dump_fill_value(hid_t dcpl, hid_t type)
     size_t            sz;
     size_t            i;
     hsize_t           space;
-    void *            buf;
-    char *            name;
+    void             *buf;
+    char             *name;
     h5tools_str_t     buffer; /* string into which to render   */
     h5tools_context_t ctx;    /* print context  */
-    h5tool_format_t * outputformat = &xml_dataformat;
+    h5tool_format_t  *outputformat = &xml_dataformat;
     h5tool_format_t   string_dataformat;
     hsize_t           curr_pos = 0; /* total data element position   */
 
@@ -3722,20 +3722,20 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t H5_ATTR_UNUSED *ss
     hid_t             dcpl;
     H5D_fill_value_t  fvstatus;
     int               maxdims;
-    hsize_t *         chsize;
+    hsize_t          *chsize;
     int               ndims;
     int               i;
     H5D_alloc_time_t  at;
     H5D_fill_time_t   ft;
     hsize_t           tempi;
-    char *            tmp;
-    char *            t_name;
-    char *            t_tmp;
-    char *            t_prefix;
+    char             *tmp;
+    char             *t_name;
+    char             *t_tmp;
+    char             *t_prefix;
     unsigned          attr_crt_order_flags;
     h5tools_str_t     buffer; /* string into which to render   */
     h5tools_context_t ctx;    /* print context  */
-    h5tool_format_t * outputformat = &xml_dataformat;
+    h5tool_format_t  *outputformat = &xml_dataformat;
     h5tool_format_t   string_dataformat;
     hsize_t           curr_pos = 0; /* total data element position   */
 
@@ -4325,8 +4325,8 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t H5_ATTR_UNUSED *ss
 static void
 xml_print_enum(hid_t type)
 {
-    char **           name  = NULL;             /*member names                   */
-    unsigned char *   value = NULL;             /*value array                    */
+    char            **name  = NULL;             /*member names                   */
+    unsigned char    *value = NULL;             /*value array                    */
     unsigned          nmembs;                   /*number of members              */
     hid_t             super;                    /*enum base integer type         */
     hid_t             native = H5I_INVALID_HID; /*native integer datatype        */
@@ -4335,7 +4335,7 @@ xml_print_enum(hid_t type)
     size_t            j;
     h5tools_str_t     buffer; /* string into which to render   */
     h5tools_context_t ctx;    /* print context  */
-    h5tool_format_t * outputformat = &xml_dataformat;
+    h5tool_format_t  *outputformat = &xml_dataformat;
     h5tool_format_t   string_dataformat;
     hsize_t           curr_pos = 0; /* total data element position   */
 

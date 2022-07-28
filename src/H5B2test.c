@@ -53,7 +53,7 @@ typedef struct H5B2_test_ctx_t {
 /* Local Prototypes */
 /********************/
 
-static void * H5B2_test_crt_context(void *udata);
+static void  *H5B2_test_crt_context(void *udata);
 static herr_t H5B2_test_dst_context(void *ctx);
 static herr_t H5B2_test_store(void *nrecord, const void *udata);
 static herr_t H5B2_test_compare(const void *rec1, const void *rec2, int *result);
@@ -61,7 +61,7 @@ static herr_t H5B2_test_encode(uint8_t *raw, const void *nrecord, void *ctx);
 static herr_t H5B2_test_decode(const uint8_t *raw, void *nrecord, void *ctx);
 static herr_t H5B2_test_debug(FILE *stream, const H5F_t *f, hid_t dxpl_id, int indent, int fwidth,
                               const void *record, const void *_udata);
-static void * H5B2_test_crt_dbg_context(H5F_t *f, hid_t dxpl_id, haddr_t addr);
+static void  *H5B2_test_crt_dbg_context(H5F_t *f, hid_t dxpl_id, haddr_t addr);
 
 /*********************/
 /* Package Variables */
@@ -110,9 +110,9 @@ H5FL_DEFINE_STATIC(H5B2_test_ctx_t);
 static void *
 H5B2_test_crt_context(void *_f)
 {
-    H5F_t *          f = (H5F_t *)_f;  /* User data for building callback context */
+    H5F_t           *f = (H5F_t *)_f;  /* User data for building callback context */
     H5B2_test_ctx_t *ctx;              /* Callback context structure */
-    void *           ret_value = NULL; /* Return value */
+    void            *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -308,7 +308,7 @@ static void *
 H5B2_test_crt_dbg_context(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t H5_ATTR_UNUSED addr)
 {
     H5B2_test_ctx_t *ctx;       /* Callback context structure */
-    void *           ret_value; /* Return value */
+    void            *ret_value; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -372,7 +372,7 @@ H5B2_get_root_addr_test(H5B2_t *bt2, haddr_t *root_addr)
 herr_t
 H5B2_get_node_info_test(H5B2_t *bt2, hid_t dxpl_id, void *udata, H5B2_node_info_test_t *ninfo)
 {
-    H5B2_hdr_t *    hdr;                 /* Pointer to the B-tree header */
+    H5B2_hdr_t     *hdr;                 /* Pointer to the B-tree header */
     H5B2_node_ptr_t curr_node_ptr;       /* Node pointer info for current node */
     unsigned        depth;               /* Current depth of the tree */
     int             cmp;                 /* Comparison value of records */

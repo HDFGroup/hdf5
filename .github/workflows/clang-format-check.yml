@@ -8,11 +8,11 @@ jobs:
     if: "!contains(github.event.head_commit.message, 'skip-ci')"
     steps:
     - uses: actions/checkout@v2
-    - name: Run clang-format style check for C programs.
-      uses: DoozyX/clang-format-lint-action@v0.11
+    - name: Run clang-format style check for C and Java programs.
+      uses: DoozyX/clang-format-lint-action@v0.13
       with:
         source: '.'
-        extensions: 'c,h,cpp,hpp'
-        clangFormatVersion: 10
+        extensions: 'c,h,cpp,hpp,java'
+        clangFormatVersion: 13
         style: file
         exclude: './config ./hl/src/H5LTanalyze.c ./hl/src/H5LTparse.c ./hl/src/H5LTparse.h ./src/H5Epubgen.h ./src/H5Einit.h ./src/H5Eterm.h ./src/H5Edefin.h ./src/H5version.h ./src/H5overflow.h'

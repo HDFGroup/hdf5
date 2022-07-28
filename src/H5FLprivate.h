@@ -64,9 +64,9 @@ struct H5CS_t;
 
 /* Tracking information for each block */
 typedef struct H5FL_track_t {
-    struct H5CS_t *      stack; /* Function stack */
-    char *               file;  /* Name of file containing calling function */
-    char *               func;  /* Name of calling function */
+    struct H5CS_t       *stack; /* Function stack */
+    char                *file;  /* Name of file containing calling function */
+    char                *func;  /* Name of calling function */
     int                  line;  /* Line # within calling function */
     struct H5FL_track_t *next;  /* Pointer to next tracking block */
     struct H5FL_track_t *prev;  /* Pointer to previous tracking block */
@@ -96,7 +96,7 @@ typedef struct H5FL_reg_head_t {
     unsigned         init;      /* Whether the free list has been initialized */
     unsigned         allocated; /* Number of blocks allocated */
     unsigned         onlist;    /* Number of blocks on free list */
-    const char *     name;      /* Name of the type */
+    const char      *name;      /* Name of the type */
     size_t           size;      /* Size of the blocks in the list */
     H5FL_reg_node_t *list;      /* List of free blocks */
 } H5FL_reg_head_t;
@@ -155,7 +155,7 @@ typedef union H5FL_blk_list_t {
 /* Data structure for priority queue node of block free lists */
 typedef struct H5FL_blk_node_t {
     size_t                  size; /* Size of the blocks in the list */
-    H5FL_blk_list_t *       list; /* List of free blocks */
+    H5FL_blk_list_t        *list; /* List of free blocks */
     struct H5FL_blk_node_t *next; /* Pointer to next free list in queue */
     struct H5FL_blk_node_t *prev; /* Pointer to previous free list in queue */
 } H5FL_blk_node_t;
@@ -166,7 +166,7 @@ typedef struct H5FL_blk_head_t {
     unsigned         allocated; /* Total number of blocks allocated */
     unsigned         onlist;    /* Total number of blocks on free list */
     size_t           list_mem;  /* Total amount of memory in blocks on free list */
-    const char *     name;      /* Name of the type */
+    const char      *name;      /* Name of the type */
     H5FL_blk_node_t *head;      /* Pointer to first free list in queue */
 } H5FL_blk_head_t;
 
@@ -237,7 +237,7 @@ typedef struct H5FL_arr_head_t {
     unsigned         init;      /* Whether the free list has been initialized */
     unsigned         allocated; /* Total number of blocks allocated */
     size_t           list_mem;  /* Amount of memory in block on free list */
-    const char *     name;      /* Name of the type */
+    const char      *name;      /* Name of the type */
     int              maxelem;   /* Maximum number of elements in an array */
     size_t           base_size; /* Size of the "base" object in the list */
     size_t           elem_size; /* Size of the array elements in the list */
@@ -358,7 +358,7 @@ typedef struct H5FL_fac_head_t {
     unsigned            allocated; /* Number of blocks allocated */
     unsigned            onlist;    /* Number of blocks on free list */
     size_t              size;      /* Size of the blocks in the list */
-    H5FL_fac_node_t *   list;      /* List of free blocks */
+    H5FL_fac_node_t    *list;      /* List of free blocks */
     H5FL_fac_gc_node_t *prev_gc;   /* Previous garbage collection node in list */
 } H5FL_fac_head_t;
 
@@ -389,10 +389,10 @@ typedef struct H5FL_fac_head_t {
  * Library prototypes.
  */
 /* Block free lists */
-H5_DLL void * H5FL_blk_malloc(H5FL_blk_head_t *head, size_t size H5FL_TRACK_PARAMS);
-H5_DLL void * H5FL_blk_calloc(H5FL_blk_head_t *head, size_t size H5FL_TRACK_PARAMS);
-H5_DLL void * H5FL_blk_free(H5FL_blk_head_t *head, void *block);
-H5_DLL void * H5FL_blk_realloc(H5FL_blk_head_t *head, void *block, size_t new_size H5FL_TRACK_PARAMS);
+H5_DLL void  *H5FL_blk_malloc(H5FL_blk_head_t *head, size_t size H5FL_TRACK_PARAMS);
+H5_DLL void  *H5FL_blk_calloc(H5FL_blk_head_t *head, size_t size H5FL_TRACK_PARAMS);
+H5_DLL void  *H5FL_blk_free(H5FL_blk_head_t *head, void *block);
+H5_DLL void  *H5FL_blk_realloc(H5FL_blk_head_t *head, void *block, size_t new_size H5FL_TRACK_PARAMS);
 H5_DLL htri_t H5FL_blk_free_block_avail(H5FL_blk_head_t *head, size_t size);
 
 /* Regular free lists */
@@ -414,9 +414,9 @@ H5_DLL void *H5FL_seq_realloc(H5FL_seq_head_t *head, void *obj, size_t new_elem 
 
 /* Factory free lists */
 H5_DLL H5FL_fac_head_t *H5FL_fac_init(size_t size);
-H5_DLL void *           H5FL_fac_malloc(H5FL_fac_head_t *head H5FL_TRACK_PARAMS);
-H5_DLL void *           H5FL_fac_calloc(H5FL_fac_head_t *head H5FL_TRACK_PARAMS);
-H5_DLL void *           H5FL_fac_free(H5FL_fac_head_t *head, void *obj);
+H5_DLL void            *H5FL_fac_malloc(H5FL_fac_head_t *head H5FL_TRACK_PARAMS);
+H5_DLL void            *H5FL_fac_calloc(H5FL_fac_head_t *head H5FL_TRACK_PARAMS);
+H5_DLL void            *H5FL_fac_free(H5FL_fac_head_t *head, void *obj);
 H5_DLL herr_t           H5FL_fac_term(H5FL_fac_head_t *head);
 
 /* General free list routines */

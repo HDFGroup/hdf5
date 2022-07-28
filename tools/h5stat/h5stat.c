@@ -74,7 +74,7 @@ typedef struct iter_t {
     unsigned long  dset_layouts[H5D_NLAYOUTS];      /* Type of storage for each dataset */
     unsigned long  dset_comptype[H5_NFILTERS_IMPL]; /* Number of currently implemented filters */
     unsigned long  dset_ntypes;                     /* Number of diff. dataset datatypes found */
-    dtype_info_t * dset_type_info;                  /* Pointer to dataset datatype information found */
+    dtype_info_t  *dset_type_info;                  /* Pointer to dataset datatype information found */
     unsigned       dset_dim_nbins;                  /* Number of bins for dataset dimensions */
     unsigned long *dset_dim_bins;                   /* Pointer to array of bins for dataset dimensions */
     ohdr_info_t    dset_ohdr_info;                  /* Object header information for datasets */
@@ -1596,7 +1596,7 @@ int
 main(int argc, char *argv[])
 {
     iter_t            iter;
-    const char *      fname   = NULL;
+    const char       *fname   = NULL;
     hid_t             fid     = H5I_INVALID_HID;
     struct handler_t *hand    = NULL;
     hid_t             fapl_id = H5P_DEFAULT;

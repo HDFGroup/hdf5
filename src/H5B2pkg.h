@@ -150,7 +150,7 @@ typedef struct H5B2_hdr_t {
     uint8_t max_nrec_size; /* Size to store max. # of records in any node (in bytes) */
 
     /* Shared internal data structures (not stored) */
-    H5F_t *           f;              /* Pointer to the file that the B-tree is in */
+    H5F_t            *f;              /* Pointer to the file that the B-tree is in */
     haddr_t           addr;           /* Address of B-tree header in the file */
     size_t            hdr_size;       /* Size of the B-tree header on disk */
     size_t            rc;             /* Reference count of nodes using this header */
@@ -159,16 +159,16 @@ typedef struct H5B2_hdr_t {
     uint8_t           sizeof_size;    /* Size of file sizes */
     uint8_t           sizeof_addr;    /* Size of file addresses */
     H5B2_remove_t     remove_op;      /* Callback operator for deleting B-tree */
-    void *            remove_op_data; /* B-tree deletion callback's context */
-    uint8_t *         page;           /* Common disk page for I/O */
-    size_t *          nat_off;        /* Array of offsets of native records */
+    void             *remove_op_data; /* B-tree deletion callback's context */
+    uint8_t          *page;           /* Common disk page for I/O */
+    size_t           *nat_off;        /* Array of offsets of native records */
     H5B2_node_info_t *node_info;      /* Table of node info structs for current depth of B-tree */
-    uint8_t *         min_native_rec; /* Pointer to minimum native record                  */
-    uint8_t *         max_native_rec; /* Pointer to maximum native record                  */
+    uint8_t          *min_native_rec; /* Pointer to minimum native record                  */
+    uint8_t          *max_native_rec; /* Pointer to maximum native record                  */
 
     /* Client information (not stored) */
     const H5B2_class_t *cls;    /* Class of B-tree client */
-    void *              cb_ctx; /* Client callback context */
+    void               *cb_ctx; /* Client callback context */
 } H5B2_hdr_t;
 
 /* B-tree leaf node information */
@@ -178,7 +178,7 @@ typedef struct H5B2_leaf_t {
 
     /* Internal B-tree information */
     H5B2_hdr_t *hdr;         /* Pointer to the [pinned] v2 B-tree header   */
-    uint8_t *   leaf_native; /* Pointer to native records                  */
+    uint8_t    *leaf_native; /* Pointer to native records                  */
     uint16_t    nrec;        /* Number of records in node                  */
 } H5B2_leaf_t;
 
@@ -188,8 +188,8 @@ typedef struct H5B2_internal_t {
     H5AC_info_t cache_info;
 
     /* Internal B-tree information */
-    H5B2_hdr_t *     hdr;        /* Pointer to the [pinned] v2 B-tree header   */
-    uint8_t *        int_native; /* Pointer to native records                  */
+    H5B2_hdr_t      *hdr;        /* Pointer to the [pinned] v2 B-tree header   */
+    uint8_t         *int_native; /* Pointer to native records                  */
     H5B2_node_ptr_t *node_ptrs;  /* Pointer to node pointers                   */
     uint16_t         nrec;       /* Number of records in node                  */
     uint16_t         depth;      /* Depth of this node in the B-tree           */
@@ -198,7 +198,7 @@ typedef struct H5B2_internal_t {
 /* v2 B-tree */
 struct H5B2_t {
     H5B2_hdr_t *hdr; /* Pointer to internal v2 B-tree header info */
-    H5F_t *     f;   /* Pointer to file for v2 B-tree */
+    H5F_t      *f;   /* Pointer to file for v2 B-tree */
 };
 
 /* Node position, for min/max determination */
@@ -212,12 +212,12 @@ typedef enum H5B2_nodepos_t {
 /* Callback info for loading a free space header into the cache */
 typedef struct H5B2_hdr_cache_ud_t {
     H5F_t *f;         /* File that v2 b-tree header is within */
-    void * ctx_udata; /* User-data for protecting */
+    void  *ctx_udata; /* User-data for protecting */
 } H5B2_hdr_cache_ud_t;
 
 /* Callback info for loading a free space internal node into the cache */
 typedef struct H5B2_internal_cache_ud_t {
-    H5F_t *     f;     /* File that v2 b-tree header is within */
+    H5F_t      *f;     /* File that v2 b-tree header is within */
     H5B2_hdr_t *hdr;   /* v2 B-tree header */
     unsigned    nrec;  /* Number of records in node to load */
     unsigned    depth; /* Depth of node to load */
@@ -225,7 +225,7 @@ typedef struct H5B2_internal_cache_ud_t {
 
 /* Callback info for loading a free space leaf node into the cache */
 typedef struct H5B2_leaf_cache_ud_t {
-    H5F_t *     f;    /* File that v2 b-tree header is within */
+    H5F_t      *f;    /* File that v2 b-tree header is within */
     H5B2_hdr_t *hdr;  /* v2 B-tree header */
     unsigned    nrec; /* Number of records in node to load */
 } H5B2_leaf_cache_ud_t;
@@ -330,7 +330,7 @@ H5_DLL herr_t H5B2_remove_leaf(H5B2_hdr_t *hdr, hid_t dxpl_id, H5B2_node_ptr_t *
                                H5B2_nodepos_t curr_pos, void *udata, H5B2_remove_t op, void *op_data);
 H5_DLL herr_t H5B2_remove_internal_by_idx(H5B2_hdr_t *hdr, hid_t dxpl_id, hbool_t *depth_decreased,
                                           void *swap_loc, unsigned depth, H5AC_info_t *parent_cache_info,
-                                          unsigned *       parent_cache_info_flags_ptr,
+                                          unsigned        *parent_cache_info_flags_ptr,
                                           H5B2_node_ptr_t *curr_node_ptr, H5B2_nodepos_t curr_pos, hsize_t n,
                                           H5B2_remove_t op, void *op_data);
 H5_DLL herr_t H5B2_remove_leaf_by_idx(H5B2_hdr_t *hdr, hid_t dxpl_id, H5B2_node_ptr_t *curr_node_ptr,

@@ -95,7 +95,7 @@ H5_GCC_DIAG_OFF("cast-align")
  * was detected.
  */
 typedef struct detected_t {
-    const char *  varname;
+    const char   *varname;
     unsigned int  size;             /* total byte size                  */
     unsigned int  precision;        /* meaningful bits                  */
     unsigned int  offset;           /* bit offset to meaningful bits    */
@@ -112,7 +112,7 @@ typedef struct detected_t {
 /* This structure holds structure alignment for pointers, hvl_t, hobj_ref_t,
  * hdset_reg_ref_t */
 typedef struct malign_t {
-    const char * name;
+    const char  *name;
     unsigned int comp_align; /* alignment for structure          */
 } malign_t;
 
@@ -282,7 +282,7 @@ precision(detected_t *d)
         unsigned char _pad_mask[sizeof(TYPE)];                                                               \
         unsigned char _byte_mask;                                                                            \
         int           _i, _j, _last = (-1);                                                                  \
-        const char *  _mesg;                                                                                 \
+        const char   *_mesg;                                                                                 \
                                                                                                              \
         HDmemset(&INFO, 0, sizeof(INFO));                                                                    \
         INFO.varname = #VAR;                                                                                 \
@@ -1134,7 +1134,7 @@ print_header(void)
 {
 
     time_t      now = HDtime(NULL);
-    struct tm * tm  = HDlocaltime(&now);
+    struct tm  *tm  = HDlocaltime(&now);
     char        real_name[30];
     char        host_name[256];
     int         i;
@@ -1190,7 +1190,7 @@ bit.\n";
 #ifdef H5_HAVE_GETPWUID
     {
         size_t n;
-        char * comma;
+        char  *comma;
         if ((pwd = HDgetpwuid(HDgetuid()))) {
             if ((comma = HDstrchr(pwd->pw_gecos, ','))) {
                 n = MIN(sizeof(real_name) - 1, (unsigned)(comma - pwd->pw_gecos));

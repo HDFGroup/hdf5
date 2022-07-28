@@ -60,9 +60,9 @@ typedef struct H5HF_huge_bt2_ctx_t {
 
 /* v2 B-tree driver callbacks */
 
-static void * H5HF_huge_bt2_crt_context(void *udata);
+static void  *H5HF_huge_bt2_crt_context(void *udata);
 static herr_t H5HF_huge_bt2_dst_context(void *ctx);
-static void * H5HF_huge_bt2_crt_dbg_context(H5F_t *f, hid_t dxpl_id, haddr_t addr);
+static void  *H5HF_huge_bt2_crt_dbg_context(H5F_t *f, hid_t dxpl_id, haddr_t addr);
 
 static herr_t H5HF_huge_bt2_indir_store(void *native, const void *udata);
 static herr_t H5HF_huge_bt2_indir_compare(const void *rec1, const void *rec2, int *result);
@@ -192,9 +192,9 @@ H5FL_DEFINE_STATIC(H5HF_huge_bt2_ctx_t);
 static void *
 H5HF_huge_bt2_crt_context(void *_f)
 {
-    H5F_t *              f = (H5F_t *)_f;  /* User data for building callback context */
+    H5F_t               *f = (H5F_t *)_f;  /* User data for building callback context */
     H5HF_huge_bt2_ctx_t *ctx;              /* Callback context structure */
-    void *               ret_value = NULL; /* Return value */
+    void                *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -264,7 +264,7 @@ static void *
 H5HF_huge_bt2_crt_dbg_context(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t H5_ATTR_UNUSED addr)
 {
     H5HF_huge_bt2_ctx_t *ctx;       /* Callback context structure */
-    void *               ret_value; /* Return value */
+    void                *ret_value; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -409,7 +409,7 @@ H5HF_huge_bt2_indir_compare(const void *_rec1, const void *_rec2, int *result)
 static herr_t
 H5HF_huge_bt2_indir_encode(uint8_t *raw, const void *_nrecord, void *_ctx)
 {
-    H5HF_huge_bt2_ctx_t *            ctx     = (H5HF_huge_bt2_ctx_t *)_ctx; /* Callback context structure */
+    H5HF_huge_bt2_ctx_t             *ctx     = (H5HF_huge_bt2_ctx_t *)_ctx; /* Callback context structure */
     const H5HF_huge_bt2_indir_rec_t *nrecord = (const H5HF_huge_bt2_indir_rec_t *)_nrecord;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -441,7 +441,7 @@ H5HF_huge_bt2_indir_encode(uint8_t *raw, const void *_nrecord, void *_ctx)
 static herr_t
 H5HF_huge_bt2_indir_decode(const uint8_t *raw, void *_nrecord, void *_ctx)
 {
-    H5HF_huge_bt2_ctx_t *      ctx     = (H5HF_huge_bt2_ctx_t *)_ctx; /* Callback context structure */
+    H5HF_huge_bt2_ctx_t       *ctx     = (H5HF_huge_bt2_ctx_t *)_ctx; /* Callback context structure */
     H5HF_huge_bt2_indir_rec_t *nrecord = (H5HF_huge_bt2_indir_rec_t *)_nrecord;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -607,7 +607,7 @@ H5HF_huge_bt2_filt_indir_compare(const void *_rec1, const void *_rec2, int *resu
 static herr_t
 H5HF_huge_bt2_filt_indir_encode(uint8_t *raw, const void *_nrecord, void *_ctx)
 {
-    H5HF_huge_bt2_ctx_t *                 ctx = (H5HF_huge_bt2_ctx_t *)_ctx; /* Callback context structure */
+    H5HF_huge_bt2_ctx_t                  *ctx = (H5HF_huge_bt2_ctx_t *)_ctx; /* Callback context structure */
     const H5HF_huge_bt2_filt_indir_rec_t *nrecord = (const H5HF_huge_bt2_filt_indir_rec_t *)_nrecord;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -641,7 +641,7 @@ H5HF_huge_bt2_filt_indir_encode(uint8_t *raw, const void *_nrecord, void *_ctx)
 static herr_t
 H5HF_huge_bt2_filt_indir_decode(const uint8_t *raw, void *_nrecord, void *_ctx)
 {
-    H5HF_huge_bt2_ctx_t *           ctx     = (H5HF_huge_bt2_ctx_t *)_ctx; /* Callback context structure */
+    H5HF_huge_bt2_ctx_t            *ctx     = (H5HF_huge_bt2_ctx_t *)_ctx; /* Callback context structure */
     H5HF_huge_bt2_filt_indir_rec_t *nrecord = (H5HF_huge_bt2_filt_indir_rec_t *)_nrecord;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -798,7 +798,7 @@ H5HF_huge_bt2_dir_compare(const void *_rec1, const void *_rec2, int *result)
 static herr_t
 H5HF_huge_bt2_dir_encode(uint8_t *raw, const void *_nrecord, void *_ctx)
 {
-    H5HF_huge_bt2_ctx_t *          ctx     = (H5HF_huge_bt2_ctx_t *)_ctx; /* Callback context structure */
+    H5HF_huge_bt2_ctx_t           *ctx     = (H5HF_huge_bt2_ctx_t *)_ctx; /* Callback context structure */
     const H5HF_huge_bt2_dir_rec_t *nrecord = (const H5HF_huge_bt2_dir_rec_t *)_nrecord;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -829,7 +829,7 @@ H5HF_huge_bt2_dir_encode(uint8_t *raw, const void *_nrecord, void *_ctx)
 static herr_t
 H5HF_huge_bt2_dir_decode(const uint8_t *raw, void *_nrecord, void *_ctx)
 {
-    H5HF_huge_bt2_ctx_t *    ctx     = (H5HF_huge_bt2_ctx_t *)_ctx; /* Callback context structure */
+    H5HF_huge_bt2_ctx_t     *ctx     = (H5HF_huge_bt2_ctx_t *)_ctx; /* Callback context structure */
     H5HF_huge_bt2_dir_rec_t *nrecord = (H5HF_huge_bt2_dir_rec_t *)_nrecord;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -1005,7 +1005,7 @@ H5HF_huge_bt2_filt_dir_compare(const void *_rec1, const void *_rec2, int *result
 static herr_t
 H5HF_huge_bt2_filt_dir_encode(uint8_t *raw, const void *_nrecord, void *_ctx)
 {
-    H5HF_huge_bt2_ctx_t *               ctx = (H5HF_huge_bt2_ctx_t *)_ctx; /* Callback context structure */
+    H5HF_huge_bt2_ctx_t                *ctx = (H5HF_huge_bt2_ctx_t *)_ctx; /* Callback context structure */
     const H5HF_huge_bt2_filt_dir_rec_t *nrecord = (const H5HF_huge_bt2_filt_dir_rec_t *)_nrecord;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -1038,7 +1038,7 @@ H5HF_huge_bt2_filt_dir_encode(uint8_t *raw, const void *_nrecord, void *_ctx)
 static herr_t
 H5HF_huge_bt2_filt_dir_decode(const uint8_t *raw, void *_nrecord, void *_ctx)
 {
-    H5HF_huge_bt2_ctx_t *         ctx     = (H5HF_huge_bt2_ctx_t *)_ctx; /* Callback context structure */
+    H5HF_huge_bt2_ctx_t          *ctx     = (H5HF_huge_bt2_ctx_t *)_ctx; /* Callback context structure */
     H5HF_huge_bt2_filt_dir_rec_t *nrecord = (H5HF_huge_bt2_filt_dir_rec_t *)_nrecord;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR

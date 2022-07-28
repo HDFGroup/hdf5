@@ -61,11 +61,11 @@ usage(void)
 int
 main(int argc, char *argv[])
 {
-    FILE * stream;
+    FILE  *stream;
     size_t numread;
     TYPE   buf[NELMTS];
     size_t i, nelmts = NELMTS;
-    char * fname = NULL;
+    char  *fname = NULL;
 
     if (argc != 2) {
         usage();

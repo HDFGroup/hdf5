@@ -76,17 +76,17 @@ typedef struct {
     hbool_t            wrapped;    /* Whether the id count has wrapped around  */
     unsigned           id_count;   /* Current number of IDs held		    */
     hid_t              nextid;     /* ID to use for the next atom		    */
-    H5SL_t *           ids;        /* Pointer to skip list that stores IDs     */
+    H5SL_t            *ids;        /* Pointer to skip list that stores IDs     */
 
     /* Fields for holding available IDs */
     unsigned avail_count; /* # of available ID structures awaiting recycling */
-    H5SL_t * avail_ids;   /* pointer to skip list of available IDs */
+    H5SL_t  *avail_ids;   /* pointer to skip list of available IDs */
 } H5I_id_type_t;
 
 typedef struct {
     H5I_search_func_t app_cb;  /* Application's callback routine */
-    void *            app_key; /* Application's "key" (user data) */
-    void *            ret_obj; /* Object to return */
+    void             *app_key; /* Application's "key" (user data) */
+    void             *ret_obj; /* Object to return */
 } H5I_search_ud_t;
 
 /* User data for iterator callback when IDs have wrapped */
@@ -97,7 +97,7 @@ typedef struct {
 /* User data for iterator callback for ID iteration */
 typedef struct {
     H5I_search_func_t user_func;  /* 'User' function to invoke */
-    void *            user_udata; /* User data to pass to 'user' function */
+    void             *user_udata; /* User data to pass to 'user' function */
     hbool_t           app_ref;    /* Whether this is an appl. ref. call */
 } H5I_iterate_ud_t;
 
@@ -134,8 +134,8 @@ H5FL_DEFINE_STATIC(H5I_class_t);
 static herr_t         H5I__free_cb(void *_item, void *_key, void *_udata);
 static htri_t         H5I__clear_type_cb(void *_id, void *key, void *udata);
 static int            H5I__destroy_type(H5I_type_t type);
-static void *         H5I__remove_verify(hid_t id, H5I_type_t id_type);
-static void *         H5I__remove_common(H5I_id_type_t *type_ptr, hid_t id);
+static void          *H5I__remove_verify(hid_t id, H5I_type_t id_type);
+static void          *H5I__remove_common(H5I_id_type_t *type_ptr, hid_t id);
 static int            H5I__inc_type_ref(H5I_type_t type);
 static int            H5I__get_type_ref(H5I_type_t type);
 static H5I_id_info_t *H5I__find_id(hid_t id);
@@ -595,7 +595,7 @@ done:
 static htri_t
 H5I__clear_type_cb(void *_id, void H5_ATTR_UNUSED *key, void *_udata)
 {
-    H5I_id_info_t *      id        = (H5I_id_info_t *)_id;          /* Current ID being worked with */
+    H5I_id_info_t       *id        = (H5I_id_info_t *)_id;          /* Current ID being worked with */
     H5I_clear_type_ud_t *udata     = (H5I_clear_type_ud_t *)_udata; /* udata struct */
     htri_t               ret_value = FALSE;                         /* Return value */
 
@@ -926,7 +926,7 @@ void *
 H5I_subst(hid_t id, const void *new_object)
 {
     H5I_id_info_t *id_ptr;           /* Pointer to the atom */
-    void *         ret_value = NULL; /* Return value */
+    void          *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -960,7 +960,7 @@ void *
 H5I_object(hid_t id)
 {
     H5I_id_info_t *id_ptr;           /* Pointer to the new atom  */
-    void *         ret_value = NULL; /* Return value             */
+    void          *ret_value = NULL; /* Return value             */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -1026,7 +1026,7 @@ void *
 H5I_object_verify(hid_t id, H5I_type_t id_type)
 {
     H5I_id_info_t *id_ptr    = NULL; /* Pointer to the new atom  */
-    void *         ret_value = NULL; /* Return value             */
+    void          *ret_value = NULL; /* Return value             */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -1194,7 +1194,7 @@ static void *
 H5I__remove_common(H5I_id_type_t *type_ptr, hid_t id)
 {
     H5I_id_info_t *curr_id;          /* Pointer to the current atom */
-    void *         ret_value = NULL; /* Return value */
+    void          *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -1266,7 +1266,7 @@ H5I_remove(hid_t id)
 {
     H5I_id_type_t *type_ptr;         /* Pointer to the atomic type */
     H5I_type_t     type;             /* Atom's atomic type */
-    void *         ret_value = NULL; /* Return value */
+    void          *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -1911,7 +1911,7 @@ void *
 H5Isearch(H5I_type_t type, H5I_search_func_t func, void *key)
 {
     H5I_search_ud_t udata;     /* Context for iteration */
-    void *          ret_value; /* Return value */
+    void           *ret_value; /* Return value */
 
     FUNC_ENTER_API(NULL)
     H5TRACE3("*x", "Itx*x", type, func, key);
@@ -1952,7 +1952,7 @@ done:
 static int
 H5I__iterate_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
 {
-    H5I_id_info_t *   item      = (H5I_id_info_t *)_item;     /* Pointer to the ID node */
+    H5I_id_info_t    *item      = (H5I_id_info_t *)_item;     /* Pointer to the ID node */
     H5I_iterate_ud_t *udata     = (H5I_iterate_ud_t *)_udata; /* User data for callback */
     int               ret_value = H5_ITER_CONT;               /* Callback return value */
 
@@ -2207,7 +2207,7 @@ H5I__debug_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
 {
     H5I_id_info_t *item      = (H5I_id_info_t *)_item; /* Pointer to the ID node */
     H5I_type_t     type      = *(H5I_type_t *)_udata;  /* User data */
-    H5G_name_t *   path      = NULL;
+    H5G_name_t    *path      = NULL;
     int            ret_value = H5_ITER_CONT; /* Return value */
 
     FUNC_ENTER_STATIC_NOERR

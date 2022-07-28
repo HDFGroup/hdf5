@@ -472,7 +472,7 @@ ssize_t
 H5Pget_efile_prefix(hid_t plist_id, char *prefix, size_t size)
 {
     H5P_genplist_t *plist;     /* Property list pointer */
-    char *          my_prefix; /* Library's copy of the prefix */
+    char           *my_prefix; /* Library's copy of the prefix */
     size_t          len;       /* Length of prefix string */
     ssize_t         ret_value; /* Return value */
 

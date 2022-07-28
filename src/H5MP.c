@@ -128,9 +128,9 @@ done:
 static H5MP_page_t *
 H5MP_new_page(H5MP_pool_t *mp, size_t page_size)
 {
-    H5MP_page_t *    new_page;         /* New page created */
+    H5MP_page_t     *new_page;         /* New page created */
     H5MP_page_blk_t *first_blk;        /* Pointer to first block in page */
-    H5MP_page_t *    ret_value = NULL; /* Return value */
+    H5MP_page_t     *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -193,10 +193,10 @@ done:
 void *
 H5MP_malloc(H5MP_pool_t *mp, size_t request)
 {
-    H5MP_page_t *    alloc_page = NULL; /* Page to allocate space from */
+    H5MP_page_t     *alloc_page = NULL; /* Page to allocate space from */
     H5MP_page_blk_t *alloc_free;        /* Pointer to free space in page */
     size_t           needed;            /* Size requested, plus block header and alignment */
-    void *           ret_value = NULL;  /* Return value */
+    void            *ret_value = NULL;  /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -325,8 +325,8 @@ void *
 H5MP_free(H5MP_pool_t *mp, void *spc)
 {
     H5MP_page_blk_t *spc_blk;          /* Block for space to free */
-    H5MP_page_t *    spc_page;         /* Page containing block to free */
-    void *           ret_value = NULL; /* Return value */
+    H5MP_page_t     *spc_page;         /* Page containing block to free */
+    void            *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

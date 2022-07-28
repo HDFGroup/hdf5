@@ -128,7 +128,7 @@ create_file(hid_t fapl_id)
     size_t        buf_size = CHUNK_NY * CHUNK_NZ * sizeof(unsigned int);
 
     const Bytef *z_src;
-    Bytef *      z_dst; /*destination buffer		*/
+    Bytef       *z_dst; /*destination buffer		*/
     uLongf       z_dst_nbytes = (uLongf)DEFLATE_SIZE_ADJUST(buf_size);
     uLong        z_src_nbytes = (uLong)buf_size;
 

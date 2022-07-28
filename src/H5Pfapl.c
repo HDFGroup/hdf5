@@ -209,7 +209,7 @@ H5P_facc_reg_prop(H5P_genclass_t *pclass)
     hsize_t  sdata_block_size = H5F_ACS_SDATA_BLOCK_SIZE_DEF;   /* Default small data allocation block size */
     unsigned gc_ref    = H5F_ACS_GARBG_COLCT_REF_DEF; /* Default garbage collection for references setting */
     hid_t    driver_id = H5F_ACS_FILE_DRV_ID_DEF;     /* Default VFL driver ID */
-    void *   driver_info             = H5F_ACS_FILE_DRV_INFO_DEF; /* Default VFL driver info */
+    void    *driver_info             = H5F_ACS_FILE_DRV_INFO_DEF; /* Default VFL driver info */
     H5F_close_degree_t close_degree  = H5F_CLOSE_DEGREE_DEF;      /* Default file close degree */
     hsize_t            family_offset = H5F_ACS_FAMILY_OFFSET_DEF; /* Default offset for family VFD */
     hsize_t    family_newsize = H5F_ACS_FAMILY_NEWSIZE_DEF; /* Default size of new files for family VFD */
@@ -436,7 +436,7 @@ H5P_facc_copy(hid_t dst_fapl_id, hid_t src_fapl_id, void H5_ATTR_UNUSED *copy_da
 
     if (driver_id > 0) {
         H5P_genplist_t *dst_plist; /* Destination property list */
-        void *          driver_info;
+        void           *driver_info;
 
         /* Get driver info from source property list */
         if (H5P_get(src_plist, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
@@ -615,7 +615,7 @@ herr_t
 H5P_set_driver(H5P_genplist_t *plist, hid_t new_driver_id, const void *new_driver_info)
 {
     hid_t  driver_id;           /* VFL driver ID */
-    void * driver_info;         /* VFL driver info */
+    void  *driver_info;         /* VFL driver info */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -828,7 +828,7 @@ void *
 H5Pget_driver_info(hid_t plist_id)
 {
     H5P_genplist_t *plist;     /* Property list pointer */
-    void *          ret_value; /* Return value */
+    void           *ret_value; /* Return value */
 
     FUNC_ENTER_API(NULL)
     H5TRACE1("*x", "i", plist_id);
@@ -1825,7 +1825,7 @@ done:
 herr_t
 H5Pset_file_image(hid_t fapl_id, void *buf_ptr, size_t buf_len)
 {
-    H5P_genplist_t *       fapl;                /* Property list pointer */
+    H5P_genplist_t        *fapl;                /* Property list pointer */
     H5FD_file_image_info_t image_info;          /* File image info */
     herr_t                 ret_value = SUCCEED; /* Return value */
 
@@ -1922,7 +1922,7 @@ done:
 herr_t
 H5Pget_file_image(hid_t fapl_id, void **buf_ptr_ptr, size_t *buf_len_ptr)
 {
-    H5P_genplist_t *       fapl;                /* Property list pointer */
+    H5P_genplist_t        *fapl;                /* Property list pointer */
     H5FD_file_image_info_t image_info;          /* File image info */
     herr_t                 ret_value = SUCCEED; /* Return value */
 
@@ -1997,7 +1997,7 @@ done:
 herr_t
 H5Pset_file_image_callbacks(hid_t fapl_id, H5FD_file_image_callbacks_t *callbacks_ptr)
 {
-    H5P_genplist_t *       fapl;                /* Property list pointer */
+    H5P_genplist_t        *fapl;                /* Property list pointer */
     H5FD_file_image_info_t info;                /* File image info */
     herr_t                 ret_value = SUCCEED; /* Return value */
 
@@ -2073,7 +2073,7 @@ done:
 herr_t
 H5Pget_file_image_callbacks(hid_t fapl_id, H5FD_file_image_callbacks_t *callbacks_ptr)
 {
-    H5P_genplist_t *       fapl;                /* Property list pointer */
+    H5P_genplist_t        *fapl;                /* Property list pointer */
     H5FD_file_image_info_t info;                /* File image info */
     herr_t                 ret_value = SUCCEED; /* Return value */
 

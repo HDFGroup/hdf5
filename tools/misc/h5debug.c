@@ -140,12 +140,12 @@ main(int argc, char *argv[])
     hid_t       fid  = H5I_INVALID_HID;
     hid_t       fapl = H5I_INVALID_HID;
     hid_t       dxpl = H5I_INVALID_HID;
-    H5F_t *     f;
+    H5F_t      *f;
     haddr_t     addr = 0, extra = 0, extra2 = 0, extra3 = 0, extra4 = 0;
     uint8_t     sig[H5F_SIGNATURE_LEN];
     size_t      u;
     H5E_auto2_t func       = NULL;
-    void *      edata      = NULL;
+    void       *edata      = NULL;
     herr_t      status     = SUCCEED;
     int         exit_value = 0;
 

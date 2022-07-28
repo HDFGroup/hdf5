@@ -255,9 +255,9 @@ extern "C" {
 /* Generally useful testing routines */
 H5TEST_DLL void        h5_clean_files(const char *base_name[], hid_t fapl);
 H5TEST_DLL int         h5_cleanup(const char *base_name[], hid_t fapl);
-H5TEST_DLL char *      h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size);
-H5TEST_DLL char *      h5_fixname_no_suffix(const char *base_name, hid_t fapl, char *fullname, size_t size);
-H5TEST_DLL char *      h5_fixname_printf(const char *base_name, hid_t fapl, char *fullname, size_t size);
+H5TEST_DLL char       *h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size);
+H5TEST_DLL char       *h5_fixname_no_suffix(const char *base_name, hid_t fapl, char *fullname, size_t size);
+H5TEST_DLL char       *h5_fixname_printf(const char *base_name, hid_t fapl, char *fullname, size_t size);
 H5TEST_DLL hid_t       h5_fileaccess(void);
 H5TEST_DLL hid_t       h5_fileaccess_flags(unsigned flags);
 H5TEST_DLL void        h5_no_hwconv(void);
@@ -269,8 +269,8 @@ H5TEST_DLL h5_stat_size_t h5_get_file_size(const char *filename, hid_t fapl);
 H5TEST_DLL int            print_func(const char *format, ...);
 H5TEST_DLL int            h5_make_local_copy(const char *origfilename, const char *local_copy_name);
 H5TEST_DLL herr_t         h5_verify_cached_stabs(const char *base_name[], hid_t fapl);
-H5TEST_DLL H5FD_class_t *h5_get_dummy_vfd_class(void);
-H5TEST_DLL char *        h5_get_version_string(H5F_libver_t libver);
+H5TEST_DLL H5FD_class_t  *h5_get_dummy_vfd_class(void);
+H5TEST_DLL char          *h5_get_version_string(H5F_libver_t libver);
 
 /* Functions that will replace components of a FAPL */
 H5TEST_DLL herr_t h5_get_vfd_fapl(hid_t fapl_id);

@@ -158,7 +158,7 @@ typedef struct {
     int             stop;      /* # of iterations to stop after */
     int64_t         curr;      /* Current creation order value */
     size_t          max_visit; /* Size of "visited link" flag array */
-    hbool_t *       visited;   /* Pointer to array of "visited link" flags */
+    hbool_t        *visited;   /* Pointer to array of "visited link" flags */
 } link_iter_info_t;
 
 #if 0

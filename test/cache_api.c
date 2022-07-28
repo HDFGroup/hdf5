@@ -63,14 +63,14 @@ static void check_file_mdc_api_errs(void);
 static void
 check_fapl_mdc_api_calls(void)
 {
-    const char *        fcn_name = "check_fapl_mdc_api_calls()";
+    const char         *fcn_name = "check_fapl_mdc_api_calls()";
     char                filename[512];
     herr_t              result;
     hid_t               fapl_id        = -1;
     hid_t               test_fapl_id   = -1;
     hid_t               file_id        = -1;
-    H5F_t *             file_ptr       = NULL;
-    H5C_t *             cache_ptr      = NULL;
+    H5F_t              *file_ptr       = NULL;
+    H5C_t              *cache_ptr      = NULL;
     H5AC_cache_config_t default_config = H5AC__DEFAULT_CACHE_CONFIG;
     H5AC_cache_config_t mod_config     = {
         /* int         version                = */ H5AC__CURR_CACHE_CONFIG_VERSION,
@@ -501,7 +501,7 @@ check_fapl_mdc_api_calls(void)
 static void
 check_file_mdc_api_calls(void)
 {
-    const char *        fcn_name = "check_file_mdc_api_calls()";
+    const char         *fcn_name = "check_file_mdc_api_calls()";
     char                filename[512];
     hid_t               file_id = -1;
     size_t              max_size;
@@ -837,7 +837,7 @@ check_file_mdc_api_calls(void)
 static void
 mdc_api_call_smoke_check(int express_test)
 {
-    const char *        fcn_name = "mdc_api_call_smoke_check()";
+    const char         *fcn_name = "mdc_api_call_smoke_check()";
     char                filename[512];
     hbool_t             valid_chunk;
     hbool_t             dump_hit_rate   = FALSE;
@@ -2856,7 +2856,7 @@ H5AC_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] = {
 static void
 check_fapl_mdc_api_errs(void)
 {
-    const char *        fcn_name = "check_fapl_mdc_api_errs()";
+    const char         *fcn_name = "check_fapl_mdc_api_errs()";
     static char         msg[128];
     int                 i;
     herr_t              result;
@@ -3034,7 +3034,7 @@ check_fapl_mdc_api_errs(void)
 static void
 check_file_mdc_api_errs(void)
 {
-    const char *        fcn_name = "check_file_mdc_api_errs()";
+    const char         *fcn_name = "check_file_mdc_api_errs()";
     char                filename[512];
     static char         msg[128];
     hbool_t             show_progress = FALSE;

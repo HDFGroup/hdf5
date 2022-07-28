@@ -89,7 +89,7 @@ nh5iget_name_c(hid_t_f *obj_id, _fcd buf, size_t_f *buf_size, size_t_f *name_siz
     hid_t   c_obj_id;
     ssize_t c_size;
     size_t  c_buf_size;
-    char *  c_buf = NULL;
+    char   *c_buf = NULL;
 
     /*
      * Allocate buffer to hold name of an object

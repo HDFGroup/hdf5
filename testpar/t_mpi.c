@@ -189,7 +189,7 @@ test_mpio_gb_file(char *filename)
     int        writerrs; /* write errors */
     int        nerrs;
     int        ntimes; /* how many times */
-    char *     buf = NULL;
+    char      *buf = NULL;
     char       expected;
     MPI_Offset size;
     MPI_Offset mpi_off;

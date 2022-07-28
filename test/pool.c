@@ -166,7 +166,7 @@ test_allocate_first(void)
     H5MP_pool_t *mp;        /* Memory pool */
     H5MP_page_t *page;      /* Memory pool page */
     size_t       free_size; /* Free size in pool */
-    void *       spc;       /* Pointer to space allocated */
+    void        *spc;       /* Pointer to space allocated */
 
     /*
      * Test memory pool allocation
@@ -321,8 +321,8 @@ test_allocate_split(void)
 {
     H5MP_pool_t *mp;        /* Memory pool */
     size_t       free_size; /* Free size in pool */
-    void *       spc1;      /* Pointer to space allocated */
-    void *       spc2;      /* Pointer to space allocated */
+    void        *spc1;      /* Pointer to space allocated */
+    void        *spc2;      /* Pointer to space allocated */
 
     /*
      * Test memory pool allocation
@@ -431,7 +431,7 @@ test_allocate_many_small(void)
 {
     H5MP_pool_t *mp;                          /* Memory pool */
     size_t       free_size;                   /* Free size in pool */
-    void *       spc[MPOOL_NUM_SMALL_BLOCKS]; /* Pointers to space allocated */
+    void        *spc[MPOOL_NUM_SMALL_BLOCKS]; /* Pointers to space allocated */
     int          i;                           /* Local index variable */
 
     /*
@@ -515,9 +515,9 @@ test_allocate_new_page(void)
     H5MP_pool_t *mp;                           /* Memory pool */
     size_t       free_size;                    /* Free size in pool */
     size_t       u;                            /* Local index variable */
-    void *       spc[MPOOL_NUM_NORMAL_BLOCKS]; /* Pointer to space allocated */
-    void *       spc1;                         /* Pointer to space allocated */
-    void *       spc2;                         /* Pointer to space allocated */
+    void        *spc[MPOOL_NUM_NORMAL_BLOCKS]; /* Pointer to space allocated */
+    void        *spc1;                         /* Pointer to space allocated */
+    void        *spc2;                         /* Pointer to space allocated */
 
     /*
      * Test memory pool allocation
@@ -648,10 +648,10 @@ test_allocate_random(void)
     H5MP_pool_t *mp;              /* Memory pool */
     size_t       u;               /* Local index variable */
     time_t       curr_time;       /* Current time, for seeding random number generator */
-    size_t *     blk_size = NULL; /* Pointer to block sizes */
-    void **      spc      = NULL; /* Pointer to space allocated */
+    size_t      *blk_size = NULL; /* Pointer to block sizes */
+    void       **spc      = NULL; /* Pointer to space allocated */
     size_t       swap_idx;        /* Location to swap with when shuffling */
-    void *       swap_ptr;        /* Pointer to swap when shuffling */
+    void        *swap_ptr;        /* Pointer to swap when shuffling */
 
     /*
      * Test memory pool allocation

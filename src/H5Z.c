@@ -763,7 +763,7 @@ H5Z_prepare_prelude_callback_dcpl(hid_t dcpl_id, hid_t type_id, H5Z_prelude_type
             /* Check if the chunks have filters */
             if (dcpl_pline.nused > 0) {
                 hsize_t chunk_dims[H5O_LAYOUT_NDIMS]; /* Size of chunk dimensions */
-                H5S_t * space;                        /* Dataspace describing chunk */
+                H5S_t  *space;                        /* Dataspace describing chunk */
                 size_t  u;                            /* Local index variable */
 
                 /* Create a dataspace for a chunk & set the extent */

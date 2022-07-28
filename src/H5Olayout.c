@@ -32,15 +32,15 @@
 /* Local macros */
 
 /* PRIVATE PROTOTYPES */
-static void * H5O_layout_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned mesg_flags,
+static void  *H5O_layout_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned mesg_flags,
                                 unsigned *ioflags, size_t p_size, const uint8_t *p);
 static herr_t H5O_layout_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
-static void * H5O_layout_copy(const void *_mesg, void *_dest);
+static void  *H5O_layout_copy(const void *_mesg, void *_dest);
 static size_t H5O_layout_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
 static herr_t H5O_layout_reset(void *_mesg);
 static herr_t H5O_layout_free(void *_mesg);
 static herr_t H5O_layout_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, void *_mesg);
-static void * H5O_layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst, hbool_t *recompute_size,
+static void  *H5O_layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst, hbool_t *recompute_size,
                                    unsigned *mesg_flags, H5O_copy_t *cpy_info, void *udata, hid_t dxpl_id);
 static herr_t H5O_layout_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream, int indent,
                                int fwidth);
@@ -92,10 +92,10 @@ H5O_layout_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *
                   unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags, size_t p_size,
                   const uint8_t *p)
 {
-    H5O_layout_t * mesg = NULL;
+    H5O_layout_t  *mesg = NULL;
     unsigned       u;
     const uint8_t *p_end     = p + p_size - 1; /* End of the p buffer */
-    void *         ret_value = NULL;           /* Return value */
+    void          *ret_value = NULL;           /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -376,8 +376,8 @@ static void *
 H5O_layout_copy(const void *_mesg, void *_dest)
 {
     const H5O_layout_t *mesg      = (const H5O_layout_t *)_mesg;
-    H5O_layout_t *      dest      = (H5O_layout_t *)_dest;
-    void *              ret_value = NULL; /* Return value */
+    H5O_layout_t       *dest      = (H5O_layout_t *)_dest;
+    void               *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -587,11 +587,11 @@ H5O_layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst, hbool_t H
                      unsigned H5_ATTR_UNUSED *mesg_flags, H5O_copy_t *cpy_info, void *_udata, hid_t dxpl_id)
 {
     H5D_copy_file_ud_t *udata      = (H5D_copy_file_ud_t *)_udata; /* Dataset copying user data */
-    H5O_layout_t *      layout_src = (H5O_layout_t *)mesg_src;
-    H5O_layout_t *      layout_dst = NULL;
+    H5O_layout_t       *layout_src = (H5O_layout_t *)mesg_src;
+    H5O_layout_t       *layout_dst = NULL;
     hbool_t             copied     = FALSE; /* Whether the data was copied */
-    H5D_shared_t *      shared_fo  = (H5D_shared_t *)cpy_info->shared_fo;
-    void *              ret_value; /* Return value */
+    H5D_shared_t       *shared_fo  = (H5D_shared_t *)cpy_info->shared_fo;
+    void               *ret_value; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

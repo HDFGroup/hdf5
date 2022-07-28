@@ -80,8 +80,8 @@ herr_t
 H5B2_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int fwidth,
                const H5B2_class_t *type, haddr_t obj_addr)
 {
-    H5B2_hdr_t *        hdr     = NULL;      /* B-tree header info */
-    void *              dbg_ctx = NULL;      /* v2 B-tree debugging context */
+    H5B2_hdr_t         *hdr     = NULL;      /* B-tree header info */
+    void               *dbg_ctx = NULL;      /* v2 B-tree debugging context */
     unsigned            u;                   /* Local index variable */
     char                temp_str[128];       /* Temporary string, for formatting */
     H5B2_hdr_cache_ud_t cache_udata;         /* User-data for callback */
@@ -179,9 +179,9 @@ herr_t
 H5B2_int_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int fwidth,
                const H5B2_class_t *type, haddr_t hdr_addr, unsigned nrec, unsigned depth, haddr_t obj_addr)
 {
-    H5B2_hdr_t *        hdr      = NULL;     /* B-tree header */
-    H5B2_internal_t *   internal = NULL;     /* B-tree internal node */
-    void *              dbg_ctx  = NULL;     /* v2 B-tree debugging context */
+    H5B2_hdr_t         *hdr      = NULL;     /* B-tree header */
+    H5B2_internal_t    *internal = NULL;     /* B-tree internal node */
+    void               *dbg_ctx  = NULL;     /* v2 B-tree debugging context */
     unsigned            u;                   /* Local index variable */
     char                temp_str[128];       /* Temporary string, for formatting */
     H5B2_hdr_cache_ud_t cache_udata;         /* User-data for callback */
@@ -299,10 +299,10 @@ herr_t
 H5B2_leaf_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int fwidth,
                 const H5B2_class_t *type, haddr_t hdr_addr, unsigned nrec, haddr_t obj_addr)
 {
-    H5B2_hdr_t *        hdr  = NULL;         /* B-tree header */
-    H5B2_leaf_t *       leaf = NULL;         /* B-tree leaf node */
+    H5B2_hdr_t         *hdr  = NULL;         /* B-tree header */
+    H5B2_leaf_t        *leaf = NULL;         /* B-tree leaf node */
     H5B2_hdr_cache_ud_t cache_udata;         /* User-data for callback */
-    void *              dbg_ctx = NULL;      /* v2 B-tree debugging context */
+    void               *dbg_ctx = NULL;      /* v2 B-tree debugging context */
     unsigned            u;                   /* Local index variable */
     char                temp_str[128];       /* Temporary string, for formatting */
     herr_t              ret_value = SUCCEED; /* Return value */

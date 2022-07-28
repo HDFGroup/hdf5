@@ -144,17 +144,17 @@ H5FL_SEQ_DEFINE(H5O_cont_t);
 static H5O_t *
 H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 {
-    H5O_t *         oh    = NULL;                     /* Object header read in */
+    H5O_t          *oh    = NULL;                     /* Object header read in */
     H5O_cache_ud_t *udata = (H5O_cache_ud_t *)_udata; /* User data for callback */
-    H5WB_t *        wb    = NULL;                     /* Wrapped buffer for prefix data */
+    H5WB_t         *wb    = NULL;                     /* Wrapped buffer for prefix data */
     uint8_t         read_buf[H5O_SPEC_READ_SIZE];     /* Buffer for speculative read */
-    const uint8_t * p;                                /* Pointer into buffer to decode */
-    uint8_t *       buf;                              /* Buffer to decode */
+    const uint8_t  *p;                                /* Pointer into buffer to decode */
+    uint8_t        *buf;                              /* Buffer to decode */
     size_t          spec_read_size;                   /* Size of buffer to speculatively read in */
     size_t          prefix_size;                      /* Size of object header prefix */
     size_t          buf_size;                         /* Size of prefix+chunk #0 buffer */
     haddr_t         eoa;                              /* Relative end of file address	*/
-    H5O_t *         ret_value;                        /* Return value */
+    H5O_t          *ret_value;                        /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -663,12 +663,12 @@ H5O_size(const H5F_t H5_ATTR_UNUSED *f, const H5O_t *oh, size_t *size_ptr)
 static H5O_chunk_proxy_t *
 H5O_cache_chk_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 {
-    H5O_chunk_proxy_t * chk_proxy = NULL;                         /* Chunk proxy object */
+    H5O_chunk_proxy_t  *chk_proxy = NULL;                         /* Chunk proxy object */
     H5O_chk_cache_ud_t *udata     = (H5O_chk_cache_ud_t *)_udata; /* User data for callback */
-    H5WB_t *            wb        = NULL;                         /* Wrapped buffer for prefix data */
+    H5WB_t             *wb        = NULL;                         /* Wrapped buffer for prefix data */
     uint8_t             chunk_buf[H5O_SPEC_READ_SIZE];            /* Buffer for speculative read */
-    uint8_t *           buf;                                      /* Buffer to decode */
-    H5O_chunk_proxy_t * ret_value;                                /* Return value */
+    uint8_t            *buf;                                      /* Buffer to decode */
+    H5O_chunk_proxy_t  *ret_value;                                /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1009,7 +1009,7 @@ H5O_chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image,
                       hbool_t *dirty)
 {
     const uint8_t *p;                    /* Pointer into buffer to decode */
-    uint8_t *      eom_ptr;              /* Pointer to end of messages for a chunk */
+    uint8_t       *eom_ptr;              /* Pointer to end of messages for a chunk */
     size_t         curmesg;              /* Current message being decoded in object header */
     unsigned       merged_null_msgs = 0; /* Number of null messages merged together */
     unsigned       chunkno;              /* Current chunk's index */

@@ -62,7 +62,7 @@ typedef struct H5FD_family_t {
     unsigned amembs;       /*number of member slots allocated    */
     H5FD_t **memb;         /*dynamic array of member pointers    */
     haddr_t  eoa;          /*end of allocated addresses        */
-    char *   name;         /*name generator printf format        */
+    char    *name;         /*name generator printf format        */
     unsigned flags;        /*flags for opening additional members    */
 
     /* Information from properties set by 'h5repart' tool */
@@ -80,8 +80,8 @@ typedef struct H5FD_family_fapl_t {
 } H5FD_family_fapl_t;
 
 /* Callback prototypes */
-static void *  H5FD_family_fapl_get(H5FD_t *_file);
-static void *  H5FD_family_fapl_copy(const void *_old_fa);
+static void   *H5FD_family_fapl_get(H5FD_t *_file);
+static void   *H5FD_family_fapl_copy(const void *_old_fa);
 static herr_t  H5FD_family_fapl_free(void *_fa);
 static hsize_t H5FD_family_sb_size(H5FD_t *_file);
 static herr_t  H5FD_family_sb_encode(H5FD_t *_file, char *name /*out*/, unsigned char *buf /*out*/);
@@ -234,7 +234,7 @@ H5Pset_fapl_family(hid_t fapl_id, hsize_t msize, hid_t memb_fapl_id)
 {
     herr_t             ret_value;
     H5FD_family_fapl_t fa = {0, -1};
-    H5P_genplist_t *   plist; /* Property list pointer */
+    H5P_genplist_t    *plist; /* Property list pointer */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "ihi", fapl_id, msize, memb_fapl_id);
@@ -280,7 +280,7 @@ done:
 herr_t
 H5Pget_fapl_family(hid_t fapl_id, hsize_t *msize /*out*/, hid_t *memb_fapl_id /*out*/)
 {
-    H5P_genplist_t *          plist; /* Property list pointer */
+    H5P_genplist_t           *plist; /* Property list pointer */
     const H5FD_family_fapl_t *fa;
     herr_t                    ret_value = SUCCEED; /* Return value */
 
@@ -323,10 +323,10 @@ done:
 static void *
 H5FD_family_fapl_get(H5FD_t *_file)
 {
-    H5FD_family_t *     file = (H5FD_family_t *)_file;
+    H5FD_family_t      *file = (H5FD_family_t *)_file;
     H5FD_family_fapl_t *fa   = NULL;
-    H5P_genplist_t *    plist;            /* Property list pointer */
-    void *              ret_value = NULL; /* Return value */
+    H5P_genplist_t     *plist;            /* Property list pointer */
+    void               *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -367,9 +367,9 @@ static void *
 H5FD_family_fapl_copy(const void *_old_fa)
 {
     const H5FD_family_fapl_t *old_fa = (const H5FD_family_fapl_t *)_old_fa;
-    H5FD_family_fapl_t *      new_fa = NULL;
-    H5P_genplist_t *          plist;            /* Property list pointer */
-    void *                    ret_value = NULL; /* Return value */
+    H5FD_family_fapl_t       *new_fa = NULL;
+    H5P_genplist_t           *plist;            /* Property list pointer */
+    void                     *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -581,7 +581,7 @@ static H5FD_t *
 H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
     H5FD_family_t *file      = NULL;
-    H5FD_t *       ret_value = NULL;
+    H5FD_t        *ret_value = NULL;
     char           memb_name[4096], temp[4096];
     hsize_t        eof     = HADDR_UNDEF;
     unsigned       t_flags = flags & ~H5F_ACC_CREAT;
@@ -606,7 +606,7 @@ H5FD_family_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxadd
         file->mem_newsize = 0;                  /*New member size used by h5repart only       */
     }                                           /* end if */
     else {
-        H5P_genplist_t *          plist; /* Property list pointer */
+        H5P_genplist_t           *plist; /* Property list pointer */
         const H5FD_family_fapl_t *fa;
 
         if (NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
@@ -1024,7 +1024,7 @@ H5FD_family_get_eof(const H5FD_t *_file)
 static herr_t
 H5FD_family_get_handle(H5FD_t *_file, hid_t fapl, void **file_handle)
 {
-    H5FD_family_t * file = (H5FD_family_t *)_file;
+    H5FD_family_t  *file = (H5FD_family_t *)_file;
     H5P_genplist_t *plist;
     hsize_t         offset;
     int             memb;
@@ -1068,8 +1068,8 @@ done:
 static herr_t
 H5FD_family_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size, void *_buf /*out*/)
 {
-    H5FD_family_t * file = (H5FD_family_t *)_file;
-    unsigned char * buf  = (unsigned char *)_buf;
+    H5FD_family_t  *file = (H5FD_family_t *)_file;
+    unsigned char  *buf  = (unsigned char *)_buf;
     haddr_t         sub;
     size_t          req;
     hsize_t         tempreq;
@@ -1133,13 +1133,13 @@ done:
 static herr_t
 H5FD_family_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size, const void *_buf)
 {
-    H5FD_family_t *      file = (H5FD_family_t *)_file;
+    H5FD_family_t       *file = (H5FD_family_t *)_file;
     const unsigned char *buf  = (const unsigned char *)_buf;
     haddr_t              sub;
     size_t               req;
     hsize_t              tempreq;
     unsigned             u;                   /* Local index variable */
-    H5P_genplist_t *     plist;               /* Property list pointer */
+    H5P_genplist_t      *plist;               /* Property list pointer */
     herr_t               ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT

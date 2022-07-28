@@ -1709,7 +1709,7 @@ static unsigned
 test_pack_ooo(void)
 {
     hid_t    cmpd, sub_cmpd;          /* Datatype IDs */
-    H5T_t *  dt;                      /* Datatype pointer */
+    H5T_t   *dt;                      /* Datatype pointer */
     unsigned order[PACK_NMEMBS];      /* Order of insertion */
     unsigned free_order[PACK_NMEMBS]; /* Index of remaining free slots in order */
     unsigned num_free;                /* Number of free slots in order */

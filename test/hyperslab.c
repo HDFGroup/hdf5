@@ -299,8 +299,8 @@ static herr_t
 test_copy(int mode, size_t nx, size_t ny, size_t nz, size_t di, size_t dj, size_t dk, size_t ddx, size_t ddy,
           size_t ddz)
 {
-    uint8_t *   src = NULL;          /*source array            */
-    uint8_t *   dst = NULL;          /*destination array        */
+    uint8_t    *src = NULL;          /*source array            */
+    uint8_t    *dst = NULL;          /*destination array        */
     hsize_t     hs_size[3];          /*hyperslab size        */
     hsize_t     dst_size[3];         /*destination total size    */
     hsize_t     src_size[3];         /*source total size        */
@@ -764,8 +764,8 @@ error:
 static herr_t
 test_transpose(size_t nx, size_t ny)
 {
-    int *   src = NULL;
-    int *   dst = NULL;
+    int    *src = NULL;
+    int    *dst = NULL;
     hsize_t src_stride[2], dst_stride[2];
     hsize_t size[2];
     char    s[256];
@@ -1012,7 +1012,7 @@ error:
 static herr_t
 test_array_fill(size_t lo, size_t hi)
 {
-    int *  dst = NULL;           /* Destination                  */
+    int   *dst = NULL;           /* Destination                  */
     int    src[ARRAY_FILL_SIZE]; /* Source to duplicate    */
     size_t u, v, w;              /* Local index variables        */
     char   s[256];

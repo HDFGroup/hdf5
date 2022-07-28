@@ -67,7 +67,7 @@ H5T_init_strpad_interface(void)
 H5T_str_t
 H5Tget_strpad(hid_t type_id)
 {
-    H5T_t *   dt = NULL;
+    H5T_t    *dt = NULL;
     H5T_str_t ret_value;
 
     FUNC_ENTER_API(H5T_STR_ERROR)

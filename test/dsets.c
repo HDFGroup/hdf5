@@ -392,7 +392,7 @@ test_simple_io(const char *env_h5_drvr, hid_t fapl)
     hid_t   file = -1, dataset = -1, space = -1, xfer = -1;
     int     i, j, n;
     hsize_t dims[2];
-    void *  tconv_buf = NULL;
+    void   *tconv_buf = NULL;
     int     f         = -1;
     haddr_t offset;
     int     rdata[DSET_DIM1][DSET_DIM2];
@@ -772,8 +772,8 @@ test_max_compact(hid_t fapl)
     hid_t   plist   = -1;
     hsize_t dims[1];
     size_t  compact_size;
-    int *   wbuf = NULL;
-    int *   rbuf = NULL;
+    int    *wbuf = NULL;
+    int    *rbuf = NULL;
     char    filename[FILENAME_BUF_SIZE];
     int     n;
     size_t  u;
@@ -1083,7 +1083,7 @@ test_conv_buffer(hid_t fid)
     herr_t status = -1;
     int    j, k, l;
 
-    CmpField * cf   = NULL;
+    CmpField  *cf   = NULL;
     CmpFieldR *cfrR = NULL;
 
     hid_t dataset = H5I_INVALID_HID;                          /* dataset ID             */
@@ -1251,7 +1251,7 @@ error:
 static herr_t
 test_tconv(hid_t file)
 {
-    char *  out = NULL, *in = NULL;
+    char   *out = NULL, *in = NULL;
     hsize_t dims[1];
     hid_t   space = -1, dataset = -1;
     int     i;
@@ -1454,7 +1454,7 @@ filter_bogus2(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_value
         /* "Compressing" */
         else {
             unsigned add_on   = cd_values[3]; /* Get "add on" value */
-            int *    int_ptr  = (int *)*buf;  /* Pointer to the data values */
+            int     *int_ptr  = (int *)*buf;  /* Pointer to the data values */
             size_t   buf_left = *buf_size;    /* Amount of data buffer left to process */
 
             /* Add the "add on" value to all the data values */
@@ -1514,7 +1514,7 @@ static size_t
 filter_corrupt(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_values, size_t nbytes,
                size_t *buf_size, void **buf)
 {
-    void *         data = NULL;
+    void          *data = NULL;
     unsigned char *dst  = (unsigned char *)(*buf);
     unsigned int   offset;
     unsigned int   length;
@@ -1615,7 +1615,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
     const hsize_t size[2]      = {DSET_DIM1, DSET_DIM2}; /* Dataspace dimensions */
     const hsize_t hs_offset[2] = {FILTER_HS_OFFSET1, FILTER_HS_OFFSET2}; /* Hyperslab offset */
     const hsize_t hs_size[2]   = {FILTER_HS_SIZE1, FILTER_HS_SIZE2};     /* Hyperslab size */
-    void *        tconv_buf    = NULL;                                   /* Temporary conversion buffer */
+    void         *tconv_buf    = NULL;                                   /* Temporary conversion buffer */
     size_t        i, j, n;                                               /* Local index variables */
     herr_t        status;                                                /* Error status */
 
@@ -2559,7 +2559,7 @@ test_missing_filter(hid_t file)
     size_t        i, j;                                   /* Local index variables */
     herr_t        ret;                                    /* Generic return value */
     char          testfile[512] = "";                     /* Buffer to hold name of existing test file */
-    char *        srcdir =
+    char         *srcdir =
         HDgetenv("srcdir"); /* The source directory, if we are using the --srcdir configure option */
 
     TESTING("dataset access with missing filter");
@@ -3977,7 +3977,7 @@ test_nbit_compound_3(hid_t file)
     typedef struct {           /* Struct with some no-op type fields */
         int           i;       /* integer field, NOT a no-op type */
         char          str[30]; /* fixed-length string, no-op type */
-        char *        vl_str;  /* varible-length string, no-op type */
+        char         *vl_str;  /* varible-length string, no-op type */
         hvl_t         v;       /* VL datatype field, no-op type */
         hobj_ref_t    r;       /* Object reference field, no-op type */
         unsigned char o[5];    /* Opaque field, no-op type */
@@ -6758,7 +6758,7 @@ auxread_fdata(hid_t fid, const char *name)
     hid_t   ftype_id = -1;      /* file data type ID */
     hid_t   mtype_id = -1;      /* memory data type ID */
     size_t  msize;              /* memory size of memory type */
-    void *  buf = NULL;         /* data buffer */
+    void   *buf = NULL;         /* data buffer */
     hsize_t nelmts;             /* number of elements in dataset */
     int     rank;               /* rank of dataset */
     hsize_t dims[H5S_MAX_RANK]; /* dimensions of dataset */
@@ -8904,7 +8904,7 @@ error:
  *-------------------------------------------------------------------------
  */
 typedef struct scatter_info_t {
-    int *  src_buf; /* Source data buffer */
+    int   *src_buf; /* Source data buffer */
     size_t block;   /* Maximum number of elements to return to H5Dscatter() */
     size_t size;    /* Remaining number of elements to return */
 } scatter_info_t;
@@ -9216,7 +9216,7 @@ error:
  *-------------------------------------------------------------------------
  */
 typedef struct gather_info_t {
-    int *   expect_dst_buf; /* Expected destination data buffer */
+    int    *expect_dst_buf; /* Expected destination data buffer */
     size_t  max_nelmts;     /* Maximum number of elements passed to callback */
     hbool_t last_call;      /* Whether this should be the last time the callback is called */
 } gather_info_t;

@@ -149,7 +149,7 @@ test_heap_create(void)
 static void
 test_heap_insert_min(void)
 {
-    H5HP_t * heap;             /* Heap created */
+    H5HP_t  *heap;             /* Heap created */
     ssize_t  num;              /* Number of elements in heap */
     int      val;              /* Value of object on heap */
     test_obj obj1, obj2, obj3; /* Test objects to insert */
@@ -223,7 +223,7 @@ test_heap_insert_min(void)
 static void
 test_heap_insert_max(void)
 {
-    H5HP_t * heap;             /* Heap created */
+    H5HP_t  *heap;             /* Heap created */
     ssize_t  num;              /* Number of elements in heap */
     int      val;              /* Value of object on heap */
     test_obj obj1, obj2, obj3; /* Test objects to insert */
@@ -390,10 +390,10 @@ test_heap_insert_many(void)
 static void
 test_heap_remove_min(void)
 {
-    H5HP_t * heap;             /* Heap created */
+    H5HP_t  *heap;             /* Heap created */
     ssize_t  num;              /* Number of elements in heap */
     int      val;              /* Value of object on heap */
-    void *   ptr;              /* Pointer for object on heap */
+    void    *ptr;              /* Pointer for object on heap */
     test_obj obj1, obj2, obj3; /* Test objects to insert */
     herr_t   ret;              /* Generic return value */
 
@@ -464,10 +464,10 @@ test_heap_remove_min(void)
 static void
 test_heap_remove_max(void)
 {
-    H5HP_t * heap;             /* Heap created */
+    H5HP_t  *heap;             /* Heap created */
     ssize_t  num;              /* Number of elements in heap */
     int      val;              /* Value of object on heap */
-    void *   ptr;              /* Pointer for object on heap */
+    void    *ptr;              /* Pointer for object on heap */
     test_obj obj1, obj2, obj3; /* Test objects to insert */
     herr_t   ret;              /* Generic return value */
 
@@ -555,7 +555,7 @@ test_heap_remove(void)
 static void
 test_heap_remove_many_core(H5HP_type_t heap_type, test_obj *arr, size_t nelem)
 {
-    H5HP_t *  heap;     /* Heap created */
+    H5HP_t   *heap;     /* Heap created */
     ssize_t   num;      /* Number of elements in heap */
     int       last_val; /* Last value from the heap */
     int       val;      /* Value of object on heap */
@@ -705,7 +705,7 @@ test_heap_remove_many(void)
 static void
 test_heap_change_min(void)
 {
-    H5HP_t * heap;             /* Heap created */
+    H5HP_t  *heap;             /* Heap created */
     ssize_t  num;              /* Number of elements in heap */
     int      val;              /* Value of object on heap */
     test_obj obj1, obj2, obj3; /* Test objects to insert */
@@ -779,7 +779,7 @@ test_heap_change_min(void)
 static void
 test_heap_change_max(void)
 {
-    H5HP_t * heap;             /* Heap created */
+    H5HP_t  *heap;             /* Heap created */
     ssize_t  num;              /* Number of elements in heap */
     int      val;              /* Value of object on heap */
     test_obj obj1, obj2, obj3; /* Test objects to insert */
@@ -871,7 +871,7 @@ test_heap_change(void)
 static void
 test_heap_incdec_min(void)
 {
-    H5HP_t * heap;             /* Heap created */
+    H5HP_t  *heap;             /* Heap created */
     ssize_t  num;              /* Number of elements in heap */
     int      val;              /* Value of object on heap */
     test_obj obj1, obj2, obj3; /* Test objects to insert */
@@ -946,7 +946,7 @@ test_heap_incdec_min(void)
 static void
 test_heap_incdec_max(void)
 {
-    H5HP_t * heap;             /* Heap created */
+    H5HP_t  *heap;             /* Heap created */
     ssize_t  num;              /* Number of elements in heap */
     int      val;              /* Value of object on heap */
     test_obj obj1, obj2, obj3; /* Test objects to insert */

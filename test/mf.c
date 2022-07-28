@@ -166,7 +166,7 @@ test_mf_eoa(const char *env_h5_drvr, hid_t fapl)
     hid_t          file     = -1;            /* File ID */
     hid_t          fapl_new = -1;            /* copy of fapl */
     char           filename[FILENAME_LEN];   /* Filename to use */
-    H5F_t *        f = NULL;                 /* Internal file object pointer */
+    H5F_t         *f = NULL;                 /* Internal file object pointer */
     h5_stat_size_t file_size, new_file_size; /* file size */
     H5FD_mem_t     type;
     haddr_t        addr1, addr2;
@@ -314,7 +314,7 @@ test_mf_eoa_shrink(const char *env_h5_drvr, hid_t fapl)
     hid_t          file     = -1;                /* File ID */
     hid_t          fapl_new = -1;                /* copy of fapl */
     char           filename[FILENAME_LEN];       /* Filename to use */
-    H5F_t *        f         = NULL;             /* Internal file object pointer */
+    H5F_t         *f         = NULL;             /* Internal file object pointer */
     h5_stat_size_t file_size = 0, new_file_size; /* file size */
     H5FD_mem_t     type;
     haddr_t        addr    = 0;
@@ -601,7 +601,7 @@ test_mf_eoa_extend(const char *env_h5_drvr, hid_t fapl)
     hid_t          file     = -1;            /* File ID */
     hid_t          fapl_new = -1;            /* copy of fapl */
     char           filename[FILENAME_LEN];   /* Filename to use */
-    H5F_t *        f = NULL;                 /* Internal file object pointer */
+    H5F_t         *f = NULL;                 /* Internal file object pointer */
     h5_stat_size_t file_size, new_file_size; /* File size */
     H5FD_mem_t     type;
     haddr_t        addr;
@@ -819,7 +819,7 @@ test_mf_tmp(const char *env_h5_drvr, hid_t fapl)
     /* Can't run this test with multi-file VFDs */
     if (HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi") && HDstrcmp(env_h5_drvr, "family")) {
         char           filename[FILENAME_LEN];   /* Filename to use */
-        H5F_t *        f = NULL;                 /* Internal file object pointer */
+        H5F_t         *f = NULL;                 /* Internal file object pointer */
         h5_stat_size_t file_size, new_file_size; /* file size */
         haddr_t        maxaddr;                  /* File's max. address */
         haddr_t        tmp_addr;                 /* Temporary space file address */
@@ -991,7 +991,7 @@ test_mf_fs_start(hid_t fapl)
     hid_t           file     = -1;            /* File ID */
     hid_t           fapl_new = -1;            /* copy of fapl */
     char            filename[FILENAME_LEN];   /* Filename to use */
-    H5F_t *         f = NULL;                 /* Internal file object pointer */
+    H5F_t          *f = NULL;                 /* Internal file object pointer */
     h5_stat_size_t  file_size, new_file_size; /* file size */
     H5FD_mem_t      type;
     frspace_state_t state;
@@ -1105,7 +1105,7 @@ test_mf_fs_alloc_free(hid_t fapl)
     hid_t                file     = -1;            /* File ID */
     hid_t                fapl_new = -1;            /* copy of fapl */
     char                 filename[FILENAME_LEN];   /* Filename to use */
-    H5F_t *              f = NULL;                 /* Internal file object pointer */
+    H5F_t               *f = NULL;                 /* Internal file object pointer */
     h5_stat_size_t       file_size, new_file_size; /* file size */
     H5FD_mem_t           type;
     H5MF_free_section_t *sect_node = NULL;
@@ -1465,7 +1465,7 @@ test_mf_fs_extend(hid_t fapl)
     hid_t                file     = -1;            /* File ID */
     hid_t                fapl_new = -1;            /* copy of fapl */
     char                 filename[FILENAME_LEN];   /* Filename to use */
-    H5F_t *              f = NULL;                 /* Internal file object pointer */
+    H5F_t               *f = NULL;                 /* Internal file object pointer */
     h5_stat_size_t       file_size, new_file_size; /* file size */
     H5FD_mem_t           type;
     H5MF_free_section_t *sect_node1 = NULL, *sect_node2 = NULL;
@@ -2021,7 +2021,7 @@ test_mf_fs_absorb(const char *env_h5_drvr, hid_t fapl)
 {
     hid_t                file = -1;              /* File ID */
     char                 filename[FILENAME_LEN]; /* Filename to use */
-    H5F_t *              f = NULL;               /* Internal file object pointer */
+    H5F_t               *f = NULL;               /* Internal file object pointer */
     H5FD_mem_t           type, stype;
     haddr_t              addr, saddr;
     haddr_t              ma_addr   = HADDR_UNDEF;
@@ -2228,7 +2228,7 @@ test_mf_aggr_alloc1(const char *env_h5_drvr, hid_t fapl)
 {
     hid_t          file = -1;                /* File ID */
     char           filename[FILENAME_LEN];   /* Filename to use */
-    H5F_t *        f = NULL;                 /* Internal file object pointer */
+    H5F_t         *f = NULL;                 /* Internal file object pointer */
     h5_stat_size_t file_size, new_file_size; /* file size */
     H5FD_mem_t     type;
     haddr_t        addr1, addr2;
@@ -2363,7 +2363,7 @@ test_mf_aggr_alloc2(const char *env_h5_drvr, hid_t fapl)
 {
     hid_t          file = -1;                /* File ID */
     char           filename[FILENAME_LEN];   /* Filename to use */
-    H5F_t *        f = NULL;                 /* Internal file object pointer */
+    H5F_t         *f = NULL;                 /* Internal file object pointer */
     h5_stat_size_t file_size, new_file_size; /* file size */
     H5FD_mem_t     type;
     haddr_t        addr1, addr2, addr3;
@@ -2518,7 +2518,7 @@ test_mf_aggr_alloc3(const char *env_h5_drvr, hid_t fapl)
 {
     hid_t          file = -1;                /* File ID */
     char           filename[FILENAME_LEN];   /* Filename to use */
-    H5F_t *        f = NULL;                 /* Internal file object pointer */
+    H5F_t         *f = NULL;                 /* Internal file object pointer */
     h5_stat_size_t file_size, new_file_size; /* file size */
     H5FD_mem_t     type, stype;
     haddr_t        addr1, addr2, addr3, addr4, saddr1;
@@ -2686,7 +2686,7 @@ test_mf_aggr_alloc4(const char *env_h5_drvr, hid_t fapl)
 {
     hid_t          file = -1;                /* File ID */
     char           filename[FILENAME_LEN];   /* Filename to use */
-    H5F_t *        f = NULL;                 /* Internal file object pointer */
+    H5F_t         *f = NULL;                 /* Internal file object pointer */
     h5_stat_size_t file_size, new_file_size; /* File size */
     H5FD_mem_t     type, stype;
     haddr_t        addr1, addr2, saddr1, saddr2, saddr3;
@@ -2835,7 +2835,7 @@ test_mf_aggr_alloc5(const char *env_h5_drvr, hid_t fapl)
 {
     hid_t          file = -1;                /* File ID */
     char           filename[FILENAME_LEN];   /* Filename to use */
-    H5F_t *        f = NULL;                 /* Internal file object pointer */
+    H5F_t         *f = NULL;                 /* Internal file object pointer */
     h5_stat_size_t file_size, new_file_size; /* File size */
     H5FD_mem_t     type;
     haddr_t        addr1, addr2, addr3;
@@ -2970,7 +2970,7 @@ test_mf_aggr_alloc6(const char *env_h5_drvr, hid_t fapl)
 {
     hid_t           file = -1;                /* File ID */
     char            filename[FILENAME_LEN];   /* Filename to use */
-    H5F_t *         f = NULL;                 /* Internal file object pointer */
+    H5F_t          *f = NULL;                 /* Internal file object pointer */
     h5_stat_size_t  file_size, new_file_size; /* file size */
     H5FD_mem_t      type, stype;
     haddr_t         addr1, addr2, addr3, saddr1;
@@ -3142,7 +3142,7 @@ test_mf_aggr_alloc7(const char *env_h5_drvr, hid_t fapl)
 {
     hid_t           file = -1;              /* File ID */
     char            filename[FILENAME_LEN]; /* Filename to use */
-    H5F_t *         f = NULL;               /* Internal file object pointer */
+    H5F_t          *f = NULL;               /* Internal file object pointer */
     h5_stat_size_t  empty_size, file_size;
     H5FD_mem_t      type, stype;
     haddr_t         addr1, addr2, addr3, saddr1, saddr2, saddr3;
@@ -3313,7 +3313,7 @@ test_mf_aggr_extend(const char *env_h5_drvr, hid_t fapl)
 {
     hid_t          file = -1;              /* File ID */
     char           filename[FILENAME_LEN]; /* Filename to use */
-    H5F_t *        f = NULL;               /* Internal file object pointer */
+    H5F_t         *f = NULL;               /* Internal file object pointer */
     h5_stat_size_t empty_size, file_size;
     H5FD_mem_t     type, stype;
     haddr_t        new_addr, addr, saddr;
@@ -3617,7 +3617,7 @@ test_mf_aggr_absorb(const char *env_h5_drvr, hid_t fapl)
 {
     hid_t          file = -1;              /* File ID */
     char           filename[FILENAME_LEN]; /* Filename to use */
-    H5F_t *        f = NULL;               /* Internal file object pointer */
+    H5F_t         *f = NULL;               /* Internal file object pointer */
     h5_stat_size_t empty_size, file_size;
     H5FD_mem_t     type, stype;
     haddr_t        addr1, addr2, addr3, saddr1;
@@ -3868,7 +3868,7 @@ test_mf_align_eoa(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     hid_t           file = -1; /* File ID */
     hid_t           fapl1;
     char            filename[FILENAME_LEN]; /* Filename to use */
-    H5F_t *         f = NULL;               /* Internal file object pointer */
+    H5F_t          *f = NULL;               /* Internal file object pointer */
     h5_stat_size_t  file_size, new_file_size;
     H5FD_mem_t      type;
     haddr_t         addr1, addr2;
@@ -4161,7 +4161,7 @@ test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     hid_t                file = -1;              /* File ID */
     char                 filename[FILENAME_LEN]; /* Filename to use */
     h5_stat_size_t       file_size;
-    H5F_t *              f = NULL; /* Internal file object pointer */
+    H5F_t               *f = NULL; /* Internal file object pointer */
     H5FD_mem_t           type;
     H5MF_free_section_t *sect_node = NULL;
     haddr_t              addr;
@@ -4544,7 +4544,7 @@ test_mf_align_alloc1(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 {
     hid_t          file = -1;              /* File ID */
     char           filename[FILENAME_LEN]; /* Filename to use */
-    H5F_t *        f = NULL;               /* Internal file object pointer */
+    H5F_t         *f = NULL;               /* Internal file object pointer */
     h5_stat_size_t file_size;              /* File size */
 
     H5FD_mem_t      type;
@@ -4809,7 +4809,7 @@ test_mf_align_alloc2(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 {
     hid_t           file = -1;              /* File ID */
     char            filename[FILENAME_LEN]; /* Filename to use */
-    H5F_t *         f = NULL;               /* Internal file object pointer */
+    H5F_t          *f = NULL;               /* Internal file object pointer */
     h5_stat_size_t  file_size;              /* File size */
     H5FD_mem_t      type, stype;
     haddr_t         addr1, addr2, addr3, saddr1;
@@ -5156,7 +5156,7 @@ test_mf_align_alloc3(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 {
     hid_t           file = -1;              /* File ID */
     char            filename[FILENAME_LEN]; /* Filename to use */
-    H5F_t *         f = NULL;               /* Internal file object pointer */
+    H5F_t          *f = NULL;               /* Internal file object pointer */
     h5_stat_size_t  file_size;
     H5FD_mem_t      type, stype;
     haddr_t         addr1, addr2, addr3;
@@ -5468,7 +5468,7 @@ test_mf_align_alloc4(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 {
     hid_t           file = -1;              /* File ID */
     char            filename[FILENAME_LEN]; /* Filename to use */
-    H5F_t *         f = NULL;               /* Internal file object pointer */
+    H5F_t          *f = NULL;               /* Internal file object pointer */
     h5_stat_size_t  file_size;
     H5FD_mem_t      type;
     haddr_t         addr1, addr2, addr3;
@@ -5687,7 +5687,7 @@ test_mf_align_alloc5(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 {
     hid_t           file = -1;              /* File ID */
     char            filename[FILENAME_LEN]; /* Filename to use */
-    H5F_t *         f = NULL;               /* Internal file object pointer */
+    H5F_t          *f = NULL;               /* Internal file object pointer */
     h5_stat_size_t  file_size;
     H5FD_mem_t      type, stype;
     haddr_t         addr1, addr2, saddr1;
@@ -5959,7 +5959,7 @@ test_mf_align_alloc6(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 {
     hid_t           file = -1;              /* File ID */
     char            filename[FILENAME_LEN]; /* Filename to use */
-    H5F_t *         f = NULL;               /* Internal file object pointer */
+    H5F_t          *f = NULL;               /* Internal file object pointer */
     h5_stat_size_t  file_size;
     H5FD_mem_t      type, stype;
     haddr_t         addr1, addr2;
@@ -6169,7 +6169,7 @@ test_mf_bug1(const char *env_h5_drvr, hid_t fapl)
     hid_t      file        = -1;       /* File ID */
     hid_t      copied_fapl = -1;       /* FAPL to use for this test */
     char       filename[FILENAME_LEN]; /* Filename to use */
-    H5F_t *    f = NULL;               /* Internal file object pointer */
+    H5F_t     *f = NULL;               /* Internal file object pointer */
     H5FD_mem_t type;
     haddr_t    addr1, addr2;
     hsize_t    block_size;
@@ -6221,7 +6221,7 @@ test_mf_bug1(const char *env_h5_drvr, hid_t fapl)
         else {
             H5FD_mem_t memb_map[H5FD_MEM_NTYPES];
             hid_t      memb_fapl_arr[H5FD_MEM_NTYPES];
-            char *     memb_name[H5FD_MEM_NTYPES];
+            char      *memb_name[H5FD_MEM_NTYPES];
             haddr_t    memb_addr[H5FD_MEM_NTYPES];
             hbool_t    relax;
             H5FD_mem_t mt;
@@ -6356,7 +6356,7 @@ test_dichotomy(const char *env_h5_drvr, hid_t fapl)
 {
     hid_t      file = -1;              /* File ID */
     char       filename[FILENAME_LEN]; /* Filename to use */
-    H5F_t *    f = NULL;               /* Internal file object pointer */
+    H5F_t     *f = NULL;               /* Internal file object pointer */
     H5FD_mem_t type, stype;
     haddr_t    addr1, addr3, saddr1, saddr2;
     hbool_t    contig_addr_vfd; /* Whether VFD used has a contigous address space */

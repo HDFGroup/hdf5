@@ -57,7 +57,7 @@
 /* User data for skip list iterator callback for iterating over section size nodes when syncing */
 typedef struct {
     H5FS_sinfo_t *sinfo;         /* Free space section info */
-    uint8_t **    p;             /* Pointer to address of buffer pointer to serialize with */
+    uint8_t     **p;             /* Pointer to address of buffer pointer to serialize with */
     unsigned      sect_cnt_size; /* # of bytes to encode section size counts in */
 } H5FS_iter_ud_t;
 
@@ -139,16 +139,16 @@ H5FL_BLK_DEFINE_STATIC(sect_block);
 static H5FS_t *
 H5FS_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 {
-    H5FS_t *             fspace = NULL;                          /* Free space header info */
+    H5FS_t              *fspace = NULL;                          /* Free space header info */
     H5FS_hdr_cache_ud_t *udata  = (H5FS_hdr_cache_ud_t *)_udata; /* user data for callback */
-    H5WB_t *             wb     = NULL;                          /* Wrapped buffer for header data */
+    H5WB_t              *wb     = NULL;                          /* Wrapped buffer for header data */
     uint8_t              hdr_buf[H5FS_HDR_BUF_SIZE];             /* Buffer for header */
-    uint8_t *            hdr;                                    /* Pointer to header buffer */
-    const uint8_t *      p;                                      /* Pointer into raw data buffer */
+    uint8_t             *hdr;                                    /* Pointer to header buffer */
+    const uint8_t       *p;                                      /* Pointer into raw data buffer */
     uint32_t             stored_chksum;                          /* Stored metadata checksum value */
     uint32_t             computed_chksum;                        /* Computed metadata checksum value */
     unsigned             nclasses;                               /* Number of section classes */
-    H5FS_t *             ret_value;                              /* Return value */
+    H5FS_t              *ret_value;                              /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -557,15 +557,15 @@ H5FS_cache_hdr_size(const H5F_t H5_ATTR_UNUSED *f, const H5FS_t *fspace, size_t 
 static H5FS_sinfo_t *
 H5FS_cache_sinfo_load(H5F_t *f, hid_t dxpl_id, haddr_t H5_ATTR_UNUSED addr, void *_udata)
 {
-    H5FS_sinfo_t *         sinfo = NULL;                            /* Free space section info */
+    H5FS_sinfo_t          *sinfo = NULL;                            /* Free space section info */
     H5FS_sinfo_cache_ud_t *udata = (H5FS_sinfo_cache_ud_t *)_udata; /* user data for callback */
     haddr_t                fs_addr;                                 /* Free space header address */
     size_t                 old_sect_size;                           /* Old section size */
-    uint8_t *              buf = NULL;                              /* Temporary buffer */
-    const uint8_t *        p;                                       /* Pointer into raw data buffer */
+    uint8_t               *buf = NULL;                              /* Temporary buffer */
+    const uint8_t         *p;                                       /* Pointer into raw data buffer */
     uint32_t               stored_chksum;                           /* Stored metadata checksum value */
     uint32_t               computed_chksum;                         /* Computed metadata checksum value */
-    H5FS_sinfo_t *         ret_value;                               /* Return value */
+    H5FS_sinfo_t          *ret_value;                               /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -725,8 +725,8 @@ static herr_t
 H5FS_sinfo_serialize_sect_cb(void *_item, void H5_ATTR_UNUSED *key, void *_udata)
 {
     H5FS_section_class_t *sect_cls;                                 /* Class of section */
-    H5FS_section_info_t * sect      = (H5FS_section_info_t *)_item; /* Free space section to work on */
-    H5FS_iter_ud_t *      udata     = (H5FS_iter_ud_t *)_udata;     /* Callback info */
+    H5FS_section_info_t  *sect      = (H5FS_section_info_t *)_item; /* Free space section to work on */
+    H5FS_iter_ud_t       *udata     = (H5FS_iter_ud_t *)_udata;     /* Callback info */
     herr_t                ret_value = SUCCEED;                      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -779,7 +779,7 @@ done:
 static herr_t
 H5FS_sinfo_serialize_node_cb(void *_item, void H5_ATTR_UNUSED *key, void *_udata)
 {
-    H5FS_node_t *   fspace_node = (H5FS_node_t *)_item;     /* Free space size node to work on */
+    H5FS_node_t    *fspace_node = (H5FS_node_t *)_item;     /* Free space size node to work on */
     H5FS_iter_ud_t *udata       = (H5FS_iter_ud_t *)_udata; /* Callback info */
     herr_t          ret_value   = SUCCEED;                  /* Return value */
 
@@ -838,8 +838,8 @@ H5FS_cache_sinfo_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H
 
     if (sinfo->cache_info.is_dirty || sinfo->dirty) {
         H5FS_iter_ud_t udata;           /* User data for callbacks */
-        uint8_t *      buf = NULL;      /* Temporary raw data buffer */
-        uint8_t *      p;               /* Pointer into raw data buffer */
+        uint8_t       *buf = NULL;      /* Temporary raw data buffer */
+        uint8_t       *p;               /* Pointer into raw data buffer */
         uint32_t       metadata_chksum; /* Computed metadata checksum value */
         unsigned       bin;             /* Current bin we are on */
 

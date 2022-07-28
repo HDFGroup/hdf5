@@ -430,7 +430,7 @@ test_fapl_config_validation(void)
      *************************/
 
     struct testcase {
-        const char *     msg;
+        const char      *msg;
         herr_t           expected;
         H5FD_ros3_fapl_t config;
     };
@@ -818,7 +818,7 @@ test_vfd_open(void)
             0,
         },
     };
-    H5FD_t * fd               = NULL;
+    H5FD_t  *fd               = NULL;
     hbool_t  curl_ready       = FALSE;
     hid_t    fapl_id          = -1;
     hid_t    fapl_file_access = -1;
@@ -1074,7 +1074,7 @@ test_H5FDread_without_eoa_set_fails(void)
 {
     char         buffer[256];
     unsigned int i                = 0;
-    H5FD_t *     file_shakespeare = NULL;
+    H5FD_t      *file_shakespeare = NULL;
     hid_t        fapl_id          = -1;
 
     TESTING("ROS3 VFD read-eoa temporal coupling library limitation ");
@@ -1248,7 +1248,7 @@ test_read(void)
     herr_t          open_return = FAIL;
     char            buffer[S3_TEST_MAX_URL_SIZE];
     unsigned int    i          = 0;
-    H5FD_t *        file_raven = NULL;
+    H5FD_t         *file_raven = NULL;
     hid_t           fapl_id    = -1;
 
     TESTING("ROS3 VFD read/range-gets");
@@ -1392,7 +1392,7 @@ test_noops_and_autofails(void)
 
     hbool_t    curl_ready = FALSE;
     hid_t      fapl_id    = -1;
-    H5FD_t *   file       = NULL;
+    H5FD_t    *file       = NULL;
     const char data[36]   = "The Force shall be with you, always";
 
     TESTING("ROS3 VFD always-fail and no-op routines");

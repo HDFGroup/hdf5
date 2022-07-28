@@ -91,13 +91,13 @@ const H5AC_class_t H5AC_BT[1] = {{
 static H5B_t *
 H5B__load(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_udata)
 {
-    H5B_t *         bt    = NULL;                     /* Pointer to the deserialized B-tree node */
+    H5B_t          *bt    = NULL;                     /* Pointer to the deserialized B-tree node */
     H5B_cache_ud_t *udata = (H5B_cache_ud_t *)_udata; /* User data for callback */
-    H5B_shared_t *  shared;                           /* Pointer to shared B-tree info */
-    const uint8_t * p;                                /* Pointer into raw data buffer */
-    uint8_t *       native;                           /* Pointer to native keys */
+    H5B_shared_t   *shared;                           /* Pointer to shared B-tree info */
+    const uint8_t  *p;                                /* Pointer into raw data buffer */
+    uint8_t        *native;                           /* Pointer to native keys */
     unsigned        u;                                /* Local index variable */
-    H5B_t *         ret_value;                        /* Return value */
+    H5B_t          *ret_value;                        /* Return value */
 
     FUNC_ENTER_STATIC
 

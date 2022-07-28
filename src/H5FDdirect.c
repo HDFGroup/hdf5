@@ -120,8 +120,8 @@ typedef struct H5FD_direct_t {
     (ADDR_OVERFLOW(A) || SIZE_OVERFLOW(Z) || HADDR_UNDEF == (A) + (Z) || (HDoff_t)((A) + (Z)) < (HDoff_t)(A))
 
 /* Prototypes */
-static void *  H5FD_direct_fapl_get(H5FD_t *file);
-static void *  H5FD_direct_fapl_copy(const void *_old_fa);
+static void   *H5FD_direct_fapl_get(H5FD_t *file);
+static void   *H5FD_direct_fapl_copy(const void *_old_fa);
 static H5FD_t *H5FD_direct_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr);
 static herr_t  H5FD_direct_close(H5FD_t *_file);
 static int     H5FD_direct_cmp(const H5FD_t *_f1, const H5FD_t *_f2);
@@ -265,7 +265,7 @@ H5FD_direct_term(void)
 herr_t
 H5Pset_fapl_direct(hid_t fapl_id, size_t boundary, size_t block_size, size_t cbuf_size)
 {
-    H5P_genplist_t *   plist; /* Property list pointer */
+    H5P_genplist_t    *plist; /* Property list pointer */
     H5FD_direct_fapl_t fa;
     herr_t             ret_value;
 
@@ -321,7 +321,7 @@ herr_t
 H5Pget_fapl_direct(hid_t fapl_id, size_t *boundary /*out*/, size_t *block_size /*out*/,
                    size_t *cbuf_size /*out*/)
 {
-    H5P_genplist_t *          plist; /* Property list pointer */
+    H5P_genplist_t           *plist; /* Property list pointer */
     const H5FD_direct_fapl_t *fa;
     herr_t                    ret_value = SUCCEED; /* Return value */
 
@@ -366,7 +366,7 @@ static void *
 H5FD_direct_fapl_get(H5FD_t *_file)
 {
     H5FD_direct_t *file = (H5FD_direct_t *)_file;
-    void *         ret_value; /* Return value */
+    void          *ret_value; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -395,7 +395,7 @@ static void *
 H5FD_direct_fapl_copy(const void *_old_fa)
 {
     const H5FD_direct_fapl_t *old_fa = (const H5FD_direct_fapl_t *)_old_fa;
-    H5FD_direct_fapl_t *      new_fa = H5MM_malloc(sizeof(H5FD_direct_fapl_t));
+    H5FD_direct_fapl_t       *new_fa = H5MM_malloc(sizeof(H5FD_direct_fapl_t));
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -428,7 +428,7 @@ H5FD_direct_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxadd
 {
     int                 o_flags;
     int                 fd   = (-1);
-    H5FD_direct_t *     file = NULL;
+    H5FD_direct_t      *file = NULL;
     H5FD_direct_fapl_t *fa;
 #ifdef H5_HAVE_WIN32_API
     HFILE                              filehandle;
@@ -436,8 +436,8 @@ H5FD_direct_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxadd
 #endif
     h5_stat_t       sb;
     H5P_genplist_t *plist; /* Property list */
-    void *          buf1, *buf2;
-    H5FD_t *        ret_value = NULL;
+    void           *buf1, *buf2;
+    H5FD_t         *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -819,7 +819,7 @@ H5FD_direct_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UN
     hbool_t        _must_align = TRUE;
     herr_t         ret_value   = SUCCEED; /* Return value */
     size_t         alloc_size;
-    void *         copy_buf = NULL, *p2;
+    void          *copy_buf = NULL, *p2;
     size_t         _boundary;
     size_t         _fbsize;
     size_t         _cbsize;
@@ -999,8 +999,8 @@ H5FD_direct_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_U
     hbool_t        _must_align = TRUE;
     herr_t         ret_value   = SUCCEED; /* Return value */
     size_t         alloc_size;
-    void *         copy_buf = NULL, *p1;
-    const void *   p3;
+    void          *copy_buf = NULL, *p1;
+    const void    *p3;
     size_t         _boundary;
     size_t         _fbsize;
     size_t         _cbsize;

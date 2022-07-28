@@ -160,7 +160,7 @@ int_f
 nh5eget_major_c(int_f *error_no, _fcd name, size_t_f *namelen)
 /******/
 {
-    char * c_name    = NULL;
+    char  *c_name    = NULL;
     size_t c_namelen = (size_t)*namelen;
     int_f  ret_value = 0;
 
@@ -208,7 +208,7 @@ int_f
 nh5eget_minor_c(int_f *error_no, _fcd name, size_t_f *namelen)
 /******/
 {
-    char * c_name    = NULL;
+    char  *c_name    = NULL;
     size_t c_namelen = (size_t)*namelen;
     int_f  ret_value = 0;
 

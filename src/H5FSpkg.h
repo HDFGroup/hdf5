@@ -92,16 +92,16 @@
 
 /* Callback info for loading a free space header into the cache */
 typedef struct H5FS_hdr_cache_ud_t {
-    H5F_t *                      f;              /* File that free space header is within */
+    H5F_t                       *f;              /* File that free space header is within */
     size_t                       nclasses;       /* Number of section classes */
     const H5FS_section_class_t **classes;        /* Array of section class info */
-    void *                       cls_init_udata; /* Pointer to class init user data */
+    void                        *cls_init_udata; /* Pointer to class init user data */
     haddr_t                      addr;           /* Address of header */
 } H5FS_hdr_cache_ud_t;
 
 /* Callback info for loading free space section info into the cache */
 typedef struct H5FS_sinfo_cache_ud_t {
-    H5F_t * f;      /* File that free space section info is within */
+    H5F_t  *f;      /* File that free space section info is within */
     H5FS_t *fspace; /* free space manager */
     hid_t   dxpl_id;
 } H5FS_sinfo_cache_ud_t;
@@ -140,7 +140,7 @@ typedef struct H5FS_sinfo_t {
     unsigned sect_prefix_size;  /* Size of the section serialization prefix (in bytes) */
     unsigned sect_off_size;     /* Size of a section offset (in bytes)        */
     unsigned sect_len_size;     /* Size of a section length (in bytes)        */
-    H5FS_t * fspace;            /* Pointer to free space manager that owns sections */
+    H5FS_t  *fspace;            /* Pointer to free space manager that owns sections */
 
     /* Memory data structures (not stored directly) */
     H5SL_t *merge_list; /* Skip list to hold sections for detecting merges */
@@ -175,7 +175,7 @@ struct H5FS_t {
     unsigned       rc;                  /* Count of outstanding references to struct  */
     haddr_t        addr;                /* Address of free space header on disk       */
     size_t         hdr_size;            /* Size of free space header on disk          */
-    H5FS_sinfo_t * sinfo;               /* Section information                        */
+    H5FS_sinfo_t  *sinfo;               /* Section information                        */
     unsigned       sinfo_lock_count;    /* # of times the section info has been locked */
     hbool_t        sinfo_protected;     /* Whether the section info was protected when locked */
     hbool_t        sinfo_modified;      /* Whether the section info has been modified while locked */

@@ -257,7 +257,7 @@ done:
 H5T_norm_t
 H5Tget_norm(hid_t type_id)
 {
-    H5T_t *    dt;        /* Datatype */
+    H5T_t     *dt;        /* Datatype */
     H5T_norm_t ret_value; /* Return value */
 
     FUNC_ENTER_API(H5T_NORM_ERROR)
@@ -339,7 +339,7 @@ done:
 H5T_pad_t
 H5Tget_inpad(hid_t type_id)
 {
-    H5T_t *   dt;        /* Datatype */
+    H5T_t    *dt;        /* Datatype */
     H5T_pad_t ret_value; /* Return value */
 
     FUNC_ENTER_API(H5T_PAD_ERROR)

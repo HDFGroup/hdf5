@@ -96,7 +96,7 @@ typedef struct H5FS_section_class_t {
     const unsigned type;        /* Type of free space section */
     size_t         serial_size; /* Size of serialized form of section */
     unsigned       flags;       /* Class flags */
-    void *         cls_private; /* Class private information */
+    void          *cls_private; /* Class private information */
 
     /* Class methods */
     herr_t (*init_cls)(struct H5FS_section_class_t *,

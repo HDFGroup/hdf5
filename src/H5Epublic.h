@@ -162,7 +162,7 @@ H5_DLLVAR hid_t H5E_ERR_CLS_g;
 #define H5E_BEGIN_TRY                                                                                        \
     {                                                                                                        \
         H5E_auto_t saved_efunc;                                                                              \
-        void *     H5E_saved_edata;                                                                          \
+        void      *H5E_saved_edata;                                                                          \
                                                                                                              \
         (void)H5Eget_auto(H5E_DEFAULT, &saved_efunc, &H5E_saved_edata);                                      \
         (void)H5Eset_auto(H5E_DEFAULT, NULL, NULL);

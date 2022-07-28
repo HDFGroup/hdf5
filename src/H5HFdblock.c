@@ -86,7 +86,7 @@ H5HF_man_dblock_create(hid_t dxpl_id, H5HF_hdr_t *hdr, H5HF_indirect_t *par_iblo
                        haddr_t *addr_p, H5HF_free_section_t **ret_sec_node)
 {
     H5HF_free_section_t *sec_node;            /* Pointer to free space section for block */
-    H5HF_direct_t *      dblock = NULL;       /* Pointer to direct block */
+    H5HF_direct_t       *dblock = NULL;       /* Pointer to direct block */
     haddr_t              dblock_addr;         /* Direct block's address */
     size_t               free_space;          /* Free space in new block */
     herr_t               ret_value = SUCCEED; /* Return value */
@@ -427,9 +427,9 @@ H5HF_direct_t *
 H5HF_man_dblock_protect(H5HF_hdr_t *hdr, hid_t dxpl_id, haddr_t dblock_addr, size_t dblock_size,
                         H5HF_indirect_t *par_iblock, unsigned par_entry, H5AC_protect_t rw)
 {
-    H5HF_direct_t *        dblock;           /* Direct block from cache */
+    H5HF_direct_t         *dblock;           /* Direct block from cache */
     H5HF_dblock_cache_ud_t udata;            /* parent and other infor for deserializing direct block */
-    H5HF_direct_t *        ret_value = NULL; /* Return value */
+    H5HF_direct_t         *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

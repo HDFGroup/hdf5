@@ -129,8 +129,8 @@ static hbool_t not_comparable;
 
 typedef struct mcomp_t {
     unsigned         n;   /* number of members */
-    hid_t *          ids; /* member type id */
-    size_t *         offsets;
+    hid_t           *ids; /* member type id */
+    size_t          *offsets;
     struct mcomp_t **m; /* members */
 } mcomp_t;
 
@@ -528,10 +528,10 @@ diff_datum(void *_mem1, void *_mem2, hsize_t elemtno, diff_opt_t *opts, hid_t co
         case H5T_STRING:
             H5TOOLS_DEBUG("H5T_STRING");
             {
-                char *    s  = NULL;
-                char *    sx = NULL;
-                char *    s1 = NULL;
-                char *    s2 = NULL;
+                char     *s  = NULL;
+                char     *sx = NULL;
+                char     *s1 = NULL;
+                char     *s2 = NULL;
                 size_t    size1;
                 size_t    size2;
                 size_t    sizex;

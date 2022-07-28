@@ -62,9 +62,9 @@ typedef enum {
 /* Define structure to hold property information */
 typedef struct H5P_genprop_t {
     /* Values for this property */
-    char *            name;        /* Name of property */
+    char             *name;        /* Name of property */
     size_t            size;        /* Size of property value */
-    void *            value;       /* Pointer to property value */
+    void             *value;       /* Pointer to property value */
     H5P_prop_within_t type;        /* Type of object the property is within */
     hbool_t           shared_name; /* Whether the name is shared or not */
 
@@ -81,25 +81,25 @@ typedef struct H5P_genprop_t {
 /* Define structure to hold class information */
 struct H5P_genclass_t {
     struct H5P_genclass_t *parent; /* Pointer to parent class */
-    char *                 name;   /* Name of property list class */
+    char                  *name;   /* Name of property list class */
     H5P_plist_type_t       type;   /* Type of property */
     size_t                 nprops; /* Number of properties in class */
     unsigned
-             plists; /* Number of property lists that have been created since the last modification to the class */
+        plists; /* Number of property lists that have been created since the last modification to the class */
     unsigned classes; /* Number of classes that have been derived since the last modification to the class */
     unsigned ref_count; /* Number of outstanding ID's open on this class object */
     hbool_t  deleted;  /* Whether this class has been deleted and is waiting for dependent classes & proplists
                           to close */
     unsigned revision; /* Revision number of a particular class (global) */
-    H5SL_t * props;    /* Skip list containing properties */
+    H5SL_t  *props;    /* Skip list containing properties */
 
     /* Callback function pointers & info */
     H5P_cls_create_func_t create_func; /* Function to call when a property list is created */
-    void *                create_data; /* Pointer to user data to pass along to create callback */
+    void                 *create_data; /* Pointer to user data to pass along to create callback */
     H5P_cls_copy_func_t   copy_func;   /* Function to call when a property list is copied */
-    void *                copy_data;   /* Pointer to user data to pass along to copy callback */
+    void                 *copy_data;   /* Pointer to user data to pass along to copy callback */
     H5P_cls_close_func_t  close_func;  /* Function to call when a property list is closed */
-    void *                close_data;  /* Pointer to user data to pass along to close callback */
+    void                 *close_data;  /* Pointer to user data to pass along to close callback */
 };
 
 /* Define structure to hold property list information */
@@ -108,8 +108,8 @@ struct H5P_genplist_t {
     hid_t           plist_id;   /* Copy of the property list ID (for use in close callback) */
     size_t          nprops;     /* Number of properties in class */
     hbool_t         class_init; /* Whether the class initialization callback finished successfully */
-    H5SL_t *        del;        /* Skip list containing names of deleted properties */
-    H5SL_t *        props;      /* Skip list containing properties */
+    H5SL_t         *del;        /* Skip list containing names of deleted properties */
+    H5SL_t         *props;      /* Skip list containing properties */
 };
 
 /* Function pointer for library classes with properties to register */
@@ -121,22 +121,22 @@ typedef herr_t (*H5P_reg_prop_func_t)(H5P_genclass_t *pclass);
  * class variables and methods used to initialize the class.
  */
 typedef struct H5P_libclass_t {
-    const char *     name; /* Class name */
+    const char      *name; /* Class name */
     H5P_plist_type_t type; /* Class type */
 
-    H5P_genclass_t **   par_pclass;    /* Pointer to global parent class property list class */
-    H5P_genclass_t **   pclass;        /* Pointer to global property list class */
+    H5P_genclass_t    **par_pclass;    /* Pointer to global parent class property list class */
+    H5P_genclass_t    **pclass;        /* Pointer to global property list class */
     hid_t *const        class_id;      /* Pointer to global property list class ID */
     hid_t *const        def_plist_id;  /* Pointer to global default property list ID */
     H5P_reg_prop_func_t reg_prop_func; /* Register class's properties */
 
     /* Class callback function pointers & info */
     H5P_cls_create_func_t create_func; /* Function to call when a property list is created */
-    void *                create_data; /* Pointer to user data to pass along to create callback */
+    void                 *create_data; /* Pointer to user data to pass along to create callback */
     H5P_cls_copy_func_t   copy_func;   /* Function to call when a property list is copied */
-    void *                copy_data;   /* Pointer to user data to pass along to copy callback */
+    void                 *copy_data;   /* Pointer to user data to pass along to copy callback */
     H5P_cls_close_func_t  close_func;  /* Function to call when a property list is closed */
-    void *                close_data;  /* Pointer to user data to pass along to close callback */
+    void                 *close_data;  /* Pointer to user data to pass along to close callback */
 } H5P_libclass_t;
 
 /* Property list/class iterator callback function pointer */
@@ -154,8 +154,8 @@ struct H5Z_filter_info_t;
 /******************************/
 
 /* Private functions, not part of the publicly documented API */
-H5_DLL herr_t H5P__term_pub_interface(void);
-H5_DLL herr_t H5P__term_deprec_interface(void);
+H5_DLL herr_t          H5P__term_pub_interface(void);
+H5_DLL herr_t          H5P__term_deprec_interface(void);
 H5_DLL H5P_genclass_t *H5P_create_class(H5P_genclass_t *par_class, const char *name, H5P_plist_type_t type,
                                         H5P_cls_create_func_t cls_create, void *create_data,
                                         H5P_cls_copy_func_t cls_copy, void *copy_data,
@@ -186,11 +186,11 @@ H5_DLL int    H5P_iterate_pclass(const H5P_genclass_t *pclass, int *idx, H5P_ite
 H5_DLL herr_t H5P_copy_prop_plist(hid_t dst_id, hid_t src_id, const char *name);
 H5_DLL herr_t H5P_copy_prop_pclass(hid_t dst_id, hid_t src_id, const char *name);
 H5_DLL herr_t H5P_unregister(H5P_genclass_t *pclass, const char *name);
-H5_DLL char * H5P_get_class_path(H5P_genclass_t *pclass);
+H5_DLL char  *H5P_get_class_path(H5P_genclass_t *pclass);
 H5_DLL H5P_genclass_t *H5P_open_class_path(const char *path);
 H5_DLL H5P_genclass_t *H5P_get_class_parent(const H5P_genclass_t *pclass);
 H5_DLL herr_t          H5P_close_class(void *_pclass);
-H5_DLL H5P_genprop_t *H5P__find_prop_plist(const H5P_genplist_t *plist, const char *name);
+H5_DLL H5P_genprop_t  *H5P__find_prop_plist(const H5P_genplist_t *plist, const char *name);
 
 /* Private OCPL routines */
 H5_DLL herr_t H5P_get_filter(const struct H5Z_filter_info_t *filter, unsigned int *flags, size_t *cd_nelmts,
@@ -198,7 +198,7 @@ H5_DLL herr_t H5P_get_filter(const struct H5Z_filter_info_t *filter, unsigned in
 
 /* Testing functions */
 #ifdef H5P_TESTING
-H5_DLL char * H5P_get_class_path_test(hid_t pclass_id);
+H5_DLL char  *H5P_get_class_path_test(hid_t pclass_id);
 H5_DLL hid_t  H5P_open_class_path_test(const char *path);
 H5_DLL herr_t H5P_reset_external_file_test(hid_t dcpl_id);
 #endif /* H5P_TESTING */

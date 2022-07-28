@@ -85,10 +85,10 @@ struct hs_dr_pio_test_vars_t {
     hsize_t   stride[PAR_SS_DR_MAX_RANK];
     hsize_t   count[PAR_SS_DR_MAX_RANK];
     hsize_t   block[PAR_SS_DR_MAX_RANK];
-    hsize_t * start_ptr;
-    hsize_t * stride_ptr;
-    hsize_t * count_ptr;
-    hsize_t * block_ptr;
+    hsize_t  *start_ptr;
+    hsize_t  *stride_ptr;
+    hsize_t  *count_ptr;
+    hsize_t  *block_ptr;
     int       skips;
     int       max_skips;
     int64_t   total_tests;
@@ -126,8 +126,8 @@ hs_dr_pio_test__setup(const int test_num, const int edge_size, const int checker
     int         mrc;
     int         mpi_rank; /* needed by the VRFY macro */
     uint32_t    expected_value;
-    uint32_t *  ptr_0;
-    uint32_t *  ptr_1;
+    uint32_t   *ptr_0;
+    uint32_t   *ptr_1;
     hid_t       acc_tpl; /* File access templates */
     hid_t       small_ds_dcpl_id = H5P_DEFAULT;
     hid_t       large_ds_dcpl_id = H5P_DEFAULT;
@@ -846,12 +846,13 @@ contig_hs_dr_pio_test__d2m_l2s(struct hs_dr_pio_test_vars_t *tv_ptr)
 
                     /* verify that expected data is retrieved */
 
-                    mis_match      = FALSE;
-                    ptr_1          = tv_ptr->small_ds_slice_buf;
-                    expected_value = (uint32_t)(
-                        (i * tv_ptr->edge_size * tv_ptr->edge_size * tv_ptr->edge_size * tv_ptr->edge_size) +
-                        (j * tv_ptr->edge_size * tv_ptr->edge_size * tv_ptr->edge_size) +
-                        (k * tv_ptr->edge_size * tv_ptr->edge_size) + (l * tv_ptr->edge_size));
+                    mis_match = FALSE;
+                    ptr_1     = tv_ptr->small_ds_slice_buf;
+                    expected_value =
+                        (uint32_t)((i * tv_ptr->edge_size * tv_ptr->edge_size * tv_ptr->edge_size *
+                                    tv_ptr->edge_size) +
+                                   (j * tv_ptr->edge_size * tv_ptr->edge_size * tv_ptr->edge_size) +
+                                   (k * tv_ptr->edge_size * tv_ptr->edge_size) + (l * tv_ptr->edge_size));
 
                     for (n = 0; n < tv_ptr->small_ds_slice_size; n++) {
 
@@ -1078,10 +1079,11 @@ contig_hs_dr_pio_test__d2m_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
                      */
                     ptr_1          = tv_ptr->large_ds_buf_1;
                     expected_value = (uint32_t)((size_t)(tv_ptr->mpi_rank) * tv_ptr->small_ds_slice_size);
-                    start_index    = (size_t)(
-                        (i * tv_ptr->edge_size * tv_ptr->edge_size * tv_ptr->edge_size * tv_ptr->edge_size) +
-                        (j * tv_ptr->edge_size * tv_ptr->edge_size * tv_ptr->edge_size) +
-                        (k * tv_ptr->edge_size * tv_ptr->edge_size) + (l * tv_ptr->edge_size));
+                    start_index =
+                        (size_t)((i * tv_ptr->edge_size * tv_ptr->edge_size * tv_ptr->edge_size *
+                                  tv_ptr->edge_size) +
+                                 (j * tv_ptr->edge_size * tv_ptr->edge_size * tv_ptr->edge_size) +
+                                 (k * tv_ptr->edge_size * tv_ptr->edge_size) + (l * tv_ptr->edge_size));
                     stop_index = start_index + tv_ptr->small_ds_slice_size - 1;
 
                     HDassert(start_index < stop_index);
@@ -1351,10 +1353,11 @@ contig_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t *tv_ptr)
                     mis_match = FALSE;
                     ptr_1     = tv_ptr->small_ds_buf_1;
 
-                    expected_value = (uint32_t)(
-                        (i * tv_ptr->edge_size * tv_ptr->edge_size * tv_ptr->edge_size * tv_ptr->edge_size) +
-                        (j * tv_ptr->edge_size * tv_ptr->edge_size * tv_ptr->edge_size) +
-                        (k * tv_ptr->edge_size * tv_ptr->edge_size) + (l * tv_ptr->edge_size));
+                    expected_value =
+                        (uint32_t)((i * tv_ptr->edge_size * tv_ptr->edge_size * tv_ptr->edge_size *
+                                    tv_ptr->edge_size) +
+                                   (j * tv_ptr->edge_size * tv_ptr->edge_size * tv_ptr->edge_size) +
+                                   (k * tv_ptr->edge_size * tv_ptr->edge_size) + (l * tv_ptr->edge_size));
 
                     start_index = (size_t)(tv_ptr->mpi_rank) * tv_ptr->small_ds_slice_size;
                     stop_index  = start_index + tv_ptr->small_ds_slice_size - 1;
@@ -1641,10 +1644,11 @@ contig_hs_dr_pio_test__m2d_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
                     ptr_1          = tv_ptr->large_ds_buf_1;
                     expected_value = (uint32_t)((size_t)(tv_ptr->mpi_rank) * tv_ptr->small_ds_slice_size);
 
-                    start_index = (size_t)(
-                        (i * tv_ptr->edge_size * tv_ptr->edge_size * tv_ptr->edge_size * tv_ptr->edge_size) +
-                        (j * tv_ptr->edge_size * tv_ptr->edge_size * tv_ptr->edge_size) +
-                        (k * tv_ptr->edge_size * tv_ptr->edge_size) + (l * tv_ptr->edge_size));
+                    start_index =
+                        (size_t)((i * tv_ptr->edge_size * tv_ptr->edge_size * tv_ptr->edge_size *
+                                  tv_ptr->edge_size) +
+                                 (j * tv_ptr->edge_size * tv_ptr->edge_size * tv_ptr->edge_size) +
+                                 (k * tv_ptr->edge_size * tv_ptr->edge_size) + (l * tv_ptr->edge_size));
                     stop_index = start_index + tv_ptr->small_ds_slice_size - 1;
 
                     HDassert(start_index < stop_index);
@@ -2551,7 +2555,7 @@ ckrbrd_hs_dr_pio_test__d2m_l2s(struct hs_dr_pio_test_vars_t *tv_ptr)
 {
 #if CHECKER_BOARD_HS_DR_PIO_TEST__D2M_L2S__DEBUG
     const char *fcnName = "ckrbrd_hs_dr_pio_test__d2m_l2s()";
-    uint32_t *  ptr_0;
+    uint32_t   *ptr_0;
 #endif /* CHECKER_BOARD_HS_DR_PIO_TEST__D2M_L2S__DEBUG */
     hbool_t  data_ok = FALSE;
     int      i, j, k, l;
@@ -2729,10 +2733,11 @@ ckrbrd_hs_dr_pio_test__d2m_l2s(struct hs_dr_pio_test_vars_t *tv_ptr)
 
                     /* verify that expected data is retrieved */
 
-                    expected_value = (uint32_t)(
-                        (i * tv_ptr->edge_size * tv_ptr->edge_size * tv_ptr->edge_size * tv_ptr->edge_size) +
-                        (j * tv_ptr->edge_size * tv_ptr->edge_size * tv_ptr->edge_size) +
-                        (k * tv_ptr->edge_size * tv_ptr->edge_size) + (l * tv_ptr->edge_size));
+                    expected_value =
+                        (uint32_t)((i * tv_ptr->edge_size * tv_ptr->edge_size * tv_ptr->edge_size *
+                                    tv_ptr->edge_size) +
+                                   (j * tv_ptr->edge_size * tv_ptr->edge_size * tv_ptr->edge_size) +
+                                   (k * tv_ptr->edge_size * tv_ptr->edge_size) + (l * tv_ptr->edge_size));
 
                     data_ok = ckrbrd_hs_dr_pio_test__verify_data(
                         tv_ptr->small_ds_slice_buf, tv_ptr->small_rank - 1, tv_ptr->edge_size,
@@ -2950,10 +2955,11 @@ ckrbrd_hs_dr_pio_test__d2m_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
                     data_ok        = TRUE;
                     ptr_1          = tv_ptr->large_ds_buf_1;
                     expected_value = (uint32_t)((size_t)(tv_ptr->mpi_rank) * tv_ptr->small_ds_slice_size);
-                    start_index    = (size_t)(
-                        (i * tv_ptr->edge_size * tv_ptr->edge_size * tv_ptr->edge_size * tv_ptr->edge_size) +
-                        (j * tv_ptr->edge_size * tv_ptr->edge_size * tv_ptr->edge_size) +
-                        (k * tv_ptr->edge_size * tv_ptr->edge_size) + (l * tv_ptr->edge_size));
+                    start_index =
+                        (size_t)((i * tv_ptr->edge_size * tv_ptr->edge_size * tv_ptr->edge_size *
+                                  tv_ptr->edge_size) +
+                                 (j * tv_ptr->edge_size * tv_ptr->edge_size * tv_ptr->edge_size) +
+                                 (k * tv_ptr->edge_size * tv_ptr->edge_size) + (l * tv_ptr->edge_size));
                     stop_index = start_index + tv_ptr->small_ds_slice_size - 1;
 
 #if CHECKER_BOARD_HS_DR_PIO_TEST__D2M_S2L__DEBUG
@@ -3280,10 +3286,11 @@ ckrbrd_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t *tv_ptr)
 
                     mis_match = FALSE;
 
-                    expected_value = (uint32_t)(
-                        (i * tv_ptr->edge_size * tv_ptr->edge_size * tv_ptr->edge_size * tv_ptr->edge_size) +
-                        (j * tv_ptr->edge_size * tv_ptr->edge_size * tv_ptr->edge_size) +
-                        (k * tv_ptr->edge_size * tv_ptr->edge_size) + (l * tv_ptr->edge_size));
+                    expected_value =
+                        (uint32_t)((i * tv_ptr->edge_size * tv_ptr->edge_size * tv_ptr->edge_size *
+                                    tv_ptr->edge_size) +
+                                   (j * tv_ptr->edge_size * tv_ptr->edge_size * tv_ptr->edge_size) +
+                                   (k * tv_ptr->edge_size * tv_ptr->edge_size) + (l * tv_ptr->edge_size));
 
                     start_index = (size_t)(tv_ptr->mpi_rank) * tv_ptr->small_ds_slice_size;
                     stop_index  = start_index + tv_ptr->small_ds_slice_size - 1;
@@ -3578,10 +3585,11 @@ ckrbrd_hs_dr_pio_test__m2d_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
                      */
                     expected_value = (uint32_t)((size_t)(tv_ptr->mpi_rank) * tv_ptr->small_ds_slice_size);
 
-                    start_index = (size_t)(
-                        (i * tv_ptr->edge_size * tv_ptr->edge_size * tv_ptr->edge_size * tv_ptr->edge_size) +
-                        (j * tv_ptr->edge_size * tv_ptr->edge_size * tv_ptr->edge_size) +
-                        (k * tv_ptr->edge_size * tv_ptr->edge_size) + (l * tv_ptr->edge_size));
+                    start_index =
+                        (size_t)((i * tv_ptr->edge_size * tv_ptr->edge_size * tv_ptr->edge_size *
+                                  tv_ptr->edge_size) +
+                                 (j * tv_ptr->edge_size * tv_ptr->edge_size * tv_ptr->edge_size) +
+                                 (k * tv_ptr->edge_size * tv_ptr->edge_size) + (l * tv_ptr->edge_size));
                     stop_index = start_index + tv_ptr->small_ds_slice_size - 1;
 
                     HDassert(start_index < stop_index);
@@ -3975,7 +3983,7 @@ int facc_type       = FACC_MPIO; /*Test file access type */
 int dxfer_coll_type = DXFER_COLLECTIVE_IO;
 
 H5E_auto2_t old_func;        /* previous error handler */
-void *      old_client_data; /* previous error handler arg.*/
+void       *old_client_data; /* previous error handler arg.*/
 
 /* other option flags */
 

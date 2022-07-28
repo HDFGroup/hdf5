@@ -144,12 +144,12 @@ multiple_dset_write(void)
     hsize_t                chunk_origin[DIM];
     hsize_t                chunk_dims[DIM], file_dims[DIM];
     hsize_t                count[DIM] = {1, 1};
-    double *               outme      = NULL;
+    double                *outme      = NULL;
     double                 fill       = 1.0; /* Fill value */
     char                   dname[100];
     herr_t                 ret;
     const H5Ptest_param_t *pt;
-    char *                 filename;
+    char                  *filename;
     int                    ndatasets;
 
     pt        = GetTestParameters();
@@ -229,8 +229,8 @@ compact_dataset(void)
     int         i, j, mpi_size, mpi_rank, size, err_num = 0;
     hid_t       iof, plist, dcpl, dxpl, dataset, filespace;
     hsize_t     file_dims[DIM];
-    double *    outme;
-    double *    inme;
+    double     *outme;
+    double     *inme;
     char        dname[] = "dataset";
     herr_t      ret;
     const char *filename;
@@ -601,8 +601,8 @@ dataset_fillvalue(void)
     hsize_t     req_start[4] = {0, 0, 0, 0};
     hsize_t     req_count[4] = {1, 6, 7, 8};
     hsize_t     dset_size;       /* Dataset size */
-    int *       rdata, *wdata;   /* Buffers for data to read and write */
-    int *       twdata, *trdata; /* Temporary pointer into buffer */
+    int        *rdata, *wdata;   /* Buffers for data to read and write */
+    int        *twdata, *trdata; /* Temporary pointer into buffer */
     int         acc, i, j, k, l; /* Local index variables */
     herr_t      ret;             /* Generic return value */
     const char *filename;
@@ -795,13 +795,13 @@ collective_group_write(void)
     int                    i, j, m;
     char                   gname[64], dname[32];
     hid_t                  fid, gid, did, plist, dcpl, memspace, filespace;
-    DATATYPE *             outme = NULL;
+    DATATYPE              *outme = NULL;
     hsize_t                chunk_origin[DIM];
     hsize_t                chunk_dims[DIM], file_dims[DIM], count[DIM];
     hsize_t                chunk_size[2]; /* Chunk dimensions - computed shortly */
     herr_t                 ret1, ret2;
     const H5Ptest_param_t *pt;
-    char *                 filename;
+    char                  *filename;
     int                    ngroups;
 
     pt       = GetTestParameters();
@@ -887,7 +887,7 @@ independent_group_read(void)
     int                    mpi_rank, m;
     hid_t                  plist, fid;
     const H5Ptest_param_t *pt;
-    char *                 filename;
+    char                  *filename;
     int                    ngroups;
 
     pt       = GetTestParameters();
@@ -1016,7 +1016,7 @@ multiple_group_write(void)
     hsize_t                chunk_dims[DIM], file_dims[DIM], count[DIM];
     herr_t                 ret;
     const H5Ptest_param_t *pt;
-    char *                 filename;
+    char                  *filename;
     int                    ngroups;
 
     pt       = GetTestParameters();
@@ -1183,7 +1183,7 @@ multiple_group_read(void)
     hsize_t                chunk_origin[DIM];
     hsize_t                chunk_dims[DIM], file_dims[DIM], count[DIM];
     const H5Ptest_param_t *pt;
-    char *                 filename;
+    char                  *filename;
     int                    ngroups;
 
     pt       = GetTestParameters();
@@ -1522,10 +1522,10 @@ io_mode_confusion(void)
      * test bed related variables
      */
 
-    const char *           fcn_name = "io_mode_confusion";
+    const char            *fcn_name = "io_mode_confusion";
     const hbool_t          verbose  = FALSE;
     const H5Ptest_param_t *pt;
-    char *                 filename;
+    char                  *filename;
 
     pt       = GetTestParameters();
     filename = pt->name;
@@ -1776,7 +1776,7 @@ rr_obj_hdr_flush_confusion(void)
     MPI_Comm comm;
 
     /* test bed related variables */
-    const char *  fcn_name = "rr_obj_hdr_flush_confusion";
+    const char   *fcn_name = "rr_obj_hdr_flush_confusion";
     const hbool_t verbose  = FALSE;
 
     /* Create two new private communicators from MPI_COMM_WORLD.
@@ -1853,10 +1853,10 @@ rr_obj_hdr_flush_confusion_writer(MPI_Comm comm)
     int steps_done = 0;
 
     /* test bed related variables */
-    const char *           fcn_name = "rr_obj_hdr_flush_confusion_writer";
+    const char            *fcn_name = "rr_obj_hdr_flush_confusion_writer";
     const hbool_t          verbose  = FALSE;
     const H5Ptest_param_t *pt;
-    char *                 filename;
+    char                  *filename;
 
     /*
      * setup test bed related variables:
@@ -2226,10 +2226,10 @@ rr_obj_hdr_flush_confusion_reader(MPI_Comm comm)
     int steps_done = -1; /* How far (steps) have been verified */
 
     /* test bed related variables */
-    const char *           fcn_name = "rr_obj_hdr_flush_confusion_reader";
+    const char            *fcn_name = "rr_obj_hdr_flush_confusion_reader";
     const hbool_t          verbose  = FALSE;
     const H5Ptest_param_t *pt;
-    char *                 filename;
+    char                  *filename;
 
     /*
      * setup test bed related variables:
@@ -2558,7 +2558,7 @@ chunk_align_bug_1(void)
     h5_stat_size_t file_size;
     hsize_t        align;
     herr_t         ret;
-    const char *   filename;
+    const char    *filename;
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 

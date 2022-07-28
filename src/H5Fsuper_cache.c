@@ -112,23 +112,23 @@ H5FL_EXTERN(H5F_super_t);
 static H5F_super_t *
 H5F_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t H5_ATTR_UNUSED addr, void *_udata)
 {
-    H5F_super_t *   sblock    = NULL;                       /* File's superblock */
+    H5F_super_t    *sblock    = NULL;                       /* File's superblock */
     haddr_t         base_addr = HADDR_UNDEF;                /* Base address of file */
     uint8_t         sbuf[H5F_MAX_SUPERBLOCK_SIZE];          /* Buffer for superblock */
     H5P_genplist_t *dxpl;                                   /* DXPL object */
     H5P_genplist_t *c_plist;                                /* File creation property list  */
-    H5F_file_t *    shared;                                 /* shared part of `file'        */
-    H5FD_t *        lf;                                     /* file driver part of `shared' */
+    H5F_file_t     *shared;                                 /* shared part of `file'        */
+    H5FD_t         *lf;                                     /* file driver part of `shared' */
     haddr_t         stored_eoa;                             /*relative end-of-addr in file  */
     haddr_t         eof;                                    /*end of file address           */
     uint8_t         sizeof_addr;                            /* Size of offsets in the file (in bytes) */
     uint8_t         sizeof_size;                            /* Size of lengths in the file (in bytes) */
     const size_t    fixed_size = H5F_SUPERBLOCK_FIXED_SIZE; /*fixed sizeof superblock   */
     size_t          variable_size;                          /*variable sizeof superblock    */
-    uint8_t *       p;                                      /* Temporary pointer into encoding buffer */
+    uint8_t        *p;                                      /* Temporary pointer into encoding buffer */
     unsigned        super_vers;                             /* Superblock version          */
-    hbool_t *       dirtied = (hbool_t *)_udata;            /* Set up dirtied out value */
-    H5F_super_t *   ret_value;                              /* Return value */
+    hbool_t        *dirtied = (hbool_t *)_udata;            /* Set up dirtied out value */
+    H5F_super_t    *ret_value;                              /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -621,7 +621,7 @@ H5F_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t H5_ATTR_UNUSE
         H5P_genplist_t *dxpl; /* DXPL object */
         uint8_t         buf[H5F_MAX_SUPERBLOCK_SIZE +
                     H5F_MAX_DRVINFOBLOCK_SIZE]; /* Superblock & driver info blockencoding buffer */
-        uint8_t *       p;                              /* Ptr into encoding buffer */
+        uint8_t        *p;                              /* Ptr into encoding buffer */
         haddr_t         rel_eoa;                        /* Relative EOA for file */
         size_t          superblock_size;                /* Size of superblock, in bytes */
         size_t          driver_size;                    /* Size of driver info block (bytes)*/

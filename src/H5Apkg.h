@@ -72,7 +72,7 @@
 typedef struct H5A_shared_t {
     uint8_t version; /* Version to encode attribute with */
 
-    char *     name;     /* Attribute's name */
+    char      *name;     /* Attribute's name */
     H5T_cset_t encoding; /* Character encoding of attribute name */
 
     H5T_t *dt;      /* Attribute's datatype */
@@ -81,7 +81,7 @@ typedef struct H5A_shared_t {
     H5S_t *ds;      /* Attribute's dataspace */
     size_t ds_size; /* Size of dataspace on disk */
 
-    void *            data;      /* Attribute data (on a temporary basis) */
+    void             *data;      /* Attribute data (on a temporary basis) */
     size_t            data_size; /* Size of data on disk */
     H5O_msg_crt_idx_t crt_idx;   /* Attribute's creation index in the object header */
     unsigned          nrefs;     /* Ref count for times this object is referred	*/
@@ -126,16 +126,16 @@ typedef herr_t (*H5A_bt2_found_t)(const H5A_t *attr, hbool_t *took_ownership, vo
  */
 typedef struct H5A_bt2_ud_common_t {
     /* downward */
-    H5F_t *           f;             /* Pointer to file that fractal heap is in */
+    H5F_t            *f;             /* Pointer to file that fractal heap is in */
     hid_t             dxpl_id;       /* DXPL for operation                */
-    H5HF_t *          fheap;         /* Fractal heap handle               */
-    H5HF_t *          shared_fheap;  /* Fractal heap handle for shared messages */
-    const char *      name;          /* Name of attribute to compare      */
+    H5HF_t           *fheap;         /* Fractal heap handle               */
+    H5HF_t           *shared_fheap;  /* Fractal heap handle for shared messages */
+    const char       *name;          /* Name of attribute to compare      */
     uint32_t          name_hash;     /* Hash of name of attribute to compare */
     uint8_t           flags;         /* Flags for attribute storage location */
     H5O_msg_crt_idx_t corder;        /* Creation order value of attribute to compare */
     H5A_bt2_found_t   found_op;      /* Callback when correct attribute is found */
-    void *            found_op_data; /* Callback data when correct attribute is found */
+    void             *found_op_data; /* Callback data when correct attribute is found */
 } H5A_bt2_ud_common_t;
 
 /*
@@ -178,29 +178,29 @@ H5_DLLVAR const H5B2_class_t H5A_BT2_CORDER[1];
 /******************************/
 
 /* Function prototypes for H5A package scope */
-H5_DLL herr_t H5A_init(void);
-H5_DLL herr_t H5A__term_deprec_interface(void);
-H5_DLL H5A_t *H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type, const H5S_t *space,
-                         hid_t acpl_id, hid_t dxpl_id);
-H5_DLL H5A_t *H5A_open_by_name(const H5G_loc_t *loc, const char *obj_name, const char *attr_name,
-                               hid_t lapl_id, hid_t dxpl_id);
-H5_DLL H5A_t * H5A_open_by_idx(const H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type,
+H5_DLL herr_t  H5A_init(void);
+H5_DLL herr_t  H5A__term_deprec_interface(void);
+H5_DLL H5A_t  *H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type, const H5S_t *space,
+                          hid_t acpl_id, hid_t dxpl_id);
+H5_DLL H5A_t  *H5A_open_by_name(const H5G_loc_t *loc, const char *obj_name, const char *attr_name,
+                                hid_t lapl_id, hid_t dxpl_id);
+H5_DLL H5A_t  *H5A_open_by_idx(const H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type,
                                H5_iter_order_t order, hsize_t n, hid_t lapl_id, hid_t dxpl_id);
 H5_DLL herr_t  H5A_open_common(const H5G_loc_t *loc, H5A_t *attr);
 H5_DLL herr_t  H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id);
 H5_DLL herr_t  H5A_read(const H5A_t *attr, const H5T_t *mem_type, void *buf, hid_t dxpl_id);
 H5_DLL ssize_t H5A_get_name(H5A_t *attr, size_t buf_size, char *buf);
-H5_DLL H5A_t *H5A_copy(H5A_t *new_attr, const H5A_t *old_attr);
-H5_DLL herr_t H5A_get_info(const H5A_t *attr, H5A_info_t *ainfo);
-H5_DLL hid_t  H5A_get_create_plist(H5A_t *attr);
-H5_DLL herr_t H5A_free(H5A_t *attr);
-H5_DLL herr_t H5A_close(H5A_t *attr);
-H5_DLL htri_t H5A_get_ainfo(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_ainfo_t *ainfo);
-H5_DLL herr_t H5A_set_version(const H5F_t *f, H5A_t *attr);
-H5_DLL herr_t H5A_rename_by_name(H5G_loc_t loc, const char *obj_name, const char *old_attr_name,
-                                 const char *new_attr_name, hid_t lapl_id, hid_t dxpl_id);
-H5_DLL htri_t H5A_exists_by_name(H5G_loc_t loc, const char *obj_name, const char *attr_name, hid_t lapl_id,
-                                 hid_t dxpl_id);
+H5_DLL H5A_t  *H5A_copy(H5A_t *new_attr, const H5A_t *old_attr);
+H5_DLL herr_t  H5A_get_info(const H5A_t *attr, H5A_info_t *ainfo);
+H5_DLL hid_t   H5A_get_create_plist(H5A_t *attr);
+H5_DLL herr_t  H5A_free(H5A_t *attr);
+H5_DLL herr_t  H5A_close(H5A_t *attr);
+H5_DLL htri_t  H5A_get_ainfo(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_ainfo_t *ainfo);
+H5_DLL herr_t  H5A_set_version(const H5F_t *f, H5A_t *attr);
+H5_DLL herr_t  H5A_rename_by_name(H5G_loc_t loc, const char *obj_name, const char *old_attr_name,
+                                  const char *new_attr_name, hid_t lapl_id, hid_t dxpl_id);
+H5_DLL htri_t  H5A_exists_by_name(H5G_loc_t loc, const char *obj_name, const char *attr_name, hid_t lapl_id,
+                                  hid_t dxpl_id);
 
 /* Attribute "dense" storage routines */
 H5_DLL herr_t H5A_dense_create(H5F_t *f, hid_t dxpl_id, H5O_ainfo_t *ainfo);

@@ -208,7 +208,7 @@ typedef struct H5FD_t H5FD_t;
 
 /* Class information for each file driver */
 typedef struct H5FD_class_t {
-    const char *       name;
+    const char        *name;
     haddr_t            maxaddr;
     H5F_close_degree_t fc_degree;
     hsize_t (*sb_size)(H5FD_t *file);
@@ -378,8 +378,8 @@ extern "C" {
 #endif
 
 /* Function prototypes */
-H5_DLL hid_t  H5FDregister(const H5FD_class_t *cls);
-H5_DLL herr_t H5FDunregister(hid_t driver_id);
+H5_DLL hid_t   H5FDregister(const H5FD_class_t *cls);
+H5_DLL herr_t  H5FDunregister(hid_t driver_id);
 H5_DLL H5FD_t *H5FDopen(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr);
 H5_DLL herr_t  H5FDclose(H5FD_t *file);
 H5_DLL int     H5FDcmp(const H5FD_t *f1, const H5FD_t *f2);

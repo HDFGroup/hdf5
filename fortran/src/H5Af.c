@@ -1144,7 +1144,7 @@ nh5aget_name_c(hid_t_f *attr_id, size_t_f *bufsize, _fcd buf)
 /******/
 {
     size_t c_bufsize;
-    char * c_buf     = NULL; /* Buffer to hold C string */
+    char  *c_buf     = NULL; /* Buffer to hold C string */
     int_f  ret_value = 0;    /* Return value */
 
     c_bufsize = (size_t)*bufsize + 1;
@@ -1495,10 +1495,10 @@ nh5aget_name_by_idx_c(hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, int
                       hsize_t_f *n, _fcd name, size_t_f *size, hid_t_f *lapl_id)
 /******/
 {
-    char *  c_obj_name = NULL; /* Buffer to hold C string */
+    char   *c_obj_name = NULL; /* Buffer to hold C string */
     ssize_t c_size;
     size_t  c_buf_size;
-    char *  c_buf     = NULL;
+    char   *c_buf     = NULL;
     int_f   ret_value = 0; /* Return value */
 
     /*
@@ -1698,7 +1698,7 @@ nh5aget_info_by_idx_c(hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, int
                       hsize_t_f *data_size)
 /******/
 {
-    char *     c_obj_name = NULL; /* Buffer to hold C string */
+    char      *c_obj_name = NULL; /* Buffer to hold C string */
     H5A_info_t ainfo;
     int_f      ret_value = 0; /* Return value */
 
@@ -1764,8 +1764,8 @@ nh5aget_info_by_name_c(hid_t_f *loc_id, _fcd obj_name, size_t_f *obj_namelen, _f
                        int_f *cset, hsize_t_f *data_size)
 /******/
 {
-    char *     c_obj_name  = NULL; /* Buffer to hold C string */
-    char *     c_attr_name = NULL; /* Buffer to hold C string */
+    char      *c_obj_name  = NULL; /* Buffer to hold C string */
+    char      *c_attr_name = NULL; /* Buffer to hold C string */
     H5A_info_t ainfo;
     int_f      ret_value = 0; /* Return value */
 

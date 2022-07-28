@@ -119,7 +119,7 @@ test_iter_group(hid_t fapl, hbool_t new_format)
     int        i;                     /* counting variable */
     hsize_t    idx;                   /* Index in the group */
     char       name[NAMELEN];         /* temporary name buffer */
-    char *     lnames[NDATASETS + 2]; /* Names of the links created */
+    char      *lnames[NDATASETS + 2]; /* Names of the links created */
     char       dataset_name[NAMELEN]; /* dataset name */
     iter_info  info;                  /* Custom iteration information */
     H5G_info_t ginfo;                 /* Buffer for querying object's info */
@@ -401,7 +401,7 @@ test_iter_attr(hid_t fapl, hbool_t new_format)
     int       i;             /* counting variable */
     hsize_t   idx;           /* Index in the attribute list */
     char      name[NAMELEN]; /* temporary name buffer */
-    char *    anames[NATTR]; /* Names of the attributes created */
+    char     *anames[NATTR]; /* Names of the attributes created */
     iter_info info;          /* Custom iteration information */
     herr_t    ret;           /* Generic return value        */
 
@@ -728,8 +728,8 @@ test_grp_memb_funcs(hid_t fapl)
     hid_t      root_group, grp;          /* Root group ID */
     int        i;                        /* counting variable */
     char       name[NAMELEN];            /* temporary name buffer */
-    char *     dnames[NDATASETS + 2];    /* Names of the datasets created */
-    char *     obj_names[NDATASETS + 2]; /* Names of the objects in group */
+    char      *dnames[NDATASETS + 2];    /* Names of the datasets created */
+    char      *obj_names[NDATASETS + 2]; /* Names of the objects in group */
     char       dataset_name[NAMELEN];    /* dataset name */
     ssize_t    name_len;                 /* Length of object's name */
     H5G_info_t ginfo;                    /* Buffer for querying object's info */

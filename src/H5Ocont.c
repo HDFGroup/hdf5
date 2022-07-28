@@ -34,7 +34,7 @@
 #include "H5Opkg.h"      /* Object headers			*/
 
 /* PRIVATE PROTOTYPES */
-static void * H5O_cont_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags,
+static void  *H5O_cont_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags,
                               size_t p_size, const uint8_t *p);
 static herr_t H5O_cont_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
 static size_t H5O_cont_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
@@ -90,7 +90,7 @@ H5O_cont_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *op
                 size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
 {
     H5O_cont_t *cont = NULL;
-    void *      ret_value;
+    void       *ret_value;
 
     FUNC_ENTER_NOAPI_NOINIT
 

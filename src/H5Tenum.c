@@ -28,7 +28,7 @@
 #include "H5Tpkg.h"      /*data-type functions			  */
 
 /* Static local functions */
-static char * H5T_enum_nameof(const H5T_t *dt, const void *value, char *name /*out*/, size_t size);
+static char  *H5T_enum_nameof(const H5T_t *dt, const void *value, char *name /*out*/, size_t size);
 static herr_t H5T_enum_valueof(const H5T_t *dt, const char *name, void *value /*out*/);
 
 /*--------------------------------------------------------------------------
@@ -198,7 +198,7 @@ herr_t
 H5T__enum_insert(const H5T_t *dt, const char *name, const void *value)
 {
     unsigned i;
-    char **  names     = NULL;
+    char   **names     = NULL;
     uint8_t *values    = NULL;
     herr_t   ret_value = SUCCEED; /* Return value */
 
@@ -380,11 +380,11 @@ done:
 static char *
 H5T_enum_nameof(const H5T_t *dt, const void *value, char *name /*out*/, size_t size)
 {
-    H5T_t *  copied_dt = NULL;   /* Do sorting in copied datatype */
+    H5T_t   *copied_dt = NULL;   /* Do sorting in copied datatype */
     unsigned lt, md = 0, rt;     /* Indices for binary search	*/
     int      cmp        = (-1);  /* Comparison result		*/
     hbool_t  alloc_name = FALSE; /* Whether name has been allocated */
-    char *   ret_value  = NULL;  /* Return value */
+    char    *ret_value  = NULL;  /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -513,7 +513,7 @@ H5T_enum_valueof(const H5T_t *dt, const char *name, void *value /*out*/)
 {
     unsigned lt, md = 0, rt;      /*indices for binary search	*/
     int      cmp       = (-1);    /*comparison result		*/
-    H5T_t *  copied_dt = NULL;    /*do sorting in copied datatype */
+    H5T_t   *copied_dt = NULL;    /*do sorting in copied datatype */
     herr_t   ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT

@@ -50,8 +50,8 @@ typedef struct H5MP_pool_t H5MP_pool_t;
 /* Library-private Function Prototypes */
 /***************************************/
 H5_DLL H5MP_pool_t *H5MP_create(size_t page_size, unsigned flags);
-H5_DLL void *       H5MP_malloc(H5MP_pool_t *mp, size_t request);
-H5_DLL void *       H5MP_free(H5MP_pool_t *mp, void *spc);
+H5_DLL void        *H5MP_malloc(H5MP_pool_t *mp, size_t request);
+H5_DLL void        *H5MP_free(H5MP_pool_t *mp, void *spc);
 H5_DLL herr_t       H5MP_close(H5MP_pool_t *mp);
 
 #endif /* H5MPprivate_H */

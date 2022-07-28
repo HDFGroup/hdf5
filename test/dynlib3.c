@@ -83,7 +83,7 @@ H5Z_filter_dynlib3(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_
         ret_value = *buf_size = nbytes - SUFFIX_LEN;
     }                                 /* end if */
     else {                            /*write*/
-        void *         outbuf = NULL; /* Pointer to new buffer */
+        void          *outbuf = NULL; /* Pointer to new buffer */
         unsigned char *dst;           /* Temporary pointer to destination buffer */
 
         dst = (unsigned char *)(outbuf = malloc(nbytes + SUFFIX_LEN));

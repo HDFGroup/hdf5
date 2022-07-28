@@ -252,7 +252,7 @@ H5CS_pop(void)
 herr_t
 H5CS_copy_stack(H5CS_t *new_stack)
 {
-    H5CS_t * old_stack = H5CS_get_my_stack();
+    H5CS_t  *old_stack = H5CS_get_my_stack();
     unsigned u; /* Local index variable */
 
     /* Don't push this function on the function stack... :-) */

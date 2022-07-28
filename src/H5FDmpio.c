@@ -71,10 +71,10 @@ typedef struct H5FD_mpio_t {
 /* Private Prototypes */
 
 /* Callbacks */
-static void *   H5FD_mpio_fapl_get(H5FD_t *_file);
-static void *   H5FD_mpio_fapl_copy(const void *_old_fa);
+static void    *H5FD_mpio_fapl_get(H5FD_t *_file);
+static void    *H5FD_mpio_fapl_copy(const void *_old_fa);
 static herr_t   H5FD_mpio_fapl_free(void *_fa);
-static H5FD_t * H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr);
+static H5FD_t  *H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr);
 static herr_t   H5FD_mpio_close(H5FD_t *_file);
 static herr_t   H5FD_mpio_query(const H5FD_t *_f1, unsigned long *flags);
 static haddr_t  H5FD_mpio_get_eoa(const H5FD_t *_file, H5FD_mem_t type);
@@ -293,7 +293,7 @@ herr_t
 H5Pset_fapl_mpio(hid_t fapl_id, MPI_Comm comm, MPI_Info info)
 {
     H5FD_mpio_fapl_t fa;
-    H5P_genplist_t * plist; /* Property list pointer */
+    H5P_genplist_t  *plist; /* Property list pointer */
     herr_t           ret_value;
 
     FUNC_ENTER_API(FAIL)
@@ -345,7 +345,7 @@ herr_t
 H5Pget_fapl_mpio(hid_t fapl_id, MPI_Comm *comm /*out*/, MPI_Info *info /*out*/)
 {
     H5FD_mpio_fapl_t *fa;
-    H5P_genplist_t *  plist; /* Property list pointer */
+    H5P_genplist_t   *plist; /* Property list pointer */
     MPI_Comm          comm_tmp = MPI_COMM_NULL;
     int               mpi_code;            /* mpi return code */
     herr_t            ret_value = SUCCEED; /* Return value */
@@ -661,9 +661,9 @@ done:
 static void *
 H5FD_mpio_fapl_get(H5FD_t *_file)
 {
-    H5FD_mpio_t *     file = (H5FD_mpio_t *)_file;
+    H5FD_mpio_t      *file = (H5FD_mpio_t *)_file;
     H5FD_mpio_fapl_t *fa   = NULL;
-    void *            ret_value; /* Return value */
+    void             *ret_value; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -701,9 +701,9 @@ done:
 static void *
 H5FD_mpio_fapl_copy(const void *_old_fa)
 {
-    void *                  ret_value = NULL;
+    void                   *ret_value = NULL;
     const H5FD_mpio_fapl_t *old_fa    = (const H5FD_mpio_fapl_t *)_old_fa;
-    H5FD_mpio_fapl_t *      new_fa    = NULL;
+    H5FD_mpio_fapl_t       *new_fa    = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
 #ifdef H5FDmpio_DEBUG
@@ -886,7 +886,7 @@ done:
 static H5FD_t *
 H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t H5_ATTR_UNUSED maxaddr)
 {
-    H5FD_mpio_t *           file = NULL;
+    H5FD_mpio_t            *file = NULL;
     MPI_File                fh;
     unsigned                file_opened = 0; /* Flag to indicate that the file was successfully opened */
     int                     mpi_amode;
@@ -896,10 +896,10 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t H5_ATTR_
     MPI_Offset              size;
     const H5FD_mpio_fapl_t *fa = NULL;
     H5FD_mpio_fapl_t        _fa;
-    H5P_genplist_t *        plist; /* Property list pointer */
+    H5P_genplist_t         *plist; /* Property list pointer */
     MPI_Comm                comm_dup = MPI_COMM_NULL;
     MPI_Info                info_dup = MPI_INFO_NULL;
-    H5FD_t *                ret_value; /* Return value */
+    H5FD_t                 *ret_value; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1299,7 +1299,7 @@ static herr_t
 H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t dxpl_id, haddr_t addr, size_t size,
                void *buf /*out*/)
 {
-    H5FD_mpio_t *   file = (H5FD_mpio_t *)_file;
+    H5FD_mpio_t    *file = (H5FD_mpio_t *)_file;
     MPI_Offset      mpi_off;
     MPI_Status      mpi_stat;            /* Status from I/O operation */
     int             mpi_code;            /* mpi return code */
@@ -1493,7 +1493,7 @@ done:
 static herr_t
 H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size, const void *buf)
 {
-    H5FD_mpio_t *   file = (H5FD_mpio_t *)_file;
+    H5FD_mpio_t    *file = (H5FD_mpio_t *)_file;
     MPI_Offset      mpi_off;
     MPI_Status      mpi_stat;            /* Status from I/O operation */
     MPI_Datatype    buf_type = MPI_BYTE; /* MPI description of the selection in memory */

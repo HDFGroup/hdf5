@@ -132,7 +132,7 @@ static herr_t  H5HF_sect_indirect_reduce(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_fr
                                          unsigned child_entry);
 static herr_t  H5HF_sect_indirect_first(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t *sect);
 static hbool_t H5HF_sect_indirect_is_first(H5HF_free_section_t *sect);
-static H5HF_indirect_t *    H5HF_sect_indirect_get_iblock(H5HF_free_section_t *sect);
+static H5HF_indirect_t     *H5HF_sect_indirect_get_iblock(H5HF_free_section_t *sect);
 static hsize_t              H5HF_sect_indirect_iblock_off(const H5HF_free_section_t *sect);
 static H5HF_free_section_t *H5HF_sect_indirect_top(H5HF_free_section_t *sect);
 static herr_t H5HF_sect_indirect_merge_row(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t *sect1,
@@ -776,8 +776,8 @@ H5HF_sect_single_add(H5FS_section_info_t *_sect, unsigned *flags, void *_udata)
      */
     if (!(*flags & H5FS_ADD_DESERIALIZING)) {
         H5HF_free_section_t *sect    = (H5HF_free_section_t *)_sect; /* Fractal heap free section */
-        H5HF_sect_add_ud_t * udata   = (H5HF_sect_add_ud_t *)_udata; /* User callback data */
-        H5HF_hdr_t *         hdr     = udata->hdr;                   /* Fractal heap header */
+        H5HF_sect_add_ud_t  *udata   = (H5HF_sect_add_ud_t *)_udata; /* User callback data */
+        H5HF_hdr_t          *hdr     = udata->hdr;                   /* Fractal heap header */
         hid_t                dxpl_id = udata->dxpl_id;               /* DXPL ID for operation */
 
         /* Sanity check */
@@ -905,8 +905,8 @@ H5HF_sect_single_merge(H5FS_section_info_t *_sect1, H5FS_section_info_t *_sect2,
 {
     H5HF_free_section_t *sect1     = (H5HF_free_section_t *)_sect1; /* Fractal heap free section */
     H5HF_free_section_t *sect2     = (H5HF_free_section_t *)_sect2; /* Fractal heap free section */
-    H5HF_sect_add_ud_t * udata     = (H5HF_sect_add_ud_t *)_udata;  /* User callback data */
-    H5HF_hdr_t *         hdr       = udata->hdr;                    /* Fractal heap header */
+    H5HF_sect_add_ud_t  *udata     = (H5HF_sect_add_ud_t *)_udata;  /* User callback data */
+    H5HF_hdr_t          *hdr       = udata->hdr;                    /* Fractal heap header */
     hid_t                dxpl_id   = udata->dxpl_id;                /* DXPL ID for operation */
     herr_t               ret_value = SUCCEED;                       /* Return value */
 
@@ -962,8 +962,8 @@ static htri_t
 H5HF_sect_single_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
 {
     const H5HF_free_section_t *sect      = (const H5HF_free_section_t *)_sect; /* Fractal heap free section */
-    H5HF_sect_add_ud_t *       udata     = (H5HF_sect_add_ud_t *)_udata;       /* User callback data */
-    H5HF_hdr_t *               hdr       = udata->hdr;                         /* Fractal heap header */
+    H5HF_sect_add_ud_t        *udata     = (H5HF_sect_add_ud_t *)_udata;       /* User callback data */
+    H5HF_hdr_t                *hdr       = udata->hdr;                         /* Fractal heap header */
     htri_t                     ret_value = FALSE;                              /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -1016,10 +1016,10 @@ static herr_t
 H5HF_sect_single_shrink(H5FS_section_info_t **_sect, void H5_ATTR_UNUSED *_udata)
 {
     H5HF_free_section_t **sect    = (H5HF_free_section_t **)_sect; /* Fractal heap free section */
-    H5HF_sect_add_ud_t *  udata   = (H5HF_sect_add_ud_t *)_udata;  /* User callback data */
-    H5HF_hdr_t *          hdr     = udata->hdr;                    /* Fractal heap header */
+    H5HF_sect_add_ud_t   *udata   = (H5HF_sect_add_ud_t *)_udata;  /* User callback data */
+    H5HF_hdr_t           *hdr     = udata->hdr;                    /* Fractal heap header */
     hid_t                 dxpl_id = udata->dxpl_id;                /* DXPL ID for operation */
-    H5HF_direct_t *       dblock;                                  /* Pointer to direct block for section */
+    H5HF_direct_t        *dblock;                                  /* Pointer to direct block for section */
     haddr_t               dblock_addr;                             /* Section's direct block's address */
     size_t                dblock_size;                             /* Section's direct block's size */
     herr_t                ret_value = SUCCEED;                     /* Return value */
@@ -1083,7 +1083,7 @@ herr_t
 H5HF_sect_single_free(H5FS_section_info_t *_sect)
 {
     H5HF_free_section_t *sect      = (H5HF_free_section_t *)_sect; /* Pointer to section to free */
-    H5HF_indirect_t *    parent    = NULL;                         /* Parent indirect block for section */
+    H5HF_indirect_t     *parent    = NULL;                         /* Parent indirect block for section */
     herr_t               ret_value = SUCCEED;                      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1565,7 +1565,7 @@ done:
 static herr_t
 H5HF_sect_row_serialize(const H5FS_section_class_t *cls, const H5FS_section_info_t *_sect, uint8_t *buf)
 {
-    H5HF_hdr_t *               hdr; /* Fractal heap header */
+    H5HF_hdr_t                *hdr; /* Fractal heap header */
     const H5HF_free_section_t *sect      = (const H5HF_free_section_t *)_sect;
     herr_t                     ret_value = SUCCEED; /* Return value */
 
@@ -1609,7 +1609,7 @@ static H5FS_section_info_t *
 H5HF_sect_row_deserialize(const H5FS_section_class_t *cls, hid_t dxpl_id, const uint8_t *buf,
                           haddr_t sect_addr, hsize_t sect_size, unsigned *des_flags)
 {
-    H5HF_hdr_t *         hdr;              /* Fractal heap header */
+    H5HF_hdr_t          *hdr;              /* Fractal heap header */
     H5FS_section_info_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1653,7 +1653,7 @@ H5HF_sect_row_can_merge(const H5FS_section_info_t *_sect1, const H5FS_section_in
 {
     const H5HF_free_section_t *sect1 = (const H5HF_free_section_t *)_sect1; /* Fractal heap free section */
     const H5HF_free_section_t *sect2 = (const H5HF_free_section_t *)_sect2; /* Fractal heap free section */
-    H5HF_free_section_t *      top_indir_sect1, *top_indir_sect2; /* Top indirect section for each row */
+    H5HF_free_section_t       *top_indir_sect1, *top_indir_sect2; /* Top indirect section for each row */
     htri_t                     ret_value = FALSE;                 /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -1710,8 +1710,8 @@ H5HF_sect_row_merge(H5FS_section_info_t *_sect1, H5FS_section_info_t *_sect2, vo
 {
     H5HF_free_section_t *sect1     = (H5HF_free_section_t *)_sect1; /* Fractal heap free section */
     H5HF_free_section_t *sect2     = (H5HF_free_section_t *)_sect2; /* Fractal heap free section */
-    H5HF_sect_add_ud_t * udata     = (H5HF_sect_add_ud_t *)_udata;  /* User callback data */
-    H5HF_hdr_t *         hdr       = udata->hdr;                    /* Fractal heap header */
+    H5HF_sect_add_ud_t  *udata     = (H5HF_sect_add_ud_t *)_udata;  /* User callback data */
+    H5HF_hdr_t          *hdr       = udata->hdr;                    /* Fractal heap header */
     hid_t                dxpl_id   = udata->dxpl_id;                /* DXPL ID for operation */
     herr_t               ret_value = SUCCEED;                       /* Return value */
 
@@ -1776,8 +1776,8 @@ static htri_t
 H5HF_sect_row_can_shrink(const H5FS_section_info_t *_sect, void H5_ATTR_UNUSED *_udata)
 {
     const H5HF_free_section_t *sect      = (const H5HF_free_section_t *)_sect; /* Fractal heap free section */
-    H5HF_sect_add_ud_t *       udata     = (H5HF_sect_add_ud_t *)_udata;       /* User callback data */
-    H5HF_hdr_t *               hdr       = udata->hdr;                         /* Fractal heap header */
+    H5HF_sect_add_ud_t        *udata     = (H5HF_sect_add_ud_t *)_udata;       /* User callback data */
+    H5HF_hdr_t                *hdr       = udata->hdr;                         /* Fractal heap header */
     htri_t                     ret_value = FALSE;                              /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -1812,9 +1812,9 @@ static herr_t
 H5HF_sect_row_shrink(H5FS_section_info_t **_sect, void *_udata)
 {
     H5HF_free_section_t **sect = (H5HF_free_section_t **)_sect;     /* Fractal heap free section */
-    H5HF_free_section_t * top_indir_sect;                           /* Top indirect section for row */
-    H5HF_sect_add_ud_t *  udata     = (H5HF_sect_add_ud_t *)_udata; /* User callback data */
-    H5HF_hdr_t *          hdr       = udata->hdr;                   /* Fractal heap header */
+    H5HF_free_section_t  *top_indir_sect;                           /* Top indirect section for row */
+    H5HF_sect_add_ud_t   *udata     = (H5HF_sect_add_ud_t *)_udata; /* User callback data */
+    H5HF_hdr_t           *hdr       = udata->hdr;                   /* Fractal heap header */
     hid_t                 dxpl_id   = udata->dxpl_id;               /* DXPL ID for operation */
     herr_t                ret_value = SUCCEED;                      /* Return value */
 
@@ -1923,8 +1923,8 @@ done:
 static herr_t
 H5HF_sect_row_valid(const H5FS_section_class_t *cls, const H5FS_section_info_t *_sect)
 {
-    H5HF_sect_private_t *      cls_prvt;                                  /* Pointer to class private info */
-    const H5HF_hdr_t *         hdr;                                       /* Fractal heap header */
+    H5HF_sect_private_t       *cls_prvt;                                  /* Pointer to class private info */
+    const H5HF_hdr_t          *hdr;                                       /* Fractal heap header */
     const H5HF_free_section_t *sect = (const H5HF_free_section_t *)_sect; /* Pointer to section to check */
     const H5HF_free_section_t *indir_sect; /* Pointer to underlying indirect section */
     unsigned                   indir_idx;  /* Index of row in underlying indirect section's row array */
@@ -2420,7 +2420,7 @@ H5HF_sect_indirect_init_rows(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t
             first_row_sect = NULL;
         } /* end if */
         else {
-            H5HF_indirect_t *    child_iblock;   /* Child indirect block */
+            H5HF_indirect_t     *child_iblock;   /* Child indirect block */
             H5HF_free_section_t *child_sect;     /* Child 'indirect' section to add */
             unsigned             child_nrows;    /* Number of child rows in indirect blocks for this row */
             unsigned             child_nentries; /* Number of child entries in indirect blocks for this row */
@@ -3190,7 +3190,7 @@ H5HF_sect_indirect_reduce(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t *s
             /* (Will use this to compute the section address for the peer section */
             sect->u.indirect.num_entries = new_nentries;
             sect->u.indirect.span_size   = H5HF_dtable_span_size(&hdr->man_dtable, sect->u.indirect.row,
-                                                               sect->u.indirect.col, new_nentries);
+                                                                 sect->u.indirect.col, new_nentries);
             HDassert(sect->u.indirect.span_size > 0);
 
             /* Compute address of peer indirect section */
@@ -3654,7 +3654,7 @@ done:
 static herr_t
 H5HF_sect_indirect_build_parent(H5HF_hdr_t *hdr, H5HF_free_section_t *sect)
 {
-    H5HF_indirect_t *    par_iblock;          /* Indirect block for parent section */
+    H5HF_indirect_t     *par_iblock;          /* Indirect block for parent section */
     H5HF_free_section_t *par_sect = NULL;     /* Parent indirect section */
     unsigned             par_row, par_col;    /* Row & column in parent indirect section */
     unsigned             par_entry;           /* Entry within parent indirect section */

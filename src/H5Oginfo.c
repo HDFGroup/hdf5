@@ -33,7 +33,7 @@
 static void *H5O_ginfo_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags,
                               size_t p_size, const uint8_t *p);
 static herr_t H5O_ginfo_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
-static void * H5O_ginfo_copy(const void *_mesg, void *_dest);
+static void  *H5O_ginfo_copy(const void *_mesg, void *_dest);
 static size_t H5O_ginfo_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
 static herr_t H5O_ginfo_free(void *_mesg);
 static herr_t H5O_ginfo_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream, int indent,
@@ -94,9 +94,9 @@ H5O_ginfo_decode(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5
                  unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags,
                  size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
 {
-    H5O_ginfo_t * ginfo = NULL;     /* Pointer to group information message */
+    H5O_ginfo_t  *ginfo = NULL;     /* Pointer to group information message */
     unsigned char flags;            /* Flags for encoding group info */
-    void *        ret_value = NULL; /* Return value */
+    void         *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -216,8 +216,8 @@ static void *
 H5O_ginfo_copy(const void *_mesg, void *_dest)
 {
     const H5O_ginfo_t *ginfo     = (const H5O_ginfo_t *)_mesg;
-    H5O_ginfo_t *      dest      = (H5O_ginfo_t *)_dest;
-    void *             ret_value = NULL; /* Return value */
+    H5O_ginfo_t       *dest      = (H5O_ginfo_t *)_dest;
+    void              *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 

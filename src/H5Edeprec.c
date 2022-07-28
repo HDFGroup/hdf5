@@ -135,8 +135,8 @@ H5Eget_major(H5E_major_t maj)
     H5E_msg_t *msg; /* Pointer to error message */
     ssize_t    size;
     H5E_type_t type;
-    char *     msg_str = NULL;
-    char *     ret_value; /* Return value */
+    char      *msg_str = NULL;
+    char      *ret_value; /* Return value */
 
     FUNC_ENTER_API_NOCLEAR(NULL)
     H5TRACE1("*s", "i", maj);
@@ -187,8 +187,8 @@ H5Eget_minor(H5E_minor_t min)
     H5E_msg_t *msg; /* Pointer to error message */
     ssize_t    size;
     H5E_type_t type;
-    char *     msg_str = NULL;
-    char *     ret_value; /* Return value */
+    char      *msg_str = NULL;
+    char      *ret_value; /* Return value */
 
     FUNC_ENTER_API_NOCLEAR(NULL)
     H5TRACE1("*s", "i", min);
@@ -342,7 +342,7 @@ done:
 herr_t
 H5Ewalk1(H5E_direction_t direction, H5E_walk1_t func, void *client_data)
 {
-    H5E_t *       estack;              /* Error stack to operate on */
+    H5E_t        *estack;              /* Error stack to operate on */
     H5E_walk_op_t walk_op;             /* Error stack walking callback */
     herr_t        ret_value = SUCCEED; /* Return value */
 
@@ -383,7 +383,7 @@ done:
 herr_t
 H5Eget_auto1(H5E_auto1_t *func, void **client_data)
 {
-    H5E_t *       estack;              /* Error stack to operate on */
+    H5E_t        *estack;              /* Error stack to operate on */
     H5E_auto_op_t auto_op;             /* Error stack operator */
     herr_t        ret_value = SUCCEED; /* Return value */
 
@@ -436,7 +436,7 @@ done:
 herr_t
 H5Eset_auto1(H5E_auto1_t func, void *client_data)
 {
-    H5E_t *       estack;              /* Error stack to operate on */
+    H5E_t        *estack;              /* Error stack to operate on */
     H5E_auto_op_t auto_op;             /* Error stack operator */
     herr_t        ret_value = SUCCEED; /* Return value */
 

@@ -59,23 +59,23 @@ typedef struct {
 typedef struct {
     hid_t              gid;     /* The group ID for the application callback */
     H5G_link_iterate_t lnk_op;  /* Application callback */
-    void *             op_data; /* Application's op data */
+    void              *op_data; /* Application's op data */
 } H5G_iter_appcall_ud_t;
 
 /* User data for recursive traversal over links from a group */
 typedef struct {
     hid_t           gid;           /* The group ID for the starting group */
-    H5G_loc_t *     curr_loc;      /* Location of starting group */
+    H5G_loc_t      *curr_loc;      /* Location of starting group */
     hid_t           lapl_id;       /* LAPL for walking across links */
     hid_t           dxpl_id;       /* DXPL for operations */
     H5_index_t      idx_type;      /* Index to use */
     H5_iter_order_t order;         /* Iteration order within index */
-    H5SL_t *        visited;       /* Skip list for tracking visited nodes */
-    char *          path;          /* Path name of the link */
+    H5SL_t         *visited;       /* Skip list for tracking visited nodes */
+    char           *path;          /* Path name of the link */
     size_t          curr_path_len; /* Current length of the path in the buffer */
     size_t          path_buf_size; /* Size of path buffer */
     H5L_iterate_t   op;            /* Application callback */
-    void *          op_data;       /* Application's op data */
+    void           *op_data;       /* Application's op data */
 } H5G_iter_visit_ud_t;
 
 /********************/
@@ -154,7 +154,7 @@ H5G__create_named(const H5G_loc_t *loc, const char *name, hid_t lcpl_id, hid_t g
 {
     H5O_obj_create_t ocrt_info;        /* Information for object creation */
     H5G_obj_create_t gcrt_info;        /* Information for group creation */
-    H5G_t *          ret_value = NULL; /* Return value */
+    H5G_t           *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -208,9 +208,9 @@ done:
 H5G_t *
 H5G__create(H5F_t *file, H5G_obj_create_t *gcrt_info, hid_t dxpl_id)
 {
-    H5G_t *  grp       = NULL; /*new group			*/
+    H5G_t   *grp       = NULL; /*new group			*/
     unsigned oloc_init = 0;    /* Flag to indicate that the group object location was created successfully */
-    H5G_t *  ret_value = NULL; /* Return value */
+    H5G_t   *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -280,13 +280,13 @@ done:
 H5G_t *
 H5G__open_name(const H5G_loc_t *loc, const char *name, hid_t gapl_id, hid_t dxpl_id)
 {
-    H5G_t *    grp = NULL;        /* Group to open */
+    H5G_t     *grp = NULL;        /* Group to open */
     H5G_loc_t  grp_loc;           /* Location used to open group */
     H5G_name_t grp_path;          /* Opened object group hier. path */
     H5O_loc_t  grp_oloc;          /* Opened object object location */
     hbool_t    loc_found = FALSE; /* Location at 'name' found */
     H5O_type_t obj_type;          /* Type of object at location */
-    H5G_t *    ret_value = NULL;  /* Return value */
+    H5G_t     *ret_value = NULL;  /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -343,9 +343,9 @@ done:
 H5G_t *
 H5G_open(const H5G_loc_t *loc, hid_t dxpl_id)
 {
-    H5G_t *       grp = NULL;       /* Group opened */
+    H5G_t        *grp = NULL;       /* Group opened */
     H5G_shared_t *shared_fo;        /* Shared group object */
-    H5G_t *       ret_value = NULL; /* Return value */
+    H5G_t        *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -518,7 +518,7 @@ H5G_close(H5G_t *grp)
         else
             /* Free object location (i.e. "unhold" the file if appropriate) */
             if (H5O_loc_free(&(grp->oloc)) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "problem attempting to free location")
+                HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "problem attempting to free location")
 
         /* If this group is a mount point and the mount point is the last open
          * reference to the group, then attempt to close down the file hierarchy
@@ -780,7 +780,7 @@ H5G_iterate(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_iter_o
 {
     H5G_loc_t             loc;                   /* Location of parent for group */
     hid_t                 gid = H5I_INVALID_HID; /* ID of group to iterate over */
-    H5G_t *               grp = NULL;            /* Pointer to group data structure to iterate over */
+    H5G_t                *grp = NULL;            /* Pointer to group data structure to iterate over */
     H5G_iter_appcall_ud_t udata;                 /* User data for callback */
     herr_t                ret_value = FAIL;      /* Return value */
 
@@ -952,7 +952,7 @@ H5G_visit_cb(const H5O_link_t *lnk, void *_udata)
 
             /* If it's a group, we recurse into it */
             if (otype == H5O_TYPE_GROUP) {
-                H5G_loc_t * old_loc  = udata->curr_loc; /* Pointer to previous group location info */
+                H5G_loc_t  *old_loc  = udata->curr_loc; /* Pointer to previous group location info */
                 H5_index_t  idx_type = udata->idx_type; /* Type of index to use */
                 H5O_linfo_t linfo;                      /* Link info message */
                 htri_t      linfo_exists;               /* Whether the link info message exists */
@@ -1041,7 +1041,7 @@ H5G_visit(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_iter_ord
     H5O_linfo_t         linfo;                 /* Link info message */
     htri_t              linfo_exists;          /* Whether the link info message exists */
     hid_t               gid = H5I_INVALID_HID; /* Group ID */
-    H5G_t *             grp = NULL;            /* Group opened */
+    H5G_t              *grp = NULL;            /* Group opened */
     H5G_loc_t           loc;                   /* Location of group passed in */
     H5G_loc_t           start_loc;             /* Location of starting group */
     unsigned            rc;                    /* Reference count of object    */

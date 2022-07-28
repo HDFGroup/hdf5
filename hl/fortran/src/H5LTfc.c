@@ -42,7 +42,7 @@ nh5ltmake_dataset_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, int_f *rank, 
 {
     int      ret_value = -1;
     herr_t   ret;
-    char *   c_name = NULL;
+    char    *c_name = NULL;
     hsize_t *c_dims = NULL;
     int      i;
 
@@ -360,7 +360,7 @@ nh5ltread_dataset_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, hid_t_f *type
     herr_t ret;
     hid_t  c_loc_id;
     hid_t  c_type_id;
-    char * c_name = NULL;
+    char  *c_name = NULL;
 
     /*
      * convert FORTRAN name to C name
@@ -666,8 +666,8 @@ nh5ltmake_dataset_string_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, size_t
     int    ret_value = -1;
     herr_t ret;
     hid_t  c_loc_id;
-    char * c_name = NULL;
-    char * c_buf  = NULL;
+    char  *c_name = NULL;
+    char  *c_buf  = NULL;
 
     /*
      * convert FORTRAN name to C name
@@ -726,7 +726,7 @@ nh5ltread_dataset_string_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, char *
     int    ret_value = -1;
     herr_t ret;
     hid_t  c_loc_id;
-    char * c_name = NULL;
+    char  *c_name = NULL;
 
     /*
      * convert FORTRAN name to C name
@@ -780,8 +780,8 @@ nh5ltset_attribute_int_c(hid_t_f *loc_id, size_t_f *namelen, _fcd dsetname, size
     int    ret_value = -1;
     herr_t ret;
     hid_t  c_loc_id;
-    char * c_name     = NULL;
-    char * c_attrname = NULL;
+    char  *c_name     = NULL;
+    char  *c_attrname = NULL;
     size_t c_size;
 
     /*
@@ -850,8 +850,8 @@ nh5ltset_attribute_float_c(hid_t_f *loc_id, size_t_f *namelen, _fcd dsetname, si
     int    ret_value = -1;
     herr_t ret;
     hid_t  c_loc_id;
-    char * c_name     = NULL;
-    char * c_attrname = NULL;
+    char  *c_name     = NULL;
+    char  *c_attrname = NULL;
     size_t c_size;
 
     /*
@@ -913,8 +913,8 @@ nh5ltset_attribute_double_c(hid_t_f *loc_id, size_t_f *namelen, _fcd dsetname, s
     int    ret_value = -1;
     herr_t ret;
     hid_t  c_loc_id;
-    char * c_name     = NULL;
-    char * c_attrname = NULL;
+    char  *c_name     = NULL;
+    char  *c_attrname = NULL;
     size_t c_size;
 
     /*
@@ -976,9 +976,9 @@ nh5ltset_attribute_string_c(hid_t_f *loc_id, size_t_f *namelen, _fcd dsetname, s
     int    ret_value = -1;
     herr_t ret;
     hid_t  c_loc_id;
-    char * c_name     = NULL;
-    char * c_attrname = NULL;
-    char * c_buf      = NULL;
+    char  *c_name     = NULL;
+    char  *c_attrname = NULL;
+    char  *c_buf      = NULL;
 
     /*
      * convert FORTRAN name to C name
@@ -1044,8 +1044,8 @@ nh5ltget_attribute_int_c(hid_t_f *loc_id, size_t_f *namelen, _fcd dsetname, size
     int    ret_value = -1;
     herr_t ret;
     hid_t  c_loc_id;
-    char * c_name     = NULL;
-    char * c_attrname = NULL;
+    char  *c_name     = NULL;
+    char  *c_attrname = NULL;
 
     /*
      * convert FORTRAN name to C name
@@ -1112,8 +1112,8 @@ nh5ltget_attribute_float_c(hid_t_f *loc_id, size_t_f *namelen, _fcd dsetname, si
     int    ret_value = -1;
     herr_t ret;
     hid_t  c_loc_id;
-    char * c_name     = NULL;
-    char * c_attrname = NULL;
+    char  *c_name     = NULL;
+    char  *c_attrname = NULL;
 
     /*
      * convert FORTRAN name to C name
@@ -1173,8 +1173,8 @@ nh5ltget_attribute_double_c(hid_t_f *loc_id, size_t_f *namelen, _fcd dsetname, s
     int    ret_value = -1;
     herr_t ret;
     hid_t  c_loc_id;
-    char * c_name     = NULL;
-    char * c_attrname = NULL;
+    char  *c_name     = NULL;
+    char  *c_attrname = NULL;
 
     /*
      * convert FORTRAN name to C name
@@ -1233,9 +1233,9 @@ nh5ltget_attribute_string_c(hid_t_f *loc_id, size_t_f *namelen, _fcd dsetname, s
 {
     int    ret_value = -1;
     herr_t ret;
-    char * c_name     = NULL;
-    char * c_attrname = NULL;
-    char * c_buf      = NULL;
+    char  *c_name     = NULL;
+    char  *c_attrname = NULL;
+    char  *c_buf      = NULL;
 
     /*
      * Convert FORTRAN name to C name
@@ -1303,7 +1303,7 @@ nh5ltget_dataset_ndims_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, int_f *r
     int    ret_value = -1;
     herr_t ret;
     hid_t  c_loc_id;
-    char * c_name = NULL;
+    char  *c_name = NULL;
     int    c_rank;
 
     /*
@@ -1356,7 +1356,7 @@ int_f
 nh5ltfind_dataset_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name)
 {
     hid_t  c_loc_id;
-    char * c_name = NULL;
+    char  *c_name = NULL;
     herr_t ret;
 
     /*
@@ -1405,7 +1405,7 @@ nh5ltget_dataset_info_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, hsize_t_f
     int         ret_value = -1;
     herr_t      ret;
     hid_t       c_loc_id;
-    char *      c_name = NULL;
+    char       *c_name = NULL;
     H5T_class_t c_classtype;
     size_t      c_type_size;
     hsize_t     c_dims[32];
@@ -1478,8 +1478,8 @@ nh5ltget_attribute_ndims_c(hid_t_f *loc_id, size_t_f *namelen, _fcd dsetname, si
     int    ret_value = -1;
     herr_t ret;
     hid_t  c_loc_id;
-    char * c_name     = NULL;
-    char * c_attrname = NULL;
+    char  *c_name     = NULL;
+    char  *c_attrname = NULL;
     int    c_rank;
 
     /*
@@ -1541,8 +1541,8 @@ nh5ltget_attribute_info_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, size_t_
     int         ret_value = -1;
     herr_t      ret;
     hid_t       c_loc_id;
-    char *      c_name     = NULL;
-    char *      c_attrname = NULL;
+    char       *c_name     = NULL;
+    char       *c_attrname = NULL;
     H5T_class_t c_classtype;
     size_t      c_type_size;
     hsize_t     c_dims[32];
@@ -1618,7 +1618,7 @@ int_f
 nh5ltpath_valid_c(hid_t_f *loc_id, _fcd path, size_t_f *pathlen, int_f *check_object_valid_c)
 {
     htri_t  ret    = -1;
-    char *  c_path = NULL;
+    char   *c_path = NULL;
     hbool_t check_object_valid;
 
     /*
