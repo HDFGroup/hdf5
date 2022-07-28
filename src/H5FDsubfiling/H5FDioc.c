@@ -25,7 +25,7 @@
 #include "H5FDprivate.h"  /* File drivers             */
 #include "H5FDioc.h"      /* IOC file driver          */
 #include "H5FDioc_priv.h" /* IOC file driver          */
-#include "H5FDsec2.h"     /* Sec2 VFD                 */
+#include "H5FDmpio.h"     /* MPI I/O VFD              */
 #include "H5FLprivate.h"  /* Free Lists               */
 #include "H5Fprivate.h"   /* File access              */
 #include "H5Iprivate.h"   /* IDs                      */
@@ -53,7 +53,7 @@ typedef struct H5FD_ioc_t {
     int      mpi_rank;
     int      mpi_size;
 
-    H5FD_t *ioc_file; /* native HDF5 file pointer (sec2) */
+    H5FD_t *ioc_file; /* native HDF5 file pointer */
 
     int64_t context_id; /* The value used to lookup a subfiling context for the file */
 
@@ -68,7 +68,6 @@ typedef struct H5FD_ioc_t {
      * Windows code further below.
      */
     dev_t device; /* file device number   */
-    ino_t inode;  /* file i-node number   */
 #else
     /* Files in windows are uniquely identified by the volume serial
      * number and the file index (both low and high parts).
@@ -161,7 +160,7 @@ static herr_t H5FD__ioc_ctl(H5FD_t *file, uint64_t op_code, uint64_t flags,
                             const void *input, void **result);
 */
 
-static herr_t H5FD__ioc_get_default_config(H5FD_ioc_config_t *config_out);
+static herr_t H5FD__ioc_get_default_config(hid_t fapl_id, H5FD_ioc_config_t *config_out);
 static herr_t H5FD__ioc_validate_config(const H5FD_ioc_config_t *fa);
 static int    H5FD__copy_plist(hid_t fapl_id, hid_t *id_out_ptr);
 
@@ -364,7 +363,7 @@ H5Pset_fapl_ioc(hid_t fapl_id, H5FD_ioc_config_t *vfd_config)
         ioc_conf->ioc_fapl_id = H5I_INVALID_HID;
 
         /* Get IOC VFD defaults */
-        if (H5FD__ioc_get_default_config(ioc_conf) < 0)
+        if (H5FD__ioc_get_default_config(fapl_id, ioc_conf) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't get default IOC VFD configuration");
 
         vfd_config = ioc_conf;
@@ -423,7 +422,7 @@ H5Pget_fapl_ioc(hid_t fapl_id, H5FD_ioc_config_t *config_out)
     }
 
     if (use_default_config) {
-        if (H5FD__ioc_get_default_config(config_out) < 0)
+        if (H5FD__ioc_get_default_config(fapl_id, config_out) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get default IOC VFD configuration");
     }
     else {
@@ -451,9 +450,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__ioc_get_default_config(H5FD_ioc_config_t *config_out)
+H5FD__ioc_get_default_config(hid_t fapl_id, H5FD_ioc_config_t *config_out)
 {
-    herr_t ret_value = SUCCEED;
+    MPI_Comm comm      = MPI_COMM_NULL;
+    MPI_Info info      = MPI_INFO_NULL;
+    herr_t   ret_value = SUCCEED;
 
     HDassert(config_out);
 
@@ -470,14 +471,25 @@ H5FD__ioc_get_default_config(H5FD_ioc_config_t *config_out)
     if ((config_out->ioc_fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL, "can't create default FAPL");
 
-    /* Currently, only sec2 vfd supported */
-    if (H5Pset_fapl_sec2(config_out->ioc_fapl_id) < 0)
-        H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set Sec2 VFD on IOC FAPL");
+    /* Check if any MPI parameters were set on the FAPL */
+    if (H5Pget_mpi_params(fapl_id, &comm, &info) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get MPI Comm/Info");
+    if (comm == MPI_COMM_NULL)
+        comm = MPI_COMM_WORLD;
+
+    /* Hardwire MPI I/O VFD for now */
+    if (H5Pset_fapl_mpio(config_out->ioc_fapl_id, comm, info) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set MPI I/O VFD on IOC FAPL");
 
     /* Specific to this I/O Concentrator */
     config_out->thread_pool_count = H5FD_IOC_THREAD_POOL_SIZE;
 
 done:
+    if (H5_mpi_comm_free(&comm) < 0)
+        H5_SUBFILING_DONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't free MPI Communicator");
+    if (H5_mpi_info_free(&info) < 0)
+        H5_SUBFILING_DONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't free MPI Info object");
+
     if (ret_value < 0) {
         if (config_out->ioc_fapl_id >= 0 && H5Pclose(config_out->ioc_fapl_id) < 0)
             H5_SUBFILING_DONE_ERROR(H5E_PLIST, H5E_CANTCLOSEOBJ, FAIL, "can't close FAPL");
@@ -814,7 +826,7 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 
     config_ptr = H5P_peek_driver_info(plist_ptr);
     if (!config_ptr || (H5P_FILE_ACCESS_DEFAULT == fapl_id)) {
-        if (H5FD__ioc_get_default_config(&default_config) < 0)
+        if (H5FD__ioc_get_default_config(fapl_id, &default_config) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get default IOC VFD configuration");
         config_ptr = &default_config;
     }
@@ -861,13 +873,13 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL,
                                 "invalid driver ID in file access property list");
 
-    if (driver->value != H5_VFD_SEC2) {
+    if (driver->value != H5_VFD_MPIO) {
         H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
-                                "unable to open file '%s' - only Sec2 VFD is currently supported", name);
+                                "unable to open file '%s' - only MPI I/O VFD is currently supported", name);
     }
     else {
-        subfiling_context_t *sf_context = NULL;
-        uint64_t             inode_id   = UINT64_MAX;
+        subfiling_context_t *sf_context  = NULL;
+        void *               file_handle = NULL;
         int                  ioc_flags;
         int                  l_error = 0;
         int                  g_error = 0;
@@ -883,32 +895,10 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 
         file_ptr->ioc_file = H5FD_open(file_ptr->file_path, flags, config_ptr->ioc_fapl_id, HADDR_UNDEF);
         if (file_ptr->ioc_file) {
-            h5_stat_t sb;
-            void *    file_handle = NULL;
-
-            if (file_ptr->mpi_rank == 0) {
-                if (H5FDget_vfd_handle(file_ptr->ioc_file, config_ptr->ioc_fapl_id, &file_handle) < 0)
-                    H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get file handle");
-
-                if (HDfstat(*(int *)file_handle, &sb) < 0)
-                    H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, NULL, "unable to fstat file");
-
-                HDcompile_assert(sizeof(uint64_t) >= sizeof(ino_t));
-                file_ptr->inode = sb.st_ino;
-                inode_id        = (uint64_t)sb.st_ino;
-            }
-
-            if (MPI_SUCCESS != (mpi_code = MPI_Bcast(&inode_id, 1, MPI_UINT64_T, 0, file_ptr->comm)))
-                H5_SUBFILING_MPI_GOTO_ERROR(NULL, "MPI_Bcast failed", mpi_code);
-
-            if (file_ptr->mpi_rank != 0)
-                file_ptr->inode = (ino_t)inode_id;
+            if (H5FDget_vfd_handle(file_ptr->ioc_file, config_ptr->ioc_fapl_id, &file_handle) < 0)
+                H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get file handle");
         }
         else {
-            /* The two-step file opening approach may be
-             * the root cause for the sec2 open to return a NULL.
-             * It is prudent then, to collectively fail (early) in this case.
-             */
             l_error = 1;
         }
 
@@ -925,7 +915,7 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
          * context ID will be returned, which is used for
          * further interactions with this file's subfiles.
          */
-        if (H5_open_subfiles(file_ptr->file_path, inode_id, file_ptr->fa.ioc_selection, ioc_flags,
+        if (H5_open_subfiles(file_ptr->file_path, file_handle, file_ptr->fa.ioc_selection, ioc_flags,
                              file_ptr->comm, &file_ptr->context_id) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open subfiles for file '%s'",
                                     name);

@@ -20,8 +20,8 @@
 #include "H5subfiling_err.h"
 
 typedef struct {            /* Format of a context map entry  */
-    uint64_t h5_file_id;    /* key value (linear search of the cache) */
-    int64_t  sf_context_id; /* The return value if matching h5_file_id */
+    void *file_handle;      /* key value (linear search of the cache) */
+    int64_t  sf_context_id; /* The return value if matching file_handle */
 } file_map_to_context_t;
 
 typedef struct stat_record {
@@ -89,7 +89,7 @@ static herr_t init_app_topology(ioc_selection_t ioc_selection_type, MPI_Comm com
 static herr_t init_subfiling_context(subfiling_context_t *sf_context, sf_topology_t *app_topology,
                                      MPI_Comm file_comm);
 static herr_t open_subfile_with_context(subfiling_context_t *sf_context, int file_acc_flags);
-static herr_t record_fid_to_subfile(uint64_t h5_file_id, int64_t subfile_context_id, int *next_index);
+static herr_t record_fid_to_subfile(void *file_handle, int64_t subfile_context_id, int *next_index);
 static herr_t ioc_open_file(sf_work_request_t *msg, int file_acc_flags);
 static herr_t generate_subfile_name(subfiling_context_t *sf_context, int file_acc_flags, char *filename_out,
                                     size_t filename_out_len, char **filename_basename_out,
@@ -102,7 +102,7 @@ static herr_t open_config_file(subfiling_context_t *sf_context, const char *base
 static void        initialize_statistics(void);
 static int         numDigits(int n);
 static int         get_next_fid_map_index(void);
-static void        clear_fid_map_entry(uint64_t sf_fid, int64_t sf_context_id);
+static void        clear_fid_map_entry(void *file_handle, int64_t sf_context_id);
 static int         compare_hostid(const void *h1, const void *h2);
 static herr_t      get_ioc_selection_criteria_from_env(ioc_selection_t *ioc_selection_type,
                                                        char **          ioc_sel_info_str);
@@ -192,7 +192,7 @@ get_next_fid_map_index(void)
     HDassert(sf_open_file_map || (sf_file_map_size == 0));
 
     for (int i = 0; i < sf_file_map_size; i++) {
-        if (sf_open_file_map[i].h5_file_id == UINT64_MAX) {
+        if (sf_open_file_map[i].file_handle == NULL) {
             index = i;
             break;
         }
@@ -222,14 +222,13 @@ get_next_fid_map_index(void)
  *-------------------------------------------------------------------------
  */
 static void
-clear_fid_map_entry(uint64_t sf_fid, int64_t sf_context_id)
+clear_fid_map_entry(void *file_handle, int64_t sf_context_id)
 {
     if (sf_open_file_map) {
-        int i;
-        for (i = 0; i < sf_file_map_size; i++) {
-            if ((sf_open_file_map[i].h5_file_id == sf_fid) &&
+        for (int i = 0; i < sf_file_map_size; i++) {
+            if ((sf_open_file_map[i].file_handle == file_handle) &&
                 (sf_open_file_map[i].sf_context_id == sf_context_id)) {
-                sf_open_file_map[i].h5_file_id    = UINT64_MAX;
+                sf_open_file_map[i].file_handle   = NULL;
                 sf_open_file_map[i].sf_context_id = -1;
                 return;
             }
@@ -784,6 +783,7 @@ H5_free_subfiling_object_int(subfiling_context_t *sf_context)
 
     sf_context->sf_context_id           = -1;
     sf_context->h5_file_id              = UINT64_MAX;
+    sf_context->h5_file_handle          = NULL;
     sf_context->sf_fid                  = -1;
     sf_context->sf_write_count          = 0;
     sf_context->sf_read_count           = 0;
@@ -912,7 +912,7 @@ H5_free_subfiling_topology(sf_topology_t *topology)
  */
 /* TODO: revise description */
 herr_t
-H5_open_subfiles(const char *base_filename, uint64_t h5_file_id, ioc_selection_t ioc_selection_type,
+H5_open_subfiles(const char *base_filename, void *file_handle, ioc_selection_t ioc_selection_type,
                  int file_acc_flags, MPI_Comm file_comm, int64_t *context_id_out)
 {
     subfiling_context_t *sf_context = NULL;
@@ -973,7 +973,7 @@ H5_open_subfiles(const char *base_filename, uint64_t h5_file_id, ioc_selection_t
     }
 
     /* Save some basic things in the new subfiling context */
-    sf_context->h5_file_id = h5_file_id;
+    sf_context->h5_file_handle = file_handle;
 
     if (NULL == (sf_context->h5_filename = HDstrdup(base_filename))) {
 #ifdef H5_SUBFILING_DEBUG
@@ -1058,7 +1058,7 @@ done:
     }
 
     if (ret_value < 0) {
-        clear_fid_map_entry(h5_file_id, context_id);
+        clear_fid_map_entry(file_handle, context_id);
 
         if (context_id >= 0 && H5_free_subfiling_object(context_id) < 0) {
 #ifdef H5_SUBFILING_DEBUG
@@ -1533,6 +1533,7 @@ init_subfiling_context(subfiling_context_t *sf_context, sf_topology_t *app_topol
     sf_context->sf_write_count  = 0;
     sf_context->sf_read_count   = 0;
     sf_context->sf_eof          = HADDR_UNDEF;
+    sf_context->h5_file_handle  = NULL;
     sf_context->sf_fid          = -1;
     sf_context->sf_group_size   = 1;
     sf_context->sf_group_rank   = 0;
@@ -1767,7 +1768,7 @@ open_subfile_with_context(subfiling_context_t *sf_context, int file_acc_flags)
      * There shouldn't be any issue, but check the status and
      * return if there was a problem.
      */
-    if (record_fid_to_subfile(sf_context->h5_file_id, sf_context->sf_context_id, NULL) < 0) {
+    if (record_fid_to_subfile(sf_context->h5_file_handle, sf_context->sf_context_id, NULL) < 0) {
 #ifdef H5_SUBFILING_DEBUG
         HDprintf("%s: couldn't record HDF5 file ID to subfile context mapping\n", __func__);
 #endif
@@ -1792,6 +1793,21 @@ open_subfile_with_context(subfiling_context_t *sf_context, int file_acc_flags)
                                  0,
                                  0,
                                  0};
+        h5_stat_t st;
+
+        /* Retrieve Inode value for HDF5 stub file */
+        if (HDstat(sf_context->h5_filename, &st) < 0) {
+#ifdef H5_SUBFILING_DEBUG
+            HDprintf("[%s %d]: couldn't stat file %s\n", __func__,
+                     sf_context->topology->app_layout->world_rank, sf_context->h5_filename);
+#endif
+
+            ret_value = FAIL;
+            goto done;
+        }
+
+        HDcompile_assert(sizeof(uint64_t) >= sizeof(ino_t));
+        sf_context->h5_file_id = (uint64_t)st.st_ino;
 
         if (ioc_open_file(&msg, file_acc_flags) < 0) {
 #ifdef H5_SUBFILING_DEBUG
@@ -1806,7 +1822,7 @@ open_subfile_with_context(subfiling_context_t *sf_context, int file_acc_flags)
 
 done:
     if (ret_value < 0) {
-        clear_fid_map_entry(sf_context->h5_file_id, sf_context->sf_context_id);
+        clear_fid_map_entry(sf_context->h5_file_handle, sf_context->sf_context_id);
     }
 
     return ret_value;
@@ -1843,7 +1859,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-record_fid_to_subfile(uint64_t h5_file_id, int64_t subfile_context_id, int *next_index)
+record_fid_to_subfile(void *file_handle, int64_t subfile_context_id, int *next_index)
 {
     int    index;
     herr_t ret_value = SUCCEED;
@@ -1861,17 +1877,17 @@ record_fid_to_subfile(uint64_t h5_file_id, int64_t subfile_context_id, int *next
 
         sf_file_map_size = DEFAULT_FILE_MAP_ENTRIES;
         for (int i = 0; i < sf_file_map_size; i++) {
-            sf_open_file_map[i].h5_file_id    = UINT64_MAX;
+            sf_open_file_map[i].file_handle   = NULL;
             sf_open_file_map[i].sf_context_id = -1;
         }
     }
 
     for (index = 0; index < sf_file_map_size; index++) {
-        if (sf_open_file_map[index].h5_file_id == h5_file_id)
+        if (sf_open_file_map[index].file_handle == file_handle)
             goto done;
 
-        if (sf_open_file_map[index].h5_file_id == UINT64_MAX) {
-            sf_open_file_map[index].h5_file_id    = h5_file_id;
+        if (sf_open_file_map[index].file_handle == NULL) {
+            sf_open_file_map[index].file_handle   = file_handle;
             sf_open_file_map[index].sf_context_id = subfile_context_id;
 
             if (next_index) {
@@ -1899,14 +1915,14 @@ record_fid_to_subfile(uint64_t h5_file_id, int64_t subfile_context_id, int *next
         sf_file_map_size *= 2;
 
         for (int i = index; i < sf_file_map_size; i++) {
-            sf_open_file_map[i].h5_file_id = UINT64_MAX;
+            sf_open_file_map[i].file_handle = NULL;
         }
 
         if (next_index) {
             *next_index = index;
         }
 
-        sf_open_file_map[index].h5_file_id      = h5_file_id;
+        sf_open_file_map[index].file_handle     = file_handle;
         sf_open_file_map[index++].sf_context_id = subfile_context_id;
     }
 
@@ -2713,9 +2729,9 @@ H5_close_subfiles(int64_t subfiling_context_id)
     }
 #endif
 
-    /* The map from FID to subfiling context can now be cleared */
-    if (sf_context->h5_file_id != UINT64_MAX) {
-        clear_fid_map_entry(sf_context->h5_file_id, sf_context->sf_context_id);
+    /* The map from file handle to subfiling context can now be cleared */
+    if (sf_context->h5_file_handle != NULL) {
+        clear_fid_map_entry(sf_context->h5_file_handle, sf_context->sf_context_id);
     }
 
     if (sf_context->topology->rank_is_ioc) {
@@ -2822,10 +2838,10 @@ done:
 }
 
 /*-------------------------------------------------------------------------
- * Function:    H5_subfile_fid_to_context
+ * Function:    H5_subfile_fhandle_to_context
  *
  * Purpose:     This is a basic lookup function which returns the subfiling
- *              context id associated with the specified file->inode.
+ *              context id associated with the specified file handle.
  *
  * Return:      Non-negative subfiling context ID if the context exists
  *              Negative on failure or if the subfiling context doesn't
@@ -2839,7 +2855,7 @@ done:
  *-------------------------------------------------------------------------
  */
 int64_t
-H5_subfile_fid_to_context(uint64_t sf_fid)
+H5_subfile_fhandle_to_context(void *file_handle)
 {
     if (!sf_open_file_map) {
 #ifdef H5_SUBFILING_DEBUG
@@ -2850,13 +2866,13 @@ H5_subfile_fid_to_context(uint64_t sf_fid)
     }
 
     for (int i = 0; i < sf_file_map_size; i++) {
-        if (sf_open_file_map[i].h5_file_id == sf_fid) {
+        if (sf_open_file_map[i].file_handle == file_handle) {
             return sf_open_file_map[i].sf_context_id;
         }
     }
 
     return -1;
-} /* end H5_subfile_fid_to_context() */
+} /* end H5_subfile_fhandle_to_context() */
 
 #ifdef H5_SUBFILING_DEBUG
 void

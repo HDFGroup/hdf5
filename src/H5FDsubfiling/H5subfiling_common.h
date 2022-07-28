@@ -178,6 +178,7 @@ typedef struct topology {
 typedef struct {
     int64_t        sf_context_id;           /* Generated context ID which embeds the cache index */
     uint64_t       h5_file_id;              /* GUID (basically the inode value) */
+    void *         h5_file_handle;          /* Low-level handle for the HDF5 stub file */
     int            sf_fid;                  /* value returned by open(file,..)  */
     size_t         sf_write_count;          /* Statistics: write_count  */
     size_t         sf_read_count;           /* Statistics: read_count  */
@@ -236,14 +237,14 @@ extern app_layout_t *sf_app_layout;
 extern "C" {
 #endif
 
-H5_DLL herr_t H5_open_subfiles(const char *base_filename, uint64_t h5_file_id,
+H5_DLL herr_t H5_open_subfiles(const char *base_filename, void *h5_file_handle,
                                ioc_selection_t ioc_selection_type, int file_acc_flags, MPI_Comm file_comm,
                                int64_t *context_id_out);
 H5_DLL herr_t H5_close_subfiles(int64_t subfiling_context_id);
 
 H5_DLL int64_t H5_new_subfiling_object_id(sf_obj_type_t obj_type, int64_t index_val);
 H5_DLL void *  H5_get_subfiling_object(int64_t object_id);
-H5_DLL int64_t H5_subfile_fid_to_context(uint64_t h5_fid);
+H5_DLL int64_t H5_subfile_fhandle_to_context(void *file_handle);
 H5_DLL herr_t  H5_free_subfiling_object(int64_t object_id);
 
 H5_DLL void H5_subfiling_log(int64_t sf_context_id, const char *fmt, ...);

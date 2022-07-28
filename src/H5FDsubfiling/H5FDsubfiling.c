@@ -842,9 +842,9 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
     H5FD_class_t *                 driver    = NULL; /* VFD for file */
     H5P_genplist_t *               plist_ptr = NULL;
     H5FD_driver_prop_t             driver_prop; /* Property for driver ID & info */
-    hbool_t                        bcasted_inode = FALSE;
     hbool_t                        bcasted_eof   = FALSE;
     int64_t                        sf_eof        = -1;
+    void *                         file_handle   = NULL;
     int                            mpi_code; /* MPI return code */
     H5FD_t *                       ret_value = NULL;
 
@@ -958,34 +958,16 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
             H5E_FILE, H5E_CANTOPENFILE, NULL,
             "unable to open file '%s' - only IOC and Sec2 VFDs are currently supported for subfiles", name);
 
+    if (H5FDget_vfd_handle(file_ptr->sf_file, file_ptr->fa.ioc_fapl_id, &file_handle) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get file handle");
+
     if (driver->value == H5_VFD_IOC) {
-        h5_stat_t sb;
-        uint64_t  fid;
-        void *    file_handle = NULL;
-
-        if (file_ptr->mpi_rank == 0) {
-            if (H5FDget_vfd_handle(file_ptr->sf_file, file_ptr->fa.ioc_fapl_id, &file_handle) < 0)
-                H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get file handle");
-
-            if (HDfstat(*(int *)file_handle, &sb) < 0)
-                H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, NULL, "unable to fstat file");
-
-            HDcompile_assert(sizeof(uint64_t) >= sizeof(ino_t));
-            fid = (uint64_t)sb.st_ino;
-        }
-
-        if (MPI_SUCCESS != (mpi_code = MPI_Bcast(&fid, 1, MPI_UINT64_T, 0, file_ptr->comm)))
-            H5_SUBFILING_MPI_GOTO_ERROR(NULL, "MPI_Bcast failed", mpi_code);
-
-        bcasted_inode = TRUE;
-
         /* Get a copy of the context ID for later use */
-        file_ptr->context_id     = H5_subfile_fid_to_context(fid);
+        file_ptr->context_id     = H5_subfile_fhandle_to_context(file_handle);
         file_ptr->fa.require_ioc = true;
     }
     else if (driver->value == H5_VFD_SEC2) {
-        uint64_t inode_id = (uint64_t)-1;
-        int      ioc_flags;
+        int ioc_flags;
 
         /* Translate the HDF5 file open flags into standard POSIX open flags */
         ioc_flags = (H5F_ACC_RDWR & flags) ? O_RDWR : O_RDONLY;
@@ -996,44 +978,12 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
         if (H5F_ACC_EXCL & flags)
             ioc_flags |= O_EXCL;
 
-        /* Let MPI rank 0 to the file stat operation and broadcast a result */
-        if (file_ptr->mpi_rank == 0) {
-            if (file_ptr->sf_file) {
-                h5_stat_t sb;
-                void *    file_handle = NULL;
-
-                if (H5FDget_vfd_handle(file_ptr->sf_file, file_ptr->fa.ioc_fapl_id, &file_handle) < 0)
-                    H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get file handle");
-
-                /* We create a new file descriptor for our file structure.
-                 * Basically, we want these separate so that sec2 can
-                 * deal with the opened file for additional operations
-                 * (especially close) without interfering with subfiling.
-                 */
-                file_ptr->fd = HDdup(*(int *)file_handle);
-
-                if (HDfstat(*(int *)file_handle, &sb) < 0)
-                    H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_BADFILE, NULL, "unable to fstat file");
-                inode_id = sb.st_ino;
-            }
-        }
-
-        if (MPI_SUCCESS == MPI_Bcast(&inode_id, 1, MPI_UNSIGNED_LONG_LONG, 0, file_ptr->comm)) {
-            file_ptr->inode = inode_id;
-        }
-
-        bcasted_inode = TRUE;
-
-        /* All ranks can now detect an error and fail. */
-        if (inode_id == (uint64_t)-1)
-            H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file = %s\n", name);
-
         /*
          * Open the subfiles for this HDF5 file. A subfiling
          * context ID will be returned, which is used for
          * further interactions with this file's subfiles.
          */
-        if (H5_open_subfiles(file_ptr->file_path, inode_id, file_ptr->fa.ioc_selection, ioc_flags,
+        if (H5_open_subfiles(file_ptr->file_path, file_handle, file_ptr->fa.ioc_selection, ioc_flags,
                              file_ptr->comm, &file_ptr->context_id) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open subfiling files = %s\n",
                                     name);
@@ -1062,13 +1012,6 @@ done:
         if (file_ptr) {
             /* Participate in possible MPI collectives on failure */
             if (file_ptr->comm != MPI_COMM_NULL) {
-                if (!bcasted_inode) {
-                    uint64_t tmp_inode = UINT64_MAX;
-
-                    if (MPI_SUCCESS !=
-                        (mpi_code = MPI_Bcast(&tmp_inode, 1, MPI_UNSIGNED_LONG_LONG, 0, file_ptr->comm)))
-                        H5_SUBFILING_MPI_DONE_ERROR(NULL, "MPI_Bcast failed", mpi_code);
-                }
                 if (!bcasted_eof) {
                     sf_eof = -1;
 
