@@ -153,7 +153,7 @@ H5FD__onion_history_decode(unsigned char *buf, H5FD_onion_history_t *history)
     uint32_t       sum         = 0;
     uint64_t       ui64        = 0;
     uint64_t       n_revisions = 0;
-    uint8_t *      ui8p        = NULL;
+    uint8_t       *ui8p        = NULL;
     unsigned char *ptr         = NULL;
     size_t         ret_value   = 0;
 

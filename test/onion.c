@@ -73,7 +73,7 @@ struct revise_revision {
     uint64_t          revision_num;
     size_t            n_writes;
     struct write_info writes[ONION_TEST_REV_REV_WRITES_MAX];
-    const char *      comment;
+    const char       *comment;
 };
 
 static int  compare_file_bytes_exactly(const char *, hid_t, size_t, const unsigned char *);
@@ -898,7 +898,7 @@ test_header_encode_decode(void)
         88,   0,    0,    0,   0,    0,    0, 0,                /* history_size */
         0,    0,    0,    0                                     /* sum populated below */
     };
-    unsigned char *     ptr          = NULL;
+    unsigned char      *ptr          = NULL;
     uint32_t            checksum     = 0;
     uint32_t            checksum_out = 0;
     size_t              i            = 0;
@@ -1017,7 +1017,7 @@ test_history_encode_decode_empty(void)
         1,   0,   0,   0,                          /* NOTE: update version w/ "current" as needed */
         0,   0,   0,   0,   0, 0, 0, 0, 0, 0, 0, 0 /* sum populated below */
     };
-    unsigned char *      ptr          = NULL;
+    unsigned char       *ptr          = NULL;
     uint32_t             checksum     = 0;
     uint32_t             checksum_out = 0;
     size_t               i            = 0;
@@ -1134,7 +1134,7 @@ test_history_encode_decode(void)
         /* final checksum */
         0, 0, 0, 0 /* sum populated below */
     };
-    unsigned char *      buf_p        = NULL;
+    unsigned char       *buf_p        = NULL;
     uint32_t             checksum_out = 0;
     size_t               i            = 0;
     H5FD_onion_history_t history      = {
@@ -1302,8 +1302,8 @@ test_revision_record_encode_decode(void)
         0, 0, 0, 0                              /* Bytes 169-172:   final checksum (populated below) */
     };
     /* clang-format on */
-    unsigned char *              buf   = NULL;
-    unsigned char *              buf_p = NULL;
+    unsigned char               *buf   = NULL;
+    unsigned char               *buf_p = NULL;
     size_t                       i     = 0;
     uint64_t                     size_ret;
     H5FD_onion_revision_record_t r_out;
@@ -1534,7 +1534,7 @@ error:
 static int
 compare_file_bytes_exactly(const char *filepath, hid_t fapl_id, size_t nbytes, const unsigned char *exp)
 {
-    H5FD_t *       raw_vfile = NULL; /* virtual file to look at raw file contents */
+    H5FD_t        *raw_vfile = NULL; /* virtual file to look at raw file contents */
     unsigned char *act_buf   = NULL; /* allocated area for actual file bytes */
     uint64_t       filesize  = 0;
 
@@ -1588,7 +1588,7 @@ error:
 static int
 verify_history_as_expected_onion(H5FD_t *raw_file, struct expected_history *filter)
 {
-    unsigned char *              buf = NULL; /* allocated area for actual file bytes */
+    unsigned char               *buf = NULL; /* allocated area for actual file bytes */
     H5FD_onion_header_t          hdr_out;
     H5FD_onion_history_t         history_out;
     H5FD_onion_revision_record_t rev_out;
@@ -1681,7 +1681,7 @@ verify_history_as_expected_onion(H5FD_t *raw_file, struct expected_history *filt
     /* Ingest revision(s) */
 
     for (i = 0; i < history_out.n_revisions; i++) {
-        H5FD_onion_record_loc_t * rpp = &history_out.record_locs[i];
+        H5FD_onion_record_loc_t  *rpp = &history_out.record_locs[i];
         struct expected_revision *erp = &filter->revisions[i];
 
         rev_out.archival_index.list           = NULL;
@@ -1780,7 +1780,7 @@ error:
 static int
 verify_stored_onion_create_0_open(struct onion_filepaths *paths, H5FD_onion_fapl_info_t *onion_info)
 {
-    H5FD_t *       file            = NULL; /* virtual file to look at raw file contents */
+    H5FD_t        *file            = NULL; /* virtual file to look at raw file contents */
     unsigned char *act_buf         = NULL; /* allocated area for actual file bytes */
     hid_t          fapl_id         = onion_info->backing_fapl_id;
     herr_t         err_ret         = FAIL;
@@ -1893,7 +1893,7 @@ error:
 static int
 test_create_oniontarget(hbool_t truncate_canonical, hbool_t with_initial_data)
 {
-    const char *            basename   = "somesuch";
+    const char             *basename   = "somesuch";
     hid_t                   fapl_id    = H5I_INVALID_HID;
     struct onion_filepaths *paths      = NULL;
     H5FD_onion_fapl_info_t  onion_info = {
@@ -1906,11 +1906,11 @@ test_create_oniontarget(hbool_t truncate_canonical, hbool_t with_initial_data)
         0,               /* creation_flags   */
         "initial commit" /* comment          */
     };
-    H5FD_t *                vfile_raw = NULL; /* virtual file to look at raw file contents */
-    H5FD_t *                vfile_rw  = NULL; /* Onion virtual file for read/write */
-    H5FD_t *                vfile_ro  = NULL; /* Onion virtual file for read-only */
+    H5FD_t                 *vfile_raw = NULL; /* virtual file to look at raw file contents */
+    H5FD_t                 *vfile_rw  = NULL; /* Onion virtual file for read/write */
+    H5FD_t                 *vfile_ro  = NULL; /* Onion virtual file for read-only */
     struct expected_history filter;
-    char *                  buf = NULL;
+    char                   *buf = NULL;
 
     if (TRUE == truncate_canonical && TRUE == with_initial_data)
         TESTING("onion creation; truncate extant canonical; w/ initial data");
@@ -2200,7 +2200,7 @@ error:
 static int
 test_several_revisions_with_logical_gaps(void)
 {
-    const char *            basename   = "somesuch";
+    const char             *basename   = "somesuch";
     hid_t                   fapl_id    = H5I_INVALID_HID;
     struct onion_filepaths *paths      = NULL;
     H5FD_onion_fapl_info_t  onion_info = {
@@ -2213,9 +2213,9 @@ test_several_revisions_with_logical_gaps(void)
         0,      /* flags */
         "first" /* comment          */
     };
-    H5FD_t *                file = NULL; /* Onion virtual file for read/write */
+    H5FD_t                 *file = NULL; /* Onion virtual file for read/write */
     struct expected_history filter;
-    unsigned char *         buf = NULL;
+    unsigned char          *buf = NULL;
     struct revise_revision  about[4];
     H5FD_onion_history_t    history_out;
     size_t                  i     = 0;
@@ -2549,7 +2549,7 @@ do_onion_open_and_writes(const char *filename, H5FD_onion_fapl_info_t *onion_inf
                          struct revise_revision *about)
 {
     hid_t          fapl_id = H5I_INVALID_HID;
-    H5FD_t *       file    = NULL; /* Onion virtual file for read/write */
+    H5FD_t        *file    = NULL; /* Onion virtual file for read/write */
     unsigned char *buf_vfy = NULL;
     size_t         i       = 0;
 
@@ -2645,7 +2645,7 @@ error:
 static int
 test_page_aligned_history_create(void)
 {
-    const char *            basename   = "somesuch";
+    const char             *basename   = "somesuch";
     hid_t                   fapl_id    = H5I_INVALID_HID;
     struct onion_filepaths *paths      = NULL;
     H5FD_onion_fapl_info_t  onion_info = {
@@ -2658,8 +2658,8 @@ test_page_aligned_history_create(void)
         H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT,
         "initial commit" /* comment          */
     };
-    H5FD_t *               file = NULL; /* Onion virtual file for read/write */
-    unsigned char *        buf  = NULL;
+    H5FD_t                *file = NULL; /* Onion virtual file for read/write */
+    unsigned char         *buf  = NULL;
     struct revise_revision about[2];
     H5FD_onion_header_t    hdr_out;
     H5FD_onion_history_t   history_out;
@@ -2849,7 +2849,7 @@ error:
 static int
 test_integration_create(void)
 {
-    const char *            basename   = "integration_2d.h5";
+    const char             *basename   = "integration_2d.h5";
     hid_t                   fapl_id    = H5I_INVALID_HID;
     hid_t                   file_id    = H5I_INVALID_HID;
     hid_t                   file       = H5I_INVALID_HID;
@@ -3174,7 +3174,7 @@ error:
 static int
 test_integration_create_simple(void)
 {
-    const char *            basename   = "integration_1d.h5";
+    const char             *basename   = "integration_1d.h5";
     hid_t                   fapl_id    = H5I_INVALID_HID;
     struct onion_filepaths *paths      = NULL;
     H5FD_onion_fapl_info_t  onion_info = {
@@ -3428,7 +3428,7 @@ error:
 static int
 test_integration_create_delete_objects(void)
 {
-    const char *            basename   = "integration_objs.h5";
+    const char             *basename   = "integration_objs.h5";
     hid_t                   fapl_id    = H5I_INVALID_HID;
     struct onion_filepaths *paths      = NULL;
     H5FD_onion_fapl_info_t  onion_info = {
@@ -3781,7 +3781,7 @@ error:
 static int
 test_integration_dset_extension(void)
 {
-    const char *            basename   = "integration_dset_ext.h5";
+    const char             *basename   = "integration_dset_ext.h5";
     hid_t                   fapl_id    = H5I_INVALID_HID;
     struct onion_filepaths *paths      = NULL;
     H5FD_onion_fapl_info_t  onion_info = {
@@ -4051,7 +4051,7 @@ error:
 static int
 test_integration_ctl(void)
 {
-    const char *            basename   = "integration_ctl.h5";
+    const char             *basename   = "integration_ctl.h5";
     hid_t                   file       = H5I_INVALID_HID;
     hid_t                   space      = H5I_INVALID_HID;
     hid_t                   dset       = H5I_INVALID_HID;
@@ -4605,7 +4605,7 @@ error:
 static int
 test_integration_create_by_name(void)
 {
-    const char *            basename   = "integration_by_name.h5";
+    const char             *basename   = "integration_by_name.h5";
     hid_t                   fapl_id    = H5I_INVALID_HID;
     struct onion_filepaths *paths      = NULL;
     H5FD_onion_fapl_info_t  onion_info = {

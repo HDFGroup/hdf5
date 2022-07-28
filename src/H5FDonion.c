@@ -131,7 +131,7 @@ typedef struct H5FD_onion_t {
     H5FD_t *original_file;
     H5FD_t *onion_file;
     H5FD_t *recovery_file;
-    char *  recovery_file_name;
+    char   *recovery_file_name;
 
     /* Onion data structures */
     H5FD_onion_header_t          header;
@@ -276,7 +276,7 @@ herr_t
 H5Pget_fapl_onion(hid_t fapl_id, H5FD_onion_fapl_info_t *fa_out)
 {
     const H5FD_onion_fapl_info_t *info_ptr  = NULL;
-    H5P_genplist_t *              plist     = NULL;
+    H5P_genplist_t               *plist     = NULL;
     herr_t                        ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
@@ -444,11 +444,11 @@ H5FD__onion_commit_new_revision_record(H5FD_onion_t *file)
     uint32_t                      checksum  = 0; /* required */
     size_t                        size      = 0;
     haddr_t                       phys_addr = 0; /* offset in history file to record start */
-    unsigned char *               buf       = NULL;
+    unsigned char                *buf       = NULL;
     herr_t                        ret_value = SUCCEED;
     H5FD_onion_revision_record_t *rec       = &file->curr_rev_record;
-    H5FD_onion_history_t *        history   = &file->history;
-    H5FD_onion_record_loc_t *     new_list  = NULL;
+    H5FD_onion_history_t         *history   = &file->history;
+    H5FD_onion_record_loc_t      *new_list  = NULL;
 
     time_t     rawtime;
     struct tm *info;
@@ -681,10 +681,10 @@ H5FD__onion_create_truncate_onion(H5FD_onion_t *file, const char *filename, cons
                                   const char *recovery_file_nameery, unsigned int flags, haddr_t maxaddr)
 {
     hid_t                         backing_fapl_id = H5I_INVALID_HID;
-    H5FD_onion_header_t *         hdr             = NULL;
-    H5FD_onion_history_t *        history         = NULL;
+    H5FD_onion_header_t          *hdr             = NULL;
+    H5FD_onion_history_t         *history         = NULL;
     H5FD_onion_revision_record_t *rec             = NULL;
-    unsigned char *               buf             = NULL;
+    unsigned char                *buf             = NULL;
     size_t                        size            = 0;
     herr_t                        ret_value       = SUCCEED;
 
@@ -791,7 +791,7 @@ H5FD__onion_remove_unused_symbols(char *s)
 static herr_t
 H5FD__onion_parse_config_str(const char *config_str, H5FD_onion_fapl_info_t *fa)
 {
-    char * config_str_copy = NULL;
+    char  *config_str_copy = NULL;
     herr_t ret_value       = SUCCEED;
 
     FUNC_ENTER_PACKAGE;
@@ -903,17 +903,17 @@ done:
 static H5FD_t *
 H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
-    H5P_genplist_t *              plist                 = NULL;
-    H5FD_onion_t *                file                  = NULL;
+    H5P_genplist_t               *plist                 = NULL;
+    H5FD_onion_t                 *file                  = NULL;
     const H5FD_onion_fapl_info_t *fa                    = NULL;
-    H5FD_onion_fapl_info_t *      new_fa                = NULL;
-    const char *                  config_str            = NULL;
+    H5FD_onion_fapl_info_t       *new_fa                = NULL;
+    const char                   *config_str            = NULL;
     hid_t                         backing_fapl_id       = H5I_INVALID_HID;
-    char *                        name_onion            = NULL;
-    char *                        recovery_file_nameery = NULL;
+    char                         *name_onion            = NULL;
+    char                         *recovery_file_nameery = NULL;
     bool                          new_open              = false;
     haddr_t                       canon_eof             = 0;
-    H5FD_t *                      ret_value             = NULL;
+    H5FD_t                       *ret_value             = NULL;
 
     FUNC_ENTER_PACKAGE
 
@@ -1033,11 +1033,11 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
         /* TODO: Move to a new function */
         if (NULL == file->onion_file) {
             if (H5F_ACC_RDWR & flags) {
-                H5FD_onion_header_t *         hdr        = NULL;
-                H5FD_onion_history_t *        history    = NULL;
+                H5FD_onion_header_t          *hdr        = NULL;
+                H5FD_onion_history_t         *history    = NULL;
                 H5FD_onion_revision_record_t *rec        = NULL;
-                unsigned char *               head_buf   = NULL;
-                unsigned char *               hist_buf   = NULL;
+                unsigned char                *head_buf   = NULL;
+                unsigned char                *hist_buf   = NULL;
                 size_t                        size       = 0;
                 size_t                        saved_size = 0;
 
@@ -1330,7 +1330,7 @@ static herr_t
 H5FD__onion_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t offset, size_t len,
                  void *_buf_out)
 {
-    H5FD_onion_t * file           = (H5FD_onion_t *)_file;
+    H5FD_onion_t  *file           = (H5FD_onion_t *)_file;
     uint64_t       page_0         = 0;
     size_t         n_pages        = 0;
     uint32_t       page_size      = 0;
@@ -1453,10 +1453,10 @@ static herr_t
 H5FD__onion_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t offset, size_t len,
                   const void *_buf)
 {
-    H5FD_onion_t *       file           = (H5FD_onion_t *)_file;
+    H5FD_onion_t        *file           = (H5FD_onion_t *)_file;
     uint64_t             page_0         = 0;
     size_t               n_pages        = 0;
-    unsigned char *      page_buf       = NULL;
+    unsigned char       *page_buf       = NULL;
     uint32_t             page_size      = 0;
     uint32_t             page_size_log2 = 0;
     size_t               bytes_to_write = len;
@@ -1486,7 +1486,7 @@ H5FD__onion_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, 
 
     /* Write, page-by-page */
     for (size_t i = 0; i < n_pages; i++) {
-        const unsigned char *           write_buf = buf;
+        const unsigned char            *write_buf = buf;
         H5FD_onion_index_entry_t        new_entry;
         const H5FD_onion_index_entry_t *entry_out     = NULL;
         haddr_t                         page_gap_head = 0; /* start of page to start of buffer */
@@ -1656,7 +1656,7 @@ herr_t
 H5FDonion_get_revision_count(const char *filename, hid_t fapl_id, size_t *revision_count /*out*/)
 {
     H5P_genplist_t *plist     = NULL;
-    H5FD_t *        file      = NULL;
+    H5FD_t         *file      = NULL;
     herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)

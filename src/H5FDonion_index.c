@@ -447,7 +447,7 @@ herr_t
 H5FD__onion_revision_index_insert(H5FD_onion_revision_index_t *rix, const H5FD_onion_index_entry_t *entry)
 {
     uint64_t                                      key         = 0;
-    H5FD_onion_revision_index_hash_chain_node_t * node        = NULL;
+    H5FD_onion_revision_index_hash_chain_node_t  *node        = NULL;
     H5FD_onion_revision_index_hash_chain_node_t **append_dest = NULL;
     herr_t                                        ret_value   = SUCCEED;
 
@@ -592,7 +592,7 @@ H5FD__onion_revision_record_decode(unsigned char *buf, H5FD_onion_revision_recor
     uint64_t       ui64         = 0;
     uint64_t       n_entries    = 0;
     uint32_t       comment_size = 0;
-    uint8_t *      ui8p         = NULL;
+    uint8_t       *ui8p         = NULL;
     unsigned char *ptr          = NULL;
     size_t         ret_value    = 0;
 
@@ -842,10 +842,10 @@ H5FD__onion_archival_index_list_sort_cmp(const void *_a, const void *_b)
  */
 herr_t
 H5FD__onion_merge_revision_index_into_archival_index(const H5FD_onion_revision_index_t *rix,
-                                                     H5FD_onion_archival_index_t *      aix)
+                                                     H5FD_onion_archival_index_t       *aix)
 {
     uint64_t                    n_kept    = 0;
-    H5FD_onion_index_entry_t *  kept_list = NULL;
+    H5FD_onion_index_entry_t   *kept_list = NULL;
     H5FD_onion_archival_index_t new_aix   = {
         H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR, 0, /* page_size_log2 tbd */
         0,                                          /* n_entries */

@@ -123,7 +123,7 @@ H5FD__onion_header_decode(unsigned char *buf, H5FD_onion_header_t *header)
     uint32_t       ui32      = 0;
     uint32_t       sum       = 0;
     uint64_t       ui64      = 0;
-    uint8_t *      ui8p      = NULL;
+    uint8_t       *ui8p      = NULL;
     unsigned char *ptr       = NULL;
     size_t         ret_value = 0;
 

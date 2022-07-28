@@ -115,7 +115,7 @@ typedef struct H5FD_onion_revision_record_t {
     uint64_t                    logical_eof;
     H5FD_onion_archival_index_t archival_index;
     uint32_t                    comment_size;
-    char *                      comment;
+    char                       *comment;
     uint32_t                    checksum;
 } H5FD_onion_revision_record_t;
 
