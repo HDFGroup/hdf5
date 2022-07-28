@@ -133,6 +133,7 @@
 ./config/intel-cxxflags
 ./config/intel-fflags
 ./config/intel-flags
+./config/libhdf5.fpc.in
 ./config/libhdf5.pc.in
 ./config/linux-gnu
 ./config/linux-gnuaout

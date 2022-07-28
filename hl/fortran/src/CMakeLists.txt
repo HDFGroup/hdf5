@@ -86,7 +86,7 @@ if (NOT ONLY_SHARED_LIBS)
   add_library (${HDF5_HL_F90_LIB_TARGET} STATIC ${HDF5_HL_F90_F_SRCS})
   target_include_directories (${HDF5_HL_F90_LIB_TARGET}
       PRIVATE "${HDF5_F90_BINARY_DIR};${CMAKE_Fortran_MODULE_DIRECTORY}/static;$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_Fortran_INCLUDE_DIRS}>"
-      INTERFACE "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include/static>"
+      INTERFACE "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${HDF5_INSTALL_MODULE_DIR}/static>"
   )
   target_compile_options(${HDF5_HL_F90_LIB_TARGET} PRIVATE "${HDF5_CMAKE_Fortran_FLAGS}")
   target_compile_definitions(${HDF5_HL_F90_LIB_TARGET}
@@ -112,7 +112,7 @@ if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
   add_library (${HDF5_HL_F90_LIBSH_TARGET} SHARED ${HDF5_HL_F90_F_SRCS})
   target_include_directories (${HDF5_HL_F90_LIBSH_TARGET}
       PRIVATE "${HDF5_F90_BINARY_DIR};${CMAKE_Fortran_MODULE_DIRECTORY}/shared;$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_Fortran_INCLUDE_DIRS}>"
-      INTERFACE "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include/shared>"
+      INTERFACE "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${HDF5_INSTALL_MODULE_DIR}/shared>"
   )
   target_compile_options(${HDF5_HL_F90_LIBSH_TARGET} PRIVATE "${HDF5_CMAKE_Fortran_FLAGS}")
   target_compile_definitions(${HDF5_HL_F90_LIBSH_TARGET}
@@ -158,7 +158,7 @@ if (NOT ONLY_SHARED_LIBS)
       FILES
           ${mod_files}
       DESTINATION
-          ${HDF5_INSTALL_INCLUDE_DIR}/static
+          ${HDF5_INSTALL_MODULE_DIR}/static
       COMPONENT
           fortheaders
   )
@@ -184,7 +184,7 @@ if (BUILD_SHARED_LIBS AND NOT SKIP_HDF5_FORTRAN_SHARED)
       FILES
           ${modsh_files}
       DESTINATION
-          ${HDF5_INSTALL_INCLUDE_DIR}/shared
+          ${HDF5_INSTALL_MODULE_DIR}/shared
       COMPONENT
           fortheaders
   )
@@ -233,6 +233,7 @@ set (_PKG_CONFIG_PREFIX ${CMAKE_INSTALL_PREFIX})
 set (_PKG_CONFIG_EXEC_PREFIX \${prefix})
 set (_PKG_CONFIG_LIBDIR \${exec_prefix}/lib)
 set (_PKG_CONFIG_INCLUDEDIR \${prefix}/include)
+set (_PKG_CONFIG_MODULEDIR \${prefix}/mod)
 set (_PKG_CONFIG_LIBNAME "${HDF5_HL_F90_LIB_CORENAME}")
 set (_PKG_CONFIG_VERSION "${HDF5_PACKAGE_VERSION}")
 
@@ -249,7 +250,7 @@ set (_PKG_CONFIG_REQUIRES "${HDF5_F90_LIB_CORENAME}-${HDF5_PACKAGE_VERSION}")
 set (_PKG_CONFIG_REQUIRES_PRIVATE "${HDF5_F90_LIB_CORENAME}-${HDF5_PACKAGE_VERSION}")
 
 configure_file (
-    ${HDF_CONFIG_DIR}/libhdf5.pc.in
+    ${HDF_CONFIG_DIR}/libhdf5.fpc.in
     ${HDF5_BINARY_DIR}/CMakeFiles/${HDF5_HL_F90_LIB_CORENAME}.pc
     @ONLY
 )
