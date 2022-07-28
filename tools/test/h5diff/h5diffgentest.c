@@ -2740,6 +2740,7 @@ gen_dataset_idx(const char *file, int format)
 {
     hid_t   fid       = H5I_INVALID_HID; /* file id */
     hid_t   did       = H5I_INVALID_HID;
+    hid_t   did2      = H5I_INVALID_HID; /* dataset id */
     hid_t   sid       = H5I_INVALID_HID; /* space id */
     hid_t   fapl      = H5I_INVALID_HID; /* file access property id */
     hid_t   dcpl      = H5I_INVALID_HID; /* dataset creation property id */
@@ -2748,9 +2749,6 @@ gen_dataset_idx(const char *file, int format)
     herr_t  status;                      /* return status */
     int     buf[10];                     /* data buffer */
     int     i;                           /* local index variable */
-#if defined(H5_HAVE_FILTER_DEFLATE)
-    hid_t did2 = H5I_INVALID_HID; /* dataset id */
-#endif
 
     /* Get a copy of the file aaccess property */
     fapl = H5Pcreate(H5P_FILE_ACCESS);

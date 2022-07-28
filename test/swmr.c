@@ -56,9 +56,6 @@ const char *FILENAME[] = {"swmr0", /* 0 */
 
 #define NAME_BUF_SIZE 1024 /* Length of file name */
 
-/* Epsilon for floating-point comparisons */
-#define FP_EPSILON 0.000001F
-
 /* Tests for H5Pget/set_metadata_read_attempts(), H5Fget_metadata_read_retry_info */
 static int test_metadata_read_attempts(hid_t in_fapl);
 static int test_metadata_read_retry_info(hid_t in_fapl);
@@ -68,7 +65,6 @@ static int test_start_swmr_write(hid_t in_fapl, hbool_t new_format);
 static int test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format);
 static int test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format);
 static int test_start_swmr_write_stress_ohdr(hid_t in_fapl);
-static int test_start_swmr_write_persist_dapl(hid_t in_fapl);
 
 /* Tests for H5Pget/set_object_flush_cb() */
 static herr_t flush_cb(hid_t obj_id, void *_udata);
@@ -7793,7 +7789,6 @@ main(void)
     nerrors += test_start_swmr_write_concur(fapl, TRUE);
     nerrors += test_start_swmr_write_concur(fapl, FALSE);
     nerrors += test_start_swmr_write_stress_ohdr(fapl);
-    nerrors += test_start_swmr_write_persist_dapl(fapl);
 
     /* Tests for H5Pget/set_object_flush_cb() */
     nerrors += test_object_flush_cb(fapl);

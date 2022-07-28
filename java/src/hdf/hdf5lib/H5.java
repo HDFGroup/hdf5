@@ -11411,29 +11411,6 @@ public class H5 implements java.io.Serializable {
         throws HDF5LibraryException, NullPointerException, IllegalArgumentException;
 
     /**
-     * H5Rget_name_string retrieves a name for the object identified by ref.
-     *
-     * @param loc_id
-     *            IN: Identifier for the dataset containing the reference or for the group that dataset is in.
-     * @param ref_type
-     *            IN: Type of reference.
-     * @param ref
-     *            IN: An object or dataset region reference.
-     *
-     * @return Returns the name if successful, returning null if no name is associated with
-     *         the identifier.
-     *
-     * @exception HDF5LibraryException
-     *            Error from the HDF-5 Library.
-     * @exception NullPointerException
-     *            size is null.
-     * @exception IllegalArgumentException
-     *            Argument is illegal.
-     **/
-    public synchronized static native String H5Rget_name_string(long loc_id, int ref_type, byte[] ref)
-        throws HDF5LibraryException, NullPointerException, IllegalArgumentException;
-
-    /**
      * H5Rget_obj_type Given a reference to an object ref, H5Rget_obj_type returns the type of the object
      * pointed to.
      *

@@ -72,6 +72,7 @@ extern "C" {
  * - \ref H5DSset_scale
  *   \n Convert dataset dsid to a dimension scale,
  *      with optional name, dimname.
+ * .
  *
  */
 
@@ -152,6 +153,7 @@ H5_HLDLL herr_t H5DSattach_scale(hid_t did, hid_t dsid, unsigned int idx);
  *          - The dataset \p did or \p dsid do not exist
  *          - The \p dsid is not a Dimension Scale
  *          - \p dsid is not attached to \p did
+ *          .
  *
  * \note A scale may be associated with more than dimension of the
  *       same dataset. If so, the detach operation only deletes one
@@ -188,6 +190,7 @@ H5_HLDLL herr_t H5DSdetach_scale(hid_t did, hid_t dsid, unsigned int idx);
  *          - Bad arguments
  *          - If \p dsid is already a scale
  *          - If \p dsid is a dataset which already has dimension scales
+ *          .
  *
  *          If the dataset was created with the Table, Image, or Palette interface [9],
  *          it is not recommended to convert to a Dimension Scale.
@@ -237,7 +240,7 @@ H5_HLDLL int H5DSget_num_scales(hid_t did, unsigned int idx);
  *
  *          Fails if:
  *          - Bad arguments
- *
+ *          .
  */
 H5_HLDLL herr_t H5DSset_label(hid_t did, unsigned int idx, const char *label);
 
@@ -267,7 +270,7 @@ H5_HLDLL herr_t H5DSset_label(hid_t did, unsigned int idx, const char *label);
  *
  *          Fails if:
  *          - Bad arguments
- *
+ *          .
  */
 H5_HLDLL ssize_t H5DSget_label(hid_t did, unsigned int idx, char *label, size_t size);
 
@@ -369,6 +372,7 @@ H5_HLDLL htri_t H5DSis_scale(hid_t did);
  *          - Negative causes the iterator to immediately return
  *            that value, indicating failure. The iterator can be
  *            restarted at the next group member.
+ *          .
  *
  *          H5DSiterate_scales() assumes that the scales of the
  *          dimension identified by \p dim remain unchanged through
@@ -399,6 +403,7 @@ H5_HLDLL herr_t H5DSiterate_scales(hid_t did, unsigned int dim, int *idx, H5DS_i
  *          - If \p dsid is not a Dimension Scale
  *          - The \p dsid is not a Dimension Scale
  *          - If \p did is a Dimension Scale (A Dimension Scale cannot have scales.)
+ *          .
  *
  */
 H5_HLDLL htri_t H5DSis_attached(hid_t did, hid_t dsid, unsigned int idx);

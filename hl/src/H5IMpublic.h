@@ -64,6 +64,7 @@ extern "C" {
  *   \n Reads image data from disk.
  * - \ref H5IMunlink_palette
  *   \n Dettaches a palette from an image.
+ * .
  *
  */
 
