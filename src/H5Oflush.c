@@ -75,11 +75,6 @@ H5O_flush(H5O_loc_t *oloc, hid_t obj_id)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Currently, H5Oflush causes H5Fclose to trigger an assertion failure in metadata cache.
-     * Leave this situation for the future solution */
-    if (H5F_HAS_FEATURE(oloc->file, H5FD_FEAT_HAS_MPI))
-        HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "H5Oflush isn't supported for parallel")
-
     /* Get the object pointer */
     if (NULL == (obj_ptr = H5VL_object(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
@@ -253,7 +248,7 @@ H5O_refresh_metadata(H5O_loc_t *oloc, hid_t oid)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to refresh object")
 
         /* Re-open the object, re-fetching its metadata */
-        if (H5O_refresh_metadata_reopen(oid, H5P_DEFAULT, &obj_loc, connector, FALSE) < 0)
+        if (H5O_refresh_metadata_reopen(oid, &obj_loc, connector, FALSE) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to refresh object")
 
         /* Restore the number of references on the VOL connector */
@@ -363,8 +358,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_refresh_metadata_reopen(hid_t oid, hid_t apl_id, H5G_loc_t *obj_loc, H5VL_t *vol_connector,
-                            hbool_t start_swmr)
+H5O_refresh_metadata_reopen(hid_t oid, H5G_loc_t *obj_loc, H5VL_t *vol_connector, hbool_t start_swmr)
 {
     void *     object = NULL;       /* Object for this operation */
     H5I_type_t type;                /* Type of object for the ID */
@@ -393,13 +387,8 @@ H5O_refresh_metadata_reopen(hid_t oid, hid_t apl_id, H5G_loc_t *obj_loc, H5VL_t 
             break;
 
         case H5I_DATASET:
-            /* Set dataset access property list in API context if appropriate */
-            if (H5CX_set_apl(&apl_id, H5P_CLS_DACC, oid, TRUE) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
-
             /* Re-open the dataset */
-            if (NULL ==
-                (object = H5D_open(obj_loc, apl_id == H5P_DEFAULT ? H5P_DATASET_ACCESS_DEFAULT : apl_id)))
+            if (NULL == (object = H5D_open(obj_loc, H5P_DATASET_ACCESS_DEFAULT)))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to open dataset")
             if (!start_swmr) /* No need to handle multiple opens when H5Fstart_swmr_write() */
                 if (H5D_mult_refresh_reopen((H5D_t *)object) < 0)

@@ -89,13 +89,6 @@ New Features
 
     Java Library:
     -------------
-    - Added version of H5Rget_name to return the name as a Java string.
-
-      Other functions that get_name process the get_size then get the name
-      within the JNI implementation. Now H5Rget_name has a H5Rget_name_string.
-
-      (ADB - 2022/07/12)
-
     - Added reference support to H5A and H5D read write vlen JNI functions.
 
       Added the implementation to handle VL references as an Array of Lists
@@ -132,13 +125,6 @@ New Features
 
     Tools:
     ------
-    - The perf tool has been removed
-
-      The small `perf` tool didn't really do anything special and the name
-      conflicts with gnu's perf tool.
-
-      (DER - 2022/07/15, GitHub #1787)
-
     - 1.10 References in containers were not displayed properly by h5dump.
 
       Ported 1.10 tools display function to provide ability to inspect and

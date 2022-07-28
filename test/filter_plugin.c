@@ -438,11 +438,9 @@ static herr_t
 test_dataset_write_with_filters(hid_t fid)
 {
     hid_t        dcpl_id = -1;     /* Dataset creation property list ID        */
+    unsigned int compress_level;   /* Deflate compression level                */
     unsigned int filter1_data;     /* Data used by filter 1                    */
     unsigned int libver_values[4]; /* Used w/ the filter that makes HDF5 calls */
-#ifdef H5_HAVE_FILTER_DEFLATE
-    unsigned int compress_level; /* Deflate compression level */
-#endif
 
     /*----------------------------------------------------------
      * STEP 1: Test deflation by itself.

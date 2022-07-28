@@ -83,6 +83,7 @@ extern "C" {
  *   \n Reads a number of packets from a packet table.
  * - \ref H5PTset_index
  *   \n Sets a packet table's index.
+ * .
  *
  */
 

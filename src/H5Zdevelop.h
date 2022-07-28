@@ -336,36 +336,9 @@ extern "C" {
  *
  *          The filter should perform the transformation in place if possible.
  *          If the transformation cannot be done in place, then the filter
- *          should allocate a new buffer and assign it to \c buf, assigning
- *          the allocated size of that buffer to \c buf_size. The old
- *          buffer should be freed by the filter.
- *
- *          Some care must be taken with the functions that allocate and free
- *          memory. Standard C library functions like malloc(3) and free(3)
- *          will work in many cases, but if there is a mismatch between the
- *          memory allocators used in the library and any filter that
- *          reallocates a buffer, there could be problems. This is most often
- *          the case with Windows and/or when debug memory allocators are being
- *          used. In both cases, the "state" of the memory allocator lies in
- *          different libraries and will get corrupted if you allocate in one
- *          library and free in another. Windows adds the C standard library
- *          via dlls that can vary with Visual Studio version and debug vs
- *          release builds. Static links to the MSVC CRT can also introduce
- *          new memory allocator state.
- *
- *          Note that the HDF5 library enabled memory sanity checks by default
- *          in debug builds for many years. The heap canaries introduced to
- *          buffers by this mechanism would cause problems when filters
- *          attempted to reallocate these buffers. The sanity checks are no
- *          longer enabled by default in any configuration. When in doubt,
- *          memory sanity checking can be disabled explicitly by configuring
- *          with `--disable-memory-alloc-sanity-check` in the Autotools or
- *          setting `HDF5_MEMORY_ALLOC_SANITY_CHECK` to `OFF` in CMake.
- *
- *          The library does provide H5allocate_memory() and H5free_memory()
- *          functions that will use the library's allocation and free functions,
- *          however using these functions will require linking your filter to
- *          a particular version of the library, which may be inconvenient.
+ *          should allocate a new buffer with malloc() and assign it to \c buf,
+ *          assigning the allocated size of that buffer to \c buf_size. The old
+ *          buffer should be freed by calling free().
  *
  *          If successful, the \Emph{filter operation} callback function
  *          returns the number of valid bytes of data contained in \c buf. In
