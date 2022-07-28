@@ -1817,7 +1817,6 @@ H5std_string
 H5Location::getLinkval(const char *name, size_t size) const
 {
     H5L_info2_t  linkinfo;
-    char        *value_C; // value in C string
     size_t       val_size = size;
     H5std_string value;
     herr_t       ret_value;
@@ -1834,17 +1833,12 @@ H5Location::getLinkval(const char *name, size_t size) const
     // if link has value, retrieve the value, otherwise, return null string
     if (val_size > 0) {
         // Create buffer for C string
-        ++val_size;
-        value_C = new char[val_size]();
+        value.assign(val_size + 1, '\0');
 
-        ret_value = H5Lget_val(getId(), name, value_C, val_size, H5P_DEFAULT);
+        ret_value = H5Lget_val(getId(), name, &value[0], val_size, H5P_DEFAULT);
         if (ret_value < 0) {
-            delete[] value_C;
             throwException("getLinkval", "H5Lget_val failed");
         }
-
-        value = H5std_string(value_C, val_size);
-        delete[] value_C;
     }
     return (value);
 }
