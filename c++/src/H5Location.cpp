@@ -1833,11 +1833,18 @@ H5Location::getLinkval(const char *name, size_t size) const
     // if link has value, retrieve the value, otherwise, return null string
     if (val_size > 0) {
         // Create buffer for C string
-        value.assign(val_size + 1, '\0');
+        value.assign(val_size, '\0');
 
         ret_value = H5Lget_val(getId(), name, &value[0], val_size, H5P_DEFAULT);
         if (ret_value < 0) {
             throwException("getLinkval", "H5Lget_val failed");
+        }
+
+        size_t last_notnull_pos(value.find_last_not_of('\0'));
+        if (last_notnull_pos == H5std_string::npos) {
+          value.resize(0);
+        } else {
+          value.resize(last_notnull_pos + 1);
         }
     }
     return (value);
