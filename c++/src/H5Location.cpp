@@ -1842,9 +1842,10 @@ H5Location::getLinkval(const char *name, size_t size) const
 
         size_t last_notnull_pos(value.find_last_not_of('\0'));
         if (last_notnull_pos == H5std_string::npos) {
-          value.resize(0);
-        } else {
-          value.resize(last_notnull_pos + 1);
+            value.resize(0);
+        }
+        else {
+            value.resize(last_notnull_pos + 1);
         }
     }
     return (value);
