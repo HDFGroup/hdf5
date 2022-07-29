@@ -331,7 +331,7 @@ main(void)
 {
     size_t io_size;
     double effic, io_percent;
-    FILE * f, *d;
+    FILE  *f, *d;
     size_t cache_size;
     double w0;
 

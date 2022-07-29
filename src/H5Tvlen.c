@@ -52,7 +52,7 @@
 /* Memory-based VL sequence callbacks */
 static herr_t  H5T_vlen_reclaim_recurse(void *elem, const H5T_t *dt, H5MM_free_t free_func, void *free_info);
 static ssize_t H5T_vlen_seq_mem_getlen(const void *_vl);
-static void *  H5T_vlen_seq_mem_getptr(void *_vl);
+static void   *H5T_vlen_seq_mem_getptr(void *_vl);
 static htri_t  H5T_vlen_seq_mem_isnull(const H5F_t *f, void *_vl);
 static herr_t  H5T_vlen_seq_mem_read(H5F_t *f, void *_vl, void *_buf, size_t len);
 static herr_t  H5T_vlen_seq_mem_write(H5F_t *f, const H5T_vlen_alloc_info_t *vl_alloc_info, void *_vl,
@@ -61,7 +61,7 @@ static herr_t  H5T_vlen_seq_mem_setnull(H5F_t *f, void *_vl, void *_bg);
 
 /* Memory-based VL string callbacks */
 static ssize_t H5T_vlen_str_mem_getlen(const void *_vl);
-static void *  H5T_vlen_str_mem_getptr(void *_vl);
+static void   *H5T_vlen_str_mem_getptr(void *_vl);
 static htri_t  H5T_vlen_str_mem_isnull(const H5F_t *f, void *_vl);
 static herr_t  H5T_vlen_str_mem_read(H5F_t *f, void *_vl, void *_buf, size_t len);
 static herr_t  H5T_vlen_str_mem_write(H5F_t *f, const H5T_vlen_alloc_info_t *vl_alloc_info, void *_vl,
@@ -70,7 +70,7 @@ static herr_t  H5T_vlen_str_mem_setnull(H5F_t *f, void *_vl, void *_bg);
 
 /* Disk-based VL sequence (and string) callbacks */
 static ssize_t H5T_vlen_disk_getlen(const void *_vl);
-static void *  H5T_vlen_disk_getptr(void *_vl);
+static void   *H5T_vlen_disk_getptr(void *_vl);
 static htri_t  H5T_vlen_disk_isnull(const H5F_t *f, void *_vl);
 static herr_t  H5T_vlen_disk_read(H5F_t *f, void *_vl, void *_buf, size_t len);
 static herr_t H5T_vlen_disk_write(H5F_t *f, const H5T_vlen_alloc_info_t *vl_alloc_info, void *_vl, void *_buf,
@@ -491,7 +491,7 @@ H5T_vlen_seq_mem_write(H5F_t H5_ATTR_UNUSED *f, const H5T_vlen_alloc_info_t *vl_
         }    /* end if */
         else /* Default to system malloc */
             if (NULL == (vl.p = HDmalloc(len)))
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "memory allocation failed for VL data")
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "memory allocation failed for VL data")
 
         /* Copy the data into the newly allocated buffer */
         H5MM_memcpy(vl.p, buf, len);
@@ -694,7 +694,7 @@ static herr_t
 H5T_vlen_str_mem_write(H5F_t H5_ATTR_UNUSED *f, const H5T_vlen_alloc_info_t *vl_alloc_info, void *_vl,
                        void *buf, void H5_ATTR_UNUSED *_bg, size_t seq_len, size_t base_size)
 {
-    char * t;                   /* Pointer to temporary buffer allocated */
+    char  *t;                   /* Pointer to temporary buffer allocated */
     size_t len;                 /* Maximum length of the string to copy */
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -712,7 +712,7 @@ H5T_vlen_str_mem_write(H5F_t H5_ATTR_UNUSED *f, const H5T_vlen_alloc_info_t *vl_
     }    /* end if */
     else /* Default to system malloc */
         if (NULL == (t = (char *)HDmalloc((seq_len + 1) * base_size)))
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "memory allocation failed for VL data")
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "memory allocation failed for VL data")
 
     /* 'write' the string into the buffer, with memcpy() */
     len = (seq_len * base_size);
@@ -894,7 +894,7 @@ H5T_vlen_disk_write(H5F_t *f, const H5T_vlen_alloc_info_t H5_ATTR_UNUSED *vl_all
                     void *_bg, size_t seq_len, size_t base_size)
 {
     const uint8_t *bg = (const uint8_t *)_bg; /*Pointer to the old data hvl_t          */
-    uint8_t *      vl = (uint8_t *)_vl;       /*Pointer to the user's hvl_t information*/
+    uint8_t       *vl = (uint8_t *)_vl;       /*Pointer to the user's hvl_t information*/
     H5HG_t         hobjid;                    /* New VL sequence's heap ID */
     size_t         len;                       /* Size of new sequence on disk (in bytes) */
     herr_t         ret_value = SUCCEED;       /* Return value */
@@ -956,7 +956,7 @@ static herr_t
 H5T_vlen_disk_setnull(H5F_t *f, void *_vl, void *_bg)
 {
     const uint8_t *bg        = (const uint8_t *)_bg; /*Pointer to the old data hvl_t          */
-    uint8_t *      vl        = (uint8_t *)_vl;       /*Pointer to the user's hvl_t information*/
+    uint8_t       *vl        = (uint8_t *)_vl;       /*Pointer to the user's hvl_t information*/
     uint32_t       seq_len   = 0;                    /* Sequence length */
     herr_t         ret_value = SUCCEED;              /* Return value */
 

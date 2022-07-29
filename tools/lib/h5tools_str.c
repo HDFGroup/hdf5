@@ -44,7 +44,7 @@ typedef struct H5LD_memb_t {
 /* Variable length string datatype */
 #define STR_INIT_LEN 4096 /*initial length            */
 
-static char *  h5tools_escape(char *s, size_t size);
+static char   *h5tools_escape(char *s, size_t size);
 static hbool_t h5tools_str_is_zero(const void *_mem, size_t size);
 static void    h5tools_print_char(h5tools_str_t *str, const h5tool_format_t *info, char ch);
 void           h5tools_str_indent(h5tools_str_t *str, const h5tool_format_t *info, h5tools_context_t *ctx);
@@ -648,15 +648,15 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
 {
     size_t         nsize, offset, size = 0, nelmts, start;
     H5T_sign_t     nsign;
-    char *         name   = NULL;
+    char          *name   = NULL;
     unsigned char *ucp_vp = (unsigned char *)vp;
-    char *         cp_vp  = (char *)vp;
+    char          *cp_vp  = (char *)vp;
     hid_t          memb   = H5I_INVALID_HID;
     hid_t          obj    = H5I_INVALID_HID;
     static char    fmt_llong[8], fmt_ullong[8];
     H5T_str_t      pad;
     H5T_class_t    type_class;
-    char *         ret_value = NULL;
+    char          *ret_value = NULL;
 
     H5TOOLS_START_DEBUG(" ");
     /* Build default formats for long long types */
@@ -729,7 +729,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
             case H5T_STRING: {
                 unsigned int i;
                 char         quote = '\0';
-                char *       s;
+                char        *s;
 
                 H5TOOLS_DEBUG("H5T_STRING");
                 quote = '\0';
@@ -1320,7 +1320,7 @@ static char *
 h5tools_escape(char *s /*in,out*/, size_t size)
 {
     register size_t i;
-    const char *    escape;
+    const char     *escape;
     char            octal[8];
     size_t          n = HDstrlen(s);
 

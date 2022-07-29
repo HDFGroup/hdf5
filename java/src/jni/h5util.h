@@ -31,14 +31,14 @@
 #endif
 
 typedef struct h5str_t {
-    char * s;
+    char  *s;
     size_t max; /* the allocated size of the string */
 } h5str_t;
 
 extern void   h5str_new(h5str_t *str, size_t len);
 extern void   h5str_free(h5str_t *str);
 extern void   h5str_resize(h5str_t *str, size_t new_len);
-extern char * h5str_append(h5str_t *str, const char *cstr);
+extern char  *h5str_append(h5str_t *str, const char *cstr);
 extern htri_t h5str_detect_vlen(hid_t tid);
 extern size_t h5str_convert(JNIEnv *env, char **in_str, hid_t container, hid_t tid, void *out_buf,
                             size_t out_buf_offset);

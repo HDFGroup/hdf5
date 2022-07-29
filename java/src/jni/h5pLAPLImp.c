@@ -117,7 +117,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1elink_1prefix(JNIEnv *env, jclass clss, jlong lapl_i
 {
     ssize_t prefix_size = -1;
     size_t  size        = 0;
-    char *  pre         = NULL;
+    char   *pre         = NULL;
     jstring str         = NULL;
 
     UNUSED(clss);

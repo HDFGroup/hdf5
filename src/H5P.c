@@ -43,7 +43,7 @@
 typedef struct {
     H5P_iterate_t iter_func; /* Iterator callback */
     hid_t         id;        /* Property list or class ID */
-    void *        iter_data; /* Iterator callback pointer */
+    void         *iter_data; /* Iterator callback pointer */
 } H5P_iter_ud_t;
 
 /********************/
@@ -1016,7 +1016,7 @@ done:
 htri_t
 H5Pequal(hid_t id1, hid_t id2)
 {
-    void * obj1, *obj2;       /* Property objects to compare */
+    void  *obj1, *obj2;       /* Property objects to compare */
     htri_t ret_value = FALSE; /* return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1193,7 +1193,7 @@ H5Piterate(hid_t id, int *idx, H5P_iterate_t iter_func, void *iter_data)
 {
     H5P_iter_ud_t udata;        /* User data for internal iterator callback */
     int           fake_idx = 0; /* Index when user doesn't provide one */
-    void *        obj;          /* Property object to copy */
+    void         *obj;          /* Property object to copy */
     int           ret_value;    /* return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1520,7 +1520,7 @@ char *
 H5Pget_class_name(hid_t pclass_id)
 {
     H5P_genclass_t *pclass;    /* Property class to query */
-    char *          ret_value; /* return value */
+    char           *ret_value; /* return value */
 
     FUNC_ENTER_API(NULL)
     H5TRACE1("*s", "i", pclass_id);

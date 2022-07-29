@@ -66,7 +66,7 @@
 /* Metadata cache (H5AC) callbacks */
 static herr_t H5FA__cache_hdr_get_initial_load_size(void *udata, size_t *image_len);
 static htri_t H5FA__cache_hdr_verify_chksum(const void *image_ptr, size_t len, void *udata_ptr);
-static void * H5FA__cache_hdr_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty);
+static void  *H5FA__cache_hdr_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty);
 static herr_t H5FA__cache_hdr_image_len(const void *thing, size_t *image_len);
 static herr_t H5FA__cache_hdr_serialize(const H5F_t *f, void *image, size_t len, void *thing);
 static herr_t H5FA__cache_hdr_notify(H5AC_notify_action_t action, void *thing);
@@ -74,7 +74,7 @@ static herr_t H5FA__cache_hdr_free_icr(void *thing);
 
 static herr_t H5FA__cache_dblock_get_initial_load_size(void *udata, size_t *image_len);
 static htri_t H5FA__cache_dblock_verify_chksum(const void *image_ptr, size_t len, void *udata_ptr);
-static void * H5FA__cache_dblock_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty);
+static void  *H5FA__cache_dblock_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty);
 static herr_t H5FA__cache_dblock_image_len(const void *thing, size_t *image_len);
 static herr_t H5FA__cache_dblock_serialize(const H5F_t *f, void *image, size_t len, void *thing);
 static herr_t H5FA__cache_dblock_notify(H5AC_notify_action_t action, void *thing);
@@ -83,7 +83,7 @@ static herr_t H5FA__cache_dblock_fsf_size(const void *thing, hsize_t *fsf_size);
 
 static herr_t H5FA__cache_dblk_page_get_initial_load_size(void *udata, size_t *image_len);
 static htri_t H5FA__cache_dblk_page_verify_chksum(const void *image_ptr, size_t len, void *udata_ptr);
-static void * H5FA__cache_dblk_page_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty);
+static void  *H5FA__cache_dblk_page_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty);
 static herr_t H5FA__cache_dblk_page_image_len(const void *thing, size_t *image_len);
 static herr_t H5FA__cache_dblk_page_serialize(const H5F_t *f, void *image, size_t len, void *thing);
 static herr_t H5FA__cache_dblk_page_notify(H5AC_notify_action_t action, void *thing);
@@ -238,11 +238,11 @@ H5FA__cache_hdr_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED len
                             hbool_t H5_ATTR_UNUSED *dirty)
 {
     H5FA_cls_id_t        id;           /* ID of fixed array class, as found in file */
-    H5FA_hdr_t *         hdr   = NULL; /* Fixed array info */
+    H5FA_hdr_t          *hdr   = NULL; /* Fixed array info */
     H5FA_hdr_cache_ud_t *udata = (H5FA_hdr_cache_ud_t *)_udata;
-    const uint8_t *      image = (const uint8_t *)_image; /* Pointer into raw data buffer */
+    const uint8_t       *image = (const uint8_t *)_image; /* Pointer into raw data buffer */
     uint32_t             stored_chksum;                   /* Stored metadata checksum value */
-    void *               ret_value = NULL;
+    void                *ret_value = NULL;
 
     FUNC_ENTER_STATIC
 
@@ -378,7 +378,7 @@ static herr_t
 H5FA__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED len, void *_thing)
 {
     H5FA_hdr_t *hdr   = (H5FA_hdr_t *)_thing; /* Pointer to the fixed array header */
-    uint8_t *   image = (uint8_t *)_image;    /* Pointer into raw data buffer */
+    uint8_t    *image = (uint8_t *)_image;    /* Pointer into raw data buffer */
     uint32_t    metadata_chksum;              /* Computed metadata checksum value */
 
     FUNC_ENTER_STATIC_NOERR
@@ -639,12 +639,12 @@ static void *
 H5FA__cache_dblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED len, void *_udata,
                                hbool_t H5_ATTR_UNUSED *dirty)
 {
-    H5FA_dblock_t *         dblock = NULL;                             /* Data block info */
+    H5FA_dblock_t          *dblock = NULL;                             /* Data block info */
     H5FA_dblock_cache_ud_t *udata  = (H5FA_dblock_cache_ud_t *)_udata; /* User data for loading data block */
-    const uint8_t *         image  = (const uint8_t *)_image;          /* Pointer into raw data buffer */
+    const uint8_t          *image  = (const uint8_t *)_image;          /* Pointer into raw data buffer */
     uint32_t                stored_chksum;                             /* Stored metadata checksum value */
     haddr_t                 arr_addr; /* Address of array header in the file */
-    void *                  ret_value = NULL;
+    void                   *ret_value = NULL;
 
     FUNC_ENTER_STATIC
 
@@ -771,7 +771,7 @@ static herr_t
 H5FA__cache_dblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_UNUSED len, void *_thing)
 {
     H5FA_dblock_t *dblock = (H5FA_dblock_t *)_thing; /* Pointer to the object to serialize */
-    uint8_t *      image  = (uint8_t *)_image;       /* Pointer into raw data buffer */
+    uint8_t       *image  = (uint8_t *)_image;       /* Pointer into raw data buffer */
     uint32_t       metadata_chksum;                  /* Computed metadata checksum value */
     herr_t         ret_value = SUCCEED;
 
@@ -1064,12 +1064,12 @@ H5FA__cache_dblk_page_verify_chksum(const void *_image, size_t len, void H5_ATTR
 static void *
 H5FA__cache_dblk_page_deserialize(const void *_image, size_t len, void *_udata, hbool_t H5_ATTR_UNUSED *dirty)
 {
-    H5FA_dblk_page_t *         dblk_page = NULL; /* Data block page info */
+    H5FA_dblk_page_t          *dblk_page = NULL; /* Data block page info */
     H5FA_dblk_page_cache_ud_t *udata =
         (H5FA_dblk_page_cache_ud_t *)_udata;        /* User data for loading data block page */
     const uint8_t *image = (const uint8_t *)_image; /* Pointer into raw data buffer */
     uint32_t       stored_chksum;                   /* Stored metadata checksum value */
-    void *         ret_value = NULL;
+    void          *ret_value = NULL;
 
     /* Sanity check */
     FUNC_ENTER_STATIC
@@ -1169,7 +1169,7 @@ H5FA__cache_dblk_page_serialize(const H5F_t H5_ATTR_NDEBUG_UNUSED *f, void *_ima
                                 void *_thing)
 {
     H5FA_dblk_page_t *dblk_page = (H5FA_dblk_page_t *)_thing; /* Pointer to the object to serialize */
-    uint8_t *         image     = (uint8_t *)_image;          /* Pointer into raw data buffer */
+    uint8_t          *image     = (uint8_t *)_image;          /* Pointer into raw data buffer */
     uint32_t          metadata_chksum;                        /* Computed metadata checksum value */
     herr_t            ret_value = SUCCEED;
 

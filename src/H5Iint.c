@@ -46,7 +46,7 @@
 /* User data for iterator callback for ID iteration */
 typedef struct {
     H5I_search_func_t user_func;  /* 'User' function to invoke */
-    void *            user_udata; /* User data to pass to 'user' function */
+    void             *user_udata; /* User data to pass to 'user' function */
     hbool_t           app_ref;    /* Whether this is an appl. ref. call */
 } H5I_iterate_ud_t;
 
@@ -66,7 +66,7 @@ typedef struct {
 /********************/
 
 static herr_t H5I__mark_node(void *_id, void *key, void *udata);
-static void * H5I__remove_common(H5I_type_info_t *type_info, hid_t id);
+static void  *H5I__remove_common(H5I_type_info_t *type_info, hid_t id);
 
 /*********************/
 /* Package Variables */
@@ -253,8 +253,8 @@ herr_t
 H5I_clear_type(H5I_type_t type, hbool_t force, hbool_t app_ref)
 {
     H5I_clear_type_ud_t udata; /* udata struct for callback */
-    H5I_id_info_t *     item      = NULL;
-    H5I_id_info_t *     tmp       = NULL;
+    H5I_id_info_t      *item      = NULL;
+    H5I_id_info_t      *tmp       = NULL;
     herr_t              ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -319,7 +319,7 @@ done:
 static herr_t
 H5I__mark_node(void *_info, void H5_ATTR_UNUSED *key, void *_udata)
 {
-    H5I_id_info_t *      info  = (H5I_id_info_t *)_info;        /* Current ID info being worked with */
+    H5I_id_info_t       *info  = (H5I_id_info_t *)_info;        /* Current ID info being worked with */
     H5I_clear_type_ud_t *udata = (H5I_clear_type_ud_t *)_udata; /* udata struct */
     hbool_t              mark  = FALSE;
 
@@ -444,7 +444,7 @@ hid_t
 H5I_register(H5I_type_t type, const void *object, hbool_t app_ref)
 {
     H5I_type_info_t *type_info = NULL;            /* Pointer to the type */
-    H5I_id_info_t *  info      = NULL;            /* Pointer to the new ID information */
+    H5I_id_info_t   *info      = NULL;            /* Pointer to the new ID information */
     hid_t            new_id    = H5I_INVALID_HID; /* New ID */
     hid_t            ret_value = H5I_INVALID_HID; /* Return value */
 
@@ -507,7 +507,7 @@ herr_t
 H5I_register_using_existing_id(H5I_type_t type, void *object, hbool_t app_ref, hid_t existing_id)
 {
     H5I_type_info_t *type_info = NULL;    /* Pointer to the type */
-    H5I_id_info_t *  info      = NULL;    /* Pointer to the new ID information */
+    H5I_id_info_t   *info      = NULL;    /* Pointer to the new ID information */
     herr_t           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -573,7 +573,7 @@ void *
 H5I_subst(hid_t id, const void *new_object)
 {
     H5I_id_info_t *info      = NULL; /* Pointer to the ID's info */
-    void *         ret_value = NULL; /* Return value */
+    void          *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -609,7 +609,7 @@ void *
 H5I_object(hid_t id)
 {
     H5I_id_info_t *info      = NULL; /* Pointer to the ID info */
-    void *         ret_value = NULL; /* Return value */
+    void          *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOERR
 
@@ -643,7 +643,7 @@ void *
 H5I_object_verify(hid_t id, H5I_type_t type)
 {
     H5I_id_info_t *info      = NULL; /* Pointer to the ID info */
-    void *         ret_value = NULL; /* Return value */
+    void          *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOERR
 
@@ -744,7 +744,7 @@ static void *
 H5I__remove_common(H5I_type_info_t *type_info, hid_t id)
 {
     H5I_id_info_t *info      = NULL; /* Pointer to the current ID */
-    void *         ret_value = NULL; /* Return value */
+    void          *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -798,7 +798,7 @@ H5I_remove(hid_t id)
 {
     H5I_type_info_t *type_info = NULL;      /* Pointer to the ID type */
     H5I_type_t       type      = H5I_BADID; /* ID's type */
-    void *           ret_value = NULL;      /* Return value */
+    void            *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -1180,7 +1180,7 @@ done:
 static int
 H5I__iterate_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
 {
-    H5I_id_info_t *   info      = (H5I_id_info_t *)_item;     /* Pointer to the ID info */
+    H5I_id_info_t    *info      = (H5I_id_info_t *)_item;     /* Pointer to the ID info */
     H5I_iterate_ud_t *udata     = (H5I_iterate_ud_t *)_udata; /* User data for callback */
     int               ret_value = H5_ITER_CONT;               /* Callback return value */
 
@@ -1248,8 +1248,8 @@ H5I_iterate(H5I_type_t type, H5I_search_func_t func, void *udata, hbool_t app_re
     /* Only iterate through ID list if it is initialized and there are IDs in type */
     if (type_info && type_info->init_count > 0 && type_info->id_count > 0) {
         H5I_iterate_ud_t iter_udata; /* User data for iteration callback */
-        H5I_id_info_t *  item = NULL;
-        H5I_id_info_t *  tmp  = NULL;
+        H5I_id_info_t   *item = NULL;
+        H5I_id_info_t   *tmp  = NULL;
 
         /* Set up iterator user data */
         iter_udata.user_func  = func;
@@ -1290,8 +1290,8 @@ H5I__find_id(hid_t id)
 {
     H5I_type_t       type;             /* ID's type */
     H5I_type_info_t *type_info = NULL; /* Pointer to the type */
-    H5I_id_info_t *  id_info   = NULL; /* ID's info */
-    H5I_id_info_t *  ret_value = NULL; /* Return value */
+    H5I_id_info_t   *id_info   = NULL; /* ID's info */
+    H5I_id_info_t   *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_PACKAGE_NOERR
 

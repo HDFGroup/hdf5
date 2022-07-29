@@ -40,8 +40,8 @@
 
 typedef struct {
     H5I_search_func_t app_cb;  /* Application's callback routine */
-    void *            app_key; /* Application's "key" (user data) */
-    void *            ret_obj; /* Object to return */
+    void             *app_key; /* Application's "key" (user data) */
+    void             *ret_obj; /* Object to return */
 } H5I_search_ud_t;
 
 /********************/
@@ -704,7 +704,7 @@ void *
 H5Isearch(H5I_type_t type, H5I_search_func_t func, void *key)
 {
     H5I_search_ud_t udata;            /* Context for iteration */
-    void *          ret_value = NULL; /* Return value */
+    void           *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API(NULL)
     H5TRACE3("*x", "Itx*x", type, func, key);

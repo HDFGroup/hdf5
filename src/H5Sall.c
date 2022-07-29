@@ -641,7 +641,7 @@ static herr_t
 H5S__all_deserialize(H5S_t **space, const uint8_t **p)
 {
     uint32_t version;           /* Version number */
-    H5S_t *  tmp_space = NULL;  /* Pointer to actual dataspace to use,
+    H5S_t   *tmp_space = NULL;  /* Pointer to actual dataspace to use,
                                    either *space or a newly allocated one */
     herr_t ret_value = SUCCEED; /* return value */
 

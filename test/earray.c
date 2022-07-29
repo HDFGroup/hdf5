@@ -602,7 +602,7 @@ static unsigned
 test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t H5_ATTR_UNUSED *tparam)
 {
     hid_t   file    = -1;          /* File ID */
-    H5F_t * f       = NULL;        /* Internal file object pointer */
+    H5F_t  *f       = NULL;        /* Internal file object pointer */
     H5EA_t *ea      = NULL;        /* Extensible array wrapper */
     haddr_t ea_addr = HADDR_UNDEF; /* Array address in file */
 
@@ -847,7 +847,7 @@ static unsigned
 test_reopen(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
 {
     hid_t   file    = -1;          /* File ID */
-    H5F_t * f       = NULL;        /* Internal file object pointer */
+    H5F_t  *f       = NULL;        /* Internal file object pointer */
     H5EA_t *ea      = NULL;        /* Extensible array wrapper */
     haddr_t ea_addr = HADDR_UNDEF; /* Array address in file */
 
@@ -919,8 +919,8 @@ test_open_twice(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
 {
     hid_t   file    = -1;          /* File ID */
     hid_t   file2   = -1;          /* File ID */
-    H5F_t * f       = NULL;        /* Internal file object pointer */
-    H5F_t * f2      = NULL;        /* Internal file object pointer */
+    H5F_t  *f       = NULL;        /* Internal file object pointer */
+    H5F_t  *f2      = NULL;        /* Internal file object pointer */
     H5EA_t *ea      = NULL;        /* Extensible array wrapper */
     H5EA_t *ea2     = NULL;        /* Extensible array wrapper */
     haddr_t ea_addr = HADDR_UNDEF; /* Array address in file */
@@ -1032,8 +1032,8 @@ test_open_twice_diff(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tpa
     hid_t   file2   = -1;                      /* File ID */
     hid_t   file0   = -1;                      /* File ID */
     hid_t   file00  = -1;                      /* File ID */
-    H5F_t * f       = NULL;                    /* Internal file object pointer */
-    H5F_t * f2      = NULL;                    /* Internal file object pointer */
+    H5F_t  *f       = NULL;                    /* Internal file object pointer */
+    H5F_t  *f2      = NULL;                    /* Internal file object pointer */
     H5EA_t *ea      = NULL;                    /* Extensible array wrapper */
     H5EA_t *ea2     = NULL;                    /* Extensible array wrapper */
     haddr_t ea_addr = HADDR_UNDEF;             /* Array address in file */
@@ -1168,9 +1168,9 @@ static unsigned
 test_delete_open(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
 {
     hid_t          file    = -1;          /* File ID */
-    H5F_t *        f       = NULL;        /* Internal file object pointer */
-    H5EA_t *       ea      = NULL;        /* Extensible array wrapper */
-    H5EA_t *       ea2     = NULL;        /* Extensible array wrapper */
+    H5F_t         *f       = NULL;        /* Internal file object pointer */
+    H5EA_t        *ea      = NULL;        /* Extensible array wrapper */
+    H5EA_t        *ea2     = NULL;        /* Extensible array wrapper */
     haddr_t        ea_addr = HADDR_UNDEF; /* Array address in file */
     h5_stat_size_t file_size;             /* File size, after deleting array */
 
@@ -2069,9 +2069,9 @@ test_set_elmts(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam, h
                const char *test_str)
 {
     hid_t          file = -1;             /* File ID */
-    H5F_t *        f    = NULL;           /* Internal file object pointer */
-    H5EA_t *       ea   = NULL;           /* Extensible array wrapper */
-    void *         eiter_info;            /* Extensible array iterator info */
+    H5F_t         *f    = NULL;           /* Internal file object pointer */
+    H5EA_t        *ea   = NULL;           /* Extensible array wrapper */
+    void          *eiter_info;            /* Extensible array iterator info */
     earray_state_t state;                 /* State of extensible array */
     uint64_t       welmt;                 /* Element to write */
     uint64_t       relmt;                 /* Element to read */
@@ -2247,8 +2247,8 @@ test_skip_elmts(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam, 
                 const char *test_str)
 {
     hid_t          file = -1;             /* File ID */
-    H5F_t *        f    = NULL;           /* Internal file object pointer */
-    H5EA_t *       ea   = NULL;           /* Extensible array wrapper */
+    H5F_t         *f    = NULL;           /* Internal file object pointer */
+    H5EA_t        *ea   = NULL;           /* Extensible array wrapper */
     earray_state_t state;                 /* State of extensible array */
     uint64_t       welmt;                 /* Element to write */
     uint64_t       relmt;                 /* Element to read */

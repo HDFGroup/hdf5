@@ -204,7 +204,7 @@ done:
 herr_t
 H5Dread_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, uint32_t *filters, void *buf)
 {
-    H5D_t * dset = NULL;
+    H5D_t  *dset = NULL;
     hsize_t offset_copy[H5O_LAYOUT_NDIMS]; /* Internal copy of chunk offset */
     herr_t  ret_value = SUCCEED;           /* Return value */
 
@@ -336,7 +336,7 @@ herr_t
 H5Dwrite_chunk(hid_t dset_id, hid_t dxpl_id, uint32_t filters, const hsize_t *offset, size_t data_size,
                const void *buf)
 {
-    H5D_t *  dset = NULL;
+    H5D_t   *dset = NULL;
     hsize_t  offset_copy[H5O_LAYOUT_NDIMS]; /* Internal copy of chunk offset */
     uint32_t data_size_32;                  /* Chunk data size (limited to 32-bits currently) */
     herr_t   ret_value = SUCCEED;           /* Return value */
@@ -406,7 +406,7 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, H5S_t *mem_space, H5S_t *file_space
     H5D_io_info_t    io_info;                     /* Dataset I/O info     */
     H5D_type_info_t  type_info;                   /* Datatype info for operation */
     hbool_t          type_info_init      = FALSE; /* Whether the datatype info has been initialized */
-    H5S_t *          projected_mem_space = NULL;  /* If not NULL, ptr to dataspace containing a     */
+    H5S_t           *projected_mem_space = NULL;  /* If not NULL, ptr to dataspace containing a     */
                                                   /* projection of the supplied mem_space to a new  */
                                                   /* dataspace with rank equal to that of           */
                                                   /* file_space.                                    */
@@ -622,7 +622,7 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, H5S_t *mem_space, H5S_t *file_spac
     H5D_type_info_t  type_info;                   /* Datatype info for operation */
     hbool_t          type_info_init      = FALSE; /* Whether the datatype info has been initialized */
     hbool_t          should_alloc_space  = FALSE; /* Whether or not to initialize dataset's storage */
-    H5S_t *          projected_mem_space = NULL;  /* If not NULL, ptr to dataspace containing a     */
+    H5S_t           *projected_mem_space = NULL;  /* If not NULL, ptr to dataspace containing a     */
                                                   /* projection of the supplied mem_space to a new  */
                                                   /* dataspace with rank equal to that of           */
                                                   /* file_space.                                    */
@@ -925,8 +925,8 @@ H5D__ioinfo_init(H5D_t *dset, const H5D_type_info_t *type_info, H5D_storage_t *s
 static herr_t
 H5D__typeinfo_init(const H5D_t *dset, hid_t mem_type_id, hbool_t do_write, H5D_type_info_t *type_info)
 {
-    const H5T_t *     src_type;            /* Source datatype */
-    const H5T_t *     dst_type;            /* Destination datatype */
+    const H5T_t      *src_type;            /* Source datatype */
+    const H5T_t      *dst_type;            /* Destination datatype */
     H5Z_data_xform_t *data_transform;      /* Data transform info */
     herr_t            ret_value = SUCCEED; /* Return value    */
 
@@ -986,8 +986,8 @@ H5D__typeinfo_init(const H5D_t *dset, hid_t mem_type_id, hbool_t do_write, H5D_t
         type_info->need_bkg    = H5T_BKG_NO;
     } /* end if */
     else {
-        void *    tconv_buf;     /* Temporary conversion buffer pointer */
-        void *    bkgr_buf;      /* Background conversion buffer pointer */
+        void     *tconv_buf;     /* Temporary conversion buffer pointer */
+        void     *bkgr_buf;      /* Background conversion buffer pointer */
         size_t    max_temp_buf;  /* Maximum temporary buffer size */
         H5T_bkg_t bkgr_buf_type; /* Background buffer type */
         size_t    target_size;   /* Desired buffer size    */

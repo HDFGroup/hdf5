@@ -24,14 +24,14 @@
 
 /* PRIVATE PROTOTYPES */
 static herr_t H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg);
-static void * H5O_attr_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags, size_t p_size,
+static void  *H5O_attr_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags, size_t p_size,
                               const uint8_t *p);
-static void * H5O_attr_copy(const void *_mesg, void *_dest);
+static void  *H5O_attr_copy(const void *_mesg, void *_dest);
 static size_t H5O_attr_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O__attr_free(void *mesg);
 static herr_t H5O_attr_pre_copy_file(H5F_t *file_src, const void *mesg_src, hbool_t *deleted,
                                      const H5O_copy_t *cpy_info, void *udata);
-static void * H5O__attr_copy_file(H5F_t *file_src, const H5O_msg_class_t *mesg_type, void *native_src,
+static void  *H5O__attr_copy_file(H5F_t *file_src, const H5O_msg_class_t *mesg_type, void *native_src,
                                   H5F_t *file_dst, hbool_t *recompute_size, H5O_copy_t *cpy_info, void *udata);
 static herr_t H5O__attr_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src, H5O_loc_t *dst_oloc,
                                        void *mesg_dst, H5O_copy_t *cpy_info);
@@ -120,14 +120,14 @@ static void *
 H5O_attr_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags, unsigned *ioflags,
                 size_t p_size, const uint8_t *p)
 {
-    H5A_t *       attr = NULL;
+    H5A_t        *attr = NULL;
     H5S_extent_t *extent;           /*extent dimensionality information  */
     size_t        name_len;         /*attribute name length */
     size_t        dt_size;          /* Datatype size */
     hssize_t      sds_size;         /* Signed Dataspace size */
     hsize_t       ds_size;          /* Dataspace size */
     unsigned      flags     = 0;    /* Attribute flags */
-    H5A_t *       ret_value = NULL; /* Return value */
+    H5A_t        *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -796,7 +796,7 @@ static herr_t
 H5O__attr_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent, int fwidth)
 {
     const H5A_t *mesg = (const H5A_t *)_mesg;
-    const char * s;                   /* Temporary string pointer */
+    const char  *s;                   /* Temporary string pointer */
     char         buf[128];            /* Temporary string buffer */
     herr_t       ret_value = SUCCEED; /* Return value */
 

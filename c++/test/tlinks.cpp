@@ -638,7 +638,7 @@ test_visit(hid_t fapl_id, hbool_t new_format)
         dims[1]                     = 2;
         cdims[0]                    = 2;
         cdims[1]                    = 2;
-        DataSpace *       dataspace = new DataSpace(RANK, dims); // create new dspace
+        DataSpace        *dataspace = new DataSpace(RANK, dims); // create new dspace
         DSetCreatPropList ds_creatplist;                         // create dataset creation prop list
         ds_creatplist.setChunk(2, cdims);                        // then modify it for compression
         ds_creatplist.setDeflate(6);

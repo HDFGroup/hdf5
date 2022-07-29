@@ -189,7 +189,7 @@ H5FL_DEFINE_STATIC(H5FD_sec2_t);
 static herr_t
 H5FD__init_package(void)
 {
-    char * lock_env_var = NULL; /* Environment variable pointer */
+    char  *lock_env_var = NULL; /* Environment variable pointer */
     herr_t ret_value    = SUCCEED;
 
     FUNC_ENTER_STATIC
@@ -322,7 +322,7 @@ H5FD__sec2_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
 #endif
     h5_stat_t       sb;
     H5P_genplist_t *plist;            /* Property list pointer */
-    H5FD_t *        ret_value = NULL; /* Return value */
+    H5FD_t         *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_STATIC
 

@@ -34,7 +34,7 @@
 
 typedef struct {
     haddr_t objno; /* Object ID (i.e. address) */
-    char *  path;  /* Object path */
+    char   *path;  /* Object path */
 } ref_path_node_t;
 
 static H5SL_t *ref_path_table = NULL; /* the "table" (implemented with a skip list) */

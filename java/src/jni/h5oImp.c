@@ -392,10 +392,10 @@ H5O_iterate_cb(hid_t g_id, const char *name, const H5O_info_t *info, void *cb_da
     jobject     ihinfobuf1;
     jobject     ihinfobuf2;
     jstring     str;
-    JNIEnv *    cbenv = NULL;
+    JNIEnv     *cbenv = NULL;
     jclass      cbcls;
     jvalue      args[12];
-    void *      op_data = (void *)wrapper->op_data;
+    void       *op_data = (void *)wrapper->op_data;
     jint        status  = FAIL;
 
     if (JVMPTR->AttachCurrentThread(JVMPAR, (void **)&cbenv, NULL) < 0) {
@@ -612,7 +612,7 @@ Java_hdf_hdf5lib_H5_H5Oget_1comment(JNIEnv *env, jclass clss, jlong loc_id)
     jstring str = NULL;
     ssize_t buf_size;
     ssize_t status   = -1;
-    char *  oComment = NULL;
+    char   *oComment = NULL;
 
     UNUSED(clss);
 
@@ -652,7 +652,7 @@ Java_hdf_hdf5lib_H5_H5Oget_1comment_1by_1name(JNIEnv *env, jclass clss, jlong lo
     jstring     str     = NULL;
     ssize_t     buf_size;
     ssize_t     status;
-    char *      objComment = NULL;
+    char       *objComment = NULL;
 
     UNUSED(clss);
 

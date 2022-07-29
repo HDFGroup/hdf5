@@ -20,7 +20,7 @@ herr_t
 H5Ovisit_cb(hid_t obj, const char *name, const H5O_info2_t *info, void *op_data)
 {
     herr_t retval    = 0;
-    char * base_path = (char *)op_data;
+    char  *base_path = (char *)op_data;
 
     if (info->type == H5O_TYPE_DATASET) // current object is a dataset
     {

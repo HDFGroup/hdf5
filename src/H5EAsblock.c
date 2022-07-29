@@ -274,9 +274,9 @@ H5EA_sblock_t *
 H5EA__sblock_protect(H5EA_hdr_t *hdr, H5EA_iblock_t *parent, haddr_t sblk_addr, unsigned sblk_idx,
                      unsigned flags)
 {
-    H5EA_sblock_t *        sblock = NULL; /* Pointer to super block */
+    H5EA_sblock_t         *sblock = NULL; /* Pointer to super block */
     H5EA_sblock_cache_ud_t udata;         /* Information needed for loading super block */
-    H5EA_sblock_t *        ret_value = NULL;
+    H5EA_sblock_t         *ret_value = NULL;
 
     FUNC_ENTER_PACKAGE
 

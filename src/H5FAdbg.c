@@ -85,7 +85,7 @@ H5FA__hdr_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, co
 {
     /* Local variables */
     H5FA_hdr_t *hdr       = NULL;    /* Shared fixed array header */
-    void *      dbg_ctx   = NULL;    /* Fixed array debugging context */
+    void       *dbg_ctx   = NULL;    /* Fixed array debugging context */
     herr_t      ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -155,9 +155,9 @@ H5FA__dblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
                    haddr_t hdr_addr, haddr_t obj_addr)
 {
     /* Local variables */
-    H5FA_hdr_t *   hdr     = NULL;      /* Shared fixed array header */
+    H5FA_hdr_t    *hdr     = NULL;      /* Shared fixed array header */
     H5FA_dblock_t *dblock  = NULL;      /* Fixed array data block */
-    void *         dbg_ctx = NULL;      /* Fixed array context */
+    void          *dbg_ctx = NULL;      /* Fixed array context */
     size_t         u;                   /* Local index variable */
     herr_t         ret_value = SUCCEED; /* Return value */
 

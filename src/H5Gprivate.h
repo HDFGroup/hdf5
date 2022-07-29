@@ -146,7 +146,7 @@ struct H5O_link_t;
  */
 typedef struct {
     struct H5O_loc_t *oloc; /* Object header location            */
-    H5G_name_t *      path; /* Group hierarchy path              */
+    H5G_name_t       *path; /* Group hierarchy path              */
 } H5G_loc_t;
 
 /* Typedef for path traversal operations */
@@ -190,14 +190,14 @@ typedef struct H5G_entry_t  H5G_entry_t;
  * call.
  */
 H5_DLL struct H5O_loc_t *H5G_oloc(H5G_t *grp);
-H5_DLL H5G_name_t *H5G_nameof(H5G_t *grp);
-H5_DLL H5F_t *H5G_fileof(H5G_t *grp);
-H5_DLL H5G_t * H5G_open(const H5G_loc_t *loc);
-H5_DLL herr_t  H5G_close(H5G_t *grp);
-H5_DLL herr_t  H5G_get_shared_count(H5G_t *grp);
-H5_DLL herr_t  H5G_mount(H5G_t *grp);
-H5_DLL hbool_t H5G_mounted(H5G_t *grp);
-H5_DLL herr_t  H5G_unmount(H5G_t *grp);
+H5_DLL H5G_name_t       *H5G_nameof(H5G_t *grp);
+H5_DLL H5F_t            *H5G_fileof(H5G_t *grp);
+H5_DLL H5G_t            *H5G_open(const H5G_loc_t *loc);
+H5_DLL herr_t            H5G_close(H5G_t *grp);
+H5_DLL herr_t            H5G_get_shared_count(H5G_t *grp);
+H5_DLL herr_t            H5G_mount(H5G_t *grp);
+H5_DLL hbool_t           H5G_mounted(H5G_t *grp);
+H5_DLL herr_t            H5G_unmount(H5G_t *grp);
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 H5_DLL H5G_obj_t H5G_map_obj_type(H5O_type_t obj_type);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
@@ -251,14 +251,14 @@ H5_DLL herr_t H5G_ent_decode(const H5F_t *f, const uint8_t **pp, H5G_entry_t *en
 /*
  * These functions operate on group hierarchy names.
  */
-H5_DLL herr_t  H5G_name_set(const H5G_name_t *loc, H5G_name_t *obj, const char *name);
-H5_DLL herr_t  H5G_name_replace(const struct H5O_link_t *lnk, H5G_names_op_t op, H5F_t *src_file,
-                                H5RS_str_t *src_full_path_r, H5F_t *dst_file, H5RS_str_t *dst_full_path_r);
-H5_DLL herr_t  H5G_name_reset(H5G_name_t *name);
-H5_DLL herr_t  H5G_name_copy(H5G_name_t *dst, const H5G_name_t *src, H5_copy_depth_t depth);
-H5_DLL herr_t  H5G_name_free(H5G_name_t *name);
-H5_DLL ssize_t H5G_get_name(const H5G_loc_t *loc, char *name /*out*/, size_t size, hbool_t *cached);
-H5_DLL ssize_t H5G_get_name_by_addr(hid_t fid, const struct H5O_loc_t *loc, char *name, size_t size);
+H5_DLL herr_t      H5G_name_set(const H5G_name_t *loc, H5G_name_t *obj, const char *name);
+H5_DLL herr_t      H5G_name_replace(const struct H5O_link_t *lnk, H5G_names_op_t op, H5F_t *src_file,
+                                    H5RS_str_t *src_full_path_r, H5F_t *dst_file, H5RS_str_t *dst_full_path_r);
+H5_DLL herr_t      H5G_name_reset(H5G_name_t *name);
+H5_DLL herr_t      H5G_name_copy(H5G_name_t *dst, const H5G_name_t *src, H5_copy_depth_t depth);
+H5_DLL herr_t      H5G_name_free(H5G_name_t *name);
+H5_DLL ssize_t     H5G_get_name(const H5G_loc_t *loc, char *name /*out*/, size_t size, hbool_t *cached);
+H5_DLL ssize_t     H5G_get_name_by_addr(hid_t fid, const struct H5O_loc_t *loc, char *name, size_t size);
 H5_DLL H5RS_str_t *H5G_build_fullpath_refstr_str(H5RS_str_t *path_r, const char *name);
 
 /*

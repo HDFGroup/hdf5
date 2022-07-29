@@ -42,7 +42,7 @@ Java_hdf_hdf5lib_H5_H5Rcreate(JNIEnv *env, jclass clss, jbyteArray ref, jlong lo
 {
     const char *refName = NULL;
     jboolean    isCopy;
-    jbyte *     refBuf = NULL;
+    jbyte      *refBuf = NULL;
     jsize       refBufLen;
     herr_t      status = FAIL;
 
@@ -92,7 +92,7 @@ Java_hdf_hdf5lib_H5__1H5Rdereference(JNIEnv *env, jclass clss, jlong dataset, jl
                                      jint ref_type, jbyteArray ref)
 {
     jboolean isCopy;
-    jbyte *  refBuf = NULL;
+    jbyte   *refBuf = NULL;
     jsize    refBufLen;
     hid_t    retVal = H5I_INVALID_HID;
 
@@ -136,7 +136,7 @@ JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_H5__1H5Rget_1region(JNIEnv *env, jclass clss, jlong dataset, jint ref_type, jbyteArray ref)
 {
     jboolean isCopy;
-    jbyte *  refBuf = NULL;
+    jbyte   *refBuf = NULL;
     jsize    refBufLen;
     hid_t    retVal = H5I_INVALID_HID;
 
@@ -178,7 +178,7 @@ Java_hdf_hdf5lib_H5_H5Rget_1obj_1type(JNIEnv *env, jclass clss, jlong loc_id, ji
 {
     H5O_type_t object_info;
     jboolean   isCopy;
-    jbyte *    refBuf = NULL;
+    jbyte     *refBuf = NULL;
     int        retVal = -1;
 
     UNUSED(clss);
@@ -211,8 +211,8 @@ Java_hdf_hdf5lib_H5_H5Rget_1obj_1type2(JNIEnv *env, jclass clss, jlong loc_id, j
                                        jintArray ref_obj)
 {
     jboolean isCopy, isCopy2;
-    jbyte *  refBuf   = NULL;
-    jint *   ref_objP = NULL;
+    jbyte   *refBuf   = NULL;
+    jint    *ref_objP = NULL;
     jint     status   = -1;
     int      retVal   = -1;
 
@@ -253,8 +253,8 @@ Java_hdf_hdf5lib_H5_H5Rget_1name(JNIEnv *env, jclass clss, jlong loc_id, jint re
     jboolean isCopy;
     jstring  str;
     jsize    refBufLen;
-    jbyte *  refBuf  = NULL;
-    char *   aName   = NULL;
+    jbyte   *refBuf  = NULL;
+    char    *aName   = NULL;
     jlong    ret_val = -1;
 
     UNUSED(clss);
@@ -314,8 +314,8 @@ Java_hdf_hdf5lib_H5_H5Rget_1name_1string(JNIEnv *env, jclass clss, jlong loc_id,
     jboolean isCopy;
     jstring  str;
     jsize    refBufLen;
-    jbyte *  refBuf   = NULL;
-    char *   aName    = NULL;
+    jbyte   *refBuf   = NULL;
+    char    *aName    = NULL;
     ssize_t  buf_size = -1;
     jlong    ret_val  = -1;
 

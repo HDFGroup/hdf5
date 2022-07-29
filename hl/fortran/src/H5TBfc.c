@@ -40,17 +40,17 @@ h5tbmake_table_c(size_t_f *namelen1, _fcd name1, hid_t_f *loc_id, size_t_f *name
                  hid_t_f *field_types, hsize_t_f *chunk_size, int_f *compress,
                  size_t_f *char_len_field_names,      /* field_names lengths */
                  size_t_f *max_char_size_field_names, /* char len of fields */
-                 char *    field_names)                   /* field_names */
+                 char     *field_names)                   /* field_names */
 {
-    char *  c_name  = NULL;
-    char *  c_name1 = NULL;
+    char   *c_name  = NULL;
+    char   *c_name1 = NULL;
     hsize_t num_elem;
     hsize_t i;
     hsize_t c_nfields      = (hsize_t)*nfields;
     size_t *c_field_offset = NULL;
-    hid_t * c_field_types  = NULL;
-    char ** c_field_names  = NULL;
-    char *  tmp            = NULL, *tmp_p;
+    hid_t  *c_field_types  = NULL;
+    char  **c_field_names  = NULL;
+    char   *tmp            = NULL, *tmp_p;
     int_f   ret_value      = 0;
 
     num_elem = (hsize_t)*nfields;
@@ -147,15 +147,15 @@ h5tbmake_table_ptr_c(size_t_f *namelen1, _fcd name1, hid_t_f *loc_id, size_t_f *
                      size_t_f *max_char_size_field_names, /* char len of fields */
                      char *field_names, void *data)       /* field_names */
 {
-    char *  c_name  = NULL;
-    char *  c_name1 = NULL;
+    char   *c_name  = NULL;
+    char   *c_name1 = NULL;
     hsize_t num_elem;
     hsize_t i;
     hsize_t c_nfields      = (hsize_t)*nfields;
     size_t *c_field_offset = NULL;
-    hid_t * c_field_types  = NULL;
-    char ** c_field_names  = NULL;
-    char *  tmp            = NULL, *tmp_p;
+    hid_t  *c_field_types  = NULL;
+    char  **c_field_names  = NULL;
+    char   *tmp            = NULL, *tmp_p;
     int_f   ret_value      = 0;
 
     num_elem = (hsize_t)*nfields;
@@ -248,7 +248,7 @@ int_f
 h5tbread_table_c(hid_t_f *loc_id, _fcd name, size_t_f *namelen, hsize_t_f *nfields, size_t_f *dst_size,
                  size_t_f *dst_offset, size_t_f *dst_sizes, void *dst_buf)
 {
-    char *  c_name       = NULL;
+    char   *c_name       = NULL;
     size_t *c_dst_offset = NULL;
     size_t *c_dst_sizes  = NULL;
     hsize_t c_nfields    = (hsize_t)*nfields;
@@ -308,8 +308,8 @@ int_f
 h5tbwrite_field_name_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, size_t_f *namelen1, _fcd field_name,
                        hsize_t_f *start, hsize_t_f *nrecords, size_t_f *type_size, void *buf)
 {
-    char * c_name         = NULL;
-    char * c_name1        = NULL;
+    char  *c_name         = NULL;
+    char  *c_name1        = NULL;
     size_t c_type_size[1] = {(size_t)*type_size};
     int_f  ret_value      = 0;
 
@@ -356,8 +356,8 @@ int_f
 h5tbread_field_name_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, size_t_f *namelen1, _fcd field_name,
                       hsize_t_f *start, hsize_t_f *nrecords, size_t_f *type_size, void *buf)
 {
-    char * c_name         = NULL;
-    char * c_name1        = NULL;
+    char  *c_name         = NULL;
+    char  *c_name1        = NULL;
     size_t c_type_size[1] = {(size_t)*type_size};
     int_f  ret_value      = 0;
 
@@ -404,7 +404,7 @@ int_f
 h5tbwrite_field_index_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, int_f *field_index, hsize_t_f *start,
                         hsize_t_f *nrecords, size_t_f *type_size, void *buf)
 {
-    char * c_name        = NULL;
+    char  *c_name        = NULL;
     size_t c_type_size   = *type_size;
     int    c_field_index = *field_index - 1; /* C zero based index */
     int_f  ret_value     = 0;
@@ -448,7 +448,7 @@ int_f
 h5tbread_field_index_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, int_f *field_index, hsize_t_f *start,
                        hsize_t_f *nrecords, size_t_f *type_size, void *buf)
 {
-    char * c_name        = NULL;
+    char  *c_name        = NULL;
     size_t c_type_size   = *type_size;
     int    c_field_index = *field_index - 1; /* C zero based index */
     int_f  ret_value     = 0;
@@ -583,7 +583,7 @@ done:
 int_f
 h5tbget_table_info_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, hsize_t_f *nfields, hsize_t_f *nrecords)
 {
-    char *  c_name = NULL;
+    char   *c_name = NULL;
     hsize_t c_nfields;
     hsize_t c_nrecords;
     int_f   ret_value = 0;
@@ -634,14 +634,14 @@ h5tbget_field_info_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, hsize_t_f *n
                      size_t_f *maxlen_out)
 
 {
-    char *  c_name = NULL;
+    char   *c_name = NULL;
     hsize_t num_elem;
     hsize_t c_nfields       = *nfields;
     size_t *c_field_sizes   = NULL;
     size_t *c_field_offsets = NULL;
     size_t  c_type_size;
-    char ** c_field_names = NULL;
-    char *  tmp           = NULL, *tmp_p;
+    char  **c_field_names = NULL;
+    char   *tmp           = NULL, *tmp_p;
     hsize_t i;
     int_f   ret_value = 0;
     size_t  c_lenmax;

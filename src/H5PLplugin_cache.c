@@ -269,7 +269,7 @@ H5PL__find_plugin_in_cache(const H5PL_search_params_t *search_params, hbool_t *f
             (search_params->key.id == (H5PL_cache_g[u]).key.id)) {
 
             H5PL_get_plugin_info_t get_plugin_info_function;
-            const H5Z_class2_t *   filter_info;
+            const H5Z_class2_t    *filter_info;
 
             /* Get the "get plugin info" function from the plugin. */
             if (NULL == (get_plugin_info_function = (H5PL_get_plugin_info_t)H5PL_GET_LIB_FUNC(

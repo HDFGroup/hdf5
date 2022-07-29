@@ -209,9 +209,9 @@ done:
 H5EA_dblk_page_t *
 H5EA__dblk_page_protect(H5EA_hdr_t *hdr, H5EA_sblock_t *parent, haddr_t dblk_page_addr, unsigned flags)
 {
-    H5EA_dblk_page_t *        dblk_page = NULL; /* Extensible array data block page */
+    H5EA_dblk_page_t         *dblk_page = NULL; /* Extensible array data block page */
     H5EA_dblk_page_cache_ud_t udata;            /* Information needed for loading data block page */
-    H5EA_dblk_page_t *        ret_value = NULL;
+    H5EA_dblk_page_t         *ret_value = NULL;
 
     FUNC_ENTER_PACKAGE
 

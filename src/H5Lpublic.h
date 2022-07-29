@@ -149,7 +149,7 @@ typedef ssize_t (*H5L_query_func_t)(const char *link_name, const void *lnkdata, 
 typedef struct {
     int                   version;     /* Version number of this struct        */
     H5L_type_t            id;          /* Link type ID                         */
-    const char *          comment;     /* Comment for debugging                */
+    const char           *comment;     /* Comment for debugging                */
     H5L_create_func_t     create_func; /* Callback during link creation        */
     H5L_move_func_t       move_func;   /* Callback after moving link           */
     H5L_copy_func_t       copy_func;   /* Callback after copying link          */
@@ -169,7 +169,7 @@ typedef struct {
 typedef struct {
     int                 version;     /**< Version number of this struct       */
     H5L_type_t          id;          /**< Link type ID                        */
-    const char *        comment;     /**< Comment for debugging               */
+    const char         *comment;     /**< Comment for debugging               */
     H5L_create_func_t   create_func; /**< Callback during link creation       */
     H5L_move_func_t     move_func;   /**< Callback after moving link          */
     H5L_copy_func_t     copy_func;   /**< Callback after copying link         */

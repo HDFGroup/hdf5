@@ -84,10 +84,10 @@ H5D__select_io(const H5D_io_info_t *io_info, size_t elmt_size, size_t nelmts, H5
     hbool_t         mem_iter_init  = FALSE; /* Memory selection iteration info has been initialized */
     H5S_sel_iter_t *file_iter      = NULL;  /* File selection iteration info */
     hbool_t         file_iter_init = FALSE; /* File selection iteration info has been initialized */
-    hsize_t *       mem_off        = NULL;  /* Pointer to sequence offsets in memory */
-    hsize_t *       file_off       = NULL;  /* Pointer to sequence offsets in the file */
-    size_t *        mem_len        = NULL;  /* Pointer to sequence lengths in memory */
-    size_t *        file_len       = NULL;  /* Pointer to sequence lengths in the file */
+    hsize_t        *mem_off        = NULL;  /* Pointer to sequence offsets in memory */
+    hsize_t        *file_off       = NULL;  /* Pointer to sequence offsets in the file */
+    size_t         *mem_len        = NULL;  /* Pointer to sequence lengths in memory */
+    size_t         *file_len       = NULL;  /* Pointer to sequence lengths in the file */
     size_t          curr_mem_seq;           /* Current memory sequence to operate on */
     size_t          curr_file_seq;          /* Current file sequence to operate on */
     size_t          mem_nseq;               /* Number of sequences generated in the file */
@@ -281,10 +281,10 @@ H5D_select_io_mem(void *dst_buf, H5S_t *dst_space, const void *src_buf, H5S_t *s
     H5S_sel_iter_t *src_sel_iter      = NULL;  /* Source dataspace iteration info */
     hbool_t         dst_sel_iter_init = FALSE; /* Destination dataspace selection iterator initialized? */
     hbool_t         src_sel_iter_init = FALSE; /* Source dataspace selection iterator initialized? */
-    hsize_t *       dst_off           = NULL;  /* Pointer to sequence offsets in destination buffer */
-    hsize_t *       src_off           = NULL;  /* Pointer to sequence offsets in source buffer */
-    size_t *        dst_len           = NULL;  /* Pointer to sequence lengths in destination buffer */
-    size_t *        src_len           = NULL;  /* Pointer to sequence lengths in source buffer */
+    hsize_t        *dst_off           = NULL;  /* Pointer to sequence offsets in destination buffer */
+    hsize_t        *src_off           = NULL;  /* Pointer to sequence offsets in source buffer */
+    size_t         *dst_len           = NULL;  /* Pointer to sequence lengths in destination buffer */
+    size_t         *src_len           = NULL;  /* Pointer to sequence lengths in source buffer */
     size_t          curr_dst_seq;              /* Current destination buffer sequence to operate on */
     size_t          curr_src_seq;              /* Current source buffer sequence to operate on */
     size_t          dst_nseq;                  /* Number of sequences generated for destination buffer */

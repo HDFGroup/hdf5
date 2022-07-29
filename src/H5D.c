@@ -94,7 +94,7 @@ H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id, hid_t 
            hid_t dapl_id)
 {
     H5G_loc_t    loc;                         /* Object location to insert dataset into */
-    H5D_t *      dset = NULL;                 /* New dataset's info */
+    H5D_t       *dset = NULL;                 /* New dataset's info */
     const H5S_t *space;                       /* Dataspace for dataset */
     hid_t        ret_value = H5I_INVALID_HID; /* Return value */
 
@@ -188,7 +188,7 @@ hid_t
 H5Dcreate_anon(hid_t loc_id, hid_t type_id, hid_t space_id, hid_t dcpl_id, hid_t dapl_id)
 {
     H5G_loc_t    loc;                         /* Object location to insert dataset into */
-    H5D_t *      dset = NULL;                 /* New dataset's info */
+    H5D_t       *dset = NULL;                 /* New dataset's info */
     const H5S_t *space;                       /* Dataspace for dataset */
     hid_t        ret_value = H5I_INVALID_HID; /* Return value */
 
@@ -260,7 +260,7 @@ done:
 hid_t
 H5Dopen2(hid_t loc_id, const char *name, hid_t dapl_id)
 {
-    H5D_t *   dset = NULL;
+    H5D_t    *dset = NULL;
     H5G_loc_t loc;                         /* Object location of group */
     hid_t     ret_value = H5I_INVALID_HID; /* Return value */
 
@@ -535,7 +535,7 @@ done:
 hsize_t
 H5Dget_storage_size(hid_t dset_id)
 {
-    H5D_t * dset;          /* Dataset to query */
+    H5D_t  *dset;          /* Dataset to query */
     hsize_t ret_value = 0; /* Return value                 */
 
     FUNC_ENTER_API(0)
@@ -567,7 +567,7 @@ done:
 haddr_t
 H5Dget_offset(hid_t dset_id)
 {
-    H5D_t * dset;                    /* Dataset to query */
+    H5D_t  *dset;                    /* Dataset to query */
     haddr_t ret_value = HADDR_UNDEF; /* Return value                 */
 
     FUNC_ENTER_API(HADDR_UNDEF)
@@ -646,8 +646,8 @@ done:
 herr_t
 H5Diterate(void *buf, hid_t type_id, hid_t space_id, H5D_operator_t op, void *operator_data)
 {
-    H5T_t *           type;      /* Datatype */
-    H5S_t *           space;     /* Dataspace for iteration */
+    H5T_t            *type;      /* Datatype */
+    H5S_t            *space;     /* Dataspace for iteration */
     H5S_sel_iter_op_t dset_op;   /* Operator for iteration */
     herr_t            ret_value; /* Return value */
 
@@ -754,12 +754,12 @@ herr_t
 H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id, hsize_t *size)
 {
     H5D_vlen_bufsize_t vlen_bufsize = {0, 0, 0, 0, 0, 0};
-    H5D_t *            dset;          /* Dataset for operation */
-    H5S_t *            fspace = NULL; /* Dataset's dataspace */
-    H5S_t *            mspace = NULL; /* Memory dataspace */
+    H5D_t             *dset;          /* Dataset for operation */
+    H5S_t             *fspace = NULL; /* Dataset's dataspace */
+    H5S_t             *mspace = NULL; /* Memory dataspace */
     char               bogus;         /* bogus value to pass to H5Diterate() */
-    H5S_t *            space;         /* Dataspace for iteration */
-    H5T_t *            type;          /* Datatype */
+    H5S_t             *space;         /* Dataspace for iteration */
+    H5T_t             *type;          /* Datatype */
     H5S_sel_iter_op_t  dset_op;       /* Operator for iteration */
     herr_t             ret_value;     /* Return value */
 
@@ -1102,7 +1102,7 @@ done:
 herr_t
 H5Dget_num_chunks(hid_t dset_id, hid_t fspace_id, hsize_t *nchunks)
 {
-    H5D_t *      dset = NULL;
+    H5D_t       *dset = NULL;
     const H5S_t *space; /* Dataspace for dataset */
     herr_t       ret_value = SUCCEED;
 
@@ -1154,7 +1154,7 @@ herr_t
 H5Dget_chunk_info(hid_t dset_id, hid_t fspace_id, hsize_t chk_index, hsize_t *offset, unsigned *filter_mask,
                   haddr_t *addr, hsize_t *size)
 {
-    H5D_t *      dset = NULL;
+    H5D_t       *dset = NULL;
     const H5S_t *space; /* Dataspace for dataset */
     herr_t       ret_value = SUCCEED;
 

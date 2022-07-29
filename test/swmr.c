@@ -851,7 +851,7 @@ test_metadata_read_retry_info(hid_t in_fapl)
     hid_t            fid      = H5I_INVALID_HID;                 /* File ID */
     hid_t            fid1     = H5I_INVALID_HID;                 /* File ID */
     H5F_retry_info_t info, info1;                                /* The collection of metadata retries */
-    H5F_t *          f = NULL, *f1 = NULL;                       /* Internal file object pointers */
+    H5F_t           *f = NULL, *f1 = NULL;                       /* Internal file object pointers */
     unsigned         i, j, n;                                    /* Local index variables */
     hid_t            did1    = H5I_INVALID_HID;                  /* Dataset ID */
     hid_t            did2    = H5I_INVALID_HID;                  /* Dataset ID */
@@ -3219,7 +3219,7 @@ test_object_flush_cb(hid_t in_fapl)
     hsize_t        dims[2] = {5, 10};       /* Dataset dimension sizes */
     int            buf[50];                 /* Data buffer */
     H5F_flush_cb_t ret_cb;                  /* The callback function set in object flush property */
-    void *         ret_ct;                  /* The user data set in object flush property */
+    void          *ret_ct;                  /* The user data set in object flush property */
     unsigned       flush_ct = 0;            /* The user data for object flush property */
     char           filename[NAME_BUF_SIZE]; /* File name */
     int            i;                       /* Local index variable */
@@ -3493,7 +3493,7 @@ test_append_flush_generic(void)
     unsigned        count = 0;       /* The user data for append flush property */
     hsize_t         ret_boundary[3]; /* The boundary set in append flush property */
     H5D_append_cb_t ret_cb;          /* The callback function set in append flush property */
-    unsigned *      ret_count;       /* The user data set in append flush property */
+    unsigned       *ret_count;       /* The user data set in append flush property */
     herr_t          ret;             /* The return value */
 
     TESTING("H5Fget/set_append_flush() for a generic dataset access property list");
@@ -3676,7 +3676,7 @@ test_append_flush_dataset_chunked(hid_t in_fapl)
 
     hsize_t         ret_boundary[3]; /* Boundary size set in the append flush property */
     H5D_append_cb_t ret_cb;          /* The callback function set in the append flush property */
-    unsigned *      ret_count;       /* The user data set in the append flush property */
+    unsigned       *ret_count;       /* The user data set in the append flush property */
 
     char filename[NAME_BUF_SIZE]; /* file name */
 
@@ -3898,7 +3898,7 @@ test_append_flush_dataset_fixed(hid_t in_fapl)
 
     hsize_t         ret_boundary[3]; /* Boundary size set in the append flush property */
     H5D_append_cb_t ret_cb;          /* The callback function set in the append flush property */
-    unsigned *      ret_count;       /* The user data set in the append flush property */
+    unsigned       *ret_count;       /* The user data set in the append flush property */
 
     char filename[NAME_BUF_SIZE]; /* file name */
 
@@ -4120,7 +4120,7 @@ test_append_flush_dataset_multiple(hid_t in_fapl)
 
     hsize_t         ret_boundary[3]; /* Boundary size set in the append flush property */
     H5D_append_cb_t ret_cb;          /* The callback function set in the append flush property */
-    unsigned *      ret_count;       /* The user data set in the append flush property */
+    unsigned       *ret_count;       /* The user data set in the append flush property */
 
     char filename[NAME_BUF_SIZE]; /* file name */
 
@@ -7360,8 +7360,8 @@ main(void)
 {
     int     nerrors      = 0;             /* The # of errors */
     hid_t   fapl         = -1;            /* File access property list ID */
-    char *  driver       = NULL;          /* VFD string (from env variable) */
-    char *  lock_env_var = NULL;          /* file locking env var pointer */
+    char   *driver       = NULL;          /* VFD string (from env variable) */
+    char   *lock_env_var = NULL;          /* file locking env var pointer */
     hbool_t use_file_locking;             /* read from env var */
     hbool_t file_locking_enabled = FALSE; /* Checks if the file system supports locks */
 

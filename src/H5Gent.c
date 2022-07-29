@@ -424,7 +424,7 @@ H5G__ent_convert(H5F_t *f, H5HL_t *heap, const char *name, const H5O_link_t *lnk
             else if (obj_type == H5O_TYPE_UNKNOWN) {
                 /* Try to retrieve symbol table information for caching */
                 H5O_loc_t  targ_oloc;   /* Location of link target */
-                H5O_t *    oh;          /* Link target object header */
+                H5O_t     *oh;          /* Link target object header */
                 H5O_stab_t stab;        /* Link target symbol table */
                 htri_t     stab_exists; /* Whether the target symbol table exists */
 

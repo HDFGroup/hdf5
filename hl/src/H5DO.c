@@ -118,9 +118,9 @@ H5DOappend(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extension, hid_t 
     hsize_t stride[H5S_MAX_RANK]; /* H5Sselect_hyperslab: # of elements to move when selecting */
     hsize_t block[H5S_MAX_RANK];  /* H5Sselect_hyperslab: # of elements in a block */
 
-    hsize_t *       boundary = NULL;  /* Boundary set in append flush property */
+    hsize_t        *boundary = NULL;  /* Boundary set in append flush property */
     H5D_append_cb_t append_cb;        /* Callback function set in append flush property */
-    void *          udata;            /* User data set in append flush property */
+    void           *udata;            /* User data set in append flush property */
     hbool_t         hit = FALSE;      /* Boundary is hit or not */
     hsize_t         k;                /* Local index variable */
     unsigned        u;                /* Local index variable */

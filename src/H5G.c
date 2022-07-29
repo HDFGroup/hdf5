@@ -269,7 +269,7 @@ hid_t
 H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id)
 {
     H5G_loc_t loc;        /* Location to create group */
-    H5G_t *   grp = NULL; /* New group created */
+    H5G_t    *grp = NULL; /* New group created */
     hid_t     ret_value;  /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -350,7 +350,7 @@ hid_t
 H5Gcreate_anon(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id)
 {
     H5G_loc_t        loc;
-    H5G_t *          grp = NULL;
+    H5G_t           *grp = NULL;
     H5G_obj_create_t gcrt_info; /* Information for group creation */
     hid_t            ret_value;
 
@@ -423,7 +423,7 @@ done:
 hid_t
 H5Gopen2(hid_t loc_id, const char *name, hid_t gapl_id)
 {
-    H5G_t *   grp = NULL; /* Group opened */
+    H5G_t    *grp = NULL; /* Group opened */
     H5G_loc_t loc;        /* Location of parent for group */
     hid_t     ret_value;  /* Return value */
 

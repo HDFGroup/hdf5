@@ -362,7 +362,7 @@ Java_hdf_hdf5lib_H5_H5Lget_1name_1by_1idx(JNIEnv *env, jclass clss, jlong loc_id
     const char *groupName   = NULL;
     jstring     str         = NULL;
     ssize_t     status_size = -1;
-    char *      linkName    = NULL;
+    char       *linkName    = NULL;
 
     UNUSED(clss);
 
@@ -414,7 +414,7 @@ Java_hdf_hdf5lib_H5_H5Lget_1value(JNIEnv *env, jclass clss, jlong loc_id, jstrin
     const char *linkName  = NULL;
     jstring     str;
     herr_t      status;
-    char *      linkValue = NULL;
+    char       *linkValue = NULL;
 
     UNUSED(clss);
 
@@ -504,7 +504,7 @@ Java_hdf_hdf5lib_H5_H5Lget_1value_1by_1idx(JNIEnv *env, jclass clss, jlong loc_i
     const char *grpName   = NULL;
     jstring     str;
     herr_t      status;
-    void *      linkValue = NULL;
+    void       *linkValue = NULL;
 
     UNUSED(clss);
 
@@ -625,10 +625,10 @@ H5L_iterate_cb(hid_t g_id, const char *name, const H5L_info_t *info, void *cb_da
     jobject     cb_info_t      = NULL;
     jobject     visit_callback = wrapper->visit_callback;
     jstring     str;
-    JNIEnv *    cbenv = NULL;
+    JNIEnv     *cbenv = NULL;
     jclass      cbcls;
     jvalue      args[5];
-    void *      op_data = (void *)wrapper->op_data;
+    void       *op_data = (void *)wrapper->op_data;
     jint        status  = -1;
 
     if (JVMPTR->AttachCurrentThread(JVMPAR, (void **)&cbenv, NULL) < 0) {

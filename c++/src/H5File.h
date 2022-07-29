@@ -27,10 +27,10 @@ class H5_DLLCPP H5File : public Group {
     // Creates or opens an HDF5 file.
     H5File(const char *name, unsigned int flags,
            const FileCreatPropList &create_plist = FileCreatPropList::DEFAULT,
-           const FileAccPropList &  access_plist = FileAccPropList::DEFAULT);
+           const FileAccPropList   &access_plist = FileAccPropList::DEFAULT);
     H5File(const H5std_string &name, unsigned int flags,
            const FileCreatPropList &create_plist = FileCreatPropList::DEFAULT,
-           const FileAccPropList &  access_plist = FileAccPropList::DEFAULT);
+           const FileAccPropList   &access_plist = FileAccPropList::DEFAULT);
 
     // Open the file
     void openFile(const H5std_string &name, unsigned int flags,

@@ -541,7 +541,7 @@ test_dangle_force(void)
     hid_t   aid, aid2;   /* Attribute IDs */
     hid_t   tid, tid2;   /* Named datatype IDs */
     ssize_t count;       /* Count of open objects */
-    hid_t * objs = NULL; /* Pointer to list of open objects */
+    hid_t  *objs = NULL; /* Pointer to list of open objects */
     size_t  u;           /* Local index variable */
 
     TESTING("force dangling IDs to close, from API routines");

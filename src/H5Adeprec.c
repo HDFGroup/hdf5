@@ -103,10 +103,10 @@
 hid_t
 H5Acreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id, hid_t acpl_id)
 {
-    H5A_t *   attr = NULL; /* Attribute created */
+    H5A_t    *attr = NULL; /* Attribute created */
     H5G_loc_t loc;         /* Object location */
-    H5T_t *   type;        /* Datatype to use for attribute */
-    H5S_t *   space;       /* Dataspace to use for attribute */
+    H5T_t    *type;        /* Datatype to use for attribute */
+    H5S_t    *space;       /* Dataspace to use for attribute */
     hid_t     ret_value;   /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -172,7 +172,7 @@ hid_t
 H5Aopen_name(hid_t loc_id, const char *name)
 {
     H5G_loc_t loc;         /* Object location */
-    H5A_t *   attr = NULL; /* Attribute opened */
+    H5A_t    *attr = NULL; /* Attribute opened */
     hid_t     ret_value;
 
     FUNC_ENTER_API(FAIL)
@@ -229,7 +229,7 @@ hid_t
 H5Aopen_idx(hid_t loc_id, unsigned idx)
 {
     H5G_loc_t loc;         /* Object location */
-    H5A_t *   attr = NULL; /* Attribute opened */
+    H5A_t    *attr = NULL; /* Attribute opened */
     hid_t     ret_value;
 
     FUNC_ENTER_API(FAIL)
@@ -280,7 +280,7 @@ int
 H5Aget_num_attrs(hid_t loc_id)
 {
     H5O_loc_t *loc; /* Object location for attribute */
-    void *     obj;
+    void      *obj;
     int        ret_value;
 
     FUNC_ENTER_API(FAIL)

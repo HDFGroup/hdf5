@@ -41,7 +41,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1version(JNIEnv *env, jclass clss, jlong plist, jintA
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     jboolean isCopy;
     jsize    arrLen;
-    jint *   theArray = NULL;
+    jint    *theArray = NULL;
 #endif
     herr_t status = FAIL;
 
@@ -108,7 +108,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1userblock(JNIEnv *env, jclass clss, jlong plist, jlo
 {
     jboolean isCopy;
     hsize_t  s;
-    jlong *  theArray = NULL;
+    jlong   *theArray = NULL;
     herr_t   status   = FAIL;
 
     UNUSED(clss);
@@ -158,7 +158,7 @@ JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5Pget_1sizes(JNIEnv *env, jclass clss, jlong plist, jlongArray size)
 {
     jboolean isCopy;
-    jlong *  theArray = NULL;
+    jlong   *theArray = NULL;
     jsize    arrLen;
     size_t   ss;
     size_t   sa;
@@ -220,7 +220,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1sym_1k(JNIEnv *env, jclass clss, jlong plist, jintAr
 {
     jboolean isCopy;
     jsize    arrLen;
-    jint *   theArray = NULL;
+    jint    *theArray = NULL;
     herr_t   status   = FAIL;
 
     UNUSED(clss);
@@ -275,7 +275,7 @@ JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5Pget_1istore_1k(JNIEnv *env, jclass clss, jlong plist, jintArray ik)
 {
     jboolean isCopy;
-    jint *   theArray = NULL;
+    jint    *theArray = NULL;
     herr_t   status   = FAIL;
 
     UNUSED(clss);
@@ -361,8 +361,8 @@ Java_hdf_hdf5lib_H5_H5Pget_1file_1space_1strategy(JNIEnv *env, jclass clss, jlon
 {
     H5F_fspace_strategy_t thestrategy = H5F_FSPACE_STRATEGY_FSM_AGGR; /* Library default */
     jboolean              isCopy;
-    jboolean *            persistArray   = NULL;
-    jlong *               thresholdArray = NULL;
+    jboolean             *persistArray   = NULL;
+    jlong                *thresholdArray = NULL;
     herr_t                status         = FAIL;
 
     UNUSED(clss);
@@ -514,7 +514,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1shared_1mesg_1index(JNIEnv *env, jclass clss, jlong 
 {
     jboolean isCopy;
     unsigned nindexes; /* Number of SOHM indexes */
-    jint *   theArray = NULL;
+    jint    *theArray = NULL;
     herr_t   retVal   = FAIL;
 
     UNUSED(clss);
@@ -593,7 +593,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1shared_1mesg_1phase_1change(JNIEnv *env, jclass clss
                                                         jintArray size)
 {
     jboolean isCopy;
-    jint *   theArray = NULL;
+    jint    *theArray = NULL;
     herr_t   retVal   = FAIL;
 
     UNUSED(clss);

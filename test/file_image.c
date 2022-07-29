@@ -85,10 +85,10 @@ test_properties(void)
 {
     hid_t  fapl_1 = -1;
     hid_t  fapl_2 = -1;
-    char * buffer = 0;
+    char  *buffer = 0;
     int    count  = 10;
-    void * temp   = 0;
-    char * temp2  = 0;
+    void  *temp   = 0;
+    char  *temp2  = 0;
     int    i;
     size_t size;
     size_t temp_size;
@@ -339,9 +339,9 @@ test_callbacks(void)
     H5FD_file_image_callbacks_t callbacks;
     hid_t                       fapl_1;
     hid_t                       fapl_2;
-    udata_t *                   udata      = NULL;
-    char *                      file_image = NULL;
-    char *                      temp_file_image;
+    udata_t                    *udata      = NULL;
+    char                       *file_image = NULL;
+    char                       *temp_file_image;
     int                         count = 10;
     int                         i;
     size_t                      size;
@@ -556,11 +556,11 @@ test_core(void)
     hid_t                       file;
     hid_t                       dset;
     hid_t                       space;
-    udata_t *                   udata;
-    unsigned char *             file_image;
+    udata_t                    *udata;
+    unsigned char              *file_image;
     char                        filename[1024];
     char                        copied_filename[1024];
-    const char *                tmp = NULL;
+    const char                 *tmp = NULL;
     size_t                      size;
     hsize_t                     dims[2];
     int                         fd;
@@ -717,9 +717,9 @@ static int
 test_get_file_image(const char *test_banner, const int file_name_num, hid_t fapl, hbool_t user)
 {
     char      file_name[1024] = "\0";
-    void *    insertion_ptr   = NULL;
-    void *    image_ptr       = NULL;
-    void *    file_image_ptr  = NULL;
+    void     *insertion_ptr   = NULL;
+    void     *image_ptr       = NULL;
+    void     *file_image_ptr  = NULL;
     hbool_t   is_family_file  = FALSE;
     hbool_t   identical;
     int       data[100];
@@ -996,7 +996,7 @@ test_get_file_image_error_rejection(void)
 {
     const char *memb_name[H5FD_MEM_NTYPES];
     char        file_name[1024] = "\0";
-    void *      image_ptr       = NULL;
+    void       *image_ptr       = NULL;
     int         data[100];
     int         i;
     hid_t       fapl_id  = -1;

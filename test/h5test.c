@@ -115,7 +115,7 @@ const char *LIBVER_NAMES[] = {"earliest", /* H5F_LIBVER_EARLIEST = 0  */
 static H5E_auto2_t err_func = NULL;
 
 static herr_t h5_errors(hid_t estack, void *client_data);
-static char * h5_fixname_real(const char *base_name, hid_t fapl, const char *suffix, char *fullname,
+static char  *h5_fixname_real(const char *base_name, hid_t fapl, const char *suffix, char *fullname,
                               size_t size, hbool_t nest_printf);
 
 /*-------------------------------------------------------------------------
@@ -539,7 +539,7 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
                 hbool_t nest_printf)
 {
     const char *prefix = NULL;
-    char *      ptr, last = '\0';
+    char       *ptr, last = '\0';
     const char *suffix = _suffix;
     size_t      i, j;
     hid_t       driver     = -1;
@@ -849,7 +849,7 @@ h5_get_vfd_fapl(hid_t fapl)
 {
     const char *env   = NULL; /* HDF5_DRIVER environment variable     */
     const char *tok   = NULL; /* strtok pointer                       */
-    char *      lasts = NULL; /* Context pointer for strtok_r() call */
+    char       *lasts = NULL; /* Context pointer for strtok_r() call */
     char        buf[1024];    /* buffer for tokenizing HDF5_DRIVER    */
 
     /* Get the environment variable, if it exists */
@@ -907,7 +907,7 @@ h5_get_vfd_fapl(hid_t fapl)
         H5FD_mem_t  memb_map[H5FD_MEM_NTYPES];
         hid_t       memb_fapl[H5FD_MEM_NTYPES];
         const char *memb_name[H5FD_MEM_NTYPES];
-        char *      sv[H5FD_MEM_NTYPES];
+        char       *sv[H5FD_MEM_NTYPES];
         haddr_t     memb_addr[H5FD_MEM_NTYPES];
         H5FD_mem_t  mt;
 
@@ -1104,7 +1104,7 @@ h5_set_info_object(void)
 
         do {
             size_t len;
-            char * key_val, *endp, *namep;
+            char  *key_val, *endp, *namep;
 
             if (*valp == ';')
                 valp++;
@@ -1506,7 +1506,7 @@ h5_make_local_copy(const char *origfilename, const char *local_copy_name)
 {
     int         fd_old = (-1), fd_new = (-1);                    /* File descriptors for copying data */
     ssize_t     nread;                                           /* Number of bytes read in */
-    void *      buf      = NULL;                                 /* Buffer for copying data */
+    void       *buf      = NULL;                                 /* Buffer for copying data */
     const char *filename = H5_get_srcdir_filename(origfilename); /* Get the test file name to copy */
 
     if (!filename)
@@ -1715,7 +1715,7 @@ h5_send_message(const char *send, const char *arg1, const char *arg2)
 herr_t
 h5_wait_message(const char *waitfor)
 {
-    FILE * returnfile;
+    FILE  *returnfile;
     time_t t0, t1;
 
     /* Start timer. If this function runs for too long (i.e.,
@@ -2048,12 +2048,12 @@ H5_get_srcdir(void)
 int
 h5_duplicate_file_by_bytes(const char *orig, const char *dest)
 {
-    FILE *  orig_ptr  = NULL;
-    FILE *  dest_ptr  = NULL;
+    FILE   *orig_ptr  = NULL;
+    FILE   *dest_ptr  = NULL;
     hsize_t fsize     = 0;
     hsize_t read_size = 0;
     hsize_t max_buf   = 0;
-    void *  dup_buf   = NULL;
+    void   *dup_buf   = NULL;
     int     ret_value = 0;
 
     max_buf = 4096 * sizeof(char);

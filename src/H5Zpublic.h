@@ -248,7 +248,7 @@ typedef H5Z_cb_return_t (*H5Z_filter_func_t)(H5Z_filter_t filter, void *buf, siz
  */
 typedef struct H5Z_cb_t {
     H5Z_filter_func_t func;
-    void *            op_data;
+    void             *op_data;
 } H5Z_cb_t;
 
 #ifdef __cplusplus
@@ -372,7 +372,7 @@ typedef struct H5Z_class2_t {
     H5Z_filter_t         id;              /**< Filter ID number                             */
     unsigned             encoder_present; /**< Does this filter have an encoder?            */
     unsigned             decoder_present; /**< Does this filter have a decoder?             */
-    const char *         name;            /**< Comment for debugging                        */
+    const char          *name;            /**< Comment for debugging                        */
     H5Z_can_apply_func_t can_apply;       /**< The "can apply" callback for a filter        */
     H5Z_set_local_func_t set_local;       /**< The "set local" callback for a filter        */
     H5Z_func_t           filter;          /**< The actual filter function                   */
@@ -675,7 +675,7 @@ H5_DLL herr_t H5Zget_filter_info(H5Z_filter_t filter, unsigned int *filter_confi
 //! <!-- [H5Z_class1_t_snip] -->
 typedef struct H5Z_class1_t {
     H5Z_filter_t         id;        /**< Filter ID number			     */
-    const char *         name;      /**< Comment for debugging		     */
+    const char          *name;      /**< Comment for debugging		     */
     H5Z_can_apply_func_t can_apply; /**< The "can apply" callback for a filter */
     H5Z_set_local_func_t set_local; /**< The "set local" callback for a filter */
     H5Z_func_t           filter;    /**< The actual filter function		     */

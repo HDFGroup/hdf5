@@ -46,9 +46,9 @@
 /******************************/
 /* Package Private Prototypes */
 /******************************/
-H5_DLL herr_t H5R__create(void *ref, H5G_loc_t *loc, const char *name, H5R_type_t ref_type, H5S_t *space);
-H5_DLL hid_t  H5R__dereference(H5F_t *file, hid_t dapl_id, H5R_type_t ref_type, const void *_ref);
-H5_DLL H5S_t * H5R__get_region(H5F_t *file, const void *_ref);
+H5_DLL herr_t  H5R__create(void *ref, H5G_loc_t *loc, const char *name, H5R_type_t ref_type, H5S_t *space);
+H5_DLL hid_t   H5R__dereference(H5F_t *file, hid_t dapl_id, H5R_type_t ref_type, const void *_ref);
+H5_DLL H5S_t  *H5R__get_region(H5F_t *file, const void *_ref);
 H5_DLL herr_t  H5R__get_obj_type(H5F_t *file, H5R_type_t ref_type, const void *_ref, H5O_type_t *obj_type);
 H5_DLL ssize_t H5R__get_name(H5F_t *file, H5R_type_t ref_type, const void *_ref, char *name, size_t size);
 

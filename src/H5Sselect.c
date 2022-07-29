@@ -378,7 +378,7 @@ H5S_select_serialize(H5S_t *space, uint8_t **p)
 hssize_t
 H5Sget_select_npoints(hid_t spaceid)
 {
-    H5S_t *  space;     /* Dataspace to modify selection of */
+    H5S_t   *space;     /* Dataspace to modify selection of */
     hssize_t ret_value; /* return value */
 
     FUNC_ENTER_API(FAIL)
@@ -991,7 +991,7 @@ H5S_select_adjust_s(H5S_t *space, const hssize_t *offset)
 herr_t
 H5Sselect_adjust(hid_t space_id, const hssize_t *offset)
 {
-    H5S_t *  space;
+    H5S_t   *space;
     hsize_t  low_bounds[H5S_MAX_RANK];
     hsize_t  high_bounds[H5S_MAX_RANK];
     unsigned u;
@@ -1501,8 +1501,8 @@ H5S_select_iterate(void *buf, const H5T_t *type, H5S_t *space, const H5S_sel_ite
 {
     H5S_sel_iter_t *iter      = NULL;         /* Selection iteration info */
     hbool_t         iter_init = FALSE;        /* Selection iteration info has been initialized */
-    hsize_t *       off       = NULL;         /* Array to store sequence offsets */
-    size_t *        len       = NULL;         /* Array to store sequence lengths */
+    hsize_t        *off       = NULL;         /* Array to store sequence offsets */
+    size_t         *len       = NULL;         /* Array to store sequence lengths */
     hssize_t        nelmts;                   /* Number of elements in selection */
     hsize_t         space_size[H5S_MAX_RANK]; /* Dataspace size */
     size_t          max_elem;                 /* Maximum number of elements allowed in sequences */
@@ -1662,7 +1662,7 @@ done:
 H5S_sel_type
 H5Sget_select_type(hid_t space_id)
 {
-    H5S_t *      space;     /* dataspace to modify */
+    H5S_t       *space;     /* dataspace to modify */
     H5S_sel_type ret_value; /* Return value */
 
     FUNC_ENTER_API(H5S_SEL_ERROR)
@@ -1759,8 +1759,8 @@ H5S_select_shape_same(H5S_t *space1, H5S_t *space2)
     /* Check special cases if both dataspaces aren't scalar */
     /* (If only one is, the number of selected points check is sufficient) */
     if (space1->extent.rank > 0 && space2->extent.rank > 0) {
-        H5S_t *      space_a;      /* Dataspace with larger rank */
-        H5S_t *      space_b;      /* Dataspace with smaller rank */
+        H5S_t       *space_a;      /* Dataspace with larger rank */
+        H5S_t       *space_b;      /* Dataspace with smaller rank */
         unsigned     space_a_rank; /* Number of dimensions of dataspace A */
         unsigned     space_b_rank; /* Number of dimensions of dataspace B */
         int          space_a_dim;  /* Current dimension in dataspace A */
@@ -2123,7 +2123,7 @@ done:
 htri_t
 H5Sselect_intersect_block(hid_t space_id, const hsize_t *start, const hsize_t *end)
 {
-    H5S_t *  space;            /* Dataspace to query */
+    H5S_t   *space;            /* Dataspace to query */
     unsigned u;                /* Local index value */
     htri_t   ret_value = FAIL; /* Return value */
 
@@ -2210,7 +2210,7 @@ herr_t
 H5S_select_construct_projection(H5S_t *base_space, H5S_t **new_space_ptr, unsigned new_space_rank,
                                 hsize_t element_size, ptrdiff_t *buf_adj)
 {
-    H5S_t *  new_space = NULL;                         /* New dataspace constructed */
+    H5S_t   *new_space = NULL;                         /* New dataspace constructed */
     hsize_t  base_space_dims[H5S_MAX_RANK];            /* Current dimensions of base dataspace */
     hsize_t  base_space_maxdims[H5S_MAX_RANK];         /* Maximum dimensions of base dataspace */
     int      sbase_space_rank;                         /* Signed # of dimensions of base dataspace */
@@ -2437,8 +2437,8 @@ H5S_select_fill(const void *fill, size_t fill_size, H5S_t *space, void *_buf)
 {
     H5S_sel_iter_t *iter      = NULL;    /* Selection iteration info */
     hbool_t         iter_init = FALSE;   /* Selection iteration info has been initialized */
-    hsize_t *       off       = NULL;    /* Array to store sequence offsets */
-    size_t *        len       = NULL;    /* Array to store sequence lengths */
+    hsize_t        *off       = NULL;    /* Array to store sequence offsets */
+    size_t         *len       = NULL;    /* Array to store sequence lengths */
     hssize_t        nelmts;              /* Number of elements in selection */
     size_t          max_elem;            /* Total number of elements in selection */
     herr_t          ret_value = SUCCEED; /* Return value */
@@ -2552,8 +2552,8 @@ herr_t
 H5S_select_project_intersection(H5S_t *src_space, H5S_t *dst_space, H5S_t *src_intersect_space,
                                 H5S_t **new_space_ptr, hbool_t share_selection)
 {
-    H5S_t *         new_space               = NULL;    /* New dataspace constructed */
-    H5S_t *         tmp_src_intersect_space = NULL;    /* Temporary SIS converted from points->hyperslabs */
+    H5S_t          *new_space               = NULL;    /* New dataspace constructed */
+    H5S_t          *tmp_src_intersect_space = NULL;    /* Temporary SIS converted from points->hyperslabs */
     H5S_sel_iter_t *ss_iter                 = NULL;    /* Selection iterator for src_space */
     hbool_t         ss_iter_init            = FALSE;   /* Whether ss_iter has been initialized */
     H5S_sel_iter_t *ds_iter                 = NULL;    /* Selection iterator for dst_space */

@@ -218,7 +218,7 @@ static herr_t
 H5P__strcrt_char_encoding_enc(const void *value, void **_pp, size_t *size)
 {
     const H5T_cset_t *encoding = (const H5T_cset_t *)value; /* Create local alias for values */
-    uint8_t **        pp       = (uint8_t **)_pp;
+    uint8_t         **pp       = (uint8_t **)_pp;
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -254,7 +254,7 @@ H5P__strcrt_char_encoding_enc(const void *value, void **_pp, size_t *size)
 static herr_t
 H5P__strcrt_char_encoding_dec(const void **_pp, void *_value)
 {
-    H5T_cset_t *    encoding = (H5T_cset_t *)_value; /* Character set encoding */
+    H5T_cset_t     *encoding = (H5T_cset_t *)_value; /* Character set encoding */
     const uint8_t **pp       = (const uint8_t **)_pp;
 
     FUNC_ENTER_STATIC_NOERR

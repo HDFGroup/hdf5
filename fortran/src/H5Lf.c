@@ -342,7 +342,7 @@ h5ldelete_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen, in
                    int_f *order, hsize_t_f *n, hid_t_f *lapl_id)
 /******/
 {
-    char *          c_group_name = NULL; /* Buffer to hold C string */
+    char           *c_group_name = NULL; /* Buffer to hold C string */
     H5_index_t      c_index_field;
     H5_iter_order_t c_order;
     int_f           ret_value = 0; /* Return value */
@@ -455,7 +455,7 @@ h5lget_info_c(hid_t_f *link_loc_id, _fcd link_name, size_t_f *link_namelen, int_
               int_f *corder_valid, int_f *link_type, haddr_t_f *address, size_t_f *val_size, hid_t_f *lapl_id)
 /******/
 {
-    char *     c_link_name = NULL; /* Buffer to hold C string */
+    char      *c_link_name = NULL; /* Buffer to hold C string */
     int_f      ret_value   = 0;    /* Return value */
     H5L_info_t link_buff;
 
@@ -524,7 +524,7 @@ h5lget_info_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen, 
                      int_f *cset, haddr_t_f *address, size_t_f *val_size, hid_t_f *lapl_id)
 /******/
 {
-    char *          c_group_name = NULL; /* Buffer to hold C string */
+    char           *c_group_name = NULL; /* Buffer to hold C string */
     H5_index_t      c_index_field;
     H5_iter_order_t c_order;
     int_f           ret_value = 0; /* Return value */
@@ -698,8 +698,8 @@ h5lget_name_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen, 
                      int_f *order, hsize_t_f *n, size_t_f *size, _fcd name, hid_t_f *lapl_id)
 /******/
 {
-    char *  c_group_name = NULL; /* Buffer to hold C string */
-    char *  c_name       = NULL; /* Buffer to hold C string */
+    char   *c_group_name = NULL; /* Buffer to hold C string */
+    char   *c_name       = NULL; /* Buffer to hold C string */
     size_t  c_size;
     ssize_t c_size_link;
     int_f   ret_value = 0; /* Return value */
@@ -1039,7 +1039,7 @@ h5literate_by_name_c(hid_t_f *loc_id, _fcd name, size_t_f *namelen, int_f *index
     int_f   ret_value = -1; /* Return value */
     herr_t  func_ret_value; /* H5Linterate return value */
     hsize_t idx_c  = 0;
-    char *  c_name = NULL; /* Buffer to hold C string */
+    char   *c_name = NULL; /* Buffer to hold C string */
 
     /*
      * Convert FORTRAN name to C name

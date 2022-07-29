@@ -1686,9 +1686,9 @@ test_h5s_chunk(void)
     hsize_t  dims[2];
     hsize_t  csize[2];
     double **chunk_data_dbl      = NULL;
-    double * chunk_data_dbl_data = NULL;
-    float ** chunk_data_flt      = NULL;
-    float *  chunk_data_flt_data = NULL;
+    double  *chunk_data_dbl_data = NULL;
+    float  **chunk_data_flt      = NULL;
+    float   *chunk_data_flt_data = NULL;
     int      i, j;
 
     /* Allocate memory */
@@ -2477,7 +2477,7 @@ test_versionbounds(void)
     hid_t        dset_space = -1; /* Retrieved dataset's dataspace ID */
     hsize_t      dim[1];          /* Dataset dimensions */
     H5F_libver_t low, high;       /* File format bounds */
-    H5S_t *      spacep = NULL;   /* Pointer to internal dataspace */
+    H5S_t       *spacep = NULL;   /* Pointer to internal dataspace */
     herr_t       ret    = 0;      /* Generic return value */
 
     /* Output message about test being performed */

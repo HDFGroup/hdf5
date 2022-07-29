@@ -209,7 +209,7 @@ herr_t
 H5C_log_json_set_up(H5C_log_info_t *log_info, const char log_location[], int mpi_rank)
 {
     H5C_log_json_udata_t *json_udata = NULL;
-    char *                file_name  = NULL;
+    char                 *file_name  = NULL;
     size_t                n_chars;
     herr_t                ret_value = SUCCEED; /* Return value */
 
