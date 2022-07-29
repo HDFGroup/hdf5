@@ -1015,7 +1015,7 @@ H5_dirname(const char *path, char **dirname)
         ptrdiff_t len;
 
         if (sep[1] == '\0') {
-            /* Find a previous occurence of the file separator, if any */
+            /* Find a previous occurrence of the file separator, if any */
             while (sep != path) {
                 sep--;
                 if (*sep == H5_DIR_SEPC)
