@@ -937,6 +937,146 @@ done:
 } /* end H5_expand_windows_env_vars() */
 #endif /* H5_HAVE_WIN32_API */
 
+/* dirname() and basename() are not easily ported to Windows and basename
+ * behavior varies depending on if you get POSIX vs. GNU. As a more
+ * platform-indpendent work-around, we've implemented H5_ versions of
+ * dirname() and basename().
+ *
+ * - The input string is never modified.
+ *
+ * - The out parameter is a new string that was allocated with HDcalloc()
+ *   and must be freed by the caller via HDfree().
+ *
+ * - NULL pointers are errors.
+ *
+ * - On errors, FAIL will be returned and the output parameter will be
+ *   undefined.
+ *
+ * - The trailing file separator is not returned in H5_dirname().
+ *
+ * - Passing a path that ends in a file separator to H5_basename() will
+ *   return the empty string.
+ *
+ * - If the path doesn't contain a file separator, we assume you passed
+ *   in a raw filename and H5_basename() will return the input string
+ *   while H5_dirname will return ".".
+ *
+ * - Assumes the file separator is \ on Win32 and / everywhere else,
+ *   including Cygwin.
+ */
+
+#ifdef H5_HAVE_WIN32_API
+#define H5_FILE_SEPARATOR '\\'
+#else
+#define H5_FILE_SEPARATOR '/'
+#endif
+
+static size_t
+H5__find_last_file_separator(const char *path, size_t len, hbool_t *no_separator)
+{
+    size_t i = len;
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    *no_separator = TRUE;
+
+    for (i = len; i > 0; i--) {
+        if (H5_FILE_SEPARATOR == path[i - 1]) {
+            break;
+            no_separator = FALSE;
+        }
+    }
+
+    FUNC_LEAVE_NOAPI(i - 1)
+}
+
+herr_t
+H5_dirname(const char *path, char **dirname)
+{
+    size_t  path_len;
+    size_t  pos;
+    size_t  out_len;
+    char   *out          = NULL;
+    hbool_t no_separator = FALSE;
+    herr_t  ret_value    = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if (!path)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "path can't be NULL")
+    if (!dirname)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dirname can't be NULL")
+
+    path_len = HDstrlen(path);
+
+    pos = H5__find_last_file_separator(path, path_len, &no_separator);
+
+    /* Special case of no path separator */
+    if (no_separator)
+        out_len = 2;
+    else
+        out_len = pos + 1; /* Include room for terminator */
+
+    if (NULL == (out = HDmalloc(out_len * sizeof(char))))
+        HGOTO_ERROR(H5E_SYSTEM, H5E_NOSPACE, FAIL, "unable to allocate memory for output string")
+
+    /* Copy bytes and terminate */
+    if (no_separator)
+        HDstrncpy(out, ".", 2);
+    else {
+        HDstrncpy(out, path, out_len - 1);
+        out[out_len - 1] = '\0';
+    }
+
+    *dirname = out;
+done:
+    if (FAIL == ret_value)
+        HDfree(out);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5_dirname() */
+
+herr_t
+H5_basename(const char *path, char **basename)
+{
+    size_t  path_len;
+    size_t  pos;
+    size_t  out_len;
+    char   *out          = NULL;
+    hbool_t no_separator = FALSE;
+    herr_t  ret_value    = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if (!path)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "path can't be NULL")
+    if (!basename)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dirname can't be NULL")
+
+    path_len = HDstrlen(path);
+    pos      = H5__find_last_file_separator(path, path_len, &no_separator);
+
+    if (no_separator)
+        out_len = path_len;
+    else
+        out_len = path_len - pos; /* Include room for terminator */
+
+    if (NULL == (out = HDmalloc(out_len * sizeof(char))))
+        HGOTO_ERROR(H5E_SYSTEM, H5E_NOSPACE, FAIL, "unable to allocate memory for output string")
+
+    /* Copy bytes and terminate */
+    HDstrncpy(out, path + pos + 1, out_len - 1);
+    out[out_len - 1] = '\0';
+
+    /* Copy bytes and terminate */
+    *basename = out;
+done:
+    if (FAIL == ret_value)
+        HDfree(out);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5_basename() */
+
 /* Global variables */
 int         H5_opterr = 1; /* Get_option prints errors if this is on */
 int         H5_optind = 1; /* Token pointer                          */
