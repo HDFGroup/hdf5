@@ -935,6 +935,32 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5_expand_windows_env_vars() */
+
+char *
+H5_strndup(const char *s, size_t n)
+{
+    size_t len       = 0;
+    char * ret_value = NULL;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if (!s)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "string cannot be NULL")
+
+    len = HDstrlen(s);
+
+    if (len > n)
+        len = n;
+
+    if (NULL == (ret_value = HDmalloc(len + 1)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate buffer for string")
+
+    HDmemcpy(ret_value, s, len);
+    ret_value[len] = '\0';
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
 #endif /* H5_HAVE_WIN32_API */
 
 /* dirname() and basename() are not easily ported to Windows and basename
@@ -944,7 +970,7 @@ done:
  *
  * - The input string is never modified.
  *
- * - The out parameter is a new string that was allocated with HDcalloc()
+ * - The out parameter is a new string that was allocated with HDmalloc()
  *   and must be freed by the caller via HDfree().
  *
  * - NULL pointers are errors.
@@ -965,40 +991,12 @@ done:
  *   including Cygwin.
  */
 
-#ifdef H5_HAVE_WIN32_API
-#define H5_FILE_SEPARATOR '\\'
-#else
-#define H5_FILE_SEPARATOR '/'
-#endif
-
-static size_t
-H5__find_last_file_separator(const char *path, size_t len, hbool_t *no_separator)
-{
-    size_t i = len;
-
-    FUNC_ENTER_PACKAGE_NOERR
-
-    *no_separator = TRUE;
-
-    for (i = len; i > 0; i--) {
-        if (H5_FILE_SEPARATOR == path[i - 1]) {
-            break;
-            no_separator = FALSE;
-        }
-    }
-
-    FUNC_LEAVE_NOAPI(i - 1)
-}
-
 herr_t
 H5_dirname(const char *path, char **dirname)
 {
-    size_t  path_len;
-    size_t  pos;
-    size_t  out_len;
-    char   *out          = NULL;
-    hbool_t no_separator = FALSE;
-    herr_t  ret_value    = SUCCEED;
+    const char *sep;
+    char *      out       = NULL;
+    herr_t      ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1007,31 +1005,54 @@ H5_dirname(const char *path, char **dirname)
     if (!dirname)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dirname can't be NULL")
 
-    path_len = HDstrlen(path);
-
-    pos = H5__find_last_file_separator(path, path_len, &no_separator);
-
-    /* Special case of no path separator */
-    if (no_separator)
-        out_len = 2;
-    else
-        out_len = pos + 1; /* Include room for terminator */
-
-    if (NULL == (out = HDmalloc(out_len * sizeof(char))))
-        HGOTO_ERROR(H5E_SYSTEM, H5E_NOSPACE, FAIL, "unable to allocate memory for output string")
-
-    /* Copy bytes and terminate */
-    if (no_separator)
-        HDstrncpy(out, ".", 2);
+    if (NULL == (sep = HDstrrchr(path, H5_DIR_SEPC))) {
+        out = HDstrdup(".");
+    }
+    else if (sep == path) {
+        out = HDstrdup(H5_DIR_SEPS);
+    }
     else {
-        HDstrncpy(out, path, out_len - 1);
-        out[out_len - 1] = '\0';
+        ptrdiff_t len;
+
+        if (sep[1] == '\0') {
+            /* Find a previous occurence of the file separator, if any */
+            while (sep != path) {
+                sep--;
+                if (*sep == H5_DIR_SEPC)
+                    break;
+            }
+
+            if (sep == path && *sep != H5_DIR_SEPC) {
+                out = HDstrdup(".");
+            }
+            else {
+                len = (sep - path) + 1;
+
+                HDassert(len >= 0);
+
+                out = HDstrndup(path, (size_t)len);
+            }
+        }
+        else {
+            len = sep - path;
+
+            HDassert(len >= 0);
+
+            out = HDstrndup(path, (size_t)len);
+        }
     }
 
+    if (NULL == out)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer for dirname");
+
     *dirname = out;
+
 done:
-    if (FAIL == ret_value)
+    if (FAIL == ret_value) {
         HDfree(out);
+        if (dirname)
+            *dirname = NULL;
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5_dirname() */
@@ -1039,40 +1060,41 @@ done:
 herr_t
 H5_basename(const char *path, char **basename)
 {
-    size_t  path_len;
-    size_t  pos;
-    size_t  out_len;
-    char   *out          = NULL;
-    hbool_t no_separator = FALSE;
-    herr_t  ret_value    = SUCCEED;
+    const char *sep;
+    char *      out       = NULL;
+    herr_t      ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
     if (!path)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "path can't be NULL")
     if (!basename)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dirname can't be NULL")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "basename can't be NULL")
 
-    path_len = HDstrlen(path);
-    pos      = H5__find_last_file_separator(path, path_len, &no_separator);
+    if (NULL == (sep = HDstrrchr(path, H5_DIR_SEPC))) {
+        if (*path == '\0')
+            out = HDstrdup(".");
+        else
+            out = HDstrdup(path);
+    }
+    else if (sep == path && sep[1] == '\0') {
+        out = HDstrdup(H5_DIR_SEPS);
+    }
+    else {
+        out = HDstrdup(sep + 1);
+    }
 
-    if (no_separator)
-        out_len = path_len;
-    else
-        out_len = path_len - pos; /* Include room for terminator */
+    if (NULL == out)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer for basename");
 
-    if (NULL == (out = HDmalloc(out_len * sizeof(char))))
-        HGOTO_ERROR(H5E_SYSTEM, H5E_NOSPACE, FAIL, "unable to allocate memory for output string")
-
-    /* Copy bytes and terminate */
-    HDstrncpy(out, path + pos + 1, out_len - 1);
-    out[out_len - 1] = '\0';
-
-    /* Copy bytes and terminate */
     *basename = out;
+
 done:
-    if (FAIL == ret_value)
+    if (FAIL == ret_value) {
         HDfree(out);
+        if (basename)
+            *basename = NULL;
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5_basename() */

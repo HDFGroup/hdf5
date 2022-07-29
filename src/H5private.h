@@ -1411,6 +1411,9 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDstrncpy
 #define HDstrncpy(X, Y, Z) strncpy(X, Y, Z)
 #endif
+#ifndef HDstrndup
+#define HDstrndup(S, N) strndup(S, N)
+#endif
 #ifndef HDstrpbrk
 #define HDstrpbrk(X, Y) strpbrk(X, Y)
 #endif
