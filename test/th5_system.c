@@ -26,8 +26,8 @@ static void
 test_h5_dirname(void)
 {
     herr_t ret;
-    char * path    = NULL;
-    char * dirname = NULL;
+    char  *path    = NULL;
+    char  *dirname = NULL;
 
     MESSAGE(5, ("Testing H5_dirname\n"));
 
@@ -48,8 +48,7 @@ test_h5_dirname(void)
 
     /* Check that H5_dirname fails for a NULL dirname pointer */
     dirname = NULL;
-    HDsnprintf(path, H5_SYSTEM_TEST_PATH_MAX, "topdir%sunderdir%sfinaldir",
-               H5_DIR_SEPS, H5_DIR_SEPS);
+    HDsnprintf(path, H5_SYSTEM_TEST_PATH_MAX, "topdir%sunderdir%sfinaldir", H5_DIR_SEPS, H5_DIR_SEPS);
     H5E_BEGIN_TRY
     {
         ret = H5_dirname(path, NULL);
@@ -59,9 +58,9 @@ test_h5_dirname(void)
     H5Eclear2(H5E_DEFAULT);
 
     /* Check that H5_dirname returns "." for an empty path string */
-    *path = '\0';
+    *path   = '\0';
     dirname = NULL;
-    ret = H5_dirname(path, &dirname);
+    ret     = H5_dirname(path, &dirname);
     CHECK(ret, FAIL, "H5_dirname with empty string");
     VERIFY_STR(dirname, ".", "comparing H5_dirname with empty string to \".\"");
     HDfree(dirname);
@@ -115,7 +114,8 @@ test_h5_dirname(void)
     dirname = NULL;
     HDsnprintf(path, H5_SYSTEM_TEST_PATH_MAX, "%stestdir%s", H5_DIR_SEPS, H5_DIR_SEPS);
     ret = H5_dirname(path, &dirname);
-    VERIFY_STR(dirname, H5_DIR_SEPS, "comparing H5_dirname with leading and trailing separator path to file separator");
+    VERIFY_STR(dirname, H5_DIR_SEPS,
+               "comparing H5_dirname with leading and trailing separator path to file separator");
     HDfree(dirname);
 
     /*
@@ -145,8 +145,8 @@ static void
 test_h5_basename(void)
 {
     herr_t ret;
-    char * path     = NULL;
-    char * basename = NULL;
+    char  *path     = NULL;
+    char  *basename = NULL;
 
     MESSAGE(5, ("Testing H5_basename\n"));
 
@@ -167,8 +167,7 @@ test_h5_basename(void)
 
     /* Check that H5_basename fails for a NULL basename pointer */
     basename = NULL;
-    HDsnprintf(path, H5_SYSTEM_TEST_PATH_MAX, "topdir%sunderdir%sfinaldir",
-               H5_DIR_SEPS, H5_DIR_SEPS);
+    HDsnprintf(path, H5_SYSTEM_TEST_PATH_MAX, "topdir%sunderdir%sfinaldir", H5_DIR_SEPS, H5_DIR_SEPS);
     H5E_BEGIN_TRY
     {
         ret = H5_basename(path, NULL);
@@ -178,9 +177,9 @@ test_h5_basename(void)
     H5Eclear2(H5E_DEFAULT);
 
     /* Check that H5_basename returns "." for an empty path string */
-    *path = '\0';
+    *path    = '\0';
     basename = NULL;
-    ret = H5_basename(path, &basename);
+    ret      = H5_basename(path, &basename);
     CHECK(ret, FAIL, "H5_basename with empty string");
     VERIFY_STR(basename, ".", "comparing H5_basename with empty string to \".\"");
     HDfree(basename);
@@ -234,7 +233,8 @@ test_h5_basename(void)
     basename = NULL;
     HDsnprintf(path, H5_SYSTEM_TEST_PATH_MAX, "%stestdir%s", H5_DIR_SEPS, H5_DIR_SEPS);
     ret = H5_basename(path, &basename);
-    VERIFY_STR(basename, "", "comparing H5_basename with leading and trailing separator path to empty string");
+    VERIFY_STR(basename, "",
+               "comparing H5_basename with leading and trailing separator path to empty string");
     HDfree(basename);
 
     /*

@@ -940,7 +940,7 @@ char *
 H5_strndup(const char *s, size_t n)
 {
     size_t len       = 0;
-    char * ret_value = NULL;
+    char  *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -995,7 +995,7 @@ herr_t
 H5_dirname(const char *path, char **dirname)
 {
     const char *sep;
-    char *      out       = NULL;
+    char       *out       = NULL;
     herr_t      ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1061,7 +1061,7 @@ herr_t
 H5_basename(const char *path, char **basename)
 {
     const char *sep;
-    char *      out       = NULL;
+    char       *out       = NULL;
     herr_t      ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
