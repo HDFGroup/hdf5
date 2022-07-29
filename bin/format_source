@@ -21,6 +21,6 @@ find . \( -type d -path ./config -prune -and -not -path ./config \) \
         -or -name H5overflow.h \
         \) \) \
     -and \( -iname *.h -or -iname *.c -or -iname *.cpp -or -iname *.hpp -or -iname *.java \) \) \
-    | xargs clang-format -style=file -i -fallback-style=none
+    | xargs clang-format-13 -style=file -i -fallback-style=none
 
 exit 0
