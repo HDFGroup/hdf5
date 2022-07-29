@@ -751,6 +751,7 @@ enable_shared = @enable_shared@
 enable_static = @enable_static@
 examplesdir = @examplesdir@
 exec_prefix = @exec_prefix@
+fmoddir = @fmoddir@
 fortran_linux_linker_option = @fortran_linux_linker_option@
 host = @host@
 host_alias = @host_alias@

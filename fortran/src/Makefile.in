@@ -475,7 +475,7 @@ AM_CPPFLAGS = @AM_CPPFLAGS@ @H5_CPPFLAGS@ -I$(top_srcdir)/src
 AM_CXXFLAGS = @AM_CXXFLAGS@ @H5_CXXFLAGS@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
 AM_FCFLAGS = @AM_FCFLAGS@ @H5_FCFLAGS@ -I$(top_srcdir)/src \
-	-I$(top_srcdir)/fortran/src
+	-I$(top_srcdir)/fortran/src $(F9XMODFLAG)$(fmoddir)
 AM_LDFLAGS = @AM_LDFLAGS@ @H5_LDFLAGS@ $(am__append_1)
 AR = @AR@
 AUTOCONF = @AUTOCONF@
@@ -706,6 +706,7 @@ enable_shared = @enable_shared@
 enable_static = @enable_static@
 examplesdir = @examplesdir@
 exec_prefix = @exec_prefix@
+fmoddir = @fmoddir@
 fortran_linux_linker_option = @fortran_linux_linker_option@
 host = @host@
 host_alias = @host_alias@
@@ -1458,15 +1459,15 @@ clean-local:
 
 install-data-local:
 	@if test -n "$(F9XMODEXT)" && test "X$(F9XMODEXT)" != "Xo"; then \
-	  $(CP) $(top_builddir)/$(subdir)/*.$(F9XMODEXT) $(DESTDIR)$(includedir)/. ; \
+	  $(CP) $(top_builddir)/$(subdir)/*.$(F9XMODEXT) $(DESTDIR)$(fmoddir)/. ; \
 	fi
 	$(CP) $(top_builddir)/$(subdir)/H5f90i_gen.h $(DESTDIR)$(includedir)/.
 	$(CP) $(top_srcdir)/fortran/src/H5f90i.h $(DESTDIR)$(includedir)/.
 
 uninstall-local:
 	@if test -n "$(F9XMODEXT)" -a "X$(F9XMODEXT)" != "Xo"; then      \
-	  if test -f "$(includedir)/hdf5.$(F9XMODEXT)" -o -f "$(includedir)/HDF5.$(F9XMODEXT)"; then \
-	    set -x; $(RM) $(DESTDIR)$(includedir)/*.$(F9XMODEXT);                 \
+	  if test -f "$(fmoddir)/hdf5.$(F9XMODEXT)" -o -f "$(fmoddir)/HDF5.$(F9XMODEXT)"; then \
+	    set -x; $(RM) $(DESTDIR)$(fmoddir)/*.$(F9XMODEXT);                 \
 	  fi;                                                           \
 	fi;								\
 	$(RM) $(DESTDIR)$(bindir)/$(H5FC_NAME)
