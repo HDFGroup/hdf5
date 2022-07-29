@@ -19,9 +19,9 @@
 #include "H5subfiling_common.h"
 #include "H5subfiling_err.h"
 
-typedef struct {            /* Format of a context map entry  */
-    void *file_handle;      /* key value (linear search of the cache) */
-    int64_t  sf_context_id; /* The return value if matching file_handle */
+typedef struct {           /* Format of a context map entry  */
+    void *  file_handle;   /* key value (linear search of the cache) */
+    int64_t sf_context_id; /* The return value if matching file_handle */
 } file_map_to_context_t;
 
 typedef struct stat_record {
@@ -1793,7 +1793,7 @@ open_subfile_with_context(subfiling_context_t *sf_context, int file_acc_flags)
                                  0,
                                  0,
                                  0};
-        h5_stat_t st;
+        h5_stat_t         st;
 
         /* Retrieve Inode value for HDF5 stub file */
         if (HDstat(sf_context->h5_filename, &st) < 0) {
@@ -2090,7 +2090,6 @@ generate_subfile_name(subfiling_context_t *sf_context, int file_acc_flags, char 
                       size_t filename_out_len, char **filename_basename_out, char **subfile_dir_out)
 {
     FILE * config_file = NULL;
-    char * config_buf  = NULL;
     char * subfile_dir = NULL;
     char * prefix      = NULL;
     char * base        = NULL;
@@ -2197,80 +2196,11 @@ generate_subfile_name(subfiling_context_t *sf_context, int file_acc_flags, char 
      * in order to generate the correct subfile names.
      */
     if (config_file) {
-        char *ioc_substr      = NULL;
-        long  config_file_len = 0;
-
-        if (HDfseek(config_file, 0, SEEK_END) < 0) {
+        if (H5_get_num_iocs_from_config_file(config_file, &n_io_concentrators) < 0) {
 #ifdef H5_SUBFILING_DEBUG
-            HDprintf("%s: couldn't seek to end of subfiling configuration file; errno = %d\n", __func__,
-                     errno);
+            HDprintf("%s: couldn't read from subfiling configuration file\n", __func__);
 #endif
 
-            ret_value = FAIL;
-            goto done;
-        }
-
-        if ((config_file_len = HDftell(config_file)) < 0) {
-#ifdef H5_SUBFILING_DEBUG
-            HDprintf("%s: couldn't get size of subfiling configuration file; errno = %d\n", __func__, errno);
-#endif
-
-            ret_value = FAIL;
-            goto done;
-        }
-
-        if (HDfseek(config_file, 0, SEEK_SET) < 0) {
-#ifdef H5_SUBFILING_DEBUG
-            HDprintf("%s: couldn't seek to end of subfiling configuration file; errno = %d\n", __func__,
-                     errno);
-#endif
-
-            ret_value = FAIL;
-            goto done;
-        }
-
-        if (NULL == (config_buf = HDmalloc((size_t)config_file_len + 1))) {
-#ifdef H5_SUBFILING_DEBUG
-            HDprintf("%s: couldn't allocate space for reading subfiling configuration file\n", __func__);
-#endif
-
-            ret_value = FAIL;
-            goto done;
-        }
-
-        if (HDfread(config_buf, (size_t)config_file_len, 1, config_file) != 1) {
-#ifdef H5_SUBFILING_DEBUG
-            HDprintf("%s: couldn't read from subfiling configuration file; errno = %d\n", __func__, errno);
-#endif
-
-            ret_value = FAIL;
-            goto done;
-        }
-
-        config_buf[config_file_len] = '\0';
-
-        if (NULL == (ioc_substr = HDstrstr(config_buf, "aggregator_count"))) {
-#ifdef H5_SUBFILING_DEBUG
-            HDprintf("%s: malformed subfiling configuration file - no aggregator_count entry\n", __func__);
-#endif
-
-            ret_value = FAIL;
-            goto done;
-        }
-
-        if (EOF == HDsscanf(ioc_substr, "aggregator_count=%d", &n_io_concentrators)) {
-#ifdef H5_SUBFILING_DEBUG
-            HDprintf("%s: couldn't get number of I/O concentrators from subfiling configuration file\n",
-                     __func__);
-#endif
-
-            ret_value = FAIL;
-            goto done;
-        }
-
-        if (n_io_concentrators <= 0) {
-            HDprintf("%s: invalid number of I/O concentrators (%d) read from subfiling configuration file\n",
-                     __func__, n_io_concentrators);
             ret_value = FAIL;
             goto done;
         }
@@ -2312,7 +2242,6 @@ done:
         }
     }
 
-    HDfree(config_buf);
     HDfree(prefix);
 
     return ret_value;
@@ -2608,6 +2537,110 @@ done:
     HDfree(config_filename);
 
     return ret_value;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    H5_get_num_iocs_from_config_file
+ *
+ * Purpose:     Reads a Subfiling configuration file to get the number of
+ *              I/O concentrators used for the logical HDF5 file.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5_get_num_iocs_from_config_file(FILE *config_file, int *n_io_concentrators)
+{
+    char * config_buf      = NULL;
+    char * ioc_substr      = NULL;
+    long   config_file_len = 0;
+    int    read_n_io_concs = 0;
+    herr_t ret_value       = SUCCEED;
+
+    HDassert(config_file);
+    HDassert(n_io_concentrators);
+
+    if (HDfseek(config_file, 0, SEEK_END) < 0) {
+#ifdef H5_SUBFILING_DEBUG
+        HDprintf("%s: couldn't seek to end of subfiling configuration file; errno = %d\n", __func__, errno);
+#endif
+
+        ret_value = FAIL;
+        goto done;
+    }
+
+    if ((config_file_len = HDftell(config_file)) < 0) {
+#ifdef H5_SUBFILING_DEBUG
+        HDprintf("%s: couldn't get size of subfiling configuration file; errno = %d\n", __func__, errno);
+#endif
+
+        ret_value = FAIL;
+        goto done;
+    }
+
+    if (HDfseek(config_file, 0, SEEK_SET) < 0) {
+#ifdef H5_SUBFILING_DEBUG
+        HDprintf("%s: couldn't seek to beginning of subfiling configuration file; errno = %d\n", __func__,
+                 errno);
+#endif
+
+        ret_value = FAIL;
+        goto done;
+    }
+
+    if (NULL == (config_buf = HDmalloc((size_t)config_file_len + 1))) {
+#ifdef H5_SUBFILING_DEBUG
+        HDprintf("%s: couldn't allocate space for reading subfiling configuration file\n", __func__);
+#endif
+
+        ret_value = FAIL;
+        goto done;
+    }
+
+    if (HDfread(config_buf, (size_t)config_file_len, 1, config_file) != 1) {
+#ifdef H5_SUBFILING_DEBUG
+        HDprintf("%s: couldn't read from subfiling configuration file; errno = %d\n", __func__, errno);
+#endif
+
+        ret_value = FAIL;
+        goto done;
+    }
+
+    config_buf[config_file_len] = '\0';
+
+    if (NULL == (ioc_substr = HDstrstr(config_buf, "aggregator_count"))) {
+#ifdef H5_SUBFILING_DEBUG
+        HDprintf("%s: malformed subfiling configuration file - no aggregator_count entry\n", __func__);
+#endif
+
+        ret_value = FAIL;
+        goto done;
+    }
+
+    if (EOF == HDsscanf(ioc_substr, "aggregator_count=%d", &read_n_io_concs)) {
+#ifdef H5_SUBFILING_DEBUG
+        HDprintf("%s: couldn't get number of I/O concentrators from subfiling configuration file\n",
+                 __func__);
+#endif
+
+        ret_value = FAIL;
+        goto done;
+    }
+
+    if (read_n_io_concs <= 0) {
+        HDprintf("%s: invalid number of I/O concentrators (%d) read from subfiling configuration file\n",
+                 __func__, read_n_io_concs);
+        ret_value = FAIL;
+        goto done;
+    }
+
+    *n_io_concentrators = read_n_io_concs;
+
+done:
+    HDfree(config_buf);
+
+    H5_SUBFILING_FUNC_LEAVE;
 }
 
 /*-------------------------------------------------------------------------

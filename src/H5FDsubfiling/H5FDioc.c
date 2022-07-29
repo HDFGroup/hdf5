@@ -16,6 +16,8 @@
  *              another underlying VFD. Maintains two files simultaneously.
  */
 
+#include <libgen.h>
+
 /* This source code file is part of the H5FD driver module */
 #include "H5FDdrvr_module.h"
 
@@ -1587,12 +1589,132 @@ done:
 static herr_t
 H5FD__ioc_del(const char *name, hid_t fapl)
 {
-    herr_t ret_value = SUCCEED;
+    H5P_genplist_t *plist;
+    h5_stat_t       st;
+    MPI_Comm        comm          = MPI_COMM_NULL;
+    MPI_Info        info          = MPI_INFO_NULL;
+    FILE *          config_file   = NULL;
+    char *          name_copy     = NULL;
+    char *          tmp_filename  = NULL;
+    char *          base_filename = NULL;
+    int             mpi_rank      = INT_MAX;
+    int             mpi_code;
+    herr_t          ret_value = SUCCEED;
 
-    (void)name;
-    (void)fapl;
+    /* TODO: Eventually this routine should share common code
+     * with H5_subfiling_common's routines so it doesn't get
+     * out of sync
+     */
 
-    /* TODO: implement later */
+    if (NULL == (plist = H5P_object_verify(fapl, H5P_FILE_ACCESS)))
+        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
+    HDassert(H5FD_IOC == H5P_peek_driver(plist));
+
+    if (H5FD_mpi_self_initialized) {
+        comm = MPI_COMM_WORLD;
+    }
+    else {
+        /* Get the MPI communicator and info from the fapl */
+        if (H5P_get(plist, H5F_ACS_MPI_PARAMS_INFO_NAME, &info) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get MPI info object");
+        if (H5P_get(plist, H5F_ACS_MPI_PARAMS_COMM_NAME, &comm) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get MPI communicator");
+    }
+
+    /* Get the MPI rank of this process */
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_rank(comm, &mpi_rank)))
+        H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Comm_rank failed", mpi_code);
+
+    if (mpi_rank == 0) {
+        int n_io_concentrators = 0;
+        int num_digits         = 0;
+
+        if (HDstat(name, &st) < 0)
+            H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_SYSERRSTR, FAIL, "HDstat failed");
+
+        if (NULL == (name_copy = HDstrdup(name)))
+            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't copy filename");
+
+        base_filename = basename(name_copy);
+
+        /* Try to open the subfiling configuration file and get the number of IOCs */
+        if (NULL == (tmp_filename = HDmalloc(PATH_MAX)))
+            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                    "can't allocate config file name buffer");
+
+        /* TODO: No support for subfile directory prefix currently */
+        HDsnprintf(tmp_filename, PATH_MAX, "%s/%s" SF_CONFIG_FILENAME_TEMPLATE, ".", base_filename,
+                   (uint64_t)st.st_ino);
+
+        if (NULL == (config_file = HDfopen(tmp_filename, "r"))) {
+            if (ENOENT == errno) {
+#ifdef H5FD_IOC_DEBUG
+                HDprintf("** WARNING: couldn't delete Subfiling configuration file '%s'\n", tmp_filename);
+#endif
+
+                H5_SUBFILING_GOTO_DONE(SUCCEED);
+            }
+            else
+                H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL,
+                                            "can't open subfiling config file");
+        }
+
+        if (H5_get_num_iocs_from_config_file(config_file, &n_io_concentrators) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_READERROR, FAIL, "can't read subfiling config file");
+
+        /* Delete the Subfiling configuration file */
+        if (EOF == HDfclose(config_file)) {
+            config_file = NULL;
+            H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL,
+                                        "can't close subfiling config file");
+        }
+
+        config_file = NULL;
+
+        if (HDremove(tmp_filename) < 0)
+            H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL,
+                                        "can't delete subfiling config file");
+
+        /* Try to delete each of the subfiles */
+        num_digits = (int)(HDlog10(n_io_concentrators) + 1);
+
+        for (int i = 0; i < n_io_concentrators; i++) {
+            /* TODO: No support for subfile directory prefix currently */
+            HDsnprintf(tmp_filename, PATH_MAX, "%s/%s" SF_FILENAME_TEMPLATE, ".", base_filename,
+                       (uint64_t)st.st_ino, num_digits, i + 1, n_io_concentrators);
+
+            if (HDremove(tmp_filename) < 0) {
+#ifdef H5FD_IOC_DEBUG
+                HDprintf("** WARNING: couldn't delete subfile '%s'\n", tmp_filename);
+#endif
+
+                if (ENOENT != errno)
+                    H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_CANTDELETEFILE, FAIL, "can't delete subfile");
+            }
+        }
+
+        /* Delete the HDF5 stub file */
+        if (HDremove(name) < 0)
+            H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_CANTDELETEFILE, FAIL, "can't delete HDF5 file");
+    }
+
+done:
+    if (config_file)
+        if (EOF == HDfclose(config_file))
+            H5_SUBFILING_DONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close subfiling config file");
+
+    /* Set up a barrier (don't want processes to run ahead of the delete) */
+    if (MPI_SUCCESS != (mpi_code = MPI_Barrier(comm)))
+        H5_SUBFILING_MPI_DONE_ERROR(FAIL, "MPI_Barrier failed", mpi_code);
+
+    /* Free duplicated MPI Communicator and Info objects */
+    if (H5_mpi_comm_free(&comm) < 0)
+        H5_SUBFILING_DONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI communicator");
+    if (H5_mpi_info_free(&info) < 0)
+        H5_SUBFILING_DONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI info object");
+
+    HDfree(tmp_filename);
+    HDfree(name_copy);
 
     H5_SUBFILING_FUNC_LEAVE;
 }
