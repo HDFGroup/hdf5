@@ -822,6 +822,7 @@ FORTRAN_HAVE_C_SIZEOF_TRUE
 FORTRAN_HAVE_SIZEOF_FALSE
 FORTRAN_HAVE_SIZEOF_TRUE
 FCLIBS
+fmoddir
 F9XMODEXT
 F9XMODFLAG
 FSEARCH_DIRS
@@ -943,7 +944,6 @@ infodir
 docdir
 oldincludedir
 includedir
-runstatedir
 localstatedir
 sharedstatedir
 sysconfdir
@@ -974,10 +974,12 @@ enable_dependency_tracking
 enable_unsupported
 enable_fortran
 enable_fortran2003
+with_fmoddir
 enable_cxx
 enable_hl
 enable_hltools
 enable_tests
+enable_test_express
 enable_tools
 enable_doxygen
 enable_doxygen_doc
@@ -1089,7 +1091,6 @@ datadir='${datarootdir}'
 sysconfdir='${prefix}/etc'
 sharedstatedir='${prefix}/com'
 localstatedir='${prefix}/var'
-runstatedir='${localstatedir}/run'
 includedir='${prefix}/include'
 oldincludedir='/usr/include'
 docdir='${datarootdir}/doc/${PACKAGE_TARNAME}'
@@ -1342,15 +1343,6 @@ do
   | -silent | --silent | --silen | --sile | --sil)
     silent=yes ;;
 
-  -runstatedir | --runstatedir | --runstatedi | --runstated \
-  | --runstate | --runstat | --runsta | --runst | --runs \
-  | --run | --ru | --r)
-    ac_prev=runstatedir ;;
-  -runstatedir=* | --runstatedir=* | --runstatedi=* | --runstated=* \
-  | --runstate=* | --runstat=* | --runsta=* | --runst=* | --runs=* \
-  | --run=* | --ru=* | --r=*)
-    runstatedir=$ac_optarg ;;
-
   -sbindir | --sbindir | --sbindi | --sbind | --sbin | --sbi | --sb)
     ac_prev=sbindir ;;
   -sbindir=* | --sbindir=* | --sbindi=* | --sbind=* | --sbin=* \
@@ -1488,7 +1480,7 @@ fi
 for ac_var in	exec_prefix prefix bindir sbindir libexecdir datarootdir \
 		datadir sysconfdir sharedstatedir localstatedir includedir \
 		oldincludedir docdir infodir htmldir dvidir pdfdir psdir \
-		libdir localedir mandir runstatedir
+		libdir localedir mandir
 do
   eval ac_val=\$$ac_var
   # Remove trailing slashes.
@@ -1641,7 +1633,6 @@ Fine tuning of the installation directories:
   --sysconfdir=DIR        read-only single-machine data [PREFIX/etc]
   --sharedstatedir=DIR    modifiable architecture-independent data [PREFIX/com]
   --localstatedir=DIR     modifiable single-machine data [PREFIX/var]
-  --runstatedir=DIR       modifiable per-process data [LOCALSTATEDIR/run]
   --libdir=DIR            object code libraries [EPREFIX/lib]
   --includedir=DIR        C header files [PREFIX/include]
   --oldincludedir=DIR     C header files for non-gcc [/usr/include]
@@ -1707,6 +1698,8 @@ Optional Features:
   --enable-hl             Enable the high level library [default=yes]
   --enable-hltools        Enable the high-level tools [default=yes)]
   --enable-tests          Compile the HDF5 tests [default=yes]
+  --enable-test-express   Set HDF5 testing intensity level (0-3) [0 =
+                          exhaustive testing; 3 = quicker testing; default=3]
   --enable-tools          Compile the HDF5 tools [default=yes]
   --enable-doxygen        Compile the HDF5 doxygen files [default=no]
   --disable-doxygen-doc   don't generate any doxygen documentation
@@ -1815,6 +1808,7 @@ Optional Features:
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
+  --with-fmoddir=DIR      Fortran module install directory
   --with-pic[=PKGS]       try to use only PIC/non-PIC objects [default=use
                           both]
   --with-aix-soname=aix|svr4|both
@@ -4074,6 +4068,8 @@ AM_CXXFLAGS="${AM_CXXFLAGS}"
 AM_FCFLAGS="${AM_FCFLAGS}"
 AM_CPPFLAGS="${AM_CPPFLAGS}"
 AM_LDFLAGS="${AM_LDFLAGS}"
+
+## Flags passed in by the user
 CFLAGS="${CFLAGS}"
 CXXFLAGS="${CXXFLAGS}"
 FCFLAGS="${FCFLAGS}"
@@ -4188,9 +4184,10 @@ $as_echo "$hdf5_cv_host" >&6; };
 if test $hdf5_cv_host = "none"; then
   hdf5_cv_host=$host
 elif test $hdf5_cv_host != $host; then
-  echo "The config.cache file was generated on $hdf5_cv_host but"
-  echo "this is $host.  Please remove that file and try again."
-  as_fn_error $? "config.cache file is invalid" "$LINENO" 5
+  as_fn_error $? "
+     The config.cache file was generated on $hdf5_cv_host but
+     this is $host.  Please remove that file and try again.
+     config.cache file is invalid" "$LINENO" 5
 fi
 
 ## ----------------------------------------------------------------------
@@ -4350,7 +4347,7 @@ $as_echo "$CLANG_SANITIZE_CHECKS" >&6; }
   # 'address;undefined'.  Which and which combinations of these are
   #  supported varies by compiler version, but unsupported options
   # or combinations will result in configure errors reported in config.log.
-  # Comma separated lists of sanitize options wil be entered intact in
+  # Comma separated lists of sanitize options will be entered intact in
   # one -fsanitize=<list> flag.  Space separated lists will be entered in
   # separate -fsanitize=<item> flags.
   # NOTE: No sanity checking done here!
@@ -6095,6 +6092,18 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
+  ## Allow setting the fortran module install dir
+
+# Check whether --with-fmoddir was given.
+if test "${with_fmoddir+set}" = set; then :
+  withval=$with_fmoddir; fmoddir=$withval
+else
+  fmoddir="\${includedir}"
+fi
+
+  fmoddir=$fmoddir
+
+￼
   ## Change to the Fortran 90 language
   ac_ext=${ac_fc_srcext-f}
 ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
@@ -8059,6 +8068,40 @@ else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 fi
+
+## ----------------------------------------------------------------------
+## Check what level of testing should be enabled
+##
+
+## Default is quickest testing
+TEST_EXPRESS_LEVEL_DEFAULT=3
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking if HDF5 testing intensity level is set" >&5
+$as_echo_n "checking if HDF5 testing intensity level is set... " >&6; }
+
+# Check whether --enable-test-express was given.
+if test "${enable_test_express+set}" = set; then :
+  enableval=$enable_test_express; TEST_EXPRESS_LEVEL_DEFAULT=$enableval
+fi
+
+
+case "X-$TEST_EXPRESS_LEVEL_DEFAULT" in
+  X-0|X-1|X-2|X-3)
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $TEST_EXPRESS_LEVEL_DEFAULT" >&5
+$as_echo "$TEST_EXPRESS_LEVEL_DEFAULT" >&6; }
+    ;;
+  *)
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: error" >&5
+$as_echo "error" >&6; }
+    as_fn_error $? "$TEST_EXPRESS_LEVEL_DEFAULT is not a valid test express level" "$LINENO" 5
+    ;;
+esac
+
+
+cat >>confdefs.h <<_ACEOF
+#define TEST_EXPRESS_LEVEL_DEFAULT $TEST_EXPRESS_LEVEL_DEFAULT
+_ACEOF
+
 
 ## ----------------------------------------------------------------------
 ## Check if they would like to disable building tools
@@ -25314,7 +25357,7 @@ else
     We can't simply define LARGE_OFF_T to be 9223372036854775807,
     since some C++ compilers masquerading as C compilers
     incorrectly reject 9223372036854775807.  */
-#define LARGE_OFF_T ((((off_t) 1 << 31) << 31) - 1 + (((off_t) 1 << 31) << 31))
+#define LARGE_OFF_T (((off_t) 1 << 62) - 1 + ((off_t) 1 << 62))
   int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721
 		       && LARGE_OFF_T % 2147483647 == 1)
 		      ? 1 : -1];
@@ -25346,7 +25389,7 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
     We can't simply define LARGE_OFF_T to be 9223372036854775807,
     since some C++ compilers masquerading as C compilers
     incorrectly reject 9223372036854775807.  */
-#define LARGE_OFF_T ((((off_t) 1 << 31) << 31) - 1 + (((off_t) 1 << 31) << 31))
+#define LARGE_OFF_T (((off_t) 1 << 62) - 1 + ((off_t) 1 << 62))
   int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721
 		       && LARGE_OFF_T % 2147483647 == 1)
 		      ? 1 : -1];
@@ -25402,7 +25445,7 @@ else
     We can't simply define LARGE_OFF_T to be 9223372036854775807,
     since some C++ compilers masquerading as C compilers
     incorrectly reject 9223372036854775807.  */
-#define LARGE_OFF_T ((((off_t) 1 << 31) << 31) - 1 + (((off_t) 1 << 31) << 31))
+#define LARGE_OFF_T (((off_t) 1 << 62) - 1 + ((off_t) 1 << 62))
   int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721
 		       && LARGE_OFF_T % 2147483647 == 1)
 		      ? 1 : -1];
@@ -25434,7 +25477,7 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
     We can't simply define LARGE_OFF_T to be 9223372036854775807,
     since some C++ compilers masquerading as C compilers
     incorrectly reject 9223372036854775807.  */
-#define LARGE_OFF_T ((((off_t) 1 << 31) << 31) - 1 + (((off_t) 1 << 31) << 31))
+#define LARGE_OFF_T (((off_t) 1 << 62) - 1 + ((off_t) 1 << 62))
   int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721
 		       && LARGE_OFF_T % 2147483647 == 1)
 		      ? 1 : -1];
