@@ -25,6 +25,7 @@
 #include "H5FDprivate.h"    /* File drivers                */
 #include "H5FDonion.h"      /* Onion file driver           */
 #include "H5FDonion_priv.h" /* Onion file driver internals */
+#include "H5FDsec2.h"       /* Sec2 file driver         */
 #include "H5FLprivate.h"    /* Free Lists                  */
 #include "H5Iprivate.h"     /* IDs                         */
 #include "H5MMprivate.h"    /* Memory management           */
@@ -316,36 +317,42 @@ done:
 herr_t
 H5Pset_fapl_onion(hid_t fapl_id, const H5FD_onion_fapl_info_t *fa)
 {
-    H5P_genplist_t *plist     = NULL;
-    herr_t          ret_value = SUCCEED;
+    H5P_genplist_t *fapl           = NULL;
+    H5P_genplist_t *backing_fapl   = NULL;
+    hid_t           backing_vfd_id = H5I_INVALID_HID;
+    herr_t          ret_value      = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*!", fapl_id, fa);
 
-    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Not a valid FAPL ID")
+    if (NULL == (fapl = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Not a valid FAPL ID");
     if (NULL == fa)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL info pointer")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL info pointer");
     if (H5FD_ONION_FAPL_INFO_VERSION_CURR != fa->version)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid info version")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid info version");
     if (!POWER_OF_TWO(fa->page_size))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid info page size")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid info page size");
     if (fa->page_size < 1)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid info page size")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid info page size");
 
-    if (H5P_DEFAULT != fa->backing_fapl_id) {
-        H5P_genplist_t *backing_fapl = NULL;
-
-        H5E_BEGIN_TRY
-        {
-            backing_fapl = H5P_object_verify(fa->backing_fapl_id, H5P_FILE_ACCESS);
-        }
-        H5E_END_TRY;
-        if (backing_fapl == NULL)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid backing fapl id")
+    if (H5P_DEFAULT == fa->backing_fapl_id) {
+        if (NULL == (backing_fapl = H5P_object_verify(H5P_FILE_ACCESS_DEFAULT, H5P_FILE_ACCESS)))
+            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "invalid backing fapl id");
+    }
+    else {
+        if (NULL == (backing_fapl = H5P_object_verify(fa->backing_fapl_id, H5P_FILE_ACCESS)))
+            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "invalid backing fapl id");
     }
 
-    ret_value = H5P_set_driver(plist, H5FD_ONION, (const void *)fa, NULL);
+    /* The only backing fapl that is currently supported is sec2 */
+    if ((backing_vfd_id = H5P_peek_driver(backing_fapl)) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "Can't get VFD from fapl");
+    if (backing_vfd_id != H5FD_SEC2)
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "Onion VFD only supports sec2 backing store");
+
+    if (H5P_set_driver(fapl, H5FD_ONION, (const void *)fa, NULL) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "Can't set the onion VFD");
 
 done:
     FUNC_LEAVE_API(ret_value)
