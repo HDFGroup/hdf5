@@ -76,7 +76,8 @@ struct revise_revision {
     const char       *comment;
 };
 
-static int  compare_file_bytes_exactly(const char *filepath, hid_t fapl_id, size_t nbytes, const unsigned char *exp);
+static int  compare_file_bytes_exactly(const char *filepath, hid_t fapl_id, size_t nbytes,
+                                       const unsigned char *exp);
 static int  do_onion_open_and_writes(const char *filename, H5FD_onion_fapl_info_t *onion_info_p, size_t n_ops,
                                      struct revise_revision *about);
 static void onion_filepaths_destroy(struct onion_filepaths *paths);
@@ -1795,8 +1796,8 @@ verify_stored_onion_create_0_open(struct onion_filepaths *paths, H5FD_onion_fapl
     unsigned char history_exp_bytes[]    = {
         'O', 'W', 'H', 'S', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 /* checksum encoded below */
     };
-    unsigned char *ptr           = NULL;
-    uint32_t       checksum      = 0;
+    unsigned char *ptr      = NULL;
+    uint32_t       checksum = 0;
 
     /* Finish populating expected header bytes */
     ptr = hdr_exp_bytes + 8; /* WARNING: must match format */
@@ -4628,14 +4629,14 @@ test_integration_create_by_name(void)
     const char             *basename   = "integration_by_name.h5";
     hid_t                   fapl_id    = H5I_INVALID_HID;
     struct onion_filepaths *paths      = NULL;
-    hid_t   file_id    = H5I_INVALID_HID;
-    hid_t   file       = H5I_INVALID_HID;
-    hid_t   space      = H5I_INVALID_HID;
-    hid_t   dset       = H5I_INVALID_HID;
-    hid_t   dcpl       = H5I_INVALID_HID;
-    hsize_t dims[2]    = {1, ONE_DIM_SIZE};
-    hsize_t maxdims[2] = {1, ONE_DIM_SIZE};
-    int     fillval;
+    hid_t                   file_id    = H5I_INVALID_HID;
+    hid_t                   file       = H5I_INVALID_HID;
+    hid_t                   space      = H5I_INVALID_HID;
+    hid_t                   dset       = H5I_INVALID_HID;
+    hid_t                   dcpl       = H5I_INVALID_HID;
+    hsize_t                 dims[2]    = {1, ONE_DIM_SIZE};
+    hsize_t                 maxdims[2] = {1, ONE_DIM_SIZE};
+    int                     fillval;
     struct {
         int arr[ONE_DIM_SIZE];
     } *wdata = NULL;
@@ -4877,7 +4878,7 @@ error:
 int
 main(void)
 {
-    const char *env_h5_drvr = NULL;  /* VFD value from environment */
+    const char *env_h5_drvr = NULL; /* VFD value from environment */
     int         nerrors     = 0;
 
     HDprintf("Testing Onion VFD functionality.\n");
