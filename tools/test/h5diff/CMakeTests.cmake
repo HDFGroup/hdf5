@@ -70,6 +70,13 @@
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_strings2.h5
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_eps1.h5
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_eps2.h5
+      # onion VFD files
+      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_onion_objs.h5
+      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_onion_objs.h5.onion
+      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_onion_dset_ext.h5
+      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_onion_dset_ext.h5.onion
+      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_onion_dset_1d.h5
+      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_onion_dset_1d.h5.onion
       # tools/testfiles/vds
       ${HDF5_TOOLS_DIR}/testfiles/vds/1_a.h5
       ${HDF5_TOOLS_DIR}/testfiles/vds/1_b.h5
@@ -295,6 +302,9 @@
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_801.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_830.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_90.txt
+      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_900.txt
+      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_901.txt
+      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_902.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_8625.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_8639.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_reg.txt
@@ -932,6 +942,12 @@
           h5diff_8639.out.err
           h5diff_90.out
           h5diff_90.out.err
+          h5diff_900.out
+          h5diff_900.out.err
+          h5diff_901.out
+          h5diff_901.out.err
+          h5diff_902.out
+          h5diff_902.out.err
           h5diff_v1.out
           h5diff_v1.out.err
           h5diff_v2.out
@@ -1562,6 +1578,13 @@ ADD_SH5_TEST (h5diff_830 1 --enable-error-stack -v ${FILE7} ${FILE8} /g1/array3D
 ADD_H5_TEST (h5diff_v1 0 -v ${FILEV1} ${FILEV2})
 ADD_H5_TEST (h5diff_v2 0 -r ${FILEV1} ${FILEV2})
 ADD_H5_TEST (h5diff_v3 0 -c ${FILEV1} ${FILEV2})
+
+# ##############################################################################
+# # onion VFD tests (serial only)
+# ##############################################################################
+ADD_SH5_TEST (h5diff_900 1 -r -v --vfd-name-1 onion --vfd-info-1 0 --vfd-name-2 onion --vfd-info-2 1 h5diff_onion_objs.h5 h5diff_onion_objs.h5)
+ADD_SH5_TEST (h5diff_901 0 -r -v --vfd-name-1 onion --vfd-info-1 0 --vfd-name-2 onion --vfd-info-2 1 h5diff_onion_dset_ext.h5 h5diff_onion_dset_ext.h5)
+ADD_SH5_TEST (h5diff_902 1 -r -v --vfd-name-1 onion --vfd-info-1 0 --vfd-name-2 onion --vfd-info-2 1 h5diff_onion_dset_1d.h5 h5diff_onion_dset_1d.h5)
 
 ##############################################################################
 ###    P L U G I N  T E S T S

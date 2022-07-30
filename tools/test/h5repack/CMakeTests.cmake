@@ -122,6 +122,13 @@
       ${HDF5_TOOLS_DIR}/testfiles/vds/5_b.h5
       ${HDF5_TOOLS_DIR}/testfiles/vds/5_c.h5
       ${HDF5_TOOLS_DIR}/testfiles/vds/5_vds.h5
+      # tools/testfiles onion VFD files
+      ${HDF5_TOOLS_DIR}/testfiles/tst_onion_dset_1d.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tst_onion_dset_1d.h5.onion
+      ${HDF5_TOOLS_DIR}/testfiles/tst_onion_dset_ext.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tst_onion_dset_ext.h5.onion
+      ${HDF5_TOOLS_DIR}/testfiles/tst_onion_objs.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tst_onion_objs.h5.onion
   )
 
   set (LIST_OTHER_TEST_FILES
@@ -433,6 +440,50 @@
                 -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
                 -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_file_ext}>"
                 -D "TEST_ARGS:STRING=-q;creation_order;-pH;out-${testname}.${resultfile}"
+                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+                -D "TEST_OUTPUT=${resultfile}-${testname}.out"
+                -D "TEST_EXPECT=${resultcode}"
+                -D "TEST_REFERENCE=${testname}.${resultfile}.ddl"
+                -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+        )
+        set_tests_properties (H5REPACK_DMP-h5dump-${testname} PROPERTIES
+            DEPENDS "H5REPACK_DMP-${testname}"
+        )
+      endif ()
+    endif ()
+  endmacro ()
+
+  macro (ADD_H5_DMP_NO_OPT_TEST testname testtype resultcode resultfile)
+    if ("${testtype}" STREQUAL "SKIP")
+      if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+        add_test (
+            NAME H5REPACK_DMP-${testname}
+            COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}"
+        )
+        set_property(TEST H5REPACK_DMP-${testname} PROPERTY DISABLED)
+      endif ()
+    else ()
+      add_test (
+          NAME H5REPACK_DMP-${testname}-clear-objects
+          COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${resultfile}
+      )
+      set_tests_properties (H5REPACK_DMP-${testname}-clear-objects PROPERTIES
+          FIXTURES_REQUIRED clear_h5repack
+      )
+      add_test (
+          NAME H5REPACK_DMP-${testname}
+          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack${tgt_file_ext}> ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${resultfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${resultfile}
+      )
+      set_tests_properties (H5REPACK_DMP-${testname} PROPERTIES
+          DEPENDS H5REPACK_DMP-${testname}-clear-objects
+      )
+      if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+        add_test (
+            NAME H5REPACK_DMP-h5dump-${testname}
+            COMMAND "${CMAKE_COMMAND}"
+                -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+                -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_file_ext}>"
+                -D "TEST_ARGS:STRING=out-${testname}.${resultfile}"
                 -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
                 -D "TEST_OUTPUT=${resultfile}-${testname}.out"
                 -D "TEST_EXPECT=${resultcode}"
@@ -1664,6 +1715,10 @@ ADD_H5_DMP_TEST (textlink-mergeprune "TEST" 0 textlink.h5 --merge --prune --enab
 #ADD_H5_DMP_TEST (textlinksrc-mergeprune "TEST" 0 textlinksrc.h5 --merge --prune --enable-error-stack)
 ### HDFFV-11128 needs fixed to enable the following test
 #ADD_H5_DMP_TEST (textlinktar-mergeprune "TEST" 0 textlinktar.h5 --merge --prune --enable-error-stack)
+
+ADD_H5_DMP_NO_OPT_TEST (tst_onion_dset_1d "TEST" 0 tst_onion_dset_1d.h5 --src-vfd-name onion --src-vfd-info 1)
+ADD_H5_DMP_NO_OPT_TEST (tst_onion_dset_ext "TEST" 0 tst_onion_dset_ext.h5 --src-vfd-name onion --src-vfd-info 1)
+ADD_H5_DMP_NO_OPT_TEST (tst_onion_objs "TEST" 0 tst_onion_objs.h5 --src-vfd-name onion --src-vfd-info 1)
 
 ##############################################################################
 ###    P L U G I N  T E S T S
