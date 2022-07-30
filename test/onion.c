@@ -2097,7 +2097,7 @@ test_create_oniontarget(hbool_t truncate_canonical, hbool_t with_initial_data)
         TEST_ERROR;
 
     if (TRUE == with_initial_data) {
-        /* Initial revsion contains data */
+        /* Initial revision contains data */
         if (H5FDget_eof(vfile_ro, H5FD_MEM_DRAW) != a_list_size_s)
             TEST_ERROR;
         if (H5FDget_eoa(vfile_ro, H5FD_MEM_DRAW) != 0)
