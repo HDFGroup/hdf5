@@ -2972,7 +2972,7 @@ test_integration_create(void)
         for (int j = 0; j < 256; j++)
             dset_data->arr[i][j] = i * 6 + j + 1;
 
-    if (H5Dwrite(dset, H5T_STD_I32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
+    if (H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
         TEST_ERROR;
 
     if (H5Dclose(dset) < 0)
@@ -2996,7 +2996,7 @@ test_integration_create(void)
         for (int j = 0; j < 256; j++)
             dset_data->arr[i][j] = i * 3 + j + 5;
 
-    if (H5Dwrite(dset, H5T_STD_I32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
+    if (H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
         TEST_ERROR;
 
     /* CLEANUP */
@@ -3294,7 +3294,7 @@ test_integration_create_simple(void)
     for (int i = 0; i < ONE_DIM_SIZE; i++)
         dset_data->arr[i] = i + ONE_DIM_SIZE;
 
-    if (H5Dwrite(dset, H5T_STD_I32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
+    if (H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
         TEST_ERROR;
 
     if (H5Dclose(dset) < 0)
@@ -3316,7 +3316,7 @@ test_integration_create_simple(void)
     for (int i = 0; i < ONE_DIM_SIZE; i++)
         dset_data->arr[i] = i + 2048;
 
-    if (H5Dwrite(dset, H5T_STD_I32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
+    if (H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
         TEST_ERROR;
 
     /* CLEANUP */
@@ -3339,7 +3339,7 @@ test_integration_create_simple(void)
     for (int i = 0; i < ONE_DIM_SIZE; i += 20)
         dset_data->arr[i] = i + 3072;
 
-    if (H5Dwrite(dset, H5T_STD_I32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
+    if (H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
         TEST_ERROR;
 
     /* CLEANUP */
@@ -4738,7 +4738,7 @@ test_integration_create_by_name(void)
     for (int i = 0; i < ONE_DIM_SIZE; i++)
         dset_data->arr[i] = i + ONE_DIM_SIZE;
 
-    if (H5Dwrite(dset, H5T_STD_I32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
+    if (H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
         TEST_ERROR;
 
     if (H5Dclose(dset) < 0)
@@ -4760,7 +4760,7 @@ test_integration_create_by_name(void)
     for (int i = 0; i < ONE_DIM_SIZE; i++)
         dset_data->arr[i] = i + 2048;
 
-    if (H5Dwrite(dset, H5T_STD_I32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
+    if (H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
         TEST_ERROR;
 
     /* CLEANUP */
@@ -4783,7 +4783,7 @@ test_integration_create_by_name(void)
     for (int i = 0; i < ONE_DIM_SIZE; i += 20)
         dset_data->arr[i] = i + 3072;
 
-    if (H5Dwrite(dset, H5T_STD_I32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
+    if (H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
         TEST_ERROR;
 
     /* CLEANUP */
