@@ -190,14 +190,24 @@ H5FD__onion_history_decode(unsigned char *buf, H5FD_onion_history_t *history)
         for (uint64_t i = 0; i < n_revisions; i++) {
             H5FD_onion_record_loc_t *rloc = &history->record_locs[i];
 
+            /* Decode into appropriately sized types, then do a checked
+             * assignment to the struct value. We don't have access to
+             * the H5F_t struct for this file, so we can't use the
+             * offset/length macros in H5Fprivate.h.
+             */
+            uint64_t record_size;
+            uint64_t phys_addr;
+
             HDmemcpy(&ui64, ptr, 8);
             ui8p = (uint8_t *)&ui64;
-            UINT64DECODE(ui8p, rloc->phys_addr);
+            UINT64DECODE(ui8p, phys_addr);
+            H5_CHECKED_ASSIGN(rloc->phys_addr, haddr_t, phys_addr, uint64_t);
             ptr += 8;
 
             HDmemcpy(&ui64, ptr, 8);
             ui8p = (uint8_t *)&ui64;
-            UINT64DECODE(ui8p, rloc->record_size);
+            UINT64DECODE(ui8p, record_size);
+            H5_CHECKED_ASSIGN(rloc->record_size, hsize_t, record_size, uint64_t);
             ptr += 8;
 
             HDmemcpy(&ui32, ptr, 4);
@@ -263,9 +273,21 @@ H5FD__onion_history_encode(H5FD_onion_history_t *history, unsigned char *buf, ui
     if (history->n_revisions > 0) {
         HDassert(history->record_locs != NULL);
         for (uint64_t i = 0; i < history->n_revisions; i++) {
-            UINT64ENCODE(ptr, history->record_locs[i].phys_addr);
-            UINT64ENCODE(ptr, history->record_locs[i].record_size);
-            UINT32ENCODE(ptr, history->record_locs[i].checksum);
+            H5FD_onion_record_loc_t *rloc = &history->record_locs[i];
+
+            /* Do a checked assignment from the struct value into appropriately
+             * sized types. We don't have access to the H5F_t struct for this
+             * file, so we can't use the offset/length macros in H5Fprivate.h.
+             */
+            uint64_t phys_addr;
+            uint64_t record_size;
+
+            H5_CHECKED_ASSIGN(phys_addr, uint64_t, rloc->phys_addr, haddr_t);
+            H5_CHECKED_ASSIGN(record_size, uint64_t, rloc->record_size, hsize_t);
+
+            UINT64ENCODE(ptr, phys_addr);
+            UINT64ENCODE(ptr, record_size);
+            UINT32ENCODE(ptr, rloc->checksum);
         }
     }
     *checksum = H5_checksum_fletcher32(buf, (size_t)(ptr - buf));

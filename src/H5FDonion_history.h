@@ -30,7 +30,7 @@
  */
 typedef struct H5FD_onion_record_loc_t {
     haddr_t  phys_addr;
-    size_t   record_size;
+    hsize_t  record_size;
     uint32_t checksum;
 } H5FD_onion_record_loc_t;
 
