@@ -1597,7 +1597,10 @@ verify_history_as_expected_onion(H5FD_t *raw_file, struct expected_history *filt
     H5FD_onion_revision_record_t rev_out;
     uint64_t                     filesize = 0;
     uint64_t                     readsize = 0;
-    size_t                       i        = 0;
+
+    /* memset to avoid bad frees on errors */
+    HDmemset(&rev_out, 0, sizeof(H5FD_onion_revision_record_t));
+    HDmemset(&history_out, 0, sizeof(H5FD_onion_history_t));
 
     hdr_out.version = H5FD__ONION_HEADER_VERSION_CURR;
 
@@ -1669,7 +1672,7 @@ verify_history_as_expected_onion(H5FD_t *raw_file, struct expected_history *filt
 
     /* Re-use buffer space to sanity-check checksum for record pointer(s). */
     HDassert(readsize >= sizeof(H5FD_onion_record_loc_t));
-    for (i = 0; i < history_out.n_revisions; i++) {
+    for (size_t i = 0; i < history_out.n_revisions; i++) {
 
         HDmemcpy(buf, &history_out.record_locs[i].phys_addr, 8);
         HDmemcpy(buf + 8, &history_out.record_locs[i].record_size, 8);
@@ -1683,7 +1686,7 @@ verify_history_as_expected_onion(H5FD_t *raw_file, struct expected_history *filt
 
     /* Ingest revision(s) */
 
-    for (i = 0; i < history_out.n_revisions; i++) {
+    for (size_t i = 0; i < history_out.n_revisions; i++) {
         H5FD_onion_record_loc_t  *rpp = &history_out.record_locs[i];
         struct expected_revision *erp = &filter->revisions[i];
 
