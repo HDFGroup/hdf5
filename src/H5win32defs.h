@@ -58,7 +58,6 @@ struct timezone {
 #define HDisatty(F)          _isatty(F)
 #define HDlseek(F, O, W)     _lseeki64(F, O, W)
 #define HDlstat(S, B)        _lstati64(S, B)
-#define HDmemset(X, C, Z)    memset((void *)(X), C, Z) /* Cast avoids MSVC warning */
 #define HDmkdir(S, M)        _mkdir(S)
 
 /* off_t exists on Windows, but is always a 32-bit long, even on 64-bit Windows,
