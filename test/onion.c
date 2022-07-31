@@ -1595,8 +1595,10 @@ verify_history_as_expected_onion(H5FD_t *raw_file, struct expected_history *filt
     H5FD_onion_header_t          hdr_out;
     H5FD_onion_history_t         history_out;
     H5FD_onion_revision_record_t rev_out;
-    uint64_t                     filesize = 0;
-    uint64_t                     readsize = 0;
+    uint64_t                     filesize     = 0;
+    uint64_t                     readsize     = 0;
+    uint8_t                     *ui8p         = NULL;
+    uint32_t                     buf_checksum = 0;
 
     /* memset to avoid bad frees on errors */
     HDmemset(&rev_out, 0, sizeof(H5FD_onion_revision_record_t));
@@ -1628,7 +1630,10 @@ verify_history_as_expected_onion(H5FD_t *raw_file, struct expected_history *filt
         TEST_ERROR;
     if (H5FD__ONION_HEADER_VERSION_CURR != hdr_out.version)
         TEST_ERROR;
-    if (HDmemcmp(&hdr_out.checksum, &buf[readsize - 4], 4) != 0)
+    /* Decode from the buffer to we can compare on BE systems */
+    ui8p = (uint8_t *)(&buf[readsize - 4]);
+    UINT32DECODE(ui8p, buf_checksum);
+    if (hdr_out.checksum != buf_checksum)
         TEST_ERROR;
     if (hdr_out.checksum != H5_checksum_fletcher32(buf, readsize - 4))
         TEST_ERROR;
@@ -1656,7 +1661,10 @@ verify_history_as_expected_onion(H5FD_t *raw_file, struct expected_history *filt
         TEST_ERROR;
     if (H5FD__ONION_HISTORY_VERSION_CURR != history_out.version)
         TEST_ERROR;
-    if (HDmemcmp(&history_out.checksum, &buf[readsize - 4], 4) != 0)
+    /* Decode from the buffer to we can compare on BE systems */
+    ui8p = (uint8_t *)(&buf[readsize - 4]);
+    UINT32DECODE(ui8p, buf_checksum);
+    if (history_out.checksum != buf_checksum)
         TEST_ERROR;
     if (history_out.checksum != H5_checksum_fletcher32(buf, readsize - 4))
         TEST_ERROR;
@@ -1710,7 +1718,10 @@ verify_history_as_expected_onion(H5FD_t *raw_file, struct expected_history *filt
             TEST_ERROR;
         if (H5FD__ONION_REVISION_RECORD_VERSION_CURR != rev_out.version)
             TEST_ERROR;
-        if (HDmemcmp(&rev_out.checksum, &buf[readsize - 4], 4) != 0)
+        /* Decode from the buffer to we can compare on BE systems */
+        ui8p = (uint8_t *)(&buf[readsize - 4]);
+        UINT32DECODE(ui8p, buf_checksum);
+        if (rev_out.checksum != buf_checksum)
             TEST_ERROR;
         if (rev_out.checksum != H5_checksum_fletcher32(buf, readsize - 4))
             TEST_ERROR;
