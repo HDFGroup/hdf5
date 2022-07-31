@@ -1682,8 +1682,24 @@ verify_history_as_expected_onion(H5FD_t *raw_file, struct expected_history *filt
     HDassert(readsize >= sizeof(H5FD_onion_record_loc_t));
     for (size_t i = 0; i < history_out.n_revisions; i++) {
 
-        HDmemcpy(buf, &history_out.record_locs[i].phys_addr, 8);
-        HDmemcpy(buf + 8, &history_out.record_locs[i].record_size, 8);
+        uint64_t phys_addr;
+        uint64_t record_size;
+
+        /* Do a checked assignment from the struct value into appropriately
+         * sized types. We don't have access to the H5F_t struct for this
+         * file, so we can't use the offset/length macros in H5Fprivate.h.
+         *
+         * Have to do an encode to get these values so the test passes on BE
+         * systems.
+         */
+        H5_CHECKED_ASSIGN(phys_addr, uint64_t, history_out.record_locs[i].phys_addr, haddr_t);
+        H5_CHECKED_ASSIGN(record_size, uint64_t, history_out.record_locs[i].record_size, hsize_t);
+
+        ui8p = (uint8_t *)buf;
+        UINT64ENCODE(ui8p, phys_addr);
+
+        ui8p = (uint8_t *)(buf + 8);
+        UINT64ENCODE(ui8p, record_size);
 
         if (history_out.record_locs[i].checksum != H5_checksum_fletcher32(buf, 16))
             TEST_ERROR;
