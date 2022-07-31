@@ -441,7 +441,7 @@ test_onion_1d_dset(const char *fname)
         goto error;
 
     /* Create the dataset using the dataset creation property list */
-    if ((dset = H5Dcreate(file, "DS1", H5T_STD_I32LE, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+    if ((dset = H5Dcreate2(file, "DS1", H5T_STD_I32LE, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         goto error;
 
     /* Write the data to the dataset */
@@ -465,7 +465,7 @@ test_onion_1d_dset(const char *fname)
     if ((file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id)) < 0)
         goto error;
 
-    if ((dset = H5Dopen(file_id, "DS1", H5P_DEFAULT)) < 0)
+    if ((dset = H5Dopen2(file_id, "DS1", H5P_DEFAULT)) < 0)
         goto error;
 
     int dset_data[1][ONE_DIM_SIZE];
@@ -487,7 +487,7 @@ test_onion_1d_dset(const char *fname)
     if ((file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id)) < 0)
         goto error;
 
-    if ((dset = H5Dopen(file_id, "DS1", H5P_DEFAULT)) < 0)
+    if ((dset = H5Dopen2(file_id, "DS1", H5P_DEFAULT)) < 0)
         goto error;
 
     for (int i = 0; i < ONE_DIM_SIZE; i++)
@@ -511,7 +511,7 @@ test_onion_1d_dset(const char *fname)
     if ((file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id)) < 0)
         goto error;
 
-    if ((dset = H5Dopen(file_id, "DS1", H5P_DEFAULT)) < 0)
+    if ((dset = H5Dopen2(file_id, "DS1", H5P_DEFAULT)) < 0)
         goto error;
 
     for (int i = 0; i < ONE_DIM_SIZE; i += 20)
@@ -643,7 +643,7 @@ test_onion_create_delete_objects(const char *fname)
     /*
      * Create the dataset using the dataset creation property list.
      */
-    if ((dset = H5Dcreate(file, "DS1", H5T_STD_I32LE, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+    if ((dset = H5Dcreate2(file, "DS1", H5T_STD_I32LE, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         goto error;
 
     /*
@@ -667,7 +667,7 @@ test_onion_create_delete_objects(const char *fname)
     /*
      * Create the dataset using the dataset creation property list.
      */
-    if ((dset = H5Dcreate(file, "DS2", H5T_STD_I32LE, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+    if ((dset = H5Dcreate2(file, "DS2", H5T_STD_I32LE, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         goto error;
 
     /*
@@ -709,7 +709,7 @@ test_onion_create_delete_objects(const char *fname)
     attr_space_id = H5Screate_simple(1, attr_dim, NULL);
 
     if ((attr_id =
-             H5Acreate(file, "file_attribute", H5T_STD_I32LE, attr_space_id, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+             H5Acreate2(file, "file_attribute", H5T_STD_I32LE, attr_space_id, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto error;
 
     if (H5Sclose(attr_space_id) < 0)
@@ -875,7 +875,7 @@ test_onion_dset_extension(const char *fname)
         goto error;
 
     /* Create the dataset using the dataset creation property list */
-    if ((dset = H5Dcreate(file, "DS1", H5T_STD_I32LE, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+    if ((dset = H5Dcreate2(file, "DS1", H5T_STD_I32LE, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         goto error;
 
     /* Write the data to the dataset */
@@ -895,7 +895,7 @@ test_onion_dset_extension(const char *fname)
         goto error;
 
     /* Open the dataset */
-    if ((dset = H5Dopen(file, "DS1", H5P_DEFAULT)) < 0)
+    if ((dset = H5Dopen2(file, "DS1", H5P_DEFAULT)) < 0)
         goto error;
 
     /* Extend the dataset and double the rows */
@@ -934,7 +934,7 @@ test_onion_dset_extension(const char *fname)
         goto error;
 
     /* Open the dataset */
-    if ((dset = H5Dopen(file, "DS1", H5P_DEFAULT)) < 0)
+    if ((dset = H5Dopen2(file, "DS1", H5P_DEFAULT)) < 0)
         goto error;
 
     /* Extend the dataset and shrink back the size */

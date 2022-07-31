@@ -2938,7 +2938,7 @@ test_integration_create(void)
         TEST_ERROR;
 
     /* Create the dataset using the dataset creation property list */
-    if ((dset = H5Dcreate(file, "DS1", H5T_STD_I32LE, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+    if ((dset = H5Dcreate2(file, "DS1", H5T_STD_I32LE, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* Write the data to the dataset */
@@ -2962,7 +2962,7 @@ test_integration_create(void)
     if ((file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id)) < 0)
         TEST_ERROR;
 
-    if ((dset = H5Dopen(file_id, "DS1", H5P_DEFAULT)) < 0)
+    if ((dset = H5Dopen2(file_id, "DS1", H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     for (int i = 0; i < 128; i++)
@@ -2986,7 +2986,7 @@ test_integration_create(void)
     if ((file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id)) < 0)
         TEST_ERROR;
 
-    if ((dset = H5Dopen(file_id, "DS1", H5P_DEFAULT)) < 0)
+    if ((dset = H5Dopen2(file_id, "DS1", H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     for (int i = 0; i < 128; i++)
@@ -3025,7 +3025,7 @@ test_integration_create(void)
     if ((file_id = H5Fopen(paths->canon, H5F_ACC_RDONLY, fapl_id)) < 0)
         TEST_ERROR;
 
-    if ((dset = H5Dopen(file_id, "DS1", H5P_DEFAULT)) < 0)
+    if ((dset = H5Dopen2(file_id, "DS1", H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     if (H5Dread(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata) < 0)
@@ -3064,7 +3064,7 @@ test_integration_create(void)
 
     if ((file_id = H5Fopen(paths->canon, H5F_ACC_RDONLY, fapl_id)) < 0)
         TEST_ERROR;
-    if ((dset = H5Dopen(file_id, "DS1", H5P_DEFAULT)) < 0)
+    if ((dset = H5Dopen2(file_id, "DS1", H5P_DEFAULT)) < 0)
         TEST_ERROR;
     if (H5Dread(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata) < 0)
         TEST_ERROR;
@@ -3103,7 +3103,7 @@ test_integration_create(void)
 
     if ((file_id = H5Fopen(paths->canon, H5F_ACC_RDONLY, fapl_id)) < 0)
         TEST_ERROR;
-    if ((dset = H5Dopen(file_id, "DS1", H5P_DEFAULT)) < 0)
+    if ((dset = H5Dopen2(file_id, "DS1", H5P_DEFAULT)) < 0)
         TEST_ERROR;
     if (H5Dread(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata) < 0)
         TEST_ERROR;
@@ -3261,7 +3261,7 @@ test_integration_create_simple(void)
         TEST_ERROR;
 
     /* Create the dataset using the dataset creation property list */
-    if ((dset = H5Dcreate(file, "DS1", H5T_STD_I32LE, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+    if ((dset = H5Dcreate2(file, "DS1", H5T_STD_I32LE, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* Write the data to the dataset */
@@ -3285,7 +3285,7 @@ test_integration_create_simple(void)
     if ((file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id)) < 0)
         TEST_ERROR;
 
-    if ((dset = H5Dopen(file_id, "DS1", H5P_DEFAULT)) < 0)
+    if ((dset = H5Dopen2(file_id, "DS1", H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     for (int i = 0; i < ONE_DIM_SIZE; i++)
@@ -3307,7 +3307,7 @@ test_integration_create_simple(void)
      */
     if ((file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id)) < 0)
         TEST_ERROR;
-    if ((dset = H5Dopen(file_id, "DS1", H5P_DEFAULT)) < 0)
+    if ((dset = H5Dopen2(file_id, "DS1", H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     for (int i = 0; i < ONE_DIM_SIZE; i++)
@@ -3330,7 +3330,7 @@ test_integration_create_simple(void)
      */
     if ((file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id)) < 0)
         TEST_ERROR;
-    if ((dset = H5Dopen(file_id, "DS1", H5P_DEFAULT)) < 0)
+    if ((dset = H5Dopen2(file_id, "DS1", H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     for (int i = 0; i < ONE_DIM_SIZE; i += 20)
@@ -3367,7 +3367,7 @@ test_integration_create_simple(void)
 
     if ((file_id = H5Fopen(paths->canon, H5F_ACC_RDONLY, fapl_id)) < 0)
         TEST_ERROR;
-    if ((dset = H5Dopen(file_id, "DS1", H5P_DEFAULT)) < 0)
+    if ((dset = H5Dopen2(file_id, "DS1", H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     if (H5Dread(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata) < 0)
@@ -3514,7 +3514,7 @@ test_integration_create_delete_objects(void)
         TEST_ERROR;
 
     /* Create the dataset using the dataset creation property list */
-    if ((dset = H5Dcreate(file, "DS1", H5T_STD_I32LE, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+    if ((dset = H5Dcreate2(file, "DS1", H5T_STD_I32LE, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* Write the data to the dataset */
@@ -3534,7 +3534,7 @@ test_integration_create_delete_objects(void)
         TEST_ERROR;
 
     /* Create the dataset using the dataset creation property list */
-    if ((dset = H5Dcreate(file, "DS2", H5T_STD_I32LE, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+    if ((dset = H5Dcreate2(file, "DS2", H5T_STD_I32LE, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* Write the data to the dataset */
@@ -3575,7 +3575,7 @@ test_integration_create_delete_objects(void)
         TEST_ERROR;
 
     if ((attr_id =
-             H5Acreate(file, "file_attribute", H5T_STD_I32LE, attr_space_id, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+             H5Acreate2(file, "file_attribute", H5T_STD_I32LE, attr_space_id, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     if (H5Sclose(attr_space_id) < 0)
@@ -3873,7 +3873,7 @@ test_integration_dset_extension(void)
         TEST_ERROR;
 
     /* Create the dataset using the dataset creation property list */
-    if ((dset = H5Dcreate(file, "DS1", H5T_STD_I32LE, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+    if ((dset = H5Dcreate2(file, "DS1", H5T_STD_I32LE, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* Write the data to the dataset */
@@ -3893,7 +3893,7 @@ test_integration_dset_extension(void)
         TEST_ERROR;
 
     /* Open the dataset */
-    if ((dset = H5Dopen(file, "DS1", H5P_DEFAULT)) < 0)
+    if ((dset = H5Dopen2(file, "DS1", H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* Extend the dataset and double the rows */
@@ -3932,7 +3932,7 @@ test_integration_dset_extension(void)
         TEST_ERROR;
 
     /* Open the dataset */
-    if ((dset = H5Dopen(file, "DS1", H5P_DEFAULT)) < 0)
+    if ((dset = H5Dopen2(file, "DS1", H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* Extend the dataset and shrink back the size */
@@ -3962,7 +3962,7 @@ test_integration_dset_extension(void)
         TEST_ERROR;
 
     /* Open the dataset */
-    if ((dset = H5Dopen(file, "DS1", H5P_DEFAULT)) < 0)
+    if ((dset = H5Dopen2(file, "DS1", H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     if ((dset_space = H5Dget_space(dset)) < 0)
@@ -4001,7 +4001,7 @@ test_integration_dset_extension(void)
         TEST_ERROR;
 
     /* Open the dataset */
-    dset = H5Dopen(file, "DS1", H5P_DEFAULT);
+    dset = H5Dopen2(file, "DS1", H5P_DEFAULT);
 
     if ((dset_space = H5Dget_space(dset)) < 0)
         TEST_ERROR;
@@ -4143,7 +4143,7 @@ test_integration_ctl(void)
         TEST_ERROR;
 
     /* Create the dataset using the dataset creation property list */
-    if ((dset = H5Dcreate(file, "DS1", H5T_STD_I32LE, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+    if ((dset = H5Dcreate2(file, "DS1", H5T_STD_I32LE, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* Write the data to the dataset */
@@ -4163,7 +4163,7 @@ test_integration_ctl(void)
         TEST_ERROR;
 
     /* Create the dataset using the dataset creation property list */
-    if ((dset = H5Dcreate(file, "DS2", H5T_STD_I32LE, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+    if ((dset = H5Dcreate2(file, "DS2", H5T_STD_I32LE, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* Write the data to the dataset */
@@ -4316,7 +4316,7 @@ test_integration_reference(void)
         TEST_ERROR;
 
     /* Create the dataset using the dataset creation property list */
-    if ((dset = H5Dcreate(file, "DS1", H5T_STD_I32LE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    if ((dset = H5Dcreate2(file, "DS1", H5T_STD_I32LE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* Write the data to the dataset */
@@ -4341,7 +4341,7 @@ test_integration_reference(void)
         TEST_ERROR;
 
     /* Create the dataset of object references */
-    if ((dset = H5Dcreate(file, "DS2", H5T_STD_REF, space_ref, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    if ((dset = H5Dcreate2(file, "DS2", H5T_STD_REF, space_ref, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* Create reference to dataset */
@@ -4389,7 +4389,7 @@ test_integration_reference(void)
         TEST_ERROR;
 
     /* Create the dataset of region references */
-    if ((dset = H5Dcreate(file, "DS3", H5T_STD_REF, space_ref, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    if ((dset = H5Dcreate2(file, "DS3", H5T_STD_REF, space_ref, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* Select 2x4 hyperslab for first reference */
@@ -4478,7 +4478,7 @@ test_integration_reference(void)
         TEST_ERROR;
 
     /* Open the dataset of the object references */
-    if ((dset = H5Dopen(file, "DS2", H5P_DEFAULT)) < 0)
+    if ((dset = H5Dopen2(file, "DS2", H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     if (H5Dread(dset, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
@@ -4540,7 +4540,7 @@ test_integration_reference(void)
         TEST_ERROR;
 
     /* Open the dataset of the region reference */
-    if ((dset = H5Dopen(file, "DS3", H5P_DEFAULT)) < 0)
+    if ((dset = H5Dopen2(file, "DS3", H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     if (H5Dread(dset, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
@@ -4705,7 +4705,7 @@ test_integration_create_by_name(void)
         TEST_ERROR;
 
     /* Create the dataset using the dataset creation property list */
-    if ((dset = H5Dcreate(file, "DS1", H5T_STD_I32LE, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+    if ((dset = H5Dcreate2(file, "DS1", H5T_STD_I32LE, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     /* Write the data to the dataset */
@@ -4729,7 +4729,7 @@ test_integration_create_by_name(void)
     if ((file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id)) < 0)
         TEST_ERROR;
 
-    if ((dset = H5Dopen(file_id, "DS1", H5P_DEFAULT)) < 0)
+    if ((dset = H5Dopen2(file_id, "DS1", H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     for (int i = 0; i < ONE_DIM_SIZE; i++)
@@ -4751,7 +4751,7 @@ test_integration_create_by_name(void)
      */
     if ((file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id)) < 0)
         TEST_ERROR;
-    if ((dset = H5Dopen(file_id, "DS1", H5P_DEFAULT)) < 0)
+    if ((dset = H5Dopen2(file_id, "DS1", H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     for (int i = 0; i < ONE_DIM_SIZE; i++)
@@ -4774,7 +4774,7 @@ test_integration_create_by_name(void)
      */
     if ((file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id)) < 0)
         TEST_ERROR;
-    if ((dset = H5Dopen(file_id, "DS1", H5P_DEFAULT)) < 0)
+    if ((dset = H5Dopen2(file_id, "DS1", H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     for (int i = 0; i < ONE_DIM_SIZE; i += 20)
@@ -4809,7 +4809,7 @@ test_integration_create_by_name(void)
 
     if ((file_id = H5Fopen(paths->canon, H5F_ACC_RDONLY, fapl_id)) < 0)
         TEST_ERROR;
-    if ((dset = H5Dopen(file_id, "DS1", H5P_DEFAULT)) < 0)
+    if ((dset = H5Dopen2(file_id, "DS1", H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     if (H5Dread(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata) < 0)
