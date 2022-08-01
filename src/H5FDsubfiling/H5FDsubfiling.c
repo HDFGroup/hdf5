@@ -213,9 +213,9 @@ static herr_t  H5FD__subfiling_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t cl
 static herr_t  H5FD__subfiling_lock(H5FD_t *_file, hbool_t rw);
 static herr_t  H5FD__subfiling_unlock(H5FD_t *_file);
 #endif
-static herr_t  H5FD__subfiling_del(const char *name, hid_t fapl);
-static herr_t  H5FD__subfiling_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void *input,
-                                   void **output);
+static herr_t H5FD__subfiling_del(const char *name, hid_t fapl);
+static herr_t H5FD__subfiling_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void *input,
+                                  void **output);
 
 static herr_t H5FD__subfiling_get_default_config(hid_t fapl_id, H5FD_subfiling_config_t *config_out);
 static herr_t H5FD__subfiling_validate_config(const H5FD_subfiling_config_t *fa);
@@ -248,46 +248,46 @@ static herr_t iovec_fill_uniform(subfiling_context_t *sf_context, int64_t iovec_
 void H5FD__subfiling_mpi_finalize(void);
 
 static const H5FD_class_t H5FD_subfiling_g = {
-    H5FD_CLASS_VERSION,              /* VFD interface version */
-    H5_VFD_SUBFILING,                /* value                 */
-    H5FD_SUBFILING_NAME,             /* name                  */
-    MAXADDR,                         /* maxaddr               */
-    H5F_CLOSE_WEAK,                  /* fc_degree             */
-    H5FD__subfiling_term,            /* terminate             */
-    NULL,                            /* sb_size               */
-    NULL,                            /* sb_encode             */
-    NULL,                            /* sb_decode             */
-    sizeof(H5FD_subfiling_config_t), /* fapl_size             */
-    H5FD__subfiling_fapl_get,        /* fapl_get              */
-    H5FD__subfiling_fapl_copy,       /* fapl_copy             */
-    H5FD__subfiling_fapl_free,       /* fapl_free             */
-    0,                               /* dxpl_size             */
-    NULL,                            /* dxpl_copy             */
-    NULL,                            /* dxpl_free             */
-    H5FD__subfiling_open,            /* open                  */
-    H5FD__subfiling_close,           /* close                 */
-    H5FD__subfiling_cmp,             /* cmp                   */
-    H5FD__subfiling_query,           /* query                 */
-    NULL,                            /* get_type_map          */
-    NULL,                            /* alloc                 */
-    NULL,                            /* free                  */
-    H5FD__subfiling_get_eoa,         /* get_eoa               */
-    H5FD__subfiling_set_eoa,         /* set_eoa               */
-    H5FD__subfiling_get_eof,         /* get_eof               */
-    H5FD__subfiling_get_handle,      /* get_handle            */
-    H5FD__subfiling_read,            /* read                  */
-    H5FD__subfiling_write,           /* write                 */
-    H5FD__subfiling_read_vector,     /* read_vector           */
-    H5FD__subfiling_write_vector,    /* write_vector          */
-    NULL,                            /* read_selection        */
-    NULL,                            /* write_selection       */
-    NULL,                            /* flush                 */
-    H5FD__subfiling_truncate,        /* truncate              */
-    NULL /* H5FD__subfiling_lock */, /* lock                  */
+    H5FD_CLASS_VERSION,                /* VFD interface version */
+    H5_VFD_SUBFILING,                  /* value                 */
+    H5FD_SUBFILING_NAME,               /* name                  */
+    MAXADDR,                           /* maxaddr               */
+    H5F_CLOSE_WEAK,                    /* fc_degree             */
+    H5FD__subfiling_term,              /* terminate             */
+    NULL,                              /* sb_size               */
+    NULL,                              /* sb_encode             */
+    NULL,                              /* sb_decode             */
+    sizeof(H5FD_subfiling_config_t),   /* fapl_size             */
+    H5FD__subfiling_fapl_get,          /* fapl_get              */
+    H5FD__subfiling_fapl_copy,         /* fapl_copy             */
+    H5FD__subfiling_fapl_free,         /* fapl_free             */
+    0,                                 /* dxpl_size             */
+    NULL,                              /* dxpl_copy             */
+    NULL,                              /* dxpl_free             */
+    H5FD__subfiling_open,              /* open                  */
+    H5FD__subfiling_close,             /* close                 */
+    H5FD__subfiling_cmp,               /* cmp                   */
+    H5FD__subfiling_query,             /* query                 */
+    NULL,                              /* get_type_map          */
+    NULL,                              /* alloc                 */
+    NULL,                              /* free                  */
+    H5FD__subfiling_get_eoa,           /* get_eoa               */
+    H5FD__subfiling_set_eoa,           /* set_eoa               */
+    H5FD__subfiling_get_eof,           /* get_eof               */
+    H5FD__subfiling_get_handle,        /* get_handle            */
+    H5FD__subfiling_read,              /* read                  */
+    H5FD__subfiling_write,             /* write                 */
+    H5FD__subfiling_read_vector,       /* read_vector           */
+    H5FD__subfiling_write_vector,      /* write_vector          */
+    NULL,                              /* read_selection        */
+    NULL,                              /* write_selection       */
+    NULL,                              /* flush                 */
+    H5FD__subfiling_truncate,          /* truncate              */
+    NULL /* H5FD__subfiling_lock */,   /* lock                  */
     NULL /* H5FD__subfiling_unlock */, /* unlock                */
-    H5FD__subfiling_del,             /* del                   */
-    H5FD__subfiling_ctl,             /* ctl                   */
-    H5FD_FLMAP_DICHOTOMY             /* fl_map                */
+    H5FD__subfiling_del,               /* del                   */
+    H5FD__subfiling_ctl,               /* ctl                   */
+    H5FD_FLMAP_DICHOTOMY               /* fl_map                */
 };
 
 /* Declare a free list to manage the H5FD_subfiling_t struct */

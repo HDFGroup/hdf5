@@ -1640,7 +1640,7 @@ H5FD__ioc_del(const char *name, hid_t fapl)
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't copy filename");
 
         base_filename = basename(name_copy);
-        file_dirname = dirname(name_copy2);
+        file_dirname  = dirname(name_copy2);
 
         /* Try to open the subfiling configuration file and get the number of IOCs */
         if (NULL == (tmp_filename = HDmalloc(PATH_MAX)))
