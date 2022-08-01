@@ -504,7 +504,7 @@
                 (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI, src_id, dst_id, S, D, cb_struct.user_data);       \
             if (except_ret == H5T_CONV_UNHANDLED)                                                            \
                 /* Let compiler convert if case is ignored by user handler*/                                 \
-                *(D) = (H5T_NATIVE_FLOAT_POS_INF_g);                                                         \
+                *(D) = H5_GLUE3(H5T_NATIVE_, DTYPE, _POS_INF_g);                                             \
             else if (except_ret == H5T_CONV_ABORT)                                                           \
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")        \
             /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */                            \
@@ -514,7 +514,7 @@
                 (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_LOW, src_id, dst_id, S, D, cb_struct.user_data);      \
             if (except_ret == H5T_CONV_UNHANDLED)                                                            \
                 /* Let compiler convert if case is ignored by user handler*/                                 \
-                *(D) = (H5T_NATIVE_FLOAT_NEG_INF_g);                                                         \
+                *(D) = H5_GLUE3(H5T_NATIVE_, DTYPE, _NEG_INF_g);                                             \
             else if (except_ret == H5T_CONV_ABORT)                                                           \
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception")        \
             /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */                            \
@@ -525,9 +525,9 @@
 #define H5T_CONV_Ff_NOEX_CORE(STYPE, DTYPE, S, D, ST, DT, D_MIN, D_MAX)                                      \
     {                                                                                                        \
         if (*(S) > (ST)(D_MAX))                                                                              \
-            *(D) = (H5T_NATIVE_FLOAT_POS_INF_g);                                                             \
+            *(D) = H5_GLUE3(H5T_NATIVE_, DTYPE, _POS_INF_g);                                                 \
         else if (*(S) < (ST)(D_MIN))                                                                         \
-            *(D) = (H5T_NATIVE_FLOAT_NEG_INF_g);                                                             \
+            *(D) = H5_GLUE3(H5T_NATIVE_, DTYPE, _NEG_INF_g);                                                 \
         else                                                                                                 \
             *(D) = (DT)(*(S));                                                                               \
     }

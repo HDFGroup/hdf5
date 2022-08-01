@@ -443,22 +443,6 @@ H5_get_win32_times(H5_timevals_t *tvs /*in,out*/)
 } /* end H5_get_win32_times() */
 #endif
 
-#define WloginBuffer_count 256
-static char Wlogin_buffer[WloginBuffer_count];
-
-char *
-Wgetlogin(void)
-{
-
-#ifdef H5_HAVE_WIN32_API
-    DWORD bufferCount = WloginBuffer_count;
-    if (GetUserName(Wlogin_buffer, &bufferCount) != 0)
-        return (Wlogin_buffer);
-    else
-#endif
-        return NULL;
-}
-
 /*-------------------------------------------------------------------------
  * Function:    Wflock
  *

@@ -948,9 +948,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDgethostname
 #define HDgethostname(N, L) gethostname(N, L)
 #endif
-#ifndef HDgetlogin
-#define HDgetlogin() getlogin()
-#endif
 #ifndef HDgetpgrp
 #define HDgetpgrp() getpgrp()
 #endif
