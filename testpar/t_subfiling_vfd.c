@@ -146,7 +146,7 @@ test_create_and_close(void)
     hid_t                   fapl_id = H5I_INVALID_HID;
 
     if (MAINPROCESS)
-        TESTING("File creation and immediate close");
+        HDprintf("File creation and immediate close\n");
 
     fapl_id = create_subfiling_ioc_fapl();
     VRFY((fapl_id >= 0), "FAPL creation succeeded");
@@ -191,12 +191,12 @@ main(int argc, char **argv)
     MPI_Comm_size(comm, &mpi_size);
     MPI_Comm_rank(comm, &mpi_rank);
 
-    H5open();
-
     if (H5dont_atexit() < 0) {
         if (MAINPROCESS)
             HDprintf("Failed to turn off atexit processing. Continue.\n");
     }
+
+    H5open();
 
     /* Enable selection I/O using internal temporary workaround */
     H5_use_selection_io_g = TRUE;
