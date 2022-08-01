@@ -842,7 +842,7 @@ H5__debug_mask(const char *s)
             H5_debug_open_stream_t *open_stream;
 
             if ((stream = HDfdopen(fd, "w")) != NULL) {
-                (void)HDsetvbuf(stream, NULL, _IOLBF, (size_t)0);
+                (void)HDsetvbuf(stream, NULL, _IOLBF, 0);
 
                 if (NULL ==
                     (open_stream = (H5_debug_open_stream_t *)H5MM_malloc(sizeof(H5_debug_open_stream_t)))) {

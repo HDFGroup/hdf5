@@ -80,7 +80,6 @@ struct timezone {
 #define HDremove(S)           Wremove_utf8(S)
 #define HDrmdir(S)            _rmdir(S)
 #define HDsetenv(N, V, O)     Wsetenv(N, V, O)
-#define HDsetvbuf(F, S, M, Z) setvbuf(F, S, M, (Z > 1 ? Z : 2))
 #define HDsleep(S)            Sleep(S * 1000)
 #define HDstat(S, B)          _stati64(S, B)
 #define HDstrcasecmp(A, B)    _stricmp(A, B)
