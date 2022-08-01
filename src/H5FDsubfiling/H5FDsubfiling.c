@@ -459,7 +459,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *vfd_config)
+H5Pset_fapl_subfiling(hid_t fapl_id, const H5FD_subfiling_config_t *vfd_config)
 {
     H5FD_subfiling_config_t *subfiling_conf = NULL;
     H5P_genplist_t *         plist          = NULL;
@@ -487,7 +487,7 @@ H5Pset_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *vfd_config)
     if (H5FD__subfiling_validate_config(vfd_config) < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid subfiling VFD configuration");
 
-    ret_value = H5P_set_driver(plist, H5FD_SUBFILING, (void *)vfd_config, NULL);
+    ret_value = H5P_set_driver(plist, H5FD_SUBFILING, vfd_config, NULL);
 
 done:
     if (subfiling_conf) {

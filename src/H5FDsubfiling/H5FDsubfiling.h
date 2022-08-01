@@ -154,7 +154,7 @@ H5_DLL hid_t H5FD_subfiling_init(void);
  * \since 1.14.0
  *
  */
-H5_DLL herr_t H5Pset_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *vfd_config);
+H5_DLL herr_t H5Pset_fapl_subfiling(hid_t fapl_id, const H5FD_subfiling_config_t *vfd_config);
 /**
  * \ingroup FAPL
  *

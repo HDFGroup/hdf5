@@ -578,15 +578,15 @@ typedef struct h5tools_vfd_info_t {
     } u;
 } h5tools_vfd_info_t;
 
-/* This enum should match the entries in the above 'volnames'
- * since they are indices into the 'volnames' array. */
+/* This enum should match the entries in the 'volnames'
+ * array since they are indices into that array. */
 typedef enum {
     NATIVE_VOL_IDX = 0,
     PASS_THROUGH_VOL_IDX,
 } vol_idx;
 
-/* This enum should match the entries in the above 'drivernames'
- * since they are indices into the 'drivernames' array. */
+/* This enum should match the entries in the 'drivernames'
+ * array since they are indices into that array. */
 typedef enum {
     SEC2_VFD_IDX = 0,
     DIRECT_VFD_IDX,
@@ -600,6 +600,7 @@ typedef enum {
     MPIO_VFD_IDX,
     ROS3_VFD_IDX,
     HDFS_VFD_IDX,
+    SUBFILING_VFD_IDX,
 } driver_idx;
 
 /* The following include, h5tools_str.h, must be after the

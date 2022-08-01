@@ -85,6 +85,7 @@ const char *drivernames[] = {
     [WINDOWS_VFD_IDX] = "windows", [STDIO_VFD_IDX] = "stdio",   [CORE_VFD_IDX] = "core",
     [FAMILY_VFD_IDX] = "family",   [SPLIT_VFD_IDX] = "split",   [MULTI_VFD_IDX] = "multi",
     [MPIO_VFD_IDX] = "mpio",       [ROS3_VFD_IDX] = "ros3",     [HDFS_VFD_IDX] = "hdfs",
+    [SUBFILING_VFD_IDX] = H5FD_SUBFILING_NAME,
 };
 
 #define NUM_VOLS    (sizeof(volnames) / sizeof(volnames[0]))
@@ -571,6 +572,14 @@ h5tools_set_fapl_vfd(hid_t fapl_id, h5tools_vfd_info_t *vfd_info)
                     H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_hdfs() failed");
 #else
                 H5TOOLS_GOTO_ERROR(FAIL, "The HDFS VFD is not enabled");
+#endif
+            }
+            else if (!HDstrcmp(vfd_info->u.name, drivernames[SUBFILING_VFD_IDX])) {
+#ifdef H5_HAVE_SUBFILING_VFD
+                if (H5Pset_fapl_subfiling(fapl_id, (const H5FD_subfiling_config_t *)vfd_info->info) < 0)
+                    H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_subfiling() failed");
+#else
+                H5TOOLS_GOTO_ERROR(FAIL, "The Subfiling VFD is not enabled");
 #endif
             }
             else {
