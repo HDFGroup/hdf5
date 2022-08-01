@@ -1318,7 +1318,7 @@ test_h5d_get_access_plist(hid_t fapl_id)
     hid_t   sid     = -1;   /* data space                           */
     hid_t   did     = -1;   /* dataset                              */
     hsize_t dims    = 0;    /* dataset size                         */
-    char *  buffer  = NULL; /* saved prefix name from dapl          */
+    char   *buffer  = NULL; /* saved prefix name from dapl          */
     char    filename[1024]; /* file names                           */
 
     TESTING("H5Dget_access_plist() returns correct prefix");

@@ -41,13 +41,13 @@
 
 typedef struct {
     H5I_search_func_t app_cb;  /* Application's callback routine */
-    void *            app_key; /* Application's "key" (user data) */
-    void *            ret_obj; /* Object to return */
+    void             *app_key; /* Application's "key" (user data) */
+    void             *ret_obj; /* Object to return */
 } H5I_search_ud_t;
 
 typedef struct {
     H5I_iterate_func_t op;      /* Application's callback routine */
-    void *             op_data; /* Application's user data */
+    void              *op_data; /* Application's user data */
 } H5I_iterate_pub_ud_t;
 
 /********************/
@@ -746,7 +746,7 @@ void *
 H5Isearch(H5I_type_t type, H5I_search_func_t func, void *key)
 {
     H5I_search_ud_t udata;            /* Context for iteration */
-    void *          ret_value = NULL; /* Return value */
+    void           *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API(NULL)
     H5TRACE3("*x", "ItIS*x", type, func, key);
@@ -925,7 +925,7 @@ done:
 ssize_t
 H5Iget_name(hid_t id, char *name /*out*/, size_t size)
 {
-    H5VL_object_t *        vol_obj = NULL; /* Object stored in ID */
+    H5VL_object_t         *vol_obj = NULL; /* Object stored in ID */
     H5VL_object_get_args_t vol_cb_args;    /* Arguments to VOL callback */
     H5VL_loc_params_t      loc_params;
     size_t                 obj_name_len = 0;  /* Length of object's name */

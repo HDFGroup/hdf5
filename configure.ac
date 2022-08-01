@@ -618,6 +618,13 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   AC_PROG_FC([PAC_FC_SEARCH_LIST],)
   AC_F9X_MODS
 
+  ## Allow setting the fortran module install dir
+  AC_ARG_WITH([fmoddir],
+    [AS_HELP_STRING([--with-fmoddir=DIR], [Fortran module install directory])],
+    [fmoddir=$withval],
+    [fmoddir="\${includedir}"])
+  AC_SUBST([fmoddir], [$fmoddir])
+￼
   ## Change to the Fortran 90 language
   AC_LANG_PUSH(Fortran)
 
@@ -1600,6 +1607,7 @@ case "X-$withval" in
     fi
     ;;
 esac
+
 
 
 ## ----------------------------------------------------------------------
@@ -3015,6 +3023,7 @@ if test -n "$PARALLEL"; then
 fi
 
 ## ----------------------------------------------------------------------
+
 ## Build parallel tools if parallel tools, parallel, and build tools options
 ## are all enabled.
 ##
@@ -3171,6 +3180,69 @@ if test "X$MAP_API" = "Xyes"; then
 else
     AC_MSG_RESULT([no])
 fi
+
+## ----------------------------------------------------------------------
+## Check if Subfiling I/O driver is enabled by --enable-subfiling-vfd
+##
+AC_SUBST([SUBFILING_VFD])
+AC_SUBST([HAVE_MERCURY])
+
+## Default is no subfiling VFD
+SUBFILING_VFD=no
+HAVE_MERCURY="no"
+
+## Always include subfiling directory so public header files are available
+CPPFLAGS="$CPPFLAGS -I$ac_abs_confdir/src/H5FDsubfiling"
+AM_CPPFLAGS="$AM_CPPFLAGS -I$ac_abs_confdir/src/H5FDsubfiling"
+
+AC_MSG_CHECKING([if the subfiling I/O virtual file driver (VFD) is enabled])
+
+AC_ARG_ENABLE([subfiling-vfd],
+              [AS_HELP_STRING([--enable-subfiling-vfd],
+                              [Build the subfiling I/O virtual file driver (VFD). Requires --enable-parallel.
+                               [default=no]])],
+              [SUBFILING_VFD=$enableval], [SUBFILING_VFD=no])
+
+if test "X$SUBFILING_VFD" = "Xyes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE([HAVE_SUBFILING_VFD], [1],
+            [Define if the subfiling I/O virtual file driver (VFD) should be compiled])
+    AC_DEFINE([HAVE_IOC_VFD], [1],
+            [Define if the I/O Concentrator virtual file driver (VFD) should be compiled])
+
+    # Set-up mercury
+    HAVE_MERCURY="yes"
+    mercury_dir="$ac_abs_confdir/src/H5FDsubfiling/mercury"
+    mercury_inc="$mercury_dir/src/util"
+
+    CPPFLAGS="$CPPFLAGS -I$mercury_inc"
+    AM_CPPFLAGS="$AM_CPPFLAGS -I$mercury_inc"
+
+    if test "X${PARALLEL}" != "Xyes"; then
+      AC_MSG_ERROR([--enable-parallel is required for --enable-subfiling-vfd])
+    fi
+
+    HAVE_STDATOMIC_H="yes"
+    AC_CHECK_HEADERS([stdatomic.h],,[HAVE_STDATOMIC_H="no"])
+    if test "x$HAVE_STDATOMIC_H" = "xno"; then
+      AC_MSG_ERROR([Subfiling VFD requires atomic operations support. C11 stdatomic.h NOT available.])
+    fi
+
+# Checks for libraries.
+    AC_SEARCH_LIBS([shm_open], [rt])
+    AC_CHECK_LIB([pthread], [pthread_self],[], [echo "Error: Required library pthread not found." && exit 1])
+
+else
+    AC_MSG_RESULT([no])
+fi
+
+## Subfiling and IOC VFD files are not built if not required.
+AM_CONDITIONAL([SUBFILING_VFD_CONDITIONAL], [test "X$SUBFILING_VFD" = "Xyes"])
+# IOC VFD is currently only built when subfiling is enabled
+AM_CONDITIONAL([IOC_VFD_CONDITIONAL], [test "X$SUBFILING_VFD" = "Xyes"])
+# Mercury is currently only needed if  subfiling is enabled
+AM_CONDITIONAL([HAVE_MERCURY_CONDITIONAL], [test "X$HAVE_MERCURY" = "Xyes"])
+
 
 ## ----------------------------------------------------------------------
 ## Check if Direct I/O driver is enabled by --enable-direct-vfd
@@ -4239,6 +4311,8 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  hl/fortran/test/Makefile
                  hl/fortran/examples/Makefile
                  hl/fortran/examples/run-hlfortran-ex.sh])
+
+AC_CONFIG_FILES([utils/subfiling_vfd/h5fuse.sh], [chmod +x utils/subfiling_vfd/h5fuse.sh])
 
 AC_CONFIG_COMMANDS([.classes], [], [$MKDIR_P java/src/.classes;
                 $MKDIR_P java/test/.classes;

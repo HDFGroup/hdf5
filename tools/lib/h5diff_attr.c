@@ -19,7 +19,7 @@
 #define ATTR_NAME_MAX 255
 
 typedef struct table_attr_t {
-    char *   name;
+    char    *name;
     unsigned exist[2];
 } match_attr_t;
 
@@ -334,8 +334,8 @@ diff_attr_data(hid_t attr1_id, hid_t attr2_id, const char *name1, const char *na
     hid_t      mtype2_id = H5I_INVALID_HID; /* memory data type ID */
     size_t     msize1;                      /* memory size of memory type */
     size_t     msize2;                      /* memory size of memory type */
-    void *     buf1        = NULL;          /* data buffer */
-    void *     buf2        = NULL;          /* data buffer */
+    void      *buf1        = NULL;          /* data buffer */
+    void      *buf2        = NULL;          /* data buffer */
     hbool_t    buf1hasdata = FALSE;         /* buffer has data */
     hbool_t    buf2hasdata = FALSE;         /* buffer has data */
     int        rank1;                       /* rank of dataset */
@@ -612,8 +612,8 @@ diff_attr(hid_t loc1_id, hid_t loc2_id, const char *path1, const char *path2, di
     table_attrs_t *match_list_attrs = NULL;
     hid_t          attr1_id         = H5I_INVALID_HID; /* attr ID */
     hid_t          attr2_id         = H5I_INVALID_HID; /* attr ID */
-    char *         name1            = NULL;
-    char *         name2            = NULL;
+    char          *name1            = NULL;
+    char          *name2            = NULL;
     unsigned       u; /* Local index variable */
     hsize_t        nfound       = 0;
     hsize_t        nfound_total = 0;

@@ -394,7 +394,7 @@ main(int argc, char *argv[])
     int      ncommon      = 5;     /* # of common symbols to poll */
     int      nrandom      = 10;    /* # of random symbols to poll */
     hbool_t  verbose      = TRUE;  /* Whether to emit some informational messages */
-    FILE *   verbose_file = NULL;  /* File handle for verbose output */
+    FILE    *verbose_file = NULL;  /* File handle for verbose output */
     hbool_t  use_seed     = FALSE; /* Set to 1 if a seed was set on the command line */
     unsigned random_seed  = 0;     /* Random # seed */
     unsigned u;                    /* Local index variables */

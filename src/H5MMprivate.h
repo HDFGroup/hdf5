@@ -42,13 +42,13 @@
 /*
  * Library prototypes...
  */
-H5_DLL void *H5MM_malloc(size_t size) H5_ATTR_MALLOC;
-H5_DLL void *H5MM_calloc(size_t size) H5_ATTR_MALLOC;
-H5_DLL void *H5MM_realloc(void *mem, size_t size);
-H5_DLL char *H5MM_strdup(const char *s);
-H5_DLL void *H5MM_memcpy(void *dest, const void *src, size_t n);
-H5_DLL void  H5MM_sanity_check_all(void);
-H5_DLL void  H5MM_final_sanity_check(void);
+H5_DLL void  *H5MM_malloc(size_t size) H5_ATTR_MALLOC;
+H5_DLL void  *H5MM_calloc(size_t size) H5_ATTR_MALLOC;
+H5_DLL void  *H5MM_realloc(void *mem, size_t size);
+H5_DLL char  *H5MM_strdup(const char *s);
+H5_DLL void  *H5MM_memcpy(void *dest, const void *src, size_t n);
+H5_DLL void   H5MM_sanity_check_all(void);
+H5_DLL void   H5MM_final_sanity_check(void);
 
 #else
 
@@ -64,9 +64,9 @@ H5_DLL void  H5MM_final_sanity_check(void);
 /*
  * Library prototypes...
  */
-H5_DLL void * H5MM_xfree(void *mem);
-H5_DLL void * H5MM_xfree_const(const void *mem);
-H5_DLL char * H5MM_xstrdup(const char *s);
+H5_DLL void  *H5MM_xfree(void *mem);
+H5_DLL void  *H5MM_xfree_const(const void *mem);
+H5_DLL char  *H5MM_xstrdup(const char *s);
 H5_DLL herr_t H5MM_get_alloc_stats(H5_alloc_stats_t *stats);
 
 #endif /* H5MMprivate_H */

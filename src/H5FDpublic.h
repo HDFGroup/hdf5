@@ -31,29 +31,21 @@
 /* VFD identifier values
  * These are H5FD_class_value_t values, NOT hid_t values!
  */
-#define H5_VFD_INVALID  ((H5FD_class_value_t)(-1))
-#define H5_VFD_SEC2     ((H5FD_class_value_t)(0))
-#define H5_VFD_CORE     ((H5FD_class_value_t)(1))
-#define H5_VFD_LOG      ((H5FD_class_value_t)(2))
-#define H5_VFD_FAMILY   ((H5FD_class_value_t)(3))
-#define H5_VFD_MULTI    ((H5FD_class_value_t)(4))
-#define H5_VFD_STDIO    ((H5FD_class_value_t)(5))
-#define H5_VFD_SPLITTER ((H5FD_class_value_t)(6))
-#ifdef H5_HAVE_PARALLEL
-#define H5_VFD_MPIO ((H5FD_class_value_t)(7))
-#endif
-#ifdef H5_HAVE_DIRECT
-#define H5_VFD_DIRECT ((H5FD_class_value_t)(8))
-#endif
-#ifdef H5_HAVE_MIRROR_VFD
-#define H5_VFD_MIRROR ((H5FD_class_value_t)(9))
-#endif
-#ifdef H5_HAVE_LIBHDFS
-#define H5_VFD_HDFS ((H5FD_class_value_t)(10))
-#endif
-#ifdef H5_HAVE_ROS3_VFD
-#define H5_VFD_ROS3 ((H5FD_class_value_t)(11))
-#endif
+#define H5_VFD_INVALID   ((H5FD_class_value_t)(-1))
+#define H5_VFD_SEC2      ((H5FD_class_value_t)(0))
+#define H5_VFD_CORE      ((H5FD_class_value_t)(1))
+#define H5_VFD_LOG       ((H5FD_class_value_t)(2))
+#define H5_VFD_FAMILY    ((H5FD_class_value_t)(3))
+#define H5_VFD_MULTI     ((H5FD_class_value_t)(4))
+#define H5_VFD_STDIO     ((H5FD_class_value_t)(5))
+#define H5_VFD_SPLITTER  ((H5FD_class_value_t)(6))
+#define H5_VFD_MPIO      ((H5FD_class_value_t)(7))
+#define H5_VFD_DIRECT    ((H5FD_class_value_t)(8))
+#define H5_VFD_MIRROR    ((H5FD_class_value_t)(9))
+#define H5_VFD_HDFS      ((H5FD_class_value_t)(10))
+#define H5_VFD_ROS3      ((H5FD_class_value_t)(11))
+#define H5_VFD_SUBFILING ((H5FD_class_value_t)(12))
+#define H5_VFD_IOC       ((H5FD_class_value_t)(13))
 
 /* VFD IDs below this value are reserved for library use. */
 #define H5_VFD_RESERVED 256
@@ -384,7 +376,7 @@ typedef struct {
  */
 //! <!-- [H5FD_ctl_memcpy_args_t_snip] -->
 typedef struct H5FD_ctl_memcpy_args_t {
-    void *      dstbuf;  /**< Destination buffer */
+    void       *dstbuf;  /**< Destination buffer */
     hsize_t     dst_off; /**< Offset within destination buffer */
     const void *srcbuf;  /**< Source buffer */
     hsize_t     src_off; /**< Offset within source buffer */

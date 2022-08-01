@@ -74,8 +74,8 @@ H5VL__native_group_create(void *obj, const H5VL_loc_params_t *loc_params, const 
                           void H5_ATTR_UNUSED **req)
 {
     H5G_loc_t loc;        /* Location to create group     */
-    H5G_t *   grp = NULL; /* New group created            */
-    void *    ret_value;
+    H5G_t    *grp = NULL; /* New group created            */
+    void     *ret_value;
 
     FUNC_ENTER_PACKAGE
 
@@ -140,8 +140,8 @@ H5VL__native_group_open(void *obj, const H5VL_loc_params_t *loc_params, const ch
                         hid_t H5_ATTR_UNUSED gapl_id, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
 {
     H5G_loc_t loc;        /* Location to open group   */
-    H5G_t *   grp = NULL; /* New group opend          */
-    void *    ret_value;
+    H5G_t    *grp = NULL; /* New group opend          */
+    void     *ret_value;
 
     FUNC_ENTER_PACKAGE
 

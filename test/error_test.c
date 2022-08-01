@@ -38,8 +38,8 @@ const char *FILENAME[] = {"errors", NULL};
 
 int **ipoints2      = NULL;
 int **icheck2       = NULL;
-int * ipoints2_data = NULL;
-int * icheck2_data  = NULL;
+int  *ipoints2_data = NULL;
+int  *icheck2_data  = NULL;
 
 hid_t ERR_CLS;
 hid_t ERR_CLS2;
@@ -99,7 +99,7 @@ test_error(hid_t file)
     hsize_t     dims[2];
     const char *FUNC_test_error = "test_error";
     H5E_auto2_t old_func;
-    void *      old_data = NULL;
+    void       *old_data = NULL;
 
     HDfprintf(stderr, "\nTesting error API based on data I/O\n");
 
@@ -181,8 +181,8 @@ init_error(void)
 {
     ssize_t    cls_size = (ssize_t)HDstrlen(ERR_CLS_NAME) + 1;
     ssize_t    msg_size = (ssize_t)HDstrlen(ERR_MIN_SUBROUTINE_MSG) + 1;
-    char *     cls_name = NULL;
-    char *     msg      = NULL;
+    char      *cls_name = NULL;
+    char      *msg      = NULL;
     H5E_type_t msg_type;
 
     if (NULL == (cls_name = (char *)HDmalloc(HDstrlen(ERR_CLS_NAME) + 1)))
@@ -324,8 +324,8 @@ static herr_t
 test_long_desc(void)
 {
     const char *format    = "Testing very long description string, %s";
-    char *      long_desc = NULL;
-    char *      full_desc = NULL;
+    char       *long_desc = NULL;
+    char       *full_desc = NULL;
     size_t      u;
     const char *test_FUNC = "test_long_desc";
 
@@ -419,7 +419,7 @@ error:
 static herr_t
 custom_print_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
 {
-    FILE *    stream = (FILE *)client_data;
+    FILE     *stream = (FILE *)client_data;
     char      maj[MSG_SIZE];
     char      min[MSG_SIZE];
     char      cls[MSG_SIZE];

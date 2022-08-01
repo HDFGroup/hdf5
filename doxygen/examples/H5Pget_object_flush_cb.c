@@ -1,7 +1,7 @@
 hid_t               fapl_id;
 unsigned            counter;
 H5F_object_flush_t *ret_cb;
-unsigned *          ret_counter;
+unsigned           *ret_counter;
 
 /* Create a copy of the file access property list */
 fapl_id = H5Pcreate(H5P_FILE_ACCESS);

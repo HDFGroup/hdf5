@@ -101,25 +101,25 @@ static hid_t
 H5L__extern_traverse(const char H5_ATTR_UNUSED *link_name, hid_t cur_group, const void *_udata,
                      size_t H5_ATTR_UNUSED udata_size, hid_t lapl_id, hid_t H5_ATTR_UNUSED dxpl_id)
 {
-    H5P_genplist_t *   plist;                              /* Property list pointer */
+    H5P_genplist_t    *plist;                              /* Property list pointer */
     H5G_loc_t          root_loc;                           /* Location of root group in external file */
     H5G_loc_t          loc;                                /* Location of object */
-    H5F_t *            ext_file = NULL;                    /* File struct for external file */
-    const uint8_t *    p        = (const uint8_t *)_udata; /* Pointer into external link buffer */
-    const char *       file_name;                    /* Name of file containing external link's object */
-    const char *       obj_name;                     /* Name external link's object */
+    H5F_t             *ext_file = NULL;                    /* File struct for external file */
+    const uint8_t     *p        = (const uint8_t *)_udata; /* Pointer into external link buffer */
+    const char        *file_name;                    /* Name of file containing external link's object */
+    const char        *obj_name;                     /* Name external link's object */
     size_t             fname_len;                    /* Length of external link file name */
     unsigned           intent;                       /* File access permissions */
     H5L_elink_cb_t     cb_info;                      /* Callback info struct */
     hid_t              fapl_id    = H5I_INVALID_HID; /* File access property list for external link's file */
-    void *             ext_obj    = NULL;            /* External link's object */
+    void              *ext_obj    = NULL;            /* External link's object */
     hid_t              ext_obj_id = H5I_INVALID_HID; /* ID for external link's object */
     H5I_type_t         opened_type;                  /* ID type of external link's object */
-    char *             parent_group_name = NULL;     /* Temporary pointer to group name */
+    char              *parent_group_name = NULL;     /* Temporary pointer to group name */
     char               local_group_name[H5L_EXT_TRAVERSE_BUF_SIZE]; /* Local buffer to hold group name */
-    H5P_genplist_t *   fa_plist;                                    /* File access property list pointer */
+    H5P_genplist_t    *fa_plist;                                    /* File access property list pointer */
     H5F_close_degree_t fc_degree    = H5F_CLOSE_WEAK;               /* File close degree for target file */
-    char *             elink_prefix = NULL;                         /* Pointer to elink prefix */
+    char              *elink_prefix = NULL;                         /* Pointer to elink prefix */
     hid_t              ret_value    = H5I_INVALID_HID;              /* Return value */
 
     FUNC_ENTER_PACKAGE

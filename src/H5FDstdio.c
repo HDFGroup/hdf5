@@ -79,7 +79,7 @@ typedef enum {
  */
 typedef struct H5FD_stdio_t {
     H5FD_t             pub;          /* public stuff, must be first      */
-    FILE *             fp;           /* the file handle                  */
+    FILE              *fp;           /* the file handle                  */
     int                fd;           /* file descriptor (for truncate)   */
     haddr_t            eoa;          /* end of allocated region          */
     haddr_t            eof;          /* end of file; current file size   */
@@ -183,46 +183,46 @@ static herr_t  H5FD_stdio_unlock(H5FD_t *_file);
 static herr_t  H5FD_stdio_delete(const char *filename, hid_t fapl_id);
 
 static const H5FD_class_t H5FD_stdio_g = {
-    H5FD_CLASS_VERSION,    /* struct version */
-    H5_VFD_STDIO,          /* value          */
-    "stdio",               /* name           */
-    MAXADDR,               /* maxaddr        */
-    H5F_CLOSE_WEAK,        /* fc_degree      */
-    H5FD_stdio_term,       /* terminate      */
-    NULL,                  /* sb_size        */
-    NULL,                  /* sb_encode      */
-    NULL,                  /* sb_decode      */
-    0,                     /* fapl_size      */
-    NULL,                  /* fapl_get       */
-    NULL,                  /* fapl_copy      */
-    NULL,                  /* fapl_free      */
-    0,                     /* dxpl_size      */
-    NULL,                  /* dxpl_copy      */
-    NULL,                  /* dxpl_free      */
-    H5FD_stdio_open,       /* open           */
-    H5FD_stdio_close,      /* close          */
-    H5FD_stdio_cmp,        /* cmp            */
-    H5FD_stdio_query,      /* query          */
-    NULL,                  /* get_type_map   */
-    H5FD_stdio_alloc,      /* alloc          */
-    NULL,                  /* free           */
-    H5FD_stdio_get_eoa,    /* get_eoa        */
-    H5FD_stdio_set_eoa,    /* set_eoa        */
-    H5FD_stdio_get_eof,    /* get_eof        */
-    H5FD_stdio_get_handle, /* get_handle     */
-    H5FD_stdio_read,       /* read           */
-    H5FD_stdio_write,      /* write          */
-    NULL,                  /* read_vector    */
-    NULL,                  /* write_vector   */
+    H5FD_CLASS_VERSION,    /* struct version  */
+    H5_VFD_STDIO,          /* value           */
+    "stdio",               /* name            */
+    MAXADDR,               /* maxaddr         */
+    H5F_CLOSE_WEAK,        /* fc_degree       */
+    H5FD_stdio_term,       /* terminate       */
+    NULL,                  /* sb_size         */
+    NULL,                  /* sb_encode       */
+    NULL,                  /* sb_decode       */
+    0,                     /* fapl_size       */
+    NULL,                  /* fapl_get        */
+    NULL,                  /* fapl_copy       */
+    NULL,                  /* fapl_free       */
+    0,                     /* dxpl_size       */
+    NULL,                  /* dxpl_copy       */
+    NULL,                  /* dxpl_free       */
+    H5FD_stdio_open,       /* open            */
+    H5FD_stdio_close,      /* close           */
+    H5FD_stdio_cmp,        /* cmp             */
+    H5FD_stdio_query,      /* query           */
+    NULL,                  /* get_type_map    */
+    H5FD_stdio_alloc,      /* alloc           */
+    NULL,                  /* free            */
+    H5FD_stdio_get_eoa,    /* get_eoa         */
+    H5FD_stdio_set_eoa,    /* set_eoa         */
+    H5FD_stdio_get_eof,    /* get_eof         */
+    H5FD_stdio_get_handle, /* get_handle      */
+    H5FD_stdio_read,       /* read            */
+    H5FD_stdio_write,      /* write           */
+    NULL,                  /* read_vector     */
+    NULL,                  /* write_vector    */
     NULL,                  /* read_selection  */
     NULL,                  /* write_selection */
-    H5FD_stdio_flush,      /* flush          */
-    H5FD_stdio_truncate,   /* truncate       */
-    H5FD_stdio_lock,       /* lock           */
-    H5FD_stdio_unlock,     /* unlock         */
-    H5FD_stdio_delete,     /* del            */
-    NULL,                  /* ctl            */
-    H5FD_FLMAP_DICHOTOMY   /* fl_map         */
+    H5FD_stdio_flush,      /* flush           */
+    H5FD_stdio_truncate,   /* truncate        */
+    H5FD_stdio_lock,       /* lock            */
+    H5FD_stdio_unlock,     /* unlock          */
+    H5FD_stdio_delete,     /* del             */
+    NULL,                  /* ctl             */
+    H5FD_FLMAP_DICHOTOMY   /* fl_map          */
 };
 
 /*-------------------------------------------------------------------------
@@ -341,9 +341,9 @@ H5Pset_fapl_stdio(hid_t fapl_id)
 static H5FD_t *
 H5FD_stdio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
-    FILE *             f            = NULL;
+    FILE              *f            = NULL;
     unsigned           write_access = 0; /* File opened with write access? */
-    H5FD_stdio_t *     file         = NULL;
+    H5FD_stdio_t      *file         = NULL;
     static const char *func         = "H5FD_stdio_open"; /* Function Name for error reporting */
 #ifdef H5_HAVE_WIN32_API
     struct _BY_HANDLE_FILE_INFORMATION fileinfo;
@@ -498,7 +498,7 @@ H5FD_stdio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
 static herr_t
 H5FD_stdio_close(H5FD_t *_file)
 {
-    H5FD_stdio_t *     file = (H5FD_stdio_t *)_file;
+    H5FD_stdio_t      *file = (H5FD_stdio_t *)_file;
     static const char *func = "H5FD_stdio_close"; /* Function Name for error reporting */
 
     /* Clear the error stack */
@@ -767,7 +767,7 @@ H5FD_stdio_get_eof(const H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type)
 static herr_t
 H5FD_stdio_get_handle(H5FD_t *_file, hid_t /*UNUSED*/ fapl, void **file_handle)
 {
-    H5FD_stdio_t *     file = (H5FD_stdio_t *)_file;
+    H5FD_stdio_t      *file = (H5FD_stdio_t *)_file;
     static const char *func = "H5FD_stdio_get_handle"; /* Function Name for error reporting */
 
     /* Quiet the compiler */
@@ -805,7 +805,7 @@ static herr_t
 H5FD_stdio_read(H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type, hid_t /*UNUSED*/ dxpl_id, haddr_t addr,
                 size_t size, void /*OUT*/ *buf)
 {
-    H5FD_stdio_t *     file = (H5FD_stdio_t *)_file;
+    H5FD_stdio_t      *file = (H5FD_stdio_t *)_file;
     static const char *func = "H5FD_stdio_read"; /* Function Name for error reporting */
 
     /* Quiet the compiler */
@@ -908,7 +908,7 @@ static herr_t
 H5FD_stdio_write(H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type, hid_t /*UNUSED*/ dxpl_id, haddr_t addr,
                  size_t size, const void *buf)
 {
-    H5FD_stdio_t *     file = (H5FD_stdio_t *)_file;
+    H5FD_stdio_t      *file = (H5FD_stdio_t *)_file;
     static const char *func = "H5FD_stdio_write"; /* Function Name for error reporting */
 
     /* Quiet the compiler */
@@ -995,7 +995,7 @@ H5FD_stdio_write(H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type, hid_t /*UNUSED*/ dxp
 static herr_t
 H5FD_stdio_flush(H5FD_t *_file, hid_t /*UNUSED*/ dxpl_id, hbool_t closing)
 {
-    H5FD_stdio_t *     file = (H5FD_stdio_t *)_file;
+    H5FD_stdio_t      *file = (H5FD_stdio_t *)_file;
     static const char *func = "H5FD_stdio_flush"; /* Function Name for error reporting */
 
     /* Quiet the compiler */
@@ -1039,7 +1039,7 @@ H5FD_stdio_flush(H5FD_t *_file, hid_t /*UNUSED*/ dxpl_id, hbool_t closing)
 static herr_t
 H5FD_stdio_truncate(H5FD_t *_file, hid_t /*UNUSED*/ dxpl_id, hbool_t /*UNUSED*/ closing)
 {
-    H5FD_stdio_t *     file = (H5FD_stdio_t *)_file;
+    H5FD_stdio_t      *file = (H5FD_stdio_t *)_file;
     static const char *func = "H5FD_stdio_truncate"; /* Function Name for error reporting */
 
     /* Quiet the compiler */
@@ -1130,7 +1130,7 @@ static herr_t
 H5FD_stdio_lock(H5FD_t *_file, hbool_t rw)
 {
 #ifdef H5_HAVE_FLOCK
-    H5FD_stdio_t *     file = (H5FD_stdio_t *)_file; /* VFD file struct                      */
+    H5FD_stdio_t      *file = (H5FD_stdio_t *)_file; /* VFD file struct                      */
     int                lock_flags;                   /* file locking flags                   */
     static const char *func = "H5FD_stdio_lock";     /* Function Name for error reporting    */
 
@@ -1181,7 +1181,7 @@ static herr_t
 H5FD_stdio_unlock(H5FD_t *_file)
 {
 #ifdef H5_HAVE_FLOCK
-    H5FD_stdio_t *     file = (H5FD_stdio_t *)_file; /* VFD file struct                      */
+    H5FD_stdio_t      *file = (H5FD_stdio_t *)_file; /* VFD file struct                      */
     static const char *func = "H5FD_stdio_unlock";   /* Function Name for error reporting    */
 
     /* Clear the error stack */

@@ -931,8 +931,8 @@ test_h5o_link(void)
     hsize_t      dims[2] = {TEST6_DIM1, TEST6_DIM2};
     htri_t       committed; /* Whether the named datatype is committed */
     H5F_libver_t low, high; /* File format bounds */
-    int *        wdata;
-    int *        rdata;
+    int         *wdata;
+    int         *rdata;
     int          i, n;
     herr_t       ret; /* Value returned from API calls */
 

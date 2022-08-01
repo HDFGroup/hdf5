@@ -71,6 +71,8 @@
 #ifdef H5_HAVE_WINDOWS
 #include "H5FDwindows.h" /* Win32 I/O                                */
 #endif
+#include "H5FDsubfiling.h" /* Subfiling VFD                            */
+#include "H5FDioc.h"       /* I/O Concentrator VFD                     */
 
 /* Virtual object layer (VOL) connectors */
 #include "H5VLnative.h"   /* Native VOL connector                     */

@@ -80,7 +80,7 @@ H5VL__native_link_create(H5VL_link_create_args_t *args, void *obj, const H5VL_lo
         case H5VL_LINK_CREATE_HARD: {
             H5G_loc_t          cur_loc;
             H5G_loc_t          link_loc;
-            void *             cur_obj    = args->args.hard.curr_obj;
+            void              *cur_obj    = args->args.hard.curr_obj;
             H5VL_loc_params_t *cur_params = &args->args.hard.curr_loc_params;
 
             if (NULL != cur_obj && H5G_loc_real(cur_obj, cur_params->obj_type, &cur_loc) < 0)

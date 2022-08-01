@@ -308,7 +308,7 @@ h5oget_info_by_name_c(hid_t_f *loc_id, _fcd name, size_t_f *namelen, hid_t_f *la
                       H5O_info_t_f *object_info, int_f *fields)
 /******/
 {
-    char *      c_name    = NULL; /* Buffer to hold C string */
+    char       *c_name    = NULL; /* Buffer to hold C string */
     int_f       ret_value = 0;    /* Return value */
     H5O_info2_t Oinfo;
 
@@ -358,7 +358,7 @@ h5oget_info_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *namelen, int_f 
                      hsize_t_f *n, hid_t_f *lapl_id, H5O_info_t_f *object_info, int_f *fields)
 /******/
 {
-    char *          c_group_name = NULL; /* Buffer to hold C string */
+    char           *c_group_name = NULL; /* Buffer to hold C string */
     int_f           ret_value    = 0;    /* Return value */
     H5O_info2_t     Oinfo;
     H5_index_t      c_index_field;
@@ -512,7 +512,7 @@ h5ovisit_by_name_c(hid_t_f *loc_id, _fcd object_name, size_t_f *namelen, int_f *
 {
     int_f  ret_value = -1;       /* Return value */
     herr_t func_ret_value;       /* H5Linterate return value */
-    char * c_object_name = NULL; /* Buffer to hold C string */
+    char  *c_object_name = NULL; /* Buffer to hold C string */
 
     /*
      * Convert FORTRAN name to C name
@@ -758,7 +758,7 @@ h5oopen_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen, int_
                  hsize_t_f *n, hid_t_f *obj_id, hid_t_f *lapl_id)
 /******/
 {
-    char *          c_group_name = NULL; /* Buffer to hold C string */
+    char           *c_group_name = NULL; /* Buffer to hold C string */
     int_f           ret_value    = 0;
     H5_index_t      c_index_type;
     H5_iter_order_t c_order;
@@ -807,7 +807,7 @@ int_f
 h5oget_comment_c(hid_t_f *object_id, _fcd comment, size_t_f *commentsize, hssize_t_f *bufsize)
 /******/
 {
-    char * c_comment = NULL; /* Buffer to hold C string */
+    char  *c_comment = NULL; /* Buffer to hold C string */
     int_f  ret_value = 0;    /* Return value */
     size_t c_commentsize;
 
@@ -864,8 +864,8 @@ h5oget_comment_by_name_c(hid_t_f *loc_id, _fcd name, size_t_f *name_size, _fcd c
                          size_t_f *bufsize, hid_t_f *lapl_id)
 /******/
 {
-    char *  c_comment = NULL; /* Buffer to hold C string */
-    char *  c_name    = NULL; /* Buffer to hold C string */
+    char   *c_comment = NULL; /* Buffer to hold C string */
+    char   *c_name    = NULL; /* Buffer to hold C string */
     int_f   ret_value = 0;    /* Return value */
     ssize_t c_bufsize;
     size_t  c_commentsize;

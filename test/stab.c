@@ -200,7 +200,7 @@ test_long(hid_t fcpl, hid_t fapl, hbool_t new_format)
 {
     hid_t  fid = (-1); /* File ID */
     hid_t  g1 = (-1), g2 = (-1);
-    char * name1 = NULL, *name2 = NULL;
+    char  *name1 = NULL, *name2 = NULL;
     char   filename[NAME_BUF_SIZE];
     size_t i;
 
@@ -649,7 +649,7 @@ long_compact(hid_t fcpl, hid_t fapl2)
     hid_t          fid     = (-1); /* File ID */
     hid_t          gid     = (-1); /* Group ID */
     hid_t          gid2    = (-1); /* Group ID */
-    char *         objname = NULL; /* Object name */
+    char          *objname = NULL; /* Object name */
     char           filename[NAME_BUF_SIZE];
     h5_stat_size_t empty_size; /* Size of an empty file */
     h5_stat_size_t file_size;  /* Size of each file created */
@@ -1418,8 +1418,8 @@ main(void)
     unsigned    new_format;      /* Whether to use the new format or not */
     const char *env_h5_drvr;     /* File Driver value from environment */
     hbool_t     contig_addr_vfd; /* Whether VFD used has a contiguous address space */
-    hbool_t     driver_uses_modified_filename = h5_driver_uses_modified_filename();
-    int         nerrors                       = 0;
+    hbool_t     driver_is_default_compatible;
+    int         nerrors = 0;
 
     /* Get the VFD to use */
     env_h5_drvr = HDgetenv(HDF5_DRIVER);
@@ -1432,6 +1432,9 @@ main(void)
     /* Reset library */
     h5_reset();
     fapl = h5_fileaccess();
+
+    if (h5_driver_is_default_vfd_compatible(fapl, &driver_is_default_compatible) < 0)
+        TEST_ERROR;
 
     /* Copy the file access property list */
     if ((fapl2 = H5Pcopy(fapl)) < 0)
@@ -1476,7 +1479,7 @@ main(void)
         nerrors += lifecycle(fcpl2, fapl2);
         nerrors += long_compact(fcpl2, fapl2);
 
-        if (!driver_uses_modified_filename) {
+        if (driver_is_default_compatible) {
             nerrors += read_old();
         }
 
@@ -1487,7 +1490,7 @@ main(void)
     /* Old group API specific tests */
     nerrors += old_api(fapl);
 
-    if (!driver_uses_modified_filename) {
+    if (driver_is_default_compatible) {
         nerrors += corrupt_stab_msg();
     }
 

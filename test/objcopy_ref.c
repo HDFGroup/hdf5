@@ -571,8 +571,8 @@ compare_attribute(hid_t aid, hid_t aid2, hid_t pid, const void *wbuf, hid_t obj_
     H5A_info_t ainfo;               /* Attribute info */
     H5A_info_t ainfo2;              /* Attribute info */
     hssize_t   nelmts;              /* # of elements in dataspace */
-    void *     rbuf  = NULL;        /* Buffer for reading raw data */
-    void *     rbuf2 = NULL;        /* Buffer for reading raw data */
+    void      *rbuf  = NULL;        /* Buffer for reading raw data */
+    void      *rbuf2 = NULL;        /* Buffer for reading raw data */
 
     /* Check the character sets are equal */
     if (H5Aget_info(aid, &ainfo) < 0)
@@ -1070,8 +1070,8 @@ compare_datasets(hid_t did, hid_t did2, hid_t pid, const void *wbuf)
     htri_t             is_committed2;         /* If the datatype is committed */
     int                nfilters;              /* Number of filters applied to dataset */
     hssize_t           nelmts;                /* # of elements in dataspace */
-    void *             rbuf  = NULL;          /* Buffer for reading raw data */
-    void *             rbuf2 = NULL;          /* Buffer for reading raw data */
+    void              *rbuf  = NULL;          /* Buffer for reading raw data */
+    void              *rbuf2 = NULL;          /* Buffer for reading raw data */
     H5D_space_status_t space_status;          /* Dataset's raw dataspace status */
     H5D_space_status_t space_status2;         /* Dataset's raw dataspace status */
 
@@ -1390,11 +1390,17 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
                     case H5O_TYPE_MAP:
                         HDassert(0 && "maps not supported in native VOL connector");
 
+                        /* clang complains about implicit fallthrough here and
+                         * our usual attributes and fall-through comments don't
+                         * quiet the compiler.
+                         */
+                        H5_CLANG_DIAG_OFF("implicit-fallthrough")
                     case H5O_TYPE_UNKNOWN:
                     case H5O_TYPE_NTYPES:
                     default:
                         HDassert(0 && "Unknown type of object");
                         break;
+                        H5_CLANG_DIAG_ON("implicit-fallthrough")
                 } /* end switch */
 
                 /* Close objects */

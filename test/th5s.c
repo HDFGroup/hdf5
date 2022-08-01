@@ -125,7 +125,8 @@ test_h5s_basic(void)
     hsize_t  max2[] = {SPACE2_MAX1, SPACE2_MAX2, SPACE2_MAX3, SPACE2_MAX4};
     hsize_t  tdims[4]; /* Dimension array to test with */
     hsize_t  tmax[4];
-    hssize_t n;   /* Number of dataspace elements */
+    hssize_t n; /* Number of dataspace elements */
+    hbool_t  driver_is_default_compatible;
     herr_t   ret; /* Generic return value        */
 
     /* Output message about test being performed */
@@ -194,7 +195,10 @@ test_h5s_basic(void)
      * If this test fails and the H5S_MAX_RANK variable has changed, follow
      * the instructions in space_overflow.c for regenerating the th5s.h5 file.
      */
-    if (!h5_driver_uses_modified_filename()) {
+    ret = h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &driver_is_default_compatible);
+    CHECK_I(ret, "h5_driver_is_default_vfd_compatible");
+
+    if (driver_is_default_compatible) {
         const char *testfile = H5_get_srcdir_filename(TESTFILE); /* Corrected test file name */
 
         fid1 = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
@@ -1597,7 +1601,7 @@ static herr_t
 test_h5s_check_encoding(hid_t in_fapl, hid_t in_sid, uint32_t expected_version, uint8_t expected_enc_size,
                         hbool_t expected_to_fail)
 {
-    char *  buf = NULL; /* Pointer to the encoded buffer */
+    char   *buf = NULL; /* Pointer to the encoded buffer */
     size_t  buf_size;   /* Size of the encoded buffer */
     hid_t   d_sid = -1; /* The decoded dataspace ID */
     htri_t  check;
@@ -2496,9 +2500,9 @@ test_h5s_chunk(void)
     hsize_t  dims[2];
     hsize_t  csize[2];
     double **chunk_data_dbl      = NULL;
-    double * chunk_data_dbl_data = NULL;
-    float ** chunk_data_flt      = NULL;
-    float *  chunk_data_flt_data = NULL;
+    double  *chunk_data_dbl_data = NULL;
+    float  **chunk_data_flt      = NULL;
+    float   *chunk_data_flt_data = NULL;
     int      i, j;
 
     /* Allocate memory */
@@ -3287,7 +3291,7 @@ test_versionbounds(void)
     hid_t        dset_space = -1; /* Retrieved dataset's dataspace ID */
     hsize_t      dim[1];          /* Dataset dimensions */
     H5F_libver_t low, high;       /* File format bounds */
-    H5S_t *      spacep = NULL;   /* Pointer to internal dataspace */
+    H5S_t       *spacep = NULL;   /* Pointer to internal dataspace */
     herr_t       ret    = 0;      /* Generic return value */
 
     /* Output message about test being performed */

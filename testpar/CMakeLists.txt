@@ -25,7 +25,7 @@ set (testphdf5_SOURCES
 add_executable (testphdf5 ${testphdf5_SOURCES})
 target_compile_options(testphdf5 PRIVATE "${HDF5_CMAKE_C_FLAGS}")
 target_include_directories (testphdf5
-    PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
+    PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
 )
 if (NOT BUILD_SHARED_LIBS)
   TARGET_C_PROPERTIES (testphdf5 STATIC)
@@ -51,7 +51,7 @@ macro (ADD_H5P_EXE file)
   add_executable (${file} ${HDF5_TEST_PAR_SOURCE_DIR}/${file}.c)
   target_compile_options(${file} PRIVATE "${HDF5_CMAKE_C_FLAGS}")
   target_include_directories (${file}
-      PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
+      PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
   )
   if (NOT BUILD_SHARED_LIBS)
     TARGET_C_PROPERTIES (${file} STATIC)
@@ -89,6 +89,7 @@ set (H5P_TESTS
     t_init_term
     t_shapesame
     t_filters_parallel
+    t_subfiling_vfd
     t_2Gio
     t_vfd
 )
