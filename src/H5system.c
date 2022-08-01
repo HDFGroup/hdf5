@@ -1015,9 +1015,9 @@ done:
 herr_t
 H5_dirname(const char *path, char **dirname)
 {
-    char   *sep;
-    char   *out       = NULL;
-    herr_t  ret_value = SUCCEED;
+    char  *sep;
+    char  *out       = NULL;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 

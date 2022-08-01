@@ -525,7 +525,7 @@ H5MM_strndup(const char *s, size_t n)
 #if defined H5_MEMORY_ALLOC_SANITY_CHECK
     size_t len;
 #endif
-    char  *ret_value = NULL;
+    char *ret_value = NULL;
 
     FUNC_ENTER_NOAPI(NULL)
 
