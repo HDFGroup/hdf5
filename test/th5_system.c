@@ -22,6 +22,8 @@
 
 #include "testhdf5.h"
 
+#include "H5MMprivate.h"
+
 static void
 test_h5_dirname(void)
 {
@@ -63,7 +65,7 @@ test_h5_dirname(void)
     ret     = H5_dirname(path, &dirname);
     CHECK(ret, FAIL, "H5_dirname with empty string");
     VERIFY_STR(dirname, ".", "comparing H5_dirname with empty string to \".\"");
-    HDfree(dirname);
+    H5MM_free(dirname);
 
     /*
      * Check that H5_dirname returns "." for a path that
@@ -73,7 +75,7 @@ test_h5_dirname(void)
     HDsnprintf(path, H5_SYSTEM_TEST_PATH_MAX, "testdirname");
     ret = H5_dirname(path, &dirname);
     VERIFY_STR(dirname, ".", "comparing H5_dirname with non-separated path to \".\"");
-    HDfree(dirname);
+    H5MM_free(dirname);
 
     /*
      * Check that H5_dirname returns the system file separator
@@ -83,7 +85,7 @@ test_h5_dirname(void)
     HDsnprintf(path, H5_SYSTEM_TEST_PATH_MAX, H5_DIR_SEPS);
     ret = H5_dirname(path, &dirname);
     VERIFY_STR(dirname, H5_DIR_SEPS, "comparing H5_dirname with file separator path to file separator");
-    HDfree(dirname);
+    H5MM_free(dirname);
 
     /*
      * Check that H5_dirname returns the system file separator
@@ -94,7 +96,7 @@ test_h5_dirname(void)
     HDsnprintf(path, H5_SYSTEM_TEST_PATH_MAX, "%stestdir", H5_DIR_SEPS);
     ret = H5_dirname(path, &dirname);
     VERIFY_STR(dirname, H5_DIR_SEPS, "comparing H5_dirname with leading separator path to file separator");
-    HDfree(dirname);
+    H5MM_free(dirname);
 
     /*
      * Check that H5_dirname returns the system file separator
@@ -106,7 +108,7 @@ test_h5_dirname(void)
                H5_DIR_SEPS);
     ret = H5_dirname(path, &dirname);
     VERIFY_STR(dirname, H5_DIR_SEPS, "comparing H5_dirname with leading separators path to file separator");
-    HDfree(dirname);
+    H5MM_free(dirname);
 
     /*
      * Check that H5_dirname returns the "." for a path which
@@ -116,7 +118,7 @@ test_h5_dirname(void)
     HDsnprintf(path, H5_SYSTEM_TEST_PATH_MAX, "testdir%s", H5_DIR_SEPS);
     ret = H5_dirname(path, &dirname);
     VERIFY_STR(dirname, ".", "comparing H5_dirname with trailing separator path to \".\"");
-    HDfree(dirname);
+    H5MM_free(dirname);
 
     /*
      * Check that H5_dirname returns the "." for a path which
@@ -127,7 +129,7 @@ test_h5_dirname(void)
                H5_DIR_SEPS);
     ret = H5_dirname(path, &dirname);
     VERIFY_STR(dirname, ".", "comparing H5_dirname with trailing separators path to \".\"");
-    HDfree(dirname);
+    H5MM_free(dirname);
 
     /*
      * Check that H5_dirname returns the system file separator
@@ -139,7 +141,7 @@ test_h5_dirname(void)
     ret = H5_dirname(path, &dirname);
     VERIFY_STR(dirname, H5_DIR_SEPS,
                "comparing H5_dirname with leading and trailing separator path to file separator");
-    HDfree(dirname);
+    H5MM_free(dirname);
 
     /*
      * Check that H5_dirname returns the system file separator
@@ -153,7 +155,7 @@ test_h5_dirname(void)
     VERIFY_STR(
         dirname, H5_DIR_SEPS,
         "comparing H5_dirname with leading separators and a trailing separator path to file separator");
-    HDfree(dirname);
+    H5MM_free(dirname);
 
     /*
      * Check that H5_dirname returns the system file separator
@@ -166,7 +168,7 @@ test_h5_dirname(void)
     ret = H5_dirname(path, &dirname);
     VERIFY_STR(dirname, H5_DIR_SEPS,
                "comparing H5_dirname with leading separator and trailing separators path to file separator");
-    HDfree(dirname);
+    H5MM_free(dirname);
 
     /*
      * Check that H5_dirname returns the system file separator
@@ -179,7 +181,7 @@ test_h5_dirname(void)
     ret = H5_dirname(path, &dirname);
     VERIFY_STR(dirname, H5_DIR_SEPS,
                "comparing H5_dirname with leading and trailing separators path to file separator");
-    HDfree(dirname);
+    H5MM_free(dirname);
 
     /*
      * Check that H5_dirname returns a proper dirname with a
@@ -189,7 +191,7 @@ test_h5_dirname(void)
     HDsnprintf(path, H5_SYSTEM_TEST_PATH_MAX, "topdir%sunderdir", H5_DIR_SEPS);
     ret = H5_dirname(path, &dirname);
     VERIFY_STR(dirname, "topdir", "comparing H5_dirname with normal path to proper dirname");
-    HDfree(dirname);
+    H5MM_free(dirname);
 
     /*
      * Check that H5_dirname returns a proper dirname with a
@@ -199,7 +201,7 @@ test_h5_dirname(void)
     HDsnprintf(path, H5_SYSTEM_TEST_PATH_MAX, "%stopdir%sunderdir", H5_DIR_SEPS, H5_DIR_SEPS);
     ret = H5_dirname(path, &dirname);
     VERIFY_STR(dirname, H5_DIR_SEPS "topdir", "comparing H5_dirname with normal path to proper dirname");
-    HDfree(dirname);
+    H5MM_free(dirname);
 
     /*
      * Check that H5_dirname returns a proper dirname with a
@@ -209,7 +211,7 @@ test_h5_dirname(void)
     HDsnprintf(path, H5_SYSTEM_TEST_PATH_MAX, "%stopdir%sunderdir%s", H5_DIR_SEPS, H5_DIR_SEPS, H5_DIR_SEPS);
     ret = H5_dirname(path, &dirname);
     VERIFY_STR(dirname, H5_DIR_SEPS "topdir", "comparing H5_dirname with normal path to proper dirname");
-    HDfree(dirname);
+    H5MM_free(dirname);
 
     /*
      * Check that H5_dirname returns a proper dirname with a
@@ -221,7 +223,7 @@ test_h5_dirname(void)
     ret = H5_dirname(path, &dirname);
     VERIFY_STR(dirname, H5_DIR_SEPS "topdir" H5_DIR_SEPS "underdir",
                "comparing H5_dirname with contrived path to proper dirname");
-    HDfree(dirname);
+    H5MM_free(dirname);
 
     HDfree(path);
 }
@@ -267,7 +269,7 @@ test_h5_basename(void)
     ret      = H5_basename(path, &basename);
     CHECK(ret, FAIL, "H5_basename with empty string");
     VERIFY_STR(basename, ".", "comparing H5_basename with empty string to \".\"");
-    HDfree(basename);
+    H5MM_free(basename);
 
     /*
      * Check that H5_basename returns the specified path for a
@@ -277,7 +279,7 @@ test_h5_basename(void)
     HDsnprintf(path, H5_SYSTEM_TEST_PATH_MAX, "testdirname");
     ret = H5_basename(path, &basename);
     VERIFY_STR(basename, "testdirname", "comparing H5_basename with non-separated path to same path");
-    HDfree(basename);
+    H5MM_free(basename);
 
     /*
      * Check that H5_basename returns the system file separator
@@ -287,7 +289,7 @@ test_h5_basename(void)
     HDsnprintf(path, H5_SYSTEM_TEST_PATH_MAX, H5_DIR_SEPS);
     ret = H5_basename(path, &basename);
     VERIFY_STR(basename, H5_DIR_SEPS, "comparing H5_basename with file separator path to file separator");
-    HDfree(basename);
+    H5MM_free(basename);
 
     /*
      * Check that H5_basename returns the proper basename for a
@@ -299,7 +301,7 @@ test_h5_basename(void)
     ret = H5_basename(path, &basename);
     VERIFY_STR(basename, "testdir",
                "comparing H5_basename with leading separator path to filename component");
-    HDfree(basename);
+    H5MM_free(basename);
 
     /*
      * Check that H5_basename returns the proper basename for a
@@ -312,7 +314,7 @@ test_h5_basename(void)
     ret = H5_basename(path, &basename);
     VERIFY_STR(basename, "testdir",
                "comparing H5_basename with leading separators path to filename component");
-    HDfree(basename);
+    H5MM_free(basename);
 
     /*
      * Check that H5_basename returns the proper basename for a
@@ -323,7 +325,7 @@ test_h5_basename(void)
     ret = H5_basename(path, &basename);
     VERIFY_STR(basename, "testdir",
                "comparing H5_basename with trailing separator path to filename component");
-    HDfree(basename);
+    H5MM_free(basename);
 
     /*
      * Check that H5_basename returns the proper basename for a
@@ -336,7 +338,7 @@ test_h5_basename(void)
     ret = H5_basename(path, &basename);
     VERIFY_STR(basename, "testdir",
                "comparing H5_basename with trailing separators path to filename component");
-    HDfree(basename);
+    H5MM_free(basename);
 
     /*
      * Check that H5_basename returns the proper basename for a
@@ -348,7 +350,7 @@ test_h5_basename(void)
     ret = H5_basename(path, &basename);
     VERIFY_STR(basename, "testdir",
                "comparing H5_basename with leading and trailing separator path to filename component");
-    HDfree(basename);
+    H5MM_free(basename);
 
     /*
      * Check that H5_basename returns the proper basename for a
@@ -362,7 +364,7 @@ test_h5_basename(void)
     VERIFY_STR(
         basename, "testdir",
         "comparing H5_basename with leading separators and a trailing separator path to filename component");
-    HDfree(basename);
+    H5MM_free(basename);
 
     /*
      * Check that H5_basename returns the proper basename for a
@@ -376,7 +378,7 @@ test_h5_basename(void)
     VERIFY_STR(
         basename, "testdir",
         "comparing H5_basename with leading separator and trailing separators path to filename component");
-    HDfree(basename);
+    H5MM_free(basename);
 
     /*
      * Check that H5_basename returns the proper basename for a
@@ -389,7 +391,7 @@ test_h5_basename(void)
     ret = H5_basename(path, &basename);
     VERIFY_STR(basename, "testdir",
                "comparing H5_basename with leading and trailing separators path to filename component");
-    HDfree(basename);
+    H5MM_free(basename);
 
     /*
      * Check that H5_basename returns a proper basename with
@@ -399,7 +401,7 @@ test_h5_basename(void)
     HDsnprintf(path, H5_SYSTEM_TEST_PATH_MAX, "topdir%sunderdir", H5_DIR_SEPS);
     ret = H5_basename(path, &basename);
     VERIFY_STR(basename, "underdir", "comparing H5_basename with normal path to proper basename");
-    HDfree(basename);
+    H5MM_free(basename);
 
     /*
      * Check that H5_basename returns a proper basename with
@@ -409,7 +411,7 @@ test_h5_basename(void)
     HDsnprintf(path, H5_SYSTEM_TEST_PATH_MAX, "%stopdir%sunderdir", H5_DIR_SEPS, H5_DIR_SEPS);
     ret = H5_basename(path, &basename);
     VERIFY_STR(basename, "underdir", "comparing H5_basename with normal path to proper basename");
-    HDfree(basename);
+    H5MM_free(basename);
 
     /*
      * Check that H5_basename returns a proper basename with
@@ -419,7 +421,7 @@ test_h5_basename(void)
     HDsnprintf(path, H5_SYSTEM_TEST_PATH_MAX, "%stopdir%sunderdir%s", H5_DIR_SEPS, H5_DIR_SEPS, H5_DIR_SEPS);
     ret = H5_basename(path, &basename);
     VERIFY_STR(basename, "underdir", "comparing H5_basename with normal path to proper basename");
-    HDfree(basename);
+    H5MM_free(basename);
 
     /*
      * Check that H5_basename returns a proper basename with a
@@ -430,7 +432,7 @@ test_h5_basename(void)
                H5_DIR_SEPS, H5_DIR_SEPS, H5_DIR_SEPS, H5_DIR_SEPS);
     ret = H5_basename(path, &basename);
     VERIFY_STR(basename, "finaldir", "comparing H5_basename with contrived path to proper basename");
-    HDfree(basename);
+    H5MM_free(basename);
 
     HDfree(path);
 }
