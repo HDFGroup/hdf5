@@ -97,8 +97,8 @@ H5FD__onion_write_history(H5FD_onion_history_t *history, H5FD_t *file, haddr_t o
 
     FUNC_ENTER_PACKAGE;
 
-    if (NULL == (buf = H5MM_malloc(H5FD__ONION_ENCODED_SIZE_HISTORY +
-                                   (H5FD__ONION_ENCODED_SIZE_RECORD_POINTER * history->n_revisions))))
+    if (NULL == (buf = H5MM_malloc(H5FD_ONION_ENCODED_SIZE_HISTORY +
+                                   (H5FD_ONION_ENCODED_SIZE_RECORD_POINTER * history->n_revisions))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, 0, "can't allocate buffer for updated history")
 
     if (0 == (size = H5FD__onion_history_encode(history, buf, &_sum)))
@@ -161,12 +161,12 @@ H5FD__onion_history_decode(unsigned char *buf, H5FD_onion_history_t *history)
 
     HDassert(buf != NULL);
     HDassert(history != NULL);
-    HDassert(H5FD__ONION_HISTORY_VERSION_CURR == history->version);
+    HDassert(H5FD_ONION_HISTORY_VERSION_CURR == history->version);
 
     if (HDstrncmp((const char *)buf, "OWHS", 4))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid signature")
 
-    if (H5FD__ONION_HISTORY_VERSION_CURR != buf[4])
+    if (H5FD_ONION_HISTORY_VERSION_CURR != buf[4])
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid version")
 
     ptr = buf + 8;
@@ -178,7 +178,7 @@ H5FD__onion_history_decode(unsigned char *buf, H5FD_onion_history_t *history)
 
     if (0 == history->n_revisions) {
         history->n_revisions = n_revisions;
-        ptr += H5FD__ONION_ENCODED_SIZE_RECORD_POINTER * n_revisions;
+        ptr += H5FD_ONION_ENCODED_SIZE_RECORD_POINTER * n_revisions;
     }
     else {
         if (history->n_revisions != n_revisions)
@@ -262,11 +262,11 @@ H5FD__onion_history_encode(H5FD_onion_history_t *history, unsigned char *buf, ui
     FUNC_ENTER_PACKAGE_NOERR;
 
     HDassert(history != NULL);
-    HDassert(H5FD__ONION_HISTORY_VERSION_CURR == history->version);
+    HDassert(H5FD_ONION_HISTORY_VERSION_CURR == history->version);
     HDassert(buf != NULL);
     HDassert(checksum != NULL);
 
-    HDmemcpy(ptr, H5FD__ONION_HISTORY_SIGNATURE, 4);
+    HDmemcpy(ptr, H5FD_ONION_HISTORY_SIGNATURE, 4);
     ptr += 4;
     UINT32ENCODE(ptr, vers_u32);
     UINT64ENCODE(ptr, history->n_revisions);

@@ -13,19 +13,19 @@
 #ifndef H5FDonion_index_H
 #define H5FDonion_index_H
 
-#define H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR 1
+#define H5FD_ONION_ARCHIVAL_INDEX_VERSION_CURR 1
 
 /* Number of bytes to encode fixed-size components */
-#define H5FD__ONION_ENCODED_SIZE_INDEX_ENTRY     20
-#define H5FD__ONION_ENCODED_SIZE_RECORD_POINTER  20
-#define H5FD__ONION_ENCODED_SIZE_REVISION_RECORD 68
+#define H5FD_ONION_ENCODED_SIZE_INDEX_ENTRY     20
+#define H5FD_ONION_ENCODED_SIZE_RECORD_POINTER  20
+#define H5FD_ONION_ENCODED_SIZE_REVISION_RECORD 68
 
-#define H5FD__ONION_REVISION_INDEX_HASH_CHAIN_NODE_VERSION_CURR 1
-#define H5FD__ONION_REVISION_INDEX_STARTING_SIZE_LOG2           10 /* 2^n slots */
-#define H5FD__ONION_REVISION_INDEX_VERSION_CURR                 1
+#define H5FD_ONION_REVISION_INDEX_HASH_CHAIN_NODE_VERSION_CURR 1
+#define H5FD_ONION_REVISION_INDEX_STARTING_SIZE_LOG2           10 /* 2^n slots */
+#define H5FD_ONION_REVISION_INDEX_VERSION_CURR                 1
 
-#define H5FD__ONION_REVISION_RECORD_SIGNATURE    "ORRS"
-#define H5FD__ONION_REVISION_RECORD_VERSION_CURR 1
+#define H5FD_ONION_REVISION_RECORD_SIGNATURE    "ORRS"
+#define H5FD_ONION_REVISION_RECORD_VERSION_CURR 1
 
 /*
  * Onion Virtual File Driver (VFD)
@@ -63,7 +63,7 @@ typedef struct H5FD_onion_index_entry_t {
  *              Convenience structure with sanity-checking components.
  *
  * version:     Future-proofing identifier. Informs struct membership.
- *              Must equal H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR to be
+ *              Must equal H5FD_ONION_ARCHIVAL_INDEX_VERSION_CURR to be
  *              considered valid.
  *
  * page_size:   Interval to which the `logical_page` component of each list

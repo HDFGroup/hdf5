@@ -40,7 +40,7 @@ H5FD__onion_ingest_header(H5FD_onion_header_t *hdr_out, H5FD_t *raw_file, haddr_
 {
     unsigned char *buf       = NULL;
     herr_t         ret_value = SUCCEED;
-    haddr_t        size      = (haddr_t)H5FD__ONION_ENCODED_SIZE_HEADER;
+    haddr_t        size      = (haddr_t)H5FD_ONION_ENCODED_SIZE_HEADER;
     uint32_t       sum       = 0;
 
     FUNC_ENTER_PACKAGE;
@@ -89,7 +89,7 @@ H5FD__onion_write_header(H5FD_onion_header_t *header, H5FD_t *file)
 
     FUNC_ENTER_PACKAGE;
 
-    if (NULL == (buf = H5MM_malloc(H5FD__ONION_ENCODED_SIZE_HEADER)))
+    if (NULL == (buf = H5MM_malloc(H5FD_ONION_ENCODED_SIZE_HEADER)))
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "can't allocate buffer for updated history header")
 
     if (0 == (size = H5FD__onion_header_encode(header, buf, &sum)))
@@ -131,12 +131,12 @@ H5FD__onion_header_decode(unsigned char *buf, H5FD_onion_header_t *header)
 
     HDassert(buf != NULL);
     HDassert(header != NULL);
-    HDassert(H5FD__ONION_HEADER_VERSION_CURR == header->version);
+    HDassert(H5FD_ONION_HEADER_VERSION_CURR == header->version);
 
-    if (HDstrncmp((const char *)buf, H5FD__ONION_HEADER_SIGNATURE, 4))
+    if (HDstrncmp((const char *)buf, H5FD_ONION_HEADER_SIGNATURE, 4))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid header signature")
 
-    if (buf[4] != H5FD__ONION_HEADER_VERSION_CURR)
+    if (buf[4] != H5FD_ONION_HEADER_VERSION_CURR)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid header version")
 
     ptr  = buf + 5;
@@ -192,7 +192,7 @@ done:
  *              H5FD__onion_header_decode().
  *
  *              The destination buffer must be sufficiently large to hold the
- *              encoded contents (H5FD__ONION_ENCODED_SIZE_HEADER).
+ *              encoded contents (H5FD_ONION_ENCODED_SIZE_HEADER).
  *
  * Return:      Number of bytes written to buffer.
  *              The checksum of the generated buffer contents (excluding the
@@ -210,10 +210,10 @@ H5FD__onion_header_encode(H5FD_onion_header_t *header, unsigned char *buf, uint3
     HDassert(buf != NULL);
     HDassert(checksum != NULL);
     HDassert(header != NULL);
-    HDassert(H5FD__ONION_HEADER_VERSION_CURR == header->version);
+    HDassert(H5FD_ONION_HEADER_VERSION_CURR == header->version);
     HDassert(0 == (header->flags & 0xFF000000)); /* max three bits long */
 
-    HDmemcpy(ptr, H5FD__ONION_HEADER_SIGNATURE, 4);
+    HDmemcpy(ptr, H5FD_ONION_HEADER_SIGNATURE, 4);
     ptr += 4;
     HDmemcpy(ptr, (unsigned char *)&header->version, 1);
     ptr += 1;

@@ -20,10 +20,10 @@
 #define H5FDonion_history_H
 
 /* Number of bytes to encode fixed-size components */
-#define H5FD__ONION_ENCODED_SIZE_HISTORY 20
+#define H5FD_ONION_ENCODED_SIZE_HISTORY 20
 
-#define H5FD__ONION_HISTORY_SIGNATURE    "OWHS"
-#define H5FD__ONION_HISTORY_VERSION_CURR 1
+#define H5FD_ONION_HISTORY_SIGNATURE    "OWHS"
+#define H5FD_ONION_HISTORY_VERSION_CURR 1
 
 /* In-memory representation of the on-store revision record.
  * Used in the history.

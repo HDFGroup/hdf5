@@ -472,8 +472,8 @@ H5FD__onion_commit_new_revision_record(H5FD_onion_t *file)
                                            file->rev_index, &file->curr_rev_record.archival_index) < 0))
         HGOTO_ERROR(H5E_VFL, H5E_INTERNAL, FAIL, "unable to update index to write")
 
-    if (NULL == (buf = H5MM_malloc(H5FD__ONION_ENCODED_SIZE_REVISION_RECORD + (size_t)rec->comment_size +
-                                   (H5FD__ONION_ENCODED_SIZE_INDEX_ENTRY * rec->archival_index.n_entries))))
+    if (NULL == (buf = H5MM_malloc(H5FD_ONION_ENCODED_SIZE_REVISION_RECORD + (size_t)rec->comment_size +
+                                   (H5FD_ONION_ENCODED_SIZE_INDEX_ENTRY * rec->archival_index.n_entries))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer for encoded revision record")
 
     if (0 == (size = H5FD__onion_revision_record_encode(rec, buf, &checksum)))
@@ -505,7 +505,7 @@ H5FD__onion_commit_new_revision_record(H5FD_onion_t *file)
         UINT64ENCODE(ptr, size);
         history->record_locs[0].checksum = H5_checksum_fletcher32(buf, (size_t)(ptr - buf));
         /* TODO: size-reset belongs where? */
-        file->header.history_size += H5FD__ONION_ENCODED_SIZE_RECORD_POINTER;
+        file->header.history_size += H5FD_ONION_ENCODED_SIZE_RECORD_POINTER;
     } /* end if no extant revisions in history */
     else {
         unsigned char *ptr = buf; /* re-use buffer space to compute checksum */
@@ -525,7 +525,7 @@ H5FD__onion_commit_new_revision_record(H5FD_onion_t *file)
         history->record_locs[history->n_revisions].checksum =
             H5_checksum_fletcher32(buf, (size_t)(ptr - buf));
 
-        file->header.history_size += H5FD__ONION_ENCODED_SIZE_RECORD_POINTER;
+        file->header.history_size += H5FD_ONION_ENCODED_SIZE_RECORD_POINTER;
         history->n_revisions += 1;
     } /* end if one or more revisions present in history */
 
@@ -572,7 +572,7 @@ H5FD__onion_close(H5FD_t *_file)
 
             /* Unset write-lock flag and write header */
             if (file->is_open_rw)
-                file->header.flags &= (uint32_t)~H5FD__ONION_HEADER_FLAG_WRITE_LOCK;
+                file->header.flags &= (uint32_t)~H5FD_ONION_HEADER_FLAG_WRITE_LOCK;
             if (H5FD__onion_write_header(&(file->header), file->onion_file) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "Can't write updated header to backing store")
         }
@@ -703,11 +703,11 @@ H5FD__onion_create_truncate_onion(H5FD_onion_t *file, const char *filename, cons
     history = &file->history;
     rec     = &file->curr_rev_record;
 
-    hdr->flags = H5FD__ONION_HEADER_FLAG_WRITE_LOCK;
+    hdr->flags = H5FD_ONION_HEADER_FLAG_WRITE_LOCK;
     if (H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_DIVERGENT_HISTORY & file->fa.creation_flags)
-        hdr->flags |= H5FD__ONION_HEADER_FLAG_DIVERGENT_HISTORY;
+        hdr->flags |= H5FD_ONION_HEADER_FLAG_DIVERGENT_HISTORY;
     if (H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT & file->fa.creation_flags)
-        hdr->flags |= H5FD__ONION_HEADER_FLAG_PAGE_ALIGNMENT;
+        hdr->flags |= H5FD_ONION_HEADER_FLAG_PAGE_ALIGNMENT;
 
     hdr->origin_eof = 0;
 
@@ -735,10 +735,10 @@ H5FD__onion_create_truncate_onion(H5FD_onion_t *file, const char *filename, cons
 
     /* Write nascent history (with no revisions) to "recovery" */
 
-    if (NULL == (buf = H5MM_malloc(H5FD__ONION_ENCODED_SIZE_HISTORY)))
+    if (NULL == (buf = H5MM_malloc(H5FD_ONION_ENCODED_SIZE_HISTORY)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer")
     size = H5FD__onion_history_encode(history, buf, &history->checksum);
-    if (H5FD__ONION_ENCODED_SIZE_HISTORY != size)
+    if (H5FD_ONION_ENCODED_SIZE_HISTORY != size)
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "can't encode history")
     if (H5FD_set_eoa(file->recovery_file, H5FD_MEM_DRAW, size) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't extend EOA")
@@ -752,10 +752,10 @@ H5FD__onion_create_truncate_onion(H5FD_onion_t *file, const char *filename, cons
      * Size of the "recovery" history recorded for later use on close.
      */
 
-    if (NULL == (buf = H5MM_malloc(H5FD__ONION_ENCODED_SIZE_HEADER)))
+    if (NULL == (buf = H5MM_malloc(H5FD_ONION_ENCODED_SIZE_HEADER)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer")
     size = H5FD__onion_header_encode(hdr, buf, &hdr->checksum);
-    if (H5FD__ONION_ENCODED_SIZE_HEADER != size)
+    if (H5FD_ONION_ENCODED_SIZE_HEADER != size)
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "can't encode history header")
     if (H5FD_set_eoa(file->onion_file, H5FD_MEM_DRAW, size) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't extend EOA")
@@ -987,13 +987,13 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
 
     HDmemcpy(&(file->fa), fa, sizeof(H5FD_onion_fapl_info_t));
 
-    file->header.version   = H5FD__ONION_HEADER_VERSION_CURR;
+    file->header.version   = H5FD_ONION_HEADER_VERSION_CURR;
     file->header.page_size = file->fa.page_size; /* guarded on FAPL-set */
 
-    file->history.version = H5FD__ONION_HISTORY_VERSION_CURR;
+    file->history.version = H5FD_ONION_HISTORY_VERSION_CURR;
 
-    file->curr_rev_record.version                = H5FD__ONION_REVISION_RECORD_VERSION_CURR;
-    file->curr_rev_record.archival_index.version = H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR;
+    file->curr_rev_record.version                = H5FD_ONION_REVISION_RECORD_VERSION_CURR;
+    file->curr_rev_record.archival_index.version = H5FD_ONION_ARCHIVAL_INDEX_VERSION_CURR;
 
     /* Check that the page size is a power of two */
     if ((fa->page_size == 0) || ((fa->page_size & (fa->page_size - 1)) != 0))
@@ -1011,7 +1011,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
 
         /* Set flags */
         if (fa->creation_flags & H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT) {
-            file->header.flags |= H5FD__ONION_HEADER_FLAG_PAGE_ALIGNMENT;
+            file->header.flags |= H5FD_ONION_HEADER_FLAG_PAGE_ALIGNMENT;
             file->align_history_on_pages = TRUE;
         }
 
@@ -1057,9 +1057,9 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
                 new_open = true;
 
                 if (H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_DIVERGENT_HISTORY & file->fa.creation_flags)
-                    hdr->flags |= H5FD__ONION_HEADER_FLAG_DIVERGENT_HISTORY;
+                    hdr->flags |= H5FD_ONION_HEADER_FLAG_DIVERGENT_HISTORY;
                 if (H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT & file->fa.creation_flags) {
-                    hdr->flags |= H5FD__ONION_HEADER_FLAG_PAGE_ALIGNMENT;
+                    hdr->flags |= H5FD_ONION_HEADER_FLAG_PAGE_ALIGNMENT;
                     file->align_history_on_pages = TRUE;
                 }
 
@@ -1084,24 +1084,24 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
                 }
 
                 /* Write history header with "no" history */
-                hdr->history_size = H5FD__ONION_ENCODED_SIZE_HISTORY; /* record for later use */
+                hdr->history_size = H5FD_ONION_ENCODED_SIZE_HISTORY; /* record for later use */
                 hdr->history_addr =
-                    H5FD__ONION_ENCODED_SIZE_HEADER + 1; /* TODO: comment these 2 or do some other way */
-                head_buf = H5MM_malloc(H5FD__ONION_ENCODED_SIZE_HEADER);
+                    H5FD_ONION_ENCODED_SIZE_HEADER + 1; /* TODO: comment these 2 or do some other way */
+                head_buf = H5MM_malloc(H5FD_ONION_ENCODED_SIZE_HEADER);
                 if (NULL == head_buf)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate buffer")
                 size = H5FD__onion_header_encode(hdr, head_buf, &hdr->checksum);
-                if (H5FD__ONION_ENCODED_SIZE_HEADER != size)
+                if (H5FD_ONION_ENCODED_SIZE_HEADER != size)
                     HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "can't encode history header")
 
-                hist_buf = H5MM_malloc(H5FD__ONION_ENCODED_SIZE_HISTORY);
+                hist_buf = H5MM_malloc(H5FD_ONION_ENCODED_SIZE_HISTORY);
                 if (NULL == hist_buf)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate buffer")
                 saved_size                = size;
                 history->n_revisions      = 0;
                 size                      = H5FD__onion_history_encode(history, hist_buf, &history->checksum);
                 file->header.history_size = size; /* record for later use */
-                if (H5FD__ONION_ENCODED_SIZE_HISTORY != size) {
+                if (H5FD_ONION_ENCODED_SIZE_HISTORY != size) {
                     HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "can't encode history")
                 }
                 if (H5FD_set_eoa(file->onion_file, H5FD_MEM_DRAW, saved_size + size + 1) < 0)
@@ -1146,9 +1146,9 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
         if (H5FD__onion_ingest_header(&file->header, file->onion_file, 0) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTDECODE, NULL, "can't get history header from backing store")
         file->align_history_on_pages =
-            (file->header.flags & H5FD__ONION_HEADER_FLAG_PAGE_ALIGNMENT) ? TRUE : FALSE;
+            (file->header.flags & H5FD_ONION_HEADER_FLAG_PAGE_ALIGNMENT) ? TRUE : FALSE;
 
-        if (H5FD__ONION_HEADER_FLAG_WRITE_LOCK & file->header.flags) {
+        if (H5FD_ONION_HEADER_FLAG_WRITE_LOCK & file->header.flags) {
             /* Opening a file twice in write mode is an error */
             HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, NULL, "Can't open file already opened in write-mode")
         }
@@ -1268,7 +1268,7 @@ H5FD__onion_open_rw(H5FD_onion_t *file, unsigned int flags, haddr_t maxaddr, boo
      * TODO: support recovery open with force-write-open flag in FAPL info.
      */
 
-    if (file->header.flags & H5FD__ONION_HEADER_FLAG_WRITE_LOCK)
+    if (file->header.flags & H5FD_ONION_HEADER_FLAG_WRITE_LOCK)
         HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, FAIL, "can't write-open write-locked file")
 
     /* Copy history to recovery file */
@@ -1285,10 +1285,10 @@ H5FD__onion_open_rw(H5FD_onion_t *file, unsigned int flags, haddr_t maxaddr, boo
 
     /* Set write-lock flag in onion header */
 
-    if (NULL == (buf = H5MM_malloc(H5FD__ONION_ENCODED_SIZE_HEADER)))
+    if (NULL == (buf = H5MM_malloc(H5FD_ONION_ENCODED_SIZE_HEADER)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate space for encoded buffer")
 
-    file->header.flags |= H5FD__ONION_HEADER_FLAG_WRITE_LOCK;
+    file->header.flags |= H5FD_ONION_HEADER_FLAG_WRITE_LOCK;
 
     if (0 == (size = H5FD__onion_header_encode(&file->header, buf, &checksum)))
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "problem encoding history header")
