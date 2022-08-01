@@ -1595,8 +1595,10 @@ H5FD__ioc_del(const char *name, hid_t fapl)
     MPI_Info        info          = MPI_INFO_NULL;
     FILE *          config_file   = NULL;
     char *          name_copy     = NULL;
+    char *          name_copy2    = NULL;
     char *          tmp_filename  = NULL;
     char *          base_filename = NULL;
+    char *          file_dirname  = NULL;
     int             mpi_rank      = INT_MAX;
     int             mpi_code;
     herr_t          ret_value = SUCCEED;
@@ -1634,8 +1636,11 @@ H5FD__ioc_del(const char *name, hid_t fapl)
 
         if (NULL == (name_copy = HDstrdup(name)))
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't copy filename");
+        if (NULL == (name_copy2 = HDstrdup(name)))
+            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't copy filename");
 
         base_filename = basename(name_copy);
+        file_dirname = dirname(name_copy2);
 
         /* Try to open the subfiling configuration file and get the number of IOCs */
         if (NULL == (tmp_filename = HDmalloc(PATH_MAX)))
@@ -1643,7 +1648,7 @@ H5FD__ioc_del(const char *name, hid_t fapl)
                                     "can't allocate config file name buffer");
 
         /* TODO: No support for subfile directory prefix currently */
-        HDsnprintf(tmp_filename, PATH_MAX, "%s/%s" SF_CONFIG_FILENAME_TEMPLATE, ".", base_filename,
+        HDsnprintf(tmp_filename, PATH_MAX, "%s/%s" SF_CONFIG_FILENAME_TEMPLATE, file_dirname, base_filename,
                    (uint64_t)st.st_ino);
 
         if (NULL == (config_file = HDfopen(tmp_filename, "r"))) {
@@ -1680,7 +1685,7 @@ H5FD__ioc_del(const char *name, hid_t fapl)
 
         for (int i = 0; i < n_io_concentrators; i++) {
             /* TODO: No support for subfile directory prefix currently */
-            HDsnprintf(tmp_filename, PATH_MAX, "%s/%s" SF_FILENAME_TEMPLATE, ".", base_filename,
+            HDsnprintf(tmp_filename, PATH_MAX, "%s/%s" SF_FILENAME_TEMPLATE, file_dirname, base_filename,
                        (uint64_t)st.st_ino, num_digits, i + 1, n_io_concentrators);
 
             if (HDremove(tmp_filename) < 0) {
@@ -1715,6 +1720,7 @@ done:
 
     HDfree(tmp_filename);
     HDfree(name_copy);
+    HDfree(name_copy2);
 
     H5_SUBFILING_FUNC_LEAVE;
 }
