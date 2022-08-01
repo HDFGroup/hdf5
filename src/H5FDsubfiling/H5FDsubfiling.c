@@ -209,8 +209,10 @@ static herr_t  H5FD__subfiling_read_vector(H5FD_t *file, hid_t dxpl_id, uint32_t
 static herr_t  H5FD__subfiling_write_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[],
                                             haddr_t addrs[], size_t sizes[], const void *bufs[] /* in */);
 static herr_t  H5FD__subfiling_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
+#if 0
 static herr_t  H5FD__subfiling_lock(H5FD_t *_file, hbool_t rw);
 static herr_t  H5FD__subfiling_unlock(H5FD_t *_file);
+#endif
 static herr_t  H5FD__subfiling_del(const char *name, hid_t fapl);
 static herr_t  H5FD__subfiling_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void *input,
                                    void **output);
@@ -281,8 +283,8 @@ static const H5FD_class_t H5FD_subfiling_g = {
     NULL,                            /* write_selection       */
     NULL,                            /* flush                 */
     H5FD__subfiling_truncate,        /* truncate              */
-    H5FD__subfiling_lock,            /* lock                  */
-    H5FD__subfiling_unlock,          /* unlock                */
+    NULL /* H5FD__subfiling_lock */, /* lock                  */
+    NULL /* H5FD__subfiling_unlock */, /* unlock                */
     H5FD__subfiling_del,             /* del                   */
     H5FD__subfiling_ctl,             /* ctl                   */
     H5FD_FLMAP_DICHOTOMY             /* fl_map                */
@@ -2310,6 +2312,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+#if 0
 static herr_t
 H5FD__subfiling_lock(H5FD_t *_file, hbool_t rw)
 {
@@ -2358,6 +2361,7 @@ H5FD__subfiling_unlock(H5FD_t *_file)
 done:
     H5_SUBFILING_FUNC_LEAVE_API;
 } /* end H5FD__subfiling_unlock() */
+#endif
 
 static herr_t
 H5FD__subfiling_del(const char *name, hid_t fapl)
