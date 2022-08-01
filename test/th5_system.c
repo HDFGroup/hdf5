@@ -457,21 +457,21 @@ test_h5_strndup(void)
     str = H5_strndup(teststr, 0);
     CHECK_PTR(str, "H5_strndup for 0-byte copy");
     if (str)
-        VERIFY_STR(str, "");
+        VERIFY_STR(str, "", "comparing H5_strndup for 0-byte copy to empty string");
     str = H5MM_xfree(str);
 
     /* Check that H5_strndup correctly performs partial copies */
     str = H5_strndup(teststr, 6);
     CHECK_PTR(str, "H5_strndup for partial copy");
     if (str)
-        VERIFY_STR(str, "mytest");
+        VERIFY_STR(str, "mytest", "comparing H5_strndup for partial copy to partial string");
     str = H5MM_xfree(str);
 
     /* Check that H5_strndup correctly performs identical copies */
     str = H5_strndup(teststr, HDstrlen(teststr));
     CHECK_PTR(str, "H5_strndup for identical copy");
     if (str)
-        VERIFY_STR(str, teststr);
+        VERIFY_STR(str, teststr, "comparing H5_strndup for identical copy to original string");
     str = H5MM_xfree(str);
 
     /*
@@ -481,7 +481,7 @@ test_h5_strndup(void)
     str = H5_strndup(teststr, HDstrlen(teststr) + 2);
     CHECK_PTR(str, "H5_strndup for larger 'n'");
     if (str)
-        VERIFY_STR(str, teststr);
+        VERIFY_STR(str, teststr, "comparing H5_strndup with larger 'n' value to original string");
     str = H5MM_xfree(str);
 #endif /* H5_HAVE_WIN32_API */
 }
