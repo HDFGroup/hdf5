@@ -782,4 +782,58 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5_mpio_gatherv_alloc_simple() */
 
+/*-------------------------------------------------------------------------
+ * Function:    H5_mpio_get_file_sync_required
+ *
+ * Purpose:     Retrieve the MPI hint indicating whether the data written
+ *              by the MPI ROMIO driver is immediately visible to all MPI
+ *              ranks.
+ *
+ * Notes:       This routine is designed for supporting UnifyFS that needs
+ *              MPI_File_sync in order to make the written data available
+ *              to all ranks.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Houjun Tang,  April 7, 2022
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5_mpio_get_file_sync_required(MPI_File fh, hbool_t *file_sync_required)
+{
+    MPI_Info info_used;
+    int      flag;
+    char     value[MPI_MAX_INFO_VAL];
+    herr_t   ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    HDassert(file_sync_required);
+
+    *file_sync_required = FALSE;
+
+    if (MPI_SUCCESS != MPI_File_get_info(fh, &info_used))
+        HGOTO_ERROR(H5E_LIB, H5E_CANTGET, FAIL, "can't get MPI info")
+
+    if (MPI_SUCCESS !=
+        MPI_Info_get(info_used, "romio_visibility_immediate", MPI_MAX_INFO_VAL - 1, value, &flag))
+        HGOTO_ERROR(H5E_LIB, H5E_CANTGET, FAIL, "can't get MPI info")
+
+    if (flag && !HDstrcmp(value, "false"))
+        *file_sync_required = TRUE;
+
+    if (MPI_SUCCESS != MPI_Info_free(&info_used))
+        HGOTO_ERROR(H5E_LIB, H5E_CANTFREE, FAIL, "can't free MPI info")
+
+    /* Force setting the flag via env variable (temp solution before the flag is implemented in MPI) */
+    char *sync_env_var = HDgetenv("HDF5_DO_MPI_FILE_SYNC");
+    if (sync_env_var && (!HDstrcmp(sync_env_var, "TRUE") || !HDstrcmp(sync_env_var, "1")))
+        *file_sync_required = TRUE;
+    if (sync_env_var && (!HDstrcmp(sync_env_var, "FALSE") || !HDstrcmp(sync_env_var, "0")))
+        *file_sync_required = FALSE;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5_mpio_get_file_sync_required() */
 #endif /* H5_HAVE_PARALLEL */

@@ -15585,7 +15585,7 @@ main(void)
     int         nerrors = 0;
     const char *envval;
     hbool_t     contig_addr_vfd; /* Whether VFD used has a contiguous address space */
-    hbool_t     driver_uses_modified_filename = h5_driver_uses_modified_filename();
+    hbool_t     driver_is_default_compatible;
     int         i;
 
     /* Don't run this test using certain file drivers */
@@ -15635,6 +15635,9 @@ main(void)
     /* Testing setup */
     h5_reset();
     fapl = h5_fileaccess();
+
+    if (h5_driver_is_default_vfd_compatible(fapl, &driver_is_default_compatible) < 0)
+        TEST_ERROR;
 
     /* Turn off the chunk cache, so all the chunks are immediately written to disk */
     if (H5Pget_cache(fapl, &mdc_nelmts, &rdcc_nelmts, &rdcc_nbytes, &rdcc_w0) < 0)
@@ -15747,7 +15750,7 @@ main(void)
                 nerrors += (test_types(file) < 0 ? 1 : 0);
                 nerrors += (test_userblock_offset(envval, my_fapl, new_format) < 0 ? 1 : 0);
 
-                if (!driver_uses_modified_filename) {
+                if (driver_is_default_compatible) {
                     nerrors += (test_missing_filter(file) < 0 ? 1 : 0);
                 }
 
@@ -15760,7 +15763,7 @@ main(void)
                 nerrors += (test_copy_dcpl(file, my_fapl) < 0 ? 1 : 0);
                 nerrors += (test_filter_delete(file) < 0 ? 1 : 0);
 
-                if (!driver_uses_modified_filename) {
+                if (driver_is_default_compatible) {
                     nerrors += (test_filters_endianess() < 0 ? 1 : 0);
                 }
 
@@ -15782,7 +15785,7 @@ main(void)
                 nerrors += (test_layout_extend(my_fapl) < 0 ? 1 : 0);
                 nerrors += (test_fixed_array(my_fapl) < 0 ? 1 : 0);
 
-                if (!driver_uses_modified_filename) {
+                if (driver_is_default_compatible) {
                     nerrors += (test_idx_compatible() < 0 ? 1 : 0);
                 }
 
@@ -15819,7 +15822,7 @@ main(void)
     nerrors += (test_gather_error() < 0 ? 1 : 0);
 
     /* Tests version bounds using its own file */
-    if (!driver_uses_modified_filename) {
+    if (driver_is_default_compatible) {
         nerrors += (test_versionbounds() < 0 ? 1 : 0);
     }
 

@@ -160,6 +160,8 @@ AM_JNIFLAGS="${AM_JNIFLAGS}"
 AM_JAVACFLAGS="${AM_JAVACFLAGS}"
 AM_JAVAFLAGS="${AM_JAVAFLAGS}"
 AM_LDFLAGS="${AM_LDFLAGS}"
+
+## Flags passed in by the user
 CFLAGS="${CFLAGS}"
 CXXFLAGS="${CXXFLAGS}"
 FCFLAGS="${FCFLAGS}"
@@ -180,6 +182,14 @@ saved_user_JAVACFLAGS="$JAVACFLAGS"
 saved_user_JAVAFLAGS="$JAVAFLAGS"
 saved_user_LDFLAGS="$LDFLAGS"
 saved_user_CPPFLAGS="$CPPFLAGS"
+
+## Strip out -Werror from CFLAGS since that can cause checks to fail when
+## compiling the test program fails due to warnings
+CFLAGS="`echo $CFLAGS | sed -e 's/-Werror//g'`"
+CXXFLAGS="`echo $CXXFLAGS | sed -e 's/-Werror//g'`"
+FCFLAGS="`echo $FCFLAGS | sed -e 's/-Werror//g'`"
+JAVACFLAGS="`echo $JAVACFLAGS | sed -e 's/-Werror//g'`"
+CPPFLAGS="`echo $CPPFLAGS | sed -e 's/-Werror//g'`"
 
 ## Support F9X variable to define Fortran compiler if FC variable is
 ## not used.  This should be deprecated in the future.
@@ -522,7 +532,6 @@ AC_CHECK_SIZEOF([int])
 AC_CHECK_SIZEOF([unsigned])
 AC_CHECK_SIZEOF([long])
 AC_CHECK_SIZEOF([long long])
-AC_CHECK_SIZEOF([__int64])
 AC_CHECK_SIZEOF([float])
 AC_CHECK_SIZEOF([double])
 AC_CHECK_SIZEOF([long double])
@@ -609,6 +618,13 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   AC_PROG_FC([PAC_FC_SEARCH_LIST],)
   AC_F9X_MODS
 
+  ## Allow setting the fortran module install dir
+  AC_ARG_WITH([fmoddir],
+    [AS_HELP_STRING([--with-fmoddir=DIR], [Fortran module install directory])],
+    [fmoddir=$withval],
+    [fmoddir="\${includedir}"])
+  AC_SUBST([fmoddir], [$fmoddir])
+￼
   ## Change to the Fortran 90 language
   AC_LANG_PUSH(Fortran)
 
@@ -783,7 +799,7 @@ HDF_CXX=no
 ## AC_PROG_CXX defines some macros that Automake 1.9.x uses and will
 ## miss even if c++ is not enabled.
 AC_PROG_CXX
-AC_PROG_CXXCPP    ## this is checked for when AC_HEADER_STDC is done
+AC_PROG_CXXCPP
 
 AC_MSG_CHECKING([if c++ interface enabled])
 
@@ -908,7 +924,7 @@ esac
 
 ## ----------------------------------------------------------------------
 ## Check which archiving tool to use. This needs to be done before
-## the AM_PROG_LIBTOOL macro.
+## the LT_INIT macro.
 ##
 if test -z "$AR"; then
   AC_CHECK_PROGS([AR], [ar xar], [:], [$PATH])
@@ -1353,7 +1369,8 @@ esac
 ## Windows
 case "`uname`" in
   MINGW*)
-    AC_HAVE_LIBRARY([ws2_32])
+    # The Winsock library
+    AC_CHECK_LIB([ws2_32], [GetUserName])
     ;;
 esac
 
@@ -1590,6 +1607,7 @@ case "X-$withval" in
     fi
     ;;
 esac
+
 
 
 ## ----------------------------------------------------------------------
@@ -2129,48 +2147,6 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]],[[int __attribute__((unused)) x]])],
                          [Define if the __attribute__(()) extension is present])
                  AC_MSG_RESULT([yes])],
                [AC_MSG_RESULT([no])])
-
-AC_MSG_CHECKING([for C99 designated initialization support])
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]], [[
-                typedef struct {
-                    int x;
-                    union {
-                        int i;
-                        double d;
-                    } u;
-                } di_struct_t;
-                di_struct_t x = {0, { .d = 0.0}}; ]])],
-               [AC_DEFINE([HAVE_C99_DESIGNATED_INITIALIZER], [1],
-                         [Define if the compiler understands C99 designated initialization of structs and unions])
-                 AC_MSG_RESULT([yes])],
-               [AC_MSG_RESULT([no])])
-
-## ----------------------------------------------------------------------
-## Try to figure out how to print `long long'.  Some machines use `%lld'
-## and others use `%qd'.  There may be more!  The final `l' is a
-## default in case none of the others work.
-##
-AC_MSG_CHECKING([how to print long long])
-AC_CACHE_VAL([hdf5_cv_printf_ll], [
-
-for hdf5_cv_printf_ll in ll l L q unknown; do
-   AC_RUN_IFELSE(
-        [AC_LANG_PROGRAM([
-            #include <stdio.h>
-            #include <stdlib.h>
-            #include <string.h>
-        ],[[
-            char *s = malloc(128);
-            long long x = (long long)1048576 * (long long)1048576;
-            snprintf(s,128,"%${hdf5_cv_printf_ll}d",x);
-            exit(strcmp(s,"1099511627776"));
-        ]])]
-   , [break],,[continue])
-done])
-
-AC_MSG_RESULT([%${hdf5_cv_printf_ll}d and %${hdf5_cv_printf_ll}u])
-AC_DEFINE_UNQUOTED([PRINTF_LL_WIDTH], ["$hdf5_cv_printf_ll"],
-                   [Width for printf() for type `long long' or `__int64', use `ll'])
 
 ## ----------------------------------------------------------------------
 ## Remove old ways of determining debug/production build.
@@ -3047,6 +3023,7 @@ if test -n "$PARALLEL"; then
 fi
 
 ## ----------------------------------------------------------------------
+
 ## Build parallel tools if parallel tools, parallel, and build tools options
 ## are all enabled.
 ##
@@ -3203,6 +3180,69 @@ if test "X$MAP_API" = "Xyes"; then
 else
     AC_MSG_RESULT([no])
 fi
+
+## ----------------------------------------------------------------------
+## Check if Subfiling I/O driver is enabled by --enable-subfiling-vfd
+##
+AC_SUBST([SUBFILING_VFD])
+AC_SUBST([HAVE_MERCURY])
+
+## Default is no subfiling VFD
+SUBFILING_VFD=no
+HAVE_MERCURY="no"
+
+## Always include subfiling directory so public header files are available
+CPPFLAGS="$CPPFLAGS -I$ac_abs_confdir/src/H5FDsubfiling"
+AM_CPPFLAGS="$AM_CPPFLAGS -I$ac_abs_confdir/src/H5FDsubfiling"
+
+AC_MSG_CHECKING([if the subfiling I/O virtual file driver (VFD) is enabled])
+
+AC_ARG_ENABLE([subfiling-vfd],
+              [AS_HELP_STRING([--enable-subfiling-vfd],
+                              [Build the subfiling I/O virtual file driver (VFD). Requires --enable-parallel.
+                               [default=no]])],
+              [SUBFILING_VFD=$enableval], [SUBFILING_VFD=no])
+
+if test "X$SUBFILING_VFD" = "Xyes"; then
+    AC_MSG_RESULT([yes])
+    AC_DEFINE([HAVE_SUBFILING_VFD], [1],
+            [Define if the subfiling I/O virtual file driver (VFD) should be compiled])
+    AC_DEFINE([HAVE_IOC_VFD], [1],
+            [Define if the I/O Concentrator virtual file driver (VFD) should be compiled])
+
+    # Set-up mercury
+    HAVE_MERCURY="yes"
+    mercury_dir="$ac_abs_confdir/src/H5FDsubfiling/mercury"
+    mercury_inc="$mercury_dir/src/util"
+
+    CPPFLAGS="$CPPFLAGS -I$mercury_inc"
+    AM_CPPFLAGS="$AM_CPPFLAGS -I$mercury_inc"
+
+    if test "X${PARALLEL}" != "Xyes"; then
+      AC_MSG_ERROR([--enable-parallel is required for --enable-subfiling-vfd])
+    fi
+
+    HAVE_STDATOMIC_H="yes"
+    AC_CHECK_HEADERS([stdatomic.h],,[HAVE_STDATOMIC_H="no"])
+    if test "x$HAVE_STDATOMIC_H" = "xno"; then
+      AC_MSG_ERROR([Subfiling VFD requires atomic operations support. C11 stdatomic.h NOT available.])
+    fi
+
+# Checks for libraries.
+    AC_SEARCH_LIBS([shm_open], [rt])
+    AC_CHECK_LIB([pthread], [pthread_self],[], [echo "Error: Required library pthread not found." && exit 1])
+
+else
+    AC_MSG_RESULT([no])
+fi
+
+## Subfiling and IOC VFD files are not built if not required.
+AM_CONDITIONAL([SUBFILING_VFD_CONDITIONAL], [test "X$SUBFILING_VFD" = "Xyes"])
+# IOC VFD is currently only built when subfiling is enabled
+AM_CONDITIONAL([IOC_VFD_CONDITIONAL], [test "X$SUBFILING_VFD" = "Xyes"])
+# Mercury is currently only needed if  subfiling is enabled
+AM_CONDITIONAL([HAVE_MERCURY_CONDITIONAL], [test "X$HAVE_MERCURY" = "Xyes"])
+
 
 ## ----------------------------------------------------------------------
 ## Check if Direct I/O driver is enabled by --enable-direct-vfd
@@ -4271,6 +4311,8 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  hl/fortran/test/Makefile
                  hl/fortran/examples/Makefile
                  hl/fortran/examples/run-hlfortran-ex.sh])
+
+AC_CONFIG_FILES([utils/subfiling_vfd/h5fuse.sh], [chmod +x utils/subfiling_vfd/h5fuse.sh])
 
 AC_CONFIG_COMMANDS([.classes], [], [$MKDIR_P java/src/.classes;
                 $MKDIR_P java/test/.classes;

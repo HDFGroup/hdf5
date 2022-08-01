@@ -742,7 +742,11 @@ H5HF__cache_hdr_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG_UN
     HDassert(len == hdr->heap_size);
 
     /* Set the shared heap header's file context for this operation */
+    H5_GCC_DIAG_OFF("discarded-qualifiers")
+    H5_CLANG_DIAG_OFF("incompatible-pointer-types-discards-qualifiers")
     hdr->f = f;
+    H5_GCC_DIAG_ON("discarded-qualifiers")
+    H5_CLANG_DIAG_ON("incompatible-pointer-types-discards-qualifiers")
 
     /* Magic number */
     H5MM_memcpy(image, H5HF_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC);
@@ -1328,7 +1332,11 @@ H5HF__cache_iblock_serialize(const H5F_t *f, void *_image, size_t H5_ATTR_NDEBUG
     hdr = iblock->hdr;
 
     /* Set the shared heap header's file context for this operation */
+    H5_GCC_DIAG_OFF("discarded-qualifiers")
+    H5_CLANG_DIAG_OFF("incompatible-pointer-types-discards-qualifiers")
     hdr->f = f;
+    H5_GCC_DIAG_ON("discarded-qualifiers")
+    H5_CLANG_DIAG_ON("incompatible-pointer-types-discards-qualifiers")
 
     /* Magic number */
     H5MM_memcpy(image, H5HF_IBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC);
@@ -1675,7 +1683,6 @@ H5HF__cache_dblock_verify_chksum(const void *_image, size_t len, void *_udata)
     chk_p -= H5HF_SIZEOF_CHKSUM;
 
     /* Reset checksum field, for computing the checksum */
-    /* (Casting away const OK - QAK) */
     HDmemset(chk_p, 0, (size_t)H5HF_SIZEOF_CHKSUM);
 
     /* Compute checksum on entire direct block */

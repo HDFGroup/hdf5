@@ -915,7 +915,7 @@ H5FD__sec2_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR
         BOOL  bError;           /* Boolean error flag */
 
         /* Windows uses this odd QuadPart union for 32/64-bit portability */
-        li.QuadPart = (__int64)file->eoa;
+        li.QuadPart = (LONGLONG)file->eoa;
 
         /* Extend the file to make sure it's large enough.
          *
@@ -1075,18 +1075,15 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__sec2_ctl(H5FD_t *_file, uint64_t H5_ATTR_UNUSED op_code, uint64_t flags,
+H5FD__sec2_ctl(H5FD_t H5_ATTR_UNUSED *_file, uint64_t H5_ATTR_UNUSED op_code, uint64_t flags,
                const void H5_ATTR_UNUSED *input, void H5_ATTR_UNUSED **output)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
-    /* Sanity checks */
-    HDassert(_file);
-
     /* No op codes are understood. */
-    if (flags & H5FD_CTL__FAIL_IF_UNKNOWN_FLAG)
+    if (flags & H5FD_CTL_FAIL_IF_UNKNOWN_FLAG)
         HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL, "unknown op_code and fail if unknown flag is set")
 
 done:

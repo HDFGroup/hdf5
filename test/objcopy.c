@@ -646,7 +646,7 @@ test_copy_attach_attributes(hid_t loc_id, hid_t type_id)
         goto done;
 
     for (u = 0; u < num_attributes_g; u++) {
-        HDsprintf(attr_name, "%u attr", u);
+        HDsnprintf(attr_name, sizeof(attr_name), "%u attr", u);
 
         /* Set attribute data */
         attr_data[0] = (int)(100 * u);
@@ -715,7 +715,7 @@ test_copy_attach_paired_attributes(hid_t loc_id, hid_t loc_id2, hid_t type_id)
         goto done;
 
     for (u = 0; u < num_attributes_g; u++) {
-        HDsprintf(attr_name, "%u attr", u);
+        HDsnprintf(attr_name, sizeof(attr_name), "%u attr", u);
 
         /* Set attribute data */
         attr_data[0] = (int)(100 * u);
@@ -7933,17 +7933,17 @@ test_copy_group_deep(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_f
 
     /* create nested sub-groups & datasets */
     for (i = 0; i < NUM_SUB_GROUPS; i++) {
-        HDsprintf(objname, "Group #%d", i);
+        HDsnprintf(objname, sizeof(objname), "Group #%d", i);
         if ((gid_sub = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR;
 
         for (j = 0; j < NUM_SUB_GROUPS; j++) {
-            HDsprintf(objname, "Group #%d", j);
+            HDsnprintf(objname, sizeof(objname), "Group #%d", j);
             if ((gid_sub2 = H5Gcreate2(gid_sub, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
                 TEST_ERROR;
 
             for (k = 0; k < NUM_DATASETS; k++) {
-                HDsprintf(objname, "Dataset #%d", k);
+                HDsnprintf(objname, sizeof(objname), "Dataset #%d", k);
 
                 /* add a dataset to the group */
                 if ((did = H5Dcreate2(gid_sub2, objname, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT,
@@ -8222,12 +8222,12 @@ test_copy_group_wide_loop(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t 
 
     /* create wide sub-group hierarchy, with multiple links to higher groups */
     for (u = 0; u < NUM_WIDE_LOOP_GROUPS; u++) {
-        HDsprintf(objname, "%s-%u", NAME_GROUP_SUB, u);
+        HDsnprintf(objname, sizeof(objname), "%s-%u", NAME_GROUP_SUB, u);
         if ((gid_sub = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR;
 
         for (v = 0; v < NUM_WIDE_LOOP_GROUPS; v++) {
-            HDsprintf(objname, "%s-%u", NAME_GROUP_SUB_SUB2, v);
+            HDsnprintf(objname, sizeof(objname), "%s-%u", NAME_GROUP_SUB_SUB2, v);
             if ((gid_sub2 = H5Gcreate2(gid_sub, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
                 FAIL_STACK_ERROR;
 
@@ -17313,6 +17313,7 @@ main(void)
     int         ExpressMode;
     const char *env_h5_drvr; /* File Driver value from environment */
     hbool_t     same_file;   /* Whether to run tests that only use one file */
+    hbool_t     driver_is_default_compatible;
 
     env_h5_drvr = HDgetenv(HDF5_DRIVER);
     if (env_h5_drvr == NULL)
@@ -17321,6 +17322,9 @@ main(void)
     /* Setup */
     h5_reset();
     fapl = h5_fileaccess();
+
+    if (h5_driver_is_default_vfd_compatible(fapl, &driver_is_default_compatible) < 0)
+        TEST_ERROR;
 
     ExpressMode = GetTestExpress();
     if (ExpressMode > 1)
@@ -17558,10 +17562,7 @@ main(void)
 
             nerrors += test_copy_same_file_named_datatype(fcpl_src, src_fapl);
 
-            /* Check if current driver might modify the filename. Skip these tests
-             * if so, since the file is pre-generated.
-             */
-            if (!h5_driver_uses_modified_filename()) {
+            if (driver_is_default_compatible) {
                 /* Test with dataset opened in the file or not */
                 nerrors += test_copy_old_layout(fcpl_dst, dst_fapl, FALSE);
                 nerrors += test_copy_old_layout(fcpl_dst, dst_fapl, TRUE);

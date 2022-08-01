@@ -46,7 +46,7 @@ static hid_t H5FD_MPIO_g = 0;
 hbool_t H5FD_mpi_opt_types_g = TRUE;
 
 /* Whether the driver initialized MPI on its own */
-hbool_t H5FD_mpi_self_initialized = FALSE;
+static hbool_t H5FD_mpi_self_initialized = FALSE;
 
 /*
  * The view is set to this value
@@ -60,16 +60,17 @@ static char H5FD_mpi_native_g[] = "native";
  * driver doesn't bother to keep it updated since it's an expensive operation.
  */
 typedef struct H5FD_mpio_t {
-    H5FD_t   pub;       /* Public stuff, must be first                  */
-    MPI_File f;         /* MPIO file handle                             */
-    MPI_Comm comm;      /* MPI Communicator                             */
-    MPI_Info info;      /* MPI info object                              */
-    int      mpi_rank;  /* This process's rank                          */
-    int      mpi_size;  /* Total number of processes                    */
-    haddr_t  eof;       /* End-of-file marker                           */
-    haddr_t  eoa;       /* End-of-address marker                        */
-    haddr_t  last_eoa;  /* Last known end-of-address marker             */
-    haddr_t  local_eof; /* Local end-of-file address for each process   */
+    H5FD_t   pub;                    /* Public stuff, must be first                  */
+    MPI_File f;                      /* MPIO file handle                             */
+    MPI_Comm comm;                   /* MPI Communicator                             */
+    MPI_Info info;                   /* MPI info object                              */
+    int      mpi_rank;               /* This process's rank                          */
+    int      mpi_size;               /* Total number of processes                    */
+    haddr_t  eof;                    /* End-of-file marker                           */
+    haddr_t  eoa;                    /* End-of-address marker                        */
+    haddr_t  last_eoa;               /* Last known end-of-address marker             */
+    haddr_t  local_eof;              /* Local end-of-file address for each process   */
+    hbool_t  mpi_file_sync_required; /* Whether the ROMIO driver requires MPI_File_sync after write */
 } H5FD_mpio_t;
 
 /* Private Prototypes */
@@ -107,7 +108,7 @@ static herr_t H5FD__mpio_vector_build_types(
 
 /* The MPIO file driver information */
 static const H5FD_class_t H5FD_mpio_g = {
-    H5FD_CLASS_VERSION,      /* struct version       */
+    H5FD_CLASS_VERSION,      /* struct version        */
     H5_VFD_MPIO,             /* value                 */
     "mpio",                  /* name                  */
     HADDR_MAX,               /* maxaddr               */
@@ -964,6 +965,10 @@ H5FD__mpio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t H5_ATTR
     file->mpi_rank = mpi_rank;
     file->mpi_size = mpi_size;
 
+    /* Retrieve the flag indicating whether MPI_File_sync is needed after each write */
+    if (H5_mpio_get_file_sync_required(fh, &file->mpi_file_sync_required) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "unable to get mpi_file_sync_required hint")
+
     /* Only processor p0 will get the filesize and broadcast it. */
     if (mpi_rank == 0) {
         /* If MPI_File_get_size fails, broadcast file size as -1 to signal error */
@@ -1629,6 +1634,12 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
             if (MPI_SUCCESS !=
                 (mpi_code = MPI_File_write_at_all(file->f, mpi_off, buf, size_i, buf_type, &mpi_stat)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_File_write_at_all failed", mpi_code)
+
+            /* Do MPI_File_sync when needed by underlying ROMIO driver */
+            if (file->mpi_file_sync_required) {
+                if (MPI_SUCCESS != (mpi_code = MPI_File_sync(file->f)))
+                    HMPI_GOTO_ERROR(FAIL, "MPI_File_sync failed", mpi_code)
+            }
         } /* end if */
         else {
             if (type != H5FD_MEM_DRAW)
@@ -2638,6 +2649,12 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
             if (MPI_SUCCESS != (mpi_code = MPI_File_write_at_all(file->f, mpi_off, mpi_bufs_base, size_i,
                                                                  buf_type, &mpi_stat)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_File_write_at_all failed", mpi_code)
+
+            /* Do MPI_File_sync when needed by underlying ROMIO driver */
+            if (file->mpi_file_sync_required) {
+                if (MPI_SUCCESS != (mpi_code = MPI_File_sync(file->f)))
+                    HMPI_GOTO_ERROR(FAIL, "MPI_File_sync failed", mpi_code)
+            }
         } /* end if */
         else if (size_i > 0) {
 #ifdef H5FDmpio_DEBUG
@@ -3017,9 +3034,10 @@ done:
  *
  *              At present, the supported op codes are:
  *
- *                  H5FD_CTL__GET_MPI_COMMUNICATOR_OPCODE
- *                  H5FD_CTL__GET_MPI_RANK_OPCODE
- *                  H5FD_CTL__GET_MPI_SIZE_OPCODE
+ *                  H5FD_CTL_GET_MPI_COMMUNICATOR_OPCODE
+ *                  H5FD_CTL_GET_MPI_RANK_OPCODE
+ *                  H5FD_CTL_GET_MPI_SIZE_OPCODE
+ *                  H5FD_CTL_GET_MPI_FILE_SYNC_OPCODE
  *
  *              Note that these opcodes must be supported by all VFDs that
  *              support MPI.
@@ -3045,26 +3063,32 @@ H5FD__mpio_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void H5_AT
 
     switch (op_code) {
 
-        case H5FD_CTL__GET_MPI_COMMUNICATOR_OPCODE:
+        case H5FD_CTL_GET_MPI_COMMUNICATOR_OPCODE:
             HDassert(output);
             HDassert(*output);
             **((MPI_Comm **)output) = file->comm;
             break;
 
-        case H5FD_CTL__GET_MPI_RANK_OPCODE:
+        case H5FD_CTL_GET_MPI_RANK_OPCODE:
             HDassert(output);
             HDassert(*output);
             **((int **)output) = file->mpi_rank;
             break;
 
-        case H5FD_CTL__GET_MPI_SIZE_OPCODE:
+        case H5FD_CTL_GET_MPI_SIZE_OPCODE:
             HDassert(output);
             HDassert(*output);
             **((int **)output) = file->mpi_size;
             break;
 
+        case H5FD_CTL_GET_MPI_FILE_SYNC_OPCODE:
+            HDassert(output);
+            HDassert(*output);
+            **((hbool_t **)output) = file->mpi_file_sync_required;
+            break;
+
         default: /* unknown op code */
-            if (flags & H5FD_CTL__FAIL_IF_UNKNOWN_FLAG) {
+            if (flags & H5FD_CTL_FAIL_IF_UNKNOWN_FLAG) {
 
                 HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL, "unknown op_code and fail if unknown")
             }

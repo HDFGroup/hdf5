@@ -322,11 +322,16 @@ DSetMemXferPropList::getDataTransform() const
 
     // If expression exists, calls C routine again to get it
     else if (exp_len > 0) {
+
+        // The actual size is the cast value + 1 for the terminal ASCII NUL
+        // (unfortunate in/out type sign mismatch)
+        size_t actual_exp_len = static_cast<size_t>(exp_len) + 1;
+
         // Temporary buffer for char* expression
-        char *exp_C = new char[exp_len + 1]();
+        char *exp_C = new char[actual_exp_len]();
 
         // Used overloaded function
-        exp_len = getDataTransform(exp_C, exp_len + 1);
+        exp_len = getDataTransform(exp_C, actual_exp_len);
 
         // Convert the C expression to return
         expression = exp_C;

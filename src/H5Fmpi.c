@@ -395,12 +395,24 @@ H5F_mpi_retrieve_comm(hid_t loc_id, hid_t acspl_id, MPI_Comm *mpi_comm)
     }
     /* otherwise, this is from H5Fopen or H5Fcreate and has to be collective */
     else {
-        H5P_genplist_t *plist; /* Property list pointer */
+        H5FD_driver_prop_t driver_prop; /* Property for driver ID & info */
+        H5P_genplist_t *   plist;       /* Property list pointer */
+        unsigned long      driver_feat_flags;
+        H5FD_class_t *     driver_class = NULL;
 
         if (NULL == (plist = H5P_object_verify(acspl_id, H5P_FILE_ACCESS)))
             HGOTO_ERROR(H5E_FILE, H5E_BADTYPE, FAIL, "not a file access list")
 
-        if (H5FD_MPIO == H5P_peek_driver(plist))
+        if (H5P_peek(plist, H5F_ACS_FILE_DRV_NAME, &driver_prop) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get driver ID & info")
+
+        if (NULL == (driver_class = H5FD_get_class(driver_prop.driver_id)))
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get driver class structure")
+
+        if (H5FD_driver_query(driver_class, &driver_feat_flags) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get driver feature flags")
+
+        if (driver_feat_flags & H5FD_FEAT_HAS_MPI)
             if (H5P_peek(plist, H5F_ACS_MPI_PARAMS_COMM_NAME, mpi_comm) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get MPI communicator")
     }
@@ -592,5 +604,4 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_mpi_get_file_block_type() */
-
 #endif /* H5_HAVE_PARALLEL */

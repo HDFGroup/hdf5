@@ -73,9 +73,14 @@ Exception::getMajorString(hid_t err_major) const
     if (mesg_size < 0)
         throw IdComponentException("Exception::getMajorString", "H5Eget_msg failed");
 
+    // The actual message size is the cast value + 1 for the terminal ASCII NUL
+    // (unfortunate in/out type sign mismatch)
+    size_t actual_mesg_size = static_cast<size_t>(mesg_size) + 1;
+
     // Call H5Eget_msg again to get the actual message
-    char *mesg_C = new char[mesg_size + 1]; // temporary C-string for C API
-    mesg_size    = H5Eget_msg(err_major, NULL, mesg_C, mesg_size + 1);
+    char *mesg_C = new char[actual_mesg_size]; // temporary C-string for C API
+
+    mesg_size = H5Eget_msg(err_major, NULL, mesg_C, actual_mesg_size);
 
     // Check for failure again
     if (mesg_size < 0) {
@@ -110,9 +115,14 @@ Exception::getMinorString(hid_t err_minor) const
     if (mesg_size < 0)
         throw IdComponentException("Exception::getMinorString", "H5Eget_msg failed");
 
+    // The actual message size is the cast value + 1 for the terminal ASCII NUL
+    // (unfortunate in/out type sign mismatch)
+    size_t actual_mesg_size = static_cast<size_t>(mesg_size) + 1;
+
     // Call H5Eget_msg again to get the actual message
-    char *mesg_C = new char[mesg_size + 1]; // temporary C-string for C API
-    mesg_size    = H5Eget_msg(err_minor, NULL, mesg_C, mesg_size + 1);
+    char *mesg_C = new char[actual_mesg_size]; // temporary C-string for C API
+
+    mesg_size = H5Eget_msg(err_minor, NULL, mesg_C, actual_mesg_size);
 
     // Check for failure again
     if (mesg_size < 0) {

@@ -288,7 +288,7 @@ H5D__compact_iovv_memmanage_cb(hsize_t dst_off, hsize_t src_off, size_t len, voi
         HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "can't get file handle")
 
     /* Setup operation flags and arguments */
-    op_flags = H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG | H5FD_CTL__FAIL_IF_UNKNOWN_FLAG;
+    op_flags = H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG | H5FD_CTL_FAIL_IF_UNKNOWN_FLAG;
 
     op_args.dstbuf  = udata->dstbuf;
     op_args.dst_off = dst_off;
@@ -297,7 +297,7 @@ H5D__compact_iovv_memmanage_cb(hsize_t dst_off, hsize_t src_off, size_t len, voi
     op_args.len     = len;
 
     /* Make request to file driver */
-    if (H5FD_ctl(file_handle, H5FD_CTL__MEM_COPY, op_flags, &op_args, NULL) < 0)
+    if (H5FD_ctl(file_handle, H5FD_CTL_MEM_COPY, op_flags, &op_args, NULL) < 0)
         HGOTO_ERROR(H5E_IO, H5E_FCNTL, FAIL, "VFD memcpy request failed")
 
 done:

@@ -125,7 +125,8 @@ test_h5s_basic(void)
     hsize_t  max2[] = {SPACE2_MAX1, SPACE2_MAX2, SPACE2_MAX3, SPACE2_MAX4};
     hsize_t  tdims[4]; /* Dimension array to test with */
     hsize_t  tmax[4];
-    hssize_t n;   /* Number of dataspace elements */
+    hssize_t n; /* Number of dataspace elements */
+    hbool_t  driver_is_default_compatible;
     herr_t   ret; /* Generic return value        */
 
     /* Output message about test being performed */
@@ -194,7 +195,10 @@ test_h5s_basic(void)
      * If this test fails and the H5S_MAX_RANK variable has changed, follow
      * the instructions in space_overflow.c for regenerating the th5s.h5 file.
      */
-    if (!h5_driver_uses_modified_filename()) {
+    ret = h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &driver_is_default_compatible);
+    CHECK_I(ret, "h5_driver_is_default_vfd_compatible");
+
+    if (driver_is_default_compatible) {
         const char *testfile = H5_get_srcdir_filename(TESTFILE); /* Corrected test file name */
 
         fid1 = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);

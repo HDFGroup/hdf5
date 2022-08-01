@@ -2322,7 +2322,7 @@ test_compound_11(void)
         ((big_t *)buf)[u].s1 = (char *)HDmalloc((size_t)32);
         if (!((big_t *)buf)[u].s1)
             TEST_ERROR;
-        HDsprintf(((big_t *)buf)[u].s1, "%u", (unsigned)u);
+        HDsnprintf(((big_t *)buf)[u].s1, 32, "%u", (unsigned)u);
     } /* end for */
 
     /* Make copy of buffer before conversion */
@@ -3661,6 +3661,7 @@ test_compound_18(void)
     hsize_t     dim      = 1;
     const char *testfile = H5_get_srcdir_filename(TESTFILE); /* Corrected test file name */
     char        filename[1024];
+    hbool_t     driver_is_default_compatible;
     herr_t      ret;
 
     TESTING("accessing objects with compound datatypes that have no fields");
@@ -3725,7 +3726,10 @@ test_compound_18(void)
     if (H5Fclose(file) < 0)
         FAIL_STACK_ERROR;
 
-    if (!h5_driver_uses_modified_filename()) {
+    if (h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &driver_is_default_compatible) < 0)
+        FAIL_PUTS_ERROR("can't check if VFD is default VFD compatible");
+
+    if (driver_is_default_compatible) {
         /* Open Generated File */
         /* (generated with gen_bad_compound.c) */
         if ((file = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
@@ -8782,14 +8786,20 @@ error:
 int
 main(void)
 {
-    long  nerrors = 0;
-    hid_t fapl    = H5I_INVALID_HID;
+    hbool_t driver_is_parallel;
+    long    nerrors = 0;
+    hid_t   fapl    = H5I_INVALID_HID;
 
     /* Set the random # seed */
     HDsrandom((unsigned)HDtime(NULL));
 
     reset_hdf5();
     fapl = h5_fileaccess();
+
+    if (h5_using_parallel_driver(fapl, &driver_is_parallel) < 0) {
+        HDprintf("Can't check if driver is parallel-enabled\n");
+        HDexit(EXIT_FAILURE);
+    }
 
     if (ALIGNMENT)
         HDprintf("Testing non-aligned conversions (ALIGNMENT=%d)....\n", ALIGNMENT);
@@ -8827,12 +8837,20 @@ main(void)
     nerrors += test_compound_6();
     nerrors += test_compound_7();
     nerrors += test_compound_8();
-    nerrors += test_compound_9();
-    nerrors += test_compound_10();
+
+    if (!driver_is_parallel) {
+        nerrors += test_compound_9();
+        nerrors += test_compound_10();
+    }
+
     nerrors += test_compound_11();
     nerrors += test_compound_12();
     nerrors += test_compound_13();
-    nerrors += test_compound_14();
+
+    if (!driver_is_parallel) {
+        nerrors += test_compound_14();
+    }
+
     nerrors += test_compound_15();
     nerrors += test_compound_16();
     nerrors += test_compound_17();
@@ -8843,7 +8861,11 @@ main(void)
     nerrors += test_bitfield_funcs();
     nerrors += test_opaque();
     nerrors += test_set_order();
-    nerrors += test_utf_ascii_conv();
+
+    if (!driver_is_parallel) {
+        nerrors += test_utf_ascii_conv();
+    }
+
     nerrors += test_versionbounds();
 
     if (nerrors) {

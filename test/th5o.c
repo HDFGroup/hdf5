@@ -1738,7 +1738,7 @@ test_h5o_getinfo_visit(void)
     /* Attach 10 attributes to "group1" */
     for (j = 0; j < 10; j++) {
         /* Create the attribute name */
-        HDsprintf(attrname, "attr%u", j);
+        HDsnprintf(attrname, sizeof(attrname), "attr%u", j);
         /* Create the attribute */
         aid = H5Acreate2(gid1, attrname, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT);
         CHECK(aid, FAIL, "H5Acreate2");

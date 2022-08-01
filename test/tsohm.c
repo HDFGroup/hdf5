@@ -3293,10 +3293,19 @@ verify_dset_create_and_open_through_extlink_with_sohm(hid_t src_fcpl_id, hid_t d
 static void
 test_sohm_extlink(void)
 {
-    hid_t  fcpl_id = -1;
-    herr_t ret;
+    hid_t   fcpl_id = -1;
+    hbool_t driver_is_default_compatible;
+    herr_t  ret;
 
     MESSAGE(5, ("Testing SOHM creation through external links\n"));
+
+    ret = h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &driver_is_default_compatible);
+    CHECK_I(ret, "h5_driver_is_default_vfd_compatible");
+
+    if (!driver_is_default_compatible) {
+        HDprintf("-- SKIPPED --\n");
+        return;
+    }
 
     fcpl_id = H5Pcreate(H5P_FILE_CREATE);
     CHECK_I(fcpl_id, "H5Pcreate");
@@ -3851,9 +3860,7 @@ test_sohm(void)
     test_sohm_delete_revert(); /* Test that a file with SOHMs becomes an
                                 * empty file again when they are deleted. */
 
-    if (!h5_driver_uses_modified_filename()) {
-        test_sohm_extlink(); /* Test SOHMs when external links are used */
-    }
+    test_sohm_extlink(); /* Test SOHMs when external links are used */
 
     test_sohm_extend_dset();    /* Test extending shared datasets */
     test_sohm_external_dtype(); /* Test using datatype in another file */

@@ -326,10 +326,6 @@ if (NOT APPLE)
   HDF_CHECK_TYPE_SIZE (long         ${HDF_PREFIX}_SIZEOF_LONG)
 endif ()
 HDF_CHECK_TYPE_SIZE ("long long"    ${HDF_PREFIX}_SIZEOF_LONG_LONG)
-HDF_CHECK_TYPE_SIZE (__int64        ${HDF_PREFIX}_SIZEOF___INT64)
-if (NOT ${HDF_PREFIX}_SIZEOF___INT64)
-  set (${HDF_PREFIX}_SIZEOF___INT64 0)
-endif ()
 
 HDF_CHECK_TYPE_SIZE (float          ${HDF_PREFIX}_SIZEOF_FLOAT)
 HDF_CHECK_TYPE_SIZE (double         ${HDF_PREFIX}_SIZEOF_DOUBLE)
@@ -497,7 +493,6 @@ endif ()
 if (MINGW OR NOT WINDOWS)
   foreach (other_test
       HAVE_ATTRIBUTE
-      HAVE_C99_DESIGNATED_INITIALIZER
       SYSTEM_SCOPE_THREADS
       HAVE_SOCKLEN_T
   )
@@ -564,54 +559,6 @@ if (WINDOWS)
         "Return value: ${HAVE_IOEO_EXITCODE}\n")
     endif ()
   endif ()
-  endif ()
-endif ()
-
-#-----------------------------------------------------------------------------
-# Check how to print a Long Long integer
-#-----------------------------------------------------------------------------
-if (NOT ${HDF_PREFIX}_PRINTF_LL_WIDTH OR ${HDF_PREFIX}_PRINTF_LL_WIDTH MATCHES "unknown")
-  set (PRINT_LL_FOUND 0)
-  if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-    message (VERBOSE "Checking for appropriate format for 64 bit long:")
-  endif ()
-  set (CURRENT_TEST_DEFINITIONS "-DPRINTF_LL_WIDTH")
-  if (${HDF_PREFIX}_SIZEOF_LONG_LONG)
-    set (CURRENT_TEST_DEFINITIONS "${CURRENT_TEST_DEFINITIONS} -DHAVE_LONG_LONG")
-  endif ()
-  TRY_RUN (${HDF_PREFIX}_PRINTF_LL_TEST_RUN   ${HDF_PREFIX}_PRINTF_LL_TEST_COMPILE
-      ${CMAKE_BINARY_DIR}
-      ${HDF_RESOURCES_EXT_DIR}/HDFTests.c
-      COMPILE_DEFINITIONS "${CURRENT_TEST_DEFINITIONS}"
-      RUN_OUTPUT_VARIABLE OUTPUT
-  )
-  if (${HDF_PREFIX}_PRINTF_LL_TEST_COMPILE)
-    if (${HDF_PREFIX}_PRINTF_LL_TEST_RUN MATCHES 0)
-      string(REGEX REPLACE ".*PRINTF_LL_WIDTH=\\[(.*)\\].*" "\\1" ${HDF_PREFIX}_PRINTF_LL "${OUTPUT}")
-      set (${HDF_PREFIX}_PRINTF_LL_WIDTH "\"${${HDF_PREFIX}_PRINTF_LL}\"" CACHE INTERNAL "Width for printf for type `long long' or `__int64', us. `ll")
-      set (PRINT_LL_FOUND 1)
-    else ()
-      if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-        message (VERBOSE "Width test failed with result: ${${HDF_PREFIX}_PRINTF_LL_TEST_RUN}")
-      endif ()
-    endif ()
-  else ()
-    file (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
-        "Test ${HDF_PREFIX}_PRINTF_LL_WIDTH failed\n"
-    )
-  endif ()
-
-  if (PRINT_LL_FOUND)
-    if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-      message (VERBOSE "Checking for appropriate format for 64 bit long: found ${${HDF_PREFIX}_PRINTF_LL_WIDTH}")
-    endif ()
-  else ()
-    if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-      message (VERBOSE "Checking for appropriate format for 64 bit long: not found")
-    endif ()
-    set (${HDF_PREFIX}_PRINTF_LL_WIDTH "\"unknown\"" CACHE INTERNAL
-        "Width for printf for type `long long' or `__int64', us. `ll"
-    )
   endif ()
 endif ()
 

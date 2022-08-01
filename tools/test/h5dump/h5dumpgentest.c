@@ -582,7 +582,7 @@ gent_attribute(void)
     dims[0] = 24;
     space   = H5Screate_simple(1, dims, NULL);
     attr    = H5Acreate2(root, "/attr1", H5T_STD_I8BE, space, H5P_DEFAULT, H5P_DEFAULT);
-    HDsprintf(buf, "attribute of root group");
+    HDsnprintf(buf, sizeof(buf), "attribute of root group");
     H5Awrite(attr, H5T_NATIVE_SCHAR, buf);
     H5Sclose(space);
     H5Aclose(attr);
@@ -1382,7 +1382,7 @@ gent_all(void)
     dims[0] = 10;
     space   = H5Screate_simple(1, dims, NULL);
     attr    = H5Acreate2(group, "attr1", H5T_STD_I8BE, space, H5P_DEFAULT, H5P_DEFAULT);
-    HDsprintf(buf, "abcdefghi");
+    HDsnprintf(buf, sizeof(buf), "abcdefghi");
     H5Awrite(attr, H5T_NATIVE_SCHAR, buf);
     H5Sclose(space);
     H5Aclose(attr);
@@ -1418,7 +1418,7 @@ gent_all(void)
     dims[0] = 27;
     space   = H5Screate_simple(1, dims, NULL);
     attr    = H5Acreate2(dataset, "attr1", H5T_STD_I8BE, space, H5P_DEFAULT, H5P_DEFAULT);
-    HDsprintf(buf, "1st attribute of dset1.1.1");
+    HDsnprintf(buf, sizeof(buf), "1st attribute of dset1.1.1");
     H5Awrite(attr, H5T_NATIVE_SCHAR, buf);
     H5Sclose(space);
     H5Aclose(attr);
@@ -1426,7 +1426,7 @@ gent_all(void)
     dims[0] = 27;
     space   = H5Screate_simple(1, dims, NULL);
     attr    = H5Acreate2(dataset, "attr2", H5T_STD_I8BE, space, H5P_DEFAULT, H5P_DEFAULT);
-    HDsprintf(buf, "2nd attribute of dset1.1.1");
+    HDsnprintf(buf, sizeof(buf), "2nd attribute of dset1.1.1");
     H5Awrite(attr, H5T_NATIVE_SCHAR, buf);
     H5Sclose(space);
     H5Aclose(attr);
@@ -1625,7 +1625,7 @@ gent_many(void)
     dims[0] = 10;
     space2  = H5Screate_simple(1, dims, NULL);
     attr    = H5Acreate2(dataset, "attr1", H5T_STD_I8BE, space2, H5P_DEFAULT, H5P_DEFAULT);
-    HDsprintf(buf, "abcdefghi");
+    HDsnprintf(buf, sizeof(buf), "abcdefghi");
     H5Awrite(attr, H5T_NATIVE_CHAR, buf);
     H5Sclose(space2);
     H5Aclose(attr);
@@ -1963,9 +1963,9 @@ gent_str2(void)
     dims[0] = 3;
     space2  = H5Screate_simple(1, dims, NULL);
     attr    = H5Acreate2(dataset, "attr1", fxdlenstr2, space2, H5P_DEFAULT, H5P_DEFAULT);
-    HDsprintf(&(buf2[0 * LENSTR2]), "0123456789");
-    HDsprintf(&(buf2[1 * LENSTR2]), "abcdefghij");
-    HDsprintf(&(buf2[2 * LENSTR2]), "ABCDEFGHIJ");
+    HDsnprintf(&(buf2[0 * LENSTR2]), LENSTR2, "0123456789");
+    HDsnprintf(&(buf2[1 * LENSTR2]), LENSTR2, "abcdefghij");
+    HDsnprintf(&(buf2[2 * LENSTR2]), LENSTR2, "ABCDEFGHIJ");
     H5Awrite(attr, fxdlenstr2, buf2);
     H5Sclose(space2);
     H5Tclose(fxdlenstr2);
@@ -1977,7 +1977,7 @@ gent_str2(void)
 
     for (i = 0; (hsize_t)i < sdim; i++) {
         start[0] = (hsize_t)i;
-        HDsprintf(buf, "This is row %1d of type H5T_STR_NULLTERM of", i);
+        HDsnprintf(buf, sizeof(buf), "This is row %1d of type H5T_STR_NULLTERM of", i);
         H5Tset_size(memtype, HDstrlen(buf) + 1);
         H5Sselect_hyperslab(hyper_space, H5S_SELECT_SET, start, stride, count, block);
         H5Dwrite(dataset, memtype, mem_space, hyper_space, H5P_DEFAULT, buf);
@@ -1990,7 +1990,7 @@ gent_str2(void)
 
     for (i = 0; (hsize_t)i < sdim; i++) {
         start[0] = (hsize_t)i;
-        HDsprintf(buf, "This is row %1d of type H5T_STR_NULLTERM of string array", i);
+        HDsnprintf(buf, sizeof(buf), "This is row %1d of type H5T_STR_NULLTERM of string array", i);
         H5Tset_size(memtype, HDstrlen(buf) + 1);
         H5Sselect_hyperslab(hyper_space, H5S_SELECT_SET, start, stride, count, block);
         H5Dwrite(dataset, memtype, mem_space, hyper_space, H5P_DEFAULT, buf);
@@ -2009,7 +2009,7 @@ gent_str2(void)
 
     for (i = 0; (hsize_t)i < sdim; i++) {
         start[0] = (hsize_t)i;
-        HDsprintf(buf, "This is row %1d of type H5T_STR_NULLPAD of", i);
+        HDsnprintf(buf, sizeof(buf), "This is row %1d of type H5T_STR_NULLPAD of", i);
         H5Tset_size(memtype, HDstrlen(buf) + 1);
         H5Sselect_hyperslab(hyper_space, H5S_SELECT_SET, start, stride, count, block);
         H5Dwrite(dataset, memtype, mem_space, hyper_space, H5P_DEFAULT, buf);
@@ -2022,7 +2022,7 @@ gent_str2(void)
 
     for (i = 0; (hsize_t)i < sdim; i++) {
         start[0] = (hsize_t)i;
-        HDsprintf(buf, "This is row %1d of type H5T_STR_NULLPAD of string array", i);
+        HDsnprintf(buf, sizeof(buf), "This is row %1d of type H5T_STR_NULLPAD of string array", i);
         H5Tset_size(memtype, HDstrlen(buf) + 1);
         H5Sselect_hyperslab(hyper_space, H5S_SELECT_SET, start, stride, count, block);
         H5Dwrite(dataset, memtype, mem_space, hyper_space, H5P_DEFAULT, buf);
@@ -2041,7 +2041,7 @@ gent_str2(void)
 
     for (i = 0; (hsize_t)i < sdim; i++) {
         start[0] = (hsize_t)i;
-        HDsprintf(buf, "This is row %1d of type H5T_STR_SPACEPAD of", i);
+        HDsnprintf(buf, sizeof(buf), "This is row %1d of type H5T_STR_SPACEPAD of", i);
         H5Tset_size(memtype, HDstrlen(buf) + 1);
         H5Sselect_hyperslab(hyper_space, H5S_SELECT_SET, start, stride, count, block);
         H5Dwrite(dataset, memtype, mem_space, hyper_space, H5P_DEFAULT, buf);
@@ -2054,7 +2054,7 @@ gent_str2(void)
 
     for (i = 0; (hsize_t)i < sdim; i++) {
         start[0] = (hsize_t)i;
-        HDsprintf(buf, "This is row %1d of type H5T_STR_SPACEPAD of string array", i);
+        HDsnprintf(buf, sizeof(buf), "This is row %1d of type H5T_STR_SPACEPAD of string array", i);
         H5Tset_size(memtype, HDstrlen(buf) + 1);
         H5Sselect_hyperslab(hyper_space, H5S_SELECT_SET, start, stride, count, block);
         H5Dwrite(dataset, memtype, mem_space, hyper_space, H5P_DEFAULT, buf);
@@ -2567,44 +2567,45 @@ gent_nestcomp(void)
     H5Fclose(file);
 }
 
+#define N_OPAQUE_BYTES_PER_ELEMENT ((uint8_t)100)
+#define N_OPAQUE_ELEMENTS          2
+
 static void
 gent_opaque(void)
 {
-    hid_t   file, type, dataset, space;
-    char    test[100][2];
-    int     x;
-    hsize_t dim = 2;
+    hid_t file    = H5I_INVALID_HID;
+    hid_t type    = H5I_INVALID_HID;
+    hid_t dataset = H5I_INVALID_HID;
+    hid_t space   = H5I_INVALID_HID;
 
-    for (x = 0; x < 100; x++) {
-        test[x][0] = (char)x;
-        test[x][1] = (char)(99 - x);
-    }
+    /* The dataset contains N_ELEMENTS elements of OPAQUE_NBYTES bytes */
+    uint8_t data[N_OPAQUE_BYTES_PER_ELEMENT][N_OPAQUE_ELEMENTS];
+    hsize_t dim = N_OPAQUE_ELEMENTS;
 
-    /*
-     * Create the data space.
-     */
-    space = H5Screate_simple(1, &dim, NULL);
-
-    /*
-     * Create the file.
-     */
     file = H5Fcreate(FILE19, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
-    /*
-     * Create the memory datatype.
-     */
-    type = H5Tcreate(H5T_OPAQUE, sizeof(char) * 100 * 2);
+    /* The opaque datatype is OPAQUE_NBYTES bytes in size */
+    type = H5Tcreate(H5T_OPAQUE, sizeof(uint8_t) * N_OPAQUE_BYTES_PER_ELEMENT);
     H5Tset_tag(type, "test opaque type");
 
-    /*
-     * Create the dataset.
-     */
+    space   = H5Screate_simple(1, &dim, NULL);
     dataset = H5Dcreate2(file, "opaque test", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-    /*
-     * Write data to the dataset;
+    /* Given the data fill algorithm, make sure that the number of bytes
+     * in the opaque type isn't so big that i or (OPAQUE_NBYTES - 1) - i
+     * don't fit in a uint8_t value..
      */
-    H5Dwrite(dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, test);
+    HDcompile_assert(N_OPAQUE_BYTES_PER_ELEMENT < UINT8_MAX);
+
+    /* Write out two opaque data elements with predictable data to
+     * the file.
+     */
+    for (uint8_t i = 0; i < N_OPAQUE_BYTES_PER_ELEMENT; i++) {
+        data[i][0] = i;
+        data[i][1] = (N_OPAQUE_BYTES_PER_ELEMENT - 1) - i;
+    }
+
+    H5Dwrite(dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
 
     H5Tclose(type);
     H5Sclose(space);
@@ -3923,7 +3924,7 @@ gent_large_objname(void)
     group = H5Gcreate2(fid, "this_is_a_large_group_name", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     for (i = 0; i < 50; ++i) {
-        HDsprintf(grp_name, "this_is_a_large_group_name%d", i);
+        HDsnprintf(grp_name, sizeof(grp_name), "this_is_a_large_group_name%d", i);
         group2 = H5Gcreate2(group, grp_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         H5Gclose(group2);
     }

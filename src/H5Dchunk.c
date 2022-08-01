@@ -6596,8 +6596,11 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
         }             /* end if */
 
         if (udata->chunk_in_cache) {
+
+            if (NULL == ent)
+                HGOTO_ERROR(H5E_IO, H5E_BADVALUE, H5_ITER_ERROR, "NULL chunk entry pointer")
+
             HDassert(H5F_addr_defined(chunk_rec->chunk_addr));
-            HDassert(ent);
             HDassert(H5F_addr_defined(ent->chunk_block.offset));
 
             H5_CHECKED_ASSIGN(nbytes, size_t, shared_fo->layout.u.chunk.size, uint32_t);

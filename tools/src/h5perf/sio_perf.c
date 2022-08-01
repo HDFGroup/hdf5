@@ -172,7 +172,7 @@ static void            get_minmax(minmax *mm, double val);
 static void            accumulate_minmax_stuff(const minmax *mm, int count, minmax *total_mm);
 static void output_results(const struct options *options, const char *name, minmax *table, int table_size,
                            off_t data_size);
-static void output_report(const char *fmt, ...);
+static void output_report(const char *fmt, ...) H5_ATTR_FORMAT(printf, 1, 2);
 static void print_indent(int indent);
 static void usage(const char *prog);
 static void report_parameters(struct options *opts);
@@ -190,10 +190,8 @@ main(int argc, char *argv[])
     int             exit_value = EXIT_SUCCESS;
     struct options *opts       = NULL;
 
-#ifndef STANDALONE
     /* Initialize h5tools lib */
     h5tools_init();
-#endif
 
     output = stdout;
 
@@ -647,7 +645,9 @@ output_report(const char *fmt, ...)
     va_list ap;
 
     HDva_start(ap, fmt);
+    H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
     HDvfprintf(output, fmt, ap);
+    H5_GCC_CLANG_DIAG_ON("format-nonliteral")
     HDva_end(ap);
 }
 
@@ -674,25 +674,25 @@ recover_size_and_print(long long val, const char *end)
         if (val >= ONE_MB && (val % ONE_MB) == 0) {
             if (val >= ONE_GB && (val % ONE_GB) == 0)
                 HDfprintf(output,
-                          "%" H5_PRINTF_LL_WIDTH "d"
+                          "%lld"
                           "GB%s",
                           val / ONE_GB, end);
             else
                 HDfprintf(output,
-                          "%" H5_PRINTF_LL_WIDTH "d"
+                          "%lld"
                           "MB%s",
                           val / ONE_MB, end);
         }
         else {
             HDfprintf(output,
-                      "%" H5_PRINTF_LL_WIDTH "d"
+                      "%lld"
                       "KB%s",
                       val / ONE_KB, end);
         }
     }
     else {
         HDfprintf(output,
-                  "%" H5_PRINTF_LL_WIDTH "d"
+                  "%lld"
                   "%s",
                   val, end);
     }

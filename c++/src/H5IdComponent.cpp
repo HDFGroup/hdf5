@@ -397,10 +397,14 @@ IdComponent::p_get_file_name() const
         throw IdComponentException("", "H5Fget_name failed");
     }
 
-    // Call H5Fget_name again to get the actual file name
-    char *name_C = new char[name_size + 1]();
+    // The actual message size is the cast value + 1 for the terminal ASCII NUL
+    // (unfortunate in/out type sign mismatch)
+    size_t actual_name_size = static_cast<size_t>(name_size) + 1;
 
-    name_size = H5Fget_name(temp_id, name_C, name_size + 1);
+    // Call H5Fget_name again to get the actual file name
+    char *name_C = new char[actual_name_size]();
+
+    name_size = H5Fget_name(temp_id, name_C, actual_name_size);
 
     // Check for failure again
     if (name_size < 0) {
@@ -411,7 +415,8 @@ IdComponent::p_get_file_name() const
     // Convert the C file name and return
     H5std_string file_name(name_C);
     delete[] name_C;
-    return (file_name);
+
+    return file_name;
 }
 
 //

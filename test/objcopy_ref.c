@@ -509,7 +509,7 @@ test_copy_attach_attributes(hid_t loc_id, hid_t type_id)
         goto done;
 
     for (u = 0; u < num_attributes_g; u++) {
-        HDsprintf(attr_name, "%u attr", u);
+        HDsnprintf(attr_name, sizeof(attr_name), "%u attr", u);
 
         /* Set attribute data */
         attr_data[0] = (int)(100 * u);
@@ -939,8 +939,10 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts, 
             H5R_ref_t *ref_buf1, *ref_buf2; /* Aliases for buffers to compare */
 
             /* Loop over elements in buffers */
+            H5_GCC_CLANG_DIAG_OFF("cast-qual")
             ref_buf1 = (H5R_ref_t *)buf1;
             ref_buf2 = (H5R_ref_t *)buf2;
+            H5_GCC_CLANG_DIAG_ON("cast-qual")
             for (u = 0; u < nelmts; u++, ref_buf1++, ref_buf2++) {
                 hid_t      obj1_id, obj2_id;     /* IDs for objects referenced */
                 H5O_type_t obj1_type, obj2_type; /* Types of objects referenced */

@@ -57,7 +57,7 @@ int
 H5FD_mpi_get_rank(H5FD_t *file)
 {
     const H5FD_class_t *cls;
-    uint64_t            flags    = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG | H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG;
+    uint64_t            flags    = H5FD_CTL_FAIL_IF_UNKNOWN_FLAG | H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG;
     int                 rank     = -1;
     void *              rank_ptr = (void *)(&rank);
     int                 ret_value;
@@ -70,7 +70,7 @@ H5FD_mpi_get_rank(H5FD_t *file)
     HDassert(cls->ctl); /* All MPI drivers must implement this */
 
     /* Dispatch to driver */
-    if ((cls->ctl)(file, H5FD_CTL__GET_MPI_RANK_OPCODE, flags, NULL, &rank_ptr) < 0)
+    if ((cls->ctl)(file, H5FD_CTL_GET_MPI_RANK_OPCODE, flags, NULL, &rank_ptr) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "driver get_rank request failed")
 
     HDassert(rank >= 0);
@@ -109,7 +109,7 @@ int
 H5FD_mpi_get_size(H5FD_t *file)
 {
     const H5FD_class_t *cls;
-    uint64_t            flags    = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG | H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG;
+    uint64_t            flags    = H5FD_CTL_FAIL_IF_UNKNOWN_FLAG | H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG;
     int                 size     = 0;
     void *              size_ptr = (void *)(&size);
     int                 ret_value;
@@ -122,7 +122,7 @@ H5FD_mpi_get_size(H5FD_t *file)
     HDassert(cls->ctl); /* All MPI drivers must implement this */
 
     /* Dispatch to driver */
-    if ((cls->ctl)(file, H5FD_CTL__GET_MPI_SIZE_OPCODE, flags, NULL, &size_ptr) < 0)
+    if ((cls->ctl)(file, H5FD_CTL_GET_MPI_SIZE_OPCODE, flags, NULL, &size_ptr) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "driver get_size request failed")
 
     if (0 >= size)
@@ -162,7 +162,7 @@ MPI_Comm
 H5FD_mpi_get_comm(H5FD_t *file)
 {
     const H5FD_class_t *cls;
-    uint64_t            flags    = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG | H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG;
+    uint64_t            flags    = H5FD_CTL_FAIL_IF_UNKNOWN_FLAG | H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG;
     MPI_Comm            comm     = MPI_COMM_NULL;
     void *              comm_ptr = (void *)(&comm);
     MPI_Comm            ret_value;
@@ -175,7 +175,7 @@ H5FD_mpi_get_comm(H5FD_t *file)
     HDassert(cls->ctl); /* All MPI drivers must implement this */
 
     /* Dispatch to driver */
-    if ((cls->ctl)(file, H5FD_CTL__GET_MPI_COMMUNICATOR_OPCODE, flags, NULL, &comm_ptr) < 0)
+    if ((cls->ctl)(file, H5FD_CTL_GET_MPI_COMMUNICATOR_OPCODE, flags, NULL, &comm_ptr) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTGET, MPI_COMM_NULL, "driver get_comm request failed")
 
     if (comm == MPI_COMM_NULL)
@@ -251,6 +251,43 @@ H5FD_mpi_haddr_to_MPIOff(haddr_t addr, MPI_Offset *mpi_off /*out*/)
 
     FUNC_LEAVE_NOAPI(ret_value)
 }
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_mpi_get_file_sync_required
+ *
+ * Purpose:	Retrieves the mpi_file_sync_required used for the file
+ *
+ * Return:	Success:	Non-negative
+ *
+ *              Failure:	Negative
+ *
+ * Programmer:	Houjun Tang
+ *              May 19, 2022
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD_mpi_get_file_sync_required(H5FD_t *file, hbool_t *file_sync_required)
+{
+    const H5FD_class_t *cls;
+    uint64_t            flags                  = H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG;
+    void *              file_sync_required_ptr = (void *)(&file_sync_required);
+    herr_t              ret_value              = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    HDassert(file);
+    cls = (const H5FD_class_t *)(file->cls);
+    HDassert(cls);
+    HDassert(cls->ctl); /* All MPI drivers must implement this */
+
+    /* Dispatch to driver */
+    if ((cls->ctl)(file, H5FD_CTL_GET_MPI_FILE_SYNC_OPCODE, flags, NULL, file_sync_required_ptr) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "driver get_mpi_file_synce request failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_mpi_get_file_sync_required() */
 
 #ifdef NOT_YET
 

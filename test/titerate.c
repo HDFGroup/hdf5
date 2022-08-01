@@ -156,7 +156,7 @@ test_iter_group(hid_t fapl, hbool_t new_format)
     CHECK(filespace, FAIL, "H5Screate");
 
     for (i = 0; i < NDATASETS; i++) {
-        HDsprintf(name, "Dataset %d", i);
+        HDsnprintf(name, sizeof(name), "Dataset %d", i);
         dataset = H5Dcreate2(file, name, datatype, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         CHECK(dataset, FAIL, "H5Dcreate2");
 
@@ -436,7 +436,7 @@ test_iter_attr(hid_t fapl, hbool_t new_format)
     CHECK(dataset, FAIL, "H5Dcreate2");
 
     for (i = 0; i < NATTR; i++) {
-        HDsprintf(name, "Attribute %02d", i);
+        HDsnprintf(name, sizeof(name), "Attribute %02d", i);
         attribute = H5Acreate2(dataset, name, H5T_NATIVE_INT, filespace, H5P_DEFAULT, H5P_DEFAULT);
         CHECK(attribute, FAIL, "H5Acreate2");
 
@@ -649,7 +649,7 @@ test_iter_group_large(hid_t fapl)
 
     /* Create a bunch of groups */
     for (i = 0; i < ITER_NGROUPS; i++) {
-        HDsprintf(gname, "Group_%d", i);
+        HDsnprintf(gname, sizeof(gname), "Group_%d", i);
 
         /* Add the name to the list of objects in the root group */
         HDstrcpy(names[i].name, gname);
@@ -766,7 +766,7 @@ test_grp_memb_funcs(hid_t fapl)
     CHECK(filespace, FAIL, "H5Screate");
 
     for (i = 0; i < NDATASETS; i++) {
-        HDsprintf(name, "Dataset %d", i);
+        HDsnprintf(name, sizeof(name), "Dataset %d", i);
         dataset = H5Dcreate2(file, name, datatype, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         CHECK(dataset, FAIL, "H5Dcreate2");
 
@@ -1009,6 +1009,7 @@ test_corrupted_attnamelen(void)
     searched_err_t err_caught; /* Data to be passed to callback func */
     int            err_status; /* Status returned by H5Aiterate2 */
     herr_t         ret;        /* Return value */
+    hbool_t        driver_is_default_compatible;
     const char *   testfile = H5_get_srcdir_filename(CORRUPTED_ATNAMELEN_FILE); /* Corrected test file name */
 
     const char *err_message = "attribute name has different length than stored length";
@@ -1016,6 +1017,14 @@ test_corrupted_attnamelen(void)
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing the Handling of Corrupted Attribute's Name Length\n"));
+
+    ret = h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &driver_is_default_compatible);
+    CHECK(ret, FAIL, "h5_driver_is_default_vfd_compatible");
+
+    if (!driver_is_default_compatible) {
+        HDprintf("-- SKIPPED --\n");
+        return;
+    }
 
     fid = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fopen");
@@ -1175,10 +1184,8 @@ test_iterate(void)
 #endif
     } /* end for */
 
-    if (!h5_driver_uses_modified_filename()) {
-        /* Test the fix for issue HDFFV-10588 */
-        test_corrupted_attnamelen();
-    }
+    /* Test the fix for issue HDFFV-10588 */
+    test_corrupted_attnamelen();
 
     /* Close FAPLs */
     ret = H5Pclose(fapl);

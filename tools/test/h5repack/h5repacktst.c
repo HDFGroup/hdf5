@@ -183,6 +183,7 @@ main(void)
 
     h5_stat_t      file_stat;
     h5_stat_size_t fsize1, fsize2; /* file sizes */
+    hbool_t        driver_is_parallel;
 #if defined(H5_HAVE_FILTER_SZIP)
     int szip_can_encode = 0;
 #endif
@@ -205,6 +206,9 @@ main(void)
     if (make_testfiles() < 0)
         GOERROR;
     PASSED();
+
+    if (h5_using_parallel_driver(H5P_DEFAULT, &driver_is_parallel) < 0)
+        GOERROR;
 
     /*-------------------------------------------------------------------------
      * Format of the tests:
@@ -391,7 +395,7 @@ main(void)
      * file with all kinds of dataset datatypes
      *-------------------------------------------------------------------------
      */
-    if (!h5_using_parallel_driver(NULL)) {
+    if (!driver_is_parallel) {
         TESTING("    copy of datasets (all datatypes)");
         if (h5repack_init(&pack_options, 0, FALSE) < 0)
             GOERROR;
@@ -1516,7 +1520,7 @@ main(void)
      * test --latest options
      *-------------------------------------------------------------------------
      */
-    if (!h5_using_parallel_driver(NULL)) {
+    if (!driver_is_parallel) {
         TESTING("    latest file format options");
         if (h5repack_init(&pack_options, 0, FALSE) < 0)
             GOERROR;
@@ -1759,6 +1763,10 @@ make_testfiles(void)
     hid_t    fcpl = H5I_INVALID_HID; /* File creation property list */
     hid_t    fapl = H5I_INVALID_HID; /* File access property list */
     unsigned j;                      /* Local index variable */
+    hbool_t  driver_is_parallel;
+
+    if (h5_using_parallel_driver(H5P_DEFAULT, &driver_is_parallel) < 0)
+        return -1;
 
     /*-------------------------------------------------------------------------
      * create a file for general copy test
@@ -1775,7 +1783,7 @@ make_testfiles(void)
      * create another file for general copy test (all datatypes)
      *-------------------------------------------------------------------------
      */
-    if (!h5_using_parallel_driver(NULL)) {
+    if (!driver_is_parallel) {
         if ((fid = H5Fcreate(FNAME1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             return -1;
         if (make_all_objects(fid) < 0)
@@ -1978,7 +1986,7 @@ make_testfiles(void)
     if (H5Fclose(fid) < 0)
         return -1;
 
-    if (!h5_using_parallel_driver(NULL)) {
+    if (!driver_is_parallel) {
         /*-------------------------------------------------------------------------
          * create obj and region reference type datasets (bug1814)
          * add attribute with int type (bug1726)
@@ -2526,12 +2534,16 @@ error:
 static int
 make_deflate(hid_t loc_id)
 {
-    hid_t      dcpl             = H5I_INVALID_HID; /* dataset creation property list */
-    hid_t      sid              = H5I_INVALID_HID; /* dataspace ID */
-    hsize_t    dims[RANK]       = {DIM1, DIM2};
-    hsize_t    chunk_dims[RANK] = {CDIM1, CDIM2};
+    hid_t   dcpl             = H5I_INVALID_HID; /* dataset creation property list */
+    hid_t   sid              = H5I_INVALID_HID; /* dataspace ID */
+    hsize_t dims[RANK]       = {DIM1, DIM2};
+    hsize_t chunk_dims[RANK] = {CDIM1, CDIM2};
+#if defined(H5_HAVE_FILTER_DEFLATE)
     hobj_ref_t bufref[1]; /* reference */
     hsize_t    dims1r[1] = {1};
+#else
+    (void)loc_id;
+#endif
 
     /* Create and fill array */
     struct {
@@ -2776,12 +2788,18 @@ make_nbit(hid_t loc_id)
         goto error;
 
 #ifdef H5_HAVE_PARALLEL
-    /* Set up collective writes for parallel driver */
-    if (h5_using_parallel_driver(NULL)) {
-        if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
+    {
+        hbool_t driver_is_parallel;
+
+        /* Set up collective writes for parallel driver */
+        if (h5_using_parallel_driver(H5P_DEFAULT, &driver_is_parallel) < 0)
             goto error;
-        if (H5Pset_dxpl_mpio(dxpl, H5FD_MPIO_COLLECTIVE) < 0)
-            goto error;
+        if (driver_is_parallel) {
+            if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
+                goto error;
+            if (H5Pset_dxpl_mpio(dxpl, H5FD_MPIO_COLLECTIVE) < 0)
+                goto error;
+        }
     }
 #endif
 
@@ -2878,12 +2896,18 @@ make_scaleoffset(hid_t loc_id)
         goto error;
 
 #ifdef H5_HAVE_PARALLEL
-    /* Set up collective writes for parallel driver */
-    if (h5_using_parallel_driver(NULL)) {
-        if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
+    {
+        hbool_t driver_is_parallel;
+
+        if (h5_using_parallel_driver(H5P_DEFAULT, &driver_is_parallel) < 0)
             goto error;
-        if (H5Pset_dxpl_mpio(dxpl, H5FD_MPIO_COLLECTIVE) < 0)
-            goto error;
+        /* Set up collective writes for parallel driver */
+        if (driver_is_parallel) {
+            if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
+                goto error;
+            if (H5Pset_dxpl_mpio(dxpl, H5FD_MPIO_COLLECTIVE) < 0)
+                goto error;
+        }
     }
 #endif
 
@@ -2981,12 +3005,18 @@ make_all_filters(hid_t loc_id)
         goto error;
 
 #ifdef H5_HAVE_PARALLEL
-    /* Set up collective writes for parallel driver */
-    if (h5_using_parallel_driver(NULL)) {
-        if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
+    {
+        hbool_t driver_is_parallel;
+
+        if (h5_using_parallel_driver(H5P_DEFAULT, &driver_is_parallel) < 0)
             goto error;
-        if (H5Pset_dxpl_mpio(dxpl, H5FD_MPIO_COLLECTIVE) < 0)
-            goto error;
+        /* Set up collective writes for parallel driver */
+        if (driver_is_parallel) {
+            if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
+                goto error;
+            if (H5Pset_dxpl_mpio(dxpl, H5FD_MPIO_COLLECTIVE) < 0)
+                goto error;
+        }
     }
 #endif
 
@@ -3157,7 +3187,7 @@ make_early(void)
             goto out;
         if ((tid = H5Tcopy(H5T_NATIVE_DOUBLE)) < 0)
             goto out;
-        HDsprintf(name, "%d", i);
+        HDsnprintf(name, sizeof(name), "%d", i);
         if ((H5Tcommit2(fid, name, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             goto out;
         if (H5Tclose(tid) < 0)
@@ -3181,7 +3211,7 @@ make_early(void)
     for (i = 0; i < iter; i++) {
         if ((tid = H5Tcopy(H5T_NATIVE_DOUBLE)) < 0)
             goto out;
-        HDsprintf(name, "%d", i);
+        HDsnprintf(name, sizeof(name), "%d", i);
         if ((H5Tcommit2(fid, name, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             goto out;
         if (H5Tclose(tid) < 0)
@@ -3240,7 +3270,7 @@ make_layout(hid_t loc_id)
      *-------------------------------------------------------------------------
      */
     for (i = 0; i < 4; i++) {
-        HDsprintf(name, "dset%d", i + 1);
+        HDsnprintf(name, sizeof(name), "dset%d", i + 1);
         if (write_dset(loc_id, RANK, dims, name, H5T_NATIVE_INT, buf) < 0)
             goto error;
     }
@@ -5884,12 +5914,18 @@ make_dset(hid_t loc_id, const char *name, hid_t sid, hid_t dcpl, void *buf)
         return -1;
 
 #ifdef H5_HAVE_PARALLEL
-    /* Set up collective writes for parallel driver */
-    if (h5_using_parallel_driver(NULL)) {
-        if ((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0)
+    {
+        hbool_t driver_is_parallel;
+
+        if (h5_using_parallel_driver(H5P_DEFAULT, &driver_is_parallel) < 0)
             goto out;
-        if (H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE) < 0)
-            goto out;
+        /* Set up collective writes for parallel driver */
+        if (driver_is_parallel) {
+            if ((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0)
+                goto out;
+            if (H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE) < 0)
+                goto out;
+        }
     }
 #endif
 
@@ -5934,12 +5970,18 @@ write_dset(hid_t loc_id, int rank, hsize_t *dims, const char *dset_name, hid_t t
         goto out;
     if (buf) {
 #ifdef H5_HAVE_PARALLEL
-        /* Set up collective writes for parallel driver */
-        if (h5_using_parallel_driver(NULL)) {
-            if ((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0)
+        {
+            hbool_t driver_is_parallel;
+
+            if (h5_using_parallel_driver(H5P_DEFAULT, &driver_is_parallel) < 0)
                 goto out;
-            if (H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE) < 0)
-                goto out;
+            /* Set up collective writes for parallel driver */
+            if (driver_is_parallel) {
+                if ((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0)
+                    goto out;
+                if (H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE) < 0)
+                    goto out;
+            }
         }
 #endif
 

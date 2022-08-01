@@ -3153,15 +3153,19 @@ error:
 int
 main(void)
 {
-    hid_t file, fapl;
-    int   nerrors = 0;
-    char  filename[1024];
+    hid_t   file, fapl;
+    int     nerrors = 0;
+    char    filename[1024];
+    hbool_t driver_is_parallel;
 
     h5_reset();
     fapl = h5_fileaccess();
 
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        goto error;
+
+    if (h5_using_parallel_driver(fapl, &driver_is_parallel) < 0)
         goto error;
 
     nerrors += test_atomic_dtype(file) < 0 ? 1 : 0;
@@ -3173,14 +3177,14 @@ main(void)
     nerrors += test_array_dtype(file) < 0 ? 1 : 0;
     nerrors += test_array_dtype2(file) < 0 ? 1 : 0;
 
-    if (!h5_using_parallel_driver(NULL)) {
+    if (!driver_is_parallel) {
         nerrors += test_vl_dtype(file) < 0 ? 1 : 0;
         nerrors += test_vlstr_dtype(file) < 0 ? 1 : 0;
     }
 
     nerrors += test_str_dtype(file) < 0 ? 1 : 0;
 
-    if (!h5_using_parallel_driver(NULL)) {
+    if (!driver_is_parallel) {
         nerrors += test_refer_dtype(file) < 0 ? 1 : 0;
         nerrors += test_refer_dtype2(file) < 0 ? 1 : 0;
     }

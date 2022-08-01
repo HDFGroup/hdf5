@@ -151,6 +151,7 @@ get_size(const char *progname, int *argno, int argc, char *argv[])
  *
  *-------------------------------------------------------------------------
  */
+H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
 int
 main(int argc, char *argv[])
 {
@@ -242,7 +243,7 @@ main(int argc, char *argv[])
     if (argno >= argc)
         usage(prog_name);
     src_gen_name = argv[argno++];
-    HDsprintf(src_name, src_gen_name, src_membno);
+    HDsnprintf(src_name, NAMELEN, src_gen_name, src_membno);
     src_is_family = strcmp(src_name, src_gen_name);
 
     if ((src = HDopen(src_name, O_RDONLY)) < 0) {
@@ -264,7 +265,7 @@ main(int argc, char *argv[])
     if (argno >= argc)
         usage(prog_name);
     dst_gen_name = argv[argno++];
-    HDsprintf(dst_name, dst_gen_name, dst_membno);
+    HDsnprintf(dst_name, NAMELEN, dst_gen_name, dst_membno);
     dst_is_family = HDstrcmp(dst_name, dst_gen_name);
 
     if ((dst = HDopen(dst_name, O_RDWR | O_CREAT | O_TRUNC, H5_POSIX_CREATE_MODE_RW)) < 0) {
@@ -356,7 +357,7 @@ main(int argc, char *argv[])
                 dst_offset = dst_offset + (off_t)n;
                 break;
             }
-            HDsprintf(src_name, src_gen_name, ++src_membno);
+            HDsnprintf(src_name, NAMELEN, src_gen_name, ++src_membno);
             if ((src = HDopen(src_name, O_RDONLY)) < 0 && ENOENT == errno) {
                 dst_offset = dst_offset + (off_t)n;
                 break;
@@ -404,7 +405,7 @@ main(int argc, char *argv[])
                 }
             }
             HDclose(dst);
-            HDsprintf(dst_name, dst_gen_name, ++dst_membno);
+            HDsnprintf(dst_name, NAMELEN, dst_gen_name, ++dst_membno);
             if ((dst = HDopen(dst_name, O_RDWR | O_CREAT | O_TRUNC, H5_POSIX_CREATE_MODE_RW)) < 0) {
                 HDperror(dst_name);
                 HDexit(EXIT_FAILURE);
@@ -507,3 +508,4 @@ main(int argc, char *argv[])
     HDfree(buf);
     return EXIT_SUCCESS;
 } /* end main */
+H5_GCC_CLANG_DIAG_ON("format-nonliteral")

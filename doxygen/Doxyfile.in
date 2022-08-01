@@ -855,8 +855,8 @@ INPUT_ENCODING         = UTF-8
 
 FILE_PATTERNS          = H5*public.h \
                          H5*module.h \
+                         H5*develop.h \
                          H5FDcore.h \
-                         H5FDdevelop.h \
                          H5FDdirect.h \
                          H5FDfamily.h \
                          H5FDhdfs.h \
@@ -873,7 +873,6 @@ FILE_PATTERNS          = H5*public.h \
                          H5VLconnector.h \
                          H5VLconnector_passthru.h \
                          H5VLnative.h \
-                         H5Zdevelop.h \
                          H5version.h \
                          *.dox
 

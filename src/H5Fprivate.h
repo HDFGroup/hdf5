@@ -932,6 +932,12 @@ H5_DLL herr_t H5F_shared_select_write(H5F_shared_t *f_sh, H5FD_mem_t type, uint3
                                       struct H5S_t **mem_spaces, struct H5S_t **file_spaces,
                                       haddr_t offsets[], size_t element_sizes[], const void *bufs[]);
 
+/* Functions that operate on I/O vectors */
+H5_DLL herr_t H5F_shared_vector_read(H5F_shared_t *f_sh, uint32_t count, H5FD_mem_t types[], haddr_t addrs[],
+                                     size_t sizes[], void *bufs[]);
+H5_DLL herr_t H5F_shared_vector_write(H5F_shared_t *f_sh, uint32_t count, H5FD_mem_t types[], haddr_t addrs[],
+                                      size_t sizes[], const void *bufs[]);
+
 /* Functions that flush or evict */
 H5_DLL herr_t H5F_flush_tagged_metadata(H5F_t *f, haddr_t tag);
 H5_DLL herr_t H5F_evict_tagged_metadata(H5F_t *f, haddr_t tag);
@@ -974,6 +980,7 @@ H5_DLL herr_t   H5F_mpi_retrieve_comm(hid_t loc_id, hid_t acspl_id, MPI_Comm *mp
 H5_DLL herr_t  H5F_mpi_get_file_block_type(hbool_t commit, MPI_Datatype *new_type, hbool_t *new_type_derived);
 H5_DLL hbool_t H5F_get_coll_metadata_reads(const H5F_t *f);
 H5_DLL void H5F_set_coll_metadata_reads(H5F_t *f, H5P_coll_md_read_flag_t *file_flag, hbool_t *context_flag);
+H5_DLL herr_t H5F_shared_get_mpi_file_sync_required(const H5F_shared_t *f_sh, hbool_t *flag);
 #endif /* H5_HAVE_PARALLEL */
 
 /* External file cache routines */

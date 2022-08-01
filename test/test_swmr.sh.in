@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/usr/bin/env bash
 #
 # Copyright by The HDF Group.
 # Copyright by the Board of Trustees of the University of Illinois.
@@ -11,12 +11,10 @@
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
-# Tests for the swmr feature.
+# Acceptance tests for the SWMR feature
 #
-# Created:
-#   Albert Cheng, 2009/07/22
+###############################################################################
 
-srcdir=@srcdir@
 utils_testdir=@abs_top_builddir@/@H5_UTILS_TEST_BUILDDIR@
 testdir=@abs_top_builddir@/@H5_TEST_BUILDDIR@
 
@@ -43,7 +41,7 @@ MESSAGE_TIMEOUT=300                     # Message timeout length in secs
                                         # This should be the same as the define in "test/h5test.h"
 
 ###############################################################################
-## short hands and function definitions
+## Aliases and function definitions
 ###############################################################################
 DPRINT=:                # Set to "echo Debug:" for debugging printing,
                         # else ":" for noop.
@@ -209,7 +207,6 @@ do
         # Wait for message from writer process before starting reader(s)
         WAIT_MESSAGE $WRITER_MESSAGE
 
-        #
         # Launch the Readers
         #declare -a seeds=(<seed1> <seed2> <seed3> ... )
         echo launch $Nreaders swmr_readers
@@ -225,7 +222,7 @@ do
         $DPRINT pid_readers=$pid_readers
         $IFDEBUG ps
 
-        # Collect exit code of the readers first because they usually finish
+        # Collect exit codes of the readers first because they usually finish
         # before the writer.
         for xpid in $pid_readers; do
             $DPRINT checked reader $xpid
@@ -281,7 +278,7 @@ do
 
         # Wait for message from writer process before starting reader(s)
         WAIT_MESSAGE $WRITER_MESSAGE
-        #
+
         # Launch the Readers
         #declare -a seeds=(<seed1> <seed2> <seed3> ... )
         echo launch $Nreaders swmr_readers
@@ -344,7 +341,7 @@ do
 
         # Wait for message from writer process before starting reader(s)
         WAIT_MESSAGE $WRITER_MESSAGE
-        #
+
         # Launch the Remove Readers
         #declare -a seeds=(<seed1> <seed2> <seed3> ... )
         n=0

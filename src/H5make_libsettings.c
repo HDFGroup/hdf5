@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*keep this declaration near the top of this file -RPM*/
+/* Keep this declaration near the top of this file */
 static const char *FileHeader = "\n\
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\n\
  * Copyright by The HDF Group.                                               *\n\
@@ -66,19 +66,27 @@ insert_libhdf5_settings(FILE *flibinfo)
         HDexit(EXIT_FAILURE);
     }
 
-    /* print variable definition and the string */
-    /* Do not use const else AIX strings does not show it. */
-    fprintf(flibinfo, "char H5libhdf5_settings[]=\n");
+    /* Turn off warnings for large arrays. If the library info string is
+     * a problem, people can build without the embedded library info.
+     */
+    HDfprintf(flibinfo, "#include \"H5private.h\"\n");
+    HDfprintf(flibinfo, "H5_GCC_DIAG_OFF(\"larger-than=\")\n\n");
+    HDfprintf(flibinfo, "H5_CLANG_DIAG_OFF(\"overlength-strings\")\n\n");
+
+    /* Print variable definition and the string. Do not use const or some
+     * platforms (AIX?) will have issues.
+     */
+    HDfprintf(flibinfo, "char H5libhdf5_settings[]=\n");
     bol++;
     while (EOF != (inchar = HDgetc(fsettings))) {
         if (bol) {
             /* Start a new line */
-            fprintf(flibinfo, "\t\"");
+            HDfprintf(flibinfo, "\t\"");
             bol = 0;
         }
         if (inchar == '\n') {
             /* end of a line */
-            fprintf(flibinfo, "\\n\"\n");
+            HDfprintf(flibinfo, "\\n\"\n");
             bol++;
         }
         else
@@ -89,21 +97,26 @@ insert_libhdf5_settings(FILE *flibinfo)
         /* wrap up */
         if (!bol)
             /* EOF found without a new line */
-            fprintf(flibinfo, "\\n\"\n");
-        fprintf(flibinfo, ";\n\n");
+            HDfprintf(flibinfo, "\\n\"\n");
+        HDfprintf(flibinfo, ";\n\n");
     }
     else {
-        fprintf(stderr, "Read errors encountered with %s\n", LIBSETTINGSFNAME);
+        HDfprintf(stderr, "Read errors encountered with %s\n", LIBSETTINGSFNAME);
         HDexit(EXIT_FAILURE);
     }
     if (0 != HDfclose(fsettings)) {
         HDperror(LIBSETTINGSFNAME);
         HDexit(EXIT_FAILURE);
     }
+
+    /* Re-enable warnings for large arrays */
+    HDfprintf(rawoutstream, "H5_GCC_DIAG_ON(\"larger-than=\")\n");
+    HDfprintf(rawoutstream, "H5_CLANG_DIAG_OFF(\"overlength-strings\")\n");
 #else
-    /* print variable definition and an empty string */
-    /* Do not use const else AIX strings does not show it. */
-    fprintf(flibinfo, "char H5libhdf5_settings[]=\"\";\n");
+    /* Print variable definition and an empty string. Do not use const or some
+     * platforms (AIX?) will have issues.
+     */
+    HDfprintf(flibinfo, "char H5libhdf5_settings[]=\"\";\n");
 #endif
 } /* insert_libhdf5_settings() */
 
@@ -120,7 +133,7 @@ insert_libhdf5_settings(FILE *flibinfo)
 static void
 make_libinfo(void)
 {
-    /* print variable definition and then the string as a macro. */
+    /* Print variable definition and then the string as a macro */
     insert_libhdf5_settings(rawoutstream);
 }
 
@@ -191,42 +204,42 @@ information about the library build configuration\n";
     /*
      * The file header: warning, copyright notice, build information.
      */
-    fprintf(rawoutstream, "/* Generated automatically by H5make_libsettings -- do not edit */\n\n\n");
+    HDfprintf(rawoutstream, "/* Generated automatically by H5make_libsettings -- do not edit */\n\n\n");
     HDfputs(FileHeader, rawoutstream); /*the copyright notice--see top of this file */
 
-    fprintf(rawoutstream, " *\n * Created:\t\t%s %2d, %4d\n", month_name[tm->tm_mon], tm->tm_mday,
-            1900 + tm->tm_year);
+    HDfprintf(rawoutstream, " *\n * Created:\t\t%s %2d, %4d\n", month_name[tm->tm_mon], tm->tm_mday,
+              1900 + tm->tm_year);
     if (pwd || real_name[0] || host_name[0]) {
-        fprintf(rawoutstream, " *\t\t\t");
+        HDfprintf(rawoutstream, " *\t\t\t");
         if (real_name[0])
-            fprintf(rawoutstream, "%s <", real_name);
+            HDfprintf(rawoutstream, "%s <", real_name);
 #ifdef H5_HAVE_GETPWUID
         if (pwd)
             HDfputs(pwd->pw_name, rawoutstream);
 #endif
         if (host_name[0])
-            fprintf(rawoutstream, "@%s", host_name);
+            HDfprintf(rawoutstream, "@%s", host_name);
         if (real_name[0])
-            fprintf(rawoutstream, ">");
+            HDfprintf(rawoutstream, ">");
         HDfputc('\n', rawoutstream);
     }
 
-    fprintf(rawoutstream, " *\n * Purpose:\t\t");
+    HDfprintf(rawoutstream, " *\n * Purpose:\t\t");
 
     for (s = purpose; *s; s++) {
         HDfputc(*s, rawoutstream);
         if ('\n' == *s && s[1])
-            fprintf(rawoutstream, " *\t\t\t");
+            HDfprintf(rawoutstream, " *\t\t\t");
     }
 
-    fprintf(rawoutstream, " *\n * Modifications:\n *\n");
-    fprintf(rawoutstream, " *\tDO NOT MAKE MODIFICATIONS TO THIS FILE!\n");
-    fprintf(rawoutstream, " *\tIt was generated by code in `H5make_libsettings.c'.\n");
+    HDfprintf(rawoutstream, " *\n * Modifications:\n *\n");
+    HDfprintf(rawoutstream, " *\tDO NOT MAKE MODIFICATIONS TO THIS FILE!\n");
+    HDfprintf(rawoutstream, " *\tIt was generated by code in `H5make_libsettings.c'.\n");
 
-    fprintf(rawoutstream, " *\n *");
+    HDfprintf(rawoutstream, " *\n *");
     for (i = 0; i < 73; i++)
         HDfputc('-', rawoutstream);
-    fprintf(rawoutstream, "\n */\n\n");
+    HDfprintf(rawoutstream, "\n */\n\n");
 }
 
 /*-------------------------------------------------------------------------
@@ -280,7 +293,7 @@ main(int argc, char *argv[])
 
     if (rawoutstream && rawoutstream != stdout) {
         if (HDfclose(rawoutstream))
-            fprintf(stderr, "closing rawoutstream");
+            HDfprintf(stderr, "closing rawoutstream");
         else
             rawoutstream = NULL;
     }

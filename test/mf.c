@@ -875,8 +875,7 @@ test_mf_tmp(const char *env_h5_drvr, hid_t fapl, hbool_t new_format)
         TESTING("'temporary' file space allocation with old library format");
 
     /* Can't run this test with multi-file VFDs */
-    if (HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
-        HDstrcmp(env_h5_drvr, "family") != 0) {
+    if (!h5_driver_uses_multiple_files(env_h5_drvr, 0)) {
         char           filename[FILENAME_LEN];   /* Filename to use */
         H5F_t *        f = NULL;                 /* Internal file object pointer */
         h5_stat_size_t file_size, new_file_size; /* file size */
@@ -6586,22 +6585,22 @@ error:
         memb_map[H5FD_MEM_DRAW]  = H5FD_MEM_DRAW;                                                            \
         memb_map[H5FD_MEM_GHEAP] = H5FD_MEM_GHEAP;                                                           \
         memb_map[H5FD_MEM_LHEAP] = H5FD_MEM_LHEAP;                                                           \
-        HDsprintf(sv[H5FD_MEM_SUPER], "%%s-%c.h5", 's');                                                     \
+        HDsnprintf(sv[H5FD_MEM_SUPER], 64, "%%s-%c.h5", 's');                                                \
         memb_name[H5FD_MEM_SUPER] = sv[H5FD_MEM_SUPER];                                                      \
         memb_addr[H5FD_MEM_SUPER] = 0;                                                                       \
-        HDsprintf(sv[H5FD_MEM_BTREE], "%%s-%c.h5", 'b');                                                     \
+        HDsnprintf(sv[H5FD_MEM_BTREE], 64, "%%s-%c.h5", 'b');                                                \
         memb_name[H5FD_MEM_BTREE] = sv[H5FD_MEM_BTREE];                                                      \
         memb_addr[H5FD_MEM_BTREE] = HADDR_MAX / 6;                                                           \
-        HDsprintf(sv[H5FD_MEM_DRAW], "%%s-%c.h5", 'r');                                                      \
+        HDsnprintf(sv[H5FD_MEM_DRAW], 64, "%%s-%c.h5", 'r');                                                 \
         memb_name[H5FD_MEM_DRAW] = sv[H5FD_MEM_DRAW];                                                        \
         memb_addr[H5FD_MEM_DRAW] = HADDR_MAX / 3;                                                            \
-        HDsprintf(sv[H5FD_MEM_GHEAP], "%%s-%c.h5", 'g');                                                     \
+        HDsnprintf(sv[H5FD_MEM_GHEAP], 64, "%%s-%c.h5", 'g');                                                \
         memb_name[H5FD_MEM_GHEAP] = sv[H5FD_MEM_GHEAP];                                                      \
         memb_addr[H5FD_MEM_GHEAP] = HADDR_MAX / 2;                                                           \
-        HDsprintf(sv[H5FD_MEM_LHEAP], "%%s-%c.h5", 'l');                                                     \
+        HDsnprintf(sv[H5FD_MEM_LHEAP], 64, "%%s-%c.h5", 'l');                                                \
         memb_name[H5FD_MEM_LHEAP] = sv[H5FD_MEM_LHEAP];                                                      \
         memb_addr[H5FD_MEM_LHEAP] = HADDR_MAX * 2 / 3;                                                       \
-        HDsprintf(sv[H5FD_MEM_OHDR], "%%s-%c.h5", 'o');                                                      \
+        HDsnprintf(sv[H5FD_MEM_OHDR], 64, "%%s-%c.h5", 'o');                                                 \
         memb_name[H5FD_MEM_OHDR] = sv[H5FD_MEM_OHDR];                                                        \
         memb_addr[H5FD_MEM_OHDR] = HADDR_MAX * 5 / 6;                                                        \
     }

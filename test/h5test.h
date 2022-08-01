@@ -220,7 +220,7 @@ H5TEST_DLL void        h5_reset(void);
 H5TEST_DLL void        h5_restore_err(void);
 H5TEST_DLL void        h5_show_hostname(void);
 H5TEST_DLL h5_stat_size_t h5_get_file_size(const char *filename, hid_t fapl);
-H5TEST_DLL int            print_func(const char *format, ...);
+H5TEST_DLL int            print_func(const char *format, ...) H5_ATTR_FORMAT(printf, 1, 2);
 H5TEST_DLL int            h5_make_local_copy(const char *origfilename, const char *local_copy_name);
 H5TEST_DLL herr_t         h5_verify_cached_stabs(const char *base_name[], hid_t fapl);
 H5TEST_DLL H5FD_class_t *h5_get_dummy_vfd_class(void);
@@ -230,8 +230,8 @@ H5TEST_DLL int           h5_compare_file_bytes(char *fname1, char *fname2);
 H5TEST_DLL int           h5_duplicate_file_by_bytes(const char *orig, const char *dest);
 H5TEST_DLL herr_t        h5_check_if_file_locking_enabled(hbool_t *are_enabled);
 H5TEST_DLL hbool_t       h5_using_default_driver(const char *drv_name);
-H5TEST_DLL hbool_t       h5_using_parallel_driver(const char *drv_name);
-H5TEST_DLL hbool_t       h5_driver_uses_modified_filename(void);
+H5TEST_DLL herr_t        h5_using_parallel_driver(hid_t fapl_id, hbool_t *driver_is_parallel);
+H5TEST_DLL herr_t        h5_driver_is_default_vfd_compatible(hid_t fapl_id, hbool_t *default_vfd_compatible);
 H5TEST_DLL hbool_t       h5_driver_uses_multiple_files(const char *drv_name, unsigned flags);
 
 /* Functions that will replace components of a FAPL */
