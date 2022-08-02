@@ -297,7 +297,7 @@ test_attr_getname()
 
         // 1. With arbitrary buf_size that is larger than the name size
         size_t buf_size    = FATTR1_NAME.length() + 10;
-        char * fattr1_name = new char[buf_size + 1];
+        char  *fattr1_name = new char[buf_size + 1];
         HDmemset(fattr1_name, 0, buf_size + 1);
         ssize_t name_size = 0; // actual length of attribute name
         name_size         = fattr1.getName(fattr1_name, buf_size + 1);
@@ -727,13 +727,12 @@ test_attr_compound_read()
 
         // Verify that the fields have the same names as when the type
         // was created
-        int j;
-        for (j = 0; j < fields; j++) {
-            H5std_string fieldname = datatype.getMemberName(j);
+        for (int j = 0; j < fields; j++) {
+            H5std_string fieldname = datatype.getMemberName(static_cast<unsigned>(j));
             if (!((fieldname == ATTR4_FIELDNAME1) || (fieldname == ATTR4_FIELDNAME2) ||
                   (fieldname == ATTR4_FIELDNAME3)))
                 TestErrPrintf("%d:invalid field name for field #%d: %s\n", __LINE__, j, fieldname.c_str());
-        } /* end for */
+        }
 
         offset = datatype.getMemberOffset(0);
         verify_val(offset, attr4_field1_off, "DataType::getMemberOffset", __LINE__, __FILE__);
@@ -1586,7 +1585,7 @@ test_string_attr()
         // Read and verify the attribute string as a string of chars; buffer
         // is dynamically allocated.
         size_t attr_size = gr_flattr1.getInMemDataSize();
-        char * fl_dyn_string_att_check;
+        char  *fl_dyn_string_att_check;
         fl_dyn_string_att_check = new char[attr_size + 1];
         gr_flattr1.read(fls_type, fl_dyn_string_att_check);
         if (HDstrcmp(fl_dyn_string_att_check, ATTRSTR_DATA.c_str()) != 0)

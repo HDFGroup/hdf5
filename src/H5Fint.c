@@ -51,13 +51,13 @@
 /* Struct only used by functions H5F__get_objects and H5F__get_objects_cb */
 typedef struct H5F_olist_t {
     H5I_type_t obj_type;     /* Type of object to look for */
-    hid_t *    obj_id_list;  /* Pointer to the list of open IDs to return */
-    size_t *   obj_id_count; /* Number of open IDs */
+    hid_t     *obj_id_list;  /* Pointer to the list of open IDs to return */
+    size_t    *obj_id_count; /* Number of open IDs */
     struct {
         hbool_t local; /* Set flag for "local" file searches */
         union {
             H5F_shared_t *shared; /* Pointer to shared file to look inside */
-            const H5F_t * file;   /* Pointer to file to look inside */
+            const H5F_t  *file;   /* Pointer to file to look inside */
         } ptr;
     } file_info;
     size_t list_index; /* Current index in open ID array */
@@ -78,7 +78,7 @@ static herr_t H5F__get_objects(const H5F_t *f, unsigned types, size_t max_index,
                                hbool_t app_ref, size_t *obj_id_count_ptr);
 static int    H5F__get_objects_cb(void *obj_ptr, hid_t obj_id, void *key);
 static herr_t H5F__build_name(const char *prefix, const char *file_name, char **full_name /*out*/);
-static char * H5F__getenv_prefix_name(char **env_prefix /*in,out*/);
+static char  *H5F__getenv_prefix_name(char **env_prefix /*in,out*/);
 static H5F_t *H5F__new(H5F_shared_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf);
 static herr_t H5F__check_if_using_file_locks(H5P_genplist_t *fapl, hbool_t *use_file_locking);
 static herr_t H5F__dest(H5F_t *f, hbool_t flush);
@@ -270,7 +270,7 @@ static herr_t
 H5F__set_vol_conn(H5F_t *file)
 {
     H5VL_connector_prop_t connector_prop;               /* Property for VOL connector ID & info */
-    void *                new_connector_info = NULL;    /* Copy of connector info */
+    void                 *new_connector_info = NULL;    /* Copy of connector info */
     herr_t                ret_value          = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -326,8 +326,8 @@ done:
 hid_t
 H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
 {
-    H5P_genplist_t *      new_plist;                  /* New property list */
-    H5P_genplist_t *      old_plist;                  /* Old property list */
+    H5P_genplist_t       *new_plist;                  /* New property list */
+    H5P_genplist_t       *old_plist;                  /* Old property list */
     H5FD_driver_prop_t    driver_prop;                /* Property for driver ID & info */
     hbool_t               driver_prop_copied = FALSE; /* Whether the driver property has been set up */
     H5VL_connector_prop_t connector_prop;             /* Property for VOL connector ID & info */
@@ -808,9 +808,9 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
                      const char *file_name, unsigned file_intent, hid_t fapl_id)
 {
     H5F_t *src_file         = NULL; /* Source file */
-    char * full_name        = NULL; /* File name with prefix */
-    char * actual_file_name = NULL; /* File's actual name */
-    char * temp_file_name   = NULL; /* Temporary pointer to file name */
+    char  *full_name        = NULL; /* File name with prefix */
+    char  *actual_file_name = NULL; /* File's actual name */
+    char  *temp_file_name   = NULL; /* Temporary pointer to file name */
     size_t temp_file_name_len;      /* Length of temporary file name */
     H5F_t *ret_value = NULL;        /* Return value  */
 
@@ -1026,7 +1026,7 @@ done:
 htri_t
 H5F__is_hdf5(const char *name, hid_t fapl_id)
 {
-    H5FD_t *      file      = NULL;        /* Low-level file struct            */
+    H5FD_t       *file      = NULL;        /* Low-level file struct            */
     H5F_shared_t *shared    = NULL;        /* Shared part of file              */
     haddr_t       sig_addr  = HADDR_UNDEF; /* Address of hdf5 file signature    */
     htri_t        ret_value = FAIL;        /* Return value                     */
@@ -1742,12 +1742,12 @@ done:
 H5F_t *
 H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
-    H5F_t *            file   = NULL; /*the success return value      */
-    H5F_shared_t *     shared = NULL; /*shared part of `file'         */
-    H5FD_t *           lf     = NULL; /*file driver part of `shared'  */
+    H5F_t             *file   = NULL; /*the success return value      */
+    H5F_shared_t      *shared = NULL; /*shared part of `file'         */
+    H5FD_t            *lf     = NULL; /*file driver part of `shared'  */
     unsigned           tent_flags;    /*tentative flags               */
-    H5FD_class_t *     drvr;          /*file driver class info        */
-    H5P_genplist_t *   a_plist;       /*file access property list     */
+    H5FD_class_t      *drvr;          /*file driver class info        */
+    H5P_genplist_t    *a_plist;       /*file access property list     */
     H5F_close_degree_t fc_degree;     /*file close degree             */
     size_t             page_buf_size;
     unsigned           page_buf_min_meta_perc = 0;
@@ -1758,7 +1758,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     hbool_t            use_file_locking = TRUE;        /* Using file locks? */
     hbool_t            ci_load          = FALSE;       /* whether MDC ci load requested */
     hbool_t            ci_write         = FALSE;       /* whether MDC CI write requested */
-    H5F_t *            ret_value        = NULL;        /*actual return value           */
+    H5F_t             *ret_value        = NULL;        /*actual return value           */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -2685,7 +2685,7 @@ H5F__build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl, const char *n
         /* Check for symbolic link */
         if (S_IFLNK == (lst.st_mode & S_IFMT)) {
             H5P_genplist_t *new_fapl;      /* Duplicated FAPL */
-            int *           fd;            /* POSIX I/O file descriptor */
+            int            *fd;            /* POSIX I/O file descriptor */
             h5_stat_t       st;            /* Stat info from stat() call */
             h5_stat_t       fst;           /* Stat info from fstat() call */
             hbool_t         want_posix_fd; /* Flag for retrieving file descriptor from VFD */
@@ -2707,10 +2707,13 @@ H5F__build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl, const char *n
             if (NULL == (new_fapl = (H5P_genplist_t *)H5I_object(new_fapl_id)))
                 HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, FAIL, "can't get property list")
 
-            /* Set the character encoding on the new property list */
+            /*
+             * Set the private property for retrieving the backing store
+             * POSIX file descriptor from the Core VFD
+             */
             want_posix_fd = TRUE;
             if (H5P_set(new_fapl, H5F_ACS_WANT_POSIX_FD_NAME, &want_posix_fd) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set character encoding")
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set property for retrieving file descriptor")
 
             /* Retrieve the file handle */
             if (H5F_get_vfd_handle(f, new_fapl_id, (void **)&fd) < 0)
@@ -3589,13 +3592,14 @@ H5F__start_swmr_write(H5F_t *f)
     hbool_t     ci_write       = FALSE;  /* whether MDC CI write requested */
     size_t      grp_dset_count = 0;      /* # of open objects: groups & datasets */
     size_t      nt_attr_count  = 0;      /* # of opened named datatypes  + opened attributes */
-    hid_t *     obj_ids        = NULL;   /* List of ids */
-    H5G_loc_t * obj_glocs      = NULL;   /* Group location of the object */
-    H5O_loc_t * obj_olocs      = NULL;   /* Object location */
+    hid_t      *obj_ids        = NULL;   /* List of ids */
+    hid_t      *obj_apl_ids    = NULL;   /* List of access property lists */
+    H5G_loc_t  *obj_glocs      = NULL;   /* Group location of the object */
+    H5O_loc_t  *obj_olocs      = NULL;   /* Object location */
     H5G_name_t *obj_paths      = NULL;   /* Group hierarchy path */
     size_t      u;                       /* Local index variable */
     hbool_t     setup         = FALSE;   /* Boolean flag to indicate whether SWMR setting is enabled */
-    H5VL_t *    vol_connector = NULL;    /* VOL connector for the file */
+    H5VL_t     *vol_connector = NULL;    /* VOL connector for the file */
     herr_t      ret_value     = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -3648,13 +3652,20 @@ H5F__start_swmr_write(H5F_t *f)
     if (grp_dset_count > 0) {
         /* Allocate space for group and object locations */
         if ((obj_ids = (hid_t *)H5MM_malloc(grp_dset_count * sizeof(hid_t))) == NULL)
-            HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate buffer for hid_t")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "can't allocate buffer for hid_t")
         if ((obj_glocs = (H5G_loc_t *)H5MM_malloc(grp_dset_count * sizeof(H5G_loc_t))) == NULL)
-            HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate buffer for H5G_loc_t")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "can't allocate buffer for object group locations")
         if ((obj_olocs = (H5O_loc_t *)H5MM_malloc(grp_dset_count * sizeof(H5O_loc_t))) == NULL)
-            HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate buffer for H5O_loc_t")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "can't allocate buffer for object locations")
         if ((obj_paths = (H5G_name_t *)H5MM_malloc(grp_dset_count * sizeof(H5G_name_t))) == NULL)
-            HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate buffer for H5G_name_t")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "can't allocate buffer for object paths")
+
+        /* Taking a shortcut here to use calloc to initialize obj_apl_ids to all H5P_DEFAULT.  If
+         * this changes in the future we'll need to either initialize this array to all H5P_DEFAULT
+         * or ensure 0 cannot be a valid value and check for 0 at cleanup. */
+        if ((obj_apl_ids = (hid_t *)H5MM_calloc(grp_dset_count * sizeof(hid_t))) == NULL)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "can't allocate buffer for hid_t")
+        HDassert(obj_apl_ids[0] == H5P_DEFAULT);
 
         /* Get the list of opened object ids (groups & datasets) */
         if (H5F_get_obj_ids(f, H5F_OBJ_GROUP | H5F_OBJ_DATASET, grp_dset_count, obj_ids, FALSE,
@@ -3676,20 +3687,68 @@ H5F__start_swmr_write(H5F_t *f)
         /* Gather information about opened objects (groups, datasets) in the file */
         /* (For refresh later on) */
         for (u = 0; u < grp_dset_count; u++) {
-            H5O_loc_t *oloc; /* object location */
+            void      *obj = NULL; /* VOL object   */
+            H5I_type_t type;       /* Type of object for the ID */
             H5G_loc_t  tmp_loc;
+
+            /* Get object's type */
+            type = H5I_get_type(obj_ids[u]);
+
+            /* Get the object from the VOL */
+            if (NULL == (obj = H5VL_object(obj_ids[u])))
+                HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "invalid location identifier")
+
+            /* Get the object's access property list, if it is a dataset (access
+             * properties are not needed to reopen other object types currently)
+             */
+            switch (type) {
+                case H5I_GROUP:
+                    /* Access properties not needed currently */
+                    break;
+
+                case H5I_DATATYPE:
+                    /* Access properties not needed currently */
+                    break;
+
+                case H5I_DATASET:
+
+                    /* Get dataset access properties */
+                    if ((obj_apl_ids[u] = H5D_get_access_plist(obj)) < 0)
+                        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
+                                    "unable to get dataset access property list")
+                    break;
+
+                case H5I_MAP:
+                    HGOTO_ERROR(H5E_FILE, H5E_BADTYPE, FAIL, "maps not supported in native VOL connector")
+
+                case H5I_UNINIT:
+                case H5I_BADID:
+                case H5I_FILE:
+                case H5I_DATASPACE:
+                case H5I_ATTR:
+                case H5I_VFL:
+                case H5I_VOL:
+                case H5I_GENPROP_CLS:
+                case H5I_GENPROP_LST:
+                case H5I_ERROR_CLASS:
+                case H5I_ERROR_MSG:
+                case H5I_ERROR_STACK:
+                case H5I_SPACE_SEL_ITER:
+                case H5I_EVENTSET:
+                case H5I_NTYPES:
+                default:
+                    HGOTO_ERROR(H5E_FILE, H5E_BADTYPE, FAIL,
+                                "not a valid file object ID (dataset, group, or datatype)")
+                    break;
+            } /* end switch */
 
             /* Set up the id's group location */
             obj_glocs[u].oloc = &obj_olocs[u];
             obj_glocs[u].path = &obj_paths[u];
             H5G_loc_reset(&obj_glocs[u]);
 
-            /* get the id's object location */
-            if ((oloc = H5O_get_loc(obj_ids[u])) == NULL)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an object")
-
             /* Make deep local copy of object's location information */
-            H5G_loc(obj_ids[u], &tmp_loc);
+            H5G_loc_real(obj, type, &tmp_loc);
             H5G_loc_copy(&obj_glocs[u], &tmp_loc, H5_COPY_DEEP);
 
             /* Close the object */
@@ -3749,12 +3808,11 @@ H5F__start_swmr_write(H5F_t *f)
 
     /* Refresh (reopen) the objects (groups & datasets) in the file */
     for (u = 0; u < grp_dset_count; u++)
-        if (H5O_refresh_metadata_reopen(obj_ids[u], &obj_glocs[u], vol_connector, TRUE) < 0)
+        if (H5O_refresh_metadata_reopen(obj_ids[u], obj_apl_ids[u], &obj_glocs[u], vol_connector, TRUE) < 0)
             HGOTO_ERROR(H5E_ID, H5E_CLOSEERROR, FAIL, "can't refresh-close object")
 
 done:
     if (ret_value < 0 && setup) {
-
         /* Re-enable accumulator */
         f->shared->feature_flags |= (unsigned)H5FD_FEAT_ACCUMULATE_METADATA;
         if (H5FD_set_feature_flags(f->shared->lf, f->shared->feature_flags) < 0)
@@ -3794,6 +3852,14 @@ done:
         H5MM_xfree(obj_olocs);
     if (obj_paths)
         H5MM_xfree(obj_paths);
+
+    /* Free access property lists */
+    if (obj_apl_ids) {
+        for (u = 0; u < grp_dset_count; u++)
+            if (obj_apl_ids[u] != H5P_DEFAULT && obj_apl_ids[u] >= 0 && H5I_dec_ref(obj_apl_ids[u]) < 0)
+                HGOTO_ERROR(H5E_ID, H5E_CANTDEC, FAIL, "decrementing property list ID failed")
+        H5MM_xfree(obj_apl_ids);
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__start_swmr_write() */
@@ -3875,7 +3941,7 @@ done:
 hid_t
 H5F_get_file_id(H5VL_object_t *vol_obj, H5I_type_t obj_type, hbool_t app_ref)
 {
-    void *                 vol_obj_file = NULL;               /* File object pointer */
+    void                  *vol_obj_file = NULL;               /* File object pointer */
     H5VL_object_get_args_t vol_cb_args;                       /* Arguments to VOL callback */
     H5VL_loc_params_t      loc_params;                        /* Location parameters */
     hid_t                  file_id         = H5I_INVALID_HID; /* File ID for object */

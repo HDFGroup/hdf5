@@ -1297,7 +1297,7 @@ h5tget_member_name_c(hid_t_f *type_id, int_f *idx, _fcd member_name, int_f *name
     int      ret_value = -1;
     hid_t    c_type_id;
     unsigned c_index;
-    char *   c_name;
+    char    *c_name;
 
     c_type_id = *type_id;
     c_index   = (unsigned)*idx;
@@ -1616,7 +1616,7 @@ h5tinsert_c(hid_t_f *type_id, _fcd name, int_f *namelen, size_t_f *offset, hid_t
 /******/
 {
     int    ret_value = -1;
-    char * c_name;
+    char  *c_name;
     herr_t error;
 
     c_name = (char *)HD5f2cstring(name, (size_t)*namelen);
@@ -1774,7 +1774,7 @@ h5tenum_insert_c(hid_t_f *type_id, _fcd name, int_f *namelen, int_f *value)
 /******/
 {
     int    ret_value = -1;
-    char * c_name;
+    char  *c_name;
     herr_t error;
     int_f  c_value;
 
@@ -1820,7 +1820,7 @@ h5tenum_nameof_c(hid_t_f *type_id, int_f *value, _fcd name, size_t_f *namelen)
 {
     int    ret_value = -1;
     hid_t  c_type_id;
-    char * c_name;
+    char  *c_name;
     size_t c_namelen;
     herr_t error;
     int_f  c_value;
@@ -1864,7 +1864,7 @@ h5tenum_valueof_c(hid_t_f *type_id, _fcd name, int_f *namelen, int_f *value)
 /******/
 {
     int    ret_value = -1;
-    char * c_name;
+    char  *c_name;
     herr_t error;
     c_name = (char *)HD5f2cstring(name, (size_t)*namelen);
     if (c_name == NULL)
@@ -1943,7 +1943,7 @@ h5tset_tag_c(hid_t_f *type_id, _fcd tag, int_f *namelen)
 {
     int    ret_value = -1;
     herr_t status;
-    char * c_tag;
+    char  *c_tag;
 
     c_tag = (char *)HD5f2cstring(tag, (size_t)*namelen);
 

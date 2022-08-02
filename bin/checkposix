@@ -136,7 +136,7 @@ foreach $arg (@ARGV) {
 
             # These are Windows system calls. Ignore them.
             next if $name =~ /^(_get_osfhandle|GetFileInformationByHandle|SetFilePointer|GetLastError|SetEndOfFile)$/;
-            next if $name =~ /^(FindNextFile|FindClose|_tzset|Wgettimeofday|GetSystemTimeAsFileTime|Wgetlogin|GetUserName)$/;
+            next if $name =~ /^(FindNextFile|FindClose|_tzset|Wgettimeofday|GetSystemTimeAsFileTime|GetUserName)$/;
             next if $name =~ /^(DeleteCriticalSection|TlsFree|TlsGetValue|CreateThread)$/;
             next if $name =~ /^(ExpandEnvironmentStringsA|LockFileEx|UnlockFileEx)$/;
             next if $name =~ /^(DllMain|LocalAlloc|LocalFree)$/;

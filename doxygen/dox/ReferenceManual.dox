@@ -1,4 +1,4 @@
-/** \page RM Reference Manual
+/** \page RM HDF5 Reference Manual
 
 The functions provided by the HDF5 C-API are grouped into the following
 \Emph{modules}:
@@ -9,7 +9,7 @@ The functions provided by the HDF5 C-API are grouped into the following
 <td>
 
 <table>
-<tr><td style="border: none;">
+<tr valign="top"><td style="border: none;">
 \li \ref H5A "Attributes (H5A)"
 \li \ref H5D "Datasets (H5D)"
 \li \ref H5S "Dataspaces (H5S)"
@@ -29,23 +29,30 @@ The functions provided by the HDF5 C-API are grouped into the following
 \li \ref H5PL "Dynamically-loaded Plugins (H5PL)"
 \li \ref H5R "References (H5R)"
 \li \ref H5VL "Virtual Object Layer (H5VL)"
-</td><td style="border: none;vertical-align: top;">
-\li Functions with \ref ASYNC "asynchronous variants"
-\li \ref api-compat-macros
-\li <a href="./deprecated.html">Deprecated functions</a>
-\li High-level Extensions
+</td><td style="border: none;">
+\li \ref high_level
     <ul>
-    <li><a href="https://portal.hdfgroup.org/display/HDF5/Lite">\Bold{HDF5 Lite} (H5LT)</a></li>
-    <li><a href="https://portal.hdfgroup.org/display/HDF5/Images">\Bold{HDF5 Image} (H5IM)</a></li>
-    <li><a href="https://portal.hdfgroup.org/display/HDF5/Tables">\Bold{HDF5 Table} (H5TB)</a></li>
-    <li><a href="https://portal.hdfgroup.org/display/HDF5/Packet+Tables">\Bold{HDF5 Packet Table} (H5TB)</a></li>
-    <li><a href="https://portal.hdfgroup.org/display/HDF5/Dimension+Scales">\Bold{HDF5 Dimension Scale} (H5DS)</a></li>
+    <li>\ref H5LT "Lite (H5LT, H5LD)"
+    <li>\ref H5IM "Images (H5IM)"
+    <li>\ref H5TB "Table (H5TB)"
+    <li>\ref H5PT "Packet Table (H5PT)"
+    <li>\ref H5DS "Dimension Scale (H5DS)"
+    <li>\ref H5DO "Optimizations (H5DO)"
+    <li>\ref H5LR "Extensions (H5LR, H5LT)"
     </ul>
 </td></tr>
 <tr><td colspan="3" style="border: none;">
-\ref H5 \ref H5A \ref H5D \ref H5E \ref H5ES \ref H5F \ref H5G \ref H5I \ref H5L
+\a Core \a library: \ref H5 \ref H5A \ref H5D \ref H5E \ref H5ES \ref H5F \ref H5G \ref H5I \ref H5L
 \ref H5M \ref H5O \ref H5P \ref H5PL \ref H5R \ref H5S \ref H5T \ref H5VL \ref H5Z
 </td></tr>
+<tr><td colspan="3" style="border: none;">
+\a High-level \a library: \ref H5LT \ref H5IM \ref H5TB \ref H5PT \ref H5DS \ref H5DO \ref H5LR
+</td></tr>
+<tr>
+<td><a href="./deprecated.html">Deprecated functions</a></td>
+<td>Functions with \ref ASYNC</td>
+<td>\ref api-compat-macros</td>
+</tr>
 </table>
 
 </td></tr>

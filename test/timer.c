@@ -126,7 +126,7 @@ static herr_t
 test_timer_system_user(void)
 {
     int           i;
-    char *        buf = NULL;
+    char         *buf = NULL;
     H5_timer_t    timer;
     H5_timevals_t times;
     herr_t        err;
@@ -194,7 +194,7 @@ static herr_t
 test_timer_elapsed(void)
 {
     int           i;
-    char *        buf = NULL;
+    char         *buf = NULL;
     H5_timer_t    timer;
     H5_timevals_t times;
     herr_t        err;
@@ -238,7 +238,7 @@ static herr_t
 test_timer_functionality(void)
 {
     int        i;
-    char *     buf = NULL;
+    char      *buf = NULL;
     H5_timer_t timer;
 
     H5_timevals_t times;

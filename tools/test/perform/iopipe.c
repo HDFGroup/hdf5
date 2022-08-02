@@ -71,7 +71,7 @@ print_stats(const char *prefix,
              ((double)(r_start->ru_stime.tv_sec) + (double)(r_start->ru_stime.tv_usec) / 1000000.0);
 #endif
     e_time = t_stop - t_start;
-    H5_bandwidth(bw, (double)nbytes, e_time);
+    H5_bandwidth(bw, sizeof(bw), (double)nbytes, e_time);
 
 #ifdef H5_HAVE_GETRUSAGE
     HDprintf(HEADING "%1.2fuser %1.2fsystem %1.2felapsed %s\n", prefix, u_time, s_time, e_time, bw);

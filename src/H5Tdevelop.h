@@ -15,8 +15,8 @@
  *      support routines.
  */
 
-#ifndef _H5Tdevelop_H
-#define _H5Tdevelop_H
+#ifndef H5Tdevelop_H
+#define H5Tdevelop_H
 
 /* Include package's public header */
 #include "H5Tpublic.h"
@@ -55,7 +55,7 @@ typedef struct H5T_cdata_t {
     H5T_cmd_t command;  /**< what should the conversion function do?    */
     H5T_bkg_t need_bkg; /**< is the background buffer needed?	     */
     hbool_t   recalc;   /**< recalculate private data		     */
-    void *    priv;     /**< private data				     */
+    void     *priv;     /**< private data				     */
 } H5T_cdata_t;
 //! <!-- [H5T_cdata_t_snip] -->
 
@@ -224,4 +224,4 @@ H5_DLL htri_t H5Tcompiler_conv(hid_t src_id, hid_t dst_id);
 
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
-#endif /* _H5Tdevelop_H */
+#endif /* H5Tdevelop_H */

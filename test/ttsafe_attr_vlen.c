@@ -60,7 +60,7 @@ tts_attr_vlen(void)
     hid_t         atid                 = H5I_INVALID_HID; /* Datatype ID for attribute */
     hid_t         asid                 = H5I_INVALID_HID; /* Dataspace ID for attribute */
     hid_t         aid                  = H5I_INVALID_HID; /* The attribute ID */
-    const char *  string_attr          = "2.0";           /* The attribute data */
+    const char   *string_attr          = "2.0";           /* The attribute data */
     int           ret;                                    /* Return value */
     int           i;                                      /* Local index variable */
 
@@ -124,7 +124,7 @@ tts_attr_vlen_thread(void H5_ATTR_UNUSED *client_data)
     hid_t       gid  = H5I_INVALID_HID; /* Group ID */
     hid_t       aid  = H5I_INVALID_HID; /* Attribute ID */
     hid_t       atid = H5I_INVALID_HID; /* Datatype ID for the attribute */
-    char *      string_attr_check;      /* The attribute data being read */
+    char       *string_attr_check;      /* The attribute data being read */
     const char *string_attr = "2.0";    /* The expected attribute data */
     herr_t      ret;                    /* Return value */
 

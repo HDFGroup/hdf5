@@ -80,11 +80,6 @@
 #define PIO_MPI   0x2
 #define PIO_HDF5  0x4
 
-#ifdef STANDALONE
-#define DBL_EPSILON            2.2204460492503131e-16
-#define H5_DBL_ABS_EQUAL(X, Y) (fabs((X) - (Y)) < DBL_EPSILON)
-#endif
-
 /* report 0.0 in case t is zero too */
 #define MB_PER_SEC(bytes, t) (H5_DBL_ABS_EQUAL((t), 0.0) ? 0.0 : ((((double)bytes) / ONE_MB) / (t)))
 
@@ -96,7 +91,7 @@
 #endif /* FALSE */
 
 /* global variables */
-FILE *   output;              /* output file                          */
+FILE    *output;              /* output file                          */
 int      comm_world_rank_g;   /* my rank in MPI_COMM_RANK             */
 int      comm_world_nprocs_g; /* num. of processes of MPI_COMM_WORLD  */
 MPI_Comm pio_comm_g;          /* Communicator to run the PIO          */
@@ -116,7 +111,7 @@ static const char *progname = "h5perf";
 #ifndef HDF5_PARAPREFIX
 #define HDF5_PARAPREFIX ""
 #endif
-char *   paraprefix   = NULL;          /* for command line option para-prefix */
+char    *paraprefix   = NULL;          /* for command line option para-prefix */
 MPI_Info h5_io_info_g = MPI_INFO_NULL; /* MPI INFO object for IO */
 
 /*
@@ -199,7 +194,7 @@ static int             destroy_comm_world(void);
 static void  output_results(const struct options *options, const char *name, minmax *table, int table_size,
                             off_t data_size);
 static void  output_times(const struct options *options, const char *name, minmax *table, int table_size);
-static void  output_report(const char *fmt, ...);
+static void  output_report(const char *fmt, ...) H5_ATTR_FORMAT(printf, 1, 2);
 static void  print_indent(int indent);
 static void  usage(const char *prog);
 static void  report_parameters(struct options *opts);
@@ -220,10 +215,8 @@ main(int argc, char *argv[])
     int             exit_value = EXIT_SUCCESS;
     struct options *opts       = NULL;
 
-#ifndef STANDALONE
     /* Initialize h5tools lib */
     h5tools_init();
-#endif
 
     output = stdout;
 
@@ -346,7 +339,7 @@ run_test_loop(struct options *opts)
 
         /* only processes doing PIO will run the tests */
         if (doing_pio) {
-            output_report("Number of processors = %ld\n", parms.num_procs);
+            output_report("Number of processors = %d\n", parms.num_procs);
 
             /* multiply the xfer buffer size by 2 for each loop iteration */
             for (buf_size = opts->min_xfer_size; buf_size <= opts->max_xfer_size; buf_size <<= 1) {
@@ -773,7 +766,7 @@ h5_set_info_object(void)
 
         do {
             size_t len;
-            char * key_val, *endp, *namep;
+            char  *key_val, *endp, *namep;
 
             if (*valp == ';')
                 valp++;
@@ -1059,14 +1052,14 @@ output_times(const struct options *opts, const char *name, minmax *table, int ta
     /* Note: The maximum throughput uses the minimum amount of time & vice versa */
 
     print_indent(4);
-    output_report("Minimum Accumulated Time using %d file(s): %7.5f s\n", opts->num_files, (total_mm.min));
+    output_report("Minimum Accumulated Time using %ld file(s): %7.5f s\n", opts->num_files, (total_mm.min));
 
     print_indent(4);
-    output_report("Average Accumulated Time using %d file(s): %7.5f s\n", opts->num_files,
+    output_report("Average Accumulated Time using %ld file(s): %7.5f s\n", opts->num_files,
                   (total_mm.sum / total_mm.num));
 
     print_indent(4);
-    output_report("Maximum Accumulated Time using %d file(s): %7.5f s\n", opts->num_files, (total_mm.max));
+    output_report("Maximum Accumulated Time using %ld file(s): %7.5f s\n", opts->num_files, (total_mm.max));
 }
 
 /*
@@ -1087,7 +1080,9 @@ output_report(const char *fmt, ...)
         va_list ap;
 
         HDva_start(ap, fmt);
+        H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
         HDvfprintf(output, fmt, ap);
+        H5_GCC_CLANG_DIAG_ON("format-nonliteral")
         HDva_end(ap);
     }
 }
@@ -1121,25 +1116,25 @@ recover_size_and_print(long long val, const char *end)
         if (val >= ONE_MB && (val % ONE_MB) == 0) {
             if (val >= ONE_GB && (val % ONE_GB) == 0)
                 HDfprintf(output,
-                          "%" H5_PRINTF_LL_WIDTH "d"
+                          "%lld"
                           "GB%s",
                           val / ONE_GB, end);
             else
                 HDfprintf(output,
-                          "%" H5_PRINTF_LL_WIDTH "d"
+                          "%lld"
                           "MB%s",
                           val / ONE_MB, end);
         }
         else {
             HDfprintf(output,
-                      "%" H5_PRINTF_LL_WIDTH "d"
+                      "%lld"
                       "KB%s",
                       val / ONE_KB, end);
         }
     }
     else {
         HDfprintf(output,
-                  "%" H5_PRINTF_LL_WIDTH "d"
+                  "%lld"
                   "%s",
                   val, end);
     }

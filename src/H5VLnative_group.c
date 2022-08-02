@@ -74,8 +74,8 @@ H5VL__native_group_create(void *obj, const H5VL_loc_params_t *loc_params, const 
                           void H5_ATTR_UNUSED **req)
 {
     H5G_loc_t loc;        /* Location to create group     */
-    H5G_t *   grp = NULL; /* New group created            */
-    void *    ret_value;
+    H5G_t    *grp = NULL; /* New group created            */
+    void     *ret_value;
 
     FUNC_ENTER_PACKAGE
 
@@ -140,8 +140,8 @@ H5VL__native_group_open(void *obj, const H5VL_loc_params_t *loc_params, const ch
                         hid_t H5_ATTR_UNUSED gapl_id, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
 {
     H5G_loc_t loc;        /* Location to open group   */
-    H5G_t *   grp = NULL; /* New group opend          */
-    void *    ret_value;
+    H5G_t    *grp = NULL; /* New group opend          */
+    void     *ret_value;
 
     FUNC_ENTER_PACKAGE
 
@@ -280,6 +280,11 @@ H5VL__native_group_specific(void *obj, H5VL_group_specific_args_t *args, hid_t H
 
         /* H5Gflush */
         case H5VL_GROUP_FLUSH: {
+            /* Currently, H5Oflush causes H5Fclose to trigger an assertion failure in metadata cache.
+             * Leave this situation for the future solution */
+            if (H5F_HAS_FEATURE(grp->oloc.file, H5FD_FEAT_HAS_MPI))
+                HGOTO_ERROR(H5E_SYM, H5E_UNSUPPORTED, FAIL, "H5Oflush isn't supported for parallel")
+
             if (H5O_flush_common(&grp->oloc, args->args.flush.grp_id) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTFLUSH, FAIL, "unable to flush group")
 

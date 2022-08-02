@@ -228,7 +228,8 @@ test_simple_io(H5File &file)
         // Check that the values read are the same as the values written
         for (i = 0; i < 100; i++)
             for (j = 0; j < 200; j++) {
-                int status = check_values(i, j, points[i][j], check[i][j]);
+                int status =
+                    check_values(static_cast<hsize_t>(i), static_cast<hsize_t>(j), points[i][j], check[i][j]);
                 if (status == -1)
                     throw Exception("DataSet::read");
             }
@@ -454,7 +455,7 @@ test_compression(H5File &file)
         }
     }
 
-    char *   tconv_buf = new char[1000];
+    char    *tconv_buf = new char[1000];
     DataSet *dataset   = NULL;
     try {
         const hsize_t size[2] = {100, 200};
@@ -1201,7 +1202,7 @@ test_chunk_cache(const FileAccPropList &fapl)
 
         // Retrieve and verify the raw data chunk cache parameters
         nslots_4 = nbytes_4 = 0;
-        w0_4                = 0.0F;
+        w0_4                = 0.0;
         dapl2.getChunkCache(nslots_4, nbytes_4, w0_4);
         verify_val(nslots_2, nslots_4, "DSetCreatPropList::getChunkCache", __LINE__, __FILE__);
         verify_val(nbytes_2, nbytes_4, "DSetCreatPropList::getChunkCache", __LINE__, __FILE__);

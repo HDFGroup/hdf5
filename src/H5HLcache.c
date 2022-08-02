@@ -68,14 +68,14 @@
 static herr_t H5HL__cache_prefix_get_initial_load_size(void *udata, size_t *image_len);
 static herr_t H5HL__cache_prefix_get_final_load_size(const void *_image, size_t image_len, void *udata,
                                                      size_t *actual_len);
-static void * H5HL__cache_prefix_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty);
+static void  *H5HL__cache_prefix_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty);
 static herr_t H5HL__cache_prefix_image_len(const void *thing, size_t *image_len);
 static herr_t H5HL__cache_prefix_serialize(const H5F_t *f, void *image, size_t len, void *thing);
 static herr_t H5HL__cache_prefix_free_icr(void *thing);
 
 /* Local heap data block */
 static herr_t H5HL__cache_datablock_get_initial_load_size(void *udata, size_t *image_len);
-static void * H5HL__cache_datablock_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty);
+static void  *H5HL__cache_datablock_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty);
 static herr_t H5HL__cache_datablock_image_len(const void *thing, size_t *image_len);
 static herr_t H5HL__cache_datablock_serialize(const H5F_t *f, void *image, size_t len, void *thing);
 static herr_t H5HL__cache_datablock_notify(H5C_notify_action_t action, void *_thing);
@@ -348,7 +348,7 @@ static herr_t
 H5HL__cache_prefix_get_final_load_size(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED image_len,
                                        void *_udata, size_t *actual_len)
 {
-    const uint8_t *       image = (const uint8_t *)_image;        /* Pointer into raw data buffer */
+    const uint8_t        *image = (const uint8_t *)_image;        /* Pointer into raw data buffer */
     H5HL_cache_prfx_ud_t *udata = (H5HL_cache_prfx_ud_t *)_udata; /* User data for callback */
     H5HL_t                heap;                                   /* Local heap */
     herr_t                ret_value = SUCCEED;                    /* Return value */
@@ -360,6 +360,8 @@ H5HL__cache_prefix_get_final_load_size(const void *_image, size_t H5_ATTR_NDEBUG
     HDassert(udata);
     HDassert(actual_len);
     HDassert(*actual_len == image_len);
+
+    HDmemset(&heap, 0, sizeof(H5HL_t));
 
     /* Deserialize the heap's header */
     if (H5HL__hdr_deserialize(&heap, (const uint8_t *)image, udata) < 0)
@@ -398,11 +400,11 @@ static void *
 H5HL__cache_prefix_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED len, void *_udata,
                                hbool_t H5_ATTR_UNUSED *dirty)
 {
-    H5HL_t *              heap      = NULL;                           /* Local heap */
-    H5HL_prfx_t *         prfx      = NULL;                           /* Heap prefix deserialized */
-    const uint8_t *       image     = (const uint8_t *)_image;        /* Pointer into decoding buffer */
+    H5HL_t               *heap      = NULL;                           /* Local heap */
+    H5HL_prfx_t          *prfx      = NULL;                           /* Heap prefix deserialized */
+    const uint8_t        *image     = (const uint8_t *)_image;        /* Pointer into decoding buffer */
     H5HL_cache_prfx_ud_t *udata     = (H5HL_cache_prfx_ud_t *)_udata; /* User data for callback */
-    void *                ret_value = NULL;                           /* Return value */
+    void                 *ret_value = NULL;                           /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -537,9 +539,8 @@ H5HL__cache_prefix_serialize(const H5_ATTR_NDEBUG_UNUSED H5F_t *f, void *_image,
                              size_t H5_ATTR_NDEBUG_UNUSED len, void *_thing)
 {
     H5HL_prfx_t *prfx = (H5HL_prfx_t *)_thing; /* Pointer to local heap prefix to query */
-    H5HL_t *     heap;                         /* Pointer to the local heap */
-    uint8_t *    image = (uint8_t *)_image;    /* Pointer into image buffer */
-    size_t       buf_size;                     /* expected size of the image buffer */
+    H5HL_t      *heap;                         /* Pointer to the local heap */
+    uint8_t     *image = (uint8_t *)_image;    /* Pointer into image buffer */
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -556,11 +557,13 @@ H5HL__cache_prefix_serialize(const H5_ATTR_NDEBUG_UNUSED H5F_t *f, void *_image,
     heap = prfx->heap;
     HDassert(heap);
 
+#ifndef NDEBUG
     /* Compute the buffer size */
-    buf_size = heap->prfx_size;
+    size_t buf_size = heap->prfx_size; /* expected size of the image buffer */
     if (heap->single_cache_obj)
         buf_size += heap->dblk_size;
     HDassert(len == buf_size);
+#endif
 
     /* Update the free block value from the free list */
     heap->free_block = heap->freelist ? heap->freelist->offset : H5HL_FREE_NULL;
@@ -706,8 +709,8 @@ static void *
 H5HL__cache_datablock_deserialize(const void *image, size_t len, void *_udata, hbool_t H5_ATTR_UNUSED *dirty)
 {
     H5HL_dblk_t *dblk      = NULL;             /* Local heap data block deserialized */
-    H5HL_t *     heap      = (H5HL_t *)_udata; /* User data for callback */
-    void *       ret_value = NULL;             /* Return value */
+    H5HL_t      *heap      = (H5HL_t *)_udata; /* User data for callback */
+    void        *ret_value = NULL;             /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -801,7 +804,7 @@ static herr_t
 H5HL__cache_datablock_serialize(const H5F_t H5_ATTR_NDEBUG_UNUSED *f, void *image,
                                 size_t H5_ATTR_NDEBUG_UNUSED len, void *_thing)
 {
-    H5HL_t *     heap;                         /* Pointer to the local heap */
+    H5HL_t      *heap;                         /* Pointer to the local heap */
     H5HL_dblk_t *dblk = (H5HL_dblk_t *)_thing; /* Pointer to the local heap data block */
 
     FUNC_ENTER_PACKAGE_NOERR

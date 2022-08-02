@@ -28,12 +28,6 @@ using namespace H5;
 #include "h5cpputil.h" // C++ utilility header file
 
 /*
- * Offset from aligned memory returned by malloc().  This can be used to test
- * that type conversions handle non-aligned buffers correctly.
- */
-#define ALIGNMENT 1
-
-/*
  * Define if you want to test alignment code on a machine that doesn't
  * normally require alignment. When set, all native datatypes must be aligned
  * on a byte boundary equal to the data size.
@@ -52,13 +46,6 @@ using namespace H5;
  */
 
 const char *FILENAME[] = {"dtypes1.h5", "dtypes2.h5", "dtypes3.h5", "dtypes4.h5", NULL};
-
-/*
- * Count up or down depending on whether the machine is big endian or little
- * endian.  If local variable `endian' is H5T_ORDER_BE then the result will
- * be I, otherwise the result will be Z-(I+1).
- */
-#define ENDIAN(Z, I) (H5T_ORDER_BE == endian ? (I) : (Z) - ((I) + 1))
 
 typedef enum flt_t { FLT_FLOAT, FLT_DOUBLE, FLT_LDOUBLE, FLT_OTHER } flt_t;
 
@@ -254,7 +241,7 @@ test_detect_type_class()
          */
 
         // Create an array datatype with an atomic base type
-        unsigned  rank    = 2;      // Rank for array datatype
+        int       rank    = 2;      // Rank for array datatype
         hsize_t   dims[2] = {3, 3}; // Dimensions for array datatype
         ArrayType atom_arr(PredType::STD_REF_OBJ, rank, dims);
 
@@ -657,7 +644,7 @@ test_named()
 {
     static hsize_t ds_size[2] = {10, 20};
     unsigned       attr_data[10][20];
-    DataType *     ds_type = NULL;
+    DataType      *ds_type = NULL;
 
     SUBTEST("Named datatypes");
     try {
@@ -987,7 +974,7 @@ test_encode_decode()
         verify_val(inttyp.hasBinaryDesc(), true, "DataType::encode", __LINE__, __FILE__);
 
         // Create an IntType instance from the decoded pointer and verify it
-        IntType *  decoded_int_ptr(static_cast<IntType *>(inttyp.decode()));
+        IntType   *decoded_int_ptr(static_cast<IntType *>(inttyp.decode()));
         H5T_sign_t int_sign = decoded_int_ptr->getSign();
         verify_val(static_cast<long>(int_sign), static_cast<long>(H5T_SGN_NONE), "DataType::decode", __LINE__,
                    __FILE__);

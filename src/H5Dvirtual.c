@@ -94,13 +94,13 @@ static herr_t  H5D__virtual_flush(H5D_t *dset);
 /* Other functions */
 static herr_t H5D__virtual_open_source_dset(const H5D_t *vdset, H5O_storage_virtual_ent_t *virtual_ent,
                                             H5O_storage_virtual_srcdset_t *source_dset);
-static herr_t H5D__virtual_reset_source_dset(H5O_storage_virtual_ent_t *    virtual_ent,
+static herr_t H5D__virtual_reset_source_dset(H5O_storage_virtual_ent_t     *virtual_ent,
                                              H5O_storage_virtual_srcdset_t *source_dset);
 static herr_t H5D__virtual_str_append(const char *src, size_t src_len, char **p, char **buf,
                                       size_t *buf_size);
 static herr_t H5D__virtual_copy_parsed_name(H5O_storage_virtual_name_seg_t **dst,
-                                            H5O_storage_virtual_name_seg_t * src);
-static herr_t H5D__virtual_build_source_name(char *                                source_name,
+                                            H5O_storage_virtual_name_seg_t  *src);
+static herr_t H5D__virtual_build_source_name(char                                 *source_name,
                                              const H5O_storage_virtual_name_seg_t *parsed_name,
                                              size_t static_strlen, size_t nsubs, hsize_t blockno,
                                              char **built_name);
@@ -241,7 +241,7 @@ H5D_virtual_check_mapping_post(const H5O_storage_virtual_ent_t *ent)
 {
     hsize_t nelmts_vs;           /* Number of elements in virtual selection */
     hsize_t nelmts_ss;           /* Number of elements in source selection */
-    H5S_t * tmp_space = NULL;    /* Temporary dataspace */
+    H5S_t  *tmp_space = NULL;    /* Temporary dataspace */
     herr_t  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -284,9 +284,9 @@ H5D_virtual_check_mapping_post(const H5O_storage_virtual_ent_t *ent)
     else
         /* Make sure there are no printf substitutions */
         if ((ent->psfn_nsubs > 0) || (ent->psdn_nsubs > 0))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL,
-                    "printf specifier(s) in source name(s) without an unlimited virtual selection and "
-                    "limited source selection")
+            HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL,
+                        "printf specifier(s) in source name(s) without an unlimited virtual selection and "
+                        "limited source selection")
 
 done:
     /* Free temporary space */
@@ -315,7 +315,7 @@ done:
 herr_t
 H5D_virtual_update_min_dims(H5O_layout_t *layout, size_t idx)
 {
-    H5O_storage_virtual_t *    virt = &layout->storage.u.virt;
+    H5O_storage_virtual_t     *virt = &layout->storage.u.virt;
     H5O_storage_virtual_ent_t *ent  = &virt->list[idx];
     H5S_sel_type               sel_type;
     int                        rank;
@@ -423,9 +423,9 @@ herr_t
 H5D__virtual_store_layout(H5F_t *f, H5O_layout_t *layout)
 {
     H5O_storage_virtual_t *virt       = &layout->storage.u.virt;
-    uint8_t *              heap_block = NULL;   /* Block to add to heap */
-    size_t *               str_size   = NULL;   /* Array for VDS entry string lengths */
-    uint8_t *              heap_block_p;        /* Pointer into the heap block, while encoding */
+    uint8_t               *heap_block = NULL;   /* Block to add to heap */
+    size_t                *str_size   = NULL;   /* Array for VDS entry string lengths */
+    uint8_t               *heap_block_p;        /* Pointer into the heap block, while encoding */
     size_t                 block_size;          /* Total size of block needed */
     hsize_t                tmp_nentries;        /* Temp. variable for # of VDS entries */
     uint32_t               chksum;              /* Checksum for heap data */
@@ -529,8 +529,7 @@ H5D__virtual_store_layout(H5F_t *f, H5O_layout_t *layout)
         UINT32ENCODE(heap_block_p, chksum)
 
         /* Insert block into global heap */
-        if (H5HG_insert(f, block_size, heap_block, &(virt->serial_list_hobjid)) <
-            0) /* Casting away const OK  --NAF */
+        if (H5HG_insert(f, block_size, heap_block, &(virt->serial_list_hobjid)) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "unable to insert virtual dataset heap block")
     } /* end if */
 
@@ -560,10 +559,10 @@ herr_t
 H5D__virtual_copy_layout(H5O_layout_t *layout)
 {
     H5O_storage_virtual_ent_t *orig_list = NULL;
-    H5O_storage_virtual_t *    virt      = &layout->storage.u.virt;
+    H5O_storage_virtual_t     *virt      = &layout->storage.u.virt;
     hid_t                      orig_source_fapl;
     hid_t                      orig_source_dapl;
-    H5P_genplist_t *           plist;
+    H5P_genplist_t            *plist;
     size_t                     i;
     herr_t                     ret_value = SUCCEED;
 
@@ -894,7 +893,7 @@ static herr_t
 H5D__virtual_open_source_dset(const H5D_t *vdset, H5O_storage_virtual_ent_t *virtual_ent,
                               H5O_storage_virtual_srcdset_t *source_dset)
 {
-    H5F_t * src_file      = NULL;    /* Source file */
+    H5F_t  *src_file      = NULL;    /* Source file */
     hbool_t src_file_open = FALSE;   /* Whether we have opened and need to close src_file */
     herr_t  ret_value     = SUCCEED; /* Return value */
 
@@ -985,7 +984,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__virtual_reset_source_dset(H5O_storage_virtual_ent_t *    virtual_ent,
+H5D__virtual_reset_source_dset(H5O_storage_virtual_ent_t     *virtual_ent,
                                H5O_storage_virtual_srcdset_t *source_dset)
 {
     herr_t ret_value = SUCCEED; /* Return value */
@@ -1098,7 +1097,7 @@ H5D__virtual_str_append(const char *src, size_t src_len, char **p, char **buf, s
 
         /* Extend buffer if necessary */
         if ((p_offset + src_len + (size_t)1) > *buf_size) {
-            char * tmp_buf;
+            char  *tmp_buf;
             size_t tmp_buf_size;
 
             /* Calculate new size of buffer */
@@ -1143,14 +1142,14 @@ herr_t
 H5D_virtual_parse_source_name(const char *source_name, H5O_storage_virtual_name_seg_t **parsed_name,
                               size_t *static_strlen, size_t *nsubs)
 {
-    H5O_storage_virtual_name_seg_t * tmp_parsed_name   = NULL;
+    H5O_storage_virtual_name_seg_t  *tmp_parsed_name   = NULL;
     H5O_storage_virtual_name_seg_t **tmp_parsed_name_p = &tmp_parsed_name;
     size_t                           tmp_static_strlen;
     size_t                           tmp_strlen;
     size_t                           tmp_nsubs = 0;
-    const char *                     p;
-    const char *                     pct;
-    char *                           name_seg_p    = NULL;
+    const char                      *p;
+    const char                      *pct;
+    char                            *name_seg_p    = NULL;
     size_t                           name_seg_size = 0;
     herr_t                           ret_value     = SUCCEED; /* Return value */
 
@@ -1259,8 +1258,8 @@ done:
 static herr_t
 H5D__virtual_copy_parsed_name(H5O_storage_virtual_name_seg_t **dst, H5O_storage_virtual_name_seg_t *src)
 {
-    H5O_storage_virtual_name_seg_t * tmp_dst   = NULL;
-    H5O_storage_virtual_name_seg_t * p_src     = src;
+    H5O_storage_virtual_name_seg_t  *tmp_dst   = NULL;
+    H5O_storage_virtual_name_seg_t  *p_src     = src;
     H5O_storage_virtual_name_seg_t **p_dst     = &tmp_dst;
     herr_t                           ret_value = SUCCEED;
 
@@ -1346,7 +1345,7 @@ static herr_t
 H5D__virtual_build_source_name(char *source_name, const H5O_storage_virtual_name_seg_t *parsed_name,
                                size_t static_strlen, size_t nsubs, hsize_t blockno, char **built_name)
 {
-    char * tmp_name  = NULL;    /* Name buffer */
+    char  *tmp_name  = NULL;    /* Name buffer */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1364,7 +1363,7 @@ H5D__virtual_build_source_name(char *source_name, const H5O_storage_virtual_name
     } /* end if */
     else {
         const H5O_storage_virtual_name_seg_t *name_seg = parsed_name;
-        char *                                p;
+        char                                 *p;
         hsize_t                               blockno_down = blockno;
         size_t                                blockno_len  = 1;
         size_t                                name_len;
@@ -2188,7 +2187,7 @@ herr_t
 H5D__virtual_init(H5F_t *f, const H5D_t *dset, hid_t dapl_id)
 {
     H5O_storage_virtual_t *storage;                      /* Convenience pointer */
-    H5P_genplist_t *       dapl;                         /* Data access property list object pointer */
+    H5P_genplist_t        *dapl;                         /* Data access property list object pointer */
     hssize_t               old_offset[H5O_LAYOUT_NDIMS]; /* Old selection offset (unused) */
     size_t                 i;                            /* Local index variables */
     herr_t                 ret_value = SUCCEED;          /* Return value */
@@ -2250,7 +2249,7 @@ H5D__virtual_init(H5F_t *f, const H5D_t *dset, hid_t dapl_id)
 
     /* Retrieve VDS file FAPL to layout */
     if (storage->source_fapl <= 0) {
-        H5P_genplist_t *   source_fapl  = NULL;           /* Source file FAPL */
+        H5P_genplist_t    *source_fapl  = NULL;           /* Source file FAPL */
         H5F_close_degree_t close_degree = H5F_CLOSE_WEAK; /* Close degree for source files */
 
         if ((storage->source_fapl = H5F_get_access_plist(f, FALSE)) < 0)
@@ -2266,7 +2265,7 @@ H5D__virtual_init(H5F_t *f, const H5D_t *dset, hid_t dapl_id)
     } /* end if */
 #ifndef NDEBUG
     else {
-        H5P_genplist_t *   source_fapl = NULL; /* Source file FAPL */
+        H5P_genplist_t    *source_fapl = NULL; /* Source file FAPL */
         H5F_close_degree_t close_degree;       /* Close degree for source files */
 
         /* Get property list pointer */
@@ -2703,10 +2702,10 @@ H5D__virtual_post_io(H5O_storage_virtual_t *storage)
         else
             /* Close projected memory space */
             if (storage->list[i].source_dset.projected_mem_space) {
-            if (H5S_close(storage->list[i].source_dset.projected_mem_space) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close temporary space")
-            storage->list[i].source_dset.projected_mem_space = NULL;
-        } /* end if */
+                if (H5S_close(storage->list[i].source_dset.projected_mem_space) < 0)
+                    HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close temporary space")
+                storage->list[i].source_dset.projected_mem_space = NULL;
+            } /* end if */
 
     /* Note the lack of a done: label.  This is because there are no HGOTO_ERROR
      * calls.  If one is added, a done: label must also be added */
@@ -2729,7 +2728,7 @@ static herr_t
 H5D__virtual_read_one(H5D_dset_info_t *dset_info, const H5D_type_info_t *type_info, H5S_t *file_space,
                       H5O_storage_virtual_srcdset_t *source_dset)
 {
-    H5S_t *          projected_src_space = NULL; /* File space for selection in a single source dataset */
+    H5S_t           *projected_src_space = NULL; /* File space for selection in a single source dataset */
     H5D_dset_info_t *dinfo               = NULL;
     herr_t           ret_value           = SUCCEED; /* Return value */
 
@@ -2805,7 +2804,7 @@ H5D__virtual_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsiz
 {
     H5O_storage_virtual_t *storage;             /* Convenient pointer into layout struct */
     hsize_t                tot_nelmts;          /* Total number of elements mapped to mem_space */
-    H5S_t *                fill_space = NULL;   /* Space to fill with fill value */
+    H5S_t                 *fill_space = NULL;   /* Space to fill with fill value */
     size_t                 i, j;                /* Local index variables */
     herr_t                 ret_value = SUCCEED; /* Return value */
 
@@ -2849,7 +2848,7 @@ H5D__virtual_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsiz
         else
             /* Read from source dataset */
             if (H5D__virtual_read_one(dset_info, type_info, file_space, &storage->list[i].source_dset) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "unable to read source dataset")
+                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "unable to read source dataset")
     } /* end for */
 
     /* Fill unmapped part of buffer with fill value */
@@ -2936,7 +2935,7 @@ static herr_t
 H5D__virtual_write_one(H5D_dset_info_t *dset_info, const H5D_type_info_t *type_info, H5S_t *file_space,
                        H5O_storage_virtual_srcdset_t *source_dset)
 {
-    H5S_t *          projected_src_space = NULL; /* File space for selection in a single source dataset */
+    H5S_t           *projected_src_space = NULL; /* File space for selection in a single source dataset */
     H5D_dset_info_t *dinfo               = NULL;
     herr_t           ret_value           = SUCCEED; /* Return value */
 
@@ -3062,7 +3061,7 @@ H5D__virtual_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsi
         else
             /* Write to source dataset */
             if (H5D__virtual_write_one(dset_info, type_info, file_space, &storage->list[i].source_dset) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to write to source dataset")
+                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to write to source dataset")
     } /* end for */
 
 done:
@@ -3134,7 +3133,7 @@ done:
 herr_t
 H5D__virtual_hold_source_dset_files(const H5D_t *dset, H5D_virtual_held_file_t **head)
 {
-    H5O_storage_virtual_t *  storage;             /* Convenient pointer into layout struct */
+    H5O_storage_virtual_t   *storage;             /* Convenient pointer into layout struct */
     H5D_virtual_held_file_t *tmp;                 /* Temporary held file node */
     size_t                   i;                   /* Local index variable */
     herr_t                   ret_value = SUCCEED; /* Return value */
@@ -3283,9 +3282,9 @@ H5D__virtual_refresh_source_dsets(H5D_t *dset)
         else
             /* Check if source dataset is open */
             if (storage->list[i].source_dset.dset)
-            /* Refresh source dataset */
-            if (H5D__virtual_refresh_source_dset(&storage->list[i].source_dset.dset) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to refresh source dataset")
+                /* Refresh source dataset */
+                if (H5D__virtual_refresh_source_dset(&storage->list[i].source_dset.dset) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to refresh source dataset")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

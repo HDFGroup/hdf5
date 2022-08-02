@@ -75,10 +75,10 @@ static int H5I__id_dump_cb(void *_item, void *_key, void *_udata);
 static int
 H5I__id_dump_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
 {
-    H5I_id_info_t *   info   = (H5I_id_info_t *)_item; /* Pointer to the ID node */
+    H5I_id_info_t    *info   = (H5I_id_info_t *)_item; /* Pointer to the ID node */
     H5I_type_t        type   = *(H5I_type_t *)_udata;  /* User data */
     const H5G_name_t *path   = NULL;                   /* Path to file object */
-    void *            object = NULL;                   /* Pointer to VOL connector object */
+    void             *object = NULL;                   /* Pointer to VOL connector object */
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -111,7 +111,7 @@ H5I__id_dump_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
             const H5T_t *dt = (const H5T_t *)info->object;
 
             H5_GCC_CLANG_DIAG_OFF("cast-qual")
-            object = (void *)H5T_get_actual_type((H5T_t *)dt); /* Casting away const OK - QAK */
+            object = (void *)H5T_get_actual_type((H5T_t *)dt);
             H5_GCC_CLANG_DIAG_ON("cast-qual")
 
             path = H5T_nameof(object);

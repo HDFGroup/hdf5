@@ -294,6 +294,7 @@ void test_dense_attr(void);
 void test_partial_no_selection_coll_md_read(void);
 void test_multi_chunk_io_addrmap_issue(void);
 void test_link_chunk_io_sort_chunk_issue(void);
+void test_oflush(void);
 
 /* commonly used prototypes */
 hid_t      create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type);

@@ -9,7 +9,7 @@ if (NOT ONLY_SHARED_LIBS)
 #  add_custom_target(generate_demo ALL
 #    DEPENDS "${HDF5_TOOLS_DIR}/test/demo_destfiles.test"
 #  )
-  target_include_directories (h5dwalk PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};${CIRCLE_INCLUDE_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  target_include_directories (h5dwalk PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};${CIRCLE_INCLUDE_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   target_compile_options(h5dwalk PRIVATE "${HDF5_CMAKE_C_FLAGS}")
   TARGET_C_PROPERTIES (h5dwalk STATIC)
   target_link_libraries (h5dwalk PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET} ${MFU_LIBRARY} "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_LIBRARIES}>")
@@ -21,7 +21,7 @@ endif ()
 
 if (BUILD_SHARED_LIBS)
   add_executable (h5dwalk-shared ${HDF5_UTILS_TOOLS_H5DWALK_SOURCE_DIR}/h5dwalk.c)
-  target_include_directories (h5dwalk-shared PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};${CIRCLE_INCLUDE_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  target_include_directories (h5dwalk-shared PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};${CIRCLE_INCLUDE_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   target_compile_options(h5dwalk-shared PRIVATE "${HDF5_CMAKE_C_FLAGS}")
   TARGET_C_PROPERTIES (h5dwalk-shared SHARED)
   target_link_libraries (h5dwalk-shared PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} ${MFU_LIBRARY} "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_LIBRARIES}>")

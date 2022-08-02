@@ -370,7 +370,7 @@ H5_DLL hid_t H5Dcreate_anon(hid_t loc_id, hid_t type_id, hid_t space_id, hid_t d
  * --------------------------------------------------------------------------
  * \ingroup H5D
  *
- * \brief Creates a new dataset and links it into the file
+ * \brief Opens an existing dataset
  *
  * \fgdta_loc_id
  * \param[in] name      Name of the dataset to open

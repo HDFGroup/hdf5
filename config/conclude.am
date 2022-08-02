@@ -293,6 +293,11 @@ endif
 if HDFS_VFD_CONDITIONAL
   VFD_LIST += hdfs
 endif
+if SUBFILING_VFD_CONDITIONAL
+  # Several VFD tests fail with Subfiling since it
+  # doesn't currently support collective I/O
+  # VFD_LIST += subfiling
+endif
 
 # Run test with different Virtual File Driver
 check-vfd: $(LIB) $(PROGS) $(chk_TESTS)

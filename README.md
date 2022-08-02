@@ -84,9 +84,8 @@ are tentative.
 
 | Release | New Features |
 | ------- | ------------ |
-| 1.13.2 | VFD SWMR, Onion VFD, Selection I/O |
+| 1.13.2 | VFD SWMR, Onion VFD, Selection I/O, Subfiling |
 | 1.13.3 | Multi-Dataset I/O |
-| 1.13.4 | Subfiling |
 
 This list of feature release versions is also tentative, and the specific release
 in which a feature is introduced may change.

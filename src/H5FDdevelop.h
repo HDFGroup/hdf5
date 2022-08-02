@@ -15,8 +15,8 @@
  *      support routines.
  */
 
-#ifndef _H5FDdevelop_H
-#define _H5FDdevelop_H
+#ifndef H5FDdevelop_H
+#define H5FDdevelop_H
 
 /* Include package's public header */
 #include "H5FDpublic.h"
@@ -165,7 +165,7 @@ typedef struct H5FD_t H5FD_t;
 typedef struct H5FD_class_t {
     unsigned           version; /**< File driver class struct version #     */
     H5FD_class_value_t value;
-    const char *       name;
+    const char        *name;
     haddr_t            maxaddr;
     H5F_close_degree_t fc_degree;
     herr_t (*terminate)(void);
@@ -252,11 +252,11 @@ typedef hid_t (*H5FD_init_t)(void);
 extern "C" {
 #endif
 
-H5_DLL hid_t  H5FDperform_init(H5FD_init_t op);
-H5_DLL hid_t  H5FDregister(const H5FD_class_t *cls);
-H5_DLL htri_t H5FDis_driver_registered_by_name(const char *driver_name);
-H5_DLL htri_t H5FDis_driver_registered_by_value(H5FD_class_value_t driver_value);
-H5_DLL herr_t H5FDunregister(hid_t driver_id);
+H5_DLL hid_t   H5FDperform_init(H5FD_init_t op);
+H5_DLL hid_t   H5FDregister(const H5FD_class_t *cls);
+H5_DLL htri_t  H5FDis_driver_registered_by_name(const char *driver_name);
+H5_DLL htri_t  H5FDis_driver_registered_by_value(H5FD_class_value_t driver_value);
+H5_DLL herr_t  H5FDunregister(hid_t driver_id);
 H5_DLL H5FD_t *H5FDopen(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr);
 H5_DLL herr_t  H5FDclose(H5FD_t *file);
 H5_DLL int     H5FDcmp(const H5FD_t *f1, const H5FD_t *f2);
@@ -292,4 +292,4 @@ H5_DLL herr_t  H5FDctl(H5FD_t *file, uint64_t op_code, uint64_t flags, const voi
 }
 #endif
 
-#endif /* _H5FDdevelop_H */
+#endif /* H5FDdevelop_H */

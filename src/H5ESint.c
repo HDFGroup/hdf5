@@ -60,22 +60,22 @@ typedef struct H5ES_get_requests_ctx_t {
 
 /* Callback context for wait operations */
 typedef struct H5ES_wait_ctx_t {
-    H5ES_t * es;              /* Event set being operated on */
+    H5ES_t  *es;              /* Event set being operated on */
     uint64_t timeout;         /* Timeout for wait operation (in ns) */
-    size_t * num_in_progress; /* Count of # of operations that have not completed */
+    size_t  *num_in_progress; /* Count of # of operations that have not completed */
     hbool_t *op_failed;       /* Flag to indicate an operation failed */
 } H5ES_wait_ctx_t;
 
 /* Callback context for cancel operations */
 typedef struct H5ES_cancel_ctx_t {
-    H5ES_t * es;               /* Event set being operated on */
-    size_t * num_not_canceled; /* Count of # of operations were not canceled */
+    H5ES_t  *es;               /* Event set being operated on */
+    size_t  *num_not_canceled; /* Count of # of operations were not canceled */
     hbool_t *op_failed;        /* Flag to indicate an operation failed */
 } H5ES_cancel_ctx_t;
 
 /* Callback context for get error info (gei) operations */
 typedef struct H5ES_gei_ctx_t {
-    H5ES_t *         es;            /* Event set being operated on */
+    H5ES_t          *es;            /* Event set being operated on */
     size_t           num_err_info;  /* # of elements in err_info[] array */
     size_t           curr_err;      /* Index of current error in array */
     H5ES_err_info_t *curr_err_info; /* Pointer to current element in err_info[] array */
@@ -332,7 +332,7 @@ done:
 herr_t
 H5ES_insert(hid_t es_id, H5VL_t *connector, void *token, const char *caller, const char *caller_args, ...)
 {
-    H5ES_t *    es = NULL;             /* Event set for the operation */
+    H5ES_t     *es = NULL;             /* Event set for the operation */
     const char *app_file;              /* Application source file name */
     const char *app_func;              /* Application source function name */
     unsigned    app_line;              /* Application source line number */
@@ -652,7 +652,7 @@ done:
 static int
 H5ES__wait_cb(H5ES_event_t *ev, void *_ctx)
 {
-    H5ES_wait_ctx_t *     ctx       = (H5ES_wait_ctx_t *)_ctx;     /* Callback context */
+    H5ES_wait_ctx_t      *ctx       = (H5ES_wait_ctx_t *)_ctx;     /* Callback context */
     H5VL_request_status_t ev_status = H5VL_REQUEST_STATUS_SUCCEED; /* Status from event's operation */
     uint64_t start_time = 0, elapsed_time = 0; /* Start and elapsed times for waiting on an operation */
     int      ret_value = H5_ITER_CONT;         /* Return value */
@@ -773,7 +773,7 @@ done:
 static int
 H5ES__cancel_cb(H5ES_event_t *ev, void *_ctx)
 {
-    H5ES_cancel_ctx_t *   ctx       = (H5ES_cancel_ctx_t *)_ctx;   /* Callback context */
+    H5ES_cancel_ctx_t    *ctx       = (H5ES_cancel_ctx_t *)_ctx;   /* Callback context */
     H5VL_request_status_t ev_status = H5VL_REQUEST_STATUS_SUCCEED; /* Status from event's operation */
     int                   ret_value = H5_ITER_CONT;                /* Return value */
 
@@ -882,7 +882,7 @@ static int
 H5ES__get_err_info_cb(H5ES_event_t *ev, void *_ctx)
 {
     H5VL_request_specific_args_t vol_cb_args;                        /* Arguments to VOL callback */
-    H5ES_gei_ctx_t *             ctx       = (H5ES_gei_ctx_t *)_ctx; /* Callback context */
+    H5ES_gei_ctx_t              *ctx       = (H5ES_gei_ctx_t *)_ctx; /* Callback context */
     int                          ret_value = H5_ITER_CONT;           /* Return value */
 
     FUNC_ENTER_PACKAGE

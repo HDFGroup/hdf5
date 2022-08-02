@@ -53,7 +53,7 @@
 struct H5MM_block_t; /* Forward declaration for typedef */
 typedef struct H5MM_block_t {
     unsigned char
-                         sig[H5MM_SIG_SIZE]; /* Signature for the block, to indicate it was allocated with H5MM* interface */
+        sig[H5MM_SIG_SIZE]; /* Signature for the block, to indicate it was allocated with H5MM* interface */
     struct H5MM_block_t *next; /* Pointer to next block in the list of allocated blocks */
     struct H5MM_block_t *prev; /* Pointer to previous block in the list of allocated blocks */
     union {
@@ -152,7 +152,7 @@ H5MM__sanity_check_block(const H5MM_block_t *block)
     HDassert(block->u.info.size > 0);
     HDassert(block->u.info.in_use);
     /* Check for head & tail guards, if not head of linked list */
-    if (block->u.info.size != SIZET_MAX) {
+    if (block->u.info.size != SIZE_MAX) {
         HDassert(0 == HDmemcmp(block->b, H5MM_block_head_guard_s, H5MM_HEAD_GUARD_SIZE));
         HDassert(0 == HDmemcmp(block->b + H5MM_HEAD_GUARD_SIZE + block->u.info.size, H5MM_block_tail_guard_s,
                                H5MM_TAIL_GUARD_SIZE));
@@ -267,7 +267,7 @@ H5MM_malloc(size_t size)
         H5MM_memcpy(H5MM_block_head_s.sig, H5MM_block_signature_s, H5MM_SIG_SIZE);
         H5MM_block_head_s.next          = &H5MM_block_head_s;
         H5MM_block_head_s.prev          = &H5MM_block_head_s;
-        H5MM_block_head_s.u.info.size   = SIZET_MAX;
+        H5MM_block_head_s.u.info.size   = SIZE_MAX;
         H5MM_block_head_s.u.info.in_use = TRUE;
 
         H5MM_init_s = TRUE;

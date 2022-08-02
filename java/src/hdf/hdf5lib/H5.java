@@ -1242,6 +1242,10 @@ public class H5 implements java.io.Serializable {
             log.trace("H5Aread_string type");
             status = H5Aread_string(attr_id, mem_type_id, (String[])obj);
         }
+        else if (H5.H5Tget_class(mem_type_id) == HDF5Constants.H5T_VLEN) {
+            log.trace("H5AreadVL type");
+            status = H5AreadVL(attr_id, mem_type_id, (Object[])obj);
+        }
         else {
             // Create a data buffer to hold the data into a Java Array
             HDFArray theArray = new HDFArray(obj);
@@ -1787,6 +1791,10 @@ public class H5 implements java.io.Serializable {
         else if (is1D && (dataClass.getComponentType() == String.class)) {
             log.trace("H5Dwrite_string type");
             status = H5Awrite_string(attr_id, mem_type_id, (String[])obj);
+        }
+        else if (H5.H5Tget_class(mem_type_id) == HDF5Constants.H5T_VLEN) {
+            log.trace("H5AwriteVL type");
+            status = H5AwriteVL(attr_id, mem_type_id, (Object[])obj);
         }
         else {
             HDFArray theArray = new HDFArray(obj);
@@ -2772,6 +2780,11 @@ public class H5 implements java.io.Serializable {
             status = H5Dread_string(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
                                     (String[])obj);
         }
+        else if (H5.H5Tget_class(mem_type_id) == HDF5Constants.H5T_VLEN) {
+            log.trace("H5DreadVL type");
+            status =
+                H5DreadVL(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, (Object[])obj);
+        }
         else {
             // Create a data buffer to hold the data into a Java Array
             HDFArray theArray = new HDFArray(obj);
@@ -3449,6 +3462,11 @@ public class H5 implements java.io.Serializable {
             log.trace("H5Dwrite_string type");
             status = H5Dwrite_string(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
                                      (String[])obj);
+        }
+        else if (H5.H5Tget_class(mem_type_id) == HDF5Constants.H5T_VLEN) {
+            log.trace("H5DwriteVL type");
+            status = H5DwriteVL(dataset_id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id,
+                                (Object[])obj);
         }
         else {
             HDFArray theArray = new HDFArray(obj);
@@ -5342,7 +5360,7 @@ public class H5 implements java.io.Serializable {
         String n[] = new String[1];
         n[0]       = new String("");
         oname[0]   = H5Lget_name_by_idx(loc_id, name, HDF5Constants.H5_INDEX_NAME, HDF5Constants.H5_ITER_INC,
-                                      idx, HDF5Constants.H5P_DEFAULT);
+                                        idx, HDF5Constants.H5P_DEFAULT);
         H5L_info_t info = H5Lget_info_by_idx(loc_id, name, HDF5Constants.H5_INDEX_NAME,
                                              HDF5Constants.H5_ITER_INC, idx, HDF5Constants.H5P_DEFAULT);
         type[0]         = info.type;
@@ -6991,7 +7009,7 @@ public class H5 implements java.io.Serializable {
     /**
      * H5Oflush causes all buffers associated with an object to be immediately flushed to disk without
      * removing the data from the cache. object_id can be any named object associated with an HDF5 file
-     * ncluding a dataset, a group, or a committed datatype.
+     * including a dataset, a group, or a committed datatype.
      *
      * @param object_id
      *            IN: Identifier of the object to be flushed.
@@ -9356,9 +9374,8 @@ public class H5 implements java.io.Serializable {
         byte[] buf        = theArray.emptyBytes();
 
         int status = H5Pget_fill_value(plist_id, type_id, buf);
-        if (status >= 0) {
+        if (status >= 0)
             obj = theArray.arrayify(buf);
-        }
 
         return status;
     }
@@ -11018,8 +11035,6 @@ public class H5 implements java.io.Serializable {
     public synchronized static native void H5Rdestroy(byte[] ref_ptr)
         throws HDF5LibraryException, NullPointerException, IllegalArgumentException;
 
-    // Info //
-
     /**
      * H5Rget_type retrieves the type of a reference.
      *
@@ -11075,8 +11090,6 @@ public class H5 implements java.io.Serializable {
      **/
     public synchronized static native byte[] H5Rcopy(byte[] src_ref_ptr)
         throws HDF5LibraryException, NullPointerException, IllegalArgumentException;
-
-    // Dereference //
 
     /**
      * H5Ropen_object opens that object and returns an identifier.
@@ -11223,8 +11236,6 @@ public class H5 implements java.io.Serializable {
      **/
     public synchronized static native int H5Rget_obj_type3(byte[] ref_ptr, long rapl_id)
         throws HDF5LibraryException, NullPointerException, IllegalArgumentException;
-
-    // Get name //
 
     /**
      * H5Rget_file_name retrieves the file name for the object, region or attribute reference pointed to.
@@ -11397,6 +11408,29 @@ public class H5 implements java.io.Serializable {
      **/
     public synchronized static native long H5Rget_name(long loc_id, int ref_type, byte[] ref, String[] name,
                                                        long size)
+        throws HDF5LibraryException, NullPointerException, IllegalArgumentException;
+
+    /**
+     * H5Rget_name_string retrieves a name for the object identified by ref.
+     *
+     * @param loc_id
+     *            IN: Identifier for the dataset containing the reference or for the group that dataset is in.
+     * @param ref_type
+     *            IN: Type of reference.
+     * @param ref
+     *            IN: An object or dataset region reference.
+     *
+     * @return Returns the name if successful, returning null if no name is associated with
+     *         the identifier.
+     *
+     * @exception HDF5LibraryException
+     *            Error from the HDF-5 Library.
+     * @exception NullPointerException
+     *            size is null.
+     * @exception IllegalArgumentException
+     *            Argument is illegal.
+     **/
+    public synchronized static native String H5Rget_name_string(long loc_id, int ref_type, byte[] ref)
         throws HDF5LibraryException, NullPointerException, IllegalArgumentException;
 
     /**

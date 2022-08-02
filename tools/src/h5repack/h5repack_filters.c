@@ -34,7 +34,7 @@
  */
 static int
 aux_copy_obj(hid_t        dcpl_id,        /* dataset creation property list */
-             const char * name,           /* object name from traverse list */
+             const char  *name,           /* object name from traverse list */
              pack_info_t *objout /*OUT*/) /* info about object to filter */
 {
     int          nfilters;       /* number of filters in DCPL */
@@ -84,12 +84,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-aux_find_obj(const char * name,        /* object name from traverse list */
-             pack_opt_t * options,     /* repack options */
+aux_find_obj(const char  *name,        /* object name from traverse list */
+             pack_opt_t  *options,     /* repack options */
              pack_info_t *obj /*OUT*/) /* info about object to filter */
 {
-    char *       pdest = NULL;
-    const char * pname = NULL;
+    char        *pdest = NULL;
+    const char  *pname = NULL;
     unsigned int i;
 
     for (i = 0; i < options->op_tbl->nelems; i++) {
@@ -124,8 +124,8 @@ aux_find_obj(const char * name,        /* object name from traverse list */
  *-------------------------------------------------------------------------
  */
 static int
-aux_assign_obj(const char * name,        /* object name from traverse list */
-               pack_opt_t * options,     /* repack options */
+aux_assign_obj(const char  *name,        /* object name from traverse list */
+               pack_opt_t  *options,     /* repack options */
                pack_info_t *obj /*OUT*/) /* info about object to filter */
 {
     int         idx, i;
@@ -236,13 +236,13 @@ aux_assign_obj(const char * name,        /* object name from traverse list */
  */
 
 int
-apply_filters(const char *   name,    /* object name from traverse list */
+apply_filters(const char    *name,    /* object name from traverse list */
               int            rank,    /* rank of dataset */
               const hsize_t *dims,    /* dimensions of dataset */
               size_t         msize,   /* size of type */
               hid_t          dcpl_id, /* dataset creation property list */
-              pack_opt_t *   options, /* repack options */
-              int *          has_filter)        /* (OUT) object NAME has a filter */
+              pack_opt_t    *options, /* repack options */
+              int           *has_filter)        /* (OUT) object NAME has a filter */
 {
     int          nfilters;   /* number of filters in DCPL */
     hsize_t      chsize[64]; /* chunk size in elements */

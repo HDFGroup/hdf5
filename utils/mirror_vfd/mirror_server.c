@@ -143,7 +143,7 @@ static void
 mybzero(void *dest, size_t size)
 {
     size_t i = 0;
-    char * s = NULL;
+    char  *s = NULL;
     HDassert(dest);
     s = (char *)dest;
     for (i = 0; i < size; i++) {
@@ -403,8 +403,8 @@ accept_connection(struct server_run *run)
 {
     struct sockaddr_in client_addr;      /**/
     socklen_t          clilen;           /**/
-    struct hostent *   host_port = NULL; /**/
-    char *             hostaddrp;        /**/
+    struct hostent    *host_port = NULL; /**/
+    char              *hostaddrp;        /**/
     int                connfd = -1;      /* connection file descriptor */
 
     if (run == NULL || run->magic != SERVER_RUN_MAGIC) {
@@ -471,12 +471,13 @@ wait_for_child(int H5_ATTR_UNUSED sig)
 static int
 handle_requests(struct server_run *run)
 {
-    int              connfd = -1;                       /**/
-    char             mybuf[H5FD_MIRROR_XMIT_OPEN_SIZE]; /**/
-    ssize_t          ret;                               /* general-purpose error-checking */
-    int              pid;                               /* process ID of fork */
-    struct sigaction sa;
-    int              ret_value = 0;
+    int                      connfd = -1;
+    char                    *mybuf  = NULL;
+    ssize_t                  ret; /* general-purpose error-checking */
+    int                      pid; /* process ID of fork */
+    struct sigaction         sa;
+    H5FD_mirror_xmit_open_t *xopen     = NULL;
+    int                      ret_value = 0;
 
     if (run == NULL || run->magic != SERVER_RUN_MAGIC) {
         mirror_log(NULL, V_ERR, "invalid server_run pointer");
@@ -501,6 +502,15 @@ handle_requests(struct server_run *run)
         return 1;
     }
 
+    if (NULL == (mybuf = HDmalloc(H5FD_MIRROR_XMIT_OPEN_SIZE * sizeof(char)))) {
+        mirror_log(NULL, V_ERR, "out of memory");
+        goto error;
+    }
+    if (NULL == (xopen = HDmalloc(sizeof(H5FD_mirror_xmit_open_t)))) {
+        mirror_log(NULL, V_ERR, "out of memory");
+        goto error;
+    }
+
     /* Keep listening for attempts to connect.
      */
 
@@ -518,7 +528,7 @@ handle_requests(struct server_run *run)
         /* Read handshake from port connection.
          */
 
-        if ((ret = HDread(connfd, &mybuf, H5FD_MIRROR_XMIT_OPEN_SIZE)) < 0) {
+        if ((ret = HDread(connfd, mybuf, H5FD_MIRROR_XMIT_OPEN_SIZE)) < 0) {
             mirror_log(run->loginfo, V_ERR, "read:%d", ret);
             goto error;
         }
@@ -555,12 +565,11 @@ handle_requests(struct server_run *run)
             HDclose(connfd);
         } /* end if "CONFIRM" directive */
         else if (H5FD_MIRROR_XMIT_OPEN_SIZE == ret) {
-            H5FD_mirror_xmit_open_t xopen;
 
             mirror_log(run->loginfo, V_INFO, "probable OPEN xmit received");
 
-            H5FD_mirror_xmit_decode_open(&xopen, (const unsigned char *)mybuf);
-            if (FALSE == H5FD_mirror_xmit_is_open(&xopen)) {
+            H5FD_mirror_xmit_decode_open(xopen, (const unsigned char *)mybuf);
+            if (FALSE == H5FD_mirror_xmit_is_open(xopen)) {
                 mirror_log(run->loginfo, V_WARN, "expected OPEN xmit was malformed");
                 HDclose(connfd);
                 continue;
@@ -575,7 +584,7 @@ handle_requests(struct server_run *run)
             }                    /* end if fork error */
             else if (pid == 0) { /* child process (writer side of fork) */
                 mirror_log(run->loginfo, V_INFO, "executing writer");
-                if (run_writer(connfd, &xopen) < 0) {
+                if (run_writer(connfd, xopen) < 0) {
                     HDprintf("can't run writer\n");
                 }
                 else {
@@ -605,12 +614,17 @@ done:
         HDclose(connfd);
     }
 
+    HDfree(mybuf);
+    HDfree(xopen);
+
     return ret_value;
 
 error:
     if (connfd >= 0) {
         HDclose(connfd);
     }
+    HDfree(mybuf);
+    HDfree(xopen);
     return -1;
 } /* end handle_requests() */
 

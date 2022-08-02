@@ -358,7 +358,7 @@ main(int argc, char *argv[])
     long        nrecords     = 0;     /* # of records to append */
     long        flush_count  = 10000; /* # of records to write between flushing file */
     hbool_t     verbose      = TRUE;  /* Whether to emit some informational messages */
-    FILE *      verbose_file = NULL;  /* File handle for verbose output */
+    FILE       *verbose_file = NULL;  /* File handle for verbose output */
     hbool_t     use_seed     = FALSE; /* Set to TRUE if a seed was set on the command line */
     unsigned    random_seed  = 0;     /* Random # seed */
     int         comp_level   = -1;    /* Compression level (-1 is no compression) */

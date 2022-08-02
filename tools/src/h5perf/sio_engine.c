@@ -84,7 +84,7 @@ typedef union {
 } file_descr;
 
 /* local functions */
-static char * sio_create_filename(iotype iot, const char *base_name, char *fullname, size_t size,
+static char  *sio_create_filename(iotype iot, const char *base_name, char *fullname, size_t size,
                                   parameters *param);
 static herr_t do_write(results *res, file_descr *fd, parameters *parms, void *buffer);
 static herr_t do_read(results *res, file_descr *fd, parameters *parms, void *buffer);
@@ -107,7 +107,7 @@ static int     cont_dim;                         /* lowest dimension for contigu
 static size_t         cont_size;                 /* size of contiguous POSIX access */
 static hid_t          fapl;                      /* file access list */
 static unsigned char *buf_p;                     /* buffer pointer */
-static const char *   multi_letters = "msbrglo"; /* string for multi driver */
+static const char    *multi_letters = "msbrglo"; /* string for multi driver */
 
 /* HDF5 global variables */
 static hsize_t  h5count[MAX_DIMS];                 /*selection count               */
@@ -127,7 +127,7 @@ static hid_t    h5dxpl          = H5I_INVALID_HID; /* Dataset transfer property 
 void
 do_sio(parameters param, results *res)
 {
-    char *     buffer = NULL;      /*data buffer pointer           */
+    char      *buffer = NULL;      /*data buffer pointer           */
     size_t     buf_size[MAX_DIMS]; /* general buffer size in bytes     */
     file_descr fd;                 /* file handles */
     iotype     iot;                /* API type */
@@ -179,7 +179,7 @@ do_sio(parameters param, results *res)
 
         if ((param.dset_size[i] % param.buf_size[i]) != 0) {
             HDfprintf(stderr,
-                      "Dataset size[%d] (%" H5_PRINTF_LL_WIDTH "d) must be a multiple of the "
+                      "Dataset size[%d] (%lld) must be a multiple of the "
                       "transfer buffer size[%d] (%zu)\n",
                       param.rank, (long long)param.dset_size[i], param.rank, param.buf_size[i]);
             GOTOERROR(FAIL);
@@ -203,7 +203,7 @@ do_sio(parameters param, results *res)
     /* Open file for write */
 
     HDstrcpy(base_name, "#sio_tmp");
-    sio_create_filename(iot, base_name, fname, sizeof(fname), &param);
+    sio_create_filename(iot, base_name, fname, FILENAME_MAX, &param);
 
     if (sio_debug_level > 0)
         HDfprintf(output, "data filename=%s\n", fname);
@@ -288,7 +288,7 @@ static char *
 sio_create_filename(iotype iot, const char *base_name, char *fullname, size_t size, parameters *param)
 {
     const char *prefix, *suffix = "";
-    char *      ptr, last       = '\0';
+    char       *ptr, last       = '\0';
     size_t      i, j;
     vfdtype     vfd;
     vfd = param->vfd;
@@ -522,7 +522,7 @@ do_write(results *res, file_descr *fd, parameters *parms, void *buffer)
                 } /* end if */
             }     /* end if */
 
-            HDsprintf(dname, "Dataset_%ld", (unsigned long)parms->num_bytes);
+            HDsnprintf(dname, sizeof(dname), "Dataset_%ld", (unsigned long)parms->num_bytes);
             h5ds_id =
                 H5Dcreate2(fd->h5fd, dname, ELMT_H5_TYPE, h5dset_space_id, H5P_DEFAULT, h5dcpl, H5P_DEFAULT);
 
@@ -767,7 +767,7 @@ done:
 static herr_t
 do_read(results *res, file_descr *fd, parameters *parms, void *buffer)
 {
-    char * buffer2  = NULL; /* Buffer for data verification */
+    char  *buffer2  = NULL; /* Buffer for data verification */
     int    ret_code = SUCCESS;
     char   dname[64];
     int    i;
@@ -851,7 +851,7 @@ do_read(results *res, file_descr *fd, parameters *parms, void *buffer)
             break;
 
         case HDF5:
-            HDsprintf(dname, "Dataset_%ld", (long)parms->num_bytes);
+            HDsnprintf(dname, sizeof(dname), "Dataset_%ld", (long)parms->num_bytes);
             h5ds_id = H5Dopen2(fd->h5fd, dname, H5P_DEFAULT);
             if (h5ds_id < 0) {
                 HDfprintf(stderr, "HDF5 Dataset open failed\n");
@@ -1181,7 +1181,7 @@ set_vfd(parameters *param)
             return -1;
         for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {
             memb_fapl[mt] = H5P_DEFAULT;
-            HDsprintf(sv->arr[mt], "%%s-%c.h5", multi_letters[mt]);
+            HDsnprintf(sv->arr[mt], 1024, "%%s-%c.h5", multi_letters[mt]);
             memb_name[mt] = sv->arr[mt];
             memb_addr[mt] = (haddr_t)MAX(mt - 1, 0) * (HADDR_MAX / 10);
         }
@@ -1274,7 +1274,7 @@ done:
 static void
 do_cleanupfile(iotype iot, char *filename)
 {
-    char * temp = NULL;
+    char  *temp = NULL;
     size_t temp_sz;
     int    j;
     hid_t  driver;
@@ -1298,7 +1298,9 @@ do_cleanupfile(iotype iot, char *filename)
 
                 if (driver == H5FD_FAMILY) {
                     for (j = 0; /*void*/; j++) {
+                        H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
                         HDsnprintf(temp, temp_sz, filename, j);
+                        H5_GCC_CLANG_DIAG_ON("format-nonliteral")
 
                         if (HDaccess(temp, F_OK) < 0)
                             break;

@@ -166,7 +166,7 @@ H5Z_term_package(void)
                  * units of `B/s', `kB/s', `MB/s', `GB/s', or `TB/s' or
                  * the word `Inf' if the elapsed time is zero.
                  */
-                H5_bandwidth(bandwidth, (double)(H5Z_stat_table_g[i].stats[dir].total),
+                H5_bandwidth(bandwidth, sizeof(bandwidth), (double)(H5Z_stat_table_g[i].stats[dir].total),
                              H5Z_stat_table_g[i].stats[dir].times.elapsed);
 
                 /* Print the statistics */
@@ -822,7 +822,7 @@ H5Z__prepare_prelude_callback_dcpl(hid_t dcpl_id, hid_t type_id, H5Z_prelude_typ
             /* Check if the chunks have filters */
             if (dcpl_pline.nused > 0) {
                 hsize_t chunk_dims[H5O_LAYOUT_NDIMS]; /* Size of chunk dimensions */
-                H5S_t * space;                        /* Dataspace describing chunk */
+                H5S_t  *space;                        /* Dataspace describing chunk */
                 size_t  u;                            /* Local index variable */
 
                 /* Create a dataspace for a chunk & set the extent */
@@ -1288,7 +1288,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags, unsigned *filter_mask /*i
     int           fclass_idx;    /* Index of filter class in global table */
     H5Z_class2_t *fclass = NULL; /* Filter class pointer */
 #ifdef H5Z_DEBUG
-    H5Z_stats_t * fstats = NULL; /* Filter stats pointer */
+    H5Z_stats_t  *fstats = NULL; /* Filter stats pointer */
     H5_timer_t    timer;         /* Timer for filter operations */
     H5_timevals_t times;         /* Elapsed time for each operation */
 #endif
