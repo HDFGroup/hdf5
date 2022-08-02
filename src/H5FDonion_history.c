@@ -26,52 +26,60 @@
 #include "H5FDonion_priv.h" /* Onion file driver internals */
 
 /*-----------------------------------------------------------------------------
- * Read and decode the history information from `raw_file` at
- * `addr` .. `addr + size` (taken from history header), and store the decoded
- * information in the structure at `history_out`.
+ * Function:    H5FD__onion_write_history
  *
- * If successful, `history_out->record_locs` is always allocated, even if
- * there is zero revisions.
+ * Purpose:     Read and decode the history information from `raw_file` at
+ *              `addr` .. `addr + size` (taken from history header), and store
+ *              the decoded information in the structure at `history_out`.
+ *
+ * Returns:     SUCCEED/FAIL
  *-----------------------------------------------------------------------------
  */
 herr_t
 H5FD__onion_ingest_history(H5FD_onion_history_t *history_out, H5FD_t *raw_file, haddr_t addr, haddr_t size)
 {
     unsigned char *buf       = NULL;
-    herr_t         ret_value = SUCCEED;
     uint32_t       sum       = 0;
+    herr_t         ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE;
 
+    HDassert(history_out);
+    HDassert(raw_file);
+
+    /* Set early so we can clean up properly on errors */
+    history_out->record_locs = NULL;
+
     if (H5FD_get_eof(raw_file, H5FD_MEM_DRAW) < (addr + size))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "header indicates history beyond EOF")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "header indicates history beyond EOF");
 
     if (NULL == (buf = H5MM_malloc(sizeof(char) * size)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer space");
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "can't allocate buffer space");
 
     if (H5FD_set_eoa(raw_file, H5FD_MEM_DRAW, (addr + size)) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "can't modify EOA")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "can't modify EOA");
 
     if (H5FD_read(raw_file, H5FD_MEM_DRAW, addr, size, buf) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "can't read history from file")
+        HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "can't read history from file");
 
     if (H5FD__onion_history_decode(buf, history_out) != size)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTDECODE, FAIL, "can't decode history (initial)")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTDECODE, FAIL, "can't decode history (initial)");
 
     sum = H5_checksum_fletcher32(buf, size - 4);
     if (history_out->checksum != sum)
-        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "checksum mismatch between buffer and stored")
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "checksum mismatch between buffer and stored");
 
-    history_out->record_locs = H5MM_calloc(history_out->n_revisions * sizeof(H5FD_onion_record_loc_t));
-    if (history_out->n_revisions > 0 && NULL == history_out->record_locs)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate record pointer list")
+    if (history_out->n_revisions > 0)
+        if (NULL == (history_out->record_locs =
+                         H5MM_calloc(history_out->n_revisions * sizeof(H5FD_onion_record_loc_t))))
+            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "can't allocate record pointer list");
 
     if (H5FD__onion_history_decode(buf, history_out) != size)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTDECODE, FAIL, "can't decode history (final)")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTDECODE, FAIL, "can't decode history (final)");
 
 done:
     H5MM_xfree(buf);
-    if (ret_value == FAIL)
+    if (ret_value < 0)
         H5MM_xfree(history_out->record_locs);
 
     FUNC_LEAVE_NOAPI(ret_value);
