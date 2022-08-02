@@ -191,7 +191,7 @@ H5_DLL herr_t H5Pset_fapl_onion(hid_t fapl_id, const H5FD_onion_fapl_info_t *fa)
  *          list that is set for the onion VFD driver.
  *
  */
-H5_DLL herr_t H5FDonion_get_revision_count(const char *filename, hid_t fapl_id, size_t *revision_count);
+H5_DLL herr_t H5FDonion_get_revision_count(const char *filename, hid_t fapl_id, uint64_t *revision_count);
 
 #ifdef __cplusplus
 }

@@ -1463,7 +1463,7 @@ main(int argc, char *argv[])
 
         /* A short cut to get the revision count of an onion file without opening the file */
         if (get_onion_revision_count && H5FD_ONION == H5Pget_driver(fapl_id)) {
-            size_t revision_count = 0;
+            uint64_t revision_count = 0;
 
             if (H5FDonion_get_revision_count(fname, fapl_id, &revision_count) < 0) {
                 error_msg("unable to create FAPL for file access\n");
@@ -1471,7 +1471,7 @@ main(int argc, char *argv[])
                 goto done;
             }
 
-            printf("The number of revisions for the onion file is %lu\n", revision_count);
+            HDprintf("The number of revisions for the onion file is %lu\n", revision_count);
             goto done;
         }
         else

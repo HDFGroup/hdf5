@@ -169,7 +169,7 @@ static herr_t  H5FD__onion_sb_decode(H5FD_t *_file, const char *name, const unsi
 static hsize_t H5FD__onion_sb_size(H5FD_t *_file);
 static herr_t  H5FD__onion_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags,
                                const void H5_ATTR_UNUSED *input, void H5_ATTR_UNUSED **output);
-static herr_t  H5FD__get_onion_revision_count(H5FD_t *file, size_t *revision_count);
+static herr_t  H5FD__get_onion_revision_count(H5FD_t *file, uint64_t *revision_count);
 
 /* Temporary */
 H5_DLL herr_t H5FD__onion_write_final_history(H5FD_onion_t *file);
@@ -1660,7 +1660,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FDonion_get_revision_count(const char *filename, hid_t fapl_id, size_t *revision_count /*out*/)
+H5FDonion_get_revision_count(const char *filename, hid_t fapl_id, uint64_t *revision_count /*out*/)
 {
     H5P_genplist_t *plist     = NULL;
     H5FD_t         *file      = NULL;
@@ -1706,7 +1706,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__get_onion_revision_count(H5FD_t *file, size_t *revision_count)
+H5FD__get_onion_revision_count(H5FD_t *file, uint64_t *revision_count)
 {
     uint64_t op_code;
     uint64_t flags;
