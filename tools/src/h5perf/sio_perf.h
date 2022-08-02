@@ -77,7 +77,7 @@ typedef struct results_ {
 #define FAIL -1
 #endif /* !FAIL */
 
-extern FILE *     output;          /* output file                          */
+extern FILE      *output;          /* output file                          */
 extern io_time_t *timer_g;         /* timer: global for stub functions     */
 extern int        sio_debug_level; /* The debug level:
                                     *   0 - Off

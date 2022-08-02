@@ -95,7 +95,7 @@ H5VL__native_dataset_io_setup(H5D_t *dset, hid_t dxpl_id, hid_t file_space_id, h
         HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "H5S_BLOCK is not allowed for file dataspace")
     else if (H5S_PLIST == file_space_id) {
         H5P_genplist_t *plist; /* Property list pointer */
-        H5S_t *         space; /* Dataspace to hold selection */
+        H5S_t          *space; /* Dataspace to hold selection */
 
         /* Get the plist structure */
         if (NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
@@ -175,9 +175,9 @@ H5VL__native_dataset_create(void *obj, const H5VL_loc_params_t *loc_params, cons
                             hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
 {
     H5G_loc_t    loc;         /* Object location to insert dataset into */
-    H5D_t *      dset = NULL; /* New dataset's info */
+    H5D_t       *dset = NULL; /* New dataset's info */
     const H5S_t *space;       /* Dataspace for dataset */
-    void *       ret_value;
+    void        *ret_value;
 
     FUNC_ENTER_PACKAGE
 
@@ -238,9 +238,9 @@ void *
 H5VL__native_dataset_open(void *obj, const H5VL_loc_params_t *loc_params, const char *name, hid_t dapl_id,
                           hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
 {
-    H5D_t *   dset = NULL;
+    H5D_t    *dset = NULL;
     H5G_loc_t loc; /* Object location of group */
-    void *    ret_value = NULL;
+    void     *ret_value = NULL;
 
     FUNC_ENTER_PACKAGE
 
@@ -270,10 +270,10 @@ herr_t
 H5VL__native_dataset_read(void *obj, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id,
                           hid_t dxpl_id, void *buf, void H5_ATTR_UNUSED **req)
 {
-    H5D_t *          dset       = (H5D_t *)obj;
+    H5D_t           *dset       = (H5D_t *)obj;
     H5D_dset_info_t *dinfo      = NULL;
-    H5S_t *          mem_space  = NULL;
-    H5S_t *          file_space = NULL;
+    H5S_t           *mem_space  = NULL;
+    H5S_t           *file_space = NULL;
     herr_t           ret_value  = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -336,10 +336,10 @@ herr_t
 H5VL__native_dataset_write(void *obj, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id,
                            hid_t dxpl_id, const void *buf, void H5_ATTR_UNUSED **req)
 {
-    H5D_t *          dset       = (H5D_t *)obj;
+    H5D_t           *dset       = (H5D_t *)obj;
     H5D_dset_info_t *dinfo      = NULL;
-    H5S_t *          mem_space  = NULL;
-    H5S_t *          file_space = NULL;
+    H5S_t           *mem_space  = NULL;
+    H5S_t           *file_space = NULL;
     herr_t           ret_value  = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -525,7 +525,7 @@ done:
 herr_t
 H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, void H5_ATTR_UNUSED **req)
 {
-    H5D_t *                              dset      = (H5D_t *)obj; /* Dataset */
+    H5D_t                               *dset      = (H5D_t *)obj; /* Dataset */
     H5VL_native_dataset_optional_args_t *opt_args  = args->args; /* Pointer to native operation's arguments */
     herr_t                               ret_value = SUCCEED;    /* Return value */
 
@@ -603,7 +603,7 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
         /* H5Dget_num_chunks */
         case H5VL_NATIVE_DATASET_GET_NUM_CHUNKS: {
             H5VL_native_dataset_get_num_chunks_t *gnc_args = &opt_args->get_num_chunks;
-            const H5S_t *                         space    = NULL;
+            const H5S_t                          *space    = NULL;
 
             HDassert(dset->shared);
             HDassert(dset->shared->space);
@@ -613,7 +613,7 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
                 space = dset->shared->space;
             else /*  otherwise, use the given space ID */
                 if (NULL == (space = (const H5S_t *)H5I_object_verify(gnc_args->space_id, H5I_DATASPACE)))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid dataspace ID")
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid dataspace ID")
 
             /* Make sure the dataset is chunked */
             if (H5D_CHUNKED != dset->shared->layout.type)
@@ -629,7 +629,7 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
         /* H5Dget_chunk_info */
         case H5VL_NATIVE_DATASET_GET_CHUNK_INFO_BY_IDX: {
             H5VL_native_dataset_get_chunk_info_by_idx_t *gcibi_args = &opt_args->get_chunk_info_by_idx;
-            const H5S_t *                                space;
+            const H5S_t                                 *space;
 
             HDassert(dset->shared);
             HDassert(dset->shared->space);
@@ -639,7 +639,7 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
                 space = dset->shared->space;
             else /*  otherwise, use the given space ID */
                 if (NULL == (space = (const H5S_t *)H5I_object_verify(gcibi_args->space_id, H5I_DATASPACE)))
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid dataspace ID")
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid dataspace ID")
 
             /* Make sure the dataset is chunked */
             if (H5D_CHUNKED != dset->shared->layout.type)

@@ -303,7 +303,7 @@ const char *
 hg_log_get_subsys(void)
 {
     static char log_subsys[HG_LOG_SUBSYS_MAX * (HG_LOG_SUBSYS_NAME_MAX + 2)] = "\0";
-    char *      p                                                            = log_subsys;
+    char       *p                                                            = log_subsys;
     int         i                                                            = 0;
 
     while (hg_log_subsys_g[i][0] != '\0' && i < HG_LOG_SUBSYS_MAX) {
@@ -324,7 +324,7 @@ void
 hg_log_set_subsys_level(const char *subsys, enum hg_log_level log_level)
 {
     const char *log_subsys = hg_log_get_subsys();
-    char *      new_subsys = NULL;
+    char       *new_subsys = NULL;
     const char *new_subsys_ptr;
 
     if (strcmp(log_subsys, "") != 0) {
@@ -451,7 +451,7 @@ hg_log_write(struct hg_log_outlet *hg_log_outlet, enum hg_log_level log_level, c
              unsigned int line, const char *func, const char *format, ...)
 {
     char        buf[HG_LOG_BUF_MAX];
-    FILE *      stream     = NULL;
+    FILE       *stream     = NULL;
     const char *level_name = NULL;
 #ifdef HG_UTIL_HAS_LOG_COLOR
     const char *color = hg_log_colors_g[log_level];

@@ -504,11 +504,11 @@ test_get_chunk_info_highest_v18(hid_t fapl)
 #ifdef H5_HAVE_FILTER_DEFLATE
     int          aggression = 9; /* Compression aggression setting */
     const Bytef *z_src      = (const Bytef *)(direct_buf);
-    Bytef *      z_dst; /* Destination buffer */
+    Bytef       *z_dst; /* Destination buffer */
     uLongf       z_dst_nbytes = (uLongf)DEFLATE_SIZE_ADJUST(CHK_SIZE);
     uLong        z_src_nbytes = (uLong)CHK_SIZE;
 #endif
-    void *  inbuf      = NULL;     /* Pointer to new buffer */
+    void   *inbuf      = NULL;     /* Pointer to new buffer */
     hsize_t chunk_size = CHK_SIZE; /* Size of a chunk, can be compressed or not */
     hsize_t ii, jj;                /* Array indices */
     int     n;                     /* Used as chunk index, but int to avoid conversion warning */

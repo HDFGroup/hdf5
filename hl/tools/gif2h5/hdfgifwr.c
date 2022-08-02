@@ -83,7 +83,7 @@ static int maxbits = XV_BITS;         /* user settable max # bits/code */
 static int maxcode;                   /* maximum code, given n_bits */
 static int maxmaxcode = 1 << XV_BITS; /* NEVER generate this */
 
-static count_int *     htab;
+static count_int      *htab;
 static unsigned short *codetab;
 
 #define HashTabOf(i) htab[i]

@@ -101,8 +101,8 @@ test_pmdset(size_t niter, unsigned flags)
     hid_t          mem_type_ids[MAX_DSETS];
     hid_t          mem_space_ids[MAX_DSETS];
     hid_t          file_space_ids[MAX_DSETS];
-    void *         rbufs[MAX_DSETS];
-    const void *   wbufs[MAX_DSETS];
+    void          *rbufs[MAX_DSETS];
+    const void    *wbufs[MAX_DSETS];
     size_t         max_dsets;
     size_t         buf_size;
     size_t         ndsets;
@@ -113,14 +113,14 @@ test_pmdset(size_t niter, unsigned flags)
     hsize_t        dset_dims[MAX_DSETS][3];
     hsize_t        chunk_dims[2];
     hsize_t        max_dims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
-    unsigned *     rbuf        = NULL;
-    unsigned *     rbufi[MAX_DSETS][MAX_DSET_X];
-    unsigned *     erbuf = NULL;
-    unsigned *     erbufi[MAX_DSETS][MAX_DSET_X];
-    unsigned *     wbuf = NULL;
-    unsigned *     wbufi[MAX_DSETS][MAX_DSET_X];
-    unsigned *     efbuf = NULL;
-    unsigned *     efbufi[MAX_DSETS][MAX_DSET_X];
+    unsigned      *rbuf        = NULL;
+    unsigned      *rbufi[MAX_DSETS][MAX_DSET_X];
+    unsigned      *erbuf = NULL;
+    unsigned      *erbufi[MAX_DSETS][MAX_DSET_X];
+    unsigned      *wbuf = NULL;
+    unsigned      *wbufi[MAX_DSETS][MAX_DSET_X];
+    unsigned      *efbuf = NULL;
+    unsigned      *efbufi[MAX_DSETS][MAX_DSET_X];
     unsigned char *dset_usage;
     unsigned char *dset_usagei[MAX_DSETS][MAX_DSET_X];
     hbool_t        do_read;
@@ -504,7 +504,7 @@ test_pmdset(size_t niter, unsigned flags)
                     /* Read */
                     if (H5Dread(dset_ids[0], mem_type_ids[0], mem_space_ids[0], file_space_ids[0], dxpl_id,
                                 rbuf) < 0)
-                    T_PMD_ERROR
+                        T_PMD_ERROR
 
                 /* Verify data */
                 if (0 != memcmp(rbuf, erbuf, buf_size))
@@ -525,7 +525,7 @@ test_pmdset(size_t niter, unsigned flags)
                     /* Write */
                     if (H5Dwrite(dset_ids[0], mem_type_ids[0], mem_space_ids[0], file_space_ids[0], dxpl_id,
                                  wbuf) < 0)
-                    T_PMD_ERROR
+                        T_PMD_ERROR
 
                 /* Update wbuf */
                 for (l = 0; l < max_dsets; l++)

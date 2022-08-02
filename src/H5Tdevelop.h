@@ -55,7 +55,7 @@ typedef struct H5T_cdata_t {
     H5T_cmd_t command;  /**< what should the conversion function do?    */
     H5T_bkg_t need_bkg; /**< is the background buffer needed?	     */
     hbool_t   recalc;   /**< recalculate private data		     */
-    void *    priv;     /**< private data				     */
+    void     *priv;     /**< private data				     */
 } H5T_cdata_t;
 //! <!-- [H5T_cdata_t_snip] -->
 

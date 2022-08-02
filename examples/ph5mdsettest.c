@@ -579,7 +579,7 @@ dset_display(hsize_t dim1, hsize_t dim2, DTYPE_INT *dataset, int dnum)
 void
 data_array1d_init(hsize_t dim0, int *dataset, int val)
 {
-    int *   dataptr = dataset;
+    int    *dataptr = dataset;
     hsize_t i, j;
 
 #if 0 // JK_DBG

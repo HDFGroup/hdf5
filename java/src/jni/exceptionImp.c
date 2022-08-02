@@ -33,7 +33,7 @@ extern "C" {
 #include "exceptionImp.h"
 
 extern H5E_auto2_t efunc;
-extern void *      edata;
+extern void       *edata;
 
 /*******************/
 /* Local Variables */
@@ -158,7 +158,7 @@ Java_hdf_hdf5lib_H5_H5error_1on(JNIEnv *env, jclass clss)
 JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_exceptions_HDF5LibraryException_printStackTrace0(JNIEnv *env, jobject obj, jstring file_name)
 {
-    FILE *      stream = NULL;
+    FILE       *stream = NULL;
     const char *file   = NULL;
 
     UNUSED(obj);
@@ -237,7 +237,7 @@ static jboolean
 H5JNIErrorClass(JNIEnv *env, const char *message, const char *className)
 {
     jstring  str;
-    char *   args[2];
+    char    *args[2];
     jboolean retVal = JNI_FALSE;
 
     if (NULL == (str = ENVPTR->NewStringUTF(ENVONLY, message)))
@@ -371,8 +371,8 @@ h5libraryError(JNIEnv *env)
     hid_t       min_num;
     hid_t       maj_num;
     hid_t       stk_id = H5I_INVALID_HID;
-    char *      args[2];
-    char *      msg_str = NULL;
+    char       *args[2];
+    char       *msg_str = NULL;
     jboolean    retVal  = JNI_FALSE;
 
     exceptionNumbers.maj_num = 0;

@@ -74,21 +74,21 @@ typedef union H5VL_map_args_t {
     /* H5VL_MAP_CREATE */
     struct {
         H5VL_loc_params_t loc_params;  /* Location parameters for object */
-        const char *      name;        /* Name of new map object */
+        const char       *name;        /* Name of new map object */
         hid_t             lcpl_id;     /* Link creation property list for map */
         hid_t             key_type_id; /* Datatype for map keys */
         hid_t             val_type_id; /* Datatype for map values */
         hid_t             mcpl_id;     /* Map creation property list */
         hid_t             mapl_id;     /* Map access property list */
-        void *            map;         /* Pointer to newly created map object (OUT) */
+        void             *map;         /* Pointer to newly created map object (OUT) */
     } create;
 
     /* H5VL_MAP_OPEN */
     struct {
         H5VL_loc_params_t loc_params; /* Location parameters for object */
-        const char *      name;       /* Name of new map object */
+        const char       *name;       /* Name of new map object */
         hid_t             mapl_id;    /* Map access property list */
-        void *            map;        /* Pointer to newly created map object (OUT) */
+        void             *map;        /* Pointer to newly created map object (OUT) */
     } open;
 
     /* H5VL_MAP_GET_VAL */
@@ -96,7 +96,7 @@ typedef union H5VL_map_args_t {
         hid_t       key_mem_type_id;   /* Memory datatype for key */
         const void *key;               /* Pointer to key */
         hid_t       value_mem_type_id; /* Memory datatype for value */
-        void *      value;             /* Buffer for value (OUT) */
+        void       *value;             /* Buffer for value (OUT) */
     } get_val;
 
     /* H5VL_MAP_EXISTS */
@@ -159,14 +159,14 @@ typedef union H5VL_map_args_t {
                 hsize_t           idx;             /* Start/end iteration index (IN/OUT) */
                 hid_t             key_mem_type_id; /* Memory datatype for key */
                 H5M_iterate_t     op;              /* Iteration callback routine */
-                void *            op_data;         /* Pointer to callback context */
+                void             *op_data;         /* Pointer to callback context */
             } iterate;
 
             /* H5VL_MAP_DELETE */
             struct {
                 H5VL_loc_params_t loc_params;      /* Location parameters for object */
                 hid_t             key_mem_type_id; /* Memory datatype for key */
-                const void *      key;             /* Pointer to key */
+                const void       *key;             /* Pointer to key */
             } del;
         } args;
     } specific;

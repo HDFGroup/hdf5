@@ -118,7 +118,7 @@ H5F_debug(H5F_t *f, FILE *stream, int indent, int fwidth)
         if (f->shared->sblock->root_ent) /* Use real root group symbol table entry */
             H5G__ent_debug(f->shared->sblock->root_ent, stream, indent + 3, MAX(0, fwidth - 3), NULL);
         else {
-            H5O_loc_t * root_oloc; /* Root object location */
+            H5O_loc_t  *root_oloc; /* Root object location */
             H5G_entry_t root_ent;  /* Constructed root symbol table entry */
 
             /* Reset the root group entry */

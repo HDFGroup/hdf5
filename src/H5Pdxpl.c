@@ -246,7 +246,7 @@ static const size_t H5D_def_max_temp_buf_g =
     H5D_XFER_MAX_TEMP_BUF_DEF; /* Default value for maximum temp buffer size */
 static const void *H5D_def_tconv_buf_g =
     H5D_XFER_TCONV_BUF_DEF; /* Default value for type conversion buffer */
-static const void *    H5D_def_bkgr_buf_g = H5D_XFER_BKGR_BUF_DEF; /* Default value for background buffer */
+static const void     *H5D_def_bkgr_buf_g = H5D_XFER_BKGR_BUF_DEF; /* Default value for background buffer */
 static const H5T_bkg_t H5D_def_bkgr_buf_type_g = H5D_XFER_BKGR_BUF_TYPE_DEF;
 static const double    H5D_def_btree_split_ratio_g[3] =
     H5D_XFER_BTREE_SPLIT_RATIO_DEF; /* Default value for B-tree node split ratios */
@@ -275,7 +275,7 @@ static const H5Z_EDC_t H5D_def_enable_edc_g = H5D_XFER_EDC_DEF;       /* Default
 static const H5Z_cb_t  H5D_def_filter_cb_g  = H5D_XFER_FILTER_CB_DEF; /* Default value for filter callback */
 static const H5T_conv_cb_t H5D_def_conv_cb_g =
     H5D_XFER_CONV_CB_DEF; /* Default value for datatype conversion callback */
-static const void * H5D_def_xfer_xform_g = H5D_XFER_XFORM_DEF; /* Default value for data transform */
+static const void  *H5D_def_xfer_xform_g = H5D_XFER_XFORM_DEF; /* Default value for data transform */
 static const H5S_t *H5D_def_dset_io_sel_g =
     H5D_XFER_DSET_IO_SEL_DEF; /* Default value for dataset I/O selection */
 
@@ -465,7 +465,7 @@ static herr_t
 H5P__dxfr_bkgr_buf_type_enc(const void *value, void **_pp, size_t *size)
 {
     const H5T_bkg_t *bkgr_buf_type = (const H5T_bkg_t *)value; /* Create local alias for values */
-    uint8_t **       pp            = (uint8_t **)_pp;
+    uint8_t        **pp            = (uint8_t **)_pp;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -501,7 +501,7 @@ H5P__dxfr_bkgr_buf_type_enc(const void *value, void **_pp, size_t *size)
 static herr_t
 H5P__dxfr_bkgr_buf_type_dec(const void **_pp, void *_value)
 {
-    H5T_bkg_t *     bkgr_buf_type = (H5T_bkg_t *)_value; /* Background buffer type */
+    H5T_bkg_t      *bkgr_buf_type = (H5T_bkg_t *)_value; /* Background buffer type */
     const uint8_t **pp            = (const uint8_t **)_pp;
 
     FUNC_ENTER_PACKAGE_NOERR
@@ -536,7 +536,7 @@ static herr_t
 H5P__dxfr_btree_split_ratio_enc(const void *value, void **_pp, size_t *size)
 {
     const double *btree_split_ratio = (const double *)value; /* Create local alias for values */
-    uint8_t **    pp                = (uint8_t **)_pp;
+    uint8_t     **pp                = (uint8_t **)_pp;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -584,7 +584,7 @@ H5P__dxfr_btree_split_ratio_enc(const void *value, void **_pp, size_t *size)
 static herr_t
 H5P__dxfr_btree_split_ratio_dec(const void **_pp, void *_value)
 {
-    double *        btree_split_ratio = (double *)_value; /* B-tree split ratio */
+    double         *btree_split_ratio = (double *)_value; /* B-tree split ratio */
     unsigned        enc_size;                             /* Size of encoded property */
     const uint8_t **pp        = (const uint8_t **)_pp;
     herr_t          ret_value = SUCCEED; /* Return value */
@@ -696,7 +696,7 @@ H5P__dxfr_xform_enc(const void *value, void **_pp, size_t *size)
         *(const H5Z_data_xform_t *const *)value; /* Create local alias for values */
     const char *pexp      = NULL;                /* Pointer to transform expression */
     size_t      len       = 0;                   /* Length of transform expression */
-    uint8_t **  pp        = (uint8_t **)_pp;
+    uint8_t   **pp        = (uint8_t **)_pp;
     herr_t      ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -766,7 +766,7 @@ H5P__dxfr_xform_dec(const void **_pp, void *_value)
 {
     H5Z_data_xform_t **data_xform_prop = (H5Z_data_xform_t **)_value; /* New data xform property */
     size_t             len;                                           /* Length of encoded string */
-    const uint8_t **   pp = (const uint8_t **)_pp;
+    const uint8_t    **pp = (const uint8_t **)_pp;
     unsigned           enc_size;
     uint64_t           enc_value;
     herr_t             ret_value = SUCCEED; /* Return value */
@@ -962,7 +962,7 @@ done:
 herr_t
 H5Pset_data_transform(hid_t plist_id, const char *expression)
 {
-    H5P_genplist_t *  plist;                     /* Property list pointer */
+    H5P_genplist_t   *plist;                     /* Property list pointer */
     H5Z_data_xform_t *data_xform_prop = NULL;    /* New data xform property */
     herr_t            ret_value       = SUCCEED; /* return value */
 
@@ -1026,10 +1026,10 @@ done:
 ssize_t
 H5Pget_data_transform(hid_t plist_id, char *expression /*out*/, size_t size)
 {
-    H5P_genplist_t *  plist;                  /* Property list pointer */
+    H5P_genplist_t   *plist;                  /* Property list pointer */
     H5Z_data_xform_t *data_xform_prop = NULL; /* New data xform property */
     size_t            len;
-    const char *      pexp;
+    const char       *pexp;
     ssize_t           ret_value; /* return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1754,7 +1754,7 @@ static herr_t
 H5P__dxfr_io_xfer_mode_enc(const void *value, void **_pp, size_t *size)
 {
     const H5FD_mpio_xfer_t *xfer_mode = (const H5FD_mpio_xfer_t *)value; /* Create local alias for values */
-    uint8_t **              pp        = (uint8_t **)_pp;
+    uint8_t               **pp        = (uint8_t **)_pp;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -1791,7 +1791,7 @@ static herr_t
 H5P__dxfr_io_xfer_mode_dec(const void **_pp, void *_value)
 {
     H5FD_mpio_xfer_t *xfer_mode = (H5FD_mpio_xfer_t *)_value; /* I/O transfer mode */
-    const uint8_t **  pp        = (const uint8_t **)_pp;
+    const uint8_t   **pp        = (const uint8_t **)_pp;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -1936,7 +1936,7 @@ static herr_t
 H5P__dxfr_mpio_chunk_opt_hard_dec(const void **_pp, void *_value)
 {
     H5FD_mpio_chunk_opt_t *chunk_opt = (H5FD_mpio_chunk_opt_t *)_value; /* MPI-I/O chunk optimization mode */
-    const uint8_t **       pp        = (const uint8_t **)_pp;
+    const uint8_t        **pp        = (const uint8_t **)_pp;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -2080,7 +2080,7 @@ static herr_t
 H5P__dxfr_edc_enc(const void *value, void **_pp, size_t *size)
 {
     const H5Z_EDC_t *check = (const H5Z_EDC_t *)value; /* Create local alias for values */
-    uint8_t **       pp    = (uint8_t **)_pp;
+    uint8_t        **pp    = (uint8_t **)_pp;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -2116,7 +2116,7 @@ H5P__dxfr_edc_enc(const void *value, void **_pp, size_t *size)
 static herr_t
 H5P__dxfr_edc_dec(const void **_pp, void *_value)
 {
-    H5Z_EDC_t *     check = (H5Z_EDC_t *)_value; /* EDC property */
+    H5Z_EDC_t      *check = (H5Z_EDC_t *)_value; /* EDC property */
     const uint8_t **pp    = (const uint8_t **)_pp;
 
     FUNC_ENTER_PACKAGE_NOERR
@@ -2290,7 +2290,7 @@ H5Pset_dataset_io_hyperslab_selection(hid_t plist_id, unsigned rank, H5S_seloper
                                       const hsize_t stride[], const hsize_t count[], const hsize_t block[])
 {
     H5P_genplist_t *plist = NULL;                  /* Property list pointer */
-    H5S_t *         space;                         /* Dataspace to hold selection */
+    H5S_t          *space;                         /* Dataspace to hold selection */
     hbool_t         space_created       = FALSE;   /* Whether a new dataspace has been created */
     hbool_t         reset_prop_on_error = FALSE;   /* Whether to reset the property on failure */
     herr_t          ret_value           = SUCCEED; /* return value */

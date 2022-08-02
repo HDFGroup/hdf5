@@ -157,7 +157,7 @@ main(int argc, char *argv[])
 {
     const char *prog_name;         /*program name            */
     size_t      blk_size = 1024;   /*size of each I/O block    */
-    char *      buf      = NULL;   /*I/O block buffer        */
+    char       *buf      = NULL;   /*I/O block buffer        */
     size_t      n, i;              /*counters            */
     ssize_t     nio;               /*I/O return value        */
     int         argno = 1;         /*program argument number    */
@@ -169,13 +169,13 @@ main(int argc, char *argv[])
     int verbose = FALSE; /*display file names?        */
 
     const char *src_gen_name;    /*general source name        */
-    char *      src_name = NULL; /*source member name        */
+    char       *src_name = NULL; /*source member name        */
 
     int src_is_family;  /*is source name a family name?    */
     int src_membno = 0; /*source member number        */
 
     const char *dst_gen_name;    /*general destination name    */
-    char *      dst_name = NULL; /*destination member name    */
+    char       *dst_name = NULL; /*destination member name    */
     int         dst_is_family;   /*is dst name a family name?    */
     int         dst_membno = 0;  /*destination member number    */
 

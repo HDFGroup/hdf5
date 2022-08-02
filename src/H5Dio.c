@@ -244,7 +244,7 @@ done:
 static herr_t
 H5D__pre_read(hid_t dxpl_id, size_t count, H5D_dset_info_t *dset_info)
 {
-    H5P_genplist_t * plist;               /* DXPL property list pointer */
+    H5P_genplist_t  *plist;               /* DXPL property list pointer */
     H5FD_mpio_xfer_t xfer_mode;           /* Parallel I/O transfer mode */
     hbool_t          broke_mdset = FALSE; /* Whether to break multi-dataset option */
     size_t           u;                   /* Local index variable */
@@ -376,7 +376,7 @@ done:
 static herr_t
 H5D__pre_write(hid_t dxpl_id, size_t count, H5D_dset_info_t *dset_info)
 {
-    H5P_genplist_t * plist;               /* DXPL property list pointer */
+    H5P_genplist_t  *plist;               /* DXPL property list pointer */
     size_t           u;                   /* Local index variable */
     hbool_t          broke_mdset = FALSE; /* Whether to break multi-dataset option */
     H5FD_mpio_xfer_t xfer_mode;           /* Parallel I/O transfer mode */
@@ -450,7 +450,7 @@ H5D__read(size_t count, H5D_dset_info_t *dset_info, hbool_t is_mdset)
 {
     H5D_io_info_t io_info;                    /* Dataset I/O info  for multi dsets */
     size_t        type_info_init      = 0;    /* Number of datatype info structs that have been initialized */
-    H5S_t **      projected_mem_space = NULL; /* If not NULL, ptr to dataspace containing a     */
+    H5S_t       **projected_mem_space = NULL; /* If not NULL, ptr to dataspace containing a     */
                                               /* projection of the supplied mem_space to a new  */
                                               /* dataspace with rank equal to that of           */
                                               /* file_space.                                    */
@@ -740,7 +740,7 @@ H5D__write(size_t count, H5D_dset_info_t *dset_info, hbool_t is_mdset)
 {
     H5D_io_info_t io_info;                    /* Dataset I/O info for multi dsets */
     size_t        type_info_init      = 0;    /* Number of datatype info structs that have been initialized */
-    H5S_t **      projected_mem_space = NULL; /* If not NULL, ptr to dataspace containing a     */
+    H5S_t       **projected_mem_space = NULL; /* If not NULL, ptr to dataspace containing a     */
                                               /* projection of the supplied mem_space to a new  */
                                               /* dataspace with rank equal to that of           */
                                               /* file_space.                                    */
@@ -1132,8 +1132,8 @@ H5D__ioinfo_init(H5D_t *dset, H5D_dset_info_t *dset_info, H5D_storage_t *store, 
 static herr_t
 H5D__typeinfo_init(const H5D_t *dset, hid_t mem_type_id, hbool_t do_write, H5D_type_info_t *type_info)
 {
-    const H5T_t *     src_type;            /* Source datatype */
-    const H5T_t *     dst_type;            /* Destination datatype */
+    const H5T_t      *src_type;            /* Source datatype */
+    const H5T_t      *dst_type;            /* Destination datatype */
     H5Z_data_xform_t *data_transform;      /* Data transform info */
     herr_t            ret_value = SUCCEED; /* Return value	*/
 
@@ -1193,8 +1193,8 @@ H5D__typeinfo_init(const H5D_t *dset, hid_t mem_type_id, hbool_t do_write, H5D_t
         type_info->need_bkg    = H5T_BKG_NO;
     } /* end if */
     else {
-        void *    tconv_buf;     /* Temporary conversion buffer pointer */
-        void *    bkgr_buf;      /* Background conversion buffer pointer */
+        void     *tconv_buf;     /* Temporary conversion buffer pointer */
+        void     *bkgr_buf;      /* Background conversion buffer pointer */
         size_t    max_temp_buf;  /* Maximum temporary buffer size */
         H5T_bkg_t bkgr_buf_type; /* Background buffer type */
         size_t    target_size;   /* Desired buffer size	*/
@@ -1430,14 +1430,14 @@ done:
 static herr_t
 H5D__final_mdset_sel_io(H5D_io_info_t *io_info)
 {
-    H5S_t **          mem_spaces    = NULL; /* Array of chunk memory spaces */
-    H5S_t **          file_spaces   = NULL; /* Array of chunk file spaces */
-    haddr_t *         addrs         = NULL; /* Array of chunk addresses */
-    size_t *          element_sizes = NULL; /* Array of element sizes */
-    void **           rbufs         = NULL; /* Array of read buffers */
-    const void **     wbufs         = NULL; /* Array of write buffers */
+    H5S_t           **mem_spaces    = NULL; /* Array of chunk memory spaces */
+    H5S_t           **file_spaces   = NULL; /* Array of chunk file spaces */
+    haddr_t          *addrs         = NULL; /* Array of chunk addresses */
+    size_t           *element_sizes = NULL; /* Array of element sizes */
+    void            **rbufs         = NULL; /* Array of read buffers */
+    const void      **wbufs         = NULL; /* Array of write buffers */
     size_t            num_pieces;           /* Number of pieces */
-    H5SL_node_t *     piece_node;           /* Skiplist node for piece */
+    H5SL_node_t      *piece_node;           /* Skiplist node for piece */
     H5D_piece_info_t *piece_info;           /* Info for current piece */
     size_t            i         = 0;        /* Local index */
     herr_t            ret_value = SUCCEED;  /* Return value */

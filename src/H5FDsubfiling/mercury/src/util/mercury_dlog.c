@@ -37,7 +37,7 @@ struct hg_dlog *
 hg_dlog_alloc(char *name, unsigned int lesize, int leloop)
 {
     struct hg_dlog_entry *le;
-    struct hg_dlog *      d;
+    struct hg_dlog       *d;
 
     le = malloc(sizeof(*le) * lesize);
     if (!le)
@@ -249,7 +249,7 @@ hg_dlog_dump_file(struct hg_dlog *d, const char *base, int addpid, int trylock)
 {
     char                     buf[2048];
     int                      pid;
-    FILE *                   fp = NULL;
+    FILE                    *fp = NULL;
     unsigned int             left, idx;
     struct hg_dlog_dcount32 *dc32;
     struct hg_dlog_dcount64 *dc64;

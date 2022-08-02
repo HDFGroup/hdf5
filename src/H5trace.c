@@ -240,7 +240,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
     int         argno = 0, ptr, asize_idx;
     hssize_t    asize[16];
     hssize_t    i;
-    void *      vp = NULL;
+    void       *vp = NULL;
 
     /* FUNC_ENTER() should not be called */
 
@@ -2238,7 +2238,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                 case 'p': /* H5P_class_t */
                 {
                     hid_t           pclass_id  = HDva_arg(ap, hid_t);
-                    char *          class_name = NULL;
+                    char           *class_name = NULL;
                     H5P_genclass_t *pclass;
 
                     /* Get the class name and print it */
@@ -3956,9 +3956,9 @@ double
 H5_trace(const double *returning, const char *func, const char *type, ...)
 {
     va_list           ap;
-    H5RS_str_t *      rs = NULL;
+    H5RS_str_t       *rs = NULL;
     hssize_t          i;
-    FILE *            out                 = H5_debug_g.trace;
+    FILE             *out                 = H5_debug_g.trace;
     static hbool_t    is_first_invocation = TRUE;
     H5_timer_t        function_timer;
     H5_timevals_t     function_times = {0.0, 0.0, 0.0};

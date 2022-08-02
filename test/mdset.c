@@ -57,10 +57,10 @@ test_mdset_location(hid_t fapl_id)
     hid_t       mem_type_ids[2];
     hid_t       mem_space_ids[2];
     hid_t       file_space_ids[2];
-    void *      rbufs[2];
+    void       *rbufs[2];
     const void *wbufs[2];
     hsize_t     dset_dims[2];
-    int *       buf = NULL;
+    int        *buf = NULL;
     char        filename1[NAME_BUF_SIZE];
     char        filename2[NAME_BUF_SIZE];
 
@@ -176,7 +176,7 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
     hid_t       mem_type_ids[MAX_DSETS];
     hid_t       mem_space_ids[MAX_DSETS];
     hid_t       file_space_ids[MAX_DSETS];
-    void *      rbufs[MAX_DSETS];
+    void       *rbufs[MAX_DSETS];
     const void *wbufs[MAX_DSETS];
     size_t      max_dsets;
     size_t      buf_size;
@@ -186,14 +186,14 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
     hsize_t     dset_dims[MAX_DSETS][3];
     hsize_t     chunk_dims[2];
     hsize_t     max_dims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
-    unsigned *  rbuf        = NULL;
-    unsigned *  rbufi[MAX_DSETS][MAX_DSET_X];
-    unsigned *  erbuf = NULL;
-    unsigned *  erbufi[MAX_DSETS][MAX_DSET_X];
-    unsigned *  wbuf = NULL;
-    unsigned *  wbufi[MAX_DSETS][MAX_DSET_X];
-    unsigned *  efbuf = NULL;
-    unsigned *  efbufi[MAX_DSETS][MAX_DSET_X];
+    unsigned   *rbuf        = NULL;
+    unsigned   *rbufi[MAX_DSETS][MAX_DSET_X];
+    unsigned   *erbuf = NULL;
+    unsigned   *erbufi[MAX_DSETS][MAX_DSET_X];
+    unsigned   *wbuf = NULL;
+    unsigned   *wbufi[MAX_DSETS][MAX_DSET_X];
+    unsigned   *efbuf = NULL;
+    unsigned   *efbufi[MAX_DSETS][MAX_DSET_X];
     hbool_t     do_read;
     hsize_t     start[3];
     hsize_t     count[3];
@@ -423,7 +423,7 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
                     /* Read */
                     if (H5Dread(dset_ids[0], mem_type_ids[0], mem_space_ids[0], file_space_ids[0],
                                 H5P_DEFAULT, rbuf) < 0)
-                    TEST_ERROR;
+                        TEST_ERROR;
 
                 /* Verify data */
                 if (0 != memcmp(rbuf, erbuf, buf_size))
@@ -444,7 +444,7 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
                     /* Write */
                     if (H5Dwrite(dset_ids[0], mem_type_ids[0], mem_space_ids[0], file_space_ids[0],
                                  H5P_DEFAULT, wbuf) < 0)
-                    TEST_ERROR;
+                        TEST_ERROR;
 
                 /* Update wbuf */
                 for (l = 0; l < max_dsets; l++)

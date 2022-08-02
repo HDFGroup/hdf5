@@ -507,7 +507,7 @@ open_hdf5_file(hbool_t create_file, hbool_t mdci_sbem_expected, hbool_t read_onl
                hbool_t config_fsm, hbool_t set_eoc, const char *hdf_file_name, unsigned cache_image_flags,
                hid_t *file_id_ptr, H5F_t **file_ptr_ptr, H5C_t **cache_ptr_ptr)
 {
-    const char *              fcn_name      = "open_hdf5_file()";
+    const char               *fcn_name      = "open_hdf5_file()";
     hbool_t                   show_progress = FALSE;
     hbool_t                   verbose       = FALSE;
     int                       cp            = 0;
@@ -515,8 +515,8 @@ open_hdf5_file(hbool_t create_file, hbool_t mdci_sbem_expected, hbool_t read_onl
     hid_t                     fcpl_id       = -1;
     hid_t                     file_id       = -1;
     herr_t                    result;
-    H5F_t *                   file_ptr  = NULL;
-    H5C_t *                   cache_ptr = NULL;
+    H5F_t                    *file_ptr  = NULL;
+    H5C_t                    *cache_ptr = NULL;
     H5C_cache_image_ctl_t     image_ctl;
     H5AC_cache_image_config_t cache_image_config = {H5AC__CURR_CACHE_IMAGE_CONFIG_VERSION, TRUE, FALSE,
                                                     H5AC__CACHE_IMAGE__ENTRY_AGEOUT__NONE};
@@ -870,7 +870,7 @@ open_hdf5_file(hbool_t create_file, hbool_t mdci_sbem_expected, hbool_t read_onl
 static void
 attempt_swmr_open_hdf5_file(const hbool_t create_file, const hbool_t set_mdci_fapl, const char *hdf_file_name)
 {
-    const char *              fcn_name      = "attempt_swmr_open_hdf5_file()";
+    const char               *fcn_name      = "attempt_swmr_open_hdf5_file()";
     hbool_t                   show_progress = FALSE;
     int                       cp            = 0;
     hid_t                     fapl_id       = -1;
@@ -1274,8 +1274,8 @@ check_cache_image_ctl_flow_1(hbool_t single_file_vfd)
     char        filename[512];
     hbool_t     show_progress = FALSE;
     hid_t       file_id       = -1;
-    H5F_t *     file_ptr      = NULL;
-    H5C_t *     cache_ptr     = NULL;
+    H5F_t      *file_ptr      = NULL;
+    H5C_t      *cache_ptr     = NULL;
     int         cp            = 0;
 
     TESTING("metadata cache image control flow test 1");
@@ -1551,8 +1551,8 @@ check_cache_image_ctl_flow_2(hbool_t single_file_vfd)
     char        filename[512];
     hbool_t     show_progress = FALSE;
     hid_t       file_id       = -1;
-    H5F_t *     file_ptr      = NULL;
-    H5C_t *     cache_ptr     = NULL;
+    H5F_t      *file_ptr      = NULL;
+    H5C_t      *cache_ptr     = NULL;
     int         cp            = 0;
 
     TESTING("metadata cache image control flow test 2");
@@ -1815,8 +1815,8 @@ check_cache_image_ctl_flow_3(hbool_t single_file_vfd)
     char        filename[512];
     hbool_t     show_progress = FALSE;
     hid_t       file_id       = -1;
-    H5F_t *     file_ptr      = NULL;
-    H5C_t *     cache_ptr     = NULL;
+    H5F_t      *file_ptr      = NULL;
+    H5C_t      *cache_ptr     = NULL;
     int         cp            = 0;
 
     TESTING("metadata cache image control flow test 3");
@@ -2181,8 +2181,8 @@ check_cache_image_ctl_flow_4(hbool_t single_file_vfd)
     char        filename[512];
     hbool_t     show_progress = FALSE;
     hid_t       file_id       = -1;
-    H5F_t *     file_ptr      = NULL;
-    H5C_t *     cache_ptr     = NULL;
+    H5F_t      *file_ptr      = NULL;
+    H5C_t      *cache_ptr     = NULL;
     int         cp            = 0;
 
     TESTING("metadata cache image control flow test 4");
@@ -2510,8 +2510,8 @@ check_cache_image_ctl_flow_5(hbool_t single_file_vfd)
     char        filename[512];
     hbool_t     show_progress = FALSE;
     hid_t       file_id       = -1;
-    H5F_t *     file_ptr      = NULL;
-    H5C_t *     cache_ptr     = NULL;
+    H5F_t      *file_ptr      = NULL;
+    H5C_t      *cache_ptr     = NULL;
     int         cp            = 0;
 
     TESTING("metadata cache image control flow test 5");
@@ -2791,8 +2791,8 @@ check_cache_image_ctl_flow_6(hbool_t single_file_vfd)
     char        filename[512];
     hbool_t     show_progress = FALSE;
     hid_t       file_id       = -1;
-    H5F_t *     file_ptr      = NULL;
-    H5C_t *     cache_ptr     = NULL;
+    H5F_t      *file_ptr      = NULL;
+    H5C_t      *cache_ptr     = NULL;
     int         cp            = 0;
 
     TESTING("metadata cache image control flow test 6");
@@ -3077,8 +3077,8 @@ cache_image_smoke_check_1(hbool_t single_file_vfd)
     char        filename[512];
     hbool_t     show_progress = FALSE;
     hid_t       file_id       = -1;
-    H5F_t *     file_ptr      = NULL;
-    H5C_t *     cache_ptr     = NULL;
+    H5F_t      *file_ptr      = NULL;
+    H5C_t      *cache_ptr     = NULL;
     int         cp            = 0;
 
     TESTING("metadata cache image smoke check 1");
@@ -3488,8 +3488,8 @@ cache_image_smoke_check_2(hbool_t single_file_vfd)
     char        filename[512];
     hbool_t     show_progress = FALSE;
     hid_t       file_id       = -1;
-    H5F_t *     file_ptr      = NULL;
-    H5C_t *     cache_ptr     = NULL;
+    H5F_t      *file_ptr      = NULL;
+    H5C_t      *cache_ptr     = NULL;
     int         cp            = 0;
 
     TESTING("metadata cache image smoke check 2");
@@ -3786,8 +3786,8 @@ cache_image_smoke_check_3(hbool_t single_file_vfd)
     char        filename[512];
     hbool_t     show_progress = FALSE;
     hid_t       file_id       = -1;
-    H5F_t *     file_ptr      = NULL;
-    H5C_t *     cache_ptr     = NULL;
+    H5F_t      *file_ptr      = NULL;
+    H5C_t      *cache_ptr     = NULL;
     int         cp            = 0;
 
     TESTING("metadata cache image smoke check 3");
@@ -4163,8 +4163,8 @@ cache_image_smoke_check_4(hbool_t single_file_vfd)
     char        filename[512];
     hbool_t     show_progress = FALSE;
     hid_t       file_id       = -1;
-    H5F_t *     file_ptr      = NULL;
-    H5C_t *     cache_ptr     = NULL;
+    H5F_t      *file_ptr      = NULL;
+    H5C_t      *cache_ptr     = NULL;
     int         cp            = 0;
     int         min_dset      = 0;
     int         max_dset      = 0;
@@ -4558,8 +4558,8 @@ cache_image_smoke_check_5(hbool_t single_file_vfd)
     hbool_t     show_progress = FALSE;
     hid_t       file_id       = -1;
     hid_t       proc_gid      = -1;
-    H5F_t *     file_ptr      = NULL;
-    H5C_t *     cache_ptr     = NULL;
+    H5F_t      *file_ptr      = NULL;
+    H5C_t      *cache_ptr     = NULL;
     int         cp            = 0;
     int         i;
     int         min_group = 0;
@@ -5054,12 +5054,12 @@ cache_image_smoke_check_5(hbool_t single_file_vfd)
 static unsigned
 cache_image_smoke_check_6(hbool_t single_file_vfd)
 {
-    const char *   fcn_name = "cache_image_smoke_check_6()";
+    const char    *fcn_name = "cache_image_smoke_check_6()";
     char           filename[512];
     hbool_t        show_progress = FALSE;
     hid_t          file_id       = -1;
-    H5F_t *        file_ptr      = NULL;
-    H5C_t *        cache_ptr     = NULL;
+    H5F_t         *file_ptr      = NULL;
+    H5C_t         *cache_ptr     = NULL;
     h5_stat_size_t file_size;
     int            cp       = 0;
     int            min_dset = 0;
@@ -5453,8 +5453,8 @@ cache_image_api_error_check_1(hbool_t single_file_vfd)
     char        filename[512];
     hbool_t     show_progress = FALSE;
     hid_t       file_id       = -1;
-    H5F_t *     file_ptr      = NULL;
-    H5C_t *     cache_ptr     = NULL;
+    H5F_t      *file_ptr      = NULL;
+    H5C_t      *cache_ptr     = NULL;
     int         cp            = 0;
 
     TESTING("metadata cache image api error check 1");
@@ -5821,8 +5821,8 @@ cache_image_api_error_check_2(hbool_t single_file_vfd)
     char        filename[512];
     hbool_t     show_progress = FALSE;
     hid_t       file_id       = -1;
-    H5F_t *     file_ptr      = NULL;
-    H5C_t *     cache_ptr     = NULL;
+    H5F_t      *file_ptr      = NULL;
+    H5C_t      *cache_ptr     = NULL;
     int         cp            = 0;
 
     TESTING("metadata cache image api error check 2");
@@ -6222,8 +6222,8 @@ cache_image_api_error_check_3(hbool_t single_file_vfd)
     char        filename[512];
     hbool_t     show_progress = FALSE;
     hid_t       file_id       = -1;
-    H5F_t *     file_ptr      = NULL;
-    H5C_t *     cache_ptr     = NULL;
+    H5F_t      *file_ptr      = NULL;
+    H5C_t      *cache_ptr     = NULL;
     int         cp            = 0;
 
     TESTING("metadata cache image api error check 3");
@@ -6499,13 +6499,13 @@ cache_image_api_error_check_3(hbool_t single_file_vfd)
 static unsigned
 cache_image_api_error_check_4(hbool_t single_file_vfd)
 {
-    const char *              fcn_name = "cache_image_api_error_check_4()";
+    const char               *fcn_name = "cache_image_api_error_check_4()";
     char                      filename[512];
     hbool_t                   show_progress = FALSE;
     hid_t                     fapl_id       = -1;
     hid_t                     file_id       = -1;
-    H5F_t *                   file_ptr      = NULL;
-    H5C_t *                   cache_ptr     = NULL;
+    H5F_t                    *file_ptr      = NULL;
+    H5C_t                    *cache_ptr     = NULL;
     int                       cp            = 0;
     H5AC_cache_image_config_t cache_image_config;
 
@@ -7071,12 +7071,12 @@ cache_image_api_error_check_4(hbool_t single_file_vfd)
 static unsigned
 get_free_sections_test(hbool_t single_file_vfd)
 {
-    const char *   fcn_name = "get_free_sections_test()";
+    const char    *fcn_name = "get_free_sections_test()";
     char           filename[512];
     hbool_t        show_progress = FALSE;
     hid_t          file_id       = -1;
-    H5F_t *        file_ptr      = NULL;
-    H5C_t *        cache_ptr     = NULL;
+    H5F_t         *file_ptr      = NULL;
+    H5C_t         *cache_ptr     = NULL;
     h5_stat_size_t file_size;
     int            cp = 0;
 
@@ -7518,8 +7518,8 @@ evict_on_close_test(hbool_t H5_ATTR_PARALLEL_UNUSED single_file_vfd)
     hbool_t     show_progress = FALSE;
     hbool_t     verbose       = FALSE;
     hid_t       file_id       = -1;
-    H5F_t *     file_ptr      = NULL;
-    H5C_t *     cache_ptr     = NULL;
+    H5F_t      *file_ptr      = NULL;
+    H5C_t      *cache_ptr     = NULL;
     int         cp            = 0;
 #endif /* H5_HAVE_PARALLEL */
 

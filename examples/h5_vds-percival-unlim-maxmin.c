@@ -61,8 +61,8 @@ main(void)
     H5D_layout_t layout;  /* Storage layout */
     size_t       num_map; /* Number of mappings */
     ssize_t      len;     /* Length of the string; also a return value */
-    char *       filename;
-    char *       dsetname;
+    char        *filename;
+    char        *dsetname;
     int          wdata[DIM0_1 * DIM1 * DIM2];
 
     /*

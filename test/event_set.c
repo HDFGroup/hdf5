@@ -325,7 +325,7 @@ test_es_get_requests(void)
 {
     hid_t   es_id;            /* Event set ID */
     hid_t   connector_ids[2]; /* Connector IDs */
-    void *  requests[2];      /* Requests */
+    void   *requests[2];      /* Requests */
     int     req_targets[2];   /* Dummy targets for void * requests */
     size_t  count;            /* # of events in set */
     hbool_t op_failed;        /* Whether an operation failed (unused) */

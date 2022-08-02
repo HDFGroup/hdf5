@@ -169,8 +169,8 @@ int_f h5tbmake_table_ptr_c(size_t_f *namelen1, _fcd name1, hid_t_f *loc_id, size
                            void *fill_data, int_f *compress,
                            size_t_f *char_len_field_names,      /* field_names lengths */
                            size_t_f *max_char_size_field_names, /* char len of fields */
-                           char *    field_names,               /* field_names */
-                           void *    data);
+                           char     *field_names,               /* field_names */
+                           void     *data);
 
 HDF5_HL_F90CSTUBDLL
 int_f h5tbwrite_field_name_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, size_t_f *namelen1,

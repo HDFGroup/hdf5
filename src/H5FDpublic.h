@@ -376,7 +376,7 @@ typedef struct {
  */
 //! <!-- [H5FD_ctl_memcpy_args_t_snip] -->
 typedef struct H5FD_ctl_memcpy_args_t {
-    void *      dstbuf;  /**< Destination buffer */
+    void       *dstbuf;  /**< Destination buffer */
     hsize_t     dst_off; /**< Offset within destination buffer */
     const void *srcbuf;  /**< Source buffer */
     hsize_t     src_off; /**< Offset within source buffer */

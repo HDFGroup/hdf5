@@ -62,8 +62,8 @@ main(void)
     H5D_layout_t layout;  /* Storage layout */
     size_t       num_map; /* Number of mappings */
     ssize_t      len;     /* Length of the string; also a return value */
-    char *       filename;
-    char *       dsetname;
+    char        *filename;
+    char        *dsetname;
     int          wdata[DIM0 * DIM1 * DIM2];
 
     /*
@@ -84,7 +84,7 @@ main(void)
         file      = H5Fcreate(SRC_FILE[i], H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
         src_space = H5Screate_simple(RANK, dims, NULL);
         dset      = H5Dcreate2(file, SRC_DATASET[i], H5T_NATIVE_INT, src_space, H5P_DEFAULT, H5P_DEFAULT,
-                          H5P_DEFAULT);
+                               H5P_DEFAULT);
         status    = H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
         status    = H5Sclose(src_space);
         status    = H5Dclose(dset);
