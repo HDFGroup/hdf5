@@ -10864,14 +10864,14 @@ test_shape_same_dr__full_space_vs_slice(int test_num, int small_rank, int large_
 
     HDsnprintf(test_desc_0, sizeof(test_desc_0), "\tn-cube slice through m-cube (n <= m) test %d.\n",
                test_num);
-    MESSAGE(7, (test_desc_0));
+    MESSAGE(7, ("%s", test_desc_0));
 
     /* This statement must be updated if SS_DR_MAX_RANK is changed */
     HDsnprintf(test_desc_1, sizeof(test_desc_1),
                "\t\tranks: %d/%d offset: %d dim_selected: %d/%d/%d/%d/%d.\n", small_rank, large_rank, offset,
                (int)dim_selected[0], (int)dim_selected[1], (int)dim_selected[2], (int)dim_selected[3],
                (int)dim_selected[4]);
-    MESSAGE(7, (test_desc_1));
+    MESSAGE(7, ("%s", test_desc_1));
 
     /* copy the edge size into the dims array */
     for (i = 0; i < SS_DR_MAX_RANK; i++)
@@ -10892,12 +10892,12 @@ test_shape_same_dr__full_space_vs_slice(int test_num, int small_rank, int large_
         if (dim_selected[i]) {
             start[i] = 0;
             block[i] = edge_size;
-        } /* end if */
+        }
         else {
             start[i] = (hsize_t)offset;
             block[i] = 1;
-        } /* end else */
-    }     /* end for */
+        }
+    }
 
     /* since large rank may be less than SS_DR_MAX_RANK, we may not
      * use the entire start, stride, count, and block arrays.  This
@@ -11019,14 +11019,14 @@ test_shape_same_dr__run_full_space_vs_slice_tests(void)
                                         expected_result = FALSE;
                                     i++;
                                     j--;
-                                } /* end while */
+                                }
 
                                 while ((i < large_rank) && expected_result) {
                                     if (dim_selected[j])
                                         expected_result = FALSE;
                                     i++;
                                     j--;
-                                } /* end while */
+                                }
 
                                 /* everything is set up -- run the tests */
 
@@ -11124,7 +11124,7 @@ test_shape_same_dr__checkerboard(int test_num, int small_rank, int large_rank, i
 
     HDsnprintf(test_desc_0, sizeof(test_desc_0),
                "\tcheckerboard n-cube slice through m-cube (n <= m) test %d.\n", test_num);
-    MESSAGE(7, (test_desc_0));
+    MESSAGE(7, ("%s", test_desc_0));
 
     /* This statement must be updated if SS_DR_MAX_RANK is changed */
     HDsnprintf(test_desc_1, sizeof(test_desc_1),
@@ -11132,7 +11132,7 @@ test_shape_same_dr__checkerboard(int test_num, int small_rank, int large_rank, i
                small_rank, large_rank, (int)edge_size, (int)checker_size, offset, (int)dim_selected[0],
                (int)dim_selected[1], (int)dim_selected[2], (int)dim_selected[3], (int)dim_selected[4],
                dims_selected);
-    MESSAGE(7, (test_desc_1));
+    MESSAGE(7, ("%s", test_desc_1));
 
     /* copy the edge size into the dims array */
     for (i = 0; i < SS_DR_MAX_RANK; i++)
@@ -11669,7 +11669,7 @@ test_shape_same_dr__irregular(int test_num, int small_rank, int large_rank, int 
 
     HDsnprintf(test_desc_0, sizeof(test_desc_0),
                "\tirregular sub set of n-cube slice through m-cube (n <= m) test %d.\n", test_num);
-    MESSAGE(7, (test_desc_0));
+    MESSAGE(7, ("%s", test_desc_0));
 
     /* This statement must be updated if SS_DR_MAX_RANK is changed */
     HDsnprintf(test_desc_1, sizeof(test_desc_1),
@@ -11677,7 +11677,7 @@ test_shape_same_dr__irregular(int test_num, int small_rank, int large_rank, int 
                large_rank, edge_size, slice_offset, pattern_offset, (int)dim_selected[0],
                (int)dim_selected[1], (int)dim_selected[2], (int)dim_selected[3], (int)dim_selected[4],
                dims_selected);
-    MESSAGE(7, (test_desc_1));
+    MESSAGE(7, ("%s", test_desc_1));
 
     /* copy the edge size into the dims array */
     for (i = 0; i < SS_DR_MAX_RANK; i++)
