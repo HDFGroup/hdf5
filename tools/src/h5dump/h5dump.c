@@ -1471,7 +1471,7 @@ main(int argc, char *argv[])
                 goto done;
             }
 
-            HDprintf("The number of revisions for the onion file is %lu\n", revision_count);
+            HDprintf("The number of revisions for the onion file is %" PRIu64 "\n", revision_count);
             goto done;
         }
         else
