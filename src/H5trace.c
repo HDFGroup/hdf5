@@ -1098,6 +1098,9 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_acat(rs, "H5_VFD_ROS3");
                                     break;
 #endif
+                                case H5_VFD_ONION:
+                                    H5RS_acat(rs, "H5_VFD_ONION");
+                                    break;
                                 default:
                                     H5RS_asprintf_cat(rs, "%ld", (long)class_val);
                                     break;

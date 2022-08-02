@@ -211,6 +211,11 @@
       ${HDF5_TOOLS_DIR}/testfiles/trefer_paramR.ddl
       ${HDF5_TOOLS_DIR}/testfiles/trefer_reg_1dR.ddl
       ${HDF5_TOOLS_DIR}/testfiles/trefer_regR.ddl
+      # Onion VFD files
+      ${HDF5_TOOLS_DIR}/testfiles/tst_onion_objs.ddl
+      ${HDF5_TOOLS_DIR}/testfiles/tst_onion_dset_ext.ddl
+      ${HDF5_TOOLS_DIR}/testfiles/tst_onion_dset_1d.ddl
+      ${HDF5_TOOLS_DIR}/testfiles/tst_onion_revision_count.ddl
   )
   set (HDF5_N_REFERENCE_FILES
       tall-3
@@ -350,7 +355,13 @@
       ${HDF5_TOOLS_DIR}/testfiles/trefer_param.h5
       ${HDF5_TOOLS_DIR}/testfiles/trefer_reg_1d.h5
       ${HDF5_TOOLS_DIR}/testfiles/trefer_reg.h5
-
+      # Onion VFD files
+      ${HDF5_TOOLS_DIR}/testfiles/tst_onion_objs.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tst_onion_objs.h5.onion
+      ${HDF5_TOOLS_DIR}/testfiles/tst_onion_dset_ext.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tst_onion_dset_ext.h5.onion
+      ${HDF5_TOOLS_DIR}/testfiles/tst_onion_dset_1d.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tst_onion_dset_1d.h5.onion
   )
   set (HDF5_ERROR_REFERENCE_TEST_FILES
       ${PROJECT_SOURCE_DIR}/errfiles/filter_fail.err
@@ -1186,6 +1197,13 @@
   # test to verify HDFFV-10480: out of bounds read in H5O_fill_new[old]_decode
   ADD_H5_TEST (tCVE_2018_11206_fill_old 1 tCVE_2018_11206_fill_old.h5)
   ADD_H5_TEST (tCVE_2018_11206_fill_new 1 tCVE_2018_11206_fill_new.h5)
+
+  # onion VFD tests
+  ADD_H5_TEST (tst_onion_objs 0 --enable-error-stack --vfd-name onion --vfd-info 3 tst_onion_objs.h5)
+  ADD_H5_TEST (tst_onion_dset_ext 0 --enable-error-stack --vfd-name onion --vfd-info 1 tst_onion_dset_ext.h5)
+  ADD_H5_TEST (tst_onion_dset_1d 0 --enable-error-stack --vfd-name onion --vfd-info 1 tst_onion_dset_1d.h5)
+  ADD_H5_TEST (tst_onion_revision_count 0 --enable-error-stack --vfd-name onion --vfd-info revision_count tst_onion_objs.h5)
+
 
 ##############################################################################
 ###    P L U G I N  T E S T S
