@@ -265,9 +265,9 @@ done:
 H5FA_dblock_t *
 H5FA__dblock_protect(H5FA_hdr_t *hdr, haddr_t dblk_addr, unsigned flags)
 {
-    H5FA_dblock_t *        dblock = NULL; /* Fixed array data block */
+    H5FA_dblock_t         *dblock = NULL; /* Fixed array data block */
     H5FA_dblock_cache_ud_t udata;         /* Information needed for loading data block */
-    H5FA_dblock_t *        ret_value = NULL;
+    H5FA_dblock_t         *ret_value = NULL;
 
     FUNC_ENTER_PACKAGE
 

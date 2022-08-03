@@ -198,7 +198,7 @@ typedef enum H5T_conv_ret_t {
  */
 typedef struct {
     size_t len; /**< Length of VL data (in base type units) */
-    void * p;   /**< Pointer to VL data */
+    void  *p;   /**< Pointer to VL data */
 } hvl_t;
 
 /* Variable Length String information */

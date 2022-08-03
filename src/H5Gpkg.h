@@ -156,7 +156,7 @@ typedef struct {
 typedef struct H5G_bt_common_t {
     /* downward */
     const char *name; /*points to temporary memory         */
-    H5HL_t *    heap; /*symbol table heap             */
+    H5HL_t     *heap; /*symbol table heap             */
 } H5G_bt_common_t;
 
 /*
@@ -168,7 +168,7 @@ typedef struct H5G_bt_ins_t {
     H5G_bt_common_t   common;   /* Common info for B-tree user data (must be first) */
     const H5O_link_t *lnk;      /* Link to insert into table         */
     H5O_type_t        obj_type; /* Type of object being inserted */
-    const void *      crt_info; /* Creation info for object being inserted */
+    const void       *crt_info; /* Creation info for object being inserted */
 } H5G_bt_ins_t;
 
 /*
@@ -178,7 +178,7 @@ typedef struct H5G_bt_ins_t {
 typedef struct H5G_bt_rm_t {
     /* downward */
     H5G_bt_common_t common;          /* Common info for B-tree user data (must be first) */
-    H5RS_str_t *    grp_full_path_r; /* Full path of group where link is removed */
+    H5RS_str_t     *grp_full_path_r; /* Full path of group where link is removed */
 } H5G_bt_rm_t;
 
 /* Typedef for B-tree 'find' operation */
@@ -192,7 +192,7 @@ typedef struct H5G_bt_lkp_t {
     /* downward */
     H5G_bt_common_t  common;  /* Common info for B-tree user data (must be first) */
     H5G_bt_find_op_t op;      /* Operator to call when correct entry is found */
-    void *           op_data; /* Data to pass to operator */
+    void            *op_data; /* Data to pass to operator */
 
     /* upward */
 } H5G_bt_lkp_t;
@@ -203,10 +203,10 @@ typedef struct H5G_bt_lkp_t {
  */
 typedef struct H5G_bt_it_it_t {
     /* downward */
-    H5HL_t *          heap;    /*symbol table heap                  */
+    H5HL_t           *heap;    /*symbol table heap                  */
     hsize_t           skip;    /*initial entries to skip             */
     H5G_lib_iterate_t op;      /*iteration operator                 */
-    void *            op_data; /*user-defined operator data             */
+    void             *op_data; /*user-defined operator data             */
 
     /* upward */
     hsize_t *final_ent; /*final entry looked at                      */
@@ -214,11 +214,11 @@ typedef struct H5G_bt_it_it_t {
 
 /* Data passed through B-tree iteration for copying copy symbol table content */
 typedef struct H5G_bt_it_cpy_t {
-    const H5O_loc_t * src_oloc;      /* Source object location */
+    const H5O_loc_t  *src_oloc;      /* Source object location */
     haddr_t           src_heap_addr; /* Heap address of the source symbol table  */
-    H5F_t *           dst_file;      /* File of destination group */
+    H5F_t            *dst_file;      /* File of destination group */
     const H5O_stab_t *dst_stab;      /* Symbol table message for destination group */
-    H5O_copy_t *      cpy_info;      /* Information for copy operation */
+    H5O_copy_t       *cpy_info;      /* Information for copy operation */
 } H5G_bt_it_cpy_t;
 
 /* Common information for "by index" lookups in symbol tables */
@@ -263,13 +263,13 @@ typedef struct H5G_dense_bt2_corder_rec_t {
  */
 typedef struct H5G_bt2_ud_common_t {
     /* downward */
-    H5F_t *      f;             /* Pointer to file that fractal heap is in */
-    H5HF_t *     fheap;         /* Fractal heap handle               */
-    const char * name;          /* Name of link to compare           */
+    H5F_t       *f;             /* Pointer to file that fractal heap is in */
+    H5HF_t      *fheap;         /* Fractal heap handle               */
+    const char  *name;          /* Name of link to compare           */
     uint32_t     name_hash;     /* Hash of name of link to compare   */
     int64_t      corder;        /* Creation order value of link to compare   */
     H5B2_found_t found_op;      /* Callback when correct link is found */
-    void *       found_op_data; /* Callback data when correct link is found */
+    void        *found_op_data; /* Callback data when correct link is found */
 } H5G_bt2_ud_common_t;
 
 /*

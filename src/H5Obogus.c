@@ -36,7 +36,7 @@
 #ifdef H5O_ENABLE_BOGUS
 
 /* PRIVATE PROTOTYPES */
-static void * H5O__bogus_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags,
+static void  *H5O__bogus_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags,
                                 size_t p_size, const uint8_t *p);
 static herr_t H5O__bogus_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
 static size_t H5O__bogus_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
@@ -110,7 +110,7 @@ H5O__bogus_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUS
                   unsigned H5_ATTR_UNUSED *ioflags, size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
 {
     H5O_bogus_t *mesg = NULL;
-    void *       ret_value; /* Return value */
+    void        *ret_value; /* Return value */
 
     FUNC_ENTER_PACKAGE
 

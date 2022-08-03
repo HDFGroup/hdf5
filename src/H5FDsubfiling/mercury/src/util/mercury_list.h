@@ -59,7 +59,7 @@
 
 #define HG_LIST_ENTRY(struct_entry_name)                                                                     \
     struct {                                                                                                 \
-        struct struct_entry_name * next;                                                                     \
+        struct struct_entry_name  *next;                                                                     \
         struct struct_entry_name **prev;                                                                     \
     }
 

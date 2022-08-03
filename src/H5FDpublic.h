@@ -46,6 +46,7 @@
 #define H5_VFD_ROS3      ((H5FD_class_value_t)(11))
 #define H5_VFD_SUBFILING ((H5FD_class_value_t)(12))
 #define H5_VFD_IOC       ((H5FD_class_value_t)(13))
+#define H5_VFD_ONION     ((H5FD_class_value_t)(14))
 
 /* VFD IDs below this value are reserved for library use. */
 #define H5_VFD_RESERVED 256
@@ -376,7 +377,7 @@ typedef struct {
  */
 //! <!-- [H5FD_ctl_memcpy_args_t_snip] -->
 typedef struct H5FD_ctl_memcpy_args_t {
-    void *      dstbuf;  /**< Destination buffer */
+    void       *dstbuf;  /**< Destination buffer */
     hsize_t     dst_off; /**< Offset within destination buffer */
     const void *srcbuf;  /**< Source buffer */
     hsize_t     src_off; /**< Offset within source buffer */

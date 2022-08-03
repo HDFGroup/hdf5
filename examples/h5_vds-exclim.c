@@ -56,8 +56,8 @@ main(void)
     H5D_layout_t layout;  /* Storage layout */
     size_t       num_map; /* Number of mappings */
     ssize_t      len;     /* Length of the string; also a return value */
-    char *       filename;
-    char *       dsetname;
+    char        *filename;
+    char        *dsetname;
 
     file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 

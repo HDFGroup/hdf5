@@ -30,8 +30,8 @@ int H5tools_INDENT_g = 0;
 /* global variables */
 H5E_auto2_t lib_func;
 H5E_auto2_t tools_func;
-void *      lib_edata;
-void *      tools_edata;
+void       *lib_edata;
+void       *tools_edata;
 
 hid_t H5tools_ERR_STACK_g     = H5I_INVALID_HID;
 hid_t H5tools_ERR_CLS_g       = H5I_INVALID_HID;
@@ -81,19 +81,11 @@ const char *volnames[] = {
  *
  */
 const char *drivernames[] = {
-    [SEC2_VFD_IDX]      = "sec2",
-    [DIRECT_VFD_IDX]    = "direct",
-    [LOG_VFD_IDX]       = "log",
-    [WINDOWS_VFD_IDX]   = "windows",
-    [STDIO_VFD_IDX]     = "stdio",
-    [CORE_VFD_IDX]      = "core",
-    [FAMILY_VFD_IDX]    = "family",
-    [SPLIT_VFD_IDX]     = "split",
-    [MULTI_VFD_IDX]     = "multi",
-    [MPIO_VFD_IDX]      = "mpio",
-    [ROS3_VFD_IDX]      = "ros3",
-    [HDFS_VFD_IDX]      = "hdfs",
-    [SUBFILING_VFD_IDX] = H5FD_SUBFILING_NAME,
+    [SEC2_VFD_IDX] = "sec2",       [DIRECT_VFD_IDX] = "direct", [LOG_VFD_IDX] = "log",
+    [WINDOWS_VFD_IDX] = "windows", [STDIO_VFD_IDX] = "stdio",   [CORE_VFD_IDX] = "core",
+    [FAMILY_VFD_IDX] = "family",   [SPLIT_VFD_IDX] = "split",   [MULTI_VFD_IDX] = "multi",
+    [MPIO_VFD_IDX] = "mpio",       [ROS3_VFD_IDX] = "ros3",     [HDFS_VFD_IDX] = "hdfs",
+    [SUBFILING_VFD_IDX] = H5FD_SUBFILING_NAME, [ONION_VFD_IDX] = "onion",
 };
 
 #define NUM_VOLS    (sizeof(volnames) / sizeof(volnames[0]))
@@ -590,6 +582,13 @@ h5tools_set_fapl_vfd(hid_t fapl_id, h5tools_vfd_info_t *vfd_info)
                 H5TOOLS_GOTO_ERROR(FAIL, "The Subfiling VFD is not enabled");
 #endif
             }
+            else if (!HDstrcmp(vfd_info->u.name, drivernames[ONION_VFD_IDX])) {
+                /* Onion driver */
+                if (!vfd_info->info)
+                    H5TOOLS_GOTO_ERROR(FAIL, "Onion VFD info is invalid");
+                if (H5Pset_fapl_onion(fapl_id, (const H5FD_onion_fapl_info_t *)vfd_info->info) < 0)
+                    H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_onion() failed");
+            }
             else {
                 /*
                  * Try to load VFD plugin.
@@ -642,7 +641,7 @@ h5tools_set_fapl_vol(hid_t fapl_id, h5tools_vol_info_t *vol_info)
 {
     htri_t connector_is_registered;
     hid_t  connector_id   = H5I_INVALID_HID;
-    void * connector_info = NULL;
+    void  *connector_info = NULL;
     herr_t ret_value      = SUCCEED;
 
     switch (vol_info->type) {
@@ -1384,8 +1383,8 @@ h5tools_render_element(FILE *stream, const h5tool_format_t *info, h5tools_contex
                        hsize_t elmt_counter)
 {
     hbool_t dimension_break = TRUE;
-    char *  s               = NULL;
-    char *  section         = NULL; /* a section of output */
+    char   *s               = NULL;
+    char   *section         = NULL; /* a section of output */
     int     secnum;                 /* section sequence number */
     int     multiline;              /* datum was multiline */
 
@@ -1549,8 +1548,8 @@ h5tools_render_region_element(FILE *stream, const h5tool_format_t *info, h5tools
                               hsize_t local_elmt_counter, hsize_t elmt_counter)
 {
     hbool_t dimension_break = TRUE;
-    char *  s               = NULL;
-    char *  section         = NULL; /* a section of output */
+    char   *s               = NULL;
+    char   *section         = NULL; /* a section of output */
     int     secnum;                 /* section sequence number */
     int     multiline;              /* datum was multiline */
 
@@ -1793,7 +1792,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem, hsize_t 
         case H5T_STRING: {
             unsigned int  i;
             H5T_str_t     pad;
-            char *        s = NULL;
+            char         *s = NULL;
             unsigned char tempuchar;
 
             H5TOOLS_DEBUG("H5T_STRING");
@@ -2002,7 +2001,7 @@ render_bin_output_region_data_blocks(hid_t region_id, FILE *stream, hid_t contai
     unsigned jndx;
     size_t   type_size;
     hid_t    mem_space  = H5I_INVALID_HID;
-    void *   region_buf = NULL;
+    void    *region_buf = NULL;
     hbool_t  past_catch = FALSE;
     hsize_t  blkndx;
     hid_t    sid1      = H5I_INVALID_HID;
@@ -2166,7 +2165,7 @@ render_bin_output_region_data_points(hid_t region_space, hid_t region_id, FILE *
     hsize_t *dims1 = NULL;
     size_t   type_size;
     hid_t    mem_space  = H5I_INVALID_HID;
-    void *   region_buf = NULL;
+    void    *region_buf = NULL;
     int      ret_value  = 0;
 
     H5TOOLS_START_DEBUG(" ");

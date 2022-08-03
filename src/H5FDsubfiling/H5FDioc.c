@@ -130,8 +130,8 @@ static herr_t  H5FD__ioc_term(void);
 static hsize_t H5FD__ioc_sb_size(H5FD_t *_file);
 static herr_t  H5FD__ioc_sb_encode(H5FD_t *_file, char *name /*out*/, unsigned char *buf /*out*/);
 static herr_t  H5FD__ioc_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf);
-static void *  H5FD__ioc_fapl_get(H5FD_t *_file);
-static void *  H5FD__ioc_fapl_copy(const void *_old_fa);
+static void   *H5FD__ioc_fapl_get(H5FD_t *_file);
+static void   *H5FD__ioc_fapl_copy(const void *_old_fa);
 static herr_t  H5FD__ioc_fapl_free(void *_fapl);
 static H5FD_t *H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr);
 static herr_t  H5FD__ioc_close(H5FD_t *_file);
@@ -350,7 +350,7 @@ herr_t
 H5Pset_fapl_ioc(hid_t fapl_id, H5FD_ioc_config_t *vfd_config)
 {
     H5FD_ioc_config_t *ioc_conf  = NULL;
-    H5P_genplist_t *   plist_ptr = NULL;
+    H5P_genplist_t    *plist_ptr = NULL;
     herr_t             ret_value = SUCCEED;
 
     H5FD_IOC_LOG_CALL(__func__);
@@ -402,7 +402,7 @@ herr_t
 H5Pget_fapl_ioc(hid_t fapl_id, H5FD_ioc_config_t *config_out)
 {
     const H5FD_ioc_config_t *config_ptr         = NULL;
-    H5P_genplist_t *         plist_ptr          = NULL;
+    H5P_genplist_t          *plist_ptr          = NULL;
     hbool_t                  use_default_config = FALSE;
     herr_t                   ret_value          = SUCCEED;
 
@@ -645,7 +645,7 @@ static void *
 H5FD__ioc_fapl_get(H5FD_t *_file)
 {
     H5FD_ioc_t *file      = (H5FD_ioc_t *)_file;
-    void *      ret_value = NULL;
+    void       *ret_value = NULL;
 
     H5FD_IOC_LOG_CALL(__func__);
 
@@ -701,8 +701,8 @@ static void *
 H5FD__ioc_fapl_copy(const void *_old_fa)
 {
     const H5FD_ioc_config_t *old_fa_ptr = (const H5FD_ioc_config_t *)_old_fa;
-    H5FD_ioc_config_t *      new_fa_ptr = NULL;
-    void *                   ret_value  = NULL;
+    H5FD_ioc_config_t       *new_fa_ptr = NULL;
+    void                    *ret_value  = NULL;
 
     H5FD_IOC_LOG_CALL(__func__);
 
@@ -771,15 +771,15 @@ done:
 static H5FD_t *
 H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
-    H5FD_ioc_t *             file_ptr   = NULL; /* Ioc VFD info */
+    H5FD_ioc_t              *file_ptr   = NULL; /* Ioc VFD info */
     const H5FD_ioc_config_t *config_ptr = NULL; /* Driver-specific property list */
     H5FD_ioc_config_t        default_config;
-    H5FD_class_t *           driver    = NULL; /* VFD for file */
-    H5P_genplist_t *         plist_ptr = NULL;
+    H5FD_class_t            *driver    = NULL; /* VFD for file */
+    H5P_genplist_t          *plist_ptr = NULL;
     H5FD_driver_prop_t       driver_prop; /* Property for driver ID & info */
     int                      mpi_inited = 0;
     int                      mpi_code; /* MPI return code */
-    H5FD_t *                 ret_value = NULL;
+    H5FD_t                  *ret_value = NULL;
 
     H5FD_IOC_LOG_CALL(__func__);
 
@@ -1283,7 +1283,7 @@ done:
 static haddr_t
 H5FD__ioc_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 {
-    const H5FD_ioc_t *   file       = (const H5FD_ioc_t *)_file;
+    const H5FD_ioc_t    *file       = (const H5FD_ioc_t *)_file;
     haddr_t              ret_value  = HADDR_UNDEF; /* Return value */
     subfiling_context_t *sf_context = NULL;
 
@@ -1751,9 +1751,9 @@ H5FD__ioc_write_vector_internal(H5FD_t *_file, uint32_t count, H5FD_mem_t types[
                                 size_t sizes[], const void *bufs[] /* in */)
 {
     subfiling_context_t *sf_context    = NULL;
-    MPI_Request *        active_reqs   = NULL;
-    H5FD_ioc_t *         file_ptr      = (H5FD_ioc_t *)_file;
-    io_req_t **          sf_async_reqs = NULL;
+    MPI_Request         *active_reqs   = NULL;
+    H5FD_ioc_t          *file_ptr      = (H5FD_ioc_t *)_file;
+    io_req_t           **sf_async_reqs = NULL;
     int64_t              sf_context_id = -1;
     herr_t               ret_value     = SUCCEED;
     struct __mpi_req {
@@ -1855,9 +1855,9 @@ H5FD__ioc_read_vector_internal(H5FD_t *_file, uint32_t count, haddr_t addrs[], s
                                void *bufs[] /* out */)
 {
     subfiling_context_t *sf_context    = NULL;
-    MPI_Request *        active_reqs   = NULL;
-    H5FD_ioc_t *         file_ptr      = (H5FD_ioc_t *)_file;
-    io_req_t **          sf_async_reqs = NULL;
+    MPI_Request         *active_reqs   = NULL;
+    H5FD_ioc_t          *file_ptr      = (H5FD_ioc_t *)_file;
+    io_req_t           **sf_async_reqs = NULL;
     int64_t              sf_context_id = -1;
     herr_t               ret_value     = SUCCEED;
     struct __mpi_req {

@@ -189,8 +189,8 @@ typedef struct H5FD_subfiling_t {
 
 /* Prototypes */
 static herr_t  H5FD__subfiling_term(void);
-static void *  H5FD__subfiling_fapl_get(H5FD_t *_file);
-static void *  H5FD__subfiling_fapl_copy(const void *_old_fa);
+static void   *H5FD__subfiling_fapl_get(H5FD_t *_file);
+static void   *H5FD__subfiling_fapl_copy(const void *_old_fa);
 static herr_t  H5FD__subfiling_fapl_free(void *_fa);
 static H5FD_t *H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr);
 static herr_t  H5FD__subfiling_close(H5FD_t *_file);
@@ -462,7 +462,7 @@ herr_t
 H5Pset_fapl_subfiling(hid_t fapl_id, const H5FD_subfiling_config_t *vfd_config)
 {
     H5FD_subfiling_config_t *subfiling_conf = NULL;
-    H5P_genplist_t *         plist          = NULL;
+    H5P_genplist_t          *plist          = NULL;
     herr_t                   ret_value      = SUCCEED;
 
     /*NO TRACE*/
@@ -516,7 +516,7 @@ herr_t
 H5Pget_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *config_out)
 {
     const H5FD_subfiling_config_t *config_ptr         = NULL;
-    H5P_genplist_t *               plist              = NULL;
+    H5P_genplist_t                *plist              = NULL;
     hbool_t                        use_default_config = FALSE;
     herr_t                         ret_value          = SUCCEED;
 
@@ -559,7 +559,7 @@ H5FD__subfiling_get_default_config(hid_t fapl_id, H5FD_subfiling_config_t *confi
 {
     MPI_Comm comm = MPI_COMM_NULL;
     MPI_Info info = MPI_INFO_NULL;
-    char *   h5_require_ioc;
+    char    *h5_require_ioc;
     herr_t   ret_value = SUCCEED;
 
     HDassert(config_out);
@@ -679,9 +679,9 @@ done:
 static void *
 H5FD__subfiling_fapl_get(H5FD_t *_file)
 {
-    H5FD_subfiling_t *       file      = (H5FD_subfiling_t *)_file;
+    H5FD_subfiling_t        *file      = (H5FD_subfiling_t *)_file;
     H5FD_subfiling_config_t *fa        = NULL;
-    void *                   ret_value = NULL;
+    void                    *ret_value = NULL;
 
     fa = (H5FD_subfiling_config_t *)H5MM_calloc(sizeof(H5FD_subfiling_config_t));
 
@@ -765,8 +765,8 @@ static void *
 H5FD__subfiling_fapl_copy(const void *_old_fa)
 {
     const H5FD_subfiling_config_t *old_fa    = (const H5FD_subfiling_config_t *)_old_fa;
-    H5FD_subfiling_config_t *      new_fa    = NULL;
-    void *                         ret_value = NULL;
+    H5FD_subfiling_config_t       *new_fa    = NULL;
+    void                          *ret_value = NULL;
 
     new_fa = (H5FD_subfiling_config_t *)H5MM_malloc(sizeof(H5FD_subfiling_config_t));
     if (new_fa == NULL) {
@@ -839,17 +839,17 @@ H5FD__subfiling_fapl_free(void *_fa)
 static H5FD_t *
 H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
-    H5FD_subfiling_t *             file_ptr   = NULL; /* Subfiling VFD info */
+    H5FD_subfiling_t              *file_ptr   = NULL; /* Subfiling VFD info */
     const H5FD_subfiling_config_t *config_ptr = NULL; /* Driver-specific property list */
     H5FD_subfiling_config_t        default_config;
-    H5FD_class_t *                 driver    = NULL; /* VFD for file */
-    H5P_genplist_t *               plist_ptr = NULL;
+    H5FD_class_t                  *driver    = NULL; /* VFD for file */
+    H5P_genplist_t                *plist_ptr = NULL;
     H5FD_driver_prop_t             driver_prop; /* Property for driver ID & info */
     hbool_t                        bcasted_eof = FALSE;
     int64_t                        sf_eof      = -1;
     void *                         file_handle = NULL;
     int                            mpi_code; /* MPI return code */
-    H5FD_t *                       ret_value = NULL;
+    H5FD_t                        *ret_value = NULL;
 
     /* Check arguments */
     if (!name || !*name)
@@ -1365,14 +1365,14 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr
                      void *buf /*out*/)
 {
     subfiling_context_t *sf_context         = NULL;
-    H5FD_subfiling_t *   file_ptr           = (H5FD_subfiling_t *)_file;
-    H5FD_mem_t *         io_types           = NULL;
-    haddr_t *            io_addrs           = NULL;
-    size_t *             io_sizes           = NULL;
-    void **              io_bufs            = NULL;
-    int64_t *            source_data_offset = NULL;
-    int64_t *            sf_data_size       = NULL;
-    int64_t *            sf_offset          = NULL;
+    H5FD_subfiling_t    *file_ptr           = (H5FD_subfiling_t *)_file;
+    H5FD_mem_t          *io_types           = NULL;
+    haddr_t             *io_addrs           = NULL;
+    size_t              *io_sizes           = NULL;
+    void               **io_bufs            = NULL;
+    int64_t             *source_data_offset = NULL;
+    int64_t             *sf_data_size       = NULL;
+    int64_t             *sf_offset          = NULL;
     hbool_t              rank0_bcast        = FALSE;
     int                  ioc_total;
     herr_t               ret_value = SUCCEED;
@@ -1634,14 +1634,14 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t add
                       const void *buf /*in*/)
 {
     subfiling_context_t *sf_context         = NULL;
-    H5FD_subfiling_t *   file_ptr           = (H5FD_subfiling_t *)_file;
-    const void **        io_bufs            = NULL;
-    H5FD_mem_t *         io_types           = NULL;
-    haddr_t *            io_addrs           = NULL;
-    size_t *             io_sizes           = NULL;
-    int64_t *            source_data_offset = NULL;
-    int64_t *            sf_data_size       = NULL;
-    int64_t *            sf_offset          = NULL;
+    H5FD_subfiling_t    *file_ptr           = (H5FD_subfiling_t *)_file;
+    const void         **io_bufs            = NULL;
+    H5FD_mem_t          *io_types           = NULL;
+    haddr_t             *io_addrs           = NULL;
+    size_t              *io_sizes           = NULL;
+    int64_t             *source_data_offset = NULL;
+    int64_t             *sf_data_size       = NULL;
+    int64_t             *sf_offset          = NULL;
     int                  ioc_total;
     herr_t               ret_value = SUCCEED;
 
@@ -2369,7 +2369,7 @@ H5FD__subfiling_del(const char *name, hid_t fapl)
 {
     const H5FD_subfiling_config_t *subfiling_config = NULL;
     H5FD_subfiling_config_t        default_config;
-    H5P_genplist_t *               plist     = NULL;
+    H5P_genplist_t                *plist     = NULL;
     herr_t                         ret_value = SUCCEED;
 
     if (NULL == (plist = H5P_object_verify(fapl, H5P_FILE_ACCESS)))

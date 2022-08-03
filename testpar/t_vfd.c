@@ -282,7 +282,7 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
     hid_t       fapl_id       = -1;   /* file access property list ID */
     hid_t       dxpl_id       = -1;   /* data access property list ID */
     unsigned    flags         = 0;    /* file open flags              */
-    H5FD_t *    lf            = NULL; /* VFD struct ptr               */
+    H5FD_t     *lf            = NULL; /* VFD struct ptr               */
 
     HDassert(vfd_name);
     HDassert(lf_ptr);
@@ -680,14 +680,14 @@ vector_read_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
     hbool_t     show_progress = FALSE;
     hid_t       fapl_id       = -1;   /* file access property list ID */
     hid_t       dxpl_id       = -1;   /* data access property list ID */
-    H5FD_t *    lf            = NULL; /* VFD struct ptr               */
+    H5FD_t     *lf            = NULL; /* VFD struct ptr               */
     int         cp            = 0;
     int         i;
     uint32_t    count;
     H5FD_mem_t  types[1];
     haddr_t     addrs[1];
     size_t      sizes[1];
-    void *      bufs[1];
+    void       *bufs[1];
 
     pass = TRUE;
 
@@ -917,14 +917,14 @@ vector_read_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
     hbool_t     show_progress = FALSE;
     hid_t       fapl_id       = -1;   /* file access property list ID */
     hid_t       dxpl_id       = -1;   /* data access property list ID */
-    H5FD_t *    lf            = NULL; /* VFD struct ptr               */
+    H5FD_t     *lf            = NULL; /* VFD struct ptr               */
     int         cp            = 0;
     int         i;
     uint32_t    count;
     H5FD_mem_t  types[1];
     haddr_t     addrs[1];
     size_t      sizes[1];
-    void *      bufs[1];
+    void       *bufs[1];
 
     pass = TRUE;
 
@@ -1225,14 +1225,14 @@ vector_read_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
     hbool_t     show_progress = FALSE;
     hid_t       fapl_id       = -1;   /* file access property list ID */
     hid_t       dxpl_id       = -1;   /* data access property list ID */
-    H5FD_t *    lf            = NULL; /* VFD struct ptr               */
+    H5FD_t     *lf            = NULL; /* VFD struct ptr               */
     int         cp            = 0;
     int         i;
     uint32_t    count;
     H5FD_mem_t  types[4];
     haddr_t     addrs[4];
     size_t      sizes[4];
-    void *      bufs[4];
+    void       *bufs[4];
 
     pass = TRUE;
 
@@ -1582,7 +1582,7 @@ vector_read_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
     hbool_t     show_progress = FALSE;
     hid_t       fapl_id       = -1;   /* file access property list ID */
     hid_t       dxpl_id       = -1;   /* data access property list ID */
-    H5FD_t *    lf            = NULL; /* VFD struct ptr               */
+    H5FD_t     *lf            = NULL; /* VFD struct ptr               */
     int         cp            = 0;
     int         i;
     int         j;
@@ -1592,7 +1592,7 @@ vector_read_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
     H5FD_mem_t  types[4];
     haddr_t     addrs[4];
     size_t      sizes[4];
-    void *      bufs[4];
+    void       *bufs[4];
 
     pass = TRUE;
 
@@ -2017,7 +2017,7 @@ vector_read_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
     hbool_t     show_progress = FALSE;
     hid_t       fapl_id       = -1;   /* file access property list ID */
     hid_t       dxpl_id       = -1;   /* data access property list ID */
-    H5FD_t *    lf            = NULL; /* VFD struct ptr               */
+    H5FD_t     *lf            = NULL; /* VFD struct ptr               */
     int         cp            = 0;
     int         i;
     int         j;
@@ -2026,7 +2026,7 @@ vector_read_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer_
     H5FD_mem_t  types[(INTS_PER_RANK / 16) + 1];
     haddr_t     addrs[(INTS_PER_RANK / 16) + 1];
     size_t      sizes[2];
-    void *      bufs[(INTS_PER_RANK / 16) + 1];
+    void       *bufs[(INTS_PER_RANK / 16) + 1];
 
     pass = TRUE;
 
@@ -2262,7 +2262,7 @@ vector_write_test_1(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     hbool_t     show_progress = FALSE;
     hid_t       fapl_id       = -1;   /* file access property list ID */
     hid_t       dxpl_id       = -1;   /* data access property list ID */
-    H5FD_t *    lf            = NULL; /* VFD struct ptr               */
+    H5FD_t     *lf            = NULL; /* VFD struct ptr               */
     int         cp            = 0;
     int         i;
     uint32_t    count;
@@ -2455,7 +2455,7 @@ vector_write_test_2(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     hbool_t     show_progress = FALSE;
     hid_t       fapl_id       = -1;   /* file access property list ID */
     hid_t       dxpl_id       = -1;   /* data access property list ID */
-    H5FD_t *    lf            = NULL; /* VFD struct ptr               */
+    H5FD_t     *lf            = NULL; /* VFD struct ptr               */
     int         cp            = 0;
     int         i;
     int         j;
@@ -2715,7 +2715,7 @@ vector_write_test_3(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     hbool_t     show_progress = FALSE;
     hid_t       fapl_id       = -1;   /* file access property list ID */
     hid_t       dxpl_id       = -1;   /* data access property list ID */
-    H5FD_t *    lf            = NULL; /* VFD struct ptr               */
+    H5FD_t     *lf            = NULL; /* VFD struct ptr               */
     int         cp            = 0;
     int         i;
     int         j;
@@ -2982,7 +2982,7 @@ vector_write_test_4(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     hbool_t     show_progress = FALSE;
     hid_t       fapl_id       = -1;   /* file access property list ID */
     hid_t       dxpl_id       = -1;   /* data access property list ID */
-    H5FD_t *    lf            = NULL; /* VFD struct ptr               */
+    H5FD_t     *lf            = NULL; /* VFD struct ptr               */
     int         cp            = 0;
     int         i;
     int         j;
@@ -3285,7 +3285,7 @@ vector_write_test_5(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     hbool_t     show_progress = FALSE;
     hid_t       fapl_id       = -1;   /* file access property list ID */
     hid_t       dxpl_id       = -1;   /* data access property list ID */
-    H5FD_t *    lf            = NULL; /* VFD struct ptr               */
+    H5FD_t     *lf            = NULL; /* VFD struct ptr               */
     int         cp            = 0;
     int         i;
     int         j;
@@ -3727,7 +3727,7 @@ vector_write_test_6(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     hbool_t     show_progress = FALSE;
     hid_t       fapl_id       = -1;   /* file access property list ID */
     hid_t       dxpl_id       = -1;   /* data access property list ID */
-    H5FD_t *    lf            = NULL; /* VFD struct ptr               */
+    H5FD_t     *lf            = NULL; /* VFD struct ptr               */
     int         cp            = 0;
     int         i;
     int         base_index;
@@ -3990,7 +3990,7 @@ vector_write_test_7(int file_name_id, int mpi_rank, int mpi_size, H5FD_mpio_xfer
     hbool_t     show_progress = FALSE;
     hid_t       fapl_id       = -1;   /* file access property list ID */
     hid_t       dxpl_id       = -1;   /* data access property list ID */
-    H5FD_t *    lf            = NULL; /* VFD struct ptr               */
+    H5FD_t     *lf            = NULL; /* VFD struct ptr               */
     int         cp            = 0;
     int         i;
     int         j;

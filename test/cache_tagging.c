@@ -1789,7 +1789,7 @@ check_attribute_rename_tags(hid_t fcpl, int type)
 #ifndef NDEBUG
     int verbose = FALSE;          /* verbose file output */
 #endif                            /* NDEBUG */
-    int *   data = NULL;          /* data buffer */
+    int    *data = NULL;          /* data buffer */
     int     i, j, k = 0;          /* iterators */
     hid_t   fapl            = -1; /* File access prop list */
     haddr_t root_tag        = 0;
@@ -2002,7 +2002,7 @@ check_attribute_delete_tags(hid_t fcpl, int type)
 #ifndef NDEBUG
     int verbose = FALSE;          /* verbose file output */
 #endif                            /* NDEBUG */
-    int *   data = NULL;          /* data buffer */
+    int    *data = NULL;          /* data buffer */
     int     i, j, k = 0;          /* iterators */
     hid_t   fapl            = -1; /* File access prop list */
     haddr_t root_tag        = 0;
@@ -2680,7 +2680,7 @@ check_dataset_write_tags(void)
     hsize_t dims1[2]   = {DIMS, DIMS};                   /* dimensions */
     hsize_t maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED}; /* dimensions */
     int     i, j, k = 0;                                 /* iterators */
-    int *   data = NULL;                                 /* data buffer */
+    int    *data = NULL;                                 /* data buffer */
 
     /* Testing Macro */
     TESTING("tag application during dataset write");
@@ -2838,7 +2838,7 @@ check_attribute_write_tags(hid_t fcpl, int type)
 #ifndef NDEBUG
     int verbose = FALSE;     /* verbose file output */
 #endif                       /* NDEBUG */
-    int *   data = NULL;     /* data buffer */
+    int    *data = NULL;     /* data buffer */
     int     i, j, k = 0;     /* iterators */
     hid_t   fapl       = -1; /* File access prop list */
     haddr_t root_tag   = 0;
@@ -3033,7 +3033,7 @@ check_dataset_read_tags(void)
     hsize_t dims1[2]   = {DIMS, DIMS};                   /* dimensions */
     hsize_t maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED}; /* dimensions */
     int     i, j, k = 0;                                 /* iterators */
-    int *   data = NULL;                                 /* data buffer */
+    int    *data = NULL;                                 /* data buffer */
 
     /* Testing Macro */
     TESTING("tag application during dataset read");
@@ -3195,7 +3195,7 @@ check_dataset_size_retrieval(void)
     hsize_t dims1[2]   = {DIMS, DIMS};                   /* dimensions */
     hsize_t maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED}; /* dimensions */
     int     i, j, k = 0;                                 /* iterators */
-    int *   data  = NULL;                                /* data buffer */
+    int    *data  = NULL;                                /* data buffer */
     hsize_t dsize = 0;
 
     /* Testing Macro */
@@ -3359,7 +3359,7 @@ check_dataset_extend_tags(void)
     hsize_t dims1[2]   = {DIMS, DIMS};                   /* dimensions */
     hsize_t maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED}; /* dimensions */
     int     i, j, k = 0;                                 /* iterators */
-    int *   data       = NULL;                           /* data buffer */
+    int    *data       = NULL;                           /* data buffer */
     hsize_t newdims[2] = {DIMS * 2, DIMS};               /* dimensions */
 
     /* Testing Macro */
@@ -3807,7 +3807,7 @@ check_link_removal_tags(hid_t fcpl, int type)
     hsize_t dims1[2]   = {DIMS, DIMS};                   /* dimensions */
     hsize_t maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED}; /* dimensions */
     int     i, j, k = 0;                                 /* iterators */
-    int *   data = NULL;                                 /* data buffer */
+    int    *data = NULL;                                 /* data buffer */
 
     /* Testing Macro */
     TESTING("tag application during link removal");
@@ -3996,7 +3996,7 @@ check_link_getname_tags(void)
     hsize_t dims1[2]   = {DIMS, DIMS};                   /* dimensions */
     hsize_t maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED}; /* dimensions */
     int     i, j, k = 0;                                 /* iterators */
-    int *   data = NULL;                                 /* data buffer */
+    int    *data = NULL;                                 /* data buffer */
 
     /* Testing Macro */
     TESTING("tag application during link name retrieval");
@@ -4456,7 +4456,7 @@ check_invalid_tag_application(void)
 {
 #if H5C_DO_TAGGING_SANITY_CHECKS
     /* Variables */
-    H5F_t * f   = NULL;
+    H5F_t  *f   = NULL;
     hid_t   fid = -1;
     haddr_t addr;
     H5HL_t *lheap          = NULL;

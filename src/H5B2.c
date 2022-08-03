@@ -123,10 +123,10 @@ H5FL_DEFINE_STATIC(H5B2_t);
 H5B2_t *
 H5B2_create(H5F_t *f, const H5B2_create_t *cparam, void *ctx_udata)
 {
-    H5B2_t *    bt2 = NULL;       /* Pointer to the B-tree */
+    H5B2_t     *bt2 = NULL;       /* Pointer to the B-tree */
     H5B2_hdr_t *hdr = NULL;       /* Pointer to the B-tree header */
     haddr_t     hdr_addr;         /* B-tree header address */
-    H5B2_t *    ret_value = NULL; /* Return value */
+    H5B2_t     *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -194,9 +194,9 @@ done:
 H5B2_t *
 H5B2_open(H5F_t *f, haddr_t addr, void *ctx_udata)
 {
-    H5B2_t *    bt2       = NULL; /* Pointer to the B-tree */
+    H5B2_t     *bt2       = NULL; /* Pointer to the B-tree */
     H5B2_hdr_t *hdr       = NULL; /* Pointer to the B-tree header */
-    H5B2_t *    ret_value = NULL; /* Return value */
+    H5B2_t     *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -299,7 +299,7 @@ done:
 herr_t
 H5B2_update(H5B2_t *bt2, void *udata, H5B2_modify_t op, void *op_data)
 {
-    H5B2_hdr_t *         hdr;                             /* Pointer to the B-tree header */
+    H5B2_hdr_t          *hdr;                             /* Pointer to the B-tree header */
     H5B2_update_status_t status    = H5B2_UPDATE_UNKNOWN; /* Whether the record was inserted/modified */
     herr_t               ret_value = SUCCEED;             /* Return value */
 
@@ -452,9 +452,9 @@ H5B2_iterate(H5B2_t *bt2, H5B2_operator_t op, void *op_data)
 herr_t
 H5B2_find(H5B2_t *bt2, void *udata, hbool_t *found, H5B2_found_t op, void *op_data)
 {
-    H5B2_hdr_t *    hdr;                 /* Pointer to the B-tree header */
+    H5B2_hdr_t     *hdr;                 /* Pointer to the B-tree header */
     H5B2_node_ptr_t curr_node_ptr;       /* Node pointer info for current node */
-    void *          parent = NULL;       /* Parent of current node */
+    void           *parent = NULL;       /* Parent of current node */
     uint16_t        depth;               /* Current depth of the tree */
     int             cmp;                 /* Comparison value of records */
     unsigned        idx;                 /* Location of record which matches key */
@@ -715,9 +715,9 @@ done:
 herr_t
 H5B2_index(H5B2_t *bt2, H5_iter_order_t order, hsize_t idx, H5B2_found_t op, void *op_data)
 {
-    H5B2_hdr_t *    hdr;                 /* Pointer to the B-tree header */
+    H5B2_hdr_t     *hdr;                 /* Pointer to the B-tree header */
     H5B2_node_ptr_t curr_node_ptr;       /* Node pointer info for current node */
-    void *          parent = NULL;       /* Parent of current node */
+    void           *parent = NULL;       /* Parent of current node */
     uint16_t        depth;               /* Current depth of the tree */
     herr_t          ret_value = SUCCEED; /* Return value */
 
@@ -1158,9 +1158,9 @@ done:
 herr_t
 H5B2_modify(H5B2_t *bt2, void *udata, H5B2_modify_t op, void *op_data)
 {
-    H5B2_hdr_t *    hdr;                 /* Pointer to the B-tree header */
+    H5B2_hdr_t     *hdr;                 /* Pointer to the B-tree header */
     H5B2_node_ptr_t curr_node_ptr;       /* Node pointer info for current node */
-    void *          parent = NULL;       /* Parent of current node */
+    void           *parent = NULL;       /* Parent of current node */
     H5B2_nodepos_t  curr_pos;            /* Position of current node */
     uint16_t        depth;               /* Current depth of the tree */
     int             cmp;                 /* Comparison value of records */

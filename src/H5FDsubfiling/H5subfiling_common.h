@@ -131,7 +131,7 @@ typedef struct {
 typedef struct app_layout_t {
     long      hostid;      /* value returned by gethostid()  */
     layout_t *layout;      /* Vector of {rank,hostid} values */
-    int *     node_ranks;  /* ranks extracted from sorted layout */
+    int      *node_ranks;  /* ranks extracted from sorted layout */
     int       node_count;  /* Total nodes (different hostids) */
     int       node_index;  /* My node: index into node_ranks */
     int       local_peers; /* How may local peers on my node */
@@ -141,12 +141,12 @@ typedef struct app_layout_t {
 
 /*  This typedef defines things related to IOC selections */
 typedef struct topology {
-    app_layout_t *              app_layout;         /* Pointer to our layout struct   */
+    app_layout_t               *app_layout;         /* Pointer to our layout struct   */
     bool                        rank_is_ioc;        /* Indicates that we host an IOC  */
     int                         subfile_rank;       /* Valid only if rank_is_ioc      */
     int                         n_io_concentrators; /* Number of IO concentrators  */
-    int *                       io_concentrators;   /* Vector of ranks which are IOCs */
-    int *                       subfile_fd;         /* file descriptor (if IOC)       */
+    int                        *io_concentrators;   /* Vector of ranks which are IOCs */
+    int                        *subfile_fd;         /* file descriptor (if IOC)       */
     H5FD_subfiling_ioc_select_t selection_type;     /* Cache our IOC selection criteria */
 } sf_topology_t;
 
@@ -170,10 +170,10 @@ typedef struct {
     int            sf_group_size;           /* IOC count (in sf_group_comm)         */
     int            sf_group_rank;           /* IOC rank  (in sf_group_comm)         */
     int            sf_intercomm_root;       /* Not used: for IOC comms              */
-    char *         subfile_prefix;          /* If subfiles are node-local           */
-    char *         sf_filename;             /* A generated subfile name             */
-    char *         h5_filename;             /* The user supplied file name          */
-    void *         ioc_data;                /* Private data for underlying IOC      */
+    char          *subfile_prefix;          /* If subfiles are node-local           */
+    char          *sf_filename;             /* A generated subfile name             */
+    char          *h5_filename;             /* The user supplied file name          */
+    void          *ioc_data;                /* Private data for underlying IOC      */
     sf_topology_t *topology;                /* pointer to our topology              */
 
 #ifdef H5_SUBFILING_DEBUG
@@ -218,7 +218,7 @@ H5_DLL herr_t H5_open_subfiles(const char *base_filename, void *h5_file_handle,
 H5_DLL herr_t H5_close_subfiles(int64_t subfiling_context_id);
 
 H5_DLL int64_t H5_new_subfiling_object_id(sf_obj_type_t obj_type, int64_t index_val);
-H5_DLL void *  H5_get_subfiling_object(int64_t object_id);
+H5_DLL void   *H5_get_subfiling_object(int64_t object_id);
 H5_DLL int64_t H5_subfile_fhandle_to_context(void *file_handle);
 H5_DLL herr_t  H5_free_subfiling_object(int64_t object_id);
 H5_DLL herr_t  H5_get_num_iocs_from_config_file(FILE *config_file, int *n_io_concentrators);

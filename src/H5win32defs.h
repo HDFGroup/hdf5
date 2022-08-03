@@ -53,12 +53,10 @@ struct timezone {
 #define HDgetcwd(S, Z)       _getcwd(S, Z)
 #define HDgetdcwd(D, S, Z)   _getdcwd(D, S, Z)
 #define HDgetdrive()         _getdrive()
-#define HDgetlogin()         Wgetlogin()
 #define HDgettimeofday(V, Z) Wgettimeofday(V, Z)
 #define HDisatty(F)          _isatty(F)
 #define HDlseek(F, O, W)     _lseeki64(F, O, W)
 #define HDlstat(S, B)        _lstati64(S, B)
-#define HDmemset(X, C, Z)    memset((void *)(X), C, Z) /* Cast avoids MSVC warning */
 #define HDmkdir(S, M)        _mkdir(S)
 
 /* off_t exists on Windows, but is always a 32-bit long, even on 64-bit Windows,
@@ -84,7 +82,6 @@ struct timezone {
 #define HDsleep(S)            Sleep(S * 1000)
 #define HDstat(S, B)          _stati64(S, B)
 #define HDstrcasecmp(A, B)    _stricmp(A, B)
-#define HDstrdup(S)           _strdup(S)
 #define HDstrtok_r(X, Y, Z)   strtok_s(X, Y, Z)
 #define HDtzset()             _tzset()
 #define HDunlink(S)           _unlink(S)
@@ -99,11 +96,10 @@ struct timezone {
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-H5_DLL int    Wgettimeofday(struct timeval *tv, struct timezone *tz);
-H5_DLL int    Wsetenv(const char *name, const char *value, int overwrite);
-H5_DLL int    Wflock(int fd, int operation);
-H5_DLL char * Wgetlogin(void);
-H5_DLL herr_t H5_expand_windows_env_vars(char **env_var);
+H5_DLL int      Wgettimeofday(struct timeval *tv, struct timezone *tz);
+H5_DLL int      Wsetenv(const char *name, const char *value, int overwrite);
+H5_DLL int      Wflock(int fd, int operation);
+H5_DLL herr_t   H5_expand_windows_env_vars(char **env_var);
 H5_DLL wchar_t *H5_get_utf16_str(const char *s);
 H5_DLL int      Wopen_utf8(const char *path, int oflag, ...);
 H5_DLL int      Wremove_utf8(const char *path);

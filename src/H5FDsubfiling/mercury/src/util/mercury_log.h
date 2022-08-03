@@ -179,11 +179,11 @@ enum hg_log_state { HG_LOG_PASS, HG_LOG_OFF, HG_LOG_ON };
 
 /* Log outlet */
 struct hg_log_outlet {
-    const char *          name;          /* Name of outlet */
+    const char           *name;          /* Name of outlet */
     enum hg_log_state     state;         /* Init state of outlet */
     enum hg_log_level     level;         /* Level of outlet */
     struct hg_log_outlet *parent;        /* Parent of outlet */
-    struct hg_dlog *      debug_log;     /* Debug log to use */
+    struct hg_dlog       *debug_log;     /* Debug log to use */
     HG_QUEUE_ENTRY(hg_log_outlet) entry; /* List entry */
 };
 

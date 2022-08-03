@@ -50,7 +50,7 @@ char  H5subfiling_mpi_error_str[MPI_MAX_ERROR_STRING];
 int   H5subfiling_mpi_error_str_len;
 
 static subfiling_context_t *sf_context_cache  = NULL;
-static sf_topology_t *      sf_topology_cache = NULL;
+static sf_topology_t       *sf_topology_cache = NULL;
 
 static size_t sf_context_cache_limit  = 16;
 static size_t sf_topology_cache_limit = 4;
@@ -107,7 +107,7 @@ static int         get_next_fid_map_index(void);
 static void        clear_fid_map_entry(void *file_handle, int64_t sf_context_id);
 static int         compare_hostid(const void *h1, const void *h2);
 static herr_t      get_ioc_selection_criteria_from_env(H5FD_subfiling_ioc_select_t *ioc_selection_type,
-                                                       char **                      ioc_sel_info_str);
+                                                       char                       **ioc_sel_info_str);
 static int         count_nodes(sf_topology_t *info, MPI_Comm comm);
 static herr_t      gather_topology_info(sf_topology_t *info, MPI_Comm comm);
 static int         identify_ioc_ranks(sf_topology_t *info, int node_count, int iocs_per_node);
@@ -552,7 +552,7 @@ static inline void
 assign_ioc_ranks(sf_topology_t *app_topology, int ioc_count, int rank_multiple)
 {
     app_layout_t *app_layout       = NULL;
-    int *         io_concentrators = NULL;
+    int          *io_concentrators = NULL;
 
     HDassert(app_topology);
     HDassert(app_topology->app_layout);
@@ -670,7 +670,7 @@ H5_get_subfiling_object(int64_t object_id)
         /* Make more space in context cache if needed */
         if ((size_t)obj_index == sf_context_cache_limit) {
             size_t old_num_entries;
-            void * tmp_realloc;
+            void  *tmp_realloc;
 
             old_num_entries = sf_context_cache_limit;
 
@@ -1109,7 +1109,7 @@ static herr_t
 init_subfiling(H5FD_subfiling_shared_config_t *subfiling_config, MPI_Comm comm, int64_t *context_id_out)
 {
     subfiling_context_t *new_context  = NULL;
-    sf_topology_t *      app_topology = NULL;
+    sf_topology_t       *app_topology = NULL;
     int64_t              context_id   = -1;
     int                  file_index   = -1;
     herr_t               ret_value    = SUCCEED;
@@ -1225,10 +1225,10 @@ init_app_topology(H5FD_subfiling_ioc_select_t ioc_selection_type, MPI_Comm comm,
                   sf_topology_t **app_topology_out)
 {
     sf_topology_t *app_topology     = NULL;
-    app_layout_t * app_layout       = sf_app_layout;
-    char *         env_value        = NULL;
-    char *         ioc_sel_str      = NULL;
-    int *          io_concentrators = NULL;
+    app_layout_t  *app_layout       = sf_app_layout;
+    char          *env_value        = NULL;
+    char          *ioc_sel_str      = NULL;
+    int           *io_concentrators = NULL;
     long           ioc_select_val   = -1;
     long           iocs_per_node    = 1;
     int            ioc_count        = 0;
@@ -1527,7 +1527,7 @@ static herr_t
 init_subfiling_context(subfiling_context_t *sf_context, H5FD_subfiling_shared_config_t *subfiling_config,
                        sf_topology_t *app_topology, MPI_Comm file_comm)
 {
-    char * env_value = NULL;
+    char  *env_value = NULL;
     int    comm_rank;
     int    mpi_code;
     herr_t ret_value = SUCCEED;
@@ -1997,9 +1997,9 @@ ioc_open_file(sf_work_request_t *msg, int file_acc_flags)
     subfiling_context_t *sf_context = NULL;
     int64_t              file_context_id;
     mode_t               mode        = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
-    char *               filepath    = NULL;
-    char *               subfile_dir = NULL;
-    char *               base        = NULL;
+    char                *filepath    = NULL;
+    char                *subfile_dir = NULL;
+    char                *base        = NULL;
     int                  fd          = -1;
     herr_t               ret_value   = SUCCEED;
 
@@ -2103,10 +2103,10 @@ static herr_t
 generate_subfile_name(subfiling_context_t *sf_context, int file_acc_flags, char *filename_out,
                       size_t filename_out_len, char **filename_basename_out, char **subfile_dir_out)
 {
-    FILE * config_file = NULL;
-    char * subfile_dir = NULL;
-    char * prefix      = NULL;
-    char * base        = NULL;
+    FILE  *config_file = NULL;
+    char  *subfile_dir = NULL;
+    char  *prefix      = NULL;
+    char  *base        = NULL;
     int    n_io_concentrators;
     int    num_digits;
     herr_t ret_value = SUCCEED;
@@ -2282,9 +2282,9 @@ create_config_file(subfiling_context_t *sf_context, const char *base_filename, c
                    hbool_t truncate_if_exists)
 {
     hbool_t config_file_exists = FALSE;
-    FILE *  config_file        = NULL;
-    char *  config_filename    = NULL;
-    char *  line_buf           = NULL;
+    FILE   *config_file        = NULL;
+    char   *config_filename    = NULL;
+    char   *line_buf           = NULL;
     int     ret                = 0;
     herr_t  ret_value          = SUCCEED;
 
@@ -2464,8 +2464,8 @@ open_config_file(subfiling_context_t *sf_context, const char *base_filename, con
                  const char *mode, FILE **config_file_out)
 {
     hbool_t config_file_exists = FALSE;
-    FILE *  config_file        = NULL;
-    char *  config_filename    = NULL;
+    FILE   *config_file        = NULL;
+    char   *config_filename    = NULL;
     int     ret                = 0;
     herr_t  ret_value          = SUCCEED;
 

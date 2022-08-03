@@ -547,7 +547,7 @@ public class TestH5A {
 
         try {
             attr_id      = H5.H5Acreate(H5did, "dset", type_id, space_id, HDF5Constants.H5P_DEFAULT,
-                                   HDF5Constants.H5P_DEFAULT);
+                                        HDF5Constants.H5P_DEFAULT);
             attribute_id = H5.H5Aopen(H5did, "dset", HDF5Constants.H5P_DEFAULT);
             // Calling H5Aget_info with attribute_id returned from H5Aopen.
             attr_info = H5.H5Aget_info(attribute_id);
@@ -588,7 +588,7 @@ public class TestH5A {
 
         try {
             attr_id      = H5.H5Acreate(H5did, ".", type_id, space_id, HDF5Constants.H5P_DEFAULT,
-                                   HDF5Constants.H5P_DEFAULT);
+                                        HDF5Constants.H5P_DEFAULT);
             attribute_id = H5.H5Aopen_by_idx(H5did, ".", HDF5Constants.H5_INDEX_CRT_ORDER, order, 0,
                                              HDF5Constants.H5P_DEFAULT, lapl_id);
             // Calling H5Aget_info with attribute_id returned from
@@ -631,7 +631,7 @@ public class TestH5A {
 
         try {
             attr_id  = H5.H5Acreate(H5did, "dset1", type_id, space_id, HDF5Constants.H5P_DEFAULT,
-                                   HDF5Constants.H5P_DEFAULT);
+                                    HDF5Constants.H5P_DEFAULT);
             attr2_id = H5.H5Acreate(H5did, "dataset2", type_id, space_id, HDF5Constants.H5P_DEFAULT,
                                     HDF5Constants.H5P_DEFAULT);
 
@@ -708,7 +708,7 @@ public class TestH5A {
 
         try {
             attr_id   = H5.H5Acreate_by_name(H5fid, obj_name, attr_name, type_id, space_id,
-                                           HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, lapl_id);
+                                             HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, lapl_id);
             attr_info = H5.H5Aget_info_by_name(H5fid, obj_name, attr_name, lapl_id);
             assertNotNull(attr_info);
         }
@@ -1221,13 +1221,13 @@ public class TestH5A {
         }
         try {
             attr1_id               = H5.H5Acreate_by_name(H5fid, ".", "attribute1", type_id, space_id,
-                                            HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, lapl_id);
+                                                          HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, lapl_id);
             attr2_id               = H5.H5Acreate_by_name(H5fid, ".", "attribute2", type_id, space_id,
-                                            HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, lapl_id);
+                                                          HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, lapl_id);
             attr3_id               = H5.H5Acreate_by_name(H5fid, ".", "attribute3", type_id, space_id,
-                                            HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, lapl_id);
+                                                          HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, lapl_id);
             attr4_id               = H5.H5Acreate_by_name(H5fid, ".", "attribute4", type_id, space_id,
-                                            HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, lapl_id);
+                                                          HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, lapl_id);
             H5A_iterate_cb iter_cb = new H5A_iter_callback();
             try {
                 H5.H5Aiterate(H5fid, HDF5Constants.H5_INDEX_CRT_ORDER, HDF5Constants.H5_ITER_INC, 0L, iter_cb,
@@ -1314,13 +1314,13 @@ public class TestH5A {
         }
         try {
             attr1_id               = H5.H5Acreate_by_name(H5fid, ".", "attribute4", type_id, space_id,
-                                            HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, lapl_id);
+                                                          HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, lapl_id);
             attr2_id               = H5.H5Acreate_by_name(H5fid, ".", "attribute3", type_id, space_id,
-                                            HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, lapl_id);
+                                                          HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, lapl_id);
             attr3_id               = H5.H5Acreate_by_name(H5fid, ".", "attribute2", type_id, space_id,
-                                            HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, lapl_id);
+                                                          HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, lapl_id);
             attr4_id               = H5.H5Acreate_by_name(H5fid, ".", "attribute1", type_id, space_id,
-                                            HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, lapl_id);
+                                                          HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, lapl_id);
             H5A_iterate_cb iter_cb = new H5A_iter_callback();
             try {
                 H5.H5Aiterate_by_name(H5fid, ".", HDF5Constants.H5_INDEX_NAME, HDF5Constants.H5_ITER_INC, 0L,

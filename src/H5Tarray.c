@@ -84,8 +84,8 @@
 hid_t
 H5Tarray_create2(hid_t base_id, unsigned ndims, const hsize_t dim[/* ndims */])
 {
-    H5T_t *  base;      /* base datatype	*/
-    H5T_t *  dt = NULL; /* new array datatype	*/
+    H5T_t   *base;      /* base datatype	*/
+    H5T_t   *dt = NULL; /* new array datatype	*/
     unsigned u;         /* local index variable */
     hid_t    ret_value; /* return value	*/
 
@@ -140,7 +140,7 @@ H5T_t *
 H5T__array_create(H5T_t *base, unsigned ndims, const hsize_t dim[/* ndims */])
 {
     unsigned u;                /* Local index variable */
-    H5T_t *  ret_value = NULL; /* New array data type	*/
+    H5T_t   *ret_value = NULL; /* New array data type	*/
 
     FUNC_ENTER_PACKAGE
 
@@ -334,8 +334,8 @@ hid_t
 H5Tarray_create1(hid_t base_id, int ndims, const hsize_t dim[/* ndims */],
                  const int H5_ATTR_UNUSED perm[/* ndims */])
 {
-    H5T_t *  base;      /* base datatype	*/
-    H5T_t *  dt = NULL; /* new array datatype	*/
+    H5T_t   *base;      /* base datatype	*/
+    H5T_t   *dt = NULL; /* new array datatype	*/
     unsigned u;         /* local index variable */
     hid_t    ret_value; /* return value	*/
 

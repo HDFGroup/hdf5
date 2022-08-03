@@ -118,8 +118,8 @@ out:
 
 static int
 read_data(const char *fname, /*IN*/
-          hsize_t *   width, /*OUT*/
-          hsize_t *   height /*OUT*/)
+          hsize_t    *width, /*OUT*/
+          hsize_t    *height /*OUT*/)
 {
     int   i, n;
     int   color_planes;

@@ -68,7 +68,7 @@ static hid_t
 create_subfiling_ioc_fapl(void)
 {
     H5FD_subfiling_config_t *subfiling_conf = NULL;
-    H5FD_ioc_config_t *      ioc_conf       = NULL;
+    H5FD_ioc_config_t       *ioc_conf       = NULL;
     hid_t                    ioc_fapl       = H5I_INVALID_HID;
     hid_t                    ret_value      = H5I_INVALID_HID;
 

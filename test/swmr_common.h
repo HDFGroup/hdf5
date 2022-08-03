@@ -40,7 +40,7 @@
 
 /* Information about a symbol/dataset */
 typedef struct {
-    char *  name;     /* Dataset name for symbol */
+    char   *name;     /* Dataset name for symbol */
     hid_t   dsid;     /* Dataset ID for symbol */
     hsize_t nrecords; /* Number of records for the symbol */
 } symbol_info_t;
