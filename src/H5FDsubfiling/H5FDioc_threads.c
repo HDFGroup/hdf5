@@ -14,10 +14,6 @@
 
 #include "H5FDsubfiling.h"
 
-#ifndef HG_TEST_NUM_THREADS_DEFAULT
-#define HG_TEST_NUM_THREADS_DEFAULT 4
-#endif
-
 #define MIN_READ_RETRIES 10
 
 /*
@@ -118,7 +114,7 @@ initialize_ioc_threads(void *_sf_context)
 {
     subfiling_context_t *sf_context        = _sf_context;
     ioc_data_t *         ioc_data          = NULL;
-    unsigned             thread_pool_count = HG_TEST_NUM_THREADS_DEFAULT;
+    unsigned             thread_pool_count = H5FD_IOC_THREAD_POOL_SIZE;
     char *               env_value;
     int                  ret_value = 0;
 #ifdef H5FD_IOC_COLLECT_STATS
@@ -174,7 +170,7 @@ initialize_ioc_threads(void *_sf_context)
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, (-1), "can't initialize IOC thread queue mutex");
 
     /* Allow experimentation with the number of helper threads */
-    if ((env_value = HDgetenv(H5_IOC_THREAD_POOL_COUNT)) != NULL) {
+    if ((env_value = HDgetenv(H5FD_IOC_THREAD_POOL_COUNT)) != NULL) {
         int value_check = HDatoi(env_value);
         if (value_check > 0) {
             thread_pool_count = (unsigned int)value_check;
@@ -589,7 +585,7 @@ handle_work_request(void *arg)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    begin_thread_exclusive
+ * Function:    H5FD_ioc_begin_thread_exclusive
  *
  * Purpose:     Mutex lock to restrict access to code or variables.
  *
@@ -603,13 +599,13 @@ handle_work_request(void *arg)
  *-------------------------------------------------------------------------
  */
 void
-begin_thread_exclusive(void)
+H5FD_ioc_begin_thread_exclusive(void)
 {
     hg_thread_mutex_lock(&ioc_thread_mutex);
 }
 
 /*-------------------------------------------------------------------------
- * Function:    end_thread_exclusive
+ * Function:    H5FD_ioc_end_thread_exclusive
  *
  * Purpose:     Mutex unlock.  Should only be called by the current holder
  *              of the locked mutex.
@@ -624,7 +620,7 @@ begin_thread_exclusive(void)
  *-------------------------------------------------------------------------
  */
 void
-end_thread_exclusive(void)
+H5FD_ioc_end_thread_exclusive(void)
 {
     hg_thread_mutex_unlock(&ioc_thread_mutex);
 }
@@ -840,13 +836,13 @@ ioc_file_queue_write_indep(sf_work_request_t *msg, int subfile_rank, int source,
     sf_queue_delay_time += t_queue_delay;
 #endif
 
-    begin_thread_exclusive();
+    H5FD_ioc_begin_thread_exclusive();
 
     /* Adjust EOF if necessary */
     if (sf_eof > sf_context->sf_eof)
         sf_context->sf_eof = sf_eof;
 
-    end_thread_exclusive();
+    H5FD_ioc_end_thread_exclusive();
 
 done:
     if (send_nack) {

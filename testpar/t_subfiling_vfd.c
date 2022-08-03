@@ -107,6 +107,8 @@ create_subfiling_ioc_fapl(void)
             TEST_ERROR;
     }
 
+    if (H5Pclose(subfiling_conf->ioc_fapl_id) < 0)
+        TEST_ERROR;
     subfiling_conf->ioc_fapl_id = ioc_fapl;
 
     if (H5Pset_fapl_subfiling(ret_value, subfiling_conf) < 0)
@@ -140,18 +142,15 @@ error:
 static void
 test_create_and_close(void)
 {
-    H5FD_subfiling_config_t subfiling_config;
-    const char *            test_filenames[2];
-    hid_t                   file_id = H5I_INVALID_HID;
-    hid_t                   fapl_id = H5I_INVALID_HID;
+    const char *test_filenames[2];
+    hid_t       file_id = H5I_INVALID_HID;
+    hid_t       fapl_id = H5I_INVALID_HID;
 
     if (MAINPROCESS)
         HDprintf("File creation and immediate close\n");
 
     fapl_id = create_subfiling_ioc_fapl();
     VRFY((fapl_id >= 0), "FAPL creation succeeded");
-
-    VRFY((H5Pget_fapl_subfiling(fapl_id, &subfiling_config) >= 0), "H5Pget_fapl_subfiling succeeded");
 
     file_id = H5Fcreate("basic_create.h5", H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
     VRFY((file_id >= 0), "H5Fcreate succeeded");
@@ -161,9 +160,6 @@ test_create_and_close(void)
     test_filenames[0] = "basic_create.h5";
     test_filenames[1] = NULL;
     h5_clean_files(test_filenames, fapl_id);
-
-    if (H5P_DEFAULT != subfiling_config.ioc_fapl_id)
-        VRFY((H5Pclose(subfiling_config.ioc_fapl_id) >= 0), "FAPL close succeeded");
 
     return;
 }

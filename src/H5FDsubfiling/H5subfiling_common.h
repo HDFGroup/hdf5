@@ -22,37 +22,12 @@
 #include "H5private.h"
 #include "H5Iprivate.h"
 
-/* TODO: needed for ioc_selection_t, which also needs to be public */
-#include "H5FDioc.h"
+#include "H5FDsubfiling.h"
 
 /*
  * Some definitions for debugging the Subfiling feature
  */
 /* #define H5_SUBFILING_DEBUG */
-
-/*
- * The following is our basic template for a subfile filename.
- * Note that eventually we shouldn't use 0_of_N since we
- * intend to use the user defined HDF5 filename for a
- * zeroth subfile as well as for all metadata.
- */
-#define SF_FILENAME_TEMPLATE ".subfile_%" PRIu64 "_%0*d_of_%d"
-
-/*
- * The following is our basic template for a subfiling
- * configuration filename.
- */
-#define SF_CONFIG_FILENAME_TEMPLATE ".subfile_%" PRIu64 ".config"
-
-/*
- * Environment variables interpreted by the HDF5 subfiling feature
- */
-#define H5_IOC_SELECTION_CRITERIA "H5_IOC_SELECTION_CRITERIA"
-#define H5_IOC_COUNT_PER_NODE     "H5_IOC_COUNT_PER_NODE"
-#define H5_IOC_STRIPE_SIZE        "H5_IOC_STRIPE_SIZE"
-#define H5_IOC_SUBFILE_PREFIX     "H5_IOC_SUBFILE_PREFIX"
-
-#define H5FD_DEFAULT_STRIPE_DEPTH (32 * 1024 * 1024)
 
 /*
  * MPI Tags are 32 bits, we treat them as unsigned
@@ -172,7 +147,7 @@ typedef struct topology {
     int             n_io_concentrators; /* Number of IO concentrators  */
     int *           io_concentrators;   /* Vector of ranks which are IOCs */
     int *           subfile_fd;         /* file descriptor (if IOC)       */
-    ioc_selection_t selection_type;     /* Cache our IOC selection criteria */
+    H5FD_subfiling_ioc_select_t selection_type; /* Cache our IOC selection criteria */
 } sf_topology_t;
 
 typedef struct {
@@ -238,7 +213,8 @@ extern "C" {
 #endif
 
 H5_DLL herr_t H5_open_subfiles(const char *base_filename, void *h5_file_handle,
-                               ioc_selection_t ioc_selection_type, int file_acc_flags, MPI_Comm file_comm,
+                               H5FD_subfiling_ioc_select_t ioc_selection_type,
+                               int file_acc_flags, MPI_Comm file_comm,
                                int64_t *context_id_out);
 H5_DLL herr_t H5_close_subfiles(int64_t subfiling_context_id);
 

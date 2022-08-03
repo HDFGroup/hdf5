@@ -83,8 +83,9 @@ static int sf_open_file_count = 0;
 static herr_t H5_free_subfiling_object_int(subfiling_context_t *sf_context);
 static herr_t H5_free_subfiling_topology(sf_topology_t *topology);
 
-static herr_t init_subfiling(ioc_selection_t ioc_selection_type, MPI_Comm comm, int64_t *context_id_out);
-static herr_t init_app_topology(ioc_selection_t ioc_selection_type, MPI_Comm comm,
+static herr_t init_subfiling(H5FD_subfiling_ioc_select_t ioc_selection_type, MPI_Comm comm,
+                             int64_t *context_id_out);
+static herr_t init_app_topology(H5FD_subfiling_ioc_select_t ioc_selection_type, MPI_Comm comm,
                                 sf_topology_t **app_topology_out);
 static herr_t init_subfiling_context(subfiling_context_t *sf_context, sf_topology_t *app_topology,
                                      MPI_Comm file_comm);
@@ -104,8 +105,8 @@ static int         numDigits(int n);
 static int         get_next_fid_map_index(void);
 static void        clear_fid_map_entry(void *file_handle, int64_t sf_context_id);
 static int         compare_hostid(const void *h1, const void *h2);
-static herr_t      get_ioc_selection_criteria_from_env(ioc_selection_t *ioc_selection_type,
-                                                       char **          ioc_sel_info_str);
+static herr_t      get_ioc_selection_criteria_from_env(H5FD_subfiling_ioc_select_t *ioc_selection_type,
+                                                       char **ioc_sel_info_str);
 static int         count_nodes(sf_topology_t *info, MPI_Comm comm);
 static herr_t      gather_topology_info(sf_topology_t *info, MPI_Comm comm);
 static int         identify_ioc_ranks(sf_topology_t *info, int node_count, int iocs_per_node);
@@ -286,8 +287,9 @@ compare_hostid(const void *h1, const void *h2)
   Purpose:     Return a character string which represents either the
                default selection method: SELECT_IOC_ONE_PER_NODE; or
                if the user has selected a method via the environment
-               variable (H5_IOC_SELECTION_CRITERIA), we return that
-               along with any optional qualifier with for that method.
+               variable (H5FD_SUBFILING_IOC_SELECTION_CRITERIA), we
+               return that along with any optional qualifier with for
+               that method.
 
   Errors:      None.
 
@@ -295,10 +297,10 @@ compare_hostid(const void *h1, const void *h2)
 -------------------------------------------------------------------------
 */
 static herr_t
-get_ioc_selection_criteria_from_env(ioc_selection_t *ioc_selection_type, char **ioc_sel_info_str)
+get_ioc_selection_criteria_from_env(H5FD_subfiling_ioc_select_t *ioc_selection_type, char **ioc_sel_info_str)
 {
     char *opt_value = NULL;
-    char *env_value = HDgetenv(H5_IOC_SELECTION_CRITERIA);
+    char *env_value = HDgetenv(H5FD_SUBFILING_IOC_SELECTION_CRITERIA);
 
     HDassert(ioc_selection_type);
     HDassert(ioc_sel_info_str);
@@ -322,7 +324,7 @@ get_ioc_selection_criteria_from_env(ioc_selection_t *ioc_selection_type, char **
 
         if (errno == ERANGE) {
 #ifdef H5_SUBFILING_DEBUG
-            HDprintf("%s: couldn't parse value from " H5_IOC_SELECTION_CRITERIA " environment variable\n",
+            HDprintf("%s: couldn't parse value from " H5FD_SUBFILING_IOC_SELECTION_CRITERIA " environment variable\n",
                      __func__);
 #endif
 
@@ -331,7 +333,7 @@ get_ioc_selection_criteria_from_env(ioc_selection_t *ioc_selection_type, char **
 
         if ((check_value < 0) || (check_value >= ioc_selection_options)) {
 #ifdef H5_SUBFILING_DEBUG
-            HDprintf("%s: invalid IOC selection type value %ld from " H5_IOC_SELECTION_CRITERIA
+            HDprintf("%s: invalid IOC selection type value %ld from " H5FD_SUBFILING_IOC_SELECTION_CRITERIA
                      " environment variable\n",
                      __func__, check_value);
 #endif
@@ -339,7 +341,7 @@ get_ioc_selection_criteria_from_env(ioc_selection_t *ioc_selection_type, char **
             return FAIL;
         }
 
-        *ioc_selection_type = (ioc_selection_t)check_value;
+        *ioc_selection_type = (H5FD_subfiling_ioc_select_t)check_value;
         *ioc_sel_info_str   = opt_value;
     }
 
@@ -912,7 +914,8 @@ H5_free_subfiling_topology(sf_topology_t *topology)
  */
 /* TODO: revise description */
 herr_t
-H5_open_subfiles(const char *base_filename, void *file_handle, ioc_selection_t ioc_selection_type,
+H5_open_subfiles(const char *base_filename, void *file_handle,
+                 H5FD_subfiling_ioc_select_t ioc_selection_type,
                  int file_acc_flags, MPI_Comm file_comm, int64_t *context_id_out)
 {
     subfiling_context_t *sf_context = NULL;
@@ -1092,7 +1095,8 @@ done:
 -------------------------------------------------------------------------
 */
 static herr_t
-init_subfiling(ioc_selection_t ioc_selection_type, MPI_Comm comm, int64_t *context_id_out)
+init_subfiling(H5FD_subfiling_ioc_select_t ioc_selection_type,
+               MPI_Comm comm, int64_t *context_id_out)
 {
     subfiling_context_t *new_context  = NULL;
     sf_topology_t *      app_topology = NULL;
@@ -1207,7 +1211,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-init_app_topology(ioc_selection_t ioc_selection_type, MPI_Comm comm, sf_topology_t **app_topology_out)
+init_app_topology(H5FD_subfiling_ioc_select_t ioc_selection_type,
+                  MPI_Comm comm, sf_topology_t **app_topology_out)
 {
     sf_topology_t *app_topology     = NULL;
     app_layout_t * app_layout       = sf_app_layout;
@@ -1392,11 +1397,11 @@ init_app_topology(ioc_selection_t ioc_selection_type, MPI_Comm comm, sf_topology
 
             /* Check for an IOC-per-node value set in the environment */
             /* TODO: should this env. var. be interpreted for other selection types? */
-            if ((env_value = HDgetenv(H5_IOC_COUNT_PER_NODE))) {
+            if ((env_value = HDgetenv(H5FD_SUBFILING_IOC_COUNT_PER_NODE))) {
                 errno          = 0;
                 ioc_select_val = HDstrtol(env_value, NULL, 0);
                 if ((ERANGE == errno)) {
-                    HDprintf("invalid value '%s' for " H5_IOC_COUNT_PER_NODE "\n", env_value);
+                    HDprintf("invalid value '%s' for " H5FD_SUBFILING_IOC_COUNT_PER_NODE "\n", env_value);
                     ioc_select_val = 1;
                 }
 
@@ -1529,7 +1534,7 @@ init_subfiling_context(subfiling_context_t *sf_context, sf_topology_t *app_topol
     sf_context->sf_barrier_comm = MPI_COMM_NULL;
     sf_context->sf_group_comm   = MPI_COMM_NULL;
     sf_context->sf_intercomm    = MPI_COMM_NULL;
-    sf_context->sf_stripe_size  = H5FD_DEFAULT_STRIPE_DEPTH;
+    sf_context->sf_stripe_size  = H5FD_SUBFILING_DEFAULT_STRIPE_SIZE;
     sf_context->sf_write_count  = 0;
     sf_context->sf_read_count   = 0;
     sf_context->sf_eof          = HADDR_UNDEF;
@@ -1547,7 +1552,7 @@ init_subfiling_context(subfiling_context_t *sf_context, sf_topology_t *app_topol
 #endif
 
     /* Check for an IOC stripe size setting in the environment */
-    if ((env_value = HDgetenv(H5_IOC_STRIPE_SIZE))) {
+    if ((env_value = HDgetenv(H5FD_SUBFILING_STRIPE_SIZE))) {
         long long stripe_size = -1;
 
         errno = 0;
@@ -1555,7 +1560,7 @@ init_subfiling_context(subfiling_context_t *sf_context, sf_topology_t *app_topol
         stripe_size = HDstrtoll(env_value, NULL, 0);
         if (ERANGE == errno) {
 #ifdef H5_SUBFILING_DEBUG
-            HDprintf("%s: invalid stripe size setting '%s' for " H5_IOC_STRIPE_SIZE "\n", __func__,
+            HDprintf("%s: invalid stripe size setting '%s' for " H5FD_SUBFILING_STRIPE_SIZE "\n", __func__,
                      env_value);
 #endif
 
@@ -1575,7 +1580,7 @@ init_subfiling_context(subfiling_context_t *sf_context, sf_topology_t *app_topol
     sf_context->sf_blocksize_per_stripe = sf_context->sf_stripe_size * app_topology->n_io_concentrators;
 
     /* Check for a subfile name prefix setting in the environment */
-    if ((env_value = HDgetenv(H5_IOC_SUBFILE_PREFIX))) {
+    if ((env_value = HDgetenv(H5FD_SUBFILING_SUBFILE_PREFIX))) {
         if (NULL == (sf_context->subfile_prefix = HDstrdup(env_value))) {
 #ifdef H5_SUBFILING_DEBUG
             HDprintf("%s: couldn't copy subfile prefix value\n", __func__);
@@ -1973,13 +1978,12 @@ ioc_open_file(sf_work_request_t *msg, int file_acc_flags)
 {
     subfiling_context_t *sf_context = NULL;
     int64_t              file_context_id;
-    hbool_t              mutex_locked = FALSE;
-    mode_t               mode         = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
-    char *               filepath     = NULL;
-    char *               subfile_dir  = NULL;
-    char *               base         = NULL;
-    int                  fd           = -1;
-    herr_t               ret_value    = SUCCEED;
+    mode_t               mode        = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
+    char *               filepath    = NULL;
+    char *               subfile_dir = NULL;
+    char *               base        = NULL;
+    int                  fd          = -1;
+    herr_t               ret_value   = SUCCEED;
 
     HDassert(msg);
 
@@ -2027,9 +2031,6 @@ ioc_open_file(sf_work_request_t *msg, int file_acc_flags)
         goto done;
     }
 
-    begin_thread_exclusive();
-    mutex_locked = TRUE;
-
     /* Attempt to create/open the subfile for this IOC rank */
     if ((fd = HDopen(filepath, file_acc_flags, mode)) < 0)
         H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "failed to open subfile");
@@ -2049,11 +2050,6 @@ ioc_open_file(sf_work_request_t *msg, int file_acc_flags)
     }
 
 done:
-    if (mutex_locked) {
-        end_thread_exclusive();
-        mutex_locked = FALSE;
-    }
-
     if (ret_value < 0) {
         if (sf_context) {
             HDfree(sf_context->sf_filename);
@@ -2218,7 +2214,7 @@ generate_subfile_name(subfiling_context_t *sf_context, int file_acc_flags, char 
      *   ABC.h5.subfile_<file-number>.config
      */
     num_digits = numDigits(n_io_concentrators);
-    HDsnprintf(filename_out, filename_out_len, "%s/%s" SF_FILENAME_TEMPLATE, subfile_dir, base,
+    HDsnprintf(filename_out, filename_out_len, "%s/%s" H5FD_SUBFILING_FILENAME_TEMPLATE, subfile_dir, base,
                sf_context->h5_file_id, num_digits, sf_context->topology->subfile_rank + 1,
                n_io_concentrators);
 
@@ -2306,7 +2302,7 @@ create_config_file(subfiling_context_t *sf_context, const char *base_filename, c
         goto done;
     }
 
-    HDsnprintf(config_filename, PATH_MAX, "%s/%s" SF_CONFIG_FILENAME_TEMPLATE, subfile_dir, base_filename,
+    HDsnprintf(config_filename, PATH_MAX, "%s/%s" H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE, subfile_dir, base_filename,
                sf_context->h5_file_id);
 
     /* Determine whether a subfiling configuration file exists */
@@ -2400,7 +2396,7 @@ create_config_file(subfiling_context_t *sf_context, const char *base_filename, c
         /* Write out each subfile name to the configuration file */
         num_digits = numDigits(n_io_concentrators);
         for (int k = 0; k < n_io_concentrators; k++) {
-            HDsnprintf(line_buf, PATH_MAX, "%s" SF_FILENAME_TEMPLATE "\n", base_filename,
+            HDsnprintf(line_buf, PATH_MAX, "%s" H5FD_SUBFILING_FILENAME_TEMPLATE "\n", base_filename,
                        sf_context->h5_file_id, num_digits, k + 1, n_io_concentrators);
 
             if (HDfwrite(line_buf, HDstrlen(line_buf), 1, config_file) != 1) {
@@ -2491,7 +2487,7 @@ open_config_file(subfiling_context_t *sf_context, const char *base_filename, con
         goto done;
     }
 
-    HDsnprintf(config_filename, PATH_MAX, "%s/%s" SF_CONFIG_FILENAME_TEMPLATE, subfile_dir, base_filename,
+    HDsnprintf(config_filename, PATH_MAX, "%s/%s" H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE, subfile_dir, base_filename,
                sf_context->h5_file_id);
 
     /* Determine whether a subfiling configuration file exists */
@@ -2922,7 +2918,7 @@ H5_subfiling_log(int64_t sf_context_id, const char *fmt, ...)
         goto done;
     }
 
-    begin_thread_exclusive();
+    H5FD_ioc_begin_thread_exclusive();
 
     if (sf_context->sf_logfile) {
         HDvfprintf(sf_context->sf_logfile, fmt, log_args);
@@ -2935,7 +2931,7 @@ H5_subfiling_log(int64_t sf_context_id, const char *fmt, ...)
         HDfflush(stdout);
     }
 
-    end_thread_exclusive();
+    H5FD_ioc_end_thread_exclusive();
 
 done:
     va_end(log_args);

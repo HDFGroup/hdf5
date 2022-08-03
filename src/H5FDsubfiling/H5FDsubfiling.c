@@ -566,13 +566,14 @@ H5FD__subfiling_get_default_config(hid_t fapl_id, H5FD_subfiling_config_t *confi
 
     HDmemset(config_out, 0, sizeof(*config_out));
 
-    config_out->magic         = H5FD_SUBFILING_FAPL_MAGIC;
-    config_out->version       = H5FD_CURR_SUBFILING_FAPL_VERSION;
-    config_out->ioc_fapl_id   = H5I_INVALID_HID;
-    config_out->stripe_count  = 0;
-    config_out->stripe_depth  = H5FD_DEFAULT_STRIPE_DEPTH;
-    config_out->ioc_selection = SELECT_IOC_ONE_PER_NODE;
-    config_out->require_ioc   = TRUE;
+    config_out->magic       = H5FD_SUBFILING_FAPL_MAGIC;
+    config_out->version     = H5FD_CURR_SUBFILING_FAPL_VERSION;
+    config_out->ioc_fapl_id = H5I_INVALID_HID;
+    config_out->require_ioc = TRUE;
+
+    config_out->shared_cfg.ioc_selection = SELECT_IOC_ONE_PER_NODE;
+    config_out->shared_cfg.stripe_size   = H5FD_SUBFILING_DEFAULT_STRIPE_SIZE;
+    config_out->shared_cfg.stripe_count  = 0;
 
     if ((h5_require_ioc = HDgetenv("H5_REQUIRE_IOC")) != NULL) {
         int value_check = HDatoi(h5_require_ioc);
@@ -985,8 +986,8 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
          * context ID will be returned, which is used for
          * further interactions with this file's subfiles.
          */
-        if (H5_open_subfiles(file_ptr->file_path, file_handle, file_ptr->fa.ioc_selection, ioc_flags,
-                             file_ptr->comm, &file_ptr->context_id) < 0)
+        if (H5_open_subfiles(file_ptr->file_path, file_handle, file_ptr->fa.shared_cfg.ioc_selection,
+                             ioc_flags, file_ptr->comm, &file_ptr->context_id) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open subfiling files = %s\n",
                                     name);
     }
