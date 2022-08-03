@@ -2202,9 +2202,8 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
                     sign_s = " unknown-sign";
 
                 /* print size, order, sign, and precision */
-                h5tools_str_append(buffer, "%lu-bit%s%s integer %zu-bit precision",
-                                   (unsigned long)(8 * H5Tget_size(type)), order_s, sign_s,
-                                   H5Tget_precision(type));
+                h5tools_str_append(buffer, "%zu-bit%s%s integer %zu-bit precision", 8 * H5Tget_size(type),
+                                   order_s, sign_s, H5Tget_precision(type));
             }
             break;
 
@@ -2243,8 +2242,8 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
                     order_s = "";
 
                 /* print size. byte order, and precision */
-                h5tools_str_append(buffer, "%lu-bit%s floating-point %zu-bit precision",
-                                   (unsigned long)(8 * H5Tget_size(type)), order_s, H5Tget_precision(type));
+                h5tools_str_append(buffer, "%zu-bit%s floating-point %zu-bit precision",
+                                   8 * H5Tget_size(type), order_s, H5Tget_precision(type));
             }
             break;
 
