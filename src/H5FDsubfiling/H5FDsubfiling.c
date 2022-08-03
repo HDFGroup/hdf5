@@ -567,7 +567,7 @@ H5FD__subfiling_get_default_config(hid_t fapl_id, H5FD_subfiling_config_t *confi
     HDmemset(config_out, 0, sizeof(*config_out));
 
     config_out->magic       = H5FD_SUBFILING_FAPL_MAGIC;
-    config_out->version     = H5FD_CURR_SUBFILING_FAPL_VERSION;
+    config_out->version     = H5FD_SUBFILING_CURR_FAPL_VERSION;
     config_out->ioc_fapl_id = H5I_INVALID_HID;
     config_out->require_ioc = TRUE;
 
@@ -647,7 +647,7 @@ H5FD__subfiling_validate_config(const H5FD_subfiling_config_t *fa)
 
     HDassert(fa != NULL);
 
-    if (fa->version != H5FD_CURR_SUBFILING_FAPL_VERSION)
+    if (fa->version != H5FD_SUBFILING_CURR_FAPL_VERSION)
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unknown H5FD_subfiling_config_t version");
 
     if (fa->magic != H5FD_SUBFILING_FAPL_MAGIC)

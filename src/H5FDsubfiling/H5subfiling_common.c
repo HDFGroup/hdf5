@@ -1407,11 +1407,11 @@ init_app_topology(H5FD_subfiling_ioc_select_t ioc_selection_type, MPI_Comm comm,
 
             /* Check for an IOC-per-node value set in the environment */
             /* TODO: should this env. var. be interpreted for other selection types? */
-            if ((env_value = HDgetenv(H5FD_SUBFILING_IOC_COUNT_PER_NODE))) {
+            if ((env_value = HDgetenv(H5FD_SUBFILING_IOC_PER_NODE))) {
                 errno          = 0;
                 ioc_select_val = HDstrtol(env_value, NULL, 0);
                 if ((ERANGE == errno)) {
-                    HDprintf("invalid value '%s' for " H5FD_SUBFILING_IOC_COUNT_PER_NODE "\n", env_value);
+                    HDprintf("invalid value '%s' for " H5FD_SUBFILING_IOC_PER_NODE "\n", env_value);
                     ioc_select_val = 1;
                 }
 

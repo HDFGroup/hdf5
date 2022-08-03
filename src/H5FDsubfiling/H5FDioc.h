@@ -42,11 +42,11 @@
 
 #ifndef H5FD_IOC_FAPL_MAGIC
 /**
- * \def H5FD_CURR_IOC_FAPL_VERSION
+ * \def H5FD_IOC_CURR_FAPL_VERSION
  * The version number of the H5FD_ioc_config_t configuration
  * structure for the #H5FD_IOC driver
  */
-#define H5FD_CURR_IOC_FAPL_VERSION 1
+#define H5FD_IOC_CURR_FAPL_VERSION 1
 /**
  * \def H5FD_IOC_FAPL_MAGIC
  * Unique number used to distinguish the #H5FD_IOC driver from other HDF5 file drivers
@@ -55,24 +55,24 @@
 #endif
 
 /**
- * \def H5FD_IOC_THREAD_POOL_SIZE
+ * \def H5FD_IOC_DEFAULT_THREAD_POOL_SIZE
  * The default number of I/O concentrator worker threads
  */
-#define H5FD_IOC_THREAD_POOL_SIZE 4
+#define H5FD_IOC_DEFAULT_THREAD_POOL_SIZE 4
 
 /*
  * Environment variables interpreted by the IOC VFD
  */
 
 /**
- * \def H5FD_IOC_THREAD_POOL_COUNT
+ * \def H5FD_IOC_THREAD_POOL_SIZE
  * Macro for name of the environment variable that controls/overrides
  * the number of I/O concentrator worker threads
  *
  * The value set for this environment variable is interpreted as an
  * int value and must be > 0.
  */
-#define H5FD_IOC_THREAD_POOL_COUNT "H5FD_IOC_THREAD_POOL_COUNT"
+#define H5FD_IOC_THREAD_POOL_SIZE "H5FD_IOC_THREAD_POOL_SIZE"
 
 //! <!-- [H5FD_ioc_config_t_snip] -->
 /**
@@ -99,7 +99,7 @@
  *      Version number of the H5FD_ioc_config_t structure. Any instance passed
  *      to H5Pset_fapl_ioc() / H5Pget_fapl_ioc() must have a recognized version
  *      number or an error will be raised. Currently, this field should be set
- *      to #H5FD_CURR_IOC_FAPL_VERSION.
+ *      to #H5FD_IOC_CURR_FAPL_VERSION.
  *
  * \var hid_t H5FD_ioc_config_t::under_fapl_id
  *      The File Access Property List which is setup with the file driver
@@ -111,7 +111,7 @@
  * \var int32_t H5FD_ioc_config_t::thread_pool_count
  *      The number of I/O concentrator worker threads to use.
  *
- *      This value can also be set or adjusted with the #H5FD_IOC_THREAD_POOL_COUNT
+ *      This value can also be set or adjusted with the #H5FD_IOC_THREAD_POOL_SIZE
  *      environment variable.
  *
  * \var H5FD_subfiling_shared_config_t H5FD_ioc_config_t::subf_config
@@ -122,7 +122,7 @@
  */
 typedef struct H5FD_ioc_config_t {
     uint32_t magic;             /* Must be set to H5FD_IOC_FAPL_MAGIC */
-    uint32_t version;           /* Must be set to H5FD_CURR_IOC_FAPL_VERSION */
+    uint32_t version;           /* Must be set to H5FD_IOC_CURR_FAPL_VERSION */
     hid_t    under_fapl_id;     /* FAPL setup with the VFD to use for I/O to the HDF5 stub file */
     int32_t  thread_pool_count; /* Number of I/O concentrator worker threads to use */
     H5FD_subfiling_shared_config_t subf_config; /* Subfiling driver configuration */

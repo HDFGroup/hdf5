@@ -463,7 +463,7 @@ H5FD__ioc_get_default_config(hid_t fapl_id, H5FD_ioc_config_t *config_out)
     HDmemset(config_out, 0, sizeof(*config_out));
 
     config_out->magic         = H5FD_IOC_FAPL_MAGIC;
-    config_out->version       = H5FD_CURR_IOC_FAPL_VERSION;
+    config_out->version       = H5FD_IOC_CURR_FAPL_VERSION;
     config_out->under_fapl_id = H5I_INVALID_HID;
 
     /*
@@ -489,7 +489,7 @@ H5FD__ioc_get_default_config(hid_t fapl_id, H5FD_ioc_config_t *config_out)
         H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set MPI I/O VFD on IOC under FAPL");
 
     /* Specific to this I/O Concentrator */
-    config_out->thread_pool_count = H5FD_IOC_THREAD_POOL_SIZE;
+    config_out->thread_pool_count = H5FD_IOC_DEFAULT_THREAD_POOL_SIZE;
 
 done:
     if (H5_mpi_comm_free(&comm) < 0)
@@ -529,7 +529,7 @@ H5FD__ioc_validate_config(const H5FD_ioc_config_t *fa)
 
     HDassert(fa != NULL);
 
-    if (fa->version != H5FD_CURR_IOC_FAPL_VERSION)
+    if (fa->version != H5FD_IOC_CURR_FAPL_VERSION)
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unknown H5FD_ioc_config_t version");
 
     if (fa->magic != H5FD_IOC_FAPL_MAGIC)

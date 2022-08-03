@@ -114,7 +114,7 @@ initialize_ioc_threads(void *_sf_context)
 {
     subfiling_context_t *sf_context        = _sf_context;
     ioc_data_t          *ioc_data          = NULL;
-    unsigned             thread_pool_count = H5FD_IOC_THREAD_POOL_SIZE;
+    unsigned             thread_pool_count = H5FD_IOC_DEFAULT_THREAD_POOL_SIZE;
     char                *env_value;
     int                  ret_value = 0;
 #ifdef H5FD_IOC_COLLECT_STATS
@@ -170,7 +170,7 @@ initialize_ioc_threads(void *_sf_context)
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, (-1), "can't initialize IOC thread queue mutex");
 
     /* Allow experimentation with the number of helper threads */
-    if ((env_value = HDgetenv(H5FD_IOC_THREAD_POOL_COUNT)) != NULL) {
+    if ((env_value = HDgetenv(H5FD_IOC_THREAD_POOL_SIZE)) != NULL) {
         int value_check = HDatoi(env_value);
         if (value_check > 0) {
             thread_pool_count = (unsigned int)value_check;

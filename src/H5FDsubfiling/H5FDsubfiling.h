@@ -34,11 +34,11 @@
 
 #ifndef H5FD_SUBFILING_FAPL_MAGIC
 /**
- * \def H5FD_CURR_SUBFILING_FAPL_VERSION
+ * \def H5FD_SUBFILING_CURR_FAPL_VERSION
  * The version number of the H5FD_subfiling_config_t configuration
  * structure for the #H5FD_SUBFILING driver
  */
-#define H5FD_CURR_SUBFILING_FAPL_VERSION 1
+#define H5FD_SUBFILING_CURR_FAPL_VERSION 1
 /**
  * \def H5FD_SUBFILING_FAPL_MAGIC
  * Unique number used to distinguish the #H5FD_SUBFILING driver from other HDF5 file drivers
@@ -78,14 +78,14 @@
  */
 #define H5FD_SUBFILING_STRIPE_SIZE "H5FD_SUBFILING_STRIPE_SIZE"
 /**
- * \def H5FD_SUBFILING_IOC_COUNT_PER_NODE
+ * \def H5FD_SUBFILING_IOC_PER_NODE
  * Macro for name of the environment variable that specifies the number
  * of MPI ranks per node to use as I/O concentrators
  *
  * The value set for this environment variable is interpreted as a
  * long value and must be > 0.
  */
-#define H5FD_SUBFILING_IOC_COUNT_PER_NODE "H5FD_SUBFILING_IOC_COUNT_PER_NODE"
+#define H5FD_SUBFILING_IOC_PER_NODE "H5FD_SUBFILING_IOC_PER_NODE"
 /**
  * \def H5FD_SUBFILING_IOC_SELECTION_CRITERIA
  * Macro for name of the environment variable that provides information
@@ -128,7 +128,7 @@
  *      Default selection method. One MPI rank per node is used as an
  *      I/O concentrator. If this selection method is used, the number
  *      of I/O concentrators per node can be adjusted with the
- *      #H5FD_SUBFILING_IOC_COUNT_PER_NODE environment variable.
+ *      #H5FD_SUBFILING_IOC_PER_NODE environment variable.
  *
  * \var SELECT_IOC_EVERY_NTH_RANK
  *      Starting with MPI rank 0, a stride of 'N' is applied to the MPI
@@ -192,7 +192,7 @@ typedef enum {
  *
  *      Alternatively, the mapping between MPI ranks and I/O concentrators can be
  *      set or adjusted with a combination of the #ioc_selection field and the
- *      #H5FD_SUBFILING_IOC_COUNT_PER_NODE and #H5FD_SUBFILING_IOC_SELECTION_CRITERIA
+ *      #H5FD_SUBFILING_IOC_PER_NODE and #H5FD_SUBFILING_IOC_SELECTION_CRITERIA
  *      environment variables.
  */
 typedef struct H5FD_subfiling_shared_config_t {
@@ -221,7 +221,7 @@ typedef struct H5FD_subfiling_shared_config_t {
  *      Version number of the H5FD_subfiling_config_t structure. Any instance
  *      passed to H5Pset_fapl_subfiling() / H5Pget_fapl_subfiling() must have
  *      a recognized version number or an error will be raised. Currently, this
- *      field should be set to #H5FD_CURR_SUBFILING_FAPL_VERSION.
+ *      field should be set to #H5FD_SUBFILING_CURR_FAPL_VERSION.
  *
  * \var hid_t H5FD_subfiling_config_t::ioc_fapl_id
  *      The File Access Property List which is setup with the file driver that
@@ -243,7 +243,7 @@ typedef struct H5FD_subfiling_shared_config_t {
  */
 typedef struct H5FD_subfiling_config_t {
     uint32_t magic;       /* Must be set to H5FD_SUBFILING_FAPL_MAGIC */
-    uint32_t version;     /* Must be set to H5FD_CURR_SUBFILING_FAPL_VERSION */
+    uint32_t version;     /* Must be set to H5FD_SUBFILING_CURR_FAPL_VERSION */
     hid_t    ioc_fapl_id; /* The FAPL setup with the stacked VFD to use for I/O concentrators */
     hbool_t  require_ioc; /* Whether to use the IOC VFD (currently must always be TRUE) */
     H5FD_subfiling_shared_config_t
