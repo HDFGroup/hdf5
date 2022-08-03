@@ -490,7 +490,7 @@ H5FD__ioc_get_default_config(hid_t fapl_id, H5FD_ioc_config_t *config_out)
         H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set MPI I/O VFD on IOC under FAPL");
 
     /* Specific to this I/O Concentrator */
-    config_out->thread_pool_count = H5FD_IOC_DEFAULT_THREAD_POOL_SIZE;
+    config_out->thread_pool_size = H5FD_IOC_DEFAULT_THREAD_POOL_SIZE;
 
 done:
     if (H5_mpi_comm_free(&comm) < 0)

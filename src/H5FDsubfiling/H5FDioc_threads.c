@@ -112,9 +112,9 @@ static void ioc_io_queue_add_entry(ioc_data_t *ioc_data, sf_work_request_t *wk_r
 int
 initialize_ioc_threads(void *_sf_context)
 {
-    subfiling_context_t *sf_context        = _sf_context;
-    ioc_data_t          *ioc_data          = NULL;
-    unsigned             thread_pool_count = H5FD_IOC_DEFAULT_THREAD_POOL_SIZE;
+    subfiling_context_t *sf_context       = _sf_context;
+    ioc_data_t          *ioc_data         = NULL;
+    unsigned             thread_pool_size = H5FD_IOC_DEFAULT_THREAD_POOL_SIZE;
     char                *env_value;
     int                  ret_value = 0;
 #ifdef H5FD_IOC_COLLECT_STATS
@@ -173,12 +173,12 @@ initialize_ioc_threads(void *_sf_context)
     if ((env_value = HDgetenv(H5FD_IOC_THREAD_POOL_SIZE)) != NULL) {
         int value_check = HDatoi(env_value);
         if (value_check > 0) {
-            thread_pool_count = (unsigned int)value_check;
+            thread_pool_size = (unsigned int)value_check;
         }
     }
 
     /* Initialize a thread pool for the I/O concentrator's worker threads */
-    if (hg_thread_pool_init(thread_pool_count, &ioc_data->io_thread_pool) < 0)
+    if (hg_thread_pool_init(thread_pool_size, &ioc_data->io_thread_pool) < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, (-1), "can't initialize IOC worker thread pool");
 
     /* Create the main IOC thread that will receive and dispatch I/O requests */
