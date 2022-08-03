@@ -886,7 +886,7 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     }
     else {
         subfiling_context_t *sf_context  = NULL;
-        void *               file_handle = NULL;
+        void                *file_handle = NULL;
         int                  ioc_flags;
         int                  l_error = 0;
         int                  g_error = 0;
@@ -1598,12 +1598,12 @@ H5FD__ioc_del(const char *name, hid_t fapl)
     h5_stat_t       st;
     MPI_Comm        comm          = MPI_COMM_NULL;
     MPI_Info        info          = MPI_INFO_NULL;
-    FILE *          config_file   = NULL;
-    char *          name_copy     = NULL;
-    char *          name_copy2    = NULL;
-    char *          tmp_filename  = NULL;
-    char *          base_filename = NULL;
-    char *          file_dirname  = NULL;
+    FILE           *config_file   = NULL;
+    char           *name_copy     = NULL;
+    char           *name_copy2    = NULL;
+    char           *tmp_filename  = NULL;
+    char           *base_filename = NULL;
+    char           *file_dirname  = NULL;
     int             mpi_rank      = INT_MAX;
     int             mpi_code;
     herr_t          ret_value = SUCCEED;

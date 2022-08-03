@@ -20,7 +20,7 @@
 #include "H5subfiling_err.h"
 
 typedef struct {           /* Format of a context map entry  */
-    void *  file_handle;   /* key value (linear search of the cache) */
+    void   *file_handle;   /* key value (linear search of the cache) */
     int64_t sf_context_id; /* The return value if matching file_handle */
 } file_map_to_context_t;
 
@@ -87,7 +87,7 @@ static herr_t init_subfiling(H5FD_subfiling_shared_config_t *subfiling_config, M
                              int64_t *context_id_out);
 static herr_t init_app_topology(H5FD_subfiling_ioc_select_t ioc_selection_type, MPI_Comm comm,
                                 sf_topology_t **app_topology_out);
-static herr_t init_subfiling_context(subfiling_context_t *           sf_context,
+static herr_t init_subfiling_context(subfiling_context_t            *sf_context,
                                      H5FD_subfiling_shared_config_t *subfiling_config,
                                      sf_topology_t *app_topology, MPI_Comm file_comm);
 static herr_t open_subfile_with_context(subfiling_context_t *sf_context, int file_acc_flags);
@@ -2566,8 +2566,8 @@ done:
 herr_t
 H5_get_num_iocs_from_config_file(FILE *config_file, int *n_io_concentrators)
 {
-    char * config_buf      = NULL;
-    char * ioc_substr      = NULL;
+    char  *config_buf      = NULL;
+    char  *ioc_substr      = NULL;
     long   config_file_len = 0;
     int    read_n_io_concs = 0;
     herr_t ret_value       = SUCCEED;

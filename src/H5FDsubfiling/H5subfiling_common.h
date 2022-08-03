@@ -153,7 +153,7 @@ typedef struct topology {
 typedef struct {
     int64_t        sf_context_id;           /* Generated context ID which embeds the cache index */
     uint64_t       h5_file_id;              /* GUID (basically the inode value) */
-    void *         h5_file_handle;          /* Low-level handle for the HDF5 stub file */
+    void          *h5_file_handle;          /* Low-level handle for the HDF5 stub file */
     int            sf_fid;                  /* value returned by open(file,..)  */
     size_t         sf_write_count;          /* Statistics: write_count  */
     size_t         sf_read_count;           /* Statistics: read_count  */

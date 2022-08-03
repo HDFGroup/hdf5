@@ -847,7 +847,7 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
     H5FD_driver_prop_t             driver_prop; /* Property for driver ID & info */
     hbool_t                        bcasted_eof = FALSE;
     int64_t                        sf_eof      = -1;
-    void *                         file_handle = NULL;
+    void                          *file_handle = NULL;
     int                            mpi_code; /* MPI return code */
     H5FD_t                        *ret_value = NULL;
 
