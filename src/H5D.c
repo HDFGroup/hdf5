@@ -279,11 +279,20 @@ H5Dcreate_anon(hid_t loc_id, hid_t type_id, hid_t space_id, hid_t dcpl_id, hid_t
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE5("i", "iiiii", loc_id, type_id, space_id, dcpl_id, dapl_id);
 
+    /* Sanity check */
+    if (loc_id < 0 || type_id < 0 || space_id < 0 || dcpl_id < 0 || dapl_id < 0)
+        HGOTO_ERROR(H5E_ID, H5E_BADID, (-1), "ID must be valid")
+
     /* Check arguments */
     if (H5P_DEFAULT == dcpl_id)
         dcpl_id = H5P_DATASET_CREATE_DEFAULT;
     else if (TRUE != H5P_isa_class(dcpl_id, H5P_DATASET_CREATE))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not dataset create property list ID")
+
+    if (H5P_DEFAULT == dapl_id)
+        dapl_id = H5P_DATASET_ACCESS_DEFAULT;
+    else if (TRUE != H5P_isa_class(dapl_id, H5P_DATASET_ACCESS))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not dataset access property list ID")
 
     /* Set the DCPL for the API context */
     H5CX_set_dcpl(dcpl_id);

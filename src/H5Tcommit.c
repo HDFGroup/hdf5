@@ -337,6 +337,10 @@ H5Tcommit_anon(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
     FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "iiii", loc_id, type_id, tcpl_id, tapl_id);
 
+    /* Sanity check */
+    if (loc_id < 0 || type_id < 0 || tcpl_id < 0 || tapl_id < 0)
+        HGOTO_ERROR(H5E_ID, H5E_BADID, (-1), "ID must be valid")
+
     /* Check arguments */
     if (NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
@@ -348,6 +352,11 @@ H5Tcommit_anon(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
         tcpl_id = H5P_DATATYPE_CREATE_DEFAULT;
     else if (TRUE != H5P_isa_class(tcpl_id, H5P_DATATYPE_CREATE))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not datatype creation property list")
+
+    if (H5P_DEFAULT == tapl_id)
+        tapl_id = H5P_DATATYPE_ACCESS_DEFAULT;
+    else if (TRUE != H5P_isa_class(tapl_id, H5P_DATATYPE_ACCESS))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not datatype access property list")
 
     /* Verify access property list and set up collective metadata if appropriate */
     if (H5CX_set_apl(&tapl_id, H5P_CLS_TACC, loc_id, TRUE) < 0)
