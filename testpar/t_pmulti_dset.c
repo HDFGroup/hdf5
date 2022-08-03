@@ -57,7 +57,8 @@
 #define MDSET_FLAG_MDSET      0x04u
 #define MDSET_FLAG_COLLECTIVE 0x08u
 #define MDSET_FLAG_TCONV      0x10u
-#define MDSET_ALL_FLAGS       (MDSET_FLAG_CHUNK | MDSET_FLAG_SHAPESAME | MDSET_FLAG_MDSET | MDSET_FLAG_COLLECTIVE | MDSET_FLAG_TCONV)
+#define MDSET_ALL_FLAGS                                                                                      \
+    (MDSET_FLAG_CHUNK | MDSET_FLAG_SHAPESAME | MDSET_FLAG_MDSET | MDSET_FLAG_COLLECTIVE | MDSET_FLAG_TCONV)
 
 /* MPI variables */
 int mpi_size;
@@ -253,8 +254,10 @@ test_pmdset(size_t niter, unsigned flags)
             /* Create dataset */
             /* If MDSET_FLAG_TCONV is set, use a different datatype for odd numbered datasets, so
              * some datasets require type conversion and others do not */
-            if ((dset_ids[j] = H5Dcreate2(file_id, dset_name[j], (flags & MDSET_FLAG_TCONV && j % 2) ? H5T_NATIVE_LONG : H5T_NATIVE_UINT, file_space_ids[j],
-                                          H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0)
+            if ((dset_ids[j] =
+                     H5Dcreate2(file_id, dset_name[j],
+                                (flags & MDSET_FLAG_TCONV && j % 2) ? H5T_NATIVE_LONG : H5T_NATIVE_UINT,
+                                file_space_ids[j], H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0)
                 T_PMD_ERROR
         } /* end for */
 

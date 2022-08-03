@@ -2682,8 +2682,8 @@ H5D__chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_
                 /* Perform the actual read operation from the nonexistent chunk
                  */
                 if ((dset_info->io_ops.single_read)(&nonexistent_io_info, type_info,
-                                                  (hsize_t)chunk_info->piece_points, chunk_info->fspace,
-                                                  chunk_info->mspace) < 0)
+                                                    (hsize_t)chunk_info->piece_points, chunk_info->fspace,
+                                                    chunk_info->mspace) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "chunked read failed")
             } /* end if */
 
@@ -2804,7 +2804,7 @@ H5D__chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_
 
                 /* Perform the actual read operation */
                 if ((dset_info->io_ops.single_read)(chk_io_info, type_info, (hsize_t)chunk_info->piece_points,
-                                                  chunk_info->fspace, chunk_info->mspace) < 0)
+                                                    chunk_info->fspace, chunk_info->mspace) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "chunked read failed")
 
                 /* Release the cache lock on the chunk. */
@@ -2991,8 +2991,9 @@ H5D__chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize
                 cpt_store.compact.buf = chunk;
 
                 /* Perform the actual write operation */
-                if ((dset_info->io_ops.single_write)(&cpt_io_info, type_info, (hsize_t)chunk_info->piece_points,
-                                                   chunk_info->fspace, chunk_info->mspace) < 0)
+                if ((dset_info->io_ops.single_write)(&cpt_io_info, type_info,
+                                                     (hsize_t)chunk_info->piece_points, chunk_info->fspace,
+                                                     chunk_info->mspace) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "chunked write failed")
 
                 /* Release the cache lock on the chunk */
@@ -3158,7 +3159,7 @@ H5D__chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize
 
             /* Perform the actual write operation */
             if ((dset_info->io_ops.single_write)(chk_io_info, type_info, (hsize_t)chunk_info->piece_points,
-                                               chunk_info->fspace, chunk_info->mspace) < 0)
+                                                 chunk_info->fspace, chunk_info->mspace) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "chunked write failed")
 
             /* Release the cache lock on the chunk, or insert chunk into index. */
