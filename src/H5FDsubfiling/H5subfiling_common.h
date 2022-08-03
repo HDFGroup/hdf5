@@ -213,7 +213,7 @@ extern "C" {
 #endif
 
 H5_DLL herr_t H5_open_subfiles(const char *base_filename, void *h5_file_handle,
-                               H5FD_subfiling_ioc_select_t ioc_selection_type,
+                               H5FD_subfiling_shared_config_t *subfiling_config,
                                int file_acc_flags, MPI_Comm file_comm,
                                int64_t *context_id_out);
 H5_DLL herr_t H5_close_subfiles(int64_t subfiling_context_id);

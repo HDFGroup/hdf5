@@ -922,7 +922,7 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
          * context ID will be returned, which is used for
          * further interactions with this file's subfiles.
          */
-        if (H5_open_subfiles(file_ptr->file_path, file_handle, file_ptr->fa.subf_config.ioc_selection,
+        if (H5_open_subfiles(file_ptr->file_path, file_handle, &file_ptr->fa.subf_config,
                              ioc_flags, file_ptr->comm, &file_ptr->context_id) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open subfiles for file '%s'",
                                     name);

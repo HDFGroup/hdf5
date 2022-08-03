@@ -83,12 +83,12 @@ static int sf_open_file_count = 0;
 static herr_t H5_free_subfiling_object_int(subfiling_context_t *sf_context);
 static herr_t H5_free_subfiling_topology(sf_topology_t *topology);
 
-static herr_t init_subfiling(H5FD_subfiling_ioc_select_t ioc_selection_type, MPI_Comm comm,
+static herr_t init_subfiling(H5FD_subfiling_shared_config_t *subfiling_config, MPI_Comm comm,
                              int64_t *context_id_out);
 static herr_t init_app_topology(H5FD_subfiling_ioc_select_t ioc_selection_type, MPI_Comm comm,
                                 sf_topology_t **app_topology_out);
-static herr_t init_subfiling_context(subfiling_context_t *sf_context, sf_topology_t *app_topology,
-                                     MPI_Comm file_comm);
+static herr_t init_subfiling_context(subfiling_context_t *sf_context, H5FD_subfiling_shared_config_t *subfiling_config,
+                                     sf_topology_t *app_topology, MPI_Comm file_comm);
 static herr_t open_subfile_with_context(subfiling_context_t *sf_context, int file_acc_flags);
 static herr_t record_fid_to_subfile(void *file_handle, int64_t subfile_context_id, int *next_index);
 static herr_t ioc_open_file(sf_work_request_t *msg, int file_acc_flags);
@@ -915,7 +915,7 @@ H5_free_subfiling_topology(sf_topology_t *topology)
 /* TODO: revise description */
 herr_t
 H5_open_subfiles(const char *base_filename, void *file_handle,
-                 H5FD_subfiling_ioc_select_t ioc_selection_type,
+                 H5FD_subfiling_shared_config_t *subfiling_config,
                  int file_acc_flags, MPI_Comm file_comm, int64_t *context_id_out)
 {
     subfiling_context_t *sf_context = NULL;
@@ -928,6 +928,15 @@ H5_open_subfiles(const char *base_filename, void *file_handle,
     if (!base_filename) {
 #ifdef H5_SUBFILING_DEBUG
         HDprintf("%s: invalid base filename\n", __func__);
+#endif
+
+        ret_value = FAIL;
+        goto done;
+    }
+
+    if (!subfiling_config) {
+#ifdef H5_SUBFILING_DEBUG
+        HDprintf("%s: invalid subfiling configuration pointer\n", __func__);
 #endif
 
         ret_value = FAIL;
@@ -956,7 +965,7 @@ H5_open_subfiles(const char *base_filename, void *file_handle,
 #endif
 
     /* Initialize new subfiling context ID based on configuration information */
-    if (init_subfiling(ioc_selection_type, file_comm, &context_id) < 0) {
+    if (init_subfiling(subfiling_config, file_comm, &context_id) < 0) {
 #ifdef H5_SUBFILING_DEBUG
         HDprintf("%s: couldn't initialize subfiling context\n", __func__);
 #endif
@@ -1095,7 +1104,7 @@ done:
 -------------------------------------------------------------------------
 */
 static herr_t
-init_subfiling(H5FD_subfiling_ioc_select_t ioc_selection_type,
+init_subfiling(H5FD_subfiling_shared_config_t *subfiling_config,
                MPI_Comm comm, int64_t *context_id_out)
 {
     subfiling_context_t *new_context  = NULL;
@@ -1133,7 +1142,7 @@ init_subfiling(H5FD_subfiling_ioc_select_t ioc_selection_type,
      * Setup the application topology information, including the computed
      * number and distribution map of the set of I/O concentrators
      */
-    if (init_app_topology(ioc_selection_type, comm, &app_topology) < 0) {
+    if (init_app_topology(subfiling_config->ioc_selection, comm, &app_topology) < 0) {
 #ifdef H5_SUBFILING_DEBUG
         HDprintf("%s: couldn't initialize application topology\n", __func__);
 #endif
@@ -1144,7 +1153,7 @@ init_subfiling(H5FD_subfiling_ioc_select_t ioc_selection_type,
 
     new_context->sf_context_id = context_id;
 
-    if (init_subfiling_context(new_context, app_topology, comm) < 0) {
+    if (init_subfiling_context(new_context, subfiling_config, app_topology, comm) < 0) {
 #ifdef H5_SUBFILING_DEBUG
         HDprintf("%s: couldn't initialize subfiling topology object\n", __func__);
 #endif
@@ -1514,7 +1523,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-init_subfiling_context(subfiling_context_t *sf_context, sf_topology_t *app_topology, MPI_Comm file_comm)
+init_subfiling_context(subfiling_context_t *sf_context, H5FD_subfiling_shared_config_t *subfiling_config,
+                       sf_topology_t *app_topology, MPI_Comm file_comm)
 {
     char * env_value = NULL;
     int    comm_rank;
@@ -1523,6 +1533,7 @@ init_subfiling_context(subfiling_context_t *sf_context, sf_topology_t *app_topol
 
     HDassert(sf_context);
     HDassert(sf_context->topology == NULL);
+    HDassert(subfiling_config);
     HDassert(app_topology);
     HDassert(app_topology->n_io_concentrators > 0);
     HDassert(MPI_COMM_NULL != file_comm);
@@ -1551,7 +1562,13 @@ init_subfiling_context(subfiling_context_t *sf_context, sf_topology_t *app_topol
     sf_context->sf_logfile = NULL;
 #endif
 
-    /* Check for an IOC stripe size setting in the environment */
+    /*
+     * Set IOC stripe size from subfiling configuration, then check
+     * for a setting from the environment
+     */
+    if (subfiling_config->stripe_size > 0)
+        sf_context->sf_stripe_size = subfiling_config->stripe_size;
+
     if ((env_value = HDgetenv(H5FD_SUBFILING_STRIPE_SIZE))) {
         long long stripe_size = -1;
 
