@@ -361,7 +361,7 @@ H5Pset_fapl_ioc(hid_t fapl_id, H5FD_ioc_config_t *vfd_config)
     if (vfd_config == NULL) {
         if (NULL == (ioc_conf = H5FL_CALLOC(H5FD_ioc_config_t)))
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                    "can't allocate IOC VFD configuration");
+                                    "can't allocate IOC VFD configuration");
         ioc_conf->under_fapl_id = H5I_INVALID_HID;
 
         /* Get IOC VFD defaults */
@@ -922,8 +922,8 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
          * context ID will be returned, which is used for
          * further interactions with this file's subfiles.
          */
-        if (H5_open_subfiles(file_ptr->file_path, file_handle, &file_ptr->fa.subf_config,
-                             ioc_flags, file_ptr->comm, &file_ptr->context_id) < 0)
+        if (H5_open_subfiles(file_ptr->file_path, file_handle, &file_ptr->fa.subf_config, ioc_flags,
+                             file_ptr->comm, &file_ptr->context_id) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open subfiles for file '%s'",
                                     name);
 
@@ -1653,8 +1653,8 @@ H5FD__ioc_del(const char *name, hid_t fapl)
                                     "can't allocate config file name buffer");
 
         /* TODO: No support for subfile directory prefix currently */
-        HDsnprintf(tmp_filename, PATH_MAX, "%s/%s" H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE, file_dirname, base_filename,
-                   (uint64_t)st.st_ino);
+        HDsnprintf(tmp_filename, PATH_MAX, "%s/%s" H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE, file_dirname,
+                   base_filename, (uint64_t)st.st_ino);
 
         if (NULL == (config_file = HDfopen(tmp_filename, "r"))) {
             if (ENOENT == errno) {
@@ -1690,8 +1690,8 @@ H5FD__ioc_del(const char *name, hid_t fapl)
 
         for (int i = 0; i < n_io_concentrators; i++) {
             /* TODO: No support for subfile directory prefix currently */
-            HDsnprintf(tmp_filename, PATH_MAX, "%s/%s" H5FD_SUBFILING_FILENAME_TEMPLATE, file_dirname, base_filename,
-                       (uint64_t)st.st_ino, num_digits, i + 1, n_io_concentrators);
+            HDsnprintf(tmp_filename, PATH_MAX, "%s/%s" H5FD_SUBFILING_FILENAME_TEMPLATE, file_dirname,
+                       base_filename, (uint64_t)st.st_ino, num_digits, i + 1, n_io_concentrators);
 
             if (HDremove(tmp_filename) < 0) {
 #ifdef H5FD_IOC_DEBUG

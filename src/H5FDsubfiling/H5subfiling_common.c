@@ -87,7 +87,8 @@ static herr_t init_subfiling(H5FD_subfiling_shared_config_t *subfiling_config, M
                              int64_t *context_id_out);
 static herr_t init_app_topology(H5FD_subfiling_ioc_select_t ioc_selection_type, MPI_Comm comm,
                                 sf_topology_t **app_topology_out);
-static herr_t init_subfiling_context(subfiling_context_t *sf_context, H5FD_subfiling_shared_config_t *subfiling_config,
+static herr_t init_subfiling_context(subfiling_context_t *           sf_context,
+                                     H5FD_subfiling_shared_config_t *subfiling_config,
                                      sf_topology_t *app_topology, MPI_Comm file_comm);
 static herr_t open_subfile_with_context(subfiling_context_t *sf_context, int file_acc_flags);
 static herr_t record_fid_to_subfile(void *file_handle, int64_t subfile_context_id, int *next_index);
@@ -106,7 +107,7 @@ static int         get_next_fid_map_index(void);
 static void        clear_fid_map_entry(void *file_handle, int64_t sf_context_id);
 static int         compare_hostid(const void *h1, const void *h2);
 static herr_t      get_ioc_selection_criteria_from_env(H5FD_subfiling_ioc_select_t *ioc_selection_type,
-                                                       char **ioc_sel_info_str);
+                                                       char **                      ioc_sel_info_str);
 static int         count_nodes(sf_topology_t *info, MPI_Comm comm);
 static herr_t      gather_topology_info(sf_topology_t *info, MPI_Comm comm);
 static int         identify_ioc_ranks(sf_topology_t *info, int node_count, int iocs_per_node);
@@ -324,7 +325,8 @@ get_ioc_selection_criteria_from_env(H5FD_subfiling_ioc_select_t *ioc_selection_t
 
         if (errno == ERANGE) {
 #ifdef H5_SUBFILING_DEBUG
-            HDprintf("%s: couldn't parse value from " H5FD_SUBFILING_IOC_SELECTION_CRITERIA " environment variable\n",
+            HDprintf("%s: couldn't parse value from " H5FD_SUBFILING_IOC_SELECTION_CRITERIA
+                     " environment variable\n",
                      __func__);
 #endif
 
@@ -915,8 +917,8 @@ H5_free_subfiling_topology(sf_topology_t *topology)
 /* TODO: revise description */
 herr_t
 H5_open_subfiles(const char *base_filename, void *file_handle,
-                 H5FD_subfiling_shared_config_t *subfiling_config,
-                 int file_acc_flags, MPI_Comm file_comm, int64_t *context_id_out)
+                 H5FD_subfiling_shared_config_t *subfiling_config, int file_acc_flags, MPI_Comm file_comm,
+                 int64_t *context_id_out)
 {
     subfiling_context_t *sf_context = NULL;
     int64_t              context_id = -1;
@@ -1104,8 +1106,7 @@ done:
 -------------------------------------------------------------------------
 */
 static herr_t
-init_subfiling(H5FD_subfiling_shared_config_t *subfiling_config,
-               MPI_Comm comm, int64_t *context_id_out)
+init_subfiling(H5FD_subfiling_shared_config_t *subfiling_config, MPI_Comm comm, int64_t *context_id_out)
 {
     subfiling_context_t *new_context  = NULL;
     sf_topology_t *      app_topology = NULL;
@@ -1220,8 +1221,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-init_app_topology(H5FD_subfiling_ioc_select_t ioc_selection_type,
-                  MPI_Comm comm, sf_topology_t **app_topology_out)
+init_app_topology(H5FD_subfiling_ioc_select_t ioc_selection_type, MPI_Comm comm,
+                  sf_topology_t **app_topology_out)
 {
     sf_topology_t *app_topology     = NULL;
     app_layout_t * app_layout       = sf_app_layout;
@@ -2319,8 +2320,8 @@ create_config_file(subfiling_context_t *sf_context, const char *base_filename, c
         goto done;
     }
 
-    HDsnprintf(config_filename, PATH_MAX, "%s/%s" H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE, subfile_dir, base_filename,
-               sf_context->h5_file_id);
+    HDsnprintf(config_filename, PATH_MAX, "%s/%s" H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE, subfile_dir,
+               base_filename, sf_context->h5_file_id);
 
     /* Determine whether a subfiling configuration file exists */
     errno = 0;
@@ -2504,8 +2505,8 @@ open_config_file(subfiling_context_t *sf_context, const char *base_filename, con
         goto done;
     }
 
-    HDsnprintf(config_filename, PATH_MAX, "%s/%s" H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE, subfile_dir, base_filename,
-               sf_context->h5_file_id);
+    HDsnprintf(config_filename, PATH_MAX, "%s/%s" H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE, subfile_dir,
+               base_filename, sf_context->h5_file_id);
 
     /* Determine whether a subfiling configuration file exists */
     errno = 0;

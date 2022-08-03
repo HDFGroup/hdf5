@@ -242,11 +242,12 @@ typedef struct H5FD_subfiling_shared_config_t {
  *
  */
 typedef struct H5FD_subfiling_config_t {
-    uint32_t                       magic;       /* Must be set to H5FD_SUBFILING_FAPL_MAGIC */
-    uint32_t                       version;     /* Must be set to H5FD_CURR_SUBFILING_FAPL_VERSION */
-    hid_t                          ioc_fapl_id; /* The FAPL setup with the stacked VFD to use for I/O concentrators */
-    hbool_t                        require_ioc; /* Whether to use the IOC VFD (currently must always be TRUE) */
-    H5FD_subfiling_shared_config_t shared_cfg;  /* Subfiling/IOC parameters (stripe size, stripe count, etc.) */
+    uint32_t magic;       /* Must be set to H5FD_SUBFILING_FAPL_MAGIC */
+    uint32_t version;     /* Must be set to H5FD_CURR_SUBFILING_FAPL_VERSION */
+    hid_t    ioc_fapl_id; /* The FAPL setup with the stacked VFD to use for I/O concentrators */
+    hbool_t  require_ioc; /* Whether to use the IOC VFD (currently must always be TRUE) */
+    H5FD_subfiling_shared_config_t
+        shared_cfg; /* Subfiling/IOC parameters (stripe size, stripe count, etc.) */
 } H5FD_subfiling_config_t;
 //! <!-- [H5FD_subfiling_config_t_snip] -->
 

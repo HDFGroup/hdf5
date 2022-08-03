@@ -986,8 +986,8 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
          * context ID will be returned, which is used for
          * further interactions with this file's subfiles.
          */
-        if (H5_open_subfiles(file_ptr->file_path, file_handle, &file_ptr->fa.shared_cfg,
-                             ioc_flags, file_ptr->comm, &file_ptr->context_id) < 0)
+        if (H5_open_subfiles(file_ptr->file_path, file_handle, &file_ptr->fa.shared_cfg, ioc_flags,
+                             file_ptr->comm, &file_ptr->context_id) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open subfiling files = %s\n",
                                     name);
     }

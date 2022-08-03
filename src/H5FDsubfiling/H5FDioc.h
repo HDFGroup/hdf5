@@ -121,11 +121,11 @@
  *
  */
 typedef struct H5FD_ioc_config_t {
-    uint32_t                       magic;             /* Must be set to H5FD_IOC_FAPL_MAGIC */
-    uint32_t                       version;           /* Must be set to H5FD_CURR_IOC_FAPL_VERSION */
-    hid_t                          under_fapl_id;     /* FAPL setup with the VFD to use for I/O to the HDF5 stub file */
-    int32_t                        thread_pool_count; /* Number of I/O concentrator worker threads to use */
-    H5FD_subfiling_shared_config_t subf_config;       /* Subfiling driver configuration */
+    uint32_t magic;             /* Must be set to H5FD_IOC_FAPL_MAGIC */
+    uint32_t version;           /* Must be set to H5FD_CURR_IOC_FAPL_VERSION */
+    hid_t    under_fapl_id;     /* FAPL setup with the VFD to use for I/O to the HDF5 stub file */
+    int32_t  thread_pool_count; /* Number of I/O concentrator worker threads to use */
+    H5FD_subfiling_shared_config_t subf_config; /* Subfiling driver configuration */
 } H5FD_ioc_config_t;
 //! <!-- [H5FD_ioc_config_t_snip] -->
 
@@ -137,7 +137,7 @@ extern "C" {
  * \brief Internal routine to initialize #H5FD_IOC driver. Not meant to be
  *        called directly by an HDF5 application
  */
-H5_DLL hid_t  H5FD_ioc_init(void);
+H5_DLL hid_t H5FD_ioc_init(void);
 /**
  * \ingroup FAPL
  *
