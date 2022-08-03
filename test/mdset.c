@@ -41,7 +41,8 @@
 #define MDSET_FLAG_CHUNK     0x01u
 #define MDSET_FLAG_SHAPESAME 0x02u
 #define MDSET_FLAG_MDSET     0x04u
-#define MDSET_ALL_FLAGS      (MDSET_FLAG_CHUNK | MDSET_FLAG_SHAPESAME | MDSET_FLAG_MDSET)
+#define MDSET_FLAG_TCONV     0x08u
+#define MDSET_ALL_FLAGS      (MDSET_FLAG_CHUNK | MDSET_FLAG_SHAPESAME | MDSET_FLAG_MDSET | MDSET_FLAG_TCONV)
 
 const char *FILENAME[] = {"mdset", "mdset1", "mdset2", NULL};
 
@@ -291,8 +292,12 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
             } /* end if */
 
             /* Create dataset */
-            if ((dset_ids[j] = H5Dcreate2(file_id, dset_name[j], H5T_NATIVE_UINT, file_space_ids[j],
-                                          H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0)
+            /* If MDSET_FLAG_TCONV is set, use a different datatype for odd numbered datasets, so
+             * some datasets require type conversion and others do not */
+            if ((dset_ids[j] =
+                     H5Dcreate2(file_id, dset_name[j],
+                                (flags & MDSET_FLAG_TCONV && j % 2) ? H5T_NATIVE_LONG : H5T_NATIVE_UINT,
+                                file_space_ids[j], H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0)
                 TEST_ERROR;
         } /* end for */
 
@@ -553,9 +558,10 @@ main(void)
     for (i = 0; i <= MDSET_ALL_FLAGS; i++) {
         /* Print flag configuration */
         puts("\nConfiguration:");
-        printf("  Layout:     %s\n", (i & MDSET_FLAG_CHUNK) ? "Chunked" : "Contiguous");
-        printf("  Shape same: %s\n", (i & MDSET_FLAG_SHAPESAME) ? "Yes" : "No");
-        printf("  I/O type:   %s\n", (i & MDSET_FLAG_MDSET) ? "Multi" : "Single");
+        printf("  Layout:          %s\n", (i & MDSET_FLAG_CHUNK) ? "Chunked" : "Contiguous");
+        printf("  Shape same:      %s\n", (i & MDSET_FLAG_SHAPESAME) ? "Yes" : "No");
+        printf("  I/O type:        %s\n", (i & MDSET_FLAG_MDSET) ? "Multi" : "Single");
+        printf("  Type conversion: %s\n", (i & MDSET_FLAG_TCONV) ? "Yes" : "No");
 
         nerrors += test_mdset(100, i, fapl_id);
     }

@@ -478,6 +478,13 @@ H5D__read(size_t count, H5D_dset_info_t *dset_info, hbool_t is_mdset)
     io_info.base_maddr.vp = NULL;
     io_info.is_mdset      = is_mdset;
 
+    /* Start without multi-dataset I/O ops. If we're not using the collective
+     * I/O path then we will call the single dataset callbacks in a loop. */
+    io_info.md_io_ops.multi_read_md   = NULL;
+    io_info.md_io_ops.multi_write_md  = NULL;
+    io_info.md_io_ops.single_read_md  = NULL;
+    io_info.md_io_ops.single_write_md = NULL;
+
     /* Create global piece skiplist */
     if (NULL == (io_info.sel_pieces = H5SL_create(H5SL_TYPE_HADDR, NULL)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create skip list for piece selections")
@@ -655,9 +662,9 @@ H5D__read(size_t count, H5D_dset_info_t *dset_info, hbool_t is_mdset)
 
     /* If multi dataset I/O callback is not provided, perform read IO via
      * single-dset path with looping */
-    if (io_info.io_ops.multi_read_md) {
+    if (io_info.md_io_ops.multi_read_md) {
         /* Invoke correct "high level" I/O routine */
-        if ((*io_info.io_ops.multi_read_md)(count, &io_info) < 0)
+        if ((*io_info.md_io_ops.multi_read_md)(count, &io_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
     } /* end if */
     else {
@@ -671,7 +678,7 @@ H5D__read(size_t count, H5D_dset_info_t *dset_info, hbool_t is_mdset)
             io_info.dsets_info = &(dset_info[i]);
 
             /* Invoke correct "high level" I/O routine */
-            if ((*io_info.io_ops.multi_read)(
+            if ((*dset_info[i].io_ops.multi_read)(
                     &io_info, &(dset_info[i].type_info), H5S_GET_SELECT_NPOINTS(dset_info[i].mem_space),
                     dset_info[i].file_space, dset_info[i].mem_space, &dset_info[i]) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
@@ -767,6 +774,13 @@ H5D__write(size_t count, H5D_dset_info_t *dset_info, hbool_t is_mdset)
     io_info.store_faddr    = 0;
     io_info.base_maddr.cvp = NULL;
     io_info.is_mdset       = is_mdset;
+
+    /* Start without multi-dataset I/O ops. If we're not using the collective
+     * I/O path then we will call the single dataset callbacks in a loop. */
+    io_info.md_io_ops.multi_read_md   = NULL;
+    io_info.md_io_ops.multi_write_md  = NULL;
+    io_info.md_io_ops.single_read_md  = NULL;
+    io_info.md_io_ops.single_write_md = NULL;
 
     /* Create global piece skiplist */
     if (NULL == (io_info.sel_pieces = H5SL_create(H5SL_TYPE_HADDR, NULL)))
@@ -959,9 +973,9 @@ H5D__write(size_t count, H5D_dset_info_t *dset_info, hbool_t is_mdset)
 
     /* If multi dataset I/O callback is not provided, perform write IO via
      * single-dset path with looping */
-    if (io_info.io_ops.multi_write_md) {
+    if (io_info.md_io_ops.multi_write_md) {
         /* Invoke correct "high level" I/O routine */
-        if ((*io_info.io_ops.multi_write_md)(count, &io_info) < 0)
+        if ((*io_info.md_io_ops.multi_write_md)(count, &io_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
     } /* end if */
     else {
@@ -975,7 +989,7 @@ H5D__write(size_t count, H5D_dset_info_t *dset_info, hbool_t is_mdset)
             io_info.dsets_info = &(dset_info[i]);
 
             /* Invoke correct "high level" I/O routine */
-            if ((*io_info.io_ops.multi_write)(
+            if ((*dset_info[i].io_ops.multi_write)(
                     &io_info, &(dset_info[i].type_info), H5S_GET_SELECT_NPOINTS(dset_info[i].mem_space),
                     dset_info[i].file_space, dset_info[i].mem_space, &dset_info[i]) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
@@ -1076,15 +1090,8 @@ H5D__ioinfo_init(H5D_t *dset, H5D_dset_info_t *dset_info, H5D_storage_t *store, 
     dset_info->layout_ops = *dset->shared->layout.ops;
 
     /* Set the "high-level" I/O operations for the dataset */
-    io_info->io_ops.multi_read  = dset->shared->layout.ops->ser_read;
-    io_info->io_ops.multi_write = dset->shared->layout.ops->ser_write;
-
-    /* Start without multi-dataset I/O ops. If we're not using the collective
-     * I/O path then we will call the single dataset callbacks in a loop. */
-    io_info->io_ops.multi_read_md   = NULL;
-    io_info->io_ops.multi_write_md  = NULL;
-    io_info->io_ops.single_read_md  = NULL;
-    io_info->io_ops.single_write_md = NULL;
+    dset_info->io_ops.multi_read  = dset->shared->layout.ops->ser_read;
+    dset_info->io_ops.multi_write = dset->shared->layout.ops->ser_write;
 
     /* Set the I/O operations for reading/writing single blocks on disk */
     if (dset_info->type_info.is_xform_noop && dset_info->type_info.is_conv_noop) {
@@ -1093,15 +1100,15 @@ H5D__ioinfo_init(H5D_t *dset, H5D_dset_info_t *dset_info, H5D_storage_t *store, 
          * into the application's buffer.
          * This saves at least one mem-to-mem copy.
          */
-        io_info->io_ops.single_read  = H5D__select_read;
-        io_info->io_ops.single_write = H5D__select_write;
+        dset_info->io_ops.single_read  = H5D__select_read;
+        dset_info->io_ops.single_write = H5D__select_write;
     } /* end if */
     else {
         /*
          * This is the general case (type conversion, usually).
          */
-        io_info->io_ops.single_read  = H5D__scatgath_read;
-        io_info->io_ops.single_write = H5D__scatgath_write;
+        dset_info->io_ops.single_read  = H5D__scatgath_read;
+        dset_info->io_ops.single_write = H5D__scatgath_write;
     } /* end else */
 
     /* Start with selection I/O on if the global is on, layout callback will
@@ -1349,12 +1356,10 @@ H5D__ioinfo_adjust(const size_t count, H5D_io_info_t *io_info)
              * handle collective I/O */
             /* Check for selection/vector support in file driver? -NAF */
             if (!io_info->use_select_io) {
-                io_info->io_ops.multi_read      = NULL;
-                io_info->io_ops.multi_write     = NULL;
-                io_info->io_ops.multi_read_md   = dset0->shared->layout.ops->par_read;
-                io_info->io_ops.multi_write_md  = dset0->shared->layout.ops->par_write;
-                io_info->io_ops.single_read_md  = H5D__mpio_select_read;
-                io_info->io_ops.single_write_md = H5D__mpio_select_write;
+                io_info->md_io_ops.multi_read_md   = dset0->shared->layout.ops->par_read;
+                io_info->md_io_ops.multi_write_md  = dset0->shared->layout.ops->par_write;
+                io_info->md_io_ops.single_read_md  = H5D__mpio_select_read;
+                io_info->md_io_ops.single_write_md = H5D__mpio_select_write;
             } /* end if */
         }     /* end if */
         else {
