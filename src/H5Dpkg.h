@@ -189,11 +189,15 @@ typedef struct H5D_io_ops_t {
     H5D_layout_write_func_t       multi_write;    /* High-level I/O routine for writing data */
     H5D_io_single_read_func_t     single_read;    /* I/O routine for reading single block */
     H5D_io_single_write_func_t    single_write;   /* I/O routine for writing single block */
+} H5D_io_ops_t;
+
+/* Typedef for raw data I/O framework info (multi-dataset I/O) */
+typedef struct H5D_md_io_ops_t {
     H5D_layout_read_md_func_t     multi_read_md;  /* High-level I/O routine for reading data for multi-dset */
     H5D_layout_write_md_func_t    multi_write_md; /* High-level I/O routine for writing data for multi-dset */
     H5D_io_single_read_md_func_t  single_read_md; /* I/O routine for reading single block for multi-dset */
     H5D_io_single_write_md_func_t single_write_md; /* I/O routine for writing single block for multi-dset */
-} H5D_io_ops_t;
+} H5D_md_io_ops_t;
 
 /* Typedefs for dataset storage information */
 typedef struct {
@@ -243,6 +247,8 @@ typedef struct H5D_dset_info_t {
     H5D_layout_ops_t        layout_ops; /* Dataset layout I/O operation function pointers */
     H5_flexible_const_ptr_t buf;        /* Buffer pointer */
 
+    H5D_io_ops_t  io_ops; /* I/O operations for this dataset */
+
     H5O_layout_t *layout; /* Dataset layout information*/
     hsize_t       nelmts; /* Number of elements selected in file & memory dataspaces */
 
@@ -277,10 +283,10 @@ typedef struct H5D_io_info_t {
     /* QAK: Delete the f_sh field when oloc has a shared file pointer? */
     H5F_shared_t *f_sh; /* Pointer to shared file struct that dataset is within */
 #ifdef H5_HAVE_PARALLEL
-    MPI_Comm comm;                  /* MPI communicator for file */
-    hbool_t  using_mpi_vfd;         /* Whether the file is using an MPI-based VFD */
-#endif                              /* H5_HAVE_PARALLEL */
-    H5D_io_ops_t            io_ops; /* I/O operation function pointers */
+    MPI_Comm comm;                     /* MPI communicator for file */
+    hbool_t  using_mpi_vfd;            /* Whether the file is using an MPI-based VFD */
+#endif                                 /* H5_HAVE_PARALLEL */
+    H5D_md_io_ops_t         md_io_ops; /* Multi dataset I/O operation function pointers */
     H5D_io_op_type_t        op_type;
     const H5D_t            *dset;          /* Pointer to dataset being operated on */
     H5D_dset_info_t        *dsets_info;    /* dsets info where I/O is done to/from */

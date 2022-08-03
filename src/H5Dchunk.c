@@ -2506,12 +2506,12 @@ H5D__chunk_may_use_select_io(const H5D_io_info_t *io_info, const H5D_dset_info_t
 
     /* Don't use selection I/O if it's globally disabled, there is a type
      * conversion, or if there are filters on the dataset (for now) */
-    if (io_info->io_ops.single_read != H5D__select_read || dataset->shared->dcpl_cache.pline.nused > 0)
+    if (dset_info->io_ops.single_read != H5D__select_read || dataset->shared->dcpl_cache.pline.nused > 0)
         ret_value = FALSE;
     else {
         hbool_t page_buf_enabled;
 
-        HDassert(io_info->io_ops.single_write == H5D__select_write);
+        HDassert(dset_info->io_ops.single_write == H5D__select_write);
 
         /* Check if the page buffer is enabled */
         if (H5PB_enabled(io_info->f_sh, H5FD_MEM_DRAW, &page_buf_enabled) < 0)
@@ -2681,7 +2681,7 @@ H5D__chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_
             else if (!skip_missing_chunks) {
                 /* Perform the actual read operation from the nonexistent chunk
                  */
-                if ((io_info->io_ops.single_read)(&nonexistent_io_info, type_info,
+                if ((dset_info->io_ops.single_read)(&nonexistent_io_info, type_info,
                                                   (hsize_t)chunk_info->piece_points, chunk_info->fspace,
                                                   chunk_info->mspace) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "chunked read failed")
@@ -2803,7 +2803,7 @@ H5D__chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_
                 } /* end else */
 
                 /* Perform the actual read operation */
-                if ((io_info->io_ops.single_read)(chk_io_info, type_info, (hsize_t)chunk_info->piece_points,
+                if ((dset_info->io_ops.single_read)(chk_io_info, type_info, (hsize_t)chunk_info->piece_points,
                                                   chunk_info->fspace, chunk_info->mspace) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "chunked read failed")
 
@@ -2991,7 +2991,7 @@ H5D__chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize
                 cpt_store.compact.buf = chunk;
 
                 /* Perform the actual write operation */
-                if ((io_info->io_ops.single_write)(&cpt_io_info, type_info, (hsize_t)chunk_info->piece_points,
+                if ((dset_info->io_ops.single_write)(&cpt_io_info, type_info, (hsize_t)chunk_info->piece_points,
                                                    chunk_info->fspace, chunk_info->mspace) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "chunked write failed")
 
@@ -3157,7 +3157,7 @@ H5D__chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize
             } /* end else */
 
             /* Perform the actual write operation */
-            if ((io_info->io_ops.single_write)(chk_io_info, type_info, (hsize_t)chunk_info->piece_points,
+            if ((dset_info->io_ops.single_write)(chk_io_info, type_info, (hsize_t)chunk_info->piece_points,
                                                chunk_info->fspace, chunk_info->mspace) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "chunked write failed")
 

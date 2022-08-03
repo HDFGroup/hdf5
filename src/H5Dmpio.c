@@ -2421,11 +2421,11 @@ H5D__final_collective_io(H5D_io_info_t *io_info, hsize_t mpi_buf_count, MPI_Data
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set MPI-I/O collective I/O datatypes")
 
     if (io_info->op_type == H5D_IO_OP_WRITE) {
-        if ((io_info->io_ops.single_write_md)(io_info, mpi_buf_count, NULL, NULL) < 0)
+        if ((io_info->md_io_ops.single_write_md)(io_info, mpi_buf_count, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "optimized write failed")
     } /* end if */
     else {
-        if ((io_info->io_ops.single_read_md)(io_info, mpi_buf_count, NULL, NULL) < 0)
+        if ((io_info->md_io_ops.single_read_md)(io_info, mpi_buf_count, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "optimized read failed")
     } /* end else */
 

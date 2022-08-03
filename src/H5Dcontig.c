@@ -782,7 +782,7 @@ H5D__contig_may_use_select_io(const H5D_io_info_t *io_info, const H5D_dset_info_
     /* Don't use selection I/O if it's globally disabled, if there is a type
      * conversion, or if it's not a contiguous dataset, or if the sieve buffer
      * exists (write) or is dirty (read) */
-    if (io_info->io_ops.single_read != H5D__select_read ||
+    if (dset_info->io_ops.single_read != H5D__select_read ||
         dset_info->layout_ops.readvv != H5D__contig_readvv ||
         (op_type == H5D_IO_OP_READ && dataset->shared->cache.contig.sieve_dirty) ||
         (op_type == H5D_IO_OP_WRITE && dataset->shared->cache.contig.sieve_buf))
@@ -790,7 +790,7 @@ H5D__contig_may_use_select_io(const H5D_io_info_t *io_info, const H5D_dset_info_
     else {
         hbool_t page_buf_enabled;
 
-        HDassert(io_info->io_ops.single_write == H5D__select_write);
+        HDassert(dset_info->io_ops.single_write == H5D__select_write);
         HDassert(dset_info->layout_ops.writevv == H5D__contig_writevv);
 
         /* Check if the page buffer is enabled */
@@ -853,7 +853,7 @@ H5D__contig_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize
     } /* end if */
     else
         /* Read data through legacy (non-selection I/O) pathway */
-        if ((io_info->io_ops.single_read)(io_info, type_info, nelmts, file_space, mem_space) < 0)
+        if ((dinfo->io_ops.single_read)(io_info, type_info, nelmts, file_space, mem_space) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "contiguous read failed")
 
 done:
@@ -907,7 +907,7 @@ H5D__contig_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsiz
     } /* end if */
     else
         /* Write data through legacy (non-selection I/O) pathway */
-        if ((io_info->io_ops.single_write)(io_info, type_info, nelmts, file_space, mem_space) < 0)
+        if ((dinfo->io_ops.single_write)(io_info, type_info, nelmts, file_space, mem_space) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "contiguous write failed")
 
 done:
