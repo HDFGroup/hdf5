@@ -30,6 +30,8 @@ set (test_ex_CLEANFILES
     group.h5
     groups.h5
     hard_link.h5
+    h5_subfiling_default_example.h5
+    h5_subfiling_custom_example.h5
     mount1.h5
     mount2.h5
     one_index_file.h5
