@@ -60,14 +60,14 @@ static void
 subfiling_write_default(hid_t fapl_id, int mpi_size, int mpi_rank)
 {
     EXAMPLE_DSET_C_DATATYPE *data;
-    hsize_t  dset_dims[EXAMPLE_DSET_DIMS];
-    hsize_t  start[EXAMPLE_DSET_DIMS];
-    hsize_t  count[EXAMPLE_DSET_DIMS];
-    hid_t    file_id;
-    hid_t    dset_id;
-    hid_t    filespace;
-    char     filename[512];
-    char    *par_prefix;
+    hsize_t                  dset_dims[EXAMPLE_DSET_DIMS];
+    hsize_t                  start[EXAMPLE_DSET_DIMS];
+    hsize_t                  count[EXAMPLE_DSET_DIMS];
+    hid_t                    file_id;
+    hid_t                    dset_id;
+    hid_t                    filespace;
+    char                     filename[512];
+    char                    *par_prefix;
 
     /*
      * Set Subfiling VFD on FAPL using default settings
@@ -99,8 +99,8 @@ subfiling_write_default(hid_t fapl_id, int mpi_size, int mpi_rank)
     /* Parse any parallel prefix and create filename */
     par_prefix = getenv("HDF5_PARAPREFIX");
 
-    snprintf(filename, sizeof(filename), "%s%s%s",
-             par_prefix ? par_prefix : "", par_prefix ? "/" : "", EXAMPLE_FILE);
+    snprintf(filename, sizeof(filename), "%s%s%s", par_prefix ? par_prefix : "", par_prefix ? "/" : "",
+             EXAMPLE_FILE);
 
     /*
      * Create a new file collectively
@@ -114,13 +114,13 @@ subfiling_write_default(hid_t fapl_id, int mpi_size, int mpi_rank)
      */
     dset_dims[0] = mpi_size;
     dset_dims[1] = EXAMPLE_DSET_NY;
-    filespace = H5Screate_simple(EXAMPLE_DSET_DIMS, dset_dims, NULL);
+    filespace    = H5Screate_simple(EXAMPLE_DSET_DIMS, dset_dims, NULL);
 
     /*
      * Create the dataset with default properties
      */
-    dset_id = H5Dcreate2(file_id, EXAMPLE_DSET_NAME, EXAMPLE_DSET_DATATYPE,
-                         filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    dset_id = H5Dcreate2(file_id, EXAMPLE_DSET_NAME, EXAMPLE_DSET_DATATYPE, filespace, H5P_DEFAULT,
+                         H5P_DEFAULT, H5P_DEFAULT);
 
     /*
      * Each MPI rank writes from a contiguous memory
@@ -143,8 +143,7 @@ subfiling_write_default(hid_t fapl_id, int mpi_size, int mpi_rank)
     /*
      * Write to dataset
      */
-    H5Dwrite(dset_id, EXAMPLE_DSET_DATATYPE, H5S_BLOCK, filespace,
-             H5P_DEFAULT, data);
+    H5Dwrite(dset_id, EXAMPLE_DSET_DATATYPE, H5S_BLOCK, filespace, H5P_DEFAULT, data);
 
     /*
      * Close/release resources.
@@ -163,17 +162,17 @@ static void
 subfiling_write_custom(hid_t fapl_id, int mpi_size, int mpi_rank)
 {
     EXAMPLE_DSET_C_DATATYPE *data;
-    H5FD_subfiling_config_t subf_config;
-    H5FD_ioc_config_t ioc_config;
-    hsize_t  dset_dims[EXAMPLE_DSET_DIMS];
-    hsize_t  start[EXAMPLE_DSET_DIMS];
-    hsize_t  count[EXAMPLE_DSET_DIMS];
-    hid_t    file_id;
-    hid_t    ioc_fapl;
-    hid_t    dset_id;
-    hid_t    filespace;
-    char     filename[512];
-    char    *par_prefix;
+    H5FD_subfiling_config_t  subf_config;
+    H5FD_ioc_config_t        ioc_config;
+    hsize_t                  dset_dims[EXAMPLE_DSET_DIMS];
+    hsize_t                  start[EXAMPLE_DSET_DIMS];
+    hsize_t                  count[EXAMPLE_DSET_DIMS];
+    hid_t                    file_id;
+    hid_t                    ioc_fapl;
+    hid_t                    dset_id;
+    hid_t                    filespace;
+    char                     filename[512];
+    char                    *par_prefix;
 
     /*
      * Get a default Subfiling and IOC configuration
@@ -189,7 +188,7 @@ subfiling_write_custom(hid_t fapl_id, int mpi_size, int mpi_rank)
      * environment variable, this will use every MPI
      * rank as an I/O concentrator.
      */
-    subf_config.shared_cfg.stripe_size = 1048576;
+    subf_config.shared_cfg.stripe_size   = 1048576;
     subf_config.shared_cfg.ioc_selection = SELECT_IOC_EVERY_NTH_RANK;
 
     /*
@@ -199,7 +198,7 @@ subfiling_write_custom(hid_t fapl_id, int mpi_size, int mpi_rank)
      * configuration.
      */
     ioc_config.thread_pool_size = 2;
-    ioc_config.subf_config = subf_config.shared_cfg;
+    ioc_config.subf_config      = subf_config.shared_cfg;
 
     /*
      * Create a File Access Property List for
@@ -246,8 +245,8 @@ subfiling_write_custom(hid_t fapl_id, int mpi_size, int mpi_rank)
     /* Parse any parallel prefix and create filename */
     par_prefix = getenv("HDF5_PARAPREFIX");
 
-    snprintf(filename, sizeof(filename), "%s%s%s",
-             par_prefix ? par_prefix : "", par_prefix ? "/" : "", EXAMPLE_FILE2);
+    snprintf(filename, sizeof(filename), "%s%s%s", par_prefix ? par_prefix : "", par_prefix ? "/" : "",
+             EXAMPLE_FILE2);
 
     /*
      * Create a new file collectively
@@ -261,13 +260,13 @@ subfiling_write_custom(hid_t fapl_id, int mpi_size, int mpi_rank)
      */
     dset_dims[0] = mpi_size;
     dset_dims[1] = EXAMPLE_DSET_NY;
-    filespace = H5Screate_simple(EXAMPLE_DSET_DIMS, dset_dims, NULL);
+    filespace    = H5Screate_simple(EXAMPLE_DSET_DIMS, dset_dims, NULL);
 
     /*
      * Create the dataset with default properties
      */
-    dset_id = H5Dcreate2(file_id, EXAMPLE_DSET_NAME, EXAMPLE_DSET_DATATYPE,
-                         filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    dset_id = H5Dcreate2(file_id, EXAMPLE_DSET_NAME, EXAMPLE_DSET_DATATYPE, filespace, H5P_DEFAULT,
+                         H5P_DEFAULT, H5P_DEFAULT);
 
     /*
      * Each MPI rank writes from a contiguous memory
@@ -290,8 +289,7 @@ subfiling_write_custom(hid_t fapl_id, int mpi_size, int mpi_rank)
     /*
      * Write to dataset
      */
-    H5Dwrite(dset_id, EXAMPLE_DSET_DATATYPE, H5S_BLOCK, filespace,
-             H5P_DEFAULT, data);
+    H5Dwrite(dset_id, EXAMPLE_DSET_DATATYPE, H5S_BLOCK, filespace, H5P_DEFAULT, data);
 
     /*
      * Close/release resources.
@@ -356,7 +354,8 @@ main(int argc, char **argv)
 int
 main(void)
 {
-    printf("Example program cannot run - HDF5 must be built with parallel support and Subfiling VFD support\n");
+    printf(
+        "Example program cannot run - HDF5 must be built with parallel support and Subfiling VFD support\n");
     return 0;
 }
 

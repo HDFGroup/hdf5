@@ -206,8 +206,6 @@ typedef struct {
 
 extern int sf_verbose_flag;
 
-extern app_layout_t *sf_app_layout;
-
 #ifdef __cplusplus
 extern "C" {
 #endif

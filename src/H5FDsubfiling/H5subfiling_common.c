@@ -55,8 +55,6 @@ static sf_topology_t       *sf_topology_cache = NULL;
 static size_t sf_context_cache_limit  = 16;
 static size_t sf_topology_cache_limit = 4;
 
-app_layout_t *sf_app_layout = NULL;
-
 static file_map_to_context_t *sf_open_file_map = NULL;
 static int                    sf_file_map_size = 0;
 #define DEFAULT_FILE_MAP_ENTRIES 8
@@ -397,9 +395,6 @@ count_nodes(sf_topology_t *info, MPI_Comm comm)
     app_layout = info->app_layout;
     node_count = app_layout->node_count;
 
-    if (node_count == 0)
-        gather_topology_info(info, comm);
-
     nextid = app_layout->layout[0].hostid;
     /* Possibly record my hostid_index */
     if (app_layout->layout[0].rank == my_rank) {
@@ -567,8 +562,10 @@ assign_ioc_ranks(sf_topology_t *app_topology, int ioc_count, int rank_multiple)
         for (int k = 0, ioc_next = 0; ioc_next < ioc_count; ioc_next++) {
             ioc_index                  = rank_multiple * k++;
             io_concentrators[ioc_next] = (int)(app_layout->layout[ioc_index].rank);
-            if (io_concentrators[ioc_next] == app_layout->world_rank)
-                app_topology->rank_is_ioc = TRUE;
+            if (io_concentrators[ioc_next] == app_layout->world_rank) {
+                app_topology->subfile_rank = ioc_next;
+                app_topology->rank_is_ioc  = TRUE;
+            }
         }
         app_topology->n_io_concentrators = ioc_count;
     }
@@ -858,15 +855,7 @@ H5_free_subfiling_topology(sf_topology_t *topology)
     HDfree(topology->subfile_fd);
     topology->subfile_fd = NULL;
 
-    /*
-     * The below assumes that the subfiling application layout
-     * is retrieved once and used for subsequent file opens for
-     * the duration that the Subfiling VFD is in use
-     */
-    HDassert(topology->app_layout == sf_app_layout);
-
-#if 0
-    if (topology->app_layout && (topology->app_layout != sf_app_layout)) {
+    if (topology->app_layout) {
         HDfree(topology->app_layout->layout);
         topology->app_layout->layout = NULL;
 
@@ -875,7 +864,6 @@ H5_free_subfiling_topology(sf_topology_t *topology)
 
         HDfree(topology->app_layout);
     }
-#endif
 
     topology->app_layout = NULL;
 
@@ -1225,7 +1213,7 @@ init_app_topology(H5FD_subfiling_ioc_select_t ioc_selection_type, MPI_Comm comm,
                   sf_topology_t **app_topology_out)
 {
     sf_topology_t *app_topology     = NULL;
-    app_layout_t  *app_layout       = sf_app_layout;
+    app_layout_t  *app_layout       = NULL;
     char          *env_value        = NULL;
     char          *ioc_sel_str      = NULL;
     int           *io_concentrators = NULL;
@@ -1343,10 +1331,6 @@ init_app_topology(H5FD_subfiling_ioc_select_t ioc_selection_type, MPI_Comm comm,
     HDassert(io_concentrators);
 
     if (!app_layout) {
-        /* TODO: this is dangerous if a new comm size is greater than what
-         * was allocated. Can't reuse app layout.
-         */
-
         if (NULL == (app_layout = HDcalloc(1, sizeof(*app_layout)))) {
 #ifdef H5_SUBFILING_DEBUG
             HDprintf("%s: couldn't allocate application layout structure\n", __func__);
@@ -1373,18 +1357,14 @@ init_app_topology(H5FD_subfiling_ioc_select_t ioc_selection_type, MPI_Comm comm,
             ret_value = FAIL;
             goto done;
         }
-
-        /*
-         * Once the application layout has been filled once, any additional
-         * file open operations won't be required to gather that information.
-         */
-        sf_app_layout = app_layout;
     }
 
     app_layout->world_size = comm_size;
     app_layout->world_rank = comm_rank;
 
     app_topology->app_layout = app_layout;
+
+    gather_topology_info(app_topology, comm);
 
     /*
      * Determine which ranks are I/O concentrator ranks, based on the
