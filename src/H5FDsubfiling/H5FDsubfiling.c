@@ -108,37 +108,6 @@ typedef struct H5FD_subfiling_t {
     char *file_dir;  /* Directory where we find files */
     char *file_path; /* The user defined filename */
 
-#ifndef H5_HAVE_WIN32_API
-    /* On most systems the combination of device and i-node number uniquely
-     * identify a file.  Note that Cygwin, MinGW and other Windows POSIX
-     * environments have the stat function (which fakes inodes)
-     * and will use the 'device + inodes' scheme as opposed to the
-     * Windows code further below.
-     */
-    dev_t device; /* file device number   */
-    ino_t inode;  /* file i-node number   */
-#else
-    /* Files in windows are uniquely identified by the volume serial
-     * number and the file index (both low and high parts).
-     *
-     * There are caveats where these numbers can change, especially
-     * on FAT file systems.  On NTFS, however, a file should keep
-     * those numbers the same until renamed or deleted (though you
-     * can use ReplaceFile() on NTFS to keep the numbers the same
-     * while renaming).
-     *
-     * See the MSDN "BY_HANDLE_FILE_INFORMATION Structure" entry for
-     * more information.
-     *
-     * http://msdn.microsoft.com/en-us/library/aa363788(v=VS.85).aspx
-     */
-    DWORD nFileIndexLow;
-    DWORD nFileIndexHigh;
-    DWORD dwVolumeSerialNumber;
-
-    HANDLE hFile; /* Native windows file handle */
-#endif /* H5_HAVE_WIN32_API */
-
     /*
      * The element layouts above this point are identical with the
      * H5FD_ioc_t structure. As a result,
@@ -174,18 +143,6 @@ typedef struct H5FD_subfiling_t {
 #define SIZE_OVERFLOW(Z) ((Z) & ~(hsize_t)MAXADDR)
 #define REGION_OVERFLOW(A, Z)                                                                                \
     (ADDR_OVERFLOW(A) || SIZE_OVERFLOW(Z) || HADDR_UNDEF == (A) + (Z) || (HDoff_t)((A) + (Z)) < (HDoff_t)(A))
-
-#define H5FD_SUBFILING_DEBUG_OP_CALLS 0 /* debugging print toggle; 0 disables */
-
-#if H5FD_SUBFILING_DEBUG_OP_CALLS
-#define H5FD_SUBFILING_LOG_CALL(name)                                                                        \
-    do {                                                                                                     \
-        HDprintf("called %s()\n", (name));                                                                   \
-        HDfflush(stdout);                                                                                    \
-    } while (0)
-#else
-#define H5FD_SUBFILING_LOG_CALL(name) /* no-op */
-#endif                                /* H5FD_SUBFILING_DEBUG_OP_CALLS */
 
 /* Prototypes */
 static herr_t  H5FD__subfiling_term(void);
@@ -634,12 +591,21 @@ H5FD__subfiling_validate_config(const H5FD_subfiling_config_t *fa)
     HDassert(fa != NULL);
 
     if (fa->version != H5FD_SUBFILING_CURR_FAPL_VERSION)
-        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unknown H5FD_subfiling_config_t version");
+        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unknown H5FD_subfiling_config_t version");
 
     if (fa->magic != H5FD_SUBFILING_FAPL_MAGIC)
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid H5FD_subfiling_config_t magic value");
 
-    /* TODO: add extra subfiling configuration validation code */
+    if (fa->ioc_fapl_id < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid IOC FAPL ID");
+
+    if (!fa->require_ioc)
+        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                                "Subfiling VFD currently always requires IOC VFD to be used");
+
+    if (fa->shared_cfg.ioc_selection < SELECT_IOC_ONE_PER_NODE ||
+        fa->shared_cfg.ioc_selection >= ioc_selection_options)
+        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid IOC selection method");
 
 done:
     H5_SUBFILING_FUNC_LEAVE;
@@ -711,8 +677,6 @@ H5FD__copy_plist(hid_t fapl_id, hid_t *id_out_ptr)
 {
     int             ret_value = 0;
     H5P_genplist_t *plist_ptr = NULL;
-
-    H5FD_SUBFILING_LOG_CALL(__func__);
 
     HDassert(id_out_ptr != NULL);
 
@@ -1029,21 +993,6 @@ H5FD__subfiling_close_int(H5FD_subfiling_t *file_ptr)
 
     HDassert(file_ptr);
 
-#if H5FD_SUBFILING_DEBUG_OP_CALLS
-    {
-        subfiling_context_t *sf_context = H5_get_subfiling_object(file_ptr->context_id);
-
-        HDassert(sf_context);
-        HDassert(sf_context->topology);
-
-        if (sf_context->topology->rank_is_ioc)
-            HDprintf("[%s %d] fd=%d\n", __func__, file_ptr->mpi_rank, sf_context->sf_fid);
-        else
-            HDprintf("[%s %d] fd=*\n", __func__, file_ptr->mpi_rank);
-        HDfflush(stdout);
-    }
-#endif
-
     if (file_ptr->sf_file && H5FD_close(file_ptr->sf_file) < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close subfile");
 
@@ -1225,87 +1174,18 @@ H5FD__subfiling_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t a
  * Return:      End of file address, the first address past the end of the
  *              "file", either the filesystem file or the HDF5 file.
  *
- *              SUBFILING NOTE:
- *              The EOF calculation for subfiling is somewhat different
- *              than for the more traditional HDF5 file implementations.
- *              This statement derives from the fact that unlike "normal"
- *              HDF5 files, subfiling introduces a multi-file representation
- *              of a single HDF5 file.  The plurality of sub-files represents
- *              a software RAID-0 based HDF5 file.  As such, each sub-file
- *              contains a designated portion of the address space of the
- *              virtual HDF5 storage.  We have no notion of HDF5 datatypes,
- *              datasets, metadata, or other HDF5 structures; only BYTES.
- *
- *              The organization of the bytes within sub-files is consistent
- *              with the RAID-0 striping, i.e. there are IO Concentrators
- *              (IOCs) which correspond to a stripe-count (in Lustre) as
- *              well as a stripe_size.  The combination of these two
- *              variables determines the "address" (a combination of IOC
- *              and a file offset) of any storage operation.
- *
- *              Having a defined storage layout, the virtual file EOF
- *              calculation should be the MAXIMUM value returned by the
- *              collection of IOCs.  Every MPI rank which hosts an IOC
- *              maintains its own EOF by updating that value for each
- *              WRITE operation that completes, i.e. if a new local EOF
- *              is greater than the existing local EOF, the new EOF
- *              will replace the old.  The local EOF calculation is as
- *              follows.
- *              1. At file creation, each IOC is assigned a rank value
- *                 (0 to N-1, where N is the total number of IOCs) and
- *                 a 'sf_base_addr' = 'subfile_rank' * 'sf_stripe_size')
- *                 we also determine the 'sf_blocksize_per_stripe' which
- *                 is simply the 'sf_stripe_size' * 'n_ioc_concentrators'
- *
- *              2. For every write operation, the IOC receives a message
- *                 containing a file_offset and the data_size.
- *
- *              3. The file_offset + data_size are in turn used to
- *                 create a stripe_id:
- *                   IOC-(ioc_rank)       IOC-(ioc_rank+1)
- *                   |<- sf_base_address  |<- sf_base_address  |
- *                ID +--------------------+--------------------+
- *                 0:|<- sf_stripe_size ->|<- sf_stripe_size ->|
- *                 1:|<- sf_stripe_size ->|<- sf_stripe_size ->|
- *                   ~                    ~                    ~
- *                 N:|<- sf_stripe_size ->|<- sf_stripe_size ->|
- *                   +--------------------+--------------------+
- *
- *                The new 'stripe_id' is then used to calculate a
- *                potential new EOF:
- *                sf_eof = (stripe_id * sf_blocksize_per_stripe) + sf_base_addr
- *                         + ((file_offset + data_size) % sf_stripe_size)
- *
- *              4. If (sf_eof > current_sf_eof), then current_sf_eof = sf_eof.
- *
- *
- * Programmer:  Richard Warren
+ *              NOTE: This VFD mimics the MPI I/O VFD and so does not try
+ *              to keep the EOF updated. The EOF is mostly just needed
+ *              right after the file is opened so the library can determine
+ *              if the file is empty, truncated or okay.
  *
  *-------------------------------------------------------------------------
  */
 static haddr_t
 H5FD__subfiling_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 {
-    const H5FD_subfiling_t *file = (const H5FD_subfiling_t *)_file;
-#if 0
-    int64_t                 logical_eof = -1;
-#endif
-    haddr_t ret_value = HADDR_UNDEF;
-
-#if 0
-    /*
-     * TODO: this is a heavy weight implementation.  We need something like this
-     * for file open, and probably for file close.  However, in between, something
-     * similar to the current solution in the MPIIO VFD might be more appropriate.
-     */
-    if (H5FD__subfiling__get_real_eof(file->fa.context_id, &logical_eof) < 0)
-        H5_SUBFILING_GOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, HADDR_UNDEF, "can't get EOF")
-
-    /* Return the global max of all the subfile EOF values */
-    ret_value = (haddr_t)(logical_eof);
-
-done:
-#endif
+    const H5FD_subfiling_t *file      = (const H5FD_subfiling_t *)_file;
+    haddr_t                 ret_value = HADDR_UNDEF;
 
     ret_value = file->eof;
 
@@ -1378,8 +1258,7 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL,
                                 "addr overflow, addr = %" PRIuHADDR ", size = %" PRIuHADDR, addr, size);
 
-    /* TODO: Temporarily reject collective I/O until support is implemented (unless types are simple MPI_BYTE)
-     */
+    /* Temporarily reject collective I/O until support is implemented (unless types are simple MPI_BYTE) */
     {
         H5FD_mpio_xfer_t xfer_mode;
 
@@ -1407,11 +1286,6 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr
         H5CX_set_io_xfer_mode(H5FD_MPIO_INDEPENDENT);
     }
 
-#if H5FD_SUBFILING_DEBUG_OP_CALLS
-    HDprintf("[%s %d] addr=%ld, size=%ld\n", __func__, file_ptr->mpi_rank, addr, size);
-    HDfflush(stdout);
-#endif
-
     /*
      * Retrieve the subfiling context object and the number
      * of I/O concentrators.
@@ -1429,14 +1303,6 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr
     HDassert(sf_context->topology);
 
     ioc_total = sf_context->topology->n_io_concentrators;
-
-#if H5FD_SUBFILING_DEBUG_OP_CALLS
-    if (sf_context->topology->rank_is_ioc)
-        HDprintf("[%s %d] fd=%d\n", __func__, file_ptr->mpi_rank, sf_context->sf_fid);
-    else
-        HDprintf("[%s %d] fd=*\n", __func__, file_ptr->mpi_rank);
-    HDfflush(stdout);
-#endif
 
     if (ioc_total == 0) {
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid number of I/O concentrators (%d)",
@@ -1527,18 +1393,6 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr
                 H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                         "can't allocate subfile I/O buffers vector");
 
-            /* TODO: The following is left for future work */
-            /*
-             * Set ASYNC MODE
-             * H5FD_class_aio_t *async_file_ptr = (H5FD_class_aio_t *)file_ptr->sf_file;
-             * uint64_t op_code_begin = OPC_BEGIN;
-             * uint64_t op_code_complete = OPC_COMPLETE;
-             * const void *input = NULL;
-             * void *output = NULL;
-             * H5FDctl(file_ptr->sf_file, op_code_begin, flags, input, &output);
-             * (*async_file_ptr->h5fdctl)(file_ptr->sf_file, op_code_begin, flags, input, &output);
-             */
-
             for (int64_t i = 0; i < max_io_req_per_ioc; i++) {
                 uint32_t final_vec_len = vector_len;
                 int      next_ioc      = ioc_start;
@@ -1576,9 +1430,6 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr
                 if (MPI_SUCCESS != MPI_Bcast(buf, (int)size, MPI_BYTE, 0, file_ptr->comm))
                     H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "can't broadcast data from rank 0");
             }
-
-            /* TODO: The following is left for future work */
-            /* H5FDctl(file_ptr->sf_file, op_code_complete, flags, input, &output); */
         }
     }
 
@@ -1646,8 +1497,7 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t add
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL,
                                 "addr overflow, addr = %" PRIuHADDR ", size = %" PRIuHADDR, addr, size);
 
-    /* TODO: Temporarily reject collective I/O until support is implemented (unless types are simple MPI_BYTE)
-     */
+    /* Temporarily reject collective I/O until support is implemented (unless types are simple MPI_BYTE) */
     {
         H5FD_mpio_xfer_t xfer_mode;
 
@@ -1672,11 +1522,6 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t add
         H5CX_set_io_xfer_mode(H5FD_MPIO_INDEPENDENT);
     }
 
-#if H5FD_SUBFILING_DEBUG_OP_CALLS
-    HDprintf("[%s %d] addr=%ld, size=%ld\n", __func__, file_ptr->mpi_rank, addr, size);
-    HDfflush(stdout);
-#endif
-
     /*
      * Retrieve the subfiling context object and the number
      * of I/O concentrators.
@@ -1694,14 +1539,6 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t add
     HDassert(sf_context->topology);
 
     ioc_total = sf_context->topology->n_io_concentrators;
-
-#if H5FD_SUBFILING_DEBUG_OP_CALLS
-    if (sf_context->topology->rank_is_ioc)
-        HDprintf("[%s %d] fd=%d\n", __func__, file_ptr->mpi_rank, sf_context->sf_fid);
-    else
-        HDprintf("[%s %d] fd=*\n", __func__, file_ptr->mpi_rank);
-    HDfflush(stdout);
-#endif
 
     if (ioc_total == 0) {
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid number of I/O concentrators (%d)",
@@ -1792,18 +1629,6 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t add
                 H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                         "can't allocate subfile I/O buffers vector");
 
-            /* TODO: The following is left for future work */
-            /*
-             * Set ASYNC MODE
-             * H5FD_class_aio_t *async_file_ptr = (H5FD_class_aio_t *)file_ptr->sf_file;
-             * uint64_t op_code_begin = OPC_BEGIN;
-             * uint64_t op_code_complete = OPC_COMPLETE;
-             * const void *input = NULL;
-             * void *output = NULL;
-             * H5FDctl(file_ptr->sf_file, op_code_begin, flags, input, &output);
-             * (*async_file_ptr->h5fdctl)(file_ptr->sf_file, op_code_begin, flags, input, &output);
-             */
-
             for (int64_t i = 0; i < max_io_req_per_ioc; i++) {
                 uint32_t final_vec_len = vector_len;
                 int      next_ioc      = ioc_start;
@@ -1833,9 +1658,6 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t add
                                      io_bufs) < 0)
                     H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "write to subfile failed");
             }
-
-            /* TODO: The following is left for future work */
-            /* H5FDctl(file_ptr->sf_file, op_code_complete, flags, input, &output); */
         }
     }
 
@@ -1846,15 +1668,11 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t add
     file_ptr->pos = addr;
     file_ptr->op  = OP_WRITE;
 
-#if 1 /* Mimic the MPI I/O VFD */
+    /* Mimic the MPI I/O VFD */
     file_ptr->eof = HADDR_UNDEF;
 
     if (file_ptr->pos > file_ptr->local_eof)
         file_ptr->local_eof = file_ptr->pos;
-#else
-    if (file_ptr->pos > file_ptr->eof)
-        file_ptr->eof = file_ptr->pos;
-#endif
 
 done:
     HDfree(io_bufs);
@@ -2223,7 +2041,6 @@ H5FD__subfiling_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5
     HDassert(file);
 
     /* Extend the file to make sure it's large enough */
-#if 1 /* Mimic the MPI I/O VFD */
     if (!H5F_addr_eq(file->eoa, file->last_eoa)) {
         int64_t sf_eof;
         int64_t eoa;
@@ -2262,29 +2079,6 @@ H5FD__subfiling_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5
         /* Update the 'last' eoa value */
         file->last_eoa = file->eoa;
     }
-#else
-    if (!H5F_addr_eq(file->eoa, file->eof)) {
-
-        /* Update the eof value */
-        file->eof = file->eoa;
-
-        /* Reset last file I/O information */
-        file->pos = HADDR_UNDEF;
-        file->op  = OP_UNKNOWN;
-
-        /* Update the 'last' eoa value */
-        file->last_eoa = file->eoa;
-    } /* end if */
-
-    /* truncate sub-files */
-    /* This is a hack.  We should be doing the truncate of the sub-files via calls to
-     * H5FD_truncate() with the IOC.  However, that system is messed up at present.
-     * thus the following hack.
-     *                                                 JRM -- 12/18/21
-     */
-    if (H5FD__subfiling__truncate_sub_files(file->context_id, file->eof, file->comm) < 0)
-        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTUPDATE, FAIL, "sub-file truncate request failed");
-#endif
 
 done:
     H5_SUBFILING_FUNC_LEAVE_API;
@@ -2313,7 +2107,6 @@ H5FD__subfiling_lock(H5FD_t *_file, hbool_t rw)
 
     HDassert(file);
 
-    /* TODO: Consider lock only on IOC ranks for one IOC per subfile case */
     if (file->fa.require_ioc) {
 #ifdef VERBOSE
         HDputs("Subfiling driver doesn't support file locking");

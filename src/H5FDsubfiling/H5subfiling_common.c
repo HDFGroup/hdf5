@@ -24,25 +24,6 @@ typedef struct {           /* Format of a context map entry  */
     int64_t sf_context_id; /* The return value if matching file_handle */
 } file_map_to_context_t;
 
-typedef struct stat_record {
-    int64_t op_count; /* How many ops in total */
-    double  min;      /* minimum (time)         */
-    double  max;      /* maximum (time)        */
-    double  total;    /* average (time)        */
-} stat_record_t;
-
-/* Stat (OP) Categories  */
-typedef enum stat_category {
-    WRITE_STAT = 0,
-    WRITE_WAIT,
-    READ_STAT,
-    READ_WAIT,
-    FOPEN_STAT,
-    FCLOSE_STAT,
-    QUEUE_STAT,
-    TOTAL_STAT_COUNT
-} stat_category_t;
-
 /* Identifiers for HDF5's error API */
 hid_t H5subfiling_err_stack_g = H5I_INVALID_HID;
 hid_t H5subfiling_err_class_g = H5I_INVALID_HID;
@@ -59,25 +40,6 @@ static file_map_to_context_t *sf_open_file_map = NULL;
 static int                    sf_file_map_size = 0;
 #define DEFAULT_FILE_MAP_ENTRIES 8
 
-/* Definitions for recording subfiling statistics */
-static stat_record_t subfiling_stats[TOTAL_STAT_COUNT];
-#define SF_WRITE_OPS       (subfiling_stats[WRITE_STAT].op_count)
-#define SF_WRITE_TIME      (subfiling_stats[WRITE_STAT].total / (double)subfiling_stats[WRITE_STAT].op_count)
-#define SF_WRITE_WAIT_TIME (subfiling_stats[WRITE_WAIT].total / (double)subfiling_stats[WRITE_WAIT].op_count)
-#define SF_READ_OPS        (subfiling_stats[READ_STAT].op_count)
-#define SF_READ_TIME       (subfiling_stats[READ_STAT].total / (double)subfiling_stats[READ_STAT].op_count)
-#define SF_READ_WAIT_TIME  (subfiling_stats[READ_WAIT].total / (double)subfiling_stats[READ_WAIT].op_count)
-#define SF_QUEUE_DELAYS    (subfiling_stats[QUEUE_STAT].total)
-
-int sf_verbose_flag = 0;
-
-#ifdef H5_SUBFILING_DEBUG
-char  sf_logile_name[PATH_MAX];
-FILE *sf_logfile = NULL;
-
-static int sf_open_file_count = 0;
-#endif
-
 static herr_t H5_free_subfiling_object_int(subfiling_context_t *sf_context);
 static herr_t H5_free_subfiling_topology(sf_topology_t *topology);
 
@@ -90,7 +52,7 @@ static herr_t init_subfiling_context(subfiling_context_t            *sf_context,
                                      sf_topology_t *app_topology, MPI_Comm file_comm);
 static herr_t open_subfile_with_context(subfiling_context_t *sf_context, int file_acc_flags);
 static herr_t record_fid_to_subfile(void *file_handle, int64_t subfile_context_id, int *next_index);
-static herr_t ioc_open_file(sf_work_request_t *msg, int file_acc_flags);
+static herr_t ioc_open_file(int64_t file_context_id, int file_acc_flags);
 static herr_t generate_subfile_name(subfiling_context_t *sf_context, int file_acc_flags, char *filename_out,
                                     size_t filename_out_len, char **filename_basename_out,
                                     char **subfile_dir_out);
@@ -99,8 +61,6 @@ static herr_t create_config_file(subfiling_context_t *sf_context, const char *ba
 static herr_t open_config_file(subfiling_context_t *sf_context, const char *base_filename,
                                const char *subfile_dir, const char *mode, FILE **config_file_out);
 
-static void        initialize_statistics(void);
-static int         numDigits(int n);
 static int         get_next_fid_map_index(void);
 static void        clear_fid_map_entry(void *file_handle, int64_t sf_context_id);
 static int         compare_hostid(const void *h1, const void *h2);
@@ -110,79 +70,6 @@ static int         count_nodes(sf_topology_t *info, MPI_Comm comm);
 static herr_t      gather_topology_info(sf_topology_t *info, MPI_Comm comm);
 static int         identify_ioc_ranks(sf_topology_t *info, int node_count, int iocs_per_node);
 static inline void assign_ioc_ranks(sf_topology_t *app_topology, int ioc_count, int rank_multiple);
-
-static void
-initialize_statistics(void)
-{
-    HDmemset(subfiling_stats, 0, sizeof(subfiling_stats));
-}
-
-static int
-numDigits(int n)
-{
-    if (n < 0)
-        n = (n == INT_MIN) ? INT_MAX : -n;
-    if (n < 10)
-        return 1;
-    if (n < 100)
-        return 2;
-    if (n < 1000)
-        return 3;
-    if (n < 10000)
-        return 4;
-    if (n < 100000)
-        return 5;
-    if (n < 1000000)
-        return 6;
-    if (n < 10000000)
-        return 7;
-    if (n < 100000000)
-        return 8;
-    if (n < 1000000000)
-        return 9;
-    return 10;
-}
-
-/*-------------------------------------------------------------------------
- * Function:    set_verbose_flag
- *
- * Purpose:     For debugging purposes, I allow a verbose setting to
- *              have printing of relevant information into an IOC specific
- *              file that is opened as a result of enabling the flag
- *              and closed when the verbose setting is disabled.
- *
- * Return:      None
- * Errors:      None
- *
- * Programmer:  Richard Warren
- *
- * Changes:     Initial Version/None.
- *-------------------------------------------------------------------------
- */
-void
-set_verbose_flag(int subfile_rank, int new_value)
-{
-#ifdef H5_SUBFILING_DEBUG
-    sf_verbose_flag = (int)(new_value & 0x0FF);
-    if (sf_verbose_flag) {
-        char logname[64];
-        HDsnprintf(logname, sizeof(logname), "ioc_%d.log", subfile_rank);
-        if (sf_open_file_count > 1)
-            sf_logfile = fopen(logname, "a+");
-        else
-            sf_logfile = fopen(logname, "w+");
-    }
-    else if (sf_logfile) {
-        fclose(sf_logfile);
-        sf_logfile = NULL;
-    }
-#else
-    (void)subfile_rank;
-    (void)new_value;
-#endif
-
-    return;
-}
 
 static int
 get_next_fid_map_index(void)
@@ -480,7 +367,7 @@ gather_topology_info(sf_topology_t *info, MPI_Comm comm)
             return FAIL;
         }
 
-        qsort(app_layout->layout, (size_t)sf_world_size, sizeof(layout_t), compare_hostid);
+        HDqsort(app_layout->layout, (size_t)sf_world_size, sizeof(layout_t), compare_hostid);
     }
 
     return SUCCEED;
@@ -606,13 +493,6 @@ H5_new_subfiling_object_id(sf_obj_type_t obj_type, int64_t index_val)
  *              Subfiling contexts are 1 per open file. If only one file is
  *              open at a time, then only a single subfiling context cache
  *              entry will be used.
- *
- *              Topologies are static, e.g. for any one I/O concentrator
- *              allocation strategy, the results should always be the same.
- *
- *              TODO: The one exception to this being the 1 IOC per N MPI
- *              ranks strategy. The value of N can be changed on a per-file
- *              basis, so we need to address that at some point.
  *
  * Return:      Pointer to underlying subfiling object if subfiling object
  *              ID is valid
@@ -941,18 +821,6 @@ H5_open_subfiles(const char *base_filename, void *file_handle,
         ret_value = FAIL;
         goto done;
     }
-
-    initialize_statistics();
-
-#if 0 /* TODO */
-    /* Maybe set the verbose flag for more debugging info */
-    envValue = HDgetenv("H5_SF_VERBOSE_FLAG");
-    if (envValue != NULL) {
-        int check_value = atoi(envValue);
-        if (check_value > 0)
-            sf_verbose_flag = 1;
-    }
-#endif
 
     /* Initialize new subfiling context ID based on configuration information */
     if (init_subfiling(subfiling_config, file_comm, &context_id) < 0) {
@@ -1386,7 +1254,6 @@ init_app_topology(H5FD_subfiling_ioc_select_t ioc_selection_type, MPI_Comm comm,
             }
 
             /* Check for an IOC-per-node value set in the environment */
-            /* TODO: should this env. var. be interpreted for other selection types? */
             if ((env_value = HDgetenv(H5FD_SUBFILING_IOC_PER_NODE))) {
                 errno          = 0;
                 ioc_select_val = HDstrtol(env_value, NULL, 0);
@@ -1759,12 +1626,9 @@ done:
 static herr_t
 open_subfile_with_context(subfiling_context_t *sf_context, int file_acc_flags)
 {
-    double start_time;
     herr_t ret_value = SUCCEED;
 
     HDassert(sf_context);
-
-    start_time = MPI_Wtime();
 
     /*
      * Save the HDF5 file ID (fid) to subfile context mapping.
@@ -1785,18 +1649,7 @@ open_subfile_with_context(subfiling_context_t *sf_context, int file_acc_flags)
      * the subfile belonging to this IOC rank
      */
     if (sf_context->topology->rank_is_ioc) {
-        sf_work_request_t msg = {{file_acc_flags, (int64_t)sf_context->h5_file_id, sf_context->sf_context_id},
-                                 OPEN_OP,
-                                 sf_context->topology->app_layout->world_rank,
-                                 sf_context->topology->subfile_rank,
-                                 sf_context->sf_context_id,
-                                 start_time,
-                                 NULL,
-                                 0,
-                                 0,
-                                 0,
-                                 0};
-        h5_stat_t         st;
+        h5_stat_t st;
 
         /* Retrieve Inode value for HDF5 stub file */
         if (HDstat(sf_context->h5_filename, &st) < 0) {
@@ -1812,7 +1665,7 @@ open_subfile_with_context(subfiling_context_t *sf_context, int file_acc_flags)
         HDcompile_assert(sizeof(uint64_t) >= sizeof(ino_t));
         sf_context->h5_file_id = (uint64_t)st.st_ino;
 
-        if (ioc_open_file(&msg, file_acc_flags) < 0) {
+        if (ioc_open_file(sf_context->sf_context_id, file_acc_flags) < 0) {
 #ifdef H5_SUBFILING_DEBUG
             HDprintf("[%s %d]: couldn't open subfile\n", __func__,
                      sf_context->topology->app_layout->world_rank);
@@ -1972,21 +1825,15 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-ioc_open_file(sf_work_request_t *msg, int file_acc_flags)
+ioc_open_file(int64_t file_context_id, int file_acc_flags)
 {
-    subfiling_context_t *sf_context = NULL;
-    int64_t              file_context_id;
+    subfiling_context_t *sf_context  = NULL;
     mode_t               mode        = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
     char                *filepath    = NULL;
     char                *subfile_dir = NULL;
     char                *base        = NULL;
     int                  fd          = -1;
     herr_t               ret_value   = SUCCEED;
-
-    HDassert(msg);
-
-    /* Retrieve subfiling context ID from RPC message */
-    file_context_id = msg->header[2];
 
     if (NULL == (sf_context = H5_get_subfiling_object(file_context_id))) {
 #ifdef H5_SUBFILING_DEBUG
@@ -2211,7 +2058,7 @@ generate_subfile_name(subfiling_context_t *sf_context, int file_acc_flags, char 
      * and the configuration file will be named:
      *   ABC.h5.subfile_<file-number>.config
      */
-    num_digits = numDigits(n_io_concentrators);
+    num_digits = (int)(HDlog10(n_io_concentrators) + 1);
     HDsnprintf(filename_out, filename_out_len, "%s/%s" H5FD_SUBFILING_FILENAME_TEMPLATE, subfile_dir, base,
                sf_context->h5_file_id, num_digits, sf_context->topology->subfile_rank + 1,
                n_io_concentrators);
@@ -2392,7 +2239,7 @@ create_config_file(subfiling_context_t *sf_context, const char *base_filename, c
         }
 
         /* Write out each subfile name to the configuration file */
-        num_digits = numDigits(n_io_concentrators);
+        num_digits = (int)(HDlog10(n_io_concentrators) + 1);
         for (int k = 0; k < n_io_concentrators; k++) {
             HDsnprintf(line_buf, PATH_MAX, "%s" H5FD_SUBFILING_FILENAME_TEMPLATE "\n", base_filename,
                        sf_context->h5_file_id, num_digits, k + 1, n_io_concentrators);
@@ -2683,17 +2530,8 @@ H5_close_subfiles(int64_t subfiling_context_id)
 {
     subfiling_context_t *sf_context  = NULL;
     MPI_Request          barrier_req = MPI_REQUEST_NULL;
-#ifdef H5_SUBFILING_DEBUG
-    double t0 = 0.0;
-    double t1 = 0.0;
-    double t2 = 0.0;
-#endif
-    int    mpi_code;
-    herr_t ret_value = SUCCEED;
-
-#ifdef H5_SUBFILING_DEBUG
-    t0 = MPI_Wtime();
-#endif
+    int                  mpi_code;
+    herr_t               ret_value = SUCCEED;
 
     if (NULL == (sf_context = H5_get_subfiling_object(subfiling_context_id))) {
 #ifdef H5_SUBFILING_DEBUG
@@ -2777,36 +2615,6 @@ H5_close_subfiles(int64_t subfiling_context_id)
 
             sf_context->sf_fid = -1;
         }
-
-#ifdef H5_SUBFILING_DEBUG
-        /* FIXME: If we've had multiple files open, our statistics
-         * will be messed up!
-         */
-        if (sf_verbose_flag) {
-            t1 = t2;
-            if (sf_logfile != NULL) {
-                if (SF_WRITE_OPS > 0)
-                    HDfprintf(
-                        sf_logfile,
-                        "[%d] pwrite perf: wrt_ops=%ld wait=%lf pwrite=%lf IOC_shutdown = %lf seconds\n",
-                        sf_context->sf_group_rank, SF_WRITE_OPS, SF_WRITE_WAIT_TIME, SF_WRITE_TIME,
-                        (t1 - t0));
-                if (SF_READ_OPS > 0)
-                    HDfprintf(sf_logfile,
-                              "[%d] pread perf: read_ops=%ld wait=%lf pread=%lf IOC_shutdown = %lf seconds\n",
-                              sf_context->sf_group_rank, SF_READ_OPS, SF_READ_WAIT_TIME, SF_READ_TIME,
-                              (t1 - t0));
-
-                HDfprintf(sf_logfile, "[%d] Avg queue time=%lf seconds\n", sf_context->sf_group_rank,
-                          SF_QUEUE_DELAYS / (double)(SF_WRITE_OPS + SF_READ_OPS));
-
-                HDfflush(sf_logfile);
-
-                HDfclose(sf_logfile);
-                sf_logfile = NULL;
-            }
-        }
-#endif
     }
 
     /*

@@ -536,7 +536,12 @@ H5FD__ioc_validate_config(const H5FD_ioc_config_t *fa)
     if (fa->magic != H5FD_IOC_FAPL_MAGIC)
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid H5FD_ioc_config_t magic value");
 
-    /* TODO: add extra IOC configuration validation code */
+    if (fa->under_fapl_id < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid under FAPL ID");
+
+    if (fa->subf_config.ioc_selection < SELECT_IOC_ONE_PER_NODE ||
+        fa->subf_config.ioc_selection >= ioc_selection_options)
+        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid IOC selection method");
 
 done:
     H5_SUBFILING_FUNC_LEAVE;
@@ -983,7 +988,7 @@ H5FD__ioc_close_int(H5FD_ioc_t *file_ptr)
 
 #ifdef H5FD_IOC_DEBUG
     {
-        subfiling_context_t *sf_context = H5_get_subfiling_object(file_ptr->fa.context_id);
+        subfiling_context_t *sf_context = H5_get_subfiling_object(file_ptr->context_id);
         if (sf_context) {
             if (sf_context->topology->rank_is_ioc)
                 HDprintf("[%s %d] fd=%d\n", __func__, file_ptr->mpi_rank, sf_context->sf_fid);

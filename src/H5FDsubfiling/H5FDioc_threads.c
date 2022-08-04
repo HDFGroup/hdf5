@@ -194,11 +194,9 @@ initialize_ioc_threads(void *_sf_context)
     t_end = MPI_Wtime();
 
 #ifdef H5FD_IOC_DEBUG
-    if (sf_verbose_flag) {
-        if (sf_context->topology->subfile_rank == 0) {
-            HDprintf("%s: time = %lf seconds\n", __func__, (t_end - t_start));
-            HDfflush(stdout);
-        }
+    if (sf_context->topology->subfile_rank == 0) {
+        HDprintf("%s: time = %lf seconds\n", __func__, (t_end - t_start));
+        HDfflush(stdout);
     }
 #endif
 
@@ -418,7 +416,6 @@ ioc_main(ioc_data_t *ioc_data)
             wk_req.subfile_rank = subfile_rank;
             wk_req.context_id   = ioc_data->sf_context_id;
             wk_req.start_time   = queue_start_time;
-            wk_req.buffer       = NULL;
 
             ioc_io_queue_add_entry(ioc_data, &wk_req);
 
@@ -520,8 +517,6 @@ handle_work_request(void *arg)
     HDassert(ioc_data);
 
     atomic_fetch_add(&ioc_data->sf_work_pending, 1);
-
-    msg->in_progress = 1;
 
     switch (msg->tag) {
         case WRITE_INDEP:
@@ -744,15 +739,10 @@ ioc_file_queue_write_indep(sf_work_request_t *msg, int subfile_rank, int source,
     t_start       = MPI_Wtime();
     t_queue_delay = t_start - msg->start_time;
 
-#ifdef H5FD_IOC_DEBUG
-    if (sf_verbose_flag) {
-        if (sf_logfile) {
-            HDfprintf(sf_logfile,
-                      "[ioc(%d) %s]: msg from %d: datasize=%ld\toffset=%ld, "
-                      "queue_delay = %lf seconds\n",
-                      subfile_rank, __func__, source, data_size, file_offset, t_queue_delay);
-        }
-    }
+#ifdef H5_SUBFILING_DEBUG
+    H5_subfiling_log(file_context_id,
+                     "[ioc(%d) %s]: msg from %d: datasize=%ld\toffset=%ld, queue_delay = %lf seconds\n",
+                     subfile_rank, __func__, source, data_size, file_offset, t_queue_delay);
 #endif
 
 #endif
@@ -799,20 +789,16 @@ ioc_file_queue_write_indep(sf_work_request_t *msg, int subfile_rank, int source,
 
     t_start = t_end;
 
-#ifdef H5FD_IOC_DEBUG
-    if (sf_verbose_flag) {
-        if (sf_logfile) {
-            HDfprintf(sf_logfile, "[ioc(%d) %s] MPI_Recv(%ld bytes, from = %d) status = %d\n", subfile_rank,
-                      __func__, data_size, source, mpi_code);
-        }
-    }
+#ifdef H5_SUBFILING_DEBUG
+    H5_subfiling_log(file_context_id, "[ioc(%d) %s] MPI_Recv(%ld bytes, from = %d) status = %d\n",
+                     subfile_rank, __func__, data_size, source, mpi_code);
 #endif
 
 #endif
 
     sf_fid = sf_context->sf_fid;
 
-#ifdef H5FD_IOC_DEBUG
+#ifdef H5_SUBFILING_DEBUG
     if (sf_fid < 0)
         H5_subfiling_log(file_context_id, "%s: WARNING: attempt to write data to closed subfile FID %d",
                          __func__, sf_fid);
@@ -919,13 +905,10 @@ ioc_file_queue_read_indep(sf_work_request_t *msg, int subfile_rank, int source, 
     t_start       = MPI_Wtime();
     t_queue_delay = t_start - msg->start_time;
 
-#ifdef H5FD_IOC_DEBUG
-    if (sf_verbose_flag && (sf_logfile != NULL)) {
-        HDfprintf(sf_logfile,
-                  "[ioc(%d) %s] msg from %d: datasize=%ld\toffset=%ld "
-                  "queue_delay=%lf seconds\n",
-                  subfile_rank, __func__, source, data_size, file_offset, t_queue_delay);
-    }
+#ifdef H5_SUBFILING_DEBUG
+    H5_subfiling_log(file_context_id,
+                     "[ioc(%d) %s] msg from %d: datasize=%ld\toffset=%ld queue_delay=%lf seconds\n",
+                     subfile_rank, __func__, source, data_size, file_offset, t_queue_delay);
 #endif
 
 #endif
@@ -959,10 +942,9 @@ ioc_file_queue_read_indep(sf_work_request_t *msg, int subfile_rank, int source, 
     sf_pread_time += t_read;
     sf_queue_delay_time += t_queue_delay;
 
-#ifdef H5FD_IOC_DEBUG
-    if (sf_verbose_flag && (sf_logfile != NULL)) {
-        HDfprintf(sf_logfile, "[ioc(%d)] MPI_Send to source(%d) completed\n", subfile_rank, source);
-    }
+#ifdef H5_SUBFILING_DEBUG
+    H5_subfiling_log(sf_context->sf_context_id, "[ioc(%d)] MPI_Send to source(%d) completed\n", subfile_rank,
+                     source);
 #endif
 
 #endif
@@ -1598,7 +1580,7 @@ ioc_io_queue_complete_entry(ioc_data_t *ioc_data, ioc_io_queue_entry_t *entry_pt
 #ifdef H5FD_IOC_COLLECT_STATS
     /* Compute the queued and execution time */
     queued_time    = entry_ptr->dispatch_time - entry_ptr->q_time;
-    execution_time = H5_now_usec() = entry_ptr->dispatch_time;
+    execution_time = H5_now_usec() - entry_ptr->dispatch_time;
 
     ioc_data->io_queue.requests_completed++;
 
@@ -1607,8 +1589,6 @@ ioc_io_queue_complete_entry(ioc_data_t *ioc_data, ioc_io_queue_entry_t *entry_pt
 #endif
 
     hg_thread_mutex_unlock(&ioc_data->io_queue.q_mutex);
-
-    HDassert(entry_ptr->wk_req.buffer == NULL);
 
     ioc_io_queue_free_entry(entry_ptr);
 
@@ -1642,7 +1622,6 @@ ioc_io_queue_free_entry(ioc_io_queue_entry_t *q_entry_ptr)
     HDassert(q_entry_ptr->magic == H5FD_IOC__IO_Q_ENTRY_MAGIC);
     HDassert(q_entry_ptr->next == NULL);
     HDassert(q_entry_ptr->prev == NULL);
-    HDassert(q_entry_ptr->wk_req.buffer == NULL);
 
     q_entry_ptr->magic = 0;
 
