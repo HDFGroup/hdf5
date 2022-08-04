@@ -37,6 +37,9 @@ set (test_ex_CLEANFILES
     only_huge_mesgs_file.h5
     REF_REG.h5
     refere.h5
+    refer_deprec.h5
+    refer_extern1.h5
+    refer_extern2.h5
     SDS.h5
     SDScompound.h5
     SDSextendible.h5
@@ -70,7 +73,18 @@ if (HDF5_TEST_SERIAL)
       NAME EXAMPLES-clear-objects
       COMMAND    ${CMAKE_COMMAND} -E remove ${test_ex_CLEANFILES}
   )
-  set_tests_properties (EXAMPLES-clear-objects PROPERTIES FIXTURES_SETUP clear_EXAMPLES)
+  set_tests_properties (EXAMPLES-clear-objects PROPERTIES
+      FIXTURES_SETUP clear_EXAMPLES
+      WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+  )
+  add_test (
+      NAME EXAMPLES-clean-objects
+      COMMAND    ${CMAKE_COMMAND} -E remove ${test_ex_CLEANFILES}
+  )
+  set_tests_properties (EXAMPLES-clean-objects PROPERTIES
+      FIXTURES_CLEANUP clear_EXAMPLES
+      WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+  )
 
   foreach (example ${examples})
     if (HDF5_ENABLE_USING_MEMCHECKER)
@@ -102,6 +116,27 @@ if (H5_HAVE_PARALLEL AND HDF5_TEST_PARALLEL AND NOT WIN32)
   # The number 24 corresponds to SPACE1_DIM1 and SPACE1_DIM2 defined in ph5example.c
   math(EXPR NUMPROCS "24 / ((24 + ${MPIEXEC_MAX_NUMPROCS} - 1) / ${MPIEXEC_MAX_NUMPROCS})")
 
+  set (mpi_test_ex_CLEANFILES
+  )
+  
+  # Remove any output file left over from previous test run
+  add_test (
+      NAME MPI_TEST_EXAMPLES-clear-objects
+      COMMAND    ${CMAKE_COMMAND} -E remove ${mpi_test_ex_CLEANFILES}
+  )
+  set_tests_properties (MPI_TEST_EXAMPLES-clear-objects PROPERTIES
+      FIXTURES_SETUP clear_MPI_TEST_EXAMPLES
+      WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+  )
+  add_test (
+      NAME MPI_TEST_EXAMPLES-clean-objects
+      COMMAND    ${CMAKE_COMMAND} -E remove ${mpi_test_ex_CLEANFILES}
+  )
+  set_tests_properties (MPI_TEST_EXAMPLES-clean-objects PROPERTIES
+      FIXTURES_CLEANUP clear_MPI_TEST_EXAMPLES
+      WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+  )
+
   foreach (parallel_example ${parallel_examples})
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME MPI_TEST_EXAMPLES-${parallel_example} COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:${parallel_example}> ${MPIEXEC_POSTFLAGS})
@@ -118,6 +153,7 @@ if (H5_HAVE_PARALLEL AND HDF5_TEST_PARALLEL AND NOT WIN32)
           -P "${HDF_RESOURCES_EXT_DIR}/grepTest.cmake"
       )
     endif ()
+    set_tests_properties (MPI_TEST_EXAMPLES-${parallel_example} PROPERTIES FIXTURES_REQUIRED clear_MPI_TEST_EXAMPLES)
     if (last_test)
       set_tests_properties (MPI_TEST_EXAMPLES-${parallel_example} PROPERTIES DEPENDS ${last_test})
     endif ()

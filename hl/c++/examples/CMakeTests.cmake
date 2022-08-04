@@ -16,12 +16,16 @@
 ##############################################################################
 ##############################################################################
 # Remove any output file left over from previous test run
+set (HL_CPP_EX_PT_CLEANFILES
+            PTcppexampleFL.h5
+)
 add_test (
     NAME HL_CPP_ex_ptExampleFL-clear-objects
     COMMAND    ${CMAKE_COMMAND}
-        -E remove
-            PTcppexampleFL.h5
-            ptExampleFL.txt
+        -E remove ${HL_CPP_EX_PT_CLEANFILES}
+)
+set_tests_properties (HL_CPP_ex_ptExampleFL-clear-objects PROPERTIES
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
 )
 
 if (HDF5_ENABLE_USING_MEMCHECKER)
@@ -40,3 +44,12 @@ else ()
   )
 endif ()
 set_tests_properties (HL_CPP_ex_ptExampleFL PROPERTIES DEPENDS HL_CPP_ex_ptExampleFL-clear-objects)
+add_test (
+    NAME HL_CPP_ex_ptExampleFL-clean-objects
+    COMMAND    ${CMAKE_COMMAND}
+        -E remove ${HL_CPP_EX_PT_CLEANFILES}
+)
+set_tests_properties (HL_CPP_ex_ptExampleFL-clean-objects PROPERTIES
+    DEPENDS HL_CPP_ex_ptExampleFL
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+)

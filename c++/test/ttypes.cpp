@@ -45,7 +45,7 @@ using namespace H5;
 /* #include "H5Tpkg.h"
  */
 
-const char *FILENAME[] = {"dtypes1.h5", "dtypes2.h5", "dtypes3.h5", "dtypes4.h5", NULL};
+const char *FILENAME[] = {"dtypes1.h5", "dtypes2.h5", "dtypes3.h5", "dtypes4.h5", "encode_decode.h5", "h5_type_operators.h5", NULL};
 
 typedef enum flt_t { FLT_FLOAT, FLT_DOUBLE, FLT_LDOUBLE, FLT_OTHER } flt_t;
 
@@ -557,7 +557,6 @@ test_query()
  *              January, 2007
  *-------------------------------------------------------------------------
  */
-const char *filename1 = "dtypes1.h5";
 
 static void
 test_transient()
@@ -568,7 +567,7 @@ test_transient()
     try {
 
         // Create the file and the dataspace.
-        H5File    file(filename1, H5F_ACC_TRUNC);
+        H5File    file(FILENAME[0], H5F_ACC_TRUNC);
         DataSpace space(2, ds_size, ds_size);
 
         // Copying a predefined type results in a modifiable copy
@@ -637,7 +636,6 @@ test_transient()
  *              January, 2007
  *-------------------------------------------------------------------------
  */
-const H5std_string filename2("dtypes2.h5");
 
 static void
 test_named()
@@ -649,7 +647,7 @@ test_named()
     SUBTEST("Named datatypes");
     try {
         // Create the file.
-        H5File file(filename2, H5F_ACC_TRUNC);
+        H5File file(FILENAME[1], H5F_ACC_TRUNC);
 
         // Create a simple dataspace.
         DataSpace space(2, ds_size, ds_size);
@@ -805,7 +803,6 @@ test_named()
  *              August, 2017
  *-------------------------------------------------------------------------
  */
-const H5std_string filename3("encode_decode.h5");
 const int          ARRAY1_RANK = 1;
 const int          ARRAY1_DIM  = 10;
 
@@ -817,7 +814,7 @@ test_encode_decode()
     SUBTEST("DataType::encode() and DataType::decode()");
     try {
         // Create the file.
-        H5File file(filename3, H5F_ACC_TRUNC);
+        H5File file(FILENAME[4], H5F_ACC_TRUNC);
 
         //
         // Test with CompType
@@ -1026,7 +1023,6 @@ test_encode_decode()
  *              August, 2017
  *-------------------------------------------------------------------------
  */
-const H5std_string filename4("h5_type_operators.h5");
 
 static void
 test_operators()
@@ -1036,7 +1032,7 @@ test_operators()
     SUBTEST("DataType::operator== and DataType::operator!=");
     try {
         // Create the file.
-        H5File file(filename4, H5F_ACC_TRUNC);
+        H5File file(FILENAME[5], H5F_ACC_TRUNC);
 
         //
         // Test with CompType
@@ -1140,6 +1136,6 @@ test_types()
 extern "C" void
 cleanup_types()
 {
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < 6; i++)
         HDremove(FILENAME[i]);
 } // cleanup_types

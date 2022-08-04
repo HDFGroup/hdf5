@@ -22,6 +22,12 @@ add_test (
     WORKING_DIRECTORY ${HDF5_TEST_PAR_BINARY_DIR}
 )
 set_tests_properties (MPI_TEST-clear-testphdf5-objects PROPERTIES FIXTURES_SETUP par_clear_testphdf5)
+add_test (
+    NAME MPI_TEST-clean-testphdf5-objects
+    COMMAND ${CMAKE_COMMAND} -E remove ParaTest.h5
+    WORKING_DIRECTORY ${HDF5_TEST_PAR_BINARY_DIR}
+)
+set_tests_properties (MPI_TEST-clean-testphdf5-objects PROPERTIES FIXTURES_CLEANUP par_clear_testphdf5)
 
 set (SKIP_tests
     cchunk1
@@ -101,6 +107,12 @@ add_test (
     WORKING_DIRECTORY ${HDF5_TEST_PAR_BINARY_DIR}
 )
 set_tests_properties (MPI_TEST-clear-objects PROPERTIES FIXTURES_SETUP par_clear_objects)
+add_test (
+    NAME MPI_TEST-clean-objects
+    COMMAND ${CMAKE_COMMAND} -E remove ${test_par_CLEANFILES}
+    WORKING_DIRECTORY ${HDF5_TEST_PAR_BINARY_DIR}
+)
+set_tests_properties (MPI_TEST-clean-objects PROPERTIES FIXTURES_CLEANUP par_clear_objects)
 
 foreach (h5_testp ${H5P_TESTS})
   add_test (NAME MPI_TEST_${h5_testp} COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:${h5_testp}> ${MPIEXEC_POSTFLAGS})
