@@ -85,7 +85,28 @@ New Features
 
     Library:
     --------
-    -
+    - Subfiling VFD
+
+      The HDF5 Subfiling VFD is a new MPI-based file driver that allows an
+      HDF5 application to distribute an HDF5 file across a collection of
+      "sub-files" in equal-sized data segment "stripes". I/O to the logical
+      HDF5 file is then directed to the appropriate "sub-file" according to
+      the Subfiling configuration and a system of I/O concentrators, which
+      are MPI ranks operating worker threads.
+
+      By allowing a configurable stripe size, number of I/O concentrators and
+      method for selecting MPI ranks as I/O concentrators, the Subfiling VFD
+      aims to enable an HDF5 application to find a middle ground between the
+      single shared file and file-per-process approaches to parallel file I/O
+      for the particular machine the application is running on. In general, the
+      goal is to avoid some of the complexity of the file-per-process approach
+      while also minimizing the locking issues of the single shared file approach
+      on a parallel file system.
+
+      The Subfiling VFD can be used by calling H5Pset_fapl_subfiling() on a
+      File Access Property List and using that FAPL for file operations. 
+
+      (JTH - 2022/07/22)
 
 
     Parallel Library:

@@ -1098,6 +1098,11 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_acat(rs, "H5_VFD_ROS3");
                                     break;
 #endif
+#ifdef H5_HAVE_SUBFILING_VFD
+                                case H5_VFD_SUBFILING:
+                                    H5RS_acat(rs, "H5_VFD_SUBFILING");
+                                    break;
+#endif
                                 case H5_VFD_ONION:
                                     H5RS_acat(rs, "H5_VFD_ONION");
                                     break;

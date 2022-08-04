@@ -209,11 +209,13 @@ static herr_t  H5FD__subfiling_read_vector(H5FD_t *file, hid_t dxpl_id, uint32_t
 static herr_t  H5FD__subfiling_write_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[],
                                             haddr_t addrs[], size_t sizes[], const void *bufs[] /* in */);
 static herr_t  H5FD__subfiling_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
+#if 0
 static herr_t  H5FD__subfiling_lock(H5FD_t *_file, hbool_t rw);
 static herr_t  H5FD__subfiling_unlock(H5FD_t *_file);
-static herr_t  H5FD__subfiling_del(const char *name, hid_t fapl);
-static herr_t  H5FD__subfiling_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void *input,
-                                   void **output);
+#endif
+static herr_t H5FD__subfiling_del(const char *name, hid_t fapl);
+static herr_t H5FD__subfiling_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void *input,
+                                  void **output);
 
 static herr_t H5FD__subfiling_get_default_config(hid_t fapl_id, H5FD_subfiling_config_t *config_out);
 static herr_t H5FD__subfiling_validate_config(const H5FD_subfiling_config_t *fa);
@@ -246,46 +248,46 @@ static herr_t iovec_fill_uniform(subfiling_context_t *sf_context, int64_t iovec_
 void H5FD__subfiling_mpi_finalize(void);
 
 static const H5FD_class_t H5FD_subfiling_g = {
-    H5FD_CLASS_VERSION,              /* VFD interface version */
-    H5_VFD_SUBFILING,                /* value                 */
-    H5FD_SUBFILING_NAME,             /* name                  */
-    MAXADDR,                         /* maxaddr               */
-    H5F_CLOSE_WEAK,                  /* fc_degree             */
-    H5FD__subfiling_term,            /* terminate             */
-    NULL,                            /* sb_size               */
-    NULL,                            /* sb_encode             */
-    NULL,                            /* sb_decode             */
-    sizeof(H5FD_subfiling_config_t), /* fapl_size             */
-    H5FD__subfiling_fapl_get,        /* fapl_get              */
-    H5FD__subfiling_fapl_copy,       /* fapl_copy             */
-    H5FD__subfiling_fapl_free,       /* fapl_free             */
-    0,                               /* dxpl_size             */
-    NULL,                            /* dxpl_copy             */
-    NULL,                            /* dxpl_free             */
-    H5FD__subfiling_open,            /* open                  */
-    H5FD__subfiling_close,           /* close                 */
-    H5FD__subfiling_cmp,             /* cmp                   */
-    H5FD__subfiling_query,           /* query                 */
-    NULL,                            /* get_type_map          */
-    NULL,                            /* alloc                 */
-    NULL,                            /* free                  */
-    H5FD__subfiling_get_eoa,         /* get_eoa               */
-    H5FD__subfiling_set_eoa,         /* set_eoa               */
-    H5FD__subfiling_get_eof,         /* get_eof               */
-    H5FD__subfiling_get_handle,      /* get_handle            */
-    H5FD__subfiling_read,            /* read                  */
-    H5FD__subfiling_write,           /* write                 */
-    H5FD__subfiling_read_vector,     /* read_vector           */
-    H5FD__subfiling_write_vector,    /* write_vector          */
-    NULL,                            /* read_selection        */
-    NULL,                            /* write_selection       */
-    NULL,                            /* flush                 */
-    H5FD__subfiling_truncate,        /* truncate              */
-    H5FD__subfiling_lock,            /* lock                  */
-    H5FD__subfiling_unlock,          /* unlock                */
-    H5FD__subfiling_del,             /* del                   */
-    H5FD__subfiling_ctl,             /* ctl                   */
-    H5FD_FLMAP_DICHOTOMY             /* fl_map                */
+    H5FD_CLASS_VERSION,                /* VFD interface version */
+    H5_VFD_SUBFILING,                  /* value                 */
+    H5FD_SUBFILING_NAME,               /* name                  */
+    MAXADDR,                           /* maxaddr               */
+    H5F_CLOSE_WEAK,                    /* fc_degree             */
+    H5FD__subfiling_term,              /* terminate             */
+    NULL,                              /* sb_size               */
+    NULL,                              /* sb_encode             */
+    NULL,                              /* sb_decode             */
+    sizeof(H5FD_subfiling_config_t),   /* fapl_size             */
+    H5FD__subfiling_fapl_get,          /* fapl_get              */
+    H5FD__subfiling_fapl_copy,         /* fapl_copy             */
+    H5FD__subfiling_fapl_free,         /* fapl_free             */
+    0,                                 /* dxpl_size             */
+    NULL,                              /* dxpl_copy             */
+    NULL,                              /* dxpl_free             */
+    H5FD__subfiling_open,              /* open                  */
+    H5FD__subfiling_close,             /* close                 */
+    H5FD__subfiling_cmp,               /* cmp                   */
+    H5FD__subfiling_query,             /* query                 */
+    NULL,                              /* get_type_map          */
+    NULL,                              /* alloc                 */
+    NULL,                              /* free                  */
+    H5FD__subfiling_get_eoa,           /* get_eoa               */
+    H5FD__subfiling_set_eoa,           /* set_eoa               */
+    H5FD__subfiling_get_eof,           /* get_eof               */
+    H5FD__subfiling_get_handle,        /* get_handle            */
+    H5FD__subfiling_read,              /* read                  */
+    H5FD__subfiling_write,             /* write                 */
+    H5FD__subfiling_read_vector,       /* read_vector           */
+    H5FD__subfiling_write_vector,      /* write_vector          */
+    NULL,                              /* read_selection        */
+    NULL,                              /* write_selection       */
+    NULL,                              /* flush                 */
+    H5FD__subfiling_truncate,          /* truncate              */
+    NULL /* H5FD__subfiling_lock */,   /* lock                  */
+    NULL /* H5FD__subfiling_unlock */, /* unlock                */
+    H5FD__subfiling_del,               /* del                   */
+    H5FD__subfiling_ctl,               /* ctl                   */
+    H5FD_FLMAP_DICHOTOMY               /* fl_map                */
 };
 
 /* Declare a free list to manage the H5FD_subfiling_t struct */
@@ -457,7 +459,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *vfd_config)
+H5Pset_fapl_subfiling(hid_t fapl_id, const H5FD_subfiling_config_t *vfd_config)
 {
     H5FD_subfiling_config_t *subfiling_conf = NULL;
     H5P_genplist_t          *plist          = NULL;
@@ -485,7 +487,7 @@ H5Pset_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *vfd_config)
     if (H5FD__subfiling_validate_config(vfd_config) < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid subfiling VFD configuration");
 
-    ret_value = H5P_set_driver(plist, H5FD_SUBFILING, (void *)vfd_config, NULL);
+    ret_value = H5P_set_driver(plist, H5FD_SUBFILING, vfd_config, NULL);
 
 done:
     if (subfiling_conf) {
@@ -564,13 +566,14 @@ H5FD__subfiling_get_default_config(hid_t fapl_id, H5FD_subfiling_config_t *confi
 
     HDmemset(config_out, 0, sizeof(*config_out));
 
-    config_out->magic         = H5FD_SUBFILING_FAPL_MAGIC;
-    config_out->version       = H5FD_CURR_SUBFILING_FAPL_VERSION;
-    config_out->ioc_fapl_id   = H5I_INVALID_HID;
-    config_out->stripe_count  = 0;
-    config_out->stripe_depth  = H5FD_DEFAULT_STRIPE_DEPTH;
-    config_out->ioc_selection = SELECT_IOC_ONE_PER_NODE;
-    config_out->require_ioc   = TRUE;
+    config_out->magic       = H5FD_SUBFILING_FAPL_MAGIC;
+    config_out->version     = H5FD_SUBFILING_CURR_FAPL_VERSION;
+    config_out->ioc_fapl_id = H5I_INVALID_HID;
+    config_out->require_ioc = TRUE;
+
+    config_out->shared_cfg.ioc_selection = SELECT_IOC_ONE_PER_NODE;
+    config_out->shared_cfg.stripe_size   = H5FD_SUBFILING_DEFAULT_STRIPE_SIZE;
+    config_out->shared_cfg.stripe_count  = 0;
 
     if ((h5_require_ioc = HDgetenv("H5_REQUIRE_IOC")) != NULL) {
         int value_check = HDatoi(h5_require_ioc);
@@ -644,7 +647,7 @@ H5FD__subfiling_validate_config(const H5FD_subfiling_config_t *fa)
 
     HDassert(fa != NULL);
 
-    if (fa->version != H5FD_CURR_SUBFILING_FAPL_VERSION)
+    if (fa->version != H5FD_SUBFILING_CURR_FAPL_VERSION)
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unknown H5FD_subfiling_config_t version");
 
     if (fa->magic != H5FD_SUBFILING_FAPL_MAGIC)
@@ -842,9 +845,9 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
     H5FD_class_t                  *driver    = NULL; /* VFD for file */
     H5P_genplist_t                *plist_ptr = NULL;
     H5FD_driver_prop_t             driver_prop; /* Property for driver ID & info */
-    hbool_t                        bcasted_inode = FALSE;
-    hbool_t                        bcasted_eof   = FALSE;
-    int64_t                        sf_eof        = -1;
+    hbool_t                        bcasted_eof = FALSE;
+    int64_t                        sf_eof      = -1;
+    void                          *file_handle = NULL;
     int                            mpi_code; /* MPI return code */
     H5FD_t                        *ret_value = NULL;
 
@@ -958,34 +961,16 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
             H5E_FILE, H5E_CANTOPENFILE, NULL,
             "unable to open file '%s' - only IOC and Sec2 VFDs are currently supported for subfiles", name);
 
+    if (H5FDget_vfd_handle(file_ptr->sf_file, file_ptr->fa.ioc_fapl_id, &file_handle) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get file handle");
+
     if (driver->value == H5_VFD_IOC) {
-        h5_stat_t sb;
-        uint64_t  fid;
-        void     *file_handle = NULL;
-
-        if (file_ptr->mpi_rank == 0) {
-            if (H5FDget_vfd_handle(file_ptr->sf_file, file_ptr->fa.ioc_fapl_id, &file_handle) < 0)
-                H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get file handle");
-
-            if (HDfstat(*(int *)file_handle, &sb) < 0)
-                H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, NULL, "unable to fstat file");
-
-            HDcompile_assert(sizeof(uint64_t) >= sizeof(ino_t));
-            fid = (uint64_t)sb.st_ino;
-        }
-
-        if (MPI_SUCCESS != (mpi_code = MPI_Bcast(&fid, 1, MPI_UINT64_T, 0, file_ptr->comm)))
-            H5_SUBFILING_MPI_GOTO_ERROR(NULL, "MPI_Bcast failed", mpi_code);
-
-        bcasted_inode = TRUE;
-
         /* Get a copy of the context ID for later use */
-        file_ptr->context_id     = H5_subfile_fid_to_context(fid);
+        file_ptr->context_id     = H5_subfile_fhandle_to_context(file_handle);
         file_ptr->fa.require_ioc = true;
     }
     else if (driver->value == H5_VFD_SEC2) {
-        uint64_t inode_id = (uint64_t)-1;
-        int      ioc_flags;
+        int ioc_flags;
 
         /* Translate the HDF5 file open flags into standard POSIX open flags */
         ioc_flags = (H5F_ACC_RDWR & flags) ? O_RDWR : O_RDONLY;
@@ -996,44 +981,12 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
         if (H5F_ACC_EXCL & flags)
             ioc_flags |= O_EXCL;
 
-        /* Let MPI rank 0 to the file stat operation and broadcast a result */
-        if (file_ptr->mpi_rank == 0) {
-            if (file_ptr->sf_file) {
-                h5_stat_t sb;
-                void     *file_handle = NULL;
-
-                if (H5FDget_vfd_handle(file_ptr->sf_file, file_ptr->fa.ioc_fapl_id, &file_handle) < 0)
-                    H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get file handle");
-
-                /* We create a new file descriptor for our file structure.
-                 * Basically, we want these separate so that sec2 can
-                 * deal with the opened file for additional operations
-                 * (especially close) without interfering with subfiling.
-                 */
-                file_ptr->fd = HDdup(*(int *)file_handle);
-
-                if (HDfstat(*(int *)file_handle, &sb) < 0)
-                    H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_BADFILE, NULL, "unable to fstat file");
-                inode_id = sb.st_ino;
-            }
-        }
-
-        if (MPI_SUCCESS == MPI_Bcast(&inode_id, 1, MPI_UNSIGNED_LONG_LONG, 0, file_ptr->comm)) {
-            file_ptr->inode = inode_id;
-        }
-
-        bcasted_inode = TRUE;
-
-        /* All ranks can now detect an error and fail. */
-        if (inode_id == (uint64_t)-1)
-            H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file = %s\n", name);
-
         /*
          * Open the subfiles for this HDF5 file. A subfiling
          * context ID will be returned, which is used for
          * further interactions with this file's subfiles.
          */
-        if (H5_open_subfiles(file_ptr->file_path, inode_id, file_ptr->fa.ioc_selection, ioc_flags,
+        if (H5_open_subfiles(file_ptr->file_path, file_handle, &file_ptr->fa.shared_cfg, ioc_flags,
                              file_ptr->comm, &file_ptr->context_id) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open subfiling files = %s\n",
                                     name);
@@ -1062,13 +1015,6 @@ done:
         if (file_ptr) {
             /* Participate in possible MPI collectives on failure */
             if (file_ptr->comm != MPI_COMM_NULL) {
-                if (!bcasted_inode) {
-                    uint64_t tmp_inode = UINT64_MAX;
-
-                    if (MPI_SUCCESS !=
-                        (mpi_code = MPI_Bcast(&tmp_inode, 1, MPI_UNSIGNED_LONG_LONG, 0, file_ptr->comm)))
-                        H5_SUBFILING_MPI_DONE_ERROR(NULL, "MPI_Bcast failed", mpi_code);
-                }
                 if (!bcasted_eof) {
                     sf_eof = -1;
 
@@ -2367,6 +2313,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+#if 0
 static herr_t
 H5FD__subfiling_lock(H5FD_t *_file, hbool_t rw)
 {
@@ -2415,6 +2362,7 @@ H5FD__subfiling_unlock(H5FD_t *_file)
 done:
     H5_SUBFILING_FUNC_LEAVE_API;
 } /* end H5FD__subfiling_unlock() */
+#endif
 
 static herr_t
 H5FD__subfiling_del(const char *name, hid_t fapl)

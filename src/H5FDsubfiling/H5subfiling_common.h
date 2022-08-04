@@ -22,37 +22,12 @@
 #include "H5private.h"
 #include "H5Iprivate.h"
 
-/* TODO: needed for ioc_selection_t, which also needs to be public */
-#include "H5FDioc.h"
+#include "H5FDsubfiling.h"
 
 /*
  * Some definitions for debugging the Subfiling feature
  */
 /* #define H5_SUBFILING_DEBUG */
-
-/*
- * The following is our basic template for a subfile filename.
- * Note that eventually we shouldn't use 0_of_N since we
- * intend to use the user defined HDF5 filename for a
- * zeroth subfile as well as for all metadata.
- */
-#define SF_FILENAME_TEMPLATE ".subfile_%" PRIu64 "_%0*d_of_%d"
-
-/*
- * The following is our basic template for a subfiling
- * configuration filename.
- */
-#define SF_CONFIG_FILENAME_TEMPLATE ".subfile_%" PRIu64 ".config"
-
-/*
- * Environment variables interpreted by the HDF5 subfiling feature
- */
-#define H5_IOC_SELECTION_CRITERIA "H5_IOC_SELECTION_CRITERIA"
-#define H5_IOC_COUNT_PER_NODE     "H5_IOC_COUNT_PER_NODE"
-#define H5_IOC_STRIPE_SIZE        "H5_IOC_STRIPE_SIZE"
-#define H5_IOC_SUBFILE_PREFIX     "H5_IOC_SUBFILE_PREFIX"
-
-#define H5FD_DEFAULT_STRIPE_DEPTH (32 * 1024 * 1024)
 
 /*
  * MPI Tags are 32 bits, we treat them as unsigned
@@ -166,18 +141,19 @@ typedef struct app_layout_t {
 
 /*  This typedef defines things related to IOC selections */
 typedef struct topology {
-    app_layout_t   *app_layout;         /* Pointer to our layout struct   */
-    bool            rank_is_ioc;        /* Indicates that we host an IOC  */
-    int             subfile_rank;       /* Valid only if rank_is_ioc      */
-    int             n_io_concentrators; /* Number of IO concentrators  */
-    int            *io_concentrators;   /* Vector of ranks which are IOCs */
-    int            *subfile_fd;         /* file descriptor (if IOC)       */
-    ioc_selection_t selection_type;     /* Cache our IOC selection criteria */
+    app_layout_t               *app_layout;         /* Pointer to our layout struct   */
+    bool                        rank_is_ioc;        /* Indicates that we host an IOC  */
+    int                         subfile_rank;       /* Valid only if rank_is_ioc      */
+    int                         n_io_concentrators; /* Number of IO concentrators  */
+    int                        *io_concentrators;   /* Vector of ranks which are IOCs */
+    int                        *subfile_fd;         /* file descriptor (if IOC)       */
+    H5FD_subfiling_ioc_select_t selection_type;     /* Cache our IOC selection criteria */
 } sf_topology_t;
 
 typedef struct {
     int64_t        sf_context_id;           /* Generated context ID which embeds the cache index */
     uint64_t       h5_file_id;              /* GUID (basically the inode value) */
+    void          *h5_file_handle;          /* Low-level handle for the HDF5 stub file */
     int            sf_fid;                  /* value returned by open(file,..)  */
     size_t         sf_write_count;          /* Statistics: write_count  */
     size_t         sf_read_count;           /* Statistics: read_count  */
@@ -236,15 +212,16 @@ extern app_layout_t *sf_app_layout;
 extern "C" {
 #endif
 
-H5_DLL herr_t H5_open_subfiles(const char *base_filename, uint64_t h5_file_id,
-                               ioc_selection_t ioc_selection_type, int file_acc_flags, MPI_Comm file_comm,
-                               int64_t *context_id_out);
+H5_DLL herr_t H5_open_subfiles(const char *base_filename, void *h5_file_handle,
+                               H5FD_subfiling_shared_config_t *subfiling_config, int file_acc_flags,
+                               MPI_Comm file_comm, int64_t *context_id_out);
 H5_DLL herr_t H5_close_subfiles(int64_t subfiling_context_id);
 
 H5_DLL int64_t H5_new_subfiling_object_id(sf_obj_type_t obj_type, int64_t index_val);
 H5_DLL void   *H5_get_subfiling_object(int64_t object_id);
-H5_DLL int64_t H5_subfile_fid_to_context(uint64_t h5_fid);
+H5_DLL int64_t H5_subfile_fhandle_to_context(void *file_handle);
 H5_DLL herr_t  H5_free_subfiling_object(int64_t object_id);
+H5_DLL herr_t  H5_get_num_iocs_from_config_file(FILE *config_file, int *n_io_concentrators);
 
 H5_DLL void H5_subfiling_log(int64_t sf_context_id, const char *fmt, ...);
 
