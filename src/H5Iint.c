@@ -1069,8 +1069,7 @@ H5I_dec_ref(hid_t id)
     FUNC_ENTER_NOAPI((-1))
 
     /* Sanity check */
-    if (id < 0)
-        HGOTO_ERROR(H5E_ID, H5E_BADID, (-1), "ID must be valid")
+    HDassert(id >= 0);
 
     /* Synchronously decrement refcount on ID */
     if ((ret_value = H5I__dec_ref(id, H5_REQUEST_NULL)) < 0)

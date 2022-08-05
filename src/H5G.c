@@ -325,10 +325,6 @@ H5Gcreate_anon(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id)
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE3("i", "iii", loc_id, gcpl_id, gapl_id);
 
-    /* Sanity check */
-    if (loc_id < 0 || gcpl_id < 0 || gapl_id < 0)
-        HGOTO_ERROR(H5E_ID, H5E_BADID, (-1), "ID must be valid")
-
     /* Check group property list */
     if (H5P_DEFAULT == gcpl_id)
         gcpl_id = H5P_GROUP_CREATE_DEFAULT;
