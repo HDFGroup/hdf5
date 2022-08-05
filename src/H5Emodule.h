@@ -580,7 +580,7 @@
  *
  * Previous Chapter \ref sec_attribute - Next Chapter \ref sec_plist
  *
- * \defgroup H5E H5E
+ * \defgroup H5E Error Handling (H5E)
  *
  * \internal The \c FUNC_ENTER macro clears the error stack whenever an
  *           interface function is entered. When an error is detected, an entry

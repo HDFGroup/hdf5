@@ -2983,7 +2983,7 @@ allocated if necessary.
  */
 
 /**
- * \defgroup H5D H5D
+ * \defgroup H5D Datasets (H5D)
  *
  * Use the functions in this module to manage HDF5 datasets, including the
  * transfer of data between memory and disk and the description of dataset

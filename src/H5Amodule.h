@@ -375,7 +375,7 @@
  *
  * Previous Chapter \ref sec_dataspace - Next Chapter \ref sec_error
  *
- * \defgroup H5A H5A
+ * \defgroup H5A Attributes (H5A)
  *
  * An HDF5 attribute is a small metadata object describing the nature and/or intended usage of a primary data
  * object. A primary data object may be a dataset, group, or committed datatype.

@@ -30,7 +30,7 @@
 #define H5_MY_PKG_INIT NO
 
 /**
- * \defgroup H5I H5I
+ * \defgroup H5I Identifiers (H5I)
  *
  * Use the functions in this module to manage identifiers defined by the HDF5
  * library. See \ref H5IUD for user-defined identifiers and identifier

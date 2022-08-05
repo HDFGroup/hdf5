@@ -20,6 +20,8 @@ import hdf.hdf5lib.structs.H5E_error2_t;
  */
 public interface H5E_walk_cb extends Callbacks {
     /**
+     * @ingroup JCALL
+     *
      *  application callback for each error stack element
      *
      *  @param nidx      the index of the current error stack element

@@ -4,7 +4,7 @@
 
 <h2><u>What it is</u></h2>
 The <b>Java HD5 Interface (JHI5)</b> is a Java package
-(<a href="../../hdf-java-html/javadocs/hdf/hdf5lib/package-summary.html">hdf.hdf5lib</a>)
+(<a href="./hdf/hdf5lib/package-summary.html">hdf.hdf5lib</a>)
 that ``wraps around'' the HDF5 library.
 <p>There are a large number of functions in the HDF5
 library (version 1.10). Some of the functions are not supported in JHI5. Most
@@ -32,7 +32,7 @@ library contains C functions which implement the native methods. The C
 functions call the standard HDF5 library, which is linked as part of the
 same library on most platforms.
 <p>The central part of the JHI5 is the Java class <i>
-<a href="../../hdf-java-html/javadocs/hdf/hdf5lib/H5.html">hdf.hdf5lib.H5</a></i>.
+<a href="./hdf/hdf5lib/H5.html">hdf.hdf5lib.H5</a></i>.
 The <i>H5 </i>class calls the standard (<i>i.e.</i>, `native' code) HDF5
 library, with native methods for most of the HDF5 functions.
 
@@ -42,11 +42,11 @@ The JHI5 is used by Java classes to call the HDF5 library, in order to
 create HDF5 files, and read and write data in existing HDF5 files.
 <p>For example, the HDF5 library has the function <b>H5Fopen</b> to open
 an HDF5 file. The Java interface is the class <i>
-<a href="../../hdf-java-html/javadocs/hdf/hdf5lib/H5.html">hdf.hdf5lib.H5</a></i>,
+<a href="./hdf/hdf5lib/H5.html">hdf.hdf5lib.H5</a></i>,
 which has a method:
 <pre><b>static native int H5Fopen(String filename, int flags, int access );</b></pre>
 The native method is implemented in C using the
-<a href="http://java.sun.com/javase/6/docs/technotes/guides/jni/index.html">Java
+<a href="https://docs.oracle.com/en/java/javase/18/docs/specs/jni/index.html">Java
 Native Method Interface </a>(JNI). This is written something like the following:
 <pre><b>JNIEXPORT jlong
 JNICALL Java_hdf_hdf5lib_H5_H5Fopen

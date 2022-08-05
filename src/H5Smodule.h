@@ -1516,7 +1516,7 @@
  */
 
 /**
- * \defgroup H5S H5S
+ * \defgroup H5S Dataspaces (H5S)
  *
  * Use the functions in this module to manage HDF5 dataspaces \Emph{and} selections.
  *

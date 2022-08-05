@@ -951,7 +951,7 @@
  */
 
 /**
- * \defgroup H5G H5G
+ * \defgroup H5G Groups (H5G)
  *
  * Use the functions in this module to manage HDF5 groups.
  *

@@ -16,16 +16,20 @@ package hdf.hdf5lib.exceptions;
 /**
  * The class HDF5LibraryException returns errors raised by the HDF5 library.
  * <p>
- * This sub-class represents HDF-5 major error code <b>H5E_PLINE</b>
+ * This sub-class represents HDF5 major error code <b>H5E_PLINE</b>
  */
 public class HDF5DataFiltersException extends HDF5LibraryException {
     /**
+     * @ingroup JERRLIB
+     * 
      * Constructs an <code>HDF5DataFiltersException</code> with no specified
      * detail message.
      */
     public HDF5DataFiltersException() { super(); }
 
     /**
+     * @ingroup JERRLIB
+     * 
      * Constructs an <code>HDF5DataFiltersException</code> with the specified
      * detail message.
      *

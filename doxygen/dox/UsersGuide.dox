@@ -383,49 +383,6 @@ These documents provide additional information for the use and tuning of specifi
 
 Previous Chapter \ref sec_plist
 
-<!-- 
-<table>
-<tr><td style="border: none;">
-\li \ref H5A "Attributes (H5A)"
-\li \ref H5D "Datasets (H5D)"
-\li \ref H5S "Dataspaces (H5S)"
-\li \ref H5T "Datatypes (H5T)"
-\li \ref H5E "Error Handling (H5E)"
-\li \ref H5F "Files (H5F)"
-\li \ref H5Z "Filters (H5Z)"
-\li \ref H5G "Groups (H5G)"
-</td><td style="border: none;">
-\li \ref H5I "Identifiers (H5I)"
-\li \ref H5 "Library General (H5)"
-\li \ref H5L "Links (H5L)"
-\li \ref H5O "Objects (H5O)"
-\li \ref H5P "Property Lists (H5P)"
-\li \ref H5PL "Dynamically-loaded Plugins (H5PL)"
-\li \ref H5R "References (H5R)"
-</td><td style="border: none;vertical-align: top;">
-\li \ref api-compat-macros
-\li <a href="./deprecated.html">Deprecated functions</a>
-\li \ref high_level
-    <ul>
-    <li>\ref H5LT "Lite (H5LT, H5LD)"
-    <li>\ref H5IM "Images (H5IM)"
-    <li>\ref H5TB "Table (H5TB)"
-    <li>\ref H5PT "Packet Table (H5PT)"
-    <li>\ref H5DS "Dimension Scale (H5DS)"
-    <li>\ref H5DO "Optimizations (H5DO)"
-    <li>\ref H5LR "Extensions (H5LR, H5LT)"
-    </ul>
-</td></tr>
-<tr><td colspan="3" style="border: none;">
-\ref H5 \ref H5A \ref H5D \ref H5E \ref H5F \ref H5G \ref H5I \ref H5L
-\ref H5O \ref H5P \ref H5PL \ref H5R \ref H5S \ref H5T \ref H5Z
-</td></tr>
-</table>
-
-</td></tr>
-</table>
- -->
-
 \par Don't like what you see? - You can help to improve this User Guide
      Complete the survey linked near the top of this page!\n
      We treat documentation like code: Fork the

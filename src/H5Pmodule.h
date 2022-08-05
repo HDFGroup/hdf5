@@ -882,7 +882,7 @@
  *
  * Previous Chapter \ref sec_error - Next Chapter \ref sec_addition
  *
- * \defgroup H5P H5P
+ * \defgroup H5P Property Lists (H5P)
  *
  * Use the functions in this module to manage HDF5 property lists and property
  * list classes. HDF5 property lists are the main vehicle to configure the

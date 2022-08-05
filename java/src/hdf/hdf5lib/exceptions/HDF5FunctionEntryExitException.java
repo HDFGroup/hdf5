@@ -16,17 +16,21 @@ package hdf.hdf5lib.exceptions;
 /**
  * The class HDF5LibraryException returns errors raised by the HDF5 library.
  * <p>
- * This sub-class represents HDF-5 major error code <b>H5E_FUNC</b>
+ * This sub-class represents HDF5 major error code <b>H5E_FUNC</b>
  */
 
 public class HDF5FunctionEntryExitException extends HDF5LibraryException {
     /**
+     * @ingroup JERRLIB
+     * 
      * Constructs an <code>HDF5FunctionEntryExitException</code> with no
      * specified detail message.
      */
     public HDF5FunctionEntryExitException() { super(); }
 
     /**
+     * @ingroup JERRLIB
+     * 
      * Constructs an <code>HDF5FunctionEntryExitException</code> with the
      * specified detail message.
      *
