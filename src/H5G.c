@@ -325,11 +325,16 @@ H5Gcreate_anon(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id)
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE3("i", "iii", loc_id, gcpl_id, gapl_id);
 
-    /* Check group creation property list */
+    /* Check group property list */
     if (H5P_DEFAULT == gcpl_id)
         gcpl_id = H5P_GROUP_CREATE_DEFAULT;
     else if (TRUE != H5P_isa_class(gcpl_id, H5P_GROUP_CREATE))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not group create property list")
+
+    if (H5P_DEFAULT == gapl_id)
+        gapl_id = H5P_GROUP_ACCESS_DEFAULT;
+    else if (TRUE != H5P_isa_class(gapl_id, H5P_GROUP_ACCESS))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not group access property list")
 
     /* Verify access property list and set up collective metadata if appropriate */
     if (H5CX_set_apl(&gapl_id, H5P_CLS_GACC, loc_id, TRUE) < 0)
