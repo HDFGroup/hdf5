@@ -873,6 +873,12 @@ h5tools_get_vfd_name(hid_t fapl_id, char *drivername, size_t drivername_size)
         else if (driver_id == H5FD_HDFS)
             driver_name = drivernames[HDFS_VFD_IDX];
 #endif
+#ifdef H5_HAVE_SUBFILING_VFD
+        else if (driver_id == H5FD_SUBFILING)
+            driver_name = drivernames[SUBFILING_VFD_IDX];
+#endif
+        else if (driver_id == H5FD_ONION)
+            driver_name = drivernames[ONION_VFD_IDX];
         else
             driver_name = "unknown";
 
@@ -1016,8 +1022,13 @@ h5tools_fopen(const char *fname, unsigned flags, hid_t fapl_id, hbool_t use_spec
                     continue;
 
                 /* Can we open the file with this combo? */
-                if ((fid = h5tools_fopen(fname, flags, tmp_fapl_id, TRUE, drivername, drivername_size)) >=
-                    0) {
+                H5E_BEGIN_TRY
+                {
+                    fid = h5tools_fopen(fname, flags, tmp_fapl_id, TRUE, drivername, drivername_size);
+                }
+                H5E_END_TRY;
+
+                if (fid >= 0) {
                     used_fapl_id = tmp_fapl_id;
                     H5TOOLS_GOTO_DONE(fid);
                 }

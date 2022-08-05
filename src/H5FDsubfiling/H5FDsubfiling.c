@@ -354,13 +354,7 @@ H5FD_subfiling_init(void)
                     "Subfiling VFD requires the use of MPI_Init_thread with MPI_THREAD_MULTIPLE");
         }
         else {
-            char *env_var;
-            int   required = MPI_THREAD_MULTIPLE;
-
-            /* Ensure that Subfiling VFD has been loaded dynamically */
-            env_var = HDgetenv(HDF5_DRIVER);
-            if (!env_var || HDstrcmp(env_var, H5FD_SUBFILING_NAME))
-                H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID, "MPI isn't initialized");
+            int required = MPI_THREAD_MULTIPLE;
 
             if (MPI_SUCCESS != (mpi_code = MPI_Init_thread(NULL, NULL, required, &provided)))
                 H5_SUBFILING_MPI_GOTO_ERROR(H5I_INVALID_HID, "MPI_Init_thread failed", mpi_code);
@@ -466,6 +460,10 @@ H5Pset_fapl_subfiling(hid_t fapl_id, const H5FD_subfiling_config_t *vfd_config)
     herr_t                   ret_value      = SUCCEED;
 
     /*NO TRACE*/
+
+    /* Ensure Subfiling (and therefore MPI) is initialized before doing anything */
+    if (H5FD_subfiling_init() < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "can't initialize subfiling VFD");
 
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
@@ -913,6 +911,10 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
     }
 
     HDmemcpy(&file_ptr->fa, config_ptr, sizeof(H5FD_subfiling_config_t));
+    if (H5FD__copy_plist(config_ptr->ioc_fapl_id, &(file_ptr->fa.ioc_fapl_id)) < 0) {
+        file_ptr->fa.ioc_fapl_id = H5I_INVALID_HID;
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "can't copy FAPL");
+    }
 
     if (NULL != (file_ptr->file_path = HDrealpath(name, NULL))) {
         char *path      = NULL;
@@ -938,9 +940,6 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
         else
             H5_SUBFILING_SYS_GOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't resolve subfile path");
     }
-
-    if (H5FD__copy_plist(config_ptr->ioc_fapl_id, &(file_ptr->fa.ioc_fapl_id)) < 0)
-        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "can't copy FAPL");
 
     file_ptr->sf_file = H5FD_open(name, flags, file_ptr->fa.ioc_fapl_id, HADDR_UNDEF);
     if (!file_ptr->sf_file)
@@ -1011,6 +1010,10 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
     ret_value = (H5FD_t *)file_ptr;
 
 done:
+    if (config_ptr == &default_config)
+        if (H5I_dec_ref(config_ptr->ioc_fapl_id) < 0)
+            H5_SUBFILING_DONE_ERROR(H5E_PLIST, H5E_CANTCLOSEOBJ, NULL, "can't close IOC FAPL");
+
     if (NULL == ret_value) {
         if (file_ptr) {
             /* Participate in possible MPI collectives on failure */
@@ -2389,6 +2392,10 @@ H5FD__subfiling_del(const char *name, hid_t fapl)
         H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTDELETE, FAIL, "unable to delete file");
 
 done:
+    if (subfiling_config == &default_config)
+        if (H5I_dec_ref(subfiling_config->ioc_fapl_id) < 0)
+            H5_SUBFILING_DONE_ERROR(H5E_PLIST, H5E_CANTCLOSEOBJ, FAIL, "unable to close IOC FAPL");
+
     H5_SUBFILING_FUNC_LEAVE_API;
 }
 

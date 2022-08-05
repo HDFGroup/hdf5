@@ -380,6 +380,7 @@ done:
     if (ioc_conf) {
         if (ioc_conf->under_fapl_id >= 0 && H5I_dec_ref(ioc_conf->under_fapl_id) < 0)
             H5_SUBFILING_DONE_ERROR(H5E_PLIST, H5E_CANTDEC, FAIL, "can't close IOC under FAPL");
+        ioc_conf->under_fapl_id = H5I_INVALID_HID;
         H5FL_FREE(H5FD_ioc_config_t, ioc_conf);
     }
 
@@ -749,6 +750,7 @@ H5FD__ioc_fapl_free(void *_fapl)
 
     if (fapl->under_fapl_id >= 0 && H5I_dec_ref(fapl->under_fapl_id) < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTDEC, FAIL, "can't close IOC under FAPL ID");
+    fapl->under_fapl_id = H5I_INVALID_HID;
 
     /* Free the property list */
     fapl = H5FL_FREE(H5FD_ioc_config_t, fapl);
@@ -841,6 +843,12 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     /* Fill in the file config values */
     HDmemcpy(&file_ptr->fa, config_ptr, sizeof(H5FD_ioc_config_t));
 
+    /* Copy the ioc FAPL. */
+    if (H5FD__copy_plist(config_ptr->under_fapl_id, &(file_ptr->fa.under_fapl_id)) < 0) {
+        file_ptr->fa.under_fapl_id = H5I_INVALID_HID;
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "can't copy IOC under FAPL");
+    }
+
     if (NULL != (file_ptr->file_path = HDrealpath(name, NULL))) {
         char *path      = NULL;
         char *directory = dirname(path);
@@ -866,12 +874,8 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
             H5_SUBFILING_SYS_GOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't resolve subfile path");
     }
 
-    /* Copy the ioc FAPL. */
-    if (H5FD__copy_plist(config_ptr->under_fapl_id, &(file_ptr->fa.under_fapl_id)) < 0)
-        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "can't copy IOC under FAPL");
-
     /* Check the underlying driver (sec2/mpio/etc.) */
-    if (NULL == (plist_ptr = (H5P_genplist_t *)H5I_object(config_ptr->under_fapl_id)))
+    if (NULL == (plist_ptr = (H5P_genplist_t *)H5I_object(file_ptr->fa.under_fapl_id)))
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
 
     if (H5P_peek(plist_ptr, H5F_ACS_FILE_DRV_NAME, &driver_prop) < 0)
@@ -900,9 +904,9 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         if (H5F_ACC_EXCL & flags)
             ioc_flags |= O_EXCL;
 
-        file_ptr->ioc_file = H5FD_open(file_ptr->file_path, flags, config_ptr->under_fapl_id, HADDR_UNDEF);
+        file_ptr->ioc_file = H5FD_open(file_ptr->file_path, flags, file_ptr->fa.under_fapl_id, HADDR_UNDEF);
         if (file_ptr->ioc_file) {
-            if (H5FDget_vfd_handle(file_ptr->ioc_file, config_ptr->under_fapl_id, &file_handle) < 0)
+            if (H5FDget_vfd_handle(file_ptr->ioc_file, file_ptr->fa.under_fapl_id, &file_handle) < 0)
                 H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get file handle");
         }
         else {
@@ -955,6 +959,10 @@ done:
         if (MPI_SUCCESS != (mpi_code = MPI_Barrier(barrier_comm)))
             H5_SUBFILING_MPI_DONE_ERROR(NULL, "MPI_Barrier failed", mpi_code);
     }
+
+    if (config_ptr == &default_config)
+        if (H5I_dec_ref(config_ptr->under_fapl_id) < 0)
+            H5_SUBFILING_DONE_ERROR(H5E_PLIST, H5E_CANTCLOSEOBJ, NULL, "can't close IOC under FAPL");
 
     if (NULL == ret_value) {
         if (file_ptr) {
