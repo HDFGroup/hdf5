@@ -240,6 +240,10 @@ finalize_ioc_threads(void *_sf_context)
         hg_thread_join(ioc_data->ioc_main_thread);
     }
 
+    if (ioc_data->io_queue.num_failed > 0)
+        H5_SUBFILING_DONE_ERROR(H5E_IO, H5E_CLOSEERROR, -1, "%" PRId32 " I/O requests failed",
+                                ioc_data->io_queue.num_failed);
+
     HDfree(ioc_data);
 
     H5_SUBFILING_FUNC_LEAVE;
