@@ -1722,9 +1722,9 @@ test_basic_query(hid_t fapl)
     if (chunk_infos[0].nbytes != 96)
         FAIL_PUTS_ERROR("size mismatch");
 
-    if (chunk_infos[1].offset[0] != 1)
+    if (chunk_infos[1].offset[0] != CHUNK_NX)
         FAIL_PUTS_ERROR("offset[0] mismatch");
-    if (chunk_infos[1].offset[1] != 1)
+    if (chunk_infos[1].offset[1] != CHUNK_NY)
         FAIL_PUTS_ERROR("offset[1] mismatch");
 
     /* Iterate and stop after one iteration */
