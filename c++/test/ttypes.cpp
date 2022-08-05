@@ -45,7 +45,8 @@ using namespace H5;
 /* #include "H5Tpkg.h"
  */
 
-const char *FILENAME[] = {"dtypes1.h5", "dtypes2.h5", "dtypes3.h5", "dtypes4.h5", "encode_decode.h5", "h5_type_operators.h5", NULL};
+const char *FILENAME[] = {"dtypes1.h5",       "dtypes2.h5",           "dtypes3.h5", "dtypes4.h5",
+                          "encode_decode.h5", "h5_type_operators.h5", NULL};
 
 typedef enum flt_t { FLT_FLOAT, FLT_DOUBLE, FLT_LDOUBLE, FLT_OTHER } flt_t;
 
@@ -803,8 +804,8 @@ test_named()
  *              August, 2017
  *-------------------------------------------------------------------------
  */
-const int          ARRAY1_RANK = 1;
-const int          ARRAY1_DIM  = 10;
+const int ARRAY1_RANK = 1;
+const int ARRAY1_DIM  = 10;
 
 static void
 test_encode_decode()
