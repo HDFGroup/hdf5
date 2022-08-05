@@ -185,8 +185,9 @@ compare_hostid(const void *h1, const void *h2)
 static herr_t
 get_ioc_selection_criteria_from_env(H5FD_subfiling_ioc_select_t *ioc_selection_type, char **ioc_sel_info_str)
 {
-    char *opt_value = NULL;
-    char *env_value = HDgetenv(H5FD_SUBFILING_IOC_SELECTION_CRITERIA);
+    char  *opt_value = NULL;
+    char  *env_value = HDgetenv(H5FD_SUBFILING_IOC_SELECTION_CRITERIA);
+    herr_t ret_value = SUCCEED;
 
     HDassert(ioc_selection_type);
     HDassert(ioc_sel_info_str);
@@ -208,31 +209,24 @@ get_ioc_selection_criteria_from_env(H5FD_subfiling_ioc_select_t *ioc_selection_t
         errno       = 0;
         check_value = HDstrtol(env_value, NULL, 0);
 
-        if (errno == ERANGE) {
-#ifdef H5_SUBFILING_DEBUG
-            HDprintf("%s: couldn't parse value from " H5FD_SUBFILING_IOC_SELECTION_CRITERIA
-                     " environment variable\n",
-                     __func__);
-#endif
+        if (errno == ERANGE)
+            H5_SUBFILING_SYS_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL,
+                                        "couldn't parse value from " H5FD_SUBFILING_IOC_SELECTION_CRITERIA
+                                        " environment variable");
 
-            return FAIL;
-        }
-
-        if ((check_value < 0) || (check_value >= ioc_selection_options)) {
-#ifdef H5_SUBFILING_DEBUG
-            HDprintf("%s: invalid IOC selection type value %ld from " H5FD_SUBFILING_IOC_SELECTION_CRITERIA
-                     " environment variable\n",
-                     __func__, check_value);
-#endif
-
-            return FAIL;
-        }
+        if ((check_value < 0) || (check_value >= ioc_selection_options))
+            H5_SUBFILING_GOTO_ERROR(
+                H5E_VFL, H5E_BADVALUE, FAIL,
+                "invalid IOC selection type value %ld from " H5FD_SUBFILING_IOC_SELECTION_CRITERIA
+                " environment variable",
+                check_value);
 
         *ioc_selection_type = (H5FD_subfiling_ioc_select_t)check_value;
         *ioc_sel_info_str   = opt_value;
     }
 
-    return SUCCEED;
+done:
+    H5_SUBFILING_FUNC_LEAVE;
 }
 
 /*-------------------------------------------------------------------------
@@ -264,6 +258,7 @@ count_nodes(sf_topology_t *info, MPI_Comm comm)
     int           hostid_index = -1;
     int           my_rank;
     int           mpi_code;
+    int           ret_value = 0;
 
     HDassert(info);
     HDassert(info->app_layout);
@@ -271,13 +266,8 @@ count_nodes(sf_topology_t *info, MPI_Comm comm)
     HDassert(info->app_layout->node_ranks);
     HDassert(MPI_COMM_NULL != comm);
 
-    if (MPI_SUCCESS != (mpi_code = MPI_Comm_rank(comm, &my_rank))) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: couldn't get MPI communicator rank; rc = %d\n", __func__, mpi_code);
-#endif
-
-        return -1;
-    }
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_rank(comm, &my_rank)))
+        H5_SUBFILING_MPI_GOTO_ERROR(-1, "MPI_Comm_rank failed", mpi_code);
 
     app_layout = info->app_layout;
     node_count = app_layout->node_count;
@@ -310,7 +300,10 @@ count_nodes(sf_topology_t *info, MPI_Comm comm)
 
     app_layout->node_count = node_count;
 
-    return node_count;
+    ret_value = node_count;
+
+done:
+    H5_SUBFILING_FUNC_LEAVE;
 }
 
 /*-------------------------------------------------------------------------
@@ -337,6 +330,7 @@ gather_topology_info(sf_topology_t *info, MPI_Comm comm)
     long          hostid;
     int           sf_world_size;
     int           sf_world_rank;
+    herr_t        ret_value = SUCCEED;
 
     HDassert(info);
     HDassert(info->app_layout);
@@ -359,18 +353,14 @@ gather_topology_info(sf_topology_t *info, MPI_Comm comm)
         int mpi_code;
 
         if (MPI_SUCCESS !=
-            (mpi_code = MPI_Allgather(&my_hostinfo, 2, MPI_LONG, app_layout->layout, 2, MPI_LONG, comm))) {
-#ifdef H5_SUBFILING_DEBUG
-            HDprintf("%s: MPI_Allgather failed with rc %d\n", __func__, mpi_code);
-#endif
-
-            return FAIL;
-        }
+            (mpi_code = MPI_Allgather(&my_hostinfo, 2, MPI_LONG, app_layout->layout, 2, MPI_LONG, comm)))
+            H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Allgather failed", mpi_code);
 
         HDqsort(app_layout->layout, (size_t)sf_world_size, sizeof(layout_t), compare_hostid);
     }
 
-    return SUCCEED;
+done:
+    H5_SUBFILING_FUNC_LEAVE;
 }
 
 /*-------------------------------------------------------------------------
@@ -513,14 +503,11 @@ H5_get_subfiling_object(int64_t object_id)
 {
     int64_t obj_type  = (object_id >> 32) & 0x0FFFF;
     int64_t obj_index = object_id & 0x0FFFF;
+    void   *ret_value = NULL;
 
-    if (obj_index < 0) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: invalid object index for subfiling object ID %" PRId64 "\n", __func__, object_id);
-#endif
-
-        return NULL;
-    }
+    if (obj_index < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL,
+                                "invalid object index for subfiling object ID %" PRId64, object_id);
 
     if (obj_type == SF_CONTEXT) {
         /* Contexts provide information principally about
@@ -535,13 +522,9 @@ H5_get_subfiling_object(int64_t object_id)
 
         /* Create subfiling context cache if it doesn't exist */
         if (!sf_context_cache) {
-            if (NULL == (sf_context_cache = HDcalloc(sf_context_cache_limit, sizeof(subfiling_context_t)))) {
-#ifdef H5_SUBFILING_DEBUG
-                HDprintf("%s: couldn't allocate space for subfiling context cache\n", __func__);
-#endif
-
-                return NULL;
-            }
+            if (NULL == (sf_context_cache = HDcalloc(sf_context_cache_limit, sizeof(subfiling_context_t))))
+                H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL,
+                                        "couldn't allocate space for subfiling context cache");
         }
 
         /* Make more space in context cache if needed */
@@ -554,13 +537,9 @@ H5_get_subfiling_object(int64_t object_id)
             sf_context_cache_limit *= 2;
 
             if (NULL == (tmp_realloc = HDrealloc(sf_context_cache,
-                                                 sf_context_cache_limit * sizeof(subfiling_context_t)))) {
-#ifdef H5_SUBFILING_DEBUG
-                HDprintf("%s: couldn't allocate space for subfiling context cache\n", __func__);
-#endif
-
-                return NULL;
-            }
+                                                 sf_context_cache_limit * sizeof(subfiling_context_t))))
+                H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL,
+                                        "couldn't allocate space for subfiling context cache");
 
             sf_context_cache = tmp_realloc;
 
@@ -575,13 +554,9 @@ H5_get_subfiling_object(int64_t object_id)
     else if (obj_type == SF_TOPOLOGY) {
         /* Create subfiling topology cache if it doesn't exist */
         if (!sf_topology_cache) {
-            if (NULL == (sf_topology_cache = HDcalloc(sf_topology_cache_limit, sizeof(sf_topology_t)))) {
-#ifdef H5_SUBFILING_DEBUG
-                HDprintf("%s: couldn't allocate space for subfiling topology cache\n", __func__);
-#endif
-
-                return NULL;
-            }
+            if (NULL == (sf_topology_cache = HDcalloc(sf_topology_cache_limit, sizeof(sf_topology_t))))
+                H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL,
+                                        "couldn't allocate space for subfiling topology cache");
         }
 
         /* We will likely only cache a single topology
@@ -589,13 +564,9 @@ H5_get_subfiling_object(int64_t object_id)
          * In that context, we will identify the number of
          * nodes along with the number of MPI ranks on a node.
          */
-        if ((size_t)obj_index >= sf_topology_cache_limit) {
-#ifdef H5_SUBFILING_DEBUG
-            HDprintf("%s: invalid object index for subfiling topology object ID\n", __func__);
-#endif
-
-            return NULL;
-        }
+        if ((size_t)obj_index >= sf_topology_cache_limit)
+            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL,
+                                    "invalid object index for subfiling topology object ID");
 
         /* Return direct pointer to the topology cache entry */
         return (void *)&sf_topology_cache[obj_index];
@@ -605,7 +576,8 @@ H5_get_subfiling_object(int64_t object_id)
     HDprintf("%s: Unknown subfiling object type for ID %" PRId64 "\n", __func__, object_id);
 #endif
 
-    return NULL;
+done:
+    H5_SUBFILING_FUNC_LEAVE;
 }
 
 /*-------------------------------------------------------------------------
@@ -623,23 +595,21 @@ H5_free_subfiling_object(int64_t object_id)
 {
     subfiling_context_t *sf_context = NULL;
     int64_t              obj_type   = (object_id >> 32) & 0x0FFFF;
+    herr_t               ret_value  = SUCCEED;
 
-    if (obj_type != SF_CONTEXT) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: invalid subfiling object type for ID %" PRId64 "\n", __func__, object_id);
-#endif
+    if (obj_type != SF_CONTEXT)
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "invalid subfiling object type for ID %" PRId64,
+                                object_id);
 
-        return FAIL;
-    }
-
-    sf_context = H5_get_subfiling_object(object_id);
-    if (!sf_context)
-        return FAIL;
+    if (NULL == (sf_context = H5_get_subfiling_object(object_id)))
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL,
+                                "couldn't get subfiling context for subfiling object ID");
 
     if (H5_free_subfiling_object_int(sf_context) < 0)
-        return FAIL;
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "couldn't free subfiling object");
 
-    return SUCCEED;
+done:
+    H5_SUBFILING_FUNC_LEAVE;
 }
 
 static herr_t
@@ -795,100 +765,55 @@ H5_open_subfiles(const char *base_filename, void *file_handle,
     int                  mpi_code;
     herr_t               ret_value = SUCCEED;
 
-    if (!base_filename) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: invalid base filename\n", __func__);
-#endif
+    if (!base_filename)
+        H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "invalid subfiling base filename");
 
-        ret_value = FAIL;
-        goto done;
-    }
+    if (!subfiling_config)
+        H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "invalid subfiling configuration");
 
-    if (!subfiling_config) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: invalid subfiling configuration pointer\n", __func__);
-#endif
-
-        ret_value = FAIL;
-        goto done;
-    }
-
-    if (!context_id_out) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: context_id_out is NULL\n", __func__);
-#endif
-
-        ret_value = FAIL;
-        goto done;
-    }
+    if (!context_id_out)
+        H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "invalid subfiling context ID pointer");
 
     /* Initialize new subfiling context ID based on configuration information */
-    if (init_subfiling(subfiling_config, file_comm, &context_id) < 0) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: couldn't initialize subfiling context\n", __func__);
-#endif
-
-        ret_value = FAIL;
-        goto done;
-    }
+    if (init_subfiling(subfiling_config, file_comm, &context_id) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "couldn't initialize subfiling context");
 
     /* Retrieve the subfiling object for the newly-created context ID */
-    if (NULL == (sf_context = H5_get_subfiling_object(context_id))) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: couldn't get subfiling object from context ID\n", __func__);
-#endif
-
-        ret_value = FAIL;
-        goto done;
-    }
+    if (NULL == (sf_context = H5_get_subfiling_object(context_id)))
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "couldn't get subfiling object from context ID");
 
     /* Save some basic things in the new subfiling context */
     sf_context->h5_file_handle = file_handle;
 
-    if (NULL == (sf_context->h5_filename = HDstrdup(base_filename))) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: couldn't copy base HDF5 filename\n", __func__);
-#endif
-
-        ret_value = FAIL;
-        goto done;
-    }
+    if (NULL == (sf_context->h5_filename = HDstrdup(base_filename)))
+        H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                "couldn't allocate space for subfiling filename");
 
     /*
      * If we're actually using the IOCs, we will
      * start the service threads on the identified
      * ranks as part of the subfile opening.
      */
-    if (open_subfile_with_context(sf_context, file_acc_flags) < 0) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: couldn't open subfiles\n", __func__);
-#endif
-
-        ret_value = FAIL;
-        goto done;
-    }
+    if (open_subfile_with_context(sf_context, file_acc_flags) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "couldn't open subfiling subfiles");
 
 #ifdef H5_SUBFILING_DEBUG
     {
         struct tm *tm = NULL;
         time_t     cur_time;
         int        mpi_rank;
+        int        mpi_code;
 
         /* Open debugging logfile */
 
-        if (MPI_SUCCESS != MPI_Comm_rank(file_comm, &mpi_rank)) {
-            HDprintf("%s: couldn't get MPI rank\n", __func__);
-            ret_value = FAIL;
-            goto done;
-        }
+        if (MPI_SUCCESS != (mpi_code = MPI_Comm_rank(file_comm, &mpi_rank)))
+            H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Comm_rank failed", mpi_code);
 
         HDsnprintf(sf_context->sf_logfile_name, PATH_MAX, "%s.log.%d", sf_context->h5_filename, mpi_rank);
 
-        if (NULL == (sf_context->sf_logfile = HDfopen(sf_context->sf_logfile_name, "a"))) {
-            HDprintf("%s: couldn't open subfiling debug logfile\n", __func__);
-            ret_value = FAIL;
-            goto done;
-        }
+        if (NULL == (sf_context->sf_logfile = HDfopen(sf_context->sf_logfile_name, "a")))
+            H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL,
+                                        "couldn't open subfiling debug logfile");
 
         cur_time = time(NULL);
         tm       = localtime(&cur_time);
@@ -908,38 +833,25 @@ done:
      * Form consensus on whether opening subfiles was
      * successful
      */
-    if (MPI_SUCCESS != (mpi_code = MPI_Allreduce(&l_errors, &g_errors, 1, MPI_INT, MPI_SUM, file_comm))) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("[%s %d]: MPI_Allreduce failed with rc %d\n", __func__,
-                 sf_context->topology->app_layout->world_rank, mpi_code);
-#endif
-
-        ret_value = FAIL;
-    }
+    if (MPI_SUCCESS != (mpi_code = MPI_Allreduce(&l_errors, &g_errors, 1, MPI_INT, MPI_SUM, file_comm)))
+        H5_SUBFILING_MPI_DONE_ERROR(FAIL, "MPI_Allreduce failed", mpi_code);
 
     if (g_errors > 0) {
-#ifdef H5_SUBFILING_DEBUG
-        if (sf_context->topology->app_layout->world_rank == 0) {
-            HDprintf("%s: one or more IOC ranks couldn't open subfiles\n", __func__);
-        }
-#endif
-
-        ret_value = FAIL;
+        if (sf_context->topology->app_layout->world_rank == 0)
+            H5_SUBFILING_DONE_ERROR(H5E_VFL, H5E_CANTOPENFILE, FAIL,
+                                    "one or more IOC ranks couldn't open subfiles");
     }
 
     if (ret_value < 0) {
         clear_fid_map_entry(file_handle, context_id);
 
-        if (context_id >= 0 && H5_free_subfiling_object(context_id) < 0) {
-#ifdef H5_SUBFILING_DEBUG
-            HDprintf("%s: couldn't free subfiling object\n", __func__);
-#endif
-        }
+        if (context_id >= 0 && H5_free_subfiling_object(context_id) < 0)
+            H5_SUBFILING_DONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "couldn't free subfiling object");
 
         *context_id_out = -1;
     }
 
-    return ret_value;
+    H5_SUBFILING_FUNC_LEAVE;
 }
 
 /*
@@ -976,48 +888,25 @@ init_subfiling(H5FD_subfiling_shared_config_t *subfiling_config, MPI_Comm comm, 
     HDassert(file_index >= 0);
 
     /* Use the file's index to create a new subfiling context ID */
-    if ((context_id = H5_new_subfiling_object_id(SF_CONTEXT, file_index)) < 0) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: couldn't create new subfiling context ID\n", __func__);
-#endif
-
-        ret_value = FAIL;
-        goto done;
-    }
+    if ((context_id = H5_new_subfiling_object_id(SF_CONTEXT, file_index)) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "couldn't create new subfiling context ID");
 
     /* Create a new subfiling context object with the created context ID */
-    if (NULL == (new_context = H5_get_subfiling_object(context_id))) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: couldn't create new subfiling object\n", __func__);
-#endif
-
-        ret_value = FAIL;
-        goto done;
-    }
+    if (NULL == (new_context = H5_get_subfiling_object(context_id)))
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "couldn't create new subfiling object");
 
     /*
      * Setup the application topology information, including the computed
      * number and distribution map of the set of I/O concentrators
      */
-    if (init_app_topology(subfiling_config->ioc_selection, comm, &app_topology) < 0) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: couldn't initialize application topology\n", __func__);
-#endif
-
-        ret_value = FAIL;
-        goto done;
-    }
+    if (init_app_topology(subfiling_config->ioc_selection, comm, &app_topology) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "couldn't initialize application topology");
 
     new_context->sf_context_id = context_id;
 
-    if (init_subfiling_context(new_context, subfiling_config, app_topology, comm) < 0) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: couldn't initialize subfiling topology object\n", __func__);
-#endif
-
-        ret_value = FAIL;
-        goto done;
-    }
+    if (init_subfiling_context(new_context, subfiling_config, app_topology, comm) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
+                                "couldn't initialize subfiling application topology object");
 
     new_context->sf_base_addr = 0;
     if (new_context->topology->rank_is_ioc) {
@@ -1031,14 +920,11 @@ done:
     if (ret_value < 0) {
         HDfree(app_topology);
 
-        if (context_id >= 0 && H5_free_subfiling_object(context_id) < 0) {
-#ifdef H5_SUBFILING_DEBUG
-            HDprintf("%s: couldn't free subfiling object\n", __func__);
-#endif
-        }
+        if (context_id >= 0 && H5_free_subfiling_object(context_id) < 0)
+            H5_SUBFILING_DONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "couldn't free subfiling object");
     }
 
-    return ret_value;
+    H5_SUBFILING_FUNC_LEAVE;
 }
 
 /*-------------------------------------------------------------------------
@@ -1080,14 +966,13 @@ static herr_t
 init_app_topology(H5FD_subfiling_ioc_select_t ioc_selection_type, MPI_Comm comm,
                   sf_topology_t **app_topology_out)
 {
-    sf_topology_t *app_topology     = NULL;
-    app_layout_t  *app_layout       = NULL;
-    char          *env_value        = NULL;
-    char          *ioc_sel_str      = NULL;
-    int           *io_concentrators = NULL;
-    long           ioc_select_val   = -1;
-    long           iocs_per_node    = 1;
-    int            ioc_count        = 0;
+    sf_topology_t *app_topology   = NULL;
+    app_layout_t  *app_layout     = NULL;
+    char          *env_value      = NULL;
+    char          *ioc_sel_str    = NULL;
+    long           ioc_select_val = -1;
+    long           iocs_per_node  = 1;
+    int            ioc_count      = 0;
     int            comm_rank;
     int            comm_size;
     int            mpi_code;
@@ -1097,33 +982,16 @@ init_app_topology(H5FD_subfiling_ioc_select_t ioc_selection_type, MPI_Comm comm,
     HDassert(app_topology_out);
     HDassert(!*app_topology_out);
 
-    if (MPI_SUCCESS != (mpi_code = MPI_Comm_rank(comm, &comm_rank))) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: couldn't get MPI communicator rank; rc = %d\n", __func__, mpi_code);
-#endif
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_rank(comm, &comm_rank)))
+        H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Comm_rank failed", mpi_code);
 
-        ret_value = FAIL;
-        goto done;
-    }
-
-    if (MPI_SUCCESS != (mpi_code = MPI_Comm_size(comm, &comm_size))) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: couldn't get MPI communicator size; rc = %d\n", __func__, mpi_code);
-#endif
-
-        ret_value = FAIL;
-        goto done;
-    }
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_size(comm, &comm_size)))
+        H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Comm_size failed", mpi_code);
 
     /* Check if an IOC selection type was specified by environment variable */
-    if (get_ioc_selection_criteria_from_env(&ioc_selection_type, &ioc_sel_str) < 0) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: couldn't get IOC selection type from environment\n", __func__);
-#endif
-
-        ret_value = FAIL;
-        goto done;
-    }
+    if (get_ioc_selection_criteria_from_env(&ioc_selection_type, &ioc_sel_str) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL,
+                                "couldn't get IOC selection type from environment");
 
     /* Sanity checking on different IOC selection strategies */
     switch (ioc_selection_type) {
@@ -1174,57 +1042,29 @@ init_app_topology(H5FD_subfiling_ioc_select_t ioc_selection_type, MPI_Comm comm,
     }
 
     /* Allocate new application topology information object */
-    if (NULL == (app_topology = HDcalloc(1, sizeof(*app_topology)))) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: couldn't create new subfiling topology object\n", __func__);
-#endif
-
-        ret_value = FAIL;
-        goto done;
-    }
+    if (NULL == (app_topology = HDcalloc(1, sizeof(*app_topology))))
+        H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                "couldn't create new subfiling topology object");
 
     app_topology->subfile_rank   = -1;
     app_topology->selection_type = ioc_selection_type;
 
-    if (NULL == (app_topology->io_concentrators = HDcalloc((size_t)comm_size, sizeof(int)))) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: couldn't allocate array of I/O concentrator ranks\n", __func__);
-#endif
-
-        ret_value = FAIL;
-        goto done;
-    }
-
-    io_concentrators = app_topology->io_concentrators;
-    HDassert(io_concentrators);
+    if (NULL == (app_topology->io_concentrators = HDcalloc((size_t)comm_size, sizeof(int))))
+        H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                "couldn't allocate array of I/O concentrator ranks");
 
     if (!app_layout) {
-        if (NULL == (app_layout = HDcalloc(1, sizeof(*app_layout)))) {
-#ifdef H5_SUBFILING_DEBUG
-            HDprintf("%s: couldn't allocate application layout structure\n", __func__);
-#endif
+        if (NULL == (app_layout = HDcalloc(1, sizeof(*app_layout))))
+            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                    "couldn't allocate application layout structure");
 
-            ret_value = FAIL;
-            goto done;
-        }
+        if (NULL == (app_layout->node_ranks = HDcalloc(1, ((size_t)comm_size + 1) * sizeof(int))))
+            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                    "couldn't allocate application layout node rank array");
 
-        if (NULL == (app_layout->node_ranks = HDcalloc(1, ((size_t)comm_size + 1) * sizeof(int)))) {
-#ifdef H5_SUBFILING_DEBUG
-            HDprintf("%s: couldn't allocate application layout node rank array\n", __func__);
-#endif
-
-            ret_value = FAIL;
-            goto done;
-        }
-
-        if (NULL == (app_layout->layout = HDcalloc(1, ((size_t)comm_size + 1) * sizeof(layout_t)))) {
-#ifdef H5_SUBFILING_DEBUG
-            HDprintf("%s: couldn't allocate application layout array\n", __func__);
-#endif
-
-            ret_value = FAIL;
-            goto done;
-        }
+        if (NULL == (app_layout->layout = HDcalloc(1, ((size_t)comm_size + 1) * sizeof(layout_t))))
+            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                    "couldn't allocate application layout array");
     }
 
     app_layout->world_size = comm_size;
@@ -1244,14 +1084,9 @@ init_app_topology(H5FD_subfiling_ioc_select_t ioc_selection_type, MPI_Comm comm,
 
             app_topology->selection_type = SELECT_IOC_ONE_PER_NODE;
 
-            if ((node_count = count_nodes(app_topology, comm)) < 0) {
-#ifdef H5_SUBFILING_DEBUG
-                HDprintf("%s: couldn't determine number of nodes used\n", __func__);
-#endif
-
-                ret_value = FAIL;
-                goto done;
-            }
+            if ((node_count = count_nodes(app_topology, comm)) < 0)
+                H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL,
+                                        "couldn't determine number of nodes used");
 
             /* Check for an IOC-per-node value set in the environment */
             if ((env_value = HDgetenv(H5FD_SUBFILING_IOC_PER_NODE))) {
@@ -1312,11 +1147,7 @@ init_app_topology(H5FD_subfiling_ioc_select_t ioc_selection_type, MPI_Comm comm,
 
         case SELECT_IOC_WITH_CONFIG:
         default:
-#ifdef H5_SUBFILING_DEBUG
-            HDprintf("%s: invalid IOC selection strategy\n", __func__);
-#endif
-            ret_value = FAIL;
-            goto done;
+            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "invalid IOC selection strategy");
             break;
     }
 
@@ -1327,14 +1158,9 @@ init_app_topology(H5FD_subfiling_ioc_select_t ioc_selection_type, MPI_Comm comm,
      * Create a vector of "potential" file descriptors
      * which can be indexed by the IOC ID
      */
-    if (NULL == (app_topology->subfile_fd = HDcalloc((size_t)ioc_count, sizeof(int)))) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: couldn't allocate subfile file descriptor array\n", __func__);
-#endif
-
-        ret_value = FAIL;
-        goto done;
-    }
+    if (NULL == (app_topology->subfile_fd = HDcalloc((size_t)ioc_count, sizeof(int))))
+        H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                "couldn't allocate subfile file descriptor array");
 
     *app_topology_out = app_topology;
 
@@ -1352,7 +1178,7 @@ done:
         }
     }
 
-    return ret_value;
+    H5_SUBFILING_FUNC_LEAVE;
 }
 
 /*-------------------------------------------------------------------------
@@ -1423,15 +1249,9 @@ init_subfiling_context(subfiling_context_t *sf_context, H5FD_subfiling_shared_co
         errno = 0;
 
         stripe_size = HDstrtoll(env_value, NULL, 0);
-        if (ERANGE == errno) {
-#ifdef H5_SUBFILING_DEBUG
-            HDprintf("%s: invalid stripe size setting '%s' for " H5FD_SUBFILING_STRIPE_SIZE "\n", __func__,
-                     env_value);
-#endif
-
-            ret_value = FAIL;
-            goto done;
-        }
+        if (ERANGE == errno)
+            H5_SUBFILING_SYS_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL,
+                                        "invalid stripe size setting for " H5FD_SUBFILING_STRIPE_SIZE);
 
         if (stripe_size > 0) {
             sf_context->sf_stripe_size = (int64_t)stripe_size;
@@ -1446,14 +1266,8 @@ init_subfiling_context(subfiling_context_t *sf_context, H5FD_subfiling_shared_co
 
     /* Check for a subfile name prefix setting in the environment */
     if ((env_value = HDgetenv(H5FD_SUBFILING_SUBFILE_PREFIX))) {
-        if (NULL == (sf_context->subfile_prefix = HDstrdup(env_value))) {
-#ifdef H5_SUBFILING_DEBUG
-            HDprintf("%s: couldn't copy subfile prefix value\n", __func__);
-#endif
-
-            ret_value = FAIL;
-            goto done;
-        }
+        if (NULL == (sf_context->subfile_prefix = HDstrdup(env_value)))
+            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "couldn't copy subfile prefix value");
     }
 
     /*
@@ -1461,124 +1275,44 @@ init_subfiling_context(subfiling_context_t *sf_context, H5FD_subfiling_shared_co
      * to/from IOC ranks
      */
 
-    if (MPI_SUCCESS != (mpi_code = MPI_Comm_rank(file_comm, &comm_rank))) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: couldn't get MPI communicator rank; rc = %d\n", __func__, mpi_code);
-#endif
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_rank(file_comm, &comm_rank)))
+        H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Comm_rank failed", mpi_code);
 
-        ret_value = FAIL;
-        goto done;
-    }
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_dup(file_comm, &sf_context->sf_msg_comm)))
+        H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Comm_dup failed", mpi_code);
 
-    if (MPI_SUCCESS != (mpi_code = MPI_Comm_dup(file_comm, &sf_context->sf_msg_comm))) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: couldn't create sub-communicator for IOC messages; rc = %d\n", __func__, mpi_code);
-#endif
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_set_errhandler(sf_context->sf_msg_comm, MPI_ERRORS_RETURN)))
+        H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Comm_set_errhandler failed", mpi_code);
 
-        ret_value = FAIL;
-        goto done;
-    }
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_dup(file_comm, &sf_context->sf_data_comm)))
+        H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Comm_dup failed", mpi_code);
 
-    if (MPI_SUCCESS != (mpi_code = MPI_Comm_set_errhandler(sf_context->sf_msg_comm, MPI_ERRORS_RETURN))) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: couldn't set MPI error handler on IOC message sub-communicator; rc = %d\n", __func__,
-                 mpi_code);
-#endif
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_set_errhandler(sf_context->sf_data_comm, MPI_ERRORS_RETURN)))
+        H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Comm_set_errhandler failed", mpi_code);
 
-        ret_value = FAIL;
-        goto done;
-    }
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_dup(file_comm, &sf_context->sf_eof_comm)))
+        H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Comm_dup failed", mpi_code);
 
-    if (MPI_SUCCESS != (mpi_code = MPI_Comm_dup(file_comm, &sf_context->sf_data_comm))) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: couldn't create sub-communicator for IOC data; rc = %d\n", __func__, mpi_code);
-#endif
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_set_errhandler(sf_context->sf_eof_comm, MPI_ERRORS_RETURN)))
+        H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Comm_set_errhandler failed", mpi_code);
 
-        ret_value = FAIL;
-        goto done;
-    }
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_dup(file_comm, &sf_context->sf_barrier_comm)))
+        H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Comm_dup failed", mpi_code);
 
-    if (MPI_SUCCESS != (mpi_code = MPI_Comm_set_errhandler(sf_context->sf_data_comm, MPI_ERRORS_RETURN))) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: couldn't set MPI error handler on IOC data sub-communicator; rc = %d\n", __func__,
-                 mpi_code);
-#endif
-
-        ret_value = FAIL;
-        goto done;
-    }
-
-    if (MPI_SUCCESS != (mpi_code = MPI_Comm_dup(file_comm, &sf_context->sf_eof_comm))) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: couldn't create sub-communicator for IOC EOF; rc = %d\n", __func__, mpi_code);
-#endif
-
-        ret_value = FAIL;
-        goto done;
-    }
-
-    if (MPI_SUCCESS != (mpi_code = MPI_Comm_set_errhandler(sf_context->sf_eof_comm, MPI_ERRORS_RETURN))) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: couldn't set MPI error handler on IOC EOF sub-communicator; rc = %d\n", __func__,
-                 mpi_code);
-#endif
-
-        ret_value = FAIL;
-        goto done;
-    }
-
-    if (MPI_SUCCESS != (mpi_code = MPI_Comm_dup(file_comm, &sf_context->sf_barrier_comm))) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: couldn't create sub-communicator for barriers; rc = %d\n", __func__, mpi_code);
-#endif
-
-        ret_value = FAIL;
-        goto done;
-    }
-
-    if (MPI_SUCCESS != (mpi_code = MPI_Comm_set_errhandler(sf_context->sf_barrier_comm, MPI_ERRORS_RETURN))) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: couldn't set MPI error handler on barrier sub-communicator; rc = %d\n", __func__,
-                 mpi_code);
-#endif
-
-        ret_value = FAIL;
-        goto done;
-    }
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_set_errhandler(sf_context->sf_barrier_comm, MPI_ERRORS_RETURN)))
+        H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Comm_set_errhandler failed", mpi_code);
 
     /* Create an MPI sub-communicator for IOC ranks */
     if (app_topology->n_io_concentrators > 1) {
         if (MPI_SUCCESS != (mpi_code = MPI_Comm_split(file_comm, app_topology->rank_is_ioc, comm_rank,
-                                                      &sf_context->sf_group_comm))) {
-#ifdef H5_SUBFILING_DEBUG
-            HDprintf("%s: couldn't create sub-communicator for IOC ranks; rc = %d\n", __func__, mpi_code);
-#endif
+                                                      &sf_context->sf_group_comm)))
+            H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Comm_split failed", mpi_code);
 
-            ret_value = FAIL;
-            goto done;
-        }
+        if (MPI_SUCCESS != (mpi_code = MPI_Comm_rank(sf_context->sf_group_comm, &sf_context->sf_group_rank)))
+            H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Comm_rank failed", mpi_code);
 
-        if (MPI_SUCCESS !=
-            (mpi_code = MPI_Comm_rank(sf_context->sf_group_comm, &sf_context->sf_group_rank))) {
-#ifdef H5_SUBFILING_DEBUG
-            HDprintf("%s: couldn't get MPI rank from IOC rank sub-communicator; rc = %d\n", __func__,
-                     mpi_code);
-#endif
-
-            ret_value = FAIL;
-            goto done;
-        }
-
-        if (MPI_SUCCESS !=
-            (mpi_code = MPI_Comm_size(sf_context->sf_group_comm, &sf_context->sf_group_size))) {
-#ifdef H5_SUBFILING_DEBUG
-            HDprintf("%s: couldn't get MPI comm size from IOC rank sub-communicator; rc = %d\n", __func__,
-                     mpi_code);
-#endif
-
-            ret_value = FAIL;
-            goto done;
-        }
+        if (MPI_SUCCESS != (mpi_code = MPI_Comm_size(sf_context->sf_group_comm, &sf_context->sf_group_size)))
+            H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Comm_size failed", mpi_code);
     }
 
 done:
@@ -1586,7 +1320,7 @@ done:
         H5_free_subfiling_object_int(sf_context);
     }
 
-    return ret_value;
+    H5_SUBFILING_FUNC_LEAVE;
 }
 
 /*-------------------------------------------------------------------------
@@ -1635,14 +1369,9 @@ open_subfile_with_context(subfiling_context_t *sf_context, int file_acc_flags)
      * There shouldn't be any issue, but check the status and
      * return if there was a problem.
      */
-    if (record_fid_to_subfile(sf_context->h5_file_handle, sf_context->sf_context_id, NULL) < 0) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: couldn't record HDF5 file ID to subfile context mapping\n", __func__);
-#endif
-
-        ret_value = FAIL;
-        goto done;
-    }
+    if (record_fid_to_subfile(sf_context->h5_file_handle, sf_context->sf_context_id, NULL) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
+                                "couldn't record HDF5 file ID to subfile context mapping");
 
     /*
      * If this rank is an I/O concentrator, actually open
@@ -1652,28 +1381,14 @@ open_subfile_with_context(subfiling_context_t *sf_context, int file_acc_flags)
         h5_stat_t st;
 
         /* Retrieve Inode value for HDF5 stub file */
-        if (HDstat(sf_context->h5_filename, &st) < 0) {
-#ifdef H5_SUBFILING_DEBUG
-            HDprintf("[%s %d]: couldn't stat file %s\n", __func__,
-                     sf_context->topology->app_layout->world_rank, sf_context->h5_filename);
-#endif
-
-            ret_value = FAIL;
-            goto done;
-        }
+        if (HDstat(sf_context->h5_filename, &st) < 0)
+            H5_SUBFILING_SYS_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "couldn't stat HDF5 stub file");
 
         HDcompile_assert(sizeof(uint64_t) >= sizeof(ino_t));
         sf_context->h5_file_id = (uint64_t)st.st_ino;
 
-        if (ioc_open_file(sf_context->sf_context_id, file_acc_flags) < 0) {
-#ifdef H5_SUBFILING_DEBUG
-            HDprintf("[%s %d]: couldn't open subfile\n", __func__,
-                     sf_context->topology->app_layout->world_rank);
-#endif
-
-            ret_value = FAIL;
-            goto done;
-        }
+        if (ioc_open_file(sf_context->sf_context_id, file_acc_flags) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, FAIL, "IOC couldn't open subfile");
     }
 
 done:
@@ -1681,7 +1396,7 @@ done:
         clear_fid_map_entry(sf_context->h5_file_handle, sf_context->sf_context_id);
     }
 
-    return ret_value;
+    H5_SUBFILING_FUNC_LEAVE;
 }
 
 /*-------------------------------------------------------------------------
@@ -1722,14 +1437,8 @@ record_fid_to_subfile(void *file_handle, int64_t subfile_context_id, int *next_i
 
     if (sf_file_map_size == 0) {
         if (NULL ==
-            (sf_open_file_map = HDmalloc((size_t)DEFAULT_FILE_MAP_ENTRIES * sizeof(*sf_open_file_map)))) {
-#ifdef H5_SUBFILING_DEBUG
-            HDprintf("%s: couldn't allocate open file map\n", __func__);
-#endif
-
-            ret_value = FAIL;
-            goto done;
-        }
+            (sf_open_file_map = HDmalloc((size_t)DEFAULT_FILE_MAP_ENTRIES * sizeof(*sf_open_file_map))))
+            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "couldn't allocate open file mapping");
 
         sf_file_map_size = DEFAULT_FILE_MAP_ENTRIES;
         for (int i = 0; i < sf_file_map_size; i++) {
@@ -1758,14 +1467,9 @@ record_fid_to_subfile(void *file_handle, int64_t subfile_context_id, int *next_i
         void *tmp_realloc;
 
         if (NULL == (tmp_realloc = HDrealloc(sf_open_file_map,
-                                             ((size_t)(sf_file_map_size * 2) * sizeof(*sf_open_file_map))))) {
-#ifdef H5_SUBFILING_DEBUG
-            HDprintf("%s: couldn't reallocate open file map\n", __func__);
-#endif
-
-            ret_value = FAIL;
-            goto done;
-        }
+                                             ((size_t)(sf_file_map_size * 2) * sizeof(*sf_open_file_map)))))
+            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                    "couldn't reallocate open file mapping");
 
         sf_open_file_map = tmp_realloc;
         sf_file_map_size *= 2;
@@ -1783,7 +1487,7 @@ record_fid_to_subfile(void *file_handle, int64_t subfile_context_id, int *next_i
     }
 
 done:
-    return ret_value;
+    H5_SUBFILING_FUNC_LEAVE;
 }
 
 /*-------------------------------------------------------------------------
@@ -1835,46 +1539,24 @@ ioc_open_file(int64_t file_context_id, int file_acc_flags)
     int                  fd          = -1;
     herr_t               ret_value   = SUCCEED;
 
-    if (NULL == (sf_context = H5_get_subfiling_object(file_context_id))) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: couldn't get subfiling object from context ID\n", __func__);
-#endif
-
-        ret_value = FAIL;
-        goto done;
-    }
+    if (NULL == (sf_context = H5_get_subfiling_object(file_context_id)))
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, FAIL,
+                                "couldn't get subfiling object from context ID");
 
     /* Only IOC ranks should be here */
     HDassert(sf_context->topology);
     HDassert(sf_context->topology->subfile_rank >= 0);
 
-    if (NULL == (filepath = HDcalloc(1, PATH_MAX))) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: couldn't allocate space for subfile filename\n", __func__);
-#endif
-
-        ret_value = FAIL;
-        goto done;
-    }
+    if (NULL == (filepath = HDcalloc(1, PATH_MAX)))
+        H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                "couldn't allocate space for subfile filename");
 
     /* Generate the name of the subfile that this IOC rank will open */
-    if (generate_subfile_name(sf_context, file_acc_flags, filepath, PATH_MAX, &base, &subfile_dir) < 0) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: couldn't generate name for subfile\n", __func__);
-#endif
+    if (generate_subfile_name(sf_context, file_acc_flags, filepath, PATH_MAX, &base, &subfile_dir) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, FAIL, "couldn't generate name for subfile");
 
-        ret_value = FAIL;
-        goto done;
-    }
-
-    if (NULL == (sf_context->sf_filename = HDstrdup(filepath))) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: couldn't copy subfile name\n", __func__);
-#endif
-
-        ret_value = FAIL;
-        goto done;
-    }
+    if (NULL == (sf_context->sf_filename = HDstrdup(filepath)))
+        H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "couldn't copy subfile name");
 
     /* Attempt to create/open the subfile for this IOC rank */
     if ((fd = HDopen(filepath, file_acc_flags, mode)) < 0)
@@ -1911,7 +1593,7 @@ done:
     HDfree(subfile_dir);
     HDfree(filepath);
 
-    return ret_value;
+    H5_SUBFILING_FUNC_LEAVE;
 }
 
 /*
@@ -1961,28 +1643,19 @@ generate_subfile_name(subfiling_context_t *sf_context, int file_acc_flags, char 
      */
     n_io_concentrators = sf_context->topology->n_io_concentrators;
 
-    if (NULL == (prefix = HDmalloc(PATH_MAX))) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: couldn't allocate space for subfile prefix\n", __func__);
-#endif
-
-        ret_value = FAIL;
-        goto done;
-    }
+    if (NULL == (prefix = HDmalloc(PATH_MAX)))
+        H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                "couldn't allocate space for subfile prefix");
 
     /* Under normal operation, we co-locate subfiles with the HDF5 file */
-    HDstrncpy(prefix, sf_context->h5_filename, PATH_MAX);
+    HDstrncpy(prefix, sf_context->h5_filename, PATH_MAX - 1);
+    prefix[PATH_MAX - 1] = '\0';
 
     base = basename(prefix);
 
-    if (NULL == (*filename_basename_out = HDstrdup(base))) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: couldn't allocate space for subfile basename\n", __func__);
-#endif
-
-        ret_value = FAIL;
-        goto done;
-    }
+    if (NULL == (*filename_basename_out = HDstrdup(base)))
+        H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                "couldn't allocate space for subfile basename");
 
     if (sf_context->subfile_prefix) {
         /* Note: Users may specify a directory name which is inaccessible
@@ -1992,28 +1665,16 @@ generate_subfile_name(subfiling_context_t *sf_context, int file_acc_flags, char 
          * if so, we could default to creating the subfiles in the
          * current directory. (?)
          */
-        if (NULL == (*subfile_dir_out = HDstrdup(sf_context->subfile_prefix))) {
-#ifdef H5_SUBFILING_DEBUG
-            HDprintf("%s: couldn't copy subfile prefix\n", __func__);
-#endif
-
-            ret_value = FAIL;
-            goto done;
-        }
+        if (NULL == (*subfile_dir_out = HDstrdup(sf_context->subfile_prefix)))
+            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "couldn't copy subfile prefix");
 
         subfile_dir = *subfile_dir_out;
     }
     else {
         subfile_dir = dirname(prefix);
 
-        if (NULL == (*subfile_dir_out = HDstrdup(subfile_dir))) {
-#ifdef H5_SUBFILING_DEBUG
-            HDprintf("%s: couldn't copy subfile prefix\n", __func__);
-#endif
-
-            ret_value = FAIL;
-            goto done;
-        }
+        if (NULL == (*subfile_dir_out = HDstrdup(subfile_dir)))
+            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "couldn't copy subfile prefix");
     }
 
     /*
@@ -2021,14 +1682,9 @@ generate_subfile_name(subfiling_context_t *sf_context, int file_acc_flags, char 
      * we aren't truncating the file.
      */
     if (0 == (file_acc_flags & O_TRUNC)) {
-        if (open_config_file(sf_context, base, subfile_dir, "r", &config_file) < 0) {
-#ifdef H5_SUBFILING_DEBUG
-            HDprintf("%s: couldn't open existing subfiling configuration file\n", __func__);
-#endif
-
-            ret_value = FAIL;
-            goto done;
-        }
+        if (open_config_file(sf_context, base, subfile_dir, "r", &config_file) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, FAIL,
+                                    "couldn't open existing subfiling configuration file");
     }
 
     /*
@@ -2037,14 +1693,9 @@ generate_subfile_name(subfiling_context_t *sf_context, int file_acc_flags, char 
      * in order to generate the correct subfile names.
      */
     if (config_file) {
-        if (H5_get_num_iocs_from_config_file(config_file, &n_io_concentrators) < 0) {
-#ifdef H5_SUBFILING_DEBUG
-            HDprintf("%s: couldn't read from subfiling configuration file\n", __func__);
-#endif
-
-            ret_value = FAIL;
-            goto done;
-        }
+        if (H5_get_num_iocs_from_config_file(config_file, &n_io_concentrators) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL,
+                                    "couldn't read from subfiling configuration file");
     }
 
     /*
@@ -2064,13 +1715,9 @@ generate_subfile_name(subfiling_context_t *sf_context, int file_acc_flags, char 
                n_io_concentrators);
 
 done:
-    if (config_file && (EOF == HDfclose(config_file))) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: fclose failed to close subfiling configuration file\n", __func__);
-#endif
-
-        ret_value = FAIL;
-    }
+    if (config_file && (EOF == HDfclose(config_file)))
+        H5_SUBFILING_DONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL,
+                                "couldn't close subfiling configuration file");
 
     if (ret_value < 0) {
         if (*filename_basename_out) {
@@ -2085,7 +1732,7 @@ done:
 
     HDfree(prefix);
 
-    return ret_value;
+    H5_SUBFILING_FUNC_LEAVE;
 }
 
 /*-------------------------------------------------------------------------
@@ -2119,33 +1766,18 @@ create_config_file(subfiling_context_t *sf_context, const char *base_filename, c
     HDassert(base_filename);
     HDassert(subfile_dir);
 
-    if (sf_context->h5_file_id == UINT64_MAX) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: invalid HDF5 file ID %" PRIu64 "\n", __func__, sf_context->h5_file_id);
-#endif
-
-        ret_value = FAIL;
-        goto done;
-    }
-    if (*base_filename == '\0') {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: invalid base HDF5 filename %s\n", __func__, base_filename);
-#endif
-
-        ret_value = FAIL;
-        goto done;
-    }
+    if (sf_context->h5_file_id == UINT64_MAX)
+        H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "invalid HDF5 file ID %" PRIu64,
+                                sf_context->h5_file_id);
+    if (*base_filename == '\0')
+        H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "invalid base HDF5 filename '%s'",
+                                base_filename);
     if (*subfile_dir == '\0')
         subfile_dir = ".";
 
-    if (NULL == (config_filename = HDmalloc(PATH_MAX))) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: couldn't allocate space for subfiling configuration file filename\n", __func__);
-#endif
-
-        ret_value = FAIL;
-        goto done;
-    }
+    if (NULL == (config_filename = HDmalloc(PATH_MAX)))
+        H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                "couldn't allocate space for subfiling configuration filename");
 
     HDsnprintf(config_filename, PATH_MAX, "%s/%s" H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE, subfile_dir,
                base_filename, sf_context->h5_file_id);
@@ -2156,14 +1788,9 @@ create_config_file(subfiling_context_t *sf_context, const char *base_filename, c
 
     config_file_exists = (ret == 0) || ((ret < 0) && (ENOENT != errno));
 
-    if (config_file_exists && (ret != 0)) {
-#ifdef H5_SUBFILING_DEBUG
-        HDperror("couldn't check existence of configuration file");
-#endif
-
-        ret_value = FAIL;
-        goto done;
-    }
+    if (config_file_exists && (ret != 0))
+        H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL,
+                                    "couldn't check existence of subfiling configuration file");
 
     /*
      * If a config file doesn't exist, create one. If a
@@ -2176,67 +1803,37 @@ create_config_file(subfiling_context_t *sf_context, const char *base_filename, c
         int n_io_concentrators = sf_context->topology->n_io_concentrators;
         int num_digits;
 
-        if (NULL == (config_file = HDfopen(config_filename, "w+"))) {
-#ifdef H5_SUBFILING_DEBUG
-            HDperror("couldn't open subfiling configuration file");
-#endif
+        if (NULL == (config_file = HDfopen(config_filename, "w+")))
+            H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL,
+                                        "couldn't open subfiling configuration file");
 
-            ret_value = FAIL;
-            goto done;
-        }
-
-        if (NULL == (line_buf = HDmalloc(PATH_MAX))) {
-#ifdef H5_SUBFILING_DEBUG
-            HDprintf("%s: couldn't allocate buffer for writing to subfiling configuration file\n", __func__);
-#endif
-
-            ret_value = FAIL;
-            goto done;
-        }
+        if (NULL == (line_buf = HDmalloc(PATH_MAX)))
+            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                    "couldn't allocate buffer for writing to subfiling configuration file");
 
         /* Write the subfiling stripe size to the configuration file */
         HDsnprintf(line_buf, PATH_MAX, "stripe_size=%" PRId64 "\n", sf_context->sf_stripe_size);
-        if (HDfwrite(line_buf, HDstrlen(line_buf), 1, config_file) != 1) {
-#ifdef H5_SUBFILING_DEBUG
-            HDprintf("%s: fwrite failed to write to subfiling configuration file\n", __func__);
-#endif
-
-            ret_value = FAIL;
-            goto done;
-        }
+        if (HDfwrite(line_buf, HDstrlen(line_buf), 1, config_file) != 1)
+            H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL,
+                                        "failed to write to subfiling configuration file");
 
         /* Write the number of I/O concentrators to the configuration file */
         HDsnprintf(line_buf, PATH_MAX, "aggregator_count=%d\n", n_io_concentrators);
-        if (HDfwrite(line_buf, HDstrlen(line_buf), 1, config_file) != 1) {
-#ifdef H5_SUBFILING_DEBUG
-            HDprintf("%s: fwrite failed to write to subfiling configuration file\n", __func__);
-#endif
-
-            ret_value = FAIL;
-            goto done;
-        }
+        if (HDfwrite(line_buf, HDstrlen(line_buf), 1, config_file) != 1)
+            H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL,
+                                        "failed to write to subfiling configuration file");
 
         /* Write the base HDF5 filename to the configuration file */
         HDsnprintf(line_buf, PATH_MAX, "hdf5_file=%s\n", sf_context->h5_filename);
-        if (HDfwrite(line_buf, HDstrlen(line_buf), 1, config_file) != 1) {
-#ifdef H5_SUBFILING_DEBUG
-            HDprintf("%s: fwrite failed to write to subfiling configuration file\n", __func__);
-#endif
-
-            ret_value = FAIL;
-            goto done;
-        }
+        if (HDfwrite(line_buf, HDstrlen(line_buf), 1, config_file) != 1)
+            H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL,
+                                        "failed to write to subfiling configuration file");
 
         /* Write the optional subfile directory prefix to the configuration file */
         HDsnprintf(line_buf, PATH_MAX, "subfile_dir=%s\n", subfile_dir);
-        if (HDfwrite(line_buf, HDstrlen(line_buf), 1, config_file) != 1) {
-#ifdef H5_SUBFILING_DEBUG
-            HDprintf("%s: fwrite failed to write to subfiling configuration file\n", __func__);
-#endif
-
-            ret_value = FAIL;
-            goto done;
-        }
+        if (HDfwrite(line_buf, HDstrlen(line_buf), 1, config_file) != 1)
+            H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL,
+                                        "failed to write to subfiling configuration file");
 
         /* Write out each subfile name to the configuration file */
         num_digits = (int)(HDlog10(n_io_concentrators) + 1);
@@ -2244,32 +1841,23 @@ create_config_file(subfiling_context_t *sf_context, const char *base_filename, c
             HDsnprintf(line_buf, PATH_MAX, "%s" H5FD_SUBFILING_FILENAME_TEMPLATE "\n", base_filename,
                        sf_context->h5_file_id, num_digits, k + 1, n_io_concentrators);
 
-            if (HDfwrite(line_buf, HDstrlen(line_buf), 1, config_file) != 1) {
-#ifdef H5_SUBFILING_DEBUG
-                HDprintf("%s: fwrite failed to write to subfiling configuration file\n", __func__);
-#endif
-
-                ret_value = FAIL;
-                goto done;
-            }
+            if (HDfwrite(line_buf, HDstrlen(line_buf), 1, config_file) != 1)
+                H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL,
+                                            "failed to write to subfiling configuration file");
         }
     }
 
 done:
     if (config_file) {
-        if (EOF == HDfclose(config_file)) {
-#ifdef H5_SUBFILING_DEBUG
-            HDprintf("%s: fclose failed to close subfiling configuration file\n", __func__);
-#endif
-
-            ret_value = FAIL;
-        }
+        if (EOF == HDfclose(config_file))
+            H5_SUBFILING_DONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL,
+                                    "couldn't close subfiling configuration file");
     }
 
     HDfree(line_buf);
     HDfree(config_filename);
 
-    return ret_value;
+    H5_SUBFILING_FUNC_LEAVE;
 }
 
 /*-------------------------------------------------------------------------
@@ -2304,33 +1892,18 @@ open_config_file(subfiling_context_t *sf_context, const char *base_filename, con
 
     *config_file_out = NULL;
 
-    if (sf_context->h5_file_id == UINT64_MAX) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: invalid HDF5 file ID %" PRIu64 "\n", __func__, sf_context->h5_file_id);
-#endif
-
-        ret_value = FAIL;
-        goto done;
-    }
-    if (*base_filename == '\0') {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: invalid base HDF5 filename %s\n", __func__, base_filename);
-#endif
-
-        ret_value = FAIL;
-        goto done;
-    }
+    if (sf_context->h5_file_id == UINT64_MAX)
+        H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "invalid HDF5 file ID %" PRIu64,
+                                sf_context->h5_file_id);
+    if (*base_filename == '\0')
+        H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "invalid base HDF5 filename '%s'",
+                                base_filename);
     if (*subfile_dir == '\0')
         subfile_dir = ".";
 
-    if (NULL == (config_filename = HDmalloc(PATH_MAX))) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: couldn't allocate space for subfiling configuration file filename\n", __func__);
-#endif
-
-        ret_value = FAIL;
-        goto done;
-    }
+    if (NULL == (config_filename = HDmalloc(PATH_MAX)))
+        H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                "couldn't allocate space for subfiling configuration filename");
 
     HDsnprintf(config_filename, PATH_MAX, "%s/%s" H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE, subfile_dir,
                base_filename, sf_context->h5_file_id);
@@ -2344,40 +1917,26 @@ open_config_file(subfiling_context_t *sf_context, const char *base_filename, con
     if (!config_file_exists)
         goto done;
 
-    if (config_file_exists && (ret != 0)) {
-#ifdef H5_SUBFILING_DEBUG
-        HDperror("couldn't check existence of configuration file");
-#endif
+    if (config_file_exists && (ret != 0))
+        H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL,
+                                    "couldn't check existence of subfiling configuration file");
 
-        ret_value = FAIL;
-        goto done;
-    }
-
-    if (NULL == (config_file = HDfopen(config_filename, mode))) {
-#ifdef H5_SUBFILING_DEBUG
-        HDperror("couldn't open subfiling configuration file");
-#endif
-
-        ret_value = FAIL;
-        goto done;
-    }
+    if (NULL == (config_file = HDfopen(config_filename, mode)))
+        H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL,
+                                    "couldn't open subfiling configuration file");
 
     *config_file_out = config_file;
 
 done:
     if (ret_value < 0) {
-        if (config_file && (EOF == HDfclose(config_file))) {
-#ifdef H5_SUBFILING_DEBUG
-            HDprintf("%s: fclose failed to close subfiling configuration file\n", __func__);
-#endif
-
-            ret_value = FAIL;
-        }
+        if (config_file && (EOF == HDfclose(config_file)))
+            H5_SUBFILING_DONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL,
+                                    "couldn't close subfiling configuration file");
     }
 
     HDfree(config_filename);
 
-    return ret_value;
+    H5_SUBFILING_FUNC_LEAVE;
 }
 
 /*-------------------------------------------------------------------------
@@ -2402,79 +1961,42 @@ H5_get_num_iocs_from_config_file(FILE *config_file, int *n_io_concentrators)
     HDassert(config_file);
     HDassert(n_io_concentrators);
 
-    if (HDfseek(config_file, 0, SEEK_END) < 0) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: couldn't seek to end of subfiling configuration file; errno = %d\n", __func__, errno);
-#endif
+    if (HDfseek(config_file, 0, SEEK_END) < 0)
+        H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_SEEKERROR, FAIL,
+                                    "couldn't seek to end of subfiling configuration file");
 
-        ret_value = FAIL;
-        goto done;
-    }
+    if ((config_file_len = HDftell(config_file)) < 0)
+        H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL,
+                                    "couldn't get size of subfiling configuration file");
 
-    if ((config_file_len = HDftell(config_file)) < 0) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: couldn't get size of subfiling configuration file; errno = %d\n", __func__, errno);
-#endif
+    if (HDfseek(config_file, 0, SEEK_SET) < 0)
+        H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_SEEKERROR, FAIL,
+                                    "couldn't seek to beginning of subfiling configuration file");
 
-        ret_value = FAIL;
-        goto done;
-    }
+    if (NULL == (config_buf = HDmalloc((size_t)config_file_len + 1)))
+        H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                "couldn't allocate space for reading from subfiling configuration file");
 
-    if (HDfseek(config_file, 0, SEEK_SET) < 0) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: couldn't seek to beginning of subfiling configuration file; errno = %d\n", __func__,
-                 errno);
-#endif
-
-        ret_value = FAIL;
-        goto done;
-    }
-
-    if (NULL == (config_buf = HDmalloc((size_t)config_file_len + 1))) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: couldn't allocate space for reading subfiling configuration file\n", __func__);
-#endif
-
-        ret_value = FAIL;
-        goto done;
-    }
-
-    if (HDfread(config_buf, (size_t)config_file_len, 1, config_file) != 1) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: couldn't read from subfiling configuration file; errno = %d\n", __func__, errno);
-#endif
-
-        ret_value = FAIL;
-        goto done;
-    }
+    if (HDfread(config_buf, (size_t)config_file_len, 1, config_file) != 1)
+        H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_READERROR, FAIL,
+                                    "couldn't read from subfiling configuration file");
 
     config_buf[config_file_len] = '\0';
 
-    if (NULL == (ioc_substr = HDstrstr(config_buf, "aggregator_count"))) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: malformed subfiling configuration file - no aggregator_count entry\n", __func__);
-#endif
+    if (NULL == (ioc_substr = HDstrstr(config_buf, "aggregator_count")))
+        H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL,
+                                "malformed subfiling configuration file - no aggregator count entry");
 
-        ret_value = FAIL;
-        goto done;
-    }
+    if (EOF == HDsscanf(ioc_substr, "aggregator_count=%d", &read_n_io_concs))
+        H5_SUBFILING_SYS_GOTO_ERROR(
+            H5E_FILE, H5E_CANTGET, FAIL,
+            "couldn't get number of I/O concentrators from subfiling configuration file");
 
-    if (EOF == HDsscanf(ioc_substr, "aggregator_count=%d", &read_n_io_concs)) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: couldn't get number of I/O concentrators from subfiling configuration file\n",
-                 __func__);
-#endif
-
-        ret_value = FAIL;
-        goto done;
-    }
-
-    if (read_n_io_concs <= 0) {
-        HDprintf("%s: invalid number of I/O concentrators (%d) read from subfiling configuration file\n",
-                 __func__, read_n_io_concs);
-        ret_value = FAIL;
-        goto done;
-    }
+    if (read_n_io_concs <= 0)
+        H5_SUBFILING_GOTO_ERROR(
+            H5E_FILE, H5E_BADVALUE, FAIL,
+            "invalid number of I/O concentrators (%d) read from subfiling configuration file",
+            read_n_io_concs);
 
     *n_io_concentrators = read_n_io_concs;
 
@@ -2533,65 +2055,41 @@ H5_close_subfiles(int64_t subfiling_context_id)
     int                  mpi_code;
     herr_t               ret_value = SUCCEED;
 
-    if (NULL == (sf_context = H5_get_subfiling_object(subfiling_context_id))) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: couldn't get subfiling object from context ID\n", __func__);
-#endif
+    if (NULL == (sf_context = H5_get_subfiling_object(subfiling_context_id)))
+        H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "couldn't get subfiling object from context ID");
 
-        ret_value = FAIL;
-        goto done;
-    }
-
-    /* We make the subfile close operation collective.
-     * Otherwise, there may be a race condition between
-     * our closing the subfiles and the user application
-     * moving ahead and possibly re-opening a file.
-     *
-     * If we can, we utilize an async barrier which gives
-     * us the opportunity to reduce the CPU load due to
-     * MPI spinning while waiting for the barrier to
-     * complete.  This is especially important if there
-     * is heavy thread utilization due to subfiling
-     * activities, i.e. the thread pool might be
-     * extremely busy servicing I/O requests from all
-     * HDF5 application ranks.
-     */
+        /* We make the subfile close operation collective.
+         * Otherwise, there may be a race condition between
+         * our closing the subfiles and the user application
+         * moving ahead and possibly re-opening a file.
+         *
+         * If we can, we utilize an async barrier which gives
+         * us the opportunity to reduce the CPU load due to
+         * MPI spinning while waiting for the barrier to
+         * complete.  This is especially important if there
+         * is heavy thread utilization due to subfiling
+         * activities, i.e. the thread pool might be
+         * extremely busy servicing I/O requests from all
+         * HDF5 application ranks.
+         */
 #if MPI_VERSION > 3 || (MPI_VERSION == 3 && MPI_SUBVERSION >= 1)
     {
         int barrier_complete = 0;
 
-        if (MPI_SUCCESS != (mpi_code = MPI_Ibarrier(sf_context->sf_barrier_comm, &barrier_req))) {
-#ifdef H5_SUBFILING_DEBUG
-            HDprintf("%s: MPI_Ibarrier failed with rc %d\n", __func__, mpi_code);
-#endif
-
-            ret_value = FAIL;
-            goto done;
-        }
+        if (MPI_SUCCESS != (mpi_code = MPI_Ibarrier(sf_context->sf_barrier_comm, &barrier_req)))
+            H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Ibarrier failed", mpi_code);
 
         while (!barrier_complete) {
             useconds_t t_delay = 5;
             usleep(t_delay);
 
-            if (MPI_SUCCESS != (mpi_code = MPI_Test(&barrier_req, &barrier_complete, MPI_STATUS_IGNORE))) {
-#ifdef H5_SUBFILING_DEBUG
-                HDprintf("%s: MPI_Test failed with rc %d\n", __func__, mpi_code);
-#endif
-
-                ret_value = FAIL;
-                goto done;
-            }
+            if (MPI_SUCCESS != (mpi_code = MPI_Test(&barrier_req, &barrier_complete, MPI_STATUS_IGNORE)))
+                H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Test failed", mpi_code);
         }
     }
 #else
-    if (MPI_SUCCESS != (mpi_code = MPI_Barrier(sf_context->sf_barrier_comm))) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: MPI_Barrier failed with rc %d\n", __func__, mpi_code);
-#endif
-
-        ret_value = FAIL;
-        goto done;
-    }
+    if (MPI_SUCCESS != (mpi_code = MPI_Barrier(sf_context->sf_barrier_comm)))
+        H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code);
 #endif
 
     /* The map from file handle to subfiling context can now be cleared */
@@ -2602,16 +2100,8 @@ H5_close_subfiles(int64_t subfiling_context_id)
     if (sf_context->topology->rank_is_ioc) {
         if (sf_context->sf_fid >= 0) {
             errno = 0;
-            if (HDclose(sf_context->sf_fid) < 0) {
-                HDperror("H5_close_subfiles - couldn't close subfile");
-
-#ifdef H5_SUBFILING_DEBUG
-                HDprintf("%s: couldn't close subfile\n", __func__);
-#endif
-
-                ret_value = FAIL;
-                goto done;
-            }
+            if (HDclose(sf_context->sf_fid) < 0)
+                H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "couldn't close subfile");
 
             sf_context->sf_fid = -1;
         }
@@ -2626,50 +2116,27 @@ H5_close_subfiles(int64_t subfiling_context_id)
     {
         int barrier_complete = 0;
 
-        if (MPI_SUCCESS != (mpi_code = MPI_Ibarrier(sf_context->sf_barrier_comm, &barrier_req))) {
-#ifdef H5_SUBFILING_DEBUG
-            HDprintf("%s: MPI_Ibarrier failed with rc %d\n", __func__, mpi_code);
-#endif
-
-            ret_value = FAIL;
-            goto done;
-        }
+        if (MPI_SUCCESS != (mpi_code = MPI_Ibarrier(sf_context->sf_barrier_comm, &barrier_req)))
+            H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Ibarrier failed", mpi_code);
 
         while (!barrier_complete) {
             useconds_t t_delay = 5;
             usleep(t_delay);
 
-            if (MPI_SUCCESS != (mpi_code = MPI_Test(&barrier_req, &barrier_complete, MPI_STATUS_IGNORE))) {
-#ifdef H5_SUBFILING_DEBUG
-                HDprintf("%s: MPI_Test failed with rc %d\n", __func__, mpi_code);
-#endif
-
-                ret_value = FAIL;
-                goto done;
-            }
+            if (MPI_SUCCESS != (mpi_code = MPI_Test(&barrier_req, &barrier_complete, MPI_STATUS_IGNORE)))
+                H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Test failed", mpi_code);
         }
     }
 #else
-    if (MPI_SUCCESS != (mpi_code = MPI_Barrier(sf_context->sf_barrier_comm))) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: MPI_Barrier failed with rc %d\n", __func__, mpi_code);
-#endif
-
-        ret_value = FAIL;
-        goto done;
-    }
+    if (MPI_SUCCESS != (mpi_code = MPI_Barrier(sf_context->sf_barrier_comm)))
+        H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code);
 #endif
 
 done:
-    if (sf_context && H5_free_subfiling_object_int(sf_context) < 0) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: couldn't free subfiling context object\n", __func__);
-#endif
+    if (sf_context && H5_free_subfiling_object_int(sf_context) < 0)
+        H5_SUBFILING_DONE_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "couldn't free subfiling context object");
 
-        ret_value = FAIL;
-    }
-
-    return ret_value;
+    H5_SUBFILING_FUNC_LEAVE;
 }
 
 /*-------------------------------------------------------------------------
@@ -2692,13 +2159,10 @@ done:
 int64_t
 H5_subfile_fhandle_to_context(void *file_handle)
 {
-    if (!sf_open_file_map) {
-#ifdef H5_SUBFILING_DEBUG
-        HDprintf("%s: open file map is invalid\n", __func__);
-#endif
+    int64_t ret_value = -1;
 
-        return -1;
-    }
+    if (!sf_open_file_map)
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, -1, "open file map is NULL");
 
     for (int i = 0; i < sf_file_map_size; i++) {
         if (sf_open_file_map[i].file_handle == file_handle) {
@@ -2706,7 +2170,8 @@ H5_subfile_fhandle_to_context(void *file_handle)
         }
     }
 
-    return -1;
+done:
+    H5_SUBFILING_FUNC_LEAVE;
 } /* end H5_subfile_fhandle_to_context() */
 
 #ifdef H5_SUBFILING_DEBUG
