@@ -1278,8 +1278,8 @@ done:
 herr_t
 H5Dchunk_iter(hid_t dset_id, hid_t dxpl_id, H5D_chunk_iter_op_t op, void *op_data)
 {
-    H5D_t *dset = NULL;
-    herr_t                              ret_value = SUCCEED;
+    H5D_t *dset      = NULL;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "iix*x", dset_id, dxpl_id, op, op_data);
