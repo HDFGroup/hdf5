@@ -7659,7 +7659,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5D__chunk_iter
  *
- * Purpose:     Iterate over all the chunks in the dataset with given callbak.
+ * Purpose:     Iterate over all the chunks in the dataset with given callback.
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative
