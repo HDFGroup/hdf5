@@ -7707,7 +7707,7 @@ H5D__chunk_iter_cb(const H5D_chunk_rec_t *chunk_rec, void *udata)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__chunk_iter(const H5D_t *dset, H5D_chunk_iter_op_t op, void *op_data)
+H5D__chunk_iter(H5D_t *dset, H5D_chunk_iter_op_t op, void *op_data)
 {
     const H5D_rdcc_t  *rdcc   = NULL;       /* Raw data chunk cache */
     H5O_layout_t      *layout = NULL;       /* Dataset layout */
