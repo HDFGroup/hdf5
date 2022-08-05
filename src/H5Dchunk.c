@@ -249,10 +249,10 @@ typedef struct H5D_chunk_coll_fill_info_t {
 } H5D_chunk_coll_fill_info_t;
 #endif /* H5_HAVE_PARALLEL */
 
-typedef struct H5D_chunk_iter_cb_data_t {
-    H5D_chunk_iter_op_t cb;      /* User defined callback */
+typedef struct H5D_chunk_iter_ud_t {
+    H5D_chunk_iter_op_t op;      /* User defined callback */
     void               *op_data; /* User data for user defined callback */
-} H5D_chunk_iter_cb_data_t;
+} H5D_chunk_iter_ud_t;
 
 /********************/
 /* Local Prototypes */
@@ -7657,6 +7657,37 @@ done:
 } /* end H5D__get_chunk_info_by_coord() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5D__chunk_iter_cb
+ *
+ * Purpose:     Call the user-defined function with the chunk data. The iterator continues if
+ *              the user-defined function returns H5_ITER_CONT, and stops if H5_ITER_STOP is
+ *              returned.
+ *
+ * Return:      Success:    H5_ITER_CONT or H5_ITER_STOP
+ *              Failure:    Negative (H5_ITER_ERROR)
+ *
+ * Programmer:  Gaute Hope
+ *              August 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5D__chunk_iter_cb(const H5D_chunk_rec_t *chunk_rec, void *udata)
+{
+    const H5D_chunk_iter_ud_t *data      = (H5D_chunk_iter_ud_t *)udata;
+    int                        ret_value = H5_ITER_CONT;
+
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* Check for callback failure and pass along return value */
+    if ((ret_value = (data->op)(chunk_rec->scaled, chunk_rec->filter_mask, chunk_rec->chunk_addr,
+                                chunk_rec->nbytes, data->op_data)) < 0)
+        HERROR(H5E_DATASET, H5E_CANTNEXT, "iteration operator failed");
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__chunk_iter_cb */
+
+/*-------------------------------------------------------------------------
  * Function:    H5D__chunk_iter
  *
  * Purpose:     Iterate over all the chunks in the dataset with given callback.
@@ -7670,13 +7701,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__chunk_iter(const H5D_t *dset, H5D_chunk_iter_op_t cb, void *op_data)
+H5D__chunk_iter(H5D_t *dset, H5D_chunk_iter_op_t op, void *op_data)
 {
-    const H5O_layout_t *layout = NULL;       /* Dataset layout */
-    const H5D_rdcc_t   *rdcc   = NULL;       /* Raw data chunk cache */
-    H5D_rdcc_ent_t     *ent;                 /* Cache entry index */
-    H5D_chk_idx_info_t  idx_info;            /* Chunked index info */
-    herr_t              ret_value = SUCCEED; /* Return value */
+    const H5D_rdcc_t  *rdcc   = NULL;       /* Raw data chunk cache */
+    H5O_layout_t      *layout = NULL;       /* Dataset layout */
+    H5D_rdcc_ent_t    *ent;                 /* Cache entry index */
+    H5D_chk_idx_info_t idx_info;            /* Chunked index info */
+    herr_t             ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(dset->oloc.addr)
 
@@ -7695,55 +7726,27 @@ H5D__chunk_iter(const H5D_t *dset, H5D_chunk_iter_op_t cb, void *op_data)
     for (ent = rdcc->head; ent; ent = ent->next)
         /* Flush the chunk out to disk, to make certain the size is correct later */
         if (H5D__chunk_flush_entry(dset, ent, FALSE) < 0)
-            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "cannot flush indexed storage buffer")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "cannot flush indexed storage buffer")
 
     /* Compose chunked index info struct */
     idx_info.f       = dset->oloc.file;
     idx_info.pline   = &dset->shared->dcpl_cache.pline;
-    idx_info.layout  = &dset->shared->layout.u.chunk;
-    idx_info.storage = &dset->shared->layout.storage.u.chunk;
+    idx_info.layout  = &layout->u.chunk;
+    idx_info.storage = &layout->storage.u.chunk;
 
     /* If the dataset is not written, return without errors */
     if (H5F_addr_defined(idx_info.storage->idx_addr)) {
-        H5D_chunk_iter_cb_data_t data;
-        data.cb      = cb;
-        data.op_data = op_data;
+        H5D_chunk_iter_ud_t ud;
+
+        /* Set up info for iteration callback */
+        ud.op      = op;
+        ud.op_data = op_data;
 
         /* Iterate over the allocated chunks calling the iterator callback */
-        if ((dset->shared->layout.storage.u.chunk.ops->iterate)(&idx_info, H5D__chunk_iter_cb, &data) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to iterate over chunks.")
+        if ((ret_value = (layout->storage.u.chunk.ops->iterate)(&idx_info, H5D__chunk_iter_cb, &ud)) < 0)
+            HERROR(H5E_DATASET, H5E_CANTNEXT, "chunk iteration failed");
     } /* end if H5F_addr_defined */
 
 done:
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5D__chunk_iter() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5D__chunk_iter_cb
- *
- * Purpose:     Call the user-defined function with the chunk data. The iterator continues if
- *              the user-defined function returns H5_ITER_CONT, and stops if H5_ITER_STOP is
- *              returned.
- *
- * Return:      Success:    H5_ITER_CONT or H5_ITER_STOP
- *              Failure:    Negative (H5_ITER_ERROR)
- *
- * Programmer:  Gaute Hope
- *              August 2020
- *
- *-------------------------------------------------------------------------
- */
-static int
-H5D__chunk_iter_cb(const H5D_chunk_rec_t *chunk_rec, void *udata)
-{
-    int ret_value = 0;
-
-    FUNC_ENTER_STATIC_NOERR
-
-    const H5D_chunk_iter_cb_data_t *data = (H5D_chunk_iter_cb_data_t *)udata;
-
-    ret_value = (data->cb)(chunk_rec->scaled, chunk_rec->filter_mask, chunk_rec->chunk_addr,
-                           chunk_rec->nbytes, data->op_data);
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__chunk_iter_cb */
