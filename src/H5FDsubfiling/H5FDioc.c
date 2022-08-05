@@ -61,36 +61,6 @@ typedef struct H5FD_ioc_t {
 
     char *file_dir;  /* Directory where we find files */
     char *file_path; /* The user defined filename */
-
-#ifndef H5_HAVE_WIN32_API
-    /* On most systems the combination of device and i-node number uniquely
-     * identify a file.  Note that Cygwin, MinGW and other Windows POSIX
-     * environments have the stat function (which fakes inodes)
-     * and will use the 'device + inodes' scheme as opposed to the
-     * Windows code further below.
-     */
-    dev_t device; /* file device number   */
-#else
-    /* Files in windows are uniquely identified by the volume serial
-     * number and the file index (both low and high parts).
-     *
-     * There are caveats where these numbers can change, especially
-     * on FAT file systems.  On NTFS, however, a file should keep
-     * those numbers the same until renamed or deleted (though you
-     * can use ReplaceFile() on NTFS to keep the numbers the same
-     * while renaming).
-     *
-     * See the MSDN "BY_HANDLE_FILE_INFORMATION Structure" entry for
-     * more information.
-     *
-     * http://msdn.microsoft.com/en-us/library/aa363788(v=VS.85).aspx
-     */
-    DWORD nFileIndexLow;
-    DWORD nFileIndexHigh;
-    DWORD dwVolumeSerialNumber;
-
-    HANDLE hFile; /* Native windows file handle */
-#endif /* H5_HAVE_WIN32_API */
 } H5FD_ioc_t;
 
 /*
@@ -1094,8 +1064,33 @@ H5FD__ioc_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     HDassert(f1);
     HDassert(f2);
 
-    ret_value = H5FD_cmp(f1->ioc_file, f2->ioc_file);
+    if (f1->ioc_file && f1->ioc_file->cls && f1->ioc_file->cls->cmp &&
+        f2->ioc_file && f2->ioc_file->cls && f2->ioc_file->cls->cmp) {
+        ret_value = H5FD_cmp(f1->ioc_file, f2->ioc_file);
+    }
+    else {
+        h5_stat_t st1;
+        h5_stat_t st2;
 
+        /*
+         * If under VFD has no compare routine, get
+         * inode of HDF5 stub file and compare them
+         *
+         * Note that the compare callback doesn't
+         * allow for failure, so we just return -1
+         * if stat fails.
+         */
+        if (HDstat(f1->file_path, &st1) < 0)
+            H5_SUBFILING_SYS_GOTO_ERROR(H5E_VFL, H5E_CANTGET, -1,
+                    "couldn't stat file");
+        if (HDstat(f2->file_path, &st2) < 0)
+            H5_SUBFILING_SYS_GOTO_ERROR(H5E_VFL, H5E_CANTGET, -1,
+                    "couldn't stat file");
+
+        ret_value = (st1.st_ino > st2.st_ino) - (st1.st_ino < st2.st_ino);
+    }
+
+done:
     H5_SUBFILING_FUNC_LEAVE;
 } /* end H5FD__ioc_cmp */
 

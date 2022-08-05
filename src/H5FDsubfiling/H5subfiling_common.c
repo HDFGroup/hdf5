@@ -837,9 +837,8 @@ done:
         H5_SUBFILING_MPI_DONE_ERROR(FAIL, "MPI_Allreduce failed", mpi_code);
 
     if (g_errors > 0) {
-        if (sf_context->topology->app_layout->world_rank == 0)
-            H5_SUBFILING_DONE_ERROR(H5E_VFL, H5E_CANTOPENFILE, FAIL,
-                                    "one or more IOC ranks couldn't open subfiles");
+        H5_SUBFILING_DONE_ERROR(H5E_VFL, H5E_CANTOPENFILE, FAIL,
+                                "one or more IOC ranks couldn't open subfiles");
     }
 
     if (ret_value < 0) {
