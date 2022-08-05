@@ -251,7 +251,7 @@ typedef struct H5D_chunk_coll_fill_info_t {
 
 typedef struct H5D_chunk_iter_cb_data_t {
     H5D_chunk_iter_op_t cb;      /* User defined callback */
-    void *              op_data; /* User data for user defined callback */
+    void               *op_data; /* User data for user defined callback */
 } H5D_chunk_iter_cb_data_t;
 
 /********************/
@@ -7673,8 +7673,8 @@ herr_t
 H5D__chunk_iter(const H5D_t *dset, H5D_chunk_iter_op_t cb, void *op_data)
 {
     const H5O_layout_t *layout = NULL;       /* Dataset layout */
-    const H5D_rdcc_t *  rdcc   = NULL;       /* Raw data chunk cache */
-    H5D_rdcc_ent_t *    ent;                 /* Cache entry index */
+    const H5D_rdcc_t   *rdcc   = NULL;       /* Raw data chunk cache */
+    H5D_rdcc_ent_t     *ent;                 /* Cache entry index */
     H5D_chk_idx_info_t  idx_info;            /* Chunked index info */
     herr_t              ret_value = SUCCEED; /* Return value */
 

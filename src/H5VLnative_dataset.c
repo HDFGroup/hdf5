@@ -355,7 +355,7 @@ H5VL__native_dataset_specific(void *obj, H5VL_dataset_specific_t specific_type, 
 
         case H5VL_DATASET_CHUNK_ITER: { /* H5Dchunk_iter */
             H5D_chunk_iter_op_t cb      = HDva_arg(arguments, H5D_chunk_iter_op_t);
-            void *              op_data = HDva_arg(arguments, void *);
+            void               *op_data = HDva_arg(arguments, void *);
 
             HDassert(dset->shared);
 
