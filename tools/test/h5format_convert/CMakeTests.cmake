@@ -301,11 +301,11 @@
       add_test (
           NAME H5FC_TEST_CHECK_IDX-${testname}-clear-objects
           COMMAND ${CMAKE_COMMAND} -E remove
-              ./testfiles/${testname}-chktmp.h5
+              ./testfiles/${testname}-tmp.h5
       )
       add_test (
           NAME H5FC_TEST_CHECK_IDX-${testname}-tmpfile
-          COMMAND ${CMAKE_COMMAND} -E copy_if_different ${HDF5_TOOLS_TEST_H5FC_SOURCE_DIR}/testfiles/${testfile} ./testfiles/${testname}-chktmp.h5
+          COMMAND ${CMAKE_COMMAND} -E copy_if_different ${HDF5_TOOLS_TEST_H5FC_SOURCE_DIR}/testfiles/${testfile} ./testfiles/${testname}-tmp.h5
       )
       set_tests_properties (H5FC_TEST_CHECK_IDX-${testname}-tmpfile PROPERTIES
           DEPENDS "H5FC_TEST_CHECK_IDX-${testname}-clear-objects"
@@ -315,7 +315,7 @@
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert${tgt_file_ext}>"
-              -D "TEST_ARGS=-d;${ARGN};./testfiles/${testname}-chktmp.h5"
+              -D "TEST_ARGS=-d;${ARGN};./testfiles/${testname}-tmp.h5"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
               -D "TEST_OUTPUT=testfiles/${testname}.out"
               -D "TEST_SKIP_COMPARE=TRUE"
@@ -327,7 +327,7 @@
       )
       add_test (
           NAME H5FC_TEST_CHECK_IDX-${testname}-check
-          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5fc_chk_idx> ./testfiles/${testname}-chktmp.h5 ${ARGN}
+          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5fc_chk_idx> ./testfiles/${testname}-tmp.h5 ${ARGN}
       )
       set_tests_properties (H5FC_TEST_CHECK_IDX-${testname}-check PROPERTIES
           DEPENDS "H5FC_TEST_CHECK_IDX-${testname}"
@@ -335,7 +335,7 @@
       add_test (
           NAME H5FC_TEST_CHECK_IDX-${testname}-clean-objects
           COMMAND ${CMAKE_COMMAND} -E remove
-              ./testfiles/${testname}-chktmp.h5
+              ./testfiles/${testname}-tmp.h5
       )
       set_tests_properties (H5FC_TEST_CHECK_IDX-${testname}-clean-objects PROPERTIES
           DEPENDS H5FC_TEST_CHECK_IDX-${testname}-check
@@ -349,11 +349,11 @@
       add_test (
           NAME H5FC_H5DUMP_CHECK-${testname}-clear-objects
           COMMAND ${CMAKE_COMMAND} -E remove
-              ./testfiles/${testname}-dmptmp.h5
+              ./testfiles/${testname}-tmp.h5
       )
       add_test (
           NAME H5FC_H5DUMP_CHECK-${testname}-tmpfile
-          COMMAND ${CMAKE_COMMAND} -E copy_if_different ${HDF5_TOOLS_TEST_H5FC_SOURCE_DIR}/testfiles/${testname}.h5 ./testfiles/${testname}-dmptmp.h5
+          COMMAND ${CMAKE_COMMAND} -E copy_if_different ${HDF5_TOOLS_TEST_H5FC_SOURCE_DIR}/testfiles/${testname}.h5 ./testfiles/${testname}-tmp.h5
       )
       set_tests_properties (H5FC_H5DUMP_CHECK-${testname}-tmpfile PROPERTIES
           DEPENDS "H5FC_H5DUMP_CHECK-${testname}-clear-objects"
@@ -363,7 +363,7 @@
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5format_convert${tgt_file_ext}>"
-              -D "TEST_ARGS=${ARGN};./testfiles/${testname}-dmptmp.h5"
+              -D "TEST_ARGS=${ARGN};./testfiles/${testname}-tmp.h5"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
               -D "TEST_OUTPUT=testfiles/${testname}.out"
               -D "TEST_SKIP_COMPARE=TRUE"
@@ -378,7 +378,7 @@
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_file_ext}>"
-              -D "TEST_ARGS:STRING=-BH;./testfiles/${testname}-dmptmp.h5"
+              -D "TEST_ARGS:STRING=-BH;./testfiles/${testname}-tmp.h5"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
               -D "TEST_OUTPUT=testfiles/${testname}_chk.out"
               -D "TEST_EXPECT=0"
@@ -391,7 +391,7 @@
       add_test (
           NAME H5FC_H5DUMP_CHECK-${testname}-clean-objects
           COMMAND ${CMAKE_COMMAND} -E remove
-             ./testfiles/${testname}-dmptmp.h5
+             ./testfiles/${testname}-tmp.h5
       )
       set_tests_properties (H5FC_H5DUMP_CHECK-${testname}-clean-objects PROPERTIES
           DEPENDS H5FC_H5DUMP_CHECK-${testname}-dump
