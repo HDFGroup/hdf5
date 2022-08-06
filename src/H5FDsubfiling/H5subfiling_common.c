@@ -19,6 +19,8 @@
 #include "H5subfiling_common.h"
 #include "H5subfiling_err.h"
 
+#include "H5MMprivate.h"
+
 typedef struct {           /* Format of a context map entry  */
     void   *file_handle;   /* key value (linear search of the cache) */
     int64_t sf_context_id; /* The return value if matching file_handle */
@@ -1588,8 +1590,8 @@ done:
         }
     }
 
-    HDfree(base);
-    HDfree(subfile_dir);
+    H5MM_free(base);
+    H5MM_free(subfile_dir);
     HDfree(filepath);
 
     H5_SUBFILING_FUNC_LEAVE;
@@ -1650,11 +1652,8 @@ generate_subfile_name(subfiling_context_t *sf_context, int file_acc_flags, char 
     HDstrncpy(prefix, sf_context->h5_filename, PATH_MAX - 1);
     prefix[PATH_MAX - 1] = '\0';
 
-    base = basename(prefix);
-
-    if (NULL == (*filename_basename_out = HDstrdup(base)))
-        H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                "couldn't allocate space for subfile basename");
+    if (H5_basename(prefix, &base) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't get subfile basename");
 
     if (sf_context->subfile_prefix) {
         /* Note: Users may specify a directory name which is inaccessible
@@ -1664,16 +1663,12 @@ generate_subfile_name(subfiling_context_t *sf_context, int file_acc_flags, char 
          * if so, we could default to creating the subfiles in the
          * current directory. (?)
          */
-        if (NULL == (*subfile_dir_out = HDstrdup(sf_context->subfile_prefix)))
+        if (NULL == (subfile_dir = H5MM_strdup(sf_context->subfile_prefix)))
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "couldn't copy subfile prefix");
-
-        subfile_dir = *subfile_dir_out;
     }
     else {
-        subfile_dir = dirname(prefix);
-
-        if (NULL == (*subfile_dir_out = HDstrdup(subfile_dir)))
-            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "couldn't copy subfile prefix");
+        if (H5_dirname(prefix, &subfile_dir) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "couldn't get subfile prefix");
     }
 
     /*
@@ -1713,18 +1708,24 @@ generate_subfile_name(subfiling_context_t *sf_context, int file_acc_flags, char 
                sf_context->h5_file_id, num_digits, sf_context->topology->subfile_rank + 1,
                n_io_concentrators);
 
+    *filename_basename_out = base;
+    *subfile_dir_out       = subfile_dir;
+
 done:
     if (config_file && (EOF == HDfclose(config_file)))
         H5_SUBFILING_DONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL,
                                 "couldn't close subfiling configuration file");
 
     if (ret_value < 0) {
+        H5MM_free(subfile_dir);
+        H5MM_free(base);
+
         if (*filename_basename_out) {
-            HDfree(*filename_basename_out);
+            H5MM_free(*filename_basename_out);
             *filename_basename_out = NULL;
         }
         if (*subfile_dir_out) {
-            HDfree(*subfile_dir_out);
+            H5MM_free(*subfile_dir_out);
             *subfile_dir_out = NULL;
         }
     }

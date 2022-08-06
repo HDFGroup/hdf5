@@ -825,24 +825,15 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     }
 
     if (NULL != (file_ptr->file_path = HDrealpath(name, NULL))) {
-        char *path      = NULL;
-        char *directory = dirname(path);
-
-        if (NULL == (path = HDstrdup(file_ptr->file_path)))
-            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTCOPY, NULL, "can't copy subfiling subfile path");
-        if (NULL == (file_ptr->file_dir = HDstrdup(directory))) {
-            HDfree(path);
-            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTCOPY, NULL,
-                                    "can't copy subfiling subfile directory path");
+        if (H5_dirname(file_ptr->file_path, &file_ptr->file_dir) < 0) {
+            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "couldn't get subfile dirname");
         }
-
-        HDfree(path);
     }
     else {
         if (ENOENT == errno) {
             if (NULL == (file_ptr->file_path = HDstrdup(name)))
                 H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTCOPY, NULL, "can't copy file name");
-            if (NULL == (file_ptr->file_dir = HDstrdup(".")))
+            if (NULL == (file_ptr->file_dir = H5MM_strdup(".")))
                 H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, NULL, "can't set subfile directory path");
         }
         else
@@ -1010,7 +1001,7 @@ done:
     HDfree(file_ptr->file_path);
     file_ptr->file_path = NULL;
 
-    HDfree(file_ptr->file_dir);
+    H5MM_free(file_ptr->file_dir);
     file_ptr->file_dir = NULL;
 
     /* Release the file info */
@@ -1064,8 +1055,8 @@ H5FD__ioc_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     HDassert(f1);
     HDassert(f2);
 
-    if (f1->ioc_file && f1->ioc_file->cls && f1->ioc_file->cls->cmp &&
-        f2->ioc_file && f2->ioc_file->cls && f2->ioc_file->cls->cmp) {
+    if (f1->ioc_file && f1->ioc_file->cls && f1->ioc_file->cls->cmp && f2->ioc_file && f2->ioc_file->cls &&
+        f2->ioc_file->cls->cmp) {
         ret_value = H5FD_cmp(f1->ioc_file, f2->ioc_file);
     }
     else {
@@ -1081,11 +1072,9 @@ H5FD__ioc_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
          * if stat fails.
          */
         if (HDstat(f1->file_path, &st1) < 0)
-            H5_SUBFILING_SYS_GOTO_ERROR(H5E_VFL, H5E_CANTGET, -1,
-                    "couldn't stat file");
+            H5_SUBFILING_SYS_GOTO_ERROR(H5E_VFL, H5E_CANTGET, -1, "couldn't stat file");
         if (HDstat(f2->file_path, &st2) < 0)
-            H5_SUBFILING_SYS_GOTO_ERROR(H5E_VFL, H5E_CANTGET, -1,
-                    "couldn't stat file");
+            H5_SUBFILING_SYS_GOTO_ERROR(H5E_VFL, H5E_CANTGET, -1, "couldn't stat file");
 
         ret_value = (st1.st_ino > st2.st_ino) - (st1.st_ino < st2.st_ino);
     }
@@ -1607,8 +1596,6 @@ H5FD__ioc_del(const char *name, hid_t fapl)
     MPI_Comm        comm          = MPI_COMM_NULL;
     MPI_Info        info          = MPI_INFO_NULL;
     FILE           *config_file   = NULL;
-    char           *name_copy     = NULL;
-    char           *name_copy2    = NULL;
     char           *tmp_filename  = NULL;
     char           *base_filename = NULL;
     char           *file_dirname  = NULL;
@@ -1647,13 +1634,10 @@ H5FD__ioc_del(const char *name, hid_t fapl)
         if (HDstat(name, &st) < 0)
             H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_SYSERRSTR, FAIL, "HDstat failed");
 
-        if (NULL == (name_copy = HDstrdup(name)))
-            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't copy filename");
-        if (NULL == (name_copy2 = HDstrdup(name)))
-            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't copy filename");
-
-        base_filename = basename(name_copy);
-        file_dirname  = dirname(name_copy2);
+        if (H5_basename(name, &base_filename) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't get file basename");
+        if (H5_dirname(name, &file_dirname) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't get file dirname");
 
         /* Try to open the subfiling configuration file and get the number of IOCs */
         if (NULL == (tmp_filename = HDmalloc(PATH_MAX)))
@@ -1732,8 +1716,8 @@ done:
         H5_SUBFILING_DONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI info object");
 
     HDfree(tmp_filename);
-    HDfree(name_copy);
-    HDfree(name_copy2);
+    H5MM_free(file_dirname);
+    H5MM_free(base_filename);
 
     H5_SUBFILING_FUNC_LEAVE;
 }

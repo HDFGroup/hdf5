@@ -869,24 +869,22 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
     }
 
     if (NULL != (file_ptr->file_path = HDrealpath(name, NULL))) {
-        char *path      = NULL;
-        char *directory = dirname(path);
+        char *path = NULL;
 
-        if (NULL == (path = HDstrdup(file_ptr->file_path)))
+        if (NULL == (path = H5MM_strdup(file_ptr->file_path)))
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTCOPY, NULL, "can't copy subfiling subfile path");
-        if (NULL == (file_ptr->file_dir = HDstrdup(directory))) {
-            HDfree(path);
-            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTCOPY, NULL,
-                                    "can't copy subfiling subfile directory path");
+        if (H5_dirname(path, &file_ptr->file_dir) < 0) {
+            H5MM_free(path);
+            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "couldn't get subfile dirname");
         }
 
-        HDfree(path);
+        H5MM_free(path);
     }
     else {
         if (ENOENT == errno) {
             if (NULL == (file_ptr->file_path = HDstrdup(name)))
                 H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTCOPY, NULL, "can't copy file name");
-            if (NULL == (file_ptr->file_dir = HDstrdup(".")))
+            if (NULL == (file_ptr->file_dir = H5MM_strdup(".")))
                 H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, NULL, "can't set subfile directory path");
         }
         else
@@ -1018,7 +1016,7 @@ done:
     HDfree(file_ptr->file_path);
     file_ptr->file_path = NULL;
 
-    HDfree(file_ptr->file_dir);
+    H5MM_free(file_ptr->file_dir);
     file_ptr->file_dir = NULL;
 
     /* Release the file info */
