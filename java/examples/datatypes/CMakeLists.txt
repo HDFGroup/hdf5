@@ -70,7 +70,8 @@ if (BUILD_TESTING AND HDF5_TEST_EXAMPLES AND HDF5_TEST_SERIAL)
   foreach (example ${HDF_JAVA_EXAMPLES})
     add_test (
         NAME JAVA_datatypes-${example}-clear-objects
-        COMMAND ${CMAKE_COMMAND} -E remove ${HDFJAVA_EXAMPLES_BINARY_DIR}/${example}.h5
+        COMMAND ${CMAKE_COMMAND} -E remove
+            ${HDFJAVA_EXAMPLES_BINARY_DIR}/${example}.h5
     )
 
     add_test (
@@ -96,6 +97,15 @@ if (BUILD_TESTING AND HDF5_TEST_EXAMPLES AND HDF5_TEST_SERIAL)
     )
     set_tests_properties (JAVA_datatypes-${example} PROPERTIES
         DEPENDS JAVA_datatypes-${example}-copy-objects
+    )
+
+    add_test (
+        NAME JAVA_datatypes-${example}-clean-objects
+        COMMAND ${CMAKE_COMMAND} -E remove
+            ${HDFJAVA_EXAMPLES_BINARY_DIR}/${example}.h5
+    )
+    set_tests_properties (JAVA_datatypes-${example}-clean-objects PROPERTIES
+        DEPENDS JAVA_datatypes-${example}
     )
   endforeach ()
 endif ()

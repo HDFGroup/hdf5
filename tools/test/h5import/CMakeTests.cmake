@@ -97,26 +97,23 @@
 ##############################################################################
 
   macro (ADD_H5_TEST testname importfile conffile testfile)
+    add_test (
+        NAME H5IMPORT-${testname}-clear-objects
+        COMMAND ${CMAKE_COMMAND} -E remove
+            ${testfile}
+            ${testfile}.new
+    )
+    set_tests_properties (H5IMPORT-${testname}-clear-objects PROPERTIES
+        FIXTURES_REQUIRED set_h5importtest
+    )
+
+    add_test (NAME H5IMPORT-${testname} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5import${tgt_file_ext}> ${importfile} -c ${conffile} -o ${testfile})
+    set_tests_properties (H5IMPORT-${testname} PROPERTIES
+        DEPENDS H5IMPORT-${testname}-clear-objects
+        FIXTURES_REQUIRED set_h5importtest
+    )
     # If using memchecker skip macro based tests
-    if (HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (NAME H5IMPORT-${testname} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5import${tgt_file_ext}> ${importfile} -c ${conffile} -o ${testfile})
-      set_tests_properties (H5IMPORT-${testname} PROPERTIES
-          FIXTURES_REQUIRED set_h5importtest
-      )
-    else ()
-      add_test (
-          NAME H5IMPORT-${testname}-clear-objects
-          COMMAND ${CMAKE_COMMAND} -E remove ${testfile}
-      )
-      set_tests_properties (H5IMPORT-${testname}-clear-objects PROPERTIES
-          FIXTURES_REQUIRED set_h5importtest
-      )
-
-      add_test (NAME H5IMPORT-${testname} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5import${tgt_file_ext}> ${importfile} -c ${conffile} -o ${testfile})
-      set_tests_properties (H5IMPORT-${testname} PROPERTIES
-          DEPENDS H5IMPORT-${testname}-clear-objects
-      )
-
+    if (NOT HDF5_ENABLE_USING_MEMCHECKER)
       add_test (
           NAME H5IMPORT-${testname}-H5DMP
           COMMAND "${CMAKE_COMMAND}"
@@ -125,6 +122,7 @@
               -D "TEST_ARGS:STRING=${testfile}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
               -D "TEST_OUTPUT=${testfile}.new"
+              -D "TEST_SAVE=1"
               -D "TEST_EXPECT=0"
               -D "TEST_FILTER=(^(HDF5)[^\n]*)"
               -D "TEST_SKIP_COMPARE=TRUE"
@@ -132,6 +130,7 @@
       )
       set_tests_properties (H5IMPORT-${testname}-H5DMP PROPERTIES
           DEPENDS H5IMPORT-${testname}
+          FIXTURES_REQUIRED set_h5importtest
       )
       add_test (
           NAME H5IMPORT-${testname}-H5DMP_CMP
@@ -148,8 +147,20 @@
       )
       set_tests_properties (H5IMPORT-${testname}-H5DMP_CMP PROPERTIES
           DEPENDS H5IMPORT-${testname}-H5DMP
+          FIXTURES_REQUIRED set_h5importtest
       )
     endif ()
+
+    add_test (
+        NAME H5IMPORT-${testname}-clean-objects
+        COMMAND ${CMAKE_COMMAND} -E remove
+              ${testfile}
+              ${testfile}.new
+    )
+    set_tests_properties (H5IMPORT-${testname}-clean-objects PROPERTIES
+        DEPENDS H5IMPORT-${testname}-H5DMP_CMP
+        FIXTURES_REQUIRED set_h5importtest
+    )
   endmacro ()
 
   macro (ADD_H5_DUMPTEST testname datasetname testfile)
@@ -160,9 +171,11 @@
           COMMAND ${CMAKE_COMMAND} -E remove
               d${testfile}
               d${testfile}.bin
+              d${testfile}.dmp
       )
       set_tests_properties (H5IMPORT-DUMP-${testname}-clear-objects PROPERTIES
           DEPENDS H5IMPORT-${testname}-H5DMP_CMP
+          FIXTURES_REQUIRED set_h5importtest
       )
 
       if ("${ARGN}" STREQUAL "BINARY")
@@ -174,6 +187,7 @@
                 -D "TEST_ARGS:STRING=-p;-d;${datasetname};-o;d${testfile}.bin;-b;NATIVE;testfiles/${testfile}"
                 -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
                 -D "TEST_OUTPUT=d${testfile}.dmp"
+                -D "TEST_SAVE=1"
                 -D "TEST_EXPECT=0"
                 -D "TEST_SKIP_COMPARE=TRUE"
                 -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
@@ -187,6 +201,7 @@
                 -D "TEST_ARGS:STRING=-p;-d;${datasetname};-o;d${testfile}.bin;-y;--width=1;testfiles/${testfile}"
                 -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
                 -D "TEST_OUTPUT=d${testfile}.dmp"
+                -D "TEST_SAVE=1"
                 -D "TEST_EXPECT=0"
                 -D "TEST_SKIP_COMPARE=TRUE"
                 -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
@@ -194,6 +209,7 @@
       endif ()
       set_tests_properties (H5IMPORT-DUMP-${testname}-H5DMP PROPERTIES
           DEPENDS "H5IMPORT-DUMP-${testname}-clear-objects"
+          FIXTURES_REQUIRED set_h5importtest
       )
 
       add_test (
@@ -210,6 +226,7 @@
       )
       set_tests_properties (H5IMPORT-DUMP-${testname} PROPERTIES
           DEPENDS "H5IMPORT-DUMP-${testname}-H5DMP"
+          FIXTURES_REQUIRED set_h5importtest
       )
 
       add_test (
@@ -222,13 +239,26 @@
               -D "TEST_OUTPUT=d${testfile}.dff"
               -D "TEST_EXPECT=0"
               -D "TEST_FILTER=(^(Warning)[^\n]*)"
-              -D "TEST_REFERENCE=testfiles/d${testfile}.txt"
+              -D "TEST_REFERENCE=testfiles/${testfile}.txt"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
       set_tests_properties (H5IMPORT-DUMP-${testname}-H5DFF PROPERTIES
           DEPENDS "H5IMPORT-DUMP-${testname}"
+          FIXTURES_REQUIRED set_h5importtest
       )
     endif ()
+
+    add_test (
+        NAME H5IMPORT-DUMP-${testname}-clean-objects
+        COMMAND ${CMAKE_COMMAND} -E remove
+              d${testfile}
+              d${testfile}.bin
+              d${testfile}.dmp
+    )
+    set_tests_properties (H5IMPORT-DUMP-${testname}-clean-objects PROPERTIES
+        DEPENDS H5IMPORT-DUMP-${testname}-H5DFF
+        FIXTURES_REQUIRED set_h5importtest
+    )
   endmacro ()
 
   macro (ADD_H5_DUMPSUBTEST testname testfile datasetname)
@@ -237,8 +267,9 @@
       add_test (
           NAME H5IMPORT_SUB-DUMP-${testname}-clear-objects
           COMMAND ${CMAKE_COMMAND} -E remove
-              d-${testname}.h5
-              ${testname}.bin
+              ds${testname}.h5
+              ds${testname}.bin
+              ds${testname}.dmp
       )
       set_tests_properties (H5IMPORT_SUB-DUMP-${testname}-clear-objects PROPERTIES
           FIXTURES_REQUIRED set_h5importtest
@@ -249,15 +280,17 @@
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_file_ext}>"
-              -D "TEST_ARGS:STRING=-p;-d;${datasetname};${ARGN};-o;${testname}.bin;-b;NATIVE;testfiles/${testfile}"
+              -D "TEST_ARGS:STRING=-p;-d;${datasetname};${ARGN};-o;ds${testname}.bin;-b;NATIVE;testfiles/${testfile}"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-              -D "TEST_OUTPUT=${testname}.dmp"
+              -D "TEST_OUTPUT=ds${testname}.dmp"
+              -D "TEST_SAVE=1"
               -D "TEST_EXPECT=0"
               -D "TEST_SKIP_COMPARE=TRUE"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
       set_tests_properties (H5IMPORT_SUB-DUMP-${testname}-H5DMP PROPERTIES
           DEPENDS "H5IMPORT_SUB-DUMP-${testname}-clear-objects"
+          FIXTURES_REQUIRED set_h5importtest
       )
 
       add_test (
@@ -265,32 +298,46 @@
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5import${tgt_file_ext}>"
-              -D "TEST_ARGS:STRING=${testname}.bin;-c;${testname}.dmp;-o;d-${testname}.h5"
+              -D "TEST_ARGS:STRING=ds${testname}.bin;-c;ds${testname}.dmp;-o;ds${testname}.h5"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-              -D "TEST_OUTPUT=${testname}.imp"
+              -D "TEST_OUTPUT=ds${testname}.imp"
               -D "TEST_EXPECT=0"
               -D "TEST_SKIP_COMPARE=TRUE"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
       set_tests_properties (H5IMPORT_SUB-DUMP-${testname}-H5IMP PROPERTIES
           DEPENDS "H5IMPORT_SUB-DUMP-${testname}-H5DMP"
+          FIXTURES_REQUIRED set_h5importtest
       )
       add_test (
           NAME H5IMPORT_SUB-DUMP-${testname}-CMP
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5dump${tgt_file_ext}>"
-              -D "TEST_ARGS:STRING=-p;d-${testname}.h5"
+              -D "TEST_ARGS:STRING=-p;ds${testname}.h5"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-              -D "TEST_OUTPUT=d-${testname}.dmp"
+              -D "TEST_OUTPUT=ds${testname}.dmp"
               -D "TEST_EXPECT=0"
               -D "TEST_REFERENCE=testfiles/${testname}.ddl"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
       set_tests_properties (H5IMPORT_SUB-DUMP-${testname}-CMP PROPERTIES
-         DEPENDS "H5IMPORT_SUB-DUMP-${testname}-H5IMP"
+          DEPENDS "H5IMPORT_SUB-DUMP-${testname}-H5IMP"
+          FIXTURES_REQUIRED set_h5importtest
       )
     endif ()
+
+    add_test (
+        NAME H5IMPORT_SUB-DUMP-${testname}-clean-objects
+        COMMAND ${CMAKE_COMMAND} -E remove
+            ds${testname}.h5
+            ds${testname}.bin
+            ds${testname}.dmp
+    )
+    set_tests_properties (H5IMPORT_SUB-DUMP-${testname}-clean-objects PROPERTIES
+        DEPENDS "H5IMPORT_SUB-DUMP-${testname}-CMP"
+        FIXTURES_REQUIRED set_h5importtest
+    )
   endmacro ()
 
   macro (ADD_H5_SKIP_DUMPTEST testname datasetname testfile)
@@ -368,29 +415,68 @@
     set (last_test "H5IMPORT-clear-objects")
   endif ()
 
-  add_test (
-      NAME H5IMPORT-h5importtest-clear-objects
-      COMMAND ${CMAKE_COMMAND} -E remove
+  set (H5IMPORTTEST_CLEANFILES
           binfp64.bin
           binfp64.conf
+          binfp64.h5
+          binfp64.h5.new
           binin8.bin
           binin8.conf
+          binin8.h5
+          binin8.h5.new
           binin8w.bin
           binin8w.conf
+          binin8w.h5
+          binin8w.h5.new
           binin16.bin
           binin16.conf
+          binin16.h5
+          binin16.h5.new
           binin32.bin
           binin32.conf
+          binin32.h5
+          binin32.h5.new
           binuin16.bin
           binuin16.conf
+          binuin16.h5
+          binuin16.h5.new
           binuin32.bin
           binuin32.conf
+          binuin32.h5
+          binuin32.h5.new
+          txtfp32.h5
+          txtfp32.h5.new
+          txtfp64.h5
+          txtfp64.h5.new
+          txtin8.h5
+          txtin8.h5.new
+          txtin8w.h5
+          txtin8w.h5.new
+          txtin16.h5
+          txtin16.h5.new
+          txtin32.h5
+          txtin32.h5.new
+          txtuin16.h5
+          txtuin16.h5.new
+          txtuin32.h5
+          txtuin32.h5.new
+  )
+  add_test (
+      NAME H5IMPORT-h5importtest-clear-objects
+      COMMAND ${CMAKE_COMMAND} -E remove ${H5IMPORTTEST_CLEANFILES}
   )
 
   add_test (NAME H5IMPORT-h5importtest COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5importtest>)
   set_tests_properties (H5IMPORT-h5importtest PROPERTIES
       FIXTURES_SETUP set_h5importtest
       DEPENDS H5IMPORT-h5importtest-clear-objects
+  )
+  add_test (
+      NAME H5IMPORT-h5importtest-clean-objects
+      COMMAND ${CMAKE_COMMAND} -E remove ${H5IMPORTTEST_CLEANFILES}
+  )
+  set_tests_properties (H5IMPORT-h5importtest-clean-objects PROPERTIES
+      FIXTURES_CLEANUP set_h5importtest
   )
 
   # ----- TESTING "ASCII I32 rank 3 - Output BE " ;
