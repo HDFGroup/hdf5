@@ -226,10 +226,10 @@ typedef herr_t (*H5D_gather_func_t)(const void *dst_buf, size_t dst_buf_bytes_us
 /**
  * \brief Callback for H5Dchunk_iter()
  *
- * \param[in]     offset      Array of starting logical coordinates of chunk.
- * \param[in]     filter_mask Filter mask of chunk.
- * \param[in]     addr        Offset in file of chunk data.
- * \param[in]     nbytes      Size in bytes of chunk data in file.
+ * \param[in]     offset      Logical position of the chunk’s first element in units of dataset elements
+ * \param[in]     filter_mask Bitmask indicating the filters used when the chunk was written
+ * \param[in]     addr        Chunk address in the file
+ * \param[in]     size        Chunk size in bytes, 0 if the chunk does not exist
  * \param[in,out] op_data     Pointer to any user-defined data associated with
  *                            the operation.
  * \returns \li Zero (#H5_ITER_CONT) causes the iterator to continue, returning
@@ -647,7 +647,7 @@ H5_DLL herr_t H5Dget_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset, u
  *
  * \return \herr_t
  *
- * \details H5Dget_chunk_iter iterates over all chunks in the dataset, calling the
+ * \details H5Dchunk_iter iterates over all chunks in the dataset, calling the
  *          user supplied callback with the details of the chunk and the supplied
  *          context \p op_data.
  *
