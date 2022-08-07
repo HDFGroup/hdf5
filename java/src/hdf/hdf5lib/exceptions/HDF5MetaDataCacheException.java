@@ -22,7 +22,7 @@ package hdf.hdf5lib.exceptions;
 public class HDF5MetaDataCacheException extends HDF5LibraryException {
     /**
      * @ingroup JERRLIB
-     * 
+     *
      * Constructs an <code>HDF5MetaDataCacheException</code> with no specified
      * detail message.
      */
@@ -30,7 +30,7 @@ public class HDF5MetaDataCacheException extends HDF5LibraryException {
 
     /**
      * @ingroup JERRLIB
-     * 
+     *
      * Constructs an <code>HDF5MetaDataCacheException</code> with the specified
      * detail message.
      *

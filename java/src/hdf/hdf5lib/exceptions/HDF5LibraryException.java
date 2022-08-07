@@ -19,7 +19,7 @@ import hdf.hdf5lib.HDF5Constants;
 /**
  * @page ERRORSLIB HDF5 Library Errors and Exceptions
  * The class HDF5LibraryException returns errors raised by the HDF5 library.
- * 
+ *
  * Each major error code from the HDF5 Library is represented by a sub-class of
  * this class, and by default the 'detailedMessage' is set according to the
  * minor error code from the HDF5 Library.
@@ -27,7 +27,7 @@ import hdf.hdf5lib.HDF5Constants;
  * For major and minor error codes, @see <b>@ref H5E</b> in the HDF5 library.
  *
  * @defgroup JERRLIB HDF5 Library JNI Exception Interface
- * 
+ *
  */
 
 @SuppressWarnings("serial")
@@ -39,7 +39,7 @@ public class HDF5LibraryException extends HDF5Exception {
 
     /**
      * @ingroup JERRLIB
-     * 
+     *
      * Constructs an <code>HDF5LibraryException</code> with no specified detail
      * message.
      */
@@ -62,7 +62,7 @@ public class HDF5LibraryException extends HDF5Exception {
 
     /**
      * @ingroup JERRLIB
-     * 
+     *
      * Constructs an <code>HDF5LibraryException</code> with the specified detail
      * message.
      *
@@ -85,7 +85,7 @@ public class HDF5LibraryException extends HDF5Exception {
 
     /**
      * @ingroup JERRLIB
-     * 
+     *
      * Get the major error number of the first error on the HDF5 library error
      * stack.
      *
@@ -96,7 +96,7 @@ public class HDF5LibraryException extends HDF5Exception {
 
     /**
      * @ingroup JERRLIB
-     * 
+     *
      * Get the minor error number of the first error on the HDF5 library error
      * stack.
      *
@@ -107,9 +107,9 @@ public class HDF5LibraryException extends HDF5Exception {
 
     /**
      * @ingroup JERRLIB
-     * 
+     *
      * Return a error message for the minor error number.
-     * 
+     *
      * These messages come from <b>@ref H5E</b>.
      *
      * @param err_code
@@ -359,7 +359,7 @@ public class HDF5LibraryException extends HDF5Exception {
 
     /**
      * @ingroup JERRLIB
-     * 
+     *
      * Prints this <code>HDF5LibraryException</code>, the HDF5 Library error
      * stack, and and the Java stack trace to the standard error stream.
      */
@@ -373,7 +373,7 @@ public class HDF5LibraryException extends HDF5Exception {
 
     /**
      * @ingroup JERRLIB
-     * 
+     *
      * Prints this <code>HDF5LibraryException</code> the HDF5 Library error
      * stack, and and the Java stack trace to the specified print stream.
      *

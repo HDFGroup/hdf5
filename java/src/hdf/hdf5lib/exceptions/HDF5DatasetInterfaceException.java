@@ -21,7 +21,7 @@ package hdf.hdf5lib.exceptions;
 public class HDF5DatasetInterfaceException extends HDF5LibraryException {
     /**
      * @ingroup JERRLIB
-     * 
+     *
      * Constructs an <code>HDF5DatasetInterfaceException</code> with no
      * specified detail message.
      */
@@ -29,7 +29,7 @@ public class HDF5DatasetInterfaceException extends HDF5LibraryException {
 
     /**
      * @ingroup JERRLIB
-     * 
+     *
      * Constructs an <code>HDF5DatasetInterfaceException</code> with the
      * specified detail message.
      *

@@ -11,7 +11,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/** @page ERRORS_UG Errors and Exceptions
+/**
+ * @page ERRORS_UG Errors and Exceptions
  * <p>
  * The package exceptions contains error classes for the Java HDF5 Interface.
  * <p>

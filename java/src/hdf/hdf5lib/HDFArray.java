@@ -18,7 +18,8 @@ import java.util.Arrays;
 import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.hdf5lib.exceptions.HDF5JavaException;
 
-/** @page HDFARRAY Java Array Conversion
+/**
+ * @page HDFARRAY Java Array Conversion
  * This is a class for handling multidimensional arrays for HDF.
  * <p>
  * The purpose is to allow the storage and retrieval of arbitrary array types containing scientific data.
@@ -48,7 +49,7 @@ public class HDFArray {
      *                object is not an array.
      */
     public HDFArray(Object anArray) throws HDF5JavaException
-    { 
+    {
         if (anArray == null) {
             HDF5JavaException ex = new HDF5JavaException("HDFArray: array is null?: ");
         }

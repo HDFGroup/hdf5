@@ -22,7 +22,7 @@ package hdf.hdf5lib.exceptions;
 public class HDF5HeapException extends HDF5LibraryException {
     /**
      * @ingroup JERRLIB
-     * 
+     *
      * Constructs an <code>HDF5HeapException</code> with no specified detail
      * message.
      */
@@ -30,7 +30,7 @@ public class HDF5HeapException extends HDF5LibraryException {
 
     /**
      * @ingroup JERRLIB
-     * 
+     *
      * Constructs an <code>HDF5HeapException</code> with the specified detail
      * message.
      *

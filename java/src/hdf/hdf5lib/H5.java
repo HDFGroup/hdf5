@@ -56,7 +56,8 @@ import hdf.hdf5lib.structs.H5G_info_t;
 import hdf.hdf5lib.structs.H5L_info_t;
 import hdf.hdf5lib.structs.H5O_info_t;
 
-/** @page HDF5LIB HDF5 Java API Package
+/**
+ * @page HDF5LIB HDF5 Java API Package
  * This class is the Java interface for the HDF5 library.
  * <p>
  * This code is the called by Java programs to access the entry points of the HDF5 library. Each routine wraps
@@ -185,7 +186,7 @@ import hdf.hdf5lib.structs.H5O_info_t;
  *                                            boolean isCriticalPinning)
  *       throws HDF5Exception, HDF5LibraryException, NullPointerException;
  * @endcode
- * 
+ *
  * and the parameter <i>data</i> can be any multi-dimensional array of numbers, such as float[][], or
  * int[][][], or Double[][].
  * <p>
@@ -212,11 +213,10 @@ import hdf.hdf5lib.structs.H5O_info_t;
  * <p>
  * <b>@ref ERRORS</b>
  * <p>
- * The HDF5 error API (@ref H5E) manages the behavior of the error stack in the HDF5 library. This API is omitted
- * from the JHI5. Errors are converted into Java exceptions. This is totally different from the C interface,
- * but is very natural for Java programming.
- * <p>
- * The exceptions of the JHI5 are organized as sub-classes of the class
+ * The HDF5 error API (@ref H5E) manages the behavior of the error stack in the HDF5 library. This API is
+ * omitted from the JHI5. Errors are converted into Java exceptions. This is totally different from the C
+ * interface, but is very natural for Java programming. <p> The exceptions of the JHI5 are organized as
+ * sub-classes of the class
  * @ref ERRORS <b>HDF5Exception</b>. There are two subclasses of
  * <b>HDF5Exception</b>, @ref ERRORSLIB <b>HDF5LibraryException</b>
  * and @ref ERRORSJAVA <b>HDF5JavaException</b>. The
@@ -224,9 +224,8 @@ import hdf.hdf5lib.structs.H5O_info_t;
  * represent errors in the JHI5 wrapper and support code.
  * <p>
  * The super-class <b><i>HDF5LibraryException</i></b> implements the method '<b><i>printStackTrace()</i></b>',
- * which prints out the HDF5 error stack, as described in the HDF5 C API <i><b>@ref H5Eprint()</b>.</i> This may
- * be used by Java exception handlers to print out the HDF5 error stack.
- * <hr>
+ * which prints out the HDF5 error stack, as described in the HDF5 C API <i><b>@ref H5Eprint()</b>.</i> This
+ * may be used by Java exception handlers to print out the HDF5 error stack. <hr>
  *
  * @version HDF5 1.10.10 <br />
  *          <b>See also: </b>
@@ -245,7 +244,7 @@ import hdf.hdf5lib.structs.H5O_info_t;
  *
  * This code is the called by Java programs to access the entry points of the HDF5 library. Each routine wraps
  * a single HDF5 entry point, generally with the arguments and return codes analogous to the C interface.
- * 
+ *
  */
 public class H5 implements java.io.Serializable {
     /**
@@ -257,7 +256,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5
-     * 
+     *
      * The version number of the HDF5 library:
      * <ul>
      * <li>LIB_VERSION[0]: The major version of the library.</li>
@@ -270,14 +269,14 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5
-     * 
+     *
      *  add system property to load library by path
      */
     public final static String H5PATH_PROPERTY_KEY = "hdf.hdf5lib.H5.hdf5lib";
 
     /**
      * @ingroup JH5
-     * 
+     *
      *  add system property to load library by name from library path, via System.loadLibrary()
      */
     public final static String H5_LIBRARY_NAME_PROPERTY_KEY = "hdf.hdf5lib.H5.loadLibraryName";
@@ -291,7 +290,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5
-     * 
+     *
      *  load native library
      */
     public static void loadH5Lib()
@@ -397,7 +396,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5
-     * 
+     *
      * Get number of open IDs.
      *
      * @return Returns a count of open IDs
@@ -406,7 +405,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5
-     * 
+     *
      * Get the open IDs
      *
      * @return Returns a collection of open IDs
@@ -415,7 +414,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5
-     * 
+     *
      * H5check_version verifies that the arguments match the version numbers compiled into the library.
      *
      * @param majnum
@@ -433,7 +432,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5
-     * 
+     *
      * H5close flushes all data to disk, closes all file identifiers, and cleans up all memory used by the
      * library.
      *
@@ -446,7 +445,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5
-     * 
+     *
      * H5open initialize the library.
      *
      * @return a non-negative value if successful
@@ -458,7 +457,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5
-     * 
+     *
      * H5dont_atexit indicates to the library that an atexit() cleanup routine should not be installed. In
      * order to be effective, this routine must be called before any other HDF function calls, and must be
      * called each time the library is loaded/linked into the application (the first time and after it's been
@@ -474,7 +473,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5
-     * 
+     *
      * Turn off error handling. By default, the C library prints the error stack of the HDF5 C library on
      * stdout. This behavior may be disabled by calling H5error_off().
      *
@@ -484,7 +483,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5
-     * 
+     *
      * Turn on error handling. By default, the C library prints the error stack of the HDF5 C library on
      * stdout. This behavior may be re-enabled by calling H5error_on().
      */
@@ -492,7 +491,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5
-     * 
+     *
      * H5garbage_collect collects on all free-lists of all types.
      *
      * @return a non-negative value if successful
@@ -504,7 +503,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5
-     * 
+     *
      * H5get_libversion retrieves the major, minor, and release numbers of the version of the HDF library
      * which is linked to the application.
      *
@@ -525,7 +524,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5
-     * 
+     *
      * H5set_free_list_limits
      *      Sets limits on the different kinds of free lists.  Setting a value
      *      of -1 for a limit means no limit of that type.  These limits are global
@@ -561,7 +560,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5
-     * 
+     *
      * H5export_dataset is a utility function to save data in a file.
      *
      * @param file_export_name
@@ -585,7 +584,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5
-     * 
+     *
      * H5export_dataset is a utility function to save data in a file.
      *
      * @param file_export_name
@@ -608,13 +607,13 @@ public class H5 implements java.io.Serializable {
     {
         _H5export_dataset_string(file_export_name, file_name, object_path, binary_order);
     }
-    private synchronized static native void _H5export_dataset_string(String file_export_name, String file_name,
-                                                              String object_path, int binary_order)
+    private synchronized static native void
+    _H5export_dataset_string(String file_export_name, String file_name, String object_path, int binary_order)
         throws HDF5LibraryException;
 
     /**
      * @ingroup JH5
-     * 
+     *
      * H5export_attribute is a utility function to save data in a file.
      *
      * @param file_export_name
@@ -638,7 +637,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5
-     * 
+     *
      * H5is_library_threadsafe Checks to see if the library was built with thread-safety enabled.
      *
      * @return true if hdf5 library implements threadsafe
@@ -659,17 +658,17 @@ public class H5 implements java.io.Serializable {
     /**
      * @defgroup JH5A Java Attribute (H5A) Interface
      *
-     * An HDF5 attribute is a small metadata object describing the nature and/or intended usage of a primary data
-     * object. A primary data object may be a dataset, group, or committed datatype.
-     * 
+     * An HDF5 attribute is a small metadata object describing the nature and/or intended usage of a primary
+     *data object. A primary data object may be a dataset, group, or committed datatype.
+     *
      * @see H5A, C-API
-     * 
+     *
      * @see @ref H5A_UG, User Guide
      **/
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Aclose terminates access to the attribute specified by its identifier, attr_id.
      *
      * @param attr_id
@@ -695,7 +694,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Acopy copies the content of one attribute to another.
      *
      * @param src_aid
@@ -712,7 +711,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Acreate creates an attribute, attr_name, which is attached to the object specified by the identifier
      * loc_id.
      *
@@ -750,7 +749,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Acreate2 an attribute, attr_name, which is attached to the object specified by the identifier loc_id.
      *
      * @see public static long H5Acreate( long loc_id, String attr_name, long type_id, long space_id, long
@@ -762,7 +761,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Acreate_by_name creates an attribute, attr_name, which is attached to the object specified by loc_id
      * and obj_name.
      *
@@ -811,7 +810,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Adelete removes the attribute specified by its name, name, from a dataset, group, or named datatype.
      *
      * @param loc_id
@@ -831,7 +830,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Adelete_by_idx removes an attribute, specified by its location in an index, from an object.
      *
      * @param loc_id
@@ -858,7 +857,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Adelete_by_name removes the attribute attr_name from an object specified by location and name, loc_id
      * and obj_name, respectively.
      *
@@ -884,7 +883,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Aexists determines whether the attribute attr_name exists on the object specified by obj_id.
      *
      * @param obj_id
@@ -904,7 +903,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Aexists_by_name determines whether the attribute attr_name exists on an object. That object is
      * specified by its location and name, loc_id and obj_name, respectively.
      *
@@ -930,7 +929,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Aget_info retrieves attribute information, by attribute identifier.
      *
      * @param attr_id
@@ -945,7 +944,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Aget_info_by_idx Retrieves attribute information, by attribute index position.
      *
      * @param loc_id
@@ -975,7 +974,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Aget_info_by_name Retrieves attribute information, by attribute name.
      *
      * @param loc_id
@@ -1000,7 +999,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Aget_name retrieves the name of an attribute specified by the identifier, attr_id.
      *
      * @param attr_id
@@ -1015,7 +1014,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Aget_name_by_idx retrieves the name of an attribute that is attached to an object, which is specified
      * by its location and name, loc_id and obj_name, respectively.
      *
@@ -1045,7 +1044,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Aget_space retrieves a copy of the dataspace for an attribute.
      *
      * @param attr_id
@@ -1071,7 +1070,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Aget_storage_size returns the amount of storage that is required for the specified attribute,
      * attr_id.
      *
@@ -1087,7 +1086,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Aget_type retrieves a copy of the datatype for an attribute.
      *
      * @param attr_id
@@ -1113,7 +1112,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Aopen opens an existing attribute, attr_name, that is attached to an object specified an object
      * identifier, object_id.
      *
@@ -1148,7 +1147,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Aopen_by_idx opens an existing attribute that is attached to an object specified by location and
      * name, loc_id and obj_name, respectively
      *
@@ -1193,7 +1192,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Aopen_by_name Opens an attribute for an object by object name and attribute name
      *
      * @param loc_id
@@ -1232,7 +1231,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Aread reads an attribute, specified with attr_id. The attribute's memory datatype is specified with
      * mem_type_id. The entire attribute is read into buffer from the file.
      *
@@ -1258,7 +1257,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Aread reads an attribute, specified with attr_id. The attribute's memory datatype is specified with
      * mem_type_id. The entire attribute is read into buffer from the file.
      *
@@ -1284,7 +1283,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Aread reads an attribute, specified with attr_id. The attribute's memory datatype is specified with
      * mem_type_id. The entire attribute is read into buffer from the file.
      *
@@ -1310,7 +1309,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Aread reads an attribute, specified with attr_id. The attribute's memory datatype is specified with
      * mem_type_id. The entire attribute is read into data object from the file.
      *
@@ -1411,7 +1410,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Aread reads an attribute, specified with attr_id. The attribute's memory datatype is specified with
      * mem_type_id. The entire attribute is read into buffer of double from the file.
      *
@@ -1437,7 +1436,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Aread reads an attribute, specified with attr_id. The attribute's memory datatype is specified with
      * mem_type_id. The entire attribute is read into buffer of double from the file.
      *
@@ -1487,7 +1486,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Aread reads an attribute, specified with attr_id. The attribute's memory datatype is specified with
      * mem_type_id. The entire attribute is read into buffer of float from the file.
      *
@@ -1513,7 +1512,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Aread reads an attribute, specified with attr_id. The attribute's memory datatype is specified with
      * mem_type_id. The entire attribute is read into buffer of int from the file.
      *
@@ -1539,7 +1538,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Aread reads an attribute, specified with attr_id. The attribute's memory datatype is specified with
      * mem_type_id. The entire attribute is read into buffer of int from the file.
      *
@@ -1565,7 +1564,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Aread reads an attribute, specified with attr_id. The attribute's memory datatype is specified with
      * mem_type_id. The entire attribute is read into buffer of long from the file.
      *
@@ -1591,7 +1590,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Aread reads an attribute, specified with attr_id. The attribute's memory datatype is specified with
      * mem_type_id. The entire attribute is read into buffer of long from the file.
      *
@@ -1617,7 +1616,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Aread reads an attribute, specified with attr_id. The attribute's memory datatype is specified with
      * mem_type_id. The entire attribute is read into buffer of String from the file.
      *
@@ -1640,7 +1639,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Aread reads an attribute, specified with attr_id. The attribute's memory datatype is specified with
      * mem_type_id. The entire attribute is read into buffer of short from the file.
      *
@@ -1666,7 +1665,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Aread reads an attribute, specified with attr_id. The attribute's memory datatype is specified with
      * mem_type_id. The entire attribute is read into buffer  of shortfrom the file.
      *
@@ -1692,7 +1691,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Aread reads an attribute, specified with attr_id. The attribute's memory datatype is specified with
      * mem_type_id. The entire attribute is read into buffer of variable-lenght from the file.
      *
@@ -1715,7 +1714,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Aread reads an attribute, specified with attr_id. The attribute's memory datatype is specified with
      * mem_type_id. The entire attribute is read into buffer of String from the file.
      *
@@ -1738,7 +1737,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Aread reads an attribute, specified with attr_id. The attribute's memory datatype is specified with
      * mem_type_id. The entire attribute is read into buffer of variable-lenght strings from the file.
      *
@@ -1761,7 +1760,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Aread reads an attribute, specified with attr_id. The attribute's memory datatype is specified with
      * mem_type_id. The entire attribute is read into buffer of string from the file.
      *
@@ -1784,7 +1783,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Arename changes the name of attribute that is attached to the object specified by loc_id. The
      * attribute named old_attr_name is renamed new_attr_name.
      *
@@ -1807,7 +1806,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Arename_by_name changes the name of attribute that is attached to the object specified by loc_id and
      * obj_name. The attribute named old_attr_name is renamed new_attr_name.
      *
@@ -1835,7 +1834,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Awrite writes an attribute, specified with attr_id. The attribute's memory datatype is specified with
      * mem_type_id. The entire attribute is written from buf to the file.
      *
@@ -1861,7 +1860,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Awrite writes an attribute, specified with attr_id. The attribute's memory datatype is specified with
      * mem_type_id. The entire attribute is written from buf to the file.
      *
@@ -1887,7 +1886,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Awrite writes an attribute, specified with attr_id. The attribute's memory datatype is specified with
      * mem_type_id. The entire attribute is written from buf to the file.
      *
@@ -1913,7 +1912,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Awrite writes an attribute, specified with attr_id. The attribute's memory datatype is specified with
      * mem_type_id. The entire attribute is written from data object to the file.
      *
@@ -1991,7 +1990,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Awrite writes an attribute, specified with attr_id. The attribute's memory datatype is specified with
      * mem_type_id. The entire attribute is written from buffer of double to the file.
      *
@@ -2017,7 +2016,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Awrite writes an attribute, specified with attr_id. The attribute's memory datatype is specified with
      * mem_type_id. The entire attribute is written from buffer of double to the file.
      *
@@ -2043,7 +2042,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Awrite writes an attribute, specified with attr_id. The attribute's memory datatype is specified with
      * mem_type_id. The entire attribute is written from buffer of float to the file.
      *
@@ -2069,7 +2068,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Awrite writes an attribute, specified with attr_id. The attribute's memory datatype is specified with
      * mem_type_id. The entire attribute is written from buffer of float to the file.
      *
@@ -2095,7 +2094,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Awrite writes an attribute, specified with attr_id. The attribute's memory datatype is specified with
      * mem_type_id. The entire attribute is written from buffer of int to the file.
      *
@@ -2121,7 +2120,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Awrite writes an attribute, specified with attr_id. The attribute's memory datatype is specified with
      * mem_type_id. The entire attribute is written from buffer of int to the file.
      *
@@ -2147,7 +2146,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Awrite writes an attribute, specified with attr_id. The attribute's memory datatype is specified with
      * mem_type_id. The entire attribute is written from buffer of long to the file.
      *
@@ -2173,7 +2172,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Awrite writes an attribute, specified with attr_id. The attribute's memory datatype is specified with
      * mem_type_id. The entire attribute is written from buffer of long to the file.
      *
@@ -2199,7 +2198,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Awrite writes an attribute, specified with attr_id. The attribute's memory datatype is specified with
      * mem_type_id. The entire attribute is written from buffer of short to the file.
      *
@@ -2225,7 +2224,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Awrite writes an attribute, specified with attr_id. The attribute's memory datatype is specified with
      * mem_type_id. The entire attribute is written from buffer of short to the file.
      *
@@ -2251,7 +2250,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Awrite writes an attribute, specified with attr_id. The attribute's memory datatype is specified with
      * mem_type_id. The entire attribute is written from buffer of string to the file.
      *
@@ -2274,7 +2273,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Awrite writes an attribute, specified with attr_id. The attribute's memory datatype is specified with
      * mem_type_id. The entire attribute is written from buffer of variable-lenght to the file.
      *
@@ -2297,7 +2296,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Awrite_VLStrings writes a variable length String dataset, specified by its identifier attr_id, from
      * the application memory buffer buffer of variable-lenght strings into the file.
      *
@@ -2323,7 +2322,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Aget_create_plist retrieves a copy of the attribute creation property list identifier.
      *
      * @param attr_id
@@ -2349,7 +2348,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Aiterate2 iterates over the attributes attached to a dataset, named datatype, or group, as
      * specified by obj_id. For each attribute, user-provided data, op_data, with additional information
      * as defined below, is passed to a user-defined function, op, which operates on that attribute.
@@ -2392,7 +2391,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5A
-     * 
+     *
      * H5Aiterate_by_name iterates over the attributes attached to the dataset or group specified with loc_id
      * and obj_name. For each attribute, user-provided data, op_data, with additional information as defined
      * below, is passed to a user-defined function, op, which operates on that attribute.
@@ -2481,7 +2480,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dcopy copies the content of one dataset to another dataset.
      *
      * @param src_did
@@ -2498,7 +2497,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dclose ends access to a dataset specified by dataset_id and releases resources used by it.
      *
      * @param dataset_id
@@ -2524,7 +2523,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dcreate creates a new dataset named name at the location specified by loc_id.
      *
      * @param loc_id
@@ -2563,7 +2562,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dcreate2 creates a new dataset named name at the location specified by loc_id.
      *
      * @see public static int H5Dcreate(int loc_id, String name, int type_id, int space_id, int lcpl_id, int
@@ -2575,7 +2574,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dcreate_anon creates a dataset in the file specified by loc_id.
      *
      * @param loc_id
@@ -2612,7 +2611,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dfill explicitly fills the dataspace selection in memory, space_id, with the fill value specified in
      * fill.
      *
@@ -2638,7 +2637,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dget_access_plist returns an identifier for a copy of the dataset access property list for a dataset.
      *
      * @param dset_id
@@ -2653,7 +2652,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dget_create_plist returns an identifier for a copy of the dataset creation property list for a
      * dataset.
      *
@@ -2679,7 +2678,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dget_offset returns the address in the file of the dataset dset_id.
      *
      * @param dset_id
@@ -2694,7 +2693,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dget_space returns an identifier for a copy of the dataspace for a dataset.
      *
      * @param dataset_id
@@ -2720,7 +2719,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dget_space_status determines whether space has been allocated for the dataset dset_id.
      *
      * @param dset_id
@@ -2735,7 +2734,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dget_storage_size returns the amount of storage that is required for the dataset.
      *
      * @param dataset_id
@@ -2751,7 +2750,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dget_type returns an identifier for a copy of the datatype for a dataset.
      *
      * @param dataset_id
@@ -2777,7 +2776,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Diterate iterates over all the data elements in the memory buffer buf, executing the callback
      * function operator once for each such data element.
      *
@@ -2806,7 +2805,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dopen opens the existing dataset specified by a location identifier and name, loc_id and name,
      * respectively.
      *
@@ -2838,7 +2837,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dopen2 opens the existing dataset specified by a location identifier and name, loc_id and name,
      * respectively.
      *
@@ -2849,7 +2848,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dread reads a (partial) dataset, specified by its identifier dataset_id, from the file into the
      * application memory buffer buf.
      *
@@ -2882,7 +2881,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dread reads a (partial) dataset, specified by its identifier dataset_id, from the file into the
      * application memory buffer buf.
      *
@@ -2915,7 +2914,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dread reads a (partial) dataset, specified by its identifier dataset_id, from the file into the
      * application memory buffer buf.
      *
@@ -2948,7 +2947,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dread reads a (partial) dataset, specified by its identifier dataset_id, from the file into the
      * application data object.
      *
@@ -3065,7 +3064,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dread reads a (partial) dataset, specified by its identifier dataset_id, from the file into the
      * application memory buffer of type double.
      *
@@ -3098,7 +3097,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dread reads a (partial) dataset, specified by its identifier dataset_id, from the file into the
      * application memory buffer of type double.
      *
@@ -3131,7 +3130,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dread reads a (partial) dataset, specified by its identifier dataset_id, from the file into the
      * application memory buffer of float.
      *
@@ -3164,7 +3163,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dread reads a (partial) dataset, specified by its identifier dataset_id, from the file into the
      * application memory buffer of float.
      *
@@ -3197,7 +3196,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dread reads a (partial) dataset, specified by its identifier dataset_id, from the file into the
      * application memory buffer of int.
      *
@@ -3230,7 +3229,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dread reads a (partial) dataset, specified by its identifier dataset_id, from the file into the
      * application memory buffer of int.
      *
@@ -3263,7 +3262,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dread reads a (partial) dataset, specified by its identifier dataset_id, from the file into the
      * application memory buffer of long.
      *
@@ -3296,7 +3295,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dread reads a (partial) dataset, specified by its identifier dataset_id, from the file into the
      * application memory buffer of long.
      *
@@ -3329,7 +3328,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dread reads a (partial) dataset, specified by its identifier dataset_id, from the file into the
      * application memory buffer of string.
      *
@@ -3360,7 +3359,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dread reads a (partial) dataset, specified by its identifier dataset_id, from the file into the
      * application memory buffer of short.
      *
@@ -3393,7 +3392,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dread reads a (partial) dataset, specified by its identifier dataset_id, from the file into the
      * application memory buffer of short.
      *
@@ -3426,7 +3425,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dread reads a (partial) dataset, specified by its identifier dataset_id, from the file into the
      * application memory buffer of variable-lenght.
      *
@@ -3456,7 +3455,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dread reads a (partial) dataset, specified by its identifier dataset_id, from the file into the
      * application memory buffer of string.
      *
@@ -3486,7 +3485,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dread reads a (partial) dataset, specified by its identifier dataset_id, from the file into the
      * application memory buffer of variable-lenght strings.
      *
@@ -3517,7 +3516,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dset_extent sets the current dimensions of the chunked dataset dset_id to the sizes specified in
      * size.
      *
@@ -3536,7 +3535,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dvlen_get_buf_size determines the number of bytes required to store the VL data from the dataset,
      * using the space_id for the selection in the dataset on disk and the type_id for the memory
      * representation of the VL data in memory.
@@ -3560,7 +3559,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dvlen_reclaim reclaims buffer used for VL data.
      *
      * @param type_id
@@ -3585,7 +3584,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dwrite writes a (partial) dataset, specified by its identifier dataset_id, from the application
      * memory buffer into the file.
      *
@@ -3618,7 +3617,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dwrite writes a (partial) dataset, specified by its identifier dataset_id, from the application
      * memory buffer into the file.
      *
@@ -3651,7 +3650,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dwrite writes a (partial) dataset, specified by its identifier dataset_id, from the application
      * memory buffer into the file.
      *
@@ -3684,7 +3683,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dwrite writes a (partial) dataset, specified by its identifier dataset_id, from the application
      * memory data object into the file.
      *
@@ -3781,7 +3780,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dwrite writes a (partial) dataset, specified by its identifier dataset_id, from the application
      * memory buffer into the file.
      *
@@ -3814,7 +3813,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dwrite writes a (partial) dataset, specified by its identifier dataset_id, from the application
      * memory buffer into the file.
      *
@@ -3848,7 +3847,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dwrite writes a (partial) dataset, specified by its identifier dataset_id, from the application
      * memory buffer into the file.
      *
@@ -3881,7 +3880,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dwrite writes a (partial) dataset, specified by its identifier dataset_id, from the application
      * memory buffer into the file.
      *
@@ -3914,7 +3913,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dwrite writes a (partial) dataset, specified by its identifier dataset_id, from the application
      * memory buffer into the file.
      *
@@ -3947,7 +3946,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dwrite writes a (partial) dataset, specified by its identifier dataset_id, from the application
      * memory buffer into the file.
      *
@@ -3980,7 +3979,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dwrite writes a (partial) dataset, specified by its identifier dataset_id, from the application
      * memory buffer into the file.
      *
@@ -4013,7 +4012,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dwrite writes a (partial) dataset, specified by its identifier dataset_id, from the application
      * memory buffer into the file.
      *
@@ -4046,7 +4045,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dwrite writes a (partial) dataset, specified by its identifier dataset_id, from the application
      * memory buffer into the file.
      *
@@ -4079,7 +4078,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dwrite writes a (partial) dataset, specified by its identifier dataset_id, from the application
      * memory buffer into the file.
      *
@@ -4112,7 +4111,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dwrite writes a (partial) dataset, specified by its identifier dataset_id, from the application
      * memory buffer into the file.
      *
@@ -4143,7 +4142,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dwrite writes a (partial) dataset, specified by its identifier dataset_id, from the application
      * memory buffer into the file.
      *
@@ -4173,7 +4172,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dwrite_VLStrings writes a (partial) variable length String dataset, specified by its identifier
      * dataset_id, from the application memory buffer buf into the file.
      *
@@ -4207,7 +4206,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Dflush causes all buffers associated with a dataset to be immediately flushed to disk without
      * removing the data from the cache.
      *
@@ -4221,7 +4220,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5D
-     * 
+     *
      * H5Drefresh causes all buffers associated with a dataset to be cleared and immediately re-loaded with
      * updated contents from disk. This function essentially closes the dataset, evicts all metadata
      * associated with it from the cache, and then re-opens the dataset. The reopened dataset is automatically
@@ -4252,14 +4251,13 @@ public class H5 implements java.io.Serializable {
     // //
     // ////////////////////////////////////////////////////////////
     /**
-    *
-    * @defgroup JH5E Java Error (H5E) Interface
-    */
-
+     *
+     * @defgroup JH5E Java Error (H5E) Interface
+     */
 
     /**
      * @ingroup JH5E
-     * 
+     *
      * H5Eauto_is_v2 determines whether the error auto reporting function for an error stack conforms to the
      * H5E_auto2_t typedef or the H5E_auto1_t typedef.
      *
@@ -4276,7 +4274,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5E
-     * 
+     *
      * H5Eclear clears the error stack for the current thread. H5Eclear can fail if there are problems
      * initializing the library. <p> This may be used by exception handlers to assure that the error condition
      * in the HDF5 library has been reset.
@@ -4294,7 +4292,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5E
-     * 
+     *
      * H5Eclear clears the error stack specified by estack_id, or, if estack_id is set to H5E_DEFAULT, the
      * error stack for the current thread.
      *
@@ -4308,7 +4306,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5E
-     * 
+     *
      * H5Eclear2 clears the error stack specified by estack_id, or, if estack_id is set to H5E_DEFAULT, the
      * error stack for the current thread.
      *
@@ -4322,7 +4320,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5E
-     * 
+     *
      * H5Eclose_msg closes an error message identifier, which can be either a major or minor message.
      *
      * @param err_id
@@ -4335,7 +4333,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5E
-     * 
+     *
      * H5Eclose_stack closes the object handle for an error stack and releases its resources.
      *
      * @param stack_id
@@ -4348,7 +4346,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5E
-     * 
+     *
      * H5Ecreate_msg adds an error message to an error class defined by client library or application program.
      *
      * @param cls_id
@@ -4370,7 +4368,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5E
-     * 
+     *
      * H5Ecreate_stack creates a new empty error stack and returns the new stack's identifier.
      *
      * @return an error stack identifier
@@ -4382,7 +4380,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5E
-     * 
+     *
      * H5Eget_class_name retrieves the name of the error class specified by the class identifier.
      *
      * @param class_id
@@ -4398,7 +4396,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5E
-     * 
+     *
      * H5Eget_current_stack copies the current error stack and returns an error stack identifier for the new
      * copy.
      *
@@ -4411,7 +4409,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5E
-     * 
+     *
      * H5Eset_current_stack replaces the content of the current error stack with a copy of the content of the
      * error stack specified by estack_id.
      *
@@ -4425,7 +4423,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5E
-     * 
+     *
      * H5Eget_msg retrieves the error message including its length and type.
      *
      * @param msg_id
@@ -4443,7 +4441,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5E
-     * 
+     *
      * H5Eget_num retrieves the number of error records in the error stack specified by estack_id (including
      * major, minor messages and description).
      *
@@ -4460,7 +4458,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5E
-     * 
+     *
      * H5Eprint2 prints the error stack specified by estack_id on the specified stream, stream.
      *
      * @param stack_id
@@ -4477,7 +4475,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5E
-     * 
+     *
      * H5Epop deletes the number of error records specified in count from the top of the error stack specified
      * by estack_id (including major, minor messages and description).
      *
@@ -4493,7 +4491,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5E
-     * 
+     *
      * H5Epush pushes a new error record onto the error stack specified by estack_id.
      *
      * @param stack_id
@@ -4525,7 +4523,7 @@ public class H5 implements java.io.Serializable {
     }
     /**
      * @ingroup JH5E
-     * 
+     *
      * H5Epush2 pushes a new error record onto the error stack specified by estack_id.
      *
      * @param stack_id
@@ -4556,7 +4554,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5E
-     * 
+     *
      * H5Eregister_class registers a client library or application program to the HDF5 error API so that the
      * client library or application program can report errors together with HDF5 library.
      *
@@ -4579,7 +4577,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5E
-     * 
+     *
      * H5Eunregister_class removes the error class specified by class_id.
      *
      * @param class_id
@@ -4592,7 +4590,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5E
-     * 
+     *
      * H5Ewalk walks the error stack specified by estack_id for the current thread and calls the
      * function specified in func for each error along the way.
      *
@@ -4617,7 +4615,7 @@ public class H5 implements java.io.Serializable {
     }
     /**
      * @ingroup JH5E
-     * 
+     *
      * H5Ewalk2 walks the error stack specified by estack_id for the current thread and calls the
      * function specified in func for each error along the way.
      *
@@ -4671,14 +4669,13 @@ public class H5 implements java.io.Serializable {
     // //
     // ////////////////////////////////////////////////////////////
     /**
-    *
-    * @defgroup JH5F Java File (H5F) Interface
-    */
-
+     *
+     * @defgroup JH5F Java File (H5F) Interface
+     */
 
     /**
      * @ingroup JH5F
-     * 
+     *
      * H5Fclose terminates access to an HDF5 file.
      *
      * @param file_id
@@ -4704,7 +4701,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5F
-     * 
+     *
      * H5Fopen opens an existing file and is the primary function for accessing existing HDF5 files.
      *
      * @param name
@@ -4738,7 +4735,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5F
-     * 
+     *
      * H5Freopen reopens an HDF5 file.
      *
      * @param file_id
@@ -4764,7 +4761,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5F
-     * 
+     *
      * H5Fcreate is the primary function for creating HDF5 files.
      *
      * @param name
@@ -4817,7 +4814,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5F
-     * 
+     *
      * H5Fflush causes all buffers associated with a file or object to be immediately flushed (written) to
      * disk without removing the data from the (memory) cache. <p> After this call completes, the file (or
      * object) is in a consistent state and all data written to date is assured to be permanent.
@@ -4844,7 +4841,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5F
-     * 
+     *
      * H5Fget_access_plist returns the file access property list identifier of the specified file.
      *
      * @param file_id
@@ -4870,7 +4867,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5F
-     * 
+     *
      * H5Fget_create_plist returns a file creation property list identifier identifying the creation
      * properties used to create this file.
      *
@@ -4897,7 +4894,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5F
-     * 
+     *
      * H5Fget_filesize retrieves the file size of the HDF5 file. This function
      *              is called after an existing file is opened in order
      *              to learn the true size of the underlying file.
@@ -4914,7 +4911,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5F
-     * 
+     *
      * H5Fget_freespace returns the amount of space that is unused by any objects in the file.
      *
      * @param file_id
@@ -4929,7 +4926,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5F
-     * 
+     *
      * H5Fget_intent retrieves the intended access mode flag passed with H5Fopen when the file was opened.
      *
      * @param file_id
@@ -4944,7 +4941,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5F
-     * 
+     *
      * H5Fget_mdc_hit_rate queries the metadata cache of the target file to obtain its hit rate (cache hits /
      * (cache hits + cache misses)) since the last time hit rate statistics were reset.
      *
@@ -4960,7 +4957,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5F
-     * 
+     *
      * H5Fget_mdc_size queries the metadata cache of the target file for the desired size information.
      *
      * @param file_id
@@ -4985,7 +4982,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5F
-     * 
+     *
      * H5Fget_name retrieves the name of the file to which the object obj_id belongs.
      *
      * @param obj_id
@@ -5000,7 +4997,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5F
-     * 
+     *
      * H5Fget_obj_count returns the number of open object identifiers for the file.
      *
      * @param file_id
@@ -5027,7 +5024,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5F
-     * 
+     *
      * H5Fget_obj_ids returns the list of identifiers for all open HDF5 objects fitting the specified
      * criteria.
      *
@@ -5053,7 +5050,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5F
-     * 
+     *
      * H5Fis_hdf5 determines whether a file is in the HDF5 format.
      *
      * @param name
@@ -5071,7 +5068,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5F
-     * 
+     *
      * H5Fmount mounts the file specified by child_id onto the group specified by loc_id and name using the
      * mount properties plist_id.
      *
@@ -5096,7 +5093,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5F
-     * 
+     *
      * Given a mount point, H5Funmount disassociates the mount point's file from the file mounted there.
      *
      * @param loc_id
@@ -5116,7 +5113,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5F
-     * 
+     *
      * H5Freset_mdc_hit_rate_stats resets the hit rate statistics counters in the metadata cache associated
      * with the specified file.
      *
@@ -5131,7 +5128,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5F
-     * 
+     *
      * H5Fget_info returns global information for the file associated with the
      * object identifier obj_id.
      *
@@ -5146,7 +5143,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5F
-     * 
+     *
      * H5Fclear_elink_file_cache evicts all the cached child files in the specified file's external file
      * cache, causing them to be closed if there is nothing else holding them open.
      *
@@ -5161,7 +5158,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5F
-     * 
+     *
      * H5Fstart_swmr_write will activate SWMR writing mode for a file associated with file_id. This routine
      * will prepare and ensure the file is safe for SWMR writing.
      *
@@ -5175,7 +5172,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5F
-     * 
+     *
      * H5Fstart_mdc_logging starts logging metadata cache events if logging was previously enabled.
      *
      * @param file_id
@@ -5188,7 +5185,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5F
-     * 
+     *
      * H5Fstop_mdc_logging stops logging metadata cache events if logging was previously enabled and is
      * currently ongoing.
      *
@@ -5202,7 +5199,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5F
-     * 
+     *
      * H5Fget_mdc_logging_status gets the current metadata cache logging status.
      *
      * @param file_id
@@ -5224,7 +5221,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5F
-     * 
+     *
      * H5Fget_dset_no_attrs_hint gets the file-level setting to create minimized dataset object headers.
      *
      * @param file_id
@@ -5240,7 +5237,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5F
-     * 
+     *
      * H5Fset_dset_no_attrs_hint sets the file-level setting to create minimized dataset object headers.
      *
      * @param file_id
@@ -5256,7 +5253,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5F
-     * 
+     *
      * H5Fset_libver_bounds sets a different low and high bounds while a file is open.
      *
      * @param file_id
@@ -5384,7 +5381,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5G
-     * 
+     *
      * H5Gclose releases resources used by a group which was opened by a call to H5Gcreate() or H5Gopen().
      *
      * @param group_id
@@ -5410,7 +5407,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5G
-     * 
+     *
      * H5Gcreate creates a new group with the specified name at the specified location, loc_id.
      *
      * @param loc_id
@@ -5450,7 +5447,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5G
-     * 
+     *
      * H5Gcreate_anon creates a new empty group in the file specified by loc_id.
      *
      * @param loc_id
@@ -5482,7 +5479,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5G
-     * 
+     *
      * H5Gget_create_plist returns an identifier for the group creation property list associated with the
      * group specified by group_id.
      *
@@ -5498,7 +5495,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5G
-     * 
+     *
      * H5Gget_info retrieves information about the group specified by group_id. The information is returned in
      * the group_info struct.
      *
@@ -5514,7 +5511,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5G
-     * 
+     *
      * H5Gget_info_by_idx retrieves information about a group, according to the group's position within an
      * index.
      *
@@ -5545,7 +5542,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5G
-     * 
+     *
      * H5Gget_info_by_name retrieves information about the group group_name located in the file or group
      * specified by loc_id.
      *
@@ -5568,7 +5565,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5G
-     * 
+     *
      * retrieves information of all objects under the group (name) located in the file or group specified by
      * loc_id.
      *
@@ -5604,7 +5601,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5G
-     * 
+     *
      * retrieves information of all objects under the group (name) located in the file or group specified by
      * loc_id.
      *
@@ -5640,7 +5637,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5G
-     * 
+     *
      * retrieves information of all objects under the group (name) located in the file or group specified by
      * loc_id.
      *
@@ -5678,7 +5675,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5G
-     * 
+     *
      * retrieves information of all objects under the group (name) located in the file or group specified by
      * loc_id.
      *
@@ -5756,7 +5753,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5G
-     * 
+     *
      * H5Gget_obj_info_idx report the name and type of object with index 'idx' in a Group. The 'idx'
      * corresponds to the index maintained by H5Giterate. Each link is returned, so objects with multiple
      * links will be counted once for each link.
@@ -5800,7 +5797,7 @@ public class H5 implements java.io.Serializable {
      */
     /**
      * @ingroup JH5G
-     * 
+     *
      * retrieves information of all objects (recurvisely) under the group (name) located in the file or group
      * specified by loc_id up to maximum specified by objMax.
      *
@@ -5861,7 +5858,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5G
-     * 
+     *
      * H5Gn_members report the number of objects in a Group. The 'objects' include everything that will be
      * visited by H5Giterate. Each link is returned, so objects with multiple links will be counted once for
      * each link.
@@ -5897,7 +5894,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5G
-     * 
+     *
      * H5Gopen opens an existing group, name, at the location specified by loc_id.
      *
      * @param loc_id
@@ -5931,7 +5928,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5G
-     * 
+     *
      * H5Gflush causes all buffers associated with a group to be immediately flushed to disk without
      * removing the data from the cache.
      *
@@ -5945,7 +5942,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5G
-     * 
+     *
      * H5Grefresh causes all buffers associated with a group to be cleared and immediately re-loaded
      * with updated contents from disk. This function essentially closes the group, evicts all metadata
      * associated with it from the cache, and then re-opens the group. The reopened group is automatically
@@ -5994,7 +5991,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5I
-     * 
+     *
      * H5Iget_file_id obtains the file ID specified by the identifier, obj_id.
      *
      * @param obj_id
@@ -6009,7 +6006,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5I
-     * 
+     *
      * H5Iget_name_long retrieves the name of an object specified by the identifier, obj_id.
      * @deprecated
      *
@@ -6030,7 +6027,7 @@ public class H5 implements java.io.Serializable {
         throws HDF5LibraryException, NullPointerException;
     /**
      * @ingroup JH5I
-     * 
+     *
      * H5Iget_name retrieves the name of an object specified by the identifier, obj_id.
      *
      * @param obj_id
@@ -6045,7 +6042,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5I
-     * 
+     *
      * H5Iget_ref obtains the number of references outstanding specified by the identifier, obj_id.
      *
      * @param obj_id
@@ -6061,7 +6058,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5I
-     * 
+     *
      * H5Idec_ref decrements the reference count specified by the identifier, obj_id.
      * If the reference count for an ID reaches zero, the object will be closed.
      *
@@ -6078,7 +6075,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5I
-     * 
+     *
      * H5Iinc_ref increments the reference count specified by the identifier, obj_id.
      *
      * @param obj_id
@@ -6094,7 +6091,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5I
-     * 
+     *
      * H5Iget_type retrieves the type of the object identified by obj_id.
      *
      * @param obj_id
@@ -6109,7 +6106,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5I
-     * 
+     *
      * H5Iget_type_ref retrieves the reference count on an ID type. The reference count is used by the library
      * to indicate when an ID type can be destroyed.
      *
@@ -6125,7 +6122,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5I
-     * 
+     *
      * H5Idec_type_ref decrements the reference count on an identifier type. The reference count is used by
      * the library to indicate when an identifier type can be destroyed. If the reference count reaches zero,
      * this function will destroy it.
@@ -6142,7 +6139,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5I
-     * 
+     *
      * H5Iinc_type_ref increments the reference count on an ID type. The reference count is used by the
      * library to indicate when an ID type can be destroyed.
      *
@@ -6158,7 +6155,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5I
-     * 
+     *
      * H5Inmembers returns the number of identifiers of the identifier type specified in type.
      *
      * @param type_id
@@ -6173,7 +6170,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5I
-     * 
+     *
      * H5Iis_valid indicates if the identifier type specified in obj_id is valid.
      *
      * @param obj_id
@@ -6188,7 +6185,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5I
-     * 
+     *
      * H5Itype_exists indicates if the identifier type specified in type exists.
      *
      * @param type_id
@@ -6203,7 +6200,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5I
-     * 
+     *
      * H5Iclear_type deletes all identifiers of the type identified by the argument type.
      *
      * @param type_id
@@ -6219,7 +6216,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5I
-     * 
+     *
      * H5Idestroy_type deletes an entire identifier type. All identifiers of this type are destroyed
      * and no new identifiers of this type can be registered.
      *
@@ -6252,7 +6249,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5L
-     * 
+     *
      * H5Lcopy copies a link from one location to another.
      *
      * @param src_loc
@@ -6279,7 +6276,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5L
-     * 
+     *
      * H5Lcreate_external creates a new soft link to an external object, which is an object in a different
      * HDF5 file from the location of the link.
      *
@@ -6308,7 +6305,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5L
-     * 
+     *
      * H5Lcreate_hard creates a new hard link to a pre-existing object in an HDF5 file.
      *
      * @param cur_loc
@@ -6335,7 +6332,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5L
-     * 
+     *
      * H5Lcreate_soft creates a new soft link to an object in an HDF5 file.
      *
      * @param link_target
@@ -6360,7 +6357,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5L
-     * 
+     *
      * H5Ldelete removes the link specified from a group.
      *
      * @param loc_id
@@ -6380,7 +6377,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5L
-     * 
+     *
      * H5Ldelete_by_idx removes the nth link in a group according to the specified order and in the specified
      * index.
      *
@@ -6408,7 +6405,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5L
-     * 
+     *
      * H5Lexists checks if a link with a particular name exists in a group.
      *
      * @param loc_id
@@ -6430,7 +6427,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5L
-     * 
+     *
      * H5Lget_info returns information about the specified link.
      *
      * @param loc_id
@@ -6452,7 +6449,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5L
-     * 
+     *
      * H5Lget_info_by_idx opens a named datatype at the location specified by loc_id and return an identifier
      * for the datatype.
      *
@@ -6483,7 +6480,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5L
-     * 
+     *
      * H5Lget_name_by_idx retrieves name of the nth link in a group, according to the order within a specified
      * field or index.
      *
@@ -6513,7 +6510,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5L
-     * 
+     *
      * H5Lget_value returns the link value of a symbolic link. Note that this function is a combination
      * of H5Lget_info(), H5Lget_val() and for external links, H5Lunpack_elink_val.
      *
@@ -6539,7 +6536,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5L
-     * 
+     *
      * H5Lget_value_by_idx retrieves value of the nth link in a group, according to the order within an index.
      * Note that this function is a combination of H5Lget_info(), H5Lget_val() and for external links,
      * H5Lunpack_elink_val.
@@ -6573,7 +6570,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5L
-     * 
+     *
      * H5Literate iterates through links in a group.
      *
      * @param grp_id
@@ -6601,7 +6598,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5L
-     * 
+     *
      * H5Literate_by_name iterates through links in a group.
      *
      * @param grp_id
@@ -6636,7 +6633,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5L
-     * 
+     *
      * H5Lmove renames a link within an HDF5 file.
      *
      * @param src_loc
@@ -6663,7 +6660,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5L
-     * 
+     *
      * H5Lvisit recursively visits all links starting from a specified group.
      *
      * @param grp_id
@@ -6688,7 +6685,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5L
-     * 
+     *
      * H5Lvisit_by_name recursively visits all links starting from a specified group.
      *
      * @param loc_id
@@ -6721,7 +6718,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5L
-     * 
+     *
      * H5Lis_registered tests whether a user-defined link class is currently registered,
      * either by the HDF5 Library or by the user through the use of H5Lregister.
      *
@@ -6739,7 +6736,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5L
-     * 
+     *
      * H5Lunregister unregisters a class of user-defined links, preventing them from being traversed, queried,
      * moved, etc.
      *
@@ -6787,7 +6784,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5O
-     * 
+     *
      * H5Oclose closes the group, dataset, or named datatype specified.
      *
      * @param object_id
@@ -6813,7 +6810,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5O
-     * 
+     *
      * H5Ocopy copies the group, dataset or named datatype specified from the file or group specified by
      * source location to the destination location.
      *
@@ -6841,7 +6838,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5O
-     * 
+     *
      * H5Oget_comment retrieves the comment for the specified object.
      *
      * @param obj_id
@@ -6857,7 +6854,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5O
-     * 
+     *
      * H5Oset_comment sets the comment for the specified object.
      *
      * @param obj_id
@@ -6876,7 +6873,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5O
-     * 
+     *
      * H5Oget_comment_by_name retrieves the comment for an object.
      *
      * @param loc_id
@@ -6898,7 +6895,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5O
-     * 
+     *
      * H5Oset_comment_by_name sets the comment for the specified object.
      *
      * @param loc_id
@@ -6924,7 +6921,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5O
-     * 
+     *
      * H5Oget_info retrieves the metadata for an object specified by an identifier.
      *
      * @param loc_id
@@ -6944,7 +6941,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5O
-     * 
+     *
      * H5Oget_info retrieves the metadata for an object specified by an identifier.
      *
      * @param loc_id
@@ -6964,7 +6961,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5O
-     * 
+     *
      * H5Oget_info_by_idx retrieves the metadata for an object, identifying the object by an index position.
      *
      * @param loc_id
@@ -6998,7 +6995,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5O
-     * 
+     *
      * H5Oget_info_by_idx retrieves the metadata for an object, identifying the object by an index position.
      *
      * @param loc_id
@@ -7031,7 +7028,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5O
-     * 
+     *
      * H5Oget_info_by_name retrieves the metadata for an object, identifying the object by location and
      * relative name.
      *
@@ -7058,7 +7055,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5O
-     * 
+     *
      * H5Oget_info_by_name retrieves the metadata for an object, identifying the object by location and
      * relative name.
      *
@@ -7085,7 +7082,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5O
-     * 
+     *
      * H5Olink creates a new hard link to an object in an HDF5 file.
      *
      * @param obj_id
@@ -7110,7 +7107,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5O
-     * 
+     *
      * H5Oopen opens a group, dataset, or named datatype specified by a location and a path name.
      *
      * @param loc_id
@@ -7144,7 +7141,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5O
-     * 
+     *
      * H5Ovisit recursively visits all objects accessible from a specified object.
      *
      * @param obj_id
@@ -7175,7 +7172,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5O
-     * 
+     *
      * H5Ovisit recursively visits all objects accessible from a specified object.
      *
      * @param obj_id
@@ -7206,7 +7203,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5O
-     * 
+     *
      * H5Ovisit_by_name recursively visits all objects starting from a specified object.
      *
      * @param loc_id
@@ -7243,7 +7240,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5O
-     * 
+     *
      * H5Ovisit_by_name recursively visits all objects starting from a specified object.
      *
      * @param loc_id
@@ -7279,7 +7276,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5O
-     * 
+     *
      * H5Oexists_by_name is used by an application to check that an existing link resolves to an object.
      * Primarily, it is designed to check for dangling soft, external, or user-defined links.
      *
@@ -7302,7 +7299,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5O
-     * 
+     *
      * H5Odecr_refcount decrements the hard link reference count for an object.
      *
      * @param object_id
@@ -7315,7 +7312,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5O
-     * 
+     *
      * H5Oincr_refcount increments the hard link reference count for an object.
      *
      * @param object_id
@@ -7328,7 +7325,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5O
-     * 
+     *
      * H5Oopen_by_addr opens a group, dataset, or named datatype using its address within an HDF5 file.
      *
      * @param loc_id
@@ -7359,7 +7356,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5O
-     * 
+     *
      * H5Oopen_by_idx opens the nth object in the group specified.
      *
      * @param loc_id
@@ -7400,7 +7397,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5O
-     * 
+     *
      * H5Oflush causes all buffers associated with an object to be immediately flushed to disk without
      * removing the data from the cache. object_id can be any named object associated with an HDF5 file
      * including a dataset, a group, or a committed datatype.
@@ -7415,7 +7412,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5O
-     * 
+     *
      * H5Orefresh causes all buffers associated with an object to be cleared and immediately re-loaded with
      * updated contents from disk. This function essentially closes the object, evicts all metadata associated
      * with it from the cache, and then re-opens the object. The reopened object is automatically
@@ -7432,7 +7429,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5O
-     * 
+     *
      * H5Odisable_mdc_flushes corks an object, keeping dirty entries associated with the object in the
      * metadata cache.
      *
@@ -7443,7 +7440,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5O
-     * 
+     *
      * H5Oenable_mdc_flushes uncorks an object, keeping dirty entries associated with the object in the
      * metadata cache.
      *
@@ -7454,7 +7451,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5O
-     * 
+     *
      * H5Oare_mdc_flushes_disabled retrieve the object's "cork" status.
      *
      * @param object_id
@@ -7479,7 +7476,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_class_name retrieves the name of a generic property list class
      *
      * @param plid
@@ -7493,7 +7490,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pcreate creates a new property as an instance of some property list class.
      *
      * @param type
@@ -7519,7 +7516,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget retrieves a copy of the value for a property in a property list (support integer only)
      *
      * @param plid
@@ -7535,7 +7532,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * Sets a property list value (support integer only)
      *
      * @param plid
@@ -7554,7 +7551,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pexist determines whether a property exists within a property list or class
      *
      * @param plid
@@ -7571,7 +7568,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_size retrieves the size of a property's value in bytes
      *
      * @param plid
@@ -7587,7 +7584,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_nprops retrieves the number of properties in a property list or class
      *
      * @param plid
@@ -7601,7 +7598,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_class returns the property list class for the property list identified by the plist parameter.
      *
      * @param plist
@@ -7615,7 +7612,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_class_parent retrieves an identifier for the parent class of a property class
      *
      * @param plid
@@ -7629,7 +7626,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pequal determines if two property lists or classes are equal
      *
      * @param plid1
@@ -7646,7 +7643,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pequal determines if two property lists or classes are equal
      *
      * @param plid1
@@ -7668,7 +7665,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pisa_class checks to determine whether a property list is a member of the specified class
      *
      * @param plist
@@ -7684,7 +7681,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pcopy_prop copies a property from one property list or class to another
      *
      * @param dst_id
@@ -7703,7 +7700,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Premove removes a property from a property list
      *
      * @param plid
@@ -7719,7 +7716,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Punregister removes a property from a property list class
      *
      * @param plid
@@ -7735,7 +7732,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * Closes an existing property list class
      *
      * @param plid
@@ -7760,7 +7757,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pclose terminates access to a property list.
      *
      * @param plist
@@ -7785,7 +7782,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pcopy copies an existing property list to create a new property list.
      *
      * @param plist
@@ -7832,7 +7829,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pcreate_class_nocb creates an new property class with no callback functions.
      *
      * @param parent_class
@@ -7880,7 +7877,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pregister2_nocb registers a property list with no callback functions.
      *
      * @param plist_class
@@ -7905,7 +7902,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pinsert2_nocb inserts a property list with no callback functions.
      *
      * @param plist
@@ -7930,7 +7927,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Piterate iterates over the properties in a property list or class
      *
      * @param  plist
@@ -7958,7 +7955,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_attr_phase_change retrieves attribute storage phase change thresholds.
      *
      * @param ocpl_id
@@ -7984,7 +7981,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_attr_phase_change sets threshold values for attribute storage on an object. These
      *      thresholds determine the point at which attribute storage changes
      *      from compact storage (i.e., storage in the object header)
@@ -8007,7 +8004,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_attr_creation_order retrieves the settings for tracking and indexing attribute creation order on
      * an object.
      *
@@ -8025,7 +8022,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_attr_creation_order sets flags specifying whether to track and index attribute creation order on
      * an object.
      *
@@ -8045,7 +8042,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_obj_track_times queries the object creation property list, ocpl_id, to determine whether object
      * times are being recorded.
      *
@@ -8063,7 +8060,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_obj_track_times sets a property in the object creation property list, ocpl_id, that governs the
      * recording of times associated with an object.
      *
@@ -8082,7 +8079,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pmodify_filter modifies the specified FILTER in the transient or permanent output filter pipeline
      *              depending on whether PLIST is a dataset creation or dataset
      *              transfer property list.  The FLAGS argument specifies certain
@@ -8133,7 +8130,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_filter adds the specified filter and corresponding properties to the end of an output filter
      * pipeline.
      *
@@ -8158,7 +8155,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_nfilters returns the number of filters defined in the filter pipeline associated with the
      * property list plist.
      *
@@ -8174,7 +8171,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_filter returns information about a filter, specified by its filter number, in a filter pipeline,
      * specified by the property list with which it is associated.
      *
@@ -8218,7 +8215,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_filter2 returns information about a filter, specified by its filter number, in a filter
      * pipeline, specified by the property list with which it is associated.
      *
@@ -8234,7 +8231,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_filter_by_id returns information about the filter specified in filter_id, a filter identifier.
      * plist_id must be a dataset or group creation property list and filter_id must be in the associated
      * filter pipeline. The filter_id and flags parameters are used in the same manner as described in the
@@ -8286,7 +8283,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_filter_by_id2 returns information about a filter, specified by its filter id, in a filter
      * pipeline, specified by the property list with which it is associated.
      *
@@ -8322,7 +8319,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pall_filters_avail query to verify that all the filters set
      *                      in the dataset creation property list are available currently.
      *
@@ -8341,7 +8338,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Premove_filter deletes a filter from the dataset creation property list;
      *                  deletes all filters if filter is H5Z_FILTER_NONE
      *
@@ -8360,7 +8357,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_deflate sets the compression method for a dataset.
      *
      * @param plist
@@ -8377,7 +8374,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_fletcher32 sets Fletcher32 checksum of EDC for a dataset creation
      *                   property list or group creation property list.
      *
@@ -8396,7 +8393,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_userblock retrieves the size of a user block in a file creation property list.
      *
      * @param plist
@@ -8416,7 +8413,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_userblock sets the user block size of a file creation property list.
      *
      * @param plist
@@ -8433,7 +8430,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_sizes retrieves the size of the offsets and lengths used in an HDF5 file. This function is only
      * valid for file creation property lists.
      *
@@ -8460,7 +8457,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_sizes sets the byte size of the offsets and lengths used to address objects in an HDF5 file.
      *
      * @param plist
@@ -8480,7 +8477,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_sym_k retrieves the size of the symbol table B-tree 1/2 rank and the symbol table leaf node 1/2
      * size.
      *
@@ -8508,7 +8505,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_sym_k sets the size of parameters used to control the symbol table nodes.
      *
      * @param plist
@@ -8528,7 +8525,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_istore_k queries the 1/2 rank of an indexed storage B-tree.
      *
      * @param plist
@@ -8548,7 +8545,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_istore_k sets the size of the parameter used to control the B-trees for indexing chunked
      * datasets.
      *
@@ -8566,7 +8563,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_shared_mesg_nindexes retrieves number of shared object header message indexes in file creation
      * property list.
      *
@@ -8585,7 +8582,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_shared_mesg_nindexes sets the number of shared object header message indexes in the specified
      * file creation property list.
      *
@@ -8608,7 +8605,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_shared_mesg_index Retrieves the configuration settings for a shared message index.
      *
      * @param fcpl_id
@@ -8639,7 +8636,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_shared_mesg_index Configures the specified shared object header message index
      *
      * @param fcpl_id
@@ -8665,7 +8662,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_shared_mesg_phase_change retrieves shared object header message phase change information.
      *
      * @param fcpl_id
@@ -8692,7 +8689,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_shared_mesg_phase_change sets shared object header message storage phase change thresholds.
      *
      * @param fcpl_id
@@ -8718,7 +8715,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_file_space_strategy sets the file space management strategy for the file associated with fcpl_id
      * to strategy. There are four strategies that applications can select and they are described in the
      * Parameters section.
@@ -8756,7 +8753,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_file_space_strategy provides the means for applications to manage the HDF5 file's file space
      * strategy for their specific needs.
      *
@@ -8781,7 +8778,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_file_space_strategy_persist provides the means for applications to manage the HDF5 file's file
      * space strategy for their specific needs.
      *
@@ -8801,7 +8798,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_file_space_strategy_threshold provides the means for applications to manage the HDF5 file's file
      * space strategy for their specific needs.
      *
@@ -8821,7 +8818,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_file_space_page_size retrieves the file space page size for aggregating small metadata or raw
      * data.
      *
@@ -8842,7 +8839,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_file_space_page_size Sets the file space page size for paged aggregation.
      *
      * @param fcpl_id
@@ -8863,7 +8860,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_alignment retrieves the current settings for alignment properties from a file access property
      * list.
      *
@@ -8890,7 +8887,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_alignment sets the alignment properties of a file access property list so that any file object
      * &gt;= THRESHOLD bytes will be aligned on an address which is a multiple of ALIGNMENT.
      *
@@ -8911,7 +8908,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_driver returns the identifier of the low-level file driver associated with the file access
      * property list or data transfer property list plid.
      *
@@ -8926,7 +8923,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_family_offset gets offset for family driver.
      *
      * @param fapl_id
@@ -8942,7 +8939,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_family_offset sets the offset for family driver.
      *
      * @param fapl_id
@@ -8961,7 +8958,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * Retrieves the maximum possible number of elements in the meta data cache and the maximum possible
      * number of bytes and the RDCC_W0 value in the raw data chunk cache.
      *
@@ -8989,7 +8986,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_cache sets the number of elements (objects) in the meta data cache and the total number of bytes
      * in the raw data chunk cache.
      *
@@ -9015,7 +9012,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_mdc_config gets the initial metadata cache configuration contained in a file access property
      * list. This configuration is used when the file is opened.
      *
@@ -9032,7 +9029,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_mdc_config sets the initial metadata cache configuration contained in a file access property
      * list and loads it into the instance of H5AC_cache_config_t pointed to by the config_ptr parameter. This
      * configuration is used when the file is opened.
@@ -9050,7 +9047,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_gc_references Returns the current setting for the garbage collection references property from a
      * file access property list.
      *
@@ -9066,7 +9063,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_gc_references Sets the flag for garbage collecting references for the file. Default value for
      * garbage collecting references is off.
      *
@@ -9085,7 +9082,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_fclose_degree returns the degree for the file close behavior for a file access
      * property list.
      *
@@ -9102,7 +9099,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_fclose_degree sets the degree for the file close behavior.
      *
      * @param fapl_id
@@ -9120,7 +9117,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_meta_block_size the current metadata block size setting.
      *
      * @param fapl_id
@@ -9136,7 +9133,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_meta_block_size sets the minimum metadata block size.
      *
      * @param fapl_id
@@ -9153,7 +9150,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_sieve_buf_size retrieves the current settings for the data sieve buffer size
      * property from a file access property list.
      *
@@ -9169,7 +9166,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_sieve_buf_size Sets the maximum size of the data seive buffer used for file
      *      drivers which are capable of using data sieving.  The data sieve
      *      buffer is used when performing I/O on datasets in the file.  Using a
@@ -9194,7 +9191,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_small_data_block_size retrieves the size of a block of small data in a file creation property
      * list.
      *
@@ -9211,7 +9208,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_small_data_block_size reserves blocks of size bytes for the contiguous storage of the raw data
      * portion of small datasets.
      *
@@ -9230,7 +9227,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_libver_bounds retrieves the lower and upper bounds on the HDF5 Library versions that indirectly
      * determine the object formats versions used when creating objects in the file.
      *
@@ -9257,7 +9254,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_libver_bounds Sets bounds on library versions, and indirectly format versions, to be used when
      * creating objects
      *
@@ -9282,7 +9279,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_elink_file_cache_size retrieves the size of the external link open file cache.
      *
      * @param fapl_id
@@ -9299,7 +9296,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_elink_file_cache_size sets the number of files that can be held open in an external link open
      * file cache.
      *
@@ -9317,7 +9314,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_mdc_log_options sets metadata cache logging options.
      *
      * @param fapl_id
@@ -9341,7 +9338,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_mdc_log_options gets metadata cache logging options.
      *
      * @param fapl_id
@@ -9363,7 +9360,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_metadata_read_attempts retrieves the number of read attempts that is set in the file access
      * property list plist_id.
      *
@@ -9381,7 +9378,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_metadata_read_attempts sets the number of reads that the library will try when reading
      * checksummed metadata in an HDF5 file opened with SWMR access. When reading such metadata, the library
      * will compare the checksum computed for the metadata just read with the checksum stored within the piece
@@ -9404,7 +9401,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_evict_on_close retrieves the file access property list setting that determines whether an HDF5
      * object will be evicted from the library's metadata cache when it is closed.
      *
@@ -9421,7 +9418,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_evict_on_close controls the library's behavior of evicting metadata associated with a closed
      * object.
      *
@@ -9439,7 +9436,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_use_file_locking retrieves whether we are using file locking.
      *
      * @param fapl_id
@@ -9456,7 +9453,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_use_file_locking retrieves whether we ignore file locks when they are disabled.
      *
      * @param fapl_id
@@ -9473,7 +9470,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_file_locking sets parameters related to file locking.
      *
      * @param fapl_id
@@ -9498,7 +9495,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_layout returns the layout of the raw data for a dataset.
      *
      * @param plist
@@ -9514,7 +9511,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_layout sets the type of storage used store the raw data for a dataset.
      *
      * @param plist
@@ -9531,7 +9528,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_chunk retrieves the size of chunks for the raw data of a chunked layout dataset.
      *
      * @param plist
@@ -9555,7 +9552,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_chunk sets the size of the chunks used to store a chunked layout dataset.
      *
      * @param plist
@@ -9579,7 +9576,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_chunk sets the size of the chunks used to store a chunked layout dataset.
      *
      * @param plist
@@ -9617,7 +9614,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_virtual maps elements of the virtual dataset (VDS) described by the
      * virtual dataspace identifier vspace_id to the elements of the source dataset
      * described by the source dataset dataspace identifier src_space_id. The source
@@ -9653,7 +9650,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_virtual_count gets the number of mappings for a virtual dataset that has the creation property
      * list specified by dcpl_id.
      *
@@ -9672,7 +9669,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_virtual_vspace takes the dataset creation property list for the virtual dataset, dcpl_id, and
      * the mapping index, index, and returns a dataspace identifier for the selection within the virtual
      * dataset used in the mapping.
@@ -9694,7 +9691,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_virtual_srcspace takes the dataset creation property list for the virtual dataset, dcpl_id, and
      * the mapping index, index, and returns a dataspace identifier for the selection within the source
      * dataset used in the mapping.
@@ -9716,7 +9713,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_virtual_filename takes the dataset creation property list for the virtual dataset, dcpl_id, the
      * mapping index, index, the size of the filename for a source dataset, size, and retrieves the name of
      * the file for a source dataset used in the mapping.
@@ -9738,7 +9735,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_virtual_dsetname takes the dataset creation property list for the virtual dataset, dcpl_id, the
      * mapping index, index, the size of the dataset name for a source dataset, size, and retrieves the name
      * of the source dataset used in the mapping.
@@ -9792,7 +9789,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_external returns information about an external file.
      *
      * @param plist
@@ -9833,7 +9830,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_external adds an external file to the list of external files.
      *
      * @param plist
@@ -9858,7 +9855,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_external_count returns the number of external files for the specified dataset.
      *
      * @param plist
@@ -9873,7 +9870,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_szip Sets up the use of the szip filter.
      *
      * @param plist
@@ -9894,7 +9891,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_shuffle Sets up the use of the shuffle filter.
      *
      * @param plist_id
@@ -9911,7 +9908,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_nbit Sets up the use of the N-Bit filter.
      *
      * @param plist_id
@@ -9927,7 +9924,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_scaleoffset sets the Scale-Offset filter for a dataset.
      *
      * @param plist_id
@@ -9950,7 +9947,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_fill_value queries the fill value property of a dataset creation property list.
      *
      * @param plist_id
@@ -9970,7 +9967,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_fill_value queries the fill value property of a dataset creation property list.
      *
      * @param plist_id
@@ -10000,7 +9997,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_fill_value sets the fill value for a dataset creation property list.
      *
      * @param plist_id
@@ -10020,7 +10017,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_fill_value sets the fill value for a dataset creation property list.
      *
      * @param plist_id
@@ -10050,7 +10047,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_fill_value checks if the fill value is defined for a dataset creation property list.
      *
      * @param plist_id
@@ -10072,7 +10069,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_alloc_time Gets space allocation time for dataset during creation.
      *
      * @param plist_id
@@ -10091,7 +10088,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_alloc_time Sets space allocation time for dataset during creation.
      *
      * @param plist_id
@@ -10110,7 +10107,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_fill_time Gets fill value writing time.
      *
      * @param plist_id
@@ -10129,7 +10126,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_fill_time Sets the fill value writing time.
      *
      * @param plist_id
@@ -10148,7 +10145,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_chunk_opts Sets the edge chunk option in a dataset creation property list.
      *
      * @param dcpl_id
@@ -10166,7 +10163,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_chunk_opts retrieves the edge chunk option setting stored in the dataset creation property list
      *
      * @param dcpl_id
@@ -10182,7 +10179,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_dset_no_attrs_hint accesses the flag for whether or not datasets created by the given dcpl
      * will be created with a "minimized" object header.
      *
@@ -10199,7 +10196,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_dset_no_attrs_hint sets the dcpl to minimize (or explicitly to not minimized) dataset object
      * headers upon creation.
      *
@@ -10219,7 +10216,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * Retrieves the maximum possible number of elements in the meta data cache and the maximum possible
      * number of bytes and the RDCC_W0 value in the raw data chunk cache on a per-datset basis.
      *
@@ -10243,7 +10240,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_chunk_cache sets the number of elements (objects) in the meta data cache and the total number of
      * bytes in the raw data chunk cache on a per-datset basis.
      *
@@ -10265,7 +10262,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_virtual_view takes the access property list for the virtual dataset, dapl_id, and the flag,
      * view, and sets the VDS view according to the flag value.
      *
@@ -10282,7 +10279,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_virtual_view takes the virtual dataset access property list, dapl_id, and retrieves the flag,
      * view, set by the H5Pset_virtual_view call.
      *
@@ -10299,7 +10296,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_virtual_printf_gap sets the access property list for the virtual dataset, dapl_id, to instruct
      * the library to stop looking for the mapped data stored in the files and/or datasets with the
      * printf-style names after not finding gap_size files and/or datasets. The found source files and
@@ -10319,7 +10316,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_virtual_printf_gap returns the maximum number of missing printf-style files and/or datasets for
      * determining the extent of an unlimited virtual dataaset, gap_size, using the access property list for
      * the virtual dataset, dapl_id.
@@ -10339,7 +10336,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_virtual_prefix Retrieves prefix applied to virtual file paths.
      *
      * @param dapl_id
@@ -10355,7 +10352,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_virtual_prefix Sets prefix to be applied to virtual file paths.
      *
      * @param dapl_id
@@ -10374,7 +10371,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_efile_prefix Retrieves prefix applied to external file paths.
      *
      * @param dapl_id
@@ -10390,7 +10387,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_efile_prefix Sets prefix to be applied to external file paths.
      *
      * @param dapl_id
@@ -10417,7 +10414,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_data_transform retrieves the data transform expression previously set in the dataset transfer
      * property list plist_id by H5Pset_data_transform.
      *
@@ -10444,7 +10441,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_data_transform sets a data transform expression
      *
      * @param plist_id
@@ -10465,7 +10462,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_buffer gets type conversion and background buffers. Returns buffer size, in bytes, if
      * successful; otherwise 0 on failure.
      *
@@ -10488,7 +10485,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_buffer_size gets type conversion and background buffer size, in bytes, if successful;
      * otherwise 0 on failure.
      *
@@ -10507,7 +10504,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_buffer sets type conversion and background buffers. status to TRUE or FALSE.
      *
      * Given a dataset transfer property list, H5Pset_buffer sets the maximum size for the type conversion
@@ -10537,7 +10534,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_edc_check gets the error-detecting algorithm in use.
      *
      * @param plist
@@ -10552,7 +10549,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_edc_check sets the error-detecting algorithm.
      *
      * @param plist
@@ -10569,7 +10566,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_btree_ratio Get the B-tree split ratios for a dataset transfer property list.
      *
      * @param plist_id
@@ -10594,7 +10591,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_btree_ratio Sets B-tree split ratios for a dataset transfer property list. The split ratios
      * determine what percent of children go in the first node when a node splits.
      *
@@ -10617,7 +10614,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_hyper_vector_size reads values previously set with H5Pset_hyper_vector_size.
      *
      * @param dxpl_id
@@ -10636,7 +10633,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_hyper_vector_size sets the number of
      *              "I/O vectors" (offset and length pairs) which are to be
      *              accumulated in memory before being issued to the lower levels
@@ -10666,7 +10663,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_create_intermediate_group determines whether property is set to enable creating missing
      * intermediate groups.
      *
@@ -10684,7 +10681,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_create_intermediate_group specifies in property list whether to create missing intermediate
      * groups
      *
@@ -10707,7 +10704,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_local_heap_size_hint Retrieves the anticipated size of the local heap for original-style groups.
      *
      * @param gcpl_id
@@ -10724,7 +10721,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_local_heap_size_hint Specifies the anticipated maximum size of a local heap.
      *
      * @param gcpl_id
@@ -10743,7 +10740,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_link_phase_change Queries the settings for conversion between compact and dense groups.
      *
      * @param gcpl_id
@@ -10770,7 +10767,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_link_phase_change Sets the parameters for conversion between compact and dense groups.
      *
      * @param gcpl_id
@@ -10794,7 +10791,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_est_link_info Queries data required to estimate required local heap or object header size.
      *
      * @param gcpl_id
@@ -10821,7 +10818,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_est_link_info Sets estimated number of links and length of link names in a group.
      *
      * @param gcpl_id
@@ -10845,7 +10842,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_link_creation_order queries the group creation property list, gcpl_id, and returns a flag
      * indicating whether link creation order is tracked and/or indexed in a group.
      *
@@ -10863,7 +10860,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_link_creation_order Sets flags in a group creation property list, gcpl_id, for tracking and/or
      * indexing links on creation order.
      *
@@ -10886,7 +10883,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_char_encoding gets the character encoding of the string.
      *
      * @param plist_id
@@ -10902,7 +10899,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_char_encoding sets the character encoding of the string.
      *
      * @param plist_id
@@ -10921,7 +10918,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_nlinks retrieves the maximum number of soft or user-defined link traversals allowed, nlinks,
      * before the library assumes it has found a cycle and aborts the traversal. This value is retrieved from
      * the link access property list lapl_id.
@@ -10939,7 +10936,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_nlinks sets the maximum number of soft or user-defined link traversals allowed, nlinks, before
      * the library assumes it has found a cycle and aborts the traversal. This value is set in the link access
      * property list lapl_id.
@@ -10962,7 +10959,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_elink_prefix Retrieves prefix applied to external link paths.
      *
      * @param lapl_id
@@ -10984,7 +10981,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_elink_prefix Sets prefix to be applied to external link paths.
      *
      * @param lapl_id
@@ -11005,7 +11002,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_elink_fapl Retrieves the file access property list identifier associated with the link access
      * property list.
      *
@@ -11033,7 +11030,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_elink_fapl sets a file access property list for use in accessing a file pointed to by an
      * external link.
      *
@@ -11053,7 +11050,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_elink_acc_flags retrieves the external link traversal file access flag from the specified link
      * access property list.
      *
@@ -11070,7 +11067,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_elink_acc_flags Sets the external link traversal file access flag in a link access property
      * list.
      *
@@ -11094,7 +11091,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_copy_object retrieves the properties to be used when an object is copied.
      *
      * @param ocp_plist_id
@@ -11110,7 +11107,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_copy_object Sets properties to be used when an object is copied.
      *
      * @param ocp_plist_id
@@ -11127,7 +11124,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_version retrieves the version information of various objects for a file creation property list.
      *
      * @param plist
@@ -11160,7 +11157,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_fapl_core retrieve H5FD_CORE I/O settings.
      *
      * @param fapl_id
@@ -11180,7 +11177,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_fapl_core modifies the file access property list to use the H5FD_CORE driver.
      *
      * @param fapl_id
@@ -11202,7 +11199,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_fapl_direct queries properties set by the H5Pset_fapl_direct.
      *
      * @param fapl_id
@@ -11223,7 +11220,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_fapl_direct Sets up use of the direct I/O driver.
      *
      * @param fapl_id
@@ -11246,7 +11243,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_fapl_family Returns information about the family file access property list.
      *
      * @param fapl_id
@@ -11268,7 +11265,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_fapl_family Sets up use of the direct I/O driver.
      *
      * @param fapl_id
@@ -11289,7 +11286,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_fapl_hdfs Modify the file access property list to use the H5FD_HDFS driver.
      *
      * @param fapl_id
@@ -11308,7 +11305,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_fapl_hdfs gets the properties hdfs I/O driver.
      *
      * @param fapl_id
@@ -11325,7 +11322,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_fapl_multi Sets up use of the multi I/O driver.
      *
      * @param fapl_id
@@ -11355,7 +11352,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_fapl_multi Sets up use of the multi I/O driver.
      *
      * @param fapl_id
@@ -11385,7 +11382,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_fapl_log Sets up the logging virtual file driver (H5FD_LOG) for use. H5Pset_fapl_log modifies
      * the file access property list to use the logging driver, H5FD_LOG. The logging virtual file driver
      * (VFD) is a clone of the standard SEC2 (H5FD_SEC2) driver with additional facilities for logging VFD
@@ -11411,7 +11408,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_fapl_sec2 Sets up use of the sec2 I/O driver.
      *
      * @param fapl_id
@@ -11428,7 +11425,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_fapl_split Sets up use of the split I/O driver. Makes the multi driver act like the
      *        old split driver which stored meta data in one file and raw
      *        data in another file
@@ -11454,7 +11451,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_fapl_stdio Sets up use of the stdio I/O driver.
      *
      * @param fapl_id
@@ -11471,7 +11468,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_fapl_windows Sets up use of the windows I/O driver.
      *
      * @param fapl_id
@@ -11488,7 +11485,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pset_fapl_ros3 Modify the file access property list to use the H5FD_ROS3 driver.
      *
      * @param fapl_id
@@ -11507,7 +11504,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5P
-     * 
+     *
      * H5Pget_fapl_ros3 gets the properties of the ros3 I/O driver.
      *
      * @param fapl_id
@@ -11609,7 +11606,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5PL
-     * 
+     *
      * H5PLset_loading_state uses one argument to enable or disable individual plugins.
      *        The plugin_flags parameter is an encoded integer in which each bit controls a specific
      *        plugin or class of plugins.
@@ -11638,7 +11635,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5PL
-     * 
+     *
      * H5PLget_loading_state retrieves the state of the dynamic plugins flag, plugin_flags..
      *
      * @return the list of dynamic plugin types that are enabled or disabled.
@@ -11654,7 +11651,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5PL
-     * 
+     *
      * H5PLappend inserts the plugin path at the end of the table.
      *
      * @param plugin_path
@@ -11667,7 +11664,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5PL
-     * 
+     *
      * H5PLprepend inserts the plugin path at the beginning of the table.
      *
      * @param plugin_path
@@ -11680,7 +11677,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5PL
-     * 
+     *
      * H5PLreplace replaces the plugin path at the specified index.
      *
      * @param plugin_path
@@ -11696,7 +11693,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5PL
-     * 
+     *
      * H5PLinsert inserts the plugin path at the specified index.
      *
      * @param plugin_path
@@ -11712,7 +11709,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5PL
-     * 
+     *
      * H5PLremove removes the plugin path at the specified index.
      *
      * @param index
@@ -11725,7 +11722,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5PL
-     * 
+     *
      * H5PLget retrieves the plugin path at the specified index.
      *
      * @param index
@@ -11740,7 +11737,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5PL
-     * 
+     *
      * H5PLsize retrieves the size of the current list of plugin paths.
      *
      * @return the current number of paths in the plugin path table
@@ -11765,7 +11762,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5R
-     * 
+     *
      * H5Rcreate creates the reference, ref, of the type specified in ref_type, pointing to the object name
      * located at loc_id.
      *
@@ -11805,7 +11802,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5R
-     * 
+     *
      * Given a reference to some object, H5Rdereference opens that object and return an identifier.
      *
      * @param dataset
@@ -11844,7 +11841,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5R
-     * 
+     *
      * H5Rget_name retrieves a name for the object identified by ref.
      *
      * @param loc_id
@@ -11874,7 +11871,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5R
-     * 
+     *
      * H5Rget_name_string retrieves a name for the object identified by ref.
      *
      * @param loc_id
@@ -11899,7 +11896,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5R
-     * 
+     *
      * H5Rget_obj_type Given a reference to an object ref, H5Rget_obj_type returns the type of the object
      * pointed to.
      *
@@ -11924,7 +11921,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5R
-     * 
+     *
      * H5Rget_obj_type2 Retrieves the type of object that an object reference points to.
      *
      * @see public static int H5Rget_obj_type(int loc_id, int ref_type, byte ref[])
@@ -11935,7 +11932,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5R
-     * 
+     *
      * Given a reference to an object ref, H5Rget_region creates a copy of the dataspace of the dataset
      * pointed to and defines a selection in the copy which is the region pointed to.
      *
@@ -11983,7 +11980,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5S
-     * 
+     *
      * H5Screate creates a new dataspace of a particular type.
      *
      * @param type
@@ -12009,7 +12006,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5S
-     * 
+     *
      * H5Screate_simple creates a new simple data space and opens it for access.
      *
      * @param rank
@@ -12043,7 +12040,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5S
-     * 
+     *
      * H5Sset_extent_simple sets or resets the size of an existing dataspace.
      *
      * @param space_id
@@ -12066,7 +12063,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5S
-     * 
+     *
      * H5Sset_extent_simple sets or resets the size of an existing dataspace.
      *
      * @param space_id
@@ -12097,7 +12094,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5S
-     * 
+     *
      * H5Scopy creates a new dataspace which is an exact copy of the dataspace identified by space_id.
      *
      * @param space_id
@@ -12122,7 +12119,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5S
-     * 
+     *
      * H5Sclose releases a dataspace.
      *
      * @param space_id
@@ -12148,7 +12145,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5S
-     * 
+     *
      * H5Sencode converts a data space description into binary form in a buffer.
      *
      * @param obj_id
@@ -12164,7 +12161,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5S
-     * 
+     *
      * H5Sdecode reconstructs the HDF5 data space object and returns a new object handle for it.
      *
      * @param buf
@@ -12182,7 +12179,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5S
-     * 
+     *
      * H5Sget_simple_extent_npoints determines the number of elements in a dataspace.
      *
      * @param space_id
@@ -12198,7 +12195,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5S
-     * 
+     *
      * H5Sget_simple_extent_ndims determines the dimensionality (or rank) of a dataspace.
      *
      * @param space_id
@@ -12214,7 +12211,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5S
-     * 
+     *
      * H5Sget_simple_extent_dims returns the size and maximum sizes of each dimension of a dataspace through
      * the dims and maxdims parameters.
      *
@@ -12238,7 +12235,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5S
-     * 
+     *
      * H5Sis_simple determines whether a dataspace is a simple dataspace.
      *
      * @param space_id
@@ -12253,7 +12250,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5S
-     * 
+     *
      * H5Sget_simple_extent_type queries a dataspace to determine the current class of a dataspace.
      *
      * @param space_id
@@ -12269,7 +12266,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5S
-     * 
+     *
      * H5Sset_extent_none removes the extent from a dataspace and sets the type to H5S_NONE.
      *
      * @param space_id
@@ -12284,7 +12281,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5S
-     * 
+     *
      * H5Sextent_copy copies the extent from source_space_id to dest_space_id. This action may change the type
      * of the dataspace.
      *
@@ -12303,7 +12300,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5S
-     * 
+     *
      * H5Sextent_equal determines whether the dataspace extents of two dataspaces, space1_id and space2_id,
      * are equal.
      *
@@ -12324,7 +12321,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5S
-     * 
+     *
      * H5Sget_select_type retrieves the type of selection currently defined for the dataspace space_id.
      *
      * @param space_id
@@ -12339,7 +12336,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5S
-     * 
+     *
      * H5Sget_select_npoints determines the number of elements in the current selection of a dataspace.
      *
      * @param space_id
@@ -12354,7 +12351,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5S
-     * 
+     *
      * H5Sselect_copy copies all the selection information (including offset) from the source
      * dataspace to the destination dataspace.
      *
@@ -12371,7 +12368,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5S
-     * 
+     *
      * H5Sselect_valid verifies that the selection for the dataspace.
      *
      * @param space_id
@@ -12386,7 +12383,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5S
-     * 
+     *
      * H5Sselect_adjust moves a selection by subtracting an offset from it.
      *
      * @param space_id
@@ -12404,7 +12401,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5S
-     * 
+     *
      * H5Sget_select_bounds retrieves the coordinates of the bounding box containing the current selection and
      * places them into user-supplied buffers. <p> The start and end buffers must be large enough to hold the
      * dataspace rank number of coordinates.
@@ -12428,7 +12425,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5S
-     * 
+     *
      * H5Sselect_shape_same checks to see if the current selection in the dataspaces are the same
      * dimensionality and shape.
      * This is primarily used for reading the entire selection in one swoop.
@@ -12449,7 +12446,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5S
-     * 
+     *
      * H5Sselect_intersect_block checks to see if the current selection in the
      * dataspace intersects with the block given.
      *
@@ -12474,7 +12471,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5S
-     * 
+     *
      * H5Soffset_simple sets the offset of a simple dataspace space_id.
      *
      * @param space_id
@@ -12494,7 +12491,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5S
-     * 
+     *
      * H5Soffset_simple sets the offset of a simple dataspace space_id.
      *
      * @param space_id
@@ -12527,7 +12524,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5S
-     * 
+     *
      * H5Sselect_all selects the entire extent of the dataspace space_id.
      *
      * @param space_id
@@ -12542,7 +12539,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5S
-     * 
+     *
      * H5Sselect_none resets the selection region for the dataspace space_id to include no elements.
      *
      * @param space_id
@@ -12557,7 +12554,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5S
-     * 
+     *
      * H5Sselect_elements selects array elements to be included in the selection for the space_id dataspace.
      *
      * @param space_id
@@ -12580,7 +12577,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5S
-     * 
+     *
      * H5Sselect_elements selects array elements to be included in the selection for the space_id dataspace.
      *
      * @param space_id
@@ -12620,7 +12617,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5S
-     * 
+     *
      * H5Sget_select_elem_npoints returns the number of element points in the current dataspace selection.
      *
      * @param spaceid
@@ -12636,7 +12633,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5S
-     * 
+     *
      * H5Sget_select_elem_pointlist returns an array of of element points in the current dataspace selection.
      * The point coordinates have the same dimensionality (rank) as the dataspace they are located within, one
      * coordinate per point.
@@ -12663,7 +12660,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5S
-     * 
+     *
      * H5Sselect_hyperslab selects a hyperslab region to add to the current selected region for the dataspace
      * specified by space_id. The start, stride, count, and block arrays must be the same size as the rank of
      * the dataspace.
@@ -12708,7 +12705,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5S
-     * 
+     *
      * H5Sselect_hyperslab selects a hyperslab region to add to the current selected region for the dataspace
      * specified by space_id. The start, stride, count, and block arrays must be the same size as the rank of
      * the dataspace.
@@ -12741,7 +12738,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5S
-     * 
+     *
      * H5Scombine_hyperslab combines a hyperslab selection with the current selection for a dataspace,
      * creating a new dataspace to return the generated selection.
      * If the current selection is not a hyperslab, it is freed and the hyperslab
@@ -12777,7 +12774,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5S
-     * 
+     *
      * H5Smodify_select refine an existing hyperslab selection with an operation, using a second
      * hyperslab. The first selection is modified to contain the result of
      * space1 operated on by space2.
@@ -12797,7 +12794,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5S
-     * 
+     *
      * H5Scombine_select combines two existing hyperslab selections with an operation, returning
      * a new dataspace with the resulting selection.  The dataspace extent from
      * space1 is copied for the dataspace extent of the newly created dataspace.
@@ -12819,7 +12816,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5S
-     * 
+     *
      * H5Sis_regular_hyperslab retrieves a regular hyperslab selection for the dataspace specified
      * by space_id.
      *
@@ -12836,7 +12833,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5S
-     * 
+     *
      * H5Sget_regular_hyperslab determines if a hyperslab selection is regular for the dataspace specified
      * by space_id. The start, stride, count, and block arrays must be the same size as the rank of the
      * dataspace.
@@ -12865,7 +12862,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5S
-     * 
+     *
      * H5Sget_select_hyper_nblocks returns the number of hyperslab blocks in the current dataspace selection.
      *
      * @param spaceid
@@ -12881,7 +12878,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5S
-     * 
+     *
      * H5Sget_select_hyper_blocklist returns an array of hyperslab blocks. The block coordinates have the same
      * dimensionality (rank) as the dataspace they are located within. The list of blocks is formatted as
      * follows:
@@ -12917,7 +12914,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5S
-     * 
+     *
      * H5Sselect_project_intersection projects the intersection of the selections of src_space_id and
      * src_intersect_space_id within the selection of src_space_id as a
      * selection within the selection of dst_space_id.
@@ -12951,7 +12948,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tarray_create creates a new array datatype object.
      *
      * @param base_id
@@ -12985,7 +12982,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tclose releases a datatype.
      *
      * @param type_id
@@ -13011,7 +13008,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tcommit saves a transient datatype as an immutable named datatype in a file.
      *
      * @param loc_id
@@ -13038,7 +13035,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tcommit_anon commits a transient datatype (not immutable) to a file, turning it into a named datatype
      * with the specified creation and property lists.
      *
@@ -13059,7 +13056,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tcommitted queries a type to determine whether the type specified by the type identifier is a named
      * type or a transient type.
      *
@@ -13075,7 +13072,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tcompiler_conv finds out whether the library's conversion function from type src_id to type dst_id is
      *a compiler (hard) conversion.
      *
@@ -13092,7 +13089,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tconvert converts nelmts elements from the type specified by the src_id identifier to type dst_id.
      *
      * @param src_id
@@ -13121,7 +13118,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tcopy copies an existing datatype. The returned type is always transient and unlocked.
      *
      * @param type_id
@@ -13148,7 +13145,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tcreate creates a new dataype of the specified class with the specified number of bytes.
      *
      * @param tclass
@@ -13176,7 +13173,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tdecode reconstructs the HDF5 data type object and returns a new object handle for it.
      *
      * @param buf
@@ -13205,7 +13202,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tdetect_class determines whether the datatype specified in dtype_id contains any datatypes of the
      * datatype class specified in dtype_class.
      *
@@ -13224,7 +13221,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tencode converts a data type description into binary form in a buffer.
      *
      * @param obj_id
@@ -13247,7 +13244,7 @@ public class H5 implements java.io.Serializable {
 
     // /**
     //  * @ingroup JH5T
-    //  * 
+    //  *
     //  * H5Tencode converts a data type description into binary form in a buffer.
     //  *
     //  * @param obj_id
@@ -13263,7 +13260,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tenum_create creates a new enumeration datatype based on the specified base datatype, parent_id,
      * which must be an integer type.
      *
@@ -13290,7 +13287,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tenum_insert inserts a new enumeration datatype member into an enumeration datatype.
      *
      * @param type
@@ -13310,7 +13307,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tenum_insert inserts a new enumeration datatype member into an enumeration datatype.
      *
      * @param type
@@ -13335,7 +13332,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tenum_insert inserts a new enumeration datatype member into an enumeration datatype.
      *
      * @param type
@@ -13364,7 +13361,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tenum_nameof finds the symbol name that corresponds to the specified value of the enumeration
      * datatype type.
      *
@@ -13389,7 +13386,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tenum_nameof finds the symbol name that corresponds to the specified value of the enumeration
      * datatype type.
      *
@@ -13420,7 +13417,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tenum_valueof finds the value that corresponds to the specified name of the enumeration datatype
      * type.
      *
@@ -13439,7 +13436,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tenum_valueof finds the value that corresponds to the specified name of the enumeration datatype
      * type.
      *
@@ -13468,7 +13465,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tequal determines whether two datatype identifiers refer to the same datatype.
      *
      * @param type_id1
@@ -13486,7 +13483,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tget_array_dims returns the sizes of the dimensions of the specified array datatype object.
      *
      * @param type_id
@@ -13509,7 +13506,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tget_array_dims2 returns the sizes of the dimensions of the specified array datatype object.
      *
      * @param type_id
@@ -13529,7 +13526,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tget_array_ndims returns the rank, the number of dimensions, of an array datatype object.
      *
      * @param type_id
@@ -13544,7 +13541,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tget_class returns the datatype class identifier.
      *
      * @param type_id
@@ -13559,7 +13556,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tget_class_name returns the datatype class identifier.
      *
      * @param class_id
@@ -13601,7 +13598,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tget_create_plist returns a property list identifier for the datatype creation property list
      * associated with the datatype specified by type_id.
      *
@@ -13628,7 +13625,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tget_cset retrieves the character set type of a string datatype.
      *
      * @param type_id
@@ -13643,7 +13640,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tset_cset the character set to be used.
      *
      * @param type_id
@@ -13660,7 +13657,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tget_ebias retrieves the exponent bias of a floating-point type.
      *
      * @param type_id
@@ -13675,7 +13672,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tset_ebias sets the exponent bias of a floating-point type.
      *
      * @param type_id
@@ -13696,7 +13693,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tget_ebias retrieves the exponent bias of a floating-point type.
      *
      * @param type_id
@@ -13711,7 +13708,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tset_ebias sets the exponent bias of a floating-point type.
      *
      * @param type_id
@@ -13726,7 +13723,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tget_fields retrieves information about the locations of the various bit fields of a floating point
      * datatype.
      *
@@ -13754,7 +13751,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tget_fields retrieves information about the locations of the various bit fields of a floating point
      * datatype.
      *
@@ -13791,7 +13788,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tset_fields sets the locations and sizes of the various floating point bit fields.
      *
      * @param type_id
@@ -13815,7 +13812,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tset_fields sets the locations and sizes of the various floating point bit fields.
      *
      * @param type_id
@@ -13845,7 +13842,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tget_inpad retrieves the internal padding type for unused bits in floating-point datatypes.
      *
      * @param type_id
@@ -13860,7 +13857,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * If any internal bits of a floating point type are unused (that is, those significant bits which are not
      * part of the sign, exponent, or mantissa), then H5Tset_inpad will be filled according to the value of
      * the padding value property inpad.
@@ -13879,7 +13876,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tget_member_class returns the class of datatype of the specified member.
      *
      * @param type_id
@@ -13897,7 +13894,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tget_member_index retrieves the index of a field of a compound datatype.
      *
      * @param type_id
@@ -13915,7 +13912,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tget_member_name retrieves the name of a field of a compound datatype or an element of an enumeration
      * datatype.
      *
@@ -13934,7 +13931,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tget_member_offset returns the byte offset of the specified member of the compound datatype. This is
      * the byte offset in the HDF5 file/library, NOT the offset of any Java object which might be mapped to
      * this data item.
@@ -13950,7 +13947,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tget_member_type returns the datatype of the specified member.
      *
      * @param type_id
@@ -13979,7 +13976,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tget_member_value returns the value of the enumeration datatype member memb_no.
      *
      * @param type_id
@@ -13999,7 +13996,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tget_member_value returns the value of the enumeration datatype member memb_no.
      *
      * @param type_id
@@ -14027,7 +14024,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tget_native_type returns the equivalent native datatype for the datatype specified in type_id.
      *
      * @param type_id
@@ -14046,7 +14043,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tget_native_type returns the equivalent native datatype for the datatype specified in type_id.
      *
      * @param type_id
@@ -14075,7 +14072,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tget_nmembers retrieves the number of fields a compound datatype has.
      *
      * @param type_id
@@ -14090,7 +14087,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tget_norm retrieves the mantissa normalization of a floating-point datatype.
      *
      * @param type_id
@@ -14105,7 +14102,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tset_norm sets the mantissa normalization of a floating-point datatype.
      *
      * @param type_id
@@ -14122,7 +14119,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tget_offset retrieves the bit offset of the first significant bit.
      *
      * @param type_id
@@ -14137,7 +14134,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tset_offset sets the bit offset of the first significant bit.
      *
      * @param type_id
@@ -14158,7 +14155,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tset_offset sets the bit offset of the first significant bit.
      *
      * @param type_id
@@ -14174,7 +14171,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tget_order returns the byte order of an atomic datatype.
      *
      * @param type_id
@@ -14189,7 +14186,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tset_order sets the byte ordering of an atomic datatype.
      *
      * @param type_id
@@ -14206,7 +14203,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tget_pad retrieves the padding type of the least and most-significant bit padding.
      *
      * @param type_id
@@ -14231,7 +14228,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tset_pad sets the least and most-significant bits padding types.
      *
      * @param type_id
@@ -14251,7 +14248,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tget_precision returns the precision of an atomic datatype.
      *
      * @param type_id
@@ -14266,7 +14263,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tset_precision sets the precision of an atomic datatype.
      *
      * @param type_id
@@ -14287,7 +14284,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tget_precision returns the precision of an atomic datatype.
      *
      * @param type_id
@@ -14302,7 +14299,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tset_precision sets the precision of an atomic datatype.
      *
      * @param type_id
@@ -14318,7 +14315,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tget_sign retrieves the sign type for an integer type.
      *
      * @param type_id
@@ -14333,7 +14330,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tset_sign sets the sign proprety for an integer type.
      *
      * @param type_id
@@ -14350,7 +14347,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tget_size returns the size of a datatype in bytes.
      *
      * @param type_id
@@ -14365,7 +14362,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tset_size sets the total size in bytes, size, for an atomic datatype (this operation is not permitted
      * on compound datatypes).
      *
@@ -14383,7 +14380,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tget_strpad retrieves the string padding method for a string datatype.
      *
      * @param type_id
@@ -14398,7 +14395,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tset_strpad defines the storage mechanism for the string.
      *
      * @param type_id
@@ -14415,7 +14412,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tget_super returns the type from which TYPE is derived.
      *
      * @param type
@@ -14441,7 +14438,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tget_tag returns the tag associated with datatype type_id.
      *
      * @param type
@@ -14456,7 +14453,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tset_tag tags an opaque datatype type_id with a unique ASCII identifier tag.
      *
      * @param type
@@ -14473,7 +14470,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tinsert adds another member to the compound datatype type_id.
      *
      * @param type_id
@@ -14497,7 +14494,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tis_variable_str determines whether the datatype identified in type_id is a variable-length string.
      *
      * @param type_id
@@ -14512,7 +14509,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tlock locks the datatype specified by the type_id identifier, making it read-only and
      * non-destrucible.
      *
@@ -14528,7 +14525,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Topen opens a named datatype at the location specified by loc_id and return an identifier for the
      * datatype.
      *
@@ -14563,7 +14560,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tpack recursively removes padding from within a compound datatype to make it more efficient
      * (space-wise) to store that data. <p> <b>WARNING:</b> This call only affects the C-data, even if it
      * succeeds, there may be no visible effect on Java objects.
@@ -14580,7 +14577,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tvlen_create creates a new variable-length (VL) dataype.
      *
      * @param base_id
@@ -14606,7 +14603,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Tflush causes all buffers associated with a committed datatype to be immediately flushed to disk
      * without removing the data from the cache.
      *
@@ -14620,7 +14617,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5T
-     * 
+     *
      * H5Trefresh causes all buffers associated with a committed datatype to be cleared and immediately
      * re-loaded with updated contents from disk. This function essentially closes the datatype, evicts
      * all metadata associated with it from the cache, and then re-opens the datatype. The reopened datatype
@@ -14656,7 +14653,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5Z
-     * 
+     *
      * H5Zfilter_avail checks if a filter is available.
      *
      * @param filter
@@ -14671,7 +14668,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5Z
-     * 
+     *
      * H5Zget_filter_info gets information about a pipeline data filter.
      *
      * @param filter
@@ -14686,7 +14683,7 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @ingroup JH5Z
-     * 
+     *
      * H5Zunregister unregisters a filter.
      *
      * @param filter

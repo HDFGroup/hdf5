@@ -21,7 +21,7 @@ package hdf.hdf5lib.exceptions;
 public class HDF5AttributeException extends HDF5LibraryException {
     /**
      * @ingroup JERRLIB
-     * 
+     *
      * Constructs an <code>HDF5AttributeException</code> with no specified
      * detail message.
      */
@@ -29,7 +29,7 @@ public class HDF5AttributeException extends HDF5LibraryException {
 
     /**
      * @ingroup JERRLIB
-     * 
+     *
      * Constructs an <code>HDF5AttributeException</code> with the specified
      * detail message.
      *

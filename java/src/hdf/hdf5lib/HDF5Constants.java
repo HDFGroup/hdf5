@@ -13,9 +13,10 @@
 
 package hdf.hdf5lib;
 
-/** @page HDF5CONST Constants and Enumerated Types
+/**
+ * @page HDF5CONST Constants and Enumerated Types
  * This class contains C constants and enumerated types of HDF5 library. The
- * values of these constants are obtained from the library by calling 
+ * values of these constants are obtained from the library by calling
  * the JNI function jconstant, where jconstant is any of the private constants
  * which start their name with "H5" need to be converted.
  * <P>

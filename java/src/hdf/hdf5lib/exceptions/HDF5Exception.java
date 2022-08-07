@@ -13,9 +13,10 @@
 
 package hdf.hdf5lib.exceptions;
 
-/** @page ERRORS Errors and Exceptions
+/**
+ * @page ERRORS Errors and Exceptions
  * The class HDF5Exception returns errors from the Java HDF5 Interface.
- * 
+ *
  * Two sub-classes of HDF5Exception are defined:
  * <ol>
  * <li>
@@ -39,7 +40,7 @@ public class HDF5Exception extends RuntimeException {
 
     /**
      * @ingroup JERR
-     * 
+     *
      * Constructs an <code>HDF5Exception</code> with no specified detail
      * message.
      */
@@ -47,7 +48,7 @@ public class HDF5Exception extends RuntimeException {
 
     /**
      * @ingroup JERR
-     * 
+     *
      * Constructs an <code>HDF5Exception</code> with the specified detail
      * message.
      *
@@ -62,7 +63,7 @@ public class HDF5Exception extends RuntimeException {
 
     /**
      * @ingroup JERR
-     * 
+     *
      * Returns the detail message of this exception
      *
      * @return the detail message or <code>null</code> if this object does not

@@ -16,7 +16,8 @@ package hdf.hdf5lib;
 import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.hdf5lib.exceptions.HDF5JavaException;
 
-/** @page HDFNATIVE Native Arrays of Numbers
+/**
+ * @page HDFNATIVE Native Arrays of Numbers
  * This class encapsulates native methods to deal with arrays of numbers,
  * converting from numbers to bytes and bytes to numbers.
  * <p>
