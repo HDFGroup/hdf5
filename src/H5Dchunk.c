@@ -252,6 +252,7 @@ typedef struct H5D_chunk_coll_fill_info_t {
 typedef struct H5D_chunk_iter_ud_t {
     H5D_chunk_iter_op_t op;      /* User defined callback */
     void               *op_data; /* User data for user defined callback */
+    H5O_layout_chunk_t *chunk;   /* Chunk layout */
 } H5D_chunk_iter_ud_t;
 
 /********************/
@@ -7675,13 +7676,20 @@ static int
 H5D__chunk_iter_cb(const H5D_chunk_rec_t *chunk_rec, void *udata)
 {
     const H5D_chunk_iter_ud_t *data      = (H5D_chunk_iter_ud_t *)udata;
+    const H5O_layout_chunk_t  *chunk     = data->chunk;
     int                        ret_value = H5_ITER_CONT;
+    hsize_t                    offset[H5O_LAYOUT_NDIMS];
+    unsigned                   ii; /* Match H5O_layout_chunk_t.ndims */
+
+    /* Similar to H5D__get_chunk_info */
+    for (ii = 0; ii < chunk->ndims; ii++)
+        offset[ii] = chunk_rec->scaled[ii] * chunk->dim[ii];
 
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check for callback failure and pass along return value */
-    if ((ret_value = (data->op)(chunk_rec->scaled, chunk_rec->filter_mask, chunk_rec->chunk_addr,
-                                chunk_rec->nbytes, data->op_data)) < 0)
+    if ((ret_value = (data->op)(offset, chunk_rec->filter_mask, chunk_rec->chunk_addr, chunk_rec->nbytes,
+                                data->op_data)) < 0)
         HERROR(H5E_DATASET, H5E_CANTNEXT, "iteration operator failed");
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -7741,6 +7749,7 @@ H5D__chunk_iter(H5D_t *dset, H5D_chunk_iter_op_t op, void *op_data)
         /* Set up info for iteration callback */
         ud.op      = op;
         ud.op_data = op_data;
+        ud.chunk   = &dset->shared->layout.u.chunk;
 
         /* Iterate over the allocated chunks calling the iterator callback */
         if ((ret_value = (layout->storage.u.chunk.ops->iterate)(&idx_info, H5D__chunk_iter_cb, &ud)) < 0)
