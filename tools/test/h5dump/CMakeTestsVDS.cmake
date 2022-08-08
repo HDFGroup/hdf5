@@ -117,15 +117,6 @@
 
   macro (ADD_H5_VDS_TEST resultfile resultcode)
     # If using memchecker add tests without using scripts
-    add_test (
-        NAME H5DUMP-${resultfile}-clear-objects
-        COMMAND ${CMAKE_COMMAND} -E remove
-            ${resultfile}.out
-            ${resultfile}.out.err
-    )
-    set_tests_properties (H5DUMP-${resultfile}-clear-objects PROPERTIES
-        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds"
-    )
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5DUMP-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump${tgt_file_ext}> ${ARGN})
       if (${resultcode})
@@ -146,17 +137,6 @@
       )
     endif ()
     set_tests_properties (H5DUMP-${resultfile} PROPERTIES
-        DEPENDS H5DUMP-${resultfile}-clear-objects
-        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds"
-    )
-    add_test (
-        NAME H5DUMP-${resultfile}-clean-objects
-        COMMAND ${CMAKE_COMMAND} -E remove
-            ${resultfile}.out
-            ${resultfile}.out.err
-    )
-    set_tests_properties (H5DUMP-${resultfile}-clean-objects PROPERTIES
-        DEPENDS H5DUMP-${resultfile}
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds"
     )
   endmacro ()

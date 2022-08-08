@@ -22,17 +22,8 @@ H5_CREATE_VFD_DIR()
 ###           T H E   T E S T S  M A C R O S                               ###
 ##############################################################################
 ##############################################################################
-set (CPP_VFD_CLEANFILES
-    *-cpp_testhdf5.out
-    *-cpp_testhdf5.out.err
-)
 macro (ADD_VFD_TEST vfdname resultcode)
   if (NOT HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (
-        NAME CPP_VFD-${vfdname}-cpp_testhdf5-clear-objects
-        COMMAND ${CMAKE_COMMAND} -E remove ${CPP_VFD_CLEANFILES}
-        WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/${vfdname}
-    )
     add_test (
         NAME CPP_VFD-${vfdname}-cpp_testhdf5
         COMMAND "${CMAKE_COMMAND}"
@@ -45,14 +36,7 @@ macro (ADD_VFD_TEST vfdname resultcode)
             -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/${vfdname}"
             -P "${HDF_RESOURCES_DIR}/vfdTest.cmake"
     )
-    set_tests_properties (CPP_VFD-${vfdname}-cpp_testhdf5 PROPERTIES DEPENDS CPP_VFD-${vfdname}-cpp_testhdf5-clear-objects)
     set_tests_properties (CPP_VFD-${vfdname}-cpp_testhdf5 PROPERTIES TIMEOUT ${CTEST_SHORT_TIMEOUT})
-    add_test (
-        NAME CPP_VFD-${vfdname}-cpp_testhdf5-clean-objects
-        COMMAND ${CMAKE_COMMAND} -E remove ${CPP_VFD_CLEANFILES}
-        WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/${vfdname}
-    )
-    set_tests_properties (CPP_VFD-${vfdname}-cpp_testhdf5-clean-objects PROPERTIES DEPENDS CPP_VFD-${vfdname}-cpp_testhdf5)
   endif ()
 endmacro ()
 

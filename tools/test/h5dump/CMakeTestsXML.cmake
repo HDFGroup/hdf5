@@ -175,15 +175,6 @@
   endmacro ()
 
   macro (ADD_XML_H5_TEST resultfile resultcode)
-    add_test (
-        NAME H5DUMP_XML-${resultfile}-clear-objects
-        COMMAND ${CMAKE_COMMAND} -E remove
-            ${resultfile}.out
-            ${resultfile}.out.err
-    )
-    set_tests_properties (H5DUMP_XML-${resultfile}-clear-objects PROPERTIES
-        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/xml"
-    )
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5DUMP_XML-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5dump${tgt_file_ext}> --xml ${ARGN})
       if (${resultcode})
@@ -204,17 +195,6 @@
       )
     endif ()
     set_tests_properties (H5DUMP_XML-${resultfile} PROPERTIES
-        DEPENDS H5DUMP_XML-${resultfile}-clear-objects
-        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/xml"
-    )
-    add_test (
-        NAME H5DUMP_XML-${resultfile}-clean-objects
-        COMMAND ${CMAKE_COMMAND} -E remove
-            ${resultfile}.out
-            ${resultfile}.out.err
-    )
-    set_tests_properties (H5DUMP_XML-${resultfile}-clean-objects PROPERTIES
-        DEPENDS H5DUMP_XML-${resultfile}
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/xml"
     )
   endmacro ()
