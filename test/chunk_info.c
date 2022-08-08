@@ -1728,7 +1728,7 @@ test_basic_query(hid_t fapl)
 
     /* Iterate and stop after one iteration */
     cptr = &(chunk_infos[0]);
-    if (H5Dchunk_iter(dset, &iter_cb_stop, &cptr) < 0)
+    if (H5Dchunk_iter(dset, H5P_DEFAULT, &iter_cb_stop, &cptr) < 0)
         TEST_ERROR;
     if (cptr != &(chunk_infos[1]))
         FAIL_PUTS_ERROR("Verification of halted iterator failed");
@@ -1737,7 +1737,7 @@ test_basic_query(hid_t fapl)
     cptr = &(chunk_infos[0]);
     H5E_BEGIN_TRY
     {
-        ret = H5Dchunk_iter(dset, &iter_cb_fail, &cptr);
+        ret = H5Dchunk_iter(dset, H5P_DEFAULT, &iter_cb_fail, &cptr);
     }
     H5E_END_TRY;
     if (ret >= 0)

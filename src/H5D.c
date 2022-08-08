@@ -1134,6 +1134,7 @@ done:
  *
  * Parameters:
  *              hid_t dset_id;          IN: Chunked dataset ID
+ *              hid_t dxpl_id;          IN: Dataset transfer property list ID
  *              H5D_chunk_iter_op_t cb  IN: User callback function, called for every chunk.
  *              void *op_data           IN/OUT: Optional user data passed on to user callback.
  *
@@ -1144,7 +1145,7 @@ done:
  *            const hsize_t *offset,
  *            uint32_t filter_mask,
  *            haddr_t addr,
- *            uint32_t nbytes,
+ *            uint32_t size,
  *            void *op_data);
  *
  *      H5D_chunk_iter_op_t parameters:
@@ -1171,22 +1172,30 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dchunk_iter(hid_t dset_id, H5D_chunk_iter_op_t cb, void *op_data)
+H5Dchunk_iter(hid_t dset_id, hid_t dxpl_id, H5D_chunk_iter_op_t op, void *op_data)
 {
     H5VL_object_t *vol_obj   = NULL; /* Dataset for this operation */
     herr_t         ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "ix*x", dset_id, cb, op_data);
+    H5TRACE4("e", "iix*x", dset_id, dxpl_id, op, op_data);
 
     /* Check arguments */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
+    if (NULL == op)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid callback to chunk iteration")
 
-    /* Call private function to get the chunk info given the chunk's index */
-    if (H5VL_dataset_specific(vol_obj, H5VL_DATASET_CHUNK_ITER, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, cb,
-                              op_data) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "Can't iterate over chunks")
+    /* Get the default dataset transfer property list if the user didn't provide one */
+    if (H5P_DEFAULT == dxpl_id)
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    else if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dxpl_id is not a dataset transfer property list ID")
+
+    /* Iterate over the chunks */
+    if ((ret_value = H5VL_dataset_optional(vol_obj, H5VL_NATIVE_DATASET_CHUNK_ITER, dxpl_id, H5_REQUEST_NULL,
+                                           op, op_data)) < 0)
+        HGOTO_ERROR(H5E_BADITER, H5E_BADITER, FAIL, "error iterating over dataset chunks")
 
 done:
     FUNC_LEAVE_API(ret_value)
