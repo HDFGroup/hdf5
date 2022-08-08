@@ -135,15 +135,6 @@
 ##############################################################################
 
   macro (ADD_H5_TEST resultfile resultcode)
-    add_test (
-        NAME H5LS-${resultfile}-clear-objects
-        COMMAND ${CMAKE_COMMAND} -E remove
-            ${resultfile}.out
-            ${resultfile}.out.err
-    )
-    set_tests_properties (H5LS-${resultfile}-clear-objects PROPERTIES
-        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
-    )
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5LS-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5ls${tgt_file_ext}> ${ARGN})
@@ -169,31 +160,11 @@
       )
     endif ()
     set_tests_properties (H5LS-${resultfile} PROPERTIES
-        DEPENDS "H5LS-${resultfile}-clear-objects"
-        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
-    )
-    add_test (
-        NAME H5LS-${resultfile}-clean-objects
-        COMMAND ${CMAKE_COMMAND} -E remove
-            ${resultfile}.out
-            ${resultfile}.out.err
-    )
-    set_tests_properties (H5LS-${resultfile}-clean-objects PROPERTIES
-        DEPENDS "H5LS-${resultfile}"
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
     )
   endmacro ()
 
   macro (ADD_H5_ERR_TEST resultfile resultcode)
-    add_test (
-        NAME H5LS-${resultfile}-clear-objects
-        COMMAND ${CMAKE_COMMAND} -E remove
-            ${resultfile}.out
-            ${resultfile}.out.err
-    )
-    set_tests_properties (H5LS-${resultfile}-clear-objects PROPERTIES
-        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
-    )
     # If using memchecker add tests without using scripts
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5LS-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5ls${tgt_file_ext}> ${ARGN})
@@ -217,32 +188,12 @@
       )
     endif ()
     set_tests_properties (H5LS-${resultfile} PROPERTIES
-        DEPENDS "H5LS-${resultfile}-clear-objects"
-        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
-    )
-    add_test (
-        NAME H5LS-${resultfile}-clean-objects
-        COMMAND ${CMAKE_COMMAND} -E remove
-            ${resultfile}.out
-            ${resultfile}.out.err
-    )
-    set_tests_properties (H5LS-${resultfile}-clean-objects PROPERTIES
-        DEPENDS "H5LS-${resultfile}"
         WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
     )
   endmacro ()
 
   macro (ADD_H5_UD_TEST testname resultcode resultfile)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
-      add_test (
-          NAME H5LS_UD-${testname}-${resultfile}-clear-objects
-          COMMAND ${CMAKE_COMMAND} -E remove
-              ${resultfile}.out
-              ${resultfile}.out.err
-      )
-      set_tests_properties (H5LS_UD-${testname}-${resultfile}-clear-objects PROPERTIES
-          WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
-      )
       add_test (
           NAME H5LS_UD-${testname}-${resultfile}
           COMMAND "${CMAKE_COMMAND}"
@@ -259,17 +210,6 @@
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
       set_tests_properties (H5LS_UD-${testname}-${resultfile} PROPERTIES
-          DEPENDS "H5LS_UD-${testname}-${resultfile}-clear-objects"
-          WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
-      )
-      add_test (
-          NAME H5LS_UD-${testname}-${resultfile}-clean-objects
-          COMMAND ${CMAKE_COMMAND} -E remove
-              ${resultfile}.out
-              ${resultfile}.out.err
-      )
-      set_tests_properties (H5LS_UD-${testname}-${resultfile}-clean-objects PROPERTIES
-          DEPENDS "H5LS_UD-${testname}-${resultfile}"
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
       )
     endif ()
