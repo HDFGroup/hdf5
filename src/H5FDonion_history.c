@@ -154,7 +154,7 @@ done:
  *              Failure:    0
  *-----------------------------------------------------------------------------
  */
-size_t
+size_t H5_ATTR_NO_OPTIMIZE
 H5FD__onion_history_decode(unsigned char *buf, H5FD_onion_history_t *history)
 {
     uint32_t       ui32        = 0;
