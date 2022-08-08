@@ -346,13 +346,6 @@ H5VL__native_dataset_specific(void *obj, H5VL_dataset_specific_t specific_type, 
             break;
         }
 
-        case H5VL_DATASET_WAIT: { /* H5Dwait */
-            /* The native VOL connector doesn't support asynchronous
-             *      operations, so this is a no-op.
-             */
-            break;
-        }
-
         case H5VL_DATASET_CHUNK_ITER: { /* H5Dchunk_iter */
             H5D_chunk_iter_op_t cb      = HDva_arg(arguments, H5D_chunk_iter_op_t);
             void               *op_data = HDva_arg(arguments, void *);
