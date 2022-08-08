@@ -1193,7 +1193,8 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
          * null-termianted string (HDF5 doesn't provide a strnlen call if you
          * don't have one).
          */
-        if (NULL == (file->curr_rev_record.comment = H5MM_strndup(fa->comment, H5FD_ONION_FAPL_INFO_COMMENT_MAX_LEN)))
+        if (NULL ==
+            (file->curr_rev_record.comment = H5MM_strndup(fa->comment, H5FD_ONION_FAPL_INFO_COMMENT_MAX_LEN)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "unable to duplicate comment string")
 
         /* TODO: Lengths of strings should be size_t */
