@@ -88,10 +88,12 @@ static void  *H5VL__dataset_create(void *obj, const H5VL_loc_params_t *loc_param
                                    hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req);
 static void  *H5VL__dataset_open(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls,
                                  const char *name, hid_t dapl_id, hid_t dxpl_id, void **req);
-static herr_t H5VL__dataset_read(size_t count, void *obj[], const H5VL_class_t *cls, hid_t mem_type_id[], hid_t mem_space_id[],
-                                 hid_t file_space_id[], hid_t dxpl_id, void *buf[], void **req);
-static herr_t H5VL__dataset_write(size_t count, void *obj[], const H5VL_class_t *cls, hid_t mem_type_id[], hid_t mem_space_id[],
-                                  hid_t file_space_id[], hid_t dxpl_id, const void *buf[], void **req);
+static herr_t H5VL__dataset_read(size_t count, void *obj[], const H5VL_class_t *cls, hid_t mem_type_id[],
+                                 hid_t mem_space_id[], hid_t file_space_id[], hid_t dxpl_id, void *buf[],
+                                 void **req);
+static herr_t H5VL__dataset_write(size_t count, void *obj[], const H5VL_class_t *cls, hid_t mem_type_id[],
+                                  hid_t mem_space_id[], hid_t file_space_id[], hid_t dxpl_id,
+                                  const void *buf[], void **req);
 static herr_t H5VL__dataset_get(void *obj, const H5VL_class_t *cls, H5VL_dataset_get_args_t *args,
                                 hid_t dxpl_id, void **req);
 static herr_t H5VL__dataset_specific(void *obj, const H5VL_class_t *cls, H5VL_dataset_specific_args_t *args,
@@ -2030,8 +2032,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL__dataset_read(size_t count, void *obj[], const H5VL_class_t *cls, hid_t mem_type_id[], hid_t mem_space_id[],
-                   hid_t file_space_id[], hid_t dxpl_id, void *buf[], void **req)
+H5VL__dataset_read(size_t count, void *obj[], const H5VL_class_t *cls, hid_t mem_type_id[],
+                   hid_t mem_space_id[], hid_t file_space_id[], hid_t dxpl_id, void *buf[], void **req)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -2064,12 +2066,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_dataset_read_direct(size_t count, void *obj[], H5VL_t *connector, hid_t mem_type_id[], hid_t mem_space_id[],
-                   hid_t file_space_id[], hid_t dxpl_id, void *buf[], void **req)
+H5VL_dataset_read_direct(size_t count, void *obj[], H5VL_t *connector, hid_t mem_type_id[],
+                         hid_t mem_space_id[], hid_t file_space_id[], hid_t dxpl_id, void *buf[], void **req)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
-    H5VL_object_t tmp_vol_obj;  /* Temporary VOL object for setting VOL wrapper */
-    herr_t ret_value = SUCCEED; /* Return value */
+    hbool_t       vol_wrapper_set = FALSE; /* Whether the VOL object wrapping context was set up */
+    H5VL_object_t tmp_vol_obj;             /* Temporary VOL object for setting VOL wrapper */
+    herr_t        ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -2077,16 +2079,16 @@ H5VL_dataset_read_direct(size_t count, void *obj[], H5VL_t *connector, hid_t mem
     HDassert(connector);
 
     /* Set wrapper info in API context */
-    tmp_vol_obj.data = obj[0];
+    tmp_vol_obj.data      = obj[0];
     tmp_vol_obj.connector = connector;
-    tmp_vol_obj.rc = 1;
+    tmp_vol_obj.rc        = 1;
     if (H5VL_set_vol_wrapper(&tmp_vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    if (H5VL__dataset_read(count, obj, connector->cls, mem_type_id, mem_space_id, file_space_id,
-                                 dxpl_id, buf, req) < 0)
+    if (H5VL__dataset_read(count, obj, connector->cls, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf,
+                           req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_READERROR, FAIL, "dataset read failed")
 
 done:
@@ -2108,14 +2110,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_dataset_read(size_t count, const H5VL_object_t *vol_obj[], hid_t mem_type_id[], hid_t mem_space_id[], hid_t file_space_id[],
-                  hid_t dxpl_id, void *buf[], void **req)
+H5VL_dataset_read(size_t count, const H5VL_object_t *vol_obj[], hid_t mem_type_id[], hid_t mem_space_id[],
+                  hid_t file_space_id[], hid_t dxpl_id, void *buf[], void **req)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
-    void  *obj_local;                  /* Local buffer for obj */
-    void  **obj             = &obj_local; /* Array of object pointers */
-    size_t  i;                         /* Local index variable */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    hbool_t vol_wrapper_set = FALSE; /* Whether the VOL object wrapping context was set up */
+    void   *obj_local;               /* Local buffer for obj */
+    void  **obj = &obj_local;        /* Array of object pointers */
+    size_t  i;                       /* Local index variable */
+    herr_t  ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -2140,12 +2142,13 @@ H5VL_dataset_read(size_t count, const H5VL_object_t *vol_obj[], hid_t mem_type_i
         /* Make sure the class matches */
         if (vol_obj[i]->connector->cls->value != vol_obj[0]->connector->cls->value)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-                        "datasets are accessed through different VOL connectors and can't be used in the same I/O call")
+                        "datasets are accessed through different VOL connectors and can't be used in the "
+                        "same I/O call")
     }
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__dataset_read(count, obj, vol_obj[0]->connector->cls, mem_type_id, mem_space_id, file_space_id,
-                                 dxpl_id, buf, req) < 0)
+                           dxpl_id, buf, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_READERROR, FAIL, "dataset read failed")
 
 done:
@@ -2171,8 +2174,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLdataset_read(size_t count, void *obj[], hid_t connector_id, hid_t mem_type_id[], hid_t mem_space_id[], hid_t file_space_id[],
-                 hid_t dxpl_id, void *buf[], void **req /*out*/)
+H5VLdataset_read(size_t count, void *obj[], hid_t connector_id, hid_t mem_type_id[], hid_t mem_space_id[],
+                 hid_t file_space_id[], hid_t dxpl_id, void *buf[], void **req /*out*/)
 {
     H5VL_class_t *cls;                 /* VOL connector's class struct */
     size_t        i;                   /* Local index variable */
@@ -2218,8 +2221,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL__dataset_write(size_t count, void *obj[], const H5VL_class_t *cls, hid_t mem_type_id[], hid_t mem_space_id[],
-                          hid_t file_space_id[], hid_t dxpl_id, const void *buf[], void **req)
+H5VL__dataset_write(size_t count, void *obj[], const H5VL_class_t *cls, hid_t mem_type_id[],
+                    hid_t mem_space_id[], hid_t file_space_id[], hid_t dxpl_id, const void *buf[], void **req)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -2252,12 +2255,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_dataset_write_direct(size_t count, void *obj[], H5VL_t *connector, hid_t mem_type_id[], hid_t mem_space_id[],
-                          hid_t file_space_id[], hid_t dxpl_id, const void *buf[], void **req)
+H5VL_dataset_write_direct(size_t count, void *obj[], H5VL_t *connector, hid_t mem_type_id[],
+                          hid_t mem_space_id[], hid_t file_space_id[], hid_t dxpl_id, const void *buf[],
+                          void **req)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
-    H5VL_object_t tmp_vol_obj;  /* Temporary VOL object for setting VOL wrapper */
-    herr_t ret_value = SUCCEED; /* Return value */
+    hbool_t       vol_wrapper_set = FALSE; /* Whether the VOL object wrapping context was set up */
+    H5VL_object_t tmp_vol_obj;             /* Temporary VOL object for setting VOL wrapper */
+    herr_t        ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -2265,16 +2269,16 @@ H5VL_dataset_write_direct(size_t count, void *obj[], H5VL_t *connector, hid_t me
     HDassert(connector);
 
     /* Set wrapper info in API context */
-    tmp_vol_obj.data = obj[0];
+    tmp_vol_obj.data      = obj[0];
     tmp_vol_obj.connector = connector;
-    tmp_vol_obj.rc = 1;
+    tmp_vol_obj.rc        = 1;
     if (H5VL_set_vol_wrapper(&tmp_vol_obj) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    if (H5VL__dataset_write(count, obj, connector->cls, mem_type_id, mem_space_id, file_space_id,
-                                  dxpl_id, buf, req) < 0)
+    if (H5VL__dataset_write(count, obj, connector->cls, mem_type_id, mem_space_id, file_space_id, dxpl_id,
+                            buf, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_WRITEERROR, FAIL, "dataset write failed")
 
 done:
@@ -2296,14 +2300,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_dataset_write(size_t count, const H5VL_object_t *vol_obj[], hid_t mem_type_id[], hid_t mem_space_id[], hid_t file_space_id[],
-                   hid_t dxpl_id, const void *buf[], void **req)
+H5VL_dataset_write(size_t count, const H5VL_object_t *vol_obj[], hid_t mem_type_id[], hid_t mem_space_id[],
+                   hid_t file_space_id[], hid_t dxpl_id, const void *buf[], void **req)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
-    void  *obj_local;                  /* Local buffer for obj */
-    void  **obj             = &obj_local; /* Array of object pointers */
-    size_t  i;                         /* Local index variable */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    hbool_t vol_wrapper_set = FALSE; /* Whether the VOL object wrapping context was set up */
+    void   *obj_local;               /* Local buffer for obj */
+    void  **obj = &obj_local;        /* Array of object pointers */
+    size_t  i;                       /* Local index variable */
+    herr_t  ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -2328,12 +2332,13 @@ H5VL_dataset_write(size_t count, const H5VL_object_t *vol_obj[], hid_t mem_type_
         /* Make sure the class matches */
         if (vol_obj[i]->connector->cls->value != vol_obj[0]->connector->cls->value)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
-                        "datasets are accessed through different VOL connectors and can't be used in the same I/O call")
+                        "datasets are accessed through different VOL connectors and can't be used in the "
+                        "same I/O call")
     }
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__dataset_write(count, obj, vol_obj[0]->connector->cls, mem_type_id, mem_space_id, file_space_id,
-                                  dxpl_id, buf, req) < 0)
+                            dxpl_id, buf, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_WRITEERROR, FAIL, "dataset write failed")
 
 done:
@@ -2359,11 +2364,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLdataset_write(size_t count, void *obj[], hid_t connector_id, hid_t mem_type_id[], hid_t mem_space_id[], hid_t file_space_id[],
-                  hid_t dxpl_id, const void *buf[], void **req /*out*/)
+H5VLdataset_write(size_t count, void *obj[], hid_t connector_id, hid_t mem_type_id[], hid_t mem_space_id[],
+                  hid_t file_space_id[], hid_t dxpl_id, const void *buf[], void **req /*out*/)
 {
     H5VL_class_t *cls;                 /* VOL connector's class struct */
-    size_t i; /* Local index variable */
+    size_t        i;                   /* Local index variable */
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT

@@ -50,9 +50,9 @@
 /********************/
 
 /* Helper routines for read/write API calls */
-static herr_t H5VL__native_dataset_io_setup(size_t count, void *obj[], hid_t mem_type_id[], hid_t mem_space_id[],
-                                            hid_t file_space_id[], hid_t dxpl_id, H5_flexible_const_ptr_t buf[],
-                                            H5D_dset_info_t **dinfo);
+static herr_t H5VL__native_dataset_io_setup(size_t count, void *obj[], hid_t mem_type_id[],
+                                            hid_t mem_space_id[], hid_t file_space_id[], hid_t dxpl_id,
+                                            H5_flexible_const_ptr_t buf[], H5D_dset_info_t **dinfo);
 
 /*********************/
 /* Package Variables */
@@ -81,8 +81,8 @@ H5VL__native_dataset_io_setup(size_t count, void *obj[], hid_t mem_type_id[], hi
                               H5D_dset_info_t **dinfo)
 {
     H5F_shared_t *f_sh;
-    size_t i;
-    herr_t ret_value = SUCCEED; /* Return value */
+    size_t        i;
+    herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -139,7 +139,8 @@ H5VL__native_dataset_io_setup(size_t count, void *obj[], hid_t mem_type_id[], hi
         } /* end else-if */
         else {
             /* Get the dataspace pointer */
-            if (NULL == ((*dinfo)[i].file_space = (H5S_t *)H5I_object_verify(file_space_id[i], H5I_DATASPACE)))
+            if (NULL ==
+                ((*dinfo)[i].file_space = (H5S_t *)H5I_object_verify(file_space_id[i], H5I_DATASPACE)))
                 HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "file_space_id is not a dataspace ID")
         } /* end else */
 
@@ -198,7 +199,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL__native_dataset_io_cleanup(size_t count, hid_t mem_space_id[], hid_t file_space_id[], H5D_dset_info_t *dinfo)
+H5VL__native_dataset_io_cleanup(size_t count, hid_t mem_space_id[], hid_t file_space_id[],
+                                H5D_dset_info_t *dinfo)
 {
     size_t i;
     herr_t ret_value = SUCCEED; /* Return value */
@@ -338,11 +340,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL__native_dataset_read(size_t count, void *obj[], hid_t mem_type_id[], hid_t mem_space_id[], hid_t file_space_id[],
-                          hid_t dxpl_id, void *buf[], void H5_ATTR_UNUSED **req)
+H5VL__native_dataset_read(size_t count, void *obj[], hid_t mem_type_id[], hid_t mem_space_id[],
+                          hid_t file_space_id[], hid_t dxpl_id, void *buf[], void H5_ATTR_UNUSED **req)
 {
-    H5D_dset_info_t *dinfo       = NULL;
-    herr_t           ret_value   = SUCCEED; /* Return value */
+    H5D_dset_info_t *dinfo     = NULL;
+    herr_t           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -359,9 +361,8 @@ H5VL__native_dataset_read(size_t count, void *obj[], hid_t mem_type_id[], hid_t 
         if (H5D__pre_read(count, dinfo) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
     }
-    else
-        if (H5D__read(count, dinfo, FALSE) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
+    else if (H5D__read(count, dinfo, FALSE) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
 
 done:
     /* Clean up */
@@ -381,11 +382,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL__native_dataset_write(size_t count, void *obj[], hid_t mem_type_id[], hid_t mem_space_id[], hid_t file_space_id[],
-                           hid_t dxpl_id, const void *buf[], void H5_ATTR_UNUSED **req)
+H5VL__native_dataset_write(size_t count, void *obj[], hid_t mem_type_id[], hid_t mem_space_id[],
+                           hid_t file_space_id[], hid_t dxpl_id, const void *buf[], void H5_ATTR_UNUSED **req)
 {
-    H5D_dset_info_t *dinfo      = NULL;
-    herr_t           ret_value  = SUCCEED; /* Return value */
+    H5D_dset_info_t *dinfo     = NULL;
+    herr_t           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -402,9 +403,8 @@ H5VL__native_dataset_write(size_t count, void *obj[], hid_t mem_type_id[], hid_t
         if (H5D__pre_write(count, dinfo) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
     }
-    else
-        if (H5D__write(1, dinfo, FALSE) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
+    else if (H5D__write(1, dinfo, FALSE) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
 
 done:
     /* Clean up */
