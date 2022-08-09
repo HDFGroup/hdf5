@@ -727,7 +727,7 @@
  * \li 3. Define a second hyperslab selection, unioned with the first
  * \li 4. Get the destination dataspace
  * \li 5. Define one hyperslab selection for the destination
- * \li 6. Define a second hyperslab seletion, unioned with the first
+ * \li 6. Define a second hyperslab selection, unioned with the first
  * \li 7. Execute the data transfer (H5Dread or H5Dwrite) using the source and destination dataspaces
  *
  * The example below shows example code to create the selections for the source dataspace (the file). The

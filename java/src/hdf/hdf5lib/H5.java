@@ -122,7 +122,7 @@ import hdf.hdf5lib.structs.H5O_info_t;
  * <p>
  * Java does not support pass by reference of arguments, so arguments that are returned through <b>OUT</b>
  * parameters must be wrapped in an object or array. The Java API for HDF consistently wraps arguments in
- * arrays. Where posssible the Java function may return the OUT parameter as an object or basic type.
+ * arrays. Where possible the Java function may return the OUT parameter as an object or basic type.
  * <p>
  * For instance, a function that returns two integers declared as:
  *
