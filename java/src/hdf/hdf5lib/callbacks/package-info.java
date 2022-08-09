@@ -12,6 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /**
+ * @page CALLBACKS_UG HDF5 Java Callbacks Interface
  * All callback definitions must derive from the Callbacks interface.  Any
  * derived interfaces must define a single public method named "callback".
  * You are responsible for deregistering your callback (if necessary)

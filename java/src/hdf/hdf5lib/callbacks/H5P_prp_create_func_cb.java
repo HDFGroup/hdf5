@@ -18,6 +18,8 @@ package hdf.hdf5lib.callbacks;
  */
 public interface H5P_prp_create_func_cb extends Callbacks {
     /**
+     * @ingroup JCALL
+     *
      *  application callback for each property list
      *
      *  @param name      the name of the property list being created

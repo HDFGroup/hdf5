@@ -18,6 +18,8 @@ package hdf.hdf5lib.callbacks;
  */
 public interface H5P_iterate_cb extends Callbacks {
     /**
+     * @ingroup JCALL
+     *
      *  application callback for each property list
      *
      *  @param plist     the ID for the property list being iterated over
