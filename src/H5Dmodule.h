@@ -2730,7 +2730,7 @@ allocated if necessary.
  *     // Define dataset datatype
  *     datatype = H5Tcopy(H5T_NATIVE_INT);
  *
- *     // Initiliaze data buffer
+ *     // Initialize data buffer
  *     for (i=0; i < NX; i++)
  *       for (j=0; j < NY; j++)
  *         orig_data[i][j] = rand() % 10000;
@@ -2851,7 +2851,7 @@ allocated if necessary.
  *     // Define dataset datatype
  *     datatype = H5Tcopy(H5T_NATIVE_FLOAT);
  *
- *     // Initiliaze data buffer
+ *     // Initialize data buffer
  *     for (i=0; i < NX; i++)
  *       for (j=0; j < NY; j++)
  *         orig_data[i][j] = (rand() % 10000) / 1000.0;
