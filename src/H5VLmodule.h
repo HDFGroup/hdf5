@@ -80,13 +80,15 @@
  * \li as a dynamically loaded plugin, implemented as a shared library
  * \li and even as an internal connector, built into the HDF5 libraryitself
  *
- * This section mostly focuses on external connectors, both libraries and plugins, as those are expected to
- * be much more common than internal implementations.
+ * This section mostly focuses on external connectors, both libraries and plugins, as those are expected
+ * to be much more common than internal implementations.
  *
  * A list of VOL connectors can be found here:
- * <a href="https://portal.hdfgroup.org/display/support/Registered+VOL+Connectors">Registered VOL Connectors</a>
+ * <a href="https://portal.hdfgroup.org/display/support/Registered+VOL+Connectors">
+ * Registered VOL Connectors</a>
  *
- * This list is incomplete and only includes the VOL connectors that have been registered with The HDF Group.
+ * This list is incomplete and only includes the VOL connectors that have been registered with
+ * The HDF Group.
  *
  * Not every connector in this collection is actively maintained by The HDF Group. It simply serves as a
  * single location where important VOL connectors can be found. See the documentation in a connector's
