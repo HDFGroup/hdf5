@@ -626,7 +626,7 @@ done:
  *
  *              External links are links to objects in other HDF5 files.  They
  *              are allowed to "dangle" like soft links internal to a file.
- *              FILE_NAME is the name of the file that OBJ_NAME is is contained
+ *              FILE_NAME is the name of the file that OBJ_NAME is contained
  *              within.  If OBJ_NAME is given as a relative path name, the
  *              path will be relative to the root group of FILE_NAME.
  *              LINK_NAME is interpreted relative to LINK_LOC_ID, which is
