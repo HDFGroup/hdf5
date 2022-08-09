@@ -1470,7 +1470,7 @@
  */
 
 /**
- * \defgroup H5F H5F
+ * \defgroup H5F Files (H5F)
  *
  * Use the functions in this module to manage HDF5 files.
  *

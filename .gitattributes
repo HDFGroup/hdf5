@@ -204,7 +204,6 @@ java/src/hdf/CMakeLists.txt -text
 java/src/hdf/hdf5lib/CMakeLists.txt -text
 java/src/hdf/hdf5lib/H5.java -text
 java/src/hdf/hdf5lib/HDF5Constants.java -text
-java/src/hdf/hdf5lib/HDF5GroupInfo.java -text
 java/src/hdf/hdf5lib/HDFArray.java -text
 java/src/hdf/hdf5lib/HDFNativeData.java -text
 java/src/hdf/hdf5lib/callbacks/Callbacks.java -text

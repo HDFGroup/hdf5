@@ -20,6 +20,8 @@ import hdf.hdf5lib.structs.H5L_info_t;
  */
 public interface H5L_iterate_cb extends Callbacks {
     /**
+     * @ingroup JCALL
+     *
      *  application callback for each group
      *
      *  @param loc_id    the ID for the group being iterated over

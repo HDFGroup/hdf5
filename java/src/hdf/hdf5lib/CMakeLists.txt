@@ -99,7 +99,6 @@ set (HDF5_JAVADOC_HDF_HDF5_STRUCTS_SOURCES
 set (HDF5_JAVA_HDF_HDF5_SOURCES
     HDFArray.java
     HDF5Constants.java
-    HDF5GroupInfo.java
     HDFNativeData.java
     H5.java
 )

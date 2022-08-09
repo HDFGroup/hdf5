@@ -2730,7 +2730,7 @@ allocated if necessary.
  *     // Define dataset datatype
  *     datatype = H5Tcopy(H5T_NATIVE_INT);
  *
- *     // Initiliaze data buffer
+ *     // Initialize data buffer
  *     for (i=0; i < NX; i++)
  *       for (j=0; j < NY; j++)
  *         orig_data[i][j] = rand() % 10000;
@@ -2851,7 +2851,7 @@ allocated if necessary.
  *     // Define dataset datatype
  *     datatype = H5Tcopy(H5T_NATIVE_FLOAT);
  *
- *     // Initiliaze data buffer
+ *     // Initialize data buffer
  *     for (i=0; i < NX; i++)
  *       for (j=0; j < NY; j++)
  *         orig_data[i][j] = (rand() % 10000) / 1000.0;
@@ -2983,7 +2983,7 @@ allocated if necessary.
  */
 
 /**
- * \defgroup H5D H5D
+ * \defgroup H5D Datasets (H5D)
  *
  * Use the functions in this module to manage HDF5 datasets, including the
  * transfer of data between memory and disk and the description of dataset

@@ -160,8 +160,6 @@ AM_JNIFLAGS="${AM_JNIFLAGS}"
 AM_JAVACFLAGS="${AM_JAVACFLAGS}"
 AM_JAVAFLAGS="${AM_JAVAFLAGS}"
 AM_LDFLAGS="${AM_LDFLAGS}"
-
-## Flags passed in by the user
 CFLAGS="${CFLAGS}"
 CXXFLAGS="${CXXFLAGS}"
 FCFLAGS="${FCFLAGS}"
@@ -1232,7 +1230,7 @@ if test "X$HDF5_DOXYGEN" = "Xyes"; then
   DOXYGEN_HTML_HEADER='$(SRCDIR)/doxygen/hdf5_header.html'
   DOXYGEN_HTML_FOOTER='$(SRCDIR)/doxygen/hdf5_footer.html'
   DOXYGEN_HTML_EXTRA_STYLESHEET='$(SRCDIR)/doxygen/hdf5doxy.css'
-  DOXYGEN_HTML_EXTRA_FILES='$(SRCDIR)/doxygen/hdf5_navtree_hacks.js $(SRCDIR)/doxygen/img/FF-IH_FileGroup.gif $(SRCDIR)/doxygen/img/FF-IH_FileObject.gif $(SRCDIR)/doxygen/img/FileFormatSpecChunkDiagram.jpg $(SRCDIR)/doxygen/img/ftv2node.png $(SRCDIR)/doxygen/img/ftv2pnode.png $(SRCDIR)/doxygen/img/HDFG-logo.png $(SRCDIR)/doxygen/img/IOFlow2.gif $(SRCDIR)/doxygen/img/IOFlow3.gif $(SRCDIR)/doxygen/img/IOFlow.gif $(SRCDIR)/doxygen/img/PaletteExample1.gif $(SRCDIR)/doxygen/img/Palettes.fm.anc.gif'
+  DOXYGEN_HTML_EXTRA_FILES='$(SRCDIR)/doxygen/hdf5_navtree_hacks.js'
   DOXYGEN_TAG_FILE=hdf5.tag
   DOXYGEN_SERVER_BASED_SEARCH=NO
   DOXYGEN_EXTERNAL_SEARCH=NO

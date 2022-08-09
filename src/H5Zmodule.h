@@ -30,7 +30,7 @@
 #define H5_MY_PKG_INIT YES
 
 /**
- * \defgroup H5Z H5Z
+ * \defgroup H5Z Filters (H5Z)
  *
  * Use the functions in this module to manage HDF5 filters.
  *

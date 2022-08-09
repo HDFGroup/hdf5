@@ -882,7 +882,7 @@
  *
  * Previous Chapter \ref sec_error - Next Chapter \ref sec_addition
  *
- * \defgroup H5P H5P
+ * \defgroup H5P Property Lists (H5P)
  *
  * Use the functions in this module to manage HDF5 property lists and property
  * list classes. HDF5 property lists are the main vehicle to configure the
@@ -915,25 +915,25 @@
  * </table>
  *
  * \defgroup STRCPL String Creation Properties
- * \ingroup H5P
  * Currently, there are only two creation properties that you can use to control
  * the creation of HDF5 attributes and links. The first creation property, the
  * choice of a character encoding, applies to both attributes and links.
  * The second creation property applies to links only, and advises the library
  * to automatically create missing intermediate groups when creating new objects.
+ * \ingroup H5P
  *
  * \defgroup LCPL Link Creation Properties
- * \ingroup STRCPL
  * The first creation property, the choice of a character encoding, applies to
  * both attributes and links.
  * The second creation property applies to links only, and advises the library
  * to automatically create missing intermediate groups when creating new objects.
+ * \ingroup STRCPL
  *
  * @see STRCPL
  *
  * \defgroup ACPL Attribute Creation Properties
- * \ingroup STRCPL
  * The creation property, the choice of a character encoding, applies to attributes.
+ * \ingroup STRCPL
  *
  * @see STRCPL
  *
@@ -941,110 +941,68 @@
  * \ingroup H5P
  *
  * \defgroup DAPL Dataset Access Properties
- * \ingroup LAPL
  * Use dataset access properties to modify the default behavior of the HDF5
  * library when accessing datasets. The properties include adjusting the size
  * of the chunk cache, providing prefixes for external content and virtual
  * dataset file paths, and controlling flush behavior, etc. These properties
  * are \Emph{not} persisted with datasets, and can be adjusted at runtime before
  * a dataset is created or opened.
+ * \ingroup LAPL
  *
  * \defgroup DCPL Dataset Creation Properties
- * \ingroup OCPL
  * Use dataset creation properties to control aspects of dataset creation such
  * as fill time, storage layout, compression methods, etc.
  * Unlike dataset access and transfer properties, creation properties \Emph{are}
  * stored with the dataset, and cannot be changed once a dataset has been
  * created.
+ * \ingroup OCPL
  *
  * \defgroup DXPL Dataset Transfer Properties
- * \ingroup H5P
  * Use dataset transfer properties to customize certain aspects of reading
  * and writing datasets such as transformations, MPI-IO I/O mode, error
  * detection, etc. These properties are \Emph{not} persisted with datasets,
  * and can be adjusted at runtime before a dataset is read or written.
+ * \ingroup H5P
  *
  * \defgroup FAPL File Access Properties
- * \ingroup H5P
  * Use file access properties to modify the default behavior of the HDF5
  * library when accessing files. The properties include selecting a virtual
  * file driver (VFD), configuring the metadata cache (MDC), control
  * file locking, etc. These properties are \Emph{not} persisted with files, and
  * can be adjusted at runtime before a file is created or opened.
+ * \ingroup H5P
  *
  * \defgroup FCPL File Creation Properties
- * \ingroup GCPL
  * Use file creation properties to control aspects of file creation such
  * as setting a file space management strategy or creating a user block.
  * Unlike file access properties, creation properties \Emph{are}
  * stored with the file, and cannot be changed once a file has been
  * created.
+ * \ingroup GCPL
  *
  * \defgroup GAPL General Access Properties
- * \ingroup LAPL
  * The functions in this section can be applied to different kinds of property
  * lists.
+ * \ingroup LAPL
  *
  * \defgroup GCPL Group Creation Properties
- * \ingroup OCPL
  * Use group creation properties to control aspects of group creation such
  * as storage layout, compression, and link creation order tracking.
  * Unlike file access properties, creation properties \Emph{are}
  * stored with the group, and cannot be changed once a group has been
  * created.
+ * \ingroup OCPL
  *
  * \defgroup PLCR Property List Class Root
- * \ingroup H5P
- *
  * Use the functions in this module to manage HDF5 property lists.
- *
- * <table>
- * <tr><th>Create</th><th>Read</th></tr>
- * <tr valign="top">
- *   <td>
- *   \snippet{lineno} H5P_examples.c create
- *   </td>
- *   <td>
- *   \snippet{lineno} H5P_examples.c read
- *   </td>
- * <tr><th>Update</th><th>Delete</th></tr>
- * <tr valign="top">
- *   <td>
- *   \snippet{lineno} H5P_examples.c update
- *   </td>
- *   <td>
- *   \snippet{lineno} H5P_examples.c delete
- *   </td>
- * </tr>
- * </table>
+ * \ingroup H5P
  *
  * \defgroup PLCRA Property List Class Root (Advanced)
- * \ingroup H5P
- *
  * You can create and customize user-defined property list classes using the
  * functions described below. Arbitrary user-defined properties can also
  * be inserted into existing property lists as so-called temporary properties.
+ * \ingroup H5P
  *
- * <table>
- * <tr><th>Create</th><th>Read</th></tr>
- *
- * <tr valign="top">
- *   <td>
- *   \snippet{lineno} H5P_examples.c create_class
- *   </td>
- *   <td>
- *   \snippet{lineno} H5P_examples.c read_class
- *   </td>
- * <tr><th>Update</th><th>Delete</th></tr>
- * <tr valign="top">
- *   <td>
- *   \snippet{lineno} H5P_examples.c update_class
- *   </td>
- *   <td>
- *   \snippet{lineno} H5P_examples.c delete_class
- *   </td>
- * </tr>
- * </table>
  *
  * \defgroup OCPL Object Creation Properties
  * \ingroup H5P
@@ -1053,19 +1011,19 @@
  * \ingroup H5P
  *
  * \defgroup FMPL File Mount Properties
+ * Empty property class.
  * \ingroup H5P
  *
- * Empty property class.
  *
  * \defgroup TCPL Datatype Creation Properties
+ * TCPL isn't supported yet.
  * \ingroup OCPL
  *
- * TCPL isn't supported yet.
  *
  * \defgroup TAPL Datatype Access Properties
+ * TAPL isn't supported yet.
  * \ingroup LAPL
  *
- * TAPL isn't supported yet.
  *
  *
  */

@@ -1428,7 +1428,7 @@
  */
 
 /**
- * \defgroup H5 H5
+ * \defgroup H5 Library General (H5)
  *
  * Use the functions in this module to manage the life cycle of HDF5 library
  * instances.

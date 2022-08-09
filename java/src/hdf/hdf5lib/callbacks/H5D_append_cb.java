@@ -18,6 +18,8 @@ package hdf.hdf5lib.callbacks;
  */
 public interface H5D_append_cb extends Callbacks {
     /**
+     * @ingroup JCALL
+     *
      *  application callback for each dataset access property list
      *
      *  @param dataset_id    the ID for the dataset being iterated over
