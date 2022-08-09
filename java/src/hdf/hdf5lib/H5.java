@@ -11752,6 +11752,7 @@ public class H5 implements java.io.Serializable {
     // H5R: HDF5 1.8 Reference API Functions //
     // //
     // ////////////////////////////////////////////////////////////
+
     /**
      * @defgroup JH5R Java Reference (H5R) Interface
      **/
@@ -13074,7 +13075,7 @@ public class H5 implements java.io.Serializable {
      * @ingroup JH5T
      *
      * H5Tcompiler_conv finds out whether the library's conversion function from type src_id to type dst_id is
-     *a compiler (hard) conversion.
+     * a compiler (hard) conversion.
      *
      * @param src_id
      *            IN: Identifier of source datatype.
