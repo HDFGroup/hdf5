@@ -863,6 +863,9 @@ H5_DLL herr_t H5Dread_async(const char *app_file, const char *app_func, unsigned
                             hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id,
                             void *buf /*out*/, hid_t es_id);
 
+H5_DLL herr_t H5Dread_multi_async(const char *app_file, const char *app_func, unsigned app_line, size_t count, hid_t dset_id[], hid_t mem_type_id[],
+              hid_t mem_space_id[], hid_t file_space_id[], hid_t dxpl_id, void *buf[] /*out*/, hid_t es_id);
+
 /**
  * --------------------------------------------------------------------------
  * \ingroup H5D
@@ -990,6 +993,9 @@ H5_DLL herr_t H5Dwrite_multi(size_t count, hid_t dset_id[], hid_t mem_type_id[],
 H5_DLL herr_t H5Dwrite_async(const char *app_file, const char *app_func, unsigned app_line, hid_t dset_id,
                              hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id,
                              const void *buf, hid_t es_id);
+
+H5_DLL herr_t H5Dwrite_multi_async(const char *app_file, const char *app_func, unsigned app_line, size_t count, hid_t dset_id[], hid_t mem_type_id[],
+              hid_t mem_space_id[], hid_t file_space_id[], hid_t dxpl_id, const void *buf[], hid_t es_id);
 
 /**
  * --------------------------------------------------------------------------

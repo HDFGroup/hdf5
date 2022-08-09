@@ -61,7 +61,7 @@ typedef struct {
 /* Internal data structure for computing variable-length dataset's total size */
 /* (Used for generic 'get vlen buf size' operation) */
 typedef struct {
-    H5VL_object_t            *dset_vol_obj; /* VOL object for the dataset */
+    const H5VL_object_t      *dset_vol_obj; /* VOL object for the dataset */
     hid_t                     fspace_id;    /* Dataset dataspace ID of the dataset we are working on */
     H5S_t                    *fspace;       /* Dataset's dataspace for operation */
     hid_t                     mspace_id;    /* Memory dataspace ID of the dataset we are working on */
@@ -2796,8 +2796,8 @@ H5D__vlen_get_buf_size_gen_cb(void H5_ATTR_UNUSED *elem, hid_t type_id, unsigned
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't select point")
 
     /* Read in the point (with the custom VL memory allocator) */
-    if (H5VL_dataset_read(vlen_bufsize->dset_vol_obj, type_id, vlen_bufsize->mspace_id,
-                          vlen_bufsize->fspace_id, vlen_bufsize->dxpl_id, vlen_bufsize->common.fl_tbuf,
+    if (H5VL_dataset_read(1, &vlen_bufsize->dset_vol_obj, &type_id, &vlen_bufsize->mspace_id,
+                          &vlen_bufsize->fspace_id, vlen_bufsize->dxpl_id, &vlen_bufsize->common.fl_tbuf,
                           H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read point")
 
@@ -2843,7 +2843,7 @@ H5D__vlen_get_buf_size_gen(H5VL_object_t *vol_obj, hid_t type_id, hid_t space_id
         HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "dataspace does not have extent set")
 
     /* Save the dataset */
-    vlen_bufsize.dset_vol_obj = vol_obj;
+    vlen_bufsize.dset_vol_obj = (const H5VL_object_t *)vol_obj;
 
     /* Set up VOL callback arguments */
     vol_cb_args.op_type                 = H5VL_DATASET_GET_SPACE;

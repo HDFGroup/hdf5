@@ -55,8 +55,6 @@ static herr_t H5D__ioinfo_adjust(const size_t count, H5D_io_info_t *io_info);
 static herr_t H5D__typeinfo_term(const H5D_type_info_t *type_info);
 
 /* Internal I/O routines */
-static herr_t H5D__pre_read(hid_t dxpl_id, size_t count, H5D_dset_info_t *dset_info);
-static herr_t H5D__pre_write(hid_t dxpl_id, size_t count, H5D_dset_info_t *dset_info);
 static herr_t H5D__final_mdset_sel_io(H5D_io_info_t *io_info);
 
 /*********************/
@@ -74,177 +72,19 @@ H5FL_BLK_DEFINE(type_conv);
 H5FL_DEFINE(H5D_dset_info_t);
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__init_dset_info
+ * Function:    H5D__pre_read
  *
- * Purpose:	Initializes a H5D_dset_info_t from a set of user parameters,
- *              while checking parameters too.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		Friday, August 29, 2014
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5D__init_dset_info(H5D_dset_info_t *dset_info, hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
-                    hid_t dset_space_id, const H5_flexible_const_ptr_t *u_buf)
-{
-    H5VL_object_t *vol_obj   = NULL;    /* Object for dset_id */
-    herr_t         ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_PACKAGE
-
-    /* Get dataset */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
-    if (!vol_obj->data)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "VOL object contains no data")
-    dset_info->dset = (H5D_t *)vol_obj->data;
-    if (NULL == dset_info->dset->oloc.file)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
-
-    /* Check for invalid space IDs */
-    if (mem_space_id < 0 || dset_space_id < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
-
-    /* Get file dataspace */
-    if (H5S_ALL != dset_space_id) {
-        if (NULL == (dset_info->file_space = (H5S_t *)H5I_object_verify(dset_space_id, H5I_DATASPACE)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
-
-        /* Check for valid selection */
-        if (H5S_SELECT_VALID(dset_info->file_space) != TRUE)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "file selection+offset not within extent")
-    } /* end if */
-    else
-        dset_info->file_space = dset_info->dset->shared->space;
-
-    /* Get memory dataspace */
-    if (H5S_ALL != mem_space_id) {
-        if (NULL == (dset_info->mem_space = (H5S_t *)H5I_object_verify(mem_space_id, H5I_DATASPACE)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
-
-        /* Check for valid selection */
-        if (H5S_SELECT_VALID(dset_info->mem_space) != TRUE)
-            HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "memory selection+offset not within extent")
-    } /* end if */
-    else
-        dset_info->mem_space = dset_info->file_space;
-
-    /* Get memory datatype */
-    dset_info->mem_type_id = mem_type_id;
-
-    /* Get buffer */
-    dset_info->buf = *u_buf;
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__init_dset_info() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5D__verify_location
- *
- * Purpose:     Verifies that all elements of info are in the same file
+ * Purpose:     Checks if multi dataset reads are possible and fowards
+ *              the call to H5D__read if it is, otherwise breaks it into
+ *              single dataset calls to H5D__read.
  *
  * Return:      Non-negative on success/Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5D__verify_location(size_t count, const H5D_dset_info_t *info)
-{
-    H5F_shared_t *f_sh;
-    size_t        u;
-    herr_t        ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_PACKAGE
-
-    f_sh = H5F_SHARED(info[0].dset->oloc.file);
-
-    for (u = 1; u < count; u++) {
-        if (f_sh != H5F_SHARED(info[u].dset->oloc.file))
-            HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL,
-                        "different files detected in multi dataset I/O request")
-    } /* end for */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__verify_location */
-
-/*-------------------------------------------------------------------------
- * Function:	H5Dread_multi
- *
- * Purpose:	Multi-version of H5Dread(), which reads selections from
- *              multiple datasets from a file into application memory BUFS.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Jonathan Kim Nov, 2013
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dread_multi(size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t mem_space_id[], hid_t file_space_id[],
-              hid_t dxpl_id, void *buf[] /*out*/)
+H5D__pre_read(size_t count, H5D_dset_info_t *dset_info)
 {
-    H5D_dset_info_t *dset_info = NULL;    /* Pointer to internal list of multi-dataset info */
-    size_t           u;                   /* Local index variable */
-    herr_t           ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "z*i*i*i*iix", count, dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf);
-
-    if (count <= 0)
-        HGOTO_DONE(SUCCEED)
-
-    /* Get the default dataset transfer property list if the user didn't provide one */
-    if (H5P_DEFAULT == dxpl_id)
-        dxpl_id = H5P_DATASET_XFER_DEFAULT;
-    else if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
-
-    /* Alloc dset_info */
-    if (NULL == (dset_info = (H5D_dset_info_t *)H5MM_calloc(count * sizeof(H5D_dset_info_t))))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate dset info array buffer")
-
-    /* Translate public multi-dataset info to internal structure */
-    /* (And check parameters) */
-    for (u = 0; u < count; u++) {
-        if (H5D__init_dset_info(&dset_info[u], dset_id[u], mem_type_id[u], mem_space_id[u], file_space_id[u],
-                                (const H5_flexible_const_ptr_t *)&(buf[u])) < 0)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't init dataset info")
-    } /* end for */
-
-    if (H5D__verify_location(count, dset_info) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "datasets are not in the same file")
-
-    /* Call common pre-read routine */
-    if (H5D__pre_read(dxpl_id, count, dset_info) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't prepare for reading data")
-
-done:
-    if (dset_info)
-        H5MM_xfree(dset_info);
-
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Dread_multi() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5D__pre_read
- *
- * Purpose:     Sets up a read operation.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Neil Fortner  Apr, 2014
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5D__pre_read(hid_t dxpl_id, size_t count, H5D_dset_info_t *dset_info)
-{
-    H5P_genplist_t  *plist;               /* DXPL property list pointer */
     H5FD_mpio_xfer_t xfer_mode;           /* Parallel I/O transfer mode */
     hbool_t          broke_mdset = FALSE; /* Whether to break multi-dataset option */
     size_t           u;                   /* Local index variable */
@@ -253,16 +93,11 @@ H5D__pre_read(hid_t dxpl_id, size_t count, H5D_dset_info_t *dset_info)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(dxpl_id > 0);
     HDassert(count > 0);
     HDassert(dset_info);
 
-    /* Retrieve DXPL for queries below */
-    if (NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
-
     /* Get the transfer mode */
-    if (H5P_get(plist, H5D_XFER_IO_XFER_MODE_NAME, &xfer_mode) < 0)
+    if (H5CX_get_io_xfer_mode(&xfer_mode) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get value")
 
     /* In independent mode or with an unsupported layout, for now just
@@ -284,9 +119,6 @@ H5D__pre_read(hid_t dxpl_id, size_t count, H5D_dset_info_t *dset_info)
         } /* end for */
     }
 
-    /* Set DXPL for operation */
-    H5CX_set_dxpl(dxpl_id);
-
     if (broke_mdset) {
         /* Read raw data from each dataset by itself */
         for (u = 0; u < count; u++)
@@ -305,78 +137,19 @@ done:
 } /* end H5D__pre_read() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Dwrite_multi
+ * Function:    H5D__pre_write
  *
- * Purpose:	Multi-version of H5Dwrite(), which writes selections from
- *              application memory BUFs into multiple datasets in a file.
+ * Purpose:     Checks if multi dataset writes are possible and fowards
+ *              the call to H5D__write if it is, otherwise breaks it into
+ *              single dataset calls to H5D__write.
  *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Jonathan Kim  Nov, 2013
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Dwrite_multi(size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t mem_space_id[],
-               hid_t file_space_id[], hid_t dxpl_id, const void *buf[])
+H5D__pre_write(size_t count, H5D_dset_info_t *dset_info)
 {
-    H5D_dset_info_t *dset_info = NULL;    /* Pointer to internal list of multi-dataset info */
-    size_t           u;                   /* Local index variable */
-    herr_t           ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "z*i*i*i*ii**x", count, dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf);
-
-    if (count <= 0)
-        HGOTO_DONE(SUCCEED)
-
-    /* Get the default dataset transfer property list if the user didn't provide one */
-    if (H5P_DEFAULT == dxpl_id)
-        dxpl_id = H5P_DATASET_XFER_DEFAULT;
-    else if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
-
-    /* Alloc dset_info */
-    if (NULL == (dset_info = (H5D_dset_info_t *)H5MM_calloc(count * sizeof(H5D_dset_info_t))))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate dset info array buffer")
-
-    /* Translate public multi-dataset info to internal structure */
-    /* (And check parameters) */
-    for (u = 0; u < count; u++) {
-        if (H5D__init_dset_info(&dset_info[u], dset_id[u], mem_type_id[u], mem_space_id[u], file_space_id[u],
-                                (const H5_flexible_const_ptr_t *)&(buf[u])) < 0)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't init dataset info")
-    }
-
-    if (H5D__verify_location(count, dset_info) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "datasets are not in the same file")
-
-    /* Call common pre-write routine */
-    if (H5D__pre_write(dxpl_id, count, dset_info) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't prepare for writing data")
-
-done:
-    if (dset_info)
-        H5MM_xfree(dset_info);
-
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Dwrite_multi() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5D__pre_write
- *
- * Purpose:     Sets up a write operation.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  Jonathan Kim  Nov, 2013
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5D__pre_write(hid_t dxpl_id, size_t count, H5D_dset_info_t *dset_info)
-{
-    H5P_genplist_t  *plist;               /* DXPL property list pointer */
     size_t           u;                   /* Local index variable */
     hbool_t          broke_mdset = FALSE; /* Whether to break multi-dataset option */
     H5FD_mpio_xfer_t xfer_mode;           /* Parallel I/O transfer mode */
@@ -385,16 +158,11 @@ H5D__pre_write(hid_t dxpl_id, size_t count, H5D_dset_info_t *dset_info)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(dxpl_id > 0);
     HDassert(count > 0);
     HDassert(dset_info);
 
-    /* Retrieve DXPL for queries below */
-    if (NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
-
     /* Get the transfer mode */
-    if (H5P_get(plist, H5D_XFER_IO_XFER_MODE_NAME, &xfer_mode) < 0)
+    if (H5CX_get_io_xfer_mode(&xfer_mode) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get value")
 
     /* In independent mode or with an unsupported layout, for now
@@ -440,8 +208,6 @@ done:
  *              See H5Dread_multi() for complete details.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Jonathan Kim  Nov, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -737,8 +503,6 @@ done:
  *          This was referred from H5D__write for multi-dset work.
  *
  * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:   Jonathan Kim  Nov, 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -1066,7 +830,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Jonathan Kim  Nov, 2013
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1305,7 +1068,6 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	Jonathan Kim  Nov, 2013
  *-------------------------------------------------------------------------
  */
 static herr_t
