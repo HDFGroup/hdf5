@@ -486,21 +486,8 @@ set_tests_properties (H5TEST-external_env PROPERTIES
 
 #-- Adding test for vds_env
 add_test (
-    NAME H5TEST-vds_env-clear-objects
-    COMMAND ${CMAKE_COMMAND} -E remove
-        vds_virt_0.h5
-        vds_virt_3.h5
-        vds_src_2.h5
-    WORKING_DIRECTORY
-        ${HDF5_TEST_BINARY_DIR}/H5TEST
-)
-set_tests_properties (H5TEST-vds_env-clear-objects PROPERTIES FIXTURES_SETUP clear_vds_env)
-add_test (
     NAME H5TEST-vds_env-clean-objects
     COMMAND ${CMAKE_COMMAND} -E remove
-        vds_virt_0.h5
-        vds_virt_3.h5
-        vds_src_2.h5
         tmp_vds_env/vds_env_src_2.h5
     WORKING_DIRECTORY
         ${HDF5_TEST_BINARY_DIR}/H5TEST
