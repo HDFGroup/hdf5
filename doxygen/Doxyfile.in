@@ -874,6 +874,9 @@ FILE_PATTERNS          = H5*public.h \
                          H5VLnative.h \
                          H5Zdevelop.h \
                          H5version.h \
+                         H5*.java \
+                         HDF*.java \
+                         *.F90 \
                          *.dox
 
 # The RECURSIVE tag can be used to specify whether or not subdirectories should
@@ -942,7 +945,7 @@ EXAMPLE_RECURSIVE      = NO
 # that contain images that are to be included in the documentation (see the
 # \image command).
 
-IMAGE_PATH             = @HDF5_DOXYGEN_DIR@/img
+IMAGE_PATH             = @DOXYGEN_DIR@/img
 
 # The INPUT_FILTER tag can be used to specify a program that doxygen should
 # invoke to filter for each input file. Doxygen will invoke the filter program

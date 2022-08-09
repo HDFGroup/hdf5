@@ -108,7 +108,6 @@ hdf5_java_JAVA =  \
 	${pkgpath}/structs/H5AC_cache_config_t.java \
 	${pkgpath}/H5.java  \
 	${pkgpath}/HDF5Constants.java  \
-	${pkgpath}/HDF5GroupInfo.java  \
 	${pkgpath}/HDFArray.java  \
 	${pkgpath}/HDFNativeData.java
 
@@ -124,7 +123,7 @@ DOCTITLE = '<h1>HDF5 Java Wrapper</h1>'
 SRCDIR = '$(pkgpath)'
 
 docs:
-	$(JAVADOC) -sourcepath $(srcdir) -d javadoc -use -splitIndex -windowtitle $(WINDOWTITLE) -doctitle $(DOCTITLE) -J-Xmx180m -verbose -overview $(top_srcdir)/java/src/hdf/overview.html -classpath $(CLASSPATH_ENV) hdf.hdf5lib
+	$(JAVADOC) -sourcepath $(srcdir) -d javadoc -Xdoclint:none -use -splitIndex -windowtitle $(WINDOWTITLE) -doctitle $(DOCTITLE) -J-Xmx180m -verbose -overview $(top_srcdir)/java/src/hdf/overview.html -classpath $(CLASSPATH_ENV) hdf.hdf5lib
 
 CLEANFILES = classhdf5_java.stamp $(jarfile) $(JAVAROOT)/$(pkgpath)/callbacks/*.class $(JAVAROOT)/$(pkgpath)/exceptions/*.class $(JAVAROOT)/$(pkgpath)/structs/*.class $(JAVAROOT)/$(pkgpath)/*.class
 

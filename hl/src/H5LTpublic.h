@@ -60,89 +60,89 @@ extern "C" {
  *
  * - Dataset Functions
  *   - Make dataset functions
- *     - \ref H5LTmake_dataset
- *     - \ref H5LTmake_dataset_char
- *     - \ref H5LTmake_dataset_short
- *     - \ref H5LTmake_dataset_int
- *     - \ref H5LTmake_dataset_long
- *     - \ref H5LTmake_dataset_float
- *     - \ref H5LTmake_dataset_double
- *     - \ref H5LTmake_dataset_string
+ *      - \ref H5LTmake_dataset
+ *      - \ref H5LTmake_dataset_char
+ *      - \ref H5LTmake_dataset_short
+ *      - \ref H5LTmake_dataset_int
+ *      - \ref H5LTmake_dataset_long
+ *      - \ref H5LTmake_dataset_float
+ *      - \ref H5LTmake_dataset_double
+ *      - \ref H5LTmake_dataset_string
  *
  *   - Read dataset functions
- *     - \ref H5LTread_dataset
- *     - \ref H5LTread_dataset_char
- *     - \ref H5LTread_dataset_short
- *     - \ref H5LTread_dataset_int
- *     - \ref H5LTread_dataset_long
- *     - \ref H5LTread_dataset_float
- *     - \ref H5LTread_dataset_double
- *     - \ref H5LTread_dataset_string
+ *      - \ref H5LTread_dataset
+ *      - \ref H5LTread_dataset_char
+ *      - \ref H5LTread_dataset_short
+ *      - \ref H5LTread_dataset_int
+ *      - \ref H5LTread_dataset_long
+ *      - \ref H5LTread_dataset_float
+ *      - \ref H5LTread_dataset_double
+ *      - \ref H5LTread_dataset_string
  *
  *   - Query dataset functions
- *     - \ref H5LTfind_dataset
- *     - \ref H5LTget_dataset_ndims
- *     - \ref H5LTget_dataset_info
+ *      - \ref H5LTfind_dataset
+ *      - \ref H5LTget_dataset_ndims
+ *      - \ref H5LTget_dataset_info
  *
  *   - Dataset watch functions
- *     - \ref H5LDget_dset_dims
- *     - \ref H5LDget_dset_elmts
- *     - \ref H5LDget_dset_type_size
+ *      - \ref H5LDget_dset_dims
+ *      - \ref H5LDget_dset_elmts
+ *      - \ref H5LDget_dset_type_size
  *
  * </td><td style="border: none;">
  *
  * - Attribute Functions
  *   - Set attribute functions
- *     - \ref H5LTset_attribute_string
- *     - \ref H5LTset_attribute_char
- *     - \ref H5LTset_attribute_uchar
- *     - \ref H5LTset_attribute_short
- *     - \ref H5LTset_attribute_ushort
- *     - \ref H5LTset_attribute_int
- *     - \ref H5LTset_attribute_uint
- *     - \ref H5LTset_attribute_long
- *     - \ref H5LTset_attribute_long_long
- *     - \ref H5LTset_attribute_ulong
- *     - \ref H5LTset_attribute_ullong
- *     - \ref H5LTset_attribute_float
- *     - \ref H5LTset_attribute_double
- *     - <code>H5LTset_attribute_f</code> (fortran ONLY)
+ *      - \ref H5LTset_attribute_string
+ *      - \ref H5LTset_attribute_char
+ *      - \ref H5LTset_attribute_uchar
+ *      - \ref H5LTset_attribute_short
+ *      - \ref H5LTset_attribute_ushort
+ *      - \ref H5LTset_attribute_int
+ *      - \ref H5LTset_attribute_uint
+ *      - \ref H5LTset_attribute_long
+ *      - \ref H5LTset_attribute_long_long
+ *      - \ref H5LTset_attribute_ulong
+ *      - \ref H5LTset_attribute_ullong
+ *      - \ref H5LTset_attribute_float
+ *      - \ref H5LTset_attribute_double
+ *      - <code>H5LTset_attribute_f</code> (fortran ONLY)
  *
  *   - Get attribute functions
- *     - \ref H5LTget_attribute
- *     - \ref H5LTget_attribute_string
- *     - \ref H5LTget_attribute_char
- *     - \ref H5LTget_attribute_uchar
- *     - \ref H5LTget_attribute_short
- *     - \ref H5LTget_attribute_ushort
- *     - \ref H5LTget_attribute_int
- *     - \ref H5LTget_attribute_uint
- *     - \ref H5LTget_attribute_long
- *     - \ref H5LTget_attribute_long_long
- *     - \ref H5LTget_attribute_ulong
- *     - \ref H5LTget_attribute_ullong
- *     - \ref H5LTget_attribute_float
- *     - \ref H5LTget_attribute_double
+ *      - \ref H5LTget_attribute
+ *      - \ref H5LTget_attribute_string
+ *      - \ref H5LTget_attribute_char
+ *      - \ref H5LTget_attribute_uchar
+ *      - \ref H5LTget_attribute_short
+ *      - \ref H5LTget_attribute_ushort
+ *      - \ref H5LTget_attribute_int
+ *      - \ref H5LTget_attribute_uint
+ *      - \ref H5LTget_attribute_long
+ *      - \ref H5LTget_attribute_long_long
+ *      - \ref H5LTget_attribute_ulong
+ *      - \ref H5LTget_attribute_ullong
+ *      - \ref H5LTget_attribute_float
+ *      - \ref H5LTget_attribute_double
  *
  *   - Query attribute functions
- *     - \ref H5LTfind_attribute
- *     - \ref H5LTget_attribute_info
- *     - \ref H5LTget_attribute_ndims
+ *      - \ref H5LTfind_attribute
+ *      - \ref H5LTget_attribute_info
+ *      - \ref H5LTget_attribute_ndims
  *
  * </td><td style="border: none;">
  *
  * - Datatype Functions
  *   - Datatype translation functions
- *     - \ref H5LTtext_to_dtype
- *     - \ref H5LTdtype_to_text
+ *      - \ref H5LTtext_to_dtype
+ *      - \ref H5LTdtype_to_text
  *
  * - File image function
  *   - Open file image function
- *     - \ref H5LTopen_file_image
+ *      - \ref H5LTopen_file_image
  *
  * - Path and object function
  *   - Query path and object function
- *     - \ref H5LTpath_valid
+ *      - \ref H5LTpath_valid
  *
  * </td></tr>
  * </table>
@@ -1516,8 +1516,7 @@ H5_HLDLL herr_t H5LTfind_attribute(hid_t loc_id, const char *name);
  *            indicating the file’s root group, followed by the members
  *          - A relative path with respect to \p loc_id
  *          - A dot (\c .), if \p loc_id is the object identifier for
- *            the object itself
- *          .
+ *            the object itself.
  *
  *          If \p path is an absolute path, then \p loc_id can be an
  *          identifier for any object in the file as it is used only to

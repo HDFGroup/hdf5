@@ -154,7 +154,11 @@ New Features
 
     Documentation:
     --------------
-    -
+    - Doxygen User Guide documentation is available when configured and generated.
+      The resulting documentation files will be in the share/html subdirectory
+      of the HDF5 install directory.
+
+        (ADB - 2022/08/09)
 
 
 Support for new platforms, languages and compilers

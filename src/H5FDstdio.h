@@ -38,7 +38,7 @@ H5_DLL hid_t H5FD_stdio_init(void);
  * \returns \herr_t
  *
  * \details H5Pset_fapl_stdio() modifies the file access property list to use
- *          the standard I/O driver, H5FDstdio().
+ *          the standard I/O driver, H5FDstdio.
  *
  * \since 1.4.0
  *
