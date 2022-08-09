@@ -74,7 +74,7 @@ H5FL_DEFINE(H5D_dset_info_t);
 /*-------------------------------------------------------------------------
  * Function:    H5D__pre_read
  *
- * Purpose:     Checks if multi dataset reads are possible and fowards
+ * Purpose:     Checks if multi dataset reads are possible and forwards
  *              the call to H5D__read if it is, otherwise breaks it into
  *              single dataset calls to H5D__read.
  *
@@ -139,7 +139,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5D__pre_write
  *
- * Purpose:     Checks if multi dataset writes are possible and fowards
+ * Purpose:     Checks if multi dataset writes are possible and forwards
  *              the call to H5D__write if it is, otherwise breaks it into
  *              single dataset calls to H5D__write.
  *
