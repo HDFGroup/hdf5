@@ -121,11 +121,12 @@ static void  *H5VL_pass_through_dataset_create(void *obj, const H5VL_loc_params_
                                                hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req);
 static void  *H5VL_pass_through_dataset_open(void *obj, const H5VL_loc_params_t *loc_params, const char *name,
                                              hid_t dapl_id, hid_t dxpl_id, void **req);
-static herr_t H5VL_pass_through_dataset_read(size_t count, void *dset[], hid_t mem_type_id[], hid_t mem_space_id[],
-                                             hid_t file_space_id[], hid_t plist_id, void *buf[], void **req);
-static herr_t H5VL_pass_through_dataset_write(size_t count, void *dset[], hid_t mem_type_id[], hid_t mem_space_id[],
-                                              hid_t file_space_id[], hid_t plist_id, const void *buf[],
-                                              void **req);
+static herr_t H5VL_pass_through_dataset_read(size_t count, void *dset[], hid_t mem_type_id[],
+                                             hid_t mem_space_id[], hid_t file_space_id[], hid_t plist_id,
+                                             void *buf[], void **req);
+static herr_t H5VL_pass_through_dataset_write(size_t count, void *dset[], hid_t mem_type_id[],
+                                              hid_t mem_space_id[], hid_t file_space_id[], hid_t plist_id,
+                                              const void *buf[], void **req);
 static herr_t H5VL_pass_through_dataset_get(void *dset, H5VL_dataset_get_args_t *args, hid_t dxpl_id,
                                             void **req);
 static herr_t H5VL_pass_through_dataset_specific(void *obj, H5VL_dataset_specific_args_t *args, hid_t dxpl_id,
@@ -1197,13 +1198,13 @@ H5VL_pass_through_dataset_open(void *obj, const H5VL_loc_params_t *loc_params, c
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_pass_through_dataset_read(size_t count, void *dset[], hid_t mem_type_id[], hid_t mem_space_id[], hid_t file_space_id[],
-                               hid_t plist_id, void *buf[], void **req)
+H5VL_pass_through_dataset_read(size_t count, void *dset[], hid_t mem_type_id[], hid_t mem_space_id[],
+                               hid_t file_space_id[], hid_t plist_id, void *buf[], void **req)
 {
-    void    *obj_local;                  /* Local buffer for obj */
-    void   **obj         = &obj_local; /* Array of object pointers */
-    size_t    i;            /* Local index variable */
-    herr_t    ret_value;
+    void  *obj_local;        /* Local buffer for obj */
+    void **obj = &obj_local; /* Array of object pointers */
+    size_t i;                /* Local index variable */
+    herr_t ret_value;
 
 #ifdef ENABLE_PASSTHRU_LOGGING
     printf("------- PASS THROUGH VOL DATASET Read\n");
@@ -1224,8 +1225,8 @@ H5VL_pass_through_dataset_read(size_t count, void *dset[], hid_t mem_type_id[], 
             return -1;
     }
 
-    ret_value = H5VLdataset_read(count, obj, ((H5VL_pass_through_t *)dset[0])->under_vol_id, mem_type_id, mem_space_id, file_space_id,
-                                 plist_id, buf, req);
+    ret_value = H5VLdataset_read(count, obj, ((H5VL_pass_through_t *)dset[0])->under_vol_id, mem_type_id,
+                                 mem_space_id, file_space_id, plist_id, buf, req);
 
     /* Check for async request */
     if (req && *req)
@@ -1249,13 +1250,13 @@ H5VL_pass_through_dataset_read(size_t count, void *dset[], hid_t mem_type_id[], 
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_pass_through_dataset_write(size_t count, void *dset[], hid_t mem_type_id[], hid_t mem_space_id[], hid_t file_space_id[],
-                                hid_t plist_id, const void *buf[], void **req)
+H5VL_pass_through_dataset_write(size_t count, void *dset[], hid_t mem_type_id[], hid_t mem_space_id[],
+                                hid_t file_space_id[], hid_t plist_id, const void *buf[], void **req)
 {
-    void  *obj_local;                  /* Local buffer for obj */
-    void  **obj             = &obj_local; /* Array of object pointers */
-    size_t    i;            /* Local index variable */
-    herr_t               ret_value;
+    void  *obj_local;        /* Local buffer for obj */
+    void **obj = &obj_local; /* Array of object pointers */
+    size_t i;                /* Local index variable */
+    herr_t ret_value;
 
 #ifdef ENABLE_PASSTHRU_LOGGING
     printf("------- PASS THROUGH VOL DATASET Write\n");
@@ -1276,8 +1277,8 @@ H5VL_pass_through_dataset_write(size_t count, void *dset[], hid_t mem_type_id[],
             return -1;
     }
 
-    ret_value = H5VLdataset_write(count, obj, ((H5VL_pass_through_t *)dset[0])->under_vol_id, mem_type_id, mem_space_id, file_space_id,
-                                  plist_id, buf, req);
+    ret_value = H5VLdataset_write(count, obj, ((H5VL_pass_through_t *)dset[0])->under_vol_id, mem_type_id,
+                                  mem_space_id, file_space_id, plist_id, buf, req);
 
     /* Check for async request */
     if (req && *req)
