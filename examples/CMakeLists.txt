@@ -47,6 +47,7 @@ if (H5_HAVE_PARALLEL)
     ph5example
     ph5_filtered_writes
     ph5_filtered_writes_no_sel
+    ph5_subfiling
   )
 endif ()
 

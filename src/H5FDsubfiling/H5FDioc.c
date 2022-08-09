@@ -61,36 +61,6 @@ typedef struct H5FD_ioc_t {
 
     char *file_dir;  /* Directory where we find files */
     char *file_path; /* The user defined filename */
-
-#ifndef H5_HAVE_WIN32_API
-    /* On most systems the combination of device and i-node number uniquely
-     * identify a file.  Note that Cygwin, MinGW and other Windows POSIX
-     * environments have the stat function (which fakes inodes)
-     * and will use the 'device + inodes' scheme as opposed to the
-     * Windows code further below.
-     */
-    dev_t device; /* file device number   */
-#else
-    /* Files in windows are uniquely identified by the volume serial
-     * number and the file index (both low and high parts).
-     *
-     * There are caveats where these numbers can change, especially
-     * on FAT file systems.  On NTFS, however, a file should keep
-     * those numbers the same until renamed or deleted (though you
-     * can use ReplaceFile() on NTFS to keep the numbers the same
-     * while renaming).
-     *
-     * See the MSDN "BY_HANDLE_FILE_INFORMATION Structure" entry for
-     * more information.
-     *
-     * http://msdn.microsoft.com/en-us/library/aa363788(v=VS.85).aspx
-     */
-    DWORD nFileIndexLow;
-    DWORD nFileIndexHigh;
-    DWORD dwVolumeSerialNumber;
-
-    HANDLE hFile; /* Native windows file handle */
-#endif /* H5_HAVE_WIN32_API */
 } H5FD_ioc_t;
 
 /*
@@ -490,7 +460,7 @@ H5FD__ioc_get_default_config(hid_t fapl_id, H5FD_ioc_config_t *config_out)
         H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set MPI I/O VFD on IOC under FAPL");
 
     /* Specific to this I/O Concentrator */
-    config_out->thread_pool_count = H5FD_IOC_DEFAULT_THREAD_POOL_SIZE;
+    config_out->thread_pool_size = H5FD_IOC_DEFAULT_THREAD_POOL_SIZE;
 
 done:
     if (H5_mpi_comm_free(&comm) < 0)
@@ -536,7 +506,12 @@ H5FD__ioc_validate_config(const H5FD_ioc_config_t *fa)
     if (fa->magic != H5FD_IOC_FAPL_MAGIC)
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid H5FD_ioc_config_t magic value");
 
-    /* TODO: add extra IOC configuration validation code */
+    if (fa->under_fapl_id < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid under FAPL ID");
+
+    if (fa->subf_config.ioc_selection < SELECT_IOC_ONE_PER_NODE ||
+        fa->subf_config.ioc_selection >= ioc_selection_options)
+        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid IOC selection method");
 
 done:
     H5_SUBFILING_FUNC_LEAVE;
@@ -850,24 +825,15 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     }
 
     if (NULL != (file_ptr->file_path = HDrealpath(name, NULL))) {
-        char *path      = NULL;
-        char *directory = dirname(path);
-
-        if (NULL == (path = HDstrdup(file_ptr->file_path)))
-            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTCOPY, NULL, "can't copy subfiling subfile path");
-        if (NULL == (file_ptr->file_dir = HDstrdup(directory))) {
-            HDfree(path);
-            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTCOPY, NULL,
-                                    "can't copy subfiling subfile directory path");
+        if (H5_dirname(file_ptr->file_path, &file_ptr->file_dir) < 0) {
+            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "couldn't get subfile dirname");
         }
-
-        HDfree(path);
     }
     else {
         if (ENOENT == errno) {
             if (NULL == (file_ptr->file_path = HDstrdup(name)))
                 H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTCOPY, NULL, "can't copy file name");
-            if (NULL == (file_ptr->file_dir = HDstrdup(".")))
+            if (NULL == (file_ptr->file_dir = H5MM_strdup(".")))
                 H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, NULL, "can't set subfile directory path");
         }
         else
@@ -983,7 +949,7 @@ H5FD__ioc_close_int(H5FD_ioc_t *file_ptr)
 
 #ifdef H5FD_IOC_DEBUG
     {
-        subfiling_context_t *sf_context = H5_get_subfiling_object(file_ptr->fa.context_id);
+        subfiling_context_t *sf_context = H5_get_subfiling_object(file_ptr->context_id);
         if (sf_context) {
             if (sf_context->topology->rank_is_ioc)
                 HDprintf("[%s %d] fd=%d\n", __func__, file_ptr->mpi_rank, sf_context->sf_fid);
@@ -1035,7 +1001,7 @@ done:
     HDfree(file_ptr->file_path);
     file_ptr->file_path = NULL;
 
-    HDfree(file_ptr->file_dir);
+    H5MM_free(file_ptr->file_dir);
     file_ptr->file_dir = NULL;
 
     /* Release the file info */
@@ -1089,8 +1055,31 @@ H5FD__ioc_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     HDassert(f1);
     HDassert(f2);
 
-    ret_value = H5FD_cmp(f1->ioc_file, f2->ioc_file);
+    if (f1->ioc_file && f1->ioc_file->cls && f1->ioc_file->cls->cmp && f2->ioc_file && f2->ioc_file->cls &&
+        f2->ioc_file->cls->cmp) {
+        ret_value = H5FD_cmp(f1->ioc_file, f2->ioc_file);
+    }
+    else {
+        h5_stat_t st1;
+        h5_stat_t st2;
 
+        /*
+         * If under VFD has no compare routine, get
+         * inode of HDF5 stub file and compare them
+         *
+         * Note that the compare callback doesn't
+         * allow for failure, so we just return -1
+         * if stat fails.
+         */
+        if (HDstat(f1->file_path, &st1) < 0)
+            H5_SUBFILING_SYS_GOTO_ERROR(H5E_VFL, H5E_CANTGET, -1, "couldn't stat file");
+        if (HDstat(f2->file_path, &st2) < 0)
+            H5_SUBFILING_SYS_GOTO_ERROR(H5E_VFL, H5E_CANTGET, -1, "couldn't stat file");
+
+        ret_value = (st1.st_ino > st2.st_ino) - (st1.st_ino < st2.st_ino);
+    }
+
+done:
     H5_SUBFILING_FUNC_LEAVE;
 } /* end H5FD__ioc_cmp */
 
@@ -1607,8 +1596,6 @@ H5FD__ioc_del(const char *name, hid_t fapl)
     MPI_Comm        comm          = MPI_COMM_NULL;
     MPI_Info        info          = MPI_INFO_NULL;
     FILE           *config_file   = NULL;
-    char           *name_copy     = NULL;
-    char           *name_copy2    = NULL;
     char           *tmp_filename  = NULL;
     char           *base_filename = NULL;
     char           *file_dirname  = NULL;
@@ -1647,13 +1634,10 @@ H5FD__ioc_del(const char *name, hid_t fapl)
         if (HDstat(name, &st) < 0)
             H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_SYSERRSTR, FAIL, "HDstat failed");
 
-        if (NULL == (name_copy = HDstrdup(name)))
-            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't copy filename");
-        if (NULL == (name_copy2 = HDstrdup(name)))
-            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't copy filename");
-
-        base_filename = basename(name_copy);
-        file_dirname  = dirname(name_copy2);
+        if (H5_basename(name, &base_filename) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't get file basename");
+        if (H5_dirname(name, &file_dirname) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't get file dirname");
 
         /* Try to open the subfiling configuration file and get the number of IOCs */
         if (NULL == (tmp_filename = HDmalloc(PATH_MAX)))
@@ -1732,8 +1716,8 @@ done:
         H5_SUBFILING_DONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI info object");
 
     HDfree(tmp_filename);
-    HDfree(name_copy);
-    HDfree(name_copy2);
+    H5MM_free(file_dirname);
+    H5MM_free(base_filename);
 
     H5_SUBFILING_FUNC_LEAVE;
 }
