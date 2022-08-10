@@ -30,7 +30,7 @@
 #pragma warning(push, 1)                                          
 #endif                                                            
 #line 2 "hl/src//H5LTanalyze.c"
-/* Quiet warnings about integer type macro redifinitions on Visual Studio
+/* Quiet warnings about integer type macro redefinitions on Visual Studio
  * (MSVC doesn't define STDC_VERSION, but has inttypes.h). This is an
  * issue that is apparently fixed in flex 2.6.5.
  */

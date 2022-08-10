@@ -901,7 +901,7 @@ CONTAINS
 !  h5tset_sign_f
 !
 ! PURPOSE
-!  Sets the sign proprety for an integer type.
+!  Sets the sign property for an integer type.
 !
 ! INPUTS
 !  type_id 	 - datatype identifier

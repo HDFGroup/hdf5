@@ -47,7 +47,7 @@
  *     4) Configurable expected-actual order in generated comparison strings.
  *        Some prefer `VERIFY(expected, actual)`, others
  *        `VERIFY(actual, expected)`. Provide preprocessor ifdef switch
- *        to satifsy both parties, assuming one paradigm per test file.
+ *        to satisfy both parties, assuming one paradigm per test file.
  *        (One could #undef and redefine the flag through the file as desired,
  *         but _why_.)
  *        Provided as courtesy, per consideration for inclusion in the library
@@ -1374,7 +1374,7 @@ test_nlowercase(void)
         HDfree(dest);
     } /* end for each testcase */
 
-    JSVERIFY(FAIL, H5FD_s3comms_nlowercase(NULL, cases[0].in, cases[0].len), "null distination should fail")
+    JSVERIFY(FAIL, H5FD_s3comms_nlowercase(NULL, cases[0].in, cases[0].len), "null destination should fail")
 
     PASSED();
     return 0;

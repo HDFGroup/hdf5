@@ -3564,7 +3564,7 @@ CONTAINS
   SUBROUTINE h5pget_class_name_f(prp_id, name, size, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier
-    CHARACTER(LEN=*), INTENT(OUT) :: name ! Buffer to retireve class name
+    CHARACTER(LEN=*), INTENT(OUT) :: name ! Buffer to retrieve class name
     INTEGER, INTENT(OUT) :: size          ! Actual length of the class name
     INTEGER, INTENT(OUT) :: hdferr        ! Error code
                                           ! 0 on success and -1 on failure
