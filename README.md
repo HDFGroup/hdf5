@@ -7,15 +7,14 @@ HDF5 version 1.13.2-1 currently under development
 
 *Please refer to the release_docs/INSTALL file for installation instructions.*
 
-THE HDF GROUP
----------------
+This repository contains a high-performance library's source code and a file format
+specification that implement the HDF5® data model. The model has been adopted across
+many industries and this implementation has become a de facto data management standard
+in science, engineering, and research communities worldwide.
 
-The HDF Group is the developer of HDF5®, a high-performance software library and
-data format that has been adopted across multiple industries and has become a
-de facto standard in scientific and research communities.
-
-More information about The HDF Group, the HDF5 Community and the HDF5 software
-project, tools and services can be found at the Group's website.
+The HDF Group is the developer, maintainer, and steward of HDF5 software. Find more
+information about The HDF Group, the HDF5 Community, and other HDF5 software projects,
+tools, and services at The HDF Group's website.
     
    https://www.hdfgroup.org/
 
