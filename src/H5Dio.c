@@ -85,7 +85,6 @@ H5FL_DEFINE(H5D_dset_info_t);
 herr_t
 H5D__pre_read(size_t count, H5D_dset_info_t *dset_info)
 {
-    H5FD_mpio_xfer_t xfer_mode;           /* Parallel I/O transfer mode */
     hbool_t          broke_mdset = FALSE; /* Whether to break multi-dataset option */
     size_t           u;                   /* Local index variable */
     herr_t           ret_value = SUCCEED; /* Return value */
@@ -96,27 +95,32 @@ H5D__pre_read(size_t count, H5D_dset_info_t *dset_info)
     HDassert(count > 0);
     HDassert(dset_info);
 
-    /* Get the transfer mode */
-    if (H5CX_get_io_xfer_mode(&xfer_mode) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get value")
+    {
+#ifdef H5_HAVE_PARALLEL
+        H5FD_mpio_xfer_t xfer_mode;           /* Parallel I/O transfer mode */
 
-    /* In independent mode or with an unsupported layout, for now just
-       read each dataset individually */
-    if (xfer_mode == H5FD_MPIO_INDEPENDENT)
-        broke_mdset = TRUE;
-    else {
-        /* Multi-dset I/O currently supports CHUNKED and internal CONTIGUOUS
-         * only, not external CONTIGUOUS (EFL) or COMPACT.  Fall back to
-         * individual dataset reads if any dataset uses an unsupported layout.
-         */
-        for (u = 0; u < count; u++) {
-            if (!(dset_info[u].dset->shared->layout.type == H5D_CHUNKED ||
-                  (dset_info[u].dset->shared->layout.type == H5D_CONTIGUOUS &&
-                   dset_info[u].dset->shared->layout.ops != H5D_LOPS_EFL))) {
-                broke_mdset = TRUE;
-                break;
-            }
-        } /* end for */
+        /* Get the transfer mode */
+        if (H5CX_get_io_xfer_mode(&xfer_mode) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get value")
+
+        /* In independent mode or with an unsupported layout, for now just
+           read each dataset individually */
+        if (xfer_mode == H5FD_MPIO_INDEPENDENT)
+            broke_mdset = TRUE;
+        else
+#endif /*H5_HAVE_PARALLEL*/
+            /* Multi-dset I/O currently supports CHUNKED and internal CONTIGUOUS
+             * only, not external CONTIGUOUS (EFL) or COMPACT.  Fall back to
+             * individual dataset reads if any dataset uses an unsupported layout.
+             */
+            for (u = 0; u < count; u++) {
+                if (!(dset_info[u].dset->shared->layout.type == H5D_CHUNKED ||
+                      (dset_info[u].dset->shared->layout.type == H5D_CONTIGUOUS &&
+                       dset_info[u].dset->shared->layout.ops != H5D_LOPS_EFL))) {
+                    broke_mdset = TRUE;
+                    break;
+                }
+            } /* end for */
     }
 
     if (broke_mdset) {
@@ -125,12 +129,9 @@ H5D__pre_read(size_t count, H5D_dset_info_t *dset_info)
             if (H5D__read(1, &dset_info[u], FALSE) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
     } /* end if */
-    else {
-        HDassert(xfer_mode == H5FD_MPIO_COLLECTIVE);
-
+    else
         if (H5D__read(count, dset_info, TRUE) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
-    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -150,9 +151,8 @@ done:
 herr_t
 H5D__pre_write(size_t count, H5D_dset_info_t *dset_info)
 {
-    size_t           u;                   /* Local index variable */
     hbool_t          broke_mdset = FALSE; /* Whether to break multi-dataset option */
-    H5FD_mpio_xfer_t xfer_mode;           /* Parallel I/O transfer mode */
+    size_t           u;                   /* Local index variable */
     herr_t           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -161,27 +161,32 @@ H5D__pre_write(size_t count, H5D_dset_info_t *dset_info)
     HDassert(count > 0);
     HDassert(dset_info);
 
-    /* Get the transfer mode */
-    if (H5CX_get_io_xfer_mode(&xfer_mode) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get value")
+    {
+#ifdef H5_HAVE_PARALLEL
+        H5FD_mpio_xfer_t xfer_mode;           /* Parallel I/O transfer mode */
 
-    /* In independent mode or with an unsupported layout, for now
-       just write each dataset individually */
-    if (xfer_mode == H5FD_MPIO_INDEPENDENT)
-        broke_mdset = TRUE;
-    else {
-        /* Multi-dset I/O currently supports CHUNKED and internal CONTIGUOUS
-         * only, not external CONTIGUOUS (EFL) or COMPACT.  Fall back to
-         * individual dataset writes if any dataset uses an unsupported layout.
-         */
-        for (u = 0; u < count; u++) {
-            if (!(dset_info[u].dset->shared->layout.type == H5D_CHUNKED ||
-                  (dset_info[u].dset->shared->layout.type == H5D_CONTIGUOUS &&
-                   dset_info[u].dset->shared->layout.ops != H5D_LOPS_EFL))) {
-                broke_mdset = TRUE;
-                break;
-            }
-        } /* end for */
+        /* Get the transfer mode */
+        if (H5CX_get_io_xfer_mode(&xfer_mode) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to get value")
+
+        /* In independent mode or with an unsupported layout, for now
+           just write each dataset individually */
+        if (xfer_mode == H5FD_MPIO_INDEPENDENT)
+            broke_mdset = TRUE;
+        else
+#endif /*H5_HAVE_PARALLEL*/
+            /* Multi-dset I/O currently supports CHUNKED and internal CONTIGUOUS
+             * only, not external CONTIGUOUS (EFL) or COMPACT.  Fall back to
+             * individual dataset writes if any dataset uses an unsupported layout.
+             */
+            for (u = 0; u < count; u++) {
+                if (!(dset_info[u].dset->shared->layout.type == H5D_CHUNKED ||
+                      (dset_info[u].dset->shared->layout.type == H5D_CONTIGUOUS &&
+                       dset_info[u].dset->shared->layout.ops != H5D_LOPS_EFL))) {
+                    broke_mdset = TRUE;
+                    break;
+                }
+            } /* end for */
     }
 
     if (broke_mdset) {
@@ -190,12 +195,9 @@ H5D__pre_write(size_t count, H5D_dset_info_t *dset_info)
             if (H5D__write(1, &dset_info[u], FALSE) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
     } /* end if */
-    else {
-        HDassert(xfer_mode == H5FD_MPIO_COLLECTIVE);
-
+    else
         if (H5D__write(count, dset_info, TRUE) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
-    } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
