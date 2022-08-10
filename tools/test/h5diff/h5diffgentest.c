@@ -2752,7 +2752,7 @@ gen_dataset_idx(const char *file, int format)
     hid_t did2 = H5I_INVALID_HID; /* dataset id */
 #endif
 
-    /* Get a copy of the file aaccess property */
+    /* Get a copy of the file access property */
     fapl = H5Pcreate(H5P_FILE_ACCESS);
 
     /* Set the "use the latest format" bounds for creating objects in the file */

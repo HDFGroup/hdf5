@@ -56,7 +56,7 @@
  *     4) Configurable expected-actual order in generated comparison strings.
  *        Some prefer `VERIFY(expected, actual)`, others
  *        `VERIFY(actual, expected)`. Provide preprocessor ifdef switch
- *        to satifsy both parties, assuming one paradigm per test file.
+ *        to satisfy both parties, assuming one paradigm per test file.
  *        (One could #undef and redefine the flag through the file as desired,
  *         but _why_.)
  *

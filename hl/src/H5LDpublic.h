@@ -107,7 +107,7 @@ H5_HLDLL size_t H5LDget_dset_type_size(hid_t did, const char *fields);
  *          selected from the dataset. Note that \p cur_dims must have
  *          at least one dimension whose size is greater than the
  *          corresponding dimension in \p prev_dims. Users can
- *          determine the size of buf by multipling the datatype
+ *          determine the size of buf by multiplying the datatype
  *          size of the dataset by the number of selected elements.
  *
  *          If the parameter \p fields is NULL, this routine returns

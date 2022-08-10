@@ -510,7 +510,7 @@ main(void)
     }
     else {
         HDputs(
-            "All address space reservation tests skippped - Incompatible with current Virtual File Driver");
+            "All address space reservation tests skipped - Incompatible with current Virtual File Driver");
     }
 #endif /* BROKEN */
 
