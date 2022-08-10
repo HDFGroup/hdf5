@@ -693,7 +693,7 @@ H5O_msg_free_real(const H5O_msg_class_t *type, void *msg_native)
 /*-------------------------------------------------------------------------
  * Function:	H5O_msg_copy
  *
- * Purpose:	Copies a message.  If MESG is is the null pointer then a null
+ * Purpose:	Copies a message.  If MESG is the null pointer then a null
  *		pointer is returned with no error.
  *
  * Return:	Success:	Ptr to the new message
@@ -1752,7 +1752,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5O__msg_copy_file
  *
- * Purpose:     Copies a message to file.  If MESG is is the null pointer then a null
+ * Purpose:     Copies a message to file.  If MESG is the null pointer then a null
  *              pointer is returned with no error.
  *
  *              Attempts to share the message in the destination and sets
