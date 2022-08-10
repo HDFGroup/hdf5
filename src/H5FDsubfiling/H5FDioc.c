@@ -16,8 +16,6 @@
  *              another underlying VFD. Maintains two files simultaneously.
  */
 
-#include <libgen.h>
-
 /* This source code file is part of the H5FD driver module */
 #include "H5FDdrvr_module.h"
 
