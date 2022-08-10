@@ -90,7 +90,7 @@ find_program(CPPCHECK_EXE NAMES "cppcheck")
 mark_as_advanced(FORCE CPPCHECK_EXE)
 if(CPPCHECK_EXE)
   message(STATUS "cppcheck found: ${CPPCHECK_EXE}")
-  if(CPPCHECK)
+  if(CPPECHECK)
     set(CMAKE_CXX_CPPCHECK
         "${CPPCHECK_EXE};--enable=warning,performance,portability,missingInclude;--template=\"[{severity}][{id}] {message} {callstack} \(On {file}:{line}\)\";--suppress=missingIncludeSystem;--quiet;--verbose;--force"
     )
