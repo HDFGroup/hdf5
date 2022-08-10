@@ -15,7 +15,6 @@
  */
 
 #include <mpi.h>
-#include <libgen.h>
 
 #include "testpar.h"
 #include "H5srcdir.h"
