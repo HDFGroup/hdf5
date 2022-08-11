@@ -85,9 +85,9 @@ H5FL_DEFINE(H5D_dset_info_t);
 herr_t
 H5D__pre_read(size_t count, H5D_dset_info_t *dset_info)
 {
-    hbool_t          broke_mdset = FALSE; /* Whether to break multi-dataset option */
-    size_t           u;                   /* Local index variable */
-    herr_t           ret_value = SUCCEED; /* Return value */
+    hbool_t broke_mdset = FALSE; /* Whether to break multi-dataset option */
+    size_t  u;                   /* Local index variable */
+    herr_t  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -97,7 +97,7 @@ H5D__pre_read(size_t count, H5D_dset_info_t *dset_info)
 
     {
 #ifdef H5_HAVE_PARALLEL
-        H5FD_mpio_xfer_t xfer_mode;           /* Parallel I/O transfer mode */
+        H5FD_mpio_xfer_t xfer_mode; /* Parallel I/O transfer mode */
 
         /* Get the transfer mode */
         if (H5CX_get_io_xfer_mode(&xfer_mode) < 0)
@@ -129,9 +129,8 @@ H5D__pre_read(size_t count, H5D_dset_info_t *dset_info)
             if (H5D__read(1, &dset_info[u], FALSE) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
     } /* end if */
-    else
-        if (H5D__read(count, dset_info, TRUE) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
+    else if (H5D__read(count, dset_info, TRUE) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -151,9 +150,9 @@ done:
 herr_t
 H5D__pre_write(size_t count, H5D_dset_info_t *dset_info)
 {
-    hbool_t          broke_mdset = FALSE; /* Whether to break multi-dataset option */
-    size_t           u;                   /* Local index variable */
-    herr_t           ret_value = SUCCEED; /* Return value */
+    hbool_t broke_mdset = FALSE; /* Whether to break multi-dataset option */
+    size_t  u;                   /* Local index variable */
+    herr_t  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -163,7 +162,7 @@ H5D__pre_write(size_t count, H5D_dset_info_t *dset_info)
 
     {
 #ifdef H5_HAVE_PARALLEL
-        H5FD_mpio_xfer_t xfer_mode;           /* Parallel I/O transfer mode */
+        H5FD_mpio_xfer_t xfer_mode; /* Parallel I/O transfer mode */
 
         /* Get the transfer mode */
         if (H5CX_get_io_xfer_mode(&xfer_mode) < 0)
@@ -195,9 +194,8 @@ H5D__pre_write(size_t count, H5D_dset_info_t *dset_info)
             if (H5D__write(1, &dset_info[u], FALSE) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
     } /* end if */
-    else
-        if (H5D__write(count, dset_info, TRUE) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
+    else if (H5D__write(count, dset_info, TRUE) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
