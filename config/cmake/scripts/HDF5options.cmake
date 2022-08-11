@@ -21,8 +21,13 @@
 #set (MAX_PROC_COUNT 8)
 
 #############################################################################################
-####      alternate toolsets       ####
+####      alternate toolsets (Windows usually)        ####
 #set (CMAKE_GENERATOR_TOOLSET "Intel C++ Compiler 17.0")
+
+#############################################################################################
+### use a toolchain file (supported everywhere)       ####
+
+#set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCMAKE_TOOLCHAIN_FILE:STRING=config/toolchain/intel.cmake")
 
 #############################################################################################
 ####      Only build static libraries       ####
@@ -96,10 +101,5 @@ endif()
 #set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_NO_PACKAGES:BOOL=ON")
 ### Create install package with external libraries (szip, zlib)
 set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_PACKAGE_EXTLIBS:BOOL=ON")
-
-#############################################################################################
-### use a toolchain file
-
-#set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DCMAKE_TOOLCHAIN_FILE:STRING=config/toolchain/intel.cmake")
 
 #############################################################################################
