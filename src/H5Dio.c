@@ -366,7 +366,7 @@ H5D__read(size_t count, H5D_dset_info_t *dset_info, hbool_t is_mdset)
 
             /* Switch to using projected memory dataspace & adjusted buffer */
             dset_info[i].mem_space = projected_mem_space;
-            projected_mem_space = NULL;
+            projected_mem_space    = NULL;
         } /* end if */
 
         /* If space hasn't been allocated and not using external storage,
@@ -490,8 +490,7 @@ done:
     if (projected_mem_space) {
         HDassert(ret_value < 0);
         if (H5S_close(projected_mem_space) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL,
-                        "unable to shut down projected memory dataspace")
+            HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down projected memory dataspace")
     }
 
     /* Free global piece skiplist */
@@ -693,7 +692,7 @@ H5D__write(size_t count, H5D_dset_info_t *dset_info, hbool_t is_mdset)
 
             /* Switch to using projected memory dataspace & adjusted buffer */
             dset_info[i].mem_space = projected_mem_space;
-            projected_mem_space = NULL;
+            projected_mem_space    = NULL;
         } /* end if */
 
         /* Retrieve dataset properties */
@@ -830,8 +829,7 @@ done:
     if (projected_mem_space) {
         HDassert(ret_value < 0);
         if (H5S_close(projected_mem_space) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL,
-                        "unable to shut down projected memory dataspace")
+            HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down projected memory dataspace")
     }
 
     /* Free global piece skiplist */

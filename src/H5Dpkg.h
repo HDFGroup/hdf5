@@ -257,11 +257,11 @@ typedef struct H5D_dset_info_t {
     unsigned     f_ndims;                  /* Number of dimensions for file dataspace */
     hsize_t      f_dims[H5O_LAYOUT_NDIMS]; /* File dataspace dimensions */
 
-    H5S_t         *mem_space;   /* Pointer to the memory dataspace */
-    H5S_t         *mchunk_tmpl; /* Dataspace template for new memory chunks */
-    H5S_sel_iter_t mem_iter;    /* Iterator for elements in memory selection */
-    unsigned       m_ndims;     /* Number of dimensions for memory dataspace */
-    H5S_sel_type   msel_type;   /* Selection type in memory */
+    H5S_t         *mem_space;       /* Pointer to the memory dataspace */
+    H5S_t         *mchunk_tmpl;     /* Dataspace template for new memory chunks */
+    H5S_sel_iter_t mem_iter;        /* Iterator for elements in memory selection */
+    unsigned       m_ndims;         /* Number of dimensions for memory dataspace */
+    H5S_sel_type   msel_type;       /* Selection type in memory */
     hbool_t        mem_space_alloc; /* Whether the memory space was allocated and needs to be freed */
 
     H5SL_t *dset_sel_pieces; /* Skiplist of selected pieces in this dataset, indexed by index */

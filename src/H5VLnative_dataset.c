@@ -171,7 +171,7 @@ H5VL__native_dataset_io_setup(size_t count, void *obj[], hid_t mem_type_id[], hi
 
             /* Make sure we free the memory space when we're done*/
             (*dinfo)[i].mem_space_alloc = TRUE;
-        }     /* end if */
+        } /* end if */
         else if (H5S_PLIST == mem_space_id[i])
             HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "H5S_PLIST is not allowed for memory dataspace")
         else {
