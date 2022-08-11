@@ -84,24 +84,24 @@
  * an error stack ID is needed as a parameter, \ref H5E_DEFAULT can be used to indicate the library’s default
  * stack. The first error record of the error stack, number #000, is produced by the API function itself and
  * is usually sufficient to indicate to the application what went wrong.
- *  <table>
- *     <caption align=top>Example: An Error Message</caption>
- *     <tr>
- *       <td>
- *         <p>If an application calls \ref H5Tclose  on a
+ * <table>
+ *   <caption align=top>Example: An Error Message</caption>
+ *   <tr>
+ *     <td>
+ *       <p>If an application calls \ref H5Tclose  on a
  *       predefined datatype then the following message is
  *       printed on the standard error stream.  This is a
  *       simple error that has only one component, the API
  *       function; other errors may have many components.
- *         <p><code><pre>
+ *       <p><code><pre>
  * HDF5-DIAG: Error detected in HDF5 (1.10.9) thread 0.
  *    #000: H5T.c line ### in H5Tclose(): predefined datatype
  *       major: Function argument
  *       minor: Bad value
- *         </pre></code>
- *       </td>
- *     </tr>
- *   </table>
+ *       </pre></code>
+ *     </td>
+ *   </tr>
+ * </table>
  * In the example above, we can see that an error record has a major message and a minor message. A major
  * message generally indicates where the error happens. The location can be a dataset or a dataspace, for
  * example. A minor message explains further details of the error. An example is “unable to open file”.
@@ -152,51 +152,40 @@
  *
  * <em>To see the current settings:</em>
  * \code
- * herr_t H5Eget_auto(hid_t error_stack, H5E_auto_t * func, void **client_data)
+ *      herr_t H5Eget_auto(hid_t error_stack, H5E_auto_t * func, void **client_data)
  * \endcode
  * The function above returns the current settings for the automatic error stack traversal function, func, and
  * its data, client_data. If either or both of the arguments are null, then the value is not returned.
  *
- *  <table>
- *     <caption align=top>Example: Turn off error messages while probing a function</caption>
- *     <tr>
- *       <td>
- *         <p>An application can temporarily turn off error messages while “probing” a function. See the
+ * An application can temporarily turn off error messages while “probing” a function. See the
  * example below.
- *         <p><code><pre>
- * ***  Save old error handler  ***
- * H5E_auto2_t oldfunc;
- * void *old_client_data;
- * H5Eget_auto2(error_stack, &old_func, &old_client_data);
- * ***  Turn off error handling  ***
- * H5Eset_auto2(error_stack, NULL, NULL);
- * ***  Probe. Likely to fail, but that’s okay  ***
- * status = H5Fopen (......);
- * ***  Restore previous error handler  ***
- * H5Eset_auto2(error_stack, old_func, old_client_data);
- *         </pre></code>
- *       </td>
- *     </tr>
- *   </table>
  *
- *   <table>
- *     <caption align=top>Example: Disable automatic printing and explicitly print error messages</caption>
- *     <tr>
- *       <td>
- *         <p>Or automatic printing can be disabled altogether and error messages can be explicitly printed.
- *         <p><code><pre>
- * ***  Turn off error handling permanently  ***
- * H5Eset_auto2(error_stack, NULL, NULL);
- * ***  If failure, print error message  ***
- * if (H5Fopen (....)<0) {
- *     H5Eprint2(H5E_DEFAULT, stderr);
- * exit (1);
- * }
- *         </pre></code>
- *       </td>
- *     </tr>
- *   </table>
+ * <em>Example: Turn off error messages while probing a function</em>
+ * \code
+ *     ***  Save old error handler  ***
+ *      H5E_auto2_t oldfunc;
+ *      void *old_client_data;
+ *      H5Eget_auto2(error_stack, &old_func, &old_client_data);
+ *      ***  Turn off error handling  ***
+ *      H5Eset_auto2(error_stack, NULL, NULL);
+ *      ***  Probe. Likely to fail, but that’s okay  ***
+ *      status = H5Fopen (......);
+ *      ***  Restore previous error handler  ***
+ *      H5Eset_auto2(error_stack, old_func, old_client_data);
+ * \endcode
  *
+ * Or automatic printing can be disabled altogether and error messages can be explicitly printed.
+ *
+ * <em>Example: Disable automatic printing and explicitly print error messages</em>
+ * \code
+ *      ***  Turn off error handling permanently  ***
+ *      H5Eset_auto2(error_stack, NULL, NULL);
+ *      ***  If failure, print error message  ***
+ *      if (H5Fopen (....)<0) {
+ *          H5Eprint2(H5E_DEFAULT, stderr);
+ *          exit (1);
+ *      }
+ * \endcode
  *
  * \subsubsection subsubsec_error_ops_custom_print Customized Printing of an Error Stack
  * Applications are allowed to define an automatic error traversal function other than the default
@@ -204,41 +193,28 @@
  * the standard error stream and then exits. The first example below defines a such a function. The second
  * example below installs the function as the error handler.
  *
- *   <table>
- *     <caption align=top>Example: Defining a function to print a simple error message</caption>
- *     <tr>
- *       <td>
- *         <p><code><pre>
- * herr_t
- * my_hdf5_error_handler(void *unused)
- * {
- *     fprintf (stderr, “An HDF5 error was detected. Bye.\\n”);
- *     exit (1);
- * }
+ * <em>Example: Defining a function to print a simple error message</em>
+ * \code
+ *      herr_t
+ *      my_hdf5_error_handler(void *unused)
+ *      {
+ *          fprintf (stderr, “An HDF5 error was detected. Bye.\\n”);
+ *          exit (1);
+ *      }
+ * \endcode
  *
- *         </pre></code>
- *       </td>
- *     </tr>
- *   </table>
- *
- *   <table>
- *     <caption align=top>Example: The user‐defined error handler</caption>
- *     <tr>
- *       <td>
- *         <p><code><pre>
- * H5Eset_auto2(H5E_DEFAULT, my_hdf5_error_handler, NULL);
- *         </pre></code>
- *       </td>
- *     </tr>
- *   </table>
+ * <em>Example: The user‐defined error handler</em>
+ * \code
+ *      H5Eset_auto2(H5E_DEFAULT, my_hdf5_error_handler, NULL);
+ * \endcode
  *
  * \subsubsection subsubsec_error_ops_walk Walk through the Error Stack
  * The \ref H5Eprint2 function is actually just a wrapper around the more complex \ref H5Ewalk function
  * which traverses an error stack and calls a user‐defined function for each member of the stack. The example
  * below shows how \ref H5Ewalk is used.
  * \code
- * herr_t H5Ewalk(hid_t err_stack, H5E_direction_t direction,
- * H5E_walk_t func, void *client_data)
+ *      herr_t H5Ewalk(hid_t err_stack, H5E_direction_t direction,
+ *      H5E_walk_t func, void *client_data)
  * \endcode
  * The error stack err_stack is traversed and func is called for each member of the stack. Its arguments
  * are an integer sequence number beginning at zero (regardless of direction) and the client_data
@@ -251,62 +227,57 @@
  * zero for each traversal, eptr is a pointer to an error stack member, and client_data is the same pointer
  * used in the example above passed to \ref H5Ewalk. See the example below.
  * \code
- *     typedef herr_t (*H5E_walk_t)(unsigned n, H5E_error2_t *eptr, void *client_data)
+ *      typedef herr_t (*H5E_walk_t)(unsigned n, H5E_error2_t *eptr, void *client_data)
  * \endcode
  * The H5E_error2_t structure is shown below.
  * \code
- *     typedef struct {
- *         hid_t cls_id;
- *         hid_t maj_num;
- *         hid_t min_num;
- *         unsigned line;
- *         const char *func_name;
- *         const char *file_name;
- *         const char *desc;
- *     } H5E_error2_t;
+ *      typedef struct {
+ *          hid_t cls_id;
+ *          hid_t maj_num;
+ *          hid_t min_num;
+ *          unsigned line;
+ *          const char *func_name;
+ *          const char *file_name;
+ *          const char *desc;
+ *      } H5E_error2_t;
  * \endcode
  * The maj_num and min_num are major and minor error IDs, func_name is the name of the function where
  * the error was detected, file_name and line locate the error within the HDF5 Library source code, and
  * desc points to a description of the error.
  *
- *   <table>
- *     <caption align=top>Example: A user‐defined callback function</caption>
- *     <tr>
- *       <td>
- *         <p>The following example shows a user‐defined callback function.
- *         <p><code><pre>
- *     \#define MSG_SIZE 64
- *     herr_t
- *     custom_print_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
- *     {
- *         FILE *stream = (FILE *)client_data;
- *         char maj[MSG_SIZE];
- *         char min[MSG_SIZE];
- *         char cls[MSG_SIZE];
- *         const int indent = 4;
+ * The following example shows a user‐defined callback function.
  *
- *         ***  Get descriptions for the major and minor error numbers  ***
- *         if(H5Eget_class_name(err_desc->cls_id, cls, MSG_SIZE) < 0)
- *             TEST_ERROR;
- *         if(H5Eget_msg(err_desc->maj_num, NULL, maj, MSG_SIZE) < 0)
- *             TEST_ERROR;
- *         if(H5Eget_msg(err_desc->min_num, NULL, min, MSG_SIZE) < 0)
- *             TEST_ERROR;
- *         fprintf (stream, “%*serror #%03d: %s in %s():
- *                 line %u\\n”,
- *                 indent, “”, n, err_desc->file_name,
- *                 err_desc->func_name, err_desc->line);
- *         fprintf (stream, “%*sclass: %s\\n”, indent*2, “”, cls);
- *         fprintf (stream, “%*smajor: %s\\n”, indent*2, “”, maj);
- *         fprintf (stream, “%*sminor: %s\\n”, indent*2, “”, min);
- *         return 0;
- *     error:
- *         return -1;
- *     }
- *         </pre></code>
- *       </td>
- *     </tr>
- *   </table>
+ * <em>Example: A user‐defined callback function</em>
+ * \code
+ *      \#define MSG_SIZE 64
+ *      herr_t
+ *      custom_print_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
+ *      {
+ *          FILE *stream = (FILE *)client_data;
+ *          char maj[MSG_SIZE];
+ *          char min[MSG_SIZE];
+ *          char cls[MSG_SIZE];
+ *          const int indent = 4;
+ *
+ *          ***  Get descriptions for the major and minor error numbers  ***
+ *          if(H5Eget_class_name(err_desc->cls_id, cls, MSG_SIZE) < 0)
+ *              TEST_ERROR;
+ *          if(H5Eget_msg(err_desc->maj_num, NULL, maj, MSG_SIZE) < 0)
+ *              TEST_ERROR;
+ *          if(H5Eget_msg(err_desc->min_num, NULL, min, MSG_SIZE) < 0)
+ *              TEST_ERROR;
+ *          fprintf (stream, “%*serror #%03d: %s in %s():
+ *                  line %u\\n”,
+ *                  indent, “”, n, err_desc->file_name,
+ *                  err_desc->func_name, err_desc->line);
+ *          fprintf (stream, “%*sclass: %s\\n”, indent*2, “”, cls);
+ *          fprintf (stream, “%*smajor: %s\\n”, indent*2, “”, maj);
+ *          fprintf (stream, “%*sminor: %s\\n”, indent*2, “”, min);
+ *          return 0;
+ *      error:
+ *          return -1;
+ *      }
+ * \endcode
  *
  * <h4>Programming Note for C++ Developers Using C Functions</h4>
  * If a C routine that takes a function pointer as an argument is called from within C++ code, the C routine
@@ -329,13 +300,13 @@
  * to push its own error records onto the error stack once it declares an error class of its own through the
  * HDF5 Error API.
  *
- *   <table>
- *     <caption align=top>Example:  An Error Report</caption>
- *     <tr>
- *       <td>
- *         <p>An error report shows both the library’s error record and the application’s error records.
+ * <table>
+ *   <caption align=top>Example:  An Error Report</caption>
+ *   <tr>
+ *     <td>
+ *       <p>An error report shows both the library’s error record and the application’s error records.
  *          See the example below.
- *         <p><code><pre>
+ *       <p><code><pre>
  * Error Test-DIAG: Error detected in Error Program (1.0)
  *         thread 8192:
  *     #000: ../../hdf5/test/error_test.c line ### in main():
@@ -351,10 +322,10 @@
  *         not a dataset
  *       major: Invalid arguments to routine
  *       minor: Inappropriate type
- *         </pre></code>
- *       </td>
- *     </tr>
- *   </table>
+ *       </pre></code>
+ *     </td>
+ *   </tr>
+ * </table>
  * In the line above error record #002 in the example above, the starting phrase is HDF5. This is the error
  * class name of the HDF5 Library. All of the library’s error messages (major and minor) are in this default
  * error class. The Error Test in the beginning of the line above error record #000 is the name of the
@@ -365,44 +336,38 @@
  * in an error class. An application will have object handles for the error class and for major and minor
  * messages for further operation. See the example below.
  *
- *   <table>
- *     <caption align=top>Example: The user‐defined error handler</caption>
- *     <tr>
- *       <td>
- *         <p><code><pre>
- * \#define MSG_SIZE 64
- * herr_t
- * custom_print_cb(unsigned n, const H5E_error2_t *err_desc,
- * void* client_data)
- * {
- *     FILE *stream = (FILE *)client_data;
- *     char maj[MSG_SIZE];
- *     char min[MSG_SIZE];
- *     char cls[MSG_SIZE];
- *     const int indent = 4;
+ * <em>Example: The user‐defined error handler</em>
+ * \code
+ *      \#define MSG_SIZE 64
+ *      herr_t
+ *      custom_print_cb(unsigned n, const H5E_error2_t *err_desc,
+ *      void* client_data)
+ *      {
+ *          FILE *stream = (FILE *)client_data;
+ *          char maj[MSG_SIZE];
+ *          char min[MSG_SIZE];
+ *          char cls[MSG_SIZE];
+ *          const int indent = 4;
  *
- *     ***  Get descriptions for the major and minor error numbers  ***
- *     if(H5Eget_class_name(err_desc->cls_id, cls, MSG_SIZE) < 0)
- *         TEST_ERROR;
- *     if(H5Eget_msg(err_desc->maj_num, NULL, maj, MSG_SIZE) < 0)
- *         TEST_ERROR;
- *     if(H5Eget_msg(err_desc->min_num, NULL, min, MSG_SIZE) < 0)
- *         TEST_ERROR;
- *     fprintf (stream, “%*serror #%03d: %s in %s():
- *             line %u\\n”,
- *             indent, “”, n, err_desc->file_name,
- *             err_desc->func_name, err_desc->line);
- *     fprintf (stream, “%*sclass: %s\\n”, indent*2, “”, cls);
- *     fprintf (stream, “%*smajor: %s\\n”, indent*2, “”, maj);
- *     fprintf (stream, “%*sminor: %s\\n”, indent*2, “”, min);
- *     return 0;
- * error:
- *     return -1;
- * }
- *         </pre></code>
- *       </td>
- *     </tr>
- *   </table>
+ *          ***  Get descriptions for the major and minor error numbers  ***
+ *          if(H5Eget_class_name(err_desc->cls_id, cls, MSG_SIZE) < 0)
+ *              TEST_ERROR;
+ *          if(H5Eget_msg(err_desc->maj_num, NULL, maj, MSG_SIZE) < 0)
+ *              TEST_ERROR;
+ *          if(H5Eget_msg(err_desc->min_num, NULL, min, MSG_SIZE) < 0)
+ *              TEST_ERROR;
+ *          fprintf (stream, “%*serror #%03d: %s in %s():
+ *                  line %u\\n”,
+ *                  indent, “”, n, err_desc->file_name,
+ *                  err_desc->func_name, err_desc->line);
+ *          fprintf (stream, “%*sclass: %s\\n”, indent*2, “”, cls);
+ *          fprintf (stream, “%*smajor: %s\\n”, indent*2, “”, maj);
+ *          fprintf (stream, “%*sminor: %s\\n”, indent*2, “”, min);
+ *          return 0;
+ *      error:
+ *          return -1;
+ *      }
+ * \endcode
  *
  * \subsubsection subsubsec_error_adv_more More Error API Functions
  * The Error API has functions that can be used to register or unregister an error class, to create or close
@@ -410,75 +375,64 @@
  *
  * <em>To register an error class:</em>
  * \code
- * hid_t H5Eregister_class(const char* cls_name, const char* lib_name, const char* version)
+ *      hid_t H5Eregister_class(const char* cls_name, const char* lib_name, const char* version)
  * \endcode
  * This function registers an error class with the HDF5 Library so that the application library or program
  * can report errors together with the HDF5 Library.
  *
  * <em>To add an error message to an error class:</em>
  * \code
- * hid_t H5Ecreate_msg(hid_t class, H5E_type_t msg_type, const char* mesg)
+ *      hid_t H5Ecreate_msg(hid_t class, H5E_type_t msg_type, const char* mesg)
  * \endcode
  * This function adds an error message to an error class defined by an application library or program. The
  * error message can be either major or minor which is indicated by parameter msg_type.
  *
  * <em>To get the name of an error class:</em>
  * \code
- * ssize_t H5Eget_class_name(hid_t class_id, char* name, size_t size)
+ *      ssize_t H5Eget_class_name(hid_t class_id, char* name, size_t size)
  * \endcode
  * This function retrieves the name of the error class specified by the class ID.
  *
  * <em>To retrieve an error message:</em>
  * \code
- * ssize_t H5Eget_msg(hid_t mesg_id, H5E_type_t* mesg_type, char* mesg, size_t size)
+ *      ssize_t H5Eget_msg(hid_t mesg_id, H5E_type_t* mesg_type, char* mesg, size_t size)
  * \endcode
  * This function retrieves the error message including its length and type.
  *
  * <em>To close an error message:</em>
  * \code
- * herr_t H5Eclose_msg(hid_t mesg_id)
+ *      herr_t H5Eclose_msg(hid_t mesg_id)
  * \endcode
  * This function closes an error message.
  *
  * <em>To remove an error class:</em>
  * \code
- * herr_t H5Eunregister_class(hid_t class_id)
+ *      herr_t H5Eunregister_class(hid_t class_id)
  * \endcode
  * This function removes an error class from the Error API.
  *
- *   <table>
- *     <caption align=top>Example: Create an error class and error messages</caption>
- *     <tr>
- *       <td>
- *         <p>The example below shows how an application creates an error class and error messages.
- *         <p><code><pre>
- * ***  Create an error class  ***
- * class_id = H5Eregister_class(ERR_CLS_NAME, PROG_NAME, PROG_VERS);
- * ***  Retrieve class name  ***
- * H5Eget_class_name(class_id, cls_name, cls_size);
- * ***  Create a major error message in the class  ***
- * maj_id = H5Ecreate_msg(class_id, H5E_MAJOR, “... ...”);
- * ***  Create a minor error message in the class  ***
- * min_id = H5Ecreate_msg(class_id, H5E_MINOR, “... ...”);
- *         </pre></code>
- *       </td>
- *     </tr>
- *   </table>
+ * The example below shows how an application creates an error class and error messages.
  *
- *   <table>
- *     <caption align=top>Example: Closing error messages and unregistering the error class</caption>
- *     <tr>
- *       <td>
- *         <p>The example below shows how an application closes error messages and unregisters the error
- * class.
- *         <p><code><pre>
- *    H5Eclose_msg(maj_id);
- *    H5Eclose_msg(min_id);
- *    H5Eunregister_class(class_id);
- *         </pre></code>
- *       </td>
- *     </tr>
- *   </table>
+ * <em>Example: Create an error class and error messages</em>
+ * \code
+ *      ***  Create an error class  ***
+ *      class_id = H5Eregister_class(ERR_CLS_NAME, PROG_NAME, PROG_VERS);
+ *      ***  Retrieve class name  ***
+ *      H5Eget_class_name(class_id, cls_name, cls_size);
+ *      ***  Create a major error message in the class  ***
+ *      maj_id = H5Ecreate_msg(class_id, H5E_MAJOR, “... ...”);
+ *      ***  Create a minor error message in the class  ***
+ *      min_id = H5Ecreate_msg(class_id, H5E_MINOR, “... ...”);
+ * \endcode
+ *
+ * The example below shows how an application closes error messages and unregisters the error class.
+ *
+ * <em>Example: Closing error messages and unregistering the error class</em>
+ * \code
+ *      H5Eclose_msg(maj_id);
+ *      H5Eclose_msg(min_id);
+ *      H5Eunregister_class(class_id);
+ * \endcode
  *
  * \subsubsection subsubsec_error_adv_app Pushing an Application Error Message onto Error Stack
  * An application can push error records onto or pop error records off of the error stack just as the library
@@ -487,7 +441,7 @@
  *
  * <em>To register the current stack:</em>
  * \code
- * hid_t H5Eget_current_stack(void)
+ *      hid_t H5Eget_current_stack(void)
  * \endcode
  * This function registers the current error stack, returns an object handle, and clears the current error
  * stack.
@@ -495,88 +449,78 @@
  *
  * <em>To replace the current error stack with another:</em>
  * \code
- * herr_t H5Eset_current_stack(hid_t error_stack)
+ *      herr_t H5Eset_current_stack(hid_t error_stack)
  * \endcode
  * This function replaces the current error stack with another error stack specified by error_stack and
  * clears the current error stack. The object handle error_stack is closed after this function call.
  *
  * <em>To push a new error record to the error stack:</em>
  * \code
- * herr_t H5Epush(hid_t error_stack, const char* file, const char* func,
- * unsigned line, hid_t cls_id, hid_t major_id, hid_t minor_id,
- * const char* desc, ... )
+ *      herr_t H5Epush(hid_t error_stack, const char* file, const char* func,
+ *                     unsigned line, hid_t cls_id, hid_t major_id, hid_t minor_id,
+ *                     const char* desc, ... )
  * \endcode
  * This function pushes a new error record onto the error stack for the current thread.
  *
  * <em>To delete some error messages:</em>
  * \code
- * herr_t H5Epop(hid_t error_stack, size_t count)
+ *      herr_t H5Epop(hid_t error_stack, size_t count)
  * \endcode
  * This function deletes some error messages from the error stack.
  *
  * <em>To retrieve the number of error records:</em>
  * \code
- * int H5Eget_num(hid_t error_stack)
+ *      int H5Eget_num(hid_t error_stack)
  * \endcode
  * This function retrieves the number of error records from an error stack.
  *
  * <em>To clear the error stack:</em>
  * \code
- * herr_t H5Eclear_stack(hid_t error_stack)
+ *      herr_t H5Eclear_stack(hid_t error_stack)
  * \endcode
  * This function clears the error stack.
  *
  * <em>To close the object handle for an error stack:</em>
  * \code
- * herr_t H5Eclose_stack(hid_t error_stack)
+ *      herr_t H5Eclose_stack(hid_t error_stack)
  * \endcode
  * This function closes the object handle for an error stack and releases its resources.
  *
- *   <table>
- *     <caption align=top>Example: Pushing an error message to an error stack</caption>
- *     <tr>
- *       <td>
- *         <p>The example below shows how an application pushes an error record onto the default error stack.
- *         <p><code><pre>
- * ***  Make call to HDF5 I/O routine  ***
- * if((dset_id=H5Dopen(file_id, dset_name, access_plist)) < 0)
- * {
- *     ***  Push client error onto error stack  ***
- *     H5Epush(H5E_DEFAULT,__FILE__,FUNC,__LINE__,cls_id,
- *             CLIENT_ERR_MAJ_IO,CLIENT_ERR_MINOR_OPEN, “H5Dopen failed”);
- * }
- * ***  Indicate error occurred in function  ***
- * return 0;
- *         </pre></code>
- *       </td>
- *     </tr>
- *   </table>
+ * The example below shows how an application pushes an error record onto the default error stack.
  *
- *   <table>
- *     <caption align=top>Example: Registering the error stack</caption>
- *     <tr>
- *       <td>
- *         <p>The example below shows how an application registers the current error stack and
- *          creates an object handle to avoid another HDF5 function from clearing the error stack.
- *         <p><code><pre>
- * if (H5Dwrite(dset_id, mem_type_id, mem_space_id, file_space_id, dset_xfer_plist_id, buf) < 0)
- * {
- * ***  Push client error onto error stack  ***
- *     H5Epush2(H5E_DEFAULT,__FILE__,FUNC,__LINE__,cls_id,
- *             CLIENT_ERR_MAJ_IO,CLIENT_ERR_MINOR_HDF5,
- *             “H5Dwrite failed”);
- * ***  Preserve the error stack by assigning an object handle to it  ***
- *     error_stack = H5Eget_current_stack();
- * ***  Close dataset  ***
- *     H5Dclose(dset_id);
- * ***  Replace the current error stack with the preserved one  ***
- *     H5Eset_current_stack(error_stack);
- * }
- * return 0;
- *         </pre></code>
- *       </td>
- *     </tr>
- *   </table>
+ * <em>Example: Pushing an error message to an error stack</em>
+ * \code
+ *      ***  Make call to HDF5 I/O routine  ***
+ *      if((dset_id=H5Dopen(file_id, dset_name, access_plist)) < 0)
+ *      {
+ *          ***  Push client error onto error stack  ***
+ *          H5Epush(H5E_DEFAULT,__FILE__,FUNC,__LINE__,cls_id,
+ *                  CLIENT_ERR_MAJ_IO,CLIENT_ERR_MINOR_OPEN, “H5Dopen failed”);
+ *      }
+ *      ***  Indicate error occurred in function  ***
+ *      return 0;
+ * \endcode
+ *
+ * The example below shows how an application registers the current error stack and
+ * creates an object handle to avoid another HDF5 function from clearing the error stack.
+ *
+ * <em>Example: Registering the error stack</em>
+ * \code
+ *      if (H5Dwrite(dset_id, mem_type_id, mem_space_id, file_space_id, dset_xfer_plist_id, buf) < 0)
+ *      {
+ *          ***  Push client error onto error stack  ***
+ *          H5Epush2(H5E_DEFAULT,__FILE__,FUNC,__LINE__,cls_id,
+ *                  CLIENT_ERR_MAJ_IO,CLIENT_ERR_MINOR_HDF5,
+ *                  “H5Dwrite failed”);
+ *          ***  Preserve the error stack by assigning an object handle to it  ***
+ *          error_stack = H5Eget_current_stack();
+ *          ***  Close dataset  ***
+ *          H5Dclose(dset_id);
+ *          ***  Replace the current error stack with the preserved one  ***
+ *          H5Eset_current_stack(error_stack);
+ *      }
+ *      return 0;
+ * \endcode
  *
  * Previous Chapter \ref sec_attribute - Next Chapter \ref sec_plist
  *
