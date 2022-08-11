@@ -217,7 +217,7 @@ if (HDF5_TEST_JAVA AND HDF5_TEST_SERIAL)
             testPf00001.h5
         WORKING_DIRECTORY ${HDF5_BINARY_DIR}/java/test/${volname}
     )
-    set_tests_properties (JUnit-VOL-${volname}-${voltest} PROPERTIES
+    set_tests_properties (JUnit-VOL-${volname}-${voltest}-clean-objects PROPERTIES
         ENVIRONMENT "HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/testdir2"
         DEPENDS "JUnit-VOL-${volname}-${voltest}"
         WORKING_DIRECTORY ${HDF5_BINARY_DIR}/java/test/${volname}
