@@ -20,6 +20,7 @@ set (CTEST_CUSTOM_WARNING_EXCEPTION
     ${CTEST_CUSTOM_WARNING_EXCEPTION}
     "note.*expected.*void.*but argument is of type.*volatile"
     "plugin-build.*:[ \t]*warning"
+    "stamp.verify"
     "CMake Warning*stamp"
     "src.ZLIB.*:[ \t]*warning"
     "warning LNK4197:.*ZLIB-prefix"
