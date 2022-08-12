@@ -224,7 +224,7 @@ import hdf.hdf5lib.structs.H5O_token_t;
  * be used by Java exception handlers to print out the HDF-5 error stack.
  * <hr>
  *
- * @version HDF5 1.13.3 <BR>
+ * @version HDF5 1.13.2 <BR>
  *          <b>See also: <a href ="./hdf.hdf5lib.HDFArray.html"> hdf.hdf5lib.HDFArray</a> </b><BR>
  *          <a href ="./hdf.hdf5lib.HDF5Constants.html"> hdf.hdf5lib.HDF5Constants</a><BR>
  *          <a href ="./hdf.hdf5lib.HDF5CDataTypes.html"> hdf.hdf5lib.HDF5CDataTypes</a><BR>
