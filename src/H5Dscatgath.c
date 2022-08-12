@@ -156,6 +156,10 @@ done:
     if (off)
         off = H5FL_SEQ_FREE(hsize_t, off);
 
+    /* Release ownership of mem_space in dest_info to calling function */
+    _io_info->dsets_info[0].mem_space = tmp_dset_info.mem_space;
+    _io_info->dsets_info[0].mem_space_alloc = tmp_dset_info.mem_space_alloc;
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__scatter_file() */
 
@@ -257,6 +261,10 @@ done:
         len = H5FL_SEQ_FREE(size_t, len);
     if (off)
         off = H5FL_SEQ_FREE(hsize_t, off);
+
+    /* Release ownership of mem_space in dest_info to calling function */
+    _io_info->dsets_info[0].mem_space = tmp_dset_info.mem_space;
+    _io_info->dsets_info[0].mem_space_alloc = tmp_dset_info.mem_space_alloc;
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__gather_file() */

@@ -262,6 +262,8 @@ H5D__contig_fill(const H5D_io_info_t *io_info)
     dset_info.dset    = (H5D_t *)dset;
     dset_info.store   = &store;
     dset_info.buf.cvp = fb_info.fill_buf;
+    dset_info.mem_space = NULL;
+    dset_info.mem_space_alloc = FALSE;
     ioinfo.dsets_info = &dset_info;
     ioinfo.f_sh       = H5F_SHARED(dset_info.dset->oloc.file);
 
@@ -335,6 +337,11 @@ done:
     /* Release the fill buffer info, if it's been initialized */
     if (fb_info_init && H5D__fill_term(&fb_info) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release fill buffer info")
+
+    /* Free the memory dataspace if it was allocated (currently this will never
+     * happen) */
+    if (dset_info.mem_space_alloc && H5S_close(dset_info.mem_space) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close memory dataspace")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__contig_fill() */
@@ -1170,8 +1177,8 @@ H5D__contig_readvv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *d
                    size_t dset_len_arr[], hsize_t dset_off_arr[], size_t mem_max_nseq, size_t *mem_curr_seq,
                    size_t mem_len_arr[], hsize_t mem_off_arr[])
 {
-    H5D_dset_info_t dset_info;
-    ssize_t         ret_value = -1; /* Return value */
+    H5D_dset_info_t *dset_info;
+    ssize_t          ret_value = -1; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1184,7 +1191,7 @@ H5D__contig_readvv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *d
     HDassert(mem_len_arr);
     HDassert(mem_off_arr);
 
-    dset_info = io_info->dsets_info[0];
+    dset_info = &io_info->dsets_info[0];
 
     /* Check if data sieving is enabled */
     if (H5F_SHARED_HAS_FEATURE(io_info->f_sh, H5FD_FEAT_DATA_SIEVE)) {
@@ -1192,9 +1199,9 @@ H5D__contig_readvv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *d
 
         /* Set up user data for H5VM_opvv() */
         udata.f_sh         = io_info->f_sh;
-        udata.dset_contig  = &(dset_info.dset->shared->cache.contig);
-        udata.store_contig = &(dset_info.store->contig);
-        udata.rbuf         = (unsigned char *)dset_info.buf.vp;
+        udata.dset_contig  = &(dset_info->dset->shared->cache.contig);
+        udata.store_contig = &(dset_info->store->contig);
+        udata.rbuf         = (unsigned char *)dset_info->buf.vp;
 
         /* Call generic sequence operation routine */
         if ((ret_value =
@@ -1207,8 +1214,8 @@ H5D__contig_readvv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *d
 
         /* Set up user data for H5VM_opvv() */
         udata.f_sh      = io_info->f_sh;
-        udata.dset_addr = dset_info.store->contig.dset_addr;
-        udata.rbuf      = (unsigned char *)dset_info.buf.vp;
+        udata.dset_addr = dset_info->store->contig.dset_addr;
+        udata.rbuf      = (unsigned char *)dset_info->buf.vp;
 
         /* Call generic sequence operation routine */
         if ((ret_value = H5VM_opvv(dset_max_nseq, dset_curr_seq, dset_len_arr, dset_off_arr, mem_max_nseq,
@@ -1491,8 +1498,8 @@ H5D__contig_writevv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *
                     size_t dset_len_arr[], hsize_t dset_off_arr[], size_t mem_max_nseq, size_t *mem_curr_seq,
                     size_t mem_len_arr[], hsize_t mem_off_arr[])
 {
-    H5D_dset_info_t dset_info;
-    ssize_t         ret_value = -1; /* Return value (Size of sequence in bytes) */
+    H5D_dset_info_t *dset_info;
+    ssize_t          ret_value = -1; /* Return value (Size of sequence in bytes) */
 
     FUNC_ENTER_PACKAGE
 
@@ -1505,7 +1512,7 @@ H5D__contig_writevv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *
     HDassert(mem_len_arr);
     HDassert(mem_off_arr);
 
-    dset_info = io_info->dsets_info[0];
+    dset_info = &io_info->dsets_info[0];
 
     /* Check if data sieving is enabled */
     if (H5F_SHARED_HAS_FEATURE(io_info->f_sh, H5FD_FEAT_DATA_SIEVE)) {
@@ -1513,9 +1520,9 @@ H5D__contig_writevv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *
 
         /* Set up user data for H5VM_opvv() */
         udata.f_sh         = io_info->f_sh;
-        udata.dset_contig  = &(dset_info.dset->shared->cache.contig);
-        udata.store_contig = &(dset_info.store->contig);
-        udata.wbuf         = (const unsigned char *)dset_info.buf.cvp;
+        udata.dset_contig  = &(dset_info->dset->shared->cache.contig);
+        udata.store_contig = &(dset_info->store->contig);
+        udata.wbuf         = (const unsigned char *)dset_info->buf.cvp;
 
         /* Call generic sequence operation routine */
         if ((ret_value =
@@ -1528,8 +1535,8 @@ H5D__contig_writevv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *
 
         /* Set up user data for H5VM_opvv() */
         udata.f_sh      = io_info->f_sh;
-        udata.dset_addr = dset_info.store->contig.dset_addr;
-        udata.wbuf      = (const unsigned char *)dset_info.buf.cvp;
+        udata.dset_addr = dset_info->store->contig.dset_addr;
+        udata.wbuf      = (const unsigned char *)dset_info->buf.cvp;
 
         /* Call generic sequence operation routine */
         if ((ret_value = H5VM_opvv(dset_max_nseq, dset_curr_seq, dset_len_arr, dset_off_arr, mem_max_nseq,
