@@ -241,6 +241,9 @@ typedef struct H5D_piece_info_t {
 } H5D_piece_info_t;
 
 /* dset info for multiple dsets */
+/* When freeing this struct, you must always check the value of mem_space_alloc,
+ * calling H5S_close() if it is true, since lower levels may have allocated and
+ * replaced mem_space */
 typedef struct H5D_dset_info_t {
     H5D_t                  *dset;       /* Pointer to dataset being operated on */
     H5D_storage_t          *store;      /* Dataset storage info */
