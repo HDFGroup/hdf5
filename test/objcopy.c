@@ -3998,7 +3998,7 @@ test_copy_dataset_chunked_empty(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, 
     if ((did = H5Dopen2(fid_src, NAME_DATASET_CHUNKED3, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
-    /* open the copied dataset NAME_DATASET_CHUNKED3 at destinaion */
+    /* open the copied dataset NAME_DATASET_CHUNKED3 at destination */
     if ((did2 = H5Dopen2(fid_dst, NAME_DATASET_CHUNKED3, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
@@ -11069,7 +11069,7 @@ typedef struct cmpd_vl_t {
  *              Failure:        number of errors
  *
  * Programmer:  Neil Fortner
- *              Tuseday, September 29, 2009
+ *              Tuesday, September 29, 2009
  *
  *-------------------------------------------------------------------------
  */

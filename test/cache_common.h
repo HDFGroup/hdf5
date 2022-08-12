@@ -253,7 +253,7 @@ typedef struct flush_op {
 
 typedef enum test_entry_action_t {
     TEST_ENTRY_ACTION_NUL = 0, /* No action on entry */
-    TEST_ENTRY_ACTION_MOVE     /* Entry is beging moved */
+    TEST_ENTRY_ACTION_MOVE     /* Entry is being moved */
 } test_entry_action_t;
 
 typedef struct test_entry_t {
@@ -372,7 +372,7 @@ typedef struct test_entry_t {
                                                       * been resized by a resize flush
                                                       * op, and the flush function has
                                                       * not yet returned,  This field is
-                                                      * used to turn off overactive santity
+                                                      * used to turn off overactive sanity
                                                       * checking code that would otherwise
                                                       * cause a false test failure.
                                                       */

@@ -924,7 +924,7 @@ typedef herr_t (*H5C_log_flush_func_t)(H5C_t *cache_ptr, haddr_t addr, hbool_t w
  * instead would apply unnecessary constraints on flushes under normal
  * operating circumstances.
  *
- * As of this writing, all metadata entries pretaining to data sets and
+ * As of this writing, all metadata entries pertaining to data sets and
  * groups must be flushed first, and are thus assigned to the outermost
  * ring.
  *
@@ -2161,7 +2161,7 @@ typedef struct H5C_auto_size_ctl_t {
  *      H5AC__CACHE_IMAGE__ENTRY_AGEOUT__MAX (100).
  *
  *      H5AC__CACHE_IMAGE__ENTRY_AGEOUT__NONE means that no limit
- *      is imposed on number of times a prefeteched entry can appear
+ *      is imposed on number of times a prefetched entry can appear
  *      in subsequent cache images.
  *
  *      A value of 0 prevents prefetched entries from being included

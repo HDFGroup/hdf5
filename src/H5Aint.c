@@ -2265,7 +2265,7 @@ H5A__attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_s
             if ((tid_mem = H5I_register(H5I_DATATYPE, dt_mem, FALSE)) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL, "unable to register memory datatype")
 
-            /* create variable-length datatype at the destinaton file */
+            /* create variable-length datatype at the destination file */
             if ((tid_dst = H5I_register(H5I_DATATYPE, attr_dst->shared->dt, FALSE)) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL,
                             "unable to register destination file datatype")

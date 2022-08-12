@@ -1688,7 +1688,7 @@ usage(const char *prog)
         HDprintf("  Environment variables:\n");
         HDprintf("  HDF5_NOCLEANUP   Do not remove data files if set [default remove]\n");
         HDprintf("  HDF5_MPI_INFO    MPI INFO object key=value separated by ;\n");
-        HDprintf("  HDF5_PARAPREFIX  Paralllel data files prefix\n");
+        HDprintf("  HDF5_PARAPREFIX  Parallel data files prefix\n");
         fflush(stdout);
     } /* end if */
 } /* end usage() */

@@ -1153,7 +1153,7 @@ test_get_obj_ids(void)
     CHECK(oid_count, FAIL, "H5Fget_obj_count");
     VERIFY(oid_count, NGROUPS + 2, "H5Fget_obj_count");
 
-    /* Get the IDs of the left opend objects */
+    /* Get the IDs of the left opened objects */
     ret_count = H5Fget_obj_ids(fid, H5F_OBJ_ALL, (size_t)oid_list_size, oid_list);
     CHECK(ret_count, FAIL, "H5Fget_obj_ids");
     VERIFY(ret_count, oid_list_size, "H5Fget_obj_count");

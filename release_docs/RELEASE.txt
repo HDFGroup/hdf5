@@ -1,4 +1,4 @@
-HDF5 version 1.13.2-1 currently under development
+HDF5 version 1.13.3-1 currently under development
 ================================================================================
 
 
@@ -103,8 +103,25 @@ New Features
       while also minimizing the locking issues of the single shared file approach
       on a parallel file system.
 
+      Also included with the Subfiling VFD is a new h5fuse.sh script which
+      reads a Subfiling configuration file and then combines the various
+      sub-files back into a single HDF5 file. By default, the h5fuse.sh script
+      looks in the current directory for the Subfiling configuration file,
+      but can also be pointed to the configuration file with a command-line
+      option.
+
       The Subfiling VFD can be used by calling H5Pset_fapl_subfiling() on a
-      File Access Property List and using that FAPL for file operations. 
+      File Access Property List and using that FAPL for file operations. Note
+      that the Subfiling VFD currently has the following limitations:
+
+      * Does not currently support HDF5 collective I/O, other than collective
+        metadata writes and reads as set by H5Pset_coll_metadata_write() and
+        H5Pset_all_coll_metadata_ops()
+
+      * The Subfiling VFD should not currently be used with an HDF5 library
+        that has been built with thread-safety enabled. This can cause deadlocks
+        when failures occur due to interactions between the VFD's internal
+        threads and HDF5's global lock. 
 
       (JTH - 2022/07/22)
 

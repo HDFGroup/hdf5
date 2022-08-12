@@ -186,15 +186,6 @@ if (HDF5_TEST_JAVA AND HDF5_TEST_SERIAL)
 
   macro (DO_VOL_TEST voltest volname volinfo volclasspath)
     #message(STATUS "${voltest}-${volname} with ${volinfo}")
-    add_test (
-        NAME JUnit-VOL-${volname}-${voltest}-clean-objects
-        COMMAND ${CMAKE_COMMAND} -E remove
-            test.h5
-            testF2.h5
-            testPf00000.h5
-            testPf00001.h5
-        WORKING_DIRECTORY ${HDF5_BINARY_DIR}/java/test/${volname}
-    )
     add_test (NAME JUnit-VOL-${volname}-${voltest}
         COMMAND "${CMAKE_COMMAND}"
             -D "TEST_TESTER=${CMAKE_Java_RUNTIME};${CMAKE_Java_RUNTIME_FLAGS}"
@@ -215,7 +206,6 @@ if (HDF5_TEST_JAVA AND HDF5_TEST_SERIAL)
     )
     set_tests_properties (JUnit-VOL-${volname}-${voltest} PROPERTIES
         ENVIRONMENT "HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/testdir2"
-        DEPENDS "JUnit-VOL-${volname}-${voltest}-clear-objects"
         WORKING_DIRECTORY ${HDF5_BINARY_DIR}/java/test/${volname}
     )
     add_test (
@@ -227,7 +217,7 @@ if (HDF5_TEST_JAVA AND HDF5_TEST_SERIAL)
             testPf00001.h5
         WORKING_DIRECTORY ${HDF5_BINARY_DIR}/java/test/${volname}
     )
-    set_tests_properties (JUnit-VOL-${volname}-${voltest} PROPERTIES
+    set_tests_properties (JUnit-VOL-${volname}-${voltest}-clean-objects PROPERTIES
         ENVIRONMENT "HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/testdir2"
         DEPENDS "JUnit-VOL-${volname}-${voltest}"
         WORKING_DIRECTORY ${HDF5_BINARY_DIR}/java/test/${volname}

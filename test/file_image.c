@@ -610,7 +610,7 @@ test_core(void)
     VERIFY((udata->used_callbacks == MALLOC) || (udata->used_callbacks == (MALLOC | UDATA_COPY | UDATA_FREE)),
            "opening a core file used the wrong callbacks");
     VERIFY(udata->malloc_src == H5FD_FILE_IMAGE_OP_FILE_OPEN,
-           "Malloc callback came from wrong sourc in core open");
+           "Malloc callback came from wrong source in core open");
 
     /* Close file */
     reset_udata(udata);
@@ -618,7 +618,7 @@ test_core(void)
     VERIFY(ret >= 0, "H5Fclose failed");
     VERIFY(udata->used_callbacks == FREE, "Closing a core file used the wrong callbacks");
     VERIFY(udata->free_src == H5FD_FILE_IMAGE_OP_FILE_CLOSE,
-           "Free callback came from wrong sourc in core close");
+           "Free callback came from wrong source in core close");
 
     /* Reopen file */
     file = H5Fopen(copied_filename, H5F_ACC_RDWR, fapl);
@@ -654,7 +654,7 @@ test_core(void)
     VERIFY(ret >= 0, "H5Fclose failed");
     VERIFY(udata->used_callbacks == (FREE), "Closing a core file used the wrong callbacks");
     VERIFY(udata->free_src == H5FD_FILE_IMAGE_OP_FILE_CLOSE,
-           "Free callback came from wrong sourc in core close");
+           "Free callback came from wrong source in core close");
 
     /* Create file image buffer */
     fd = HDopen(copied_filename, O_RDONLY);

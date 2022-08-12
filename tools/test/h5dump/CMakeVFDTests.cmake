@@ -55,9 +55,6 @@ macro (ADD_VFD_H5DUMP_TEST vfdname resultfile resultcode)
             -P "${HDF_RESOURCES_DIR}/vfdTest.cmake"
     )
     set_tests_properties (H5DUMP_VFD-${vfdname}-${resultfile}-h5dump PROPERTIES TIMEOUT ${CTEST_SHORT_TIMEOUT})
-    set_tests_properties (H5DUMP_VFD-${resultfile} PROPERTIES
-        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/${vfdname}"
-    )
   endif ()
 endmacro ()
 
