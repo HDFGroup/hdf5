@@ -121,7 +121,10 @@ New Features
 
     C++ Library:
     ------------
-    -
+    - Added two new constructors to H5::H5File class
+
+      Two new constructors were added to allow opening a file with non-default
+      access property list.
 
 
     Java Library:

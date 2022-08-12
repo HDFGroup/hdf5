@@ -80,8 +80,7 @@ H5File::H5File() : Group(), id(H5I_INVALID_HID)
 // December 2000
 //--------------------------------------------------------------------------
 H5File::H5File(const char *name, unsigned int flags, const FileCreatPropList &create_plist,
-               const FileAccPropList &access_plist)
-    : Group(), id(H5I_INVALID_HID)
+               const FileAccPropList &access_plist) : Group(), id(H5I_INVALID_HID)
 {
     try {
         p_get_file(name, flags, create_plist, access_plist);
@@ -108,11 +107,57 @@ H5File::H5File(const char *name, unsigned int flags, const FileCreatPropList &cr
 // December 2000
 //--------------------------------------------------------------------------
 H5File::H5File(const H5std_string &name, unsigned int flags, const FileCreatPropList &create_plist,
-               const FileAccPropList &access_plist)
-    : Group(), id(H5I_INVALID_HID)
+               const FileAccPropList &access_plist) : Group(), id(H5I_INVALID_HID)
 {
     try {
         p_get_file(name.c_str(), flags, create_plist, access_plist);
+    }
+    catch (FileIException &open_file) {
+        throw open_file;
+    }
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5File overloaded constructor
+///\brief       Opens an HDF5 file using a non-default access property list
+///\param       name         - IN: Name of the file
+///\param       flags        - IN: File access flags
+///\param       access_plist - IN: File access property list.  Default to
+///             FileAccPropList::DEFAULT
+///\par Description
+///             Valid values of \a flags include:
+///             \li \c H5F_ACC_RDONLY - Open file as read-only, if it already
+///                             exists, and fail, otherwise
+///             \li \c H5F_ACC_RDWR - Open file for read/write, if it already
+///                             exists, and fail, otherwise
+// Notes        With a PGI compiler (~2012-2013,) the exception thrown by
+//              p_get_file could not be caught in the applications.  Added try
+//              block here to catch then re-throw it. -BMR 2013/03/21
+//--------------------------------------------------------------------------
+H5File::H5File(const char *name, unsigned int flags, 
+               const FileAccPropList &access_plist) : Group(), id(H5I_INVALID_HID)
+{
+    try {
+        p_get_file(name, flags, FileCreatPropList::DEFAULT, access_plist);
+    }
+    catch (FileIException &open_file) {
+        throw open_file;
+    }
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5File overloaded constructor
+///\brief       This is another overloaded constructor.  It differs from the
+///             above constructor only in the type of the \a name argument.
+///\param       name - IN: Name of the file - \c H5std_string
+///\param       flags - IN: File access flags
+///\param       access_plist - IN: File access property list
+//--------------------------------------------------------------------------
+H5File::H5File(const H5std_string &name, unsigned int flags,
+               const FileAccPropList &access_plist) : Group(), id(H5I_INVALID_HID)
+{
+    try {
+        p_get_file(name.c_str(), flags, FileCreatPropList::DEFAULT, access_plist);
     }
     catch (FileIException &open_file) {
         throw open_file;
