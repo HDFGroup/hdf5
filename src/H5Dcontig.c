@@ -259,13 +259,13 @@ H5D__contig_fill(const H5D_io_info_t *io_info)
     /* Simple setup for dataset I/O info struct */
     ioinfo.op_type = H5D_IO_OP_WRITE;
 
-    dset_info.dset    = (H5D_t *)dset;
-    dset_info.store   = &store;
-    dset_info.buf.cvp = fb_info.fill_buf;
-    dset_info.mem_space = NULL;
+    dset_info.dset            = (H5D_t *)dset;
+    dset_info.store           = &store;
+    dset_info.buf.cvp         = fb_info.fill_buf;
+    dset_info.mem_space       = NULL;
     dset_info.mem_space_alloc = FALSE;
-    ioinfo.dsets_info = &dset_info;
-    ioinfo.f_sh       = H5F_SHARED(dset_info.dset->oloc.file);
+    ioinfo.dsets_info         = &dset_info;
+    ioinfo.f_sh               = H5F_SHARED(dset_info.dset->oloc.file);
 
     /*
      * Fill the entire current extent with the fill value.  We can do
