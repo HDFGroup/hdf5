@@ -660,25 +660,14 @@ H5_free_subfiling_object_int(subfiling_context_t *sf_context)
             return FAIL;
         sf_context->sf_eof_comm = MPI_COMM_NULL;
     }
-    if (sf_context->sf_barrier_comm != MPI_COMM_NULL) {
-        if (H5_mpi_comm_free(&sf_context->sf_barrier_comm) < 0)
-            return FAIL;
-        sf_context->sf_barrier_comm = MPI_COMM_NULL;
-    }
     if (sf_context->sf_group_comm != MPI_COMM_NULL) {
         if (H5_mpi_comm_free(&sf_context->sf_group_comm) < 0)
             return FAIL;
         sf_context->sf_group_comm = MPI_COMM_NULL;
     }
-    if (sf_context->sf_intercomm != MPI_COMM_NULL) {
-        if (H5_mpi_comm_free(&sf_context->sf_intercomm) < 0)
-            return FAIL;
-        sf_context->sf_intercomm = MPI_COMM_NULL;
-    }
 
-    sf_context->sf_group_size     = -1;
-    sf_context->sf_group_rank     = -1;
-    sf_context->sf_intercomm_root = -1;
+    sf_context->sf_group_size = -1;
+    sf_context->sf_group_rank = -1;
 
     HDfree(sf_context->subfile_prefix);
     sf_context->subfile_prefix = NULL;
@@ -835,7 +824,7 @@ done:
      * Form consensus on whether opening subfiles was
      * successful
      */
-    if (MPI_SUCCESS != (mpi_code = MPI_Allreduce(&l_errors, &g_errors, 1, MPI_INT, MPI_SUM, file_comm)))
+    if (MPI_SUCCESS != (mpi_code = MPI_Allreduce(&l_errors, &g_errors, 1, MPI_INT, MPI_MAX, file_comm)))
         H5_SUBFILING_MPI_DONE_ERROR(FAIL, "MPI_Allreduce failed", mpi_code);
 
     if (g_errors > 0) {
@@ -1213,25 +1202,23 @@ init_subfiling_context(subfiling_context_t *sf_context, H5FD_subfiling_shared_co
     HDassert(app_topology->n_io_concentrators > 0);
     HDassert(MPI_COMM_NULL != file_comm);
 
-    sf_context->topology        = app_topology;
-    sf_context->sf_msg_comm     = MPI_COMM_NULL;
-    sf_context->sf_data_comm    = MPI_COMM_NULL;
-    sf_context->sf_eof_comm     = MPI_COMM_NULL;
-    sf_context->sf_barrier_comm = MPI_COMM_NULL;
-    sf_context->sf_group_comm   = MPI_COMM_NULL;
-    sf_context->sf_intercomm    = MPI_COMM_NULL;
-    sf_context->sf_stripe_size  = H5FD_SUBFILING_DEFAULT_STRIPE_SIZE;
-    sf_context->sf_write_count  = 0;
-    sf_context->sf_read_count   = 0;
-    sf_context->sf_eof          = HADDR_UNDEF;
-    sf_context->h5_file_handle  = NULL;
-    sf_context->sf_fid          = -1;
-    sf_context->sf_group_size   = 1;
-    sf_context->sf_group_rank   = 0;
-    sf_context->h5_filename     = NULL;
-    sf_context->sf_filename     = NULL;
-    sf_context->subfile_prefix  = NULL;
-    sf_context->ioc_data        = NULL;
+    sf_context->topology       = app_topology;
+    sf_context->sf_msg_comm    = MPI_COMM_NULL;
+    sf_context->sf_data_comm   = MPI_COMM_NULL;
+    sf_context->sf_eof_comm    = MPI_COMM_NULL;
+    sf_context->sf_group_comm  = MPI_COMM_NULL;
+    sf_context->sf_stripe_size = H5FD_SUBFILING_DEFAULT_STRIPE_SIZE;
+    sf_context->sf_write_count = 0;
+    sf_context->sf_read_count  = 0;
+    sf_context->sf_eof         = HADDR_UNDEF;
+    sf_context->h5_file_handle = NULL;
+    sf_context->sf_fid         = -1;
+    sf_context->sf_group_size  = 1;
+    sf_context->sf_group_rank  = 0;
+    sf_context->h5_filename    = NULL;
+    sf_context->sf_filename    = NULL;
+    sf_context->subfile_prefix = NULL;
+    sf_context->ioc_data       = NULL;
 
 #ifdef H5_SUBFILING_DEBUG
     sf_context->sf_logfile = NULL;
@@ -1295,12 +1282,6 @@ init_subfiling_context(subfiling_context_t *sf_context, H5FD_subfiling_shared_co
         H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Comm_dup failed", mpi_code);
 
     if (MPI_SUCCESS != (mpi_code = MPI_Comm_set_errhandler(sf_context->sf_eof_comm, MPI_ERRORS_RETURN)))
-        H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Comm_set_errhandler failed", mpi_code);
-
-    if (MPI_SUCCESS != (mpi_code = MPI_Comm_dup(file_comm, &sf_context->sf_barrier_comm)))
-        H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Comm_dup failed", mpi_code);
-
-    if (MPI_SUCCESS != (mpi_code = MPI_Comm_set_errhandler(sf_context->sf_barrier_comm, MPI_ERRORS_RETURN)))
         H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Comm_set_errhandler failed", mpi_code);
 
     /* Create an MPI sub-communicator for IOC ranks */
@@ -2048,7 +2029,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5_close_subfiles(int64_t subfiling_context_id)
+H5_close_subfiles(int64_t subfiling_context_id, MPI_Comm file_comm)
 {
     subfiling_context_t *sf_context  = NULL;
     MPI_Request          barrier_req = MPI_REQUEST_NULL;
@@ -2076,7 +2057,7 @@ H5_close_subfiles(int64_t subfiling_context_id)
     {
         int barrier_complete = 0;
 
-        if (MPI_SUCCESS != (mpi_code = MPI_Ibarrier(sf_context->sf_barrier_comm, &barrier_req)))
+        if (MPI_SUCCESS != (mpi_code = MPI_Ibarrier(file_comm, &barrier_req)))
             H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Ibarrier failed", mpi_code);
 
         while (!barrier_complete) {
@@ -2088,7 +2069,7 @@ H5_close_subfiles(int64_t subfiling_context_id)
         }
     }
 #else
-    if (MPI_SUCCESS != (mpi_code = MPI_Barrier(sf_context->sf_barrier_comm)))
+    if (MPI_SUCCESS != (mpi_code = MPI_Barrier(file_comm)))
         H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code);
 #endif
 
@@ -2116,7 +2097,7 @@ H5_close_subfiles(int64_t subfiling_context_id)
     {
         int barrier_complete = 0;
 
-        if (MPI_SUCCESS != (mpi_code = MPI_Ibarrier(sf_context->sf_barrier_comm, &barrier_req)))
+        if (MPI_SUCCESS != (mpi_code = MPI_Ibarrier(file_comm, &barrier_req)))
             H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Ibarrier failed", mpi_code);
 
         while (!barrier_complete) {
@@ -2128,7 +2109,7 @@ H5_close_subfiles(int64_t subfiling_context_id)
         }
     }
 #else
-    if (MPI_SUCCESS != (mpi_code = MPI_Barrier(sf_context->sf_barrier_comm)))
+    if (MPI_SUCCESS != (mpi_code = MPI_Barrier(file_comm)))
         H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code);
 #endif
 

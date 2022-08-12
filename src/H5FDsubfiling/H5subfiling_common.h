@@ -165,12 +165,9 @@ typedef struct {
     MPI_Comm       sf_msg_comm;             /* MPI comm used to send RPC msg        */
     MPI_Comm       sf_data_comm;            /* MPI comm used to move data           */
     MPI_Comm       sf_eof_comm;             /* MPI comm used to communicate EOF     */
-    MPI_Comm       sf_barrier_comm;         /* MPI comm used for barrier operations */
     MPI_Comm       sf_group_comm;           /* Not used: for IOC collectives        */
-    MPI_Comm       sf_intercomm;            /* Not used: for msgs to all IOC        */
     int            sf_group_size;           /* IOC count (in sf_group_comm)         */
     int            sf_group_rank;           /* IOC rank  (in sf_group_comm)         */
-    int            sf_intercomm_root;       /* Not used: for IOC comms              */
     char          *subfile_prefix;          /* If subfiles are node-local           */
     char          *sf_filename;             /* A generated subfile name             */
     char          *h5_filename;             /* The user supplied file name          */
@@ -206,7 +203,7 @@ extern "C" {
 H5_DLL herr_t H5_open_subfiles(const char *base_filename, void *h5_file_handle,
                                H5FD_subfiling_shared_config_t *subfiling_config, int file_acc_flags,
                                MPI_Comm file_comm, int64_t *context_id_out);
-H5_DLL herr_t H5_close_subfiles(int64_t subfiling_context_id);
+H5_DLL herr_t H5_close_subfiles(int64_t subfiling_context_id, MPI_Comm file_comm);
 
 H5_DLL int64_t H5_new_subfiling_object_id(sf_obj_type_t obj_type, int64_t index_val);
 H5_DLL void   *H5_get_subfiling_object(int64_t object_id);

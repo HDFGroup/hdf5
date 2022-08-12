@@ -858,8 +858,6 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         subfiling_context_t *sf_context  = NULL;
         void                *file_handle = NULL;
         int                  ioc_flags;
-        int                  l_error = 0;
-        int                  g_error = 0;
 
         /* Translate the HDF5 file open flags into standard POSIX open flags */
         ioc_flags = (H5F_ACC_RDWR & flags) ? O_RDWR : O_RDONLY;
@@ -870,22 +868,19 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         if (H5F_ACC_EXCL & flags)
             ioc_flags |= O_EXCL;
 
+        /*
+         * Open the HDF5 stub file. Note that we currently don't do a collective
+         * error check here, because we assume the MPI I/O driver is used and
+         * that all ranks will fail collectively if MPI_File_open fails to open
+         * the file. If a different VFD is used here in the future, a collective
+         * error check may be needed after the file open.
+         */
         file_ptr->ioc_file = H5FD_open(file_ptr->file_path, flags, file_ptr->fa.under_fapl_id, HADDR_UNDEF);
-        if (file_ptr->ioc_file) {
-            if (H5FDget_vfd_handle(file_ptr->ioc_file, file_ptr->fa.under_fapl_id, &file_handle) < 0)
-                H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get file handle");
-        }
-        else {
-            l_error = 1;
-        }
+        if (NULL == file_ptr->ioc_file)
+            H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "couldn't open HDF5 stub file");
 
-        /* Check if any ranks had an issue opening the file */
-        if (MPI_SUCCESS !=
-            (mpi_code = MPI_Allreduce(&l_error, &g_error, 1, MPI_INT, MPI_SUM, file_ptr->comm)))
-            H5_SUBFILING_MPI_GOTO_ERROR(NULL, "MPI_Allreduce failed", mpi_code);
-        if (g_error)
-            H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
-                                    "one or more MPI ranks were unable to open file '%s'", name);
+        if (H5FDget_vfd_handle(file_ptr->ioc_file, file_ptr->fa.under_fapl_id, &file_handle) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get file handle");
 
         /*
          * Open the subfiles for this HDF5 file. A subfiling
@@ -909,21 +904,30 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     ret_value = (H5FD_t *)file_ptr;
 
 done:
-    /* run a barrier just before exit.  The objective is to
-     * ensure that the IOCs are fully up and running before
-     * we proceed.  Note that this barrier is not sufficient
-     * by itself -- we also need code in initialize_ioc_threads()
-     * to wait until the main IOC thread has finished its
-     * initialization.
+    /*
+     * Check if any ranks failed before exit. The objective
+     * here is twofold:
+     *
+     *   - prevent possible hangs caused by ranks sending
+     *     messages to I/O concentrators that failed and
+     *     didn't spin up
+     *   - use the barrier semantics of MPI_Allreduce to
+     *     ensure that the I/O concentrators are fully up
+     *     and running before proceeding.
      */
     if (mpi_inited) {
-        MPI_Comm barrier_comm = MPI_COMM_WORLD;
+        MPI_Comm reduce_comm = MPI_COMM_WORLD;
+        int      err_result  = (ret_value == NULL);
 
         if (file_ptr && (file_ptr->comm != MPI_COMM_NULL))
-            barrier_comm = file_ptr->comm;
+            reduce_comm = file_ptr->comm;
 
-        if (MPI_SUCCESS != (mpi_code = MPI_Barrier(barrier_comm)))
-            H5_SUBFILING_MPI_DONE_ERROR(NULL, "MPI_Barrier failed", mpi_code);
+        if (MPI_SUCCESS !=
+            (mpi_code = MPI_Allreduce(MPI_IN_PLACE, &err_result, 1, MPI_INT, MPI_MAX, reduce_comm)))
+            H5_SUBFILING_MPI_DONE_ERROR(NULL, "MPI_Allreduce failed", mpi_code);
+        if (err_result)
+            H5_SUBFILING_DONE_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
+                                    "one or more MPI ranks were unable to open file '%s'", name);
     }
 
     if (config_ptr == &default_config)
@@ -987,7 +991,7 @@ H5FD__ioc_close_int(H5FD_ioc_t *file_ptr)
                 H5_SUBFILING_DONE_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to finalize IOC threads");
         }
 
-        if (H5_close_subfiles(file_ptr->context_id) < 0)
+        if (H5_close_subfiles(file_ptr->context_id, file_ptr->comm) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to close subfiling file(s)");
         file_ptr->context_id = -1;
     }
