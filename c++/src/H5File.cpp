@@ -80,7 +80,8 @@ H5File::H5File() : Group(), id(H5I_INVALID_HID)
 // December 2000
 //--------------------------------------------------------------------------
 H5File::H5File(const char *name, unsigned int flags, const FileCreatPropList &create_plist,
-               const FileAccPropList &access_plist) : Group(), id(H5I_INVALID_HID)
+               const FileAccPropList &access_plist)
+    : Group(), id(H5I_INVALID_HID)
 {
     try {
         p_get_file(name, flags, create_plist, access_plist);
@@ -107,7 +108,8 @@ H5File::H5File(const char *name, unsigned int flags, const FileCreatPropList &cr
 // December 2000
 //--------------------------------------------------------------------------
 H5File::H5File(const H5std_string &name, unsigned int flags, const FileCreatPropList &create_plist,
-               const FileAccPropList &access_plist) : Group(), id(H5I_INVALID_HID)
+               const FileAccPropList &access_plist)
+    : Group(), id(H5I_INVALID_HID)
 {
     try {
         p_get_file(name.c_str(), flags, create_plist, access_plist);
@@ -134,8 +136,8 @@ H5File::H5File(const H5std_string &name, unsigned int flags, const FileCreatProp
 //              p_get_file could not be caught in the applications.  Added try
 //              block here to catch then re-throw it. -BMR 2013/03/21
 //--------------------------------------------------------------------------
-H5File::H5File(const char *name, unsigned int flags, 
-               const FileAccPropList &access_plist) : Group(), id(H5I_INVALID_HID)
+H5File::H5File(const char *name, unsigned int flags, const FileAccPropList &access_plist)
+    : Group(), id(H5I_INVALID_HID)
 {
     try {
         p_get_file(name, flags, FileCreatPropList::DEFAULT, access_plist);
@@ -153,8 +155,8 @@ H5File::H5File(const char *name, unsigned int flags,
 ///\param       flags - IN: File access flags
 ///\param       access_plist - IN: File access property list
 //--------------------------------------------------------------------------
-H5File::H5File(const H5std_string &name, unsigned int flags,
-               const FileAccPropList &access_plist) : Group(), id(H5I_INVALID_HID)
+H5File::H5File(const H5std_string &name, unsigned int flags, const FileAccPropList &access_plist)
+    : Group(), id(H5I_INVALID_HID)
 {
     try {
         p_get_file(name.c_str(), flags, FileCreatPropList::DEFAULT, access_plist);

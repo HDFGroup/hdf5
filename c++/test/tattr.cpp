@@ -1309,7 +1309,7 @@ test_attr_delete(FileAccPropList &fapl)
         verify_val(num_attrs, 2, "DataSet::getNumAttrs", __LINE__, __FILE__);
 
 #if 0 // commented this test out, awaiting HDFFV-11327 resolution
-        // Open 1st attribute for the dataset
+      // Open 1st attribute for the dataset
         Attribute attr = dataset.openAttribute(static_cast<unsigned>(0));
 
         // Verify Name
@@ -1334,8 +1334,7 @@ test_attr_delete(FileAccPropList &fapl)
             Attribute exp_attr = dataset.openAttribute(ATTR2_NAME);
 
             // continuation here, that means no exception has been thrown
-            throw InvalidActionException("DataSet::removeAttr",
-                                         "Attempting to open non-existing attribute");
+            throw InvalidActionException("DataSet::removeAttr", "Attempting to open non-existing attribute");
         }
         catch (AttributeIException &E) // catching invalid removing attribute
         {
@@ -1349,7 +1348,7 @@ test_attr_delete(FileAccPropList &fapl)
         verify_val(num_attrs, 1, "DataSet::getNumAttrs", __LINE__, __FILE__);
 
 #if 0 // commented this test out, awaiting HDFFV-11327 resolution
-        // Open the only attribute for the dataset (formally 3rd)
+      // Open the only attribute for the dataset (formally 3rd)
         attr = dataset.openAttribute(static_cast<unsigned>(0));
 
         // Verify Name
