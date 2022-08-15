@@ -824,21 +824,11 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "can't copy IOC under FAPL");
     }
 
-    if (NULL != (file_ptr->file_path = HDrealpath(name, NULL))) {
-        if (H5_dirname(file_ptr->file_path, &file_ptr->file_dir) < 0) {
-            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "couldn't get subfile dirname");
-        }
-    }
-    else {
-        if (ENOENT == errno) {
-            if (NULL == (file_ptr->file_path = HDstrdup(name)))
-                H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTCOPY, NULL, "can't copy file name");
-            if (NULL == (file_ptr->file_dir = H5MM_strdup(".")))
-                H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, NULL, "can't set subfile directory path");
-        }
-        else
-            H5_SUBFILING_SYS_GOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't resolve subfile path");
-    }
+    /* Fully resolve the given filepath and get its dirname */
+    if (H5_resolve_pathname(name, file_ptr->comm, &file_ptr->file_path) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't resolve filepath");
+    if (H5_dirname(file_ptr->file_path, &file_ptr->file_dir) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get filepath dirname");
 
     /* Check the underlying driver (sec2/mpio/etc.) */
     if (NULL == (plist_ptr = (H5P_genplist_t *)H5I_object(file_ptr->fa.under_fapl_id)))

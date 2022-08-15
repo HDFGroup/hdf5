@@ -2031,6 +2031,85 @@ done:
 }
 
 /*-------------------------------------------------------------------------
+ * Function:    H5_resolve_pathname
+ *
+ * Purpose:     Simple wrapper routine around realpath(3) to fully resolve
+ *              a given filepath. Collective across the specified MPI
+ *              communicator in order to minimize file system contention
+ *              between MPI ranks.
+ *
+ *              The resolved filepath returned through `resolved_filepath`
+ *              must be freed by the caller with HDfree.
+ *
+ * Return       Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5_resolve_pathname(const char *filepath, MPI_Comm comm, char **resolved_filepath)
+{
+    hsize_t path_len;
+    char   *resolved_path = NULL;
+    int     mpi_rank;
+    int     mpi_code;
+    herr_t  ret_value = SUCCEED;
+
+    HDassert(filepath);
+    HDassert(resolved_filepath);
+
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_rank(comm, &mpi_rank)))
+        H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Comm_rank failed", mpi_code);
+
+    if (mpi_rank == 0) {
+        if (NULL == (resolved_path = HDrealpath(filepath, NULL))) {
+            if (ENOENT == errno) {
+                if (NULL == (resolved_path = HDstrdup(filepath)))
+                    /* Push error, but participate in bcast */
+                    H5_SUBFILING_DONE_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't copy filename");
+            }
+            else
+                /* Push error, but participate in bcast */
+                H5_SUBFILING_DONE_ERROR(H5E_VFL, H5E_CANTGET, FAIL,
+                                        "can't resolve subfile path, errno = %d, error message = '%s'", errno,
+                                        strerror(errno));
+        }
+
+        if (resolved_path) {
+            H5_CHECKED_ASSIGN(path_len, hsize_t, (HDstrlen(resolved_path) + 1), size_t);
+        }
+        else
+            path_len = HSIZE_UNDEF;
+    }
+
+    /* Broadcast the size of the resolved filepath string to other ranks */
+    if (MPI_SUCCESS != (mpi_code = MPI_Bcast(&path_len, 1, HSIZE_AS_MPI_TYPE, 0, comm)))
+        H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code);
+
+    if (path_len == HSIZE_UNDEF)
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "couldn't resolve filepath");
+
+    if (mpi_rank != 0) {
+        if (NULL == (resolved_path = HDmalloc(path_len)))
+            /* Push error, but participate in bcast */
+            H5_SUBFILING_DONE_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate file name buffer");
+    }
+
+    /* Broadcast the resolved filepath to other ranks */
+    H5_CHECK_OVERFLOW(path_len, hsize_t, int);
+    if (MPI_SUCCESS != (mpi_code = MPI_Bcast(resolved_path, (int)path_len, MPI_CHAR, 0, comm)))
+        H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code);
+
+    *resolved_filepath = resolved_path;
+
+done:
+    if (ret_value < 0) {
+        HDfree(resolved_path);
+    }
+
+    H5_SUBFILING_FUNC_LEAVE;
+}
+
+/*-------------------------------------------------------------------------
  * Function:    H5_close_subfiles
  *
  * Purpose:     This is a simple wrapper function for the internal version

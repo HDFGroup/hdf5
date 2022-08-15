@@ -210,6 +210,7 @@ H5_DLL void   *H5_get_subfiling_object(int64_t object_id);
 H5_DLL int64_t H5_subfile_fhandle_to_context(void *file_handle);
 H5_DLL herr_t  H5_free_subfiling_object(int64_t object_id);
 H5_DLL herr_t  H5_get_num_iocs_from_config_file(FILE *config_file, int *n_io_concentrators);
+H5_DLL herr_t  H5_resolve_pathname(const char *filepath, MPI_Comm comm, char **resolved_filepath);
 
 H5_DLL void H5_subfiling_log(int64_t sf_context_id, const char *fmt, ...);
 
