@@ -1361,14 +1361,33 @@ open_subfile_with_context(subfiling_context_t *sf_context, int file_acc_flags)
      * the subfile belonging to this IOC rank
      */
     if (sf_context->topology->rank_is_ioc) {
-        h5_stat_t st;
+        if (sf_context->sf_group_rank == 0) {
+            h5_stat_t st;
 
-        /* Retrieve Inode value for HDF5 stub file */
-        if (HDstat(sf_context->h5_filename, &st) < 0)
-            H5_SUBFILING_SYS_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "couldn't stat HDF5 stub file");
+            HDcompile_assert(sizeof(uint64_t) >= sizeof(ino_t));
 
-        HDcompile_assert(sizeof(uint64_t) >= sizeof(ino_t));
-        sf_context->h5_file_id = (uint64_t)st.st_ino;
+            /* Retrieve Inode value for HDF5 stub file and broadcast to other IOCs */
+            if (HDstat(sf_context->h5_filename, &st) < 0) {
+                sf_context->h5_file_id = UINT64_MAX;
+                H5_SUBFILING_DONE_ERROR(H5E_VFL, H5E_CANTGET, FAIL,
+                                        "couldn't stat HDF5 stub file, errno = %d, error message = '%s'",
+                                        errno, strerror(errno));
+            }
+            else
+                sf_context->h5_file_id = (uint64_t)st.st_ino;
+        }
+
+        if (sf_context->sf_group_size > 1) {
+            int mpi_code;
+
+            if (MPI_SUCCESS != (mpi_code = MPI_Bcast(&sf_context->h5_file_id, 1, MPI_UINT64_T, 0,
+                                                     sf_context->sf_group_comm)))
+                H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code);
+        }
+
+        if (sf_context->h5_file_id == UINT64_MAX)
+            H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL,
+                                    "couldn't get inode value for HDF5 stub file");
 
         if (ioc_open_file(sf_context->sf_context_id, file_acc_flags) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, FAIL, "IOC couldn't open subfile");
