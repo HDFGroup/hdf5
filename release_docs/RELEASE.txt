@@ -85,6 +85,22 @@ New Features
 
     Library:
     --------
+    - Onion VFD
+
+      The onion VFD allows creating "versioned" HDF5 files. File open/close
+      operations after initial file creation will add changes to an external
+      "onion" file (.onion extension by default) instead of the original file.
+      Each written revision can be opened independently.
+
+      To open a file with the onion VFD, use the H5Pset_fapl_onion() API call
+      (does not need to be used for the initial creation of the file). The
+      options for the H5FD_onion_fapl_info_t struct are described in H5FDonion.h.
+
+      The H5FDonion_get_revision_count() API call can be used to query a file
+      to find out how many revisions have been created.
+
+      (DER - 2022/08/02)
+
     - Subfiling VFD
 
       The HDF5 Subfiling VFD is a new MPI-based file driver that allows an
@@ -245,6 +261,14 @@ Bug Fixes since HDF5-1.13.1 release
 ===================================
     Library
     -------
+    - The offset parameter in H5Dchunk_iter() is now scaled properly
+
+      In earlier HDF5 1.13.x versions, the chunk offset was not scaled by the
+      chunk dimensions. This offset parameter in the callback now matches
+      that of H5Dget_chunk_info().
+
+      (@mkitti - 2022/08/06, GitHub #1419)
+
     - Converted an assertion on (possibly corrupt) file contents to a normal
       error check
 
@@ -255,7 +279,6 @@ Bug Fixes since HDF5-1.13.1 release
       either a library error or a crash, depending on the platform.
 
       (JTH - 2022/07/08)
-
 
     Java Library
     ------------
