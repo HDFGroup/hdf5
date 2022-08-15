@@ -3442,7 +3442,7 @@ test_compound_15_attr(void)
         HDprintf("Can't create datatype!\n");
         goto error;
     } /* end if */
-     if (H5Tinsert(cmpd_m_tid, "i1", (size_t)0, H5T_NATIVE_INT) < 0) {
+    if (H5Tinsert(cmpd_m_tid, "i1", (size_t)0, H5T_NATIVE_INT) < 0) {
         H5_FAILED();
         AT();
         HDprintf("Can't insert field 'i1'\n");
@@ -3458,14 +3458,15 @@ test_compound_15_attr(void)
         goto error;
     } /* end if */
 
-    if((attr_id = H5Acreate_by_name(file, ".", "attr_cmpd", cmpd_f_tid, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+    if ((attr_id = H5Acreate_by_name(file, ".", "attr_cmpd", cmpd_f_tid, space_id, H5P_DEFAULT, H5P_DEFAULT,
+                                     H5P_DEFAULT)) < 0) {
         H5_FAILED();
         AT();
         HDprintf("Can't create dataset\n");
         goto error;
     } /* end if */
 
-    if(H5Awrite(attr_id, cmpd_f_tid, &wdata1) < 0) {
+    if (H5Awrite(attr_id, cmpd_f_tid, &wdata1) < 0) {
         H5_FAILED();
         AT();
         HDprintf("Can't write data\n");
@@ -3474,7 +3475,7 @@ test_compound_15_attr(void)
 
     /* Write wdata2.  The use of cmpd_m_tid here should cause only the first
      * element of wdata2 to be written. */
-    if(H5Awrite(attr_id, cmpd_m_tid, &wdata2) < 0) {
+    if (H5Awrite(attr_id, cmpd_m_tid, &wdata2) < 0) {
         H5_FAILED();
         AT();
         HDprintf("Can't write data\n");
@@ -3482,7 +3483,7 @@ test_compound_15_attr(void)
     } /* end if */
 
     /* Read data */
-    if(H5Aread(attr_id, cmpd_f_tid, &rdata) < 0) {
+    if (H5Aread(attr_id, cmpd_f_tid, &rdata) < 0) {
         H5_FAILED();
         AT();
         HDprintf("Can't read data\n");
@@ -3503,7 +3504,7 @@ test_compound_15_attr(void)
     rdata.i2 = wdata2[1];
 
     /* Read data */
-    if(H5Aread(attr_id, cmpd_m_tid, &rdata) < 0) {
+    if (H5Aread(attr_id, cmpd_m_tid, &rdata) < 0) {
         H5_FAILED();
         AT();
         HDprintf("Can't read data\n");
@@ -3534,13 +3535,15 @@ test_compound_15_attr(void)
     return 0;
 
 error:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5Aclose(attr_id);
         H5Tclose(cmpd_f_tid);
         H5Tclose(cmpd_m_tid);
         H5Sclose(space_id);
         H5Fclose(file);
-   } H5E_END_TRY;
+    }
+    H5E_END_TRY;
 
     return 1;
 } /* end test_compound_15_attr() */

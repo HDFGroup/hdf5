@@ -765,7 +765,7 @@ H5A__read(const H5A_t *attr, const H5T_t *mem_type, void *buf)
 
                     /* Copy the application buffer into the background buffer if necessary */
                     if (need_bkg == H5T_BKG_YES)
-                        H5MM_memcpy(bkg_buf, buf, (dst_type_size *nelmts));
+                        H5MM_memcpy(bkg_buf, buf, (dst_type_size * nelmts));
                 }
 
                 /* Perform datatype conversion.  */
@@ -817,8 +817,8 @@ done:
 herr_t
 H5A__write(H5A_t *attr, const H5T_t *mem_type, const void *buf)
 {
-    uint8_t    *tconv_buf   = NULL;       /* datatype conv buffer */
-    uint8_t    *bkg_buf     = NULL;       /* temp conversion buffer */
+    uint8_t    *tconv_buf = NULL;         /* datatype conv buffer */
+    uint8_t    *bkg_buf   = NULL;         /* temp conversion buffer */
     hssize_t    snelmts;                  /* elements in attribute */
     size_t      nelmts;                   /* elements in attribute */
     H5T_path_t *tpath  = NULL;            /* conversion information*/
@@ -877,7 +877,7 @@ H5A__write(H5A_t *attr, const H5T_t *mem_type, const void *buf)
                  * otherwise allocate one.  Note we don't need to track which one it is since both
                  * use the "attr_buf" free list block. */
                 if (attr->shared->data) {
-                    bkg_buf = attr->shared->data;
+                    bkg_buf            = attr->shared->data;
                     attr->shared->data = NULL;
 
                     /* Clear background buffer if it's not supposed to be initialized with file
@@ -885,9 +885,8 @@ H5A__write(H5A_t *attr, const H5T_t *mem_type, const void *buf)
                     if (need_bkg == H5T_BKG_TEMP)
                         HDmemset(bkg_buf, 0, dst_type_size * nelmts);
                 }
-                else
-                    if (NULL == (bkg_buf = H5FL_BLK_CALLOC(attr_buf, buf_size)))
-                        HGOTO_ERROR(H5E_ATTR, H5E_CANTALLOC, FAIL, "memory allocation failed")
+                else if (NULL == (bkg_buf = H5FL_BLK_CALLOC(attr_buf, buf_size)))
+                    HGOTO_ERROR(H5E_ATTR, H5E_CANTALLOC, FAIL, "memory allocation failed")
             }
 
             /* Perform datatype conversion */
