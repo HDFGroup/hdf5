@@ -48,7 +48,7 @@ static herr_t H5_free_subfiling_topology(sf_topology_t *topology);
 static herr_t init_subfiling(H5FD_subfiling_shared_config_t *subfiling_config, MPI_Comm comm,
                              int64_t *context_id_out);
 static herr_t init_app_topology(H5FD_subfiling_ioc_select_t ioc_selection_type, MPI_Comm comm,
-                                sf_topology_t **app_topology_out);
+                                MPI_Comm intra_comm, sf_topology_t **app_topology_out);
 static herr_t init_subfiling_context(subfiling_context_t            *sf_context,
                                      H5FD_subfiling_shared_config_t *subfiling_config,
                                      sf_topology_t *app_topology, MPI_Comm file_comm);
@@ -69,7 +69,7 @@ static int         compare_hostid(const void *h1, const void *h2);
 static herr_t      get_ioc_selection_criteria_from_env(H5FD_subfiling_ioc_select_t *ioc_selection_type,
                                                        char                       **ioc_sel_info_str);
 static int         count_nodes(sf_topology_t *info, MPI_Comm comm);
-static herr_t      gather_topology_info(sf_topology_t *info, MPI_Comm comm);
+static herr_t      gather_topology_info(sf_topology_t *info, MPI_Comm comm, MPI_Comm intra_comm);
 static int         identify_ioc_ranks(sf_topology_t *info, int node_count, int iocs_per_node);
 static inline void assign_ioc_ranks(sf_topology_t *app_topology, int ioc_count, int rank_multiple);
 
@@ -325,11 +325,15 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-gather_topology_info(sf_topology_t *info, MPI_Comm comm)
+gather_topology_info(sf_topology_t *info, MPI_Comm comm, MPI_Comm intra_comm)
 {
-    app_layout_t *app_layout = NULL;
+    app_layout_t *app_layout       = NULL;
+    layout_t     *hostinfo_partial = NULL;
     layout_t      my_hostinfo;
+    MPI_Comm      aggr_comm = MPI_COMM_NULL;
     long          hostid;
+    int          *recv_counts = NULL;
+    int          *recv_displs = NULL;
     int           sf_world_size;
     int           sf_world_rank;
     herr_t        ret_value = SUCCEED;
@@ -354,14 +358,95 @@ gather_topology_info(sf_topology_t *info, MPI_Comm comm)
     if (sf_world_size > 1) {
         int mpi_code;
 
+#ifdef H5_SUBFILING_PREFER_ALLGATHER_TOPOLOGY
+        (void)intra_comm;
+
         if (MPI_SUCCESS !=
             (mpi_code = MPI_Allgather(&my_hostinfo, 2, MPI_LONG, app_layout->layout, 2, MPI_LONG, comm)))
             H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Allgather failed", mpi_code);
 
         HDqsort(app_layout->layout, (size_t)sf_world_size, sizeof(layout_t), compare_hostid);
+#else
+        int node_local_rank = 0;
+        int node_local_size = 0;
+        int aggr_comm_size  = 0;
+
+        HDassert(MPI_COMM_NULL != intra_comm);
+
+        if (MPI_SUCCESS != (mpi_code = MPI_Comm_rank(intra_comm, &node_local_rank)))
+            H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Comm_rank failed", mpi_code);
+        if (MPI_SUCCESS != (mpi_code = MPI_Comm_size(intra_comm, &node_local_size)))
+            H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Comm_size failed", mpi_code);
+
+        /* Split the file communicator into a sub-group of one rank per node */
+        if (MPI_SUCCESS != (mpi_code = MPI_Comm_split(comm, node_local_rank, sf_world_rank, &aggr_comm)))
+            H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Comm_split failed", mpi_code);
+
+        if (MPI_SUCCESS != (mpi_code = MPI_Comm_size(aggr_comm, &aggr_comm_size)))
+            H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Comm_size failed", mpi_code);
+
+        /* Allocate a partial hostinfo array to aggregate into from node-local ranks */
+        if (node_local_rank == 0) {
+            if (NULL == (hostinfo_partial = HDmalloc((size_t)node_local_size * sizeof(*hostinfo_partial))))
+                /* Push error, but participate in gather operation */
+                H5_SUBFILING_DONE_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate hostinfo array");
+        }
+
+        /* Gather node-local hostinfo to single master rank on each node */
+        if (MPI_SUCCESS !=
+            (mpi_code = MPI_Gather(&my_hostinfo, 2, MPI_LONG, hostinfo_partial, 2, MPI_LONG, 0, intra_comm)))
+            H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Gather failed", mpi_code);
+
+        /* Gather total hostinfo from/to each master rank on each node */
+        if (node_local_rank == 0) {
+            int send_size = 2 * node_local_size;
+
+            if (NULL == (recv_counts = HDmalloc((size_t)aggr_comm_size * sizeof(*recv_counts))))
+                H5_SUBFILING_DONE_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                        "can't allocate receive counts array");
+            if (NULL == (recv_displs = HDmalloc((size_t)aggr_comm_size * sizeof(*recv_displs))))
+                H5_SUBFILING_DONE_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                        "can't allocate receive displacements array");
+
+            if (MPI_SUCCESS !=
+                (mpi_code = MPI_Allgather(&send_size, 1, MPI_INT, recv_counts, 1, MPI_INT, aggr_comm)))
+                H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Allgather failed", mpi_code);
+
+            recv_displs[0] = 0;
+            for (int i = 1; i < aggr_comm_size; i++)
+                recv_displs[i] = recv_displs[i - 1] + recv_counts[i - 1];
+
+            if (MPI_SUCCESS !=
+                (mpi_code = MPI_Allgatherv(hostinfo_partial, send_size, MPI_LONG, app_layout->layout,
+                                           recv_counts, recv_displs, MPI_LONG, aggr_comm)))
+                H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Allgatherv failed", mpi_code);
+
+            HDfree(recv_displs);
+            HDfree(recv_counts);
+            recv_displs = NULL;
+            recv_counts = NULL;
+
+            HDqsort(app_layout->layout, (size_t)sf_world_size, sizeof(layout_t), compare_hostid);
+        }
+
+        /*
+         * Each master rank on each node distributes the total
+         * hostinfo back to other node-local ranks
+         */
+        if (MPI_SUCCESS !=
+            (mpi_code = MPI_Bcast(app_layout->layout, 2 * sf_world_size, MPI_LONG, 0, intra_comm)))
+            H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code);
+#endif
     }
 
 done:
+    HDfree(recv_displs);
+    HDfree(recv_counts);
+    HDfree(hostinfo_partial);
+
+    if (H5_mpi_comm_free(&aggr_comm) < 0)
+        H5_SUBFILING_DONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free MPI communicator");
+
     H5_SUBFILING_FUNC_LEAVE;
 }
 
@@ -660,6 +745,11 @@ H5_free_subfiling_object_int(subfiling_context_t *sf_context)
             return FAIL;
         sf_context->sf_eof_comm = MPI_COMM_NULL;
     }
+    if (sf_context->sf_intra_comm != MPI_COMM_NULL) {
+        if (H5_mpi_comm_free(&sf_context->sf_intra_comm) < 0)
+            return FAIL;
+        sf_context->sf_intra_comm = MPI_COMM_NULL;
+    }
     if (sf_context->sf_group_comm != MPI_COMM_NULL) {
         if (H5_mpi_comm_free(&sf_context->sf_group_comm) < 0)
             return FAIL;
@@ -868,6 +958,7 @@ init_subfiling(H5FD_subfiling_shared_config_t *subfiling_config, MPI_Comm comm, 
 {
     subfiling_context_t *new_context  = NULL;
     sf_topology_t       *app_topology = NULL;
+    MPI_Comm             intra_comm   = MPI_COMM_NULL;
     int64_t              context_id   = -1;
     int                  file_index   = -1;
     herr_t               ret_value    = SUCCEED;
@@ -885,11 +976,29 @@ init_subfiling(H5FD_subfiling_shared_config_t *subfiling_config, MPI_Comm comm, 
     if (NULL == (new_context = H5_get_subfiling_object(context_id)))
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "couldn't create new subfiling object");
 
+#ifndef H5_SUBFILING_PREFER_ALLGATHER_TOPOLOGY
+    {
+        int mpi_rank;
+        int mpi_code;
+
+        if (MPI_SUCCESS != (mpi_code = MPI_Comm_rank(comm, &mpi_rank)))
+            H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Comm_rank failed", mpi_code);
+
+        /* Create an MPI sub-communicator for intra-node communications */
+        if (MPI_SUCCESS != (mpi_code = MPI_Comm_split_type(comm, MPI_COMM_TYPE_SHARED, mpi_rank,
+                                                           MPI_INFO_NULL, &intra_comm)))
+            H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Comm_split_type failed", mpi_code);
+
+        if (MPI_SUCCESS != (mpi_code = MPI_Comm_set_errhandler(intra_comm, MPI_ERRORS_RETURN)))
+            H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Comm_set_errhandler failed", mpi_code);
+    }
+#endif
+
     /*
      * Setup the application topology information, including the computed
      * number and distribution map of the set of I/O concentrators
      */
-    if (init_app_topology(subfiling_config->ioc_selection, comm, &app_topology) < 0)
+    if (init_app_topology(subfiling_config->ioc_selection, comm, intra_comm, &app_topology) < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "couldn't initialize application topology");
 
     new_context->sf_context_id = context_id;
@@ -897,6 +1006,7 @@ init_subfiling(H5FD_subfiling_shared_config_t *subfiling_config, MPI_Comm comm, 
     if (init_subfiling_context(new_context, subfiling_config, app_topology, comm) < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
                                 "couldn't initialize subfiling application topology object");
+    new_context->sf_intra_comm = intra_comm;
 
     new_context->sf_base_addr = 0;
     if (new_context->topology->rank_is_ioc) {
@@ -909,6 +1019,9 @@ init_subfiling(H5FD_subfiling_shared_config_t *subfiling_config, MPI_Comm comm, 
 done:
     if (ret_value < 0) {
         HDfree(app_topology);
+
+        if (H5_mpi_comm_free(&intra_comm) < 0)
+            H5_SUBFILING_DONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "couldn't free MPI communicator");
 
         if (context_id >= 0 && H5_free_subfiling_object(context_id) < 0)
             H5_SUBFILING_DONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "couldn't free subfiling object");
@@ -953,7 +1066,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-init_app_topology(H5FD_subfiling_ioc_select_t ioc_selection_type, MPI_Comm comm,
+init_app_topology(H5FD_subfiling_ioc_select_t ioc_selection_type, MPI_Comm comm, MPI_Comm intra_comm,
                   sf_topology_t **app_topology_out)
 {
     sf_topology_t *app_topology   = NULL;
@@ -1062,7 +1175,7 @@ init_app_topology(H5FD_subfiling_ioc_select_t ioc_selection_type, MPI_Comm comm,
 
     app_topology->app_layout = app_layout;
 
-    if (gather_topology_info(app_topology, comm) < 0)
+    if (gather_topology_info(app_topology, comm, intra_comm) < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "can't gather application topology info");
 
     /*
@@ -1207,6 +1320,7 @@ init_subfiling_context(subfiling_context_t *sf_context, H5FD_subfiling_shared_co
     sf_context->sf_msg_comm    = MPI_COMM_NULL;
     sf_context->sf_data_comm   = MPI_COMM_NULL;
     sf_context->sf_eof_comm    = MPI_COMM_NULL;
+    sf_context->sf_intra_comm  = MPI_COMM_NULL;
     sf_context->sf_group_comm  = MPI_COMM_NULL;
     sf_context->sf_stripe_size = H5FD_SUBFILING_DEFAULT_STRIPE_SIZE;
     sf_context->sf_write_count = 0;

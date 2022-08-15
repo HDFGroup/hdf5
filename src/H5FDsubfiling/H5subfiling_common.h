@@ -31,6 +31,13 @@
 /* #define H5_SUBFILING_DEBUG */
 
 /*
+ * Some definitions for controlling performance across
+ * different machines where some types of MPI operations
+ * may be better optimized than others
+ */
+/* #define H5_SUBFILING_PREFER_ALLGATHER_TOPOLOGY */
+
+/*
  * MPI Tags are 32 bits, we treat them as unsigned
  * to allow the use of the available bits for RPC
  * selections, i.e. a message from the VFD read or write functions
@@ -165,6 +172,7 @@ typedef struct {
     MPI_Comm       sf_msg_comm;             /* MPI comm used to send RPC msg        */
     MPI_Comm       sf_data_comm;            /* MPI comm used to move data           */
     MPI_Comm       sf_eof_comm;             /* MPI comm used to communicate EOF     */
+    MPI_Comm       sf_intra_comm;           /* MPI comm used for intra-node comms   */
     MPI_Comm       sf_group_comm;           /* Not used: for IOC collectives        */
     int            sf_group_size;           /* IOC count (in sf_group_comm)         */
     int            sf_group_rank;           /* IOC rank  (in sf_group_comm)         */
