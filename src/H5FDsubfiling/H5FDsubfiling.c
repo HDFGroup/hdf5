@@ -553,9 +553,9 @@ H5FD__subfiling_get_default_config(hid_t fapl_id, H5FD_subfiling_config_t *confi
 
 done:
     if (H5_mpi_comm_free(&comm) < 0)
-        H5_SUBFILING_DONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't free MPI Communicator");
+        H5_SUBFILING_DONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free MPI Communicator");
     if (H5_mpi_info_free(&info) < 0)
-        H5_SUBFILING_DONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't free MPI Info object");
+        H5_SUBFILING_DONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free MPI Info object");
 
     if (ret_value < 0) {
         if (config_out->ioc_fapl_id >= 0 && H5Pclose(config_out->ioc_fapl_id) < 0)

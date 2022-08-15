@@ -346,7 +346,6 @@ ioc_main(ioc_data_t *ioc_data)
 {
     subfiling_context_t *context = NULL;
     sf_work_request_t    wk_req;
-    int                  subfile_rank;
     int                  shutdown_requested;
     int                  ret_value = 0;
 
@@ -361,8 +360,6 @@ ioc_main(ioc_data_t *ioc_data)
      * We can simply utilize the file descriptor (which should now
      * represent an open file).
      */
-
-    subfile_rank = context->sf_group_rank;
 
     /* tell initialize_ioc_threads() that ioc_main() is ready to enter its main loop */
     atomic_store(&ioc_data->sf_ioc_ready, 1);
@@ -417,7 +414,7 @@ ioc_main(ioc_data_t *ioc_data)
 
             wk_req.tag          = tag;
             wk_req.source       = source;
-            wk_req.subfile_rank = subfile_rank;
+            wk_req.subfile_rank = context->topology->subfile_rank;
             wk_req.context_id   = ioc_data->sf_context_id;
             wk_req.start_time   = queue_start_time;
 

@@ -1062,7 +1062,8 @@ init_app_topology(H5FD_subfiling_ioc_select_t ioc_selection_type, MPI_Comm comm,
 
     app_topology->app_layout = app_layout;
 
-    gather_topology_info(app_topology, comm);
+    if (gather_topology_info(app_topology, comm) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "can't gather application topology info");
 
     /*
      * Determine which ranks are I/O concentrator ranks, based on the
@@ -1589,6 +1590,11 @@ done:
  * - the base file's name and ID (inode or similar)
  * - the IOC's rank value within the set of I/O concentrators
  * - an optional filename prefix specified by the user
+ *
+ * This routine is collective across the set of I/O concentrator
+ * ranks, as some information may be read from the subfiling
+ * configuration file and we don't want to do that from all
+ * ranks.
  */
 static herr_t
 generate_subfile_name(subfiling_context_t *sf_context, int file_acc_flags, char *filename_out,
@@ -1657,20 +1663,38 @@ generate_subfile_name(subfiling_context_t *sf_context, int file_acc_flags, char 
      * we aren't truncating the file.
      */
     if (0 == (file_acc_flags & O_TRUNC)) {
-        if (open_config_file(sf_context, base, subfile_dir, "r", &config_file) < 0)
-            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, FAIL,
-                                    "couldn't open existing subfiling configuration file");
-    }
+        int n_iocs_from_config_file = 0;
 
-    /*
-     * If a subfiling configuration file exists and we aren't truncating
-     * it, read the number of I/O concentrators used at file creation time
-     * in order to generate the correct subfile names.
-     */
-    if (config_file) {
-        if (H5_get_num_iocs_from_config_file(config_file, &n_io_concentrators) < 0)
-            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL,
-                                    "couldn't read from subfiling configuration file");
+        if (sf_context->sf_group_rank == 0) {
+            if (open_config_file(sf_context, base, subfile_dir, "r", &config_file) < 0)
+                n_iocs_from_config_file = -1;
+            else if (!config_file)
+                n_iocs_from_config_file = -2; /* No config file; use setting from context */
+            else {
+                /*
+                 * If a subfiling configuration file exists and we aren't truncating
+                 * it, read the number of I/O concentrators used at file creation time
+                 * in order to generate the correct subfile names.
+                 */
+                if (H5_get_num_iocs_from_config_file(config_file, &n_iocs_from_config_file) < 0)
+                    n_iocs_from_config_file = -1;
+            }
+        }
+
+        if (sf_context->sf_group_size > 1) {
+            int mpi_code;
+
+            if (MPI_SUCCESS !=
+                (mpi_code = MPI_Bcast(&n_iocs_from_config_file, 1, MPI_INT, 0, sf_context->sf_group_comm)))
+                H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code);
+        }
+
+        if (n_iocs_from_config_file > 0)
+            n_io_concentrators = n_iocs_from_config_file;
+        else if (n_iocs_from_config_file == -1)
+            H5_SUBFILING_GOTO_ERROR(
+                H5E_FILE, H5E_CANTOPENFILE, FAIL,
+                "couldn't read the number of I/O concentrators from subfiling configuration file");
     }
 
     /*
