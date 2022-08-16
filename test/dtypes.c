@@ -3394,11 +3394,12 @@ test_compound_15_attr(void)
 
     cmpd_struct wdata1 = {1254, 5471};
     cmpd_struct rdata;
-    int         wdata2[2] = {1, 2};
-    hid_t       file;
-    hid_t       cmpd_m_tid, cmpd_f_tid;
-    hid_t       space_id;
-    hid_t       attr_id;
+    int         wdata2[2]  = {1, 2};
+    hid_t       file       = H5I_INVALID_HID;
+    hid_t       cmpd_m_tid = H5I_INVALID_HID;
+    hid_t       cmpd_f_tid = H5I_INVALID_HID;
+    hid_t       space_id   = H5I_INVALID_HID;
+    hid_t       attr_id    = H5I_INVALID_HID;
     hsize_t     dim1[1];
     char        filename[1024];
 
