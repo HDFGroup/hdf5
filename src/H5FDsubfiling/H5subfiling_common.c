@@ -38,6 +38,8 @@ static sf_topology_t       *sf_topology_cache = NULL;
 static size_t sf_context_cache_limit  = 16;
 static size_t sf_topology_cache_limit = 4;
 
+static int sf_topology_cache_size = 0;
+
 static file_map_to_context_t *sf_open_file_map = NULL;
 static int                    sf_file_map_size = 0;
 #define DEFAULT_FILE_MAP_ENTRIES 8
@@ -69,6 +71,8 @@ static int         compare_hostid(const void *h1, const void *h2);
 static herr_t      get_ioc_selection_criteria_from_env(H5FD_subfiling_ioc_select_t *ioc_selection_type,
                                                        char                       **ioc_sel_info_str);
 static int         count_nodes(sf_topology_t *info, MPI_Comm comm);
+static herr_t      find_cached_topology_info(MPI_Comm comm, H5FD_subfiling_ioc_select_t ioc_selection_type,
+                                             sf_topology_t **app_topology);
 static herr_t      gather_topology_info(sf_topology_t *info, MPI_Comm comm, MPI_Comm intra_comm);
 static int         identify_ioc_ranks(sf_topology_t *info, int node_count, int iocs_per_node);
 static inline void assign_ioc_ranks(sf_topology_t *app_topology, int ioc_count, int rank_multiple);
@@ -303,6 +307,44 @@ count_nodes(sf_topology_t *info, MPI_Comm comm)
     app_layout->node_count = node_count;
 
     ret_value = node_count;
+
+done:
+    H5_SUBFILING_FUNC_LEAVE;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    find_cached_topology_info
+ *
+ * Purpose:     Given an MPI communicator and IOC selection strategy,
+ *              checks the subfiling topology cached to see if any matching
+ *              topology objects have been cached.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+find_cached_topology_info(MPI_Comm comm, H5FD_subfiling_ioc_select_t ioc_selection_type,
+                          sf_topology_t **app_topology)
+{
+    herr_t ret_value = SUCCEED;
+
+    for (int i = 0; i < sf_topology_cache_size; i++) {
+        sf_topology_t *cached_topology = &sf_topology_cache[i];
+        int            result;
+        int            mpi_code;
+
+        if (ioc_selection_type != cached_topology->selection_type)
+            continue;
+
+        if (MPI_SUCCESS != (mpi_code = MPI_Comm_compare(comm, cached_topology->app_comm, &result)))
+            H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Comm_compare failed", mpi_code);
+
+        if (MPI_IDENT == result || MPI_CONGRUENT == result) {
+            *app_topology = cached_topology;
+            break;
+        }
+    }
 
 done:
     H5_SUBFILING_FUNC_LEAVE;
@@ -579,11 +621,6 @@ H5_new_subfiling_object_id(sf_obj_type_t obj_type, int64_t index_val)
  *
  *-------------------------------------------------------------------------
  */
-/*
- * TODO: we don't appear to ever use this for retrieving a subfile topology
- *       object. Might be able to refactor to just return a subfile context
- *       object.
- */
 /* TODO: no way of freeing caches on close currently */
 void *
 H5_get_subfiling_object(int64_t object_id)
@@ -778,13 +815,17 @@ H5_free_subfiling_object_int(subfiling_context_t *sf_context)
 static herr_t
 H5_free_subfiling_topology(sf_topology_t *topology)
 {
+    herr_t ret_value = SUCCEED;
+
     HDassert(topology);
+
+    /* Subfiling currently keeps topologies in cache until application exit */
+    for (int i = 0; i < sf_topology_cache_size; i++)
+        if (topology == &sf_topology_cache[i])
+            return SUCCEED;
 
     topology->subfile_rank       = -1;
     topology->n_io_concentrators = 0;
-
-    HDfree(topology->subfile_fd);
-    topology->subfile_fd = NULL;
 
     if (topology->app_layout) {
         HDfree(topology->app_layout->layout);
@@ -801,9 +842,12 @@ H5_free_subfiling_topology(sf_topology_t *topology)
     HDfree(topology->io_concentrators);
     topology->io_concentrators = NULL;
 
+    if (H5_mpi_comm_free(&topology->app_comm) < 0)
+        H5_SUBFILING_DONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free MPI communicator");
+
     HDfree(topology);
 
-    return SUCCEED;
+    H5_SUBFILING_FUNC_LEAVE;
 }
 
 /*-------------------------------------------------------------------------
@@ -1071,6 +1115,7 @@ init_app_topology(H5FD_subfiling_ioc_select_t ioc_selection_type, MPI_Comm comm,
 {
     sf_topology_t *app_topology   = NULL;
     app_layout_t  *app_layout     = NULL;
+    int64_t        topology_id    = -1;
     char          *env_value      = NULL;
     char          *ioc_sel_str    = NULL;
     long           ioc_select_val = -1;
@@ -1144,22 +1189,48 @@ init_app_topology(H5FD_subfiling_ioc_select_t ioc_selection_type, MPI_Comm comm,
             break;
     }
 
-    /* Allocate new application topology information object */
-    if (NULL == (app_topology = HDcalloc(1, sizeof(*app_topology))))
-        H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                "couldn't create new subfiling topology object");
+    /*
+     * TODO: A different IOC selection string from the environment than what was
+     *       used originally will cause the IOCs to be assigned differently than
+     *       expected. While this generally shouldn't cause issues (other than
+     *       for the SELECT_IOC_TOTAL case), this should still be dealt with
+     *       eventually.
+     */
+    /* Check the subfiling topology cache to see if there's a matching object */
+    if (find_cached_topology_info(comm, ioc_selection_type, &app_topology) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL,
+                                "can't check for cached subfiling topology object");
+    HDassert(!app_topology || (app_topology->selection_type == ioc_selection_type));
 
-    app_topology->subfile_rank   = -1;
-    app_topology->selection_type = ioc_selection_type;
+    if (!app_topology) {
+        /* Generate an ID for the application topology object */
+        if ((topology_id = H5_new_subfiling_object_id(SF_TOPOLOGY, (int64_t)sf_topology_cache_size)) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get ID for subfiling topology object");
+        sf_topology_cache_size++;
 
-    if (NULL == (app_topology->io_concentrators = HDcalloc((size_t)comm_size, sizeof(int))))
-        H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                "couldn't allocate array of I/O concentrator ranks");
+        /* Get a new application topology object from the cache */
+        if (NULL == (app_topology = H5_get_subfiling_object(topology_id)))
+            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get subfiling topology object");
+        app_topology->app_layout         = NULL;
+        app_topology->app_comm           = MPI_COMM_NULL;
+        app_topology->rank_is_ioc        = FALSE;
+        app_topology->subfile_rank       = -1;
+        app_topology->n_io_concentrators = -1;
+        app_topology->io_concentrators   = NULL;
+        app_topology->selection_type     = ioc_selection_type;
 
-    if (!app_layout) {
+        if (H5_mpi_comm_dup(comm, &app_topology->app_comm) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTCOPY, FAIL, "can't duplicate MPI communicator");
+
+        if (NULL == (app_topology->io_concentrators = HDcalloc((size_t)comm_size, sizeof(int))))
+            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                    "couldn't allocate array of I/O concentrator ranks");
+
         if (NULL == (app_layout = HDcalloc(1, sizeof(*app_layout))))
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                     "couldn't allocate application layout structure");
+        app_layout->world_size = comm_size;
+        app_layout->world_rank = comm_rank;
 
         if (NULL == (app_layout->node_ranks = HDcalloc(1, ((size_t)comm_size + 1) * sizeof(int))))
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
@@ -1168,103 +1239,92 @@ init_app_topology(H5FD_subfiling_ioc_select_t ioc_selection_type, MPI_Comm comm,
         if (NULL == (app_layout->layout = HDcalloc(1, ((size_t)comm_size + 1) * sizeof(layout_t))))
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                     "couldn't allocate application layout array");
-    }
 
-    app_layout->world_size = comm_size;
-    app_layout->world_rank = comm_rank;
+        app_topology->app_layout = app_layout;
 
-    app_topology->app_layout = app_layout;
+        if (gather_topology_info(app_topology, comm, intra_comm) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "can't gather application topology info");
 
-    if (gather_topology_info(app_topology, comm, intra_comm) < 0)
-        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "can't gather application topology info");
+        /*
+         * Determine which ranks are I/O concentrator ranks, based on the
+         * given IOC selection strategy and MPI information.
+         */
+        switch (ioc_selection_type) {
+            case SELECT_IOC_ONE_PER_NODE: {
+                int node_count;
 
-    /*
-     * Determine which ranks are I/O concentrator ranks, based on the
-     * given IOC selection strategy and MPI information.
-     */
-    switch (ioc_selection_type) {
-        case SELECT_IOC_ONE_PER_NODE: {
-            int node_count;
+                app_topology->selection_type = SELECT_IOC_ONE_PER_NODE;
 
-            app_topology->selection_type = SELECT_IOC_ONE_PER_NODE;
+                if ((node_count = count_nodes(app_topology, comm)) < 0)
+                    H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL,
+                                            "couldn't determine number of nodes used");
 
-            if ((node_count = count_nodes(app_topology, comm)) < 0)
-                H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL,
-                                        "couldn't determine number of nodes used");
+                /* Check for an IOC-per-node value set in the environment */
+                if ((env_value = HDgetenv(H5FD_SUBFILING_IOC_PER_NODE))) {
+                    errno          = 0;
+                    ioc_select_val = HDstrtol(env_value, NULL, 0);
+                    if ((ERANGE == errno)) {
+                        HDprintf("invalid value '%s' for " H5FD_SUBFILING_IOC_PER_NODE "\n", env_value);
+                        ioc_select_val = 1;
+                    }
 
-            /* Check for an IOC-per-node value set in the environment */
-            if ((env_value = HDgetenv(H5FD_SUBFILING_IOC_PER_NODE))) {
-                errno          = 0;
-                ioc_select_val = HDstrtol(env_value, NULL, 0);
-                if ((ERANGE == errno)) {
-                    HDprintf("invalid value '%s' for " H5FD_SUBFILING_IOC_PER_NODE "\n", env_value);
-                    ioc_select_val = 1;
+                    if (ioc_select_val > 0)
+                        iocs_per_node = ioc_select_val;
                 }
 
-                if (ioc_select_val > 0)
-                    iocs_per_node = ioc_select_val;
+                H5_CHECK_OVERFLOW(iocs_per_node, long, int);
+                ioc_count = identify_ioc_ranks(app_topology, node_count, (int)iocs_per_node);
+
+                break;
             }
 
-            H5_CHECK_OVERFLOW(iocs_per_node, long, int);
-            ioc_count = identify_ioc_ranks(app_topology, node_count, (int)iocs_per_node);
+            case SELECT_IOC_EVERY_NTH_RANK: {
+                /*
+                 * User specifies a rank multiple value. Selection starts
+                 * with rank 0 and then the user-specified stride is applied\
+                 * to identify other IOC ranks.
+                 */
 
-            break;
-        }
+                H5_CHECK_OVERFLOW(ioc_select_val, long, int);
+                ioc_count = (comm_size / (int)ioc_select_val);
 
-        case SELECT_IOC_EVERY_NTH_RANK: {
-            /*
-             * User specifies a rank multiple value. Selection starts
-             * with rank 0 and then the user-specified stride is applied\
-             * to identify other IOC ranks.
-             */
+                if ((comm_size % ioc_select_val) != 0) {
+                    ioc_count++;
+                }
 
-            H5_CHECK_OVERFLOW(ioc_select_val, long, int);
-            ioc_count = (comm_size / (int)ioc_select_val);
+                assign_ioc_ranks(app_topology, ioc_count, (int)ioc_select_val);
 
-            if ((comm_size % ioc_select_val) != 0) {
-                ioc_count++;
+                break;
             }
 
-            assign_ioc_ranks(app_topology, ioc_count, (int)ioc_select_val);
+            case SELECT_IOC_TOTAL: {
+                int rank_multiple = 0;
 
-            break;
+                /*
+                 * User specifies a total number of I/O concentrators.
+                 * Starting with rank 0, a stride of (mpi_size / total)
+                 * is applied to identify other IOC ranks.
+                 */
+
+                H5_CHECK_OVERFLOW(ioc_select_val, long, int);
+                ioc_count = (int)ioc_select_val;
+
+                rank_multiple = (comm_size / ioc_count);
+
+                assign_ioc_ranks(app_topology, ioc_count, rank_multiple);
+
+                break;
+            }
+
+            case SELECT_IOC_WITH_CONFIG:
+            default:
+                H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "invalid IOC selection strategy");
+                break;
         }
 
-        case SELECT_IOC_TOTAL: {
-            int rank_multiple = 0;
-
-            /*
-             * User specifies a total number of I/O concentrators.
-             * Starting with rank 0, a stride of (mpi_size / total)
-             * is applied to identify other IOC ranks.
-             */
-
-            H5_CHECK_OVERFLOW(ioc_select_val, long, int);
-            ioc_count = (int)ioc_select_val;
-
-            rank_multiple = (comm_size / ioc_count);
-
-            assign_ioc_ranks(app_topology, ioc_count, rank_multiple);
-
-            break;
-        }
-
-        case SELECT_IOC_WITH_CONFIG:
-        default:
-            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "invalid IOC selection strategy");
-            break;
+        HDassert(ioc_count > 0);
+        app_topology->n_io_concentrators = ioc_count;
     }
-
-    HDassert(ioc_count > 0);
-    app_topology->n_io_concentrators = ioc_count;
-
-    /*
-     * Create a vector of "potential" file descriptors
-     * which can be indexed by the IOC ID
-     */
-    if (NULL == (app_topology->subfile_fd = HDcalloc((size_t)ioc_count, sizeof(int))))
-        H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                "couldn't allocate subfile file descriptor array");
 
     *app_topology_out = app_topology;
 
@@ -1275,10 +1335,15 @@ done:
             HDfree(app_layout->node_ranks);
             HDfree(app_layout);
         }
-        if (app_topology) {
-            HDfree(app_topology->subfile_fd);
-            HDfree(app_topology->io_concentrators);
-            HDfree(app_topology);
+        if (topology_id >= 0) {
+            sf_topology_cache_size--;
+
+            if (app_topology) {
+                HDfree(app_topology->io_concentrators);
+                if (H5_mpi_comm_free(&app_topology->app_comm) < 0)
+                    H5_SUBFILING_DONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free MPI communicator");
+                HDfree(app_topology);
+            }
         }
     }
 

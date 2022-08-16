@@ -150,11 +150,11 @@ typedef struct app_layout_t {
 /*  This typedef defines things related to IOC selections */
 typedef struct topology {
     app_layout_t               *app_layout;         /* Pointer to our layout struct   */
+    MPI_Comm                    app_comm;           /* MPI communicator for this topology */
     bool                        rank_is_ioc;        /* Indicates that we host an IOC  */
     int                         subfile_rank;       /* Valid only if rank_is_ioc      */
     int                         n_io_concentrators; /* Number of IO concentrators  */
     int                        *io_concentrators;   /* Vector of ranks which are IOCs */
-    int                        *subfile_fd;         /* file descriptor (if IOC)       */
     H5FD_subfiling_ioc_select_t selection_type;     /* Cache our IOC selection criteria */
 } sf_topology_t;
 
