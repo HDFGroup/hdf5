@@ -3406,98 +3406,51 @@ test_compound_15_attr(void)
     TESTING("compound subset conversion with extra space in source for attribute");
 
     /* Create File */
-    h5_fixname(FILENAME[3], H5P_DEFAULT, filename, sizeof filename);
-    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
-        H5_FAILED();
-        AT();
-        HDprintf("Can't create file!\n");
-        goto error;
-    } /* end if */
+    h5_fixname(FILENAME[3], H5P_DEFAULT, filename, sizeof(filename));
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        FAIL_PUTS_ERROR("Can't create file!\n");
 
     /* Create file compound datatype */
-    if ((cmpd_f_tid = H5Tcreate(H5T_COMPOUND, sizeof(struct cmpd_struct))) < 0) {
-        H5_FAILED();
-        AT();
-        HDprintf("Can't create datatype!\n");
-        goto error;
-    } /* end if */
+    if ((cmpd_f_tid = H5Tcreate(H5T_COMPOUND, sizeof(struct cmpd_struct))) < 0)
+        FAIL_PUTS_ERROR("Can't create datatype!\n");
 
-    if (H5Tinsert(cmpd_f_tid, "i1", HOFFSET(struct cmpd_struct, i1), H5T_NATIVE_INT) < 0) {
-        H5_FAILED();
-        AT();
-        HDprintf("Can't insert field 'i1'\n");
-        goto error;
-    } /* end if */
+    if (H5Tinsert(cmpd_f_tid, "i1", HOFFSET(struct cmpd_struct, i1), H5T_NATIVE_INT) < 0)
+        FAIL_PUTS_ERROR("Can't insert field 'i1'\n");
 
-    if (H5Tinsert(cmpd_f_tid, "i2", HOFFSET(struct cmpd_struct, i2), H5T_NATIVE_INT) < 0) {
-        H5_FAILED();
-        AT();
-        HDprintf("Can't insert field 'i2'\n");
-        goto error;
-    } /* end if */
+    if (H5Tinsert(cmpd_f_tid, "i2", HOFFSET(struct cmpd_struct, i2), H5T_NATIVE_INT) < 0)
+        FAIL_PUTS_ERROR("Can't insert field 'i2'\n");
 
     /* Create memory compound datatype */
-    if ((cmpd_m_tid = H5Tcreate(H5T_COMPOUND, sizeof(struct cmpd_struct))) < 0) {
-        H5_FAILED();
-        AT();
-        HDprintf("Can't create datatype!\n");
-        goto error;
-    } /* end if */
-    if (H5Tinsert(cmpd_m_tid, "i1", (size_t)0, H5T_NATIVE_INT) < 0) {
-        H5_FAILED();
-        AT();
-        HDprintf("Can't insert field 'i1'\n");
-        goto error;
-    } /* end if */
+    if ((cmpd_m_tid = H5Tcreate(H5T_COMPOUND, sizeof(struct cmpd_struct))) < 0)
+        FAIL_PUTS_ERROR("Can't create datatype!\n");
+
+    if (H5Tinsert(cmpd_m_tid, "i1", (size_t)0, H5T_NATIVE_INT) < 0)
+        FAIL_PUTS_ERROR("Can't insert field 'i1'\n");
 
     /* Create space, dataset, write wdata1 */
     dim1[0] = 1;
-    if ((space_id = H5Screate_simple(1, dim1, NULL)) < 0) {
-        H5_FAILED();
-        AT();
-        HDprintf("Can't create space\n");
-        goto error;
-    } /* end if */
+    if ((space_id = H5Screate_simple(1, dim1, NULL)) < 0)
+        FAIL_PUTS_ERROR("Can't create space\n");
 
     if ((attr_id = H5Acreate_by_name(file, ".", "attr_cmpd", cmpd_f_tid, space_id, H5P_DEFAULT, H5P_DEFAULT,
-                                     H5P_DEFAULT)) < 0) {
-        H5_FAILED();
-        AT();
-        HDprintf("Can't create dataset\n");
-        goto error;
-    } /* end if */
+                                     H5P_DEFAULT)) < 0)
+        FAIL_PUTS_ERROR("Can't create dataset\n");
 
-    if (H5Awrite(attr_id, cmpd_f_tid, &wdata1) < 0) {
-        H5_FAILED();
-        AT();
-        HDprintf("Can't write data\n");
-        goto error;
-    } /* end if */
+    if (H5Awrite(attr_id, cmpd_f_tid, &wdata1) < 0)
+        FAIL_PUTS_ERROR("Can't write data\n");
 
     /* Write wdata2.  The use of cmpd_m_tid here should cause only the first
      * element of wdata2 to be written. */
-    if (H5Awrite(attr_id, cmpd_m_tid, &wdata2) < 0) {
-        H5_FAILED();
-        AT();
-        HDprintf("Can't write data\n");
-        goto error;
-    } /* end if */
+    if (H5Awrite(attr_id, cmpd_m_tid, &wdata2) < 0)
+        FAIL_PUTS_ERROR("Can't write data\n");
 
     /* Read data */
-    if (H5Aread(attr_id, cmpd_f_tid, &rdata) < 0) {
-        H5_FAILED();
-        AT();
-        HDprintf("Can't read data\n");
-        goto error;
-    } /* end if */
+    if (H5Aread(attr_id, cmpd_f_tid, &rdata) < 0)
+        FAIL_PUTS_ERROR("Can't read data\n");
 
     /* Check for correctness of read data */
-    if (rdata.i1 != wdata2[0] || rdata.i2 != wdata1.i2) {
-        H5_FAILED();
-        AT();
-        HDprintf("incorrect read data\n");
-        goto error;
-    } /* end if */
+    if (rdata.i1 != wdata2[0] || rdata.i2 != wdata1.i2)
+        FAIL_PUTS_ERROR("incorrect read data\n");
 
     /* Now try reading only the i1 field, verify it does not overwrite i2 in the
      * read buffer */
@@ -3505,20 +3458,12 @@ test_compound_15_attr(void)
     rdata.i2 = wdata2[1];
 
     /* Read data */
-    if (H5Aread(attr_id, cmpd_m_tid, &rdata) < 0) {
-        H5_FAILED();
-        AT();
-        HDprintf("Can't read data\n");
-        goto error;
-    } /* end if */
+    if (H5Aread(attr_id, cmpd_m_tid, &rdata) < 0)
+        FAIL_PUTS_ERROR("Can't read data\n");
 
     /* Check for correctness of read data */
-    if (rdata.i1 != wdata2[0] || rdata.i2 != wdata2[1]) {
-        H5_FAILED();
-        AT();
-        HDprintf("incorrect read data\n");
-        goto error;
-    } /* end if */
+    if (rdata.i1 != wdata2[0] || rdata.i2 != wdata2[1])
+        FAIL_PUTS_ERROR("incorrect read data\n");
 
     /* Close */
     if (H5Aclose(attr_id) < 0)
