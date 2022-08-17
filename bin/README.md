@@ -1,4 +1,4 @@
-#Scripts in `bin` and their purpose
+# Scripts in `bin` and their purpose
 
 Programs run via `autogen.sh` (or the equivalent in CMake) are indicated.
 
@@ -26,7 +26,7 @@ Programs run via `autogen.sh` (or the equivalent in CMake) are indicated.
 |`trace`|Adds `TRACE` macros to HDF5 C library source files (run by `autogen.sh`)|
 |`warnhist`|Generates compiler warning statistics for gcc/clang when fed output of make|
 
-##TODO
+## TODO
 
 * chkcopyright is currently semi-broken as it doesn't handle the full variety of copyright headers we need. We're leaving it in place, though, in the hopes that someone will update it in the future.
 * Extending warnhist to better understand the output of additional compilers/languages would be nice.
