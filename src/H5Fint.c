@@ -3690,7 +3690,7 @@ H5F__start_swmr_write(H5F_t *f)
         /* Gather information about opened objects (groups, datasets) in the file */
         /* (For refresh later on) */
         for (u = 0; u < grp_dset_count; u++) {
-            void *     obj = NULL; /* VOL object   */
+            void      *obj = NULL; /* VOL object   */
             H5I_type_t type;       /* Type of object for the ID */
             H5G_loc_t  tmp_loc;
 

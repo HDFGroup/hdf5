@@ -3208,7 +3208,7 @@ tssw_persist_dapl_verify(hid_t did, hid_t vdsid1, hid_t vdsid2, hsize_t boundary
     hid_t           vds_dapl2          = H5I_INVALID_HID;
     hsize_t         boundary_out       = 0;
     H5D_append_cb_t append_func_out    = NULL;
-    void *          append_func_ud_out = NULL;
+    void           *append_func_ud_out = NULL;
     size_t          rdcc_nslots_out    = 0;
     size_t          rdcc_nbytes_out    = 0;
     double          rdcc_w0_out        = 0.;
@@ -3311,12 +3311,12 @@ test_start_swmr_write_persist_dapl(hid_t in_fapl)
     hsize_t         chunk_dim[1]   = {2};             /* Chunk dimension sizes */
     hsize_t         boundary       = 23;
     H5D_append_cb_t append_func    = dummy_append_flush_cb;
-    void *          append_func_ud = &boundary;
+    void           *append_func_ud = &boundary;
     size_t          rdcc_nslots    = 125;
     size_t          rdcc_nbytes    = 23434;
     double          rdcc_w0        = 0.68419;
-    const char *    efile_prefix   = "dummy_efile_prefix";
-    const char *    virtual_prefix = "dummy_virtual_prefix";
+    const char     *efile_prefix   = "dummy_efile_prefix";
+    const char     *virtual_prefix = "dummy_virtual_prefix";
     hsize_t         gap_size       = 421;
     H5D_vds_view_t  virtual_view   = H5D_VDS_FIRST_MISSING;
     char            filename[NAME_BUF_SIZE]; /* File name */
