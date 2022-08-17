@@ -885,8 +885,6 @@ H5_open_subfiles(const char *base_filename, void *file_handle,
 {
     subfiling_context_t *sf_context = NULL;
     int64_t              context_id = -1;
-    int                  l_errors   = 0;
-    int                  g_errors   = 0;
     int                  mpi_code;
     herr_t               ret_value = SUCCEED;
 
@@ -950,20 +948,26 @@ H5_open_subfiles(const char *base_filename, void *file_handle,
     *context_id_out = context_id;
 
 done:
-    if (ret_value < 0) {
-        l_errors = 1;
-    }
-
     /*
      * Form consensus on whether opening subfiles was
      * successful
      */
-    if (MPI_SUCCESS != (mpi_code = MPI_Allreduce(&l_errors, &g_errors, 1, MPI_INT, MPI_MAX, file_comm)))
-        H5_SUBFILING_MPI_DONE_ERROR(FAIL, "MPI_Allreduce failed", mpi_code);
+    {
+        int mpi_size   = -1;
+        int err_result = (ret_value < 0);
 
-    if (g_errors > 0) {
-        H5_SUBFILING_DONE_ERROR(H5E_VFL, H5E_CANTOPENFILE, FAIL,
-                                "one or more IOC ranks couldn't open subfiles");
+        if (MPI_SUCCESS != (mpi_code = MPI_Comm_size(file_comm, &mpi_size)))
+            H5_SUBFILING_MPI_DONE_ERROR(FAIL, "MPI_Comm_size failed", mpi_code);
+
+        if (mpi_size > 1) {
+            if (MPI_SUCCESS !=
+                (mpi_code = MPI_Allreduce(MPI_IN_PLACE, &err_result, 1, MPI_INT, MPI_MAX, file_comm)))
+                H5_SUBFILING_MPI_DONE_ERROR(FAIL, "MPI_Allreduce failed", mpi_code);
+        }
+
+        if (err_result)
+            H5_SUBFILING_DONE_ERROR(H5E_VFL, H5E_CANTOPENFILE, FAIL,
+                                    "one or more IOC ranks couldn't open subfiles");
     }
 
     if (ret_value < 0) {
@@ -2230,6 +2234,7 @@ H5_resolve_pathname(const char *filepath, MPI_Comm comm, char **resolved_filepat
     hsize_t path_len;
     char   *resolved_path = NULL;
     int     mpi_rank;
+    int     mpi_size;
     int     mpi_code;
     herr_t  ret_value = SUCCEED;
 
@@ -2238,6 +2243,8 @@ H5_resolve_pathname(const char *filepath, MPI_Comm comm, char **resolved_filepat
 
     if (MPI_SUCCESS != (mpi_code = MPI_Comm_rank(comm, &mpi_rank)))
         H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Comm_rank failed", mpi_code);
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_size(comm, &mpi_size)))
+        H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Comm_size failed", mpi_code);
 
     if (mpi_rank == 0) {
         if (NULL == (resolved_path = HDrealpath(filepath, NULL))) {
@@ -2261,8 +2268,10 @@ H5_resolve_pathname(const char *filepath, MPI_Comm comm, char **resolved_filepat
     }
 
     /* Broadcast the size of the resolved filepath string to other ranks */
-    if (MPI_SUCCESS != (mpi_code = MPI_Bcast(&path_len, 1, HSIZE_AS_MPI_TYPE, 0, comm)))
-        H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code);
+    if (mpi_size > 1) {
+        if (MPI_SUCCESS != (mpi_code = MPI_Bcast(&path_len, 1, HSIZE_AS_MPI_TYPE, 0, comm)))
+            H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code);
+    }
 
     if (path_len == HSIZE_UNDEF)
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "couldn't resolve filepath");
@@ -2274,9 +2283,11 @@ H5_resolve_pathname(const char *filepath, MPI_Comm comm, char **resolved_filepat
     }
 
     /* Broadcast the resolved filepath to other ranks */
-    H5_CHECK_OVERFLOW(path_len, hsize_t, int);
-    if (MPI_SUCCESS != (mpi_code = MPI_Bcast(resolved_path, (int)path_len, MPI_CHAR, 0, comm)))
-        H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code);
+    if (mpi_size > 1) {
+        H5_CHECK_OVERFLOW(path_len, hsize_t, int);
+        if (MPI_SUCCESS != (mpi_code = MPI_Bcast(resolved_path, (int)path_len, MPI_CHAR, 0, comm)))
+            H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code);
+    }
 
     *resolved_filepath = resolved_path;
 
@@ -2334,28 +2345,32 @@ H5_close_subfiles(int64_t subfiling_context_id, MPI_Comm file_comm)
 {
     subfiling_context_t *sf_context  = NULL;
     MPI_Request          barrier_req = MPI_REQUEST_NULL;
+    int                  mpi_size;
     int                  mpi_code;
     herr_t               ret_value = SUCCEED;
 
     if (NULL == (sf_context = H5_get_subfiling_object(subfiling_context_id)))
         H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "couldn't get subfiling object from context ID");
 
-        /* We make the subfile close operation collective.
-         * Otherwise, there may be a race condition between
-         * our closing the subfiles and the user application
-         * moving ahead and possibly re-opening a file.
-         *
-         * If we can, we utilize an async barrier which gives
-         * us the opportunity to reduce the CPU load due to
-         * MPI spinning while waiting for the barrier to
-         * complete.  This is especially important if there
-         * is heavy thread utilization due to subfiling
-         * activities, i.e. the thread pool might be
-         * extremely busy servicing I/O requests from all
-         * HDF5 application ranks.
-         */
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_size(file_comm, &mpi_size)))
+        H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Comm_size failed", mpi_code);
+
+    /* We make the subfile close operation collective.
+     * Otherwise, there may be a race condition between
+     * our closing the subfiles and the user application
+     * moving ahead and possibly re-opening a file.
+     *
+     * If we can, we utilize an async barrier which gives
+     * us the opportunity to reduce the CPU load due to
+     * MPI spinning while waiting for the barrier to
+     * complete.  This is especially important if there
+     * is heavy thread utilization due to subfiling
+     * activities, i.e. the thread pool might be
+     * extremely busy servicing I/O requests from all
+     * HDF5 application ranks.
+     */
+    if (mpi_size > 1) {
 #if MPI_VERSION > 3 || (MPI_VERSION == 3 && MPI_SUBVERSION >= 1)
-    {
         int barrier_complete = 0;
 
         if (MPI_SUCCESS != (mpi_code = MPI_Ibarrier(file_comm, &barrier_req)))
@@ -2368,11 +2383,11 @@ H5_close_subfiles(int64_t subfiling_context_id, MPI_Comm file_comm)
             if (MPI_SUCCESS != (mpi_code = MPI_Test(&barrier_req, &barrier_complete, MPI_STATUS_IGNORE)))
                 H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Test failed", mpi_code);
         }
-    }
 #else
-    if (MPI_SUCCESS != (mpi_code = MPI_Barrier(file_comm)))
-        H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code);
+        if (MPI_SUCCESS != (mpi_code = MPI_Barrier(file_comm)))
+            H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code);
 #endif
+    }
 
     /* The map from file handle to subfiling context can now be cleared */
     if (sf_context->h5_file_handle != NULL) {
@@ -2394,8 +2409,8 @@ H5_close_subfiles(int64_t subfiling_context_id, MPI_Comm file_comm)
      * and opening another file before this file is completely closed
      * down.
      */
+    if (mpi_size > 1) {
 #if MPI_VERSION > 3 || (MPI_VERSION == 3 && MPI_SUBVERSION >= 1)
-    {
         int barrier_complete = 0;
 
         if (MPI_SUCCESS != (mpi_code = MPI_Ibarrier(file_comm, &barrier_req)))
@@ -2408,11 +2423,11 @@ H5_close_subfiles(int64_t subfiling_context_id, MPI_Comm file_comm)
             if (MPI_SUCCESS != (mpi_code = MPI_Test(&barrier_req, &barrier_complete, MPI_STATUS_IGNORE)))
                 H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Test failed", mpi_code);
         }
-    }
 #else
-    if (MPI_SUCCESS != (mpi_code = MPI_Barrier(file_comm)))
-        H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code);
+        if (MPI_SUCCESS != (mpi_code = MPI_Barrier(file_comm)))
+            H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code);
 #endif
+    }
 
 done:
     if (sf_context && H5_free_subfiling_object_int(sf_context) < 0)

@@ -72,6 +72,7 @@
 herr_t
 H5FD__subfiling__truncate_sub_files(hid_t context_id, int64_t logical_file_eof, MPI_Comm comm)
 {
+    int                  mpi_size;
     int                  mpi_code; /* MPI return code */
     subfiling_context_t *sf_context = NULL;
     int64_t              msg[3]     = {
@@ -79,9 +80,13 @@ H5FD__subfiling__truncate_sub_files(hid_t context_id, int64_t logical_file_eof, 
     };
     herr_t ret_value = SUCCEED; /* Return value */
 
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_size(comm, &mpi_size)))
+        H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Comm_size failed", mpi_code);
+
     /* Barrier on entry */
-    if (MPI_SUCCESS != (mpi_code = MPI_Barrier(comm)))
-        H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code);
+    if (mpi_size > 1)
+        if (MPI_SUCCESS != (mpi_code = MPI_Barrier(comm)))
+            H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code);
 
     if (NULL == (sf_context = (subfiling_context_t *)H5_get_subfiling_object(context_id)))
         H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "can't get subfile context");
@@ -156,8 +161,9 @@ H5FD__subfiling__truncate_sub_files(hid_t context_id, int64_t logical_file_eof, 
     }
 
     /* Barrier on exit */
-    if (MPI_SUCCESS != (mpi_code = MPI_Barrier(comm)))
-        H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code);
+    if (mpi_size > 1)
+        if (MPI_SUCCESS != (mpi_code = MPI_Barrier(comm)))
+            H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code);
 
 done:
 

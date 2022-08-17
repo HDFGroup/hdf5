@@ -929,8 +929,10 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
             sf_eof = -1;
     }
 
-    if (MPI_SUCCESS != (mpi_code = MPI_Bcast(&sf_eof, 1, MPI_INT64_T, 0, file_ptr->comm)))
-        H5_SUBFILING_MPI_GOTO_ERROR(NULL, "MPI_Bcast", mpi_code);
+    if (file_ptr->mpi_size > 1) {
+        if (MPI_SUCCESS != (mpi_code = MPI_Bcast(&sf_eof, 1, MPI_INT64_T, 0, file_ptr->comm)))
+            H5_SUBFILING_MPI_GOTO_ERROR(NULL, "MPI_Bcast", mpi_code);
+    }
 
     bcasted_eof = TRUE;
 
@@ -954,8 +956,10 @@ done:
                 if (!bcasted_eof) {
                     sf_eof = -1;
 
-                    if (MPI_SUCCESS != (mpi_code = MPI_Bcast(&sf_eof, 1, MPI_INT64_T, 0, file_ptr->comm)))
-                        H5_SUBFILING_MPI_DONE_ERROR(NULL, "MPI_Bcast failed", mpi_code);
+                    if (file_ptr->mpi_size > 1) {
+                        if (MPI_SUCCESS != (mpi_code = MPI_Bcast(&sf_eof, 1, MPI_INT64_T, 0, file_ptr->comm)))
+                            H5_SUBFILING_MPI_DONE_ERROR(NULL, "MPI_Bcast failed", mpi_code);
+                    }
                 }
             }
 
@@ -1406,7 +1410,7 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr
                 }
             }
 
-            if (rank0_bcast) {
+            if (rank0_bcast && (file_ptr->mpi_size > 1)) {
                 H5_CHECK_OVERFLOW(size, size_t, int);
                 if (MPI_SUCCESS != MPI_Bcast(buf, (int)size, MPI_BYTE, 0, file_ptr->comm))
                     H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "can't broadcast data from rank 0");
@@ -2027,17 +2031,21 @@ H5FD__subfiling_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5
         int64_t eoa;
         int     mpi_code;
 
-        if (!H5CX_get_mpi_file_flushing())
-            if (MPI_SUCCESS != (mpi_code = MPI_Barrier(file->comm)))
-                H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code);
+        if (!H5CX_get_mpi_file_flushing()) {
+            if (file->mpi_size > 1)
+                if (MPI_SUCCESS != (mpi_code = MPI_Barrier(file->comm)))
+                    H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code);
+        }
 
         if (0 == file->mpi_rank) {
             if (H5FD__subfiling__get_real_eof(file->context_id, &sf_eof) < 0)
                 H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get EOF");
         }
 
-        if (MPI_SUCCESS != (mpi_code = MPI_Bcast(&sf_eof, 1, MPI_INT64_T, 0, file->comm)))
-            H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code);
+        if (file->mpi_size > 1) {
+            if (MPI_SUCCESS != (mpi_code = MPI_Bcast(&sf_eof, 1, MPI_INT64_T, 0, file->comm)))
+                H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code);
+        }
 
         if (sf_eof < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "invalid EOF");

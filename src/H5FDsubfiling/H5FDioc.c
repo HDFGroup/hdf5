@@ -907,14 +907,21 @@ done:
      */
     if (mpi_inited) {
         MPI_Comm reduce_comm = MPI_COMM_WORLD;
+        int      mpi_size    = -1;
         int      err_result  = (ret_value == NULL);
 
         if (file_ptr && (file_ptr->comm != MPI_COMM_NULL))
             reduce_comm = file_ptr->comm;
 
-        if (MPI_SUCCESS !=
-            (mpi_code = MPI_Allreduce(MPI_IN_PLACE, &err_result, 1, MPI_INT, MPI_MAX, reduce_comm)))
-            H5_SUBFILING_MPI_DONE_ERROR(NULL, "MPI_Allreduce failed", mpi_code);
+        if (MPI_SUCCESS != (mpi_code = MPI_Comm_size(reduce_comm, &mpi_size)))
+            H5_SUBFILING_MPI_DONE_ERROR(NULL, "MPI_Comm_size failed", mpi_code);
+
+        if (mpi_size > 1) {
+            if (MPI_SUCCESS !=
+                (mpi_code = MPI_Allreduce(MPI_IN_PLACE, &err_result, 1, MPI_INT, MPI_MAX, reduce_comm)))
+                H5_SUBFILING_MPI_DONE_ERROR(NULL, "MPI_Allreduce failed", mpi_code);
+        }
+
         if (err_result)
             H5_SUBFILING_DONE_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
                                     "one or more MPI ranks were unable to open file '%s'", name);
@@ -972,8 +979,9 @@ H5FD__ioc_close_int(H5FD_ioc_t *file_ptr)
         int                  mpi_code;
 
         /* Don't allow IOC threads to be finalized until everyone gets here */
-        if (MPI_SUCCESS != (mpi_code = MPI_Barrier(file_ptr->comm)))
-            H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code);
+        if (file_ptr->mpi_size > 1)
+            if (MPI_SUCCESS != (mpi_code = MPI_Barrier(file_ptr->comm)))
+                H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code);
 
         if (sf_context && sf_context->topology->rank_is_ioc) {
             if (finalize_ioc_threads(sf_context) < 0)
@@ -1700,8 +1708,16 @@ done:
             H5_SUBFILING_DONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close subfiling config file");
 
     /* Set up a barrier (don't want processes to run ahead of the delete) */
-    if (MPI_SUCCESS != (mpi_code = MPI_Barrier(comm)))
-        H5_SUBFILING_MPI_DONE_ERROR(FAIL, "MPI_Barrier failed", mpi_code);
+    if (comm != MPI_COMM_NULL) {
+        int comm_size = -1;
+
+        if (MPI_SUCCESS != (mpi_code = MPI_Comm_size(comm, &comm_size)))
+            H5_SUBFILING_MPI_DONE_ERROR(FAIL, "MPI_Comm_size failed", mpi_code);
+
+        if (comm_size > 1)
+            if (MPI_SUCCESS != (mpi_code = MPI_Barrier(comm)))
+                H5_SUBFILING_MPI_DONE_ERROR(FAIL, "MPI_Barrier failed", mpi_code);
+    }
 
     /* Free duplicated MPI Communicator and Info objects */
     if (H5_mpi_comm_free(&comm) < 0)
