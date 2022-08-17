@@ -258,8 +258,6 @@ Bug Fixes since HDF5-1.13.1 release
 
       (NAF - 2022/07/18, HDFFV-11308)
 
-    Library
-    -------
     - Converted an assertion on (possibly corrupt) file contents to a normal
       error check
 
