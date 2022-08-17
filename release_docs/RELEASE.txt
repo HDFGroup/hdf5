@@ -255,7 +255,7 @@ Bug Fixes since HDF5-1.13.1 release
       the contents of the destination, potentially causing data to be lost when
       only writing to a subset of the compound fields.
 
-      (NAF - 2022/08/22)
+      (NAF - 2022/08/22, GitHub #2016)
 
     - Converted an assertion on (possibly corrupt) file contents to a normal
       error check
