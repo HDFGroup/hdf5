@@ -913,7 +913,7 @@ CONTAINS
 !
 ! AUTHOR
 !  M. Scot Breitenfeld
-!  Augest 25, 2008
+!  August 25, 2008
 !
 ! ACKNOWLEDGEMENTS
 !  Joe Krahn
