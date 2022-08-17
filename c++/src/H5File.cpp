@@ -124,8 +124,7 @@ H5File::H5File(const H5std_string &name, unsigned int flags, const FileCreatProp
 ///\brief       Opens an HDF5 file using a non-default access property list
 ///\param       name         - IN: Name of the file
 ///\param       flags        - IN: File access flags
-///\param       access_plist - IN: File access property list.  Default to
-///             FileAccPropList::DEFAULT
+///\param       access_plist - IN: File access property list.
 ///\par Description
 ///             Valid values of \a flags include:
 ///             \li \c H5F_ACC_RDONLY - Open file as read-only, if it already
