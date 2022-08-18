@@ -99,5 +99,4 @@ H5_test_buildiface_LDADD =
 # fflush2 depends on files created by fflush1
 fflush2.chkexe_: fflush1.chkexe_
 
-
-include $(top_srcdir)/config/conclude_fc.am
+include $(top_srcdir)/config/conclude.am

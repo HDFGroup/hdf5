@@ -62,4 +62,4 @@ EXAMPLETOPDIR=${DESTDIR}$(examplesdir)/hl
 # and fortran libraries above.
 
 include $(top_srcdir)/config/examples.am
-include $(top_srcdir)/config/conclude_fc.am
+include $(top_srcdir)/config/conclude.am

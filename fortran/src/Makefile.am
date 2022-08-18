@@ -139,7 +139,7 @@ FORTRAN_API=yes
 # Hardcode the dependencies of these files. There isn't a known way of
 # determining this automagically (like we do with the C files). So, when
 # doing a parallel make, some modules could be made way before the
-# modules they depend upon are actually made. *sigh*
+# modules they depend upon are actually made.
 H5f90global.lo:      $(srcdir)/H5f90global.F90 H5fortran_types.lo
 H5_buildiface.lo:    $(srcdir)/H5_buildiface.F90
 H5_ff.lo:            $(srcdir)/H5_ff.F90 H5Fff.lo H5f90global.lo
@@ -165,4 +165,4 @@ HDF5.lo:             $(srcdir)/HDF5.F90 H5f90global.lo H5_ff.lo H5Aff.lo  \
 	             H5Off.lo H5Pff.lo H5Rff.lo \
                      H5Sff.lo H5Tff.lo H5Zff.lo H5_gen.lo
 
-include $(top_srcdir)/config/conclude_fc.am
+include $(top_srcdir)/config/conclude.am

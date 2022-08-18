@@ -104,14 +104,16 @@ H5TBff_gen.F90: H5HL_buildiface$(EXEEXT)
 # how to compile a fortran program given its sources.
 
 H5HL_buildiface_SOURCES = H5HL_buildiface.F90
+
 # Hardcode the dependencies of these files. There isn't a known way of
 # determining this automagically (like we do with the C files). So, when
 # doing a parallel make, some modules could be made way before the
-# modules they depend upon are actually made. *sigh*
+# modules they depend upon are actually made.
 H5DSff.lo:          $(srcdir)/H5DSff.F90
 H5LTff.lo:          $(srcdir)/H5LTff.F90
 H5IMff.lo:          $(srcdir)/H5IMff.F90
 H5TBff.lo:          $(srcdir)/H5TBff.F90
 H5LTff_gen.lo:      H5LTff.lo H5LTff_gen.F90
 H5TBff_gen.lo:      H5TBff.lo H5LTff_gen.F90 H5TBff_gen.F90
-include $(top_srcdir)/config/conclude_fc.am
+
+include $(top_srcdir)/config/conclude.am
