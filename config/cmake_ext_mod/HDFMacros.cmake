@@ -414,7 +414,6 @@ macro (HDF_DIR_PATHS package_prefix)
     set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY
         ${PROJECT_BINARY_DIR}/bin CACHE PATH "Single Directory for all static libraries."
     )
-    file (MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/mod)
     set (CMAKE_Fortran_MODULE_DIRECTORY
         ${PROJECT_BINARY_DIR}/mod CACHE PATH "Single Directory for all fortran modules."
     )
