@@ -2169,7 +2169,6 @@ the gif tool. Disable building the High-Level tools with these options:
     cmake:       HDF5_BUILD_HL_TOOLS=OFF
 
 
-
 %%%%1.13.2%%%%
 
 HDF5 version 1.13.2 released on 2022-08-15
