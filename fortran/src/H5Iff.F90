@@ -108,7 +108,7 @@ CONTAINS
 !  h5iget_name_f
 !
 ! PURPOSE
-!  Gets a name of an object specified by its idetifier.
+!  Gets a name of an object specified by its identifier.
 !
 ! INPUTS
 !  obj_id    - attribute identifier

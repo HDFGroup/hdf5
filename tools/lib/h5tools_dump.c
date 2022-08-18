@@ -2202,9 +2202,8 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
                     sign_s = " unknown-sign";
 
                 /* print size, order, sign, and precision */
-                h5tools_str_append(buffer, "%lu-bit%s%s integer %lu-bit precision",
-                                   (unsigned long)(8 * H5Tget_size(type)), order_s, sign_s,
-                                   H5Tget_precision(type));
+                h5tools_str_append(buffer, "%zu-bit%s%s integer %zu-bit precision", 8 * H5Tget_size(type),
+                                   order_s, sign_s, H5Tget_precision(type));
             }
             break;
 
@@ -2243,8 +2242,8 @@ h5tools_print_datatype(FILE *stream, h5tools_str_t *buffer, const h5tool_format_
                     order_s = "";
 
                 /* print size. byte order, and precision */
-                h5tools_str_append(buffer, "%lu-bit%s floating-point %lu-bit precision",
-                                   (unsigned long)(8 * H5Tget_size(type)), order_s, H5Tget_precision(type));
+                h5tools_str_append(buffer, "%zu-bit%s floating-point %zu-bit precision",
+                                   8 * H5Tget_size(type), order_s, H5Tget_precision(type));
             }
             break;
 
@@ -3287,7 +3286,11 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
 
                     h5tools_str_reset(&buffer);
                     h5tools_str_append(&buffer, "FILENAME %s SIZE %" PRIuHSIZE, name, size);
-                    h5tools_str_append(&buffer, " OFFSET %ld", offset);
+                    /* Using %lld with a cast to (long long) is probably the only portable
+                     * way to print off_t values. There's no real standard for off_t other
+                     * than it must be signed, according to POSIX.
+                     */
+                    h5tools_str_append(&buffer, " OFFSET %lld", (long long)offset);
                     h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0,
                                            (hsize_t)0);
                 }
@@ -3360,7 +3363,7 @@ h5tools_dump_dcpl(FILE *stream, const h5tool_format_t *info, h5tools_context_t *
                     ctx->need_prefix = TRUE;
 
                     h5tools_str_reset(&buffer);
-                    h5tools_str_append(&buffer, "%s %ld %s ", VDS_MAPPING, curr_vmap, BEGIN);
+                    h5tools_str_append(&buffer, "%s %zu %s ", VDS_MAPPING, curr_vmap, BEGIN);
                     h5tools_render_element(stream, info, ctx, &buffer, &curr_pos, (size_t)ncols, (hsize_t)0,
                                            (hsize_t)0);
 

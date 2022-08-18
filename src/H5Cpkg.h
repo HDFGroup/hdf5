@@ -4731,7 +4731,7 @@ typedef struct H5C_tag_info_t {
  *
  * Fields for tracking prefetched entries.  Note that flushes and evictions
  * of prefetched entries are tracked in the flushes and evictions arrays
- * discused above.
+ * discussed above.
  *
  * prefetches:    Number of prefetched entries that are loaded to the
  *        cache.

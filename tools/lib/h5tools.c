@@ -81,10 +81,20 @@ const char *volnames[] = {
  *
  */
 const char *drivernames[] = {
-    [SEC2_VFD_IDX] = "sec2",       [DIRECT_VFD_IDX] = "direct", [LOG_VFD_IDX] = "log",
-    [WINDOWS_VFD_IDX] = "windows", [STDIO_VFD_IDX] = "stdio",   [CORE_VFD_IDX] = "core",
-    [FAMILY_VFD_IDX] = "family",   [SPLIT_VFD_IDX] = "split",   [MULTI_VFD_IDX] = "multi",
-    [MPIO_VFD_IDX] = "mpio",       [ROS3_VFD_IDX] = "ros3",     [HDFS_VFD_IDX] = "hdfs",
+    [SEC2_VFD_IDX]      = "sec2",
+    [DIRECT_VFD_IDX]    = "direct",
+    [LOG_VFD_IDX]       = "log",
+    [WINDOWS_VFD_IDX]   = "windows",
+    [STDIO_VFD_IDX]     = "stdio",
+    [CORE_VFD_IDX]      = "core",
+    [FAMILY_VFD_IDX]    = "family",
+    [SPLIT_VFD_IDX]     = "split",
+    [MULTI_VFD_IDX]     = "multi",
+    [MPIO_VFD_IDX]      = "mpio",
+    [ROS3_VFD_IDX]      = "ros3",
+    [HDFS_VFD_IDX]      = "hdfs",
+    [SUBFILING_VFD_IDX] = H5FD_SUBFILING_NAME,
+    [ONION_VFD_IDX]     = "onion",
 };
 
 #define NUM_VOLS    (sizeof(volnames) / sizeof(volnames[0]))
@@ -573,6 +583,29 @@ h5tools_set_fapl_vfd(hid_t fapl_id, h5tools_vfd_info_t *vfd_info)
                 H5TOOLS_GOTO_ERROR(FAIL, "The HDFS VFD is not enabled");
 #endif
             }
+            else if (!HDstrcmp(vfd_info->u.name, drivernames[SUBFILING_VFD_IDX])) {
+#if defined(H5_HAVE_PARALLEL) && defined(H5_HAVE_SUBFILING_VFD)
+                int mpi_initialized, mpi_finalized;
+
+                /* check if MPI is available. */
+                MPI_Initialized(&mpi_initialized);
+                MPI_Finalized(&mpi_finalized);
+
+                if (mpi_initialized && !mpi_finalized) {
+                    if (H5Pset_fapl_subfiling(fapl_id, (const H5FD_subfiling_config_t *)vfd_info->info) < 0)
+                        H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_subfiling() failed");
+                }
+#else
+                H5TOOLS_GOTO_ERROR(FAIL, "The Subfiling VFD is not enabled");
+#endif
+            }
+            else if (!HDstrcmp(vfd_info->u.name, drivernames[ONION_VFD_IDX])) {
+                /* Onion driver */
+                if (!vfd_info->info)
+                    H5TOOLS_GOTO_ERROR(FAIL, "Onion VFD info is invalid");
+                if (H5Pset_fapl_onion(fapl_id, (const H5FD_onion_fapl_info_t *)vfd_info->info) < 0)
+                    H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_onion() failed");
+            }
             else {
                 /*
                  * Try to load VFD plugin.
@@ -848,6 +881,12 @@ h5tools_get_vfd_name(hid_t fapl_id, char *drivername, size_t drivername_size)
         else if (driver_id == H5FD_HDFS)
             driver_name = drivernames[HDFS_VFD_IDX];
 #endif
+#ifdef H5_HAVE_SUBFILING_VFD
+        else if (driver_id == H5FD_SUBFILING)
+            driver_name = drivernames[SUBFILING_VFD_IDX];
+#endif
+        else if (driver_id == H5FD_ONION)
+            driver_name = drivernames[ONION_VFD_IDX];
         else
             driver_name = "unknown";
 
@@ -991,8 +1030,13 @@ h5tools_fopen(const char *fname, unsigned flags, hid_t fapl_id, hbool_t use_spec
                     continue;
 
                 /* Can we open the file with this combo? */
-                if ((fid = h5tools_fopen(fname, flags, tmp_fapl_id, TRUE, drivername, drivername_size)) >=
-                    0) {
+                H5E_BEGIN_TRY
+                {
+                    fid = h5tools_fopen(fname, flags, tmp_fapl_id, TRUE, drivername, drivername_size);
+                }
+                H5E_END_TRY;
+
+                if (fid >= 0) {
                     used_fapl_id = tmp_fapl_id;
                     H5TOOLS_GOTO_DONE(fid);
                 }

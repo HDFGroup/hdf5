@@ -350,7 +350,7 @@ public class HDF5LibraryException extends HDF5Exception {
 
     /**
      * Prints this <code>HDF5LibraryException</code>, the HDF-5 Library error
-     * stack, and and the Java stack trace to the standard error stream.
+     * stack, and the Java stack trace to the standard error stream.
      */
     @Override
     public void printStackTrace()
@@ -362,7 +362,7 @@ public class HDF5LibraryException extends HDF5Exception {
 
     /**
      * Prints this <code>HDF5LibraryException</code> the HDF-5 Library error
-     * stack, and and the Java stack trace to the specified print stream.
+     * stack, and the Java stack trace to the specified print stream.
      *
      * @param f
      *            the file print stream.

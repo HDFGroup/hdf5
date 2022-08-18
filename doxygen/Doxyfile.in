@@ -860,6 +860,7 @@ FILE_PATTERNS          = H5*public.h \
                          H5FDdirect.h \
                          H5FDfamily.h \
                          H5FDhdfs.h \
+                         H5FDioc.h \
                          H5FDlog.h \
                          H5FDmirror.h \
                          H5FDmpi.h \
@@ -869,6 +870,7 @@ FILE_PATTERNS          = H5*public.h \
                          H5FDsec2.h \
                          H5FDsplitter.h \
                          H5FDstdio.h \
+                         H5FDsubfiling.h \
                          H5FDwindows.h \
                          H5VLconnector.h \
                          H5VLconnector_passthru.h \

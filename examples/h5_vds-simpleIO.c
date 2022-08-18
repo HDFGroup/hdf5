@@ -132,7 +132,7 @@ main(void)
     for (i = 0; i < (int)num_map; i++) {
         printf(" Mapping %d \n", i);
         printf("         Selection in the virtual dataset ");
-        /* Get selection in the virttual  dataset */
+        /* Get selection in the virtual dataset */
         vspace = H5Pget_virtual_vspace(dcpl, (size_t)i);
 
         /* Make sure it is ALL selection and then print selection. */

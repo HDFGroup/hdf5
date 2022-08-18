@@ -141,7 +141,7 @@ test_fapl_mpio_dup(void)
     VRFY((ret >= 0), "H5Pget_fapl_mpio neither");
 
     /* now get both and check validity too. */
-    /* Donot free the returned objects which are used in the next case. */
+    /* Do not free the returned objects which are used in the next case. */
     ret = H5Pget_fapl_mpio(acc_pl, &comm_tmp, &info_tmp);
     VRFY((ret >= 0), "H5Pget_fapl_mpio");
     MPI_Comm_size(comm_tmp, &mpi_size_tmp);

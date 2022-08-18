@@ -3138,7 +3138,7 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size)
         }
         /*-------------------------------------------------------------------------
          * Remove chunk information in the case of chunked datasets
-         * This removal takes place only in case we are shrinking the dateset
+         * This removal takes place only in case we are shrinking the dataset
          * and if the chunks are written
          *-------------------------------------------------------------------------
          */

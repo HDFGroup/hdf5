@@ -63,7 +63,7 @@ const char *FILENAME[] = {"h5fc_ext1_i.h5",   /* 0 */
 /*
  * Function: gen_non()
  *
- * Create a file with SWMR write+non-latest-format--this will result in v3 superbock+latest version support:
+ * Create a file with SWMR write+non-latest-format--this will result in v3 superblock+latest version support:
  *    1) 1 chunked dataset with extensible array chunk indexing type (without data)
  *    2) 1 chunked dataset with version 2 B-tree chunk indexing type (with data)
  * Re-open the file with write+non-latest-format and create:

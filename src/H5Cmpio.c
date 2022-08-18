@@ -997,11 +997,12 @@ H5C__collective_write(H5F_t *f)
             HGOTO_ERROR(H5E_CACHE, H5E_NOTFOUND, FAIL, "can't retrieve skip list item")
 
         /* Set up initial array position & buffer base address */
+        HDassert(entry_ptr->type);
         base_buf = entry_ptr->image_ptr;
         addrs[0] = entry_ptr->addr;
         sizes[0] = entry_ptr->size;
         bufs[0]  = base_buf;
-        types[0] = H5FD_MEM_DEFAULT;
+        types[0] = entry_ptr->type->mem_type;
 
         node = H5SL_next(node);
         i    = 1;
@@ -1010,20 +1011,17 @@ H5C__collective_write(H5F_t *f)
                 HGOTO_ERROR(H5E_CACHE, H5E_NOTFOUND, FAIL, "can't retrieve skip list item")
 
             /* Set up array position */
+            HDassert(entry_ptr->type);
             addrs[i] = entry_ptr->addr;
             sizes[i] = entry_ptr->size;
             bufs[i]  = entry_ptr->image_ptr;
-            types[i] = H5FD_MEM_DEFAULT;
+            types[i] = entry_ptr->type->mem_type;
 
             /* Advance to next node & array location */
             node = H5SL_next(node);
             i++;
         } /* end while */
-
-        /* Optimization for vector I/O */
-        if (count > 1)
-            types[1] = H5FD_MEM_NOLIST;
-    } /* end if */
+    }     /* end if */
 
     /* Pass buf type, file type to the file driver */
     if (H5CX_set_mpi_coll_datatypes(MPI_BYTE, MPI_BYTE) < 0)

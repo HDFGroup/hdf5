@@ -2640,7 +2640,7 @@ H5HF__cache_dblock_fsf_size(const void *_thing, hsize_t *fsf_size)
  *
  *		For example, it is now possible for a dirty fractal heap
  *		header to be flushed before a dirty dblock, as long as the
- *		there in an interviening iblock, and the header has no
+ *		there in an intervening iblock, and the header has no
  *		dirty immediate flush dependency children.
  *
  *		Also, I gather that under some circumstances, a dblock
@@ -3005,7 +3005,7 @@ done:
  *
  *		For example, it is now possible for a dirty fractal heap
  *		header to be flushed before a dirty dblock, as long as the
- *		there in an interviening iblock, and the header has no
+ *		there in an intervening iblock, and the header has no
  *		dirty immediate flush dependency children.
  *
  *		Also, I gather that under some circumstances, a dblock
@@ -3122,7 +3122,7 @@ done:
  *
  *		For example, it is now possible for a dirty fractal heap
  *		header to be flushed before a dirty dblock, as long as the
- *		there in an interviening iblock, and the header has no
+ *		there in an intervening iblock, and the header has no
  *		dirty immediate flush dependency children.
  *
  *		Also, I gather that under some circumstances, a dblock
@@ -3285,7 +3285,7 @@ done:
  *
  *		For example, it is now possible for a dirty fractal heap
  *		header to be flushed before a dirty dblock, as long as the
- *		there in an interviening iblock, and the header has no
+ *		there in an intervening iblock, and the header has no
  *		dirty immediate flush dependency children.
  *
  *		Also, I gather that under some circumstances, a dblock
