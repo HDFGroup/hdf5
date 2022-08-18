@@ -27,11 +27,12 @@ set (testhdf5_fortran_CLEANFILES
           extern_2a.raw
           extern_3a.raw
           extern_4a.raw
-          extren_raw.raw
+          extern_raw.h5
           get_info.h5
           nbit.h5
           t_array_F03.h5
           t_bit_F03.h5
+          t_controlchar.h5
           t_controlchar_F03.h5
           t_enum_F03.h5
           t_objref_F03.h5
@@ -39,6 +40,7 @@ set (testhdf5_fortran_CLEANFILES
           t_regref_F03.h5
           t_string_F03.h5
           t_vlen_F03.h5
+          t_vlstring.h5
           t_vlstring_F03.h5
           t_vlstringrw_F03.h5
           tarray1.h5
@@ -50,6 +52,7 @@ set (testhdf5_fortran_CLEANFILES
           titerate.h5
           vds.h5
           visit.h5
+          voltest.h5
 )
 
 # Remove any output file left over from previous test run
@@ -57,7 +60,18 @@ add_test (
     NAME FORTRAN_testhdf5-clear-objects
     COMMAND ${CMAKE_COMMAND} -E remove ${testhdf5_fortran_CLEANFILES}
 )
-set_tests_properties (FORTRAN_testhdf5-clear-objects PROPERTIES FIXTURES_SETUP clear_testhdf5_fortran)
+set_tests_properties (FORTRAN_testhdf5-clear-objects PROPERTIES
+    FIXTURES_SETUP clear_testhdf5_fortran
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+)
+add_test (
+    NAME FORTRAN_testhdf5-clean-objects
+    COMMAND ${CMAKE_COMMAND} -E remove ${testhdf5_fortran_CLEANFILES}
+)
+set_tests_properties (FORTRAN_testhdf5-clean-objects PROPERTIES
+    FIXTURES_CLEANUP clear_testhdf5_fortran
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+)
 
 if (HDF5_ENABLE_USING_MEMCHECKER)
   add_test (NAME FORTRAN_testhdf5_fortran COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:testhdf5_fortran>)
@@ -147,6 +161,9 @@ else ()
       -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
   )
 endif ()
+set_tests_properties (FORTRAN_vol_connector PROPERTIES
+    FIXTURES_REQUIRED clear_testhdf5_fortran
+)
 
 #-- Adding test for fflush1
 add_test (
@@ -168,4 +185,11 @@ add_test (
 )
 set_tests_properties (FORTRAN_fflush2 PROPERTIES
     DEPENDS FORTRAN_fflush1
+)
+add_test (
+    NAME FORTRAN_flush1-clean-objects
+    COMMAND ${CMAKE_COMMAND} -E remove flush.h5
+)
+set_tests_properties (FORTRAN_flush1-clean-objects PROPERTIES
+    DEPENDS FORTRAN_fflush2
 )

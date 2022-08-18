@@ -931,7 +931,7 @@ done:
  *              iteration index and iteration order given) will be used to in
  *              the callback about the object.
  *
- *              NOTE: Add a a parameter "fields" to indicate selection of
+ *              NOTE: Add a parameter "fields" to indicate selection of
  *              object info to be retrieved to the callback "op".
  *
  * Return:      Success:    The return value of the first operator that
@@ -1028,7 +1028,7 @@ done:
  *              iteration index and iteration order given) will be used to in
  *              the callback about the object.
  *
- *              NOTE: Add a a parameter "fields" to indicate selection of
+ *              NOTE: Add a parameter "fields" to indicate selection of
  *              object info to be retrieved to the callback "op".
  *
  * Return:      Success:    The return value of the first operator that

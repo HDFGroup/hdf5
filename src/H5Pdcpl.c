@@ -1670,7 +1670,7 @@ done:
  *              Failure:        Negative
  *
  * Programmer:  Neil Fortner
- *              Thurday, Feb 26, 2015
+ *              Thursday, Feb 26, 2015
  *
  *--------------------------------------------------------------------------
  */

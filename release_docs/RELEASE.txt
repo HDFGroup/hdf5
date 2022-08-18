@@ -1,4 +1,4 @@
-HDF5 version 1.13.2-1 currently under development
+HDF5 version 1.13.3-1 currently under development
 ================================================================================
 
 
@@ -85,7 +85,45 @@ New Features
 
     Library:
     --------
-    -
+    - Subfiling VFD
+
+      The HDF5 Subfiling VFD is a new MPI-based file driver that allows an
+      HDF5 application to distribute an HDF5 file across a collection of
+      "sub-files" in equal-sized data segment "stripes". I/O to the logical
+      HDF5 file is then directed to the appropriate "sub-file" according to
+      the Subfiling configuration and a system of I/O concentrators, which
+      are MPI ranks operating worker threads.
+
+      By allowing a configurable stripe size, number of I/O concentrators and
+      method for selecting MPI ranks as I/O concentrators, the Subfiling VFD
+      aims to enable an HDF5 application to find a middle ground between the
+      single shared file and file-per-process approaches to parallel file I/O
+      for the particular machine the application is running on. In general, the
+      goal is to avoid some of the complexity of the file-per-process approach
+      while also minimizing the locking issues of the single shared file approach
+      on a parallel file system.
+
+      Also included with the Subfiling VFD is a new h5fuse.sh script which
+      reads a Subfiling configuration file and then combines the various
+      sub-files back into a single HDF5 file. By default, the h5fuse.sh script
+      looks in the current directory for the Subfiling configuration file,
+      but can also be pointed to the configuration file with a command-line
+      option.
+
+      The Subfiling VFD can be used by calling H5Pset_fapl_subfiling() on a
+      File Access Property List and using that FAPL for file operations. Note
+      that the Subfiling VFD currently has the following limitations:
+
+      * Does not currently support HDF5 collective I/O, other than collective
+        metadata writes and reads as set by H5Pset_coll_metadata_write() and
+        H5Pset_all_coll_metadata_ops()
+
+      * The Subfiling VFD should not currently be used with an HDF5 library
+        that has been built with thread-safety enabled. This can cause deadlocks
+        when failures occur due to interactions between the VFD's internal
+        threads and HDF5's global lock. 
+
+      (JTH - 2022/07/22)
 
 
     Parallel Library:
@@ -100,7 +138,10 @@ New Features
 
     C++ Library:
     ------------
-    -
+    - Added two new constructors to H5::H5File class
+
+      Two new constructors were added to allow opening a file with non-default
+      access property list.
 
 
     Java Library:
@@ -207,6 +248,25 @@ Bug Fixes since HDF5-1.13.1 release
 ===================================
     Library
     -------
+    - Fixed an issue with attribute type conversion with compound datatypes
+
+      Previously, when performing type conversion for attribute I/O with a
+      compound datatype, the library would not fill the background buffer with
+      the contents of the destination, potentially causing data to be lost when
+      only writing to a subset of the compound fields.
+
+      (NAF - 2022/08/22, GitHub #2016)
+
+    - Modified H5Fstart_swmr_write() to preserve DAPL properties
+
+      Internally, H5Fstart_swmr_write() closes and reopens the file in question
+      as part of its process for making the file SWMR-safe.  Previously, when
+      the library reopened the file it would simply use the default access
+      properties.  Modified the library to instead save these properties and use
+      them when reopening the file.
+
+      (NAF - 2022/07/18, HDFFV-11308)
+
     - Converted an assertion on (possibly corrupt) file contents to a normal
       error check
 

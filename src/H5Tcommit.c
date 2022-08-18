@@ -349,6 +349,11 @@ H5Tcommit_anon(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
     else if (TRUE != H5P_isa_class(tcpl_id, H5P_DATATYPE_CREATE))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not datatype creation property list")
 
+    if (H5P_DEFAULT == tapl_id)
+        tapl_id = H5P_DATATYPE_ACCESS_DEFAULT;
+    else if (TRUE != H5P_isa_class(tapl_id, H5P_DATATYPE_ACCESS))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not datatype access property list")
+
     /* Verify access property list and set up collective metadata if appropriate */
     if (H5CX_set_apl(&tapl_id, H5P_CLS_TACC, loc_id, TRUE) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set access property list info")

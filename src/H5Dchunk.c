@@ -247,6 +247,7 @@ typedef struct H5D_chunk_coll_fill_info_t {
 typedef struct H5D_chunk_iter_ud_t {
     H5D_chunk_iter_op_t op;      /* User defined callback */
     void               *op_data; /* User data for user defined callback */
+    H5O_layout_chunk_t *chunk;   /* Chunk layout */
 } H5D_chunk_iter_ud_t;
 
 /********************/
@@ -1032,7 +1033,7 @@ H5D__chunk_is_space_alloc(const H5O_storage_t *storage)
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Neil Fortner
- *              Wednessday, March 6, 2016
+ *              Wednesday, March 6, 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -1634,7 +1635,7 @@ H5D__create_piece_file_map_all(H5D_dset_info_t *di, const H5D_io_info_t *io_info
         coords[u] = 0;
         end[u]    = di->chunk_dim[u] - 1;
 
-        /* Iniitialize partial chunk dimension information */
+        /* Initialize partial chunk dimension information */
         partial_dim_size[u] = file_dims[u] % di->chunk_dim[u];
         if (file_dims[u] < di->chunk_dim[u]) {
             curr_partial_clip[u] = partial_dim_size[u];
@@ -6845,7 +6846,7 @@ H5D__chunk_copy(H5F_t *f_src, H5O_storage_chunk_t *storage_src, H5O_layout_chunk
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register memory datatype")
         } /* end if */
 
-        /* create variable-length datatype at the destinaton file */
+        /* create variable-length datatype at the destination file */
         if (NULL == (dt_dst = H5T_copy(dt_src, H5T_COPY_TRANSIENT)))
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy")
         if (H5T_set_loc(dt_dst, H5F_VOL_OBJ(f_dst), H5T_LOC_DISK) < 0) {
@@ -8136,13 +8137,20 @@ static int
 H5D__chunk_iter_cb(const H5D_chunk_rec_t *chunk_rec, void *udata)
 {
     const H5D_chunk_iter_ud_t *data      = (H5D_chunk_iter_ud_t *)udata;
+    const H5O_layout_chunk_t  *chunk     = data->chunk;
     int                        ret_value = H5_ITER_CONT;
+    hsize_t                    offset[H5O_LAYOUT_NDIMS];
+    unsigned                   ii; /* Match H5O_layout_chunk_t.ndims */
+
+    /* Similar to H5D__get_chunk_info */
+    for (ii = 0; ii < chunk->ndims; ii++)
+        offset[ii] = chunk_rec->scaled[ii] * chunk->dim[ii];
 
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check for callback failure and pass along return value */
-    if ((ret_value = (data->op)(chunk_rec->scaled, chunk_rec->filter_mask, chunk_rec->chunk_addr,
-                                chunk_rec->nbytes, data->op_data)) < 0)
+    if ((ret_value = (data->op)(offset, chunk_rec->filter_mask, chunk_rec->chunk_addr, chunk_rec->nbytes,
+                                data->op_data)) < 0)
         HERROR(H5E_DATASET, H5E_CANTNEXT, "iteration operator failed");
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -8202,6 +8210,7 @@ H5D__chunk_iter(H5D_t *dset, H5D_chunk_iter_op_t op, void *op_data)
         /* Set up info for iteration callback */
         ud.op      = op;
         ud.op_data = op_data;
+        ud.chunk   = &dset->shared->layout.u.chunk;
 
         /* Iterate over the allocated chunks calling the iterator callback */
         if ((ret_value = (layout->storage.u.chunk.ops->iterate)(&idx_info, H5D__chunk_iter_cb, &ud)) < 0)

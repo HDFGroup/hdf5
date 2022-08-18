@@ -1,5 +1,5 @@
 Process command line options
-Open the file outtmp.h5
+Open the file h5fc_v_err-tmp.h5
 Processing all datasets in the file...
 Going to process dataset:/DSET_ERR...
 Open the dataset

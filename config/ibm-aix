@@ -58,7 +58,7 @@ if test "X-" = "X-$f9x_flags_set"; then
   H5_FCFLAGS="$H5_FCFLAGS ${F9XSUFFIXFLAG}"
   FSEARCH_DIRS="-I./ -I../src"
 
-  # Produciton
+  # Production
   PROD_FCFLAGS=
 
   # Debug
@@ -109,7 +109,7 @@ case $CC_BASENAME in
     # Use very generic flags
     H5_CFLAGS="$H5_CFLAGS -ansi"
 
-    # Produciton
+    # Production
     PROD_CFLAGS=
 
     # Debug

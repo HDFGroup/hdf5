@@ -72,6 +72,19 @@
         family_to_sec2.h5
   )
   set_tests_properties (H5REPART-clearall-objects PROPERTIES FIXTURES_SETUP clear_testrepart)
+  add_test (
+    NAME H5REPART-clean-objects
+    COMMAND    ${CMAKE_COMMAND}
+        -E remove
+        fst_family00000.h5
+        scd_family00000.h5
+        scd_family00001.h5
+        scd_family00002.h5
+        scd_family00003.h5
+        family_to_single.h5
+        family_to_sec2.h5
+  )
+  set_tests_properties (H5REPART-clean-objects PROPERTIES FIXTURES_CLEANUP clear_testrepart)
 
   # repartition family member size to 20,000 bytes.
   add_test (
@@ -116,6 +129,7 @@
   )
   set_tests_properties (H5REPART-h5repart_test PROPERTIES
       DEPENDS "H5REPART-h5repart_20K;H5REPART-h5repart_5K;H5REPART-h5repart_single;H5REPART-h5repart_sec2"
+      FIXTURES_REQUIRED clear_testrepart
   )
 
   set (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES}

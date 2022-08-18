@@ -21,6 +21,11 @@ include $(top_srcdir)/config/commence.am
 
 if BUILD_PARALLEL_CONDITIONAL
   EXAMPLE_PROG_PARA = ph5example ph5_filtered_writes ph5_filtered_writes_no_sel
+
+if SUBFILING_VFD_CONDITIONAL
+  EXAMPLE_PROG_PARA += ph5_subfiling
+endif
+
 endif
 
 INSTALL_SCRIPT_FILES = run-c-ex.sh
@@ -51,8 +56,9 @@ INSTALL_FILES = h5_write.c h5_read.c h5_extend_write.c h5_chunk_read.c h5_compou
             h5_reference_deprec.c h5_ref_extern.c h5_ref_compat.c h5_ref2reg_deprec.c \
             h5_extlink.c h5_elink_unix2win.c h5_shared_mesg.c h5_debug_trace.c \
             ph5example.c ph5_filtered_writes.c ph5_filtered_writes_no_sel.c \
-            h5_vds.c h5_vds-exc.c h5_vds-exclim.c h5_vds-eiger.c h5_vds-simpleIO.c \
-            h5_vds-percival.c h5_vds-percival-unlim.c h5_vds-percival-unlim-maxmin.c
+            ph5_subfiling.c h5_vds.c h5_vds-exc.c h5_vds-exclim.c h5_vds-eiger.c \
+            h5_vds-simpleIO.c h5_vds-percival.c h5_vds-percival-unlim.c \
+            h5_vds-percival-unlim-maxmin.c
 
 
 
@@ -120,7 +126,8 @@ h5_ref2reg_deprec: $(srcdir)/h5_ref2reg_deprec.c
 h5_drivers: $(srcdir)/h5_drivers.c
 ph5example: $(srcdir)/ph5example.c
 ph5_filtered_writes: $(srcdir)/ph5_filtered_writes.c
-ph5_filtered_writes_no_sel: $(srcdir)/ph5_filtered_writes_no_sel.c 
+ph5_filtered_writes_no_sel: $(srcdir)/ph5_filtered_writes_no_sel.c
+ph5_subfiling: $(srcdir)/ph5_subfiling.c
 h5_dtransform: $(srcdir)/h5_dtransform.c
 h5_extlink: $(srcdir)/h5_extlink.c $(EXTLINK_DIRS)
 h5_elink_unix2win: $(srcdir)/h5_elink_unix2win.c $(EXTLINK_DIRS)

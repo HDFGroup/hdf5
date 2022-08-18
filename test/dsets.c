@@ -1827,7 +1827,7 @@ filter_corrupt(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_valu
         TEST_ERROR;
     HDmemset(data, (int)value, (size_t)length);
 
-    if (flags & H5Z_FLAG_REVERSE) { /* Varify data is actually corrupted during read */
+    if (flags & H5Z_FLAG_REVERSE) { /* Verify data is actually corrupted during read */
         dst += offset;
         if (HDmemcmp(data, dst, (size_t)length) != 0)
             TEST_ERROR;
@@ -7722,7 +7722,7 @@ test_missing_chunk(hid_t file)
     if (H5Dread(did2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata2_bytes) < 0)
         TEST_ERROR;
 
-    /* Validata values read for the 1-D dataset */
+    /* Validate values read for the 1-D dataset */
     for (u = 0; u < MISSING_CHUNK_DIM; u++) {
         if ((u % 10) >= 5) {
             if (rdata[u] != 911) {
@@ -7739,7 +7739,7 @@ test_missing_chunk(hid_t file)
         }     /* end else */
     }         /* end for */
 
-    /* Validata values read for the 2-D dataset */
+    /* Validate values read for the 2-D dataset */
     for (i = 0; i < MISSING_CHUNK_DIM; i++) {
         for (j = 0; j < MISSING_CHUNK_DIM; j++) {
 

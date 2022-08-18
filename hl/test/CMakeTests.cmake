@@ -81,7 +81,18 @@ add_test (
     NAME HL_test-clear-objects
     COMMAND    ${CMAKE_COMMAND} -E remove ${test_hl_CLEANFILES}
 )
-set_tests_properties (HL_test-clear-objects PROPERTIES FIXTURES_SETUP clear_test_hl)
+set_tests_properties (HL_test-clear-objects PROPERTIES
+    FIXTURES_SETUP clear_test_hl
+    WORKING_DIRECTORY ${HDF5_HL_TEST_BINARY_DIR}
+)
+add_test (
+    NAME HL_test-clean-objects
+    COMMAND    ${CMAKE_COMMAND} -E remove ${test_hl_CLEANFILES}
+)
+set_tests_properties (HL_test-clean-objects PROPERTIES
+    FIXTURES_CLEANUP clear_test_hl
+    WORKING_DIRECTORY ${HDF5_HL_TEST_BINARY_DIR}
+)
 
 # --------------------------------------------------------------------
 #  Macro used to add a unit test

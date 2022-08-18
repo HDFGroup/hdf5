@@ -2742,7 +2742,7 @@ done:
  *        All arguments are optional. Missing arguments are wild cards.
  *        The special no-op path cannot be removed.
  *
- * Return:    Succeess:    non-negative
+ * Return:    Success:    non-negative
  *            Failure:    negative
  *
  * Programmer:    Robb Matzke
@@ -2846,7 +2846,7 @@ H5T__unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_c
  *        All arguments are optional. Missing arguments are wild cards.
  *        The special no-op path cannot be removed.
  *
- * Return:    Succeess:    non-negative
+ * Return:    Success:    non-negative
  *
  *            Failure:    negative
  *

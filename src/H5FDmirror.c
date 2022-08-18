@@ -321,9 +321,9 @@ H5FD__mirror_xmit_decode_uint32(uint32_t *out, const unsigned char *_buf)
 /* ---------------------------------------------------------------------------
  * Function:    is_host_little_endian
  *
- * Purpose:     Determine whether the host machine is is little-endian.
+ * Purpose:     Determine whether the host machine is little-endian.
  *
- *              Store an intger with a known value, re-map the memory to a
+ *              Store an integer with a known value, re-map the memory to a
  *              character array, and inspect the array's contents.
  *
  * Return:      The number of bytes written to the buffer (8).
@@ -1554,7 +1554,7 @@ H5FD__mirror_query(const H5FD_t H5_ATTR_UNUSED *_file, unsigned long *flags)
     LOG_OP_CALL(__func__);
 
     /* Notice: the Mirror VFD Writer currently uses only the Sec2 driver as
-     * the underying driver -- as such, the Mirror VFD implementation copies
+     * the underlying driver -- as such, the Mirror VFD implementation copies
      * the Sec2 feature flags as its own.
      *
      * File pointer is always NULL/unused -- the H5FD_FEAT_IGNORE_DRVRINFO flag

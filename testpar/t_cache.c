@@ -248,7 +248,7 @@ int *data_index = NULL;
  * in which no acks are sent after writes.  Instead, the metadata cache is
  * provided with a callback function to call after each sequence of writes.
  * This callback simply causes the client to send the server process a
- * "sync" message and and await an ack in reply.
+ * "sync" message and await an ack in reply.
  *
  * Strangely, at least on Phoenix, the first solution runs faster by a
  * rather large margin.  However, I can imagine this changing with

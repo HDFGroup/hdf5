@@ -40,7 +40,18 @@ if (HDF5_TEST_SERIAL)
       NAME f90_ex-clear-objects
       COMMAND ${CMAKE_COMMAND} -E remove ${test_ex_fortran_CLEANFILES}
   )
-  set_tests_properties (f90_ex-clear-objects PROPERTIES FIXTURES_SETUP clear_f90_ex)
+  set_tests_properties (f90_ex-clear-objects PROPERTIES
+      FIXTURES_SETUP clear_f90_ex
+      WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+  )
+  add_test (
+      NAME f90_ex-clean-objects
+      COMMAND ${CMAKE_COMMAND} -E remove ${test_ex_fortran_CLEANFILES}
+  )
+  set_tests_properties (f90_ex-clean-objects PROPERTIES
+      FIXTURES_CLEANUP clear_f90_ex
+      WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+  )
 
   foreach (example ${examples})
     if (HDF5_ENABLE_USING_MEMCHECKER)

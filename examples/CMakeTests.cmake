@@ -30,6 +30,8 @@ set (test_ex_CLEANFILES
     group.h5
     groups.h5
     hard_link.h5
+    h5_subfiling_default_example.h5
+    h5_subfiling_custom_example.h5
     mount1.h5
     mount2.h5
     one_index_file.h5
@@ -37,6 +39,9 @@ set (test_ex_CLEANFILES
     only_huge_mesgs_file.h5
     REF_REG.h5
     refere.h5
+    refer_deprec.h5
+    refer_extern1.h5
+    refer_extern2.h5
     SDS.h5
     SDScompound.h5
     SDSextendible.h5
@@ -70,7 +75,18 @@ if (HDF5_TEST_SERIAL)
       NAME EXAMPLES-clear-objects
       COMMAND    ${CMAKE_COMMAND} -E remove ${test_ex_CLEANFILES}
   )
-  set_tests_properties (EXAMPLES-clear-objects PROPERTIES FIXTURES_SETUP clear_EXAMPLES)
+  set_tests_properties (EXAMPLES-clear-objects PROPERTIES
+      FIXTURES_SETUP clear_EXAMPLES
+      WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+  )
+  add_test (
+      NAME EXAMPLES-clean-objects
+      COMMAND    ${CMAKE_COMMAND} -E remove ${test_ex_CLEANFILES}
+  )
+  set_tests_properties (EXAMPLES-clean-objects PROPERTIES
+      FIXTURES_CLEANUP clear_EXAMPLES
+      WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+  )
 
   foreach (example ${examples})
     if (HDF5_ENABLE_USING_MEMCHECKER)

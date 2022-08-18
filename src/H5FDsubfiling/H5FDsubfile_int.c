@@ -192,6 +192,59 @@ done:
  *              invalid data if other ranks perform writes while this
  *              operation is in progress.
  *
+ *              SUBFILING NOTE:
+ *              The EOF calculation for subfiling is somewhat different
+ *              than for the more traditional HDF5 file implementations.
+ *              This statement derives from the fact that unlike "normal"
+ *              HDF5 files, subfiling introduces a multi-file representation
+ *              of a single HDF5 file.  The plurality of sub-files represents
+ *              a software RAID-0 based HDF5 file.  As such, each sub-file
+ *              contains a designated portion of the address space of the
+ *              virtual HDF5 storage.  We have no notion of HDF5 datatypes,
+ *              datasets, metadata, or other HDF5 structures; only BYTES.
+ *
+ *              The organization of the bytes within sub-files is consistent
+ *              with the RAID-0 striping, i.e. there are IO Concentrators
+ *              (IOCs) which correspond to a stripe-count (in Lustre) as
+ *              well as a stripe_size.  The combination of these two
+ *              variables determines the "address" (a combination of IOC
+ *              and a file offset) of any storage operation.
+ *
+ *              Having a defined storage layout, the virtual file EOF
+ *              calculation should be the MAXIMUM value returned by the
+ *              collection of IOCs.  Every MPI rank which hosts an IOC
+ *              maintains its own EOF by updating that value for each
+ *              WRITE operation that completes, i.e. if a new local EOF
+ *              is greater than the existing local EOF, the new EOF
+ *              will replace the old.  The local EOF calculation is as
+ *              follows.
+ *              1. At file creation, each IOC is assigned a rank value
+ *                 (0 to N-1, where N is the total number of IOCs) and
+ *                 a 'sf_base_addr' = 'subfile_rank' * 'sf_stripe_size')
+ *                 we also determine the 'sf_blocksize_per_stripe' which
+ *                 is simply the 'sf_stripe_size' * 'n_ioc_concentrators'
+ *
+ *              2. For every write operation, the IOC receives a message
+ *                 containing a file_offset and the data_size.
+ *
+ *              3. The file_offset + data_size are in turn used to
+ *                 create a stripe_id:
+ *                   IOC-(ioc_rank)       IOC-(ioc_rank+1)
+ *                   |<- sf_base_address  |<- sf_base_address  |
+ *                ID +--------------------+--------------------+
+ *                 0:|<- sf_stripe_size ->|<- sf_stripe_size ->|
+ *                 1:|<- sf_stripe_size ->|<- sf_stripe_size ->|
+ *                   ~                    ~                    ~
+ *                 N:|<- sf_stripe_size ->|<- sf_stripe_size ->|
+ *                   +--------------------+--------------------+
+ *
+ *                The new 'stripe_id' is then used to calculate a
+ *                potential new EOF:
+ *                sf_eof = (stripe_id * sf_blocksize_per_stripe) + sf_base_addr
+ *                         + ((file_offset + data_size) % sf_stripe_size)
+ *
+ *              4. If (sf_eof > current_sf_eof), then current_sf_eof = sf_eof.
+ *
  * Return:      SUCCEED/FAIL
  *
  * Programmer:  JRM -- 1/18/22

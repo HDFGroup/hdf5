@@ -12,7 +12,7 @@
 
 /*
  * Purpose:     The Virtual Object Layer as described in documentation.
- *              The pupose is to provide an abstraction on how to access the
+ *              The purpose is to provide an abstraction on how to access the
  *              underlying HDF5 container, whether in a local file with
  *              a specific file format, or remotely on other machines, etc...
  */
@@ -487,7 +487,7 @@ H5VL_cmp_connector_info(const H5VL_class_t *connector, int *cmp_value, const voi
     } /* end if */
 
     /* Use the class's info comparison routine to compare the info objects,
-     * if there is a a callback, otherwise just compare the info objects as
+     * if there is a callback, otherwise just compare the info objects as
      * memory buffers
      */
     if (connector->info_cls.cmp) {
