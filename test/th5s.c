@@ -1104,7 +1104,7 @@ test_h5s_zero_dim(void)
         dset1 = H5Dopen2(fid1, BASICDATASET1, H5P_DEFAULT);
         CHECK(dset1, FAIL, "H5Dopen2");
 
-        /* Get the space of the dataset and querry it */
+        /* Get the space of the dataset and query it */
         sid1 = H5Dget_space(dset1);
         CHECK(sid1, FAIL, "H5Dget_space");
 

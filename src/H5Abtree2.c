@@ -177,7 +177,7 @@ H5A__dense_fh_name_cmp(const void *obj, size_t obj_len, void *_udata)
     } /* end if */
 
 done:
-    /* Release the space allocated for the attrbute */
+    /* Release the space allocated for the attribute */
     if (attr && !took_ownership)
         H5O_msg_free(H5O_ATTR_ID, attr);
 

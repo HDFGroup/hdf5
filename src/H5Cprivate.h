@@ -924,7 +924,7 @@ typedef herr_t (*H5C_log_flush_func_t)(H5C_t *cache_ptr, haddr_t addr, hbool_t w
  * instead would apply unnecessary constraints on flushes under normal
  * operating circumstances.
  *
- * As of this writing, all metadata entries pretaining to data sets and
+ * As of this writing, all metadata entries pertaining to data sets and
  * groups must be flushed first, and are thus assigned to the outermost
  * ring.
  *

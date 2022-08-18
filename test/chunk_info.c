@@ -921,7 +921,7 @@ test_chunk_info_single_chunk(const char *filename, hid_t fapl)
     if (ret != FAIL)
         TEST_ERROR
 
-    /* Release resourse */
+    /* Release resource */
     if (H5Dclose(dset) < 0)
         TEST_ERROR
     if (H5Sclose(dspace) < 0)
@@ -1038,7 +1038,7 @@ test_chunk_info_implicit(char *filename, hid_t fapl)
                 FAIL_PUTS_ERROR("Verification of H5Dget_chunk_info_by_coord failed\n");
         }
 
-    /* Release resourse */
+    /* Release resource */
     if (H5Dclose(dset) < 0)
         TEST_ERROR
     if (H5Sclose(dspace) < 0)
@@ -1183,7 +1183,7 @@ test_chunk_info_fixed_array(const char *filename, hid_t fapl)
     /* Read and verify values of selected chunks */
     if (verify_selected_chunks(dset, H5P_DEFAULT, start, end) < 0)
 
-        /* Release resourse */
+        /* Release resource */
         if (H5Dclose(dset) < 0)
             TEST_ERROR
     if (H5Sclose(dspace) < 0)
@@ -1332,7 +1332,7 @@ test_chunk_info_extensible_array(const char *filename, hid_t fapl)
     /* Read and verify values of selected chunks */
     if (verify_selected_chunks(dset, H5P_DEFAULT, start, end) < 0)
 
-        /* Release resourse */
+        /* Release resource */
         if (H5Dclose(dset) < 0)
             TEST_ERROR
     if (H5Sclose(dspace) < 0)
@@ -1481,7 +1481,7 @@ test_chunk_info_version2_btrees(const char *filename, hid_t fapl)
     /* Read and verify values of selected chunks */
     if (verify_selected_chunks(dset, H5P_DEFAULT, start, end) < 0)
 
-        /* Release resourse */
+        /* Release resource */
         if (H5Dclose(dset) < 0)
             TEST_ERROR
     if (H5Sclose(dspace) < 0)
@@ -1745,7 +1745,7 @@ test_basic_query(hid_t fapl)
     if (cptr != &(chunk_infos[1]))
         FAIL_PUTS_ERROR("Verification of halted iterator failed");
 
-    /* Release resourse */
+    /* Release resource */
     if (H5Dclose(dset) < 0)
         TEST_ERROR
     if (H5Sclose(dspace) < 0)
@@ -1874,7 +1874,7 @@ test_failed_attempts(const char *filename, hid_t fapl)
     if (ret != FAIL)
         FAIL_PUTS_ERROR("    Attempt a chunk query function on a contiguous dataset.")
 
-    /* Release resourse */
+    /* Release resource */
     if (H5Dclose(dset) < 0)
         TEST_ERROR
     if (H5Sclose(dspace) < 0)
@@ -2150,7 +2150,7 @@ test_flt_msk_with_skip_compress(hid_t fapl)
     if (verify_get_chunk_info_by_coord(dset, offset, CHK_SIZE, flt_msk) == FAIL)
         FAIL_PUTS_ERROR("Verification of H5Dget_chunk_info_by_coord failed\n");
 
-    /* Release resourse */
+    /* Release resource */
     if (H5Dclose(dset) < 0)
         TEST_ERROR
     if (H5Sclose(mem_space) < 0)

@@ -2069,7 +2069,7 @@ gen_dataset_idx(const char *file, int format)
     int     buf[10];                     /* data buffer */
     int     i;                           /* local index variable */
 
-    /* Get a copy of the file aaccess property */
+    /* Get a copy of the file access property */
     fapl = H5Pcreate(H5P_FILE_ACCESS);
 
     /* Set the "use the latest format" bounds for creating objects in the file */

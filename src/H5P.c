@@ -664,7 +664,7 @@ H5Pset(hid_t plist_id, const char *name, const void *value)
     if (!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid property name");
     if (value == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalied property value");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid property value");
 
     /* Go set the value */
     if (H5P_set(plist, name, value) < 0)
@@ -1276,7 +1276,7 @@ H5Pget(hid_t plist_id, const char *name, void *value)
     if (!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid property name");
     if (value == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalied property value");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid property value");
 
     /* Go get the value */
     if (H5P_get(plist, name, value) < 0)

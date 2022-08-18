@@ -739,7 +739,7 @@ H5P__dapl_efile_pref_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSE
  * Purpose:    Set the number of objects in the meta data cache and the
  *        maximum number of chunks and bytes in the raw data chunk cache.
  *        Once set, these values will override the values in the file access
- *        property list.  Each of thhese values can be individually unset
+ *        property list.  Each of these values can be individually unset
  *        (or not set at all) by passing the macros:
  *        H5D_CHUNK_CACHE_NCHUNKS_DEFAULT,
  *        H5D_CHUNK_CACHE_NSLOTS_DEFAULT, and/or

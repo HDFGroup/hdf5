@@ -7183,7 +7183,7 @@ gent_dataset_idx(void)
     int                       i, j;
     int H5_ATTR_NDEBUG_UNUSED ret;
 
-    /* Get a copy of the file aaccess property */
+    /* Get a copy of the file access property */
     fapl = H5Pcreate(H5P_FILE_ACCESS);
 
     /* Set the "use the latest version of the format" bounds for creating objects in the file */

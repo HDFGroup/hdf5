@@ -6785,7 +6785,7 @@ test_select_point_chunk(void)
 
     /* Verify data (later) */
 
-    /* Close everything (inclusing selections) */
+    /* Close everything (including selections) */
     ret = H5Sclose(pnt1_space);
     CHECK(ret, FAIL, "H5Sclose");
     ret = H5Sclose(pnt2_space);
@@ -10957,7 +10957,7 @@ test_shape_same_dr__full_space_vs_slice(int test_num, int small_rank, int large_
 **         m-cube (m >= n).
 **
 **    2) The dimensions selected in the slice through the m-cube
-**       are the dimesnions with the most quickly changing
+**       are the dimensions with the most quickly changing
 **       indices.
 **
 ****************************************************************/

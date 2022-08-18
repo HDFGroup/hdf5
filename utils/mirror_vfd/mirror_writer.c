@@ -291,7 +291,7 @@ session_start(int socketfd, const H5FD_mirror_xmit_open_t *xmit_open)
 {
     struct mirror_session    *session = NULL;
     struct mirror_writer_opts opts;
-#if 0 /* TODO: behaviro option */
+#if 0 /* TODO: behavior option */
     char logpath[H5FD_MIRROR_XMIT_FILEPATH_MAX] = "";
 #endif
 

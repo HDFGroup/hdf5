@@ -3513,7 +3513,7 @@ done:
  USAGE
     hssize_t H5S__hyper_get_enc_size_real(max_size, enc_size)
         hsize_t max_size:       IN: The maximum size of the hyperslab selection info
-        unint8_t *enc_size:     OUT:The encoding size
+        uint8_t *enc_size:      OUT:The encoding size
  RETURNS
     The size to encode hyperslab selection info
  DESCRIPTION

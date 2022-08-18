@@ -362,7 +362,7 @@ H5C_create(size_t max_cache_size, size_t min_clean_size, int max_type_id,
     cache_ptr->slist_size    = (size_t)0;
 
     /* slist_ring_len, slist_ring_size, and
-     * slist_ptr initializaed above.
+     * slist_ptr initialized above.
      */
 
 #if H5C_DO_SANITY_CHECKS
@@ -2982,7 +2982,7 @@ H5C_set_slist_enabled(H5C_t *cache_ptr, hbool_t slist_enabled, hbool_t clear_sli
         }
 
         /* set cache_ptr->slist_enabled to TRUE so that the slist
-         * mainenance macros will be enabled.
+         * maintenance macros will be enabled.
          */
         cache_ptr->slist_enabled = TRUE;
 
@@ -4089,7 +4089,7 @@ H5C_destroy_flush_dependency(void *parent_thing, void *child_thing)
                         "can't notify parent about child entry serialized flag set")
     } /* end if */
 
-    /* Shrink or free the parent array if apporpriate */
+    /* Shrink or free the parent array if appropriate */
     if (child_entry->flush_dep_nparents == 0) {
         child_entry->flush_dep_parent = H5FL_SEQ_FREE(H5C_cache_entry_ptr_t, child_entry->flush_dep_parent);
         child_entry->flush_dep_parent_nalloc = 0;

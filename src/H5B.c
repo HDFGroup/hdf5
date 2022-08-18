@@ -1458,7 +1458,7 @@ H5B__remove_helper(H5F_t *f, haddr_t addr, const H5B_class_t *type, int level, u
              */
             if (type->critical_key == H5B_LEFT)
                 /* Slide the rightmost key down one, overwriting the left key of
-                 * the deleted (righmost) child */
+                 * the deleted (rightmost) child */
                 HDmemmove(H5B_NKEY(bt, shared, bt->nchildren - 1), H5B_NKEY(bt, shared, bt->nchildren),
                           type->sizeof_nkey);
             else {
