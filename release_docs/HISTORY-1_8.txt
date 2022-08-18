@@ -1266,7 +1266,7 @@ New Features
 
       (BMR, 2017/05/13, HDFFV-10004, HDFFV-10156)
 
-    - New class LinkAccPropList is added for link access proprety list
+    - New class LinkAccPropList is added for link access property list
 
       (BMR, 2017/05/13, HDFFV-10156)
 
