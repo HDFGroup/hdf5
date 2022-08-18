@@ -210,7 +210,7 @@ H5_init_library(void)
      * Install atexit() library cleanup routines unless the H5dont_atexit()
      * has been called.  Once we add something to the atexit() list it stays
      * there permanently, so we set H5_dont_atexit_g after we add it to prevent
-     * adding it again later if the library is cosed and reopened.
+     * adding it again later if the library is closed and reopened.
      */
     if (!H5_dont_atexit_g) {
 

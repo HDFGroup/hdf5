@@ -53,7 +53,7 @@ static void coll_chunktest(const char *filename, int chunk_factor, int select_fa
  */
 
 /* ------------------------------------------------------------------------
- *  Descriptions for the selection: One big singluar selection inside one chunk
+ *  Descriptions for the selection: One big singular selection inside one chunk
  *  Two dimensions,
  *
  *  dim1       = SPACE_DIM1(5760)*mpi_size

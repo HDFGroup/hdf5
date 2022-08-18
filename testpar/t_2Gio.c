@@ -3493,7 +3493,7 @@ test_actual_io_mode(int selection_mode)
              * process. To get mixed I/O, have the root select all chunks and each
              * subsequent process select the first and nth chunk. The first chunk,
              * accessed by all, will be assigned collective I/O while each other chunk
-             * will be accessed only by the root and the nth procecess and will be
+             * will be accessed only by the root and the nth process and will be
              * assigned independent I/O. Each process will access one chunk collectively
              * and at least one chunk independently, reporting mixed I/O.
              */

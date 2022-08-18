@@ -2066,7 +2066,7 @@ rr_obj_hdr_flush_confusion_writer(MPI_Comm comm)
      * flush the metadata cache yet again to clean the object headers.
      *
      * This is an attempt to create a situation where we have dirty
-     * object header continuation chunks, but clean opject headers
+     * object header continuation chunks, but clean object headers
      * to verify a speculative bug fix -- it doesn't seem to work,
      * but I will leave the code in anyway, as the object header
      * code is going to change a lot in the near future.

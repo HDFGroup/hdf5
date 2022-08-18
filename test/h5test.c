@@ -1533,7 +1533,7 @@ h5_szip_can_encode(void)
  *     further calls to getenv_all take place.
  *
  * Return:  pointer to a string containing the value of the environment variable
- *     NULL if the varialbe doesn't exist in task 'root's environment.
+ *     NULL if the variable doesn't exist in task 'root's environment.
  *
  * Programmer:  Leon Arber
  *              4/4/05

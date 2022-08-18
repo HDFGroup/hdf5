@@ -2078,7 +2078,7 @@ fi
 ##       beneficial in some HDF5 use cases (in callbacks, custom VOL or VFD
 ##       connectors) so we use a custom RW lock scheme.
 ##
-## Reqires a thread-safe library and Pthreads.
+## Requires a thread-safe library and Pthreads.
 AC_SUBST([RECURSIVE_RW_LOCKS])
 
 ## Default is to not use recursive RW locks

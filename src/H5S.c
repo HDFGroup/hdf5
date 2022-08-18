@@ -1985,7 +1985,7 @@ done:
     htri_t H5S_extent_equal(ds1, ds2)
         H5S_t *ds1, *ds2;            IN: Dataspace objects to compare
  RETURNS
-     TRUE if equal, FALSE if unequal on succeess/Negative on failure
+     TRUE if equal, FALSE if unequal on success/Negative on failure
  DESCRIPTION
     Compare two dataspaces if their extents are identical.
 --------------------------------------------------------------------------*/

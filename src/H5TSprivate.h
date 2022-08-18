@@ -260,7 +260,7 @@ typedef struct H5TS_rw_lock_stats_t {
  * Structure H5TS_rw_lock_t
  *
  * A read / write lock, is a lock that allows either an arbitrary number
- * of readers, or a single writer into a critical region.  A recurssive
+ * of readers, or a single writer into a critical region.  A recursive
  * lock is one that allows a thread that already has a lock (be it read or
  * write) to successfully request the lock again, only dropping the lock
  * when the number of un-lock calls equals the number of lock calls.

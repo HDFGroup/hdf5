@@ -2457,7 +2457,7 @@ public class H5 implements java.io.Serializable {
      * @param src_did
      *            the identifier of the source dataset
      * @param dst_did
-     *            the identifier of the destinaiton dataset
+     *            the identifier of the destination dataset
      *
      * @return a non-negative value if successful
      *
@@ -10646,7 +10646,7 @@ public class H5 implements java.io.Serializable {
      * @param expression
      *            IN: Pointer to the null-terminated data transform expression
      *
-     * @return a non-negative valule if successful; otherwise returns a negative value.
+     * @return a non-negative value if successful; otherwise returns a negative value.
      *
      * @exception HDF5LibraryException
      *            Error from the HDF5 Library.
@@ -10887,7 +10887,7 @@ public class H5 implements java.io.Serializable {
      * @param crt_intermed_group
      *            IN: Flag specifying whether to create intermediate groups upon the creation of an object
      *
-     * @return a non-negative valule if successful; otherwise returns a negative value.
+     * @return a non-negative value if successful; otherwise returns a negative value.
      *
      * @exception HDF5LibraryException
      *            Error from the HDF5 Library.
@@ -14894,7 +14894,7 @@ public class H5 implements java.io.Serializable {
     /**
      * @ingroup JH5T
      *
-     * H5Tset_sign sets the sign proprety for an integer type.
+     * H5Tset_sign sets the sign property for an integer type.
      *
      * @param type_id
      *            IN: Identifier of datatype to set.

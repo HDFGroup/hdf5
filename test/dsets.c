@@ -1825,7 +1825,7 @@ filter_corrupt(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_valu
         TEST_ERROR
     HDmemset(data, (int)value, (size_t)length);
 
-    if (flags & H5Z_FLAG_REVERSE) { /* Varify data is actually corrupted during read */
+    if (flags & H5Z_FLAG_REVERSE) { /* Verify data is actually corrupted during read */
         dst += offset;
         if (HDmemcmp(data, dst, (size_t)length) != 0)
             TEST_ERROR
@@ -7720,7 +7720,7 @@ test_missing_chunk(hid_t file)
     if (H5Dread(did2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata2_bytes) < 0)
         TEST_ERROR;
 
-    /* Validata values read for the 1-D dataset */
+    /* Validate values read for the 1-D dataset */
     for (u = 0; u < MISSING_CHUNK_DIM; u++) {
         if ((u % 10) >= 5) {
             if (rdata[u] != 911) {
@@ -7737,7 +7737,7 @@ test_missing_chunk(hid_t file)
         }     /* end else */
     }         /* end for */
 
-    /* Validata values read for the 2-D dataset */
+    /* Validate values read for the 2-D dataset */
     for (i = 0; i < MISSING_CHUNK_DIM; i++) {
         for (j = 0; j < MISSING_CHUNK_DIM; j++) {
 
@@ -8843,7 +8843,7 @@ test_chunk_cache(hid_t fapl)
     if ((dsid = H5Dcreate2(fid, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, dapl1)) < 0)
         FAIL_STACK_ERROR
 
-    /* Retrieve dapl from dataset, verfiy cache values are the same as on fapl_local */
+    /* Retrieve dapl from dataset, verify cache values are the same as on fapl_local */
     if ((dapl2 = H5Dget_access_plist(dsid)) < 0)
         FAIL_STACK_ERROR
     if (H5Pget_chunk_cache(dapl2, &nslots_4, &nbytes_4, &w0_4) < 0)
@@ -8867,7 +8867,7 @@ test_chunk_cache(hid_t fapl)
     if ((dsid = H5Oopen(fid, "dset", dapl1)) < 0)
         FAIL_STACK_ERROR
 
-    /* Retrieve dapl from dataset, verfiy cache values are the same as on dapl1 */
+    /* Retrieve dapl from dataset, verify cache values are the same as on dapl1 */
     /* Note we rely on the knowledge that H5Pget_chunk_cache retrieves these
      * values directly from the dataset structure, and not from a copy of the
      * dapl used to open the dataset (which is not preserved).
@@ -8887,7 +8887,7 @@ test_chunk_cache(hid_t fapl)
     if ((dsid = H5Dopen2(fid, "dset", H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
 
-    /* Retrieve dapl from dataset, verfiy cache values are the same on fapl_local */
+    /* Retrieve dapl from dataset, verify cache values are the same on fapl_local */
     if ((dapl2 = H5Dget_access_plist(dsid)) < 0)
         FAIL_STACK_ERROR
     if (H5Pget_chunk_cache(dapl2, &nslots_4, &nbytes_4, &w0_4) < 0)

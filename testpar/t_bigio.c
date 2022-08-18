@@ -1250,7 +1250,7 @@ create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type)
  */
 
 /* ------------------------------------------------------------------------
- *  Descriptions for the selection: One big singluar selection inside one chunk
+ *  Descriptions for the selection: One big singular selection inside one chunk
  *  Two dimensions,
  *
  *  dim1       = space_dim1(5760)*mpi_size

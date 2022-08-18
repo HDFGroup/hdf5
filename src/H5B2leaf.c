@@ -17,7 +17,7 @@
  *			Dec 01 2016
  *			Quincey Koziol
  *
- * Purpose:		Routines for managing v2 B-tree leaf ndoes.
+ * Purpose:		Routines for managing v2 B-tree leaf nodes.
  *
  *-------------------------------------------------------------------------
  */

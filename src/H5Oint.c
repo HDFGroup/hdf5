@@ -1441,7 +1441,7 @@ H5O_touch(const H5O_loc_t *loc, hbool_t force)
 
     /* Create/Update the modification time message */
     if (H5O_touch_oh(loc->file, oh, force) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "unable to update object modificaton time")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "unable to update object modification time")
 
     /* Mark object header as changed */
     oh_flags |= H5AC__DIRTIED_FLAG;

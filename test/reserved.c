@@ -479,7 +479,7 @@ error:
 int
 main(void)
 {
-    /* This test is currently not working properly; it should be revisted
+    /* This test is currently not working properly; it should be revisited
      * when we have time.
      *
      * (Also, we should try to make this test work with all the VFDs)
@@ -510,7 +510,7 @@ main(void)
     }
     else {
         HDputs(
-            "All address space reservation tests skippped - Incompatible with current Virtual File Driver");
+            "All address space reservation tests skipped - Incompatible with current Virtual File Driver");
     }
 #endif /* BROKEN */
 

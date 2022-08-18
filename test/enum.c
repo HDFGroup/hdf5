@@ -541,7 +541,7 @@ test_value_dsnt_exist(void)
 
     hid_t  datatype_id = (-1); /* identifiers */
     int    val;
-    char   nam[100];
+    char   name[100];
     size_t size = 100;
     TESTING("for non-existing name and value");
     /* Turn off error reporting since we expect failure in this test */
@@ -556,7 +556,7 @@ test_value_dsnt_exist(void)
     if (H5Tenum_valueof(datatype_id, "SAX", &val) >= 0)
         goto error;
     val = 3;
-    if (H5Tenum_nameof(datatype_id, &val, nam, size) >= 0)
+    if (H5Tenum_nameof(datatype_id, &val, name, size) >= 0)
         goto error;
 
     val = 2;
@@ -571,17 +571,17 @@ test_value_dsnt_exist(void)
 
     /* This call should fail since we did not create a member with value = 3*/
     val = 3;
-    if (H5Tenum_nameof(datatype_id, &val, nam, size) >= 0)
+    if (H5Tenum_nameof(datatype_id, &val, name, size) >= 0)
         goto error;
 
     /* This call should fail since we did not create a member with value = 11*/
     val = 11;
-    if (H5Tenum_nameof(datatype_id, &val, nam, size) >= 0)
+    if (H5Tenum_nameof(datatype_id, &val, name, size) >= 0)
         goto error;
 
     /* This call should fail since we did not create a member with value = 0*/
     val = 0;
-    if (H5Tenum_nameof(datatype_id, &val, nam, size) >= 0)
+    if (H5Tenum_nameof(datatype_id, &val, name, size) >= 0)
         goto error;
 
     /* This call should fail since we do not have SAX name in the type */

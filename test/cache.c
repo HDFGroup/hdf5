@@ -9853,15 +9853,6 @@ check_flush_cache__flush_op_eviction_test(H5F_t *file_ptr)
  * Programmer:    John Mainzer
  *              1/12/05
  *
- * Modifications:
- *
- *         JRM -- 3/29/06
- *         Added tests for pinned entries.
- *
- *         JRM -- 5/17/06
- *         Complete reqrite of pinned entry tests to accommodate
- *         the new H5C_mark_entry_dirty() call.
- *
  *-------------------------------------------------------------------------
  */
 
@@ -33492,7 +33483,7 @@ cedds__H5C_flush_invalidate_cache__bucket_scan(H5F_t *file_ptr)
 
     if (pass) {
 
-        /* load the entry that will have a flush dependencey with (MET, 0),
+        /* load the entry that will have a flush dependency with (MET, 0),
          * thus preventing it from being flushed on the first pass through
          * the skip list.
          */

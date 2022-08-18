@@ -903,7 +903,7 @@ done:
  *
  * Purpose:    Set the file driver (DRIVER_ID) for a file access
  *        property list (PLIST_ID) and supply an optional
- *        struct containing the driver-specific properites
+ *        struct containing the driver-specific properties
  *        (DRIVER_INFO).  The driver properties will be copied into the
  *        property list and the reference count on the driver will be
  *        incremented, allowing the caller to close the driver ID but
@@ -950,7 +950,7 @@ done:
  *
  * Purpose:    Set the file driver (DRIVER_ID) for a file access
  *        property list (PLIST_ID) and supply an optional
- *        struct containing the driver-specific properites
+ *        struct containing the driver-specific properties
  *        (DRIVER_INFO).  The driver properties will be copied into the
  *        property list and the reference count on the driver will be
  *        incremented, allowing the caller to close the driver ID but
@@ -2583,7 +2583,7 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Jacob Gruber
- *              Thurday, August 11, 2011
+ *              Thursday, August 11, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -2680,7 +2680,7 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Jacob Gruber
- *              Thurday, August 11, 2011
+ *              Thursday, August 11, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -2755,7 +2755,7 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Jacob Gruber
- *              Thurday, August 11, 2011
+ *              Thursday, August 11, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -2831,7 +2831,7 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Jacob Gruber
- *              Thurday, August 11, 2011
+ *              Thursday, August 11, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -3233,7 +3233,7 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Jacob Gruber
- *              Thurday, August 11, 2011
+ *              Thursday, August 11, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -3263,7 +3263,7 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Jacob Gruber
- *              Thurday, August 11, 2011
+ *              Thursday, August 11, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -3362,7 +3362,7 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Jacob Gruber
- *              Thurday, August 11, 2011
+ *              Thursday, August 11, 2011
  *
  *-------------------------------------------------------------------------
  */

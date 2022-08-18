@@ -590,7 +590,7 @@ tts_rw_lock_smoke_check_test_thread(void *_udata)
  * The reader threads obtain and drop the read lock a specified
  * number of times.  Once a reader has a read lock, it does random
  * recursive read locks / unlocks until drops the read lock, and then
- * repeats the process until the spcified number of read locks have
+ * repeats the process until the specified number of read locks have
  * been acquired and dropped.
  *
  * Created Sept. 3. 2020.
@@ -836,7 +836,7 @@ cleanup_rec_rw_lock_smoke_check_2(void)
  * The writer threads obtain and drop the read lock a specified
  * number of times.  Once a writeer has a write lock, it does random
  * recursive write locks / unlocks until drops the write lock, and then
- * repeats the process until the spcified number of write locks have
+ * repeats the process until the specified number of write locks have
  * been acquired and dropped.
  *
  * Created Sept. 3. 2020.
@@ -1082,7 +1082,7 @@ cleanup_rec_rw_lock_smoke_check_3(void)
  * The reader / writer threads obtain and drop the read or write
  * locks a specified number of times.  Once a thread has a lock, it
  * does random recursive locks / unlocks until drops the lock, and then
- * repeats the process until the spcified number of locks have
+ * repeats the process until the specified number of locks have
  * been acquired and dropped.
  *
  * Created Sept. 3. 2020.

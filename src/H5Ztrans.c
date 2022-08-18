@@ -363,7 +363,7 @@ H5Z__unget_token(H5Z_token *current)
  *              kept internal to the H5Z_token and handled by this and the
  *              unget_H5Z_token function.
  *
- * Return:      Succeess:       The passed in H5Z_token with a valid tok_type
+ * Return:      Success:        The passed in H5Z_token with a valid tok_type
  *                              field.
  *              Failure:        The passed in H5Z_token but with the tok_type
  *                              field set to ERROR.

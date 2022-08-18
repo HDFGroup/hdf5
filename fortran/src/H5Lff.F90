@@ -1418,7 +1418,7 @@ CONTAINS
 !
 ! AUTHOR
 !  M. Scot Breitenfeld
-!  Augest 18, 2008
+!  August 18, 2008
 !
 ! Fortran2003 Interface:
   SUBROUTINE h5literate_by_name_f(loc_id, group_name, index_type, order, &
