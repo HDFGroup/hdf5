@@ -29,7 +29,7 @@ else ()
       -D "TEST_OUTPUT=cpp_testhdf5.txt"
       #-D "TEST_REFERENCE=cpp_testhdf5.out"
       -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-      -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      -P "${HDF_RESOURCES_DIR}/runTest.cmake"
   )
 endif ()
 set_tests_properties (CPP_testhdf5 PROPERTIES

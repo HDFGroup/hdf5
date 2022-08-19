@@ -87,7 +87,7 @@ else ()
       -D "TEST_OUTPUT=testhdf5_fortran.txt"
       #-D "TEST_REFERENCE=testhdf5_fortran.out"
       -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-      -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      -P "${HDF_RESOURCES_DIR}/runTest.cmake"
   )
 endif ()
 #set_tests_properties (FORTRAN_testhdf5_fortran PROPERTIES PASS_REGULAR_EXPRESSION "[ ]*0 error.s")
@@ -110,7 +110,7 @@ else ()
       -D "TEST_OUTPUT=testhdf5_fortran_1_8.txt"
       #-D "TEST_REFERENCE=testhdf5_fortran_1_8.out"
       -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-      -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      -P "${HDF_RESOURCES_DIR}/runTest.cmake"
   )
 endif ()
 #set_tests_properties (FORTRAN_testhdf5_fortran_1_8 PROPERTIES PASS_REGULAR_EXPRESSION "[ ]*0 error.s")
@@ -134,7 +134,7 @@ else ()
       -D "TEST_OUTPUT=fortranlib_test_F03.txt"
       #-D "TEST_REFERENCE=fortranlib_test_F03.out"
       -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-      -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      -P "${HDF_RESOURCES_DIR}/runTest.cmake"
   )
 endif ()
 #  set_tests_properties (FORTRAN_fortranlib_test_F03 PROPERTIES PASS_REGULAR_EXPRESSION "[ ]*0 error.s")
@@ -158,7 +158,7 @@ else ()
       -D "TEST_OUTPUT=vol_connector.txt"
       #-D "TEST_REFERENCE=vol_connector.out"
       -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-      -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      -P "${HDF_RESOURCES_DIR}/runTest.cmake"
   )
 endif ()
 set_tests_properties (FORTRAN_vol_connector PROPERTIES
