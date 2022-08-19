@@ -650,10 +650,8 @@ done:
 int
 h5str_sprint_reference(JNIEnv *env, h5str_t *out_str, hid_t region_obj, void *ref_buf)
 {
-    hid_t region = H5I_INVALID_HID;
-    char  ref_name[1024];
-
-    int ret_value = FAIL;
+    char ref_name[1024];
+    int  ret_value = FAIL;
 
     if ((H5Rget_name(region_obj, H5R_DATASET_REGION, ref_buf, (char *)ref_name, 1024)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -661,8 +659,8 @@ h5str_sprint_reference(JNIEnv *env, h5str_t *out_str, hid_t region_obj, void *re
         H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
 
     ret_value = SUCCEED;
-done:
 
+done:
     return ret_value;
 } /* h5str_sprint_reference */
 
@@ -2132,14 +2130,15 @@ h5str_render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem, hs
             }
 
             for (block_index = 0; block_index < block_nelmts; block_index++) {
-                mem = ((unsigned char *)_mem) + block_index * size;
+                hvl_t vl_elem;
+
+                HDmemcpy(&vl_elem, ((unsigned char *)_mem) + block_index * size, sizeof(hvl_t));
 
                 /* Get the number of sequence elements */
-                nelmts = ((hvl_t *)mem)->len;
+                nelmts = vl_elem.len;
 
                 /* dump the array element */
-                if (h5str_render_bin_output(stream, container, memb, ((char *)(((hvl_t *)mem)->p)), nelmts) <
-                    0) {
+                if (h5str_render_bin_output(stream, container, memb, ((char *)(vl_elem.p)), nelmts) < 0) {
                     ret_value = FAIL;
                     break;
                 }
@@ -2563,8 +2562,8 @@ h5str_dump_simple_dset(JNIEnv *env, FILE *stream, hid_t dset, int binary_order)
     int     carry; /* counter carry value */
 
     /* Print info */
-    hsize_t p_nelmts;      /* total selected elmts */
-    size_t  p_type_nbytes; /* size of memory type */
+    hssize_t p_nelmts;      /* total selected elmts */
+    size_t   p_type_nbytes; /* size of memory type */
 
     /* Stripmine info */
     unsigned char *sm_buf = NULL;              /* buffer for raw data */
@@ -2758,7 +2757,7 @@ h5str_dump_simple_mem(JNIEnv *env, FILE *stream, hid_t attr_id, int binary_order
     int      ndims;                    /* rank of dataspace */
     unsigned i;                        /* counters  */
     hsize_t  total_size[H5S_MAX_RANK]; /* total size of dataset*/
-    hsize_t  p_nelmts;                 /* total selected elmts */
+    hssize_t p_nelmts;                 /* total selected elmts */
 
     unsigned char *sm_buf = NULL;         /* buffer for raw data */
     hsize_t        sm_size[H5S_MAX_RANK]; /* stripmine size */
