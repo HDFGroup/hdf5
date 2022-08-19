@@ -1911,7 +1911,7 @@ generate_subfile_name(subfiling_context_t *sf_context, int file_acc_flags, char 
      *   ABC.h5.subfile_<file-number>.config
      */
     num_digits = (int)(HDlog10(n_io_concentrators) + 1);
-    HDsnprintf(filename_out, filename_out_len, "%s/%s" H5FD_SUBFILING_FILENAME_TEMPLATE, subfile_dir, base,
+    HDsnprintf(filename_out, filename_out_len, "%s/" H5FD_SUBFILING_FILENAME_TEMPLATE, subfile_dir, base,
                sf_context->h5_file_id, num_digits, sf_context->topology->subfile_rank + 1,
                n_io_concentrators);
 
@@ -1986,7 +1986,7 @@ create_config_file(subfiling_context_t *sf_context, const char *base_filename, c
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                 "couldn't allocate space for subfiling configuration filename");
 
-    HDsnprintf(config_filename, PATH_MAX, "%s/%s" H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE, subfile_dir,
+    HDsnprintf(config_filename, PATH_MAX, "%s/" H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE, subfile_dir,
                base_filename, sf_context->h5_file_id);
 
     /* Determine whether a subfiling configuration file exists */
@@ -2045,7 +2045,7 @@ create_config_file(subfiling_context_t *sf_context, const char *base_filename, c
         /* Write out each subfile name to the configuration file */
         num_digits = (int)(HDlog10(n_io_concentrators) + 1);
         for (int k = 0; k < n_io_concentrators; k++) {
-            HDsnprintf(line_buf, PATH_MAX, "%s" H5FD_SUBFILING_FILENAME_TEMPLATE "\n", base_filename,
+            HDsnprintf(line_buf, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE "\n", base_filename,
                        sf_context->h5_file_id, num_digits, k + 1, n_io_concentrators);
 
             if (HDfwrite(line_buf, HDstrlen(line_buf), 1, config_file) != 1)
@@ -2112,7 +2112,7 @@ open_config_file(subfiling_context_t *sf_context, const char *base_filename, con
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                 "couldn't allocate space for subfiling configuration filename");
 
-    HDsnprintf(config_filename, PATH_MAX, "%s/%s" H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE, subfile_dir,
+    HDsnprintf(config_filename, PATH_MAX, "%s/" H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE, subfile_dir,
                base_filename, sf_context->h5_file_id);
 
     /* Determine whether a subfiling configuration file exists */

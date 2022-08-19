@@ -1647,7 +1647,7 @@ H5FD__ioc_del(const char *name, hid_t fapl)
                                     "can't allocate config file name buffer");
 
         /* TODO: No support for subfile directory prefix currently */
-        HDsnprintf(tmp_filename, PATH_MAX, "%s/%s" H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE, file_dirname,
+        HDsnprintf(tmp_filename, PATH_MAX, "%s/" H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE, file_dirname,
                    base_filename, (uint64_t)st.st_ino);
 
         if (NULL == (config_file = HDfopen(tmp_filename, "r"))) {
@@ -1684,7 +1684,7 @@ H5FD__ioc_del(const char *name, hid_t fapl)
 
         for (int i = 0; i < n_io_concentrators; i++) {
             /* TODO: No support for subfile directory prefix currently */
-            HDsnprintf(tmp_filename, PATH_MAX, "%s/%s" H5FD_SUBFILING_FILENAME_TEMPLATE, file_dirname,
+            HDsnprintf(tmp_filename, PATH_MAX, "%s/" H5FD_SUBFILING_FILENAME_TEMPLATE, file_dirname,
                        base_filename, (uint64_t)st.st_ino, num_digits, i + 1, n_io_concentrators);
 
             if (HDremove(tmp_filename) < 0) {

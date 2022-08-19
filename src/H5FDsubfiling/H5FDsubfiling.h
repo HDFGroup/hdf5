@@ -54,15 +54,38 @@
 
 /**
  * \def H5FD_SUBFILING_FILENAME_TEMPLATE
- * The basic template for a sub-file filename
+ * The basic template for a sub-file filename. The format specifiers
+ * correspond to:
+ *
+ * %s      -> base filename, e.g. "file.h5"
+ * %PRIu64 -> file inode, e.g. 11273556
+ * %0*d    -> number (starting at 1) signifying the Nth (out of total
+ *            number of I/O concentrators) subfile. Zero-padded according
+ *            to the number of digits in the number of I/O concentrators
+ *            (calculated by log10(n_io_concentrators) + 1)
+ * %d      -> number of I/O concentrators
+ *
+ * yielding filenames such as:
+ *
+ * file.h5.subfile_11273556_01_of_10
+ * file.h5.subfile_11273556_02_of_10
+ * file.h5.subfile_11273556_10_of_10
  */
-#define H5FD_SUBFILING_FILENAME_TEMPLATE ".subfile_%" PRIu64 "_%0*d_of_%d"
+#define H5FD_SUBFILING_FILENAME_TEMPLATE "%s.subfile_%" PRIu64 "_%0*d_of_%d"
 
 /**
  * \def H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE
- * The basic template for a #H5FD_SUBFILING driver configuration filename
+ * The basic template for a #H5FD_SUBFILING driver configuration filename.
+ * The format specifiers correspond to:
+ *
+ * %s      -> base filename, e.g. "file.h5"
+ * %PRIu64 -> file inode, e.g. 11273556
+ *
+ * yielding a filename such as:
+ *
+ * file.h5.subfile_11273556.config
  */
-#define H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE ".subfile_%" PRIu64 ".config"
+#define H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE "%s.subfile_%" PRIu64 ".config"
 
 /*
  * Environment variables interpreted by the HDF5 Subfiling feature
