@@ -441,7 +441,7 @@ get_hyperslab(hid_t dcpl_id, int rank_dset, const hsize_t dims_dset[], size_t si
     hsize_t      dims_chunk[H5S_MAX_RANK];
     hsize_t      size_chunk = 1;
     hsize_t      nchunk_fit; /* number of chunks that fits in hyperslab buffer (H5TOOLS_BUFSIZE) */
-    hsize_t      ndatum_fit; /* number of dataum that fits in hyperslab buffer (H5TOOLS_BUFSIZE) */
+    hsize_t      ndatum_fit; /* number of datum that fits in hyperslab buffer (H5TOOLS_BUFSIZE) */
     hsize_t      chunk_dims_map[H5S_MAX_RANK]; /* mapped chunk dimensions */
     hsize_t      hs_dims_map[H5S_MAX_RANK];    /* mapped hyperslab dimensions */
     hsize_t      hslab_nbytes;                 /* size of hyperslab in byte */

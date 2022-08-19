@@ -14,8 +14,6 @@
  * Generic code for integrating an HDF5 VFD with the subfiling feature
  */
 
-#include <libgen.h>
-
 #include "H5subfiling_common.h"
 #include "H5subfiling_err.h"
 

@@ -385,7 +385,7 @@ while (<>) {
 	    $warning =~ s/"[A-Za-z_0-9]*"/"-"/g;
 	}
 
-	# Genericize [GCC?] C/C++ warning text about suggessted attribute
+	# Genericize [GCC?] C/C++ warning text about suggested attribute
 	if($warning =~ /attribute=[A-Za-z_0-9]*\]/) {
 	    $warning =~ s/=[A-Za-z_0-9]*\]/=-\]/g;
 	}

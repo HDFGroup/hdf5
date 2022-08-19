@@ -47,8 +47,11 @@ if (H5_HAVE_PARALLEL)
     ph5example
     ph5_filtered_writes
     ph5_filtered_writes_no_sel
-    ph5_subfiling
   )
+
+  if (HDF5_ENABLE_SUBFILING_VFD)
+    list (APPEND parallel_examples ph5_subfiling)
+  endif ()
 endif ()
 
 foreach (example ${examples})

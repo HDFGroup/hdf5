@@ -746,8 +746,8 @@ CONTAINS
                                                      ! element
     INTEGER, INTENT(IN), DIMENSION(dims(1),dims(2)), TARGET :: buf   ! Data buffer
     INTEGER, INTENT(OUT) :: hdferr      ! Error code
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id  ! Memory dataspace identfier
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id ! File dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id  ! Memory dataspace identifier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id ! File dataspace identifier
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp      ! Transfer property list identifier
     INTEGER(HID_T) :: xfer_prp_default
     INTEGER(HID_T) :: mem_space_id_default
@@ -800,8 +800,8 @@ CONTAINS
          DIMENSION(dims(1),dims(2)), TARGET :: buf   ! Data buffer
     INTEGER, INTENT(OUT) :: hdferr ! Error code
                                    ! -1 if failed, 0 otherwise
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id  ! Memory dataspace identfier
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id ! File dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id  ! Memory dataspace identifier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id ! File dataspace identifier
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp      ! Transfer property list identifier
     INTEGER(HID_T) :: xfer_prp_default
     INTEGER(HID_T)  :: mem_space_id_default
@@ -856,8 +856,8 @@ CONTAINS
     REAL, INTENT(IN), &
          DIMENSION(dims(1),dims(2)) :: buf ! Data buffer
     INTEGER, INTENT(OUT) :: hdferr         ! Error code
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id  ! Memory dataspace identfier
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id ! File dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id  ! Memory dataspace identifier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id ! File dataspace identifier
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp      ! Transfer property list identifier
 
     INTEGER(HID_T) :: xfer_prp_default
@@ -911,8 +911,8 @@ CONTAINS
          DIMENSION(dims(1),dims(2)) :: buf ! Data buffer
     INTEGER, INTENT(OUT) :: hdferr         ! Error code
                                            ! -1 if failed, 0 otherwise
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id  ! Memory dataspace identfier
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id ! File dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id  ! Memory dataspace identifier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id ! File dataspace identifier
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp      ! Transfer property list identifier
 
     INTEGER(HID_T) :: xfer_prp_default
@@ -967,8 +967,8 @@ CONTAINS
     INTEGER(SIZE_T), INTENT(IN), DIMENSION(*) :: str_len ! Array to store the length of each element
     CHARACTER(LEN=*), INTENT(IN), DIMENSION(dims(2)) :: buf  ! Data buffer
     INTEGER, INTENT(OUT) :: hdferr  ! Error code
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id  ! Memory dataspace identfier
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id ! File dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id  ! Memory dataspace identifier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id ! File dataspace identifier
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp      ! Transfer property list identifier
 
     INTEGER(HID_T) :: xfer_prp_default
@@ -1023,8 +1023,8 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(OUT), &
          DIMENSION(dims(2)) :: buf      ! Data buffer
     INTEGER, INTENT(OUT) :: hdferr      ! Error code
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id  ! Memory dataspace identfier
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id ! File dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id  ! Memory dataspace identifier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id ! File dataspace identifier
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp      ! Transfer property list identifier
 
     INTEGER(HID_T) :: xfer_prp_default
@@ -1198,8 +1198,8 @@ CONTAINS
     INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: dims ! size of the buffer buf
     TYPE(hobj_ref_t_f), DIMENSION(dims(1)), INTENT(IN), TARGET :: buf ! Data buffer
     INTEGER, INTENT(OUT) :: hdferr      ! Error code
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id  ! Memory dataspace identfier
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id ! File dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id  ! Memory dataspace identifier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id ! File dataspace identifier
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp      ! Transfer property list identifier
 
     INTEGER(HID_T) :: xfer_prp_default
@@ -1230,8 +1230,8 @@ CONTAINS
     INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: dims ! size of the buffer buf
     TYPE(hdset_reg_ref_t_f), DIMENSION(dims(1)), INTENT(IN), TARGET :: buf ! Data buffer
     INTEGER, INTENT(OUT) :: hdferr      ! Error code
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id  ! Memory dataspace identfier
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id ! File dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id  ! Memory dataspace identifier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id ! File dataspace identifier
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp      ! Transfer property list identifier
 
     INTEGER(HID_T) :: xfer_prp_default
@@ -1292,8 +1292,8 @@ CONTAINS
     INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
     CHARACTER(*), INTENT(IN), TARGET :: buf ! Data buffer
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id  ! Memory dataspace identfier
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id ! File dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id  ! Memory dataspace identifier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id ! File dataspace identifier
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp      ! Transfer property list identifier
 
     CALL h5dwrite_char_scalar_fix(dset_id, mem_type_id, buf, LEN(buf), dims, hdferr, &
@@ -1311,8 +1311,8 @@ CONTAINS
     INTEGER, INTENT(IN) :: buf_len
     CHARACTER(LEN=buf_len), INTENT(IN), TARGET :: buf ! Data buffer
     INTEGER, INTENT(OUT) :: hdferr          ! Error code
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id  ! Memory dataspace identfier
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id ! File dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id  ! Memory dataspace identifier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id ! File dataspace identifier
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp      ! Transfer property list identifier
     INTEGER(HID_T) :: xfer_prp_default
     INTEGER(HID_T) :: mem_space_id_default
@@ -1344,8 +1344,8 @@ CONTAINS
     TYPE(hobj_ref_t_f), INTENT(INOUT) , &
          DIMENSION(dims(1)), TARGET :: buf
     INTEGER, INTENT(OUT) :: hdferr      ! Error code
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id  ! Memory dataspace identfier
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id ! File dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id  ! Memory dataspace identifier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id ! File dataspace identifier
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp      ! Transfer property list identifier
 
     INTEGER(HID_T) :: xfer_prp_default
@@ -1376,8 +1376,8 @@ CONTAINS
     TYPE(hdset_reg_ref_t_f), INTENT(INOUT), &
          DIMENSION(dims(1)), TARGET :: buf
     INTEGER, INTENT(OUT) :: hdferr      ! Error code
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id  ! Memory dataspace identfier
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id ! File dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id  ! Memory dataspace identifier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id ! File dataspace identifier
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp      ! Transfer property list identifier
     INTEGER(HID_T) :: xfer_prp_default
     INTEGER(HID_T) :: mem_space_id_default
@@ -1438,8 +1438,8 @@ CONTAINS
     INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
     CHARACTER(LEN=*), INTENT(INOUT) :: buf     ! Data buffer
     INTEGER, INTENT(OUT) :: hdferr             ! Error code
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id  ! Memory dataspace identfier
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id ! File dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id  ! Memory dataspace identifier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id ! File dataspace identifier
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp      ! Transfer property list identifier
 
     INTEGER(HID_T) :: xfer_prp_default
@@ -1468,8 +1468,8 @@ CONTAINS
     INTEGER, INTENT(IN)  :: buf_len
     CHARACTER(LEN=buf_len), INTENT(INOUT), TARGET :: buf ! Data buffer
     INTEGER, INTENT(OUT) :: hdferr      ! Error code
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id  ! Memory dataspace identfier
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id ! File dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id  ! Memory dataspace identifier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id ! File dataspace identifier
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp      ! Transfer property list identifier
 
     TYPE(C_PTR) :: f_ptr
@@ -1525,8 +1525,8 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
     TYPE(C_PTR), INTENT(IN) :: buf
     INTEGER, INTENT(OUT) :: hdferr      ! Error code
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id  ! Memory dataspace identfier
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id ! File dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id  ! Memory dataspace identifier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id ! File dataspace identifier
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp      ! Transfer property list identifier
 
     INTEGER(HID_T) :: xfer_prp_default
@@ -1590,8 +1590,8 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
     TYPE(C_PTR), INTENT(INOUT) :: buf
     INTEGER, INTENT(OUT) :: hdferr      ! Error code
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id  ! Memory dataspace identfier
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id ! File dataspace identfier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id  ! Memory dataspace identifier
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id ! File dataspace identifier
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp      ! Transfer property list identifier
 
     INTEGER(HID_T) :: xfer_prp_default

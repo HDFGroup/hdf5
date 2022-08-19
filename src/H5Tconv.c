@@ -3107,7 +3107,7 @@ H5T__conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, si
     H5T_path_t           *tpath         = NULL;       /* Type conversion path             */
     hbool_t               noop_conv     = FALSE;      /* Flag to indicate a noop conversion */
     hbool_t               write_to_file = FALSE;      /* Flag to indicate writing to file */
-    htri_t                parent_is_vlen;             /* Flag to indicate parent is vlen datatyp */
+    htri_t                parent_is_vlen;             /* Flag to indicate parent is vlen datatype */
     size_t                bg_seq_len = 0;             /* The number of elements in the background sequence */
     hid_t                 tsrc_id = -1, tdst_id = -1; /*temporary type atoms         */
     H5T_t                *src = NULL;                 /*source datatype             */
@@ -5085,7 +5085,7 @@ H5T__conv_s_s(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
             break;
 
         default:
-            HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unknown converson command")
+            HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unknown conversion command")
     } /* end switch */
 
 done:

@@ -2120,7 +2120,7 @@ test_create_oniontarget(hbool_t truncate_canonical, hbool_t with_initial_data)
         TEST_ERROR;
     vfile_raw = NULL;
 
-    /* R/O open the file with Onion VFD; inspect logial file */
+    /* R/O open the file with Onion VFD; inspect logical file */
 
     vfile_ro = H5FDopen(paths->canon, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF);
     if (NULL == vfile_ro)

@@ -22,7 +22,6 @@
 /********************/
 
 #include <stdatomic.h>
-#include <libgen.h>
 
 /**************/
 /* H5 Headers */

@@ -391,7 +391,7 @@ sub plot_default_graph1 {
 	print GNUPLOT_PIPE  "set term x11 1\n";
 	print GNUPLOT_PIPE  "set xlabel \"Number of Processors\"\n";
 	print GNUPLOT_PIPE  "set title \"" . $data_type . " Performance (Speed vs. Num. Procs)\"\n";
-	print GNUPLOT_PIPE  "set ylabel \"Bandwdith (MB/s)\"\n";
+	print GNUPLOT_PIPE  "set ylabel \"Bandwidth (MB/s)\"\n";
 	print GNUPLOT_PIPE  "set label 1 \"Transfer buffer size: " . $transfer_buffer_size . "K\" at graph 0.7, graph 0.7 left \n";
 
 #the next line attempts to hack gnuplot to get around it's inability to linearly scale, but logarithmically label an axis
@@ -435,7 +435,7 @@ sub plot_default_graph2 {
 	print GNUPLOT_PIPE  "set term x11 2\n";
 	print GNUPLOT_PIPE  "set xlabel \"Transfer Buffer Size (in bytes)\"\n";
 	print GNUPLOT_PIPE  "set title \"" . $data_type . " Performance (Speed vs. Transfer Buffer Size)\"\n";
-	print GNUPLOT_PIPE  "set ylabel \"Bandwdith (MB/s)\"\n";
+	print GNUPLOT_PIPE  "set ylabel \"Bandwidth (MB/s)\"\n";
 	print GNUPLOT_PIPE  "set label 1 \"Procs: " . $num_procs_graph . "\" at graph 0.7, graph 0.7 left \n";
 
 #the next line attempts to hack gnuplot to get around it's inability to linearly scale, but logarithmically label an axis

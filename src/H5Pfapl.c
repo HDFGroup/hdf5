@@ -3116,7 +3116,7 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Jacob Gruber
- *              Thurday, August 11, 2011
+ *              Thursday, August 11, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -3213,7 +3213,7 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Jacob Gruber
- *              Thurday, August 11, 2011
+ *              Thursday, August 11, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -3288,7 +3288,7 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Jacob Gruber
- *              Thurday, August 11, 2011
+ *              Thursday, August 11, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -3364,7 +3364,7 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Jacob Gruber
- *              Thurday, August 11, 2011
+ *              Thursday, August 11, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -3766,7 +3766,7 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Jacob Gruber
- *              Thurday, August 11, 2011
+ *              Thursday, August 11, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -3796,7 +3796,7 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Jacob Gruber
- *              Thurday, August 11, 2011
+ *              Thursday, August 11, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -3895,7 +3895,7 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Jacob Gruber
- *              Thurday, August 11, 2011
+ *              Thursday, August 11, 2011
  *
  *-------------------------------------------------------------------------
  */

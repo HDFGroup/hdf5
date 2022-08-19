@@ -922,7 +922,7 @@ notify_image_len(const void *thing, size_t *image_length)
 /*-------------------------------------------------------------------------
  * Function:    pre_serialize & friends
  *
- * Purpose:    Pre_serialize the supplied entry.  For now this consistes of
+ * Purpose:    Pre_serialize the supplied entry.  For now this consists of
  *         executing any flush operations and loading the appropriate
  *        values into *new_addr_ptr, *new_len_ptr, and *flags_ptr.
  *
@@ -1086,7 +1086,7 @@ notify_pre_serialize(H5F_t *f, void *thing, haddr_t addr, size_t len, haddr_t *n
 /*-------------------------------------------------------------------------
  * Function:    serialize & friends
  *
- * Purpose:    Serialize the supplied entry.  For now this consistes of
+ * Purpose:    Serialize the supplied entry.  For now this consists of
  *         loading the type and index of the entry into the first
  *         three bytes of the image (if it is long enough -- if not
  *         just load the low order byte of the index into the first

@@ -20,7 +20,12 @@
 include $(top_srcdir)/config/commence.am
 
 if BUILD_PARALLEL_CONDITIONAL
-  EXAMPLE_PROG_PARA = ph5example ph5_filtered_writes ph5_filtered_writes_no_sel ph5_subfiling
+  EXAMPLE_PROG_PARA = ph5example ph5_filtered_writes ph5_filtered_writes_no_sel
+
+if SUBFILING_VFD_CONDITIONAL
+  EXAMPLE_PROG_PARA += ph5_subfiling
+endif
+
 endif
 
 INSTALL_SCRIPT_FILES = run-c-ex.sh

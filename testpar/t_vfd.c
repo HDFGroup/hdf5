@@ -15,8 +15,6 @@
  *              This file is a catchall for parallel VFD tests.
  */
 
-#include <libgen.h>
-
 #include "testphdf5.h"
 
 #ifdef H5_HAVE_SUBFILING_VFD

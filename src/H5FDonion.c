@@ -978,7 +978,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "unable to allocate recovery name string")
     HDsnprintf(file->recovery_file_name, HDstrlen(name_onion) + 10, "%s.recovery", name_onion);
 
-    /* Translate H5P_DEFAULT to a a real fapl ID, if necessary */
+    /* Translate H5P_DEFAULT to a real fapl ID, if necessary */
     backing_fapl_id = H5FD__onion_get_legit_fapl_id(file->fa.backing_fapl_id);
     if (H5I_INVALID_HID == backing_fapl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid backing FAPL ID");
