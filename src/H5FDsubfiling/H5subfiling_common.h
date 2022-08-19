@@ -88,7 +88,8 @@
 /* MPI tag values for data communicator */
 #define WRITE_INDEP_ACK 0
 #define READ_INDEP_DATA 1
-#define WRITE_TAG_BASE  2
+#define WRITE_DATA_DONE 2
+#define WRITE_TAG_BASE  3
 
 /*
  * Object type definitions for subfiling objects.

@@ -1753,15 +1753,11 @@ H5FD__ioc_write_vector_internal(H5FD_t *_file, uint32_t count, H5FD_mem_t types[
                                 size_t sizes[], const void *bufs[] /* in */)
 {
     subfiling_context_t *sf_context    = NULL;
-    MPI_Request         *active_reqs   = NULL;
+    MPI_Request         *mpi_reqs      = NULL;
     H5FD_ioc_t          *file_ptr      = (H5FD_ioc_t *)_file;
-    io_req_t           **sf_async_reqs = NULL;
+    io_req_t           **sf_io_reqs    = NULL;
     int64_t              sf_context_id = -1;
     herr_t               ret_value     = SUCCEED;
-    struct __mpi_req {
-        int          n_reqs;
-        MPI_Request *active_reqs;
-    } *mpi_reqs = NULL;
 
     HDassert(_file);
     HDassert(addrs);
@@ -1778,20 +1774,19 @@ H5FD__ioc_write_vector_internal(H5FD_t *_file, uint32_t count, H5FD_mem_t types[
     HDassert(sf_context->topology);
     HDassert(sf_context->topology->n_io_concentrators);
 
-    if (NULL == (active_reqs = HDcalloc((size_t)(count + 2), sizeof(struct __mpi_req))))
-        H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                "can't allocate active I/O requests array");
-
-    if (NULL == (sf_async_reqs = HDcalloc((size_t)count, sizeof(*sf_async_reqs))))
-        H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate I/O request array");
-
     /*
-     * Note: We allocated extra space in the active_requests (above).
-     * The extra should be enough for an integer plus a pointer.
+     * Allocate an array of I/O requests and an array twice that size for
+     * MPI_Request objects. Each write I/O request has an MPI_Request
+     * object for the I/O data transfer and an MPI_Request object that,
+     * when waited on until completion, signifies that the actual I/O
+     * call (currently, HDpwrite) has completed. This is needed for ensuring
+     * that blocking write calls do not return early before the data is
+     * actually written.
      */
-    mpi_reqs              = (struct __mpi_req *)&active_reqs[count];
-    mpi_reqs->n_reqs      = (int)count;
-    mpi_reqs->active_reqs = active_reqs;
+    if (NULL == (sf_io_reqs = HDcalloc((size_t)count, sizeof(*sf_io_reqs))))
+        H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate I/O request array");
+    if (NULL == (mpi_reqs = HDmalloc(2 * (size_t)count * sizeof(*mpi_reqs))))
+        H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate MPI request array");
 
     /* Each pass thru the following should queue an MPI write
      * to a new IOC. Both the IOC selection and offset within the
@@ -1808,12 +1803,13 @@ H5FD__ioc_write_vector_internal(H5FD_t *_file, uint32_t count, H5FD_mem_t types[
         H5_CHECK_OVERFLOW(sizes[i], size_t, int64_t);
         write_status =
             ioc__write_independent_async(sf_context_id, sf_context->topology->n_io_concentrators,
-                                         (int64_t)addrs[i], (int64_t)sizes[i], bufs[i], &sf_async_reqs[i]);
+                                         (int64_t)addrs[i], (int64_t)sizes[i], bufs[i], &sf_io_reqs[i]);
 
         if (write_status < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "couldn't queue write operation");
 
-        mpi_reqs->active_reqs[i] = sf_async_reqs[i]->completion_func.io_args.io_req;
+        mpi_reqs[(2 * i)]     = sf_io_reqs[i]->io_transfer_req;
+        mpi_reqs[(2 * i) + 1] = sf_io_reqs[i]->io_comp_req;
     }
 
     /*
@@ -1823,7 +1819,7 @@ H5FD__ioc_write_vector_internal(H5FD_t *_file, uint32_t count, H5FD_mem_t types[
      */
     for (size_t i = 0; i < (size_t)count; i++) {
         if (types[i] == H5FD_MEM_SUPER) {
-            if (H5FDwrite(file_ptr->ioc_file, H5FD_MEM_SUPER, H5P_DEFAULT, addrs[i], sizes[i], bufs[i]) < 0)
+            if (H5FD_write(file_ptr->ioc_file, H5FD_MEM_SUPER, addrs[i], sizes[i], bufs[i]) < 0)
                 H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
                                         "couldn't write superblock information to stub file");
         }
@@ -1833,20 +1829,16 @@ H5FD__ioc_write_vector_internal(H5FD_t *_file, uint32_t count, H5FD_mem_t types[
      * We can can now try to complete those before returning
      * to the caller for the next set of IO operations.
      */
-    if (sf_async_reqs[0]->completion_func.io_function)
-        ret_value = (*sf_async_reqs[0]->completion_func.io_function)(mpi_reqs);
+    if (ioc__async_completion(mpi_reqs, 2 * (size_t)count) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "can't complete I/O requests");
 
 done:
-    if (active_reqs)
-        HDfree(active_reqs);
+    HDfree(mpi_reqs);
 
-    if (sf_async_reqs) {
-        for (size_t i = 0; i < (size_t)count; i++) {
-            if (sf_async_reqs[i]) {
-                HDfree(sf_async_reqs[i]);
-            }
-        }
-        HDfree(sf_async_reqs);
+    if (sf_io_reqs) {
+        for (size_t i = 0; i < count; i++)
+            HDfree(sf_io_reqs[i]);
+        HDfree(sf_io_reqs);
     }
 
     H5_SUBFILING_FUNC_LEAVE;
@@ -1857,15 +1849,11 @@ H5FD__ioc_read_vector_internal(H5FD_t *_file, uint32_t count, haddr_t addrs[], s
                                void *bufs[] /* out */)
 {
     subfiling_context_t *sf_context    = NULL;
-    MPI_Request         *active_reqs   = NULL;
+    MPI_Request         *mpi_reqs      = NULL;
     H5FD_ioc_t          *file_ptr      = (H5FD_ioc_t *)_file;
-    io_req_t           **sf_async_reqs = NULL;
+    io_req_t           **sf_io_reqs    = NULL;
     int64_t              sf_context_id = -1;
     herr_t               ret_value     = SUCCEED;
-    struct __mpi_req {
-        int          n_reqs;
-        MPI_Request *active_reqs;
-    } *mpi_reqs = NULL;
 
     HDassert(_file);
     HDassert(addrs);
@@ -1882,20 +1870,17 @@ H5FD__ioc_read_vector_internal(H5FD_t *_file, uint32_t count, haddr_t addrs[], s
     HDassert(sf_context->topology);
     HDassert(sf_context->topology->n_io_concentrators);
 
-    if (NULL == (active_reqs = HDcalloc((size_t)(count + 2), sizeof(struct __mpi_req))))
-        H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                "can't allocate active I/O requests array");
-
-    if (NULL == (sf_async_reqs = HDcalloc((size_t)count, sizeof(*sf_async_reqs))))
-        H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate I/O request array");
-
     /*
-     * Note: We allocated extra space in the active_requests (above).
-     * The extra should be enough for an integer plus a pointer.
+     * Allocate an array of I/O requests and an array for MPI_Request
+     * objects. Each read I/O request has an MPI_Request object for the
+     * I/O data transfer that, when waited on until completion, signifies
+     * that the actual I/O call (currently, HDpread) has completed and
+     * the data read from the file has been transferred to the caller.
      */
-    mpi_reqs              = (struct __mpi_req *)&active_reqs[count];
-    mpi_reqs->n_reqs      = (int)count;
-    mpi_reqs->active_reqs = active_reqs;
+    if (NULL == (sf_io_reqs = HDcalloc((size_t)count, sizeof(*sf_io_reqs))))
+        H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate I/O request array");
+    if (NULL == (mpi_reqs = HDmalloc((size_t)count * sizeof(*mpi_reqs))))
+        H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate MPI request array");
 
     for (size_t i = 0; i < (size_t)count; i++) {
         int read_status;
@@ -1904,12 +1889,12 @@ H5FD__ioc_read_vector_internal(H5FD_t *_file, uint32_t count, haddr_t addrs[], s
         H5_CHECK_OVERFLOW(sizes[i], size_t, int64_t);
         read_status =
             ioc__read_independent_async(sf_context_id, sf_context->topology->n_io_concentrators,
-                                        (int64_t)addrs[i], (int64_t)sizes[i], bufs[i], &sf_async_reqs[i]);
+                                        (int64_t)addrs[i], (int64_t)sizes[i], bufs[i], &sf_io_reqs[i]);
 
         if (read_status < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "couldn't queue read operation");
 
-        mpi_reqs->active_reqs[i] = sf_async_reqs[i]->completion_func.io_args.io_req;
+        mpi_reqs[i] = sf_io_reqs[i]->io_transfer_req;
     }
 
     /* Here, we should have queued 'count' async requests
@@ -1918,20 +1903,16 @@ H5FD__ioc_read_vector_internal(H5FD_t *_file, uint32_t count, haddr_t addrs[], s
      * We can can now try to complete those before returning
      * to the caller for the next set of IO operations.
      */
-    if (sf_async_reqs[0]->completion_func.io_function)
-        ret_value = (*sf_async_reqs[0]->completion_func.io_function)(mpi_reqs);
+    if (ioc__async_completion(mpi_reqs, (size_t)count) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "can't complete I/O requests");
 
 done:
-    if (active_reqs)
-        HDfree(active_reqs);
+    HDfree(mpi_reqs);
 
-    if (sf_async_reqs) {
-        for (size_t i = 0; i < count; i++) {
-            if (sf_async_reqs[i]) {
-                HDfree(sf_async_reqs[i]);
-            }
-        }
-        HDfree(sf_async_reqs);
+    if (sf_io_reqs) {
+        for (size_t i = 0; i < count; i++)
+            HDfree(sf_io_reqs[i]);
+        HDfree(sf_io_reqs);
     }
 
     H5_SUBFILING_FUNC_LEAVE;

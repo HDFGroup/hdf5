@@ -831,6 +831,13 @@ ioc_file_queue_write_indep(sf_work_request_t *msg, int subfile_rank, int source,
 
     H5FD_ioc_end_thread_exclusive();
 
+    /*
+     * Send a message back to the client that the I/O call has
+     * completed and it is safe to return from the write call
+     */
+    if (MPI_SUCCESS != (mpi_code = MPI_Send(&rcv_tag, 1, MPI_INT, source, WRITE_DATA_DONE, comm)))
+        H5_SUBFILING_MPI_GOTO_ERROR(-1, "MPI_Send failed", mpi_code);
+
 done:
     if (send_nack) {
         /* Send NACK back to client so client can handle failure gracefully */

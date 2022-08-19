@@ -16,8 +16,6 @@
 
 #include "H5FDioc_priv.h"
 
-static int async_completion(void *arg);
-
 /*
  * Given a file offset, the stripe size and
  * the number of IOCs, calculate the target
@@ -162,16 +160,23 @@ ioc__write_independent_async(int64_t context_id, int n_io_concentrators, int64_t
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_WRITEERROR, FAIL, "couldn't allocate I/O request");
 
     H5_CHECK_OVERFLOW(ioc_start, int64_t, int);
-    sf_io_request->completion_func.io_args.ioc        = (int)ioc_start;
-    sf_io_request->completion_func.io_args.context_id = context_id;
-    sf_io_request->completion_func.io_args.offset     = offset;
-    sf_io_request->completion_func.io_args.elements   = elements;
-    sf_io_request->completion_func.io_args.data       = cast_to_void(data);
-    sf_io_request->completion_func.io_args.io_req     = MPI_REQUEST_NULL;
-    sf_io_request->completion_func.io_function        = async_completion;
-    sf_io_request->completion_func.pending            = 0;
+    sf_io_request->ioc             = (int)ioc_start;
+    sf_io_request->context_id      = context_id;
+    sf_io_request->offset          = offset;
+    sf_io_request->elements        = elements;
+    sf_io_request->data            = cast_to_void(data);
+    sf_io_request->io_transfer_req = MPI_REQUEST_NULL;
+    sf_io_request->io_comp_req     = MPI_REQUEST_NULL;
+    sf_io_request->io_comp_tag     = -1;
 
-    sf_io_request->prev = sf_io_request->next = NULL;
+    /*
+     * Start a non-blocking receive from the IOC that signifies
+     * when the actual write is complete
+     */
+    if (MPI_SUCCESS != (mpi_code = MPI_Irecv(&sf_io_request->io_comp_tag, 1, MPI_INT,
+                                             io_concentrators[ioc_start], WRITE_DATA_DONE,
+                                             sf_context->sf_data_comm, &sf_io_request->io_comp_req)))
+        H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Irecv failed", mpi_code);
 
     /*
      * Start the actual data transfer using the ack received
@@ -180,7 +185,7 @@ ioc__write_independent_async(int64_t context_id, int n_io_concentrators, int64_t
     H5_CHECK_OVERFLOW(elements, int64_t, int);
     if (MPI_SUCCESS !=
         (mpi_code = MPI_Isend(data, (int)elements, MPI_BYTE, io_concentrators[ioc_start], data_tag,
-                              sf_context->sf_data_comm, &sf_io_request->completion_func.io_args.io_req)))
+                              sf_context->sf_data_comm, &sf_io_request->io_transfer_req)))
         H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Isend failed", mpi_code);
 
     /*
@@ -193,14 +198,23 @@ ioc__write_independent_async(int64_t context_id, int n_io_concentrators, int64_t
      * to the caller.
      */
 
-    sf_io_request->completion_func.pending = 1;
-    *io_req                                = sf_io_request;
+    *io_req = sf_io_request;
 
 done:
     if (ret_value < 0) {
         if (ack_request != MPI_REQUEST_NULL) {
             if (MPI_SUCCESS != (mpi_code = MPI_Cancel(&ack_request)))
                 H5_SUBFILING_MPI_DONE_ERROR(FAIL, "MPI_Cancel failed", mpi_code);
+        }
+        if (sf_io_request) {
+            if (sf_io_request->io_comp_req != MPI_REQUEST_NULL) {
+                if (MPI_SUCCESS != (mpi_code = MPI_Cancel(&sf_io_request->io_comp_req)))
+                    H5_SUBFILING_MPI_DONE_ERROR(FAIL, "MPI_Cancel failed", mpi_code);
+            }
+            if (sf_io_request->io_transfer_req != MPI_REQUEST_NULL) {
+                if (MPI_SUCCESS != (mpi_code = MPI_Cancel(&sf_io_request->io_transfer_req)))
+                    H5_SUBFILING_MPI_DONE_ERROR(FAIL, "MPI_Cancel failed", mpi_code);
+            }
         }
 
         HDfree(sf_io_request);
@@ -280,25 +294,22 @@ ioc__read_independent_async(int64_t context_id, int n_io_concentrators, int64_t 
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_READERROR, FAIL, "couldn't allocate I/O request");
 
     H5_CHECK_OVERFLOW(ioc_start, int64_t, int);
-    sf_io_request->completion_func.io_args.ioc        = (int)ioc_start;
-    sf_io_request->completion_func.io_args.context_id = context_id;
-    sf_io_request->completion_func.io_args.offset     = offset;
-    sf_io_request->completion_func.io_args.elements   = elements;
-    sf_io_request->completion_func.io_args.data       = data;
-    sf_io_request->completion_func.io_args.io_req     = MPI_REQUEST_NULL;
-    sf_io_request->completion_func.io_function        = async_completion;
-    sf_io_request->completion_func.pending            = 0;
-
-    sf_io_request->prev = sf_io_request->next = NULL;
+    sf_io_request->ioc             = (int)ioc_start;
+    sf_io_request->context_id      = context_id;
+    sf_io_request->offset          = offset;
+    sf_io_request->elements        = elements;
+    sf_io_request->data            = data;
+    sf_io_request->io_transfer_req = MPI_REQUEST_NULL;
+    sf_io_request->io_comp_req     = MPI_REQUEST_NULL;
+    sf_io_request->io_comp_tag     = -1;
 
     H5_CHECK_OVERFLOW(elements, int64_t, int);
     if (MPI_SUCCESS !=
         (mpi_code = MPI_Irecv(data, (int)elements, MPI_BYTE, io_concentrators[ioc_start], READ_INDEP_DATA,
-                              sf_context->sf_data_comm, &sf_io_request->completion_func.io_args.io_req)))
+                              sf_context->sf_data_comm, &sf_io_request->io_transfer_req)))
         H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Irecv failed", mpi_code);
 
-    sf_io_request->completion_func.pending = 1;
-    *io_req                                = sf_io_request;
+    *io_req = sf_io_request;
 
     /*
      * Prepare and send an I/O request to the IOC identified
@@ -313,9 +324,13 @@ ioc__read_independent_async(int64_t context_id, int n_io_concentrators, int64_t 
 
 done:
     if (ret_value < 0) {
-        if (sf_io_request && sf_io_request->completion_func.io_args.io_req != MPI_REQUEST_NULL) {
-            if (MPI_SUCCESS != (mpi_code = MPI_Cancel(&sf_io_request->completion_func.io_args.io_req)))
-                H5_SUBFILING_MPI_DONE_ERROR(FAIL, "MPI_Cancel failed", mpi_code);
+        if (sf_io_request) {
+            if (sf_io_request) {
+                if (sf_io_request->io_transfer_req != MPI_REQUEST_NULL) {
+                    if (MPI_SUCCESS != (mpi_code = MPI_Cancel(&sf_io_request->io_transfer_req)))
+                        H5_SUBFILING_MPI_DONE_ERROR(FAIL, "MPI_Cancel failed", mpi_code);
+                }
+            }
         }
 
         HDfree(sf_io_request);
@@ -326,56 +341,27 @@ done:
 } /* end ioc__read_independent_async() */
 
 /*-------------------------------------------------------------------------
- * Function:    async_completion
+ * Function:    ioc__async_completion
  *
- * Purpose:     Given a single io_func_t structure containing the function
- *              pointer and it's input arguments and a single MPI_Request
- *              argument which needs to be completed, we make progress
- *              by calling MPI_Test.  In this initial example, we loop
- *              until the request is completed as indicated by a non-zero
- *              flag variable.
+ * Purpose:     IOC function to complete outstanding I/O requests.
+ *              Currently just a wrapper around MPI_Waitall on the given
+ *              MPI_Request array.
  *
- *              As we go further with the implementation, we anticipate that
- *              rather than testing a single request variable, we will
- *              deal with a collection of all pending IO requests (on
- *              this rank).
+ * Return:      Non-negative on success/Negative on failure
  *
- * Return:      an integer status.  Zero(0) indicates success. Negative
- *              values (-1) indicates an error.
  *-------------------------------------------------------------------------
  */
-static int
-async_completion(void *arg)
+herr_t
+ioc__async_completion(MPI_Request *mpi_reqs, size_t num_reqs)
 {
-    int n_reqs;
-    int mpi_code;
-    int ret_value = 0;
-    struct async_arg {
-        int          n_reqs;
-        MPI_Request *sf_reqs;
-    } *in_progress = (struct async_arg *)arg;
+    herr_t ret_value = SUCCEED;
+    int    mpi_code;
 
-    HDassert(arg);
+    HDassert(mpi_reqs);
 
-    n_reqs = in_progress->n_reqs;
-
-    if (n_reqs < 0) {
-#ifdef H5FD_IOC_DEBUG
-        HDprintf("%s: invalid number of in progress I/O requests\n", __func__);
-#endif
-
-        ret_value = -1;
-        goto done;
-    }
-
-    if (MPI_SUCCESS != (mpi_code = MPI_Waitall(n_reqs, in_progress->sf_reqs, MPI_STATUSES_IGNORE))) {
-#ifdef H5FD_IOC_DEBUG
-        HDprintf("%s: MPI_Waitall failed with rc %d\n", __func__, mpi_code);
-#endif
-
-        ret_value = -1;
-        goto done;
-    }
+    H5_CHECK_OVERFLOW(num_reqs, size_t, int);
+    if (MPI_SUCCESS != (mpi_code = MPI_Waitall((int)num_reqs, mpi_reqs, MPI_STATUSES_IGNORE)))
+        H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Waitall failed", mpi_code);
 
 done:
     H5_SUBFILING_FUNC_LEAVE;
