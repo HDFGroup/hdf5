@@ -2234,6 +2234,7 @@ H5_resolve_pathname(const char *filepath, MPI_Comm comm, char **resolved_filepat
     hbool_t bcasted_path     = FALSE;
     char   *resolved_path    = NULL;
     char   *file_basename    = NULL;
+    char   *file_dirname     = NULL;
     char   *cwd              = NULL;
     int     mpi_rank;
     int     mpi_size;
@@ -2251,22 +2252,33 @@ H5_resolve_pathname(const char *filepath, MPI_Comm comm, char **resolved_filepat
     if (mpi_rank == 0) {
         if (NULL == (resolved_path = HDrealpath(filepath, NULL))) {
             if (ENOENT == errno) {
-                if (NULL == (resolved_path = HDmalloc(PATH_MAX)))
-                    H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                            "can't allocate buffer for filepath");
-                if (H5_basename(filepath, &file_basename) < 0)
-                    H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't get file basename");
-                if (NULL == (cwd = HDmalloc(PATH_MAX)))
-                    H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                            "can't allocate buffer for CWD");
+                if (H5_dirname(filepath, &file_dirname) < 0)
+                    H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't get file dirname");
 
-                if (NULL == HDgetcwd(cwd, PATH_MAX))
-                    H5_SUBFILING_GOTO_ERROR(
-                        H5E_VFL, H5E_CANTGET, FAIL,
-                        "can't get current working directory, errno = %d, error message = '%s'", errno,
-                        HDstrerror(errno));
+                /* If filepath is just the filename, set up path using CWD */
+                if (!HDstrcmp(file_dirname, ".")) {
+                    if (NULL == (resolved_path = HDmalloc(PATH_MAX)))
+                        H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                                "can't allocate buffer for filepath");
+                    if (H5_basename(filepath, &file_basename) < 0)
+                        H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't get file basename");
+                    if (NULL == (cwd = HDmalloc(PATH_MAX)))
+                        H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                                "can't allocate buffer for CWD");
 
-                HDsnprintf(resolved_path, PATH_MAX, "%s/%s", cwd, file_basename);
+                    if (NULL == HDgetcwd(cwd, PATH_MAX))
+                        H5_SUBFILING_GOTO_ERROR(
+                            H5E_VFL, H5E_CANTGET, FAIL,
+                            "can't get current working directory, errno = %d, error message = '%s'", errno,
+                            HDstrerror(errno));
+
+                    HDsnprintf(resolved_path, PATH_MAX, "%s/%s", cwd, file_basename);
+                }
+                else {
+                    /* Otherwise, just use what was given as the pathname */
+                    if (NULL == (resolved_path = HDstrdup(filepath)))
+                        H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't copy filename");
+                }
             }
             else
                 H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL,
@@ -2309,6 +2321,7 @@ H5_resolve_pathname(const char *filepath, MPI_Comm comm, char **resolved_filepat
 done:
     HDfree(cwd);
     H5MM_free(file_basename);
+    H5MM_free(file_dirname);
 
     if (ret_value < 0) {
         if (!bcasted_path_len) {
