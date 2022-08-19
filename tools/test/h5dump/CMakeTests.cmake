@@ -455,7 +455,7 @@
               -D "TEST_OUTPUT=h5dump-${testname}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=h5dump-${testname}.txt"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
     set_tests_properties (H5DUMP-${testname} PROPERTIES
@@ -498,7 +498,7 @@
               -D "TEST_OUTPUT=${resultfile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.ddl"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
     set_tests_properties (H5DUMP-${resultfile} PROPERTIES
@@ -536,7 +536,7 @@
               -D "TEST_OUTPUT=${resultfile}-N.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}-N.ddl"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
     set_tests_properties (H5DUMP-N-${resultfile} PROPERTIES
@@ -583,7 +583,7 @@
               -D "TEST_OUTPUT=${resultfile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.ddl"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES
           DEPENDS H5DUMP-${resultfile}-clear-objects
@@ -647,7 +647,7 @@
               -D "TEST_OUTPUT=${resultfile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.ddl"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES
           DEPENDS H5DUMP-${resultfile}-clear-objects
@@ -740,7 +740,7 @@
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.ddl"
               -D "TEST_MASK_ERROR=true"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
@@ -760,7 +760,7 @@
               -D "TEST_OUTPUT=${resultfile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${result_check}"
-              -P "${HDF_RESOURCES_EXT_DIR}/grepTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/grepTest.cmake"
       )
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
@@ -781,7 +781,7 @@
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.ddl"
               -D "TEST_ERRREF=${result_errcheck}"
-              -P "${HDF_RESOURCES_EXT_DIR}/grepTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/grepTest.cmake"
       )
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
@@ -804,7 +804,7 @@
               -D "TEST_ERRREF=${result_errcheck}"
               -D "TEST_ENV_VAR:STRING=${envvar}"
               -D "TEST_ENV_VALUE:STRING=${envval}"
-              -P "${HDF_RESOURCES_EXT_DIR}/grepTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/grepTest.cmake"
       )
       set_tests_properties (H5DUMP-${resultfile} PROPERTIES
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
@@ -832,7 +832,7 @@
               -D "TEST_OUTPUT=${conffile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${conffile}.ddl"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5DUMP-BIN_EXPORT-${conffile} PROPERTIES
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"
@@ -871,7 +871,7 @@
               -D "TEST_OUTPUT=${conffile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${conffile}.ddl"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5DUMP-IMPORT-${resultfile} PROPERTIES
           DEPENDS H5DUMP-IMPORT-${resultfile}-clear-objects
@@ -915,7 +915,7 @@
               -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
               -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins"
               -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5DUMP_UD-${testname}-${resultfile} PROPERTIES
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/std"

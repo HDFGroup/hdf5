@@ -126,7 +126,7 @@
               -D "TEST_EXPECT=0"
               -D "TEST_FILTER=(^(HDF5)[^\n]*)"
               -D "TEST_SKIP_COMPARE=TRUE"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5IMPORT-${testname}-H5DMP PROPERTIES
           DEPENDS H5IMPORT-${testname}
@@ -143,7 +143,7 @@
               -D "TEST_EXPECT=0"
               -D "TEST_FILTER=(^(HDF5)[^\n]*)"
               -D "TEST_REFERENCE=${testfile}.new"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5IMPORT-${testname}-H5DMP_CMP PROPERTIES
           DEPENDS H5IMPORT-${testname}-H5DMP
@@ -190,7 +190,7 @@
                 -D "TEST_SAVE=1"
                 -D "TEST_EXPECT=0"
                 -D "TEST_SKIP_COMPARE=TRUE"
-                -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+                -P "${HDF_RESOURCES_DIR}/runTest.cmake"
         )
       else ()
         add_test (
@@ -204,7 +204,7 @@
                 -D "TEST_SAVE=1"
                 -D "TEST_EXPECT=0"
                 -D "TEST_SKIP_COMPARE=TRUE"
-                -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+                -P "${HDF_RESOURCES_DIR}/runTest.cmake"
         )
       endif ()
       set_tests_properties (H5IMPORT-DUMP-${testname}-H5DMP PROPERTIES
@@ -222,7 +222,7 @@
               -D "TEST_OUTPUT=d${testfile}.imp"
               -D "TEST_EXPECT=0"
               -D "TEST_SKIP_COMPARE=TRUE"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5IMPORT-DUMP-${testname} PROPERTIES
           DEPENDS "H5IMPORT-DUMP-${testname}-H5DMP"
@@ -240,7 +240,7 @@
               -D "TEST_EXPECT=0"
               -D "TEST_FILTER=(^(Warning)[^\n]*)"
               -D "TEST_REFERENCE=testfiles/${testfile}.txt"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5IMPORT-DUMP-${testname}-H5DFF PROPERTIES
           DEPENDS "H5IMPORT-DUMP-${testname}"
@@ -286,7 +286,7 @@
               -D "TEST_SAVE=1"
               -D "TEST_EXPECT=0"
               -D "TEST_SKIP_COMPARE=TRUE"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5IMPORT_SUB-DUMP-${testname}-H5DMP PROPERTIES
           DEPENDS "H5IMPORT_SUB-DUMP-${testname}-clear-objects"
@@ -303,7 +303,7 @@
               -D "TEST_OUTPUT=ds${testname}.imp"
               -D "TEST_EXPECT=0"
               -D "TEST_SKIP_COMPARE=TRUE"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5IMPORT_SUB-DUMP-${testname}-H5IMP PROPERTIES
           DEPENDS "H5IMPORT_SUB-DUMP-${testname}-H5DMP"
@@ -319,7 +319,7 @@
               -D "TEST_OUTPUT=ds${testname}.dmp"
               -D "TEST_EXPECT=0"
               -D "TEST_REFERENCE=testfiles/${testname}.ddl"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5IMPORT_SUB-DUMP-${testname}-CMP PROPERTIES
           DEPENDS "H5IMPORT_SUB-DUMP-${testname}-H5IMP"
