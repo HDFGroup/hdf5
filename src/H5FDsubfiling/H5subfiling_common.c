@@ -2231,8 +2231,12 @@ done:
 herr_t
 H5_resolve_pathname(const char *filepath, MPI_Comm comm, char **resolved_filepath)
 {
-    hsize_t path_len;
-    char   *resolved_path = NULL;
+    hsize_t path_len         = HSIZE_UNDEF;
+    hbool_t bcasted_path_len = FALSE;
+    hbool_t bcasted_path     = FALSE;
+    char   *resolved_path    = NULL;
+    char   *file_basename    = NULL;
+    char   *cwd              = NULL;
     int     mpi_rank;
     int     mpi_size;
     int     mpi_code;
@@ -2249,15 +2253,24 @@ H5_resolve_pathname(const char *filepath, MPI_Comm comm, char **resolved_filepat
     if (mpi_rank == 0) {
         if (NULL == (resolved_path = HDrealpath(filepath, NULL))) {
             if (ENOENT == errno) {
-                if (NULL == (resolved_path = HDstrdup(filepath)))
-                    /* Push error, but participate in bcast */
-                    H5_SUBFILING_DONE_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't copy filename");
+                if (NULL == (resolved_path = HDmalloc(PATH_MAX)))
+                    H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer for filepath");
+                if (H5_basename(filepath, &file_basename) < 0)
+                    H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't get file basename");
+                if (NULL == (cwd = HDmalloc(PATH_MAX)))
+                    H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer for CWD");
+
+                if (NULL == HDgetcwd(cwd, PATH_MAX))
+                    H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL,
+                                            "can't get current working directory, errno = %d, error message = '%s'", errno,
+                                            HDstrerror(errno));
+
+                HDsnprintf(resolved_path, PATH_MAX, "%s/%s", cwd, file_basename);
             }
             else
-                /* Push error, but participate in bcast */
-                H5_SUBFILING_DONE_ERROR(H5E_VFL, H5E_CANTGET, FAIL,
+                H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL,
                                         "can't resolve subfile path, errno = %d, error message = '%s'", errno,
-                                        strerror(errno));
+                                        HDstrerror(errno));
         }
 
         if (resolved_path) {
@@ -2268,6 +2281,7 @@ H5_resolve_pathname(const char *filepath, MPI_Comm comm, char **resolved_filepat
     }
 
     /* Broadcast the size of the resolved filepath string to other ranks */
+    bcasted_path_len = TRUE;
     if (mpi_size > 1) {
         if (MPI_SUCCESS != (mpi_code = MPI_Bcast(&path_len, 1, HSIZE_AS_MPI_TYPE, 0, comm)))
             H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code);
@@ -2278,11 +2292,11 @@ H5_resolve_pathname(const char *filepath, MPI_Comm comm, char **resolved_filepat
 
     if (mpi_rank != 0) {
         if (NULL == (resolved_path = HDmalloc(path_len)))
-            /* Push error, but participate in bcast */
-            H5_SUBFILING_DONE_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate file name buffer");
+            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate file name buffer");
     }
 
     /* Broadcast the resolved filepath to other ranks */
+    bcasted_path = TRUE;
     if (mpi_size > 1) {
         H5_CHECK_OVERFLOW(path_len, hsize_t, int);
         if (MPI_SUCCESS != (mpi_code = MPI_Bcast(resolved_path, (int)path_len, MPI_CHAR, 0, comm)))
@@ -2292,7 +2306,20 @@ H5_resolve_pathname(const char *filepath, MPI_Comm comm, char **resolved_filepat
     *resolved_filepath = resolved_path;
 
 done:
+    HDfree(cwd);
+    H5MM_free(file_basename);
+
     if (ret_value < 0) {
+        if (!bcasted_path_len) {
+            if (MPI_SUCCESS != (mpi_code = MPI_Bcast(&path_len, 1, HSIZE_AS_MPI_TYPE, 0, comm)))
+                H5_SUBFILING_MPI_DONE_ERROR(FAIL, "MPI_Bcast failed", mpi_code);
+        }
+        if (!bcasted_path) {
+            H5_CHECK_OVERFLOW(path_len, hsize_t, int);
+            if (MPI_SUCCESS != (mpi_code = MPI_Bcast(resolved_path, (int)path_len, MPI_CHAR, 0, comm)))
+                H5_SUBFILING_MPI_DONE_ERROR(FAIL, "MPI_Bcast failed", mpi_code);
+        }
+
         HDfree(resolved_path);
     }
 

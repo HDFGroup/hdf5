@@ -25,6 +25,10 @@
 #include "H5FDsubfiling.h"
 #include "H5FDioc.h"
 
+#ifndef PATH_MAX
+#define PATH_MAX 4096
+#endif
+
 /*
  * Some definitions for debugging the Subfiling feature
  */
