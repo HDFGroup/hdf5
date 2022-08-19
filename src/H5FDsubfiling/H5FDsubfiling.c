@@ -1217,8 +1217,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr,
-                     size_t size, void *buf /*out*/)
+H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr, size_t size,
+                     void *buf /*out*/)
 {
     subfiling_context_t *sf_context         = NULL;
     H5FD_subfiling_t    *file_ptr           = (H5FD_subfiling_t *)_file;
@@ -1404,8 +1404,8 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_i
 
                 if (!rank0_bcast || (file_ptr->mpi_rank == 0)) {
                     /* Make vector read call to subfile */
-                    if (H5FD_read_vector(file_ptr->sf_file, final_vec_len, io_types, io_addrs,
-                                         io_sizes, io_bufs) < 0)
+                    if (H5FD_read_vector(file_ptr->sf_file, final_vec_len, io_types, io_addrs, io_sizes,
+                                         io_bufs) < 0)
                         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "read from subfile failed");
                 }
             }
@@ -1457,8 +1457,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr,
-                      size_t size, const void *buf /*in*/)
+H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr, size_t size,
+                      const void *buf /*in*/)
 {
     subfiling_context_t *sf_context         = NULL;
     H5FD_subfiling_t    *file_ptr           = (H5FD_subfiling_t *)_file;

@@ -173,9 +173,9 @@ ioc__write_independent_async(int64_t context_id, int n_io_concentrators, int64_t
      * Start a non-blocking receive from the IOC that signifies
      * when the actual write is complete
      */
-    if (MPI_SUCCESS != (mpi_code = MPI_Irecv(&sf_io_request->io_comp_tag, 1, MPI_INT,
-                                             io_concentrators[ioc_start], WRITE_DATA_DONE,
-                                             sf_context->sf_data_comm, &sf_io_request->io_comp_req)))
+    if (MPI_SUCCESS !=
+        (mpi_code = MPI_Irecv(&sf_io_request->io_comp_tag, 1, MPI_INT, io_concentrators[ioc_start],
+                              WRITE_DATA_DONE, sf_context->sf_data_comm, &sf_io_request->io_comp_req)))
         H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Irecv failed", mpi_code);
 
     /*
