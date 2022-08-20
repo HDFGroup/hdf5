@@ -51,7 +51,7 @@ endif()
 
 if (CMAKE_COMPILER_IS_GNUCC)
   set (CMAKE_C_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_C_FLAGS}")
-  if (${HDF_CFG_NAME} MATCHES "Debug")
+  if (${HDF_CFG_NAME} MATCHES "Debug" OR ${HDF_CFG_NAME} MATCHES "Developer")
     if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 5.0)
       set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Og -ftrapv -fno-common")
     endif ()
@@ -173,6 +173,10 @@ endif ()
 # Developer warnings (suggestions from gcc, not code problems)
 #-----------------------------------------------------------------------------
 option (HDF5_ENABLE_DEV_WARNINGS "Enable HDF5 developer group warnings" OFF)
+if (${HDF_CFG_NAME} MATCHES "Developer")
+  # Developer build modes should always have these types of warnings enabled
+  set (HDF5_ENABLE_DEV_WARNINGS ON CACHE BOOL "Enable HDF5 developer group warnings" FORCE)
+endif ()
 if (HDF5_ENABLE_DEV_WARNINGS)
   message (STATUS "....HDF5 developer group warnings are enabled")
   if (CMAKE_C_COMPILER_ID STREQUAL "Intel")
@@ -277,6 +281,28 @@ if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
     #  ADD_H5_FLAGS (H5_CFLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/no-developer-12")
     endif ()
   endif ()
+endif ()
+
+#-----------------------------------------------------------------------------
+# Option to allow the user to enable debug output
+# from various HDF5 modules
+#-----------------------------------------------------------------------------
+option (HDF5_ENABLE_DEBUG_APIS "Turn on extra debug output in all packages" OFF)
+if (HDF5_ENABLE_DEBUG_APIS)
+  # Add standard debug definitions to any existing ones
+  list (APPEND HDF5_DEBUG_APIS
+      H5AC_DEBUG
+      H5CX_DEBUG
+      H5D_DEBUG
+      H5D_CHUNK_DEBUG
+      H5F_DEBUG
+      H5HL_DEBUG
+      H5I_DEBUG
+      H5O_DEBUG
+      H5S_DEBUG
+      H5T_DEBUG
+      H5Z_DEBUG
+  )
 endif ()
 
 #-----------------------------------------------------------------------------

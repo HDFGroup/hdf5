@@ -124,7 +124,7 @@ typedef enum {
 #define H5AC__DEFAULT_MIN_CLEAN_SIZE H5C__DEFAULT_MIN_CLEAN_SIZE
 
 /* Check if we are sanity checking tagging */
-#if H5C_DO_TAGGING_SANITY_CHECKS
+#ifdef H5C_DO_TAGGING_SANITY_CHECKS
 #define H5AC_DO_TAGGING_SANITY_CHECKS 1
 #else
 #define H5AC_DO_TAGGING_SANITY_CHECKS 0

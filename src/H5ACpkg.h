@@ -50,7 +50,7 @@ H5FL_EXTERN(H5AC_aux_t);
 /* Package Private Macros */
 /**************************/
 
-#define H5AC_DEBUG_DIRTY_BYTES_CREATION 0
+/* #define H5AC_DEBUG_DIRTY_BYTES_CREATION */
 
 #ifdef H5_HAVE_PARALLEL
 
@@ -372,7 +372,7 @@ typedef struct H5AC_aux_t {
 
     int32_t metadata_write_strategy;
 
-#if H5AC_DEBUG_DIRTY_BYTES_CREATION
+#ifdef H5AC_DEBUG_DIRTY_BYTES_CREATION
 
     unsigned dirty_bytes_propagations;
 
