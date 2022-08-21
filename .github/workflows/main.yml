@@ -27,13 +27,13 @@ jobs:
 
       # The current matrix has three dimensions:
       #
-      # * config
+      # * config name
       # * thread-safety on/off
       # * release vs. debug build
       #
-      # Other configuration information is added via the 'include' mechanism
-      #
-      # These are combined to produce each job
+      # Most configuration information is added via the 'include' mechanism,
+      # which will append the key-value pairs in the configuration where the
+      # names match.
 
       matrix:
 
@@ -61,10 +61,7 @@ jobs:
         # This is where we list the bulk of the options for each configuration.
         # The key-value pair values are usually appropriate for being CMake or
         # Autotools configure values, so be aware of that.
-        #
-        # We build with the "enable unsupported" option, so don't worry about
-        # thread-safety and wrapper clash. The wrappers and high-level library
-        # tests don't create multiple threads, so there shouldn't be problems.
+
         include:
 
           # Windows w/ MSVC + CMake
