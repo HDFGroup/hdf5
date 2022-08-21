@@ -2542,7 +2542,7 @@ AC_SUBST([INTERNAL_DEBUG_OUTPUT])
 ## are not listed in the "all" packages list.
 ##
 ## all_packages="AC,B,B2,D,F,FA,FL,FS,HL,I,O,S,T,Z"
-all_packages="AC,CX,D,F,HL,I,O,S,T,Z"
+all_packages="AC,B2,CX,D,F,HL,I,O,S,T,Z"
 
 case "X-$INTERNAL_DEBUG_OUTPUT" in
   X-yes|X-all)
