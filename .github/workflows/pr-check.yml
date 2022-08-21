@@ -140,11 +140,11 @@ jobs:
             cpp: disable
             fortran: enable
             java: disable
-            ts: enable
+            ts: disable
             hl: disable
             parallel: enable
-            mirror_vfd: enable
-            direct_vfd: enable
+            mirror_vfd: disable
+            direct_vfd: disable
             toolchain: ""
             generator: "autogen"
             flags: ""
