@@ -119,7 +119,7 @@ jobs:
             flags: ""
             run_tests: "YES"
           # Build that ensures no new warnings sneak into the library.
-          - name: "-Werror Ubuntu Debug Autotools GCC (compile only)"
+          - name: "-Werror Ubuntu Debug Autotools GCC compile only"
             os: ubuntu-latest
             build_type: "debug"
             cpp: enable
@@ -134,7 +134,7 @@ jobs:
             generator: "autogen"
             flags: "CFLAGS=-Werror"
             run_tests: "NO"
-          - name: "Parallel Ubuntu Autotools GCC (compile only)"
+          - name: "Parallel Ubuntu Autotools GCC compile only"
             os: ubuntu-latest
             build_type: "production"
             cpp: disable
