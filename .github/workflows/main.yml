@@ -181,6 +181,72 @@ jobs:
                 cmake: "Debug"
                 autotools: "debug"
 
+          - name: "Ubuntu gcc Autotools v1.8 default API (build only)"
+            os: ubuntu-latest
+            cpp: enable
+            fortran: enable
+            java: enable
+            parallel: disable
+            mirror_vfd: enable
+            direct_vfd: enable
+            deprec_sym: enable
+            default_api: v18
+            toolchain: ""
+            generator: "autogen"
+            flags: ""
+            run_tests: false
+            thread_safety:
+              - enabled: false
+                text: ""
+            build_mode:
+              - text: "DBG"
+                cmake: "Debug"
+                autotools: "debug"
+
+          - name: "Ubuntu gcc Autotools v1.10 default API (build only)"
+            os: ubuntu-latest
+            cpp: enable
+            fortran: enable
+            java: enable
+            parallel: disable
+            mirror_vfd: enable
+            direct_vfd: enable
+            deprec_sym: enable
+            default_api: v110
+            toolchain: ""
+            generator: "autogen"
+            flags: ""
+            run_tests: false
+            thread_safety:
+              - enabled: false
+                text: ""
+            build_mode:
+              - text: "DBG"
+                cmake: "Debug"
+                autotools: "debug"
+
+          - name: "Ubuntu gcc Autotools v1.12 default API (build only)"
+            os: ubuntu-latest
+            cpp: enable
+            fortran: enable
+            java: enable
+            parallel: disable
+            mirror_vfd: enable
+            direct_vfd: enable
+            deprec_sym: enable
+            default_api: v112
+            toolchain: ""
+            generator: "autogen"
+            flags: ""
+            run_tests: false
+            thread_safety:
+              - enabled: false
+                text: ""
+            build_mode:
+              - text: "DBG"
+                cmake: "Debug"
+                autotools: "debug"
+
           - name: "Ubuntu gcc Autotools no deprecated symbols (build only)"
             os: ubuntu-latest
             cpp: enable
