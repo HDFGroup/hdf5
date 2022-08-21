@@ -313,6 +313,9 @@ jobs:
         run: |
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
+          echo "BUILD MODE: ${{ matrix.build_mode.text }}"
+          echo "BUILD MODE: ${{ matrix.build_mode.cmake }}"
+          echo "BUILD MODE: ${{ matrix.build_mode.autotools }}"
           cmake ${{ matrix.generator }} -DCMAKE_BUILD_TYPE=${{ matrix.build_mode.cmake }} -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain }} -DBUILD_SHARED_LIBS=ON -DHDF5_ENABLE_ALL_WARNINGS=ON -DHDF5_ENABLE_PARALLEL:BOOL=${{ matrix.parallel }} -DHDF5_BUILD_CPP_LIB:BOOL=${{ matrix.cpp }} -DHDF5_BUILD_FORTRAN=${{ matrix.fortran }} -DHDF5_BUILD_JAVA=${{ matrix.java }} -DHDF5_ENABLE_MIRROR_VFD:BOOL=${{ matrix.mirror_vfd }} -DHDF5_ENABLE_DIRECT_VFD:BOOL=${{ matrix.direct_vfd }} $GITHUB_WORKSPACE
         shell: bash
         if: (matrix.generator != 'autogen') && (! matrix.thread_safe.enabled)
