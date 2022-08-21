@@ -38,6 +38,7 @@ jobs:
             direct_vfd: OFF
             generator: "-G \"Visual Studio 17 2022\" -A x64"
             flags: ""
+            run_tests: "YES"
           - name: "Ubuntu Latest GCC"
             artifact: "Linux.tar.xz"
             os: ubuntu-latest
@@ -53,6 +54,7 @@ jobs:
             toolchain: "config/toolchain/GCC.cmake"
             generator: "-G Ninja"
             flags: ""
+            run_tests: "YES"
           - name: "macOS Latest Clang"
             artifact: "macOS.tar.xz"
             os: macos-latest
@@ -68,6 +70,7 @@ jobs:
             toolchain: "config/toolchain/clang.cmake"
             generator: "-G Ninja"
             flags: ""
+            run_tests: "YES"
           - name: "Ubuntu Debug GCC"
             artifact: "LinuxDBG.tar.xz"
             os: ubuntu-latest
@@ -83,6 +86,7 @@ jobs:
             toolchain: "config/toolchain/GCC.cmake"
             generator: "-G Ninja"
             flags: ""
+            run_tests: "YES"
           - name: "Ubuntu Autotools GCC"
             artifact: "LinuxA.tar.xz"
             os: ubuntu-latest
@@ -98,6 +102,7 @@ jobs:
             toolchain: ""
             generator: "autogen"
             flags: ""
+            run_tests: "YES"
           - name: "Ubuntu Debug Autotools GCC"
             artifact: "LinuxA.tar.xz"
             os: ubuntu-latest
@@ -113,6 +118,7 @@ jobs:
             toolchain: ""
             generator: "autogen"
             flags: ""
+            run_tests: "YES"
           # Build that ensures no new warnings sneak into the library.
           - name: "-Werror Ubuntu Debug Autotools GCC"
             artifact: "LinuxA.tar.xz"
@@ -129,6 +135,7 @@ jobs:
             toolchain: ""
             generator: "autogen"
             flags: "CFLAGS=-Werror"
+            run_tests: "NO"
 #  Threadsafe runs
           - name: "Windows TS MSVC"
             artifact: "Windows-MSVCTS.tar.xz"
@@ -145,6 +152,7 @@ jobs:
             direct_vfd: OFF
             generator: "-G \"Visual Studio 16 2019\" -A x64"
             flags: ""
+            run_tests: "YES"
           - name: "Ubuntu TS GCC"
             artifact: "LinuxTS.tar.xz"
             os: ubuntu-latest
@@ -160,6 +168,7 @@ jobs:
             toolchain: "config/toolchain/GCC.cmake"
             generator: "-G Ninja"
             flags: ""
+            run_tests: "YES"
           - name: "macOS TS Clang"
             artifact: "macOSTS.tar.xz"
             os: macos-latest
@@ -175,6 +184,7 @@ jobs:
             toolchain: "config/toolchain/clang.cmake"
             generator: "-G Ninja"
             flags: ""
+            run_tests: "YES"
           - name: "TS Debug GCC"
             artifact: "LinuxTSDBG.tar.xz"
             os: ubuntu-latest
@@ -190,6 +200,7 @@ jobs:
             toolchain: "config/toolchain/GCC.cmake"
             generator: "-G Ninja"
             flags: ""
+            run_tests: "YES"
           - name: "TS Autotools GCC"
             artifact: "LinuxATS.tar.xz"
             os: ubuntu-latest
@@ -205,6 +216,7 @@ jobs:
             toolchain: ""
             generator: "autogen"
             flags: ""
+            run_tests: "YES"
 
     name: ${{ matrix.name }}
     # The type of runner that the job will run on
@@ -272,11 +284,11 @@ jobs:
       working-directory: ${{ runner.workspace }}/build      
 
     - name: Autotools Test
-      if: matrix.generator == 'autogen'
+      if: (matrix.generator == 'autogen') && (matrix.run_tests == 'YES')
       run: make check
       working-directory: ${{ runner.workspace }}/build
 
     - name: Test
-      if: matrix.generator != 'autogen'
+      if: (matrix.generator != 'autogen') && (matrix.run_tests == 'YES')
       run: ctest --build . -C ${{ matrix.build_type }} -V
       working-directory: ${{ runner.workspace }}/build
