@@ -134,7 +134,7 @@ jobs:
             default_api: v114
             toolchain: ""
             generator: "autogen"
-            flags: ""
+            flags: "CC=mpicc"
             run_tests: false
 
           # MacOS w/ Clang + CMake
