@@ -60,7 +60,7 @@ jobs:
 
         # This is where we list the bulk of the options for each configuration.
         # The key-value pair values are usually appropriate for being CMake or
-        # Autotools confgure values, so be aware of that.
+        # Autotools configure values, so be aware of that.
         #
         # We build with the "enable unsupported" option, so don't worry about
         # thread-safety and wrapper clash. The wrappers and high-level library
