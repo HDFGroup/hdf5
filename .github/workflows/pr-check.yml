@@ -119,8 +119,7 @@ jobs:
             flags: ""
             run_tests: "YES"
           # Build that ensures no new warnings sneak into the library.
-          - name: "-Werror Ubuntu Debug Autotools GCC"
-            artifact: "LinuxDBG.tar.xz"
+          - name: "-Werror Ubuntu Debug Autotools GCC (compile only)"
             os: ubuntu-latest
             build_type: "debug"
             cpp: enable
@@ -134,6 +133,21 @@ jobs:
             toolchain: ""
             generator: "autogen"
             flags: "CFLAGS=-Werror"
+            run_tests: "NO"
+          - name: "Parallel Ubuntu Autotools GCC (compile only)"
+            os: ubuntu-latest
+            build_type: "production"
+            cpp: disable
+            fortran: enable
+            java: disable
+            ts: enable
+            hl: disable
+            parallel: enable
+            mirror_vfd: enable
+            direct_vfd: enable
+            toolchain: ""
+            generator: "autogen"
+            flags: ""
             run_tests: "NO"
 #  Threadsafe runs
           - name: "Windows TS MSVC"
