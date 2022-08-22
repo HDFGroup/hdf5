@@ -3441,7 +3441,7 @@ H5F__start_swmr_write(H5F_t *f)
     size_t      grp_dset_count = 0;     /* # of open objects: groups & datasets */
     size_t      nt_attr_count  = 0;     /* # of opened named datatypes  + opened attributes */
     hid_t      *obj_ids        = NULL;  /* List of ids */
-    hid_t      *obj_apl_ids    = NULL;   /* List of access property lists */
+    hid_t      *obj_apl_ids    = NULL;  /* List of access property lists */
     H5G_loc_t  *obj_glocs      = NULL;  /* Group location of the object */
     H5O_loc_t  *obj_olocs      = NULL;  /* Object location */
     H5G_name_t *obj_paths      = NULL;  /* Group hierarchy path */
@@ -3521,7 +3521,7 @@ H5F__start_swmr_write(H5F_t *f)
 
         /* Refresh opened objects (groups, datasets) in the file */
         for (u = 0; u < grp_dset_count; u++) {
-            H5I_type_t type;    /* Type of object for the ID */
+            H5I_type_t type; /* Type of object for the ID */
             H5G_loc_t  tmp_loc;
 
             /* Get object's type */
@@ -3539,20 +3539,19 @@ H5F__start_swmr_write(H5F_t *f)
                     /* Access properties not needed currently */
                     break;
 
-                case H5I_DATASET:
-                    {
-                        H5D_t     *dset; /* Dataset object   */
+                case H5I_DATASET: {
+                    H5D_t *dset; /* Dataset object   */
 
-                        /* Get dataset object */
-                        if (NULL == (dset = (H5D_t *)H5I_object(obj_ids[u])))
-                            HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "can't find object for ID")
+                    /* Get dataset object */
+                    if (NULL == (dset = (H5D_t *)H5I_object(obj_ids[u])))
+                        HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "can't find object for ID")
 
-                        /* Get dataset access properties */
-                        if ((obj_apl_ids[u] = H5D_get_access_plist(dset)) < 0)
-                            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
-                                        "unable to get dataset access property list")
-                        break;
-                    }
+                    /* Get dataset access properties */
+                    if ((obj_apl_ids[u] = H5D_get_access_plist(dset)) < 0)
+                        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
+                                    "unable to get dataset access property list")
+                    break;
+                }
 
                 case H5I_UNINIT:
                 case H5I_BADID:
