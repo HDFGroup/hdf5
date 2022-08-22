@@ -38,6 +38,7 @@ jobs:
       matrix:
 
         name:
+          - "Windows MSVC CMake"
           - "Ubuntu gcc CMake"
           - "Ubuntu gcc Autotools"
           - "Ubuntu gcc Autotools parallel (build only)"
@@ -62,6 +63,21 @@ jobs:
         # Autotools configure values, so be aware of that.
 
         include:
+
+          # Windows w/ MSVC + CMake
+          #
+          # No Fortran, parallel, or VFDs that rely on POSIX things
+          - name: "Windows MSVC CMake"
+            os: windows-2022
+            toolchain: ""
+            cpp: ON
+            fortran: OFF
+            java: ON
+            parallel: OFF
+            mirror_vfd: OFF
+            direct_vfd: OFF
+            generator: "-G \"Visual Studio 17 2022\" -A x64"
+            run_tests: true
 
           # Linux (Ubuntu) w/ gcc + CMake
           #
@@ -133,6 +149,7 @@ jobs:
             toolchain: "config/toolchain/clang.cmake"
             generator: "-G Ninja"
             run_tests: true
+
 
           #
           # SPECIAL AUTOTOOLS BUILDS
@@ -269,107 +286,6 @@ jobs:
             thread_safety:
               - enabled: false
                 text: ""
-            build_mode:
-              - text: "DBG"
-                cmake: "Debug"
-                autotools: "debug"
-
-          #
-          # WINDOWS BUILDS
-          #
-          # Windows *should* be handled in the matrix, above, but the Java
-          # H5L tests time out in Debug configs. While we investigate, we'll
-          # specify the four Windows configs manually so we can turn off
-          # Java testing in Debug builds.
-          #
-          # These do not run tests and are not built into the matrix and instead
-          # become NEW configs as their name would clobber one of the matrix
-          # names (so make sure the names are UNIQUE).
-          #
-
-          # Windows w/ MSVC + CMake (REL)
-          #
-          # No Fortran, parallel, or VFDs that rely on POSIX things
-          - name: "Windows MSVC CMake"
-            os: windows-2022
-            toolchain: ""
-            cpp: ON
-            fortran: OFF
-            java: ON
-            parallel: OFF
-            mirror_vfd: OFF
-            direct_vfd: OFF
-            generator: "-G \"Visual Studio 17 2022\" -A x64"
-            run_tests: true
-            thread_safety:
-              - enabled: false
-                text: ""
-            build_mode:
-              - text: "REL"
-                cmake: "Release"
-                autotools: "production"
-
-          # Windows w/ MSVC + CMake (DBG)
-          #
-          # No Fortran, parallel, or VFDs that rely on POSIX things
-          - name: "Windows MSVC CMake"
-            os: windows-2022
-            toolchain: ""
-            cpp: ON
-            fortran: OFF
-            java: OFF
-            parallel: OFF
-            mirror_vfd: OFF
-            direct_vfd: OFF
-            generator: "-G \"Visual Studio 17 2022\" -A x64"
-            run_tests: true
-            thread_safety:
-              - enabled: false
-                text: ""
-            build_mode:
-              - text: "DBG"
-                cmake: "Debug"
-                autotools: "debug"
-
-          # Windows w/ MSVC + CMake (REL TS)
-          #
-          # No Fortran, parallel, or VFDs that rely on POSIX things
-          - name: "Windows MSVC CMake"
-            os: windows-2022
-            toolchain: ""
-            cpp: ON
-            fortran: OFF
-            java: ON
-            parallel: OFF
-            mirror_vfd: OFF
-            direct_vfd: OFF
-            generator: "-G \"Visual Studio 17 2022\" -A x64"
-            run_tests: true
-            thread_safety:
-              - enabled: true
-                text: " TS"
-            build_mode:
-              - text: "DBG"
-                cmake: "Debug"
-                autotools: "debug"
-
-          # Windows w/ MSVC + CMake (DBG TS)
-          #
-          # No Fortran, parallel, or VFDs that rely on POSIX things
-          - name: "Windows MSVC CMake"
-            os: windows-2022
-            toolchain: ""
-            cpp: ON
-            fortran: OFF
-            java: OFF
-            parallel: OFF
-            mirror_vfd: OFF
-            direct_vfd: OFF
-            generator: "-G \"Visual Studio 17 2022\" -A x64"
-            run_tests: true
-            thread_safety:
-              - enabled: true
-                text: " TS"
             build_mode:
               - text: "DBG"
                 cmake: "Debug"
