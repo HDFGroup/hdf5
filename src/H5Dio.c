@@ -45,7 +45,7 @@
 /********************/
 
 /* Setup/teardown routines */
-static herr_t H5D__ioinfo_init(H5D_t *dset, H5D_dset_info_t *dset_info, H5D_storage_t *store,
+static herr_t H5D__ioinfo_init(H5D_t *dset, H5D_dset_io_info_t *dset_info, H5D_storage_t *store,
                                H5D_io_info_t *io_info);
 static herr_t H5D__typeinfo_init(const H5D_t *dset, hid_t mem_type_id, hbool_t do_write,
                                  H5D_type_info_t *type_info);
@@ -68,8 +68,8 @@ static herr_t H5D__final_mdset_sel_io(H5D_io_info_t *io_info);
 /* Declare a free list to manage blocks of type conversion data */
 H5FL_BLK_DEFINE(type_conv);
 
-/* Declare a free list to manage the H5D_dset_info_t struct */
-H5FL_DEFINE(H5D_dset_info_t);
+/* Declare a free list to manage the H5D_dset_io_info_t struct */
+H5FL_DEFINE(H5D_dset_io_info_t);
 
 /*-------------------------------------------------------------------------
  * Function:    H5D__pre_read
@@ -83,7 +83,7 @@ H5FL_DEFINE(H5D_dset_info_t);
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__pre_read(size_t count, H5D_dset_info_t *dset_info)
+H5D__pre_read(size_t count, H5D_dset_io_info_t *dset_info)
 {
     hbool_t broke_mdset = FALSE; /* Whether to break multi-dataset option */
     size_t  u;                   /* Local index variable */
@@ -148,7 +148,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__pre_write(size_t count, H5D_dset_info_t *dset_info)
+H5D__pre_write(size_t count, H5D_dset_io_info_t *dset_info)
 {
     hbool_t broke_mdset = FALSE; /* Whether to break multi-dataset option */
     size_t  u;                   /* Local index variable */
@@ -212,7 +212,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__read(size_t count, H5D_dset_info_t *dset_info, hbool_t is_mdset)
+H5D__read(size_t count, H5D_dset_io_info_t *dset_info, hbool_t is_mdset)
 {
     H5D_io_info_t io_info;                    /* Dataset I/O info  for multi dsets */
     size_t        type_info_init      = 0;    /* Number of datatype info structs that have been initialized */
@@ -518,7 +518,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__write(size_t count, H5D_dset_info_t *dset_info, hbool_t is_mdset)
+H5D__write(size_t count, H5D_dset_io_info_t *dset_info, hbool_t is_mdset)
 {
     H5D_io_info_t io_info;                    /* Dataset I/O info for multi dsets */
     size_t        type_info_init      = 0;    /* Number of datatype info structs that have been initialized */
@@ -856,7 +856,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__ioinfo_init(H5D_t *dset, H5D_dset_info_t *dset_info, H5D_storage_t *store, H5D_io_info_t *io_info)
+H5D__ioinfo_init(H5D_t *dset, H5D_dset_io_info_t *dset_info, H5D_storage_t *store, H5D_io_info_t *io_info)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
