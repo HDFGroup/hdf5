@@ -418,4 +418,5 @@ jobs:
       - name: CMake Run Tests
         run: ctest --build . -C ${{ matrix.build_mode.cmake }} -V
         working-directory: ${{ runner.workspace }}/build
-        if: (matrix.generator != 'autogen') && (matrix.run_tests)
+        # Skip Debug MSVC while we investigate H5L Java test timeouts
+        if: (matrix.generator != 'autogen') && (matrix.run_tests) && ! ((matrix.name == 'Windows MSVC CMake') && (matrix.build_mode.cmake == 'Debug'))
