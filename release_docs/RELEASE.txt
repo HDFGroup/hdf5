@@ -163,6 +163,16 @@ Bug Fixes since HDF5-1.10.9 release
 ===================================
     Library
     -------
+    - Modified H5Fstart_swmr_write() to preserve DAPL properties
+
+      Internally, H5Fstart_swmr_write() closes and reopens the file in question
+      as part of its process for making the file SWMR-safe.  Previously, when
+      the library reopened the file it would simply use the default access
+      properties.  Modified the library to instead save these properties and use
+      them when reopening the file.
+
+      (NAF - 2022/07/18, HDFFV-11308)
+
     - Converted an assertion on (possibly corrupt) file contents to a normal
       error check
 
