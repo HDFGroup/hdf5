@@ -115,7 +115,7 @@ typedef struct H5D_type_info_t {
 
 /* Forward declaration of structs used below */
 struct H5D_io_info_t;
-struct H5D_dset_info_t;
+struct H5D_dset_io_info_t;
 typedef struct H5D_shared_t H5D_shared_t;
 
 /* Function pointers for I/O on particular types of dataset layouts */
@@ -125,13 +125,13 @@ typedef hbool_t (*H5D_layout_is_space_alloc_func_t)(const H5O_storage_t *storage
 typedef hbool_t (*H5D_layout_is_data_cached_func_t)(const H5D_shared_t *shared_dset);
 typedef herr_t (*H5D_layout_io_init_func_t)(struct H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
                                             hsize_t nelmts, H5S_t *file_space, H5S_t *mem_space,
-                                            struct H5D_dset_info_t *dinfo);
+                                            struct H5D_dset_io_info_t *dinfo);
 typedef herr_t (*H5D_layout_read_func_t)(struct H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
                                          hsize_t nelmts, H5S_t *file_space, H5S_t *mem_space,
-                                         struct H5D_dset_info_t *dinfo);
+                                         struct H5D_dset_io_info_t *dinfo);
 typedef herr_t (*H5D_layout_write_func_t)(struct H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
                                           hsize_t nelmts, H5S_t *file_space, H5S_t *mem_space,
-                                          struct H5D_dset_info_t *dinfo);
+                                          struct H5D_dset_io_info_t *dinfo);
 typedef herr_t (*H5D_layout_read_md_func_t)(const size_t count, struct H5D_io_info_t *io_info);
 typedef herr_t (*H5D_layout_write_md_func_t)(const size_t count, struct H5D_io_info_t *io_info);
 typedef ssize_t (*H5D_layout_readvv_func_t)(const struct H5D_io_info_t *io_info, size_t dset_max_nseq,
@@ -145,7 +145,7 @@ typedef ssize_t (*H5D_layout_writevv_func_t)(const struct H5D_io_info_t *io_info
                                              size_t *mem_curr_seq, size_t mem_len_arr[],
                                              hsize_t mem_offset_arr[]);
 typedef herr_t (*H5D_layout_flush_func_t)(H5D_t *dataset);
-typedef herr_t (*H5D_layout_io_term_func_t)(struct H5D_io_info_t *io_info, struct H5D_dset_info_t *di);
+typedef herr_t (*H5D_layout_io_term_func_t)(struct H5D_io_info_t *io_info, struct H5D_dset_io_info_t *di);
 typedef herr_t (*H5D_layout_dest_func_t)(H5D_t *dataset);
 
 /* Typedef for grouping layout I/O routines */
@@ -237,14 +237,14 @@ typedef struct H5D_piece_info_t {
     unsigned fspace_shared; /* Indicate that the file space for a chunk is shared and shouldn't be freed */
     H5S_t   *mspace;        /* Dataspace describing selection in memory corresponding to this chunk */
     unsigned mspace_shared; /* Indicate that the memory space for a chunk is shared and shouldn't be freed */
-    struct H5D_dset_info_t *dset_info; /* Pointer to dset_info */
+    struct H5D_dset_io_info_t *dset_info; /* Pointer to dset_info */
 } H5D_piece_info_t;
 
 /* dset info for multiple dsets */
 /* When freeing this struct, you must always check the value of mem_space_alloc,
  * calling H5S_close() if it is true, since lower levels may have allocated and
  * replaced mem_space */
-typedef struct H5D_dset_info_t {
+typedef struct H5D_dset_io_info_t {
     H5D_t                  *dset;       /* Pointer to dataset being operated on */
     H5D_storage_t          *store;      /* Dataset storage info */
     H5D_layout_ops_t        layout_ops; /* Dataset layout I/O operation function pointers */
@@ -281,7 +281,7 @@ typedef struct H5D_dset_info_t {
     hid_t           mem_type_id; /* memory datatype ID */
     H5D_type_info_t type_info;
     hbool_t         type_info_init;
-} H5D_dset_info_t;
+} H5D_dset_io_info_t;
 
 typedef struct H5D_io_info_t {
     /* QAK: Delete the f_sh field when oloc has a shared file pointer? */
@@ -293,7 +293,7 @@ typedef struct H5D_io_info_t {
     H5D_md_io_ops_t         md_io_ops; /* Multi dataset I/O operation function pointers */
     H5D_io_op_type_t        op_type;
     const H5D_t            *dset;          /* Pointer to dataset being operated on */
-    H5D_dset_info_t        *dsets_info;    /* dsets info where I/O is done to/from */
+    H5D_dset_io_info_t     *dsets_info;    /* dsets info where I/O is done to/from */
     H5SL_t                 *sel_pieces;    /* Skip list containing information for each piece selected */
     haddr_t                 store_faddr;   /* lowest file addr for read/write */
     H5_flexible_const_ptr_t base_maddr;    /* starting mem address */
@@ -303,8 +303,8 @@ typedef struct H5D_io_info_t {
 
 /* Created to pass both at once for callback func */
 typedef struct H5D_io_info_wrap_t {
-    H5D_io_info_t   *io_info;
-    H5D_dset_info_t *dinfo;
+    H5D_io_info_t      *io_info;
+    H5D_dset_io_info_t *dinfo;
 } H5D_io_info_wrap_t;
 
 /******************/
@@ -582,8 +582,8 @@ H5_DLLVAR const H5B2_class_t H5D_BT2_FILT[1];
 /*  Array of versions for Layout */
 H5_DLLVAR const unsigned H5O_layout_ver_bounds[H5F_LIBVER_NBOUNDS];
 
-/* Declare extern the free list for H5D_dset_info_t */
-H5FL_EXTERN(H5D_dset_info_t);
+/* Declare extern the free list for H5D_dset_io_info_t */
+H5FL_EXTERN(H5D_dset_io_info_t);
 
 /******************************/
 /* Package Private Prototypes */
@@ -622,10 +622,10 @@ H5_DLL herr_t  H5D__refresh(H5D_t *dataset, hid_t dset_id);
 H5_DLL herr_t H5D__format_convert(H5D_t *dataset);
 
 /* Internal I/O routines */
-H5_DLL herr_t H5D__pre_read(size_t count, H5D_dset_info_t *dset_info);
-H5_DLL herr_t H5D__read(size_t count, H5D_dset_info_t *dset_info, hbool_t is_mdset);
-H5_DLL herr_t H5D__pre_write(size_t count, H5D_dset_info_t *dset_info);
-H5_DLL herr_t H5D__write(size_t count, H5D_dset_info_t *dset_info, hbool_t is_mdset);
+H5_DLL herr_t H5D__pre_read(size_t count, H5D_dset_io_info_t *dset_info);
+H5_DLL herr_t H5D__read(size_t count, H5D_dset_io_info_t *dset_info, hbool_t is_mdset);
+H5_DLL herr_t H5D__pre_write(size_t count, H5D_dset_io_info_t *dset_info);
+H5_DLL herr_t H5D__write(size_t count, H5D_dset_io_info_t *dset_info, hbool_t is_mdset);
 
 /* Functions that perform direct serial I/O operations */
 H5_DLL herr_t H5D__select_read(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
@@ -662,18 +662,18 @@ H5_DLL hbool_t H5D__contig_is_space_alloc(const H5O_storage_t *storage);
 H5_DLL hbool_t H5D__contig_is_data_cached(const H5D_shared_t *shared_dset);
 H5_DLL herr_t  H5D__contig_fill(const H5D_io_info_t *io_info);
 H5_DLL herr_t  H5D__contig_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
-                                H5S_t *file_space, H5S_t *mem_space, H5D_dset_info_t *dinfo);
+                                H5S_t *file_space, H5S_t *mem_space, H5D_dset_io_info_t *dinfo);
 H5_DLL herr_t  H5D__contig_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
-                                 H5S_t *file_space, H5S_t *mem_space, H5D_dset_info_t *dinfo);
+                                 H5S_t *file_space, H5S_t *mem_space, H5D_dset_io_info_t *dinfo);
 H5_DLL herr_t  H5D__contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src, H5F_t *f_dst,
                                 H5O_storage_contig_t *storage_dst, H5T_t *src_dtype, H5O_copy_t *cpy_info);
 H5_DLL herr_t  H5D__contig_delete(H5F_t *f, const H5O_storage_t *store);
 
 /* Functions that operate on chunked dataset storage */
-H5_DLL htri_t  H5D__chunk_cacheable(const H5D_io_info_t *io_info, H5D_dset_info_t *dset_info, haddr_t caddr,
-                                    hbool_t write_op);
-H5_DLL herr_t  H5D__chunk_create(const H5D_t *dset /*in,out*/);
-H5_DLL herr_t  H5D__chunk_set_info(const H5D_t *dset);
+H5_DLL htri_t H5D__chunk_cacheable(const H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info, haddr_t caddr,
+                                   hbool_t write_op);
+H5_DLL herr_t H5D__chunk_create(const H5D_t *dset /*in,out*/);
+H5_DLL herr_t H5D__chunk_set_info(const H5D_t *dset);
 H5_DLL hbool_t H5D__chunk_is_space_alloc(const H5O_storage_t *storage);
 H5_DLL hbool_t H5D__chunk_is_data_cached(const H5D_shared_t *shared_dset);
 H5_DLL herr_t  H5D__chunk_lookup(const H5D_t *dset, const hsize_t *scaled, H5D_chunk_ud_t *udata);
@@ -775,7 +775,7 @@ H5_DLL herr_t H5D__mpio_get_no_coll_cause_strings(char *local_cause, size_t loca
 #endif /* H5_HAVE_PARALLEL */
 
 /* for both CHUNK and CONTIG dset skiplist free (sel_pieces) for layout_ops.io_term. */
-H5_DLL herr_t H5D__piece_io_term(H5D_io_info_t *io_info, H5D_dset_info_t *di);
+H5_DLL herr_t H5D__piece_io_term(H5D_io_info_t *io_info, H5D_dset_io_info_t *di);
 
 /* Testing functions */
 #ifdef H5D_TESTING

@@ -84,11 +84,11 @@
 /* Layout operation callbacks */
 static hbool_t H5D__virtual_is_data_cached(const H5D_shared_t *shared_dset);
 static herr_t  H5D__virtual_io_init(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
-                                    H5S_t *file_space, H5S_t *mem_space, H5D_dset_info_t *dinfo);
+                                    H5S_t *file_space, H5S_t *mem_space, H5D_dset_io_info_t *dinfo);
 static herr_t  H5D__virtual_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
-                                 H5S_t *file_space, H5S_t *mem_space, H5D_dset_info_t *dinfo);
+                                 H5S_t *file_space, H5S_t *mem_space, H5D_dset_io_info_t *dinfo);
 static herr_t  H5D__virtual_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
-                                  H5S_t *file_space, H5S_t *mem_space, H5D_dset_info_t *dinfo);
+                                  H5S_t *file_space, H5S_t *mem_space, H5D_dset_io_info_t *dinfo);
 static herr_t  H5D__virtual_flush(H5D_t *dset);
 
 /* Other functions */
@@ -105,12 +105,12 @@ static herr_t H5D__virtual_build_source_name(char                               
                                              size_t static_strlen, size_t nsubs, hsize_t blockno,
                                              char **built_name);
 static herr_t H5D__virtual_init_all(const H5D_t *dset);
-static herr_t H5D__virtual_pre_io(H5D_dset_info_t *dset_info, H5O_storage_virtual_t *storage,
+static herr_t H5D__virtual_pre_io(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_t *storage,
                                   H5S_t *file_space, H5S_t *mem_space, hsize_t *tot_nelmts);
 static herr_t H5D__virtual_post_io(H5O_storage_virtual_t *storage);
-static herr_t H5D__virtual_read_one(H5D_dset_info_t *dset_info, const H5D_type_info_t *type_info,
+static herr_t H5D__virtual_read_one(H5D_dset_io_info_t *dset_info, const H5D_type_info_t *type_info,
                                     H5S_t *file_space, H5O_storage_virtual_srcdset_t *source_dset);
-static herr_t H5D__virtual_write_one(H5D_dset_info_t *dset_info, const H5D_type_info_t *type_info,
+static herr_t H5D__virtual_write_one(H5D_dset_io_info_t *dset_info, const H5D_type_info_t *type_info,
                                      H5S_t *file_space, H5O_storage_virtual_srcdset_t *source_dset);
 
 /*********************/
@@ -2387,7 +2387,7 @@ done:
 static herr_t
 H5D__virtual_io_init(H5D_io_info_t *io_info, const H5D_type_info_t H5_ATTR_UNUSED *type_info,
                      hsize_t H5_ATTR_UNUSED nelmts, H5S_t H5_ATTR_UNUSED *file_space,
-                     H5S_t H5_ATTR_UNUSED *mem_space, H5D_dset_info_t H5_ATTR_UNUSED *dinfo)
+                     H5S_t H5_ATTR_UNUSED *mem_space, H5D_dset_io_info_t H5_ATTR_UNUSED *dinfo)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -2413,7 +2413,7 @@ H5D__virtual_io_init(H5D_io_info_t *io_info, const H5D_type_info_t H5_ATTR_UNUSE
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__virtual_pre_io(H5D_dset_info_t *dset_info, H5O_storage_virtual_t *storage, H5S_t *file_space,
+H5D__virtual_pre_io(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_t *storage, H5S_t *file_space,
                     H5S_t *mem_space, hsize_t *tot_nelmts)
 {
     const H5D_t *dset = dset_info->dset;     /* Local pointer to dataset info */
@@ -2725,12 +2725,12 @@ H5D__virtual_post_io(H5O_storage_virtual_t *storage)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__virtual_read_one(H5D_dset_info_t *dset_info, const H5D_type_info_t *type_info, H5S_t *file_space,
+H5D__virtual_read_one(H5D_dset_io_info_t *dset_info, const H5D_type_info_t *type_info, H5S_t *file_space,
                       H5O_storage_virtual_srcdset_t *source_dset)
 {
-    H5S_t           *projected_src_space = NULL; /* File space for selection in a single source dataset */
-    H5D_dset_info_t *dinfo               = NULL;
-    herr_t           ret_value           = SUCCEED; /* Return value */
+    H5S_t              *projected_src_space = NULL; /* File space for selection in a single source dataset */
+    H5D_dset_io_info_t *dinfo               = NULL;
+    herr_t              ret_value           = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -2753,14 +2753,15 @@ H5D__virtual_read_one(H5D_dset_info_t *dset_info, const H5D_type_info_t *type_in
 
         {
             /* Alloc dset_info */
-            if (NULL == (dinfo = H5FL_CALLOC(H5D_dset_info_t)))
+            if (NULL == (dinfo = H5FL_CALLOC(H5D_dset_io_info_t)))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate dset info array buffer")
 
-            dinfo->dset        = source_dset->dset;
-            dinfo->mem_space   = source_dset->projected_mem_space;
-            dinfo->file_space  = projected_src_space;
-            dinfo->buf.vp      = dset_info->buf.vp;
-            dinfo->mem_type_id = type_info->dst_type_id;
+            dinfo->dset            = source_dset->dset;
+            dinfo->mem_space       = source_dset->projected_mem_space;
+            dinfo->mem_space_alloc = FALSE;
+            dinfo->file_space      = projected_src_space;
+            dinfo->buf.vp          = dset_info->buf.vp;
+            dinfo->mem_type_id     = type_info->dst_type_id;
 
             /* Read in the point (with the custom VL memory allocator) */
             if (H5D__read(1, dinfo, FALSE) < 0)
@@ -2778,7 +2779,7 @@ done:
     if (dinfo) {
         if (dinfo->mem_space_alloc && H5S_close(dinfo->mem_space) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close memory dataspace")
-        dinfo = H5FL_FREE(H5D_dset_info_t, dinfo);
+        dinfo = H5FL_FREE(H5D_dset_io_info_t, dinfo);
     }
     if (projected_src_space) {
         HDassert(ret_value < 0);
@@ -2803,7 +2804,7 @@ done:
  */
 static herr_t
 H5D__virtual_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts, H5S_t *file_space,
-                  H5S_t *mem_space, H5D_dset_info_t *dset_info)
+                  H5S_t *mem_space, H5D_dset_io_info_t *dset_info)
 {
     H5O_storage_virtual_t *storage;             /* Convenient pointer into layout struct */
     hsize_t                tot_nelmts;          /* Total number of elements mapped to mem_space */
@@ -2935,12 +2936,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__virtual_write_one(H5D_dset_info_t *dset_info, const H5D_type_info_t *type_info, H5S_t *file_space,
+H5D__virtual_write_one(H5D_dset_io_info_t *dset_info, const H5D_type_info_t *type_info, H5S_t *file_space,
                        H5O_storage_virtual_srcdset_t *source_dset)
 {
-    H5S_t           *projected_src_space = NULL; /* File space for selection in a single source dataset */
-    H5D_dset_info_t *dinfo               = NULL;
-    herr_t           ret_value           = SUCCEED; /* Return value */
+    H5S_t              *projected_src_space = NULL; /* File space for selection in a single source dataset */
+    H5D_dset_io_info_t *dinfo               = NULL;
+    herr_t              ret_value           = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -2965,7 +2966,7 @@ H5D__virtual_write_one(H5D_dset_info_t *dset_info, const H5D_type_info_t *type_i
 
         {
             /* Alloc dset_info */
-            if (NULL == (dinfo = H5FL_CALLOC(H5D_dset_info_t)))
+            if (NULL == (dinfo = H5FL_CALLOC(H5D_dset_io_info_t)))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate dset info array buffer")
 
             dinfo->dset        = source_dset->dset;
@@ -2990,7 +2991,7 @@ done:
     if (dinfo) {
         if (dinfo->mem_space_alloc && H5S_close(dinfo->mem_space) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close memory dataspace")
-        dinfo = H5FL_FREE(H5D_dset_info_t, dinfo);
+        dinfo = H5FL_FREE(H5D_dset_io_info_t, dinfo);
     }
     if (projected_src_space) {
         HDassert(ret_value < 0);
@@ -3015,7 +3016,7 @@ done:
  */
 static herr_t
 H5D__virtual_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
-                   H5S_t *file_space, H5S_t *mem_space, H5D_dset_info_t *dset_info)
+                   H5S_t *file_space, H5S_t *mem_space, H5D_dset_io_info_t *dset_info)
 {
     H5O_storage_virtual_t *storage;             /* Convenient pointer into layout struct */
     hsize_t                tot_nelmts;          /* Total number of elements mapped to mem_space */

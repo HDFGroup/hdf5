@@ -2613,7 +2613,7 @@ H5D__vlen_get_buf_size_cb(void H5_ATTR_UNUSED *elem, hid_t type_id, unsigned H5_
                           const hsize_t *point, void *op_data)
 {
     H5D_vlen_bufsize_native_t *vlen_bufsize = (H5D_vlen_bufsize_native_t *)op_data;
-    H5D_dset_info_t           *dset_info    = NULL;         /* Internal multi-dataset info placeholder */
+    H5D_dset_io_info_t        *dset_info    = NULL;         /* Internal multi-dataset info placeholder */
     herr_t                     ret_value    = H5_ITER_CONT; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -2629,7 +2629,7 @@ H5D__vlen_get_buf_size_cb(void H5_ATTR_UNUSED *elem, hid_t type_id, unsigned H5_
 
     {
         /* Alloc dset_info */
-        if (NULL == (dset_info = H5FL_CALLOC(H5D_dset_info_t)))
+        if (NULL == (dset_info = H5FL_CALLOC(H5D_dset_io_info_t)))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate dset info array buffer")
 
         dset_info->dset        = vlen_bufsize->dset;
@@ -2648,7 +2648,7 @@ done:
     if (dset_info) {
         if (dset_info->mem_space_alloc && H5S_close(dset_info->mem_space) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close memory dataspace")
-        dset_info = H5FL_FREE(H5D_dset_info_t, dset_info);
+        dset_info = H5FL_FREE(H5D_dset_io_info_t, dset_info);
     }
 
     FUNC_LEAVE_NOAPI(ret_value)

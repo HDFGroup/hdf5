@@ -52,8 +52,8 @@
 /* Helper routines for read/write API calls */
 static herr_t H5VL__native_dataset_io_setup(size_t count, void *obj[], hid_t mem_type_id[],
                                             hid_t mem_space_id[], hid_t file_space_id[], hid_t dxpl_id,
-                                            H5_flexible_const_ptr_t buf[], H5D_dset_info_t **dinfo);
-static herr_t H5VL__native_dataset_io_cleanup(size_t count, hid_t file_space_id[], H5D_dset_info_t *dinfo);
+                                            H5_flexible_const_ptr_t buf[], H5D_dset_io_info_t **dinfo);
+static herr_t H5VL__native_dataset_io_cleanup(size_t count, hid_t file_space_id[], H5D_dset_io_info_t *dinfo);
 
 /*********************/
 /* Package Variables */
@@ -79,7 +79,7 @@ static herr_t H5VL__native_dataset_io_cleanup(size_t count, hid_t file_space_id[
 static herr_t
 H5VL__native_dataset_io_setup(size_t count, void *obj[], hid_t mem_type_id[], hid_t mem_space_id[],
                               hid_t file_space_id[], hid_t dxpl_id, H5_flexible_const_ptr_t buf[],
-                              H5D_dset_info_t **dinfo)
+                              H5D_dset_io_info_t **dinfo)
 {
     H5F_shared_t *f_sh;
     size_t        i;
@@ -94,7 +94,7 @@ H5VL__native_dataset_io_setup(size_t count, void *obj[], hid_t mem_type_id[], hi
     f_sh = H5F_SHARED(((H5D_t *)obj[0])->oloc.file);
 
     /* Allocate dataset info array */
-    if (NULL == (*dinfo = (H5D_dset_info_t *)H5MM_calloc(count * sizeof(H5D_dset_info_t))))
+    if (NULL == (*dinfo = (H5D_dset_io_info_t *)H5MM_calloc(count * sizeof(H5D_dset_io_info_t))))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate dset info array buffer")
 
     /* Iterate over datasets */
@@ -206,7 +206,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL__native_dataset_io_cleanup(size_t count, hid_t file_space_id[], H5D_dset_info_t *dinfo)
+H5VL__native_dataset_io_cleanup(size_t count, hid_t file_space_id[], H5D_dset_io_info_t *dinfo)
 {
     size_t i;
     herr_t ret_value = SUCCEED; /* Return value */
@@ -351,8 +351,8 @@ herr_t
 H5VL__native_dataset_read(size_t count, void *obj[], hid_t mem_type_id[], hid_t mem_space_id[],
                           hid_t file_space_id[], hid_t dxpl_id, void *buf[], void H5_ATTR_UNUSED **req)
 {
-    H5D_dset_info_t *dinfo     = NULL;
-    herr_t           ret_value = SUCCEED; /* Return value */
+    H5D_dset_io_info_t *dinfo     = NULL;
+    herr_t              ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -393,8 +393,8 @@ herr_t
 H5VL__native_dataset_write(size_t count, void *obj[], hid_t mem_type_id[], hid_t mem_space_id[],
                            hid_t file_space_id[], hid_t dxpl_id, const void *buf[], void H5_ATTR_UNUSED **req)
 {
-    H5D_dset_info_t *dinfo     = NULL;
-    herr_t           ret_value = SUCCEED; /* Return value */
+    H5D_dset_io_info_t *dinfo     = NULL;
+    herr_t              ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 

@@ -92,7 +92,7 @@ typedef struct H5D_contig_writevv_ud_t {
 static herr_t  H5D__contig_construct(H5F_t *f, H5D_t *dset);
 static herr_t  H5D__contig_init(H5F_t *f, const H5D_t *dset, hid_t dapl_id);
 static herr_t  H5D__contig_io_init(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
-                                   H5S_t *file_space, H5S_t *mem_space, H5D_dset_info_t *dinfo);
+                                   H5S_t *file_space, H5S_t *mem_space, H5D_dset_io_info_t *dinfo);
 static ssize_t H5D__contig_readvv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *dset_curr_seq,
                                   size_t dset_len_arr[], hsize_t dset_offset_arr[], size_t mem_max_nseq,
                                   size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[]);
@@ -103,7 +103,7 @@ static herr_t  H5D__contig_flush(H5D_t *dset);
 
 /* Helper routines */
 static herr_t H5D__contig_write_one(H5D_io_info_t *io_info, hsize_t offset, size_t size);
-static htri_t H5D__contig_may_use_select_io(const H5D_io_info_t *io_info, const H5D_dset_info_t *dset_info,
+static htri_t H5D__contig_may_use_select_io(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info,
                                             H5D_io_op_type_t op_type);
 
 /*********************/
@@ -189,14 +189,14 @@ done:
 herr_t
 H5D__contig_fill(const H5D_io_info_t *io_info)
 {
-    const H5D_t    *dset = io_info->dset; /* the dataset pointer */
-    H5D_io_info_t   ioinfo;               /* Dataset I/O info */
-    H5D_dset_info_t dset_info;            /* Dset info */
-    H5D_storage_t   store;                /* Union of storage info for dataset */
-    hssize_t        snpoints;             /* Number of points in space (for error checking) */
-    size_t          npoints;              /* Number of points in space */
-    hsize_t         offset;               /* Offset of dataset */
-    size_t          max_temp_buf;         /* Maximum size of temporary buffer */
+    const H5D_t        *dset = io_info->dset; /* the dataset pointer */
+    H5D_io_info_t       ioinfo;               /* Dataset I/O info */
+    H5D_dset_io_info_t *dset_info = NULL;     /* Dset info */
+    H5D_storage_t       store;                /* Union of storage info for dataset */
+    hssize_t            snpoints;             /* Number of points in space (for error checking) */
+    size_t              npoints;              /* Number of points in space */
+    hsize_t             offset;               /* Offset of dataset */
+    size_t              max_temp_buf;         /* Maximum size of temporary buffer */
 #ifdef H5_HAVE_PARALLEL
     MPI_Comm mpi_comm = MPI_COMM_NULL; /* MPI communicator for file */
     int      mpi_rank = (-1);          /* This process's rank  */
@@ -259,13 +259,15 @@ H5D__contig_fill(const H5D_io_info_t *io_info)
     /* Simple setup for dataset I/O info struct */
     ioinfo.op_type = H5D_IO_OP_WRITE;
 
-    dset_info.dset            = (H5D_t *)dset;
-    dset_info.store           = &store;
-    dset_info.buf.cvp         = fb_info.fill_buf;
-    dset_info.mem_space       = NULL;
-    dset_info.mem_space_alloc = FALSE;
-    ioinfo.dsets_info         = &dset_info;
-    ioinfo.f_sh               = H5F_SHARED(dset_info.dset->oloc.file);
+    if (NULL == (dset_info = H5FL_CALLOC(H5D_dset_io_info_t)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate dset info array buffer")
+    dset_info->dset            = (H5D_t *)dset;
+    dset_info->store           = &store;
+    dset_info->buf.cvp         = fb_info.fill_buf;
+    dset_info->mem_space       = NULL;
+    dset_info->mem_space_alloc = FALSE;
+    ioinfo.dsets_info          = dset_info;
+    ioinfo.f_sh                = H5F_SHARED(dset->oloc.file);
 
     /*
      * Fill the entire current extent with the fill value.  We can do
@@ -340,8 +342,12 @@ done:
 
     /* Free the memory dataspace if it was allocated (currently this will never
      * happen) */
-    if (dset_info.mem_space_alloc && H5S_close(dset_info.mem_space) < 0)
+    if (dset_info->mem_space_alloc && H5S_close(dset_info->mem_space) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close memory dataspace")
+
+    /* Close dset_info */
+    if (dset_info)
+        dset_info = H5FL_FREE(H5D_dset_io_info_t, dset_info);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__contig_fill() */
@@ -586,7 +592,7 @@ H5D__contig_is_data_cached(const H5D_shared_t *shared_dset)
 static herr_t
 H5D__contig_io_init(H5D_io_info_t *io_info, const H5D_type_info_t H5_ATTR_UNUSED *type_info,
                     hsize_t H5_ATTR_UNUSED nelmts, H5S_t H5_ATTR_UNUSED *file_space,
-                    H5S_t H5_ATTR_UNUSED *mem_space, H5D_dset_info_t *dinfo)
+                    H5S_t H5_ATTR_UNUSED *mem_space, H5D_dset_io_info_t *dinfo)
 {
     H5D_t *dataset = dinfo->dset; /* Local pointer to dataset info */
 
@@ -770,7 +776,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static htri_t
-H5D__contig_may_use_select_io(const H5D_io_info_t *io_info, const H5D_dset_info_t *dset_info,
+H5D__contig_may_use_select_io(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info,
                               H5D_io_op_type_t op_type)
 {
     const H5D_t *dataset   = NULL; /* Local pointer to dataset info */
@@ -827,7 +833,7 @@ done:
  */
 herr_t
 H5D__contig_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts, H5S_t *file_space,
-                 H5S_t *mem_space, H5D_dset_info_t *dinfo)
+                 H5S_t *mem_space, H5D_dset_io_info_t *dinfo)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -881,7 +887,7 @@ done:
  */
 herr_t
 H5D__contig_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts, H5S_t *file_space,
-                  H5S_t *mem_space, H5D_dset_info_t *dinfo)
+                  H5S_t *mem_space, H5D_dset_io_info_t *dinfo)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -1177,8 +1183,8 @@ H5D__contig_readvv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *d
                    size_t dset_len_arr[], hsize_t dset_off_arr[], size_t mem_max_nseq, size_t *mem_curr_seq,
                    size_t mem_len_arr[], hsize_t mem_off_arr[])
 {
-    H5D_dset_info_t *dset_info;
-    ssize_t          ret_value = -1; /* Return value */
+    H5D_dset_io_info_t *dset_info;
+    ssize_t             ret_value = -1; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1498,8 +1504,8 @@ H5D__contig_writevv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *
                     size_t dset_len_arr[], hsize_t dset_off_arr[], size_t mem_max_nseq, size_t *mem_curr_seq,
                     size_t mem_len_arr[], hsize_t mem_off_arr[])
 {
-    H5D_dset_info_t *dset_info;
-    ssize_t          ret_value = -1; /* Return value (Size of sequence in bytes) */
+    H5D_dset_io_info_t *dset_info;
+    ssize_t             ret_value = -1; /* Return value (Size of sequence in bytes) */
 
     FUNC_ENTER_PACKAGE
 
