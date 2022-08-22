@@ -670,10 +670,10 @@ H5_DLL herr_t  H5D__contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storag
 H5_DLL herr_t  H5D__contig_delete(H5F_t *f, const H5O_storage_t *store);
 
 /* Functions that operate on chunked dataset storage */
-H5_DLL htri_t  H5D__chunk_cacheable(const H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info, haddr_t caddr,
-                                    hbool_t write_op);
-H5_DLL herr_t  H5D__chunk_create(const H5D_t *dset /*in,out*/);
-H5_DLL herr_t  H5D__chunk_set_info(const H5D_t *dset);
+H5_DLL htri_t H5D__chunk_cacheable(const H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info, haddr_t caddr,
+                                   hbool_t write_op);
+H5_DLL herr_t H5D__chunk_create(const H5D_t *dset /*in,out*/);
+H5_DLL herr_t H5D__chunk_set_info(const H5D_t *dset);
 H5_DLL hbool_t H5D__chunk_is_space_alloc(const H5O_storage_t *storage);
 H5_DLL hbool_t H5D__chunk_is_data_cached(const H5D_shared_t *shared_dset);
 H5_DLL herr_t  H5D__chunk_lookup(const H5D_t *dset, const hsize_t *scaled, H5D_chunk_ud_t *udata);

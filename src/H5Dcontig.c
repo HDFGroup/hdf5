@@ -189,14 +189,14 @@ done:
 herr_t
 H5D__contig_fill(const H5D_io_info_t *io_info)
 {
-    const H5D_t    *dset = io_info->dset; /* the dataset pointer */
-    H5D_io_info_t   ioinfo;               /* Dataset I/O info */
-    H5D_dset_io_info_t *dset_info = NULL; /* Dset info */
-    H5D_storage_t   store;                /* Union of storage info for dataset */
-    hssize_t        snpoints;             /* Number of points in space (for error checking) */
-    size_t          npoints;              /* Number of points in space */
-    hsize_t         offset;               /* Offset of dataset */
-    size_t          max_temp_buf;         /* Maximum size of temporary buffer */
+    const H5D_t        *dset = io_info->dset; /* the dataset pointer */
+    H5D_io_info_t       ioinfo;               /* Dataset I/O info */
+    H5D_dset_io_info_t *dset_info = NULL;     /* Dset info */
+    H5D_storage_t       store;                /* Union of storage info for dataset */
+    hssize_t            snpoints;             /* Number of points in space (for error checking) */
+    size_t              npoints;              /* Number of points in space */
+    hsize_t             offset;               /* Offset of dataset */
+    size_t              max_temp_buf;         /* Maximum size of temporary buffer */
 #ifdef H5_HAVE_PARALLEL
     MPI_Comm mpi_comm = MPI_COMM_NULL; /* MPI communicator for file */
     int      mpi_rank = (-1);          /* This process's rank  */
@@ -266,8 +266,8 @@ H5D__contig_fill(const H5D_io_info_t *io_info)
     dset_info->buf.cvp         = fb_info.fill_buf;
     dset_info->mem_space       = NULL;
     dset_info->mem_space_alloc = FALSE;
-    ioinfo.dsets_info         = dset_info;
-    ioinfo.f_sh               = H5F_SHARED(dset->oloc.file);
+    ioinfo.dsets_info          = dset_info;
+    ioinfo.f_sh                = H5F_SHARED(dset->oloc.file);
 
     /*
      * Fill the entire current extent with the fill value.  We can do
@@ -346,7 +346,7 @@ done:
         HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close memory dataspace")
 
     /* Close dset_info */
-     if (dset_info)
+    if (dset_info)
         dset_info = H5FL_FREE(H5D_dset_io_info_t, dset_info);
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1184,7 +1184,7 @@ H5D__contig_readvv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *d
                    size_t mem_len_arr[], hsize_t mem_off_arr[])
 {
     H5D_dset_io_info_t *dset_info;
-    ssize_t          ret_value = -1; /* Return value */
+    ssize_t             ret_value = -1; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1505,7 +1505,7 @@ H5D__contig_writevv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *
                     size_t mem_len_arr[], hsize_t mem_off_arr[])
 {
     H5D_dset_io_info_t *dset_info;
-    ssize_t          ret_value = -1; /* Return value (Size of sequence in bytes) */
+    ssize_t             ret_value = -1; /* Return value (Size of sequence in bytes) */
 
     FUNC_ENTER_PACKAGE
 

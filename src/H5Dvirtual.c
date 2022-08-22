@@ -2728,9 +2728,9 @@ static herr_t
 H5D__virtual_read_one(H5D_dset_io_info_t *dset_info, const H5D_type_info_t *type_info, H5S_t *file_space,
                       H5O_storage_virtual_srcdset_t *source_dset)
 {
-    H5S_t           *projected_src_space = NULL; /* File space for selection in a single source dataset */
+    H5S_t              *projected_src_space = NULL; /* File space for selection in a single source dataset */
     H5D_dset_io_info_t *dinfo               = NULL;
-    herr_t           ret_value           = SUCCEED; /* Return value */
+    herr_t              ret_value           = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -2756,12 +2756,12 @@ H5D__virtual_read_one(H5D_dset_io_info_t *dset_info, const H5D_type_info_t *type
             if (NULL == (dinfo = H5FL_CALLOC(H5D_dset_io_info_t)))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate dset info array buffer")
 
-            dinfo->dset        = source_dset->dset;
-            dinfo->mem_space   = source_dset->projected_mem_space;
+            dinfo->dset            = source_dset->dset;
+            dinfo->mem_space       = source_dset->projected_mem_space;
             dinfo->mem_space_alloc = FALSE;
-            dinfo->file_space  = projected_src_space;
-            dinfo->buf.vp      = dset_info->buf.vp;
-            dinfo->mem_type_id = type_info->dst_type_id;
+            dinfo->file_space      = projected_src_space;
+            dinfo->buf.vp          = dset_info->buf.vp;
+            dinfo->mem_type_id     = type_info->dst_type_id;
 
             /* Read in the point (with the custom VL memory allocator) */
             if (H5D__read(1, dinfo, FALSE) < 0)
