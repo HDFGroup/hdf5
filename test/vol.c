@@ -50,13 +50,13 @@ static herr_t reg_opt_datatype_get(void *obj, H5VL_datatype_get_args_t *args, hi
 #define REG_OPT_VOL_NAME  "reg_opt"
 #define REG_OPT_VOL_VALUE ((H5VL_class_value_t)502)
 static const H5VL_class_t reg_opt_vol_g = {
-    H5VL_VERSION,      /* VOL class struct version */
-    REG_OPT_VOL_VALUE, /* value        */
-    REG_OPT_VOL_NAME,  /* name         */
-    0,                 /* version      */
-    0,                 /* capability flags */
-    NULL,              /* initialize   */
-    NULL,              /* terminate    */
+    H5VL_VERSION,       /* VOL class struct version */
+    REG_OPT_VOL_VALUE,  /* value        */
+    REG_OPT_VOL_NAME,   /* name         */
+    0,                  /* version      */
+    H5VL_CAP_FLAG_NONE, /* capability flags */
+    NULL,               /* initialize   */
+    NULL,               /* terminate    */
     {
         /* info_cls */
         (size_t)0, /* size    */
@@ -178,13 +178,13 @@ static const H5VL_class_t reg_opt_vol_g = {
  * functionality.
  */
 static const H5VL_class_t fake_vol_g = {
-    H5VL_VERSION,   /* VOL class struct version */
-    FAKE_VOL_VALUE, /* value        */
-    FAKE_VOL_NAME,  /* name         */
-    0,              /* connector version */
-    0,              /* capability flags */
-    NULL,           /* initialize   */
-    NULL,           /* terminate    */
+    H5VL_VERSION,       /* VOL class struct version */
+    FAKE_VOL_VALUE,     /* value        */
+    FAKE_VOL_NAME,      /* name         */
+    0,                  /* connector version */
+    H5VL_CAP_FLAG_NONE, /* capability flags */
+    NULL,               /* initialize   */
+    NULL,               /* terminate    */
     {
         /* info_cls */
         (size_t)0, /* size    */
@@ -299,7 +299,7 @@ static const H5VL_class_t fake_vol_g = {
     NULL /* optional     */
 };
 
-static herr_t fake_async_get_cap_flags(const void *info, unsigned *cap_flags);
+static herr_t fake_async_get_cap_flags(const void *info, uint64_t *cap_flags);
 
 #define FAKE_ASYNC_VOL_NAME  "fake_async"
 #define FAKE_ASYNC_VOL_VALUE ((H5VL_class_value_t)503)
@@ -562,7 +562,7 @@ reg_opt_datatype_get(void H5_ATTR_UNUSED *obj, H5VL_datatype_get_args_t *args, h
  *-------------------------------------------------------------------------
  */
 static herr_t
-fake_async_get_cap_flags(const void H5_ATTR_UNUSED *info, unsigned *cap_flags)
+fake_async_get_cap_flags(const void H5_ATTR_UNUSED *info, uint64_t *cap_flags)
 {
     *cap_flags = fake_async_vol_g.cap_flags;
 
@@ -1979,7 +1979,7 @@ test_async_vol_props(void)
     hid_t                    fapl_id = H5I_INVALID_HID;
     hid_t                    vol_id  = H5I_INVALID_HID;
     H5VL_pass_through_info_t passthru_info;
-    unsigned                 cap_flags    = 0;
+    uint64_t                 cap_flags    = H5VL_CAP_FLAG_NONE;
     char                    *conn_env_str = NULL;
 
     TESTING("Async VOL props");
@@ -2002,7 +2002,7 @@ test_async_vol_props(void)
             TEST_ERROR;
         if (H5VL__reparse_def_vol_conn_variable_test() < 0)
             TEST_ERROR;
-    } /* end if */
+    }
 
     /* Test query w/default VOL, which should indicate no async, since native connector
      * doesn't support async.
@@ -2032,7 +2032,7 @@ test_async_vol_props(void)
     fapl_id = h5_fileaccess();
 
     /* Test query w/fake async VOL, which should succeed */
-    cap_flags = 0;
+    cap_flags = H5VL_CAP_FLAG_NONE;
     if (H5Pget_vol_cap_flags(fapl_id, &cap_flags) < 0)
         FAIL_STACK_ERROR;
     if ((cap_flags & H5VL_CAP_FLAG_ASYNC) == 0)
@@ -2058,7 +2058,7 @@ test_async_vol_props(void)
         FAIL_STACK_ERROR;
 
     /* Test query w/fake async VOL, which should succeed */
-    cap_flags = 0;
+    cap_flags = H5VL_CAP_FLAG_NONE;
     if (H5Pget_vol_cap_flags(fapl_id, &cap_flags) < 0)
         FAIL_STACK_ERROR;
     if ((cap_flags & H5VL_CAP_FLAG_ASYNC) == 0)
@@ -2073,7 +2073,7 @@ test_async_vol_props(void)
         FAIL_STACK_ERROR;
 
     /* Test query w/passthru -> fake async VOL, which should succeed */
-    cap_flags = 0;
+    cap_flags = H5VL_CAP_FLAG_NONE;
     if (H5Pget_vol_cap_flags(fapl_id, &cap_flags) < 0)
         FAIL_STACK_ERROR;
     if ((cap_flags & H5VL_CAP_FLAG_ASYNC) == 0)
@@ -2097,7 +2097,7 @@ test_async_vol_props(void)
 
         if (H5VL__reparse_def_vol_conn_variable_test() < 0)
             TEST_ERROR;
-    } /* end if */
+    }
 
     PASSED();
 

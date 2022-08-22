@@ -5332,7 +5332,7 @@ H5_DLL herr_t H5Pset_vol(hid_t plist_id, hid_t new_vol_id, const void *new_vol_i
  * \since 1.13.0
  *
  */
-H5_DLL herr_t H5Pget_vol_cap_flags(hid_t plist_id, unsigned *cap_flags);
+H5_DLL herr_t H5Pget_vol_cap_flags(hid_t plist_id, uint64_t *cap_flags);
 
 #ifdef H5_HAVE_PARALLEL
 /**
