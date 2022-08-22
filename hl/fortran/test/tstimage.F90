@@ -64,10 +64,10 @@ integer(hid_t) :: file_id                            ! file identifier
 integer(hsize_t), parameter :: width  = 500          ! width of image
 integer(hsize_t), parameter :: height = 270          ! height of image
 integer, parameter :: pal_entries = 9                ! palette number of entries
-integer, dimension(width*height) :: buf1             ! data buffer
-integer, dimension(width*height) :: bufr1            ! data buffer
-integer, dimension(width*height*3) :: buf2           ! data buffer
-integer, dimension(width*height*3) :: bufr2          ! data buffer
+integer, dimension(:), allocatable :: buf1           ! data buffer
+integer, dimension(:), allocatable :: bufr1          ! data buffer
+integer, dimension(:), allocatable :: buf2           ! data buffer
+integer, dimension(:), allocatable :: bufr2          ! data buffer
 integer(hsize_t) :: widthr                           ! width of image
 integer(hsize_t) :: heightr                          ! height of image
 integer(hsize_t) :: planesr                          ! color planes
@@ -99,6 +99,12 @@ integer, dimension(pal_entries*3) :: pal_data_in = (/&
  252,168,0,&    ! orange
  252,0,0/)      ! red
 
+! allocate arrays
+!
+allocate(buf1(width * height))
+allocate(bufr1(width * height))
+allocate(buf2(width * height * 3))
+allocate(bufr2(width * height * 3))
 
 ! create an 8bit image of 9 values divided evenly by the array
 !
@@ -335,6 +341,13 @@ call h5fclose_f(file_id, errcode)
 ! Close FORTRAN predefined datatypes.
 !
 call h5close_f(errcode)
+
+! deallocate arrays
+!
+deallocate(buf1)
+deallocate(bufr1)
+deallocate(buf2)
+deallocate(bufr2)
 
 !
 ! end function.
