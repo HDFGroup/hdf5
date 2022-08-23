@@ -56,17 +56,10 @@ MODULE H5R
   !        END TYPE
   !
 
-  PRIVATE h5rget_object_type_obj_f
   PRIVATE h5rget_region_region_f, h5rget_region_ptr_f
   PRIVATE h5rcreate_object_f, h5rcreate_region_f, h5rcreate_ptr_f
   PRIVATE h5rdereference_object_f, h5rdereference_region_f, h5rdereference_ptr_f
   PRIVATE h5rget_name_object_f, h5rget_name_region_f, h5rget_name_ptr_f
-
-  INTERFACE h5rget_object_type_f
-
-     MODULE PROCEDURE h5rget_object_type_obj_f
-
-  END INTERFACE
 
   TYPE :: hdset_reg_ref_t_f03
      INTEGER(C_SIGNED_CHAR), DIMENSION(1:H5R_DSET_REG_REF_BUF_SIZE_F) :: ref
@@ -162,10 +155,10 @@ MODULE H5R
 
 CONTAINS
 
-!****s* H5R/h5rget_object_type_obj_f
+!****s* H5R/h5rget_object_type_f
 !
 ! NAME
-!  h5rget_object_type_obj_f
+!  h5rget_object_type_f
 !
 ! PURPOSE
 !  Retrieves the type of object that an object reference points to.
@@ -195,7 +188,7 @@ CONTAINS
 !  This is a module procedure for the h5rget_object_type_f
 !  subroutine.
 ! SOURCE
-  SUBROUTINE h5rget_object_type_obj_f(dset_id, ref, obj_type, hdferr)
+  SUBROUTINE  h5rget_object_type_f(dset_id, ref, obj_type, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
     TYPE(hobj_ref_t_f), INTENT(IN) :: ref   ! Object reference
@@ -221,7 +214,7 @@ CONTAINS
     ref_f = ref%ref
     hdferr = h5rget_object_type_obj_c(dset_id, ref_f, obj_type )
 
-  END SUBROUTINE h5rget_object_type_obj_f
+  END SUBROUTINE h5rget_object_type_f
 
 
 !****s* H5R/h5rget_region_region_f
