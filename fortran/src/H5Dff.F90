@@ -591,8 +591,8 @@ CONTAINS
   !!                      dimension of buffer buf. Values are ignored if buf is a scalar.
   !! \param len           Array to store length of each element.
   !! \param hdferr        Returns 0 if successful and -1 if fails.
-  !! \param mem_space_id  Memory dataspace identfier, default value is H5S_ALL_F.
-  !! \param file_space_id File dataspace identfier, default value is H5S_ALL_F.
+  !! \param mem_space_id  Memory dataspace identifier, default value is H5S_ALL_F.
+  !! \param file_space_id File dataspace identifier, default value is H5S_ALL_F.
   !! \param xfer_prp      Transfer property list identifier, default value is H5P_DEFAULT_F.
   !! 
   SUBROUTINE h5dread_vl_f(dset_id, mem_type_id, buf, dims, len, hdferr, mem_space_id, file_space_id, xfer_prp) 
@@ -624,8 +624,8 @@ CONTAINS
   !!                      dimension of buffer buf. Values are ignored if buf is a scalar.
   !! \param len           Array to store length of each element.
   !! \param hdferr        Returns 0 if successful and -1 if fails.
-  !! \param mem_space_id  Memory dataspace identfier, default value is H5S_ALL_F.
-  !! \param file_space_id File dataspace identfier, default value is H5S_ALL_F.
+  !! \param mem_space_id  Memory dataspace identifier, default value is H5S_ALL_F.
+  !! \param file_space_id File dataspace identifier, default value is H5S_ALL_F.
   !! \param xfer_prp      Transfer property list identifier, default value is H5P_DEFAULT_F.
   !! 
   SUBROUTINE h5dwrite_vl_f(dset_id, mem_type_id, buf, dims, len, hdferr, mem_space_id, file_space_id, xfer_prp)

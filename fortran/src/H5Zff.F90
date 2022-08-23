@@ -115,7 +115,7 @@ CONTAINS
 !!                       H5Z_FILTER_SHUFFLE_F
 !!                       H5Z_FILTER_FLETCHER32_Ffilter
 !! </pre>
-!! \param config_flags Flag, indicates if filter has its encoder and/or decoder available, possiable values:
+!! \param config_flags Flag, indicates if filter has its encoder and/or decoder available, possible values:
 !! <pre>
 !!                       H5Z_FILTER_ENCODE_ENABLED_F
 !!                       5Z_FILTER_DECODE_ENABLED_F

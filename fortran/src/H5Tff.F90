@@ -604,7 +604,7 @@ CONTAINS
 !>
 !! \ingroup H5T
 !!
-!! \brief Sets the sign proprety for an integer type.
+!! \brief Sets the sign property for an integer type.
 !!
 !! \param type_id  Datatype identifier.
 !! \param sign     Sign type. Possible values are:

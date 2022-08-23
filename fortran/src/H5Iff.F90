@@ -73,7 +73,7 @@ CONTAINS
 !>
 !! \ingroup H5I
 !!
-!! \brief Gets a name of an object specified by its idetifier.
+!! \brief Gets a name of an object specified by its identifier.
 !!
 !! \param obj_id    Attribute identifier.
 !! \param buf_size  Size of a buffer to read name in.
