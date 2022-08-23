@@ -1294,7 +1294,7 @@ CONTAINS
 !! \brief Writes data to an attribute. F2003 API h5awrite_f should be used instead.
 !!
 !! \param attr_id     Identifier of an attribute to write.
-!! \param mem_type_id Identifier of the attribute datatype (in memory).
+!! \param memtype_id  Identifier of the attribute datatype (in memory).
 !! \param buf	      Data buffer; may be a scalar or an array.
 !! \param dims        Array to hold corresponding dimension sizes of data buffer buf;
 !!                    dim(k) has value of the k-th dimension of buffer buf; values are ignored if buf is a scalar.
@@ -1314,7 +1314,7 @@ CONTAINS
 !! \brief Writes data to an attribute. **Preferred API**.
 !!
 !! \param attr_id     Identifier of an attribute to write.
-!! \param mem_type_id Identifier of the attribute datatype (in memory).
+!! \param memtype_id  Identifier of the attribute datatype (in memory).
 !! \param buf	      Data to be written.
 !! \param hdferr      Returns 0 if successful and -1 if fails.
 !!
@@ -1330,7 +1330,7 @@ CONTAINS
 !! \brief Reads an attribute. F2003 API h5aread_f should be used instead.
 !!
 !! \param attr_id     Identifier of an attribute to read.
-!! \param mem_type_id Identifier of the attribute datatype (in memory).
+!! \param memtype_id  Identifier of the attribute datatype (in memory).
 !! \param buf	      Buffer for data to be read.
 !! \param dims	      Array to hold corresponding dimension sizes of data buffer buf;
 !!                    dim(k) has value of the k-th dimension of buffer buf; values are ignored if buf is a scalar.
@@ -1349,7 +1349,7 @@ CONTAINS
 !! \brief Reads an attribute. **Preferred API**.
 !!
 !! \param attr_id     Identifier of an attribute to read.
-!! \param mem_type_id Identifier of the attribute datatype (in memory).
+!! \param memtype_id  Identifier of the attribute datatype (in memory).
 !! \param buf	      Buffer for data to be read.
 !! \param hdferr      Returns 0 if successful and -1 if fails.
 !!

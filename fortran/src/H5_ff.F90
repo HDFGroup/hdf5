@@ -1,8 +1,6 @@
-! NAME
-!  MODULE H5LIB
-!
-! PURPOSE
-!  This module provides fortran specific helper functions for the HDF library
+!> @ingroup H5
+!!
+!! @brief This module provides fortran specific helper functions for the HDF library.
 !
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -757,7 +755,7 @@ CONTAINS
 !!
 !! \brief Converts the KIND to the correct HDF type
 !!
-!! \param kind Fortran KIND parameter
+!! \param ikind Fortran KIND parameter
 !! \param flag Whether KIND is of type INTEGER or REAL:
 !! <pre>
 !!               H5_INTEGER_KIND - integer
@@ -831,7 +829,7 @@ CONTAINS
 !>
 !! \ingroup H5
 !!
-!! \brief onvert time_t structure (C) to Fortran DATE AND TIME storage format.
+!! \brief Convert time_t structure (C) to Fortran DATE AND TIME storage format.
 !!
 !! 
 !! \param stdtime_t Object of type time_t that contains a time value
