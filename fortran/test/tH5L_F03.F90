@@ -73,7 +73,8 @@ CONTAINS
     INTEGER, SAVE :: count
     INTEGER, SAVE :: count2
 
-!!$
+    liter_cb = 0
+
 !!$    iter_info *info = (iter_info *)op_data;
 !!$    static int count = 0;
 !!$    static int count2 = 0;
