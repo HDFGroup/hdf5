@@ -3441,6 +3441,7 @@ H5F__start_swmr_write(H5F_t *f)
     size_t      grp_dset_count = 0;     /* # of open objects: groups & datasets */
     size_t      nt_attr_count  = 0;     /* # of opened named datatypes  + opened attributes */
     hid_t      *obj_ids        = NULL;  /* List of ids */
+    hid_t      *obj_apl_ids    = NULL;  /* List of access property lists */
     H5G_loc_t  *obj_glocs      = NULL;  /* Group location of the object */
     H5O_loc_t  *obj_olocs      = NULL;  /* Object location */
     H5G_name_t *obj_paths      = NULL;  /* Group hierarchy path */
@@ -3498,13 +3499,20 @@ H5F__start_swmr_write(H5F_t *f)
     if (grp_dset_count > 0) {
         /* Allocate space for group and object locations */
         if ((obj_ids = (hid_t *)H5MM_malloc(grp_dset_count * sizeof(hid_t))) == NULL)
-            HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate buffer for hid_t")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "can't allocate buffer for hid_t")
         if ((obj_glocs = (H5G_loc_t *)H5MM_malloc(grp_dset_count * sizeof(H5G_loc_t))) == NULL)
-            HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate buffer for H5G_loc_t")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "can't allocate buffer for object group locations")
         if ((obj_olocs = (H5O_loc_t *)H5MM_malloc(grp_dset_count * sizeof(H5O_loc_t))) == NULL)
-            HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate buffer for H5O_loc_t")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "can't allocate buffer for object locations")
         if ((obj_paths = (H5G_name_t *)H5MM_malloc(grp_dset_count * sizeof(H5G_name_t))) == NULL)
-            HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, FAIL, "can't allocate buffer for H5G_name_t")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "can't allocate buffer for object paths")
+
+        /* Taking a shortcut here to use calloc to initialize obj_apl_ids to all H5P_DEFAULT.  If
+         * this changes in the future we'll need to either initialize this array to all H5P_DEFAULT
+         * or ensure 0 cannot be a valid value and check for 0 at cleanup. */
+        if ((obj_apl_ids = (hid_t *)H5MM_calloc(grp_dset_count * sizeof(hid_t))) == NULL)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTALLOC, FAIL, "can't allocate buffer for hid_t")
+        HDassert(obj_apl_ids[0] == H5P_DEFAULT);
 
         /* Get the list of opened object ids (groups & datasets) */
         if (H5F_get_obj_ids(f, H5F_OBJ_GROUP | H5F_OBJ_DATASET, grp_dset_count, obj_ids, FALSE,
@@ -3513,17 +3521,60 @@ H5F__start_swmr_write(H5F_t *f)
 
         /* Refresh opened objects (groups, datasets) in the file */
         for (u = 0; u < grp_dset_count; u++) {
-            H5O_loc_t *oloc; /* object location */
+            H5I_type_t type; /* Type of object for the ID */
             H5G_loc_t  tmp_loc;
+
+            /* Get object's type */
+            type = H5I_get_type(obj_ids[u]);
+
+            /* Get the object's access property list, if it is a dataset (access
+             * properties are not needed to reopen other object types currently)
+             */
+            switch (type) {
+                case H5I_GROUP:
+                    /* Access properties not needed currently */
+                    break;
+
+                case H5I_DATATYPE:
+                    /* Access properties not needed currently */
+                    break;
+
+                case H5I_DATASET: {
+                    H5D_t *dset; /* Dataset object   */
+
+                    /* Get dataset object */
+                    if (NULL == (dset = (H5D_t *)H5I_object(obj_ids[u])))
+                        HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "can't find object for ID")
+
+                    /* Get dataset access properties */
+                    if ((obj_apl_ids[u] = H5D_get_access_plist(dset)) < 0)
+                        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
+                                    "unable to get dataset access property list")
+                    break;
+                }
+
+                case H5I_UNINIT:
+                case H5I_BADID:
+                case H5I_FILE:
+                case H5I_DATASPACE:
+                case H5I_ATTR:
+                case H5I_VFL:
+                case H5I_GENPROP_CLS:
+                case H5I_GENPROP_LST:
+                case H5I_ERROR_CLASS:
+                case H5I_ERROR_MSG:
+                case H5I_ERROR_STACK:
+                case H5I_NTYPES:
+                default:
+                    HGOTO_ERROR(H5E_FILE, H5E_BADTYPE, FAIL,
+                                "not a valid file object ID (dataset, group, or datatype)")
+                    break;
+            } /* end switch */
 
             /* Set up the id's group location */
             obj_glocs[u].oloc = &obj_olocs[u];
             obj_glocs[u].path = &obj_paths[u];
             H5G_loc_reset(&obj_glocs[u]);
-
-            /* get the id's object location */
-            if ((oloc = H5O_get_loc(obj_ids[u])) == NULL)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an object")
 
             /* Make deep local copy of object's location information */
             H5G_loc(obj_ids[u], &tmp_loc);
@@ -3586,12 +3637,11 @@ H5F__start_swmr_write(H5F_t *f)
 
     /* Refresh (reopen) the objects (groups & datasets) in the file */
     for (u = 0; u < grp_dset_count; u++)
-        if (H5O_refresh_metadata_reopen(obj_ids[u], &obj_glocs[u], TRUE) < 0)
+        if (H5O_refresh_metadata_reopen(obj_ids[u], obj_apl_ids[u], &obj_glocs[u], TRUE) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CLOSEERROR, FAIL, "can't refresh-close object")
 
 done:
     if (ret_value < 0 && setup) {
-
         /* Re-enable accumulator */
         f->shared->feature_flags |= (unsigned)H5FD_FEAT_ACCUMULATE_METADATA;
         if (H5FD_set_feature_flags(f->shared->lf, f->shared->feature_flags) < 0)
@@ -3631,6 +3681,14 @@ done:
         H5MM_xfree(obj_olocs);
     if (obj_paths)
         H5MM_xfree(obj_paths);
+
+    /* Free access property lists */
+    if (obj_apl_ids) {
+        for (u = 0; u < grp_dset_count; u++)
+            if (obj_apl_ids[u] != H5P_DEFAULT && obj_apl_ids[u] >= 0 && H5I_dec_ref(obj_apl_ids[u]) < 0)
+                HDONE_ERROR(H5E_ATOM, H5E_CANTDEC, FAIL, "decrementing property list ID failed")
+        H5MM_xfree(obj_apl_ids);
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__start_swmr_write() */
