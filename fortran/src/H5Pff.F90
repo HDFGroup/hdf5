@@ -1,8 +1,6 @@
-! NAME
-!  H5P
-!
-! PURPOSE
-!  This file contains Fortran interfaces for H5P functions.
+!> @ingroup H5P
+!!
+!! @brief This module contains Fortran interfaces for H5P functions.
 !
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -46,6 +44,45 @@ MODULE H5P
   PRIVATE h5pget_integer, h5pget_char, h5pget_ptr
   PRIVATE h5pregister_integer, h5pregister_ptr
   PRIVATE h5pinsert_integer, h5pinsert_char, h5pinsert_ptr
+
+#ifdef H5_DOXYGEN_FORTRAN
+
+  INTERFACE h5pset_fapl_multi_f
+     MODULE PROCEDURE h5pset_fapl_multi_l
+     MODULE PROCEDURE h5pset_fapl_multi_s
+  END INTERFACE
+
+  INTERFACE h5pset_fill_value_f
+     MODULE PROCEDURE h5pset_fill_value_f
+     MODULE PROCEDURE h5pset_fill_value___F90_VERSION
+  END INTERFACE
+
+  INTERFACE h5pget_fill_value_f
+     MODULE PROCEDURE h5pget_fill_value_f
+     MODULE PROCEDURE h5pget_fill_value___F90_VERSION
+  END INTERFACE
+
+  INTERFACE h5pset_f
+     MODULE PROCEDURE h5pset_f
+     MODULE PROCEDURE h5pset_f___F90_VERSION
+  END INTERFACE
+
+  INTERFACE h5pget_f
+     MODULE PROCEDURE h5pget_f
+     MODULE PROCEDURE h5pget_f___F90_VERSION
+  END INTERFACE
+
+  INTERFACE h5pregister_f
+     MODULE PROCEDURE h5pregister_f
+     MODULE PROCEDURE h5pregister_f___F90_VERSION
+  END INTERFACE
+
+  INTERFACE h5pinsert_f
+     MODULE PROCEDURE h5pinsert_f
+     MODULE PROCEDURE h5pinsert_f___F90_VERSION
+  END INTERFACE
+
+#else
 
   INTERFACE h5pset_fapl_multi_f
      MODULE PROCEDURE h5pset_fapl_multi_l
@@ -172,6 +209,8 @@ MODULE H5P
        TYPE(C_PTR), INTENT(IN), VALUE :: value
      END FUNCTION h5pinsert_c
   END INTERFACE
+
+#endif
 
 CONTAINS
 
@@ -2501,6 +2540,34 @@ CONTAINS
 
   END SUBROUTINE h5pset_family_offset_f
 
+#ifdef H5_DOXYGEN_FORTRAN
+
+!>
+!! \ingroup H5P
+!!
+!! \brief Sets up use of the multi-file driver.
+!!
+!! \param prp_id    File creation property list identifier.
+!! \param memb_map  Mapping array.
+!! \param memb_fapl Property list for each memory usage type.
+!! \param memb_name Names of member file.
+!! \param memb_addr Offsets within the virtual address space, from 0 (zero) to HADDR_MAX_F, at which each type of data storage begins.  
+!! \param relax     Flag.
+!! \param hdferr    Returns 0 if successful and -1 if fails.
+!!
+  SUBROUTINE h5pset_fapl_multi_l(prp_id, memb_map, memb_fapl, memb_name, memb_addr, relax, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: prp_id
+    INTEGER, DIMENSION(*), INTENT(IN) :: memb_map
+    INTEGER(HID_T), DIMENSION(*), INTENT(IN) :: memb_fapl
+    CHARACTER(LEN=*), DIMENSION(*), INTENT(IN) :: memb_name
+    REAL, DIMENSION(*), INTENT(IN) :: memb_addr
+    LOGICAL, INTENT(IN) :: relax
+    INTEGER, INTENT(OUT) :: hdferr
+  END SUBROUTINE h5pset_fapl_multi_l
+
+#else
+
 !>
 !! \ingroup H5P
 !!
@@ -2644,6 +2711,7 @@ CONTAINS
     IF(flag .EQ. 0) relax = .FALSE.
     IF(PRESENT(maxlen_out)) maxlen_out = c_maxlen_out
   END SUBROUTINE h5pget_fapl_multi_f
+#endif
 !>
 !! \ingroup H5P
 !!
@@ -3917,6 +3985,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 
   END SUBROUTINE h5pget_chunk_cache_f
 
+#ifdef H5_DOXYGEN_FORTRAN
 !>
 !! \ingroup H5P
 !!
@@ -3927,6 +3996,252 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !! \param fillvalue Fillvalue.
 !! \param hdferr    Returns 0 if successful and -1 if fails.
 !!
+  SUBROUTINE h5pset_fill_value_f(prp_id, type_id, fillvalue, hdferr)
+    INTEGER(HID_T), INTENT(IN)  :: prp_id 
+    INTEGER(HID_T), INTENT(IN)  :: type_id
+    TYPE(C_PTR)   , INTENT(IN)  :: fillvalue
+    INTEGER       , INTENT(OUT) :: hdferr
+  END SUBROUTINE h5pset_fill_value_f
+
+!>
+!! \ingroup H5P
+!!
+!! \brief Sets fill value for a dataset creation property list
+!!
+!! \param prp_id    Property list identifier.
+!! \param type_id   Datatype identifier of fill value datatype (in memory).
+!! \param fillvalue Fillvalue.
+!! \param hdferr    Returns 0 if successful and -1 if fails.
+!!
+  SUBROUTINE h5pset_fill_value_f___F90_VERSION(prp_id, type_id, fillvalue, hdferr)
+    INTEGER(HID_T), INTENT(IN)  :: prp_id 
+    INTEGER(HID_T), INTENT(IN)  :: type_id
+    TYPE(TYPE)    , INTENT(IN)  :: fillvalue
+    INTEGER       , INTENT(OUT) :: hdferr
+  END SUBROUTINE h5pset_fill_value_f___F90_VERSION
+!>
+!! \ingroup H5P
+!!
+!! \brief Gets fill value for a dataset creation property list
+!!
+!! \param prp_id    Property list identifier.
+!! \param type_id   Datatype identifier of fill value datatype (in memory).
+!! \param fillvalue Fillvalue.
+!! \param hdferr    Returns 0 if successful and -1 if fails.
+!!
+  SUBROUTINE h5pget_fill_value_f(prp_id, type_id, fillvalue, hdferr)
+    INTEGER(HID_T), INTENT(IN)  :: prp_id 
+    INTEGER(HID_T), INTENT(IN)  :: type_id
+    TYPE(C_PTR)   , INTENT(IN)  :: fillvalue
+    INTEGER       , INTENT(OUT) :: hdferr
+  END SUBROUTINE h5pget_fill_value_f
+
+!>
+!! \ingroup H5P
+!!
+!! \brief Gets fill value for a dataset creation property list.
+!!
+!! \param prp_id    Property list identifier.
+!! \param type_id   Datatype identifier of fill value datatype (in memory).
+!! \param fillvalue Fillvalue.
+!! \param hdferr    Returns 0 if successful and -1 if fails.
+!!
+  SUBROUTINE h5pget_fill_value_f___F90_VERSION(prp_id, type_id, fillvalue, hdferr)
+    INTEGER(HID_T), INTENT(IN)  :: prp_id 
+    INTEGER(HID_T), INTENT(IN)  :: type_id
+    TYPE(TYPE)    , INTENT(OUT) :: fillvalue
+    INTEGER       , INTENT(OUT) :: hdferr
+  END SUBROUTINE h5pget_fill_value_f___F90_VERSION
+
+!>
+!! \ingroup H5P
+!!
+!! \brief Sets a property list value.
+!!
+!! \param prp_id Property list identifier to modify.
+!! \param name   Name of property to modify.
+!! \param value  Property value, supported types are:
+!! <pre>
+!!                  INTEGER
+!!                  REAL
+!!                  DOUBLE PRECISION
+!!                  CHARACTER(LEN=*)
+!! </pre>
+!! \param hdferr Returns 0 if successful and -1 if fails.
+!!
+  SUBROUTINE h5pset_f___F90_VERSION(prp_id, name, value, hdferr)
+    INTEGER(HID_T)  , INTENT(IN)  :: prp_id
+    CHARACTER(LEN=*), INTENT(IN)  :: name
+    INTEGER         , INTENT(IN)  :: value
+    INTEGER         , INTENT(OUT) :: hdferr
+  END SUBROUTINE h5pset_f___F90_VERSION
+!>
+!! \ingroup H5P
+!!
+!! \brief Sets a property list value.
+!!
+!! \param prp_id Property list identifier to modify.
+!! \param name   Name of property to modify.
+!! \param value  Pointer to value to set the property to.
+!! \param hdferr Returns 0 if successful and -1 if fails.
+!!
+  SUBROUTINE h5pset_f(prp_id, name, value, hdferr)
+    INTEGER(HID_T)  , INTENT(IN)  :: prp_id
+    CHARACTER(LEN=*), INTENT(IN)  :: name
+    TYPE(C_PTR)     , INTENT(IN)  :: value
+    INTEGER         , INTENT(OUT) :: hdferr
+  END SUBROUTINE h5pset_f
+!>
+!! \ingroup H5P
+!!
+!! \brief Sets a property list value.
+!!
+!! \param prp_id Property list identifier to modify.
+!! \param name   Name of property to modify.
+!! \param value  Property value, supported types are:
+!! <pre>
+!!                  INTEGER
+!!                  REAL
+!!                  DOUBLE PRECISION
+!!                  CHARACTER(LEN=*)
+!! </pre>
+!! \param hdferr Returns 0 if successful and -1 if fails.
+!!
+  SUBROUTINE h5pset_f___F90_VERSION(prp_id, name, value, hdferr)
+    INTEGER(HID_T), INTENT(IN) :: prp_id
+    CHARACTER(LEN=*), INTENT(IN) :: name
+    INTEGER,   INTENT(IN) :: value
+    INTEGER, INTENT(OUT) :: hdferr
+  END SUBROUTINE h5pset_f___F90_VERSION
+!>
+!! \ingroup H5P
+!!
+!! \brief Queries the value of a property.
+!!
+!! \param prp_id Property list identifier to modify.
+!! \param name   Name of property to get.
+!! \param value  Pointer to a location to which to copy the value of of the property.
+!! \param hdferr Returns 0 if successful and -1 if fails.
+!!
+  SUBROUTINE h5pget_f(prp_id, name, value, hdferr)
+    INTEGER(HID_T)  , INTENT(IN)  :: prp_id
+    CHARACTER(LEN=*), INTENT(IN)  :: name
+    TYPE(C_PTR)     , INTENT(OUT) :: value
+    INTEGER         , INTENT(OUT) :: hdferr
+  END SUBROUTINE h5pget_f
+
+!>
+!! \ingroup H5P
+!!
+!! \brief Queries the value of a property.
+!!
+!! \param prp_id Property list identifier to modify.
+!! \param name   Name of property to get.
+!! \param value  Property value, supported types are:
+!! <pre>
+!!                INTEGER
+!!                REAL
+!!                DOUBLE PRECISION
+!!                CHARACTER(LEN=*)
+!! </pre>
+!! \param hdferr Returns 0 if successful and -1 if fails.
+!!
+  SUBROUTINE h5pget_f___F90_VERSION(prp_id, name, value, hdferr)
+    INTEGER(HID_T)  , INTENT(IN)  :: prp_id
+    CHARACTER(LEN=*), INTENT(IN)  :: name
+    INTEGER         , INTENT(OUT) :: value
+    INTEGER         , INTENT(OUT) :: hdferr
+  END SUBROUTINE h5pget_f___F90_VERSION
+!>
+!! \ingroup H5P
+!!
+!! \brief Registers a permanent property with a property list class.
+!!
+!! \param class Property list class identifier.
+!! \param name  Name of property to register.
+!! \param size  Size of the property value.
+!! \param value Pointer to value to set the property to.
+!! \param hdferr Returns 0 if successful and -1 if fails.
+!!
+  SUBROUTINE h5pregister_f(class, name, size, value, hdferr)
+    INTEGER(HID_T)  , INTENT(IN)  :: class
+    CHARACTER(LEN=*), INTENT(IN)  :: name
+    INTEGER(SIZE_T) , INTENT(IN)  :: size
+    TYPE(C_PTR)     , INTENT(IN)  :: value
+    INTEGER         , INTENT(OUT) :: hdferr
+  END SUBROUTINE h5pregister_f
+!>
+!! \ingroup H5P
+!!
+!! \brief Registers a permanent property with a property list class.
+!!
+!! \param class Property list class identifier.
+!! \param name  Name of property to register.
+!! \param size  Size of the property value.
+!! \param value Property value, supported types are:
+!! <pre>
+!!                  INTEGER
+!!                  REAL
+!!                  DOUBLE PRECISION
+!!                  CHARACTER(LEN=*)
+!! </pre>
+!! \param hdferr Returns 0 if successful and -1 if fails.
+!!
+  SUBROUTINE h5pregister_integer(class, name, size, value, hdferr)
+    INTEGER(HID_T)  , INTENT(IN)  :: class
+    CHARACTER(LEN=*), INTENT(IN)  :: name
+    INTEGER(SIZE_T) , INTENT(IN)  :: size
+    INTEGER         , INTENT(IN)  :: value
+    INTEGER         , INTENT(OUT) :: hdferr
+  END SUBROUTINE h5pregister_integer
+
+!>
+!! \ingroup H5P
+!!
+!! \brief Registers a temporary property with a property list class.
+!!
+!! \param plist  Property list class identifier.
+!! \param name   Name of property to insert.
+!! \param size   Size of the property value.
+!! \param value  Pointer to new value pointer for the property being modified.
+!! \param hdferr Returns 0 if successful and -1 if fails.
+!!
+  SUBROUTINE h5pinsert_f(plist, name, size, value, hdferr)
+    INTEGER(HID_T)  , INTENT(IN)  :: plist
+    CHARACTER(LEN=*), INTENT(IN)  :: name
+    INTEGER(SIZE_T) , INTENT(IN)  :: size
+    TYPE(C_PTR)     , INTENT(IN)  :: value
+    INTEGER         , INTENT(OUT) :: hdferr
+  END SUBROUTINE h5pinsert_f
+
+!>
+!! \ingroup H5P
+!!
+!! \brief Registers a temporary property with a property list class.
+!!
+!! \param plist  Property list class identifier.
+!! \param name   Name of property to insert.
+!! \param size   Size of the property value.
+!! \param value  Property value, supported types are:
+!! <pre>
+!!                  INTEGER
+!!                  REAL
+!!                  DOUBLE PRECISION
+!!                  CHARACTER(LEN=*)
+!! </pre>
+!! \param hdferr Returns 0 if successful and -1 if fails.
+!!
+  SUBROUTINE h5pinsert_f___F90_VERSION(plist, name, size, value, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T)  , INTENT(IN)  :: plist
+    CHARACTER(LEN=*), INTENT(IN)  :: name
+    INTEGER(SIZE_T) , INTENT(IN)  :: size
+    INTEGER         , INTENT(IN)  :: value
+    INTEGER         , INTENT(OUT) :: hdferr
+  END SUBROUTINE h5pinsert_f___F90_VERSION
+
+#else
+
   SUBROUTINE h5pset_fill_value_integer(prp_id, type_id, fillvalue, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id
@@ -3941,16 +4256,6 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 
   END SUBROUTINE h5pset_fill_value_integer
 
-!>
-!! \ingroup H5P
-!!
-!! \brief Gets fill value for a dataset creation property list
-!!
-!! \param prp_id    Property list identifier.
-!! \param type_id   Datatype identifier of fill value datatype (in memory).
-!! \param fillvalue Fillvalue
-!! \param hdferr    Returns 0 if successful and -1 if fails.
-!!
   SUBROUTINE h5pget_fill_value_integer(prp_id, type_id, fillvalue, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id
@@ -4009,16 +4314,6 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     DEALLOCATE(chr)
 
   END SUBROUTINE h5pget_fill_value_char
-!>
-!! \ingroup H5P
-!!
-!! \brief Sets fill value for a dataset creation property list
-!!
-!! \param prp_id    Property list identifier.
-!! \param type_id   Datatype identifier of fill value datatype (in memory).
-!! \param fillvalue Fillvalue.
-!! \param hdferr    Returns 0 if successful and -1 if fails.
-!!
 
   SUBROUTINE h5pset_fill_value_ptr(prp_id, type_id, fillvalue, hdferr)
     IMPLICIT NONE
@@ -4031,16 +4326,6 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 
   END SUBROUTINE h5pset_fill_value_ptr
 
-!>
-!! \ingroup H5P
-!!
-!! \brief Gets fill value for a dataset creation property list
-!!
-!! \param prp_id    Property list identifier.
-!! \param type_id   Datatype identifier of fill value datatype (in memory).
-!! \param fillvalue Fillvalue.
-!! \param hdferr    Returns 0 if successful and -1 if fails.
-!!
   SUBROUTINE h5pget_fill_value_ptr(prp_id, type_id, fillvalue, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN)  :: prp_id
@@ -4051,23 +4336,6 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     hdferr = h5pget_fill_value_c(prp_id, type_id, fillvalue)
 
   END SUBROUTINE h5pget_fill_value_ptr
-
-!>
-!! \ingroup H5P
-!!
-!! \brief Sets a property list value
-!!
-!! \param prp_id Property list identifier to modify.
-!! \param name   Name of property to modify.
-!! \param value  Property value, supported types are:
-!! <pre>
-!!                  INTEGER
-!!                  REAL
-!!                  DOUBLE PRECISION
-!!                  CHARACTER(LEN=*)
-!! </pre>
-!! \param hdferr Returns 0 if successful and -1 if fails.
-!!
 
   SUBROUTINE h5pset_integer(prp_id, name, value, hdferr)
     IMPLICIT NONE
@@ -4229,23 +4497,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     hdferr = h5pget_c(prp_id, name, name_len, value)
 
   END SUBROUTINE h5pget_ptr
-!>
-!! \ingroup H5P
-!!
-!! \brief Registers a permanent property with a property list class.
-!!
-!! \param class Property list class identifier.
-!! \param name  Name of property to register.
-!! \param size  Size of the property value.
-!! \param value Property value, supported types are:
-!! <pre>
-!!                  INTEGER
-!!                  REAL
-!!                  DOUBLE PRECISION
-!!                  CHARACTER(LEN=*)
-!! </pre>
-!! \param hdferr Returns 0 if successful and -1 if fails.
-!!
+
   SUBROUTINE h5pregister_integer(class, name, size, value, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: class
@@ -4262,7 +4514,6 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     hdferr = h5pregister_c(class, name, name_len, size, f_ptr)
 
   END SUBROUTINE h5pregister_integer
-
 
   SUBROUTINE h5pregister_char(class, name, size, value, hdferr)
     IMPLICIT NONE
@@ -4298,16 +4549,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     hdferr = h5pregister_c(class, name, name_len, size, f_ptr)
     DEALLOCATE(chr)
   END SUBROUTINE h5pregister_char
-!>
-!! \ingroup H5P
-!!
-!! \brief Registers a permanent property with a property list class.
-!!
-!! \param class Property list class identifier.
-!! \param name  Name of property to register.
-!! \param size  Size of the property value.
-!! \param value Pointer to value to set the property to.
-!! \param hdferr Returns 0 if successful and -1 if fails.
+
   SUBROUTINE h5pregister_ptr(class, name, size, value, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: class
@@ -4321,23 +4563,6 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     hdferr = h5pregister_c(class, name, name_len, size, value)
   END SUBROUTINE h5pregister_ptr
 
-!>
-!! \ingroup H5P
-!!
-!! \brief Registers a temporary property with a property list class.
-!!
-!! \param plist  Property list class identifier.
-!! \param name   Name of property to insert.
-!! \param size   Size of the property value.
-!! \param value  Property value, supported types are:
-!! <pre>
-!!                  INTEGER
-!!                  REAL
-!!                  DOUBLE PRECISION
-!!                  CHARACTER(LEN=*)
-!! </pre>
-!! \param hdferr Returns 0 if successful and -1 if fails.
-!!
   SUBROUTINE h5pinsert_integer(plist, name, size, value, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: plist
@@ -4391,17 +4616,6 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 
   END SUBROUTINE h5pinsert_char
 
-!>
-!! \ingroup H5P
-!!
-!! \brief Registers a temporary property with a property list class.
-!!
-!! \param plist  Property list class identifier.
-!! \param name   Name of property to insert.
-!! \param size   Size of the property value.
-!! \param value  Pointer to new value pointer for the property being modified.
-!! \param hdferr Returns 0 if successful and -1 if fails.
-!!
   SUBROUTINE h5pinsert_ptr(plist, name, size, value, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: plist
@@ -4414,6 +4628,9 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     name_len = LEN(name)
     hdferr = h5pinsert_c(plist, name , name_len, size, value)
   END SUBROUTINE h5pinsert_ptr
+
+#endif
+
 !>
 !! \ingroup H5P
 !!
