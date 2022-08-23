@@ -1,34 +1,33 @@
 !> @ingroup H5O
 !!
-!!  @brief This file contains Fortran interfaces for H5O functions.
-!!
-!!
-!! COPYRIGHT
-!! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-!!   Copyright by The HDF Group.                                               *
-!!   Copyright by the Board of Trustees of the University of Illinois.         *
-!!   All rights reserved.                                                      *
-!!                                                                             *
-!!   This file is part of HDF5.  The full HDF5 copyright notice, including     *
-!!   terms governing use, modification, and redistribution, is contained in    *
-!!   the COPYING file, which can be found at the root of the source code       *
-!!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
-!!   If you do not have access to either file, you may request a copy from     *
-!!   help@hdfgroup.org.                                                        *
-!! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-!!
-!! NOTES
-!!       _____ __  __ _____   ____  _____ _______       _   _ _______
-!!      |_   _|  \/  |  __ \ / __ \|  __ \__   __|/\   | \ | |__   __|
-!! ****   | | | \  / | |__) | |  | | |__) | | |  /  \  |  \| |  | |    ****
-!! ****   | | | |\/| |  ___/| |  | |  _  /  | | / /\ \ | . ` |  | |    ****
-!! ****  _| |_| |  | | |    | |__| | | \ \  | |/ ____ \| |\  |  | |    ****
-!!      |_____|_|  |_|_|     \____/|_|  \_\ |_/_/    \_\_| \_|  |_|
-!!
-!!  If you add a new H5O function you must add the function name to the
-!!  Windows dll file 'hdf5_fortrandll.def.in' in the fortran/src directory.
-!!  This is needed for Windows based operating systems.
-!!
+!! @brief This module contains Fortran interfaces for H5O functions.
+!
+! COPYRIGHT
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+!   Copyright by The HDF Group.                                               *
+!   Copyright by the Board of Trustees of the University of Illinois.         *
+!   All rights reserved.                                                      *
+!                                                                             *
+!   This file is part of HDF5.  The full HDF5 copyright notice, including     *
+!   terms governing use, modification, and redistribution, is contained in    *
+!   the COPYING file, which can be found at the root of the source code       *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
+!   If you do not have access to either file, you may request a copy from     *
+!   help@hdfgroup.org.                                                        *
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+!
+! NOTES
+!       _____ __  __ _____   ____  _____ _______       _   _ _______
+!      |_   _|  \/  |  __ \ / __ \|  __ \__   __|/\   | \ | |__   __|
+! ****   | | | \  / | |__) | |  | | |__) | | |  /  \  |  \| |  | |    ****
+! ****   | | | |\/| |  ___/| |  | |  _  /  | | / /\ \ | . ` |  | |    ****
+! ****  _| |_| |  | | |    | |__| | | \ \  | |/ ____ \| |\  |  | |    ****
+!      |_____|_|  |_|_|     \____/|_|  \_\ |_/_/    \_\_| \_|  |_|
+!
+!  If you add a new H5O function you must add the function name to the
+!  Windows dll file 'hdf5_fortrandll.def.in' in the fortran/src directory.
+!  This is needed for Windows based operating systems.
+!
 
 MODULE H5O
 
@@ -36,19 +35,22 @@ MODULE H5O
   USE H5GLOBAL
   IMPLICIT NONE
 
-!> @brief h5o_info_t derived type
+!> @brief h5o_info_t derived type. The time values are an integer array as specified in the Fortran intrinsic DATE_AND_TIME(VALUES).
   TYPE, BIND(C) :: h5o_info_t
-     INTEGER(C_LONG)     :: fileno     ! File number that object is located in
-     TYPE(H5O_TOKEN_T_F) :: token      ! Token for object in file
-     INTEGER(C_INT)      :: type       ! Basic object type (group, dataset, etc.)
-     INTEGER             :: rc         ! Reference count of object
+     INTEGER(C_LONG)     :: fileno     !< File number that object is located in
+     TYPE(H5O_TOKEN_T_F) :: token      !< Token for object in file
+     INTEGER(C_INT)      :: type       !< Basic object type (group, dataset, etc.)
+     INTEGER             :: rc         !< Reference count of object
+     !    -- NOTE --
+     ! Returns an integer array
+     ! as specified in the Fortran
+     ! intrinsic DATE_AND_TIME(VALUES)
+     INTEGER, DIMENSION(8) :: atime !<  Access time
+     INTEGER, DIMENSION(8) :: mtime !<  Modification time
+     INTEGER, DIMENSION(8) :: ctime !<  Change time
+     INTEGER, DIMENSION(8) :: btime !<  Birth time
 
-     INTEGER, DIMENSION(8) :: atime ! Access time         !    -- NOTE --
-     INTEGER, DIMENSION(8) :: mtime ! Modification time   ! Returns an integer array
-     INTEGER, DIMENSION(8) :: ctime ! Change time         ! as specified in the Fortran
-     INTEGER, DIMENSION(8) :: btime ! Birth time          ! intrinsic DATE_AND_TIME(VALUES)
-
-     INTEGER(hsize_t) :: num_attrs  ! # of attributes attached to object
+     INTEGER(hsize_t) :: num_attrs  !<  Number of attributes attached to object
   END TYPE h5o_info_t
 
 !> @brief C interoperable structure for h5o_info_t. The Fortran derived type returns the time
@@ -56,63 +58,63 @@ MODULE H5O
 !! Whereas, this derived type does not.
 
   TYPE, BIND(C) :: c_h5o_info_t
-     INTEGER(C_LONG)  :: fileno     ! File number that object is located in
-     TYPE(H5O_TOKEN_T_F) :: token   ! Token for object in file
-     INTEGER(C_INT)   :: type       ! Basic object type (group, dataset, etc.)
-     INTEGER(C_INT)   :: rc         ! Reference count of object
+     INTEGER(C_LONG)  :: fileno     !<  File number that object is located in
+     TYPE(H5O_TOKEN_T_F) :: token   !<  Token for object in file
+     INTEGER(C_INT)   :: type       !<  Basic object type (group, dataset, etc.)
+     INTEGER(C_INT)   :: rc         !<  Reference count of object
 
-     INTEGER(KIND=TIME_T) :: atime ! Access time
-     INTEGER(KIND=TIME_T) :: mtime ! Modify time
-     INTEGER(KIND=TIME_T) :: ctime ! Create time
-     INTEGER(KIND=TIME_T) :: btime ! Birth time
+     INTEGER(KIND=TIME_T) :: atime  !<  Access time
+     INTEGER(KIND=TIME_T) :: mtime  !<  Modify time
+     INTEGER(KIND=TIME_T) :: ctime  !<  Create time
+     INTEGER(KIND=TIME_T) :: btime  !<  Birth time
 
-     INTEGER(hsize_t) :: num_attrs  ! # of attributes attached to object
+     INTEGER(hsize_t) :: num_attrs  !<  Number of attributes attached to object
   END TYPE c_h5o_info_t
 
 !> @brief space_t derived type
   TYPE, BIND(C) :: space_t
-     INTEGER(hsize_t) :: total ! Total space for storing object header in file
-     INTEGER(hsize_t) :: meta  ! Space within header for object header metadata information
-     INTEGER(hsize_t) :: mesg  ! Space within header for actual message information
-     INTEGER(hsize_t) :: free  ! Free space within object header
+     INTEGER(hsize_t) :: total !<  Total space for storing object header in file
+     INTEGER(hsize_t) :: meta  !<  Space within header for object header metadata information
+     INTEGER(hsize_t) :: mesg  !<  Space within header for actual message information
+     INTEGER(hsize_t) :: free  !<  Free space within object header
   END TYPE space_t
 
 !> @brief mesg_t derived type
   TYPE, BIND(C) :: mesg_t
-     INTEGER(c_int64_t) :: present ! Flags to indicate presence of message type in header
-     INTEGER(c_int64_t) :: shared  ! Flags to indicate message type is shared in header
+     INTEGER(c_int64_t) :: present !<  Flags to indicate presence of message type in header
+     INTEGER(c_int64_t) :: shared  !<  Flags to indicate message type is shared in header
   END TYPE mesg_t
 
 !> @brief hdr_t derived type
   TYPE, BIND(C) :: hdr_t
-     INTEGER :: version ! Version number of header format in file
-     INTEGER :: nmesgs  ! Number of object header messages
-     INTEGER :: nchunks ! Number of object header chunks
-     INTEGER :: flags   ! Object header status flags
+     INTEGER :: version !<  Version number of header format in file
+     INTEGER :: nmesgs  !<  Number of object header messages
+     INTEGER :: nchunks !<  Number of object header chunks
+     INTEGER :: flags   !<  Object header status flags
      TYPE(space_t)  :: space
      TYPE(mesg_t)   :: mesg
   END TYPE hdr_t
 
 !> @brief c_hdr_t derived type
   TYPE, BIND(C) :: c_hdr_t
-     INTEGER(C_INT) :: version ! Version number of header format in file
-     INTEGER(C_INT) :: nmesgs  ! Number of object header messages
-     INTEGER(C_INT) :: nchunks ! Number of object header chunks
-     INTEGER(C_INT) :: flags   ! Object header status flags
+     INTEGER(C_INT) :: version !<  Version number of header format in file
+     INTEGER(C_INT) :: nmesgs  !<  Number of object header messages
+     INTEGER(C_INT) :: nchunks !<  Number of object header chunks
+     INTEGER(C_INT) :: flags   !<  Object header status flags
      TYPE(space_t)  :: space
      TYPE(mesg_t)   :: mesg
   END TYPE c_hdr_t
 
 !> @brief Extra metadata storage for obj & attributes
   TYPE, BIND(C) :: H5_ih_info_t
-     INTEGER(hsize_t) :: index_size ! btree and/or list
-     INTEGER(hsize_t) :: heap_size
+     INTEGER(hsize_t) :: index_size !<  btree and/or list
+     INTEGER(hsize_t) :: heap_size  !<  heap
   END TYPE H5_ih_info_t
 
 !> @brief meta_size_t derived type
   TYPE, BIND(C) :: meta_size_t
-     TYPE(H5_ih_info_t) :: obj  ! v1/v2 B-tree & local/fractal heap for groups, B-tree for chunked datasets
-     TYPE(H5_ih_info_t) :: attr ! v2 B-tree & heap for attributes
+     TYPE(H5_ih_info_t) :: obj  !<  v1/v2 B-tree & local/fractal heap for groups, B-tree for chunked datasets
+     TYPE(H5_ih_info_t) :: attr !<  v2 B-tree & heap for attributes
   ENDTYPE meta_size_t
 
 !> @brief h5o_native_info_t derived type

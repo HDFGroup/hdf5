@@ -1,8 +1,6 @@
-! NAME
-!  MODULE H5L
-!
-! PURPOSE
-!  This file contains Fortran interfaces for H5L functions.
+!> @ingroup H5L
+!!
+!! @brief This module contains Fortran interfaces for H5L functions.
 !
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -38,29 +36,32 @@ MODULE H5L
 
   IMPLICIT NONE
 
-!****t* H5L (F03)/h5l_info_t
-!
-! Fortran2003 Derived Type:
-!
   TYPE, bind(c) :: union_t
-     TYPE(H5O_TOKEN_T_F) :: token
-     INTEGER(size_t)  :: val_size
+     TYPE(H5O_TOKEN_T_F) :: token !< Type for object tokens
+     INTEGER(size_t)  :: val_size !< Size of a soft link or user-defined link value
   END TYPE union_t
 
+!
+! @brief Fortran2003 Derived Type for h5l_info_t
+!
   TYPE, bind(c) :: h5l_info_t
-     INTEGER(c_int) :: type ! H5L_type_t     type
-!       LOGICAL(c_bool) :: corder_valid ! hbool_t        corder_valid
-     INTEGER(c_int64_t) :: corder ! int64_t        corder;
-     INTEGER(c_int) :: cset ! H5T_cset_t     cset;
-     TYPE(union_t) :: u
+     INTEGER(c_int) :: type !< Specifies the link class. Valid values include the following:
+                            !< <pre>
+                            !<           H5L_TYPE_HARD_F     Hard link
+                            !<           H5L_TYPE_SOFT_F     Soft link
+                            !<           H5L_TYPE_EXTERNAL_F External link
+                            !<           H5L_TYPE_ERROR_F    Invalid link type id
+                            !< </pre>
+ !   LOGICAL(c_bool) :: corder_valid ! hbool_t corder_valid
+     INTEGER(c_int64_t) :: corder !< Creation order
+     INTEGER(c_int)     :: cset   !< Character set of link name is encoded. Valid values include the following:
+                                  !< <pre>
+                                  !<    H5T_CSET_ASCII  US ASCII
+                                  !<    H5T_CSET_UTF8   UTF-8 Unicode encoding
+                                  !< </pre>
+     TYPE(union_t) :: u           
   END TYPE h5l_info_t
 
-
-!type specifies the link class. Valid values include the following:
-!           H5L_TYPE_HARD         Hard link
-!           H5L_TYPE_SOFT         Soft link
-!           H5L_TYPE_EXTERNAL External link
-!           H5L_TYPE_ERROR         Error
 !cset specifies the character set in which the link name is encoded. Valid values include the following:
 !           H5T_CSET_ASCII       US ASCII
 !           H5T_CSET_UTF8   UTF-8 Unicode encoding

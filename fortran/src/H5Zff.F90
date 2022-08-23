@@ -1,8 +1,6 @@
-! NAME
-!  MODULE H5Z
-!
-! PURPOSE
-!  This file contains Fortran interfaces for H5Z functions.
+!> @ingroup H5Z
+!!
+!! @brief This module contains Fortran interfaces for H5Z functions.
 !
 ! COPYRIGHT
 !  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -12,10 +10,10 @@
 !                                                                              *
 !  This file is part of HDF5.  The full HDF5 copyright notice, including       *
 !  terms governing use, modification, and redistribution, is contained in      *
-!   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
-!   If you do not have access to either file, you may request a copy from     *
-!   help@hdfgroup.org.                                                        *
+!  the COPYING file, which can be found at the root of the source code         *
+!  distribution tree, or in https://www.hdfgroup.org/licenses.                 *
+!  If you do not have access to either file, you may request a copy from       *
+!  help@hdfgroup.org.                                                          *
 !  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 ! NOTES!

@@ -1,11 +1,6 @@
-! NAME
-!  MODULE H5F
-!
-! FILE
-!  H5Fff.F90
-!
-! PURPOSE
-!  This file contains Fortran interfaces for H5F functions.
+!> @ingroup H5F
+!!
+!! @brief This module contains Fortran interfaces for H5F functions.
 !
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -42,6 +37,7 @@ MODULE H5F
   ! Number of objects opened in H5open_f
   INTEGER(SIZE_T) :: H5OPEN_NUM_OBJ
 
+#ifndef H5_DOXYGEN_FORTRAN
   INTERFACE
      INTEGER(C_INT) FUNCTION h5fis_accessible(name, &
           access_prp_default) BIND(C,NAME='H5Fis_accessible')
@@ -53,12 +49,13 @@ MODULE H5F
        INTEGER(HID_T), INTENT(IN), VALUE :: access_prp_default
      END FUNCTION h5fis_accessible
   END INTERFACE
+#endif
 
 CONTAINS
 !>
 !! \ingroup H5F
 !!
-!! \brief Creates HDF5 files.
+!! \brief Creates HDF5 files. 
 !!
 !! \param name         Name of the file to create.
 !! \param access_flags File access flags. Allowable values are:
@@ -621,7 +618,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5fget_fileno_c(file_id, fileno) &
             BIND(C,NAME='h5fget_fileno_c')
-         IMPORT :: HID_T, HSIZE_T
+         IMPORT :: HID_T
          IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN) :: file_id
          INTEGER, INTENT(OUT) :: fileno

@@ -1,11 +1,6 @@
-! NAME
-!  MODULE H5D
-!
-! FILE
-!  fortran/src/H5Dff.F90
-!
-! PURPOSE
-!  This file contains Fortran interfaces for H5D functions.
+!> @ingroup H5D
+!!
+!! @brief This module contains Fortran interfaces for H5D functions.
 !
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -34,7 +29,7 @@
 !  (i.e. real   , dimension(*) :: ... ) etc...
 !
 !  (3) Could not place the USE, INTRINSIC :: ISO_C_BINDING in the module header because it may
-!  conflict with the USE, INTRINSIC :: ISO_C_BINDING included in the user's program. Moved
+!  conflict with the USE, INTRINSIC :: ISO_C_BINDING included in the user&apos;s program. Moved
 !  the statement instead to each subroutine.
 !
 !
@@ -100,6 +95,40 @@ MODULE H5D
      MODULE PROCEDURE h5dset_extent_f
   END INTERFACE
 
+#ifdef H5_DOXYGEN_FORTRAN
+  INTERFACE h5dwrite_f
+     MODULE PROCEDURE h5dwrite_f
+     MODULE PROCEDURE h5dwrite_f___F90_VERSION
+  END INTERFACE
+#else
+  INTERFACE h5dwrite_f
+     MODULE PROCEDURE h5dwrite_reference_obj
+     MODULE PROCEDURE h5dwrite_reference_dsetreg
+     MODULE PROCEDURE h5dwrite_char_scalar
+     ! This is the preferred way to call h5dwrite
+     ! by passing an address
+     MODULE PROCEDURE h5dwrite_ptr
+  END INTERFACE
+#endif
+
+#ifdef H5_DOXYGEN_FORTRAN
+  INTERFACE h5dread_f
+     MODULE PROCEDURE h5dread_f
+     MODULE PROCEDURE h5dread_f___F90_VERSION
+  END INTERFACE
+#else
+  INTERFACE h5dread_f
+     MODULE PROCEDURE h5dread_reference_obj
+     MODULE PROCEDURE h5dread_reference_dsetreg
+     MODULE PROCEDURE h5dread_char_scalar
+     ! This is the preferred way to call h5dread
+     ! by passing an address
+!     MODULE PROCEDURE h5dread_ptr
+  END INTERFACE
+#endif
+
+#ifndef H5_DOXYGEN_FORTRAN
+
   INTERFACE h5dread_vl_f
      MODULE PROCEDURE h5dread_vl_integer
      MODULE PROCEDURE h5dread_vl_real
@@ -110,25 +139,6 @@ MODULE H5D
      MODULE PROCEDURE h5dwrite_vl_integer
      MODULE PROCEDURE h5dwrite_vl_real
      MODULE PROCEDURE h5dwrite_vl_string
-  END INTERFACE
-
-  INTERFACE h5dwrite_f
-     MODULE PROCEDURE h5dwrite_reference_obj
-     MODULE PROCEDURE h5dwrite_reference_dsetreg
-     MODULE PROCEDURE h5dwrite_char_scalar
-     ! This is the preferred way to call h5dwrite
-     ! by passing an address
-     MODULE PROCEDURE h5dwrite_ptr
-  END INTERFACE
-
-  INTERFACE h5dread_f
-     MODULE PROCEDURE h5dread_reference_obj
-     MODULE PROCEDURE h5dread_reference_dsetreg
-     MODULE PROCEDURE h5dread_char_scalar
-     ! This is the preferred way to call h5dread
-     ! by passing an address
-     MODULE PROCEDURE h5dread_ptr
-
   END INTERFACE
 
 
@@ -198,13 +208,14 @@ MODULE H5D
        INTEGER(HID_T) :: mem_type_id
      END FUNCTION h5dfill_c
   END INTERFACE
+#endif
 
 CONTAINS
 
 !>
 !! \ingroup H5D
 !!
-!! \brief Creates a dataset at the specified location
+!! \brief Creates a dataset at the specified location.
 !!
 !! \param loc_id   File or group identifier
 !! \param name     Dataset name
@@ -562,6 +573,74 @@ CONTAINS
 
   END SUBROUTINE h5dcreate_anon_f
 
+#if H5_DOXYGEN_FORTRAN
+  !>
+  !! \ingroup H5D
+  !!
+  !! \brief Reads variable-length data. F2003 API h5dread_f should be used instead.
+  !!
+  !! \param dset_id       Dataset identifier.
+  !! \param mem_type_id   Memory datatype identifier.
+  !! \param buf           Data buffer; may be a scalar or an array, TYPE(TYPE) must be one of the following:
+  !! <pre>
+  !!      INTEGER
+  !!      REAL
+  !!      CHARACTER
+  !! </pre>
+  !! \param dims          Array to hold corresponding dimension sizes of data buffer buf, dim(k) has value of the k-th 
+  !!                      dimension of buffer buf. Values are ignored if buf is a scalar.
+  !! \param len           Array to store length of each element.
+  !! \param hdferr        Returns 0 if successful and -1 if fails.
+  !! \param mem_space_id  Memory dataspace identfier, default value is H5S_ALL_F.
+  !! \param file_space_id File dataspace identfier, default value is H5S_ALL_F.
+  !! \param xfer_prp      Transfer property list identifier, default value is H5P_DEFAULT_F.
+  !! 
+  SUBROUTINE h5dread_vl_f(dset_id, mem_type_id, buf, dims, len, hdferr, mem_space_id, file_space_id, xfer_prp) 
+    INTEGER(HID_T), INTENT(IN) :: dset_id
+    INTEGER(HID_T), INTENT(IN) :: mem_type_id
+    TYPE(TYPE), INTENT(INOUT), DIMENSION(dims(1),dims(2)) :: buf
+    
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(2)  :: dims
+    INTEGER(SIZE_T), INTENT(INOUT), DIMENSION(*)  :: len
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+  END SUBROUTINE h5dread_vl_f
+  !>
+  !! \ingroup H5D
+  !!
+  !! \brief Writes variable-length data. F2003 API h5dwritef should be used instead.
+  !!
+  !! \param dset_id       Dataset identifier.
+  !! \param mem_type_id   Memory datatype identifier.
+  !! \param buf           Data buffer; may be a scalar or an array, TYPE(TYPE) must be one of the following:
+  !! <pre>
+  !!      INTEGER
+  !!      REAL
+  !!      CHARACTER
+  !! </pre>
+  !! \param dims          Array to hold corresponding dimension sizes of data buffer buf, dim(k) has value of the k-th 
+  !!                      dimension of buffer buf. Values are ignored if buf is a scalar.
+  !! \param len           Array to store length of each element.
+  !! \param hdferr        Returns 0 if successful and -1 if fails.
+  !! \param mem_space_id  Memory dataspace identfier, default value is H5S_ALL_F.
+  !! \param file_space_id File dataspace identfier, default value is H5S_ALL_F.
+  !! \param xfer_prp      Transfer property list identifier, default value is H5P_DEFAULT_F.
+  !! 
+  SUBROUTINE h5dwrite_vl_f(dset_id, mem_type_id, buf, dims, len, hdferr, mem_space_id, file_space_id, xfer_prp)
+    INTEGER(HID_T), INTENT(IN) :: dset_id
+    INTEGER(HID_T), INTENT(IN) :: mem_type_id 
+    TYPE(TYPE), INTENT(IN),DIMENSION(dims(1),dims(2)) :: buf
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(2)  :: dims
+    INTEGER(SIZE_T), INTENT(IN), DIMENSION(*)  :: len
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
+  END SUBROUTINE h5dwrite_vl_f
+
+#else
   SUBROUTINE h5dwrite_vl_integer(dset_id, mem_type_id, buf, dims, len, &
        hdferr, &
        mem_space_id, file_space_id, xfer_prp)
@@ -882,6 +961,7 @@ CONTAINS
          buf, dims, str_len)
     RETURN
   END SUBROUTINE h5dread_vl_string
+#endif
 
 !>
 !! \ingroup H5D
@@ -965,6 +1045,177 @@ CONTAINS
 
   END SUBROUTINE h5dget_access_plist_f
 
+!>
+!! \ingroup H5D
+!!
+!! \brief Reclaims VL datatype memory buffers.
+!!
+!! \param type_id  Identifier of the datatype.
+!! \param space_id Identifier of the dataspace.
+!! \param plist_id Identifier of the property list used to create the buffer.
+!! \param buf      Pointer to the buffer to be reclaimed.
+!! \param hdferr   Returns 0 if successful and -1 if fails.
+!!
+  SUBROUTINE h5dvlen_reclaim_f(type_id, space_id, plist_id, buf, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN)    :: type_id
+    INTEGER(HID_T), INTENT(IN)    :: space_id
+    INTEGER(HID_T), INTENT(IN)    :: plist_id
+    TYPE(C_PTR)   , INTENT(INOUT) :: buf
+    INTEGER       , INTENT(OUT)   :: hdferr
+
+    INTERFACE
+       INTEGER FUNCTION h5dvlen_reclaim_c(type_id, space_id, plist_id, buf) BIND(C, NAME='h5dvlen_reclaim_c')
+         IMPORT :: C_PTR
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         INTEGER(HID_T) :: type_id
+         INTEGER(HID_T) :: space_id
+         INTEGER(HID_T) :: plist_id
+         TYPE(C_PTR), VALUE :: buf
+       END FUNCTION h5dvlen_reclaim_c
+    END INTERFACE
+
+    hdferr = H5Dvlen_reclaim_c(type_id, space_id, plist_id, buf)
+
+  END SUBROUTINE H5Dvlen_reclaim_f
+
+#ifdef H5_DOXYGEN_FORTRAN
+!>
+!! \ingroup H5D
+!!
+!! \brief Writes raw data from a dataset into a buffer.
+!!
+!! \param dset_id       Identifier of the dataset to write to.
+!! \param mem_type_id   Identifier of the memory datatype.
+!! \param buf           Buffer with data to be written to the file.
+!! \param hdferr        Returns 0 if successful and -1 if fails
+!! \param mem_space_id  Identifier of the memory dataspace.
+!! \param file_space_id Identifier of the dataset&apos;s dataspace in the file.
+!! \param xfer_prp      Identifier of a transfer property list for this I/O operation.
+!!
+  SUBROUTINE h5dwrite_f(dset_id, mem_type_id, buf, hdferr, mem_space_id, file_space_id, xfer_prp)
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: dset_id
+    INTEGER(HID_T), INTENT(IN) :: mem_type_id
+    TYPE(C_PTR), INTENT(IN) :: buf
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+  END SUBROUTINE h5dwrite
+!>
+!! \ingroup H5D
+!!
+!! \brief Reads raw data from a dataset into a buffer (Passes Pointer). This is the preferred signature for H5Dread_f.
+!!
+!! \param dset_id       Identifier of the dataset read from.
+!! \param mem_type_id   Identifier of the memory datatype.
+!! \param buf           Buffer to receive data read from file.
+!! \param hdferr        Returns 0 if successful and -1 if fails.
+!! \param mem_space_id  Identifier of the memory dataspace.
+!! \param file_space_id Identifier of dataset&apos;s dataspace in the file. (Default: H5S_ALL_F)
+!! \param xfer_prp      Identifier of a transfer property list for this I/O operation.
+!!
+ SUBROUTINE h5dread_f(dset_id, mem_type_id, buf, hdferr, &
+       mem_space_id, file_space_id, xfer_prp)
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: dset_id
+    INTEGER(HID_T), INTENT(IN) :: mem_type_id
+    TYPE(C_PTR), INTENT(INOUT) :: buf
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+  END SUBROUTINE h5dread_f
+
+!>
+!! \ingroup H5D
+!!
+!! \brief There is no direct Fortran90 counterpart for the C function H5Dwrite. Instead, that functionality is 
+!!        provided by two Fortran90 subroutines:
+!! <pre>
+!! h5dwrite_f	 Purpose: Writes data other than variable-length data.
+!! h5dwrite_vl_f Purpose: Writes variable-length data.
+!! </pre>
+!!
+!! \param dset_id       Identifier of the dataset to write to.
+!! \param mem_type_id   Identifier of the memory datatype.
+!! \param buf           Data buffer; may be a scalar or an array.
+!! \param dims          Array to hold corresponding dimension sizes of data buffer buf; dim(k) has value 
+!!                      of the k-th dimension of buffer buf; values are ignored if buf is a scalar.
+!! \param hdferr        Returns 0 if successful and -1 if fails
+!! \param mem_space_id  Identifier of the memory dataspace. Default value is H5S_ALL_F.
+!! \param file_space_id Identifier of the dataset&apos;s dataspace in the file. Default value is H5S_ALL_F.
+!! \param xfer_prp      Identifier of a transfer property list for this I/O operation. Default value  is H5P_DEFAULT_F
+!!
+  SUBROUTINE h5dwrite_f___F90_VERSION(dset_id, mem_type_id, buf, dims, hdferr, mem_space_id, file_space_id, xfer_prp)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: dset_id
+    INTEGER(HID_T), INTENT(IN) :: mem_type_id
+    TYPE(TYPE), INTENT(IN) :: buf
+    DIMENSION(*), INTEGER(HSIZE_T), INTENT(IN)  :: dims 
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+  END SUBROUTINE h5dwrite_f___F90_VERSION
+
+!>
+!! \ingroup H5D
+!!
+!! \brief There is no direct Fortran90 counterpart for the C function H5Dread. Instead, that functionality is provided by 
+!!        two Fortran90 subroutines:
+!! <pre>
+!!         h5dread_f    Purpose: Reads data other than variable-length data, uses DIMENSION argument and buf is not a pointer.
+!!         h5dread_vl_f	Purpose: Reads variable-length data.
+!! </pre>
+!!         The user is encouraged to use the F2003 h5dread_f() instead.
+!!
+!! \param dset_id       Identifier of the dataset read from.
+!! \param mem_type_id   Identifier of the memory datatype.
+!! \param buf           Buffer to receive data read from file, may be a scalar or an array.
+!! \param dims          Array to hold corresponding dimension sizes of data buffer buf. dim(k) has value of the k-th 
+!!                      dimension of buffer buf. Values are ignored if buf is a scalar.
+!! \param hdferr        Returns 0 if successful and -1 if fails.
+!! \param mem_space_id  Identifier of the memory dataspace. (Default: H5S_ALL_F)
+!! \param file_space_id Identifier of dataset&apos;s dataspace in the file. (Default: H5S_ALL_F)
+!! \param xfer_prp      Identifier of a transfer property list for this I/O operation. (Default: H5P_DEFAULT_F)
+!!
+  SUBROUTINE h5dread_f___F90_VERSION(dset_id, mem_type_id, buf, dims, hdferr, mem_space_id, file_space_id, xfer_prp)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: dset_id
+    INTEGER(HID_T), INTENT(IN) :: mem_type_id
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
+    TYPE(TYPE), INTENT(INOUT) :: buf
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+  END SUBROUTINE h5dread_f___F90_VERSION
+
+!>
+!! \ingroup H5D
+!!
+!! \brief Fills dataspace elements with a fill value in a memory buffer.
+!!  Only INTEGER, CHARACTER, REAL and DOUBLE PRECISION datatypes of the fillvalues and buffers are supported. 
+!!  Buffer and fillvalue are assumed to have the same datatype. Only one-dimesional buffers are supported.
+!!
+!! \param fill_value Fill value.
+!! \param space_id   Identifier of the memory datatype.
+!! \param buf        Buffer to receive data read from file.
+!! \param hdferr     Returns 0 if successful and -1 if fails.
+!!
+  SUBROUTINE h5dfill_f(fill_value, space_id, buf,  hdferr)
+    TYPE(TYPE), INTENT(IN) :: fill_value
+    INTEGER(HID_T), INTENT(IN) :: space_id
+    TYPE(TYPE), INTENT(OUT), DIMENSION(*) :: buf
+    INTEGER, INTENT(OUT) :: hdferr
+
+  END SUBROUTINE h5dfill_integer
+
+#else
 
   SUBROUTINE h5dwrite_reference_obj(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
@@ -1213,6 +1464,7 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: dset_id
     INTEGER(HID_T), INTENT(IN) :: mem_type_id
     INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
+
     CHARACTER(LEN=*), INTENT(INOUT) :: buf
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
@@ -1258,28 +1510,6 @@ CONTAINS
 
   END SUBROUTINE h5dread_char_scalar_fix
 
-!>
-!! \ingroup H5D
-!!
-!! \brief Writes raw data from a dataset into a buffer.
-!!
-!! Inputs:
-!!  dset_id       - Identifier of the dataset to write to.
-!!  mem_type_id       - Identifier of the memory datatype.
-!!  buf             - Buffer with data to be written to the file.
-!!
-!! Outputs:
-!!  hdferr        - Returns 0 if successful and -1 if fails
-!!
-!! Optional parameters:
-!!  mem_space_id       - Identifier of the memory dataspace.
-!!  file_space_id - Identifier of the dataset's dataspace in the file.
-!!  xfer_prp       - Identifier of a transfer property list for this I/O operation.
-!!
-!! Fortran2003 Interface:
-!!  SUBROUTINE h5dwrite_f(dset_id, mem_type_id, buf, hdferr, &
-!!                        mem_space_id, file_space_id, xfer_prp)
-
   SUBROUTINE h5dwrite_ptr(dset_id, mem_type_id, buf, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
     USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
@@ -1308,28 +1538,6 @@ CONTAINS
          file_space_id_default, xfer_prp_default, buf)
 
   END SUBROUTINE h5dwrite_ptr
-
-!>
-!! \ingroup H5D
-!!
-!! \brief Reads raw data from a dataset into a buffer.
-!!
-!! Inputs:
-!!  dset_id       - Identifier of the dataset read from.
-!!  mem_type_id       - Identifier of the memory datatype.
-!!
-!! Outputs:
-!!  buf             - Buffer to receive data read from file.
-!!  hdferr        - Returns 0 if successful and -1 if fails
-!!
-!! Optional parameters:
-!!  mem_space_id       - Identifier of the memory dataspace.
-!!  file_space_id - Identifier of the dataset's dataspace in the file.
-!!  xfer_prp       - Identifier of a transfer property list for this I/O operation.
-!!
-!! Fortran2003 Interface:
-!!  SUBROUTINE h5dread_f(dset_id, mem_type_id, buf, hdferr, &
-!!                       mem_space_id, file_space_id, xfer_prp)
 
   SUBROUTINE h5dread_ptr(dset_id, mem_type_id, buf, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
@@ -1360,86 +1568,12 @@ CONTAINS
 
   END SUBROUTINE h5dread_ptr
 
-!
-! NAME
-!  h5dfill_integer
-!
-! PURPOSE
-!  Fills dataspace elements with a fill value in a memory buffer.
-!  Only INTEGER, CHARACTER, REAL and DOUBLE PRECISION datatypes
-!  of the fillvalues and buffers are supported. Buffer and fillvalue
-!  are assumed to have the same datatype.
-!  Only one-dimesional buffers are supported.
-!
-! Inputs:
-!            fill_value      - fill value
-!            space_id      - memory space selection identifier
-!            buf            - memory buffer containing the selection to be filled
-! Outputs:
-!            hdferr:            - error code
-!                               Success:  0
-!                               Failure: -1
-! AUTHOR
-!  Elena Pourmal
-!  March 12, 2003
-!
-!
-
-  SUBROUTINE h5dfill_integer(fill_value, space_id, buf,  hdferr)
-    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
-    IMPLICIT NONE
-    INTEGER, INTENT(IN), TARGET :: fill_value
-    INTEGER(HID_T), INTENT(IN) :: space_id
-    INTEGER, INTENT(IN), DIMENSION(*), TARGET :: buf
-    INTEGER, INTENT(OUT) :: hdferr
-
-    INTEGER(HID_T) :: fill_type_id ! Fill value datatype identifier
-    INTEGER(HID_T) :: mem_type_id  ! Buffer dadtype identifier
-
-    TYPE(C_PTR) :: f_ptr_fill_value ! C pointer to fill_value
-    TYPE(C_PTR) :: f_ptr_buf        ! C pointer to buf
-
-    f_ptr_fill_value = C_LOC(fill_value)
-    f_ptr_buf = C_LOC(buf(1))
-
-    fill_type_id = H5T_NATIVE_INTEGER
-    mem_type_id  = H5T_NATIVE_INTEGER
-
-    hdferr = h5dfill_c(f_ptr_fill_value, fill_type_id, space_id, &
-         f_ptr_buf, mem_type_id)
-
-  END SUBROUTINE h5dfill_integer
-
-!
-! NAME
-!  h5dfill_c_float
-!
-! PURPOSE
-!  Fills dataspace elements with a fill value in a memory buffer.
-!  Only INTEGER, CHARACTER, REAL and DOUBLE PRECISION datatypes
-!  of the fillvalues and buffers are supported. Buffer and fillvalue
-!  are assumed to have the same datatype.
-!  Only one-dimesional buffers are supported.
-!
-! Inputs:
-!            fill_value      - fill value
-!            space_id      - memory space selection identifier
-!            buf            - memory buffer containing the selection to be filled
-! Outputs:
-!            hdferr:            - error code
-!                               Success:  0
-!                               Failure: -1
-!
-! AUTHOR
-!  Elena Pourmal
-!  March 12, 2003
-!
   SUBROUTINE h5dfill_c_float(fill_valuer, space_id, buf,  hdferr)
     USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     REAL(KIND=C_FLOAT), INTENT(IN), TARGET :: fill_valuer
     INTEGER(HID_T), INTENT(IN) :: space_id
-    REAL(KIND=C_FLOAT), INTENT(IN), DIMENSION(*), TARGET :: buf
+    REAL(KIND=C_FLOAT), INTENT(OUT), DIMENSION(*), TARGET :: buf
     INTEGER, INTENT(OUT) :: hdferr
 
     INTEGER(HID_T) :: fill_type_id ! Fill value datatype identifier
@@ -1459,34 +1593,11 @@ CONTAINS
 
   END SUBROUTINE h5dfill_c_float
 
-  !----------------------------------------------------------------------
-  ! Name:        h5dfill_c_double
-  !
-  ! Purpose:      Fills dataspace elements with a fill value in a memory buffer.
-  !               Only INTEGER, CHARACTER, REAL and DOUBLE PRECISION datatypes
-  !               of the fillvalues and buffers are supported. Buffer and fillvalue
-  !               are assumed to have the same datatype.
-  !               Only one-dimesional buffers are supported.
-  !
-  ! Inputs:
-  !            fill_value      - fill value
-  !            space_id      - memory space selection identifier
-  !            buf            - memory buffer containing the selection to be filled
-  ! Outputs:
-  !            hdferr:            - error code
-  !                               Success:  0
-  !                               Failure: -1
-  !
-  ! Programmer:      Elena Pourmal
-  !            March 12, 2003
-  !
-  !----------------------------------------------------------------------
-
   SUBROUTINE h5dfill_c_double(fill_value, space_id, buf,  hdferr)
     IMPLICIT NONE
     REAL(KIND=C_DOUBLE), INTENT(IN), TARGET :: fill_value
     INTEGER(HID_T), INTENT(IN) :: space_id
-    REAL(KIND=C_DOUBLE), INTENT(IN), DIMENSION(*), TARGET :: buf
+    REAL(KIND=C_DOUBLE), INTENT(OUT), DIMENSION(*), TARGET :: buf
     INTEGER, INTENT(OUT) :: hdferr
 
     INTEGER(HID_T) :: fill_type_id ! Fill value datatype identifier
@@ -1511,7 +1622,7 @@ CONTAINS
     IMPLICIT NONE
     REAL(KIND=C_LONG_DOUBLE), INTENT(IN), TARGET :: fill_value
     INTEGER(HID_T), INTENT(IN) :: space_id
-    REAL(KIND=C_LONG_DOUBLE), INTENT(IN), DIMENSION(*), TARGET :: buf
+    REAL(KIND=C_LONG_DOUBLE), INTENT(OUT), DIMENSION(*), TARGET :: buf
     INTEGER, INTENT(OUT) :: hdferr
 
     INTEGER(HID_T) :: fill_type_id ! Fill value datatype identifier
@@ -1531,35 +1642,13 @@ CONTAINS
 
   END SUBROUTINE h5dfill_c_long_double
 #endif
-!
-! NAME
-!  h5dfill_char
-!
-! PURPOSE
-!  Fills dataspace elements with a fill value in a memory buffer.
-!  Only INTEGER, CHARACTER, REAL and DOUBLE PRECISION datatypes
-!  of the fillvalues and buffers are supported. Buffer and fillvalue
-!  are assumed to have the same datatype.
-!  Only one-dimesional buffers are supported.
-!
-! Inputs:
-!            fill_value      - fill value
-!            space_id      - memory space selection identifier
-!            buf            - memory buffer containing the selection to be filled
-! Outputs:
-!            hdferr:            - error code
-!                               Success:  0
-!                               Failure: -1
-! AUTHOR
-!  Elena Pourmal
-!  March 12, 2003
-!
+
   SUBROUTINE h5dfill_char(fill_value, space_id, buf,  hdferr)
     USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     CHARACTER, INTENT(IN), TARGET :: fill_value
     INTEGER(HID_T), INTENT(IN) :: space_id
-    CHARACTER, INTENT(IN), DIMENSION(*), TARGET :: buf
+    CHARACTER, INTENT(OUT), DIMENSION(*), TARGET :: buf
     INTEGER, INTENT(OUT) :: hdferr
 
     INTEGER(HID_T) :: fill_type_id ! Fill value datatype identifier
@@ -1575,46 +1664,8 @@ CONTAINS
          f_ptr_buf, mem_type_id)
 
   END SUBROUTINE h5dfill_char
-!>
-!! \ingroup H5D
-!!
-!! \brief Reclaims VL datatype memory buffers.
-!!
-!! Inputs:
-!!
-!!  type_id  - Identifier of the datatype.
-!!  space_id - Identifier of the dataspace.
-!!  plist_id - Identifier of the property list used to create the buffer.
-!!  buf      - Pointer to the buffer to be reclaimed.
-!!
-!! Outputs:
-!!  hdferr   - Returns 0 if successful and -1 if fails
-!!
-!! Fortran2003 Interface:
-  SUBROUTINE h5dvlen_reclaim_f(type_id, space_id, plist_id, buf, hdferr)
-    IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN)    :: type_id
-    INTEGER(HID_T), INTENT(IN)    :: space_id
-    INTEGER(HID_T), INTENT(IN)    :: plist_id
-    TYPE(C_PTR)   , INTENT(INOUT) :: buf
-    INTEGER       , INTENT(OUT)   :: hdferr
 
-    INTERFACE
-       INTEGER FUNCTION h5dvlen_reclaim_c(type_id, space_id, plist_id, buf) BIND(C, NAME='h5dvlen_reclaim_c')
-         IMPORT :: C_PTR
-         IMPORT :: HID_T
-         IMPLICIT NONE
-         INTEGER(HID_T) :: type_id
-         INTEGER(HID_T) :: space_id
-         INTEGER(HID_T) :: plist_id
-         TYPE(C_PTR), VALUE :: buf
-       END FUNCTION h5dvlen_reclaim_c
-    END INTERFACE
-
-    hdferr = H5Dvlen_reclaim_c(type_id, space_id, plist_id, buf)
-
-  END SUBROUTINE H5Dvlen_reclaim_f
-
+#endif
 
 END MODULE H5D
 

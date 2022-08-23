@@ -1,11 +1,6 @@
-! NAME
-!  MODULE H5I
-!
-!  FILE
-!  fortran/src/H5Iff.F90
-!
-! PURPOSE
-!  This file contains Fortran interfaces for H5I functions.
+!> @ingroup H5I
+!!
+!! @brief This module contains Fortran interfaces for H5I functions.
 !
 ! COPYRIGHT
 !  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

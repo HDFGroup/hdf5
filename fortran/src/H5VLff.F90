@@ -1,8 +1,6 @@
-! NAME
-!  MODULE H5VL
-!
-! PURPOSE
-!  This file contains Fortran interfaces for H5VL (VOL) functions.
+!> @ingroup H5P
+!!
+!! @brief This module contains Fortran interfaces for H5VL (VOL) functions.
 !
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -82,7 +80,16 @@ CONTAINS
     IF(vol_id.LT.0) hdferr = H5I_INVALID_HID_F
     
   END SUBROUTINE H5VLregister_connector_by_name_f
-  
+!>
+!! \ingroup H5V
+!!
+!! \brief Registers a new VOL connector by value.
+!!
+!! \param connector_value Connector value.
+!! \param vol_id          VOL connector identifier if successful; otherwise returns H5I_INVALID_HID_F.
+!! \param hdferr          Returns 0 if successful and -1 if fails.
+!! \param vipl_id         VOL initialization property list identifier 
+!!
   SUBROUTINE H5VLregister_connector_by_value_f(connector_value, vol_id, hdferr, vipl_id)
     IMPLICIT NONE
     INTEGER, INTENT(IN) :: connector_value
@@ -275,7 +282,16 @@ CONTAINS
     ENDIF
     
   END SUBROUTINE H5VLget_connector_id_by_value_f
-  
+!>
+!! \ingroup H5V
+!!
+!! \brief Retrieves a connector name for a VOL.
+!!
+!! \param obj_id   Object identifier or file identifier.
+!! \param name     Connector name.
+!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param name_len Maximum length of the name to retrieve.
+!!
   SUBROUTINE H5VLget_connector_name_f(obj_id, name, hdferr, name_len)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: obj_id

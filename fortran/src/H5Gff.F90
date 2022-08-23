@@ -1,11 +1,6 @@
-! NAME
-!  MODULE H5G
-!
-! FILE
-!  fortran/src/H5Gff.F90
-!
-! PURPOSE
-!  This file contains Fortran interfaces for H5G functions.
+!> @ingroup H5G
+!!
+!! @brief This module contains Fortran interfaces for H5G functions.
 !
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -391,8 +386,8 @@ CONTAINS
 !! \brief Renames an object within an HDF5 file.
 !!
 !! \param loc_id   Location identifier.
-!! \param name     Object's name at specified location.
-!! \param new_name Object's new name.
+!! \param name     Object&apos;s name at specified location.
+!! \param new_name Object&apos;s new name.
 !! \param hdferr   Returns 0 if successful and -1 if fails.
 !!
   SUBROUTINE h5gmove_f(loc_id, name, new_name, hdferr)
@@ -426,9 +421,9 @@ CONTAINS
 !! \brief Renames an object within an HDF5 file.
 !!
 !! \param src_loc_id Original location identifier.
-!! \param src_name   Object's name at specified original location.
+!! \param src_name   Object&apos;s name at specified original location.
 !! \param dst_loc_id Original location identifier.
-!! \param dst_name   Object's new name.
+!! \param dst_name   Object&apos;s new name.
 !! \param hdferr     Returns 0 if successful and -1 if fails.
 !!
   SUBROUTINE h5gmove2_f(src_loc_id, src_name, dst_loc_id, dst_name, hdferr)
@@ -539,7 +534,7 @@ CONTAINS
 !! \param loc_id Location identifier.
 !! \param name   Name of the object at specified location.
 !! \param size   Size of the buffer required to hold comment.
-!! \param buffer Buffer to hold object's comment.
+!! \param buffer Buffer to hold object&apos;s comment.
 !! \param hdferr Returns 0 if successful and -1 if fails.
 !!
   SUBROUTINE h5gget_comment_f(loc_id, name, size, buffer, hdferr)

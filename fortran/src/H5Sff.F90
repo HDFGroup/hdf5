@@ -1,11 +1,6 @@
-! NAME
-!  MODULE H5S
-!
-! FILE
-!  fortran/src/H5Sff.F90
-!
-! PURPOSE
-!  This file contains Fortran interfaces for H5S functions.
+!> @ingroup H5S
+!!
+!! @brief This module contains Fortran interfaces for H5S functions.
 !
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -149,7 +144,7 @@ CONTAINS
 !! \brief Creates an exact copy of a dataspace.
 !!
 !! \param space_id     Dataspace identifier.
-!! \param new_space_id Identifier of dataspace's copy.
+!! \param new_space_id Identifier of dataspace&apos;s copy.
 !! \param hdferr       Returns 0 if successful and -1 if fails.
 !!
   SUBROUTINE h5scopy_f(space_id, new_space_id, hdferr)

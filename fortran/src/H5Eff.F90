@@ -1,11 +1,6 @@
-! NAME
-!  MODULE H5E
-!
-! FILE
-!  fortran/src/H5Eff.F90
-!
-! PURPOSE
-!  This Module contains Fortran interfaces for H5E functions.
+!> @ingroup H5E
+!!
+!! @brief This module contains Fortran interfaces for H5E functions.
 !
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -39,11 +34,9 @@ MODULE H5E
   USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_FUNPTR, C_CHAR
   USE H5GLOBAL
 
-  !Turn on automatic printing of errors
-  INTEGER, PARAMETER :: PRINTON = 1
-
-  !Turn off automatic printing of errors
-  INTEGER, PARAMETER :: PRINTOFF = 0
+   
+  INTEGER, PARAMETER :: PRINTON  = 1 !< Turn on automatic printing of errors
+  INTEGER, PARAMETER :: PRINTOFF = 0 !< Turn off automatic printing of errors
 
 CONTAINS
 

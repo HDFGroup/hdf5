@@ -1,11 +1,6 @@
-! NAME
-!  MODULE H5A
-!
-! PURPOSE
-!  This file contains Fortran interfaces for H5A functions. It includes
-!  all the functions that are independent on whether the Fortran 2003 functions
-!  are enabled or disabled.
-!
+!> @ingroup H5A
+!!
+!! @brief This module contains Fortran interfaces for H5A functions.
 !
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -76,6 +71,17 @@ MODULE H5A
   PRIVATE h5awrite_char_scalar, h5awrite_ptr
   PRIVATE h5aread_char_scalar, h5aread_ptr
 
+#ifdef H5_DOXYGEN_FORTRAN
+  INTERFACE h5awrite_f
+     MODULE PROCEDURE h5awrite_f
+     MODULE PROCEDURE h5awrite_f___F90_VERSION
+  END INTERFACE
+
+  INTERFACE h5aread_f
+     MODULE PROCEDURE h5aread_f
+     MODULE PROCEDURE h5aread_f___F90_VERSION
+  END INTERFACE
+#else
   INTERFACE h5awrite_f
      MODULE PROCEDURE h5awrite_char_scalar
      ! This is the preferred way to call h5awrite
@@ -115,6 +121,7 @@ MODULE H5A
        TYPE(C_PTR), VALUE :: buf
      END FUNCTION h5aread_f_c
   END INTERFACE
+#endif
 
 CONTAINS
 
@@ -1132,7 +1139,7 @@ CONTAINS
 !! \brief Determines whether an attribute with a given name exists on an object
 !!
 !! \param loc_id      Location identifier
-!! \param obj_name    Object name either relative to loc_id, absolute from the file’s root group, or '.' (a dot)
+!! \param obj_name    Object name either relative to loc_id, absolute from the file’s root group, or &apos;. &apos;(a dot)
 !! \param attr_name   Attribute name
 !! \param attr_exists Attribute exists status
 !! \param hdferr      Returns 0 if successful and -1 if fails
@@ -1186,7 +1193,7 @@ CONTAINS
 !! \brief Opens an attribute for an object by object name and attribute name.
 !!
 !! \param loc_id    Location from which to find object to which attribute is attached
-!! \param obj_name  Object name either relative to loc_id, absolute from the file’s root group, or '.' (a dot)
+!! \param obj_name  Object name either relative to loc_id, absolute from the file’s root group, or &apos;.&apos; (a dot)
 !! \param attr_name Attribute name
 !! \param attr_id   Attribute identifier
 !! \param hdferr    Returns 0 if successful and -1 if fails
@@ -1279,6 +1286,82 @@ CONTAINS
 
   END SUBROUTINE H5Arename_f
 
+#ifdef H5_DOXYGEN_FORTRAN
+
+!>
+!! \ingroup H5A
+!!
+!! \brief Writes data to an attribute. F2003 API h5awrite_f should be used instead.
+!!
+!! \param attr_id     Identifier of an attribute to write.
+!! \param mem_type_id Identifier of the attribute datatype (in memory).
+!! \param buf	      Data buffer; may be a scalar or an array.
+!! \param dims        Array to hold corresponding dimension sizes of data buffer buf;
+!!                    dim(k) has value of the k-th dimension of buffer buf; values are ignored if buf is a scalar.
+!! \param hdferr      Returns 0 if successful and -1 if fails.
+!!
+  SUBROUTINE h5awrite_f___F90_VERSION(attr_id, memtype_id, buf, dims, hdferr) 
+    INTEGER(HID_T)  , INTENT(IN)               :: attr_id
+    INTEGER(HID_T)  , INTENT(IN)               :: memtype_id
+    TYPE(TYPE)      , INTENT(IN)               :: buf
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
+    INTEGER         , INTENT(OUT)              :: hdferr
+  END SUBROUTINE h5awrite_f___F90_VERSION
+
+!>
+!! \ingroup H5A
+!!
+!! \brief Writes data to an attribute. **Preferred API**.
+!!
+!! \param attr_id     Identifier of an attribute to write.
+!! \param mem_type_id Identifier of the attribute datatype (in memory).
+!! \param buf	      Data to be written.
+!! \param hdferr      Returns 0 if successful and -1 if fails.
+!!
+  SUBROUTINE h5awrite_f(attr_id, memtype_id, buf, hdferr) 
+    INTEGER(HID_T)  , INTENT(IN)  :: attr_id
+    INTEGER(HID_T)  , INTENT(IN)  :: memtype_id
+    TYPE(C_PTR)     , INTENT(IN)  :: buf
+    INTEGER         , INTENT(OUT) :: hdferr
+  END SUBROUTINE h5awrite_f
+!>
+!! \ingroup H5A
+!!
+!! \brief Reads an attribute. F2003 API h5aread_f should be used instead.
+!!
+!! \param attr_id     Identifier of an attribute to read.
+!! \param mem_type_id Identifier of the attribute datatype (in memory).
+!! \param buf	      Buffer for data to be read.
+!! \param dims	      Array to hold corresponding dimension sizes of data buffer buf;
+!!                    dim(k) has value of the k-th dimension of buffer buf; values are ignored if buf is a scalar.
+!! \param hdferr      Returns 0 if successful and -1 if fails.
+!!
+  SUBROUTINE h5aread_f___F90_VERSION(attr_id, memtype_id, buf, dims, hdferr) 
+    INTEGER(HID_T)  , INTENT(IN)               :: attr_id
+    INTEGER(HID_T)  , INTENT(IN)               :: memtype_id
+    TYPE(TYPE)      , INTENT(INOUT)            :: buf
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
+    INTEGER         , INTENT(OUT)              :: hdferr
+  END SUBROUTINE h5aread_f___F90_version
+!>
+!! \ingroup H5A
+!!
+!! \brief Reads an attribute. **Preferred API**.
+!!
+!! \param attr_id     Identifier of an attribute to read.
+!! \param mem_type_id Identifier of the attribute datatype (in memory).
+!! \param buf	      Buffer for data to be read.
+!! \param hdferr      Returns 0 if successful and -1 if fails.
+!!
+  SUBROUTINE h5aread_f(attr_id, memtype_id, buf, hdferr)
+    INTEGER(HID_T), INTENT(IN)    :: attr_id
+    INTEGER(HID_T), INTENT(IN)    :: mem_type_id
+    TYPE(C_PTR)   , INTENT(INOUT) :: buf
+    INTEGER       , INTENT(OUT)   :: hdferr
+  END SUBROUTINE h5aread_f
+
+#else
+
   SUBROUTINE H5Awrite_char_scalar(attr_id, memtype_id, buf, dims, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id
@@ -1306,21 +1389,6 @@ CONTAINS
     hdferr = H5Awrite_f_c(attr_id, memtype_id, f_ptr)
 
   END SUBROUTINE H5Awrite_char_scalar_fix
-
-
-!>
-!! \ingroup H5A
-!!
-!! \brief Writes an attribute.
-!!
-!! Inputs:
-!!  attr_id     - Attribute identifier
-!!  memtype_id  - Attribute datatype identifier  (in memory)
-!!  buf             - Data buffer; may be a scalar or an array
-!!
-!! Outputs:
-!!  hdferr      - Returns 0 if successful and -1 if fails
-!!
 
   SUBROUTINE H5Awrite_ptr(attr_id, mem_type_id, buf, hdferr)
     IMPLICIT NONE
@@ -1360,20 +1428,6 @@ CONTAINS
 
   END SUBROUTINE H5Aread_char_scalar_fix
 
-!>
-!! \ingroup H5A
-!!
-!! \brief Reads an attribute.
-!!
-!! Inputs:
-!!  attr_id     - Attribute identifier
-!!  memtype_id  - Attribute datatype identifier  (in memory)
-!!
-!! Outputs:
-!!  buf             - Data buffer; may be a scalar or an array
-!!  hdferr      - Returns 0 if successful and -1 if fails
-!!
-
   SUBROUTINE H5Aread_ptr(attr_id, mem_type_id, buf, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id
@@ -1384,6 +1438,8 @@ CONTAINS
     hdferr = H5Aread_f_c(attr_id, mem_type_id, buf)
 
   END SUBROUTINE H5Aread_ptr
+
+#endif
 
 END MODULE H5A
 

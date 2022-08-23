@@ -1,8 +1,6 @@
-! NAME
-!  MODULE H5T
-!
-! PURPOSE
-!  This file contains Fortran interfaces for H5T functions.
+!> @ingroup H5T
+!!
+!! @brief This module contains Fortran interfaces for H5T functions.
 !
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -40,18 +38,23 @@ MODULE H5T
 
   PRIVATE h5tenum_insert_f03, h5tenum_insert_f90
 
-!****t* H5T/hvl_t
 ! Fortran2003 Derived Type:
   TYPE hvl_t
-     INTEGER(size_t) :: len ! Length of VL data (in base type units)
-     TYPE(C_PTR) :: p       ! Pointer to VL data
+     INTEGER(size_t) :: len !< Length of VL data (in base type units)
+     TYPE(C_PTR)     :: p   !< Pointer to VL data
   END TYPE hvl_t
 
-
+#ifdef H5_DOXYGEN_FORTRAN
+  INTERFACE h5tenum_insert_f
+     MODULE PROCEDURE h5tenum_insert_f
+     MODULE PROCEDURE h5tenum_insert___F90_VERSION
+  END INTERFACE
+#else
   INTERFACE h5tenum_insert_f
      MODULE PROCEDURE h5tenum_insert_f03
      MODULE PROCEDURE h5tenum_insert_f90
   END INTERFACE
+#endif
 
 CONTAINS
 
@@ -162,7 +165,7 @@ CONTAINS
 !! \brief Creates a copy of existing datatype.
 !!
 !! \param type_id     Datatype identifier.
-!! \param new_type_id Identifier of datatype's copy.
+!! \param new_type_id Identifier of datatype&apos;s copy.
 !! \param hdferr      Returns 0 if successful and -1 if fails.
 !!
   SUBROUTINE h5tcopy_f(type_id, new_type_id, hdferr)
@@ -573,7 +576,7 @@ CONTAINS
 !! <pre>
 !!                  Unsigned integer type
 !!                     H5T_SGN_NONE_F = 0
-!!                  Two's complement signed integer type
+!!                  Two&apos;s complement signed integer type
 !!                     H5T_SGN_2_F = 1
 !!                  Error value
 !!                     H5T_SGN_ERROR_F = -1
@@ -608,7 +611,7 @@ CONTAINS
 !! <pre>
 !!                  Unsigned integer type
 !!                     H5T_SGN_NONE_F = 0
-!!                  Two's complement signed integer type
+!!                  Two&apos;s complement signed integer type
 !!                     H5T_SGN_2_F = 1
 !!                  Error value
 !!                     H5T_SGN_ERROR_F = -1
@@ -1046,7 +1049,7 @@ CONTAINS
 !!
 !! \param type_id     Datatype identifier.
 !! \param index       Filed index (0-based).
-!! \param member_name Buffer to hold member's name.
+!! \param member_name Buffer to hold member&apos;s name.
 !! \param namelen     Name length.
 !! \param hdferr      Returns 0 if successful and -1 if fails.
 !!
@@ -1256,7 +1259,7 @@ CONTAINS
 !!
 !! \param type_id   Compound datatype identifier.
 !! \param field_idx Field index (0-based).
-!! \param datatype  Identifier of the member's datatype.
+!! \param datatype  Identifier of the member&apos;s datatype.
 !! \param hdferr    Returns 0 if successful and -1 if fails.
 !!
   SUBROUTINE h5tget_member_type_f(type_id,  field_idx, datatype, hdferr)
@@ -2022,6 +2025,8 @@ CONTAINS
     hdferr = H5Tconvert_c(src_id, dst_id, nelmts, buf, background_default, plist_id_default)
 
   END SUBROUTINE h5tconvert_f
+
+#ifdef H5_DOXYGEN_FORTRAN
 !>
 !! \ingroup H5T
 !!
@@ -2032,6 +2037,65 @@ CONTAINS
 !! \param value   Value of the new member.
 !! \param hdferr  Returns 0 if successful and -1 if fails.
 !!
+  SUBROUTINE h5tenum_insert___F90_VERSION(type_id,  name, value, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: type_id
+    CHARACTER(LEN=*), INTENT(IN) :: name
+    INTEGER, INTENT(IN) :: value
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER :: namelen
+    INTERFACE
+       INTEGER FUNCTION h5tenum_insert_c(type_id, name, namelen, value) BIND(C,NAME='h5tenum_insert_c')
+         IMPORT :: C_CHAR
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         INTEGER(HID_T), INTENT(IN) :: type_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
+         INTEGER, INTENT(IN) :: value
+         INTEGER :: namelen
+       END FUNCTION h5tenum_insert_c
+    END INTERFACE
+
+    namelen = LEN(name)
+    hdferr = h5tenum_insert_c(type_id, name, namelen, value)
+  END SUBROUTINE h5tenum_insert___F90_VERSION
+!>
+!! \ingroup H5T
+!!
+!! \brief Inserts a new enumeration datatype member.
+!!
+!! \param type_id Datatype identifier for the enumeration datatype.
+!! \param name    Datatype identifier.
+!! \param value   Pointer to the value of the new member.
+!! \param hdferr  Returns 0 if successful and -1 if fails.
+!!
+  SUBROUTINE h5tenum_insert_f(type_id, name, value, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T)  , INTENT(IN) :: type_id
+    CHARACTER(LEN=*), INTENT(IN) :: name
+    TYPE(C_PTR)     , INTENT(IN) :: value
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER :: namelen
+
+    INTERFACE
+       INTEGER FUNCTION h5tenum_insert_ptr_c(type_id, name, namelen, value) &
+            BIND(C, NAME='h5tenum_insert_ptr_c')
+         IMPORT :: C_CHAR, C_PTR
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         INTEGER(HID_T), INTENT(IN) :: type_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
+         INTEGER :: namelen
+         TYPE(C_PTR), VALUE :: value
+       END FUNCTION h5tenum_insert_ptr_c
+    END INTERFACE
+
+    namelen = LEN(name)
+    hdferr = h5tenum_insert_ptr_c(type_id, name, namelen, value)
+  END SUBROUTINE h5tenum_insert_f
+
+#else
+
   SUBROUTINE h5tenum_insert_f90(type_id,  name, value, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: type_id
@@ -2055,16 +2119,6 @@ CONTAINS
     hdferr = h5tenum_insert_c(type_id, name, namelen, value)
   END SUBROUTINE h5tenum_insert_f90
 
-!>
-!! \ingroup H5T
-!!
-!! \brief Inserts a new enumeration datatype member.
-!!
-!! \param type_id Datatype identifier for the enumeration datatype.
-!! \param name    Datatype identifier.
-!! \param value   Pointer to the value of the new member.
-!! \param hdferr  Returns 0 if successful and -1 if fails.
-!!
   SUBROUTINE h5tenum_insert_f03(type_id, name, value, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T)  , INTENT(IN) :: type_id
@@ -2089,5 +2143,6 @@ CONTAINS
     namelen = LEN(name)
     hdferr = h5tenum_insert_ptr_c(type_id, name, namelen, value)
   END SUBROUTINE h5tenum_insert_f03
+#endif
 
 END MODULE H5T
