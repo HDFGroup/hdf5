@@ -123,7 +123,7 @@ MODULE H5D
      MODULE PROCEDURE h5dread_char_scalar
      ! This is the preferred way to call h5dread
      ! by passing an address
-!     MODULE PROCEDURE h5dread_ptr
+     MODULE PROCEDURE h5dread_ptr
   END INTERFACE
 #endif
 
@@ -1213,7 +1213,7 @@ CONTAINS
     TYPE(TYPE), INTENT(OUT), DIMENSION(*) :: buf
     INTEGER, INTENT(OUT) :: hdferr
 
-  END SUBROUTINE h5dfill_integer
+  END SUBROUTINE h5dfill_f
 
 #else
 
@@ -1567,6 +1567,31 @@ CONTAINS
          file_space_id_default, xfer_prp_default, buf)
 
   END SUBROUTINE h5dread_ptr
+
+  SUBROUTINE h5dfill_integer(fill_value, space_id, buf,  hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
+    IMPLICIT NONE
+    INTEGER, INTENT(IN), TARGET :: fill_value  ! Fill value
+    INTEGER(HID_T), INTENT(IN) :: space_id ! Memory dataspace selection identifier
+    INTEGER, INTENT(IN), DIMENSION(*), TARGET :: buf ! Memory buffer to fill in
+    INTEGER, INTENT(OUT) :: hdferr      ! Error code
+
+    INTEGER(HID_T) :: fill_type_id ! Fill value datatype identifier
+    INTEGER(HID_T) :: mem_type_id  ! Buffer dadtype identifier
+
+    TYPE(C_PTR) :: f_ptr_fill_value ! C pointer to fill_value
+    TYPE(C_PTR) :: f_ptr_buf        ! C pointer to buf
+
+    f_ptr_fill_value = C_LOC(fill_value)
+    f_ptr_buf = C_LOC(buf(1))
+
+    fill_type_id = H5T_NATIVE_INTEGER
+    mem_type_id  = H5T_NATIVE_INTEGER
+
+    hdferr = h5dfill_c(f_ptr_fill_value, fill_type_id, space_id, &
+         f_ptr_buf, mem_type_id)
+
+  END SUBROUTINE h5dfill_integer
 
   SUBROUTINE h5dfill_c_float(fill_valuer, space_id, buf,  hdferr)
     USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
