@@ -294,7 +294,7 @@ write_wo_file(void)
         return -1;
     }
 
-    /* all writes done. return succeess. */
+    /* all writes done. return success. */
 #ifdef DEBUG
     HDprintf("wrote %d blocks\n", nlinkedblock_g);
 #endif

@@ -736,7 +736,7 @@ contig_hs_dr_pio_test__d2m_l2s(struct hs_dr_pio_test_vars_t *tv_ptr)
      * of the large data set.  However, in the parallel version, each
      * process only works with that slice of the large cube indicated
      * by its rank -- hence we set the most slowly changing index to
-     * mpi_rank, and don't itterate over it.
+     * mpi_rank, and don't iterate over it.
      */
 
     if (PAR_SS_DR_MAX_RANK - tv_ptr->large_rank == 0) {
@@ -966,7 +966,7 @@ contig_hs_dr_pio_test__d2m_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
      *
      * However, in the parallel version, each process only works with that
      * slice of the large (and small) data set indicated by its rank -- hence
-     * we set the most slowly changing index to mpi_rank, and don't itterate
+     * we set the most slowly changing index to mpi_rank, and don't iterate
      * over it.
      */
 
@@ -1223,7 +1223,7 @@ contig_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t *tv_ptr)
      *
      * However, in the parallel version, each process only works with that
      * slice of the large (and small) data set indicated by its rank -- hence
-     * we set the most slowly changing index to mpi_rank, and don't itterate
+     * we set the most slowly changing index to mpi_rank, and don't iterate
      * over it.
      */
 
@@ -2607,7 +2607,7 @@ ckrbrd_hs_dr_pio_test__d2m_l2s(struct hs_dr_pio_test_vars_t *tv_ptr)
      * of the large data set.  However, in the parallel version, each
      * process only works with that slice of the large cube indicated
      * by its rank -- hence we set the most slowly changing index to
-     * mpi_rank, and don't itterate over it.
+     * mpi_rank, and don't iterate over it.
      */
 
     if (PAR_SS_DR_MAX_RANK - tv_ptr->large_rank == 0) {
@@ -2830,7 +2830,7 @@ ckrbrd_hs_dr_pio_test__d2m_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
      *
      * However, in the parallel version, each process only works with that
      * slice of the large (and small) data set indicated by its rank -- hence
-     * we set the most slowly changing index to mpi_rank, and don't itterate
+     * we set the most slowly changing index to mpi_rank, and don't iterate
      * over it.
      */
 
@@ -3142,7 +3142,7 @@ ckrbrd_hs_dr_pio_test__m2d_l2s(struct hs_dr_pio_test_vars_t *tv_ptr)
      *
      * However, in the parallel version, each process only works with that
      * slice of the large (and small) data set indicated by its rank -- hence
-     * we set the most slowly changing index to mpi_rank, and don't itterate
+     * we set the most slowly changing index to mpi_rank, and don't iterate
      * over it.
      */
 

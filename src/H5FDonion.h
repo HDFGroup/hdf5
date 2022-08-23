@@ -33,12 +33,12 @@
 /* Flag to require page alignment of onion revision data */
 #define H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT 0x2
 
-/* Max length of a comment */
+/* Max length of a comment
+ * The buffer is defined to be this size + 1 to handle the NUL
+ */
 #define H5FD_ONION_FAPL_INFO_COMMENT_MAX_LEN 255
 
-/* Indicates that you want the latest revision
- * TODO: Does this work?
- */
+/* Indicates that you want the latest revision */
 #define H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST UINT64_MAX
 
 typedef enum H5FD_onion_target_file_constant_t {

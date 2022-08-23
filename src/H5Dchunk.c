@@ -1041,7 +1041,7 @@ H5D__chunk_is_space_alloc(const H5O_storage_t *storage)
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Neil Fortner
- *              Wednessday, March 6, 2016
+ *              Wednesday, March 6, 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -1650,7 +1650,7 @@ H5D__create_chunk_file_map_all(H5D_chunk_map_t *fm, const H5D_io_info_t
         coords[u] = 0;
         end[u]    = fm->chunk_dim[u] - 1;
 
-        /* Iniitialize partial chunk dimension information */
+        /* Initialize partial chunk dimension information */
         partial_dim_size[u] = file_dims[u] % fm->chunk_dim[u];
         if (file_dims[u] < fm->chunk_dim[u]) {
             curr_partial_clip[u] = partial_dim_size[u];
@@ -6776,7 +6776,7 @@ H5D__chunk_copy(H5F_t *f_src, H5O_storage_chunk_t *storage_src, H5O_layout_chunk
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register memory datatype")
         } /* end if */
 
-        /* create variable-length datatype at the destinaton file */
+        /* create variable-length datatype at the destination file */
         if (NULL == (dt_dst = H5T_copy(dt_src, H5T_COPY_TRANSIENT)))
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy")
         if (H5T_set_loc(dt_dst, H5F_VOL_OBJ(f_dst), H5T_LOC_DISK) < 0) {

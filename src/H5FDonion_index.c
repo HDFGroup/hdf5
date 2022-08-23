@@ -583,7 +583,7 @@ H5FD__onion_revision_index_find(const H5FD_onion_revision_index_t *rix, uint64_t
  *              Failure:    0
  *-----------------------------------------------------------------------------
  */
-size_t
+size_t H5_ATTR_NO_OPTIMIZE
 H5FD__onion_revision_record_decode(unsigned char *buf, H5FD_onion_revision_record_t *record)
 {
     uint32_t       ui32         = 0;

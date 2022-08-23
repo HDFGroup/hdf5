@@ -60,7 +60,7 @@
 
 /*
  * The `struct stat' data type for stat() and fstat(). This is a POSIX file
- * but often apears on non-POSIX systems also.  The `struct stat' is required
+ * but often appears on non-POSIX systems also.  The `struct stat' is required
  * for HDF5 to compile, although only a few fields are actually used.
  */
 #ifdef H5_HAVE_SYS_STAT_H
@@ -289,6 +289,18 @@
 #       define H5_ATTR_MALLOC /*void*/
 #  endif
 
+/* Turns off optimizations for a function. Goes after the return type.
+ * Not generally needed in the library, but ancient versions of clang
+ * (7.3.3, possibly others) have trouble with some of the onion VFD decode
+ * functions and need the optimizer turned off. This macro can go away when
+ * we figure out what's going on and can engineer another solution.
+ */
+#  if defined(__clang__)
+#       define H5_ATTR_NO_OPTIMIZE __attribute__((optnone))
+#  else
+#       define H5_ATTR_NO_OPTIMIZE /*void*/
+#  endif
+
 #else
 #   define H5_ATTR_FORMAT(X, Y, Z) /*void*/
 #   define H5_ATTR_UNUSED          /*void*/
@@ -302,6 +314,7 @@
 #   define H5_ATTR_PURE            /*void*/
 #   define H5_ATTR_FALLTHROUGH     /*void*/
 #   define H5_ATTR_MALLOC          /*void*/
+#   define H5_ATTR_NO_OPTIMIZE     /*void*/
 #endif
 /* clang-format on */
 

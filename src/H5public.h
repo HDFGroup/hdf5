@@ -84,7 +84,7 @@
 /**
  * For tweaks, bug-fixes, or development
  */
-#define H5_VERS_RELEASE 2
+#define H5_VERS_RELEASE 3
 /**
  * For pre-releases like \c snap0. Empty string for official releases.
  */
@@ -92,7 +92,7 @@
 /**
  * Full version string
  */
-#define H5_VERS_INFO "HDF5 library version: 1.13.2-1"
+#define H5_VERS_INFO "HDF5 library version: 1.13.3-1"
 
 #define H5check() H5check_version(H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE)
 
@@ -658,7 +658,7 @@ H5_DLL herr_t H5get_libversion(unsigned *majnum, unsigned *minnum, unsigned *rel
  *          currently linked. If this check fails, H5check_version() causes the
  *          application to abort (by means of a standard C abort() call) and
  *          prints information that is usually useful for debugging. This
- *          precaution is is taken to avoid the risks of data corruption or
+ *          precaution is taken to avoid the risks of data corruption or
  *          segmentation faults.
  *
  *          The most common cause of this failure is that an application was

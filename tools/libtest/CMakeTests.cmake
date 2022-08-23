@@ -24,26 +24,10 @@
 ##############################################################################
 
   macro (ADD_H5_TEST resultfile resultcode)
-    add_test (
-        NAME H5LIBTEST-${resultfile}-clear-objects
-        COMMAND    ${CMAKE_COMMAND}
-            -E remove
-                ${resultfile}.out
-                ${resultfile}.out.err
-    )
     add_test (NAME H5LIBTEST-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5tools_test_utils> ${ARGN})
     if (NOT "${resultcode}" STREQUAL "0")
       set_tests_properties (H5LIBTEST-${resultfile} PROPERTIES WILL_FAIL "true")
     endif ()
-    set_tests_properties (H5LIBTEST-${resultfile} PROPERTIES DEPENDS H5LIBTEST-${resultfile}-clear-objects)
-    add_test (
-        NAME H5LIBTEST-${resultfile}-clean-objects
-        COMMAND    ${CMAKE_COMMAND}
-            -E remove
-                ${resultfile}.out
-                ${resultfile}.out.err
-    )
-    set_tests_properties (H5LIBTEST-${resultfile}-clean-objects PROPERTIES DEPENDS H5LIBTEST-${resultfile})
   endmacro ()
 
 ##############################################################################

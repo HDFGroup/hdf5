@@ -313,14 +313,14 @@ set (EXTLINKS_CLEANFILES
 # Remove any output file left over from previous test run
 add_test (
     NAME H5TEST-clear-objects
-    COMMAND ${CMAKE_COMMAND} -E rm -f ${test_CLEANFILES} ${EXTLINKS_CLEANFILES}
+    COMMAND ${CMAKE_COMMAND} -E remove ${test_CLEANFILES} ${EXTLINKS_CLEANFILES}
     COMMAND_EXPAND_LISTS
     WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
 )
 set_tests_properties (H5TEST-clear-objects PROPERTIES FIXTURES_SETUP clear_H5TEST)
 add_test (
     NAME H5TEST-clean-objects
-    COMMAND ${CMAKE_COMMAND} -E rm -f ${test_CLEANFILES} ${EXTLINKS_CLEANFILES}
+    COMMAND ${CMAKE_COMMAND} -E remove ${test_CLEANFILES} ${EXTLINKS_CLEANFILES}
     COMMAND_EXPAND_LISTS
     WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
 )
@@ -360,7 +360,7 @@ foreach (h5_test ${H5_TESTS})
             -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
             #-D "TEST_REFERENCE=${test}.out"
             -D "TEST_FOLDER=${HDF5_TEST_BINARY_DIR}/H5TEST"
-            -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+            -P "${HDF_RESOURCES_DIR}/runTest.cmake"
         )
       endif ()
       set_tests_properties (H5TEST-${h5_test} PROPERTIES
@@ -405,7 +405,7 @@ if (NOT CYGWIN)
         -D "TEST_OUTPUT=cache.txt"
         #-D "TEST_REFERENCE=cache.out"
         -D "TEST_FOLDER=${HDF5_TEST_BINARY_DIR}/H5TEST"
-        -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+        -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
   endif ()
   set_tests_properties (H5TEST-cache PROPERTIES
@@ -475,7 +475,7 @@ else ()
         -D "TEST_OUTPUT=external_env.txt"
         #-D "TEST_REFERENCE=external_env.out"
         -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/H5TEST"
-        -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+        -P "${HDF_RESOURCES_DIR}/runTest.cmake"
   )
 endif ()
 set_tests_properties (H5TEST-external_env PROPERTIES
@@ -486,21 +486,8 @@ set_tests_properties (H5TEST-external_env PROPERTIES
 
 #-- Adding test for vds_env
 add_test (
-    NAME H5TEST-vds_env-clear-objects
-    COMMAND ${CMAKE_COMMAND} -E remove
-        vds_virt_0.h5
-        vds_virt_3.h5
-        vds_src_2.h5
-    WORKING_DIRECTORY
-        ${HDF5_TEST_BINARY_DIR}/H5TEST
-)
-set_tests_properties (H5TEST-vds_env-clear-objects PROPERTIES FIXTURES_SETUP clear_vds_env)
-add_test (
     NAME H5TEST-vds_env-clean-objects
     COMMAND ${CMAKE_COMMAND} -E remove
-        vds_virt_0.h5
-        vds_virt_3.h5
-        vds_src_2.h5
         tmp_vds_env/vds_env_src_2.h5
     WORKING_DIRECTORY
         ${HDF5_TEST_BINARY_DIR}/H5TEST
@@ -520,7 +507,7 @@ else ()
         -D "TEST_OUTPUT=vds_env.txt"
         #-D "TEST_REFERENCE=vds_env.out"
         -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/H5TEST"
-        -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+        -P "${HDF_RESOURCES_DIR}/runTest.cmake"
   )
 endif ()
 set_tests_properties (H5TEST-vds_env PROPERTIES
@@ -561,7 +548,7 @@ else ()
       -D "TEST_SKIP_COMPARE=TRUE"
       -D "TEST_OUTPUT=flush1.txt"
       -D "TEST_FOLDER=${HDF5_TEST_BINARY_DIR}/H5TEST"
-      -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      -P "${HDF_RESOURCES_DIR}/runTest.cmake"
   )
 endif ()
 set_tests_properties (H5TEST-flush1 PROPERTIES
@@ -580,7 +567,7 @@ else ()
       -D "TEST_SKIP_COMPARE=TRUE"
       -D "TEST_OUTPUT=flush2.txt"
       -D "TEST_FOLDER=${HDF5_TEST_BINARY_DIR}/H5TEST"
-      -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      -P "${HDF_RESOURCES_DIR}/runTest.cmake"
   )
 endif ()
 set_tests_properties (H5TEST-flush2 PROPERTIES
@@ -690,7 +677,7 @@ if (HDF5_ENABLE_DEPRECATED_SYMBOLS AND NOT MINGW)
       -D "TEST_OUTPUT=err_compat.txt"
       -D "TEST_REFERENCE=err_compat_1"
       -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/H5TEST"
-      -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      -P "${HDF_RESOURCES_DIR}/runTest.cmake"
   )
   set_tests_properties (H5TEST-err_compat PROPERTIES
       ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST"
@@ -707,7 +694,7 @@ else ()
       -D "TEST_OUTPUT=err_compat.txt"
       -D "TEST_REFERENCE=err_compat_2"
       -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/H5TEST"
-      -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      -P "${HDF_RESOURCES_DIR}/runTest.cmake"
   )
   set_tests_properties (H5TEST-err_compat PROPERTIES
       ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST"
@@ -727,7 +714,7 @@ if (DEFAULT_API_VERSION MATCHES "v16" OR MINGW)
       -D "TEST_OUTPUT=error_test.txt"
       -D "TEST_REFERENCE=error_test_2"
       -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/H5TEST"
-      -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      -P "${HDF_RESOURCES_DIR}/runTest.cmake"
   )
   set_tests_properties (H5TEST-error_test PROPERTIES
       ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST;HDF5_PLUGIN_PRELOAD=::"
@@ -744,7 +731,7 @@ else ()
       -D "TEST_OUTPUT=error_test.txt"
       -D "TEST_REFERENCE=error_test_1"
       -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/H5TEST"
-      -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      -P "${HDF_RESOURCES_DIR}/runTest.cmake"
   )
   set_tests_properties (H5TEST-error_test PROPERTIES
       ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST;HDF5_PLUGIN_PRELOAD=::"
@@ -792,7 +779,7 @@ else ()
       -D "TEST_OUTPUT=links_env.txt"
       -D "TEST_REFERENCE=links_env.out"
       -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/H5TEST"
-      -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      -P "${HDF_RESOURCES_DIR}/runTest.cmake"
   )
 endif ()
 set_tests_properties (H5TEST-links_env PROPERTIES

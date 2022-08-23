@@ -887,7 +887,7 @@ h5tget_ebias_c(hid_t_f *type_id, size_t_f *ebias)
  *  floating-point type of the datatype
  * INPUTS
  *  type_id - identifier of the dataspace
- *  ebias - exponent bias of a floating-point type of the datatyp
+ *  ebias - exponent bias of a floating-point type of the datatype
  * RETURNS
  *  0 on success, -1 on failure
  * AUTHOR

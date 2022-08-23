@@ -3600,7 +3600,7 @@ smoke_check_1(MPI_Comm mpi_comm, MPI_Info mpi_info, int mpi_rank, int mpi_size)
  * Purpose:     Run parallel tests on the cache image feature.
  *
  *              At present, cache image is disabled in parallel, and
- *              thus these tests are restructed to verifying that a
+ *              thus these tests are restricted to verifying that a
  *              file with a cache image can be opened in the parallel
  *              case, and verifying that instructions to create a
  *              cache image are ignored in the parallel case.

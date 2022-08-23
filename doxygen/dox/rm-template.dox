@@ -46,7 +46,7 @@ the <a href="https://www.oreilly.com/library/view/97-things-every/9780596809515/
 4. Preconditions
    - A set of preconditions that must be met.
      \verbatim
-     * \pre The argmument supplied in parameter \p name2 must be even.
+     * \pre The argument supplied in parameter \p name2 must be even.
      \endverbatim
 5. Invariants
    - A set of invariants.

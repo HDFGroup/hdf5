@@ -42,15 +42,6 @@ add_custom_target(HDF5_VFD_H5DUMP_files ALL COMMENT "Copying files needed by HDF
 macro (ADD_VFD_H5DUMP_TEST vfdname resultfile resultcode)
   if (NOT HDF5_ENABLE_USING_MEMCHECKER)
     add_test (
-        NAME H5DUMP_VFD-${resultfile}-clear-objects
-        COMMAND ${CMAKE_COMMAND} -E remove
-            ${resultfile}.out
-            ${resultfile}.out.err
-    )
-    set_tests_properties (H5DUMP_VFD-${resultfile}-clear-objects PROPERTIES
-        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/${vfdname}"
-    )
-    add_test (
         NAME H5DUMP_VFD-${vfdname}-${resultfile}-h5dump
         COMMAND "${CMAKE_COMMAND}"
             -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
@@ -64,21 +55,6 @@ macro (ADD_VFD_H5DUMP_TEST vfdname resultfile resultcode)
             -P "${HDF_RESOURCES_DIR}/vfdTest.cmake"
     )
     set_tests_properties (H5DUMP_VFD-${vfdname}-${resultfile}-h5dump PROPERTIES TIMEOUT ${CTEST_SHORT_TIMEOUT})
-    set_tests_properties (H5DUMP_VFD-${resultfile} PROPERTIES
-        DEPENDS H5DUMP_VFD-${resultfile}-clear-objects
-        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/${vfdname}"
-    )
-    add_test (
-        NAME H5DUMP_VFD-${resultfile}-clean-objects
-        COMMAND ${CMAKE_COMMAND} -E remove
-            ${resultfile}.out
-            ${resultfile}.out.err
-    )
-    set_tests_properties (H5DUMP_VFD-${resultfile}-clean-objects PROPERTIES
-        DEPENDS H5DUMP_VFD-${resultfile}
-        WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/${vfdname}"
-    )
-  endmacro ()
   endif ()
 endmacro ()
 

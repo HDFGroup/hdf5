@@ -435,7 +435,7 @@ static const unsigned MultiplyDeBruijnBitPosition[32] = {0,  1,  28, 2,  29, 14,
  * Return:      log2(n) (always - no failure condition)
  *
  * Programmer:  Quincey Koziol
- *              Monday, Febraury 27, 2006
+ *              Monday, February 27, 2006
  *
  *-------------------------------------------------------------------------
  */

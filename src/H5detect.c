@@ -457,7 +457,7 @@ iprint(detected_t *d)
         for (i = MIN(pass * 4 + 3, d->size - 1); i >= pass * 4; --i) {
             fprintf(rawoutstream, "%4d", d->perm[i]);
             if (i > pass * 4)
-                HDfputs("     ", stdout);
+                HDfputs("     ", rawoutstream);
             if (!i)
                 break;
         }

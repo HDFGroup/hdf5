@@ -23,6 +23,7 @@
 #include "H5Iprivate.h"
 
 #include "H5FDsubfiling.h"
+#include "H5FDioc.h"
 
 /*
  * Some definitions for debugging the Subfiling feature
@@ -189,24 +190,14 @@ typedef struct {
  */
 typedef struct {
     /* {Datasize, Offset, FileID} */
-    int64_t header[3];        /* The basic RPC input plus       */
-    int     tag;              /* the supplied OPCODE tag        */
-    int     source;           /* Rank of who sent the message   */
-    int     subfile_rank;     /* The IOC rank                   */
-    int64_t context_id;       /* context to be used to complete */
-    double  start_time;       /* the request, + time of receipt */
-                              /* from which we calc Time(queued) */
-    void *buffer;             /* for writes, we keep the buffer */
-                              /* around for awhile...           */
-    volatile int in_progress; /* Not used!               */
-    volatile int serialize;   /* worker thread needs to wait while true */
-    volatile int dependents;  //* If current work item has dependents */
-    int          depend_id;   /* work queue index of the dependent */
+    int64_t header[3];    /* The basic RPC input plus       */
+    int     tag;          /* the supplied OPCODE tag        */
+    int     source;       /* Rank of who sent the message   */
+    int     subfile_rank; /* The IOC rank                   */
+    int64_t context_id;   /* context to be used to complete */
+    double  start_time;   /* the request, + time of receipt */
+                          /* from which we calc Time(queued) */
 } sf_work_request_t;
-
-extern int sf_verbose_flag;
-
-extern app_layout_t *sf_app_layout;
 
 #ifdef __cplusplus
 extern "C" {
@@ -224,8 +215,6 @@ H5_DLL herr_t  H5_free_subfiling_object(int64_t object_id);
 H5_DLL herr_t  H5_get_num_iocs_from_config_file(FILE *config_file, int *n_io_concentrators);
 
 H5_DLL void H5_subfiling_log(int64_t sf_context_id, const char *fmt, ...);
-
-void set_verbose_flag(int subfile_rank, int new_value);
 
 #ifdef __cplusplus
 }

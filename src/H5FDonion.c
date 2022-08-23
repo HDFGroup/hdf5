@@ -978,7 +978,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "unable to allocate recovery name string")
     HDsnprintf(file->recovery_file_name, HDstrlen(name_onion) + 10, "%s.recovery", name_onion);
 
-    /* Translate H5P_DEFAULT to a a real fapl ID, if necessary */
+    /* Translate H5P_DEFAULT to a real fapl ID, if necessary */
     backing_fapl_id = H5FD__onion_get_legit_fapl_id(file->fa.backing_fapl_id);
     if (H5I_INVALID_HID == backing_fapl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid backing FAPL ID");
@@ -1182,16 +1182,23 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
 
     /* Copy comment from FAPL info, if one is given */
     if ((H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC) & flags) {
-        if (fa->comment) {
-            /* Free the old comment */
-            file->curr_rev_record.comment = H5MM_xfree(file->curr_rev_record.comment);
+        /* Free the old comment */
+        file->curr_rev_record.comment = H5MM_xfree(file->curr_rev_record.comment);
 
-            /* TODO: Lengths of strings should be size_t */
-            file->curr_rev_record.comment_size = (uint32_t)HDstrlen(fa->comment) + 1;
+        /* The buffer is of size H5FD_ONION_FAPL_INFO_COMMENT_MAX_LEN + 1
+         *
+         * We're getting this buffer from a fixed-size array in a struct, which
+         * will be garbage and not null-terminated if the user isn't careful.
+         * Be careful of this and do strndup first to ensure strdup gets a
+         * null-termianted string (HDF5 doesn't provide a strnlen call if you
+         * don't have one).
+         */
+        if (NULL ==
+            (file->curr_rev_record.comment = H5MM_strndup(fa->comment, H5FD_ONION_FAPL_INFO_COMMENT_MAX_LEN)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "unable to duplicate comment string")
 
-            if (NULL == (file->curr_rev_record.comment = H5MM_xstrdup(fa->comment)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "unable to allocate comment string")
-        }
+        /* TODO: Lengths of strings should be size_t */
+        file->curr_rev_record.comment_size = (uint32_t)HDstrlen(fa->comment) + 1;
     }
     file->origin_eof  = file->header.origin_eof;
     file->logical_eof = MAX(file->curr_rev_record.logical_eof, file->logical_eof);
