@@ -45,7 +45,7 @@ CONTAINS
 !!
 !! \brief Clears the error stack for the current thread.
 !!
-!! \param hdferr    Returns 0 if successful and -1 if fails
+!! \param hdferr    \herr_t
 !! \param estack_id Error Stack id
 !!
   SUBROUTINE h5eclear_f(hdferr, estack_id)
@@ -73,7 +73,7 @@ CONTAINS
 !!
 !! \brief Prints the error stack in a default manner.
 !!
-!! \param hdferr Returns 0 if successful and -1 if fails
+!! \param hdferr \herr_t
 !! \param name   Name of the file that contains print output
 !!
   SUBROUTINE h5eprint_f(hdferr, name)
@@ -110,7 +110,7 @@ CONTAINS
 !! \param error_no Major error number.
 !! \param name     Character string describing the error.
 !! \param namelen  Number of characters in the name buffer.
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \herr_t.
 !!
   SUBROUTINE h5eget_major_f(error_no, name, namelen, hdferr)
     INTEGER, INTENT(IN) :: error_no
@@ -137,7 +137,7 @@ CONTAINS
 !!
 !! \param error_no Minor error number.
 !! \param name     Character string describing the error.
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \herr_t.
 !!
   SUBROUTINE h5eget_minor_f(error_no, name, hdferr)
     INTEGER, INTENT(IN) :: error_no
@@ -167,7 +167,7 @@ CONTAINS
 !! \param estack_id   Error stack identifier.
 !! \param func        Function to be called upon an error condition.
 !! \param client_data Data passed to the error function.
-!! \param hdferr      Returns 0 if successful and -1 if fails.
+!! \param hdferr      \herr_t.
 !!
   SUBROUTINE h5eset_auto_f(printflag, hdferr, estack_id, func, client_data)
     USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_FUNPTR

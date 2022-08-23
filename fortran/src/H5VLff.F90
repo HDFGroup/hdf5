@@ -48,7 +48,7 @@ CONTAINS
 !!
 !! \param name    Connector name.
 !! \param vol_id  VOL connector identifier if successful; otherwise returns H5I_INVALID_HID_F.
-!! \param hdferr  Returns 0 if successful and -1 if fails.
+!! \param hdferr  \herr_t.
 !! \param vipl_id VOL initialization property list identifier 
 !!
   SUBROUTINE H5VLregister_connector_by_name_f(name, vol_id, hdferr, vipl_id)
@@ -87,7 +87,7 @@ CONTAINS
 !!
 !! \param connector_value Connector value.
 !! \param vol_id          VOL connector identifier if successful; otherwise returns H5I_INVALID_HID_F.
-!! \param hdferr          Returns 0 if successful and -1 if fails.
+!! \param hdferr          \herr_t.
 !! \param vipl_id         VOL initialization property list identifier 
 !!
   SUBROUTINE H5VLregister_connector_by_value_f(connector_value, vol_id, hdferr, vipl_id)
@@ -125,7 +125,7 @@ CONTAINS
 !!
 !! \param name       Connector name.
 !! \param registered State of VOL class registration.
-!! \param hdferr     Returns 0 if successful and -1 if fails.
+!! \param hdferr     \herr_t.
 !!
   SUBROUTINE H5VLis_connector_registered_by_name_f(name, registered,  hdferr)
     IMPLICIT NONE
@@ -160,7 +160,7 @@ CONTAINS
 !!
 !! \param value ConneConnector value.
 !! \param registered State of VOL class registration.
-!! \param hdferr RetuReturns 0 if successful and -1 if fails.
+!! \param hdferr Retu\herr_t.
 !!
   SUBROUTINE H5VLis_connector_registered_by_value_f(value, registered,  hdferr)
     IMPLICIT NONE
@@ -192,7 +192,7 @@ CONTAINS
 !!
 !! \param obj_id Object id.
 !! \param vol_id Connector id.
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \herr_t.
 !!
   SUBROUTINE H5VLget_connector_id_f(obj_id, vol_id, hdferr)
     IMPLICIT NONE
@@ -223,7 +223,7 @@ CONTAINS
 !!
 !! \param name   Connector name.
 !! \param vol_id Connector id.
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \herr_t.
 !!
   SUBROUTINE H5VLget_connector_id_by_name_f(name, vol_id, hdferr)
     IMPLICIT NONE
@@ -258,7 +258,7 @@ CONTAINS
 !!
 !! \param value CConnector value.
 !! \param vol_id Connector id.
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \herr_t.
 !!
   SUBROUTINE H5VLget_connector_id_by_value_f(value, vol_id, hdferr)
     IMPLICIT NONE
@@ -289,7 +289,7 @@ CONTAINS
 !!
 !! \param obj_id   Object identifier or file identifier.
 !! \param name     Connector name.
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \herr_t.
 !! \param name_len Maximum length of the name to retrieve.
 !!
   SUBROUTINE H5VLget_connector_name_f(obj_id, name, hdferr, name_len)
@@ -333,7 +333,7 @@ CONTAINS
 !! \brief Closes a VOL connector ID.
 !!
 !! \param vol_id A valid identifier of the connectory to unregister.
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \herr_t.
 !!
   SUBROUTINE H5VLclose_f(vol_id, hdferr)
     IMPLICIT NONE
@@ -357,7 +357,7 @@ CONTAINS
 !! \brief Removes a VOL connector ID from the library.
 !!
 !! \param plugin_id A valid identifier of the connector to unregister..
-!! \param hdferr RetReturns 0 if successful and -1 if fails.
+!! \param hdferr Ret\herr_t.
 !!
   SUBROUTINE H5VLunregister_connector_f(plugin_id, hdferr)
     IMPLICIT NONE

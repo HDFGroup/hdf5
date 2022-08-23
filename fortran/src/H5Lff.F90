@@ -77,7 +77,7 @@ CONTAINS
 !! \param src_name    Name of the link to be copied.
 !! \param dest_loc_id Location identifier. The identifier may be that of a file, group, dataset, or named datatype.
 !! \param dest_name   Name to be assigned to the new copy.
-!! \param hdferr      Returns 0 if successful and -1 if fails.
+!! \param hdferr      \herr_t.
 !! \param lcpl_id     Link creation property list identifier.
 !! \param lapl_id     Link access property list identifier.
 !!
@@ -137,7 +137,7 @@ CONTAINS
 !!
 !! \param loc_id  Identifier of the file or group containing the object.
 !! \param name    Name of the link to delete.
-!! \param hdferr  Returns 0 if successful and -1 if fails.
+!! \param hdferr  \herr_t.
 !! \param lapl_id Link access property list identifier.
 !!
   SUBROUTINE h5ldelete_f(loc_id, name, hdferr, lapl_id)
@@ -178,7 +178,7 @@ CONTAINS
 !! \param target_path Path to the target object, which is not required to exist.
 !! \param link_loc_id The file or group identifier for the new link.
 !! \param link_name   The name of the new link.
-!! \param hdferr      Returns 0 if successful and -1 if fails.
+!! \param hdferr      \herr_t.
 !! \param lcpl_id     Link creation property list identifier.
 !! \param lapl_id     Link access property list identifier.
 !!
@@ -237,7 +237,7 @@ CONTAINS
 !! \param obj_name    Name of the target object, which must already exist.
 !! \param link_loc_id The file or group identifier for the new link.
 !! \param link_name   The name of the new link.
-!! \param hdferr      Returns 0 if successful and -1 if fails.
+!! \param hdferr      \herr_t.
 !! \param lcpl_id     Link creation property list identifier.
 !! \param lapl_id     Link access property list identifier.
 !!
@@ -297,7 +297,7 @@ CONTAINS
 !! \param obj_name    Path within the target file to the target object.
 !! \param link_loc_id The file or group identifier for the new link.
 !! \param link_name   The name of the new link.
-!! \param hdferr      Returns 0 if successful and -1 if fails.
+!! \param hdferr      \herr_t.
 !! \param lcpl_id     Link creation property list identifier.
 !! \param lapl_id     Link access property list identifier.
 !!
@@ -373,7 +373,7 @@ CONTAINS
 !!                     H5_ITER_N_F        - Number of iteration orders
 !! </pre>
 !! \param n           Link for which to retrieve information.
-!! \param hdferr      Returns 0 if successful and -1 if fails.
+!! \param hdferr      \herr_t.
 !! \param lapl_id     Link access property list.
 !!
   SUBROUTINE h5ldelete_by_idx_f(loc_id, group_name, index_field, order, n, hdferr, lapl_id)
@@ -420,7 +420,7 @@ CONTAINS
 !! \param loc_id      Identifier of the file or group to query.
 !! \param name        Link name to check.
 !! \param link_exists Link exists status (.TRUE.,.FALSE.).
-!! \param hdferr      Returns 0 if successful and -1 if fails.
+!! \param hdferr      \herr_t.
 !! \param lapl_id     Link access property list identifier.
 !!
   SUBROUTINE h5lexists_f(loc_id, name, link_exists, hdferr, lapl_id)
@@ -482,7 +482,7 @@ CONTAINS
 !! \param token        If the link is a hard link, token specifies the object token that the link points to
 !! \param val_size     If the link is a symbolic link, val_size will be the length of the link value, e.g.,
 !!                     the length of the name of the pointed-to object with a null terminator.
-!! \param hdferr       Returns 0 if successful and -1 if fails
+!! \param hdferr       \herr_t
 !! \param lapl_id      Link access property list.
 !!
   SUBROUTINE h5lget_info_f(link_loc_id, link_name, &
@@ -575,7 +575,7 @@ CONTAINS
 !! \param token          If the link is a hard link, token specifies the object token that the link points to.
 !! \param val_size       If the link is a symbolic link, val_size will be the length of the link value, e.g.,
 !!                       the length of the name of the pointed-to object with a null terminator.
-!! \param hdferr         Returns 0 if successful and -1 if fails.
+!! \param hdferr         \herr_t.
 !!
 !! \param lapl_id        Link access property list.
 !!
@@ -644,7 +644,7 @@ CONTAINS
 !!
 !! \param link_cls_id User-defined link class identifier.
 !! \param registered  .TRUE. if the link class has been registered.
-!! \param hdferr      Returns 0 if successful and -1 if fails.
+!! \param hdferr      \herr_t.
 !!
   SUBROUTINE h5lis_registered_f(link_cls_id, registered, hdferr)
     IMPLICIT NONE
@@ -753,7 +753,7 @@ CONTAINS
 !! </pre>
 !! \param n           Link for which to retrieve information.
 !! \param name        Buffer in which link value is returned.
-!! \param hdferr      Returns 0 if successful and -1 if fails.
+!! \param hdferr      \herr_t.
 !! \param lapl_id     List access property list identifier.
 !! \param size        Maximum number of characters of link value to be returned.
 !!
@@ -956,7 +956,7 @@ CONTAINS
 !!                      Failure: Negative if something goes wrong within the
 !!                               library, or the negative value returned by one of the operators.
 !! </pre>
-!! \param hdferr        Returns 0 if successful and -1 if fails.
+!! \param hdferr        \herr_t.
 !!
   SUBROUTINE h5literate_f(group_id, index_type, order, idx, op, op_data, return_value, hdferr)
     USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_FUNPTR
@@ -1023,7 +1023,7 @@ CONTAINS
 !!                      Failure: Negative if something goes wrong within the
 !!                               library, or the negative value returned by one of the operators.
 !! </pre>
-!! \param  hdferr       Returns 0 if successful and -1 if fails
+!! \param  hdferr       \herr_t
 !! \param  lapl_id      Link access property list
 !!
   SUBROUTINE h5literate_by_name_f(loc_id, group_name, index_type, order, &

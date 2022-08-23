@@ -166,7 +166,7 @@ CONTAINS
 !!                  H5G_DATASET_F
 !!                  H5G_TYPE_F
 !! </pre>
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \herr_t.
 !!
 !!
   SUBROUTINE  h5rget_object_type_f(dset_id, ref, obj_type, hdferr)
@@ -201,7 +201,7 @@ CONTAINS
 !! \param dset_id  Identifier of the dataset containing reference to the regions.
 !! \param ref      Reference to open.
 !! \param space_id Dataspace identifier.
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \herr_t.
 !!
   SUBROUTINE h5rget_region_region_f(dset_id, ref, space_id, hdferr)
     IMPLICIT NONE
@@ -234,7 +234,7 @@ CONTAINS
 !! \param dset_id  Identifier of the dataset containing reference to the regions.
 !! \param ref      Reference to open.
 !! \param space_id Dataspace identifier.
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \herr_t.
 !!
   SUBROUTINE h5rget_region_ptr_f(dset_id, ref, space_id, hdferr)
     IMPLICIT NONE
@@ -256,7 +256,7 @@ CONTAINS
 !! \param loc_id Location identifier.
 !! \param name   Name of the object at the specified location.
 !! \param ref    Reference to the specified object.
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \herr_t.
 !!
   SUBROUTINE h5rcreate_object_f(loc_id, name, ref, hdferr)
     USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
@@ -285,7 +285,7 @@ CONTAINS
 !! \param name     Name of the dataset at the specified location.
 !! \param space_id Dataspace identifier that describes selected region.
 !! \param ref      Reference to the dataset region.
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \herr_t.
 !!
   SUBROUTINE h5rcreate_region_f(loc_id, name, space_id, ref, hdferr)
     IMPLICIT NONE
@@ -330,7 +330,7 @@ CONTAINS
 !!                   H5T_STD_REF_DSETREG_F
 !! </pre>
 !! \param ref      Reference created by the function call.
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \herr_t.
 !! \param space_id Dataspace identifier that describes selected region.
 !!
   SUBROUTINE h5rcreate_ptr_f(loc_id, name, ref_type, ref, hdferr, space_id)
@@ -359,7 +359,7 @@ CONTAINS
 !! \param obj_id     Identifier of the dataset containing reference.
 !! \param ref        Reference to open.
 !! \param ref_obj_id Object_identifier.
-!! \param hdferr     Returns 0 if successful and -1 if fails.
+!! \param hdferr     \herr_t.
 !!
   SUBROUTINE h5rdereference_object_f(obj_id, ref, ref_obj_id, hdferr)
     USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
@@ -383,7 +383,7 @@ CONTAINS
 !! \param obj_id     Object identifier.
 !! \param ref        Reference to open.
 !! \param ref_obj_id Identifier of the object containing reference to the regions.
-!! \param hdferr     Returns 0 if successful and -1 if fails.
+!! \param hdferr     \herr_t.
 !!
   SUBROUTINE h5rdereference_region_f(obj_id, ref, ref_obj_id, hdferr)
     USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
@@ -408,7 +408,7 @@ CONTAINS
 !! \param ref_type   The reference type of ref.
 !! \param ref        Reference to open.
 !! \param ref_obj_id Identifier of referenced object.
-!! \param hdferr     Returns 0 if successful and -1 if fails.
+!! \param hdferr     \herr_t.
 !!
   SUBROUTINE h5rdereference_ptr_f(obj_id, ref_type, ref, ref_obj_id, hdferr)
     USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
@@ -430,7 +430,7 @@ CONTAINS
 !! \param loc_id Identifier for the file containing the reference or for any object in that file.
 !! \param ref    An object or dataset region reference.
 !! \param name   A name associated with the referenced object or dataset region.
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \herr_t.
 !! \param size   The size of the name buffer, returning 0 (zero) if no name is associated with the identifier.
 !!
   SUBROUTINE h5rget_name_object_f(loc_id,  ref, name, hdferr, size)
@@ -463,7 +463,7 @@ CONTAINS
 !! \param loc_id Identifier for the file containing the reference or for any object in that file.
 !! \param ref    An object or dataset region reference.
 !! \param name   A name associated with the referenced object or dataset region.
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \herr_t.
 !! \param size   The size of the name buffer, returning 0 (zero) if no name is associated with the identifier.
 !!
   SUBROUTINE h5rget_name_region_f(loc_id, ref, name, hdferr, size)
@@ -503,7 +503,7 @@ CONTAINS
 !  !
 !  ! Outputs:
 !  !  name     - A name associated with the referenced object or dataset ptr.
-!  !  hdferr   - Returns 0 if successful and -1 if fails.
+!  !  hdferr   - \herr_t.
 !  !
 !  ! Optional parameters:
 !  !   size    - The size of the name buffer, returning 0 (zero) if no name is associated
@@ -555,7 +555,7 @@ CONTAINS
 !  !               H5G_DATASET_F
 !  !               H5G_TYPE_F
 !  !
-!  !  hdferr   - Returns 0 if successful and -1 if fails.
+!  !  hdferr   - \herr_t.
 !  !
 !  ! AUTHOR
 !  !  M. Scot Breitenfeld

@@ -140,7 +140,7 @@ CONTAINS
 !! \param object_id     Object to be linked.
 !! \param new_loc_id    File or group identifier specifying location at which object is to be linked.
 !! \param new_link_name Name of link to be created, relative to new_loc_id.
-!! \param hdferr        Returns 0 if successful and -1 if fails.
+!! \param hdferr        \herr_t.
 !! \param lcpl_id       Link creation property list identifier.
 !! \param lapl_id       Link access property list identifier.
 !!
@@ -192,7 +192,7 @@ CONTAINS
 !! \param loc_id  File or group identifier.
 !! \param name    Path to the object, relative to loc_id.
 !! \param obj_id  Object identifier for the opened object.
-!! \param hdferr  Returns 0 if successful and -1 if fails.
+!! \param hdferr  \herr_t.
 !! \param lapl_id Access property list identifier for the link pointing to the object.
 !!
   SUBROUTINE h5oopen_f(loc_id, name, obj_id, hdferr, lapl_id)
@@ -232,7 +232,7 @@ CONTAINS
 !! \brief Closes an object in an HDF5 file.
 !!
 !! \param object_id Object identifier.
-!! \param hdferr    Returns 0 if successful and -1 if fails.
+!! \param hdferr    \herr_t.
 !!
   SUBROUTINE h5oclose_f(object_id, hdferr)
     IMPLICIT NONE
@@ -257,7 +257,7 @@ CONTAINS
 !! \param loc_id File or group identifier.
 !! \param token  Object’s token in the file.
 !! \param obj_id Object identifier for the opened object.
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \herr_t.
 !!
   SUBROUTINE h5oopen_by_token_f(loc_id, token, obj_id, hdferr)
     IMPLICIT NONE
@@ -289,7 +289,7 @@ CONTAINS
 !! \param dst_name   Name to be assigned to the new copy.
 !! \param ocpypl_id  Object copy property list.
 !! \param lcpl_id    Link creation property list for the new hard link.
-!! \param hdferr     Returns 0 if successful and -1 if fails.
+!! \param hdferr     \herr_t.
 !!
   SUBROUTINE h5ocopy_f(src_loc_id, src_name, dst_loc_id, dst_name, hdferr, ocpypl_id, lcpl_id)
     IMPLICIT NONE
@@ -341,7 +341,7 @@ CONTAINS
 !! \brief Decrements an object reference count.
 !!
 !! \param object_id Object identifier.
-!! \param hdferr    Returns 0 if successful and -1 if fails.
+!! \param hdferr    \herr_t.
 !!
   SUBROUTINE h5odecr_refcount_f(object_id, hdferr)
     IMPLICIT NONE
@@ -371,7 +371,7 @@ CONTAINS
 !!
 !! \param lapl_id     Link access property list identifier.
 !! \param link_exists Existing link resolves to an object.
-!! \param hdferr      Returns 0 if successful and -1 if fails.
+!! \param hdferr      \herr_t.
 !!
   SUBROUTINE h5oexists_by_name_f(loc_id, name, link_exists, hdferr, lapl_id)
     IMPLICIT NONE
@@ -426,7 +426,7 @@ CONTAINS
 !! \param obj_id  Identifier for the target object.
 !! \param bufsize Size of the comment buffer.
 !! \param comment The comment.
-!! \param hdferr  Returns 0 if successful and -1 if fails.
+!! \param hdferr  \herr_t.
 !!
   SUBROUTINE h5oget_comment_f(obj_id, comment, hdferr, bufsize)
     IMPLICIT NONE
@@ -467,7 +467,7 @@ CONTAINS
 !! \param loc_id  Identifier of a file, group, dataset, or named datatype.
 !! \param name    Name of the object whose comment is to be retrieved, specified as a path relative to loc_id.
 !! \param comment The comment.
-!! \param hdferr  Returns 0 if successful and -1 if fails.
+!! \param hdferr  \herr_t.
 !! \param bufsize Size of the comment buffer.
 !! \param lapl_id File access property list identifier.
 !!
@@ -519,7 +519,7 @@ CONTAINS
 !! \brief Increments an object reference count.
 !!
 !! \param obj_id Object identifier.
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \herr_t.
 !!
   SUBROUTINE h5oincr_refcount_f(obj_id, hdferr)
     IMPLICIT NONE
@@ -549,7 +549,7 @@ CONTAINS
 !! \param order      Order of iteration within index, NOTE: zero-based.
 !! \param n          Object to open.
 !! \param obj_id     An object identifier for the opened object.
-!! \param hdferr     Returns 0 if successful and -1 if fails.
+!! \param hdferr     \herr_t.
 !!
 !! \param lapl_id    Link access property list.
 !!
@@ -601,7 +601,7 @@ CONTAINS
 !!
 !! \param obj_id  Identifier of the target object.
 !! \param comment The new comment.
-!! \param hdferr  Returns 0 if successful and -1 if fails.
+!! \param hdferr  \herr_t.
 !!
   SUBROUTINE h5oset_comment_f(obj_id, comment, hdferr)
     IMPLICIT NONE
@@ -636,7 +636,7 @@ CONTAINS
 !! \param loc_id  Identifier of a file, group, dataset, or named datatype.
 !! \param name    Name of the object whose comment is to be set or reset, specified as a path relative to loc_id.
 !! \param comment The new comment.
-!! \param hdferr  Returns 0 if successful and -1 if fails.
+!! \param hdferr  \herr_t.
 !! \param lapl_id Link access property list identifier.
 !!
   SUBROUTINE h5oset_comment_by_name_f(loc_id, name, comment, hdferr, lapl_id)
@@ -696,7 +696,7 @@ CONTAINS
 !! \param op_data      User-defined pointer to data required by the application for its processing of the group.
 !! \param return_value Returns the return value of the first operator that returns a positive value, or
 !!                     zero if all members were processed with no operator returning non-zero.
-!! \param hdferr       Returns 0 if successful and -1 if fails.
+!! \param hdferr       \herr_t.
 !! \param fields      FFlags specifying the fields to include in object_info.
 !!
   SUBROUTINE h5ovisit_f(object_id, index_type, order, op, op_data, return_value, hdferr, fields)
@@ -748,7 +748,7 @@ CONTAINS
 !! \param loc_id      File or group identifier specifying location of group in which object is located.
 !! \param name        Name of group, relative to loc_id.
 !! \param object_info Buffer in which to return object information.
-!! \param hdferr      Returns 0 if successful and -1 if fails.
+!! \param hdferr      \herr_t.
 !! \param lapl_id     Link access property list.
 !! \param fields      Flags specifying the fields to include in object_info.
 !!
@@ -802,7 +802,7 @@ CONTAINS
 !!
 !! \param object_id   Identifier for target object.
 !! \param object_info Buffer in which to return object information.
-!! \param hdferr      Returns 0 if successful and -1 if fails.
+!! \param hdferr      \herr_t.
 !! \param fields      Flags specifying the fields to include in object_info.
 !!
   SUBROUTINE h5oget_info_f(object_id, object_info, hdferr, fields)
@@ -847,7 +847,7 @@ CONTAINS
 !! \param order       Order within field or index.
 !! \param n           Object for which information is to be returned.
 !! \param object_info Buffer in which to return object information.
-!! \param hdferr      Returns 0 if successful and -1 if fails.
+!! \param hdferr      \herr_t.
 !!
 !! \param lapl_id     Link access property list. (Not currently used.).
 !! \param fields      Flags specifying the fields to include in object_info.
@@ -925,7 +925,7 @@ CONTAINS
 !! \param op_data      User-defined pointer to data required by the application for its processing of the group.
 !! \param return_value Returns the return value of the first operator that returns a positive value, or.
 !!                     zero if all members were processed with no operator returning non-zero.
-!! \param hdferr       Returns 0 if successful and -1 if fails.
+!! \param hdferr       \herr_t.
 !! \param lapl_id      Link access property list identifier.
 !! \param fields       Flags specifying the fields to include in object_info.
 !!
@@ -994,7 +994,7 @@ CONTAINS
 !! \param token1    The first token to compare.
 !! \param token2    The second token to compare.
 !! \param cmp_value Returns 0 if tokens are equal, non-zero for unequal tokens.
-!! \param hdferr    Returns 0 if successful and -1 if fails.
+!! \param hdferr    \herr_t.
 !!
   SUBROUTINE h5otoken_cmp_f(loc_id, token1, token2, cmp_value, hdferr)
     IMPLICIT NONE

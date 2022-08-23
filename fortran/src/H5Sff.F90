@@ -43,7 +43,7 @@ CONTAINS
 !! \param rank     Number of dimensions.
 !! \param dims     An array of the size of each dimension.
 !! \param space_id Dataspace identifier.
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \herr_t.
 !! \param maxdims  An array of the maximum size of each dimension.
 !!
   SUBROUTINE h5screate_simple_f(rank, dims, space_id, hdferr, maxdims)
@@ -88,7 +88,7 @@ CONTAINS
 !! \brief Releases and terminates access to a dataspace.
 !!
 !! \param space_id Identifier of dataspace to release.
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \herr_t.
 !!
   SUBROUTINE h5sclose_f(space_id, hdferr)
     IMPLICIT NONE
@@ -118,7 +118,7 @@ CONTAINS
 !!                   H5S_NULL_F
 !! </pre>
 !! \param space_id  Dataspace identifier.
-!! \param hdferr    Returns 0 if successful and -1 if fails.
+!! \param hdferr    \herr_t.
 !!
   SUBROUTINE h5screate_f(classtype, space_id, hdferr)
     IMPLICIT NONE
@@ -145,7 +145,7 @@ CONTAINS
 !!
 !! \param space_id     Dataspace identifier.
 !! \param new_space_id Identifier of dataspace&apos;s copy.
-!! \param hdferr       Returns 0 if successful and -1 if fails.
+!! \param hdferr       \herr_t.
 !!
   SUBROUTINE h5scopy_f(space_id, new_space_id, hdferr)
     IMPLICIT NONE
@@ -172,7 +172,7 @@ CONTAINS
 !!
 !! \param space_id   Dataspace identifier.
 !! \param num_blocks Number of hyperslab blocks in the current hyperslab selection.
-!! \param hdferr     Returns 0 if successful and -1 if fails.
+!! \param hdferr     \herr_t.
 !!
   SUBROUTINE h5sget_select_hyper_nblocks_f(space_id, num_blocks, hdferr)
     IMPLICIT NONE
@@ -202,7 +202,7 @@ CONTAINS
 !! \param startblock Hyperslab block to start with.
 !! \param num_blocks Number of blocks to get.
 !! \param buf        Buffer to hold block list.
-!! \param hdferr     Returns 0 if successful and -1 if fails.
+!! \param hdferr     \herr_t.
 !!
   SUBROUTINE h5sget_select_hyper_blocklist_f(space_id, startblock, &
                                                     num_blocks, buf, hdferr)
@@ -236,7 +236,7 @@ CONTAINS
 !! \param space_id Dataspace identifier.
 !! \param start    Starting coordinates of bounding box.
 !! \param end      Ending coordinates of bounding box, i.e., the coordinates of the diagonally opposite corner.
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \herr_t.
 !!
   SUBROUTINE  h5sget_select_bounds_f(space_id, start, END, hdferr)
     IMPLICIT NONE
@@ -266,7 +266,7 @@ CONTAINS
 !!
 !! \param space_id   Dataspace identifier.
 !! \param num_points Number of element points in the current dataspace selection
-!! \param hdferr     Returns 0 if successful and -1 if fails.
+!! \param hdferr     \herr_t.
 !!
   SUBROUTINE h5sget_select_elem_npoints_f(space_id, num_points, hdferr)
     IMPLICIT NONE
@@ -294,7 +294,7 @@ CONTAINS
 !! \param startpoint Element point to start with.
 !! \param num_points Number of element points to get.
 !! \param buf        Buffer with element points selected.
-!! \param hdferr     Returns 0 if successful and -1 if fails.
+!! \param hdferr     \herr_t.
 !!
   SUBROUTINE h5sget_select_elem_pointlist_f(space_id, startpoint, &
        num_points, buf, hdferr)
@@ -337,7 +337,7 @@ CONTAINS
 !! \param num_elements Number of elements to be selected.
 !! \param coord        2D (rank x num_elements) array with the elements coordinates ( 1-based); in C the
 !!                     array is stored in 2D as (num_element x rank).
-!! \param hdferr       Returns 0 if successful and -1 if fails.
+!! \param hdferr       \herr_t.
 !!
   SUBROUTINE h5sselect_elements_f(space_id, OPERATOR, rank, &
        num_elements, coord, hdferr)
@@ -393,7 +393,7 @@ CONTAINS
 !! \brief Selects the entire dataspace.
 !!
 !! \param space_id Identifier for the dataspace in which selection being made.
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \herr_t.
 !!
   SUBROUTINE h5sselect_all_f(space_id, hdferr)
     IMPLICIT NONE
@@ -417,7 +417,7 @@ CONTAINS
 !! \brief Resets the selection region to include no elements.
 !!
 !! \param space_id The identifier for the dataspace in which the selection is being reset.
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \herr_t.
 !!
   SUBROUTINE h5sselect_none_f(space_id, hdferr)
     IMPLICIT NONE
@@ -442,7 +442,7 @@ CONTAINS
 !!
 !! \param space_id Identifier for the dataspace for whichselection is verified
 !! \param status   TRUE if the selection is contained within the extent, FALSE otherwise.
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \herr_t.
 !!
   SUBROUTINE h5sselect_valid_f(space_id, status, hdferr)
     IMPLICIT NONE
@@ -473,7 +473,7 @@ CONTAINS
 !!
 !! \param space_id Dataspace identifier.
 !! \param npoints  Number of elements in the dataspace.
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \herr_t.
 !!
   SUBROUTINE h5sget_simple_extent_npoints_f(space_id, npoints, hdferr)
     IMPLICIT NONE
@@ -500,7 +500,7 @@ CONTAINS
 !!
 !! \param space_id Dataspace identifier.
 !! \param npoints  Number of points in the dataspace selection.
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \herr_t.
 !!
   SUBROUTINE h5sget_select_npoints_f(space_id, npoints, hdferr)
     IMPLICIT NONE
@@ -527,7 +527,7 @@ CONTAINS
 !!
 !! \param space_id Dataspace identifier.
 !! \param rank     Number of dataspace dimensions.
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \herr_t.
 !!
   SUBROUTINE h5sget_simple_extent_ndims_f(space_id, rank, hdferr)
     IMPLICIT NONE
@@ -554,7 +554,7 @@ CONTAINS
 !! \param space_id Dataspace identifier.
 !! \param dims     Array to store size of each dimension.
 !! \param maxdims  Array to store maximum size of each dimension.
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \herr_t.
 !!
   SUBROUTINE h5sget_simple_extent_dims_f(space_id, dims, maxdims, hdferr)
     IMPLICIT NONE
@@ -589,7 +589,7 @@ CONTAINS
 !!                   H5S_SIMPLE_F
 !!                   H5S_NULL_F
 !! </pre>
-!! \param hdferr    Returns 0 if successful and -1 if fails.
+!! \param hdferr    \herr_t.
 !!
   SUBROUTINE h5sget_simple_extent_type_f(space_id, classtype, hdferr)
     IMPLICIT NONE
@@ -618,7 +618,7 @@ CONTAINS
 !! \param rank         Dataspace number of dimensions.
 !! \param current_size Array with the new sizes of dimensions.
 !! \param maximum_size Array with the new maximum sizes of dimensions.
-!! \param hdferr       Returns 0 if successful and -1 if fails.
+!! \param hdferr       \herr_t.
 !!
   SUBROUTINE h5sset_extent_simple_f(space_id, rank, current_size, &
        maximum_size, hdferr)
@@ -650,7 +650,7 @@ CONTAINS
 !!
 !! \param space_id Dataspace identifier.
 !! \param status   Flag to indicate if dataspace is simple or not (TRUE or FALSE).
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \herr_t.
 !!
   SUBROUTINE h5sis_simple_f(space_id, status, hdferr)
     IMPLICIT NONE
@@ -681,7 +681,7 @@ CONTAINS
 !!
 !! \param space_id Dataspace identifier.
 !! \param offset   The offset at which to position the selection.
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \herr_t.
 !!
   SUBROUTINE h5soffset_simple_f(space_id, offset, hdferr)
     IMPLICIT NONE
@@ -708,7 +708,7 @@ CONTAINS
 !!
 !! \param dest_space_id   The identifier for the dataspace to which the extent is copied.
 !! \param source_space_id The identifier for the dataspace from which the extent is copied.
-!! \param hdferr          Returns 0 if successful and -1 if fails.
+!! \param hdferr          \herr_t.
 !!
   SUBROUTINE h5sextent_copy_f(dest_space_id, source_space_id, hdferr)
     IMPLICIT NONE
@@ -734,7 +734,7 @@ CONTAINS
 !! \brief Removes the extent from a dataspace.
 !!
 !! \param space_id Dataspace identifier.
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \herr_t.
 !!
   SUBROUTINE h5sset_extent_none_f(space_id, hdferr)
     IMPLICIT NONE
@@ -765,7 +765,7 @@ CONTAINS
 !! </pre>
 !! \param start    Array with hyperslab offsets.
 !! \param count    Number of blocks included in the hyperslab.
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \herr_t.
 !! \param stride   Array with hyperslab strides.
 !! \param block    Array with hyperslab block sizes.
 !!
@@ -1118,7 +1118,7 @@ CONTAINS
 !!                         H5S_SEL_HYPERSLABS_F
 !!                         H5S_SEL_ALL_F
 !! </pre>
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \herr_t.
 !!
   SUBROUTINE h5sget_select_type_f(space_id, TYPE, hdferr)
     IMPLICIT NONE
@@ -1146,7 +1146,7 @@ CONTAINS
 !!
 !! \param buf    Buffer for the data space object to be decoded.
 !! \param obj_id Object ID.
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \herr_t.
 !!
   SUBROUTINE h5sdecode_f(buf, obj_id, hdferr)
     IMPLICIT NONE
@@ -1174,7 +1174,7 @@ CONTAINS
 !! \param obj_id  Identifier of the object to be encoded.
 !! \param buf     Buffer for the object to be encoded into.
 !! \param nalloc  The size of the buffer needed.
-!! \param hdferr  Returns 0 if successful and -1 if fails.
+!! \param hdferr  \herr_t.
 !! \param fapl_id File access property list identifier
 !!
   SUBROUTINE h5sencode_f(obj_id, buf, nalloc, hdferr, fapl_id)
@@ -1213,7 +1213,7 @@ CONTAINS
 !! \param space1_id First dataspace identifier.
 !! \param space2_id Second dataspace identifier.
 !! \param Equal     .TRUE. if equal, .FALSE. if unequal.
-!! \param hdferr    Returns 0 if successful and -1 if fails.
+!! \param hdferr    \herr_t.
 !!
   SUBROUTINE h5sextent_equal_f(space1_id, space2_id, equal, hdferr)
     IMPLICIT NONE
@@ -1249,7 +1249,7 @@ CONTAINS
 !! \param stride   Stride of the regular hyperslab.
 !! \param count    Number of blocks in the regular hyperslab.
 !! \param block    Size of a block in the regular hyperslab.
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \herr_t.
 !!
   SUBROUTINE h5sget_regular_hyperslab_f(space_id, start, stride, count, block, hdferr)
 
@@ -1303,7 +1303,7 @@ CONTAINS
 !!
 !! \param space_id  The identifier of the dataspace.
 !! \param IsRegular TRUE or FALSE for hyperslab selection if successful.
-!! \param hdferr    Returns 0 if successful and -1 if fails.
+!! \param hdferr    \herr_t.
 !!
   SUBROUTINE h5sis_regular_hyperslab_f(space_id, IsRegular, hdferr)
     IMPLICIT NONE

@@ -49,7 +49,7 @@ CONTAINS
 !!                H5Z_FILTER_SHUFFLE_F
 !!                H5Z_FILTER_FLETCHER32_F
 !! </pre>
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \herr_t.
 !!
   SUBROUTINE h5zunregister_f(filter, hdferr)
     IMPLICIT NONE
@@ -78,7 +78,7 @@ CONTAINS
 !!                        H5Z_FILTER_FLETCHER32_F
 !! </pre>
 !! \param status  Flag; .TRUE. if filter is available, .FALSE. otherwise.
-!! \param hdferr  Returns 0 if successful and -1 if fails.
+!! \param hdferr  \herr_t.
 !!
   SUBROUTINE h5zfilter_avail_f(filter, status, hdferr)
     IMPLICIT NONE
@@ -120,7 +120,7 @@ CONTAINS
 !!                       H5Z_FILTER_ENCODE_ENABLED_F
 !!                       5Z_FILTER_DECODE_ENABLED_F
 !! </pre>
-!! \param hdferr       Returns 0 if successful and -1 if fails.
+!! \param hdferr       \herr_t.
 !!
   SUBROUTINE h5zget_filter_info_f(filter, config_flags, hdferr)
     IMPLICIT NONE

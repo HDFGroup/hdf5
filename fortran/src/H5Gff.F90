@@ -43,7 +43,7 @@ CONTAINS
 !! \param loc_id    Location identifier.
 !! \param name      Group name at the specified location.
 !! \param grp_id    Group identifier.
-!! \param hdferr    Returns 0 if successful and -1 if fails.
+!! \param hdferr    \herr_t.
 !! \param size_hint A parameter indicating the number of bytes to reserve for the names that will appear in the group.
 !!                  Set to OBJECT_NAMELEN_DEFAULT_F if using any of the optional parameters lcpl_id, gcpl_id, 
 !!                  and/or gapl_id when not using keywords in specifying the optional parameters.
@@ -109,7 +109,7 @@ CONTAINS
 !! \param loc_id  Location identifier.
 !! \param name    Name of the group to open.
 !! \param grp_id  Group identifier.
-!! \param hdferr  Returns 0 if successful and -1 if fails.
+!! \param hdferr  \herr_t.
 !! \param gapl_id Group access property list identifier.
 !!
   SUBROUTINE h5gopen_f(loc_id, name, grp_id, hdferr, gapl_id)
@@ -148,7 +148,7 @@ CONTAINS
 !! \brief Closes the specified group.
 !!
 !! \param grp_id Group identifier.
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \herr_t.
 !!
   SUBROUTINE h5gclose_f(grp_id, hdferr)
     IMPLICIT NONE
@@ -174,7 +174,7 @@ CONTAINS
 !! \param idx      Object index (zero-based).
 !! \param obj_name Object name.
 !! \param obj_type Object type.
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \herr_t.
 !!
   SUBROUTINE h5gget_obj_info_idx_f(loc_id, name, idx, &
        obj_name, obj_type, hdferr)
@@ -219,7 +219,7 @@ CONTAINS
 !! \param loc_id   Location identifier.
 !! \param name     Name of the group at the specified location.
 !! \param nmembers Number of group members.
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \herr_t.
 !!
   SUBROUTINE h5gn_members_f(loc_id, name, nmembers, hdferr)
     IMPLICIT NONE
@@ -259,7 +259,7 @@ CONTAINS
 !! </pre>
 !! \param current_name Name of the existing object if link is a hard link. Can be anything for the soft link.
 !! \param new_name     New name for the object.
-!! \param hdferr       Returns 0 if successful and -1 if fails.
+!! \param hdferr       \herr_t.
 !!
   SUBROUTINE h5glink_f(loc_id, link_type, current_name, &
        new_name, hdferr)
@@ -311,7 +311,7 @@ CONTAINS
 !! </pre>
 !! \param new_loc_id New location identifier.
 !! \param new_name   New name for the object.
-!! \param hdferr     Returns 0 if successful and -1 if fails.
+!! \param hdferr     \herr_t.
 !!
   SUBROUTINE h5glink2_f(cur_loc_id, cur_name, link_type, new_loc_id, &
        new_name, hdferr)
@@ -357,7 +357,7 @@ CONTAINS
 !!
 !! \param loc_id Location identifier.
 !! \param name   Name of the object to unlink.
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \herr_t.
 !!
   SUBROUTINE h5gunlink_f(loc_id, name, hdferr)
     IMPLICIT NONE
@@ -388,7 +388,7 @@ CONTAINS
 !! \param loc_id   Location identifier.
 !! \param name     Object&apos;s name at specified location.
 !! \param new_name Object&apos;s new name.
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \herr_t.
 !!
   SUBROUTINE h5gmove_f(loc_id, name, new_name, hdferr)
     IMPLICIT NONE
@@ -424,7 +424,7 @@ CONTAINS
 !! \param src_name   Object&apos;s name at specified original location.
 !! \param dst_loc_id Original location identifier.
 !! \param dst_name   Object&apos;s new name.
-!! \param hdferr     Returns 0 if successful and -1 if fails.
+!! \param hdferr     \herr_t.
 !!
   SUBROUTINE h5gmove2_f(src_loc_id, src_name, dst_loc_id, dst_name, hdferr)
     IMPLICIT NONE
@@ -463,7 +463,7 @@ CONTAINS
 !! \param name   Symbolic link to the object whose name is to be returned.
 !! \param size   Maximum number of characters to be returned.
 !! \param buffer A buffer to hold the name of the object being sought.
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \herr_t.
 !!
   SUBROUTINE h5gget_linkval_f(loc_id, name, size, buffer, hdferr)
     IMPLICIT NONE
@@ -498,7 +498,7 @@ CONTAINS
 !! \param loc_id  Location identifier.
 !! \param name    Name of the object.
 !! \param comment Comment to set for the object.
-!! \param hdferr  Returns 0 if successful and -1 if fails.
+!! \param hdferr  \herr_t.
 !!
   SUBROUTINE h5gset_comment_f(loc_id, name, comment, hdferr)
     IMPLICIT NONE
@@ -535,7 +535,7 @@ CONTAINS
 !! \param name   Name of the object at specified location.
 !! \param size   Size of the buffer required to hold comment.
 !! \param buffer Buffer to hold object&apos;s comment.
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \herr_t.
 !!
   SUBROUTINE h5gget_comment_f(loc_id, name, size, buffer, hdferr)
     IMPLICIT NONE
@@ -569,7 +569,7 @@ CONTAINS
 !!
 !! \param loc_id  Location identifier.
 !! \param grp_id  Group identifier.
-!! \param hdferr  Returns 0 if successful and -1 if fails.
+!! \param hdferr  \herr_t.
 !! \param gcpl_id Group creation property list identifier.
 !! \param gapl_id Group access property list identifier.
 !!
@@ -610,7 +610,7 @@ CONTAINS
 !!
 !! \param grp_id  Group identifier.
 !! \param gcpl_id Group creation property list identifier.
-!! \param hdferr  Returns 0 if successful and -1 if fails.
+!! \param hdferr  \herr_t.
 !!
   SUBROUTINE h5gget_create_plist_f(grp_id, gcpl_id, hdferr)
     IMPLICIT NONE
@@ -643,7 +643,7 @@ CONTAINS
 !! </pre>
 !! \param nlinks       Number of links in group.
 !! \param max_corder   Current maximum creation order value for group.
-!! \param hdferr       Returns 0 if successful and -1 if fails.
+!! \param hdferr       \herr_t.
 !! \param mounted      Whether group has a file mounted on it.
 !!
   SUBROUTINE h5gget_info_f(group_id, storage_type, nlinks, max_corder, hdferr, mounted)
@@ -698,7 +698,7 @@ CONTAINS
 !! </pre>
 !! \param nlinks       Number of links in group.
 !! \param max_corder   Current maximum creation order value for group.
-!! \param hdferr       Returns 0 if successful and -1 if fails.
+!! \param hdferr       \herr_t.
 !! \param lapl_id      Link access property list.
 !! \param mounted      Whether group has a file mounted on it.
 !!
@@ -776,7 +776,7 @@ CONTAINS
 !! </pre>
 !! \param nlinks      Number of links in group.
 !! \param max_corder  Current maximum creation order value for group.
-!! \param hdferr      Returns 0 if successful and -1 if fails.
+!! \param hdferr      \herr_t.
 !! \param lapl_id     Link access property list.
 !! \param mounted     Whether group has a file mounted on it.
 !!

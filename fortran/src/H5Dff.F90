@@ -222,7 +222,7 @@ CONTAINS
 !! \param type_id  Dataset datatype identifier
 !! \param space_id Dataset dataspace identifier
 !! \param dset_id  Dataset identifier
-!! \param hdferr   Returns 0 if successful and -1 if fails
+!! \param hdferr   \herr_t
 !! \param dcpl_id  Dataset creation property list
 !! \param lcpl_id  Link creation property list
 !! \param dapl_id  Dataset access property list
@@ -289,7 +289,7 @@ CONTAINS
 !! \param loc_id  File or group identifier
 !! \param name    Dataset name
 !! \param dset_id Dataset identifier
-!! \param hdferr  Returns 0 if successful and -1 if fails
+!! \param hdferr  \herr_t
 !! \param dapl_id Dataset access property list
 !!
   SUBROUTINE h5dopen_f(loc_id, name, dset_id, hdferr, dapl_id)
@@ -330,8 +330,8 @@ CONTAINS
 !!
 !! \brief Closes a dataset.
 !!
-!! \param dset_id Dataset identifier
-!! \param hdferr  Returns 0 if successful and -1 if fails
+!! \param dset_id Dataset identifier.
+!! \param hdferr  \herr_t
 !!
   SUBROUTINE h5dclose_f(dset_id, hdferr)
     IMPLICIT NONE
@@ -356,9 +356,9 @@ CONTAINS
 !! \brief Returns an identifier for a copy of the datatype for a
 !!       dataset.
 !!
-!! \param dataset_id  Dataset identifier
-!! \param datatype_id Dataspace identifier
-!! \param hdferr      Returns 0 if successful and -1 if fails
+!! \param dataset_id  Dataset identifier.
+!! \param datatype_id Dataspace identifier.
+!! \param hdferr      \herr_t
 !!
   SUBROUTINE h5dget_type_f(dataset_id, datatype_id, hdferr)
     IMPLICIT NONE
@@ -383,9 +383,9 @@ CONTAINS
 !!
 !! \brief Extends a dataset with unlimited dimension.
 !!
-!! \param dataset_id Dataset identifier
-!! \param size       Array containing the new magnitude of each dimension
-!! \param hdferr     Returns 0 if successful and -1 if fails
+!! \param dataset_id Dataset identifier.
+!! \param size       Array containing the new magnitude of each dimension.
+!! \param hdferr     \herr_t
 !!
   SUBROUTINE h5dset_extent_f(dataset_id, size, hdferr)
     IMPLICIT NONE
@@ -410,9 +410,9 @@ CONTAINS
 !!
 !! \brief Returns an identifier for a copy of the dataset creation property list for a dataset.
 !!
-!! \param dataset_id Dataset identifier
-!! \param plist_id   Creation property list identifier
-!! \param hdferr     Returns 0 if successful and -1 if fails
+!! \param dataset_id Dataset identifier.
+!! \param plist_id   Creation property list identifier.
+!! \param hdferr     \herr_t
 !!
   SUBROUTINE h5dget_create_plist_f(dataset_id, plist_id, hdferr)
     IMPLICIT NONE
@@ -436,9 +436,9 @@ CONTAINS
 !!
 !! \brief Returns the amount of storage requires by a dataset
 !!
-!! \param dataset_id Dataset identifier
-!! \param size       Datastorage size
-!! \param hdferr     Returns 0 if successful and -1 if fails
+!! \param dataset_id Dataset identifier.
+!! \param size       Datastorage size.
+!! \param hdferr     \herr_t
 !!
   SUBROUTINE h5dget_storage_size_f(dataset_id, size, hdferr)
     IMPLICIT NONE
@@ -462,11 +462,11 @@ CONTAINS
 !!
 !! \brief Returns maximum length of the VL array elements
 !!
-!! \param dataset_id Dataset identifier
-!! \param type_id    Datatype identifier
-!! \param space_id   Dataspace identifier
+!! \param dataset_id Dataset identifier.
+!! \param type_id    Datatype identifier.
+!! \param space_id   Dataspace identifier.
 !! \param len        Buffer size
-!! \param hdferr     Returns 0 if successful and -1 if fails
+!! \param hdferr     \herr_t
 !!
   SUBROUTINE h5dvlen_get_max_len_f(dataset_id, type_id, space_id, len,  hdferr)
     IMPLICIT NONE
@@ -502,7 +502,7 @@ CONTAINS
 !!                     H5D_SPACE_STS_PART_ALLOCATED_F
 !!                     H5D_SPACE_STS_ALLOCATED_F
 !! </pre>
-!! \param hdferr  Returns 0 if successful and -1 if fails
+!! \param hdferr  \herr_t
 !!
   SUBROUTINE h5dget_space_status_f(dset_id, flag, hdferr)
     IMPLICIT NONE
@@ -530,7 +530,7 @@ CONTAINS
 !! \param type_id  Identifier of the datatype to use when creating the dataset.
 !! \param space_id Identifier of the dataspace to use when creating the dataset.
 !! \param dset_id  Dataset identifier.
-!! \param hdferr   Returns 0 if successful and -1 if fails
+!! \param hdferr   \herr_t
 !! \param dcpl_id  Dataset creation property list identifier.
 !! \param dapl_id  Dataset access property list identifier.
 !!
@@ -590,7 +590,7 @@ CONTAINS
   !! \param dims          Array to hold corresponding dimension sizes of data buffer buf, dim(k) has value of the k-th 
   !!                      dimension of buffer buf. Values are ignored if buf is a scalar.
   !! \param len           Array to store length of each element.
-  !! \param hdferr        Returns 0 if successful and -1 if fails.
+  !! \param hdferr        \herr_t.
   !! \param mem_space_id  Memory dataspace identifier, default value is H5S_ALL_F.
   !! \param file_space_id File dataspace identifier, default value is H5S_ALL_F.
   !! \param xfer_prp      Transfer property list identifier, default value is H5P_DEFAULT_F.
@@ -623,11 +623,11 @@ CONTAINS
   !! \param dims          Array to hold corresponding dimension sizes of data buffer buf, dim(k) has value of the k-th 
   !!                      dimension of buffer buf. Values are ignored if buf is a scalar.
   !! \param len           Array to store length of each element.
-  !! \param hdferr        Returns 0 if successful and -1 if fails.
+  !! \param hdferr        \herr_t.
   !! \param mem_space_id  Memory dataspace identifier, default value is H5S_ALL_F.
   !! \param file_space_id File dataspace identifier, default value is H5S_ALL_F.
   !! \param xfer_prp      Transfer property list identifier, default value is H5P_DEFAULT_F.
-  !! 
+  !!
   SUBROUTINE h5dwrite_vl_f(dset_id, mem_type_id, buf, dims, len, hdferr, mem_space_id, file_space_id, xfer_prp)
     INTEGER(HID_T), INTENT(IN) :: dset_id
     INTEGER(HID_T), INTENT(IN) :: mem_type_id 
@@ -970,7 +970,7 @@ CONTAINS
 !!
 !! \param dset_id Dataset identifier.
 !! \param offset  The offset in bytes.
-!! \param hdferr  Returns 0 if successful and -1 if fails.
+!! \param hdferr  \herr_t.
 !!
   SUBROUTINE h5dget_offset_f(dset_id, offset, hdferr)
     IMPLICIT NONE
@@ -999,7 +999,7 @@ CONTAINS
 !!
 !! \param dataset_id   Dataset identifier.
 !! \param dataspace_id Dataspace identifier.
-!! \param hdferr       Returns 0 if successful and -1 if fails.
+!! \param hdferr       \herr_t.
 !!
   SUBROUTINE h5dget_space_f(dataset_id, dataspace_id, hdferr)
     IMPLICIT NONE
@@ -1025,7 +1025,7 @@ CONTAINS
 !!
 !! \param dset_id  Dataset identifier.
 !! \param plist_id Dataset access property list identifier.
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \herr_t.
 !!
   SUBROUTINE h5dget_access_plist_f(dset_id, plist_id, hdferr)
     IMPLICIT NONE
@@ -1054,7 +1054,7 @@ CONTAINS
 !! \param space_id Identifier of the dataspace.
 !! \param plist_id Identifier of the property list used to create the buffer.
 !! \param buf      Pointer to the buffer to be reclaimed.
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \herr_t.
 !!
   SUBROUTINE h5dvlen_reclaim_f(type_id, space_id, plist_id, buf, hdferr)
     IMPLICIT NONE
@@ -1089,7 +1089,7 @@ CONTAINS
 !! \param dset_id       Identifier of the dataset to write to.
 !! \param mem_type_id   Identifier of the memory datatype.
 !! \param buf           Buffer with data to be written to the file.
-!! \param hdferr        Returns 0 if successful and -1 if fails
+!! \param hdferr        \herr_t
 !! \param mem_space_id  Identifier of the memory dataspace.
 !! \param file_space_id Identifier of the dataset&apos;s dataspace in the file.
 !! \param xfer_prp      Identifier of a transfer property list for this I/O operation.
@@ -1113,7 +1113,7 @@ CONTAINS
 !! \param dset_id       Identifier of the dataset read from.
 !! \param mem_type_id   Identifier of the memory datatype.
 !! \param buf           Buffer to receive data read from file.
-!! \param hdferr        Returns 0 if successful and -1 if fails.
+!! \param hdferr        \herr_t.
 !! \param mem_space_id  Identifier of the memory dataspace.
 !! \param file_space_id Identifier of dataset&apos;s dataspace in the file. (Default: H5S_ALL_F)
 !! \param xfer_prp      Identifier of a transfer property list for this I/O operation.
@@ -1146,7 +1146,7 @@ CONTAINS
 !! \param buf           Data buffer; may be a scalar or an array.
 !! \param dims          Array to hold corresponding dimension sizes of data buffer buf; dim(k) has value 
 !!                      of the k-th dimension of buffer buf; values are ignored if buf is a scalar.
-!! \param hdferr        Returns 0 if successful and -1 if fails
+!! \param hdferr        \herr_t
 !! \param mem_space_id  Identifier of the memory dataspace. Default value is H5S_ALL_F.
 !! \param file_space_id Identifier of the dataset&apos;s dataspace in the file. Default value is H5S_ALL_F.
 !! \param xfer_prp      Identifier of a transfer property list for this I/O operation. Default value  is H5P_DEFAULT_F
@@ -1178,7 +1178,7 @@ CONTAINS
 !! \param buf           Buffer to receive data read from file, may be a scalar or an array.
 !! \param dims          Array to hold corresponding dimension sizes of data buffer buf. dim(k) has value of the k-th 
 !!                      dimension of buffer buf. Values are ignored if buf is a scalar.
-!! \param hdferr        Returns 0 if successful and -1 if fails.
+!! \param hdferr        \herr_t.
 !! \param mem_space_id  Identifier of the memory dataspace. (Default: H5S_ALL_F)
 !! \param file_space_id Identifier of dataset&apos;s dataspace in the file. (Default: H5S_ALL_F)
 !! \param xfer_prp      Identifier of a transfer property list for this I/O operation. (Default: H5P_DEFAULT_F)
@@ -1205,7 +1205,7 @@ CONTAINS
 !! \param fill_value Fill value.
 !! \param space_id   Identifier of the memory datatype.
 !! \param buf        Buffer to receive data read from file.
-!! \param hdferr     Returns 0 if successful and -1 if fails.
+!! \param hdferr     \herr_t.
 !!
   SUBROUTINE h5dfill_f(fill_value, space_id, buf,  hdferr)
     TYPE(TYPE), INTENT(IN) :: fill_value
