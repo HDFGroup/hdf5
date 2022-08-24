@@ -1108,7 +1108,7 @@ CONTAINS
 !>
 !! \ingroup H5D
 !!
-!! \brief Reads raw data from a dataset into a buffer (Passes Pointer). This is the preferred signature for H5Dread_f.
+!! \brief Reads raw data from a dataset into a buffer (Passes Pointer). **This is the preferred signature for H5Dread_f.**
 !!
 !! \param dset_id       Identifier of the dataset read from.
 !! \param mem_type_id   Identifier of the memory datatype.

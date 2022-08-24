@@ -1442,7 +1442,6 @@ CONTAINS
 !! \param idx       External file index.
 !! \param name_size Maximum size of name array.
 !! \param name      Name of the external file.
-!! \param name      Name of external file.
 !! \param offset    Offset in bytes from the beginning of the file to the location in the file where the data starts.
 !! \param bytes     Size of the external file data.
 !! \param hdferr    \herr_t.

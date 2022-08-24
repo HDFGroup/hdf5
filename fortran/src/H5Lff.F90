@@ -1012,10 +1012,9 @@ CONTAINS
 !!                       H5_ITER_DEC_F    - Decreasing order
 !!                       H5_ITER_NATIVE_F - Fastest available order
 !! </pre>
-!! \param  idx          Iteration position at which to start.
+!! \param  idx          Position at which an interrupted iteration may be restarted.
 !! \param  op           Callback function passing data regarding the link to the calling application.
 !! \param  op_data      User-defined pointer to data required by the application for its processing of the link.
-!! \param  idx          Position at which an interrupted iteration may be restarted
 !! \param  return_value
 !! <pre>
 !!                      Success: The return value of the first operator that returns non-zero, or zero if

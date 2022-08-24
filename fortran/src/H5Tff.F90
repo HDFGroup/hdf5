@@ -1855,8 +1855,7 @@ CONTAINS
 !!
 !! \param obj_id Identifier of the object to be encoded.
 !! \param buf    Buffer for the object to be encoded into.
-!! \param nalloc The size of the allocated buffer.
-!! \param nalloc The size of the buffer needed.
+!! \param nalloc If set to zero, returns the size of the buffer needed. Otherwise, it sets the size of \p buf allocated.
 !! \param hdferr \herr_t.
 !!
   SUBROUTINE h5tencode_f(obj_id, buf, nalloc, hdferr)
@@ -1984,10 +1983,9 @@ CONTAINS
 !! \param dst_id     Identifier for the destination datatype.
 !! \param nelmts     Size of array buf.
 !! \param buf        Array containing pre-conversion values.
-!! \param background Optional background buffer.
-!! \param plist_id   Dataset transfer property list identifier.
-!! \param buf        Array containing post-conversion values.
 !! \param hdferr     \herr_t.
+!! \param background Background buffer.
+!! \param plist_id   Dataset transfer property list identifier.
 !!
   SUBROUTINE h5tconvert_f(src_id, dst_id, nelmts, buf, hdferr, background, plist_id)
     IMPLICIT NONE
