@@ -1,7 +1,7 @@
-!> @ingroup H5F
+!> @ingroup H5DS
 !!
 !! @brief This file contains Fortran interfaces for H5DS
-!.
+!
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
@@ -14,8 +14,19 @@
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+!       _____ __  __ _____   ____  _____ _______       _   _ _______
+!      |_   _|  \/  |  __ \ / __ \|  __ \__   __|/\   | \ | |__   __|
+! ****   | | | \  / | |__) | |  | | |__) | | |  /  \  |  \| |  | |    ****
+! ****   | | | |\/| |  ___/| |  | |  _  /  | | / /\ \ | . ` |  | |    ****
+! ****  _| |_| |  | | |    | |__| | | \ \  | |/ ____ \| |\  |  | |    ****
+!      |_____|_|  |_|_|     \____/|_|  \_\ |_/_/    \_\_| \_|  |_|
 !
-MODULE h5ds
+!  If you add a new function here then you MUST add the function name to the
+!  Windows dll file 'hdf5_hl_fortrandll.def.in' in the hl/fortran/src directory.
+!  This is needed for Windows based operating systems.
+!
+
+MODULE H5DS
 
   USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_CHAR, C_FLOAT, C_DOUBLE, C_LOC, C_CHAR
   USE h5fortran_types
@@ -25,7 +36,7 @@ CONTAINS
 !>
 !! \ingroup H5DS
 !!
-!! \brief Convert dataset dsid to a dimension scale, with optional name, dimname.
+!! \brief Convert dataset \p dsid to a dimension scale, with optional name, \p dimname.
 !!
 !! \param dsid    The dataset to be made a Dimemsion Scale.
 !! \param errcode \herr_t.     
@@ -102,7 +113,7 @@ CONTAINS
 !>
 !! \ingroup H5DS
 !!
-!! \brief Detach dimension scale dsid from the dimension idx of Dataset \p did.
+!! \brief Detach dimension scale dsid from the dimension idx of dataset \p did.
 !!
 !! \param did     The dataset.
 !! \param dsid    The scale to be detached.
@@ -191,10 +202,10 @@ CONTAINS
 !>
 !! \ingroup H5DS
 !!
-!! \brief Determines whether /p did is a Dimension Scale.
+!! \brief Determines whether \p did is a Dimension Scale.
 !!
 !! \param did         The data set to query.
-!! \param is_scaled   If is a Dimension Scale.
+!! \param is_scale    If is a Dimension Scale.
 !! \param errcode     \herr_t. 
 !!
   SUBROUTINE H5DSis_scale_f( did, is_scale, errcode)
@@ -203,7 +214,7 @@ CONTAINS
 
     INTEGER(hid_t), INTENT(in)  :: did
     LOGICAL       , INTENT(out) :: is_scale
-    INTEGER                     :: errcode
+    INTEGER       , INTENT(out) :: errcode
     INTEGER                     :: c_is_scale
 
     INTERFACE

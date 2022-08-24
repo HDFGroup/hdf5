@@ -1,3 +1,7 @@
+!> @ingroup H5IM
+!!
+!! @brief This file contains Fortran interfaces for H5IM.
+!
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
@@ -10,12 +14,6 @@
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-!
-!
-! This file contains FORTRAN interfaces for H5IM functions
-!
-! NOTES
-!
 !       _____ __  __ _____   ____  _____ _______       _   _ _______
 !      |_   _|  \/  |  __ \ / __ \|  __ \__   __|/\   | \ | |__   __|
 ! ****   | | | \  / | |__) | |  | | |__) | | |  /  \  |  \| |  | |    ****
@@ -28,7 +26,7 @@
 !  This is needed for Windows based operating systems.
 !
 
-MODULE h5im
+MODULE H5IM
   USE, INTRINSIC :: ISO_C_BINDING
   USE h5fortran_types
   USE hdf5
@@ -104,7 +102,7 @@ CONTAINS
     CHARACTER(len=*), INTENT(in) :: dset_name
     INTEGER, INTENT(inout), DIMENSION(*) :: buf
     INTEGER :: errcode
-    INTEGER(size_t) :: namelen                         ! name length
+    INTEGER(size_t) :: namelen ! name length
 
     INTERFACE
        INTEGER FUNCTION h5imread_image_c(loc_id,namelen,dset_name,buf) &
@@ -129,7 +127,7 @@ CONTAINS
 !!
 !! \brief Creates and writes an image a 24 bit image.
 !! 
-!!\ param loc_id    Location identifier. The identifier may be that of a file or group.
+!! \param loc_id    Location identifier. The identifier may be that of a file or group.
 !! \param dset_name The name of the dataset to create.
 !! \param width     The width of the image.
 !! \param height    The height of the image.
@@ -137,13 +135,7 @@ CONTAINS
 !! \param buf       Buffer with data to be written to the dataset.
 !! \param errcode   \herr_t
 !!
-  SUBROUTINE h5immake_image_24bit_f(loc_id,&
-       dset_name,&
-       width,&
-       height,&
-       il,&
-       buf,&
-       errcode )
+  SUBROUTINE h5immake_image_24bit_f(loc_id, dset_name, width, height, il, buf, errcode )
 
     IMPLICIT NONE
 
@@ -163,14 +155,14 @@ CONTAINS
          IMPORT :: C_CHAR
          IMPORT :: HID_T, SIZE_T, HSIZE_T
          IMPLICIT NONE
-         INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name               ! name of the dataset
-         INTEGER(hsize_t), INTENT(in) :: width                   ! width of image
-         INTEGER(hsize_t), INTENT(in) :: height                  ! height of image
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: il                      ! interlace
-         INTEGER, INTENT(in), DIMENSION(*) :: buf                ! buffer
-         INTEGER(size_t) :: namelen                                      ! length of name buffer
-         INTEGER(size_t) :: ILEN                                         ! name length
+         INTEGER(hid_t),   INTENT(in) :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name
+         INTEGER(hsize_t), INTENT(in) :: width
+         INTEGER(hsize_t), INTENT(in) :: height
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: il
+         INTEGER, INTENT(in), DIMENSION(*) :: buf
+         INTEGER(size_t) :: namelen
+         INTEGER(size_t) :: ILEN
 
        END FUNCTION h5immake_image_24bit_c
     END INTERFACE
@@ -186,13 +178,13 @@ CONTAINS
 !!
 !! \brief Gets information about an image dataset (dimensions, interlace mode and number of associated palettes).
 !!
-!!\ param loc_id    Location identifier. The identifier may be that of a file or group.
-!!\ param dset_name The name of the dataset.
-!!\ param width	    The width of the image.
-!!\ param height    The height of the image.
-!!\ param planes    The number of color planes of the image.
-!!\ param interlace The interlace mode of the image.
-!!\ param npals	    The number of palettes associated to the image.
+!! \param loc_id    Location identifier. The identifier may be that of a file or group.
+!! \param dset_name The name of the dataset.
+!! \param width     The width of the image.
+!! \param height    The height of the image.
+!! \param planes    The number of color planes of the image.
+!! \param interlace The interlace mode of the image.
+!! \param npals     The number of palettes associated to the image.
 !! \param errcode   \herr_t
 !!
   SUBROUTINE h5imget_image_info_f(loc_id,&
@@ -206,16 +198,16 @@ CONTAINS
 
     IMPLICIT NONE
 
-    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
-    CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER(hsize_t), INTENT(inout) :: width           ! width of image
-    INTEGER(hsize_t), INTENT(inout) :: height          ! height of image
-    INTEGER(hsize_t), INTENT(inout) :: planes          ! color planes
-    INTEGER(hsize_t), INTENT(inout) :: npals           ! palettes
-    CHARACTER(len=*), INTENT(inout) :: interlace       ! interlace
-    INTEGER :: errcode                                 ! error code
-    INTEGER(size_t) :: namelen                                 ! name length
-    INTEGER(size_t) :: ILEN                                    ! name length
+    INTEGER(hid_t),   INTENT(in) :: loc_id
+    CHARACTER(len=*), INTENT(in) :: dset_name
+    INTEGER(hsize_t), INTENT(inout) :: width
+    INTEGER(hsize_t), INTENT(inout) :: height
+    INTEGER(hsize_t), INTENT(inout) :: planes
+    INTEGER(hsize_t), INTENT(inout) :: npals
+    CHARACTER(len=*), INTENT(inout) :: interlace
+    INTEGER :: errcode
+    INTEGER(size_t) :: namelen ! name length
+    INTEGER(size_t) :: ILEN    ! name length
 
     INTERFACE
        INTEGER FUNCTION h5imget_image_info_c(loc_id,namelen,dset_name,width,height,planes,npals,ILEN,interlace) &
@@ -223,15 +215,15 @@ CONTAINS
          IMPORT :: C_CHAR
          IMPORT :: HID_T, SIZE_T, HSIZE_T
          IMPLICIT NONE
-         INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name          ! name of the dataset
-         INTEGER(hsize_t), INTENT(inout) :: width           ! width of image
-         INTEGER(hsize_t), INTENT(inout) :: height          ! height of image
-         INTEGER(hsize_t), INTENT(inout) :: planes          ! color planes
-         INTEGER(hsize_t), INTENT(inout) :: npals           ! palettes
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(inout) :: interlace       ! interlace
-         INTEGER(size_t) :: namelen                                 ! name length
-         INTEGER(size_t) :: ILEN                                    ! name length
+         INTEGER(hid_t),   INTENT(in) :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name
+         INTEGER(hsize_t), INTENT(inout) :: width
+         INTEGER(hsize_t), INTENT(inout) :: height
+         INTEGER(hsize_t), INTENT(inout) :: planes
+         INTEGER(hsize_t), INTENT(inout) :: npals
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(inout) :: interlace
+         INTEGER(size_t) :: namelen
+         INTEGER(size_t) :: ILEN
        END FUNCTION h5imget_image_info_c
     END INTERFACE
 
@@ -264,9 +256,9 @@ CONTAINS
          IMPORT :: C_CHAR
          IMPORT :: HID_T, SIZE_T
          IMPLICIT NONE
-         INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
-         INTEGER(size_t) :: namelen                                      ! length of name buffer
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name               ! name of the dataset
+         INTEGER(hid_t),   INTENT(in) :: loc_id
+         INTEGER(size_t) :: namelen
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name
        END FUNCTION h5imis_image_c
     END INTERFACE
 
@@ -309,7 +301,7 @@ CONTAINS
          IMPORT :: HID_T, SIZE_T, HSIZE_T
          IMPLICIT NONE
          INTEGER(hid_t),   INTENT(in) :: loc_id 
-         INTEGER(size_t) :: namelen ! length of name buffer
+         INTEGER(size_t) :: namelen
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: pal_name
          INTEGER(hsize_t), INTENT(in), DIMENSION(*) :: pal_dims
          INTEGER, INTENT(in), DIMENSION(*) :: pal_data
@@ -454,10 +446,10 @@ CONTAINS
 !!
 !! \brief Gets information about a palette dataset (dimensions).
 !!
-!! \params loc_id     Location identifier. The identifier may be that of a file or group.
-!! \params image_name The name of the image dataset.
-!! \params pal_number The zero based index that identifies the palette.
-!! \params pal_dims   The dimensions of the palette dataset.
+!! \param loc_id     Location identifier. The identifier may be that of a file or group.
+!! \param image_name The name of the image dataset.
+!! \param pal_number The zero based index that identifies the palette.
+!! \param pal_dims   The dimensions of the palette dataset.
 !! \param  errcode    \herr_t
 !!
   SUBROUTINE h5imget_palette_info_f(loc_id,&
@@ -542,11 +534,10 @@ CONTAINS
 !>
 !! \ingroup H5IM
 !!
-!! \brief Inquires if a dataset is a palette.
+!! \brief Inquires if a dataset is a palette. Returns zero (false), a positive (true) or a negative (failure) value.
 !!
 !! \param loc_id    Location identifier. The identifier may be that of a file or group.
 !! \param dset_name The name of the dataset.
-!! \param errcode   \herr_t
 !!
   INTEGER FUNCTION h5imis_palette_f(loc_id, dset_name)
 
