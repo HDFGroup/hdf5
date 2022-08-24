@@ -85,4 +85,4 @@ configure checks with -Werror).
 For anyone interested, we are always interested in improving both the OS and
 compiler files, so pull requests for those are always welcome, especially for
 platforms we don't have routine access to. If you are a compiler or platform
-expert/afficionado, please help us out!
+expert/aficionado, please help us out!
