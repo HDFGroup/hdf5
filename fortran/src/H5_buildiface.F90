@@ -423,7 +423,7 @@ PROGRAM H5_buildiface
 !  buf 	       - Data buffer; may be a scalar or an array
 !
 ! Outputs:
-!  hdferr      - Returns 0 if successful and -1 if fails
+!  hdferr      - \herr_t
 !
 ! AUTHOR
 !  Elena Pourmal
@@ -550,7 +550,7 @@ PROGRAM H5_buildiface
 !
 ! Outputs:
 !  buf 	       - Data buffer; may be a scalar or an array
-!  hdferr      - Returns 0 if successful and -1 if fails
+!  hdferr      - \herr_t
 !
 ! AUTHOR
 !  Elena Pourmal

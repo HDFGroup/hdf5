@@ -1,10 +1,13 @@
-!****h* ROBODoc/H5LIB
-!
-! NAME
-!  MODULE H5LIB
-!
-! PURPOSE
-!  This module provides fortran specific helper functions for the HDF library
+!> @defgroup FH5 Fortran Library (H5) Interface
+!!
+!! @see H5, C-API
+!!
+!! @see @ref H5_UG, User Guide
+!!
+
+!> @ingroup FH5
+!!
+!! @brief This module provides fortran specific helper functions for the HDF library.
 !
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -32,7 +35,6 @@
 !  Windows dll file 'hdf5_fortrandll.def.in' in the fortran/src directory.
 !  This is needed for Windows based operating systems.
 !
-!*****
 
 #include <H5config_f.inc>
 
@@ -145,36 +147,18 @@ MODULE H5LIB
   PUBLIC :: h5garbage_collect_f, h5check_version_f
 
 CONTAINS
-!****s* H5LIB/h5open_f
-!
-! NAME
-!  h5open_f
-!
-! PURPOSE
-!  Initializes HDF5 Fortran interface.
-!
-! Outputs:
-!  error - Returns 0 if successful and -1 if fails
-!
-! AUTHOR
-!  Elena Pourmal
-!  August 12, 1999
-!
-! HISTORY
-!  Explicit Fortran interfaces were added for
-!  called C functions (it is needed for Windows
-!  port).  February 28, 2001
-!
-! Removed call to h5open_c since this may cause a problem for an
-! application that uses HDF5 library outside HDF5 Fortran APIs.
-! October 13, 2011
-! Fortran90 Interface:
+!>
+!! \ingroup FH5
+!!
+!! \brief Initializes HDF5 Fortran interface.
+!!
+!! \param error Returns 0 if successful and -1 if fails
+!!
   SUBROUTINE h5open_f(error)
     USE H5F, ONLY : h5fget_obj_count_f, H5OPEN_NUM_OBJ
     IMPLICIT NONE
     INTEGER, INTENT(OUT) :: error
     INTEGER(SIZE_T) :: H5OPEN_NUM_OBJ_LOC = 0
-!*****
     INTERFACE
 
        INTEGER FUNCTION h5init_types_c(p_types, f_types, i_types) &
@@ -249,6 +233,9 @@ CONTAINS
        END FUNCTION h5init1_flags_c
 
     END INTERFACE
+
+    ! Check if H5open_f has already been called. If so, skip doing it again.
+    IF(H5OPEN_NUM_OBJ .NE. 0) RETURN
 
     error = h5init_types_c(predef_types, floating_types, integer_types)
 
@@ -640,34 +627,17 @@ CONTAINS
 
   END SUBROUTINE h5open_f
 
-!****s* H5LIB/h5close_f
-!
-! NAME
-!  h5close_f
-!
-! PURPOSE
-!  Closes HDF5 Fortran interface.
-!
-! Outputs:
-!  error - Returns 0 if successful and -1 if fails
-!
-! AUTHOR
-!  Elena Pourmal
-!  August 12, 1999
-!
-! HISTORY
-!  Explicit Fortran interfaces were added for
-!  called C functions (it is needed for Windows
-!  port).  February 28, 2001
-!
-! Removed call to h5close_c since this may cause a problem for an
-! application that uses HDF5 library outside HDF5 Fortran APIs.
-!          October 13, 2011
-! Fortran90 Interface:
+!>
+!! \ingroup FH5
+!!
+!! \brief Closes HDF5 Fortran interface.
+!!
+!! \param error Returns 0 if successful and -1 if fails.
+!!
   SUBROUTINE h5close_f(error)
+    USE H5F, ONLY : h5fget_obj_count_f, H5OPEN_NUM_OBJ
     IMPLICIT NONE
     INTEGER, INTENT(OUT) :: error
-!*****
     INTERFACE
        INTEGER FUNCTION h5close_types_c(p_types, P_TYPES_LEN, &
             f_types, F_TYPES_LEN, &
@@ -682,35 +652,32 @@ CONTAINS
          INTEGER(HID_T), DIMENSION(1:I_TYPES_LEN) :: i_types
        END FUNCTION h5close_types_c
     END INTERFACE
+
+    ! Check if h5close_f has already been called. Skip doing it again.
+    IF(H5OPEN_NUM_OBJ .EQ. 0) RETURN
+
     error = h5close_types_c(predef_types, PREDEF_TYPES_LEN, &
          floating_types, FLOATING_TYPES_LEN, &
          integer_types, INTEGER_TYPES_LEN )
 
+    ! Reset the number of open objects from h5open_f to zero
+    CALL h5fget_obj_count_f(INT(H5F_OBJ_ALL_F,HID_T), H5F_OBJ_ALL_F, H5OPEN_NUM_OBJ,  error)
+
   END SUBROUTINE h5close_f
 
-!****s* H5LIB/h5get_libversion_f
-!
-! NAME
-!  h5get_libversion_f
-!
-! PURPOSE
-!  Returns the HDF5 LIbrary release number
-!
-! Outputs:
-!  majnum - major version of the library
-!  minnum - minor version of the library
-!  relnum - release version of the library
-!  error  - Returns 0 if successful and -1 if fails
-!
-! AUTHOR
-!  Elena Pourmal
-!  September 24, 2002
-!
-! Fortran90 Interface:
+!>
+!! \ingroup FH5
+!!
+!! \brief Returns the HDF5 LIbrary release number
+!!
+!! \param majnum  Major version of the library.
+!! \param minnum  Minor version of the library.
+!! \param relnum  Release version of the library.
+!! \param error   Returns 0 if successful and -1 if fails.
+!!
   SUBROUTINE h5get_libversion_f(majnum, minnum, relnum, error)
     IMPLICIT NONE
     INTEGER, INTENT(OUT) :: majnum, minnum, relnum, error
-!*****
     INTERFACE
        INTEGER FUNCTION h5get_libversion_c(majnum, minnum, relnum) &
             BIND(C,NAME='h5get_libversion_c')
@@ -723,32 +690,20 @@ CONTAINS
 
   END SUBROUTINE h5get_libversion_f
 
-!****s* H5LIB/h5check_version_f
-!
-! NAME
-!  h5check_version_f
-!
-! PURPOSE
-!  Verifies that library versions are consistent.
-!
-! Inputs:
-!  majnum - major version of the library
-!  minnum - minor version of the library
-!  relnum - release version of the library
-!
-! Outputs:
-!  error - Returns 0 if successful and -1 if fails
-!
-! AUTHOR
-!  Elena Pourmal
-!  September 24, 2002
-!
-! Fortran90 Interface:
+!>
+!! \ingroup FH5
+!!
+!! \brief Verifies that library versions are consistent.
+!!
+!! \param majnum Major version of the library.
+!! \param minnum Minor version of the library.
+!! \param relnum Release version of the library.
+!! \param error  Returns 0 if successful and -1 if fails.
+!!
   SUBROUTINE h5check_version_f(majnum, minnum, relnum, error)
     IMPLICIT NONE
     INTEGER, INTENT(IN)  :: majnum, minnum, relnum
     INTEGER, INTENT(OUT) :: error
-!*****
     INTERFACE
        INTEGER FUNCTION h5check_version_c(majnum, minnum, relnum) &
             BIND(C,NAME='h5check_version_c')
@@ -760,58 +715,38 @@ CONTAINS
     error = h5check_version_c(majnum, minnum, relnum)
 
   END SUBROUTINE h5check_version_f
-!****s* H5LIB/h5garbage_collect_f
-!
-! NAME
-!  h5garbage_collect_f
-!
-! PURPOSE
-!  Garbage collects on all free-lists of all types.
-!
-! Outputs:
-!  error - Returns 0 if successful and -1 if fails
-!
-! AUTHOR
-!  Elena Pourmal
-!  September 24, 2002
-!
-! Fortran90 Interface:
+!>
+!! \ingroup FH5
+!!
+!! \brief Garbage collects on all free-lists of all types.
+!!
+!! \param error Returns 0 if successful and -1 if fails.
+!!
   SUBROUTINE h5garbage_collect_f(error)
     IMPLICIT NONE
     INTEGER, INTENT(OUT) :: error
-!*****
     INTERFACE
-       INTEGER FUNCTION h5garbage_collect_c() &
-            BIND(C,NAME='h5garbage_collect_c')
+       INTEGER FUNCTION h5garbage_collect_c() BIND(C,NAME='h5garbage_collect_c')
+         IMPLICIT NONE
        END FUNCTION h5garbage_collect_c
     END INTERFACE
 
     error = h5garbage_collect_c()
 
   END SUBROUTINE h5garbage_collect_f
-!****s* H5LIB/h5dont_atexit_f
-!
-! NAME
-!  h5dont_atexit_f
-!
-! PURPOSE
-!  Instructs library not to install atexit cleanup routine.
-!
-! Outputs:
-!  error - Returns 0 if successful and -1 if fails
-!
-! AUTHOR
-!  Elena Pourmal
-!  September 24, 2002
-!
-! Fortran90 Interface:
+!>
+!! \ingroup FH5
+!!
+!! \brief Instructs library not to install atexit cleanup routine.
+!!
+!! \param error Returns 0 if successful and -1 if fails.
+!!
   SUBROUTINE h5dont_atexit_f(error)
     IMPLICIT NONE
     INTEGER, INTENT(OUT) :: error
-!*****
     INTERFACE
-       INTEGER FUNCTION h5dont_atexit_c() &
-            BIND(C,NAME='h5dont_atexit_c')
+       INTEGER FUNCTION h5dont_atexit_c() BIND(C,NAME='h5dont_atexit_c')
+         IMPLICIT NONE
        END FUNCTION h5dont_atexit_c
     END INTERFACE
 
@@ -819,34 +754,24 @@ CONTAINS
 
   END SUBROUTINE h5dont_atexit_f
 
-!****f* H5LIB/h5kind_to_type
-!
-! NAME
-!  h5kind_to_type
-!
-! PURPOSE
-!  Converts the KIND to the correct HDF type
-!
-! Inputs:
-!  kind    - Fortran KIND parameter
-!  flag    - Whether KIND is of type INTEGER or REAL:
-!              H5_INTEGER_KIND - integer
-!              H5_REAL_KIND    - real
-! Outputs:
-!  h5_type - Returns the type
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  August 25, 2008
-!
-! Fortran90 Interface:
+!>
+!! \ingroup FH5
+!!
+!! \brief Converts the KIND to the correct HDF type
+!!
+!! \param ikind Fortran KIND parameter
+!! \param flag Whether KIND is of type INTEGER or REAL:
+!!             \li H5_INTEGER_KIND - integer
+!!             \li H5_REAL_KIND    - real
+!!
+!! \return h5_type Returns the type
+!!
   INTEGER(HID_T) FUNCTION h5kind_to_type(ikind, flag) RESULT(h5_type)
     USE ISO_C_BINDING
     IMPLICIT NONE
     INTEGER, INTENT(IN) :: ikind
     INTEGER, INTENT(IN) :: flag
     INTEGER :: i
-!*****
 
 !#if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
 !    ! (1) The array index assumes INTEGER*16 the last integer in the series, and
@@ -882,34 +807,20 @@ CONTAINS
 
   END FUNCTION h5kind_to_type
 
-!****f* H5LIB_PROVISIONAL/h5offsetof
-!
-! NAME
-!  h5offsetof
-!
-! PURPOSE
-!  Computes the offset in memory
-!
-! Inputs:
-!  start - starting pointer address
-!  end 	 - ending pointer address
-!
-! Outputs:
-!  offset - offset of a member within the derived type
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  Augest 25, 2008
-!
-! ACKNOWLEDGEMENTS
-!  Joe Krahn
-!
-! Fortran2003 Interface:
+!>
+!! \ingroup FH5
+!!
+!! \brief Computes the offset in memory
+!!
+!! \param start  Starting pointer address
+!! \param end    Ending pointer address
+!!
+!! \return offset Offset of a member within the derived type
+!!
   FUNCTION h5offsetof(start,end) RESULT(offset)
     IMPLICIT NONE
     INTEGER(SIZE_T) :: offset
     TYPE(C_PTR), VALUE, INTENT(IN) :: start, end
-!*****
     INTEGER(C_INTPTR_T) :: int_address_start, int_address_end
     int_address_start = TRANSFER(start, int_address_start)
     int_address_end   = TRANSFER(end  , int_address_end  )
@@ -918,38 +829,26 @@ CONTAINS
 
   END FUNCTION h5offsetof
 
-!****f* H5LIB_PROVISIONAL/h5gmtime
-!
-! NAME
-!  h5gmtime
-!
-! PURPOSE
-!  Convert time_t structure (C) to Fortran DATE AND TIME storage format.
-!
-! Inputs:
-!  stdtime_t - Object of type time_t that contains a time value
-!
-! Outputs:
-!   datetime - A date/time array using Fortran conventions:
-!   datetime(1)     = year
-!   datetime(2)     = month
-!   datetime(3)     = day
-!   datetime(4)     = 0 ! time is expressed as UTC (or GMT timezone) */
-!   datetime(5)     = hour
-!   datetime(6)     = minute
-!   datetime(7)     = second
-!   datetime(8)     = millisecond -- not available, assigned - HUGE(0)
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  January, 2019
-!
-! Fortran Interface:
-  FUNCTION h5gmtime(stdtime_t)
+!>
+!! \ingroup FH5
+!!
+!! \brief Convert time_t structure (C) to Fortran DATE AND TIME storage format.
+!!
+!! \param stdtime_t Object of type time_t that contains a time value
+!! \return datetime  A date/time array using Fortran conventions:
+!!                 \li datetime(1) = year
+!!                 \li datetime(2) = month
+!!                 \li datetime(3) = day
+!!                 \li datetime(4) = 0 ! time is expressed as UTC (or GMT timezone)
+!!                 \li datetime(5) = hour
+!!                 \li datetime(6) = minute
+!!                 \li datetime(7) = second
+!!                 \li datetime(8) = millisecond -- not available, assigned - HUGE(0)
+!!
+  FUNCTION h5gmtime(stdtime_t) RESULT(datetime)
     IMPLICIT NONE
     INTEGER(KIND=TIME_T), INTENT(IN) :: stdtime_t
-    INTEGER, DIMENSION(1:8) :: h5gmtime
-!*****
+    INTEGER, DIMENSION(1:8) :: datetime
     TYPE(C_PTR) :: cptr
     INTEGER(C_INT), DIMENSION(:), POINTER :: c_time
 
@@ -965,14 +864,14 @@ CONTAINS
     cptr = gmtime(stdtime_t)
     CALL C_F_POINTER(cptr, c_time, [9])
 
-    h5gmtime(1) = INT(c_time(6)+1900) ! year starts at 1900
-    h5gmtime(2) = INT(c_time(5)+1)    ! month starts at 0 in C
-    h5gmtime(3) = INT(c_time(4))      ! day
-    h5gmtime(4) = 0                   ! time is expressed as UTC (or GMT timezone)
-    h5gmtime(5) = INT(c_time(3))      ! hour
-    h5gmtime(6) = INT(c_time(2))      ! minute
-    h5gmtime(7) = INT(c_time(1))      ! second
-    h5gmtime(8) = -32767              ! millisecond is not available, assign it -HUGE(0)
+    datetime(1) = INT(c_time(6)+1900) ! year starts at 1900
+    datetime(2) = INT(c_time(5)+1)    ! month starts at 0 in C
+    datetime(3) = INT(c_time(4))      ! day
+    datetime(4) = 0                   ! time is expressed as UTC (or GMT timezone)
+    datetime(5) = INT(c_time(3))      ! hour
+    datetime(6) = INT(c_time(2))      ! minute
+    datetime(7) = INT(c_time(1))      ! second
+    datetime(8) = -32767              ! millisecond is not available, assign it -HUGE(0)
 
   END FUNCTION h5gmtime
 

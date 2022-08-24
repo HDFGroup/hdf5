@@ -1,0 +1,31 @@
+/** @page LearnBasics Learning the Basics
+The following topics cover the basic features in HDF5. The topics build on each other and are
+intended to be completed in order. Some sections use files created in earlier sections. The
+examples used can also be found on the <a href="/display/HDF5/Examples+from+Learning+the+Basics">Examples from Learning the Basics</a>
+page and in the HDF5 source code (C, C++, Fortran).
+<ul>
+<li><a href="/display/HDF5/HDF5+File+Organization">HDF5 File Organization</a></li>
+<li><a href="/display/HDF5/The+HDF5+API">The HDF5 API</a></li>
+<li><a href="/display/HDF5/Programming+Issues">Programming Issues</a></li>
+<li><a href="/display/HDF5/Creating+an+HDF5+File">Creating an HDF5 File</a></li>
+<li><a href="/display/HDF5/Creating+a+Dataset">Creating a Dataset</a></li>
+<li><a href="/display/HDF5/Reading+From+and+Writing+To+a+Dataset">Reading From and Writing To a Dataset</a></li>
+<li><a href="/display/HDF5/Creating+an+Attribute">Creating an Attribute</a></li>
+<li><a href="/display/HDF5/Creating+a+Group">Creating a Group</a></li>
+<li> <a href="/display/HDF5/Creating+Groups+using+Absolute+and+Relative+Names">Creating Groups using Absolute and Relative Names</a></li>
+<li><a href="/display/HDF5/Creating+Datasets+in+Groups">Creating Datasets in Groups</a></li>
+<li><a href="/display/HDF5/Reading+From+or+Writing+To+a+Subset+of+a+Dataset">Reading From or Writing To a Subset of a Dataset</a></li>
+<li><a href="/display/HDF5/Datatype+Basics">Datatype Basics</a></li>
+<li><a href="/display/HDF5/Property+Lists+Basics">Property Lists Basics</a></li>
+<li><a href="/display/HDF5/Dataset+Storage+Layout">Dataset Storage Layout</a></li>
+<li><a href="/display/HDF5/Extendible+Datasets">Extendible Datasets</a></li>
+<li> <a href="/display/HDF5/Compressed+Datasets">Compressed Datasets</a></li>
+<li><a href="/display/HDF5/Discovering+the+Contents+of+an+HDF5+File">Discovering the Contents of an HDF5 File</a></li>
+<li><a href="/display/HDF5/Learning+the+basics+QUIZ">Learning the basics QUIZ</a></li>
+<li><a href="/display/HDF5/Learning+the+basics+QUIZ+with+ANSWERS">Learning the basics QUIZ with ANSWERS</a></li>
+<li><a href="/display/HDF5/Compiling+HDF5+Applications">Compiling HDF5 Applications</a></li>
+<li><a href="/display/HDF5/Training+Videos">Training Videos</a></li>
+<li><a href="/display/HDF5/Learning+the+Basics+in+PDF">Learning the Basics in PDF</a></li>
+</ul>
+
+*/

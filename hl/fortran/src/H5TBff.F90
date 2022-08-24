@@ -165,6 +165,13 @@ MODULE h5tb_CONST
 
 CONTAINS
 
+!> @defgroup FH5TB Fortran High Level Table (H5TB) Interface
+!!
+!! @see H5TB, C-HL API
+!!
+!! @see @ref H5TB_UG, User Guide
+!!
+
 !-------------------------------------------------------------------------
 ! Function: h5tbmake_table_f90
 !
@@ -961,7 +968,7 @@ CONTAINS
          INTEGER(size_t),  DIMENSION(1:nfields), INTENT(inout) :: field_offsets ! field offsets
          INTEGER(size_t),  INTENT(inout):: type_size                            ! type size
          INTEGER(size_t) :: namelen                                             ! name length
-         INTEGER(size_t) :: maxlen                                              ! maxiumum length of input field names
+         INTEGER(size_t) :: maxlen                                              ! maximum length of input field names
          INTEGER(size_t), DIMENSION(1:nfields) :: namelen2                      ! name lengths
          INTEGER(size_t) :: c_maxlen_out                  ! maximum character length of a field array element
        END FUNCTION h5tbget_field_info_c

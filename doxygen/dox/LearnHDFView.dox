@@ -1,0 +1,183 @@
+/** @page LearnHDFView Learning HDF5 with HDFView
+This tutorial enables you to get a feel for HDF5 by using the HDFView browser. It does NOT require
+any programming experience.
+
+\section sec_learn_hv_install HDFView Installation
+\li Download and install HDFView. It can be downloaded from the <a href="https://portal.hdfgroup.org/display/support/Download+HDFView">Download HDFView page.</a>
+\li Obtain the  <a href="https://support.hdfgroup.org/ftp/HDF5/examples/files/tutorial/storm1.txt">storm1.txt</a> text file, used in the tutorial.
+
+\section sec_learn_hv_begin Begin Tutorial
+Once you have HDFView installed, bring it up and you are ready to begin the tutorial.
+
+<table style="background-color:#FAFAD2">
+<caption>
+Unable to complete tutorial because fields are greyed out?
+</caption>
+<tr>
+<td>
+This tutorial requires that the default HDFView File Access Mode be Read / Write. If fields are greyed out so that you cannot select them, then the File Access Mode is Read Only.
+
+To change the File Access Mode follow these steps:
+<ul>
+<li>Bring up HDFView</li>
+<li>Left-mouse click on the Tools pull-down menu and select User Options.</li>
+<li>A Preferences window pops up with the General Settings tab selected.
+About half-way down you will see Default File Access Mode.
+Select Read / Write.</li>
+<li>Click on Apply and Close at the bottom of the window.</li>
+<li>Close down HDFView.</li>
+<li>Bring HDFView back up and try the tutorial again.</li>
+PLEASE BE AWARE that selecting a File Access Mode of Read / Write can result in changes to the timestamp of HDF files that are viewed with HDFView. In general, a File Access Mode
+of Read Only should be used to ensure that this does not occur.
+</ul>
+</td>
+</tr>
+</table>
+
+\subsection subsec_learn_hv_begin_topics Topics Covered
+Following are the topics covered in the tutorial. The first topic creates the file that is used in
+the subsequent topics.
+<ul>
+<li>@ref subsec_learn_hv_topics_file</li>
+<li>@ref subsec_learn_hv_topics_image</li>
+<li>@ref subsec_learn_hv_topics_attr</li>
+<li>@ref subsec_learn_hv_topics_compress</li>
+<li>@ref subsec_learn_hv_topics_subset</li>
+<li>@ref subsec_learn_hv_topics_table</li>
+</ul>
+
+\section sec_learn_hv_topics Topics
+
+\subsection subsec_learn_hv_topics_file Creating a New HDF5 File with a Contiguous Dataset
+The steps below describe how to create a file (storm.h5), group (/Data), and a contiguous dataset
+(/Data/Storm) using HDFView. A group is an HDF5 object that allows objects to be collected together.
+A dataset is an array of data values. A contiguous dataset is one that is stored as a single block
+in the HDF5 file.
+<ul>
+<li>Select the File pull-down menu at the top left, and then select New -> HDF5.</li>
+<li>Specify a location and type in storm.h5 for the name of your file, and click on the Save button.
+You will see the storm.h5 file in the TableView:</li>
+<li>Right click on storm.h5, and select New -> Group.</li>
+<li>Enter Data for the name of the group and then click the Ok button. You will see the group Data in the TableView.</li>
+<li>Right click on the group Data and select New -> Dataset.</li>
+<li>A window pops up on the right. Fill in the information as follows, and then click Ok (leave the
+Datatype information as is):</li>
+<li>Left click on the Data group in the tree view to see the Storm dataset in the TableView:</li>
+<li>Double left click on the Storm dataset in the tree view. A window with an empty spreadsheet pops open.</li>
+<li>Copy the data from the storm1.txt file into the dataset.
+
+If you downloaded storm1.txt, then right click on the Table menu and select Import Data from Text File.
+Specify a location, select storm1.txt and click on the Open button. Answer Yes in the dialog box that
+pops up (which asks if you wish to paste the selected data).
+
+Alternately, you can copy/paste directly. Select and copy the data in a separate window. Position your
+cursor at (0,0) in your table, and select Paste from the Table menu.
+
+The values will be entered into the spreadsheet.</li>
+<li>Close the dataset, and save the data.</li>
+</ul>
+
+\subsection subsec_learn_hv_topics_image Displaying a Dataset as an Image
+Any dataset can be viewed as an image in HDFView. Below are the steps that demonstrate this.
+<ul>
+<li>Right click on Storm in the tree view, and select Open As.</li>
+<li>Select the Image button under Display As (near the top) in the Dataset Selection window that pops
+up. Then click OK at the bottom of the window to display the image.</li>
+<li>The rainbow icon brings you to the Image Palette window. Click on that to play with the palette
+(GrayWave probably is the best choice). Close.</li>
+</ul>
+
+\subsection subsec_learn_hv_topics_attr Creating Attributes
+Additional information to describe an object can be stored in attributes. An attribute can be
+added to a group or dataset with HDFView.
+
+The following illustrates how to add an attribute to the group /Data:
+<ul>
+<li>Click on the /Data folder in the tree view. You will see two tabs, Object Attribute Info and
+General Object Info, in the pane on the right site of the HDFView window.</li>
+<li>With the left mouse button, select the Add Attribute button.</li>
+<li>Select the Add Attribute button to add an attribute with these values:</li>
+<li>Select the Ok button. The attribute will show up in the Properties window.</li>
+<li>Close the Properties window.</li>
+</ul>
+
+Adding an attribute to a dataset is very similar to adding an attribute to a group. For example,
+the following adds an attribute to the /Storm dataset:
+<ul>
+<li>Left mouse click on the /Storm dataset in the tree view. You will see the Object Attribute
+Info and General Object Info tabs on the right</li>
+<li>In the Object Attribute Info pane select the Add Attribute button and enter an attribute with
+these values. (Be sure to add a String Length or the string will bet truncated to one character!):</li>
+<li>Select the Ok button. The attribute will be displayed in the window.</li>
+<li>Close the Properties window.</li>
+</ul>
+
+\subsection subsec_learn_hv_topics_compress Creating a Compressed and Chunked Dataset
+A chunked and compressed dataset can be created using HDFView. A compressed dataset is a dataset
+whose size has been compressed to take up less space. In order to compress an HDF5 dataset, the
+dataset must be stored with a chunked dataset layout (as multiple chunks that are stored separately
+in the file).
+
+Please note that the chunk sizes used in this topic are for demonstration purposes only. For
+information on chunking and specifying an appropriate chunk size, see the Chunking in HDF5 documentation.
+
+Also see the HDF5 Tutorial topic on <a href="https://portal.hdfgroup.org/display/HDF5/Compressed+Datasets">Creating a Compressed Dataset</a>.
+<ul>
+<li>Right click on storm.h5. Select New -> Group.</li>
+<li>Enter Image for the name of the group, and click the OK button to create the group.</li>
+<li>Right click on the Image group, and select New -> Dataset.</li>
+<li>Enter the following information for the dataset. Leave the Datatype as is (INTEGER):</li>
+<li>Double left-mouse click on the Another Storm dataset to display the spredsheet:</li>
+<li>Copy the data from the storm1.txt file into the dataset. (See the previous topic for copying
+storm1.txt into a dataset.)</li>
+<li>Close the table, and save the data.</li>
+<li>Right click on Another Storm, and select Open As.</li>
+<li>Select the Image button in the Dataset Selection window that pops up. Click the Ok button at the
+bottom of the window to view the dataset as an image.</li>
+</ul>
+
+\subsection subsec_learn_hv_topics_subset Creating an Image and a Subset
+A previous topic demonstrated how to view any dataset as an image in HDFView. With HDFView you can also
+create an image to begin with, as is shown below.
+<ul>
+<li>Right click on the Data group and select New -> Image.</li>
+<li>A window pops up on the right. Enter the following and then click Ok:</li>
+<li>Close the dataset.</li>
+<li>Double left-mouse click on the Data group to see its contents. You will see the Storm Image dataset.</li>
+<li>
+Add data to the Storm Image dataset as was shown previously:
+<ul>
+<li>Right click on Storm Image, and select Open As to open the Dataset Selection window.</li>
+<li>Click on the Spreadsheet button at the top left of the Dataset Selection window to view the image
+as a spreadsheet.</li>
+<li>Copy the data from the storm1.txt file into the dataset.</li>
+<li>Close the dataset and save the data.</li>
+</ul>
+</li>
+<li>Left double click on Storm Image to see the image. Close the dataset.</li>
+<li>Right click on Storm Image and select Show Properties from the pop-up menu, to open the Properties
+window. Select the Attributes tab to see the attributes:</li>
+<li>Close the Properties window.</li>
+<li>Right click on Storm Image and select Open As to bring up the Data Selection window.</li>
+<li>Select a subset by clicking the left mouse on the image in the window and dragging the mouse.
+Notice that the Height and Width values change. Select to display it as an image. Click Ok.</li>
+<li>Position the cursor in the middle of the image. Press Shift+Left Mouse button and hold, and then
+drag the mouse to select another subset.</li>
+<li>Select Image->Write Selection to Image. Enter Subset for the new image name. Click Ok. The Subset
+image will appear in the tree view on the left.</li>
+<li>Left double click on the image Subset to bring it up on the right.</li>
+<li>Close the Subset image.</li>
+</ul>
+
+\subsection subsec_learn_hv_topics_table Creating a Table (Compound Dataset)
+A dataset with a compound datatype contains data elements that consist of multiple fields. If the
+dataspace for the compound dataset is one-dimensional, then the dataset can be viewed as a table in
+HDFView, as is shown below.
+<ul>
+<li>Right button click on the group Data. Select New -> Compound DS.</li>
+<li>A window pops up on the right side of the screen. Only fill in the following fields:</li>
+<li>Open the Data group (if it is not open) and double left click on the Table object.</li>
+<li>Close the dataset.</li>
+</ul>
+
+*/
