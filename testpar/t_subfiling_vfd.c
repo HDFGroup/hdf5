@@ -56,7 +56,7 @@ typedef void (*test_func)(void);
 
 /* Utility functions */
 static hid_t create_subfiling_ioc_fapl(MPI_Comm comm, MPI_Info info, hbool_t custom_config,
-    H5FD_subfiling_shared_config_t *custom_cfg, int32_t thread_pool_size);
+                                       H5FD_subfiling_shared_config_t *custom_cfg, int32_t thread_pool_size);
 
 /* Test functions */
 static void test_create_and_close(void);
@@ -81,7 +81,7 @@ static test_func tests[] = {
  */
 static hid_t
 create_subfiling_ioc_fapl(MPI_Comm comm, MPI_Info info, hbool_t custom_config,
-    H5FD_subfiling_shared_config_t *custom_cfg, int32_t thread_pool_size)
+                          H5FD_subfiling_shared_config_t *custom_cfg, int32_t thread_pool_size)
 {
     H5FD_subfiling_config_t *subfiling_conf = NULL;
     H5FD_ioc_config_t       *ioc_conf       = NULL;
@@ -125,7 +125,7 @@ create_subfiling_ioc_fapl(MPI_Comm comm, MPI_Info info, hbool_t custom_config,
                 TEST_ERROR;
 
             /* Set custom configuration */
-            ioc_conf->subf_config = *custom_cfg;
+            ioc_conf->subf_config      = *custom_cfg;
             ioc_conf->thread_pool_size = thread_pool_size;
 
             if (H5Pset_fapl_ioc(ioc_fapl, ioc_conf) < 0)
@@ -209,16 +209,16 @@ static void
 test_config_file(void)
 {
     H5FD_subfiling_shared_config_t cfg;
-    int64_t stripe_size;
-    int64_t read_stripe_size;
-    FILE *config_file;
-    char *config_filename = NULL;
-    char *config_buf = NULL;
-    long config_file_len;
-    hid_t file_id = H5I_INVALID_HID;
-    hid_t fapl_id = H5I_INVALID_HID;
-    int read_stripe_count;
-    int mpi_code;
+    int64_t                        stripe_size;
+    int64_t                        read_stripe_size;
+    FILE                          *config_file;
+    char                          *config_filename = NULL;
+    char                          *config_buf      = NULL;
+    long                           config_file_len;
+    hid_t                          file_id = H5I_INVALID_HID;
+    hid_t                          fapl_id = H5I_INVALID_HID;
+    int                            read_stripe_count;
+    int                            mpi_code;
 
     if (MAINPROCESS)
         HDprintf("Subfiling configuration file format\n");
@@ -233,8 +233,7 @@ test_config_file(void)
     cfg.stripe_size   = stripe_size;
     cfg.stripe_count  = 1; /* TODO: Subfiling currently does not respect stripe_count setting */
 
-    fapl_id = create_subfiling_ioc_fapl(comm_g, info_g, TRUE, &cfg,
-                                        H5FD_IOC_DEFAULT_THREAD_POOL_SIZE);
+    fapl_id = create_subfiling_ioc_fapl(comm_g, info_g, TRUE, &cfg, H5FD_IOC_DEFAULT_THREAD_POOL_SIZE);
     VRFY((fapl_id >= 0), "FAPL creation succeeded");
 
     file_id = H5Fcreate(SUBF_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
@@ -244,21 +243,21 @@ test_config_file(void)
 
     if (MAINPROCESS) {
         h5_stat_t file_info;
-        char *resolved_path;
-        char *subfile_dir;
-        char *subfile_name;
-        char *tmp_buf;
-        char *substr;
-        char scan_format[256];
-        int num_digits;
+        char     *resolved_path;
+        char     *subfile_dir;
+        char     *subfile_name;
+        char     *tmp_buf;
+        char     *substr;
+        char      scan_format[256];
+        int       num_digits;
 
         VRFY((HDstat(SUBF_FILENAME, &file_info) >= 0), "HDstat succeeded");
 
         config_filename = HDmalloc(PATH_MAX);
         VRFY(config_filename, "HDmalloc succeeded");
 
-        HDsnprintf(config_filename, PATH_MAX, H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE,
-                   SUBF_FILENAME, (uint64_t)file_info.st_ino);
+        HDsnprintf(config_filename, PATH_MAX, H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE, SUBF_FILENAME,
+                   (uint64_t)file_info.st_ino);
 
         config_file = HDfopen(config_filename, "r");
         VRFY(config_file, "HDfopen succeeded");
@@ -270,30 +269,26 @@ test_config_file(void)
         config_file_len = HDftell(config_file);
         VRFY((config_file_len > 0), "HDftell succeeded");
 
-
         VRFY((HDfseek(config_file, 0, SEEK_SET) >= 0), "HDfseek succeeded");
 
         config_buf = HDmalloc((size_t)config_file_len + 1);
         VRFY(config_buf, "HDmalloc succeeded");
 
-        VRFY((HDfread(config_buf, (size_t)config_file_len, 1, config_file) == 1),
-                "HDfread succeeded");
+        VRFY((HDfread(config_buf, (size_t)config_file_len, 1, config_file) == 1), "HDfread succeeded");
         config_buf[config_file_len] = '\0';
 
         /* Check the stripe_size field in the configuration file */
         substr = HDstrstr(config_buf, "stripe_size");
         VRFY(substr, "HDstrstr succeeded");
 
-        VRFY((HDsscanf(substr, "stripe_size=%" PRId64, &read_stripe_size) == 1),
-                "HDsscanf succeeded");
+        VRFY((HDsscanf(substr, "stripe_size=%" PRId64, &read_stripe_size) == 1), "HDsscanf succeeded");
         VRFY((read_stripe_size == stripe_size), "Stripe size comparison succeeded");
 
         /* Check the aggregator_count (stripe count) field in the configuration file */
         substr = HDstrstr(config_buf, "aggregator_count");
         VRFY(substr, "HDstrstr succeeded");
 
-        VRFY((HDsscanf(substr, "aggregator_count=%d", &read_stripe_count) == 1),
-                "HDsscanf succeeded");
+        VRFY((HDsscanf(substr, "aggregator_count=%d", &read_stripe_count) == 1), "HDsscanf succeeded");
         VRFY((read_stripe_count == cfg.stripe_count), "Stripe count comparison succeeded");
 
         /* Check the hdf5_file and subfile_dir fields in the configuration file */
@@ -309,8 +304,7 @@ test_config_file(void)
         VRFY(substr, "HDstrstr succeeded");
 
         HDsnprintf(scan_format, sizeof(scan_format), "hdf5_file=%%%zus", (size_t)(PATH_MAX - 1));
-        VRFY((HDsscanf(substr, scan_format, tmp_buf) == 1),
-                "HDsscanf succeeded");
+        VRFY((HDsscanf(substr, scan_format, tmp_buf) == 1), "HDsscanf succeeded");
 
         VRFY((HDstrcmp(tmp_buf, resolved_path) == 0), "HDstrcmp succeeded");
 
@@ -318,8 +312,7 @@ test_config_file(void)
         VRFY(substr, "HDstrstr succeeded");
 
         HDsnprintf(scan_format, sizeof(scan_format), "subfile_dir=%%%zus", (size_t)(PATH_MAX - 1));
-        VRFY((HDsscanf(substr, scan_format, tmp_buf) == 1),
-                "HDsscanf succeeded");
+        VRFY((HDsscanf(substr, scan_format, tmp_buf) == 1), "HDsscanf succeeded");
 
         VRFY((HDstrcmp(tmp_buf, subfile_dir) == 0), "HDstrcmp succeeded");
 
@@ -365,7 +358,7 @@ test_config_file(void)
  */
 /* TODO: Test collective I/O as well when support is implemented */
 #define SUBF_FILENAME "test_subfiling_stripe_sizes.h5"
-#define SUBF_NITER 10
+#define SUBF_NITER    10
 static void
 test_stripe_sizes(void)
 {
@@ -391,17 +384,17 @@ test_stripe_sizes(void)
 
     for (size_t i = 0; i < SUBF_NITER; i++) {
         H5FD_subfiling_shared_config_t cfg;
-        h5_stat_size_t file_size;
-        const void *c_write_buf;
-        h5_stat_t file_info;
-        int64_t file_size64;
-        int64_t stripe_size;
-        haddr_t file_end_addr;
-        haddr_t write_addr;
-        size_t nbytes;
-        herr_t write_status;
-        hid_t file_id;
-        int mpi_code;
+        h5_stat_size_t                 file_size;
+        const void                    *c_write_buf;
+        h5_stat_t                      file_info;
+        int64_t                        file_size64;
+        int64_t                        stripe_size;
+        haddr_t                        file_end_addr;
+        haddr_t                        write_addr;
+        size_t                         nbytes;
+        herr_t                         write_status;
+        hid_t                          file_id;
+        int                            mpi_code;
 
         /*
          * Choose a random Subfiling stripe size between
@@ -450,12 +443,11 @@ test_stripe_sizes(void)
             c_write_buf = write_buf;
 
             /* Set independent I/O on DXPL */
-            VRFY((H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_INDEPENDENT) >= 0),
-                    "H5Pset_dxpl_mpio succeeded");
+            VRFY((H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_INDEPENDENT) >= 0), "H5Pset_dxpl_mpio succeeded");
 
             /* Set EOA for following write call */
             VRFY((H5FDset_eoa(file_ptr, H5FD_MEM_DEFAULT, file_end_addr + nbytes) >= 0),
-                    "H5FDset_eoa succeeded");
+                 "H5FDset_eoa succeeded");
 
             /*
              * Write "number of IOCs" X "stripe size" bytes to the file
@@ -463,17 +455,16 @@ test_stripe_sizes(void)
              * with a size of at least "stripe size" bytes. The first
              * (few) subfile(s) may be a bit larger due to file metadata.
              */
-            write_addr = file_end_addr;
-            write_status = H5FDwrite(file_ptr, H5FD_MEM_DRAW, dxpl_id,
-                                     write_addr, nbytes, c_write_buf);
+            write_addr   = file_end_addr;
+            write_status = H5FDwrite(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, c_write_buf);
             VRFY((write_status >= 0), "H5FDwrite succeeded");
 
             file_end_addr += nbytes;
 
             for (int j = 0; j < n_io_concentrators; j++) {
                 h5_stat_size_t subfile_size;
-                h5_stat_t subfile_info;
-                FILE *subfile_ptr;
+                h5_stat_t      subfile_info;
+                FILE          *subfile_ptr;
 
                 HDsnprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
                            (uint64_t)file_info.st_ino, num_digits, j + 1, n_io_concentrators);
@@ -492,7 +483,7 @@ test_stripe_sizes(void)
 
             /* Set EOA for following write call */
             VRFY((H5FDset_eoa(file_ptr, H5FD_MEM_DEFAULT, file_end_addr + nbytes) >= 0),
-                    "H5FDset_eoa succeeded");
+                 "H5FDset_eoa succeeded");
 
             /*
              * Write another round of "number of IOCs" X "stripe size"
@@ -502,15 +493,15 @@ test_stripe_sizes(void)
              * be a bit larger due to file metadata.
              */
             H5FD_mem_t write_type = H5FD_MEM_DRAW;
-            write_addr = file_end_addr;
-            write_status = H5FDwrite_vector(file_ptr, dxpl_id, 1, &write_type, &write_addr,
-                                            &nbytes, &c_write_buf);
+            write_addr            = file_end_addr;
+            write_status =
+                H5FDwrite_vector(file_ptr, dxpl_id, 1, &write_type, &write_addr, &nbytes, &c_write_buf);
             VRFY((write_status >= 0), "H5FDwrite_vector succeeded");
 
             for (int j = 0; j < n_io_concentrators; j++) {
                 h5_stat_size_t subfile_size;
-                h5_stat_t subfile_info;
-                FILE *subfile_ptr;
+                h5_stat_t      subfile_info;
+                FILE          *subfile_ptr;
 
                 HDsnprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
                            (uint64_t)file_info.st_ino, num_digits, j + 1, n_io_concentrators);
@@ -542,8 +533,7 @@ test_stripe_sizes(void)
 
         /* Next, try I/O with all ranks */
 
-        fapl_id = create_subfiling_ioc_fapl(comm_g, info_g, TRUE, &cfg,
-                                            H5FD_IOC_DEFAULT_THREAD_POOL_SIZE);
+        fapl_id = create_subfiling_ioc_fapl(comm_g, info_g, TRUE, &cfg, H5FD_IOC_DEFAULT_THREAD_POOL_SIZE);
         VRFY((fapl_id >= 0), "FAPL creation succeeded");
 
         /* Create and close file with H5Fcreate to setup superblock */
@@ -579,12 +569,11 @@ test_stripe_sizes(void)
         file_end_addr = (haddr_t)file_size64;
 
         /* Set independent I/O on DXPL */
-        VRFY((H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_INDEPENDENT) >= 0),
-                "H5Pset_dxpl_mpio succeeded");
+        VRFY((H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_INDEPENDENT) >= 0), "H5Pset_dxpl_mpio succeeded");
 
         /* Set EOA for following write call */
         VRFY((H5FDset_eoa(file_ptr, H5FD_MEM_DEFAULT, file_end_addr + ((size_t)mpi_size * nbytes)) >= 0),
-                "H5FDset_eoa succeeded");
+             "H5FDset_eoa succeeded");
 
         /*
          * Write "number of IOCs" X "stripe size" bytes to the file
@@ -593,9 +582,8 @@ test_stripe_sizes(void)
          * bytes. The first (few) subfile(s) may be a bit larger
          * due to file metadata.
          */
-        write_addr = file_end_addr + ((size_t)mpi_rank * nbytes);
-        write_status = H5FDwrite(file_ptr, H5FD_MEM_DRAW, dxpl_id,
-                                 write_addr, nbytes, c_write_buf);
+        write_addr   = file_end_addr + ((size_t)mpi_rank * nbytes);
+        write_status = H5FDwrite(file_ptr, H5FD_MEM_DRAW, dxpl_id, write_addr, nbytes, c_write_buf);
         VRFY((write_status >= 0), "H5FDwrite succeeded");
 
         file_end_addr += ((size_t)mpi_size * nbytes);
@@ -606,8 +594,8 @@ test_stripe_sizes(void)
         if (MAINPROCESS) {
             for (int j = 0; j < n_io_concentrators; j++) {
                 h5_stat_size_t subfile_size;
-                h5_stat_t subfile_info;
-                FILE *subfile_ptr;
+                h5_stat_t      subfile_info;
+                FILE          *subfile_ptr;
 
                 HDsnprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
                            (uint64_t)file_info.st_ino, num_digits, j + 1, n_io_concentrators);
@@ -630,7 +618,7 @@ test_stripe_sizes(void)
 
         /* Set EOA for following write call */
         VRFY((H5FDset_eoa(file_ptr, H5FD_MEM_DEFAULT, file_end_addr + ((size_t)mpi_size * nbytes)) >= 0),
-                "H5FDset_eoa succeeded");
+             "H5FDset_eoa succeeded");
 
         /*
          * Write another round of "number of IOCs" X "stripe size"
@@ -641,9 +629,9 @@ test_stripe_sizes(void)
          * file metadata.
          */
         H5FD_mem_t write_type = H5FD_MEM_DRAW;
-        write_addr = file_end_addr + ((size_t)mpi_rank * nbytes);
-        write_status = H5FDwrite_vector(file_ptr, dxpl_id, 1, &write_type, &write_addr,
-                                        &nbytes, &c_write_buf);
+        write_addr            = file_end_addr + ((size_t)mpi_rank * nbytes);
+        write_status =
+            H5FDwrite_vector(file_ptr, dxpl_id, 1, &write_type, &write_addr, &nbytes, &c_write_buf);
         VRFY((write_status >= 0), "H5FDwrite_vector succeeded");
 
         mpi_code = MPI_Barrier(comm_g);
@@ -652,8 +640,8 @@ test_stripe_sizes(void)
         if (MAINPROCESS) {
             for (int j = 0; j < n_io_concentrators; j++) {
                 h5_stat_size_t subfile_size;
-                h5_stat_t subfile_info;
-                FILE *subfile_ptr;
+                h5_stat_t      subfile_info;
+                FILE          *subfile_ptr;
 
                 HDsnprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
                            (uint64_t)file_info.st_ino, num_digits, j + 1, n_io_concentrators);
@@ -726,8 +714,8 @@ main(int argc, char **argv)
     }
 
     /* Split communicator according to node-local ranks */
-    if (MPI_SUCCESS != (mpi_code = MPI_Comm_split_type(comm_g, MPI_COMM_TYPE_SHARED, mpi_rank,
-                                                       MPI_INFO_NULL, &node_local_comm))) {
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_split_type(comm_g, MPI_COMM_TYPE_SHARED, mpi_rank, MPI_INFO_NULL,
+                                                       &node_local_comm))) {
         HDprintf("MPI_Comm_split_type failed with error code %d\n", mpi_code);
         nerrors++;
         goto exit;

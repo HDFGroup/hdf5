@@ -875,7 +875,7 @@ H5_free_subfiling_topology(sf_topology_t *topology)
  */
 herr_t
 H5_open_subfiling_stub_file(const char *name, unsigned flags, MPI_Comm file_comm, H5FD_t **file_ptr,
-    uint64_t *file_id)
+                            uint64_t *file_id)
 {
     H5P_genplist_t *plist         = NULL;
     uint64_t        stub_file_id  = UINT64_MAX;
@@ -930,8 +930,8 @@ H5_open_subfiling_stub_file(const char *name, unsigned flags, MPI_Comm file_comm
         if (HDstat(name, &st) < 0) {
             stub_file_id = UINT64_MAX;
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL,
-                                    "couldn't stat HDF5 stub file, errno = %d, error message = '%s'",
-                                    errno, strerror(errno));
+                                    "couldn't stat HDF5 stub file, errno = %d, error message = '%s'", errno,
+                                    strerror(errno));
         }
         else
             stub_file_id = (uint64_t)st.st_ino;
@@ -940,14 +940,12 @@ H5_open_subfiling_stub_file(const char *name, unsigned flags, MPI_Comm file_comm
     bcasted_inode = TRUE;
 
     if (mpi_size > 1) {
-        if (MPI_SUCCESS != (mpi_code = MPI_Bcast(&stub_file_id, 1, MPI_UINT64_T, 0,
-                                                 file_comm)))
+        if (MPI_SUCCESS != (mpi_code = MPI_Bcast(&stub_file_id, 1, MPI_UINT64_T, 0, file_comm)))
             H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code);
     }
 
     if (stub_file_id == UINT64_MAX)
-        H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL,
-                                "couldn't get inode value for HDF5 stub file");
+        H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "couldn't get inode value for HDF5 stub file");
 
     if (file_ptr)
         *file_ptr = stub_file;
@@ -959,8 +957,7 @@ done:
 
     if (ret_value < 0) {
         if (!bcasted_inode && (mpi_size > 1)) {
-            if (MPI_SUCCESS != (mpi_code = MPI_Bcast(&stub_file_id, 1, MPI_UINT64_T,
-                                                     0, file_comm)))
+            if (MPI_SUCCESS != (mpi_code = MPI_Bcast(&stub_file_id, 1, MPI_UINT64_T, 0, file_comm)))
                 H5_SUBFILING_MPI_DONE_ERROR(FAIL, "MPI_Bcast failed", mpi_code);
         }
         if (stub_file) {
@@ -1563,8 +1560,7 @@ init_subfiling_context(subfiling_context_t *sf_context, H5FD_subfiling_shared_co
 
     /* Adjust base address after stripe size is set, if necessary */
     if (app_topology->rank_is_ioc) {
-        sf_context->sf_base_addr =
-            (int64_t)(app_topology->subfile_rank * sf_context->sf_stripe_size);
+        sf_context->sf_base_addr = (int64_t)(app_topology->subfile_rank * sf_context->sf_stripe_size);
     }
 
     /*
@@ -2601,16 +2597,18 @@ H5_subfiling_set_file_id_prop(H5P_genplist_t *plist_ptr, uint64_t file_id)
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file ID value");
 
     if ((prop_exists = H5P_exist_plist(plist_ptr, H5FD_SUBFILING_STUB_FILE_ID)) < 0)
-        H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't check if file ID property exists in FAPL");
+        H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL,
+                                "can't check if file ID property exists in FAPL");
 
     if (prop_exists) {
         if (H5P_set(plist_ptr, H5FD_SUBFILING_STUB_FILE_ID, &file_id) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file ID property on FAPL");
     }
     else {
-        if (H5P_insert(plist_ptr, H5FD_SUBFILING_STUB_FILE_ID, sizeof(uint64_t),
-                       &file_id, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-            H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to register file ID property in FAPL");
+        if (H5P_insert(plist_ptr, H5FD_SUBFILING_STUB_FILE_ID, sizeof(uint64_t), &file_id, NULL, NULL, NULL,
+                       NULL, NULL, NULL, NULL, NULL) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL,
+                                    "unable to register file ID property in FAPL");
     }
 
 done:
@@ -2640,7 +2638,8 @@ H5_subfiling_get_file_id_prop(H5P_genplist_t *plist_ptr, uint64_t *file_id)
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL file ID pointer");
 
     if ((prop_exists = H5P_exist_plist(plist_ptr, H5FD_SUBFILING_STUB_FILE_ID)) < 0)
-        H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't check if file ID property exists in FAPL");
+        H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL,
+                                "can't check if file ID property exists in FAPL");
 
     if (prop_exists) {
         if (H5P_get(plist_ptr, H5FD_SUBFILING_STUB_FILE_ID, file_id) < 0)

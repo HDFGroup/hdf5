@@ -928,8 +928,8 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
          * context ID will be returned, which is used for
          * further interactions with this file's subfiles.
          */
-        if (H5_open_subfiles(file_ptr->file_path, file_ptr->file_id, &file_ptr->fa.shared_cfg,
-                             ioc_flags, file_ptr->comm, &file_ptr->context_id) < 0)
+        if (H5_open_subfiles(file_ptr->file_path, file_ptr->file_id, &file_ptr->fa.shared_cfg, ioc_flags,
+                             file_ptr->comm, &file_ptr->context_id) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open subfiling files = %s\n",
                                     name);
     }
@@ -1564,7 +1564,7 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_
         if ((type == H5FD_MEM_SUPER) && (file_ptr->mpi_rank == 0)) {
             if (H5FD_write_vector(file_ptr->stub_file, 1, &type, &addr, &size, &buf) < 0)
                 H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
-                        "couldn't write superblock information to stub file");
+                                        "couldn't write superblock information to stub file");
         }
     }
     else {
@@ -1681,9 +1681,9 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_
                     for (size_t count_idx = 0; count_idx < (size_t)final_vec_len; count_idx++) {
                         if (io_types[count_idx] == H5FD_MEM_SUPER) {
                             if (H5FD_write(file_ptr->stub_file, H5FD_MEM_SUPER, io_addrs[count_idx],
-                                    io_sizes[count_idx], io_bufs[count_idx]) < 0)
+                                           io_sizes[count_idx], io_bufs[count_idx]) < 0)
                                 H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
-                                        "couldn't write superblock information to stub file");
+                                                        "couldn't write superblock information to stub file");
                         }
                     }
                 }

@@ -577,7 +577,8 @@ H5FD__ioc_sb_encode(H5FD_t H5_ATTR_UNUSED *_file, char H5_ATTR_UNUSED *name /*ou
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__ioc_sb_decode(H5FD_t H5_ATTR_UNUSED *_file, const char H5_ATTR_UNUSED *name, const unsigned char H5_ATTR_UNUSED *buf)
+H5FD__ioc_sb_decode(H5FD_t H5_ATTR_UNUSED *_file, const char H5_ATTR_UNUSED *name,
+                    const unsigned char H5_ATTR_UNUSED *buf)
 {
     herr_t ret_value = SUCCEED;
 
@@ -1089,7 +1090,7 @@ static haddr_t
 H5FD__ioc_alloc(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED dxpl_id,
                 hsize_t H5_ATTR_UNUSED size)
 {
-    haddr_t ret_value = HADDR_UNDEF;         /* Return value */
+    haddr_t ret_value = HADDR_UNDEF; /* Return value */
 
     H5FD_IOC_LOG_CALL(__func__);
 
@@ -1110,7 +1111,7 @@ static herr_t
 H5FD__ioc_free(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED dxpl_id,
                haddr_t H5_ATTR_UNUSED addr, hsize_t H5_ATTR_UNUSED size)
 {
-    herr_t ret_value = SUCCEED;             /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     H5FD_IOC_LOG_CALL(__func__);
 
@@ -1219,7 +1220,8 @@ done:
  *--------------------------------------------------------------------------
  */
 static herr_t
-H5FD__ioc_get_handle(H5FD_t H5_ATTR_UNUSED *_file, hid_t H5_ATTR_UNUSED fapl, void H5_ATTR_UNUSED **file_handle)
+H5FD__ioc_get_handle(H5FD_t H5_ATTR_UNUSED *_file, hid_t H5_ATTR_UNUSED fapl,
+                     void H5_ATTR_UNUSED **file_handle)
 {
     herr_t ret_value = SUCCEED;
 
