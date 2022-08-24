@@ -245,6 +245,7 @@ finalize_ioc_threads(void *_sf_context)
                                 ioc_data->io_queue.num_failed);
 
     HDfree(ioc_data);
+    sf_context->ioc_data = NULL;
 
     H5_SUBFILING_FUNC_LEAVE;
 }

@@ -91,7 +91,6 @@ static hbool_t H5FD_mpi_self_initialized = FALSE;
 
 typedef struct H5FD_subfiling_t {
     H5FD_t                  pub; /* public stuff, must be first      */
-    int                     fd;  /* the filesystem file descriptor   */
     H5FD_subfiling_config_t fa;  /* driver-specific file access properties */
 
     /* MPI Info */
@@ -102,8 +101,10 @@ typedef struct H5FD_subfiling_t {
     int      mpi_size;
 
     H5FD_t *sf_file;
+    H5FD_t *stub_file;
 
-    int64_t context_id; /* The value used to lookup a subfiling context for the file */
+    uint64_t file_id;
+    int64_t  context_id; /* The value used to lookup a subfiling context for the file */
 
     char *file_dir;  /* Directory where we find files */
     char *file_path; /* The user defined filename */
@@ -797,7 +798,6 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
     H5FD_driver_prop_t             driver_prop; /* Property for driver ID & info */
     hbool_t                        bcasted_eof = FALSE;
     int64_t                        sf_eof      = -1;
-    void                          *file_handle = NULL;
     int                            mpi_code; /* MPI return code */
     H5FD_t                        *ret_value = NULL;
 
@@ -813,6 +813,7 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to allocate file struct");
     file_ptr->comm           = MPI_COMM_NULL;
     file_ptr->info           = MPI_INFO_NULL;
+    file_ptr->file_id        = UINT64_MAX;
     file_ptr->context_id     = -1;
     file_ptr->fa.ioc_fapl_id = H5I_INVALID_HID;
     file_ptr->ext_comm       = MPI_COMM_NULL;
@@ -868,16 +869,6 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "can't copy FAPL");
     }
 
-    /* Fully resolve the given filepath and get its dirname */
-    if (H5_resolve_pathname(name, file_ptr->comm, &file_ptr->file_path) < 0)
-        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't resolve filepath");
-    if (H5_dirname(file_ptr->file_path, &file_ptr->file_dir) < 0)
-        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get filepath dirname");
-
-    file_ptr->sf_file = H5FD_open(name, flags, file_ptr->fa.ioc_fapl_id, HADDR_UNDEF);
-    if (!file_ptr->sf_file)
-        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, NULL, "unable to open IOC file");
-
     /* Check the "native" driver (IOC/sec2/etc.) */
     if (NULL == (plist_ptr = H5I_object(file_ptr->fa.ioc_fapl_id)))
         H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_BADVALUE, NULL, "invalid IOC FAPL");
@@ -893,12 +884,31 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
             H5E_FILE, H5E_CANTOPENFILE, NULL,
             "unable to open file '%s' - only IOC and Sec2 VFDs are currently supported for subfiles", name);
 
-    if (H5FDget_vfd_handle(file_ptr->sf_file, file_ptr->fa.ioc_fapl_id, &file_handle) < 0)
-        H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get file handle");
+    /* Fully resolve the given filepath and get its dirname */
+    if (H5_resolve_pathname(name, file_ptr->comm, &file_ptr->file_path) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't resolve filepath");
+    if (H5_dirname(file_ptr->file_path, &file_ptr->file_dir) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get filepath dirname");
+
+    /*
+     * Create/open the HDF5 stub file and get its inode value for
+     * the internal mapping from file inode to subfiling context.
+     */
+    if (H5_open_subfiling_stub_file(file_ptr->file_path, flags, file_ptr->comm, &file_ptr->stub_file,
+                                    &file_ptr->file_id) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open HDF5 stub file");
+
+    /* Set stub file ID on IOC fapl so it can reuse on open */
+    if (H5_subfiling_set_file_id_prop(plist_ptr, file_ptr->file_id) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTSET, NULL, "can't set stub file ID on FAPL");
+
+    /* Open the HDF5 file's subfiles */
+    if (NULL == (file_ptr->sf_file = H5FD_open(name, flags, file_ptr->fa.ioc_fapl_id, HADDR_UNDEF)))
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, NULL, "unable to open IOC file");
 
     if (driver->value == H5_VFD_IOC) {
         /* Get a copy of the context ID for later use */
-        file_ptr->context_id     = H5_subfile_fhandle_to_context(file_handle);
+        file_ptr->context_id     = H5_subfile_fid_to_context(file_ptr->file_id);
         file_ptr->fa.require_ioc = true;
     }
     else if (driver->value == H5_VFD_SEC2) {
@@ -918,8 +928,8 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
          * context ID will be returned, which is used for
          * further interactions with this file's subfiles.
          */
-        if (H5_open_subfiles(file_ptr->file_path, file_handle, &file_ptr->fa.shared_cfg, ioc_flags,
-                             file_ptr->comm, &file_ptr->context_id) < 0)
+        if (H5_open_subfiles(file_ptr->file_path, file_ptr->file_id, &file_ptr->fa.shared_cfg,
+                             ioc_flags, file_ptr->comm, &file_ptr->context_id) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open subfiling files = %s\n",
                                     name);
     }
@@ -980,6 +990,8 @@ H5FD__subfiling_close_int(H5FD_subfiling_t *file_ptr)
 
     if (file_ptr->sf_file && H5FD_close(file_ptr->sf_file) < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close subfile");
+    if (file_ptr->stub_file && H5FD_close(file_ptr->stub_file) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close HDF5 stub file");
 
     if (!file_ptr->fa.require_ioc) {
         if (file_ptr->context_id >= 0 && H5_free_subfiling_object(file_ptr->context_id) < 0)
@@ -1094,7 +1106,6 @@ H5FD__subfiling_query(const H5FD_t H5_ATTR_UNUSED *_file, unsigned long *flags /
         *flags |= H5FD_FEAT_AGGREGATE_METADATA;  /* OK to aggregate metadata allocations  */
         *flags |= H5FD_FEAT_AGGREGATE_SMALLDATA; /* OK to aggregate "small" raw data allocations */
         *flags |= H5FD_FEAT_HAS_MPI;             /* This driver uses MPI */
-        *flags |= H5FD_FEAT_ALLOCATE_EARLY;      /* Allocate space early instead of late  */
     }
 
     H5_SUBFILING_FUNC_LEAVE_API;
@@ -1138,15 +1149,22 @@ H5FD__subfiling_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__subfiling_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr)
+H5FD__subfiling_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr)
 {
     H5FD_subfiling_t *file_ptr  = (H5FD_subfiling_t *)_file;
     herr_t            ret_value = SUCCEED;
 
     file_ptr->eoa = addr;
 
+    /* Set EOA for HDF5 stub file */
+    if (file_ptr->mpi_rank == 0) {
+        if (H5FD_set_eoa(file_ptr->stub_file, type, addr) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set HDF5 stub file EOA");
+    }
+
     ret_value = H5FD_set_eoa(file_ptr->sf_file, type, addr);
 
+done:
     H5_SUBFILING_FUNC_LEAVE_API;
 } /* end H5FD__subfiling_set_eoa() */
 
@@ -1195,7 +1213,7 @@ H5FD__subfiling_get_handle(H5FD_t *_file, hid_t H5_ATTR_UNUSED fapl, void **file
     if (!file_handle)
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file handle not valid");
 
-    *file_handle = &(file->fd);
+    H5FD_get_vfd_handle(file->sf_file, file->fa.ioc_fapl_id, file_handle);
 
 done:
     H5_SUBFILING_FUNC_LEAVE_API;
@@ -1537,6 +1555,17 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_
         /* Make vector write call to subfile */
         if (H5FD_write_vector(file_ptr->sf_file, 1, &type, &addr, &size, &buf) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "write to subfile failed");
+
+        /*
+         * Mirror superblock writes to the stub file so that
+         * legacy HDF5 applications can check what type of
+         * file they are reading
+         */
+        if ((type == H5FD_MEM_SUPER) && (file_ptr->mpi_rank == 0)) {
+            if (H5FD_write_vector(file_ptr->stub_file, 1, &type, &addr, &size, &buf) < 0)
+                H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
+                        "couldn't write superblock information to stub file");
+        }
     }
     else {
         int64_t max_io_req_per_ioc;
@@ -1642,6 +1671,22 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_
                 if (H5FD_write_vector(file_ptr->sf_file, final_vec_len, io_types, io_addrs, io_sizes,
                                       io_bufs) < 0)
                     H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "write to subfile failed");
+
+                /*
+                 * Mirror superblock writes to the stub file so that
+                 * legacy HDF5 applications can check what type of
+                 * file they are reading
+                 */
+                if (file_ptr->mpi_rank == 0) {
+                    for (size_t count_idx = 0; count_idx < (size_t)final_vec_len; count_idx++) {
+                        if (io_types[count_idx] == H5FD_MEM_SUPER) {
+                            if (H5FD_write(file_ptr->stub_file, H5FD_MEM_SUPER, io_addrs[count_idx],
+                                    io_sizes[count_idx], io_bufs[count_idx]) < 0)
+                                H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
+                                        "couldn't write superblock information to stub file");
+                        }
+                    }
+                }
             }
         }
     }
@@ -2060,6 +2105,14 @@ H5FD__subfiling_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5
          */
         if (H5FD__subfiling__truncate_sub_files(file->context_id, eoa, file->comm) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTUPDATE, FAIL, "sub-file truncate request failed");
+
+#if 0 /* TODO: Should be truncated only to size of superblock metadata */
+        /* Truncate the HDF5 stub file */
+        if (file->mpi_rank == 0) {
+            if (H5FD_truncate(file->stub_file, closing) < 0)
+                H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTUPDATE, FAIL, "stub file truncate request failed");
+        }
+#endif
 
         /* Reset last file I/O information */
         file->pos = HADDR_UNDEF;

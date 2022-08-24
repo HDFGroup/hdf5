@@ -20,7 +20,9 @@
 #include <stdatomic.h>
 
 #include "H5private.h"
+#include "H5FDprivate.h"
 #include "H5Iprivate.h"
+#include "H5Pprivate.h"
 
 #include "H5FDsubfiling.h"
 #include "H5FDioc.h"
@@ -40,6 +42,13 @@
  * may be better optimized than others
  */
 /* #define H5_SUBFILING_PREFER_ALLGATHER_TOPOLOGY */
+
+/*
+ * Name of the HDF5 FAPL property that the Subfiling VFD
+ * uses to pass the HDF5 stub file's Inode value to the
+ * underlying IOC VFD
+ */
+#define H5FD_SUBFILING_STUB_FILE_ID "H5FD_SUBFILING_STUB_FILE_ID"
 
 /*
  * MPI Tags are 32 bits, we treat them as unsigned
@@ -166,7 +175,6 @@ typedef struct topology {
 typedef struct {
     int64_t        sf_context_id;           /* Generated context ID which embeds the cache index */
     uint64_t       h5_file_id;              /* GUID (basically the inode value) */
-    void          *h5_file_handle;          /* Low-level handle for the HDF5 stub file */
     int            sf_fid;                  /* value returned by open(file,..)  */
     size_t         sf_write_count;          /* Statistics: write_count  */
     size_t         sf_read_count;           /* Statistics: read_count  */
@@ -213,17 +221,22 @@ typedef struct {
 extern "C" {
 #endif
 
-H5_DLL herr_t H5_open_subfiles(const char *base_filename, void *h5_file_handle,
+H5_DLL herr_t H5_open_subfiling_stub_file(const char *name, unsigned flags, MPI_Comm file_comm,
+                                          H5FD_t **file_ptr, uint64_t *file_id);
+H5_DLL herr_t H5_open_subfiles(const char *base_filename, uint64_t file_id,
                                H5FD_subfiling_shared_config_t *subfiling_config, int file_acc_flags,
                                MPI_Comm file_comm, int64_t *context_id_out);
 H5_DLL herr_t H5_close_subfiles(int64_t subfiling_context_id, MPI_Comm file_comm);
 
 H5_DLL int64_t H5_new_subfiling_object_id(sf_obj_type_t obj_type, int64_t index_val);
 H5_DLL void   *H5_get_subfiling_object(int64_t object_id);
-H5_DLL int64_t H5_subfile_fhandle_to_context(void *file_handle);
 H5_DLL herr_t  H5_free_subfiling_object(int64_t object_id);
 H5_DLL herr_t  H5_get_num_iocs_from_config_file(FILE *config_file, int *n_io_concentrators);
 H5_DLL herr_t  H5_resolve_pathname(const char *filepath, MPI_Comm comm, char **resolved_filepath);
+
+H5_DLL herr_t  H5_subfiling_set_file_id_prop(H5P_genplist_t *plist_ptr, uint64_t file_id);
+H5_DLL herr_t  H5_subfiling_get_file_id_prop(H5P_genplist_t *plist_ptr, uint64_t *file_id);
+H5_DLL int64_t H5_subfile_fid_to_context(uint64_t file_id);
 
 H5_DLL void H5_subfiling_log(int64_t sf_context_id, const char *fmt, ...);
 

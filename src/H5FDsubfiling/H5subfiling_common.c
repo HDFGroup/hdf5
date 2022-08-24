@@ -19,9 +19,9 @@
 
 #include "H5MMprivate.h"
 
-typedef struct {           /* Format of a context map entry  */
-    void   *file_handle;   /* key value (linear search of the cache) */
-    int64_t sf_context_id; /* The return value if matching file_handle */
+typedef struct {            /* Format of a context map entry  */
+    uint64_t file_id;       /* key value (linear search of the cache) */
+    int64_t  sf_context_id; /* The return value if matching file_handle */
 } file_map_to_context_t;
 
 /* Identifiers for HDF5's error API */
@@ -53,7 +53,7 @@ static herr_t init_subfiling_context(subfiling_context_t            *sf_context,
                                      H5FD_subfiling_shared_config_t *subfiling_config,
                                      sf_topology_t *app_topology, MPI_Comm file_comm);
 static herr_t open_subfile_with_context(subfiling_context_t *sf_context, int file_acc_flags);
-static herr_t record_fid_to_subfile(void *file_handle, int64_t subfile_context_id, int *next_index);
+static herr_t record_fid_to_subfile(uint64_t file_id, int64_t subfile_context_id, int *next_index);
 static herr_t ioc_open_file(int64_t file_context_id, int file_acc_flags);
 static herr_t generate_subfile_name(subfiling_context_t *sf_context, int file_acc_flags, char *filename_out,
                                     size_t filename_out_len, char **filename_basename_out,
@@ -64,7 +64,7 @@ static herr_t open_config_file(subfiling_context_t *sf_context, const char *base
                                const char *subfile_dir, const char *mode, FILE **config_file_out);
 
 static int         get_next_fid_map_index(void);
-static void        clear_fid_map_entry(void *file_handle, int64_t sf_context_id);
+static void        clear_fid_map_entry(uint64_t file_id, int64_t sf_context_id);
 static int         compare_hostid(const void *h1, const void *h2);
 static herr_t      get_ioc_selection_criteria_from_env(H5FD_subfiling_ioc_select_t *ioc_selection_type,
                                                        char                       **ioc_sel_info_str);
@@ -83,7 +83,7 @@ get_next_fid_map_index(void)
     HDassert(sf_open_file_map || (sf_file_map_size == 0));
 
     for (int i = 0; i < sf_file_map_size; i++) {
-        if (sf_open_file_map[i].file_handle == NULL) {
+        if (sf_open_file_map[i].file_id == UINT64_MAX) {
             index = i;
             break;
         }
@@ -113,13 +113,13 @@ get_next_fid_map_index(void)
  *-------------------------------------------------------------------------
  */
 static void
-clear_fid_map_entry(void *file_handle, int64_t sf_context_id)
+clear_fid_map_entry(uint64_t file_id, int64_t sf_context_id)
 {
     if (sf_open_file_map) {
         for (int i = 0; i < sf_file_map_size; i++) {
-            if ((sf_open_file_map[i].file_handle == file_handle) &&
+            if ((sf_open_file_map[i].file_id == file_id) &&
                 (sf_open_file_map[i].sf_context_id == sf_context_id)) {
-                sf_open_file_map[i].file_handle   = NULL;
+                sf_open_file_map[i].file_id       = UINT64_MAX;
                 sf_open_file_map[i].sf_context_id = -1;
                 return;
             }
@@ -756,7 +756,6 @@ H5_free_subfiling_object_int(subfiling_context_t *sf_context)
 
     sf_context->sf_context_id           = -1;
     sf_context->h5_file_id              = UINT64_MAX;
-    sf_context->h5_file_handle          = NULL;
     sf_context->sf_fid                  = -1;
     sf_context->sf_write_count          = 0;
     sf_context->sf_read_count           = 0;
@@ -849,6 +848,131 @@ H5_free_subfiling_topology(sf_topology_t *topology)
 }
 
 /*-------------------------------------------------------------------------
+ * Function:    H5_open_subfiling_stub_file
+ *
+ * Purpose:     Opens the stub file for an HDF5 file created with the
+ *              Subfiling VFD. This stub file only contains some superblock
+ *              metadata that can allow HDF5 applications to determine that
+ *              the file is an HDF5 file and was created with the Subfiling
+ *              VFD.
+ *
+ *              This routine is collective across `file_comm`; once the
+ *              stub file has been opened, the inode value for the file is
+ *              retrieved and broadcasted to all MPI ranks in `file_comm`
+ *              for future use.
+ *
+ *              To avoid unnecessary overhead from a large-scale file open,
+ *              this stub file is currently only opened on MPI rank 0. Note
+ *              that this assumes that all the relevant metadata will be
+ *              written from MPI rank 0. This should be fine for now since
+ *              the HDF file signature and Subfiling driver info is really
+ *              all that's needed, but this should be revisited since the
+ *              file metadata can and will come from other MPI ranks as
+ *              well.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5_open_subfiling_stub_file(const char *name, unsigned flags, MPI_Comm file_comm, H5FD_t **file_ptr,
+    uint64_t *file_id)
+{
+    H5P_genplist_t *plist         = NULL;
+    uint64_t        stub_file_id  = UINT64_MAX;
+    hbool_t         bcasted_inode = FALSE;
+    H5FD_t         *stub_file     = NULL;
+    hid_t           fapl_id       = H5I_INVALID_HID;
+    int             mpi_rank      = 0;
+    int             mpi_size      = 1;
+    int             mpi_code;
+    herr_t          ret_value = SUCCEED;
+
+    if (!name)
+        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid subfiling stub file name");
+    if (file_comm == MPI_COMM_NULL)
+        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid MPI communicator");
+    if (!file_id)
+        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL file ID pointer");
+
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_rank(file_comm, &mpi_rank)))
+        H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Comm_rank failed", mpi_code);
+    if (MPI_SUCCESS != (mpi_code = MPI_Comm_size(file_comm, &mpi_size)))
+        H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Comm_size failed", mpi_code);
+
+    if (!file_ptr && (mpi_rank == 0))
+        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL stub file pointer");
+
+    /* Open stub file on MPI rank 0 only */
+    if (mpi_rank == 0) {
+        h5_stat_t st;
+        MPI_Comm  stub_comm = MPI_COMM_SELF;
+        MPI_Info  stub_info = MPI_INFO_NULL;
+
+        if ((fapl_id = H5P_create_id(H5P_CLS_FILE_ACCESS_g, FALSE)) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't create FAPL for stub file");
+        if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+            H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access property list");
+
+        /* Use MPI I/O driver for stub file to allow access to vector I/O */
+        if (H5P_set(plist, H5F_ACS_MPI_PARAMS_COMM_NAME, &stub_comm) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set MPI communicator");
+        if (H5P_set(plist, H5F_ACS_MPI_PARAMS_INFO_NAME, &stub_info) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set MPI info object");
+        if (H5P_set_driver(plist, H5FD_MPIO, NULL, NULL) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set MPI I/O driver on FAPL");
+
+        if (NULL == (stub_file = H5FD_open(name, flags, fapl_id, HADDR_UNDEF)))
+            H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "couldn't open HDF5 stub file");
+
+        HDcompile_assert(sizeof(uint64_t) >= sizeof(ino_t));
+
+        /* Retrieve Inode value for stub file */
+        if (HDstat(name, &st) < 0) {
+            stub_file_id = UINT64_MAX;
+            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL,
+                                    "couldn't stat HDF5 stub file, errno = %d, error message = '%s'",
+                                    errno, strerror(errno));
+        }
+        else
+            stub_file_id = (uint64_t)st.st_ino;
+    }
+
+    bcasted_inode = TRUE;
+
+    if (mpi_size > 1) {
+        if (MPI_SUCCESS != (mpi_code = MPI_Bcast(&stub_file_id, 1, MPI_UINT64_T, 0,
+                                                 file_comm)))
+            H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code);
+    }
+
+    if (stub_file_id == UINT64_MAX)
+        H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL,
+                                "couldn't get inode value for HDF5 stub file");
+
+    if (file_ptr)
+        *file_ptr = stub_file;
+    *file_id = stub_file_id;
+
+done:
+    if (fapl_id >= 0 && H5I_dec_ref(fapl_id) < 0)
+        H5_SUBFILING_DONE_ERROR(H5E_ID, H5E_CANTDEC, FAIL, "can't close FAPL ID");
+
+    if (ret_value < 0) {
+        if (!bcasted_inode && (mpi_size > 1)) {
+            if (MPI_SUCCESS != (mpi_code = MPI_Bcast(&stub_file_id, 1, MPI_UINT64_T,
+                                                     0, file_comm)))
+                H5_SUBFILING_MPI_DONE_ERROR(FAIL, "MPI_Bcast failed", mpi_code);
+        }
+        if (stub_file) {
+            if (H5FD_close(stub_file) < 0)
+                H5_SUBFILING_DONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "couldn't close HDF5 stub file");
+        }
+    }
+
+    H5_SUBFILING_FUNC_LEAVE;
+}
+
+/*-------------------------------------------------------------------------
  * Function:    H5_open_subfiles
  *
  * Purpose:     Wrapper for the internal 'open__subfiles' function
@@ -877,7 +1001,7 @@ H5_free_subfiling_topology(sf_topology_t *topology)
  */
 /* TODO: revise description */
 herr_t
-H5_open_subfiles(const char *base_filename, void *file_handle,
+H5_open_subfiles(const char *base_filename, uint64_t file_id,
                  H5FD_subfiling_shared_config_t *subfiling_config, int file_acc_flags, MPI_Comm file_comm,
                  int64_t *context_id_out)
 {
@@ -904,7 +1028,7 @@ H5_open_subfiles(const char *base_filename, void *file_handle,
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "couldn't get subfiling object from context ID");
 
     /* Save some basic things in the new subfiling context */
-    sf_context->h5_file_handle = file_handle;
+    sf_context->h5_file_id = file_id;
 
     if (NULL == (sf_context->h5_filename = HDstrdup(base_filename)))
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
@@ -969,7 +1093,7 @@ done:
     }
 
     if (ret_value < 0) {
-        clear_fid_map_entry(file_handle, context_id);
+        clear_fid_map_entry(file_id, context_id);
 
         if (context_id >= 0 && H5_free_subfiling_object(context_id) < 0)
             H5_SUBFILING_DONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "couldn't free subfiling object");
@@ -1021,6 +1145,7 @@ init_subfiling(H5FD_subfiling_shared_config_t *subfiling_config, MPI_Comm comm, 
     /* Create a new subfiling context object with the created context ID */
     if (NULL == (new_context = H5_get_subfiling_object(context_id)))
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "couldn't create new subfiling object");
+    new_context->sf_context_id = -1;
 
 #ifndef H5_SUBFILING_PREFER_ALLGATHER_TOPOLOGY
     {
@@ -1053,12 +1178,6 @@ init_subfiling(H5FD_subfiling_shared_config_t *subfiling_config, MPI_Comm comm, 
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
                                 "couldn't initialize subfiling application topology object");
     new_context->sf_intra_comm = intra_comm;
-
-    new_context->sf_base_addr = 0;
-    if (new_context->topology->rank_is_ioc) {
-        new_context->sf_base_addr =
-            (int64_t)(new_context->topology->subfile_rank * new_context->sf_stripe_size);
-    }
 
     *context_id_out = context_id;
 
@@ -1378,29 +1497,31 @@ init_subfiling_context(subfiling_context_t *sf_context, H5FD_subfiling_shared_co
 
     HDassert(sf_context);
     HDassert(sf_context->topology == NULL);
+    HDassert(sf_context->sf_context_id >= 0);
     HDassert(subfiling_config);
     HDassert(app_topology);
     HDassert(app_topology->n_io_concentrators > 0);
     HDassert(MPI_COMM_NULL != file_comm);
 
-    sf_context->topology       = app_topology;
+    sf_context->h5_file_id     = UINT64_MAX;
+    sf_context->sf_fid         = -1;
+    sf_context->sf_write_count = 0;
+    sf_context->sf_read_count  = 0;
+    sf_context->sf_eof         = HADDR_UNDEF;
+    sf_context->sf_stripe_size = H5FD_SUBFILING_DEFAULT_STRIPE_SIZE;
+    sf_context->sf_base_addr   = 0;
     sf_context->sf_msg_comm    = MPI_COMM_NULL;
     sf_context->sf_data_comm   = MPI_COMM_NULL;
     sf_context->sf_eof_comm    = MPI_COMM_NULL;
     sf_context->sf_intra_comm  = MPI_COMM_NULL;
     sf_context->sf_group_comm  = MPI_COMM_NULL;
-    sf_context->sf_stripe_size = H5FD_SUBFILING_DEFAULT_STRIPE_SIZE;
-    sf_context->sf_write_count = 0;
-    sf_context->sf_read_count  = 0;
-    sf_context->sf_eof         = HADDR_UNDEF;
-    sf_context->h5_file_handle = NULL;
-    sf_context->sf_fid         = -1;
     sf_context->sf_group_size  = 1;
     sf_context->sf_group_rank  = 0;
-    sf_context->h5_filename    = NULL;
-    sf_context->sf_filename    = NULL;
     sf_context->subfile_prefix = NULL;
+    sf_context->sf_filename    = NULL;
+    sf_context->h5_filename    = NULL;
     sf_context->ioc_data       = NULL;
+    sf_context->topology       = app_topology;
 
 #ifdef H5_SUBFILING_DEBUG
     sf_context->sf_logfile = NULL;
@@ -1438,6 +1559,12 @@ init_subfiling_context(subfiling_context_t *sf_context, H5FD_subfiling_shared_co
     if ((env_value = HDgetenv(H5FD_SUBFILING_SUBFILE_PREFIX))) {
         if (NULL == (sf_context->subfile_prefix = HDstrdup(env_value)))
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "couldn't copy subfile prefix value");
+    }
+
+    /* Adjust base address after stripe size is set, if necessary */
+    if (app_topology->rank_is_ioc) {
+        sf_context->sf_base_addr =
+            (int64_t)(app_topology->subfile_rank * sf_context->sf_stripe_size);
     }
 
     /*
@@ -1527,13 +1654,14 @@ open_subfile_with_context(subfiling_context_t *sf_context, int file_acc_flags)
     herr_t ret_value = SUCCEED;
 
     HDassert(sf_context);
+    HDassert(sf_context->h5_file_id != UINT64_MAX);
 
     /*
-     * Save the HDF5 file ID (fid) to subfile context mapping.
+     * Save the HDF5 file ID (e.g., inode) to subfile context mapping.
      * There shouldn't be any issue, but check the status and
      * return if there was a problem.
      */
-    if (record_fid_to_subfile(sf_context->h5_file_handle, sf_context->sf_context_id, NULL) < 0)
+    if (record_fid_to_subfile(sf_context->h5_file_id, sf_context->sf_context_id, NULL) < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
                                 "couldn't record HDF5 file ID to subfile context mapping");
 
@@ -1542,41 +1670,13 @@ open_subfile_with_context(subfiling_context_t *sf_context, int file_acc_flags)
      * the subfile belonging to this IOC rank
      */
     if (sf_context->topology->rank_is_ioc) {
-        if (sf_context->sf_group_rank == 0) {
-            h5_stat_t st;
-
-            HDcompile_assert(sizeof(uint64_t) >= sizeof(ino_t));
-
-            /* Retrieve Inode value for HDF5 stub file and broadcast to other IOCs */
-            if (HDstat(sf_context->h5_filename, &st) < 0) {
-                sf_context->h5_file_id = UINT64_MAX;
-                H5_SUBFILING_DONE_ERROR(H5E_VFL, H5E_CANTGET, FAIL,
-                                        "couldn't stat HDF5 stub file, errno = %d, error message = '%s'",
-                                        errno, strerror(errno));
-            }
-            else
-                sf_context->h5_file_id = (uint64_t)st.st_ino;
-        }
-
-        if (sf_context->sf_group_size > 1) {
-            int mpi_code;
-
-            if (MPI_SUCCESS != (mpi_code = MPI_Bcast(&sf_context->h5_file_id, 1, MPI_UINT64_T, 0,
-                                                     sf_context->sf_group_comm)))
-                H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code);
-        }
-
-        if (sf_context->h5_file_id == UINT64_MAX)
-            H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL,
-                                    "couldn't get inode value for HDF5 stub file");
-
         if (ioc_open_file(sf_context->sf_context_id, file_acc_flags) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, FAIL, "IOC couldn't open subfile");
     }
 
 done:
     if (ret_value < 0) {
-        clear_fid_map_entry(sf_context->h5_file_handle, sf_context->sf_context_id);
+        clear_fid_map_entry(sf_context->h5_file_id, sf_context->sf_context_id);
     }
 
     H5_SUBFILING_FUNC_LEAVE;
@@ -1613,7 +1713,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-record_fid_to_subfile(void *file_handle, int64_t subfile_context_id, int *next_index)
+record_fid_to_subfile(uint64_t file_id, int64_t subfile_context_id, int *next_index)
 {
     int    index;
     herr_t ret_value = SUCCEED;
@@ -1625,17 +1725,17 @@ record_fid_to_subfile(void *file_handle, int64_t subfile_context_id, int *next_i
 
         sf_file_map_size = DEFAULT_FILE_MAP_ENTRIES;
         for (int i = 0; i < sf_file_map_size; i++) {
-            sf_open_file_map[i].file_handle   = NULL;
+            sf_open_file_map[i].file_id       = UINT64_MAX;
             sf_open_file_map[i].sf_context_id = -1;
         }
     }
 
     for (index = 0; index < sf_file_map_size; index++) {
-        if (sf_open_file_map[index].file_handle == file_handle)
+        if (sf_open_file_map[index].file_id == file_id)
             goto done;
 
-        if (sf_open_file_map[index].file_handle == NULL) {
-            sf_open_file_map[index].file_handle   = file_handle;
+        if (sf_open_file_map[index].file_id == UINT64_MAX) {
+            sf_open_file_map[index].file_id       = file_id;
             sf_open_file_map[index].sf_context_id = subfile_context_id;
 
             if (next_index) {
@@ -1658,14 +1758,14 @@ record_fid_to_subfile(void *file_handle, int64_t subfile_context_id, int *next_i
         sf_file_map_size *= 2;
 
         for (int i = index; i < sf_file_map_size; i++) {
-            sf_open_file_map[i].file_handle = NULL;
+            sf_open_file_map[i].file_id = UINT64_MAX;
         }
 
         if (next_index) {
             *next_index = index;
         }
 
-        sf_open_file_map[index].file_handle     = file_handle;
+        sf_open_file_map[index].file_id         = file_id;
         sf_open_file_map[index++].sf_context_id = subfile_context_id;
     }
 
@@ -2431,8 +2531,8 @@ H5_close_subfiles(int64_t subfiling_context_id, MPI_Comm file_comm)
     }
 
     /* The map from file handle to subfiling context can now be cleared */
-    if (sf_context->h5_file_handle != NULL) {
-        clear_fid_map_entry(sf_context->h5_file_handle, sf_context->sf_context_id);
+    if (sf_context->h5_file_id != UINT64_MAX) {
+        clear_fid_map_entry(sf_context->h5_file_id, sf_context->sf_context_id);
     }
 
     if (sf_context->topology->rank_is_ioc) {
@@ -2478,10 +2578,86 @@ done:
 }
 
 /*-------------------------------------------------------------------------
- * Function:    H5_subfile_fhandle_to_context
+ * Function:    H5_subfiling_set_file_id_prop
+ *
+ * Purpose:     Sets the specified file ID (Inode) value as a property on
+ *              the given FAPL pointer. The Subfiling VFD uses this
+ *              property to pass the HDF5 stub file ID value down to the
+ *              IOC VFD.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5_subfiling_set_file_id_prop(H5P_genplist_t *plist_ptr, uint64_t file_id)
+{
+    htri_t prop_exists = FAIL;
+    herr_t ret_value   = SUCCEED;
+
+    if (!plist_ptr)
+        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL FAPL pointer");
+    if (file_id == UINT64_MAX)
+        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file ID value");
+
+    if ((prop_exists = H5P_exist_plist(plist_ptr, H5FD_SUBFILING_STUB_FILE_ID)) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't check if file ID property exists in FAPL");
+
+    if (prop_exists) {
+        if (H5P_set(plist_ptr, H5FD_SUBFILING_STUB_FILE_ID, &file_id) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file ID property on FAPL");
+    }
+    else {
+        if (H5P_insert(plist_ptr, H5FD_SUBFILING_STUB_FILE_ID, sizeof(uint64_t),
+                       &file_id, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to register file ID property in FAPL");
+    }
+
+done:
+    H5_SUBFILING_FUNC_LEAVE;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    H5_subfiling_get_file_id_prop
+ *
+ * Purpose:     Retrieves the file ID (Inode) value from the given FAPL
+ *              pointer. The Subfiling VFD uses this property to pass the
+ *              HDF5 stub file ID value down to the IOC VFD.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5_subfiling_get_file_id_prop(H5P_genplist_t *plist_ptr, uint64_t *file_id)
+{
+    htri_t prop_exists = FAIL;
+    herr_t ret_value   = SUCCEED;
+
+    if (!plist_ptr)
+        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL FAPL pointer");
+    if (!file_id)
+        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL file ID pointer");
+
+    if ((prop_exists = H5P_exist_plist(plist_ptr, H5FD_SUBFILING_STUB_FILE_ID)) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't check if file ID property exists in FAPL");
+
+    if (prop_exists) {
+        if (H5P_get(plist_ptr, H5FD_SUBFILING_STUB_FILE_ID, file_id) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get file ID property from FAPL");
+    }
+    else
+        *file_id = UINT64_MAX;
+
+done:
+    H5_SUBFILING_FUNC_LEAVE;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    H5_subfile_fid_to_context
  *
  * Purpose:     This is a basic lookup function which returns the subfiling
- *              context id associated with the specified file handle.
+ *              context id associated with the specified file ID.
  *
  * Return:      Non-negative subfiling context ID if the context exists
  *              Negative on failure or if the subfiling context doesn't
@@ -2495,7 +2671,7 @@ done:
  *-------------------------------------------------------------------------
  */
 int64_t
-H5_subfile_fhandle_to_context(void *file_handle)
+H5_subfile_fid_to_context(uint64_t file_id)
 {
     int64_t ret_value = -1;
 
@@ -2503,14 +2679,14 @@ H5_subfile_fhandle_to_context(void *file_handle)
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, -1, "open file map is NULL");
 
     for (int i = 0; i < sf_file_map_size; i++) {
-        if (sf_open_file_map[i].file_handle == file_handle) {
+        if (sf_open_file_map[i].file_id == file_id) {
             return sf_open_file_map[i].sf_context_id;
         }
     }
 
 done:
     H5_SUBFILING_FUNC_LEAVE;
-} /* end H5_subfile_fhandle_to_context() */
+} /* end H5_subfile_fid_to_context() */
 
 #ifdef H5_SUBFILING_DEBUG
 void

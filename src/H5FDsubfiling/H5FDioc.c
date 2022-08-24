@@ -53,9 +53,13 @@ typedef struct H5FD_ioc_t {
     int      mpi_rank;
     int      mpi_size;
 
-    H5FD_t *ioc_file; /* native HDF5 file pointer */
+    uint64_t file_id;
+    int64_t  context_id; /* The value used to lookup a subfiling context for the file */
 
-    int64_t context_id; /* The value used to lookup a subfiling context for the file */
+    haddr_t eof;
+    haddr_t eoa;
+    haddr_t last_eoa;
+    haddr_t local_eof;
 
     char *file_dir;  /* Directory where we find files */
     char *file_path; /* The user defined filename */
@@ -530,19 +534,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static hsize_t
-H5FD__ioc_sb_size(H5FD_t *_file)
+H5FD__ioc_sb_size(H5FD_t H5_ATTR_UNUSED *_file)
 {
-    H5FD_ioc_t *file      = (H5FD_ioc_t *)_file;
-    hsize_t     ret_value = 0;
+    hsize_t ret_value = 0;
 
     H5FD_IOC_LOG_CALL(__func__);
 
-    /* Sanity check */
-    HDassert(file);
-    HDassert(file->ioc_file);
-
-    if (file->ioc_file)
-        ret_value = H5FD_sb_size(file->ioc_file);
+    /* TODO: placeholder for now */
 
     H5_SUBFILING_FUNC_LEAVE;
 } /* end H5FD__ioc_sb_size */
@@ -556,21 +554,15 @@ H5FD__ioc_sb_size(H5FD_t *_file)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__ioc_sb_encode(H5FD_t *_file, char *name /*out*/, unsigned char *buf /*out*/)
+H5FD__ioc_sb_encode(H5FD_t H5_ATTR_UNUSED *_file, char H5_ATTR_UNUSED *name /*out*/,
+                    unsigned char H5_ATTR_UNUSED *buf /*out*/)
 {
-    H5FD_ioc_t *file      = (H5FD_ioc_t *)_file;
-    herr_t      ret_value = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED;
 
     H5FD_IOC_LOG_CALL(__func__);
 
-    /* Sanity check */
-    HDassert(file);
-    HDassert(file->ioc_file);
+    /* TODO: placeholder for now */
 
-    if (file->ioc_file && H5FD_sb_encode(file->ioc_file, name, buf) < 0)
-        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTENCODE, FAIL, "unable to encode the superblock in R/W file");
-
-done:
     H5_SUBFILING_FUNC_LEAVE;
 } /* end H5FD__ioc_sb_encode */
 
@@ -585,21 +577,14 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__ioc_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
+H5FD__ioc_sb_decode(H5FD_t H5_ATTR_UNUSED *_file, const char H5_ATTR_UNUSED *name, const unsigned char H5_ATTR_UNUSED *buf)
 {
-    H5FD_ioc_t *file      = (H5FD_ioc_t *)_file;
-    herr_t      ret_value = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED;
 
     H5FD_IOC_LOG_CALL(__func__);
 
-    /* Sanity check */
-    HDassert(file);
-    HDassert(file->ioc_file);
+    /* TODO: placeholder for now */
 
-    if (H5FD_sb_load(file->ioc_file, name, buf) < 0)
-        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTDECODE, FAIL, "unable to decode the superblock in R/W file");
-
-done:
     H5_SUBFILING_FUNC_LEAVE;
 } /* end H5FD__ioc_sb_decode */
 
@@ -770,6 +755,7 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to allocate file struct");
     file_ptr->comm             = MPI_COMM_NULL;
     file_ptr->info             = MPI_INFO_NULL;
+    file_ptr->file_id          = UINT64_MAX;
     file_ptr->context_id       = -1;
     file_ptr->fa.under_fapl_id = H5I_INVALID_HID;
 
@@ -843,8 +829,7 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
                                 "unable to open file '%s' - only MPI I/O VFD is currently supported", name);
     }
     else {
-        subfiling_context_t *sf_context  = NULL;
-        void                *file_handle = NULL;
+        subfiling_context_t *sf_context = NULL;
         int                  ioc_flags;
 
         /* Translate the HDF5 file open flags into standard POSIX open flags */
@@ -856,26 +841,18 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         if (H5F_ACC_EXCL & flags)
             ioc_flags |= O_EXCL;
 
-        /*
-         * Open the HDF5 stub file. Note that we currently don't do a collective
-         * error check here, because we assume the MPI I/O driver is used and
-         * that all ranks will fail collectively if MPI_File_open fails to open
-         * the file. If a different VFD is used here in the future, a collective
-         * error check may be needed after the file open.
-         */
-        file_ptr->ioc_file = H5FD_open(file_ptr->file_path, flags, file_ptr->fa.under_fapl_id, HADDR_UNDEF);
-        if (NULL == file_ptr->ioc_file)
-            H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "couldn't open HDF5 stub file");
-
-        if (H5FDget_vfd_handle(file_ptr->ioc_file, file_ptr->fa.under_fapl_id, &file_handle) < 0)
-            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get file handle");
+        /* Retrieve the HDF5 stub file ID for the current file */
+        if (NULL == (plist_ptr = (H5P_genplist_t *)H5I_object(fapl_id)))
+            H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
+        if (H5_subfiling_get_file_id_prop(plist_ptr, &file_ptr->file_id) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get stub file ID from FAPL");
 
         /*
          * Open the subfiles for this HDF5 file. A subfiling
          * context ID will be returned, which is used for
          * further interactions with this file's subfiles.
          */
-        if (H5_open_subfiles(file_ptr->file_path, file_handle, &file_ptr->fa.subf_config, ioc_flags,
+        if (H5_open_subfiles(file_ptr->file_path, file_ptr->file_id, &file_ptr->fa.subf_config, ioc_flags,
                              file_ptr->comm, &file_ptr->context_id) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open subfiles for file '%s'",
                                     name);
@@ -965,13 +942,6 @@ H5FD__ioc_close_int(H5FD_ioc_t *file_ptr)
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_ARGS, FAIL, "can't close IOC under FAPL");
     file_ptr->fa.under_fapl_id = H5I_INVALID_HID;
 
-    /* Close underlying file */
-    if (file_ptr->ioc_file) {
-        if (H5FD_close(file_ptr->ioc_file) < 0)
-            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to close HDF5 file");
-        file_ptr->ioc_file = NULL;
-    }
-
     if (file_ptr->context_id >= 0) {
         subfiling_context_t *sf_context = H5_get_subfiling_object(file_ptr->context_id);
         int                  mpi_code;
@@ -1055,31 +1025,8 @@ H5FD__ioc_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     HDassert(f1);
     HDassert(f2);
 
-    if (f1->ioc_file && f1->ioc_file->cls && f1->ioc_file->cls->cmp && f2->ioc_file && f2->ioc_file->cls &&
-        f2->ioc_file->cls->cmp) {
-        ret_value = H5FD_cmp(f1->ioc_file, f2->ioc_file);
-    }
-    else {
-        h5_stat_t st1;
-        h5_stat_t st2;
+    ret_value = (f1->file_id > f2->file_id) - (f1->file_id < f2->file_id);
 
-        /*
-         * If under VFD has no compare routine, get
-         * inode of HDF5 stub file and compare them
-         *
-         * Note that the compare callback doesn't
-         * allow for failure, so we just return -1
-         * if stat fails.
-         */
-        if (HDstat(f1->file_path, &st1) < 0)
-            H5_SUBFILING_SYS_GOTO_ERROR(H5E_VFL, H5E_CANTGET, -1, "couldn't stat file");
-        if (HDstat(f2->file_path, &st2) < 0)
-            H5_SUBFILING_SYS_GOTO_ERROR(H5E_VFL, H5E_CANTGET, -1, "couldn't stat file");
-
-        ret_value = (st1.st_ino > st2.st_ino) - (st1.st_ino < st2.st_ino);
-    }
-
-done:
     H5_SUBFILING_FUNC_LEAVE;
 } /* end H5FD__ioc_cmp */
 
@@ -1093,30 +1040,20 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__ioc_query(const H5FD_t *_file, unsigned long *flags /* out */)
+H5FD__ioc_query(const H5FD_t H5_ATTR_UNUSED *_file, unsigned long *flags /* out */)
 {
-    const H5FD_ioc_t *file_ptr  = (const H5FD_ioc_t *)_file;
-    herr_t            ret_value = SUCCEED;
+    herr_t ret_value = SUCCEED;
 
     H5FD_IOC_LOG_CALL(__func__);
 
-    if (file_ptr == NULL) {
-        if (flags)
-            *flags = 0;
-    }
-    else if (file_ptr->ioc_file) {
-        if (H5FDquery(file_ptr->ioc_file, flags) < 0)
-            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTLOCK, FAIL, "unable to query R/W file");
-    }
-    else {
-        /* There is no file. Because this is a pure passthrough VFD,
-         * it has no features of its own.
-         */
-        if (flags)
-            *flags = 0;
+    /* Set the VFL feature flags that this driver supports */
+    if (flags) {
+        *flags = 0;
+        *flags |= H5FD_FEAT_AGGREGATE_METADATA;  /* OK to aggregate metadata allocations  */
+        *flags |= H5FD_FEAT_AGGREGATE_SMALLDATA; /* OK to aggregate "small" raw data allocations */
+        *flags |= H5FD_FEAT_HAS_MPI;             /* This driver uses MPI */
     }
 
-done:
     H5_SUBFILING_FUNC_LEAVE;
 } /* end H5FD__ioc_query() */
 
@@ -1129,22 +1066,14 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__ioc_get_type_map(const H5FD_t *_file, H5FD_mem_t *type_map)
+H5FD__ioc_get_type_map(const H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED *type_map)
 {
-    const H5FD_ioc_t *file      = (const H5FD_ioc_t *)_file;
-    herr_t            ret_value = SUCCEED;
+    herr_t ret_value = SUCCEED;
 
     H5FD_IOC_LOG_CALL(__func__);
 
-    /* Check arguments */
-    HDassert(file);
-    HDassert(file->ioc_file);
+    /* TODO: placeholder for now */
 
-    /* Retrieve memory type mapping for R/W channel only */
-    if (H5FD_get_fs_type_map(file->ioc_file, type_map) < 0)
-        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "unable to allocate for R/W file");
-
-done:
     H5_SUBFILING_FUNC_LEAVE;
 } /* end H5FD__ioc_get_type_map() */
 
@@ -1157,23 +1086,15 @@ done:
  *-------------------------------------------------------------------------
  */
 static haddr_t
-H5FD__ioc_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
+H5FD__ioc_alloc(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED dxpl_id,
+                hsize_t H5_ATTR_UNUSED size)
 {
-    H5FD_ioc_t *file      = (H5FD_ioc_t *)_file; /* VFD file struct */
-    haddr_t     ret_value = HADDR_UNDEF;         /* Return value */
+    haddr_t ret_value = HADDR_UNDEF;         /* Return value */
 
     H5FD_IOC_LOG_CALL(__func__);
 
-    /* Check arguments */
-    HDassert(file);
-    HDassert(file->ioc_file);
+    /* TODO: placeholder for now */
 
-    /* Allocate memory for each file, only return the return value for R/W file.
-     */
-    if ((ret_value = H5FDalloc(file->ioc_file, type, dxpl_id, size)) == HADDR_UNDEF)
-        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "unable to allocate for R/W file");
-
-done:
     H5_SUBFILING_FUNC_LEAVE;
 } /* end H5FD__ioc_alloc() */
 
@@ -1186,21 +1107,15 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__ioc_free(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t size)
+H5FD__ioc_free(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED dxpl_id,
+               haddr_t H5_ATTR_UNUSED addr, hsize_t H5_ATTR_UNUSED size)
 {
-    H5FD_ioc_t *file      = (H5FD_ioc_t *)_file; /* VFD file struct */
-    herr_t      ret_value = SUCCEED;             /* Return value */
+    herr_t ret_value = SUCCEED;             /* Return value */
 
     H5FD_IOC_LOG_CALL(__func__);
 
-    /* Check arguments */
-    HDassert(file);
-    HDassert(file->ioc_file);
+    /* TODO: placeholder for now */
 
-    if (H5FDfree(file->ioc_file, type, dxpl_id, addr, size) < 0)
-        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free for R/W file");
-
-done:
     H5_SUBFILING_FUNC_LEAVE;
 } /* end H5FD__ioc_free() */
 
@@ -1226,12 +1141,9 @@ H5FD__ioc_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 
     /* Sanity check */
     HDassert(file);
-    HDassert(file->ioc_file);
 
-    if ((ret_value = H5FD_get_eoa(file->ioc_file, type)) == HADDR_UNDEF)
-        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, HADDR_UNDEF, "unable to get eoa");
+    ret_value = file->eoa;
 
-done:
     H5_SUBFILING_FUNC_LEAVE;
 } /* end H5FD__ioc_get_eoa */
 
@@ -1255,13 +1167,9 @@ H5FD__ioc_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr)
 
     /* Sanity check */
     HDassert(file);
-    HDassert(file->ioc_file);
-    HDassert(file->ioc_file);
 
-    if (H5FD_set_eoa(file->ioc_file, type, addr) < 0)
-        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "H5FDset_eoa failed for R/W file");
+    file->eoa = addr;
 
-done:
     H5_SUBFILING_FUNC_LEAVE;
 } /* end H5FD__ioc_set_eoa() */
 
@@ -1288,16 +1196,14 @@ H5FD__ioc_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 
     /* Sanity check */
     HDassert(file);
-    HDassert(file->ioc_file);
 
     sf_context = H5_get_subfiling_object(file->context_id);
     if (sf_context) {
         ret_value = sf_context->sf_eof;
         goto done;
     }
-
-    if (HADDR_UNDEF == (ret_value = H5FD_get_eof(file->ioc_file, type)))
-        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, HADDR_UNDEF, "unable to get eof");
+    else
+        ret_value = file->eof;
 
 done:
     H5_SUBFILING_FUNC_LEAVE;
@@ -1313,22 +1219,14 @@ done:
  *--------------------------------------------------------------------------
  */
 static herr_t
-H5FD__ioc_get_handle(H5FD_t *_file, hid_t H5_ATTR_UNUSED fapl, void **file_handle)
+H5FD__ioc_get_handle(H5FD_t H5_ATTR_UNUSED *_file, hid_t H5_ATTR_UNUSED fapl, void H5_ATTR_UNUSED **file_handle)
 {
-    H5FD_ioc_t *file      = (H5FD_ioc_t *)_file;
-    herr_t      ret_value = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED;
 
     H5FD_IOC_LOG_CALL(__func__);
 
-    /* Check arguments */
-    HDassert(file);
-    HDassert(file->ioc_file);
-    HDassert(file_handle);
+    /* TODO: placeholder for now */
 
-    if (H5FD_get_vfd_handle(file->ioc_file, file->fa.under_fapl_id, file_handle) < 0)
-        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "unable to get handle of R/W file");
-
-done:
     H5_SUBFILING_FUNC_LEAVE;
 } /* end H5FD__ioc_get_handle */
 
@@ -1364,9 +1262,7 @@ H5FD__ioc_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUS
     if (REGION_OVERFLOW(addr, size))
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow, addr = %" PRIuHADDR, addr);
 
-    /* Public API for dxpl "context" */
-    if (H5FDread(file->ioc_file, type, dxpl_id, addr, size, buf) < 0)
-        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "Reading from R/W channel failed");
+    ret_value = H5FD__ioc_read_vector_internal(_file, 1, &addr, &size, &buf);
 
 done:
     H5_SUBFILING_FUNC_LEAVE;
@@ -1383,19 +1279,15 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__ioc_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size, const void *buf)
+H5FD__ioc_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr, size_t size,
+                const void *buf)
 {
-    H5P_genplist_t *plist_ptr = NULL;
-    herr_t          ret_value = SUCCEED;
-
-    if (NULL == (plist_ptr = (H5P_genplist_t *)H5I_object(dxpl_id)))
-        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+    herr_t ret_value = SUCCEED;
 
     addr += _file->base_addr;
 
     ret_value = H5FD__ioc_write_vector_internal(_file, 1, &type, &addr, &size, &buf);
 
-done:
     H5_SUBFILING_FUNC_LEAVE;
 } /* end H5FD__ioc_write() */
 
@@ -1494,17 +1386,14 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__ioc_flush(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closing)
+H5FD__ioc_flush(H5FD_t H5_ATTR_UNUSED *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR_UNUSED closing)
 {
-    H5FD_ioc_t *file      = (H5FD_ioc_t *)_file;
-    herr_t      ret_value = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED;
 
     H5FD_IOC_LOG_CALL(__func__);
 
-    if (H5FDflush(file->ioc_file, dxpl_id, closing) < 0)
-        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFLUSH, FAIL, "unable to flush R/W file");
+    /* TODO: placeholder for now */
 
-done:
     H5_SUBFILING_FUNC_LEAVE;
 } /* end H5FD__ioc_flush() */
 
@@ -1517,21 +1406,20 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__ioc_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
+H5FD__ioc_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR_UNUSED closing)
 {
     H5FD_ioc_t *file      = (H5FD_ioc_t *)_file;
-    herr_t      ret_value = SUCCEED; /* Return value */
+    herr_t      ret_value = SUCCEED;
 
     H5FD_IOC_LOG_CALL(__func__);
 
     HDassert(file);
-    HDassert(file->ioc_file);
-    HDassert(file->ioc_file);
 
-    if (H5FDtruncate(file->ioc_file, dxpl_id, closing) < 0)
-        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTUPDATE, FAIL, "unable to truncate R/W file");
+    /* TODO: placeholder for now since Subfiling does the truncation */
+    if (!H5F_addr_eq(file->eoa, file->last_eoa)) {
+        file->last_eoa = file->eoa;
+    }
 
-done:
     H5_SUBFILING_FUNC_LEAVE;
 } /* end H5FD__ioc_truncate */
 
@@ -1544,20 +1432,14 @@ done:
  *--------------------------------------------------------------------------
  */
 static herr_t
-H5FD__ioc_lock(H5FD_t *_file, hbool_t rw)
+H5FD__ioc_lock(H5FD_t H5_ATTR_UNUSED *_file, hbool_t H5_ATTR_UNUSED rw)
 {
-    H5FD_ioc_t *file      = (H5FD_ioc_t *)_file; /* VFD file struct */
-    herr_t      ret_value = SUCCEED;             /* Return value */
+    herr_t ret_value = SUCCEED;
 
     H5FD_IOC_LOG_CALL(__func__);
 
-    HDassert(file);
-    HDassert(file->ioc_file);
+    /* TODO: placeholder for now */
 
-    if (H5FD_lock(file->ioc_file, rw) < 0)
-        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTLOCKFILE, FAIL, "unable to lock file");
-
-done:
     H5_SUBFILING_FUNC_LEAVE;
 } /* end H5FD__ioc_lock */
 
@@ -1570,21 +1452,14 @@ done:
  *--------------------------------------------------------------------------
  */
 static herr_t
-H5FD__ioc_unlock(H5FD_t *_file)
+H5FD__ioc_unlock(H5FD_t H5_ATTR_UNUSED *_file)
 {
-    H5FD_ioc_t *file      = (H5FD_ioc_t *)_file; /* VFD file struct */
-    herr_t      ret_value = SUCCEED;             /* Return value */
+    herr_t ret_value = SUCCEED;
 
     H5FD_IOC_LOG_CALL(__func__);
 
-    /* Check arguments */
-    HDassert(file);
-    HDassert(file->ioc_file);
+    /* TODO: placeholder for now */
 
-    if (H5FD_unlock(file->ioc_file) < 0)
-        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTUNLOCKFILE, FAIL, "unable to unlock file");
-
-done:
     H5_SUBFILING_FUNC_LEAVE;
 } /* end H5FD__ioc_unlock */
 
@@ -1747,8 +1622,8 @@ done:
  *--------------------------------------------------------------------------
  */
 static herr_t
-H5FD__ioc_write_vector_internal(H5FD_t *_file, uint32_t count, H5FD_mem_t types[], haddr_t addrs[],
-                                size_t sizes[], const void *bufs[] /* in */)
+H5FD__ioc_write_vector_internal(H5FD_t *_file, uint32_t count, H5FD_mem_t H5_ATTR_UNUSED types[],
+                                haddr_t addrs[], size_t sizes[], const void *bufs[] /* in */)
 {
     subfiling_context_t *sf_context    = NULL;
     MPI_Request         *mpi_reqs      = NULL;
@@ -1808,19 +1683,6 @@ H5FD__ioc_write_vector_internal(H5FD_t *_file, uint32_t count, H5FD_mem_t types[
 
         mpi_reqs[(2 * i)]     = sf_io_reqs[i]->io_transfer_req;
         mpi_reqs[(2 * i) + 1] = sf_io_reqs[i]->io_comp_req;
-    }
-
-    /*
-     * Mirror superblock writes to the stub file so that
-     * legacy HDF5 applications can check what type of
-     * file they are reading
-     */
-    for (size_t i = 0; i < (size_t)count; i++) {
-        if (types[i] == H5FD_MEM_SUPER) {
-            if (H5FD_write(file_ptr->ioc_file, H5FD_MEM_SUPER, addrs[i], sizes[i], bufs[i]) < 0)
-                H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL,
-                                        "couldn't write superblock information to stub file");
-        }
     }
 
     /* Here, we should have queued 'count' async requests.
