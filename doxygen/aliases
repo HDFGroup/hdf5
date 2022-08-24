@@ -252,6 +252,7 @@ ALIASES += ref_vol_doc="VOL documentation"
 # RFCs
 ################################################################################
 
+ALIASES += ref_rfc20220819="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/Terminal_VOL_Connector_Feature_Flags.pdf\">Terminal VOL Connector Feature Flags</a>"
 ALIASES += ref_rfc20210528="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC_multi_thread.pdf\">Multi-Thread HDF5</a>"
 ALIASES += ref_rfc20210219="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/selection_io_RFC_210610.pdf\">Selection I/O</a>"
 ALIASES += ref_rfc20200213="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC_VFD_subfiling_200424.pdf\">VFD Sub-filing</a>"
