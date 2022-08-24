@@ -802,7 +802,7 @@ H5__debug_mask(const char *s)
             }
             else {
                 clear = FALSE;
-            } /* end if */
+            }
 
             /* Get the name */
             for (i = 0; HDisalpha(*s); i++, s++)
@@ -831,36 +831,37 @@ H5__debug_mask(const char *s)
                     if (!HDstrcmp(H5_debug_g.pkg[i].name, pkg_name)) {
                         H5_debug_g.pkg[i].stream = clear ? NULL : stream;
                         break;
-                    } /* end if */
-                }     /* end for */
+                    }
+                }
                 if (i >= (size_t)H5_NPKGS)
                     HDfprintf(stderr, "HDF5_DEBUG: ignored %s\n", pkg_name);
-            } /* end if-else */
+            }
         }
         else if (HDisdigit(*s)) {
             int                     fd = (int)HDstrtol(s, &rest, 0);
             H5_debug_open_stream_t *open_stream;
 
             if ((stream = HDfdopen(fd, "w")) != NULL) {
-                (void)HDsetvbuf(stream, NULL, _IOLBF, (size_t)0);
+                /* This is for debugging info, so turn off buffering */
+                (void)HDsetbuf(stream, NULL);
 
                 if (NULL ==
                     (open_stream = (H5_debug_open_stream_t *)H5MM_malloc(sizeof(H5_debug_open_stream_t)))) {
                     (void)HDfclose(stream);
                     return;
-                } /* end if */
+                }
 
                 open_stream->stream    = stream;
                 open_stream->next      = H5_debug_g.open_stream;
                 H5_debug_g.open_stream = open_stream;
-            } /* end if */
+            }
 
             s = rest;
         }
         else {
             s++;
-        } /* end if-else */
-    }     /* end while */
+        }
+    }
 } /* end H5__debug_mask() */
 
 #ifdef H5_HAVE_PARALLEL
