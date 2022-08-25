@@ -3,7 +3,7 @@ This tutorial enables you to get a feel for HDF5 by using the HDFView browser. I
 any programming experience.
 
 \section sec_learn_hv_install HDFView Installation
-\li Download and install HDFView. It can be downloaded from the <a href="https://portal.hdfgroup.org/display/support/Download+HDFView">Download HDFView page.</a>
+\li Download and install HDFView. It can be downloaded from the <a href="https://portal.hdfgroup.org/display/support/Download+HDFView">Download HDFView</a> page.
 \li Obtain the  <a href="https://support.hdfgroup.org/ftp/HDF5/examples/files/tutorial/storm1.txt">storm1.txt</a> text file, used in the tutorial.
 
 \section sec_learn_hv_begin Begin Tutorial
@@ -54,35 +54,103 @@ The steps below describe how to create a file (storm.h5), group (/Data), and a c
 A dataset is an array of data values. A contiguous dataset is one that is stored as a single block
 in the HDF5 file.
 <ul>
-<li>Select the File pull-down menu at the top left, and then select New -> HDF5.</li>
-<li>Specify a location and type in storm.h5 for the name of your file, and click on the Save button.
-You will see the storm.h5 file in the TableView:</li>
-<li>Right click on storm.h5, and select New -> Group.</li>
-<li>Enter Data for the name of the group and then click the Ok button. You will see the group Data in the TableView.</li>
-<li>Right click on the group Data and select New -> Dataset.</li>
-<li>A window pops up on the right. Fill in the information as follows, and then click Ok (leave the
-Datatype information as is):</li>
-<li>Left click on the Data group in the tree view to see the Storm dataset in the TableView:</li>
-<li>Double left click on the Storm dataset in the tree view. A window with an empty spreadsheet pops open.</li>
-<li>Copy the data from the storm1.txt file into the dataset.
+<li>Select the <em>File</em> pull-down menu at the top left, and then select <em>New -> HDF5</em>.</li>
+<li>Specify a location and type in <em>storm.h5</em> for the name of your file, and click on the <em>Save</em> button.
+You will see the <em>storm.h5</em> file in the TableView:
+<table>
+<tr>
+<td>
+\image html storm.png 
+</td>
+</tr>
+</table>
+</li>
+<li>Right click on <em>storm.h5</em>, and select <em>New -> Group</em>.</li>
+<li>Enter <em>Data</em> for the name of the group and then click the <em>Ok</em> button. You will see the group <em>Data</em> in the TableView.
+<table>
+<tr>
+<td>
+\image html DataGroup.png 
+</td>
+</tr>
+</table>
+</li>
+<li>Right click on the group <em>Data</em> and select <em>New -> Dataset</em>.</li>
+<li>A window pops up on the right. Fill in the information as follows, and then click <em>Ok</em> (leave the
+Datatype information as is):
+<table>
+<tr>
+<th>Dataset Name
+</th>
+<td><em>Storm</em>
+</td>
+</tr>
+<tr>
+<th>Under Dataspace, Current size
+</th>
+<td>57x57
+</td>
+</tr>
+<tr>
+<th>Under Dataspace, Maximum Size
+</th>
+<td>57x57
+</td>
+<tr>
+<th>Layout
+</th>
+<td><em>Contiguous</em> (default)
+</td>
+</tr>
+</table>
+</li>
+<li>Left click on the <em>Data</em> group in the tree view to see the <em>Storm</em> dataset in the TableView:
+<table>
+<tr>
+<td>
+\image html StormDataset.png 
+</td>
+</tr>
+</table>
+</li>
+<li>Double left click on the <em>Storm</em> dataset in the tree view. A window with an empty spreadsheet pops open.</li>
+<li>Copy the data from the <a href="https://support.hdfgroup.org/ftp/HDF5/examples/files/tutorial/storm1.txt">storm1.txt</a> file into the dataset.
 
-If you downloaded storm1.txt, then right click on the Table menu and select Import Data from Text File.
-Specify a location, select storm1.txt and click on the Open button. Answer Yes in the dialog box that
+If you downloaded <a href="https://support.hdfgroup.org/ftp/HDF5/examples/files/tutorial/storm1.txt">storm1.txt</a>,
+then right click on the <em>Table</em> menu and select <em>Import Data from Text File</em>.
+Specify a location, select <a href="https://support.hdfgroup.org/ftp/HDF5/examples/files/tutorial/storm1.txt">storm1.txt</a>
+and click on the <em>Open</em> button. Answer <em>Yes</em> in the dialog box that
 pops up (which asks if you wish to paste the selected data).
 
 Alternately, you can copy/paste directly. Select and copy the data in a separate window. Position your
-cursor at (0,0) in your table, and select Paste from the Table menu.
+cursor at (0,0) in your table, and select <em>Paste</em> from the <em>Table</em> menu.
 
-The values will be entered into the spreadsheet.</li>
+The values will be entered into the spreadsheet.
+<table>
+<tr>
+<td>
+\image html datasetwdata.png 
+</td>
+</tr>
+</table>
+</li>
 <li>Close the dataset, and save the data.</li>
 </ul>
 
 \subsection subsec_learn_hv_topics_image Displaying a Dataset as an Image
 Any dataset can be viewed as an image in HDFView. Below are the steps that demonstrate this.
 <ul>
-<li>Right click on Storm in the tree view, and select Open As.</li>
-<li>Select the Image button under Display As (near the top) in the Dataset Selection window that pops
-up. Then click OK at the bottom of the window to display the image.</li>
+<li>Right click on <em>Storm</em> in the tree view, and select <em>Open As</em>.</li>
+<li>Select the <em>Image</em> button under <em>Display As</em> (near the top) in the Dataset Selection window that pops
+up. Then click <em>OK</em> at the bottom of the window to display the image.
+<table>
+<tr>
+<td>
+\image html showasimage.png 
+</td>
+</tr>
+</table>
+</li>
 <li>The rainbow icon brings you to the Image Palette window. Click on that to play with the palette
 (GrayWave probably is the best choice). Close.</li>
 </ul>
@@ -91,82 +159,276 @@ up. Then click OK at the bottom of the window to display the image.</li>
 Additional information to describe an object can be stored in attributes. An attribute can be
 added to a group or dataset with HDFView.
 
-The following illustrates how to add an attribute to the group /Data:
+The following illustrates how to add an attribute to the group <em>/Data</em>:
 <ul>
-<li>Click on the /Data folder in the tree view. You will see two tabs, Object Attribute Info and
-General Object Info, in the pane on the right site of the HDFView window.</li>
-<li>With the left mouse button, select the Add Attribute button.</li>
-<li>Select the Add Attribute button to add an attribute with these values:</li>
-<li>Select the Ok button. The attribute will show up in the Properties window.</li>
+<li>Click on the <em>/Data</em> folder in the tree view. You will see two tabs, <em>Object Attribute Info</em> and
+<em>General Object Info</em>, in the pane on the right site of the HDFView window.
+<table>
+<tr>
+<td>
+\image html noattrs.png 
+</td>
+</tr>
+</table>
+</li>
+<li>With the left mouse button, select the <em>Add Attribute</em> button.</li>
+<li>Select the <em>Add Attribute</em> button to add an attribute with these values:</li>
+<table>
+<tr>
+<th>Name
+</th>
+<td><em>BatchID</em>
+</td>
+</tr>
+<tr>
+<th>Type
+</th>
+<td>INTEGER
+</td>
+</tr>
+<tr>
+<th>Size (bits)
+</th>
+<td>32
+</td>
+<tr>
+<th>Value
+</th>
+<td>3343
+</td>
+</tr>
+</table>
+<li>Select the <em>Ok</em> button. The attribute will show up in the <em>Properties</em> window.</li>
 <li>Close the Properties window.</li>
 </ul>
-
 Adding an attribute to a dataset is very similar to adding an attribute to a group. For example,
-the following adds an attribute to the /Storm dataset:
+the following adds an attribute to the <em>/Storm</em> dataset:
 <ul>
-<li>Left mouse click on the /Storm dataset in the tree view. You will see the Object Attribute
-Info and General Object Info tabs on the right</li>
-<li>In the Object Attribute Info pane select the Add Attribute button and enter an attribute with
-these values. (Be sure to add a String Length or the string will bet truncated to one character!):</li>
-<li>Select the Ok button. The attribute will be displayed in the window.</li>
-<li>Close the Properties window.</li>
+<li>Left mouse click on the <em>/Storm</em> dataset in the tree view. You will see the <em>Object Attribute
+Info</em> and <em>General Object Info</em> tabs on the right</li>
+<li>In the <em>Object Attribute Info</em> pane select the <em>Add Attribute</em> button and enter an attribute with
+these values. (Be sure to add a <em>String Length</em> or the string will be truncated to one character!):</li>
+<table>
+<tr>
+<th>Name
+</th>
+<td><em>Units</em>
+</td>
+</tr>
+<tr>
+<th>Type
+</th>
+<td>STRING
+</td>
+</tr>
+<tr>
+<th>String Length
+</th>
+<td>3
+</td>
+<tr>
+<th>Value
+</th>
+<td><em>m/s</em>
+</td>
+</tr>
+</table>
+<li>Select the <em>Ok</em> button. The attribute will be displayed in the window.</li>
+<li>Close the Properties window.
+<table>
+<tr>
+<td>
+\image html scarletletter.png 
+</td>
+</tr>
+</table>
+</li>
 </ul>
 
 \subsection subsec_learn_hv_topics_compress Creating a Compressed and Chunked Dataset
 A chunked and compressed dataset can be created using HDFView. A compressed dataset is a dataset
 whose size has been compressed to take up less space. In order to compress an HDF5 dataset, the
-dataset must be stored with a chunked dataset layout (as multiple chunks that are stored separately
+dataset must be stored with a chunked dataset layout (as multiple <em>chunks</em> that are stored separately
 in the file).
 
 Please note that the chunk sizes used in this topic are for demonstration purposes only. For
-information on chunking and specifying an appropriate chunk size, see the Chunking in HDF5 documentation.
+information on chunking and specifying an appropriate chunk size, see the
+<a href="/display/HDF5/Chunking+in+HDF5">Chunking in HDF5</a> documentation.
 
 Also see the HDF5 Tutorial topic on <a href="https://portal.hdfgroup.org/display/HDF5/Compressed+Datasets">Creating a Compressed Dataset</a>.
 <ul>
-<li>Right click on storm.h5. Select New -> Group.</li>
-<li>Enter Image for the name of the group, and click the OK button to create the group.</li>
-<li>Right click on the Image group, and select New -> Dataset.</li>
-<li>Enter the following information for the dataset. Leave the Datatype as is (INTEGER):</li>
-<li>Double left-mouse click on the Another Storm dataset to display the spredsheet:</li>
-<li>Copy the data from the storm1.txt file into the dataset. (See the previous topic for copying
-storm1.txt into a dataset.)</li>
+<li>Right click on storm.h5. Select <em>New -> Group</em>.</li>
+<li>Enter <em>Image</em> for the name of the group, and click the <em>OK</em> button to create the group.
+<table>
+<tr>
+<td>
+\image html newgroupimage.png 
+</td>
+</tr>
+</table>
+</li>
+<li>Right click on the <em>Image</em> group, and select <em>New -> Dataset</em>.</li>
+<li>Enter the following information for the dataset. Leave the <em>Datatype</em> as is (INTEGER):
+<table>
+<tr>
+<th>Dataset name
+</th>
+<td><em>Another Storm</em>
+</td>
+</tr>
+<tr>
+<th>Under Dataspace, Current size
+</th>
+<td>57x57
+</td>
+</tr>
+<tr>
+<th>Under Dataspace, Set Max Size
+</th>
+<td>57x57
+</td>
+</tr>
+<tr>
+<th>Storage Layout
+</th>
+<td>Chunked
+</td>
+</tr>
+<tr>
+<th>Chunk Size
+</th>
+<td>20x20
+</td>
+</tr>
+<tr>
+<th>Compression
+</th>
+<td>gzip
+</td>
+</tr>
+<tr>
+<th>Compression Level
+</th>
+<td>9
+</td>
+</table>
+You will see the <em>Another Storm</em> dataset in the <em>Image</em> group:
+<table>
+<tr>
+<td>
+\image html hdfview-anthrstrm.png 
+</td>
+</tr>
+</table>
+</li>
+<li>Double left-mouse click on the <em>Another Storm</em> dataset to display the spredsheet:
+<table>
+<tr>
+<td>
+\image html hdfview-anthrstrm-sprdsht.png 
+</td>
+</tr>
+</table>
+</li>
+<li>Copy the data from the <a href="https://support.hdfgroup.org/ftp/HDF5/examples/files/tutorial/storm1.txt">storm1.txt</a> file into the dataset. (See the previous topic for copying
+<a href="https://support.hdfgroup.org/ftp/HDF5/examples/files/tutorial/storm1.txt">storm1.txt</a> into a dataset.)</li>
 <li>Close the table, and save the data.</li>
-<li>Right click on Another Storm, and select Open As.</li>
-<li>Select the Image button in the Dataset Selection window that pops up. Click the Ok button at the
-bottom of the window to view the dataset as an image.</li>
+<li>Right click on <em>Another Storm</em>, and select <em>Open As</em>.</li>
+<li>Select the <em>Image</em> button in the Dataset Selection window that pops up. Click the <em>Ok</em> button at the
+bottom of the window to view the dataset as an image.
+<table>
+<tr>
+<td>
+\image html hdfview-anthrstrm-img.png 
+</td>
+</tr>
+</table>
+</li>
 </ul>
 
 \subsection subsec_learn_hv_topics_subset Creating an Image and a Subset
 A previous topic demonstrated how to view any dataset as an image in HDFView. With HDFView you can also
 create an image to begin with, as is shown below.
 <ul>
-<li>Right click on the Data group and select New -> Image.</li>
-<li>A window pops up on the right. Enter the following and then click Ok:</li>
+<li>Right click on the <em>Data</em> group and select <em>New -> Image</em>.</li>
+<li>A window pops up on the right. Enter the following and then click <em>Ok</em>:</li>
+<table>
+<tr>
+<th>Image name
+</th>
+<td><em>Storm Image</em>
+</td>
+</tr>
+<tr>
+<th>Height
+</th>
+<td>57
+</td>
+</tr>
+<tr>
+<th>Width
+</th>
+<td>57
+</td>
+</table>
+
 <li>Close the dataset.</li>
-<li>Double left-mouse click on the Data group to see its contents. You will see the Storm Image dataset.</li>
+<li>Double left-mouse click on the <em>Data</em> group to see its contents. You will see the <em>Storm Image</em> dataset.
+<table>
+<tr>
+<td>
+\image html hdfview-imgicon.png 
+</td>
+</tr>
+</table>
+</li>
 <li>
-Add data to the Storm Image dataset as was shown previously:
+Add data to the <em>Storm Image</em> dataset as was shown previously:
 <ul>
-<li>Right click on Storm Image, and select Open As to open the Dataset Selection window.</li>
-<li>Click on the Spreadsheet button at the top left of the Dataset Selection window to view the image
+<li>Right click on <em>Storm Image</em>, and select <em>Open As</em> to open the Dataset Selection window.</li>
+<li>Click on the <em>Spreadsheet</em> button at the top left of the Dataset Selection window to view the image
 as a spreadsheet.</li>
-<li>Copy the data from the storm1.txt file into the dataset.</li>
+<li>Copy the data from the <a href="https://support.hdfgroup.org/ftp/HDF5/examples/files/tutorial/storm1.txt">storm1.txt</a> file into the dataset.</li>
 <li>Close the dataset and save the data.</li>
 </ul>
 </li>
-<li>Left double click on Storm Image to see the image. Close the dataset.</li>
-<li>Right click on Storm Image and select Show Properties from the pop-up menu, to open the Properties
-window. Select the Attributes tab to see the attributes:</li>
+<li>Left double click on <em>Storm Image</em> to see the image. Close the dataset.</li>
+<li>Right click on <em>Storm Image</em> and select <em>Show Properties</em> from the pop-up menu, to open the Properties
+window. Select the <em>Attributes</em> tab to see the attributes:
+<table>
+<tr>
+<td>
+\image html hdfview-imgprop.png 
+</td>
+</tr>
+</table>
+</li>
 <li>Close the Properties window.</li>
-<li>Right click on Storm Image and select Open As to bring up the Data Selection window.</li>
+<li>Right click on <em>Storm Image</em> and select <em>Open As</em> to bring up the Data Selection window.</li>
 <li>Select a subset by clicking the left mouse on the image in the window and dragging the mouse.
-Notice that the Height and Width values change. Select to display it as an image. Click Ok.</li>
+Notice that the Height and Width values change. Select to display it as an image. Click <em>Ok</em>.
+<table>
+<tr>
+<td>
+\image html hdfview-imgsubset.png 
+</td>
+</tr>
+</table>
+</li>
 <li>Position the cursor in the middle of the image. Press Shift+Left Mouse button and hold, and then
 drag the mouse to select another subset.</li>
-<li>Select Image->Write Selection to Image. Enter Subset for the new image name. Click Ok. The Subset
+<li>Select <em>Image->Write Selection to Image</em>. Enter <em>Subset</em> for the new image name. Click <em>Ok</em>. The <em>Subset</em>
 image will appear in the tree view on the left.</li>
-<li>Left double click on the image Subset to bring it up on the right.</li>
-<li>Close the Subset image.</li>
+<li>Left double click on the image <em>Subset</em> to bring it up on the right.
+<table>
+<tr>
+<td>
+\image html hdfview-newimgsubset.png 
+</td>
+</tr>
+</table>
+</li>
+<li>Close the <em>Subset</em> image.</li>
 </ul>
 
 \subsection subsec_learn_hv_topics_table Creating a Table (Compound Dataset)
@@ -174,9 +436,57 @@ A dataset with a compound datatype contains data elements that consist of multip
 dataspace for the compound dataset is one-dimensional, then the dataset can be viewed as a table in
 HDFView, as is shown below.
 <ul>
-<li>Right button click on the group Data. Select New -> Compound DS.</li>
-<li>A window pops up on the right side of the screen. Only fill in the following fields:</li>
-<li>Open the Data group (if it is not open) and double left click on the Table object.</li>
+<li>Right button click on the group <em>Data</em>. Select <em>New -> Compound DS</em>.</li>
+<li>A window pops up on the right side of the screen. Only fill in the following fields:
+<table>
+<tr>
+<th>Dataset name
+</th>
+<td>Table
+</td>
+</tr>
+<tr>
+<th>Dataspace (Current size only)
+</th>
+<td>4
+</td>
+</tr>
+<tr>
+<th>Compound Datatype Properties:
+<br />Number of Members
+</th>
+<td>3
+</td>
+</tr>
+<tr>
+<th>Compound Datatype Properties:
+<br /><em>Name</em> / Datatype / Size
+</th>
+<td><em>Description</em> / string / 4
+<br /><em>Temperature</em> / float / 1
+<br /><em>Pressure</em> / double / 1
+</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td>
+\image html hdfview-newcmpd.png 
+</td>
+</tr>
+</table>
+</li>
+<li>Click Ok at the bottom.</li>
+<li>Open the Data group (if it is not open) and double left click on the Table object.
+<table>
+<tr>
+<td>
+\image html hdfview-table.png 
+</td>
+</tr>
+</table>
+</li>
 <li>Close the dataset.</li>
 </ul>
 

@@ -50,7 +50,7 @@ H5LT (Lite)    H5IM (Image)    H5TB (Table)    H5PT (Packet Table)    H5DS (Dime
 <a href="https://portal.hdfgroup.org/display/HDF5/Introduction+to+Parallel+HDF5">Introduction to Parallel HDF5</a>
 </td>
 <td>
-A brief introduction to Parallel HDF5. If you are new to HDF5 please see the Learning the Basics topic first. 
+A brief introduction to Parallel HDF5. If you are new to HDF5 please see the @ref LearnBasics topic first. 
 </td>
 </tr>
 <tr>
