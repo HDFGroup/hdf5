@@ -2756,11 +2756,11 @@ H5D__virtual_read_one(H5D_dset_io_info_t *dset_info, const H5D_type_info_t *type
             if (NULL == (dinfo = H5FL_CALLOC(H5D_dset_io_info_t)))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate dset info array buffer")
 
-            dinfo->dset            = source_dset->dset;
-            dinfo->mem_space       = source_dset->projected_mem_space;
-            dinfo->file_space      = projected_src_space;
-            dinfo->buf.vp          = dset_info->buf.vp;
-            dinfo->mem_type_id     = type_info->dst_type_id;
+            dinfo->dset        = source_dset->dset;
+            dinfo->mem_space   = source_dset->projected_mem_space;
+            dinfo->file_space  = projected_src_space;
+            dinfo->buf.vp      = dset_info->buf.vp;
+            dinfo->mem_type_id = type_info->dst_type_id;
 
             /* Read in the point (with the custom VL memory allocator) */
             if (H5D__read(1, dinfo, FALSE) < 0)

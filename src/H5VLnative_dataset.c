@@ -53,7 +53,8 @@
 static herr_t H5VL__native_dataset_io_setup(size_t count, void *obj[], hid_t mem_type_id[],
                                             hid_t mem_space_id[], hid_t file_space_id[], hid_t dxpl_id,
                                             H5_flexible_const_ptr_t buf[], H5D_dset_io_info_t **dinfo);
-static herr_t H5VL__native_dataset_io_cleanup(size_t count, hid_t mem_space_id[], hid_t file_space_id[], H5D_dset_io_info_t *dinfo);
+static herr_t H5VL__native_dataset_io_cleanup(size_t count, hid_t mem_space_id[], hid_t file_space_id[],
+                                              H5D_dset_io_info_t *dinfo);
 
 /*********************/
 /* Package Variables */
@@ -165,7 +166,7 @@ H5VL__native_dataset_io_setup(size_t count, void *obj[], hid_t mem_type_id[], hi
                 if (NULL == ((*dinfo)[i].mem_space = H5S_create(H5S_NULL)))
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "unable to create NULL memory dataspace")
             } /* end else */
-        } /* end if */
+        }     /* end if */
         else if (H5S_PLIST == mem_space_id[i])
             HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "H5S_PLIST is not allowed for memory dataspace")
         else {
@@ -200,7 +201,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL__native_dataset_io_cleanup(size_t count, hid_t mem_space_id[], hid_t file_space_id[], H5D_dset_io_info_t *dinfo)
+H5VL__native_dataset_io_cleanup(size_t count, hid_t mem_space_id[], hid_t file_space_id[],
+                                H5D_dset_io_info_t *dinfo)
 {
     size_t i;
     herr_t ret_value = SUCCEED; /* Return value */
