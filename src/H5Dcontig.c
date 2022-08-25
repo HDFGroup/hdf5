@@ -265,7 +265,6 @@ H5D__contig_fill(const H5D_io_info_t *io_info)
     dset_info->store           = &store;
     dset_info->buf.cvp         = fb_info.fill_buf;
     dset_info->mem_space       = NULL;
-    dset_info->mem_space_alloc = FALSE;
     ioinfo.dsets_info          = dset_info;
     ioinfo.f_sh                = H5F_SHARED(dset->oloc.file);
 
@@ -339,11 +338,6 @@ done:
     /* Release the fill buffer info, if it's been initialized */
     if (fb_info_init && H5D__fill_term(&fb_info) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release fill buffer info")
-
-    /* Free the memory dataspace if it was allocated (currently this will never
-     * happen) */
-    if (dset_info->mem_space_alloc && H5S_close(dset_info->mem_space) < 0)
-        HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close memory dataspace")
 
     /* Close dset_info */
     if (dset_info)

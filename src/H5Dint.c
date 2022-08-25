@@ -2645,11 +2645,8 @@ H5D__vlen_get_buf_size_cb(void H5_ATTR_UNUSED *elem, hid_t type_id, unsigned H5_
 
 done:
     /* Release resources */
-    if (dset_info) {
-        if (dset_info->mem_space_alloc && H5S_close(dset_info->mem_space) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close memory dataspace")
+    if (dset_info)
         dset_info = H5FL_FREE(H5D_dset_io_info_t, dset_info);
-    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__vlen_get_buf_size_cb() */

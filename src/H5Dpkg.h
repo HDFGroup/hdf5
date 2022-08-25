@@ -241,9 +241,6 @@ typedef struct H5D_piece_info_t {
 } H5D_piece_info_t;
 
 /* dset info for multiple dsets */
-/* When freeing this struct, you must always check the value of mem_space_alloc,
- * calling H5S_close() if it is true, since lower levels may have allocated and
- * replaced mem_space */
 typedef struct H5D_dset_io_info_t {
     H5D_t                  *dset;       /* Pointer to dataset being operated on */
     H5D_storage_t          *store;      /* Dataset storage info */
@@ -265,7 +262,6 @@ typedef struct H5D_dset_io_info_t {
     H5S_sel_iter_t mem_iter;        /* Iterator for elements in memory selection */
     unsigned       m_ndims;         /* Number of dimensions for memory dataspace */
     H5S_sel_type   msel_type;       /* Selection type in memory */
-    hbool_t        mem_space_alloc; /* Whether the memory space was allocated and needs to be freed */
 
     H5SL_t *dset_sel_pieces; /* Skiplist of selected pieces in this dataset, indexed by index */
 
