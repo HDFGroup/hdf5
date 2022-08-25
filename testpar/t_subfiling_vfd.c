@@ -36,6 +36,16 @@
 
 #define ARRAY_SIZE(a) sizeof(a) / sizeof(a[0])
 
+#define CHECK_PASSED()               \
+do {                                 \
+    if (MAINPROCESS) {               \
+        if (nerrors == curr_nerrors) \
+            PASSED();                \
+        else                         \
+            H5_FAILED();             \
+    }                                \
+} while(0)
+
 static MPI_Comm comm_g = MPI_COMM_WORLD;
 static MPI_Info info_g = MPI_INFO_NULL;
 static int      mpi_rank;
@@ -49,7 +59,12 @@ static MPI_Comm ioc_comm = MPI_COMM_WORLD;
 static int      ioc_comm_rank;
 static int      ioc_comm_size;
 
-int nerrors = 0;
+static long long stripe_size_g;
+static long      ioc_per_node_g;
+static int       ioc_thread_pool_size_g;
+
+int nerrors      = 0;
+int curr_nerrors = 0;
 
 /* Function pointer typedef for test functions */
 typedef void (*test_func)(void);
@@ -62,11 +77,15 @@ static hid_t create_subfiling_ioc_fapl(MPI_Comm comm, MPI_Info info, hbool_t cus
 static void test_create_and_close(void);
 static void test_config_file(void);
 static void test_stripe_sizes(void);
+static void test_subfiling_write_many_read_one(void);
+static void test_subfiling_write_many_read_few(void);
 
 static test_func tests[] = {
     test_create_and_close,
     test_config_file,
     test_stripe_sizes,
+    test_subfiling_write_many_read_one,
+    test_subfiling_write_many_read_few,
 };
 
 /* ---------------------------------------------------------------------------
@@ -93,6 +112,9 @@ create_subfiling_ioc_fapl(MPI_Comm comm, MPI_Info info, hbool_t custom_config,
     if ((ret_value = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         TEST_ERROR;
 
+    if (H5Pset_mpi_params(ret_value, comm, info) < 0)
+        TEST_ERROR;
+
     if (!custom_config) {
         if (H5Pset_fapl_subfiling(ret_value, NULL) < 0)
             TEST_ERROR;
@@ -105,8 +127,6 @@ create_subfiling_ioc_fapl(MPI_Comm comm, MPI_Info info, hbool_t custom_config,
             TEST_ERROR;
 
         if (H5Pset_mpi_params(ioc_fapl, comm, info) < 0)
-            TEST_ERROR;
-        if (H5Pset_mpi_params(ret_value, comm, info) < 0)
             TEST_ERROR;
 
         /* Get defaults for Subfiling configuration */
@@ -178,8 +198,10 @@ test_create_and_close(void)
     hid_t file_id = H5I_INVALID_HID;
     hid_t fapl_id = H5I_INVALID_HID;
 
+    curr_nerrors = nerrors;
+
     if (MAINPROCESS)
-        HDprintf("File creation and immediate close\n");
+        TESTING_2("file creation and immediate close");
 
     /* Get a default Subfiling FAPL */
     fapl_id = create_subfiling_ioc_fapl(comm_g, info_g, FALSE, NULL, 0);
@@ -197,6 +219,8 @@ test_create_and_close(void)
     H5E_END_TRY;
 
     VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
+
+    CHECK_PASSED();
 }
 #undef SUBF_FILENAME
 
@@ -220,8 +244,10 @@ test_config_file(void)
     int                            read_stripe_count;
     int                            mpi_code;
 
+    curr_nerrors = nerrors;
+
     if (MAINPROCESS)
-        HDprintf("Subfiling configuration file format\n");
+        TESTING_2("subfiling configuration file format");
 
     /*
      * Choose a random Subfiling stripe size between
@@ -229,9 +255,18 @@ test_config_file(void)
      */
     stripe_size = (rand() % ((int)(32 * H5_MB) - SUBFILING_MIN_STRIPE_SIZE)) + SUBFILING_MIN_STRIPE_SIZE;
 
+    /* TODO: Subfiling currently does not respect stripe_count setting */
     cfg.ioc_selection = SELECT_IOC_ONE_PER_NODE;
-    cfg.stripe_size   = stripe_size;
-    cfg.stripe_count  = 1; /* TODO: Subfiling currently does not respect stripe_count setting */
+    cfg.stripe_size   = (stripe_size_g > 0) ? stripe_size_g : stripe_size;
+
+    if (ioc_per_node_g > 0) {
+        if (ioc_per_node_g * ioc_comm_size <= mpi_size)
+            cfg.stripe_count = (int32_t) (ioc_per_node_g * ioc_comm_size);
+        else
+            cfg.stripe_count = mpi_size;
+    }
+    else
+        cfg.stripe_count = ioc_comm_size;
 
     fapl_id = create_subfiling_ioc_fapl(comm_g, info_g, TRUE, &cfg, H5FD_IOC_DEFAULT_THREAD_POOL_SIZE);
     VRFY((fapl_id >= 0), "FAPL creation succeeded");
@@ -282,7 +317,7 @@ test_config_file(void)
         VRFY(substr, "HDstrstr succeeded");
 
         VRFY((HDsscanf(substr, "stripe_size=%" PRId64, &read_stripe_size) == 1), "HDsscanf succeeded");
-        VRFY((read_stripe_size == stripe_size), "Stripe size comparison succeeded");
+        VRFY((read_stripe_size == cfg.stripe_size), "Stripe size comparison succeeded");
 
         /* Check the aggregator_count (stripe count) field in the configuration file */
         substr = HDstrstr(config_buf, "aggregator_count");
@@ -349,6 +384,8 @@ test_config_file(void)
     H5E_END_TRY;
 
     VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
+
+    CHECK_PASSED();
 }
 #undef SUBF_FILENAME
 
@@ -370,14 +407,13 @@ test_stripe_sizes(void)
     int     num_digits;
     hid_t   fapl_id = H5I_INVALID_HID;
 
+    curr_nerrors = nerrors;
+
     if (MAINPROCESS)
-        HDprintf("Subfiling stripe sizes\n");
+        TESTING_2("random subfiling stripe sizes");
 
     tmp_filename = HDmalloc(PATH_MAX);
     VRFY(tmp_filename, "HDmalloc succeeded");
-
-    n_io_concentrators = ioc_comm_size;
-    num_digits         = (int)(HDlog10(n_io_concentrators) + 1);
 
     dxpl_id = H5Pcreate(H5P_DATASET_XFER);
     VRFY((dxpl_id >= 0), "DCPL creation succeeded");
@@ -403,8 +439,12 @@ test_stripe_sizes(void)
         stripe_size = (rand() % ((int)(32 * H5_MB) - SUBFILING_MIN_STRIPE_SIZE)) + SUBFILING_MIN_STRIPE_SIZE;
 
         cfg.ioc_selection = SELECT_IOC_ONE_PER_NODE;
-        cfg.stripe_size   = stripe_size;
-        cfg.stripe_count  = 1;
+        cfg.stripe_size   = (stripe_size_g > 0) ? stripe_size_g : stripe_size;
+        cfg.stripe_count  = (int32_t) ((ioc_per_node_g > 0) ? ioc_per_node_g * ioc_comm_size : ioc_comm_size);
+
+        /* Start with a single rank for I/O */
+        n_io_concentrators = 1;
+        num_digits         = (int)(HDlog10(n_io_concentrators) + 1);
 
         nbytes = (size_t)(stripe_size * n_io_concentrators);
 
@@ -545,7 +585,7 @@ test_stripe_sizes(void)
         file_ptr = H5FDopen(SUBF_FILENAME, H5F_ACC_RDWR, fapl_id, HADDR_UNDEF);
         VRFY(file_ptr, "H5FDopen succeeded");
 
-        n_io_concentrators = ioc_comm_size;
+        n_io_concentrators = (int) ((ioc_per_node_g > 0) ? ioc_per_node_g * ioc_comm_size : ioc_comm_size);
         num_digits         = (int)(HDlog10(n_io_concentrators) + 1);
 
         /*
@@ -677,14 +717,158 @@ test_stripe_sizes(void)
     HDfree(tmp_filename);
 
     VRFY((H5Pclose(dxpl_id) >= 0), "DXPL close succeeded");
+
+    CHECK_PASSED();
 }
 #undef SUBF_FILENAME
 #undef SUBF_NITER
+
+/*
+ * Test to check that an HDF5 file created with the
+ * Subfiling VFD can be read back with a single MPI
+ * rank
+ */
+#define SUBF_FILENAME  "test_subfiling_write_many_read_one.h5"
+#define SUBF_HDF5_TYPE H5T_NATIVE_INT
+#define SUBF_C_TYPE    int
+static void
+test_subfiling_write_many_read_one(void)
+{
+    hsize_t start[1];
+    hsize_t count[1];
+    hsize_t dset_dims[1];
+    size_t  target_size;
+    hid_t   file_id   = H5I_INVALID_HID;
+    hid_t   fapl_id   = H5I_INVALID_HID;
+    hid_t   dset_id   = H5I_INVALID_HID;
+    hid_t   fspace_id = H5I_INVALID_HID;
+    void   *buf       = NULL;
+    int     mpi_code;
+
+    curr_nerrors = nerrors;
+
+    if (MAINPROCESS)
+        TESTING_2("reading back file with single MPI rank");
+
+    /* Get a default Subfiling FAPL */
+    fapl_id = create_subfiling_ioc_fapl(comm_g, info_g, FALSE, NULL, 0);
+    VRFY((fapl_id >= 0), "FAPL creation succeeded");
+
+    /* Create file on all ranks */
+    file_id = H5Fcreate(SUBF_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+    VRFY((file_id >= 0), "H5Fcreate succeeded");
+
+    VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
+
+    /*
+     * Attempt to create a dataset that is striped across
+     * 2 IOCs
+     */
+    VRFY(((H5FD_SUBFILING_DEFAULT_STRIPE_SIZE % sizeof(SUBF_C_TYPE)) == 0),
+            "I/O type size check succeeded");
+
+    target_size = (2 * H5FD_SUBFILING_DEFAULT_STRIPE_SIZE);
+    target_size -= (target_size % (size_t)mpi_size);
+
+    VRFY((target_size >= H5FD_SUBFILING_DEFAULT_STRIPE_SIZE),
+            "target size calculation succeeded");
+    VRFY(((target_size % sizeof(SUBF_C_TYPE)) == 0),
+            "target size check succeeded");
+
+    dset_dims[0] = (hsize_t) (target_size / sizeof(SUBF_C_TYPE));
+
+    fspace_id = H5Screate_simple(1, dset_dims, NULL);
+    VRFY((fspace_id >= 0), "H5Screate_simple succeeded");
+
+    dset_id = H5Dcreate2(file_id, "DSET", SUBF_HDF5_TYPE, fspace_id,
+            H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    VRFY((dset_id >= 0), "Dataset creation succeeded");
+
+    /* Select hyperslab */
+    count[0] = dset_dims[0] / (hsize_t)mpi_size;
+    start[0] = (hsize_t)mpi_rank * count[0];
+    VRFY((H5Sselect_hyperslab(fspace_id, H5S_SELECT_SET, start, NULL, count, NULL) >= 0),
+            "H5Sselect_hyperslab succeeded");
+
+    buf = HDmalloc(count[0] * sizeof(SUBF_C_TYPE));
+    VRFY(buf, "HDmalloc succeeded");
+
+    for (size_t i = 0; i < count[0]; i++)
+        ((SUBF_C_TYPE *)buf)[i] = (SUBF_C_TYPE) ((size_t)mpi_rank + i);
+
+    VRFY((H5Dwrite(dset_id, SUBF_HDF5_TYPE, H5S_BLOCK, fspace_id, H5P_DEFAULT, buf) >= 0),
+            "Dataset write succeeded");
+
+    HDfree(buf);
+    buf = NULL;
+
+    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+    VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
+
+    if (MAINPROCESS) {
+        fapl_id = create_subfiling_ioc_fapl(MPI_COMM_SELF, MPI_INFO_NULL, FALSE, NULL, 0);
+        VRFY((fapl_id >= 0), "FAPL creation succeeded");
+
+        file_id = H5Fopen(SUBF_FILENAME, H5F_ACC_RDONLY, fapl_id);
+        VRFY((file_id >= 0), "H5Fopen succeeded");
+
+        dset_id = H5Dopen2(file_id, "DSET", H5P_DEFAULT);
+        VRFY((dset_id >= 0), "Dataset open succeeded");
+
+        buf = HDmalloc(target_size);
+        VRFY(buf, "HDmalloc succeeded");
+
+        VRFY((H5Dread(dset_id, SUBF_HDF5_TYPE, H5S_BLOCK, H5S_ALL, H5P_DEFAULT, buf) >= 0),
+                "Dataset read succeeded");
+
+        for (size_t i = 0; i < (size_t)mpi_size; i++) {
+            for (size_t j = 0; j < count[0]; j++) {
+                SUBF_C_TYPE buf_value = ((SUBF_C_TYPE *)buf)[(i * count[0]) + j];
+
+                VRFY((buf_value == (SUBF_C_TYPE) (j + i)), "data verification succeeded");
+            }
+        }
+
+        HDfree(buf);
+        buf = NULL;
+
+        VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+        VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
+
+        H5E_BEGIN_TRY
+        {
+            H5Fdelete(SUBF_FILENAME, fapl_id);
+        }
+        H5E_END_TRY;
+
+        VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
+    }
+
+    mpi_code = MPI_Barrier(comm_g);
+    VRFY((mpi_code == MPI_SUCCESS), "MPI_Barrier succeeded");
+
+    VRFY((H5Sclose(fspace_id) >= 0), "FAPL close succeeded");
+
+    CHECK_PASSED();
+}
+#undef SUBF_FILENAME
+#undef SUBF_HDF5_TYPE
+#undef SUBF_C_TYPE
+
+#define SUBF_FILENAME  "test_subfiling_write_many_read_few.h5"
+#define SUBF_HDF5_TYPE H5T_NATIVE_INT
+#define SUBF_C_TYPE    int
+static void
+test_subfiling_write_many_read_few(void)
+{
+
+}
 
 int
 main(int argc, char **argv)
 {
     time_t seed;
+    char  *env_value;
     int    required = MPI_THREAD_MULTIPLE;
     int    provided = 0;
     int    mpi_code;
@@ -782,7 +966,34 @@ main(int argc, char **argv)
     srand((unsigned)seed);
 
     if (MAINPROCESS)
-        HDprintf("Using seed: %lld\n", (long long)seed);
+        HDprintf("Using seed: %lld\n\n", (long long)seed);
+
+    /* Grab values from global variables if set */
+    if (NULL != (env_value = HDgetenv(H5FD_SUBFILING_STRIPE_SIZE))) {
+        stripe_size_g = HDstrtoll(env_value, NULL, 0);
+        if ((ERANGE == errno) || (stripe_size_g <= 0))
+            stripe_size_g = -1;
+    }
+
+    if (NULL != (env_value = HDgetenv(H5FD_SUBFILING_IOC_PER_NODE))) {
+        ioc_per_node_g = HDstrtol(env_value, NULL, 0);
+        if ((ERANGE == errno) || (ioc_per_node_g <= 0))
+            ioc_per_node_g = -1;
+        else if (ioc_per_node_g * ioc_comm_size > mpi_size)
+            /*
+             * If the number of IOCs per node from the environment
+             * causes the total number of IOCs to exceed the number
+             * of MPI ranks available, the Subfiling VFD will simply
+             * use all of the MPI ranks on a node as IOCs
+             */
+            ioc_per_node_g = node_local_size;
+    }
+
+    if (NULL != (env_value = HDgetenv(H5FD_IOC_THREAD_POOL_SIZE))) {
+        ioc_thread_pool_size_g = HDatoi(env_value);
+        if (ioc_thread_pool_size_g <= 0)
+            ioc_thread_pool_size_g = -1;
+    }
 
     for (size_t i = 0; i < ARRAY_SIZE(tests); i++) {
         if (MPI_SUCCESS == (mpi_code = MPI_Barrier(comm_g))) {
