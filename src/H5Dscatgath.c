@@ -152,10 +152,6 @@ H5D__scatter_file(const H5D_io_info_t *_io_info, H5S_sel_iter_t *iter, size_t ne
     } /* end while */
 
 done:
-    /* Release ownership of mem_space in dest_info to calling function */
-    _io_info->dsets_info[0].mem_space       = tmp_dset_info->mem_space;
-    _io_info->dsets_info[0].mem_space_alloc = tmp_dset_info->mem_space_alloc;
-
     /* Release resources, if allocated */
     if (len)
         len = H5FL_SEQ_FREE(size_t, len);
@@ -262,10 +258,6 @@ H5D__gather_file(const H5D_io_info_t *_io_info, H5S_sel_iter_t *iter, size_t nel
     } /* end while */
 
 done:
-    /* Release ownership of mem_space in dest_info to calling function */
-    _io_info->dsets_info[0].mem_space       = tmp_dset_info->mem_space;
-    _io_info->dsets_info[0].mem_space_alloc = tmp_dset_info->mem_space_alloc;
-
     /* Release resources, if allocated */
     if (len)
         len = H5FL_SEQ_FREE(size_t, len);

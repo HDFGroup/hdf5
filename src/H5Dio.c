@@ -214,29 +214,32 @@ done:
 herr_t
 H5D__read(size_t count, H5D_dset_io_info_t *dset_info, hbool_t is_mdset)
 {
-    H5D_io_info_t io_info;                    /* Dataset I/O info  for multi dsets */
-    size_t        type_info_init      = 0;    /* Number of datatype info structs that have been initialized */
-    H5S_t        *projected_mem_space = NULL; /* If not NULL, ptr to dataspace containing a     */
-                                              /* projection of the supplied mem_space to a new  */
-                                              /* dataspace with rank equal to that of           */
-                                              /* file_space.                                    */
-                                              /*                                                */
-                                              /* This field is only used if                     */
-                                              /* H5S_select_shape_same() returns TRUE when      */
-                                              /* comparing the mem_space and the data_space,    */
-                                              /* and the mem_space have different rank.         */
-                                              /*                                                */
-                                              /* Note that this is a temporary variable - the   */
-                                              /* projected memory space is stored in dset_info, */
-                                              /* and will be freed when that structure is       */
-                                              /* freed. */
-    H5D_storage_t  store_local;               /* Local buffer for store */
-    H5D_storage_t *store = &store_local;      /* Union of EFL and chunk pointer in file space */
-    hsize_t        nelmts;                    /* Total number of elmts	*/
-    size_t         io_op_init = 0;            /* Number I/O ops that have been initialized */
-    size_t         i;                         /* Local index variable */
-    char           fake_char;                 /* Temporary variable for NULL buffer pointers */
-    herr_t         ret_value = SUCCEED;       /* Return value	*/
+    H5D_io_info_t io_info;               /* Dataset I/O info  for multi dsets */
+    size_t        type_info_init = 0;    /* Number of datatype info structs that have been initialized */
+    H5S_t        *orig_mem_space_local;  /* Local buffer for orig_mem_space */
+    H5S_t       **orig_mem_space = NULL; /* If not NULL, ptr to an array of dataspaces       */
+                                         /* containing the original memory spaces contained  */
+                                         /* in dset_info.  This is needed in order to        */
+                                         /* restore the original state of  dset_info if we   */
+                                         /* replaced any mem spaces with equivalents         */
+                                         /* projected to a rank equal to that of file_space. */
+                                         /*                                                  */
+                                         /* This field is only used if                       */
+                                         /* H5S_select_shape_same() returns TRUE when        */
+                                         /* comparing at least one mem_space and data_space, */
+                                         /* and the mem_space has a different rank.          */
+                                         /*                                                  */
+                                         /* Note that this is a temporary variable - the     */
+                                         /* projected memory space is stored in dset_info,   */
+                                         /* and will be freed when that structure is         */
+                                         /* freed. */
+    H5D_storage_t  store_local;          /* Local buffer for store */
+    H5D_storage_t *store = &store_local; /* Union of EFL and chunk pointer in file space */
+    hsize_t        nelmts;               /* Total number of elmts	*/
+    size_t         io_op_init = 0;       /* Number I/O ops that have been initialized */
+    size_t         i;                    /* Local index variable */
+    char           fake_char;            /* Temporary variable for NULL buffer pointers */
+    herr_t         ret_value = SUCCEED;  /* Return value	*/
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -263,7 +266,7 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info, hbool_t is_mdset)
     /* Allocate store buffer if necessary */
     if (count > 1)
         if (NULL == (store = (H5D_storage_t *)H5MM_malloc(count * sizeof(H5D_storage_t))))
-            HGOTO_ERROR(H5E_STORAGE, H5E_CANTALLOC, FAIL, "couldn't allocate dset storage info array buffer")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate dset storage info array buffer")
 
 #ifdef H5_HAVE_PARALLEL
     /* Check for non-MPI-based VFD.  Only need to check first dataset since all
@@ -342,31 +345,32 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info, hbool_t is_mdset)
             H5S_GET_EXTENT_NDIMS(dset_info[i].mem_space) != H5S_GET_EXTENT_NDIMS(dset_info[i].file_space)) {
             ptrdiff_t buf_adj = 0;
 
+            /* Allocate original memory space buffer if necessary */
+            if (!orig_mem_space) {
+                if (count > 1) {
+                    /* Allocate buffer */
+                    if (NULL == (orig_mem_space = (H5S_t **)H5MM_calloc(count * sizeof(H5S_t *))))
+                        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL,
+                                    "couldn't allocate original memory space array buffer")
+                }
+                else
+                    /* Use local buffer */
+                    orig_mem_space = &orig_mem_space_local;
+            }
+
+            /* Save original memory space */
+            orig_mem_space[i]      = dset_info[i].mem_space;
+            dset_info[i].mem_space = NULL;
+
             /* Attempt to construct projected dataspace for memory dataspace */
-            if (H5S_select_construct_projection(dset_info[i].mem_space, &projected_mem_space,
+            if (H5S_select_construct_projection(orig_mem_space[i], &dset_info[i].mem_space,
                                                 (unsigned)H5S_GET_EXTENT_NDIMS(dset_info[i].file_space),
                                                 (hsize_t)dset_info[i].type_info.dst_type_size, &buf_adj) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to construct projected memory dataspace")
-            HDassert(projected_mem_space);
+            HDassert(dset_info[i].mem_space);
 
             /* Adjust the buffer by the given amount */
             dset_info[i].buf.vp = (void *)(((uint8_t *)dset_info[i].buf.vp) + buf_adj);
-
-            /* Check if we need to free the old mem_space, and make sure we mark
-             * the memory dataspace as having been allocated so it gets freed
-             * eventually */
-            if (dset_info[i].mem_space_alloc) {
-                HDassert(dset_info[i].mem_space);
-                if (H5S_close(dset_info[i].mem_space) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL,
-                                "unable to release temporary memory dataspace")
-            }
-            else
-                dset_info[i].mem_space_alloc = TRUE;
-
-            /* Switch to using projected memory dataspace & adjusted buffer */
-            dset_info[i].mem_space = projected_mem_space;
-            projected_mem_space    = NULL;
         } /* end if */
 
         /* If space hasn't been allocated and not using external storage,
@@ -486,17 +490,25 @@ done:
         if (H5D__typeinfo_term(&(dset_info[i].type_info)) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down type info")
 
-    /* Discard projected mem space if it was created and not placed in dset_info */
-    if (projected_mem_space) {
-        HDassert(ret_value < 0);
-        if (H5S_close(projected_mem_space) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down projected memory dataspace")
+    /* Discard projected mem spaces and restore originals */
+    if (orig_mem_space) {
+        for (i = 0; i < count; i++)
+            if (orig_mem_space[i]) {
+                if (H5S_close(dset_info[i].mem_space) < 0)
+                    HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL,
+                                "unable to shut down projected memory dataspace")
+                dset_info[i].mem_space = orig_mem_space[i];
+            }
+
+        /* Free orig_mem_space array if it was allocated */
+        if (orig_mem_space != &orig_mem_space_local)
+            H5MM_free(orig_mem_space);
     }
 
     /* Free global piece skiplist */
     if (io_info.sel_pieces)
         if (H5SL_close(io_info.sel_pieces) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't close dataset skip list")
+            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't close dataset skip list")
 
     /* Free store array if it was allocated */
     if (store != &store_local)
@@ -520,29 +532,32 @@ done:
 herr_t
 H5D__write(size_t count, H5D_dset_io_info_t *dset_info, hbool_t is_mdset)
 {
-    H5D_io_info_t io_info;                    /* Dataset I/O info for multi dsets */
-    size_t        type_info_init      = 0;    /* Number of datatype info structs that have been initialized */
-    H5S_t        *projected_mem_space = NULL; /* If not NULL, ptr to dataspace containing a     */
-                                              /* projection of the supplied mem_space to a new  */
-                                              /* dataspace with rank equal to that of           */
-                                              /* file_space.                                    */
-                                              /*                                                */
-                                              /* This field is only used if                     */
-                                              /* H5S_select_shape_same() returns TRUE when      */
-                                              /* comparing the mem_space and the data_space,    */
-                                              /* and the mem_space have different rank.         */
-                                              /*                                                */
-                                              /* Note that this is a temporary variable - the   */
-                                              /* projected memory space is stored in dset_info, */
-                                              /* and will be freed when that structure is       */
-                                              /* freed. */
-    H5D_storage_t  store_local;               /* Local buffer for store */
-    H5D_storage_t *store = &store_local;      /* Union of EFL and chunk pointer in file space */
-    hsize_t        nelmts;                    /* Total number of elmts	*/
-    size_t         io_op_init = 0;            /* Number I/O ops that have been initialized */
-    size_t         i;                         /* Local index variable */
-    char           fake_char;                 /* Temporary variable for NULL buffer pointers */
-    herr_t         ret_value = SUCCEED;       /* Return value	*/
+    H5D_io_info_t io_info;               /* Dataset I/O info for multi dsets */
+    size_t        type_info_init = 0;    /* Number of datatype info structs that have been initialized */
+    H5S_t        *orig_mem_space_local;  /* Local buffer for orig_mem_space */
+    H5S_t       **orig_mem_space = NULL; /* If not NULL, ptr to an array of dataspaces       */
+                                         /* containing the original memory spaces contained  */
+                                         /* in dset_info.  This is needed in order to        */
+                                         /* restore the original state of  dset_info if we   */
+                                         /* replaced any mem spaces with equivalents         */
+                                         /* projected to a rank equal to that of file_space. */
+                                         /*                                                  */
+                                         /* This field is only used if                       */
+                                         /* H5S_select_shape_same() returns TRUE when        */
+                                         /* comparing at least one mem_space and data_space, */
+                                         /* and the mem_space has a different rank.          */
+                                         /*                                                  */
+                                         /* Note that this is a temporary variable - the     */
+                                         /* projected memory space is stored in dset_info,   */
+                                         /* and will be freed when that structure is         */
+                                         /* freed. */
+    H5D_storage_t  store_local;          /* Local buffer for store */
+    H5D_storage_t *store = &store_local; /* Union of EFL and chunk pointer in file space */
+    hsize_t        nelmts;               /* Total number of elmts	*/
+    size_t         io_op_init = 0;       /* Number I/O ops that have been initialized */
+    size_t         i;                    /* Local index variable */
+    char           fake_char;            /* Temporary variable for NULL buffer pointers */
+    herr_t         ret_value = SUCCEED;  /* Return value	*/
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -569,7 +584,7 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info, hbool_t is_mdset)
     /* Allocate store buffer if necessary */
     if (count > 1)
         if (NULL == (store = (H5D_storage_t *)H5MM_malloc(count * sizeof(H5D_storage_t))))
-            HGOTO_ERROR(H5E_STORAGE, H5E_CANTALLOC, FAIL, "couldn't allocate dset storage info array buffer")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate dset storage info array buffer")
 
     /* iterate over all dsets and construct I/O information */
     for (i = 0; i < count; i++) {
@@ -668,31 +683,32 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info, hbool_t is_mdset)
             H5S_GET_EXTENT_NDIMS(dset_info[i].mem_space) != H5S_GET_EXTENT_NDIMS(dset_info[i].file_space)) {
             ptrdiff_t buf_adj = 0;
 
+            /* Allocate original memory space buffer if necessary */
+            if (!orig_mem_space) {
+                if (count > 1) {
+                    /* Allocate buffer */
+                    if (NULL == (orig_mem_space = (H5S_t **)H5MM_calloc(count * sizeof(H5S_t *))))
+                        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL,
+                                    "couldn't allocate original memory space array buffer")
+                }
+                else
+                    /* Use local buffer */
+                    orig_mem_space = &orig_mem_space_local;
+            }
+
+            /* Save original memory space */
+            orig_mem_space[i]      = dset_info[i].mem_space;
+            dset_info[i].mem_space = NULL;
+
             /* Attempt to construct projected dataspace for memory dataspace */
-            if (H5S_select_construct_projection(dset_info[i].mem_space, &projected_mem_space,
+            if (H5S_select_construct_projection(orig_mem_space[i], &dset_info[i].mem_space,
                                                 (unsigned)H5S_GET_EXTENT_NDIMS(dset_info[i].file_space),
                                                 dset_info[i].type_info.src_type_size, &buf_adj) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to construct projected memory dataspace")
-            HDassert(projected_mem_space);
+            HDassert(dset_info[i].mem_space);
 
             /* Adjust the buffer by the given amount */
             dset_info[i].buf.cvp = (const void *)(((const uint8_t *)dset_info[i].buf.cvp) + buf_adj);
-
-            /* Check if we need to free the old mem_space, and make sure we mark
-             * the memory dataspace as having been allocated so it gets freed
-             * eventually */
-            if (dset_info[i].mem_space_alloc) {
-                HDassert(dset_info[i].mem_space);
-                if (H5S_close(dset_info[i].mem_space) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL,
-                                "unable to release temporary memory dataspace")
-            }
-            else
-                dset_info[i].mem_space_alloc = TRUE;
-
-            /* Switch to using projected memory dataspace & adjusted buffer */
-            dset_info[i].mem_space = projected_mem_space;
-            projected_mem_space    = NULL;
         } /* end if */
 
         /* Retrieve dataset properties */
@@ -825,17 +841,25 @@ done:
         if (H5D__typeinfo_term(&(dset_info[i].type_info)) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down type info")
 
-    /* Discard projected mem space if it was created and not placed in dset_info */
-    if (projected_mem_space) {
-        HDassert(ret_value < 0);
-        if (H5S_close(projected_mem_space) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down projected memory dataspace")
+    /* Discard projected mem spaces and restore originals */
+    if (orig_mem_space) {
+        for (i = 0; i < count; i++)
+            if (orig_mem_space[i]) {
+                if (H5S_close(dset_info[i].mem_space) < 0)
+                    HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL,
+                                "unable to shut down projected memory dataspace")
+                dset_info[i].mem_space = orig_mem_space[i];
+            }
+
+        /* Free orig_mem_space array if it was allocated */
+        if (orig_mem_space != &orig_mem_space_local)
+            H5MM_free(orig_mem_space);
     }
 
     /* Free global piece skiplist */
     if (io_info.sel_pieces)
         if (H5SL_close(io_info.sel_pieces) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't close dataset skip list")
+            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't close dataset skip list")
 
     /* Free store array if it was allocated */
     if (store != &store_local)

@@ -2756,12 +2756,11 @@ H5D__virtual_read_one(H5D_dset_io_info_t *dset_info, const H5D_type_info_t *type
             if (NULL == (dinfo = H5FL_CALLOC(H5D_dset_io_info_t)))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate dset info array buffer")
 
-            dinfo->dset            = source_dset->dset;
-            dinfo->mem_space       = source_dset->projected_mem_space;
-            dinfo->mem_space_alloc = FALSE;
-            dinfo->file_space      = projected_src_space;
-            dinfo->buf.vp          = dset_info->buf.vp;
-            dinfo->mem_type_id     = type_info->dst_type_id;
+            dinfo->dset        = source_dset->dset;
+            dinfo->mem_space   = source_dset->projected_mem_space;
+            dinfo->file_space  = projected_src_space;
+            dinfo->buf.vp      = dset_info->buf.vp;
+            dinfo->mem_type_id = type_info->dst_type_id;
 
             /* Read in the point (with the custom VL memory allocator) */
             if (H5D__read(1, dinfo, FALSE) < 0)
@@ -2776,11 +2775,8 @@ H5D__virtual_read_one(H5D_dset_io_info_t *dset_info, const H5D_type_info_t *type
 
 done:
     /* Release allocated resources */
-    if (dinfo) {
-        if (dinfo->mem_space_alloc && H5S_close(dinfo->mem_space) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close memory dataspace")
+    if (dinfo)
         dinfo = H5FL_FREE(H5D_dset_io_info_t, dinfo);
-    }
     if (projected_src_space) {
         HDassert(ret_value < 0);
         if (H5S_close(projected_src_space) < 0)
@@ -2988,11 +2984,8 @@ H5D__virtual_write_one(H5D_dset_io_info_t *dset_info, const H5D_type_info_t *typ
 
 done:
     /* Release allocated resources */
-    if (dinfo) {
-        if (dinfo->mem_space_alloc && H5S_close(dinfo->mem_space) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "can't close memory dataspace")
+    if (dinfo)
         dinfo = H5FL_FREE(H5D_dset_io_info_t, dinfo);
-    }
     if (projected_src_space) {
         HDassert(ret_value < 0);
         if (H5S_close(projected_src_space) < 0)

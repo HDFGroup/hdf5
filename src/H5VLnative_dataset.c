@@ -53,7 +53,8 @@
 static herr_t H5VL__native_dataset_io_setup(size_t count, void *obj[], hid_t mem_type_id[],
                                             hid_t mem_space_id[], hid_t file_space_id[], hid_t dxpl_id,
                                             H5_flexible_const_ptr_t buf[], H5D_dset_io_info_t **dinfo);
-static herr_t H5VL__native_dataset_io_cleanup(size_t count, hid_t file_space_id[], H5D_dset_io_info_t *dinfo);
+static herr_t H5VL__native_dataset_io_cleanup(size_t count, hid_t mem_space_id[], hid_t file_space_id[],
+                                              H5D_dset_io_info_t *dinfo);
 
 /*********************/
 /* Package Variables */
@@ -145,9 +146,6 @@ H5VL__native_dataset_io_setup(size_t count, void *obj[], hid_t mem_type_id[], hi
                 HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "file_space_id is not a dataspace ID")
         } /* end else */
 
-        /* Set mem_space_alloc to FALSE by default, set to true when allocated */
-        (*dinfo)[i].mem_space_alloc = FALSE;
-
         /* Get dataspace for memory buffer */
         if (H5S_ALL == mem_space_id[i])
             (*dinfo)[i].mem_space = (*dinfo)[i].file_space;
@@ -168,10 +166,7 @@ H5VL__native_dataset_io_setup(size_t count, void *obj[], hid_t mem_type_id[], hi
                 if (NULL == ((*dinfo)[i].mem_space = H5S_create(H5S_NULL)))
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "unable to create NULL memory dataspace")
             } /* end else */
-
-            /* Make sure we free the memory space when we're done*/
-            (*dinfo)[i].mem_space_alloc = TRUE;
-        } /* end if */
+        }     /* end if */
         else if (H5S_PLIST == mem_space_id[i])
             HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "H5S_PLIST is not allowed for memory dataspace")
         else {
@@ -206,7 +201,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL__native_dataset_io_cleanup(size_t count, hid_t file_space_id[], H5D_dset_io_info_t *dinfo)
+H5VL__native_dataset_io_cleanup(size_t count, hid_t mem_space_id[], hid_t file_space_id[],
+                                H5D_dset_io_info_t *dinfo)
 {
     size_t i;
     herr_t ret_value = SUCCEED; /* Return value */
@@ -220,12 +216,10 @@ H5VL__native_dataset_io_cleanup(size_t count, hid_t file_space_id[], H5D_dset_io
     for (i = 0; i < count; i++) {
         /* Free memory dataspace if it was created.  Use HDONE_ERROR in this function so we always
          * try to free everything we can. */
-        if (dinfo[i].mem_space_alloc) {
-            HDassert(dinfo[i].mem_space);
+        if (H5S_BLOCK == mem_space_id[i] && dinfo[i].mem_space)
             if (H5S_close(dinfo[i].mem_space) < 0)
                 HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL,
-                            "unable to release temporary memory dataspace")
-        }
+                            "unable to release temporary memory dataspace for H5S_BLOCK")
 
         /* Reset file dataspace selection if it was copied from the property list */
         if (H5S_PLIST == file_space_id[i] && dinfo[i].file_space)
@@ -374,7 +368,7 @@ H5VL__native_dataset_read(size_t count, void *obj[], hid_t mem_type_id[], hid_t 
 
 done:
     /* Clean up */
-    if (H5VL__native_dataset_io_cleanup(count, file_space_id, dinfo) < 0)
+    if (H5VL__native_dataset_io_cleanup(count, mem_space_id, file_space_id, dinfo) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to release dataset info")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -416,7 +410,7 @@ H5VL__native_dataset_write(size_t count, void *obj[], hid_t mem_type_id[], hid_t
 
 done:
     /* Clean up */
-    if (H5VL__native_dataset_io_cleanup(count, file_space_id, dinfo) < 0)
+    if (H5VL__native_dataset_io_cleanup(count, mem_space_id, file_space_id, dinfo) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to release dataset info")
 
     FUNC_LEAVE_NOAPI(ret_value)
