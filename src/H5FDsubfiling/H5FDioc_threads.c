@@ -156,6 +156,8 @@ initialize_ioc_threads(void *_sf_context)
 #endif
     };
 
+    sf_context->ioc_data = ioc_data;
+
     /* Initialize atomic vars */
     atomic_init(&ioc_data->sf_ioc_ready, 0);
     atomic_init(&ioc_data->sf_shutdown_flag, 0);
@@ -201,8 +203,6 @@ initialize_ioc_threads(void *_sf_context)
 #endif
 
 #endif
-
-    sf_context->ioc_data = ioc_data;
 
 done:
     H5_SUBFILING_FUNC_LEAVE;
@@ -504,7 +504,7 @@ handle_work_request(void *arg)
     subfiling_context_t  *sf_context      = NULL;
     sf_work_request_t    *msg             = &(q_entry_ptr->wk_req);
     ioc_data_t           *ioc_data        = NULL;
-    int64_t               file_context_id = msg->header[2];
+    int64_t               file_context_id = msg->context_id;
     int                   op_ret;
     hg_thread_ret_t       ret_value = 0;
 
@@ -712,10 +712,11 @@ ioc_file_queue_write_indep(sf_work_request_t *msg, int subfile_rank, int source,
 
     HDassert(msg);
 
+    file_context_id = msg->context_id;
+
     /* Retrieve the fields of the RPC message for the write operation */
-    data_size       = msg->header[0];
-    file_offset     = msg->header[1];
-    file_context_id = msg->header[2];
+    data_size   = msg->header[0];
+    file_offset = msg->header[1];
 
     if (data_size < 0) {
         send_nack = TRUE;
@@ -893,10 +894,11 @@ ioc_file_queue_read_indep(sf_work_request_t *msg, int subfile_rank, int source, 
 
     HDassert(msg);
 
+    file_context_id = msg->context_id;
+
     /* Retrieve the fields of the RPC message for the read operation */
-    data_size       = msg->header[0];
-    file_offset     = msg->header[1];
-    file_context_id = msg->header[2];
+    data_size   = msg->header[0];
+    file_offset = msg->header[1];
 
     if (data_size < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_BADVALUE, -1, "invalid data size for read");
@@ -1140,7 +1142,7 @@ ioc_file_report_eof(sf_work_request_t *msg, int subfile_rank, int source, MPI_Co
 {
     subfiling_context_t *sf_context = NULL;
     h5_stat_t            sb;
-    int64_t              eof_req_reply[3];
+    int64_t              eof_req_reply[2];
     int64_t              file_context_id;
     int                  fd;
     int                  mpi_code;
@@ -1150,7 +1152,7 @@ ioc_file_report_eof(sf_work_request_t *msg, int subfile_rank, int source, MPI_Co
 
     /* first get the EOF of the target file. */
 
-    file_context_id = msg->header[2];
+    file_context_id = msg->context_id;
 
     if (NULL == (sf_context = H5_get_subfiling_object(file_context_id)))
         H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTGET, -1, "couldn't retrieve subfiling context");
@@ -1162,14 +1164,14 @@ ioc_file_report_eof(sf_work_request_t *msg, int subfile_rank, int source, MPI_Co
 
     eof_req_reply[0] = (int64_t)subfile_rank;
     eof_req_reply[1] = (int64_t)(sb.st_size);
-    eof_req_reply[2] = 0; /* not used */
 
 #ifdef H5_SUBFILING_DEBUG
     H5_subfiling_log(file_context_id, "%s: reporting file EOF as %" PRId64 ".", __func__, eof_req_reply[1]);
 #endif
 
     /* return the subfile EOF to the querying rank */
-    if (MPI_SUCCESS != (mpi_code = MPI_Send(eof_req_reply, 3, MPI_INT64_T, source, GET_EOF_COMPLETED, comm)))
+    if (MPI_SUCCESS !=
+        (mpi_code = MPI_Send(eof_req_reply, 1, H5_subfiling_rpc_msg_type, source, GET_EOF_COMPLETED, comm)))
         H5_SUBFILING_MPI_GOTO_ERROR(-1, "MPI_Send", mpi_code);
 
 done:

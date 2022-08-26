@@ -30,18 +30,25 @@ hid_t H5subfiling_err_class_g = H5I_INVALID_HID;
 char  H5subfiling_mpi_error_str[MPI_MAX_ERROR_STRING];
 int   H5subfiling_mpi_error_str_len;
 
-static subfiling_context_t *sf_context_cache  = NULL;
-static sf_topology_t       *sf_topology_cache = NULL;
+/* MPI Datatype used to send/receive an RPC message */
+MPI_Datatype H5_subfiling_rpc_msg_type = MPI_DATATYPE_NULL;
 
-static size_t sf_context_cache_limit  = 16;
-static size_t sf_topology_cache_limit = 4;
+static subfiling_context_t **sf_context_cache  = NULL;
+static sf_topology_t       **sf_topology_cache = NULL;
 
-static int sf_topology_cache_size = 0;
+static size_t sf_context_cache_size         = 0;
+static size_t sf_topology_cache_size        = 0;
+static size_t sf_context_cache_num_entries  = 0;
+static size_t sf_topology_cache_num_entries = 0;
 
 static file_map_to_context_t *sf_open_file_map = NULL;
 static int                    sf_file_map_size = 0;
-#define DEFAULT_FILE_MAP_ENTRIES 8
 
+#define DEFAULT_CONTEXT_CACHE_SIZE  16
+#define DEFAULT_TOPOLOGY_CACHE_SIZE 4
+#define DEFAULT_FILE_MAP_ENTRIES    8
+
+static herr_t H5_free_subfiling_object(int64_t object_id);
 static herr_t H5_free_subfiling_object_int(subfiling_context_t *sf_context);
 static herr_t H5_free_subfiling_topology(sf_topology_t *topology);
 
@@ -63,7 +70,6 @@ static herr_t create_config_file(subfiling_context_t *sf_context, const char *ba
 static herr_t open_config_file(subfiling_context_t *sf_context, const char *base_filename,
                                const char *subfile_dir, const char *mode, FILE **config_file_out);
 
-static int         get_next_fid_map_index(void);
 static void        clear_fid_map_entry(uint64_t file_id, int64_t sf_context_id);
 static int         compare_hostid(const void *h1, const void *h2);
 static herr_t      get_ioc_selection_criteria_from_env(H5FD_subfiling_ioc_select_t *ioc_selection_type,
@@ -74,27 +80,6 @@ static herr_t      find_cached_topology_info(MPI_Comm comm, H5FD_subfiling_ioc_s
 static herr_t      gather_topology_info(sf_topology_t *info, MPI_Comm comm, MPI_Comm intra_comm);
 static int         identify_ioc_ranks(sf_topology_t *info, int node_count, int iocs_per_node);
 static inline void assign_ioc_ranks(sf_topology_t *app_topology, int ioc_count, int rank_multiple);
-
-static int
-get_next_fid_map_index(void)
-{
-    int index = 0;
-
-    HDassert(sf_open_file_map || (sf_file_map_size == 0));
-
-    for (int i = 0; i < sf_file_map_size; i++) {
-        if (sf_open_file_map[i].file_id == UINT64_MAX) {
-            index = i;
-            break;
-        }
-    }
-
-    /* A valid index should always be found here */
-    HDassert(index >= 0);
-    HDassert((sf_file_map_size == 0) || (index < sf_file_map_size));
-
-    return index;
-}
 
 /*-------------------------------------------------------------------------
  * Function:    clear_fid_map_entry
@@ -322,28 +307,38 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-find_cached_topology_info(MPI_Comm comm, H5FD_subfiling_ioc_select_t ioc_selection_type,
-                          long iocs_per_node, sf_topology_t **app_topology)
+find_cached_topology_info(MPI_Comm comm, H5FD_subfiling_ioc_select_t ioc_selection_type, long iocs_per_node,
+                          sf_topology_t **app_topology)
 {
     herr_t ret_value = SUCCEED;
 
-    for (int i = 0; i < sf_topology_cache_size; i++) {
-        sf_topology_t *cached_topology = &sf_topology_cache[i];
+    for (size_t i = 0; i < sf_topology_cache_num_entries; i++) {
+        sf_topology_t *cached_topology = sf_topology_cache[i];
         int            result;
         int            mpi_code;
 
-        HDassert(cached_topology->app_layout->node_count > 0);
+        HDassert(cached_topology);
 
+        /*
+         * If the selection types differ, just reject the cached topology
+         * for now rather than checking if the mapping is equivalent
+         */
         if (ioc_selection_type != cached_topology->selection_type)
             continue;
 
-        /*
-         * If a IOCs-per-node setting was set in the environment and would
-         * cause the application topology to differ from the cached topology
-         * we found, don't reuse the cached topology
-         */
-        if (cached_topology->n_io_concentrators != (iocs_per_node * cached_topology->app_layout->node_count))
-            continue;
+        if (cached_topology->selection_type == SELECT_IOC_ONE_PER_NODE) {
+            HDassert(iocs_per_node >= 1);
+            HDassert(cached_topology->app_layout->node_count > 0);
+
+            /*
+             * If a IOCs-per-node setting was set in the environment and would
+             * cause the application topology to differ from the cached topology
+             * we found, don't reuse the cached topology
+             */
+            if (cached_topology->n_io_concentrators !=
+                (iocs_per_node * cached_topology->app_layout->node_count))
+                continue;
+        }
 
         if (MPI_SUCCESS != (mpi_code = MPI_Comm_compare(comm, cached_topology->app_comm, &result)))
             H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Comm_compare failed", mpi_code);
@@ -596,10 +591,19 @@ assign_ioc_ranks(sf_topology_t *app_topology, int ioc_count, int rank_multiple)
  *-------------------------------------------------------------------------
  */
 int64_t
-H5_new_subfiling_object_id(sf_obj_type_t obj_type, int64_t index_val)
+H5_new_subfiling_object_id(sf_obj_type_t obj_type)
 {
-    if (obj_type != SF_CONTEXT && obj_type != SF_TOPOLOGY)
+    int64_t index_val = 0;
+
+    if (obj_type == SF_CONTEXT) {
+        index_val = (int64_t)sf_context_cache_num_entries;
+    }
+    else if (obj_type == SF_TOPOLOGY) {
+        index_val = (int64_t)sf_topology_cache_num_entries;
+    }
+    else
         return -1;
+
     if (index_val < 0)
         return -1;
 
@@ -629,7 +633,6 @@ H5_new_subfiling_object_id(sf_obj_type_t obj_type, int64_t index_val)
  *
  *-------------------------------------------------------------------------
  */
-/* TODO: no way of freeing caches on close currently */
 void *
 H5_get_subfiling_object(int64_t object_id)
 {
@@ -654,70 +657,121 @@ H5_get_subfiling_object(int64_t object_id)
 
         /* Create subfiling context cache if it doesn't exist */
         if (!sf_context_cache) {
-            if (NULL == (sf_context_cache = HDcalloc(sf_context_cache_limit, sizeof(subfiling_context_t))))
+            if (NULL == (sf_context_cache = HDcalloc(DEFAULT_CONTEXT_CACHE_SIZE, sizeof(*sf_context_cache))))
                 H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL,
                                         "couldn't allocate space for subfiling context cache");
+            sf_context_cache_size        = DEFAULT_CONTEXT_CACHE_SIZE;
+            sf_context_cache_num_entries = 0;
         }
 
         /* Make more space in context cache if needed */
-        if ((size_t)obj_index == sf_context_cache_limit) {
+        if ((size_t)obj_index >= sf_context_cache_size) {
             size_t old_num_entries;
+            size_t new_size;
             void  *tmp_realloc;
 
-            old_num_entries = sf_context_cache_limit;
+            old_num_entries = sf_context_cache_num_entries;
 
-            sf_context_cache_limit *= 2;
+            new_size = (sf_context_cache_size * 3) / 2;
 
-            if (NULL == (tmp_realloc = HDrealloc(sf_context_cache,
-                                                 sf_context_cache_limit * sizeof(subfiling_context_t))))
+            if (NULL == (tmp_realloc = HDrealloc(sf_context_cache, new_size * sizeof(*sf_context_cache))))
                 H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL,
                                         "couldn't allocate space for subfiling context cache");
 
-            sf_context_cache = tmp_realloc;
+            sf_context_cache      = tmp_realloc;
+            sf_context_cache_size = new_size;
 
             /* Clear newly-allocated entries */
-            HDmemset(&sf_context_cache[obj_index], 0,
-                     (sf_context_cache_limit - old_num_entries) * sizeof(subfiling_context_t));
+            HDmemset(&sf_context_cache[old_num_entries], 0,
+                     (sf_context_cache_size - old_num_entries) * sizeof(*sf_context_cache));
+
+            /*
+             * If we had to make more space, the given object index
+             * should always fall within range after a single re-allocation
+             */
+            HDassert((size_t)obj_index < sf_context_cache_size);
         }
 
-        /* Return direct pointer to the context cache entry */
-        return (void *)&sf_context_cache[obj_index];
+        /*
+         * Since this cache currently just keeps all entries until
+         * application exit, context entry indices should just be
+         * consecutive
+         */
+        HDassert((size_t)obj_index <= sf_context_cache_num_entries);
+        if ((size_t)obj_index < sf_context_cache_num_entries)
+            ret_value = sf_context_cache[obj_index];
+        else {
+            HDassert(!sf_context_cache[sf_context_cache_num_entries]);
+
+            /* Allocate a new subfiling context object */
+            if (NULL == (ret_value = HDmalloc(sizeof(subfiling_context_t))))
+                H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL,
+                                        "couldn't allocate subfiling context object");
+
+            sf_context_cache[sf_context_cache_num_entries++] = ret_value;
+        }
     }
     else if (obj_type == SF_TOPOLOGY) {
         /* Create subfiling topology cache if it doesn't exist */
         if (!sf_topology_cache) {
-            if (NULL == (sf_topology_cache = HDcalloc(sf_topology_cache_limit, sizeof(sf_topology_t))))
+            if (NULL ==
+                (sf_topology_cache = HDcalloc(DEFAULT_TOPOLOGY_CACHE_SIZE, sizeof(*sf_topology_cache))))
                 H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL,
                                         "couldn't allocate space for subfiling topology cache");
+            sf_topology_cache_size        = DEFAULT_TOPOLOGY_CACHE_SIZE;
+            sf_topology_cache_num_entries = 0;
         }
 
         /* Make more space in topology cache if needed */
-        if ((size_t)obj_index == sf_topology_cache_limit) {
+        if ((size_t)obj_index >= sf_topology_cache_size) {
             size_t old_num_entries;
+            size_t new_size;
             void  *tmp_realloc;
 
-            old_num_entries = sf_topology_cache_limit;
+            old_num_entries = sf_topology_cache_num_entries;
 
-            sf_topology_cache_limit *= 2;
+            new_size = (sf_topology_cache_size * 3) / 2;
 
-            if (NULL == (tmp_realloc = HDrealloc(sf_topology_cache,
-                                                 sf_topology_cache_limit * sizeof(sf_topology_t))))
+            if (NULL == (tmp_realloc = HDrealloc(sf_topology_cache, new_size * sizeof(*sf_topology_cache))))
                 H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL,
                                         "couldn't allocate space for subfiling topology cache");
 
-            sf_topology_cache = tmp_realloc;
+            sf_topology_cache      = tmp_realloc;
+            sf_topology_cache_size = new_size;
 
             /* Clear newly-allocated entries */
-            HDmemset(&sf_topology_cache[obj_index], 0,
-                     (sf_topology_cache_limit - old_num_entries) * sizeof(sf_topology_t));
+            HDmemset(&sf_topology_cache[old_num_entries], 0,
+                     (sf_topology_cache_size - old_num_entries) * sizeof(*sf_topology_cache));
+
+            /*
+             * If we had to make more space, the given object index
+             * should always fall within range after a single re-allocation
+             */
+            HDassert((size_t)obj_index < sf_topology_cache_size);
         }
 
-        /* Return direct pointer to the topology cache entry */
-        return (void *)&sf_topology_cache[obj_index];
-    }
+        /*
+         * Since this cache currently just keeps all entries until
+         * application exit, topology entry indices should just be
+         * consecutive
+         */
+        HDassert((size_t)obj_index <= sf_topology_cache_num_entries);
+        if ((size_t)obj_index < sf_topology_cache_num_entries)
+            ret_value = sf_topology_cache[obj_index];
+        else {
+            HDassert(!sf_topology_cache[sf_topology_cache_num_entries]);
 
+            /* Allocate a new subfiling topology object */
+            if (NULL == (ret_value = HDmalloc(sizeof(sf_topology_t))))
+                H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL,
+                                        "couldn't allocate subfiling topology object");
+
+            sf_topology_cache[sf_topology_cache_num_entries++] = ret_value;
+        }
+    }
 #ifdef H5_SUBFILING_DEBUG
-    HDprintf("%s: Unknown subfiling object type for ID %" PRId64 "\n", __func__, object_id);
+    else
+        HDprintf("%s: Unknown subfiling object type for ID %" PRId64 "\n", __func__, object_id);
 #endif
 
 done:
@@ -730,11 +784,18 @@ done:
  * Purpose:     Frees the underlying subfiling object for a given subfiling
  *              object ID.
  *
+ *              NOTE: Currently we assume that all created subfiling
+ *              context objects are cached in the (very simple) context
+ *              cache until application exit, so the only time a context
+ *              object should be freed by this routine is if something
+ *              fails right after creating one. Otherwise, the internal
+ *              indexing for the context cache will be invalid.
+ *
  * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5_free_subfiling_object(int64_t object_id)
 {
     subfiling_context_t *sf_context = NULL;
@@ -751,6 +812,15 @@ H5_free_subfiling_object(int64_t object_id)
 
     if (H5_free_subfiling_object_int(sf_context) < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "couldn't free subfiling object");
+
+    /*
+     * Assume that we need to evict the context
+     * object from the context cache
+     */
+    HDassert(sf_context_cache_num_entries > 0);
+    HDassert(sf_context == sf_context_cache[sf_context_cache_num_entries - 1]);
+    sf_context_cache[sf_context_cache_num_entries - 1] = NULL;
+    sf_context_cache_num_entries--;
 
 done:
     H5_SUBFILING_FUNC_LEAVE;
@@ -824,11 +894,15 @@ H5_free_subfiling_object_int(subfiling_context_t *sf_context)
     HDfree(sf_context->h5_filename);
     sf_context->h5_filename = NULL;
 
-    if (sf_context->topology) {
-        if (H5_free_subfiling_topology(sf_context->topology) < 0)
-            return FAIL;
-    }
+    /*
+     * Currently we assume that all created application topology
+     * objects are cached until application exit and may be shared
+     * among multiple subfiling contexts, so we free them separately
+     * from here to avoid issues with stale pointers.
+     */
     sf_context->topology = NULL;
+
+    HDfree(sf_context);
 
     return SUCCEED;
 }
@@ -840,10 +914,17 @@ H5_free_subfiling_topology(sf_topology_t *topology)
 
     HDassert(topology);
 
-    /* Subfiling currently keeps topologies in cache until application exit */
-    for (int i = 0; i < sf_topology_cache_size; i++)
-        if (topology == &sf_topology_cache[i])
-            return SUCCEED;
+#ifndef NDEBUG
+    {
+        hbool_t topology_cached = FALSE;
+
+        /* Make sure this application topology object is in the cache */
+        for (size_t i = 0; i < sf_topology_cache_num_entries; i++)
+            if (topology == sf_topology_cache[i])
+                topology_cached = TRUE;
+        HDassert(topology_cached);
+    }
+#endif
 
     topology->subfile_rank       = -1;
     topology->n_io_concentrators = 0;
@@ -1151,16 +1232,12 @@ init_subfiling(H5FD_subfiling_shared_config_t *subfiling_config, MPI_Comm comm, 
     sf_topology_t       *app_topology = NULL;
     MPI_Comm             intra_comm   = MPI_COMM_NULL;
     int64_t              context_id   = -1;
-    int                  file_index   = -1;
     herr_t               ret_value    = SUCCEED;
 
     HDassert(context_id_out);
 
-    file_index = get_next_fid_map_index();
-    HDassert(file_index >= 0);
-
     /* Use the file's index to create a new subfiling context ID */
-    if ((context_id = H5_new_subfiling_object_id(SF_CONTEXT, file_index)) < 0)
+    if ((context_id = H5_new_subfiling_object_id(SF_CONTEXT)) < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "couldn't create new subfiling context ID");
 
     /* Create a new subfiling context object with the created context ID */
@@ -1205,13 +1282,18 @@ init_subfiling(H5FD_subfiling_shared_config_t *subfiling_config, MPI_Comm comm, 
 
 done:
     if (ret_value < 0) {
-        HDfree(app_topology);
+        if (app_topology) {
+            if (H5_free_subfiling_topology(app_topology) < 0)
+                H5_SUBFILING_DONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "couldn't free subfiling topology");
+        }
 
         if (H5_mpi_comm_free(&intra_comm) < 0)
             H5_SUBFILING_DONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "couldn't free MPI communicator");
 
         if (context_id >= 0 && H5_free_subfiling_object(context_id) < 0)
             H5_SUBFILING_DONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "couldn't free subfiling object");
+
+        *context_id_out = -1;
     }
 
     H5_SUBFILING_FUNC_LEAVE;
@@ -1364,9 +1446,8 @@ init_app_topology(H5FD_subfiling_ioc_select_t ioc_selection_type, MPI_Comm comm,
 
     if (!app_topology) {
         /* Generate an ID for the application topology object */
-        if ((topology_id = H5_new_subfiling_object_id(SF_TOPOLOGY, (int64_t)sf_topology_cache_size)) < 0)
+        if ((topology_id = H5_new_subfiling_object_id(SF_TOPOLOGY)) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get ID for subfiling topology object");
-        sf_topology_cache_size++;
 
         /* Get a new application topology object from the cache */
         if (NULL == (app_topology = H5_get_subfiling_object(topology_id)))
@@ -1483,8 +1564,6 @@ done:
             HDfree(app_layout);
         }
         if (topology_id >= 0) {
-            sf_topology_cache_size--;
-
             if (app_topology) {
                 HDfree(app_topology->io_concentrators);
                 if (H5_mpi_comm_free(&app_topology->app_comm) < 0)
@@ -1632,10 +1711,6 @@ init_subfiling_context(subfiling_context_t *sf_context, H5FD_subfiling_shared_co
     }
 
 done:
-    if (ret_value < 0) {
-        H5_free_subfiling_object_int(sf_context);
-    }
-
     H5_SUBFILING_FUNC_LEAVE;
 }
 
@@ -1743,7 +1818,7 @@ record_fid_to_subfile(uint64_t file_id, int64_t subfile_context_id, int *next_in
     int    index;
     herr_t ret_value = SUCCEED;
 
-    if (sf_file_map_size == 0) {
+    if (!sf_open_file_map) {
         if (NULL ==
             (sf_open_file_map = HDmalloc((size_t)DEFAULT_FILE_MAP_ENTRIES * sizeof(*sf_open_file_map))))
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "couldn't allocate open file mapping");
@@ -2596,9 +2671,6 @@ H5_close_subfiles(int64_t subfiling_context_id, MPI_Comm file_comm)
     }
 
 done:
-    if (sf_context && H5_free_subfiling_object_int(sf_context) < 0)
-        H5_SUBFILING_DONE_ERROR(H5E_FILE, H5E_CANTFREE, FAIL, "couldn't free subfiling context object");
-
     H5_SUBFILING_FUNC_LEAVE;
 }
 
@@ -2715,6 +2787,61 @@ H5_subfile_fid_to_context(uint64_t file_id)
 done:
     H5_SUBFILING_FUNC_LEAVE;
 } /* end H5_subfile_fid_to_context() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5_subfiling_terminate
+ *
+ * Purpose:     A cleanup routine to be called by the Subfiling VFD when
+ *              it is terminating. Cleans up internal resources such as the
+ *              context and topology caches.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5_subfiling_terminate(void)
+{
+    herr_t ret_value = SUCCEED;
+
+    /* Clean up subfiling context and topology caches */
+    if (sf_context_cache) {
+        for (size_t i = 0; i < sf_context_cache_num_entries; i++) {
+            if (H5_free_subfiling_object_int(sf_context_cache[i]) < 0)
+                H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL,
+                                        "couldn't free subfiling context object");
+            sf_context_cache[i] = NULL;
+        }
+
+        sf_context_cache_size        = 0;
+        sf_context_cache_num_entries = 0;
+
+        HDfree(sf_context_cache);
+        sf_context_cache = NULL;
+    }
+    if (sf_topology_cache) {
+        for (size_t i = 0; i < sf_topology_cache_num_entries; i++) {
+            if (H5_free_subfiling_topology(sf_topology_cache[i]) < 0)
+                H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL,
+                                        "couldn't free subfiling topology object");
+            sf_topology_cache[i] = NULL;
+        }
+
+        sf_topology_cache_size        = 0;
+        sf_topology_cache_num_entries = 0;
+
+        HDfree(sf_topology_cache);
+        sf_topology_cache = NULL;
+    }
+
+    /* Clean up the file ID to context object mapping */
+    sf_file_map_size = 0;
+    HDfree(sf_open_file_map);
+    sf_open_file_map = NULL;
+
+done:
+    H5_SUBFILING_FUNC_LEAVE;
+}
 
 #ifdef H5_SUBFILING_DEBUG
 void

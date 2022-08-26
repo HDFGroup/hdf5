@@ -96,7 +96,7 @@ ioc__write_independent_async(int64_t context_id, int n_io_concentrators, int64_t
     io_req_t            *sf_io_request = NULL;
     int64_t              ioc_start;
     int64_t              ioc_offset;
-    int64_t              msg[3]           = {0};
+    int64_t              msg[2]           = {0};
     int                 *io_concentrators = NULL;
     int                  data_tag         = 0;
     int                  mpi_code;
@@ -139,9 +139,8 @@ ioc__write_independent_async(int64_t context_id, int n_io_concentrators, int64_t
      */
     msg[0] = elements;
     msg[1] = ioc_offset;
-    msg[2] = context_id;
-    if (MPI_SUCCESS != (mpi_code = MPI_Send(msg, 3, MPI_INT64_T, io_concentrators[ioc_start], WRITE_INDEP,
-                                            sf_context->sf_msg_comm)))
+    if (MPI_SUCCESS != (mpi_code = MPI_Send(msg, 1, H5_subfiling_rpc_msg_type, io_concentrators[ioc_start],
+                                            WRITE_INDEP, sf_context->sf_msg_comm)))
         H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Send failed", mpi_code);
 
     /* Wait to receive data tag */
@@ -262,7 +261,7 @@ ioc__read_independent_async(int64_t context_id, int n_io_concentrators, int64_t 
     io_req_t            *sf_io_request = NULL;
     int64_t              ioc_start;
     int64_t              ioc_offset;
-    int64_t              msg[3]           = {0};
+    int64_t              msg[2]           = {0};
     int                 *io_concentrators = NULL;
     int                  mpi_code;
     herr_t               ret_value = SUCCEED;
@@ -317,9 +316,8 @@ ioc__read_independent_async(int64_t context_id, int n_io_concentrators, int64_t 
      */
     msg[0] = elements;
     msg[1] = ioc_offset;
-    msg[2] = context_id;
-    if (MPI_SUCCESS != (mpi_code = MPI_Send(msg, 3, MPI_INT64_T, io_concentrators[ioc_start], READ_INDEP,
-                                            sf_context->sf_msg_comm)))
+    if (MPI_SUCCESS != (mpi_code = MPI_Send(msg, 1, H5_subfiling_rpc_msg_type, io_concentrators[ioc_start],
+                                            READ_INDEP, sf_context->sf_msg_comm)))
         H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Send failed", mpi_code);
 
 done:

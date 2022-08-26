@@ -208,7 +208,7 @@ typedef struct {
  */
 typedef struct {
     /* {Datasize, Offset, FileID} */
-    int64_t header[3];    /* The basic RPC input plus       */
+    int64_t header[2];    /* The basic RPC input plus       */
     int     tag;          /* the supplied OPCODE tag        */
     int     source;       /* Rank of who sent the message   */
     int     subfile_rank; /* The IOC rank                   */
@@ -216,6 +216,9 @@ typedef struct {
     double  start_time;   /* the request, + time of receipt */
                           /* from which we calc Time(queued) */
 } sf_work_request_t;
+
+/* MPI Datatype used to send/receive an RPC message */
+extern MPI_Datatype H5_subfiling_rpc_msg_type;
 
 #ifdef __cplusplus
 extern "C" {
@@ -228,15 +231,16 @@ H5_DLL herr_t H5_open_subfiles(const char *base_filename, uint64_t file_id,
                                MPI_Comm file_comm, int64_t *context_id_out);
 H5_DLL herr_t H5_close_subfiles(int64_t subfiling_context_id, MPI_Comm file_comm);
 
-H5_DLL int64_t H5_new_subfiling_object_id(sf_obj_type_t obj_type, int64_t index_val);
+H5_DLL int64_t H5_new_subfiling_object_id(sf_obj_type_t obj_type);
 H5_DLL void   *H5_get_subfiling_object(int64_t object_id);
-H5_DLL herr_t  H5_free_subfiling_object(int64_t object_id);
 H5_DLL herr_t  H5_get_num_iocs_from_config_file(FILE *config_file, int *n_io_concentrators);
 H5_DLL herr_t  H5_resolve_pathname(const char *filepath, MPI_Comm comm, char **resolved_filepath);
 
 H5_DLL herr_t  H5_subfiling_set_file_id_prop(H5P_genplist_t *plist_ptr, uint64_t file_id);
 H5_DLL herr_t  H5_subfiling_get_file_id_prop(H5P_genplist_t *plist_ptr, uint64_t *file_id);
 H5_DLL int64_t H5_subfile_fid_to_context(uint64_t file_id);
+
+H5_DLL herr_t H5_subfiling_terminate(void);
 
 H5_DLL void H5_subfiling_log(int64_t sf_context_id, const char *fmt, ...);
 

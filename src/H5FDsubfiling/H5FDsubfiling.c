@@ -327,6 +327,18 @@ H5FD_subfiling_init(void)
                 H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID,
                                         "can't register atexit handler for MPI_Finalize");
         }
+
+        /*
+         * Create the MPI Datatype that will be used
+         * for sending/receiving RPC messages
+         */
+        HDcompile_assert(sizeof(((sf_work_request_t *)NULL)->header) == 2 * sizeof(int64_t));
+        if (H5_subfiling_rpc_msg_type == MPI_DATATYPE_NULL) {
+            if (MPI_SUCCESS != (mpi_code = MPI_Type_contiguous(2, MPI_INT64_T, &H5_subfiling_rpc_msg_type)))
+                H5_SUBFILING_MPI_GOTO_ERROR(H5I_INVALID_HID, "MPI_Type_contiguous failed", mpi_code);
+            if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(&H5_subfiling_rpc_msg_type)))
+                H5_SUBFILING_MPI_GOTO_ERROR(H5I_INVALID_HID, "MPI_Type_commit failed", mpi_code);
+        }
     }
 
     /* Set return value */
@@ -351,6 +363,18 @@ H5FD__subfiling_term(void)
     herr_t ret_value = SUCCEED;
 
     if (H5FD_SUBFILING_g >= 0) {
+        int mpi_code;
+
+        /* Free RPC message MPI Datatype */
+        if (H5_subfiling_rpc_msg_type != MPI_DATATYPE_NULL)
+            if (MPI_SUCCESS != (mpi_code = MPI_Type_free(&H5_subfiling_rpc_msg_type)))
+                H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Type_free failed", mpi_code);
+
+        /* Clean up resources */
+        if (H5_subfiling_terminate() < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL,
+                                    "can't cleanup internal subfiling resources");
+
         /* Unregister from HDF5 error API */
         if (H5subfiling_err_class_g >= 0) {
             if (H5Eunregister_class(H5subfiling_err_class_g) < 0)
@@ -992,11 +1016,6 @@ H5FD__subfiling_close_int(H5FD_subfiling_t *file_ptr)
         H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close subfile");
     if (file_ptr->stub_file && H5FD_close(file_ptr->stub_file) < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close HDF5 stub file");
-
-    if (!file_ptr->fa.require_ioc) {
-        if (file_ptr->context_id >= 0 && H5_free_subfiling_object(file_ptr->context_id) < 0)
-            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free subfiling context object");
-    }
 
     /* if set, close the copy of the plist for the underlying VFD. */
     if ((file_ptr->fa.ioc_fapl_id >= 0) && (H5I_dec_ref(file_ptr->fa.ioc_fapl_id) < 0))

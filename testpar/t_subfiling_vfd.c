@@ -36,15 +36,15 @@
 
 #define ARRAY_SIZE(a) sizeof(a) / sizeof(a[0])
 
-#define CHECK_PASSED()               \
-do {                                 \
-    if (MAINPROCESS) {               \
-        if (nerrors == curr_nerrors) \
-            PASSED();                \
-        else                         \
-            H5_FAILED();             \
-    }                                \
-} while(0)
+#define CHECK_PASSED()                                                                                       \
+    do {                                                                                                     \
+        if (MAINPROCESS) {                                                                                   \
+            if (nerrors == curr_nerrors)                                                                     \
+                PASSED();                                                                                    \
+            else                                                                                             \
+                H5_FAILED();                                                                                 \
+        }                                                                                                    \
+    } while (0)
 
 static MPI_Comm comm_g = MPI_COMM_WORLD;
 static MPI_Info info_g = MPI_INFO_NULL;
@@ -261,7 +261,7 @@ test_config_file(void)
 
     if (ioc_per_node_g > 0) {
         if (ioc_per_node_g * ioc_comm_size <= mpi_size)
-            cfg.stripe_count = (int32_t) (ioc_per_node_g * ioc_comm_size);
+            cfg.stripe_count = (int32_t)(ioc_per_node_g * ioc_comm_size);
         else
             cfg.stripe_count = mpi_size;
     }
@@ -440,7 +440,7 @@ test_stripe_sizes(void)
 
         cfg.ioc_selection = SELECT_IOC_ONE_PER_NODE;
         cfg.stripe_size   = (stripe_size_g > 0) ? stripe_size_g : stripe_size;
-        cfg.stripe_count  = (int32_t) ((ioc_per_node_g > 0) ? ioc_per_node_g * ioc_comm_size : ioc_comm_size);
+        cfg.stripe_count  = (int32_t)((ioc_per_node_g > 0) ? ioc_per_node_g * ioc_comm_size : ioc_comm_size);
 
         /* Start with a single rank for I/O */
         n_io_concentrators = 1;
@@ -585,7 +585,7 @@ test_stripe_sizes(void)
         file_ptr = H5FDopen(SUBF_FILENAME, H5F_ACC_RDWR, fapl_id, HADDR_UNDEF);
         VRFY(file_ptr, "H5FDopen succeeded");
 
-        n_io_concentrators = (int) ((ioc_per_node_g > 0) ? ioc_per_node_g * ioc_comm_size : ioc_comm_size);
+        n_io_concentrators = (int)((ioc_per_node_g > 0) ? ioc_per_node_g * ioc_comm_size : ioc_comm_size);
         num_digits         = (int)(HDlog10(n_io_concentrators) + 1);
 
         /*
@@ -764,40 +764,36 @@ test_subfiling_write_many_read_one(void)
      * Attempt to create a dataset that is striped across
      * 2 IOCs
      */
-    VRFY(((H5FD_SUBFILING_DEFAULT_STRIPE_SIZE % sizeof(SUBF_C_TYPE)) == 0),
-            "I/O type size check succeeded");
+    VRFY(((H5FD_SUBFILING_DEFAULT_STRIPE_SIZE % sizeof(SUBF_C_TYPE)) == 0), "I/O type size check succeeded");
 
     target_size = (2 * H5FD_SUBFILING_DEFAULT_STRIPE_SIZE);
     target_size -= (target_size % (size_t)mpi_size);
 
-    VRFY((target_size >= H5FD_SUBFILING_DEFAULT_STRIPE_SIZE),
-            "target size calculation succeeded");
-    VRFY(((target_size % sizeof(SUBF_C_TYPE)) == 0),
-            "target size check succeeded");
+    VRFY((target_size >= H5FD_SUBFILING_DEFAULT_STRIPE_SIZE), "target size calculation succeeded");
+    VRFY(((target_size % sizeof(SUBF_C_TYPE)) == 0), "target size check succeeded");
 
-    dset_dims[0] = (hsize_t) (target_size / sizeof(SUBF_C_TYPE));
+    dset_dims[0] = (hsize_t)(target_size / sizeof(SUBF_C_TYPE));
 
     fspace_id = H5Screate_simple(1, dset_dims, NULL);
     VRFY((fspace_id >= 0), "H5Screate_simple succeeded");
 
-    dset_id = H5Dcreate2(file_id, "DSET", SUBF_HDF5_TYPE, fspace_id,
-            H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    dset_id = H5Dcreate2(file_id, "DSET", SUBF_HDF5_TYPE, fspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
     /* Select hyperslab */
     count[0] = dset_dims[0] / (hsize_t)mpi_size;
     start[0] = (hsize_t)mpi_rank * count[0];
     VRFY((H5Sselect_hyperslab(fspace_id, H5S_SELECT_SET, start, NULL, count, NULL) >= 0),
-            "H5Sselect_hyperslab succeeded");
+         "H5Sselect_hyperslab succeeded");
 
     buf = HDmalloc(count[0] * sizeof(SUBF_C_TYPE));
     VRFY(buf, "HDmalloc succeeded");
 
     for (size_t i = 0; i < count[0]; i++)
-        ((SUBF_C_TYPE *)buf)[i] = (SUBF_C_TYPE) ((size_t)mpi_rank + i);
+        ((SUBF_C_TYPE *)buf)[i] = (SUBF_C_TYPE)((size_t)mpi_rank + i);
 
     VRFY((H5Dwrite(dset_id, SUBF_HDF5_TYPE, H5S_BLOCK, fspace_id, H5P_DEFAULT, buf) >= 0),
-            "Dataset write succeeded");
+         "Dataset write succeeded");
 
     HDfree(buf);
     buf = NULL;
@@ -819,13 +815,13 @@ test_subfiling_write_many_read_one(void)
         VRFY(buf, "HDmalloc succeeded");
 
         VRFY((H5Dread(dset_id, SUBF_HDF5_TYPE, H5S_BLOCK, H5S_ALL, H5P_DEFAULT, buf) >= 0),
-                "Dataset read succeeded");
+             "Dataset read succeeded");
 
         for (size_t i = 0; i < (size_t)mpi_size; i++) {
             for (size_t j = 0; j < count[0]; j++) {
                 SUBF_C_TYPE buf_value = ((SUBF_C_TYPE *)buf)[(i * count[0]) + j];
 
-                VRFY((buf_value == (SUBF_C_TYPE) (j + i)), "data verification succeeded");
+                VRFY((buf_value == (SUBF_C_TYPE)(j + i)), "data verification succeeded");
             }
         }
 
@@ -861,7 +857,6 @@ test_subfiling_write_many_read_one(void)
 static void
 test_subfiling_write_many_read_few(void)
 {
-
 }
 
 int
