@@ -1508,9 +1508,9 @@ error:
 
 typedef struct chunk_iter_info_t {
     hsize_t  offset[2];
-    uint32_t filter_mask;
+    unsigned filter_mask;
     haddr_t  addr;
-    uint32_t size;
+    hsize_t  size;
 } chunk_iter_info_t;
 
 typedef struct chunk_iter_udata_t {
