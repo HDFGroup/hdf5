@@ -1510,7 +1510,7 @@ typedef struct chunk_iter_info_t {
     hsize_t  offset[2];
     uint32_t filter_mask;
     haddr_t  addr;
-    uint32_t nbytes;
+    uint32_t size;
 } chunk_iter_info_t;
 
 typedef struct chunk_iter_udata_t {
@@ -1519,7 +1519,7 @@ typedef struct chunk_iter_udata_t {
 } chunk_iter_udata_t;
 
 static int
-iter_cb(const hsize_t *offset, uint32_t filter_mask, haddr_t addr, uint32_t nbytes, void *op_data)
+iter_cb(const hsize_t *offset, unsigned filter_mask, haddr_t addr, hsize_t size, void *op_data)
 {
     chunk_iter_udata_t *cidata = (chunk_iter_udata_t *)op_data;
     int                 idx    = cidata->last_index + 1;
@@ -1528,7 +1528,7 @@ iter_cb(const hsize_t *offset, uint32_t filter_mask, haddr_t addr, uint32_t nbyt
     cidata->chunk_info[idx].offset[1]   = offset[1];
     cidata->chunk_info[idx].filter_mask = filter_mask;
     cidata->chunk_info[idx].addr        = addr;
-    cidata->chunk_info[idx].nbytes      = nbytes;
+    cidata->chunk_info[idx].size        = size;
 
     cidata->last_index++;
 
@@ -1536,8 +1536,8 @@ iter_cb(const hsize_t *offset, uint32_t filter_mask, haddr_t addr, uint32_t nbyt
 }
 
 static int
-iter_cb_stop(const hsize_t H5_ATTR_UNUSED *offset, uint32_t H5_ATTR_UNUSED filter_mask,
-             haddr_t H5_ATTR_UNUSED addr, uint32_t H5_ATTR_UNUSED nbytes, void *op_data)
+iter_cb_stop(const hsize_t H5_ATTR_UNUSED *offset, unsigned H5_ATTR_UNUSED filter_mask,
+             haddr_t H5_ATTR_UNUSED addr, hsize_t H5_ATTR_UNUSED size, void *op_data)
 {
     chunk_iter_info_t **chunk_info = (chunk_iter_info_t **)op_data;
     *chunk_info += 1;
@@ -1545,8 +1545,8 @@ iter_cb_stop(const hsize_t H5_ATTR_UNUSED *offset, uint32_t H5_ATTR_UNUSED filte
 }
 
 static int
-iter_cb_fail(const hsize_t H5_ATTR_UNUSED *offset, uint32_t H5_ATTR_UNUSED filter_mask,
-             haddr_t H5_ATTR_UNUSED addr, uint32_t H5_ATTR_UNUSED nbytes, void *op_data)
+iter_cb_fail(const hsize_t H5_ATTR_UNUSED *offset, unsigned H5_ATTR_UNUSED filter_mask,
+             haddr_t H5_ATTR_UNUSED addr, hsize_t H5_ATTR_UNUSED size, void *op_data)
 {
     chunk_iter_info_t **chunk_info = (chunk_iter_info_t **)op_data;
     *chunk_info += 1;
@@ -1718,7 +1718,7 @@ test_basic_query(hid_t fapl)
         FAIL_PUTS_ERROR("offset[1] mismatch");
     if (chunk_infos[0].filter_mask != 0)
         FAIL_PUTS_ERROR("filter mask mismatch");
-    if (chunk_infos[0].nbytes != 96)
+    if (chunk_infos[0].size != 96)
         FAIL_PUTS_ERROR("size mismatch");
 
     if (chunk_infos[1].offset[0] != CHUNK_NX)
