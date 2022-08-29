@@ -25,9 +25,6 @@ main ()
     return 0;
 }
 
-#endif
-
-
 #endif /* HAVE_ATTRIBUTE */
 
 #ifdef HAVE_TIMEZONE
