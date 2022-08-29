@@ -34,7 +34,6 @@ endif()
 # future
 if(MSVC OR _INTEL_WINDOWS OR _CLANG_MSVC_WINDOWS)
   add_definitions(-D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE)
-else()
 endif()
 
 if(MSVC)
