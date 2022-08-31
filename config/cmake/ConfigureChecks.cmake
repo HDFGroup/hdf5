@@ -421,7 +421,7 @@ if (MINGW OR NOT WINDOWS)
   endif ()
 
   # ----------------------------------------------------------------------
-  # Does the struct stat have the st_blocks field?  This field is not Posix.
+  # Does the struct stat have the st_blocks field?  This field is not POSIX.
   #
   CHECK_STRUCT_HAS_MEMBER("struct stat" st_blocks "sys/types.h;sys/stat.h" ${HDF_PREFIX}_HAVE_STAT_ST_BLOCKS)
 
@@ -568,11 +568,15 @@ endif ()
 # Set the flag to indicate that the machine can handle converting
 # denormalized floating-point values.
 # (This flag should be set for all machines, except for the Crays, where
-# the cache value is set in it's config file)
-#
+# the cache value is set in its config file)
+#-----------------------------------------------------------------------------
 set (${HDF_PREFIX}_CONVERT_DENORMAL_FLOAT 1)
 
-
+# ----------------------------------------------------------------------
+# Set a special flag when using memory sanity checkers like Valgrind.
+# This disables the free lists, as the memory reuse scheme they implement
+# can hide memory problems.
+#-----------------------------------------------------------------------------
 if (HDF5_ENABLE_USING_MEMCHECKER)
   set (${HDF_PREFIX}_USING_MEMCHECKER 1)
 endif ()
