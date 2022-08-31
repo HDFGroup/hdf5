@@ -187,9 +187,7 @@ macro (HDF_FUNCTION_TEST OTHER_TEST)
       )
     endif ()
 
-    if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-      message (TRACE "Performing ${OTHER_TEST}")
-    endif ()
+    message (TRACE "Performing ${OTHER_TEST}")
     try_compile (${OTHER_TEST}
         ${CMAKE_BINARY_DIR}
         ${HDF_RESOURCES_DIR}/HDFTests.c
@@ -199,13 +197,9 @@ macro (HDF_FUNCTION_TEST OTHER_TEST)
     )
     if (${OTHER_TEST})
       set (${HDF_PREFIX}_${OTHER_TEST} 1 CACHE INTERNAL "Other test ${FUNCTION}")
-      if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-        message (VERBOSE "Performing Other Test ${OTHER_TEST} - Success")
-      endif ()
+      message (VERBOSE "Performing Other Test ${OTHER_TEST} - Success")
     else ()
-      if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-        message (VERBOSE "Performing Other Test ${OTHER_TEST} - Failed")
-      endif ()
+      message (VERBOSE "Performing Other Test ${OTHER_TEST} - Failed")
       set (${HDF_PREFIX}_${OTHER_TEST} "" CACHE INTERNAL "Other test ${FUNCTION}")
       file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
           "Performing Other Test ${OTHER_TEST} failed with the following output:\n"
@@ -259,23 +253,17 @@ if (MINGW OR NOT WINDOWS)
           set (TEST_LFS_WORKS 1 CACHE INTERNAL ${msg})
           set (LARGEFILE 1)
           set (HDF_EXTRA_FLAGS ${HDF_EXTRA_FLAGS} -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE)
-          if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-            message (VERBOSE "${msg}... yes")
-          endif ()
+          message (VERBOSE "${msg}... yes")
         else ()
           set (TEST_LFS_WORKS "" CACHE INTERNAL ${msg})
-          if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-            message (VERBOSE "${msg}... no")
-          endif ()
+          message (VERBOSE "${msg}... no")
           file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
                 "Test TEST_LFS_WORKS Run failed with the following exit code:\n ${TEST_LFS_WORKS_RUN}\n"
           )
         endif ()
       else ()
         set (TEST_LFS_WORKS "" CACHE INTERNAL ${msg})
-        if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-            message (VERBOSE "${msg}... no")
-        endif ()
+        message (VERBOSE "${msg}... no")
         file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
             "Test TEST_LFS_WORKS Compile failed\n"
         )
@@ -308,15 +296,11 @@ endif ()
 macro (HDF_CHECK_TYPE_SIZE type var)
   set (aType ${type})
   set (aVar  ${var})
-  if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-    message (TRACE "Checking size of ${aType} and storing into ${aVar}")
-  endif ()
+  message (TRACE "Checking size of ${aType} and storing into ${aVar}")
   CHECK_TYPE_SIZE (${aType}   ${aVar})
   if (NOT ${aVar})
     set (${aVar} 0 CACHE INTERNAL "SizeOf for ${aType}")
-    if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-      message (TRACE "Size of ${aType} was NOT Found")
-    endif ()
+    message (TRACE "Size of ${aType} was NOT Found")
   endif ()
 endmacro ()
 
@@ -507,9 +491,7 @@ endif ()
 #-----------------------------------------------------------------------------
 if (WINDOWS)
   if (NOT HDF_NO_IOEO_TEST)
-    if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-      message (VERBOSE "Checking for InitOnceExecuteOnce:")
-    endif ()
+    message (VERBOSE "Checking for InitOnceExecuteOnce:")
   if (NOT DEFINED ${HDF_PREFIX}_HAVE_IOEO)
     if (LARGEFILE)
       set (CMAKE_REQUIRED_DEFINITIONS
@@ -538,9 +520,7 @@ if (WINDOWS)
     # if the return value was 0 then it worked
     if ("${HAVE_IOEO_EXITCODE}" EQUAL 0)
       set (${HDF_PREFIX}_HAVE_IOEO 1 CACHE INTERNAL "Test InitOnceExecuteOnce")
-      if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-        message (VERBOSE "Performing Test InitOnceExecuteOnce - Success")
-      endif ()
+      message (VERBOSE "Performing Test InitOnceExecuteOnce - Success")
       file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "Performing C SOURCE FILE Test InitOnceExecuteOnce succeeded with the following output:\n"
         "${OUTPUT}\n"
@@ -552,9 +532,7 @@ if (WINDOWS)
         set (${HDF_PREFIX}_HAVE_IOEO "" CACHE INTERNAL "Test InitOnceExecuteOnce")
       endif ()
 
-      if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-        message (VERBOSE "Performing Test InitOnceExecuteOnce - Failed")
-      endif ()
+      message (VERBOSE "Performing Test InitOnceExecuteOnce - Failed")
       file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
         "Performing InitOnceExecuteOnce Test  failed with the following output:\n"
         "${OUTPUT}\n"
@@ -713,18 +691,14 @@ if (NOT WINDOWS)
         add_definitions ("-D_GNU_SOURCE")
       else ()
         set (TEST_DIRECT_VFD_WORKS "" CACHE INTERNAL ${msg})
-        if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-          message (VERBOSE "${msg}... no")
-        endif ()
+        message (VERBOSE "${msg}... no")
         file (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
               "Test TEST_DIRECT_VFD_WORKS Run failed with the following output and exit code:\n ${OUTPUT}\n"
         )
       endif ()
     else ()
       set (TEST_DIRECT_VFD_WORKS "" CACHE INTERNAL ${msg})
-      if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-        message (VERBOSE "${msg}... no")
-      endif ()
+      message (VERBOSE "${msg}... no")
       file (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
           "Test TEST_DIRECT_VFD_WORKS Compile failed with the following output:\n ${OUTPUT}\n"
       )
@@ -790,9 +764,7 @@ endif ()
 #-----------------------------------------------------------------------------
 set (RUN_OUTPUT_PATH_DEFAULT ${CMAKE_BINARY_DIR})
 macro (C_RUN FUNCTION_NAME SOURCE_CODE RETURN_VAR RETURN_OUTPUT_VAR)
-    if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-      message (VERBOSE "Detecting C ${FUNCTION_NAME}")
-    endif ()
+    message (VERBOSE "Detecting C ${FUNCTION_NAME}")
     file (WRITE
         ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCCompiler1.c
         ${SOURCE_CODE}
@@ -807,29 +779,23 @@ macro (C_RUN FUNCTION_NAME SOURCE_CODE RETURN_VAR RETURN_OUTPUT_VAR)
 
     set (${RETURN_OUTPUT_VAR} ${OUTPUT_VAR})
 
-    if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-      message (VERBOSE "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
-      message (VERBOSE "Test COMPILE_RESULT_VAR ${COMPILE_RESULT_VAR} ")
-      message (VERBOSE "Test COMPILE_OUTPUT ${COMPILEOUT} ")
-      message (VERBOSE "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
-      message (VERBOSE "Test RUN_RESULT_VAR ${RUN_RESULT_VAR} ")
-      message (VERBOSE "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
-    endif ()
+    message (VERBOSE "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
+    message (VERBOSE "Test COMPILE_RESULT_VAR ${COMPILE_RESULT_VAR} ")
+    message (VERBOSE "Test COMPILE_OUTPUT ${COMPILEOUT} ")
+    message (VERBOSE "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
+    message (VERBOSE "Test RUN_RESULT_VAR ${RUN_RESULT_VAR} ")
+    message (VERBOSE "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
 
     if (COMPILE_RESULT_VAR)
       if (RUN_RESULT_VAR EQUAL "0")
         set (${RETURN_VAR} 1 CACHE INTERNAL "Have C function ${FUNCTION_NAME}")
-        if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-          message (VERBOSE "Testing C ${FUNCTION_NAME} - OK")
-        endif ()
+        message (VERBOSE "Testing C ${FUNCTION_NAME} - OK")
         file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
             "Determining if the C ${FUNCTION_NAME} exists passed with the following output:\n"
             "${OUTPUT_VAR}\n\n"
         )
       else ()
-        if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-          message (VERBOSE "Testing C ${FUNCTION_NAME} - Fail")
-        endif ()
+        message (VERBOSE "Testing C ${FUNCTION_NAME} - Fail")
         set (${RETURN_VAR} 0 CACHE INTERNAL "Have C function ${FUNCTION_NAME}")
         file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
             "Determining if the C ${FUNCTION_NAME} exists failed with the following output:\n"
@@ -902,23 +868,17 @@ macro (H5ConversionTests TEST msg)
     if (${TEST}_COMPILE)
       if (${TEST}_RUN EQUAL "0")
         set (${TEST} 1 CACHE INTERNAL ${msg})
-        if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-          message (VERBOSE "${msg}... yes")
-        endif ()
+        message (VERBOSE "${msg}... yes")
       else ()
         set (${TEST} "" CACHE INTERNAL ${msg})
-        if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-          message (VERBOSE "${msg}... no")
-        endif ()
+        message (VERBOSE "${msg}... no")
         file (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
               "Test ${TEST} Run failed with the following output and exit code:\n ${OUTPUT}\n"
         )
       endif ()
     else ()
       set (${TEST} "" CACHE INTERNAL ${msg})
-      if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-        message (VERBOSE "${msg}... no")
-      endif ()
+      message (VERBOSE "${msg}... no")
       file (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
           "Test ${TEST} Compile failed with the following output:\n ${OUTPUT}\n"
       )

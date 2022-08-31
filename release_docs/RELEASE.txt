@@ -47,6 +47,13 @@ New Features
 
     Configuration:
     -------------
+    - Update CMake minimum version to 3.18
+
+      Updated CMake minimum version to 3.12 and removed version checks
+      for Windows features.
+
+      (ADB - 2022/08/29, HDFFV-11329)
+
     -
 
 

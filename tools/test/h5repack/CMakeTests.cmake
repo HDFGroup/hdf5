@@ -883,11 +883,6 @@
               -D "TEST_FUNCTION=LTEQ"
               -P "${HDF_RESOURCES_DIR}/fileCompareTest.cmake"
       )
-      if (CMAKE_VERSION VERSION_LESS "3.14.0")
-        set_tests_properties (H5REPACK_META-${testname} PROPERTIES
-            DISABLED "true"
-        )
-      endif ()
       set_tests_properties (H5REPACK_META-${testname} PROPERTIES
           DEPENDS H5REPACK_META-${testname}_M_DFF
       )

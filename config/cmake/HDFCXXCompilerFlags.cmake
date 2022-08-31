@@ -17,9 +17,7 @@ set (CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set (CMAKE_CXX_EXTENSIONS OFF)
 
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_SANITIZER_FLAGS} ${CMAKE_CXX_FLAGS}")
-if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-  message (VERBOSE "Warnings Configuration: CXX default: ${CMAKE_CXX_FLAGS}")
-endif ()
+message (VERBOSE "Warnings Configuration: CXX default: ${CMAKE_CXX_FLAGS}")
 #-----------------------------------------------------------------------------
 # Compiler specific flags : Shouldn't there be compiler tests for these
 #-----------------------------------------------------------------------------
@@ -140,9 +138,7 @@ else ()
   elseif (CMAKE_CXX_COMPILER_ID STREQUAL "PGI")
     list (APPEND HDF5_CMAKE_CXX_FLAGS "-Minform=inform")
   endif ()
-  if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-    message (VERBOSE "CMAKE_CXX_FLAGS_GENERAL=${HDF5_CMAKE_CXX_FLAGS}")
-  endif ()
+  message (VERBOSE "CMAKE_CXX_FLAGS_GENERAL=${HDF5_CMAKE_CXX_FLAGS}")
 endif ()
 
 #-----------------------------------------------------------------------------
