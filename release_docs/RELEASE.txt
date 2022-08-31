@@ -49,8 +49,9 @@ New Features
     -------------
     - Update CMake minimum version to 3.18
 
-      Updated CMake minimum version to 3.12 and removed version checks
-      for Windows features.
+      Updated CMake minimum version from 3.12 to 3.18 and removed version checks
+      which were added for Windows features not yet available in version 3.12. Also
+      removed configure macros and code checks for old style code compile checks.
 
       (ADB - 2022/08/29, HDFFV-11329)
 
