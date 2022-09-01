@@ -645,11 +645,13 @@ H5A__read(const H5A_t *attr, const H5T_t *mem_type, void *buf)
                 if (need_bkg) {
                     /* Allocate background buffer */
                     if (NULL == (bkg_buf = H5FL_BLK_CALLOC(attr_buf, buf_size)))
-                        HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, FAIL, "memory allocation failed")
+                        HGOTO_ERROR(H5E_ATTR, H5E_CANTALLOC, FAIL, "memory allocation failed")
 
                     /* Copy the application buffer into the background buffer if necessary */
-                    if (need_bkg == H5T_BKG_YES)
-                        H5MM_memcpy(bkg_buf, buf, (dst_type_size * nelmts));
+                    if (need_bkg == H5T_BKG_YES) {
+                        HDassert(buf_size >= (dst_type_size * nelmts));
+                        H5MM_memcpy(bkg_buf, buf, dst_type_size * nelmts);
+                    }
                 }
 
                 /* Perform datatype conversion.  */
