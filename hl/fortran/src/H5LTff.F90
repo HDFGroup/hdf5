@@ -1,3 +1,7 @@
+!> @ingroup H5LT
+!!
+!! @brief This file contains Fortran interfaces for H5LT.
+!
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
@@ -10,12 +14,6 @@
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-!
-!
-! This file contains FORTRAN interfaces for H5LT functions
-!
-! NOTES
-!
 !       _____ __  __ _____   ____  _____ _______       _   _ _______
 !      |_   _|  \/  |  __ \ / __ \|  __ \__   __|/\   | \ | |__   __|
 ! ****   | | | \  / | |__) | |  | | |__) | | |  /  \  |  \| |  | |    ****
@@ -35,6 +33,18 @@ MODULE H5LT_CONST
   USE h5fortran_types
   USE hdf5
 
+#ifdef H5_DOXYGEN_FORTRAN
+  INTERFACE h5ltmake_dataset_f
+     MODULE PROCEDURE h5ltmake_dataset_f
+     MODULE PROCEDURE h5ltmake_dataset_f___F90_VERSION
+  END INTERFACE
+
+  INTERFACE h5ltread_dataset_f
+     MODULE PROCEDURE h5ltread_dataset_f
+     MODULE PROCEDURE h5ltread_dataset_f___F90_VERSION
+  END INTERFACE
+
+#else
   INTERFACE h5ltmake_dataset_f
      MODULE PROCEDURE h5ltmake_dataset_f_ptr
   END INTERFACE
@@ -111,28 +121,61 @@ MODULE H5LT_CONST
        INTEGER(size_t), INTENT(in) :: SizeOf_buf                     ! Sizeof the buf data type
      END FUNCTION h5ltget_attribute_c
   END INTERFACE
+#endif
 
 CONTAINS
+
   !-------------------------------------------------------------------------
   ! Make/Read dataset functions
   !-------------------------------------------------------------------------
 
-  !-------------------------------------------------------------------------
-  ! Function(s): h5ltmake_dataset_f_ptr
-  !
-  ! Purpose: Creates and writes a dataset of a type TYPE_ID
-  !
-  ! Return: Success: 0, Failure: -1
-  !
-  ! Programmer: M. Scot Breitenfeld
-  !
-  ! Date: APR 29, 2015
-  !
-  ! Comments:
-  !
-  ! Modifications:
-  !
-  !-------------------------------------------------------------------------
+#ifdef H5_DOXYGEN_FORTRAN
+  !<
+  !! \ingroup H5LT
+  !!
+  !! \brief Creates and writes a dataset of a type \p type_id. **This is the preferred signature for h5ltmake_dataset_f.**
+  !!
+  !! \param loc_id    Location identifier. The identifier may be that of a file or group.
+  !! \param dset_name The name of the dataset to create.
+  !! \param rank      Number of dimensions of dataspace.
+  !! \param dims      An array of the size of each dimension.
+  !! \param type_id   Identifier of the datatype to use when creating the dataset.
+  !! \param buf       Buffer with data to be written to the dataset.
+  !! \param errcode   \herr_t.
+  !!
+  SUBROUTINE h5ltmake_dataset_f(loc_id, dset_name, rank, dims, type_id, buf, errcode )
+    INTEGER(hid_t),   INTENT(in) :: loc_id
+    CHARACTER(len=*), INTENT(in) :: dset_name
+    INTEGER,          INTENT(in) :: rank
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims
+    INTEGER(hid_t),   INTENT(in) :: type_id
+    TYPE(C_PTR) :: buf
+    INTEGER :: errcode
+  END SUBROUTINE h5ltmake_dataset_f
+  !<
+  !! \ingroup H5LT
+  !!
+  !! \brief Creates and writes a dataset of a type \p type_id. **This is the preferred signature for h5ltmake_dataset_f.**
+  !!
+  !! \param loc_id    Location identifier. The identifier may be that of a file or group.
+  !! \param dset_name The name of the dataset to create.
+  !! \param rank      Number of dimensions of dataspace.
+  !! \param dims      An array of the size of each dimension.
+  !! \param type_id   Identifier of the datatype to use when creating the dataset.
+  !! \param buf       Buffer with data to be written to the dataset.
+  !! \param errcode   \herr_t.
+  !!
+  SUBROUTINE h5ltmake_dataset_f___F90_VERSION(loc_id, dset_name, rank, dims, type_id, buf, errcode)
+    INTEGER(hid_t)       , INTENT(IN)               :: loc_id
+    CHARACTER(len=*)     , INTENT(IN)               :: dset_name
+    INTEGER              , INTENT(IN)               :: rank
+    INTEGER(hsize_t)     , INTENT(IN), DIMENSION(*) :: dims
+    INTEGER(hid_t)       , INTENT(IN)               :: type_id
+    TYPE(TYPE)           , INTENT(IN), DIMENSION(*) :: buf
+    INTEGER :: errcode 
+  END SUBROUTINE h5ltmake_dataset_f___F90_VERSION
+
+#else
 
   SUBROUTINE h5ltmake_dataset_f_ptr(loc_id,&
        dset_name,&
@@ -160,7 +203,7 @@ CONTAINS
   !-------------------------------------------------------------------------
   ! Function(s): h5ltmake_dataset_f_int(1-7)
   !
-  ! Purpose: Creates and writes a dataset of a type TYPE_ID
+  !! \brief Creates and writes a dataset of a type TYPE_ID
   !
   ! Return: Success: 0, Failure: -1
   !
@@ -341,24 +384,54 @@ CONTAINS
 
   END SUBROUTINE h5ltmake_dataset_f_int7
 
+#endif
 
-  !-------------------------------------------------------------------------
-  ! Function(s): h5ltread_dataset_f_ptr
-  !
-  ! Purpose: Read a dataset of a type TYPE_ID
-  !
-  ! Return: Success: 0, Failure: -1
-  !
-  ! Programmer: M. Scot Breitenfeld
-  !
-  ! Date: Apr 29, 2015
-  !
-  ! Comments:
-  !
-  ! Modifications:
-  !
-  !-------------------------------------------------------------------------
+#ifdef H5_DOXYGEN_FORTRAN
+  !<
+  !! \ingroup H5LT
+  !!
+  !! \brief Creates and writes a dataset of a type \p type_id. **This is the preferred signature for h5ltmake_dataset_f.**
+  !!
+  !! \param loc_id    Location identifier. The identifier may be that of a file or group.
+  !! \param dset_name The name of the dataset to create.
+  !! \param rank      Number of dimensions of dataspace.
+  !! \param dims      An array of the size of each dimension.
+  !! \param type_id   Identifier of the datatype to use when creating the dataset.
+  !! \param buf       Buffer with data to be written to the dataset.
+  !! \param errcode   \herr_t.
+  !!
+subroutine h5ltread_dataset_f(loc_id, dset_name, type_id, buf, errcode)
+  implicit none
+  integer(HID_T), intent(IN) :: loc_id               ! file or group identifier 
+  character(LEN=*), intent(IN) :: dset_name          ! name of the dataset 
+  integer(HID_T), intent(IN) :: type_id              ! datatype identifier
+  type(C_PTR) :: buf                                 ! data buffer 
+  integer :: errcode                                 ! error code
+end subroutine h5ltread_dataset_f
+  !<
+  !! \ingroup H5LT
+  !!
+  !! \brief Creates and writes a dataset of a type \p type_id. **This is the preferred signature for h5ltmake_dataset_f.**
+  !!
+  !! \param loc_id    Location identifier. The identifier may be that of a file or group.
+  !! \param dset_name The name of the dataset to create.
+  !! \param rank      Number of dimensions of dataspace.
+  !! \param dims      An array of the size of each dimension.
+  !! \param type_id   Identifier of the datatype to use when creating the dataset.
+  !! \param buf       Buffer with data to be written to the dataset.
+  !! \param errcode   \herr_t.
+  !!
+subroutine h5ltread_dataset_f(loc_id, dset_name, type_id, buf, dims, errcode)
+  implicit none
+  integer(HID_T), intent(IN) :: loc_id               ! file or group identifier 
+  character(LEN=*), intent(IN) :: dset_name          ! name of the dataset 
+  integer(HID_T), intent(IN) :: type_id              ! datatype identifier 
+  integer(HSIZE_T), dimension(*), intent(IN) :: dims ! size of the buffer buf 
+  , intent(INOUT), dimension(*) :: buf         ! data buffer 
+  integer :: errcode                                 ! error code
+end subroutine h5ltread_dataset_f
 
+#else
   SUBROUTINE h5ltread_dataset_f_ptr(loc_id,&
        dset_name,&
        type_id,&
@@ -381,7 +454,7 @@ CONTAINS
   !-------------------------------------------------------------------------
   ! Function(s): h5ltread_dataset_f_int(1-7)
   !
-  ! Purpose: Read a dataset of a type TYPE_ID
+  !! \brief Read a dataset of a type TYPE_ID
   !
   ! Return: Success: 0, Failure: -1
   !
@@ -422,7 +495,7 @@ CONTAINS
   !-------------------------------------------------------------------------
   ! Function: h5ltread_dataset_f_int2
   !
-  ! Purpose: Read a dataset of a type TYPE_ID
+  !! \brief Read a dataset of a type TYPE_ID
   !
   ! Return: Success: 0, Failure: -1
   !
@@ -531,7 +604,7 @@ CONTAINS
   !-------------------------------------------------------------------------
   ! Function: h5ltread_dataset_f_int6
   !
-  ! Purpose: Read a dataset of a type TYPE_ID
+  !! \brief Read a dataset of a type TYPE_ID
   !
   ! Return: Success: 0, Failure: -1
   !
@@ -586,12 +659,12 @@ CONTAINS
     errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr)
 
   END SUBROUTINE h5ltread_dataset_f_int7
-
+#endif
 
   !-------------------------------------------------------------------------
   ! Function: h5ltmake_dataset_int_f_1
   !
-  ! Purpose: Creates and writes a dataset of H5T_NATIVE_INT type
+  !! \brief Creates and writes a dataset of H5T_NATIVE_INT type
   !
   ! Return: Success: 0, Failure: -1
   !
@@ -766,7 +839,7 @@ CONTAINS
   !-------------------------------------------------------------------------
   ! Function(s): h5ltread_dataset_int_f_(1-7)
   !
-  ! Purpose: Read a dataset
+  !! \brief Read a dataset
   !
   ! Return: Success: 0, Failure: -1
   !
@@ -929,7 +1002,7 @@ CONTAINS
   !-------------------------------------------------------------------------
   ! Function: h5ltmake_dataset_string_f
   !
-  ! Purpose: Creates and writes a dataset
+  !! \brief Creates and writes a dataset
   !
   ! Return: Success: 0, Failure: -1
   !
@@ -979,7 +1052,7 @@ CONTAINS
   !-------------------------------------------------------------------------
   ! Function: h5ltread_dataset_string_f
   !
-  ! Purpose: Read a dataset
+  !! \brief Read a dataset
   !
   ! Return: Success: 0, Failure: -1
   !
@@ -1030,7 +1103,7 @@ CONTAINS
   !-------------------------------------------------------------------------
   ! Function: h5ltset_attribute_f
   !
-  ! Purpose: Create and write an attribute
+  !! \brief Create and write an attribute
   !
   ! Return: Success: 0, Failure: -1
   !
@@ -1088,7 +1161,7 @@ CONTAINS
   !-------------------------------------------------------------------------
   ! Function: h5ltset_attribute_int_f
   !
-  ! Purpose: Create and write an attribute
+  !! \brief Create and write an attribute
   !
   ! Return: Success: 0, Failure: -1
   !
@@ -1139,7 +1212,7 @@ CONTAINS
   !-------------------------------------------------------------------------
   ! Function: h5ltset_attribute_float_f
   !
-  ! Purpose: Create and write an attribute
+  !! \brief Create and write an attribute
   !
   ! Return: Success: 0, Failure: -1
   !
@@ -1189,7 +1262,7 @@ CONTAINS
   !-------------------------------------------------------------------------
   ! Function: h5ltset_attribute_double_f
   !
-  ! Purpose: Create and write an attribute
+  !! \brief Create and write an attribute
   !
   ! Return: Success: 0, Failure: -1
   !
@@ -1241,7 +1314,7 @@ CONTAINS
   !-------------------------------------------------------------------------
   ! Function: h5ltset_attribute_string_f
   !
-  ! Purpose: Create and write an attribute
+  !! \brief Create and write an attribute
   !
   ! Return: Success: 0, Failure: -1
   !
@@ -1292,7 +1365,7 @@ CONTAINS
   !-------------------------------------------------------------------------
   ! Function: h5ltget_attribute_f
   !
-  ! Purpose: Reads an attribute named ATTR_NAME
+  !! \brief Reads an attribute named ATTR_NAME
   !
   ! Return: Success: 0, Failure: -1
   !
@@ -1346,7 +1419,7 @@ CONTAINS
   !-------------------------------------------------------------------------
   ! Function: h5ltget_attribute_int_f
   !
-  ! Purpose: Reads an attribute named ATTR_NAME
+  !! \brief Reads an attribute named ATTR_NAME
   !
   ! Return: Success: 0, Failure: -1
   !
@@ -1393,7 +1466,7 @@ CONTAINS
   !-------------------------------------------------------------------------
   ! Function: h5ltget_attribute_float_f
   !
-  ! Purpose: Reads an attribute named ATTR_NAME
+  !! \brief Reads an attribute named ATTR_NAME
   !
   ! Return: Success: 0, Failure: -1
   !
@@ -1439,7 +1512,7 @@ CONTAINS
   !-------------------------------------------------------------------------
   ! Function: h5ltget_attribute_c_double_f
   !
-  ! Purpose: Reads an attribute named ATTR_NAME
+  !! \brief Reads an attribute named ATTR_NAME
   !
   ! Return: Success: 0, Failure: -1
   !
@@ -1486,7 +1559,7 @@ CONTAINS
   !-------------------------------------------------------------------------
   ! Function: h5ltget_attribute_string_f
   !
-  ! Purpose: Reads an attribute named ATTR_NAME
+  !! \brief Reads an attribute named ATTR_NAME
   !
   ! Return: Success: 0, Failure: -1
   !
@@ -1547,7 +1620,7 @@ CONTAINS
   !-------------------------------------------------------------------------
   ! Function: h5ltget_dataset_ndims_f
   !
-  ! Purpose: Gets the dimensionality of a dataset
+  !! \brief Gets the dimensionality of a dataset
   !
   ! Return: Success: 0, Failure: -1
   !
@@ -1595,7 +1668,7 @@ CONTAINS
   !-------------------------------------------------------------------------
   ! Function: h5ltfind_dataset_f
   !
-  ! Purpose: Inquires if a dataset named dset_name exists attached
+  !! \brief Inquires if a dataset named dset_name exists attached
   !           to the object loc_id.
   !
   ! Return: Success: 0, Failure: -1
@@ -1640,7 +1713,7 @@ CONTAINS
   !-------------------------------------------------------------------------
   ! Function: h5ltget_dataset_info_f
   !
-  ! Purpose: Gets information about a dataset
+  !! \brief Gets information about a dataset
   !
   ! Return: Success: 0, Failure: -1
   !
@@ -1699,7 +1772,7 @@ CONTAINS
   !-------------------------------------------------------------------------
   ! Function: h5ltget_attribute_ndims_f
   !
-  ! Purpose: Create and write an attribute
+  !! \brief Create and write an attribute
   !
   ! Return: Success: 0, Failure: -1
   !
@@ -1753,7 +1826,7 @@ CONTAINS
   !-------------------------------------------------------------------------
   ! Function: h5ltget_attribute_info_f
   !
-  ! Purpose: Gets information about an attribute
+  !! \brief Gets information about an attribute
   !
   ! Return: Success: 0, Failure: -1
   !
@@ -1812,7 +1885,7 @@ CONTAINS
   !-------------------------------------------------------------------------
   ! Function: h5ltpath_valid_f
   !
-  ! Purpose: Validates a path
+  !! \brief Validates a path
   !
   ! Return: Success: 0, Failure: -1
   !
