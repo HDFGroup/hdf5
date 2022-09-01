@@ -3432,7 +3432,7 @@ test_compound_15_attr(void)
 
     if ((attr_id = H5Acreate_by_name(file, ".", "attr_cmpd", cmpd_f_tid, space_id, H5P_DEFAULT, H5P_DEFAULT,
                                      H5P_DEFAULT)) < 0)
-        FAIL_PUTS_ERROR("Can't create dataset\n");
+        FAIL_PUTS_ERROR("Can't create attribute\n");
 
     if (H5Awrite(attr_id, cmpd_f_tid, &wdata1) < 0)
         FAIL_PUTS_ERROR("Can't write data\n");
