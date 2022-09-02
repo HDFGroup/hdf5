@@ -757,6 +757,12 @@ option (HDF5_ENABLE_SUBFILING_VFD "Build Parallel HDF5 Subfiling VFD" OFF)
 if (HDF5_ENABLE_SUBFILING_VFD)
   if (NOT HDF5_ENABLE_PARALLEL)
     message (FATAL_ERROR "Subfiling VFD requires a parallel HDF5 build")
+  else ()
+    # Check for MPI_Comm_split_type
+    CHECK_SYMBOL_EXISTS (MPI_Comm_split_type "mpi.h" H5_HAVE_MPI_Comm_split_type)
+    if (NOT H5_HAVE_MPI_Comm_split_type)
+      message (FATAL_ERROR "Subfiling VFD requires MPI-3 support for MPI_Comm_split_type")
+    endif ()
   endif()
 
   if (NOT DEFINED Threads_FOUND)

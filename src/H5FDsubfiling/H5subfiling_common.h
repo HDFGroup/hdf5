@@ -42,6 +42,11 @@
  * may be better optimized than others
  */
 /* #define H5_SUBFILING_PREFER_ALLGATHER_TOPOLOGY */
+#ifndef H5_SUBFILING_PREFER_ALLGATHER_TOPOLOGY
+#if !H5_CHECK_MPI_VERSION(3, 0)
+#error "MPI 3 required for MPI_Comm_split_type"
+#endif
+#endif
 
 /*
  * Name of the HDF5 FAPL property that the Subfiling VFD
@@ -133,32 +138,34 @@ typedef enum io_ops {
     LOGGING_OP = 16
 } io_op_t;
 
-/* Every application rank will record their MPI rank
- * and hostid as a structure.  These eventually get
- * communicated to MPI rank zero(0) and sorted before
- * being broadcast. The resulting sorted vector
- * provides a basis for determining which MPI ranks
- * will host an IO Concentrator (IOC), e.g. For
- * default behavior, we choose the first vector entry
- * associated with a "new" hostid.
+/*
+ * Every MPI rank in a file's communicator will
+ * record their MPI rank for the file communicator
+ * and their node-local MPI rank for the node's
+ * communicator. Then the resulting information
+ * will be broadcast to all MPI ranks and will
+ * provide a basis for determining which MPI ranks
+ * will host an I/O concentrator.
  */
 typedef struct {
-    long rank;
-    long hostid;
+    int rank;
+    int node_local_rank;
+    int node_local_size;
+    int node_lead_rank;
 } layout_t;
 
-/* This typedef defines a fixed process layout which
+/*
+ * This typedef defines a fixed process layout which
  * can be reused for any number of file open operations
  */
 typedef struct app_layout_t {
-    long      hostid;      /* value returned by gethostid()  */
-    layout_t *layout;      /* Vector of {rank,hostid} values */
-    int      *node_ranks;  /* ranks extracted from sorted layout */
-    int       node_count;  /* Total nodes (different hostids) */
-    int       node_index;  /* My node: index into node_ranks */
-    int       local_peers; /* How may local peers on my node */
-    int       world_rank;  /* My MPI rank                    */
-    int       world_size;  /* Total number of MPI ranks      */
+    layout_t *layout;          /* Array of (rank, node local rank, node local size) values */
+    int      *node_ranks;      /* Array of lowest MPI rank values on each node             */
+    int       node_count;      /* Total number of nodes                                    */
+    int       world_rank;      /* MPI rank in file communicator                            */
+    int       world_size;      /* Size of file communicator                                */
+    int       node_local_rank; /* MPI rank on node                                         */
+    int       node_local_size; /* Size of node intra-communicator                          */
 } app_layout_t;
 
 /*  This typedef defines things related to IOC selections */
@@ -185,7 +192,7 @@ typedef struct {
     MPI_Comm       sf_msg_comm;             /* MPI comm used to send RPC msg        */
     MPI_Comm       sf_data_comm;            /* MPI comm used to move data           */
     MPI_Comm       sf_eof_comm;             /* MPI comm used to communicate EOF     */
-    MPI_Comm       sf_intra_comm;           /* MPI comm used for intra-node comms   */
+    MPI_Comm       sf_node_comm;            /* MPI comm used for intra-node comms   */
     MPI_Comm       sf_group_comm;           /* Not used: for IOC collectives        */
     int            sf_group_size;           /* IOC count (in sf_group_comm)         */
     int            sf_group_rank;           /* IOC rank  (in sf_group_comm)         */
