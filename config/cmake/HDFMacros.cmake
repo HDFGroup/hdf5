@@ -28,9 +28,7 @@ macro (SET_HDF_BUILD_TYPE)
     endif()
   endif()
   if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-    if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-      message (VERBOSE "Setting build type to 'RelWithDebInfo' as none was specified.")
-    endif()
+    message (VERBOSE "Setting build type to 'RelWithDebInfo' as none was specified.")
     set(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING "Choose the type of build." FORCE)
     # Set the possible values of build type for cmake-gui
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release"
@@ -448,19 +446,6 @@ macro (HDF_DIR_PATHS package_prefix)
       set (CMAKE_GENERIC_PROGRAM_FILES)
     endif ()
   endif ()
-
-#-----------------------------------------------------------------------------
-# Setup pre-3.14 FetchContent
-#-----------------------------------------------------------------------------
-  if(${CMAKE_VERSION} VERSION_LESS 3.14)
-    macro(FetchContent_MakeAvailable NAME)
-        FetchContent_GetProperties(${NAME})
-        if(NOT ${NAME}_POPULATED)
-            FetchContent_Populate(${NAME})
-            add_subdirectory(${${NAME}_SOURCE_DIR} ${${NAME}_BINARY_DIR})
-        endif()
-    endmacro()
-  endif()
 endmacro ()
 
 macro (ADD_H5_FLAGS h5_flag_var infile)

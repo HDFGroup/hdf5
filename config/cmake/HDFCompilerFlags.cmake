@@ -14,9 +14,7 @@ set(CMAKE_C_STANDARD_REQUIRED TRUE)
 
 set (CMAKE_C_FLAGS "${CMAKE_C99_STANDARD_COMPILE_OPTION} ${CMAKE_C_FLAGS}")
 set (CMAKE_C_FLAGS "${CMAKE_C_SANITIZER_FLAGS} ${CMAKE_C_FLAGS}")
-if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-  message (VERBOSE "Warnings Configuration: C default: ${CMAKE_C_FLAGS}")
-endif ()
+message (VERBOSE "Warnings Configuration: C default: ${CMAKE_C_FLAGS}")
 #-----------------------------------------------------------------------------
 # Compiler specific flags : Shouldn't there be compiler tests for these
 #-----------------------------------------------------------------------------
@@ -163,9 +161,7 @@ else ()
   elseif (CMAKE_C_COMPILER_ID STREQUAL "PGI")
     list (APPEND HDF5_CMAKE_C_FLAGS "-Minform=inform")
   endif ()
-  if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-    message (VERBOSE "CMAKE_C_FLAGS_GENERAL=${HDF5_CMAKE_C_FLAGS}")
-  endif ()
+  message (VERBOSE "CMAKE_C_FLAGS_GENERAL=${HDF5_CMAKE_C_FLAGS}")
 endif ()
 
 #-----------------------------------------------------------------------------
