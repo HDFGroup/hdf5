@@ -24,7 +24,7 @@ crashing your reader processes."
 
 The long answer is more complicated.
 
-An HDF5 file's state exists in two places when it is being written to:
+An HDF5 file's state exists in two places when it is open for writing:
 
 1. The HDF5 file itself
 2. The HDF5 library's various caches
@@ -32,8 +32,9 @@ An HDF5 file's state exists in two places when it is being written to:
 One of those caches is the metadata cache, which stores things like B-tree
 nodes that we use to locate data in the file. Problems arise when parent
 objects are flushed to storage before child objects. If a reader tries to
-load unflushed children, it will encounter library failures as it tries
-to access the non-existant objects.
+load unflushed children, the object's file offset could point at garbage
+and it will encounter library failures as it tries to access the non-existant
+objects.
 
 Keep in mind that the HDF5 library is not analogous to a database server. The
 HDF5 library is just a simple shared library, like libjpeg. Library state is
@@ -56,7 +57,7 @@ prevent harmful accesses when SWMR is not in use, we decided to switch the
 file locking scheme on by default. This scheme has been carried forward into
 HDF5 1.12 and 1.13 (soon to be 1.14).
 
-The current implementation of SWMR is only useful for appending to chunked
+Note that the current implementation of SWMR is only useful for appending to chunked
 datasets. Creating file objects like groups and datasets is not supported
 in the current SWMR implementation.
 
@@ -71,7 +72,7 @@ to disable the file locking scheme over the years.
 There are two parts to the file locking scheme. One is the file lock itself.
 The second is a mark we make in the HDF5 file's superblock. The superblock
 mark isn't really that important for understanding the file locking, but since
-it's entwined with the file locking scheme, we'll briefly mention it in the
+it's entwined with the file locking scheme, we'll cover it in the
 algorithm below. The lower-level details of file lock implementations are
 described in the appendix, but the semantics are straightfoward: Locks are
 mandatory unless disabled, always for the entire file, and non-blocking. They
@@ -85,8 +86,9 @@ Here's how it all works:
     - We first check the file locking property in the file access property list
       (fapl). The default value of this property is set at configure time when
       the library is built.
-    - Next we check the value of the `HDF5_USE_FILE_LOCKING` environment variable.
-      If this is set, we use the value to override the property list setting.
+    - Next we check the value of the `HDF5_USE_FILE_LOCKING` environment variable,
+      which was previously parsed at library startup. If this is set,
+      we use the value to override the property list setting.
 
     The particulars of the ways you can disable file locks are described in a
     separate section below.
@@ -94,7 +96,14 @@ Here's how it all works:
     If we are not using file locking, no further file locking operations will
     take place.
 
-2. When we open a file, we lock it based on the file access flags:
+2. We also check for ignoring file locks when they are disabled on the file system.
+
+    - The environment variable setting for this is checked at VFD initialization
+      time for all library VFDs.
+    - We check the value in the fapl in the `open` callback. The default value for
+      this property was set at configure time when the library was built.
+
+3. When we open a file, we lock it based on the file access flags:
 
     - If the `H5F_ACC_RDWR` flag is set, use an exclusive lock
     - Otherwise use a shared lock
@@ -102,18 +111,11 @@ Here's how it all works:
     If we are ignoring disabled file locks (see below), we will silently swallow
     lock API call failure when locks are not implemented on the file system.
 
-3. When we are in the VFD's `open` callback, we check for ignoring file locks
-   when they are disabled on the file system.
-
-    - The environment variable setting for this is checked at VFD initialization
-      time for all library VFDs.
-    - We check the value in the fapl in the `open` callback. The default value for
-      this property was set at configure time when the library was built.
-
 4. If the VFD supports locking and the file is open for writing, we mark the
    file consistency flags in the file's superblock to indicate this.
 
     **NOTE!**
+
     - The VFD has to have a lock callback for this to happen. It doesn't matter if
       the locking was disabled - the check is simply for the callback.
     - We mark the superblock in **ANY** write case - both SWMR and non-SWMR.
@@ -145,6 +147,13 @@ Here's how it all works:
 6. We normally don't explicitly unlock the file on file close. We let the OS
    handle it when the file descriptors are closed since file locks don't
    normally surivive closing the underlying file descriptor.
+
+**TL;DR**
+
+When locks are available, HDF5 files will be exclusively locked while they are
+in use. The exception to this are files that are opened for SWMR writing, which
+are unlocked. Files that are open for any kind of writing get a "writing"
+superblock mark that HDF5 1.10.0+ will respect and refuse to open outside of SWMR.
 
 ## `H5Fstart_swmr_write()`
 
@@ -210,17 +219,17 @@ The `HDF5_USE_FILE_LOCKING` environment variable overrides all other file
 locking settings.
 
 HDF5 1.10.6 and earlier, 1.12.0:
-- `FALSE` turned file locking off
-- Anything else turned file locking on
+- `FALSE` turns file locking off
+- Anything else turns file locking on
 - Neither of these values ignores disabled file locks
 - Environment variable parsed at file create/open time
 
-1.10.7+, 1.12.1+, 1.13.x:
+HDF5 1.10.7+, 1.12.1+, 1.13.x:
 - `FALSE` or `0` disables file locking
 - `TRUE` or `1` enables file locking
 - `BEST_EFFORT` enables file locking and ignores disabled file locks
 - Anything else gives you the defaults
-- Environment variable parsed at H5F package initialization
+- Environment variable parsed at library startup
 
 ### Lock disable scheme interactions
 
@@ -253,17 +262,19 @@ just need to be extra careful that you hold to rules for SWMR access.
 
 The following table indicates which versions of the library support which file
 lock features. 1.13.0 and 1.13.1 are experimental releases (basically glorified
-release candidates, so they are not included here).
+release candidates) so they are not included here.
 
 **Locks**
-P = POSIX locks only, Windows was a no-op that always succeeded
-WP = POSIX and Windows locks
-(-) = POSIX no-op lock fails
-(+) = POSIX no-op lock passes
+
+- P = POSIX locks only, Windows was a no-op that always succeeded
+- WP = POSIX and Windows locks
+- (-) = POSIX no-op lock fails
+- (+) = POSIX no-op lock passes
 
 **Configure Option and Environment Variable**
-on/off = sets file locks on/off
-try = can also set "best effort", where locks are on but ignored if disabled
+
+- on/off = sets file locks on/off
+- try = can also set "best effort", where locks are on but ignored if disabled
 
 |Version|Has locks|Configure option|`H5Pset_file_locking()`|`HDF5_USE_FILE_LOCKING`|
 |-------|---------|----------------|-----------------------|-----------------------|
@@ -296,7 +307,7 @@ for concurrent access across processes.
 On Unix systems, we call `flock()` directly when it's available and pass
 `LOCK_SH` (shared lock), `LOCK_EX` (exclusive lock), and `LOCK_UN` (unlock) as
 described in the algorithm section. All locks are non-blocking, so we set the
-`LOCK_NB` flag. Sadly, `flock(2)` is not POSIX neither does it lock files over
+`LOCK_NB` flag. Sadly, `flock(2)` is not POSIX and it doesn't lock files over
 NFS. We didn't consider a lack of NFS support a problem since SWMR isn't
 supported on networked file systems like NFS (write order preservation isn't
 guaranteed) and `flock(2)` usually doesn't fail when you attempt to lock NFS
@@ -324,6 +335,7 @@ thoroughly vetted as the `flock`-based scheme.
 
 On non-Windows systems where neither `flock(2)` nor `fcntl(2)` is available,
 we substitute a no-op stub that always succeeds (`Nflock()` in `H5system.c`).
+In the past, the stub always failed (see the matrix for when we made the switch).
 We currently know of no non-Windows systems where neither call is available
 so this scheme is not well-tested.
 
@@ -335,9 +347,10 @@ been optional, so we consider this a lower-order concern.
 Locks are implemented at the VFD level via `lock` and `unlock` callbacks. The
 VFDs that implement file locks are: core (w/ backing store), direct, log, sec2,
 and stdio (`flock(2)` locks only). The family, multi, and splitter VFDs invoke
-the lock callback on their sub-files. The onion and MPI-IO VFDs do NOT use locks,
-even though they create normal, on-disk native HDF5 files. The read-only S3 VFD
-and HDFS VFDs do not use file locking since they use alternative storage schemes.
+the lock callback of their underlying sub-files. The onion and MPI-IO VFDs do NOT
+use locks, even though they create normal, on-disk native HDF5 files. The
+read-only S3 VFD and HDFS VFDs do not use file locking since they use
+alternative storage schemes.
 
 Lock failures are detected by checking to see if `errno` is set to `ENOSYS`.
 This is not particularly sophisticated and was implemented as a way of working
