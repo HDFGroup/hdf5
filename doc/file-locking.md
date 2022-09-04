@@ -206,7 +206,7 @@ environment variable.
 This API call can be used to override the configure defaults. It takes
 `hbool_t` parameters for both the file locking and "ignore file locks when
 disabled on the file system" parameters. The values set here can be
-overridden by the file locking environment variables.
+overridden by the file locking environment variable.
 
 There is a corresponding `H5Pget_file_locking()` call that can be used to check
 the currently set values of both properties in the fapl. **NOTE** that this
