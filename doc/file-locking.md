@@ -33,7 +33,7 @@ One of those caches is the metadata cache, which stores things like B-tree
 nodes that we use to locate data in the file. Problems arise when parent
 objects are flushed to storage before child objects. If a reader tries to
 load unflushed children, the object's file offset could point at garbage
-and it will encounter library failures as it tries to access the non-existant
+and it will encounter library failures as it tries to access the non-existent
 objects.
 
 Keep in mind that the HDF5 library is not analogous to a database server. The
@@ -74,7 +74,7 @@ The second is a mark we make in the HDF5 file's superblock. The superblock
 mark isn't really that important for understanding the file locking, but since
 it's entwined with the file locking scheme, we'll cover it in the
 algorithm below. The lower-level details of file lock implementations are
-described in the appendix, but the semantics are straightfoward: Locks are
+described in the appendix, but the semantics are straightforward: Locks are
 mandatory unless disabled, always for the entire file, and non-blocking. They
 are also not required for SWMR operations and simply exist to help you set up
 SWMR and prevent dangerous file access.
