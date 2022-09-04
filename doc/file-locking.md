@@ -218,7 +218,10 @@ environment variables!
 The `HDF5_USE_FILE_LOCKING` environment variable overrides all other file
 locking settings.
 
-HDF5 1.10.6 and earlier, 1.12.0:
+HDF5 1.10.0
+- No file locking environment variable
+
+HDF5 1.10.1 - 1.10.6, 1.12.0:
 - `FALSE` turns file locking off
 - Anything else turns file locking on
 - Neither of these values ignores disabled file locks
