@@ -2,11 +2,13 @@
 
 This document describes the file locking scheme that was added to HDF5 in
 version 1.10.0 and how you can work around it, if you choose to do so. I'll
-try to keep it understandable for everyone. We're in the process of converting
-the HDF5 user guide (UG) to Doxygen and this document will eventually be
-rolled up into those files as we update things.
+try to keep it understandable for everyone, though diving into technical
+details is unavoidable, given the complexity of the material. We're in the
+process of converting the HDF5 user guide (UG) to Doxygen and this document
+will eventually be rolled up into those files as we update things.
 
 **Parallel HDF5 Note**
+
 Everything written here is from the perspective of serial HDF5. When we say
 that you can't access a file for write access from more than one process, we
 mean "from more than one independent, serial process". Parallel HDF5 can
