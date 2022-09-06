@@ -128,7 +128,6 @@ if (H5_HAVE_PARALLEL AND HDF5_TEST_PARALLEL AND NOT WIN32)
           -D "TEST_SKIP_COMPARE=TRUE"
           -D "TEST_OUTPUT=${parallel_example}.out"
           -D "TEST_REFERENCE:STRING=PHDF5 example finished with no errors"
-          #-D "TEST_FILTER:STRING=PHDF5 example finished with no errors"
           -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
           -P "${HDF_RESOURCES_DIR}/grepTest.cmake"
       )
