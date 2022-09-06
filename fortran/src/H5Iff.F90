@@ -1,4 +1,11 @@
-!> @ingroup H5I
+!> @defgroup FH5I Fortran Identifier (H5I) Interface
+!!
+!! @see H5I, C-API
+!!
+!! @see @ref H5I_UG, User Guide
+!!
+
+!> @ingroup FH5I
 !!
 !! @brief This module contains Fortran interfaces for H5I functions.
 !
@@ -37,22 +44,20 @@ MODULE H5I
 CONTAINS
 
 !>
-!! \ingroup H5I
+!! \ingroup FH5I
 !!
 !! \brief Retrieves the type of an object.
 !!
-!! \param obj_id  Object identifier.
-!! \param type    Type of the object, possible values:
-!! <pre>
-!!                   H5I_FILE_F
-!!                   H5I_GROUP_F
-!!                   H5I_DATATYPE_F
-!!                   H5I_DATASPACE_F
-!!                   H5I_DATASET_F
-!!                   H5I_ATTR_F
-!!                   H5I_BADID_F
-!! </pre>
-!! \param hdferr \herr_t.
+!! \param obj_id Object identifier.
+!! \param type   Type of the object, possible values:
+!!               \li H5I_FILE_F
+!!               \li H5I_GROUP_F
+!!               \li H5I_DATATYPE_F
+!!               \li H5I_DATASPACE_F
+!!               \li H5I_DATASET_F
+!!               \li H5I_ATTR_F
+!!               \li H5I_BADID_F
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5iget_type_f(obj_id, TYPE, hdferr)
     IMPLICIT NONE
@@ -71,15 +76,15 @@ CONTAINS
   END SUBROUTINE h5iget_type_f
 
 !>
-!! \ingroup H5I
+!! \ingroup FH5I
 !!
 !! \brief Gets a name of an object specified by its identifier.
 !!
 !! \param obj_id    Attribute identifier.
 !! \param buf_size  Size of a buffer to read name in.
-!! \param buf       Buffer to read name in, name will be truncated if buffer is not big enough
+!! \param buf       Buffer to read name in, name will be truncated if buffer is not big enough.
 !! \param name_size Name size.
-!! \param hdferr    \herr_t.
+!! \param hdferr    \fortran_error
 !!
   SUBROUTINE h5iget_name_f(obj_id, buf, buf_size, name_size, hdferr)
     IMPLICIT NONE
@@ -104,13 +109,13 @@ CONTAINS
   END SUBROUTINE h5iget_name_f
 
 !>
-!! \ingroup H5I
+!! \ingroup FH5I
 !!
 !! \brief Increments the reference count of an ID.
 !!
 !! \param obj_id    Object identifier.
 !! \param ref_count Current reference count of the ID.
-!! \param hdferr    \herr_t.
+!! \param hdferr    \fortran_error
 !!
   SUBROUTINE h5iinc_ref_f(obj_id, ref_count, hdferr)
     IMPLICIT NONE
@@ -129,13 +134,13 @@ CONTAINS
   END SUBROUTINE h5iinc_ref_f
 
 !>
-!! \ingroup H5I
+!! \ingroup FH5I
 !!
 !! \brief Decrements the reference count of an ID.
 !!
 !! \param obj_id    Object identifier.
 !! \param ref_count Current reference count of the ID.
-!! \param hdferr    \herr_t.
+!! \param hdferr    \fortran_error
 !!
   SUBROUTINE h5idec_ref_f(obj_id, ref_count, hdferr)
     IMPLICIT NONE
@@ -154,13 +159,13 @@ CONTAINS
   END SUBROUTINE h5idec_ref_f
 
 !>
-!! \ingroup H5I
+!! \ingroup FH5I
 !!
 !! \brief Retrieves the reference count of an ID.
 !!
 !! \param obj_id    Object identifier.
 !! \param ref_count Current reference count of the ID.
-!! \param hdferr     \herr_t.
+!! \param hdferr     \fortran_error
 !!
   SUBROUTINE h5iget_ref_f(obj_id, ref_count, hdferr)
     IMPLICIT NONE
@@ -178,13 +183,13 @@ CONTAINS
     hdferr = h5iget_ref_c(obj_id, ref_count)
   END SUBROUTINE h5iget_ref_f
 !>
-!! \ingroup H5I
+!! \ingroup FH5I
 !!
 !! \brief Obtains file identifier from the object identifier.
 !!
 !! \param obj_id  Object identifier.
 !! \param file_id File identifier.
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5iget_file_id_f(obj_id, file_id, hdferr)
     IMPLICIT NONE
@@ -202,13 +207,13 @@ CONTAINS
     hdferr = h5iget_file_id_c(obj_id, file_id)
   END SUBROUTINE h5iget_file_id_f
 !>
-!! \ingroup H5I
+!! \ingroup FH5I
 !!
 !! \brief Check if an ID is valid without producing an error message.
 !!
 !! \param id      Identifier.
 !! \param valid   Status of id as a valid identifier.
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5iis_valid_f(id, valid, hdferr)
     IMPLICIT NONE

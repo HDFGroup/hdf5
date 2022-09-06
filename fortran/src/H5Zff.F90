@@ -1,4 +1,4 @@
-!> @ingroup H5Z
+!> @ingroup FH5Z
 !!
 !! @brief This module contains Fortran interfaces for H5Z functions.
 !
@@ -36,20 +36,18 @@ MODULE H5Z
 CONTAINS
 
 !>
-!! \ingroup H5Z
+!! \ingroup FH5Z
 !!
 !! \brief Unregisters specified filters.
 !!
 !! \param filter Filter; may have one of the following values:
-!! <pre>
-!!                H5Z_FILTER_DEFLATE_F
-!!                H5Z_FILTER_SZIP_F
-!!                H5Z_FILTER_NBIT_F
-!!                H5Z_FILTER_SCALEOFFSET_F
-!!                H5Z_FILTER_SHUFFLE_F
-!!                H5Z_FILTER_FLETCHER32_F
-!! </pre>
-!! \param hdferr \herr_t.
+!!               \li H5Z_FILTER_DEFLATE_F
+!!               \li H5Z_FILTER_SZIP_F
+!!               \li H5Z_FILTER_NBIT_F
+!!               \li H5Z_FILTER_SCALEOFFSET_F
+!!               \li H5Z_FILTER_SHUFFLE_F
+!!               \li H5Z_FILTER_FLETCHER32_F
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5zunregister_f(filter, hdferr)
     IMPLICIT NONE
@@ -64,21 +62,19 @@ CONTAINS
   END SUBROUTINE h5zunregister_f
 
 !>
-!! \ingroup H5Z
+!! \ingroup FH5Z
 !!
 !! \brief Queries if filter is available
 !!
 !! \param filter  Filter; may be one of the following:
-!! <pre>
-!!                        H5Z_FILTER_DEFLATE_F
-!!                        H5Z_FILTER_SZIP_F
-!!                        H5Z_FILTER_NBIT_F
-!!                        H5Z_FILTER_SCALEOFFSET_F
-!!                        H5Z_FILTER_SHUFFLE_F
-!!                        H5Z_FILTER_FLETCHER32_F
-!! </pre>
+!!                \li H5Z_FILTER_DEFLATE_F
+!!                \li H5Z_FILTER_SZIP_F
+!!                \li H5Z_FILTER_NBIT_F
+!!                \li H5Z_FILTER_SCALEOFFSET_F
+!!                \li H5Z_FILTER_SHUFFLE_F
+!!                \li H5Z_FILTER_FLETCHER32_F
 !! \param status  Flag; .TRUE. if filter is available, .FALSE. otherwise.
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5zfilter_avail_f(filter, status, hdferr)
     IMPLICIT NONE
@@ -102,25 +98,21 @@ CONTAINS
   END SUBROUTINE h5zfilter_avail_f
 
 !>
-!! \ingroup H5Z
+!! \ingroup FH5Z
 !!
 !! \brief Queries if filter has its encoder and/or decoder available.
 !!
 !! \param filter       Filter; may be one of the following:
-!! <pre>
-!!                       H5Z_FILTER_DEFLATE_F
-!!                       H5Z_FILTER_SZIP_F
-!!                       H5Z_FILTER_NBIT_F
-!!                       H5Z_FILTER_SCALEOFFSET_F
-!!                       H5Z_FILTER_SHUFFLE_F
-!!                       H5Z_FILTER_FLETCHER32_Ffilter
-!! </pre>
+!!                     \li H5Z_FILTER_DEFLATE_F
+!!                     \li H5Z_FILTER_SZIP_F
+!!                     \li H5Z_FILTER_NBIT_F
+!!                     \li H5Z_FILTER_SCALEOFFSET_F
+!!                     \li H5Z_FILTER_SHUFFLE_F
+!!                     \li H5Z_FILTER_FLETCHER32_Ffilter
 !! \param config_flags Flag, indicates if filter has its encoder and/or decoder available, possible values:
-!! <pre>
-!!                       H5Z_FILTER_ENCODE_ENABLED_F
-!!                       5Z_FILTER_DECODE_ENABLED_F
-!! </pre>
-!! \param hdferr       \herr_t.
+!!                     \li H5Z_FILTER_ENCODE_ENABLED_F
+!!                     \li H5Z_FILTER_DECODE_ENABLED_F
+!! \param hdferr       \fortran_error
 !!
   SUBROUTINE h5zget_filter_info_f(filter, config_flags, hdferr)
     IMPLICIT NONE

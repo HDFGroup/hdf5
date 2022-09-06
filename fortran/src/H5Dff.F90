@@ -1,4 +1,11 @@
-!> @ingroup H5D
+!> @defgroup FH5D Fortran Datasets (H5D) Interface
+!!
+!! @see H5D, C-API
+!!
+!! @see @ref H5D_UG, User Guide
+!!
+
+!> @ingroup FH5D
 !!
 !! @brief This module contains Fortran interfaces for H5D functions.
 !
@@ -95,12 +102,8 @@ MODULE H5D
      MODULE PROCEDURE h5dset_extent_f
   END INTERFACE
 
-#ifdef H5_DOXYGEN_FORTRAN
-  INTERFACE h5dwrite_f
-     MODULE PROCEDURE h5dwrite_f
-     MODULE PROCEDURE h5dwrite_f___F90_VERSION
-  END INTERFACE
-#else
+#ifndef H5_DOXYGEN_FORTRAN
+
   INTERFACE h5dwrite_f
      MODULE PROCEDURE h5dwrite_reference_obj
      MODULE PROCEDURE h5dwrite_reference_dsetreg
@@ -109,14 +112,7 @@ MODULE H5D
      ! by passing an address
      MODULE PROCEDURE h5dwrite_ptr
   END INTERFACE
-#endif
 
-#ifdef H5_DOXYGEN_FORTRAN
-  INTERFACE h5dread_f
-     MODULE PROCEDURE h5dread_f
-     MODULE PROCEDURE h5dread_f___F90_VERSION
-  END INTERFACE
-#else
   INTERFACE h5dread_f
      MODULE PROCEDURE h5dread_reference_obj
      MODULE PROCEDURE h5dread_reference_dsetreg
@@ -125,9 +121,6 @@ MODULE H5D
      ! by passing an address
      MODULE PROCEDURE h5dread_ptr
   END INTERFACE
-#endif
-
-#ifndef H5_DOXYGEN_FORTRAN
 
   INTERFACE h5dread_vl_f
      MODULE PROCEDURE h5dread_vl_integer
@@ -202,7 +195,7 @@ MODULE H5D
        IMPORT :: HID_T
        IMPLICIT NONE
        TYPE(C_PTR), VALUE :: f_ptr_fill_value
-       INTEGER(HID_T) :: fill_type_id ! Fill value datatype identifier
+       INTEGER(HID_T) :: fill_type_id
        INTEGER(HID_T), INTENT(IN) :: space_id
        TYPE(C_PTR), VALUE :: f_ptr_buf
        INTEGER(HID_T) :: mem_type_id
@@ -213,19 +206,19 @@ MODULE H5D
 CONTAINS
 
 !>
-!! \ingroup H5D
+!! \ingroup FH5D
 !!
 !! \brief Creates a dataset at the specified location.
 !!
-!! \param loc_id   File or group identifier
-!! \param name     Dataset name
-!! \param type_id  Dataset datatype identifier
-!! \param space_id Dataset dataspace identifier
-!! \param dset_id  Dataset identifier
-!! \param hdferr   \herr_t
-!! \param dcpl_id  Dataset creation property list
-!! \param lcpl_id  Link creation property list
-!! \param dapl_id  Dataset access property list
+!! \param loc_id   File or group identifier.
+!! \param name     Dataset name.
+!! \param type_id  Dataset datatype identifier.
+!! \param space_id Dataset dataspace identifier.
+!! \param dset_id  Dataset identifier.
+!! \param hdferr   \fortran_error
+!! \param dcpl_id  Dataset creation property list.
+!! \param lcpl_id  Link creation property list.
+!! \param dapl_id  Dataset access property list.
 !!
   SUBROUTINE h5dcreate_f(loc_id, name, type_id, space_id, dset_id, &
        hdferr, dcpl_id, lcpl_id, dapl_id)
@@ -282,15 +275,15 @@ CONTAINS
   END SUBROUTINE h5dcreate_f
 
 !>
-!! \ingroup H5D
+!! \ingroup FH5D
 !!
 !! \brief Opens an existing dataset.
 !!
-!! \param loc_id  File or group identifier
-!! \param name    Dataset name
-!! \param dset_id Dataset identifier
-!! \param hdferr  \herr_t
-!! \param dapl_id Dataset access property list
+!! \param loc_id  File or group identifier.
+!! \param name    Dataset name.
+!! \param dset_id Dataset identifier.
+!! \param hdferr  \fortran_error
+!! \param dapl_id Dataset access property list.
 !!
   SUBROUTINE h5dopen_f(loc_id, name, dset_id, hdferr, dapl_id)
     IMPLICIT NONE
@@ -326,12 +319,12 @@ CONTAINS
   END SUBROUTINE h5dopen_f
 
 !>
-!! \ingroup H5D
+!! \ingroup FH5D
 !!
 !! \brief Closes a dataset.
 !!
 !! \param dset_id Dataset identifier.
-!! \param hdferr  \herr_t
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5dclose_f(dset_id, hdferr)
     IMPLICIT NONE
@@ -351,14 +344,14 @@ CONTAINS
   END SUBROUTINE h5dclose_f
 
 !>
-!! \ingroup H5D
+!! \ingroup FH5D
 !!
 !! \brief Returns an identifier for a copy of the datatype for a
 !!       dataset.
 !!
 !! \param dataset_id  Dataset identifier.
 !! \param datatype_id Dataspace identifier.
-!! \param hdferr      \herr_t
+!! \param hdferr      \fortran_error
 !!
   SUBROUTINE h5dget_type_f(dataset_id, datatype_id, hdferr)
     IMPLICIT NONE
@@ -379,13 +372,13 @@ CONTAINS
   END SUBROUTINE h5dget_type_f
 
 !>
-!! \ingroup H5D
+!! \ingroup FH5D
 !!
 !! \brief Extends a dataset with unlimited dimension.
 !!
 !! \param dataset_id Dataset identifier.
 !! \param size       Array containing the new magnitude of each dimension.
-!! \param hdferr     \herr_t
+!! \param hdferr     \fortran_error
 !!
   SUBROUTINE h5dset_extent_f(dataset_id, size, hdferr)
     IMPLICIT NONE
@@ -406,13 +399,13 @@ CONTAINS
   END SUBROUTINE h5dset_extent_f
 
 !>
-!! \ingroup H5D
+!! \ingroup FH5D
 !!
 !! \brief Returns an identifier for a copy of the dataset creation property list for a dataset.
 !!
 !! \param dataset_id Dataset identifier.
 !! \param plist_id   Creation property list identifier.
-!! \param hdferr     \herr_t
+!! \param hdferr     \fortran_error
 !!
   SUBROUTINE h5dget_create_plist_f(dataset_id, plist_id, hdferr)
     IMPLICIT NONE
@@ -432,13 +425,13 @@ CONTAINS
   END SUBROUTINE h5dget_create_plist_f
 
 !>
-!! \ingroup H5D
+!! \ingroup FH5D
 !!
 !! \brief Returns the amount of storage requires by a dataset
 !!
 !! \param dataset_id Dataset identifier.
 !! \param size       Datastorage size.
-!! \param hdferr     \herr_t
+!! \param hdferr     \fortran_error
 !!
   SUBROUTINE h5dget_storage_size_f(dataset_id, size, hdferr)
     IMPLICIT NONE
@@ -458,15 +451,15 @@ CONTAINS
   END SUBROUTINE h5dget_storage_size_f
 
 !>
-!! \ingroup H5D
+!! \ingroup FH5D
 !!
 !! \brief Returns maximum length of the VL array elements
 !!
 !! \param dataset_id Dataset identifier.
 !! \param type_id    Datatype identifier.
 !! \param space_id   Dataspace identifier.
-!! \param len        Buffer size
-!! \param hdferr     \herr_t
+!! \param len        Buffer size.
+!! \param hdferr     \fortran_error
 !!
   SUBROUTINE h5dvlen_get_max_len_f(dataset_id, type_id, space_id, len,  hdferr)
     IMPLICIT NONE
@@ -490,19 +483,17 @@ CONTAINS
   END SUBROUTINE h5dvlen_get_max_len_f
 
 !>
-!! \ingroup H5D
+!! \ingroup FH5D
 !!
 !! \brief Returns the status of data space allocation.
 !!
-!! \param dset_id Dataset identifier
+!! \param dset_id Dataset identifier.
 !! \param flag    Status; may have one of the following values:
-!! <pre>
-!!                     H5D_SPACE_STS_ERROR_F
-!!                     H5D_SPACE_STS_NOT_ALLOCATED_F
-!!                     H5D_SPACE_STS_PART_ALLOCATED_F
-!!                     H5D_SPACE_STS_ALLOCATED_F
-!! </pre>
-!! \param hdferr  \herr_t
+!!                \li H5D_SPACE_STS_ERROR_F
+!!                \li H5D_SPACE_STS_NOT_ALLOCATED_F
+!!                \li H5D_SPACE_STS_PART_ALLOCATED_F
+!!                \li H5D_SPACE_STS_ALLOCATED_F
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5dget_space_status_f(dset_id, flag, hdferr)
     IMPLICIT NONE
@@ -522,7 +513,7 @@ CONTAINS
   END SUBROUTINE h5dget_space_status_f
 
 !>
-!! \ingroup H5D
+!! \ingroup FH5D
 !!
 !! \brief Creates a dataset in a file without linking it into the file structure
 !!
@@ -530,7 +521,7 @@ CONTAINS
 !! \param type_id  Identifier of the datatype to use when creating the dataset.
 !! \param space_id Identifier of the dataspace to use when creating the dataset.
 !! \param dset_id  Dataset identifier.
-!! \param hdferr   \herr_t
+!! \param hdferr   \fortran_error
 !! \param dcpl_id  Dataset creation property list identifier.
 !! \param dapl_id  Dataset access property list identifier.
 !!
@@ -575,69 +566,65 @@ CONTAINS
 
 #if H5_DOXYGEN_FORTRAN
   !>
-  !! \ingroup H5D
+  !! \ingroup FH5D
   !!
   !! \brief Reads variable-length data. F2003 API h5dread_f should be used instead.
   !!
   !! \param dset_id       Dataset identifier.
   !! \param mem_type_id   Memory datatype identifier.
   !! \param buf           Data buffer; may be a scalar or an array, TYPE(TYPE) must be one of the following:
-  !! <pre>
-  !!      INTEGER
-  !!      REAL
-  !!      CHARACTER
-  !! </pre>
-  !! \param dims          Array to hold corresponding dimension sizes of data buffer buf, dim(k) has value of the k-th 
+  !!                      \li INTEGER
+  !!                      \li REAL
+  !!                      \li CHARACTER
+  !! \param dims          Array to hold corresponding dimension sizes of data buffer buf, dim(k) has value of the k-th
   !!                      dimension of buffer buf. Values are ignored if buf is a scalar.
   !! \param len           Array to store length of each element.
-  !! \param hdferr        \herr_t.
+  !! \param hdferr        \fortran_error
   !! \param mem_space_id  Memory dataspace identifier, default value is H5S_ALL_F.
   !! \param file_space_id File dataspace identifier, default value is H5S_ALL_F.
   !! \param xfer_prp      Transfer property list identifier, default value is H5P_DEFAULT_F.
-  !! 
-  SUBROUTINE h5dread_vl_f(dset_id, mem_type_id, buf, dims, len, hdferr, mem_space_id, file_space_id, xfer_prp) 
+  !!
+  SUBROUTINE h5dread_vl_f(dset_id, mem_type_id, buf, dims, len, hdferr, mem_space_id, file_space_id, xfer_prp)
     INTEGER(HID_T), INTENT(IN) :: dset_id
     INTEGER(HID_T), INTENT(IN) :: mem_type_id
     TYPE(TYPE), INTENT(INOUT), DIMENSION(dims(1),dims(2)) :: buf
-    
+
     INTEGER(HSIZE_T), INTENT(IN), DIMENSION(2)  :: dims
     INTEGER(SIZE_T), INTENT(INOUT), DIMENSION(*)  :: len
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
   END SUBROUTINE h5dread_vl_f
   !>
-  !! \ingroup H5D
+  !! \ingroup FH5D
   !!
   !! \brief Writes variable-length data. F2003 API h5dwritef should be used instead.
   !!
   !! \param dset_id       Dataset identifier.
   !! \param mem_type_id   Memory datatype identifier.
   !! \param buf           Data buffer; may be a scalar or an array, TYPE(TYPE) must be one of the following:
-  !! <pre>
-  !!      INTEGER
-  !!      REAL
-  !!      CHARACTER
-  !! </pre>
-  !! \param dims          Array to hold corresponding dimension sizes of data buffer buf, dim(k) has value of the k-th 
+  !!                      \li INTEGER
+  !!                      \li REAL
+  !!                      \li CHARACTER
+  !! \param dims          Array to hold corresponding dimension sizes of data buffer buf, dim(k) has value of the k-th
   !!                      dimension of buffer buf. Values are ignored if buf is a scalar.
   !! \param len           Array to store length of each element.
-  !! \param hdferr        \herr_t.
+  !! \param hdferr        \fortran_error
   !! \param mem_space_id  Memory dataspace identifier, default value is H5S_ALL_F.
   !! \param file_space_id File dataspace identifier, default value is H5S_ALL_F.
   !! \param xfer_prp      Transfer property list identifier, default value is H5P_DEFAULT_F.
   !!
   SUBROUTINE h5dwrite_vl_f(dset_id, mem_type_id, buf, dims, len, hdferr, mem_space_id, file_space_id, xfer_prp)
     INTEGER(HID_T), INTENT(IN) :: dset_id
-    INTEGER(HID_T), INTENT(IN) :: mem_type_id 
+    INTEGER(HID_T), INTENT(IN) :: mem_type_id
     TYPE(TYPE), INTENT(IN),DIMENSION(dims(1),dims(2)) :: buf
     INTEGER(HSIZE_T), INTENT(IN), DIMENSION(2)  :: dims
     INTEGER(SIZE_T), INTENT(IN), DIMENSION(*)  :: len
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
+    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
   END SUBROUTINE h5dwrite_vl_f
 
 #else
@@ -699,8 +686,7 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: mem_type_id
     INTEGER(HSIZE_T), INTENT(IN), DIMENSION(2) :: dims
     INTEGER(SIZE_T), INTENT(INOUT), DIMENSION(*) :: len
-    INTEGER, INTENT(INOUT), &
-         DIMENSION(dims(1),dims(2)), TARGET :: buf   ! Data buffer
+    INTEGER, INTENT(INOUT), DIMENSION(dims(1),dims(2)), TARGET :: buf
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
@@ -964,13 +950,13 @@ CONTAINS
 #endif
 
 !>
-!! \ingroup H5D
+!! \ingroup FH5D
 !!
 !! \brief Returns dataset address in file.
 !!
 !! \param dset_id Dataset identifier.
 !! \param offset  The offset in bytes.
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5dget_offset_f(dset_id, offset, hdferr)
     IMPLICIT NONE
@@ -992,14 +978,14 @@ CONTAINS
   END SUBROUTINE h5dget_offset_f
 
 !>
-!! \ingroup H5D
+!! \ingroup FH5D
 !!
 !! \brief Returns an identifier for a copy of the dataspace for a
 !!       dataset.
 !!
 !! \param dataset_id   Dataset identifier.
 !! \param dataspace_id Dataspace identifier.
-!! \param hdferr       \herr_t.
+!! \param hdferr       \fortran_error
 !!
   SUBROUTINE h5dget_space_f(dataset_id, dataspace_id, hdferr)
     IMPLICIT NONE
@@ -1019,13 +1005,13 @@ CONTAINS
   END SUBROUTINE h5dget_space_f
 
 !>
-!! \ingroup H5D
+!! \ingroup FH5D
 !!
 !! \brief Returns a copy of the dataset creation property list.
 !!
 !! \param dset_id  Dataset identifier.
 !! \param plist_id Dataset access property list identifier.
-!! \param hdferr   \herr_t.
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5dget_access_plist_f(dset_id, plist_id, hdferr)
     IMPLICIT NONE
@@ -1046,7 +1032,7 @@ CONTAINS
   END SUBROUTINE h5dget_access_plist_f
 
 !>
-!! \ingroup H5D
+!! \ingroup FH5D
 !!
 !! \brief Reclaims VL datatype memory buffers.
 !!
@@ -1054,7 +1040,7 @@ CONTAINS
 !! \param space_id Identifier of the dataspace.
 !! \param plist_id Identifier of the property list used to create the buffer.
 !! \param buf      Pointer to the buffer to be reclaimed.
-!! \param hdferr   \herr_t.
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5dvlen_reclaim_f(type_id, space_id, plist_id, buf, hdferr)
     IMPLICIT NONE
@@ -1082,14 +1068,16 @@ CONTAINS
 
 #ifdef H5_DOXYGEN_FORTRAN
 !>
-!! \ingroup H5D
+!! \ingroup FH5D
 !!
 !! \brief Writes raw data from a dataset into a buffer.
+!!
+!! \note  \fortran_approved
 !!
 !! \param dset_id       Identifier of the dataset to write to.
 !! \param mem_type_id   Identifier of the memory datatype.
 !! \param buf           Buffer with data to be written to the file.
-!! \param hdferr        \herr_t
+!! \param hdferr        \fortran_error
 !! \param mem_space_id  Identifier of the memory dataspace.
 !! \param file_space_id Identifier of the dataset&apos;s dataspace in the file.
 !! \param xfer_prp      Identifier of a transfer property list for this I/O operation.
@@ -1106,20 +1094,21 @@ CONTAINS
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
   END SUBROUTINE h5dwrite
 !>
-!! \ingroup H5D
+!! \ingroup FH5D
 !!
-!! \brief Reads raw data from a dataset into a buffer (Passes Pointer). **This is the preferred signature for H5Dread_f.**
+!! \brief Reads raw data from a dataset into a buffer (Passes Pointer).
+!!
+!! \note  \fortran_approved
 !!
 !! \param dset_id       Identifier of the dataset read from.
 !! \param mem_type_id   Identifier of the memory datatype.
 !! \param buf           Buffer to receive data read from file.
-!! \param hdferr        \herr_t.
+!! \param hdferr        \fortran_error
 !! \param mem_space_id  Identifier of the memory dataspace.
 !! \param file_space_id Identifier of dataset&apos;s dataspace in the file. (Default: H5S_ALL_F)
 !! \param xfer_prp      Identifier of a transfer property list for this I/O operation.
 !!
- SUBROUTINE h5dread_f(dset_id, mem_type_id, buf, hdferr, &
-       mem_space_id, file_space_id, xfer_prp)
+ SUBROUTINE h5dread_f(dset_id, mem_type_id, buf, hdferr, mem_space_id, file_space_id, xfer_prp)
     USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id
@@ -1132,53 +1121,52 @@ CONTAINS
   END SUBROUTINE h5dread_f
 
 !>
-!! \ingroup H5D
+!! \ingroup FH5D
 !!
-!! \brief There is no direct Fortran90 counterpart for the C function H5Dwrite. Instead, that functionality is 
-!!        provided by two Fortran90 subroutines:
-!! <pre>
-!! h5dwrite_f	 Purpose: Writes data other than variable-length data.
-!! h5dwrite_vl_f Purpose: Writes variable-length data.
-!! </pre>
+!! \brief There is no direct Fortran90 counterpart for the C function H5Dwrite. Instead, that
+!!        functionality is provided by two Fortran90 subroutines:
+!!        \li h5dwrite_f Purpose: Writes data other than variable-length data.
+!!        \li h5dwrite_vl_f Purpose: Writes variable-length data.
+!!
+!! \note  \fortran_obsolete
 !!
 !! \param dset_id       Identifier of the dataset to write to.
 !! \param mem_type_id   Identifier of the memory datatype.
 !! \param buf           Data buffer; may be a scalar or an array.
-!! \param dims          Array to hold corresponding dimension sizes of data buffer buf; dim(k) has value 
+!! \param dims          Array to hold corresponding dimension sizes of data buffer buf; dim(k) has value.
 !!                      of the k-th dimension of buffer buf; values are ignored if buf is a scalar.
-!! \param hdferr        \herr_t
+!! \param hdferr        \fortran_error
 !! \param mem_space_id  Identifier of the memory dataspace. Default value is H5S_ALL_F.
 !! \param file_space_id Identifier of the dataset&apos;s dataspace in the file. Default value is H5S_ALL_F.
-!! \param xfer_prp      Identifier of a transfer property list for this I/O operation. Default value  is H5P_DEFAULT_F
+!! \param xfer_prp      Identifier of a transfer property list for this I/O operation. Default value is H5P_DEFAULT_F.
 !!
   SUBROUTINE h5dwrite_f___F90_VERSION(dset_id, mem_type_id, buf, dims, hdferr, mem_space_id, file_space_id, xfer_prp)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id
     INTEGER(HID_T), INTENT(IN) :: mem_type_id
     TYPE(TYPE), INTENT(IN) :: buf
-    DIMENSION(*), INTEGER(HSIZE_T), INTENT(IN)  :: dims 
+    DIMENSION(*), INTEGER(HSIZE_T), INTENT(IN)  :: dims
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
   END SUBROUTINE h5dwrite_f___F90_VERSION
 
 !>
-!! \ingroup H5D
+!! \ingroup FH5D
 !!
-!! \brief There is no direct Fortran90 counterpart for the C function H5Dread. Instead, that functionality is provided by 
-!!        two Fortran90 subroutines:
-!! <pre>
-!!         h5dread_f    Purpose: Reads data other than variable-length data, uses DIMENSION argument and buf is not a pointer.
-!!         h5dread_vl_f	Purpose: Reads variable-length data.
-!! </pre>
-!!         The user is encouraged to use the F2003 h5dread_f() instead.
+!! \brief There is no direct Fortran90 counterpart for the C function H5Dread. Instead, that functionality
+!!        is provided by two Fortran90 subroutines:
+!!        \li h5dread_f    Purpose: Reads data other than variable-length data, uses DIMENSION argument and buf is not a pointer.
+!!        \li h5dread_vl_f Purpose: Reads variable-length data.
+!!
+!! \note  \fortran_obsolete
 !!
 !! \param dset_id       Identifier of the dataset read from.
 !! \param mem_type_id   Identifier of the memory datatype.
 !! \param buf           Buffer to receive data read from file, may be a scalar or an array.
-!! \param dims          Array to hold corresponding dimension sizes of data buffer buf. dim(k) has value of the k-th 
+!! \param dims          Array to hold corresponding dimension sizes of data buffer buf. dim(k) has value of the k-th.
 !!                      dimension of buffer buf. Values are ignored if buf is a scalar.
-!! \param hdferr        \herr_t.
+!! \param hdferr        \fortran_error
 !! \param mem_space_id  Identifier of the memory dataspace. (Default: H5S_ALL_F)
 !! \param file_space_id Identifier of dataset&apos;s dataspace in the file. (Default: H5S_ALL_F)
 !! \param xfer_prp      Identifier of a transfer property list for this I/O operation. (Default: H5P_DEFAULT_F)
@@ -1196,23 +1184,22 @@ CONTAINS
   END SUBROUTINE h5dread_f___F90_VERSION
 
 !>
-!! \ingroup H5D
+!! \ingroup FH5D
 !!
 !! \brief Fills dataspace elements with a fill value in a memory buffer.
-!!  Only INTEGER, CHARACTER, REAL and DOUBLE PRECISION datatypes of the fillvalues and buffers are supported. 
+!!  Only INTEGER, CHARACTER, REAL and DOUBLE PRECISION datatypes of the fillvalues and buffers are supported.
 !!  Buffer and fillvalue are assumed to have the same datatype. Only one-dimesional buffers are supported.
 !!
 !! \param fill_value Fill value.
 !! \param space_id   Identifier of the memory datatype.
 !! \param buf        Buffer to receive data read from file.
-!! \param hdferr     \herr_t.
+!! \param hdferr     \fortran_error
 !!
   SUBROUTINE h5dfill_f(fill_value, space_id, buf,  hdferr)
     TYPE(TYPE), INTENT(IN) :: fill_value
     INTEGER(HID_T), INTENT(IN) :: space_id
     TYPE(TYPE), INTENT(OUT), DIMENSION(*) :: buf
     INTEGER, INTENT(OUT) :: hdferr
-
   END SUBROUTINE h5dfill_f
 
 #else

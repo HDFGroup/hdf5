@@ -1,4 +1,11 @@
-!> @ingroup H5L
+!> @defgroup FH5L Fortran Link (H5L) Interface
+!!
+!! @see H5L, C-API
+!!
+!! @see @ref H5L_UG, User Guide
+!!
+
+!> @ingroup FH5L
 !!
 !! @brief This module contains Fortran interfaces for H5L functions.
 !
@@ -46,30 +53,22 @@ MODULE H5L
 !
   TYPE, bind(c) :: h5l_info_t
      INTEGER(c_int) :: type !< Specifies the link class. Valid values include the following:
-                            !< <pre>
-                            !<           H5L_TYPE_HARD_F     Hard link
-                            !<           H5L_TYPE_SOFT_F     Soft link
-                            !<           H5L_TYPE_EXTERNAL_F External link
-                            !<           H5L_TYPE_ERROR_F    Invalid link type id
-                            !< </pre>
+                            !< \li H5L_TYPE_HARD_F     Hard link
+                            !< \li H5L_TYPE_SOFT_F     Soft link
+                            !< \li H5L_TYPE_EXTERNAL_F External link
+                            !< \li H5L_TYPE_ERROR_F    Invalid link type id
  !   LOGICAL(c_bool) :: corder_valid ! hbool_t corder_valid
      INTEGER(c_int64_t) :: corder !< Creation order
      INTEGER(c_int)     :: cset   !< Character set of link name is encoded. Valid values include the following:
-                                  !< <pre>
-                                  !<    H5T_CSET_ASCII  US ASCII
-                                  !<    H5T_CSET_UTF8   UTF-8 Unicode encoding
-                                  !< </pre>
-     TYPE(union_t) :: u           
+                                  !< \li H5T_CSET_ASCII  US ASCII
+                                  !< \li H5T_CSET_UTF8   UTF-8 Unicode encoding
+     TYPE(union_t) :: u
   END TYPE h5l_info_t
-
-!cset specifies the character set in which the link name is encoded. Valid values include the following:
-!           H5T_CSET_ASCII       US ASCII
-!           H5T_CSET_UTF8   UTF-8 Unicode encoding
 
 CONTAINS
 
 !>
-!! \ingroup H5L
+!! \ingroup FH5L
 !!
 !! \brief Copies a link from one location to another.
 !!
@@ -77,7 +76,7 @@ CONTAINS
 !! \param src_name    Name of the link to be copied.
 !! \param dest_loc_id Location identifier. The identifier may be that of a file, group, dataset, or named datatype.
 !! \param dest_name   Name to be assigned to the new copy.
-!! \param hdferr      \herr_t.
+!! \param hdferr      \fortran_error
 !! \param lcpl_id     Link creation property list identifier.
 !! \param lapl_id     Link access property list identifier.
 !!
@@ -131,13 +130,13 @@ CONTAINS
   END SUBROUTINE h5lcopy_f
 
 !>
-!! \ingroup H5L
+!! \ingroup FH5L
 !!
 !! \brief Removes a link from a group.
 !!
 !! \param loc_id  Identifier of the file or group containing the object.
 !! \param name    Name of the link to delete.
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !! \param lapl_id Link access property list identifier.
 !!
   SUBROUTINE h5ldelete_f(loc_id, name, hdferr, lapl_id)
@@ -171,14 +170,14 @@ CONTAINS
   END SUBROUTINE h5ldelete_f
 
 !>
-!! \ingroup H5L
+!! \ingroup FH5L
 !!
 !! \brief Creates a soft link to an object.
 !!
 !! \param target_path Path to the target object, which is not required to exist.
 !! \param link_loc_id The file or group identifier for the new link.
 !! \param link_name   The name of the new link.
-!! \param hdferr      \herr_t.
+!! \param hdferr      \fortran_error
 !! \param lcpl_id     Link creation property list identifier.
 !! \param lapl_id     Link access property list identifier.
 !!
@@ -229,7 +228,7 @@ CONTAINS
   END SUBROUTINE h5lcreate_soft_f
 
 !>
-!! \ingroup H5L
+!! \ingroup FH5L
 !!
 !! \brief Creates a hard link to an object.
 !!
@@ -237,7 +236,7 @@ CONTAINS
 !! \param obj_name    Name of the target object, which must already exist.
 !! \param link_loc_id The file or group identifier for the new link.
 !! \param link_name   The name of the new link.
-!! \param hdferr      \herr_t.
+!! \param hdferr      \fortran_error
 !! \param lcpl_id     Link creation property list identifier.
 !! \param lapl_id     Link access property list identifier.
 !!
@@ -288,7 +287,7 @@ CONTAINS
   END SUBROUTINE h5lcreate_hard_f
 
 !>
-!! \ingroup H5L
+!! \ingroup FH5L
 !!
 !! \brief Creates a soft link to an object in a different file.
 !!
@@ -297,7 +296,7 @@ CONTAINS
 !! \param obj_name    Path within the target file to the target object.
 !! \param link_loc_id The file or group identifier for the new link.
 !! \param link_name   The name of the new link.
-!! \param hdferr      \herr_t.
+!! \param hdferr      \fortran_error
 !! \param lcpl_id     Link creation property list identifier.
 !! \param lapl_id     Link access property list identifier.
 !!
@@ -352,28 +351,25 @@ CONTAINS
   END SUBROUTINE h5lcreate_external_f
 
 !>
-!! \ingroup H5L
+!! \ingroup FH5L
 !!
 !! \brief Removes the nth link in a group.
+!!
 !! \param loc_id      File or group identifier specifying location of subject group.
 !! \param group_name  Name of subject group.
 !! \param index_field Type of index; Possible values are:
-!! <pre>
-!!                     H5_INDEX_UNKNOWN_F = -1  - Unknown index type
-!!                     H5_INDEX_NAME_F          - Index on names
-!!                     H5_INDEX_CRT_ORDER_F     - Index on creation order
-!!                     H5_INDEX_N_F             - Number of indices defined
-!! </pre>
+!!                    \li H5_INDEX_UNKNOWN_F = -1 - Unknown index type
+!!                    \li H5_INDEX_NAME_F         - Index on names
+!!                    \li H5_INDEX_CRT_ORDER_F    - Index on creation order
+!!                    \li H5_INDEX_N_F            - Number of indices defined
 !! \param order       Order within field or index; Possible values are:
-!! <pre>
-!!                     H5_ITER_UNKNOWN_F  - Unknown order
-!!                     H5_ITER_INC_F      - Increasing order
-!!                     H5_ITER_DEC_F      - Decreasing order
-!!                     H5_ITER_NATIVE_F   - No particular order, whatever is fastest
-!!                     H5_ITER_N_F        - Number of iteration orders
-!! </pre>
+!!                    \li H5_ITER_UNKNOWN_F - Unknown order
+!!                    \li H5_ITER_INC_F     - Increasing order
+!!                    \li H5_ITER_DEC_F     - Decreasing order
+!!                    \li H5_ITER_NATIVE_F  - No particular order, whatever is fastest
+!!                    \li H5_ITER_N_F       - Number of iteration orders
 !! \param n           Link for which to retrieve information.
-!! \param hdferr      \herr_t.
+!! \param hdferr      \fortran_error
 !! \param lapl_id     Link access property list.
 !!
   SUBROUTINE h5ldelete_by_idx_f(loc_id, group_name, index_field, order, n, hdferr, lapl_id)
@@ -413,14 +409,14 @@ CONTAINS
   END SUBROUTINE h5ldelete_by_idx_f
 
 !>
-!! \ingroup H5L
+!! \ingroup FH5L
 !!
 !! \brief Check if a link with a particular name exists in a group.
 !!
 !! \param loc_id      Identifier of the file or group to query.
 !! \param name        Link name to check.
 !! \param link_exists Link exists status (.TRUE.,.FALSE.).
-!! \param hdferr      \herr_t.
+!! \param hdferr      \fortran_error
 !! \param lapl_id     Link access property list identifier.
 !!
   SUBROUTINE h5lexists_f(loc_id, name, link_exists, hdferr, lapl_id)
@@ -462,7 +458,7 @@ CONTAINS
   END SUBROUTINE h5lexists_f
 
 !>
-!! \ingroup H5L
+!! \ingroup FH5L
 !!
 !! \brief Returns information about a link.
 !!
@@ -473,16 +469,14 @@ CONTAINS
 !! \param corder       Specifies the link’s creation order position.
 !! \param f_corder_valid Indicates whether the value in corder is valid.
 !! \param link_type    Specifies the link class:
-!! <pre>
-!!                      H5L_TYPE_HARD_F     - Hard link
-!!                      H5L_TYPE_SOFT_F     - Soft link
-!!                      H5L_TYPE_EXTERNAL_F - External link
-!!                      H5L_TYPE_ERROR_ F   - Error
-!! </pre>
-!! \param token        If the link is a hard link, token specifies the object token that the link points to
+!!                     \li H5L_TYPE_HARD_F     - Hard link
+!!                     \li H5L_TYPE_SOFT_F     - Soft link
+!!                     \li H5L_TYPE_EXTERNAL_F - External link
+!!                     \li H5L_TYPE_ERROR_ F   - Error
+!! \param token        If the link is a hard link, token specifies the object token that the link points to.
 !! \param val_size     If the link is a symbolic link, val_size will be the length of the link value, e.g.,
 !!                     the length of the name of the pointed-to object with a null terminator.
-!! \param hdferr       \herr_t
+!! \param hdferr       \fortran_error
 !! \param lapl_id      Link access property list.
 !!
   SUBROUTINE h5lget_info_f(link_loc_id, link_name, &
@@ -539,43 +533,37 @@ CONTAINS
   END SUBROUTINE h5lget_info_f
 
 !>
-!! \ingroup H5L
+!! \ingroup FH5L
 !!
 !! \brief Retrieves metadata for a link in a group, according to the order within a field or index.
 !!
 !! \param loc_id         File or group identifier specifying location of subject group.
 !! \param group_name     Name of subject group.
-!! \param index_field    Index or field which determines the order.
-!! <pre>
-!!                        H5_INDEX_UNKNOWN_F = -1  - Unknown index type
-!!                        H5_INDEX_NAME_F          - Index on names
-!!                        H5_INDEX_CRT_ORDER_F     - Index on creation order
-!!                        H5_INDEX_N_F             - Number of indices defined
-!! </pre>
-!! \param order          Order within field or index.
-!! <pre>
-!!                        H5_ITER_UNKNOWN_F  - Unknown order
-!!                        H5_ITER_INC_F      - Increasing order
-!!                        H5_ITER_DEC_F      - Decreasing order
-!!                        H5_ITER_NATIVE_F   - No particular order, whatever is fastest
-!!                        H5_ITER_N_F        - Number of iteration orders
-!! </pre>
+!! \param index_field    Index or field which determines the order:
+!!                       \li H5_INDEX_UNKNOWN_F = -1  - Unknown index type
+!!                       \li H5_INDEX_NAME_F          - Index on names
+!!                       \li H5_INDEX_CRT_ORDER_F     - Index on creation order
+!!                       \li H5_INDEX_N_F             - Number of indices defined
+!! \param order          Order within field or index:
+!!                       \li H5_ITER_UNKNOWN_F  - Unknown order
+!!                       \li H5_ITER_INC_F      - Increasing order
+!!                       \li H5_ITER_DEC_F      - Decreasing order
+!!                       \li H5_ITER_NATIVE_F   - No particular order, whatever is fastest
+!!                       \li H5_ITER_N_F        - Number of iteration orders
 !! \param n              Link for which to retrieve information.
 !!                       NOTE: In C these are defined as a structure: H5L_info_t
 !! \param link_type      Specifies the link class:
-!! <pre>
-!!                        H5L_TYPE_HARD_F      - Hard link
-!!                        H5L_TYPE_SOFT_F      - Soft link
-!!                        H5L_TYPE_EXTERNAL_F  - External link
-!!                        H5L_TYPE_ERROR _F    - Error
-!! </pre>
+!!                       \li H5L_TYPE_HARD_F      - Hard link
+!!                       \li H5L_TYPE_SOFT_F      - Soft link
+!!                       \li H5L_TYPE_EXTERNAL_F  - External link
+!!                       \li H5L_TYPE_ERROR _F    - Error
 !! \param f_corder_valid Indicates whether the creation order data is valid for this attribute.
 !! \param corder         Is a positive integer containing the creation order of the attribute.
 !! \param cset           Indicates the character set used for the attribute’s name.
 !! \param token          If the link is a hard link, token specifies the object token that the link points to.
 !! \param val_size       If the link is a symbolic link, val_size will be the length of the link value, e.g.,
 !!                       the length of the name of the pointed-to object with a null terminator.
-!! \param hdferr         \herr_t.
+!! \param hdferr         \fortran_error
 !!
 !! \param lapl_id        Link access property list.
 !!
@@ -638,13 +626,13 @@ CONTAINS
   END SUBROUTINE h5lget_info_by_idx_f
 
 !>
-!! \ingroup H5L
+!! \ingroup FH5L
 !!
 !! \brief Determines whether a class of user-defined links is registered.
 !!
 !! \param link_cls_id User-defined link class identifier.
 !! \param registered  .TRUE. if the link class has been registered.
-!! \param hdferr      \herr_t.
+!! \param hdferr      \fortran_error
 !!
   SUBROUTINE h5lis_registered_f(link_cls_id, registered, hdferr)
     IMPLICIT NONE
@@ -669,7 +657,7 @@ CONTAINS
   END SUBROUTINE h5lis_registered_f
 
 !>
-!! \ingroup H5L
+!! \ingroup FH5L
 !!
 !! \brief Renames a link within an HDF5 file.
 !!
@@ -677,7 +665,7 @@ CONTAINS
 !! \param src_name    Original link name.
 !! \param dest_loc_id Destination file or group identifier.
 !! \param dest_name   NEW link name.
-!! \param hdferr      Error code: 0 on success and -1 on failure
+!! \param hdferr      \fortran_error
 !! \param lcpl_id     Link creation property list identifier to be associated WITH the NEW link.
 !! \param lapl_id     Link access property list identifier to be associated WITH the NEW link.
 !!
@@ -730,30 +718,26 @@ CONTAINS
   END SUBROUTINE h5lmove_f
 
 !>
-!! \ingroup H5L
+!! \ingroup FH5L
 !!
 !! \brief Retrieves name of the nth link in a group, according to the order within a specified field or index.
 !!
 !! \param loc_id      File or group identifier specifying location of subject group.
 !! \param group_name  Name of subject group.
-!! \param index_field Index or field which determines the order.
-!! <pre>
-!!                     H5_INDEX_UNKNOWN_F = -1  - Unknown index type
-!!                     H5_INDEX_NAME_F          - Index on names
-!!                     H5_INDEX_CRT_ORDER_F     - Index on creation order
-!!                     H5_INDEX_N_F             - Number of indices defined
-!! </pre>
-!! \param order       Order within field or index.
-!! <pre>
-!!                     H5_ITER_UNKNOWN_F  - Unknown order
-!!                     H5_ITER_INC_F      - Increasing order
-!!                     H5_ITER_DEC_F      - Decreasing order
-!!                     H5_ITER_NATIVE_F   - No particular order, whatever is fastest
-!!                     H5_ITER_N_F        - Number of iteration orders
-!! </pre>
+!! \param index_field Index or field which determines the order:
+!!                    \li H5_INDEX_UNKNOWN_F = -1  - Unknown index type
+!!                    \li H5_INDEX_NAME_F          - Index on names
+!!                    \li H5_INDEX_CRT_ORDER_F     - Index on creation order
+!!                    \li H5_INDEX_N_F             - Number of indices defined
+!! \param order       Order within field or index:
+!!                    \li H5_ITER_UNKNOWN_F  - Unknown order
+!!                    \li H5_ITER_INC_F      - Increasing order
+!!                    \li H5_ITER_DEC_F      - Decreasing order
+!!                    \li H5_ITER_NATIVE_F   - No particular order, whatever is fastest
+!!                    \li H5_ITER_N_F        - Number of iteration orders
 !! \param n           Link for which to retrieve information.
 !! \param name        Buffer in which link value is returned.
-!! \param hdferr      \herr_t.
+!! \param hdferr      \fortran_error
 !! \param lapl_id     List access property list identifier.
 !! \param size        Maximum number of characters of link value to be returned.
 !!
@@ -929,34 +913,28 @@ CONTAINS
 !!$  END SUBROUTINE H5Lregistered_f
 
 !>
-!! \ingroup H5L
+!! \ingroup FH5L
 !!
 !! \brief Iterates through links in a group.
 !!
 !! \param group_id      Identifier specifying subject group.
 !! \param index_type    Type of index which determines the order:
-!! <pre>
-!!                       H5_INDEX_NAME_F      - Alphanumeric index on name
-!!                       H5_INDEX_CRT_ORDER_F - Index on creation order
-!! </pre>
+!!                      \li H5_INDEX_NAME_F      - Alphanumeric index on name
+!!                      \li H5_INDEX_CRT_ORDER_F - Index on creation order
 !! \param order         Order within index:
-!! <pre>
-!!                       H5_ITER_INC_F    - Increasing order
-!!                       H5_ITER_DEC_F    - Decreasing order
-!!                       H5_ITER_NATIVE_F - Fastest available order
-!! </pre>
+!!                      \li H5_ITER_INC_F    - Increasing order
+!!                      \li H5_ITER_DEC_F    - Decreasing order
+!!                      \li H5_ITER_NATIVE_F - Fastest available order
 !! \param idx           Iteration position at which to start.
 !! \param op            Callback function passing data regarding the link to the calling application.
 !! \param op_data       User-defined pointer to data required by the application for its processing of the link.
 !! \param idx           Position at which an interrupted iteration may be restarted.
-!! \param return_value
-!!  <pre>
-!!                      Success: The return value of the first operator that
+!! \param return_value  Return context:
+!!                      \li Success: The return value of the first operator that
 !!                               returns non-zero, or zero if all members were processed with no operator returning non-zero.
-!!                      Failure: Negative if something goes wrong within the
+!!                      \li Failure: Negative if something goes wrong within the
 !!                               library, or the negative value returned by one of the operators.
-!! </pre>
-!! \param hdferr        \herr_t.
+!! \param hdferr        \fortran_error
 !!
   SUBROUTINE h5literate_f(group_id, index_type, order, idx, op, op_data, return_value, hdferr)
     USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_FUNPTR
@@ -995,35 +973,29 @@ CONTAINS
   END SUBROUTINE h5literate_f
 
 !>
-!! \ingroup H5L
+!! \ingroup FH5L
 !!
 !! \brief Iterates through links in a group.
 !!
 !! \param loc_id        File or group identifier specifying location of subject group.
 !! \param group_name    Name of subject group.
 !! \param index_type    Type of index which determines the order:
-!! <pre>
-!!                       H5_INDEX_NAME_F      - Alphanumeric index on name
-!!                       H5_INDEX_CRT_ORDER_F - Index on creation order
-!! </pre>
-!! \param  order        Order within index:
-!! <pre>
-!!                       H5_ITER_INC_F    - Increasing order
-!!                       H5_ITER_DEC_F    - Decreasing order
-!!                       H5_ITER_NATIVE_F - Fastest available order
-!! </pre>
-!! \param  idx          Position at which an interrupted iteration may be restarted.
-!! \param  op           Callback function passing data regarding the link to the calling application.
-!! \param  op_data      User-defined pointer to data required by the application for its processing of the link.
-!! \param  return_value
-!! <pre>
-!!                      Success: The return value of the first operator that returns non-zero, or zero if
+!!                      \li H5_INDEX_NAME_F      - Alphanumeric index on name
+!!                      \li H5_INDEX_CRT_ORDER_F - Index on creation order
+!! \param order        Order within index:
+!!                      \li H5_ITER_INC_F    - Increasing order
+!!                      \li H5_ITER_DEC_F    - Decreasing order
+!!                      \li H5_ITER_NATIVE_F - Fastest available order
+!! \param idx          Position at which an interrupted iteration may be restarted.
+!! \param op           Callback function passing data regarding the link to the calling application.
+!! \param op_data      User-defined pointer to data required by the application for its processing of the link.
+!! \param return_value Return context:
+!!                      \li Success: The return value of the first operator that returns non-zero, or zero if
 !!                               all members were processed with no operator returning non-zero.
-!!                      Failure: Negative if something goes wrong within the
+!!                      \li Failure: Negative if something goes wrong within the
 !!                               library, or the negative value returned by one of the operators.
-!! </pre>
-!! \param  hdferr       \herr_t
-!! \param  lapl_id      Link access property list
+!! \param hdferr       \fortran_error
+!! \param lapl_id      Link access property list.
 !!
   SUBROUTINE h5literate_by_name_f(loc_id, group_name, index_type, order, &
        idx, op, op_data, return_value, hdferr, lapl_id)

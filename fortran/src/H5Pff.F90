@@ -1,4 +1,11 @@
-!> @ingroup H5P
+!> @defgroup FH5P Fortran Propert List (H5P) Interface
+!!
+!! @see H5P, C-API
+!!
+!! @see @ref H5P_UG, User Guide
+!!
+
+!> @ingroup FH5P
 !!
 !! @brief This module contains Fortran interfaces for H5P functions.
 !
@@ -45,44 +52,7 @@ MODULE H5P
   PRIVATE h5pregister_integer, h5pregister_ptr
   PRIVATE h5pinsert_integer, h5pinsert_char, h5pinsert_ptr
 
-#ifdef H5_DOXYGEN_FORTRAN
-
-  INTERFACE h5pset_fapl_multi_f
-     MODULE PROCEDURE h5pset_fapl_multi_l
-     MODULE PROCEDURE h5pset_fapl_multi_s
-  END INTERFACE
-
-  INTERFACE h5pset_fill_value_f
-     MODULE PROCEDURE h5pset_fill_value_f
-     MODULE PROCEDURE h5pset_fill_value___F90_VERSION
-  END INTERFACE
-
-  INTERFACE h5pget_fill_value_f
-     MODULE PROCEDURE h5pget_fill_value_f
-     MODULE PROCEDURE h5pget_fill_value___F90_VERSION
-  END INTERFACE
-
-  INTERFACE h5pset_f
-     MODULE PROCEDURE h5pset_f
-     MODULE PROCEDURE h5pset_f___F90_VERSION
-  END INTERFACE
-
-  INTERFACE h5pget_f
-     MODULE PROCEDURE h5pget_f
-     MODULE PROCEDURE h5pget_f___F90_VERSION
-  END INTERFACE
-
-  INTERFACE h5pregister_f
-     MODULE PROCEDURE h5pregister_f
-     MODULE PROCEDURE h5pregister_f___F90_VERSION
-  END INTERFACE
-
-  INTERFACE h5pinsert_f
-     MODULE PROCEDURE h5pinsert_f
-     MODULE PROCEDURE h5pinsert_f___F90_VERSION
-  END INTERFACE
-
-#else
+#ifndef H5_DOXYGEN_FORTRAN
 
   INTERFACE h5pset_fapl_multi_f
      MODULE PROCEDURE h5pset_fapl_multi_l
@@ -215,31 +185,29 @@ MODULE H5P
 CONTAINS
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Creates a new property as an instance of a property list class.
 !!
 !! \param class  Type of the property class to be created. Possible values are:
-!! <pre>
-!!                  H5P_OBJECT_CREATE_F
-!!                  H5P_FILE_CREATE_F
-!!                  H5P_FILE_ACCESS_F
-!!                  H5P_DATASET_CREATE_F
-!!                  H5P_DATASET_ACCESS_F
-!!                  H5P_DATASET_XFER_F
-!!                  H5P_FILE_MOUNT_F
-!!                  H5P_GROUP_CREATE_F
-!!                  H5P_GROUP_ACCESS_F
-!!                  H5P_DATATYPE_CREATE_F
-!!                  H5P_DATATYPE_ACCESS_F
-!!                  H5P_STRING_CREATE_F
-!!                  H5P_ATTRIBUTE_CREATE _F
-!!                  H5P_OBJECT_COPY_F
-!!                  H5P_LINK_CREATE_F
-!!                  H5P_LINK_ACCESS_F
-!! </pre>
+!!               \li H5P_OBJECT_CREATE_F
+!!               \li H5P_FILE_CREATE_F
+!!               \li H5P_FILE_ACCESS_F
+!!               \li H5P_DATASET_CREATE_F
+!!               \li H5P_DATASET_ACCESS_F
+!!               \li H5P_DATASET_XFER_F
+!!               \li H5P_FILE_MOUNT_F
+!!               \li H5P_GROUP_CREATE_F
+!!               \li H5P_GROUP_ACCESS_F
+!!               \li H5P_DATATYPE_CREATE_F
+!!               \li H5P_DATATYPE_ACCESS_F
+!!               \li H5P_STRING_CREATE_F
+!!               \li H5P_ATTRIBUTE_CREATE _F
+!!               \li H5P_OBJECT_COPY_F
+!!               \li H5P_LINK_CREATE_F
+!!               \li H5P_LINK_ACCESS_F
 !! \param prp_id Property list identifier.
-!! \param hdferr \herr_t
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5pcreate_f(class, prp_id, hdferr)
     IMPLICIT NONE
@@ -260,14 +228,14 @@ CONTAINS
   END SUBROUTINE h5pcreate_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets the dataset transfer property list status to TRUE or FALSE for initializing
 !!        compound datatype members during write/read operations.
 !!
 !! \param prp_id Property list identifier.
 !! \param flag   Status flag.
-!! \param hdferr \herr_t.
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5pset_preserve_f(prp_id, flag, hdferr)
     IMPLICIT NONE
@@ -291,13 +259,13 @@ CONTAINS
   END SUBROUTINE h5pset_preserve_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Checks status of the dataset transfer property list.
 !!
 !! \param prp_id Property list identifier.
 !! \param flag   Status flag.
-!! \param hdferr \herr_t.
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5pget_preserve_f(prp_id, flag, hdferr)
     IMPLICIT NONE
@@ -322,13 +290,13 @@ CONTAINS
   END SUBROUTINE h5pget_preserve_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Returns the property list class for a property list.
 !!
 !! \param prp_id    Property list identifier.
 !! \param classtype Property list class.
-!! \param hdferr    \herr_t.
+!! \param hdferr    \fortran_error
 !!
   SUBROUTINE h5pget_class_f(prp_id, classtype, hdferr)
     IMPLICIT NONE
@@ -350,13 +318,13 @@ CONTAINS
   END SUBROUTINE h5pget_class_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Copies an existing property list to create a new property list
 !!
 !! \param prp_id     Property list identifier.
 !! \param new_prp_id New property list identifier.
-!! \param hdferr     \herr_t.
+!! \param hdferr     \fortran_error
 !!
   SUBROUTINE h5pcopy_f(prp_id, new_prp_id, hdferr)
     IMPLICIT NONE
@@ -378,12 +346,12 @@ CONTAINS
   END SUBROUTINE h5pcopy_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Terminates access to a property list.
 !!
 !! \param prp_id Identifier of the property list to terminate access to.
-!! \param hdferr \herr_t.
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5pclose_f(prp_id, hdferr)
     IMPLICIT NONE
@@ -402,7 +370,7 @@ CONTAINS
   END SUBROUTINE h5pclose_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets the size of the chunks used to store
 !!       a chunked layout dataset.
@@ -410,7 +378,7 @@ CONTAINS
 !! \param prp_id Dataset creation property list identifier.
 !! \param ndims  Number of dimensions for each chunk.
 !! \param dims   Array with dimension sizes for each chunk.
-!! \param hdferr \herr_t.
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5pset_chunk_f(prp_id, ndims, dims, hdferr)
     IMPLICIT NONE
@@ -433,7 +401,7 @@ CONTAINS
   END SUBROUTINE h5pset_chunk_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Retrieves the size of chunks for the raw data of a chunked layout dataset
 !!
@@ -464,13 +432,13 @@ CONTAINS
   END SUBROUTINE h5pget_chunk_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets compression method and compression level.
 !!
 !! \param prp_id Property list identifier.
 !! \param level  Compression level.
-!! \param hdferr \herr_t.
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5pset_deflate_f(prp_id, level, hdferr)
     IMPLICIT NONE
@@ -495,7 +463,7 @@ CONTAINS
   END SUBROUTINE h5pset_deflate_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Retrieves the version information of various objects for a file creation property list.
 !!
@@ -504,7 +472,7 @@ CONTAINS
 !! \param freelist Global freelist version number.
 !! \param stab     Symbol table version number.
 !! \param shhdr    Shared object header version number.
-!! \param hdferr   \herr_t.
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5pget_version_f(prp_id, boot, freelist, &
        stab, shhdr, hdferr)
@@ -534,13 +502,13 @@ CONTAINS
   END SUBROUTINE h5pget_version_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets user block size.
 !!
 !! \param prp_id File creation property list to modify.
 !! \param size   Size of the user-block in bytes.
-!! \param hdferr \herr_t.
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5pset_userblock_f (prp_id, size, hdferr)
     IMPLICIT NONE
@@ -561,13 +529,13 @@ CONTAINS
   END SUBROUTINE h5pset_userblock_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Gets user block size.
 !!
 !! \param prp_id     File creation property list identifier.
 !! \param block_size Size of the user block in bytes.
-!! \param hdferr     \herr_t.
+!! \param hdferr     \fortran_error
 !!
   SUBROUTINE h5pget_userblock_f(prp_id, block_size, hdferr)
     IMPLICIT NONE
@@ -587,14 +555,14 @@ CONTAINS
   END SUBROUTINE h5pget_userblock_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets the byte size of the offsets and lengths used to address objects in an HDF5 file.
 !!
 !! \param prp_id      File creation property list identifier.
 !! \param sizeof_addr Size of an object offset in bytes.
 !! \param sizeof_size Size of an object length in bytes.
-!! \param hdferr      \herr_t.
+!! \param hdferr      \fortran_error
 !!
   SUBROUTINE h5pset_sizes_f (prp_id, sizeof_addr, sizeof_size, hdferr)
     IMPLICIT NONE
@@ -617,14 +585,14 @@ CONTAINS
   END SUBROUTINE h5pset_sizes_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Retrieves the size of the offsets and lengths used in an HDF5 file
 !!
 !! \param prp_id File Creation property list identifier.
 !! \param sizeof_addr Size of an object offset in bytes.
 !! \param sizeof_size Size of an object length in bytes.
-!! \param hdferr      \herr_t.
+!! \param hdferr      \fortran_error
 !!
   SUBROUTINE h5pget_sizes_f(prp_id, sizeof_addr, sizeof_size, hdferr)
     IMPLICIT NONE
@@ -647,14 +615,14 @@ CONTAINS
   END SUBROUTINE h5pget_sizes_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets the size of parameters used to control the symbol table nodes.
 !!
 !! \param prp_id  File creation property list identifier.
 !! \param ik      Symbol table tree rank.
 !! \param lk      Symbol table node size.
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5pset_sym_k_f (prp_id, ik, lk, hdferr)
     IMPLICIT NONE
@@ -676,14 +644,14 @@ CONTAINS
     hdferr = h5pset_sym_k_c(prp_id, ik, lk)
   END SUBROUTINE h5pset_sym_k_f
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Retrieves the size of the symbol table B-tree 1/2 rank and the symbol table leaf node 1/2 size.
 !!
 !! \param prp_id File creation property list identifier.
 !! \param ik     Symbol table tree 1/2 rank.
 !! \param lk     Symbol table node 1/2 size.
-!! \param hdferr \herr_t.
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5pget_sym_k_f(prp_id, ik, lk, hdferr)
     IMPLICIT NONE
@@ -705,13 +673,13 @@ CONTAINS
     hdferr = h5pget_sym_k_c(prp_id, ik, lk)
   END SUBROUTINE h5pget_sym_k_f
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets the size of the parameter used to control the B-trees for indexing chunked datasets
 !!
-!! \param  prp_id File creation property list identifier
-!! \param ik      1/2 rank of chunked storage B-tree
-!! \param hdferr  \herr_t.
+!! \param  prp_id File creation property list identifier.
+!! \param ik      1/2 rank of chunked storage B-tree.
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5pset_istore_k_f (prp_id, ik, hdferr)
     IMPLICIT NONE
@@ -732,13 +700,13 @@ CONTAINS
   END SUBROUTINE h5pset_istore_k_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Queries the 1/2 rank of an indexed storage B-tree.
 !!
 !! \param prp_id File creation property list identifier.
 !! \param ik     Rank of chunked storage B-tree.
-!! \param hdferr \herr_t.
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5pget_istore_k_f(prp_id, ik, hdferr)
     IMPLICIT NONE
@@ -759,13 +727,13 @@ CONTAINS
   END SUBROUTINE h5pget_istore_k_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Returns low-lever driver identifier.
 !!
 !! \param prp_id File access or data transfer property list identifier.
 !! \param driver Low-level driver identifier.
-!! \param hdferr \herr_t.
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5pget_driver_f(prp_id, driver, hdferr)
     IMPLICIT NONE
@@ -786,12 +754,12 @@ CONTAINS
   END SUBROUTINE h5pget_driver_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets the standard I/O driver.
 !!
 !! \param prp_id File access property list identifier.
-!! \param hdferr \herr_t.
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5pset_fapl_stdio_f (prp_id, hdferr)
     IMPLICIT NONE
@@ -810,12 +778,12 @@ CONTAINS
   END SUBROUTINE h5pset_fapl_stdio_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets the sec2 driver.
 !!
 !! \param prp_id File access property list identifier.
-!! \param hdferr \herr_t.
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5pset_fapl_sec2_f (prp_id, hdferr)
     IMPLICIT NONE
@@ -834,14 +802,14 @@ CONTAINS
   END SUBROUTINE h5pset_fapl_sec2_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets alignment properties of a file access property list.
 !!
 !! \param prp_id    File access property list identifier.
 !! \param threshold Threshold value.
 !! \param alignment Alignment value.
-!! \param hdferr    \herr_t.
+!! \param hdferr    \fortran_error
 !!
   SUBROUTINE h5pset_alignment_f(prp_id, threshold,  alignment, hdferr)
     IMPLICIT NONE
@@ -864,14 +832,14 @@ CONTAINS
   END SUBROUTINE h5pset_alignment_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Retrieves the current settings for alignment properties from a file access property list.
 !!
 !! \param prp_id    File access property list identifier.
 !! \param threshold Threshold value.
 !! \param alignment Alignment value.
-!! \param hdferr    \herr_t.
+!! \param hdferr    \fortran_error
 !!
   SUBROUTINE h5pget_alignment_f(prp_id, threshold,  alignment, hdferr)
     IMPLICIT NONE
@@ -894,14 +862,14 @@ CONTAINS
   END SUBROUTINE h5pget_alignment_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Modifies the file access property list to use the H5FD_CORE driver.
 !!
 !! \param prp_id        File access property list identifier.
 !! \param increment     Size, in bytes, of memory increments.
 !! \param backing_store Boolean flag indicating whether to write the file contents to disk when the file is closed.
-!! \param hdferr        \herr_t.
+!! \param hdferr        \fortran_error
 !!
   SUBROUTINE h5pset_fapl_core_f(prp_id, increment, backing_store, hdferr)
     IMPLICIT NONE
@@ -926,14 +894,14 @@ CONTAINS
   END SUBROUTINE h5pset_fapl_core_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Queries core file driver properties.
 !!
 !! \param prp_id        File access property list identifier.
 !! \param increment     Size, in bytes, of memory increments.
 !! \param backing_store Boolean flag indicating whether to write the file contents to disk when the file is closed.
-!! \param hdferr        \herr_t.
+!! \param hdferr        \fortran_error
 !!
   SUBROUTINE h5pget_fapl_core_f(prp_id, increment, backing_store, hdferr)
     IMPLICIT NONE
@@ -960,14 +928,14 @@ CONTAINS
   END SUBROUTINE h5pget_fapl_core_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets the file access property list to use the family driver.
 !!
 !! \param prp_id     File access property list identifier.
 !! \param memb_size  Size in bytes of each file member.
-!! \param memb_plist Identifier of the file access property list to be used for each family member
-!! \param hdferr     \herr_t.
+!! \param memb_plist Identifier of the file access property list to be used for each family member.
+!! \param hdferr     \fortran_error
 !!
   SUBROUTINE h5pset_fapl_family_f(prp_id, memb_size, memb_plist , hdferr)
     IMPLICIT NONE
@@ -990,14 +958,14 @@ CONTAINS
   END SUBROUTINE h5pset_fapl_family_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Returns file access property list information.
 !!
 !! \param prp_id     File access property list identifier.
 !! \param memb_size  Size in bytes of each file member.
-!! \param memb_plist Identifier of the file access property list to be used for each family member
-!! \param hdferr     \herr_t
+!! \param memb_plist Identifier of the file access property list to be used for each family member.
+!! \param hdferr     \fortran_error
 !!
   SUBROUTINE h5pget_fapl_family_f(prp_id, memb_size, memb_plist , hdferr)
     IMPLICIT NONE
@@ -1020,7 +988,7 @@ CONTAINS
   END SUBROUTINE h5pget_fapl_family_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets the meta data cache and raw data chunk cache parameters
 !!
@@ -1029,7 +997,7 @@ CONTAINS
 !! \param rdcc_nelmts Number of elements (objects) in the raw data chunk cache.
 !! \param rdcc_nbytes Total size of the raw data chunk cache, in bytes.
 !! \param rdcc_w0     Preemption policy (0 or 1).
-!! \param hdferr      \herr_t.
+!! \param hdferr      \fortran_error
 !!
   SUBROUTINE h5pset_cache_f(prp_id, mdc_nelmts,rdcc_nelmts, rdcc_nbytes, rdcc_w0, hdferr)
     IMPLICIT NONE
@@ -1056,16 +1024,16 @@ CONTAINS
   END SUBROUTINE h5pset_cache_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Queries the meta data cache and raw data chunk cache parameters.
 !!
 !! \param prp_id      File access property list identifier.
-!! \param mdc_nelmts  Number of elements (objects) in the metadata cache
-!! \param rdcc_nelmts Number of elements (objects) in the raw data chunk cache
+!! \param mdc_nelmts  Number of elements (objects) in the metadata cache.
+!! \param rdcc_nelmts Number of elements (objects) in the raw data chunk cache.
 !! \param rdcc_nbytes Total size of the raw data chunk cache, in bytes.
 !! \param rdcc_w0     Preemption policy (0 or 1).
-!! \param hdferr      \herr_t.
+!! \param hdferr      \fortran_error
 !!
   SUBROUTINE h5pget_cache_f(prp_id, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, rdcc_w0, hdferr)
     IMPLICIT NONE
@@ -1092,7 +1060,7 @@ CONTAINS
   END SUBROUTINE h5pget_cache_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Emulates the old split file driver.
 !!
@@ -1101,7 +1069,7 @@ CONTAINS
 !! \param meta_plist Identifier of the meta file access property list.
 !! \param raw_ext    Name extension for the raw file filename.
 !! \param raw_plist  Identifier of the raw file access property list.
-!! \param hdferr     \herr_t.
+!! \param hdferr     \fortran_error
 !!
   SUBROUTINE h5pset_fapl_split_f(prp_id, meta_ext, meta_plist, raw_ext, raw_plist, hdferr)
     IMPLICIT NONE
@@ -1133,13 +1101,13 @@ CONTAINS
   END SUBROUTINE h5pset_fapl_split_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets garbage collecting references flag.
 !!
 !! \param prp_id       File access property list identifier.
 !! \param gc_reference Flag for setting garbage collection on and off (1 or 0).
-!! \param hdferr       \herr_t.
+!! \param hdferr       \fortran_error
 !!
   SUBROUTINE h5pset_gc_references_f (prp_id, gc_reference, hdferr)
     IMPLICIT NONE
@@ -1160,13 +1128,13 @@ CONTAINS
   END SUBROUTINE h5pset_gc_references_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Returns garbage collecting references setting.
 !!
 !! \param prp_id       File access property list identifier.
 !! \param gc_reference Flag for setting garbage collection on and off (1 or 0)
-!! \param hdferr       \herr_t.
+!! \param hdferr       \fortran_error
 !!
   SUBROUTINE h5pget_gc_references_f(prp_id, gc_reference, hdferr)
     IMPLICIT NONE
@@ -1187,19 +1155,17 @@ CONTAINS
   END SUBROUTINE h5pget_gc_references_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets the type of storage used store the raw data
 !!       for a dataset.
 !!
 !! \param prp_id Data creation property list identifier.
 !! \param layout Type of storage layout for raw data. Possible values are:
-!! <pre>
-!!                 H5D_COMPACT_F
-!!                 H5D_CONTIGUOUS_F
-!!                 H5D_CHUNKED_F
-!! </pre>
-!! \param hdferr \herr_t.
+!!               \li H5D_COMPACT_F
+!!               \li H5D_CONTIGUOUS_F
+!!               \li H5D_CHUNKED_F
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5pset_layout_f (prp_id, layout, hdferr)
     IMPLICIT NONE
@@ -1221,18 +1187,16 @@ CONTAINS
   END SUBROUTINE h5pset_layout_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Returns the layout of the raw data for a dataset.
 !!
 !! \param prp_id Data creation property list identifier.
 !! \param layout Type of storage layout for raw data. Possible values are:
-!! <pre>
-!!                      H5D_COMPACT_F
-!!                      H5D_CONTIGUOUS_F
-!!                      H5D_CHUNKED_F
-!! </pre>
-!! \param hdferr \herr_t.
+!!               \li H5D_COMPACT_F
+!!               \li H5D_CONTIGUOUS_F
+!!               \li H5D_CHUNKED_F
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5pget_layout_f (prp_id, layout, hdferr)
     IMPLICIT NONE
@@ -1254,7 +1218,7 @@ CONTAINS
   END SUBROUTINE h5pget_layout_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Adds a filter to the filter pipeline.
 !!
@@ -1263,7 +1227,7 @@ CONTAINS
 !! \param flags     Bit vector specifying certain general properties of the filter.
 !! \param cd_nelmts Number of elements in cd_values.
 !! \param cd_values Auxiliary data for the filter.
-!! \param hdferr    \herr_t.
+!! \param hdferr    \fortran_error
 !!
   SUBROUTINE h5pset_filter_f(prp_id, filter, flags, cd_nelmts, cd_values,  hdferr)
     IMPLICIT NONE
@@ -1290,13 +1254,13 @@ CONTAINS
   END SUBROUTINE h5pset_filter_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Returns the number of filters in the pipeline.
 !!
 !! \param prp_id   Data creation or transfer property list identifier.
 !! \param nfilters Number of filters in the pipeline.
-!! \param hdferr   \herr_t.
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5pget_nfilters_f (prp_id, nfilters, hdferr)
     IMPLICIT NONE
@@ -1317,19 +1281,19 @@ CONTAINS
   END SUBROUTINE h5pget_nfilters_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Returns information about a filter in a pipeline
 !!
-!! \param prp_id        Data creation or transfer property list identifier
-!! \param filter_number Sequence number within the filter pipeline of the filter for which information is sought
+!! \param prp_id        Data creation or transfer property list identifier.
+!! \param filter_number Sequence number within the filter pipeline of the filter for which information is sought.
 !! \param filter_id     Filter identification number.
 !! \param flags         Bitbit vector specifying certain general properties of the filter.
 !! \param cd_nelmts     Number of elements in cd_values.
 !! \param cd_values     Auxiliary data for the filter.
 !! \param namelen       Number of characters in the name buffer.
 !! \param name          Buffer to retrieve filter name.
-!! \param hdferr        \herr_t.
+!! \param hdferr        \fortran_error
 !!
   SUBROUTINE h5pget_filter_f(prp_id, filter_number, flags, cd_nelmts, cd_values, namelen, name, filter_id, hdferr)
     IMPLICIT NONE
@@ -1369,7 +1333,7 @@ CONTAINS
   END SUBROUTINE h5pget_filter_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Adds an external file to the list of external files.
 !!
@@ -1377,7 +1341,7 @@ CONTAINS
 !! \param name   Name of external file.
 !! \param offset Offset in bytes from the beginning of the file to the location in the file where the data starts.
 !! \param bytes  Size of the external file data.
-!! \param hdferr \herr_t.
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5pset_external_f(prp_id, name, offset, bytes, hdferr)
     IMPLICIT NONE
@@ -1407,13 +1371,13 @@ CONTAINS
   END SUBROUTINE h5pset_external_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Returns the number of external files for a dataset.
 !!
 !! \param prp_id Dataset creation property list identifier.
 !! \param count  Number of external files for the specified dataset.
-!! \param hdferr \herr_t.
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5pget_external_count_f (prp_id, count, hdferr)
     IMPLICIT NONE
@@ -1434,7 +1398,7 @@ CONTAINS
   END SUBROUTINE h5pget_external_count_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Returns information about an external file.
 !!
@@ -1444,7 +1408,7 @@ CONTAINS
 !! \param name      Name of the external file.
 !! \param offset    Offset in bytes from the beginning of the file to the location in the file where the data starts.
 !! \param bytes     Size of the external file data.
-!! \param hdferr    \herr_t.
+!! \param hdferr    \fortran_error
 !!
   SUBROUTINE h5pget_external_f(prp_id, idx, name_size, name, offset,bytes, hdferr)
     IMPLICIT NONE
@@ -1474,7 +1438,7 @@ CONTAINS
   END SUBROUTINE h5pget_external_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets B-tree split ratios for a dataset transfer property list.
 !!
@@ -1482,7 +1446,7 @@ CONTAINS
 !! \param left   The B-tree split ratio for left-most nodes.
 !! \param middle The B-tree split ratio for all other nodes.
 !! \param right  The B-tree split ratio for right-most nodes.
-!! \param hdferr \herr_t.
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5pset_btree_ratios_f(prp_id, left, middle, right, hdferr)
     IMPLICIT NONE
@@ -1507,7 +1471,7 @@ CONTAINS
   END SUBROUTINE h5pset_btree_ratios_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Gets B-tree split ratios for a dataset transfer property list
 !!
@@ -1515,7 +1479,7 @@ CONTAINS
 !! \param left   The B-tree split ratio for left-most nodes.
 !! \param middle The B-tree split ratio for all other nodes.
 !! \param right  The B-tree split ratio for right-most nodes.
-!! \param hdferr \herr_t.
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5pget_btree_ratios_f(prp_id, left, middle, right, hdferr)
     IMPLICIT NONE
@@ -1540,19 +1504,17 @@ CONTAINS
   END SUBROUTINE h5pget_btree_ratios_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Returns the degree for the file close behavior.
 !!
 !! \param fapl_id File access property list identifier.
 !! \param degree  Possible values are:
-!! <pre>
-!!                      H5F_CLOSE_DEFAULT_F
-!!                      H5F_CLOSE_WEAK_F
-!!                      H5F_CLOSE_SEMI_F
-!!                      H5F_CLOSE_STRONG_F
-!! </pre>
-!! \param hdferr  \herr_t.
+!!                \li H5F_CLOSE_DEFAULT_F
+!!                \li H5F_CLOSE_WEAK_F
+!!                \li H5F_CLOSE_SEMI_F
+!!                \li H5F_CLOSE_STRONG_F
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5pget_fclose_degree_f(fapl_id, degree, hdferr)
     IMPLICIT NONE
@@ -1574,19 +1536,17 @@ CONTAINS
   END SUBROUTINE h5pget_fclose_degree_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets the degree for the file close behavior.
 !!
 !! \param fapl_id File access property list identifier.
 !! \param degree  Possible values are:
-!! <pre>
-!!                 H5F_CLOSE_DEFAULT_F
-!!                 H5F_CLOSE_WEAK_F
-!!                 H5F_CLOSE_SEMI_F
-!!                 H5F_CLOSE_STRONG_F
-!! </pre>
-!! \param hdferr \herr_t.
+!!                \li H5F_CLOSE_DEFAULT_F
+!!                \li H5F_CLOSE_WEAK_F
+!!                \li H5F_CLOSE_SEMI_F
+!!                \li H5F_CLOSE_STRONG_F
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5pset_fclose_degree_f(fapl_id, degree, hdferr)
     IMPLICIT NONE
@@ -1608,14 +1568,14 @@ CONTAINS
   END SUBROUTINE h5pset_fclose_degree_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Checks if two property lists are equal
 !!
 !! \param plist1_id Property list identifier.
 !! \param plist2_id Property list identifier.
 !! \param flag      Flag, Possible values: .TRUE. or .FALSE.
-!! \param hdferr:   \herr_t. and flag is set to .FALSE.
+!! \param hdferr:   \fortran_error and flag is set to .FALSE.
 !!
   SUBROUTINE h5pequal_f(plist1_id, plist2_id, flag, hdferr)
     IMPLICIT NONE
@@ -1642,13 +1602,13 @@ CONTAINS
   END SUBROUTINE h5pequal_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets sixe for conversion buffer
 !!
 !! \param plist_id Data transfer property list identifier.
 !! \param size     Buffer size.
-!! \param hdferr   \herr_t.
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5pset_buffer_f(plist_id, size, hdferr)
     IMPLICIT NONE
@@ -1670,13 +1630,13 @@ CONTAINS
   END SUBROUTINE h5pset_buffer_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Gets size for conversion buffer
 !!
 !! \param plist_id Data transfer property list identifier.
 !! \param size     Buffer size.
-!! \param hdferr   \herr_t.
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5pget_buffer_f(plist_id, size, hdferr)
     IMPLICIT NONE
@@ -1698,19 +1658,17 @@ CONTAINS
   END SUBROUTINE h5pget_buffer_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Check if fill value is defined.
 !!
 !! \param plist_id Dataset creation property list identifier.
 !! \param flag     Fill value status flag. Possible values are:
-!! <pre>
-!!                  H5D_FILL_VALUE_ERROR_F
-!!                  H5D_FILL_VALUE_UNDEFINED_F
-!!                  H5D_FILL_VALUE_DEFAULT_F
-!!                  H5D_FILL_VALUE_USER_DEFINED_F
-!! </pre>
-!! \param hdferr   \herr_t.
+!!                 \li H5D_FILL_VALUE_ERROR_F
+!!                 \li H5D_FILL_VALUE_UNDEFINED_F
+!!                 \li H5D_FILL_VALUE_DEFAULT_F
+!!                 \li H5D_FILL_VALUE_USER_DEFINED_F
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5pfill_value_defined_f(plist_id, flag, hdferr)
     IMPLICIT NONE
@@ -1732,27 +1690,23 @@ CONTAINS
   END SUBROUTINE h5pfill_value_defined_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Set space allocation time for dataset during creation.
 !!
 !! \param plist_id Dataset creation property list identifier.
 !! \param flag     Allocation time flag: Possible values are:
-!! <pre>
-!!                  H5D_ALLOC_TIME_ERROR_F
-!!                  H5D_ALLOC_TIME_DEFAULT_F
-!!                  H5D_ALLOC_TIME_EARLY_F
-!!                  H5D_ALLOC_TIME_LATE_F
-!!                  H5D_ALLOC_TIME_INCR_F
-!! </pre>
-!! \param hdferr   \herr_t.
+!!                 \li H5D_ALLOC_TIME_ERROR_F
+!!                 \li H5D_ALLOC_TIME_DEFAULT_F
+!!                 \li H5D_ALLOC_TIME_EARLY_F
+!!                 \li H5D_ALLOC_TIME_LATE_F
+!!                 \li H5D_ALLOC_TIME_INCR_F
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5pset_alloc_time_f(plist_id, flag, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: plist_id
     INTEGER, INTENT(IN) :: flag
-                                            !  H5D_ALLOC_TIME_LATE_F
-                                            !  H5D_ALLOC_TIME_INCR_F
     INTEGER, INTENT(OUT) :: hdferr
 
     INTERFACE
@@ -1769,20 +1723,18 @@ CONTAINS
   END SUBROUTINE h5pset_alloc_time_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Get space allocation time for dataset during creation.
 !!
 !! \param plist_id Dataset creation property list identifier.
 !! \param flag     Allocation time flag. Possible values are:
-!! <pre>
-!!                  H5D_ALLOC_TIME_ERROR_F
-!!                  H5D_ALLOC_TIME_DEFAULT_F
-!!                  H5D_ALLOC_TIME_EARLY_F
-!!                  H5D_ALLOC_TIME_LATE_F
-!!                  H5D_ALLOC_TIME_INCR_F
-!! </pre>
-!! \param hdferr   \herr_t.
+!!                 \li H5D_ALLOC_TIME_ERROR_F
+!!                 \li H5D_ALLOC_TIME_DEFAULT_F
+!!                 \li H5D_ALLOC_TIME_EARLY_F
+!!                 \li H5D_ALLOC_TIME_LATE_F
+!!                 \li H5D_ALLOC_TIME_INCR_F
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5pget_alloc_time_f(plist_id, flag, hdferr)
     IMPLICIT NONE
@@ -1804,18 +1756,16 @@ CONTAINS
   END SUBROUTINE h5pget_alloc_time_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Set fill value writing time for dataset
 !!
 !! \param plist_id Dataset creation property list identifier.
 !! \param flag     Fill time flag: Possible values are:
-!! <pre>
-!!                  H5D_FILL_TIME_ERROR_F
-!!                  H5D_FILL_TIME_ALLOC_F
-!!                  H5D_FILL_TIME_NEVER_F
-!! </pre>
-!! \param hdferr   \herr_t.
+!!                 \li H5D_FILL_TIME_ERROR_F
+!!                 \li H5D_FILL_TIME_ALLOC_F
+!!                 \li H5D_FILL_TIME_NEVER_F
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5pset_fill_time_f(plist_id, flag, hdferr)
     IMPLICIT NONE
@@ -1837,19 +1787,17 @@ CONTAINS
   END SUBROUTINE h5pset_fill_time_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Get fill value writing time for dataset
 !!
 !! \param plist_id Dataset creation property list identifier.
 !!
 !! \param flag     Fill time flag. Possible values are:
-!! <pre>
-!!                  H5D_FILL_TIME_ERROR_F
-!!                  H5D_FILL_TIME_ALLOC_F
-!!                  H5D_FILL_TIME_NEVER_F
-!! </pre>
-!! \param hdferr  \herr_t.
+!!                 \li H5D_FILL_TIME_ERROR_F
+!!                 \li H5D_FILL_TIME_ALLOC_F
+!!                 \li H5D_FILL_TIME_NEVER_F
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5pget_fill_time_f(plist_id, flag, hdferr)
     IMPLICIT NONE
@@ -1871,13 +1819,13 @@ CONTAINS
   END SUBROUTINE h5pget_fill_time_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets the minimum size of metadata block allocations
 !!
 !! \param plist_id File access property list identifier.
 !! \param size     Metadata block size.
-!! \param hdferr   \herr_t.
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5pset_meta_block_size_f(plist_id, size, hdferr)
     IMPLICIT NONE
@@ -1898,13 +1846,13 @@ CONTAINS
   END SUBROUTINE h5pset_meta_block_size_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Gets the minimum size of metadata block allocations
 !!
 !! \param plist_id File access property list identifier.
 !! \param size     Metadata block size.
-!! \param hdferr   \herr_t.
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5pget_meta_block_size_f(plist_id, size, hdferr)
     IMPLICIT NONE
@@ -1925,13 +1873,13 @@ CONTAINS
   END SUBROUTINE h5pget_meta_block_size_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets the maximum size of the data sieve buffer
 !!
 !! \param plist_id File access property list identifier.
 !! \param size     Sieve buffer size.
-!! \param hdferr   \herr_t.
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5pset_sieve_buf_size_f(plist_id, size, hdferr)
     IMPLICIT NONE
@@ -1952,13 +1900,13 @@ CONTAINS
   END SUBROUTINE h5pset_sieve_buf_size_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Gets the maximum size of the data sieve buffer
 !!
 !! \param plist_id File access property list identifier.
 !! \param size     Sieve buffer size.
-!! \param hdferr   \herr_t.
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5pget_sieve_buf_size_f(plist_id, size, hdferr)
     IMPLICIT NONE
@@ -1979,13 +1927,13 @@ CONTAINS
   END SUBROUTINE h5pget_sieve_buf_size_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets the minimum size of "small" raw data block
 !!
 !! \param plist_id File access property list identifier.
 !! \param size     Small raw data block size.
-!! \param hdferr   \herr_t.
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5pset_small_data_block_size_f(plist_id, size, hdferr)
     IMPLICIT NONE
@@ -2006,13 +1954,13 @@ CONTAINS
   END SUBROUTINE h5pset_small_data_block_size_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Gets the minimum size of "small" raw data block
 !!
 !! \param plist_id File access property list identifier.
 !! \param size     Small raw data block size.
-!! \param hdferr   \herr_t.
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5pget_small_data_block_size_f(plist_id, size, hdferr)
     IMPLICIT NONE
@@ -2033,13 +1981,13 @@ CONTAINS
   END SUBROUTINE h5pget_small_data_block_size_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Set the number of "I/O" vectors (vector size)
 !!
 !! \param plist_id Dataset transfer property list identifier.
 !! \param size     Vector size.
-!! \param hdferr   \herr_t.
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5pset_hyper_vector_size_f(plist_id, size, hdferr)
     IMPLICIT NONE
@@ -2060,13 +2008,13 @@ CONTAINS
   END SUBROUTINE h5pset_hyper_vector_size_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Get the number of "I/O" vectors (vector size)
 !!
 !! \param plist_id Dataset transfer property list identifier.
 !! \param size     Vector size.
-!! \param hdferr   \herr_t.
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5pget_hyper_vector_size_f(plist_id, size, hdferr)
     IMPLICIT NONE
@@ -2087,14 +2035,14 @@ CONTAINS
   END SUBROUTINE h5pget_hyper_vector_size_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Queries whether a property name exists in a property list or class.
 !!
 !! \param prp_id Property list identifier to query.
 !! \param name   Name of property to check for.
 !! \param flag   Logical flag.
-!! \param hdferr \herr_t.
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5pexist_f(prp_id, name, flag, hdferr)
     IMPLICIT NONE
@@ -2125,14 +2073,14 @@ CONTAINS
   END SUBROUTINE h5pexist_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Queries the size of a property value in bytes.
 !!
 !! \param prp_id Property list identifier to query.
 !! \param name   Name of property to query.
 !! \param size   Size of property in bytes.
-!! \param hdferr \herr_t.
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5pget_size_f(prp_id, name, size, hdferr)
     IMPLICIT NONE
@@ -2159,13 +2107,13 @@ CONTAINS
   END SUBROUTINE h5pget_size_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Queries number of properties in property list or class
 !!
 !! \param prp_id Iproperty list identifier to query.
 !! \param nprops Number of properties in property object.
-!! \param hdferr \herr_t.
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5pget_nprops_f(prp_id, nprops, hdferr)
     IMPLICIT NONE
@@ -2185,7 +2133,7 @@ CONTAINS
   END SUBROUTINE h5pget_nprops_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Queries the name of a class.
 !!
@@ -2194,7 +2142,7 @@ CONTAINS
 !! \param size    Actual length of the class name.
 !!                NOTE: If provided buffer "name" is smaller, than name will be
 !!                      truncated to fit into provided user buffer.
-!! \param hdferr \herr_t.
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5pget_class_name_f(prp_id, name, size, hdferr)
     IMPLICIT NONE
@@ -2225,13 +2173,13 @@ CONTAINS
   END SUBROUTINE h5pget_class_name_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Retrieves the parent class of a generic property class.
 !!
 !! \param prp_id    Property list identifier to query.
 !! \param parent_id Identifier of the parent class.
-!! \param hdferr:   \herr_t.
+!! \param hdferr:   \fortran_error
 !!
   SUBROUTINE h5pget_class_parent_f(prp_id, parent_id, hdferr)
     IMPLICIT NONE
@@ -2251,14 +2199,14 @@ CONTAINS
   END SUBROUTINE h5pget_class_parent_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Determines whether a property list is a member of a class.
 !!
 !! \param plist   Property list identifier.
 !! \param pclass  Identifier of the property class.
 !! \param flag    TRUE. if a member, .FALSE. otherwise.
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5pisa_class_f(plist, pclass, flag, hdferr)
     IMPLICIT NONE
@@ -2284,14 +2232,14 @@ CONTAINS
   END SUBROUTINE h5pisa_class_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Copies a property from one list or class to another.
 !!
 !! \param dst_id  Identifier of the destination property list.
 !! \param src_id  Identifier of the source property list.
 !! \param name    Name of the property to copy.
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5pcopy_prop_f(dst_id, src_id, name, hdferr)
     IMPLICIT NONE
@@ -2318,13 +2266,13 @@ CONTAINS
   END SUBROUTINE h5pcopy_prop_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Removes a property from a property list.
 !!
 !! \param plid    Property list identofoer.
 !! \param name    Name of the property to remove.
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5premove_f(plid, name, hdferr)
     IMPLICIT NONE
@@ -2349,13 +2297,13 @@ CONTAINS
   END SUBROUTINE h5premove_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Removes a property from a property list class.
 !!
 !! \param class   Property list class identifier.
 !! \param name    Name of the property to remove.
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5punregister_f(class, name, hdferr)
     IMPLICIT NONE
@@ -2380,12 +2328,12 @@ CONTAINS
   END SUBROUTINE h5punregister_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Closes an existing property list class.
 !!
 !! \param class  Property list class identifier.
-!! \param hdferr \herr_t.
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5pclose_class_f(class, hdferr)
     IMPLICIT NONE
@@ -2403,12 +2351,12 @@ CONTAINS
   END SUBROUTINE h5pclose_class_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets shuffling filter
 !!
 !! \param prp_id Dataset creation property list identifier.
-!! \param hdferr \herr_t.
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5pset_shuffle_f(prp_id, hdferr)
     IMPLICIT NONE
@@ -2427,17 +2375,15 @@ CONTAINS
   END SUBROUTINE h5pset_shuffle_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Enables/disables error detecting
 !!
 !! \param prp_id Dataset creation property list identifier.
 !! \param flag   EDC flag. Possible values:
-!! <pre>
-!!                H5Z_DISABLE_EDC_F
-!!                H5Z_ENABLE_EDC_F
-!! </pre>
-!! \param hdferr \herr_t.
+!!               \li H5Z_DISABLE_EDC_F
+!!               \li H5Z_ENABLE_EDC_F
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5pset_edc_check_f(prp_id, flag, hdferr)
     IMPLICIT NONE
@@ -2458,17 +2404,15 @@ CONTAINS
   END SUBROUTINE h5pset_edc_check_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Determines whether error-detection is enabled for dataset reads.
 !!
 !! \param prp_id Dataset creation property list identifier.
 !! \param flag   EDC flag; possible values:
-!! <pre>
-!!                H5Z_DISABLE_EDC_F
-!!                H5Z_ENABLE_EDC_F
-!! </pre>
-!! \param hdferr \herr_t.
+!!               \li H5Z_DISABLE_EDC_F
+!!               \li H5Z_ENABLE_EDC_F
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5pget_edc_check_f(prp_id, flag, hdferr)
     IMPLICIT NONE
@@ -2489,12 +2433,12 @@ CONTAINS
   END SUBROUTINE h5pget_edc_check_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets Fletcher32 checksum of EDC for a dataset creation property list.
 !!
 !! \param prp_id Dataset creation property list identifier.
-!! \param hdferr \herr_t.
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5pset_fletcher32_f(prp_id, hdferr)
     IMPLICIT NONE
@@ -2513,13 +2457,13 @@ CONTAINS
   END SUBROUTINE h5pset_fletcher32_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets offset for family file driver.
 !!
 !! \param prp_id File creation property list identifier.
 !! \param offset File offset.
-!! \param hdferr \herr_t.
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5pset_family_offset_f(prp_id, offset, hdferr)
     IMPLICIT NONE
@@ -2542,7 +2486,7 @@ CONTAINS
 #ifdef H5_DOXYGEN_FORTRAN
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets up use of the multi-file driver.
 !!
@@ -2550,9 +2494,9 @@ CONTAINS
 !! \param memb_map  Mapping array.
 !! \param memb_fapl Property list for each memory usage type.
 !! \param memb_name Names of member file.
-!! \param memb_addr Offsets within the virtual address space, from 0 (zero) to HADDR_MAX_F, at which each type of data storage begins.  
+!! \param memb_addr Offsets within the virtual address space, from 0 (zero) to HADDR_MAX_F, at which each type of data storage begins.
 !! \param relax     Flag.
-!! \param hdferr    \herr_t.
+!! \param hdferr    \fortran_error
 !!
   SUBROUTINE h5pset_fapl_multi_l(prp_id, memb_map, memb_fapl, memb_name, memb_addr, relax, hdferr)
     IMPLICIT NONE
@@ -2568,7 +2512,7 @@ CONTAINS
 #else
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets up use of the multi-file driver.
 !!
@@ -2576,9 +2520,9 @@ CONTAINS
 !! \param memb_map  Mapping array.
 !! \param memb_fapl Property list for each memory usage type.
 !! \param memb_name Names of member file.
-!! \param memb_addr Offsets within the virtual address space, from 0 (zero) to HADDR_MAX_F, at which each type of data storage begins.  
+!! \param memb_addr Offsets within the virtual address space, from 0 (zero) to HADDR_MAX_F, at which each type of data storage begins.
 !! \param relax     Flag.
-!! \param hdferr    \herr_t.
+!! \param hdferr    \fortran_error
 !!
   SUBROUTINE h5pset_fapl_multi_l(prp_id, memb_map, memb_fapl, memb_name, memb_addr, relax, hdferr)
     IMPLICIT NONE
@@ -2621,13 +2565,13 @@ CONTAINS
 
   END SUBROUTINE h5pset_fapl_multi_l
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets up use of the multi-file driver.
 !!
 !! \param prp_id File creation property list identifier.
 !! \param relax  Flag.
-!! \param hdferr \herr_t.
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5pset_fapl_multi_s(prp_id, relax, hdferr)
     IMPLICIT NONE
@@ -2651,7 +2595,7 @@ CONTAINS
 
   END SUBROUTINE h5pset_fapl_multi_s
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets up use of the multi-file driver.
 !!
@@ -2659,9 +2603,9 @@ CONTAINS
 !! \param memb_map   Mapping array.
 !! \param memb_fapl  Property list for each memory usage type.
 !! \param memb_name  Names of member file.
-!! \param memb_addr  Offsets within the virtual address space, from 0 (zero) to HADDR_MAX_F, at which each type of data storage begins. 
+!! \param memb_addr  Offsets within the virtual address space, from 0 (zero) to HADDR_MAX_F, at which each type of data storage begins.
 !! \param relax      Flag.
-!! \param hdferr     \herr_t.
+!! \param hdferr     \fortran_error
 !! \param maxlen_out Maximum length for memb_name array element.
 !!
   SUBROUTINE h5pget_fapl_multi_f(prp_id, memb_map, memb_fapl, memb_name, memb_addr, relax, hdferr, maxlen_out)
@@ -2712,18 +2656,16 @@ CONTAINS
   END SUBROUTINE h5pget_fapl_multi_f
 #endif
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets up use of szip compression
 !!
 !! \param prp_id           Dataset creation property list identifier.
 !! \param options_mask     A bit-mask conveying the desired SZIP options. Current valid values in Fortran are:
-!! <pre>
-!!                           H5_SZIP_EC_OM_F
-!!                           H5_SZIP_NN_OM_F
-!! </pre>
+!!                         \li H5_SZIP_EC_OM_F
+!!                         \li H5_SZIP_NN_OM_F
 !! \param pixels_per_block Szip parameters.
-!! \param hdferr           \herr_t.       
+!! \param hdferr           \fortran_error
 !!
   SUBROUTINE h5pset_szip_f(prp_id, options_mask, pixels_per_block, hdferr)
     IMPLICIT NONE
@@ -2747,13 +2689,13 @@ CONTAINS
   END SUBROUTINE h5pset_szip_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Checks if all filters set in the dataset creation property list are available.
 !!
 !! \param prp_id Data creation property list identifier.
 !! \param flag   .TRUE. if all filters are available, .FALSE. otherwise.
-!! \param hdferr \herr_t.
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5pall_filters_avail_f(prp_id, flag, hdferr)
     IMPLICIT NONE
@@ -2778,18 +2720,18 @@ CONTAINS
   END SUBROUTINE h5pall_filters_avail_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Returns information about a filter in a pipeline
 !!
-!! \param prp_id    Data creation or transfer property list identifier
+!! \param prp_id    Data creation or transfer property list identifier.
 !! \param filter_id Filter identifier.
-!! \param flags     Bit vector specifying certain general properties of the filter
+!! \param flags     Bit vector specifying certain general properties of the filter.
 !! \param cd_nelmts Number of elements in cd_values.
 !! \param cd_values Auxiliary data for the filter.
 !! \param namelen   Number of characters in the name buffer.
 !! \param name      Buffer to retrieve filter name.
-!! \param hdferr    \herr_t.
+!! \param hdferr    \fortran_error
 !!
   SUBROUTINE h5pget_filter_by_id_f(prp_id, filter_id, flags, cd_nelmts, cd_values, namelen, name, hdferr)
     IMPLICIT NONE
@@ -2823,16 +2765,16 @@ CONTAINS
   END SUBROUTINE h5pget_filter_by_id_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Adds a filter to the filter pipeline.
 !!
-!! \param prp_id    Data creation or transfer property list identifier
+!! \param prp_id    Data creation or transfer property list identifier.
 !! \param filter    Filter to be modified.
-!! \param flags     Bit vector specifying certain general properties of the filter
+!! \param flags     Bit vector specifying certain general properties of the filter.
 !! \param cd_nelmts Number of elements in cd_values.
 !! \param cd_values Auxiliary data for the filter.
-!! \param hdferr    \herr_t.
+!! \param hdferr    \fortran_error
 !!
   SUBROUTINE h5pmodify_filter_f(prp_id, filter, flags, cd_nelmts, cd_values,  hdferr)
     IMPLICIT NONE
@@ -2859,13 +2801,13 @@ CONTAINS
   END SUBROUTINE h5pmodify_filter_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Delete one or more filters from the filter pipeline.
 !!
-!! \param prp_id Data creation or transfer property list identifier
+!! \param prp_id Data creation or transfer property list identifier.
 !! \param filter Filter to be removed.
-!! \param hdferr \herr_t.
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5premove_filter_f(prp_id, filter, hdferr)
     IMPLICIT NONE
@@ -2886,14 +2828,14 @@ CONTAINS
   END SUBROUTINE h5premove_filter_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Retrieves attribute storage phase change thresholds
 !!
 !! \param ocpl_id     Object (dataset or group) creation property list identifier.
 !! \param max_compact Maximum number of attributes to be stored in compact storage (Default: 8).
 !! \param min_dense   Minimum number of attributes to be stored in dense storage (Default: 6).
-!! \param hdferr      \herr_t.
+!! \param hdferr      \fortran_error
 !!
   SUBROUTINE h5pget_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     IMPLICIT NONE
@@ -2917,13 +2859,13 @@ CONTAINS
   END SUBROUTINE h5pget_attr_phase_change_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets tracking and indexing of attribute creation order
 !!
 !! \param ocpl_id         Object creation property list identifier.
 !! \param crt_order_flags Flags specifying whether to track and index attribute creation order.
-!! \param hdferr          \herr_t.
+!! \param hdferr          \fortran_error
 !!
   SUBROUTINE h5pset_attr_creation_order_f(ocpl_id, crt_order_flags , hdferr)
     IMPLICIT NONE
@@ -2945,13 +2887,13 @@ CONTAINS
   END SUBROUTINE h5pset_attr_creation_order_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets number of shared object header message indexes
 !!
 !! \param plist_id File creation property list.
 !! \param nindexes Number of shared object header message indexes to be available in files created with this property list.
-!! \param hdferr   \herr_t.
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5pset_shared_mesg_nindexes_f( plist_id, nindexes, hdferr)
     IMPLICIT NONE
@@ -2976,7 +2918,7 @@ CONTAINS
   END SUBROUTINE h5pset_shared_mesg_nindexes_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Configures the specified shared object header message index
 !!
@@ -2984,7 +2926,7 @@ CONTAINS
 !! \param index_num       Index being configured.
 !! \param mesg_type_flags Types of messages that should be stored in this index.
 !! \param min_mesg_size   Minimum message size.
-!! \param hdferr          \herr_t.
+!! \param hdferr          \fortran_error
 !!
   SUBROUTINE h5pset_shared_mesg_index_f(fcpl_id, index_num, mesg_type_flags, min_mesg_size, hdferr)
     IMPLICIT NONE
@@ -3012,13 +2954,13 @@ CONTAINS
   END SUBROUTINE h5pset_shared_mesg_index_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Retrieves tracking and indexing settings for attribute creation order
 !!
 !! \param ocpl_id         Object (group or dataset) creation property list identifier.
 !! \param crt_order_flags Flags specifying whether to track and index attribute creation order.
-!! \param hdferr          \herr_t.
+!! \param hdferr          \fortran_error
 !!
   SUBROUTINE h5pget_attr_creation_order_f(ocpl_id, crt_order_flags, hdferr)
     IMPLICIT NONE
@@ -3042,7 +2984,7 @@ CONTAINS
   END SUBROUTINE h5pget_attr_creation_order_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Retrieves the lower and upper bounds on the HDF5 library release versions that indirectly
 !!        determine the object format versions used when creating objects in the file.
@@ -3050,7 +2992,7 @@ CONTAINS
 !! \param fapl_id File access property list identifier.
 !! \param low     The earliest version of the library that will be used for writing objects.
 !! \param high    The latest version of the library that will be used for writing objects.
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !!
 !! Fortran Interface:
   SUBROUTINE h5pget_libver_bounds_f(fapl_id, low, high, hdferr)
@@ -3086,14 +3028,14 @@ CONTAINS
   END SUBROUTINE h5pget_libver_bounds_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets bounds on library versions, and indirectly format versions, to be used when creating objects.
 !!
 !! \param fapl_id File access property list identifier.
 !! \param low     The earliest version of the library that will be used for writing objects.
 !! \param high    The latest version of the library that will be used for writing objects.
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5pset_libver_bounds_f(fapl_id, low, high, hdferr)
     IMPLICIT NONE
@@ -3124,13 +3066,13 @@ CONTAINS
   END SUBROUTINE h5pset_libver_bounds_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets creation order tracking and indexing for links in a group.
 !!
 !! \param gcpl_id         Group creation property list identifier.
 !! \param crt_order_flags Creation order flag(s).
-!! \param hdferr          \herr_t.
+!! \param hdferr          \fortran_error
 !!
   SUBROUTINE h5pset_link_creation_order_f(gcpl_id, crt_order_flags, hdferr)
     IMPLICIT NONE
@@ -3153,14 +3095,14 @@ CONTAINS
   END SUBROUTINE h5pset_link_creation_order_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Queries the settings for conversion between compact and dense groups.
 !!
 !! \param gcpl_id     Group creation property list identifier.
 !! \param max_compact Maximum number of attributes to be stored in compact storage.
 !! \param min_dense   Minimum number of attributes to be stored in dense storage.
-!! \param hdferr      \herr_t
+!! \param hdferr      \fortran_error
 !!
   SUBROUTINE h5pget_link_phase_change_f(gcpl_id, max_compact, min_dense, hdferr)
     IMPLICIT NONE
@@ -3184,13 +3126,13 @@ CONTAINS
   END SUBROUTINE h5pget_link_phase_change_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Returns whether times are tracked for an object.
 !!
 !! \param plist_id Property list id.
 !! \param flag     Object timestamp setting, .TRUE. or .FALSE.
-!! \param hdferr   \herr_t
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5pget_obj_track_times_f(plist_id, flag, hdferr)
     IMPLICIT NONE
@@ -3216,13 +3158,13 @@ CONTAINS
   END SUBROUTINE h5pget_obj_track_times_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Set whether the birth, access, modification & change times for an object are stored.
 !!
 !! \param plist_id Property list id.
 !! \param flag     Object timestamp setting, .TRUE. or .FALSE.
-!! \param hdferr   \herr_t.
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5pset_obj_track_times_f(plist_id, flag, hdferr)
     IMPLICIT NONE
@@ -3251,13 +3193,13 @@ CONTAINS
   END SUBROUTINE h5pset_obj_track_times_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Specifies in property list whether to create missing intermediate groups.
 !!
 !! \param lcpl_id            Link creation property list identifier.
 !! \param crt_intermed_group Specifies whether to create intermediate groups upon the creation of an object.
-!! \param hdferr             \herr_t.
+!! \param hdferr             \fortran_error
 !!
   SUBROUTINE h5pset_create_inter_group_f(lcpl_id, crt_intermed_group, hdferr)
     IMPLICIT NONE
@@ -3279,13 +3221,13 @@ CONTAINS
   END SUBROUTINE h5pset_create_inter_group_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Queries whether link creation order is tracked and/or indexed in a group.
 !!
 !! \param gcpl_id         Group creation property list identifier.
 !! \param crt_order_flags Creation order flag(s).
-!! \param hdferr          \herr_t.
+!! \param hdferr          \fortran_error
 !!
   SUBROUTINE h5pget_link_creation_order_f(gcpl_id, crt_order_flags, hdferr)
     IMPLICIT NONE
@@ -3308,17 +3250,15 @@ CONTAINS
   END SUBROUTINE h5pget_link_creation_order_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets the character encoding used to encode a string.
 !!
 !! \param plist_id Property list identifier.
 !! \param encoding Valid values for encoding are:
-!! <pre>
-!!                  H5T_CSET_ASCII_F -> US ASCII
-!!                  H5T_CSET_UTF8_F -> UTF-8 Unicode encoding
-!! </pre>
-!! \param hdferr   \herr_t.
+!!                 \li H5T_CSET_ASCII_F -> US ASCII
+!!                 \li H5T_CSET_UTF8_F -> UTF-8 Unicode encoding
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5pset_char_encoding_f(plist_id, encoding, hdferr)
     IMPLICIT NONE
@@ -3341,17 +3281,15 @@ CONTAINS
   END SUBROUTINE h5pset_char_encoding_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Retrieves the character encoding used to create a string
 !!
 !! \param plist_id Property list identifier.
 !! \param encoding Valid values for encoding are:
-!! <pre>
-!!                  H5T_CSET_ASCII_F -> US ASCII
-!!                  H5T_CSET_UTF8_F -> UTF-8 Unicode encoding
-!! </pre>
-!! \param hdferr   \herr_t.
+!!                 \li H5T_CSET_ASCII_F -> US ASCII
+!!                 \li H5T_CSET_UTF8_F -> UTF-8 Unicode encoding
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE  h5pget_char_encoding_f(plist_id, encoding, hdferr)
     IMPLICIT NONE
@@ -3375,13 +3313,13 @@ CONTAINS
   END SUBROUTINE h5pget_char_encoding_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets properties to be used when an object is copied.
 !!
 !! \param ocp_plist_id Object copy property list identifier.
 !! \param copy_options Copy option(s) to be set.
-!! \param hdferr       \herr_t.
+!! \param hdferr       \fortran_error
 !!
   SUBROUTINE h5pset_copy_object_f(ocp_plist_id, copy_options, hdferr)
     IMPLICIT NONE
@@ -3403,13 +3341,13 @@ CONTAINS
   END SUBROUTINE h5pset_copy_object_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Retrieves the properties to be used when an object is copied.
 !!
 !! \param ocp_plist_id Object copy property list identifier.
 !! \param copy_options Copy option(s) to be get.
-!! \param hdferr       \herr_t
+!! \param hdferr       \fortran_error
 !!
   SUBROUTINE h5pget_copy_object_f(ocp_plist_id, copy_options, hdferr)
     IMPLICIT NONE
@@ -3431,7 +3369,7 @@ CONTAINS
   END SUBROUTINE h5pget_copy_object_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Retrieves a data transform expression.
 !!
@@ -3441,7 +3379,7 @@ CONTAINS
 !!                     Success:  Actual length of the expression. If provided buffer "expression" is
 !!                               smaller, than expression will be truncated to fit into provided user buffer.
 !!                     Failure: -1
-!! \param size       Registered size of the transform expression 
+!! \param size       Registered size of the transform expression.
 !!
 SUBROUTINE h5pget_data_transform_f(plist_id, expression, hdferr, size)
     IMPLICIT NONE
@@ -3475,13 +3413,13 @@ SUBROUTINE h5pget_data_transform_f(plist_id, expression, hdferr, size)
   END SUBROUTINE h5pget_data_transform_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets a data transform expression.
 !!
 !! \param plist_id   Identifier of the property list or class.
 !! \param expression Buffer to hold transform expression.
-!! \param hdferr     \herr_t.
+!! \param hdferr     \fortran_error
 !!
   SUBROUTINE h5pset_data_transform_f(plist_id, expression, hdferr)
     IMPLICIT NONE
@@ -3508,13 +3446,13 @@ SUBROUTINE h5pget_data_transform_f(plist_id, expression, hdferr, size)
   END SUBROUTINE h5pset_data_transform_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Queries the local heap size hint for original-style groups.
 !!
 !! \param gcpl_id   Group creation property list identifier.
 !! \param size_hint Hint for size of local heap.
-!! \param hdferr    \herr_t.
+!! \param hdferr    \fortran_error
 !!
   SUBROUTINE h5pget_local_heap_size_hint_f(gcpl_id, size_hint, hdferr)
     IMPLICIT NONE
@@ -3536,14 +3474,14 @@ SUBROUTINE h5pget_data_transform_f(plist_id, expression, hdferr, size)
   END SUBROUTINE h5pget_local_heap_size_hint_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Queries data required to estimate required local heap or object header size.
 !!
 !! \param gcpl_id         Group creation property list identifier.
 !! \param est_num_entries Estimated number of links to be inserted into group.
 !! \param est_name_len    Estimated average length of link names.
-!! \param hdferr          \herr_t.
+!! \param hdferr          \fortran_error
 !!
   SUBROUTINE h5pget_est_link_info_f(gcpl_id, est_num_entries, est_name_len, hdferr)
     IMPLICIT NONE
@@ -3567,13 +3505,13 @@ SUBROUTINE h5pget_data_transform_f(plist_id, expression, hdferr, size)
   END SUBROUTINE h5pget_est_link_info_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets the local heap size hint for original-style groups.
 !!
 !! \param gcpl_id   Group creation property list identifier.
 !! \param size_hint Hint for size of local heap.
-!! \param hdferr    \herr_t.
+!! \param hdferr    \fortran_error
 !!
   SUBROUTINE h5pset_local_heap_size_hint_f(gcpl_id, size_hint, hdferr)
     IMPLICIT NONE
@@ -3595,14 +3533,14 @@ SUBROUTINE h5pget_data_transform_f(plist_id, expression, hdferr, size)
   END SUBROUTINE h5pset_local_heap_size_hint_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets estimated number of links and length of link names in a group.
 !!
 !! \param gcpl_id         Group creation property list identifier.
 !! \param est_num_entries Estimated number of links to be inserted into group.
 !! \param est_name_len    Estimated average length of link names.
-!! \param hdferr          \herr_t.
+!! \param hdferr          \fortran_error
 !!
   SUBROUTINE h5pset_est_link_info_f(gcpl_id, est_num_entries, est_name_len, hdferr)
     IMPLICIT NONE
@@ -3626,14 +3564,14 @@ SUBROUTINE h5pget_data_transform_f(plist_id, expression, hdferr, size)
   END SUBROUTINE h5pset_est_link_info_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets the parameters for conversion between compact and dense groups.
 !!
 !! \param gcpl_id     Group creation property list identifier.
 !! \param max_compact Maximum number of attributes to be stored in compact storage.
 !! \param min_dense   Minimum number of attributes to be stored in dense storage.
-!! \param hdferr      \herr_t.
+!! \param hdferr      \fortran_error
 !!
 SUBROUTINE h5pset_link_phase_change_f(gcpl_id, max_compact, min_dense, hdferr)
     IMPLICIT NONE
@@ -3656,7 +3594,7 @@ SUBROUTINE h5pset_link_phase_change_f(gcpl_id, max_compact, min_dense, hdferr)
   END SUBROUTINE h5pset_link_phase_change_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets up use of the direct I/O driver.
 !!
@@ -3664,7 +3602,7 @@ SUBROUTINE h5pset_link_phase_change_f(gcpl_id, max_compact, min_dense, hdferr)
 !! \param alignment  Required memory alignment boundary.
 !! \param block_size File system block size.
 !! \param cbuf_size  Copy buffer size.
-!! \param hdferr     \herr_t.
+!! \param hdferr     \fortran_error
 !!
 SUBROUTINE h5pset_fapl_direct_f(fapl_id, alignment, block_size, cbuf_size, hdferr)
     IMPLICIT NONE
@@ -3689,7 +3627,7 @@ SUBROUTINE h5pset_fapl_direct_f(fapl_id, alignment, block_size, cbuf_size, hdfer
   END SUBROUTINE h5pset_fapl_direct_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Gets up use of the direct I/O driver.
 !!
@@ -3697,7 +3635,7 @@ SUBROUTINE h5pset_fapl_direct_f(fapl_id, alignment, block_size, cbuf_size, hdfer
 !! \param alignment  Required memory alignment boundary.
 !! \param block_size File system block size.
 !! \param cbuf_size  Copy buffer size.
-!! \param hdferr     \herr_t.
+!! \param hdferr     \fortran_error
 !!
   SUBROUTINE h5pget_fapl_direct_f(fapl_id, alignment, block_size, cbuf_size, hdferr)
     IMPLICIT NONE
@@ -3723,14 +3661,14 @@ SUBROUTINE h5pset_fapl_direct_f(fapl_id, alignment, block_size, cbuf_size, hdfer
   END SUBROUTINE h5pget_fapl_direct_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets attribute storage phase change thresholds.
 !!
 !! \param ocpl_id     Object (dataset or group) creation property list identifier.
 !! \param max_compact Maximum number of attributes to be stored in compact storage, (Default: 8).
 !! \param min_dense   Minimum number of attributes to be stored in dense storage, (Default: 6).
-!! \param hdferr      \herr_t.
+!! \param hdferr      \fortran_error
 !!
 SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     IMPLICIT NONE
@@ -3755,12 +3693,12 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
   END SUBROUTINE h5pset_attr_phase_change_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets up the use of the N-Bit filter.
 !!
 !! \param plist_id Dataset creation property list identifier.
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5pset_nbit_f(plist_id, hdferr)
     IMPLICIT NONE
@@ -3780,19 +3718,17 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
   END SUBROUTINE h5pset_nbit_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets up the use of the scale-offset filter.
 !!
 !! \param plist_id     Dataset creation property list identifier.
 !! \param scale_type   Flag indicating compression method. Valid values:
-!! <pre>
-!!                      H5Z_SO_FLOAT_DSCALE_F
-!!                      H5Z_SO_FLOAT_ESCALE_F
-!!                      H5Z_SO_INT_F
-!! </pre>
+!!                     \li H5Z_SO_FLOAT_DSCALE_F
+!!                     \li H5Z_SO_FLOAT_ESCALE_F
+!!                     \li H5Z_SO_INT_F
 !! \param scale_factor Parameter related to scale.
-!! \param hdferr       \herr_t.
+!! \param hdferr       \fortran_error
 !!
   SUBROUTINE h5pset_scaleoffset_f(plist_id, scale_type, scale_factor, hdferr)
     IMPLICIT NONE
@@ -3817,13 +3753,13 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
   END SUBROUTINE h5pset_scaleoffset_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets maximum number of soft or user-defined link traversals.
 !!
 !! \param lapl_id File access property list identifier.
 !! \param nlinks  Maximum number of links to traverse.
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5pset_nlinks_f(lapl_id, nlinks, hdferr)
     IMPLICIT NONE
@@ -3845,13 +3781,13 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
   END SUBROUTINE h5pset_nlinks_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Gets maximum number of soft or user-defined link traversals.
 !!
 !! \param lapl_id File access property list identifier.
 !! \param nlinks  Maximum number of links to traverse.
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5pget_nlinks_f(lapl_id, nlinks, hdferr)
     IMPLICIT NONE
@@ -3873,13 +3809,13 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
   END SUBROUTINE h5pget_nlinks_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Determines whether property is set to enable creating missing intermediate groups.
 !!
 !! \param lcpl_id            Link creation property list identifier.
 !! \param crt_intermed_group Specifying whether to create intermediate groups upon the creation of an object.
-!! \param hdferr             \herr_t.
+!! \param hdferr             \fortran_error
 !!
   SUBROUTINE h5pget_create_inter_group_f(lcpl_id, crt_intermed_group, hdferr)
     IMPLICIT NONE
@@ -3901,7 +3837,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
   END SUBROUTINE h5pget_create_inter_group_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Set the number of objects in the meta data cache and the maximum number of chunks and bytes in the raw data chunk cache.
 !!  Once set, these values will override the values in the file access
@@ -3924,7 +3860,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !! \param rdcc_nslots The number of chunk slots in the raw data chunk cache for this dataset.
 !! \param rdcc_nbytes The total size of the raw data chunk cache for this dataset.
 !! \param rdcc_w0     The chunk preemption policy for this dataset.
-!! \param hdferr      \herr_t.
+!! \param hdferr      \fortran_error
 !!
   SUBROUTINE h5pset_chunk_cache_f(dapl_id, rdcc_nslots, rdcc_nbytes, rdcc_w0, hdferr)
     IMPLICIT NONE
@@ -3951,7 +3887,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
   END SUBROUTINE h5pset_chunk_cache_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Retrieves the raw data chunk cache parameters.
 !!
@@ -3959,7 +3895,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !! \param rdcc_nslots Number of chunk slots in the raw data chunk cache hash table.
 !! \param rdcc_nbytes Total size of the raw data chunk cache, in bytes.
 !! \param rdcc_w0     Preemption policy.
-!! \param hdferr      \herr_t.
+!! \param hdferr      \fortran_error
 !!
   SUBROUTINE h5pget_chunk_cache_f(dapl_id, rdcc_nslots, rdcc_nbytes, rdcc_w0, hdferr)
     IMPLICIT NONE
@@ -3986,103 +3922,92 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 
 #ifdef H5_DOXYGEN_FORTRAN
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets fill value for a dataset creation property list
+!!
+!! \note  \fortran_approved
 !!
 !! \param prp_id    Property list identifier.
 !! \param type_id   Datatype identifier of fill value datatype (in memory).
 !! \param fillvalue Fillvalue.
-!! \param hdferr    \herr_t.
+!! \param hdferr    \fortran_error
 !!
   SUBROUTINE h5pset_fill_value_f(prp_id, type_id, fillvalue, hdferr)
-    INTEGER(HID_T), INTENT(IN)  :: prp_id 
+    INTEGER(HID_T), INTENT(IN)  :: prp_id
     INTEGER(HID_T), INTENT(IN)  :: type_id
     TYPE(C_PTR)   , INTENT(IN)  :: fillvalue
     INTEGER       , INTENT(OUT) :: hdferr
   END SUBROUTINE h5pset_fill_value_f
 
 !>
-!! \ingroup H5P
-!!
-!! \brief Sets fill value for a dataset creation property list
-!!
-!! \param prp_id    Property list identifier.
-!! \param type_id   Datatype identifier of fill value datatype (in memory).
-!! \param fillvalue Fillvalue.
-!! \param hdferr    \herr_t.
-!!
-  SUBROUTINE h5pset_fill_value_f___F90_VERSION(prp_id, type_id, fillvalue, hdferr)
-    INTEGER(HID_T), INTENT(IN)  :: prp_id 
-    INTEGER(HID_T), INTENT(IN)  :: type_id
-    TYPE(TYPE)    , INTENT(IN)  :: fillvalue
-    INTEGER       , INTENT(OUT) :: hdferr
-  END SUBROUTINE h5pset_fill_value_f___F90_VERSION
-!>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Gets fill value for a dataset creation property list
 !!
+!! \note  \fortran_approved
+!!
 !! \param prp_id    Property list identifier.
 !! \param type_id   Datatype identifier of fill value datatype (in memory).
 !! \param fillvalue Fillvalue.
-!! \param hdferr    \herr_t.
+!! \param hdferr    \fortran_error
 !!
   SUBROUTINE h5pget_fill_value_f(prp_id, type_id, fillvalue, hdferr)
-    INTEGER(HID_T), INTENT(IN)  :: prp_id 
+    INTEGER(HID_T), INTENT(IN)  :: prp_id
     INTEGER(HID_T), INTENT(IN)  :: type_id
     TYPE(C_PTR)   , INTENT(IN)  :: fillvalue
     INTEGER       , INTENT(OUT) :: hdferr
   END SUBROUTINE h5pget_fill_value_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
-!! \brief Gets fill value for a dataset creation property list.
+!! \brief Sets fill value for a dataset creation property list
+!!
+!! \note  \fortran_obsolete
 !!
 !! \param prp_id    Property list identifier.
 !! \param type_id   Datatype identifier of fill value datatype (in memory).
 !! \param fillvalue Fillvalue.
-!! \param hdferr    \herr_t.
+!! \param hdferr    \fortran_error
 !!
-  SUBROUTINE h5pget_fill_value_f___F90_VERSION(prp_id, type_id, fillvalue, hdferr)
-    INTEGER(HID_T), INTENT(IN)  :: prp_id 
+  SUBROUTINE h5pset_fill_value_f(prp_id, type_id, fillvalue, hdferr)
+    INTEGER(HID_T), INTENT(IN)  :: prp_id
+    INTEGER(HID_T), INTENT(IN)  :: type_id
+    TYPE(TYPE)    , INTENT(IN)  :: fillvalue
+    INTEGER       , INTENT(OUT) :: hdferr
+  END SUBROUTINE h5pset_fill_value_f
+
+!>
+!! \ingroup FH5P
+!!
+!! \brief Gets fill value for a dataset creation property list.
+!!
+!! \note  \fortran_obsolete
+!!
+!! \param prp_id    Property list identifier.
+!! \param type_id   Datatype identifier of fill value datatype (in memory).
+!! \param fillvalue Fillvalue.
+!! \param hdferr    \fortran_error
+!!
+  SUBROUTINE h5pget_fill_value_f(prp_id, type_id, fillvalue, hdferr)
+    INTEGER(HID_T), INTENT(IN)  :: prp_id
     INTEGER(HID_T), INTENT(IN)  :: type_id
     TYPE(TYPE)    , INTENT(OUT) :: fillvalue
     INTEGER       , INTENT(OUT) :: hdferr
-  END SUBROUTINE h5pget_fill_value_f___F90_VERSION
+  END SUBROUTINE h5pget_fill_value_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets a property list value.
 !!
-!! \param prp_id Property list identifier to modify.
-!! \param name   Name of property to modify.
-!! \param value  Property value, supported types are:
-!! <pre>
-!!                  INTEGER
-!!                  REAL
-!!                  DOUBLE PRECISION
-!!                  CHARACTER(LEN=*)
-!! </pre>
-!! \param hdferr \herr_t.
-!!
-  SUBROUTINE h5pset_f___F90_VERSION(prp_id, name, value, hdferr)
-    INTEGER(HID_T)  , INTENT(IN)  :: prp_id
-    CHARACTER(LEN=*), INTENT(IN)  :: name
-    INTEGER         , INTENT(IN)  :: value
-    INTEGER         , INTENT(OUT) :: hdferr
-  END SUBROUTINE h5pset_f___F90_VERSION
-!>
-!! \ingroup H5P
-!!
-!! \brief Sets a property list value.
+!! \note  \fortran_approved
 !!
 !! \param prp_id Property list identifier to modify.
 !! \param name   Name of property to modify.
 !! \param value  Pointer to value to set the property to.
-!! \param hdferr \herr_t.
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5pset_f(prp_id, name, value, hdferr)
     INTEGER(HID_T)  , INTENT(IN)  :: prp_id
@@ -4090,37 +4015,63 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     TYPE(C_PTR)     , INTENT(IN)  :: value
     INTEGER         , INTENT(OUT) :: hdferr
   END SUBROUTINE h5pset_f
+
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets a property list value.
+!!
+!! \note  \fortran_obsolete
 !!
 !! \param prp_id Property list identifier to modify.
 !! \param name   Name of property to modify.
 !! \param value  Property value, supported types are:
-!! <pre>
-!!                  INTEGER
-!!                  REAL
-!!                  DOUBLE PRECISION
-!!                  CHARACTER(LEN=*)
-!! </pre>
-!! \param hdferr \herr_t.
+!!               \li INTEGER
+!!               \li REAL
+!!               \li DOUBLE PRECISION
+!!               \li CHARACTER(LEN=*)
+!! \param hdferr \fortran_error
 !!
-  SUBROUTINE h5pset_f___F90_VERSION(prp_id, name, value, hdferr)
+  SUBROUTINE h5pset_f(prp_id, name, value, hdferr)
+    INTEGER(HID_T)  , INTENT(IN)  :: prp_id
+    CHARACTER(LEN=*), INTENT(IN)  :: name
+    INTEGER         , INTENT(IN)  :: value
+    INTEGER         , INTENT(OUT) :: hdferr
+  END SUBROUTINE h5pset
+
+!>
+!! \ingroup FH5P
+!!
+!! \brief Sets a property list value.
+!!
+!! \note  \fortran_obsolete
+!!
+!! \param prp_id Property list identifier to modify.
+!! \param name   Name of property to modify.
+!! \param value  Property value, supported types are:
+!!               \li INTEGER
+!!               \li REAL
+!!               \li DOUBLE PRECISION
+!!               \li CHARACTER(LEN=*)
+!! \param hdferr \fortran_error
+!!
+  SUBROUTINE h5pset_f(prp_id, name, value, hdferr)
     INTEGER(HID_T), INTENT(IN) :: prp_id
     CHARACTER(LEN=*), INTENT(IN) :: name
     INTEGER,   INTENT(IN) :: value
     INTEGER, INTENT(OUT) :: hdferr
-  END SUBROUTINE h5pset_f___F90_VERSION
+  END SUBROUTINE h5pset_f
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Queries the value of a property.
+!!
+!! \note  \fortran_approved
 !!
 !! \param prp_id Property list identifier to modify.
 !! \param name   Name of property to get.
 !! \param value  Pointer to a location to which to copy the value of of the property.
-!! \param hdferr \herr_t.
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5pget_f(prp_id, name, value, hdferr)
     INTEGER(HID_T)  , INTENT(IN)  :: prp_id
@@ -4130,37 +4081,39 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
   END SUBROUTINE h5pget_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Queries the value of a property.
+!!
+!! \note  \fortran_obsolete
 !!
 !! \param prp_id Property list identifier to modify.
 !! \param name   Name of property to get.
 !! \param value  Property value, supported types are:
-!! <pre>
-!!                INTEGER
-!!                REAL
-!!                DOUBLE PRECISION
-!!                CHARACTER(LEN=*)
-!! </pre>
-!! \param hdferr \herr_t.
+!!               \li INTEGER
+!!               \li REAL
+!!               \li DOUBLE PRECISION
+!!               \li CHARACTER(LEN=*)
+!! \param hdferr \fortran_error
 !!
-  SUBROUTINE h5pget_f___F90_VERSION(prp_id, name, value, hdferr)
+  SUBROUTINE h5pget_f(prp_id, name, value, hdferr)
     INTEGER(HID_T)  , INTENT(IN)  :: prp_id
     CHARACTER(LEN=*), INTENT(IN)  :: name
     INTEGER         , INTENT(OUT) :: value
     INTEGER         , INTENT(OUT) :: hdferr
-  END SUBROUTINE h5pget_f___F90_VERSION
+  END SUBROUTINE h5pget_f
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Registers a permanent property with a property list class.
+!!
+!! \note  \fortran_approved
 !!
 !! \param class Property list class identifier.
 !! \param name  Name of property to register.
 !! \param size  Size of the property value.
 !! \param value Pointer to value to set the property to.
-!! \param hdferr \herr_t.
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5pregister_f(class, name, size, value, hdferr)
     INTEGER(HID_T)  , INTENT(IN)  :: class
@@ -4170,40 +4123,42 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     INTEGER         , INTENT(OUT) :: hdferr
   END SUBROUTINE h5pregister_f
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Registers a permanent property with a property list class.
+!!
+!! \note  \fortran_obsolete
 !!
 !! \param class Property list class identifier.
 !! \param name  Name of property to register.
 !! \param size  Size of the property value.
 !! \param value Property value, supported types are:
-!! <pre>
-!!                  INTEGER
-!!                  REAL
-!!                  DOUBLE PRECISION
-!!                  CHARACTER(LEN=*)
-!! </pre>
-!! \param hdferr \herr_t.
+!!              \li INTEGER
+!!              \li REAL
+!!              \li DOUBLE PRECISION
+!!              \li CHARACTER(LEN=*)
+!! \param hdferr \fortran_error
 !!
-  SUBROUTINE h5pregister_integer(class, name, size, value, hdferr)
+  SUBROUTINE h5pregister_f(class, name, size, value, hdferr)
     INTEGER(HID_T)  , INTENT(IN)  :: class
     CHARACTER(LEN=*), INTENT(IN)  :: name
     INTEGER(SIZE_T) , INTENT(IN)  :: size
-    INTEGER         , INTENT(IN)  :: value
+    TYPE(TYPE)      , INTENT(IN)  :: value
     INTEGER         , INTENT(OUT) :: hdferr
-  END SUBROUTINE h5pregister_integer
+  END SUBROUTINE h5pregister_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Registers a temporary property with a property list class.
+!!
+!! \note  \fortran_approved
 !!
 !! \param plist  Property list class identifier.
 !! \param name   Name of property to insert.
 !! \param size   Size of the property value.
 !! \param value  Pointer to new value pointer for the property being modified.
-!! \param hdferr \herr_t.
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5pinsert_f(plist, name, size, value, hdferr)
     INTEGER(HID_T)  , INTENT(IN)  :: plist
@@ -4214,30 +4169,30 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
   END SUBROUTINE h5pinsert_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Registers a temporary property with a property list class.
+!!
+!! \note  \fortran_obsolete
 !!
 !! \param plist  Property list class identifier.
 !! \param name   Name of property to insert.
 !! \param size   Size of the property value.
 !! \param value  Property value, supported types are:
-!! <pre>
-!!                  INTEGER
-!!                  REAL
-!!                  DOUBLE PRECISION
-!!                  CHARACTER(LEN=*)
-!! </pre>
-!! \param hdferr \herr_t.
+!!               \li INTEGER
+!!               \li REAL
+!!               \li DOUBLE PRECISION
+!!               \li CHARACTER(LEN=*)
+!! \param hdferr \fortran_error
 !!
-  SUBROUTINE h5pinsert_f___F90_VERSION(plist, name, size, value, hdferr)
+  SUBROUTINE h5pinsert_f(plist, name, size, value, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T)  , INTENT(IN)  :: plist
     CHARACTER(LEN=*), INTENT(IN)  :: name
     INTEGER(SIZE_T) , INTENT(IN)  :: size
-    INTEGER         , INTENT(IN)  :: value
+    TYPE(TYPE)      , INTENT(IN)  :: value
     INTEGER         , INTENT(OUT) :: hdferr
-  END SUBROUTINE h5pinsert_f___F90_VERSION
+  END SUBROUTINE h5pinsert_f
 
 #else
 
@@ -4389,20 +4344,18 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 
   END SUBROUTINE h5pset_char
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Queries the value of a property.
 !!
 !! \param prp_id Property list identifier to modify.
 !! \param name   Name of property to get.
 !! \param value  Property value, supported types are:
-!! <pre>
-!!                INTEGER
-!!                REAL
-!!                DOUBLE PRECISION
-!!                CHARACTER(LEN=*)
-!! </pre>
-!! \param hdferr \herr_t.
+!!               \li INTEGER
+!!               \li REAL
+!!               \li DOUBLE PRECISION
+!!               \li CHARACTER(LEN=*)
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5pget_integer(prp_id, name, value, hdferr)
     IMPLICIT NONE
@@ -4453,14 +4406,14 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
   END SUBROUTINE h5pget_char
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets a property list value
 !!
 !! \param prp_id Property list identifier to modify.
 !! \param name   Name of property to modify.
 !! \param value  Pointer to value to set the property to.
-!! \param hdferr \herr_t.
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5pset_ptr(prp_id, name, value, hdferr)
     IMPLICIT NONE
@@ -4475,14 +4428,14 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 
   END SUBROUTINE h5pset_ptr
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Queries the value of a property.
 !!
 !! \param prp_id Property list identifier to modify.
 !! \param name   Name of property to get.
 !! \param value  Pointer to a location to which to copy the value of of the property.
-!! \param hdferr \herr_t.
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5pget_ptr(prp_id, name, value, hdferr)
     IMPLICIT NONE
@@ -4631,22 +4584,20 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 #endif
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Create a new property list class
 !!
 !! \param parent     Parent property list class identifier. Possible values include:
-!! <pre>
-!!                    H5P_ROOT_F
-!!                    H5P_FILE_CREATE_F
-!!                    H5P_FILE_ACCESS_F
-!!                    H5P_DATASET_CREATE_F
-!!                    H5P_DATASET_XFER_F
-!!                    H5P_FILE_MOUNT_F
-!! </pre>
+!!                   \li H5P_ROOT_F
+!!                   \li H5P_FILE_CREATE_F
+!!                   \li H5P_FILE_ACCESS_F
+!!                   \li H5P_DATASET_CREATE_F
+!!                   \li H5P_DATASET_XFER_F
+!!                   \li H5P_FILE_MOUNT_F
 !! \param name        Name of property to create.
 !! \param class       Property list class identifier.
-!! \param hdferr      \herr_t.
+!! \param hdferr      \fortran_error
 !! \param create      (H5P_cls_create_func_t) - Callback routine called when a property list is created.
 !! \param create_data User pointer to any class creation information needed.
 !! \param copy        (H5P_cls_copy_func_t)   - Callback routine called when a property list is copied.
@@ -4704,14 +4655,14 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
   END SUBROUTINE h5pcreate_class_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets an initial file image in a memory buffer.
 !!
 !! \param fapl_id File access property list identifier.
 !! \param buf_ptr Pointer to the initial file image, or C_NULL_PTR if no initial file image is desired.
 !! \param buf_len Size of the supplied buffer, or 0 (zero) if no initial image is desired.
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5pset_file_image_f(fapl_id, buf_ptr, buf_len, hdferr)
     IMPLICIT NONE
@@ -4734,22 +4685,18 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 
   END SUBROUTINE h5pset_file_image_f
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Retrieves a copy of the file image designated as the initial content and structure of a file.
 !!
 !! \param fapl_id     File access property list identifier.
-!! \param buf_ptr     Will hold either a C_NULL_PTR or a scalar of type
-!!                    c_loc. If buf_ptr is not C_NULL_PTR, on successful
-!!                    return, buf_ptr shall contain a C pointer to a copy
-!!                    of the initial image provided in the last call to
-!!                    H5Pset_file_image_f for the supplied fapl_id, or
-!!                    buf_ptr shall contain a C_NULL_PTR if there is no
+!! \param buf_ptr     Will hold either a C_NULL_PTR or a scalar of type c_loc. If buf_ptr is not C_NULL_PTR, on successful
+!!                    return, buf_ptr shall contain a C pointer to a copy of the initial image provided in the last call to
+!!                    H5Pset_file_image_f for the supplied fapl_id, or buf_ptr shall contain a C_NULL_PTR if there is no
 !!                    initial image set.
-!! \param buf_len_ptr Contains the value of the buffer parameter for
-!!                    the initial image in the supplied fapl_id. The value
+!! \param buf_len_ptr Contains the value of the buffer parameter for the initial image in the supplied fapl_id. The value
 !!                    will be 0 if no initial image is set.
-!! \param hdferr      \herr_t
+!! \param hdferr      \fortran_error
 !!
   SUBROUTINE h5pget_file_image_f(fapl_id, buf_ptr, buf_len_ptr, hdferr)
     IMPLICIT NONE
@@ -4779,14 +4726,14 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 
 #ifdef H5_HAVE_PARALLEL
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Stores MPI IO communicator information to the file access property list.
 !!
 !! \param prp_id File access property list identifier.
 !! \param comm   MPI-2 communicator.
 !! \param info   MPI-2 info object.
-!! \param hdferr \herr_t.
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5pset_fapl_mpio_f(prp_id, comm, info, hdferr)
     IMPLICIT NONE
@@ -4810,14 +4757,14 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
   END SUBROUTINE h5pset_fapl_mpio_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Returns MPI communicator information.
 !!
 !! \param prp_id File access property list identifier.
 !! \param comm   MPI-2 communicator.
 !! \param info   MPI-2 info object.
-!! \param hdferr \herr_t.
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5pget_fapl_mpio_f(prp_id, comm, info, hdferr)
     IMPLICIT NONE
@@ -4841,17 +4788,15 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
   END SUBROUTINE h5pget_fapl_mpio_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets data transfer mode.
 !!
 !! \param prp_id         Data transfer property list identifier.
 !! \param data_xfer_mode Transfer mode; possible values are:
-!! <pre>
-!!                        H5FD_MPIO_INDEPENDENT_F
-!!                        H5FD_MPIO_COLLECTIVE_F
-!! </pre>
-!! \param hdferr         \herr_t.
+!!                       \li H5FD_MPIO_INDEPENDENT_F
+!!                       \li H5FD_MPIO_COLLECTIVE_F
+!! \param hdferr         \fortran_error
 !!
   SUBROUTINE h5pset_dxpl_mpio_f(prp_id, data_xfer_mode, hdferr)
     IMPLICIT NONE
@@ -4872,17 +4817,15 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
   END SUBROUTINE h5pset_dxpl_mpio_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Returns the data transfer mode.
 !!
 !! \param prp_id         Data transfer property list identifier.
 !! \param data_xfer_mode Transfer mode; possible values are:
-!! <pre>
-!!                        H5FD_MPIO_INDEPENDENT_F
-!!                        H5FD_MPIO_COLLECTIVE_F
-!! </pre>
-!! \param hdferr         \herr_t.
+!!                       \li H5FD_MPIO_INDEPENDENT_F
+!!                       \li H5FD_MPIO_COLLECTIVE_F
+!! \param hdferr         \fortran_error
 !!
   SUBROUTINE h5pget_dxpl_mpio_f(prp_id, data_xfer_mode, hdferr)
     IMPLICIT NONE
@@ -4903,14 +4846,14 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
   END SUBROUTINE h5pget_dxpl_mpio_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Retrieves the type of I/O that HDF5 actually performed on the last
 !!       parallel I/O call. This is not necessarily the type of I/O requested.
 !!
 !! \param dxpl_id        Dataset transfer property list identifier.
 !! \param actual_io_mode The type of I/O performed by this process.
-!! \param hdferr         \herr_t.
+!! \param hdferr         \fortran_error
 !!
   SUBROUTINE h5pget_mpio_actual_io_mode_f(dxpl_id, actual_io_mode, hdferr)
     IMPLICIT NONE
@@ -4934,7 +4877,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
   END SUBROUTINE h5pget_mpio_actual_io_mode_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets requirement whether HDF5 metadata read operations using the access property
 !!        list are required to be collective or independent. If collective requirement is
@@ -4943,7 +4886,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !!
 !! \param plist_id      File access property list identifier.
 !! \param is_collective Indicates if metadata writes are collective or not.
-!! \param hdferr        \herr_t.
+!! \param hdferr        \fortran_error
 !!
   SUBROUTINE h5pset_all_coll_metadata_ops_f(plist_id, is_collective, hdferr)
     IMPLICIT NONE
@@ -4969,13 +4912,13 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
   END SUBROUTINE h5pset_all_coll_metadata_ops_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Retrieves metadata read mode from the access property list.
 !!
 !! \param plist_id      File access property list identifier.
 !! \param is_collective Collective access setting.
-!! \param hdferr        \herr_t.
+!! \param hdferr        \fortran_error
 !!
   SUBROUTINE h5pget_all_coll_metadata_ops_f(plist_id, is_collective, hdferr)
 
@@ -5002,13 +4945,13 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
   END SUBROUTINE h5pget_all_coll_metadata_ops_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets metadata writes to collective or independent. Default setting is independent (false).
 !!
 !! \param plist_id      File access property list identifier.
 !! \param is_collective Indicates if metadata writes are collective or not.
-!! \param hdferr        \herr_t.
+!! \param hdferr        \fortran_error
 !!
   SUBROUTINE h5pset_coll_metadata_write_f(plist_id, is_collective, hdferr)
     IMPLICIT NONE
@@ -5034,13 +4977,13 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
   END SUBROUTINE h5pset_coll_metadata_write_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Retrieves metadata write mode from the file access property list.
 !!
 !! \param plist_id      File access property list identifier.
 !! \param is_collective Collective access setting.
-!! \param hdferr        \herr_t.
+!! \param hdferr        \fortran_error
 !!
   SUBROUTINE h5pget_coll_metadata_write_f(plist_id, is_collective, hdferr)
 
@@ -5073,17 +5016,15 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets the view of the virtual dataset (VDS) to include or exclude missing mapped elements.
 !!
 !! \param dapl_id Identifier Of the virtual dataset access property list.
 !! \param view    Flag specifying the extent of the data to be included in the view. Valid values are:
-!! <pre>
-!!                 H5D_VDS_FIRST_MISSING_F
-!!                 H5D_VDS_LAST_AVAILABLE_F
-!! </pre>
-!! \param hdferr  \herr_t.
+!!                \li H5D_VDS_FIRST_MISSING_F
+!!                \li H5D_VDS_LAST_AVAILABLE_F
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5pset_virtual_view_f(dapl_id, view, hdferr)
     IMPLICIT NONE
@@ -5106,17 +5047,15 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
   END SUBROUTINE h5pset_virtual_view_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Retrieves the view of a virtual dataset accessed with dapl_id.
 !!
 !! \param dapl_id Dataset access property list identifier for the virtual dataset.
 !! \param view    The flag specifying the view of the virtual dataset. Valid values are:
-!! <pre>
-!!                 H5D_VDS_FIRST_MISSING_F
-!!                 H5D_VDS_LAST_AVAILABLE_F
-!! </pre>
-!! \param hdferr  \herr_t.
+!!                \li H5D_VDS_FIRST_MISSING_F
+!!                \li H5D_VDS_LAST_AVAILABLE_F
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5pget_virtual_view_f(dapl_id, view, hdferr)
     IMPLICIT NONE
@@ -5140,7 +5079,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
   END SUBROUTINE h5pget_virtual_view_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets the maximum number of missing source files and/or datasets with the printf-style names
 !!        when getting the extent of an unlimited virtual dataset.
@@ -5148,7 +5087,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !! \param dapl_id  Dataset access property list identifier for the virtual dataset.
 !! \param gap_size Maximum number of files and/or datasets allowed to be missing for determining
 !!                 the extent of an unlimited virtual dataset with printf-style mappings.
-!! \param hdferr   \herr_t.
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5pset_virtual_printf_gap_f(dapl_id, gap_size, hdferr)
     IMPLICIT NONE
@@ -5169,7 +5108,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
   END SUBROUTINE h5pset_virtual_printf_gap_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Returns the maximum number of missing source files and/or datasets with the
 !!        printf-style names when getting the extent for an unlimited virtual dataset.
@@ -5177,7 +5116,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !! \param dapl_id  Dataset access property list identifier for the virtual dataset.
 !! \param gap_size Maximum Number of the files and/or datasets allowed to be missing for
 !!                 determining the extent of an unlimited virtual dataset with printf-style mappings.
-!! \param hdferr   \herr_t.
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5pget_virtual_printf_gap_f(dapl_id, gap_size, hdferr)
     IMPLICIT NONE
@@ -5199,7 +5138,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
   END SUBROUTINE h5pget_virtual_printf_gap_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets the mapping between virtual and source datasets.
 !!
@@ -5208,7 +5147,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !! \param src_file_name The name of the HDF5 file where the source dataset is located.
 !! \param src_dset_name The path to the HDF5 dataset in the file specified by src_file_name.
 !! \param src_space_id  The source dataset’s dataspace identifier with a selection applied, possibly an unlimited selection.
-!! \param hdferr        \herr_t.
+!! \param hdferr        \fortran_error
 !!
   SUBROUTINE h5pset_virtual_f(dcpl_id, vspace_id, src_file_name, src_dset_name, src_space_id, hdferr)
     IMPLICIT NONE
@@ -5244,13 +5183,13 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
   END SUBROUTINE h5pset_virtual_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Gets the number of mappings for the virtual dataset.
 !!
 !! \param dcpl_id The identifier of the virtual dataset creation property list.
 !! \param count   The number of mappings.
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5pget_virtual_count_f(dcpl_id, count, hdferr)
 
@@ -5273,7 +5212,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
   END SUBROUTINE h5pget_virtual_count_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Gets a dataspace identifier for the selection within the virtual dataset used in the mapping.
 !!
@@ -5281,7 +5220,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !! \param index   Mapping index. The value of index is 0 (zero) or greater and less than count (0 ≤ index < count),
 !!                where count is the number of mappings returned by h5pget_virtual_count.
 !! \param ds_id   Valid dataspace identifier identifier if successful; otherwise returns H5I_INVALID_HID_F.
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5pget_virtual_vspace_f(dcpl_id, index, ds_id, hdferr)
     IMPLICIT NONE
@@ -5308,7 +5247,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 END SUBROUTINE h5pget_virtual_vspace_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Gets a dataspace identifier for the selection within the source dataset used in the mapping.
 !!
@@ -5316,7 +5255,7 @@ END SUBROUTINE h5pget_virtual_vspace_f
 !! \param index   Mapping index.The value of index is 0 (zero) or greater and less than count (0 ≤ index < count),
 !!                where count is the number of mappings returned by h5pget_virtual_count.
 !! \param ds_id   Dataspace identifier.
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !!
 SUBROUTINE h5pget_virtual_srcspace_f(dcpl_id, index, ds_id, hdferr)
   IMPLICIT NONE
@@ -5343,7 +5282,7 @@ SUBROUTINE h5pget_virtual_srcspace_f(dcpl_id, index, ds_id, hdferr)
 END SUBROUTINE h5pget_virtual_srcspace_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Gets the filename of a source dataset used in the mapping.
 !!
@@ -5351,7 +5290,7 @@ END SUBROUTINE h5pget_virtual_srcspace_f
 !! \param index    Mapping index. The value of index is 0 (zero) or greater and less than count (0 ≤ index < count),
 !!                 where count is the number of mappings returned by h5pget_virtual_count.
 !! \param name     A buffer containing the name of the file containing the source dataset.
-!! \param hdferr   \herr_t.
+!! \param hdferr   \fortran_error
 !! \param name_len The size of name needed to hold the filename. (OUT)
 !!
 !!
@@ -5396,7 +5335,7 @@ SUBROUTINE h5pget_virtual_filename_f(dcpl_id, index, name, hdferr, name_len)
 END SUBROUTINE h5pget_virtual_filename_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Gets the name of a source dataset used in the mapping.
 !!
@@ -5404,7 +5343,7 @@ END SUBROUTINE h5pget_virtual_filename_f
 !! \param index    Mapping index. The value of index is 0 (zero) or greater and less than count (0 ≤ index < count),
 !!                 where count is the number of mappings returned by h5pget_virtual_count.
 !! \param name     A buffer containing the name of the source dataset.
-!! \param hdferr   \herr_t.
+!! \param hdferr   \fortran_error
 !! \param name_len The size of name needed to hold the source dataset name.
 !!
 SUBROUTINE h5pget_virtual_dsetname_f(dcpl_id, index, name, hdferr, name_len)
@@ -5447,14 +5386,14 @@ SUBROUTINE h5pget_virtual_dsetname_f(dcpl_id, index, name, hdferr, name_len)
 END SUBROUTINE h5pget_virtual_dsetname_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Gets the value of the "minimize dataset headers" value which creates
 !!        smaller dataset object headers when its set and no attributes are present.
 !!
 !! \param dcpl_id  Target dataset creation property list identifier.
 !! \param minimize Value of the setting.
-!! \param hdferr   \herr_t.
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5pget_dset_no_attrs_hint_f(dcpl_id, minimize, hdferr)
     IMPLICIT NONE
@@ -5480,14 +5419,14 @@ END SUBROUTINE h5pget_virtual_dsetname_f
    END SUBROUTINE h5pget_dset_no_attrs_hint_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets the value of the "minimize dataset headers" value which creates
 !!       smaller dataset object headers when its set and no attributes are present.
 !!
 !! \param dcpl_id  Target dataset creation property list identifier.
 !! \param minimize Value of the setting.
-!! \param hdferr   \herr_t.
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5pset_dset_no_attrs_hint_f(dcpl_id, minimize, hdferr)
     IMPLICIT NONE
@@ -5513,13 +5452,13 @@ END SUBROUTINE h5pget_virtual_dsetname_f
   END SUBROUTINE h5pset_dset_no_attrs_hint_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Set the file VOL connector (VOL_ID) for a file access property list (PLIST_ID)
 !!
 !! \param plist_id     Access property list identifier.
 !! \param new_vol_id   VOL connector id.
-!! \param hdferr       \herr_t. 
+!! \param hdferr       \fortran_error
 !! \param new_vol_info VOL connector info.
 !!
   SUBROUTINE h5pset_vol_f(plist_id, new_vol_id, hdferr, new_vol_info)
@@ -5549,13 +5488,13 @@ END SUBROUTINE h5pget_virtual_dsetname_f
   END SUBROUTINE h5pset_vol_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Get the file VOL connector (VOL_ID) for a file access property list (PLIST_ID)
 !
 !! \param plist_id Access property list identifier.
 !! \param vol_id   VOL connector id.
-!! \param hdferr   \herr_t. 
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5pget_vol_id_f(plist_id, vol_id, hdferr)
     IMPLICIT NONE
@@ -5577,14 +5516,14 @@ END SUBROUTINE h5pget_virtual_dsetname_f
   END SUBROUTINE h5pget_vol_id_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Gets the file locking properties. File locking is mainly used to help enforce SWMR semantics.
 !!
 !! \param fapl_id               Target fileTarget file access property list identifier.
 !! \param use_file_locking      Whether or not to use file locks.
 !! \param ignore_disabled_locks Whether or not to ignore file locks when locking is disabled on a file system.
-!! \param hdferr                \herr_t. 
+!! \param hdferr                \fortran_error
 !!
   SUBROUTINE h5pget_file_locking_f(fapl_id, use_file_locking, ignore_disabled_locks, hdferr)
     IMPLICIT NONE
@@ -5614,14 +5553,14 @@ END SUBROUTINE h5pget_virtual_dsetname_f
    END SUBROUTINE h5pget_file_locking_f
 
 !>
-!! \ingroup H5P
+!! \ingroup FH5P
 !!
 !! \brief Sets the file locking properties. File locking is mainly used to help enforce SWMR semantics.
 !!
 !! \param fapl_id               Target file access property list identifier.
 !! \param use_file_locking      Whether or not to use file locks.
 !! \param ignore_disabled_locks Whether or not to ignore file locks when locking is disabled on a file system.
-!! \param hdferr                \herr_t. 
+!! \param hdferr                \fortran_error
 !!
   SUBROUTINE h5pset_file_locking_f(fapl_id, use_file_locking, ignore_disabled_locks, hdferr)
     IMPLICIT NONE

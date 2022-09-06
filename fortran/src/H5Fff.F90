@@ -1,6 +1,9 @@
-!> @ingroup H5F
+!> @defgroup FH5F Fortran File (H5F) Interface
 !!
-!! @brief This module contains Fortran interfaces for H5F functions.
+!! @see H5F, C-API
+!!
+!! @see @ref H5F_UG, User Guide
+!!
 !
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -53,18 +56,16 @@ MODULE H5F
 
 CONTAINS
 !>
-!! \ingroup H5F
+!! \ingroup FH5F
 !!
-!! \brief Creates HDF5 files. 
+!! \brief Creates HDF5 files.
 !!
 !! \param name         Name of the file to create.
 !! \param access_flags File access flags. Allowable values are:
-!! <pre>
-!!                      H5F_ACC_TRUNC_F
-!!                      H5F_ACC_EXCL_F
-!! </pre>
+!!                     \li H5F_ACC_TRUNC_F
+!!                     \li H5F_ACC_EXCL_F
 !! \param file_id      File identifier.
-!! \param hdferr       \herr_t.
+!! \param hdferr       \fortran_error
 !! \param creation_prp File creation property list identifier.
 !! \param access_prp   File access property list identifier.
 !!
@@ -106,17 +107,15 @@ CONTAINS
 
   END SUBROUTINE h5fcreate_f
 !>
-!! \ingroup H5F
+!! \ingroup FH5F
 !!
 !! \brief Flushes all buffers associated with a file to disk
 !!
 !! \param object_id    Identifier of object used to identify the file.
 !! \param scope        Specifies the scope of the flushing action. Possible values are:
-!! <pre>
-!!                      H5F_SCOPE_GLOBAL_F
-!!                      H5F_SCOPE_LOCAL_F
-!! </pre>
-!! \param hdferr       \herr_t.
+!!                     \li H5F_SCOPE_GLOBAL_F
+!!                     \li H5F_SCOPE_LOCAL_F
+!! \param hdferr       \fortran_error
 !!
   SUBROUTINE h5fflush_f(object_id, scope, hdferr)
     IMPLICIT NONE
@@ -137,14 +136,14 @@ CONTAINS
 
   END SUBROUTINE h5fflush_f
 !>
-!! \ingroup H5F
+!! \ingroup FH5F
 !!
 !! \brief Mounts a file.
 !!
 !! \param loc_id     The identifier for of file or group in which name is defined.
 !! \param name       The name of the group onto which the file specified by child_id is to be mounted.
 !! \param child_id   The identifier of the file to be mounted.
-!! \param hdferr     \herr_t.
+!! \param hdferr     \fortran_error
 !! \param access_prp The identifier of the property list to be used.
 !!
   SUBROUTINE h5fmount_f(loc_id, name, child_id, hdferr, access_prp)
@@ -179,13 +178,13 @@ CONTAINS
   END SUBROUTINE h5fmount_f
 
 !>
-!! \ingroup H5F
+!! \ingroup FH5F
 !!
 !! \brief Unmounts a file.
 !!
 !! \param loc_id The identifier for of file or group in which name is defined.
 !! \param name   The name of the mount point.
-!! \param hdferr \herr_t.
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5funmount_f(loc_id, name, hdferr)
     IMPLICIT NONE
@@ -210,18 +209,16 @@ CONTAINS
 
   END SUBROUTINE h5funmount_f
 !>
-!! \ingroup H5F
+!! \ingroup FH5F
 !!
 !! \brief Opens HDF5 file.
 !!
 !! \param name         Name of the file to acecss.
 !! \param access_flags File access flags. Allowable values are:
-!! <pre>
-!!                      H5F_ACC_RDWR_F
-!!                      H5F_ACC_RDONLY_F
-!! </pre>
+!!                     \li H5F_ACC_RDWR_F
+!!                     \li H5F_ACC_RDONLY_F
 !! \param file_id      File identifier.
-!! \param hdferr       \herr_t.
+!! \param hdferr       \fortran_error
 !! \param access_prp   File access property list identifier.
 !!
   SUBROUTINE h5fopen_f(name, access_flags, file_id, hdferr, access_prp)
@@ -255,13 +252,13 @@ CONTAINS
                                access_prp_default, file_id)
   END SUBROUTINE h5fopen_f
 !>
-!! \ingroup H5F
+!! \ingroup FH5F
 !!
 !! \brief Reopens HDF5 file.
 !!
 !! \param file_id     Identifier of a file for which an additional identifier is required.
 !! \param ret_file_id New file identifier.
-!! \param hdferr      \herr_t.
+!! \param hdferr      \fortran_error
 !!
   SUBROUTINE h5freopen_f(file_id, ret_file_id, hdferr)
     IMPLICIT NONE
@@ -281,13 +278,13 @@ CONTAINS
 
   END SUBROUTINE h5freopen_f
 !>
-!! \ingroup H5F
+!! \ingroup FH5F
 !!
 !! \brief Returns a file creation property list identifier.
 !!
 !! \param file_id Identifier of a file to creation property list of.
 !! \param prop_id Creation property list identifier.
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5fget_create_plist_f(file_id, prop_id, hdferr)
     IMPLICIT NONE
@@ -307,13 +304,13 @@ CONTAINS
 
   END SUBROUTINE h5fget_create_plist_f
 !>
-!! \ingroup H5F
+!! \ingroup FH5F
 !!
 !! \brief Returns a file access property list identifier.
 !!
 !! \param file_id   Identifier of a file to creation property list of.
 !! \param access_id Access property list identifier.
-!! \param hdferr    \herr_t.
+!! \param hdferr    \fortran_error
 !!
   SUBROUTINE h5fget_access_plist_f(file_id, access_id, hdferr)
     IMPLICIT NONE
@@ -334,13 +331,13 @@ CONTAINS
   END SUBROUTINE h5fget_access_plist_f
 
 !>
-!! \ingroup H5F
+!! \ingroup FH5F
 !!
 !! \brief Determines whether a file can be accessed as HDF5.
 !!
 !! \param name       Name of the file to check.
 !! \param status     Indicates if file is and HDF5 file.
-!! \param hdferr     \herr_t.
+!! \param hdferr     \fortran_error
 !! \param access_prp File access property list identifier.
 !!
   SUBROUTINE h5fis_accessible_f(name, status, hdferr, access_prp)
@@ -373,13 +370,13 @@ CONTAINS
 !                  deprecated since H5Fis_hdf5() is deprecated.
 
 !>
-!! \ingroup H5F
+!! \ingroup FH5F
 !!
 !! \brief Determines whether a file is in the HDF5 format.
 !!
 !! \param name   Name of the file to check.
 !! \param status Indicates if file is and HDF5 file.
-!! \param hdferr \herr_t.
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5fis_hdf5_f(name, status, hdferr)
     IMPLICIT NONE
@@ -403,12 +400,12 @@ CONTAINS
   END SUBROUTINE h5fis_hdf5_f
 
 !>
-!! \ingroup H5F
+!! \ingroup FH5F
 !!
 !! \brief Closes HDF5 file.
 !!
 !! \param file_id File identifier.
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5fclose_f(file_id, hdferr)
     IMPLICIT NONE
@@ -427,21 +424,19 @@ CONTAINS
   END SUBROUTINE h5fclose_f
 
 !>
-!! \ingroup H5F
+!! \ingroup FH5F
 !!
 !! \brief Gets number of the objects open within a file
 !!
 !! \param file_id   File identifier.
 !! \param obj_type  Type of the object; possible values are:
-!! <pre>
-!!                   H5F_OBJ_FILE_F
-!!                   H5F_OBJ_DATASET_F
-!!                   H5F_OBJ_GROUP_F
-!!                   H5F_OBJ_DATATYPE_F
-!!                   H5F_OBJ_ALL_F
-!! </pre>
-!! \param obj_count Number of open objects
-!! \param hdferr    \herr_t
+!!                  \li H5F_OBJ_FILE_F
+!!                  \li H5F_OBJ_DATASET_F
+!!                  \li H5F_OBJ_GROUP_F
+!!                  \li H5F_OBJ_DATATYPE_F
+!!                  \li H5F_OBJ_ALL_F
+!! \param obj_count Number of open objects.
+!! \param hdferr    \fortran_error
 !!
   SUBROUTINE h5fget_obj_count_f(file_id, obj_type, obj_count, hdferr)
     IMPLICIT NONE
@@ -469,23 +464,21 @@ CONTAINS
   END SUBROUTINE h5fget_obj_count_f
 
 !>
-!! \ingroup H5F
+!! \ingroup FH5F
 !!
 !! \brief Get list of open objects identifiers within a file
 !!
 !! \param file_id  File identifier.
 !! \param obj_type Type of the object; possible values are:
-!!  <pre>
-!!                  H5F_OBJ_FILE_F
-!!                  H5F_OBJ_DATASET_F
-!!                  H5F_OBJ_GROUP_F
-!!                  H5F_OBJ_DATATYPE_F
-!!                  H5F_OBJ_ALL_F
-!! </pre>
-!! \param max_objs Maximum # of objects to retrieve
-!! \param obj_ids  Array of open object identifiers
-!! \param hdferr   \herr_t
-!! \param num_objs Number of open objects
+!!                 \li H5F_OBJ_FILE_F
+!!                 \li H5F_OBJ_DATASET_F
+!!                 \li H5F_OBJ_GROUP_F
+!!                 \li H5F_OBJ_DATATYPE_F
+!!                 \li H5F_OBJ_ALL_F
+!! \param max_objs Maximum # of objects to retrieve.
+!! \param obj_ids  Array of open object identifiers.
+!! \param hdferr   \fortran_error
+!! \param num_objs Number of open objects.
 !!
   SUBROUTINE h5fget_obj_ids_f(file_id, obj_type, max_objs, obj_ids, hdferr, num_objs)
     IMPLICIT NONE
@@ -516,13 +509,13 @@ CONTAINS
 
   END SUBROUTINE h5fget_obj_ids_f
 !>
-!! \ingroup H5F
+!! \ingroup FH5F
 !!
 !! \brief Get amount of free space within a file.
 !!
 !! \param file_id    File identifier.
 !! \param free_space Amount of free space in file.
-!! \param hdferr     \herr_t.
+!! \param hdferr     \fortran_error
 !!
   SUBROUTINE h5fget_freespace_f(file_id, free_space, hdferr)
     IMPLICIT NONE
@@ -543,14 +536,14 @@ CONTAINS
 
   END SUBROUTINE h5fget_freespace_f
 !>
-!! \ingroup H5F
+!! \ingroup FH5F
 !!
 !! \brief Gets the name of the file from the object identifier.
 !!
 !! \param obj_id Object identifier.
 !! \param buf    Buffer to store the read name.
 !! \param size   Actual size of the name.
-!! \param hdferr \herr_t.
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5fget_name_f(obj_id, buf, size, hdferr)
     IMPLICIT NONE
@@ -576,13 +569,13 @@ CONTAINS
     hdferr = h5fget_name_c(obj_id, size, buf, buflen)
   END SUBROUTINE h5fget_name_f
 !>
-!! \ingroup H5F
+!! \ingroup FH5F
 !!
 !! \brief Retrieves the file size of the HDF5 file.
 !!
 !! \param file_id File identifier.
 !! \param size    File size.
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5fget_filesize_f(file_id, size, hdferr)
     IMPLICIT NONE
@@ -602,13 +595,13 @@ CONTAINS
   END SUBROUTINE h5fget_filesize_f
 
 !>
-!! \ingroup H5F
+!! \ingroup FH5F
 !!
 !! \brief Retrieves the file number of the HDF5 file.
 !!
 !! \param file_id File identifier.
 !! \param fileno  File number.
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5fget_fileno_f(file_id, fileno, hdferr)
     IMPLICIT NONE
@@ -628,14 +621,14 @@ CONTAINS
   END SUBROUTINE h5fget_fileno_f
 
 !>
-!! \ingroup H5F
+!! \ingroup FH5F
 !!
 !! \brief Retrieves a copy of the image of an existing, open file.
 !!
 !! \param file_id  Target file identifier.
 !! \param buf_ptr  Pointer to the buffer into which the image of the HDF5 file is to be copied.
 !! \param buf_len  Size of the supplied buffer.
-!! \param hdferr   Error code: 0 on success and -1 on failure
+!! \param hdferr   Error code: 0 on success and -1 on failure.
 !! \param buf_size Returns the size in bytes of the buffer required to store the file image, no data will be copied.
 !!
   SUBROUTINE h5fget_file_image_f(file_id, buf_ptr, buf_len, hdferr, buf_size)
@@ -673,14 +666,14 @@ CONTAINS
   END SUBROUTINE h5fget_file_image_f
 
 !>
-!! \ingroup H5F
+!! \ingroup FH5F
 !!
 !! \brief Gets the value of the "minimize dataset headers" value which creates
 !!        smaller dataset object headers when its set and no attributes are present.
 !!
 !! \param file_id  Target file identifier.
 !! \param minimize Value of the setting.
-!! \param hdferr   Error code: 0 on success and -1 on failure
+!! \param hdferr   Error code: 0 on success and -1 on failure.
 !!
   SUBROUTINE h5fget_dset_no_attrs_hint_f(file_id, minimize, hdferr)
     IMPLICIT NONE
@@ -706,14 +699,14 @@ CONTAINS
   END SUBROUTINE h5fget_dset_no_attrs_hint_f
 
 !>
-!! \ingroup H5F
+!! \ingroup FH5F
 !!
 !! \brief Sets the value of the "minimize dataset headers" value which creates
 !!        smaller dataset object headers when its set and no attributes are present.
 !!
 !! \param file_id  Target file identifier.
 !! \param minimize Value of the setting.
-!! \param hdferr   Error code: 0 on success and -1 on failure
+!! \param hdferr   Error code: 0 on success and -1 on failure.
 !!
   SUBROUTINE h5fset_dset_no_attrs_hint_f(file_id, minimize, hdferr)
     IMPLICIT NONE

@@ -1,4 +1,11 @@
-!> @ingroup H5E
+!> @defgroup FH5E Fortran Error (H5E) Interface
+!!
+!! @see H5E, C-API
+!!
+!! @see @ref H5E_UG, User Guide
+!!
+
+!> @ingroup FH5E
 !!
 !! @brief This module contains Fortran interfaces for H5E functions.
 !
@@ -34,18 +41,17 @@ MODULE H5E
   USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_FUNPTR, C_CHAR
   USE H5GLOBAL
 
-   
   INTEGER, PARAMETER :: PRINTON  = 1 !< Turn on automatic printing of errors
   INTEGER, PARAMETER :: PRINTOFF = 0 !< Turn off automatic printing of errors
 
 CONTAINS
 
 !>
-!! \ingroup H5E
+!! \ingroup FH5E
 !!
 !! \brief Clears the error stack for the current thread.
 !!
-!! \param hdferr    \herr_t
+!! \param hdferr    \fortran_error
 !! \param estack_id Error Stack id
 !!
   SUBROUTINE h5eclear_f(hdferr, estack_id)
@@ -69,11 +75,11 @@ CONTAINS
   END SUBROUTINE h5eclear_f
 
 !>
-!! \ingroup H5E
+!! \ingroup FH5E
 !!
 !! \brief Prints the error stack in a default manner.
 !!
-!! \param hdferr \herr_t
+!! \param hdferr \fortran_error
 !! \param name   Name of the file that contains print output
 !!
   SUBROUTINE h5eprint_f(hdferr, name)
@@ -103,14 +109,14 @@ CONTAINS
     ENDIF
   END SUBROUTINE h5eprint_f
 !>
-!! \ingroup H5E
+!! \ingroup FH5E
 !!
 !! \brief Returns a character string describing an error specified by a major error number.
 !!
 !! \param error_no Major error number.
 !! \param name     Character string describing the error.
 !! \param namelen  Number of characters in the name buffer.
-!! \param hdferr   \herr_t.
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5eget_major_f(error_no, name, namelen, hdferr)
     INTEGER, INTENT(IN) :: error_no
@@ -131,13 +137,13 @@ CONTAINS
     hdferr = h5eget_major_c(error_no, name, namelen)
   END SUBROUTINE h5eget_major_f
 !>
-!! \ingroup H5E
+!! \ingroup FH5E
 !!
 !! \brief Returns a character string describing an error specified by a minor error number.
 !!
 !! \param error_no Minor error number.
 !! \param name     Character string describing the error.
-!! \param hdferr   \herr_t.
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5eget_minor_f(error_no, name, hdferr)
     INTEGER, INTENT(IN) :: error_no
@@ -155,19 +161,17 @@ CONTAINS
   END SUBROUTINE h5eget_minor_f
 
 !>
-!! \ingroup H5E
+!! \ingroup FH5E
 !!
 !! \brief Returns settings for automatic error stack traversal function and its data.
 !!
 !! \param printflag   Flag to turn automatic error printing on or off; possible values are:
-!! <pre> 
-!!                    printon (1)
-!!                    printoff(0)
-!! </pre>
+!!                    \li printon (1)
+!!                    \li printoff(0)
 !! \param estack_id   Error stack identifier.
 !! \param func        Function to be called upon an error condition.
 !! \param client_data Data passed to the error function.
-!! \param hdferr      \herr_t.
+!! \param hdferr      \fortran_error
 !!
   SUBROUTINE h5eset_auto_f(printflag, hdferr, estack_id, func, client_data)
     USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_FUNPTR

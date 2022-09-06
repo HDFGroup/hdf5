@@ -1,4 +1,11 @@
-!> @ingroup H5T
+!> @defgroup FH5T Fortran Datatype (H5T) Interface
+!!
+!! @see H5T, C-API
+!!
+!! @see @ref H5T_UG, User Guide
+!!
+
+!> @ingroup FH5T
 !!
 !! @brief This module contains Fortran interfaces for H5T functions.
 !
@@ -44,29 +51,26 @@ MODULE H5T
      TYPE(C_PTR)     :: p   !< Pointer to VL data
   END TYPE hvl_t
 
-#ifdef H5_DOXYGEN_FORTRAN
-  INTERFACE h5tenum_insert_f
-     MODULE PROCEDURE h5tenum_insert_f
-     MODULE PROCEDURE h5tenum_insert___F90_VERSION
-  END INTERFACE
-#else
+#ifndef H5_DOXYGEN_FORTRAN
+
   INTERFACE h5tenum_insert_f
      MODULE PROCEDURE h5tenum_insert_f03
      MODULE PROCEDURE h5tenum_insert_f90
   END INTERFACE
+
 #endif
 
 CONTAINS
 
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Opens named datatype.
 !!
 !! \param loc_id  Location identifier.
 !! \param name    A datatype name.
 !! \param type_id Datatype identifier.
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !! \param tapl_id Datatype access property list identifier.
 !!
   SUBROUTINE h5topen_f(loc_id, name, type_id, hdferr, tapl_id)
@@ -100,14 +104,14 @@ CONTAINS
     hdferr = h5topen_c(loc_id, name, namelen, type_id, tapl_id_default)
   END SUBROUTINE h5topen_f
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Commits a transient datatype to a file, creating a new named datatype.
 !!
 !! \param loc_id  Location identifier.
-!! \param name    Name of the datatype to be stored at the specified location
+!! \param name    Name of the datatype to be stored at the specified location.
 !! \param type_id Identifier of a datatype to be stored.
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !! \param lcpl_id Link creation property list.
 !! \param tcpl_id Datatype creation property list.
 !! \param tapl_id Datatype access property list.
@@ -160,13 +164,13 @@ CONTAINS
 
   END SUBROUTINE h5tcommit_f
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Creates a copy of existing datatype.
 !!
 !! \param type_id     Datatype identifier.
 !! \param new_type_id Identifier of datatype&apos;s copy.
-!! \param hdferr      \herr_t.
+!! \param hdferr      \fortran_error
 !!
   SUBROUTINE h5tcopy_f(type_id, new_type_id, hdferr)
     IMPLICIT NONE
@@ -184,14 +188,14 @@ CONTAINS
     hdferr = h5tcopy_c(type_id, new_type_id)
   END SUBROUTINE h5tcopy_f
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Determines whether two datatype identifiers refer to the same datatype.
 !!
 !! \param type1_id Datatype identifier.
 !! \param type2_id Datatype identifier.
 !! \param flag     TRUE/FALSE flag to indicate if two datatypes are equal.
-!! \param hdferr   \herr_t.
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5tequal_f(type1_id, type2_id, flag, hdferr)
     IMPLICIT NONE
@@ -215,12 +219,12 @@ CONTAINS
     IF(c_flag .GT. 0) flag = .TRUE.
   END SUBROUTINE h5tequal_f
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Releases a datatype.
 !!
 !! \param type_id Datatype identifier.
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5tclose_f(type_id, hdferr)
     IMPLICIT NONE
@@ -237,27 +241,25 @@ CONTAINS
     hdferr = h5tclose_c(type_id)
   END SUBROUTINE h5tclose_f
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Returns the datatype class identifier.
 !!
 !! \param type_id Datatype identifier.
 !! \param class   Class, possible values are:
-!! <pre>
-!!                 H5T_NO_CLASS_F
-!!                 H5T_INTEGER_F
-!!                 H5T_FLOAT_F
-!!                 H5T_TIME_F
-!!                 H5T_STRING_F
-!!                 H5T_BITFIELD_F
-!!                 H5T_OPAQUE_F
-!!                 H5T_COMPOUND_F
-!!                 H5T_REFERENCE_F
-!!                 H5T_ENUM_F
-!!                 H5T_VLEN_F
-!!                 H5T_ARRAY_F
-!! </pre>
-!! \param hdferr  \herr_t.
+!!                \li H5T_NO_CLASS_F
+!!                \li H5T_INTEGER_F
+!!                \li H5T_FLOAT_F
+!!                \li H5T_TIME_F
+!!                \li H5T_STRING_F
+!!                \li H5T_BITFIELD_F
+!!                \li H5T_OPAQUE_F
+!!                \li H5T_COMPOUND_F
+!!                \li H5T_REFERENCE_F
+!!                \li H5T_ENUM_F
+!!                \li H5T_VLEN_F
+!!                \li H5T_ARRAY_F
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5tget_class_f(type_id, class, hdferr)
     IMPLICIT NONE
@@ -276,13 +278,13 @@ CONTAINS
     hdferr = h5tget_class_c(type_id, class)
   END SUBROUTINE h5tget_class_f
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Returns the size of a datatype.
 !!
 !! \param type_id Datatype identifier.
 !! \param size    Datatype size.
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5tget_size_f(type_id, size, hdferr)
     IMPLICIT NONE
@@ -302,13 +304,13 @@ CONTAINS
   END SUBROUTINE h5tget_size_f
 
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Sets the total size for an atomic datatype.
 !!
 !! \param type_id Datatype identifier.
 !! \param size    Size of the datatype.
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5tset_size_f(type_id, size, hdferr)
     IMPLICIT NONE
@@ -328,18 +330,16 @@ CONTAINS
   END SUBROUTINE h5tset_size_f
 
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Returns the byte order of an atomic datatype.
 !!
 !! \param type_id Datatype identifier.
 !! \param order   Byte order for the datatype, possible values are:
-!! <pre>
-!!                 H5T_ORDER_LE_F
-!!                 H5T_ORDER_BE_F
-!!                 H5T_ORDER_VAX_F (not implemented yet)
-!! </pre>
-!! \param hdferr  \herr_t.
+!!                \li H5T_ORDER_LE_F
+!!                \li H5T_ORDER_BE_F
+!!                \li H5T_ORDER_VAX_F (not implemented yet)
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5tget_order_f(type_id, order, hdferr)
     IMPLICIT NONE
@@ -359,18 +359,16 @@ CONTAINS
     hdferr = h5tget_order_c(type_id, order)
   END SUBROUTINE h5tget_order_f
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Sets the byte ordering of an atomic datatype.
 !!
 !! \param type_id Datatype identifier.
 !! \param order   Datatype byte order Possible values are:
-!! <pre>
-!!                 H5T_ORDER_LE_F
-!!                 H5T_ORDER_BE_F
-!!                 H5T_ORDER_VAX_F (not implemented yet)
-!! </pre>
-!! \param hdferr  \herr_t.
+!!                \li H5T_ORDER_LE_F
+!!                \li H5T_ORDER_BE_F
+!!                \li H5T_ORDER_VAX_F (not implemented yet)
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5tset_order_f(type_id, order, hdferr)
     IMPLICIT NONE
@@ -391,13 +389,13 @@ CONTAINS
   END SUBROUTINE h5tset_order_f
 
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Returns the precision of an atomic datatype.
 !!
 !! \param type_id   Datatype identifier.
 !! \param precision Precision of the datatype.
-!! \param hdferr    \herr_t.
+!! \param hdferr    \fortran_error
 !!
   SUBROUTINE h5tget_precision_f(type_id, PRECISION, hdferr)
     IMPLICIT NONE
@@ -417,13 +415,13 @@ CONTAINS
   END SUBROUTINE h5tget_precision_f
 
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Sets the precision of an atomic datatype.
 !!
 !! \param type_id   Datatype identifier.
 !! \param precision Datatype precision.
-!! \param hdferr    \herr_t.
+!! \param hdferr    \fortran_error
 !!
   SUBROUTINE h5tset_precision_f(type_id, PRECISION, hdferr)
     IMPLICIT NONE
@@ -443,13 +441,13 @@ CONTAINS
   END SUBROUTINE h5tset_precision_f
 
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Retrieves the bit offset of the first significant bit.
 !!
 !! \param type_id Datatype identifier.
 !! \param offset  Offset value.
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5tget_offset_f(type_id, offset, hdferr)
     IMPLICIT NONE
@@ -469,13 +467,13 @@ CONTAINS
   END SUBROUTINE h5tget_offset_f
 
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Sets the bit offset of the first significant bit.
 !!
 !! \param type_id Datatype identifier.
 !! \param offset  Offset value.
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5tset_offset_f(type_id, offset, hdferr)
     IMPLICIT NONE
@@ -495,21 +493,19 @@ CONTAINS
   END SUBROUTINE h5tset_offset_f
 
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Retrieves the padding type of the least and most-significant bit padding.
 !!
 !! \param type_id Datatype identifier.
 !! \param lsbpad  Least-significant bit padding type.
 !! \param msbpad  Most-significant bit padding type. Possible values are:
-!! <pre>
-!!                 H5T_PAD_ERROR_F
-!!                 H5T_PAD_ZERO_F
-!!                 H5T_PAD_ONE_F
-!!                 H5T_PAD_BACKGROUND_F
-!!                 H5T_PAD_NPAD_F
-!! </pre>
-!! \param hdferr  \herr_t.
+!!                \li H5T_PAD_ERROR_F
+!!                \li H5T_PAD_ZERO_F
+!!                \li H5T_PAD_ONE_F
+!!                \li H5T_PAD_BACKGROUND_F
+!!                \li H5T_PAD_NPAD_F
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5tget_pad_f(type_id, lsbpad, msbpad, hdferr)
     IMPLICIT NONE
@@ -531,21 +527,19 @@ CONTAINS
   END SUBROUTINE h5tget_pad_f
 
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Sets the least and most-significant bits padding types.
 !!
 !! \param type_id Datatype identifier.
 !! \param lsbpad  Least-significant bit padding type.
 !! \param msbpad  Most-significant bit padding type. Possible values are:
-!! <pre>
-!!                 H5T_PAD_ERROR_F
-!!                 H5T_PAD_ZERO_F
-!!                 H5T_PAD_ONE_F
-!!                 H5T_PAD_BACKGROUND_F
-!!                 H5T_PAD_NPAD_F
-!! </pre>
-!! \param hdferr  \herr_t.
+!!                \li H5T_PAD_ERROR_F
+!!                \li H5T_PAD_ZERO_F
+!!                \li H5T_PAD_ONE_F
+!!                \li H5T_PAD_BACKGROUND_F
+!!                \li H5T_PAD_NPAD_F
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5tset_pad_f(type_id, lsbpad, msbpad, hdferr)
     IMPLICIT NONE
@@ -567,21 +561,19 @@ CONTAINS
   END SUBROUTINE h5tset_pad_f
 
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Retrieves the sign type for an integer type.
 !!
 !! \param type_id  Datatype identifier.
 !! \param sign     Sign type. Possible values are:
-!! <pre>
-!!                  Unsigned integer type
+!!                \li  Unsigned integer type
 !!                     H5T_SGN_NONE_F = 0
-!!                  Two&apos;s complement signed integer type
+!!                \li  Two&apos;s complement signed integer type
 !!                     H5T_SGN_2_F = 1
-!!                  Error value
+!!                \li  Error value
 !!                     H5T_SGN_ERROR_F = -1
-!! </pre>
-!! \param hdferr   \herr_t.
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5tget_sign_f(type_id, sign, hdferr)
     IMPLICIT NONE
@@ -602,21 +594,19 @@ CONTAINS
   END SUBROUTINE h5tget_sign_f
 
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Sets the sign property for an integer type.
 !!
 !! \param type_id  Datatype identifier.
 !! \param sign     Sign type. Possible values are:
-!! <pre>
-!!                  Unsigned integer type
+!!                 \li Unsigned integer type
 !!                     H5T_SGN_NONE_F = 0
-!!                  Two&apos;s complement signed integer type
+!!                 \li Two&apos;s complement signed integer type
 !!                     H5T_SGN_2_F = 1
-!!                  Error value
+!!                 \li Error value
 !!                     H5T_SGN_ERROR_F = -1
-!! </pre>
-!! \param hdferr   \herr_t.
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5tset_sign_f(type_id, sign, hdferr)
     IMPLICIT NONE
@@ -636,7 +626,7 @@ CONTAINS
   END SUBROUTINE h5tset_sign_f
 
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Retrieves floating point datatype bit field information.
 !!
@@ -646,7 +636,7 @@ CONTAINS
 !! \param esize   Size of exponent in bits.
 !! \param mpos    Mantissa position.
 !! \param msize   Size of mantissa in bits.
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5tget_fields_f(type_id, spos, epos, esize, mpos, msize, hdferr)
     IMPLICIT NONE
@@ -676,7 +666,7 @@ CONTAINS
   END SUBROUTINE h5tget_fields_f
 
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Sets locations and sizes of floating point bit fields.
 !!
@@ -686,7 +676,7 @@ CONTAINS
 !! \param esize   Size of exponent in bits.
 !! \param mpos    Mantissa position.
 !! \param msize   Size of mantissa in bits.
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5tset_fields_f(type_id, spos, epos, esize, mpos, msize, hdferr)
     IMPLICIT NONE
@@ -716,13 +706,13 @@ CONTAINS
   END SUBROUTINE h5tset_fields_f
 
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Retrieves the exponent bias of a floating-point type.
 !!
 !! \param type_id Datatype identifier.
 !! \param ebias   Datatype exponent bias.
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5tget_ebias_f(type_id, ebias, hdferr)
     IMPLICIT NONE
@@ -743,13 +733,13 @@ CONTAINS
   END SUBROUTINE h5tget_ebias_f
 
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Sets the exponent bias of a floating-point type.
 !!
 !! \param type_id Datatype identifier.
 !! \param ebias   Datatype exponent bias.
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5tset_ebias_f(type_id, ebias, hdferr)
     IMPLICIT NONE
@@ -769,18 +759,16 @@ CONTAINS
   END SUBROUTINE h5tset_ebias_f
 
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Retrieves mantissa normalization of a floating-point datatype.
 !!
 !! \param type_id Datatype identifier.
 !! \param norm    Normalization types, valid values are:
-!! <pre>
-!!                 H5T_NORM_IMPLIED_F
-!!                 H5T_NORM_MSBSET_F
-!!                 H5T_NORM_NONE_F
-!! </pre>
-!! \param hdferr  \herr_t.
+!!                \li H5T_NORM_IMPLIED_F
+!!                \li H5T_NORM_MSBSET_F
+!!                \li H5T_NORM_NONE_F
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5tget_norm_f(type_id, norm, hdferr)
     IMPLICIT NONE
@@ -801,18 +789,16 @@ CONTAINS
   END SUBROUTINE h5tget_norm_f
 
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Sets the mantissa normalization of a floating-point datatype.
 !!
 !! \param type_id Datatype identifier.
 !! \param norm    Normalization types, valid values are:
-!! <pre>
-!!                 H5T_NORM_IMPLIED_F
-!!                 H5T_NORM_MSBSET_F
-!!                 H5T_NORM_NONE_F
-!! </pre>
-!! \param hdferr  \herr_t.
+!!                \li H5T_NORM_IMPLIED_F
+!!                \li H5T_NORM_MSBSET_F
+!!                \li H5T_NORM_NONE_F
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5tset_norm_f(type_id, norm, hdferr)
     IMPLICIT NONE
@@ -832,18 +818,16 @@ CONTAINS
   END SUBROUTINE h5tset_norm_f
 
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Retrieves the internal padding type for unused bits in floating-point datatypes.
 !!
 !! \param type_id Datatype identifier.
 !! \param padtype Padding type for unused bits. Possible values are:
-!! <pre>
-!!                 H5T_PAD_ZERO_F
-!!                 H5T_PAD_ONE_F
-!!                 H5T_PAD_BACKGROUND_F
-!! </pre>
-!! \param hdferr  \herr_t.
+!!                \li H5T_PAD_ZERO_F
+!!                \li H5T_PAD_ONE_F
+!!                \li H5T_PAD_BACKGROUND_F
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5tget_inpad_f(type_id, padtype, hdferr)
     IMPLICIT NONE
@@ -863,18 +847,16 @@ CONTAINS
   END SUBROUTINE h5tget_inpad_f
 
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Fills unused internal floating point bits.
 !!
 !! \param type_id Datatype identifier.
 !! \param padtype Padding type for unused bits. Possible values are:
-!! <pre>
-!!                 H5T_PAD_ZERO_F
-!!                 H5T_PAD_ONE_F
-!!                 H5T_PAD_BACKGROUND_F
-!! </pre>
-!! \param hdferr  \herr_t.
+!!                \li H5T_PAD_ZERO_F
+!!                \li H5T_PAD_ONE_F
+!!                \li H5T_PAD_BACKGROUND_F
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5tset_inpad_f(type_id, padtype, hdferr)
     IMPLICIT NONE
@@ -894,17 +876,15 @@ CONTAINS
   END SUBROUTINE h5tset_inpad_f
 
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Retrieves the character set type of a string datatype.
 !!
 !! \param type_id Datatype identifier.
 !! \param cset    Character set type of a string datatype. Possible values are:
-!! <pre>
-!!                 H5T_CSET_ASCII_F
-!!                 H5T_CSET_UTF8_F
-!! </pre>
-!! \param hdferr  \herr_t.
+!!                \li H5T_CSET_ASCII_F
+!!                \li H5T_CSET_UTF8_F
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5tget_cset_f(type_id, cset, hdferr)
     IMPLICIT NONE
@@ -924,17 +904,15 @@ CONTAINS
   END SUBROUTINE h5tget_cset_f
 
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Sets character set to be used.
 !!
 !! \param type_id Datatype identifier.
 !! \param cset    Character set type of a string datatype. Possible values are:
-!! <pre>
-!!                 H5T_CSET_ASCII_F
-!!                 H5T_CSET_UTF8_F
-!! </pre>
-!! \param hdferr  \herr_t.
+!!                \li H5T_CSET_ASCII_F
+!!                \li H5T_CSET_UTF8_F
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5tset_cset_f(type_id, cset, hdferr)
     IMPLICIT NONE
@@ -953,19 +931,17 @@ CONTAINS
     hdferr = h5tset_cset_c(type_id, cset)
   END SUBROUTINE h5tset_cset_f
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Retrieves the storage mechanism for a string datatype.
 !!
 !! \param type_id Datatype identifier.
 !! \param strpad  Storage method for a string datatype. Possible values are:
-!! <pre>
-!!                 H5T_STR_NULLTERM_F,
-!!                 H5T_STR_NULLPAD_F,
-!!                 H5T_STR_SPACEPAD_F
-!!                 H5T_STR_ERROR_F
-!! </pre>
-!! \param hdferr  \herr_t.
+!!                \li H5T_STR_NULLTERM_F
+!!                \li H5T_STR_NULLPAD_F
+!!                \li H5T_STR_SPACEPAD_F
+!!                \li H5T_STR_ERROR_F
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5tget_strpad_f(type_id, strpad, hdferr)
     IMPLICIT NONE
@@ -985,19 +961,17 @@ CONTAINS
   END SUBROUTINE h5tget_strpad_f
 
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Defines the storage mechanism for character strings.
 !!
 !! \param type_id Datatype identifier.
 !! \param strpad  Storage method for a string datatype. Possible values are:
-!! <pre>
-!!                 H5T_STR_NULLTERM_F,
-!!                 H5T_STR_NULLPAD_F,
-!!                 H5T_STR_SPACEPAD_F
-!!                 H5T_STR_ERROR_F
-!! </pre>
-!! \param hdferr  \herr_t.
+!!                \li H5T_STR_NULLTERM_F
+!!                \li H5T_STR_NULLPAD_F
+!!                \li H5T_STR_SPACEPAD_F
+!!                \li H5T_STR_ERROR_F
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5tset_strpad_f(type_id, strpad, hdferr)
     IMPLICIT NONE
@@ -1017,13 +991,13 @@ CONTAINS
   END SUBROUTINE h5tset_strpad_f
 
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Retrieves the number of fields in a compound datatype.
 !!
 !! \param type_id     Datatype identifier.
 !! \param num_members Number of members.
-!! \param hdferr      \herr_t.
+!! \param hdferr      \fortran_error
 !!
   SUBROUTINE h5tget_nmembers_f(type_id, num_members, hdferr)
     IMPLICIT NONE
@@ -1043,7 +1017,7 @@ CONTAINS
   END SUBROUTINE h5tget_nmembers_f
 
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Retrieves the name of a field of a compound datatype.
 !!
@@ -1051,7 +1025,7 @@ CONTAINS
 !! \param index       Filed index (0-based).
 !! \param member_name Buffer to hold member&apos;s name.
 !! \param namelen     Name length.
-!! \param hdferr      \herr_t.
+!! \param hdferr      \fortran_error
 !!
   SUBROUTINE h5tget_member_name_f(type_id, index, member_name,  namelen, hdferr)
     IMPLICIT NONE
@@ -1076,14 +1050,14 @@ CONTAINS
   END SUBROUTINE h5tget_member_name_f
 
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Retrieves the offset of a field of a compound datatype.
 !!
 !! \param type_id   Datatype identifier.
 !! \param member_no Number of the field.
 !! \param offset    Byte offset of the requested field.
-!! \param hdferr    \herr_t.
+!! \param hdferr    \fortran_error
 !!
   SUBROUTINE h5tget_member_offset_f(type_id, member_no, offset, hdferr)
     IMPLICIT NONE
@@ -1104,14 +1078,14 @@ CONTAINS
     hdferr = h5tget_member_offset_c(type_id, member_no, offset )
   END SUBROUTINE h5tget_member_offset_f
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Retrieves the index of a compound or enumeration datatype member.
 !!
 !! \param type_id Datatype identifier.
 !! \param name    Name of the field or member whose index to be retrieved from the datatype.
 !! \param index   Based index of the filed or member (0 to N-1).
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5tget_member_index_f(type_id, name, index, hdferr)
     IMPLICIT NONE
@@ -1172,13 +1146,13 @@ CONTAINS
 
 
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Returns sizes of array dimensions.
 !!
 !! \param type_id Array datatype identifier.
 !! \param dims    Buffer to store array datatype dimensions.
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5tget_array_dims_f(type_id, dims, hdferr)
     IMPLICIT NONE
@@ -1199,13 +1173,13 @@ CONTAINS
   END SUBROUTINE h5tget_array_dims_f
 
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Returns the rank of an array datatype.
 !!
 !! \param type_id Array datatype identifier.
 !! \param ndims   Number of array dimensions.
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5tget_array_ndims_f(type_id, ndims, hdferr)
     IMPLICIT NONE
@@ -1226,13 +1200,13 @@ CONTAINS
   END SUBROUTINE h5tget_array_ndims_f
 
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Returns the base datatype from which a datatype is derived.
 !!
 !! \param type_id      Datatype identifier.
 !! \param base_type_id Identifier of the base type.
-!! \param hdferr       \herr_t.
+!! \param hdferr       \fortran_error
 !!
   SUBROUTINE h5tget_super_f(type_id, base_type_id, hdferr)
     IMPLICIT NONE
@@ -1253,14 +1227,14 @@ CONTAINS
   END SUBROUTINE h5tget_super_f
 
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Returns the datatype of the specified member.
 !!
 !! \param type_id   Compound datatype identifier.
 !! \param field_idx Field index (0-based).
 !! \param datatype  Identifier of the member&apos;s datatype.
-!! \param hdferr    \herr_t.
+!! \param hdferr    \fortran_error
 !!
   SUBROUTINE h5tget_member_type_f(type_id,  field_idx, datatype, hdferr)
     IMPLICIT NONE
@@ -1283,20 +1257,18 @@ CONTAINS
   END SUBROUTINE h5tget_member_type_f
 
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Creates a new datatype.
 !!
 !! \param class   Datatype class can be one of:
-!! <pre>
-!!                 H5T_COMPOUND_F
-!!                 H5T_ENUM_F
-!!                 H5T_OPAQUE_F
-!!                 H5T_STRING_F
-!! </pre>
+!!                \li H5T_COMPOUND_F
+!!                \li H5T_ENUM_F
+!!                \li H5T_OPAQUE_F
+!!                \li H5T_STRING_F
 !! \param size    Size of the datatype.
 !! \param type_id Datatype identifier.
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5tcreate_f(class, size, type_id, hdferr)
     IMPLICIT NONE
@@ -1318,7 +1290,7 @@ CONTAINS
   END SUBROUTINE h5tcreate_f
 
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Adds a new member to a compound datatype.
 !!
@@ -1326,7 +1298,7 @@ CONTAINS
 !! \param name     Name of the field to insert.
 !! \param offset   Start of the member in an instance of the compound datatype.
 !! \param field_id Datatype identifier of the field to insert.
-!! \param hdferr   \herr_t.
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5tinsert_f(type_id,  name, offset, field_id, hdferr)
     IMPLICIT NONE
@@ -1355,12 +1327,12 @@ CONTAINS
   END SUBROUTINE h5tinsert_f
 
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Recursively removes padding from within a compound datatype.
 !!
 !! \param type_id Compound datatype identifier.
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5tpack_f(type_id, hdferr)
     IMPLICIT NONE
@@ -1415,15 +1387,15 @@ CONTAINS
 !  END SUBROUTINE h5tinsert_array_f
 
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Creates an array datatype object.
 !!
-!! \param base_id Datatype identifier for the array base datatype
+!! \param base_id Datatype identifier for the array base datatype.
 !! \param rank    Rank of the array.
 !! \param dims    Array dimension sizes.
 !! \param type_id Array datatype identifier.
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5tarray_create_f(base_id, rank, dims, type_id, hdferr)
     IMPLICIT NONE
@@ -1448,13 +1420,13 @@ CONTAINS
   END SUBROUTINE h5tarray_create_f
 
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Creates a new enumeration datatype.
 !!
 !! \param parent_id   Datatype identifier for base datatype.
 !! \param new_type_id Datatype identifier for the enumeration datatype.
-!! \param hdferr      \herr_t.
+!! \param hdferr      \fortran_error
 !!
   SUBROUTINE h5tenum_create_f(parent_id, new_type_id, hdferr)
     IMPLICIT NONE
@@ -1474,7 +1446,7 @@ CONTAINS
     hdferr = h5tenum_create_c(parent_id, new_type_id)
   END SUBROUTINE h5tenum_create_f
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Returns the symbol name corresponding to a specified member of an enumeration datatype.
 !!
@@ -1482,7 +1454,7 @@ CONTAINS
 !! \param value   Value of the enumeration datatype.
 !! \param namelen Name buffer size.
 !! \param name    Buffer to hold symbol name.
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5tenum_nameof_f(type_id,  value, namelen, name, hdferr)
     IMPLICIT NONE
@@ -1508,14 +1480,14 @@ CONTAINS
     hdferr = h5tenum_nameof_c(type_id, value, name, namelen)
   END SUBROUTINE h5tenum_nameof_f
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Returns the value corresponding to a specified member of an enumeration datatype.
 !!
 !! \param type_id Datatype identifier.
 !! \param name    Symbol name.
 !! \param value   Value of the enumeration datatype.
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5tenum_valueof_f(type_id,  name, value, hdferr)
     IMPLICIT NONE
@@ -1543,14 +1515,14 @@ CONTAINS
   END SUBROUTINE h5tenum_valueof_f
 
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Returns the value of an enumeration datatype member.
 !!
 !! \param type_id   Datatype identifier.
 !! \param member_no Number of the enumeration datatype member.
 !! \param value     Value of the enumeration datatype.
-!! \param hdferr    \herr_t.
+!! \param hdferr    \fortran_error
 !!
   SUBROUTINE h5tget_member_value_f(type_id,  member_no, value, hdferr)
     IMPLICIT NONE
@@ -1573,13 +1545,13 @@ CONTAINS
   END SUBROUTINE h5tget_member_value_f
 
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Tags an opaque datatype.
 !!
 !! \param type_id Identifier for opaque datatype.
 !! \param tag     Unique ASCII string with which the opaque datatype is to be tagged.
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5tset_tag_f(type_id, tag, hdferr)
     IMPLICIT NONE
@@ -1604,14 +1576,14 @@ CONTAINS
   END SUBROUTINE h5tset_tag_f
 
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Gets the tag associated with an opaque datatype.
 !!
 !! \param type_id Identifier for opaque datatype.
 !! \param tag     Unique ASCII string associated with opaque datatype.
 !! \param taglen  Length of tag.
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5tget_tag_f(type_id, tag,taglen, hdferr)
     IMPLICIT NONE
@@ -1638,13 +1610,13 @@ CONTAINS
   END SUBROUTINE h5tget_tag_f
 
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Creates a new variable-length datatype.
 !!
 !! \param type_id   Identifier iof base datatype.
 !! \param vltype_id Identifier for VL datatype.
-!! \param hdferr    \herr_t.
+!! \param hdferr    \fortran_error
 !!
   SUBROUTINE h5tvlen_create_f(type_id, vltype_id, hdferr)
     IMPLICIT NONE
@@ -1664,13 +1636,13 @@ CONTAINS
   END SUBROUTINE h5tvlen_create_f
 
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Determines whether a dattype is a variable string.
 !!
 !! \param type_id Datartpe identifier.
 !! \param status  Flag to indicate if datatype is a variable string ( TRUE or FALSE).
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5tis_variable_str_f(type_id, status, hdferr)
     IMPLICIT NONE
@@ -1696,28 +1668,26 @@ CONTAINS
   END SUBROUTINE h5tis_variable_str_f
 
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Returns datatype class of compound datatype member.
 !!
 !! \param type_id   Datartpe identifier.
 !! \param member_no Index of compound datatype member.
 !! \param class     Class type for compound dadtype member. Valid classes:
-!! <pre>
-!!                   H5T_NO_CLASS_F (error)
-!!                   H5T_INTEGER_F
-!!                   H5T_FLOAT_F
-!!                   H5T_TIME_F
-!!                   H5T_STRING_F
-!!                   H5T_BITFIELD_F
-!!                   H5T_OPAQUE_F
-!!                   H5T_COMPOUND_F
-!!                   H5T_REFERENCE_F
-!!                   H5T_ENUM_F
-!!                   H5T_VLEN_F
-!!                   H5T_ARRAY_F
-!! </pre>
-!! \param hdferr    \herr_t.
+!!                  \li H5T_NO_CLASS_F (error)
+!!                  \li H5T_INTEGER_F
+!!                  \li H5T_FLOAT_F
+!!                  \li H5T_TIME_F
+!!                  \li H5T_STRING_F
+!!                  \li H5T_BITFIELD_F
+!!                  \li H5T_OPAQUE_F
+!!                  \li H5T_COMPOUND_F
+!!                  \li H5T_REFERENCE_F
+!!                  \li H5T_ENUM_F
+!!                  \li H5T_VLEN_F
+!!                  \li H5T_ARRAY_F
+!! \param hdferr    \fortran_error
 !!
   SUBROUTINE h5tget_member_class_f(type_id, member_no, class, hdferr)
     IMPLICIT NONE
@@ -1741,13 +1711,13 @@ CONTAINS
   END SUBROUTINE h5tget_member_class_f
 
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Commits a transient datatype to a file, creating a new named datatype, but does not link it into the file structure.
 !!
 !! \param loc_id   A file or group identifier specifying the file in which the new named datatype is to be created.
 !! \param dtype_id A datatype identifier.
-!! \param hdferr   \herr_t.
+!! \param hdferr   \fortran_error
 !! \param tcpl_id  A datatype creation property list identifier (H5P_DEFAULT_F for the default property list.)
 !! \param tapl_id  A datatype access property list identifier should always be passed as the value H5P_DEFAULT_F.
 !!
@@ -1785,13 +1755,13 @@ CONTAINS
   END SUBROUTINE h5tcommit_anon_f
 
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Determines whether a datatype is a named type or a transient type.
 !!
 !! \param dtype_id  A datatype identifier.
 !! \param committed .TRUE. if the datatype has been committed, and .FALSE. if the datatype has not been committed.
-!! \param hdferr    \herr_t.
+!! \param hdferr    \fortran_error
 !!
   SUBROUTINE h5tcommitted_f(dtype_id, committed, hdferr)
     IMPLICIT NONE
@@ -1821,13 +1791,13 @@ CONTAINS
   END SUBROUTINE h5tcommitted_f
 
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Decode A binary object description of data type and return a new object handle.
 !!
 !! \param buf    Buffer for the data space object to be decoded.
 !! \param obj_id Object ID.
-!! \param hdferr \herr_t.
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5tdecode_f(buf, obj_id, hdferr)
     IMPLICIT NONE
@@ -1849,14 +1819,14 @@ CONTAINS
   END SUBROUTINE h5tdecode_f
 
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Encode a data type object description into a binary buffer.
 !!
 !! \param obj_id Identifier of the object to be encoded.
 !! \param buf    Buffer for the object to be encoded into.
 !! \param nalloc If set to zero, returns the size of the buffer needed. Otherwise, it sets the size of \p buf allocated.
-!! \param hdferr \herr_t.
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5tencode_f(obj_id, buf, nalloc, hdferr)
     IMPLICIT NONE
@@ -1881,13 +1851,13 @@ CONTAINS
   END SUBROUTINE h5tencode_f
 
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Returns a copy of a datatype creation property list.
 !!
 !! \param dtype_id Datatype identifier.
 !! \param dtpl_id  Datatype property list identifier.
-!! \param hdferr   \herr_t.
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5tget_create_plist_f(dtype_id, dtpl_id, hdferr)
     IMPLICIT NONE
@@ -1907,14 +1877,14 @@ CONTAINS
   END SUBROUTINE h5tget_create_plist_f
 
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Check whether the library’s default conversion is hard conversion.
 !!
 !! \param src_id Identifier for the source datatype.
 !! \param dst_id Identifier for the destination datatype.
 !! \param flag   .TRUE. for compiler conversion, .FALSE. for library conversion.
-!! \param hdferr \herr_t.
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5tcompiler_conv_f(src_id, dst_id, flag, hdferr)
     IMPLICIT NONE
@@ -1942,7 +1912,7 @@ CONTAINS
   END SUBROUTINE h5tcompiler_conv_f
 
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Returns the native datatype of a specified datatype.
 !!
@@ -1953,7 +1923,7 @@ CONTAINS
 !!                         H5T_DIR_DESCEND,   in descendent order.
 !!                         * NOTE: In C it is defined as a structure: H5T_direction_t
 !! \param native_dtype_id The native datatype identifier for the specified dataset datatype.
-!! \param hdferr          \herr_t.
+!! \param hdferr          \fortran_error
 !!
   SUBROUTINE h5tget_native_type_f(dtype_id, direction, native_dtype_id, hdferr)
     IMPLICIT NONE
@@ -1975,7 +1945,7 @@ CONTAINS
   END SUBROUTINE h5tget_native_type_f
 
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Converts data from between specified datatypes.
 !!
@@ -1983,7 +1953,7 @@ CONTAINS
 !! \param dst_id     Identifier for the destination datatype.
 !! \param nelmts     Size of array buf.
 !! \param buf        Array containing pre-conversion values.
-!! \param hdferr     \herr_t.
+!! \param hdferr     \fortran_error
 !! \param background Background buffer.
 !! \param plist_id   Dataset transfer property list identifier.
 !!
@@ -2024,50 +1994,24 @@ CONTAINS
 
   END SUBROUTINE h5tconvert_f
 
-#ifdef H5_DOXYGEN_FORTRAN
 !>
-!! \ingroup H5T
+!! \ingroup FH5T
 !!
 !! \brief Inserts a new enumeration datatype member.
 !!
-!! \param type_id Datatype identifier for the enumeration datatype.
-!! \param name    Datatype identifier.
-!! \param value   Value of the new member.
-!! \param hdferr  \herr_t.
-!!
-  SUBROUTINE h5tenum_insert___F90_VERSION(type_id,  name, value, hdferr)
-    IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: type_id
-    CHARACTER(LEN=*), INTENT(IN) :: name
-    INTEGER, INTENT(IN) :: value
-    INTEGER, INTENT(OUT) :: hdferr
-    INTEGER :: namelen
-    INTERFACE
-       INTEGER FUNCTION h5tenum_insert_c(type_id, name, namelen, value) BIND(C,NAME='h5tenum_insert_c')
-         IMPORT :: C_CHAR
-         IMPORT :: HID_T
-         IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN) :: type_id
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
-         INTEGER, INTENT(IN) :: value
-         INTEGER :: namelen
-       END FUNCTION h5tenum_insert_c
-    END INTERFACE
-
-    namelen = LEN(name)
-    hdferr = h5tenum_insert_c(type_id, name, namelen, value)
-  END SUBROUTINE h5tenum_insert___F90_VERSION
-!>
-!! \ingroup H5T
-!!
-!! \brief Inserts a new enumeration datatype member.
+!! \note \fortran_approved
 !!
 !! \param type_id Datatype identifier for the enumeration datatype.
 !! \param name    Datatype identifier.
 !! \param value   Pointer to the value of the new member.
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !!
-  SUBROUTINE h5tenum_insert_f(type_id, name, value, hdferr)
+#ifdef H5_DOXYGEN_FORTRAN
+  SUBROUTINE h5tenum_insert_f(&
+#else
+  SUBROUTINE h5tenum_insert_f03(&
+#endif
+      type_id, name, value, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T)  , INTENT(IN) :: type_id
     CHARACTER(LEN=*), INTENT(IN) :: name
@@ -2090,11 +2034,29 @@ CONTAINS
 
     namelen = LEN(name)
     hdferr = h5tenum_insert_ptr_c(type_id, name, namelen, value)
+#ifdef H5_DOXYGEN_FORTRAN
   END SUBROUTINE h5tenum_insert_f
-
 #else
+  END SUBROUTINE h5tenum_insert_f03
+#endif
 
+!>
+!! \ingroup FH5T
+!!
+!! \brief Inserts a new enumeration datatype member.
+!!
+!! \note  \fortran_obsolete
+!!
+!! \param type_id Datatype identifier for the enumeration datatype.
+!! \param name    Datatype identifier.
+!! \param value   Value of the new member.
+!! \param hdferr  \fortran_error
+!!
+#ifdef H5_DOXYGEN_FORTRAN
+  SUBROUTINE h5tenum_insert_f(type_id,  name, value, hdferr)
+#else
   SUBROUTINE h5tenum_insert_f90(type_id,  name, value, hdferr)
+#endif
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: type_id
     CHARACTER(LEN=*), INTENT(IN) :: name
@@ -2115,32 +2077,10 @@ CONTAINS
 
     namelen = LEN(name)
     hdferr = h5tenum_insert_c(type_id, name, namelen, value)
+#ifdef H5_DOXYGEN_FORTRAN
+  END SUBROUTINE h5tenum_insert_f
+#else
   END SUBROUTINE h5tenum_insert_f90
-
-  SUBROUTINE h5tenum_insert_f03(type_id, name, value, hdferr)
-    IMPLICIT NONE
-    INTEGER(HID_T)  , INTENT(IN) :: type_id
-    CHARACTER(LEN=*), INTENT(IN) :: name
-    TYPE(C_PTR)     , INTENT(IN) :: value
-    INTEGER, INTENT(OUT) :: hdferr
-    INTEGER :: namelen
-
-    INTERFACE
-       INTEGER FUNCTION h5tenum_insert_ptr_c(type_id, name, namelen, value) &
-            BIND(C, NAME='h5tenum_insert_ptr_c')
-         IMPORT :: C_CHAR, C_PTR
-         IMPORT :: HID_T
-         IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN) :: type_id
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
-         INTEGER :: namelen
-         TYPE(C_PTR), VALUE :: value
-       END FUNCTION h5tenum_insert_ptr_c
-    END INTERFACE
-
-    namelen = LEN(name)
-    hdferr = h5tenum_insert_ptr_c(type_id, name, namelen, value)
-  END SUBROUTINE h5tenum_insert_f03
 #endif
 
 END MODULE H5T

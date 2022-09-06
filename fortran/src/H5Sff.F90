@@ -1,4 +1,11 @@
-!> @ingroup H5S
+!> @defgroup FH5S Fortran Dataspace (H5S) Interface
+!!
+!! @see H5S, C-API
+!!
+!! @see @ref H5S_UG, User Guide
+!!
+
+!> @ingroup FH5S
 !!
 !! @brief This module contains Fortran interfaces for H5S functions.
 !
@@ -36,14 +43,14 @@ MODULE H5S
 
 CONTAINS
 !>
-!! \ingroup H5S
+!! \ingroup FH5S
 !!
 !! \brief Creates a new simple data space and opens it for access.
 !!
 !! \param rank     Number of dimensions.
 !! \param dims     An array of the size of each dimension.
 !! \param space_id Dataspace identifier.
-!! \param hdferr   \herr_t.
+!! \param hdferr   \fortran_error
 !! \param maxdims  An array of the maximum size of each dimension.
 !!
   SUBROUTINE h5screate_simple_f(rank, dims, space_id, hdferr, maxdims)
@@ -83,12 +90,12 @@ CONTAINS
   END SUBROUTINE h5screate_simple_f
 
 !>
-!! \ingroup H5S
+!! \ingroup FH5S
 !!
 !! \brief Releases and terminates access to a dataspace.
 !!
 !! \param space_id Identifier of dataspace to release.
-!! \param hdferr   \herr_t.
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5sclose_f(space_id, hdferr)
     IMPLICIT NONE
@@ -107,18 +114,16 @@ CONTAINS
   END SUBROUTINE h5sclose_f
 
 !>
-!! \ingroup H5S
+!! \ingroup FH5S
 !!
 !! \brief Creates a new dataspace of a specified type.
 !!
 !! \param classtype The type of the dataspace to be created. Possible values are:
-!! <pre>         
-!!                   H5S_SCALAR_F
-!!                   H5S_SIMPLE_F
-!!                   H5S_NULL_F
-!! </pre>
+!!                  \li H5S_SCALAR_F
+!!                  \li H5S_SIMPLE_F
+!!                  \li H5S_NULL_F
 !! \param space_id  Dataspace identifier.
-!! \param hdferr    \herr_t.
+!! \param hdferr    \fortran_error
 !!
   SUBROUTINE h5screate_f(classtype, space_id, hdferr)
     IMPLICIT NONE
@@ -139,13 +144,13 @@ CONTAINS
   END SUBROUTINE h5screate_f
 
 !>
-!! \ingroup H5S
+!! \ingroup FH5S
 !!
 !! \brief Creates an exact copy of a dataspace.
 !!
 !! \param space_id     Dataspace identifier.
 !! \param new_space_id Identifier of dataspace&apos;s copy.
-!! \param hdferr       \herr_t.
+!! \param hdferr       \fortran_error
 !!
   SUBROUTINE h5scopy_f(space_id, new_space_id, hdferr)
     IMPLICIT NONE
@@ -166,13 +171,13 @@ CONTAINS
   END SUBROUTINE h5scopy_f
 
 !>
-!! \ingroup H5S
+!! \ingroup FH5S
 !!
 !! \brief Get number of hyperslab blocks.
 !!
 !! \param space_id   Dataspace identifier.
 !! \param num_blocks Number of hyperslab blocks in the current hyperslab selection.
-!! \param hdferr     \herr_t.
+!! \param hdferr     \fortran_error
 !!
   SUBROUTINE h5sget_select_hyper_nblocks_f(space_id, num_blocks, hdferr)
     IMPLICIT NONE
@@ -194,7 +199,7 @@ CONTAINS
   END SUBROUTINE h5sget_select_hyper_nblocks_f
 
 !>
-!! \ingroup H5S
+!! \ingroup FH5S
 !!
 !! \brief Gets the list of hyperslab blocks currently selected.
 !!
@@ -202,7 +207,7 @@ CONTAINS
 !! \param startblock Hyperslab block to start with.
 !! \param num_blocks Number of blocks to get.
 !! \param buf        Buffer to hold block list.
-!! \param hdferr     \herr_t.
+!! \param hdferr     \fortran_error
 !!
   SUBROUTINE h5sget_select_hyper_blocklist_f(space_id, startblock, &
                                                     num_blocks, buf, hdferr)
@@ -229,14 +234,14 @@ CONTAINS
   END SUBROUTINE h5sget_select_hyper_blocklist_f
 
 !>
-!! \ingroup H5S
+!! \ingroup FH5S
 !!
 !! \brief Gets the bounding box containing the current selection.
 !!
 !! \param space_id Dataspace identifier.
 !! \param start    Starting coordinates of bounding box.
 !! \param end      Ending coordinates of bounding box, i.e., the coordinates of the diagonally opposite corner.
-!! \param hdferr   \herr_t.
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE  h5sget_select_bounds_f(space_id, start, END, hdferr)
     IMPLICIT NONE
@@ -260,13 +265,13 @@ CONTAINS
   END SUBROUTINE h5sget_select_bounds_f
 
 !>
-!! \ingroup H5S
+!! \ingroup FH5S
 !!
 !! \brief Gets the number of element points in the current selection
 !!
 !! \param space_id   Dataspace identifier.
-!! \param num_points Number of element points in the current dataspace selection
-!! \param hdferr     \herr_t.
+!! \param num_points Number of element points in the current dataspace selection.
+!! \param hdferr     \fortran_error
 !!
   SUBROUTINE h5sget_select_elem_npoints_f(space_id, num_points, hdferr)
     IMPLICIT NONE
@@ -286,7 +291,7 @@ CONTAINS
   END SUBROUTINE h5sget_select_elem_npoints_f
 
 !>
-!! \ingroup H5S
+!! \ingroup FH5S
 !!
 !! \brief Gets the list of element points currently selected.
 !!
@@ -294,7 +299,7 @@ CONTAINS
 !! \param startpoint Element point to start with.
 !! \param num_points Number of element points to get.
 !! \param buf        Buffer with element points selected.
-!! \param hdferr     \herr_t.
+!! \param hdferr     \fortran_error
 !!
   SUBROUTINE h5sget_select_elem_pointlist_f(space_id, startpoint, &
        num_points, buf, hdferr)
@@ -322,22 +327,20 @@ CONTAINS
   END SUBROUTINE h5sget_select_elem_pointlist_f
 
 !>
-!! \ingroup H5S
+!! \ingroup FH5S
 !!
 !! \brief Selects elements to be included in the selection for a dataspace
 !!
 !! \param space_id     Dataspace identifier.
 !! \param operator     Flag, valid values are:
-!! <pre>
-!!                      H5S_SELECT_SET_F
-!!                      H5S_SELECT_APPEND_F
-!!                      H5S_SELECT_PREPEND_F
-!! </pre>
+!!                     \li H5S_SELECT_SET_F
+!!                     \li H5S_SELECT_APPEND_F
+!!                     \li H5S_SELECT_PREPEND_F
 !! \param rank         Number of dataspace dimensions.
 !! \param num_elements Number of elements to be selected.
 !! \param coord        2D (rank x num_elements) array with the elements coordinates ( 1-based); in C the
 !!                     array is stored in 2D as (num_element x rank).
-!! \param hdferr       \herr_t.
+!! \param hdferr       \fortran_error
 !!
   SUBROUTINE h5sselect_elements_f(space_id, OPERATOR, rank, &
        num_elements, coord, hdferr)
@@ -388,12 +391,12 @@ CONTAINS
   END SUBROUTINE h5sselect_elements_f
 
 !>
-!! \ingroup H5S
+!! \ingroup FH5S
 !!
 !! \brief Selects the entire dataspace.
 !!
 !! \param space_id Identifier for the dataspace in which selection being made.
-!! \param hdferr   \herr_t.
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5sselect_all_f(space_id, hdferr)
     IMPLICIT NONE
@@ -412,12 +415,12 @@ CONTAINS
   END SUBROUTINE h5sselect_all_f
 
 !>
-!! \ingroup H5S
+!! \ingroup FH5S
 !!
 !! \brief Resets the selection region to include no elements.
 !!
 !! \param space_id The identifier for the dataspace in which the selection is being reset.
-!! \param hdferr   \herr_t.
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5sselect_none_f(space_id, hdferr)
     IMPLICIT NONE
@@ -436,13 +439,13 @@ CONTAINS
   END SUBROUTINE h5sselect_none_f
 
 !>
-!! \ingroup H5S
+!! \ingroup FH5S
 !!
 !! \brief Verifies that the selection is within the extent of the dataspace.
 !!
-!! \param space_id Identifier for the dataspace for whichselection is verified
+!! \param space_id Identifier for the dataspace for whichselection is verified.
 !! \param status   TRUE if the selection is contained within the extent, FALSE otherwise.
-!! \param hdferr   \herr_t.
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5sselect_valid_f(space_id, status, hdferr)
     IMPLICIT NONE
@@ -467,13 +470,13 @@ CONTAINS
   END SUBROUTINE h5sselect_valid_f
 
 !>
-!! \ingroup H5S
+!! \ingroup FH5S
 !!
 !! \brief Determines the number of elements in a dataspace.
 !!
 !! \param space_id Dataspace identifier.
 !! \param npoints  Number of elements in the dataspace.
-!! \param hdferr   \herr_t.
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5sget_simple_extent_npoints_f(space_id, npoints, hdferr)
     IMPLICIT NONE
@@ -494,13 +497,13 @@ CONTAINS
   END SUBROUTINE h5sget_simple_extent_npoints_f
 
 !>
-!! \ingroup H5S
+!! \ingroup FH5S
 !!
 !! \brief Determines the number of elements in a dataspace selection.
 !!
 !! \param space_id Dataspace identifier.
 !! \param npoints  Number of points in the dataspace selection.
-!! \param hdferr   \herr_t.
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5sget_select_npoints_f(space_id, npoints, hdferr)
     IMPLICIT NONE
@@ -521,13 +524,13 @@ CONTAINS
   END SUBROUTINE h5sget_select_npoints_f
 
 !>
-!! \ingroup H5S
+!! \ingroup FH5S
 !!
 !! \brief Determines the dimensionality of a dataspace
 !!
 !! \param space_id Dataspace identifier.
 !! \param rank     Number of dataspace dimensions.
-!! \param hdferr   \herr_t.
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5sget_simple_extent_ndims_f(space_id, rank, hdferr)
     IMPLICIT NONE
@@ -547,14 +550,14 @@ CONTAINS
 
   END SUBROUTINE h5sget_simple_extent_ndims_f
 !>
-!! \ingroup H5S
+!! \ingroup FH5S
 !!
 !! \brief Retrieves dataspace dimension size and maximum size.
 !!
 !! \param space_id Dataspace identifier.
 !! \param dims     Array to store size of each dimension.
 !! \param maxdims  Array to store maximum size of each dimension.
-!! \param hdferr   \herr_t.
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5sget_simple_extent_dims_f(space_id, dims, maxdims, hdferr)
     IMPLICIT NONE
@@ -577,19 +580,17 @@ CONTAINS
   END SUBROUTINE h5sget_simple_extent_dims_f
 
 !>
-!! \ingroup H5S
+!! \ingroup FH5S
 !!
 !! \brief Determine the current class of a dataspace
 !!
 !! \param space_id  Dataspace identifier.
 !! \param classtype Class type, possible values are:
-!! <pre>
-!!                   H5S_NO_CLASS_F
-!!                   H5S_SCALAR_F
-!!                   H5S_SIMPLE_F
-!!                   H5S_NULL_F
-!! </pre>
-!! \param hdferr    \herr_t.
+!!                  \li H5S_NO_CLASS_F
+!!                  \li H5S_SCALAR_F
+!!                  \li H5S_SIMPLE_F
+!!                  \li H5S_NULL_F
+!! \param hdferr    \fortran_error
 !!
   SUBROUTINE h5sget_simple_extent_type_f(space_id, classtype, hdferr)
     IMPLICIT NONE
@@ -610,7 +611,7 @@ CONTAINS
   END SUBROUTINE h5sget_simple_extent_type_f
   !
 !>
-!! \ingroup H5S
+!! \ingroup FH5S
 !!
 !! \brief Sets or resets the size of an existing dataspace.
 !!
@@ -618,7 +619,7 @@ CONTAINS
 !! \param rank         Dataspace number of dimensions.
 !! \param current_size Array with the new sizes of dimensions.
 !! \param maximum_size Array with the new maximum sizes of dimensions.
-!! \param hdferr       \herr_t.
+!! \param hdferr       \fortran_error
 !!
   SUBROUTINE h5sset_extent_simple_f(space_id, rank, current_size, &
        maximum_size, hdferr)
@@ -644,13 +645,13 @@ CONTAINS
 
   END SUBROUTINE h5sset_extent_simple_f
 !>
-!! \ingroup H5S
+!! \ingroup FH5S
 !!
 !! \brief Determines whether a dataspace is a simple dataspace.
 !!
 !! \param space_id Dataspace identifier.
 !! \param status   Flag to indicate if dataspace is simple or not (TRUE or FALSE).
-!! \param hdferr   \herr_t.
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5sis_simple_f(space_id, status, hdferr)
     IMPLICIT NONE
@@ -675,13 +676,13 @@ CONTAINS
   END SUBROUTINE h5sis_simple_f
 
 !>
-!! \ingroup H5S
+!! \ingroup FH5S
 !!
 !! \brief Sets the offset of a simple dataspace.
 !!
 !! \param space_id Dataspace identifier.
 !! \param offset   The offset at which to position the selection.
-!! \param hdferr   \herr_t.
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5soffset_simple_f(space_id, offset, hdferr)
     IMPLICIT NONE
@@ -702,13 +703,13 @@ CONTAINS
   END SUBROUTINE h5soffset_simple_f
 
 !>
-!! \ingroup H5S
+!! \ingroup FH5S
 !!
 !! \brief Copies the extent of a dataspace.
 !!
 !! \param dest_space_id   The identifier for the dataspace to which the extent is copied.
 !! \param source_space_id The identifier for the dataspace from which the extent is copied.
-!! \param hdferr          \herr_t.
+!! \param hdferr          \fortran_error
 !!
   SUBROUTINE h5sextent_copy_f(dest_space_id, source_space_id, hdferr)
     IMPLICIT NONE
@@ -729,12 +730,12 @@ CONTAINS
   END SUBROUTINE h5sextent_copy_f
 
 !>
-!! \ingroup H5S
+!! \ingroup FH5S
 !!
 !! \brief Removes the extent from a dataspace.
 !!
 !! \param space_id Dataspace identifier.
-!! \param hdferr   \herr_t.
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5sset_extent_none_f(space_id, hdferr)
     IMPLICIT NONE
@@ -752,20 +753,18 @@ CONTAINS
 
   END SUBROUTINE h5sset_extent_none_f
 !>
-!! \ingroup H5S
+!! \ingroup FH5S
 !!
 !! \brief Selects a hyperslab region to add to the current selected
 !!       region
 !!
 !! \param space_id Dataspace identifier.
 !! \param operator Flag, valid values are:
-!! <pre>
-!!                  H5S_SELECT_SET_F
-!!                  H5S_SELECT_OR_F
-!! </pre>
+!!                 \li H5S_SELECT_SET_F
+!!                 \li H5S_SELECT_OR_F
 !! \param start    Array with hyperslab offsets.
 !! \param count    Number of blocks included in the hyperslab.
-!! \param hdferr   \herr_t.
+!! \param hdferr   \fortran_error
 !! \param stride   Array with hyperslab strides.
 !! \param block    Array with hyperslab block sizes.
 !!
@@ -1105,20 +1104,18 @@ CONTAINS
 !  END SUBROUTINE h5smodify_select_f
 
 !>
-!! \ingroup H5S
+!! \ingroup FH5S
 !!
 !! \brief Retrieve the type of selection
 !!
 !! \param space_id Dataspace identifier with selection.
 !! \param type     Selection type flag, valid values are:
-!! <pre>
-!!                         H5S_SEL_ERROR_F
-!!                         H5S_SEL_NONE_F
-!!                         H5S_SEL_POINTS_F
-!!                         H5S_SEL_HYPERSLABS_F
-!!                         H5S_SEL_ALL_F
-!! </pre>
-!! \param hdferr   \herr_t.
+!!                 \li H5S_SEL_ERROR_F
+!!                 \li H5S_SEL_NONE_F
+!!                 \li H5S_SEL_POINTS_F
+!!                 \li H5S_SEL_HYPERSLABS_F
+!!                 \li H5S_SEL_ALL_F
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5sget_select_type_f(space_id, TYPE, hdferr)
     IMPLICIT NONE
@@ -1140,13 +1137,13 @@ CONTAINS
   END SUBROUTINE h5sget_select_type_f
 
 !>
-!! \ingroup H5S
+!! \ingroup FH5S
 !!
 !! \brief Decode a binary object description of data space and return a new object handle.
 !!
 !! \param buf    Buffer for the data space object to be decoded.
 !! \param obj_id Object ID.
-!! \param hdferr \herr_t.
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5sdecode_f(buf, obj_id, hdferr)
     IMPLICIT NONE
@@ -1167,15 +1164,15 @@ CONTAINS
   END SUBROUTINE h5sdecode_f
 
 !>
-!! \ingroup H5S
+!! \ingroup FH5S
 !!
 !! \brief Encode a data space object description into a binary buffer.
 !!
 !! \param obj_id  Identifier of the object to be encoded.
 !! \param buf     Buffer for the object to be encoded into.
 !! \param nalloc  The size of the buffer needed.
-!! \param hdferr  \herr_t.
-!! \param fapl_id File access property list identifier
+!! \param hdferr  \fortran_error
+!! \param fapl_id File access property list identifier.
 !!
   SUBROUTINE h5sencode_f(obj_id, buf, nalloc, hdferr, fapl_id)
     IMPLICIT NONE
@@ -1206,14 +1203,14 @@ CONTAINS
   END SUBROUTINE h5sencode_f
 
 !>
-!! \ingroup H5S
+!! \ingroup FH5S
 !!
 !! \brief Determines whether two dataspace extents are equal.
 !!
 !! \param space1_id First dataspace identifier.
 !! \param space2_id Second dataspace identifier.
 !! \param Equal     .TRUE. if equal, .FALSE. if unequal.
-!! \param hdferr    \herr_t.
+!! \param hdferr    \fortran_error
 !!
   SUBROUTINE h5sextent_equal_f(space1_id, space2_id, equal, hdferr)
     IMPLICIT NONE
@@ -1240,7 +1237,7 @@ CONTAINS
   END SUBROUTINE h5sextent_equal_f
 
 !>
-!! \ingroup H5S
+!! \ingroup FH5S
 !!
 !! \brief Retrieves a regular hyperslab selection.
 !!
@@ -1249,7 +1246,7 @@ CONTAINS
 !! \param stride   Stride of the regular hyperslab.
 !! \param count    Number of blocks in the regular hyperslab.
 !! \param block    Size of a block in the regular hyperslab.
-!! \param hdferr   \herr_t.
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5sget_regular_hyperslab_f(space_id, start, stride, count, block, hdferr)
 
@@ -1297,13 +1294,13 @@ CONTAINS
   END SUBROUTINE h5sget_regular_hyperslab_f
 
 !>
-!! \ingroup H5S
+!! \ingroup FH5S
 !!
 !! \brief Retrieves a regular hyperslab selection.
 !!
 !! \param space_id  The identifier of the dataspace.
 !! \param IsRegular TRUE or FALSE for hyperslab selection if successful.
-!! \param hdferr    \herr_t.
+!! \param hdferr    \fortran_error
 !!
   SUBROUTINE h5sis_regular_hyperslab_f(space_id, IsRegular, hdferr)
     IMPLICIT NONE

@@ -1,4 +1,11 @@
-!> @ingroup H5G
+!> @defgroup FH5G Fortran Group (H5G) Interface
+!!
+!! @see H5G, C-API
+!!
+!! @see @ref H5G_UG, User Guide
+!!
+
+!> @ingroup FH5G
 !!
 !! @brief This module contains Fortran interfaces for H5G functions.
 !
@@ -36,16 +43,16 @@ MODULE H5G
 CONTAINS
 
 !>
-!! \ingroup H5G
+!! \ingroup FH5G
 !!
 !! \brief Creates a new group.
 !!
 !! \param loc_id    Location identifier.
 !! \param name      Group name at the specified location.
 !! \param grp_id    Group identifier.
-!! \param hdferr    \herr_t.
+!! \param hdferr    \fortran_error
 !! \param size_hint A parameter indicating the number of bytes to reserve for the names that will appear in the group.
-!!                  Set to OBJECT_NAMELEN_DEFAULT_F if using any of the optional parameters lcpl_id, gcpl_id, 
+!!                  Set to OBJECT_NAMELEN_DEFAULT_F if using any of the optional parameters lcpl_id, gcpl_id,
 !!                  and/or gapl_id when not using keywords in specifying the optional parameters.
 !! \param lcpl_id   Property list for link creation.
 !! \param gcpl_id   Property list for group creation.
@@ -102,14 +109,14 @@ CONTAINS
   END SUBROUTINE h5gcreate_f
 
 !>
-!! \ingroup H5G
+!! \ingroup FH5G
 !!
 !! \brief Opens an existing group.
 !!
 !! \param loc_id  Location identifier.
 !! \param name    Name of the group to open.
 !! \param grp_id  Group identifier.
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !! \param gapl_id Group access property list identifier.
 !!
   SUBROUTINE h5gopen_f(loc_id, name, grp_id, hdferr, gapl_id)
@@ -143,12 +150,12 @@ CONTAINS
 
   END SUBROUTINE h5gopen_f
 !>
-!! \ingroup H5G
+!! \ingroup FH5G
 !!
 !! \brief Closes the specified group.
 !!
 !! \param grp_id Group identifier.
-!! \param hdferr \herr_t.
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5gclose_f(grp_id, hdferr)
     IMPLICIT NONE
@@ -165,7 +172,7 @@ CONTAINS
 
   END SUBROUTINE h5gclose_f
 !>
-!! \ingroup H5G
+!! \ingroup FH5G
 !!
 !! \brief Returns name and type of the group member identified by its index.
 !!
@@ -174,7 +181,7 @@ CONTAINS
 !! \param idx      Object index (zero-based).
 !! \param obj_name Object name.
 !! \param obj_type Object type.
-!! \param hdferr   \herr_t.
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5gget_obj_info_idx_f(loc_id, name, idx, &
        obj_name, obj_type, hdferr)
@@ -212,14 +219,14 @@ CONTAINS
   END SUBROUTINE h5gget_obj_info_idx_f
 
 !>
-!! \ingroup H5G
+!! \ingroup FH5G
 !!
 !! \brief Returns the number of group members.
 !!
 !! \param loc_id   Location identifier.
 !! \param name     Name of the group at the specified location.
 !! \param nmembers Number of group members.
-!! \param hdferr   \herr_t.
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5gn_members_f(loc_id, name, nmembers, hdferr)
     IMPLICIT NONE
@@ -227,9 +234,9 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(IN) :: name
     INTEGER, INTENT(OUT) :: nmembers
     INTEGER, INTENT(OUT) :: hdferr
-    
+
     INTEGER :: namelen ! Length of the name character string
-    
+
     INTERFACE
        INTEGER FUNCTION h5gn_members_c(loc_id, name, namelen, nmembers) &
             BIND(C,NAME='h5gn_members_c')
@@ -241,25 +248,23 @@ CONTAINS
          INTEGER, INTENT(OUT) :: nmembers
        END FUNCTION h5gn_members_c
     END INTERFACE
-    
+
     namelen = LEN(name)
     hdferr = h5gn_members_c(loc_id, name, namelen, nmembers)
-    
+
   END SUBROUTINE h5gn_members_f
 !>
-!! \ingroup H5G
+!! \ingroup FH5G
 !!
 !! \brief Creates a link of the specified type from new_name to current_name.
 !!
 !! \param loc_id       Location identifier.
 !! \param link_type    Link type; possible values are:
-!! <pre>
-!!                         H5G_LINK_HARD_F (0)
-!!                         H5G_LINK_SOFT_F (1)
-!! </pre>
+!!                     \li H5G_LINK_HARD_F
+!!                     \li H5G_LINK_SOFT_F
 !! \param current_name Name of the existing object if link is a hard link. Can be anything for the soft link.
 !! \param new_name     New name for the object.
-!! \param hdferr       \herr_t.
+!! \param hdferr       \fortran_error
 !!
   SUBROUTINE h5glink_f(loc_id, link_type, current_name, &
        new_name, hdferr)
@@ -296,7 +301,7 @@ CONTAINS
   END SUBROUTINE h5glink_f
 
 !>
-!! \ingroup H5G
+!! \ingroup FH5G
 !!
 !! \brief Creates a link of the specified type from new_name
 !!        to current_name. current_name and new_name are interpreted
@@ -305,13 +310,11 @@ CONTAINS
 !! \param cur_loc_id Location identifier.
 !! \param cur_name   Name of the existing object if link is a hard link. Can be anything for the soft link.
 !! \param link_type  Link type; possible values are:
-!! <pre>
-!!                         H5G_LINK_HARD_F (0)
-!!                         H5G_LINK_SOFT_F (1)
-!! </pre>
+!!                   \li H5G_LINK_HARD_F
+!!                   \li H5G_LINK_SOFT_F
 !! \param new_loc_id New location identifier.
 !! \param new_name   New name for the object.
-!! \param hdferr     \herr_t.
+!! \param hdferr     \fortran_error
 !!
   SUBROUTINE h5glink2_f(cur_loc_id, cur_name, link_type, new_loc_id, &
        new_name, hdferr)
@@ -350,14 +353,14 @@ CONTAINS
   END SUBROUTINE h5glink2_f
 
 !>
-!! \ingroup H5G
+!! \ingroup FH5G
 !!
 !! \brief Removes the specified name from the group graph and
 !!        decrements the link count for the object to which name points
 !!
 !! \param loc_id Location identifier.
 !! \param name   Name of the object to unlink.
-!! \param hdferr \herr_t.
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5gunlink_f(loc_id, name, hdferr)
     IMPLICIT NONE
@@ -381,14 +384,14 @@ CONTAINS
   END SUBROUTINE h5gunlink_f
 
 !>
-!! \ingroup H5G
+!! \ingroup FH5G
 !!
 !! \brief Renames an object within an HDF5 file.
 !!
 !! \param loc_id   Location identifier.
 !! \param name     Object&apos;s name at specified location.
 !! \param new_name Object&apos;s new name.
-!! \param hdferr   \herr_t.
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5gmove_f(loc_id, name, new_name, hdferr)
     IMPLICIT NONE
@@ -416,7 +419,7 @@ CONTAINS
     hdferr = h5gmove_c(loc_id, name, namelen, new_name, new_namelen)
   END SUBROUTINE h5gmove_f
 !>
-!! \ingroup H5G
+!! \ingroup FH5G
 !!
 !! \brief Renames an object within an HDF5 file.
 !!
@@ -424,7 +427,7 @@ CONTAINS
 !! \param src_name   Object&apos;s name at specified original location.
 !! \param dst_loc_id Original location identifier.
 !! \param dst_name   Object&apos;s new name.
-!! \param hdferr     \herr_t.
+!! \param hdferr     \fortran_error
 !!
   SUBROUTINE h5gmove2_f(src_loc_id, src_name, dst_loc_id, dst_name, hdferr)
     IMPLICIT NONE
@@ -455,7 +458,7 @@ CONTAINS
     hdferr = h5gmove2_c(src_loc_id, src_name, src_namelen, dst_loc_id, dst_name, dst_namelen)
   END SUBROUTINE h5gmove2_f
 !>
-!! \ingroup H5G
+!! \ingroup FH5G
 !!
 !! \brief Returns the name of the object that the symbolic link points to.
 !!
@@ -463,7 +466,7 @@ CONTAINS
 !! \param name   Symbolic link to the object whose name is to be returned.
 !! \param size   Maximum number of characters to be returned.
 !! \param buffer A buffer to hold the name of the object being sought.
-!! \param hdferr \herr_t.
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5gget_linkval_f(loc_id, name, size, buffer, hdferr)
     IMPLICIT NONE
@@ -491,14 +494,14 @@ CONTAINS
   END SUBROUTINE h5gget_linkval_f
 
 !>
-!! \ingroup H5G
+!! \ingroup FH5G
 !!
 !! \brief Sets comment for specified object.
 !!
 !! \param loc_id  Location identifier.
 !! \param name    Name of the object.
 !! \param comment Comment to set for the object.
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5gset_comment_f(loc_id, name, comment, hdferr)
     IMPLICIT NONE
@@ -527,7 +530,7 @@ CONTAINS
     hdferr = h5gset_comment_c(loc_id, name, namelen, comment, commentlen)
   END SUBROUTINE h5gset_comment_f
 !>
-!! \ingroup H5G
+!! \ingroup FH5G
 !!
 !! \brief Retrieves comment for specified object.
 !!
@@ -535,7 +538,7 @@ CONTAINS
 !! \param name   Name of the object at specified location.
 !! \param size   Size of the buffer required to hold comment.
 !! \param buffer Buffer to hold object&apos;s comment.
-!! \param hdferr \herr_t.
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5gget_comment_f(loc_id, name, size, buffer, hdferr)
     IMPLICIT NONE
@@ -563,13 +566,13 @@ CONTAINS
 
   END SUBROUTINE h5gget_comment_f
 !>
-!! \ingroup H5G
+!! \ingroup FH5G
 !!
 !! \brief Creates a new empty group without linking it into the file structure.
 !!
 !! \param loc_id  Location identifier.
 !! \param grp_id  Group identifier.
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !! \param gcpl_id Group creation property list identifier.
 !! \param gapl_id Group access property list identifier.
 !!
@@ -604,13 +607,13 @@ CONTAINS
 
   END SUBROUTINE h5Gcreate_anon_f
 !>
-!! \ingroup H5G
+!! \ingroup FH5G
 !!
 !! \brief Gets a group creation property list identifier.
 !!
 !! \param grp_id  Group identifier.
 !! \param gcpl_id Group creation property list identifier.
-!! \param hdferr  \herr_t.
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5gget_create_plist_f(grp_id, gcpl_id, hdferr)
     IMPLICIT NONE
@@ -630,20 +633,18 @@ CONTAINS
   END SUBROUTINE h5gget_create_plist_f
 
 !>
-!! \ingroup H5G
+!! \ingroup FH5G
 !!
 !! \brief Retrieves information about a group
 !!
 !! \param group_id     Group identifier.
 !! \param storage_type Type of storage for links in group:
-!! <pre>
-!!                       H5G_STORAGE_TYPE_COMPACT_F: Compact storage
-!!                       H5G_STORAGE_TYPE_DENS_FE: Indexed storage
-!!                       H5G_STORAGE_TYPE_SYMBOL_TABLE_F: Symbol tables, the original HDF5 structure
-!! </pre>
+!!                     \li H5G_STORAGE_TYPE_COMPACT_F: Compact storage
+!!                     \li H5G_STORAGE_TYPE_DENS_FE: Indexed storage
+!!                     \li H5G_STORAGE_TYPE_SYMBOL_TABLE_F: Symbol tables, the original HDF5 structure
 !! \param nlinks       Number of links in group.
 !! \param max_corder   Current maximum creation order value for group.
-!! \param hdferr       \herr_t.
+!! \param hdferr       \fortran_error
 !! \param mounted      Whether group has a file mounted on it.
 !!
   SUBROUTINE h5gget_info_f(group_id, storage_type, nlinks, max_corder, hdferr, mounted)
@@ -681,7 +682,7 @@ CONTAINS
 
   END SUBROUTINE h5gget_info_f
 !>
-!! \ingroup H5G
+!! \ingroup FH5G
 !!
 !! \brief Retrieves information about a group, according to the group’s position within an index.
 !!
@@ -691,14 +692,12 @@ CONTAINS
 !! \param order        Order of the count in the index.
 !! \param n            Position in the index of the group for which information is retrieved.
 !! \param storage_type Type of storage for links in group:
-!! <pre>
-!!                      H5G_STORAGE_TYPE_COMPACT_F: Compact storage
-!!                      H5G_STORAGE_TYPE_DENSE_F: Indexed storage
-!!                      H5G_STORAGE_TYPE_SYMBOL_TABLE_F: Symbol tables, the original HDF5 structure
-!! </pre>
+!!                     \li H5G_STORAGE_TYPE_COMPACT_F: Compact storage
+!!                     \li H5G_STORAGE_TYPE_DENSE_F: Indexed storage
+!!                     \li H5G_STORAGE_TYPE_SYMBOL_TABLE_F: Symbol tables, the original HDF5 structure
 !! \param nlinks       Number of links in group.
 !! \param max_corder   Current maximum creation order value for group.
-!! \param hdferr       \herr_t.
+!! \param hdferr       \fortran_error
 !! \param lapl_id      Link access property list.
 !! \param mounted      Whether group has a file mounted on it.
 !!
@@ -761,24 +760,21 @@ CONTAINS
 
   END SUBROUTINE h5gget_info_by_idx_f
 !>
-!! \ingroup H5G
+!! \ingroup FH5G
 !!
 !! \brief Retrieves information about a group.
 !!
-!! \param loc_id     File or group identifier.
-!! \param group_name Name of group containing group for which information is to be retrieved.
-!!
+!! \param loc_id       File or group identifier.
+!! \param group_name   Name of group containing group for which information is to be retrieved.
 !! \param storage_type Type of storage for links in group:
-!! <pre>
-!!                    H5G_STORAGE_TYPE_COMPACT_F: Compact storage
-!!                    H5G_STORAGE_TYPE_DENSE_F: Indexed storage
-!!                    H5G_STORAGE_TYPE_SYMBOL_TABLE_F: Symbol tables, the original HDF5 structure
-!! </pre>
-!! \param nlinks      Number of links in group.
-!! \param max_corder  Current maximum creation order value for group.
-!! \param hdferr      \herr_t.
-!! \param lapl_id     Link access property list.
-!! \param mounted     Whether group has a file mounted on it.
+!!                     \li H5G_STORAGE_TYPE_COMPACT_F: Compact storage
+!!                     \li H5G_STORAGE_TYPE_DENSE_F: Indexed storage
+!!                     \li H5G_STORAGE_TYPE_SYMBOL_TABLE_F: Symbol tables, the original HDF5 structure
+!! \param nlinks       Number of links in group.
+!! \param max_corder   Current maximum creation order value for group.
+!! \param hdferr       \fortran_error
+!! \param lapl_id      Link access property list.
+!! \param mounted      Whether group has a file mounted on it.
 !!
   SUBROUTINE h5gget_info_by_name_f(loc_id, group_name, &
        storage_type, nlinks, max_corder, hdferr, lapl_id, mounted)
