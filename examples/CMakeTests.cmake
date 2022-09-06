@@ -99,7 +99,6 @@ if (HDF5_TEST_SERIAL)
           -D "TEST_EXPECT=0"
           -D "TEST_SKIP_COMPARE=TRUE"
           -D "TEST_OUTPUT=${example}.txt"
-          #-D "TEST_REFERENCE=${example}.out"
           -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
           -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
