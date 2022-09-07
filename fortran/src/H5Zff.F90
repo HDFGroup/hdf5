@@ -48,13 +48,13 @@ CONTAINS
 !! \brief Unregisters specified filters.
 !!
 !! \param filter Filter; may have one of the following values:
-!!           \li H5Z_FILTER_DEFLATE_F
-!!           \li H5Z_FILTER_SZIP_F
-!!           \li H5Z_FILTER_NBIT_F
-!!           \li H5Z_FILTER_SCALEOFFSET_F
-!!           \li H5Z_FILTER_SHUFFLE_F
-!!           \li H5Z_FILTER_FLETCHER32_F
-!! \param hdferr \fortran_error.
+!!               \li H5Z_FILTER_DEFLATE_F
+!!               \li H5Z_FILTER_SZIP_F
+!!               \li H5Z_FILTER_NBIT_F
+!!               \li H5Z_FILTER_SCALEOFFSET_F
+!!               \li H5Z_FILTER_SHUFFLE_F
+!!               \li H5Z_FILTER_FLETCHER32_F
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5zunregister_f(filter, hdferr)
     IMPLICIT NONE
@@ -74,14 +74,14 @@ CONTAINS
 !! \brief Queries if filter is available
 !!
 !! \param filter  Filter; may be one of the following:
-!!            \li H5Z_FILTER_DEFLATE_F
-!!            \li H5Z_FILTER_SZIP_F
-!!            \li H5Z_FILTER_NBIT_F
-!!            \li H5Z_FILTER_SCALEOFFSET_F
-!!            \li H5Z_FILTER_SHUFFLE_F
-!!            \li H5Z_FILTER_FLETCHER32_F
+!!                \li H5Z_FILTER_DEFLATE_F
+!!                \li H5Z_FILTER_SZIP_F
+!!                \li H5Z_FILTER_NBIT_F
+!!                \li H5Z_FILTER_SCALEOFFSET_F
+!!                \li H5Z_FILTER_SHUFFLE_F
+!!                \li H5Z_FILTER_FLETCHER32_F
 !! \param status  Flag; .TRUE. if filter is available, .FALSE. otherwise.
-!! \param hdferr  \fortran_error.
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5zfilter_avail_f(filter, status, hdferr)
     IMPLICIT NONE
@@ -110,16 +110,16 @@ CONTAINS
 !! \brief Queries if filter has its encoder and/or decoder available.
 !!
 !! \param filter       Filter; may be one of the following:
-!!                 \li H5Z_FILTER_DEFLATE_F
-!!                 \li H5Z_FILTER_SZIP_F
-!!                 \li   H5Z_FILTER_NBIT_F
-!!                 \li H5Z_FILTER_SCALEOFFSET_F
-!!                 \li H5Z_FILTER_SHUFFLE_F
-!!                 \li  H5Z_FILTER_FLETCHER32_Ffilter
-!! \param config_flags Flag, indicates if filter has its encoder and/or decoder available, possiable values:
-!!                 \li H5Z_FILTER_ENCODE_ENABLED_F
-!!                 \li 5Z_FILTER_DECODE_ENABLED_F
-!! \param hdferr       \fortran_error.
+!!                     \li H5Z_FILTER_DEFLATE_F
+!!                     \li H5Z_FILTER_SZIP_F
+!!                     \li H5Z_FILTER_NBIT_F
+!!                     \li H5Z_FILTER_SCALEOFFSET_F
+!!                     \li H5Z_FILTER_SHUFFLE_F
+!!                     \li H5Z_FILTER_FLETCHER32_Ffilter
+!! \param config_flags Flag, indicates if filter has its encoder and/or decoder available, possible values:
+!!                     \li H5Z_FILTER_ENCODE_ENABLED_F
+!!                     \li H5Z_FILTER_DECODE_ENABLED_F
+!! \param hdferr       \fortran_error
 !!
   SUBROUTINE h5zget_filter_info_f(filter, config_flags, hdferr)
     IMPLICIT NONE

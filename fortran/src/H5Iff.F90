@@ -48,16 +48,16 @@ CONTAINS
 !!
 !! \brief Retrieves the type of an object.
 !!
-!! \param obj_id  Object identifier.
-!! \param type    Type of the object, possible values:
-!!            \li H5I_FILE_F
-!!            \li H5I_GROUP_F
-!!            \li H5I_DATATYPE_F
-!!            \li H5I_DATASPACE_F
-!!            \li H5I_DATASET_F
-!!            \li H5I_ATTR_F
-!!            \li H5I_BADID_F
-!! \param hdferr \fortran_error.
+!! \param obj_id Object identifier.
+!! \param type   Type of the object, possible values:
+!!               \li H5I_FILE_F
+!!               \li H5I_GROUP_F
+!!               \li H5I_DATATYPE_F
+!!               \li H5I_DATASPACE_F
+!!               \li H5I_DATASET_F
+!!               \li H5I_ATTR_F
+!!               \li H5I_BADID_F
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5iget_type_f(obj_id, TYPE, hdferr)
     IMPLICIT NONE
@@ -78,13 +78,13 @@ CONTAINS
 !>
 !! \ingroup FH5I
 !!
-!! \brief Gets a name of an object specified by its idetifier.
+!! \brief Gets a name of an object specified by its identifier.
 !!
 !! \param obj_id    Attribute identifier.
 !! \param buf_size  Size of a buffer to read name in.
-!! \param buf       Buffer to read name in, name will be truncated if buffer is not big enough
+!! \param buf       Buffer to read name in, name will be truncated if buffer is not big enough.
 !! \param name_size Name size.
-!! \param hdferr    \fortran_error.
+!! \param hdferr    \fortran_error
 !!
   SUBROUTINE h5iget_name_f(obj_id, buf, buf_size, name_size, hdferr)
     IMPLICIT NONE
@@ -115,7 +115,7 @@ CONTAINS
 !!
 !! \param obj_id    Object identifier.
 !! \param ref_count Current reference count of the ID.
-!! \param hdferr    \fortran_error.
+!! \param hdferr    \fortran_error
 !!
   SUBROUTINE h5iinc_ref_f(obj_id, ref_count, hdferr)
     IMPLICIT NONE
@@ -140,7 +140,7 @@ CONTAINS
 !!
 !! \param obj_id    Object identifier.
 !! \param ref_count Current reference count of the ID.
-!! \param hdferr    \fortran_error.
+!! \param hdferr    \fortran_error
 !!
   SUBROUTINE h5idec_ref_f(obj_id, ref_count, hdferr)
     IMPLICIT NONE
@@ -165,7 +165,7 @@ CONTAINS
 !!
 !! \param obj_id    Object identifier.
 !! \param ref_count Current reference count of the ID.
-!! \param hdferr     \fortran_error.
+!! \param hdferr     \fortran_error
 !!
   SUBROUTINE h5iget_ref_f(obj_id, ref_count, hdferr)
     IMPLICIT NONE
@@ -189,7 +189,7 @@ CONTAINS
 !!
 !! \param obj_id  Object identifier.
 !! \param file_id File identifier.
-!! \param hdferr  \fortran_error.
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5iget_file_id_f(obj_id, file_id, hdferr)
     IMPLICIT NONE
@@ -213,7 +213,7 @@ CONTAINS
 !!
 !! \param id      Identifier.
 !! \param valid   Status of id as a valid identifier.
-!! \param hdferr  \fortran_error.
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5iis_valid_f(id, valid, hdferr)
     IMPLICIT NONE

@@ -632,7 +632,7 @@ CONTAINS
 !!
 !! \brief Closes HDF5 Fortran interface.
 !!
-!! \param error \fortran_error.
+!! \param error \fortran_error
 !!
   SUBROUTINE h5close_f(error)
     USE H5F, ONLY : h5fget_obj_count_f, H5OPEN_NUM_OBJ
@@ -673,7 +673,7 @@ CONTAINS
 !! \param majnum  Major version of the library.
 !! \param minnum  Minor version of the library.
 !! \param relnum  Release version of the library.
-!! \param error   \fortran_error.
+!! \param error   \fortran_error
 !!
   SUBROUTINE h5get_libversion_f(majnum, minnum, relnum, error)
     IMPLICIT NONE
@@ -698,7 +698,7 @@ CONTAINS
 !! \param majnum Major version of the library.
 !! \param minnum Minor version of the library.
 !! \param relnum Release version of the library.
-!! \param error  \fortran_error.
+!! \param error  \fortran_error
 !!
   SUBROUTINE h5check_version_f(majnum, minnum, relnum, error)
     IMPLICIT NONE
@@ -720,7 +720,7 @@ CONTAINS
 !!
 !! \brief Garbage collects on all free-lists of all types.
 !!
-!! \param error \fortran_error.
+!! \param error \fortran_error
 !!
   SUBROUTINE h5garbage_collect_f(error)
     IMPLICIT NONE
@@ -739,7 +739,7 @@ CONTAINS
 !!
 !! \brief Instructs library not to install atexit cleanup routine.
 !!
-!! \param error \fortran_error.
+!! \param error \fortran_error
 !!
   SUBROUTINE h5dont_atexit_f(error)
     IMPLICIT NONE
@@ -763,8 +763,7 @@ CONTAINS
 !! \param flag Whether KIND is of type INTEGER or REAL:
 !!             \li H5_INTEGER_KIND - integer
 !!             \li H5_REAL_KIND    - real
-!!
-!! \return h5_type Returns the type
+!! \result h5_type Returns the type.
 !!
   INTEGER(HID_T) FUNCTION h5kind_to_type(ikind, flag) RESULT(h5_type)
     USE ISO_C_BINDING
@@ -815,7 +814,7 @@ CONTAINS
 !! \param start  Starting pointer address
 !! \param end    Ending pointer address
 !!
-!! \return offset Offset of a member within the derived type
+!! \result offset Offset of a member within the derived type.
 !!
   FUNCTION h5offsetof(start,end) RESULT(offset)
     IMPLICIT NONE
@@ -835,15 +834,15 @@ CONTAINS
 !! \brief Convert time_t structure (C) to Fortran DATE AND TIME storage format.
 !!
 !! \param stdtime_t Object of type time_t that contains a time value
-!! \return datetime  A date/time array using Fortran conventions:
-!!                 \li datetime(1) = year
-!!                 \li datetime(2) = month
-!!                 \li datetime(3) = day
-!!                 \li datetime(4) = 0 ! time is expressed as UTC (or GMT timezone)
-!!                 \li datetime(5) = hour
-!!                 \li datetime(6) = minute
-!!                 \li datetime(7) = second
-!!                 \li datetime(8) = millisecond -- not available, assigned - HUGE(0)
+!! \result datetime  A date/time array using Fortran conventions:
+!!                  \li datetime(1) = year
+!!                  \li datetime(2) = month
+!!                  \li datetime(3) = day
+!!                  \li datetime(4) = 0 ! time is expressed as UTC (or GMT timezone)
+!!                  \li datetime(5) = hour
+!!                  \li datetime(6) = minute
+!!                  \li datetime(7) = second
+!!                  \li datetime(8) = millisecond -- not available, assigned - HUGE(0)
 !!
   FUNCTION h5gmtime(stdtime_t) RESULT(datetime)
     IMPLICIT NONE

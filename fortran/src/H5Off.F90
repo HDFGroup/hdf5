@@ -7,35 +7,34 @@
 
 !> @ingroup FH5O
 !!
-!!  @brief This file contains Fortran interfaces for H5O functions.
-!!
-!!
-!! COPYRIGHT
-!! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-!!   Copyright by The HDF Group.                                               *
-!!   Copyright by the Board of Trustees of the University of Illinois.         *
-!!   All rights reserved.                                                      *
-!!                                                                             *
-!!   This file is part of HDF5.  The full HDF5 copyright notice, including     *
-!!   terms governing use, modification, and redistribution, is contained in    *
-!!   the COPYING file, which can be found at the root of the source code       *
-!!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
-!!   If you do not have access to either file, you may request a copy from     *
-!!   help@hdfgroup.org.                                                        *
-!! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-!!
-!! NOTES
-!!       _____ __  __ _____   ____  _____ _______       _   _ _______
-!!      |_   _|  \/  |  __ \ / __ \|  __ \__   __|/\   | \ | |__   __|
-!! ****   | | | \  / | |__) | |  | | |__) | | |  /  \  |  \| |  | |    ****
-!! ****   | | | |\/| |  ___/| |  | |  _  /  | | / /\ \ | . ` |  | |    ****
-!! ****  _| |_| |  | | |    | |__| | | \ \  | |/ ____ \| |\  |  | |    ****
-!!      |_____|_|  |_|_|     \____/|_|  \_\ |_/_/    \_\_| \_|  |_|
-!!
-!!  If you add a new H5O function you must add the function name to the
-!!  Windows dll file 'hdf5_fortrandll.def.in' in the fortran/src directory.
-!!  This is needed for Windows based operating systems.
-!!
+!!  @brief This module contains Fortran interfaces for H5O functions.
+!
+! COPYRIGHT
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+!   Copyright by The HDF Group.                                               *
+!   Copyright by the Board of Trustees of the University of Illinois.         *
+!   All rights reserved.                                                      *
+!                                                                             *
+!   This file is part of HDF5.  The full HDF5 copyright notice, including     *
+!   terms governing use, modification, and redistribution, is contained in    *
+!   the COPYING file, which can be found at the root of the source code       *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
+!   If you do not have access to either file, you may request a copy from     *
+!   help@hdfgroup.org.                                                        *
+! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+!
+! NOTES
+!       _____ __  __ _____   ____  _____ _______       _   _ _______
+!      |_   _|  \/  |  __ \ / __ \|  __ \__   __|/\   | \ | |__   __|
+! ****   | | | \  / | |__) | |  | | |__) | | |  /  \  |  \| |  | |    ****
+! ****   | | | |\/| |  ___/| |  | |  _  /  | | / /\ \ | . ` |  | |    ****
+! ****  _| |_| |  | | |    | |__| | | \ \  | |/ ____ \| |\  |  | |    ****
+!      |_____|_|  |_|_|     \____/|_|  \_\ |_/_/    \_\_| \_|  |_|
+!
+!  If you add a new H5O function you must add the function name to the
+!  Windows dll file 'hdf5_fortrandll.def.in' in the fortran/src directory.
+!  This is needed for Windows based operating systems.
+!
 
 MODULE H5O
 
@@ -43,53 +42,50 @@ MODULE H5O
   USE H5GLOBAL
   IMPLICIT NONE
 
-!****t* H5T (F03)/h5o_info_t
-!
-! Fortran2003 Derived Type:
-!
+!> @brief space_t derived type
   TYPE, BIND(C) :: space_t
-     INTEGER(hsize_t) :: total ! Total space for storing object header in file
-     INTEGER(hsize_t) :: meta  ! Space within header for object header metadata information
-     INTEGER(hsize_t) :: mesg  ! Space within header for actual message information
-     INTEGER(hsize_t) :: free  ! Free space within object header
+     INTEGER(hsize_t) :: total !<  Total space for storing object header in file
+     INTEGER(hsize_t) :: meta  !<  Space within header for object header metadata information
+     INTEGER(hsize_t) :: mesg  !<  Space within header for actual message information
+     INTEGER(hsize_t) :: free  !<  Free space within object header
   END TYPE space_t
 
 !> @brief mesg_t derived type
   TYPE, BIND(C) :: mesg_t
-     INTEGER(c_int64_t) :: present ! Flags to indicate presence of message type in header
-     INTEGER(c_int64_t) :: shared  ! Flags to indicate message type is shared in header
+     INTEGER(c_int64_t) :: present !<  Flags to indicate presence of message type in header
+     INTEGER(c_int64_t) :: shared  !<  Flags to indicate message type is shared in header
   END TYPE mesg_t
 
 !> @brief hdr_t derived type
   TYPE, BIND(C) :: hdr_t
-     INTEGER :: version ! Version number of header format in file
-     INTEGER :: nmesgs  ! Number of object header messages
-     INTEGER :: nchunks ! Number of object header chunks
-     INTEGER :: flags   ! Object header status flags
+     INTEGER :: version !<  Version number of header format in file
+     INTEGER :: nmesgs  !<  Number of object header messages
+     INTEGER :: nchunks !<  Number of object header chunks
+     INTEGER :: flags   !<  Object header status flags
      TYPE(space_t)  :: space
      TYPE(mesg_t)   :: mesg
   END TYPE hdr_t
 
 !> @brief c_hdr_t derived type
   TYPE, BIND(C) :: c_hdr_t
-     INTEGER(C_INT) :: version ! Version number of header format in file
-     INTEGER(C_INT) :: nmesgs  ! Number of object header messages
-     INTEGER(C_INT) :: nchunks ! Number of object header chunks
-     INTEGER(C_INT) :: flags   ! Object header status flags
+     INTEGER(C_INT) :: version !<  Version number of header format in file
+     INTEGER(C_INT) :: nmesgs  !<  Number of object header messages
+     INTEGER(C_INT) :: nchunks !<  Number of object header chunks
+     INTEGER(C_INT) :: flags   !<  Object header status flags
      TYPE(space_t)  :: space
      TYPE(mesg_t)   :: mesg
   END TYPE c_hdr_t
 
 !> @brief Extra metadata storage for obj & attributes
   TYPE, BIND(C) :: H5_ih_info_t
-     INTEGER(hsize_t) :: index_size ! btree and/or list
-     INTEGER(hsize_t) :: heap_size
+     INTEGER(hsize_t) :: index_size !<  btree and/or list
+     INTEGER(hsize_t) :: heap_size  !<  heap
   END TYPE H5_ih_info_t
 
 !> @brief meta_size_t derived type
   TYPE, BIND(C) :: meta_size_t
-     TYPE(H5_ih_info_t) :: obj  ! v1/v2 B-tree & local/fractal heap for groups, B-tree for chunked datasets
-     TYPE(H5_ih_info_t) :: attr ! v2 B-tree & heap for attributes
+     TYPE(H5_ih_info_t) :: obj  !<  v1/v2 B-tree & local/fractal heap for groups, B-tree for chunked datasets
+     TYPE(H5_ih_info_t) :: attr !<  v2 B-tree & heap for attributes
   ENDTYPE meta_size_t
 
 !> @brief h5o_info_t derived type
@@ -144,7 +140,7 @@ CONTAINS
 !! \param object_id     Object to be linked.
 !! \param new_loc_id    File or group identifier specifying location at which object is to be linked.
 !! \param new_link_name Name of link to be created, relative to new_loc_id.
-!! \param hdferr        \fortran_error.
+!! \param hdferr        \fortran_error
 !! \param lcpl_id       Link creation property list identifier.
 !! \param lapl_id       Link access property list identifier.
 !!
@@ -196,7 +192,7 @@ CONTAINS
 !! \param loc_id  File or group identifier.
 !! \param name    Path to the object, relative to loc_id.
 !! \param obj_id  Object identifier for the opened object.
-!! \param hdferr  \fortran_error.
+!! \param hdferr  \fortran_error
 !! \param lapl_id Access property list identifier for the link pointing to the object.
 !!
   SUBROUTINE h5oopen_f(loc_id, name, obj_id, hdferr, lapl_id)
@@ -236,7 +232,7 @@ CONTAINS
 !! \brief Closes an object in an HDF5 file.
 !!
 !! \param object_id Object identifier.
-!! \param hdferr    \fortran_error.
+!! \param hdferr    \fortran_error
 !!
   SUBROUTINE h5oclose_f(object_id, hdferr)
     IMPLICIT NONE
@@ -261,7 +257,7 @@ CONTAINS
 !! \param loc_id File or group identifier.
 !! \param addr   Object’s address in the file.
 !! \param obj_id Object identifier for the opened object.
-!! \param hdferr \fortran_error.
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5oopen_by_addr_f(loc_id, addr, obj_id, hdferr)
     IMPLICIT NONE
@@ -294,7 +290,7 @@ CONTAINS
 !! \param dst_name   Name to be assigned to the new copy.
 !! \param ocpypl_id  Object copy property list.
 !! \param lcpl_id    Link creation property list for the new hard link.
-!! \param hdferr     \fortran_error.
+!! \param hdferr     \fortran_error
 !!
   SUBROUTINE h5ocopy_f(src_loc_id, src_name, dst_loc_id, dst_name, hdferr, ocpypl_id, lcpl_id)
     IMPLICIT NONE
@@ -346,7 +342,7 @@ CONTAINS
 !! \brief Decrements an object reference count.
 !!
 !! \param object_id Object identifier.
-!! \param hdferr    \fortran_error.
+!! \param hdferr    \fortran_error
 !!
   SUBROUTINE h5odecr_refcount_f(object_id, hdferr)
     IMPLICIT NONE
@@ -376,7 +372,7 @@ CONTAINS
 !!
 !! \param lapl_id     Link access property list identifier.
 !! \param link_exists Existing link resolves to an object.
-!! \param hdferr      \fortran_error.
+!! \param hdferr      \fortran_error
 !!
   SUBROUTINE h5oexists_by_name_f(loc_id, name, link_exists, hdferr, lapl_id)
     IMPLICIT NONE
@@ -431,7 +427,7 @@ CONTAINS
 !! \param obj_id  Identifier for the target object.
 !! \param bufsize Size of the comment buffer.
 !! \param comment The comment.
-!! \param hdferr  \fortran_error.
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5oget_comment_f(obj_id, comment, hdferr, bufsize)
     IMPLICIT NONE
@@ -472,7 +468,7 @@ CONTAINS
 !! \param loc_id  Identifier of a file, group, dataset, or named datatype.
 !! \param name    Name of the object whose comment is to be retrieved, specified as a path relative to loc_id.
 !! \param comment The comment.
-!! \param hdferr  \fortran_error.
+!! \param hdferr  \fortran_error
 !! \param bufsize Size of the comment buffer.
 !! \param lapl_id File access property list identifier.
 !!
@@ -524,7 +520,7 @@ CONTAINS
 !! \brief Increments an object reference count.
 !!
 !! \param obj_id Object identifier.
-!! \param hdferr \fortran_error.
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5oincr_refcount_f(obj_id, hdferr)
     IMPLICIT NONE
@@ -554,7 +550,7 @@ CONTAINS
 !! \param order      Order of iteration within index, NOTE: zero-based.
 !! \param n          Object to open.
 !! \param obj_id     An object identifier for the opened object.
-!! \param hdferr     \fortran_error.
+!! \param hdferr     \fortran_error
 !!
 !! \param lapl_id    Link access property list.
 !!
@@ -606,7 +602,7 @@ CONTAINS
 !!
 !! \param obj_id  Identifier of the target object.
 !! \param comment The new comment.
-!! \param hdferr  \fortran_error.
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5oset_comment_f(obj_id, comment, hdferr)
     IMPLICIT NONE
@@ -641,7 +637,7 @@ CONTAINS
 !! \param loc_id  Identifier of a file, group, dataset, or named datatype.
 !! \param name    Name of the object whose comment is to be set or reset, specified as a path relative to loc_id.
 !! \param comment The new comment.
-!! \param hdferr  \fortran_error.
+!! \param hdferr  \fortran_error
 !! \param lapl_id Link access property list identifier.
 !!
   SUBROUTINE h5oset_comment_by_name_f(loc_id, name, comment, hdferr, lapl_id)
@@ -685,20 +681,20 @@ CONTAINS
 !!
 !! \brief Recursively visits all objects starting from a specified object.
 !!
-!! \param object_id  Identifier of the object at which the recursive iteration begins.
-!! \param index_type Type of index; valid values include:
-!!               \li H5_INDEX_NAME_F
-!!               \li H5_INDEX_CRT_ORDER_F
-!! \param order      OrOrder in which index is traversed; valid values include:
-!!               \li H5_ITER_DEC_F
-!!               \li H5_ITER_INC_F
-!!               \li  H5_ITER_NATIVE_F
+!! \param object_id    Identifier of the object at which the recursive iteration begins.
+!! \param index_type   Type of index; valid values include:
+!!                     \li H5_INDEX_NAME_F
+!!                     \li H5_INDEX_CRT_ORDER_F
+!! \param order        Order in which index is traversed; valid values include:
+!!                     \li H5_ITER_DEC_F
+!!                     \li H5_ITER_INC_F
+!!                     \li H5_ITER_NATIVE_F
 !! \param op           Callback function passing data regarding the group to the calling application.
 !! \param op_data      User-defined pointer to data required by the application for its processing of the group.
 !! \param return_value Returns the return value of the first operator that returns a positive value, or
 !!                     zero if all members were processed with no operator returning non-zero.
-!! \param hdferr       \fortran_error.
-!! \param fields      FFlags specifying the fields to include in object_info.
+!! \param hdferr       \fortran_error
+!! \param fields       Flags specifying the fields to include in object_info.
 !!
   SUBROUTINE h5ovisit_f(object_id, index_type, order, op, op_data, return_value, hdferr, fields)
     IMPLICIT NONE
@@ -749,7 +745,7 @@ CONTAINS
 !! \param loc_id      File or group identifier specifying location of group in which object is located.
 !! \param name        Name of group, relative to loc_id.
 !! \param object_info Buffer in which to return object information.
-!! \param hdferr      \fortran_error.
+!! \param hdferr      \fortran_error
 !! \param lapl_id     Link access property list.
 !! \param fields      Flags specifying the fields to include in object_info.
 !!
@@ -803,7 +799,7 @@ CONTAINS
 !!
 !! \param object_id   Identifier for target object.
 !! \param object_info Buffer in which to return object information.
-!! \param hdferr      \fortran_error.
+!! \param hdferr      \fortran_error
 !! \param fields      Flags specifying the fields to include in object_info.
 !!
   SUBROUTINE h5oget_info_f(object_id, object_info, hdferr, fields)
@@ -848,7 +844,7 @@ CONTAINS
 !! \param order       Order within field or index.
 !! \param n           Object for which information is to be returned.
 !! \param object_info Buffer in which to return object information.
-!! \param hdferr      \fortran_error.
+!! \param hdferr      \fortran_error
 !!
 !! \param lapl_id     Link access property list. (Not currently used.).
 !! \param fields      Flags specifying the fields to include in object_info.
@@ -912,17 +908,17 @@ CONTAINS
 !! \param loc_id       Identifier of a file or group.
 !! \param object_name  Name of the object, generally relative to loc_id, that will serve as root of the iteration.
 !! \param index_type   Type of index; valid values include:
-!!                 \li H5_INDEX_NAME_F
-!!                 \li  H5_INDEX_CRT_ORDER_F
+!!                     \li H5_INDEX_NAME_F
+!!                     \li H5_INDEX_CRT_ORDER_F
 !! \param order        Order in which index is traversed; valid values include:
-!!                 \li H5_ITER_DEC_F
-!!                 \li H5_ITER_INC_F
-!!                 \li H5_ITER_NATIVE_F
+!!                     \li H5_ITER_DEC_F
+!!                     \li H5_ITER_INC_F
+!!                     \li H5_ITER_NATIVE_F
 !! \param op           Callback function passing data regarding the group to the calling application.
 !! \param op_data      User-defined pointer to data required by the application for its processing of the group.
-!! \param return_value Returns the return value of the first operator that returns a positive value, or.
+!! \param return_value Returns the return value of the first operator that returns a positive value, or
 !!                     zero if all members were processed with no operator returning non-zero.
-!! \param hdferr       \fortran_error.
+!! \param hdferr       \fortran_error
 !! \param lapl_id      Link access property list identifier.
 !! \param fields       Flags specifying the fields to include in object_info.
 !!

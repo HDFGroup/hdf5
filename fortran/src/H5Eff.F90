@@ -41,7 +41,6 @@ MODULE H5E
   USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_FUNPTR, C_CHAR
   USE H5GLOBAL
 
-
   INTEGER, PARAMETER :: PRINTON  = 1 !< Turn on automatic printing of errors
   INTEGER, PARAMETER :: PRINTOFF = 0 !< Turn off automatic printing of errors
 
@@ -117,7 +116,7 @@ CONTAINS
 !! \param error_no Major error number.
 !! \param name     Character string describing the error.
 !! \param namelen  Number of characters in the name buffer.
-!! \param hdferr   \fortran_error.
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5eget_major_f(error_no, name, namelen, hdferr)
     INTEGER, INTENT(IN) :: error_no
@@ -144,7 +143,7 @@ CONTAINS
 !!
 !! \param error_no Minor error number.
 !! \param name     Character string describing the error.
-!! \param hdferr   \fortran_error.
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5eget_minor_f(error_no, name, hdferr)
     INTEGER, INTENT(IN) :: error_no
@@ -167,12 +166,12 @@ CONTAINS
 !! \brief Returns settings for automatic error stack traversal function and its data.
 !!
 !! \param printflag   Flag to turn automatic error printing on or off; possible values are:
-!!                \li printon (1)
-!!                \li printoff(0)
+!!                    \li printon (1)
+!!                    \li printoff(0)
 !! \param estack_id   Error stack identifier.
 !! \param func        Function to be called upon an error condition.
 !! \param client_data Data passed to the error function.
-!! \param hdferr      \fortran_error.
+!! \param hdferr      \fortran_error
 !!
   SUBROUTINE h5eset_auto_f(printflag, hdferr, estack_id, func, client_data)
     USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_FUNPTR

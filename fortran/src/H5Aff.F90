@@ -527,7 +527,7 @@ CONTAINS
 !!
 !! \param attr_id          Identifier of the attribute
 !! \param creation_prop_id Identifier for the attribute’s creation property
-!! \param hdferr          R\fortran_error
+!! \param hdferr           \fortran_error
 !!
   SUBROUTINE H5Aget_create_plist_f(attr_id, creation_prop_id, hdferr)
     IMPLICIT NONE
@@ -780,7 +780,7 @@ CONTAINS
 !!                 \li H5_ITER_N_F         - Number of iteration orders
 !! \param n        Attribute’s position in index.
 !! \param attr_id  Attribute identifier.
-!! \param hdferr   \fortran_error.
+!! \param hdferr   \fortran_error
 !! \param aapl_id  Attribute access property list.
 !! \param lapl_id  Link access property list.
 !!
@@ -841,7 +841,7 @@ CONTAINS
 !! \param corder         Is a positive integer containing the creation order of the attribute.
 !! \param cset           Indicates the character set used for the attribute’s name.
 !! \param data_size      Indicates the size, in the number of characters, of the attribute.
-!! \param hdferr         \fortran_error.
+!! \param hdferr         \fortran_error
 !!
   SUBROUTINE H5Aget_info_f(attr_id, f_corder_valid, corder, cset, data_size, hdferr)
     IMPLICIT NONE
@@ -1295,7 +1295,7 @@ CONTAINS
 !! \param attr_id     Identifier of an attribute to write.
 !! \param memtype_id  Identifier of the attribute datatype (in memory).
 !! \param buf	      Data to be written.
-!! \param hdferr      \fortran_error.
+!! \param hdferr      \fortran_error
 !!
   SUBROUTINE h5awrite_f(attr_id, memtype_id, buf, hdferr)
     INTEGER(HID_T)  , INTENT(IN)  :: attr_id
@@ -1335,36 +1335,36 @@ CONTAINS
 !! \param attr_id     Identifier of an attribute to read.
 !! \param memtype_id  Identifier of the attribute datatype (in memory).
 !! \param buf	      Buffer for data to be read.
-!! \param hdferr      \fortran_error.
+!! \param hdferr      \fortran_error
 !!
   SUBROUTINE h5aread_f(attr_id, memtype_id, buf, hdferr)
     INTEGER(HID_T), INTENT(IN)    :: attr_id
-    INTEGER(HID_T), INTENT(IN)    :: mem_type_id
+    INTEGER(HID_T), INTENT(IN)    :: memtype_id
     TYPE(C_PTR)   , INTENT(INOUT) :: buf
     INTEGER       , INTENT(OUT)   :: hdferr
   END SUBROUTINE h5aread_f
 
-￼!>
-￼!! \ingroup FH5A
-￼!!
-￼!! \brief Reads an attribute.
-￼!!
-￼!! \note  \fortran_obsolete
-￼!!
-￼!! \param attr_id     Identifier of an attribute to read.
-￼!! \param memtype_id  Identifier of the attribute datatype (in memory).
-￼!! \param buf        Buffer for data to be read.
-￼!! \param dims       Array to hold corresponding dimension sizes of data buffer buf;
-￼!!                    dim(k) has value of the k-th dimension of buffer buf; values are ignored if buf is a scalar.
-￼!! \param hdferr      \fortran_error
-￼!!
-￼  SUBROUTINE h5aread_f(attr_id, memtype_id, buf, dims, hdferr)
-￼    INTEGER(HID_T)  , INTENT(IN)               :: attr_id
-￼    INTEGER(HID_T)  , INTENT(IN)               :: memtype_id
-￼    TYPE(TYPE)      , INTENT(INOUT)            :: buf
-￼    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
-￼    INTEGER         , INTENT(OUT)              :: hdferr
-￼  END SUBROUTINE h5aread_f
+!>
+!! \ingroup FH5A
+!!
+!! \brief Reads an attribute.
+!!
+!! \note  \fortran_obsolete
+!!
+!! \param attr_id     Identifier of an attribute to read.
+!! \param memtype_id  Identifier of the attribute datatype (in memory).
+!! \param buf         Buffer for data to be read.
+!! \param dims        Array to hold corresponding dimension sizes of data buffer buf;
+!!                    dim(k) has value of the k-th dimension of buffer buf; values are ignored if buf is a scalar.
+!! \param hdferr      \fortran_error
+!!
+  SUBROUTINE h5aread_f(attr_id, memtype_id, buf, dims, hdferr)
+    INTEGER(HID_T)  , INTENT(IN)               :: attr_id
+    INTEGER(HID_T)  , INTENT(IN)               :: memtype_id
+    TYPE(TYPE)      , INTENT(INOUT)            :: buf
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
+    INTEGER         , INTENT(OUT)              :: hdferr
+  END SUBROUTINE h5aread_f
 
 #else
 
