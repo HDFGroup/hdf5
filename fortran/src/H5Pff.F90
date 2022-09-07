@@ -1,4 +1,4 @@
-!> @defgroup FH5P Fortran Propert List (H5P) Interface
+!> @defgroup FH5P Fortran Property List (H5P) Interface
 !!
 !! @see H5P, C-API
 !!
@@ -52,44 +52,7 @@ MODULE H5P
   PRIVATE h5pregister_integer, h5pregister_ptr
   PRIVATE h5pinsert_integer, h5pinsert_char, h5pinsert_ptr
 
-#ifdef H5_DOXYGEN_FORTRAN
-
-  INTERFACE h5pset_fapl_multi_f
-     MODULE PROCEDURE h5pset_fapl_multi_l
-     MODULE PROCEDURE h5pset_fapl_multi_s
-  END INTERFACE
-
-  INTERFACE h5pset_fill_value_f
-     MODULE PROCEDURE h5pset_fill_value_f
-     MODULE PROCEDURE h5pset_fill_value___F90_VERSION
-  END INTERFACE
-
-  INTERFACE h5pget_fill_value_f
-     MODULE PROCEDURE h5pget_fill_value_f
-     MODULE PROCEDURE h5pget_fill_value___F90_VERSION
-  END INTERFACE
-
-  INTERFACE h5pset_f
-     MODULE PROCEDURE h5pset_f
-     MODULE PROCEDURE h5pset_f___F90_VERSION
-  END INTERFACE
-
-  INTERFACE h5pget_f
-     MODULE PROCEDURE h5pget_f
-     MODULE PROCEDURE h5pget_f___F90_VERSION
-  END INTERFACE
-
-  INTERFACE h5pregister_f
-     MODULE PROCEDURE h5pregister_f
-     MODULE PROCEDURE h5pregister_f___F90_VERSION
-  END INTERFACE
-
-  INTERFACE h5pinsert_f
-     MODULE PROCEDURE h5pinsert_f
-     MODULE PROCEDURE h5pinsert_f___F90_VERSION
-  END INTERFACE
-
-#else
+#ifndef H5_DOXYGEN_FORTRAN
 
   INTERFACE h5pset_fapl_multi_f
      MODULE PROCEDURE h5pset_fapl_multi_l
@@ -244,7 +207,7 @@ CONTAINS
 !!           \li H5P_LINK_CREATE_F
 !!           \li H5P_LINK_ACCESS_F
 !! \param prp_id Property list identifier.
-!! \param hdferr Returns 0 if successful and -1 if fails
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE h5pcreate_f(class, prp_id, hdferr)
     IMPLICIT NONE
@@ -272,7 +235,7 @@ CONTAINS
 !!
 !! \param prp_id Property list identifier.
 !! \param flag   Status flag.
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \fortran_error.
 !!
   SUBROUTINE h5pset_preserve_f(prp_id, flag, hdferr)
     IMPLICIT NONE
@@ -302,7 +265,7 @@ CONTAINS
 !!
 !! \param prp_id Property list identifier.
 !! \param flag   Status flag.
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \fortran_error.
 !!
   SUBROUTINE h5pget_preserve_f(prp_id, flag, hdferr)
     IMPLICIT NONE
@@ -333,7 +296,7 @@ CONTAINS
 !!
 !! \param prp_id    Property list identifier.
 !! \param classtype Property list class.
-!! \param hdferr    Returns 0 if successful and -1 if fails.
+!! \param hdferr    \fortran_error.
 !!
   SUBROUTINE h5pget_class_f(prp_id, classtype, hdferr)
     IMPLICIT NONE
@@ -361,7 +324,7 @@ CONTAINS
 !!
 !! \param prp_id     Property list identifier.
 !! \param new_prp_id New property list identifier.
-!! \param hdferr     Returns 0 if successful and -1 if fails.
+!! \param hdferr     \fortran_error.
 !!
   SUBROUTINE h5pcopy_f(prp_id, new_prp_id, hdferr)
     IMPLICIT NONE
@@ -388,7 +351,7 @@ CONTAINS
 !! \brief Terminates access to a property list.
 !!
 !! \param prp_id Identifier of the property list to terminate access to.
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \fortran_error.
 !!
   SUBROUTINE h5pclose_f(prp_id, hdferr)
     IMPLICIT NONE
@@ -415,7 +378,7 @@ CONTAINS
 !! \param prp_id Dataset creation property list identifier.
 !! \param ndims  Number of dimensions for each chunk.
 !! \param dims   Array with dimension sizes for each chunk.
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \fortran_error.
 !!
   SUBROUTINE h5pset_chunk_f(prp_id, ndims, dims, hdferr)
     IMPLICIT NONE
@@ -475,7 +438,7 @@ CONTAINS
 !!
 !! \param prp_id Property list identifier.
 !! \param level  Compression level.
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \fortran_error.
 !!
   SUBROUTINE h5pset_deflate_f(prp_id, level, hdferr)
     IMPLICIT NONE
@@ -509,7 +472,7 @@ CONTAINS
 !! \param freelist Global freelist version number.
 !! \param stab     Symbol table version number.
 !! \param shhdr    Shared object header version number.
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \fortran_error.
 !!
   SUBROUTINE h5pget_version_f(prp_id, boot, freelist, &
        stab, shhdr, hdferr)
@@ -545,7 +508,7 @@ CONTAINS
 !!
 !! \param prp_id File creation property list to modify.
 !! \param size   Size of the user-block in bytes.
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \fortran_error.
 !!
   SUBROUTINE h5pset_userblock_f (prp_id, size, hdferr)
     IMPLICIT NONE
@@ -572,7 +535,7 @@ CONTAINS
 !!
 !! \param prp_id     File creation property list identifier.
 !! \param block_size Size of the user block in bytes.
-!! \param hdferr     Returns 0 if successful and -1 if fails.
+!! \param hdferr     \fortran_error.
 !!
   SUBROUTINE h5pget_userblock_f(prp_id, block_size, hdferr)
     IMPLICIT NONE
@@ -599,7 +562,7 @@ CONTAINS
 !! \param prp_id      File creation property list identifier.
 !! \param sizeof_addr Size of an object offset in bytes.
 !! \param sizeof_size Size of an object length in bytes.
-!! \param hdferr      Returns 0 if successful and -1 if fails.
+!! \param hdferr      \fortran_error.
 !!
   SUBROUTINE h5pset_sizes_f (prp_id, sizeof_addr, sizeof_size, hdferr)
     IMPLICIT NONE
@@ -629,7 +592,7 @@ CONTAINS
 !! \param prp_id File Creation property list identifier.
 !! \param sizeof_addr Size of an object offset in bytes.
 !! \param sizeof_size Size of an object length in bytes.
-!! \param hdferr      Returns 0 if successful and -1 if fails.
+!! \param hdferr      \fortran_error.
 !!
   SUBROUTINE h5pget_sizes_f(prp_id, sizeof_addr, sizeof_size, hdferr)
     IMPLICIT NONE
@@ -659,7 +622,7 @@ CONTAINS
 !! \param prp_id  File creation property list identifier.
 !! \param ik      Symbol table tree rank.
 !! \param lk      Symbol table node size.
-!! \param hdferr  Returns 0 if successful and -1 if fails.
+!! \param hdferr  \fortran_error.
 !!
   SUBROUTINE h5pset_sym_k_f (prp_id, ik, lk, hdferr)
     IMPLICIT NONE
@@ -688,7 +651,7 @@ CONTAINS
 !! \param prp_id File creation property list identifier.
 !! \param ik     Symbol table tree 1/2 rank.
 !! \param lk     Symbol table node 1/2 size.
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \fortran_error.
 !!
   SUBROUTINE h5pget_sym_k_f(prp_id, ik, lk, hdferr)
     IMPLICIT NONE
@@ -716,7 +679,7 @@ CONTAINS
 !!
 !! \param  prp_id File creation property list identifier
 !! \param ik      1/2 rank of chunked storage B-tree
-!! \param hdferr  Returns 0 if successful and -1 if fails.
+!! \param hdferr  \fortran_error.
 !!
   SUBROUTINE h5pset_istore_k_f (prp_id, ik, hdferr)
     IMPLICIT NONE
@@ -743,7 +706,7 @@ CONTAINS
 !!
 !! \param prp_id File creation property list identifier.
 !! \param ik     Rank of chunked storage B-tree.
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \fortran_error.
 !!
   SUBROUTINE h5pget_istore_k_f(prp_id, ik, hdferr)
     IMPLICIT NONE
@@ -770,7 +733,7 @@ CONTAINS
 !!
 !! \param prp_id File access or data transfer property list identifier.
 !! \param driver Low-level driver identifier.
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \fortran_error.
 !!
   SUBROUTINE h5pget_driver_f(prp_id, driver, hdferr)
     IMPLICIT NONE
@@ -796,7 +759,7 @@ CONTAINS
 !! \brief Sets the standard I/O driver.
 !!
 !! \param prp_id File access property list identifier.
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \fortran_error.
 !!
   SUBROUTINE h5pset_fapl_stdio_f (prp_id, hdferr)
     IMPLICIT NONE
@@ -820,7 +783,7 @@ CONTAINS
 !! \brief Sets the sec2 driver.
 !!
 !! \param prp_id File access property list identifier.
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \fortran_error.
 !!
   SUBROUTINE h5pset_fapl_sec2_f (prp_id, hdferr)
     IMPLICIT NONE
@@ -846,7 +809,7 @@ CONTAINS
 !! \param prp_id    File access property list identifier.
 !! \param threshold Threshold value.
 !! \param alignment Alignment value.
-!! \param hdferr    Returns 0 if successful and -1 if fails.
+!! \param hdferr    \fortran_error.
 !!
   SUBROUTINE h5pset_alignment_f(prp_id, threshold,  alignment, hdferr)
     IMPLICIT NONE
@@ -876,7 +839,7 @@ CONTAINS
 !! \param prp_id    File access property list identifier.
 !! \param threshold Threshold value.
 !! \param alignment Alignment value.
-!! \param hdferr    Returns 0 if successful and -1 if fails.
+!! \param hdferr    \fortran_error.
 !!
   SUBROUTINE h5pget_alignment_f(prp_id, threshold,  alignment, hdferr)
     IMPLICIT NONE
@@ -906,7 +869,7 @@ CONTAINS
 !! \param prp_id        File access property list identifier.
 !! \param increment     Size, in bytes, of memory increments.
 !! \param backing_store Boolean flag indicating whether to write the file contents to disk when the file is closed.
-!! \param hdferr        Returns 0 if successful and -1 if fails.
+!! \param hdferr        \fortran_error.
 !!
   SUBROUTINE h5pset_fapl_core_f(prp_id, increment, backing_store, hdferr)
     IMPLICIT NONE
@@ -938,7 +901,7 @@ CONTAINS
 !! \param prp_id        File access property list identifier.
 !! \param increment     Size, in bytes, of memory increments.
 !! \param backing_store Boolean flag indicating whether to write the file contents to disk when the file is closed.
-!! \param hdferr        Returns 0 if successful and -1 if fails.
+!! \param hdferr        \fortran_error.
 !!
   SUBROUTINE h5pget_fapl_core_f(prp_id, increment, backing_store, hdferr)
     IMPLICIT NONE
@@ -972,7 +935,7 @@ CONTAINS
 !! \param prp_id     File access property list identifier.
 !! \param memb_size  Size in bytes of each file member.
 !! \param memb_plist Identifier of the file access property list to be used for each family member
-!! \param hdferr     Returns 0 if successful and -1 if fails.
+!! \param hdferr     \fortran_error.
 !!
   SUBROUTINE h5pset_fapl_family_f(prp_id, memb_size, memb_plist , hdferr)
     IMPLICIT NONE
@@ -1002,7 +965,7 @@ CONTAINS
 !! \param prp_id     File access property list identifier.
 !! \param memb_size  Size in bytes of each file member.
 !! \param memb_plist Identifier of the file access property list to be used for each family member
-!! \param hdferr     Returns 0 if successful and -1 if fails
+!! \param hdferr     \fortran_error
 !!
   SUBROUTINE h5pget_fapl_family_f(prp_id, memb_size, memb_plist , hdferr)
     IMPLICIT NONE
@@ -1034,7 +997,7 @@ CONTAINS
 !! \param rdcc_nelmts Number of elements (objects) in the raw data chunk cache.
 !! \param rdcc_nbytes Total size of the raw data chunk cache, in bytes.
 !! \param rdcc_w0     Preemption policy (0 or 1).
-!! \param hdferr      Returns 0 if successful and -1 if fails.
+!! \param hdferr      \fortran_error.
 !!
   SUBROUTINE h5pset_cache_f(prp_id, mdc_nelmts,rdcc_nelmts, rdcc_nbytes, rdcc_w0, hdferr)
     IMPLICIT NONE
@@ -1070,7 +1033,7 @@ CONTAINS
 !! \param rdcc_nelmts Number of elements (objects) in the raw data chunk cache
 !! \param rdcc_nbytes Total size of the raw data chunk cache, in bytes.
 !! \param rdcc_w0     Preemption policy (0 or 1).
-!! \param hdferr      Returns 0 if successful and -1 if fails.
+!! \param hdferr      \fortran_error.
 !!
   SUBROUTINE h5pget_cache_f(prp_id, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, rdcc_w0, hdferr)
     IMPLICIT NONE
@@ -1106,7 +1069,7 @@ CONTAINS
 !! \param meta_plist Identifier of the meta file access property list.
 !! \param raw_ext    Name extension for the raw file filename.
 !! \param raw_plist  Identifier of the raw file access property list.
-!! \param hdferr     Returns 0 if successful and -1 if fails.
+!! \param hdferr     \fortran_error.
 !!
   SUBROUTINE h5pset_fapl_split_f(prp_id, meta_ext, meta_plist, raw_ext, raw_plist, hdferr)
     IMPLICIT NONE
@@ -1144,7 +1107,7 @@ CONTAINS
 !!
 !! \param prp_id       File access property list identifier.
 !! \param gc_reference Flag for setting garbage collection on and off (1 or 0).
-!! \param hdferr       Returns 0 if successful and -1 if fails.
+!! \param hdferr       \fortran_error.
 !!
   SUBROUTINE h5pset_gc_references_f (prp_id, gc_reference, hdferr)
     IMPLICIT NONE
@@ -1171,7 +1134,7 @@ CONTAINS
 !!
 !! \param prp_id       File access property list identifier.
 !! \param gc_reference Flag for setting garbage collection on and off (1 or 0)
-!! \param hdferr       Returns 0 if successful and -1 if fails.
+!! \param hdferr       \fortran_error.
 !!
   SUBROUTINE h5pget_gc_references_f(prp_id, gc_reference, hdferr)
     IMPLICIT NONE
@@ -1202,7 +1165,7 @@ CONTAINS
 !!           \li H5D_COMPACT_F
 !!           \li H5D_CONTIGUOUS_F
 !!           \li H5D_CHUNKED_F
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \fortran_error.
 !!
   SUBROUTINE h5pset_layout_f (prp_id, layout, hdferr)
     IMPLICIT NONE
@@ -1233,7 +1196,7 @@ CONTAINS
 !!           \li H5D_COMPACT_F
 !!           \li H5D_CONTIGUOUS_F
 !!           \li H5D_CHUNKED_F
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \fortran_error.
 !!
   SUBROUTINE h5pget_layout_f (prp_id, layout, hdferr)
     IMPLICIT NONE
@@ -1264,7 +1227,7 @@ CONTAINS
 !! \param flags     Bit vector specifying certain general properties of the filter.
 !! \param cd_nelmts Number of elements in cd_values.
 !! \param cd_values Auxiliary data for the filter.
-!! \param hdferr    Returns 0 if successful and -1 if fails.
+!! \param hdferr    \fortran_error.
 !!
   SUBROUTINE h5pset_filter_f(prp_id, filter, flags, cd_nelmts, cd_values,  hdferr)
     IMPLICIT NONE
@@ -1297,7 +1260,7 @@ CONTAINS
 !!
 !! \param prp_id   Data creation or transfer property list identifier.
 !! \param nfilters Number of filters in the pipeline.
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \fortran_error.
 !!
   SUBROUTINE h5pget_nfilters_f (prp_id, nfilters, hdferr)
     IMPLICIT NONE
@@ -1330,7 +1293,7 @@ CONTAINS
 !! \param cd_values     Auxiliary data for the filter.
 !! \param namelen       Number of characters in the name buffer.
 !! \param name          Buffer to retrieve filter name.
-!! \param hdferr        Returns 0 if successful and -1 if fails.
+!! \param hdferr        \fortran_error.
 !!
   SUBROUTINE h5pget_filter_f(prp_id, filter_number, flags, cd_nelmts, cd_values, namelen, name, filter_id, hdferr)
     IMPLICIT NONE
@@ -1378,7 +1341,7 @@ CONTAINS
 !! \param name   Name of external file.
 !! \param offset Offset in bytes from the beginning of the file to the location in the file where the data starts.
 !! \param bytes  Size of the external file data.
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \fortran_error.
 !!
   SUBROUTINE h5pset_external_f(prp_id, name, offset, bytes, hdferr)
     IMPLICIT NONE
@@ -1414,7 +1377,7 @@ CONTAINS
 !!
 !! \param prp_id Dataset creation property list identifier.
 !! \param count  Number of external files for the specified dataset.
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \fortran_error.
 !!
   SUBROUTINE h5pget_external_count_f (prp_id, count, hdferr)
     IMPLICIT NONE
@@ -1445,7 +1408,7 @@ CONTAINS
 !! \param name      Name of the external file.
 !! \param offset    Offset in bytes from the beginning of the file to the location in the file where the data starts.
 !! \param bytes     Size of the external file data.
-!! \param hdferr    Returns 0 if successful and -1 if fails.
+!! \param hdferr    \fortran_error.
 !!
   SUBROUTINE h5pget_external_f(prp_id, idx, name_size, name, offset,bytes, hdferr)
     IMPLICIT NONE
@@ -1483,7 +1446,7 @@ CONTAINS
 !! \param left   The B-tree split ratio for left-most nodes.
 !! \param middle The B-tree split ratio for all other nodes.
 !! \param right  The B-tree split ratio for right-most nodes.
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \fortran_error.
 !!
   SUBROUTINE h5pset_btree_ratios_f(prp_id, left, middle, right, hdferr)
     IMPLICIT NONE
@@ -1516,7 +1479,7 @@ CONTAINS
 !! \param left   The B-tree split ratio for left-most nodes.
 !! \param middle The B-tree split ratio for all other nodes.
 !! \param right  The B-tree split ratio for right-most nodes.
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \fortran_error.
 !!
   SUBROUTINE h5pget_btree_ratios_f(prp_id, left, middle, right, hdferr)
     IMPLICIT NONE
@@ -1551,7 +1514,7 @@ CONTAINS
 !!            \li H5F_CLOSE_WEAK_F
 !!            \li H5F_CLOSE_SEMI_F
 !!            \li H5F_CLOSE_STRONG_F
-!! \param hdferr  Returns 0 if successful and -1 if fails.
+!! \param hdferr  \fortran_error.
 !!
   SUBROUTINE h5pget_fclose_degree_f(fapl_id, degree, hdferr)
     IMPLICIT NONE
@@ -1583,7 +1546,7 @@ CONTAINS
 !!            \li H5F_CLOSE_WEAK_F
 !!            \li H5F_CLOSE_SEMI_F
 !!            \li H5F_CLOSE_STRONG_F
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \fortran_error.
 !!
   SUBROUTINE h5pset_fclose_degree_f(fapl_id, degree, hdferr)
     IMPLICIT NONE
@@ -1612,7 +1575,7 @@ CONTAINS
 !! \param plist1_id Property list identifier.
 !! \param plist2_id Property list identifier.
 !! \param flag      Flag, Possible values: .TRUE. or .FALSE.
-!! \param hdferr:   Returns 0 if successful and -1 if fails. and flag is set to .FALSE.
+!! \param hdferr:   \fortran_error. and flag is set to .FALSE.
 !!
   SUBROUTINE h5pequal_f(plist1_id, plist2_id, flag, hdferr)
     IMPLICIT NONE
@@ -1645,7 +1608,7 @@ CONTAINS
 !!
 !! \param plist_id Data transfer property list identifier.
 !! \param size     Buffer size.
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \fortran_error.
 !!
   SUBROUTINE h5pset_buffer_f(plist_id, size, hdferr)
     IMPLICIT NONE
@@ -1673,7 +1636,7 @@ CONTAINS
 !!
 !! \param plist_id Data transfer property list identifier.
 !! \param size     Buffer size.
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \fortran_error.
 !!
   SUBROUTINE h5pget_buffer_f(plist_id, size, hdferr)
     IMPLICIT NONE
@@ -1705,7 +1668,7 @@ CONTAINS
 !!             \li H5D_FILL_VALUE_UNDEFINED_F
 !!             \li H5D_FILL_VALUE_DEFAULT_F
 !!             \li H5D_FILL_VALUE_USER_DEFINED_F
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \fortran_error.
 !!
   SUBROUTINE h5pfill_value_defined_f(plist_id, flag, hdferr)
     IMPLICIT NONE
@@ -1738,7 +1701,7 @@ CONTAINS
 !!             \li H5D_ALLOC_TIME_EARLY_F
 !!             \li H5D_ALLOC_TIME_LATE_F
 !!             \li H5D_ALLOC_TIME_INCR_F
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \fortran_error.
 !!
   SUBROUTINE h5pset_alloc_time_f(plist_id, flag, hdferr)
     IMPLICIT NONE
@@ -1773,7 +1736,7 @@ CONTAINS
 !!             \li H5D_ALLOC_TIME_EARLY_F
 !!             \li H5D_ALLOC_TIME_LATE_F
 !!             \li H5D_ALLOC_TIME_INCR_F
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \fortran_error.
 !!
   SUBROUTINE h5pget_alloc_time_f(plist_id, flag, hdferr)
     IMPLICIT NONE
@@ -1804,7 +1767,7 @@ CONTAINS
 !!             \li H5D_FILL_TIME_ERROR_F
 !!             \li H5D_FILL_TIME_ALLOC_F
 !!             \li H5D_FILL_TIME_NEVER_F
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \fortran_error.
 !!
   SUBROUTINE h5pset_fill_time_f(plist_id, flag, hdferr)
     IMPLICIT NONE
@@ -1836,7 +1799,7 @@ CONTAINS
 !!             \li H5D_FILL_TIME_ERROR_F
 !!             \li H5D_FILL_TIME_ALLOC_F
 !!             \li H5D_FILL_TIME_NEVER_F
-!! \param hdferr  Returns 0 if successful and -1 if fails.
+!! \param hdferr  \fortran_error.
 !!
   SUBROUTINE h5pget_fill_time_f(plist_id, flag, hdferr)
     IMPLICIT NONE
@@ -1864,7 +1827,7 @@ CONTAINS
 !!
 !! \param plist_id File access property list identifier.
 !! \param size     Metadata block size.
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \fortran_error.
 !!
   SUBROUTINE h5pset_meta_block_size_f(plist_id, size, hdferr)
     IMPLICIT NONE
@@ -1891,7 +1854,7 @@ CONTAINS
 !!
 !! \param plist_id File access property list identifier.
 !! \param size     Metadata block size.
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \fortran_error.
 !!
   SUBROUTINE h5pget_meta_block_size_f(plist_id, size, hdferr)
     IMPLICIT NONE
@@ -1918,7 +1881,7 @@ CONTAINS
 !!
 !! \param plist_id File access property list identifier.
 !! \param size     Sieve buffer size.
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \fortran_error.
 !!
   SUBROUTINE h5pset_sieve_buf_size_f(plist_id, size, hdferr)
     IMPLICIT NONE
@@ -1945,7 +1908,7 @@ CONTAINS
 !!
 !! \param plist_id File access property list identifier.
 !! \param size     Sieve buffer size.
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \fortran_error.
 !!
   SUBROUTINE h5pget_sieve_buf_size_f(plist_id, size, hdferr)
     IMPLICIT NONE
@@ -1972,7 +1935,7 @@ CONTAINS
 !!
 !! \param plist_id File access property list identifier.
 !! \param size     Small raw data block size.
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \fortran_error.
 !!
   SUBROUTINE h5pset_small_data_block_size_f(plist_id, size, hdferr)
     IMPLICIT NONE
@@ -1999,7 +1962,7 @@ CONTAINS
 !!
 !! \param plist_id File access property list identifier.
 !! \param size     Small raw data block size.
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \fortran_error.
 !!
   SUBROUTINE h5pget_small_data_block_size_f(plist_id, size, hdferr)
     IMPLICIT NONE
@@ -2026,7 +1989,7 @@ CONTAINS
 !!
 !! \param plist_id Dataset transfer property list identifier.
 !! \param size     Vector size.
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \fortran_error.
 !!
   SUBROUTINE h5pset_hyper_vector_size_f(plist_id, size, hdferr)
     IMPLICIT NONE
@@ -2053,7 +2016,7 @@ CONTAINS
 !!
 !! \param plist_id Dataset transfer property list identifier.
 !! \param size     Vector size.
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \fortran_error.
 !!
   SUBROUTINE h5pget_hyper_vector_size_f(plist_id, size, hdferr)
     IMPLICIT NONE
@@ -2081,7 +2044,7 @@ CONTAINS
 !! \param prp_id Property list identifier to query.
 !! \param name   Name of property to check for.
 !! \param flag   Logical flag.
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \fortran_error.
 !!
   SUBROUTINE h5pexist_f(prp_id, name, flag, hdferr)
     IMPLICIT NONE
@@ -2119,7 +2082,7 @@ CONTAINS
 !! \param prp_id Property list identifier to query.
 !! \param name   Name of property to query.
 !! \param size   Size of property in bytes.
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \fortran_error.
 !!
   SUBROUTINE h5pget_size_f(prp_id, name, size, hdferr)
     IMPLICIT NONE
@@ -2152,7 +2115,7 @@ CONTAINS
 !!
 !! \param prp_id Iproperty list identifier to query.
 !! \param nprops Number of properties in property object.
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \fortran_error.
 !!
   SUBROUTINE h5pget_nprops_f(prp_id, nprops, hdferr)
     IMPLICIT NONE
@@ -2181,7 +2144,7 @@ CONTAINS
 !! \param size    Actual length of the class name.
 !!                NOTE: If provided buffer "name" is smaller, than name will be
 !!                      truncated to fit into provided user buffer.
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \fortran_error.
 !!
   SUBROUTINE h5pget_class_name_f(prp_id, name, size, hdferr)
     IMPLICIT NONE
@@ -2218,7 +2181,7 @@ CONTAINS
 !!
 !! \param prp_id    Property list identifier to query.
 !! \param parent_id Identifier of the parent class.
-!! \param hdferr:   Returns 0 if successful and -1 if fails.
+!! \param hdferr:   \fortran_error.
 !!
   SUBROUTINE h5pget_class_parent_f(prp_id, parent_id, hdferr)
     IMPLICIT NONE
@@ -2245,7 +2208,7 @@ CONTAINS
 !! \param plist   Property list identifier.
 !! \param pclass  Identifier of the property class.
 !! \param flag    TRUE. if a member, .FALSE. otherwise.
-!! \param hdferr  Returns 0 if successful and -1 if fails.
+!! \param hdferr  \fortran_error.
 !!
   SUBROUTINE h5pisa_class_f(plist, pclass, flag, hdferr)
     IMPLICIT NONE
@@ -2278,7 +2241,7 @@ CONTAINS
 !! \param dst_id  Identifier of the destination property list.
 !! \param src_id  Identifier of the source property list.
 !! \param name    Name of the property to copy.
-!! \param hdferr  Returns 0 if successful and -1 if fails.
+!! \param hdferr  \fortran_error.
 !!
   SUBROUTINE h5pcopy_prop_f(dst_id, src_id, name, hdferr)
     IMPLICIT NONE
@@ -2311,7 +2274,7 @@ CONTAINS
 !!
 !! \param plid    Property list identofoer.
 !! \param name    Name of the property to remove.
-!! \param hdferr  Returns 0 if successful and -1 if fails.
+!! \param hdferr  \fortran_error.
 !!
   SUBROUTINE h5premove_f(plid, name, hdferr)
     IMPLICIT NONE
@@ -2342,7 +2305,7 @@ CONTAINS
 !!
 !! \param class   Property list class identifier.
 !! \param name    Name of the property to remove.
-!! \param hdferr  Returns 0 if successful and -1 if fails.
+!! \param hdferr  \fortran_error.
 !!
   SUBROUTINE h5punregister_f(class, name, hdferr)
     IMPLICIT NONE
@@ -2372,7 +2335,7 @@ CONTAINS
 !! \brief Closes an existing property list class.
 !!
 !! \param class  Property list class identifier.
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \fortran_error.
 !!
   SUBROUTINE h5pclose_class_f(class, hdferr)
     IMPLICIT NONE
@@ -2395,7 +2358,7 @@ CONTAINS
 !! \brief Sets shuffling filter
 !!
 !! \param prp_id Dataset creation property list identifier.
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \fortran_error.
 !!
   SUBROUTINE h5pset_shuffle_f(prp_id, hdferr)
     IMPLICIT NONE
@@ -2422,7 +2385,7 @@ CONTAINS
 !! \param flag   EDC flag. Possible values:
 !!           \li H5Z_DISABLE_EDC_F
 !!           \li H5Z_ENABLE_EDC_F
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \fortran_error.
 !!
   SUBROUTINE h5pset_edc_check_f(prp_id, flag, hdferr)
     IMPLICIT NONE
@@ -2451,7 +2414,7 @@ CONTAINS
 !! \param flag   EDC flag; possible values:
 !!           \li H5Z_DISABLE_EDC_F
 !!           \li H5Z_ENABLE_EDC_F
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \fortran_error.
 !!
   SUBROUTINE h5pget_edc_check_f(prp_id, flag, hdferr)
     IMPLICIT NONE
@@ -2477,7 +2440,7 @@ CONTAINS
 !! \brief Sets Fletcher32 checksum of EDC for a dataset creation property list.
 !!
 !! \param prp_id Dataset creation property list identifier.
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \fortran_error.
 !!
   SUBROUTINE h5pset_fletcher32_f(prp_id, hdferr)
     IMPLICIT NONE
@@ -2502,7 +2465,7 @@ CONTAINS
 !!
 !! \param prp_id File creation property list identifier.
 !! \param offset File offset.
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \fortran_error.
 !!
   SUBROUTINE h5pset_family_offset_f(prp_id, offset, hdferr)
     IMPLICIT NONE
@@ -2535,7 +2498,7 @@ CONTAINS
 !! \param memb_name Names of member file.
 !! \param memb_addr Offsets within the virtual address space, from 0 (zero) to HADDR_MAX_F, at which each type of data storage begins.
 !! \param relax     Flag.
-!! \param hdferr    Returns 0 if successful and -1 if fails.
+!! \param hdferr    \fortran_error.
 !!
   SUBROUTINE h5pset_fapl_multi_l(prp_id, memb_map, memb_fapl, memb_name, memb_addr, relax, hdferr)
     IMPLICIT NONE
@@ -2561,7 +2524,7 @@ CONTAINS
 !! \param memb_name Names of member file.
 !! \param memb_addr Offsets within the virtual address space, from 0 (zero) to HADDR_MAX_F, at which each type of data storage begins.
 !! \param relax     Flag.
-!! \param hdferr    Returns 0 if successful and -1 if fails.
+!! \param hdferr    \fortran_error.
 !!
   SUBROUTINE h5pset_fapl_multi_l(prp_id, memb_map, memb_fapl, memb_name, memb_addr, relax, hdferr)
     IMPLICIT NONE
@@ -2610,7 +2573,7 @@ CONTAINS
 !!
 !! \param prp_id File creation property list identifier.
 !! \param relax  Flag.
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \fortran_error.
 !!
   SUBROUTINE h5pset_fapl_multi_s(prp_id, relax, hdferr)
     IMPLICIT NONE
@@ -2644,7 +2607,7 @@ CONTAINS
 !! \param memb_name  Names of member file.
 !! \param memb_addr  Offsets within the virtual address space, from 0 (zero) to HADDR_MAX_F, at which each type of data storage begins.
 !! \param relax      Flag.
-!! \param hdferr     Returns 0 if successful and -1 if fails.
+!! \param hdferr     \fortran_error.
 !! \param maxlen_out Maximum length for memb_name array element.
 !!
   SUBROUTINE h5pget_fapl_multi_f(prp_id, memb_map, memb_fapl, memb_name, memb_addr, relax, hdferr, maxlen_out)
@@ -2704,7 +2667,7 @@ CONTAINS
 !!                     \li H5_SZIP_EC_OM_F
 !!                     \li H5_SZIP_NN_OM_F
 !! \param pixels_per_block Szip parameters.
-!! \param hdferr           Returns 0 if successful and -1 if fails.
+!! \param hdferr           \fortran_error.
 !!
   SUBROUTINE h5pset_szip_f(prp_id, options_mask, pixels_per_block, hdferr)
     IMPLICIT NONE
@@ -2734,7 +2697,7 @@ CONTAINS
 !!
 !! \param prp_id Data creation property list identifier.
 !! \param flag   .TRUE. if all filters are available, .FALSE. otherwise.
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \fortran_error.
 !!
   SUBROUTINE h5pall_filters_avail_f(prp_id, flag, hdferr)
     IMPLICIT NONE
@@ -2770,7 +2733,7 @@ CONTAINS
 !! \param cd_values Auxiliary data for the filter.
 !! \param namelen   Number of characters in the name buffer.
 !! \param name      Buffer to retrieve filter name.
-!! \param hdferr    Returns 0 if successful and -1 if fails.
+!! \param hdferr    \fortran_error.
 !!
   SUBROUTINE h5pget_filter_by_id_f(prp_id, filter_id, flags, cd_nelmts, cd_values, namelen, name, hdferr)
     IMPLICIT NONE
@@ -2813,7 +2776,7 @@ CONTAINS
 !! \param flags     Bit vector specifying certain general properties of the filter
 !! \param cd_nelmts Number of elements in cd_values.
 !! \param cd_values Auxiliary data for the filter.
-!! \param hdferr    Returns 0 if successful and -1 if fails.
+!! \param hdferr    \fortran_error.
 !!
   SUBROUTINE h5pmodify_filter_f(prp_id, filter, flags, cd_nelmts, cd_values,  hdferr)
     IMPLICIT NONE
@@ -2846,7 +2809,7 @@ CONTAINS
 !!
 !! \param prp_id Data creation or transfer property list identifier
 !! \param filter Filter to be removed.
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \fortran_error.
 !!
   SUBROUTINE h5premove_filter_f(prp_id, filter, hdferr)
     IMPLICIT NONE
@@ -2874,7 +2837,7 @@ CONTAINS
 !! \param ocpl_id     Object (dataset or group) creation property list identifier.
 !! \param max_compact Maximum number of attributes to be stored in compact storage (Default: 8).
 !! \param min_dense   Minimum number of attributes to be stored in dense storage (Default: 6).
-!! \param hdferr      Returns 0 if successful and -1 if fails.
+!! \param hdferr      \fortran_error.
 !!
   SUBROUTINE h5pget_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     IMPLICIT NONE
@@ -2904,7 +2867,7 @@ CONTAINS
 !!
 !! \param ocpl_id         Object creation property list identifier.
 !! \param crt_order_flags Flags specifying whether to track and index attribute creation order.
-!! \param hdferr          Returns 0 if successful and -1 if fails.
+!! \param hdferr          \fortran_error.
 !!
   SUBROUTINE h5pset_attr_creation_order_f(ocpl_id, crt_order_flags , hdferr)
     IMPLICIT NONE
@@ -2932,7 +2895,7 @@ CONTAINS
 !!
 !! \param plist_id File creation property list.
 !! \param nindexes Number of shared object header message indexes to be available in files created with this property list.
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \fortran_error.
 !!
   SUBROUTINE h5pset_shared_mesg_nindexes_f( plist_id, nindexes, hdferr)
     IMPLICIT NONE
@@ -2965,7 +2928,7 @@ CONTAINS
 !! \param index_num       Index being configured.
 !! \param mesg_type_flags Types of messages that should be stored in this index.
 !! \param min_mesg_size   Minimum message size.
-!! \param hdferr          Returns 0 if successful and -1 if fails.
+!! \param hdferr          \fortran_error.
 !!
   SUBROUTINE h5pset_shared_mesg_index_f(fcpl_id, index_num, mesg_type_flags, min_mesg_size, hdferr)
     IMPLICIT NONE
@@ -2999,7 +2962,7 @@ CONTAINS
 !!
 !! \param ocpl_id         Object (group or dataset) creation property list identifier.
 !! \param crt_order_flags Flags specifying whether to track and index attribute creation order.
-!! \param hdferr          Returns 0 if successful and -1 if fails.
+!! \param hdferr          \fortran_error.
 !!
   SUBROUTINE h5pget_attr_creation_order_f(ocpl_id, crt_order_flags, hdferr)
     IMPLICIT NONE
@@ -3031,7 +2994,7 @@ CONTAINS
 !! \param fapl_id File access property list identifier.
 !! \param low     The earliest version of the library that will be used for writing objects.
 !! \param high    The latest version of the library that will be used for writing objects.
-!! \param hdferr  Returns 0 if successful and -1 if fails.
+!! \param hdferr  \fortran_error.
 !!
 !! Fortran Interface:
   SUBROUTINE h5pget_libver_bounds_f(fapl_id, low, high, hdferr)
@@ -3074,7 +3037,7 @@ CONTAINS
 !! \param fapl_id File access property list identifier.
 !! \param low     The earliest version of the library that will be used for writing objects.
 !! \param high    The latest version of the library that will be used for writing objects.
-!! \param hdferr  Returns 0 if successful and -1 if fails.
+!! \param hdferr  \fortran_error.
 !!
   SUBROUTINE h5pset_libver_bounds_f(fapl_id, low, high, hdferr)
     IMPLICIT NONE
@@ -3111,7 +3074,7 @@ CONTAINS
 !!
 !! \param gcpl_id         Group creation property list identifier.
 !! \param crt_order_flags Creation order flag(s).
-!! \param hdferr          Returns 0 if successful and -1 if fails.
+!! \param hdferr          \fortran_error.
 !!
   SUBROUTINE h5pset_link_creation_order_f(gcpl_id, crt_order_flags, hdferr)
     IMPLICIT NONE
@@ -3141,7 +3104,7 @@ CONTAINS
 !! \param gcpl_id     Group creation property list identifier.
 !! \param max_compact Maximum number of attributes to be stored in compact storage.
 !! \param min_dense   Minimum number of attributes to be stored in dense storage.
-!! \param hdferr      Returns 0 if successful and -1 if fails
+!! \param hdferr      \fortran_error
 !!
   SUBROUTINE h5pget_link_phase_change_f(gcpl_id, max_compact, min_dense, hdferr)
     IMPLICIT NONE
@@ -3171,7 +3134,7 @@ CONTAINS
 !!
 !! \param plist_id Property list id.
 !! \param flag     Object timestamp setting, .TRUE. or .FALSE.
-!! \param hdferr   Returns 0 if successful and -1 if fails
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5pget_obj_track_times_f(plist_id, flag, hdferr)
     IMPLICIT NONE
@@ -3203,7 +3166,7 @@ CONTAINS
 !!
 !! \param plist_id Property list id.
 !! \param flag     Object timestamp setting, .TRUE. or .FALSE.
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \fortran_error.
 !!
   SUBROUTINE h5pset_obj_track_times_f(plist_id, flag, hdferr)
     IMPLICIT NONE
@@ -3238,7 +3201,7 @@ CONTAINS
 !!
 !! \param lcpl_id            Link creation property list identifier.
 !! \param crt_intermed_group Specifies whether to create intermediate groups upon the creation of an object.
-!! \param hdferr             Returns 0 if successful and -1 if fails.
+!! \param hdferr             \fortran_error.
 !!
   SUBROUTINE h5pset_create_inter_group_f(lcpl_id, crt_intermed_group, hdferr)
     IMPLICIT NONE
@@ -3266,7 +3229,7 @@ CONTAINS
 !!
 !! \param gcpl_id         Group creation property list identifier.
 !! \param crt_order_flags Creation order flag(s).
-!! \param hdferr          Returns 0 if successful and -1 if fails.
+!! \param hdferr          \fortran_error.
 !!
   SUBROUTINE h5pget_link_creation_order_f(gcpl_id, crt_order_flags, hdferr)
     IMPLICIT NONE
@@ -3297,7 +3260,7 @@ CONTAINS
 !! \param encoding Valid values for encoding are:
 !!             \li H5T_CSET_ASCII_F -> US ASCII
 !!             \li H5T_CSET_UTF8_F -> UTF-8 Unicode encoding
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \fortran_error.
 !!
   SUBROUTINE h5pset_char_encoding_f(plist_id, encoding, hdferr)
     IMPLICIT NONE
@@ -3328,7 +3291,7 @@ CONTAINS
 !! \param encoding Valid values for encoding are:
 !!             \li H5T_CSET_ASCII_F -> US ASCII
 !!             \li H5T_CSET_UTF8_F -> UTF-8 Unicode encoding
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \fortran_error.
 !!
   SUBROUTINE  h5pget_char_encoding_f(plist_id, encoding, hdferr)
     IMPLICIT NONE
@@ -3358,7 +3321,7 @@ CONTAINS
 !!
 !! \param ocp_plist_id Object copy property list identifier.
 !! \param copy_options Copy option(s) to be set.
-!! \param hdferr       Returns 0 if successful and -1 if fails.
+!! \param hdferr       \fortran_error.
 !!
   SUBROUTINE h5pset_copy_object_f(ocp_plist_id, copy_options, hdferr)
     IMPLICIT NONE
@@ -3386,7 +3349,7 @@ CONTAINS
 !!
 !! \param ocp_plist_id Object copy property list identifier.
 !! \param copy_options Copy option(s) to be get.
-!! \param hdferr       Returns 0 if successful and -1 if fails
+!! \param hdferr       \fortran_error
 !!
   SUBROUTINE h5pget_copy_object_f(ocp_plist_id, copy_options, hdferr)
     IMPLICIT NONE
@@ -3458,7 +3421,7 @@ SUBROUTINE h5pget_data_transform_f(plist_id, expression, hdferr, size)
 !!
 !! \param plist_id   Identifier of the property list or class.
 !! \param expression Buffer to hold transform expression.
-!! \param hdferr     Returns 0 if successful and -1 if fails.
+!! \param hdferr     \fortran_error.
 !!
   SUBROUTINE h5pset_data_transform_f(plist_id, expression, hdferr)
     IMPLICIT NONE
@@ -3491,7 +3454,7 @@ SUBROUTINE h5pget_data_transform_f(plist_id, expression, hdferr, size)
 !!
 !! \param gcpl_id   Group creation property list identifier.
 !! \param size_hint Hint for size of local heap.
-!! \param hdferr    Returns 0 if successful and -1 if fails.
+!! \param hdferr    \fortran_error.
 !!
   SUBROUTINE h5pget_local_heap_size_hint_f(gcpl_id, size_hint, hdferr)
     IMPLICIT NONE
@@ -3520,7 +3483,7 @@ SUBROUTINE h5pget_data_transform_f(plist_id, expression, hdferr, size)
 !! \param gcpl_id         Group creation property list identifier.
 !! \param est_num_entries Estimated number of links to be inserted into group.
 !! \param est_name_len    Estimated average length of link names.
-!! \param hdferr          Returns 0 if successful and -1 if fails.
+!! \param hdferr          \fortran_error.
 !!
   SUBROUTINE h5pget_est_link_info_f(gcpl_id, est_num_entries, est_name_len, hdferr)
     IMPLICIT NONE
@@ -3550,7 +3513,7 @@ SUBROUTINE h5pget_data_transform_f(plist_id, expression, hdferr, size)
 !!
 !! \param gcpl_id   Group creation property list identifier.
 !! \param size_hint Hint for size of local heap.
-!! \param hdferr    Returns 0 if successful and -1 if fails.
+!! \param hdferr    \fortran_error.
 !!
   SUBROUTINE h5pset_local_heap_size_hint_f(gcpl_id, size_hint, hdferr)
     IMPLICIT NONE
@@ -3579,7 +3542,7 @@ SUBROUTINE h5pget_data_transform_f(plist_id, expression, hdferr, size)
 !! \param gcpl_id         Group creation property list identifier.
 !! \param est_num_entries Estimated number of links to be inserted into group.
 !! \param est_name_len    Estimated average length of link names.
-!! \param hdferr          Returns 0 if successful and -1 if fails.
+!! \param hdferr          \fortran_error.
 !!
   SUBROUTINE h5pset_est_link_info_f(gcpl_id, est_num_entries, est_name_len, hdferr)
     IMPLICIT NONE
@@ -3610,7 +3573,7 @@ SUBROUTINE h5pget_data_transform_f(plist_id, expression, hdferr, size)
 !! \param gcpl_id     Group creation property list identifier.
 !! \param max_compact Maximum number of attributes to be stored in compact storage.
 !! \param min_dense   Minimum number of attributes to be stored in dense storage.
-!! \param hdferr      Returns 0 if successful and -1 if fails.
+!! \param hdferr      \fortran_error.
 !!
 SUBROUTINE h5pset_link_phase_change_f(gcpl_id, max_compact, min_dense, hdferr)
     IMPLICIT NONE
@@ -3641,7 +3604,7 @@ SUBROUTINE h5pset_link_phase_change_f(gcpl_id, max_compact, min_dense, hdferr)
 !! \param alignment  Required memory alignment boundary.
 !! \param block_size File system block size.
 !! \param cbuf_size  Copy buffer size.
-!! \param hdferr     Returns 0 if successful and -1 if fails.
+!! \param hdferr     \fortran_error.
 !!
 SUBROUTINE h5pset_fapl_direct_f(fapl_id, alignment, block_size, cbuf_size, hdferr)
     IMPLICIT NONE
@@ -3674,7 +3637,7 @@ SUBROUTINE h5pset_fapl_direct_f(fapl_id, alignment, block_size, cbuf_size, hdfer
 !! \param alignment  Required memory alignment boundary.
 !! \param block_size File system block size.
 !! \param cbuf_size  Copy buffer size.
-!! \param hdferr     Returns 0 if successful and -1 if fails.
+!! \param hdferr     \fortran_error.
 !!
   SUBROUTINE h5pget_fapl_direct_f(fapl_id, alignment, block_size, cbuf_size, hdferr)
     IMPLICIT NONE
@@ -3707,7 +3670,7 @@ SUBROUTINE h5pset_fapl_direct_f(fapl_id, alignment, block_size, cbuf_size, hdfer
 !! \param ocpl_id     Object (dataset or group) creation property list identifier.
 !! \param max_compact Maximum number of attributes to be stored in compact storage, (Default: 8).
 !! \param min_dense   Minimum number of attributes to be stored in dense storage, (Default: 6).
-!! \param hdferr      Returns 0 if successful and -1 if fails.
+!! \param hdferr      \fortran_error.
 !!
 SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     IMPLICIT NONE
@@ -3737,7 +3700,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !! \brief Sets up the use of the N-Bit filter.
 !!
 !! \param plist_id Dataset creation property list identifier.
-!! \param hdferr  Returns 0 if successful and -1 if fails.
+!! \param hdferr  \fortran_error.
 !!
   SUBROUTINE h5pset_nbit_f(plist_id, hdferr)
     IMPLICIT NONE
@@ -3767,7 +3730,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !!                 \li H5Z_SO_FLOAT_ESCALE_F
 !!                 \li H5Z_SO_INT_F
 !! \param scale_factor Parameter related to scale.
-!! \param hdferr       Returns 0 if successful and -1 if fails.
+!! \param hdferr       \fortran_error.
 !!
   SUBROUTINE h5pset_scaleoffset_f(plist_id, scale_type, scale_factor, hdferr)
     IMPLICIT NONE
@@ -3798,7 +3761,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !!
 !! \param lapl_id File access property list identifier.
 !! \param nlinks  Maximum number of links to traverse.
-!! \param hdferr  Returns 0 if successful and -1 if fails.
+!! \param hdferr  \fortran_error.
 !!
   SUBROUTINE h5pset_nlinks_f(lapl_id, nlinks, hdferr)
     IMPLICIT NONE
@@ -3826,7 +3789,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !!
 !! \param lapl_id File access property list identifier.
 !! \param nlinks  Maximum number of links to traverse.
-!! \param hdferr  Returns 0 if successful and -1 if fails.
+!! \param hdferr  \fortran_error.
 !!
   SUBROUTINE h5pget_nlinks_f(lapl_id, nlinks, hdferr)
     IMPLICIT NONE
@@ -3854,7 +3817,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !!
 !! \param lcpl_id            Link creation property list identifier.
 !! \param crt_intermed_group Specifying whether to create intermediate groups upon the creation of an object.
-!! \param hdferr             Returns 0 if successful and -1 if fails.
+!! \param hdferr             \fortran_error.
 !!
   SUBROUTINE h5pget_create_inter_group_f(lcpl_id, crt_intermed_group, hdferr)
     IMPLICIT NONE
@@ -3899,7 +3862,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !! \param rdcc_nslots The number of chunk slots in the raw data chunk cache for this dataset.
 !! \param rdcc_nbytes The total size of the raw data chunk cache for this dataset.
 !! \param rdcc_w0     The chunk preemption policy for this dataset.
-!! \param hdferr      Returns 0 if successful and -1 if fails.
+!! \param hdferr      \fortran_error.
 !!
   SUBROUTINE h5pset_chunk_cache_f(dapl_id, rdcc_nslots, rdcc_nbytes, rdcc_w0, hdferr)
     IMPLICIT NONE
@@ -3934,7 +3897,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !! \param rdcc_nslots Number of chunk slots in the raw data chunk cache hash table.
 !! \param rdcc_nbytes Total size of the raw data chunk cache, in bytes.
 !! \param rdcc_w0     Preemption policy.
-!! \param hdferr      Returns 0 if successful and -1 if fails.
+!! \param hdferr      \fortran_error.
 !!
   SUBROUTINE h5pget_chunk_cache_f(dapl_id, rdcc_nslots, rdcc_nbytes, rdcc_w0, hdferr)
     IMPLICIT NONE
@@ -3968,7 +3931,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !! \param prp_id    Property list identifier.
 !! \param type_id   Datatype identifier of fill value datatype (in memory).
 !! \param fillvalue Fillvalue.
-!! \param hdferr    Returns 0 if successful and -1 if fails.
+!! \param hdferr    \fortran_error.
 !!
   SUBROUTINE h5pset_fill_value_f(prp_id, type_id, fillvalue, hdferr)
     INTEGER(HID_T), INTENT(IN)  :: prp_id
@@ -3985,7 +3948,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !! \param prp_id    Property list identifier.
 !! \param type_id   Datatype identifier of fill value datatype (in memory).
 !! \param fillvalue Fillvalue.
-!! \param hdferr    Returns 0 if successful and -1 if fails.
+!! \param hdferr    \fortran_error.
 !!
   SUBROUTINE h5pset_fill_value_f___F90_VERSION(prp_id, type_id, fillvalue, hdferr)
     INTEGER(HID_T), INTENT(IN)  :: prp_id
@@ -4001,7 +3964,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !! \param prp_id    Property list identifier.
 !! \param type_id   Datatype identifier of fill value datatype (in memory).
 !! \param fillvalue Fillvalue.
-!! \param hdferr    Returns 0 if successful and -1 if fails.
+!! \param hdferr    \fortran_error.
 !!
   SUBROUTINE h5pget_fill_value_f(prp_id, type_id, fillvalue, hdferr)
     INTEGER(HID_T), INTENT(IN)  :: prp_id
@@ -4018,7 +3981,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !! \param prp_id    Property list identifier.
 !! \param type_id   Datatype identifier of fill value datatype (in memory).
 !! \param fillvalue Fillvalue.
-!! \param hdferr    Returns 0 if successful and -1 if fails.
+!! \param hdferr    \fortran_error.
 !!
   SUBROUTINE h5pget_fill_value_f___F90_VERSION(prp_id, type_id, fillvalue, hdferr)
     INTEGER(HID_T), INTENT(IN)  :: prp_id
@@ -4039,7 +4002,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !!           \li REAL
 !!           \li DOUBLE PRECISION
 !!           \li CHARACTER(LEN=*)
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \fortran_error.
 !!
   SUBROUTINE h5pset_f___F90_VERSION(prp_id, name, value, hdferr)
     INTEGER(HID_T)  , INTENT(IN)  :: prp_id
@@ -4055,7 +4018,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !! \param prp_id Property list identifier to modify.
 !! \param name   Name of property to modify.
 !! \param value  Pointer to value to set the property to.
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \fortran_error.
 !!
   SUBROUTINE h5pset_f(prp_id, name, value, hdferr)
     INTEGER(HID_T)  , INTENT(IN)  :: prp_id
@@ -4075,7 +4038,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !!           \li REAL
 !!           \li DOUBLE PRECISION
 !!           \li CHARACTER(LEN=*)
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \fortran_error.
 !!
   SUBROUTINE h5pset_f___F90_VERSION(prp_id, name, value, hdferr)
     INTEGER(HID_T), INTENT(IN) :: prp_id
@@ -4091,7 +4054,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !! \param prp_id Property list identifier to modify.
 !! \param name   Name of property to get.
 !! \param value  Pointer to a location to which to copy the value of of the property.
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \fortran_error.
 !!
   SUBROUTINE h5pget_f(prp_id, name, value, hdferr)
     INTEGER(HID_T)  , INTENT(IN)  :: prp_id
@@ -4112,7 +4075,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !!           \li REAL
 !!           \li DOUBLE PRECISION
 !!           \li CHARACTER(LEN=*)
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \fortran_error.
 !!
   SUBROUTINE h5pget_f___F90_VERSION(prp_id, name, value, hdferr)
     INTEGER(HID_T)  , INTENT(IN)  :: prp_id
@@ -4129,7 +4092,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !! \param name  Name of property to register.
 !! \param size  Size of the property value.
 !! \param value Pointer to value to set the property to.
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \fortran_error.
 !!
   SUBROUTINE h5pregister_f(class, name, size, value, hdferr)
     INTEGER(HID_T)  , INTENT(IN)  :: class
@@ -4151,7 +4114,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !!          \li REAL
 !!          \li DOUBLE PRECISION
 !!          \li CHARACTER(LEN=*)
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \fortran_error.
 !!
   SUBROUTINE h5pregister_integer(class, name, size, value, hdferr)
     INTEGER(HID_T)  , INTENT(IN)  :: class
@@ -4170,7 +4133,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !! \param name   Name of property to insert.
 !! \param size   Size of the property value.
 !! \param value  Pointer to new value pointer for the property being modified.
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \fortran_error.
 !!
   SUBROUTINE h5pinsert_f(plist, name, size, value, hdferr)
     INTEGER(HID_T)  , INTENT(IN)  :: plist
@@ -4193,7 +4156,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !!           \li REAL
 !!           \li DOUBLE PRECISION
 !!           \li CHARACTER(LEN=*)
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \fortran_error.
 !!
   SUBROUTINE h5pinsert_f___F90_VERSION(plist, name, size, value, hdferr)
     IMPLICIT NONE
@@ -4365,7 +4328,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !!           \li REAL
 !!           \li DOUBLE PRECISION
 !!           \li CHARACTER(LEN=*)
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \fortran_error.
 !!
   SUBROUTINE h5pget_integer(prp_id, name, value, hdferr)
     IMPLICIT NONE
@@ -4423,7 +4386,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !! \param prp_id Property list identifier to modify.
 !! \param name   Name of property to modify.
 !! \param value  Pointer to value to set the property to.
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \fortran_error.
 !!
   SUBROUTINE h5pset_ptr(prp_id, name, value, hdferr)
     IMPLICIT NONE
@@ -4445,7 +4408,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !! \param prp_id Property list identifier to modify.
 !! \param name   Name of property to get.
 !! \param value  Pointer to a location to which to copy the value of of the property.
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \fortran_error.
 !!
   SUBROUTINE h5pget_ptr(prp_id, name, value, hdferr)
     IMPLICIT NONE
@@ -4607,7 +4570,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !!               \li H5P_FILE_MOUNT_F
 !! \param name        Name of property to create.
 !! \param class       Property list class identifier.
-!! \param hdferr      Returns 0 if successful and -1 if fails.
+!! \param hdferr      \fortran_error.
 !! \param create      (H5P_cls_create_func_t) - Callback routine called when a property list is created.
 !! \param create_data User pointer to any class creation information needed.
 !! \param copy        (H5P_cls_copy_func_t)   - Callback routine called when a property list is copied.
@@ -4672,7 +4635,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !! \param fapl_id File access property list identifier.
 !! \param buf_ptr Pointer to the initial file image, or C_NULL_PTR if no initial file image is desired.
 !! \param buf_len Size of the supplied buffer, or 0 (zero) if no initial image is desired.
-!! \param hdferr  Returns 0 if successful and -1 if fails.
+!! \param hdferr  \fortran_error.
 !!
   SUBROUTINE h5pset_file_image_f(fapl_id, buf_ptr, buf_len, hdferr)
     IMPLICIT NONE
@@ -4710,7 +4673,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !! \param buf_len_ptr Contains the value of the buffer parameter for
 !!                    the initial image in the supplied fapl_id. The value
 !!                    will be 0 if no initial image is set.
-!! \param hdferr      Returns 0 if successful and -1 if fails
+!! \param hdferr      \fortran_error
 !!
   SUBROUTINE h5pget_file_image_f(fapl_id, buf_ptr, buf_len_ptr, hdferr)
     IMPLICIT NONE
@@ -4747,7 +4710,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !! \param prp_id File access property list identifier.
 !! \param comm   MPI-2 communicator.
 !! \param info   MPI-2 info object.
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \fortran_error.
 !!
   SUBROUTINE h5pset_fapl_mpio_f(prp_id, comm, info, hdferr)
     IMPLICIT NONE
@@ -4778,7 +4741,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !! \param prp_id File access property list identifier.
 !! \param comm   MPI-2 communicator.
 !! \param info   MPI-2 info object.
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \fortran_error.
 !!
   SUBROUTINE h5pget_fapl_mpio_f(prp_id, comm, info, hdferr)
     IMPLICIT NONE
@@ -4810,7 +4773,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !! \param data_xfer_mode Transfer mode; possible values are:
 !!                   \li H5FD_MPIO_INDEPENDENT_F
 !!                   \li H5FD_MPIO_COLLECTIVE_F
-!! \param hdferr         Returns 0 if successful and -1 if fails.
+!! \param hdferr         \fortran_error.
 !!
   SUBROUTINE h5pset_dxpl_mpio_f(prp_id, data_xfer_mode, hdferr)
     IMPLICIT NONE
@@ -4839,7 +4802,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !! \param data_xfer_mode Transfer mode; possible values are:
 !!                   \li H5FD_MPIO_INDEPENDENT_F
 !!                   \li H5FD_MPIO_COLLECTIVE_F
-!! \param hdferr         Returns 0 if successful and -1 if fails.
+!! \param hdferr         \fortran_error.
 !!
   SUBROUTINE h5pget_dxpl_mpio_f(prp_id, data_xfer_mode, hdferr)
     IMPLICIT NONE
@@ -4867,7 +4830,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !!
 !! \param dxpl_id        Dataset transfer property list identifier.
 !! \param actual_io_mode The type of I/O performed by this process.
-!! \param hdferr         Returns 0 if successful and -1 if fails.
+!! \param hdferr         \fortran_error.
 !!
   SUBROUTINE h5pget_mpio_actual_io_mode_f(dxpl_id, actual_io_mode, hdferr)
     IMPLICIT NONE
@@ -4900,7 +4863,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !!
 !! \param plist_id      File access property list identifier.
 !! \param is_collective Indicates if metadata writes are collective or not.
-!! \param hdferr        Returns 0 if successful and -1 if fails.
+!! \param hdferr        \fortran_error.
 !!
   SUBROUTINE h5pset_all_coll_metadata_ops_f(plist_id, is_collective, hdferr)
     IMPLICIT NONE
@@ -4932,7 +4895,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !!
 !! \param plist_id      File access property list identifier.
 !! \param is_collective Collective access setting.
-!! \param hdferr        Returns 0 if successful and -1 if fails.
+!! \param hdferr        \fortran_error.
 !!
   SUBROUTINE h5pget_all_coll_metadata_ops_f(plist_id, is_collective, hdferr)
 
@@ -4965,7 +4928,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !!
 !! \param plist_id      File access property list identifier.
 !! \param is_collective Indicates if metadata writes are collective or not.
-!! \param hdferr        Returns 0 if successful and -1 if fails.
+!! \param hdferr        \fortran_error.
 !!
   SUBROUTINE h5pset_coll_metadata_write_f(plist_id, is_collective, hdferr)
     IMPLICIT NONE
@@ -4997,7 +4960,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !!
 !! \param plist_id      File access property list identifier.
 !! \param is_collective Collective access setting.
-!! \param hdferr        Returns 0 if successful and -1 if fails.
+!! \param hdferr        \fortran_error.
 !!
   SUBROUTINE h5pget_coll_metadata_write_f(plist_id, is_collective, hdferr)
 
@@ -5038,7 +5001,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !! \param view    Flag specifying the extent of the data to be included in the view. Valid values are:
 !!            \li H5D_VDS_FIRST_MISSING_F
 !!            \li H5D_VDS_LAST_AVAILABLE_F
-!! \param hdferr  Returns 0 if successful and -1 if fails.
+!! \param hdferr  \fortran_error.
 !!
   SUBROUTINE h5pset_virtual_view_f(dapl_id, view, hdferr)
     IMPLICIT NONE
@@ -5069,7 +5032,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !! \param view    The flag specifying the view of the virtual dataset. Valid values are:
 !!            \li H5D_VDS_FIRST_MISSING_F
 !!            \li H5D_VDS_LAST_AVAILABLE_F
-!! \param hdferr  Returns 0 if successful and -1 if fails.
+!! \param hdferr  \fortran_error.
 !!
   SUBROUTINE h5pget_virtual_view_f(dapl_id, view, hdferr)
     IMPLICIT NONE
@@ -5101,7 +5064,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !! \param dapl_id  Dataset access property list identifier for the virtual dataset.
 !! \param gap_size Maximum number of files and/or datasets allowed to be missing for determining
 !!                 the extent of an unlimited virtual dataset with printf-style mappings.
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \fortran_error.
 !!
   SUBROUTINE h5pset_virtual_printf_gap_f(dapl_id, gap_size, hdferr)
     IMPLICIT NONE
@@ -5130,7 +5093,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !! \param dapl_id  Dataset access property list identifier for the virtual dataset.
 !! \param gap_size Maximum Number of the files and/or datasets allowed to be missing for
 !!                 determining the extent of an unlimited virtual dataset with printf-style mappings.
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \fortran_error.
 !!
   SUBROUTINE h5pget_virtual_printf_gap_f(dapl_id, gap_size, hdferr)
     IMPLICIT NONE
@@ -5161,7 +5124,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !! \param src_file_name The name of the HDF5 file where the source dataset is located.
 !! \param src_dset_name The path to the HDF5 dataset in the file specified by src_file_name.
 !! \param src_space_id  The source dataset’s dataspace identifier with a selection applied, possibly an unlimited selection.
-!! \param hdferr        Returns 0 if successful and -1 if fails.
+!! \param hdferr        \fortran_error.
 !!
   SUBROUTINE h5pset_virtual_f(dcpl_id, vspace_id, src_file_name, src_dset_name, src_space_id, hdferr)
     IMPLICIT NONE
@@ -5203,7 +5166,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !!
 !! \param dcpl_id The identifier of the virtual dataset creation property list.
 !! \param count   The number of mappings.
-!! \param hdferr  Returns 0 if successful and -1 if fails.
+!! \param hdferr  \fortran_error.
 !!
   SUBROUTINE h5pget_virtual_count_f(dcpl_id, count, hdferr)
 
@@ -5234,7 +5197,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !! \param index   Mapping index. The value of index is 0 (zero) or greater and less than count (0 ≤ index < count),
 !!                where count is the number of mappings returned by h5pget_virtual_count.
 !! \param ds_id   Valid dataspace identifier identifier if successful; otherwise returns H5I_INVALID_HID_F.
-!! \param hdferr  Returns 0 if successful and -1 if fails.
+!! \param hdferr  \fortran_error.
 !!
   SUBROUTINE h5pget_virtual_vspace_f(dcpl_id, index, ds_id, hdferr)
     IMPLICIT NONE
@@ -5269,7 +5232,7 @@ END SUBROUTINE h5pget_virtual_vspace_f
 !! \param index   Mapping index.The value of index is 0 (zero) or greater and less than count (0 ≤ index < count),
 !!                where count is the number of mappings returned by h5pget_virtual_count.
 !! \param ds_id   Dataspace identifier.
-!! \param hdferr  Returns 0 if successful and -1 if fails.
+!! \param hdferr  \fortran_error.
 !!
 SUBROUTINE h5pget_virtual_srcspace_f(dcpl_id, index, ds_id, hdferr)
   IMPLICIT NONE
@@ -5304,7 +5267,7 @@ END SUBROUTINE h5pget_virtual_srcspace_f
 !! \param index    Mapping index. The value of index is 0 (zero) or greater and less than count (0 ≤ index < count),
 !!                 where count is the number of mappings returned by h5pget_virtual_count.
 !! \param name     A buffer containing the name of the file containing the source dataset.
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \fortran_error.
 !! \param name_len The size of name needed to hold the filename. (OUT)
 !!
 !!
@@ -5357,7 +5320,7 @@ END SUBROUTINE h5pget_virtual_filename_f
 !! \param index    Mapping index. The value of index is 0 (zero) or greater and less than count (0 ≤ index < count),
 !!                 where count is the number of mappings returned by h5pget_virtual_count.
 !! \param name     A buffer containing the name of the source dataset.
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \fortran_error.
 !! \param name_len The size of name needed to hold the source dataset name.
 !!
 SUBROUTINE h5pget_virtual_dsetname_f(dcpl_id, index, name, hdferr, name_len)
@@ -5407,7 +5370,7 @@ END SUBROUTINE h5pget_virtual_dsetname_f
 !!
 !! \param dcpl_id  Target dataset creation property list identifier.
 !! \param minimize Value of the setting.
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \fortran_error.
 !!
   SUBROUTINE h5pget_dset_no_attrs_hint_f(dcpl_id, minimize, hdferr)
     IMPLICIT NONE
@@ -5440,7 +5403,7 @@ END SUBROUTINE h5pget_virtual_dsetname_f
 !!
 !! \param dcpl_id  Target dataset creation property list identifier.
 !! \param minimize Value of the setting.
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \fortran_error.
 !!
   SUBROUTINE h5pset_dset_no_attrs_hint_f(dcpl_id, minimize, hdferr)
     IMPLICIT NONE
@@ -5524,7 +5487,7 @@ END SUBROUTINE h5pget_virtual_dsetname_f
 !! \param fapl_id               Target file access property list identifier.
 !! \param use_file_locking      Whether or not to use file locks.
 !! \param ignore_disabled_locks Whether or not to ignore file locks when locking is disabled on a file system.
-!! \param hdferr                Returns 0 if successful and -1 if fails.
+!! \param hdferr                \fortran_error.
 !!
   SUBROUTINE h5pset_file_locking_f(fapl_id, use_file_locking, ignore_disabled_locks, hdferr)
     IMPLICIT NONE

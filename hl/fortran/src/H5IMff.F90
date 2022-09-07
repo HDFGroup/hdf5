@@ -1,6 +1,13 @@
-!> @ingroup H5IM
+!> @defgroup FH5IM Fortran High Level Images (H5IM) Interface
 !!
-!! @brief This file contains Fortran interfaces for H5IM.
+!! @see H5IM, C-HL API
+!!
+!! @see @ref H5IM_UG, User Guide
+!!
+
+!> @ingroup FH5IM
+!!
+!! @brief This module contains Fortran interfaces for H5IM.
 !
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
@@ -32,13 +39,6 @@ MODULE H5IM
   USE hdf5
 CONTAINS
 
-!> @defgroup FH5IM Fortran High Level Images (H5IM) Interface
-!!
-!! @see H5IM, C-HL API
-!!
-!! @see @ref H5IM_UG, User Guide
-!!
-
 !>
 !! \ingroup FH5IM
 !!
@@ -49,7 +49,7 @@ CONTAINS
 !! \param width	    The width of the image.
 !! \param height    The height of the image
 !! \param buf       Buffer with data to be written to the dataset
-!! \param errcode   \herr_t
+!! \param errcode   \fortran_error
 !!
   SUBROUTINE h5immake_image_8bit_f(loc_id,&
        dset_name,&
@@ -96,7 +96,7 @@ CONTAINS
 !! \param loc_id    Location identifier. The identifier may be that of a file or group.
 !! \param dset_name The name of the dataset to create.
 !! \param buf       Buffer with data to store the image.
-!! \param errcode   \herr_t
+!! \param errcode   \fortran_error
 !!
   SUBROUTINE h5imread_image_f(loc_id,&
        dset_name,&
@@ -140,7 +140,7 @@ CONTAINS
 !! \param height    The height of the image.
 !! \param il        String defining the interlace mode.
 !! \param buf       Buffer with data to be written to the dataset.
-!! \param errcode   \herr_t
+!! \param errcode   \fortran_error
 !!
   SUBROUTINE h5immake_image_24bit_f(loc_id, dset_name, width, height, il, buf, errcode )
 
@@ -192,7 +192,7 @@ CONTAINS
 !! \param planes    The number of color planes of the image.
 !! \param interlace The interlace mode of the image.
 !! \param npals     The number of palettes associated to the image.
-!! \param errcode   \herr_t
+!! \param errcode   \fortran_error
 !!
   SUBROUTINE h5imget_image_info_f(loc_id,&
        dset_name,&
@@ -284,7 +284,7 @@ CONTAINS
 !! \param pal_name The name of the palette.
 !! \param pal_dims An array of the size of the palette dimensions.
 !! \param pal_data Buffer with data to be written to the dataset.
-!! \param errcode   \herr_t
+!! \param errcode  \fortran_error
 !!
   SUBROUTINE h5immake_palette_f(loc_id,&
        pal_name,&
@@ -328,7 +328,7 @@ CONTAINS
 !! \param loc_id     Location identifier. The identifier may be that of a file or group.
 !! \param image_name The name of the dataset to attach the palette to.
 !! \param pal_name   The name of the palette.
-!! \param errcode   \herr_t
+!! \param errcode    \fortran_error
 !!
   SUBROUTINE h5imlink_palette_f(loc_id,&
        image_name,&
@@ -372,7 +372,7 @@ CONTAINS
 !! \param loc_id     Location identifier. The identifier may be that of a file or group.
 !! \param image_name The name of the image dataset.
 !! \param pal_name   The name of the palette.
-!! \param errcode    \herr_t
+!! \param errcode    \fortran_error
 
   SUBROUTINE h5imunlink_palette_f(loc_id,&
        image_name,&
@@ -416,7 +416,7 @@ CONTAINS
 !! \param loc_id     Location identifier. The identifier may be that of a file or group.
 !! \param image_name The name of the image dataset.
 !! \param npals      The number of palettes.
-!! \param errcode    \herr_t
+!! \param errcode    \fortran_error
 !!
   SUBROUTINE h5imget_npalettes_f(loc_id,&
        image_name,&
@@ -457,7 +457,7 @@ CONTAINS
 !! \param image_name The name of the image dataset.
 !! \param pal_number The zero based index that identifies the palette.
 !! \param pal_dims   The dimensions of the palette dataset.
-!! \param  errcode    \herr_t
+!! \param  errcode   \fortran_error
 !!
   SUBROUTINE h5imget_palette_info_f(loc_id,&
        image_name,&
@@ -502,7 +502,7 @@ CONTAINS
 !! \param image_name The name of the image dataset.
 !! \param pal_number The zero based index that identifies the palette.
 !! \param pal_data   The palette dataset.
-!! \param errcode    \herr_t
+!! \param errcode    \fortran_error
 !!
   SUBROUTINE h5imget_palette_f(loc_id,&
        image_name,&

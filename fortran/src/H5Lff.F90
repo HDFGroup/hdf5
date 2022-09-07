@@ -84,7 +84,7 @@ CONTAINS
 !! \param src_name    Name of the link to be copied.
 !! \param dest_loc_id Location identifier. The identifier may be that of a file, group, dataset, or named datatype.
 !! \param dest_name   Name to be assigned to the new copy.
-!! \param hdferr      Returns 0 if successful and -1 if fails.
+!! \param hdferr      \fortran_error.
 !! \param lcpl_id     Link creation property list identifier.
 !! \param lapl_id     Link access property list identifier.
 !!
@@ -144,7 +144,7 @@ CONTAINS
 !!
 !! \param loc_id  Identifier of the file or group containing the object.
 !! \param name    Name of the link to delete.
-!! \param hdferr  Returns 0 if successful and -1 if fails.
+!! \param hdferr  \fortran_error.
 !! \param lapl_id Link access property list identifier.
 !!
   SUBROUTINE h5ldelete_f(loc_id, name, hdferr, lapl_id)
@@ -185,7 +185,7 @@ CONTAINS
 !! \param target_path Path to the target object, which is not required to exist.
 !! \param link_loc_id The file or group identifier for the new link.
 !! \param link_name   The name of the new link.
-!! \param hdferr      Returns 0 if successful and -1 if fails.
+!! \param hdferr      \fortran_error.
 !! \param lcpl_id     Link creation property list identifier.
 !! \param lapl_id     Link access property list identifier.
 !!
@@ -244,7 +244,7 @@ CONTAINS
 !! \param obj_name    Name of the target object, which must already exist.
 !! \param link_loc_id The file or group identifier for the new link.
 !! \param link_name   The name of the new link.
-!! \param hdferr      Returns 0 if successful and -1 if fails.
+!! \param hdferr      \fortran_error.
 !! \param lcpl_id     Link creation property list identifier.
 !! \param lapl_id     Link access property list identifier.
 !!
@@ -304,7 +304,7 @@ CONTAINS
 !! \param obj_name    Path within the target file to the target object.
 !! \param link_loc_id The file or group identifier for the new link.
 !! \param link_name   The name of the new link.
-!! \param hdferr      Returns 0 if successful and -1 if fails.
+!! \param hdferr      \fortran_error.
 !! \param lcpl_id     Link creation property list identifier.
 !! \param lapl_id     Link access property list identifier.
 !!
@@ -376,7 +376,7 @@ CONTAINS
 !!                \li H5_ITER_NATIVE_F   - No particular order, whatever is fastest
 !!                \li H5_ITER_N_F        - Number of iteration orders
 !! \param n           Link for which to retrieve information.
-!! \param hdferr      Returns 0 if successful and -1 if fails.
+!! \param hdferr      \fortran_error.
 !! \param lapl_id     Link access property list.
 !!
   SUBROUTINE h5ldelete_by_idx_f(loc_id, group_name, index_field, order, n, hdferr, lapl_id)
@@ -434,7 +434,7 @@ CONTAINS
 !! \param loc_id      Identifier of the file or group to query.
 !! \param name        Link name to check.
 !! \param link_exists Link exists status (.TRUE.,.FALSE.).
-!! \param hdferr      Returns 0 if successful and -1 if fails.
+!! \param hdferr      \fortran_error.
 !! \param lapl_id     Link access property list identifier.
 !!
   SUBROUTINE h5lexists_f(loc_id, name, link_exists, hdferr, lapl_id)
@@ -496,7 +496,7 @@ CONTAINS
 !! \param address      If the link is a hard link, address specifies the file address that the link points to
 !! \param val_size     If the link is a symbolic link, val_size will be the length of the link value, e.g.,
 !!                     the length of the name of the pointed-to object with a null terminator.
-!! \param hdferr       Returns 0 if successful and -1 if fails
+!! \param hdferr       \fortran_error
 !! \param lapl_id      Link access property list.
 !!
   SUBROUTINE h5lget_info_f(link_loc_id, link_name, &
@@ -598,7 +598,7 @@ CONTAINS
 !! \param address      If the link is a hard link, address specifies the file address that the link points to
 !! \param val_size       If the link is a symbolic link, val_size will be the length of the link value, e.g.,
 !!                       the length of the name of the pointed-to object with a null terminator.
-!! \param hdferr         Returns 0 if successful and -1 if fails.
+!! \param hdferr         \fortran_error.
 !!
 !! \param lapl_id        Link access property list.
 !!
@@ -681,7 +681,7 @@ CONTAINS
 !!
 !! \param link_cls_id User-defined link class identifier.
 !! \param registered  .TRUE. if the link class has been registered.
-!! \param hdferr      Returns 0 if successful and -1 if fails.
+!! \param hdferr      \fortran_error.
 !!
   SUBROUTINE h5lis_registered_f(link_cls_id, registered, hdferr)
     IMPLICIT NONE
@@ -714,7 +714,7 @@ CONTAINS
 !! \param src_name    Original link name.
 !! \param dest_loc_id Destination file or group identifier.
 !! \param dest_name   NEW link name.
-!! \param hdferr      Error code: 0 on success and -1 on failure
+!! \param hdferr      \fortran_error
 !! \param lcpl_id     Link creation property list identifier to be associated WITH the NEW link.
 !! \param lapl_id     Link access property list identifier to be associated WITH the NEW link.
 !!
@@ -786,7 +786,7 @@ CONTAINS
 !!                    \li H5_ITER_N_F        - Number of iteration orders
 !! \param n           Link for which to retrieve information.
 !! \param name        Buffer in which link value is returned.
-!! \param hdferr      Returns 0 if successful and -1 if fails.
+!! \param hdferr      \fortran_error.
 !! \param lapl_id     List access property list identifier.
 !! \param size        Maximum number of characters of link value to be returned.
 !!
@@ -983,7 +983,7 @@ CONTAINS
 !!                               returns non-zero, or zero if all members were processed with no operator returning non-zero.
 !!                  \li Failure: Negative if something goes wrong within the
 !!                               library, or the negative value returned by one of the operators.
-!! \param hdferr        Returns 0 if successful and -1 if fails.
+!! \param hdferr        \fortran_error.
 !!
   SUBROUTINE h5literate_f(group_id, index_type, order, idx, op, op_data, return_value, hdferr)
     USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_FUNPTR
@@ -1044,7 +1044,7 @@ CONTAINS
 !!                               all members were processed with no operator returning non-zero.
 !!                  \li Failure: Negative if something goes wrong within the
 !!                               library, or the negative value returned by one of the operators.
-!! \param  hdferr       Returns 0 if successful and -1 if fails
+!! \param  hdferr       \fortran_error
 !! \param  lapl_id      Link access property list
 !!
   SUBROUTINE h5literate_by_name_f(loc_id, group_name, index_type, order, &

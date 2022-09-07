@@ -78,17 +78,7 @@ MODULE H5A
   PRIVATE h5awrite_char_scalar, h5awrite_ptr
   PRIVATE h5aread_char_scalar, h5aread_ptr
 
-#ifdef H5_DOXYGEN_FORTRAN
-  INTERFACE h5awrite_f
-     MODULE PROCEDURE h5awrite_f
-     MODULE PROCEDURE h5awrite_f___F90_VERSION
-  END INTERFACE
-
-  INTERFACE h5aread_f
-     MODULE PROCEDURE h5aread_f
-     MODULE PROCEDURE h5aread_f___F90_VERSION
-  END INTERFACE
-#else
+#ifndef H5_DOXYGEN_FORTRAN
   INTERFACE h5awrite_f
      MODULE PROCEDURE h5awrite_char_scalar
      ! This is the preferred way to call h5awrite
@@ -142,7 +132,7 @@ CONTAINS
 !! \param type_id  Attribute datatype identifier
 !! \param space_id Attribute dataspace identifier
 !! \param attr_id  Attribute identifier
-!! \param hdferr   Returns 0 if successful and -1 if fails
+!! \param hdferr   \fortran_error
 !! \param acpl_id  Attribute creation property list identifier
 !! \param aapl_id  Attribute access property list identifier
 !!
@@ -199,7 +189,7 @@ CONTAINS
 !!                       datatype attribute to be attached to
 !! \param name    Attribute name
 !! \param attr_id Attribute identifier
-!! \param hdferr  Returns 0 if successful and -1 if fails
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE H5Aopen_name_f(obj_id, name, attr_id, hdferr)
     IMPLICIT NONE
@@ -236,7 +226,7 @@ CONTAINS
 !! \param obj_id  Identifier of a group, dataset, or named datatype an attribute to be attached to
 !! \param index   Index of the attribute to open (zero-based)
 !! \param attr_id Attribute identifier
-!! \param hdferr  Returns 0 if successful and -1 if fails
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE H5Aopen_idx_f(obj_id, index, attr_id, hdferr)
     IMPLICIT NONE
@@ -266,7 +256,7 @@ CONTAINS
 !!
 !! \param attr_id  Attribute identifier
 !! \param space_id Attribite dataspace identifier
-!! \param hdferr   Returns 0 if successful and -1 if fails
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE H5Aget_space_f(attr_id, space_id, hdferr)
     IMPLICIT NONE
@@ -294,7 +284,7 @@ CONTAINS
 !!
 !! \param attr_id Attribute identifier
 !! \param type_id Attribute datatype identifier
-!! \param hdferr  Returns 0 if successful and -1 if fails
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE H5Aget_type_f(attr_id, type_id, hdferr)
     IMPLICIT NONE
@@ -323,7 +313,7 @@ CONTAINS
 !! \param attr_id Attribute identifier
 !! \param size    Size of a buffer to read name in
 !! \param buf     Buffer to read name in
-!! \param hdferr  Returns 0 if successful and -1 if fails
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5aget_name_f(attr_id, size, buf, hdferr)
     IMPLICIT NONE
@@ -365,7 +355,7 @@ CONTAINS
 !!                 \li H5_ITER_N_F         - Number of iteration orders
 !! \param n        Attribute’s position in index
 !! \param name     Attribute name
-!! \param hdferr   Returns 0 if successful and -1 if fails
+!! \param hdferr   \fortran_error
 !!
 !! \param size     Size, in bytes, of attribute name
 !! \param lapl_id  Link access property list
@@ -428,7 +418,7 @@ CONTAINS
 !!
 !! \param obj_id   Object (group, dataset, or named datatype) identifier
 !! \param attr_num Number of attributes attached to the object
-!! \param hdferr   Returns 0 if successful and -1 if fails
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5aget_num_attrs_f(obj_id, attr_num, hdferr)
     IMPLICIT NONE
@@ -455,7 +445,7 @@ CONTAINS
 !! \param obj_id Object identifier
 !! \param name   Attribute name
 !!
-!! \param hdferr Returns 0 if successful and -1 if fails
+!! \param hdferr \fortran_error
 !!
   SUBROUTINE H5Adelete_f(obj_id, name, hdferr)
     IMPLICIT NONE
@@ -484,7 +474,7 @@ CONTAINS
 !! \brief Closes the specified attribute.
 !!
 !! \param attr_id Attribute identifier
-!! \param  hdferr Returns 0 if successful and -1 if fails
+!! \param  hdferr \fortran_error
 !!
   SUBROUTINE H5Aclose_f(attr_id, hdferr)
     IMPLICIT NONE
@@ -508,7 +498,7 @@ CONTAINS
 !!
 !! \param attr_id Attribute identifier
 !! \param size    Attribute storage size
-!! \param hdferr  Returns 0 if successful and -1 if fails
+!! \param hdferr  \fortran_error
 !!
   SUBROUTINE H5Aget_storage_size_f(attr_id, size, hdferr)
     IMPLICIT NONE
@@ -537,7 +527,7 @@ CONTAINS
 !!
 !! \param attr_id          Identifier of the attribute
 !! \param creation_prop_id Identifier for the attribute’s creation property
-!! \param hdferr          RReturns 0 if successful and -1 if fails
+!! \param hdferr          R\fortran_error
 !!
   SUBROUTINE H5Aget_create_plist_f(attr_id, creation_prop_id, hdferr)
     IMPLICIT NONE
@@ -568,7 +558,7 @@ CONTAINS
 !! \param old_attr_name Prior attribute name
 !! \param new_attr_name New attribute name
 !! \param lapl_id       Link access property list identifier
-!! \param hdferr        Returns 0 if successful and -1 if fails
+!! \param hdferr        \fortran_error
 !!
   SUBROUTINE H5Arename_by_name_f(loc_id, obj_name, old_attr_name, new_attr_name, &
         hdferr, lapl_id)
@@ -626,7 +616,7 @@ CONTAINS
 !! \param obj_id    Identifier for object to which attribute is attached
 !! \param attr_name Name of attribute to open
 !! \param attr_id   Attribute identifier
-!! \param hdferr    Returns 0 if successful and -1 if fails
+!! \param hdferr    \fortran_error
 !! \param aapl_id   Attribute access property list
 !!
   SUBROUTINE H5Aopen_f(obj_id, attr_name, attr_id, hdferr, aapl_id)
@@ -683,7 +673,7 @@ CONTAINS
 !!                 \li H5_ITER_N_F         - Number of iteration orders
 !!
 !! \param n        Offset within index
-!! \param hdferr   Returns 0 if successful and -1 if fails
+!! \param hdferr   \fortran_error
 !! \param lapl_id  Link access property list
 !!
   SUBROUTINE H5Adelete_by_idx_f(loc_id, obj_name, idx_type, order, n, hdferr, lapl_id)
@@ -731,7 +721,7 @@ CONTAINS
 !! \param obj_name  Name of attribute to open
 !! \param attr_name Attribute access property list
 !! \param lapl_id   Link access property list
-!! \param hdferr    Returns 0 if successful and -1 if fails
+!! \param hdferr    \fortran_error
 !!
   SUBROUTINE H5Adelete_by_name_f(loc_id, obj_name, attr_name, hdferr, lapl_id)
     IMPLICIT NONE
@@ -790,7 +780,7 @@ CONTAINS
 !!                 \li H5_ITER_N_F         - Number of iteration orders
 !! \param n        Attribute’s position in index.
 !! \param attr_id  Attribute identifier.
-!! \param hdferr   Returns 0 if successful and -1 if fails.
+!! \param hdferr   \fortran_error.
 !! \param aapl_id  Attribute access property list.
 !! \param lapl_id  Link access property list.
 !!
@@ -851,7 +841,7 @@ CONTAINS
 !! \param corder         Is a positive integer containing the creation order of the attribute.
 !! \param cset           Indicates the character set used for the attribute’s name.
 !! \param data_size      Indicates the size, in the number of characters, of the attribute.
-!! \param hdferr         Returns 0 if successful and -1 if fails.
+!! \param hdferr         \fortran_error.
 !!
   SUBROUTINE H5Aget_info_f(attr_id, f_corder_valid, corder, cset, data_size, hdferr)
     IMPLICIT NONE
@@ -898,7 +888,7 @@ CONTAINS
 !! \param corder         Is a positive integer containing the creation order of the attribute
 !! \param cset           Indicates the character set used for the attribute’s name
 !! \param data_size      Indicates the size, in the number of characters, of the attribute
-!! \param hdferr         Returns 0 if successful and -1 if fails
+!! \param hdferr         \fortran_error
 !! \param lapl_id        Link access property list
 !!
   SUBROUTINE H5Aget_info_by_idx_f(loc_id, obj_name, idx_type, order, n, &
@@ -969,7 +959,7 @@ CONTAINS
 !! \param corder         Is a positive integer containing the creation order of the attribute
 !! \param cset           Indicates the character set used for the attribute’s name
 !! \param data_size      Indicates the size, in the number of characters, of the attribute
-!! \param hdferr         Returns 0 if successful and -1 if fails
+!! \param hdferr         \fortran_error
 !! \param lapl_id        Link access property list
 !!
   SUBROUTINE H5Aget_info_by_name_f(loc_id, obj_name, attr_name, &
@@ -1036,7 +1026,7 @@ CONTAINS
 !! \param type_id   Attribute datatype identifier
 !! \param space_id  Attribute dataspace identifier
 !! \param attr      An attribute identifier
-!! \param hdferr    Returns 0 if successful and -1 if fails
+!! \param hdferr    \fortran_error
 !! \param acpl_id   Attribute creation property list identifier (Currently not used.)
 !! \param aapl_id   Attribute access property list identifier (Currently not used.)
 !! \param lapl_id   Link access property list
@@ -1107,7 +1097,7 @@ CONTAINS
 !! \param obj_id      Object identifier
 !! \param attr_name   Attribute name
 !! \param attr_exists Attribute exists status
-!! \param hdferr      Returns 0 if successful and -1 if fails
+!! \param hdferr      \fortran_error
 !!
   SUBROUTINE H5Aexists_f(obj_id, attr_name, attr_exists, hdferr)
     IMPLICIT NONE
@@ -1148,7 +1138,7 @@ CONTAINS
 !! \param obj_name    Object name either relative to loc_id, absolute from the file’s root group, or &apos;. &apos;(a dot)
 !! \param attr_name   Attribute name
 !! \param attr_exists Attribute exists status
-!! \param hdferr      Returns 0 if successful and -1 if fails
+!! \param hdferr      \fortran_error
 !! \param lapl_id     Link access property list identifier
 !!
   SUBROUTINE H5Aexists_by_name_f(loc_id, obj_name, attr_name, attr_exists, hdferr, lapl_id)
@@ -1202,7 +1192,7 @@ CONTAINS
 !! \param obj_name  Object name either relative to loc_id, absolute from the file’s root group, or &apos;.&apos; (a dot)
 !! \param attr_name Attribute name
 !! \param attr_id   Attribute identifier
-!! \param hdferr    Returns 0 if successful and -1 if fails
+!! \param hdferr    \fortran_error
 !! \param aapl_id   Attribute access property list (Currently unused; should be passed in as H5P_DEFAULT.)
 !! \param lapl_id   Link access property list identifier
 !!
@@ -1256,10 +1246,10 @@ CONTAINS
 !!
 !! \brief Renames an attribute
 !!
-!! \param loc_id       LLocation or object identifier; may be dataset or group
+!! \param loc_id        Location or object identifier; may be dataset or group
 !! \param old_attr_name Prior attribute name
 !! \param new_attr_name New attribute name
-!! \param hdferr       RReturns 0 if successful and -1 if fails
+!! \param hdferr        \fortran_error
 !!
   SUBROUTINE H5Arename_f(loc_id, old_attr_name, new_attr_name, hdferr)
     IMPLICIT NONE
@@ -1294,35 +1284,18 @@ CONTAINS
 
 #ifdef H5_DOXYGEN_FORTRAN
 
-!>
-!! \ingroup FH5A
-!!
-!! \brief Writes data to an attribute. F2003 API h5awrite_f should be used instead.
-!!
-!! \param attr_id     Identifier of an attribute to write.
-!! \param memtype_id  Identifier of the attribute datatype (in memory).
-!! \param buf	      Data buffer; may be a scalar or an array.
-!! \param dims        Array to hold corresponding dimension sizes of data buffer buf;
-!!                    dim(k) has value of the k-th dimension of buffer buf; values are ignored if buf is a scalar.
-!! \param hdferr      Returns 0 if successful and -1 if fails.
-!!
-  SUBROUTINE h5awrite_f___F90_VERSION(attr_id, memtype_id, buf, dims, hdferr)
-    INTEGER(HID_T)  , INTENT(IN)               :: attr_id
-    INTEGER(HID_T)  , INTENT(IN)               :: memtype_id
-    TYPE(TYPE)      , INTENT(IN)               :: buf
-    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
-    INTEGER         , INTENT(OUT)              :: hdferr
-  END SUBROUTINE h5awrite_f___F90_VERSION
 
 !>
 !! \ingroup FH5A
 !!
-!! \brief Writes data to an attribute. **Preferred API**.
+!! \brief Writes data to an attribute.
+!!
+!! \note  \fortran_approved
 !!
 !! \param attr_id     Identifier of an attribute to write.
 !! \param memtype_id  Identifier of the attribute datatype (in memory).
 !! \param buf	      Data to be written.
-!! \param hdferr      Returns 0 if successful and -1 if fails.
+!! \param hdferr      \fortran_error.
 !!
   SUBROUTINE h5awrite_f(attr_id, memtype_id, buf, hdferr)
     INTEGER(HID_T)  , INTENT(IN)  :: attr_id
@@ -1330,34 +1303,39 @@ CONTAINS
     TYPE(C_PTR)     , INTENT(IN)  :: buf
     INTEGER         , INTENT(OUT) :: hdferr
   END SUBROUTINE h5awrite_f
+
 !>
 !! \ingroup FH5A
 !!
-!! \brief Reads an attribute. F2003 API h5aread_f should be used instead.
+!! \brief Writes data to an attribute.
 !!
-!! \param attr_id     Identifier of an attribute to read.
+!! \note  \fortran_obsolete
+!!
+!! \param attr_id     Identifier of an attribute to write.
 !! \param memtype_id  Identifier of the attribute datatype (in memory).
-!! \param buf	      Buffer for data to be read.
-!! \param dims	      Array to hold corresponding dimension sizes of data buffer buf;
+!! \param buf         Data buffer; may be a scalar or an array.
+!! \param dims        Array to hold corresponding dimension sizes of data buffer buf;
 !!                    dim(k) has value of the k-th dimension of buffer buf; values are ignored if buf is a scalar.
-!! \param hdferr      Returns 0 if successful and -1 if fails.
+!! \param hdferr      \fortran_error
 !!
-  SUBROUTINE h5aread_f___F90_VERSION(attr_id, memtype_id, buf, dims, hdferr)
+  SUBROUTINE h5awrite_f(attr_id, memtype_id, buf, dims, hdferr)
     INTEGER(HID_T)  , INTENT(IN)               :: attr_id
     INTEGER(HID_T)  , INTENT(IN)               :: memtype_id
-    TYPE(TYPE)      , INTENT(INOUT)            :: buf
+    TYPE(TYPE)      , INTENT(IN)               :: buf
     INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
     INTEGER         , INTENT(OUT)              :: hdferr
-  END SUBROUTINE h5aread_f___F90_version
+  END SUBROUTINE h5awrite_f
 !>
 !! \ingroup FH5A
 !!
-!! \brief Reads an attribute. **Preferred API**.
+!! \brief Reads an attribute.
+!!
+!! \note  \fortran_approved
 !!
 !! \param attr_id     Identifier of an attribute to read.
 !! \param memtype_id  Identifier of the attribute datatype (in memory).
 !! \param buf	      Buffer for data to be read.
-!! \param hdferr      Returns 0 if successful and -1 if fails.
+!! \param hdferr      \fortran_error.
 !!
   SUBROUTINE h5aread_f(attr_id, memtype_id, buf, hdferr)
     INTEGER(HID_T), INTENT(IN)    :: attr_id
@@ -1365,6 +1343,28 @@ CONTAINS
     TYPE(C_PTR)   , INTENT(INOUT) :: buf
     INTEGER       , INTENT(OUT)   :: hdferr
   END SUBROUTINE h5aread_f
+
+￼!>
+￼!! \ingroup FH5A
+￼!!
+￼!! \brief Reads an attribute.
+￼!!
+￼!! \note  \fortran_obsolete
+￼!!
+￼!! \param attr_id     Identifier of an attribute to read.
+￼!! \param memtype_id  Identifier of the attribute datatype (in memory).
+￼!! \param buf        Buffer for data to be read.
+￼!! \param dims       Array to hold corresponding dimension sizes of data buffer buf;
+￼!!                    dim(k) has value of the k-th dimension of buffer buf; values are ignored if buf is a scalar.
+￼!! \param hdferr      \fortran_error
+￼!!
+￼  SUBROUTINE h5aread_f(attr_id, memtype_id, buf, dims, hdferr)
+￼    INTEGER(HID_T)  , INTENT(IN)               :: attr_id
+￼    INTEGER(HID_T)  , INTENT(IN)               :: memtype_id
+￼    TYPE(TYPE)      , INTENT(INOUT)            :: buf
+￼    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
+￼    INTEGER         , INTENT(OUT)              :: hdferr
+￼  END SUBROUTINE h5aread_f
 
 #else
 

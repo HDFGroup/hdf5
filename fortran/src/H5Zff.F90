@@ -54,7 +54,7 @@ CONTAINS
 !!           \li H5Z_FILTER_SCALEOFFSET_F
 !!           \li H5Z_FILTER_SHUFFLE_F
 !!           \li H5Z_FILTER_FLETCHER32_F
-!! \param hdferr Returns 0 if successful and -1 if fails.
+!! \param hdferr \fortran_error.
 !!
   SUBROUTINE h5zunregister_f(filter, hdferr)
     IMPLICIT NONE
@@ -81,7 +81,7 @@ CONTAINS
 !!            \li H5Z_FILTER_SHUFFLE_F
 !!            \li H5Z_FILTER_FLETCHER32_F
 !! \param status  Flag; .TRUE. if filter is available, .FALSE. otherwise.
-!! \param hdferr  Returns 0 if successful and -1 if fails.
+!! \param hdferr  \fortran_error.
 !!
   SUBROUTINE h5zfilter_avail_f(filter, status, hdferr)
     IMPLICIT NONE
@@ -119,7 +119,7 @@ CONTAINS
 !! \param config_flags Flag, indicates if filter has its encoder and/or decoder available, possiable values:
 !!                 \li H5Z_FILTER_ENCODE_ENABLED_F
 !!                 \li 5Z_FILTER_DECODE_ENABLED_F
-!! \param hdferr       Returns 0 if successful and -1 if fails.
+!! \param hdferr       \fortran_error.
 !!
   SUBROUTINE h5zget_filter_info_f(filter, config_flags, hdferr)
     IMPLICIT NONE

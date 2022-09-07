@@ -152,7 +152,7 @@ CONTAINS
 !!
 !! \brief Initializes HDF5 Fortran interface.
 !!
-!! \param error Returns 0 if successful and -1 if fails
+!! \param error \fortran_error
 !!
   SUBROUTINE h5open_f(error)
     USE H5F, ONLY : h5fget_obj_count_f, H5OPEN_NUM_OBJ
@@ -632,7 +632,7 @@ CONTAINS
 !!
 !! \brief Closes HDF5 Fortran interface.
 !!
-!! \param error Returns 0 if successful and -1 if fails.
+!! \param error \fortran_error.
 !!
   SUBROUTINE h5close_f(error)
     USE H5F, ONLY : h5fget_obj_count_f, H5OPEN_NUM_OBJ
@@ -673,7 +673,7 @@ CONTAINS
 !! \param majnum  Major version of the library.
 !! \param minnum  Minor version of the library.
 !! \param relnum  Release version of the library.
-!! \param error   Returns 0 if successful and -1 if fails.
+!! \param error   \fortran_error.
 !!
   SUBROUTINE h5get_libversion_f(majnum, minnum, relnum, error)
     IMPLICIT NONE
@@ -698,7 +698,7 @@ CONTAINS
 !! \param majnum Major version of the library.
 !! \param minnum Minor version of the library.
 !! \param relnum Release version of the library.
-!! \param error  Returns 0 if successful and -1 if fails.
+!! \param error  \fortran_error.
 !!
   SUBROUTINE h5check_version_f(majnum, minnum, relnum, error)
     IMPLICIT NONE
@@ -720,7 +720,7 @@ CONTAINS
 !!
 !! \brief Garbage collects on all free-lists of all types.
 !!
-!! \param error Returns 0 if successful and -1 if fails.
+!! \param error \fortran_error.
 !!
   SUBROUTINE h5garbage_collect_f(error)
     IMPLICIT NONE
@@ -739,7 +739,7 @@ CONTAINS
 !!
 !! \brief Instructs library not to install atexit cleanup routine.
 !!
-!! \param error Returns 0 if successful and -1 if fails.
+!! \param error \fortran_error.
 !!
   SUBROUTINE h5dont_atexit_f(error)
     IMPLICIT NONE
