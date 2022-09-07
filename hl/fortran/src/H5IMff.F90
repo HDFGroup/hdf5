@@ -1,6 +1,13 @@
-!> @ingroup H5IM
+!> @defgroup FH5IM Fortran High-level H5IM Interface
 !!
-!! @brief This file contains Fortran interfaces for H5IM.
+!! @see H5IM, C-API
+!!
+!! @see @ref H5IM_UG, User Guide
+!!
+
+!> @ingroup FH5IM
+!!
+!! @brief This module contains Fortran interfaces for H5IM.
 !
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
@@ -33,16 +40,16 @@ MODULE H5IM
 CONTAINS
 
 !>
-!! \ingroup H5IM
+!! \ingroup FH5IM
 !!
-!! \brief Creates and writes an image an 8 bit image
+!! \brief Creates and writes an image an 8 bit image.
 !!
 !! \param loc_id    Location identifier. The identifier may be that of a file or group.
 !! \param dset_name The name of the dataset to create.
 !! \param width	    The width of the image.
-!! \param height    The height of the image
-!! \param buf       Buffer with data to be written to the dataset
-!! \param errcode   \herr_t
+!! \param height    The height of the image.
+!! \param buf       Buffer with data to be written to the dataset.
+!! \param errcode   \fortran_error
 !!
   SUBROUTINE h5immake_image_8bit_f(loc_id,&
        dset_name,&
@@ -82,14 +89,14 @@ CONTAINS
   END SUBROUTINE h5immake_image_8bit_f
 
 !>
-!! \ingroup H5IM
+!! \ingroup FH5IM
 !!
 !! \brief Reads image data from disk.
 !!
 !! \param loc_id    Location identifier. The identifier may be that of a file or group.
 !! \param dset_name The name of the dataset to create.
 !! \param buf       Buffer with data to store the image.
-!! \param errcode   \herr_t
+!! \param errcode   \fortran_error
 !!
   SUBROUTINE h5imread_image_f(loc_id,&
        dset_name,&
@@ -123,7 +130,7 @@ CONTAINS
   END SUBROUTINE h5imread_image_f
 
 !>
-!! \ingroup H5IM
+!! \ingroup FH5IM
 !!
 !! \brief Creates and writes an image a 24 bit image.
 !! 
@@ -133,7 +140,7 @@ CONTAINS
 !! \param height    The height of the image.
 !! \param il        String defining the interlace mode.
 !! \param buf       Buffer with data to be written to the dataset.
-!! \param errcode   \herr_t
+!! \param errcode   \fortran_error
 !!
   SUBROUTINE h5immake_image_24bit_f(loc_id, dset_name, width, height, il, buf, errcode )
 
@@ -174,7 +181,7 @@ CONTAINS
   END SUBROUTINE h5immake_image_24bit_f
 
 !>
-!! \ingroup H5IM
+!! \ingroup FH5IM
 !!
 !! \brief Gets information about an image dataset (dimensions, interlace mode and number of associated palettes).
 !!
@@ -185,7 +192,7 @@ CONTAINS
 !! \param planes    The number of color planes of the image.
 !! \param interlace The interlace mode of the image.
 !! \param npals     The number of palettes associated to the image.
-!! \param errcode   \herr_t
+!! \param errcode   \fortran_error
 !!
   SUBROUTINE h5imget_image_info_f(loc_id,&
        dset_name,&
@@ -234,7 +241,7 @@ CONTAINS
   END SUBROUTINE h5imget_image_info_f
 
 !>
-!! \ingroup H5IM
+!! \ingroup FH5IM
 !!
 !! \brief Inquires if a dataset is an image.
 !!
@@ -269,7 +276,7 @@ CONTAINS
   END FUNCTION h5imis_image_f
 
 !>
-!! \ingroup H5IM
+!! \ingroup FH5IM
 !!
 !! \brief Creates and writes a palette
 !!
@@ -277,7 +284,7 @@ CONTAINS
 !! \param pal_name The name of the palette.
 !! \param pal_dims An array of the size of the palette dimensions.
 !! \param pal_data Buffer with data to be written to the dataset.
-!! \param errcode   \herr_t
+!! \param errcode  \fortran_error
 !!
   SUBROUTINE h5immake_palette_f(loc_id,&
        pal_name,&
@@ -314,14 +321,14 @@ CONTAINS
   END SUBROUTINE h5immake_palette_f
 
 !>
-!! \ingroup H5IM
+!! \ingroup FH5IM
 !!
 !! \brief This function attaches a palette to an existing image dataset.
 !!
 !! \param loc_id     Location identifier. The identifier may be that of a file or group.
 !! \param image_name The name of the dataset to attach the palette to.
 !! \param pal_name   The name of the palette.
-!! \param errcode   \herr_t
+!! \param errcode    \fortran_error
 !!
   SUBROUTINE h5imlink_palette_f(loc_id,&
        image_name,&
@@ -358,14 +365,14 @@ CONTAINS
   END SUBROUTINE h5imlink_palette_f
 
 !>
-!! \ingroup H5IM
+!! \ingroup FH5IM
 !!
 !! \brief This function dettaches a palette to an existing image dataset.
 !!
 !! \param loc_id     Location identifier. The identifier may be that of a file or group.
 !! \param image_name The name of the image dataset.
 !! \param pal_name   The name of the palette.
-!! \param errcode    \herr_t
+!! \param errcode    \fortran_error
 
   SUBROUTINE h5imunlink_palette_f(loc_id,&
        image_name,&
@@ -402,14 +409,14 @@ CONTAINS
   END SUBROUTINE h5imunlink_palette_f
 
 !>
-!! \ingroup H5IM
+!! \ingroup FH5IM
 !!
 !! \brief Gets the number of palettes associated to an image.
 !!
 !! \param loc_id     Location identifier. The identifier may be that of a file or group.
 !! \param image_name The name of the image dataset.
 !! \param npals      The number of palettes.
-!! \param errcode    \herr_t
+!! \param errcode    \fortran_error
 !!
   SUBROUTINE h5imget_npalettes_f(loc_id,&
        image_name,&
@@ -442,7 +449,7 @@ CONTAINS
 
   END SUBROUTINE h5imget_npalettes_f
 !>
-!! \ingroup H5IM
+!! \ingroup FH5IM
 !!
 !! \brief Gets information about a palette dataset (dimensions).
 !!
@@ -450,7 +457,7 @@ CONTAINS
 !! \param image_name The name of the image dataset.
 !! \param pal_number The zero based index that identifies the palette.
 !! \param pal_dims   The dimensions of the palette dataset.
-!! \param  errcode    \herr_t
+!! \param  errcode   \fortran_error
 !!
   SUBROUTINE h5imget_palette_info_f(loc_id,&
        image_name,&
@@ -487,7 +494,7 @@ CONTAINS
   END SUBROUTINE h5imget_palette_info_f
 
 !>
-!! \ingroup H5IM
+!! \ingroup FH5IM
 !!
 !! \brief Gets the palette dataset
 !!
@@ -495,7 +502,7 @@ CONTAINS
 !! \param image_name The name of the image dataset.
 !! \param pal_number The zero based index that identifies the palette.
 !! \param pal_data   The palette dataset.
-!! \param errcode    \herr_t
+!! \param errcode    \fortran_error
 !!
   SUBROUTINE h5imget_palette_f(loc_id,&
        image_name,&
@@ -532,7 +539,7 @@ CONTAINS
   END SUBROUTINE h5imget_palette_f
 
 !>
-!! \ingroup H5IM
+!! \ingroup FH5IM
 !!
 !! \brief Inquires if a dataset is a palette. Returns zero (false), a positive (true) or a negative (failure) value.
 !!

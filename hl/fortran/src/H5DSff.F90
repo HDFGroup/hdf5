@@ -1,6 +1,13 @@
-!> @ingroup H5DS
+!> @defgroup FH5DS Fortran High-level H5DS Interface
 !!
-!! @brief This file contains Fortran interfaces for H5DS
+!! @see H5DS, C-API
+!!
+!! @see @ref H5DS_UG, User Guide
+!!
+
+!> @ingroup FH5DS
+!!
+!! @brief This module contains Fortran interfaces for H5DS
 !
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
@@ -34,13 +41,13 @@ MODULE H5DS
 
 CONTAINS
 !>
-!! \ingroup H5DS
+!! \ingroup FH5DS
 !!
 !! \brief Convert dataset \p dsid to a dimension scale, with optional name, \p dimname.
 !!
 !! \param dsid    The dataset to be made a Dimemsion Scale.
-!! \param errcode \herr_t.     
-!! \param dimname The dimension name 
+!! \param errcode \fortran_error
+!! \param dimname The dimension name.
 !!
   SUBROUTINE H5DSset_scale_f( dsid, errcode, dimname)
 
@@ -74,14 +81,14 @@ CONTAINS
   END SUBROUTINE H5DSset_scale_f
 
 !>
-!! \ingroup H5DS
+!! \ingroup FH5DS
 !!
-!! \brief Attach dimension scale dsid to dimension idx of dataset \p did.
+!! \brief Attach dimension scale dsid to dimension \p idx of dataset \p did.
 !!
 !! \param did     The dataset.
 !! \param dsid    The scale to be attached.
 !! \param idx     The dimension of \p did that \p dsid is associated with.
-!! \param errcode \herr_t. 
+!! \param errcode \fortran_error 
 !!
   SUBROUTINE H5DSattach_scale_f( did, dsid, idx, errcode)
 
@@ -90,7 +97,7 @@ CONTAINS
     INTEGER(hid_t), INTENT(in) :: did
     INTEGER(hid_t), INTENT(in) :: dsid
     INTEGER       , INTENT(in) :: idx
-    INTEGER                    :: errcode ! error code
+    INTEGER                    :: errcode
     INTEGER                    :: c_idx
 
     INTERFACE
@@ -111,14 +118,14 @@ CONTAINS
   END SUBROUTINE H5DSattach_scale_f
 
 !>
-!! \ingroup H5DS
+!! \ingroup FH5DS
 !!
 !! \brief Detach dimension scale dsid from the dimension idx of dataset \p did.
 !!
 !! \param did     The dataset.
 !! \param dsid    The scale to be detached.
 !! \param idx     The dimension of \p did to detach.
-!! \param errcode \herr_t. 
+!! \param errcode \fortran_error 
 !!
 
   SUBROUTINE H5DSdetach_scale_f( did, dsid, idx, errcode)
@@ -128,7 +135,7 @@ CONTAINS
     INTEGER(hid_t), INTENT(in) :: did
     INTEGER(hid_t), INTENT(in) :: dsid
     INTEGER       , INTENT(in) :: idx
-    INTEGER                    :: errcode ! error code
+    INTEGER                    :: errcode
     INTEGER                    :: c_idx
 
     INTERFACE
@@ -149,7 +156,7 @@ CONTAINS
   END SUBROUTINE H5DSdetach_scale_f
 
 !>
-!! \ingroup H5DS
+!! \ingroup FH5DS
 !!
 !! \brief Report if dimension scale dsid is currently attached to dimension idx of dataset did.
 !!
@@ -157,7 +164,7 @@ CONTAINS
 !! \param dsid        The scale to be attached.
 !! \param idx         The dimension of \p did that \p dsid is associated with.
 !! \param is_attached If dimension scale \p dsid is currently attached to dimension \p idx of dataset \p did.
-!! \param errcode     \herr_t. 
+!! \param errcode     \fortran_error 
 !!
   SUBROUTINE H5DSis_attached_f( did, dsid, idx, is_attached, errcode)
 
@@ -167,7 +174,7 @@ CONTAINS
     INTEGER(hid_t), INTENT(in)  :: dsid
     INTEGER       , INTENT(in)  :: idx
     LOGICAL       , INTENT(out) :: is_attached
-    INTEGER                     :: errcode     ! error code
+    INTEGER                     :: errcode
     INTEGER                     :: c_is_attached
     INTEGER                     :: c_idx
 
@@ -200,13 +207,13 @@ CONTAINS
 ! H5DSiterate_scales: Implement in  F2003
 !
 !>
-!! \ingroup H5DS
+!! \ingroup FH5DS
 !!
 !! \brief Determines whether \p did is a Dimension Scale.
 !!
 !! \param did         The data set to query.
 !! \param is_scale    If is a Dimension Scale.
-!! \param errcode     \herr_t. 
+!! \param errcode     \fortran_error 
 !!
   SUBROUTINE H5DSis_scale_f( did, is_scale, errcode)
 
@@ -239,14 +246,14 @@ CONTAINS
   END SUBROUTINE H5DSis_scale_f
 
 !>
-!! \ingroup H5DS
+!! \ingroup FH5DS
 !!
 !! \brief Set label for the dimension \p idx of \p did to the value \p label.
 !!
 !! \param did     The data set.
 !! \param idx     The dimension.
 !! \param label   The label.
-!! \param errcode \herr_t. 
+!! \param errcode \fortran_error 
 !!
   SUBROUTINE H5DSset_label_f( did, idx, label, errcode)
 
@@ -281,7 +288,7 @@ CONTAINS
   END SUBROUTINE H5DSset_label_f
 
 !>
-!! \ingroup H5DS
+!! \ingroup FH5DS
 !!
 !! \brief Read the \p label for dimension \p idx of \p did into buffer \p label.
 !!
@@ -289,7 +296,7 @@ CONTAINS
 !! \param idx     The dimension.
 !! \param label   The label.
 !! \param size    The length of the \p label buffer.
-!! \param errcode \herr_t. 
+!! \param errcode \fortran_error 
 !!
   SUBROUTINE H5DSget_label_f( did, idx, label, size, errcode)
 
@@ -299,7 +306,7 @@ CONTAINS
     INTEGER       ,   INTENT(in) :: idx
     CHARACTER(LEN=*), INTENT(INOUT) :: label
     INTEGER(size_t) , INTENT(INOUT) :: size
-    INTEGER :: errcode                       ! Error code
+    INTEGER :: errcode
     INTEGER :: c_idx
 
     INTERFACE
@@ -322,14 +329,14 @@ CONTAINS
   END SUBROUTINE H5DSget_label_f
 
 !>
-!! \ingroup H5DS
+!! \ingroup FH5DS
 !!
 !! \brief Read the name of scale \p did into buffer name.
 !!
 !! \param did     Dimension scale identifier.
 !! \param name    Buffer to contain the returned name.
 !! \param size    Size in bytes, of the name buffer.
-!! \param errcode \herr_t. 
+!! \param errcode \fortran_error 
 !!
   SUBROUTINE H5DSget_scale_name_f(did, name, size, errcode)
 
@@ -338,7 +345,7 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: did
     CHARACTER(LEN=*), INTENT(INOUT) :: name
     INTEGER(size_t) , INTENT(INOUT) :: size
-    INTEGER :: errcode                      ! Error code
+    INTEGER :: errcode
 
     INTERFACE
        INTEGER FUNCTION H5DSget_scale_name_c(did, name, size) &
@@ -357,14 +364,14 @@ CONTAINS
   END SUBROUTINE H5DSget_scale_name_f
 
 !>
-!! \ingroup H5DS
+!! \ingroup FH5DS
 !!
 !! \brief Determines how many Dimension Scales are attached to dimension idx of \p did.
 !!
 !! \param did        The dataset to query.
 !! \param idx        The dimension of \p did to query.
 !! \param num_scales Number of Dimension Scales associated with \p did.
-!! \param errcode    \herr_t. 
+!! \param errcode    \fortran_error 
 !!
   SUBROUTINE H5DSget_num_scales_f( did, idx, num_scales, errcode)
 
@@ -372,7 +379,7 @@ CONTAINS
     INTEGER(hid_t), INTENT(in)  :: did
     INTEGER       , INTENT(in)  :: idx
     INTEGER       , INTENT(INOUT) :: num_scales
-    INTEGER                     :: errcode      ! error code
+    INTEGER                     :: errcode
     INTEGER                     :: c_idx
 
     INTERFACE
