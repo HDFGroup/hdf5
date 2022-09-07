@@ -70,7 +70,7 @@ MODULE H5R
   PRIVATE h5rdereference_object_f, h5rdereference_region_f, h5rdereference_ptr_f
   PRIVATE h5rget_name_object_f, h5rget_name_region_f, h5rget_name_ptr_f
 
-!> @brief hdset_reg_ref_t_f03 C compatable reference
+!> @brief hdset_reg_ref_t_f03 C compatible reference
   TYPE :: hdset_reg_ref_t_f03
      INTEGER(C_SIGNED_CHAR), DIMENSION(1:H5R_DSET_REG_REF_BUF_SIZE_F) :: ref 
   END TYPE hdset_reg_ref_t_f03

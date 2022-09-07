@@ -1,4 +1,4 @@
-!> @defgroup FH5P Fortran Propert List (H5P) Interface
+!> @defgroup FH5P Fortran Property List (H5P) Interface
 !!
 !! @see H5P, C-API
 !!
