@@ -1061,7 +1061,7 @@ CONTAINS
     INTEGER(hsize_t), INTENT(in) :: nfields
     CHARACTER(LEN=*), DIMENSION(nfields), INTENT(inout) :: field_names
     INTEGER(size_t),  DIMENSION(nfields), INTENT(inout) :: field_sizes
-    INTEGER(size_t),  DIMENSION(nfields), INTENT(inout) :: field_offset
+    INTEGER(size_t),  DIMENSION(nfields), INTENT(inout) :: field_offsets
     INTEGER(size_t),  INTENT(inout):: type_size
     INTEGER :: errcode
     INTEGER(size_t), OPTIONAL :: maxlen_out
