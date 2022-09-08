@@ -334,17 +334,22 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(IN) :: name
     LOGICAL, INTENT(OUT) :: status
     INTEGER, INTENT(OUT) :: hdferr
-    CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
-    INTEGER(C_INT) :: flag    ! "TRUE/FALSE/ERROR" flag from C routine
-                              ! to define status value.
+    INTEGER :: namelen ! Length of the name character string
+    INTEGER :: flag    ! "TRUE/FALSE" flag from C routine
+                       ! to define status value.
 
-    c_name = TRIM(name)//C_NULL_CHAR
+    INTERFACE
+       INTEGER FUNCTION h5fis_hdf5_c(name, namelen, flag) BIND(C,NAME='h5fis_hdf5_c')
+         IMPORT :: C_CHAR
+         IMPLICIT NONE
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
+         INTEGER :: namelen
+         INTEGER :: flag
+       END FUNCTION h5fis_hdf5_c
+    END INTERFACE
 
-    flag = H5Fis_accessible(c_name, H5P_DEFAULT_F)
-
-    hdferr = 0
-    IF(flag.LT.0) hdferr = -1
-
+    namelen = LEN_TRIM(name)
+    hdferr = h5fis_hdf5_c(name, namelen, flag)
     status = .TRUE.
     IF (flag .EQ. 0) status = .FALSE.
 
