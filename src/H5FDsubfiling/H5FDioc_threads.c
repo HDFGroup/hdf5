@@ -72,16 +72,16 @@ static double sf_queue_delay_time = 0.0;
 static HG_THREAD_RETURN_TYPE ioc_thread_main(void *arg);
 static int                   ioc_main(ioc_data_t *ioc_data);
 
-static int ioc_file_queue_write_indep(sf_work_request_t *msg, int subfile_rank, int source, MPI_Comm comm,
+static int ioc_file_queue_write_indep(sf_work_request_t *msg, int ioc_idx, int source, MPI_Comm comm,
                                       uint32_t counter);
-static int ioc_file_queue_read_indep(sf_work_request_t *msg, int subfile_rank, int source, MPI_Comm comm);
+static int ioc_file_queue_read_indep(sf_work_request_t *msg, int ioc_idx, int source, MPI_Comm comm,
+                                     uint32_t counter);
 
 static int ioc_file_write_data(int fd, int64_t file_offset, void *data_buffer, int64_t data_size,
-                               int subfile_rank);
-static int ioc_file_read_data(int fd, int64_t file_offset, void *data_buffer, int64_t data_size,
-                              int subfile_rank);
-static int ioc_file_truncate(int fd, int64_t length, int subfile_rank);
-static int ioc_file_report_eof(sf_work_request_t *msg, int subfile_rank, int source, MPI_Comm comm);
+                               int ioc_idx);
+static int ioc_file_read_data(int fd, int64_t file_offset, void *data_buffer, int64_t data_size, int ioc_idx);
+static int ioc_file_truncate(sf_work_request_t *msg);
+static int ioc_file_report_eof(sf_work_request_t *msg, MPI_Comm comm);
 
 static ioc_io_queue_entry_t *ioc_io_queue_alloc_entry(void);
 static void ioc_io_queue_complete_entry(ioc_data_t *ioc_data, ioc_io_queue_entry_t *entry_ptr);
@@ -196,7 +196,7 @@ initialize_ioc_threads(void *_sf_context)
     t_end = MPI_Wtime();
 
 #ifdef H5FD_IOC_DEBUG
-    if (sf_context->topology->subfile_rank == 0) {
+    if (sf_context->topology->ioc_idx == 0) {
         HDprintf("%s: time = %lf seconds\n", __func__, (t_end - t_start));
         HDfflush(stdout);
     }
@@ -413,11 +413,11 @@ ioc_main(ioc_data_t *ioc_data)
 
             queue_start_time = MPI_Wtime();
 
-            wk_req.tag          = tag;
-            wk_req.source       = source;
-            wk_req.subfile_rank = context->topology->subfile_rank;
-            wk_req.context_id   = ioc_data->sf_context_id;
-            wk_req.start_time   = queue_start_time;
+            wk_req.tag        = tag;
+            wk_req.source     = source;
+            wk_req.ioc_idx    = context->topology->ioc_idx;
+            wk_req.context_id = ioc_data->sf_context_id;
+            wk_req.start_time = queue_start_time;
 
             ioc_io_queue_add_entry(ioc_data, &wk_req);
 
@@ -522,27 +522,27 @@ handle_work_request(void *arg)
 
     switch (msg->tag) {
         case WRITE_INDEP:
-            op_ret = ioc_file_queue_write_indep(msg, msg->subfile_rank, msg->source, sf_context->sf_data_comm,
+            op_ret = ioc_file_queue_write_indep(msg, msg->ioc_idx, msg->source, sf_context->sf_data_comm,
                                                 q_entry_ptr->counter);
             break;
 
         case READ_INDEP:
-            op_ret = ioc_file_queue_read_indep(msg, msg->subfile_rank, msg->source, sf_context->sf_data_comm);
+            op_ret = ioc_file_queue_read_indep(msg, msg->ioc_idx, msg->source, sf_context->sf_data_comm,
+                                               q_entry_ptr->counter);
             break;
 
         case TRUNC_OP:
-            op_ret = ioc_file_truncate(sf_context->sf_fid, q_entry_ptr->wk_req.header[0],
-                                       sf_context->topology->subfile_rank);
+            op_ret = ioc_file_truncate(msg);
             break;
 
         case GET_EOF_OP:
-            op_ret = ioc_file_report_eof(msg, msg->subfile_rank, msg->source, sf_context->sf_eof_comm);
+            op_ret = ioc_file_report_eof(msg, sf_context->sf_eof_comm);
             break;
 
         default:
 #ifdef H5_SUBFILING_DEBUG
             H5_subfiling_log(file_context_id, "%s: IOC %d received unknown message with tag %x from rank %d",
-                             __func__, msg->subfile_rank, msg->tag, msg->source);
+                             __func__, msg->ioc_idx, msg->tag, msg->source);
 #endif
 
             op_ret = -1;
@@ -553,11 +553,11 @@ handle_work_request(void *arg)
 
     if (op_ret < 0) {
 #ifdef H5_SUBFILING_DEBUG
-        H5_subfiling_log(
-            file_context_id,
-            "%s: IOC %d request(%s) filename=%s from rank(%d), size=%ld, offset=%ld FAILED with ret %d",
-            __func__, msg->subfile_rank, translate_opcode((io_op_t)msg->tag), sf_context->sf_filename,
-            msg->source, msg->header[0], msg->header[1], op_ret);
+        H5_subfiling_log(file_context_id,
+                         "%s: IOC %d request(%s) from rank(%d), (%" PRId64 ", %" PRId64 ", %" PRId64
+                         ") FAILED with ret %d",
+                         __func__, msg->ioc_idx, translate_opcode((io_op_t)msg->tag), msg->source,
+                         msg->header[0], msg->header[1], msg->header[2], op_ret);
 #endif
 
         q_entry_ptr->wk_ret = op_ret;
@@ -684,15 +684,15 @@ from the thread pool threads...
  *-------------------------------------------------------------------------
  */
 static int
-ioc_file_queue_write_indep(sf_work_request_t *msg, int subfile_rank, int source, MPI_Comm comm,
-                           uint32_t counter)
+ioc_file_queue_write_indep(sf_work_request_t *msg, int ioc_idx, int source, MPI_Comm comm, uint32_t counter)
 {
     subfiling_context_t *sf_context = NULL;
     MPI_Status           msg_status;
     hbool_t              send_nack = FALSE;
+    int64_t              file_context_id;
     int64_t              data_size;
     int64_t              file_offset;
-    int64_t              file_context_id;
+    int64_t              subfile_idx;
     int64_t              stripe_id;
     haddr_t              sf_eof;
 #ifdef H5FD_IOC_COLLECT_STATS
@@ -717,6 +717,7 @@ ioc_file_queue_write_indep(sf_work_request_t *msg, int subfile_rank, int source,
     /* Retrieve the fields of the RPC message for the write operation */
     data_size   = msg->header[0];
     file_offset = msg->header[1];
+    subfile_idx = msg->header[2];
 
     if (data_size < 0) {
         send_nack = TRUE;
@@ -745,7 +746,7 @@ ioc_file_queue_write_indep(sf_work_request_t *msg, int subfile_rank, int source,
 #ifdef H5_SUBFILING_DEBUG
     H5_subfiling_log(file_context_id,
                      "[ioc(%d) %s]: msg from %d: datasize=%ld\toffset=%ld, queue_delay = %lf seconds\n",
-                     subfile_rank, __func__, source, data_size, file_offset, t_queue_delay);
+                     ioc_idx, __func__, source, data_size, file_offset, t_queue_delay);
 #endif
 
 #endif
@@ -763,12 +764,12 @@ ioc_file_queue_write_indep(sf_work_request_t *msg, int subfile_rank, int source,
      * allows us to distinguish between multiple concurrent
      * writes from a single rank.
      */
-    HDassert(H5FD_IOC_tag_ub_val_ptr && (*H5FD_IOC_tag_ub_val_ptr >= WRITE_TAG_BASE));
-    rcv_tag = (int)(counter % (INT_MAX - WRITE_TAG_BASE));
-    rcv_tag %= (*H5FD_IOC_tag_ub_val_ptr - WRITE_TAG_BASE);
-    rcv_tag += WRITE_TAG_BASE;
+    HDassert(H5FD_IOC_tag_ub_val_ptr && (*H5FD_IOC_tag_ub_val_ptr >= IO_TAG_BASE));
+    rcv_tag = (int)(counter % (INT_MAX - IO_TAG_BASE));
+    rcv_tag %= (*H5FD_IOC_tag_ub_val_ptr - IO_TAG_BASE);
+    rcv_tag += IO_TAG_BASE;
 
-    if (send_ack_to_client(rcv_tag, source, subfile_rank, WRITE_INDEP_ACK, comm) < 0)
+    if (send_ack_to_client(rcv_tag, source, ioc_idx, WRITE_INDEP_ACK, comm) < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_WRITEERROR, -1, "couldn't send ACK to client");
 
     /* Receive data from client */
@@ -793,13 +794,13 @@ ioc_file_queue_write_indep(sf_work_request_t *msg, int subfile_rank, int source,
     t_start = t_end;
 
 #ifdef H5_SUBFILING_DEBUG
-    H5_subfiling_log(file_context_id, "[ioc(%d) %s] MPI_Recv(%ld bytes, from = %d) status = %d\n",
-                     subfile_rank, __func__, data_size, source, mpi_code);
+    H5_subfiling_log(file_context_id, "[ioc(%d) %s] MPI_Recv(%ld bytes, from = %d) status = %d\n", ioc_idx,
+                     __func__, data_size, source, mpi_code);
 #endif
 
 #endif
 
-    sf_fid = sf_context->sf_fid;
+    sf_fid = sf_context->sf_fids[subfile_idx];
 
 #ifdef H5_SUBFILING_DEBUG
     if (sf_fid < 0)
@@ -809,7 +810,7 @@ ioc_file_queue_write_indep(sf_work_request_t *msg, int subfile_rank, int source,
 
     if (sf_fid >= 0) {
         /* Actually write data received from client into subfile */
-        if ((write_ret = ioc_file_write_data(sf_fid, file_offset, recv_buf, data_size, subfile_rank)) < 0)
+        if ((write_ret = ioc_file_write_data(sf_fid, file_offset, recv_buf, data_size, ioc_idx)) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_WRITEERROR, -1,
                                     "write function(FID=%d, Source=%d) returned an error (%d)", sf_fid,
                                     source, write_ret);
@@ -843,7 +844,7 @@ ioc_file_queue_write_indep(sf_work_request_t *msg, int subfile_rank, int source,
 done:
     if (send_nack) {
         /* Send NACK back to client so client can handle failure gracefully */
-        if (send_nack_to_client(source, subfile_rank, WRITE_INDEP_ACK, comm) < 0)
+        if (send_nack_to_client(source, ioc_idx, WRITE_INDEP_ACK, comm) < 0)
             H5_SUBFILING_DONE_ERROR(H5E_IO, H5E_WRITEERROR, -1, "couldn't send NACK to client");
     }
 
@@ -873,13 +874,16 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-ioc_file_queue_read_indep(sf_work_request_t *msg, int subfile_rank, int source, MPI_Comm comm)
+ioc_file_queue_read_indep(sf_work_request_t *msg, int ioc_idx, int source, MPI_Comm comm, uint32_t counter)
 {
     subfiling_context_t *sf_context     = NULL;
     hbool_t              send_empty_buf = TRUE;
+    hbool_t              send_nack      = FALSE;
+    hbool_t              need_data_tag  = FALSE;
+    int64_t              file_context_id;
     int64_t              data_size;
     int64_t              file_offset;
-    int64_t              file_context_id;
+    int64_t              subfile_idx;
 #ifdef H5FD_IOC_COLLECT_STATS
     double t_start;
     double t_end;
@@ -887,6 +891,7 @@ ioc_file_queue_read_indep(sf_work_request_t *msg, int subfile_rank, int source, 
     double t_queue_delay;
 #endif
     char *send_buf = NULL;
+    int   send_tag;
     int   sf_fid;
     int   read_ret;
     int   mpi_code;
@@ -896,15 +901,34 @@ ioc_file_queue_read_indep(sf_work_request_t *msg, int subfile_rank, int source, 
 
     file_context_id = msg->context_id;
 
+    sf_context = H5_get_subfiling_object(file_context_id);
+    HDassert(sf_context);
+
+    /*
+     * If we are using 1 subfile per IOC, we can optimize reads
+     * a little since each read will go to a separate IOC and we
+     * won't be in danger of data being received in an
+     * unpredictable order. However, if some IOCs own more than
+     * 1 subfile, we need to associate each read with a unique
+     * message tag to make sure the data is received in the
+     * correct order.
+     */
+    need_data_tag = sf_context->sf_num_subfiles != sf_context->topology->n_io_concentrators;
+    if (!need_data_tag)
+        send_tag = READ_INDEP_DATA;
+
     /* Retrieve the fields of the RPC message for the read operation */
     data_size   = msg->header[0];
     file_offset = msg->header[1];
+    subfile_idx = msg->header[2];
 
-    if (data_size < 0)
+    if (data_size < 0) {
+        if (need_data_tag) {
+            send_nack      = TRUE;
+            send_empty_buf = FALSE;
+        }
         H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_BADVALUE, -1, "invalid data size for read");
-
-    sf_context = H5_get_subfiling_object(file_context_id);
-    HDassert(sf_context);
+    }
 
     /* Flag that we've attempted to read data from the file */
     sf_context->sf_read_count++;
@@ -918,22 +942,47 @@ ioc_file_queue_read_indep(sf_work_request_t *msg, int subfile_rank, int source, 
 
 #ifdef H5_SUBFILING_DEBUG
     H5_subfiling_log(file_context_id,
-                     "[ioc(%d) %s] msg from %d: datasize=%ld\toffset=%ld queue_delay=%lf seconds\n",
-                     subfile_rank, __func__, source, data_size, file_offset, t_queue_delay);
+                     "[ioc(%d) %s] msg from %d: datasize=%ld\toffset=%ld queue_delay=%lf seconds\n", ioc_idx,
+                     __func__, source, data_size, file_offset, t_queue_delay);
 #endif
 
 #endif
 
     /* Allocate space to send data read from file to client */
-    if (NULL == (send_buf = HDmalloc((size_t)data_size)))
+    if (NULL == (send_buf = HDmalloc((size_t)data_size))) {
+        if (need_data_tag) {
+            send_nack      = TRUE;
+            send_empty_buf = FALSE;
+        }
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, -1, "couldn't allocate send buffer for data");
+    }
 
-    sf_fid = sf_context->sf_fid;
+    if (need_data_tag) {
+        /*
+         * Calculate message tag for the client to use for receiving
+         * data, then send an ACK message to the client with the
+         * calculated message tag. This calculated message tag
+         * allows us to distinguish between multiple concurrent
+         * reads from a single rank, which can happen when a rank
+         * owns multiple subfiles.
+         */
+        HDassert(H5FD_IOC_tag_ub_val_ptr && (*H5FD_IOC_tag_ub_val_ptr >= IO_TAG_BASE));
+        send_tag = (int)(counter % (INT_MAX - IO_TAG_BASE));
+        send_tag %= (*H5FD_IOC_tag_ub_val_ptr - IO_TAG_BASE);
+        send_tag += IO_TAG_BASE;
+
+        if (send_ack_to_client(send_tag, source, ioc_idx, READ_INDEP_ACK, comm) < 0) {
+            send_empty_buf = FALSE;
+            H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_READERROR, -1, "couldn't send ACK to client");
+        }
+    }
+
+    /* Read data from the subfile */
+    sf_fid = sf_context->sf_fids[subfile_idx];
     if (sf_fid < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_BADVALUE, -1, "subfile file descriptor %d is invalid", sf_fid);
 
-    /* Read data from the subfile */
-    if ((read_ret = ioc_file_read_data(sf_fid, file_offset, send_buf, data_size, subfile_rank)) < 0) {
+    if ((read_ret = ioc_file_read_data(sf_fid, file_offset, send_buf, data_size, ioc_idx)) < 0) {
         H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_READERROR, read_ret,
                                 "read function(FID=%d, Source=%d) returned an error (%d)", sf_fid, source,
                                 read_ret);
@@ -943,8 +992,7 @@ ioc_file_queue_read_indep(sf_work_request_t *msg, int subfile_rank, int source, 
 
     /* Send read data to the client */
     H5_CHECK_OVERFLOW(data_size, int64_t, int);
-    if (MPI_SUCCESS !=
-        (mpi_code = MPI_Send(send_buf, (int)data_size, MPI_BYTE, source, READ_INDEP_DATA, comm)))
+    if (MPI_SUCCESS != (mpi_code = MPI_Send(send_buf, (int)data_size, MPI_BYTE, source, send_tag, comm)))
         H5_SUBFILING_MPI_GOTO_ERROR(-1, "MPI_Send failed", mpi_code);
 
 #ifdef H5FD_IOC_COLLECT_STATS
@@ -954,19 +1002,24 @@ ioc_file_queue_read_indep(sf_work_request_t *msg, int subfile_rank, int source, 
     sf_queue_delay_time += t_queue_delay;
 
 #ifdef H5_SUBFILING_DEBUG
-    H5_subfiling_log(sf_context->sf_context_id, "[ioc(%d)] MPI_Send to source(%d) completed\n", subfile_rank,
+    H5_subfiling_log(sf_context->sf_context_id, "[ioc(%d)] MPI_Send to source(%d) completed\n", ioc_idx,
                      source);
 #endif
 
 #endif
 
 done:
+    if (need_data_tag && send_nack) {
+        /* Send NACK back to client so client can handle failure gracefully */
+        if (send_nack_to_client(source, ioc_idx, READ_INDEP_ACK, comm) < 0)
+            H5_SUBFILING_DONE_ERROR(H5E_IO, H5E_READERROR, -1, "couldn't send NACK to client");
+    }
     if (send_empty_buf) {
         /*
          * Send an empty message back to client on failure. The client will
          * likely get a message truncation error, but at least shouldn't hang.
          */
-        if (MPI_SUCCESS != (mpi_code = MPI_Send(NULL, 0, MPI_BYTE, source, READ_INDEP_DATA, comm)))
+        if (MPI_SUCCESS != (mpi_code = MPI_Send(NULL, 0, MPI_BYTE, source, send_tag, comm)))
             H5_SUBFILING_MPI_DONE_ERROR(-1, "MPI_Send failed", mpi_code);
     }
 
@@ -985,7 +1038,7 @@ being thread safe.
 */
 
 static int
-ioc_file_write_data(int fd, int64_t file_offset, void *data_buffer, int64_t data_size, int subfile_rank)
+ioc_file_write_data(int fd, int64_t file_offset, void *data_buffer, int64_t data_size, int ioc_idx)
 {
     ssize_t bytes_remaining = (ssize_t)data_size;
     ssize_t bytes_written   = 0;
@@ -993,7 +1046,7 @@ ioc_file_write_data(int fd, int64_t file_offset, void *data_buffer, int64_t data
     int     ret_value       = 0;
 
 #ifndef H5FD_IOC_DEBUG
-    (void)subfile_rank;
+    (void)ioc_idx;
 #endif
 
     HDcompile_assert(H5_SIZEOF_OFF_T == sizeof(file_offset));
@@ -1007,7 +1060,7 @@ ioc_file_write_data(int fd, int64_t file_offset, void *data_buffer, int64_t data
             bytes_remaining -= bytes_written;
 
 #ifdef H5FD_IOC_DEBUG
-            HDprintf("[ioc(%d) %s]: wrote %ld bytes, remaining=%ld, file_offset=%" PRId64 "\n", subfile_rank,
+            HDprintf("[ioc(%d) %s]: wrote %ld bytes, remaining=%ld, file_offset=%" PRId64 "\n", ioc_idx,
                      __func__, bytes_written, bytes_remaining, file_offset);
 #endif
 
@@ -1031,7 +1084,7 @@ done:
 } /* end ioc_file_write_data() */
 
 static int
-ioc_file_read_data(int fd, int64_t file_offset, void *data_buffer, int64_t data_size, int subfile_rank)
+ioc_file_read_data(int fd, int64_t file_offset, void *data_buffer, int64_t data_size, int ioc_idx)
 {
     useconds_t delay           = 100;
     ssize_t    bytes_remaining = (ssize_t)data_size;
@@ -1041,7 +1094,7 @@ ioc_file_read_data(int fd, int64_t file_offset, void *data_buffer, int64_t data_
     int        ret_value       = 0;
 
 #ifndef H5FD_IOC_DEBUG
-    (void)subfile_rank;
+    (void)ioc_idx;
 #endif
 
     HDcompile_assert(H5_SIZEOF_OFF_T == sizeof(file_offset));
@@ -1059,7 +1112,7 @@ ioc_file_read_data(int fd, int64_t file_offset, void *data_buffer, int64_t data_
             bytes_remaining -= bytes_read;
 
 #ifdef H5FD_IOC_DEBUG
-            HDprintf("[ioc(%d) %s]: read %ld bytes, remaining=%ld, file_offset=%" PRId64 "\n", subfile_rank,
+            HDprintf("[ioc(%d) %s]: read %ld bytes, remaining=%ld, file_offset=%" PRId64 "\n", ioc_idx,
                      __func__, bytes_read, bytes_remaining, file_offset);
 #endif
 
@@ -1076,8 +1129,8 @@ ioc_file_read_data(int fd, int64_t file_offset, void *data_buffer, int64_t data_
         else {
             if (retries == 0) {
 #ifdef H5FD_IOC_DEBUG
-                HDprintf("[ioc(%d) %s]: TIMEOUT: file_offset=%" PRId64 ", data_size=%ld\n", subfile_rank,
-                         __func__, file_offset, data_size);
+                HDprintf("[ioc(%d) %s]: TIMEOUT: file_offset=%" PRId64 ", data_size=%ld\n", ioc_idx, __func__,
+                         file_offset, data_size);
 #endif
 
                 H5_SUBFILING_SYS_GOTO_ERROR(H5E_IO, H5E_READERROR, -1, "HDpread failed");
@@ -1094,19 +1147,40 @@ done:
 } /* end ioc_file_read_data() */
 
 static int
-ioc_file_truncate(int fd, int64_t length, int subfile_rank)
+ioc_file_truncate(sf_work_request_t *msg)
 {
-    int ret_value = 0;
+    subfiling_context_t *sf_context = NULL;
+    int64_t              file_context_id;
+    int64_t              length;
+    int64_t              subfile_idx;
+    int                  fd;
+    int                  ioc_idx;
+    int                  ret_value = 0;
+
+    HDassert(msg);
+
+    file_context_id = msg->context_id;
+    ioc_idx         = msg->ioc_idx;
+
+    length      = msg->header[0];
+    subfile_idx = msg->header[1];
 
 #ifndef H5FD_IOC_DEBUG
-    (void)subfile_rank;
+    (void)ioc_idx;
 #endif
+
+    if (NULL == (sf_context = H5_get_subfiling_object(file_context_id)))
+        H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTGET, -1, "couldn't retrieve subfiling context");
+
+    HDassert(subfile_idx < sf_context->sf_num_fids);
+
+    fd = sf_context->sf_fids[subfile_idx];
 
     if (HDftruncate(fd, (off_t)length) != 0)
         H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_SEEKERROR, -1, "HDftruncate failed");
 
 #ifdef H5FD_IOC_DEBUG
-    HDprintf("[ioc(%d) %s]: truncated subfile to %lld bytes. ret = %d\n", subfile_rank, __func__,
+    HDprintf("[ioc(%d) %s]: truncated subfile to %lld bytes. ret = %d\n", ioc_idx, __func__,
              (long long)length, errno);
     HDfflush(stdout);
 #endif
@@ -1138,32 +1212,40 @@ done:
  */
 
 static int
-ioc_file_report_eof(sf_work_request_t *msg, int subfile_rank, int source, MPI_Comm comm)
+ioc_file_report_eof(sf_work_request_t *msg, MPI_Comm comm)
 {
     subfiling_context_t *sf_context = NULL;
     h5_stat_t            sb;
-    int64_t              eof_req_reply[2];
+    int64_t              eof_req_reply[3];
     int64_t              file_context_id;
+    int64_t              subfile_idx;
     int                  fd;
+    int                  source;
+    int                  ioc_idx;
     int                  mpi_code;
     int                  ret_value = 0;
 
     HDassert(msg);
 
-    /* first get the EOF of the target file. */
-
     file_context_id = msg->context_id;
+    source          = msg->source;
+    ioc_idx         = msg->ioc_idx;
+
+    subfile_idx = msg->header[0];
 
     if (NULL == (sf_context = H5_get_subfiling_object(file_context_id)))
         H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTGET, -1, "couldn't retrieve subfiling context");
 
-    fd = sf_context->sf_fid;
+    HDassert(subfile_idx < sf_context->sf_num_fids);
+
+    fd = sf_context->sf_fids[subfile_idx];
 
     if (HDfstat(fd, &sb) < 0)
         H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_SYSERRSTR, -1, "HDfstat failed");
 
-    eof_req_reply[0] = (int64_t)subfile_rank;
+    eof_req_reply[0] = (int64_t)ioc_idx;
     eof_req_reply[1] = (int64_t)(sb.st_size);
+    eof_req_reply[2] = subfile_idx;
 
 #ifdef H5_SUBFILING_DEBUG
     H5_subfiling_log(file_context_id, "%s: reporting file EOF as %" PRId64 ".", __func__, eof_req_reply[1]);
@@ -1279,12 +1361,13 @@ ioc_io_queue_add_entry(ioc_data_t *ioc_data, sf_work_request_t *wk_req_ptr)
     atomic_fetch_add(&ioc_data->sf_io_ops_pending, 1);
 
 #ifdef H5_SUBFILING_DEBUG
-    H5_subfiling_log(wk_req_ptr->context_id,
-                     "%s: request %d queued. op = %d, offset/len = %lld/%lld, q-ed/disp/ops_pend = %d/%d/%d.",
-                     __func__, entry_ptr->counter, (entry_ptr->wk_req.tag),
-                     (long long)(entry_ptr->wk_req.header[1]), (long long)(entry_ptr->wk_req.header[0]),
-                     ioc_data->io_queue.num_pending, ioc_data->io_queue.num_in_progress,
-                     atomic_load(&ioc_data->sf_io_ops_pending));
+    H5_subfiling_log(
+        wk_req_ptr->context_id,
+        "%s: request %d queued. op = %d, req = (%lld, %lld, %lld), q-ed/disp/ops_pend = %d/%d/%d.", __func__,
+        entry_ptr->counter, (entry_ptr->wk_req.tag), (long long)(entry_ptr->wk_req.header[0]),
+        (long long)(entry_ptr->wk_req.header[1]), (long long)(entry_ptr->wk_req.header[2]),
+        ioc_data->io_queue.num_pending, ioc_data->io_queue.num_in_progress,
+        atomic_load(&ioc_data->sf_io_ops_pending));
 #endif
 
     HDassert(ioc_data->io_queue.num_pending + ioc_data->io_queue.num_in_progress == ioc_data->io_queue.q_len);
@@ -1485,14 +1568,14 @@ ioc_io_queue_dispatch_eligible_entries(ioc_data_t *ioc_data, hbool_t try_lock)
                 entry_ptr->thread_wk.args = entry_ptr;
 
 #ifdef H5_SUBFILING_DEBUG
-                H5_subfiling_log(entry_ptr->wk_req.context_id,
-                                 "%s: request %d dispatched. op = %d, offset/len = %lld/%lld, "
-                                 "q-ed/disp/ops_pend = %d/%d/%d.",
-                                 __func__, entry_ptr->counter, (entry_ptr->wk_req.tag),
-                                 (long long)(entry_ptr->wk_req.header[1]),
-                                 (long long)(entry_ptr->wk_req.header[0]), ioc_data->io_queue.num_pending,
-                                 ioc_data->io_queue.num_in_progress,
-                                 atomic_load(&ioc_data->sf_io_ops_pending));
+                H5_subfiling_log(
+                    entry_ptr->wk_req.context_id,
+                    "%s: request %d dispatched. op = %d, req = (%lld, %lld, %lld), "
+                    "q-ed/disp/ops_pend = %d/%d/%d.",
+                    __func__, entry_ptr->counter, (entry_ptr->wk_req.tag),
+                    (long long)(entry_ptr->wk_req.header[0]), (long long)(entry_ptr->wk_req.header[1]),
+                    (long long)(entry_ptr->wk_req.header[2]), ioc_data->io_queue.num_pending,
+                    ioc_data->io_queue.num_in_progress, atomic_load(&ioc_data->sf_io_ops_pending));
 #endif
 
 #ifdef H5FD_IOC_COLLECT_STATS
@@ -1571,12 +1654,12 @@ ioc_io_queue_complete_entry(ioc_data_t *ioc_data, ioc_io_queue_entry_t *entry_pt
 
 #ifdef H5_SUBFILING_DEBUG
     H5_subfiling_log(entry_ptr->wk_req.context_id,
-                     "%s: request %d completed with ret %d. op = %d, offset/len = %lld/%lld, "
+                     "%s: request %d completed with ret %d. op = %d, req = (%lld, %lld, %lld), "
                      "q-ed/disp/ops_pend = %d/%d/%d.",
                      __func__, entry_ptr->counter, entry_ptr->wk_ret, (entry_ptr->wk_req.tag),
-                     (long long)(entry_ptr->wk_req.header[1]), (long long)(entry_ptr->wk_req.header[0]),
-                     ioc_data->io_queue.num_pending, ioc_data->io_queue.num_in_progress,
-                     atomic_load(&ioc_data->sf_io_ops_pending));
+                     (long long)(entry_ptr->wk_req.header[0]), (long long)(entry_ptr->wk_req.header[1]),
+                     (long long)(entry_ptr->wk_req.header[2]), ioc_data->io_queue.num_pending,
+                     ioc_data->io_queue.num_in_progress, atomic_load(&ioc_data->sf_io_ops_pending));
 
     /*
      * If this I/O request is a truncate or "get eof" op, make sure

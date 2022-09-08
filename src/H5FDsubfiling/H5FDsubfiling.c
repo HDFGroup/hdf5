@@ -183,8 +183,8 @@ static herr_t H5FD__subfiling_close_int(H5FD_subfiling_t *file_ptr);
 
 static herr_t init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_nelemts,
                             size_t dtype_extent, size_t max_iovec_len, int64_t *mem_buf_offset,
-                            int64_t *target_file_offset, int64_t *io_block_len, int *first_ioc_index,
-                            int *n_iocs_used, int64_t *max_io_req_per_ioc);
+                            int64_t *target_file_offset, int64_t *io_block_len, int *first_subfile_index,
+                            int *n_subfiles_used, int64_t *max_io_req_per_subfile);
 static herr_t iovec_fill_first(subfiling_context_t *sf_context, int64_t iovec_depth, int64_t target_datasize,
                                int64_t start_mem_offset, int64_t start_file_offset, int64_t first_io_len,
                                int64_t *mem_offset_out, int64_t *target_file_offset_out,
@@ -332,9 +332,9 @@ H5FD_subfiling_init(void)
          * Create the MPI Datatype that will be used
          * for sending/receiving RPC messages
          */
-        HDcompile_assert(sizeof(((sf_work_request_t *)NULL)->header) == 2 * sizeof(int64_t));
+        HDcompile_assert(sizeof(((sf_work_request_t *)NULL)->header) == 3 * sizeof(int64_t));
         if (H5_subfiling_rpc_msg_type == MPI_DATATYPE_NULL) {
-            if (MPI_SUCCESS != (mpi_code = MPI_Type_contiguous(2, MPI_INT64_T, &H5_subfiling_rpc_msg_type)))
+            if (MPI_SUCCESS != (mpi_code = MPI_Type_contiguous(3, MPI_INT64_T, &H5_subfiling_rpc_msg_type)))
                 H5_SUBFILING_MPI_GOTO_ERROR(H5I_INVALID_HID, "MPI_Type_contiguous failed", mpi_code);
             if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(&H5_subfiling_rpc_msg_type)))
                 H5_SUBFILING_MPI_GOTO_ERROR(H5I_INVALID_HID, "MPI_Type_commit failed", mpi_code);
@@ -541,7 +541,7 @@ H5FD__subfiling_get_default_config(hid_t fapl_id, H5FD_subfiling_config_t *confi
 
     config_out->shared_cfg.ioc_selection = SELECT_IOC_ONE_PER_NODE;
     config_out->shared_cfg.stripe_size   = H5FD_SUBFILING_DEFAULT_STRIPE_SIZE;
-    config_out->shared_cfg.stripe_count  = 0;
+    config_out->shared_cfg.stripe_count  = H5FD_SUBFILING_DEFAULT_STRIPE_COUNT;
 
     if ((h5_require_ioc = HDgetenv("H5_REQUIRE_IOC")) != NULL) {
         int value_check = HDatoi(h5_require_ioc);
@@ -611,7 +611,8 @@ done:
 static herr_t
 H5FD__subfiling_validate_config(const H5FD_subfiling_config_t *fa)
 {
-    herr_t ret_value = SUCCEED;
+    H5FD_subfiling_ioc_select_t ioc_sel_type;
+    herr_t                      ret_value = SUCCEED;
 
     HDassert(fa != NULL);
 
@@ -628,9 +629,19 @@ H5FD__subfiling_validate_config(const H5FD_subfiling_config_t *fa)
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                                 "Subfiling VFD currently always requires IOC VFD to be used");
 
-    if (fa->shared_cfg.ioc_selection < SELECT_IOC_ONE_PER_NODE ||
-        fa->shared_cfg.ioc_selection >= ioc_selection_options)
+    /*
+     * Compare against each IOC selection value directly since
+     * the enum might be a signed or unsigned type and a comparison
+     * against < 0 could generate a warning
+     */
+    ioc_sel_type = fa->shared_cfg.ioc_selection;
+    if (ioc_sel_type != SELECT_IOC_ONE_PER_NODE && ioc_sel_type != SELECT_IOC_EVERY_NTH_RANK &&
+        ioc_sel_type != SELECT_IOC_WITH_CONFIG && ioc_sel_type != SELECT_IOC_TOTAL)
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid IOC selection method");
+
+    if (fa->shared_cfg.stripe_count <= 0 &&
+        fa->shared_cfg.stripe_count != H5FD_SUBFILING_DEFAULT_STRIPE_COUNT)
+        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid stripe count setting");
 
 done:
     H5_SUBFILING_FUNC_LEAVE;
@@ -1267,7 +1278,7 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_i
     int64_t             *sf_data_size       = NULL;
     int64_t             *sf_offset          = NULL;
     hbool_t              rank0_bcast        = FALSE;
-    int                  ioc_total;
+    int                  num_subfiles;
     herr_t               ret_value = SUCCEED;
 
     HDassert(file_ptr && file_ptr->pub.cls);
@@ -1310,7 +1321,7 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_i
 
     /*
      * Retrieve the subfiling context object and the number
-     * of I/O concentrators.
+     * of subfiles.
      *
      * Given the current I/O and the I/O concentrator info,
      * we can determine some I/O transaction parameters.
@@ -1324,50 +1335,50 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_i
     HDassert(sf_context);
     HDassert(sf_context->topology);
 
-    ioc_total = sf_context->topology->n_io_concentrators;
+    num_subfiles = sf_context->sf_num_subfiles;
 
-    if (ioc_total == 0) {
-        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid number of I/O concentrators (%d)",
-                                ioc_total);
+    if (num_subfiles <= 0) {
+        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid number of subfiles (%d)",
+                                num_subfiles);
     }
-    else if (ioc_total == 1) {
-        /***********************************
-         * No striping - just a single IOC *
-         ***********************************/
+    else if (num_subfiles == 1) {
+        /***************************************
+         * No striping - just a single subfile *
+         ***************************************/
 
         /* Make vector read call to subfile */
         if (H5FD_read_vector(file_ptr->sf_file, 1, &type, &addr, &size, &buf) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "read from subfile failed");
     }
     else {
-        int64_t max_io_req_per_ioc;
+        int64_t max_io_req_per_subfile;
         int64_t file_offset;
         int64_t block_size;
         size_t  max_depth;
         herr_t  status;
-        int     ioc_count = 0;
-        int     ioc_start = -1;
+        int     num_subfiles_used = 0;
+        int     first_subfile_idx = -1;
 
-        /*********************************
-         * Striping across multiple IOCs *
-         *********************************/
+        /*************************************
+         * Striping across multiple subfiles *
+         *************************************/
 
         block_size = sf_context->sf_blocksize_per_stripe;
         max_depth  = (size / (size_t)block_size) + 2;
 
         /*
-         * Given the number of I/O concentrators, allocate vectors (one per IOC)
-         * to contain the translation of the I/O request into a collection of I/O
-         * requests.
+         * Given the number of subfiles, allocate vectors (one per subfile)
+         * to contain the translation of the I/O request into a collection of
+         * I/O requests.
          */
-        if (NULL ==
-            (source_data_offset = HDcalloc(1, (size_t)ioc_total * max_depth * sizeof(*source_data_offset))))
+        if (NULL == (source_data_offset =
+                         HDcalloc(1, (size_t)num_subfiles * max_depth * sizeof(*source_data_offset))))
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                     "can't allocate source data offset I/O vector");
-        if (NULL == (sf_data_size = HDcalloc(1, (size_t)ioc_total * max_depth * sizeof(*sf_data_size))))
+        if (NULL == (sf_data_size = HDcalloc(1, (size_t)num_subfiles * max_depth * sizeof(*sf_data_size))))
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                     "can't allocate subfile data size I/O vector");
-        if (NULL == (sf_offset = HDcalloc(1, (size_t)ioc_total * max_depth * sizeof(*sf_offset))))
+        if (NULL == (sf_offset = HDcalloc(1, (size_t)num_subfiles * max_depth * sizeof(*sf_offset))))
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                     "can't allocate subfile offset I/O vector");
 
@@ -1375,31 +1386,27 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_i
 
         /*
          * Get the potential set of IOC transactions; e.g., data sizes,
-         * offsets and datatypes. These can all be used by either the
-         * underlying IOC or by the sec2 driver.
-         *
-         * For now, assume we're dealing with contiguous datasets. Vector
-         * I/O will probably handle the non-contiguous case.
+         * offsets and datatypes.
          */
-        status = init_indep_io(sf_context,           /* IN: Context used to look up config info */
-                               file_offset,          /* IN: Starting file offset */
-                               size,                 /* IN: I/O size */
-                               1,                    /* IN: Data extent of the 'type' assumes byte */
-                               max_depth,            /* IN: Maximum stripe depth */
-                               source_data_offset,   /* OUT: Memory offset */
-                               sf_offset,            /* OUT: File offset */
-                               sf_data_size,         /* OUT: Length of this contiguous block */
-                               &ioc_start,           /* OUT: IOC index corresponding to starting offset */
-                               &ioc_count,           /* OUT: Number of actual IOCs used */
-                               &max_io_req_per_ioc); /* OUT: Maximum number of requests to any IOC */
+        status = init_indep_io(sf_context,         /* IN: Context used to look up config info */
+                               file_offset,        /* IN: Starting file offset */
+                               size,               /* IN: I/O size */
+                               1,                  /* IN: Data extent of the 'type' assumes byte */
+                               max_depth,          /* IN: Maximum stripe depth */
+                               source_data_offset, /* OUT: Memory offset */
+                               sf_offset,          /* OUT: File offset */
+                               sf_data_size,       /* OUT: Length of this contiguous block */
+                               &first_subfile_idx, /* OUT: Subfile index corresponding to starting offset */
+                               &num_subfiles_used, /* OUT: Number of actual subfiles used */
+                               &max_io_req_per_subfile); /* OUT: Maximum number of requests to any subfile */
 
         if (status < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "can't initialize IOC transactions");
 
-        if (max_io_req_per_ioc > 0) {
+        if (max_io_req_per_subfile > 0) {
             uint32_t vector_len;
 
-            H5_CHECKED_ASSIGN(vector_len, uint32_t, ioc_count, int);
+            H5_CHECKED_ASSIGN(vector_len, uint32_t, num_subfiles_used, int);
 
             /* Allocate I/O vectors */
             if (NULL == (io_types = HDmalloc(vector_len * sizeof(*io_types))))
@@ -1415,20 +1422,20 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_i
                 H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                         "can't allocate subfile I/O buffers vector");
 
-            for (int64_t i = 0; i < max_io_req_per_ioc; i++) {
-                uint32_t final_vec_len = vector_len;
-                int      next_ioc      = ioc_start;
+            for (int64_t i = 0; i < max_io_req_per_subfile; i++) {
+                uint32_t final_vec_len    = vector_len;
+                int      next_subfile_idx = first_subfile_idx;
 
                 /* Fill in I/O types, offsets, sizes and buffers vectors */
                 for (uint32_t k = 0, vec_idx = 0; k < vector_len; k++) {
-                    size_t idx = (size_t)next_ioc * max_depth + (size_t)i;
+                    size_t idx = (size_t)next_subfile_idx * max_depth + (size_t)i;
 
                     io_types[vec_idx] = type;
                     H5_CHECKED_ASSIGN(io_addrs[vec_idx], haddr_t, sf_offset[idx], int64_t);
                     H5_CHECKED_ASSIGN(io_sizes[vec_idx], size_t, sf_data_size[idx], int64_t);
                     io_bufs[vec_idx] = ((char *)buf + source_data_offset[idx]);
 
-                    next_ioc = (next_ioc + 1) % ioc_total;
+                    next_subfile_idx = (next_subfile_idx + 1) % num_subfiles;
 
                     /* Skip 0-sized I/Os */
                     if (io_sizes[vec_idx] == 0) {
@@ -1506,7 +1513,7 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_
     int64_t             *source_data_offset = NULL;
     int64_t             *sf_data_size       = NULL;
     int64_t             *sf_offset          = NULL;
-    int                  ioc_total;
+    int                  num_subfiles;
     herr_t               ret_value = SUCCEED;
 
     HDassert(file_ptr && file_ptr->pub.cls);
@@ -1546,7 +1553,7 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_
 
     /*
      * Retrieve the subfiling context object and the number
-     * of I/O concentrators.
+     * of subfiles.
      *
      * Given the current I/O and the I/O concentrator info,
      * we can determine some I/O transaction parameters.
@@ -1560,16 +1567,16 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_
     HDassert(sf_context);
     HDassert(sf_context->topology);
 
-    ioc_total = sf_context->topology->n_io_concentrators;
+    num_subfiles = sf_context->sf_num_subfiles;
 
-    if (ioc_total == 0) {
-        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid number of I/O concentrators (%d)",
-                                ioc_total);
+    if (num_subfiles <= 0) {
+        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid number of subfiles (%d)",
+                                num_subfiles);
     }
-    else if (ioc_total == 1) {
-        /***********************************
-         * No striping - just a single IOC *
-         ***********************************/
+    else if (num_subfiles == 1) {
+        /***************************************
+         * No striping - just a single subfile *
+         ***************************************/
 
         /* Make vector write call to subfile */
         if (H5FD_write_vector(file_ptr->sf_file, 1, &type, &addr, &size, &buf) < 0)
@@ -1587,34 +1594,34 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_
         }
     }
     else {
-        int64_t max_io_req_per_ioc;
+        int64_t max_io_req_per_subfile;
         int64_t file_offset;
         int64_t block_size;
         size_t  max_depth;
         herr_t  status;
-        int     ioc_count = 0;
-        int     ioc_start = -1;
+        int     num_subfiles_used = 0;
+        int     first_subfile_idx = -1;
 
-        /*********************************
-         * Striping across multiple IOCs *
-         *********************************/
+        /*************************************
+         * Striping across multiple subfiles *
+         *************************************/
 
         block_size = sf_context->sf_blocksize_per_stripe;
         max_depth  = (size / (size_t)block_size) + 2;
 
         /*
-         * Given the number of I/O concentrators, allocate vectors (one per IOC)
-         * to contain the translation of the I/O request into a collection of I/O
-         * requests.
+         * Given the number of subfiles, allocate vectors (one per subfile)
+         * to contain the translation of the I/O request into a collection of
+         * I/O requests.
          */
-        if (NULL ==
-            (source_data_offset = HDcalloc(1, (size_t)ioc_total * max_depth * sizeof(*source_data_offset))))
+        if (NULL == (source_data_offset =
+                         HDcalloc(1, (size_t)num_subfiles * max_depth * sizeof(*source_data_offset))))
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                     "can't allocate source data offset I/O vector");
-        if (NULL == (sf_data_size = HDcalloc(1, (size_t)ioc_total * max_depth * sizeof(*sf_data_size))))
+        if (NULL == (sf_data_size = HDcalloc(1, (size_t)num_subfiles * max_depth * sizeof(*sf_data_size))))
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                     "can't allocate subfile data size I/O vector");
-        if (NULL == (sf_offset = HDcalloc(1, (size_t)ioc_total * max_depth * sizeof(*sf_offset))))
+        if (NULL == (sf_offset = HDcalloc(1, (size_t)num_subfiles * max_depth * sizeof(*sf_offset))))
             H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                     "can't allocate subfile offset I/O vector");
 
@@ -1622,31 +1629,27 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_
 
         /*
          * Get the potential set of IOC transactions; e.g., data sizes,
-         * offsets and datatypes. These can all be used by either the
-         * underlying IOC or by the sec2 driver.
-         *
-         * For now, assume we're dealing with contiguous datasets. Vector
-         * I/O will probably handle the non-contiguous case.
+         * offsets and datatypes.
          */
-        status = init_indep_io(sf_context,           /* IN: Context used to look up config info */
-                               file_offset,          /* IN: Starting file offset */
-                               size,                 /* IN: I/O size */
-                               1,                    /* IN: Data extent of the 'type' assumes byte */
-                               max_depth,            /* IN: Maximum stripe depth */
-                               source_data_offset,   /* OUT: Memory offset */
-                               sf_offset,            /* OUT: File offset */
-                               sf_data_size,         /* OUT: Length of this contiguous block */
-                               &ioc_start,           /* OUT: IOC index corresponding to starting offset */
-                               &ioc_count,           /* OUT: Number of actual IOCs used */
-                               &max_io_req_per_ioc); /* OUT: Maximum number of requests to any IOC */
+        status = init_indep_io(sf_context,         /* IN: Context used to look up config info */
+                               file_offset,        /* IN: Starting file offset */
+                               size,               /* IN: I/O size */
+                               1,                  /* IN: Data extent of the 'type' assumes byte */
+                               max_depth,          /* IN: Maximum stripe depth */
+                               source_data_offset, /* OUT: Memory offset */
+                               sf_offset,          /* OUT: File offset */
+                               sf_data_size,       /* OUT: Length of this contiguous block */
+                               &first_subfile_idx, /* OUT: Subfile index corresponding to starting offset */
+                               &num_subfiles_used, /* OUT: Number of actual subfiles used */
+                               &max_io_req_per_subfile); /* OUT: Maximum number of requests to any subfile */
 
         if (status < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "can't initialize IOC transactions");
 
-        if (max_io_req_per_ioc > 0) {
+        if (max_io_req_per_subfile > 0) {
             uint32_t vector_len;
 
-            H5_CHECKED_ASSIGN(vector_len, uint32_t, ioc_count, int);
+            H5_CHECKED_ASSIGN(vector_len, uint32_t, num_subfiles_used, int);
 
             /* Allocate I/O vectors */
             if (NULL == (io_types = HDmalloc(vector_len * sizeof(*io_types))))
@@ -1662,20 +1665,20 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_
                 H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                         "can't allocate subfile I/O buffers vector");
 
-            for (int64_t i = 0; i < max_io_req_per_ioc; i++) {
-                uint32_t final_vec_len = vector_len;
-                int      next_ioc      = ioc_start;
+            for (int64_t i = 0; i < max_io_req_per_subfile; i++) {
+                uint32_t final_vec_len    = vector_len;
+                int      next_subfile_idx = first_subfile_idx;
 
                 /* Fill in I/O types, offsets, sizes and buffers vectors */
                 for (uint32_t k = 0, vec_idx = 0; k < vector_len; k++) {
-                    size_t idx = (size_t)next_ioc * max_depth + (size_t)i;
+                    size_t idx = (size_t)next_subfile_idx * max_depth + (size_t)i;
 
                     io_types[vec_idx] = type;
                     H5_CHECKED_ASSIGN(io_addrs[vec_idx], haddr_t, sf_offset[idx], int64_t);
                     H5_CHECKED_ASSIGN(io_sizes[vec_idx], size_t, sf_data_size[idx], int64_t);
                     io_bufs[vec_idx] = ((const char *)buf + source_data_offset[idx]);
 
-                    next_ioc = (next_ioc + 1) % ioc_total;
+                    next_subfile_idx = (next_subfile_idx + 1) % num_subfiles;
 
                     /* Skip 0-sized I/Os */
                     if (io_sizes[vec_idx] == 0) {
@@ -2334,24 +2337,24 @@ done:
  *              As a consequence of not allowing use of MPI derived
  *              datatypes in the VFD layer, we need to accommodate the
  *              possibility that large I/O transactions will be required to
- *              use multiple I/Os per IOC.
+ *              use multiple I/Os per subfile.
  *
- *              Example: Using 4 IOCs, each with 1M stripe-depth; when
- *              presented an I/O request for 8MB then at a minimum each IOC
- *              will require 2 I/Os of 1MB each.  Depending on the starting
- *              file offset, the 2 I/Os can instead be 3...
+ *              Example: Using 4 subfiles, each with 1M stripe-depth; when
+ *              presented an I/O request for 8MB then at a minimum each
+ *              subfile will require 2 I/Os of 1MB each.  Depending on the
+ *              starting file offset, the 2 I/Os can instead be 3...
  *
  *              To fully describe the I/O transactions for reads and writes
  *              the output arrays are therefore arrays of I/O vectors,
  *              where each vector has a length of which corresponds to the
- *              max number of I/O transactions per IOC. In the example
+ *              max number of I/O transactions per subfile. In the example
  *              above, these vector lengths can be 2 or 3. The actual
  *              length is determined by the 'container_depth' variable.
  *
- *              For I/O operations which involve a subset of I/O
- *              concentrators, the vector entries for the unused I/O
- *              concentrators IOCs will have lengths of zero and be empty.
- *              The 'container_depth' in this case will always be 1.
+ *              For I/O operations which involve a subset of subfiles, the
+ *              vector entries for the unused subfiles will have lengths of
+ *              zero and be empty. The 'container_depth' in this case will
+ *              always be 1.
  *
  *              sf_context (IN)
  *                - the subfiling context for the file
@@ -2371,37 +2374,37 @@ done:
  *                  the output arrays `mem_buf_offset`, `io_block_len`
  *                  and `sf_offset`. NOTE that this routine expects each
  *                  of these output arrays to have enough space allocated
- *                  for one I/O vector PER I/O concentrator. Therefore,
- *                  the total size of each output array should be at least
- *                  `max_iovec_len * n_io_concentrators`.
+ *                  for one I/O vector PER subfile. Therefore, the total
+ *                  size of each output array should be at least
+ *                  `max_iovec_len * num_subfiles`.
  *
  *              mem_buf_offset (OUT)
- *                - output array of vectors (one vector for each IOC)
+ *                - output array of vectors (one vector for each subfile)
  *                  containing the set of offsets into the memory buffer
  *                  for I/O
  *
  *              target_file_offset (OUT)
- *                - output array of vectors (one vector for each IOC)
+ *                - output array of vectors (one vector for each subfile)
  *                  containing the set of offsets into the target file
  *
  *              io_block_len (OUT)
- *                - output array of vectors (one vector for each IOC)
+ *                - output array of vectors (one vector for each subfile)
  *                  containing the set of block lengths for each source
  *                  buffer/target file offset.
  *
- *              first_ioc_index (OUT)
- *                - the index of the first I/O concentrator that this I/O
- *                  operation begins at
+ *              first_subfile_index (OUT)
+ *                - the index of the first subfile that this I/O operation
+ *                  begins at
  *
- *              n_iocs_used (OUT)
- *                - the number of I/O concentrators actually used for this
- *                  I/O operation, which may be different from the total
- *                  number of I/O concentrators for the file
+ *              n_subfiles_used (OUT)
+ *                - the number of subfiles actually used for this I/O
+ *                  operation, which may be different from the total
+ *                  number of subfiles for the file
  *
- *              max_io_req_per_ioc (OUT)
+ *              max_io_req_per_subfile (OUT)
  *                - the maximum number of I/O requests to any particular
- *                  I/O concentrator, or the maximum "depth" of each I/O
- *                  vector in the output arrays.
+ *                  subfile, or the maximum "depth" of each I/O vector
+ *                  in the output arrays.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -2410,7 +2413,8 @@ done:
 static herr_t
 init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_nelemts, size_t dtype_extent,
               size_t max_iovec_len, int64_t *mem_buf_offset, int64_t *target_file_offset,
-              int64_t *io_block_len, int *first_ioc_index, int *n_iocs_used, int64_t *max_io_req_per_ioc)
+              int64_t *io_block_len, int *first_subfile_index, int *n_subfiles_used,
+              int64_t *max_io_req_per_subfile)
 {
     int64_t stripe_size          = 0;
     int64_t block_size           = 0;
@@ -2423,8 +2427,8 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
     int64_t final_offset         = 0;
     int64_t start_length         = 0;
     int64_t final_length         = 0;
-    int64_t ioc_start            = 0;
-    int64_t ioc_final            = 0;
+    int64_t first_subfile        = 0;
+    int64_t last_subfile         = 0;
     int64_t start_row            = 0;
     int64_t row_offset           = 0;
     int64_t row_stripe_idx_start = 0;
@@ -2433,41 +2437,44 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
     int64_t curr_max_iovec_depth = 0;
     int64_t total_bytes          = 0;
     int64_t mem_offset           = 0;
-    int     ioc_count            = 0;
+    int     num_subfiles         = 0;
     herr_t  ret_value            = SUCCEED;
 
     HDassert(sf_context);
-    HDassert(sf_context->topology);
-    HDassert(sf_context->topology->n_io_concentrators > 0);
     HDassert(sf_context->sf_stripe_size > 0);
     HDassert(sf_context->sf_blocksize_per_stripe > 0);
+    HDassert(sf_context->sf_num_subfiles > 0);
+    HDassert(sf_context->topology);
     HDassert(mem_buf_offset);
     HDassert(target_file_offset);
     HDassert(io_block_len);
-    HDassert(first_ioc_index);
-    HDassert(n_iocs_used);
-    HDassert(max_io_req_per_ioc);
+    HDassert(first_subfile_index);
+    HDassert(n_subfiles_used);
+    HDassert(max_io_req_per_subfile);
 
-    *first_ioc_index    = 0;
-    *n_iocs_used        = 0;
-    *max_io_req_per_ioc = 0;
+    *first_subfile_index    = 0;
+    *n_subfiles_used        = 0;
+    *max_io_req_per_subfile = 0;
 
     /*
      * Retrieve the needed fields from the subfiling context.
      *
-     *  ioc_count
-     *    - the total number of I/O concentrators in the
-     *      application topology
      *  stripe_size
      *    - the size of the data striping across the file's subfiles
      *  block_size
      *    - the size of a "block" across the IOCs, as calculated
-     *      by the stripe size multiplied by the number of I/O
-     *      concentrators
+     *      by the stripe size multiplied by the number of
+     *      subfiles
+     *  num_subfiles
+     *    - the total number of subfiles for the logical
+     *      HDF5 file
+     *  num_io_concentrators
+     *    - the number of I/O concentrators currently being
+     *      used
      */
-    ioc_count   = sf_context->topology->n_io_concentrators;
-    stripe_size = sf_context->sf_stripe_size;
-    block_size  = sf_context->sf_blocksize_per_stripe;
+    stripe_size  = sf_context->sf_stripe_size;
+    block_size   = sf_context->sf_blocksize_per_stripe;
+    num_subfiles = sf_context->sf_num_subfiles;
 
     H5_CHECKED_ASSIGN(data_size, int64_t, (io_nelemts * dtype_extent), size_t);
 
@@ -2478,16 +2485,16 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
      *    - a stripe "index" given by the file offset divided by the
      *      stripe size. Note that when the file offset equals or exceeds
      *      the block size, we simply wrap around. So, for example, if 4
-     *      I/O concentrators are being used with a stripe size of 1MiB,
-     *      the block size would be 4MiB and file offset 4096 would have
-     *      a stripe index of 4 and reside in the same subfile as stripe
-     *      index 0 (offsets 0-1023)
+     *      subfiles are being used with a stripe size of 1MiB, the block
+     *      size would be 4MiB and file offset 4096 would have a stripe
+     *      index of 4 and reside in the same subfile as stripe index 0
+     *      (offsets 0-1023)
      *  offset_in_stripe
      *    - the relative offset in the stripe that the starting file
      *      offset resides in
      *  offset_in_block
-     *    - the relative offset in the "block" of stripes across the I/O
-     *      concentrators
+     *    - the relative offset in the "block" of stripes across the
+     *      subfiles
      *  final_offset
      *    - the last offset in the virtual file covered by this I/O
      *      operation. Simply the I/O size added to the starting file
@@ -2505,19 +2512,18 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
     HDassert(final_length <= stripe_size);
 
     /*
-     * Determine which I/O concentrator the I/O request begins
-     * in and which "row" the I/O request begins in within the
-     * "block" of stripes across the I/O concentrators. Note that
-     * "row" here is just a conceptual way to think of how a block
-     * of data stripes is laid out across the I/O concentrator
-     * subfiles. A block's "column" size in bytes is equal to the
-     * stripe size multiplied the number of I/O concentrators.
-     * Therefore, file offsets that are multiples of the block size
-     * begin a new "row".
+     * Determine which subfile the I/O request begins in and which
+     * "row" the I/O request begins in within the "block" of stripes
+     * across the subfiles. Note that "row" here is just a conceptual
+     * way to think of how a block of data stripes is laid out across
+     * the subfiles. A block's "column" size in bytes is equal to the
+     * stripe size multiplied by the number of subfiles. Therefore,
+     * file offsets that are multiples of the block size begin a new
+     * "row".
      */
-    start_row = stripe_idx / ioc_count;
-    ioc_start = stripe_idx % ioc_count;
-    H5_CHECK_OVERFLOW(ioc_start, int64_t, int);
+    start_row     = stripe_idx / num_subfiles;
+    first_subfile = stripe_idx % num_subfiles;
+    H5_CHECK_OVERFLOW(first_subfile, int64_t, int);
 
     /*
      * Set initial file offset for starting "row"
@@ -2527,53 +2533,52 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
 
     /*
      * Determine the stripe "index" of the last offset in the
-     * virtual file and, from that, determine the I/O concentrator
-     * that the I/O request ends in.
+     * virtual file and, from that, determine the subfile that
+     * the I/O request ends in.
      */
     final_stripe_idx = final_offset / stripe_size;
-    ioc_final        = final_stripe_idx % ioc_count;
+    last_subfile     = final_stripe_idx % num_subfiles;
 
     /*
      * Determine how "deep" the resulting I/O vectors are at
      * most by calculating the maximum number of "rows" spanned
      * for any particular subfile; e.g. the maximum number of
-     * I/O requests for any particular I/O concentrator
+     * I/O requests for any particular subfile
      */
-    row_stripe_idx_start = stripe_idx - ioc_start;
-    row_stripe_idx_final = final_stripe_idx - ioc_final;
-    max_iovec_depth      = ((row_stripe_idx_final - row_stripe_idx_start) / ioc_count) + 1;
+    row_stripe_idx_start = stripe_idx - first_subfile;
+    row_stripe_idx_final = final_stripe_idx - last_subfile;
+    max_iovec_depth      = ((row_stripe_idx_final - row_stripe_idx_start) / num_subfiles) + 1;
 
-    if (ioc_final < ioc_start)
+    if (last_subfile < first_subfile)
         max_iovec_depth--;
 
     /* Set returned parameters early */
-    *first_ioc_index    = (int)ioc_start;
-    *n_iocs_used        = ioc_count;
-    *max_io_req_per_ioc = max_iovec_depth;
+    *first_subfile_index    = (int)first_subfile;
+    *n_subfiles_used        = num_subfiles;
+    *max_io_req_per_subfile = max_iovec_depth;
 
 #ifdef H5_SUBFILING_DEBUG
     H5_subfiling_log(sf_context->sf_context_id,
                      "%s: FILE OFFSET = %" PRId64 ", DATA SIZE = %zu, STRIPE SIZE = %" PRId64, __func__,
                      file_offset, io_nelemts, stripe_size);
     H5_subfiling_log(sf_context->sf_context_id,
-                     "%s: IOC START = %" PRId64 ", IOC FINAL = %" PRId64 ", "
+                     "%s: FIRST SUBFILE = %" PRId64 ", LAST SUBFILE = %" PRId64 ", "
                      "MAX IOVEC DEPTH = %" PRId64 ", START LENGTH = %" PRId64 ", FINAL LENGTH = %" PRId64,
-                     __func__, ioc_start, ioc_final, max_iovec_depth, start_length, final_length);
+                     __func__, first_subfile, last_subfile, max_iovec_depth, start_length, final_length);
 #endif
 
     /*
-     * Loop through the set of I/O concentrators to determine
-     * the various vector components for each. I/O concentrators
-     * whose data size is zero will not have I/O requests passed
-     * to them.
+     * Loop through the set of subfiles to determine the various
+     * vector components for each. Subfiles whose data size is
+     * zero will not have I/O requests passed to them.
      */
     curr_stripe_idx      = stripe_idx;
     curr_max_iovec_depth = max_iovec_depth;
-    for (int i = 0, k = (int)ioc_start; i < ioc_count; i++) {
+    for (int i = 0, k = (int)first_subfile; i < num_subfiles; i++) {
         int64_t *_mem_buf_offset;
         int64_t *_target_file_offset;
         int64_t *_io_block_len;
-        int64_t  ioc_bytes = 0;
+        int64_t  subfile_bytes = 0;
         int64_t  iovec_depth;
         hbool_t  is_first = FALSE;
         hbool_t  is_last  = FALSE;
@@ -2595,14 +2600,14 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
         HDmemset(_io_block_len, 0, (max_iovec_len * sizeof(*_io_block_len)));
 
         if (total_bytes == data_size) {
-            *n_iocs_used = i;
+            *n_subfiles_used = i;
             goto done;
         }
 
         if (total_bytes < data_size) {
             int64_t num_full_stripes = iovec_depth;
 
-            if (k == ioc_start) {
+            if (k == first_subfile) {
                 is_first = TRUE;
 
                 /*
@@ -2610,12 +2615,12 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
                  * starting on a stripe boundary
                  */
                 if (start_length < stripe_size) {
-                    ioc_bytes += start_length;
+                    subfile_bytes += start_length;
                     num_full_stripes--;
                 }
             }
 
-            if (k == ioc_final) {
+            if (k == last_subfile) {
                 is_last = TRUE;
 
                 /*
@@ -2623,34 +2628,35 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
                  * ending on a stripe boundary
                  */
                 if (final_length < stripe_size) {
-                    ioc_bytes += final_length;
+                    subfile_bytes += final_length;
                     if (num_full_stripes)
                         num_full_stripes--;
                 }
             }
 
-            /* Account for IOCs with uniform segments */
+            /* Account for subfiles with uniform segments */
             if (!is_first && !is_last) {
                 hbool_t thin_uniform_section = FALSE;
 
-                if (ioc_final >= ioc_start) {
+                if (last_subfile >= first_subfile) {
                     /*
-                     * When an IOC has an index value that is greater
-                     * than both the starting IOC and ending IOC indices,
-                     * it is a "thinner" section with a smaller I/O vector
-                     * depth.
+                     * When a subfile has an index value that is greater
+                     * than both the starting subfile and ending subfile
+                     * indices, it is a "thinner" section with a smaller
+                     * I/O vector depth.
                      */
-                    thin_uniform_section = (k > ioc_start) && (k > ioc_final);
+                    thin_uniform_section = (k > first_subfile) && (k > last_subfile);
                 }
 
-                if (ioc_final < ioc_start) {
+                if (last_subfile < first_subfile) {
                     /*
-                     * This can also happen when the IOC with the final
-                     * data segment has a smaller IOC index than the IOC
-                     * with the first data segment and the current IOC
-                     * index falls between the two.
+                     * This can also happen when the subfile with the final
+                     * data segment has a smaller subfile index than the
+                     * subfile with the first data segment and the current
+                     * subfile index falls between the two.
                      */
-                    thin_uniform_section = thin_uniform_section || ((ioc_final < k) && (k < ioc_start));
+                    thin_uniform_section =
+                        thin_uniform_section || ((last_subfile < k) && (k < first_subfile));
                 }
 
                 if (thin_uniform_section) {
@@ -2668,45 +2674,45 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
              * size of the fully selected I/O stripes to the
              * running bytes total
              */
-            ioc_bytes += num_full_stripes * stripe_size;
-            total_bytes += ioc_bytes;
+            subfile_bytes += num_full_stripes * stripe_size;
+            total_bytes += subfile_bytes;
         }
 
         _mem_buf_offset[0]     = mem_offset;
         _target_file_offset[0] = row_offset + offset_in_block;
-        _io_block_len[0]       = ioc_bytes;
+        _io_block_len[0]       = subfile_bytes;
 
-        if (ioc_count > 1) {
+        if (num_subfiles > 1) {
             int64_t curr_file_offset = row_offset + offset_in_block;
 
             /* Fill the I/O vectors */
             if (is_first) {
                 if (is_last) { /* First + Last */
-                    if (iovec_fill_first_last(sf_context, iovec_depth, ioc_bytes, mem_offset,
+                    if (iovec_fill_first_last(sf_context, iovec_depth, subfile_bytes, mem_offset,
                                               curr_file_offset, start_length, final_length, _mem_buf_offset,
                                               _target_file_offset, _io_block_len) < 0)
                         H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "can't fill I/O vectors");
                 }
                 else { /* First ONLY */
-                    if (iovec_fill_first(sf_context, iovec_depth, ioc_bytes, mem_offset, curr_file_offset,
+                    if (iovec_fill_first(sf_context, iovec_depth, subfile_bytes, mem_offset, curr_file_offset,
                                          start_length, _mem_buf_offset, _target_file_offset,
                                          _io_block_len) < 0)
                         H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "can't fill I/O vectors");
                 }
                 /* Move the memory pointer to the starting location
-                 * for next IOC request.
+                 * for next subfile I/O request.
                  */
                 mem_offset += start_length;
             }
             else if (is_last) { /* Last ONLY */
-                if (iovec_fill_last(sf_context, iovec_depth, ioc_bytes, mem_offset, curr_file_offset,
+                if (iovec_fill_last(sf_context, iovec_depth, subfile_bytes, mem_offset, curr_file_offset,
                                     final_length, _mem_buf_offset, _target_file_offset, _io_block_len) < 0)
                     H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "can't fill I/O vectors");
 
                 mem_offset += stripe_size;
             }
             else { /* Everything else (uniform) */
-                if (iovec_fill_uniform(sf_context, iovec_depth, ioc_bytes, mem_offset, curr_file_offset,
+                if (iovec_fill_uniform(sf_context, iovec_depth, subfile_bytes, mem_offset, curr_file_offset,
                                        _mem_buf_offset, _target_file_offset, _io_block_len) < 0)
                     H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "can't fill I/O vectors");
 
@@ -2719,10 +2725,10 @@ init_indep_io(subfiling_context_t *sf_context, int64_t file_offset, size_t io_ne
         k++;
         curr_stripe_idx++;
 
-        if (k == ioc_count) {
+        if (k == num_subfiles) {
             k                    = 0;
             offset_in_block      = 0;
-            curr_max_iovec_depth = ((final_stripe_idx - curr_stripe_idx) / ioc_count) + 1;
+            curr_max_iovec_depth = ((final_stripe_idx - curr_stripe_idx) / num_subfiles) + 1;
 
             row_offset += block_size;
         }

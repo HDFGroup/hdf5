@@ -445,7 +445,7 @@ H5FD__ioc_get_default_config(hid_t fapl_id, H5FD_ioc_config_t *config_out)
      */
     config_out->subf_config.ioc_selection = SELECT_IOC_ONE_PER_NODE;
     config_out->subf_config.stripe_size   = H5FD_SUBFILING_DEFAULT_STRIPE_SIZE;
-    config_out->subf_config.stripe_count  = 0;
+    config_out->subf_config.stripe_count  = H5FD_SUBFILING_DEFAULT_STRIPE_COUNT;
 
     /* Create a default FAPL and choose an appropriate underlying driver */
     if ((config_out->under_fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -498,7 +498,8 @@ done:
 static herr_t
 H5FD__ioc_validate_config(const H5FD_ioc_config_t *fa)
 {
-    herr_t ret_value = SUCCEED;
+    H5FD_subfiling_ioc_select_t ioc_sel_type;
+    herr_t                      ret_value = SUCCEED;
 
     HDassert(fa != NULL);
 
@@ -511,9 +512,19 @@ H5FD__ioc_validate_config(const H5FD_ioc_config_t *fa)
     if (fa->under_fapl_id < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid under FAPL ID");
 
-    if (fa->subf_config.ioc_selection < SELECT_IOC_ONE_PER_NODE ||
-        fa->subf_config.ioc_selection >= ioc_selection_options)
+    /*
+     * Compare against each IOC selection value directly since
+     * the enum might be a signed or unsigned type and a comparison
+     * against < 0 could generate a warning
+     */
+    ioc_sel_type = fa->subf_config.ioc_selection;
+    if (ioc_sel_type != SELECT_IOC_ONE_PER_NODE && ioc_sel_type != SELECT_IOC_EVERY_NTH_RANK &&
+        ioc_sel_type != SELECT_IOC_WITH_CONFIG && ioc_sel_type != SELECT_IOC_TOTAL)
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid IOC selection method");
+
+    if (fa->subf_config.stripe_count <= 0 &&
+        fa->subf_config.stripe_count != H5FD_SUBFILING_DEFAULT_STRIPE_COUNT)
+        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid stripe count setting");
 
 done:
     H5_SUBFILING_FUNC_LEAVE;
@@ -923,21 +934,6 @@ H5FD__ioc_close_int(H5FD_ioc_t *file_ptr)
     herr_t ret_value = SUCCEED;
 
     HDassert(file_ptr);
-
-#ifdef H5FD_IOC_DEBUG
-    {
-        subfiling_context_t *sf_context = H5_get_subfiling_object(file_ptr->context_id);
-        if (sf_context) {
-            if (sf_context->topology->rank_is_ioc)
-                HDprintf("[%s %d] fd=%d\n", __func__, file_ptr->mpi_rank, sf_context->sf_fid);
-            else
-                HDprintf("[%s %d] fd=*\n", __func__, file_ptr->mpi_rank);
-        }
-        else
-            HDprintf("[%s %d] invalid subfiling context", __func__, file_ptr->mpi_rank);
-        HDfflush(stdout);
-    }
-#endif
 
     if (file_ptr->fa.under_fapl_id >= 0 && H5I_dec_ref(file_ptr->fa.under_fapl_id) < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_ARGS, FAIL, "can't close IOC under FAPL");
@@ -1505,8 +1501,8 @@ H5FD__ioc_del(const char *name, hid_t fapl)
         H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Comm_rank failed", mpi_code);
 
     if (mpi_rank == 0) {
-        int n_io_concentrators = 0;
-        int num_digits         = 0;
+        int n_subfiles = 0;
+        int num_digits = 0;
 
         if (HDstat(name, &st) < 0)
             H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_SYSERRSTR, FAIL, "HDstat failed");
@@ -1538,7 +1534,7 @@ H5FD__ioc_del(const char *name, hid_t fapl)
                                             "can't open subfiling config file");
         }
 
-        if (H5_get_num_iocs_from_config_file(config_file, &n_io_concentrators) < 0)
+        if (H5_get_num_subfiles_from_config_file(config_file, &n_subfiles) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_READERROR, FAIL, "can't read subfiling config file");
 
         /* Delete the Subfiling configuration file */
@@ -1555,12 +1551,12 @@ H5FD__ioc_del(const char *name, hid_t fapl)
                                         "can't delete subfiling config file");
 
         /* Try to delete each of the subfiles */
-        num_digits = (int)(HDlog10(n_io_concentrators) + 1);
+        num_digits = (int)(HDlog10(n_subfiles) + 1);
 
-        for (int i = 0; i < n_io_concentrators; i++) {
+        for (int i = 0; i < n_subfiles; i++) {
             /* TODO: No support for subfile directory prefix currently */
             HDsnprintf(tmp_filename, PATH_MAX, "%s/" H5FD_SUBFILING_FILENAME_TEMPLATE, file_dirname,
-                       base_filename, (uint64_t)st.st_ino, num_digits, i + 1, n_io_concentrators);
+                       base_filename, (uint64_t)st.st_ino, num_digits, i + 1, n_subfiles);
 
             if (HDremove(tmp_filename) < 0) {
 #ifdef H5FD_IOC_DEBUG
@@ -1647,7 +1643,6 @@ H5FD__ioc_write_vector_internal(H5FD_t *_file, uint32_t count, H5FD_mem_t H5_ATT
     if (NULL == (sf_context = H5_get_subfiling_object(sf_context_id)))
         H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "can't get subfiling context from ID");
     HDassert(sf_context->topology);
-    HDassert(sf_context->topology->n_io_concentrators);
 
     /*
      * Allocate an array of I/O requests and an array twice that size for
@@ -1676,9 +1671,8 @@ H5FD__ioc_write_vector_internal(H5FD_t *_file, uint32_t count, H5FD_mem_t H5_ATT
 
         H5_CHECK_OVERFLOW(addrs[i], haddr_t, int64_t);
         H5_CHECK_OVERFLOW(sizes[i], size_t, int64_t);
-        write_status =
-            ioc__write_independent_async(sf_context_id, sf_context->topology->n_io_concentrators,
-                                         (int64_t)addrs[i], (int64_t)sizes[i], bufs[i], &sf_io_reqs[i]);
+        write_status = ioc__write_independent_async(sf_context_id, (int64_t)addrs[i], (int64_t)sizes[i],
+                                                    bufs[i], &sf_io_reqs[i]);
 
         if (write_status < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "couldn't queue write operation");
@@ -1730,7 +1724,6 @@ H5FD__ioc_read_vector_internal(H5FD_t *_file, uint32_t count, haddr_t addrs[], s
     if (NULL == (sf_context = H5_get_subfiling_object(sf_context_id)))
         H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "can't get subfiling context from ID");
     HDassert(sf_context->topology);
-    HDassert(sf_context->topology->n_io_concentrators);
 
     /*
      * Allocate an array of I/O requests and an array for MPI_Request
@@ -1749,9 +1742,8 @@ H5FD__ioc_read_vector_internal(H5FD_t *_file, uint32_t count, haddr_t addrs[], s
 
         H5_CHECK_OVERFLOW(addrs[i], haddr_t, int64_t);
         H5_CHECK_OVERFLOW(sizes[i], size_t, int64_t);
-        read_status =
-            ioc__read_independent_async(sf_context_id, sf_context->topology->n_io_concentrators,
-                                        (int64_t)addrs[i], (int64_t)sizes[i], bufs[i], &sf_io_reqs[i]);
+        read_status = ioc__read_independent_async(sf_context_id, (int64_t)addrs[i], (int64_t)sizes[i],
+                                                  bufs[i], &sf_io_reqs[i]);
 
         if (read_status < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "couldn't queue read operation");
