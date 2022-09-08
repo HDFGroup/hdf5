@@ -18,6 +18,10 @@
 extern "C" {
 #endif
 
+/** \page H5TB_UG The HDF5 High Level Table
+ * @todo Under Construction
+ */
+
 /**\defgroup H5TB Table
  *
  * <em>Creating and manipulating HDF5 datasets intended to be
@@ -656,11 +660,9 @@ H5_HLDLL herr_t H5TBAget_title(hid_t loc_id, char *table_title);
  * \return A return value of 0 indicates a fill value is not present.
  * \return A return value <0 indicates an error.
  *
- *
  * \details H5TBget_fill() reads the table attribute fill values into
  *          the buffer \p dst_buf for the table specified by \p dset_id
  *          and \p dset_name located in \p loc_id.
- *
  *
  * \par Example
  * \include H5TBAget_fill.c

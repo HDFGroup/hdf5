@@ -35,6 +35,10 @@ typedef enum H5LT_lang_t {
 extern "C" {
 #endif
 
+/** \page H5LT_UG The HDF5 High Level Lite
+ * @todo Under Construction
+ */
+
 /**\defgroup H5LT Lite
  * <em>Functions used to simplify creating and manipulating datasets,
  * attributes and other features (H5LT, H5LD)</em>

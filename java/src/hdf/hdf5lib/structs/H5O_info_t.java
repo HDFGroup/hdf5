@@ -36,7 +36,7 @@ public class H5O_info_t implements Serializable {
     public long ctime;
     /** Birth time */
     public long btime;
-    /** # of attributes attached to object */
+    /** Number of attributes attached to object */
     public long num_attrs;
     /** Object header information */
     public H5O_hdr_info_t hdr;
