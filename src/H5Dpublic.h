@@ -588,10 +588,10 @@ H5_DLL herr_t H5Dget_num_chunks(hid_t dset_id, hid_t fspace_id, hsize_t *nchunks
  * \brief Retrieves information about a chunk specified by its coordinates
  *
  * \dset_id
- * \param[in]  offset      Logical position of the chunk’s first element
- * \param[out] filter_mask Indicating filters used with the chunk when written
+ * \param[in]  offset      Logical position of the chunk’s first element in units of dataset elements
+ * \param[out] filter_mask Bitmask indicating the filters used when the chunk was written
  * \param[out] addr        Chunk address in the file
- * \param[out] size        Chunk size in bytes, 0 if chunk doesn’t exist
+ * \param[out] size        Chunk size in bytes, 0 if the chunk does not exist
  *
  * \return \herr_t
  *
@@ -622,10 +622,10 @@ H5_DLL herr_t H5Dget_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset, u
  * \dset_id
  * \param[in]  fspace_id File dataspace selection identifier (See Note below)
  * \param[in]  chk_idx   Index of the chunk
- * \param[out] offset    Logical position of the chunk’s first element
- * \param[out] filter_mask Indicating filters used with the chunk when written
+ * \param[out] offset    Logical position of the chunk’s first element in units of dataset elements
+ * \param[out] filter_mask Bitmask indicating the filters used when the chunk was written
  * \param[out] addr      Chunk address in the file
- * \param[out] size      Chunk size in bytes, 0 if chunk doesn’t exist
+ * \param[out] size      Chunk size in bytes, 0 if the chunk does not exist
  *
  * \return \herr_t
  *

@@ -121,7 +121,7 @@ CONTAINS
 !>
 !! \ingroup FH5DS
 !!
-!! \brief Detach dimension scale dsid from the dimension idx of Dataset \p did.
+!! \brief Detach dimension scale dsid from the dimension idx of dataset \p did.
 !!
 !! \param did     The dataset.
 !! \param dsid    The scale to be detached.

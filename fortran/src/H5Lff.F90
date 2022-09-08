@@ -925,7 +925,8 @@ CONTAINS
 !!                      \li H5_ITER_INC_F    - Increasing order
 !!                      \li H5_ITER_DEC_F    - Decreasing order
 !!                      \li H5_ITER_NATIVE_F - Fastest available order
-!! \param idx           Iteration position at which to start.
+!! \param idx          Iteration position at which to start, or <br />
+!!                     Position at which an interrupted iteration may be restarted
 !! \param op            Callback function passing data regarding the link to the calling application.
 !! \param op_data       User-defined pointer to data required by the application for its processing of the link.
 !! \param return_value  Return context:

@@ -103,7 +103,6 @@ MODULE H5O
      INTEGER(hsize_t) :: num_attrs  ! # of attributes attached to object
 
      TYPE(hdr_t) :: hdr
-
      TYPE(meta_size_t) :: meta_size
   END TYPE h5o_info_t
 
