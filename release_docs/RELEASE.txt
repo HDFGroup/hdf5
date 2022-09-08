@@ -203,7 +203,9 @@ Bug Fixes since HDF5-1.10.9 release
 
     Documentation
     -------------
-    -
+    - Doxygen updated with recent Fortran changes.
+
+      (ADB - 2022/09/09)
 
 
     F90 APIs
