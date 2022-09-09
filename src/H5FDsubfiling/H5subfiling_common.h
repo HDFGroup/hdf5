@@ -191,7 +191,7 @@ typedef struct {
     int64_t        sf_context_id;           /* Generated context ID which embeds the cache index */
     uint64_t       h5_file_id;              /* GUID (basically the inode value)                  */
     int           *sf_fids;                 /* Array of file IDs for subfiles this rank owns     */
-    int            sf_num_fids;             /* Number of sub-files this rank owns                */
+    int            sf_num_fids;             /* Number of subfiles this rank owns                 */
     int            sf_num_subfiles;         /* Total number of subfiles for logical HDF5 file    */
     size_t         sf_write_count;          /* Statistics: write_count                           */
     size_t         sf_read_count;           /* Statistics: read_count                            */

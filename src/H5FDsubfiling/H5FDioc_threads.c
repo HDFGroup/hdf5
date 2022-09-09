@@ -1192,7 +1192,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    ioc_file_report_eof
  *
- * Purpose:     Determine the target sub-file's eof and report this value
+ * Purpose:     Determine the target subfile's eof and report this value
  *              to the requesting rank.
  *
  *              Notes: This function will have to be reworked once we solve

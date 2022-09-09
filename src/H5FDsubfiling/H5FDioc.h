@@ -138,7 +138,7 @@ H5_DLL hid_t H5FD_ioc_init(void);
  *
  *          The #H5FD_IOC driver is a reference implementation of an "I/O concentrator"
  *          file driver that works in conjunction with the #H5FD_SUBFILING driver and
- *          provides the I/O backend for servicing I/O requests to sub-files.
+ *          provides the I/O backend for servicing I/O requests to subfiles.
  *
  *          Typically, an HDF5 application won't need to call this routine directly.
  *          The #H5FD_IOC driver is usually set up as a side effect of an HDF5 application

@@ -30,11 +30,11 @@
  *              Note: This code should be moved -- most likely to the IOC
  *                    code files.
  *
- * Purpose:     Apply a truncate operation to the sub-files.
+ * Purpose:     Apply a truncate operation to the subfiles.
  *
  *              In the context of the I/O concentrators, the eof must be
  *              translated into the appropriate value for each of the
- *              sub-files, and then applied to same.
+ *              subfiles, and then applied to same.
  *
  *              Further, we must ensure that all prior I/O requests complete
  *              before the truncate is applied.
@@ -44,7 +44,7 @@
  *              1) Run a barrier on entry.
  *
  *              2) Determine if this rank is a IOC.  If it is, compute
- *                 the correct EOF for this sub-file, and send a truncate
+ *                 the correct EOF for this subfile, and send a truncate
  *                 request to the IOC.
  *
  *              3) On the IOC thread, allow all pending I/O requests
@@ -98,7 +98,7 @@ H5FD__subfiling__truncate_sub_files(hid_t context_id, int64_t logical_file_eof, 
         partial_stripe_len   = logical_file_eof % sf_context->sf_blocksize_per_stripe;
         num_leftover_stripes = partial_stripe_len / sf_context->sf_stripe_size;
 
-        /* Compute the EOF for each sub-file this IOC owns */
+        /* Compute the EOF for each subfile this IOC owns */
         for (int i = 0; i < sf_context->sf_num_fids; i++) {
             int64_t subfile_eof = num_full_stripes * sf_context->sf_stripe_size;
             int64_t global_subfile_idx;
@@ -113,7 +113,7 @@ H5FD__subfiling__truncate_sub_files(hid_t context_id, int64_t logical_file_eof, 
                 subfile_eof += partial_stripe_len % sf_context->sf_stripe_size;
             }
 
-            /* Direct the IOC to truncate this sub-file to the correct EOF */
+            /* Direct the IOC to truncate this subfile to the correct EOF */
             msg[0] = subfile_eof;
             msg[1] = i;
             msg[2] = -1; /* padding -- not used in this message */
@@ -126,7 +126,7 @@ H5FD__subfiling__truncate_sub_files(hid_t context_id, int64_t logical_file_eof, 
         }
 
         /* sanity check -- compute the file eof using the same mechanism used to
-         * compute the sub-file eof.  Assert that the computed value and the
+         * compute the subfile eof.  Assert that the computed value and the
          * actual value match.
          *
          * Do this only for debug builds -- probably delete this before release.
@@ -178,8 +178,8 @@ done:
  *              1) allocate an array of int64_t of length equal to the
  *                 the number of subfiles, and initialize all fields to -1.
  *
- *              2) Send each sub-file's IOC a message requesting that
- *                 sub-file's EOF.
+ *              2) Send each subfile's IOC a message requesting that
+ *                 subfile's EOF.
  *
  *              3) Await reply from each IOC, storing the reply in
  *                 the appropriate entry in the array allocated in 1.
@@ -198,13 +198,13 @@ done:
  *              than for the more traditional HDF5 file implementations.
  *              This statement derives from the fact that unlike "normal"
  *              HDF5 files, subfiling introduces a multi-file representation
- *              of a single HDF5 file.  The plurality of sub-files represents
- *              a software RAID-0 based HDF5 file.  As such, each sub-file
+ *              of a single HDF5 file.  The plurality of subfiles represents
+ *              a software RAID-0 based HDF5 file.  As such, each subfile
  *              contains a designated portion of the address space of the
  *              virtual HDF5 storage.  We have no notion of HDF5 datatypes,
  *              datasets, metadata, or other HDF5 structures; only BYTES.
  *
- *              The organization of the bytes within sub-files is consistent
+ *              The organization of the bytes within subfiles is consistent
  *              with the RAID-0 striping, i.e. there are IO Concentrators
  *              (IOCs) which correspond to a stripe-count (in Lustre) as
  *              well as a stripe_size.  The combination of these two
@@ -283,7 +283,7 @@ H5FD__subfiling__get_real_eof(hid_t context_id, int64_t *logical_eof_ptr)
     HDassert(num_subfiles >= n_io_concentrators);
 
     if (NULL == (sf_eofs = HDmalloc((size_t)num_subfiles * sizeof(int64_t))))
-        H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate sub-file EOFs array");
+        H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate subfile EOFs array");
     if (NULL == (recv_reqs = HDmalloc((size_t)num_subfiles * sizeof(*recv_reqs))))
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate receive requests array");
     if (NULL == (recv_msg = HDmalloc((size_t)num_subfiles * sizeof(msg))))
@@ -347,13 +347,13 @@ H5FD__subfiling__get_real_eof(hid_t context_id, int64_t *logical_eof_ptr)
         /* multiply by stripe size */
         sf_logical_eof *= sf_context->sf_stripe_size * num_subfiles;
 
-        /* if the sub-file doesn't end on a stripe size boundary, must add in a partial stripe */
+        /* if the subfile doesn't end on a stripe size boundary, must add in a partial stripe */
         if (sf_eofs[i] % sf_context->sf_stripe_size > 0) {
 
             /* add in the size of the partial stripe up to but not including this subfile */
             sf_logical_eof += i * sf_context->sf_stripe_size;
 
-            /* finally, add in the number of bytes in the last partial stripe depth in the sub-file */
+            /* finally, add in the number of bytes in the last partial stripe depth in the subfile */
             sf_logical_eof += sf_eofs[i] % sf_context->sf_stripe_size;
         }
 

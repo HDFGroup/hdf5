@@ -2136,14 +2136,14 @@ H5FD__subfiling_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5
 
         H5_CHECKED_ASSIGN(eoa, int64_t, file->eoa, haddr_t);
 
-        /* truncate sub-files */
-        /* This is a hack.  We should be doing the truncate of the sub-files via calls to
+        /* truncate subfiles */
+        /* This is a hack.  We should be doing the truncate of the subfiles via calls to
          * H5FD_truncate() with the IOC.  However, that system is messed up at present.
          * thus the following hack.
          *                                                 JRM -- 12/18/21
          */
         if (H5FD__subfiling__truncate_sub_files(file->context_id, eoa, file->comm) < 0)
-            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTUPDATE, FAIL, "sub-file truncate request failed");
+            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTUPDATE, FAIL, "subfile truncate request failed");
 
 #if 0 /* TODO: Should be truncated only to size of superblock metadata */
         /* Truncate the HDF5 stub file */

@@ -144,7 +144,7 @@ H5_get_subfiling_object(int64_t object_id)
     if (obj_type == SF_CONTEXT) {
         /* Contexts provide information principally about
          * the application and how the data layout is managed
-         * over some number of sub-files.  The important
+         * over some number of subfiles.  The important
          * parameters are the number of subfiles (or in the
          * context of IOCs, the MPI ranks and counts of the
          * processes which host an I/O Concentrator.  We
@@ -751,7 +751,7 @@ init_subfiling(const char *base_filename, uint64_t file_id, H5FD_subfiling_share
 
     /*
      * If there's an existing subfiling configuration file for
-     * this file, read the number of sub-files from it
+     * this file, read the number of subfiles from it
      */
     if (0 == (file_acc_flags & O_TRUNC)) {
         int n_subfiles_from_config_file = 0;
@@ -777,7 +777,7 @@ init_subfiling(const char *base_filename, uint64_t file_id, H5FD_subfiling_share
                 else {
                     /*
                      * If a subfiling configuration file exists and we aren't truncating
-                     * it, read the number of sub-files used at file creation time.
+                     * it, read the number of subfiles used at file creation time.
                      */
                     if (H5_get_num_subfiles_from_config_file(config_file, &n_subfiles_from_config_file) < 0)
                         n_subfiles_from_config_file = -1;
@@ -800,7 +800,7 @@ init_subfiling(const char *base_filename, uint64_t file_id, H5FD_subfiling_share
         else if (n_subfiles_from_config_file == -1)
             H5_SUBFILING_GOTO_ERROR(
                 H5E_FILE, H5E_CANTOPENFILE, FAIL,
-                "lead process couldn't read the number of sub-files from subfiling configuration file");
+                "lead process couldn't read the number of subfiles from subfiling configuration file");
     }
 
 #if H5_CHECK_MPI_VERSION(3, 0)
@@ -1702,7 +1702,7 @@ init_subfiling_context(subfiling_context_t *sf_context, const char *base_filenam
     /*
      * If still set to the default, set the number of subfiles
      * according to the default mapping of 1 I/O concentrator
-     * -> 1 sub-file
+     * -> 1 subfile
      */
     if (sf_context->sf_num_subfiles == H5FD_SUBFILING_DEFAULT_STRIPE_COUNT)
         sf_context->sf_num_subfiles = app_topology->n_io_concentrators;
@@ -1721,9 +1721,9 @@ init_subfiling_context(subfiling_context_t *sf_context, const char *base_filenam
         sf_context->sf_base_addr = (int64_t)(app_topology->ioc_idx * sf_context->sf_stripe_size);
 
         /*
-         * Calculate the number of sub-files this rank owns by
+         * Calculate the number of subfiles this rank owns by
          * round-robining them across the available IOCs and
-         * then allocate an array for the sub-file IDs
+         * then allocate an array for the subfile IDs
          */
         sf_context->sf_num_fids = sf_context->sf_num_subfiles / app_topology->n_io_concentrators;
 
@@ -1733,8 +1733,7 @@ init_subfiling_context(subfiling_context_t *sf_context, const char *base_filenam
 
         if (NULL ==
             (sf_context->sf_fids = HDmalloc((size_t)sf_context->sf_num_fids * sizeof(*sf_context->sf_fids))))
-            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                                    "couldn't allocate sub-file IDs array");
+            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "couldn't allocate subfile IDs array");
 
         for (int i = 0; i < sf_context->sf_num_fids; i++)
             sf_context->sf_fids[i] = -1;
@@ -2070,7 +2069,7 @@ ioc_open_files(int64_t file_context_id, int file_acc_flags)
     for (int i = 0; i < sf_context->sf_num_fids; i++) {
         int subfile_idx;
 
-        /* Round-robin sub-files among the available IOCs */
+        /* Round-robin subfiles among the available IOCs */
         subfile_idx = (i * sf_context->topology->n_io_concentrators) + sf_context->topology->ioc_idx + 1;
 
         /*
@@ -2333,7 +2332,7 @@ done:
  * Function:    H5_get_num_subfiles_from_config_file
  *
  * Purpose:     Reads a Subfiling configuration file to get the number of
- *              sub-files used for the logical HDF5 file.
+ *              subfiles used for the logical HDF5 file.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -2379,11 +2378,11 @@ H5_get_num_subfiles_from_config_file(FILE *config_file, int *num_subfiles)
 
     if (EOF == HDsscanf(ioc_substr, "subfile_count=%d", &read_n_subfiles))
         H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL,
-                                    "couldn't get number of sub-files from subfiling configuration file");
+                                    "couldn't get number of subfiles from subfiling configuration file");
 
     if (read_n_subfiles <= 0)
         H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL,
-                                "invalid number of sub-files (%d) read from subfiling configuration file",
+                                "invalid number of subfiles (%d) read from subfiling configuration file",
                                 read_n_subfiles);
 
     *num_subfiles = read_n_subfiles;

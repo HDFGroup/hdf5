@@ -472,7 +472,7 @@ test_stripe_sizes(void)
 
             /*
              * Write "number of IOCs" X "stripe size" bytes to the file
-             * and ensure that we have "number of IOCs" sub-files, each
+             * and ensure that we have "number of IOCs" subfiles, each
              * with a size of at least "stripe size" bytes. The first
              * (few) subfile(s) may be a bit larger due to file metadata.
              */
@@ -509,7 +509,7 @@ test_stripe_sizes(void)
             /*
              * Write another round of "number of IOCs" X "stripe size"
              * bytes to the file using vector I/O and ensure we have
-             * "number of IOCs" sub-files, each with a size of at least
+             * "number of IOCs" subfiles, each with a size of at least
              * 2 * "stripe size" bytes. The first (few) subfile(s) may
              * be a bit larger due to file metadata.
              */
@@ -613,7 +613,7 @@ test_stripe_sizes(void)
         /*
          * Write "number of IOCs" X "stripe size" bytes to the file
          * from each rank and ensure that we have "number of IOCs"
-         * sub-files, each with a size of at least "mpi size" * "stripe size"
+         * subfiles, each with a size of at least "mpi size" * "stripe size"
          * bytes. The first (few) subfile(s) may be a bit larger
          * due to file metadata.
          */
@@ -658,7 +658,7 @@ test_stripe_sizes(void)
         /*
          * Write another round of "number of IOCs" X "stripe size"
          * bytes to the file from each rank using vector I/O and
-         * ensure we have "number of IOCs" sub-files, each with a
+         * ensure we have "number of IOCs" subfiles, each with a
          * size of at least 2 * "mpi size" * "stripe size" bytes.
          * The first (few) subfile(s) may be a bit larger due to
          * file metadata.
@@ -776,7 +776,7 @@ test_subfiling_precreate_rank_0(void)
         int                            num_subfiles;
         int                            num_digits;
 
-        /* Create a file consisting of 1 sub-file per application I/O concentrator */
+        /* Create a file consisting of 1 subfile per application I/O concentrator */
         cfg.ioc_selection = SELECT_IOC_ONE_PER_NODE;
         cfg.stripe_size   = (stripe_size_g > 0) ? stripe_size_g : H5FD_SUBFILING_DEFAULT_STRIPE_SIZE;
         cfg.stripe_count  = num_iocs_g;
@@ -813,7 +813,7 @@ test_subfiling_precreate_rank_0(void)
         VRFY((H5Fclose(file_id) >= 0), "H5Fclose succeeded");
 
         /*
-         * Ensure that all the sub-files are present
+         * Ensure that all the subfiles are present
          */
 
         num_subfiles = cfg.stripe_count;

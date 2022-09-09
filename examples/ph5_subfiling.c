@@ -12,7 +12,7 @@
 
 /*
  * Example of using HDF5's Subfiling VFD to write to an
- * HDF5 file that is striped across multiple sub-files
+ * HDF5 file that is striped across multiple subfiles
  *
  * If the HDF5_NOCLEANUP environment variable is set, the
  * files that this example creates will not be removed as
