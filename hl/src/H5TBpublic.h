@@ -22,7 +22,7 @@ extern "C" {
  * @todo Under Construction
  */
 
-/**\defgroup H5TB Table
+/**\defgroup H5TB HDF5 Table APIs (H5TB)
  *
  * <em>Creating and manipulating HDF5 datasets intended to be
  * interpreted as tables (H5TB)</em>

@@ -1,5 +1,8 @@
 /** @page GettingStarted Getting Started with HDF5
 
+Navigate back: \ref index "Main"
+<hr>
+
 \section sec_learn Learning HDF5
 There are several resources for learning about HDF5. The HDF Group provides an on-line HDF5 tutorial,
 documentation, examples, and videos. There are also tutorials provided by other organizations that are very useful for learning about HDF5.
@@ -42,7 +45,7 @@ Parallel HDF5, and the HDF5-1.10 VDS and SWMR new features:
 <a href="https://portal.hdfgroup.org/display/HDF5/Introduction+to+the+HDF5+High+Level+APIs">Using the High Level APIs</a>
 </td>
 <td>
-H5LT (Lite)    H5IM (Image)    H5TB (Table)    H5PT (Packet Table)    H5DS (Dimension Scale)
+\ref H5LT    \ref H5IM    \ref H5TB    \ref H5PT    \ref H5DS
 </td>
 </tr>
 <tr>
@@ -55,12 +58,12 @@ A brief introduction to Parallel HDF5. If you are new to HDF5 please see the @re
 </tr>
 <tr>
 <td style="background-color:#F5F5F5">
-<a href="https://portal.hdfgroup.org/display/HDF5/Tools+for+Viewing+and+Editing+HDF5+Files">Tools for Viewing and Editing HDF5 Files</a>
+\ref ViewTools
 </td>
 <td>
 \li @ref LearnHDFView
-\li <a href="https://portal.hdfgroup.org/display/HDF5/Using+the+HDF5+Command-line+Tools">Using the HDF5 Command-line Tools</a>
-\li <a href="https://portal.hdfgroup.org/display/HDF5/USE+CASE%3A+Examining+a+JPSS+NPP+File+with+HDF5+tools">Use Case - JPSS NPP Files</a>
+\li @ref ViewToolsCommand
+\li @ref ViewToolsJPSS
 </td>
 </tr>
 <tr>
@@ -74,10 +77,10 @@ HDF5-1.10 New Features
 </tr>
 <tr>
 <td style="background-color:#F5F5F5">
-<a href="https://portal.hdfgroup.org/display/HDF5/HDF5+Examples">Example Programs</a>
+Example Programs
 </td>
 <td>
-Example Programs
+\ref HDF5Examples
 </td>
 </tr>
 <tr>
@@ -91,5 +94,7 @@ Videos
 </tr>
 </table>
 
-@subpage IntroHDF5
+<hr>
+Navigate back: \ref index "Main"
+
 */

@@ -1,5 +1,8 @@
 /** @page IntroHDF5 Introduction to HDF5
 
+Navigate back: \ref index "Main" / \ref GettingStarted
+<hr>
+
 \section sec_intro_desc HDF5 Description
 HDF5 consists of a file format for storing HDF5 data, a data model for logically organizing and accessing
 HDF5 data from an application, and the software (libraries, language interfaces, and tools) for working with this format.
@@ -188,11 +191,11 @@ of object on which the function operates:
 
 The HDF5 High Level APIs simplify many of the steps required to create and access objects, as well
 as providing templates for storing objects. Following is a list of the High Level APIs:
-\li HDF5 @ref H5LT (H5LT) – simplifies steps in creating datasets and attributes
-\li HDF5 @ref H5IM (H5IM) – defines a standard for storing images in HDF5
-\li HDF5 @ref H5TB (H5TB) – condenses the steps required to create tables
-\li HDF5 @ref H5DS (H5DS) – provides a standard for dimension scale storage
-\li HDF5 @ref H5PT (H5PT) – provides a standard for storing packet data
+\li @ref H5LT – simplifies steps in creating datasets and attributes
+\li @ref H5IM – defines a standard for storing images in HDF5
+\li @ref H5TB – condenses the steps required to create tables
+\li @ref H5DS – provides a standard for dimension scale storage
+\li @ref H5PT – provides a standard for storing packet data
 
 \subsubsection subsec_intro_desc_soft_tools Tools
 Useful tools for working with HDF5 files include:
@@ -257,8 +260,8 @@ operation is to be performed.
 FORTRAN routines are similar; they begin with “h5*” and end with “_f”.
 </li>
 <li>
-Java routines are similar; they begin with “H5*” and begin with “H5.” as the class. Constants are
-in the HDF5Constants class and begin with "HDF5Constants.". The function arguments
+Java routines are similar; the routine names begin with “H5*” and are prefixed with “H5.” as the class. Constants are
+in the HDF5Constants class and are prefixed with "HDF5Constants.". The function arguments
 are usually similar, @see @ref HDF5LIB
 </li>
 </ul>
@@ -591,5 +594,34 @@ to it and then close it in separate steps:
 </td>
 </tr>
 </table>
+
+<hr>
+Navigate back: \ref index "Main" / \ref GettingStarted
+
+
+@page HDF5Examples HDF5 Examples
+Example programs of how to use HDF5 are provided below.
+For HDF-EOS specific examples, see the <a href="http://hdfeos.org/zoo/index.php">examples</a>
+of how to access and visualize NASA HDF-EOS files using IDL, MATLAB, and NCL on the
+<a href="http://hdfeos.org/">HDF-EOS Tools and Information Center</a> page.
+
+\section secHDF5Examples Examples
+\li \ref LBExamples
+\li <a href="https://portal.hdfgroup.org/display/HDF5/Examples+by+API">Examples by API</a>
+\li <a href="https://portal.hdfgroup.org/display/HDF5/Examples+in+the+Source+Code">Examples in the Source Code</a>
+\li <a href="https://portal.hdfgroup.org/display/HDF5/Other+Examples">Other Examples</a>
+
+\section secHDF5ExamplesCompile How To Compile
+For information on compiling in C, C++ and Fortran, see: \ref LBCompiling
+
+\section secHDF5ExamplesOther Other Examples
+<a href="http://hdfeos.org/zoo/index.php">IDL, MATLAB, and NCL Examples for HDF-EOS</a>
+Examples of how to access and visualize NASA HDF-EOS files using IDL, MATLAB, and NCL.
+
+<a href="https://support.hdfgroup.org/ftp/HDF5/examples/misc-examples/">Miscellaneous Examples</a>
+These (very old) examples resulted from working with users, and are not fully tested. Most of them are in C, with a few in Fortran and Java.
+
+<a href="https://support.hdfgroup.org/ftp/HDF5/examples/special_values_HDF5_example.tar">Using Special Values</a>
+These examples show how to create special values in an HDF5 application.
 
 */
