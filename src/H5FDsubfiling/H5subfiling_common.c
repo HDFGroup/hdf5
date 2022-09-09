@@ -201,7 +201,7 @@ H5_get_subfiling_object(int64_t object_id)
             HDassert(!sf_context_cache[sf_context_cache_num_entries]);
 
             /* Allocate a new subfiling context object */
-            if (NULL == (ret_value = HDmalloc(sizeof(subfiling_context_t))))
+            if (NULL == (ret_value = HDcalloc(1, sizeof(subfiling_context_t))))
                 H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL,
                                         "couldn't allocate subfiling context object");
 
@@ -743,6 +743,11 @@ init_subfiling(const char *base_filename, uint64_t file_id, H5FD_subfiling_share
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "couldn't create new subfiling object");
     new_context->sf_context_id = -1;
     new_context->topology      = NULL;
+    new_context->sf_msg_comm   = MPI_COMM_NULL;
+    new_context->sf_data_comm  = MPI_COMM_NULL;
+    new_context->sf_eof_comm   = MPI_COMM_NULL;
+    new_context->sf_node_comm  = MPI_COMM_NULL;
+    new_context->sf_group_comm = MPI_COMM_NULL;
 
     /*
      * If there's an existing subfiling configuration file for
@@ -2669,6 +2674,104 @@ done:
 }
 
 /*-------------------------------------------------------------------------
+ * Function:    H5_subfiling_set_config_prop
+ *
+ * Purpose:     Sets the specified Subfiling VFD configuration as a
+ *              property on the given FAPL pointer. The Subfiling VFD uses
+ *              this property to pass its configuration down to the IOC VFD
+ *              without needing each IOC VFD to include it as part of its
+ *              public configuration.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5_subfiling_set_config_prop(H5P_genplist_t *plist_ptr, const H5FD_subfiling_shared_config_t *vfd_config)
+{
+    htri_t prop_exists = FAIL;
+    herr_t ret_value   = SUCCEED;
+
+    if (!plist_ptr)
+        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL FAPL pointer");
+    if (!vfd_config)
+        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid subfiling configuration pointer");
+
+    if ((prop_exists = H5P_exist_plist(plist_ptr, H5FD_SUBFILING_CONFIG_PROP)) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL,
+                                "can't check if subfiling configuration property exists in FAPL");
+
+    if (prop_exists) {
+        if (H5P_set(plist_ptr, H5FD_SUBFILING_CONFIG_PROP, vfd_config) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL,
+                                    "can't set subfiling configuration property on FAPL");
+    }
+    else {
+        union {
+            const void *const_ptr_to_data;
+            void       *ptr_to_data;
+        } eliminate_const_warning;
+
+        /*
+         * Cast away const since H5P_insert doesn't match the signature
+         * for "value" as H5P_set
+         */
+        eliminate_const_warning.const_ptr_to_data = vfd_config;
+
+        if (H5P_insert(plist_ptr, H5FD_SUBFILING_CONFIG_PROP, sizeof(H5FD_subfiling_shared_config_t),
+                       eliminate_const_warning.ptr_to_data, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+                       NULL) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL,
+                                    "unable to register subfiling configuration property in FAPL");
+    }
+
+done:
+    H5_SUBFILING_FUNC_LEAVE;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    H5_subfiling_get_config_prop
+ *
+ * Purpose:     Retrieves the Subfiling VFD configuration from the given
+ *              FAPL pointer. The Subfiling VFD uses this property to pass
+ *              its configuration down to the IOC VFD without needing each
+ *              IOC VFD to include it as part of its public configuration.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5_subfiling_get_config_prop(H5P_genplist_t *plist_ptr, H5FD_subfiling_shared_config_t *vfd_config)
+{
+    htri_t prop_exists = FAIL;
+    herr_t ret_value   = SUCCEED;
+
+    if (!plist_ptr)
+        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL FAPL pointer");
+    if (!vfd_config)
+        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid subfiling configuration pointer");
+
+    if ((prop_exists = H5P_exist_plist(plist_ptr, H5FD_SUBFILING_CONFIG_PROP)) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL,
+                                "can't check if subfiling configuration property exists in FAPL");
+
+    if (prop_exists) {
+        if (H5P_get(plist_ptr, H5FD_SUBFILING_CONFIG_PROP, vfd_config) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL,
+                                    "can't get subfiling configuration property from FAPL");
+    }
+    else {
+        vfd_config->ioc_selection = SELECT_IOC_ONE_PER_NODE;
+        vfd_config->stripe_size   = H5FD_SUBFILING_DEFAULT_STRIPE_SIZE;
+        vfd_config->stripe_count  = H5FD_SUBFILING_DEFAULT_STRIPE_COUNT;
+    }
+
+done:
+    H5_SUBFILING_FUNC_LEAVE;
+}
+
+/*-------------------------------------------------------------------------
  * Function:    H5_subfiling_set_file_id_prop
  *
  * Purpose:     Sets the specified file ID (Inode) value as a property on
@@ -2781,6 +2884,44 @@ H5_subfile_fid_to_context(uint64_t file_id)
 done:
     H5_SUBFILING_FUNC_LEAVE;
 } /* end H5_subfile_fid_to_context() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5_subfiling_validate_config
+ *
+ * Purpose:     Checks that the given subfiling configuration parameters
+ *              are valid
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5_subfiling_validate_config(const H5FD_subfiling_shared_config_t *subf_config)
+{
+    H5FD_subfiling_ioc_select_t ioc_sel_type;
+    herr_t                      ret_value = SUCCEED;
+
+    if (!subf_config)
+        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL subfiling configuration pointer");
+
+    /*
+     * Compare against each IOC selection value directly since
+     * the enum might be a signed or unsigned type and a comparison
+     * against < 0 could generate a warning
+     */
+    ioc_sel_type = subf_config->ioc_selection;
+    if (ioc_sel_type != SELECT_IOC_ONE_PER_NODE && ioc_sel_type != SELECT_IOC_EVERY_NTH_RANK &&
+        ioc_sel_type != SELECT_IOC_WITH_CONFIG && ioc_sel_type != SELECT_IOC_TOTAL)
+        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid IOC selection method");
+
+    if (subf_config->stripe_size <= 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid stripe size");
+
+    if (subf_config->stripe_count <= 0 && subf_config->stripe_count != H5FD_SUBFILING_DEFAULT_STRIPE_COUNT)
+        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid stripe count");
+
+done:
+    H5_SUBFILING_FUNC_LEAVE;
+}
 
 /*-------------------------------------------------------------------------
  * Function:    H5_subfiling_terminate

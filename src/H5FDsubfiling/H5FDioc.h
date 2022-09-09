@@ -107,17 +107,11 @@
  *      This value can also be set or adjusted with the #H5FD_IOC_THREAD_POOL_SIZE
  *      environment variable.
  *
- * \var H5FD_subfiling_shared_config_t H5FD_ioc_config_t::subf_config
- *      Subfiling configuration data for the parent #H5FD_SUBFILING driver. This
- *      includes the sub-file stripe size, number of I/O concentrators, IOC
- *      selection method, etc.
- *
  */
 typedef struct H5FD_ioc_config_t {
-    uint32_t                       magic;            /* Must be set to H5FD_IOC_FAPL_MAGIC */
-    uint32_t                       version;          /* Must be set to H5FD_IOC_CURR_FAPL_VERSION */
-    int32_t                        thread_pool_size; /* Number of I/O concentrator worker threads to use */
-    H5FD_subfiling_shared_config_t subf_config;      /* Subfiling driver configuration */
+    uint32_t magic;            /* Must be set to H5FD_IOC_FAPL_MAGIC */
+    uint32_t version;          /* Must be set to H5FD_IOC_CURR_FAPL_VERSION */
+    int32_t  thread_pool_size; /* Number of I/O concentrator worker threads to use */
 } H5FD_ioc_config_t;
 //! <!-- [H5FD_ioc_config_t_snip] -->
 

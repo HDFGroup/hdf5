@@ -428,14 +428,6 @@ H5FD__ioc_get_default_config(H5FD_ioc_config_t *config_out)
     config_out->version          = H5FD_IOC_CURR_FAPL_VERSION;
     config_out->thread_pool_size = H5FD_IOC_DEFAULT_THREAD_POOL_SIZE;
 
-    /*
-     * Use default subfiling configuration. Do NOT call
-     * H5Pget_fapl_subfiling here as that can cause issues
-     */
-    config_out->subf_config.ioc_selection = SELECT_IOC_ONE_PER_NODE;
-    config_out->subf_config.stripe_size   = H5FD_SUBFILING_DEFAULT_STRIPE_SIZE;
-    config_out->subf_config.stripe_count  = H5FD_SUBFILING_DEFAULT_STRIPE_COUNT;
-
     H5_SUBFILING_FUNC_LEAVE;
 }
 
@@ -459,8 +451,7 @@ H5FD__ioc_get_default_config(H5FD_ioc_config_t *config_out)
 static herr_t
 H5FD__ioc_validate_config(const H5FD_ioc_config_t *fa)
 {
-    H5FD_subfiling_ioc_select_t ioc_sel_type;
-    herr_t                      ret_value = SUCCEED;
+    herr_t ret_value = SUCCEED;
 
     HDassert(fa != NULL);
 
@@ -469,20 +460,6 @@ H5FD__ioc_validate_config(const H5FD_ioc_config_t *fa)
 
     if (fa->magic != H5FD_IOC_FAPL_MAGIC)
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid H5FD_ioc_config_t magic value");
-
-    /*
-     * Compare against each IOC selection value directly since
-     * the enum might be a signed or unsigned type and a comparison
-     * against < 0 could generate a warning
-     */
-    ioc_sel_type = fa->subf_config.ioc_selection;
-    if (ioc_sel_type != SELECT_IOC_ONE_PER_NODE && ioc_sel_type != SELECT_IOC_EVERY_NTH_RANK &&
-        ioc_sel_type != SELECT_IOC_WITH_CONFIG && ioc_sel_type != SELECT_IOC_TOTAL)
-        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid IOC selection method");
-
-    if (fa->subf_config.stripe_count <= 0 &&
-        fa->subf_config.stripe_count != H5FD_SUBFILING_DEFAULT_STRIPE_COUNT)
-        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid stripe count setting");
 
 done:
     H5_SUBFILING_FUNC_LEAVE;
@@ -658,15 +635,16 @@ H5FD__ioc_fapl_free(void *_fapl)
 static H5FD_t *
 H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
-    H5FD_ioc_t              *file_ptr   = NULL; /* Ioc VFD info */
-    const H5FD_ioc_config_t *config_ptr = NULL; /* Driver-specific property list */
-    subfiling_context_t     *sf_context = NULL;
-    H5FD_ioc_config_t        default_config;
-    H5P_genplist_t          *plist_ptr = NULL;
-    int                      ioc_flags;
-    int                      mpi_inited = 0;
-    int                      mpi_code; /* MPI return code */
-    H5FD_t                  *ret_value = NULL;
+    H5FD_subfiling_shared_config_t subf_config;
+    H5FD_ioc_t                    *file_ptr   = NULL; /* Ioc VFD info */
+    const H5FD_ioc_config_t       *config_ptr = NULL; /* Driver-specific property list */
+    subfiling_context_t           *sf_context = NULL;
+    H5FD_ioc_config_t              default_config;
+    H5P_genplist_t                *plist_ptr = NULL;
+    int                            ioc_flags;
+    int                            mpi_inited = 0;
+    int                            mpi_code; /* MPI return code */
+    H5FD_t                        *ret_value = NULL;
 
     H5FD_IOC_LOG_CALL(__func__);
 
@@ -743,9 +721,16 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     if (H5F_ACC_EXCL & flags)
         ioc_flags |= O_EXCL;
 
-    /* Retrieve the HDF5 stub file ID for the current file */
     if (NULL == (plist_ptr = (H5P_genplist_t *)H5I_object(fapl_id)))
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
+
+    /* Retrieve the subfiling configuration for the current file */
+    if (H5_subfiling_get_config_prop(plist_ptr, &subf_config) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get subfiling configuration from FAPL");
+    if (H5_subfiling_validate_config(&subf_config) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_BADVALUE, NULL, "invalid subfiling configuration");
+
+    /* Retrieve the HDF5 stub file ID for the current file */
     if (H5_subfiling_get_file_id_prop(plist_ptr, &file_ptr->file_id) < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get stub file ID from FAPL");
 
@@ -754,8 +739,8 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
      * context ID will be returned, which is used for
      * further interactions with this file's subfiles.
      */
-    if (H5_open_subfiles(file_ptr->file_path, file_ptr->file_id, &file_ptr->fa.subf_config, ioc_flags,
-                         file_ptr->comm, &file_ptr->context_id) < 0)
+    if (H5_open_subfiles(file_ptr->file_path, file_ptr->file_id, &subf_config, ioc_flags, file_ptr->comm,
+                         &file_ptr->context_id) < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open subfiles for file '%s'",
                                 name);
 

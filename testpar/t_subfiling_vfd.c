@@ -117,10 +117,9 @@ static hid_t
 create_subfiling_ioc_fapl(MPI_Comm comm, MPI_Info info, hbool_t custom_config,
                           H5FD_subfiling_shared_config_t *custom_cfg, int32_t thread_pool_size)
 {
-    H5FD_subfiling_config_t *subfiling_conf = NULL;
-    H5FD_ioc_config_t       *ioc_conf       = NULL;
-    hid_t                    ioc_fapl       = H5I_INVALID_HID;
-    hid_t                    ret_value      = H5I_INVALID_HID;
+    H5FD_subfiling_config_t subfiling_conf;
+    H5FD_ioc_config_t       ioc_conf;
+    hid_t                   ret_value = H5I_INVALID_HID;
 
     HDassert(!custom_config || custom_cfg);
 
@@ -135,65 +134,36 @@ create_subfiling_ioc_fapl(MPI_Comm comm, MPI_Info info, hbool_t custom_config,
             TEST_ERROR;
     }
     else {
-        if (NULL == (subfiling_conf = HDcalloc(1, sizeof(*subfiling_conf))))
-            TEST_ERROR;
-
-        if ((ioc_fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-            TEST_ERROR;
-
-        if (H5Pset_mpi_params(ioc_fapl, comm, info) < 0)
-            TEST_ERROR;
-
         /* Get defaults for Subfiling configuration */
-        if (H5Pget_fapl_subfiling(ret_value, subfiling_conf) < 0)
+        if (H5Pget_fapl_subfiling(ret_value, &subfiling_conf) < 0)
             TEST_ERROR;
 
         /* Set custom configuration */
-        subfiling_conf->shared_cfg = *custom_cfg;
+        subfiling_conf.shared_cfg = *custom_cfg;
 
-        if (subfiling_conf->require_ioc) {
-            if (NULL == (ioc_conf = HDcalloc(1, sizeof(*ioc_conf))))
-                TEST_ERROR;
-
+        if (subfiling_conf.require_ioc) {
             /* Get IOC VFD defaults */
-            if (H5Pget_fapl_ioc(ioc_fapl, ioc_conf) < 0)
+            if (H5Pget_fapl_ioc(ret_value, &ioc_conf) < 0)
                 TEST_ERROR;
 
             /* Set custom configuration */
-            ioc_conf->subf_config      = *custom_cfg;
-            ioc_conf->thread_pool_size = thread_pool_size;
+            ioc_conf.thread_pool_size = thread_pool_size;
 
-            if (H5Pset_fapl_ioc(ioc_fapl, ioc_conf) < 0)
+            if (H5Pset_fapl_ioc(subfiling_conf.ioc_fapl_id, &ioc_conf) < 0)
                 TEST_ERROR;
         }
         else {
-            if (H5Pset_fapl_sec2(ioc_fapl) < 0)
+            if (H5Pset_fapl_sec2(subfiling_conf.ioc_fapl_id) < 0)
                 TEST_ERROR;
         }
 
-        if (H5Pclose(subfiling_conf->ioc_fapl_id) < 0)
+        if (H5Pset_fapl_subfiling(ret_value, &subfiling_conf) < 0)
             TEST_ERROR;
-        subfiling_conf->ioc_fapl_id = ioc_fapl;
-
-        if (H5Pset_fapl_subfiling(ret_value, subfiling_conf) < 0)
-            TEST_ERROR;
-
-        HDfree(ioc_conf);
-        ioc_conf = NULL;
-        HDfree(subfiling_conf);
-        subfiling_conf = NULL;
     }
 
     return ret_value;
 
 error:
-    HDfree(ioc_conf);
-    HDfree(subfiling_conf);
-
-    if ((H5I_INVALID_HID != ioc_fapl) && (H5Pclose(ioc_fapl) < 0)) {
-        H5_FAILED();
-        AT();
-    }
     if ((H5I_INVALID_HID != ret_value) && (H5Pclose(ret_value) < 0)) {
         H5_FAILED();
         AT();

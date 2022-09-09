@@ -223,7 +223,6 @@ subfiling_write_custom(hid_t fapl_id, int mpi_size, int mpi_rank)
      * configuration.
      */
     ioc_config.thread_pool_size = 2;
-    ioc_config.subf_config      = subf_config.shared_cfg;
 
     /*
      * Set our new configuration on the IOC
@@ -329,7 +328,6 @@ subfiling_write_precreate(hid_t fapl_id, int mpi_size, int mpi_rank)
 {
     EXAMPLE_DSET_C_DATATYPE *data;
     H5FD_subfiling_config_t  subf_config;
-    H5FD_ioc_config_t        ioc_config;
     hsize_t                  dset_dims[EXAMPLE_DSET_DIMS];
     hsize_t                  start[EXAMPLE_DSET_DIMS];
     hsize_t                  count[EXAMPLE_DSET_DIMS];
@@ -350,7 +348,6 @@ subfiling_write_precreate(hid_t fapl_id, int mpi_size, int mpi_rank)
      * Get a default Subfiling and IOC configuration
      */
     H5Pget_fapl_subfiling(subfiling_fapl, &subf_config);
-    H5Pget_fapl_ioc(subfiling_fapl, &ioc_config);
 
     /*
      * Set the Subfiling stripe count so that rank
@@ -360,13 +357,6 @@ subfiling_write_precreate(hid_t fapl_id, int mpi_size, int mpi_rank)
      * 32MiB.
      */
     subf_config.shared_cfg.stripe_count = 5;
-    ioc_config.subf_config              = subf_config.shared_cfg;
-
-    /*
-     * Set our new configuration on the IOC
-     * FAPL used for Subfiling
-     */
-    H5Pset_fapl_ioc(subf_config.ioc_fapl_id, &ioc_config);
 
     /*
      * OPTIONAL: Set alignment of objects in HDF5 file to

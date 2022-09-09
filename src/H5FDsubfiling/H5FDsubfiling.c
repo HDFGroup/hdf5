@@ -474,6 +474,11 @@ H5Pset_fapl_subfiling(hid_t fapl_id, const H5FD_subfiling_config_t *vfd_config)
     if (H5FD__subfiling_validate_config(vfd_config) < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid subfiling VFD configuration");
 
+    /* Set Subfiling configuration on IOC FAPL */
+    if (H5_subfiling_set_config_prop(ioc_plist, &vfd_config->shared_cfg) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL,
+                                "can't set subfiling configuration on IOC FAPL");
+
     ret_value = H5P_set_driver(plist, H5FD_SUBFILING, vfd_config, NULL);
 
 done:
@@ -635,8 +640,7 @@ done:
 static herr_t
 H5FD__subfiling_validate_config(const H5FD_subfiling_config_t *fa)
 {
-    H5FD_subfiling_ioc_select_t ioc_sel_type;
-    herr_t                      ret_value = SUCCEED;
+    herr_t ret_value = SUCCEED;
 
     HDassert(fa != NULL);
 
@@ -653,19 +657,8 @@ H5FD__subfiling_validate_config(const H5FD_subfiling_config_t *fa)
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                                 "Subfiling VFD currently always requires IOC VFD to be used");
 
-    /*
-     * Compare against each IOC selection value directly since
-     * the enum might be a signed or unsigned type and a comparison
-     * against < 0 could generate a warning
-     */
-    ioc_sel_type = fa->shared_cfg.ioc_selection;
-    if (ioc_sel_type != SELECT_IOC_ONE_PER_NODE && ioc_sel_type != SELECT_IOC_EVERY_NTH_RANK &&
-        ioc_sel_type != SELECT_IOC_WITH_CONFIG && ioc_sel_type != SELECT_IOC_TOTAL)
-        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid IOC selection method");
-
-    if (fa->shared_cfg.stripe_count <= 0 &&
-        fa->shared_cfg.stripe_count != H5FD_SUBFILING_DEFAULT_STRIPE_COUNT)
-        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid stripe count setting");
+    if (H5_subfiling_validate_config(&fa->shared_cfg) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid subfiling configuration parameters");
 
 done:
     H5_SUBFILING_FUNC_LEAVE;

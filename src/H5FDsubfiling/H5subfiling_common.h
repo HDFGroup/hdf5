@@ -50,6 +50,13 @@
 
 /*
  * Name of the HDF5 FAPL property that the Subfiling VFD
+ * uses to pass its configuration down to the underlying
+ * IOC VFD
+ */
+#define H5FD_SUBFILING_CONFIG_PROP "H5FD_SUBFILING_CONFIG_PROP"
+
+/*
+ * Name of the HDF5 FAPL property that the Subfiling VFD
  * uses to pass the HDF5 stub file's Inode value to the
  * underlying IOC VFD
  */
@@ -244,9 +251,15 @@ H5_DLL void   *H5_get_subfiling_object(int64_t object_id);
 H5_DLL herr_t  H5_get_num_subfiles_from_config_file(FILE *config_file, int *n_io_concentrators);
 H5_DLL herr_t  H5_resolve_pathname(const char *filepath, MPI_Comm comm, char **resolved_filepath);
 
+H5_DLL herr_t  H5_subfiling_set_config_prop(H5P_genplist_t                       *plist_ptr,
+                                            const H5FD_subfiling_shared_config_t *vfd_config);
+H5_DLL herr_t  H5_subfiling_get_config_prop(H5P_genplist_t                 *plist_ptr,
+                                            H5FD_subfiling_shared_config_t *vfd_config);
 H5_DLL herr_t  H5_subfiling_set_file_id_prop(H5P_genplist_t *plist_ptr, uint64_t file_id);
 H5_DLL herr_t  H5_subfiling_get_file_id_prop(H5P_genplist_t *plist_ptr, uint64_t *file_id);
 H5_DLL int64_t H5_subfile_fid_to_context(uint64_t file_id);
+
+H5_DLL herr_t H5_subfiling_validate_config(const H5FD_subfiling_shared_config_t *subf_config);
 
 H5_DLL herr_t H5_subfiling_terminate(void);
 
