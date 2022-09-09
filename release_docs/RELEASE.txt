@@ -163,6 +163,15 @@ Bug Fixes since HDF5-1.10.9 release
 ===================================
     Library
     -------
+    - Fixed an issue with attribute type conversion with compound datatypes
+
+      Previously, when performing type conversion for attribute I/O with a
+      compound datatype, the library would not fill the background buffer with
+      the contents of the destination, potentially causing data to be lost when
+      only writing to a subset of the compound fields.
+
+      (NAF - 2022/08/22, GitHub #2016)
+
     - Modified H5Fstart_swmr_write() to preserve DAPL properties
 
       Internally, H5Fstart_swmr_write() closes and reopens the file in question
