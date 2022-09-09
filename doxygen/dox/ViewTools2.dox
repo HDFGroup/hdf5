@@ -551,7 +551,7 @@ In particular, note that:
 and the <code style="background-color:whitesmoke;">-y</code> option suppresses this.
 \li The <code style="background-color:whitesmoke;">-w 50</code> option tells
 <code style="background-color:whitesmoke;">h5dump</code> to allow 50 columns for outputting the data. The
-value specified must be large enough to accomodate the dimension size of the dataset multiplied by the
+value specified must be large enough to accommodate the dimension size of the dataset multiplied by the
 number of positions and spaces needed to print each value. If the value is not large enough, the output
 will wrap to the next line, and the data will not display as expected in Excel or other applications. To
 ensure that the output does not wrap to the next line, you can also specify 0 (zero) for the
