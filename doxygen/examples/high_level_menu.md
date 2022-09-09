@@ -3,27 +3,27 @@
 The high-level HDF5 library includes several sets of convenience and standard-use APIs to 
 facilitate common HDF5 operations.
 
-- @ref H5LT "Lite (H5LT, H5LD)"
+- @ref H5LT
 <br />
 Functions to simplify creating and manipulating datasets, attributes and other features
 
-- @ref H5IM "Image (H5IM)"
+- @ref H5IM
 <br />
 Creating and manipulating HDF5 datasets intended to be interpreted as images
 
-- @ref H5TB "Table (H5TB)"
+- @ref H5TB
 <br />
 Creating and manipulating HDF5 datasets intended to be interpreted as tables
 
-- @ref H5PT "Packet Table (H5PT)"
+- @ref H5PT
 <br />
 Creating and manipulating HDF5 datasets to support append- and read-only operations on table data
 
-- @ref H5DS "Dimension Scale (H5DS)"
+- @ref H5DS
 <br />
 Creating and manipulating HDF5 datasets that are associated with the dimension of another HDF5 dataset
 
-- @ref H5DO "Optimizations (H5DO)"
+- @ref H5DO
 <br />
 Bypassing default HDF5 behavior in order to optimize for specific use cases
 

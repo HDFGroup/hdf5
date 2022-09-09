@@ -35,7 +35,7 @@ extern "C" {
  * @todo Under Construction
  */
 
-/**\defgroup H5DS Dimension Scales
+/**\defgroup H5DS HDF5 Dimension Scales APIs (H5DS)
  *
  * <em>Creating and manipulating HDF5 datasets that are associated with
  * the dimension of another HDF5 dataset (H5DS)</em>

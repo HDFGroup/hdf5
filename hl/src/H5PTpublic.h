@@ -22,7 +22,7 @@ extern "C" {
  * @todo Under Construction
  */
 
-/**\defgroup H5PT Packet Table
+/**\defgroup H5PT HDF5 Packet Table APIs (H5PT)
  *
  * <em>Creating and manipulating HDF5 datasets to support append-
  * and read-only operations on table data (H5PT)</em>

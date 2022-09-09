@@ -285,7 +285,7 @@ These documents provide additional information for the use and tuning of specifi
 </tr>
   <tr style="height: 23.00pt;">
   <td style="width: 234.000pt; border-bottom-style: solid; border-bottom-width: 1px; border-bottom-color: #228a22; vertical-align: top;padding-left: 6.00pt; padding-top: 3.00pt; padding-right: 6.00pt; padding-bottom: 3.00pt;">
-  <p style="font-style: italic; color: #0000ff;"><span><a href="http://www.hdfgroup.org/HDF5/examples/">HDF5 Examples</a></span></p>
+  <p style="font-style: italic; color: #0000ff;"><span>@ref HDF5Examples</span></p>
 </td>
   <td style="width: 198.000pt; border-bottom-style: solid; border-bottom-width: 1px; border-bottom-color: #228a22; vertical-align: top;padding-left: 6.00pt; padding-top: 3.00pt; padding-right: 6.00pt; padding-bottom: 3.00pt;">
   <p>Code examples by API. </p>

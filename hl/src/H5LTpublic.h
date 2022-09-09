@@ -39,7 +39,7 @@ extern "C" {
  * @todo Under Construction
  */
 
-/**\defgroup H5LT Lite
+/**\defgroup H5LT HDF5 Lite APIs (H5LT,H5LD)
  * <em>Functions used to simplify creating and manipulating datasets,
  * attributes and other features (H5LT, H5LD)</em>
  *

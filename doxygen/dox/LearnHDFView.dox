@@ -1,4 +1,8 @@
 /** @page LearnHDFView Learning HDF5 with HDFView
+
+Navigate back: \ref index "Main" / \ref GettingStarted
+<hr>
+
 This tutorial enables you to get a feel for HDF5 by using the HDFView browser. It does NOT require
 any programming experience.
 
@@ -92,11 +96,6 @@ Datatype information as is):
 </td>
 </tr>
 <tr>
-<th>Under Dataspace, Maximum Size
-</th>
-<td>57x57
-</td>
-<tr>
 <th>Layout
 </th>
 <td><em>Contiguous</em> (default)
@@ -104,7 +103,7 @@ Datatype information as is):
 </tr>
 </table>
 </li>
-<li>Left click on the <em>Data</em> group in the tree view to see the <em>Storm</em> dataset in the TableView:
+<li>Click to expand the <em>Data</em> group in the tree view to see the <em>Storm</em> dataset:
 <table>
 <tr>
 <td>
@@ -117,7 +116,7 @@ Datatype information as is):
 <li>Copy the data from the <a href="https://support.hdfgroup.org/ftp/HDF5/examples/files/tutorial/storm1.txt">storm1.txt</a> file into the dataset.
 
 If you downloaded <a href="https://support.hdfgroup.org/ftp/HDF5/examples/files/tutorial/storm1.txt">storm1.txt</a>,
-then right click on the <em>Table</em> menu and select <em>Import Data from Text File</em>.
+then click on the <em>Import/Export Data</em> menu and select <em>Import Data from -> Text File</em>.
 Specify a location, select <a href="https://support.hdfgroup.org/ftp/HDF5/examples/files/tutorial/storm1.txt">storm1.txt</a>
 and click on the <em>Open</em> button. Answer <em>Yes</em> in the dialog box that
 pops up (which asks if you wish to paste the selected data).
@@ -134,7 +133,7 @@ The values will be entered into the spreadsheet.
 </tr>
 </table>
 </li>
-<li>Close the dataset, and save the data.</li>
+<li><em>Table -> Close</em> the dataset, and save the data.</li>
 </ul>
 
 \subsection subsec_learn_hv_topics_image Displaying a Dataset as an Image
@@ -191,15 +190,12 @@ The following illustrates how to add an attribute to the group <em>/Data</em>:
 </th>
 <td>32
 </td>
-<tr>
-<th>Value
-</th>
-<td>3343
-</td>
-</tr>
 </table>
-<li>Select the <em>Ok</em> button. The attribute will show up in the <em>Properties</em> window.</li>
-<li>Close the Properties window.</li>
+<li>Select the <em>Ok</em> button. The attribute will show up under the <em>Object Attribute Info</em> tab.</li>
+<li>Double-click the BatchID attribute line to open the data table for BatchID.</li>
+<li>Click in the first cell and enter <em>3343</em> followed by the enter key.</li>
+<li><em>Table -> Close</em>, answer <em>Yes</em> in the dialog box that
+pops up (which asks if you wish to paste the selected data).</li>
 </ul>
 Adding an attribute to a dataset is very similar to adding an attribute to a group. For example,
 the following adds an attribute to the <em>/Storm</em> dataset:
@@ -226,15 +222,12 @@ these values. (Be sure to add a <em>String Length</em> or the string will be tru
 </th>
 <td>3
 </td>
-<tr>
-<th>Value
-</th>
-<td><em>m/s</em>
-</td>
-</tr>
 </table>
-<li>Select the <em>Ok</em> button. The attribute will be displayed in the window.</li>
-<li>Close the Properties window.
+<li>Select the <em>Ok</em> button. The attribute will show up under the <em>Object Attribute Info</em> tab.</li>
+<li>Double-click the Units attribute line to open the data table for Units.</li>
+<li>Click in the first cell and enter <em>m/s</em> followed by the enter key.</li>
+<li><em>Table -> Close</em>, answer <em>Yes</em> in the dialog box that
+pops up (which asks if you wish to paste the selected data).
 <table>
 <tr>
 <td>
@@ -253,9 +246,9 @@ in the file).
 
 Please note that the chunk sizes used in this topic are for demonstration purposes only. For
 information on chunking and specifying an appropriate chunk size, see the
-<a href="/display/HDF5/Chunking+in+HDF5">Chunking in HDF5</a> documentation.
+<a href="https://confluence.hdfgroup.org/display/HDF5/Chunking+in+HDF5">Chunking in HDF5</a> documentation.
 
-Also see the HDF5 Tutorial topic on <a href="https://portal.hdfgroup.org/display/HDF5/Compressed+Datasets">Creating a Compressed Dataset</a>.
+Also see the HDF5 Tutorial topic on \ref secLBComDsetCreate.
 <ul>
 <li>Right click on storm.h5. Select <em>New -> Group</em>.</li>
 <li>Enter <em>Image</em> for the name of the group, and click the <em>OK</em> button to create the group.
@@ -278,12 +271,6 @@ Also see the HDF5 Tutorial topic on <a href="https://portal.hdfgroup.org/display
 </tr>
 <tr>
 <th>Under Dataspace, Current size
-</th>
-<td>57x57
-</td>
-</tr>
-<tr>
-<th>Under Dataspace, Set Max Size
 </th>
 <td>57x57
 </td>
@@ -332,7 +319,7 @@ You will see the <em>Another Storm</em> dataset in the <em>Image</em> group:
 </li>
 <li>Copy the data from the <a href="https://support.hdfgroup.org/ftp/HDF5/examples/files/tutorial/storm1.txt">storm1.txt</a> file into the dataset. (See the previous topic for copying
 <a href="https://support.hdfgroup.org/ftp/HDF5/examples/files/tutorial/storm1.txt">storm1.txt</a> into a dataset.)</li>
-<li>Close the table, and save the data.</li>
+<li><em>Table -> Close</em>, and save the data.</li>
 <li>Right click on <em>Another Storm</em>, and select <em>Open As</em>.</li>
 <li>Select the <em>Image</em> button in the Dataset Selection window that pops up. Click the <em>Ok</em> button at the
 bottom of the window to view the dataset as an image.
@@ -373,7 +360,7 @@ create an image to begin with, as is shown below.
 </table>
 
 <li>Close the dataset.</li>
-<li>Double left-mouse click on the <em>Data</em> group to see its contents. You will see the <em>Storm Image</em> dataset.
+<li>Expand the <em>Data</em> group to see its contents. You will see the <em>Storm Image</em> dataset.
 <table>
 <tr>
 <td>
@@ -393,17 +380,6 @@ as a spreadsheet.</li>
 </ul>
 </li>
 <li>Left double click on <em>Storm Image</em> to see the image. Close the dataset.</li>
-<li>Right click on <em>Storm Image</em> and select <em>Show Properties</em> from the pop-up menu, to open the Properties
-window. Select the <em>Attributes</em> tab to see the attributes:
-<table>
-<tr>
-<td>
-\image html hdfview-imgprop.png 
-</td>
-</tr>
-</table>
-</li>
-<li>Close the Properties window.</li>
 <li>Right click on <em>Storm Image</em> and select <em>Open As</em> to bring up the Data Selection window.</li>
 <li>Select a subset by clicking the left mouse on the image in the window and dragging the mouse.
 Notice that the Height and Width values change. Select to display it as an image. Click <em>Ok</em>.
@@ -437,7 +413,7 @@ dataspace for the compound dataset is one-dimensional, then the dataset can be v
 HDFView, as is shown below.
 <ul>
 <li>Right button click on the group <em>Data</em>. Select <em>New -> Compound DS</em>.</li>
-<li>A window pops up on the right side of the screen. Only fill in the following fields:
+<li>A window pops up. Only fill in the following fields:
 <table>
 <tr>
 <th>Dataset name
@@ -489,5 +465,8 @@ HDFView, as is shown below.
 </li>
 <li>Close the dataset.</li>
 </ul>
+
+<hr>
+Navigate back: \ref index "Main" / \ref GettingStarted
 
 */
