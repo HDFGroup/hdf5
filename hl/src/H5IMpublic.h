@@ -18,6 +18,10 @@
 extern "C" {
 #endif
 
+/** \page H5IM_UG The HDF5 High Level Images
+ * @todo Under Construction
+ */
+
 /**\defgroup H5IM Images
  *
  * <em>Creating and manipulating HDF5 datasets intended to be

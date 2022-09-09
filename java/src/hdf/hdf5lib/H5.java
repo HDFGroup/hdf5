@@ -245,6 +245,10 @@ import hdf.hdf5lib.structs.H5O_info_t;
  * This code is the called by Java programs to access the entry points of the HDF5 library. Each routine wraps
  * a single HDF5 entry point, generally with the arguments and return codes analogous to the C interface.
  *
+ * @see H5, C-API
+ *
+ * @see @ref H5_UG, User Guide
+ *
  */
 public class H5 implements java.io.Serializable {
     /**
@@ -2476,6 +2480,10 @@ public class H5 implements java.io.Serializable {
     // ////////////////////////////////////////////////////////////
     /**
      * @defgroup JH5D Java Datasets (H5D) Interface
+     *
+     * @see H5D, C-API
+     *
+     * @see @ref H5D_UG, User Guide
      **/
 
     /**
@@ -2486,7 +2494,7 @@ public class H5 implements java.io.Serializable {
      * @param src_did
      *            the identifier of the source dataset
      * @param dst_did
-     *            the identifier of the destinaiton dataset
+     *            the identifier of the destination dataset
      *
      * @return a non-negative value if successful
      *
@@ -4253,6 +4261,10 @@ public class H5 implements java.io.Serializable {
     /**
      *
      * @defgroup JH5E Java Error (H5E) Interface
+     *
+     * @see H5E, C-API
+     *
+     * @see @ref H5E_UG, User Guide
      */
 
     /**
@@ -4671,6 +4683,10 @@ public class H5 implements java.io.Serializable {
     /**
      *
      * @defgroup JH5F Java File (H5F) Interface
+     *
+     * @see H5F, C-API
+     *
+     * @see @ref H5F_UG, User Guide
      */
 
     /**
@@ -5377,6 +5393,10 @@ public class H5 implements java.io.Serializable {
     // ////////////////////////////////////////////////////////////
     /**
      * @defgroup JH5G Java Group (H5G) Interface
+     *
+     * @see H5G, C-API
+     *
+     * @see @ref H5G_UG, User Guide
      **/
 
     /**
@@ -5987,6 +6007,10 @@ public class H5 implements java.io.Serializable {
     // ////////////////////////////////////////////////////////////
     /**
      * @defgroup JH5I Java Identifier (H5I) Interface
+     *
+     * @see H5I, C-API
+     *
+     * @see @ref H5I_UG, User Guide
      **/
 
     /**
@@ -6245,6 +6269,10 @@ public class H5 implements java.io.Serializable {
     // //////////////////////////////////////////////////////////////////
     /**
      * @defgroup JH5L Java Link (H5L) Interface
+     *
+     * @see H5L, C-API
+     *
+     * @see @ref H5L_UG, User Guide
      **/
 
     /**
@@ -6780,6 +6808,10 @@ public class H5 implements java.io.Serializable {
     // ////////////////////////////////////////////////////////////
     /**
      * @defgroup JH5O Java Object (H5O) Interface
+     *
+     * @see H5O, C-API
+     *
+     * @see @ref H5O_UG, User Guide
      **/
 
     /**
@@ -7472,6 +7504,10 @@ public class H5 implements java.io.Serializable {
     // /////// Generic property list routines ///////
     /**
      * @defgroup JH5P Java Property List (H5P) Interface
+     *
+     * @see H5P, C-API
+     *
+     * @see @ref H5P_UG, User Guide
      **/
 
     /**
@@ -10449,7 +10485,7 @@ public class H5 implements java.io.Serializable {
      * @param expression
      *            IN: Pointer to the null-terminated data transform expression
      *
-     * @return a non-negative valule if successful; otherwise returns a negative value.
+     * @return a non-negative value if successful; otherwise returns a negative value.
      *
      * @exception HDF5LibraryException
      *            Error from the HDF5 Library.
@@ -10690,7 +10726,7 @@ public class H5 implements java.io.Serializable {
      * @param crt_intermed_group
      *            IN: Flag specifying whether to create intermediate groups upon the creation of an object
      *
-     * @return a non-negative valule if successful; otherwise returns a negative value.
+     * @return a non-negative value if successful; otherwise returns a negative value.
      *
      * @exception HDF5LibraryException
      *            Error from the HDF5 Library.
@@ -11602,6 +11638,10 @@ public class H5 implements java.io.Serializable {
     // ////////////////////////////////////////////////////////////
     /**
      * @defgroup JH5PL Java Plugin (H5PL) Interface
+     *
+     * @see H5PL, C-API
+     *
+     * @see @ref H5PL_UG, User Guide
      **/
 
     /**
@@ -11755,6 +11795,10 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @defgroup JH5R Java Reference (H5R) Interface
+     *
+     * @see H5R, C-API
+     *
+     * @see @ref H5R_UG, User Guide
      **/
 
     private synchronized static native int H5Rcreate(byte[] ref, long loc_id, String name, int ref_type,
@@ -11973,8 +12017,13 @@ public class H5 implements java.io.Serializable {
     // H5S: Dataspace Interface Functions //
     // //
     // ////////////////////////////////////////////////////////////
+
     /**
      * @defgroup JH5S Java Dataspace (H5S) Interface
+     *
+     * @see H5S, C-API
+     *
+     * @see @ref H5S_UG, User Guide
      **/
 
     /**************** Operations on dataspaces ********************/
@@ -12945,6 +12994,10 @@ public class H5 implements java.io.Serializable {
     // ////////////////////////////////////////////////////////////
     /**
      * @defgroup JH5T Java Datatype (H5T) Interface
+     *
+     * @see H5T, C-API
+     *
+     * @see @ref H5T_UG, User Guide
      **/
 
     /**
@@ -14650,6 +14703,10 @@ public class H5 implements java.io.Serializable {
     // ////////////////////////////////////////////////////////////
     /**
      * @defgroup JH5Z Java Filter (H5Z) Interface
+     *
+     * @see H5Z, C-API
+     *
+     * @see @ref H5Z_UG, User Guide
      **/
 
     /**

@@ -29,6 +29,10 @@
 #define H5_MY_PKG_ERR  H5E_ATOM
 #define H5_MY_PKG_INIT NO
 
+/** \page H5I_UG The HDF5 Identifiers
+ * @todo Under Construction
+ */
+
 /**
  * \defgroup H5I Identifiers (H5I)
  *

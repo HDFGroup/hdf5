@@ -29,6 +29,10 @@
 #define H5_MY_PKG_ERR  H5E_LINK
 #define H5_MY_PKG_INIT YES
 
+/** \page H5L_UG The HDF5 Links
+ * @todo Under Construction
+ */
+
 /**
  * \defgroup H5L Links (H5L)
  *
