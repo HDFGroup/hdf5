@@ -427,6 +427,9 @@ H5Pset_fapl_subfiling(hid_t fapl_id, const H5FD_subfiling_config_t *vfd_config)
 {
     H5FD_subfiling_config_t *subfiling_conf = NULL;
     H5P_genplist_t          *plist          = NULL;
+    H5P_genplist_t          *ioc_plist      = NULL;
+    MPI_Comm                 comm           = MPI_COMM_NULL;
+    MPI_Info                 info           = MPI_INFO_NULL;
     herr_t                   ret_value      = SUCCEED;
 
     /*NO TRACE*/
@@ -452,12 +455,33 @@ H5Pset_fapl_subfiling(hid_t fapl_id, const H5FD_subfiling_config_t *vfd_config)
         vfd_config = subfiling_conf;
     }
 
+    /* Check if any MPI parameters were set on the FAPL */
+    if (H5P_get(plist, H5F_ACS_MPI_PARAMS_COMM_NAME, &comm) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get MPI communicator from plist");
+    if (H5P_get(plist, H5F_ACS_MPI_PARAMS_INFO_NAME, &info) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get MPI info from plist");
+    if (comm == MPI_COMM_NULL)
+        comm = MPI_COMM_WORLD;
+
+    /* Set MPI parameters on IOC FAPL */
+    if (NULL == (ioc_plist = H5P_object_verify(vfd_config->ioc_fapl_id, H5P_FILE_ACCESS)))
+        H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
+    if (H5P_set(ioc_plist, H5F_ACS_MPI_PARAMS_COMM_NAME, &comm) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set MPI communicator on plist");
+    if (H5P_set(ioc_plist, H5F_ACS_MPI_PARAMS_INFO_NAME, &info) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set MPI info on plist");
+
     if (H5FD__subfiling_validate_config(vfd_config) < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid subfiling VFD configuration");
 
     ret_value = H5P_set_driver(plist, H5FD_SUBFILING, vfd_config, NULL);
 
 done:
+    if (H5_mpi_comm_free(&comm) < 0)
+        H5_SUBFILING_DONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free MPI Communicator");
+    if (H5_mpi_info_free(&info) < 0)
+        H5_SUBFILING_DONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't free MPI Info object");
+
     if (subfiling_conf) {
         if (subfiling_conf->ioc_fapl_id >= 0 && H5I_dec_ref(subfiling_conf->ioc_fapl_id) < 0)
             H5_SUBFILING_DONE_ERROR(H5E_PLIST, H5E_CANTDEC, FAIL, "can't close IOC FAPL");
@@ -914,10 +938,10 @@ H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t ma
         H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL,
                                 "invalid driver ID in file access property list");
 
-    if (driver->value != H5_VFD_IOC && driver->value != H5_VFD_SEC2)
-        H5_SUBFILING_GOTO_ERROR(
-            H5E_FILE, H5E_CANTOPENFILE, NULL,
-            "unable to open file '%s' - only IOC and Sec2 VFDs are currently supported for subfiles", name);
+    if (driver->value != H5_VFD_IOC)
+        H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL,
+                                "unable to open file '%s' - only IOC VFD is currently supported for subfiles",
+                                name);
 
     /* Fully resolve the given filepath and get its dirname */
     if (H5_resolve_pathname(name, file_ptr->comm, &file_ptr->file_path) < 0)

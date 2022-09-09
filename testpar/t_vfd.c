@@ -342,7 +342,6 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
             H5FD_ioc_config_t ioc_config = {
                 /* magic            = */ H5FD_IOC_FAPL_MAGIC,
                 /* version          = */ H5FD_IOC_CURR_FAPL_VERSION,
-                /* under_fapl_id    = */ H5P_DEFAULT,
                 /* thread_pool_size = */ H5FD_IOC_DEFAULT_THREAD_POOL_SIZE,
                 /* subf_config      = */ shared_conf,
             };

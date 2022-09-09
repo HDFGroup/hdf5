@@ -101,13 +101,6 @@
  *      number or an error will be raised. Currently, this field should be set
  *      to #H5FD_IOC_CURR_FAPL_VERSION.
  *
- * \var hid_t H5FD_ioc_config_t::under_fapl_id
- *      The File Access Property List which is setup with the file driver
- *      to use for I/O to the HDF5 stub file. The stub file looks like a
- *      typical HDF5 file, but currently only contains the superblock metadata
- *      for compatibility with legacy HDF5 applications. The default driver used
- *      is currently the #H5FD_MPIO driver.
- *
  * \var int32_t H5FD_ioc_config_t::thread_pool_size
  *      The number of I/O concentrator worker threads to use.
  *
@@ -121,11 +114,10 @@
  *
  */
 typedef struct H5FD_ioc_config_t {
-    uint32_t magic;            /* Must be set to H5FD_IOC_FAPL_MAGIC */
-    uint32_t version;          /* Must be set to H5FD_IOC_CURR_FAPL_VERSION */
-    hid_t    under_fapl_id;    /* FAPL setup with the VFD to use for I/O to the HDF5 stub file */
-    int32_t  thread_pool_size; /* Number of I/O concentrator worker threads to use */
-    H5FD_subfiling_shared_config_t subf_config; /* Subfiling driver configuration */
+    uint32_t                       magic;            /* Must be set to H5FD_IOC_FAPL_MAGIC */
+    uint32_t                       version;          /* Must be set to H5FD_IOC_CURR_FAPL_VERSION */
+    int32_t                        thread_pool_size; /* Number of I/O concentrator worker threads to use */
+    H5FD_subfiling_shared_config_t subf_config;      /* Subfiling driver configuration */
 } H5FD_ioc_config_t;
 //! <!-- [H5FD_ioc_config_t_snip] -->
 
