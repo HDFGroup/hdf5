@@ -3361,6 +3361,136 @@ error:
 } /* end test_compound_15() */
 
 /*-------------------------------------------------------------------------
+ * Function:    test_compound_15_attr
+ *
+ * Purpose:     Tests that conversion occurs correctly when the source is
+ *              subset of the destination, but there is extra space at the
+ *              end of the source type. This one tests on attribute while
+ *              test_compound_15() tests on dataset.  That's the only
+ *              difference.
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        number of errors
+ *
+ * Programmer:  Ray Lu
+ *              14 July 2022
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_compound_15_attr(void)
+{
+    typedef struct cmpd_struct {
+        int i1;
+        int i2;
+    } cmpd_struct;
+
+    cmpd_struct wdata1 = {1254, 5471};
+    cmpd_struct rdata;
+    int         wdata2[2]  = {1, 2};
+    hid_t       file       = H5I_INVALID_HID;
+    hid_t       cmpd_m_tid = H5I_INVALID_HID;
+    hid_t       cmpd_f_tid = H5I_INVALID_HID;
+    hid_t       space_id   = H5I_INVALID_HID;
+    hid_t       attr_id    = H5I_INVALID_HID;
+    hsize_t     dim1[1];
+    char        filename[1024];
+
+    TESTING("compound subset conversion with extra space in source for attribute");
+
+    /* Create File */
+    h5_fixname(FILENAME[3], H5P_DEFAULT, filename, sizeof(filename));
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        FAIL_PUTS_ERROR("Can't create file!\n");
+
+    /* Create file compound datatype */
+    if ((cmpd_f_tid = H5Tcreate(H5T_COMPOUND, sizeof(struct cmpd_struct))) < 0)
+        FAIL_PUTS_ERROR("Can't create datatype!\n");
+
+    if (H5Tinsert(cmpd_f_tid, "i1", HOFFSET(struct cmpd_struct, i1), H5T_NATIVE_INT) < 0)
+        FAIL_PUTS_ERROR("Can't insert field 'i1'\n");
+
+    if (H5Tinsert(cmpd_f_tid, "i2", HOFFSET(struct cmpd_struct, i2), H5T_NATIVE_INT) < 0)
+        FAIL_PUTS_ERROR("Can't insert field 'i2'\n");
+
+    /* Create memory compound datatype */
+    if ((cmpd_m_tid = H5Tcreate(H5T_COMPOUND, sizeof(struct cmpd_struct))) < 0)
+        FAIL_PUTS_ERROR("Can't create datatype!\n");
+
+    if (H5Tinsert(cmpd_m_tid, "i1", (size_t)0, H5T_NATIVE_INT) < 0)
+        FAIL_PUTS_ERROR("Can't insert field 'i1'\n");
+
+    /* Create space, dataset, write wdata1 */
+    dim1[0] = 1;
+    if ((space_id = H5Screate_simple(1, dim1, NULL)) < 0)
+        FAIL_PUTS_ERROR("Can't create space\n");
+
+    if ((attr_id = H5Acreate_by_name(file, ".", "attr_cmpd", cmpd_f_tid, space_id, H5P_DEFAULT, H5P_DEFAULT,
+                                     H5P_DEFAULT)) < 0)
+        FAIL_PUTS_ERROR("Can't create attribute\n");
+
+    if (H5Awrite(attr_id, cmpd_f_tid, &wdata1) < 0)
+        FAIL_PUTS_ERROR("Can't write data\n");
+
+    /* Write wdata2.  The use of cmpd_m_tid here should cause only the first
+     * element of wdata2 to be written. */
+    if (H5Awrite(attr_id, cmpd_m_tid, &wdata2) < 0)
+        FAIL_PUTS_ERROR("Can't write data\n");
+
+    /* Read data */
+    if (H5Aread(attr_id, cmpd_f_tid, &rdata) < 0)
+        FAIL_PUTS_ERROR("Can't read data\n");
+
+    /* Check for correctness of read data */
+    if (rdata.i1 != wdata2[0] || rdata.i2 != wdata1.i2)
+        FAIL_PUTS_ERROR("incorrect read data\n");
+
+    /* Now try reading only the i1 field, verify it does not overwrite i2 in the
+     * read buffer */
+    rdata.i1 = wdata1.i1;
+    rdata.i2 = wdata2[1];
+
+    /* Read data */
+    if (H5Aread(attr_id, cmpd_m_tid, &rdata) < 0)
+        FAIL_PUTS_ERROR("Can't read data\n");
+
+    /* Check for correctness of read data */
+    if (rdata.i1 != wdata2[0] || rdata.i2 != wdata2[1])
+        FAIL_PUTS_ERROR("incorrect read data\n");
+
+    /* Close */
+    if (H5Aclose(attr_id) < 0)
+        goto error;
+    if (H5Tclose(cmpd_f_tid) < 0)
+        goto error;
+    if (H5Tclose(cmpd_m_tid) < 0)
+        goto error;
+    if (H5Sclose(space_id) < 0)
+        goto error;
+    if (H5Fclose(file) < 0)
+        goto error;
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Aclose(attr_id);
+        H5Tclose(cmpd_f_tid);
+        H5Tclose(cmpd_m_tid);
+        H5Sclose(space_id);
+        H5Fclose(file);
+    }
+    H5E_END_TRY;
+
+    return 1;
+} /* end test_compound_15_attr() */
+
+/*-------------------------------------------------------------------------
  * Function:    test_compound_16
  *
  * Purpose:     Tests that committed types that can be registered during
@@ -8593,6 +8723,7 @@ main(void)
     nerrors += test_compound_13();
     nerrors += test_compound_14();
     nerrors += test_compound_15();
+    nerrors += test_compound_15_attr();
     nerrors += test_compound_16();
     nerrors += test_compound_17();
     nerrors += test_compound_18();
