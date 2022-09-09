@@ -15,7 +15,7 @@ The following are basic facts about HDF5 files to keep in mind while completing 
 <table>
 <tr>
 <th>Tutorial Topic</th>
-<th>Description</th>
+<th>Descriptionn</th>
 </tr>
 <tr>
 <td>
@@ -192,7 +192,7 @@ The following h5dump options can be helpful in viewing the content and structure
 <table>
 <tr>
 <th>Option</th>
-<th>Descriptio</th>
+<th>Description</th>
 <th>Comment</th>
 </tr>
 <tr>
@@ -325,7 +325,7 @@ file content and structure are:
 <table>
 <tr>
 <th>Option</th>
-<th>Descriptio</th>
+<th>Description</th>
 <th>Comment</th>
 </tr>
 <tr>
@@ -382,7 +382,7 @@ Useful h5dump options for examining specific datasets include:
 <table>
 <tr>
 <th>Option</th>
-<th>Descriptio</th>
+<th>Description</th>
 <th>Comment</th>
 </tr>
 <tr>
@@ -516,7 +516,7 @@ The following options can be used to see detailed information about a dataset.
 <table>
 <tr>
 <th>Option</th>
-<th>Descriptio</th>
+<th>Description</th>
 </tr>
 <tr>
 <td>-v, --verbose
@@ -564,7 +564,7 @@ The <code style="background-color:whitesmoke;">h5dump</code> options that are us
 <table>
 <tr>
 <th>Option</th>
-<th>Descriptio</th>
+<th>Description</th>
 </tr>
 <tr>
 <td>-g G, --group=G
@@ -761,7 +761,7 @@ This can be done with the following <code style="background-color:whitesmoke;">h
 <table>
 <tr>
 <th>Option</th>
-<th>Descriptio</th>
+<th>Description</th>
 </tr>
 <tr>
 <td>-d D, --dataset=D
@@ -893,7 +893,7 @@ You can do that with the following command:
         -s "1,0" -S "2,3" -c "3,3" -k "2,3" -w 0 OMI-Aura.he5
 \endcode
 
-In this case, the stride must be specified as 2 by 3 (or larger) to accomodate the reading of 2 by 3 blocks.
+In this case, the stride must be specified as 2 by 3 (or larger) to accommodate the reading of 2 by 3 blocks.
 If it is smaller, the command will fail with the error,
 \code
 h5dump error: wrong subset selection; blocks overlap.
