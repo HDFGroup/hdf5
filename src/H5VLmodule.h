@@ -53,13 +53,13 @@
  * <table>
  * <tr>
  * <td>
- * \image html V_fig1.gif "The VOL Architecture"
+ * \image html vol_architecture.png "The VOL Architecture"
  * </td>
  * </tr>
  * </table>
  *
  * Not all public HDF5 API calls pass through the VOL. Only calls which require manipulating storage go
- * through the VOL and require a VOL connector authorto implement the appropriate callback. Dataspace,
+ * through the VOL and require a VOL connector author to implement the appropriate callback. Dataspace,
  * property list, error stack, etc. calls have nothing to do with storage manipulation or querying and
  * do not use the VOL. This may be confusing when it comes to property list calls, since many of those
  * calls set properties for storage. Property lists are just collections of key-value pairs, though, so

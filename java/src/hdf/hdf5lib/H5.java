@@ -247,6 +247,10 @@ import hdf.hdf5lib.structs.H5O_token_t;
  * This code is the called by Java programs to access the entry points of the HDF5 library. Each routine wraps
  * a single HDF5 entry point, generally with the arguments and return codes analogous to the C interface.
  *
+ * @see H5, C-API
+ *
+ * @see @ref H5_UG, User Guide
+ *
  */
 public class H5 implements java.io.Serializable {
     /**
@@ -585,6 +589,8 @@ public class H5 implements java.io.Serializable {
         throws HDF5LibraryException;
 
     /**
+     * @ingroup JH5
+     *
      * H5export_attribute is a utility function to save data in a file.
      *
      * @param file_export_name
@@ -2447,6 +2453,10 @@ public class H5 implements java.io.Serializable {
     // ////////////////////////////////////////////////////////////
     /**
      * @defgroup JH5D Java Datasets (H5D) Interface
+     *
+     * @see H5D, C-API
+     *
+     * @see @ref H5D_UG, User Guide
      **/
 
     /**
@@ -4227,6 +4237,10 @@ public class H5 implements java.io.Serializable {
     /**
      *
      * @defgroup JH5E Java Error (H5E) Interface
+     *
+     * @see H5E, C-API
+     *
+     * @see @ref H5E_UG, User Guide
      */
 
     /**
@@ -4645,6 +4659,10 @@ public class H5 implements java.io.Serializable {
     /**
      *
      * @defgroup JH5F Java File (H5F) Interface
+     *
+     * @see H5F, C-API
+     *
+     * @see @ref H5F_UG, User Guide
      */
 
     /**
@@ -5389,6 +5407,10 @@ public class H5 implements java.io.Serializable {
     // ////////////////////////////////////////////////////////////
     /**
      * @defgroup JH5G Java Group (H5G) Interface
+     *
+     * @see H5G, C-API
+     *
+     * @see @ref H5G_UG, User Guide
      **/
 
     /**
@@ -6000,6 +6022,10 @@ public class H5 implements java.io.Serializable {
     // ////////////////////////////////////////////////////////////
     /**
      * @defgroup JH5I Java Identifier (H5I) Interface
+     *
+     * @see H5I, C-API
+     *
+     * @see @ref H5I_UG, User Guide
      **/
 
     /**
@@ -6265,6 +6291,10 @@ public class H5 implements java.io.Serializable {
     // //////////////////////////////////////////////////////////////////
     /**
      * @defgroup JH5L Java Link (H5L) Interface
+     *
+     * @see H5L, C-API
+     *
+     * @see @ref H5L_UG, User Guide
      **/
 
     /**
@@ -6800,6 +6830,10 @@ public class H5 implements java.io.Serializable {
     // ////////////////////////////////////////////////////////////
     /**
      * @defgroup JH5O Java Object (H5O) Interface
+     *
+     * @see H5O, C-API
+     *
+     * @see @ref H5O_UG, User Guide
      **/
 
     /**
@@ -7344,6 +7378,8 @@ public class H5 implements java.io.Serializable {
     public synchronized static native void H5Oincr_refcount(long object_id) throws HDF5LibraryException;
 
     /**
+     * @ingroup JH5O
+     *
      * H5Oopen_by_token opens a group, dataset, or named datatype using its object token within an HDF5 file.
      *
      * @param loc_id
@@ -7665,6 +7701,13 @@ public class H5 implements java.io.Serializable {
     // ////////////////////////////////////////////////////////////
 
     // /////// Generic property list routines ///////
+    /**
+     * @defgroup JH5P Java Property List (H5P) Interface
+     *
+     * @see H5P, C-API
+     *
+     * @see @ref H5P_UG, User Guide
+     **/
 
     /**
      * @ingroup JH5P
@@ -11768,6 +11811,10 @@ public class H5 implements java.io.Serializable {
     // ////////////////////////////////////////////////////////////
     /**
      * @defgroup JH5PL Java Plugin (H5PL) Interface
+     *
+     * @see H5PL, C-API
+     *
+     * @see @ref H5PL_UG, User Guide
      **/
 
     /**
@@ -11921,6 +11968,10 @@ public class H5 implements java.io.Serializable {
 
     /**
      * @defgroup JH5R Java Reference (H5R) Interface
+     *
+     * @see H5R, C-API
+     *
+     * @see @ref H5R_UG, User Guide
      **/
 
     private synchronized static native int H5Rcreate(byte[] ref, long loc_id, String name, int ref_type,
@@ -11956,9 +12007,9 @@ public class H5 implements java.io.Serializable {
     {
         /* These sizes are correct for HDF5.1.2 */
         int ref_size = 8;
-        if (ref_type == HDF5Constants.H5R_DATASET_REGION) {
+        if (ref_type == HDF5Constants.H5R_DATASET_REGION)
             ref_size = 12;
-        }
+
         byte rbuf[] = new byte[ref_size];
 
         /* will raise an exception if fails */
@@ -12025,14 +12076,12 @@ public class H5 implements java.io.Serializable {
      * @return Returns the length of the name if successful, returning 0 (zero) if no name is associated with
      *         the identifier. Otherwise returns a negative value.
      *
-     *
      * @exception HDF5LibraryException
      *            Error from the HDF5 Library.
      * @exception NullPointerException
      *            size is null.
      * @exception IllegalArgumentException
      *            Argument is illegal.
-     *
      **/
     public synchronized static native long H5Rget_name(long loc_id, int ref_type, byte[] ref, String[] name,
                                                        long size)
@@ -12081,9 +12130,9 @@ public class H5 implements java.io.Serializable {
      * @exception HDF5LibraryException
      *            Error from the HDF5 Library.
      * @exception NullPointerException
-     *            array is null.
+     *            an input array is null.
      * @exception IllegalArgumentException
-     *            array is invalid.
+     *            an input array is invalid.
      **/
     public synchronized static native int H5Rget_obj_type(long loc_id, int ref_type, byte ref[])
         throws HDF5LibraryException, NullPointerException, IllegalArgumentException;
@@ -12117,9 +12166,9 @@ public class H5 implements java.io.Serializable {
      * @exception HDF5LibraryException
      *            Error from the HDF5 Library.
      * @exception NullPointerException
-     *            output array is null.
+     *            an input array is null.
      * @exception IllegalArgumentException
-     *            output array is invalid.
+     *            an input array is invalid.
      **/
     public static long H5Rget_region(long loc_id, int ref_type, byte[] ref)
         throws HDF5LibraryException, NullPointerException, IllegalArgumentException
@@ -12523,6 +12572,14 @@ public class H5 implements java.io.Serializable {
     // H5S: Dataspace Interface Functions //
     // //
     // ////////////////////////////////////////////////////////////
+    /**
+     * @defgroup JH5S Java Dataspace (H5S) Interface
+     *
+     * @see H5S, C-API
+     *
+     * @see @ref H5S_UG, User Guide
+     **/
+
     /**
      * @defgroup JH5S Java Dataspace (H5S) Interface
      **/
@@ -13505,6 +13562,14 @@ public class H5 implements java.io.Serializable {
     // H5T: Datatype Interface Functions //
     // //
     // ////////////////////////////////////////////////////////////
+    /**
+     * @defgroup JH5T Java Datatype (H5T) Interface
+     *
+     * @see H5T, C-API
+     *
+     * @see @ref H5T_UG, User Guide
+     **/
+
     /**
      * @defgroup JH5T Java Datatype (H5T) Interface
      **/
@@ -15233,6 +15298,14 @@ public class H5 implements java.io.Serializable {
     // H5VL: VOL Interface Functions //
     // //
     // ////////////////////////////////////////////////////////////
+     /**
+     * @defgroup JH5VL Java VOL Connector (H5VL) Interface
+     *
+     * @see H5VL, C-API
+     *
+     * @see @ref H5VL_UG, User Guide
+     **/
+
     /**
      * @defgroup JH5VL Java VOL Connector (H5VL) Interface
      **/
@@ -15401,6 +15474,10 @@ public class H5 implements java.io.Serializable {
     // ////////////////////////////////////////////////////////////
     /**
      * @defgroup JH5Z Java Filter (H5Z) Interface
+     *
+     * @see H5Z, C-API
+     *
+     * @see @ref H5Z_UG, User Guide
      **/
 
     /**

@@ -31,7 +31,11 @@ typedef herr_t (*H5DS_iterate_t)(hid_t dset, unsigned dim, hid_t scale, void *vi
 extern "C" {
 #endif
 
-/**\defgroup H5DS Dimension Scales
+/** \page H5DS_UG The HDF5 High Level Dimension Scales
+ * @todo Under Construction
+ */
+
+/**\defgroup H5DS HDF5 Dimension Scales APIs (H5DS)
  *
  * <em>Creating and manipulating HDF5 datasets that are associated with
  * the dimension of another HDF5 dataset (H5DS)</em>

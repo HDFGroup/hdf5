@@ -1,0 +1,183 @@
+/** @page LearnBasics Learning the Basics
+
+Navigate back: \ref index "Main" / \ref GettingStarted
+<hr>
+
+\section secIntro Introduction
+The following topics cover the basic features in HDF5. The topics build on each other and are
+intended to be completed in order. Some sections use files created in earlier sections. The
+examples used can also be found on the \ref LBExamples
+page and in the HDF5 source code (C, C++, Fortran).
+
+\section Topics Topics
+\li @subpage LBFileOrg
+\li @subpage LBAPI
+\li @subpage LBProg
+\li @subpage LBFileCreate
+\li @subpage LBDsetCreate
+\li @subpage LBDsetRW
+\li @subpage LBAttrCreate
+\li @subpage LBGrpCreate
+\li @subpage LBGrpCreateNames
+\li @subpage LBGrpDset
+\li @subpage LBDsetSubRW
+\li @subpage LBDatatypes
+\li @subpage LBPropsList
+\li @subpage LBDsetLayout
+\li @subpage LBExtDset
+\li @subpage LBComDset
+\li @subpage LBContents
+\li @subpage LBQuiz
+\li @subpage LBQuizAnswers
+\li @subpage LBCompiling
+\li @subpage LBTraining
+
+<hr>
+Navigate back: \ref index "Main" / \ref GettingStarted
+
+
+@page LBExamples Examples from Learning the Basics
+
+Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
+<hr>
+
+\section secLBExamples
+These examples are used in the \ref LearnBasics topic. See \ref LBCompiling for details on compiling them.
+PLEASE NOTE that the example programs are listed in the order they are expected to be run. Some example
+programs use files created in earlier examples.
+
+\section secLBExamplesSrc HDF5 Source Code Examples
+These examples (C, C++, Fortran) are provided in the HDF5 source code and (Unix) binaries.
+<table>
+<tr>
+<th>Feature
+</th>
+<th>Examples
+</th>
+<th>Comments
+</th>
+<tr>
+<td>Create a file
+</td>
+<td>C  Fortran  C++  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/java/examples/intro/H5_CreateFile.java">Java</a>  Python
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>Create a dataset
+</td>
+<td><a href="https://raw.githubusercontent.com//HDFGroup/hdf5/hdf5_1_10/examples/h5_crtdat.c">C</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/fortran/examples/h5_crtdat.f90">Fortran</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/c++/examples/h5tutr_crtdat.cpp">C++</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/java/examples/intro/H5_CreateDataset.java">Java</a>  <a href="https://support.hdfgroup.org/ftp/HDF5/examples/Py/h5_crtdat.py">Python</a>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>Read and write to a dataset
+</td>
+<td><a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/examples/h5_rdwt.c">C</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/fortran/examples/h5_rdwt.f90">Fortran</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/c++/examples/h5tutr_rdwt.cpp">C++</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/java/examples/intro/H5_ReadWrite.java">Java</a>  <a href="https://support.hdfgroup.org/ftp/HDF5/examples/Py/h5_rdwt.py">Python</a>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>Create an attribute
+</td>
+<td><a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/examples/h5_crtatt.c">C</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/fortran/examples/h5_crtatt.f90">Fortran</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/c++/examples/h5tutr_crtatt.cpp">C++</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/java/examples/intro/H5_CreateAttribute.java">Java</a>  <a href="https://support.hdfgroup.org/ftp/HDF5/examples/Py/h5_crtatt.py">Python</a>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>Create a group
+</td>
+<td><a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/examples/h5_crtgrp.c">C</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/fortran/examples/h5_crtgrp.f90">Fortran</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/c++/examples/h5tutr_crtgrp.cpp">C++</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/java/examples/intro/H5_CreateGroup.java">Java</a>  <a href="https://support.hdfgroup.org/ftp/HDF5/examples/Py/h5_crtgrp.py">Python</a>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>Create groups in a file using absolute and relative paths
+</td>
+<td><a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/examples/h5_crtgrpar.c">C</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/fortran/examples/h5_crtgrpar.f90">Fortran</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/c++/examples/h5tutr_crtgrpar.cpp">C++</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/java/examples/intro/H5_CreateGroupAbsoluteRelative.java">Java</a>  <a href="https://support.hdfgroup.org/ftp/HDF5/examples/Py/h5_crtgrpar.py">Python</a>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>Create datasets in a group
+</td>
+<td><a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/examples/h5_crtgrpd.c">C</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/fortran/examples/h5_crtgrpd.f90">Fortran</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/c++/examples/h5tutr_crtgrpd.cpp">C++</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/java/examples/intro/H5_CreateGroupDataset.java">Java</a>  <a href="https://support.hdfgroup.org/ftp/HDF5/examples/Py/h5_crtgrpd.py">Python</a>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>Create a file and dataset and select/read a subset from the dataset
+</td>
+<td><a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/examples/h5_subset.c">C</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/fortran/examples/h5_subset.f90">Fortran</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/c++/examples/h5tutr_subset.cpp">C++</a>  Java  Python
+</td>
+<td>Also see examples to Write by row (and column) below.
+</td>
+</tr>
+<tr>
+<td>Create an extendible (unlimited dimension) dataset
+</td>
+<td><a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/examples/h5_extend.c">C</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/fortran/examples/h5_extend.f90">Fortran</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/c++/examples/h5tutr_extend.cpp">C++</a>  Java  Python
+</td>
+<td>Also see examples to Extend by row (and column) below
+</td>
+</tr>
+<tr>
+<td>Create a chunked and compressed dataset
+</td>
+<td><a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/examples/h5_cmprss.c">C</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/fortran/examples/h5_cmprss.f90">Fortran</a>  <a href="https://raw.githubusercontent.com/HDFGroup/hdf5/hdf5_1_10/c++/examples/h5tutr_cmprss.cpp">C++</a>  Java  <a href="https://support.hdfgroup.org/ftp/HDF5/examples/Py/h5_cmprss.py">Python</a>
+</td>
+<td>
+</td>
+</tr>
+</table>
+
+*See <a href="https://github.com/scotmartin1234/HDF5Mathematica">HDF5Mathematica</a> for user-contributed
+HDF5 Mathematica Wrappers and Introductory Tutorial Examples. The examples use P/Invoke.
+
+\section secLBExamplesAddl Additional Examples
+These examples make minor changes to the tutorial examples.
+<table>
+<tr>
+<th>Feature
+</th>
+<th>Examples
+</th>
+</tr>
+<tr>
+<td>Write by row
+</td>
+<td><a href="">C</a>  <a href="">Fortran</a>
+</td>
+</tr>
+<tr>
+<td>Write by column
+</td>
+<td><a href="">C</a>  <a href="">Fortran</a>
+</td>
+</tr>
+<tr>
+<td>Extend by row
+</td>
+<td><a href="">C</a>  <a href="">Fortran</a>
+</td>
+</tr>
+<tr>
+<td>Extend by column
+</td>
+<td><a href="">C</a>  <a href="">Fortran</a>
+</td>
+</tr>
+</table>
+
+
+<hr>
+Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
+
+*/

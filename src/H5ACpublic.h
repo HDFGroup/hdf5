@@ -563,7 +563,7 @@ typedef struct H5AC_cache_config_t {
      * The value must lie in the interval [0.0, 1.0]. 0.01 is a good place to
      * start in the serial case. In the parallel case, a larger value is needed
      * -- see the overview of the metadata cache in the
-     * “Metadata Caching in HDF5” section of the -- <em>HDF5 User’s Guide</em>
+     * “Metadata Caching in HDF5” section of the -- <em>\ref UG</em>
      * for details. */
 
     size_t max_size;
