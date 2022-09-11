@@ -1313,7 +1313,7 @@ CONTAINS
 !!
 !! \param attr_id     Identifier of an attribute to write.
 !! \param memtype_id  Identifier of the attribute datatype (in memory).
-!! \param buf	      Data buffer; may be a scalar or an array.
+!! \param buf         Data buffer; may be a scalar or an array.
 !! \param dims        Array to hold corresponding dimension sizes of data buffer buf;
 !!                    dim(k) has value of the k-th dimension of buffer buf; values are ignored if buf is a scalar.
 !! \param hdferr      \fortran_error
@@ -1353,8 +1353,8 @@ CONTAINS
 !!
 !! \param attr_id     Identifier of an attribute to read.
 !! \param memtype_id  Identifier of the attribute datatype (in memory).
-!! \param buf	      Buffer for data to be read.
-!! \param dims	      Array to hold corresponding dimension sizes of data buffer buf;
+!! \param buf         Buffer for data to be read.
+!! \param dims        Array to hold corresponding dimension sizes of data buffer buf;
 !!                    dim(k) has value of the k-th dimension of buffer buf; values are ignored if buf is a scalar.
 !! \param hdferr      \fortran_error
 !!

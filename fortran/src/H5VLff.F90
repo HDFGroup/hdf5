@@ -1,4 +1,4 @@
-!> @defgroup FH5VL Fortran Datatype (H5VL) Interface
+!> @defgroup FH5VL Fortran VOL (H5VL) Interface
 !!
 !! @see H5VL, C-API
 !!

@@ -1,6 +1,6 @@
-!> @defgroup FH5LT Fortran High-level H5LT Interface
+!> @defgroup FH5LT Fortran High Level Lite (H5LT) Interface
 !!
-!! @see H5LT, C-API
+!! @see H5LT, C-HL API
 !!
 !! @see @ref H5LT_UG, User Guide
 !!
@@ -98,7 +98,7 @@ MODULE H5LT_CONST
        CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: attr_name ! name of the attribute
        INTEGER(size_t),  INTENT(in) :: size                          ! size of attribute array
        TYPE(C_PTR), VALUE :: buf                                     ! data buffer
-       CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dtype     ! flag indicating the datatype of the the buffer:
+       CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dtype     ! flag indicating the datatype of the buffer:
                                                                      ! R=Real, D=DOUBLE, I=Integer, C=Character
        INTEGER(size_t) :: SizeOf_buf                                 ! Sizeof the buf datatype
      END FUNCTION h5ltset_attribute_c
@@ -116,7 +116,7 @@ MODULE H5LT_CONST
        CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name ! name of the dataset
        CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: attr_name ! name of the attribute
        TYPE(C_PTR), VALUE :: buf                                     ! data buffer
-       CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dtype     ! flag indicating the datatype of the the buffer:
+       CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dtype     ! flag indicating the datatype of the buffer:
                                                                      ! R=Real, D=DOUBLE, I=Integer
        INTEGER(size_t), INTENT(in) :: SizeOf_buf                     ! Sizeof the buf data type
      END FUNCTION h5ltget_attribute_c
@@ -291,7 +291,7 @@ CONTAINS
     INTEGER,          INTENT(in) :: rank
     INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims
     INTEGER(hid_t),   INTENT(in) :: type_id
-    INTEGER :: errcode 
+    INTEGER :: errcode
     INTEGER(size_t) :: namelen ! name length
     INTEGER, INTENT(in), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4)), TARGET :: buf ! data buffer
@@ -335,7 +335,7 @@ CONTAINS
     INTEGER,          INTENT(in) :: rank
     INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims
     INTEGER(hid_t),   INTENT(in) :: type_id
-    INTEGER :: errcode 
+    INTEGER :: errcode
     INTEGER(size_t) :: namelen ! name length
     INTEGER, INTENT(in), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)), TARGET :: buf ! data buffer
@@ -377,7 +377,7 @@ CONTAINS
   !!
   !! \brief Reads a dataset of a type \p type_id.
   !!
-  !! \note \fortran_approved 
+  !! \note \fortran_approved
   !!
   !! \param loc_id    Location identifier. The identifier may be that of a file or group.
   !! \param dset_name The name of the dataset to create.
@@ -881,7 +881,7 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id
     CHARACTER(LEN=*), INTENT(in) :: dset_name
     INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims
-    INTEGER :: errcode 
+    INTEGER :: errcode
     INTEGER(size_t) :: namelen ! name length
     INTEGER, INTENT(inout), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)), TARGET :: buf
@@ -1039,7 +1039,7 @@ CONTAINS
   !>
   !! \ingroup FH5LT
   !!
-  !! \brief Creates and writes an attribute and is a generic replacement for data type specific 
+  !! \brief Creates and writes an attribute and is a generic replacement for data type specific
   !!        Fortran h5ltset_attribute_*_f APIs. There is no C equivalent API.
   !!
   !! \note  \fortran_approved
@@ -1105,7 +1105,7 @@ CONTAINS
   !! \param obj_name  The name of the object to attach the attribute.
   !! \param attr_name The attribute name.
   !! \param buf       Buffer with data to be written to the attribute.
-  !! \param size      The size of the 1D array (one in the case of a scalar attribute). 
+  !! \param size      The size of the 1D array (one in the case of a scalar attribute).
   !!                  This value is used by H5Screate_simple() to create the dataspace.
   !! \param errcode   \fortran_error
   !!
@@ -1154,7 +1154,7 @@ CONTAINS
   !! \param obj_name  The name of the object to attach the attribute.
   !! \param attr_name The attribute name.
   !! \param buf       Buffer with data to be written to the attribute.
-  !! \param size      The size of the 1D array (one in the case of a scalar attribute). 
+  !! \param size      The size of the 1D array (one in the case of a scalar attribute).
   !!                  This value is used by H5Screate_simple() to create the dataspace.
   !! \param errcode   \fortran_error
   !!
@@ -1202,7 +1202,7 @@ CONTAINS
   !! \param obj_name  The name of the object to attach the attribute.
   !! \param attr_name The attribute name.
   !! \param buf       Buffer with data to be written to the attribute.
-  !! \param size      The size of the 1D array (one in the case of a scalar attribute). 
+  !! \param size      The size of the 1D array (one in the case of a scalar attribute).
   !!                  This value is used by H5Screate_simple() to create the dataspace.
   !! \param errcode   \fortran_error
   !!
@@ -1601,7 +1601,7 @@ CONTAINS
   !>
   !! \ingroup FH5LT
   !!
-  !! \brief Retrieves information about a dataset. 
+  !! \brief Retrieves information about a dataset.
   !!
   !! \param loc_id     Identifier of the object to locate the dataset within.
   !! \param dset_name  The dataset name.
@@ -1633,7 +1633,7 @@ CONTAINS
          IMPORT :: HID_T, SIZE_T, HSIZE_T
          IMPLICIT NONE
          INTEGER(hid_t),   INTENT(in) :: loc_id
-         INTEGER(size_t) :: namelen 
+         INTEGER(size_t) :: namelen
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name
          INTEGER(hsize_t),DIMENSION(*),INTENT(inout):: dims
          INTEGER, INTENT(inout)         :: type_class
@@ -1759,7 +1759,7 @@ CONTAINS
   !! \brief Determines whether an HDF5 path is valid and, optionally, whether the path resolves to an HDF5 object.
   !!
   !! \param loc_id              Identifier of an object in the file.
-  !! \param path                The path to the object to check; links in path may be of any type. 
+  !! \param path                The path to the object to check; links in path may be of any type.
   !! \param check_object_valid	Indicates whether to check if the final component of the path resolves to a valid object.
   !! \param path_valid          Object status.
   !! \param errcode             \fortran_error

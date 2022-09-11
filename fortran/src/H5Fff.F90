@@ -4,6 +4,10 @@
 !!
 !! @see @ref H5F_UG, User Guide
 !!
+
+!> @ingroup FH5F
+!!
+!! @brief This module contains Fortran interfaces for H5F functions.
 !
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -628,7 +632,7 @@ CONTAINS
 !! \param file_id  Target file identifier.
 !! \param buf_ptr  Pointer to the buffer into which the image of the HDF5 file is to be copied.
 !! \param buf_len  Size of the supplied buffer.
-!! \param hdferr   Error code: 0 on success and -1 on failure.
+!! \param hdferr   \fortran_error
 !! \param buf_size Returns the size in bytes of the buffer required to store the file image, no data will be copied.
 !!
   SUBROUTINE h5fget_file_image_f(file_id, buf_ptr, buf_len, hdferr, buf_size)
@@ -673,7 +677,7 @@ CONTAINS
 !!
 !! \param file_id  Target file identifier.
 !! \param minimize Value of the setting.
-!! \param hdferr   Error code: 0 on success and -1 on failure.
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5fget_dset_no_attrs_hint_f(file_id, minimize, hdferr)
     IMPLICIT NONE
@@ -706,7 +710,7 @@ CONTAINS
 !!
 !! \param file_id  Target file identifier.
 !! \param minimize Value of the setting.
-!! \param hdferr   Error code: 0 on success and -1 on failure.
+!! \param hdferr   \fortran_error
 !!
   SUBROUTINE h5fset_dset_no_attrs_hint_f(file_id, minimize, hdferr)
     IMPLICIT NONE

@@ -210,15 +210,15 @@ CONTAINS
 !!
 !! \brief Creates a dataset at the specified location.
 !!
-!! \param loc_id   File or group identifier.
-!! \param name     Dataset name.
-!! \param type_id  Dataset datatype identifier.
-!! \param space_id Dataset dataspace identifier.
-!! \param dset_id  Dataset identifier.
+!! \param loc_id   File or group identifier
+!! \param name     Dataset name
+!! \param type_id  Dataset datatype identifier
+!! \param space_id Dataset dataspace identifier
+!! \param dset_id  Dataset identifier
 !! \param hdferr   \fortran_error
-!! \param dcpl_id  Dataset creation property list.
-!! \param lcpl_id  Link creation property list.
-!! \param dapl_id  Dataset access property list.
+!! \param dcpl_id  Dataset creation property list
+!! \param lcpl_id  Link creation property list
+!! \param dapl_id  Dataset access property list
 !!
   SUBROUTINE h5dcreate_f(loc_id, name, type_id, space_id, dset_id, &
        hdferr, dcpl_id, lcpl_id, dapl_id)
@@ -279,11 +279,11 @@ CONTAINS
 !!
 !! \brief Opens an existing dataset.
 !!
-!! \param loc_id  File or group identifier.
-!! \param name    Dataset name.
-!! \param dset_id Dataset identifier.
+!! \param loc_id  File or group identifier
+!! \param name    Dataset name
+!! \param dset_id Dataset identifier
 !! \param hdferr  \fortran_error
-!! \param dapl_id Dataset access property list.
+!! \param dapl_id Dataset access property list
 !!
   SUBROUTINE h5dopen_f(loc_id, name, dset_id, hdferr, dapl_id)
     IMPLICIT NONE
@@ -323,7 +323,7 @@ CONTAINS
 !!
 !! \brief Closes a dataset.
 !!
-!! \param dset_id Dataset identifier.
+!! \param dset_id Dataset identifier
 !! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5dclose_f(dset_id, hdferr)
@@ -349,8 +349,8 @@ CONTAINS
 !! \brief Returns an identifier for a copy of the datatype for a
 !!       dataset.
 !!
-!! \param dataset_id  Dataset identifier.
-!! \param datatype_id Dataspace identifier.
+!! \param dataset_id  Dataset identifier
+!! \param datatype_id Dataspace identifier
 !! \param hdferr      \fortran_error
 !!
   SUBROUTINE h5dget_type_f(dataset_id, datatype_id, hdferr)
@@ -376,8 +376,8 @@ CONTAINS
 !!
 !! \brief Extends a dataset with unlimited dimension.
 !!
-!! \param dataset_id Dataset identifier.
-!! \param size       Array containing the new magnitude of each dimension.
+!! \param dataset_id Dataset identifier
+!! \param size       Array containing the new magnitude of each dimension
 !! \param hdferr     \fortran_error
 !!
   SUBROUTINE h5dset_extent_f(dataset_id, size, hdferr)
@@ -403,8 +403,8 @@ CONTAINS
 !!
 !! \brief Returns an identifier for a copy of the dataset creation property list for a dataset.
 !!
-!! \param dataset_id Dataset identifier.
-!! \param plist_id   Creation property list identifier.
+!! \param dataset_id Dataset identifier
+!! \param plist_id   Creation property list identifier
 !! \param hdferr     \fortran_error
 !!
   SUBROUTINE h5dget_create_plist_f(dataset_id, plist_id, hdferr)
@@ -429,8 +429,8 @@ CONTAINS
 !!
 !! \brief Returns the amount of storage requires by a dataset
 !!
-!! \param dataset_id Dataset identifier.
-!! \param size       Datastorage size.
+!! \param dataset_id Dataset identifier
+!! \param size       Datastorage size
 !! \param hdferr     \fortran_error
 !!
   SUBROUTINE h5dget_storage_size_f(dataset_id, size, hdferr)
@@ -455,10 +455,10 @@ CONTAINS
 !!
 !! \brief Returns maximum length of the VL array elements
 !!
-!! \param dataset_id Dataset identifier.
-!! \param type_id    Datatype identifier.
-!! \param space_id   Dataspace identifier.
-!! \param len        Buffer size.
+!! \param dataset_id Dataset identifier
+!! \param type_id    Datatype identifier
+!! \param space_id   Dataspace identifier
+!! \param len        Buffer size
 !! \param hdferr     \fortran_error
 !!
   SUBROUTINE h5dvlen_get_max_len_f(dataset_id, type_id, space_id, len,  hdferr)
@@ -487,7 +487,7 @@ CONTAINS
 !!
 !! \brief Returns the status of data space allocation.
 !!
-!! \param dset_id Dataset identifier.
+!! \param dset_id Dataset identifier
 !! \param flag    Status; may have one of the following values:
 !!                \li H5D_SPACE_STS_ERROR_F
 !!                \li H5D_SPACE_STS_NOT_ALLOCATED_F

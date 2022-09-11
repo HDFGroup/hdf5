@@ -1,0 +1,1159 @@
+/** @page LBGrpCreate Creating an Group
+Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
+<hr>
+
+\section secLBGrpCreate Creating an group
+An HDF5 group is a structure containing zero or more HDF5 objects. The two primary HDF5 objects are groups and datasets. To create a group, the calling program must:
+<ol>
+<li>Obtain the location identifier where the group is to be created.</li>
+<li>Create the group.</li>
+<li>Close the group.</li>
+</ol>
+
+To create a group, the calling program must call #H5Gcreate.
+To close the group, #H5Gclose must be called. The close call is mandatory.
+
+For example:
+
+<em>C</em>
+\code
+  group_id = H5Gcreate(file_id, "/MyGroup", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  status = H5Gclose (group_id);
+\endcode
+
+<em>Fortran</em>
+\code
+  CALL h5gcreate_f (loc_id, name, group_id, error)
+  CALL h5gclose_f (group_id, error)
+\endcode
+
+\section secLBGrpCreateRWEx Programming Example
+
+\subsection secLBGrpCreateRWExDesc Description
+See \ref LBExamples for the examples used in the \ref LearnBasics tutorial.
+
+The example shows how to create and close a group. It creates a file called <code style="background-color:whitesmoke;">group.h5</code> in C
+(<code style="background-color:whitesmoke;">groupf.h5</code> for FORTRAN), creates a group called MyGroup in the root group, and then closes the group and file.
+
+For details on compiling an HDF5 application:
+[ \ref LBCompiling ]
+
+\subsection secLBGrpCreateRWExCont File Contents
+
+Shown below is the contents and the definition of the group of <code style="background-color:whitesmoke;">group.h5</code> (created by the C program).
+(The FORTRAN program creates the HDF5 file <code style="background-color:whitesmoke;">groupf.h5</code> and the resulting DDL shows the filename
+<code style="background-color:whitesmoke;">groupf.h5</code> in the first line.)
+<table>
+<caption>The Contents of group.h5.</caption>
+<tr>
+<td>
+\image html imggrpcreate.gif
+</td>
+</tr>
+</table>
+
+<em>group.h5 in DDL</em>
+\code
+HDF5 "group.h5" {
+GROUP "/" {
+   GROUP "MyGroup" {
+   }
+}
+}
+\endcode
+
+<hr>
+Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
+
+@page LBGrpCreateNames Creating Groups using Absolute and Relative Names
+Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
+<hr>
+
+Recall that to create an HDF5 object, we have to specify the location where the object is to be created.
+This location is determined by the identifier of an HDF5 object and the name of the object to be created.
+The name of the created object can be either an absolute name or a name relative to the specified identifier.
+In the previous example, we used the file identifier and the absolute name <code style="background-color:whitesmoke;">/MyGroup</code> to create a group.
+
+In this section, we discuss HDF5 names and show how to use absolute and relative names.
+
+\section secLBGrpCreateNames Names
+HDF5 object names are a slash-separated list of components. There are few restrictions on names: component
+names may be any length except zero and may contain any character except slash (<code style="background-color:whitesmoke;">/</code>) and the null terminator.
+A full name may be composed of any number of component names separated by slashes, with any of the component
+names being the special name <code style="background-color:whitesmoke;">.</code> (a dot or period). A name which begins with a slash is an <em>absolute name</em> which
+is accessed beginning with the root group of the file; all other names are <em>relative names</em> and and the named
+object is accessed beginning with the specified group. A special case is the name <code style="background-color:whitesmoke;">/</code> (or equivalent) which
+refers to the root group.
+
+Functions which operate on names generally take a location identifier, which can be either a file identifier
+or a group identifier, and perform the lookup with respect to that location. Several possibilities are
+described in the following table:
+
+<table>
+<tr>
+<th><strong>Location Type</strong></th>
+<th><strong>Object Name</strong></th>
+<th><strong>Description</strong></th>
+</tr>
+<tr>
+<th><strong>File identifier</strong></th>
+<td>/foo/bar</td>
+<td>The object bar in group foo in the root group.</td>
+</tr>
+<tr>
+<th><strong>Group identifier</strong></th>
+<td>/foo/bar</td>
+<td>The object bar in group foo in the root group of the file containing the specified group.
+In other words, the group identifier's only purpose is to specify a file.</td>
+</tr>
+<tr>
+<th><strong>File identifier</strong></th>
+<td>/</td>
+<td>The root group of the specified file.</td>
+</tr>
+<tr>
+<th><strong>Group identifier</strong></th>
+<td>/</td>
+<td>The root group of the file containing the specified group.</td>
+</tr>
+<tr>
+<th><strong>Group identifier</strong></th>
+<td>foo/bar</td>
+<td>The object bar in group foo in the specified group.</td>
+</tr>
+<tr>
+<th><strong>File identifier</strong></th>
+<td>.</td>
+<td>The root group of the file.</td>
+</tr>
+<tr>
+<th><strong>Group identifier</strong></th>
+<td>.</td>
+<td>The specified group.</td>
+</tr>
+<tr>
+<th><strong>Other identifier</strong></th>
+<td>.</td>
+<td>The specified object.</td>
+</tr>
+</table>
+
+\section secLBGrpCreateNamesEx Programming Example
+
+\subsection secLBGrpCreateNamesExDesc Description
+See \ref LBExamples for the examples used in the \ref LearnBasics tutorial.
+
+The example code shows how to create groups using absolute and relative names. It creates three groups: the first two groups are created using
+the file identifier and the group absolute names while the third group is created using a group identifier and a name relative to the specified group.
+
+For details on compiling an HDF5 application:
+[ \ref LBCompiling ]
+
+\subsection secLBGrpCreateNamesExRem Remarks
+#H5Gcreate creates a group at the location specified by a location identifier and a name. The location identifier
+can be a file identifier or a group identifier and the name can be relative or absolute.
+
+The first #H5Gcreate/h5gcreate_f creates the group <code style="background-color:whitesmoke;">MyGroup</code> in the root group of the specified file.
+
+The second #H5Gcreate/h5gcreate_f creates the group <code style="background-color:whitesmoke;">Group_A</code> in the group <code style="background-color:whitesmoke;">MyGroup</code> in the root group of the specified
+file. Note that the parent group (<code style="background-color:whitesmoke;">MyGroup</code>) already exists.
+
+The third #H5Gcreate/h5gcreate_f creates the group <code style="background-color:whitesmoke;">Group_B</code> in the specified group.
+
+\subsection secLBGrpCreateNamesExCont File Contents
+
+Shown below is the contents and the definition of the group of <code style="background-color:whitesmoke;">groups.h5</code> (created by the C program).
+(The FORTRAN program creates the HDF5 file <code style="background-color:whitesmoke;">groupsf.h5</code> and the resulting DDL shows the filename
+<code style="background-color:whitesmoke;">groupsf.h5</code> in the first line.)
+<table>
+<caption>The Contents of groups.h5.</caption>
+<tr>
+<td>
+\image html imggrps.gif
+</td>
+</tr>
+</table>
+
+<em>groups.h5 in DDL</em>
+\code
+HDF5 "groups.h5" {
+GROUP "/" {
+ GROUP "MyGroup" {
+    GROUP "Group_A" {
+    }
+    GROUP "Group_B" {
+    }
+ }
+}
+}
+\endcode
+
+<hr>
+Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
+
+@page LBGrpDset Creating Datasets in Groups
+Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
+<hr>
+
+\section secLBGrpDset Datasets in Groups
+We have shown how to create groups, datasets, and attributes. In this section, we show how to create
+datasets in groups. Recall that #H5Dcreate creates a dataset at the location specified by a location
+identifier and a name. Similar to #H5Gcreate, the location identifier can be a file identifier or a
+group identifier and the name can be relative or absolute. The location identifier and the name
+together determine the location where the dataset is to be created. If the location identifier and
+name refer to a group, then the dataset is created in that group.
+
+\section secLBGrpDsetEx Programming Example
+
+\subsection secLBGrpDsetExDesc Description
+See \ref LBExamples for the examples used in the \ref LearnBasics tutorial.
+
+The example shows how to create a dataset in a particular group. It opens the file created in the previous example and creates two datasets:
+
+For details on compiling an HDF5 application:
+[ \ref LBCompiling ]
+
+\subsection secLBGrpDsetExCont File Contents
+
+Shown below is the contents and the definition of the group of <code style="background-color:whitesmoke;">groups.h5</code> (created by the C program).
+(The FORTRAN program creates the HDF5 file <code style="background-color:whitesmoke;">groupsf.h5</code> and the resulting DDL shows the filename
+<code style="background-color:whitesmoke;">groupsf.h5</code> in the first line.)
+<table>
+<caption>The contents of the file groups.h5 (groupsf.h5 for FORTRAN)</caption>
+<tr>
+<td>
+\image html imggrpdsets.gif
+</td>
+</tr>
+</table>
+
+<em>groups.h5 in DDL</em>
+\code
+HDF5 "groups.h5" {
+GROUP "/" {
+GROUP "MyGroup" {
+GROUP "Group_A" {
+ DATASET "dset2" {
+    DATATYPE { H5T_STD_I32BE }
+    DATASPACE { SIMPLE ( 2, 10 ) / ( 2, 10 ) }
+    DATA {
+       1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+       1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+    }
+ }
+}
+GROUP "Group_B" {
+}
+DATASET "dset1" {
+ DATATYPE { H5T_STD_I32BE }
+ DATASPACE { SIMPLE ( 3, 3 ) / ( 3, 3 ) }
+ DATA {
+    1, 2, 3,
+    1, 2, 3,
+    1, 2, 3
+ }
+}
+}
+}
+}
+\endcode
+
+<em>groupsf.h5 in DDL</em>
+\code
+HDF5 "groupsf.h5" {
+GROUP "/" {
+GROUP "MyGroup" {
+GROUP "Group_A" {
+ DATASET "dset2" {
+    DATATYPE { H5T_STD_I32BE }
+    DATASPACE { SIMPLE ( 10, 2 ) / ( 10, 2 ) }
+    DATA {
+       1, 1,
+       2, 2,
+       3, 3,
+       4, 4,
+       5, 5,
+       6, 6,
+       7, 7,
+       8, 8,
+       9, 9,
+       10, 10
+    }
+ }
+}
+GROUP "Group_B" {
+}
+DATASET "dset1" {
+ DATATYPE { H5T_STD_I32BE }
+ DATASPACE { SIMPLE ( 3, 3 ) / ( 3, 3 ) }
+ DATA {
+    1, 1, 1,
+    2, 2, 2,
+    3, 3, 3
+ }
+}
+}
+}
+}
+\endcode
+
+<hr>
+Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
+
+@page LBDsetSubRW Reading From or Writing To a Subset of a Dataset
+Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
+<hr>
+
+\section secLBDsetSubRW Dataset Subsets
+There are two ways that you can select a subset in an HDF5 dataset and read or write to it:
+<ul><li>
+<strong>Hyperslab Selection</strong>:  The #H5Sselect_hyperslab call selects a logically contiguous
+collection of points in a dataspace, or a regular pattern of points or blocks in a dataspace.
+</li><li>
+<strong>Element Selection</strong>: The #H5Sselect_elements call selects elements in an array.
+</li></ul>
+
+HDF5 allows you to read from or write to a portion or subset of a dataset by:
+\li Selecting a Subset of the Dataset's Dataspace,
+\li Selecting a Memory Dataspace,
+\li Reading From or Writing to a Dataset Subset.
+
+\section secLBDsetSubRWSel Selecting a Subset of the Dataset's Dataspace
+First you must obtain the dataspace of a dataset in a file by calling #H5Dget_space.
+
+Then select a subset of that dataspace by calling #H5Sselect_hyperslab. The <em>offset</em>, <em>count</em>, <em>stride</em>
+and <em>block</em> parameters of this API define the shape and size of the selection. They must be arrays
+with the same number of dimensions as the rank of the dataset's dataspace. These arrays <strong>ALL</strong> work
+together to define a selection. A change to one of these arrays can affect the others.
+\li \em offset: An array that specifies the offset of the starting element of the specified hyperslab.
+\li \em count: An array that determines how many blocks to select from the dataspace in each dimension. If the block
+size for a dimension is one then the count is the number of elements along that dimension.
+\li \em stride: An array that allows you to sample elements along a dimension. For example, a stride of one (or NULL)
+will select every element along a dimension, a stride of two will select every other element, and a stride of three
+will select an element after every two elements.
+\li \em block: An array that determines the size of the element block selected from a dataspace. If the block size
+is one or NULL then the block size is a single element in that dimension.
+
+\section secLBDsetSubRWMem Selecting a Memory Dataspace
+You must select a memory dataspace in addition to a file dataspace before you can read a subset from or write a subset
+to a dataset. A memory dataspace can be specified by calling #H5Screate_simple.
+
+The memory dataspace passed to the read or write call must contain the same number of elements as the file dataspace.
+The number of elements in a dataspace selection can be determined with the #H5Sget_select_npoints API.
+
+\section secLBDsetSubRWSub Reading From or Writing To a Dataset Subset
+To read from or write to a dataset subset, the #H5Dread and #H5Dwrite routines are used. The memory and file dataspace
+identifiers from the selections that were made are passed into the read or write call. For example (C):
+\code
+    status = H5Dwrite (.., .., memspace_id, dataspace_id, .., ..);
+\endcode
+
+\section secLBDsetSubRWProg Programming Example
+
+\subsection subsecLBDsetSubRWProgDesc Description
+See \ref LBExamples for the examples used in the \ref LearnBasics tutorial.
+
+The example creates an 8 x 10 integer dataset in an HDF5 file. It then selects and writes to a 3 x 4 subset
+of the dataset created with the dimensions offset by 1 x 2. (If using Fortran, the dimensions will be swapped.
+The dataset will be 10 x 8, the subset will be 4 x 3, and the offset will be 2 x 1.)
+
+PLEASE NOTE that the examples and images below were created using C.
+
+The following image shows the dataset that gets written originally, and the subset of data that gets modified
+afterwards. Dimension 0 is vertical and Dimension 1 is horizontal as shown below:
+<table>
+<tr>
+<td>
+\image html LBDsetSubRWProg.png
+</td>
+</tr>
+</table>
+
+The subset on the right above is created using these values for offset, count stride, and block:
+\code
+offset = {1, 2}
+
+count = {3, 4}
+
+stride = {1, 1}
+
+block = {1, 1}
+\endcode
+
+\subsection subsecLBDsetSubRWProgExper Experiments with Different Selections
+Following are examples of changes that can be made to the example code provided to better understand
+how to make selections.
+
+\subsubsection subsubsecLBDsetSubRWProgExperOne Example 1
+By default the example code will select and write to a 3 x 4 subset. You can modify the count
+parameter in the example code to select a different subset, by changing the value of
+DIM0_SUB (C, C++) / dim0_sub (Fortran) near the top. Change its value to 7 to create a 7 x 4 subset:
+<table>
+<tr>
+<td>
+\image html imgLBDsetSubRW11.png
+</td>
+</tr>
+</table>
+
+If you were to change the subset to 8 x 4, the selection would be beyond the extent of the dimension:
+<table>
+<tr>
+<td>
+\image html imgLBDsetSubRW12.png
+</td>
+</tr>
+</table>
+
+The write will fail with the error: "<strong>file selection+offset not within extent</strong>"
+
+\subsubsection subsubsecLBDsetSubRWProgExperTwo Example 2
+In the example code provided, the memory and file dataspaces passed to the H5Dwrite call have the
+same size, 3 x 4 (DIM0_SUB x DIM1_SUB). Change the size of the memory dataspace to be 4 x 4 so that
+they do not match, and then compile:
+\code
+    dimsm[0] = DIM0_SUB + 1;
+    dimsm[1] = DIM1_SUB;
+    memspace_id = H5Screate_simple (RANK, dimsm, NULL);
+\endcode
+The code will fail with the error: "<strong>src and dest data spaces have different sizes</strong>"
+
+How many elements are in the memory and file dataspaces that were specified above? Add these lines:
+\code
+    hssize_t    size;
+  
+    /* Just before H5Dwrite call the following */
+    size = H5Sget_select_npoints (memspace_id);
+    printf ("\nmemspace_id size: %i\n", size);
+    size = H5Sget_select_npoints (dataspace_id);
+    printf ("dataspace_id size: %i\n", size);
+\endcode
+
+You should see these lines followed by the error:
+\code
+    memspace_id size: 16
+    dataspace_id size: 12
+\endcode
+
+\subsubsection subsubsecLBDsetSubRWProgExperThree Example 3
+This example shows the selection that occurs if changing the values of the <em>offset</em>, <em>count</em>,
+<em>stride</em> and <em>block</em> parameters in the example code.
+
+This will select two blocks. The <em>count</em> array specifies the number of blocks. The <em>block</em> array
+specifies the size of a block. The <em>stride</em> must be modified to accommodate the block <em>size</em>.
+<table>
+<tr>
+<td>
+\image html imgLBDsetSubRW31.png
+</td>
+</tr>
+</table>
+
+Now try modifying the count as shown below. The write will fail because the selection goes beyond the extent of the dimension:
+<table>
+<tr>
+<td>
+\image html imgLBDsetSubRW32.png
+</td>
+</tr>
+</table>
+
+If the offset were 1x1 (instead of 1x2), then the selection can be made:
+<table>
+<tr>
+<td>
+\image html imgLBDsetSubRW33.png
+</td>
+</tr>
+</table>
+
+The selections above were tested with the
+<a href="https://support.hdfgroup.org/ftp/HDF5/examples/howto/subset/h5_subsetbk.c">h5_subsetbk.c</a>
+example code. The memory dataspace was defined as one-dimensional.
+
+\subsection subsecLBDsetSubRWProgRem Remarks
+\li In addition to #H5Sselect_hyperslab, this example introduces the #H5Dget_space call to obtain the dataspace of a dataset.
+\li If using the default values for the stride and block parameters of #H5Sselect_hyperslab, then, for C you can specify NULL
+for these parameters, rather than passing in an array for each, and for Fortran 90 you can omit these parameters.
+
+<hr>
+Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
+
+@page LBDatatypes Datatype Basics
+Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
+<hr>
+
+\section secLBDtype What is a Datatype?
+A datatype is a collection of datatype properties which provide complete information for data conversion to or from that datatype.
+
+Datatypes in HDF5 can be grouped as follows:
+\li <strong>Pre-Defined Datatypes</strong>:   These are datatypes that are created by HDF5. They are actually opened
+(and closed) by HDF5, and can have a different value from one HDF5 session to the next.
+\li <strong>Derived Datatypes</strong>:   These are datatypes that are created or derived from the pre-defined datatypes.
+Although created from pre-defined types, they represent a category unto themselves. An example of a commonly used derived
+datatype is a string of more than one character.
+
+\section secLBDtypePre Pre-defined Datatypes
+The properties of pre-defined datatypes are:
+\li Pre-defined datatypes are opened and closed by HDF5.
+\li A pre-defined datatype is a handle and is NOT PERSISTENT. Its value can be different from one HDF5 session to the next.
+\li Pre-defined datatypes are Read-Only.
+\li As mentioned, other datatypes can be derived from pre-defined datatypes.
+
+There are two types of pre-defined datatypes, standard (file) and native.
+
+<h4>Standard</h4>
+A standard (or file) datatype can be:
+<ul>
+<li><strong>Atomic</strong>: A datatype which cannot be decomposed into smaller datatype units at the API level.
+The atomic datatypes are:
+<ul>
+<li>integer</li>
+<li>float</li>
+<li>string (1-character)</li>
+<li>date and time</li>
+<li>bitfield</li>
+<li>reference</li>
+<li>opaque</li>
+</ul>
+</li>
+<li><strong>Composite</strong>: An aggregation of one or more datatypes.
+Composite datatypes include:
+<ul>
+<li>array</li>
+<li>variable length</li>
+<li>enumeration</li>
+<li>compound datatypes</li>
+</ul>
+Array, variable length, and enumeration datatypes are defined in terms of a single atomic datatype,
+whereas a compound datatype is a datatype composed of a sequence of datatypes.
+</li>
+</ul>
+
+<table>
+<tr>
+<th><strong>Notes</strong></th>
+</tr>
+<tr>
+<td>
+\li  Standard pre-defined datatypes are the SAME on all platforms.
+\li  They are the datatypes that you see in an HDF5 file.
+\li  They are typically used when creating a dataset.
+</td>
+</tr>
+</table>
+
+<h4>Native</h4>
+Native pre-defined datatypes are used for memory operations, such as reading and writing. They are
+NOT THE SAME on different platforms. They are similar to C type names, and are aliased to the
+appropriate HDF5 standard pre-defined datatype for a given platform.
+
+For example, when on an Intel based PC, #H5T_NATIVE_INT is aliased to the standard pre-defined type,
+#H5T_STD_I32LE. On a MIPS machine, it is aliased to #H5T_STD_I32BE.
+<table>
+<tr>
+<th><strong>Notes</strong></th>
+</tr>
+<tr>
+<td>
+\li  Native datatypes are NOT THE SAME on all platforms.
+\li  Native datatypes simplify memory operations (read/write). The HDF5 library automatically converts as needed.
+\li  Native datatypes are NOT in an HDF5 File. The standard pre-defined datatype that a native datatype corresponds
+to is what you will see in the file. 
+</td>
+</tr>
+</table>
+
+<h4>Pre-Defined</h4>
+The following table shows the native types and the standard pre-defined datatypes they correspond
+to. (Keep in mind that HDF5 can convert between datatypes, so you can specify a buffer of a larger
+type for a dataset of a given type. For example, you can read a dataset that has a short datatype
+into a long integer buffer.)
+
+<table>
+<caption>Some HDF5 pre-defined native datatypes and corresponding standard (file) type</caption>
+<tr>
+<th><strong>C Type</strong></th>
+<th><strong>HDF5 Memory Type</strong></th>
+<th><strong>HDF5 File Type*</strong></th>
+</tr>
+<tr>
+<th span="3"><strong>Integer</strong></th>
+</tr>
+<tr>
+<td>int</td>
+<td>#H5T_NATIVE_INT</td>
+<td>#H5T_STD_I32BE or #H5T_STD_I32LE</td>
+</tr>
+<tr>
+<td>short</td>
+<td>#H5T_NATIVE_SHORT</td>
+<td>#H5T_STD_I16BE or #H5T_STD_I16LE</td>
+</tr>
+<tr>
+<td>long</td>
+<td>#H5T_NATIVE_LONG</td>
+<td>#H5T_STD_I32BE, #H5T_STD_I32LE,
+  #H5T_STD_I64BE or #H5T_STD_I64LE</td>
+</tr>
+<tr>
+<td>long long</td>
+<td>#H5T_NATIVE_LLONG</td>
+<td>#H5T_STD_I64BE or #H5T_STD_I64LE</td>
+</tr>
+<tr>
+<td>unsigned int</td>
+<td>#H5T_NATIVE_UINT</td>
+<td>#H5T_STD_U32BE or #H5T_STD_U32LE</td>
+</tr>
+<tr>
+<td>unsigned short</td>
+<td>#H5T_NATIVE_USHORT</td>
+<td>#H5T_STD_U16BE or #H5T_STD_U16LE</td>
+</tr>
+<tr>
+<td>unsigned long</td>
+<td>#H5T_NATIVE_ULONG</td>
+<td>#H5T_STD_U32BE, #H5T_STD_U32LE,
+  #H5T_STD_U64BE or #H5T_STD_U64LE</td>
+</tr>
+<tr>
+<td>unsigned long long</td>
+<td>#H5T_NATIVE_ULLONG</td>
+<td>#H5T_STD_U64BE or #H5T_STD_U64LE</td>
+</tr>
+<tr>
+<th span="3"><strong>Float</strong></th>
+</tr>
+<tr>
+<td>float</td>
+<td>#H5T_NATIVE_FLOAT</td>
+<td>#H5T_IEEE_F32BE or #H5T_IEEE_F32LE</td>
+</tr>
+<tr>
+<td>double</td>
+<td>#H5T_NATIVE_DOUBLE</td>
+<td>#H5T_IEEE_F64BE or #H5T_IEEE_F64LE</td>
+</tr>
+</table>
+
+<table>
+<caption>Some HDF5 pre-defined native datatypes and corresponding standard (file) type</caption>
+<tr>
+<th><strong>F90 Type</strong></th>
+<th><strong>HDF5 Memory Type</strong></th>
+<th><strong>HDF5 File Type*</strong></th>
+</tr>
+<tr>
+<td>integer</td>
+<td>H5T_NATIVE_INTEGER</td>
+<td>#H5T_STD_I32BE(8,16) or #H5T_STD_I32LE(8,16)</td>
+</tr>
+<tr>
+<td>real</td>
+<td>H5T_NATIVE_REAL</td>
+<td>#H5T_IEEE_F32BE or #H5T_IEEE_F32LE</td>
+</tr>
+<tr>
+<td>double-precision</td>
+<td>#H5T_NATIVE_DOUBLE</td>
+<td>#H5T_IEEE_F64BE or #H5T_IEEE_F64LE</td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td>* Note that the HDF5 File Types listed are those that are most commonly created.
+  The file type created depends on the compiler switches and platforms being
+  used. For example, on the Cray an integer is 64-bit, and using #H5T_NATIVE_INT (C)
+  or H5T_NATIVE_INTEGER (F90) would result in an #H5T_STD_I64BE file type.</td>
+</tr>
+</table>
+
+The following code is an example of when you would use standard pre-defined datatypes vs. native types:
+\code
+   #include "hdf5.h"
+
+   main() {
+
+      hid_t       file_id, dataset_id, dataspace_id;  
+      herr_t      status;
+      hsize_t     dims[2]={4,6};
+      int         i, j, dset_data[4][6];
+
+      for (i = 0; i < 4; i++)
+           for (j = 0; j < 6; j++)
+            dset_data[i][j] = i * 6 + j + 1;
+
+      file_id = H5Fcreate ("dtypes.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+      dataspace_id = H5Screate_simple (2, dims, NULL);
+
+      dataset_id = H5Dcreate (file_id, "/dset", H5T_STD_I32BE, dataspace_id, 
+                              H5P_DEFAULT);
+
+      status = H5Dwrite (dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, 
+                         H5P_DEFAULT, dset_data);
+
+      status = H5Dclose (dataset_id);
+
+      status = H5Fclose (file_id);
+   }
+\endcode
+By using the native types when reading and writing, the code that reads from or writes to a dataset
+can be the same for different platforms.
+
+Can native types also be used when creating a dataset? Yes. However, just be aware that the resulting
+datatype in the file will be one of the standard pre-defined types and may be different than expected.
+
+What happens if you do not use the correct native datatype for a standard (file) datatype? Your data
+may be incorrect or not what you expect.
+
+\section secLBDtypeDer Derived Datatypes
+ANY pre-defined datatype can be used to derive user-defined datatypes.
+
+To create a datatype derived from a pre-defined type:
+<ol>
+<li>Make a copy of the pre-defined datatype:
+\code
+    tid = H5Tcopy (H5T_STD_I32BE);
+\endcode
+</li>
+<li>Change the datatype.</li>
+</ol>
+
+There are numerous datatype functions that allow a user to alter a pre-defined datatype. See
+\ref subsecLBDtypeSpecStr below for a simple example.
+
+Refer to the \ref H5T in the \ref RM. Example functions are #H5Tset_size and #H5Tset_precision.
+
+\section secLBDtypeSpec Specific Datatypes
+On the <a href="https://portal.hdfgroup.org/display/HDF5/Examples+by+API">Examples by API</a>
+page under <a href="https://confluence.hdfgroup.org/display/HDF5/Examples+by+API#ExamplesbyAPI-datatypes">Datatypes</a>
+you will find many example programs for creating and reading datasets with different datatypes.
+
+Below is additional information on some of the datatypes. See
+the <a href="https://portal.hdfgroup.org/display/HDF5/Examples+by+API">Examples by API</a>
+page for examples of these datatypes.
+
+\subsection subsecLBDtypeSpec Array Datatype vs Array Dataspace
+#H5T_ARRAY is a datatype, and it should not be confused with the dataspace of a dataset. The dataspace
+of a dataset can consist of a regular array of elements. For example, the datatype for a dataset
+could be an atomic datatype like integer, and the dataset could be an N-dimensional appendable array,
+as specified by the dataspace. See #H5Screate and #H5Screate_simple for details. 
+
+Unlimited dimensions and subsetting are not supported when using the #H5T_ARRAY datatype.
+
+The #H5T_ARRAY datatype was primarily created to address the simple case of a compound datatype
+when all members of the compound datatype are of the same type and there is no need to subset by
+compound datatype members. Creation of such a datatype is more efficient and I/O also requires
+less work, because there is no alignment involved.
+
+\subsection subsecLBDtypeSpecArr Array Datatype
+The array class of datatypes, #H5T_ARRAY, allows the construction of true, homogeneous,
+multi-dimensional arrays. Since these are homogeneous arrays, each element of the array
+will be of the same datatype, designated at the time the array is created.
+
+Users may be confused by this datatype, as opposed to a dataset with a simple atomic
+datatype (eg. integer) that is an array. See subsecLBDtypeSpec for more information.
+
+Arrays can be nested. Not only is an array datatype used as an element of an HDF5 dataset,
+but the elements of an array datatype may be of any datatype, including another array datatype.
+
+Array datatypes <strong>cannot be subdivided for I/O</strong>; the entire array must be transferred from one
+dataset to another.
+
+Within certain limitations, outlined in the next paragraph, array datatypes may be N-dimensional
+and of any dimension size. <strong>Unlimited dimensions, however, are not supported</strong>. Functionality similar
+to unlimited dimension arrays is available through the use of variable-length datatypes.
+
+The maximum number of dimensions, i.e., the maximum rank, of an array datatype is specified by
+the HDF5 library constant #H5S_MAX_RANK. The minimum rank is 1 (one). All dimension sizes must
+be greater than 0 (zero).
+
+One array datatype may only be converted to another array datatype if the number of dimensions
+and the sizes of the dimensions are equal and the datatype of the first array's elements can be
+converted to the datatype of the second array's elements.
+
+\subsubsection subsubsecLBDtypeSpecArrAPI Array Datatype APIs
+There are three functions that are specific to array datatypes: one, #H5Tarray_create, for creating
+an array datatype, and two, #H5Tget_array_ndims and #H5Tget_array_dims
+for working with existing array datatypes.
+
+<h4>Creating</h4>
+The function #H5Tarray_create creates a new array datatype object. Parameters specify
+\li the base datatype of each element of the array,
+\li the rank of the array, i.e., the number of dimensions,
+\li the size of each dimension, and
+\li the dimension permutation of the array, i.e., whether the elements of the array are listed in C or FORTRAN order.
+
+<h4>Working with existing array datatypes</h4>
+When working with existing arrays, one must first determine the the rank, or number of dimensions, of the array.
+
+The function #H5Tget_array_dims returns the rank of a specified array datatype.
+
+In many instances, one needs further information. The function #H5Tget_array_dims retrieves the
+permutation of the array and the size of each dimension.
+
+\subsection subsecLBDtypeSpecCmpd Compound
+
+\subsubsection subsubsecLBDtypeSpecCmpdProp Properties of compound datatypes
+A compound datatype is similar to a struct in C or a common block in Fortran. It is a collection of
+one or more atomic types or small arrays of such types. To create and use of a compound datatype
+you need to refer to various properties of the data compound datatype:
+\li It is of class compound.
+\li It has a fixed total size, in bytes.
+\li It consists of zero or more members (defined in any order) with unique names and which occupy non-overlapping regions within the datum.
+\li Each member has its own datatype.
+\li Each member is referenced by an index number between zero and N-1, where N is the number of members in the compound datatype.
+\li Each member has a name which is unique among its siblings in a compound datatype.
+\li Each member has a fixed byte offset, which is the first byte (smallest byte address) of that member in a compound datatype.
+\li Each member can be a small array of up to four dimensions.
+
+Properties of members of a compound datatype are defined when the member is added to the compound type and cannot be subsequently modified.
+
+\subsubsection subsubsecLBDtypeSpecCmpdDef Defining compound datatypes
+Compound datatypes must be built out of other datatypes. First, one creates an empty compound
+datatype and specifies its total size. Then members are added to the compound datatype in any order.
+
+Member names. Each member must have a descriptive name, which is the key used to uniquely identify
+the member within the compound datatype. A member name in an HDF5 datatype does not necessarily
+have to be the same as the name of the corresponding member in the C struct in memory, although
+this is often the case. Nor does one need to define all members of the C struct in the HDF5
+compound datatype (or vice versa).
+
+Offsets. Usually a C struct will be defined to hold a data point in memory, and the offsets of the
+members in memory will be the offsets of the struct members from the beginning of an instance of the
+struct. The library defines the macro to compute the offset of a member within a struct:
+\code
+  HOFFSET(s,m)
+\endcode
+This macro computes the offset of member m within a struct variable s.
+
+Here is an example in which a compound datatype is created to describe complex numbers whose type
+is defined by the complex_t struct.
+\code
+typedef struct {
+   double re;   /*real part */
+   double im;   /*imaginary part */
+} complex_t;
+
+complex_t tmp;  /*used only to compute offsets */
+hid_t complex_id = H5Tcreate (H5T_COMPOUND, sizeof tmp);
+H5Tinsert (complex_id, "real", HOFFSET(tmp,re), H5T_NATIVE_DOUBLE);
+H5Tinsert (complex_id, "imaginary", HOFFSET(tmp,im), H5T_NATIVE_DOUBLE);
+\endcode
+
+\subsection subsecLBDtypeSpecRef Reference
+There are two types of Reference datatypes in HDF5:
+\li \ref subsubsecLBDtypeSpecRefObj
+\li \ref subsubsecLBDtypeSpecRefDset
+
+\subsubsection subsubsecLBDtypeSpecRefObj Reference to objects
+In HDF5, objects (i.e. groups, datasets, and named datatypes) are usually accessed by name.
+There is another way to access stored objects -- by reference.
+
+An object reference is based on the relative file address of the object header in the file
+and is constant for the life of the object. Once a reference to an object is created and
+stored in a dataset in the file, it can be used to dereference the object it points to.
+References are handy for creating a file index or for grouping related objects by storing
+references to them in one dataset.
+
+<h4>Creating and storing references to objects</h4>
+The following steps are involved in creating and storing file references to objects:
+<ol>
+<li>Create the objects or open them if they already exist in the file.</li>
+<li>Create a dataset to store the objects' references, by specifying #H5T_STD_REF_OBJ as the datatype</li>
+<li>Create and store references to the objects in a buffer, using #H5Rcreate.</li>
+<li>Write a buffer with the references to the dataset, using #H5Dwrite with the #H5T_STD_REF_OBJ datatype.</li>
+</ol>
+
+<h4>Reading references and accessing objects using references</h4>
+The following steps are involved:
+<ol>
+<li>Open the dataset with the references and read them. The #H5T_STD_REF_OBJ datatype must be used to describe the memory datatype.</li>
+<li>Use the read reference to obtain the identifier of the object the reference points to using #H5Rdereference.</li>
+<li>Open the dereferenced object and perform the desired operations.</li>
+<li>Close all objects when the task is complete.</li>
+</ol>
+
+\subsubsection subsubsecLBDtypeSpecRefDset Reference to a dataset region
+A dataset region reference points to a dataset selection in another dataset.
+A reference to the dataset selection (region) is constant for the life of the dataset.
+
+<h4>Creating and storing references to dataset regions</h4>
+The following steps are involved in creating and storing references to a dataset region:
+\li Create a dataset to store the dataset region (selection), by passing in #H5T_STD_REF_DSETREG for the datatype when calling #H5Dcreate.
+\li Create selection(s) in existing dataset(s) using #H5Sselect_hyperslab and/or #H5Sselect_elements.
+\li Create reference(s) to the selection(s) using #H5Rcreate and store them in a buffer.
+\li Write the references to the dataset regions in the file.
+\li Close all objects.
+
+<h4>Reading references to dataset regions</h4>
+The following steps are involved in reading references to dataset regions and referenced dataset regions (selections).
+<ol>
+<li>Open and read the dataset containing references to the dataset regions.
+The datatype #H5T_STD_REF_DSETREG must be used during read operation.</li>
+<li>Use #H5Rdereference to obtain the dataset identifier from the read dataset region reference.
+    OR
+    Use #H5Rget_region to obtain the dataspace identifier for the dataset containing the selection from the read dataset region reference.
+</li>
+<li>With the dataspace identifier, the \ref H5S interface functions, H5Sget_select_*,
+can be used to obtain information about the selection.</li>
+<li>Close all objects when they are no longer needed.</li>
+</ol>
+
+The dataset with the region references was read by #H5Dread with the #H5T_STD_REF_DSETREG datatype specified.
+
+The read reference can be used to obtain the dataset identifier by calling #H5Rdereference or by obtaining
+obtain spacial information (dataspace and selection) with the call to #H5Rget_region.
+
+The reference to the dataset region has information for both the dataset itself and its selection. In both functions:
+\li The first parameter is an identifier of the dataset with the region references.
+\li The second parameter specifies the type of reference stored. In this example, a reference to the dataset region is stored.
+\li The third parameter is a buffer containing the reference of the specified type.
+
+This example introduces several H5Sget_select_* functions used to obtain information about selections:
+<table>
+<caption>Examples of HDF5 predefined datatypes</caption>
+<tr>
+<th><strong>Function</strong></th>
+<th><strong>Description</strong></th>
+</tr>
+<tr>
+<td>#H5Sget_select_npoints</td>
+<td>Returns the number of elements in the hyperslab</td>
+</tr>
+<tr>
+<td>#H5Sget_select_hyper_nblocks</td>
+<td>Returns the number of blocks in the hyperslab</td>
+</tr>
+<tr>
+<td>#H5Sget_select_hyper_blocklist</td>
+<td>Returns the "lower left" and "upper right" coordinates of the blocks in the hyperslab selection</td>
+</tr>
+<tr>
+<td>#H5Sget_select_bounds</td>
+<td>Returns the coordinates of the "minimal" block containing a hyperslab selection</td>
+</tr>
+<tr>
+<td>#H5Sget_select_elem_npoints</td>
+<td>Returns the number of points in the element selection</td>
+</tr>
+<tr>
+<td>#H5Sget_select_elem_pointlist</td>
+<td>Returns the coordinates of points in the element selection</td>
+</tr>
+</table>
+
+\subsection subsecLBDtypeSpecStr String
+A simple example of creating a derived datatype is using the string datatype,
+#H5T_C_S1 (#H5T_FORTRAN_S1) to create strings of more than one character. Strings
+can be stored as either fixed or variable length, and may have different rules
+for padding of unused storage.
+
+\subsubsection subsecLBDtypeSpecStrFix Fixed Length 5-character String Datatype
+\code
+    hid_t strtype;                     /* Datatype ID */
+    herr_t status;
+
+    strtype = H5Tcopy (H5T_C_S1);
+    status = H5Tset_size (strtype, 5); /* create string of length 5 */
+\endcode
+
+\subsubsection subsecLBDtypeSpecStrVar Variable Length String Datatype
+\code
+    strtype = H5Tcopy (H5T_C_S1);
+    status = H5Tset_size (strtype, H5T_VARIABLE);
+\endcode
+
+The ability to derive datatypes from pre-defined types allows users to create any number of datatypes,
+from simple to very complex.
+
+As the term implies, variable length strings are strings of varying lengths. They are stored internally
+in a heap, potentially impacting efficiency in the following ways:
+\li Heap storage requires more space than regular raw data storage.
+\li Heap access generally reduces I/O efficiency because it requires individual read or write operations
+for each data element rather than one read or write per dataset or per data selection.
+\li A variable length dataset consists of pointers to the heaps of data, not the actual data. Chunking
+and filters, including compression, are not available for heaps.
+
+See \ref subsubsec_datatype_other_strings in the \ref UG, for more information on how fixed and variable
+length strings are stored.
+
+\subsection subsecLBDtypeSpecVL Variable Length
+Variable-length (VL) datatypes are sequences of an existing datatype (atomic, VL, or compound)
+which are not fixed in length from one dataset location to another. In essence, they are similar
+to C character strings -- a sequence of a type which is pointed to by a particular type of
+pointer -- although they are implemented more closely to FORTRAN strings by including an explicit
+length in the pointer instead of using a particular value to terminate the sequence.
+
+VL datatypes are useful to the scientific community in many different ways, some of which are listed below:
+<ul>
+<li>Ragged arrays: Multi-dimensional ragged arrays can be implemented with the last (fastest changing)
+dimension being ragged by using a VL datatype as the type of the element stored. (Or as a field in a compound datatype.)
+</li>
+<li>Fractal arrays: If a compound datatype has a VL field of another compound type with VL fields
+(a nested VL datatype), this can be used to implement ragged arrays of ragged arrays, to whatever
+nesting depth is required for the user.
+</li>
+<li>Polygon lists: A common storage requirement is to efficiently store arrays of polygons with
+different numbers of vertices. VL datatypes can be used to efficiently and succinctly describe an
+array of polygons with different numbers of vertices.
+</li>
+<li>Character strings: Perhaps the most common use of VL datatypes will be to store C-like VL character
+strings in dataset elements or as attributes of objects.
+</li>
+<li>Indices: An array of VL object references could be used as an index to all the objects in a file
+which contain a particular sequence of dataset values. Perhaps an array something like the following:
+\code
+    Value1: Object1, Object3,  Object9
+    Value2: Object0, Object12, Object14, Object21, Object22
+    Value3: Object2
+    Value4: <none>
+    Value5: Object1, Object10, Object12
+        .
+        .
+\endcode
+</li>
+<li>Object Tracking: An array of VL dataset region references can be used as a method of tracking
+objects or features appearing in a sequence of datasets. Perhaps an array of them would look like:
+\code
+    Feature1: Dataset1:Region,  Dataset3:Region,  Dataset9:Region
+    Feature2: Dataset0:Region,  Dataset12:Region, Dataset14:Region,
+              Dataset21:Region, Dataset22:Region
+    Feature3: Dataset2:Region
+    Feature4: <none>
+    Feature5: Dataset1:Region,  Dataset10:Region, Dataset12:Region
+        .
+        .
+\endcode
+</li>
+</ul>
+
+\subsubsection subsubsecLBDtypeSpecVLMem Variable-length datatype memory management
+With each element possibly being of different sequence lengths for a dataset with a VL datatype,
+the memory for the VL datatype must be dynamically allocated. Currently there are two methods
+of managing the memory for VL datatypes: the standard C malloc/free memory allocation routines
+or a method of calling user-defined memory management routines to allocate or free memory. Since
+the memory allocated when reading (or writing) may be complicated to release, an HDF5 routine is
+provided to traverse a memory buffer and free the VL datatype information without leaking memory.
+
+\subsubsection subsubsecLBDtypeSpecVLDiv Variable-length datatypes cannot be divided
+VL datatypes are designed so that they cannot be subdivided by the library with selections, etc.
+This design was chosen due to the complexities in specifying selections on each VL element of a
+dataset through a selection API that is easy to understand. Also, the selection APIs work on
+dataspaces, not on datatypes. At some point in time, we may want to create a way for dataspaces
+to have VL components to them and we would need to allow selections of those VL regions, but
+that is beyond the scope of this document.
+
+\subsubsection subsubsecLBDtypeSpecVLErr What happens if the library runs out of memory while reading?
+It is possible for a call to #H5Dread to fail while reading in VL datatype information if the memory
+required exceeds that which is available. In this case, the #H5Dread call will fail gracefully and any
+VL data which has been allocated prior to the memory shortage will be returned to the system via the
+memory management routines detailed below. It may be possible to design a partial read API function
+at a later date, if demand for such a function warrants.
+
+\subsubsection subsubsecLBDtypeSpecVLStr Strings as variable-length datatypes
+Since character strings are a special case of VL data that is implemented in many different ways on
+different machines and in different programming languages, they are handled somewhat differently from
+other VL datatypes in HDF5.
+
+HDF5 has native VL strings for each language API, which are stored the same way on disk, but are
+exported through each language API in a natural way for that language. When retrieving VL strings
+from a dataset, users may choose to have them stored in memory as a native VL string or in HDF5's
+#hvl_t struct for VL datatypes.
+
+VL strings may be created in one of two ways: by creating a VL datatype with a base type of
+#H5T_C_S1 and setting its length to #H5T_VARIABLE. The second method is used to access native VL strings in memory. The
+library will convert between the two types, but they are stored on disk using different datatypes
+and have different memory representations.
+
+Multi-byte character representations, such as \em UNICODE or \em wide characters in C/C++, will need the
+appropriate character and string datatypes created so that they can be described properly through
+the datatype API. Additional conversions between these types and the current ASCII characters
+will also be required.
+
+Variable-width character strings (which might be compressed data or some other encoding) are not
+currently handled by this design. We will evaluate how to implement them based on user feedback.
+
+\subsubsection subsubsecLBDtypeSpecVLAPIs Variable-length datatype APIs
+
+<h4>Creation</h4>
+VL datatypes are created with the #H5Tvlen_create function as follows:
+\code
+type_id = H5Tvlen_create(hid_t base_type_id);
+\endcode
+The base datatype will be the datatype that the sequence is composed of, characters for character
+strings, vertex coordinates for polygon lists, etc. The base datatype specified for the VL datatype
+can be of any HDF5 datatype, including another VL datatype, a compound datatype, or an atomic datatype.
+
+<h4>Querying base datatype of VL datatype</h4>
+It may be necessary to know the base datatype of a VL datatype before memory is allocated, etc.
+The base datatype is queried with the #H5Tget_super function, described in the \ref H5T documentation.
+
+<h4>Querying minimum memory required for VL information</h4>
+It order to predict the memory usage that #H5Dread may need to allocate to store VL data while
+reading the data, the #H5Dvlen_get_buf_size function is provided:
+\code
+herr_t H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id, hsize_t *size)
+\endcode
+This routine checks the number of bytes required to store the VL data from the dataset, using
+the \em space_id for the selection in the dataset on disk and the \em type_id for the memory representation
+of the VL data in memory. The *\em size value is modified according to how many bytes are required
+to store the VL data in memory.
+
+<h4>Specifying how to manage memory for the VL datatype</h4>
+The memory management method is determined by dataset transfer properties passed into the
+#H5Dread and #H5Dwrite functions with the dataset transfer property list.
+
+Default memory management is set by using #H5P_DEFAULT for the dataset transfer
+property list identifier. If #H5P_DEFAULT is used with #H5Dread, the system \em malloc and \em free
+calls will be used for allocating and freeing memory. In such a case, #H5P_DEFAULT should
+also be passed as the property list identifier to #H5Dvlen_reclaim.
+
+The rest of this subsection is relevant only to those who choose not to use default memory management.
+
+The user can choose whether to use the system \em malloc and \em free calls or user-defined, or custom,
+memory management functions. If user-defined memory management functions are to be used, the
+memory allocation and free routines must be defined via #H5Pset_vlen_mem_manager(), as follows:
+\code
+herr_t H5Pset_vlen_mem_manager(hid_t plist_id, H5MM_allocate_t alloc, void *alloc_info, H5MM_free_t free, void *free_info)
+\endcode
+The \em alloc and \em free parameters identify the memory management routines to be used. If the user
+has defined custom memory management routines, \em alloc and/or \em free should be set to make those
+routine calls (i.e., the name of the routine is used as the value of the parameter); if the user
+prefers to use the system's \em malloc and/or \em free, the \em alloc and \em free parameters, respectively, should be set to \em NULL
+
+The prototypes for the user-defined functions would appear as follows:
+\code
+typedef void *(*H5MM_allocate_t)(size_t size, void *info) ; typedef void (*H5MM_free_t)(void *mem, void *free_info) ;
+\endcode
+The \em alloc_info and \em free_info parameters can be used to pass along any required information to
+the user's memory management routines.
+
+In summary, if the user has defined custom memory management routines, the name(s) of the routines
+are passed in the \em alloc and \em free parameters and the custom routines' parameters are passed in the
+\em alloc_info and \em free_info parameters. If the user wishes to use the system \em malloc and \em free functions,
+the \em alloc and/or \em free parameters are set to \em NULL and the \em alloc_info and \em free_info parameters are ignored.
+
+<h4>Recovering memory from VL buffers read in</h4>
+The complex memory buffers created for a VL datatype may be reclaimed with the #H5Dvlen_reclaim
+function call, as follows:
+\code
+herr_t H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t plist_id, void *buf);
+\endcode
+
+The \em type_id must be the datatype stored in the buffer, \em space_id describes the selection for the
+memory buffer to free the VL datatypes within, \em plist_id is the dataset transfer property list
+which was used for the I/O transfer to create the buffer, and \em buf is the pointer to the buffer
+to free the VL memory within. The VL structures (#hvl_t) in the user's buffer are modified to zero
+out the VL information after it has been freed.
+
+If nested VL datatypes were used to create the buffer, this routine frees them from the bottom up,
+releasing all the memory without creating memory leaks.
+
+<hr>
+Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
+
+*/

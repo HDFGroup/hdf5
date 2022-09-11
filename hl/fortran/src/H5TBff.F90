@@ -1,6 +1,6 @@
-!> @defgroup FH5TB Fortran High-level H5TB Interface
+!> @defgroup FH5TB Fortran High Level Table (H5TB) Interface
 !!
-!! @see H5TB, C-API
+!! @see H5TB, C-HL API
 !!
 !! @see @ref H5TB_UG, User Guide
 !!
@@ -45,7 +45,7 @@
 
   INTERFACE h5tbwrite_field_name_f
 #ifdef H5_DOXYGEN_FORTRAN
-     MODULE PROCEDURE h5tbwrite_field_name_f 
+     MODULE PROCEDURE h5tbwrite_field_name_f
 #else
      MODULE PROCEDURE h5tbwrite_field_name_f_int
      MODULE PROCEDURE h5tbwrite_field_name_f_string
@@ -214,12 +214,12 @@ CONTAINS
 !! \param field_types   An array containing the type of the fields.
 !! \param chunk_size    The chunk size.
 !! \param compress      Flag that turns compression on or off.
-!! \param errcode       \fortran_error     
+!! \param errcode       \fortran_error
 !!
 #ifdef H5_DOXYGEN_FORTRAN
   SUBROUTINE h5tbmake_table_f(&
 #else
-  SUBROUTINE h5tbmake_table_f90(&    
+  SUBROUTINE h5tbmake_table_f90(&
 #endif
        table_title,&
        loc_id,&
@@ -308,7 +308,7 @@ CONTAINS
 #ifdef H5_DOXYGEN_FORTRAN
   END SUBROUTINE h5tbmake_table_f
 #else
-  END SUBROUTINE h5tbmake_table_f90 
+  END SUBROUTINE h5tbmake_table_f90
 #endif
 
 !>
@@ -331,7 +331,7 @@ CONTAINS
 !! \param fill_data     Fill values data
 !! \param compress      Flag that turns compression on or off
 !! \param data	        Buffer with data to be written to the table
-!! \param errcode       \fortran_error     
+!! \param errcode       \fortran_error
 !!
 #ifdef H5_DOXYGEN_FORTRAN
   SUBROUTINE h5tbmake_table_f(&
@@ -446,9 +446,9 @@ CONTAINS
 !! \param nfields    Number of fields, i.e., size of dst_offset and dst_sizes arrays.
 !! \param dst_size   The size of the structure type, as calculated by sizeof or storage_size
 !! \param dst_offset An array containing the offsets of the fields. These offsets can be calculated with H5OFFSETOF.
-!! \param dst_sizes  An array containing the sizes of the fields. These sizes can be calculated with sizeof or storage_size. 
+!! \param dst_sizes  An array containing the sizes of the fields. These sizes can be calculated with sizeof or storage_size.
 !! \param dst_buf    Pointer to buffer with data.
-!! \param errcode    \fortran_error  
+!! \param errcode    \fortran_error
 !!
   SUBROUTINE h5tbread_table_f(loc_id, dset_name, nfields, dst_size, dst_offset, &
        dst_sizes, dst_buf, errcode)
@@ -509,7 +509,7 @@ CONTAINS
 !! \ingroup FH5TB
 !!
 !! \brief Overwrites field.
-!! 
+!!
 !! \param loc_id      Location identifier. The identifier may be that of a file or group.
 !! \param dset_name   The name of the dataset to overwrite
 !! \param field_name  The names of the fields to write
@@ -556,7 +556,7 @@ CONTAINS
     errcode = h5tbwrite_field_name_c(loc_id,namelen,dset_name,namelen1,field_name,&
          start,nrecords,type_size,f_ptr)
 #ifdef H5_DOXYGEN_FORTRAN
-  END SUBROUTINE h5tbwrite_field_name_f  
+  END SUBROUTINE h5tbwrite_field_name_f
 #else
   END SUBROUTINE h5tbwrite_field_name_f_int
 
@@ -607,7 +607,7 @@ CONTAINS
 !! \param nrecords    The number of records to read.
 !! \param type_size   The size in bytes of the structure associated with the table.  Obtained with sizeof or storage_size.
 !! \param buf         Buffer with data
-!! \param errcode     \fortran_error     
+!! \param errcode     \fortran_error
 !!
   SUBROUTINE h5tbread_field_name_f(&
 #else
@@ -700,7 +700,7 @@ CONTAINS
 !! \param type_size    The size of the structure type, as calculated by sizeof or storage_size.
 !! \param buf	       Buffer with data.
 !! \param errcode      \fortran_error
-!!   
+!!
   SUBROUTINE h5tbwrite_field_index_f(&
 #else
   SUBROUTINE h5tbwrite_field_index_f_int(&
@@ -776,7 +776,7 @@ CONTAINS
 !>
 !! \ingroup FH5TB
 !!
-!! \brief Reads field. The fields are identified by index. 
+!! \brief Reads field. The fields are identified by index.
 !!
 !! \param loc_id       Location identifier. The identifier may be that of a file or group.
 !! \param dset_name    The name of the dataset to read.
@@ -957,7 +957,7 @@ CONTAINS
        field_name,&
        errcode )
     IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id 
+    INTEGER(hid_t),   INTENT(in) :: loc_id
     CHARACTER(LEN=*), INTENT(in) :: dset_name
     CHARACTER(LEN=*), INTENT(in) :: field_name
     INTEGER :: errcode
@@ -995,7 +995,7 @@ CONTAINS
 !! \param dset_name The name of the dataset to read.
 !! \param nfields   The number of fields.
 !! \param nrecords  The number of records.
-!! \param errcode   \fortran_error     
+!! \param errcode   \fortran_error
 !!
   SUBROUTINE h5tbget_table_info_f(loc_id,&
        dset_name,&
@@ -1017,7 +1017,7 @@ CONTAINS
          IMPORT :: C_CHAR
          IMPORT :: HID_T, SIZE_T, HSIZE_T
          IMPLICIT NONE
-         INTEGER(hid_t),   INTENT(in) :: loc_id 
+         INTEGER(hid_t),   INTENT(in) :: loc_id
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name
          INTEGER(hsize_t), INTENT(inout):: nfields
          INTEGER(hsize_t), INTENT(inout):: nrecords
@@ -1043,7 +1043,7 @@ CONTAINS
 !! \param field_offsets	An array containing the offsets of the fields.
 !! \param type_size	The size of the HDF5 datatype associated with the table
 !!                      (i.e., the size in bytes of the HDF5 compound datatype used to define a row, or record, in the table).
-!! \param errcode       \fortran_error   
+!! \param errcode       \fortran_error
 !! \param maxlen_out    Maximum character length of the field names.
 !!
   SUBROUTINE h5tbget_field_info_f(loc_id,&

@@ -28,6 +28,10 @@
 #define H5_MY_PKG     H5ES
 #define H5_MY_PKG_ERR H5E_EVENTSET
 
+/** \page H5ES_UG The HDF5 Event Set
+ * @todo Under Construction
+ */
+
 /**\defgroup H5ES H5ES
  *
  * \todo Add the event set life cycle.

@@ -1,3 +1,10 @@
+!> @defgroup FH5Z Fortran Filter (H5Z) Interface
+!!
+!! @see H5Z, C-API
+!!
+!! @see @ref H5Z_UG, User Guide
+!!
+
 !> @ingroup FH5Z
 !!
 !! @brief This module contains Fortran interfaces for H5Z functions.

@@ -24,33 +24,16 @@
 #define H5_MY_PKG     H5R
 #define H5_MY_PKG_ERR H5E_REFERENCE
 
+/** \page H5R_UG The HDF5 References
+ * @todo Under Construction
+ */
+
 /**
- * \defgroup H5R H5R
+ * \defgroup H5R References (H5R)
  *
  * Use the functions in this module to manage HDF5 references. Referents can
  * be HDF5 objects, attributes, and selections on datasets a.k.a. dataset
  * regions.
- *
- *
- * <table>
- * <tr><th>Create</th><th>Read</th></tr>
- * <tr valign="top">
- *   <td>
- *   \snippet{lineno} H5R_examples.c create
- *   </td>
- *   <td>
- *   \snippet{lineno} H5R_examples.c read
- *   </td>
- * <tr><th>Update</th><th>Delete</th></tr>
- * <tr valign="top">
- *   <td>
- *   \snippet{lineno} H5R_examples.c update
- *   </td>
- *   <td>
- *   \snippet{lineno} H5R_examples.c delete
- *   </td>
- * </tr>
- * </table>
  *
  */
 

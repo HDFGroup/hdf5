@@ -270,7 +270,7 @@ CONTAINS
 !! \brief Gets the number of element points in the current selection
 !!
 !! \param space_id   Dataspace identifier.
-!! \param num_points Number of element points in the current dataspace selection.
+!! \param num_points Number of element points in the current dataspace selection
 !! \param hdferr     \fortran_error
 !!
   SUBROUTINE h5sget_select_elem_npoints_f(space_id, num_points, hdferr)
@@ -443,7 +443,7 @@ CONTAINS
 !!
 !! \brief Verifies that the selection is within the extent of the dataspace.
 !!
-!! \param space_id Identifier for the dataspace for whichselection is verified.
+!! \param space_id Identifier for the dataspace for whichselection is verified
 !! \param status   TRUE if the selection is contained within the extent, FALSE otherwise.
 !! \param hdferr   \fortran_error
 !!
