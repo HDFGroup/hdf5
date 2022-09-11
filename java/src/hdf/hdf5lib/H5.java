@@ -15298,7 +15298,8 @@ public class H5 implements java.io.Serializable {
     // H5VL: VOL Interface Functions //
     // //
     // ////////////////////////////////////////////////////////////
-     /**
+
+    /**
      * @defgroup JH5VL Java VOL Connector (H5VL) Interface
      *
      * @see H5VL, C-API
