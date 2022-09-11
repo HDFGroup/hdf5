@@ -7565,62 +7565,6 @@ public class H5 implements java.io.Serializable {
     /**
      * @ingroup JH5O
      *
-     * H5Oget_native_info_by_name retrieves the native HDF5-specific metadata for an HDF5 object, identifying
-     * the object by location and relative name. Native HDF5-specific metadata includes things like object
-     * header information and object storage layout information.
-     *
-     * @param loc_id
-     *            IN: File or group identifier specifying location of group in which object is located
-     * @param name
-     *            IN: Relative name of group
-     * @param lapl_id
-     *            IN: Access property list identifier for the link pointing to the object (Not currently used;
-     *                pass as H5P_DEFAULT.)
-     *
-     * @return object information
-     *
-     * @exception HDF5LibraryException
-     *            Error from the HDF5 Library.
-     * @exception NullPointerException
-     *            name is null.
-     **/
-    public static H5O_native_info_t H5Oget_native_info_by_name(long loc_id, String name, long lapl_id)
-        throws HDF5LibraryException, NullPointerException
-    {
-        return H5Oget_native_info_by_name(loc_id, name, HDF5Constants.H5O_NATIVE_INFO_ALL, lapl_id);
-    }
-
-    /**
-     * @ingroup JH5O
-     *
-     * H5Oget_native_info_by_name retrieves the native HDF5-specific metadata for an HDF5 object, identifying
-     * the object by location and relative name. Native HDF5-specific metadata includes things like object
-     * header information and object storage layout information.
-     *
-     * @param loc_id
-     *            IN: File or group identifier specifying location of group in which object is located
-     * @param name
-     *            IN: Relative name of group
-     * @param fields
-     *            IN: Object fields to select
-     * @param lapl_id
-     *            IN: Access property list identifier for the link pointing to the object (Not currently used;
-     *                pass as H5P_DEFAULT.)
-     *
-     * @return object information
-     *
-     * @exception HDF5LibraryException
-     *            Error from the HDF5 Library.
-     * @exception NullPointerException
-     *            name is null.
-     **/
-    public synchronized static native H5O_native_info_t H5Oget_native_info_by_name(long loc_id, String name,
-                                                                                   int fields, long lapl_id)
-        throws HDF5LibraryException, NullPointerException;
-
-    /**
-     * @ingroup JH5O
-     *
      * H5Oget_native_info_by_idx retrieves the native HDF5-specific metadata for an HDF5 object, identifying
      * the object by an index position. Native HDF5-specific metadata includes things like object header
      * information and object storage layout information.
@@ -7686,6 +7630,62 @@ public class H5 implements java.io.Serializable {
      **/
     public synchronized static native H5O_native_info_t H5Oget_native_info_by_idx(
         long loc_id, String group_name, int idx_type, int order, long n, int fields, long lapl_id)
+        throws HDF5LibraryException, NullPointerException;
+
+    /**
+     * @ingroup JH5O
+     *
+     * H5Oget_native_info_by_name retrieves the native HDF5-specific metadata for an HDF5 object, identifying
+     * the object by location and relative name. Native HDF5-specific metadata includes things like object
+     * header information and object storage layout information.
+     *
+     * @param loc_id
+     *            IN: File or group identifier specifying location of group in which object is located
+     * @param name
+     *            IN: Relative name of group
+     * @param lapl_id
+     *            IN: Access property list identifier for the link pointing to the object (Not currently used;
+     *                pass as H5P_DEFAULT.)
+     *
+     * @return object information
+     *
+     * @exception HDF5LibraryException
+     *            Error from the HDF5 Library.
+     * @exception NullPointerException
+     *            name is null.
+     **/
+    public static H5O_native_info_t H5Oget_native_info_by_name(long loc_id, String name, long lapl_id)
+        throws HDF5LibraryException, NullPointerException
+    {
+        return H5Oget_native_info_by_name(loc_id, name, HDF5Constants.H5O_NATIVE_INFO_ALL, lapl_id);
+    }
+
+    /**
+     * @ingroup JH5O
+     *
+     * H5Oget_native_info_by_name retrieves the native HDF5-specific metadata for an HDF5 object, identifying
+     * the object by location and relative name. Native HDF5-specific metadata includes things like object
+     * header information and object storage layout information.
+     *
+     * @param loc_id
+     *            IN: File or group identifier specifying location of group in which object is located
+     * @param name
+     *            IN: Relative name of group
+     * @param fields
+     *            IN: Object fields to select
+     * @param lapl_id
+     *            IN: Access property list identifier for the link pointing to the object (Not currently used;
+     *                pass as H5P_DEFAULT.)
+     *
+     * @return object information
+     *
+     * @exception HDF5LibraryException
+     *            Error from the HDF5 Library.
+     * @exception NullPointerException
+     *            name is null.
+     **/
+    public synchronized static native H5O_native_info_t H5Oget_native_info_by_name(long loc_id, String name,
+                                                                                   int fields, long lapl_id)
         throws HDF5LibraryException, NullPointerException;
 
     // /////// unimplemented ////////
