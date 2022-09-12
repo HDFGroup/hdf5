@@ -4653,6 +4653,36 @@ public class H5 implements java.io.Serializable {
 
     // ////////////////////////////////////////////////////////////
     // //
+    // H5ES: Event Set Interface Functions //
+    // //
+    // ////////////////////////////////////////////////////////////
+    /**
+     *
+     * @defgroup JH5ES Java Event Set (H5ES) Interface
+     *
+     * @see H5ES, C-API
+     *
+     * @see @ref H5ES_UG, User Guide
+     */
+
+    // /////// unimplemented ////////
+    // H5_DLL hid_t H5EScreate(void);
+    // H5_DLL herr_t H5ESwait(hid_t es_id, uint64_t timeout, size_t *num_in_progress, hbool_t *err_occurred);
+    // H5_DLL herr_t H5EScancel(hid_t es_id, size_t *num_not_canceled, hbool_t *err_occurred);
+    // H5_DLL herr_t H5ESget_count(hid_t es_id, size_t *count);
+    // H5_DLL herr_t H5ESget_op_counter(hid_t es_id, uint64_t *counter);
+    // H5_DLL herr_t H5ESget_err_status(hid_t es_id, hbool_t *err_occurred);
+    // H5_DLL herr_t H5ESget_err_count(hid_t es_id, size_t *num_errs);
+    // H5_DLL herr_t H5ESget_err_info(hid_t es_id, size_t num_err_info, H5ES_err_info_t err_info[],
+    //                                size_t *err_cleared);
+    // H5_DLL herr_t H5ESfree_err_info(size_t num_err_info, H5ES_err_info_t err_info[]);
+    // H5_DLL herr_t H5ESregister_insert_func(hid_t es_id, H5ES_event_insert_func_t func, void *ctx);
+    // H5_DLL herr_t H5ESregister_complete_func(hid_t es_id, H5ES_event_complete_func_t func, void *ctx);
+    // H5_DLL herr_t H5ESclose(hid_t es_id);
+    //
+
+    // ////////////////////////////////////////////////////////////
+    // //
     // H5F: File Interface Functions //
     // //
     // ////////////////////////////////////////////////////////////
