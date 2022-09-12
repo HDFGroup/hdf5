@@ -273,6 +273,9 @@ HDF5 Release 1.14
 \li \ref subsec_vol_connect
 \li \ref subsec_vol_use
 
+\ref sec_async
+\li \ref subsec_async_intro
+
 \ref sec_map
 
 \ref sec_addition
