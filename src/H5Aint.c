@@ -684,7 +684,7 @@ H5A_read(const H5A_t *attr, const H5T_t *mem_type, void *buf, hid_t dxpl_id)
                     /* Copy the application buffer into the background buffer if necessary */
                     if (need_bkg == H5T_BKG_YES) {
                         HDassert(buf_size >= (dst_type_size * nelmts));
-                        H5MM_memcpy(bkg_buf, buf, dst_type_size * nelmts);
+                        HDmemcpy(bkg_buf, buf, dst_type_size * nelmts);
                     }
                 }
 
