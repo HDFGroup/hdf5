@@ -352,6 +352,12 @@ test_config_file(void)
             VRFY(substr, "HDstrstr succeeded");
         }
 
+        /* Verify that there aren't too many subfiles */
+        HDsnprintf(subfile_name, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
+                   (uint64_t)file_info.st_ino, num_digits, (int)cfg.stripe_count + 1, cfg.stripe_count);
+        substr = HDstrstr(config_buf, subfile_name);
+        VRFY(substr == NULL, "HDstrstr correctly failed");
+
         HDfree(subfile_name);
         HDfree(config_buf);
 
@@ -428,6 +434,8 @@ test_stripe_sizes(void)
 
         /* First, try I/O with a single rank */
         if (MAINPROCESS) {
+            FILE *subfile_ptr;
+
             num_subfiles = 1;
             num_digits   = (int)(HDlog10(num_subfiles) + 1);
 
@@ -485,7 +493,6 @@ test_stripe_sizes(void)
             for (int j = 0; j < num_subfiles; j++) {
                 h5_stat_size_t subfile_size;
                 h5_stat_t      subfile_info;
-                FILE          *subfile_ptr;
 
                 HDsnprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
                            (uint64_t)file_info.st_ino, num_digits, j + 1, num_subfiles);
@@ -501,6 +508,14 @@ test_stripe_sizes(void)
 
                 VRFY((subfile_size >= cfg.stripe_size), "File size verification succeeded");
             }
+
+            /* Verify that there aren't too many subfiles */
+            HDsnprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
+                       (uint64_t)file_info.st_ino, num_digits, num_subfiles + 1, num_subfiles);
+
+            /* Ensure file doesn't exist */
+            subfile_ptr = HDfopen(tmp_filename, "r");
+            VRFY(subfile_ptr == NULL, "HDfopen on subfile correctly failed");
 
             /* Set EOA for following write call */
             VRFY((H5FDset_eoa(file_ptr, H5FD_MEM_DEFAULT, file_end_addr + nbytes) >= 0),
@@ -522,7 +537,6 @@ test_stripe_sizes(void)
             for (int j = 0; j < num_subfiles; j++) {
                 h5_stat_size_t subfile_size;
                 h5_stat_t      subfile_info;
-                FILE          *subfile_ptr;
 
                 HDsnprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
                            (uint64_t)file_info.st_ino, num_digits, j + 1, num_subfiles);
@@ -539,8 +553,18 @@ test_stripe_sizes(void)
                 VRFY((subfile_size >= 2 * cfg.stripe_size), "File size verification succeeded");
             }
 
+            /* Verify that there aren't too many subfiles */
+            HDsnprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
+                       (uint64_t)file_info.st_ino, num_digits, num_subfiles + 1, num_subfiles);
+
+            /* Ensure file doesn't exist */
+            subfile_ptr = HDfopen(tmp_filename, "r");
+            VRFY(subfile_ptr == NULL, "HDfopen on subfile correctly failed");
+
             HDfree(write_buf);
             write_buf = NULL;
+
+            VRFY((H5FDclose(file_ptr) >= 0), "H5FDclose succeeded");
 
             H5E_BEGIN_TRY
             {
@@ -549,7 +573,6 @@ test_stripe_sizes(void)
             H5E_END_TRY;
 
             VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
-            VRFY((H5FDclose(file_ptr) >= 0), "H5FDclose succeeded");
         }
 
         mpi_code_g = MPI_Barrier(comm_g);
@@ -627,10 +650,11 @@ test_stripe_sizes(void)
         VRFY((mpi_code_g == MPI_SUCCESS), "MPI_Barrier succeeded");
 
         if (MAINPROCESS) {
+            FILE *subfile_ptr;
+
             for (int j = 0; j < num_subfiles; j++) {
                 h5_stat_size_t subfile_size;
                 h5_stat_t      subfile_info;
-                FILE          *subfile_ptr;
 
                 HDsnprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
                            (uint64_t)file_info.st_ino, num_digits, j + 1, num_subfiles);
@@ -646,6 +670,14 @@ test_stripe_sizes(void)
 
                 VRFY((subfile_size >= (mpi_size * cfg.stripe_size)), "File size verification succeeded");
             }
+
+            /* Verify that there aren't too many subfiles */
+            HDsnprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
+                       (uint64_t)file_info.st_ino, num_digits, num_subfiles + 1, num_subfiles);
+
+            /* Ensure file doesn't exist */
+            subfile_ptr = HDfopen(tmp_filename, "r");
+            VRFY(subfile_ptr == NULL, "HDfopen on subfile correctly failed");
         }
 
         mpi_code_g = MPI_Barrier(comm_g);
@@ -673,10 +705,11 @@ test_stripe_sizes(void)
         VRFY((mpi_code_g == MPI_SUCCESS), "MPI_Barrier succeeded");
 
         if (MAINPROCESS) {
+            FILE *subfile_ptr;
+
             for (int j = 0; j < num_subfiles; j++) {
                 h5_stat_size_t subfile_size;
                 h5_stat_t      subfile_info;
-                FILE          *subfile_ptr;
 
                 HDsnprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
                            (uint64_t)file_info.st_ino, num_digits, j + 1, num_subfiles);
@@ -692,7 +725,17 @@ test_stripe_sizes(void)
 
                 VRFY((subfile_size >= (2 * mpi_size * cfg.stripe_size)), "File size verification succeeded");
             }
+
+            /* Verify that there aren't too many subfiles */
+            HDsnprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
+                       (uint64_t)file_info.st_ino, num_digits, num_subfiles + 1, num_subfiles);
+
+            /* Ensure file doesn't exist */
+            subfile_ptr = HDfopen(tmp_filename, "r");
+            VRFY(subfile_ptr == NULL, "HDfopen on subfile correctly failed");
         }
+
+        VRFY((H5FDclose(file_ptr) >= 0), "H5FDclose succeeded");
 
         mpi_code_g = MPI_Barrier(comm_g);
         VRFY((mpi_code_g == MPI_SUCCESS), "MPI_Barrier succeeded");
@@ -706,7 +749,6 @@ test_stripe_sizes(void)
         HDfree(write_buf);
 
         VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
-        VRFY((H5FDclose(file_ptr) >= 0), "H5FDclose succeeded");
     }
 
     HDfree(tmp_filename);
@@ -842,6 +884,14 @@ test_subfiling_precreate_rank_0(void)
             VRFY((file_size >= cfg.stripe_size), "File size verification succeeded");
         }
 
+        /* Verify that there aren't too many subfiles */
+        HDsnprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
+                   (uint64_t)file_info.st_ino, num_digits, num_subfiles + 1, num_subfiles);
+
+        /* Ensure file doesn't exist */
+        subfile_ptr = HDfopen(tmp_filename, "r");
+        VRFY(subfile_ptr == NULL, "HDfopen on subfile correctly failed");
+
         HDfree(tmp_filename);
         tmp_filename = NULL;
     }
@@ -881,19 +931,20 @@ test_subfiling_precreate_rank_0(void)
         VRFY((buf_value == (SUBF_C_TYPE)((size_t)mpi_rank + i)), "data verification succeeded");
     }
 
+    HDfree(buf);
+    buf = NULL;
+
+    VRFY((H5Sclose(fspace_id) >= 0), "File dataspace close succeeded");
+    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+    VRFY((H5Fclose(file_id) >= 0), "H5Fclose succeeded");
+
     H5E_BEGIN_TRY
     {
         H5Fdelete(SUBF_FILENAME, fapl_id);
     }
     H5E_END_TRY;
 
-    HDfree(buf);
-    buf = NULL;
-
-    VRFY((H5Sclose(fspace_id) >= 0), "File dataspace close succeeded");
-    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
     VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
-    VRFY((H5Fclose(file_id) >= 0), "H5Fclose succeeded");
 
     CHECK_PASSED();
 }
