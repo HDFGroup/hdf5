@@ -27,6 +27,10 @@
 #define H5_MY_PKG_ERR  H5E_PLUGIN
 #define H5_MY_PKG_INIT YES
 
+/** \page H5PL_UG The HDF5 Plugins
+ * @todo Under Construction
+ */
+
 /**
  * \defgroup H5PL Dynamically-loaded Plugins (H5PL)
  *

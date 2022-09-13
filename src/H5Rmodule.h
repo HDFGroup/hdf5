@@ -25,6 +25,10 @@
 #define H5_MY_PKG_ERR  H5E_REFERENCE
 #define H5_MY_PKG_INIT YES
 
+/** \page H5R_UG The HDF5 References
+ * @todo Under Construction
+ */
+
 /**
  * \defgroup H5R References (H5R)
  *

@@ -18,7 +18,11 @@
 extern "C" {
 #endif
 
-/**\defgroup H5TB Table
+/** \page H5TB_UG The HDF5 High Level Table
+ * @todo Under Construction
+ */
+
+/**\defgroup H5TB HDF5 Table APIs (H5TB)
  *
  * <em>Creating and manipulating HDF5 datasets intended to be
  * interpreted as tables (H5TB)</em>

@@ -29,6 +29,10 @@
 #define H5_MY_PKG_ERR  H5E_OHDR
 #define H5_MY_PKG_INIT YES
 
+/** \page H5O_UG The HDF5 Objects
+ * @todo Under Construction
+ */
+
 /**
  * \defgroup H5O Objects (H5O)
  *

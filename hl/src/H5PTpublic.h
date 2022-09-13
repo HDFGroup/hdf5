@@ -18,7 +18,11 @@
 extern "C" {
 #endif
 
-/**\defgroup H5PT Packet Table
+/** \page H5PT_UG The HDF5 High Level Packet Table
+ * @todo Under Construction
+ */
+
+/**\defgroup H5PT HDF5 Packet Table APIs (H5PT)
  *
  * <em>Creating and manipulating HDF5 datasets to support append-
  * and read-only operations on table data (H5PT)</em>

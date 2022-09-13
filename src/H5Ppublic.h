@@ -829,7 +829,7 @@ H5_DLL htri_t H5Pexist(hid_t plist_id, const char *name);
  */
 H5_DLL herr_t H5Pget(hid_t plist_id, const char *name, void *value);
 /**
- *\ingroup PLCR
+ * \ingroup PLCR
  *
  * \brief Returns the property list class identifier for a property list
  *
