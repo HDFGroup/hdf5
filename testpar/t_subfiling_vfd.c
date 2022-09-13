@@ -301,7 +301,10 @@ test_config_file(void)
         VRFY(substr, "HDstrstr succeeded");
 
         VRFY((HDsscanf(substr, "aggregator_count=%d", &read_aggr_count) == 1), "HDsscanf succeeded");
-        VRFY((read_aggr_count == cfg.stripe_count), "Aggregator count comparison succeeded");
+        if (cfg.stripe_count < num_iocs_g)
+            VRFY((read_aggr_count == cfg.stripe_count), "Aggregator count comparison succeeded");
+        else
+            VRFY((read_aggr_count == num_iocs_g), "Aggregator count comparison succeeded");
 
         /* Check the subfile_count field in the configuration file */
         substr = HDstrstr(config_buf, "subfile_count");

@@ -2510,7 +2510,7 @@ done:
             if (MPI_SUCCESS != (mpi_code = MPI_Bcast(&path_len, 1, HSIZE_AS_MPI_TYPE, 0, comm)))
                 H5_SUBFILING_MPI_DONE_ERROR(FAIL, "MPI_Bcast failed", mpi_code);
         }
-        if (!bcasted_path) {
+        if (!bcasted_path && (path_len != HSIZE_UNDEF)) {
             H5_CHECK_OVERFLOW(path_len, hsize_t, int);
             if (MPI_SUCCESS != (mpi_code = MPI_Bcast(resolved_path, (int)path_len, MPI_CHAR, 0, comm)))
                 H5_SUBFILING_MPI_DONE_ERROR(FAIL, "MPI_Bcast failed", mpi_code);
