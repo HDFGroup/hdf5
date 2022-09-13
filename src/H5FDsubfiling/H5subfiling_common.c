@@ -1507,6 +1507,7 @@ identify_ioc_ranks(sf_topology_t *app_topology, int rank_stride)
 {
     app_layout_t *app_layout       = NULL;
     int          *io_concentrators = NULL;
+    int           max_iocs         = 0;
     herr_t        ret_value        = SUCCEED;
 
     HDassert(app_topology);
@@ -1518,6 +1519,8 @@ identify_ioc_ranks(sf_topology_t *app_topology, int rank_stride)
 
     app_layout = app_topology->app_layout;
 
+    max_iocs = app_topology->n_io_concentrators;
+
     if (NULL == (app_topology->io_concentrators = HDmalloc((size_t)app_topology->n_io_concentrators *
                                                            sizeof(*app_topology->io_concentrators))))
         H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
@@ -1528,7 +1531,10 @@ identify_ioc_ranks(sf_topology_t *app_topology, int rank_stride)
     switch (app_topology->selection_type) {
         case SELECT_IOC_ONE_PER_NODE: {
             int total_ioc_count = 0;
-            int iocs_per_node   = app_topology->n_io_concentrators / app_layout->node_count;
+            int iocs_per_node   = 1;
+
+            if (app_topology->n_io_concentrators > app_layout->node_count)
+                iocs_per_node = app_topology->n_io_concentrators / app_layout->node_count;
 
             HDassert(app_layout->node_ranks);
 
@@ -1547,18 +1553,24 @@ identify_ioc_ranks(sf_topology_t *app_topology, int rank_stride)
                 total_ioc_count++;
 
                 for (size_t j = 1; j < (size_t)iocs_per_node; j++) {
-                    if (j < (size_t)local_size) {
-                        HDassert(total_ioc_count < app_topology->n_io_concentrators);
-                        io_concentrators[total_ioc_count] = app_layout->layout[node_index++].rank;
+                    if (total_ioc_count >= max_iocs)
+                        break;
+                    if (j >= (size_t)local_size)
+                        break;
 
-                        if (app_layout->world_rank == io_concentrators[total_ioc_count]) {
-                            app_topology->ioc_idx     = total_ioc_count;
-                            app_topology->rank_is_ioc = TRUE;
-                        }
+                    HDassert(total_ioc_count < app_topology->n_io_concentrators);
+                    io_concentrators[total_ioc_count] = app_layout->layout[node_index++].rank;
 
-                        total_ioc_count++;
+                    if (app_layout->world_rank == io_concentrators[total_ioc_count]) {
+                        app_topology->ioc_idx     = total_ioc_count;
+                        app_topology->rank_is_ioc = TRUE;
                     }
+
+                    total_ioc_count++;
                 }
+
+                if (total_ioc_count >= max_iocs)
+                    break;
             }
 
             /* Set final number of I/O concentrators after adjustments */
@@ -1586,6 +1598,9 @@ identify_ioc_ranks(sf_topology_t *app_topology, int rank_stride)
                     app_topology->ioc_idx     = ioc_next;
                     app_topology->rank_is_ioc = TRUE;
                 }
+
+                if (ioc_next + 1 >= max_iocs)
+                    break;
             }
 
             /* Set final number of I/O concentrators after adjustments */
