@@ -443,7 +443,7 @@ CONTAINS
 !!
 !! \brief Verifies that the selection is within the extent of the dataspace.
 !!
-!! \param space_id Identifier for the dataspace for whichselection is verified
+!! \param space_id Identifier for the dataspace for which selection is verified
 !! \param status   TRUE if the selection is contained within the extent, FALSE otherwise.
 !! \param hdferr   \fortran_error
 !!
