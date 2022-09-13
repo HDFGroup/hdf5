@@ -800,6 +800,7 @@ ioc_file_queue_write_indep(sf_work_request_t *msg, int ioc_idx, int source, MPI_
 
 #endif
 
+    HDassert(subfile_idx < sf_context->sf_num_fids);
     sf_fid = sf_context->sf_fids[subfile_idx];
 
 #ifdef H5_SUBFILING_DEBUG
@@ -978,6 +979,7 @@ ioc_file_queue_read_indep(sf_work_request_t *msg, int ioc_idx, int source, MPI_C
     }
 
     /* Read data from the subfile */
+    HDassert(subfile_idx < sf_context->sf_num_fids);
     sf_fid = sf_context->sf_fids[subfile_idx];
     if (sf_fid < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_IO, H5E_BADVALUE, -1, "subfile file descriptor %d is invalid", sf_fid);

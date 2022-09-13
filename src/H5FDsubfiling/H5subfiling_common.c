@@ -1181,8 +1181,10 @@ find_cached_topology_info(MPI_Comm comm, H5FD_subfiling_shared_config_t *subf_co
          * is greater than the specified target number of subfiles,
          * reject the cached topology
          */
-        if (stripe_count < cached_topology->n_io_concentrators)
-            continue;
+        if (stripe_count != H5FD_SUBFILING_DEFAULT_STRIPE_COUNT) {
+            if (stripe_count < cached_topology->n_io_concentrators)
+                continue;
+        }
 
         if (cached_topology->selection_type == SELECT_IOC_ONE_PER_NODE) {
             HDassert(iocs_per_node >= 1);

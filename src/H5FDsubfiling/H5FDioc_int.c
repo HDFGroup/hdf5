@@ -43,7 +43,7 @@ calculate_target_ioc(int64_t file_offset, int64_t stripe_size, int num_io_concen
     subfile_row = stripe_idx / num_subfiles;
     subfile_idx = (stripe_idx % num_subfiles) / num_io_concentrators;
 
-    *target_ioc      = stripe_idx % num_io_concentrators;
+    *target_ioc      = (stripe_idx % num_subfiles) % num_io_concentrators;
     *ioc_file_offset = (subfile_row * stripe_size) + (file_offset % stripe_size);
     *ioc_subfile_idx = subfile_idx;
 }
