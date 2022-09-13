@@ -1288,19 +1288,22 @@ main(int argc, char **argv)
         goto exit;
     }
 
+    if (MPI_SUCCESS != (mpi_code_g = MPI_Comm_rank(comm_g, &mpi_rank))) {
+        HDprintf("MPI_Comm_rank failed with error code %d\n", mpi_code_g);
+        nerrors++;
+        goto exit;
+    }
+
     if (provided != required) {
-        HDprintf("MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE\n");
+        if (MAINPROCESS)
+            HDprintf("MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE\n");
         nerrors++;
         goto exit;
     }
 
     if (MPI_SUCCESS != (mpi_code_g = MPI_Comm_size(comm_g, &mpi_size))) {
-        HDprintf("MPI_Comm_size failed with error code %d\n", mpi_code_g);
-        nerrors++;
-        goto exit;
-    }
-    if (MPI_SUCCESS != (mpi_code_g = MPI_Comm_rank(comm_g, &mpi_rank))) {
-        HDprintf("MPI_Comm_rank failed with error code %d\n", mpi_code_g);
+        if (MAINPROCESS)
+            HDprintf("MPI_Comm_size failed with error code %d\n", mpi_code_g);
         nerrors++;
         goto exit;
     }
@@ -1308,17 +1311,20 @@ main(int argc, char **argv)
     /* Split communicator according to node-local ranks */
     if (MPI_SUCCESS != (mpi_code_g = MPI_Comm_split_type(comm_g, MPI_COMM_TYPE_SHARED, mpi_rank,
                                                          MPI_INFO_NULL, &node_local_comm))) {
-        HDprintf("MPI_Comm_split_type failed with error code %d\n", mpi_code_g);
+        if (MAINPROCESS)
+            HDprintf("MPI_Comm_split_type failed with error code %d\n", mpi_code_g);
         nerrors++;
         goto exit;
     }
     if (MPI_SUCCESS != (mpi_code_g = MPI_Comm_size(node_local_comm, &node_local_size))) {
-        HDprintf("MPI_Comm_size failed with error code %d\n", mpi_code_g);
+        if (MAINPROCESS)
+            HDprintf("MPI_Comm_size failed with error code %d\n", mpi_code_g);
         nerrors++;
         goto exit;
     }
     if (MPI_SUCCESS != (mpi_code_g = MPI_Comm_rank(node_local_comm, &node_local_rank))) {
-        HDprintf("MPI_Comm_rank failed with error code %d\n", mpi_code_g);
+        if (MAINPROCESS)
+            HDprintf("MPI_Comm_rank failed with error code %d\n", mpi_code_g);
         nerrors++;
         goto exit;
     }
@@ -1327,7 +1333,8 @@ main(int argc, char **argv)
     num_nodes_g = (node_local_rank == 0) ? 1 : 0;
     if (MPI_SUCCESS !=
         (mpi_code_g = MPI_Allreduce(MPI_IN_PLACE, &num_nodes_g, 1, MPI_INT, MPI_SUM, comm_g))) {
-        HDprintf("MPI_Allreduce failed with error code %d\n", mpi_code_g);
+        if (MAINPROCESS)
+            HDprintf("MPI_Allreduce failed with error code %d\n", mpi_code_g);
         nerrors++;
         goto exit;
     }
@@ -1339,17 +1346,20 @@ main(int argc, char **argv)
      * be an IOC in the new communicator.
      */
     if (MPI_SUCCESS != (mpi_code_g = MPI_Comm_split(comm_g, node_local_rank, mpi_rank, &ioc_comm))) {
-        HDprintf("MPI_Comm_split failed with error code %d\n", mpi_code_g);
+        if (MAINPROCESS)
+            HDprintf("MPI_Comm_split failed with error code %d\n", mpi_code_g);
         nerrors++;
         goto exit;
     }
     if (MPI_SUCCESS != (mpi_code_g = MPI_Comm_size(ioc_comm, &ioc_comm_size))) {
-        HDprintf("MPI_Comm_size failed with error code %d\n", mpi_code_g);
+        if (MAINPROCESS)
+            HDprintf("MPI_Comm_size failed with error code %d\n", mpi_code_g);
         nerrors++;
         goto exit;
     }
     if (MPI_SUCCESS != (mpi_code_g = MPI_Comm_rank(ioc_comm, &ioc_comm_rank))) {
-        HDprintf("MPI_Comm_rank failed with error code %d\n", mpi_code_g);
+        if (MAINPROCESS)
+            HDprintf("MPI_Comm_rank failed with error code %d\n", mpi_code_g);
         nerrors++;
         goto exit;
     }
@@ -1421,7 +1431,8 @@ main(int argc, char **argv)
         HDsnprintf(tmp, sizeof(tmp), "%" PRId64, stripe_size);
 
         if (HDsetenv(H5FD_SUBFILING_STRIPE_SIZE, tmp, 1) < 0) {
-            HDprintf("HDsetenv failed\n");
+            if (MAINPROCESS)
+                HDprintf("HDsetenv failed\n");
             nerrors++;
             goto exit;
         }
@@ -1435,14 +1446,16 @@ main(int argc, char **argv)
             ioc_per_node_str = "1";
 
         if (HDsetenv(H5FD_SUBFILING_IOC_PER_NODE, ioc_per_node_str, 1) < 0) {
-            HDprintf("HDsetenv failed\n");
+            if (MAINPROCESS)
+                HDprintf("HDsetenv failed\n");
             nerrors++;
             goto exit;
         }
     }
     if (ioc_thread_pool_size_g < 0) {
         if (HDsetenv(H5FD_IOC_THREAD_POOL_SIZE, "2", 1) < 0) {
-            HDprintf("HDsetenv failed\n");
+            if (MAINPROCESS)
+                HDprintf("HDsetenv failed\n");
             nerrors++;
             goto exit;
         }
@@ -1494,8 +1507,10 @@ exit:
 
     H5close();
 
-    MPI_Comm_free(&ioc_comm);
-    MPI_Comm_free(&node_local_comm);
+    if (MPI_COMM_WORLD != ioc_comm)
+        MPI_Comm_free(&ioc_comm);
+    if (MPI_COMM_WORLD != node_local_comm)
+        MPI_Comm_free(&node_local_comm);
 
     MPI_Finalize();
 
