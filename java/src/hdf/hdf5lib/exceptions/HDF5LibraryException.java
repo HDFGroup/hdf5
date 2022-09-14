@@ -108,7 +108,7 @@ public class HDF5LibraryException extends HDF5Exception {
     /**
      * @ingroup JERRLIB
      *
-     * Return a error message for the minor error number.
+     * Return an error message for the minor error number.
      *
      * These messages come from <b>@ref H5E</b>.
      *
