@@ -2,6 +2,7 @@
 
 <table>
 <tr><th>RFC ID</th><th>Title</th><th>Comments</th></tr>
+<tr> <td>2022-08-19</td> <td>\ref_rfc20220819</td> <td></td></tr>
 <tr> <td>2021-05-28</td> <td>\ref_rfc20210528</td> <td></td></tr>
 <tr> <td>2021-02-19</td> <td>\ref_rfc20210219</td> <td></td></tr>
 <tr> <td>2020-02-13</td> <td>\ref_rfc20200213</td> <td></td></tr>
@@ -14,6 +15,7 @@
 <tr> <td>2018-08-30</td> <td>\ref_rfc20180830</td> <td></td> </tr>
 <tr> <td>2018-08-29</td> <td>\ref_rfc20180829</td> <td></td> </tr>
 <tr> <td>2018-08-15</td> <td>\ref_rfc20180815</td> <td></td> </tr>
+<tr> <td>2018-07-12</td> <td>\ref_rfc20180712</td> <td></td> </tr>
 <tr> <td>2018-06-20</td> <td>\ref_rfc20180620</td> <td></td> </tr>
 <tr> <td>2018-06-10</td> <td>\ref_rfc20180610</td> <td></td> </tr>
 <tr> <td>2018-03-21</td> <td>\ref_rfc20180321</td> <td></td> </tr>

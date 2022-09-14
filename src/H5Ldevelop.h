@@ -15,8 +15,8 @@
  *      support routines.
  */
 
-#ifndef _H5Ldevelop_H
-#define _H5Ldevelop_H
+#ifndef H5Ldevelop_H
+#define H5Ldevelop_H
 
 /* Include package's public header */
 #include "H5Lpublic.h"
@@ -83,7 +83,7 @@ typedef ssize_t (*H5L_query_func_t)(const char *link_name, const void *lnkdata, 
 typedef struct {
     int                 version;     /**< Version number of this struct       */
     H5L_type_t          id;          /**< Link type ID                        */
-    const char *        comment;     /**< Comment for debugging               */
+    const char         *comment;     /**< Comment for debugging               */
     H5L_create_func_t   create_func; /**< Callback during link creation       */
     H5L_move_func_t     move_func;   /**< Callback after moving link          */
     H5L_copy_func_t     copy_func;   /**< Callback after copying link         */
@@ -300,7 +300,7 @@ typedef hid_t (*H5L_traverse_0_func_t)(const char *link_name, hid_t cur_group, c
 typedef struct {
     int                   version;     /**< Version number of this struct        */
     H5L_type_t            id;          /**< Link type ID                         */
-    const char *          comment;     /**< Comment for debugging                */
+    const char           *comment;     /**< Comment for debugging                */
     H5L_create_func_t     create_func; /**< Callback during link creation        */
     H5L_move_func_t       move_func;   /**< Callback after moving link           */
     H5L_copy_func_t       copy_func;   /**< Callback after copying link          */
@@ -311,4 +311,4 @@ typedef struct {
 
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
-#endif /* _H5Ldevelop_H */
+#endif /* H5Ldevelop_H */

@@ -180,15 +180,15 @@ ensure_filter_works(hid_t fid, const char *name, hid_t dcpl_id)
     hid_t   dxpl_id       = -1;           /* Dataset xfer property list ID                */
     hid_t   write_dxpl_id = -1;           /* Dataset xfer property list ID for writing    */
     hid_t   sid           = -1;           /* Dataspace ID                                 */
-    void *  tconv_buf     = NULL;         /* Temporary conversion buffer                  */
-    int **  orig          = NULL;         /* Data written to the dataset                  */
-    int **  read          = NULL;         /* Data read from the dataset                   */
+    void   *tconv_buf     = NULL;         /* Temporary conversion buffer                  */
+    int   **orig          = NULL;         /* Data written to the dataset                  */
+    int   **read          = NULL;         /* Data read from the dataset                   */
     size_t  r, c;                         /* Data rows and columns                        */
     size_t  hs_r, hs_c, hs_offr, hs_offc; /* Hypserslab sizes and offsets                 */
     size_t  i, j;                         /* Local index variables                        */
     int     n = 0;                        /* Value written to point array                 */
     hbool_t are_same;                     /* Output from dataset compare function         */
-    int *** save_array = NULL;            /* (Global) array where the final data go       */
+    int  ***save_array = NULL;            /* (Global) array where the final data go       */
 
     /* initialize */
     r = (size_t)sizes_g[0];
@@ -438,9 +438,11 @@ static herr_t
 test_dataset_write_with_filters(hid_t fid)
 {
     hid_t        dcpl_id = -1;     /* Dataset creation property list ID        */
-    unsigned int compress_level;   /* Deflate compression level                */
     unsigned int filter1_data;     /* Data used by filter 1                    */
     unsigned int libver_values[4]; /* Used w/ the filter that makes HDF5 calls */
+#ifdef H5_HAVE_FILTER_DEFLATE
+    unsigned int compress_level; /* Deflate compression level */
+#endif
 
     /*----------------------------------------------------------
      * STEP 1: Test deflation by itself.
@@ -587,8 +589,8 @@ error:
 static herr_t
 test_read_data(hid_t did, int *origin_data)
 {
-    int ** check  = NULL;
-    int *  data_p = origin_data;
+    int  **check  = NULL;
+    int   *data_p = origin_data;
     size_t i, j; /* Local index variables */
 
     if (allocate_and_init_2D_array(&check, sizes_g, NULL) < 0)
@@ -602,7 +604,7 @@ test_read_data(hid_t did, int *origin_data)
     for (i = 0; i < sizes_g[0]; i++)
         for (j = 0; j < sizes_g[1]; j++) {
             if (*data_p != check[i][j])
-                TEST_ERROR
+                TEST_ERROR;
             data_p++;
         }
 
@@ -727,7 +729,7 @@ error:
 static herr_t
 ensure_data_read_fails(hid_t did)
 {
-    int ** check = NULL;
+    int  **check = NULL;
     herr_t ret   = FAIL;
 
     if (allocate_and_init_2D_array(&check, sizes_g, NULL) < 0)
@@ -847,7 +849,7 @@ test_creating_groups_using_plugins(hid_t fid)
     for (i = 0; i < N_SUBGROUPS; i++) {
         char *sp = subgroup_name;
 
-        sp += HDsprintf(subgroup_name, SUBGROUP_PREFIX);
+        sp += HDsnprintf(subgroup_name, sizeof(subgroup_name), SUBGROUP_PREFIX);
         HDsprintf(sp, "%d", i);
 
         if ((sub_gid = H5Gcreate2(gid, subgroup_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -906,7 +908,7 @@ test_opening_groups_using_plugins(hid_t fid)
     for (i = 0; i < N_SUBGROUPS; i++) {
         char *sp = subgroup_name;
 
-        sp += HDsprintf(subgroup_name, SUBGROUP_PREFIX);
+        sp += HDsnprintf(subgroup_name, sizeof(subgroup_name), SUBGROUP_PREFIX);
         HDsprintf(sp, "%d", i);
 
         if ((sub_gid = H5Gopen2(gid, subgroup_name, H5P_DEFAULT)) < 0)
@@ -1015,7 +1017,7 @@ test_path_api_calls(void)
 
     /* Add a bunch of paths to the path table */
     for (u = 0; u < n_starting_paths; u++) {
-        HDsprintf(path, "a_path_%u", u);
+        HDsnprintf(path, sizeof(path), "a_path_%u", u);
         if (H5PLappend(path) < 0) {
             HDfprintf(stderr, "    at %u: %s\n", u, path);
             TEST_ERROR;
@@ -1038,7 +1040,7 @@ test_path_api_calls(void)
     H5E_END_TRY
 
     if (ret >= 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     PASSED();
 
@@ -1081,7 +1083,7 @@ test_path_api_calls(void)
     /* Get path at the last index */
     if ((path_len = H5PLget(n_starting_paths - 1, path, 256)) <= 0)
         TEST_ERROR;
-    HDsprintf(temp_name, "a_path_%u", n_starting_paths - 1);
+    HDsnprintf(temp_name, sizeof(temp_name), "a_path_%u", n_starting_paths - 1);
     if (HDstrcmp(path, temp_name) != 0) {
         HDfprintf(stderr, "    get %u: %s\n", n_starting_paths - 1, path);
         TEST_ERROR;
@@ -1135,7 +1137,7 @@ test_path_api_calls(void)
     TESTING("    prepend");
 
     /* Prepend one path */
-    HDsprintf(path, "a_path_%d", n_starting_paths + 1);
+    HDsnprintf(path, sizeof(path), "a_path_%d", n_starting_paths + 1);
     if (H5PLprepend(path) < 0) {
         HDfprintf(stderr, "    prepend %u: %s\n", n_starting_paths + 1, path);
         TEST_ERROR;
@@ -1158,7 +1160,7 @@ test_path_api_calls(void)
     /* Verify that the path was inserted at index zero */
     if (H5PLget(0, path, 256) <= 0)
         TEST_ERROR;
-    HDsprintf(temp_name, "a_path_%d", n_starting_paths + 1);
+    HDsnprintf(temp_name, sizeof(temp_name), "a_path_%d", n_starting_paths + 1);
     if (HDstrcmp(path, temp_name) != 0) {
         HDfprintf(stderr, "    get 0: %s\n", path);
         TEST_ERROR;
@@ -1173,7 +1175,7 @@ test_path_api_calls(void)
     TESTING("    replace");
 
     /* Replace one path at index 1 */
-    HDsprintf(path, "a_path_%u", n_starting_paths + 4);
+    HDsnprintf(path, sizeof(path), "a_path_%u", n_starting_paths + 4);
     if (H5PLreplace(path, 1) < 0) {
         HDfprintf(stderr, "    replace 1: %s\n", path);
         TEST_ERROR;
@@ -1192,7 +1194,7 @@ test_path_api_calls(void)
     /* Check path at index 0 */
     if (H5PLget(0, path, 256) <= 0)
         TEST_ERROR;
-    HDsprintf(temp_name, "a_path_%u", n_starting_paths + 1);
+    HDsnprintf(temp_name, sizeof(temp_name), "a_path_%u", n_starting_paths + 1);
     if (HDstrcmp(path, temp_name) != 0) {
         HDfprintf(stderr, "    get 0: %s\n", path);
         TEST_ERROR;
@@ -1240,7 +1242,7 @@ test_path_api_calls(void)
     TESTING("    insert");
 
     /* Insert one path at index 3*/
-    HDsprintf(path, "a_path_%d", n_starting_paths + 5);
+    HDsnprintf(path, sizeof(path), "a_path_%d", n_starting_paths + 5);
     if (H5PLinsert(path, 3) < 0) {
         HDfprintf(stderr, "    insert 3: %s\n", path);
         TEST_ERROR;

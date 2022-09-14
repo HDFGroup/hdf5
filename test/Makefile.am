@@ -70,7 +70,8 @@ TEST_PROG= testhdf5 \
            flush1 flush2 app_ref enum set_extent ttsafe enc_dec_plist \
            enc_dec_plist_cross_platform getname vfd ros3 s3comms hdfs ntypes \
            dangle dtransform reserved cross_read freespace mf vds file_image \
-           unregister cache_logging cork swmr thread_id vol timer event_set
+           unregister cache_logging cork swmr thread_id vol timer event_set \
+		   onion
 
 # List programs to be built when testing here
 #
@@ -230,7 +231,7 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offse
 
 # Sources for testhdf5 executable
 testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
-    tgenprop.c th5o.c th5s.c tcoords.c tid.c titerate.c tmeta.c tmisc.c \
+    tgenprop.c th5o.c th5s.c th5_system.c tcoords.c tid.c titerate.c tmeta.c tmisc.c \
     trefer.c trefer_deprec.c trefstr.c tselect.c tskiplist.c tsohm.c ttime.c tunicode.c \
     tvlstr.c tvltypes.c
 

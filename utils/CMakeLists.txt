@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required (VERSION 3.18)
 project (HDF5_UTILS C)
 
 if (BUILD_TESTING)
@@ -8,6 +8,7 @@ endif ()
 option (HDF5_BUILD_UTILS  "Build HDF5 Utils" ON)
 if (HDF5_BUILD_UTILS)
   add_subdirectory (mirror_vfd)
+  add_subdirectory (subfiling_vfd)
 endif ()
 
 #-- Add the h5dwalk and test executables

@@ -18,15 +18,18 @@
 /* Name of tool */
 #define PROGRAMNAME "h5dump"
 
-const char *       outfname_g    = NULL;
+const char        *outfname_g    = NULL;
 static hbool_t     doxml_g       = FALSE;
 static hbool_t     useschema_g   = TRUE;
 static const char *xml_dtd_uri_g = NULL;
 
-static hbool_t            use_custom_vol_g = FALSE;
-static hbool_t            use_custom_vfd_g = FALSE;
-static h5tools_vol_info_t vol_info_g;
-static h5tools_vfd_info_t vfd_info_g;
+static hbool_t use_custom_vol_g = FALSE;
+static hbool_t use_custom_vfd_g = FALSE;
+
+static h5tools_vol_info_t vol_info_g = {0};
+static h5tools_vfd_info_t vfd_info_g = {0};
+
+static hbool_t get_onion_revision_count = FALSE;
 
 #ifdef H5_HAVE_ROS3_VFD
 /* Default "anonymous" S3 configuration */
@@ -51,6 +54,17 @@ static H5FD_hdfs_fapl_t hdfs_fa_g = {
 };
 #endif /* H5_HAVE_LIBHDFS */
 
+static H5FD_onion_fapl_info_t onion_fa_g = {
+    H5FD_ONION_FAPL_INFO_VERSION_CURR,
+    H5P_DEFAULT,                   /* backing_fapl_id                */
+    32,                            /* page_size                      */
+    H5FD_ONION_STORE_TARGET_ONION, /* store_target                   */
+    H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST,
+    0,            /* force_write_open               */
+    0,            /* creation_flags                 */
+    "input file", /* comment                        */
+};
+
 /* module-scoped variables for XML option */
 #define DEFAULT_XSD "http://www.hdfgroup.org/HDF5/XML/schema/HDF5-File.xsd"
 #define DEFAULT_DTD "http://www.hdfgroup.org/HDF5/XML/DTD/HDF5-File.dtd"
@@ -70,7 +84,7 @@ static void init_prefix(char **prfx, size_t prfx_len);
 /* a structure for handling the order command-line parameters come in */
 struct handler_t {
     void (*func)(hid_t, const char *, void *, int, const char *);
-    char *           obj;
+    char            *obj;
     struct subset_t *subset_info;
 };
 
@@ -81,7 +95,7 @@ struct handler_t {
  */
 /* The following initialization makes use of C language concatenating */
 /* "xxx" "yyy" into "xxxyyy". */
-static const char *           s_opts   = "a:b*c:d:ef:g:hik:l:m:n*o*pq:rs:t:uvw:xyz:A*BCD:E*F:G:HM:N:O*RS:VX:";
+static const char            *s_opts   = "a:b*c:d:ef:g:hik:l:m:n*o*pq:rs:t:uvw:xyz:A*BCD:E*F:G:HM:N:O*RS:VX:";
 static struct h5_long_options l_opts[] = {{"attribute", require_arg, 'a'},
                                           {"binary", optional_arg, 'b'},
                                           {"count", require_arg, 'c'},
@@ -569,8 +583,8 @@ set_sort_order(const char *form)
 static void
 parse_hsize_list(const char *h_list, subset_d *d)
 {
-    hsize_t *    p_list;
-    const char * ptr;
+    hsize_t     *p_list;
+    const char  *ptr;
     unsigned int size_count = 0;
     unsigned int i          = 0;
     unsigned int last_digit = 0;
@@ -623,7 +637,7 @@ static struct subset_t *
 parse_subset_params(const char *dset)
 {
     struct subset_t *s = NULL;
-    char *           brace;
+    char            *brace;
 
     if (!dump_opts.disable_compact_subset && ((brace = HDstrrchr(dset, '[')) != NULL)) {
         *brace++ = '\0';
@@ -678,7 +692,7 @@ parse_mask_list(const char *h_list)
     int                slength_value;
     unsigned           length_value;
     unsigned long long temp_mask;
-    const char *       ptr = NULL;
+    const char        *ptr = NULL;
 
     /* sanity check */
     if (h_list) {
@@ -1238,6 +1252,8 @@ end_collect:
                     h5tools_setstatus(EXIT_FAILURE);
                     goto done;
                 }
+
+                vfd_info_g.info = &ros3_fa_g;
 #else
                 error_msg("Read-Only S3 VFD not enabled.\n");
                 h5tools_setstatus(EXIT_FAILURE);
@@ -1255,6 +1271,8 @@ end_collect:
                     h5tools_setstatus(EXIT_FAILURE);
                     goto done;
                 }
+
+                vfd_info_g.info = &hdfs_fa_g;
 #else
                 error_msg("HDFS VFD not enabled.\n");
                 h5tools_setstatus(EXIT_FAILURE);
@@ -1301,6 +1319,29 @@ end_collect:
         }
     }
 
+    /* If the file uses the onion VFD, get the revision number */
+    if (vfd_info_g.u.name && !HDstrcmp(vfd_info_g.u.name, "onion")) {
+
+        if (vfd_info_g.info) {
+            if (!HDstrcmp(vfd_info_g.info, "revision_count"))
+                get_onion_revision_count = TRUE;
+            else {
+                errno                   = 0;
+                onion_fa_g.revision_num = HDstrtoull(vfd_info_g.info, NULL, 10);
+                if (errno == ERANGE) {
+                    HDprintf("Invalid onion revision specified\n");
+                    goto error;
+                }
+
+                HDprintf("Using revision %" PRIu64 "\n", onion_fa_g.revision_num);
+            }
+        }
+        else
+            onion_fa_g.revision_num = 0;
+
+        vfd_info_g.info = &onion_fa_g;
+    }
+
 parse_end:
     /* check for file name to be processed */
     if (argc <= H5_optind) {
@@ -1340,7 +1381,7 @@ main(int argc, char *argv[])
     struct handler_t *hand = NULL;
     int               i;
     unsigned          u;
-    char *            fname = NULL;
+    char             *fname = NULL;
 
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
@@ -1420,7 +1461,21 @@ main(int argc, char *argv[])
     while (H5_optind < argc) {
         fname = HDstrdup(argv[H5_optind++]);
 
-        fid = h5tools_fopen(fname, H5F_ACC_RDONLY, fapl_id, (fapl_id != H5P_DEFAULT), NULL, 0);
+        /* A short cut to get the revision count of an onion file without opening the file */
+        if (get_onion_revision_count && H5FD_ONION == H5Pget_driver(fapl_id)) {
+            uint64_t revision_count = 0;
+
+            if (H5FDonion_get_revision_count(fname, fapl_id, &revision_count) < 0) {
+                error_msg("unable to create FAPL for file access\n");
+                h5tools_setstatus(EXIT_FAILURE);
+                goto done;
+            }
+
+            HDprintf("The number of revisions for the onion file is %" PRIu64 "\n", revision_count);
+            goto done;
+        }
+        else
+            fid = h5tools_fopen(fname, H5F_ACC_RDONLY, fapl_id, (fapl_id != H5P_DEFAULT), NULL, 0);
 
         if (fid < 0) {
             error_msg("unable to open file \"%s\"\n", fname);

@@ -170,7 +170,7 @@
  *
  ****************************************************************************/
 
-#if H5C_DO_SANITY_CHECKS
+#ifdef H5C_DO_SANITY_CHECKS
 
 #define H5C__DLL_PRE_REMOVE_SC(entry_ptr, head_ptr, tail_ptr, len, Size, fv) \
 if ( ( (head_ptr) == NULL ) ||                                               \
@@ -335,7 +335,7 @@ if ( ( (new_size) > (dll_size) ) ||                                            \
     H5C__DLL_POST_SIZE_UPDATE_SC(dll_len, dll_size, old_size, new_size)        \
 } /* H5C__DLL_UPDATE_FOR_SIZE_CHANGE() */
 
-#if H5C_DO_SANITY_CHECKS
+#ifdef H5C_DO_SANITY_CHECKS
 
 #define H5C__AUX_DLL_PRE_REMOVE_SC(entry_ptr, hd_ptr, tail_ptr, len, Size, fv) \
 if ( ( (hd_ptr) == NULL ) ||                                                   \
@@ -472,7 +472,7 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
     }                                                                        \
 } /* H5C__AUX_DLL_REMOVE() */
 
-#if H5C_DO_SANITY_CHECKS
+#ifdef H5C_DO_SANITY_CHECKS
 
 #define H5C__IL_DLL_PRE_REMOVE_SC(entry_ptr, hd_ptr, tail_ptr, len, Size, fv) \
 if ( ( (hd_ptr) == NULL ) ||                                                  \
@@ -997,7 +997,7 @@ if ( ( ( ( (head_ptr) == NULL ) || ( (tail_ptr) == NULL ) ) &&             \
 
 #define H5C__HASH_FCN(x)    (int)((unsigned)((x) & H5C__HASH_MASK) >> 3)
 
-#if H5C_DO_SANITY_CHECKS
+#ifdef H5C_DO_SANITY_CHECKS
 
 #define H5C__PRE_HT_INSERT_SC(cache_ptr, entry_ptr, fail_val)           \
 if ( ( (cache_ptr) == NULL ) ||                                         \
@@ -1601,7 +1601,7 @@ if ( ( (cache_ptr)->index_size !=                                           \
  *        two #defines are easy to confuse.
  */
 
-#if H5C_DO_SLIST_SANITY_CHECKS
+#ifdef H5C_DO_SLIST_SANITY_CHECKS
 
 #define ENTRY_IN_SLIST(cache_ptr, entry_ptr) \
     H5C_entry_in_skip_list((cache_ptr), (entry_ptr))
@@ -1613,7 +1613,7 @@ if ( ( (cache_ptr)->index_size !=                                           \
 #endif /* H5C_DO_SLIST_SANITY_CHECKS */
 
 
-#if H5C_DO_SANITY_CHECKS
+#ifdef H5C_DO_SANITY_CHECKS
 
 #define H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, fail_val)             \
 {                                                                              \
@@ -1747,7 +1747,7 @@ if ( ( (cache_ptr)->index_size !=                                           \
  *-------------------------------------------------------------------------
  */
 
-#if H5C_DO_SANITY_CHECKS
+#ifdef H5C_DO_SANITY_CHECKS
 #define H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, during_flush)       \
 {                                                                              \
     HDassert( (cache_ptr) );                                                   \
@@ -1884,7 +1884,7 @@ if ( ( (cache_ptr)->index_size !=                                           \
  *-------------------------------------------------------------------------
  */
 
-#if H5C_DO_SANITY_CHECKS
+#ifdef H5C_DO_SANITY_CHECKS
 
 #define H5C__UPDATE_SLIST_FOR_SIZE_CHANGE(cache_ptr, old_size, new_size)      \
 {                                                                             \
@@ -3308,7 +3308,7 @@ if ( ( (cache_ptr)->index_size !=                                           \
 
 #ifdef H5_HAVE_PARALLEL
 
-#if H5C_DO_SANITY_CHECKS
+#ifdef H5C_DO_SANITY_CHECKS
 
 #define H5C__COLL_DLL_PRE_REMOVE_SC(entry_ptr, hd_ptr, tail_ptr, len, Size, fv) \
 if ( ( (hd_ptr) == NULL ) ||                                                   \
@@ -3566,15 +3566,17 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
  *
  * The fields of this structure are discussed individually below:
  *
- * tag:    Address (i.e. "tag") of the object header for all the entries
+ * tag:         Address (i.e. "tag") of the object header for all the entries
  *              corresponding to parts of that object.
  *
- * head: Head of doubly-linked list of all entries belonging to the tag.
+ * head:        Head of doubly-linked list of all entries belonging to the tag.
  *
- * entry_cnt: Number of entries on linked list of entries for this tag.
+ * entry_cnt:   Number of entries on linked list of entries for this tag.
  *
- * corked: Boolean flag indicating whether entries for this object can be
- *         evicted.
+ * corked:      Boolean flag indicating whether entries for this object can be
+ *              evicted.
+ *
+ * hh:          uthash hash table handle (must be last)
  *
  ****************************************************************************/
 typedef struct H5C_tag_info_t {
@@ -3582,6 +3584,9 @@ typedef struct H5C_tag_info_t {
     H5C_cache_entry_t *head;    /* Head of the list of entries for this tag */
     size_t entry_cnt;           /* Number of entries on list */
     hbool_t corked;             /* Whether this object is corked */
+
+    /* Hash table fields */
+    UT_hash_handle hh; /* Hash table handle (must be LAST) */
 } H5C_tag_info_t;
 
 
@@ -3974,17 +3979,17 @@ typedef struct H5C_tag_info_t {
  *
  * The following fields are maintained to facilitate this.
  *
- * tag_list: A skip list to track entries that belong to an object.
- *                Each H5C_tag_info_t struct on the tag list corresponds to
- *                a particular object in the file.  Tagged entries can be
- *                flushed or evicted as a group, or corked to prevent entries
- *                from being evicted from the cache.
+ * tag_list:        A collection to track entries that belong to an object.
+ *                  Each H5C_tag_info_t struct on the tag list corresponds to
+ *                  a particular object in the file.  Tagged entries can be
+ *                  flushed or evicted as a group, or corked to prevent entries
+ *                  from being evicted from the cache.
  *
- *                "Global" entries, like the superblock and the file's
- *                freelist, as well as shared entries like global
- *                heaps and shared object header messages, are not tagged.
+ *                  "Global" entries, like the superblock and the file's
+ *                  freelist, as well as shared entries like global
+ *                  heaps and shared object header messages, are not tagged.
  *
- * ignore_tags:    Boolean flag to disable tag validation during entry insertion.
+ * ignore_tags:     Boolean flag to disable tag validation during entry insertion.
  *
  * num_objs_corked: Unsigned integer field containing the number of objects
  *                  that are "corked".  The "corked" status of an object is
@@ -4726,7 +4731,7 @@ typedef struct H5C_tag_info_t {
  *
  * Fields for tracking prefetched entries.  Note that flushes and evictions
  * of prefetched entries are tracked in the flushes and evictions arrays
- * discused above.
+ * discussed above.
  *
  * prefetches:    Number of prefetched entries that are loaded to the
  *        cache.
@@ -4857,13 +4862,13 @@ struct H5C_t {
     size_t            slist_ring_size[H5C_RING_NTYPES];
     H5SL_t *                    slist_ptr;
     uint32_t                    num_last_entries;
-#if H5C_DO_SANITY_CHECKS
+#ifdef H5C_DO_SANITY_CHECKS
     int32_t            slist_len_increase;
     int64_t            slist_size_increase;
 #endif /* H5C_DO_SANITY_CHECKS */
 
     /* Fields for maintaining list of tagged entries */
-    H5SL_t *                    tag_list;
+    H5C_tag_info_t *            tag_list;
     hbool_t                     ignore_tags;
     uint32_t                    num_objs_corked;
 

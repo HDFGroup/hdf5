@@ -801,7 +801,7 @@ H5Pget_filter2(hid_t plist_id, unsigned idx, unsigned int *flags /*out*/, size_t
                unsigned cd_values[] /*out*/, size_t namelen, char name[] /*out*/,
                unsigned *filter_config /*out*/)
 {
-    H5P_genplist_t *         plist;     /* Property list */
+    H5P_genplist_t          *plist;     /* Property list */
     H5O_pline_t              pline;     /* Filter pipeline */
     const H5Z_filter_info_t *filter;    /* Pointer to filter information */
     H5Z_filter_t             ret_value; /* return value */
@@ -1358,7 +1358,7 @@ static herr_t
 H5P__ocrt_pipeline_enc(const void *value, void **_pp, size_t *size)
 {
     const H5O_pline_t *pline = (const H5O_pline_t *)value;
-    uint8_t **         pp    = (uint8_t **)_pp;
+    uint8_t          **pp    = (uint8_t **)_pp;
     size_t             u; /* Local index variable */
 
     FUNC_ENTER_PACKAGE_NOERR
@@ -1449,7 +1449,7 @@ H5P__ocrt_pipeline_enc(const void *value, void **_pp, size_t *size)
 static herr_t
 H5P__ocrt_pipeline_dec(const void **_pp, void *_value)
 {
-    H5O_pline_t *   pline = (H5O_pline_t *)_value; /* Property to set */
+    H5O_pline_t    *pline = (H5O_pline_t *)_value; /* Property to set */
     const uint8_t **pp    = (const uint8_t **)_pp;
     size_t          nused;               /* Number of filters used for pipeline */
     unsigned        enc_size;            /* Size of encoded value (in bytes) */
@@ -1753,7 +1753,7 @@ H5Pget_filter1(hid_t plist_id, unsigned idx, unsigned int *flags /*out*/, size_t
 {
     H5O_pline_t              pline;     /* Filter pipeline */
     const H5Z_filter_info_t *filter;    /* Pointer to filter information */
-    H5P_genplist_t *         plist;     /* Property list pointer */
+    H5P_genplist_t          *plist;     /* Property list pointer */
     H5Z_filter_t             ret_value; /* return value */
 
     FUNC_ENTER_API(H5Z_FILTER_ERROR)

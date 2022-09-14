@@ -347,9 +347,9 @@ writer(char *filename, hid_t fapl, fsizes_t testsize, int wrt_n)
     hsize_t hs_start[1];
     hsize_t hs_size[1];
     hid_t   file = -1, space1 = -1, space2 = -1, mem_space = -1, d1 = -1, d2 = -1;
-    int *   buf = (int *)HDmalloc(sizeof(int) * WRT_SIZE);
+    int    *buf = (int *)HDmalloc(sizeof(int) * WRT_SIZE);
     int     i, j;
-    FILE *  out = HDfopen(DNAME, "w");
+    FILE   *out = HDfopen(DNAME, "w");
     hid_t   dcpl;
 
     switch (testsize) {
@@ -493,12 +493,12 @@ error:
 static int
 reader(char *filename, hid_t fapl)
 {
-    FILE *  script = NULL;
+    FILE   *script = NULL;
     hid_t   file = -1, mspace = -1, fspace = -1, d2 = -1;
     char    ln[128], *s;
     hsize_t hs_offset[1];
     hsize_t hs_size[1] = {WRT_SIZE};
-    int *   buf        = (int *)HDmalloc(sizeof(int) * WRT_SIZE);
+    int    *buf        = (int *)HDmalloc(sizeof(int) * WRT_SIZE);
     int     i, j, zero, wrong, nerrors = 0;
 
     /* Open script file */
@@ -506,17 +506,17 @@ reader(char *filename, hid_t fapl)
 
     /* Open HDF5 file */
     if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Open the dataset */
     if ((d2 = H5Dopen2(file, "d2", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if ((fspace = H5Dget_space(d2)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Describe `buf' */
     if ((mspace = H5Screate_simple(1, hs_size, hs_size)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Read each region */
     while (HDfgets(ln, (int)sizeof(ln), script)) {
@@ -528,9 +528,9 @@ reader(char *filename, hid_t fapl)
         HDfflush(stdout);
 
         if (H5Sselect_hyperslab(fspace, H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL) < 0)
-            FAIL_STACK_ERROR
+            FAIL_STACK_ERROR;
         if (H5Dread(d2, H5T_NATIVE_INT, mspace, fspace, H5P_DEFAULT, buf) < 0)
-            FAIL_STACK_ERROR
+            FAIL_STACK_ERROR;
 
         /* Check */
         for (j = zero = wrong = 0; j < WRT_SIZE; j++) {
@@ -554,13 +554,13 @@ reader(char *filename, hid_t fapl)
     }
 
     if (H5Dclose(d2) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Sclose(mspace) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Sclose(fspace) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     HDfree(buf);
     HDfclose(script);
 

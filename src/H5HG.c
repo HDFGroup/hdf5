@@ -124,7 +124,7 @@ static haddr_t
 H5HG__create(H5F_t *f, size_t size)
 {
     H5HG_heap_t *heap = NULL;
-    uint8_t *    p    = NULL;
+    uint8_t     *p    = NULL;
     haddr_t      addr = HADDR_UNDEF;
     size_t       n;
     haddr_t      ret_value = HADDR_UNDEF; /* Return value */
@@ -407,8 +407,8 @@ H5HG_extend(H5F_t *f, haddr_t addr, size_t need)
     H5HG_heap_t *heap       = NULL;               /* Pointer to heap to extend */
     unsigned     heap_flags = H5AC__NO_FLAGS_SET; /* Flags to unprotecting heap */
     size_t       old_size;                        /* Previous size of the heap's chunk */
-    uint8_t *    new_chunk;                       /* Pointer to new chunk information */
-    uint8_t *    p;                               /* Pointer to raw heap info */
+    uint8_t     *new_chunk;                       /* Pointer to new chunk information */
+    uint8_t     *p;                               /* Pointer to raw heap info */
     unsigned     u;                               /* Local index variable */
     herr_t       ret_value = SUCCEED;             /* Return value */
 
@@ -581,9 +581,9 @@ H5HG_read(H5F_t *f, H5HG_t *hobj, void *object /*out*/, size_t *buf_size)
 {
     H5HG_heap_t *heap = NULL;          /* Pointer to global heap object */
     size_t       size;                 /* Size of the heap object */
-    uint8_t *    p;                    /* Pointer to object in heap buffer */
-    void *       orig_object = object; /* Keep a copy of the original object pointer */
-    void *       ret_value   = NULL;   /* Return value */
+    uint8_t     *p;                    /* Pointer to object in heap buffer */
+    void        *orig_object = object; /* Keep a copy of the original object pointer */
+    void        *ret_value   = NULL;   /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(H5AC__GLOBALHEAP_TAG, NULL)
 
@@ -748,7 +748,7 @@ herr_t
 H5HG_remove(H5F_t *f, H5HG_t *hobj)
 {
     H5HG_heap_t *heap = NULL;
-    uint8_t *    p = NULL, *obj_start = NULL;
+    uint8_t     *p = NULL, *obj_start = NULL;
     size_t       need;
     unsigned     u;
     unsigned     flags     = H5AC__NO_FLAGS_SET; /* Whether the heap gets deleted */

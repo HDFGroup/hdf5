@@ -41,18 +41,18 @@ static int errors_sum(int nerrs);
 static int
 test_mpio_overlap_writes(char *filename)
 {
-    int           mpi_size, mpi_rank;
-    MPI_Comm      comm;
-    MPI_Info      info = MPI_INFO_NULL;
-    int           color, mrc;
-    MPI_File      fh;
-    int           i;
-    int           vrfyerrs, nerrs;
-    unsigned char buf[4093]; /* use some prime number for size */
-    int           bufsize = sizeof(buf);
-    MPI_Offset    stride;
-    MPI_Offset    mpi_off;
-    MPI_Status    mpi_stat;
+    int            mpi_size, mpi_rank;
+    MPI_Comm       comm;
+    MPI_Info       info = MPI_INFO_NULL;
+    int            color, mrc;
+    MPI_File       fh;
+    int            i;
+    int            vrfyerrs, nerrs;
+    unsigned char *buf = NULL;
+    int            bufsize;
+    MPI_Offset     stride;
+    MPI_Offset     mpi_off;
+    MPI_Status     mpi_stat;
 
     if (VERBOSE_MED)
         HDprintf("MPIO independent overlapping writes test on file %s\n", filename);
@@ -68,6 +68,13 @@ test_mpio_overlap_writes(char *filename)
             HDprintf("Need at least 2 processes to run MPIO test.\n");
         HDprintf(" -SKIP- \n");
         return 0;
+    }
+
+    bufsize = 4093; /* use some prime number for size */
+    if (NULL == (buf = HDmalloc((size_t)bufsize))) {
+        if (MAINPROCESS)
+            HDprintf("couldn't allocate buffer\n");
+        return 1;
     }
 
     /* splits processes 0 to n-2 into one comm. and the last one into another */
@@ -159,6 +166,9 @@ test_mpio_overlap_writes(char *filename)
      */
     mrc = MPI_Barrier(MPI_COMM_WORLD);
     VRFY((mrc == MPI_SUCCESS), "Sync before leaving test");
+
+    HDfree(buf);
+
     return (nerrs);
 }
 
@@ -189,7 +199,7 @@ test_mpio_gb_file(char *filename)
     int        writerrs; /* write errors */
     int        nerrs;
     int        ntimes; /* how many times */
-    char *     buf = NULL;
+    char      *buf = NULL;
     char       expected;
     MPI_Offset size;
     MPI_Offset mpi_off;

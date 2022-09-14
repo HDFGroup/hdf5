@@ -47,10 +47,10 @@ if test "X-" = "X-$FC"; then
   fi
 fi
 
-# While we try to avoid setting FCFLAGS directly for use in compilation, in 
-# this case we need the -k flag present for some configure checks. As such, 
-# the configure script saves the user's set FCFLAGS before running, and 
-# restores them when complete. We must then set up both FCFLAGS and H5_FCFLAGS 
+# While we try to avoid setting FCFLAGS directly for use in compilation, in
+# this case we need the -k flag present for some configure checks. As such,
+# the configure script saves the user's set FCFLAGS before running, and
+# restores them when complete. We must then set up both FCFLAGS and H5_FCFLAGS
 # to ensure the flag is present for both configure as well as for the build.
 if test "X-" = "X-$f9x_flags_set"; then
   F9XSUFFIXFLAG="-qsuffix=f=f90"
@@ -58,7 +58,7 @@ if test "X-" = "X-$f9x_flags_set"; then
   H5_FCFLAGS="$H5_FCFLAGS ${F9XSUFFIXFLAG}"
   FSEARCH_DIRS="-I./ -I../src"
 
-  # Produciton
+  # Production
   PROD_FCFLAGS=
 
   # Debug
@@ -109,7 +109,7 @@ case $CC_BASENAME in
     # Use very generic flags
     H5_CFLAGS="$H5_CFLAGS -ansi"
 
-    # Produciton
+    # Production
     PROD_CFLAGS=
 
     # Debug
@@ -149,8 +149,6 @@ ac_cv_sizeof_char=${ac_cv_sizeof_char=1}
 ac_cv_sizeof_short=${ac_cv_sizeof_short=2}
 ac_cv_sizeof_int=${ac_cv_sizeof_int=4}
 ac_cv_sizeof_long_long=${ac_cv_sizeof_long_long=8}
-# Do not cache __int64 since it is not a standard C type and some compilers
-# (e.g., gcc) does not support it.
 ac_cv_sizeof_float=${ac_cv_sizeof_float=4}
 ac_cv_sizeof_double=${ac_cv_sizeof_double=8}
 ac_cv_sizeof_long_double=${ac_cv_sizeof_long_double=8}

@@ -855,11 +855,12 @@ INPUT_ENCODING         = UTF-8
 
 FILE_PATTERNS          = H5*public.h \
                          H5*module.h \
+                         H5*develop.h \
                          H5FDcore.h \
-                         H5FDdevelop.h \
                          H5FDdirect.h \
                          H5FDfamily.h \
                          H5FDhdfs.h \
+                         H5FDioc.h \
                          H5FDlog.h \
                          H5FDmirror.h \
                          H5FDmpi.h \
@@ -869,11 +870,11 @@ FILE_PATTERNS          = H5*public.h \
                          H5FDsec2.h \
                          H5FDsplitter.h \
                          H5FDstdio.h \
+                         H5FDsubfiling.h \
                          H5FDwindows.h \
                          H5VLconnector.h \
                          H5VLconnector_passthru.h \
                          H5VLnative.h \
-                         H5Zdevelop.h \
                          H5version.h \
                          *.dox
 
@@ -943,7 +944,7 @@ EXAMPLE_RECURSIVE      = NO
 # that contain images that are to be included in the documentation (see the
 # \image command).
 
-IMAGE_PATH             =
+IMAGE_PATH             = @HDF5_DOXYGEN_DIR@/img
 
 # The INPUT_FILTER tag can be used to specify a program that doxygen should
 # invoke to filter for each input file. Doxygen will invoke the filter program

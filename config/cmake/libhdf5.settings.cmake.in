@@ -50,6 +50,7 @@ Languages:
 @BUILD_FORTRAN_CONDITIONAL_TRUE@               AM Fortran Flags: @AM_FCFLAGS@
 @BUILD_FORTRAN_CONDITIONAL_TRUE@         Shared Fortran Library: @H5_ENABLE_SHARED_LIB@
 @BUILD_FORTRAN_CONDITIONAL_TRUE@         Static Fortran Library: @H5_ENABLE_STATIC_LIB@
+@BUILD_FORTRAN_CONDITIONAL_TRUE@               Module Directory: @CMAKE_Fortran_MODULE_DIRECTORY@
 
                             C++: @HDF5_BUILD_CPP_LIB@
 @BUILD_CXX_CONDITIONAL_TRUE@                   C++ Compiler: @CMAKE_CXX_COMPILER@ @CMAKE_CXX_COMPILER_VERSION@
@@ -79,6 +80,7 @@ Dimension scales w/ new references: @DIMENSION_SCALES_WITH_NEW_REF@
                                MPE: @H5_HAVE_LIBLMPE@
                         Direct VFD: @H5_HAVE_DIRECT@
                         Mirror VFD: @H5_HAVE_MIRROR_VFD@
+                     Subfiling VFD: @H5_HAVE_SUBFILING_VFD@
                 (Read-Only) S3 VFD: @H5_HAVE_ROS3_VFD@
               (Read-Only) HDFS VFD: @H5_HAVE_LIBHDFS@
                            dmalloc: @H5_HAVE_LIBDMALLOC@

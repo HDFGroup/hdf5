@@ -216,7 +216,7 @@ H5Z__calc_parms_atomic(size_t *cd_values_actual_nparms)
 static herr_t
 H5Z__calc_parms_array(const H5T_t *type, size_t *cd_values_actual_nparms)
 {
-    H5T_t *     dtype_base = NULL;   /* Array datatype's base datatype */
+    H5T_t      *dtype_base = NULL;   /* Array datatype's base datatype */
     H5T_class_t dtype_base_class;    /* Array datatype's base datatype's class */
     herr_t      ret_value = SUCCEED; /* Return value */
 
@@ -299,7 +299,7 @@ static herr_t
 H5Z__calc_parms_compound(const H5T_t *type, size_t *cd_values_actual_nparms)
 {
     int      nmembers;            /* Compound datatype's number of members */
-    H5T_t *  dtype_member = NULL; /* Compound datatype's member datatype */
+    H5T_t   *dtype_member = NULL; /* Compound datatype's member datatype */
     unsigned u;                   /* Local index variable */
     herr_t   ret_value = SUCCEED; /* Return value */
 
@@ -531,7 +531,7 @@ static herr_t
 H5Z__set_parms_array(const H5T_t *type, unsigned *cd_values_index, unsigned cd_values[],
                      hbool_t *need_not_compress)
 {
-    H5T_t *     dtype_base = NULL;   /* Array datatype's base datatype */
+    H5T_t      *dtype_base = NULL;   /* Array datatype's base datatype */
     H5T_class_t dtype_base_class;    /* Array datatype's base datatype's class */
     size_t      dtype_size;          /* Array datatype's size (in bytes) */
     htri_t      is_vlstring;         /* flag indicating if datatype is variable-length string */
@@ -636,7 +636,7 @@ H5Z__set_parms_compound(const H5T_t *type, unsigned *cd_values_index, unsigned c
 {
     int         snmembers;           /* Compound datatype's number of members */
     unsigned    nmembers;            /* Compound datatype's number of members */
-    H5T_t *     dtype_member = NULL; /* Compound datatype's member datatype */
+    H5T_t      *dtype_member = NULL; /* Compound datatype's member datatype */
     H5T_class_t dtype_member_class;  /* Compound datatype's member datatype's class */
     size_t      dtype_member_offset; /* Compound datatype's current member datatype's offset (in bytes) */
     size_t      dtype_next_member_offset; /* Compound datatype's next member datatype's offset (in bytes) */
@@ -780,13 +780,13 @@ static herr_t
 H5Z__set_local_nbit(hid_t dcpl_id, hid_t type_id, hid_t space_id)
 {
     H5P_genplist_t *dcpl_plist;                       /* Property list pointer */
-    const H5T_t *   type;                             /* Datatype */
-    const H5S_t *   ds;                               /* Dataspace */
+    const H5T_t    *type;                             /* Datatype */
+    const H5S_t    *ds;                               /* Dataspace */
     unsigned        flags;                            /* Filter flags */
     unsigned        cd_values_index;                  /* Index of array cd_values */
     size_t          cd_values_actual_nparms;          /* Number of parameters in array cd_values[] */
     size_t          cd_nelmts = H5Z_NBIT_USER_NPARMS; /* Number of filter parameters */
-    unsigned *      cd_values = NULL;                 /* Filter parameters */
+    unsigned       *cd_values = NULL;                 /* Filter parameters */
     hssize_t        npoints;                          /* Number of points in the dataspace */
     H5T_class_t     dtype_class;                      /* Datatype's class */
     hbool_t         need_not_compress;   /* Flag if TRUE indicating no need to do nbit compression */

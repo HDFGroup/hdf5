@@ -56,8 +56,8 @@ main(void)
     H5D_layout_t layout;  /* Storage layout */
     size_t       num_map; /* Number of mappings */
     ssize_t      len;     /* Length of the string; also a return value */
-    char *       filename;
-    char *       dsetname;
+    char        *filename;
+    char        *dsetname;
 
     file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
@@ -153,7 +153,7 @@ main(void)
     for (i = 0; i < (int)num_map; i++) {
         printf(" Mapping %d \n", i);
         printf("         Selection in the virtual dataset \n");
-        /* Get selection in the virttual  dataset */
+        /* Get selection in the virtual dataset */
         vspace = H5Pget_virtual_vspace(dcpl, (size_t)i);
         if (H5Sget_select_type(vspace) == H5S_SEL_HYPERSLABS) {
             if (H5Sis_regular_hyperslab(vspace)) {

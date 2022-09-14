@@ -78,13 +78,13 @@ clean-local:
 
 install-data-local:
 	@if test -n "$(F9XMODEXT)" && test "X$(F9XMODEXT)" != "Xo"; then \
-	  $(CP) $(top_builddir)/$(subdir)/*.$(F9XMODEXT) $(DESTDIR)$(includedir)/. ; \
+	  $(CP) $(top_builddir)/$(subdir)/*.$(F9XMODEXT) $(DESTDIR)$(fmoddir)/. ; \
 	fi
 
 uninstall-local:
 	@if test -n "$(F9XMODEXT)" -a "X$(F9XMODEXT)" != "Xo"; then      \
-	  if test -f "$(includedir)/hdf5.$(F9XMODEXT)" -o -f "$(DESTDIR)$(includedir)/HDF5.$(F9XMODEXT)"; then \
-	    set -x; $(RM) $(includedir)/*.$(F9XMODEXT);                 \
+	  if test -f "$(fmoddir)/hdf5.$(F9XMODEXT)" -o -f "$(DESTDIR)$(fmoddir)/HDF5.$(F9XMODEXT)"; then \
+	    set -x; $(RM) $(fmoddir)/*.$(F9XMODEXT);                 \
 	  fi;                                                           \
 	fi
 	$(RM) $(DESTDIR)$(libdir)/libhdf5_hl_fortran*

@@ -52,6 +52,7 @@ Languages:
 @BUILD_FORTRAN_CONDITIONAL_TRUE@               AM Fortran Flags: @AM_FCFLAGS@
 @BUILD_FORTRAN_CONDITIONAL_TRUE@         Shared Fortran Library: @H5_FORTRAN_SHARED@
 @BUILD_FORTRAN_CONDITIONAL_TRUE@         Static Fortran Library: @enable_static@
+@BUILD_FORTRAN_CONDITIONAL_TRUE@               Module Directory: @fmoddir@
 
                             C++: @HDF_CXX@
 @BUILD_CXX_CONDITIONAL_TRUE@                   C++ Compiler: @CXX_VERSION@
@@ -82,6 +83,7 @@ Dimension scales w/ new references: @DIMENSION_SCALES_WITH_NEW_REF@
                      Map (H5M) API: @MAP_API@
                         Direct VFD: @DIRECT_VFD@
                         Mirror VFD: @MIRROR_VFD@
+                     Subfiling VFD: @SUBFILING_VFD@
                 (Read-Only) S3 VFD: @ROS3_VFD@
               (Read-Only) HDFS VFD: @HAVE_LIBHDFS@
                            dmalloc: @HAVE_DMALLOC@

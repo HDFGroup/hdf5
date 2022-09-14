@@ -64,13 +64,13 @@ typedef struct H5EA__test_ctx_t {
 /********************/
 
 /* Extensible array class callbacks */
-static void * H5EA__test_crt_context(void *udata);
+static void  *H5EA__test_crt_context(void *udata);
 static herr_t H5EA__test_dst_context(void *ctx);
 static herr_t H5EA__test_fill(void *nat_blk, size_t nelmts);
 static herr_t H5EA__test_encode(void *raw, const void *elmt, size_t nelmts, void *ctx);
 static herr_t H5EA__test_decode(const void *raw, void *elmt, size_t nelmts, void *ctx);
 static herr_t H5EA__test_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const void *elmt);
-static void * H5EA__test_crt_dbg_context(H5F_t H5_ATTR_UNUSED *f, haddr_t H5_ATTR_UNUSED obj_addr);
+static void  *H5EA__test_crt_dbg_context(H5F_t H5_ATTR_UNUSED *f, haddr_t H5_ATTR_UNUSED obj_addr);
 static herr_t H5EA__test_dst_dbg_context(void *_ctx);
 
 /*********************/
@@ -123,8 +123,8 @@ static void *
 H5EA__test_crt_context(void *_udata)
 {
     H5EA__test_ctx_t *ctx;                                  /* Context for callbacks */
-    H5EA__ctx_cb_t *  udata     = (H5EA__ctx_cb_t *)_udata; /* User data for context */
-    void *            ret_value = NULL;
+    H5EA__ctx_cb_t   *udata     = (H5EA__ctx_cb_t *)_udata; /* User data for context */
+    void             *ret_value = NULL;
 
     FUNC_ENTER_PACKAGE
 
@@ -219,7 +219,7 @@ static herr_t
 H5EA__test_encode(void *raw, const void *_elmt, size_t nelmts, void *_ctx)
 {
     H5EA__test_ctx_t *ctx       = (H5EA__test_ctx_t *)_ctx; /* Callback context to destroy */
-    const uint64_t *  elmt      = (const uint64_t *)_elmt;  /* Convenience pointer to native elements */
+    const uint64_t   *elmt      = (const uint64_t *)_elmt;  /* Convenience pointer to native elements */
     herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
@@ -271,7 +271,7 @@ H5EA__test_decode(const void *_raw, void *_elmt, size_t nelmts, void H5_ATTR_NDE
 #ifndef NDEBUG
     H5EA__test_ctx_t *ctx = (H5EA__test_ctx_t *)_ctx; /* Callback context to destroy */
 #endif                                                /* NDEBUG */
-    uint64_t *     elmt = (uint64_t *)_elmt;          /* Convenience pointer to native elements */
+    uint64_t      *elmt = (uint64_t *)_elmt;          /* Convenience pointer to native elements */
     const uint8_t *raw  = (const uint8_t *)_raw;      /* Convenience pointer to raw elements */
 
     FUNC_ENTER_PACKAGE_NOERR
@@ -345,7 +345,7 @@ static void *
 H5EA__test_crt_dbg_context(H5F_t H5_ATTR_UNUSED *f, haddr_t H5_ATTR_UNUSED obj_addr)
 {
     H5EA__ctx_cb_t *ctx; /* Context for callbacks */
-    void *          ret_value = NULL;
+    void           *ret_value = NULL;
 
     FUNC_ENTER_PACKAGE
 

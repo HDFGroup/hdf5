@@ -52,8 +52,8 @@
  */
 typedef struct H5D_compact_iovv_memmanage_ud_t {
     H5F_shared_t *f_sh;   /* Shared file for dataset */
-    void *        dstbuf; /* Pointer to buffer to be read into/written into */
-    const void *  srcbuf; /* Pointer to buffer to be read from/written from */
+    void         *dstbuf; /* Pointer to buffer to be read into/written into */
+    const void   *srcbuf; /* Pointer to buffer to be read from/written from */
 } H5D_compact_iovv_memmanage_ud_t;
 
 /********************/
@@ -275,7 +275,7 @@ H5D__compact_iovv_memmanage_cb(hsize_t dst_off, hsize_t src_off, size_t len, voi
     H5D_compact_iovv_memmanage_ud_t *udata = (H5D_compact_iovv_memmanage_ud_t *)_udata;
     H5FD_ctl_memcpy_args_t           op_args;
     uint64_t                         op_flags;
-    H5FD_t *                         file_handle = NULL;
+    H5FD_t                          *file_handle = NULL;
     herr_t                           ret_value   = SUCCEED;
 
     FUNC_ENTER_PACKAGE
@@ -285,7 +285,7 @@ H5D__compact_iovv_memmanage_cb(hsize_t dst_off, hsize_t src_off, size_t len, voi
         HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "can't get file handle")
 
     /* Setup operation flags and arguments */
-    op_flags = H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG | H5FD_CTL__FAIL_IF_UNKNOWN_FLAG;
+    op_flags = H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG | H5FD_CTL_FAIL_IF_UNKNOWN_FLAG;
 
     op_args.dstbuf  = udata->dstbuf;
     op_args.dst_off = dst_off;
@@ -294,7 +294,7 @@ H5D__compact_iovv_memmanage_cb(hsize_t dst_off, hsize_t src_off, size_t len, voi
     op_args.len     = len;
 
     /* Make request to file driver */
-    if (H5FD_ctl(file_handle, H5FD_CTL__MEM_COPY, op_flags, &op_args, NULL) < 0)
+    if (H5FD_ctl(file_handle, H5FD_CTL_MEM_COPY, op_flags, &op_args, NULL) < 0)
         HGOTO_ERROR(H5E_IO, H5E_FCNTL, FAIL, "VFD memcpy request failed")
 
 done:
@@ -499,9 +499,9 @@ H5D__compact_copy(H5F_t *f_src, H5O_storage_compact_t *_storage_src, H5F_t *f_ds
     hid_t         tid_src     = -1;   /* Datatype ID for source datatype */
     hid_t         tid_dst     = -1;   /* Datatype ID for destination datatype */
     hid_t         tid_mem     = -1;   /* Datatype ID for memory datatype */
-    void *        buf         = NULL; /* Buffer for copying data */
-    void *        bkg         = NULL; /* Temporary buffer for copying data */
-    void *        reclaim_buf = NULL; /* Buffer for reclaiming data */
+    void         *buf         = NULL; /* Buffer for copying data */
+    void         *bkg         = NULL; /* Temporary buffer for copying data */
+    void         *reclaim_buf = NULL; /* Buffer for reclaiming data */
     hid_t         buf_sid     = -1;   /* ID for buffer dataspace */
     H5D_shared_t *shared_fo =
         (H5D_shared_t *)cpy_info->shared_fo;           /* Pointer to the shared struct for dataset object */
@@ -529,9 +529,9 @@ H5D__compact_copy(H5F_t *f_src, H5O_storage_compact_t *_storage_src, H5F_t *f_ds
     /* If there's a VLEN source datatype, do type conversion information */
     if (H5T_detect_class(dt_src, H5T_VLEN, FALSE) > 0) {
         H5T_path_t *tpath_src_mem, *tpath_mem_dst; /* Datatype conversion paths */
-        H5T_t *     dt_dst;                        /* Destination datatype */
-        H5T_t *     dt_mem;                        /* Memory datatype */
-        H5S_t *     buf_space;                     /* Dataspace describing buffer */
+        H5T_t      *dt_dst;                        /* Destination datatype */
+        H5T_t      *dt_mem;                        /* Memory datatype */
+        H5S_t      *buf_space;                     /* Dataspace describing buffer */
         size_t      buf_size;                      /* Size of copy buffer */
         size_t      nelmts;                        /* Number of elements in buffer */
         size_t      src_dt_size;                   /* Source datatype size */
@@ -547,7 +547,7 @@ H5D__compact_copy(H5F_t *f_src, H5O_storage_compact_t *_storage_src, H5F_t *f_ds
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register memory datatype")
         } /* end if */
 
-        /* create variable-length datatype at the destinaton file */
+        /* create variable-length datatype at the destination file */
         if (NULL == (dt_dst = H5T_copy(dt_src, H5T_COPY_TRANSIENT)))
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy")
         if (H5T_set_loc(dt_dst, H5F_VOL_OBJ(f_dst), H5T_LOC_DISK) < 0) {

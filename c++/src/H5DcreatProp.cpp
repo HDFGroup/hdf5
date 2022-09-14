@@ -202,7 +202,7 @@ DSetCreatPropList::getLayout() const
     if (layout == H5D_LAYOUT_ERROR) {
         throw PropListIException("DSetCreatPropList::getLayout", "H5Pget_layout returns H5D_LAYOUT_ERROR");
     }
-    return (layout);
+    return layout;
 }
 
 //--------------------------------------------------------------------------
@@ -220,7 +220,12 @@ DSetCreatPropList::getLayout() const
 void
 DSetCreatPropList::setDeflate(int level) const
 {
-    herr_t ret_value = H5Pset_deflate(id, level);
+    if (level < 0) {
+        throw PropListIException("DSetCreatPropList::setDeflate", "level can't be negative");
+    }
+
+    herr_t ret_value = H5Pset_deflate(id, static_cast<unsigned>(level));
+
     if (ret_value < 0) {
         throw PropListIException("DSetCreatPropList::setDeflate", "H5Pset_deflate failed");
     }
@@ -436,13 +441,15 @@ DSetCreatPropList::getFilter(int filter_number, unsigned int &flags, size_t &cd_
                              unsigned int *cd_values, size_t namelen, char name[],
                              unsigned int &filter_config) const
 {
-    H5Z_filter_t filter_id;
-    filter_id =
-        H5Pget_filter2(id, filter_number, &flags, &cd_nelmts, cd_values, namelen, name, &filter_config);
+    if (filter_number < 0)
+        throw PropListIException("DSetCreatPropList::getFilter", "filter_number can't be negative");
+
+    H5Z_filter_t filter_id = H5Pget_filter2(id, static_cast<unsigned>(filter_number), &flags, &cd_nelmts,
+                                            cd_values, namelen, name, &filter_config);
     if (filter_id == H5Z_FILTER_ERROR)
         throw PropListIException("DSetCreatPropList::getFilter", "H5Pget_filter2 returned H5Z_FILTER_ERROR");
     else
-        return (filter_id);
+        return filter_id;
 }
 
 //--------------------------------------------------------------------------

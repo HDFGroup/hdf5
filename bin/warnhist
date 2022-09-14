@@ -229,6 +229,9 @@ while (<>) {
     # Skip variables with the word 'warning' in them
     next if $_ =~ /_warning_/;
 
+    # Skip AMD Optimizing Compiler (aocc) lines "<#> warning(s) generated."
+    next if $_ =~ / warnings? generated\./;
+
     # "Hide" the C++ '::' symbol until we've parsed out the parts of the line
     while($_ =~ /\:\:/) {
 	$_ =~ s/\:\:/@@@@/g;
@@ -244,6 +247,18 @@ while (<>) {
     } elsif($_ =~ /^\s*[Ww]arning:.*/) {
         $name = $last_c_name;
         ($toss, $warning, $extra, $extra2) = split /\:/, $_;
+    # Check for file-scope gcc Fortran warning output
+    } elsif($_ =~ /f\d\d\d: Warning:/) {
+        # These are interspersed with the "compiling a file" output
+        # when compiling with `make -j` and thus difficult to tie to
+        # any particular file. They are due to things like inappropriate
+        # build options and don't have a line number.
+        #
+        # They start with f, as in f951
+        $name = "(generic)";
+        $line = int(rand(1000000)); # Hack to avoid counting as duplictates
+
+        ($warning) = $_ =~ /\[(.*)\]/x;
     # Check for FORTRAN warning output
     } elsif($_ =~ /^Warning:.*/) {
         $name = $last_fort_name;
@@ -382,7 +397,7 @@ while (<>) {
 	    $warning =~ s/"[A-Za-z_0-9]*"/"-"/g;
 	}
 
-	# Genericize [GCC?] C/C++ warning text about suggessted attribute
+	# Genericize [GCC?] C/C++ warning text about suggested attribute
 	if($warning =~ /attribute=[A-Za-z_0-9]*\]/) {
 	    $warning =~ s/=[A-Za-z_0-9]*\]/=-\]/g;
 	}

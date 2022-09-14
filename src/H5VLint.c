@@ -12,7 +12,7 @@
 
 /*
  * Purpose:     The Virtual Object Layer as described in documentation.
- *              The pupose is to provide an abstraction on how to access the
+ *              The purpose is to provide an abstraction on how to access the
  *              underlying HDF5 container, whether in a local file with
  *              a specific file format, or remotely on other machines, etc...
  */
@@ -58,8 +58,8 @@
 /* Object wrapping context info */
 typedef struct H5VL_wrap_ctx_t {
     unsigned rc;           /* Ref. count for the # of times the context was set / reset */
-    H5VL_t * connector;    /* VOL connector for "outermost" class to start wrap */
-    void *   obj_wrap_ctx; /* "wrap context" for outermost connector */
+    H5VL_t  *connector;    /* VOL connector for "outermost" class to start wrap */
+    void    *obj_wrap_ctx; /* "wrap context" for outermost connector */
 } H5VL_wrap_ctx_t;
 
 /* Information needed for iterating over the registered VOL connector hid_t IDs.
@@ -85,10 +85,10 @@ typedef struct {
 /********************/
 static herr_t         H5VL__free_cls(H5VL_class_t *cls, void **request);
 static int            H5VL__get_connector_cb(void *obj, hid_t id, void *_op_data);
-static void *         H5VL__wrap_obj(void *obj, H5I_type_t obj_type);
+static void          *H5VL__wrap_obj(void *obj, H5I_type_t obj_type);
 static H5VL_object_t *H5VL__new_vol_obj(H5I_type_t type, void *object, H5VL_t *vol_connector,
                                         hbool_t wrap_obj);
-static void *         H5VL__object(hid_t id, H5I_type_t obj_type);
+static void          *H5VL__object(hid_t id, H5I_type_t obj_type);
 static herr_t         H5VL__free_vol_wrapper(H5VL_wrap_ctx_t *vol_wrap_ctx);
 
 /*********************/
@@ -315,7 +315,7 @@ static int
 H5VL__get_connector_cb(void *obj, hid_t id, void *_op_data)
 {
     H5VL_get_connector_ud_t *op_data   = (H5VL_get_connector_ud_t *)_op_data; /* User data for callback */
-    H5VL_class_t *           cls       = (H5VL_class_t *)obj;
+    H5VL_class_t            *cls       = (H5VL_class_t *)obj;
     int                      ret_value = H5_ITER_CONT; /* Callback return value */
 
     FUNC_ENTER_PACKAGE_NOERR
@@ -359,10 +359,10 @@ H5VL__set_def_conn(void)
 {
     H5P_genplist_t *def_fapl;               /* Default file access property list */
     H5P_genclass_t *def_fapclass;           /* Default file access property class */
-    const char *    env_var;                /* Environment variable for default VOL connector */
-    char *          buf          = NULL;    /* Buffer for tokenizing string */
+    const char     *env_var;                /* Environment variable for default VOL connector */
+    char           *buf          = NULL;    /* Buffer for tokenizing string */
     hid_t           connector_id = -1;      /* VOL conntector ID */
-    void *          vol_info     = NULL;    /* VOL connector info */
+    void           *vol_info     = NULL;    /* VOL connector info */
     herr_t          ret_value    = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -381,7 +381,7 @@ H5VL__set_def_conn(void)
 
     /* Only parse the string if it's set */
     if (env_var && *env_var) {
-        char *      lasts = NULL;            /* Context pointer for strtok_r() call */
+        char       *lasts = NULL;            /* Context pointer for strtok_r() call */
         const char *tok   = NULL;            /* Token from strtok_r call */
         htri_t      connector_is_registered; /* Whether connector is already registered */
 
@@ -496,7 +496,7 @@ static void *
 H5VL__wrap_obj(void *obj, H5I_type_t obj_type)
 {
     H5VL_wrap_ctx_t *vol_wrap_ctx = NULL; /* Object wrapping context */
-    void *           ret_value    = NULL; /* Return value */
+    void            *ret_value    = NULL; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -615,7 +615,7 @@ H5VL_conn_copy(H5VL_connector_prop_t *connector_prop)
             /* Copy connector info, if it exists */
             if (connector_prop->connector_info) {
                 H5VL_class_t *connector;                 /* Pointer to connector */
-                void *        new_connector_info = NULL; /* Copy of connector info */
+                void         *new_connector_info = NULL; /* Copy of connector info */
 
                 /* Retrieve the connector for the ID */
                 if (NULL == (connector = (H5VL_class_t *)H5I_object(connector_prop->connector_id)))
@@ -767,9 +767,9 @@ H5VL_t *
 H5VL_new_connector(hid_t connector_id)
 {
     H5VL_class_t *cls          = NULL;  /* VOL connector class */
-    H5VL_t *      connector    = NULL;  /* New VOL connector struct */
+    H5VL_t       *connector    = NULL;  /* New VOL connector struct */
     hbool_t       conn_id_incr = FALSE; /* Whether the VOL connector ID has been incremented */
-    H5VL_t *      ret_value    = NULL;  /* Return value */
+    H5VL_t       *ret_value    = NULL;  /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -898,8 +898,8 @@ done:
 H5VL_object_t *
 H5VL_create_object_using_vol_id(H5I_type_t type, void *obj, hid_t connector_id)
 {
-    H5VL_class_t * cls          = NULL;  /* VOL connector class */
-    H5VL_t *       connector    = NULL;  /* VOL connector struct */
+    H5VL_class_t  *cls          = NULL;  /* VOL connector class */
+    H5VL_t        *connector    = NULL;  /* VOL connector struct */
     hbool_t        conn_id_incr = FALSE; /* Whether the VOL connector ID has been incremented */
     H5VL_object_t *ret_value    = NULL;  /* Return value */
 
@@ -1153,7 +1153,7 @@ H5VL_file_is_same(const H5VL_object_t *vol_obj1, const H5VL_object_t *vol_obj2, 
     if (cmp_value)
         *same_file = FALSE;
     else {
-        void *                    obj2;        /* Terminal object for second file */
+        void                     *obj2;        /* Terminal object for second file */
         H5VL_file_specific_args_t vol_cb_args; /* Arguments to VOL callback */
 
         /* Get unwrapped (terminal) object for vol_obj2 */
@@ -1194,7 +1194,7 @@ hid_t
 H5VL__register_connector(const void *_cls, hbool_t app_ref, hid_t vipl_id)
 {
     const H5VL_class_t *cls       = (const H5VL_class_t *)_cls;
-    H5VL_class_t *      saved     = NULL;
+    H5VL_class_t       *saved     = NULL;
     hid_t               ret_value = H5I_INVALID_HID;
 
     FUNC_ENTER_PACKAGE
@@ -1722,7 +1722,7 @@ done:
 ssize_t
 H5VL__get_connector_name(hid_t id, char *name /*out*/, size_t size)
 {
-    H5VL_object_t *     vol_obj;
+    H5VL_object_t      *vol_obj;
     const H5VL_class_t *cls;
     size_t              len;
     ssize_t             ret_value = -1;
@@ -1765,7 +1765,7 @@ done:
 H5VL_object_t *
 H5VL_vol_object(hid_t id)
 {
-    void *         obj = NULL;
+    void          *obj = NULL;
     H5I_type_t     obj_type;
     H5VL_object_t *ret_value = NULL;
 
@@ -1859,7 +1859,7 @@ static void *
 H5VL__object(hid_t id, H5I_type_t obj_type)
 {
     H5VL_object_t *vol_obj   = NULL;
-    void *         ret_value = NULL;
+    void          *ret_value = NULL;
 
     FUNC_ENTER_PACKAGE
 
@@ -2438,7 +2438,7 @@ H5VL_reset_vol_wrapper(void)
     else
         /* Save the updated wrapper context */
         if (H5CX_set_vol_wrap_ctx(vol_wrap_ctx) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL object wrap context")
+            HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL object wrap context")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2457,7 +2457,7 @@ hid_t
 H5VL_wrap_register(H5I_type_t type, void *obj, hbool_t app_ref)
 {
     H5VL_wrap_ctx_t *vol_wrap_ctx = NULL;         /* Object wrapping context */
-    void *           new_obj;                     /* Newly wrapped object */
+    void            *new_obj;                     /* Newly wrapped object */
     hid_t            ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_NOAPI(H5I_INVALID_HID)

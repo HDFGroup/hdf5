@@ -89,7 +89,10 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g; /* MPI INFO object for IO */
 /*
  * Print the current location on the standard output stream.
  */
-#define AT() HDprintf("   at %s:%d in %s()...\n", __FILE__, __LINE__, __func__);
+#define AT()                                                                                                 \
+    do {                                                                                                     \
+        HDprintf("   at %s:%d in %s()...\n", __FILE__, __LINE__, __func__);                                  \
+    } while (0)
 
 /*
  * The name of the test is printed by saying TESTING("something") which will
@@ -101,66 +104,66 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g; /* MPI INFO object for IO */
  * the H5_FAILED() macro is invoked automatically when an API function fails.
  */
 #define TESTING(WHAT)                                                                                        \
-    {                                                                                                        \
+    do {                                                                                                     \
         HDprintf("Testing %-62s", WHAT);                                                                     \
         HDfflush(stdout);                                                                                    \
-    }
+    } while (0)
 #define TESTING_2(WHAT)                                                                                      \
-    {                                                                                                        \
+    do {                                                                                                     \
         HDprintf("  Testing %-60s", WHAT);                                                                   \
         HDfflush(stdout);                                                                                    \
-    }
+    } while (0)
 #define PASSED()                                                                                             \
     do {                                                                                                     \
         HDputs(" PASSED");                                                                                   \
         HDfflush(stdout);                                                                                    \
     } while (0)
 #define H5_FAILED()                                                                                          \
-    {                                                                                                        \
+    do {                                                                                                     \
         HDputs("*FAILED*");                                                                                  \
         HDfflush(stdout);                                                                                    \
-    }
+    } while (0)
 #define H5_WARNING()                                                                                         \
-    {                                                                                                        \
+    do {                                                                                                     \
         HDputs("*WARNING*");                                                                                 \
         HDfflush(stdout);                                                                                    \
-    }
+    } while (0)
 #define SKIPPED()                                                                                            \
-    {                                                                                                        \
+    do {                                                                                                     \
         HDputs(" -SKIP-");                                                                                   \
         HDfflush(stdout);                                                                                    \
-    }
+    } while (0)
 #define PUTS_ERROR(s)                                                                                        \
-    {                                                                                                        \
+    do {                                                                                                     \
         HDputs(s);                                                                                           \
         AT();                                                                                                \
         goto error;                                                                                          \
-    }
+    } while (0)
 #define TEST_ERROR                                                                                           \
-    {                                                                                                        \
+    do {                                                                                                     \
         H5_FAILED();                                                                                         \
         AT();                                                                                                \
         goto error;                                                                                          \
-    }
+    } while (0)
 #define STACK_ERROR                                                                                          \
-    {                                                                                                        \
+    do {                                                                                                     \
         H5Eprint2(H5E_DEFAULT, stdout);                                                                      \
         goto error;                                                                                          \
-    }
+    } while (0)
 #define FAIL_STACK_ERROR                                                                                     \
-    {                                                                                                        \
+    do {                                                                                                     \
         H5_FAILED();                                                                                         \
         AT();                                                                                                \
         H5Eprint2(H5E_DEFAULT, stdout);                                                                      \
         goto error;                                                                                          \
-    }
+    } while (0)
 #define FAIL_PUTS_ERROR(s)                                                                                   \
-    {                                                                                                        \
+    do {                                                                                                     \
         H5_FAILED();                                                                                         \
         AT();                                                                                                \
         HDputs(s);                                                                                           \
         goto error;                                                                                          \
-    }
+    } while (0)
 
 /* Number of seconds to wait before killing a test (requires alarm(2)) */
 #define H5_ALARM_SEC 1200 /* default is 20 minutes */
@@ -193,13 +196,22 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g; /* MPI INFO object for IO */
 extern "C" {
 #endif
 
+/*
+ * Ugly hack to cast away const for freeing const-qualified pointers.
+ * Should only be used sparingly, where the alternative (like keeping
+ * an equivalent non-const pointer around) is far messier.
+ */
+#ifndef h5_free_const
+#define h5_free_const(mem) HDfree((void *)(uintptr_t)mem)
+#endif
+
 /* Generally useful testing routines */
 H5TEST_DLL void        h5_clean_files(const char *base_name[], hid_t fapl);
 H5TEST_DLL int         h5_cleanup(const char *base_name[], hid_t fapl);
-H5TEST_DLL char *      h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size);
-H5TEST_DLL char *      h5_fixname_superblock(const char *base_name, hid_t fapl, char *fullname, size_t size);
-H5TEST_DLL char *      h5_fixname_no_suffix(const char *base_name, hid_t fapl, char *fullname, size_t size);
-H5TEST_DLL char *      h5_fixname_printf(const char *base_name, hid_t fapl, char *fullname, size_t size);
+H5TEST_DLL char       *h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size);
+H5TEST_DLL char       *h5_fixname_superblock(const char *base_name, hid_t fapl, char *fullname, size_t size);
+H5TEST_DLL char       *h5_fixname_no_suffix(const char *base_name, hid_t fapl, char *fullname, size_t size);
+H5TEST_DLL char       *h5_fixname_printf(const char *base_name, hid_t fapl, char *fullname, size_t size);
 H5TEST_DLL hid_t       h5_fileaccess(void);
 H5TEST_DLL hid_t       h5_fileaccess_flags(unsigned flags);
 H5TEST_DLL void        h5_no_hwconv(void);
@@ -208,19 +220,19 @@ H5TEST_DLL void        h5_reset(void);
 H5TEST_DLL void        h5_restore_err(void);
 H5TEST_DLL void        h5_show_hostname(void);
 H5TEST_DLL h5_stat_size_t h5_get_file_size(const char *filename, hid_t fapl);
-H5TEST_DLL int            print_func(const char *format, ...);
+H5TEST_DLL int            print_func(const char *format, ...) H5_ATTR_FORMAT(printf, 1, 2);
 H5TEST_DLL int            h5_make_local_copy(const char *origfilename, const char *local_copy_name);
 H5TEST_DLL herr_t         h5_verify_cached_stabs(const char *base_name[], hid_t fapl);
-H5TEST_DLL H5FD_class_t *h5_get_dummy_vfd_class(void);
-H5TEST_DLL H5VL_class_t *h5_get_dummy_vol_class(void);
-H5TEST_DLL const char *  h5_get_version_string(H5F_libver_t libver);
-H5TEST_DLL int           h5_compare_file_bytes(char *fname1, char *fname2);
-H5TEST_DLL int           h5_duplicate_file_by_bytes(const char *orig, const char *dest);
-H5TEST_DLL herr_t        h5_check_if_file_locking_enabled(hbool_t *are_enabled);
-H5TEST_DLL hbool_t       h5_using_default_driver(const char *drv_name);
-H5TEST_DLL hbool_t       h5_using_parallel_driver(const char *drv_name);
-H5TEST_DLL hbool_t       h5_driver_uses_modified_filename(void);
-H5TEST_DLL hbool_t       h5_driver_uses_multiple_files(const char *drv_name, unsigned flags);
+H5TEST_DLL H5FD_class_t  *h5_get_dummy_vfd_class(void);
+H5TEST_DLL H5VL_class_t  *h5_get_dummy_vol_class(void);
+H5TEST_DLL const char    *h5_get_version_string(H5F_libver_t libver);
+H5TEST_DLL int            h5_compare_file_bytes(char *fname1, char *fname2);
+H5TEST_DLL int            h5_duplicate_file_by_bytes(const char *orig, const char *dest);
+H5TEST_DLL herr_t         h5_check_if_file_locking_enabled(hbool_t *are_enabled);
+H5TEST_DLL hbool_t        h5_using_default_driver(const char *drv_name);
+H5TEST_DLL herr_t         h5_using_parallel_driver(hid_t fapl_id, hbool_t *driver_is_parallel);
+H5TEST_DLL herr_t         h5_driver_is_default_vfd_compatible(hid_t fapl_id, hbool_t *default_vfd_compatible);
+H5TEST_DLL hbool_t        h5_driver_uses_multiple_files(const char *drv_name, unsigned flags);
 
 /* Functions that will replace components of a FAPL */
 H5TEST_DLL herr_t h5_get_libver_fapl(hid_t fapl_id);

@@ -63,7 +63,7 @@ dset_ok(hid_t fid, const char *dset_name)
 {
     hid_t   sid     = -1;   /* dataspace ID                     */
     hid_t   did     = -1;   /* dataset ID                       */
-    int *   data    = NULL; /* data buffer                      */
+    int    *data    = NULL; /* data buffer                      */
     hsize_t dims[1] = {0};  /* size of dataset                  */
     int     i;              /* iterator                         */
 
@@ -239,20 +239,31 @@ error:
 int
 main(void)
 {
-    char *      driver = NULL;     /* name of current VFD (from env var)       */
+    char       *driver = NULL;     /* name of current VFD (from env var)       */
     hbool_t     vfd_supports_swmr; /* whether the current VFD supports SWMR    */
     hid_t       fapl_id = -1;      /* file access proplist ID                  */
     char        filename[1024];    /* filename                                 */
     hbool_t     check_second_dset; /* whether or not to check the second dset  */
     H5E_auto2_t func;              /* for shutting off error reporting         */
+    hbool_t     driver_is_default_vfd_compatible;
 
     h5_reset();
     if ((fapl_id = h5_fileaccess()) < 0)
-        PUTS_ERROR("bad vfd-dependent fapl")
+        PUTS_ERROR("bad vfd-dependent fapl");
 
     /* Check if the current VFD supports SWMR */
     driver            = HDgetenv(HDF5_DRIVER);
     vfd_supports_swmr = H5FD__supports_swmr_test(driver);
+
+    if (h5_driver_is_default_vfd_compatible(fapl_id, &driver_is_default_vfd_compatible) < 0) {
+        HDprintf("Can't check if VFD is compatible with default VFD\n");
+        HDexit(EXIT_FAILURE);
+    }
+
+    if (!driver_is_default_vfd_compatible) {
+        HDprintf("Skipping SWMR tests for VFD incompatible with default VFD\n");
+        HDexit(EXIT_SUCCESS);
+    }
 
     /* TEST 1 */
     /* Check the case where the file was flushed */
@@ -262,7 +273,7 @@ main(void)
     if (file_ok(filename, fapl_id, check_second_dset))
         PASSED();
     else
-        TEST_ERROR
+        TEST_ERROR;
 
     /* TEST 2 */
     /* Check the case where the file was flushed (w/SWMR) */
@@ -271,23 +282,23 @@ main(void)
         h5_fixname(FILENAME[1], fapl_id, filename, sizeof(filename));
         check_second_dset = FALSE;
         if (clear_status_flags(filename, fapl_id) < 0)
-            TEST_ERROR
+            TEST_ERROR;
         if (file_ok(filename, fapl_id, check_second_dset))
             PASSED();
         else
-            TEST_ERROR
+            TEST_ERROR;
     } /* end if */
     else
-        SKIPPED()
+        SKIPPED();
 
     /* TEST 3 */
     /* Check the case where the file was not flushed */
     TESTING("H5Fflush (part2 without flush)");
     /* Turn the error stack off (failures expected) */
     if (H5Eget_auto2(H5E_DEFAULT, &func, NULL) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Eset_auto2(H5E_DEFAULT, NULL, NULL) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     h5_fixname(FILENAME[2], fapl_id, filename, sizeof(filename));
     check_second_dset = FALSE;
     if (file_ok(filename, fapl_id, check_second_dset)) {
@@ -295,14 +306,14 @@ main(void)
         SKIPPED();
         HDputs("   the DLL will flush the file even when calling _exit, skip this test temporarily");
 #else
-        TEST_ERROR
+        TEST_ERROR;
 #endif
     } /* end if */
     else
         PASSED();
     /* Turn the error stack back on */
     if (H5Eset_auto2(H5E_DEFAULT, func, NULL) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* TEST 4 */
     /* Check the case where the file was not flushed (w/SWMR) */
@@ -310,29 +321,29 @@ main(void)
     if (vfd_supports_swmr) {
         /* Turn the error stack off (failures expected) */
         if (H5Eget_auto2(H5E_DEFAULT, &func, NULL) < 0)
-            FAIL_STACK_ERROR
+            FAIL_STACK_ERROR;
         if (H5Eset_auto2(H5E_DEFAULT, NULL, NULL) < 0)
-            FAIL_STACK_ERROR
+            FAIL_STACK_ERROR;
         h5_fixname(FILENAME[3], fapl_id, filename, sizeof(filename));
         check_second_dset = FALSE;
         if (clear_status_flags(filename, fapl_id) < 0)
-            TEST_ERROR
+            TEST_ERROR;
         if (file_ok(filename, fapl_id, check_second_dset)) {
 #if defined H5_HAVE_WIN32_API && !defined(hdf5_EXPORTS)
             SKIPPED();
             HDputs("   the DLL will flush the file even when calling _exit, skip this test temporarily");
 #else
-            TEST_ERROR
+            TEST_ERROR;
 #endif
         } /* end if */
         else
             PASSED();
         /* Turn the error stack back on */
         if (H5Eset_auto2(H5E_DEFAULT, func, NULL) < 0)
-            FAIL_STACK_ERROR
+            FAIL_STACK_ERROR;
     } /* end if */
     else
-        SKIPPED()
+        SKIPPED();
 
     /* TEST 5 */
     /* Check the case where the file was flushed, but more data was
@@ -344,7 +355,7 @@ main(void)
     if (file_ok(filename, fapl_id, check_second_dset))
         PASSED();
     else
-        TEST_ERROR
+        TEST_ERROR;
 
     /* TEST 6 */
     /* Check the case where the file was flushed, but more data was
@@ -355,14 +366,14 @@ main(void)
         check_second_dset = TRUE;
         h5_fixname(FILENAME[5], fapl_id, filename, sizeof(filename));
         if (clear_status_flags(filename, fapl_id) < 0)
-            TEST_ERROR
+            TEST_ERROR;
         if (file_ok(filename, fapl_id, check_second_dset))
             PASSED();
         else
-            TEST_ERROR
+            TEST_ERROR;
     } /* end if */
     else
-        SKIPPED()
+        SKIPPED();
 
     /* TEST 7 */
     /* Check the case where the file was flushed, but more data was added
@@ -371,24 +382,24 @@ main(void)
     TESTING("H5Fflush (part2 with flush and later addition)");
     /* Turn the error stack off (failures expected) */
     if (H5Eget_auto2(H5E_DEFAULT, &func, NULL) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Eset_auto2(H5E_DEFAULT, NULL, NULL) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     h5_fixname(FILENAME[6], fapl_id, filename, sizeof(filename));
     check_second_dset = TRUE;
     if (file_ok(filename, fapl_id, check_second_dset)) {
 #if defined H5_HAVE_WIN32_API && !defined(hdf5_EXPORTS)
-        SKIPPED()
+        SKIPPED();
         HDputs("   the DLL will flush the file even when calling _exit, skip this test temporarily");
 #else
-        TEST_ERROR
+        TEST_ERROR;
 #endif
     } /* end if */
     else
         PASSED();
     /* Turn the error stack back on */
     if (H5Eset_auto2(H5E_DEFAULT, func, NULL) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* TEST 8 */
     /* Check the case where the file was flushed, but more data was added
@@ -398,29 +409,29 @@ main(void)
     if (vfd_supports_swmr) {
         /* Turn the error stack off (failures expected) */
         if (H5Eget_auto2(H5E_DEFAULT, &func, NULL) < 0)
-            FAIL_STACK_ERROR
+            FAIL_STACK_ERROR;
         if (H5Eset_auto2(H5E_DEFAULT, NULL, NULL) < 0)
-            FAIL_STACK_ERROR
+            FAIL_STACK_ERROR;
         h5_fixname(FILENAME[7], fapl_id, filename, sizeof(filename));
         check_second_dset = TRUE;
         if (clear_status_flags(filename, fapl_id) < 0)
-            TEST_ERROR
+            TEST_ERROR;
         if (file_ok(filename, fapl_id, check_second_dset)) {
 #if defined H5_HAVE_WIN32_API && !defined(hdf5_EXPORTS)
             SKIPPED();
             HDputs("   the DLL will flush the file even when calling _exit, skip this test temporarily");
 #else
-            TEST_ERROR
+            TEST_ERROR;
 #endif
         } /* end if */
         else
             PASSED();
         /* Turn the error stack back on */
         if (H5Eset_auto2(H5E_DEFAULT, func, NULL) < 0)
-            FAIL_STACK_ERROR
+            FAIL_STACK_ERROR;
     } /* end if */
     else
-        SKIPPED()
+        SKIPPED();
 
     if (!vfd_supports_swmr)
         HDprintf("NOTE: Some tests were skipped since the current VFD lacks SWMR support\n");

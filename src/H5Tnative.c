@@ -120,25 +120,25 @@ static H5T_t *
 H5T__get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_align, size_t *offset,
                      size_t *comp_size)
 {
-    H5T_t * super_type;       /* Super type of VL, array and enum datatypes */
-    H5T_t * nat_super_type;   /* Native form of VL, array & enum super datatype */
-    H5T_t * new_type  = NULL; /* New native datatype */
-    H5T_t * memb_type = NULL; /* Datatype of member */
+    H5T_t  *super_type;       /* Super type of VL, array and enum datatypes */
+    H5T_t  *nat_super_type;   /* Native form of VL, array & enum super datatype */
+    H5T_t  *new_type  = NULL; /* New native datatype */
+    H5T_t  *memb_type = NULL; /* Datatype of member */
     H5T_t **memb_list = NULL; /* List of compound member IDs */
     size_t *memb_offset =
         NULL; /* List of member offsets in compound type, including member size and alignment */
-    char **     comp_mname     = NULL; /* List of member names in compound type */
-    char *      memb_name      = NULL; /* Enum's member name */
-    void *      memb_value     = NULL; /* Enum's member value */
-    void *      tmp_memb_value = NULL; /* Enum's member value */
-    hsize_t *   dims           = NULL; /* Dimension sizes for array */
+    char      **comp_mname     = NULL; /* List of member names in compound type */
+    char       *memb_name      = NULL; /* Enum's member name */
+    void       *memb_value     = NULL; /* Enum's member value */
+    void       *tmp_memb_value = NULL; /* Enum's member value */
+    hsize_t    *dims           = NULL; /* Dimension sizes for array */
     H5T_class_t h5_class;              /* Class of datatype to make native */
     size_t      size;                  /* Size of datatype to make native */
     size_t      prec;                  /* Precision of datatype to make native */
     int         snmemb;                /* Number of members in compound & enum types */
     unsigned    nmemb = 0;             /* Number of members in compound & enum types */
     unsigned    u;                     /* Local index variable */
-    H5T_t *     ret_value = NULL;      /* Return value */
+    H5T_t      *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1159,7 +1159,7 @@ H5T__init_native_internal(void)
         /* Pointer to the global variable that receives the
          * identifier for `type`'s H5T_t:
          */
-        hid_t *      hidp;
+        hid_t       *hidp;
         size_t       size;   // sizeof(`type`)
         H5T_atomic_t atomic; // `type` facts such as signedness
     } native_int_t;
@@ -1171,10 +1171,20 @@ H5T__init_native_internal(void)
 
     /* clang-format off */
 
+    /* Version 19.10 of the PGI C compiler croaks on the following
+     * tables if they are `static`, so make them `static` only if
+     * some other compiler is used.
+     */
+#if defined(__PGIC__) && __PGIC__ == 19 && __PGIC_MINOR__ == 10
+#   define static_unless_buggy_pgic
+#else
+#   define static_unless_buggy_pgic static
+#endif
+
     /* The library compiles with a limit on `static` object size, so
      * I broke this table into three.
      */
-    static const native_int_t table1[] = {
+    static_unless_buggy_pgic const native_int_t table1[] = {
       NATIVE_ENTRY_INITIALIZER(SCHAR, signed char, 0, true)
     , NATIVE_ENTRY_INITIALIZER(UCHAR, unsigned char, 0, false)
     , NATIVE_ENTRY_INITIALIZER(SHORT, short, 0, true)
@@ -1188,7 +1198,7 @@ H5T__init_native_internal(void)
     , NATIVE_ENTRY_INITIALIZER(LLONG, long long, 0, true)
     , NATIVE_ENTRY_INITIALIZER(ULLONG, unsigned long long, 0, false)
     };
-    static const native_int_t table2[] = {
+    static_unless_buggy_pgic const native_int_t table2[] = {
       NATIVE_ENTRY_INITIALIZER(INT8, int8_t, 0, true)
     , NATIVE_ENTRY_INITIALIZER(UINT8, uint8_t, 0, false)
     , NATIVE_ENTRY_INITIALIZER(INT_LEAST8, int_least8_t, 0, true)
@@ -1202,7 +1212,7 @@ H5T__init_native_internal(void)
     , NATIVE_ENTRY_INITIALIZER(INT_FAST16, int_fast16_t, 0, true)
     , NATIVE_ENTRY_INITIALIZER(UINT_FAST16, uint_fast16_t, 0, false)
     };
-    static const native_int_t table3[] = {
+    static_unless_buggy_pgic const native_int_t table3[] = {
       NATIVE_ENTRY_INITIALIZER(INT32, int32_t, 0, true)
     , NATIVE_ENTRY_INITIALIZER(UINT32, uint32_t, 0, false)
     , NATIVE_ENTRY_INITIALIZER(INT_LEAST32, int_least32_t, 0, true)
@@ -1216,11 +1226,12 @@ H5T__init_native_internal(void)
     , NATIVE_ENTRY_INITIALIZER(INT_FAST64, int_fast64_t, 0, true)
     , NATIVE_ENTRY_INITIALIZER(UINT_FAST64, uint_fast64_t, 0, false)
     };
-    static const native_int_table_t table_table[] = {
+    static_unless_buggy_pgic const native_int_table_t table_table[] = {
       {table1, NELMTS(table1)}
     , {table2, NELMTS(table2)}
     , {table3, NELMTS(table3)}
     };
+#undef static_unless_buggy_pgic
     /* clang-format on */
 
     size_t      i, j;

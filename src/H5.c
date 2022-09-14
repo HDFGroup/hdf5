@@ -50,7 +50,7 @@
 /* Node for list of 'atclose' routines to invoke at library shutdown */
 typedef struct H5_atclose_node_t {
     H5_atclose_func_t         func; /* Function to invoke */
-    void *                    ctx;  /* Context to pass to function */
+    void                     *ctx;  /* Context to pass to function */
     struct H5_atclose_node_t *next; /* Pointer to next node in list */
 } H5_atclose_node_t;
 
@@ -71,8 +71,8 @@ static int H5__mpi_delete_cb(MPI_Comm comm, int keyval, void *attr_val, int *fla
 /*****************************/
 
 /* Library incompatible release versions, develop releases are incompatible by design */
-const unsigned VERS_RELEASE_EXCEPTIONS[]    = {0, 1, 2};
-const unsigned VERS_RELEASE_EXCEPTIONS_SIZE = 3;
+const unsigned VERS_RELEASE_EXCEPTIONS[]    = {0, 1, 2, 3};
+const unsigned VERS_RELEASE_EXCEPTIONS_SIZE = 4;
 
 /* statically initialize block for pthread_once call used in initializing */
 /* the first global mutex                                                 */
@@ -146,7 +146,7 @@ herr_t
 H5_init_library(void)
 {
     size_t i;
-    char * env_use_select_io = NULL;
+    char  *env_use_select_io = NULL;
     herr_t ret_value         = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -782,7 +782,7 @@ done:
 static void
 H5__debug_mask(const char *s)
 {
-    FILE *  stream = stderr;
+    FILE   *stream = stderr;
     char    pkg_name[32], *rest;
     size_t  i;
     hbool_t clear;
@@ -964,8 +964,8 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
     char                substr[]                 = H5_VERS_SUBRELEASE;
     static int          checked                  = 0; /* If we've already checked the version info */
     static unsigned int disable_version_check    = 0; /* Set if the version check should be disabled */
-    static const char * version_mismatch_warning = VERSION_MISMATCH_WARNING;
-    static const char * release_mismatch_warning = RELEASE_MISMATCH_WARNING;
+    static const char  *version_mismatch_warning = VERSION_MISMATCH_WARNING;
+    static const char  *release_mismatch_warning = RELEASE_MISMATCH_WARNING;
     herr_t              ret_value                = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT_NOERR_NOFS

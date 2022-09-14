@@ -26,7 +26,7 @@
 #define FILENAME      "family_file%05d.h5"
 
 int **buf      = NULL;
-int * buf_data = NULL;
+int  *buf_data = NULL;
 
 int
 main(void)

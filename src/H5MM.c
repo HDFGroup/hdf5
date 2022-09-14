@@ -53,7 +53,7 @@
 struct H5MM_block_t; /* Forward declaration for typedef */
 typedef struct H5MM_block_t {
     unsigned char
-                         sig[H5MM_SIG_SIZE]; /* Signature for the block, to indicate it was allocated with H5MM* interface */
+        sig[H5MM_SIG_SIZE]; /* Signature for the block, to indicate it was allocated with H5MM* interface */
     struct H5MM_block_t *next; /* Pointer to next block in the list of allocated blocks */
     struct H5MM_block_t *prev; /* Pointer to previous block in the list of allocated blocks */
     union {
@@ -152,7 +152,7 @@ H5MM__sanity_check_block(const H5MM_block_t *block)
     HDassert(block->u.info.size > 0);
     HDassert(block->u.info.in_use);
     /* Check for head & tail guards, if not head of linked list */
-    if (block->u.info.size != SIZET_MAX) {
+    if (block->u.info.size != SIZE_MAX) {
         HDassert(0 == HDmemcmp(block->b, H5MM_block_head_guard_s, H5MM_HEAD_GUARD_SIZE));
         HDassert(0 == HDmemcmp(block->b + H5MM_HEAD_GUARD_SIZE + block->u.info.size, H5MM_block_tail_guard_s,
                                H5MM_TAIL_GUARD_SIZE));
@@ -267,7 +267,7 @@ H5MM_malloc(size_t size)
         H5MM_memcpy(H5MM_block_head_s.sig, H5MM_block_signature_s, H5MM_SIG_SIZE);
         H5MM_block_head_s.next          = &H5MM_block_head_s;
         H5MM_block_head_s.prev          = &H5MM_block_head_s;
-        H5MM_block_head_s.u.info.size   = SIZET_MAX;
+        H5MM_block_head_s.u.info.size   = SIZE_MAX;
         H5MM_block_head_s.u.info.in_use = TRUE;
 
         H5MM_init_s = TRUE;
@@ -502,6 +502,53 @@ H5MM_strdup(const char *s)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MM_strdup() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5MM_strndup
+ *
+ * Purpose:     Duplicates a string, including memory allocation, but only
+ *              copies at most `n` bytes from the string to be duplicated.
+ *              If the string to be duplicated is longer than `n`, only `n`
+ *              bytes are copied and a terminating null byte is added.
+ *              NULL is NOT an acceptable value for the input string.
+ *
+ *              If the string to be duplicated is the NULL pointer, then
+ *              an error will be raised.
+ *
+ * Return:      Success:    Pointer to a new string
+ *              Failure:    NULL
+ *-------------------------------------------------------------------------
+ */
+char *
+H5MM_strndup(const char *s, size_t n)
+{
+#if defined H5_MEMORY_ALLOC_SANITY_CHECK
+    size_t len;
+#endif
+    char *ret_value = NULL;
+
+    FUNC_ENTER_NOAPI(NULL)
+
+    if (!s)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "NULL string not allowed")
+
+#if defined H5_MEMORY_ALLOC_SANITY_CHECK
+    for (len = 0; len < n && s[len] != '\0'; len++)
+        ;
+
+    if (NULL == (ret_value = H5MM_malloc(len + 1)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+    H5MM_memcpy(ret_value, s, len);
+    ret_value[len] = '\0';
+#else
+    if (NULL == (ret_value = HDstrndup(s, n)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "string duplication failed")
+#endif
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5MM_strndup() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5MM_xfree

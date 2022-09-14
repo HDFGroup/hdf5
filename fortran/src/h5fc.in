@@ -26,6 +26,7 @@ prefix="@prefix@"
 exec_prefix="@exec_prefix@"
 libdir="@libdir@"
 includedir="@includedir@"
+fmoddir="@fmoddir@"
 HL="@HL@"
 
 ############################################################################
@@ -38,7 +39,7 @@ HL="@HL@"
 ##    $FLINKER $FCFLAGS $H5BLD_FCFLAGS $F9XSUFFIXFLAG $LDFLAGS $LIBS      ##
 ##    $fmodules $link_objs $link_args $shared_link                        ##
 ##                                                                        ##
-## These settings can be overridden by setting HDF5_FCFLAGS,               ##
+## These settings can be overridden by setting HDF5_FCFLAGS,              ##
 ## HDF5_LDFLAGS, or HDF5_LIBS in the environment.                         ##
 ##                                                                        ##
 ############################################################################
@@ -278,7 +279,7 @@ done
 # It's possible that there isn't a modules flag...
   fmodules=""
   if test -n "$F9XMODFLAG"; then
-    fmodules="${F9XMODFLAG}${includedir}"
+    fmodules="${F9XMODFLAG}${fmoddir}"
   fi
 
 if test "x$do_compile" = "xyes"; then

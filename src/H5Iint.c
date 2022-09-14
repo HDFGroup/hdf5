@@ -53,7 +53,7 @@ typedef struct {
 /* User data for iterator callback for ID iteration */
 typedef struct {
     H5I_search_func_t user_func;  /* 'User' function to invoke */
-    void *            user_udata; /* User data to pass to 'user' function */
+    void             *user_udata; /* User data to pass to 'user' function */
     hbool_t           app_ref;    /* Whether this is an appl. ref. call */
     H5I_type_t        obj_type;   /* Type of object we are iterating over */
 } H5I_iterate_ud_t;
@@ -73,9 +73,9 @@ typedef struct {
 /* Local Prototypes */
 /********************/
 
-static void * H5I__unwrap(void *object, H5I_type_t type);
+static void  *H5I__unwrap(void *object, H5I_type_t type);
 static herr_t H5I__mark_node(void *_id, void *key, void *udata);
-static void * H5I__remove_common(H5I_type_info_t *type_info, hid_t id);
+static void  *H5I__remove_common(H5I_type_info_t *type_info, hid_t id);
 static int    H5I__dec_ref(hid_t id, void **request);
 static int    H5I__dec_app_ref(hid_t id, void **request);
 static int    H5I__dec_app_ref_always_close(hid_t id, void **request);
@@ -300,8 +300,8 @@ herr_t
 H5I_clear_type(H5I_type_t type, hbool_t force, hbool_t app_ref)
 {
     H5I_clear_type_ud_t udata; /* udata struct for callback */
-    H5I_id_info_t *     item      = NULL;
-    H5I_id_info_t *     tmp       = NULL;
+    H5I_id_info_t      *item      = NULL;
+    H5I_id_info_t      *tmp       = NULL;
     herr_t              ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -366,7 +366,7 @@ done:
 static herr_t
 H5I__mark_node(void *_info, void H5_ATTR_UNUSED *key, void *_udata)
 {
-    H5I_id_info_t *      info  = (H5I_id_info_t *)_info;        /* Current ID info being worked with */
+    H5I_id_info_t       *info  = (H5I_id_info_t *)_info;        /* Current ID info being worked with */
     H5I_clear_type_ud_t *udata = (H5I_clear_type_ud_t *)_udata; /* udata struct */
     hbool_t              mark  = FALSE;
 
@@ -520,7 +520,7 @@ H5I__register(H5I_type_t type, const void *object, hbool_t app_ref, H5I_future_r
               H5I_future_discard_func_t discard_cb)
 {
     H5I_type_info_t *type_info = NULL;            /* Pointer to the type */
-    H5I_id_info_t *  info      = NULL;            /* Pointer to the new ID information */
+    H5I_id_info_t   *info      = NULL;            /* Pointer to the new ID information */
     hid_t            new_id    = H5I_INVALID_HID; /* New ID */
     hid_t            ret_value = H5I_INVALID_HID; /* Return value */
 
@@ -615,7 +615,7 @@ herr_t
 H5I_register_using_existing_id(H5I_type_t type, void *object, hbool_t app_ref, hid_t existing_id)
 {
     H5I_type_info_t *type_info = NULL;    /* Pointer to the type */
-    H5I_id_info_t *  info      = NULL;    /* Pointer to the new ID information */
+    H5I_id_info_t   *info      = NULL;    /* Pointer to the new ID information */
     herr_t           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -687,7 +687,7 @@ void *
 H5I_subst(hid_t id, const void *new_object)
 {
     H5I_id_info_t *info      = NULL; /* Pointer to the ID's info */
-    void *         ret_value = NULL; /* Return value */
+    void          *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -697,7 +697,7 @@ H5I_subst(hid_t id, const void *new_object)
 
     /* Get the old object pointer to return */
     H5_GCC_CLANG_DIAG_OFF("cast-qual")
-    ret_value = (void *)info->object; /* (Casting away const OK -QAK) */
+    ret_value = (void *)info->object;
     H5_GCC_CLANG_DIAG_ON("cast-qual")
 
     /* Set the new object pointer for the ID */
@@ -723,7 +723,7 @@ void *
 H5I_object(hid_t id)
 {
     H5I_id_info_t *info      = NULL; /* Pointer to the ID info */
-    void *         ret_value = NULL; /* Return value */
+    void          *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOERR
 
@@ -731,7 +731,7 @@ H5I_object(hid_t id)
     if (NULL != (info = H5I__find_id(id))) {
         /* Get the object pointer to return */
         H5_GCC_CLANG_DIAG_OFF("cast-qual")
-        ret_value = (void *)info->object; /* (Casting away const OK -QAK) */
+        ret_value = (void *)info->object;
         H5_GCC_CLANG_DIAG_ON("cast-qual")
     }
 
@@ -757,7 +757,7 @@ void *
 H5I_object_verify(hid_t id, H5I_type_t type)
 {
     H5I_id_info_t *info      = NULL; /* Pointer to the ID info */
-    void *         ret_value = NULL; /* Return value */
+    void          *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOERR
 
@@ -767,7 +767,7 @@ H5I_object_verify(hid_t id, H5I_type_t type)
     if (type == H5I_TYPE(id) && NULL != (info = H5I__find_id(id))) {
         /* Get the object pointer to return */
         H5_GCC_CLANG_DIAG_OFF("cast-qual")
-        ret_value = (void *)info->object; /* (Casting away const OK -QAK) */
+        ret_value = (void *)info->object;
         H5_GCC_CLANG_DIAG_ON("cast-qual")
     }
 
@@ -906,7 +906,7 @@ static void *
 H5I__remove_common(H5I_type_info_t *type_info, hid_t id)
 {
     H5I_id_info_t *info      = NULL; /* Pointer to the current ID */
-    void *         ret_value = NULL; /* Return value */
+    void          *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -930,7 +930,7 @@ H5I__remove_common(H5I_type_info_t *type_info, hid_t id)
         type_info->last_id_info = NULL;
 
     H5_GCC_CLANG_DIAG_OFF("cast-qual")
-    ret_value = (void *)info->object; /* (Casting away const OK -QAK) */
+    ret_value = (void *)info->object;
     H5_GCC_CLANG_DIAG_ON("cast-qual")
 
     if (!H5I_marking_g)
@@ -960,7 +960,7 @@ H5I_remove(hid_t id)
 {
     H5I_type_info_t *type_info = NULL;      /* Pointer to the ID type */
     H5I_type_t       type      = H5I_BADID; /* ID's type */
-    void *           ret_value = NULL;      /* Return value */
+    void            *ret_value = NULL;      /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -1032,7 +1032,6 @@ H5I__dec_ref(hid_t id, void **request)
         type_info = H5I_type_info_array_g[H5I_TYPE(id)];
 
         H5_GCC_CLANG_DIAG_OFF("cast-qual")
-        /* (Casting away const OK -QAK) */
         if (!type_info->cls->free_func || (type_info->cls->free_func)((void *)info->object, request) >= 0) {
             /* Remove the node from the type */
             if (NULL == H5I__remove_common(type_info, id))
@@ -1503,7 +1502,7 @@ done:
 static int
 H5I__iterate_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
 {
-    H5I_id_info_t *   info      = (H5I_id_info_t *)_item;     /* Pointer to the ID info */
+    H5I_id_info_t    *info      = (H5I_id_info_t *)_item;     /* Pointer to the ID info */
     H5I_iterate_ud_t *udata     = (H5I_iterate_ud_t *)_udata; /* User data for callback */
     int               ret_value = H5_ITER_CONT;               /* Callback return value */
 
@@ -1514,14 +1513,14 @@ H5I__iterate_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
      */
     if ((!udata->app_ref) || (info->app_count > 0)) {
         H5I_type_t type = udata->obj_type;
-        void *     object;
+        void      *object;
         herr_t     cb_ret_val;
 
         /* The stored object pointer might be an H5VL_object_t, in which
          * case we'll need to get the wrapped object struct (H5F_t *, etc.).
          */
         H5_GCC_CLANG_DIAG_OFF("cast-qual")
-        object = H5I__unwrap((void *)info->object, type); /* Casting away const OK */
+        object = H5I__unwrap((void *)info->object, type);
         H5_GCC_CLANG_DIAG_ON("cast-qual")
 
         /* Invoke callback function */
@@ -1578,8 +1577,8 @@ H5I_iterate(H5I_type_t type, H5I_search_func_t func, void *udata, hbool_t app_re
     /* Only iterate through ID list if it is initialized and there are IDs in type */
     if (type_info && type_info->init_count > 0 && type_info->id_count > 0) {
         H5I_iterate_ud_t iter_udata; /* User data for iteration callback */
-        H5I_id_info_t *  item = NULL;
-        H5I_id_info_t *  tmp  = NULL;
+        H5I_id_info_t   *item = NULL;
+        H5I_id_info_t   *tmp  = NULL;
 
         /* Set up iterator user data */
         iter_udata.user_func  = func;
@@ -1621,8 +1620,8 @@ H5I__find_id(hid_t id)
 {
     H5I_type_t       type;             /* ID's type */
     H5I_type_info_t *type_info = NULL; /* Pointer to the type */
-    H5I_id_info_t *  id_info   = NULL; /* ID's info */
-    H5I_id_info_t *  ret_value = NULL; /* Return value */
+    H5I_id_info_t   *id_info   = NULL; /* ID's info */
+    H5I_id_info_t   *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -1699,10 +1698,10 @@ done:
 static int
 H5I__find_id_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
 {
-    H5I_id_info_t *  info      = (H5I_id_info_t *)_item;    /* Pointer to the ID info */
+    H5I_id_info_t   *info      = (H5I_id_info_t *)_item;    /* Pointer to the ID info */
     H5I_get_id_ud_t *udata     = (H5I_get_id_ud_t *)_udata; /* Pointer to user data */
     H5I_type_t       type      = udata->obj_type;
-    const void *     object    = NULL;
+    const void      *object    = NULL;
     int              ret_value = H5_ITER_CONT; /* Return value */
 
     FUNC_ENTER_PACKAGE_NOERR
@@ -1713,7 +1712,7 @@ H5I__find_id_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
 
     /* Get a pointer to the VOL connector's data */
     H5_GCC_CLANG_DIAG_OFF("cast-qual")
-    object = H5I__unwrap((void *)info->object, type); /* Casting away const OK */
+    object = H5I__unwrap((void *)info->object, type);
     H5_GCC_CLANG_DIAG_ON("cast-qual")
 
     /* Check for a match */
@@ -1755,8 +1754,8 @@ H5I_find_id(const void *object, H5I_type_t type, hid_t *id)
     /* Only iterate through ID list if it is initialized and there are IDs in type */
     if (type_info->init_count > 0 && type_info->id_count > 0) {
         H5I_get_id_ud_t udata; /* User data */
-        H5I_id_info_t * item = NULL;
-        H5I_id_info_t * tmp  = NULL;
+        H5I_id_info_t  *item = NULL;
+        H5I_id_info_t  *tmp  = NULL;
 
         /* Set up iterator user data */
         udata.object   = object;

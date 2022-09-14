@@ -136,7 +136,7 @@ generate_eoc_test_file(hid_t fapl_id)
     hsize_t           chunk_dims[2];               /* chunk dimensions             */
     H5D_chunk_index_t idx_type;                    /* dataset chunk index type     */
     H5D_layout_t      layout_type;                 /* dataset layout type          */
-    int *             data = NULL;                 /* buffer for fake data         */
+    int              *data = NULL;                 /* buffer for fake data         */
     int               n;                           /* # of data elements           */
     int               i;                           /* iterator (# subgroups)       */
 
@@ -186,7 +186,7 @@ generate_eoc_test_file(hid_t fapl_id)
         /* Create the group name */
         HDmemset(subgroup_name, '\0', SUBGROUP_NAME_SIZE);
         if (HDsnprintf(subgroup_name, (size_t)(SUBGROUP_NAME_SIZE - 1), "%d", i) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         if ((gid2 = H5Gcreate2(gid1, subgroup_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR;
@@ -281,7 +281,7 @@ generate_eoc_test_file(hid_t fapl_id)
         /* Create the group name */
         HDmemset(subgroup_name, '\0', SUBGROUP_NAME_SIZE);
         if (HDsnprintf(subgroup_name, (size_t)(SUBGROUP_NAME_SIZE - 1), "%d", i) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         if ((gid2 = H5Gcreate2(gid1, subgroup_name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR;
@@ -585,9 +585,9 @@ error:
 static herr_t
 check_group_layout(hid_t fid, const char *group_name)
 {
-    H5F_t *  file_ptr = NULL;       /* ptr to internal file struct  */
+    H5F_t   *file_ptr = NULL;       /* ptr to internal file struct  */
     hid_t    gid1 = -1, gid2 = -1;  /* group IDs                    */
-    H5G_t *  grp_ptr = NULL;        /* ptr to internal group struct */
+    H5G_t   *grp_ptr = NULL;        /* ptr to internal group struct */
     haddr_t  tag1, tag2;            /* MD cache tags for groups     */
     uint32_t before, during, after; /* cache sizes                  */
     int      i;                     /* iterator                     */
@@ -622,7 +622,7 @@ check_group_layout(hid_t fid, const char *group_name)
         /* Create the group name */
         HDmemset(subgroup_name, '\0', SUBGROUP_NAME_SIZE);
         if (HDsnprintf(subgroup_name, (size_t)(SUBGROUP_NAME_SIZE - 1), "%d", i) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         if ((gid2 = H5Gopen2(gid1, subgroup_name, H5P_DEFAULT)) < 0)
             TEST_ERROR;
@@ -699,11 +699,11 @@ error:
 static herr_t
 check_dset_scheme(hid_t fid, const char *dset_name)
 {
-    H5F_t *  file_ptr = NULL;       /* ptr to internal file struct  */
+    H5F_t   *file_ptr = NULL;       /* ptr to internal file struct  */
     hid_t    did      = -1;         /* dataset ID                   */
-    H5D_t *  dset_ptr = NULL;       /* ptr to internal dset struct  */
+    H5D_t   *dset_ptr = NULL;       /* ptr to internal dset struct  */
     haddr_t  tag;                   /* MD cache tag for dataset     */
-    int *    data = NULL;           /* buffer for fake data         */
+    int     *data = NULL;           /* buffer for fake data         */
     uint32_t before, during, after; /* cache sizes                  */
 
     /* NOTE: The TESTING() macro is called in main() */

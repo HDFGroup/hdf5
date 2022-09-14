@@ -63,7 +63,7 @@
 /* For region compatibility support */
 struct H5Tref_dsetreg {
     H5O_token_t token; /* Object token */
-    H5S_t *     space; /* Dataspace */
+    H5S_t      *space; /* Dataspace */
 };
 
 /********************/
@@ -409,9 +409,9 @@ static size_t
 H5T__ref_mem_getsize(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf,
                      size_t H5_ATTR_UNUSED src_size, H5VL_object_t *dst_file, hbool_t *dst_copy)
 {
-    H5VL_object_t *       vol_obj = NULL; /* VOL object for src ref's location */
+    H5VL_object_t        *vol_obj = NULL; /* VOL object for src ref's location */
     const H5R_ref_priv_t *src_ref = (const H5R_ref_priv_t *)src_buf;
-    char *                file_name_buf_dyn =
+    char                 *file_name_buf_dyn =
         NULL; /* Pointer to dynamically allocated buffer for file name, if static buffer is too small */
     unsigned flags     = 0; /* References flags */
     size_t   ret_value = 0; /* Return value */
@@ -439,7 +439,7 @@ H5T__ref_mem_getsize(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf
     /* Force re-calculating encoding size if any flags are set */
     if (flags || !src_ref->encode_size) {
         H5VL_file_get_args_t vol_cb_args;               /* Arguments to VOL callback */
-        char *               file_name = NULL;          /* Actual file name */
+        char                *file_name = NULL;          /* Actual file name */
         char                 file_name_buf_static[256]; /* File name */
         size_t               file_name_len = 0;         /* Length of file name */
 
@@ -526,12 +526,12 @@ static herr_t
 H5T__ref_mem_read(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf, size_t H5_ATTR_UNUSED src_size,
                   H5VL_object_t *dst_file, void *dst_buf, size_t dst_size)
 {
-    H5VL_object_t *       vol_obj; /* VOL object for src ref's location */
+    H5VL_object_t        *vol_obj; /* VOL object for src ref's location */
     const H5R_ref_priv_t *src_ref     = (const H5R_ref_priv_t *)src_buf;
     hbool_t               files_equal = TRUE; /* Whether src & dst references are in same file */
-    char *                file_name   = NULL; /* Actual file name */
+    char                 *file_name   = NULL; /* Actual file name */
     char                  file_name_buf_static[256] = {'\0'}; /* File name */
-    char *                file_name_buf_dyn =
+    char                 *file_name_buf_dyn =
         NULL; /* Pointer to dynamically allocated buffer for file name, if static buffer is too small */
     unsigned flags     = 0;       /* References flags */
     herr_t   ret_value = SUCCEED; /* Return value */
@@ -641,7 +641,7 @@ H5T__ref_mem_write(H5VL_object_t *src_file, const void *src_buf, size_t src_size
                    H5VL_object_t H5_ATTR_UNUSED *dst_file, void *dst_buf,
                    size_t H5_ATTR_NDEBUG_UNUSED dst_size, void H5_ATTR_UNUSED *bg_buf)
 {
-    H5F_t *         src_f   = NULL;
+    H5F_t          *src_f   = NULL;
     hid_t           file_id = H5I_INVALID_HID;
     H5R_ref_priv_t *dst_ref = (H5R_ref_priv_t *)dst_buf;
     H5R_ref_priv_t  tmp_ref; /* Temporary reference to decode into */
@@ -753,6 +753,14 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+/*
+ * It is the correct thing to do to have the reference buffer
+ * be const-qualified here, but the VOL "blob specific" routine
+ * needs a non-const pointer since an operation might modify
+ * the "blob". Disable this warning here (at least temporarily)
+ * for this reason.
+ */
+H5_GCC_CLANG_DIAG_OFF("cast-qual")
 static herr_t
 H5T__ref_disk_isnull(const H5VL_object_t *src_file, const void *src_buf, hbool_t *isnull)
 {
@@ -792,6 +800,7 @@ H5T__ref_disk_isnull(const H5VL_object_t *src_file, const void *src_buf, hbool_t
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__ref_disk_isnull() */
+H5_GCC_CLANG_DIAG_ON("cast-qual")
 
 /*-------------------------------------------------------------------------
  * Function:    H5T__ref_disk_setnull
@@ -806,8 +815,8 @@ static herr_t
 H5T__ref_disk_setnull(H5VL_object_t *dst_file, void *dst_buf, void *bg_buf)
 {
     H5VL_blob_specific_args_t vol_cb_args; /* Arguments to VOL callback */
-    uint8_t *                 q         = (uint8_t *)dst_buf;
-    uint8_t *                 p_bg      = (uint8_t *)bg_buf;
+    uint8_t                  *q         = (uint8_t *)dst_buf;
+    uint8_t                  *p_bg      = (uint8_t *)bg_buf;
     herr_t                    ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
@@ -910,7 +919,7 @@ H5T__ref_disk_read(H5VL_object_t *src_file, const void *src_buf, size_t H5_ATTR_
                    H5VL_object_t H5_ATTR_UNUSED *dst_file, void *dst_buf, size_t dst_size)
 {
     const uint8_t *p         = (const uint8_t *)src_buf;
-    uint8_t *      q         = (uint8_t *)dst_buf;
+    uint8_t       *q         = (uint8_t *)dst_buf;
     size_t         blob_size = dst_size;
     herr_t         ret_value = SUCCEED;
 
@@ -952,13 +961,12 @@ done:
 static herr_t
 H5T__ref_disk_write(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf, size_t src_size,
                     H5R_type_t H5_ATTR_UNUSED src_type, H5VL_object_t *dst_file, void *dst_buf,
-                    size_t dst_size, void *bg_buf)
+                    size_t H5_ATTR_NDEBUG_UNUSED dst_size, void *bg_buf)
 {
-    const uint8_t *p             = (const uint8_t *)src_buf;
-    uint8_t *      q             = (uint8_t *)dst_buf;
-    size_t         buf_size_left = dst_size;
-    uint8_t *      p_bg          = (uint8_t *)bg_buf;
-    herr_t         ret_value     = SUCCEED;
+    const uint8_t *p         = (const uint8_t *)src_buf;
+    uint8_t       *q         = (uint8_t *)dst_buf;
+    uint8_t       *p_bg      = (uint8_t *)bg_buf;
+    herr_t         ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
     H5T_REF_LOG_DEBUG("");
@@ -971,12 +979,14 @@ H5T__ref_disk_write(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf,
     /* TODO Should get rid of bg stuff */
     if (p_bg) {
         H5VL_blob_specific_args_t vol_cb_args; /* Arguments to VOL callback */
-        size_t                    p_buf_size_left = dst_size;
 
         /* Skip the size / header */
         p_bg += (sizeof(uint32_t) + H5R_ENCODE_HEADER_SIZE);
+
+#ifndef NDEBUG
+        size_t p_buf_size_left = dst_size;
         HDassert(p_buf_size_left > (sizeof(uint32_t) + H5R_ENCODE_HEADER_SIZE));
-        p_buf_size_left -= (sizeof(uint32_t) + H5R_ENCODE_HEADER_SIZE);
+#endif
 
         /* Set up VOL callback arguments */
         vol_cb_args.op_type = H5VL_BLOB_DELETE;
@@ -991,12 +1001,14 @@ H5T__ref_disk_write(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf,
     p += H5R_ENCODE_HEADER_SIZE;
     q += H5R_ENCODE_HEADER_SIZE;
     src_size -= H5R_ENCODE_HEADER_SIZE;
-    buf_size_left -= sizeof(uint32_t);
+
+#ifndef NDEBUG
+    size_t buf_size_left = dst_size - sizeof(uint32_t);
+    HDassert(buf_size_left > sizeof(uint32_t));
+#endif
 
     /* Set the size */
     UINT32ENCODE(q, src_size);
-    HDassert(buf_size_left > sizeof(uint32_t));
-    buf_size_left -= sizeof(uint32_t);
 
     /* Store blob */
     if (H5VL_blob_put(dst_file, p, src_size, q, NULL) < 0)
@@ -1018,7 +1030,7 @@ done:
 static herr_t
 H5T__ref_obj_disk_isnull(const H5VL_object_t *src_file, const void *src_buf, hbool_t *isnull)
 {
-    H5F_t *        src_f;
+    H5F_t         *src_f;
     const uint8_t *p = (const uint8_t *)src_buf;
     haddr_t        addr;
     herr_t         ret_value = SUCCEED;
@@ -1170,7 +1182,7 @@ done:
 static herr_t
 H5T__ref_dsetreg_disk_isnull(const H5VL_object_t *src_file, const void *src_buf, hbool_t *isnull)
 {
-    H5F_t *        src_f;
+    H5F_t         *src_f;
     const uint8_t *p = (const uint8_t *)src_buf;
     haddr_t        addr;
     herr_t         ret_value = SUCCEED;
@@ -1237,7 +1249,7 @@ H5T__ref_dsetreg_disk_getsize(H5VL_object_t H5_ATTR_UNUSED *src_file, const void
 
 #ifndef NDEBUG
     {
-        H5F_t * src_f;
+        H5F_t  *src_f;
         hbool_t is_native = FALSE; /* Whether the src file is using the native VOL connector */
 
         /* Check if using native VOL connector */
@@ -1275,7 +1287,7 @@ H5T__ref_dsetreg_disk_read(H5VL_object_t *src_file, const void *src_buf, size_t 
                            H5VL_object_t H5_ATTR_UNUSED *dst_file, void *dst_buf,
                            size_t H5_ATTR_UNUSED dst_size)
 {
-    H5F_t *                src_f;
+    H5F_t                 *src_f;
     struct H5Tref_dsetreg *dst_reg   = (struct H5Tref_dsetreg *)dst_buf;
     herr_t                 ret_value = SUCCEED;
 

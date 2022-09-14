@@ -90,8 +90,8 @@ test_unregister_filters(hid_t fapl_id)
     char          filename[FILENAME_BUF_SIZE];
     const hsize_t chunk_dims[2] = {FILTER_CHUNK_DIM1, FILTER_CHUNK_DIM2}; /* Chunk dimensions */
     hsize_t       dims[2];
-    int **        buf      = NULL;
-    int *         buf_data = NULL;
+    int         **buf      = NULL;
+    int          *buf_data = NULL;
     herr_t        ret;
 
     TESTING("Unregistering filter");
@@ -288,7 +288,7 @@ main(void)
 
     /* Push API context */
     if (H5CX_push() < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     api_ctx_pushed = TRUE;
 
     /* Test unregistering filter in its own file */
@@ -302,7 +302,7 @@ main(void)
 
     /* Pop API context */
     if (api_ctx_pushed && H5CX_pop(FALSE) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     api_ctx_pushed = FALSE;
 
     HDexit(EXIT_SUCCESS);

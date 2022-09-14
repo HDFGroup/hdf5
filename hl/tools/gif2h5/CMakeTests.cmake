@@ -28,16 +28,24 @@ HDFTEST_COPY_FILE("${HDF5_HL_TOOLS_GIF2H5_SOURCE_DIR}/testfiles/ex_image2.h5" "$
 add_custom_target(gif2h5_files ALL COMMENT "Copying files needed by gif2h5 tests" DEPENDS ${gif2h5_files_list})
 
 # Remove any output file left over from previous test run
+set (HL_TOOLS_CLEANFILES
+    image1.gif
+    image1.h5
+    image.gif
+    image24.gif
+)
 add_test (
     NAME HL_TOOLS-clear-objects
     COMMAND    ${CMAKE_COMMAND}
-        -E remove
-        image1.gif
-        image1.h5
-        image.gif
-        image24.gif
+        -E remove ${HL_TOOLS_CLEANFILES}
 )
 set_tests_properties (HL_TOOLS-clear-objects PROPERTIES FIXTURES_SETUP clear_tools_hl)
+add_test (
+    NAME HL_TOOLS-clean-objects
+    COMMAND    ${CMAKE_COMMAND}
+        -E remove ${HL_TOOLS_CLEANFILES}
+)
+set_tests_properties (HL_TOOLS-clean-objects PROPERTIES FIXTURES_CLEANUP clear_tools_hl)
 
 add_test (NAME HL_TOOLS_gif2h5 COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:gif2h5${tgt_file_ext}> testfiles/image1.gif image1.h5)
 set_tests_properties (HL_TOOLS_gif2h5 PROPERTIES

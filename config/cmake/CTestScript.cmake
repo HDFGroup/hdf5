@@ -9,7 +9,7 @@
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
-cmake_minimum_required (VERSION 3.12)
+cmake_minimum_required (VERSION 3.18)
 ########################################################
 # For any comments please contact cdashhelp@hdfgroup.org
 #
@@ -54,7 +54,7 @@ else ()
 endif ()
 
 #-----------------------------------------------------------------------------
-# MAC machines need special option
+# MacOS machines need special options
 #-----------------------------------------------------------------------------
 if (APPLE)
   # Compiler choice

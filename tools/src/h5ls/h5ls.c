@@ -109,7 +109,7 @@ static h5tool_format_t ls_dataformat = {
 
 /* Struct to pass through to visitors */
 typedef struct {
-    const char *    fname;          /* Filename */
+    const char     *fname;          /* Filename */
     hid_t           fid;            /* File ID */
     hid_t           gid;            /* Group ID */
     hbool_t         symlink_target; /* Whether this is the target of an symbolic link */
@@ -836,7 +836,7 @@ print_float_type(h5tools_str_t *buffer, hid_t type, int ind)
 static hbool_t
 print_cmpd_type(h5tools_str_t *buffer, hid_t type, int ind)
 {
-    char *   name = NULL; /* member name */
+    char    *name = NULL; /* member name */
     size_t   size;        /* total size of type in bytes */
     hid_t    subtype;     /* member data type */
     int      nmembs;      /* number of members */
@@ -895,7 +895,7 @@ print_enum_type(h5tools_str_t *buffer, hid_t type, int ind)
     h5tools_str_append(buffer, " {");
 
     if (nmembs > 0) {
-        char **        name;                     /* member names */
+        char         **name;                     /* member names */
         unsigned char *value;                    /* value array */
         hid_t          native = H5I_INVALID_HID; /* native integer data type */
         size_t         dst_size;                 /* destination value type size */
@@ -1120,7 +1120,7 @@ print_reference_type(h5tools_str_t *buffer, hid_t type, int H5_ATTR_UNUSED ind)
 static hbool_t
 print_opaque_type(h5tools_str_t *buffer, hid_t type, int ind)
 {
-    char * tag;
+    char  *tag;
     size_t size;
 
     if (H5T_OPAQUE != H5Tget_class(type))
@@ -1317,8 +1317,8 @@ dump_dataset_values(hid_t dset)
     h5tools_str_t     buffer;       /* string into which to render   */
     h5tools_context_t ctx;          /* print context  */
     h5tool_format_t   outputformat;
-    h5tool_format_t * info    = &ls_dataformat;
-    H5R_ref_t *       ref_buf = NULL;
+    h5tool_format_t  *info    = &ls_dataformat;
+    H5R_ref_t        *ref_buf = NULL;
 
     H5TOOLS_START_DEBUG(" ");
 
@@ -1486,8 +1486,8 @@ dump_attribute_values(hid_t attr)
     h5tools_str_t     buffer;       /* string into which to render   */
     h5tools_context_t ctx;          /* print context  */
     h5tool_format_t   outputformat;
-    h5tool_format_t * info    = &ls_dataformat;
-    H5R_ref_t *       ref_buf = NULL;
+    h5tool_format_t  *info    = &ls_dataformat;
+    H5R_ref_t        *ref_buf = NULL;
 
     H5TOOLS_START_DEBUG(" ");
 
@@ -1657,14 +1657,13 @@ list_attr(hid_t obj, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *ain
     hid_t             space = H5I_INVALID_HID;
     hid_t             type  = H5I_INVALID_HID;
     hsize_t           size[H5S_MAX_RANK];
-    hsize_t           nelmts = 1;
     int               ndims;
     int               i;
     H5S_class_t       space_type;
     hsize_t           curr_pos = 0; /* total data element position   */
     h5tools_str_t     buffer;       /* string into which to render   */
     h5tools_context_t ctx;          /* print context  */
-    h5tool_format_t * info = &ls_dataformat;
+    h5tool_format_t  *info = &ls_dataformat;
 
     H5TOOLS_START_DEBUG(" ");
 
@@ -1699,10 +1698,8 @@ list_attr(hid_t obj, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *ain
             case H5S_SIMPLE:
                 /* simple dataspace */
                 h5tools_str_append(&buffer, " {");
-                for (i = 0; i < ndims; i++) {
+                for (i = 0; i < ndims; i++)
                     h5tools_str_append(&buffer, "%s%" PRIuHSIZE, i ? ", " : "", size[i]);
-                    nelmts *= size[i];
-                }
                 h5tools_str_append(&buffer, "}\n");
                 h5tools_render_element(rawoutstream, info, &ctx, &buffer, &curr_pos, (size_t)info->line_ncols,
                                        (hsize_t)0, (hsize_t)0);
@@ -1774,7 +1771,7 @@ dataset_list1(hid_t dset)
     hsize_t           curr_pos = 0; /* total data element position   */
     h5tools_str_t     buffer;       /* string into which to render   */
     h5tools_context_t ctx;          /* print context  */
-    h5tool_format_t * info = &ls_dataformat;
+    h5tool_format_t  *info = &ls_dataformat;
 
     HDmemset(&ctx, 0, sizeof(ctx));
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
@@ -1846,7 +1843,7 @@ dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
     hsize_t           curr_pos = 0; /* total data element position   */
     h5tools_str_t     buffer;       /* string into which to render   */
     h5tools_context_t ctx;          /* print context  */
-    h5tool_format_t * info = &ls_dataformat;
+    h5tool_format_t  *info = &ls_dataformat;
 
     HDmemset(&ctx, 0, sizeof(ctx));
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
@@ -1931,7 +1928,7 @@ dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
                 if (vmaps) {
                     size_t next;
 
-                    h5tools_str_append(&buffer, "    %-10s {%ld} Source {\n", "Maps:", vmaps);
+                    h5tools_str_append(&buffer, "    %-10s {%zu} Source {\n", "Maps:", vmaps);
                     for (next = 0; next < (unsigned)vmaps; next++) {
                         H5Pget_virtual_filename(dcpl, next, f_name, sizeof(f_name));
                         H5Pget_virtual_dsetname(dcpl, next, dset_name, sizeof(dset_name));
@@ -1997,7 +1994,7 @@ dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
             for (i = 0; i < nf; i++) {
                 cd_nelmts = NELMTS(cd_values);
                 filt_id   = H5Pget_filter2(dcpl, (unsigned)i, &filt_flags, &cd_nelmts, cd_values,
-                                         sizeof(f_name), f_name, NULL);
+                                           sizeof(f_name), f_name, NULL);
                 f_name[sizeof(f_name) - 1] = '\0';
                 HDsnprintf(s, sizeof(s), "Filter-%d:", i);
                 h5tools_str_append(&buffer, "    %-10s %s-%u %s {", s, (f_name[0] ? f_name : "method"),
@@ -2053,7 +2050,7 @@ datatype_list2(hid_t type, const char H5_ATTR_UNUSED *name)
         hsize_t           curr_pos = 0; /* total data element position   */
         h5tools_str_t     buffer;       /* string into which to render   */
         h5tools_context_t ctx;          /* print context  */
-        h5tool_format_t * info = &ls_dataformat;
+        h5tool_format_t  *info = &ls_dataformat;
 
         HDmemset(&ctx, 0, sizeof(ctx));
         HDmemset(&buffer, 0, sizeof(h5tools_str_t));
@@ -2084,11 +2081,11 @@ static herr_t
 list_obj(const char *name, const H5O_info2_t *oinfo, const char *first_seen, void *_iter)
 {
     H5O_type_t        obj_type = oinfo->type; /* Type of the object */
-    iter_t *          iter     = (iter_t *)_iter;
+    iter_t           *iter     = (iter_t *)_iter;
     hsize_t           curr_pos = 0; /* total data element position   */
     h5tools_str_t     buffer;       /* string into which to render   */
     h5tools_context_t ctx;          /* print context  */
-    h5tool_format_t * info = &ls_dataformat;
+    h5tool_format_t  *info = &ls_dataformat;
 
     H5TOOLS_START_DEBUG(" ");
 
@@ -2155,8 +2152,8 @@ list_obj(const char *name, const H5O_info2_t *oinfo, const char *first_seen, voi
          * which is common to all objects. */
         if (verbose_g > 0) {
             size_t   buf_size    = 0;
-            char *   comment     = NULL;
-            char *   obj_tok_str = NULL;
+            char    *comment     = NULL;
+            char    *obj_tok_str = NULL;
             ssize_t  cmt_bufsize = -1;
             uint64_t supported   = 0;
 
@@ -2261,14 +2258,14 @@ done:
 static herr_t
 list_lnk(const char *name, const H5L_info2_t *linfo, void *_iter)
 {
-    char *             buf  = NULL;
-    iter_t *           iter = (iter_t *)_iter;
+    char              *buf  = NULL;
+    iter_t            *iter = (iter_t *)_iter;
     int                ret;
     hsize_t            curr_pos = 0; /* total data element position   */
     h5tool_link_info_t lnk_info;
     h5tools_str_t      buffer; /* string into which to render   */
     h5tools_context_t  ctx;    /* print context  */
-    h5tool_format_t *  info = &ls_dataformat;
+    h5tool_format_t   *info = &ls_dataformat;
 
     HDmemset(&ctx, 0, sizeof(ctx));
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
@@ -2454,7 +2451,7 @@ visit_obj(hid_t file, const char *oname, iter_t *iter)
     hsize_t           curr_pos = 0; /* total data element position   */
     h5tools_str_t     buffer;       /* string into which to render   */
     h5tools_context_t ctx;          /* print context  */
-    h5tool_format_t * info = &ls_dataformat;
+    h5tool_format_t  *info = &ls_dataformat;
 
     HDmemset(&ctx, 0, sizeof(ctx));
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
@@ -2645,9 +2642,9 @@ int
 main(int argc, char *argv[])
 {
     hid_t              file_id = H5I_INVALID_HID;
-    char *             fname = NULL, *oname = NULL, *x = NULL;
-    const char *       s = NULL;
-    char *             rest;
+    char              *fname = NULL, *oname = NULL, *x = NULL;
+    const char        *s = NULL;
+    char              *rest;
     int                argno;
     static char        root_name[] = "/";
     char               drivername[50];
@@ -2857,6 +2854,8 @@ main(int argc, char *argv[])
                 usage();
                 leave(EXIT_FAILURE);
             }
+
+            vfd_info.info = &ros3_fa;
 #else
             HDfprintf(rawerrorstream, "Error: Read-Only S3 VFD is not enabled\n\n");
             usage();
@@ -2878,6 +2877,8 @@ main(int argc, char *argv[])
                 usage();
                 leave(EXIT_FAILURE);
             }
+
+            vfd_info.info = &hdfs_fa;
 #else
             HDfprintf(rawerrorstream, "Error: The HDFS VFD is not enabled\n\n");
             usage();
@@ -3081,7 +3082,7 @@ main(int argc, char *argv[])
                 hsize_t           curr_pos = 0; /* total data element position   */
                 h5tools_str_t     buffer;       /* string into which to render   */
                 h5tools_context_t ctx;          /* print context  */
-                h5tool_format_t * info = &ls_dataformat;
+                h5tool_format_t  *info = &ls_dataformat;
 
                 HDmemset(&ctx, 0, sizeof(ctx));
                 HDmemset(&buffer, 0, sizeof(h5tools_str_t));

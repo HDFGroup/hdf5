@@ -315,7 +315,7 @@ static herr_t
 H5P__dapl_vds_file_pref_enc(const void *value, void **_pp, size_t *size)
 {
     const char *vds_file_pref = *(const char *const *)value;
-    uint8_t **  pp            = (uint8_t **)_pp;
+    uint8_t   **pp            = (uint8_t **)_pp;
     size_t      len           = 0;
     uint64_t    enc_value;
     unsigned    enc_size;
@@ -364,7 +364,7 @@ H5P__dapl_vds_file_pref_enc(const void *value, void **_pp, size_t *size)
 static herr_t
 H5P__dapl_vds_file_pref_dec(const void **_pp, void *_value)
 {
-    char **         vds_file_pref = (char **)_value;
+    char          **vds_file_pref = (char **)_value;
     const uint8_t **pp            = (const uint8_t **)_pp;
     size_t          len;
     uint64_t        enc_value; /* Decoded property value */
@@ -555,7 +555,7 @@ static herr_t
 H5P__dapl_efile_pref_enc(const void *value, void **_pp, size_t *size)
 {
     const char *efile_pref = *(const char *const *)value;
-    uint8_t **  pp         = (uint8_t **)_pp;
+    uint8_t   **pp         = (uint8_t **)_pp;
     size_t      len        = 0;
     uint64_t    enc_value;
     unsigned    enc_size;
@@ -604,7 +604,7 @@ H5P__dapl_efile_pref_enc(const void *value, void **_pp, size_t *size)
 static herr_t
 H5P__dapl_efile_pref_dec(const void **_pp, void *_value)
 {
-    char **         efile_pref = (char **)_value;
+    char          **efile_pref = (char **)_value;
     const uint8_t **pp         = (const uint8_t **)_pp;
     size_t          len;
     uint64_t        enc_value; /* Decoded property value */
@@ -739,7 +739,7 @@ H5P__dapl_efile_pref_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSE
  * Purpose:    Set the number of objects in the meta data cache and the
  *        maximum number of chunks and bytes in the raw data chunk cache.
  *        Once set, these values will override the values in the file access
- *        property list.  Each of thhese values can be individually unset
+ *        property list.  Each of these values can be individually unset
  *        (or not set at all) by passing the macros:
  *        H5D_CHUNK_CACHE_NCHUNKS_DEFAULT,
  *        H5D_CHUNK_CACHE_NSLOTS_DEFAULT, and/or
@@ -920,7 +920,7 @@ H5P__encode_chunk_cache_nslots(const void *value, void **_pp, size_t *size)
 static herr_t
 H5P__decode_chunk_cache_nslots(const void **_pp, void *_value)
 {
-    size_t *        value = (size_t *)_value; /* Property value to return */
+    size_t         *value = (size_t *)_value; /* Property value to return */
     const uint8_t **pp    = (const uint8_t **)_pp;
     uint64_t        enc_value; /* Decoded property value */
     unsigned        enc_size;  /* Size of encoded property */
@@ -1020,7 +1020,7 @@ H5P__encode_chunk_cache_nbytes(const void *value, void **_pp, size_t *size)
 static herr_t
 H5P__decode_chunk_cache_nbytes(const void **_pp, void *_value)
 {
-    size_t *        value = (size_t *)_value; /* Property value to return */
+    size_t         *value = (size_t *)_value; /* Property value to return */
     const uint8_t **pp    = (const uint8_t **)_pp;
     uint64_t        enc_value; /* Decoded property value */
     unsigned        enc_size;  /* Size of encoded property */
@@ -1139,7 +1139,7 @@ static herr_t
 H5P__dacc_vds_view_enc(const void *value, void **_pp, size_t *size)
 {
     const H5D_vds_view_t *view = (const H5D_vds_view_t *)value; /* Create local alias for values */
-    uint8_t **            pp   = (uint8_t **)_pp;
+    uint8_t             **pp   = (uint8_t **)_pp;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -1287,7 +1287,7 @@ herr_t
 H5Pset_append_flush(hid_t plist_id, unsigned ndims, const hsize_t *boundary, H5D_append_cb_t func,
                     void *udata)
 {
-    H5P_genplist_t *   plist;               /* Property list pointer */
+    H5P_genplist_t    *plist;               /* Property list pointer */
     H5D_append_flush_t info;                /* Property for append flush parameters */
     unsigned           u;                   /* Local index variable */
     herr_t             ret_value = SUCCEED; /* Return value */
@@ -1349,7 +1349,7 @@ herr_t
 H5Pget_append_flush(hid_t plist_id, unsigned ndims, hsize_t boundary[], H5D_append_cb_t *func /*out*/,
                     void **udata /*out*/)
 {
-    H5P_genplist_t *   plist; /* property list pointer */
+    H5P_genplist_t    *plist; /* property list pointer */
     H5D_append_flush_t info;
     unsigned           u;                   /* local index variable */
     herr_t             ret_value = SUCCEED; /* return value */
@@ -1433,7 +1433,7 @@ ssize_t
 H5Pget_efile_prefix(hid_t plist_id, char *prefix /*out*/, size_t size)
 {
     H5P_genplist_t *plist;     /* Property list pointer */
-    char *          my_prefix; /* Library's copy of the prefix */
+    char           *my_prefix; /* Library's copy of the prefix */
     size_t          len;       /* Length of prefix string */
     ssize_t         ret_value; /* Return value */
 
@@ -1523,7 +1523,7 @@ ssize_t
 H5Pget_virtual_prefix(hid_t plist_id, char *prefix /*out*/, size_t size)
 {
     H5P_genplist_t *plist;     /* Property list pointer */
-    char *          my_prefix; /* Library's copy of the prefix */
+    char           *my_prefix; /* Library's copy of the prefix */
     size_t          len;       /* Length of prefix string */
     ssize_t         ret_value; /* Return value */
 

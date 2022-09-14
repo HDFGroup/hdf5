@@ -1436,7 +1436,7 @@ Known Problems
     e.g. within a single parallel test (testphdf5) the subtests (cdsetr, eidsetr)
     report data verification errors before eventually aborting.
     The most recent versions of OpenMPI (v3.1.3 or newer) have evidently
-    resolved these isses and parallel HDF5 testing does not currently report
+    resolved these issues and parallel HDF5 testing does not currently report
     errors though occasional hangs have been observed.
 
     Known problems in previous releases can be found in the HISTORY*.txt files
@@ -2139,7 +2139,7 @@ Known Problems
     e.g. within a single parallel test (testphdf5) the subtests (cdsetr, eidsetr)
     report data verification errors before eventually aborting.
     The most recent versions of OpenMPI (v3.1.3 or newer) have evidently
-    resolved these isses and parallel HDF5 testing does not currently report
+    resolved these issues and parallel HDF5 testing does not currently report
     errors though occasional hangs have been observed.
 
     Known problems in previous releases can be found in the HISTORY*.txt files

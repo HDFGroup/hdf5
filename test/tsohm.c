@@ -425,36 +425,36 @@ make_dtype_1(void)
 
     /* Create compound datatype. */
     if ((dtype1_id = H5Tcreate(H5T_COMPOUND, sizeof(struct dtype1_struct))) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     if (H5Tinsert(dtype1_id, "i1", HOFFSET(dtype1_struct, i1), H5T_NATIVE_INT) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     str_id = H5Tcopy(H5T_C_S1);
     if (H5Tset_size(str_id, (size_t)10) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     if (H5Tinsert(dtype1_id, "string", HOFFSET(dtype1_struct, str), str_id) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Tinsert(dtype1_id, "i2", HOFFSET(dtype1_struct, i2), H5T_NATIVE_INT) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Tinsert(dtype1_id, "i3", HOFFSET(dtype1_struct, i3), H5T_NATIVE_INT) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Tinsert(dtype1_id, "i4", HOFFSET(dtype1_struct, i4), H5T_NATIVE_INT) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Tinsert(dtype1_id, "i5", HOFFSET(dtype1_struct, i5), H5T_NATIVE_INT) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Tinsert(dtype1_id, "i6", HOFFSET(dtype1_struct, i6), H5T_NATIVE_INT) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Tinsert(dtype1_id, "i7", HOFFSET(dtype1_struct, i7), H5T_NATIVE_INT) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Tinsert(dtype1_id, "i8", HOFFSET(dtype1_struct, i8), H5T_NATIVE_INT) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Tinsert(dtype1_id, "f1", HOFFSET(dtype1_struct, f1), H5T_NATIVE_FLOAT) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     if (H5Tclose(str_id) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     return dtype1_id;
 
@@ -497,39 +497,39 @@ make_dtype_2(void)
 
     /* Create an int with a strange precision */
     if ((int_id = H5Tcopy(H5T_NATIVE_INT)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Tset_precision(int_id, (size_t)24) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Create an enumeration using that int */
     if ((enum_id = H5Tenum_create(int_id)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     for (x = 0; x < ENUM_NUM_MEMBS; x++)
         if (H5Tenum_insert(enum_id, ENUM_NAME[x], &ENUM_VAL[x]) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
     /* Create arrays of arrays of arrays of enums */
     if ((dtype2_id = H5Tarray_create2(enum_id, 3, dims)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if ((dtype2_id = H5Tarray_create2(dtype2_id, 4, dims)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if ((dtype2_id = H5Tarray_create2(dtype2_id, 2, dims)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if ((dtype2_id = H5Tarray_create2(dtype2_id, 1, dims)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     if (H5Tclose(enum_id) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Tclose(int_id) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Check the datatype size.  If this is different than the #defined
      * size then the fills values will have the wrong size.
      */
     size = H5Tget_size(dtype2_id);
     if (size != DTYPE2_SIZE)
-        TEST_ERROR
+        TEST_ERROR;
 
     return dtype2_id;
 
@@ -564,10 +564,10 @@ static hid_t
 close_reopen_file(hid_t file, const char *filename, hid_t fapl_id)
 {
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     file = H5Fopen(filename, H5F_ACC_RDWR, fapl_id);
     if (file < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     return (file);
 
 error:
@@ -654,58 +654,58 @@ size1_helper(hid_t file, const char *filename, hid_t fapl_id, hbool_t test_file_
 
     dtype1_id = make_dtype_1();
     if (dtype1_id < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     dim1[0]  = 1;
     space_id = H5Screate_simple(1, dim1, NULL);
     if (space_id < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     dset_id = H5Dcreate2(file, DSETNAME[0], dtype1_id, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     if (dset_id < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Test writing and reading */
     if (H5Dwrite(dset_id, dtype1_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &wdata) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     TSOHM_S1H_VERIFY_DATA(dset_id, dtype1_id)
     if (H5Dclose(dset_id) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     if (test_file_closing)
         if ((file = close_reopen_file(file, filename, fapl_id)) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
     /* Create 3 more datasets with the same datatype/dataspace */
     for (x = 1; x < 4; x++) {
         dset_id = H5Dcreate2(file, DSETNAME[x], dtype1_id, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         if (0 > dset_id)
-            FAIL_STACK_ERROR
+            FAIL_STACK_ERROR;
         if (x == 3)
             if (H5Dwrite(dset_id, dtype1_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &wdata) < 0)
-                TEST_ERROR
+                TEST_ERROR;
         if (H5Dclose(dset_id) < 0)
-            FAIL_STACK_ERROR
+            FAIL_STACK_ERROR;
 
         if (test_file_closing)
             if ((file = close_reopen_file(file, filename, fapl_id)) < 0)
-                TEST_ERROR
+                TEST_ERROR;
     }
 
     if (H5Tclose(dtype1_id) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Make sure the data has been written successfully */
     dset_id = H5Dopen2(file, DSETNAME[0], H5P_DEFAULT);
     if (dset_id < 0)
-        TEST_ERROR
+        TEST_ERROR;
     dtype1_id = H5Dget_type(dset_id);
     if (dtype1_id < 0)
-        TEST_ERROR
+        TEST_ERROR;
     TSOHM_S1H_VERIFY_DATA(dset_id, dtype1_id)
 
     if (H5Dclose(dset_id) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Create several copies of the dataset
      * this increases the amount of space saved by sharing the datatype message
@@ -714,33 +714,33 @@ size1_helper(hid_t file, const char *filename, hid_t fapl_id, hbool_t test_file_
         dset_id =
             H5Dcreate2(file, EXTRA_DSETNAME[x], dtype1_id, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         if (dset_id < 0)
-            TEST_ERROR
+            TEST_ERROR;
         if (H5Dclose(dset_id) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         if (test_file_closing)
             if ((file = close_reopen_file(file, filename, fapl_id)) < 0)
-                TEST_ERROR
+                TEST_ERROR;
     }
 
     if (H5Tclose(dtype1_id) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Sclose(space_id) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Ensure that we can still read data back from dataset 3 */
     dset_id = H5Dopen2(file, DSETNAME[3], H5P_DEFAULT);
     if (dset_id < 0)
-        TEST_ERROR
+        TEST_ERROR;
     dtype1_id = H5Dget_type(dset_id);
     if (dtype1_id < 0)
-        TEST_ERROR
+        TEST_ERROR;
     TSOHM_S1H_VERIFY_DATA(dset_id, dtype1_id)
 
     if (H5Dclose(dset_id) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5Tclose(dtype1_id) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     return file;
 
@@ -3293,10 +3293,19 @@ verify_dset_create_and_open_through_extlink_with_sohm(hid_t src_fcpl_id, hid_t d
 static void
 test_sohm_extlink(void)
 {
-    hid_t  fcpl_id = -1;
-    herr_t ret;
+    hid_t   fcpl_id = -1;
+    hbool_t driver_is_default_compatible;
+    herr_t  ret;
 
     MESSAGE(5, ("Testing SOHM creation through external links\n"));
+
+    ret = h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &driver_is_default_compatible);
+    CHECK_I(ret, "h5_driver_is_default_vfd_compatible");
+
+    if (!driver_is_default_compatible) {
+        HDprintf("-- SKIPPED --\n");
+        return;
+    }
 
     fcpl_id = H5Pcreate(H5P_FILE_CREATE);
     CHECK_I(fcpl_id, "H5Pcreate");
@@ -3685,7 +3694,7 @@ test_sohm_external_dtype(void)
         int a;
         int b;
     } s1_t;
-    s1_t *      s_ptr, *orig;
+    s1_t       *s_ptr, *orig;
     hid_t       fcpl, file1, file2;
     hid_t       dataset1, dataset2;
     hid_t       s1_tid, dset1_tid, dset2_tid, space;
@@ -3851,9 +3860,7 @@ test_sohm(void)
     test_sohm_delete_revert(); /* Test that a file with SOHMs becomes an
                                 * empty file again when they are deleted. */
 
-    if (!h5_driver_uses_modified_filename()) {
-        test_sohm_extlink(); /* Test SOHMs when external links are used */
-    }
+    test_sohm_extlink(); /* Test SOHMs when external links are used */
 
     test_sohm_extend_dset();    /* Test extending shared datasets */
     test_sohm_external_dtype(); /* Test using datatype in another file */

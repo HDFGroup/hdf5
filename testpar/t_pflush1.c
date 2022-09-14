@@ -25,7 +25,7 @@
 
 const char *FILENAME[] = {"flush", "noflush", NULL};
 
-static int data_g[100][100];
+static int *data_g = NULL;
 
 #define N_GROUPS 100
 
@@ -77,7 +77,7 @@ create_test_file(char *name, size_t name_length, hid_t fapl_id)
     /* Write some data */
     for (i = 0; i < dims[0]; i++)
         for (j = 0; j < dims[1]; j++)
-            data_g[i][j] = (int)(i + (i * j) + j);
+            data_g[(i * 100) + j] = (int)(i + (i * j) + j);
 
     if (H5Dwrite(did, H5T_NATIVE_INT, sid, sid, dxpl_id, data_g) < 0)
         goto error;
@@ -117,7 +117,7 @@ main(int argc, char *argv[])
     hid_t       fid1    = H5I_INVALID_HID;
     hid_t       fid2    = H5I_INVALID_HID;
     hid_t       fapl_id = H5I_INVALID_HID;
-    MPI_File *  mpifh_p = NULL;
+    MPI_File   *mpifh_p = NULL;
     char        name[1024];
     const char *envval = NULL;
     int         mpi_size;
@@ -145,6 +145,9 @@ main(int argc, char *argv[])
         MPI_Finalize();
         HDexit(EXIT_FAILURE);
     }
+
+    if (NULL == (data_g = HDmalloc(100 * 100 * sizeof(*data_g))))
+        goto error;
 
     if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         goto error;
@@ -192,6 +195,11 @@ main(int argc, char *argv[])
     HDfflush(stdout);
     HDfflush(stderr);
 
+    if (data_g) {
+        HDfree(data_g);
+        data_g = NULL;
+    }
+
     /* Always exit with a failure code!
      *
      * In accordance with the standard, not having all processes
@@ -208,6 +216,9 @@ error:
     HDprintf("*** ERROR ***\n");
     HDprintf("THERE WAS A REAL ERROR IN t_pflush1.\n");
     HDfflush(stdout);
+
+    if (data_g)
+        HDfree(data_g);
 
     HD_exit(EXIT_FAILURE);
 } /* end main() */

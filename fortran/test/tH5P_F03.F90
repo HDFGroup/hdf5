@@ -567,7 +567,7 @@ SUBROUTINE external_test_offset(cleanup,total_error)
   !
   ! Create the file and an initial group.
   CALL h5pcreate_f(H5P_FILE_ACCESS_F, fapl, error)
-  CALL h5fcreate_f('extren_raw.h5', H5F_ACC_TRUNC_F, file, error, access_prp=fapl)
+  CALL h5fcreate_f('extern_raw.h5', H5F_ACC_TRUNC_F, file, error, access_prp=fapl)
   CALL check("h5fcreate_f",error,total_error)
 
   CALL h5gcreate_f(file, "emit-diagnostics", grp, error)
@@ -646,7 +646,7 @@ SUBROUTINE external_test_offset(cleanup,total_error)
      CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
      CALL check("h5_cleanup_f", error, total_error)
   ENDDO
-  IF(cleanup) CALL h5_cleanup_f("extren_raw.h5", H5P_DEFAULT_F, error)
+  IF(cleanup) CALL h5_cleanup_f("extern_raw.h5", H5P_DEFAULT_F, error)
   CALL check("h5_cleanup_f", error, total_error)
 
 END SUBROUTINE external_test_offset

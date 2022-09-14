@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.12)
+cmake_minimum_required (VERSION 3.18)
 project (HDF5_FORTRAN_TESTPAR C Fortran)
 
 #-----------------------------------------------------------------------------
@@ -17,9 +17,9 @@ endif ()
 
 #-- Adding test for parallel_test
 add_executable (parallel_test
-    ptest.f90
-    hyper.f90
-    mdset.f90
+    ptest.F90
+    hyper.F90
+    mdset.F90
 )
 target_include_directories (parallel_test
     PRIVATE ${TESTPAR_INCLUDES}

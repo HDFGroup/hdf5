@@ -170,7 +170,7 @@ test_dangle_group(H5F_close_degree_t degree)
         TEST_ERROR;
 
     if ((gid = H5Gcreate2(fid, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     if (H5Gclose(gid) < 0)
         TEST_ERROR;
@@ -182,15 +182,15 @@ test_dangle_group(H5F_close_degree_t degree)
     }
     H5E_END_TRY;
     if (gid >= 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Leave open a _lot_ of objects */
     for (u = 0; u < MAX_DANGLE; u++)
         if ((gid = H5Gopen2(fid, GROUPNAME, H5P_DEFAULT)) < 0)
-            FAIL_STACK_ERROR
+            FAIL_STACK_ERROR;
 
     if ((gid = H5Gopen2(fid, GROUPNAME, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     if (degree == H5F_CLOSE_SEMI) {
         H5E_BEGIN_TRY
@@ -288,7 +288,7 @@ test_dangle_datatype1(H5F_close_degree_t degree)
     /* Leave open a _lot_ of objects */
     for (u = 0; u < MAX_DANGLE; u++)
         if ((tid = H5Topen2(fid, TYPENAME, H5P_DEFAULT)) < 0)
-            FAIL_STACK_ERROR
+            FAIL_STACK_ERROR;
 
     if (degree == H5F_CLOSE_SEMI) {
         H5E_BEGIN_TRY
@@ -481,10 +481,10 @@ test_dangle_attribute(H5F_close_degree_t degree)
     /* Leave open a _lot_ of objects */
     for (u = 0; u < MAX_DANGLE; u++)
         if ((aid = H5Aopen(dsid, ATTRNAME, H5P_DEFAULT)) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
     if (H5Dclose(dsid) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     if (degree == H5F_CLOSE_SEMI) {
         H5E_BEGIN_TRY
@@ -541,70 +541,70 @@ test_dangle_force(void)
     hid_t   aid, aid2;   /* Attribute IDs */
     hid_t   tid, tid2;   /* Named datatype IDs */
     ssize_t count;       /* Count of open objects */
-    hid_t * objs = NULL; /* Pointer to list of open objects */
+    hid_t  *objs = NULL; /* Pointer to list of open objects */
     size_t  u;           /* Local index variable */
 
     TESTING("force dangling IDs to close, from API routines");
 
     h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof filename);
     if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Create a dataspace for the dataset & attribute to use */
     if ((sid = H5Screate(H5S_SCALAR)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Create a dataset */
     if ((dsid = H5Dcreate2(fid, DSETNAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Re-open the dataset */
     if ((dsid2 = H5Dopen2(fid, DSETNAME, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Create an attribute on the dataset */
     if ((aid = H5Acreate2(dsid, ATTRNAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Re-open the attribute */
     if ((aid2 = H5Aopen(dsid, ATTRNAME, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Close the dataspace ID */
     if (H5Sclose(sid) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Open a group ID */
     if ((gid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Open group again */
     if ((gid2 = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Create a named datatype */
     if ((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Tcommit2(fid, TYPENAME, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Re-open the named datatype */
     if ((tid2 = H5Topen2(fid, TYPENAME, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Increment the ref count on all the "second" objects */
     if (H5Iinc_ref(dsid2) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Iinc_ref(aid2) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Iinc_ref(gid2) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Iinc_ref(aid2) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Get the number of open objects */
     if ((count = H5Fget_obj_count((hid_t)H5F_OBJ_ALL, H5F_OBJ_ALL)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (0 == count)
         TEST_ERROR;
 
@@ -614,7 +614,7 @@ test_dangle_force(void)
 
     /* Get the list of open IDs */
     if (H5Fget_obj_ids((hid_t)H5F_OBJ_ALL, H5F_OBJ_ALL, (size_t)count, objs) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Close all open IDs */
     for (u = 0; u < (size_t)count; u++)
@@ -623,7 +623,7 @@ test_dangle_force(void)
 
     /* Get the number of open objects */
     if ((count = H5Fget_obj_count((hid_t)H5F_OBJ_ALL, H5F_OBJ_ALL)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (0 != count)
         TEST_ERROR;
 

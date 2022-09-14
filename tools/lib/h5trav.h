@@ -50,8 +50,8 @@ typedef enum {
  */
 typedef struct symlink_trav_path_t {
     H5L_type_t type;
-    char *     file;
-    char *     path;
+    char      *file;
+    char      *path;
 } symlink_trav_path_t;
 
 typedef struct symlink_trav_t {
@@ -62,7 +62,7 @@ typedef struct symlink_trav_t {
 } symlink_trav_t;
 
 typedef struct trav_path_t {
-    char *        path;
+    char         *path;
     h5trav_type_t type;
     H5O_token_t   obj_token; /* object token */
     unsigned long fileno;    /* File number that object is located in */
@@ -71,11 +71,11 @@ typedef struct trav_path_t {
 typedef struct trav_info_t {
     size_t         nalloc;
     size_t         nused;
-    const char *   fname;
+    const char    *fname;
     hid_t          fid; /* File ID */
-    trav_path_t *  paths;
+    trav_path_t   *paths;
     symlink_trav_t symlink_visited; /* already visited symbolic links */
-    void *         opts;            /* optional data passing */
+    void          *opts;            /* optional data passing */
 } trav_info_t;
 
 /*-------------------------------------------------------------------------
@@ -95,9 +95,9 @@ typedef struct trav_obj_t {
     H5O_token_t   obj_token;      /* object token */
     unsigned      flags[2];       /* h5diff.object is present or not in both files*/
     hbool_t       is_same_trgobj; /* same target object? no need to compare */
-    char *        name;           /* name */
+    char         *name;           /* name */
     h5trav_type_t type;           /* type of object */
-    trav_link_t * links;          /* array of possible link names */
+    trav_link_t  *links;          /* array of possible link names */
     size_t        sizelinks;      /* size of links array */
     size_t        nlinks;         /* number of links */
 } trav_obj_t;

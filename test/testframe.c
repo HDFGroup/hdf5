@@ -413,16 +413,20 @@ SetTestVerbosity(int newval)
  Values:
  0: Exhaustive run
     Tests should take as long as necessary
- 1: Full run.  Default if HDF5TestExpress is not defined
+ 1: Full run.  Default if H5_TEST_EXPRESS_LEVEL_DEFAULT
+    and HDF5TestExpress are not defined
     Tests should take no more than 30 minutes
  2: Quick run
     Tests should take no more than 10 minutes
- 3: Smoke test.  Default if HDF5TestExpress is set to a value other than 0-3
+ 3: Smoke test.
+    Default if HDF5TestExpress is set to a value other than 0-3
     Tests should take less than 1 minute
 
  Design:
  If the environment variable $HDF5TestExpress is defined,
- then test programs should skip some tests so that they
+ or if a default testing level > 1 has been set via
+ H5_TEST_EXPRESS_LEVEL_DEFAULT, then test programs should
+ skip some tests so that they
  complete sooner.
 
  Terms:
@@ -442,18 +446,27 @@ GetTestExpress(void)
 
     /* set it here for now.  Should be done in something like h5test_init(). */
     if (TestExpress == -1) {
-        env_val = HDgetenv("HDF5TestExpress");
+        int express_val = 1;
 
-        if (env_val == NULL)
-            SetTestExpress(1);
-        else if (HDstrcmp(env_val, "0") == 0)
-            SetTestExpress(0);
-        else if (HDstrcmp(env_val, "1") == 0)
-            SetTestExpress(1);
-        else if (HDstrcmp(env_val, "2") == 0)
-            SetTestExpress(2);
-        else
-            SetTestExpress(3);
+        /* Check if a default test express level is defined (e.g., by build system) */
+#ifdef H5_TEST_EXPRESS_LEVEL_DEFAULT
+        express_val = H5_TEST_EXPRESS_LEVEL_DEFAULT;
+#endif
+
+        /* Check if HDF5TestExpress is set to override the default level */
+        env_val = HDgetenv("HDF5TestExpress");
+        if (env_val) {
+            if (HDstrcmp(env_val, "0") == 0)
+                express_val = 0;
+            else if (HDstrcmp(env_val, "1") == 0)
+                express_val = 1;
+            else if (HDstrcmp(env_val, "2") == 0)
+                express_val = 2;
+            else
+                express_val = 3;
+        }
+
+        SetTestExpress(express_val);
     }
 
     return (TestExpress);
@@ -629,7 +642,7 @@ void
 TestAlarmOn(void)
 {
 #ifdef H5_HAVE_ALARM
-    char *        env_val   = HDgetenv("HDF5_ALARM_SECONDS"); /* Alarm environment */
+    char         *env_val   = HDgetenv("HDF5_ALARM_SECONDS"); /* Alarm environment */
     unsigned long alarm_sec = H5_ALARM_SEC;                   /* Number of seconds before alarm goes off */
 
     /* Get the alarm value from the environment variable, if set */

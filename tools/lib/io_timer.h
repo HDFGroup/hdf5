@@ -14,17 +14,7 @@
 #ifndef IO_TIMER
 #define IO_TIMER
 
-#include "hdf5.h"
-
-#include <time.h>
-
-#ifdef H5_HAVE_SYS_TIME_H
-#include <sys/time.h>
-#endif
-
-#ifdef H5_HAVE_WIN32_API
-#include <winsock2.h>
-#endif
+#include "H5private.h"
 
 /* The different types of timers we can have */
 typedef enum timer_type_ {
@@ -64,25 +54,17 @@ typedef struct io_time_t {
     struct timeval sys_timer[NUM_TIMERS];
 } io_time_t;
 
-/* External function declarations */
 #ifdef __cplusplus
 extern "C" {
-#endif /* __cplusplus */
+#endif
 
-#ifdef STANDALONE
-io_time_t *io_time_new(clock_type t);
-void       io_time_destroy(io_time_t *pt);
-io_time_t *io_time_set(io_time_t *pt, timer_type t, int start_stop);
-double     io_time_get(io_time_t *pt, timer_type t);
-#else
 H5TOOLS_DLL io_time_t *io_time_new(clock_type t);
 H5TOOLS_DLL void       io_time_destroy(io_time_t *pt);
 H5TOOLS_DLL io_time_t *io_time_set(io_time_t *pt, timer_type t, int start_stop);
 H5TOOLS_DLL double     io_time_get(io_time_t *pt, timer_type t);
-#endif
 
 #ifdef __cplusplus
 }
-#endif /* __cplusplus */
+#endif
 
 #endif /* IO_TIMER */

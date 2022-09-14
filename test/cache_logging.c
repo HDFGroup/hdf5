@@ -38,7 +38,7 @@ test_logging_api(void)
     hbool_t is_enabled_out;
     hbool_t start_on_access;
     hbool_t start_on_access_out;
-    char *  location = NULL;
+    char   *location = NULL;
     size_t  size;
 
     hid_t   fid = -1;

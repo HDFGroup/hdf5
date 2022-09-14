@@ -24,7 +24,7 @@
 #define VERIFY(condition, string)                                                                            \
     do {                                                                                                     \
         if (!(condition))                                                                                    \
-            FAIL_PUTS_ERROR(string)                                                                          \
+            FAIL_PUTS_ERROR(string);                                                                         \
     } while (0)
 
 /* Values for callback bit field */
@@ -85,10 +85,10 @@ test_properties(void)
 {
     hid_t  fapl_1 = -1;
     hid_t  fapl_2 = -1;
-    char * buffer = 0;
+    char  *buffer = 0;
     int    count  = 10;
-    void * temp   = 0;
-    char * temp2  = 0;
+    void  *temp   = 0;
+    char  *temp2  = 0;
     int    i;
     size_t size;
     size_t temp_size;
@@ -104,18 +104,18 @@ test_properties(void)
      */
     size = (size_t)count * sizeof(char);
     if (NULL == (buffer = (char *)HDmalloc(size)))
-        TEST_ERROR
+        TEST_ERROR;
     for (i = 0; i < count - 1; i++)
         buffer[i] = (char)(65 + i);
     buffer[count - 1] = '\0';
 
     /* Create fapl */
     if ((fapl_1 = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Get file image stuff */
     if (H5Pget_file_image(fapl_1, (void **)&temp, &temp_size) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Check default values */
     VERIFY(temp == NULL, "Default pointer is wrong");
@@ -123,11 +123,11 @@ test_properties(void)
 
     /* Set file image stuff */
     if (H5Pset_file_image(fapl_1, (void *)buffer, size) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Get the same */
     if (H5Pget_file_image(fapl_1, (void **)&temp, &temp_size) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Check that sizes are the same, and that the buffers are identical but separate */
     VERIFY(temp != NULL, "temp is null!");
@@ -137,11 +137,11 @@ test_properties(void)
 
     /* Copy the fapl */
     if ((fapl_2 = H5Pcopy(fapl_1)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Get values from the new fapl */
     if (H5Pget_file_image(fapl_2, (void **)&temp2, &temp_size) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Check that sizes are the same, and that the buffers are identical but separate */
     VERIFY(temp_size == size, "Sizes of buffers don't match");
@@ -339,9 +339,9 @@ test_callbacks(void)
     H5FD_file_image_callbacks_t callbacks;
     hid_t                       fapl_1;
     hid_t                       fapl_2;
-    udata_t *                   udata      = NULL;
-    char *                      file_image = NULL;
-    char *                      temp_file_image;
+    udata_t                    *udata      = NULL;
+    char                       *file_image = NULL;
+    char                       *temp_file_image;
     int                         count = 10;
     int                         i;
     size_t                      size;
@@ -367,12 +367,12 @@ test_callbacks(void)
 
     /* Create fapl */
     if ((fapl_1 = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Get file image stuff */
     callbacks = real_callbacks;
     if (H5Pget_file_image_callbacks(fapl_1, &callbacks) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Check default values */
     VERIFY(callbacks.image_malloc == NULL, "Default malloc callback is wrong");
@@ -386,12 +386,12 @@ test_callbacks(void)
     /* Set file image callbacks */
     callbacks = real_callbacks;
     if (H5Pset_file_image_callbacks(fapl_1, &callbacks) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Get file image callbacks */
     callbacks = null_callbacks;
     if (H5Pget_file_image_callbacks(fapl_1, &callbacks) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Verify values */
     VERIFY(callbacks.image_malloc == &malloc_cb, "malloc callback was not set or retrieved properly");
@@ -409,7 +409,7 @@ test_callbacks(void)
     /* Copy fapl */
     reset_udata(udata);
     if ((fapl_2 = H5Pcopy(fapl_1)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Verify that the property's copy callback used the correct image callbacks */
     VERIFY(udata->used_callbacks == (UDATA_COPY), "Copying a fapl with no image used incorrect callbacks");
@@ -417,19 +417,19 @@ test_callbacks(void)
     /* Close fapl */
     reset_udata(udata);
     if (H5Pclose(fapl_2) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Verify that the udata free callback was used */
     VERIFY(udata->used_callbacks == (UDATA_FREE), "Closing a fapl with no image used incorrect callbacks");
 
     /* Copy again */
     if ((fapl_2 = H5Pcopy(fapl_1)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Remove property from fapl */
     reset_udata(udata);
     if (H5Premove(fapl_2, H5F_ACS_FILE_IMAGE_INFO_NAME) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Verify that the property's delete callback was called using the correct image callbacks */
     VERIFY(udata->used_callbacks == (UDATA_FREE),
@@ -437,12 +437,12 @@ test_callbacks(void)
 
     /* Close it again */
     if (H5Pclose(fapl_2) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Get file image */
     reset_udata(udata);
     if (H5Pget_file_image(fapl_1, (void **)&temp_file_image, &temp_size) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Verify that the correct callbacks were used */
     VERIFY(udata->used_callbacks == 0,
@@ -451,7 +451,7 @@ test_callbacks(void)
     /* Set file image */
     reset_udata(udata);
     if (H5Pset_file_image(fapl_1, (void *)file_image, size) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     VERIFY(udata->used_callbacks == (MALLOC | MEMCPY),
            "Setting a file image (first time) used incorrect callbacks");
@@ -463,7 +463,7 @@ test_callbacks(void)
     /* Copy fapl */
     reset_udata(udata);
     if ((fapl_2 = H5Pcopy(fapl_1)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Verify that the property's copy callback used the correct image callbacks */
     VERIFY(udata->used_callbacks == (MALLOC | MEMCPY | UDATA_COPY),
@@ -474,7 +474,7 @@ test_callbacks(void)
     /* Close fapl */
     reset_udata(udata);
     if (H5Pclose(fapl_2) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Verify that the udata free callback was used */
     VERIFY(udata->used_callbacks == (FREE | UDATA_FREE),
@@ -483,12 +483,12 @@ test_callbacks(void)
 
     /* Copy again */
     if ((fapl_2 = H5Pcopy(fapl_1)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Remove property from fapl */
     reset_udata(udata);
     if (H5Premove(fapl_2, H5F_ACS_FILE_IMAGE_INFO_NAME) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Verify that the property's delete callback was called using the correct image callbacks */
     VERIFY(udata->used_callbacks == (FREE | UDATA_FREE),
@@ -497,12 +497,12 @@ test_callbacks(void)
 
     /* Close it again */
     if (H5Pclose(fapl_2) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Get file image */
     reset_udata(udata);
     if (H5Pget_file_image(fapl_1, (void **)&temp_file_image, &temp_size) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Verify that the correct callbacks were used */
     VERIFY(udata->used_callbacks == (MALLOC | MEMCPY),
@@ -513,7 +513,7 @@ test_callbacks(void)
     /* Set file image */
     reset_udata(udata);
     if (H5Pset_file_image(fapl_1, (void *)file_image, size) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     VERIFY(udata->used_callbacks == (FREE | MALLOC | MEMCPY),
            "Setting a file image (second time) used incorrect callbacks");
@@ -523,7 +523,7 @@ test_callbacks(void)
 
     /* Close stuff */
     if (H5Pclose(fapl_1) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     HDfree(file_image);
     HDfree(temp_file_image);
     HDfree(udata);
@@ -556,11 +556,11 @@ test_core(void)
     hid_t                       file;
     hid_t                       dset;
     hid_t                       space;
-    udata_t *                   udata;
-    unsigned char *             file_image;
+    udata_t                    *udata;
+    unsigned char              *file_image;
     char                        filename[1024];
     char                        copied_filename[1024];
-    const char *                tmp = NULL;
+    const char                 *tmp = NULL;
     size_t                      size;
     hsize_t                     dims[2];
     int                         fd;
@@ -610,7 +610,7 @@ test_core(void)
     VERIFY((udata->used_callbacks == MALLOC) || (udata->used_callbacks == (MALLOC | UDATA_COPY | UDATA_FREE)),
            "opening a core file used the wrong callbacks");
     VERIFY(udata->malloc_src == H5FD_FILE_IMAGE_OP_FILE_OPEN,
-           "Malloc callback came from wrong sourc in core open");
+           "Malloc callback came from wrong source in core open");
 
     /* Close file */
     reset_udata(udata);
@@ -618,7 +618,7 @@ test_core(void)
     VERIFY(ret >= 0, "H5Fclose failed");
     VERIFY(udata->used_callbacks == FREE, "Closing a core file used the wrong callbacks");
     VERIFY(udata->free_src == H5FD_FILE_IMAGE_OP_FILE_CLOSE,
-           "Free callback came from wrong sourc in core close");
+           "Free callback came from wrong source in core close");
 
     /* Reopen file */
     file = H5Fopen(copied_filename, H5F_ACC_RDWR, fapl);
@@ -654,7 +654,7 @@ test_core(void)
     VERIFY(ret >= 0, "H5Fclose failed");
     VERIFY(udata->used_callbacks == (FREE), "Closing a core file used the wrong callbacks");
     VERIFY(udata->free_src == H5FD_FILE_IMAGE_OP_FILE_CLOSE,
-           "Free callback came from wrong sourc in core close");
+           "Free callback came from wrong source in core close");
 
     /* Create file image buffer */
     fd = HDopen(copied_filename, O_RDONLY);
@@ -670,13 +670,13 @@ test_core(void)
 
     /* Set file image in plist */
     if (H5Pset_file_image(fapl, file_image, size) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Test open with file image */
     if ((file = H5Fopen("dne.h5", H5F_ACC_RDONLY, fapl)) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
     if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR
+        FAIL_STACK_ERROR;
 
     /* Release resources */
     h5_clean_files(FILENAME, fapl);
@@ -717,9 +717,9 @@ static int
 test_get_file_image(const char *test_banner, const int file_name_num, hid_t fapl, hbool_t user)
 {
     char      file_name[1024] = "\0";
-    void *    insertion_ptr   = NULL;
-    void *    image_ptr       = NULL;
-    void *    file_image_ptr  = NULL;
+    void     *insertion_ptr   = NULL;
+    void     *image_ptr       = NULL;
+    void     *file_image_ptr  = NULL;
     hbool_t   is_family_file  = FALSE;
     hbool_t   identical;
     int       data[100];
@@ -996,7 +996,7 @@ test_get_file_image_error_rejection(void)
 {
     const char *memb_name[H5FD_MEM_NTYPES];
     char        file_name[1024] = "\0";
-    void *      image_ptr       = NULL;
+    void       *image_ptr       = NULL;
     int         data[100];
     int         i;
     hid_t       fapl_id  = -1;
@@ -1353,6 +1353,7 @@ main(void)
 {
     int      errors = 0;
     hid_t    fapl;
+    hbool_t  driver_is_default_compatible;
     unsigned user;
 
     h5_reset();
@@ -1362,7 +1363,9 @@ main(void)
     errors += test_properties();
     errors += test_callbacks();
 
-    if (!h5_driver_uses_modified_filename()) {
+    if (h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &driver_is_default_compatible) < 0)
+        errors++;
+    else if (driver_is_default_compatible) {
         errors += test_core();
     }
 

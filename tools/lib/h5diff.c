@@ -182,7 +182,7 @@ is_exclude_path(char *path, h5trav_type_t type, diff_opt_t *opts)
 
     /* search objects in exclude list */
     while (NULL != exclude_path_ptr) {
-        /* if exclude path is is group, exclude its members as well */
+        /* if exclude path is in group, exclude its members as well */
         if (exclude_path_ptr->obj_type == H5TRAV_TYPE_GROUP) {
             ret_cmp = HDstrncmp(exclude_path_ptr->obj_path, path, HDstrlen(exclude_path_ptr->obj_path));
             if (ret_cmp == 0) { /* found matching members */
@@ -246,7 +246,7 @@ is_exclude_attr(const char *path, h5trav_type_t type, diff_opt_t *opts)
 
     /* search objects in exclude list */
     while (NULL != exclude_ptr) {
-        /* if exclude path is is group, exclude its members as well */
+        /* if exclude path is in group, exclude its members as well */
         if (exclude_ptr->obj_type == H5TRAV_TYPE_GROUP) {
             ret_cmp = HDstrncmp(exclude_ptr->obj_path, path, HDstrlen(exclude_ptr->obj_path));
             if (ret_cmp == 0) { /* found matching members */
@@ -342,8 +342,8 @@ build_match_list(const char *objname1, trav_info_t *info1, const char *objname2,
     size_t        curr1 = 0;
     size_t        curr2 = 0;
     unsigned      infile[2];
-    char *        path1_lp = NULL;
-    char *        path2_lp = NULL;
+    char         *path1_lp = NULL;
+    char         *path2_lp = NULL;
     h5trav_type_t type1_l;
     h5trav_type_t type2_l;
     size_t        path1_offset = 0;
@@ -486,11 +486,11 @@ trav_grp_objs(const char *path, const H5O_info2_t *oinfo, const char *already_vi
 static herr_t
 trav_grp_symlinks(const char *path, const H5L_info2_t *linfo, void *udata)
 {
-    trav_info_t *      tinfo = (trav_info_t *)udata;
-    diff_opt_t *       opts  = (diff_opt_t *)tinfo->opts;
+    trav_info_t       *tinfo = (trav_info_t *)udata;
+    diff_opt_t        *opts  = (diff_opt_t *)tinfo->opts;
     h5tool_link_info_t lnk_info;
-    const char *       ext_fname;
-    const char *       ext_path;
+    const char        *ext_fname;
+    const char        *ext_path;
     herr_t             ret_value = SUCCEED;
 
     H5TOOLS_START_DEBUG(" ");
@@ -601,8 +601,8 @@ h5diff(const char *fname1, const char *fname2, const char *objname1, const char 
     hsize_t nfound        = 0;
     int     l_ret1        = -1;
     int     l_ret2        = -1;
-    char *  obj1fullname  = NULL;
-    char *  obj2fullname  = NULL;
+    char   *obj1fullname  = NULL;
+    char   *obj2fullname  = NULL;
     int     both_objs_grp = 0;
     /* init to group type */
     h5trav_type_t obj1type = H5TRAV_TYPE_GROUP;
@@ -648,8 +648,15 @@ h5diff(const char *fname1, const char *fname2, const char *objname1, const char 
      *-------------------------------------------------------------------------
      */
     /* open file 1 */
+    if (opts->vfd_info[0].u.name) {
+        if ((fapl1_id = h5tools_get_fapl(H5P_DEFAULT, NULL, &(opts->vfd_info[0]))) < 0) {
+            parallel_print("h5diff: unable to create fapl for input file\n");
+            H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "unable to create input fapl\n");
+        }
+    }
+
     if (opts->custom_vol[0] || opts->custom_vfd[0]) {
-        if ((fapl1_id = h5tools_get_fapl(H5P_DEFAULT, opts->custom_vol[0] ? &(opts->vol_info[0]) : NULL,
+        if ((fapl1_id = h5tools_get_fapl(fapl1_id, opts->custom_vol[0] ? &(opts->vol_info[0]) : NULL,
                                          opts->custom_vfd[0] ? &(opts->vfd_info[0]) : NULL)) < 0) {
             parallel_print("h5diff: unable to create fapl for input file\n");
             H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "unable to create input fapl\n");
@@ -664,9 +671,15 @@ h5diff(const char *fname1, const char *fname2, const char *objname1, const char 
     H5TOOLS_DEBUG("file1_id = %s", fname1);
 
     /* open file 2 */
+    if (opts->vfd_info[1].u.name) {
+        if ((fapl2_id = h5tools_get_fapl(H5P_DEFAULT, NULL, &(opts->vfd_info[1]))) < 0) {
+            parallel_print("h5diff: unable to create fapl for output file\n");
+            H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "unable to create output fapl\n");
+        }
+    }
 
     if (opts->custom_vol[1] || opts->custom_vfd[1]) {
-        if ((fapl2_id = h5tools_get_fapl(H5P_DEFAULT, opts->custom_vol[1] ? &(opts->vol_info[1]) : NULL,
+        if ((fapl2_id = h5tools_get_fapl(fapl2_id, opts->custom_vol[1] ? &(opts->vol_info[1]) : NULL,
                                          opts->custom_vfd[1] ? &(opts->vfd_info[1]) : NULL)) < 0) {
             parallel_print("h5diff: unable to create fapl for output file\n");
             H5TOOLS_GOTO_ERROR(H5DIFF_ERR, "unable to create output fapl\n");
@@ -1107,8 +1120,8 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id,
     unsigned    i;
     const char *grp1_path     = "";
     const char *grp2_path     = "";
-    char *      obj1_fullpath = NULL;
-    char *      obj2_fullpath = NULL;
+    char       *obj1_fullpath = NULL;
+    char       *obj2_fullpath = NULL;
     diff_args_t argdata;
     size_t      idx1      = 0;
     size_t      idx2      = 0;
@@ -1157,7 +1170,7 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id,
      */
 #ifdef H5_HAVE_PARALLEL
     {
-        char *               workerTasks = (char *)HDmalloc((size_t)(g_nTasks - 1) * sizeof(char));
+        char                *workerTasks = (char *)HDmalloc((size_t)(g_nTasks - 1) * sizeof(char));
         int                  n;
         int                  busyTasks = 0;
         struct diffs_found   nFoundbyWorker;

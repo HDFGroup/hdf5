@@ -32,7 +32,7 @@ CMake version
    1. We suggest you obtain the latest CMake from the Kitware web site.
       The HDF5 1.13."X" product requires a minimum CMake version 3.12,
       where "X" is the current HDF5 release version. If you are using
-      VS2019, the minimum version is 3.15.
+      VS2022, the minimum version is 3.21.
 
 Note:
    To change the install prefix from the platform defaults initialize
@@ -276,7 +276,7 @@ IV. Further considerations
 ========================================================================
 
    1. We suggest you obtain the latest CMake for windows from the Kitware
-      web site. The HDF5 1.13."X" product requires a minimum CMake version 3.12.
+      web site. The HDF5 1.13."X" product requires a minimum CMake version 3.18.
 
    2. If you plan to use Zlib or Szip:
       A. Download the binary packages and install them in a central location.
@@ -511,7 +511,7 @@ These five steps are described in detail below.
                 ############
                 # bitshuffle
                 ###########
-                set (BSHUF_GIT_URL "https://git@bitbucket.hdfgroup.org/scm/test/bitshuffle.git" CACHE STRING "Use BSHUF from HDF repository" FORCE)
+                set (BSHUF_GIT_URL "https://someurl/bitshuffle.git" CACHE STRING "Use BSHUF from HDF repository" FORCE)
                 set (BSHUF_GIT_BRANCH "master" CACHE STRING "" FORCE)
                 set (BSHUF_TGZ_NAME "bitshuffle.tar.gz" CACHE STRING "Use BSHUF from compressed file" FORCE)
                 set (BSHUF_PACKAGE_NAME "bshuf" CACHE STRING "Name of BSHUF package" FORCE)
@@ -522,7 +522,7 @@ These five steps are described in detail below.
                 set (BLOSC_GIT_BRANCH "master" CACHE STRING "" FORCE)
                 set (BLOSC_TGZ_NAME "c-blosc.tar.gz" CACHE STRING "Use BLOSC from compressed file" FORCE)
                 set (BLOSC_PACKAGE_NAME "blosc" CACHE STRING "Name of BLOSC package" FORCE)
-                set (ZLIB_GIT_URL "https://git@bitbucket.hdfgroup.org/scm/test/zlib.git" CACHE STRING "Use ZLIB from HDF repo" FORCE)
+                set (ZLIB_GIT_URL "https://someurl/zlib.git" CACHE STRING "Use ZLIB from HDF repo" FORCE)
                 set (ZLIB_GIT_BRANCH "master" CACHE STRING "" FORCE)
                 set (ZLIB_TGZ_NAME "ZLib.tar.gz" CACHE STRING "Use ZLib from compressed file" FORCE)
                 set (ZLIB_PACKAGE_NAME "zlib" CACHE STRING "Name of ZLIB package" FORCE)
@@ -530,7 +530,7 @@ These five steps are described in detail below.
                 # bzip2
                 ######
                 #
-                set (BZ2_GIT_URL "https://git@bitbucket.hdfgroup.org/scm/test/bzip2.git" CACHE STRING "Use BZ2 from HDF repository" FORCE)
+                set (BZ2_GIT_URL "https://someurl/bzip2.git" CACHE STRING "Use BZ2 from HDF repository" FORCE)
                 set (BZ2_GIT_BRANCH "master" CACHE STRING "" FORCE)
                 set (BZ2_TGZ_NAME "BZ2.tar.gz" CACHE STRING "Use BZ2 from compressed file" FORCE)
                 set (BZ2_PACKAGE_NAME "bz2" CACHE STRING "Name of BZ2 package" FORCE)
@@ -544,7 +544,7 @@ These five steps are described in detail below.
                 ######
                 # jpeg
                 ######
-                set (JPEG_GIT_URL "https://git@bitbucket.hdfgroup.org/scm/test/jpeg.git" CACHE STRING "Use JPEG from HDF repository" FORCE)
+                set (JPEG_GIT_URL "https://someurl/jpeg.git" CACHE STRING "Use JPEG from HDF repository" FORCE)
                 set (JPEG_GIT_BRANCH "jpeg9c" CACHE STRING "" FORCE)
                 #set (JPEG_TGZ_NAME "JPEG9c.tar.gz" CACHE STRING "Use JPEG from compressed file" FORCE)
                 set (JPEG_TGZ_NAME "JPEG.tar.gz" CACHE STRING "Use JPEG from compressed file" FORCE)
@@ -553,14 +553,14 @@ These five steps are described in detail below.
                 # lz4
                 ######
                 set (BUILD_LZ4_LIBRARY_SOURCE ON CACHE BOOL "build the lz4 library within the plugin" FORCE)
-                set (LZ4_GIT_URL "https://git@bitbucket.hdfgroup.org/scm/test/lz4.git" CACHE STRING "Use LZ4 from HDF repository" FORCE)
+                set (LZ4_GIT_URL "https://someurl/lz4.git" CACHE STRING "Use LZ4 from HDF repository" FORCE)
                 set (LZ4_GIT_BRANCH "master" CACHE STRING "" FORCE)
                 set (LZ4_TGZ_NAME "lz4.tar.gz" CACHE STRING "Use LZ4 from compressed file" FORCE)
                 set (LZ4_PACKAGE_NAME "lz4" CACHE STRING "Name of LZ4 package" FORCE)
                 ######
                 # lzf
                 ######
-                set (LZF_GIT_URL "https://git@bitbucket.hdfgroup.org/scm/test/lzf.git" CACHE STRING "Use LZF from HDF repository" FORCE)
+                set (LZF_GIT_URL "https://someurl/lzf.git" CACHE STRING "Use LZF from HDF repository" FORCE)
                 set (LZF_GIT_BRANCH "master" CACHE STRING "" FORCE)
                 set (LZF_TGZ_NAME "lzf.tar.gz" CACHE STRING "Use LZF from compressed file" FORCE)
                 set (LZF_PACKAGE_NAME "lzf" CACHE STRING "Name of LZF package" FORCE)
@@ -742,6 +742,18 @@ HDF5_BUILD_HL_LIB   "Build HIGH Level HDF5 Library"  ON
 HDF5_BUILD_TOOLS    "Build HDF5 Tools"               ON
 HDF5_BUILD_HL_TOOLS "Build HIGH Level HDF5 Tools"    ON
 
+---------------- HDF5 Folder Build Options ---------------------
+Defaults relative to $<INSTALL_PREFIX>
+HDF5_INSTALL_BIN_DIR      "bin"
+HDF5_INSTALL_LIB_DIR      "lib"
+HDF5_INSTALL_INCLUDE_DIR  "include"
+HDF5_INSTALL_MODULE_DIR   "mod"
+HDF5_INSTALL_CMAKE_DIR    "cmake"
+if (MSVC)
+  HDF5_INSTALL_DATA_DIR   "."
+else ()
+  HDF5_INSTALL_DATA_DIR   "share"
+
 ---------------- HDF5 Advanced Options ---------------------
 ONLY_SHARED_LIBS               "Only Build Shared Libraries"                                  OFF
 ALLOW_UNSUPPORTED              "Allow unsupported combinations of configure options"          OFF
@@ -769,7 +781,7 @@ HDF5_BUILD_FRAMEWORKS          "TRUE to build as frameworks libraries,
                                 FALSE to build according to BUILD_SHARED_LIBS"                FALSE
 HDF5_PACKAGE_EXTLIBS           "CPACK - include external libraries"                           OFF
 HDF5_STRICT_FORMAT_CHECKS      "Whether to perform strict file format checks"                 OFF
-HDF_TEST_EXPRESS               "Control testing framework (0-3)"                              "0"
+HDF_TEST_EXPRESS               "Control testing framework (0-3)"                              "3"
 HDF5_TEST_VFD                  "Execute tests with different VFDs"                            OFF
 HDF5_TEST_PASSTHROUGH_VOL      "Execute tests with different passthrough VOL connectors"      OFF
 DEFAULT_API_VERSION            "Enable default API (v16, v18, v110, v112, v114)"              "v114"

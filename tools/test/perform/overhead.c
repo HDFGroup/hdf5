@@ -175,8 +175,8 @@ test(fill_t fill_style, const double splits[], hbool_t verbose, hbool_t use_rdcc
     hsize_t     hs_start[1];                   /*hyperslab start offset*/
     hsize_t     hs_count[1] = {1};             /*hyperslab nelmts  */
     int         fd          = (-1);            /*h5 file direct  */
-    int *       had         = NULL;            /*for random filling  */
-    const char *sname       = NULL;            /*fill style nam  */
+    int        *had         = NULL;            /*for random filling  */
+    const char *sname       = NULL;            /*fill style name */
     int         mdc_nelmts;                    /*num meta objs to cache*/
     hsize_t     i, k;
     int         j;

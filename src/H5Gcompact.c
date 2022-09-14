@@ -40,7 +40,7 @@ typedef struct {
 /* User data for deleting a link in the link messages */
 typedef struct {
     /* downward */
-    H5F_t *     file;            /* File that object header is located within */
+    H5F_t      *file;            /* File that object header is located within */
     H5RS_str_t *grp_full_path_r; /* Full path for group of link */
     const char *name;            /* Link name to search for */
 } H5G_iter_rm_t;
@@ -52,7 +52,7 @@ typedef struct {
 
     /* upward */
     H5O_link_t *lnk;   /* Link struct to fill in */
-    hbool_t *   found; /* Pointer to flag to indicate that the object was found */
+    hbool_t    *found; /* Pointer to flag to indicate that the object was found */
 } H5G_iter_lkp_t;
 
 /* Private macros */
@@ -80,7 +80,7 @@ static herr_t
 H5G__compact_build_table_cb(const void *_mesg, unsigned H5_ATTR_UNUSED idx, void *_udata)
 {
     const H5O_link_t *lnk       = (const H5O_link_t *)_mesg; /* Pointer to link */
-    H5G_iter_bt_t *   udata     = (H5G_iter_bt_t *)_udata;   /* 'User data' passed in */
+    H5G_iter_bt_t    *udata     = (H5G_iter_bt_t *)_udata;   /* 'User data' passed in */
     herr_t            ret_value = H5_ITER_CONT;              /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -138,7 +138,7 @@ H5G__compact_build_table(const H5O_loc_t *oloc, const H5O_linfo_t *linfo, H5_ind
         H5O_mesg_operator_t op;    /* Message operator */
 
         /* Allocate the link table */
-        if ((ltable->lnks = (H5O_link_t *)H5MM_malloc(sizeof(H5O_link_t) * ltable->nlinks)) == NULL)
+        if ((ltable->lnks = (H5O_link_t *)H5MM_calloc(sizeof(H5O_link_t) * ltable->nlinks)) == NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
         /* Set up user data for iteration */
@@ -263,7 +263,7 @@ static herr_t
 H5G__compact_remove_common_cb(const void *_mesg, unsigned H5_ATTR_UNUSED idx, void *_udata)
 {
     const H5O_link_t *lnk       = (const H5O_link_t *)_mesg; /* Pointer to link */
-    H5G_iter_rm_t *   udata     = (H5G_iter_rm_t *)_udata;   /* 'User data' passed in */
+    H5G_iter_rm_t    *udata     = (H5G_iter_rm_t *)_udata;   /* 'User data' passed in */
     herr_t            ret_value = H5_ITER_CONT;              /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -432,7 +432,7 @@ static herr_t
 H5G__compact_lookup_cb(const void *_mesg, unsigned H5_ATTR_UNUSED idx, void *_udata)
 {
     const H5O_link_t *lnk       = (const H5O_link_t *)_mesg; /* Pointer to link */
-    H5G_iter_lkp_t *  udata     = (H5G_iter_lkp_t *)_udata;  /* 'User data' passed in */
+    H5G_iter_lkp_t   *udata     = (H5G_iter_lkp_t *)_udata;  /* 'User data' passed in */
     herr_t            ret_value = H5_ITER_CONT;              /* Return value */
 
     FUNC_ENTER_PACKAGE

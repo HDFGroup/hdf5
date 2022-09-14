@@ -26,7 +26,7 @@ test_encode_decode(hid_t orig_pl, int mpi_rank, int recv_proc)
     MPI_Status  status;
     hid_t       pl; /* Decoded property list */
     size_t      buf_size = 0;
-    void *      sbuf     = NULL;
+    void       *sbuf     = NULL;
     herr_t      ret; /* Generic return value */
 
     if (mpi_rank == 0) {
@@ -69,14 +69,22 @@ test_encode_decode(hid_t orig_pl, int mpi_rank, int recv_proc)
             HDfree(rbuf);
     } /* end if */
 
-    if (0 == mpi_rank)
+    if (0 == mpi_rank) {
+        /* gcc 11 complains about passing MPI_STATUSES_IGNORE as an MPI_Status
+         * array. See the discussion here:
+         *
+         * https://github.com/pmodels/mpich/issues/5687
+         */
+        H5_GCC_DIAG_OFF("stringop-overflow")
         MPI_Waitall(2, req, MPI_STATUSES_IGNORE);
+        H5_GCC_DIAG_ON("stringop-overflow")
+    }
 
     if (NULL != sbuf)
         HDfree(sbuf);
 
     MPI_Barrier(MPI_COMM_WORLD);
-    return (0);
+    return 0;
 }
 
 void
@@ -105,7 +113,7 @@ test_plist_ed(void)
     unsigned            max_compact;
     unsigned            min_dense;
     hsize_t             max_size[1]; /*data space maximum size */
-    const char *        c_to_f          = "x+32";
+    const char         *c_to_f          = "x+32";
     H5AC_cache_config_t my_cache_config = {H5AC__CURR_CACHE_CONFIG_VERSION,
                                            TRUE,
                                            FALSE,

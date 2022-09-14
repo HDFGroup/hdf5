@@ -325,7 +325,7 @@ test_es_get_requests(void)
 {
     hid_t   es_id;            /* Event set ID */
     hid_t   connector_ids[2]; /* Connector IDs */
-    void *  requests[2];      /* Requests */
+    void   *requests[2];      /* Requests */
     int     req_targets[2];   /* Dummy targets for void * requests */
     size_t  count;            /* # of events in set */
     hbool_t op_failed;        /* Whether an operation failed (unused) */
@@ -334,40 +334,40 @@ test_es_get_requests(void)
 
     /* Create an event set */
     if ((es_id = H5EScreate()) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Get number of requests in event set */
     count = 3;
     if (H5ESget_requests(es_id, H5_ITER_NATIVE, NULL, NULL, 0, &count) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (count != 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Get only connector IDs */
     count            = 3;
     connector_ids[0] = H5I_INVALID_HID;
     connector_ids[1] = H5I_INVALID_HID;
     if (H5ESget_requests(es_id, H5_ITER_NATIVE, connector_ids, NULL, 2, &count) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (count != 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (connector_ids[0] != H5I_INVALID_HID)
-        TEST_ERROR
+        TEST_ERROR;
     if (connector_ids[1] != H5I_INVALID_HID)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Get only requests */
     count       = 3;
     requests[0] = NULL;
     requests[1] = NULL;
     if (H5ESget_requests(es_id, H5_ITER_NATIVE, NULL, requests, 2, &count) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (count != 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (requests[0] != NULL)
-        TEST_ERROR
+        TEST_ERROR;
     if (requests[1] != NULL)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Get both */
     count            = 3;
@@ -376,54 +376,54 @@ test_es_get_requests(void)
     requests[0]      = NULL;
     requests[1]      = NULL;
     if (H5ESget_requests(es_id, H5_ITER_NATIVE, connector_ids, requests, 2, &count) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (count != 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (connector_ids[0] != H5I_INVALID_HID)
-        TEST_ERROR
+        TEST_ERROR;
     if (connector_ids[1] != H5I_INVALID_HID)
-        TEST_ERROR
+        TEST_ERROR;
     if (requests[0] != NULL)
-        TEST_ERROR
+        TEST_ERROR;
     if (requests[1] != NULL)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Insert event into event set */
     if (H5ESinsert_request(es_id, connector_ids_g[0], &req_targets[0]) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Get number of requests in event set */
     count = 0;
     if (H5ESget_requests(es_id, H5_ITER_NATIVE, NULL, NULL, 0, &count) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (count != 1)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Get only connector IDs */
     count            = 0;
     connector_ids[0] = H5I_INVALID_HID;
     connector_ids[1] = H5I_INVALID_HID;
     if (H5ESget_requests(es_id, H5_ITER_NATIVE, connector_ids, NULL, 2, &count) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (count != 1)
-        TEST_ERROR
+        TEST_ERROR;
     if (connector_ids[0] != connector_ids_g[0])
-        TEST_ERROR
+        TEST_ERROR;
     if (connector_ids[1] != H5I_INVALID_HID)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Get only requests */
     count       = 0;
     requests[0] = NULL;
     requests[1] = NULL;
     if (H5ESget_requests(es_id, H5_ITER_NATIVE, NULL, requests, 2, &count) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (count != 1)
-        TEST_ERROR
+        TEST_ERROR;
     if (requests[0] != &req_targets[0])
-        TEST_ERROR
+        TEST_ERROR;
     if (requests[1] != NULL)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Get both */
     count            = 0;
@@ -432,80 +432,80 @@ test_es_get_requests(void)
     requests[0]      = NULL;
     requests[1]      = NULL;
     if (H5ESget_requests(es_id, H5_ITER_NATIVE, connector_ids, requests, 2, &count) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (count != 1)
-        TEST_ERROR
+        TEST_ERROR;
     if (connector_ids[0] != connector_ids_g[0])
-        TEST_ERROR
+        TEST_ERROR;
     if (connector_ids[1] != H5I_INVALID_HID)
-        TEST_ERROR
+        TEST_ERROR;
     if (requests[0] != &req_targets[0])
-        TEST_ERROR
+        TEST_ERROR;
     if (requests[1] != NULL)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Insert second event into event set */
     if (H5ESinsert_request(es_id, connector_ids_g[1], &req_targets[1]) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Get number of requests in event set */
     count = 0;
     if (H5ESget_requests(es_id, H5_ITER_NATIVE, NULL, NULL, 0, &count) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (count != 2)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Get only connector IDs */
     count            = 0;
     connector_ids[0] = H5I_INVALID_HID;
     connector_ids[1] = H5I_INVALID_HID;
     if (H5ESget_requests(es_id, H5_ITER_INC, connector_ids, NULL, 2, &count) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (count != 2)
-        TEST_ERROR
+        TEST_ERROR;
     if (connector_ids[0] != connector_ids_g[0])
-        TEST_ERROR
+        TEST_ERROR;
     if (connector_ids[1] != connector_ids_g[1])
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Try with H5_ITER_DEC */
     count            = 0;
     connector_ids[0] = H5I_INVALID_HID;
     connector_ids[1] = H5I_INVALID_HID;
     if (H5ESget_requests(es_id, H5_ITER_DEC, connector_ids, NULL, 2, &count) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (count != 2)
-        TEST_ERROR
+        TEST_ERROR;
     if (connector_ids[0] != connector_ids_g[1])
-        TEST_ERROR
+        TEST_ERROR;
     if (connector_ids[1] != connector_ids_g[0])
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Get only requests */
     count       = 0;
     requests[0] = NULL;
     requests[1] = NULL;
     if (H5ESget_requests(es_id, H5_ITER_INC, NULL, requests, 2, &count) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (count != 2)
-        TEST_ERROR
+        TEST_ERROR;
     if (requests[0] != &req_targets[0])
-        TEST_ERROR
+        TEST_ERROR;
     if (requests[1] != &req_targets[1])
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Try with H5_ITER_DEC */
     count       = 0;
     requests[0] = NULL;
     requests[1] = NULL;
     if (H5ESget_requests(es_id, H5_ITER_DEC, NULL, requests, 2, &count) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (count != 2)
-        TEST_ERROR
+        TEST_ERROR;
     if (requests[0] != &req_targets[1])
-        TEST_ERROR
+        TEST_ERROR;
     if (requests[1] != &req_targets[0])
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Get both */
     count            = 0;
@@ -514,17 +514,17 @@ test_es_get_requests(void)
     requests[0]      = NULL;
     requests[1]      = NULL;
     if (H5ESget_requests(es_id, H5_ITER_INC, connector_ids, requests, 2, &count) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (count != 2)
-        TEST_ERROR
+        TEST_ERROR;
     if (connector_ids[0] != connector_ids_g[0])
-        TEST_ERROR
+        TEST_ERROR;
     if (connector_ids[1] != connector_ids_g[1])
-        TEST_ERROR
+        TEST_ERROR;
     if (requests[0] != &req_targets[0])
-        TEST_ERROR
+        TEST_ERROR;
     if (requests[1] != &req_targets[1])
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Try with H5_ITER_DEC */
     count            = 0;
@@ -533,69 +533,69 @@ test_es_get_requests(void)
     requests[0]      = NULL;
     requests[1]      = NULL;
     if (H5ESget_requests(es_id, H5_ITER_DEC, connector_ids, requests, 2, &count) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (count != 2)
-        TEST_ERROR
+        TEST_ERROR;
     if (connector_ids[0] != connector_ids_g[1])
-        TEST_ERROR
+        TEST_ERROR;
     if (connector_ids[1] != connector_ids_g[0])
-        TEST_ERROR
+        TEST_ERROR;
     if (requests[0] != &req_targets[1])
-        TEST_ERROR
+        TEST_ERROR;
     if (requests[1] != &req_targets[0])
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Get only first connector ID */
     count            = 0;
     connector_ids[0] = H5I_INVALID_HID;
     connector_ids[1] = H5I_INVALID_HID;
     if (H5ESget_requests(es_id, H5_ITER_INC, connector_ids, NULL, 1, &count) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (count != 2)
-        TEST_ERROR
+        TEST_ERROR;
     if (connector_ids[0] != connector_ids_g[0])
-        TEST_ERROR
+        TEST_ERROR;
     if (connector_ids[1] != H5I_INVALID_HID)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Try with H5_ITER_DEC */
     count            = 0;
     connector_ids[0] = H5I_INVALID_HID;
     connector_ids[1] = H5I_INVALID_HID;
     if (H5ESget_requests(es_id, H5_ITER_DEC, connector_ids, NULL, 1, &count) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (count != 2)
-        TEST_ERROR
+        TEST_ERROR;
     if (connector_ids[0] != connector_ids_g[1])
-        TEST_ERROR
+        TEST_ERROR;
     if (connector_ids[1] != H5I_INVALID_HID)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Get only first request */
     count       = 0;
     requests[0] = NULL;
     requests[1] = NULL;
     if (H5ESget_requests(es_id, H5_ITER_INC, NULL, requests, 1, &count) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (count != 2)
-        TEST_ERROR
+        TEST_ERROR;
     if (requests[0] != &req_targets[0])
-        TEST_ERROR
+        TEST_ERROR;
     if (requests[1] != NULL)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Try with H5_ITER_DEC */
     count       = 0;
     requests[0] = NULL;
     requests[1] = NULL;
     if (H5ESget_requests(es_id, H5_ITER_DEC, NULL, requests, 1, &count) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (count != 2)
-        TEST_ERROR
+        TEST_ERROR;
     if (requests[0] != &req_targets[1])
-        TEST_ERROR
+        TEST_ERROR;
     if (requests[1] != NULL)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Get only first of both */
     count            = 0;
@@ -604,15 +604,15 @@ test_es_get_requests(void)
     requests[0]      = NULL;
     requests[1]      = NULL;
     if (H5ESget_requests(es_id, H5_ITER_INC, connector_ids, requests, 1, &count) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (connector_ids[0] != connector_ids_g[0])
-        TEST_ERROR
+        TEST_ERROR;
     if (connector_ids[1] != H5I_INVALID_HID)
-        TEST_ERROR
+        TEST_ERROR;
     if (requests[0] != &req_targets[0])
-        TEST_ERROR
+        TEST_ERROR;
     if (requests[1] != NULL)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Try with H5_ITER_DEC */
     count            = 0;
@@ -621,21 +621,21 @@ test_es_get_requests(void)
     requests[0]      = NULL;
     requests[1]      = NULL;
     if (H5ESget_requests(es_id, H5_ITER_DEC, connector_ids, requests, 1, &count) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (connector_ids[0] != connector_ids_g[1])
-        TEST_ERROR
+        TEST_ERROR;
     if (connector_ids[1] != H5I_INVALID_HID)
-        TEST_ERROR
+        TEST_ERROR;
     if (requests[0] != &req_targets[1])
-        TEST_ERROR
+        TEST_ERROR;
     if (requests[1] != NULL)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Close the event set */
     if (H5ESwait(es_id, 10000000, &count, &op_failed) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5ESclose(es_id) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     PASSED();
     return 0;
@@ -676,7 +676,7 @@ main(void)
     /* Register dummy connector IDs */
     for (i = 0; i < EVENT_SET_NUM_CONNECTOR_IDS; i++)
         if ((connector_ids_g[i] = H5VLregister_connector(&fake_wait_vol_g, H5P_DEFAULT)) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
     /* Tests */
     nerrors += test_es_create();
@@ -686,7 +686,7 @@ main(void)
     /* Unregister dummy connectors */
     for (i = 0; i < EVENT_SET_NUM_CONNECTOR_IDS; i++)
         if (H5VLunregister_connector(connector_ids_g[i]) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
     /* Cleanup */
     h5_cleanup(FILENAME, fapl_id);

@@ -79,10 +79,10 @@ static hid_t H5R__open_attr_api_common(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t 
 herr_t
 H5Rcreate_object(hid_t loc_id, const char *name, hid_t oapl_id, H5R_ref_t *ref_ptr)
 {
-    H5VL_object_t *             vol_obj = NULL;                 /* Object of loc_id */
+    H5VL_object_t              *vol_obj = NULL;                 /* Object of loc_id */
     H5I_type_t                  obj_type;                       /* Object type of loc_id */
     hid_t                       file_id      = H5I_INVALID_HID; /* File ID */
-    H5VL_object_t *             vol_obj_file = NULL;            /* Object of file_id */
+    H5VL_object_t              *vol_obj_file = NULL;            /* Object of file_id */
     H5VL_object_specific_args_t obj_spec_vol_cb_args;           /* Arguments to VOL callback */
     H5VL_loc_params_t           loc_params;                     /* Location parameters */
     H5O_token_t                 obj_token = {0};                /* Object token */
@@ -175,16 +175,16 @@ done:
 herr_t
 H5Rcreate_region(hid_t loc_id, const char *name, hid_t space_id, hid_t oapl_id, H5R_ref_t *ref_ptr)
 {
-    H5VL_object_t *             vol_obj = NULL;                 /* Object of loc_id */
+    H5VL_object_t              *vol_obj = NULL;                 /* Object of loc_id */
     H5I_type_t                  obj_type;                       /* Object type of loc_id */
     hid_t                       file_id      = H5I_INVALID_HID; /* File ID */
-    H5VL_object_t *             vol_obj_file = NULL;            /* Object of file_id */
+    H5VL_object_t              *vol_obj_file = NULL;            /* Object of file_id */
     H5VL_object_specific_args_t obj_spec_vol_cb_args;           /* Arguments to VOL callback */
     H5VL_loc_params_t           loc_params;                     /* Location parameters */
     H5O_token_t                 obj_token = {0};                /* Object token */
     H5VL_file_cont_info_t       cont_info = {H5VL_CONTAINER_INFO_VERSION, 0, 0, 0};
     H5VL_file_get_args_t        file_get_vol_cb_args; /* Arguments to VOL callback */
-    struct H5S_t *              space     = NULL;     /* Pointer to dataspace containing region */
+    struct H5S_t               *space     = NULL;     /* Pointer to dataspace containing region */
     herr_t                      ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -276,10 +276,10 @@ done:
 herr_t
 H5Rcreate_attr(hid_t loc_id, const char *name, const char *attr_name, hid_t oapl_id, H5R_ref_t *ref_ptr)
 {
-    H5VL_object_t *             vol_obj = NULL;                 /* Object of loc_id */
+    H5VL_object_t              *vol_obj = NULL;                 /* Object of loc_id */
     H5I_type_t                  obj_type;                       /* Object type of loc_id */
     hid_t                       file_id      = H5I_INVALID_HID; /* File ID */
-    H5VL_object_t *             vol_obj_file = NULL;            /* Object of file_id */
+    H5VL_object_t              *vol_obj_file = NULL;            /* Object of file_id */
     H5VL_object_specific_args_t obj_spec_vol_cb_args;           /* Arguments to VOL callback */
     H5VL_loc_params_t           loc_params;                     /* Location parameters */
     H5O_token_t                 obj_token = {0};                /* Object token */
@@ -497,13 +497,13 @@ H5R__open_object_api_common(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id, vo
                             H5VL_object_t **_vol_obj_ptr)
 {
     hid_t           loc_id;             /* Reference location ID */
-    H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
+    H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
     H5VL_loc_params_t loc_params;                     /* Location parameters */
     H5O_token_t       obj_token = {0};                /* Object token */
     H5I_type_t        opened_type;                    /* Opened object type */
-    void *            opened_obj = NULL;              /* Opened object */
+    void             *opened_obj = NULL;              /* Opened object */
     hid_t             ret_value  = H5I_INVALID_HID;   /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -591,8 +591,8 @@ H5Ropen_object_async(const char *app_file, const char *app_func, unsigned app_li
                      hid_t rapl_id, hid_t oapl_id, hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object of loc_id */
-    void *         token     = NULL;            /* Request token for async operation        */
-    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    void          *token     = NULL;            /* Request token for async operation        */
+    void         **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
     hid_t          ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -635,16 +635,16 @@ H5R__open_region_api_common(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id, vo
                             H5VL_object_t **_vol_obj_ptr)
 {
     hid_t           loc_id;             /* Reference location ID */
-    H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
+    H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj);        /* Ptr to object ptr for loc_id */
     H5VL_loc_params_t       loc_params;                      /* Location parameters */
     H5VL_dataset_get_args_t vol_cb_args;                     /* Arguments to VOL callback */
     H5O_token_t             obj_token = {0};                 /* Object token */
     H5I_type_t              opened_type;                     /* Opened object type */
-    void *                  opened_obj    = NULL;            /* Opened object */
+    void                   *opened_obj    = NULL;            /* Opened object */
     hid_t                   opened_obj_id = H5I_INVALID_HID; /* Opened object ID */
-    H5S_t *                 space         = NULL;            /* Dataspace pointer (copy) */
+    H5S_t                  *space         = NULL;            /* Dataspace pointer (copy) */
     hid_t                   space_id      = H5I_INVALID_HID; /* Dataspace ID */
     hid_t                   ret_value     = H5I_INVALID_HID; /* Return value */
 
@@ -758,8 +758,8 @@ H5Ropen_region_async(const char *app_file, const char *app_func, unsigned app_li
                      hid_t rapl_id, hid_t oapl_id, hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object of loc_id */
-    void *         token     = NULL;            /* Request token for async operation */
-    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation */
+    void          *token     = NULL;            /* Request token for async operation */
+    void         **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation */
     hid_t          ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -802,15 +802,15 @@ H5R__open_attr_api_common(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t aapl_id, void
                           H5VL_object_t **_vol_obj_ptr)
 {
     hid_t           loc_id;             /* Reference location ID */
-    H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
+    H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj);  /* Ptr to object ptr for loc_id */
     H5VL_loc_params_t loc_params;                      /* Location parameters */
     H5O_token_t       obj_token = {0};                 /* Object token */
     H5I_type_t        opened_type;                     /* Opened object type */
-    void *            opened_obj    = NULL;            /* Opened object */
+    void             *opened_obj    = NULL;            /* Opened object */
     hid_t             opened_obj_id = H5I_INVALID_HID; /* Opened object ID */
-    void *            opened_attr   = NULL;            /* Opened attribute */
+    void             *opened_attr   = NULL;            /* Opened attribute */
     hid_t             ret_value     = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -927,8 +927,8 @@ H5Ropen_attr_async(const char *app_file, const char *app_func, unsigned app_line
                    hid_t rapl_id, hid_t aapl_id, hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
-    void *         token     = NULL;            /* Request token for async operation        */
-    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    void          *token     = NULL;            /* Request token for async operation        */
+    void         **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
     hid_t          ret_value;                   /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -972,7 +972,7 @@ herr_t
 H5Rget_obj_type3(H5R_ref_t *ref_ptr, hid_t rapl_id, H5O_type_t *obj_type /*out*/)
 {
     hid_t                  loc_id;              /* Reference location ID */
-    H5VL_object_t *        vol_obj = NULL;      /* Object of loc_id */
+    H5VL_object_t         *vol_obj = NULL;      /* Object of loc_id */
     H5VL_object_get_args_t vol_cb_args;         /* Arguments to VOL callback */
     H5VL_loc_params_t      loc_params;          /* Location parameters */
     H5O_token_t            obj_token = {0};     /* Object token */
@@ -1055,7 +1055,7 @@ H5Rget_file_name(const H5R_ref_t *ref_ptr, char *buf /*out*/, size_t size)
             HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, (-1), "unable to retrieve file name")
     }
     else {
-        H5VL_object_t *      vol_obj;           /* Object of loc_id */
+        H5VL_object_t       *vol_obj;           /* Object of loc_id */
         H5VL_file_get_args_t vol_cb_args;       /* Arguments to VOL callback */
         size_t               file_name_len = 0; /* Length of file name */
 
@@ -1096,7 +1096,7 @@ ssize_t
 H5Rget_obj_name(H5R_ref_t *ref_ptr, hid_t rapl_id, char *buf /*out*/, size_t size)
 {
     hid_t                  loc_id;             /* Reference location ID */
-    H5VL_object_t *        vol_obj = NULL;     /* Object of loc_id */
+    H5VL_object_t         *vol_obj = NULL;     /* Object of loc_id */
     H5VL_object_get_args_t vol_cb_args;        /* Arguments to VOL callback */
     H5VL_loc_params_t      loc_params;         /* Location parameters */
     H5O_token_t            obj_token    = {0}; /* Object token */

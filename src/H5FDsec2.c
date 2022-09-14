@@ -309,7 +309,7 @@ H5FD__sec2_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
 #endif
     h5_stat_t       sb;
     H5P_genplist_t *plist;            /* Property list pointer */
-    H5FD_t *        ret_value = NULL; /* Return value */
+    H5FD_t         *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -536,7 +536,7 @@ H5FD__sec2_query(const H5FD_t *_file, unsigned long *flags /* out */)
 
     /* Set the VFL feature flags that this driver supports */
     /* Notice: the Mirror VFD Writer currently uses only the Sec2 driver as
-     * the underying driver -- as such, the Mirror VFD implementation copies
+     * the underlying driver -- as such, the Mirror VFD implementation copies
      * these feature flags as its own. Any modifications made here must be
      * reflected in H5FDmirror.c
      * -- JOS 2020-01-13
@@ -915,7 +915,7 @@ H5FD__sec2_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR
         BOOL  bError;           /* Boolean error flag */
 
         /* Windows uses this odd QuadPart union for 32/64-bit portability */
-        li.QuadPart = (__int64)file->eoa;
+        li.QuadPart = (LONGLONG)file->eoa;
 
         /* Extend the file to make sure it's large enough.
          *
@@ -1075,20 +1075,16 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__sec2_ctl(H5FD_t H5_ATTR_UNUSED *_file, uint64_t op_code, uint64_t flags,
+H5FD__sec2_ctl(H5FD_t H5_ATTR_UNUSED *_file, uint64_t H5_ATTR_UNUSED op_code, uint64_t flags,
                const void H5_ATTR_UNUSED *input, void H5_ATTR_UNUSED **output)
 {
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
-    switch (op_code) {
-        /* Unknown op code */
-        default:
-            if (flags & H5FD_CTL__FAIL_IF_UNKNOWN_FLAG)
-                HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL, "unknown op_code and fail if unknown flag is set")
-            break;
-    }
+    /* No op codes are understood. */
+    if (flags & H5FD_CTL_FAIL_IF_UNKNOWN_FLAG)
+        HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL, "unknown op_code and fail if unknown flag is set")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

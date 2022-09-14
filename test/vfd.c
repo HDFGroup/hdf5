@@ -143,8 +143,8 @@ static int __k;
 /* Helper structure to pass around dataset information.
  */
 struct splitter_dataset_def {
-    void *         buf;         /* contents of dataset */
-    const char *   dset_name;   /* dataset name, always added to root group */
+    void          *buf;         /* contents of dataset */
+    const char    *dset_name;   /* dataset name, always added to root group */
     hid_t          mem_type_id; /* datatype */
     const hsize_t *dims;        /* dimensions */
     int            n_dims;      /* rank */
@@ -202,7 +202,7 @@ test_sec2(void)
     hid_t         driver_id    = -1;     /* ID for this VFD              */
     unsigned long driver_flags = 0;      /* VFD feature flags            */
     char          filename[1024];        /* filename                     */
-    void *        os_file_handle = NULL; /* OS file handle               */
+    void         *os_file_handle = NULL; /* OS file handle               */
     hsize_t       file_size;             /* file size                    */
 
     TESTING("SEC2 file driver");
@@ -216,28 +216,28 @@ test_sec2(void)
 
     /* Check that the VFD feature flags are correct */
     if ((driver_id = H5Pget_driver(fapl_id)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5FDdriver_query(driver_id, &driver_flags) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_AGGREGATE_METADATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_ACCUMULATE_METADATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_DATA_SIEVE))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_AGGREGATE_SMALLDATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_POSIX_COMPAT_HANDLE))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_SUPPORTS_SWMR_IO))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_DEFAULT_VFD_COMPATIBLE))
-        TEST_ERROR
+        TEST_ERROR;
     /* Check for extra flags not accounted for above */
     if (driver_flags != (H5FD_FEAT_AGGREGATE_METADATA | H5FD_FEAT_ACCUMULATE_METADATA | H5FD_FEAT_DATA_SIEVE |
                          H5FD_FEAT_AGGREGATE_SMALLDATA | H5FD_FEAT_POSIX_COMPAT_HANDLE |
                          H5FD_FEAT_SUPPORTS_SWMR_IO | H5FD_FEAT_DEFAULT_VFD_COMPATIBLE))
-        TEST_ERROR
+        TEST_ERROR;
 
     if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
         TEST_ERROR;
@@ -319,16 +319,16 @@ test_core(void)
     hid_t         did          = -1;        /* dataset ID                   */
     hid_t         sid          = -1;        /* dataspace ID                 */
     char          filename[1024];           /* filename                     */
-    void *        os_file_handle = NULL;    /* OS file handle               */
+    void         *os_file_handle = NULL;    /* OS file handle               */
     hsize_t       file_size;                /* file size                    */
     size_t        increment;                /* core VFD increment           */
     hbool_t       backing_store;            /* use backing store?           */
     hbool_t       use_write_tracking;       /* write tracking flag          */
     size_t        write_tracking_page_size; /* write tracking page size     */
-    int *         data_w = NULL;            /* data written to the dataset  */
-    int *         data_r = NULL;            /* data read from the dataset   */
+    int          *data_w = NULL;            /* data written to the dataset  */
+    int          *data_r = NULL;            /* data read from the dataset   */
     int           val;                      /* data value                   */
-    int *         pw = NULL, *pr = NULL;    /* pointers for iterating over
+    int          *pw = NULL, *pr = NULL;    /* pointers for iterating over
                                                data arrays (write & read)   */
     hsize_t dims[2];                        /* dataspace dimensions         */
     int     i, j;                           /* iterators                    */
@@ -360,26 +360,26 @@ test_core(void)
      * so backing-store related flags will not be returned here.
      */
     if ((driver_id = H5Pget_driver(fapl_id)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5FDdriver_query(driver_id, &driver_flags) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_AGGREGATE_METADATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_ACCUMULATE_METADATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_DATA_SIEVE))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_AGGREGATE_SMALLDATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_ALLOW_FILE_IMAGE))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_CAN_USE_FILE_IMAGE_CALLBACKS))
-        TEST_ERROR
+        TEST_ERROR;
     /* Check for extra flags not accounted for above */
     if (driver_flags !=
         (H5FD_FEAT_AGGREGATE_METADATA | H5FD_FEAT_ACCUMULATE_METADATA | H5FD_FEAT_DATA_SIEVE |
          H5FD_FEAT_AGGREGATE_SMALLDATA | H5FD_FEAT_ALLOW_FILE_IMAGE | H5FD_FEAT_CAN_USE_FILE_IMAGE_CALLBACKS))
-        TEST_ERROR
+        TEST_ERROR;
 
     if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
         TEST_ERROR;
@@ -428,7 +428,7 @@ test_core(void)
      * they are correct.
      */
     if (H5Pget_fapl_core(fapl_id_out, &increment, &backing_store) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (increment != (size_t)CORE_INCREMENT)
         FAIL_PUTS_ERROR("incorrect increment from file fapl");
     if (backing_store != TRUE)
@@ -707,14 +707,14 @@ test_direct(void)
     hid_t   file = -1, fapl = -1, access_fapl = -1;
     hid_t   dset1 = -1, dset2 = -1, space1 = -1, space2 = -1;
     char    filename[1024];
-    int *   fhandle = NULL;
+    int    *fhandle = NULL;
     hsize_t file_size;
     hsize_t dims1[2], dims2[1];
     size_t  mbound;
     size_t  fbsize;
     size_t  cbsize;
-    void *  proto_points = NULL, *proto_check = NULL;
-    int *   points = NULL, *check = NULL, *p1 = NULL, *p2 = NULL;
+    void   *proto_points = NULL, *proto_check = NULL;
+    int    *points = NULL, *check = NULL, *p1 = NULL, *p2 = NULL;
     int     wdata2[DSET2_DIM] = {11, 12, 13, 14};
     int     rdata2[DSET2_DIM];
     int     i, j, n;
@@ -953,7 +953,7 @@ test_family_opens(char *fname, hid_t fa_pl)
     }
     H5E_END_TRY;
     if (file >= 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Case 2: reopen file with correct name template but default property list */
     H5E_BEGIN_TRY
@@ -962,7 +962,7 @@ test_family_opens(char *fname, hid_t fa_pl)
     }
     H5E_END_TRY;
     if (file >= 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Case 3: reopen file with wrong member size */
     if (H5Pset_fapl_family(fa_pl, (hsize_t)128, H5P_DEFAULT) < 0)
@@ -974,7 +974,7 @@ test_family_opens(char *fname, hid_t fa_pl)
     }
     H5E_END_TRY;
     if (file >= 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Case 4: reopen file with wrong name template */
     HDstrcpy(wrong_name, fname);
@@ -993,7 +993,7 @@ test_family_opens(char *fname, hid_t fa_pl)
     }
     H5E_END_TRY;
     if (file >= 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     return 0;
 
@@ -1024,9 +1024,9 @@ test_family(void)
     char          filename[1024];
     char          dname[] = "dataset";
     unsigned int  i, j;
-    int *         fhandle = NULL, *fhandle2 = NULL;
-    int **        buf      = NULL;
-    int *         buf_data = NULL;
+    int          *fhandle = NULL, *fhandle2 = NULL;
+    int         **buf      = NULL;
+    int          *buf_data = NULL;
     hsize_t       dims[2]  = {FAMILY_NUMBER, FAMILY_SIZE};
     hsize_t       file_size;
 
@@ -1049,21 +1049,21 @@ test_family(void)
 
     /* Check that the VFD feature flags are correct */
     if ((driver_id = H5Pget_driver(fapl)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5FDdriver_query(driver_id, &driver_flags) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_AGGREGATE_METADATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_ACCUMULATE_METADATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_DATA_SIEVE))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_AGGREGATE_SMALLDATA))
-        TEST_ERROR
+        TEST_ERROR;
     /* Check for extra flags not accounted for above */
     if (driver_flags != (H5FD_FEAT_AGGREGATE_METADATA | H5FD_FEAT_ACCUMULATE_METADATA | H5FD_FEAT_DATA_SIEVE |
                          H5FD_FEAT_AGGREGATE_SMALLDATA))
-        TEST_ERROR
+        TEST_ERROR;
 
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR;
@@ -1338,8 +1338,8 @@ test_family_member_fapl(void)
     char     dname[]  = "dataset";
     unsigned i        = 0;
     unsigned j        = 0;
-    int **   buf      = NULL;
-    int *    buf_data = NULL;
+    int    **buf      = NULL;
+    int     *buf_data = NULL;
     hsize_t  dims[2]  = {FAMILY_NUMBER, FAMILY_SIZE};
 
     TESTING("Family member FAPL");
@@ -1495,20 +1495,20 @@ test_multi(void)
     hid_t         driver_id    = -1; /* ID for this VFD              */
     unsigned long driver_flags = 0;  /* VFD feature flags            */
     char          filename[1024];
-    int *         fhandle2 = NULL, *fhandle = NULL;
+    int          *fhandle2 = NULL, *fhandle = NULL;
     hsize_t       file_size;
     H5FD_mem_t    mt, memb_map[H5FD_MEM_NTYPES];
     hid_t         memb_fapl[H5FD_MEM_NTYPES];
     haddr_t       memb_addr[H5FD_MEM_NTYPES];
-    const char *  memb_name[H5FD_MEM_NTYPES];
+    const char   *memb_name[H5FD_MEM_NTYPES];
     char          sv[H5FD_MEM_NTYPES][32];
     hsize_t       dims[2]  = {MULTI_SIZE, MULTI_SIZE};
     hsize_t       adims[1] = {1};
     char          dname[]  = "dataset";
     char          meta[]   = "this is some metadata on this file";
     int           i, j;
-    int **        buf      = NULL;
-    int *         buf_data = NULL;
+    int         **buf      = NULL;
+    int          *buf_data = NULL;
 
     TESTING("MULTI file driver");
 
@@ -1538,19 +1538,19 @@ test_multi(void)
     memb_map[H5FD_MEM_BTREE] = H5FD_MEM_BTREE;
     memb_map[H5FD_MEM_GHEAP] = H5FD_MEM_GHEAP;
 
-    HDsprintf(sv[H5FD_MEM_SUPER], "%%s-%c.h5", 's');
+    HDsnprintf(sv[H5FD_MEM_SUPER], 32, "%%s-%c.h5", 's');
     memb_name[H5FD_MEM_SUPER] = sv[H5FD_MEM_SUPER];
     memb_addr[H5FD_MEM_SUPER] = 0;
 
-    HDsprintf(sv[H5FD_MEM_BTREE], "%%s-%c.h5", 'b');
+    HDsnprintf(sv[H5FD_MEM_BTREE], 32, "%%s-%c.h5", 'b');
     memb_name[H5FD_MEM_BTREE] = sv[H5FD_MEM_BTREE];
     memb_addr[H5FD_MEM_BTREE] = HADDR_MAX / 4;
 
-    HDsprintf(sv[H5FD_MEM_DRAW], "%%s-%c.h5", 'r');
+    HDsnprintf(sv[H5FD_MEM_DRAW], 32, "%%s-%c.h5", 'r');
     memb_name[H5FD_MEM_DRAW] = sv[H5FD_MEM_DRAW];
     memb_addr[H5FD_MEM_DRAW] = HADDR_MAX / 2;
 
-    HDsprintf(sv[H5FD_MEM_GHEAP], "%%s-%c.h5", 'g');
+    HDsnprintf(sv[H5FD_MEM_GHEAP], 32, "%%s-%c.h5", 'g');
     memb_name[H5FD_MEM_GHEAP] = sv[H5FD_MEM_GHEAP];
     memb_addr[H5FD_MEM_GHEAP] = (HADDR_MAX / 4) * 3;
 
@@ -1560,21 +1560,21 @@ test_multi(void)
 
     /* Check that the VFD feature flags are correct */
     if ((driver_id = H5Pget_driver(fapl)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5FDdriver_query(driver_id, &driver_flags) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_DATA_SIEVE))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_AGGREGATE_SMALLDATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_USE_ALLOC_SIZE))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_PAGED_AGGR))
-        TEST_ERROR
+        TEST_ERROR;
     /* Check for extra flags not accounted for above */
     if (driver_flags != (H5FD_FEAT_DATA_SIEVE | H5FD_FEAT_AGGREGATE_SMALLDATA | H5FD_FEAT_USE_ALLOC_SIZE |
                          H5FD_FEAT_PAGED_AGGR))
-        TEST_ERROR
+        TEST_ERROR;
 
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR;
@@ -1661,7 +1661,7 @@ test_multi(void)
 
     /* Create and write attribute for the root group. */
     if ((root = H5Gopen2(file, "/", H5P_DEFAULT)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Attribute string. */
     if ((atype = H5Tcopy(H5T_C_S1)) < 0)
@@ -1759,8 +1759,8 @@ test_multi_compat(void)
     char        sv[H5FD_MEM_NTYPES][32];
     hsize_t     dims[2] = {MULTI_SIZE, MULTI_SIZE};
     int         i, j;
-    int **      buf      = NULL;
-    int *       buf_data = NULL;
+    int       **buf      = NULL;
+    int        *buf_data = NULL;
 
     TESTING("MULTI file driver backward compatibility");
 
@@ -1787,12 +1787,12 @@ test_multi_compat(void)
     memb_map[H5FD_MEM_DRAW] = H5FD_MEM_DRAW;
 
     memb_fapl[H5FD_MEM_SUPER] = H5P_DEFAULT;
-    HDsprintf(sv[H5FD_MEM_SUPER], "%%s-%c.h5", 's');
+    HDsnprintf(sv[H5FD_MEM_SUPER], 32, "%%s-%c.h5", 's');
     memb_name[H5FD_MEM_SUPER] = sv[H5FD_MEM_SUPER];
     memb_addr[H5FD_MEM_SUPER] = 0;
 
     memb_fapl[H5FD_MEM_DRAW] = H5P_DEFAULT;
-    HDsprintf(sv[H5FD_MEM_DRAW], "%%s-%c.h5", 'r');
+    HDsnprintf(sv[H5FD_MEM_DRAW], 32, "%%s-%c.h5", 'r');
     memb_name[H5FD_MEM_DRAW] = sv[H5FD_MEM_DRAW];
     memb_addr[H5FD_MEM_DRAW] = HADDR_MAX / 2;
 
@@ -1804,12 +1804,12 @@ test_multi_compat(void)
     /* Make copy for the data file in the build directory, to protect the
      * original file in the source directory
      */
-    HDsprintf(filename_s, "%s-%c.h5", MULTI_COMPAT_BASENAME, 's');
-    HDsprintf(newname_s, "%s-%c.h5", FILENAME[9], 's');
+    HDsnprintf(filename_s, sizeof(filename_s), "%s-%c.h5", MULTI_COMPAT_BASENAME, 's');
+    HDsnprintf(newname_s, sizeof(newname_s), "%s-%c.h5", FILENAME[9], 's');
     h5_make_local_copy(filename_s, newname_s);
 
-    HDsprintf(filename_r, "%s-%c.h5", MULTI_COMPAT_BASENAME, 'r');
-    HDsprintf(newname_r, "%s-%c.h5", FILENAME[9], 'r');
+    HDsnprintf(filename_r, sizeof(filename_r), "%s-%c.h5", MULTI_COMPAT_BASENAME, 'r');
+    HDsnprintf(newname_r, sizeof(newname_r), "%s-%c.h5", FILENAME[9], 'r');
     h5_make_local_copy(filename_r, newname_r);
 
     /* Reopen the file for read only.  Verify 1.8 library can open file
@@ -1939,7 +1939,7 @@ test_log(void)
     hid_t         driver_id    = -1; /* ID for this VFD              */
     unsigned long driver_flags = 0;  /* VFD feature flags            */
     char          filename[1024];
-    int *         fhandle   = NULL;
+    int          *fhandle   = NULL;
     hsize_t       file_size = 0;
     unsigned int  flags     = H5FD_LOG_ALL;
     size_t        buf_size  = 4 * KB;
@@ -1966,28 +1966,28 @@ test_log(void)
 
     /* Check that the VFD feature flags are correct */
     if ((driver_id = H5Pget_driver(fapl)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5FDdriver_query(driver_id, &driver_flags) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_AGGREGATE_METADATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_ACCUMULATE_METADATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_DATA_SIEVE))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_AGGREGATE_SMALLDATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_POSIX_COMPAT_HANDLE))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_SUPPORTS_SWMR_IO))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_DEFAULT_VFD_COMPATIBLE))
-        TEST_ERROR
+        TEST_ERROR;
     /* Check for extra flags not accounted for above */
     if (driver_flags != (H5FD_FEAT_AGGREGATE_METADATA | H5FD_FEAT_ACCUMULATE_METADATA | H5FD_FEAT_DATA_SIEVE |
                          H5FD_FEAT_AGGREGATE_SMALLDATA | H5FD_FEAT_POSIX_COMPAT_HANDLE |
                          H5FD_FEAT_SUPPORTS_SWMR_IO | H5FD_FEAT_DEFAULT_VFD_COMPATIBLE))
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Create the test file */
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
@@ -2065,7 +2065,7 @@ test_stdio(void)
     hid_t         driver_id    = -1; /* ID for this VFD              */
     unsigned long driver_flags = 0;  /* VFD feature flags            */
     char          filename[1024];
-    FILE *        fhandle   = NULL;
+    FILE         *fhandle   = NULL;
     hsize_t       file_size = 0;
 
     TESTING("STDIO file driver");
@@ -2079,23 +2079,23 @@ test_stdio(void)
 
     /* Check that the VFD feature flags are correct */
     if ((driver_id = H5Pget_driver(fapl)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5FDdriver_query(driver_id, &driver_flags) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_AGGREGATE_METADATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_ACCUMULATE_METADATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_DATA_SIEVE))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_AGGREGATE_SMALLDATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_DEFAULT_VFD_COMPATIBLE))
-        TEST_ERROR
+        TEST_ERROR;
     /* Check for extra flags not accounted for above */
     if (driver_flags != (H5FD_FEAT_AGGREGATE_METADATA | H5FD_FEAT_ACCUMULATE_METADATA | H5FD_FEAT_DATA_SIEVE |
                          H5FD_FEAT_AGGREGATE_SMALLDATA | H5FD_FEAT_DEFAULT_VFD_COMPATIBLE))
-        TEST_ERROR
+        TEST_ERROR;
 
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR;
@@ -2174,7 +2174,7 @@ test_windows(void)
     hid_t         driver_id    = -1; /* ID for this VFD              */
     unsigned long driver_flags = 0;  /* VFD feature flags            */
     char          filename[1024];
-    int *         fhandle   = NULL;
+    int          *fhandle   = NULL;
     hsize_t       file_size = 0;
 
 #endif /*H5_HAVE_WINDOWS*/
@@ -2197,28 +2197,28 @@ test_windows(void)
 
     /* Check that the VFD feature flags are correct */
     if ((driver_id = H5Pget_driver(fapl)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (H5FDdriver_query(driver_id, &driver_flags) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_AGGREGATE_METADATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_ACCUMULATE_METADATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_DATA_SIEVE))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_AGGREGATE_SMALLDATA))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_POSIX_COMPAT_HANDLE))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_SUPPORTS_SWMR_IO))
-        TEST_ERROR
+        TEST_ERROR;
     if (!(driver_flags & H5FD_FEAT_DEFAULT_VFD_COMPATIBLE))
-        TEST_ERROR
+        TEST_ERROR;
     /* Check for extra flags not accounted for above */
     if (driver_flags != (H5FD_FEAT_AGGREGATE_METADATA | H5FD_FEAT_ACCUMULATE_METADATA | H5FD_FEAT_DATA_SIEVE |
                          H5FD_FEAT_AGGREGATE_SMALLDATA | H5FD_FEAT_POSIX_COMPAT_HANDLE |
                          H5FD_FEAT_SUPPORTS_SWMR_IO | H5FD_FEAT_DEFAULT_VFD_COMPATIBLE))
-        TEST_ERROR
+        TEST_ERROR;
 
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR;
@@ -2351,11 +2351,11 @@ test_ros3(void)
         TEST_ERROR;
 
     if (!(driver_flags & H5FD_FEAT_DATA_SIEVE))
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Check for extra flags not accounted for above */
     if (driver_flags != (H5FD_FEAT_DATA_SIEVE))
-        TEST_ERROR
+        TEST_ERROR;
 
     PASSED();
     return 0;
@@ -2482,8 +2482,8 @@ run_splitter_test(const struct splitter_dataset_def *data, hbool_t ignore_wo_err
     hid_t                       fapl_id_out = H5I_INVALID_HID;
     hid_t                       fapl_id_cpy = H5I_INVALID_HID;
     H5FD_splitter_vfd_config_t *vfd_config  = NULL;
-    char *                      filename_rw = NULL;
-    FILE *                      logfile     = NULL;
+    char                       *filename_rw = NULL;
+    FILE                       *logfile     = NULL;
     int                         ret_value   = 0;
 
     if (NULL == (vfd_config = HDcalloc(1, sizeof(H5FD_splitter_vfd_config_t))))
@@ -2676,7 +2676,7 @@ driver_is_splitter_compatible(hid_t fapl_id)
     }
 
     if (H5Pclose(split_fapl_id) < 0) {
-        FAIL_PUTS_ERROR("Can't close contained FAPL")
+        FAIL_PUTS_ERROR("Can't close contained FAPL");
     }
     split_fapl_id = H5I_INVALID_HID;
 
@@ -2712,7 +2712,7 @@ error:
 static int
 splitter_RO_test(const struct splitter_dataset_def *data, hid_t child_fapl_id)
 {
-    char *                      filename_rw = NULL;
+    char                       *filename_rw = NULL;
     H5FD_splitter_vfd_config_t *vfd_config  = NULL;
     hid_t                       fapl_id     = H5I_INVALID_HID;
     hid_t                       file_id     = H5I_INVALID_HID;
@@ -3055,8 +3055,8 @@ done:
 static int
 splitter_tentative_open_test(hid_t child_fapl_id)
 {
-    const char *                filename_tmp = "splitter_tmp.h5";
-    char *                      filename_rw  = NULL;
+    const char                 *filename_tmp = "splitter_tmp.h5";
+    char                       *filename_rw  = NULL;
     H5FD_splitter_vfd_config_t *vfd_config   = NULL;
     hid_t                       fapl_id      = H5I_INVALID_HID;
     hid_t                       file_id      = H5I_INVALID_HID;
@@ -3581,12 +3581,12 @@ H5FD__ctl_test_vfd_ctl(H5FD_t H5_ATTR_UNUSED *_file, uint64_t op_code, uint64_t 
 
     switch (op_code) {
         /* Op code for testing purposes */
-        case H5FD_CTL__TEST_OPCODE:
+        case H5FD_CTL_TEST_OPCODE:
             break;
 
         /* Unknown op code */
         default:
-            if (flags & H5FD_CTL__FAIL_IF_UNKNOWN_FLAG)
+            if (flags & H5FD_CTL_FAIL_IF_UNKNOWN_FLAG)
                 ret_value = FAIL;
             break;
     }
@@ -3660,8 +3660,8 @@ run_ctl_test(uint64_t op_code, uint64_t flags, ctl_test_opc_type opc_type, hid_t
     char    filename[1024];
 
     /* Check for a few ctl function flags */
-    fail_if_unknown  = (flags & H5FD_CTL__FAIL_IF_UNKNOWN_FLAG);
-    routing_flag_set = (flags & H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG);
+    fail_if_unknown  = (flags & H5FD_CTL_FAIL_IF_UNKNOWN_FLAG);
+    routing_flag_set = (flags & H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG);
 
     /* Determine if the top-level VFD is a passthrough VFD */
     if ((driver_id = H5Pget_driver(fapl_id)) < 0)
@@ -3759,9 +3759,9 @@ test_ctl(void)
     if (H5Pset_driver(fapl_id, driver_id, NULL) < 0)
         PUTS_ERROR("couldn't set testing VFD on FAPL");
 
-    TESTING_2("known op code to terminal VFD (without fail on unknown flag)")
+    TESTING_2("known op code to terminal VFD (without fail on unknown flag)");
 
-    op_code = H5FD_CTL__TEST_OPCODE;
+    op_code = H5FD_CTL_TEST_OPCODE;
     flags   = 0;
 
     /* H5FDctl call should succeed normally */
@@ -3770,21 +3770,10 @@ test_ctl(void)
 
     PASSED();
 
-    TESTING_2("known op code to terminal VFD (with fail on unknown flag)")
+    TESTING_2("known op code to terminal VFD (with fail on unknown flag)");
 
-    op_code = H5FD_CTL__TEST_OPCODE;
-    flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG;
-
-    /* H5FDctl call should succeed normally */
-    if (run_ctl_test(op_code, flags, CTL_OPC_KNOWN_TERMINAL, fapl_id) < 0)
-        TEST_ERROR;
-
-    PASSED();
-
-    TESTING_2("known op code to terminal VFD (without fail on unknown flag/route to terminal VFD)")
-
-    op_code = H5FD_CTL__TEST_OPCODE;
-    flags   = H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG;
+    op_code = H5FD_CTL_TEST_OPCODE;
+    flags   = H5FD_CTL_FAIL_IF_UNKNOWN_FLAG;
 
     /* H5FDctl call should succeed normally */
     if (run_ctl_test(op_code, flags, CTL_OPC_KNOWN_TERMINAL, fapl_id) < 0)
@@ -3792,10 +3781,10 @@ test_ctl(void)
 
     PASSED();
 
-    TESTING_2("known op code to terminal VFD (with fail on unknown flag/route to terminal VFD)")
+    TESTING_2("known op code to terminal VFD (without fail on unknown flag/route to terminal VFD)");
 
-    op_code = H5FD_CTL__TEST_OPCODE;
-    flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG | H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG;
+    op_code = H5FD_CTL_TEST_OPCODE;
+    flags   = H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG;
 
     /* H5FDctl call should succeed normally */
     if (run_ctl_test(op_code, flags, CTL_OPC_KNOWN_TERMINAL, fapl_id) < 0)
@@ -3803,7 +3792,18 @@ test_ctl(void)
 
     PASSED();
 
-    TESTING_2("unknown op code to terminal VFD (without fail on unknown flag)")
+    TESTING_2("known op code to terminal VFD (with fail on unknown flag/route to terminal VFD)");
+
+    op_code = H5FD_CTL_TEST_OPCODE;
+    flags   = H5FD_CTL_FAIL_IF_UNKNOWN_FLAG | H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG;
+
+    /* H5FDctl call should succeed normally */
+    if (run_ctl_test(op_code, flags, CTL_OPC_KNOWN_TERMINAL, fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    TESTING_2("unknown op code to terminal VFD (without fail on unknown flag)");
 
     op_code = H5FD_CTL_OPC_RESERVED;
     flags   = 0;
@@ -3814,10 +3814,10 @@ test_ctl(void)
 
     PASSED();
 
-    TESTING_2("unknown op code to terminal VFD (with fail on unknown flag)")
+    TESTING_2("unknown op code to terminal VFD (with fail on unknown flag)");
 
     op_code = H5FD_CTL_OPC_RESERVED;
-    flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG;
+    flags   = H5FD_CTL_FAIL_IF_UNKNOWN_FLAG;
 
     /* H5FDctl call should fail due to 'fail if unknown' flag being specified */
     if (run_ctl_test(op_code, flags, CTL_OPC_UNKNOWN, fapl_id) < 0)
@@ -3825,10 +3825,10 @@ test_ctl(void)
 
     PASSED();
 
-    TESTING_2("unknown op code to terminal VFD (without fail on unknown flag/route to terminal VFD)")
+    TESTING_2("unknown op code to terminal VFD (without fail on unknown flag/route to terminal VFD)");
 
     op_code = H5FD_CTL_OPC_RESERVED;
-    flags   = H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG;
+    flags   = H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG;
 
     /* H5FDctl call should silently ignore unknown op code and succeed */
     if (run_ctl_test(op_code, flags, CTL_OPC_UNKNOWN, fapl_id) < 0)
@@ -3836,10 +3836,10 @@ test_ctl(void)
 
     PASSED();
 
-    TESTING_2("unknown op code to terminal VFD (with fail on unknown flag/route to terminal VFD)")
+    TESTING_2("unknown op code to terminal VFD (with fail on unknown flag/route to terminal VFD)");
 
     op_code = H5FD_CTL_OPC_RESERVED;
-    flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG | H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG;
+    flags   = H5FD_CTL_FAIL_IF_UNKNOWN_FLAG | H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG;
 
     /* H5FDctl call should fail due to 'fail if unknown' flag being specified */
     if (run_ctl_test(op_code, flags, CTL_OPC_UNKNOWN, fapl_id) < 0)
@@ -3868,9 +3868,9 @@ test_ctl(void)
         PUTS_ERROR("couldn't set splitter VFD on FAPL");
 
     TESTING_2("known op code through passthrough VFD to terminal VFD (without fail on unknown flag/no "
-              "routing flag)")
+              "routing flag)");
 
-    op_code = H5FD_CTL__TEST_OPCODE;
+    op_code = H5FD_CTL_TEST_OPCODE;
     flags   = 0;
 
     /*
@@ -3884,10 +3884,10 @@ test_ctl(void)
     PASSED();
 
     TESTING_2(
-        "known op code through passthrough VFD to terminal VFD (with fail on unknown flag/no routing flag)")
+        "known op code through passthrough VFD to terminal VFD (with fail on unknown flag/no routing flag)");
 
-    op_code = H5FD_CTL__TEST_OPCODE;
-    flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG;
+    op_code = H5FD_CTL_TEST_OPCODE;
+    flags   = H5FD_CTL_FAIL_IF_UNKNOWN_FLAG;
 
     /*
      * H5FDctl call should fail since op code is unknown to
@@ -3901,10 +3901,10 @@ test_ctl(void)
     PASSED();
 
     TESTING_2("known op code through passthrough VFD to terminal VFD (without fail on unknown flag/route to "
-              "terminal VFD)")
+              "terminal VFD)");
 
-    op_code = H5FD_CTL__TEST_OPCODE;
-    flags   = H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG;
+    op_code = H5FD_CTL_TEST_OPCODE;
+    flags   = H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG;
 
     /*
      * H5Dctl call should succeed since the passthrough VFD
@@ -3917,10 +3917,10 @@ test_ctl(void)
     PASSED();
 
     TESTING_2("known op code through passthrough VFD to terminal VFD (with fail on unknown flag/route to "
-              "terminal VFD)")
+              "terminal VFD)");
 
-    op_code = H5FD_CTL__TEST_OPCODE;
-    flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG | H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG;
+    op_code = H5FD_CTL_TEST_OPCODE;
+    flags   = H5FD_CTL_FAIL_IF_UNKNOWN_FLAG | H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG;
 
     /*
      * H5Dctl call should succeed since the passthrough VFD
@@ -3932,7 +3932,7 @@ test_ctl(void)
 
     PASSED();
 
-    TESTING_2("unknown op code to passthrough VFD (without fail on unknown flag)")
+    TESTING_2("unknown op code to passthrough VFD (without fail on unknown flag)");
 
     op_code = H5FD_CTL_OPC_RESERVED;
     flags   = 0;
@@ -3947,10 +3947,10 @@ test_ctl(void)
 
     PASSED();
 
-    TESTING_2("unknown op code to passthrough VFD (with fail on unknown flag)")
+    TESTING_2("unknown op code to passthrough VFD (with fail on unknown flag)");
 
     op_code = H5FD_CTL_OPC_RESERVED;
-    flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG;
+    flags   = H5FD_CTL_FAIL_IF_UNKNOWN_FLAG;
 
     /*
      * H5FDctl call should fail since op code is unknown to
@@ -3962,10 +3962,10 @@ test_ctl(void)
 
     PASSED();
 
-    TESTING_2("unknown op code to passthrough VFD (without fail on unknown flag/route to terminal VFD)")
+    TESTING_2("unknown op code to passthrough VFD (without fail on unknown flag/route to terminal VFD)");
 
     op_code = H5FD_CTL_OPC_RESERVED;
-    flags   = H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG;
+    flags   = H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG;
 
     /*
      * H5Dctl call should succeed since the passthrough VFD
@@ -3980,10 +3980,10 @@ test_ctl(void)
 
     PASSED();
 
-    TESTING_2("unknown op code to passthrough VFD (with fail on unknown flag/route to terminal VFD)")
+    TESTING_2("unknown op code to passthrough VFD (with fail on unknown flag/route to terminal VFD)");
 
     op_code = H5FD_CTL_OPC_RESERVED;
-    flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG | H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG;
+    flags   = H5FD_CTL_FAIL_IF_UNKNOWN_FLAG | H5FD_CTL_ROUTE_TO_TERMINAL_VFD_FLAG;
 
     /*
      * H5Dctl call should fail since the passthrough VFD
@@ -3998,7 +3998,7 @@ test_ctl(void)
 
     PASSED();
 
-    TESTING_2("test cleanup")
+    TESTING_2("test cleanup");
 
     HDfree(splitter_config);
 
@@ -4057,7 +4057,7 @@ test_vector_io__setup_v(uint32_t count, H5FD_mem_t types[], haddr_t addrs[], siz
 {
     hbool_t    result    = TRUE; /* will set to FALSE on failure */
     char       fill_char = base_fill_char;
-    void *     temp_buf  = NULL;
+    void      *temp_buf  = NULL;
     uint32_t   i;
     uint32_t   j;
     H5FD_mem_t mem_types[6] = {H5FD_MEM_SUPER, H5FD_MEM_BTREE, H5FD_MEM_DRAW,
@@ -4112,7 +4112,7 @@ test_vector_io__setup_v(uint32_t count, H5FD_mem_t types[], haddr_t addrs[], siz
 
             if (write_bufs[i]) {
 
-                HDfree((void *)write_bufs[i]);
+                h5_free_const(write_bufs[i]);
                 write_bufs[i] = NULL;
             }
 
@@ -4163,7 +4163,7 @@ test_vector_io__setup_fixed_size_v(uint32_t count, H5FD_mem_t types[], haddr_t a
 {
     hbool_t    result    = TRUE; /* will set to FALSE on failure */
     char       fill_char = base_fill_char;
-    void *     temp_buf  = NULL;
+    void      *temp_buf  = NULL;
     uint32_t   fix_point;
     uint32_t   i;
     uint32_t   j;
@@ -4256,7 +4256,7 @@ test_vector_io__setup_fixed_size_v(uint32_t count, H5FD_mem_t types[], haddr_t a
 
             if (write_bufs[i]) {
 
-                HDfree((void *)write_bufs[i]);
+                h5_free_const(write_bufs[i]);
                 write_bufs[i] = NULL;
             }
 
@@ -4411,7 +4411,7 @@ test_vector_io__verify_v(uint32_t count, H5FD_mem_t types[], size_t sizes[], con
     uint32_t    i;
     size_t      j;
     const char *w_buf;
-    char *      r_buf;
+    char       *r_buf;
     const char *mem_type_names[7] = {"H5FD_MEM_DEFAULT", "H5FD_MEM_SUPER", "H5FD_MEM_BTREE", "H5FD_MEM_DRAW",
                                      "H5FD_MEM_GHEAP",   "H5FD_MEM_LHEAP", "H5FD_MEM_OHDR"};
     size_t      size              = SIZE_MAX;
@@ -4484,7 +4484,7 @@ test_vector_io__dump_test_vectors(uint32_t count, H5FD_mem_t types[], haddr_t ad
     H5FD_mem_t  type              = H5FD_MEM_NTYPES;
 
     const char *w_buf;
-    char *      r_buf;
+    char       *r_buf;
 
     HDfprintf(stdout, "\n\nDumping test vector \"%s\" of length %d\n\n", name, count);
 
@@ -4562,9 +4562,9 @@ test_vector_io(const char *vfd_name)
     hid_t       fapl_id      = -1;          /* file access property list ID */
     haddr_t     eoa;                        /* file eoa                     */
     char        filename[1024];             /* filename                     */
-    char *      buf;                        /* tmp ptr to buf               */
+    char       *buf;                        /* tmp ptr to buf               */
     unsigned    flags = 0;                  /* file open flags              */
-    H5FD_t *    lf;                         /* VFD struct ptr               */
+    H5FD_t     *lf    = NULL;               /* VFD struct ptr               */
     uint32_t    i;                          /* index                        */
     uint32_t    j;                          /* index                        */
     uint32_t    count = VECTOR_LEN;         /* length of vectors            */
@@ -4598,12 +4598,12 @@ test_vector_io(const char *vfd_name)
     const void *f_write_bufs_0[VECTOR_LEN]; /* fixed write bufs vector      */
     const void *f_write_bufs_1[VECTOR_LEN]; /* fixed write bufs vector      */
     const void *f_write_bufs_2[VECTOR_LEN]; /* fixed write bufs vector      */
-    void *      read_bufs_0[VECTOR_LEN];    /* read bufs vector             */
-    void *      read_bufs_1[VECTOR_LEN];    /* read bufs vector             */
-    void *      read_bufs_2[VECTOR_LEN];    /* read bufs vector             */
-    void *      f_read_bufs_0[VECTOR_LEN];  /* fixed read bufs vector       */
-    void *      f_read_bufs_1[VECTOR_LEN];  /* fixed read bufs vector       */
-    void *      f_read_bufs_2[VECTOR_LEN];  /* fixed read bufs vector       */
+    void       *read_bufs_0[VECTOR_LEN];    /* read bufs vector             */
+    void       *read_bufs_1[VECTOR_LEN];    /* read bufs vector             */
+    void       *read_bufs_2[VECTOR_LEN];    /* read bufs vector             */
+    void       *f_read_bufs_0[VECTOR_LEN];  /* fixed read bufs vector       */
+    void       *f_read_bufs_1[VECTOR_LEN];  /* fixed read bufs vector       */
+    void       *f_read_bufs_2[VECTOR_LEN];  /* fixed read bufs vector       */
 
     HDsnprintf(test_title, sizeof(test_title), "vector I/O with %s VFD", vfd_name);
 
@@ -4631,7 +4631,7 @@ test_vector_io(const char *vfd_name)
     else {
 
         HDfprintf(stdout, "un-supported VFD\n");
-        TEST_ERROR
+        TEST_ERROR;
     }
 
     /* setup the test vectors -- note that addresses are not set until
@@ -4922,13 +4922,13 @@ test_vector_io(const char *vfd_name)
 
     for (i = 0; i < count; i++) {
 
-        HDfree((void *)write_bufs_0[i]);
+        h5_free_const(write_bufs_0[i]);
         write_bufs_0[i] = NULL;
 
-        HDfree((void *)write_bufs_1[i]);
+        h5_free_const(write_bufs_1[i]);
         write_bufs_1[i] = NULL;
 
-        HDfree((void *)write_bufs_2[i]);
+        h5_free_const(write_bufs_2[i]);
         write_bufs_2[i] = NULL;
 
         HDfree(read_bufs_0[i]);
@@ -4940,13 +4940,13 @@ test_vector_io(const char *vfd_name)
         HDfree(read_bufs_2[i]);
         read_bufs_2[i] = NULL;
 
-        HDfree((void *)f_write_bufs_0[i]);
+        h5_free_const(f_write_bufs_0[i]);
         f_write_bufs_0[i] = NULL;
 
-        HDfree((void *)f_write_bufs_1[i]);
+        h5_free_const(f_write_bufs_1[i]);
         f_write_bufs_1[i] = NULL;
 
-        HDfree((void *)f_write_bufs_2[i]);
+        h5_free_const(f_write_bufs_2[i]);
         f_write_bufs_2[i] = NULL;
 
         HDfree(f_read_bufs_0[i]);
@@ -5009,7 +5009,7 @@ test_selection_io_write(H5FD_t *lf, H5FD_mem_t type, uint32_t count, hid_t mem_s
     /* Issue write call */
     if (H5FDwrite_selection(lf, type, H5P_DEFAULT, count, mem_spaces, file_spaces, offsets, element_sizes,
                             (const void **)wbufs) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     return 0;
 
@@ -5061,14 +5061,14 @@ test_selection_io_read_verify(H5FD_t *lf, H5FD_mem_t type, uint32_t count, hid_t
     /* Issue read call */
     if (H5FDread_selection(lf, type, H5P_DEFAULT, count, mem_spaces, file_spaces, offsets, element_sizes,
                            (void **)rbufs) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Verify result */
     for (i = 0; i < (int)rbufcount; i++)
         for (j = 0; j < SEL_IO_DIM0 * SEL_IO_DIM1; j++)
             if (rbufs[i][j] != erbufs[i][j]) {
-                H5_FAILED()
-                AT()
+                H5_FAILED();
+                AT();
                 HDprintf("data read from file does not match expected values at mapping array location %d\n",
                          i);
                 HDprintf("expected data: \n");
@@ -5118,7 +5118,7 @@ test_selection_io(const char *vfd_name)
     hid_t      fapl_id = -1;                                        /* file access property list ID */
     char       filename[1024];                                      /* filename                     */
     unsigned   flags = 0;                                           /* file open flags              */
-    H5FD_t *   lf;                                                  /* VFD struct ptr               */
+    H5FD_t    *lf    = NULL;                                        /* VFD struct ptr               */
     int        i;                                                   /* index                        */
     int        j;                                                   /* index                        */
     int        i2;                                                  /* index                        */
@@ -5136,13 +5136,13 @@ test_selection_io(const char *vfd_name)
     size_t     element_sizes[2] = {sizeof(int), sizeof(int)};       /* element sizes vector */
     int        wbuf1[SEL_IO_DIM0 * SEL_IO_DIM1];                    /* 1D write buffer        */
     int        wbuf2[SEL_IO_DIM0][SEL_IO_DIM1];                     /* 2D write buffer         */
-    int *      wbufs[2] = {wbuf1, wbuf2[0]};                        /* Array of write buffers    */
+    int       *wbufs[2] = {wbuf1, wbuf2[0]};                        /* Array of write buffers    */
     int        fbuf1[SEL_IO_DIM0 * SEL_IO_DIM1];                    /* 1D file buffer         */
     int        fbuf2[SEL_IO_DIM0][SEL_IO_DIM1];                     /* 2D file buffer          */
-    int *      fbufs[2] = {fbuf1, fbuf2[0]};                        /* Array of file buffers     */
+    int       *fbufs[2] = {fbuf1, fbuf2[0]};                        /* Array of file buffers     */
     int        erbuf1[SEL_IO_DIM0 * SEL_IO_DIM1];                   /* 1D expected read buffer */
     int        erbuf2[SEL_IO_DIM0][SEL_IO_DIM1];                    /* 2D expected read buffer */
-    int *      erbufs[2] = {erbuf1, erbuf2[0]};                     /* Array of expected read buffers */
+    int       *erbufs[2] = {erbuf1, erbuf2[0]};                     /* Array of expected read buffers */
     int        shorten_element_sizes; /* Whether to shorten the element sizes array */
 
     HDsnprintf(test_title, sizeof(test_title), "selection I/O with %s VFD", vfd_name);
@@ -5152,26 +5152,26 @@ test_selection_io(const char *vfd_name)
     /* Set property list and file name for target driver */
 
     if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     if (HDstrcmp(vfd_name, "sec2") == 0) {
 
         if (H5Pset_fapl_sec2(fapl_id) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         h5_fixname(FILENAME[0], fapl_id, filename, sizeof(filename));
     }
     else if (HDstrcmp(vfd_name, "stdio") == 0) {
 
         if (H5Pset_fapl_stdio(fapl_id) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         h5_fixname(FILENAME[7], fapl_id, filename, sizeof filename);
     }
     else {
 
         HDfprintf(stdout, "un-supported VFD\n");
-        TEST_ERROR
+        TEST_ERROR;
     }
 
     /* Initialize write buffers */
@@ -5183,13 +5183,13 @@ test_selection_io(const char *vfd_name)
 
     /* Create dataspaces - location 0 will be 1D and location 1 will be 2D */
     if ((mem_spaces[0] = H5Screate_simple(1, dims1, NULL)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if ((mem_spaces[1] = H5Screate_simple(2, dims2, NULL)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if ((file_spaces[0] = H5Screate_simple(1, dims1, NULL)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
     if ((file_spaces[1] = H5Screate_simple(2, dims2, NULL)) < 0)
-        TEST_ERROR
+        TEST_ERROR;
 
     /* Create file */
     flags = H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC;
@@ -5209,7 +5209,7 @@ test_selection_io(const char *vfd_name)
         /* Issue write call */
         if (test_selection_io_write(lf, type, 1, &mem_spaces[0], &file_spaces[0], &addrs[0], element_sizes,
                                     (int **)&wbufs[0]) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Update file buf */
         for (i = 0; i < SEL_IO_DIM0 * SEL_IO_DIM1; i++)
@@ -5218,7 +5218,7 @@ test_selection_io(const char *vfd_name)
         /* Read and verify */
         if (test_selection_io_read_verify(lf, type, 1, &mem_spaces[0], &file_spaces[0], &addrs[0],
                                           element_sizes, 1, (int **)&fbufs[0], FALSE) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /*
          * Test 2: Simple 2D contiguous I/O
@@ -5226,7 +5226,7 @@ test_selection_io(const char *vfd_name)
         /* Issue write call */
         if (test_selection_io_write(lf, type, 1, &mem_spaces[1], &file_spaces[1], &addrs[1], element_sizes,
                                     (int **)&wbufs[1]) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Update file buf */
         for (i = 0; i < SEL_IO_DIM0; i++)
@@ -5236,7 +5236,7 @@ test_selection_io(const char *vfd_name)
         /* Read and verify */
         if (test_selection_io_read_verify(lf, type, 1, &mem_spaces[1], &file_spaces[1], &addrs[1],
                                           element_sizes, 1, (int **)&fbufs[1], FALSE) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /*
          * Test 3: Strided <> Contiguous 1D I/O
@@ -5250,16 +5250,16 @@ test_selection_io(const char *vfd_name)
         count[0]  = (SEL_IO_DIM0 * SEL_IO_DIM1) / 2;
         block[0]  = 1;
         if (H5Sselect_hyperslab(mem_spaces[0], H5S_SELECT_SET, start, stride, count, block) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Contiguous selection in file */
         if (H5Sselect_hyperslab(file_spaces[0], H5S_SELECT_SET, start, NULL, count, NULL) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Issue write call */
         if (test_selection_io_write(lf, type, 1, &mem_spaces[0], &file_spaces[0], &addrs[0], element_sizes,
                                     (int **)&wbufs[0]) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Update file buf */
         for (i = 0; i < (SEL_IO_DIM0 * SEL_IO_DIM1) / 2; i++)
@@ -5274,18 +5274,18 @@ test_selection_io(const char *vfd_name)
         /* Read and verify */
         if (test_selection_io_read_verify(lf, type, 1, &mem_spaces[0], &file_spaces[0], &addrs[0],
                                           element_sizes, 1, (int **)&erbufs[0], FALSE) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Reset selections */
         if (H5Sselect_all(mem_spaces[0]) < 0)
-            TEST_ERROR
+            TEST_ERROR;
         if (H5Sselect_all(file_spaces[0]) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Read entire file buffer and verify */
         if (test_selection_io_read_verify(lf, type, 1, &mem_spaces[0], &file_spaces[0], &addrs[0],
                                           element_sizes, 1, (int **)&fbufs[0], FALSE) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /*
          * Test 4: Contiguous <> Strided 1D I/O
@@ -5297,18 +5297,18 @@ test_selection_io(const char *vfd_name)
         start[0]  = 1;
         stride[0] = 2;
         if (H5Sselect_hyperslab(mem_spaces[0], H5S_SELECT_SET, start, NULL, count, NULL) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Strided selection in file */
         count[0] = (SEL_IO_DIM0 * SEL_IO_DIM1) / 2;
         block[0] = 1;
         if (H5Sselect_hyperslab(file_spaces[0], H5S_SELECT_SET, start, stride, count, block) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Issue write call */
         if (test_selection_io_write(lf, type, 1, &mem_spaces[0], &file_spaces[0], &addrs[0], element_sizes,
                                     (int **)&wbufs[0]) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Update file buf */
         for (i = 0; i < (SEL_IO_DIM0 * SEL_IO_DIM1) / 2; i++)
@@ -5323,18 +5323,18 @@ test_selection_io(const char *vfd_name)
         /* Read and verify */
         if (test_selection_io_read_verify(lf, type, 1, &mem_spaces[0], &file_spaces[0], &addrs[0],
                                           element_sizes, 1, (int **)&erbufs[0], FALSE) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Reset selections */
         if (H5Sselect_all(mem_spaces[0]) < 0)
-            TEST_ERROR
+            TEST_ERROR;
         if (H5Sselect_all(file_spaces[0]) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Read entire file buffer and verify */
         if (test_selection_io_read_verify(lf, type, 1, &mem_spaces[0], &file_spaces[0], &addrs[0],
                                           element_sizes, 1, (int **)&fbufs[0], FALSE) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /*
          * Test 5: Strided <> Strided 1D I/O
@@ -5348,17 +5348,17 @@ test_selection_io(const char *vfd_name)
         count[0]  = (SEL_IO_DIM0 * SEL_IO_DIM1) / 2;
         block[0]  = 1;
         if (H5Sselect_hyperslab(mem_spaces[0], H5S_SELECT_SET, start, stride, count, block) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Strided selection in file */
         start[0] = 0;
         if (H5Sselect_hyperslab(file_spaces[0], H5S_SELECT_SET, start, stride, count, block) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Issue write call */
         if (test_selection_io_write(lf, type, 1, &mem_spaces[0], &file_spaces[0], &addrs[0], element_sizes,
                                     (int **)&wbufs[0]) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Update file buf */
         for (i = 0; i < (SEL_IO_DIM0 * SEL_IO_DIM1) / 2; i++)
@@ -5373,18 +5373,18 @@ test_selection_io(const char *vfd_name)
         /* Read and verify */
         if (test_selection_io_read_verify(lf, type, 1, &mem_spaces[0], &file_spaces[0], &addrs[0],
                                           element_sizes, 1, (int **)&erbufs[0], FALSE) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Reset selections */
         if (H5Sselect_all(mem_spaces[0]) < 0)
-            TEST_ERROR
+            TEST_ERROR;
         if (H5Sselect_all(file_spaces[0]) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Read entire file buffer and verify */
         if (test_selection_io_read_verify(lf, type, 1, &mem_spaces[0], &file_spaces[0], &addrs[0],
                                           element_sizes, 1, (int **)&fbufs[0], FALSE) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /*
          * Test 6: Strided <> Contiguous 2D I/O
@@ -5399,16 +5399,16 @@ test_selection_io(const char *vfd_name)
         block[0]  = 1;
         block[1]  = 1;
         if (H5Sselect_hyperslab(mem_spaces[1], H5S_SELECT_SET, start, stride, count, block) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Contiguous selection in file */
         if (H5Sselect_hyperslab(file_spaces[1], H5S_SELECT_SET, start, NULL, count, NULL) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Issue write call */
         if (test_selection_io_write(lf, type, 1, &mem_spaces[1], &file_spaces[1], &addrs[1], element_sizes,
                                     (int **)&wbufs[1]) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Update file buf */
         for (i = 0; i < SEL_IO_DIM0 / 2; i++)
@@ -5426,18 +5426,18 @@ test_selection_io(const char *vfd_name)
         /* Read and verify */
         if (test_selection_io_read_verify(lf, type, 1, &mem_spaces[1], &file_spaces[1], &addrs[1],
                                           element_sizes, 1, (int **)&erbufs[1], FALSE) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Reset selections */
         if (H5Sselect_all(mem_spaces[1]) < 0)
-            TEST_ERROR
+            TEST_ERROR;
         if (H5Sselect_all(file_spaces[1]) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Read entire file buffer and verify */
         if (test_selection_io_read_verify(lf, type, 1, &mem_spaces[1], &file_spaces[1], &addrs[1],
                                           element_sizes, 1, (int **)&fbufs[1], FALSE) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /*
          * Test 7: Contiguous <> Strided 2D I/O
@@ -5448,7 +5448,7 @@ test_selection_io(const char *vfd_name)
         count[0] = SEL_IO_DIM0;
         count[1] = SEL_IO_DIM1 / 2;
         if (H5Sselect_hyperslab(mem_spaces[1], H5S_SELECT_SET, start, NULL, count, NULL) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Strided selection in file */
         stride[0] = 1;
@@ -5456,12 +5456,12 @@ test_selection_io(const char *vfd_name)
         block[0]  = 1;
         block[1]  = 1;
         if (H5Sselect_hyperslab(file_spaces[1], H5S_SELECT_SET, start, stride, count, block) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Issue write call */
         if (test_selection_io_write(lf, type, 1, &mem_spaces[1], &file_spaces[1], &addrs[1], element_sizes,
                                     (int **)&wbufs[1]) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Update file buf */
         for (i = 0; i < SEL_IO_DIM0; i++)
@@ -5479,18 +5479,18 @@ test_selection_io(const char *vfd_name)
         /* Read and verify */
         if (test_selection_io_read_verify(lf, type, 1, &mem_spaces[1], &file_spaces[1], &addrs[1],
                                           element_sizes, 1, (int **)&erbufs[1], FALSE) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Reset selections */
         if (H5Sselect_all(mem_spaces[1]) < 0)
-            TEST_ERROR
+            TEST_ERROR;
         if (H5Sselect_all(file_spaces[1]) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Read entire file buffer and verify */
         if (test_selection_io_read_verify(lf, type, 1, &mem_spaces[1], &file_spaces[1], &addrs[1],
                                           element_sizes, 1, (int **)&fbufs[1], FALSE) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /*
          * Test 8: Strided <> Strided 2D I/O
@@ -5509,7 +5509,7 @@ test_selection_io(const char *vfd_name)
         block[0]  = 1;
         block[1]  = 1;
         if (H5Sselect_hyperslab(mem_spaces[1], H5S_SELECT_SET, start, stride, count, block) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Strided selection (across dim 0) in file */
         start[0]  = 1;
@@ -5521,12 +5521,12 @@ test_selection_io(const char *vfd_name)
         block[0]  = 1;
         block[1]  = 1;
         if (H5Sselect_hyperslab(file_spaces[1], H5S_SELECT_SET, start, stride, count, block) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Issue write call */
         if (test_selection_io_write(lf, type, 1, &mem_spaces[1], &file_spaces[1], &addrs[1], element_sizes,
                                     (int **)&wbufs[1]) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Update file buf */
         for (i = 0, i2 = 1, j2 = 0; i < SEL_IO_DIM0; i++)
@@ -5550,18 +5550,18 @@ test_selection_io(const char *vfd_name)
         /* Read and verify */
         if (test_selection_io_read_verify(lf, type, 1, &mem_spaces[1], &file_spaces[1], &addrs[1],
                                           element_sizes, 1, (int **)&erbufs[1], FALSE) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Reset selections */
         if (H5Sselect_all(mem_spaces[1]) < 0)
-            TEST_ERROR
+            TEST_ERROR;
         if (H5Sselect_all(file_spaces[1]) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Read entire file buffer and verify */
         if (test_selection_io_read_verify(lf, type, 1, &mem_spaces[1], &file_spaces[1], &addrs[1],
                                           element_sizes, 1, (int **)&fbufs[1], FALSE) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /*
          * Test 9: Strided 1D <> Strided 2D I/O
@@ -5572,7 +5572,7 @@ test_selection_io(const char *vfd_name)
         count[0]  = (SEL_IO_DIM0 * SEL_IO_DIM1) / 2;
         block[0]  = 1;
         if (H5Sselect_hyperslab(mem_spaces[0], H5S_SELECT_SET, start, stride, count, block) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Strided selection (across dim 1) in file */
         start[0]  = 0;
@@ -5584,12 +5584,12 @@ test_selection_io(const char *vfd_name)
         block[0]  = 1;
         block[1]  = 1;
         if (H5Sselect_hyperslab(file_spaces[1], H5S_SELECT_SET, start, stride, count, block) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Issue write call */
         if (test_selection_io_write(lf, type, 1, &mem_spaces[0], &file_spaces[1], &addrs[1], element_sizes,
                                     (int **)&wbufs[0]) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Update file buf */
         for (i = 1, i2 = 0, j2 = 1; i < (SEL_IO_DIM0 * SEL_IO_DIM1); i += 2) {
@@ -5611,18 +5611,18 @@ test_selection_io(const char *vfd_name)
         /* Read and verify */
         if (test_selection_io_read_verify(lf, type, 1, &mem_spaces[0], &file_spaces[1], &addrs[1],
                                           element_sizes, 1, (int **)&erbufs[0], FALSE) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Reset selections */
         if (H5Sselect_all(mem_spaces[0]) < 0)
-            TEST_ERROR
+            TEST_ERROR;
         if (H5Sselect_all(file_spaces[1]) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Read entire file buffer and verify */
         if (test_selection_io_read_verify(lf, type, 1, &mem_spaces[0], &file_spaces[1], &addrs[1],
                                           element_sizes, 1, (int **)&fbufs[1], FALSE) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /*
          * Test 10: Strided 2D <> Strided 1D I/O
@@ -5637,7 +5637,7 @@ test_selection_io(const char *vfd_name)
         block[0]  = 1;
         block[1]  = 1;
         if (H5Sselect_hyperslab(mem_spaces[1], H5S_SELECT_SET, start, stride, count, block) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Strided selection in file */
         start[0]  = 0;
@@ -5645,12 +5645,12 @@ test_selection_io(const char *vfd_name)
         count[0]  = (SEL_IO_DIM0 * SEL_IO_DIM1) / 2;
         block[0]  = 1;
         if (H5Sselect_hyperslab(file_spaces[0], H5S_SELECT_SET, start, stride, count, block) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Issue write call */
         if (test_selection_io_write(lf, type, 1, &mem_spaces[1], &file_spaces[0], &addrs[0], element_sizes,
                                     (int **)&wbufs[1]) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Update file buf */
         for (i = 0, i2 = 0; i < SEL_IO_DIM0; i += 2)
@@ -5671,18 +5671,18 @@ test_selection_io(const char *vfd_name)
         /* Read and verify */
         if (test_selection_io_read_verify(lf, type, 1, &mem_spaces[1], &file_spaces[0], &addrs[0],
                                           element_sizes, 1, (int **)&erbufs[1], FALSE) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Reset selections */
         if (H5Sselect_all(mem_spaces[1]) < 0)
-            TEST_ERROR
+            TEST_ERROR;
         if (H5Sselect_all(file_spaces[0]) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Read entire file buffer and verify */
         if (test_selection_io_read_verify(lf, type, 1, &mem_spaces[1], &file_spaces[0], &addrs[0],
                                           element_sizes, 1, (int **)&fbufs[0], FALSE) < 0)
-            TEST_ERROR
+            TEST_ERROR;
 
         /* Run tests with full and partial element sizes array */
         for (shorten_element_sizes = 0; shorten_element_sizes <= 1; shorten_element_sizes++) {
@@ -5698,12 +5698,12 @@ test_selection_io(const char *vfd_name)
             count[0]  = (SEL_IO_DIM0 * SEL_IO_DIM1) / 2;
             block[0]  = 1;
             if (H5Sselect_hyperslab(mem_spaces[0], H5S_SELECT_SET, start, stride, count, block) < 0)
-                TEST_ERROR
+                TEST_ERROR;
 
             /* Strided selection in file (1D) */
             start[0] = 1;
             if (H5Sselect_hyperslab(file_spaces[0], H5S_SELECT_SET, start, stride, count, block) < 0)
-                TEST_ERROR
+                TEST_ERROR;
 
             /* Strided selection (across dim 0) in memory (2D) */
             start[0]  = 1;
@@ -5715,7 +5715,7 @@ test_selection_io(const char *vfd_name)
             block[0]  = 1;
             block[1]  = 1;
             if (H5Sselect_hyperslab(mem_spaces[1], H5S_SELECT_SET, start, stride, count, block) < 0)
-                TEST_ERROR
+                TEST_ERROR;
 
             /* Strided selection (across dim 1) in file (2D) */
             start[0]  = 0;
@@ -5727,12 +5727,12 @@ test_selection_io(const char *vfd_name)
             block[0]  = 1;
             block[1]  = 1;
             if (H5Sselect_hyperslab(file_spaces[1], H5S_SELECT_SET, start, stride, count, block) < 0)
-                TEST_ERROR
+                TEST_ERROR;
 
             /* Issue write call */
             if (test_selection_io_write(lf, type, 2, mem_spaces, file_spaces, addrs, element_sizes,
                                         (int **)wbufs) < 0)
-                TEST_ERROR
+                TEST_ERROR;
 
             /* Update file bufs */
             for (i = 0; i < (SEL_IO_DIM0 * SEL_IO_DIM1) / 2; i++)
@@ -5763,31 +5763,31 @@ test_selection_io(const char *vfd_name)
             /* Read and verify */
             if (test_selection_io_read_verify(lf, type, 2, mem_spaces, file_spaces, addrs, element_sizes, 2,
                                               (int **)erbufs, FALSE) < 0)
-                TEST_ERROR
+                TEST_ERROR;
 
             /* Reset selections */
             if (H5Sselect_all(mem_spaces[0]) < 0)
-                TEST_ERROR
+                TEST_ERROR;
             if (H5Sselect_all(file_spaces[0]) < 0)
-                TEST_ERROR
+                TEST_ERROR;
             if (H5Sselect_all(mem_spaces[1]) < 0)
-                TEST_ERROR
+                TEST_ERROR;
             if (H5Sselect_all(file_spaces[1]) < 0)
-                TEST_ERROR
+                TEST_ERROR;
 
             /* Read entire file buffer and verify */
             if (test_selection_io_read_verify(lf, type, 2, mem_spaces, file_spaces, addrs, element_sizes, 2,
                                               (int **)fbufs, FALSE) < 0)
-                TEST_ERROR
+                TEST_ERROR;
 
             /*
              * Test 12: Strided <> Strided 2D I/O, 2 different selections in the same memory buffer
              */
             /* Switch mem and file spaces to both be 2D */
             if (H5Sset_extent_simple(mem_spaces[0], 2, dims2, NULL) < 0)
-                TEST_ERROR
+                TEST_ERROR;
             if (H5Sset_extent_simple(file_spaces[0], 2, dims2, NULL) < 0)
-                TEST_ERROR
+                TEST_ERROR;
 
             /* Strided selection in memory (1st) */
             start[0]  = 0;
@@ -5799,12 +5799,12 @@ test_selection_io(const char *vfd_name)
             block[0]  = 1;
             block[1]  = 1;
             if (H5Sselect_hyperslab(mem_spaces[0], H5S_SELECT_SET, start, stride, count, block) < 0)
-                TEST_ERROR
+                TEST_ERROR;
 
             /* Strided selection (across dim 0) in memory (2nd) */
             start[0] = 1;
             if (H5Sselect_hyperslab(mem_spaces[1], H5S_SELECT_SET, start, stride, count, block) < 0)
-                TEST_ERROR
+                TEST_ERROR;
 
             /* Strided selection in file (1st) */
             start[0]  = 0;
@@ -5816,7 +5816,7 @@ test_selection_io(const char *vfd_name)
             block[0]  = 1;
             block[1]  = 1;
             if (H5Sselect_hyperslab(file_spaces[0], H5S_SELECT_SET, start, stride, count, block) < 0)
-                TEST_ERROR
+                TEST_ERROR;
 
             /* Strided selection (across dim 1) in file (2nd) */
             start[0]  = 0;
@@ -5828,7 +5828,7 @@ test_selection_io(const char *vfd_name)
             block[0]  = 1;
             block[1]  = 1;
             if (H5Sselect_hyperslab(file_spaces[1], H5S_SELECT_SET, start, stride, count, block) < 0)
-                TEST_ERROR
+                TEST_ERROR;
 
             /* Use the same memory buffer for both selections */
             wbufs[0] = wbuf2[0];
@@ -5842,7 +5842,7 @@ test_selection_io(const char *vfd_name)
             /* Issue write call */
             if (test_selection_io_write(lf, type, 2, mem_spaces, file_spaces, addrs, element_sizes,
                                         (int **)wbufs) < 0)
-                TEST_ERROR
+                TEST_ERROR;
 
             /* Update file bufs - need to reuse 1D array so data stays consistent, so use math to
              * find 1D index into 2D array */
@@ -5881,28 +5881,28 @@ test_selection_io(const char *vfd_name)
             /* Read and verify */
             if (test_selection_io_read_verify(lf, type, 2, mem_spaces, file_spaces, addrs, element_sizes, 1,
                                               (int **)&erbufs[1], shorten_element_sizes ? TRUE : FALSE) < 0)
-                TEST_ERROR
+                TEST_ERROR;
 
             /* Reset selections */
             if (H5Sselect_all(mem_spaces[0]) < 0)
-                TEST_ERROR
+                TEST_ERROR;
             if (H5Sselect_all(file_spaces[0]) < 0)
-                TEST_ERROR
+                TEST_ERROR;
             if (H5Sselect_all(mem_spaces[1]) < 0)
-                TEST_ERROR
+                TEST_ERROR;
             if (H5Sselect_all(file_spaces[1]) < 0)
-                TEST_ERROR
+                TEST_ERROR;
 
             /* Read entire file buffer and verify */
             if (test_selection_io_read_verify(lf, type, 2, mem_spaces, file_spaces, addrs, element_sizes, 2,
                                               (int **)fbufs, FALSE) < 0)
-                TEST_ERROR
+                TEST_ERROR;
 
             /* Reset first spaces to 1D */
             if (H5Sset_extent_simple(mem_spaces[0], 1, dims1, NULL) < 0)
-                TEST_ERROR
+                TEST_ERROR;
             if (H5Sset_extent_simple(file_spaces[0], 1, dims1, NULL) < 0)
-                TEST_ERROR
+                TEST_ERROR;
 
             /* Reset write buffer array */
             wbufs[0] = wbuf1;
@@ -5932,9 +5932,9 @@ test_selection_io(const char *vfd_name)
     /* Close dataspaces */
     for (i = 0; i < 2; i++) {
         if (H5Sclose(mem_spaces[i]) < 0)
-            TEST_ERROR
+            TEST_ERROR;
         if (H5Sclose(file_spaces[i]) < 0)
-            TEST_ERROR
+            TEST_ERROR;
     }
 
     PASSED();
