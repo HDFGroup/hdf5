@@ -285,6 +285,7 @@ CONTAINS
     hdferr = h5oopen_by_token_c(loc_id, token, obj_id)
 
   END SUBROUTINE h5oopen_by_token_f
+
 !>
 !! \ingroup FH5O
 !!

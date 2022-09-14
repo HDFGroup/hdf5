@@ -925,10 +925,10 @@ CONTAINS
 !!                      \li H5_ITER_INC_F    - Increasing order
 !!                      \li H5_ITER_DEC_F    - Decreasing order
 !!                      \li H5_ITER_NATIVE_F - Fastest available order
-!! \param idx           Iteration position at which to start.
+!! \param idx          Iteration position at which to start, or <br />
+!!                     Position at which an interrupted iteration may be restarted
 !! \param op            Callback function passing data regarding the link to the calling application.
 !! \param op_data       User-defined pointer to data required by the application for its processing of the link.
-!! \param idx           Position at which an interrupted iteration may be restarted.
 !! \param return_value  Return context:
 !!                      \li Success: The return value of the first operator that
 !!                               returns non-zero, or zero if all members were processed with no operator returning non-zero.
@@ -983,10 +983,11 @@ CONTAINS
 !!                      \li H5_INDEX_NAME_F      - Alphanumeric index on name
 !!                      \li H5_INDEX_CRT_ORDER_F - Index on creation order
 !! \param order        Order within index:
-!!                      \li H5_ITER_INC_F    - Increasing order
-!!                      \li H5_ITER_DEC_F    - Decreasing order
-!!                      \li H5_ITER_NATIVE_F - Fastest available order
-!! \param idx          Position at which an interrupted iteration may be restarted.
+!!                     \li H5_ITER_INC_F    - Increasing order
+!!                     \li H5_ITER_DEC_F    - Decreasing order
+!!                     \li H5_ITER_NATIVE_F - Fastest available order
+!! \param idx          Iteration position at which to start, or <br />
+!!                     Position at which an interrupted iteration may be restarted
 !! \param op           Callback function passing data regarding the link to the calling application.
 !! \param op_data      User-defined pointer to data required by the application for its processing of the link.
 !! \param return_value Return context:
@@ -995,7 +996,7 @@ CONTAINS
 !!                      \li Failure: Negative if something goes wrong within the
 !!                               library, or the negative value returned by one of the operators.
 !! \param hdferr       \fortran_error
-!! \param lapl_id      Link access property list.
+!! \param lapl_id      Link access property list
 !!
   SUBROUTINE h5literate_by_name_f(loc_id, group_name, index_type, order, &
        idx, op, op_data, return_value, hdferr, lapl_id)

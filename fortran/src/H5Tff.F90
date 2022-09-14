@@ -109,7 +109,7 @@ CONTAINS
 !! \brief Commits a transient datatype to a file, creating a new named datatype.
 !!
 !! \param loc_id  Location identifier.
-!! \param name    Name of the datatype to be stored at the specified location.
+!! \param name    Name of the datatype to be stored at the specified location
 !! \param type_id Identifier of a datatype to be stored.
 !! \param hdferr  \fortran_error
 !! \param lcpl_id Link creation property list.
@@ -1391,7 +1391,7 @@ CONTAINS
 !!
 !! \brief Creates an array datatype object.
 !!
-!! \param base_id Datatype identifier for the array base datatype.
+!! \param base_id Datatype identifier for the array base datatype
 !! \param rank    Rank of the array.
 !! \param dims    Array dimension sizes.
 !! \param type_id Array datatype identifier.

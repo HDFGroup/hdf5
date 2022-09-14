@@ -762,7 +762,7 @@ CONTAINS
 !!
 !! \brief Converts the KIND to the correct HDF type
 !!
-!! \param ikind Fortran KIND parameter.
+!! \param ikind Fortran KIND parameter
 !! \param flag Whether KIND is of type INTEGER or REAL:
 !!             \li H5_INTEGER_KIND - integer
 !!             \li H5_REAL_KIND    - real
@@ -814,8 +814,8 @@ CONTAINS
 !!
 !! \brief Computes the offset in memory
 !!
-!! \param start  Starting pointer address.
-!! \param end    Ending pointer address.
+!! \param start  Starting pointer address
+!! \param end    Ending pointer address
 !!
 !! \result offset Offset of a member within the derived type.
 !!
@@ -836,7 +836,7 @@ CONTAINS
 !!
 !! \brief Convert time_t structure (C) to Fortran DATE AND TIME storage format.
 !!
-!! \param stdtime_t Object of type time_t that contains a time value.
+!! \param stdtime_t Object of type time_t that contains a time value
 !! \result datetime  A date/time array using Fortran conventions:
 !!                  \li datetime(1) = year
 !!                  \li datetime(2) = month

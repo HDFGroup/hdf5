@@ -677,8 +677,8 @@ CONTAINS
 !!
 !! \brief Sets the size of the parameter used to control the B-trees for indexing chunked datasets
 !!
-!! \param  prp_id File creation property list identifier.
-!! \param ik      1/2 rank of chunked storage B-tree.
+!! \param  prp_id File creation property list identifier
+!! \param ik      1/2 rank of chunked storage B-tree
 !! \param hdferr  \fortran_error
 !!
   SUBROUTINE h5pset_istore_k_f (prp_id, ik, hdferr)
@@ -934,7 +934,7 @@ CONTAINS
 !!
 !! \param prp_id     File access property list identifier.
 !! \param memb_size  Size in bytes of each file member.
-!! \param memb_plist Identifier of the file access property list to be used for each family member.
+!! \param memb_plist Identifier of the file access property list to be used for each family member
 !! \param hdferr     \fortran_error
 !!
   SUBROUTINE h5pset_fapl_family_f(prp_id, memb_size, memb_plist , hdferr)
@@ -964,7 +964,7 @@ CONTAINS
 !!
 !! \param prp_id     File access property list identifier.
 !! \param memb_size  Size in bytes of each file member.
-!! \param memb_plist Identifier of the file access property list to be used for each family member.
+!! \param memb_plist Identifier of the file access property list to be used for each family member
 !! \param hdferr     \fortran_error
 !!
   SUBROUTINE h5pget_fapl_family_f(prp_id, memb_size, memb_plist , hdferr)
@@ -1029,8 +1029,8 @@ CONTAINS
 !! \brief Queries the meta data cache and raw data chunk cache parameters.
 !!
 !! \param prp_id      File access property list identifier.
-!! \param mdc_nelmts  Number of elements (objects) in the metadata cache.
-!! \param rdcc_nelmts Number of elements (objects) in the raw data chunk cache.
+!! \param mdc_nelmts  Number of elements (objects) in the metadata cache
+!! \param rdcc_nelmts Number of elements (objects) in the raw data chunk cache
 !! \param rdcc_nbytes Total size of the raw data chunk cache, in bytes.
 !! \param rdcc_w0     Preemption policy (0 or 1).
 !! \param hdferr      \fortran_error
@@ -1285,8 +1285,8 @@ CONTAINS
 !!
 !! \brief Returns information about a filter in a pipeline
 !!
-!! \param prp_id        Data creation or transfer property list identifier.
-!! \param filter_number Sequence number within the filter pipeline of the filter for which information is sought.
+!! \param prp_id        Data creation or transfer property list identifier
+!! \param filter_number Sequence number within the filter pipeline of the filter for which information is sought
 !! \param filter_id     Filter identification number.
 !! \param flags         Bitbit vector specifying certain general properties of the filter.
 !! \param cd_nelmts     Number of elements in cd_values.
@@ -2724,9 +2724,9 @@ CONTAINS
 !!
 !! \brief Returns information about a filter in a pipeline
 !!
-!! \param prp_id    Data creation or transfer property list identifier.
+!! \param prp_id    Data creation or transfer property list identifier
 !! \param filter_id Filter identifier.
-!! \param flags     Bit vector specifying certain general properties of the filter.
+!! \param flags     Bit vector specifying certain general properties of the filter
 !! \param cd_nelmts Number of elements in cd_values.
 !! \param cd_values Auxiliary data for the filter.
 !! \param namelen   Number of characters in the name buffer.
@@ -2769,9 +2769,9 @@ CONTAINS
 !!
 !! \brief Adds a filter to the filter pipeline.
 !!
-!! \param prp_id    Data creation or transfer property list identifier.
+!! \param prp_id    Data creation or transfer property list identifier
 !! \param filter    Filter to be modified.
-!! \param flags     Bit vector specifying certain general properties of the filter.
+!! \param flags     Bit vector specifying certain general properties of the filter
 !! \param cd_nelmts Number of elements in cd_values.
 !! \param cd_values Auxiliary data for the filter.
 !! \param hdferr    \fortran_error
@@ -2805,7 +2805,7 @@ CONTAINS
 !!
 !! \brief Delete one or more filters from the filter pipeline.
 !!
-!! \param prp_id Data creation or transfer property list identifier.
+!! \param prp_id Data creation or transfer property list identifier
 !! \param filter Filter to be removed.
 !! \param hdferr \fortran_error
 !!
@@ -3379,7 +3379,7 @@ CONTAINS
 !!                     Success:  Actual length of the expression. If provided buffer "expression" is
 !!                               smaller, than expression will be truncated to fit into provided user buffer.
 !!                     Failure: -1
-!! \param size       Registered size of the transform expression.
+!! \param size       Registered size of the transform expression
 !!
 SUBROUTINE h5pget_data_transform_f(plist_id, expression, hdferr, size)
     IMPLICIT NONE

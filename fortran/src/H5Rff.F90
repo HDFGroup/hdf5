@@ -222,8 +222,7 @@ CONTAINS
 !! \param space_id Dataspace identifier.
 !! \param hdferr   \fortran_error
 !!
-SUBROUTINE h5rget_region_region_f(dset_id, ref, space_id, hdferr)
-
+  SUBROUTINE h5rget_region_region_f(dset_id, ref, space_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id
     TYPE(hdset_reg_ref_t_f), INTENT(IN) :: ref
@@ -246,6 +245,7 @@ SUBROUTINE h5rget_region_region_f(dset_id, ref, space_id, hdferr)
     hdferr = h5rget_region_region_c(dset_id, ref_f, space_id )
 
   END SUBROUTINE h5rget_region_region_f
+
 !>
 !! \ingroup FH5R
 !!
@@ -307,6 +307,7 @@ SUBROUTINE h5rget_region_region_f(dset_id, ref, space_id, hdferr)
     hdferr = h5rcreate_ptr_c(f_ptr, loc_id, name, namelen, INT(0), INT(-1,HID_T))
 
   END SUBROUTINE h5rcreate_object_f
+
 !>
 !! \ingroup FH5R
 !!
@@ -396,7 +397,7 @@ SUBROUTINE h5rget_region_region_f(dset_id, ref, space_id, hdferr)
 !>
 !! \ingroup FH5R
 !!
-!! \brief Opens the HDF5 object referenced.
+!! \brief Opens the HDF5 object referenced
 !!
 !! \note  \fortran_obsolete
 !!
@@ -422,7 +423,7 @@ SUBROUTINE h5rget_region_region_f(dset_id, ref, space_id, hdferr)
 !>
 !! \ingroup FH5R
 !!
-!! \brief Opens the dataset region.
+!! \brief Opens the dataset region
 !!
 !! \note  \fortran_obsolete
 !!

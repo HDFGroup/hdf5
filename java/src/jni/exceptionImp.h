@@ -41,7 +41,7 @@ JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5error_1on(JNIEnv *env, jclass clss)
  * Method:    printStackTrace0
  * Signature: (Ljava/lang/Object;)V
  *
- *  Call the HDF-5 library to print the HDF-5 error stack to 'file_name'.
+ *  Call the HDF5 library to print the HDF5 error stack to 'file_name'.
  */
 JNIEXPORT void JNICALL Java_hdf_hdf5lib_exceptions_HDF5LibraryException_printStackTrace0(JNIEnv *env,
                                                                                          jobject obj,
