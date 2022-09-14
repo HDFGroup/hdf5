@@ -175,7 +175,7 @@ H5_DLL hid_t H5Gcreate_async(const char *app_file, const char *app_func, unsigne
  *          H5Gclose() when the group is no longer needed so that resource
  *          leaks will not develop.
  *
- * \see H5Olink(), H5Dcreate(), \ref api-compat-macros
+ * \see H5Olink(), H5Dcreate(), \see <a href="http://www.hdfgroup.org/HDF5/doc/Advanced/UsingIdentifiers/index.html">Using Identifiers</a>
  *
  * \since 1.8.0
  *
