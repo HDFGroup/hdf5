@@ -248,7 +248,8 @@ H5_DLL herr_t H5_close_subfiles(int64_t subfiling_context_id, MPI_Comm file_comm
 
 H5_DLL int64_t H5_new_subfiling_object_id(sf_obj_type_t obj_type);
 H5_DLL void   *H5_get_subfiling_object(int64_t object_id);
-H5_DLL herr_t  H5_get_num_subfiles_from_config_file(FILE *config_file, int *n_io_concentrators);
+H5_DLL herr_t  H5_get_subfiling_config_from_file(FILE *config_file, int64_t *stripe_size,
+                                                 int64_t *num_subfiles);
 H5_DLL herr_t  H5_resolve_pathname(const char *filepath, MPI_Comm comm, char **resolved_filepath);
 
 H5_DLL herr_t  H5_subfiling_set_config_prop(H5P_genplist_t                       *plist_ptr,

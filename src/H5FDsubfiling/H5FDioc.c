@@ -47,6 +47,8 @@ typedef struct H5FD_ioc_t {
     int               fd;  /* the filesystem file descriptor */
     H5FD_ioc_config_t fa;  /* driver-specific file access properties */
 
+    H5FD_subfiling_shared_config_t subf_config;
+
     /* MPI Info */
     MPI_Comm comm;
     MPI_Info info;
@@ -468,15 +470,14 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5FD__ioc_sb_size
  *
- * Purpose:     Obtains the number of bytes required to store the driver file
- *              access data in the HDF5 superblock.
+ * Purpose:     Obtains the number of bytes required to store the driver
+ *              file access data in the HDF5 superblock.
  *
  * Return:      Success:    Number of bytes required.
  *
  *              Failure:    0 if an error occurs or if the driver has no
  *                          data to store in the superblock.
  *
- * NOTE: no public API for H5FD_sb_size, it needs to be added
  *-------------------------------------------------------------------------
  */
 static hsize_t
@@ -486,7 +487,20 @@ H5FD__ioc_sb_size(H5FD_t H5_ATTR_UNUSED *_file)
 
     H5FD_IOC_LOG_CALL(__func__);
 
-    /* TODO: placeholder for now */
+    /* Configuration structure magic number */
+    ret_value += sizeof(uint32_t);
+
+    /* Configuration structure version number */
+    ret_value += sizeof(uint32_t);
+
+    /* IOC thread pool size */
+    ret_value += sizeof(int32_t);
+
+    /* Subfiling stripe size */
+    ret_value += sizeof(int64_t);
+
+    /* Subfiling stripe count (encoded as int64_t for future) */
+    ret_value += sizeof(int64_t);
 
     H5_SUBFILING_FUNC_LEAVE;
 } /* end H5FD__ioc_sb_size */
@@ -496,19 +510,44 @@ H5FD__ioc_sb_size(H5FD_t H5_ATTR_UNUSED *_file)
  *
  * Purpose:     Encode driver-specific data into the output arguments.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__ioc_sb_encode(H5FD_t H5_ATTR_UNUSED *_file, char H5_ATTR_UNUSED *name /*out*/,
-                    unsigned char H5_ATTR_UNUSED *buf /*out*/)
+H5FD__ioc_sb_encode(H5FD_t *_file, char *name, unsigned char *buf)
 {
-    herr_t ret_value = SUCCEED;
+    subfiling_context_t *sf_context = NULL;
+    H5FD_ioc_t          *file       = (H5FD_ioc_t *)_file;
+    uint8_t             *p          = (uint8_t *)buf;
+    int64_t              tmp64;
+    herr_t               ret_value = SUCCEED;
 
     H5FD_IOC_LOG_CALL(__func__);
 
-    /* TODO: placeholder for now */
+    if (NULL == (sf_context = H5_get_subfiling_object(file->context_id)))
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get subfiling context object");
 
+    /* Encode driver name */
+    HDstrncpy(name, "IOC", 9);
+    name[8] = '\0';
+
+    /* Encode configuration structure magic number */
+    UINT32ENCODE(p, file->fa.magic);
+
+    /* Encode configuration structure version number */
+    UINT32ENCODE(p, file->fa.version);
+
+    /* Encode thread pool size field */
+    INT32ENCODE(p, file->fa.thread_pool_size);
+
+    /* Encode subfiling stripe size */
+    INT64ENCODE(p, sf_context->sf_stripe_size);
+
+    /* Encode subfiling stripe count (number of subfiles) */
+    tmp64 = sf_context->sf_num_subfiles;
+    INT64ENCODE(p, tmp64);
+
+done:
     H5_SUBFILING_FUNC_LEAVE;
 } /* end H5FD__ioc_sb_encode */
 
@@ -517,21 +556,64 @@ H5FD__ioc_sb_encode(H5FD_t H5_ATTR_UNUSED *_file, char H5_ATTR_UNUSED *name /*ou
  *
  * Purpose:     Decodes the driver information block.
  *
- * Return:      SUCCEED/FAIL
- *
- * NOTE: no public API for H5FD_sb_size, need to add
+ * Return:      Non-negative on success/Negative on failure
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__ioc_sb_decode(H5FD_t H5_ATTR_UNUSED *_file, const char H5_ATTR_UNUSED *name,
-                    const unsigned char H5_ATTR_UNUSED *buf)
+H5FD__ioc_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
 {
-    herr_t ret_value = SUCCEED;
+    subfiling_context_t *sf_context = NULL;
+    const uint8_t       *p          = (const uint8_t *)buf;
+    H5FD_ioc_t          *file       = (H5FD_ioc_t *)_file;
+    int64_t              tmp64;
+    herr_t               ret_value = SUCCEED;
 
     H5FD_IOC_LOG_CALL(__func__);
 
-    /* TODO: placeholder for now */
+    if (NULL == (sf_context = H5_get_subfiling_object(file->context_id)))
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get subfiling context object");
 
+    if (HDstrncmp(name, "IOC", 9))
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "invalid driver name in superblock");
+
+    /* Decode configuration structure magic number */
+    UINT32DECODE(p, file->fa.magic);
+
+    /* Decode configuration structure version number */
+    UINT32DECODE(p, file->fa.version);
+
+    /* Decode thread pool size field */
+    INT32DECODE(p, file->fa.thread_pool_size);
+
+    /* Decode subfiling stripe size */
+    INT64DECODE(p, file->subf_config.stripe_size);
+
+    /* Decode subfiling stripe count */
+    INT64DECODE(p, tmp64);
+    H5_CHECK_OVERFLOW(tmp64, int64_t, int32_t);
+    file->subf_config.stripe_count = (int32_t)tmp64;
+
+    /* Validate the decoded configuration */
+    if (H5FD__ioc_validate_config(&file->fa) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "decoded IOC VFD configuration info is invalid");
+
+    if (H5_subfiling_validate_config(&file->subf_config) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL,
+                                "decoded subfiling configuration parameters are invalid");
+
+    if (file->subf_config.stripe_size != sf_context->sf_stripe_size)
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL,
+                                "specified subfiling stripe size (%" PRId64
+                                ") doesn't match value stored in file (%" PRId64 ")",
+                                sf_context->sf_stripe_size, file->subf_config.stripe_size);
+
+    if (file->subf_config.stripe_count != sf_context->sf_num_subfiles)
+        H5_SUBFILING_GOTO_ERROR(
+            H5E_VFL, H5E_BADVALUE, FAIL,
+            "specified subfiling stripe count (%d) doesn't match value stored in file (%" PRId32 ")",
+            sf_context->sf_num_subfiles, file->subf_config.stripe_count);
+
+done:
     H5_SUBFILING_FUNC_LEAVE;
 } /* end H5FD__ioc_sb_decode */
 
@@ -635,16 +717,15 @@ H5FD__ioc_fapl_free(void *_fapl)
 static H5FD_t *
 H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
-    H5FD_subfiling_shared_config_t subf_config;
-    H5FD_ioc_t                    *file_ptr   = NULL; /* Ioc VFD info */
-    const H5FD_ioc_config_t       *config_ptr = NULL; /* Driver-specific property list */
-    subfiling_context_t           *sf_context = NULL;
-    H5FD_ioc_config_t              default_config;
-    H5P_genplist_t                *plist_ptr = NULL;
-    int                            ioc_flags;
-    int                            mpi_inited = 0;
-    int                            mpi_code; /* MPI return code */
-    H5FD_t                        *ret_value = NULL;
+    H5FD_ioc_t              *file_ptr   = NULL; /* Ioc VFD info */
+    const H5FD_ioc_config_t *config_ptr = NULL; /* Driver-specific property list */
+    subfiling_context_t     *sf_context = NULL;
+    H5FD_ioc_config_t        default_config;
+    H5P_genplist_t          *plist_ptr = NULL;
+    int                      ioc_flags;
+    int                      mpi_inited = 0;
+    int                      mpi_code; /* MPI return code */
+    H5FD_t                  *ret_value = NULL;
 
     H5FD_IOC_LOG_CALL(__func__);
 
@@ -662,6 +743,11 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     file_ptr->info       = MPI_INFO_NULL;
     file_ptr->file_id    = UINT64_MAX;
     file_ptr->context_id = -1;
+
+    /* Initialize file pointer's subfiling parameters */
+    file_ptr->subf_config.ioc_selection = SELECT_IOC_ONE_PER_NODE;
+    file_ptr->subf_config.stripe_size   = H5FD_SUBFILING_DEFAULT_STRIPE_SIZE;
+    file_ptr->subf_config.stripe_count  = H5FD_SUBFILING_DEFAULT_STRIPE_COUNT;
 
     /* Get the driver-specific file access properties */
     if (NULL == (plist_ptr = (H5P_genplist_t *)H5I_object(fapl_id)))
@@ -725,9 +811,9 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         H5_SUBFILING_GOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
 
     /* Retrieve the subfiling configuration for the current file */
-    if (H5_subfiling_get_config_prop(plist_ptr, &subf_config) < 0)
+    if (H5_subfiling_get_config_prop(plist_ptr, &file_ptr->subf_config) < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get subfiling configuration from FAPL");
-    if (H5_subfiling_validate_config(&subf_config) < 0)
+    if (H5_subfiling_validate_config(&file_ptr->subf_config) < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_BADVALUE, NULL, "invalid subfiling configuration");
 
     /* Retrieve the HDF5 stub file ID for the current file */
@@ -739,8 +825,8 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
      * context ID will be returned, which is used for
      * further interactions with this file's subfiles.
      */
-    if (H5_open_subfiles(file_ptr->file_path, file_ptr->file_id, &subf_config, ioc_flags, file_ptr->comm,
-                         &file_ptr->context_id) < 0)
+    if (H5_open_subfiles(file_ptr->file_path, file_ptr->file_id, &file_ptr->subf_config, ioc_flags,
+                         file_ptr->comm, &file_ptr->context_id) < 0)
         H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open subfiles for file '%s'",
                                 name);
 
@@ -1367,8 +1453,9 @@ H5FD__ioc_del(const char *name, hid_t fapl)
         H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Comm_rank failed", mpi_code);
 
     if (mpi_rank == 0) {
-        int n_subfiles = 0;
-        int num_digits = 0;
+        int64_t read_n_subfiles = 0;
+        int32_t n_subfiles      = 0;
+        int     num_digits      = 0;
 
         if (HDstat(name, &st) < 0)
             H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_SYSERRSTR, FAIL, "HDstat failed");
@@ -1400,8 +1487,11 @@ H5FD__ioc_del(const char *name, hid_t fapl)
                                             "can't open subfiling config file");
         }
 
-        if (H5_get_num_subfiles_from_config_file(config_file, &n_subfiles) < 0)
+        if (H5_get_subfiling_config_from_file(config_file, NULL, &read_n_subfiles) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_READERROR, FAIL, "can't read subfiling config file");
+
+        H5_CHECK_OVERFLOW(read_n_subfiles, int64_t, int32_t);
+        n_subfiles = (int32_t)read_n_subfiles;
 
         /* Delete the Subfiling configuration file */
         if (EOF == HDfclose(config_file)) {

@@ -751,56 +751,82 @@ init_subfiling(const char *base_filename, uint64_t file_id, H5FD_subfiling_share
 
     /*
      * If there's an existing subfiling configuration file for
-     * this file, read the number of subfiles from it
+     * this file, read the stripe size and number of subfiles
+     * from it
      */
-    if (0 == (file_acc_flags & O_TRUNC)) {
-        int n_subfiles_from_config_file = 0;
+    if (0 == (file_acc_flags & O_CREAT)) {
+        int64_t config[2] = {0, 0}; /* {stripe size, num subfiles} */
 
         if (mpi_rank == 0) {
             /* TODO: currently no support for subfile prefix */
             if (H5_dirname(base_filename, &subfile_dir) < 0)
-                n_subfiles_from_config_file = -1;
+                config[0] = -1;
 
-            if (n_subfiles_from_config_file >= 0) {
+            if (config[0] >= 0) {
                 if (H5_basename(base_filename, &file_basename) < 0)
-                    n_subfiles_from_config_file = -1;
+                    config[0] = -1;
             }
 
-            if (n_subfiles_from_config_file >= 0) {
+            if (config[0] >= 0) {
                 if (open_config_file(file_basename, subfile_dir, file_id, "r", &config_file) < 0)
-                    n_subfiles_from_config_file = -1;
+                    config[0] = -1;
             }
 
-            if (n_subfiles_from_config_file >= 0) {
+            if (config[0] >= 0) {
                 if (!config_file)
-                    n_subfiles_from_config_file = -2; /* No config file; use setting from configuration */
+                    config[0] = -2; /* No config file; use setting from configuration */
                 else {
                     /*
                      * If a subfiling configuration file exists and we aren't truncating
                      * it, read the number of subfiles used at file creation time.
                      */
-                    if (H5_get_num_subfiles_from_config_file(config_file, &n_subfiles_from_config_file) < 0)
-                        n_subfiles_from_config_file = -1;
+                    if (H5_get_subfiling_config_from_file(config_file, &config[0], &config[1]) < 0)
+                        config[0] = -1;
                 }
             }
         }
 
         if (mpi_size > 1) {
-            if (MPI_SUCCESS != (mpi_code = MPI_Bcast(&n_subfiles_from_config_file, 1, MPI_INT, 0, comm)))
+            if (MPI_SUCCESS != (mpi_code = MPI_Bcast(config, 2, MPI_INT64_T, 0, comm)))
                 H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code);
         }
 
         /*
-         * Override the stripe count setting in the application's subfiling
-         * configuration if we read a value from an existing subfiling
-         * configuration file
+         * Override the stripe size and stripe count settings in the
+         * application's subfiling configuration if we read values
+         * from an existing subfiling configuration file
          */
-        if (n_subfiles_from_config_file > 0)
-            subfiling_config->stripe_count = n_subfiles_from_config_file;
-        else if (n_subfiles_from_config_file == -1)
+        if (config[0] == -1)
             H5_SUBFILING_GOTO_ERROR(
                 H5E_FILE, H5E_CANTOPENFILE, FAIL,
                 "lead process couldn't read the number of subfiles from subfiling configuration file");
+        else {
+            if (config[0] > 0)
+                subfiling_config->stripe_size = config[0];
+            if (config[1] > 0) {
+                H5_CHECK_OVERFLOW(config[1], int64_t, int32_t);
+                subfiling_config->stripe_count = (int32_t)config[1];
+            }
+        }
+    }
+    else {
+        char *env_value = NULL;
+
+        /* Check for a subfiling stripe size setting from the environment */
+        if ((env_value = HDgetenv(H5FD_SUBFILING_STRIPE_SIZE))) {
+            long long stripe_size = -1;
+
+            errno = 0;
+
+            stripe_size = HDstrtoll(env_value, NULL, 0);
+            if (ERANGE == errno)
+                H5_SUBFILING_SYS_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL,
+                                            "invalid stripe size setting for " H5FD_SUBFILING_STRIPE_SIZE);
+
+            if (stripe_size > 0) {
+                subfiling_config->stripe_size = (int64_t)stripe_size;
+            }
+        }
     }
 
 #if H5_CHECK_MPI_VERSION(3, 0)
@@ -1695,26 +1721,10 @@ init_subfiling_context(subfiling_context_t *sf_context, const char *base_filenam
     }
 
     /*
-     * Set IOC stripe size from subfiling configuration, then check
-     * for a setting from the environment
+     * Set IOC stripe size from subfiling configuration
      */
     if (subfiling_config->stripe_size > 0)
         sf_context->sf_stripe_size = subfiling_config->stripe_size;
-
-    if ((env_value = HDgetenv(H5FD_SUBFILING_STRIPE_SIZE))) {
-        long long stripe_size = -1;
-
-        errno = 0;
-
-        stripe_size = HDstrtoll(env_value, NULL, 0);
-        if (ERANGE == errno)
-            H5_SUBFILING_SYS_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL,
-                                        "invalid stripe size setting for " H5FD_SUBFILING_STRIPE_SIZE);
-
-        if (stripe_size > 0) {
-            sf_context->sf_stripe_size = (int64_t)stripe_size;
-        }
-    }
 
     /*
      * If still set to the default, set the number of subfiles
@@ -1794,6 +1804,15 @@ init_subfiling_context(subfiling_context_t *sf_context, const char *base_filenam
         if (MPI_SUCCESS != (mpi_code = MPI_Comm_size(sf_context->sf_group_comm, &sf_context->sf_group_size)))
             H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Comm_size failed", mpi_code);
     }
+
+    /* Perform some final validation of subfiling configuration */
+    if (sf_context->sf_stripe_size <= 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "invalid subfiling stripe size (%" PRId64 ")",
+                                sf_context->sf_stripe_size);
+
+    if (sf_context->sf_num_subfiles <= 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "invalid subfiling stripe count (%d)",
+                                sf_context->sf_num_subfiles);
 
     HDassert(sf_context->sf_num_subfiles >= app_topology->n_io_concentrators);
 
@@ -2346,26 +2365,26 @@ done:
 }
 
 /*-------------------------------------------------------------------------
- * Function:    H5_get_num_subfiles_from_config_file
+ * Function:    H5_get_subfiling_config_from_file
  *
- * Purpose:     Reads a Subfiling configuration file to get the number of
- *              subfiles used for the logical HDF5 file.
+ * Purpose:     Reads a Subfiling configuration file to get the stripe size
+ *              and number of subfiles used for the logical HDF5 file.
  *
  * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5_get_num_subfiles_from_config_file(FILE *config_file, int *num_subfiles)
+H5_get_subfiling_config_from_file(FILE *config_file, int64_t *stripe_size, int64_t *num_subfiles)
 {
-    char  *config_buf      = NULL;
-    char  *ioc_substr      = NULL;
-    long   config_file_len = 0;
-    int    read_n_subfiles = 0;
-    herr_t ret_value       = SUCCEED;
+    int64_t read_stripe_size  = 0;
+    int64_t read_num_subfiles = 0;
+    char   *config_buf        = NULL;
+    char   *substr            = NULL;
+    long    config_file_len   = 0;
+    herr_t  ret_value         = SUCCEED;
 
     HDassert(config_file);
-    HDassert(num_subfiles);
 
     if (HDfseek(config_file, 0, SEEK_END) < 0)
         H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_SEEKERROR, FAIL,
@@ -2389,20 +2408,40 @@ H5_get_num_subfiles_from_config_file(FILE *config_file, int *num_subfiles)
 
     config_buf[config_file_len] = '\0';
 
-    if (NULL == (ioc_substr = HDstrstr(config_buf, "subfile_count")))
-        H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL,
-                                "malformed subfiling configuration file - no subfile count entry");
+    if (stripe_size) {
+        if (NULL == (substr = HDstrstr(config_buf, "stripe_size")))
+            H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL,
+                                    "malformed subfiling configuration file - no stripe size entry");
 
-    if (EOF == HDsscanf(ioc_substr, "subfile_count=%d", &read_n_subfiles))
-        H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL,
-                                    "couldn't get number of subfiles from subfiling configuration file");
+        if (EOF == HDsscanf(substr, "stripe_size=%" PRId64, &read_stripe_size))
+            H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL,
+                                        "couldn't get stripe size from subfiling configuration file");
 
-    if (read_n_subfiles <= 0)
-        H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL,
-                                "invalid number of subfiles (%d) read from subfiling configuration file",
-                                read_n_subfiles);
+        if (read_stripe_size <= 0)
+            H5_SUBFILING_GOTO_ERROR(
+                H5E_FILE, H5E_BADVALUE, FAIL,
+                "invalid stripe size (%" PRId64 ") read from subfiling configuration file", read_stripe_size);
 
-    *num_subfiles = read_n_subfiles;
+        *stripe_size = read_stripe_size;
+    }
+
+    if (num_subfiles) {
+        if (NULL == (substr = HDstrstr(config_buf, "subfile_count")))
+            H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL,
+                                    "malformed subfiling configuration file - no subfile count entry");
+
+        if (EOF == HDsscanf(substr, "subfile_count=%" PRId64, &read_num_subfiles))
+            H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL,
+                                        "couldn't get number of subfiles from subfiling configuration file");
+
+        if (read_num_subfiles <= 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL,
+                                    "invalid number of subfiles (%" PRId64
+                                    ") read from subfiling configuration file",
+                                    read_num_subfiles);
+
+        *num_subfiles = read_num_subfiles;
+    }
 
 done:
     HDfree(config_buf);

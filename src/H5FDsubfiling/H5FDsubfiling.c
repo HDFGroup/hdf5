@@ -147,6 +147,9 @@ typedef struct H5FD_subfiling_t {
 
 /* Prototypes */
 static herr_t  H5FD__subfiling_term(void);
+static hsize_t H5FD__subfiling_sb_size(H5FD_t *_file);
+static herr_t  H5FD__subfiling_sb_encode(H5FD_t *_file, char *name, unsigned char *buf);
+static herr_t  H5FD__subfiling_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf);
 static void   *H5FD__subfiling_fapl_get(H5FD_t *_file);
 static void   *H5FD__subfiling_fapl_copy(const void *_old_fa);
 static herr_t  H5FD__subfiling_fapl_free(void *_fa);
@@ -212,9 +215,9 @@ static const H5FD_class_t H5FD_subfiling_g = {
     MAXADDR,                           /* maxaddr               */
     H5F_CLOSE_WEAK,                    /* fc_degree             */
     H5FD__subfiling_term,              /* terminate             */
-    NULL,                              /* sb_size               */
-    NULL,                              /* sb_encode             */
-    NULL,                              /* sb_decode             */
+    H5FD__subfiling_sb_size,           /* sb_size               */
+    H5FD__subfiling_sb_encode,         /* sb_encode             */
+    H5FD__subfiling_sb_decode,         /* sb_decode             */
     sizeof(H5FD_subfiling_config_t),   /* fapl_size             */
     H5FD__subfiling_fapl_get,          /* fapl_get              */
     H5FD__subfiling_fapl_copy,         /* fapl_copy             */
@@ -663,6 +666,185 @@ H5FD__subfiling_validate_config(const H5FD_subfiling_config_t *fa)
 done:
     H5_SUBFILING_FUNC_LEAVE;
 } /* end H5FD__subfiling_validate_config() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__subfiling_sb_size
+ *
+ * Purpose:     Returns the size of the subfiling configuration information
+ *              to be stored in the superblock.
+ *
+ * Return:      Size of subfiling configuration information (never fails)
+ *-------------------------------------------------------------------------
+ */
+static hsize_t
+H5FD__subfiling_sb_size(H5FD_t *_file)
+{
+    H5FD_subfiling_t *file      = (H5FD_subfiling_t *)_file;
+    hsize_t           ret_value = 0;
+
+    HDassert(file);
+
+    /* Configuration structure magic number */
+    ret_value += sizeof(uint32_t);
+
+    /* Configuration structure version number */
+    ret_value += sizeof(uint32_t);
+
+    /* "Require IOC" field */
+    ret_value += sizeof(int32_t);
+
+    /* Subfiling stripe size */
+    ret_value += sizeof(int64_t);
+
+    /* Subfiling stripe count (encoded as int64_t for future) */
+    ret_value += sizeof(int64_t);
+
+    /* Add superblock information from IOC file if necessary */
+    if (file->sf_file) {
+        /* Encode the IOC's name into the subfiling information */
+        ret_value += 9;
+
+        ret_value += H5FD_sb_size(file->sf_file);
+    }
+
+    H5_SUBFILING_FUNC_LEAVE;
+} /* end H5FD__subfiling_sb_size() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__subfiling_sb_encode
+ *
+ * Purpose:     Encodes the subfiling configuration information into the
+ *              specified buffer.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__subfiling_sb_encode(H5FD_t *_file, char *name, unsigned char *buf)
+{
+    subfiling_context_t *sf_context = NULL;
+    H5FD_subfiling_t    *file       = (H5FD_subfiling_t *)_file;
+    uint8_t             *p          = (uint8_t *)buf;
+    int64_t              tmp64;
+    int32_t              tmp32;
+    herr_t               ret_value = SUCCEED;
+
+    if (NULL == (sf_context = H5_get_subfiling_object(file->context_id)))
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get subfiling context object");
+
+    /* Encode driver name */
+    HDstrncpy(name, "Subfilin", 9);
+    name[8] = '\0';
+
+    /* Encode configuration structure magic number */
+    UINT32ENCODE(p, file->fa.magic);
+
+    /* Encode configuration structure version number */
+    UINT32ENCODE(p, file->fa.version);
+
+    /* Encode "require IOC" field */
+    tmp32 = (int32_t)file->fa.require_ioc;
+    INT32ENCODE(p, tmp32);
+
+    /* Encode subfiling stripe size */
+    INT64ENCODE(p, sf_context->sf_stripe_size);
+
+    /* Encode subfiling stripe count (number of subfiles) */
+    tmp64 = sf_context->sf_num_subfiles;
+    INT64ENCODE(p, tmp64);
+
+    /* Encode IOC VFD configuration information if necessary */
+    if (file->sf_file) {
+        char ioc_name[9];
+
+        HDmemset(ioc_name, 0, sizeof(ioc_name));
+
+        if (H5FD_sb_encode(file->sf_file, ioc_name, p + 9) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTENCODE, FAIL,
+                                    "unable to encode IOC VFD's superblock information");
+
+        /* Copy the IOC VFD's name into our buffer */
+        HDmemcpy(p, ioc_name, 9);
+    }
+
+done:
+    H5_SUBFILING_FUNC_LEAVE;
+} /* end H5FD__subfiling_sb_encode() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__subfiling_sb_decode
+ *
+ * Purpose:     Decodes the subfiling configuration information from the
+ *              specified buffer.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__subfiling_sb_decode(H5FD_t *_file, const char *name, const unsigned char *buf)
+{
+    subfiling_context_t *sf_context = NULL;
+    H5FD_subfiling_t    *file       = (H5FD_subfiling_t *)_file;
+    const uint8_t       *p          = (const uint8_t *)buf;
+    int64_t              tmp64;
+    int32_t              tmp32;
+    herr_t               ret_value = SUCCEED;
+
+    if (NULL == (sf_context = H5_get_subfiling_object(file->context_id)))
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get subfiling context object");
+
+    if (HDstrncmp(name, "Subfilin", 9))
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "invalid driver name in superblock");
+
+    /* Decode configuration structure magic number */
+    UINT32DECODE(p, file->fa.magic);
+
+    /* Decode configuration structure version number */
+    UINT32DECODE(p, file->fa.version);
+
+    /* Decode "require IOC" field */
+    INT32DECODE(p, tmp32);
+    file->fa.require_ioc = (hbool_t)tmp32;
+
+    /* Decode subfiling stripe size */
+    INT64DECODE(p, file->fa.shared_cfg.stripe_size);
+
+    /* Decode subfiling stripe count */
+    INT64DECODE(p, tmp64);
+    H5_CHECK_OVERFLOW(tmp64, int64_t, int32_t);
+    file->fa.shared_cfg.stripe_count = (int32_t)tmp64;
+
+    if (file->sf_file) {
+        char ioc_name[9];
+
+        HDmemcpy(ioc_name, p, 9);
+        p += 9;
+
+        if (H5FD_sb_load(file->sf_file, ioc_name, p) < 0)
+            H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_CANTDECODE, FAIL,
+                                    "unable to decode IOC VFD's superblock information");
+    }
+
+    /* Validate the decoded configuration */
+    if (H5FD__subfiling_validate_config(&file->fa) < 0)
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL,
+                                "decoded subfiling configuration info is invalid");
+
+    if (file->fa.shared_cfg.stripe_size != sf_context->sf_stripe_size)
+        H5_SUBFILING_GOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL,
+                                "specified subfiling stripe size (%" PRId64
+                                ") doesn't match value stored in file (%" PRId64 ")",
+                                sf_context->sf_stripe_size, file->fa.shared_cfg.stripe_size);
+
+    if (file->fa.shared_cfg.stripe_count != sf_context->sf_num_subfiles)
+        H5_SUBFILING_GOTO_ERROR(
+            H5E_VFL, H5E_BADVALUE, FAIL,
+            "specified subfiling stripe count (%d) doesn't match value stored in file (%" PRId32 ")",
+            sf_context->sf_num_subfiles, file->fa.shared_cfg.stripe_count);
+
+done:
+    H5_SUBFILING_FUNC_LEAVE;
+} /* end H5FD__subfiling_sb_decode() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD__subfiling_fapl_get
