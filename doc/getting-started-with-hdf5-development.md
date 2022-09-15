@@ -214,10 +214,10 @@ slightly between private and public API calls.
 Here's an example of an internal API call:
 
 ```c
-herr_t
 /*
  * Function comments of dubious value
  */
+herr_t
 H5X_do_stuff(<parameters>)
 {
 	<variables>
@@ -323,4 +323,93 @@ A public API call differs little from an internal call. The biggest differences:
   VOL call.
 * The function exit macro will be `FUNC_LEAVE_API` (or similar). This is where
   we release the global thread-safe lock, etc.
+
+
+### Public, private, package
+
+HDF5 is divided into _packages_, which encapsulate related functionality. Each
+has a prefix of the form `H5X(Y)`. An example is the dataset package, which has
+the prefix `H5D`. Hopefully, you are familiar with this from the public API. In
+addition to the public packages, we all know and love, there are many internal
+packages that are not visible to the public via API calls, like `H5FL` (free
+lists / memory pools) and `H5B2` (version 2 B-trees). There's also an `H5`
+package that deals with very low-level things like library startup.
+
+API calls, types, etc. in HDF5 have three levels of visibility. From most to
+least visible, these are:
+
+* Public
+* Private
+* Package
+
+**Public** things are in the public API. They are usually found in `H5Xpublic.h`
+header files. API calls are of the form `H5Xfoo()`, with no underscores between
+the package name and the rest of the function name.
+
+**Private** things are for use across the HDF5 library, outside the packages
+that contain them. They collectively make up the "internal library API". API
+calls are of the form `H5X_foo()` with one underscore between the package
+name and the rest of the function name.
+
+**Package** things are for use inside the package and the compiler will
+complain if you include them outside of the package they belong to. They
+collectively make up the "internal package API". API calls are of the form
+`H5X__foo()` with two underscores between the package name and the rest of the
+function name. The concept of "friend" packages exists and you can declare this
+by defining `<package>_FRIEND` in a file. This will let you include the package
+header from a package in a file that it is not a member of. Doing this is
+strongly discouraged, though. Test functions are often declared in package
+headers as they expose package internals and test programs can include
+multiple package headers so they can check on internal package state.
+
+Note that these underscore schemes are primarily for API calls and do not extend
+to things like types and symbols. Another thing to keep in mind is that the
+difference between package and private API calls can be somewhat arbitrary.
+We're hoping to improve the coherence of the internal APIs via refactoring.
+
+
+### Function enter and leave macros
+
+Function enter and leave macros are added to almost all HDF5 API calls. This is
+where we set up error handling (see below) and things like the thread-safety
+global lock (in public API calls). There are different flavors depending on the
+API call and it's very important that they are appropriate for the function they
+mark up.
+
+The various combinations you are most likely to encounter:
+
+`FUNC_ENTER_API`
+`FUNC_ENTER_NOAPI`
+`FUNC_ENTER_PACKAGE`
+
+
+There are also `_NO_INIT` flavors of some of these macros. These are usually
+small utility functions that don't initialize the library, like
+`H5is_library_threadsafe()`. They are uncommon.
+
+You may also come across `_NO_FS` ("no function stack") flavors that don't push
+themselves on the stack. These are rare.
+
+For the most part, you will be using the `API`, `NOAPI`, and `PACKAGE` macros.
+
+You may see other versions if you are working in a maintenance branch, like the
+`STATIC` macros that we removed in 1.13. We've been working to reduce the
+complexity and number of these macros and we don't always push that downstream
+due to the scope of the changes involved. You should be able to figure out what
+any new macros do based on what you've seen here, though.
+
+### Error macros
+
+### Trace macros
+
+These are automatically generated for public C library API calls by the
+`bin/trace` script, which scans the source code, looking for functions of the
+form `H5X(Y?)<whatever>()`, to which it will add or update the `H5TRACE` macros.
+
+`H5TRACE` macros are only added to public C library API calls. They are NOT
+added to the language wrappers, tools code, high-level library, etc.
+
+You should never have to modify an `H5TRACE` macro. Either point `bin/trace` at
+your source file or run `autogen.sh` (which runs `bin/trace` over the C files
+in `src`). `bin/trace` is a Perl script, so you'll need to have that available.
 
