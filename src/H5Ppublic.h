@@ -8202,9 +8202,8 @@ H5_DLL herr_t H5Pset_dataset_io_hyperslab_selection(hid_t plist_id, unsigned ran
                                                     const hsize_t start[], const hsize_t stride[],
                                                     const hsize_t count[], const hsize_t block[]);
 
-/* Link creation property list (LCPL) routines */
 /**
- * \ingroup STRCPL
+ * \ingroup LCPL
  *
  * \brief Determines whether property is set to enable creating missing
  *        intermediate groups
@@ -8235,7 +8234,7 @@ H5_DLL herr_t H5Pset_dataset_io_hyperslab_selection(hid_t plist_id, unsigned ran
  */
 H5_DLL herr_t H5Pget_create_intermediate_group(hid_t plist_id, unsigned *crt_intmd /*out*/);
 /**
- * \ingroup STRCPL
+ * \ingroup LCPL
  *
  * \brief Specifies in property list whether to create missing
  *        intermediate groups
@@ -8617,9 +8616,8 @@ H5_DLL herr_t H5Pget_map_iterate_hints(hid_t mapl_id, size_t *key_prefetch_size 
                                        size_t *key_alloc_size /*out*/);
 #endif /*  H5_HAVE_MAP_API */
 
-/* String creation property list (STRCPL) routines */
 /**
- * \ingroup STRCPL
+ * \ingroup ACPL
  *
  * \brief  Retrieves the character encoding used to create a link or
  *         attribute name
@@ -8648,7 +8646,7 @@ H5_DLL herr_t H5Pget_map_iterate_hints(hid_t mapl_id, size_t *key_prefetch_size 
  */
 H5_DLL herr_t H5Pget_char_encoding(hid_t plist_id, H5T_cset_t *encoding /*out*/);
 /**
- * \ingroup STRCPL
+ * \ingroup ACPL
  *
  * \brief Sets the character encoding used to encode link and attribute
  *        names
