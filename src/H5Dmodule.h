@@ -181,8 +181,10 @@
  * </tr>
  * </table>
  *
+ * \anchor dcpl_table_tag Dataset creation property list functions (H5P)
  * \snippet{doc} tables/propertyLists.dox dcpl_table
  *
+ * \anchor dapl_table_tag Dataset access property list functions (H5P)
  * \snippet{doc} tables/propertyLists.dox dapl_table
  *
  * \subsection subsec_dataset_program Programming Model for Datasets

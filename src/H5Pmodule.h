@@ -788,9 +788,9 @@
  * <li>\ref subsec_file_property_lists</li>
  * <li>\ref subsubsec_file_examples_props</li>
  * <li>\ref subsubsec_file_examples_access</li>
- * <li>"Dataset creation property list functions (H5P)"</li>
- * <li>"File access property list functions (H5P)"</li>
- * <li>"File driver functions (H5P)"</li></ul>
+ * <li>\ref dcpl_table_tag "Dataset creation property list functions (H5P)"</li>
+ * <li>\ref fapl_table_tag "File access property list functions (H5P)"</li>
+ * <li>\ref fd_pl_table_tag "File driver property list functions (H5P)"</li></ul>
  * \li In the \ref sec_attribute chapter, see "Attribute creation property list functions (H5P)".
  * \li In the \ref sec_group chapter, see "Group creation property list functions (H5P)".
  * \li Property lists are discussed throughout \ref sec_dataset.
@@ -798,16 +798,16 @@
  * All property list functions are described in the \ref H5P section of the
  * \ref RM. The function index at the top of the page provides a categorized listing
  * grouped by property list class. Those classes are listed below:
- * \li File creation properties
- * \li File access properties
- * \li Group creation properties
- * \li Dataset creation properties
- * \li Dataset access properties
- * \li Dataset transfer properties
- * \li Link creation properties
- * \li Link access properties
- * \li Object creation properties
- * \li Object copy properties
+ * \li \ref FCPL
+ * \li \ref FAPL
+ * \li \ref GCPL
+ * \li \ref DCPL
+ * \li \ref DAPL
+ * \li \ref DXPL
+ * \li \ref LCPL
+ * \li \ref LAPL
+ * \li \ref OCPL
+ * \li \ref OCPYPL
  *
  * Additional categories not related to the class structure are as follows:
  * \li General property list operations

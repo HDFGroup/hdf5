@@ -410,10 +410,13 @@
  * </tr>
  * </table>
  *
+ * \anchor fcpl_table_tag File creation property list functions (H5P)
  * \snippet{doc} tables/propertyLists.dox fcpl_table
  *
+ * \anchor fapl_table_tag File access property list functions (H5P)
  * \snippet{doc} tables/propertyLists.dox fapl_table
  *
+ * \anchor fd_pl_table_tag File driver property list functions (H5P)
  * \snippet{doc} tables/propertyLists.dox fd_pl_table
  *
  *
