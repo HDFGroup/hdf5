@@ -34,7 +34,7 @@
  *          implements.  The HDF5 library will reject connectors with
  *          incompatible structs.
  */
-#define H5VL_VERSION 2
+#define H5VL_VERSION 3
 
 /* VOL connector identifier values
  * These are H5VL_class_value_t values, NOT hid_t values!
