@@ -1394,13 +1394,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDstrcasecmp
 #define HDstrcasecmp(X, Y) strcasecmp(X, Y)
 #endif
-#ifndef HDstrcasestr
-#ifdef _WIN32
-#define HDstrcasestr(X, Y) StrStrIA(X, Y)
-#else
-#define HDstrcasestr(X, Y) strcasestr(X, Y)
-#endif /* _WIN32 */
-#endif /* HDstrcasestr */
 #ifndef HDstrcoll
 #define HDstrcoll(X, Y) strcoll(X, Y)
 #endif

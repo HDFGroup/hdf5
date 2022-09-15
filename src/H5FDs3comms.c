@@ -941,7 +941,7 @@ H5FD_s3comms_s3r_getsize(s3r_t *handle)
      * PARSE RESPONSE *
      ******************/
 
-    start = HDstrcasestr(headerresponse, "\r\nContent-Length: ");
+    start = HDstrstr(headerresponse, "\r\nContent-Length: ");
     if (start == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "could not find \"Content-Length\" in response.");
 
