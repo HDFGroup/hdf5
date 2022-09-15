@@ -864,41 +864,7 @@
  * the pipeline processing: the pipeline and filter operations are identical no matter what data access
  * mechanism is used.
  *
- * <table>
- * <caption>I/O file drivers</caption>
- * <tr>
- * <th>File Driver</th>
- * <th>Description</th>
- * </tr>
- * <tr>
- * <td>#H5FD_CORE</td>
- * <td>Store in memory (optional backing store to disk file).</td>
- * </tr>
- * <tr>
- * <td>#H5FD_FAMILY</td>
- * <td>Store in a set of files.</td>
- * </tr>
- * <tr>
- * <td>#H5FD_LOG</td>
- * <td>Store in logging file.</td>
- * </tr>
- * <tr>
- * <td>#H5FD_MPIO</td>
- * <td>Store using MPI/IO.</td>
- * </tr>
- * <tr>
- * <td>#H5FD_MULTI</td>
- * <td>Store in multiple files. There are several options to control layout.</td>
- * </tr>
- * <tr>
- * <td>#H5FD_SEC2</td>
- * <td>Serial I/O to file using Unix “section 2” functions.</td>
- * </tr>
- * <tr>
- * <td>#H5FD_STDIO</td>
- * <td>Serial I/O to file using Unix “stdio” functions.</td>
- * </tr>
- * </table>
+ * \snippet{doc} tables/propertyLists.dox lcpl_table
  *
  * Each file driver writes/reads contiguous blocks of bytes from a logically contiguous address
  * space. The file driver is responsible for managing the details of the different physical storage
@@ -915,7 +881,7 @@
  * Data transfer properties set optional parameters that control parts of the data pipeline. The
  * function listing below shows transfer properties that control the behavior of the library.
  *
- * \snippet{doc} tables/propertyLists.dox dxpl_table
+ * \snippet{doc} tables/fileDriverLists.dox file_driver_table
  *
  * Some filters and file drivers require or use additional parameters from the application program.
  * These can be passed in the data transfer property list. The table below shows file driver property
