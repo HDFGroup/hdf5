@@ -191,17 +191,17 @@ typedef enum {
 } H5FD_subfiling_ioc_select_t;
 
 /**
- * \struct H5FD_subfiling_shared_config_t
- * \brief Subfiling configuration structure that is shared between the #H5FD_SUBFILING
+ * \struct H5FD_subfiling_params_t
+ * \brief Subfiling parameter structure that is shared between the #H5FD_SUBFILING
  *        and #H5FD_IOC drivers
  *
- * \var H5FD_subfiling_ioc_select_t H5FD_subfiling_shared_config_t::ioc_selection
+ * \var H5FD_subfiling_ioc_select_t H5FD_subfiling_params_t::ioc_selection
  *      The method to use for selecting MPI ranks to be I/O concentrators. The
  *      current default is to select one MPI rank per node to be an I/O concentrator.
  *      Refer to #H5FD_subfiling_ioc_select_t for a description of the algorithms
  *      available for use.
  *
- * \var int64_t H5FD_subfiling_shared_config_t::stripe_size
+ * \var int64_t H5FD_subfiling_params_t::stripe_size
  *      The stripe size defines the size (in bytes) of the data stripes in the
  *      subfiles for the logical HDF5 file. Data is striped across the subfiles
  *      in a round-robin wrap-around fashion in segments equal to the stripe size.
@@ -214,7 +214,7 @@ typedef enum {
  *      This value can also be set or adjusted with the #H5FD_SUBFILING_STRIPE_SIZE
  *      environment variable.
  *
- * \var int32_t H5FD_subfiling_shared_config_t::stripe_count
+ * \var int32_t H5FD_subfiling_params_t::stripe_count
  *      The target number of subfiles to use for the logical HDF5 file. The current
  *      default is to use one subfile per node, but it can be useful to set a
  *      different target number of subfiles, especially if the HDF5 application will
@@ -228,11 +228,11 @@ typedef enum {
  *      combination of the #ioc_selection field and the #H5FD_SUBFILING_IOC_PER_NODE
  *      and #H5FD_SUBFILING_IOC_SELECTION_CRITERIA environment variables.
  */
-typedef struct H5FD_subfiling_shared_config_t {
+typedef struct H5FD_subfiling_params_t {
     H5FD_subfiling_ioc_select_t ioc_selection; /* Method to select I/O concentrators          */
     int64_t                     stripe_size;   /* Size (in bytes) of data stripes in subfiles */
     int32_t                     stripe_count;  /* Target number of subfiles to use            */
-} H5FD_subfiling_shared_config_t;
+} H5FD_subfiling_params_t;
 
 //! <!-- [H5FD_subfiling_config_t_snip] -->
 /**
@@ -268,19 +268,18 @@ typedef struct H5FD_subfiling_shared_config_t {
  *      use the #H5FD_IOC driver for its I/O operations. This field should currently
  *      always be set to TRUE.
  *
- * \var H5FD_subfiling_shared_config_t H5FD_subfiling_config_t::shared_cfg
+ * \var H5FD_subfiling_params_t H5FD_subfiling_config_t::shared_cfg
  *      A structure which contains the subfiling parameters that are shared between
  *      the #H5FD_SUBFILING and #H5FD_IOC drivers. This includes the subfile stripe
  *      size, stripe count, IOC selection method, etc.
  *
  */
 typedef struct H5FD_subfiling_config_t {
-    uint32_t magic;       /* Must be set to H5FD_SUBFILING_FAPL_MAGIC                         */
-    uint32_t version;     /* Must be set to H5FD_SUBFILING_CURR_FAPL_VERSION                  */
-    hid_t    ioc_fapl_id; /* The FAPL setup with the stacked VFD to use for I/O concentrators */
-    hbool_t  require_ioc; /* Whether to use the IOC VFD (currently must always be TRUE)       */
-    H5FD_subfiling_shared_config_t
-        shared_cfg; /* Subfiling/IOC parameters (stripe size, stripe count, etc.) */
+    uint32_t                magic;       /* Must be set to H5FD_SUBFILING_FAPL_MAGIC                         */
+    uint32_t                version;     /* Must be set to H5FD_SUBFILING_CURR_FAPL_VERSION                  */
+    hid_t                   ioc_fapl_id; /* The FAPL setup with the stacked VFD to use for I/O concentrators */
+    hbool_t                 require_ioc; /* Whether to use the IOC VFD (currently must always be TRUE)       */
+    H5FD_subfiling_params_t shared_cfg;  /* Subfiling/IOC parameters (stripe size, stripe count, etc.)       */
 } H5FD_subfiling_config_t;
 //! <!-- [H5FD_subfiling_config_t_snip] -->
 

@@ -242,7 +242,7 @@ extern "C" {
 H5_DLL herr_t H5_open_subfiling_stub_file(const char *name, unsigned flags, MPI_Comm file_comm,
                                           H5FD_t **file_ptr, uint64_t *file_id);
 H5_DLL herr_t H5_open_subfiles(const char *base_filename, uint64_t file_id,
-                               H5FD_subfiling_shared_config_t *subfiling_config, int file_acc_flags,
+                               H5FD_subfiling_params_t *subfiling_config, int file_acc_flags,
                                MPI_Comm file_comm, int64_t *context_id_out);
 H5_DLL herr_t H5_close_subfiles(int64_t subfiling_context_id, MPI_Comm file_comm);
 
@@ -252,15 +252,15 @@ H5_DLL herr_t  H5_get_subfiling_config_from_file(FILE *config_file, int64_t *str
                                                  int64_t *num_subfiles);
 H5_DLL herr_t  H5_resolve_pathname(const char *filepath, MPI_Comm comm, char **resolved_filepath);
 
-H5_DLL herr_t  H5_subfiling_set_config_prop(H5P_genplist_t                       *plist_ptr,
-                                            const H5FD_subfiling_shared_config_t *vfd_config);
-H5_DLL herr_t  H5_subfiling_get_config_prop(H5P_genplist_t                 *plist_ptr,
-                                            H5FD_subfiling_shared_config_t *vfd_config);
+H5_DLL herr_t  H5_subfiling_set_config_prop(H5P_genplist_t                *plist_ptr,
+                                            const H5FD_subfiling_params_t *vfd_config);
+H5_DLL herr_t  H5_subfiling_get_config_prop(H5P_genplist_t          *plist_ptr,
+                                            H5FD_subfiling_params_t *vfd_config);
 H5_DLL herr_t  H5_subfiling_set_file_id_prop(H5P_genplist_t *plist_ptr, uint64_t file_id);
 H5_DLL herr_t  H5_subfiling_get_file_id_prop(H5P_genplist_t *plist_ptr, uint64_t *file_id);
 H5_DLL int64_t H5_subfile_fid_to_context(uint64_t file_id);
 
-H5_DLL herr_t H5_subfiling_validate_config(const H5FD_subfiling_shared_config_t *subf_config);
+H5_DLL herr_t H5_subfiling_validate_config(const H5FD_subfiling_params_t *subf_config);
 
 H5_DLL herr_t H5_subfiling_terminate(void);
 

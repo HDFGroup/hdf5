@@ -53,20 +53,20 @@ static herr_t H5_free_subfiling_object_int(subfiling_context_t *sf_context);
 static herr_t H5_free_subfiling_topology(sf_topology_t *topology);
 
 static herr_t init_subfiling(const char *base_filename, uint64_t file_id,
-                             H5FD_subfiling_shared_config_t *subfiling_config, int file_acc_flags,
+                             H5FD_subfiling_params_t *subfiling_config, int file_acc_flags,
                              MPI_Comm comm, int64_t *context_id_out);
-static herr_t init_app_topology(H5FD_subfiling_shared_config_t *subfiling_config, MPI_Comm comm,
+static herr_t init_app_topology(H5FD_subfiling_params_t *subfiling_config, MPI_Comm comm,
                                 MPI_Comm node_comm, sf_topology_t **app_topology_out);
 static herr_t get_ioc_selection_criteria_from_env(H5FD_subfiling_ioc_select_t *ioc_selection_type,
                                                   char                       **ioc_sel_info_str);
-static herr_t find_cached_topology_info(MPI_Comm comm, H5FD_subfiling_shared_config_t *subf_config,
+static herr_t find_cached_topology_info(MPI_Comm comm, H5FD_subfiling_params_t *subf_config,
                                         long iocs_per_node, sf_topology_t **app_topology);
 static herr_t init_app_layout(sf_topology_t *app_topology, MPI_Comm comm, MPI_Comm node_comm);
 static herr_t gather_topology_info(app_layout_t *app_layout, MPI_Comm comm, MPI_Comm intra_comm);
 static int    compare_layout_nodelocal(const void *layout1, const void *layout2);
 static herr_t identify_ioc_ranks(sf_topology_t *app_topology, int rank_stride);
 static herr_t init_subfiling_context(subfiling_context_t *sf_context, const char *base_filename,
-                                     uint64_t file_id, H5FD_subfiling_shared_config_t *subfiling_config,
+                                     uint64_t file_id, H5FD_subfiling_params_t *subfiling_config,
                                      sf_topology_t *app_topology, MPI_Comm file_comm);
 static herr_t open_subfile_with_context(subfiling_context_t *sf_context, int file_acc_flags);
 static herr_t record_fid_to_subfile(uint64_t file_id, int64_t subfile_context_id, int *next_index);
@@ -598,7 +598,7 @@ done:
  */
 herr_t
 H5_open_subfiles(const char *base_filename, uint64_t file_id,
-                 H5FD_subfiling_shared_config_t *subfiling_config, int file_acc_flags, MPI_Comm file_comm,
+                 H5FD_subfiling_params_t *subfiling_config, int file_acc_flags, MPI_Comm file_comm,
                  int64_t *context_id_out)
 {
     subfiling_context_t *sf_context = NULL;
@@ -712,7 +712,7 @@ done:
 -------------------------------------------------------------------------
 */
 static herr_t
-init_subfiling(const char *base_filename, uint64_t file_id, H5FD_subfiling_shared_config_t *subfiling_config,
+init_subfiling(const char *base_filename, uint64_t file_id, H5FD_subfiling_params_t *subfiling_config,
                int file_acc_flags, MPI_Comm comm, int64_t *context_id_out)
 {
     subfiling_context_t *new_context   = NULL;
@@ -900,7 +900,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-init_app_topology(H5FD_subfiling_shared_config_t *subfiling_config, MPI_Comm comm, MPI_Comm node_comm,
+init_app_topology(H5FD_subfiling_params_t *subfiling_config, MPI_Comm comm, MPI_Comm node_comm,
                   sf_topology_t **app_topology_out)
 {
     H5FD_subfiling_ioc_select_t ioc_selection_type;
@@ -1176,7 +1176,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-find_cached_topology_info(MPI_Comm comm, H5FD_subfiling_shared_config_t *subf_config, long iocs_per_node,
+find_cached_topology_info(MPI_Comm comm, H5FD_subfiling_params_t *subf_config, long iocs_per_node,
                           sf_topology_t **app_topology)
 {
     H5FD_subfiling_ioc_select_t ioc_selection_type;
@@ -1667,7 +1667,7 @@ done:
  */
 static herr_t
 init_subfiling_context(subfiling_context_t *sf_context, const char *base_filename, uint64_t file_id,
-                       H5FD_subfiling_shared_config_t *subfiling_config, sf_topology_t *app_topology,
+                       H5FD_subfiling_params_t *subfiling_config, sf_topology_t *app_topology,
                        MPI_Comm file_comm)
 {
     char  *env_value = NULL;
@@ -2742,7 +2742,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5_subfiling_set_config_prop(H5P_genplist_t *plist_ptr, const H5FD_subfiling_shared_config_t *vfd_config)
+H5_subfiling_set_config_prop(H5P_genplist_t *plist_ptr, const H5FD_subfiling_params_t *vfd_config)
 {
     htri_t prop_exists = FAIL;
     herr_t ret_value   = SUCCEED;
@@ -2773,7 +2773,7 @@ H5_subfiling_set_config_prop(H5P_genplist_t *plist_ptr, const H5FD_subfiling_sha
          */
         eliminate_const_warning.const_ptr_to_data = vfd_config;
 
-        if (H5P_insert(plist_ptr, H5FD_SUBFILING_CONFIG_PROP, sizeof(H5FD_subfiling_shared_config_t),
+        if (H5P_insert(plist_ptr, H5FD_SUBFILING_CONFIG_PROP, sizeof(H5FD_subfiling_params_t),
                        eliminate_const_warning.ptr_to_data, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
                        NULL) < 0)
             H5_SUBFILING_GOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL,
@@ -2797,7 +2797,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5_subfiling_get_config_prop(H5P_genplist_t *plist_ptr, H5FD_subfiling_shared_config_t *vfd_config)
+H5_subfiling_get_config_prop(H5P_genplist_t *plist_ptr, H5FD_subfiling_params_t *vfd_config)
 {
     htri_t prop_exists = FAIL;
     herr_t ret_value   = SUCCEED;
@@ -2950,7 +2950,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5_subfiling_validate_config(const H5FD_subfiling_shared_config_t *subf_config)
+H5_subfiling_validate_config(const H5FD_subfiling_params_t *subf_config)
 {
     H5FD_subfiling_ioc_select_t ioc_sel_type;
     herr_t                      ret_value = SUCCEED;

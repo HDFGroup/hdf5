@@ -327,7 +327,7 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
 #ifdef H5_HAVE_SUBFILING_VFD
         else if (HDstrcmp(vfd_name, H5FD_SUBFILING_NAME) == 0) {
 
-            H5FD_subfiling_shared_config_t shared_conf = {
+            H5FD_subfiling_params_t shared_conf = {
                 /* ioc_selection = */ SELECT_IOC_ONE_PER_NODE,
                 /* stripe_size   = */ (INTS_PER_RANK / 2),
                 /* stripe_count  = */ 0, /* will over write */

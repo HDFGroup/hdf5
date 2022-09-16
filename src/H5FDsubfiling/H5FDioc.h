@@ -84,11 +84,6 @@
  *          Property List. A pointer to an instance of this structure is
  *          a parameter to H5Pset_fapl_ioc() and H5Pget_fapl_ioc().
  *
- *          The #H5FD_IOC driver shares much of its configuration with the
- *          #H5FD_SUBFILING driver and so its configuration structure
- *          contains an instance of a H5FD_subfiling_shared_config_t
- *          configuration structure.
- *
  * \var uint32_t H5FD_ioc_config_t::magic
  *      A somewhat unique number which distinguishes the #H5FD_IOC driver
  *      from other drivers. Used in combination with a version number, it

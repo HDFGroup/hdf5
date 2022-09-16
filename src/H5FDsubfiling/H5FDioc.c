@@ -47,7 +47,7 @@ typedef struct H5FD_ioc_t {
     int               fd;  /* the filesystem file descriptor */
     H5FD_ioc_config_t fa;  /* driver-specific file access properties */
 
-    H5FD_subfiling_shared_config_t subf_config;
+    H5FD_subfiling_params_t subf_config;
 
     /* MPI Info */
     MPI_Comm comm;

@@ -84,7 +84,7 @@ typedef void (*test_func)(void);
 
 /* Utility functions */
 static hid_t create_subfiling_ioc_fapl(MPI_Comm comm, MPI_Info info, hbool_t custom_config,
-                                       H5FD_subfiling_shared_config_t *custom_cfg, int32_t thread_pool_size);
+                                       H5FD_subfiling_params_t *custom_cfg, int32_t thread_pool_size);
 
 /* Test functions */
 static void test_create_and_close(void);
@@ -115,7 +115,7 @@ static test_func tests[] = {
  */
 static hid_t
 create_subfiling_ioc_fapl(MPI_Comm comm, MPI_Info info, hbool_t custom_config,
-                          H5FD_subfiling_shared_config_t *custom_cfg, int32_t thread_pool_size)
+                          H5FD_subfiling_params_t *custom_cfg, int32_t thread_pool_size)
 {
     H5FD_subfiling_config_t subfiling_conf;
     H5FD_ioc_config_t       ioc_conf;
@@ -217,17 +217,17 @@ test_create_and_close(void)
 static void
 test_config_file(void)
 {
-    H5FD_subfiling_shared_config_t cfg;
-    int64_t                        stripe_size;
-    int64_t                        read_stripe_size;
-    FILE                          *config_file;
-    char                          *config_filename = NULL;
-    char                          *config_buf      = NULL;
-    long                           config_file_len;
-    hid_t                          file_id = H5I_INVALID_HID;
-    hid_t                          fapl_id = H5I_INVALID_HID;
-    int                            read_stripe_count;
-    int                            read_aggr_count;
+    H5FD_subfiling_params_t cfg;
+    int64_t                 stripe_size;
+    int64_t                 read_stripe_size;
+    FILE                   *config_file;
+    char                   *config_filename = NULL;
+    char                   *config_buf      = NULL;
+    long                    config_file_len;
+    hid_t                   file_id = H5I_INVALID_HID;
+    hid_t                   fapl_id = H5I_INVALID_HID;
+    int                     read_stripe_count;
+    int                     read_aggr_count;
 
     curr_nerrors = nerrors;
 
@@ -412,17 +412,17 @@ test_stripe_sizes(void)
     VRFY((dxpl_id >= 0), "DCPL creation succeeded");
 
     for (size_t i = 0; i < SUBF_NITER; i++) {
-        H5FD_subfiling_shared_config_t cfg;
-        h5_stat_size_t                 file_size;
-        const void                    *c_write_buf;
-        h5_stat_t                      file_info;
-        int64_t                        file_size64;
-        int64_t                        stripe_size;
-        haddr_t                        file_end_addr;
-        haddr_t                        write_addr;
-        size_t                         nbytes;
-        herr_t                         write_status;
-        hid_t                          file_id;
+        H5FD_subfiling_params_t cfg;
+        h5_stat_size_t          file_size;
+        const void             *c_write_buf;
+        h5_stat_t               file_info;
+        int64_t                 file_size64;
+        int64_t                 stripe_size;
+        haddr_t                 file_end_addr;
+        haddr_t                 write_addr;
+        size_t                  nbytes;
+        herr_t                  write_status;
+        hid_t                   file_id;
 
         /*
          * Choose a random Subfiling stripe size between
@@ -813,13 +813,13 @@ test_subfiling_precreate_rank_0(void)
 
     /* Create and populate file on rank 0 only */
     if (MAINPROCESS) {
-        H5FD_subfiling_shared_config_t cfg;
-        h5_stat_size_t                 file_size;
-        h5_stat_t                      file_info;
-        FILE                          *subfile_ptr;
-        char                          *tmp_filename = NULL;
-        int                            num_subfiles;
-        int                            num_digits;
+        H5FD_subfiling_params_t cfg;
+        h5_stat_size_t          file_size;
+        h5_stat_t               file_info;
+        FILE                   *subfile_ptr;
+        char                   *tmp_filename = NULL;
+        int                     num_subfiles;
+        int                     num_digits;
 
         /* Create a file consisting of 1 subfile per application I/O concentrator */
         cfg.ioc_selection = SELECT_IOC_ONE_PER_NODE;
