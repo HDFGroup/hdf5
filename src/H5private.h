@@ -593,7 +593,7 @@ H5_DLL herr_t   H5_timer_stop(H5_timer_t *timer /*in,out*/);
 H5_DLL herr_t   H5_timer_get_times(H5_timer_t timer, H5_timevals_t *times /*in,out*/);
 H5_DLL herr_t   H5_timer_get_total_times(H5_timer_t timer, H5_timevals_t *times /*in,out*/);
 H5_DLL char    *H5_timer_get_time_string(double seconds);
-H5_DLL char    *H5strcasestr(const char *haystack, const char *needle);
+H5_DLL char    *H5_strcasestr(const char *haystack, const char *needle);
 
 /* Depth of object copy */
 typedef enum {
@@ -1387,7 +1387,7 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #define HDstrcat(X, Y) strcat(X, Y)
 #endif
 #ifndef HDstrcasestr
-#define HDstrcasestr(X, Y) H5strcasestr(X, Y)
+#define HDstrcasestr(X, Y) H5_strcasestr(X, Y)
 #endif
 #ifndef HDstrchr
 #define HDstrchr(S, C) strchr(S, C)

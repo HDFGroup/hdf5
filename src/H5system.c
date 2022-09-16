@@ -1352,7 +1352,7 @@ H5_get_option(int argc, const char *const *argv, const char *opts, const struct 
 }
 
 /*-------------------------------------------------------------------------
- * Function:    H5strcasestr
+ * Function:    H5_strcasestr
  *
  * Purpose:     Find the first occurrence of the substring needle in the
  *              string haystack ignoring case.
@@ -1367,7 +1367,7 @@ H5_get_option(int argc, const char *const *argv, const char *opts, const struct 
  *-------------------------------------------------------------------------
  */
 char *
-H5strcasestr(const char *haystack, const char *needle)
+H5_strcasestr(const char *haystack, const char *needle)
 {
     /* Check arguments. */
     HDassert(haystack);
@@ -1388,4 +1388,4 @@ H5strcasestr(const char *haystack, const char *needle)
         }
     } while (*haystack++);
     return 0;
-} /* end H5strcasestr() */
+} /* end H5_strcasestr() */
