@@ -1350,3 +1350,42 @@ H5_get_option(int argc, const char *const *argv, const char *opts, const struct 
     /* return the current flag character found */
     return optchar;
 }
+
+/*-------------------------------------------------------------------------
+ * Function:    H5strcasestr
+ *
+ * Purpose:     Find the first occurrence of the substring needle in the
+ *              string haystack ignoring case.
+ *
+ * Return:      Success:  Pointer to the beginning of the located substring
+ *
+ *              Failure:  NULL
+ *
+ * Programmer:  Frank Berghaus
+ *              Sep 2022
+ *
+ *-------------------------------------------------------------------------
+ */
+char *
+H5strcasestr(const char *haystack, const char *needle)
+{
+    /* Check arguments. */
+    HDassert(haystack);
+    HDassert(needle);
+
+    /* begin once from each character of haystack, until needle is found */
+    do {
+        const char *h = haystack;
+        const char *n = needle;
+        /* loop while lowercase strings match, or needle ends */
+        while (HDtolower(*h) == HDtolower(*n) && *n) {
+            h++;
+            n++;
+        }
+        /* if all characters in needle matched we found it */
+        if (*n == 0) {
+            return (char *)haystack;
+        }
+    } while (*haystack++);
+    return 0;
+} /* end H5strcasestr() */
