@@ -90,17 +90,21 @@ static hid_t create_subfiling_ioc_fapl(MPI_Comm comm, MPI_Info info, hbool_t cus
 static void test_create_and_close(void);
 static void test_config_file(void);
 static void test_stripe_sizes(void);
+static void test_read_different_stripe_size(void);
 static void test_subfiling_precreate_rank_0(void);
 static void test_subfiling_write_many_read_one(void);
 static void test_subfiling_write_many_read_few(void);
+static void test_subfiling_h5fuse(void);
 
 static test_func tests[] = {
     test_create_and_close,
     test_config_file,
     test_stripe_sizes,
+    test_read_different_stripe_size,
     test_subfiling_precreate_rank_0,
     test_subfiling_write_many_read_one,
     test_subfiling_write_many_read_few,
+    test_subfiling_h5fuse,
 };
 
 /* ---------------------------------------------------------------------------
@@ -764,6 +768,213 @@ test_stripe_sizes(void)
 #undef SUBF_NITER
 
 /*
+ * Test that opening a file with a different stripe
+ * size/count than was used when creating the file
+ * results in the original stripe size/count being
+ * used. As there is currently no API to check the
+ * exact values used, we rely on the assumption that
+ * using a different stripe size/count would result
+ * in data verification failures.
+ */
+#define SUBF_FILENAME "test_subfiling_read_different_stripe_sizes.h5"
+#define SUBF_HDF5_TYPE H5T_NATIVE_INT
+#define SUBF_C_TYPE    int
+static void
+test_read_different_stripe_size(void)
+{
+    H5FD_subfiling_params_t cfg;
+    hsize_t                 start[1];
+    hsize_t                 count[1];
+    hsize_t                 dset_dims[1];
+    size_t                  target_size;
+    hid_t                   file_id      = H5I_INVALID_HID;
+    hid_t                   fapl_id      = H5I_INVALID_HID;
+    hid_t                   dset_id      = H5I_INVALID_HID;
+    hid_t                   fspace_id    = H5I_INVALID_HID;
+    char                   *tmp_filename = NULL;
+    void                   *buf          = NULL;
+
+    curr_nerrors = nerrors;
+
+    if (MAINPROCESS)
+        TESTING_2("file re-opening with different stripe size");
+
+    tmp_filename = HDmalloc(PATH_MAX);
+    VRFY(tmp_filename, "HDmalloc succeeded");
+
+    /* Use a 1MiB stripe size and a subfile for each IOC */
+    cfg.ioc_selection = SELECT_IOC_ONE_PER_NODE;
+    cfg.stripe_size   = (stripe_size_g > 0) ? stripe_size_g : 1048576;
+    cfg.stripe_count  = num_iocs_g;
+
+    fapl_id = create_subfiling_ioc_fapl(comm_g, info_g, TRUE, &cfg, H5FD_IOC_DEFAULT_THREAD_POOL_SIZE);
+    VRFY((fapl_id >= 0), "FAPL creation succeeded");
+
+    file_id = H5Fcreate(SUBF_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+    VRFY((file_id >= 0), "H5Fcreate succeeded");
+
+    VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
+
+    target_size = (size_t)cfg.stripe_size;
+
+    /* Nudge stripe size to be multiple of C type size */
+    if ((target_size % sizeof(SUBF_C_TYPE)) != 0)
+        target_size += sizeof(SUBF_C_TYPE) - (target_size % sizeof(SUBF_C_TYPE));
+
+    target_size *= (size_t)mpi_size;
+
+    VRFY(((target_size % sizeof(SUBF_C_TYPE)) == 0), "target size check succeeded");
+
+    dset_dims[0] = (hsize_t)(target_size / sizeof(SUBF_C_TYPE));
+
+    fspace_id = H5Screate_simple(1, dset_dims, NULL);
+    VRFY((fspace_id >= 0), "H5Screate_simple succeeded");
+
+    dset_id = H5Dcreate2(file_id, "DSET", SUBF_HDF5_TYPE, fspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    VRFY((dset_id >= 0), "Dataset creation succeeded");
+
+    /* Select hyperslab */
+    count[0] = dset_dims[0] / (hsize_t)mpi_size;
+    start[0] = (hsize_t)mpi_rank * count[0];
+    VRFY((H5Sselect_hyperslab(fspace_id, H5S_SELECT_SET, start, NULL, count, NULL) >= 0),
+         "H5Sselect_hyperslab succeeded");
+
+    buf = HDmalloc(count[0] * sizeof(SUBF_C_TYPE));
+    VRFY(buf, "HDmalloc succeeded");
+
+    for (size_t i = 0; i < count[0]; i++)
+        ((SUBF_C_TYPE *)buf)[i] = (SUBF_C_TYPE)((size_t)mpi_rank + i);
+
+    VRFY((H5Dwrite(dset_id, SUBF_HDF5_TYPE, H5S_BLOCK, fspace_id, H5P_DEFAULT, buf) >= 0),
+         "Dataset write succeeded");
+
+    HDfree(buf);
+    buf = NULL;
+
+    VRFY((H5Sclose(fspace_id) >= 0), "File dataspace close succeeded");
+    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+    VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
+
+    /* Ensure all the subfiles are present */
+    if (MAINPROCESS) {
+        h5_stat_t file_info;
+        FILE     *subfile_ptr;
+        int       num_subfiles = cfg.stripe_count;
+        int       num_digits   = (int)(HDlog10(num_subfiles) + 1);
+
+        VRFY((HDstat(SUBF_FILENAME, &file_info) >= 0), "HDstat succeeded");
+
+        for (int j = 0; j < num_subfiles; j++) {
+            h5_stat_size_t subfile_size;
+            h5_stat_t      subfile_info;
+
+            HDsnprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
+                       (uint64_t)file_info.st_ino, num_digits, j + 1, num_subfiles);
+
+            /* Ensure file exists */
+            subfile_ptr = HDfopen(tmp_filename, "r");
+            VRFY(subfile_ptr, "HDfopen on subfile succeeded");
+            VRFY((HDfclose(subfile_ptr) >= 0), "HDfclose on subfile succeeded");
+
+            /* Check file size */
+            VRFY((HDstat(tmp_filename, &subfile_info) >= 0), "HDstat succeeded");
+            subfile_size = (h5_stat_size_t)subfile_info.st_size;
+
+            VRFY((subfile_size >= cfg.stripe_size), "File size verification succeeded");
+        }
+    }
+
+    mpi_code_g = MPI_Barrier(comm_g);
+    VRFY((mpi_code_g == MPI_SUCCESS), "MPI_Barrier succeeded");
+
+    /* Add a bit to the stripe size and specify a few more subfiles */
+    cfg.stripe_size  += (cfg.stripe_size / 2);
+    cfg.stripe_count *= 2;
+
+    fapl_id = create_subfiling_ioc_fapl(comm_g, info_g, TRUE, &cfg, H5FD_IOC_DEFAULT_THREAD_POOL_SIZE);
+    VRFY((fapl_id >= 0), "FAPL creation succeeded");
+
+    file_id = H5Fopen(SUBF_FILENAME, H5F_ACC_RDONLY, fapl_id);
+    VRFY((file_id >= 0), "H5Fopen succeeded");
+
+    dset_id = H5Dopen2(file_id, "DSET", H5P_DEFAULT);
+    VRFY((dset_id >= 0), "Dataset open succeeded");
+
+    fspace_id = H5Dget_space(dset_id);
+    VRFY((fspace_id >= 0), "Dataspace retrieval succeeded");
+
+    /* Select hyperslab */
+    count[0] = dset_dims[0] / (hsize_t)mpi_size;
+    start[0] = (hsize_t)mpi_rank * count[0];
+    VRFY((H5Sselect_hyperslab(fspace_id, H5S_SELECT_SET, start, NULL, count, NULL) >= 0),
+         "H5Sselect_hyperslab succeeded");
+
+    buf = HDcalloc(1, count[0] * sizeof(SUBF_C_TYPE));
+    VRFY(buf, "HDcalloc succeeded");
+
+    VRFY((H5Dread(dset_id, SUBF_HDF5_TYPE, H5S_BLOCK, fspace_id, H5P_DEFAULT, buf) >= 0),
+         "Dataset read succeeded");
+
+    for (size_t i = 0; i < count[0]; i++) {
+        SUBF_C_TYPE buf_value = ((SUBF_C_TYPE *)buf)[i];
+
+        VRFY((buf_value == (SUBF_C_TYPE)((size_t)mpi_rank + i)), "data verification succeeded");
+    }
+
+    HDfree(buf);
+    buf = NULL;
+
+    VRFY((H5Sclose(fspace_id) >= 0), "File dataspace close succeeded");
+    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+    VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
+
+    /* Ensure only the original subfiles are present */
+    if (MAINPROCESS) {
+        h5_stat_t file_info;
+        FILE     *subfile_ptr;
+        int       num_subfiles = cfg.stripe_count;
+        int       num_digits   = (int)(HDlog10(num_subfiles) + 1);
+
+        VRFY((HDstat(SUBF_FILENAME, &file_info) >= 0), "HDstat succeeded");
+
+        for (int j = 0; j < num_subfiles; j++) {
+            HDsnprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_FILENAME_TEMPLATE, SUBF_FILENAME,
+                       (uint64_t)file_info.st_ino, num_digits, j + 1, num_subfiles / 2);
+
+            if (j < (num_subfiles / 2)) {
+                /* Ensure file exists */
+                subfile_ptr = HDfopen(tmp_filename, "r");
+                VRFY(subfile_ptr, "HDfopen on subfile succeeded");
+                VRFY((HDfclose(subfile_ptr) >= 0), "HDfclose on subfile succeeded");
+            }
+            else {
+                /* Ensure file doesn't exist */
+                subfile_ptr = HDfopen(tmp_filename, "r");
+                VRFY(subfile_ptr == NULL, "HDfopen on subfile correctly failed");
+            }
+        }
+    }
+
+    mpi_code_g = MPI_Barrier(comm_g);
+    VRFY((mpi_code_g == MPI_SUCCESS), "MPI_Barrier succeeded");
+
+    H5E_BEGIN_TRY
+    {
+        H5Fdelete(SUBF_FILENAME, fapl_id);
+    }
+    H5E_END_TRY;
+
+    VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
+
+    HDfree(tmp_filename);
+
+    CHECK_PASSED();
+}
+#undef SUBF_FILENAME
+#undef SUBF_HDF5_TYPE
+#undef SUBF_C_TYPE
+
+/*
  * Test that everything works correctly when a file is
  * pre-created on rank 0 with a specified target number
  * of subfiles and then read back on all ranks.
@@ -922,8 +1133,8 @@ test_subfiling_precreate_rank_0(void)
     VRFY((H5Sselect_hyperslab(fspace_id, H5S_SELECT_SET, start, NULL, count, NULL) >= 0),
          "H5Sselect_hyperslab succeeded");
 
-    buf = HDmalloc(count[0] * sizeof(SUBF_C_TYPE));
-    VRFY(buf, "HDmalloc succeeded");
+    buf = HDcalloc(1, count[0] * sizeof(SUBF_C_TYPE));
+    VRFY(buf, "HDcalloc succeeded");
 
     VRFY((H5Dread(dset_id, SUBF_HDF5_TYPE, H5S_BLOCK, fspace_id, H5P_DEFAULT, buf) >= 0),
          "Dataset read succeeded");
@@ -1051,8 +1262,8 @@ test_subfiling_write_many_read_one(void)
         dset_id = H5Dopen2(file_id, "DSET", H5P_DEFAULT);
         VRFY((dset_id >= 0), "Dataset open succeeded");
 
-        buf = HDmalloc(target_size);
-        VRFY(buf, "HDmalloc succeeded");
+        buf = HDcalloc(1, target_size);
+        VRFY(buf, "HDcalloc succeeded");
 
         VRFY((H5Dread(dset_id, SUBF_HDF5_TYPE, H5S_BLOCK, H5S_ALL, H5P_DEFAULT, buf) >= 0),
              "Dataset read succeeded");
@@ -1200,8 +1411,8 @@ test_subfiling_write_many_read_few(void)
         dset_id = H5Dopen2(file_id, "DSET", H5P_DEFAULT);
         VRFY((dset_id >= 0), "Dataset open succeeded");
 
-        buf = HDmalloc(target_size);
-        VRFY(buf, "HDmalloc succeeded");
+        buf = HDcalloc(1, target_size);
+        VRFY(buf, "HDcalloc succeeded");
 
         VRFY((H5Dread(dset_id, SUBF_HDF5_TYPE, H5S_BLOCK, H5S_ALL, H5P_DEFAULT, buf) >= 0),
              "Dataset read succeeded");
@@ -1238,6 +1449,220 @@ test_subfiling_write_many_read_few(void)
     VRFY((H5Sclose(fspace_id) >= 0), "File dataspace close succeeded");
 
     CHECK_PASSED();
+}
+#undef SUBF_FILENAME
+#undef SUBF_HDF5_TYPE
+#undef SUBF_C_TYPE
+
+/*
+ * Test that the subfiling file can be read with the
+ * sec2 driver after being fused back together with
+ * the h5fuse utility
+ */
+#define SUBF_FILENAME  "test_subfiling_h5fuse.h5"
+#define SUBF_HDF5_TYPE H5T_NATIVE_INT
+#define SUBF_C_TYPE    int
+static void
+test_subfiling_h5fuse(void)
+{
+    hsize_t start[1];
+    hsize_t count[1];
+    hsize_t dset_dims[1];
+    size_t  target_size;
+    hid_t   file_id   = H5I_INVALID_HID;
+    hid_t   fapl_id   = H5I_INVALID_HID;
+    hid_t   dset_id   = H5I_INVALID_HID;
+    hid_t   fspace_id = H5I_INVALID_HID;
+    void   *buf       = NULL;
+    int     skip_test = 0;
+
+    curr_nerrors = nerrors;
+
+    if (MAINPROCESS)
+        TESTING_2("h5fuse utility");
+
+#if defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID)
+
+    /*
+     * Check if h5fuse script exists in current directory;
+     * Skip test if it doesn't
+     */
+    if (MAINPROCESS) {
+        FILE *h5fuse_script;
+
+        h5fuse_script = HDfopen("h5fuse.sh", "r");
+        if (h5fuse_script)
+            HDfclose(h5fuse_script);
+        else
+            skip_test = 1;
+    }
+
+    if (mpi_size > 1) {
+        mpi_code_g = MPI_Bcast(&skip_test, 1, MPI_INT, 0, comm_g);
+        VRFY((mpi_code_g == MPI_SUCCESS), "MPI_Bcast succeeded");
+    }
+
+    if (skip_test) {
+        if (MAINPROCESS)
+            SKIPPED();
+        return;
+    }
+
+    /* Get a default Subfiling FAPL */
+    fapl_id = create_subfiling_ioc_fapl(comm_g, info_g, FALSE, NULL, 0);
+    VRFY((fapl_id >= 0), "FAPL creation succeeded");
+
+    /* Create file on all ranks */
+    file_id = H5Fcreate(SUBF_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+    VRFY((file_id >= 0), "H5Fcreate succeeded");
+
+    /* Calculate target size for dataset to stripe it across available IOCs */
+    target_size = (stripe_size_g > 0) ? (size_t)stripe_size_g : H5FD_SUBFILING_DEFAULT_STRIPE_SIZE;
+
+    /* Nudge stripe size to be multiple of C type size */
+    if ((target_size % sizeof(SUBF_C_TYPE)) != 0)
+        target_size += sizeof(SUBF_C_TYPE) - (target_size % sizeof(SUBF_C_TYPE));
+
+    target_size *= (size_t)mpi_size;
+
+    VRFY(((target_size % sizeof(SUBF_C_TYPE)) == 0), "target size check succeeded");
+
+    if (stripe_size_g > 0) {
+        VRFY((target_size >= (size_t)stripe_size_g), "target size check succeeded");
+    }
+    else {
+        VRFY((target_size >= H5FD_SUBFILING_DEFAULT_STRIPE_SIZE), "target size check succeeded");
+    }
+
+    dset_dims[0] = (hsize_t)(target_size / sizeof(SUBF_C_TYPE));
+
+    fspace_id = H5Screate_simple(1, dset_dims, NULL);
+    VRFY((fspace_id >= 0), "H5Screate_simple succeeded");
+
+    dset_id = H5Dcreate2(file_id, "DSET", SUBF_HDF5_TYPE, fspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    VRFY((dset_id >= 0), "Dataset creation succeeded");
+
+    /* Select hyperslab */
+    count[0] = dset_dims[0] / (hsize_t)mpi_size;
+    start[0] = (hsize_t)mpi_rank * count[0];
+    VRFY((H5Sselect_hyperslab(fspace_id, H5S_SELECT_SET, start, NULL, count, NULL) >= 0),
+         "H5Sselect_hyperslab succeeded");
+
+    buf = HDmalloc(count[0] * sizeof(SUBF_C_TYPE));
+    VRFY(buf, "HDmalloc succeeded");
+
+    for (size_t i = 0; i < count[0]; i++)
+        ((SUBF_C_TYPE *)buf)[i] = (SUBF_C_TYPE)((size_t)mpi_rank + i);
+
+    VRFY((H5Dwrite(dset_id, SUBF_HDF5_TYPE, H5S_BLOCK, fspace_id, H5P_DEFAULT, buf) >= 0),
+         "Dataset write succeeded");
+
+    HDfree(buf);
+    buf = NULL;
+
+    VRFY((H5Sclose(fspace_id) >= 0), "File dataspace close succeeded");
+    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+    VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
+
+    if (MAINPROCESS) {
+        h5_stat_t file_info;
+        pid_t     pid = 0;
+        pid_t     tmppid;
+        int       status;
+
+        pid = HDfork();
+        VRFY(pid >= 0, "HDfork succeeded");
+
+        if (pid == 0) {
+            char *tmp_filename;
+            char *args[6];
+
+            tmp_filename = HDmalloc(PATH_MAX);
+            VRFY(tmp_filename, "HDmalloc succeeded");
+
+            VRFY((HDstat(SUBF_FILENAME, &file_info) >= 0), "HDstat succeeded");
+
+            /* Generate name for configuration file */
+            HDsnprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE,
+                       SUBF_FILENAME, (uint64_t)file_info.st_ino);
+
+            args[0] = HDstrdup("env");
+            args[1] = HDstrdup("sh");
+            args[2] = HDstrdup("h5fuse.sh");
+            args[3] = HDstrdup("-f");
+            args[4] = tmp_filename;
+            args[5] = NULL;
+
+            /* Call h5fuse script from MPI rank 0 */
+            HDexecvp("env", args);
+        }
+        else {
+            tmppid = HDwaitpid(pid, &status, 0);
+            VRFY(tmppid >= 0, "HDwaitpid succeeded");
+
+            if (WIFEXITED(status)) {
+                int ret;
+
+                if ((ret = WEXITSTATUS(status)) != 0) {
+                    HDprintf("h5fuse process exited with error code %d\n", ret);
+                    HDfflush(stdout);
+                    MPI_Abort(comm_g, -1);
+                }
+            }
+            else {
+                HDprintf("h5fuse process terminated abnormally\n");
+                HDfflush(stdout);
+                MPI_Abort(comm_g, -1);
+            }
+        }
+
+        /* Verify the size of the fused file */
+        VRFY((HDstat(SUBF_FILENAME, &file_info) >= 0), "HDstat succeeded");
+        VRFY(((size_t)file_info.st_size >= target_size), "File size verification succeeded");
+
+        /* Re-open file with sec2 driver and verify the data */
+        file_id = H5Fopen(SUBF_FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT);
+        VRFY((file_id >= 0), "H5Fopen succeeded");
+
+        dset_id = H5Dopen2(file_id, "DSET", H5P_DEFAULT);
+        VRFY((dset_id >= 0), "Dataset open succeeded");
+
+        buf = HDcalloc(1, target_size);
+        VRFY(buf, "HDcalloc succeeded");
+
+        VRFY((H5Dread(dset_id, SUBF_HDF5_TYPE, H5S_BLOCK, H5S_ALL, H5P_DEFAULT, buf) >= 0),
+             "Dataset read succeeded");
+
+        for (size_t i = 0; i < (size_t)mpi_size; i++) {
+            for (size_t j = 0; j < count[0]; j++) {
+                SUBF_C_TYPE buf_value = ((SUBF_C_TYPE *)buf)[(i * count[0]) + j];
+
+                VRFY((buf_value == (SUBF_C_TYPE)(j + i)), "data verification succeeded");
+            }
+        }
+
+        HDfree(buf);
+        buf = NULL;
+
+        VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+        VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
+    }
+
+    mpi_code_g = MPI_Barrier(comm_g);
+    VRFY((mpi_code_g == MPI_SUCCESS), "MPI_Barrier succeeded");
+
+    H5E_BEGIN_TRY
+    {
+        H5Fdelete(SUBF_FILENAME, fapl_id);
+    }
+    H5E_END_TRY;
+
+    VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
+
+    CHECK_PASSED();
+#else
+    SKIPPED();
+#endif
 }
 #undef SUBF_FILENAME
 #undef SUBF_HDF5_TYPE
