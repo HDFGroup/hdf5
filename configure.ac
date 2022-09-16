@@ -3213,6 +3213,32 @@ if test "X$SUBFILING_VFD" = "Xyes"; then
     AC_DEFINE([HAVE_IOC_VFD], [1],
             [Define if the I/O Concentrator virtual file driver (VFD) should be compiled])
 
+    if test "X${PARALLEL}" != "Xyes"; then
+      AC_MSG_ERROR([--enable-parallel is required for --enable-subfiling-vfd])
+    fi
+
+    ## ----------------------------------------------------------------------
+    ## Check for MPI_Comm_split_type availability
+    ##
+    AC_MSG_CHECKING([for MPI_Comm_split_type function])
+
+    AC_LINK_IFELSE(
+      [AC_LANG_PROGRAM(
+          [[
+              #include <mpi.h>
+          ]],
+          [[
+              MPI_Comm intra_comm;
+              MPI_Init(0, (void *) 0);
+              MPI_Comm_split_type(MPI_COMM_WORLD, MPI_COMM_TYPE_SHARED, 0, MPI_INFO_NULL, &intra_comm);
+          ]]
+      )],
+      [AC_MSG_RESULT([yes])],
+      [AC_MSG_RESULT([no])
+       AC_MSG_ERROR([unable to link MPI program that uses MPI_Comm_split_type])
+       ]
+    )
+
     # Set-up mercury
     HAVE_MERCURY="yes"
     mercury_dir="$ac_abs_confdir/src/H5FDsubfiling/mercury"
@@ -3221,17 +3247,13 @@ if test "X$SUBFILING_VFD" = "Xyes"; then
     CPPFLAGS="$CPPFLAGS -I$mercury_inc"
     AM_CPPFLAGS="$AM_CPPFLAGS -I$mercury_inc"
 
-    if test "X${PARALLEL}" != "Xyes"; then
-      AC_MSG_ERROR([--enable-parallel is required for --enable-subfiling-vfd])
-    fi
-
     HAVE_STDATOMIC_H="yes"
     AC_CHECK_HEADERS([stdatomic.h],,[HAVE_STDATOMIC_H="no"])
     if test "x$HAVE_STDATOMIC_H" = "xno"; then
       AC_MSG_ERROR([Subfiling VFD requires atomic operations support. C11 stdatomic.h NOT available.])
     fi
 
-# Checks for libraries.
+    # Checks for libraries.
     AC_SEARCH_LIBS([shm_open], [rt])
     AC_CHECK_LIB([pthread], [pthread_self],[], [echo "Error: Required library pthread not found." && exit 1])
 
