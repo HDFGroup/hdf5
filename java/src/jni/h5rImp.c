@@ -312,7 +312,7 @@ Java_hdf_hdf5lib_H5_H5Rget_1name_1string(JNIEnv *env, jclass clss, jlong loc_id,
                                          jbyteArray ref)
 {
     jboolean isCopy;
-    jstring  str;
+    jstring  str = NULL;
     jsize    refBufLen;
     jbyte   *refBuf   = NULL;
     char    *aName    = NULL;
