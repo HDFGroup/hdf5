@@ -1361,9 +1361,6 @@ H5_get_option(int argc, const char *const *argv, const char *opts, const struct 
  *
  *              Failure:  NULL
  *
- * Programmer:  Frank Berghaus
- *              Sep 2022
- *
  *-------------------------------------------------------------------------
  */
 char *
