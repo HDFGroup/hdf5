@@ -1387,7 +1387,11 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #define HDstrcat(X, Y) strcat(X, Y)
 #endif
 #ifndef HDstrcasestr
+#if defined(H5_HAVE_STRCASESTR)
+#define HDstrcasestr(X, Y) strcasestr(X, Y)
+#else
 #define HDstrcasestr(X, Y) H5_strcasestr(X, Y)
+#endif
 #endif
 #ifndef HDstrchr
 #define HDstrchr(S, C) strchr(S, C)
