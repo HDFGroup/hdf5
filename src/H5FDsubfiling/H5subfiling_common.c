@@ -53,10 +53,10 @@ static herr_t H5_free_subfiling_object_int(subfiling_context_t *sf_context);
 static herr_t H5_free_subfiling_topology(sf_topology_t *topology);
 
 static herr_t init_subfiling(const char *base_filename, uint64_t file_id,
-                             H5FD_subfiling_params_t *subfiling_config, int file_acc_flags,
-                             MPI_Comm comm, int64_t *context_id_out);
-static herr_t init_app_topology(H5FD_subfiling_params_t *subfiling_config, MPI_Comm comm,
-                                MPI_Comm node_comm, sf_topology_t **app_topology_out);
+                             H5FD_subfiling_params_t *subfiling_config, int file_acc_flags, MPI_Comm comm,
+                             int64_t *context_id_out);
+static herr_t init_app_topology(H5FD_subfiling_params_t *subfiling_config, MPI_Comm comm, MPI_Comm node_comm,
+                                sf_topology_t **app_topology_out);
 static herr_t get_ioc_selection_criteria_from_env(H5FD_subfiling_ioc_select_t *ioc_selection_type,
                                                   char                       **ioc_sel_info_str);
 static herr_t find_cached_topology_info(MPI_Comm comm, H5FD_subfiling_params_t *subf_config,
@@ -597,9 +597,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5_open_subfiles(const char *base_filename, uint64_t file_id,
-                 H5FD_subfiling_params_t *subfiling_config, int file_acc_flags, MPI_Comm file_comm,
-                 int64_t *context_id_out)
+H5_open_subfiles(const char *base_filename, uint64_t file_id, H5FD_subfiling_params_t *subfiling_config,
+                 int file_acc_flags, MPI_Comm file_comm, int64_t *context_id_out)
 {
     subfiling_context_t *sf_context = NULL;
     int64_t              context_id = -1;

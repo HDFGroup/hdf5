@@ -254,8 +254,7 @@ H5_DLL herr_t  H5_resolve_pathname(const char *filepath, MPI_Comm comm, char **r
 
 H5_DLL herr_t  H5_subfiling_set_config_prop(H5P_genplist_t                *plist_ptr,
                                             const H5FD_subfiling_params_t *vfd_config);
-H5_DLL herr_t  H5_subfiling_get_config_prop(H5P_genplist_t          *plist_ptr,
-                                            H5FD_subfiling_params_t *vfd_config);
+H5_DLL herr_t  H5_subfiling_get_config_prop(H5P_genplist_t *plist_ptr, H5FD_subfiling_params_t *vfd_config);
 H5_DLL herr_t  H5_subfiling_set_file_id_prop(H5P_genplist_t *plist_ptr, uint64_t file_id);
 H5_DLL herr_t  H5_subfiling_get_file_id_prop(H5P_genplist_t *plist_ptr, uint64_t *file_id);
 H5_DLL int64_t H5_subfile_fid_to_context(uint64_t file_id);

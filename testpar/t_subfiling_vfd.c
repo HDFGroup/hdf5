@@ -776,7 +776,7 @@ test_stripe_sizes(void)
  * using a different stripe size/count would result
  * in data verification failures.
  */
-#define SUBF_FILENAME "test_subfiling_read_different_stripe_sizes.h5"
+#define SUBF_FILENAME  "test_subfiling_read_different_stripe_sizes.h5"
 #define SUBF_HDF5_TYPE H5T_NATIVE_INT
 #define SUBF_C_TYPE    int
 static void
@@ -888,7 +888,7 @@ test_read_different_stripe_size(void)
     VRFY((mpi_code_g == MPI_SUCCESS), "MPI_Barrier succeeded");
 
     /* Add a bit to the stripe size and specify a few more subfiles */
-    cfg.stripe_size  += (cfg.stripe_size / 2);
+    cfg.stripe_size += (cfg.stripe_size / 2);
     cfg.stripe_count *= 2;
 
     fapl_id = create_subfiling_ioc_fapl(comm_g, info_g, TRUE, &cfg, H5FD_IOC_DEFAULT_THREAD_POOL_SIZE);
@@ -1583,8 +1583,8 @@ test_subfiling_h5fuse(void)
             VRFY((HDstat(SUBF_FILENAME, &file_info) >= 0), "HDstat succeeded");
 
             /* Generate name for configuration file */
-            HDsnprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE,
-                       SUBF_FILENAME, (uint64_t)file_info.st_ino);
+            HDsnprintf(tmp_filename, PATH_MAX, H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE, SUBF_FILENAME,
+                       (uint64_t)file_info.st_ino);
 
             args[0] = HDstrdup("env");
             args[1] = HDstrdup("sh");
