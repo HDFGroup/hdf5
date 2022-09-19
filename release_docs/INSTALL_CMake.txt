@@ -69,7 +69,7 @@ External compression plugin libraries:
     hdf5_plugins.tar.gz
 
 Examples Source package:
-    HDF5Examples-1.14.x-Source.tar.gz
+    HDF5Examples-2.0.x-Source.tar.gz
 
 Configuration files:
     HDF5config.cmake
