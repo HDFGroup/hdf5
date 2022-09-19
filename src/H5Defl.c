@@ -61,14 +61,15 @@ typedef struct H5D_efl_writevv_ud_t {
 
 /* Layout operation callbacks */
 static herr_t  H5D__efl_construct(H5F_t *f, H5D_t *dset);
-static herr_t  H5D__efl_io_init(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
-                                H5S_t *file_space, H5S_t *mem_space, H5D_dset_io_info_t *dinfo);
-static ssize_t H5D__efl_readvv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *dset_curr_seq,
-                               size_t dset_len_arr[], hsize_t dset_offset_arr[], size_t mem_max_nseq,
-                               size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[]);
-static ssize_t H5D__efl_writevv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *dset_curr_seq,
-                                size_t dset_len_arr[], hsize_t dset_offset_arr[], size_t mem_max_nseq,
-                                size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[]);
+static herr_t  H5D__efl_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo);
+static ssize_t H5D__efl_readvv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info,
+                               size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[],
+                               hsize_t dset_offset_arr[], size_t mem_max_nseq, size_t *mem_curr_seq,
+                               size_t mem_len_arr[], hsize_t mem_offset_arr[]);
+static ssize_t H5D__efl_writevv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info,
+                                size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[],
+                                hsize_t dset_offset_arr[], size_t mem_max_nseq, size_t *mem_curr_seq,
+                                size_t mem_len_arr[], hsize_t mem_offset_arr[]);
 
 /* Helper routines */
 static herr_t H5D__efl_read(const H5O_efl_t *efl, const H5D_t *dset, haddr_t addr, size_t size, uint8_t *buf);
@@ -209,9 +210,7 @@ H5D__efl_is_space_alloc(const H5O_storage_t H5_ATTR_UNUSED *storage)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__efl_io_init(H5D_io_info_t *io_info, const H5D_type_info_t H5_ATTR_UNUSED *type_info,
-                 hsize_t H5_ATTR_UNUSED nelmts, H5S_t H5_ATTR_UNUSED *file_space,
-                 H5S_t H5_ATTR_UNUSED *mem_space, H5D_dset_io_info_t *dinfo)
+H5D__efl_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -446,9 +445,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static ssize_t
-H5D__efl_readvv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *dset_curr_seq,
-                size_t dset_len_arr[], hsize_t dset_off_arr[], size_t mem_max_nseq, size_t *mem_curr_seq,
-                size_t mem_len_arr[], hsize_t mem_off_arr[])
+H5D__efl_readvv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info, size_t dset_max_nseq,
+                size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_off_arr[], size_t mem_max_nseq,
+                size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_off_arr[])
 {
     H5D_efl_readvv_ud_t udata;          /* User data for H5VM_opvv() operator */
     ssize_t             ret_value = -1; /* Return value (Total size of sequence in bytes) */
@@ -457,10 +456,11 @@ H5D__efl_readvv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *dset
 
     /* Check args */
     HDassert(io_info);
-    HDassert(io_info->dsets_info[0].store->efl.nused > 0);
-    HDassert(io_info->dsets_info[0].buf.vp);
-    HDassert(io_info->dset);
-    HDassert(io_info->dset->shared);
+    HDassert(dset_info);
+    HDassert(dset_info->store->efl.nused > 0);
+    HDassert(dset_info->buf.vp);
+    HDassert(dset_info->dset);
+    HDassert(dset_info->dset->shared);
     HDassert(dset_curr_seq);
     HDassert(dset_len_arr);
     HDassert(dset_off_arr);
@@ -469,9 +469,9 @@ H5D__efl_readvv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *dset
     HDassert(mem_off_arr);
 
     /* Set up user data for H5VM_opvv() */
-    udata.efl  = &(io_info->dsets_info[0].store->efl);
-    udata.dset = io_info->dset;
-    udata.rbuf = (unsigned char *)io_info->dsets_info[0].buf.vp;
+    udata.efl  = &(dset_info->store->efl);
+    udata.dset = dset_info->dset;
+    udata.rbuf = (unsigned char *)dset_info->buf.vp;
 
     /* Call generic sequence operation routine */
     if ((ret_value = H5VM_opvv(dset_max_nseq, dset_curr_seq, dset_len_arr, dset_off_arr, mem_max_nseq,
@@ -526,9 +526,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static ssize_t
-H5D__efl_writevv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *dset_curr_seq,
-                 size_t dset_len_arr[], hsize_t dset_off_arr[], size_t mem_max_nseq, size_t *mem_curr_seq,
-                 size_t mem_len_arr[], hsize_t mem_off_arr[])
+H5D__efl_writevv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info, size_t dset_max_nseq,
+                 size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_off_arr[], size_t mem_max_nseq,
+                 size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_off_arr[])
 {
     H5D_efl_writevv_ud_t udata;          /* User data for H5VM_opvv() operator */
     ssize_t              ret_value = -1; /* Return value (Total size of sequence in bytes) */
@@ -537,10 +537,11 @@ H5D__efl_writevv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *dse
 
     /* Check args */
     HDassert(io_info);
-    HDassert(io_info->dsets_info[0].store->efl.nused > 0);
-    HDassert(io_info->dsets_info[0].buf.cvp);
-    HDassert(io_info->dset);
-    HDassert(io_info->dset->shared);
+    HDassert(dset_info);
+    HDassert(dset_info->store->efl.nused > 0);
+    HDassert(dset_info->buf.vp);
+    HDassert(dset_info->dset);
+    HDassert(dset_info->dset->shared);
     HDassert(dset_curr_seq);
     HDassert(dset_len_arr);
     HDassert(dset_off_arr);
@@ -549,9 +550,9 @@ H5D__efl_writevv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *dse
     HDassert(mem_off_arr);
 
     /* Set up user data for H5VM_opvv() */
-    udata.efl  = &(io_info->dsets_info[0].store->efl);
-    udata.dset = io_info->dset;
-    udata.wbuf = (const unsigned char *)io_info->dsets_info[0].buf.cvp;
+    udata.efl  = &(dset_info->store->efl);
+    udata.dset = dset_info->dset;
+    udata.wbuf = (const unsigned char *)dset_info->buf.cvp;
 
     /* Call generic sequence operation routine */
     if ((ret_value = H5VM_opvv(dset_max_nseq, dset_curr_seq, dset_len_arr, dset_off_arr, mem_max_nseq,
