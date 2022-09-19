@@ -92,16 +92,19 @@ typedef struct H5D_contig_writevv_ud_t {
 static herr_t  H5D__contig_construct(H5F_t *f, H5D_t *dset);
 static herr_t  H5D__contig_init(H5F_t *f, const H5D_t *dset, hid_t dapl_id);
 static herr_t  H5D__contig_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo);
-static ssize_t H5D__contig_readvv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dinfo, size_t dset_max_nseq, size_t *dset_curr_seq,
-                                  size_t dset_len_arr[], hsize_t dset_offset_arr[], size_t mem_max_nseq,
-                                  size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[]);
-static ssize_t H5D__contig_writevv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dinfo, size_t dset_max_nseq, size_t *dset_curr_seq,
-                                   size_t dset_len_arr[], hsize_t dset_offset_arr[], size_t mem_max_nseq,
-                                   size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[]);
+static ssize_t H5D__contig_readvv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dinfo,
+                                  size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[],
+                                  hsize_t dset_offset_arr[], size_t mem_max_nseq, size_t *mem_curr_seq,
+                                  size_t mem_len_arr[], hsize_t mem_offset_arr[]);
+static ssize_t H5D__contig_writevv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dinfo,
+                                   size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[],
+                                   hsize_t dset_offset_arr[], size_t mem_max_nseq, size_t *mem_curr_seq,
+                                   size_t mem_len_arr[], hsize_t mem_offset_arr[]);
 static herr_t  H5D__contig_flush(H5D_t *dset);
 
 /* Helper routines */
-static herr_t H5D__contig_write_one(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info, hsize_t offset, size_t size);
+static herr_t H5D__contig_write_one(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info, hsize_t offset,
+                                    size_t size);
 static htri_t H5D__contig_may_use_select_io(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info,
                                             H5D_io_op_type_t op_type);
 
@@ -188,13 +191,13 @@ done:
 herr_t
 H5D__contig_fill(H5D_t *dset)
 {
-    H5D_io_info_t       ioinfo;               /* Dataset I/O info */
-    H5D_dset_io_info_t *dset_info = NULL;     /* Dset info */
-    H5D_storage_t       store;                /* Union of storage info for dataset */
-    hssize_t            snpoints;             /* Number of points in space (for error checking) */
-    size_t              npoints;              /* Number of points in space */
-    hsize_t             offset;               /* Offset of dataset */
-    size_t              max_temp_buf;         /* Maximum size of temporary buffer */
+    H5D_io_info_t       ioinfo;           /* Dataset I/O info */
+    H5D_dset_io_info_t *dset_info = NULL; /* Dset info */
+    H5D_storage_t       store;            /* Union of storage info for dataset */
+    hssize_t            snpoints;         /* Number of points in space (for error checking) */
+    size_t              npoints;          /* Number of points in space */
+    hsize_t             offset;           /* Offset of dataset */
+    size_t              max_temp_buf;     /* Maximum size of temporary buffer */
 #ifdef H5_HAVE_PARALLEL
     MPI_Comm mpi_comm = MPI_COMM_NULL; /* MPI communicator for file */
     int      mpi_rank = (-1);          /* This process's rank  */
@@ -723,7 +726,7 @@ H5D__contig_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
             H5FL_FREE(H5D_piece_info_t, new_piece_info);
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't insert chunk into skip list")
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     /* Check if we're performing selection I/O if it hasn't been disabled
      * already */
@@ -841,9 +844,10 @@ H5D__contig_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
             /* Issue selection I/O call (we can skip the page buffer because we've
              * already verified it won't be used, and the metadata accumulator
              * because this is raw data) */
-            if (H5F_shared_select_read(H5F_SHARED(dinfo->dset->oloc.file), H5FD_MEM_DRAW, dinfo->nelmts > 0 ? 1 : 0,
-                                       &dinfo->mem_space, &dinfo->file_space, &(dinfo->store->contig.dset_addr),
-                                       &dst_type_size, &(dinfo->buf.vp)) < 0)
+            if (H5F_shared_select_read(H5F_SHARED(dinfo->dset->oloc.file), H5FD_MEM_DRAW,
+                                       dinfo->nelmts > 0 ? 1 : 0, &dinfo->mem_space, &dinfo->file_space,
+                                       &(dinfo->store->contig.dset_addr), &dst_type_size,
+                                       &(dinfo->buf.vp)) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "contiguous selection read failed")
         }
     } /* end if */
@@ -892,9 +896,10 @@ H5D__contig_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
             /* Issue selection I/O call (we can skip the page buffer because we've
              * already verified it won't be used, and the metadata accumulator
              * because this is raw data) */
-            if (H5F_shared_select_write(H5F_SHARED(dinfo->dset->oloc.file), H5FD_MEM_DRAW, dinfo->nelmts > 0 ? 1 : 0,
-                                        &dinfo->mem_space, &dinfo->file_space, &(dinfo->store->contig.dset_addr),
-                                        &dst_type_size, &(dinfo->buf.cvp)) < 0)
+            if (H5F_shared_select_write(H5F_SHARED(dinfo->dset->oloc.file), H5FD_MEM_DRAW,
+                                        dinfo->nelmts > 0 ? 1 : 0, &dinfo->mem_space, &dinfo->file_space,
+                                        &(dinfo->store->contig.dset_addr), &dst_type_size,
+                                        &(dinfo->buf.cvp)) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "contiguous selection write failed")
         }
     } /* end if */
@@ -1159,11 +1164,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static ssize_t
-H5D__contig_readvv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info, size_t dset_max_nseq, size_t *dset_curr_seq,
-                   size_t dset_len_arr[], hsize_t dset_off_arr[], size_t mem_max_nseq, size_t *mem_curr_seq,
-                   size_t mem_len_arr[], hsize_t mem_off_arr[])
+H5D__contig_readvv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info, size_t dset_max_nseq,
+                   size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_off_arr[], size_t mem_max_nseq,
+                   size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_off_arr[])
 {
-    ssize_t             ret_value = -1; /* Return value */
+    ssize_t ret_value = -1; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1478,11 +1483,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static ssize_t
-H5D__contig_writevv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info, size_t dset_max_nseq, size_t *dset_curr_seq,
-                    size_t dset_len_arr[], hsize_t dset_off_arr[], size_t mem_max_nseq, size_t *mem_curr_seq,
-                    size_t mem_len_arr[], hsize_t mem_off_arr[])
+H5D__contig_writevv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info, size_t dset_max_nseq,
+                    size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_off_arr[], size_t mem_max_nseq,
+                    size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_off_arr[])
 {
-    ssize_t             ret_value = -1; /* Return value (Size of sequence in bytes) */
+    ssize_t ret_value = -1; /* Return value (Size of sequence in bytes) */
 
     FUNC_ENTER_PACKAGE
 

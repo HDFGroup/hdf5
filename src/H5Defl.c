@@ -62,12 +62,14 @@ typedef struct H5D_efl_writevv_ud_t {
 /* Layout operation callbacks */
 static herr_t  H5D__efl_construct(H5F_t *f, H5D_t *dset);
 static herr_t  H5D__efl_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo);
-static ssize_t H5D__efl_readvv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info, size_t dset_max_nseq, size_t *dset_curr_seq,
-                               size_t dset_len_arr[], hsize_t dset_offset_arr[], size_t mem_max_nseq,
-                               size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[]);
-static ssize_t H5D__efl_writevv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info, size_t dset_max_nseq, size_t *dset_curr_seq,
-                                size_t dset_len_arr[], hsize_t dset_offset_arr[], size_t mem_max_nseq,
-                                size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_offset_arr[]);
+static ssize_t H5D__efl_readvv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info,
+                               size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[],
+                               hsize_t dset_offset_arr[], size_t mem_max_nseq, size_t *mem_curr_seq,
+                               size_t mem_len_arr[], hsize_t mem_offset_arr[]);
+static ssize_t H5D__efl_writevv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info,
+                                size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[],
+                                hsize_t dset_offset_arr[], size_t mem_max_nseq, size_t *mem_curr_seq,
+                                size_t mem_len_arr[], hsize_t mem_offset_arr[]);
 
 /* Helper routines */
 static herr_t H5D__efl_read(const H5O_efl_t *efl, const H5D_t *dset, haddr_t addr, size_t size, uint8_t *buf);
@@ -443,9 +445,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static ssize_t
-H5D__efl_readvv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info, size_t dset_max_nseq, size_t *dset_curr_seq,
-                size_t dset_len_arr[], hsize_t dset_off_arr[], size_t mem_max_nseq, size_t *mem_curr_seq,
-                size_t mem_len_arr[], hsize_t mem_off_arr[])
+H5D__efl_readvv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info, size_t dset_max_nseq,
+                size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_off_arr[], size_t mem_max_nseq,
+                size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_off_arr[])
 {
     H5D_efl_readvv_ud_t udata;          /* User data for H5VM_opvv() operator */
     ssize_t             ret_value = -1; /* Return value (Total size of sequence in bytes) */
@@ -524,9 +526,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static ssize_t
-H5D__efl_writevv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info, size_t dset_max_nseq, size_t *dset_curr_seq,
-                 size_t dset_len_arr[], hsize_t dset_off_arr[], size_t mem_max_nseq, size_t *mem_curr_seq,
-                 size_t mem_len_arr[], hsize_t mem_off_arr[])
+H5D__efl_writevv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info, size_t dset_max_nseq,
+                 size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_off_arr[], size_t mem_max_nseq,
+                 size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_off_arr[])
 {
     H5D_efl_writevv_ud_t udata;          /* User data for H5VM_opvv() operator */
     ssize_t              ret_value = -1; /* Return value (Total size of sequence in bytes) */

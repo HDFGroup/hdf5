@@ -2218,8 +2218,7 @@ H5D_nameof(H5D_t *dataset)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__alloc_storage(H5D_t *dset, H5D_time_alloc_t time_alloc, hbool_t full_overwrite,
-                   hsize_t old_dim[])
+H5D__alloc_storage(H5D_t *dset, H5D_time_alloc_t time_alloc, hbool_t full_overwrite, hsize_t old_dim[])
 {
     H5F_t        *f;                         /* The dataset's file pointer */
     H5O_layout_t *layout;                    /* The dataset's layout information */
@@ -2394,7 +2393,7 @@ done:
 static herr_t
 H5D__init_storage(H5D_t *dset, hbool_t full_overwrite, hsize_t old_dim[])
 {
-    herr_t       ret_value = SUCCEED;       /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 

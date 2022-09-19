@@ -65,12 +65,14 @@ static herr_t  H5D__compact_construct(H5F_t *f, H5D_t *dset);
 static hbool_t H5D__compact_is_space_alloc(const H5O_storage_t *storage);
 static herr_t  H5D__compact_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo);
 static herr_t  H5D__compact_iovv_memmanage_cb(hsize_t dst_off, hsize_t src_off, size_t len, void *_udata);
-static ssize_t H5D__compact_readvv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info, size_t dset_max_nseq, size_t *dset_curr_seq,
-                                   size_t dset_size_arr[], hsize_t dset_offset_arr[], size_t mem_max_nseq,
-                                   size_t *mem_curr_seq, size_t mem_size_arr[], hsize_t mem_offset_arr[]);
-static ssize_t H5D__compact_writevv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info, size_t dset_max_nseq, size_t *dset_curr_seq,
-                                    size_t dset_size_arr[], hsize_t dset_offset_arr[], size_t mem_max_nseq,
-                                    size_t *mem_curr_seq, size_t mem_size_arr[], hsize_t mem_offset_arr[]);
+static ssize_t H5D__compact_readvv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info,
+                                   size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_size_arr[],
+                                   hsize_t dset_offset_arr[], size_t mem_max_nseq, size_t *mem_curr_seq,
+                                   size_t mem_size_arr[], hsize_t mem_offset_arr[]);
+static ssize_t H5D__compact_writevv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info,
+                                    size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_size_arr[],
+                                    hsize_t dset_offset_arr[], size_t mem_max_nseq, size_t *mem_curr_seq,
+                                    size_t mem_size_arr[], hsize_t mem_offset_arr[]);
 static herr_t  H5D__compact_flush(H5D_t *dset);
 static herr_t  H5D__compact_dest(H5D_t *dset);
 
@@ -320,9 +322,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static ssize_t
-H5D__compact_readvv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info, size_t dset_max_nseq, size_t *dset_curr_seq,
-                    size_t dset_size_arr[], hsize_t dset_offset_arr[], size_t mem_max_nseq,
-                    size_t *mem_curr_seq, size_t mem_size_arr[], hsize_t mem_offset_arr[])
+H5D__compact_readvv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info, size_t dset_max_nseq,
+                    size_t *dset_curr_seq, size_t dset_size_arr[], hsize_t dset_offset_arr[],
+                    size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_size_arr[],
+                    hsize_t mem_offset_arr[])
 {
     ssize_t ret_value = -1; /* Return value */
 
@@ -348,10 +351,9 @@ H5D__compact_readvv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset
     }
     else {
         /* Use the vectorized memory copy routine to do actual work */
-        if ((ret_value =
-                 H5VM_memcpyvv(dset_info->buf.vp, mem_max_nseq, mem_curr_seq, mem_size_arr,
-                               mem_offset_arr, dset_info->store->compact.buf, dset_max_nseq,
-                               dset_curr_seq, dset_size_arr, dset_offset_arr)) < 0)
+        if ((ret_value = H5VM_memcpyvv(dset_info->buf.vp, mem_max_nseq, mem_curr_seq, mem_size_arr,
+                                       mem_offset_arr, dset_info->store->compact.buf, dset_max_nseq,
+                                       dset_curr_seq, dset_size_arr, dset_offset_arr)) < 0)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "vectorized memcpy failed")
     }
 
@@ -381,9 +383,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static ssize_t
-H5D__compact_writevv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info, size_t dset_max_nseq, size_t *dset_curr_seq,
-                     size_t dset_size_arr[], hsize_t dset_offset_arr[], size_t mem_max_nseq,
-                     size_t *mem_curr_seq, size_t mem_size_arr[], hsize_t mem_offset_arr[])
+H5D__compact_writevv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info, size_t dset_max_nseq,
+                     size_t *dset_curr_seq, size_t dset_size_arr[], hsize_t dset_offset_arr[],
+                     size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_size_arr[],
+                     hsize_t mem_offset_arr[])
 {
     ssize_t ret_value = -1; /* Return value */
 
@@ -409,10 +412,9 @@ H5D__compact_writevv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dse
     }
     else {
         /* Use the vectorized memory copy routine to do actual work */
-        if ((ret_value =
-                 H5VM_memcpyvv(dset_info->store->compact.buf, dset_max_nseq, dset_curr_seq,
-                               dset_size_arr, dset_offset_arr, dset_info->buf.cvp, mem_max_nseq,
-                               mem_curr_seq, mem_size_arr, mem_offset_arr)) < 0)
+        if ((ret_value = H5VM_memcpyvv(dset_info->store->compact.buf, dset_max_nseq, dset_curr_seq,
+                                       dset_size_arr, dset_offset_arr, dset_info->buf.cvp, mem_max_nseq,
+                                       mem_curr_seq, mem_size_arr, mem_offset_arr)) < 0)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "vectorized memcpy failed")
     }
 

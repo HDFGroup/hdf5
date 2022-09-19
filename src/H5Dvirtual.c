@@ -105,8 +105,10 @@ static herr_t H5D__virtual_init_all(const H5D_t *dset);
 static herr_t H5D__virtual_pre_io(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_t *storage,
                                   H5S_t *file_space, H5S_t *mem_space, hsize_t *tot_nelmts);
 static herr_t H5D__virtual_post_io(H5O_storage_virtual_t *storage);
-static herr_t H5D__virtual_read_one(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_srcdset_t *source_dset);
-static herr_t H5D__virtual_write_one(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_srcdset_t *source_dset);
+static herr_t H5D__virtual_read_one(H5D_dset_io_info_t            *dset_info,
+                                    H5O_storage_virtual_srcdset_t *source_dset);
+static herr_t H5D__virtual_write_one(H5D_dset_io_info_t            *dset_info,
+                                     H5O_storage_virtual_srcdset_t *source_dset);
 
 /*********************/
 /* Package Variables */
@@ -2834,8 +2836,7 @@ H5D__virtual_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
         if (storage->list[i].psfn_nsubs || storage->list[i].psdn_nsubs) {
             /* Iterate over sub-source dsets */
             for (j = storage->list[i].sub_dset_io_start; j < storage->list[i].sub_dset_io_end; j++)
-                if (H5D__virtual_read_one(dset_info, &storage->list[i].sub_dset[j]) <
-                    0)
+                if (H5D__virtual_read_one(dset_info, &storage->list[i].sub_dset[j]) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "unable to read source dataset")
         } /* end if */
         else
@@ -3048,8 +3049,7 @@ H5D__virtual_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
         if (storage->list[i].psfn_nsubs || storage->list[i].psdn_nsubs) {
             /* Iterate over sub-source dsets */
             for (j = storage->list[i].sub_dset_io_start; j < storage->list[i].sub_dset_io_end; j++)
-                if (H5D__virtual_write_one(dset_info, &storage->list[i].sub_dset[j]) <
-                    0)
+                if (H5D__virtual_write_one(dset_info, &storage->list[i].sub_dset[j]) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to write to source dataset")
         } /* end if */
         else
