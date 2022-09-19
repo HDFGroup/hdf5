@@ -63,13 +63,12 @@ typedef struct H5D_compact_iovv_memmanage_ud_t {
 /* Layout operation callbacks */
 static herr_t  H5D__compact_construct(H5F_t *f, H5D_t *dset);
 static hbool_t H5D__compact_is_space_alloc(const H5O_storage_t *storage);
-static herr_t  H5D__compact_io_init(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
-                                    H5S_t *file_space, H5S_t *mem_space, H5D_dset_io_info_t *dinfo);
+static herr_t  H5D__compact_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo);
 static herr_t  H5D__compact_iovv_memmanage_cb(hsize_t dst_off, hsize_t src_off, size_t len, void *_udata);
-static ssize_t H5D__compact_readvv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *dset_curr_seq,
+static ssize_t H5D__compact_readvv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info, size_t dset_max_nseq, size_t *dset_curr_seq,
                                    size_t dset_size_arr[], hsize_t dset_offset_arr[], size_t mem_max_nseq,
                                    size_t *mem_curr_seq, size_t mem_size_arr[], hsize_t mem_offset_arr[]);
-static ssize_t H5D__compact_writevv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *dset_curr_seq,
+static ssize_t H5D__compact_writevv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info, size_t dset_max_nseq, size_t *dset_curr_seq,
                                     size_t dset_size_arr[], hsize_t dset_offset_arr[], size_t mem_max_nseq,
                                     size_t *mem_curr_seq, size_t mem_size_arr[], hsize_t mem_offset_arr[]);
 static herr_t  H5D__compact_flush(H5D_t *dset);
@@ -247,9 +246,7 @@ H5D__compact_is_space_alloc(const H5O_storage_t H5_ATTR_UNUSED *storage)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__compact_io_init(H5D_io_info_t *io_info, const H5D_type_info_t H5_ATTR_UNUSED *type_info,
-                     hsize_t H5_ATTR_UNUSED nelmts, H5S_t H5_ATTR_UNUSED *file_space,
-                     H5S_t H5_ATTR_UNUSED *mem_space, H5D_dset_io_info_t *dinfo)
+H5D__compact_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -323,7 +320,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static ssize_t
-H5D__compact_readvv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *dset_curr_seq,
+H5D__compact_readvv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info, size_t dset_max_nseq, size_t *dset_curr_seq,
                     size_t dset_size_arr[], hsize_t dset_offset_arr[], size_t mem_max_nseq,
                     size_t *mem_curr_seq, size_t mem_size_arr[], hsize_t mem_offset_arr[])
 {
@@ -332,6 +329,7 @@ H5D__compact_readvv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *
     FUNC_ENTER_PACKAGE
 
     HDassert(io_info);
+    HDassert(dset_info);
 
     /* Check if file driver wishes to do its own memory management */
     if (H5F_SHARED_HAS_FEATURE(io_info->f_sh, H5FD_FEAT_MEMMANAGE)) {
@@ -339,8 +337,8 @@ H5D__compact_readvv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *
 
         /* Set up udata for memory copy operation */
         udata.f_sh   = io_info->f_sh;
-        udata.dstbuf = io_info->dsets_info[0].buf.vp;
-        udata.srcbuf = io_info->dsets_info[0].store->compact.buf;
+        udata.dstbuf = dset_info->buf.vp;
+        udata.srcbuf = dset_info->store->compact.buf;
 
         /* Request that file driver does the memory copy */
         if ((ret_value = H5VM_opvv(mem_max_nseq, mem_curr_seq, mem_size_arr, mem_offset_arr, dset_max_nseq,
@@ -351,8 +349,8 @@ H5D__compact_readvv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *
     else {
         /* Use the vectorized memory copy routine to do actual work */
         if ((ret_value =
-                 H5VM_memcpyvv(io_info->dsets_info[0].buf.vp, mem_max_nseq, mem_curr_seq, mem_size_arr,
-                               mem_offset_arr, io_info->dsets_info[0].store->compact.buf, dset_max_nseq,
+                 H5VM_memcpyvv(dset_info->buf.vp, mem_max_nseq, mem_curr_seq, mem_size_arr,
+                               mem_offset_arr, dset_info->store->compact.buf, dset_max_nseq,
                                dset_curr_seq, dset_size_arr, dset_offset_arr)) < 0)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "vectorized memcpy failed")
     }
@@ -383,7 +381,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static ssize_t
-H5D__compact_writevv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *dset_curr_seq,
+H5D__compact_writevv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info, size_t dset_max_nseq, size_t *dset_curr_seq,
                      size_t dset_size_arr[], hsize_t dset_offset_arr[], size_t mem_max_nseq,
                      size_t *mem_curr_seq, size_t mem_size_arr[], hsize_t mem_offset_arr[])
 {
@@ -392,6 +390,7 @@ H5D__compact_writevv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t 
     FUNC_ENTER_PACKAGE
 
     HDassert(io_info);
+    HDassert(dset_info);
 
     /* Check if file driver wishes to do its own memory management */
     if (H5F_SHARED_HAS_FEATURE(io_info->f_sh, H5FD_FEAT_MEMMANAGE)) {
@@ -399,8 +398,8 @@ H5D__compact_writevv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t 
 
         /* Set up udata for memory copy operation */
         udata.f_sh   = io_info->f_sh;
-        udata.dstbuf = io_info->dsets_info[0].store->compact.buf;
-        udata.srcbuf = io_info->dsets_info[0].buf.cvp;
+        udata.dstbuf = dset_info->store->compact.buf;
+        udata.srcbuf = dset_info->buf.cvp;
 
         /* Request that file driver does the memory copy */
         if ((ret_value = H5VM_opvv(dset_max_nseq, dset_curr_seq, dset_size_arr, dset_offset_arr, mem_max_nseq,
@@ -411,8 +410,8 @@ H5D__compact_writevv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t 
     else {
         /* Use the vectorized memory copy routine to do actual work */
         if ((ret_value =
-                 H5VM_memcpyvv(io_info->dsets_info[0].store->compact.buf, dset_max_nseq, dset_curr_seq,
-                               dset_size_arr, dset_offset_arr, io_info->dsets_info[0].buf.cvp, mem_max_nseq,
+                 H5VM_memcpyvv(dset_info->store->compact.buf, dset_max_nseq, dset_curr_seq,
+                               dset_size_arr, dset_offset_arr, dset_info->buf.cvp, mem_max_nseq,
                                mem_curr_seq, mem_size_arr, mem_offset_arr)) < 0)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "vectorized memcpy failed")
     }
