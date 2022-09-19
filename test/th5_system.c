@@ -438,6 +438,31 @@ test_h5_basename(void)
 }
 
 static void
+test_h5_strcasestr(void)
+{
+    const char *const haystack = "My test string";
+    char * str = NULL;
+
+    MESSAGE(5, ("Testing H5_strcasestr\n"));
+
+    /* check that H5_strcasestr returns target in empty search */
+    str = H5_strcasestr(haystack, "");
+    CHECK_PTR_EQ(str, haystack, "H5_strcasestr search for empty");
+
+    /* Check that H5_strcasestr find a string of same case */
+    str = H5_strcasestr(haystack, "string");
+    CHECK_PTR_EQ(str, &(haystack[8]), "H5_strcasestr search same case");
+
+    /* Check that H5_strcasestr find a string of different case */
+    str = H5_strcasestr(haystack, "sTrInG");
+    CHECK_PTR_EQ(str, &(haystack[8]), "H5_strcasestr search different case");
+
+    /* Check that H5_strcasestr find a string of different case */
+    str = H5_strcasestr(haystack, "nomatch");
+    CHECK_PTR_NULL(str, "H5_strcasestr search with no match");
+}
+
+static void
 test_h5_strndup(void)
 {
 #ifdef H5_HAVE_WIN32_API
@@ -495,6 +520,7 @@ test_h5_system(void)
 
     test_h5_dirname();
     test_h5_basename();
+    test_h5_strcasestr();
     test_h5_strndup();
 }
 
