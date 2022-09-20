@@ -3857,7 +3857,7 @@ done:
     if (obj_apl_ids) {
         for (u = 0; u < grp_dset_count; u++)
             if (obj_apl_ids[u] != H5P_DEFAULT && obj_apl_ids[u] >= 0 && H5I_dec_ref(obj_apl_ids[u]) < 0)
-                HGOTO_ERROR(H5E_ID, H5E_CANTDEC, FAIL, "decrementing property list ID failed")
+                HDONE_ERROR(H5E_ID, H5E_CANTDEC, FAIL, "decrementing property list ID failed")
         H5MM_xfree(obj_apl_ids);
     }
 

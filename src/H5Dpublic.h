@@ -667,7 +667,7 @@ H5_DLL herr_t H5Dget_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset, u
  * \brief Iterate over all chunks of a chunked dataset
  *
  * \dset_id
- * \param[in] dxpl_id       Identifier of a transfer property list
+ * \param[in]  dxpl_id  Identifier of a transfer property list
  * \param[in]  cb       User callback function, called for every chunk.
  * \param[in]  op_data  User-defined pointer to data required by op
  *

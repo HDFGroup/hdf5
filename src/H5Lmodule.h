@@ -28,7 +28,12 @@
 #define H5_MY_PKG     H5L
 #define H5_MY_PKG_ERR H5E_LINK
 
-/**\defgroup H5L H5L
+/** \page H5L_UG The HDF5 Links
+ * @todo Under Construction
+ */
+
+/**
+ * \defgroup H5L Links (H5L)
  *
  * Use the functions in this module to manage HDF5 links and link types.
  *

@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.12)
+cmake_minimum_required (VERSION 3.18)
 project (HDFJAVA_EXAMPLES_GROUPS Java)
 
 set (CMAKE_VERBOSE_MAKEFILE 1)
@@ -64,7 +64,7 @@ add_custom_target(H5Ex_G_Visit_files ALL COMMENT "Copying files needed by H5Ex_G
 
 if (BUILD_TESTING AND HDF5_TEST_EXAMPLES AND HDF5_TEST_SERIAL)
   get_property (target_name TARGET ${HDF5_JAVA_JNI_LIB_TARGET} PROPERTY OUTPUT_NAME)
-  set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=${target_name}$<$<CONFIG:Debug>:${CMAKE_DEBUG_POSTFIX}>;")
+  set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=${target_name}$<$<OR:$<CONFIG:Debug>,$<CONFIG:Developer>>:${CMAKE_DEBUG_POSTFIX}>;")
 
   foreach (example ${HDF_JAVA_EXAMPLES})
     if (NOT example STREQUAL "H5Ex_G_Iterate" AND NOT example STREQUAL "H5Ex_G_Visit")

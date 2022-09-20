@@ -1213,6 +1213,7 @@ if test "X$HDF5_DOXYGEN" = "Xyes"; then
 
   AC_SUBST([DOXYGEN_PACKAGE])
   AC_SUBST([DOXYGEN_VERSION_STRING])
+  AC_SUBST([DOXYGEN_DIR])
   AC_SUBST([DOXYGEN_INCLUDE_ALIASES])
   AC_SUBST([DOXYGEN_PROJECT_LOGO])
   AC_SUBST([DOXYGEN_PROJECT_BRIEF])
@@ -1237,6 +1238,7 @@ if test "X$HDF5_DOXYGEN" = "Xyes"; then
 # SRCDIR Environment variables used inside doxygen macro for the source location:
   DOXYGEN_PACKAGE=${PACKAGE_NAME}
   DOXYGEN_VERSION_STRING=${PACKAGE_VERSION}
+  DOXYGEN_DIR='$(SRCDIR)/doxygen'
   DOXYGEN_INCLUDE_ALIASES='$(SRCDIR)/doxygen/aliases'
   DOXYGEN_PROJECT_LOGO='$(SRCDIR)/doxygen/img/HDFG-logo.png'
   DOXYGEN_PROJECT_BRIEF=''
@@ -1249,14 +1251,14 @@ if test "X$HDF5_DOXYGEN" = "Xyes"; then
   DOXYGEN_HTML_HEADER='$(SRCDIR)/doxygen/hdf5_header.html'
   DOXYGEN_HTML_FOOTER='$(SRCDIR)/doxygen/hdf5_footer.html'
   DOXYGEN_HTML_EXTRA_STYLESHEET='$(SRCDIR)/doxygen/hdf5doxy.css'
-  DOXYGEN_HTML_EXTRA_FILES='$(SRCDIR)/doxygen/hdf5_navtree_hacks.js $(SRCDIR)/doxygen/img/FF-IH_FileGroup.gif $(SRCDIR)/doxygen/img/FF-IH_FileObject.gif $(SRCDIR)/doxygen/img/FileFormatSpecChunkDiagram.jpg $(SRCDIR)/doxygen/img/ftv2node.png $(SRCDIR)/doxygen/img/ftv2pnode.png $(SRCDIR)/doxygen/img/HDFG-logo.png $(SRCDIR)/doxygen/img/IOFlow2.gif $(SRCDIR)/doxygen/img/IOFlow3.gif $(SRCDIR)/doxygen/img/IOFlow.gif $(SRCDIR)/doxygen/img/PaletteExample1.gif $(SRCDIR)/doxygen/img/Palettes.fm.anc.gif'
+  DOXYGEN_HTML_EXTRA_FILES='$(SRCDIR)/doxygen/hdf5_navtree_hacks.js'
   DOXYGEN_TAG_FILE=hdf5.tag
   DOXYGEN_SERVER_BASED_SEARCH=NO
   DOXYGEN_EXTERNAL_SEARCH=NO
   DOXYGEN_SEARCHENGINE_URL=
   DOXYGEN_STRIP_FROM_PATH='$(SRCDIR)'
   DOXYGEN_STRIP_FROM_INC_PATH='$(SRCDIR)'
-  DOXYGEN_PREDEFINED='H5_HAVE_DIRECT H5_HAVE_LIBHDFS H5_HAVE_MAP_API H5_HAVE_PARALLEL H5_HAVE_ROS3_VFD'
+  DOXYGEN_PREDEFINED='H5_HAVE_DIRECT H5_HAVE_LIBHDFS H5_HAVE_MAP_API H5_HAVE_PARALLEL H5_HAVE_ROS3_VFD H5_DOXYGEN_FORTRAN'
 
   DX_INIT_DOXYGEN([HDF5], [./doxygen/Doxyfile], [hdf5lib_docs])
 fi
@@ -2336,6 +2338,7 @@ case "X-$DEV_WARNINGS" in
     ;;
   X-no)
     H5_CFLAGS="$H5_CFLAGS $NO_DEVELOPER_WARNING_CFLAGS"
+    H5_FCFLAGS="$H5_FCFLAGS $NO_DEVELOPER_WARNING_FCFLAGS"
     AC_MSG_RESULT([no])
     ;;
   *)
@@ -2541,8 +2544,8 @@ AC_SUBST([INTERNAL_DEBUG_OUTPUT])
 ## too specialized or have huge performance hits. These
 ## are not listed in the "all" packages list.
 ##
-## all_packages="AC,B,B2,D,F,FA,FL,FS,HL,I,O,S,ST,T,Z"
-all_packages="AC,B2,CX,D,F,HL,I,O,S,ST,T,Z"
+## all_packages="AC,B,B2,D,F,FA,FL,FS,HL,I,O,S,T,Z"
+all_packages="AC,B2,CX,D,F,HL,I,O,S,T,Z"
 
 case "X-$INTERNAL_DEBUG_OUTPUT" in
   X-yes|X-all)
@@ -3210,6 +3213,32 @@ if test "X$SUBFILING_VFD" = "Xyes"; then
     AC_DEFINE([HAVE_IOC_VFD], [1],
             [Define if the I/O Concentrator virtual file driver (VFD) should be compiled])
 
+    if test "X${PARALLEL}" != "Xyes"; then
+      AC_MSG_ERROR([--enable-parallel is required for --enable-subfiling-vfd])
+    fi
+
+    ## ----------------------------------------------------------------------
+    ## Check for MPI_Comm_split_type availability
+    ##
+    AC_MSG_CHECKING([for MPI_Comm_split_type function])
+
+    AC_LINK_IFELSE(
+      [AC_LANG_PROGRAM(
+          [[
+              #include <mpi.h>
+          ]],
+          [[
+              MPI_Comm intra_comm;
+              MPI_Init(0, (void *) 0);
+              MPI_Comm_split_type(MPI_COMM_WORLD, MPI_COMM_TYPE_SHARED, 0, MPI_INFO_NULL, &intra_comm);
+          ]]
+      )],
+      [AC_MSG_RESULT([yes])],
+      [AC_MSG_RESULT([no])
+       AC_MSG_ERROR([unable to link MPI program that uses MPI_Comm_split_type])
+       ]
+    )
+
     # Set-up mercury
     HAVE_MERCURY="yes"
     mercury_dir="$ac_abs_confdir/src/H5FDsubfiling/mercury"
@@ -3218,17 +3247,13 @@ if test "X$SUBFILING_VFD" = "Xyes"; then
     CPPFLAGS="$CPPFLAGS -I$mercury_inc"
     AM_CPPFLAGS="$AM_CPPFLAGS -I$mercury_inc"
 
-    if test "X${PARALLEL}" != "Xyes"; then
-      AC_MSG_ERROR([--enable-parallel is required for --enable-subfiling-vfd])
-    fi
-
     HAVE_STDATOMIC_H="yes"
     AC_CHECK_HEADERS([stdatomic.h],,[HAVE_STDATOMIC_H="no"])
     if test "x$HAVE_STDATOMIC_H" = "xno"; then
       AC_MSG_ERROR([Subfiling VFD requires atomic operations support. C11 stdatomic.h NOT available.])
     fi
 
-# Checks for libraries.
+    # Checks for libraries.
     AC_SEARCH_LIBS([shm_open], [rt])
     AC_CHECK_LIB([pthread], [pthread_self],[], [echo "Error: Required library pthread not found." && exit 1])
 

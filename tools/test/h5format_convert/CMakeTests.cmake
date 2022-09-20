@@ -123,7 +123,7 @@
                   -D "TEST_EXPECT=${resultcode}"
                   -D "TEST_REFERENCE=${resultfile}"
                   -D "TEST_ERRREF=${resultfile}.err"
-                  -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+                  -P "${HDF_RESOURCES_DIR}/runTest.cmake"
           )
           set_tests_properties (H5FC-${testname}-${testfile} PROPERTIES
               DEPENDS H5FC-${testname}-${testfile}-tmpfile
@@ -140,7 +140,7 @@
                   -D "TEST_OUTPUT=${testname}-${testfile}.out"
                   -D "TEST_EXPECT=${resultcode}"
                   -D "TEST_REFERENCE=${resultfile}"
-                  -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+                  -P "${HDF_RESOURCES_DIR}/runTest.cmake"
           )
           set_tests_properties (H5FC-${testname}-${testfile}-NA PROPERTIES
               DEPENDS H5FC-${testname}-${testfile}-tmpfile
@@ -180,7 +180,7 @@
               -D "TEST_OUTPUT=${testname}-${testfile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5FC-${testname}-${testfile} PROPERTIES
           DEPENDS H5FC-${testname}-${testfile}-tmpfile
@@ -220,7 +220,7 @@
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}"
               -D "TEST_ERRREF=${result_errcheck}"
-              -P "${HDF_RESOURCES_EXT_DIR}/grepTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/grepTest.cmake"
       )
       set_tests_properties (H5FC-${testname}-${testfile} PROPERTIES
           DEPENDS H5FC-${testname}-${testfile}-tmpfile
@@ -272,7 +272,7 @@
               -D "TEST_OUTPUT=testfiles/${testname}.out"
               -D "TEST_SKIP_COMPARE=TRUE"
               -D "TEST_EXPECT=${resultcode}"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5FC-${testname} PROPERTIES
           DEPENDS "H5FC-${testname}-tmpfile"
@@ -320,7 +320,7 @@
               -D "TEST_OUTPUT=testfiles/${testname}.out"
               -D "TEST_SKIP_COMPARE=TRUE"
               -D "TEST_EXPECT=${resultcode}"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5FC_TEST_CHECK_IDX-${testname} PROPERTIES
           DEPENDS "H5FC_TEST_CHECK_IDX-${testname}-tmpfile"
@@ -368,7 +368,7 @@
               -D "TEST_OUTPUT=testfiles/${testname}.out"
               -D "TEST_SKIP_COMPARE=TRUE"
               -D "TEST_EXPECT=0"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5FC_H5DUMP_CHECK-${testname} PROPERTIES
           DEPENDS "H5FC_H5DUMP_CHECK-${testname}-tmpfile"
@@ -383,7 +383,7 @@
               -D "TEST_OUTPUT=testfiles/${testname}_chk.out"
               -D "TEST_EXPECT=0"
               -D "TEST_REFERENCE=testfiles/${testname}.ddl"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
       set_tests_properties (H5FC_H5DUMP_CHECK-${testname}-dump PROPERTIES
           DEPENDS "H5FC_H5DUMP_CHECK-${testname}"

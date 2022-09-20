@@ -278,7 +278,7 @@ done:
  *---------------------------------------------------------------------------
  */
 herr_t
-H5VLget_cap_flags(hid_t connector_id, unsigned *cap_flags /*out*/)
+H5VLget_cap_flags(hid_t connector_id, uint64_t *cap_flags /*out*/)
 {
     H5VL_class_t *cls;                 /* VOL connector's class struct */
     herr_t        ret_value = SUCCEED; /* Return value */
@@ -6424,7 +6424,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_introspect_get_cap_flags(const void *info, const H5VL_class_t *cls, unsigned *cap_flags)
+H5VL_introspect_get_cap_flags(const void *info, const H5VL_class_t *cls, uint64_t *cap_flags)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -6458,7 +6458,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLintrospect_get_cap_flags(const void *info, hid_t connector_id, unsigned *cap_flags /*out*/)
+H5VLintrospect_get_cap_flags(const void *info, hid_t connector_id, uint64_t *cap_flags /*out*/)
 {
     H5VL_class_t *cls;                 /* VOL connector's class struct */
     herr_t        ret_value = SUCCEED; /* Return value */

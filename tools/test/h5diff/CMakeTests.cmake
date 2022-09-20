@@ -412,7 +412,7 @@
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.txt"
               -D "TEST_APPEND=EXIT CODE:"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
     set_tests_properties (H5DIFF-${resultfile} PROPERTIES
@@ -442,7 +442,7 @@
               -D "TEST_REF_APPEND=EXIT CODE: [0-9]"
               -D "TEST_REF_FILTER=EXIT CODE: 0"
               -D "TEST_SORT_COMPARE=TRUE"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
     set_tests_properties (MPI_TEST_H5DIFF-${resultfile} PROPERTIES
@@ -467,7 +467,7 @@
                 -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
                 -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}"
                 -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
-                -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+                -P "${HDF_RESOURCES_DIR}/runTest.cmake"
         )
       else ()
         add_test (
@@ -484,7 +484,7 @@
                 -D "TEST_ENV_VAR=HDF5_PLUGIN_PATH"
                 -D "TEST_ENV_VALUE=${CMAKE_BINARY_DIR}/plugins"
                 -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
-                -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+                -P "${HDF_RESOURCES_DIR}/runTest.cmake"
         )
       endif ()
     endif ()

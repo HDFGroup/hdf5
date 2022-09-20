@@ -27,7 +27,7 @@ static const H5VL_class_t null_vol_g = {
     NULL_VOL_CONNECTOR_VALUE, /* value            */
     NULL_VOL_CONNECTOR_NAME,  /* name             */
     0,                        /* connector version */
-    0,                        /* capability flags */
+    H5VL_CAP_FLAG_NONE,       /* capability flags */
     NULL,                     /* initialize       */
     NULL,                     /* terminate        */
     {

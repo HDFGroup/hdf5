@@ -18,6 +18,8 @@ package hdf.hdf5lib.callbacks;
  */
 public interface H5P_prp_compare_func_cb extends Callbacks {
     /**
+     * @ingroup JCALL
+     *
      *  application callback for each property list
      *
      *  @param value1  the value of the first property being compared

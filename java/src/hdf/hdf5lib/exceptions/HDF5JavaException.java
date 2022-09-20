@@ -14,21 +14,27 @@
 package hdf.hdf5lib.exceptions;
 
 /**
- * <p>
+ * @page ERRORSJAVA Java Wrapper Errors and Exceptions
  * The class HDF5JavaException returns errors from the Java wrapper of theHDF5
  * library.
  * <p>
  * These errors include Java configuration errors, security violations, and
  * resource exhaustion.
+ *
+ * @defgroup JERRJAVA HDF5 Library Java Exception Interface
  */
 public class HDF5JavaException extends HDF5Exception {
     /**
+     * @ingroup JERRJAVA
+     *
      * Constructs an <code>HDF5JavaException</code> with no specified detail
      * message.
      */
     public HDF5JavaException() { super(); }
 
     /**
+     * @ingroup JERRJAVA
+     *
      * Constructs an <code>HDF5JavaException</code> with the specified detail
      * message.
      *
