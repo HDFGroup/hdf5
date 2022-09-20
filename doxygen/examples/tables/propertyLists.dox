@@ -1,0 +1,810 @@
+/** Property List Tables
+ *
+//! [plcr_table]
+<table>
+<caption id="table_plcr_id" border="1" style="background-color:whitesmoke;">Property list class root functions (H5P)</caption>
+<tr>
+<th>Function</th>
+<th>Purpose</th>
+</tr>
+<tr>
+<td>#H5Pclose</td>
+<td>Terminates access to a property list.</td>
+</tr>
+<tr>
+<td>#H5Pcopy</td>
+<td>Copies an existing property list to create a new property list.</td>
+</tr>
+<tr>
+<td>#H5Pcreate</td>
+<td>Creates a new property list as an instance of a property list class.</td>
+</tr>
+<tr>
+<td>#H5Pencode/#H5Pdecode</td>
+<td>Encodes/ecodes property list into/from a binary object buffer.</td>
+</tr>
+<tr>
+<td>#H5Pget_class</td>
+<td>Returns the property list class identifier for a property list</td>
+</tr>
+</table>
+//! [plcr_table]
+ *
+//! [plcra_table]
+<table>
+<caption id="table_plcra_id" border="1" style="background-color:whitesmoke;">Property list class root (Advanced) functions (H5P)</caption>
+<tr>
+<th>Function</th>
+<th>Purpose</th>
+</tr>
+<tr>
+<td>#H5Pclose_class</td>
+<td>Closes an existing property list class.</td>
+</tr>
+<tr>
+<td>#H5Pcopy_prop</td>
+<td>Copies a property from one list or class to another.</td>
+</tr>
+<tr>
+<td>#H5Pcreate_class</td>
+<td>Creates a new property list class.</td>
+</tr>
+<tr>
+<td>#H5Pequal</td>
+<td>Compares two property lists or classes for equality.</td>
+</tr>
+<tr>
+<td>#H5Pexist</td>
+<td>Queries whether a property name exists in a property list or class.</td>
+</tr>
+<tr>
+<td>#H5Pget_class_name</td>
+<td>Retrieves the name of a class.</td>
+</tr>
+<tr>
+<td>#H5Pget_class_parent</td>
+<td>Retrieves the parent class of a property class.</td>
+</tr>
+<tr>
+<td>#H5Pget_nprops</td>
+<td>Queries the number of properties in a property list or class.</td>
+</tr>
+<tr>
+<td>#H5Pget_size</td>
+<td>Queries the size of a property value in bytes.</td>
+</tr>
+<tr>
+<td>#H5Pinsert</td>
+<td>Registers a temporary property with a property list.</td>
+</tr>
+<tr>
+<td>#H5Pisa_class</td>
+<td>Determines whether a property list is a member of a class.</td>
+</tr>
+<tr>
+<td>#H5Piterate</td>
+<td>Iterates over properties in a property class or list</td>
+</tr>
+<tr>
+<td>#H5Pregister/H5Punregister</td>
+<td>Registers/removes a permanent property with/from a property list class</td>
+</tr>
+<tr>
+<td>#H5Premove</td>
+<td>Removes a property from a property list.</td>
+</tr>
+<tr>
+<td>#H5Pset/#H5Pget</td>
+<td>Sets/queries a property list value</td>
+</tr>
+</table>
+//! [plcra_table]
+ *
+//! [fcpl_table]
+<table>
+<caption id="table_fcpl_id" border="1" style="background-color:whitesmoke;">File creation property list functions (H5P)</caption>
+<tr>
+<th>Function</th>
+<th>Purpose</th>
+</tr>
+<tr>
+<td>#H5Pset_userblock/#H5Pget_userblock</td>
+<td>Sets/retrieves size of userblock.</td>
+</tr>
+<tr>
+<td>#H5Pset_sizes/#H5Pget_sizes</td>
+<td>Sets/retrieves byte size of offsets and lengths used to address objects in HDF5 file.</td>
+</tr>
+<tr>
+<td>#H5Pset_sym_k/#H5Pget_sym_k</td>
+<td>Sets/retrieves size of parameters used to control symbol table nodes.</td>
+</tr>
+<tr>
+<td>#H5Pset_istore_k/#H5Pget_istore_k</td>
+<td>Sets/retrieves size of parameter used to control B-trees for indexing chunked datasets.</td>
+</tr>
+<tr>
+<td>#H5Pset_file_image</td>
+<td>Sets an initial file image in a memory buffer.</td>
+</tr>
+<tr>
+<td>#H5Pget_file_image</td>
+<td>Retrieves a copy of the file image designated as the initial content and structure of a file.</td>
+</tr>
+<tr>
+<td>#H5Pset_file_space_page_size/#H5Pget_file_space_page_size</td>
+<td>Sets or retrieves the file space page size used in paged aggregation and paged buffering.</td>
+</tr>
+<tr>
+<td>#H5Pset_file_space_strategy/#H5Pget_file_space_strategy</td>
+<td>Sets or retrieves the file space handling strategy, the persisting free-space and the free-space section size.</td>
+</tr>
+<tr>
+<td>#H5Pset_shared_mesg_nindexes/#H5Pget_shared_mesg_nindexes</td>
+<td>Sets or retrieves number of shared object header message indexes in file
+creation property list.</td>
+</tr>
+<tr>
+<td>#H5Pset_shared_mesg_index</td>
+<td>Configures the specified shared object header message index.</td>
+</tr>
+<tr>
+<td>#H5Pget_shared_mesg_index</td>
+<td>Retrieves the configuration settings for a shared message index.</td>
+</tr>
+<tr>
+<td>#H5Pset_shared_mesg_phase_change/#H5Pget_shared_mesg_phase_change</td>
+<td>Sets or retrieves shared object header message storage phase change thresholds.</td>
+</tr>
+<tr>
+<td>#H5Pget_version</td>
+<td></td>
+</tr>
+</table>
+//! [fcpl_table]
+ *
+//! [fapl_table]
+<table>
+<caption id="table_fapl_id" border="1" style="background-color:whitesmoke;">File access property list functions (H5P)</caption>
+<tr>
+<th>Function</th>
+<th>Purpose</th>
+</tr>
+<tr>
+<td>#H5Pset_alignment/#H5Pget_alignment</td>
+<td>Sets/retrieves alignment properties.</td>
+</tr>
+<tr>
+<td>#H5Pset_cache/#H5Pget_cache</td>
+<td>Sets/retrieves metadata cache and raw data chunk cache parameters.</td>
+</tr>
+<tr>
+<td>#H5Pset_elink_file_cache_size/#H5Pget_elink_file_cache_size</td>
+<td>Sets/retrieves the size of the external link open file cache from the specified
+file access property list.</td>
+</tr>
+<tr>
+<td>#H5Pset_gc_references/#H5Pget_gc_references</td>
+<td>Sets/retrieves garbage collecting references flag.</td>
+</tr>
+<tr>
+<td>#H5Pset_family_offset</td>
+<td>Sets offset property for low-level access to a file in a family of files.</td>
+</tr>
+<tr>
+<td>#H5Pget_family_offset</td>
+<td>Retrieves a data offset from the file access property list.</td>
+</tr>
+<tr>
+<td>#H5Pset_meta_block_size/#H5Pget_meta_block_size</td>
+<td>Sets the minimum metadata blocksize or retrieves the current metadata block size setting.</td>
+</tr>
+<tr>
+<td>#H5Pset_mdc_config</td>
+<td>Set the initial metadata cache configuration in the indicated File Access Property List
+to the supplied value.</td>
+</tr>
+<tr>
+<td>#H5Pget_mdc_config</td>
+<td>Get the current initial metadata cache config-uration from the indicated File Access
+Property List.</td>
+</tr>
+<tr>
+<td>#H5Pset_sieve_buf_size/#H5Pget_sieve_buf_size</td>
+<td>Sets/retrieves maximum size of data sieve buffer.</td>
+</tr>
+<tr>
+<td>#H5Pset_libver_bounds</td>
+<td>Sets bounds on library versions, and indirectly format versions, to be used
+when creating objects.</td>
+</tr>
+<tr>
+<td>#H5Pget_libver_bounds</td>
+<td>Retrieves library version bounds settings that indirectly control the format
+versions used when creating objects.</td>
+</tr>
+<tr>
+<td>#H5Pset_small_data_block_size</td>
+<td>Sets the size of a contiguous block reserved for small data.</td>
+</tr>
+<tr>
+<td>#H5Pget_small_data_block_size</td>
+<td>Retrieves the current small data block size setting.</td>
+</tr>
+</table>
+//! [fapl_table]
+ *
+//! [fd_pl_table]
+<table>
+<caption id="table_fd_pl_id" border="1" style="background-color:whitesmoke;">File driver property list functions (H5P)</caption>
+<tr>
+<th>Function</th>
+<th>Purpose</th>
+</tr>
+<tr>
+<td>#H5Pset_driver</td>
+<td>Sets a file driver.</td>
+</tr>
+<tr>
+<td>#H5Pget_driver</td>
+<td>Returns the identifier for the driver used to create a file.</td>
+</tr>
+<tr>
+<td>#H5Pget_driver_info</td>
+<td>Returns a pointer to file driver information.</td>
+</tr>
+<tr>
+<td>#H5Pset_fapl_core/#H5Pget_fapl_core</td>
+<td>Sets the driver for buffered memory files (in RAM) or retrieves information regarding
+the driver.</td>
+</tr>
+<tr>
+<td>#H5Pset_fapl_direct/#H5Pget_fapl_direct</td>
+<td>Sets up use of the direct I/O driver or retrieves the direct I/O driver settings.</td>
+</tr>
+<tr>
+<td>#H5Pset_fapl_family/#H5Pget_fapl_family</td>
+<td>Sets driver for file families, designed for systems that do not support files
+larger than 2 gigabytes, or retrieves information regarding driver.</td>
+</tr>
+<tr>
+<td>#H5Pset_fapl_log</td>
+<td>Sets logging driver.</td>
+</tr>
+<tr>
+<td>#H5Pset_fapl_mpio/#H5Pget_fapl_mpio</td>
+<td>Sets driver for files on parallel file systems (MPI I/O) or retrieves information
+regarding the driver.</td>
+</tr>
+<tr>
+<td>H5Pset_fapl_mpiposix/H5Pget_fapl_mpiposix</td>
+<td>No longer available.</td>
+</tr>
+<tr>
+<td>#H5Pset_fapl_multi/#H5Pget_fapl_multi</td>
+<td>Sets driver for multiple files, separating categories of metadata and raw data,
+or retrieves information regarding driver.</td>
+</tr>
+<tr>
+<td>#H5Pset_fapl_sec2</td>
+<td>Sets driver for unbuffered permanent files or retrieves information regarding driver.</td>
+</tr>
+<tr>
+<td>#H5Pset_fapl_split</td>
+<td>Sets driver for split files, a limited case of multiple files with one metadata file
+and one raw data file.</td>
+</tr>
+<tr>
+<td>#H5Pset_fapl_stdio</td>
+<td>Sets driver for buffered permanent files.</td>
+</tr>
+<tr>
+<td>#H5Pset_fapl_windows</td>
+<td>Sets the Windows I/O driver.</td>
+</tr>
+<tr>
+<td>#H5Pset_multi_type</td>
+<td>Specifies type of data to be accessed via the MULTI driver enabling more direct access.</td>
+</tr>
+<tr>
+<td>#H5Pget_multi_type</td>
+<td>Retrieves type of data property for MULTI driver.</td>
+</tr>
+</table>
+//! [fd_pl_table]
+ *
+//! [dcpl_table]
+<table>
+<caption id="table_dcpl_id" border="1" style="background-color:whitesmoke;">Dataset creation property list functions (H5P)</caption>
+<tr>
+<th>Function</th>
+<th>Purpose</th>
+</tr>
+<tr>
+<td>#H5Pset_layout</td>
+<td>Sets the type of storage used to store the raw data for a dataset.</td>
+</tr>
+<tr>
+<td>#H5Pget_layout</td>
+<td>Returns the layout of the raw data for a dataset.</td>
+</tr>
+<tr>
+<td>#H5Pset_chunk</td>
+<td>Sets the size of the chunks used to store a chunked layout dataset.</td>
+</tr>
+<tr>
+<td>#H5Pget_chunk</td>
+<td>Retrieves the size of chunks for the raw data of a chunked layout dataset.</td>
+</tr>
+<tr>
+<td>#H5Pset_deflate</td>
+<td>Sets compression method and compression level.</td>
+</tr>
+<tr>
+<td>#H5Pset_fill_value</td>
+<td>Sets the fill value for a dataset.</td>
+</tr>
+<tr>
+<td>#H5Pget_fill_value</td>
+<td>Retrieves a dataset fill value.</td>
+</tr>
+<tr>
+<td>#H5Pfill_value_defined</td>
+<td>Determines whether the fill value is defined.</td>
+</tr>
+<tr>
+<td>#H5Pset_fill_time</td>
+<td>Sets the time when fill values are written to a dataset.</td>
+</tr>
+<tr>
+<td>#H5Pget_fill_time</td>
+<td>Retrieves the time when fill value are written to a dataset.</td>
+</tr>
+<tr>
+<td>#H5Pset_alloc_time</td>
+<td>Sets the timing for storage space allocation.</td>
+</tr>
+<tr>
+<td>#H5Pget_alloc_time</td>
+<td>Retrieves the timing for storage space allocation.</td>
+</tr>
+<tr>
+<td>#H5Pset_filter</td>
+<td>Adds a filter to the filter pipeline.</td>
+</tr>
+<tr>
+<td>#H5Pall_filters_avail</td>
+<td>Verifies that all required filters are available.</td>
+</tr>
+<tr>
+<td>#H5Pget_nfilters</td>
+<td>Returns the number of filters in the pipeline.</td>
+</tr>
+<tr>
+<td>#H5Pget_filter</td>
+<td>Returns information about a filter in a pipeline.
+The C function is a macro: \see \ref api-compat-macros.</td>
+</tr>
+<tr>
+<td>#H5Pget_filter_by_id</td>
+<td>Returns information about the specified filter.
+The C function is a macro: \see \ref api-compat-macros.</td>
+</tr>
+<tr>
+<td>#H5Pmodify_filter</td>
+<td>Modifies a filter in the filter pipeline.</td>
+</tr>
+<tr>
+<td>#H5Premove_filter</td>
+<td>Deletes one or more filters in the filter pipeline.</td>
+</tr>
+<tr>
+<td>#H5Pset_fletcher32</td>
+<td>Sets up use of the Fletcher32 checksum filter.</td>
+</tr>
+<tr>
+<td>#H5Pset_nbit</td>
+<td>Sets up use of the n-bit filter.</td>
+</tr>
+<tr>
+<td>#H5Pset_scaleoffset</td>
+<td>Sets up use of the scale-offset filter.</td>
+</tr>
+<tr>
+<td>#H5Pset_shuffle</td>
+<td>Sets up use of the shuffle filter.</td>
+</tr>
+<tr>
+<td>#H5Pset_szip</td>
+<td>Sets up use of the Szip compression filter.</td>
+</tr>
+<tr>
+<td>#H5Pset_external</td>
+<td>Adds an external file to the list of external files.</td>
+</tr>
+<tr>
+<td>#H5Pget_external_count</td>
+<td>Returns the number of external files for a dataset.</td>
+</tr>
+<tr>
+<td>#H5Pget_external</td>
+<td>Returns information about an external file.</td>
+</tr>
+<tr>
+<td>#H5Pset_char_encoding</td>
+<td>Sets the character encoding used to encode a string. Use to set ASCII or UTF-8 character
+encoding for object names.</td>
+</tr>
+<tr>
+<td>#H5Pget_char_encoding</td>
+<td>Retrieves the character encoding used to create a string.</td>
+</tr>
+</table>
+//! [dcpl_table]
+ *
+//! [dapl_table]
+<table>
+<caption id="table_dapl_id" border="1" style="background-color:whitesmoke;">Dataset access property list functions (H5P)</caption>
+<tr>
+<th>Function</th>
+<th>Purpose</th>
+</tr>
+<tr>
+<td>#H5Pset_buffer</td>
+<td>Sets type conversion and background buffers.</td>
+</tr>
+<tr>
+<td>#H5Pget_buffer</td>
+<td>Reads buffer settings.</td>
+</tr>
+<tr>
+<td>#H5Pset_chunk_cache/#H5Pget_chunk_cache</td>
+<td>Sets/gets the raw data chunk cache parameters.</td>
+</tr>
+<tr>
+<td>#H5Pset_edc_check/#H5Pget_edc_check</td>
+<td>Sets/gets whether to enable error-detection when reading a dataset.</td>
+</tr>
+<tr>
+<td>#H5Pset_filter_callback</td>
+<td>Sets user-defined filter callback function.</td>
+</tr>
+<tr>
+<td>#H5Pset_data_transform/#H5Pget_data_transform</td>
+<td>Sets/gets a data transform expression.</td>
+</tr>
+<tr>
+<td>#H5Pset_type_conv_cb/#H5Pget_type_conv_cb</td>
+<td>Sets/gets user-defined datatype conversion callback function.</td>
+</tr>
+<tr>
+<td>#H5Pset_hyper_vector_size/#H5Pget_hyper_vector_size</td>
+<td>Sets/gets number of I/O vectors to be read/written in hyperslab I/O.</td>
+</tr>
+<tr>
+<td>#H5Pset_btree_ratios/#H5Pget_btree_ratios</td>
+<td>Sets/gets B-tree split ratios for a dataset transfer property list.</td>
+</tr>
+<tr>
+<td>#H5Pset_vlen_mem_manager/#H5Pget_vlen_mem_manager</td>
+<td>Sets/gets the memory manager for variable-length datatype allocation in #H5Dread and
+#H5Dvlen_reclaim.</td>
+</tr>
+<tr>
+<td>#H5Pset_dxpl_mpio/#H5Pget_dxpl_mpio</td>
+<td>Sets/gets data transfer mode.</td>
+</tr>
+<tr>
+<td>#H5Pset_dxpl_mpio_chunk_opt</td>
+<td>Sets a flag specifying linked-chunk I/O or multi-chunk I/O.</td>
+</tr>
+<tr>
+<td>#H5Pset_dxpl_mpio_chunk_opt_num</td>
+<td>Sets a numeric threshold for linked-chunk I/O.</td>
+</tr>
+<tr>
+<td>#H5Pset_dxpl_mpio_chunk_opt_ratio</td>
+<td>Sets a ratio threshold for collective I/O.</td>
+</tr>
+<tr>
+<td>#H5Pset_dxpl_mpio_collective_opt</td>
+<td>Sets a flag governing the use of independent versus collective I/O.</td>
+</tr>
+<tr>
+<td>#H5Pset_multi_type/#H5Pget_multi_type</td>
+<td>Sets/gets the type of data property for the MULTI driver.</td>
+</tr>
+<tr>
+<td>#H5Pset_small_data_block_size/#H5Pget_small_data_block_size</td>
+<td>Sets/gets the size of a contiguous block reserved for small data.</td>
+</tr>
+</table>
+//! [dapl_table]
+ *
+//! [dxpl_table]
+<table>
+<caption id="table_dxpl_id" border="1" style="background-color:whitesmoke;">Data transfer property list functions (H5P)</caption>
+<tr>
+<th>C Function</th>
+<th>Purpose</th>
+</tr>
+<tr>
+<td>#H5Pset_buffer</td>
+<td>Maximum size for the type conversion buffer and the background buffer. May also supply
+pointers to application-allocated buffers.</td>
+</tr>
+<tr>
+<td>#H5Pset_hyper_vector_size</td>
+<td>set the number of "I/O vectors" (offset and length pairs) which are to be
+accumulated in memory before being issued to the lower levels
+of the library for reading or writing the actual data.</td>
+</tr>
+<tr>
+<td>#H5Pset_btree_ratios</td>
+<td>Set the B-tree split ratios for a dataset transfer property list. The split ratios determine
+what percent of children go in the first node when a node splits.</td>
+</tr>
+</table>
+//! [dxpl_table]
+ *
+//! [gcpl_table]
+<table>
+<caption id="table_gcpl_id">Group creation property list functions (H5P)</caption>
+<tr>
+<th>Function</th>
+<th>Purpose</th>
+</tr>
+<tr>
+<td>#H5Pall_filters_avail</td>
+<td>Verifies that all required filters are available.</td>
+</tr>
+<tr>
+<td>#H5Pget_filter</td>
+<td>Returns information about a filter in a pipeline. The
+C function is a macro: \see \ref api-compat-macros.</td>
+</tr>
+<tr>
+<td>#H5Pget_filter_by_id</td>
+<td>Returns information about the specified filter. The
+C function is a macro: \see \ref api-compat-macros.</td>
+</tr>
+<tr>
+<td>#H5Pget_nfilters</td>
+<td>Returns the number of filters in the pipeline.</td>
+</tr>
+<tr>
+<td>#H5Pmodify_filter</td>
+<td>Modifies a filter in the filter pipeline.</td>
+</tr>
+<tr>
+<td>#H5Premove_filter</td>
+<td>Deletes one or more filters in the filter pipeline.</td>
+</tr>
+<tr>
+<td>#H5Pset_deflate</td>
+<td>Sets the deflate (GNU gzip) compression method and compression level.</td>
+</tr>
+<tr>
+<td>#H5Pset_filter</td>
+<td>Adds a filter to the filter pipeline.</td>
+</tr>
+<tr>
+<td>#H5Pset_fletcher32</td>
+<td>Sets up use of the Fletcher32 checksum filter.</td>
+</tr>
+<tr>
+<td>#H5Pset_link_phase_change</td>
+<td>Sets the parameters for conversion between compact and dense groups.</td>
+</tr>
+<tr>
+<td>#H5Pget_link_phase_change</td>
+<td>Queries the settings for conversion between compact and dense groups.</td>
+</tr>
+<tr>
+<td>#H5Pset_est_link_info</td>
+<td>Sets estimated number of links and length of link names in a group.</td>
+</tr>
+<tr>
+<td>#H5Pget_est_link_info</td>
+<td>Queries data required to estimate required local heap or object header size.</td>
+</tr>
+<tr>
+<td>#H5Pset_nlinks</td>
+<td>Sets maximum number of soft or user-defined link traversals.</td>
+</tr>
+<tr>
+<td>#H5Pget_nlinks</td>
+<td>Retrieves the maximum number of link traversals.</td>
+</tr>
+<tr>
+<td>#H5Pset_link_creation_order</td>
+<td>Sets creation order tracking and indexing for links in a group.</td>
+</tr>
+<tr>
+<td>#H5Pget_link_creation_order</td>
+<td>Queries whether link creation order is tracked and/or indexed in a group.</td>
+</tr>
+<tr>
+<td>#H5Pset_create_intermediate_group</td>
+<td>Specifies in the property list whether to create missing intermediate groups.</td>
+</tr>
+<tr>
+<td>#H5Pget_create_intermediate_group</td>
+<td>Determines whether the property is set to enable creating missing intermediate groups.</td>
+</tr>
+<tr>
+<td>#H5Pset_char_encoding</td>
+<td>Sets the character encoding used to encode a string. Use to set ASCII or UTF-8 character
+encoding for object names.</td>
+</tr>
+<tr>
+<td>#H5Pget_char_encoding</td>
+<td>Retrieves the character encoding used to create a string.</td>
+</tr>
+</table>
+//! [gcpl_table]
+ *
+//! [gapl_table]
+<table>
+<caption id="table_gapl_id" border="1" style="background-color:whitesmoke;">Group access property list functions (H5P)</caption>
+<tr>
+<th>Function</th>
+<th>Purpose</th>
+</tr>
+<tr>
+<td>#H5Pset_all_coll_metadata_ops/#H5Pget_all_coll_metadata_ops</td>
+<td>Sets/gets metadata I/O mode for read operations</td>
+</tr>
+</table>
+//! [gapl_table]
+ *
+//! [lapl_table]
+<table>
+<caption id="table_lapl_id" border="1" style="background-color:whitesmoke;">Link access property list functions (H5P)</caption>
+<tr>
+<th>Function</th>
+<th>Purpose</th>
+</tr>
+<tr>
+<td>#H5Pset_elink_cb/#H5Pget_elink_cb</td>
+<td>Sets/gets the external link traversal callback function.</td>
+</tr>
+<tr>
+<td>#H5Pset_elink_acc_flags/#H5Pget_elink_acc_flags</td>
+<td>Sets/gets the external link traversal file access flag.</td>
+</tr>
+<tr>
+<td>#H5Pset_elink_fapl/#H5Pget_elink_fapl</td>
+<td>Sets/gets a file access property list for use in accessing a file pointed to by an external link</td>
+</tr>
+<tr>
+<td>#H5Pset_elink_prefix/#H5Pget_elink_prefix</td>
+<td>Sets/gets prefix to be applied to external link paths.</td>
+</tr>
+<tr>
+<td>#H5Pset_nlinks/#H5Pget_nlinks</td>
+<td>Sets/gets maximum number of soft or user-defined link traversals.</td>
+</tr>
+</table>
+//! [lapl_table]
+ *
+//! [ocpl_table]
+<table>
+<caption id="table_ocpl_id" border="1" style="background-color:whitesmoke;">Object creation property list functions (H5P)</caption>
+<tr>
+<th>Function</th>
+<th>Purpose</th>
+</tr>
+<tr>
+<td>#H5Pset_attr_creation_order/#H5Pget_attr_creation_order</td>
+<td>Sets/gets tracking and indexing of attribute creation order.</td>
+</tr>
+<tr>
+<td>#H5Pset_attr_phase_change/#H5Pget_attr_phase_change</td>
+<td>Sets/gets attribute storage phase change thresholds</td>
+</tr>
+<tr>
+<td>#H5Pset_filter/#H5Pget_filter</td>
+<td>Adds/gets a filter to/from the filter pipeline.</td>
+</tr>
+<tr>
+<td>#H5Pget_filter_by_id</td>
+<td>Returns information about a filter in a pipeline.</td>
+</tr>
+<tr>
+<td>#H5Pget_nfilters</td>
+<td>Returns information about the specified filter.</td>
+</tr>
+<tr>
+<td>#H5Pset_obj_track_times/#H5Pget_obj_track_times</td>
+<td>Sets/gets the recording of times associated with an object.</td>
+</tr>
+<tr>
+<td>#H5Pmodify_filter</td>
+<td>Modifies a filter in the filter pipeline.</td>
+</tr>
+<tr>
+<td>#H5Premove_filter</td>
+<td>Delete one or more filters in the filter pipeline.</td>
+</tr>
+<tr>
+<td>#H5Pset_fletcher32</td>
+<td>Sets up use of the Fletcher32 checksum filter.</td>
+</tr>
+</table>
+//! [ocpl_table]
+ *
+//! [ocpypl_table]
+<table>
+<caption id="table_ocpypl_id" border="1" style="background-color:whitesmoke;">Object copy property list functions (H5P)</caption>
+<tr>
+<th>Function</th>
+<th>Purpose</th>
+</tr>
+<tr>
+<td>#H5Padd_merge_committed_dtype_path</td>
+<td>Adds a path to the list of paths that will be searched in the destination file for a matching committed datatype.</td>
+</tr>
+<tr>
+<td>#H5Pfree_merge_committed_dtype_paths</td>
+<td>Clears the list of paths stored in the object copy property list.</td>
+</tr>
+<tr>
+<td>#H5Pset_copy_object/#H5Pget_copy_object</td>
+<td>Sets/gets the properties to be used when an object is copied.</td>
+</tr>
+<tr>
+<td>#H5Pset_mcdt_search_cb/#H5Pget_mcdt_search_cb</td>
+<td>Sets/gets the callback function that H5Ocopy() will invoke before searching for a matching committed datatype.</td>
+</tr>
+</table>
+//! [ocpypl_table]
+ *
+//! [strcpl_table]
+<table>
+<caption id="table_strcpl_id" border="1" style="background-color:whitesmoke;">String creation property list functions (H5P)</caption>
+<tr>
+<th>Function</th>
+<th>Purpose</th>
+</tr>
+<tr>
+<td>#H5Pset_char_encoding/#H5Pget_char_encoding</td>
+<td>Sets/gets the character encoding used to encode link and attribute names.</td>
+</tr>
+<tr>
+<td>#H5Pset_create_intermediate_group/#H5Pget_create_intermediate_group</td>
+<td>Specifies/retrieves whether to create missing intermediate groups.</td>
+</tr>
+</table>
+//! [strcpl_table]
+ *
+//! [lcpl_table]
+<table>
+<caption id="table_lcpl_id" border="1" style="background-color:whitesmoke;">Link creation property list functions (H5P)</caption>
+<tr>
+<th>Function</th>
+<th>Purpose</th>
+</tr>
+<tr>
+<td>#H5Pset_create_intermediate_group/#H5Pget_create_intermediate_group</td>
+<td>Specifies/retrieves whether to create missing intermediate groups.</td>
+</tr>
+</table>
+//! [lcpl_table]
+ *
+//! [acpl_table]
+<table>
+<caption id="table_acpl_id" border="1" style="background-color:whitesmoke;">Attribute creation property list functions (H5P)</caption>
+<tr>
+<th>Function</th>
+<th>Purpose</th>
+</tr>
+<tr>
+<td>#H5Pset_char_encoding/#H5Pget_char_encoding</td>
+<td>Sets/gets the character encoding used to encode link and attribute names.</td>
+</tr>
+</table>
+//! [acpl_table]
+ *
+ */
+ 

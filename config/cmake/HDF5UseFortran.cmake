@@ -19,10 +19,8 @@ enable_language (Fortran)
 set (HDF_PREFIX "H5")
 include (CheckFortranFunctionExists)
 
-if (NOT CMAKE_VERSION VERSION_LESS "3.14.0")
-  include (CheckFortranSourceRuns)
-  include (CheckFortranSourceCompiles)
-endif ()
+include (CheckFortranSourceRuns)
+include (CheckFortranSourceCompiles)
 
 # Read source line beginning at the line matching Input:"START" and ending at the line matching Input:"END"
 macro (READ_SOURCE SOURCE_START SOURCE_END RETURN_VAR)
@@ -36,9 +34,7 @@ set (RUN_OUTPUT_PATH_DEFAULT ${CMAKE_BINARY_DIR})
 # so this one is used.
 #-----------------------------------------------------------------------------
 macro (FORTRAN_RUN FUNCTION_NAME SOURCE_CODE RUN_RESULT_VAR1 COMPILE_RESULT_VAR1 RETURN_VAR RETURN_OUTPUT_VAR)
-    if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-      message (VERBOSE "Detecting Fortran ${FUNCTION_NAME}")
-    endif ()
+    message (VERBOSE "Detecting Fortran ${FUNCTION_NAME}")
     file (WRITE
         ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testFortranCompiler1.f90
         "${SOURCE_CODE}"
@@ -54,24 +50,18 @@ macro (FORTRAN_RUN FUNCTION_NAME SOURCE_CODE RUN_RESULT_VAR1 COMPILE_RESULT_VAR1
     if (${COMPILE_RESULT_VAR})
       set(${RETURN_VAR} ${RUN_RESULT_VAR})
       if (${RUN_RESULT_VAR} MATCHES 0)
-        if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-          message (VERBOSE "Testing Fortran ${FUNCTION_NAME} - OK")
-        endif ()
+        message (VERBOSE "Testing Fortran ${FUNCTION_NAME} - OK")
         file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
             "Determining if the Fortran ${FUNCTION_NAME} exists passed\n"
         )
       else ()
-        if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-          message (VERBOSE "Testing Fortran ${FUNCTION_NAME} - Fail")
-        endif ()
+        message (VERBOSE "Testing Fortran ${FUNCTION_NAME} - Fail")
         file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
             "Determining if the Fortran ${FUNCTION_NAME} exists failed: ${RUN_RESULT_VAR}\n"
         )
       endif ()
     else ()
-        if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-          message (VERBOSE "Compiling Fortran ${FUNCTION_NAME} - Fail")
-        endif ()
+        message (VERBOSE "Compiling Fortran ${FUNCTION_NAME} - Fail")
         file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
             "Determining if the Fortran ${FUNCTION_NAME} compiles failed: ${COMPILE_RESULT_VAR}\n"
         )
@@ -82,11 +72,7 @@ endmacro ()
 #  Check to see C_LONG_DOUBLE is available
 
 READ_SOURCE("PROGRAM PROG_FC_HAVE_C_LONG_DOUBLE" "END PROGRAM PROG_FC_HAVE_C_LONG_DOUBLE" SOURCE_CODE)
-if (NOT CMAKE_VERSION VERSION_LESS "3.14.0")
-  check_fortran_source_compiles (${SOURCE_CODE} FORTRAN_HAVE_C_LONG_DOUBLE SRC_EXT f90)
-else ()
-  CHECK_FORTRAN_FEATURE(c_long_double "${SOURCE_CODE}" FORTRAN_HAVE_C_LONG_DOUBLE)
-endif ()
+check_fortran_source_compiles (${SOURCE_CODE} FORTRAN_HAVE_C_LONG_DOUBLE SRC_EXT f90)
 
 if (${FORTRAN_HAVE_C_LONG_DOUBLE})
   set (${HDF_PREFIX}_FORTRAN_HAVE_C_LONG_DOUBLE 1)
@@ -97,11 +83,7 @@ endif ()
 # Check to see C_LONG_DOUBLE is different from C_DOUBLE
 
 READ_SOURCE("MODULE type_mod" "END PROGRAM PROG_FC_C_LONG_DOUBLE_EQ_C_DOUBLE" SOURCE_CODE)
-if (NOT CMAKE_VERSION VERSION_LESS "3.14.0")
-  check_fortran_source_compiles (${SOURCE_CODE} FORTRAN_C_LONG_DOUBLE_IS_UNIQUE SRC_EXT f90)
-else ()
-  CHECK_FORTRAN_FEATURE(c_long_double "${SOURCE_CODE}" FORTRAN_C_LONG_DOUBLE_IS_UNIQUE)
-endif ()
+check_fortran_source_compiles (${SOURCE_CODE} FORTRAN_C_LONG_DOUBLE_IS_UNIQUE SRC_EXT f90)
 if (${FORTRAN_C_LONG_DOUBLE_IS_UNIQUE})
   set (${HDF_PREFIX}_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE 1)
 else ()
@@ -212,9 +194,7 @@ string (REGEX REPLACE " " "" pack_int_sizeof "${pack_int_sizeof}")
 
 set (PAC_FC_ALL_INTEGER_KINDS_SIZEOF "\{${pack_int_sizeof}\}")
 
-if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-  message (VERBOSE "....FOUND SIZEOF for INTEGER KINDs ${PAC_FC_ALL_INTEGER_KINDS_SIZEOF}")
-endif ()
+message (VERBOSE "....FOUND SIZEOF for INTEGER KINDs ${PAC_FC_ALL_INTEGER_KINDS_SIZEOF}")
 # **********
 # REALS
 # **********

@@ -196,10 +196,11 @@ settings_DATA=libhdf5.settings
 # Remove the generated .c file if errors occur unless HDF5_Make_Ignore
 # is set to ignore the error.
 H5Tinit.c: H5detect$(EXEEXT)
-	LD_LIBRARY_PATH="$$LD_LIBRARY_PATH`echo $(LDFLAGS) |                  \
-		sed -e 's/-L/:/g' -e 's/ //g'`"                               \
-	$(RUNSERIAL) ./H5detect$(EXEEXT)  $@  ||                               \
-	    (test $$HDF5_Make_Ignore && echo "*** Error ignored") ||          \
+	@if $(AM_V_P); then set -x; else echo "  GEN      H5Tinit.c"; fi;       \
+	LD_LIBRARY_PATH="$$LD_LIBRARY_PATH`echo $(LDFLAGS) |                    \
+	    sed -e 's/-L/:/g' -e 's/ //g'`"                                     \
+	$(RUNSERIAL) ./H5detect$(EXEEXT)  $@  ||                               	\
+	    (test $$HDF5_Make_Ignore && echo "*** Error ignored") ||            \
 	    ($(RM) $@ ; exit 1)
 
 # Build configuration header file generation
@@ -208,10 +209,11 @@ H5Tinit.c: H5detect$(EXEEXT)
 # Remove the generated .c file if errors occur unless HDF5_Make_Ignore
 # is set to ignore the error.
 H5lib_settings.c: H5make_libsettings$(EXEEXT) libhdf5.settings
-	LD_LIBRARY_PATH="$$LD_LIBRARY_PATH`echo $(LDFLAGS) |                  \
-		sed -e 's/-L/:/g' -e 's/ //g'`"                               \
-	$(RUNSERIAL) ./H5make_libsettings$(EXEEXT)  $@  ||                               \
-	    (test $$HDF5_Make_Ignore && echo "*** Error ignored") ||          \
+	@if $(AM_V_P); then set -x; else echo "  GEN      H5lib_settings.c"; fi;    \
+	LD_LIBRARY_PATH="$$LD_LIBRARY_PATH`echo $(LDFLAGS) |                        \
+	    sed -e 's/-L/:/g' -e 's/ //g'`"                                         \
+	$(RUNSERIAL) ./H5make_libsettings$(EXEEXT)  $@  ||                          \
+	    (test $$HDF5_Make_Ignore && echo "*** Error ignored") ||                \
 	    ($(RM) $@ ; exit 1)
 
 # Error header generation
@@ -238,7 +240,7 @@ $(top_srcdir)/src/H5overflow.h: $(top_srcdir)/src/H5overflow.txt
 
 trace: $(libhdf5_la_SOURCES)
 	@for dep in $? dummy; do                                          \
-	 if test $$dep != "dummy" -a -n "$(PERL)"; then                      \
+	 if test $$dep != "dummy" -a -n "$(PERL)"; then                   \
 	  case "$$dep" in                                                 \
 	   *.c)                                                           \
 	    $(TRACE) $$dep;                                               \

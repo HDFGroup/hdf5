@@ -664,11 +664,15 @@ h5fget_fileno_c(hid_t_f *file_id, int_f *fileno)
     herr_t        ret_value = 0; /* Return value */
 
     /*
-     * Call H5Fget_filesize function
+     * Call H5Fget_fileno function
      */
     if ((ret_value = H5Fget_fileno((hid_t)*file_id, &fileno_c)) < 0)
         HGOTO_DONE(FAIL);
-    *fileno = (hsize_t_f)fileno_c;
+
+    /* XXX: This will have problems if the library fileno value doesn't fit
+     * into an int_f.
+     */
+    *fileno = (int_f)fileno_c;
 
 done:
     return ret_value;

@@ -52,6 +52,7 @@ Languages:
 @BUILD_FORTRAN_CONDITIONAL_TRUE@               AM Fortran Flags: @AM_FCFLAGS@
 @BUILD_FORTRAN_CONDITIONAL_TRUE@         Shared Fortran Library: @H5_FORTRAN_SHARED@
 @BUILD_FORTRAN_CONDITIONAL_TRUE@         Static Fortran Library: @enable_static@
+@BUILD_FORTRAN_CONDITIONAL_TRUE@               Module Directory: @fmoddir@
 
                             C++: @HDF_CXX@
 @BUILD_CXX_CONDITIONAL_TRUE@                   C++ Compiler: @CXX_VERSION@

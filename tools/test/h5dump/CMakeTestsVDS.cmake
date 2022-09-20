@@ -133,7 +133,7 @@
               -D "TEST_OUTPUT=${resultfile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.ddl"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
     set_tests_properties (H5DUMP-${resultfile} PROPERTIES
@@ -168,7 +168,7 @@
               -D "TEST_REFERENCE=${resultfile}.ddl"
               -D "TEST_ENV_VAR=HDF5_VDS_PREFIX"
               -D "TEST_ENV_VALUE=${PROJECT_BINARY_DIR}/testfiles/vds/"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
   endmacro ()
@@ -195,7 +195,7 @@
               -D "TEST_OUTPUT=${resultfile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.ddl"
-              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+              -P "${HDF_RESOURCES_DIR}/runTest.cmake"
       )
     endif ()
   endmacro ()

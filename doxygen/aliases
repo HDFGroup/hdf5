@@ -252,6 +252,7 @@ ALIASES += ref_vol_doc="VOL documentation"
 # RFCs
 ################################################################################
 
+ALIASES += ref_rfc20220819="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/Terminal_VOL_Connector_Feature_Flags.pdf\">Terminal VOL Connector Feature Flags</a>"
 ALIASES += ref_rfc20210528="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC_multi_thread.pdf\">Multi-Thread HDF5</a>"
 ALIASES += ref_rfc20210219="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/selection_io_RFC_210610.pdf\">Selection I/O</a>"
 ALIASES += ref_rfc20200213="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC_VFD_subfiling_200424.pdf\">VFD Sub-filing</a>"
@@ -371,3 +372,11 @@ ALIASES += storage_type="<table><tr><td>#H5G_STORAGE_TYPE_COMPACT</td><td>Compac
 ALIASES += str_pad_type="<table><tr><td>#H5T_STR_NULLTERM</td><td>0</td><td>Null terminate (as C does)</td></tr><tr><td>#H5T_STR_NULLPAD</td><td>1</td><td>Pad with zeros</td></tr><tr><td>#H5T_STR_SPACEPAD</td><td>2</td><td>Pad with spaces (as FORTRAN does)</td></tr></table>"
 ALIASES += see_virtual=" \see Supporting Functions: H5Pget_layout(), H5Pset_layout(), H5Sget_regular_hyperslab(), H5Sis_regular_hyperslab(), H5Sselect_hyperslab() \see VDS Functions: H5Pget_virtual_count(), H5Pget_virtual_dsetname(), H5Pget_virtual_filename(), H5Pget_virtual_prefix(), H5Pget_virtual_printf_gap(), H5Pget_virtual_srcspace(), H5Pget_virtual_view(), H5Pget_virtual_vspace(), H5Pset_virtual(), H5Pset_virtual_prefix(), H5Pset_virtual_printf_gap(), H5Pset_virtual_view()"
 ALIASES += obj_info_fields="<table><tr><th>Flag</th><th>Purpose</th></tr><tr><td>#H5O_INFO_BASIC</td><td>Fill in the fileno, addr, type, and rc fields</td></tr><tr> <td>#H5O_INFO_TIME</td><td>Fill in the atime, mtime, ctime, and btime fields</td></tr><tr> <td>#H5O_INFO_NUM_ATTRS</td> <td>Fill in the num_attrs field</td></tr><tr><td>#H5O_INFO_HDR</td><td>Fill in the num_attrs field</td></tr><tr><td>#H5O_INFO_META_SIZE</td><td>Fill in the meta_size field</td></tr><tr><td>#H5O_INFO_ALL</td><td>#H5O_INFO_BASIC | #H5O_INFO_TIME | #H5O_INFO_NUM_ATTRS | #H5O_INFO_HDR | #H5O_INFO_META_SIZE</td></tr></table>"
+
+################################################################################
+# FORTRAN
+################################################################################
+
+ALIASES += fortran_error="Returns 0 if successful and -1 if it fails."
+ALIASES += fortran_approved="The preferred API, Fortran 2003 version."
+ALIASES += fortran_obsolete="Obsolete API, use the Fortran 2003 version instead."

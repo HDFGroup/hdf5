@@ -20,15 +20,47 @@
 #include <stdatomic.h>
 
 #include "H5private.h"
+#include "H5FDprivate.h"
 #include "H5Iprivate.h"
+#include "H5Pprivate.h"
 
 #include "H5FDsubfiling.h"
 #include "H5FDioc.h"
+
+#ifndef PATH_MAX
+#define PATH_MAX 4096
+#endif
 
 /*
  * Some definitions for debugging the Subfiling feature
  */
 /* #define H5_SUBFILING_DEBUG */
+
+/*
+ * Some definitions for controlling performance across
+ * different machines where some types of MPI operations
+ * may be better optimized than others
+ */
+/* #define H5_SUBFILING_PREFER_ALLGATHER_TOPOLOGY */
+#ifndef H5_SUBFILING_PREFER_ALLGATHER_TOPOLOGY
+#if !H5_CHECK_MPI_VERSION(3, 0)
+#error "MPI 3 required for MPI_Comm_split_type"
+#endif
+#endif
+
+/*
+ * Name of the HDF5 FAPL property that the Subfiling VFD
+ * uses to pass its configuration down to the underlying
+ * IOC VFD
+ */
+#define H5FD_SUBFILING_CONFIG_PROP "H5FD_SUBFILING_CONFIG_PROP"
+
+/*
+ * Name of the HDF5 FAPL property that the Subfiling VFD
+ * uses to pass the HDF5 stub file's Inode value to the
+ * underlying IOC VFD
+ */
+#define H5FD_SUBFILING_STUB_FILE_ID "H5FD_SUBFILING_STUB_FILE_ID"
 
 /*
  * MPI Tags are 32 bits, we treat them as unsigned
@@ -80,8 +112,10 @@
 
 /* MPI tag values for data communicator */
 #define WRITE_INDEP_ACK 0
-#define READ_INDEP_DATA 1
-#define WRITE_TAG_BASE  2
+#define READ_INDEP_ACK  1
+#define READ_INDEP_DATA 2
+#define WRITE_DATA_DONE 3
+#define IO_TAG_BASE     4
 
 /*
  * Object type definitions for subfiling objects.
@@ -112,70 +146,70 @@ typedef enum io_ops {
     LOGGING_OP = 16
 } io_op_t;
 
-/* Every application rank will record their MPI rank
- * and hostid as a structure.  These eventually get
- * communicated to MPI rank zero(0) and sorted before
- * being broadcast. The resulting sorted vector
- * provides a basis for determining which MPI ranks
- * will host an IO Concentrator (IOC), e.g. For
- * default behavior, we choose the first vector entry
- * associated with a "new" hostid.
+/*
+ * Every MPI rank in a file's communicator will
+ * record their MPI rank for the file communicator
+ * and their node-local MPI rank for the node's
+ * communicator. Then the resulting information
+ * will be broadcast to all MPI ranks and will
+ * provide a basis for determining which MPI ranks
+ * will host an I/O concentrator.
  */
 typedef struct {
-    long rank;
-    long hostid;
+    int rank;
+    int node_local_rank;
+    int node_local_size;
+    int node_lead_rank;
 } layout_t;
 
-/* This typedef defines a fixed process layout which
+/*
+ * This typedef defines a fixed process layout which
  * can be reused for any number of file open operations
  */
 typedef struct app_layout_t {
-    long      hostid;      /* value returned by gethostid()  */
-    layout_t *layout;      /* Vector of {rank,hostid} values */
-    int      *node_ranks;  /* ranks extracted from sorted layout */
-    int       node_count;  /* Total nodes (different hostids) */
-    int       node_index;  /* My node: index into node_ranks */
-    int       local_peers; /* How may local peers on my node */
-    int       world_rank;  /* My MPI rank                    */
-    int       world_size;  /* Total number of MPI ranks      */
+    layout_t *layout;          /* Array of (rank, node local rank, node local size) values */
+    int      *node_ranks;      /* Array of lowest MPI rank values on each node             */
+    int       node_count;      /* Total number of nodes                                    */
+    int       world_rank;      /* MPI rank in file communicator                            */
+    int       world_size;      /* Size of file communicator                                */
+    int       node_local_rank; /* MPI rank on node                                         */
+    int       node_local_size; /* Size of node intra-communicator                          */
 } app_layout_t;
 
 /*  This typedef defines things related to IOC selections */
 typedef struct topology {
-    app_layout_t               *app_layout;         /* Pointer to our layout struct   */
-    bool                        rank_is_ioc;        /* Indicates that we host an IOC  */
-    int                         subfile_rank;       /* Valid only if rank_is_ioc      */
-    int                         n_io_concentrators; /* Number of IO concentrators  */
-    int                        *io_concentrators;   /* Vector of ranks which are IOCs */
-    int                        *subfile_fd;         /* file descriptor (if IOC)       */
-    H5FD_subfiling_ioc_select_t selection_type;     /* Cache our IOC selection criteria */
+    app_layout_t               *app_layout;         /* Pointer to our layout struct       */
+    MPI_Comm                    app_comm;           /* MPI communicator for this topology */
+    bool                        rank_is_ioc;        /* Indicates that we host an IOC      */
+    int                         ioc_idx;            /* Valid only if rank_is_ioc          */
+    int                         n_io_concentrators; /* Number of I/O concentrators        */
+    int                        *io_concentrators;   /* Vector of ranks which are IOCs     */
+    H5FD_subfiling_ioc_select_t selection_type;     /* Cache our IOC selection criteria   */
 } sf_topology_t;
 
 typedef struct {
     int64_t        sf_context_id;           /* Generated context ID which embeds the cache index */
-    uint64_t       h5_file_id;              /* GUID (basically the inode value) */
-    void          *h5_file_handle;          /* Low-level handle for the HDF5 stub file */
-    int            sf_fid;                  /* value returned by open(file,..)  */
-    size_t         sf_write_count;          /* Statistics: write_count  */
-    size_t         sf_read_count;           /* Statistics: read_count  */
-    haddr_t        sf_eof;                  /* File eof */
-    int64_t        sf_stripe_size;          /* Stripe-depth */
-    int64_t        sf_blocksize_per_stripe; /* Stripe-depth X n_IOCs  */
-    int64_t        sf_base_addr;            /* For an IOC, our base address         */
-    MPI_Comm       sf_msg_comm;             /* MPI comm used to send RPC msg        */
-    MPI_Comm       sf_data_comm;            /* MPI comm used to move data           */
-    MPI_Comm       sf_eof_comm;             /* MPI comm used to communicate EOF     */
-    MPI_Comm       sf_barrier_comm;         /* MPI comm used for barrier operations */
-    MPI_Comm       sf_group_comm;           /* Not used: for IOC collectives        */
-    MPI_Comm       sf_intercomm;            /* Not used: for msgs to all IOC        */
-    int            sf_group_size;           /* IOC count (in sf_group_comm)         */
-    int            sf_group_rank;           /* IOC rank  (in sf_group_comm)         */
-    int            sf_intercomm_root;       /* Not used: for IOC comms              */
-    char          *subfile_prefix;          /* If subfiles are node-local           */
-    char          *sf_filename;             /* A generated subfile name             */
-    char          *h5_filename;             /* The user supplied file name          */
-    void          *ioc_data;                /* Private data for underlying IOC      */
-    sf_topology_t *topology;                /* pointer to our topology              */
+    uint64_t       h5_file_id;              /* GUID (basically the inode value)                  */
+    int           *sf_fids;                 /* Array of file IDs for subfiles this rank owns     */
+    int            sf_num_fids;             /* Number of subfiles this rank owns                 */
+    int            sf_num_subfiles;         /* Total number of subfiles for logical HDF5 file    */
+    size_t         sf_write_count;          /* Statistics: write_count                           */
+    size_t         sf_read_count;           /* Statistics: read_count                            */
+    haddr_t        sf_eof;                  /* File eof                                          */
+    int64_t        sf_stripe_size;          /* Stripe-depth                                      */
+    int64_t        sf_blocksize_per_stripe; /* Stripe-depth X n_IOCs                             */
+    int64_t        sf_base_addr;            /* For an IOC, our base address                      */
+    MPI_Comm       sf_msg_comm;             /* MPI comm used to send RPC msg                     */
+    MPI_Comm       sf_data_comm;            /* MPI comm used to move data                        */
+    MPI_Comm       sf_eof_comm;             /* MPI comm used to communicate EOF                  */
+    MPI_Comm       sf_node_comm;            /* MPI comm used for intra-node comms                */
+    MPI_Comm       sf_group_comm;           /* Not used: for IOC collectives                     */
+    int            sf_group_size;           /* IOC count (in sf_group_comm)                      */
+    int            sf_group_rank;           /* IOC rank  (in sf_group_comm)                      */
+    char          *subfile_prefix;          /* If subfiles are node-local                        */
+    char          *h5_filename;             /* The user supplied file name                       */
+    void          *ioc_data;                /* Private data for underlying IOC                   */
+    sf_topology_t *topology;                /* Pointer to our topology                           */
 
 #ifdef H5_SUBFILING_DEBUG
     char  sf_logfile_name[PATH_MAX];
@@ -189,30 +223,45 @@ typedef struct {
  * an easy gathering of statistics by the IO Concentrator.
  */
 typedef struct {
-    /* {Datasize, Offset, FileID} */
-    int64_t header[3];    /* The basic RPC input plus       */
-    int     tag;          /* the supplied OPCODE tag        */
-    int     source;       /* Rank of who sent the message   */
-    int     subfile_rank; /* The IOC rank                   */
-    int64_t context_id;   /* context to be used to complete */
-    double  start_time;   /* the request, + time of receipt */
-                          /* from which we calc Time(queued) */
+    int64_t header[3];  /* The basic RPC input             */
+    int     tag;        /* the supplied OPCODE tag         */
+    int     source;     /* Rank of who sent the message    */
+    int     ioc_idx;    /* The IOC rank                    */
+    int64_t context_id; /* context to be used to complete  */
+    double  start_time; /* the request, + time of receipt  */
+                        /* from which we calc Time(queued) */
 } sf_work_request_t;
+
+/* MPI Datatype used to send/receive an RPC message */
+extern MPI_Datatype H5_subfiling_rpc_msg_type;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-H5_DLL herr_t H5_open_subfiles(const char *base_filename, void *h5_file_handle,
-                               H5FD_subfiling_shared_config_t *subfiling_config, int file_acc_flags,
+H5_DLL herr_t H5_open_subfiling_stub_file(const char *name, unsigned flags, MPI_Comm file_comm,
+                                          H5FD_t **file_ptr, uint64_t *file_id);
+H5_DLL herr_t H5_open_subfiles(const char *base_filename, uint64_t file_id,
+                               H5FD_subfiling_params_t *subfiling_config, int file_acc_flags,
                                MPI_Comm file_comm, int64_t *context_id_out);
-H5_DLL herr_t H5_close_subfiles(int64_t subfiling_context_id);
+H5_DLL herr_t H5_close_subfiles(int64_t subfiling_context_id, MPI_Comm file_comm);
 
-H5_DLL int64_t H5_new_subfiling_object_id(sf_obj_type_t obj_type, int64_t index_val);
+H5_DLL int64_t H5_new_subfiling_object_id(sf_obj_type_t obj_type);
 H5_DLL void   *H5_get_subfiling_object(int64_t object_id);
-H5_DLL int64_t H5_subfile_fhandle_to_context(void *file_handle);
-H5_DLL herr_t  H5_free_subfiling_object(int64_t object_id);
-H5_DLL herr_t  H5_get_num_iocs_from_config_file(FILE *config_file, int *n_io_concentrators);
+H5_DLL herr_t  H5_get_subfiling_config_from_file(FILE *config_file, int64_t *stripe_size,
+                                                 int64_t *num_subfiles);
+H5_DLL herr_t  H5_resolve_pathname(const char *filepath, MPI_Comm comm, char **resolved_filepath);
+
+H5_DLL herr_t  H5_subfiling_set_config_prop(H5P_genplist_t                *plist_ptr,
+                                            const H5FD_subfiling_params_t *vfd_config);
+H5_DLL herr_t  H5_subfiling_get_config_prop(H5P_genplist_t *plist_ptr, H5FD_subfiling_params_t *vfd_config);
+H5_DLL herr_t  H5_subfiling_set_file_id_prop(H5P_genplist_t *plist_ptr, uint64_t file_id);
+H5_DLL herr_t  H5_subfiling_get_file_id_prop(H5P_genplist_t *plist_ptr, uint64_t *file_id);
+H5_DLL int64_t H5_subfile_fid_to_context(uint64_t file_id);
+
+H5_DLL herr_t H5_subfiling_validate_config(const H5FD_subfiling_params_t *subf_config);
+
+H5_DLL herr_t H5_subfiling_terminate(void);
 
 H5_DLL void H5_subfiling_log(int64_t sf_context_id, const char *fmt, ...);
 

@@ -231,7 +231,7 @@ H5C__tag_entry(H5C_t *cache, H5C_cache_entry_t *entry)
         if (!H5F_addr_defined(tag))
             tag = H5AC__IGNORE_TAG;
     }
-#if H5C_DO_TAGGING_SANITY_CHECKS
+#ifdef H5C_DO_TAGGING_SANITY_CHECKS
     else {
         /* Perform some sanity checks to ensure that a correct tag is being applied */
         if (H5C_verify_tag(entry->type->id, tag) < 0)
@@ -630,7 +630,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C__mark_tagged_entries() */
 
-#if H5C_DO_TAGGING_SANITY_CHECKS
+#ifdef H5C_DO_TAGGING_SANITY_CHECKS
 
 /*-------------------------------------------------------------------------
  *

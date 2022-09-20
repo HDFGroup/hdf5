@@ -474,7 +474,7 @@ H5FD__onion_commit_new_revision_record(H5FD_onion_t *file)
 
     if (NULL == (buf = H5MM_malloc(H5FD_ONION_ENCODED_SIZE_REVISION_RECORD + (size_t)rec->comment_size +
                                    (H5FD_ONION_ENCODED_SIZE_INDEX_ENTRY * rec->archival_index.n_entries))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer for encoded revision record")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "can't allocate buffer for encoded revision record")
 
     if (0 == (size = H5FD__onion_revision_record_encode(rec, buf, &checksum)))
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "problem encoding revision record")
@@ -497,7 +497,7 @@ H5FD__onion_commit_new_revision_record(H5FD_onion_t *file)
         HDassert(history->record_locs == NULL);
         history->n_revisions = 1;
         if (NULL == (history->record_locs = H5MM_calloc(sizeof(H5FD_onion_record_loc_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate temporary record pointer list")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "can't allocate temporary record pointer list")
 
         history->record_locs[0].phys_addr   = phys_addr;
         history->record_locs[0].record_size = size;
@@ -513,7 +513,7 @@ H5FD__onion_commit_new_revision_record(H5FD_onion_t *file)
         HDassert(history->record_locs != NULL);
 
         if (NULL == (new_list = H5MM_calloc((history->n_revisions + 1) * sizeof(H5FD_onion_record_loc_t))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "unable to resize record pointer list")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "unable to resize record pointer list")
         HDmemcpy(new_list, history->record_locs, sizeof(H5FD_onion_record_loc_t) * history->n_revisions);
         H5MM_xfree(history->record_locs);
         history->record_locs                                   = new_list;
@@ -718,32 +718,32 @@ H5FD__onion_create_truncate_onion(H5FD_onion_t *file, const char *filename, cons
     /* Create backing files for onion history */
 
     if (NULL == (file->original_file = H5FD_open(filename, flags, backing_fapl_id, maxaddr)))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "cannot open the backing file")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, FAIL, "cannot open the backing file")
 
     if (NULL == (file->onion_file = H5FD_open(name_onion, flags, backing_fapl_id, maxaddr)))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "cannot open the backing onion file")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, FAIL, "cannot open the backing onion file")
 
     if (NULL == (file->recovery_file = H5FD_open(recovery_file_nameery, flags, backing_fapl_id, maxaddr)))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "cannot open the backing file")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, FAIL, "cannot open the backing file")
 
     /* Write "empty" .h5 file contents (signature ONIONEOF) */
 
     if (H5FD_set_eoa(file->original_file, H5FD_MEM_DRAW, 8) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't extend EOA")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "can't extend EOA")
     if (H5FD_write(file->original_file, H5FD_MEM_DRAW, 0, 8, "ONIONEOF") < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "cannot write header to the backing h5 file")
+        HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "cannot write header to the backing h5 file")
 
     /* Write nascent history (with no revisions) to "recovery" */
 
     if (NULL == (buf = H5MM_malloc(H5FD_ONION_ENCODED_SIZE_HISTORY)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "can't allocate buffer")
     size = H5FD__onion_history_encode(history, buf, &history->checksum);
     if (H5FD_ONION_ENCODED_SIZE_HISTORY != size)
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "can't encode history")
     if (H5FD_set_eoa(file->recovery_file, H5FD_MEM_DRAW, size) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't extend EOA")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "can't extend EOA")
     if (H5FD_write(file->recovery_file, H5FD_MEM_DRAW, 0, size, buf) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "cannot write history to the backing recovery file")
+        HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "cannot write history to the backing recovery file")
     hdr->history_size = size; /* record for later use */
     H5MM_xfree(buf);
     buf = NULL;
@@ -753,14 +753,14 @@ H5FD__onion_create_truncate_onion(H5FD_onion_t *file, const char *filename, cons
      */
 
     if (NULL == (buf = H5MM_malloc(H5FD_ONION_ENCODED_SIZE_HEADER)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "can't allocate buffer")
     size = H5FD__onion_header_encode(hdr, buf, &hdr->checksum);
     if (H5FD_ONION_ENCODED_SIZE_HEADER != size)
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "can't encode history header")
     if (H5FD_set_eoa(file->onion_file, H5FD_MEM_DRAW, size) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't extend EOA")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "can't extend EOA")
     if (H5FD_write(file->onion_file, H5FD_MEM_DRAW, 0, size, buf) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "cannot write header to the backing onion file")
+        HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "cannot write header to the backing onion file")
     file->onion_eof = (haddr_t)size;
     if (TRUE == file->align_history_on_pages)
         file->onion_eof = (file->onion_eof + (hdr->page_size - 1)) & (~(hdr->page_size - 1));
@@ -834,7 +834,7 @@ H5FD__onion_parse_config_str(const char *config_str, H5FD_onion_fapl_info_t *fa)
 
         /* The configure string can't be empty after removing the curly brackets */
         if (!HDstrcmp(config_str_copy, ""))
-            HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "configure string can't be empty")
+            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "configure string can't be empty")
 
         token1 = HDstrtok(config_str_copy, ":");
         token2 = HDstrtok(NULL, ";");
@@ -872,7 +872,7 @@ H5FD__onion_parse_config_str(const char *config_str, H5FD_onion_fapl_info_t *fa)
                     HDstrcpy(fa->comment, token2);
                 }
                 else
-                    HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "unknown token in the configure string: %s",
+                    HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "unknown token in the configure string: %s",
                                 token1)
             }
 
@@ -885,11 +885,11 @@ H5FD__onion_parse_config_str(const char *config_str, H5FD_onion_fapl_info_t *fa)
         H5P_genclass_t *pclass; /* Property list class to modify */
 
         if (NULL == (pclass = (H5P_genclass_t *)H5I_object_verify(H5P_FILE_ACCESS, H5I_GENPROP_CLS)))
-            HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a property list class");
+            HGOTO_ERROR(H5E_VFL, H5E_BADTYPE, FAIL, "not a property list class");
 
         /* Create the new property list */
         if ((fa->backing_fapl_id = H5P_create_id(pclass, TRUE)) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL, "unable to create property list");
+            HGOTO_ERROR(H5E_VFL, H5E_CANTCREATE, FAIL, "unable to create property list");
     }
 
 done:
@@ -941,7 +941,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
 
     if (NULL == fa) {
         if (NULL == (config_str = H5P_peek_driver_config_str(plist)))
-            HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, NULL, "missing VFL driver configure string")
+            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "missing VFL driver configure string")
 
         /* Allocate a new onion fapl info struct and fill it from the
          * configuration string
@@ -949,7 +949,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
         if (NULL == (new_fa = H5MM_calloc(sizeof(H5FD_onion_fapl_info_t))))
             HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "can't allocate memory for onion fapl info struct")
         if (H5FD__onion_parse_config_str(config_str, new_fa) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, NULL, "failed to parse configure string")
+            HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "failed to parse configure string")
 
         fa = new_fa;
     }
@@ -962,20 +962,20 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
 
     /* Allocate space for the file struct */
     if (NULL == (file = H5FL_CALLOC(H5FD_onion_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "unable to allocate file struct")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to allocate file struct")
 
     /* Allocate space for onion VFD file names */
     if (NULL == (name_onion = H5MM_malloc(sizeof(char) * (HDstrlen(filename) + 7))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "unable to allocate onion name string")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to allocate onion name string")
     HDsnprintf(name_onion, HDstrlen(filename) + 7, "%s.onion", filename);
 
     if (NULL == (recovery_file_nameery = H5MM_malloc(sizeof(char) * (HDstrlen(name_onion) + 10))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "unable to allocate recovery name string")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to allocate recovery name string")
     HDsnprintf(recovery_file_nameery, HDstrlen(name_onion) + 10, "%s.recovery", name_onion);
     file->recovery_file_name = recovery_file_nameery;
 
     if (NULL == (file->recovery_file_name = H5MM_malloc(sizeof(char) * (HDstrlen(name_onion) + 10))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "unable to allocate recovery name string")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to allocate recovery name string")
     HDsnprintf(file->recovery_file_name, HDstrlen(name_onion) + 10, "%s.recovery", name_onion);
 
     /* Translate H5P_DEFAULT to a real fapl ID, if necessary */
@@ -1067,7 +1067,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
                     HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "cannot get size of canonical file")
                 }
                 if (H5FD_set_eoa(file->original_file, H5FD_MEM_DRAW, canon_eof) < 0)
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTSET, NULL, "can't extend EOA")
+                    HGOTO_ERROR(H5E_VFL, H5E_CANTSET, NULL, "can't extend EOA")
                 hdr->origin_eof   = canon_eof;
                 file->logical_eof = canon_eof;
 
@@ -1080,7 +1080,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
 
                 if ((file->onion_file = H5FD_open(name_onion, (H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC),
                                                   backing_fapl_id, maxaddr)) == NULL) {
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "cannot open the backing onion file")
+                    HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, NULL, "cannot open the backing onion file")
                 }
 
                 /* Write history header with "no" history */
@@ -1089,14 +1089,14 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
                     H5FD_ONION_ENCODED_SIZE_HEADER + 1; /* TODO: comment these 2 or do some other way */
                 head_buf = H5MM_malloc(H5FD_ONION_ENCODED_SIZE_HEADER);
                 if (NULL == head_buf)
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate buffer")
+                    HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "can't allocate buffer")
                 size = H5FD__onion_header_encode(hdr, head_buf, &hdr->checksum);
                 if (H5FD_ONION_ENCODED_SIZE_HEADER != size)
                     HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "can't encode history header")
 
                 hist_buf = H5MM_malloc(H5FD_ONION_ENCODED_SIZE_HISTORY);
                 if (NULL == hist_buf)
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate buffer")
+                    HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "can't allocate buffer")
                 saved_size                = size;
                 history->n_revisions      = 0;
                 size                      = H5FD__onion_history_encode(history, hist_buf, &history->checksum);
@@ -1105,10 +1105,10 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
                     HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "can't encode history")
                 }
                 if (H5FD_set_eoa(file->onion_file, H5FD_MEM_DRAW, saved_size + size + 1) < 0)
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTSET, NULL, "can't extend EOA")
+                    HGOTO_ERROR(H5E_VFL, H5E_CANTSET, NULL, "can't extend EOA")
 
                 if (H5FD_write(file->onion_file, H5FD_MEM_DRAW, 0, saved_size, head_buf) < 0) {
-                    HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, NULL,
+                    HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, NULL,
                                 "cannot write header to the backing onion file")
                 }
 
@@ -1122,7 +1122,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
 
                 /* Write nascent history (with no revisions) to the backing onion file */
                 if (H5FD_write(file->onion_file, H5FD_MEM_DRAW, saved_size + 1, size, hist_buf) < 0) {
-                    HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, NULL,
+                    HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, NULL,
                                 "cannot write history to the backing onion file")
                 }
 
@@ -1140,7 +1140,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
             HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "cannot get size of canonical file")
         }
         if (H5FD_set_eoa(file->original_file, H5FD_MEM_DRAW, canon_eof) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTSET, NULL, "can't extend EOA")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTSET, NULL, "can't extend EOA")
 
         /* Get the history header from the onion file */
         if (H5FD__onion_ingest_header(&file->header, file->onion_file, 0) < 0)
@@ -1195,7 +1195,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
          */
         if (NULL ==
             (file->curr_rev_record.comment = H5MM_strndup(fa->comment, H5FD_ONION_FAPL_INFO_COMMENT_MAX_LEN)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "unable to duplicate comment string")
+            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to duplicate comment string")
 
         /* TODO: Lengths of strings should be size_t */
         file->curr_rev_record.comment_size = (uint32_t)HDstrlen(fa->comment) + 1;
@@ -1293,7 +1293,7 @@ H5FD__onion_open_rw(H5FD_onion_t *file, unsigned int flags, haddr_t maxaddr, boo
     /* Set write-lock flag in onion header */
 
     if (NULL == (buf = H5MM_malloc(H5FD_ONION_ENCODED_SIZE_HEADER)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate space for encoded buffer")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "can't allocate space for encoded buffer")
 
     file->header.flags |= H5FD_ONION_HEADER_FLAG_WRITE_LOCK;
 
@@ -1496,7 +1496,7 @@ H5FD__onion_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, 
     n_pages        = (len + page_size - 1) >> page_size_log2;
 
     if (NULL == (page_buf = H5MM_calloc(page_size * sizeof(unsigned char))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "cannot allocate temporary buffer")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "cannot allocate temporary buffer")
 
     /* Write, page-by-page */
     for (size_t i = 0; i < n_pages; i++) {

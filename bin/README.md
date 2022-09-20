@@ -10,7 +10,6 @@ Programs run via `autogen.sh` (or the equivalent in CMake) are indicated.
 |`chkcopyright`|Checks if files have appropriate copyright statements|
 |`cmakehdf5`|Convenience script to build HDF5 using CMake|
 |`debug-ohdr`|Examines debug output from `H5O_open/close` to look for open objects|
-|`deploy`|Deploys HDF5 to a location in the file system|
 |`format_source`|Runs `clang-format` over the source files, applying our rules|
 |`genparser`|Creates the flex/bison-based parser files in the high-level library|
 |`h5cc.in`|Input file from which h5cc is created|

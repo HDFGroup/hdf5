@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.12)
+cmake_minimum_required (VERSION 3.18)
 project (HDF5_F90_EXAMPLES C Fortran)
 # --------------------------------------------------------------------
 # Notes: When creating examples they should be prefixed

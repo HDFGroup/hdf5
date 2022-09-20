@@ -1,3 +1,14 @@
+!> @defgroup FH5LT Fortran High Level Lite (H5LT) Interface
+!!
+!! @see H5LT, C-HL API
+!!
+!! @see @ref H5LT_UG, User Guide
+!!
+
+!> @ingroup H5LT
+!!
+!! @brief This module contains Fortran interfaces for H5LT.
+!
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
@@ -10,12 +21,6 @@
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-!
-!
-! This file contains FORTRAN interfaces for H5LT functions
-!
-! NOTES
-!
 !       _____ __  __ _____   ____  _____ _______       _   _ _______
 !      |_   _|  \/  |  __ \ / __ \|  __ \__   __|/\   | \ | |__   __|
 ! ****   | | | \  / | |__) | |  | | |__) | | |  /  \  |  \| |  | |    ****
@@ -30,10 +35,17 @@
 
 #include <H5config_f.inc>
 
+#ifdef H5_DOXYGEN_FORTRAN
+MODULE H5LT
+#else
 MODULE H5LT_CONST
+#endif
+
   USE, INTRINSIC :: ISO_C_BINDING
   USE h5fortran_types
   USE hdf5
+
+#ifndef H5_DOXYGEN_FORTRAN
 
   INTERFACE h5ltmake_dataset_f
      MODULE PROCEDURE h5ltmake_dataset_f_ptr
@@ -86,8 +98,7 @@ MODULE H5LT_CONST
        CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: attr_name ! name of the attribute
        INTEGER(size_t),  INTENT(in) :: size                          ! size of attribute array
        TYPE(C_PTR), VALUE :: buf                                     ! data buffer
-       CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dtype     ! flag indicating the datatype of the
-                                                                     ! the buffer:
+       CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dtype     ! flag indicating the datatype of the buffer:
                                                                      ! R=Real, D=DOUBLE, I=Integer, C=Character
        INTEGER(size_t) :: SizeOf_buf                                 ! Sizeof the buf datatype
      END FUNCTION h5ltset_attribute_c
@@ -105,76 +116,88 @@ MODULE H5LT_CONST
        CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name ! name of the dataset
        CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: attr_name ! name of the attribute
        TYPE(C_PTR), VALUE :: buf                                     ! data buffer
-       CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dtype     ! flag indicating the datatype of the
-                                                                     ! the buffer:
+       CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dtype     ! flag indicating the datatype of the buffer:
                                                                      ! R=Real, D=DOUBLE, I=Integer
        INTEGER(size_t), INTENT(in) :: SizeOf_buf                     ! Sizeof the buf data type
      END FUNCTION h5ltget_attribute_c
   END INTERFACE
 
+#endif
+
 CONTAINS
+
   !-------------------------------------------------------------------------
   ! Make/Read dataset functions
   !-------------------------------------------------------------------------
 
-  !-------------------------------------------------------------------------
-  ! Function(s): h5ltmake_dataset_f_ptr
-  !
-  ! Purpose: Creates and writes a dataset of a type TYPE_ID
-  !
-  ! Return: Success: 0, Failure: -1
-  !
-  ! Programmer: M. Scot Breitenfeld
-  !
-  ! Date: APR 29, 2015
-  !
-  ! Comments:
-  !
-  ! Modifications:
-  !
-  !-------------------------------------------------------------------------
-
-  SUBROUTINE h5ltmake_dataset_f_ptr(loc_id,&
+#ifdef H5_DOXYGEN_FORTRAN
+  !>
+  !! \ingroup FH5LT
+  !!
+  !! \brief Creates and writes a dataset of a type \p type_id.
+  !!
+  !! \note  \fortran_approved
+  !!
+  !! \param loc_id    Location identifier. The identifier may be that of a file or group.
+  !! \param dset_name The name of the dataset to create.
+  !! \param rank      Number of dimensions of dataspace.
+  !! \param dims      An array of the size of each dimension.
+  !! \param type_id   Identifier of the datatype to use when creating the dataset.
+  !! \param buf       Buffer with data to be written to the dataset.
+  !! \param errcode   \fortran_error
+  !!
+  SUBROUTINE h5ltmake_dataset_f(&
+#else
+  SUBROUTINE h5ltmake_dataset_f_ptr( &
+#endif
+       loc_id,&
        dset_name,&
        rank,&
        dims,&
        type_id,&
        buf,&
-       errcode )
+       errcode)
 
     IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
-    CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
-    INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
-    TYPE(C_PTR) :: buf                                 ! data buffer
-    INTEGER :: errcode                                 ! error code
-    INTEGER(size_t) :: namelen                         ! name length
+    INTEGER(hid_t),   INTENT(in) :: loc_id
+    CHARACTER(len=*), INTENT(in) :: dset_name
+    INTEGER,          INTENT(in) :: rank
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims
+    INTEGER(hid_t),   INTENT(in) :: type_id
+    TYPE(C_PTR) :: buf
+    INTEGER :: errcode
+    INTEGER(size_t) :: namelen ! name length
 
     namelen = LEN(dset_name)
     errcode = h5ltmake_dataset_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
 
+#ifdef H5_DOXYGEN_FORTRAN
+  END SUBROUTINE h5ltmake_dataset_f
+#else
   END SUBROUTINE h5ltmake_dataset_f_ptr
+#endif
 
-  !-------------------------------------------------------------------------
-  ! Function(s): h5ltmake_dataset_f_int(1-7)
-  !
-  ! Purpose: Creates and writes a dataset of a type TYPE_ID
-  !
-  ! Return: Success: 0, Failure: -1
-  !
-  ! Programmer: Pedro Vicente
-  !
-  ! Date: September 1, 2004
-  !
-  ! Comments:
-  !
-  ! Modifications: Changed to passing C_PTR.
-  !
-  !-------------------------------------------------------------------------
-
-  SUBROUTINE h5ltmake_dataset_f_int1(loc_id,&
+#ifdef H5_DOXYGEN_FORTRAN
+  !>
+  !! \ingroup FH5LT
+  !!
+  !! \brief Creates and writes a dataset of a type \p type_id.
+  !!
+  !! \note \fortran_obsolete
+  !!
+  !! \param loc_id    Location identifier. The identifier may be that of a file or group.
+  !! \param dset_name The name of the dataset to create.
+  !! \param rank      Number of dimensions of dataspace.
+  !! \param dims      An array of the size of each dimension. Limited to seven dimensions.
+  !! \param type_id   Identifier of the datatype to use when creating the dataset.
+  !! \param buf       Buffer with data to be written to the dataset.
+  !! \param errcode   \fortran_error
+  !!
+   SUBROUTINE h5ltmake_dataset_f(&
+#else
+  SUBROUTINE h5ltmake_dataset_f_int1(&
+#endif
+       loc_id,&
        dset_name,&
        rank,&
        dims,&
@@ -183,20 +206,26 @@ CONTAINS
        errcode )
 
     IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
-    CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
-    INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
-    INTEGER, INTENT(in), DIMENSION(*), TARGET :: buf   ! data buffer
-    INTEGER :: errcode                                 ! error code
-    INTEGER(size_t) :: namelen                         ! name length
+    INTEGER(hid_t),   INTENT(in) :: loc_id
+    CHARACTER(len=*), INTENT(in) :: dset_name
+    INTEGER,          INTENT(in) :: rank
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims
+    INTEGER(hid_t),   INTENT(in) :: type_id
+#ifdef H5_DOXYGEN_FORTRAN
+    TYPE(TYPE), INTENT(in), DIMENSION(*,*,...) :: buf
+#else
+    INTEGER, INTENT(in), DIMENSION(*), TARGET :: buf
+#endif
+    INTEGER :: errcode
+    INTEGER(size_t) :: namelen ! name length
     TYPE(C_PTR) :: f_ptr
 
     f_ptr = C_LOC(buf(1))
     namelen = LEN(dset_name)
     errcode = h5ltmake_dataset_c(loc_id,namelen,dset_name,rank,dims,type_id,f_ptr)
-
+#ifdef H5_DOXYGEN_FORTRAN
+  END SUBROUTINE h5ltmake_dataset_f
+#else
   END SUBROUTINE h5ltmake_dataset_f_int1
 
   SUBROUTINE h5ltmake_dataset_f_int2(loc_id,&
@@ -208,15 +237,15 @@ CONTAINS
        errcode )
 
     IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
-    CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
-    INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
-    INTEGER :: errcode                                 ! error code
-    INTEGER(size_t) :: namelen                         ! name length
+    INTEGER(hid_t),   INTENT(in) :: loc_id
+    CHARACTER(len=*), INTENT(in) :: dset_name
+    INTEGER,          INTENT(in) :: rank
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims
+    INTEGER(hid_t),   INTENT(in) :: type_id
+    INTEGER :: errcode
+    INTEGER(size_t) :: namelen ! name length
     INTEGER, INTENT(in), &
-         DIMENSION(dims(1),dims(2)), TARGET :: buf     ! data buffer
+         DIMENSION(dims(1),dims(2)), TARGET :: buf ! data buffer
     TYPE(C_PTR) :: f_ptr
 
     f_ptr = C_LOC(buf(1,1))
@@ -235,15 +264,15 @@ CONTAINS
        errcode )
 
     IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
-    INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
-    INTEGER :: errcode                                 ! error code
-    INTEGER(size_t) :: namelen                                 ! name length
+    INTEGER(hid_t),   INTENT(in) :: loc_id
+    CHARACTER(LEN=*), INTENT(in) :: dset_name
+    INTEGER,          INTENT(in) :: rank
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims
+    INTEGER(hid_t),   INTENT(in) :: type_id
+    INTEGER :: errcode
+    INTEGER(size_t) :: namelen ! name length
     INTEGER, INTENT(in), &
-         DIMENSION(dims(1),dims(2),dims(3)), TARGET :: buf          ! data buffer
+         DIMENSION(dims(1),dims(2),dims(3)), TARGET :: buf ! data buffer
     TYPE(C_PTR) :: f_ptr
 
     f_ptr = C_LOC(buf(1,1,1))
@@ -257,15 +286,15 @@ CONTAINS
        type_id, buf, errcode )
 
     IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
-    INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
-    INTEGER :: errcode                                 ! error code
-    INTEGER(size_t) :: namelen                                 ! name length
+    INTEGER(hid_t),   INTENT(in) :: loc_id
+    CHARACTER(LEN=*), INTENT(in) :: dset_name
+    INTEGER,          INTENT(in) :: rank
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims
+    INTEGER(hid_t),   INTENT(in) :: type_id
+    INTEGER :: errcode
+    INTEGER(size_t) :: namelen ! name length
     INTEGER, INTENT(in), &
-         DIMENSION(dims(1),dims(2),dims(3),dims(4)), TARGET :: buf  ! data buffer
+         DIMENSION(dims(1),dims(2),dims(3),dims(4)), TARGET :: buf ! data buffer
     TYPE(C_PTR) :: f_ptr
 
     f_ptr = C_LOC(buf(1,1,1,1))
@@ -279,15 +308,15 @@ CONTAINS
        type_id, buf, errcode )
 
     IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
-    INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
-    INTEGER :: errcode                                 ! error code
-    INTEGER(size_t) :: namelen                                 ! name length
+    INTEGER(hid_t),   INTENT(in) :: loc_id
+    CHARACTER(LEN=*), INTENT(in) :: dset_name
+    INTEGER,          INTENT(in) :: rank
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims
+    INTEGER(hid_t),   INTENT(in) :: type_id
+    INTEGER :: errcode
+    INTEGER(size_t) :: namelen ! name length
     INTEGER, INTENT(in), &
-         DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)), TARGET :: buf  ! data buffer
+         DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)), TARGET :: buf ! data buffer
     TYPE(C_PTR) :: f_ptr
 
     f_ptr = C_LOC(buf(1,1,1,1,1))
@@ -301,15 +330,15 @@ CONTAINS
        type_id, buf, errcode )
 
     IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
-    INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
-    INTEGER :: errcode                                 ! error code
-    INTEGER(size_t) :: namelen                                 ! name length
+    INTEGER(hid_t),   INTENT(in) :: loc_id
+    CHARACTER(LEN=*), INTENT(in) :: dset_name
+    INTEGER,          INTENT(in) :: rank
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims
+    INTEGER(hid_t),   INTENT(in) :: type_id
+    INTEGER :: errcode
+    INTEGER(size_t) :: namelen ! name length
     INTEGER, INTENT(in), &
-         DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)), TARGET :: buf  ! data buffer
+         DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)), TARGET :: buf ! data buffer
     TYPE(C_PTR) :: f_ptr
 
     f_ptr = C_LOC(buf(1,1,1,1,1,1))
@@ -323,13 +352,13 @@ CONTAINS
        type_id, buf, errcode )
 
     IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
-    INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
-    INTEGER :: errcode                                 ! error code
-    INTEGER(size_t) :: namelen                                 ! name length
+    INTEGER(hid_t),   INTENT(in) :: loc_id
+    CHARACTER(LEN=*), INTENT(in) :: dset_name
+    INTEGER,          INTENT(in) :: rank
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims
+    INTEGER(hid_t),   INTENT(in) :: type_id
+    INTEGER :: errcode
+    INTEGER(size_t) :: namelen ! name length
     INTEGER, INTENT(in), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)), TARGET :: buf ! data buffer
     TYPE(C_PTR) :: f_ptr
@@ -340,62 +369,68 @@ CONTAINS
     errcode = h5ltmake_dataset_c(loc_id,namelen,dset_name,rank,dims,type_id,f_ptr)
 
   END SUBROUTINE h5ltmake_dataset_f_int7
+#endif
 
-
-  !-------------------------------------------------------------------------
-  ! Function(s): h5ltread_dataset_f_ptr
-  !
-  ! Purpose: Read a dataset of a type TYPE_ID
-  !
-  ! Return: Success: 0, Failure: -1
-  !
-  ! Programmer: M. Scot Breitenfeld
-  !
-  ! Date: Apr 29, 2015
-  !
-  ! Comments:
-  !
-  ! Modifications:
-  !
-  !-------------------------------------------------------------------------
-
-  SUBROUTINE h5ltread_dataset_f_ptr(loc_id,&
+#ifdef H5_DOXYGEN_FORTRAN
+  !>
+  !! \ingroup FH5LT
+  !!
+  !! \brief Reads a dataset of a type \p type_id.
+  !!
+  !! \note \fortran_approved
+  !!
+  !! \param loc_id    Location identifier. The identifier may be that of a file or group.
+  !! \param dset_name The name of the dataset to create.
+  !! \param type_id   Identifier of the datatype to use when creating the dataset.
+  !! \param buf       Buffer with data to be written to the dataset.
+  !! \param errcode   \fortran_error
+  !!
+  SUBROUTINE h5ltread_dataset_f(&
+#else
+  SUBROUTINE h5ltread_dataset_f_ptr(&
+#endif
+       loc_id,&
        dset_name,&
        type_id,&
        buf,&
        errcode )
 
     IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id              ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name           ! name of the dataset
-    INTEGER(hid_t),   INTENT(in) :: type_id             ! datatype identifier
-    TYPE(C_PTR) :: buf                                  ! data buffer
-    INTEGER :: errcode                                  ! error code
+    INTEGER(hid_t),   INTENT(in) :: loc_id
+    CHARACTER(LEN=*), INTENT(in) :: dset_name
+    INTEGER(hid_t),   INTENT(in) :: type_id
+    TYPE(C_PTR) :: buf
+    INTEGER :: errcode
     INTEGER(size_t) :: namelen
 
     namelen = LEN(dset_name)
     errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id, buf)
-
+#ifdef H5_DOXYGEN_FORTRAN
+  END SUBROUTINE h5ltread_dataset_f
+#else
   END SUBROUTINE h5ltread_dataset_f_ptr
+#endif
 
-  !-------------------------------------------------------------------------
-  ! Function(s): h5ltread_dataset_f_int(1-7)
-  !
-  ! Purpose: Read a dataset of a type TYPE_ID
-  !
-  ! Return: Success: 0, Failure: -1
-  !
-  ! Programmer: Pedro Vicente
-  !
-  ! Date: September 22, 2004
-  !
-  ! Comments:
-  !
-  ! Modifications:
-  !
-  !-------------------------------------------------------------------------
-
-  SUBROUTINE h5ltread_dataset_f_int1(loc_id,&
+#ifdef H5_DOXYGEN_FORTRAN
+  !>
+  !! \ingroup FH5LT
+  !!
+  !! \brief Reads a dataset of a type \p type_id.
+  !!
+  !! \note \fortran_obsolete
+  !!
+  !! \param loc_id    Location identifier. The identifier may be that of a file or group.
+  !! \param dset_name The name of the dataset to create.
+  !! \param type_id   Identifier of the datatype to use when creating the dataset.
+  !! \param buf       Buffer with data to be written to the dataset.
+  !! \param dims      An array of the size of each dimension. Limited to seven dimensions.
+  !! \param errcode   \fortran_error
+  !!
+   SUBROUTINE h5ltread_dataset_f(&
+#else
+  SUBROUTINE h5ltread_dataset_f_int1(&
+#endif
+       loc_id,&
        dset_name,&
        type_id,&
        buf,&
@@ -403,12 +438,16 @@ CONTAINS
        errcode )
 
     IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id              ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name           ! name of the dataset
-    INTEGER(hid_t),   INTENT(in) :: type_id             ! datatype identifier
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims  ! size of the buffer buf
-    INTEGER, INTENT(inout), DIMENSION(*), TARGET :: buf ! data buffer
-    INTEGER :: errcode                                  ! error code
+    INTEGER(hid_t),   INTENT(in) :: loc_id
+    CHARACTER(LEN=*), INTENT(in) :: dset_name
+    INTEGER(hid_t),   INTENT(in) :: type_id
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims
+#ifdef H5_DOXYGEN_FORTRAN
+    TYPE(TYPE), INTENT(inout), DIMENSION(*,*,...) :: buf
+#else
+    INTEGER, INTENT(inout), DIMENSION(*), TARGET :: buf
+#endif
+    INTEGER :: errcode
     INTEGER(size_t) :: namelen
     TYPE(C_PTR) :: f_ptr
 
@@ -417,24 +456,10 @@ CONTAINS
     namelen = LEN(dset_name)
     errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr)
 
+#ifdef H5_DOXYGEN_FORTRAN
+  END SUBROUTINE h5ltread_dataset_f
+#else
   END SUBROUTINE h5ltread_dataset_f_int1
-
-  !-------------------------------------------------------------------------
-  ! Function: h5ltread_dataset_f_int2
-  !
-  ! Purpose: Read a dataset of a type TYPE_ID
-  !
-  ! Return: Success: 0, Failure: -1
-  !
-  ! Programmer: Pedro Vicente
-  !
-  ! Date: September 22, 2004
-  !
-  ! Comments:
-  !
-  ! Modifications:
-  !
-  !-------------------------------------------------------------------------
 
   SUBROUTINE h5ltread_dataset_f_int2(loc_id,&
        dset_name,&
@@ -444,12 +469,12 @@ CONTAINS
        errcode )
 
     IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
-    INTEGER :: errcode                                 ! error code
-    INTEGER(size_t) :: namelen                                 ! name length
+    INTEGER(hid_t),   INTENT(in) :: loc_id
+    CHARACTER(LEN=*), INTENT(in) :: dset_name
+    INTEGER(hid_t),   INTENT(in) :: type_id
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims
+    INTEGER :: errcode
+    INTEGER(size_t) :: namelen ! name length
     INTEGER, INTENT(inout), &
          DIMENSION(dims(1),dims(2)), TARGET :: buf
     TYPE(C_PTR) :: f_ptr
@@ -469,12 +494,12 @@ CONTAINS
        errcode )
 
     IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
-    INTEGER :: errcode                                 ! error code
-    INTEGER(size_t) :: namelen                                 ! name length
+    INTEGER(hid_t),   INTENT(in) :: loc_id
+    CHARACTER(LEN=*), INTENT(in) :: dset_name
+    INTEGER(hid_t),   INTENT(in) :: type_id
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims
+    INTEGER :: errcode
+    INTEGER(size_t) :: namelen ! name length
     INTEGER, INTENT(inout), &
          DIMENSION(dims(1),dims(2),dims(3)), TARGET :: buf
     TYPE(C_PTR) :: f_ptr
@@ -490,12 +515,12 @@ CONTAINS
        dims, errcode )
 
     IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
-    INTEGER :: errcode                                 ! error code
-    INTEGER(size_t) :: namelen                                 ! name length
+    INTEGER(hid_t),   INTENT(in) :: loc_id
+    CHARACTER(LEN=*), INTENT(in) :: dset_name
+    INTEGER(hid_t),   INTENT(in) :: type_id
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims
+    INTEGER :: errcode
+    INTEGER(size_t) :: namelen ! name length
     INTEGER, INTENT(inout), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4)), TARGET :: buf
     TYPE(C_PTR) :: f_ptr
@@ -511,12 +536,12 @@ CONTAINS
        dims, errcode )
 
     IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
-    INTEGER :: errcode                                 ! error code
-    INTEGER(size_t) :: namelen                                 ! name length
+    INTEGER(hid_t),   INTENT(in) :: loc_id
+    CHARACTER(LEN=*), INTENT(in) :: dset_name
+    INTEGER(hid_t),   INTENT(in) :: type_id
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims
+    INTEGER :: errcode
+    INTEGER(size_t) :: namelen ! name length
     INTEGER, INTENT(inout), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)), TARGET :: buf
     TYPE(C_PTR) :: f_ptr
@@ -528,33 +553,16 @@ CONTAINS
 
   END SUBROUTINE h5ltread_dataset_f_int5
 
-  !-------------------------------------------------------------------------
-  ! Function: h5ltread_dataset_f_int6
-  !
-  ! Purpose: Read a dataset of a type TYPE_ID
-  !
-  ! Return: Success: 0, Failure: -1
-  !
-  ! Programmer: M. Scot Breitenfeld
-  !
-  ! Date: March 12, 2011
-  !
-  ! Comments:
-  !
-  ! Modifications:
-  !
-  !-------------------------------------------------------------------------
-
   SUBROUTINE h5ltread_dataset_f_int6(loc_id, dset_name, type_id, buf, &
        dims, errcode )
 
     IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
-    INTEGER :: errcode                                 ! error code
-    INTEGER(size_t) :: namelen                                 ! name length
+    INTEGER(hid_t),   INTENT(in) :: loc_id
+    CHARACTER(LEN=*), INTENT(in) :: dset_name
+    INTEGER(hid_t),   INTENT(in) :: type_id
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims
+    INTEGER :: errcode
+    INTEGER(size_t) :: namelen ! name length
     INTEGER, INTENT(inout), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)), TARGET :: buf
     TYPE(C_PTR) :: f_ptr
@@ -570,12 +578,12 @@ CONTAINS
        dims, errcode )
 
     IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER(hid_t),   INTENT(in) :: type_id            ! datatype identifier
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
-    INTEGER :: errcode                                 ! error code
-    INTEGER(size_t) :: namelen                                 ! name length
+    INTEGER(hid_t),   INTENT(in) :: loc_id
+    CHARACTER(LEN=*), INTENT(in) :: dset_name
+    INTEGER(hid_t),   INTENT(in) :: type_id
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims
+    INTEGER :: errcode
+    INTEGER(size_t) :: namelen ! name length
     INTEGER, INTENT(inout), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)), TARGET :: buf
     TYPE(C_PTR) :: f_ptr
@@ -587,11 +595,10 @@ CONTAINS
 
   END SUBROUTINE h5ltread_dataset_f_int7
 
-
   !-------------------------------------------------------------------------
   ! Function: h5ltmake_dataset_int_f_1
   !
-  ! Purpose: Creates and writes a dataset of H5T_NATIVE_INT type
+  !! \brief Creates and writes a dataset of H5T_NATIVE_INT type
   !
   ! Return: Success: 0, Failure: -1
   !
@@ -613,13 +620,13 @@ CONTAINS
        errcode )
 
     IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
-    INTEGER, INTENT(in), DIMENSION(*), TARGET :: buf   ! data buffer
-    INTEGER :: errcode                                 ! error code
-    INTEGER(size_t) :: namelen                         ! name length
+    INTEGER(hid_t),   INTENT(in) :: loc_id
+    CHARACTER(LEN=*), INTENT(in) :: dset_name
+    INTEGER,          INTENT(in) :: rank
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims
+    INTEGER, INTENT(in), DIMENSION(*), TARGET :: buf
+    INTEGER :: errcode
+    INTEGER(size_t) :: namelen ! name length
     TYPE(C_PTR) :: f_ptr
 
     f_ptr = C_LOC(buf(1))
@@ -637,12 +644,12 @@ CONTAINS
        errcode )
 
     IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
-    INTEGER :: errcode                                 ! error code
-    INTEGER(size_t) :: namelen                                 ! name length
+    INTEGER(hid_t),   INTENT(in) :: loc_id
+    CHARACTER(LEN=*), INTENT(in) :: dset_name
+    INTEGER,          INTENT(in) :: rank
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims
+    INTEGER :: errcode
+    INTEGER(size_t) :: namelen ! name length
     INTEGER, INTENT(in), &
          DIMENSION(dims(1),dims(2)), TARGET :: buf
     TYPE(C_PTR) :: f_ptr
@@ -662,12 +669,12 @@ CONTAINS
        errcode )
 
     IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
-    INTEGER :: errcode                                 ! error code
-    INTEGER(size_t) :: namelen                                 ! name length
+    INTEGER(hid_t),   INTENT(in) :: loc_id
+    CHARACTER(LEN=*), INTENT(in) :: dset_name
+    INTEGER,          INTENT(in) :: rank
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims
+    INTEGER :: errcode
+    INTEGER(size_t) :: namelen ! name length
     INTEGER, INTENT(in), &
          DIMENSION(dims(1),dims(2),dims(3)), TARGET :: buf
     TYPE(C_PTR) :: f_ptr
@@ -683,12 +690,12 @@ CONTAINS
        buf, errcode )
 
     IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
-    INTEGER :: errcode                                 ! error code
-    INTEGER(size_t) :: namelen                                 ! name length
+    INTEGER(hid_t),   INTENT(in) :: loc_id
+    CHARACTER(LEN=*), INTENT(in) :: dset_name
+    INTEGER,          INTENT(in) :: rank
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims
+    INTEGER :: errcode
+    INTEGER(size_t) :: namelen ! name length
     INTEGER, INTENT(in), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4)), TARGET :: buf
     TYPE(C_PTR) :: f_ptr
@@ -704,12 +711,12 @@ CONTAINS
        buf, errcode )
 
     IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
-    INTEGER :: errcode                                 ! error code
-    INTEGER(size_t) :: namelen                                 ! name length
+    INTEGER(hid_t),   INTENT(in) :: loc_id
+    CHARACTER(LEN=*), INTENT(in) :: dset_name
+    INTEGER,          INTENT(in) :: rank
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims
+    INTEGER :: errcode
+    INTEGER(size_t) :: namelen ! name length
     INTEGER, INTENT(in), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)), TARGET :: buf
     TYPE(C_PTR) :: f_ptr
@@ -725,12 +732,12 @@ CONTAINS
        buf, errcode )
 
     IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
-    INTEGER :: errcode                                 ! error code
-    INTEGER(size_t) :: namelen                                 ! name length
+    INTEGER(hid_t),   INTENT(in) :: loc_id
+    CHARACTER(LEN=*), INTENT(in) :: dset_name
+    INTEGER,          INTENT(in) :: rank
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims
+    INTEGER :: errcode
+    INTEGER(size_t) :: namelen ! name length
     INTEGER, INTENT(in), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)), TARGET :: buf
     TYPE(C_PTR) :: f_ptr
@@ -746,12 +753,12 @@ CONTAINS
        buf, errcode )
 
     IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER,          INTENT(in) :: rank               ! rank
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
-    INTEGER :: errcode                                 ! error code
-    INTEGER(size_t) :: namelen                         ! name length
+    INTEGER(hid_t),   INTENT(in) :: loc_id
+    CHARACTER(LEN=*), INTENT(in) :: dset_name
+    INTEGER,          INTENT(in) :: rank
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims
+    INTEGER :: errcode
+    INTEGER(size_t) :: namelen ! name length
     INTEGER, INTENT(in), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)), TARGET :: buf
     TYPE(C_PTR) :: f_ptr
@@ -766,7 +773,7 @@ CONTAINS
   !-------------------------------------------------------------------------
   ! Function(s): h5ltread_dataset_int_f_(1-7)
   !
-  ! Purpose: Read a dataset
+  !! \brief Read a dataset
   !
   ! Return: Success: 0, Failure: -1
   !
@@ -787,11 +794,11 @@ CONTAINS
        errcode )
 
     IMPLICIT NONE
-    INTEGER(HID_T),   INTENT(IN) :: loc_id             ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
-    INTEGER :: errcode                                 ! error code
-    INTEGER(size_t) :: namelen                                 ! name length
+    INTEGER(HID_T),   INTENT(IN) :: loc_id
+    CHARACTER(LEN=*), INTENT(in) :: dset_name
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims
+    INTEGER :: errcode
+    INTEGER(size_t) :: namelen ! name length
     INTEGER, INTENT(inout), &
          DIMENSION(dims(1)), TARGET :: buf
     TYPE(C_PTR) :: f_ptr
@@ -810,11 +817,11 @@ CONTAINS
        errcode )
 
     IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
-    INTEGER :: errcode                                 ! error code
-    INTEGER(size_t) :: namelen                                 ! name length
+    INTEGER(hid_t),   INTENT(in) :: loc_id
+    CHARACTER(LEN=*), INTENT(in) :: dset_name
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims
+    INTEGER :: errcode
+    INTEGER(size_t) :: namelen ! name length
     INTEGER, INTENT(inout), &
          DIMENSION(dims(1),dims(2)), TARGET :: buf
     TYPE(C_PTR) :: f_ptr
@@ -833,11 +840,11 @@ CONTAINS
        errcode )
 
     IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
-    INTEGER :: errcode                                 ! error code
-    INTEGER(size_t) :: namelen                                 ! name length
+    INTEGER(hid_t),   INTENT(in) :: loc_id
+    CHARACTER(LEN=*), INTENT(in) :: dset_name
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims
+    INTEGER :: errcode
+    INTEGER(size_t) :: namelen ! name length
     INTEGER, INTENT(inout), &
          DIMENSION(dims(1),dims(2),dims(3)), TARGET :: buf
     TYPE(C_PTR) :: f_ptr
@@ -852,11 +859,11 @@ CONTAINS
   SUBROUTINE h5ltread_dataset_int_f_4(loc_id, dset_name, buf, dims, errcode )
 
     IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
-    INTEGER :: errcode                                 ! error code
-    INTEGER(size_t) :: namelen                                 ! name length
+    INTEGER(hid_t),   INTENT(in) :: loc_id
+    CHARACTER(LEN=*), INTENT(in) :: dset_name
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims
+    INTEGER :: errcode
+    INTEGER(size_t) :: namelen ! name length
     INTEGER, INTENT(inout), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4)), TARGET :: buf
     TYPE(C_PTR) :: f_ptr
@@ -871,11 +878,11 @@ CONTAINS
   SUBROUTINE h5ltread_dataset_int_f_5(loc_id, dset_name, buf, dims, errcode )
 
     IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
-    INTEGER :: errcode                                 ! error code
-    INTEGER(size_t) :: namelen                                 ! name length
+    INTEGER(hid_t),   INTENT(in) :: loc_id
+    CHARACTER(LEN=*), INTENT(in) :: dset_name
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims
+    INTEGER :: errcode
+    INTEGER(size_t) :: namelen ! name length
     INTEGER, INTENT(inout), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)), TARGET :: buf
     TYPE(C_PTR) :: f_ptr
@@ -890,11 +897,11 @@ CONTAINS
   SUBROUTINE h5ltread_dataset_int_f_6(loc_id, dset_name, buf, dims, errcode )
 
     IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
-    INTEGER :: errcode                                 ! error code
-    INTEGER(size_t) :: namelen                                 ! name length
+    INTEGER(hid_t),   INTENT(in) :: loc_id
+    CHARACTER(LEN=*), INTENT(in) :: dset_name
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims
+    INTEGER :: errcode
+    INTEGER(size_t) :: namelen ! name length
     INTEGER, INTENT(inout), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)), TARGET :: buf
     TYPE(C_PTR) :: f_ptr
@@ -909,11 +916,11 @@ CONTAINS
   SUBROUTINE h5ltread_dataset_int_f_7(loc_id, dset_name, buf, dims, errcode )
 
     IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims ! size of the buffer buf
-    INTEGER :: errcode                                 ! error code
-    INTEGER(size_t) :: namelen                                 ! name length
+    INTEGER(hid_t),   INTENT(in) :: loc_id
+    CHARACTER(LEN=*), INTENT(in) :: dset_name
+    INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims
+    INTEGER :: errcode
+    INTEGER(size_t) :: namelen ! name length
     INTEGER, INTENT(inout), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)), TARGET :: buf
     TYPE(C_PTR) :: f_ptr
@@ -929,7 +936,7 @@ CONTAINS
   !-------------------------------------------------------------------------
   ! Function: h5ltmake_dataset_string_f
   !
-  ! Purpose: Creates and writes a dataset
+  !! \brief Creates and writes a dataset
   !
   ! Return: Success: 0, Failure: -1
   !
@@ -949,10 +956,10 @@ CONTAINS
        errcode )
 
     IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
-    CHARACTER(LEN=*), INTENT(in) :: buf                ! data buffer
-    INTEGER :: errcode                                 ! error code
+    INTEGER(hid_t),   INTENT(in) :: loc_id
+    CHARACTER(LEN=*), INTENT(in) :: dset_name
+    CHARACTER(LEN=*), INTENT(in) :: buf
+    INTEGER :: errcode
     INTEGER(size_t) :: namelen                         ! name length
     INTEGER(size_t) :: buflen                          ! buffer length
 
@@ -962,11 +969,11 @@ CONTAINS
          IMPORT :: C_CHAR
          IMPORT :: HID_T, SIZE_T, HSIZE_T
          IMPLICIT NONE
-         INTEGER(hid_t),   INTENT(in) :: loc_id                          ! file or group identifier
+         INTEGER(hid_t),   INTENT(in) :: loc_id
          INTEGER(size_t) :: namelen                                      ! length of name buffer
          INTEGER(size_t) :: buflen                                       ! length of data buffer
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name   ! name of the dataset
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: buf         ! data buffer
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: buf
        END FUNCTION h5ltmake_dataset_string_c
     END INTERFACE
 
@@ -979,7 +986,7 @@ CONTAINS
   !-------------------------------------------------------------------------
   ! Function: h5ltread_dataset_string_f
   !
-  ! Purpose: Read a dataset
+  !! \brief Read a dataset
   !
   ! Return: Success: 0, Failure: -1
   !
@@ -999,10 +1006,10 @@ CONTAINS
        errcode )
 
     IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
-    CHARACTER(LEN=*), INTENT(inout) :: buf             ! data buffer
-    INTEGER :: errcode                                 ! error code
+    INTEGER(hid_t),   INTENT(in) :: loc_id
+    CHARACTER(LEN=*), INTENT(in) :: dset_name
+    CHARACTER(LEN=*), INTENT(inout) :: buf
+    INTEGER :: errcode
     INTEGER(size_t) :: namelen                         ! name length
 
     INTERFACE
@@ -1011,10 +1018,10 @@ CONTAINS
          IMPORT :: C_CHAR
          IMPORT :: HID_T, SIZE_T, HSIZE_T
          IMPLICIT NONE
-         INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
+         INTEGER(hid_t),   INTENT(in) :: loc_id
          INTEGER(size_t) :: namelen                                       ! length of name buffer
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in)    :: dset_name ! name of the dataset
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(inout) :: buf       ! data buffer
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in)    :: dset_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(inout) :: buf
        END FUNCTION h5ltread_dataset_string_c
     END INTERFACE
 
@@ -1023,49 +1030,51 @@ CONTAINS
 
   END SUBROUTINE h5ltread_dataset_string_f
 
+#endif
+
   !-------------------------------------------------------------------------
   ! Make/Read attribute functions
   !-------------------------------------------------------------------------
 
-  !-------------------------------------------------------------------------
-  ! Function: h5ltset_attribute_f
-  !
-  ! Purpose: Create and write an attribute
-  !
-  ! Return: Success: 0, Failure: -1
-  !
-  ! Programmer: M. Scot Breitenfeld
-  !
-  ! Date: May 4, 2015
-  !
-  ! Comments:
-  !
-  ! Modifications:
-  !
-  !-------------------------------------------------------------------------
-
+  !>
+  !! \ingroup FH5LT
+  !!
+  !! \brief Creates and writes an attribute and is a generic replacement for data type specific
+  !!        Fortran h5ltset_attribute_*_f APIs. There is no C equivalent API.
+  !!
+  !! \note  \fortran_approved
+  !!
+  !! \param loc_id          Location identifier. The identifier may be that of a file or group.
+  !! \param dset_name       The name of the dataset to create.
+  !! \param attr_name       The name of the attribute to create.
+  !! \param buf             The data buffer.
+  !! \param buf_type        Valid data types are CHARACTER, INTEGER or REAL.
+  !!                        NOTE: only the first character matters and is case insensitive.
+  !! \param SizeOf_buf_type Size of \p buf&apos;s data type, in bytes.
+  !! \param size            Size of attribute array.
+  !! \param errcode         \fortran_error
+  !!
   SUBROUTINE h5ltset_attribute_f(loc_id,&
        dset_name,&
        attr_name,&
        buf,&
-       buf_type, SizeOf_buf_type, &
+       buf_type,&
+       SizeOf_buf_type, &
        size,&
        errcode )
 
     IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
-    CHARACTER(LEN=*), INTENT(in) :: attr_name          ! name of the attribute
-    TYPE(C_PTR) :: buf                                 ! data buffer
-    CHARACTER(LEN=*), INTENT(in) :: buf_type           ! valid data types are:
-                                                       !   CHARACTER, INTEGER or REAL
-                                                       !   NOTE: only the first character matters and is case insensitive
-    INTEGER(size_t),  INTENT(in) :: size               ! size of attribute array
-    INTEGER(size_t),  INTENT(in) :: SizeOf_buf_type    ! size of buf's data type
-    INTEGER, INTENT(out) :: errcode                    ! error code
+    INTEGER(hid_t),   INTENT(in) :: loc_id
+    CHARACTER(LEN=*), INTENT(in) :: dset_name
+    CHARACTER(LEN=*), INTENT(in) :: attr_name
+    TYPE(C_PTR) :: buf
+    CHARACTER(LEN=*), INTENT(in) :: buf_type
+    INTEGER(size_t),  INTENT(in) :: size
+    INTEGER(size_t),  INTENT(in) :: SizeOf_buf_type
+    INTEGER, INTENT(out) :: errcode
 
-    INTEGER(size_t) :: namelen                         ! name length
-    INTEGER(size_t) :: attrlen                         ! name length
+    INTEGER(size_t) :: namelen ! name length
+    INTEGER(size_t) :: attrlen ! name length
     CHARACTER(KIND=C_CHAR) :: buf_type_uppercase
 
     namelen = LEN(dset_name)
@@ -1085,39 +1094,37 @@ CONTAINS
 
   END SUBROUTINE h5ltset_attribute_f
 
-  !-------------------------------------------------------------------------
-  ! Function: h5ltset_attribute_int_f
-  !
-  ! Purpose: Create and write an attribute
-  !
-  ! Return: Success: 0, Failure: -1
-  !
-  ! Programmer: Pedro Vicente
-  !
-  ! Date: October 05, 2004
-  !
-  ! Comments:
-  !
-  ! Modifications:
-  !
-  !-------------------------------------------------------------------------
-
+  !>
+  !! \ingroup FH5LT
+  !!
+  !! \brief Creates and writes an attribute.
+  !!
+  !! \note  \fortran_obsolete
+  !!
+  !! \param loc_id    Identifier of the object (dataset or group) to create the attribute within
+  !! \param obj_name  The name of the object to attach the attribute.
+  !! \param attr_name The attribute name.
+  !! \param buf       Buffer with data to be written to the attribute.
+  !! \param size      The size of the 1D array (one in the case of a scalar attribute).
+  !!                  This value is used by H5Screate_simple() to create the dataspace.
+  !! \param errcode   \fortran_error
+  !!
   SUBROUTINE h5ltset_attribute_int_f(loc_id,&
-       dset_name,&
+       obj_name,&
        attr_name,&
        buf,&
        size,&
        errcode )
 
     IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
-    CHARACTER(LEN=*), INTENT(in) :: attr_name          ! name of the attribute
-    INTEGER(size_t),  INTENT(in) :: size               ! size of attribute array
-    INTEGER :: errcode                                 ! error code
-    INTEGER, DIMENSION(*), TARGET :: buf   ! data buffer
-    INTEGER(size_t) :: namelen                                 ! name length
-    INTEGER(size_t) :: attrlen                                 ! name length
+    INTEGER(hid_t),   INTENT(in) :: loc_id
+    CHARACTER(LEN=*), INTENT(in) :: obj_name
+    CHARACTER(LEN=*), INTENT(in) :: attr_name
+    INTEGER(size_t),  INTENT(in) :: size
+    INTEGER :: errcode
+    INTEGER, DIMENSION(*), TARGET :: buf
+    INTEGER(size_t) :: namelen ! name length
+    INTEGER(size_t) :: attrlen ! name length
     TYPE(C_PTR) :: f_ptr
     INTEGER(size_t) :: SizeOf_buf_type
 
@@ -1129,46 +1136,44 @@ CONTAINS
     SizeOf_buf_type = SIZEOF(buf(1))
 #endif
 
-    namelen = LEN(dset_name)
+    namelen = LEN(obj_name)
     attrlen = LEN(attr_name)
-    errcode = h5ltset_attribute_c(loc_id,namelen,dset_name,attrlen,attr_name,size,&
+    errcode = h5ltset_attribute_c(loc_id,namelen,obj_name,attrlen,attr_name,size,&
          f_ptr,'I'//C_NULL_CHAR,SizeOf_buf_type)
 
   END SUBROUTINE h5ltset_attribute_int_f
 
-  !-------------------------------------------------------------------------
-  ! Function: h5ltset_attribute_float_f
-  !
-  ! Purpose: Create and write an attribute
-  !
-  ! Return: Success: 0, Failure: -1
-  !
-  ! Programmer: Pedro Vicente
-  !
-  ! Date: October 05, 2004
-  !
-  ! Comments:
-  !
-  ! Modifications:
-  !
-  !-------------------------------------------------------------------------
-
+  !>
+  !! \ingroup FH5LT
+  !!
+  !! \brief Creates and writes an attribute.
+  !!
+  !! \note  \fortran_obsolete
+  !!
+  !! \param loc_id    Identifier of the object (dataset or group) to create the attribute within
+  !! \param obj_name  The name of the object to attach the attribute.
+  !! \param attr_name The attribute name.
+  !! \param buf       Buffer with data to be written to the attribute.
+  !! \param size      The size of the 1D array (one in the case of a scalar attribute).
+  !!                  This value is used by H5Screate_simple() to create the dataspace.
+  !! \param errcode   \fortran_error
+  !!
   SUBROUTINE h5ltset_attribute_float_f(loc_id,&
-       dset_name,&
+       obj_name,&
        attr_name,&
        buf,&
        size,&
        errcode )
 
     IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
-    CHARACTER(LEN=*), INTENT(in) :: attr_name          ! name of the attribute
-    INTEGER(size_t),  INTENT(in) :: size               ! size of attribute array
-    INTEGER :: errcode                                 ! error code
-    REAL(KIND=C_FLOAT), INTENT(in), DIMENSION(*), TARGET :: buf ! data buffer
-    INTEGER(size_t) :: namelen                         ! name length
-    INTEGER(size_t) :: attrlen                         ! name length
+    INTEGER(hid_t),   INTENT(in) :: loc_id
+    CHARACTER(LEN=*), INTENT(in) :: obj_name
+    CHARACTER(LEN=*), INTENT(in) :: attr_name
+    INTEGER(size_t),  INTENT(in) :: size
+    INTEGER :: errcode
+    REAL(KIND=C_FLOAT), INTENT(in), DIMENSION(*), TARGET :: buf
+    INTEGER(size_t) :: namelen ! name length
+    INTEGER(size_t) :: attrlen ! name length
     TYPE(C_PTR) :: f_ptr
     INTEGER(size_t) :: SizeOf_buf_type
 
@@ -1179,46 +1184,44 @@ CONTAINS
     SizeOf_buf_type = SIZEOF(buf(1))
 #endif
 
-    namelen = LEN(dset_name)
+    namelen = LEN(obj_name)
     attrlen = LEN(attr_name)
-    errcode = h5ltset_attribute_c(loc_id,namelen,dset_name,attrlen,attr_name,size,&
+    errcode = h5ltset_attribute_c(loc_id,namelen,obj_name,attrlen,attr_name,size,&
          f_ptr,'R'//C_NULL_CHAR, SizeOf_buf_type)
 
   END SUBROUTINE h5ltset_attribute_float_f
 
-  !-------------------------------------------------------------------------
-  ! Function: h5ltset_attribute_double_f
-  !
-  ! Purpose: Create and write an attribute
-  !
-  ! Return: Success: 0, Failure: -1
-  !
-  ! Programmer: Pedro Vicente
-  !
-  ! Date: October 05, 2004
-  !
-  ! Comments:
-  !
-  ! Modifications:
-  !
-  !-------------------------------------------------------------------------
-
+  !>
+  !! \ingroup FH5LT
+  !!
+  !! \brief Creates and writes an attribute.
+  !!
+  !! \note  \fortran_obsolete
+  !!
+  !! \param loc_id    Identifier of the object (dataset or group) to create the attribute within
+  !! \param obj_name  The name of the object to attach the attribute.
+  !! \param attr_name The attribute name.
+  !! \param buf       Buffer with data to be written to the attribute.
+  !! \param size      The size of the 1D array (one in the case of a scalar attribute).
+  !!                  This value is used by H5Screate_simple() to create the dataspace.
+  !! \param errcode   \fortran_error
+  !!
   SUBROUTINE h5ltset_attribute_double_f(loc_id,&
-       dset_name,&
+       obj_name,&
        attr_name,&
        buf,&
        size,&
        errcode )
 
     IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
-    CHARACTER(LEN=*), INTENT(in) :: attr_name          ! name of the attribute
-    INTEGER(size_t),  INTENT(in) :: size               ! size of attribute array
-    INTEGER :: errcode                                 ! error code
-    REAL(KIND=C_DOUBLE), INTENT(in), DIMENSION(*), TARGET :: buf  ! data buffer
-    INTEGER(size_t) :: namelen                         ! name length
-    INTEGER(size_t) :: attrlen                         ! name length
+    INTEGER(hid_t),   INTENT(in) :: loc_id
+    CHARACTER(LEN=*), INTENT(in) :: obj_name
+    CHARACTER(LEN=*), INTENT(in) :: attr_name
+    INTEGER(size_t),  INTENT(in) :: size
+    INTEGER :: errcode
+    REAL(KIND=C_DOUBLE), INTENT(in), DIMENSION(*), TARGET :: buf
+    INTEGER(size_t) :: namelen ! name length
+    INTEGER(size_t) :: attrlen ! name length
     TYPE(C_PTR) :: f_ptr
     INTEGER(size_t) :: SizeOf_buf_type
 
@@ -1230,46 +1233,41 @@ CONTAINS
     SizeOf_buf_type = SIZEOF(buf(1))
 #endif
 
-    namelen = LEN(dset_name)
+    namelen = LEN(obj_name)
     attrlen = LEN(attr_name)
-    errcode = h5ltset_attribute_c(loc_id,namelen,dset_name,attrlen,attr_name,size,&
+    errcode = h5ltset_attribute_c(loc_id,namelen,obj_name,attrlen,attr_name,size,&
          f_ptr,'R'//C_NULL_CHAR,SizeOf_buf_type)
 
   END SUBROUTINE h5ltset_attribute_double_f
 
-
-  !-------------------------------------------------------------------------
-  ! Function: h5ltset_attribute_string_f
-  !
-  ! Purpose: Create and write an attribute
-  !
-  ! Return: Success: 0, Failure: -1
-  !
-  ! Programmer: Pedro Vicente
-  !
-  ! Date: October 05, 2004
-  !
-  ! Comments:
-  !
-  ! Modifications:
-  !
-  !-------------------------------------------------------------------------
-
+  !>
+  !! \ingroup FH5LT
+  !!
+  !! \brief Creates and writes an attribute.
+  !!
+  !! \note  \fortran_obsolete
+  !!
+  !! \param loc_id    Identifier of the object (dataset or group) to create the attribute within
+  !! \param obj_name  The name of the object to attach the attribute.
+  !! \param attr_name The attribute name.
+  !! \param buf       Buffer with data to be written to the attribute.
+  !! \param errcode   \fortran_error
+  !!
   SUBROUTINE h5ltset_attribute_string_f(loc_id,&
-       dset_name,&
+       obj_name,&
        attr_name,&
        buf,&
        errcode )
 
     IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
-    CHARACTER(LEN=*), INTENT(in) :: attr_name          ! name of the attribute
-    INTEGER :: errcode                                 ! error code
-    CHARACTER(LEN=*), DIMENSION(*), INTENT(in), TARGET :: buf    ! data buffer
-    INTEGER(size_t) :: namelen                         ! name length
-    INTEGER(size_t) :: attrlen                         ! name length
-    INTEGER(size_t) :: buflen                          ! data buffer length
+    INTEGER(hid_t),   INTENT(in) :: loc_id
+    CHARACTER(LEN=*), INTENT(in) :: obj_name
+    CHARACTER(LEN=*), INTENT(in) :: attr_name
+    INTEGER :: errcode
+    CHARACTER(LEN=*), DIMENSION(*), INTENT(in), TARGET :: buf
+    INTEGER(size_t) :: namelen ! name length
+    INTEGER(size_t) :: attrlen ! name length
+    INTEGER(size_t) :: buflen  ! data buffer length
     TYPE(C_PTR) :: f_ptr
     INTEGER(size_t) :: SizeOf_buf_type
 
@@ -1281,52 +1279,48 @@ CONTAINS
     SizeOf_buf_type = SIZEOF(buf(1:1)(1:1))
 #endif
 
-    namelen = LEN(dset_name)
+    namelen = LEN(obj_name)
     attrlen = LEN(attr_name)
     buflen = LEN(buf)
-    errcode = h5ltset_attribute_c(loc_id,namelen,dset_name,attrlen,attr_name,buflen,&
+    errcode = h5ltset_attribute_c(loc_id,namelen,obj_name,attrlen,attr_name,buflen,&
          f_ptr,'C'//C_NULL_CHAR, SizeOf_buf_type)
 
   END SUBROUTINE h5ltset_attribute_string_f
-
-  !-------------------------------------------------------------------------
-  ! Function: h5ltget_attribute_f
-  !
-  ! Purpose: Reads an attribute named ATTR_NAME
-  !
-  ! Return: Success: 0, Failure: -1
-  !
-  ! Programmer: M. Scot Breitenfeld
-  !
-  ! Date: Apr 29, 2015
-  !
-  ! Comments:
-  !
-  ! Modifications:
-  !
-  !-------------------------------------------------------------------------
-
+  !>
+  !! \ingroup FH5LT
+  !!
+  !! \brief Reads an attribute from disk.
+  !!
+  !! \note  \fortran_approved
+  !!
+  !! \param loc_id          Location identifier. The identifier may be that of a file or group.
+  !! \param obj_name        The name of the object that the attribute is attached to.
+  !! \param attr_name       The name of the attribute to create.
+  !! \param buf             The data buffer.
+  !! \param buf_type        Valid data types are CHARACTER, INTEGER or REAL.
+  !!                        NOTE: only the first character matters and is case insensitive.
+  !! \param SizeOf_buf_type Size of \p buf&apos;s data type, in bytes.
+  !! \param errcode         \fortran_error
+  !!
   SUBROUTINE h5ltget_attribute_f(loc_id,&
-       dset_name,&
+       obj_name,&
        attr_name,&
        buf, buf_type, SizeOf_buf_type, &
        errcode )
 
     IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
-    CHARACTER(LEN=*), INTENT(in) :: attr_name          ! name of the attribute
-    TYPE(C_PTR) :: buf                                 ! data buffer
-    CHARACTER(LEN=*), INTENT(in) :: buf_type           ! valid data types are:
-                                                       ! CHARACTER, INTEGER or REAL
-                                                       ! NOTE: only the first character matters and is case insensitive
-    INTEGER(size_t), INTENT(in) :: SizeOf_buf_type     ! size of buf's data type
-    INTEGER, INTENT(out) :: errcode                    ! error code
-    INTEGER(size_t) :: namelen                         ! name length
-    INTEGER(size_t) :: attrlen                         ! attr length
+    INTEGER(hid_t),   INTENT(in) :: loc_id
+    CHARACTER(LEN=*), INTENT(in) :: obj_name
+    CHARACTER(LEN=*), INTENT(in) :: attr_name
+    TYPE(C_PTR) :: buf
+    CHARACTER(LEN=*), INTENT(in) :: buf_type
+    INTEGER(size_t), INTENT(in) :: SizeOf_buf_type
+    INTEGER, INTENT(out) :: errcode
+    INTEGER(size_t) :: namelen ! name length
+    INTEGER(size_t) :: attrlen ! attr length
     CHARACTER(KIND=C_CHAR) :: buf_type_uppercase
 
-    namelen = LEN(dset_name)
+    namelen = LEN(obj_name)
     attrlen = LEN(attr_name)
 
     buf_type_uppercase(1:1) = buf_type(1:1)
@@ -1337,43 +1331,38 @@ CONTAINS
     ELSE IF(buf_type_uppercase(1:1).EQ.'c')THEN
        buf_type_uppercase(1:1) = 'C'
     ENDIF
-    errcode = h5ltget_attribute_c(loc_id,namelen,dset_name,attrlen,attr_name, &
+    errcode = h5ltget_attribute_c(loc_id,namelen,obj_name,attrlen,attr_name, &
          buf, buf_type_uppercase//C_NULL_CHAR, SizeOf_buf_type)
-
 
   END SUBROUTINE h5ltget_attribute_f
 
-  !-------------------------------------------------------------------------
-  ! Function: h5ltget_attribute_int_f
-  !
-  ! Purpose: Reads an attribute named ATTR_NAME
-  !
-  ! Return: Success: 0, Failure: -1
-  !
-  ! Programmer: Pedro Vicente
-  !
-  ! Date: October 05, 2004
-  !
-  ! Comments:
-  !
-  ! Modifications:
-  !
-  !-------------------------------------------------------------------------
-
+  !>
+  !! \ingroup FH5LT
+  !!
+  !! \brief Reads an attribute from disk.
+  !!
+  !! \note  \fortran_obsolete
+  !!
+  !! \param loc_id    Identifier of the object (dataset or group) to create the attribute within
+  !! \param obj_name  The name of the object that the attribute is attached to.
+  !! \param attr_name The attribute name.
+  !! \param buf       Buffer with data to be written to the attribute.
+  !! \param errcode   \fortran_error
+  !!
   SUBROUTINE h5ltget_attribute_int_f(loc_id,&
-       dset_name,&
+       obj_name,&
        attr_name,&
        buf,&
        errcode )
 
     IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
-    CHARACTER(LEN=*), INTENT(in) :: attr_name          ! name of the attribute
-    INTEGER :: errcode                                 ! error code
-    INTEGER, INTENT(inout), DIMENSION(*), TARGET :: buf! data buffer
-    INTEGER(size_t) :: namelen                         ! name length
-    INTEGER(size_t) :: attrlen                         ! name length
+    INTEGER(hid_t),   INTENT(in) :: loc_id
+    CHARACTER(LEN=*), INTENT(in) :: obj_name
+    CHARACTER(LEN=*), INTENT(in) :: attr_name
+    INTEGER :: errcode
+    INTEGER, INTENT(inout), DIMENSION(*), TARGET :: buf
+    INTEGER(size_t) :: namelen ! name length
+    INTEGER(size_t) :: attrlen ! name length
     TYPE(C_PTR) :: f_ptr
     INTEGER(size_t) :: SizeOf_buf
 
@@ -1384,43 +1373,39 @@ CONTAINS
 #else
     SizeOf_buf = SIZEOF(buf(1))
 #endif
-    namelen = LEN(dset_name)
+    namelen = LEN(obj_name)
     attrlen = LEN(attr_name)
-    errcode = h5ltget_attribute_c(loc_id,namelen,dset_name,attrlen,attr_name,f_ptr,'I'//C_NULL_CHAR, SizeOf_buf)
+    errcode = h5ltget_attribute_c(loc_id,namelen,obj_name,attrlen,attr_name,f_ptr,'I'//C_NULL_CHAR, SizeOf_buf)
 
   END SUBROUTINE h5ltget_attribute_int_f
 
-  !-------------------------------------------------------------------------
-  ! Function: h5ltget_attribute_float_f
-  !
-  ! Purpose: Reads an attribute named ATTR_NAME
-  !
-  ! Return: Success: 0, Failure: -1
-  !
-  ! Programmer: Pedro Vicente
-  !
-  ! Date: October 05, 2004
-  !
-  ! Comments:
-  !
-  ! Modifications:
-  !
-  !-------------------------------------------------------------------------
-
+  !>
+  !! \ingroup FH5LT
+  !!
+  !! \brief Reads an attribute from disk.
+  !!
+  !! \note  \fortran_obsolete
+  !!
+  !! \param loc_id    Identifier of the object (dataset or group) to create the attribute within
+  !! \param obj_name  The name of the object that the attribute is attached to.
+  !! \param attr_name The attribute name.
+  !! \param buf       Buffer with data to be written to the attribute.
+  !! \param errcode   \fortran_error
+  !!
   SUBROUTINE h5ltget_attribute_float_f(loc_id,&
-       dset_name,&
+       obj_name,&
        attr_name,&
        buf,&
        errcode )
 
     IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
-    CHARACTER(LEN=*), INTENT(in) :: attr_name          ! name of the attribute
-    INTEGER :: errcode                                 ! error code
+    INTEGER(hid_t),   INTENT(in) :: loc_id
+    CHARACTER(LEN=*), INTENT(in) :: obj_name
+    CHARACTER(LEN=*), INTENT(in) :: attr_name
+    INTEGER :: errcode
     REAL(KIND=C_FLOAT), INTENT(inout), DIMENSION(*), TARGET :: buf
-    INTEGER(size_t) :: namelen                         ! name length
-    INTEGER(size_t) :: attrlen                         ! name length
+    INTEGER(size_t) :: namelen ! name length
+    INTEGER(size_t) :: attrlen ! name length
     TYPE(C_PTR) :: f_ptr
     INTEGER(size_t) :: SizeOf_buf
 
@@ -1430,43 +1415,39 @@ CONTAINS
 #else
     SizeOf_buf = SIZEOF(buf(1))
 #endif
-    namelen = LEN(dset_name)
+    namelen = LEN(obj_name)
     attrlen = LEN(attr_name)
-    errcode = h5ltget_attribute_c(loc_id,namelen,dset_name,attrlen,attr_name,f_ptr,'R'//C_NULL_CHAR, SizeOf_buf)
+    errcode = h5ltget_attribute_c(loc_id,namelen,obj_name,attrlen,attr_name,f_ptr,'R'//C_NULL_CHAR, SizeOf_buf)
 
   END SUBROUTINE h5ltget_attribute_float_f
 
-  !-------------------------------------------------------------------------
-  ! Function: h5ltget_attribute_c_double_f
-  !
-  ! Purpose: Reads an attribute named ATTR_NAME
-  !
-  ! Return: Success: 0, Failure: -1
-  !
-  ! Programmer: Pedro Vicente
-  !
-  ! Date: October 05, 2004
-  !
-  ! Comments:
-  !
-  ! Modifications:
-  !
-  !-------------------------------------------------------------------------
-
+  !>
+  !! \ingroup FH5LT
+  !!
+  !! \brief Reads an attribute from disk.
+  !!
+  !! \note  \fortran_obsolete
+  !!
+  !! \param loc_id    Identifier of the object (dataset or group) to create the attribute within
+  !! \param obj_name  The name of the object that the attribute is attached to.
+  !! \param attr_name The attribute name.
+  !! \param buf       Buffer with data to be written to the attribute.
+  !! \param errcode   \fortran_error
+  !!
   SUBROUTINE h5ltget_attribute_double_f(loc_id,&
-       dset_name,&
+       obj_name,&
        attr_name,&
        buf,&
        errcode )
 
     IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
-    CHARACTER(LEN=*), INTENT(in) :: attr_name          ! name of the attribute
-    INTEGER :: errcode                                 ! error code
+    INTEGER(hid_t),   INTENT(in) :: loc_id
+    CHARACTER(LEN=*), INTENT(in) :: obj_name
+    CHARACTER(LEN=*), INTENT(in) :: attr_name
+    INTEGER :: errcode
     REAL(KIND=C_DOUBLE),INTENT(inout),DIMENSION(*), TARGET :: buf
-    INTEGER(size_t) :: namelen                                 ! name length
-    INTEGER(size_t) :: attrlen                                 ! name length
+    INTEGER(size_t) :: namelen ! name length
+    INTEGER(size_t) :: attrlen ! name length
     TYPE(C_PTR) :: f_ptr
     INTEGER(size_t) :: SizeOf_buf
 
@@ -1477,66 +1458,62 @@ CONTAINS
     SizeOf_buf = SIZEOF(buf(1))
 #endif
 
-    namelen = LEN(dset_name)
+    namelen = LEN(obj_name)
     attrlen = LEN(attr_name)
-    errcode = h5ltget_attribute_c(loc_id,namelen,dset_name,attrlen,attr_name,f_ptr,'R'//C_NULL_CHAR, SizeOf_buf)
+    errcode = h5ltget_attribute_c(loc_id,namelen,obj_name,attrlen,attr_name,f_ptr,'R'//C_NULL_CHAR, SizeOf_buf)
 
   END SUBROUTINE h5ltget_attribute_double_f
 
-  !-------------------------------------------------------------------------
-  ! Function: h5ltget_attribute_string_f
-  !
-  ! Purpose: Reads an attribute named ATTR_NAME
-  !
-  ! Return: Success: 0, Failure: -1
-  !
-  ! Programmer: Pedro Vicente
-  !
-  ! Date: October 05, 2004
-  !
-  ! Comments:
-  !
-  ! Modifications:
-  !
-  !-------------------------------------------------------------------------
-
+  !>
+  !! \ingroup FH5LT
+  !!
+  !! \brief Reads an attribute from disk.
+  !!
+  !! \note  \fortran_obsolete
+  !!
+  !! \param loc_id    Identifier of the object (dataset or group) to create the attribute within
+  !! \param obj_name  The name of the object that the attribute is attached to.
+  !! \param attr_name The attribute name.
+  !! \param buf       Buffer with data to be written to the attribute.
+  !! \param errcode   \fortran_error
+  !!
   SUBROUTINE h5ltget_attribute_string_f(loc_id,&
-       dset_name,&
+       obj_name,&
        attr_name,&
        buf,&
        errcode )
 
     IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
-    CHARACTER(LEN=*), INTENT(in) :: attr_name          ! name of the attribute
-    INTEGER :: errcode                                 ! error code
+    INTEGER(hid_t),   INTENT(in) :: loc_id
+    CHARACTER(LEN=*), INTENT(in) :: obj_name
+    CHARACTER(LEN=*), INTENT(in) :: attr_name
+    INTEGER :: errcode
     CHARACTER(LEN=*), INTENT(inout) :: buf
-    INTEGER(size_t) :: namelen                         ! name length
-    INTEGER(size_t) :: attrlen                         ! name length
-    INTEGER(size_t) :: buf_size                        ! buf size
+    INTEGER(size_t) :: namelen  ! name length
+    INTEGER(size_t) :: attrlen  ! name length
+    INTEGER(size_t) :: buf_size ! buf size
 
    INTERFACE
-       INTEGER FUNCTION h5ltget_attribute_string_c(loc_id,namelen,dset_name,attrlen,attr_name,buf,buf_size) &
+       INTEGER FUNCTION h5ltget_attribute_string_c(loc_id,namelen,obj_name,attrlen,attr_name,buf,buf_size) &
             BIND(C,NAME='h5ltget_attribute_string_c')
          IMPORT :: C_CHAR
          IMPORT :: HID_T, SIZE_T, HSIZE_T
          IMPLICIT NONE
-         INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
-         INTEGER(size_t) :: namelen                                      ! length of name buffer
-         INTEGER(size_t) :: attrlen                                      ! length of attr name buffer
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name               ! name of the dataset
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: attr_name               ! name of the attribute
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(inout) :: buf                  ! data buffer
-         INTEGER(size_t) :: buf_size                 ! data buffer size
+         INTEGER(hid_t),   INTENT(in) :: loc_id
+         INTEGER(size_t) :: namelen
+         INTEGER(size_t) :: attrlen
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: obj_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: attr_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(inout) :: buf
+         INTEGER(size_t) :: buf_size
        END FUNCTION h5ltget_attribute_string_c
     END INTERFACE
 
-    namelen  = LEN(dset_name)
+    namelen  = LEN(obj_name)
     attrlen  = LEN(attr_name)
     buf_size = LEN(buf)
 
-    errcode = h5ltget_attribute_string_c(loc_id,namelen,dset_name,attrlen,attr_name,buf,buf_size)
+    errcode = h5ltget_attribute_string_c(loc_id,namelen,obj_name,attrlen,attr_name,buf,buf_size)
 
   END SUBROUTINE h5ltget_attribute_string_f
 
@@ -1544,34 +1521,27 @@ CONTAINS
   ! Query dataset functions
   !-------------------------------------------------------------------------
 
-  !-------------------------------------------------------------------------
-  ! Function: h5ltget_dataset_ndims_f
-  !
-  ! Purpose: Gets the dimensionality of a dataset
-  !
-  ! Return: Success: 0, Failure: -1
-  !
-  ! Programmer: Pedro Vicente
-  !
-  ! Date: September 30, 2004
-  !
-  ! Comments:
-  !
-  ! Modifications:
-  !
-  !-------------------------------------------------------------------------
-
+  !>
+  !! \ingroup FH5LT
+  !!
+  !! \brief Gets the dimensionality of a dataset.
+  !!
+  !! \param loc_id    Identifier of the object to locate the dataset within.
+  !! \param dset_name The dataset name.
+  !! \param rank      The dimensionality of the dataset.
+  !! \param errcode   \fortran_error
+  !!
   SUBROUTINE h5ltget_dataset_ndims_f(loc_id,&
        dset_name,&
        rank,&
        errcode )
 
     IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER,          INTENT(inout) :: rank            ! rank
-    INTEGER :: errcode                                 ! error code
-    INTEGER(size_t) :: namelen                                 ! name length
+    INTEGER(hid_t),   INTENT(in) :: loc_id
+    CHARACTER(LEN=*), INTENT(in) :: dset_name
+    INTEGER,          INTENT(inout) :: rank
+    INTEGER :: errcode
+    INTEGER(size_t) :: namelen ! name length
 
     INTERFACE
        INTEGER FUNCTION h5ltget_dataset_ndims_c(loc_id,namelen,dset_name,rank) &
@@ -1579,10 +1549,10 @@ CONTAINS
          IMPORT :: C_CHAR
          IMPORT :: HID_T, SIZE_T, HSIZE_T
          IMPLICIT NONE
-         INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
-         INTEGER(size_t) :: namelen                                      ! length of name buffer
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name               ! name of the dataset
-         INTEGER,          INTENT(inout) :: rank                 ! rank
+         INTEGER(hid_t),   INTENT(in) :: loc_id
+         INTEGER(size_t) :: namelen
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name
+         INTEGER,          INTENT(inout) :: rank
        END FUNCTION h5ltget_dataset_ndims_c
     END INTERFACE
 
@@ -1591,33 +1561,24 @@ CONTAINS
 
   END SUBROUTINE h5ltget_dataset_ndims_f
 
-
-  !-------------------------------------------------------------------------
-  ! Function: h5ltfind_dataset_f
-  !
-  ! Purpose: Inquires if a dataset named dset_name exists attached
-  !           to the object loc_id.
-  !
-  ! Return: Success: 0, Failure: -1
-  !
-  ! Programmer: Pedro Vicente
-  !
-  ! Date: October 05, 2004
-  !
-  ! Comments:
-  !
-  ! Modifications:
-  !
-  !-------------------------------------------------------------------------
-
+  !>
+  !! \ingroup FH5LT
+  !!
+  !! \brief Determines whether a dataset exists.
+  !!
+  !! \param loc_id    Identifier of the group containing the dataset.
+  !! \param dset_name The dataset name.
+  !!
+  !! \result Returns zero (false), a positive (true) or a negative (failure) value.
+  !!
   INTEGER FUNCTION h5ltfind_dataset_f(loc_id,&
        dset_name)
 
     IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER :: errcode                                 ! error code
-    INTEGER(size_t) :: namelen                                 ! name length
+    INTEGER(hid_t),   INTENT(in) :: loc_id
+    CHARACTER(LEN=*), INTENT(in) :: dset_name
+    INTEGER :: errcode
+    INTEGER(size_t) :: namelen ! name length
 
     INTERFACE
        INTEGER FUNCTION h5ltfind_dataset_c(loc_id,namelen,dset_name) &
@@ -1625,9 +1586,9 @@ CONTAINS
          IMPORT :: C_CHAR
          IMPORT :: HID_T, SIZE_T, HSIZE_T
          IMPLICIT NONE
-         INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
-         INTEGER(size_t) :: namelen                                      ! length of name buffer
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name               ! name of the dataset
+         INTEGER(hid_t),   INTENT(in) :: loc_id
+         INTEGER(size_t) :: namelen
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name
        END FUNCTION h5ltfind_dataset_c
     END INTERFACE
 
@@ -1637,23 +1598,18 @@ CONTAINS
 
   END FUNCTION h5ltfind_dataset_f
 
-  !-------------------------------------------------------------------------
-  ! Function: h5ltget_dataset_info_f
-  !
-  ! Purpose: Gets information about a dataset
-  !
-  ! Return: Success: 0, Failure: -1
-  !
-  ! Programmer: Pedro Vicente
-  !
-  ! Date: September 30, 2004
-  !
-  ! Comments:
-  !
-  ! Modifications:
-  !
-  !-------------------------------------------------------------------------
-
+  !>
+  !! \ingroup FH5LT
+  !!
+  !! \brief Retrieves information about a dataset.
+  !!
+  !! \param loc_id     Identifier of the object to locate the dataset within.
+  !! \param dset_name  The dataset name.
+  !! \param dims       The dimensions of the dataset.
+  !! \param type_class The class identifier. See H5Tget_class_f() for a list of class types.
+  !! \param type_size  The size of the datatype in bytes.
+  !! \param errcode    \fortran_error
+  !!
   SUBROUTINE h5ltget_dataset_info_f(loc_id,&
        dset_name,&
        dims,&
@@ -1662,13 +1618,13 @@ CONTAINS
        errcode )
 
     IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
-    INTEGER(hsize_t),DIMENSION(*),INTENT(inout):: dims ! dimensions
-    INTEGER, INTENT(inout)         :: type_class       ! type class
-    INTEGER(size_t), INTENT(inout) :: type_size        ! type size
-    INTEGER :: errcode                                 ! error code
-    INTEGER(size_t) :: namelen                                 ! name length
+    INTEGER(hid_t),   INTENT(in) :: loc_id
+    CHARACTER(LEN=*), INTENT(in) :: dset_name
+    INTEGER(hsize_t),DIMENSION(*),INTENT(inout):: dims
+    INTEGER, INTENT(inout)         :: type_class
+    INTEGER(size_t), INTENT(inout) :: type_size
+    INTEGER :: errcode
+    INTEGER(size_t) :: namelen ! name length
 
     INTERFACE
        INTEGER FUNCTION h5ltget_dataset_info_c(loc_id,namelen,dset_name,dims,type_class,type_size) &
@@ -1676,12 +1632,12 @@ CONTAINS
          IMPORT :: C_CHAR
          IMPORT :: HID_T, SIZE_T, HSIZE_T
          IMPLICIT NONE
-         INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
-         INTEGER(size_t) :: namelen                                      ! length of name buffer
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name               ! name of the dataset
-         INTEGER(hsize_t),DIMENSION(*),INTENT(inout):: dims      ! dimensions
-         INTEGER, INTENT(inout)         :: type_class            ! type class
-         INTEGER(size_t), INTENT(inout) :: type_size             ! type size
+         INTEGER(hid_t),   INTENT(in) :: loc_id
+         INTEGER(size_t) :: namelen
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name
+         INTEGER(hsize_t),DIMENSION(*),INTENT(inout):: dims
+         INTEGER, INTENT(inout)         :: type_class
+         INTEGER(size_t), INTENT(inout) :: type_size
        END FUNCTION h5ltget_dataset_info_c
     END INTERFACE
 
@@ -1695,80 +1651,68 @@ CONTAINS
   ! Query attribute functions
   !-------------------------------------------------------------------------
 
-
-  !-------------------------------------------------------------------------
-  ! Function: h5ltget_attribute_ndims_f
-  !
-  ! Purpose: Create and write an attribute
-  !
-  ! Return: Success: 0, Failure: -1
-  !
-  ! Programmer: Pedro Vicente
-  !
-  ! Date: October 05, 2004
-  !
-  ! Comments:
-  !
-  ! Modifications:
-  !
-  !-------------------------------------------------------------------------
-
+  !>
+  !! \ingroup FH5LT
+  !!
+  !! \brief Gets the dimensionality of an attribute.
+  !!
+  !! \param loc_id     Identifier of the object (dataset or group) to read the attribute from.
+  !! \param obj_name   The name of the object that the attribute is attached to.
+  !! \param attr_name  The attribute name.
+  !! \param rank       The dimensionality of the attribute.
+  !! \param errcode    \fortran_error
+  !!
   SUBROUTINE h5ltget_attribute_ndims_f(loc_id,&
-       dset_name,&
+       obj_name,&
        attr_name,&
        rank,&
        errcode )
 
     IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
-    CHARACTER(LEN=*), INTENT(in) :: attr_name          ! name of the attribute
-    INTEGER,          INTENT(inout) :: rank            ! rank
-    INTEGER :: errcode                                 ! error code
-    INTEGER(size_t) :: namelen                                 ! name length
-    INTEGER(size_t) :: attrlen                                 ! name length
+    INTEGER(hid_t),   INTENT(in) :: loc_id
+    CHARACTER(LEN=*), INTENT(in) :: obj_name
+    CHARACTER(LEN=*), INTENT(in) :: attr_name
+    INTEGER,          INTENT(inout) :: rank
+    INTEGER :: errcode
+    INTEGER(size_t) :: namelen ! name length
+    INTEGER(size_t) :: attrlen ! name length
 
     INTERFACE
-       INTEGER FUNCTION h5ltget_attribute_ndims_c(loc_id,namelen,dset_name,attrlen,attr_name,rank) &
+       INTEGER FUNCTION h5ltget_attribute_ndims_c(loc_id,namelen,obj_name,attrlen,attr_name,rank) &
             BIND(C,NAME='h5ltget_attribute_ndims_c')
          IMPORT :: C_CHAR
          IMPORT :: HID_T, SIZE_T, HSIZE_T
          IMPLICIT NONE
-         INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
-         INTEGER(size_t) :: namelen                                      ! length of name buffer
-         INTEGER(size_t) :: attrlen                                      ! length of attr name buffer
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name               ! name of the dataset
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: attr_name               ! name of the attribute
-         INTEGER,          INTENT(inout) :: rank                 ! rank
+         INTEGER(hid_t),   INTENT(in) :: loc_id
+         INTEGER(size_t) :: namelen
+         INTEGER(size_t) :: attrlen
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: obj_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: attr_name
+         INTEGER,          INTENT(inout) :: rank
        END FUNCTION h5ltget_attribute_ndims_c
     END INTERFACE
 
-    namelen = LEN(dset_name)
+    namelen = LEN(obj_name)
     attrlen = LEN(attr_name)
-    errcode = h5ltget_attribute_ndims_c(loc_id,namelen,dset_name,attrlen,attr_name,rank)
+    errcode = h5ltget_attribute_ndims_c(loc_id,namelen,obj_name,attrlen,attr_name,rank)
 
   END SUBROUTINE h5ltget_attribute_ndims_f
 
-
-  !-------------------------------------------------------------------------
-  ! Function: h5ltget_attribute_info_f
-  !
-  ! Purpose: Gets information about an attribute
-  !
-  ! Return: Success: 0, Failure: -1
-  !
-  ! Programmer: Pedro Vicente
-  !
-  ! Date: September 30, 2004
-  !
-  ! Comments:
-  !
-  ! Modifications:
-  !
-  !-------------------------------------------------------------------------
-
+  !>
+  !! \ingroup FH5LT
+  !!
+  !! \brief Gets information about an attribute.
+  !!
+  !! \param loc_id     Identifier of the object (dataset or group) to read the attribute from.
+  !! \param obj_name   The name of the object that the attribute is attached to.
+  !! \param attr_name  The attribute name.
+  !! \param dims       The dimensions of the attribute.
+  !! \param type_class The class identifier. For a list of valid class types see: H5Tget_class_f().
+  !! \param type_size  The size of the datatype in bytes.
+  !! \param errcode    \fortran_error
+  !!
   SUBROUTINE h5ltget_attribute_info_f(loc_id,&
-       dset_name,&
+       obj_name,&
        attr_name,&
        dims,&
        type_class,&
@@ -1776,65 +1720,58 @@ CONTAINS
        errcode )
 
     IMPLICIT NONE
-    INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
-    CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
-    CHARACTER(LEN=*), INTENT(in) :: attr_name          ! name of the attribute
-    INTEGER(hsize_t),DIMENSION(*),INTENT(inout):: dims ! dimensions
-    INTEGER, INTENT(inout)         :: type_class       ! type class
-    INTEGER(size_t), INTENT(inout) :: type_size        ! type size
-    INTEGER :: errcode                                 ! error code
-    INTEGER(size_t) :: namelen                         ! name length
-    INTEGER(size_t) :: attrlen                                 ! name length
+    INTEGER(hid_t),   INTENT(in) :: loc_id
+    CHARACTER(LEN=*), INTENT(in) :: obj_name
+    CHARACTER(LEN=*), INTENT(in) :: attr_name
+    INTEGER(hsize_t),DIMENSION(*),INTENT(inout):: dims
+    INTEGER, INTENT(inout)         :: type_class
+    INTEGER(size_t), INTENT(inout) :: type_size
+    INTEGER :: errcode
+    INTEGER(size_t) :: namelen ! name length
+    INTEGER(size_t) :: attrlen ! name length
 
     INTERFACE
-       INTEGER FUNCTION h5ltget_attribute_info_c(loc_id,namelen,dset_name,attrlen,attr_name,dims,type_class,type_size) &
+       INTEGER FUNCTION h5ltget_attribute_info_c(loc_id,namelen,obj_name,attrlen,attr_name,dims,type_class,type_size) &
             BIND(C,NAME='h5ltget_attribute_info_c')
          IMPORT :: C_CHAR
          IMPORT :: HID_T, SIZE_T, HSIZE_T
          IMPLICIT NONE
-         INTEGER(hid_t),   INTENT(in) :: loc_id                  ! file or group identifier
-         INTEGER(size_t) :: namelen                              ! length of name buffer
-         INTEGER(size_t) :: attrlen                                      ! length of attr name buffer
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name               ! name of the dataset
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: attr_name               ! name of the attribute
-         INTEGER(hsize_t),DIMENSION(*),INTENT(inout):: dims      ! dimensions
-         INTEGER, INTENT(inout)         :: type_class            ! type class
-         INTEGER(size_t), INTENT(inout) :: type_size             ! type size
+         INTEGER(hid_t),   INTENT(in) :: loc_id
+         INTEGER(size_t) :: namelen
+         INTEGER(size_t) :: attrlen
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: obj_name
+         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: attr_name
+         INTEGER(hsize_t),DIMENSION(*),INTENT(inout):: dims
+         INTEGER, INTENT(inout)         :: type_class
+         INTEGER(size_t), INTENT(inout) :: type_size
        END FUNCTION h5ltget_attribute_info_c
     END INTERFACE
 
-    namelen = LEN(dset_name)
+    namelen = LEN(obj_name)
     attrlen = LEN(attr_name)
-    errcode = h5ltget_attribute_info_c(loc_id,namelen,dset_name,attrlen,attr_name,dims,type_class,type_size)
+    errcode = h5ltget_attribute_info_c(loc_id,namelen,obj_name,attrlen,attr_name,dims,type_class,type_size)
 
   END SUBROUTINE h5ltget_attribute_info_f
 
-  !-------------------------------------------------------------------------
-  ! Function: h5ltpath_valid_f
-  !
-  ! Purpose: Validates a path
-  !
-  ! Return: Success: 0, Failure: -1
-  !
-  ! Programmer: M. Scot Breitenfeld
-  !
-  ! Date: February 18, 2012
-  !
-  ! Comments:
-  !
-  ! Modifications:
-  !
-  !-------------------------------------------------------------------------
-
+  !>
+  !! \ingroup FH5LT
+  !!
+  !! \brief Determines whether an HDF5 path is valid and, optionally, whether the path resolves to an HDF5 object.
+  !!
+  !! \param loc_id              Identifier of an object in the file.
+  !! \param path                The path to the object to check; links in path may be of any type.
+  !! \param check_object_valid	Indicates whether to check if the final component of the path resolves to a valid object.
+  !! \param path_valid          Object status.
+  !! \param errcode             \fortran_error
+  !!
   SUBROUTINE h5ltpath_valid_f(loc_id, path, check_object_valid, path_valid, errcode)
 
     IMPLICIT NONE
-    INTEGER(hid_t)  , INTENT(IN)  :: loc_id              ! An identifier of an object in the file.
-    CHARACTER(LEN=*), INTENT(IN)  :: path                ! Path to the object to check, relative to loc_id.
-    LOGICAL         , INTENT(IN)  :: check_object_valid  ! Indicates whether to check if the final component
-                                                         !  of the path resolves to a valid object
-    LOGICAL         , INTENT(OUT) :: path_valid          ! Object status
-    INTEGER         , INTENT(OUT) :: errcode             ! Error code: 0 on success and -1 on failure
+    INTEGER(hid_t)  , INTENT(IN)  :: loc_id
+    CHARACTER(LEN=*), INTENT(IN)  :: path
+    LOGICAL         , INTENT(IN)  :: check_object_valid
+    LOGICAL         , INTENT(OUT) :: path_valid
+    INTEGER         , INTENT(OUT) :: errcode
 
     INTEGER(size_t) :: pathlen
     INTEGER :: check_object_valid_c
@@ -1871,7 +1808,11 @@ CONTAINS
 
   END SUBROUTINE h5ltpath_valid_f
 
+#ifdef H5_DOXYGEN_FORTRAN
+END MODULE H5LT
+#else
 END MODULE H5LT_CONST
+#endif
 
 
 

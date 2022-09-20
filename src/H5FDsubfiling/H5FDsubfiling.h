@@ -48,21 +48,51 @@
 
 /**
  * \def H5FD_SUBFILING_DEFAULT_STRIPE_SIZE
- * The default stripe size (in bytes) for data stripes in sub-files
+ * The default stripe size (in bytes) for data stripes in subfiles
  */
 #define H5FD_SUBFILING_DEFAULT_STRIPE_SIZE (32 * 1024 * 1024)
 
 /**
- * \def H5FD_SUBFILING_FILENAME_TEMPLATE
- * The basic template for a sub-file filename
+ * \def H5FD_SUBFILING_DEFAULT_STRIPE_COUNT
+ * Macro for the default Subfiling stripe count value. The default
+ * is currently to use one subfile per node.
  */
-#define H5FD_SUBFILING_FILENAME_TEMPLATE ".subfile_%" PRIu64 "_%0*d_of_%d"
+#define H5FD_SUBFILING_DEFAULT_STRIPE_COUNT -1
+
+/**
+ * \def H5FD_SUBFILING_FILENAME_TEMPLATE
+ * The basic template for a subfile filename. The format specifiers
+ * correspond to:
+ *
+ * %s      -> base filename, e.g. "file.h5"
+ * %PRIu64 -> file inode, e.g. 11273556
+ * %0*d    -> number (starting at 1) signifying the Nth (out of total
+ *            number of subfiles) subfile. Zero-padded according
+ *            to the number of digits in the number of subfiles
+ *            (calculated by log10(num_subfiles) + 1)
+ * %d      -> number of subfiles
+ *
+ * yielding filenames such as:
+ *
+ * file.h5.subfile_11273556_01_of_10
+ * file.h5.subfile_11273556_02_of_10
+ * file.h5.subfile_11273556_10_of_10
+ */
+#define H5FD_SUBFILING_FILENAME_TEMPLATE "%s.subfile_%" PRIu64 "_%0*d_of_%d"
 
 /**
  * \def H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE
- * The basic template for a #H5FD_SUBFILING driver configuration filename
+ * The basic template for a #H5FD_SUBFILING driver configuration filename.
+ * The format specifiers correspond to:
+ *
+ * %s      -> base filename, e.g. "file.h5"
+ * %PRIu64 -> file inode, e.g. 11273556
+ *
+ * yielding a filename such as:
+ *
+ * file.h5.subfile_11273556.config
  */
-#define H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE ".subfile_%" PRIu64 ".config"
+#define H5FD_SUBFILING_CONFIG_FILENAME_TEMPLATE "%s.subfile_%" PRIu64 ".config"
 
 /*
  * Environment variables interpreted by the HDF5 Subfiling feature
@@ -71,7 +101,7 @@
 /**
  * \def H5FD_SUBFILING_STRIPE_SIZE
  * Macro for name of the environment variable that specifies the size
- * (in bytes) for data stripes in sub-files
+ * (in bytes) for data stripes in subfiles
  *
  * The value set for this environment variable is interpreted as a
  * long long value and must be > 0.
@@ -112,7 +142,7 @@
 /**
  * \def H5FD_SUBFILING_SUBFILE_PREFIX
  * Macro for name of the environment variable that specifies a prefix
- * to apply to the filenames generated for sub-files
+ * to apply to the filenames generated for subfiles
  *
  * The value set for this environment variable is interpreted as a
  * pathname.
@@ -153,53 +183,56 @@
  *      Unused. Sentinel value
  */
 typedef enum {
-    SELECT_IOC_ONE_PER_NODE = 0, /* Default */
+    SELECT_IOC_ONE_PER_NODE = 0, /* Default                              */
     SELECT_IOC_EVERY_NTH_RANK,   /* Starting at rank 0, select-next += N */
-    SELECT_IOC_WITH_CONFIG,      /* NOT IMPLEMENTED: Read-from-file       */
-    SELECT_IOC_TOTAL,            /* Starting at rank 0, mpi_size / total   */
-    ioc_selection_options        /* Sentinel value */
+    SELECT_IOC_WITH_CONFIG,      /* NOT IMPLEMENTED: Read-from-file      */
+    SELECT_IOC_TOTAL,            /* Starting at rank 0, mpi_size / total */
+    ioc_selection_options        /* Sentinel value                       */
 } H5FD_subfiling_ioc_select_t;
 
 /**
- * \struct H5FD_subfiling_shared_config_t
- * \brief Subfiling configuration structure that is shared between the #H5FD_SUBFILING
+ * \struct H5FD_subfiling_params_t
+ * \brief Subfiling parameter structure that is shared between the #H5FD_SUBFILING
  *        and #H5FD_IOC drivers
  *
- * \var H5FD_subfiling_ioc_select_t H5FD_subfiling_shared_config_t::ioc_selection
+ * \var H5FD_subfiling_ioc_select_t H5FD_subfiling_params_t::ioc_selection
  *      The method to use for selecting MPI ranks to be I/O concentrators. The
  *      current default is to select one MPI rank per node to be an I/O concentrator.
  *      Refer to #H5FD_subfiling_ioc_select_t for a description of the algorithms
  *      available for use.
  *
- * \var int64_t H5FD_subfiling_shared_config_t::stripe_size
+ * \var int64_t H5FD_subfiling_params_t::stripe_size
  *      The stripe size defines the size (in bytes) of the data stripes in the
- *      sub-files for the logical HDF5 file. Data is striped across the sub-files
+ *      subfiles for the logical HDF5 file. Data is striped across the subfiles
  *      in a round-robin wrap-around fashion in segments equal to the stripe size.
  *
- *      For example, in an HDF5 file consisting of four sub-files with a 1MiB stripe
- *      size, the first and fifth 1MiB of data would reside in the first sub-file,
- *      the second and sixth 1MiB of data would reside in the second sub-file and so
+ *      For example, in an HDF5 file consisting of four subfiles with a 1MiB stripe
+ *      size, the first and fifth 1MiB of data would reside in the first subfile,
+ *      the second and sixth 1MiB of data would reside in the second subfile and so
  *      on.
  *
  *      This value can also be set or adjusted with the #H5FD_SUBFILING_STRIPE_SIZE
  *      environment variable.
  *
- * \var int32_t H5FD_subfiling_shared_config_t::stripe_count
- *      The number of I/O concentrators (and, currently, the number of sub-files)
- *      to use for the logical HDF5 file. This value is used in conjunction with
- *      the IOC selection method to determine which MPI ranks will be assigned as
- *      I/O concentrators.
+ * \var int32_t H5FD_subfiling_params_t::stripe_count
+ *      The target number of subfiles to use for the logical HDF5 file. The current
+ *      default is to use one subfile per node, but it can be useful to set a
+ *      different target number of subfiles, especially if the HDF5 application will
+ *      pre-create the HDF5 file on a single MPI rank. In that particular case, the
+ *      single rank will need to know how many subfiles the logical HDF5 file will
+ *      consist of in order to properly pre-create the file.
  *
- *      Alternatively, the mapping between MPI ranks and I/O concentrators can be
- *      set or adjusted with a combination of the #ioc_selection field and the
- *      #H5FD_SUBFILING_IOC_PER_NODE and #H5FD_SUBFILING_IOC_SELECTION_CRITERIA
- *      environment variables.
+ *      This value is used in conjunction with the IOC selection method to determine
+ *      which MPI ranks will be assigned as I/O concentrators. Alternatively, the
+ *      mapping between MPI ranks and I/O concentrators can be set or adjusted with a
+ *      combination of the #ioc_selection field and the #H5FD_SUBFILING_IOC_PER_NODE
+ *      and #H5FD_SUBFILING_IOC_SELECTION_CRITERIA environment variables.
  */
-typedef struct H5FD_subfiling_shared_config_t {
-    H5FD_subfiling_ioc_select_t ioc_selection; /* Method to select I/O concentrators */
-    int64_t                     stripe_size;   /* Size (in bytes) of data stripes in sub-files */
-    int32_t                     stripe_count;  /* Number of I/O concentrators to use */
-} H5FD_subfiling_shared_config_t;
+typedef struct H5FD_subfiling_params_t {
+    H5FD_subfiling_ioc_select_t ioc_selection; /* Method to select I/O concentrators          */
+    int64_t                     stripe_size;   /* Size (in bytes) of data stripes in subfiles */
+    int32_t                     stripe_count;  /* Target number of subfiles to use            */
+} H5FD_subfiling_params_t;
 
 //! <!-- [H5FD_subfiling_config_t_snip] -->
 /**
@@ -226,7 +259,7 @@ typedef struct H5FD_subfiling_shared_config_t {
  * \var hid_t H5FD_subfiling_config_t::ioc_fapl_id
  *      The File Access Property List which is setup with the file driver that
  *      the #H5FD_SUBFILING driver will use for servicing I/O requests to the
- *      sub-files. Currently, the File Access Property List must be setup with
+ *      subfiles. Currently, the File Access Property List must be setup with
  *      the #H5FD_IOC driver by calling H5Pset_fapl_ioc(), but future development
  *      may allow other file drivers to be used.
  *
@@ -235,19 +268,18 @@ typedef struct H5FD_subfiling_shared_config_t {
  *      use the #H5FD_IOC driver for its I/O operations. This field should currently
  *      always be set to TRUE.
  *
- * \var H5FD_subfiling_shared_config_t H5FD_subfiling_config_t::shared_cfg
+ * \var H5FD_subfiling_params_t H5FD_subfiling_config_t::shared_cfg
  *      A structure which contains the subfiling parameters that are shared between
- *      the #H5FD_SUBFILING and #H5FD_IOC drivers. This includes the sub-file stripe
- *      size, number of I/O concentrators, IOC selection method, etc.
+ *      the #H5FD_SUBFILING and #H5FD_IOC drivers. This includes the subfile stripe
+ *      size, stripe count, IOC selection method, etc.
  *
  */
 typedef struct H5FD_subfiling_config_t {
-    uint32_t magic;       /* Must be set to H5FD_SUBFILING_FAPL_MAGIC */
-    uint32_t version;     /* Must be set to H5FD_SUBFILING_CURR_FAPL_VERSION */
-    hid_t    ioc_fapl_id; /* The FAPL setup with the stacked VFD to use for I/O concentrators */
-    hbool_t  require_ioc; /* Whether to use the IOC VFD (currently must always be TRUE) */
-    H5FD_subfiling_shared_config_t
-        shared_cfg; /* Subfiling/IOC parameters (stripe size, stripe count, etc.) */
+    uint32_t magic;                     /* Must be set to H5FD_SUBFILING_FAPL_MAGIC                         */
+    uint32_t version;                   /* Must be set to H5FD_SUBFILING_CURR_FAPL_VERSION                  */
+    hid_t    ioc_fapl_id;               /* The FAPL setup with the stacked VFD to use for I/O concentrators */
+    hbool_t  require_ioc;               /* Whether to use the IOC VFD (currently must always be TRUE)       */
+    H5FD_subfiling_params_t shared_cfg; /* Subfiling/IOC parameters (stripe size, stripe count, etc.)       */
 } H5FD_subfiling_config_t;
 //! <!-- [H5FD_subfiling_config_t_snip] -->
 
@@ -274,8 +306,8 @@ H5_DLL hid_t H5FD_subfiling_init(void);
  *
  *          The #H5FD_SUBFILING driver is an MPI-based file driver that allows an
  *          HDF5 application to distribute a logical HDF5 file across a collection
- *          of "sub-files" in equal-sized data segment "stripes". I/O to the logical
- *          HDF5 file is then directed to the appropriate "sub-file" according to the
+ *          of "subfiles" in equal-sized data segment "stripes". I/O to the logical
+ *          HDF5 file is then directed to the appropriate "subfile" according to the
  *          #H5FD_SUBFILING configuration and a system of I/O concentrators, which
  *          are MPI ranks operating worker threads.
  *

@@ -360,7 +360,7 @@ foreach (h5_test ${H5_TESTS})
             -D "TEST_LIBRARY_DIRECTORY=${CMAKE_TEST_OUTPUT_DIRECTORY}"
             #-D "TEST_REFERENCE=${test}.out"
             -D "TEST_FOLDER=${HDF5_TEST_BINARY_DIR}/H5TEST"
-            -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+            -P "${HDF_RESOURCES_DIR}/runTest.cmake"
         )
       endif ()
       set_tests_properties (H5TEST-${h5_test} PROPERTIES
@@ -405,7 +405,7 @@ if (NOT CYGWIN)
         -D "TEST_OUTPUT=cache.txt"
         #-D "TEST_REFERENCE=cache.out"
         -D "TEST_FOLDER=${HDF5_TEST_BINARY_DIR}/H5TEST"
-        -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+        -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
   endif ()
   set_tests_properties (H5TEST-cache PROPERTIES
@@ -475,7 +475,7 @@ else ()
         -D "TEST_OUTPUT=external_env.txt"
         #-D "TEST_REFERENCE=external_env.out"
         -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/H5TEST"
-        -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+        -P "${HDF_RESOURCES_DIR}/runTest.cmake"
   )
 endif ()
 set_tests_properties (H5TEST-external_env PROPERTIES
@@ -507,7 +507,7 @@ else ()
         -D "TEST_OUTPUT=vds_env.txt"
         #-D "TEST_REFERENCE=vds_env.out"
         -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/H5TEST"
-        -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+        -P "${HDF_RESOURCES_DIR}/runTest.cmake"
   )
 endif ()
 set_tests_properties (H5TEST-vds_env PROPERTIES
@@ -548,7 +548,7 @@ else ()
       -D "TEST_SKIP_COMPARE=TRUE"
       -D "TEST_OUTPUT=flush1.txt"
       -D "TEST_FOLDER=${HDF5_TEST_BINARY_DIR}/H5TEST"
-      -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      -P "${HDF_RESOURCES_DIR}/runTest.cmake"
   )
 endif ()
 set_tests_properties (H5TEST-flush1 PROPERTIES
@@ -567,7 +567,7 @@ else ()
       -D "TEST_SKIP_COMPARE=TRUE"
       -D "TEST_OUTPUT=flush2.txt"
       -D "TEST_FOLDER=${HDF5_TEST_BINARY_DIR}/H5TEST"
-      -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      -P "${HDF_RESOURCES_DIR}/runTest.cmake"
   )
 endif ()
 set_tests_properties (H5TEST-flush2 PROPERTIES
@@ -677,7 +677,7 @@ if (HDF5_ENABLE_DEPRECATED_SYMBOLS AND NOT MINGW)
       -D "TEST_OUTPUT=err_compat.txt"
       -D "TEST_REFERENCE=err_compat_1"
       -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/H5TEST"
-      -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      -P "${HDF_RESOURCES_DIR}/runTest.cmake"
   )
   set_tests_properties (H5TEST-err_compat PROPERTIES
       ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST"
@@ -694,7 +694,7 @@ else ()
       -D "TEST_OUTPUT=err_compat.txt"
       -D "TEST_REFERENCE=err_compat_2"
       -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/H5TEST"
-      -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      -P "${HDF_RESOURCES_DIR}/runTest.cmake"
   )
   set_tests_properties (H5TEST-err_compat PROPERTIES
       ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST"
@@ -714,7 +714,7 @@ if (DEFAULT_API_VERSION MATCHES "v16" OR MINGW)
       -D "TEST_OUTPUT=error_test.txt"
       -D "TEST_REFERENCE=error_test_2"
       -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/H5TEST"
-      -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      -P "${HDF_RESOURCES_DIR}/runTest.cmake"
   )
   set_tests_properties (H5TEST-error_test PROPERTIES
       ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST;HDF5_PLUGIN_PRELOAD=::"
@@ -731,7 +731,7 @@ else ()
       -D "TEST_OUTPUT=error_test.txt"
       -D "TEST_REFERENCE=error_test_1"
       -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/H5TEST"
-      -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      -P "${HDF_RESOURCES_DIR}/runTest.cmake"
   )
   set_tests_properties (H5TEST-error_test PROPERTIES
       ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST;HDF5_PLUGIN_PRELOAD=::"
@@ -779,7 +779,7 @@ else ()
       -D "TEST_OUTPUT=links_env.txt"
       -D "TEST_REFERENCE=links_env.out"
       -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/H5TEST"
-      -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      -P "${HDF_RESOURCES_DIR}/runTest.cmake"
   )
 endif ()
 set_tests_properties (H5TEST-links_env PROPERTIES

@@ -62,7 +62,7 @@ if (HDF5_TEST_SERIAL)
         -D "TEST_OUTPUT=h5perf_serial.txt"
         #-D "TEST_REFERENCE=h5perf_serial.out"
         -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-        -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+        -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
   endif ()
   set_tests_properties (PERFORM_h5perf_serial PROPERTIES
@@ -82,7 +82,7 @@ if (HDF5_TEST_SERIAL)
         -D "TEST_OUTPUT=chunk.txt"
         #-D "TEST_REFERENCE=chunk.out"
         -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-        -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+        -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
   endif ()
   set_tests_properties (PERFORM_chunk PROPERTIES
@@ -101,7 +101,7 @@ if (HDF5_TEST_SERIAL)
         -D "TEST_OUTPUT=iopipe.txt"
         #-D "TEST_REFERENCE=iopipe.out"
         -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-        -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+        -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
   endif ()
   set_tests_properties (PERFORM_iopipe PROPERTIES
@@ -120,7 +120,7 @@ if (HDF5_TEST_SERIAL)
         -D "TEST_OUTPUT=overhead.txt"
         #-D "TEST_REFERENCE=overhead.out"
         -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-        -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+        -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
   endif ()
   set_tests_properties (PERFORM_overhead PROPERTIES
@@ -139,7 +139,7 @@ if (HDF5_TEST_SERIAL)
         -D "TEST_OUTPUT=perf_meta.txt"
         #-D "TEST_REFERENCE=perf_meta.out"
         -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-        -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+        -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
   endif ()
   set_tests_properties (PERFORM_perf_meta PROPERTIES
@@ -158,7 +158,7 @@ if (HDF5_TEST_SERIAL)
         -D "TEST_OUTPUT=zip_perf-h.txt"
         #-D "TEST_REFERENCE=zip_perf-h.out"
         -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-        -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+        -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
   endif ()
   set_tests_properties (PERFORM_zip_perf_help PROPERTIES
@@ -177,7 +177,7 @@ if (HDF5_TEST_SERIAL)
         -D "TEST_OUTPUT=zip_perf.txt"
         #-D "TEST_REFERENCE=zip_perf.out"
         -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
-        -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+        -P "${HDF_RESOURCES_DIR}/runTest.cmake"
     )
   endif ()
   set_tests_properties (PERFORM_zip_perf PROPERTIES

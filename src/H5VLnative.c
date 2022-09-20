@@ -45,15 +45,28 @@ static hid_t H5VL_NATIVE_ID_g = H5I_INVALID_HID;
 /* Prototypes */
 static herr_t H5VL__native_term(void);
 
+#define H5VL_NATIVE_CAP_FLAGS                                                                                \
+    (H5VL_CAP_FLAG_NATIVE_FILES | H5VL_CAP_FLAG_ATTR_BASIC | H5VL_CAP_FLAG_ATTR_MORE |                       \
+     H5VL_CAP_FLAG_DATASET_BASIC | H5VL_CAP_FLAG_DATASET_MORE | H5VL_CAP_FLAG_FILE_BASIC |                   \
+     H5VL_CAP_FLAG_FILE_MORE | H5VL_CAP_FLAG_GROUP_BASIC | H5VL_CAP_FLAG_GROUP_MORE |                        \
+     H5VL_CAP_FLAG_LINK_BASIC | H5VL_CAP_FLAG_LINK_MORE | H5VL_CAP_FLAG_OBJECT_BASIC |                       \
+     H5VL_CAP_FLAG_OBJECT_MORE | H5VL_CAP_FLAG_REF_BASIC | H5VL_CAP_FLAG_REF_MORE | H5VL_CAP_FLAG_OBJ_REF |  \
+     H5VL_CAP_FLAG_REG_REF | H5VL_CAP_FLAG_ATTR_REF | H5VL_CAP_FLAG_STORED_DATATYPES |                       \
+     H5VL_CAP_FLAG_CREATION_ORDER | H5VL_CAP_FLAG_ITERATE | H5VL_CAP_FLAG_STORAGE_SIZE |                     \
+     H5VL_CAP_FLAG_BY_IDX | H5VL_CAP_FLAG_GET_PLIST | H5VL_CAP_FLAG_FLUSH_REFRESH |                          \
+     H5VL_CAP_FLAG_EXTERNAL_LINKS | H5VL_CAP_FLAG_HARD_LINKS | H5VL_CAP_FLAG_SOFT_LINKS |                    \
+     H5VL_CAP_FLAG_UD_LINKS | H5VL_CAP_FLAG_TRACK_TIMES | H5VL_CAP_FLAG_MOUNT | H5VL_CAP_FLAG_FILTERS |      \
+     H5VL_CAP_FLAG_FILL_VALUES)
+
 /* Native VOL connector class struct */
 static const H5VL_class_t H5VL_native_cls_g = {
-    H5VL_VERSION,               /* VOL class struct version */
-    H5VL_NATIVE_VALUE,          /* value        */
-    H5VL_NATIVE_NAME,           /* name         */
-    H5VL_NATIVE_VERSION,        /* connector version */
-    H5VL_CAP_FLAG_NATIVE_FILES, /* capability flags */
-    NULL,                       /* initialize   */
-    H5VL__native_term,          /* terminate    */
+    H5VL_VERSION,          /* VOL class struct version */
+    H5VL_NATIVE_VALUE,     /* value        */
+    H5VL_NATIVE_NAME,      /* name         */
+    H5VL_NATIVE_VERSION,   /* connector version */
+    H5VL_NATIVE_CAP_FLAGS, /* capability flags */
+    NULL,                  /* initialize   */
+    H5VL__native_term,     /* terminate    */
     {
         /* info_cls */
         (size_t)0, /* info size    */
@@ -258,7 +271,7 @@ H5VL__native_introspect_get_conn_cls(void H5_ATTR_UNUSED *obj, H5VL_get_conn_lvl
  *---------------------------------------------------------------------------
  */
 herr_t
-H5VL__native_introspect_get_cap_flags(const void H5_ATTR_UNUSED *info, unsigned *cap_flags)
+H5VL__native_introspect_get_cap_flags(const void H5_ATTR_UNUSED *info, uint64_t *cap_flags)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
