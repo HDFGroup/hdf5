@@ -28,8 +28,8 @@ static void
 test_h5_dirname(void)
 {
     herr_t ret;
-    char  *path    = NULL;
-    char  *dirname = NULL;
+    char *path    = NULL;
+    char *dirname = NULL;
 
     MESSAGE(5, ("Testing H5_dirname\n"));
 
@@ -232,8 +232,8 @@ static void
 test_h5_basename(void)
 {
     herr_t ret;
-    char  *path     = NULL;
-    char  *basename = NULL;
+    char *path     = NULL;
+    char *basename = NULL;
 
     MESSAGE(5, ("Testing H5_basename\n"));
 
@@ -441,7 +441,7 @@ static void
 test_h5_strcasestr(void)
 {
     const char *const haystack = "My test string";
-    char * str = NULL;
+    char             *str      = NULL;
 
     MESSAGE(5, ("Testing H5_strcasestr\n"));
 
