@@ -457,7 +457,7 @@ test_h5_strcasestr(void)
     str = H5_strcasestr(haystack, "sTrInG");
     CHECK_PTR_EQ(str, &(haystack[8]), "H5_strcasestr search different case");
 
-    /* Check that H5_strcasestr find a string of different case */
+    /* Check that H5_strcasestr returns NULL if no match is found */
     str = H5_strcasestr(haystack, "nomatch");
     CHECK_PTR_NULL(str, "H5_strcasestr search with no match");
 }
