@@ -2681,6 +2681,8 @@ H5D__obtain_mpio_mode(H5D_io_info_t *io_info, H5D_dset_io_info_t *di, uint8_t as
 
     FUNC_ENTER_PACKAGE
 
+    HDassert(di->layout->type == H5D_CHUNKED);
+
     /* Assign the rank 0 to the root */
     root = 0;
     comm = io_info->comm;
@@ -2712,7 +2714,7 @@ H5D__obtain_mpio_mode(H5D_io_info_t *io_info, H5D_dset_io_info_t *di, uint8_t as
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate recv I/O mode info buffer")
 
     /* Obtain the regularity and selection information for all chunks in this process. */
-    chunk_node = H5SL_first(di->dset_sel_pieces);
+    chunk_node = H5SL_first(di->layout_io_info.chunk_map->dset_sel_pieces);
     while (chunk_node) {
         chunk_info = (H5D_piece_info_t *)H5SL_item(chunk_node);
 
@@ -2860,7 +2862,6 @@ H5D__mpio_collective_filtered_chunk_io_setup(const H5D_io_info_t                
     HDassert(io_info);
     HDassert(chunk_list);
     HDassert(num_entries);
-
 #ifdef H5Dmpio_DEBUG
     H5D_MPIO_TRACE_ENTER(mpi_rank);
     H5D_MPIO_TIME_START(mpi_rank, "Filtered Collective I/O Setup");
@@ -2872,8 +2873,10 @@ H5D__mpio_collective_filtered_chunk_io_setup(const H5D_io_info_t                
     type_info = &(di->type_info);
     HDassert(type_info);
 
+    HDassert(di->layout->type == H5D_CHUNKED);
+
     /* Each rank builds a local list of the chunks they have selected */
-    if ((num_chunks_selected = H5SL_count(di->dset_sel_pieces))) {
+    if ((num_chunks_selected = H5SL_count(di->layout_io_info.chunk_map->dset_sel_pieces))) {
         H5D_piece_info_t *chunk_info;
         H5SL_node_t      *chunk_node;
         hsize_t           select_npoints;
@@ -2886,7 +2889,7 @@ H5D__mpio_collective_filtered_chunk_io_setup(const H5D_io_info_t                
         if (NULL == (local_info_array = H5MM_malloc(num_chunks_selected * sizeof(*local_info_array))))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate local io info array buffer")
 
-        chunk_node = H5SL_first(di->dset_sel_pieces);
+        chunk_node = H5SL_first(di->layout_io_info.chunk_map->dset_sel_pieces);
         for (i = 0; chunk_node; i++) {
             chunk_info = (H5D_piece_info_t *)H5SL_item(chunk_node);
 

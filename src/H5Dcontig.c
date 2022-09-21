@@ -101,6 +101,7 @@ static ssize_t H5D__contig_writevv(const H5D_io_info_t *io_info, const H5D_dset_
                                    hsize_t dset_offset_arr[], size_t mem_max_nseq, size_t *mem_curr_seq,
                                    size_t mem_len_arr[], hsize_t mem_offset_arr[]);
 static herr_t  H5D__contig_flush(H5D_t *dset);
+static herr_t  H5D__contig_io_term(H5D_io_info_t *io_info, H5D_dset_io_info_t *di);
 
 /* Helper routines */
 static herr_t H5D__contig_write_one(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info, hsize_t offset,
@@ -128,7 +129,7 @@ const H5D_layout_ops_t H5D_LOPS_CONTIG[1] = {{
     H5D__contig_readvv,  /* readvv */
     H5D__contig_writevv, /* writevv */
     H5D__contig_flush,   /* flush */
-    H5D__piece_io_term,  /* io_term */
+    H5D__contig_io_term, /* io_term */
     NULL                 /* dest */
 }};
 
@@ -592,7 +593,6 @@ H5D__contig_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
     hssize_t old_offset[H5O_LAYOUT_NDIMS];  /* Old selection offset */
     htri_t   file_space_normalized = FALSE; /* File dataspace was normalized */
 
-    int sm_ndims; /* The number of dimensions of the memory buffer's dataspace (signed) */
     int sf_ndims; /* The number of dimensions of the file dataspace (signed) */
 
     htri_t use_selection_io = FALSE;   /* Whether to use selection I/O */
@@ -606,20 +606,9 @@ H5D__contig_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
     /* Get layout for dataset */
     dinfo->layout = &(dataset->shared->layout);
 
-    /* Check if the memory space is scalar & make equivalent memory space */
-    if ((sm_ndims = H5S_GET_EXTENT_NDIMS(dinfo->mem_space)) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get dimension number")
-    /* Set the number of dimensions for the memory dataspace */
-    H5_CHECKED_ASSIGN(dinfo->m_ndims, unsigned, sm_ndims, int);
-
     /* Get dim number and dimensionality for each dataspace */
     if ((sf_ndims = H5S_GET_EXTENT_NDIMS(dinfo->file_space)) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get dimension number")
-    /* Set the number of dimensions for the file dataspace */
-    H5_CHECKED_ASSIGN(dinfo->f_ndims, unsigned, sf_ndims, int);
-
-    if (H5S_get_simple_extent_dims(dinfo->file_space, dinfo->f_dims, NULL) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get dimensionality")
 
     /* Normalize hyperslab selections by adjusting them by the offset */
     /* (It might be worthwhile to normalize both the file and memory dataspaces
@@ -629,10 +618,6 @@ H5D__contig_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
      */
     if ((file_space_normalized = H5S_hyper_normalize_offset(dinfo->file_space, old_offset)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_BADSELECT, FAIL, "unable to normalize dataspace by offset")
-
-    /* Initialize "last chunk" information */
-    dinfo->last_index      = (hsize_t)-1;
-    dinfo->last_piece_info = NULL;
 
     /* Only need single skip list point over multiple read/write IO
      * and multiple dsets until H5D_close. Thus check both
@@ -653,18 +638,9 @@ H5D__contig_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
 
     HDassert(io_info->sel_pieces);
 
-    /* We are not using single element mode */
-    dinfo->use_single = FALSE;
-
-    /* Get type of selection on disk & in memory */
-    if ((dinfo->fsel_type = H5S_GET_SELECT_TYPE(dinfo->file_space)) < H5S_SEL_NONE)
-        HGOTO_ERROR(H5E_DATASET, H5E_BADSELECT, FAIL, "unable to get type of selection")
-    if ((dinfo->msel_type = H5S_GET_SELECT_TYPE(dinfo->mem_space)) < H5S_SEL_NONE)
-        HGOTO_ERROR(H5E_DATASET, H5E_BADSELECT, FAIL, "unable to get type of selection")
-
     /* if selected elements exist */
     if (dinfo->nelmts) {
-        unsigned          u;
+        int          u;
         H5D_piece_info_t *new_piece_info; /* piece information to insert into skip list */
 
         /* Get copy of dset file_space, so it can be changed temporarily
@@ -705,9 +681,9 @@ H5D__contig_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
         new_piece_info->piece_points = dinfo->nelmts;
 
         /* Copy the piece's coordinates */
-        for (u = 0; u < dinfo->f_ndims; u++)
+        for (u = 0; u < sf_ndims; u++)
             new_piece_info->scaled[u] = 0;
-        new_piece_info->scaled[dinfo->f_ndims] = 0;
+        new_piece_info->scaled[sf_ndims] = 0;
 
         /* make connection to related dset info from this piece_info */
         new_piece_info->dset_info = dinfo;
@@ -715,9 +691,9 @@ H5D__contig_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
         /* get dset file address for piece */
         new_piece_info->faddr = dinfo->dset->shared->layout.storage.u.contig.addr;
 
-        /* Save piece to last_piece_info so it is freed at the end of the
+        /* Save piece to dataset info struct so it is freed at the end of the
          * operation */
-        dinfo->last_piece_info = new_piece_info;
+        dinfo->layout_io_info.contig_piece_info = new_piece_info;
 
         /* insert piece info */
         if (H5SL_insert(io_info->sel_pieces, new_piece_info, &new_piece_info->faddr) < 0) {
@@ -738,8 +714,8 @@ H5D__contig_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
 
 done:
     if (ret_value < 0) {
-        if (H5D__piece_io_term(io_info, dinfo) < 0)
-            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release chunk mapping")
+        if (H5D__contig_io_term(io_info, dinfo) < 0)
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release dataset I/O info")
     } /* end if */
 
     if (file_space_normalized) {
@@ -1565,6 +1541,35 @@ H5D__contig_flush(H5D_t *dset)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__contig_flush() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__contig_io_term
+ *
+ * Purpose:    Destroy I/O operation information.
+ *
+ * Return:    Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__contig_io_term(H5D_io_info_t H5_ATTR_UNUSED *io_info, H5D_dset_io_info_t *di)
+{
+    herr_t ret_value = SUCCEED; /*return value        */
+
+    FUNC_ENTER_PACKAGE
+
+    HDassert(di);
+
+    /* Free piece info */
+    if (di->layout_io_info.contig_piece_info) {
+        if (H5D__free_piece_info(di->layout_io_info.contig_piece_info, NULL, NULL) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't free piece info")
+        di->layout_io_info.contig_piece_info = NULL;
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__contig_io_term() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5D__contig_copy
