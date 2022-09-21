@@ -1381,7 +1381,10 @@ H5_strcasestr(const char *haystack, const char *needle)
         }
         /* if all characters in needle matched we found it */
         if (*n == 0) {
+            /* must discard const qualifier here, so turn off the warning */
+            H5_GCC_CLANG_DIAG_OFF("cast-qual")
             return (char *)haystack;
+            H5_GCC_CLANG_DIAG_ON("cast-qual")
         }
     } while (*haystack++);
     return 0;
