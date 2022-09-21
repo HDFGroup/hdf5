@@ -2606,8 +2606,8 @@ H5D__vlen_get_buf_size_cb(void H5_ATTR_UNUSED *elem, hid_t type_id, unsigned H5_
                           const hsize_t *point, void *op_data)
 {
     H5D_vlen_bufsize_native_t *vlen_bufsize = (H5D_vlen_bufsize_native_t *)op_data;
-    H5D_dset_io_info_t        *dset_info    = NULL;         /* Internal multi-dataset info placeholder */
-    herr_t                     ret_value    = H5_ITER_CONT; /* Return value */
+    H5D_dset_io_info_t         dset_info;                /* Internal multi-dataset info placeholder */
+    herr_t                     ret_value = H5_ITER_CONT; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -2621,26 +2621,18 @@ H5D__vlen_get_buf_size_cb(void H5_ATTR_UNUSED *elem, hid_t type_id, unsigned H5_
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, H5_ITER_ERROR, "can't select point")
 
     {
-        /* Alloc dset_info */
-        if (NULL == (dset_info = H5FL_CALLOC(H5D_dset_io_info_t)))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate dset info array buffer")
-
-        dset_info->dset        = vlen_bufsize->dset;
-        dset_info->mem_space   = vlen_bufsize->mspace;
-        dset_info->file_space  = vlen_bufsize->fspace;
-        dset_info->buf.vp      = vlen_bufsize->common.fl_tbuf;
-        dset_info->mem_type_id = type_id;
+        dset_info.dset        = vlen_bufsize->dset;
+        dset_info.mem_space   = vlen_bufsize->mspace;
+        dset_info.file_space  = vlen_bufsize->fspace;
+        dset_info.buf.vp      = vlen_bufsize->common.fl_tbuf;
+        dset_info.mem_type_id = type_id;
 
         /* Read in the point (with the custom VL memory allocator) */
-        if (H5D__read(1, dset_info) < 0)
+        if (H5D__read(1, &dset_info) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
     }
 
 done:
-    /* Release resources */
-    if (dset_info)
-        dset_info = H5FL_FREE(H5D_dset_io_info_t, dset_info);
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__vlen_get_buf_size_cb() */
 

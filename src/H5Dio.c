@@ -68,9 +68,6 @@ static herr_t H5D__final_mdset_sel_io(H5D_io_info_t *io_info);
 /* Declare a free list to manage blocks of type conversion data */
 H5FL_BLK_DEFINE(type_conv);
 
-/* Declare a free list to manage the H5D_dset_io_info_t struct */
-H5FL_DEFINE(H5D_dset_io_info_t);
-
 /*-------------------------------------------------------------------------
  * Function:    H5D__pre_read
  *

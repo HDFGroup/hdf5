@@ -237,7 +237,7 @@ typedef struct H5D_piece_info_t {
     struct H5D_dset_io_info_t *dset_info; /* Pointer to dset_info */
 } H5D_piece_info_t;
 
-/* dset info for multiple dsets */
+/* I/O info for a single dataset */
 typedef struct H5D_dset_io_info_t {
     H5D_t                  *dset;       /* Pointer to dataset being operated on */
     H5D_storage_t          *store;      /* Dataset storage info */
@@ -249,33 +249,20 @@ typedef struct H5D_dset_io_info_t {
     H5O_layout_t *layout; /* Dataset layout information*/
     hsize_t       nelmts; /* Number of elements selected in file & memory dataspaces */
 
-    H5S_t       *file_space;               /* Pointer to the file dataspace */
-    H5S_sel_type fsel_type;                /* Selection type in file */
-    unsigned     f_ndims;                  /* Number of dimensions for file dataspace */
-    hsize_t      f_dims[H5O_LAYOUT_NDIMS]; /* File dataspace dimensions */
+    H5S_t *file_space; /* Pointer to the file dataspace */
+    H5S_t *mem_space;  /* Pointer to the memory dataspace */
 
-    H5S_t         *mem_space;   /* Pointer to the memory dataspace */
-    H5S_t         *mchunk_tmpl; /* Dataspace template for new memory chunks */
-    H5S_sel_iter_t mem_iter;    /* Iterator for elements in memory selection */
-    unsigned       m_ndims;     /* Number of dimensions for memory dataspace */
-    H5S_sel_type   msel_type;   /* Selection type in memory */
-
-    H5SL_t *dset_sel_pieces; /* Skiplist of selected pieces in this dataset, indexed by index */
-
-    H5S_t            *single_space; /* Dataspace for single chunk */
-    H5D_piece_info_t *single_piece_info;
-    hbool_t           use_single; /* Whether I/O is on a single element */
-
-    hsize_t           last_index;      /* Index of last chunk operated on */
-    H5D_piece_info_t *last_piece_info; /* Pointer to last piece's info */
-
-    hsize_t chunk_dim[H5O_LAYOUT_NDIMS]; /* Size of chunk in each dimension */
+    union {
+        struct H5D_chunk_map_t *chunk_map;         /* Chunk specific I/O info */
+        H5D_piece_info_t       *contig_piece_info; /* Piece info for contiguous dataset */
+    } layout_io_info;
 
     hid_t           mem_type_id; /* memory datatype ID */
     H5D_type_info_t type_info;
     hbool_t         type_info_init;
 } H5D_dset_io_info_t;
 
+/* I/O info for entire I/O operation */
 typedef struct H5D_io_info_t {
     /* QAK: Delete the f_sh field when oloc has a shared file pointer? */
     H5F_shared_t *f_sh; /* Pointer to shared file struct that dataset is within */
@@ -399,6 +386,28 @@ typedef struct H5D_chunk_ops_t {
     H5D_chunk_dump_func_t  dump;          /* Routine to dump indexing information */
     H5D_chunk_dest_func_t  dest;          /* Routine to destroy indexing information in memory */
 } H5D_chunk_ops_t;
+
+/* Main structure holding the mapping between file chunks and memory */
+typedef struct H5D_chunk_map_t {
+    unsigned f_ndims; /* Number of dimensions for file dataspace */
+
+    H5S_t         *mchunk_tmpl; /* Dataspace template for new memory chunks */
+    H5S_sel_iter_t mem_iter;    /* Iterator for elements in memory selection */
+    unsigned       m_ndims;     /* Number of dimensions for memory dataspace */
+    H5S_sel_type   msel_type;   /* Selection type in memory */
+    H5S_sel_type   fsel_type;   /* Selection type in file */
+
+    H5SL_t *dset_sel_pieces; /* Skip list containing information for each chunk selected */
+
+    H5S_t            *single_space;      /* Dataspace for single chunk */
+    H5D_piece_info_t *single_piece_info; /* Pointer to single chunk's info */
+    hbool_t           use_single;        /* Whether I/O is on a single element */
+
+    hsize_t           last_index;      /* Index of last chunk operated on */
+    H5D_piece_info_t *last_piece_info; /* Pointer to last chunk's info */
+
+    hsize_t chunk_dim[H5O_LAYOUT_NDIMS]; /* Size of chunk in each dimension */
+} H5D_chunk_map_t;
 
 /* Cached information about a particular chunk */
 typedef struct H5D_chunk_cached_t {
@@ -573,9 +582,6 @@ H5_DLLVAR const H5B2_class_t H5D_BT2_FILT[1];
 
 /*  Array of versions for Layout */
 H5_DLLVAR const unsigned H5O_layout_ver_bounds[H5F_LIBVER_NBOUNDS];
-
-/* Declare extern the free list for H5D_dset_io_info_t */
-H5FL_EXTERN(H5D_dset_io_info_t);
 
 /******************************/
 /* Package Private Prototypes */
@@ -759,8 +765,8 @@ H5_DLL herr_t H5D__mpio_get_no_coll_cause_strings(char *local_cause, size_t loca
 
 #endif /* H5_HAVE_PARALLEL */
 
-/* for both CHUNK and CONTIG dset skiplist free (sel_pieces) for layout_ops.io_term. */
-H5_DLL herr_t H5D__piece_io_term(H5D_io_info_t *io_info, H5D_dset_io_info_t *di);
+/* Free a piece (chunk or contiguous dataset data block) info struct */
+H5_DLL herr_t H5D__free_piece_info(void *item, void *key, void *opdata);
 
 /* Testing functions */
 #ifdef H5D_TESTING
