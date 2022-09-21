@@ -192,13 +192,13 @@ done:
 herr_t
 H5D__contig_fill(H5D_t *dset)
 {
-    H5D_io_info_t       ioinfo;           /* Dataset I/O info */
-    H5D_dset_io_info_t  dset_info;        /* Dset info */
-    H5D_storage_t       store;            /* Union of storage info for dataset */
-    hssize_t            snpoints;         /* Number of points in space (for error checking) */
-    size_t              npoints;          /* Number of points in space */
-    hsize_t             offset;           /* Offset of dataset */
-    size_t              max_temp_buf;     /* Maximum size of temporary buffer */
+    H5D_io_info_t      ioinfo;       /* Dataset I/O info */
+    H5D_dset_io_info_t dset_info;    /* Dset info */
+    H5D_storage_t      store;        /* Union of storage info for dataset */
+    hssize_t           snpoints;     /* Number of points in space (for error checking) */
+    size_t             npoints;      /* Number of points in space */
+    hsize_t            offset;       /* Offset of dataset */
+    size_t             max_temp_buf; /* Maximum size of temporary buffer */
 #ifdef H5_HAVE_PARALLEL
     MPI_Comm mpi_comm = MPI_COMM_NULL; /* MPI communicator for file */
     int      mpi_rank = (-1);          /* This process's rank  */
@@ -265,8 +265,8 @@ H5D__contig_fill(H5D_t *dset)
     dset_info.store     = &store;
     dset_info.buf.cvp   = fb_info.fill_buf;
     dset_info.mem_space = NULL;
-    ioinfo.dsets_info    = &dset_info;
-    ioinfo.f_sh          = H5F_SHARED(dset->oloc.file);
+    ioinfo.dsets_info   = &dset_info;
+    ioinfo.f_sh         = H5F_SHARED(dset->oloc.file);
 
     /*
      * Fill the entire current extent with the fill value.  We can do
@@ -637,7 +637,7 @@ H5D__contig_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
 
     /* if selected elements exist */
     if (dinfo->nelmts) {
-        int          u;
+        int               u;
         H5D_piece_info_t *new_piece_info; /* piece information to insert into skip list */
 
         /* Get copy of dset file_space, so it can be changed temporarily

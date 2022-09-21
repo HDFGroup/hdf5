@@ -2606,8 +2606,8 @@ H5D__vlen_get_buf_size_cb(void H5_ATTR_UNUSED *elem, hid_t type_id, unsigned H5_
                           const hsize_t *point, void *op_data)
 {
     H5D_vlen_bufsize_native_t *vlen_bufsize = (H5D_vlen_bufsize_native_t *)op_data;
-    H5D_dset_io_info_t         dset_info;                   /* Internal multi-dataset info placeholder */
-    herr_t                     ret_value    = H5_ITER_CONT; /* Return value */
+    H5D_dset_io_info_t         dset_info;                /* Internal multi-dataset info placeholder */
+    herr_t                     ret_value = H5_ITER_CONT; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
