@@ -193,7 +193,7 @@ herr_t
 H5D__contig_fill(H5D_t *dset)
 {
     H5D_io_info_t       ioinfo;           /* Dataset I/O info */
-    H5D_dset_io_info_t *dset_info = NULL; /* Dset info */
+    H5D_dset_io_info_t  dset_info;        /* Dset info */
     H5D_storage_t       store;            /* Union of storage info for dataset */
     hssize_t            snpoints;         /* Number of points in space (for error checking) */
     size_t              npoints;          /* Number of points in space */
@@ -261,13 +261,11 @@ H5D__contig_fill(H5D_t *dset)
     /* Simple setup for dataset I/O info struct */
     ioinfo.op_type = H5D_IO_OP_WRITE;
 
-    if (NULL == (dset_info = H5FL_CALLOC(H5D_dset_io_info_t)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate dset info array buffer")
-    dset_info->dset      = (H5D_t *)dset;
-    dset_info->store     = &store;
-    dset_info->buf.cvp   = fb_info.fill_buf;
-    dset_info->mem_space = NULL;
-    ioinfo.dsets_info    = dset_info;
+    dset_info.dset      = (H5D_t *)dset;
+    dset_info.store     = &store;
+    dset_info.buf.cvp   = fb_info.fill_buf;
+    dset_info.mem_space = NULL;
+    ioinfo.dsets_info    = &dset_info;
     ioinfo.f_sh          = H5F_SHARED(dset->oloc.file);
 
     /*
@@ -297,7 +295,7 @@ H5D__contig_fill(H5D_t *dset)
             /* Write the chunks out from only one process */
             /* !! Use the internal "independent" DXPL!! -QAK */
             if (H5_PAR_META_WRITE == mpi_rank) {
-                if (H5D__contig_write_one(&ioinfo, dset_info, offset, size) < 0) {
+                if (H5D__contig_write_one(&ioinfo, &dset_info, offset, size) < 0) {
                     /* If writing fails, push an error and stop writing, but
                      * still participate in following MPI_Barrier.
                      */
@@ -313,7 +311,7 @@ H5D__contig_fill(H5D_t *dset)
         else {
 #endif /* H5_HAVE_PARALLEL */
             H5_CHECK_OVERFLOW(size, size_t, hsize_t);
-            if (H5D__contig_write_one(&ioinfo, dset_info, offset, size) < 0)
+            if (H5D__contig_write_one(&ioinfo, &dset_info, offset, size) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to write fill value to dataset")
 #ifdef H5_HAVE_PARALLEL
         } /* end else */
@@ -340,10 +338,6 @@ done:
     /* Release the fill buffer info, if it's been initialized */
     if (fb_info_init && H5D__fill_term(&fb_info) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't release fill buffer info")
-
-    /* Close dset_info */
-    if (dset_info)
-        dset_info = H5FL_FREE(H5D_dset_io_info_t, dset_info);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__contig_fill() */
@@ -602,6 +596,9 @@ H5D__contig_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
 
     dinfo->store->contig.dset_addr = dataset->shared->layout.storage.u.contig.addr;
     dinfo->store->contig.dset_size = dataset->shared->layout.storage.u.contig.size;
+
+    /* Initialize piece info */
+    dinfo->layout_io_info.contig_piece_info = NULL;
 
     /* Get layout for dataset */
     dinfo->layout = &(dataset->shared->layout);

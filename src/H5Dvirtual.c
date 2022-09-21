@@ -2723,7 +2723,7 @@ static herr_t
 H5D__virtual_read_one(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_srcdset_t *source_dset)
 {
     H5S_t              *projected_src_space = NULL; /* File space for selection in a single source dataset */
-    H5D_dset_io_info_t *dinfo               = NULL; /* Dataset info for source dataset read */
+    H5D_dset_io_info_t  source_dinfo;               /* Dataset info for source dataset read */
     herr_t              ret_value           = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -2746,18 +2746,15 @@ H5D__virtual_read_one(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_srcdset
                         "can't project virtual intersection onto source space")
 
         {
-            /* Alloc dset_info */
-            if (NULL == (dinfo = H5FL_CALLOC(H5D_dset_io_info_t)))
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate dset info array buffer")
-
-            dinfo->dset        = source_dset->dset;
-            dinfo->mem_space   = source_dset->projected_mem_space;
-            dinfo->file_space  = projected_src_space;
-            dinfo->buf.vp      = dset_info->buf.vp;
-            dinfo->mem_type_id = dset_info->type_info.dst_type_id;
+            /* Initialize source_dinfo */
+            source_dinfo.dset        = source_dset->dset;
+            source_dinfo.mem_space   = source_dset->projected_mem_space;
+            source_dinfo.file_space  = projected_src_space;
+            source_dinfo.buf.vp      = dset_info->buf.vp;
+            source_dinfo.mem_type_id = dset_info->type_info.dst_type_id;
 
             /* Read in the point (with the custom VL memory allocator) */
-            if (H5D__read(1, dinfo) < 0)
+            if (H5D__read(1, &source_dinfo) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read source dataset")
         }
 
@@ -2769,8 +2766,6 @@ H5D__virtual_read_one(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_srcdset
 
 done:
     /* Release allocated resources */
-    if (dinfo)
-        dinfo = H5FL_FREE(H5D_dset_io_info_t, dinfo);
     if (projected_src_space) {
         HDassert(ret_value < 0);
         if (H5S_close(projected_src_space) < 0)
@@ -2929,7 +2924,7 @@ static herr_t
 H5D__virtual_write_one(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_srcdset_t *source_dset)
 {
     H5S_t              *projected_src_space = NULL; /* File space for selection in a single source dataset */
-    H5D_dset_io_info_t *dinfo               = NULL; /* Dataset info for source dataset write */
+    H5D_dset_io_info_t  source_dinfo;               /* Dataset info for source dataset write */
     herr_t              ret_value           = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -2954,18 +2949,15 @@ H5D__virtual_write_one(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_srcdse
                         "can't project virtual intersection onto source space")
 
         {
-            /* Alloc dset_info */
-            if (NULL == (dinfo = H5FL_CALLOC(H5D_dset_io_info_t)))
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate dset info array buffer")
-
-            dinfo->dset        = source_dset->dset;
-            dinfo->mem_space   = source_dset->projected_mem_space;
-            dinfo->file_space  = projected_src_space;
-            dinfo->buf.cvp     = dset_info->buf.cvp;
-            dinfo->mem_type_id = dset_info->type_info.dst_type_id;
+            /* Initialize source_dinfo */
+            source_dinfo.dset        = source_dset->dset;
+            source_dinfo.mem_space   = source_dset->projected_mem_space;
+            source_dinfo.file_space  = projected_src_space;
+            source_dinfo.buf.cvp     = dset_info->buf.cvp;
+            source_dinfo.mem_type_id = dset_info->type_info.dst_type_id;
 
             /* Read in the point (with the custom VL memory allocator) */
-            if (H5D__write(1, dinfo) < 0)
+            if (H5D__write(1, &source_dinfo) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read source dataset")
         }
 
@@ -2977,8 +2969,6 @@ H5D__virtual_write_one(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_srcdse
 
 done:
     /* Release allocated resources */
-    if (dinfo)
-        dinfo = H5FL_FREE(H5D_dset_io_info_t, dinfo);
     if (projected_src_space) {
         HDassert(ret_value < 0);
         if (H5S_close(projected_src_space) < 0)

@@ -85,7 +85,7 @@ H5D__scatter_file(const H5D_io_info_t *_io_info, const H5D_dset_io_info_t *_dset
                   size_t nelmts, const void *_buf)
 {
     H5D_io_info_t       tmp_io_info;           /* Temporary I/O info object */
-    H5D_dset_io_info_t *tmp_dset_info = NULL;  /* Temporary I/O info object */
+    H5D_dset_io_info_t  tmp_dset_info;         /* Temporary I/O info object */
     hsize_t            *off           = NULL;  /* Pointer to sequence offsets */
     hsize_t             mem_off;               /* Offset in memory */
     size_t              mem_curr_seq;          /* "Current sequence" in memory */
@@ -109,14 +109,12 @@ H5D__scatter_file(const H5D_io_info_t *_io_info, const H5D_dset_io_info_t *_dset
     HDassert(nelmts > 0);
     HDassert(_buf);
 
-    /* Set up temporary I/O info object */
-    if (NULL == (tmp_dset_info = H5FL_CALLOC(H5D_dset_io_info_t)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate dset info array buffer")
+    /* Set up temporary I/O info object */\
     H5MM_memcpy(&tmp_io_info, _io_info, sizeof(*_io_info));
-    HDmemcpy(tmp_dset_info, _dset_info, sizeof(*tmp_dset_info));
+    HDmemcpy(&tmp_dset_info, _dset_info, sizeof(*_dset_info));
     tmp_io_info.op_type    = H5D_IO_OP_WRITE;
-    tmp_dset_info->buf.cvp = _buf;
-    tmp_io_info.dsets_info = tmp_dset_info;
+    tmp_dset_info.buf.cvp = _buf;
+    tmp_io_info.dsets_info = &tmp_dset_info;
 
     /* Get info from API context */
     if (H5CX_get_vec_size(&dxpl_vec_size) < 0)
@@ -144,12 +142,12 @@ H5D__scatter_file(const H5D_io_info_t *_io_info, const H5D_dset_io_info_t *_dset
         mem_off                = 0;
 
         /* Write sequence list out */
-        if ((*tmp_dset_info->layout_ops.writevv)(&tmp_io_info, tmp_dset_info, nseq, &dset_curr_seq, len, off,
+        if ((*tmp_dset_info.layout_ops.writevv)(&tmp_io_info, &tmp_dset_info, nseq, &dset_curr_seq, len, off,
                                                  (size_t)1, &mem_curr_seq, &mem_len, &mem_off) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_WRITEERROR, FAIL, "write error")
 
         /* Update buffer */
-        tmp_dset_info->buf.cvp = (const uint8_t *)tmp_dset_info->buf.cvp + orig_mem_len;
+        tmp_dset_info.buf.cvp = (const uint8_t *)tmp_dset_info.buf.cvp + orig_mem_len;
 
         /* Decrement number of elements left to process */
         nelmts -= nelem;
@@ -161,8 +159,6 @@ done:
         len = H5FL_SEQ_FREE(size_t, len);
     if (off)
         off = H5FL_SEQ_FREE(hsize_t, off);
-    if (tmp_dset_info)
-        tmp_dset_info = H5FL_FREE(H5D_dset_io_info_t, tmp_dset_info);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__scatter_file() */
@@ -193,7 +189,7 @@ H5D__gather_file(const H5D_io_info_t *_io_info, const H5D_dset_io_info_t *_dset_
                  size_t nelmts, void *_buf /*out*/)
 {
     H5D_io_info_t       tmp_io_info;           /* Temporary I/O info object */
-    H5D_dset_io_info_t *tmp_dset_info = NULL;  /* Temporary I/O info object */
+    H5D_dset_io_info_t  tmp_dset_info;         /* Temporary I/O info object */
     hsize_t            *off           = NULL;  /* Pointer to sequence offsets */
     hsize_t             mem_off;               /* Offset in memory */
     size_t              mem_curr_seq;          /* "Current sequence" in memory */
@@ -218,13 +214,11 @@ H5D__gather_file(const H5D_io_info_t *_io_info, const H5D_dset_io_info_t *_dset_
     HDassert(_buf);
 
     /* Set up temporary I/O info object */
-    if (NULL == (tmp_dset_info = H5FL_CALLOC(H5D_dset_io_info_t)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, 0, "couldn't allocate dset info array buffer")
     H5MM_memcpy(&tmp_io_info, _io_info, sizeof(*_io_info));
-    HDmemcpy(tmp_dset_info, _dset_info, sizeof(*tmp_dset_info));
+    HDmemcpy(&tmp_dset_info, _dset_info, sizeof(*_dset_info));
     tmp_io_info.op_type    = H5D_IO_OP_READ;
-    tmp_dset_info->buf.vp  = _buf;
-    tmp_io_info.dsets_info = tmp_dset_info;
+    tmp_dset_info.buf.vp  = _buf;
+    tmp_io_info.dsets_info = &tmp_dset_info;
 
     /* Get info from API context */
     if (H5CX_get_vec_size(&dxpl_vec_size) < 0)
@@ -252,12 +246,12 @@ H5D__gather_file(const H5D_io_info_t *_io_info, const H5D_dset_io_info_t *_dset_
         mem_off                = 0;
 
         /* Read sequence list in */
-        if ((*tmp_dset_info->layout_ops.readvv)(&tmp_io_info, tmp_dset_info, nseq, &dset_curr_seq, len, off,
+        if ((*tmp_dset_info.layout_ops.readvv)(&tmp_io_info, &tmp_dset_info, nseq, &dset_curr_seq, len, off,
                                                 (size_t)1, &mem_curr_seq, &mem_len, &mem_off) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "read error")
 
         /* Update buffer */
-        tmp_dset_info->buf.vp = (uint8_t *)tmp_dset_info->buf.vp + orig_mem_len;
+        tmp_dset_info.buf.vp = (uint8_t *)tmp_dset_info.buf.vp + orig_mem_len;
 
         /* Decrement number of elements left to process */
         nelmts -= nelem;
@@ -269,8 +263,6 @@ done:
         len = H5FL_SEQ_FREE(size_t, len);
     if (off)
         off = H5FL_SEQ_FREE(hsize_t, off);
-    if (tmp_dset_info)
-        tmp_dset_info = H5FL_FREE(H5D_dset_io_info_t, tmp_dset_info);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__gather_file() */
