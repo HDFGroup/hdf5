@@ -1070,7 +1070,7 @@ CONTAINS
 !>
 !! \ingroup FH5D
 !!
-!! \brief Writes raw data from a dataset into a buffer.
+!! \brief Writes raw data from a buffer to a dataset.
 !!
 !! \note  \fortran_approved
 !!
@@ -1676,31 +1676,21 @@ CONTAINS
          f_ptr_buf, mem_type_id)
 
   END SUBROUTINE h5dfill_char
-
-!****s* H5D/H5Dread_multi_f
-!
-! NAME
-!  H5Dread_multi_f
-!
-! PURPOSE
-!  Reads data from a file to memory buffers for multiple datasets
-!
-! INPUTS
-!  count         - the number of datasets.
-!  dset_id       - Identifier of the dataset to read from
-!  mem_type_id   - Identifier of the memory datatype
-!  mem_space_id  - Identifier of the memory dataspace
-!  file_space_id - Identifier of the dataset's dataspace in the file
-!  dxpl_id       - dataset transfer property.
-!
-! OUTPUTS
-!  buf           - Buffer to receive data read from file
-! AUTHOR
-!  M. Scot Breitenfeld
-!  March 25, 2014
-!
-! SOURCE
-  SUBROUTINE H5Dread_multi_f(count, dset_id, mem_type_id, mem_space_id, file_space_id, buf, hdferr, dxpl_id)
+!>
+!! \ingroup FH5D
+!!
+!! \brief Reads data from a file to memory buffers for multiple datasets.
+!!
+!! \param count         Number of datasets to write to.
+!! \param dset_id       Identifier of the dataset to write to.
+!! \param mem_type_id   Identifier of the memory datatype.
+!! \param mem_space_id  Identifier of the memory dataspace.
+!! \param file_space_id Identifier of the dataset&apos;s dataspace in the file.
+!! \param buf           Buffer with data to be written to the file.
+!! \param hdferr        \fortran_error
+!! \param xfer_prp      Identifier of a transfer property list for this I/O operation.
+!!
+  SUBROUTINE H5Dread_multi_f(count, dset_id, mem_type_id, mem_space_id, file_space_id, buf, hdferr, xfer_prp)
     IMPLICIT NONE
 
     INTEGER(SIZE_T),      INTENT(IN)               :: count
@@ -1710,12 +1700,12 @@ CONTAINS
     INTEGER(HID_T),       INTENT(IN), DIMENSION(*) :: file_space_id
     TYPE(C_PTR),                      DIMENSION(*) :: buf
     INTEGER,              INTENT(OUT)              :: hdferr
-    INTEGER(HID_T),       INTENT(IN), OPTIONAL     :: dxpl_id
-!*****
-    INTEGER(HID_T) :: dxpl_id_default
+    INTEGER(HID_T),       INTENT(IN), OPTIONAL     :: xfer_prp
+
+    INTEGER(HID_T) :: xfer_prp_default
 
     INTERFACE
-       INTEGER FUNCTION H5Dread_multi(count, dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf) &
+       INTEGER FUNCTION H5Dread_multi(count, dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf) &
             BIND(C, NAME='H5Dread_multi')
          IMPORT :: SIZE_T
          IMPORT :: HID_T
@@ -1726,43 +1716,32 @@ CONTAINS
          INTEGER(HID_T), DIMENSION(*) :: mem_type_id
          INTEGER(HID_T), DIMENSION(*) :: mem_space_id
          INTEGER(HID_T), DIMENSION(*) :: file_space_id
-         INTEGER(HID_T), VALUE :: dxpl_id
+         INTEGER(HID_T), VALUE :: xfer_prp
          TYPE(C_PTR), DIMENSION(*) :: buf
        END FUNCTION H5Dread_multi
     END INTERFACE 
 
-    dxpl_id_default = H5P_DEFAULT_F
-    IF (PRESENT(dxpl_id)) dxpl_id_default = dxpl_id
+    xfer_prp_default = H5P_DEFAULT_F
+    IF (PRESENT(xfer_prp)) xfer_prp_default = xfer_prp
 
-    hdferr = H5Dread_multi(count, dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id_default, buf)
+    hdferr = H5Dread_multi(count, dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp_default, buf)
 
   END SUBROUTINE H5Dread_multi_f
-            
-!****s* H5D/H5Dwrite_multi_f
-!
-! NAME
-!  H5Dwrite_multi_f
-!
-! PURPOSE
-!  Writes data in memory to a file for multiple datasets
-!
-! INPUTS
-!  count         - the number of datasets.
-!  dset_id       - Identifier of the dataset to read from
-!  mem_type_id   - Identifier of the memory datatype
-!  mem_space_id  - Identifier of the memory dataspace
-!  file_space_id - Identifier of the dataset's dataspace in the file
-!  dxpl_id       - dataset transfer property.
-!  buf           - Buffer to write to file
-!
-! OUTPUTS
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  March 25, 2014
-!
-! SOURCE
-  SUBROUTINE H5Dwrite_multi_f(count, dset_id, mem_type_id, mem_space_id, file_space_id, buf, hdferr, dxpl_id)
+!>
+!! \ingroup FH5D
+!!
+!! \brief Writes data in memory to a file for multiple datasets.
+!!
+!! \param count         Number of datasets to write to.
+!! \param dset_id       Identifier of the dataset to write to.
+!! \param mem_type_id   Identifier of the memory datatype.
+!! \param mem_space_id  Identifier of the memory dataspace.
+!! \param file_space_id Identifier of the dataset&apos;s dataspace in the file.
+!! \param buf           Buffer with data to be written to the file.
+!! \param hdferr        \fortran_error
+!! \param xfer_prp      Identifier of a transfer property list for this I/O operation.
+!!
+  SUBROUTINE H5Dwrite_multi_f(count, dset_id, mem_type_id, mem_space_id, file_space_id, buf, hdferr, xfer_prp)
     IMPLICIT NONE
 
     INTEGER(SIZE_T),      INTENT(IN)               :: count
@@ -1772,12 +1751,12 @@ CONTAINS
     INTEGER(HID_T),       INTENT(IN), DIMENSION(*) :: file_space_id
     TYPE(C_PTR),                      DIMENSION(*) :: buf
     INTEGER,              INTENT(OUT)              :: hdferr
-    INTEGER(HID_T),       INTENT(IN), OPTIONAL     :: dxpl_id
-!*****
-    INTEGER(HID_T) :: dxpl_id_default
+    INTEGER(HID_T),       INTENT(IN), OPTIONAL     :: xfer_prp
+
+    INTEGER(HID_T) :: xfer_prp_default
 
     INTERFACE
-       INTEGER FUNCTION H5Dwrite_multi(count, dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf) &
+       INTEGER FUNCTION H5Dwrite_multi(count, dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf) &
             BIND(C, NAME='H5Dwrite_multi')
          IMPORT :: SIZE_T
          IMPORT :: HID_T
@@ -1788,15 +1767,15 @@ CONTAINS
          INTEGER(HID_T), DIMENSION(*) :: mem_type_id
          INTEGER(HID_T), DIMENSION(*) :: mem_space_id
          INTEGER(HID_T), DIMENSION(*) :: file_space_id
-         INTEGER(HID_T), VALUE :: dxpl_id
+         INTEGER(HID_T), VALUE :: xfer_prp
          TYPE(C_PTR), DIMENSION(*) :: buf
        END FUNCTION H5Dwrite_multi
     END INTERFACE
 
-    dxpl_id_default = H5P_DEFAULT_F
-    IF (PRESENT(dxpl_id)) dxpl_id_default = dxpl_id
+    xfer_prp_default = H5P_DEFAULT_F
+    IF (PRESENT(xfer_prp)) xfer_prp_default = xfer_prp
 
-    hdferr = H5Dwrite_multi(count, dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id_default, buf)
+    hdferr = H5Dwrite_multi(count, dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp_default, buf)
 
   END SUBROUTINE H5Dwrite_multi_f
 
