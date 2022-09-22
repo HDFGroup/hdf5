@@ -521,9 +521,13 @@ PROGRAM parallel_test_F03
   !
 
   ALLOCATE(numdsets(1:max_ndsets))
+  j = 1
   DO i = 1, max_ndsets
-     numdsets(i) = 2**(i-1)
+     numdsets(i) = 2**(j-1)
+     j = j + 1
+     PRINT*,numdsets(i)
   ENDDO
+  stop
 
 
   DO i = 1, max_ndsets
