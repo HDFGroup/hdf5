@@ -28,7 +28,9 @@ MODULE timer
      REAL*8 min, max, mean, std
   END TYPE timer_statinfo
 
+  INTEGER(SIZE_T) :: max_ndsets
   INTEGER(SIZE_T), DIMENSION(:), ALLOCATABLE :: numdsets
+  CHARACTER(LEN=1) :: coll
 
 CONTAINS
   
@@ -159,8 +161,8 @@ CONTAINS
      WRITE(*,'(X,A,4(A,1X,F0.7))') TRIM(prefix(7:))," timer seconds mean =",stats%mean, &
           ", min =", stats%min, ", max =", stats%max, ", std =", stats%std
 
-     OPEN(12, file=prefix(1:6)//".dgnu", FORM='FORMATTED')
-     IF(it.EQ.1.AND.ik.EQ.1) WRITE(12,'(A,T10,A,T27,A,T44,A,T61,A))') "#nd", "MD.T_W", "MD.T_R", "MD.F_W", "MD.F_R"
+     OPEN(12, file=prefix(1:6)//"_"//coll//".dgnu", FORM='FORMATTED')
+     IF(it.EQ.1.AND.ik.EQ.1) WRITE(12,'("#nd",T10,"MD.T_W",T27,"MD.T_W",T44,"MD.T_R",T61,"MD.F_R")')
      IF(ik.EQ.4)THEN
         WRITE(12,"(3X,E14.7)") stats%mean
      ELSE IF(ik.EQ.1)THEN
@@ -175,6 +177,8 @@ CONTAINS
      ELSE
         ik = ik + 1
      ENDIF
+
+     IF(it.GT.max_ndsets) it = 1
      
 
    END SUBROUTINE timer_printstats
@@ -243,6 +247,7 @@ SUBROUTINE pmultiple_dset_hyper_rw(do_collective, do_chunk, mpi_size, mpi_rank, 
 
      CALL h5pcreate_f(H5P_DATASET_CREATE_F, dcpl_id, error)
      CALL H5Pset_alloc_time_f(dcpl_id, H5D_ALLOC_TIME_EARLY_F, error)
+     CALL H5Pset_fill_time_f(dcpl_id, H5D_FILL_TIME_NEVER_F, error);
      CALL h5screate_simple_f(rank, dimsf, filespace, error)
      DO i = 1, ndsets
         WRITE(dsetname,'("dataset ",I0)') i
@@ -468,7 +473,7 @@ PROGRAM parallel_test_F03
   LOGICAL, DIMENSION(1:2) :: do_chunk = (/.FALSE.,.TRUE./)
   !CHARACTER(LEN=10), DIMENSION(1:2) :: chr_chunk =(/"contiguous", "chunk     "/)
   LOGICAL multi
-  INTEGER(SIZE_T) :: ndsets,max_ndsets
+  INTEGER(SIZE_T) :: ndsets
   CHARACTER(len=32) :: arg
 
   !
@@ -521,21 +526,26 @@ PROGRAM parallel_test_F03
   !
 
   ALLOCATE(numdsets(1:max_ndsets))
-  j = 1
   DO i = 1, max_ndsets
-     numdsets(i) = 2**(j-1)
-     j = j + 1
-     PRINT*,numdsets(i)
+     numdsets(i) = 2**(i-1)
   ENDDO
-  stop
 
-
+  coll ="C"
   DO i = 1, max_ndsets
      ndsets = numdsets(i)
      multi=.TRUE.
      CALL pmultiple_dset_hyper_rw(do_collective(2), do_chunk(1), mpi_size, mpi_rank, ndsets, multi)
      multi=.FALSE.
      CALL pmultiple_dset_hyper_rw(do_collective(2), do_chunk(1), mpi_size, mpi_rank, ndsets, multi)
+  ENDDO
+
+  coll = "I"
+  DO i = 1, max_ndsets
+     ndsets = numdsets(i)
+     multi=.TRUE.
+     CALL pmultiple_dset_hyper_rw(do_collective(1), do_chunk(1), mpi_size, mpi_rank, ndsets, multi)
+     multi=.FALSE.
+     CALL pmultiple_dset_hyper_rw(do_collective(1), do_chunk(1), mpi_size, mpi_rank, ndsets, multi)
   ENDDO
 
   !
