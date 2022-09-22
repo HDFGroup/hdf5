@@ -137,8 +137,7 @@ H5VL__native_dataset_io_setup(size_t count, void *obj[], hid_t mem_type_id[], hi
         } /* end else-if */
         else {
             /* Get the dataspace pointer */
-            if (NULL ==
-                (dinfo[i].file_space = (H5S_t *)H5I_object_verify(file_space_id[i], H5I_DATASPACE)))
+            if (NULL == (dinfo[i].file_space = (H5S_t *)H5I_object_verify(file_space_id[i], H5I_DATASPACE)))
                 HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "file_space_id is not a dataspace ID")
         } /* end else */
 

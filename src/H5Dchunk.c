@@ -67,12 +67,19 @@
 /****************/
 
 /* Macros for iterating over chunks to operate on */
-#define H5D_CHUNK_GET_FIRST_NODE(dinfo)                                                                        \
-    (dinfo->layout_io_info.chunk_map->use_single ? (H5SL_node_t *)(1) : H5SL_first(dinfo->layout_io_info.chunk_map->dset_sel_pieces))
-#define H5D_CHUNK_GET_NODE_INFO(dinfo, node)                                                                   \
-    (dinfo->layout_io_info.chunk_map->use_single ? dinfo->layout_io_info.chunk_map->single_piece_info : (H5D_piece_info_t *)H5SL_item(node))
-#define H5D_CHUNK_GET_NEXT_NODE(dinfo, node) (dinfo->layout_io_info.chunk_map->use_single ? (H5SL_node_t *)NULL : H5SL_next(node))
-#define H5D_CHUNK_GET_NODE_COUNT(dinfo)      (dinfo->layout_io_info.chunk_map->use_single ? (size_t)1 : H5SL_count(dinfo->layout_io_info.chunk_map->dset_sel_pieces))
+#define H5D_CHUNK_GET_FIRST_NODE(dinfo)                                                                      \
+    (dinfo->layout_io_info.chunk_map->use_single                                                             \
+         ? (H5SL_node_t *)(1)                                                                                \
+         : H5SL_first(dinfo->layout_io_info.chunk_map->dset_sel_pieces))
+#define H5D_CHUNK_GET_NODE_INFO(dinfo, node)                                                                 \
+    (dinfo->layout_io_info.chunk_map->use_single ? dinfo->layout_io_info.chunk_map->single_piece_info        \
+                                                 : (H5D_piece_info_t *)H5SL_item(node))
+#define H5D_CHUNK_GET_NEXT_NODE(dinfo, node)                                                                 \
+    (dinfo->layout_io_info.chunk_map->use_single ? (H5SL_node_t *)NULL : H5SL_next(node))
+#define H5D_CHUNK_GET_NODE_COUNT(dinfo)                                                                      \
+    (dinfo->layout_io_info.chunk_map->use_single                                                             \
+         ? (size_t)1                                                                                         \
+         : H5SL_count(dinfo->layout_io_info.chunk_map->dset_sel_pieces))
 
 /* Sanity check on chunk index types: commonly used by a lot of routines in this file */
 #define H5D_CHUNK_STORAGE_INDEX_CHK(storage)                                                                 \
@@ -1055,15 +1062,15 @@ H5D__chunk_is_data_cached(const H5D_shared_t *shared_dset)
 static herr_t
 H5D__chunk_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
 {
-    const H5D_t *dataset = dinfo->dset;         /* Local pointer to dataset info */
-    H5D_chunk_map_t *fm;                        /* Convenience pointer to chunk map */
-    hssize_t     old_offset[H5O_LAYOUT_NDIMS];  /* Old selection offset */
-    htri_t       file_space_normalized = FALSE; /* File dataspace was normalized */
-    unsigned     f_ndims;                       /* The number of dimensions of the file's dataspace */
-    int          sm_ndims; /* The number of dimensions of the memory buffer's dataspace (signed) */
-    htri_t       use_selection_io = FALSE; /* Whether to use selection I/O */
-    unsigned     u;                        /* Local index variable */
-    herr_t       ret_value = SUCCEED;      /* Return value        */
+    const H5D_t     *dataset = dinfo->dset;         /* Local pointer to dataset info */
+    H5D_chunk_map_t *fm;                            /* Convenience pointer to chunk map */
+    hssize_t         old_offset[H5O_LAYOUT_NDIMS];  /* Old selection offset */
+    htri_t           file_space_normalized = FALSE; /* File dataspace was normalized */
+    unsigned         f_ndims;                       /* The number of dimensions of the file's dataspace */
+    int              sm_ndims; /* The number of dimensions of the memory buffer's dataspace (signed) */
+    htri_t           use_selection_io = FALSE; /* Whether to use selection I/O */
+    unsigned         u;                        /* Local index variable */
+    herr_t           ret_value = SUCCEED;      /* Return value        */
 
     FUNC_ENTER_PACKAGE
 
@@ -1080,9 +1087,9 @@ H5D__chunk_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
     fm->last_piece_info = NULL;
 
     /* Clear other fields */
-    fm->mchunk_tmpl = NULL;
-    fm->dset_sel_pieces = NULL;
-    fm->single_space = NULL;
+    fm->mchunk_tmpl       = NULL;
+    fm->dset_sel_pieces   = NULL;
+    fm->single_space      = NULL;
     fm->single_piece_info = NULL;
 
     /* Check if the memory space is scalar & make equivalent memory space */
@@ -1160,7 +1167,7 @@ H5D__chunk_io_init_selections(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
     /* Set convenience pointers */
     fm = dinfo->layout_io_info.chunk_map;
     HDassert(fm);
-    dataset = dinfo->dset;
+    dataset  = dinfo->dset;
     mem_type = dinfo->type_info.mem_type;
 
     /* Special case for only one element in selection */
@@ -1604,16 +1611,16 @@ done:
 static herr_t
 H5D__create_piece_file_map_all(H5D_dset_io_info_t *di, const H5D_io_info_t *io_info)
 {
-    H5D_chunk_map_t  *fm;            /* Convenience pointer to chunk map */
-    H5S_t  *tmp_fchunk = NULL;       /* Temporary file dataspace */
-    hsize_t file_dims[H5S_MAX_RANK]; /* File dataspace dims */
-    hsize_t sel_points;              /* Number of elements in file selection */
-    hsize_t zeros[H5S_MAX_RANK];     /* All zero vector (for start parameter to setting hyperslab on partial
-                                        chunks) */
-    hsize_t  coords[H5S_MAX_RANK];   /* Current coordinates of chunk */
-    hsize_t  end[H5S_MAX_RANK];      /* Final coordinates of chunk */
-    hsize_t  scaled[H5S_MAX_RANK];   /* Scaled coordinates for this chunk */
-    hsize_t  chunk_index;            /* "Index" of chunk */
+    H5D_chunk_map_t *fm;                      /* Convenience pointer to chunk map */
+    H5S_t           *tmp_fchunk = NULL;       /* Temporary file dataspace */
+    hsize_t          file_dims[H5S_MAX_RANK]; /* File dataspace dims */
+    hsize_t          sel_points;              /* Number of elements in file selection */
+    hsize_t zeros[H5S_MAX_RANK];   /* All zero vector (for start parameter to setting hyperslab on partial
+                                      chunks) */
+    hsize_t  coords[H5S_MAX_RANK]; /* Current coordinates of chunk */
+    hsize_t  end[H5S_MAX_RANK];    /* Final coordinates of chunk */
+    hsize_t  scaled[H5S_MAX_RANK]; /* Scaled coordinates for this chunk */
+    hsize_t  chunk_index;          /* "Index" of chunk */
     hsize_t  curr_partial_clip[H5S_MAX_RANK]; /* Current partial dimension sizes to clip against */
     hsize_t  partial_dim_size[H5S_MAX_RANK];  /* Size of a partial dimension */
     hbool_t  is_partial_dim[H5S_MAX_RANK];    /* Whether a dimension is currently a partial chunk */
@@ -1818,20 +1825,20 @@ done:
 static herr_t
 H5D__create_piece_file_map_hyper(H5D_dset_io_info_t *dinfo, const H5D_io_info_t *io_info)
 {
-    H5D_chunk_map_t  *fm;            /* Convenience pointer to chunk map */
-    H5S_t   *tmp_fchunk = NULL;              /* Temporary file dataspace */
-    hsize_t  sel_start[H5O_LAYOUT_NDIMS];    /* Offset of low bound of file selection */
-    hsize_t  sel_end[H5O_LAYOUT_NDIMS];      /* Offset of high bound of file selection */
-    hsize_t  sel_points;                     /* Number of elements in file selection */
-    hsize_t  start_coords[H5O_LAYOUT_NDIMS]; /* Starting coordinates of selection */
-    hsize_t  coords[H5O_LAYOUT_NDIMS];       /* Current coordinates of chunk */
-    hsize_t  end[H5O_LAYOUT_NDIMS];          /* Final coordinates of chunk */
-    hsize_t  chunk_index;                    /* Index of chunk */
-    hsize_t  start_scaled[H5S_MAX_RANK];     /* Starting scaled coordinates of selection */
-    hsize_t  scaled[H5S_MAX_RANK];           /* Scaled coordinates for this chunk */
-    int      curr_dim;                       /* Current dimension to increment */
-    unsigned u;                              /* Local index variable */
-    herr_t   ret_value = SUCCEED;            /* Return value */
+    H5D_chunk_map_t *fm;                             /* Convenience pointer to chunk map */
+    H5S_t           *tmp_fchunk = NULL;              /* Temporary file dataspace */
+    hsize_t          sel_start[H5O_LAYOUT_NDIMS];    /* Offset of low bound of file selection */
+    hsize_t          sel_end[H5O_LAYOUT_NDIMS];      /* Offset of high bound of file selection */
+    hsize_t          sel_points;                     /* Number of elements in file selection */
+    hsize_t          start_coords[H5O_LAYOUT_NDIMS]; /* Starting coordinates of selection */
+    hsize_t          coords[H5O_LAYOUT_NDIMS];       /* Current coordinates of chunk */
+    hsize_t          end[H5O_LAYOUT_NDIMS];          /* Final coordinates of chunk */
+    hsize_t          chunk_index;                    /* Index of chunk */
+    hsize_t          start_scaled[H5S_MAX_RANK];     /* Starting scaled coordinates of selection */
+    hsize_t          scaled[H5S_MAX_RANK];           /* Scaled coordinates for this chunk */
+    int              curr_dim;                       /* Current dimension to increment */
+    unsigned         u;                              /* Local index variable */
+    herr_t           ret_value = SUCCEED;            /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -2228,7 +2235,7 @@ H5D__piece_file_cb(void H5_ATTR_UNUSED *elem, const H5T_t H5_ATTR_UNUSED *type, 
     H5D_io_info_wrap_t *opdata  = (H5D_io_info_wrap_t *)_opdata;
     H5D_io_info_t      *io_info = (H5D_io_info_t *)opdata->io_info;    /* io info for multi dset */
     H5D_dset_io_info_t *dinfo   = (H5D_dset_io_info_t *)opdata->dinfo; /* File<->memory piece mapping info */
-    H5D_chunk_map_t    *fm;                                /* Convenience pointer to chunk map */
+    H5D_chunk_map_t    *fm;                                            /* Convenience pointer to chunk map */
     H5D_piece_info_t   *piece_info;                        /* Chunk information for current piece */
     hsize_t             coords_in_chunk[H5O_LAYOUT_NDIMS]; /* Coordinates of element in chunk */
     hsize_t             chunk_index;                       /* Chunk index */
@@ -2601,20 +2608,20 @@ done:
 static herr_t
 H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
 {
-    H5SL_node_t        *chunk_node;                    /* Current node in chunk skip list */
-    H5D_io_info_t       nonexistent_io_info;           /* "nonexistent" I/O info object */
-    H5D_dset_io_info_t  nonexistent_dset_info;         /* "nonexistent" I/O dset info object */
-    H5D_dset_io_info_t  ctg_dset_info;                 /* Contiguous I/O dset info object */
-    H5D_dset_io_info_t  cpt_dset_info;                 /* Compact I/O dset info object */
-    uint32_t            src_accessed_bytes    = 0;     /* Total accessed size in a chunk */
-    hbool_t             skip_missing_chunks   = FALSE; /* Whether to skip missing chunks */
-    H5S_t             **chunk_mem_spaces      = NULL;  /* Array of chunk memory spaces */
-    H5S_t              *chunk_mem_spaces_local[8];     /* Local buffer for chunk_mem_spaces */
-    H5S_t             **chunk_file_spaces = NULL;      /* Array of chunk file spaces */
-    H5S_t              *chunk_file_spaces_local[8];    /* Local buffer for chunk_file_spaces */
-    haddr_t            *chunk_addrs = NULL;            /* Array of chunk addresses */
-    haddr_t             chunk_addrs_local[8];          /* Local buffer for chunk_addrs */
-    herr_t              ret_value = SUCCEED;           /*return value        */
+    H5SL_node_t       *chunk_node;                  /* Current node in chunk skip list */
+    H5D_io_info_t      nonexistent_io_info;         /* "nonexistent" I/O info object */
+    H5D_dset_io_info_t nonexistent_dset_info;       /* "nonexistent" I/O dset info object */
+    H5D_dset_io_info_t ctg_dset_info;               /* Contiguous I/O dset info object */
+    H5D_dset_io_info_t cpt_dset_info;               /* Compact I/O dset info object */
+    uint32_t           src_accessed_bytes  = 0;     /* Total accessed size in a chunk */
+    hbool_t            skip_missing_chunks = FALSE; /* Whether to skip missing chunks */
+    H5S_t            **chunk_mem_spaces    = NULL;  /* Array of chunk memory spaces */
+    H5S_t             *chunk_mem_spaces_local[8];   /* Local buffer for chunk_mem_spaces */
+    H5S_t            **chunk_file_spaces = NULL;    /* Array of chunk file spaces */
+    H5S_t             *chunk_file_spaces_local[8];  /* Local buffer for chunk_file_spaces */
+    haddr_t           *chunk_addrs = NULL;          /* Array of chunk addresses */
+    haddr_t            chunk_addrs_local[8];        /* Local buffer for chunk_addrs */
+    herr_t             ret_value = SUCCEED;         /*return value        */
 
     FUNC_ENTER_PACKAGE
 
@@ -2627,8 +2634,8 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
     H5MM_memcpy(&nonexistent_io_info, io_info, sizeof(nonexistent_io_info));
     H5MM_memcpy(&nonexistent_dset_info, dset_info, sizeof(nonexistent_dset_info));
     nonexistent_dset_info.layout_ops = *H5D_LOPS_NONEXISTENT;
-    nonexistent_io_info.dsets_info    = &nonexistent_dset_info;
-    nonexistent_io_info.count         = 1;
+    nonexistent_io_info.dsets_info   = &nonexistent_dset_info;
+    nonexistent_io_info.count        = 1;
 
     {
         const H5O_fill_t *fill = &(dset_info->dset->shared->dcpl_cache.fill); /* Fill value info */
@@ -2763,8 +2770,8 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
         HDmemcpy(&ctg_dset_info, dset_info, sizeof(ctg_dset_info));
         ctg_dset_info.store      = &ctg_store;
         ctg_dset_info.layout_ops = *H5D_LOPS_CONTIG;
-        ctg_io_info.dsets_info    = &ctg_dset_info;
-        ctg_io_info.count         = 1;
+        ctg_io_info.dsets_info   = &ctg_dset_info;
+        ctg_io_info.count        = 1;
 
         /* Initialize temporary contiguous storage info */
         H5_CHECKED_ASSIGN(ctg_store.contig.dset_size, hsize_t, dset_info->dset->shared->layout.u.chunk.size,
@@ -2775,8 +2782,8 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
         HDmemcpy(&cpt_dset_info, dset_info, sizeof(cpt_dset_info));
         cpt_dset_info.store      = &cpt_store;
         cpt_dset_info.layout_ops = *H5D_LOPS_COMPACT;
-        cpt_io_info.dsets_info    = &cpt_dset_info;
-        cpt_io_info.count         = 1;
+        cpt_io_info.dsets_info   = &cpt_dset_info;
+        cpt_io_info.count        = 1;
 
         /* Initialize temporary compact storage info */
         cpt_store.compact.dirty = &cpt_dirty;
@@ -2860,7 +2867,7 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
             /* Advance to next chunk in list */
             chunk_node = H5D_CHUNK_GET_NEXT_NODE(dset_info, chunk_node);
         } /* end while */
-    } /* end else */
+    }     /* end else */
 
 done:
     /* Cleanup on failure */
@@ -2896,22 +2903,22 @@ done:
 static herr_t
 H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
 {
-    H5SL_node_t        *chunk_node;             /* Current node in chunk skip list */
-    H5D_io_info_t       ctg_io_info;            /* Contiguous I/O info object */
-    H5D_dset_io_info_t  ctg_dset_info;          /* Contiguous I/O dset info object */
-    H5D_storage_t       ctg_store;              /* Chunk storage information as contiguous dataset */
-    H5D_io_info_t       cpt_io_info;            /* Compact I/O info object */
-    H5D_dset_io_info_t  cpt_dset_info;          /* Compact I/O dset info object */
-    H5D_storage_t       cpt_store;              /* Chunk storage information as compact dataset */
-    hbool_t             cpt_dirty;              /* Temporary placeholder for compact storage "dirty" flag */
-    uint32_t            dst_accessed_bytes = 0; /* Total accessed size in a chunk */
-    H5S_t             **chunk_mem_spaces   = NULL;  /* Array of chunk memory spaces */
-    H5S_t              *chunk_mem_spaces_local[8];  /* Local buffer for chunk_mem_spaces */
-    H5S_t             **chunk_file_spaces = NULL;   /* Array of chunk file spaces */
-    H5S_t              *chunk_file_spaces_local[8]; /* Local buffer for chunk_file_spaces */
-    haddr_t            *chunk_addrs = NULL;         /* Array of chunk addresses */
-    haddr_t             chunk_addrs_local[8];       /* Local buffer for chunk_addrs */
-    herr_t              ret_value = SUCCEED;        /* Return value        */
+    H5SL_node_t       *chunk_node;                /* Current node in chunk skip list */
+    H5D_io_info_t      ctg_io_info;               /* Contiguous I/O info object */
+    H5D_dset_io_info_t ctg_dset_info;             /* Contiguous I/O dset info object */
+    H5D_storage_t      ctg_store;                 /* Chunk storage information as contiguous dataset */
+    H5D_io_info_t      cpt_io_info;               /* Compact I/O info object */
+    H5D_dset_io_info_t cpt_dset_info;             /* Compact I/O dset info object */
+    H5D_storage_t      cpt_store;                 /* Chunk storage information as compact dataset */
+    hbool_t            cpt_dirty;                 /* Temporary placeholder for compact storage "dirty" flag */
+    uint32_t           dst_accessed_bytes = 0;    /* Total accessed size in a chunk */
+    H5S_t            **chunk_mem_spaces   = NULL; /* Array of chunk memory spaces */
+    H5S_t             *chunk_mem_spaces_local[8]; /* Local buffer for chunk_mem_spaces */
+    H5S_t            **chunk_file_spaces = NULL;  /* Array of chunk file spaces */
+    H5S_t             *chunk_file_spaces_local[8]; /* Local buffer for chunk_file_spaces */
+    haddr_t           *chunk_addrs = NULL;         /* Array of chunk addresses */
+    haddr_t            chunk_addrs_local[8];       /* Local buffer for chunk_addrs */
+    herr_t             ret_value = SUCCEED;        /* Return value        */
 
     FUNC_ENTER_PACKAGE
 
@@ -2925,8 +2932,8 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
     HDmemcpy(&ctg_dset_info, dset_info, sizeof(ctg_dset_info));
     ctg_dset_info.store      = &ctg_store;
     ctg_dset_info.layout_ops = *H5D_LOPS_CONTIG;
-    ctg_io_info.dsets_info    = &ctg_dset_info;
-    ctg_io_info.count         = 1;
+    ctg_io_info.dsets_info   = &ctg_dset_info;
+    ctg_io_info.count        = 1;
 
     /* Initialize temporary contiguous storage info */
     H5_CHECKED_ASSIGN(ctg_store.contig.dset_size, hsize_t, dset_info->dset->shared->layout.u.chunk.size,
@@ -2937,8 +2944,8 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
     HDmemcpy(&cpt_dset_info, dset_info, sizeof(cpt_dset_info));
     cpt_dset_info.store      = &cpt_store;
     cpt_dset_info.layout_ops = *H5D_LOPS_COMPACT;
-    cpt_io_info.dsets_info    = &cpt_dset_info;
-    cpt_io_info.count         = 1;
+    cpt_io_info.dsets_info   = &cpt_dset_info;
+    cpt_io_info.count        = 1;
 
     /* Initialize temporary compact storage info */
     cpt_store.compact.dirty = &cpt_dirty;
@@ -3306,8 +3313,8 @@ done:
 static herr_t
 H5D__chunk_io_term(H5D_io_info_t H5_ATTR_UNUSED *io_info, H5D_dset_io_info_t *di)
 {
-    H5D_chunk_map_t *fm; /* Convenience pointer to chunk map */
-    herr_t ret_value = SUCCEED; /*return value        */
+    H5D_chunk_map_t *fm;                  /* Convenience pointer to chunk map */
+    herr_t           ret_value = SUCCEED; /*return value        */
 
     FUNC_ENTER_PACKAGE
 
@@ -5334,9 +5341,9 @@ H5D__chunk_update_old_edge_chunks(H5D_t *dset, hsize_t old_dim[])
 
     chk_io_info.op_type = H5D_IO_OP_READ;
 
-    chk_dset_info.dset    = dset;
-    chk_dset_info.store   = &chk_store;
-    chk_dset_info.buf.vp  = NULL;
+    chk_dset_info.dset     = dset;
+    chk_dset_info.store    = &chk_store;
+    chk_dset_info.buf.vp   = NULL;
     chk_io_info.dsets_info = &chk_dset_info;
 
     /*
@@ -6028,9 +6035,9 @@ H5D__chunk_prune_by_extent(H5D_t *dset, const hsize_t *old_dim)
 
     chk_io_info.op_type = H5D_IO_OP_READ;
 
-    chk_dset_info.dset    = dset;
-    chk_dset_info.store   = &chk_store;
-    chk_dset_info.buf.vp  = NULL;
+    chk_dset_info.dset     = dset;
+    chk_dset_info.store    = &chk_store;
+    chk_dset_info.buf.vp   = NULL;
     chk_io_info.dsets_info = &chk_dset_info;
     chk_io_info.count      = 1;
 

@@ -253,8 +253,8 @@ typedef struct H5D_dset_io_info_t {
     H5S_t *mem_space;  /* Pointer to the memory dataspace */
 
     union {
-        struct H5D_chunk_map_t *chunk_map; /* Chunk specific I/O info */
-        H5D_piece_info_t *contig_piece_info; /* Piece info for contiguous dataset */
+        struct H5D_chunk_map_t *chunk_map;         /* Chunk specific I/O info */
+        H5D_piece_info_t       *contig_piece_info; /* Piece info for contiguous dataset */
     } layout_io_info;
 
     hid_t           mem_type_id; /* memory datatype ID */
@@ -389,7 +389,7 @@ typedef struct H5D_chunk_ops_t {
 
 /* Main structure holding the mapping between file chunks and memory */
 typedef struct H5D_chunk_map_t {
-    unsigned f_ndims;    /* Number of dimensions for file dataspace */
+    unsigned f_ndims; /* Number of dimensions for file dataspace */
 
     H5S_t         *mchunk_tmpl; /* Dataspace template for new memory chunks */
     H5S_sel_iter_t mem_iter;    /* Iterator for elements in memory selection */
@@ -766,7 +766,7 @@ H5_DLL herr_t H5D__mpio_get_no_coll_cause_strings(char *local_cause, size_t loca
 #endif /* H5_HAVE_PARALLEL */
 
 /* Free a piece (chunk or contiguous dataset data block) info struct */
-H5_DLL herr_t  H5D__free_piece_info(void *item, void *key, void *opdata);
+H5_DLL herr_t H5D__free_piece_info(void *item, void *key, void *opdata);
 
 /* Testing functions */
 #ifdef H5D_TESTING

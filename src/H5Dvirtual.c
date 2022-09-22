@@ -2722,9 +2722,9 @@ H5D__virtual_post_io(H5O_storage_virtual_t *storage)
 static herr_t
 H5D__virtual_read_one(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_srcdset_t *source_dset)
 {
-    H5S_t              *projected_src_space = NULL; /* File space for selection in a single source dataset */
-    H5D_dset_io_info_t  source_dinfo;               /* Dataset info for source dataset read */
-    herr_t              ret_value           = SUCCEED; /* Return value */
+    H5S_t             *projected_src_space = NULL; /* File space for selection in a single source dataset */
+    H5D_dset_io_info_t source_dinfo;               /* Dataset info for source dataset read */
+    herr_t             ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -2923,9 +2923,9 @@ done:
 static herr_t
 H5D__virtual_write_one(H5D_dset_io_info_t *dset_info, H5O_storage_virtual_srcdset_t *source_dset)
 {
-    H5S_t              *projected_src_space = NULL; /* File space for selection in a single source dataset */
-    H5D_dset_io_info_t  source_dinfo;               /* Dataset info for source dataset write */
-    herr_t              ret_value           = SUCCEED; /* Return value */
+    H5S_t             *projected_src_space = NULL; /* File space for selection in a single source dataset */
+    H5D_dset_io_info_t source_dinfo;               /* Dataset info for source dataset write */
+    herr_t             ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_PACKAGE
 
