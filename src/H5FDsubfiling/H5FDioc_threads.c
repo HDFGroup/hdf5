@@ -1157,6 +1157,7 @@ ioc_file_truncate(sf_work_request_t *msg)
     int64_t              subfile_idx;
     int                  fd;
     int                  ioc_idx;
+    int                  mpi_code;
     int                  ret_value = 0;
 
     HDassert(msg);
@@ -1180,6 +1181,14 @@ ioc_file_truncate(sf_work_request_t *msg)
 
     if (HDftruncate(fd, (off_t)length) != 0)
         H5_SUBFILING_SYS_GOTO_ERROR(H5E_FILE, H5E_SEEKERROR, -1, "HDftruncate failed");
+
+    /*
+     * Send a completion message back to the source that
+     * requested the truncation operation
+     */
+    if (MPI_SUCCESS != (mpi_code = MPI_Send(msg->header, 1, H5_subfiling_rpc_msg_type, msg->source,
+                                            TRUNC_COMPLETED, sf_context->sf_eof_comm)))
+        H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Send failed", mpi_code);
 
 #ifdef H5FD_IOC_DEBUG
     HDprintf("[ioc(%d) %s]: truncated subfile to %lld bytes. ret = %d\n", ioc_idx, __func__,

@@ -242,8 +242,15 @@ test_config_file(void)
      * Choose a random Subfiling stripe size between
      * the smallest allowed value and 32MiB
      */
-    stripe_size = (rand() % (H5FD_SUBFILING_DEFAULT_STRIPE_SIZE - SUBFILING_MIN_STRIPE_SIZE + 1)) +
-                  SUBFILING_MIN_STRIPE_SIZE;
+    if (mpi_rank == 0) {
+        stripe_size = (rand() % (H5FD_SUBFILING_DEFAULT_STRIPE_SIZE - SUBFILING_MIN_STRIPE_SIZE + 1)) +
+                      SUBFILING_MIN_STRIPE_SIZE;
+    }
+
+    if (mpi_size > 1) {
+        mpi_code_g = MPI_Bcast(&stripe_size, 1, MPI_INT64_T, 0, comm_g);
+        VRFY((mpi_code_g == MPI_SUCCESS), "MPI_Bcast succeeded");
+    }
 
     cfg.ioc_selection = SELECT_IOC_ONE_PER_NODE;
     cfg.stripe_size   = (stripe_size_g > 0) ? stripe_size_g : stripe_size;
@@ -432,8 +439,15 @@ test_stripe_sizes(void)
          * Choose a random Subfiling stripe size between
          * the smallest allowed value and the default value
          */
-        stripe_size = (rand() % (H5FD_SUBFILING_DEFAULT_STRIPE_SIZE - SUBFILING_MIN_STRIPE_SIZE + 1)) +
-                      SUBFILING_MIN_STRIPE_SIZE;
+        if (mpi_rank == 0) {
+            stripe_size = (rand() % (H5FD_SUBFILING_DEFAULT_STRIPE_SIZE - SUBFILING_MIN_STRIPE_SIZE + 1)) +
+                          SUBFILING_MIN_STRIPE_SIZE;
+        }
+
+        if (mpi_size > 1) {
+            mpi_code_g = MPI_Bcast(&stripe_size, 1, MPI_INT64_T, 0, comm_g);
+            VRFY((mpi_code_g == MPI_SUCCESS), "MPI_Bcast succeeded");
+        }
 
         cfg.ioc_selection = SELECT_IOC_ONE_PER_NODE;
         cfg.stripe_size   = (stripe_size_g > 0) ? stripe_size_g : stripe_size;
@@ -497,6 +511,8 @@ test_stripe_sizes(void)
 
             file_end_addr += nbytes;
 
+            VRFY((H5FDtruncate(file_ptr, dxpl_id, 0) >= 0), "H5FDtruncate succeeded");
+
             for (int j = 0; j < num_subfiles; j++) {
                 h5_stat_size_t subfile_size;
                 h5_stat_t      subfile_info;
@@ -540,6 +556,8 @@ test_stripe_sizes(void)
             write_status =
                 H5FDwrite_vector(file_ptr, dxpl_id, 1, &write_type, &write_addr, &nbytes, &c_write_buf);
             VRFY((write_status >= 0), "H5FDwrite_vector succeeded");
+
+            VRFY((H5FDtruncate(file_ptr, dxpl_id, 0) >= 0), "H5FDtruncate succeeded");
 
             for (int j = 0; j < num_subfiles; j++) {
                 h5_stat_size_t subfile_size;
@@ -653,6 +671,8 @@ test_stripe_sizes(void)
 
         file_end_addr += ((size_t)mpi_size * nbytes);
 
+        VRFY((H5FDtruncate(file_ptr, dxpl_id, 0) >= 0), "H5FDtruncate succeeded");
+
         mpi_code_g = MPI_Barrier(comm_g);
         VRFY((mpi_code_g == MPI_SUCCESS), "MPI_Barrier succeeded");
 
@@ -707,6 +727,8 @@ test_stripe_sizes(void)
         write_status =
             H5FDwrite_vector(file_ptr, dxpl_id, 1, &write_type, &write_addr, &nbytes, &c_write_buf);
         VRFY((write_status >= 0), "H5FDwrite_vector succeeded");
+
+        VRFY((H5FDtruncate(file_ptr, dxpl_id, 0) >= 0), "H5FDtruncate succeeded");
 
         mpi_code_g = MPI_Barrier(comm_g);
         VRFY((mpi_code_g == MPI_SUCCESS), "MPI_Barrier succeeded");
@@ -933,7 +955,7 @@ test_read_different_stripe_size(void)
         h5_stat_t file_info;
         FILE     *subfile_ptr;
         int       num_subfiles = cfg.stripe_count;
-        int       num_digits   = (int)(HDlog10(num_subfiles) + 1);
+        int       num_digits   = (int)(HDlog10(num_subfiles / 2) + 1);
 
         VRFY((HDstat(SUBF_FILENAME, &file_info) >= 0), "HDstat succeeded");
 
@@ -1317,6 +1339,7 @@ test_subfiling_write_many_read_few(void)
     hsize_t  start[1];
     hsize_t  count[1];
     hsize_t  dset_dims[1];
+    hbool_t  reading_file = FALSE;
     size_t   target_size;
     hid_t    file_id   = H5I_INVALID_HID;
     hid_t    fapl_id   = H5I_INVALID_HID;
@@ -1396,12 +1419,40 @@ test_subfiling_write_many_read_few(void)
     VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
     VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
 
-    /* Read file back with half the number of MPI ranks */
-    int color  = (mpi_rank < (mpi_size / 2));
-    mpi_code_g = MPI_Comm_split(comm_g, color, mpi_rank, &sub_comm);
-    VRFY((mpi_code_g == MPI_SUCCESS), "MPI_Comm_split succeeded");
+    /*
+     * If only using 1 node, read file back with a
+     * few ranks from that node. Otherwise, read file
+     * back with 1 MPI rank per node
+     */
+    if (num_nodes_g == 1) {
+        int color;
 
-    if (color) {
+        if (mpi_size < 2) {
+            color = 1;
+        }
+        else if (mpi_size < 4) {
+            color = (mpi_rank < (mpi_size / 2));
+        }
+        else {
+            color = (mpi_rank < (mpi_size / 4));
+        }
+
+        if (mpi_size > 1) {
+            mpi_code_g = MPI_Comm_split(comm_g, color, mpi_rank, &sub_comm);
+            VRFY((mpi_code_g == MPI_SUCCESS), "MPI_Comm_split succeeded");
+        }
+
+        if (color)
+            reading_file = TRUE;
+    }
+    else {
+        if (node_local_rank == 0) {
+            sub_comm     = ioc_comm;
+            reading_file = TRUE;
+        }
+    }
+
+    if (reading_file) {
         fapl_id = create_subfiling_ioc_fapl(sub_comm, MPI_INFO_NULL, FALSE, NULL, 0);
         VRFY((fapl_id >= 0), "FAPL creation succeeded");
 
@@ -1440,8 +1491,10 @@ test_subfiling_write_many_read_few(void)
         VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
     }
 
-    mpi_code_g = MPI_Comm_free(&sub_comm);
-    VRFY((mpi_code_g == MPI_SUCCESS), "MPI_Comm_free succeeded");
+    if ((sub_comm != MPI_COMM_NULL) && (num_nodes_g == 1)) {
+        mpi_code_g = MPI_Comm_free(&sub_comm);
+        VRFY((mpi_code_g == MPI_SUCCESS), "MPI_Comm_free succeeded");
+    }
 
     mpi_code_g = MPI_Barrier(comm_g);
     VRFY((mpi_code_g == MPI_SUCCESS), "MPI_Barrier succeeded");
@@ -1703,9 +1756,9 @@ parse_subfiling_env_vars(void)
 int
 main(int argc, char **argv)
 {
-    time_t seed;
-    int    required = MPI_THREAD_MULTIPLE;
-    int    provided = 0;
+    unsigned seed;
+    int      required = MPI_THREAD_MULTIPLE;
+    int      provided = 0;
 
     HDcompile_assert(SUBFILING_MIN_STRIPE_SIZE <= H5FD_SUBFILING_DEFAULT_STRIPE_SIZE);
 
@@ -1808,11 +1861,29 @@ main(int argc, char **argv)
 
     TestAlarmOn();
 
-    seed = time(NULL);
-    srand((unsigned)seed);
+    /*
+     * Obtain and broadcast seed value since ranks
+     * aren't guaranteed to arrive here at exactly
+     * the same time and could end up out of sync
+     * with each other in regards to random number
+     * generation
+     */
+    if (mpi_rank == 0)
+        seed = (unsigned)time(NULL);
+
+    if (mpi_size > 1) {
+        if (MPI_SUCCESS != (mpi_code_g = MPI_Bcast(&seed, 1, MPI_UNSIGNED, 0, comm_g))) {
+            if (MAINPROCESS)
+                HDprintf("MPI_Bcast failed with error code %d\n", mpi_code_g);
+            nerrors++;
+            goto exit;
+        }
+    }
+
+    srand(seed);
 
     if (MAINPROCESS)
-        HDprintf("Using seed: %lld\n\n", (long long)seed);
+        HDprintf("Using seed: %u\n\n", seed);
 
     /* Grab values from environment variables if set */
     parse_subfiling_env_vars();
@@ -1853,8 +1924,15 @@ main(int argc, char **argv)
          * Choose a random Subfiling stripe size between
          * the smallest allowed value and the default value
          */
-        stripe_size = (rand() % (H5FD_SUBFILING_DEFAULT_STRIPE_SIZE - SUBFILING_MIN_STRIPE_SIZE + 1)) +
-                      SUBFILING_MIN_STRIPE_SIZE;
+        if (mpi_rank == 0) {
+            stripe_size = (rand() % (H5FD_SUBFILING_DEFAULT_STRIPE_SIZE - SUBFILING_MIN_STRIPE_SIZE + 1)) +
+                          SUBFILING_MIN_STRIPE_SIZE;
+        }
+
+        if (mpi_size > 1) {
+            mpi_code_g = MPI_Bcast(&stripe_size, 1, MPI_INT64_T, 0, comm_g);
+            VRFY((mpi_code_g == MPI_SUCCESS), "MPI_Bcast succeeded");
+        }
 
         HDsnprintf(tmp, sizeof(tmp), "%" PRId64, stripe_size);
 
