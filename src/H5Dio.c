@@ -1162,9 +1162,7 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info)
              * handle collective I/O */
             /* Check for selection/vector support in file driver? -NAF */
             if (!io_info->use_select_io) {
-                io_info->md_io_ops.multi_read_md =
-                    dset0->shared->layout.ops->par_read; /*!FIXME eliminate par_read/par_write here and just
-                                                            assign H5D__collective_read/write? */
+                io_info->md_io_ops.multi_read_md   = dset0->shared->layout.ops->par_read;
                 io_info->md_io_ops.multi_write_md  = dset0->shared->layout.ops->par_write;
                 io_info->md_io_ops.single_read_md  = H5D__mpio_select_read;
                 io_info->md_io_ops.single_write_md = H5D__mpio_select_write;
