@@ -18,6 +18,7 @@
 !
 MODULE timer
   USE MPI
+  USE hdf5
   IMPLICIT NONE
 
   ! Statistics structure: contains stats that aggregate timer
@@ -27,6 +28,7 @@ MODULE timer
      REAL*8 min, max, mean, std
   END TYPE timer_statinfo
 
+  INTEGER(SIZE_T), DIMENSION(:), ALLOCATABLE :: numdsets
 
 CONTAINS
   
@@ -153,19 +155,18 @@ CONTAINS
 
      INTEGER, SAVE :: ik = 1
      INTEGER, SAVE :: it = 1
-     INTEGER, DIMENSION(1:10) :: nd = (/1,2,4,8,16,32,64,128,256,512/)
 
-     WRITE(*,'(A,4(A,1X,F6.3))') TRIM(prefix(7:))," timer seconds mean =",stats%mean, &
+     WRITE(*,'(X,A,4(A,1X,F0.7))') TRIM(prefix(7:))," timer seconds mean =",stats%mean, &
           ", min =", stats%min, ", max =", stats%max, ", std =", stats%std
 
      OPEN(12, file=prefix(1:6)//".dgnu", FORM='FORMATTED')
-     IF(it.EQ.1.AND.ik.EQ.1) WRITE(12,'(A)') "#  nd   MD.T_W  MD.T_R  MD.F_W  MD.F_R"
+     IF(it.EQ.1.AND.ik.EQ.1) WRITE(12,'(A,T10,A,T27,A,T44,A,T61,A))') "#nd", "MD.T_W", "MD.T_R", "MD.F_W", "MD.F_R"
      IF(ik.EQ.4)THEN
-        WRITE(12,"(1X,F6.3)") stats%mean
+        WRITE(12,"(3X,E14.7)") stats%mean
      ELSE IF(ik.EQ.1)THEN
-        WRITE(12,"(I0,1X,F6.3)", ADVANCE='NO') nd(it), stats%mean
+        WRITE(12,"(I0,3X,E14.7)", ADVANCE='NO') numdsets(it), stats%mean
      ELSE
-        WRITE(12,"(1X,F6.3)", ADVANCE='NO') stats%mean
+        WRITE(12,"(3X,E14.7)", ADVANCE='NO') stats%mean
      ENDIF
      IF(ik.EQ.4)THEN
         ik = 1
@@ -225,7 +226,7 @@ SUBROUTINE pmultiple_dset_hyper_rw(do_collective, do_chunk, mpi_size, mpi_rank, 
   CHARACTER(LEN=5) :: ichr5
   CHARACTER(LEN=6) :: ichr6
 
-  dimsf = (/25000_hsize_t,INT(mpi_size*8, hsize_t)/)
+  dimsf = (/131072_hsize_t,INT(mpi_size*8, hsize_t)/)
 
   IF(mpi_rank.EQ.0)THEN
 
@@ -451,6 +452,7 @@ END SUBROUTINE pmultiple_dset_hyper_rw
 PROGRAM parallel_test_F03
   USE hdf5
   USE mpi
+  USE timer
   IMPLICIT NONE
 
   INTEGER :: mpierror       ! MPI hdferror flag
@@ -517,8 +519,15 @@ PROGRAM parallel_test_F03
   !
   ! test write/read multiple hyperslab datasets
   !
+
+  ALLOCATE(numdsets(1:max_ndsets))
   DO i = 1, max_ndsets
-     ndsets = 2**(i-1)
+     numdsets(i) = 2**(i-1)
+  ENDDO
+
+
+  DO i = 1, max_ndsets
+     ndsets = numdsets(i)
      multi=.TRUE.
      CALL pmultiple_dset_hyper_rw(do_collective(2), do_chunk(1), mpi_size, mpi_rank, ndsets, multi)
      multi=.FALSE.
