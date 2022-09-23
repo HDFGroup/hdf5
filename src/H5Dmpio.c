@@ -1958,9 +1958,9 @@ H5D__multi_chunk_collective_io(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_
         H5FD_MPIO_COLLECTIVE_IO;           /* Original parallel transfer property on entering this function */
     size_t                    total_chunk; /* Total # of chunks in dataset */
     size_t                    num_chunk;   /* Number of chunks for this process */
-    H5SL_node_t              *piece_node = NULL; /* Current node in chunk skip list */
+    H5SL_node_t              *piece_node      = NULL; /* Current node in chunk skip list */
     H5D_piece_info_t         *next_chunk_info = NULL; /* Chunk info for next selected chunk */
-    size_t                    u;                 /* Local index variable */
+    size_t                    u;                      /* Local index variable */
     H5D_mpio_actual_io_mode_t actual_io_mode =
         H5D_MPIO_NO_COLLECTIVE; /* Local variable for tracking the I/O mode used. */
     herr_t ret_value = SUCCEED;
