@@ -700,7 +700,7 @@ main(int argc, char *argv[])
         T_PMD_ERROR
 
     for (i = 0; i <= MDSET_ALL_FLAGS; i++) {
-        /* Skip incomaptible flag combinations */
+        /* Skip incompatible flag combinations */
         if (((i & MDSET_FLAG_MLAYOUT) && (i & MDSET_FLAG_CHUNK)) ||
             ((i & MDSET_FLAG_MLAYOUT) && !(i & MDSET_FLAG_MDSET)) ||
             ((i & MDSET_FLAG_MLAYOUT) && !(i & MDSET_FLAG_COLLECTIVE)) ||
