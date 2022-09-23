@@ -55,6 +55,7 @@
 #define H5D_MULTI_CHUNK_IO             1
 #define H5D_ONE_LINK_CHUNK_IO_MORE_OPT 2
 #define H5D_MULTI_CHUNK_IO_MORE_OPT    3
+#define H5D_NO_IO                      4
 
 /***** Macros for One linked collective IO case. *****/
 /* The default value to do one linked collective IO for all chunks.
@@ -300,6 +301,7 @@ static herr_t H5D__final_collective_io(H5D_io_info_t *io_info, hsize_t mpi_buf_c
 static herr_t H5D__obtain_mpio_mode(H5D_io_info_t *io_info, H5D_dset_io_info_t *di, uint8_t assign_io_mode[],
                                     haddr_t chunk_addr[], int mpi_rank, int mpi_size);
 static herr_t H5D__mpio_get_sum_chunk(const H5D_io_info_t *io_info, int *sum_chunkf);
+static herr_t H5D__mpio_get_sum_chunk_dset(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info, int *sum_chunkf);
 static herr_t H5D__mpio_collective_filtered_chunk_io_setup(const H5D_io_info_t                *io_info,
                                                            const H5D_dset_io_info_t           *di,
                                                            H5D_filtered_collective_io_info_t **chunk_list,
@@ -949,10 +951,9 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5D__mpio_get_sum_chunk
  *
- * Purpose:     Routine for choosing an IO option:
- *              a) Single collective IO defined by one MPI derived datatype
- *                 to link through all pieces (chunks/contigs). Default.
- *              Note: previously there were other options, but cutoff as part of multi-dset work.
+ * Purpose:     Routine for obtaining total number of chunks to cover
+ *              hyperslab selection selected by all processors.  Operates
+ *              on all datasets in the operation.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -981,6 +982,45 @@ H5D__mpio_get_sum_chunk(const H5D_io_info_t *io_info, int *sum_chunkf)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__mpio_get_sum_chunk() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__mpio_get_sum_chunk_dset
+ *
+ * Purpose:     Routine for obtaining total number of chunks to cover
+ *              hyperslab selection selected by all processors.  Operates
+ *              on a single dataset.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__mpio_get_sum_chunk_dset(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info, int *sum_chunkf)
+{
+    int    num_chunkf; /* Number of chunks to iterate over */
+    size_t ori_num_chunkf;
+    int    mpi_code; /* MPI return code */
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    /* Check for non-chunked dataset, in this case we know the number of "chunks"
+     * is simply the mpi size */
+    HDassert(dset_info->layout->type == H5D_CHUNKED);
+
+    /* Get the number of chunks to perform I/O on */
+    num_chunkf     = 0;
+    ori_num_chunkf = H5SL_count(dset_info->layout_io_info.chunk_map->dset_sel_pieces);
+    H5_CHECKED_ASSIGN(num_chunkf, int, ori_num_chunkf, size_t);
+
+    /* Determine the summation of number of chunks for all processes */
+    if (MPI_SUCCESS !=
+        (mpi_code = MPI_Allreduce(&num_chunkf, sum_chunkf, 1, MPI_INT, MPI_SUM, io_info->comm)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Allreduce failed", mpi_code)
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__mpio_get_sum_chunk_dset() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5D__piece_io
@@ -1026,13 +1066,14 @@ H5D__piece_io(H5D_io_info_t *io_info)
     hbool_t log_file_flag  = FALSE;
     FILE   *debug_log_file = NULL;
 #endif
-#ifdef H5_HAVE_INSTRUMENTED_LIBRARY
-    htri_t temp_not_link_io = FALSE;
-#endif
     int    io_option = H5D_MULTI_CHUNK_IO_MORE_OPT;
+    hbool_t recalc_io_option = FALSE;
+    hbool_t use_multi_dset = FALSE;
+    unsigned one_link_chunk_io_threshold; /* Threshold to use single collective I/O for all chunks */
     int    sum_chunk = -1;
     int    mpi_rank;
     int    mpi_size;
+    size_t i;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
@@ -1072,104 +1113,190 @@ H5D__piece_io(H5D_io_info_t *io_info)
     }
 #endif
 
-    /* Check for cases that are only supported by link chunk path - multi
-     * dataset and contiguous dataset */
+    /* Check the optional property list for the collective chunk IO optimization option.
+     * Only set here if it's a static option, if it needs to be calculated using the
+     * number of chunks per process delay that calculation until later. */
+    if (H5CX_get_mpio_chunk_opt_mode(&chunk_opt_mode) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "couldn't get chunk optimization option")
 
-    if (io_info->count > 1 || io_info->dsets_info[0].layout->type != H5D_CHUNKED)
-        io_option = H5D_ONE_LINK_CHUNK_IO;
-    else {
-        /* Check the optional property list for the collective chunk IO optimization option */
-        if (H5CX_get_mpio_chunk_opt_mode(&chunk_opt_mode) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "couldn't get chunk optimization option")
+    if (H5FD_MPIO_CHUNK_ONE_IO == chunk_opt_mode)
+        io_option = H5D_ONE_LINK_CHUNK_IO; /*no opt*/
+    /* direct request to multi-chunk-io */
+    else if (H5FD_MPIO_CHUNK_MULTI_IO == chunk_opt_mode)
+        io_option = H5D_MULTI_CHUNK_IO;
+    else
+        recalc_io_option = TRUE;
 
-        if (H5FD_MPIO_CHUNK_ONE_IO == chunk_opt_mode)
-            io_option = H5D_ONE_LINK_CHUNK_IO; /*no opt*/
-        /* direct request to multi-chunk-io */
-        else if (H5FD_MPIO_CHUNK_MULTI_IO == chunk_opt_mode)
-            io_option = H5D_MULTI_CHUNK_IO;
-        /* via default path. branch by num threshold */
-        else {
-            unsigned one_link_chunk_io_threshold; /* Threshold to use single collective I/O for all chunks */
+    /* Check if we can and should use multi dataset path */
+    if (io_info->count > 1 && (io_option == H5D_ONE_LINK_CHUNK_IO || recalc_io_option)) {
+        /* Use multi dataset path for now */
+        use_multi_dset = TRUE;
 
-            if (H5D__mpio_get_sum_chunk(io_info, &sum_chunk) < 0)
-                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSWAP, FAIL,
-                            "unable to obtain the total chunk number of all processes");
+        /* Check for filtered datasets */
+        for (i = 0; i < io_info->count; i++)
+            if (io_info->dsets_info[i].dset->shared->dcpl_cache.pline.nused > 0) {
+                use_multi_dset = FALSE;
+                break;
+            }
 
+        /* Check if this I/O exceeds one linked chunk threshold */
+        if (recalc_io_option && use_multi_dset) {
             /* Get the chunk optimization option threshold */
             if (H5CX_get_mpio_chunk_opt_num(&one_link_chunk_io_threshold) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
                             "couldn't get chunk optimization option threshold value")
 
-            /* step 1: choose an IO option */
-            /* If the average number of chunk per process is greater than a threshold, we will do one link
-             * chunked IO. */
-            if ((unsigned)sum_chunk / (unsigned)mpi_size >= one_link_chunk_io_threshold)
-                io_option = H5D_ONE_LINK_CHUNK_IO_MORE_OPT;
+            /* If the threshold is 0, no need to check number of chunks */
+            if (one_link_chunk_io_threshold > 0) {
+                /* Get number of chunks for all processes */
+                if (H5D__mpio_get_sum_chunk(io_info, &sum_chunk) < 0)
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSWAP, FAIL,
+                                "unable to obtain the total chunk number of all processes");
+
+                /* If the average number of chunk per process is less than the threshold, we will do multi
+                 * chunk IO.  If this threshold is not exceeded for all datasets, no need to check it again
+                 * for each individual dataset. */
+                if ((unsigned)sum_chunk / (unsigned)mpi_size < one_link_chunk_io_threshold) {
+                    recalc_io_option = FALSE;
+                    use_multi_dset = FALSE;
+                }
+            }
+        }
+
+        /* Perform multi dataset I/O if appropriate */
+        if (use_multi_dset) {
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
-            else
-                temp_not_link_io = TRUE;
+            /*** Set collective chunk user-input optimization API. ***/
+            if (H5D_ONE_LINK_CHUNK_IO == io_option) {
+                if (H5CX_test_set_mpio_coll_chunk_link_hard(0) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to set property value")
+            } /* end if */
 #endif    /* H5_HAVE_INSTRUMENTED_LIBRARY */
-        } /* end else */
+
+            /* Perform unfiltered link chunk collective IO */
+            if (H5D__link_piece_collective_io(io_info, mpi_rank) < 0)
+                HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "couldn't finish linked chunk MPI-IO")
+        }
     }
+
+    if (!use_multi_dset) {
+        /* Loop over datasets */
+        for (i = 0; i < io_info->count; i++) {
+            if (io_info->dsets_info[i].layout->type == H5D_CONTIGUOUS) {
+                /* Contiguous: call H5D__inter_collective_io() directly */
+                H5D_mpio_actual_io_mode_t actual_io_mode = H5D_MPIO_CONTIGUOUS_COLLECTIVE;
+
+                io_info->store_faddr = io_info->dsets_info[i].store->contig.dset_addr;
+                io_info->base_maddr = io_info->dsets_info[i].buf;
+
+                if (H5D__inter_collective_io(io_info, &io_info->dsets_info[i], io_info->dsets_info[i].file_space, io_info->dsets_info[i].mem_space) < 0)
+                    HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "couldn't finish shared collective MPI-IO")
+
+                /* Set the actual I/O mode property. internal_collective_io will not break to
+                 * independent I/O, so we set it here.
+                 */
+                H5CX_set_mpio_actual_io_mode(actual_io_mode);
+            }
+            else {
+                /* Chunked I/O path */
+                HDassert(io_info->dsets_info[i].layout->type == H5D_CHUNKED);
+
+                /* Recalculate io_option if necessary */
+                if (recalc_io_option) {
+                    /* Get the chunk optimization option threshold */
+                    if (H5CX_get_mpio_chunk_opt_num(&one_link_chunk_io_threshold) < 0)
+                        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
+                                    "couldn't get chunk optimization option threshold value")
+
+                    /* If the threshold is 0, no need to check number of chunks */
+                    if (one_link_chunk_io_threshold == 0) {
+                        io_option = H5D_ONE_LINK_CHUNK_IO_MORE_OPT;
+                        recalc_io_option = FALSE;
+                    }
+                    else {
+                        /* Get number of chunks for all processes */
+                        if (H5D__mpio_get_sum_chunk_dset(io_info, &io_info->dsets_info[i], &sum_chunk) < 0)
+                            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSWAP, FAIL,
+                                        "unable to obtain the total chunk number of all processes");
+
+                        /* step 1: choose an IO option */
+                        /* If the average number of chunk per process is greater than a threshold, we will do one link
+                         * chunked IO. */
+                        if ((unsigned)sum_chunk / (unsigned)mpi_size >= one_link_chunk_io_threshold)
+                            io_option = H5D_ONE_LINK_CHUNK_IO_MORE_OPT;
+                        else
+                            io_option = H5D_MULTI_CHUNK_IO_MORE_OPT;
+                    }
+                }
+
+                /* step 2:  Go ahead to do IO.*/
+                switch (io_option) {
+                    case H5D_ONE_LINK_CHUNK_IO:
+                    case H5D_ONE_LINK_CHUNK_IO_MORE_OPT:
+                        /* Check if there are any filters in the pipeline */
+                        if (io_info->dsets_info[i].dset->shared->dcpl_cache.pline.nused > 0) {
+                            if (H5D__link_chunk_filtered_collective_io(io_info, &io_info->dsets_info[i], mpi_rank,
+                                                                       mpi_size) < 0)
+                                HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "couldn't finish filtered linked chunk MPI-IO")
+                        } /* end if */
+                        else {
+                            /* If there is more than one dataset we cannot make the multi dataset call here, fall back to multi chunk */
+                            if (io_info->count > 1) {
+                                io_option = H5D_MULTI_CHUNK_IO_MORE_OPT;
+                                recalc_io_option = TRUE;
+
+                                if (H5D__multi_chunk_collective_io(io_info, &io_info->dsets_info[i], mpi_rank, mpi_size) < 0)
+                                    HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "couldn't finish optimized multiple chunk MPI-IO")
+                            }
+                            else {
+                                /* Perform unfiltered link chunk collective IO */
+                                if (H5D__link_piece_collective_io(io_info, mpi_rank) < 0)
+                                    HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "couldn't finish linked chunk MPI-IO") }
+                        }
+
+                        break;
+
+                    case H5D_MULTI_CHUNK_IO: /* direct request to do multi-chunk IO */
+                    default:                 /* multiple chunk IO via threshold */
+                        /* Check if there are any filters in the pipeline */
+                        if (io_info->dsets_info[i].dset->shared->dcpl_cache.pline.nused > 0) {
+                            if (H5D__multi_chunk_filtered_collective_io(io_info, &io_info->dsets_info[i], mpi_rank,
+                                                                        mpi_size) < 0)
+                                HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL,
+                                            "couldn't finish optimized multiple filtered chunk MPI-IO")
+                        } /* end if */
+                        else {
+                            /* Perform unfiltered multi chunk collective IO */
+                            if (H5D__multi_chunk_collective_io(io_info, &io_info->dsets_info[i], mpi_rank, mpi_size) < 0)
+                                HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "couldn't finish optimized multiple chunk MPI-IO") }
+
+                        break;
+                } /* end switch */
 
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
-    {
-        /*** Set collective chunk user-input optimization APIs. ***/
-        if (H5D_ONE_LINK_CHUNK_IO == io_option) {
-            if (H5CX_test_set_mpio_coll_chunk_link_hard(0) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to set property value")
-        } /* end if */
-        else if (H5D_MULTI_CHUNK_IO == io_option) {
-            if (H5CX_test_set_mpio_coll_chunk_multi_hard(0) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to set property value")
-        } /* end else-if */
-        else if (H5D_ONE_LINK_CHUNK_IO_MORE_OPT == io_option) {
-            if (H5CX_test_set_mpio_coll_chunk_link_num_true(0) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to set property value")
-        } /* end if */
-        else if (temp_not_link_io) {
-            if (H5CX_test_set_mpio_coll_chunk_link_num_false(0) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to set property value")
-        } /* end if */
-    }
+                {
+                    /*** Set collective chunk user-input optimization APIs. ***/
+                    if (H5D_ONE_LINK_CHUNK_IO == io_option) {
+                        if (H5CX_test_set_mpio_coll_chunk_link_hard(0) < 0)
+                            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to set property value")
+                    } /* end if */
+                    else if (H5D_MULTI_CHUNK_IO == io_option) {
+                        if (H5CX_test_set_mpio_coll_chunk_multi_hard(0) < 0)
+                            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to set property value")
+                    } /* end else-if */
+                    else if (H5D_ONE_LINK_CHUNK_IO_MORE_OPT == io_option) {
+                        if (H5CX_test_set_mpio_coll_chunk_link_num_true(0) < 0)
+                            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to set property value")
+                    } /* end if */
+                    else if (H5D_MULTI_CHUNK_IO_MORE_OPT == io_option) {
+                        if (H5CX_test_set_mpio_coll_chunk_link_num_false(0) < 0)
+                            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to set property value")
+                    } /* end if */
+                }
 #endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
-
-    /* step 2:  Go ahead to do IO.*/
-    switch (io_option) {
-        case H5D_ONE_LINK_CHUNK_IO:
-        case H5D_ONE_LINK_CHUNK_IO_MORE_OPT:
-            /* Check if there are any filters in the pipeline */
-            if (io_info->dsets_info[0].dset->shared->dcpl_cache.pline.nused > 0) {
-                /* Check for multi dataset (currently unsupported) */
-                if (io_info->count > 1)
-                    HGOTO_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL,
-                                "filtered datasets with multi-dataset I/O unsupported")
-
-                if (H5D__link_chunk_filtered_collective_io(io_info, &io_info->dsets_info[0], mpi_rank,
-                                                           mpi_size) < 0)
-                    HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "couldn't finish filtered linked chunk MPI-IO")
-            } /* end if */
-            else
-                /* Perform unfiltered link chunk collective IO */
-                if (H5D__link_piece_collective_io(io_info, mpi_rank) < 0)
-                    HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "couldn't finish linked chunk MPI-IO")
-            break;
-
-        case H5D_MULTI_CHUNK_IO: /* direct request to do multi-chunk IO */
-        default:                 /* multiple chunk IO via threshold */
-            /* Check if there are any filters in the pipeline */
-            if (io_info->dsets_info[0].dset->shared->dcpl_cache.pline.nused > 0) {
-                if (H5D__multi_chunk_filtered_collective_io(io_info, &io_info->dsets_info[0], mpi_rank,
-                                                            mpi_size) < 0)
-                    HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL,
-                                "couldn't finish optimized multiple filtered chunk MPI-IO")
-            } /* end if */
-            else
-                /* Perform unfiltered multi chunk collective IO */
-                if (H5D__multi_chunk_collective_io(io_info, &io_info->dsets_info[0], mpi_rank, mpi_size) < 0)
-                    HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "couldn't finish optimized multiple chunk MPI-IO")
-            break;
-    } /* end switch */
+            }
+        }
+    }
 
 done:
 #ifdef H5Dmpio_DEBUG
@@ -1447,6 +1574,7 @@ H5D__link_piece_collective_io(H5D_io_info_t *io_info, int mpi_rank)
                 piece_node = H5SL_next(piece_node);
             } /* end while */
 
+            /* Create final MPI derived datatype for the file */
             if (MPI_SUCCESS !=
                 (mpi_code = MPI_Type_create_struct((int)num_chunk, chunk_mpi_file_counts,
                                                    chunk_file_disp_array, chunk_ftype, &chunk_final_ftype)))
@@ -4008,9 +4136,8 @@ H5D__mpio_collective_filtered_chunk_common_io(H5D_filtered_collective_io_info_t 
 
     /*
      * If this rank doesn't have a selection, it can
-     * skip I/O if independent I/O was requested at
-     * the low level, or if the MPI communicator size
-     * is 1.
+     * skip I/O if independent I/O was requested, or
+     * if the MPI communicator size is 1.
      *
      * Otherwise, this rank has to participate in
      * collective I/O, but probably has a NULL buf
@@ -4018,13 +4145,13 @@ H5D__mpio_collective_filtered_chunk_common_io(H5D_filtered_collective_io_info_t 
      * write/read function expects one.
      */
     if (num_chunks == 0) {
-        H5FD_mpio_collective_opt_t coll_opt_mode;
+        H5FD_mpio_xfer_t xfer_mode; /* I/O transfer mode */
 
-        /* Get the collective_opt property to check whether the application wants to do IO individually. */
-        if (H5CX_get_mpio_coll_opt(&coll_opt_mode) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get MPI-I/O collective_opt property")
+        /* Get the I/O transfer to check whether the application wants to do IO individually. */
+        if (H5CX_get_io_xfer_mode(&xfer_mode) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode property")
 
-        if ((mpi_size == 1) || (H5FD_MPIO_INDIVIDUAL_IO == coll_opt_mode)) {
+        if ((mpi_size == 1) || (H5FD_MPIO_COLLECTIVE != xfer_mode)) {
             HGOTO_DONE(SUCCEED)
         }
         else {
