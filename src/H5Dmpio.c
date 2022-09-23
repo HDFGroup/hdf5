@@ -1959,12 +1959,15 @@ H5D__multi_chunk_collective_io(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_
     size_t                    total_chunk; /* Total # of chunks in dataset */
     size_t                    num_chunk;   /* Number of chunks for this process */
     H5SL_node_t              *piece_node = NULL; /* Current node in chunk skip list */
+    H5D_piece_info_t         *next_chunk_info = NULL; /* Chunk info for next selected chunk */
     size_t                    u;                 /* Local index variable */
     H5D_mpio_actual_io_mode_t actual_io_mode =
         H5D_MPIO_NO_COLLECTIVE; /* Local variable for tracking the I/O mode used. */
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE_TAG(dset_info->dset->oloc.addr)
+
+    HDassert(dset_info->layout->type == H5D_CHUNKED);
 
     /* Get the current I/O collective opt mode so we can restore it later */
     if (H5CX_get_mpio_coll_opt(&orig_coll_opt_mode) < 0)
@@ -1996,7 +1999,17 @@ H5D__multi_chunk_collective_io(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_
     dset_info->store = &store;
 
     /* Get the number of chunks with a selection */
-    num_chunk = H5SL_count(io_info->sel_pieces);
+    num_chunk = H5SL_count(dset_info->layout_io_info.chunk_map->dset_sel_pieces);
+
+    if (num_chunk) {
+        /* Start at the beginning of the chunk map skiplist.  Since these chunks are
+         * stored in index order and since we're iterating in index order we can
+         * just check for each chunk being selected in order */
+        if (NULL == (piece_node = H5SL_first(dset_info->layout_io_info.chunk_map->dset_sel_pieces)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "couldn't get piece node from skip list")
+        if (NULL == (next_chunk_info = (H5D_piece_info_t *)H5SL_item(piece_node)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "couldn't get piece info from skip list")
+    }
 
     /* Loop over _all_ the chunks */
     for (u = 0; u < total_chunk; u++) {
@@ -2008,30 +2021,27 @@ H5D__multi_chunk_collective_io(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_
         H5D_MPIO_DEBUG_VA(mpi_rank, "mpi_rank = %d, chunk index = %zu", mpi_rank, u);
 #endif
 
-        /* Look for this chunk in the list of selected pieces, if there are
+        /* Check if this chunk is the next chunk in the skip list, if there are
          * selected chunks left to process */
-        /*!FIXME Can go back to the old way, dset_sel_pieces is sorted by index */
-        if (num_chunk) {
-            piece_node = H5SL_find(io_info->sel_pieces, (void *)(&(chunk_addr[u])));
+        HDassert(!num_chunk || next_chunk_info);
+        HDassert(!num_chunk || next_chunk_info->index >= u);
+        if (num_chunk && next_chunk_info->index == u) {
+            /* Next chunk is this chunk */
+            chunk_info = next_chunk_info;
 
-            /* Get the chunk info for this chunk, if there are elements selected */
-            if (piece_node) {
-                if (NULL == (chunk_info = (H5D_piece_info_t *)H5SL_item(piece_node)))
-                    HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL, "couldn't get piece info from skipped list")
+            /* One less chunk to process */
+            num_chunk--;
 
-                /* One less chunk to process */
-                num_chunk--;
+            /* Advance next chunk to next node in skip list, if there are more chunks selected */
+            if (num_chunk) {
+                if (NULL == (piece_node = H5SL_next(piece_node)))
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "chunk skip list terminated early")
+                if (NULL == (next_chunk_info = (H5D_piece_info_t *)H5SL_item(piece_node)))
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "couldn't get piece info from skip list")
             }
-            else
-                chunk_info = NULL;
 
-            /* Set the storage information for chunks with selections */
-            if (chunk_info) {
-                HDassert(chunk_info->index == u);
-
-                /* Pass in chunk's coordinates in a union. */
-                store.chunk.scaled = chunk_info->scaled;
-            } /* end if */
+            /* Pass in chunk's coordinates in a union. */
+            store.chunk.scaled = chunk_info->scaled;
         }
         else
             chunk_info = NULL;
