@@ -57,11 +57,12 @@
 #define MDSET_FLAG_SHAPESAME  0x04u
 #define MDSET_FLAG_MDSET      0x08u
 #define MDSET_FLAG_COLLECTIVE 0x10u
-#define MDSET_FLAG_TCONV      0x20u
-#define MDSET_FLAG_FILTER     0x40u
+#define MDSET_FLAG_COLLECTIVE_OPT 0x20u
+#define MDSET_FLAG_TCONV      0x40u
+#define MDSET_FLAG_FILTER     0x80u
 #define MDSET_ALL_FLAGS                                                                                      \
     (MDSET_FLAG_CHUNK | MDSET_FLAG_MLAYOUT | MDSET_FLAG_SHAPESAME | MDSET_FLAG_MDSET |                       \
-     MDSET_FLAG_COLLECTIVE | MDSET_FLAG_TCONV | MDSET_FLAG_FILTER)
+     MDSET_FLAG_COLLECTIVE | MDSET_FLAG_COLLECTIVE_OPT | MDSET_FLAG_TCONV | MDSET_FLAG_FILTER)
 
 /* MPI variables */
 int mpi_size;
@@ -144,6 +145,13 @@ test_pmdset(size_t niter, unsigned flags)
 
     if (mpi_rank == 0)
         TESTING("random I/O");
+
+    /* Skipped configurations */
+    if (flags & MDSET_FLAG_COLLECTIVE_OPT) {
+        if (mpi_rank == 0)
+            SKIPPED();
+        return;
+    }
 
     /* Calculate maximum number of datasets */
     max_dsets = (flags & MDSET_FLAG_MDSET) ? MAX_DSETS : 1;
@@ -257,6 +265,14 @@ test_pmdset(size_t niter, unsigned flags)
     /* Set collective or independent I/O */
     if (flags & MDSET_FLAG_COLLECTIVE) {
         if (H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE) < 0)
+            T_PMD_ERROR
+
+        /* Set low level I/O mode */
+        if (flags & MDSET_FLAG_COLLECTIVE_OPT) {
+            if (H5Pset_dxpl_mpio_collective_opt(dxpl_id, H5FD_MPIO_COLLECTIVE_IO) < 0)
+                T_PMD_ERROR
+        }
+        else if (H5Pset_dxpl_mpio_collective_opt(dxpl_id, H5FD_MPIO_INDIVIDUAL_IO) < 0)
             T_PMD_ERROR
     } /* end if */
     else if (H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_INDEPENDENT) < 0)
@@ -691,20 +707,23 @@ main(int argc, char *argv[])
             ((i & MDSET_FLAG_MLAYOUT) && (i & MDSET_FLAG_TCONV)) ||
             ((i & MDSET_FLAG_FILTER) && !(i & MDSET_FLAG_CHUNK)) ||
             ((i & MDSET_FLAG_FILTER) && !(i & MDSET_FLAG_COLLECTIVE)) ||
-            ((i & MDSET_FLAG_FILTER) && (i & MDSET_FLAG_TCONV)))
+            ((i & MDSET_FLAG_FILTER) && (i & MDSET_FLAG_TCONV)) || 
+            ((i & MDSET_FLAG_COLLECTIVE_OPT) && !(i & MDSET_FLAG_COLLECTIVE)))
             continue;
 
         /* Print flag configuration */
         if (MAINPROCESS) {
             puts("\nConfiguration:");
-            printf("  Layout:          %s\n", (i & MDSET_FLAG_MLAYOUT) ? "Multi"
+            printf("  Layout:           %s\n", (i & MDSET_FLAG_MLAYOUT) ? "Multi"
                                               : (i & MDSET_FLAG_CHUNK) ? "Chunked"
                                                                        : "Contiguous");
-            printf("  Shape same:      %s\n", (i & MDSET_FLAG_SHAPESAME) ? "Yes" : "No");
-            printf("  I/O type:        %s\n", (i & MDSET_FLAG_MDSET) ? "Multi" : "Single");
-            printf("  MPI I/O type:    %s\n", (i & MDSET_FLAG_COLLECTIVE) ? "Collective" : "Independent");
-            printf("  Type conversion: %s\n", (i & MDSET_FLAG_TCONV) ? "Yes" : "No");
-            printf("  Data filter:     %s\n", (i & MDSET_FLAG_MLAYOUT)  ? "Mixed"
+            printf("  Shape same:       %s\n", (i & MDSET_FLAG_SHAPESAME) ? "Yes" : "No");
+            printf("  I/O type:         %s\n", (i & MDSET_FLAG_MDSET) ? "Multi" : "Single");
+            printf("  MPI I/O type:     %s\n", (i & MDSET_FLAG_COLLECTIVE) ? "Collective" : "Independent");
+            if (i & MDSET_FLAG_COLLECTIVE)
+                printf("  Low level MPI I/O:%s\n", (i & MDSET_FLAG_COLLECTIVE_OPT) ? "Collective" : "Independent");
+            printf("  Type conversion:  %s\n", (i & MDSET_FLAG_TCONV) ? "Yes" : "No");
+            printf("  Data filter:      %s\n", (i & MDSET_FLAG_MLAYOUT)  ? "Mixed"
                                               : (i & MDSET_FLAG_FILTER) ? "Yes"
                                                                         : "No");
         } /* end if */

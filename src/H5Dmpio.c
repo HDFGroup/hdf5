@@ -1954,6 +1954,8 @@ H5D__multi_chunk_collective_io(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_
     H5FD_mpio_collective_opt_t last_coll_opt_mode =
         H5FD_MPIO_COLLECTIVE_IO; /* Last parallel transfer with independent IO or collective IO with this mode
                                   */
+    H5FD_mpio_collective_opt_t orig_coll_opt_mode =
+        H5FD_MPIO_COLLECTIVE_IO; /* Original parallel transfer property on entering this function */
     size_t                    total_chunk;       /* Total # of chunks in dataset */
     size_t                    num_chunk;         /* Number of chunks for this process */
     H5SL_node_t              *piece_node = NULL; /* Current node in chunk skip list */
@@ -1963,6 +1965,10 @@ H5D__multi_chunk_collective_io(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE_TAG(dset_info->dset->oloc.addr)
+
+    /* Get the current I/O collective opt mode so we can restore it later */
+    if (H5CX_get_mpio_coll_opt(&orig_coll_opt_mode) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get MPI-I/O collective_op property")
 
     /* Set the actual chunk opt mode property */
     H5CX_set_mpio_actual_chunk_opt(H5D_MPIO_MULTI_CHUNK);
@@ -2115,6 +2121,11 @@ H5D__multi_chunk_collective_io(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_
     H5CX_set_mpio_actual_io_mode(actual_io_mode);
 
 done:
+    /* Reset collective opt mode */
+    if (H5CX_set_mpio_coll_opt(orig_coll_opt_mode) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't reset MPI-I/O collective_op property")
+
+    /* Free memory */
     if (chunk_io_option)
         H5MM_xfree(chunk_io_option);
     if (chunk_addr)
@@ -4149,8 +4160,7 @@ H5D__mpio_collective_filtered_chunk_common_io(H5D_filtered_collective_io_info_t 
 
     /*
      * If this rank doesn't have a selection, it can
-     * skip I/O if independent I/O was requested, or
-     * if the MPI communicator size is 1.
+     * skip I/O if the MPI communicator size is 1.
      *
      * Otherwise, this rank has to participate in
      * collective I/O, but probably has a NULL buf
@@ -4158,15 +4168,8 @@ H5D__mpio_collective_filtered_chunk_common_io(H5D_filtered_collective_io_info_t 
      * write/read function expects one.
      */
     if (num_chunks == 0) {
-        H5FD_mpio_xfer_t xfer_mode; /* I/O transfer mode */
-
-        /* Get the I/O transfer to check whether the application wants to do IO individually. */
-        if (H5CX_get_io_xfer_mode(&xfer_mode) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get MPI-I/O transfer mode property")
-
-        if ((mpi_size == 1) || (H5FD_MPIO_COLLECTIVE != xfer_mode)) {
+        if (mpi_size == 1)
             HGOTO_DONE(SUCCEED)
-        }
         else {
             if (io_info->op_type == H5D_IO_OP_WRITE)
                 coll_io_info.base_maddr.cvp = &fake_buf;
