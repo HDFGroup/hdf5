@@ -52,14 +52,14 @@
 #define DSET_MAX_NAME_LEN 8
 
 /* Option flags */
-#define MDSET_FLAG_CHUNK      0x01u
-#define MDSET_FLAG_MLAYOUT    0x02u
-#define MDSET_FLAG_SHAPESAME  0x04u
-#define MDSET_FLAG_MDSET      0x08u
-#define MDSET_FLAG_COLLECTIVE 0x10u
+#define MDSET_FLAG_CHUNK          0x01u
+#define MDSET_FLAG_MLAYOUT        0x02u
+#define MDSET_FLAG_SHAPESAME      0x04u
+#define MDSET_FLAG_MDSET          0x08u
+#define MDSET_FLAG_COLLECTIVE     0x10u
 #define MDSET_FLAG_COLLECTIVE_OPT 0x20u
-#define MDSET_FLAG_TCONV      0x40u
-#define MDSET_FLAG_FILTER     0x80u
+#define MDSET_FLAG_TCONV          0x40u
+#define MDSET_FLAG_FILTER         0x80u
 #define MDSET_ALL_FLAGS                                                                                      \
     (MDSET_FLAG_CHUNK | MDSET_FLAG_MLAYOUT | MDSET_FLAG_SHAPESAME | MDSET_FLAG_MDSET |                       \
      MDSET_FLAG_COLLECTIVE | MDSET_FLAG_COLLECTIVE_OPT | MDSET_FLAG_TCONV | MDSET_FLAG_FILTER)
@@ -707,7 +707,7 @@ main(int argc, char *argv[])
             ((i & MDSET_FLAG_MLAYOUT) && (i & MDSET_FLAG_TCONV)) ||
             ((i & MDSET_FLAG_FILTER) && !(i & MDSET_FLAG_CHUNK)) ||
             ((i & MDSET_FLAG_FILTER) && !(i & MDSET_FLAG_COLLECTIVE)) ||
-            ((i & MDSET_FLAG_FILTER) && (i & MDSET_FLAG_TCONV)) || 
+            ((i & MDSET_FLAG_FILTER) && (i & MDSET_FLAG_TCONV)) ||
             ((i & MDSET_FLAG_COLLECTIVE_OPT) && !(i & MDSET_FLAG_COLLECTIVE)))
             continue;
 
@@ -715,17 +715,18 @@ main(int argc, char *argv[])
         if (MAINPROCESS) {
             puts("\nConfiguration:");
             printf("  Layout:           %s\n", (i & MDSET_FLAG_MLAYOUT) ? "Multi"
-                                              : (i & MDSET_FLAG_CHUNK) ? "Chunked"
-                                                                       : "Contiguous");
+                                               : (i & MDSET_FLAG_CHUNK) ? "Chunked"
+                                                                        : "Contiguous");
             printf("  Shape same:       %s\n", (i & MDSET_FLAG_SHAPESAME) ? "Yes" : "No");
             printf("  I/O type:         %s\n", (i & MDSET_FLAG_MDSET) ? "Multi" : "Single");
             printf("  MPI I/O type:     %s\n", (i & MDSET_FLAG_COLLECTIVE) ? "Collective" : "Independent");
             if (i & MDSET_FLAG_COLLECTIVE)
-                printf("  Low level MPI I/O:%s\n", (i & MDSET_FLAG_COLLECTIVE_OPT) ? "Collective" : "Independent");
+                printf("  Low level MPI I/O:%s\n",
+                       (i & MDSET_FLAG_COLLECTIVE_OPT) ? "Collective" : "Independent");
             printf("  Type conversion:  %s\n", (i & MDSET_FLAG_TCONV) ? "Yes" : "No");
             printf("  Data filter:      %s\n", (i & MDSET_FLAG_MLAYOUT)  ? "Mixed"
-                                              : (i & MDSET_FLAG_FILTER) ? "Yes"
-                                                                        : "No");
+                                               : (i & MDSET_FLAG_FILTER) ? "Yes"
+                                                                         : "No");
         } /* end if */
 
         test_pmdset(10, i);
