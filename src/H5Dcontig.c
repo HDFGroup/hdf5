@@ -122,15 +122,11 @@ const H5D_layout_ops_t H5D_LOPS_CONTIG[1] = {{
     H5D__contig_io_init,        /* io_init */
     H5D__contig_read,           /* ser_read */
     H5D__contig_write,          /* ser_write */
-#ifdef H5_HAVE_PARALLEL
-    H5D__collective_read,  /* par_read */
-    H5D__collective_write, /* par_write */
-#endif
-    H5D__contig_readvv,  /* readvv */
-    H5D__contig_writevv, /* writevv */
-    H5D__contig_flush,   /* flush */
-    H5D__contig_io_term, /* io_term */
-    NULL                 /* dest */
+    H5D__contig_readvv,         /* readvv */
+    H5D__contig_writevv,        /* writevv */
+    H5D__contig_flush,          /* flush */
+    H5D__contig_io_term,        /* io_term */
+    NULL                        /* dest */
 }};
 
 /*******************/

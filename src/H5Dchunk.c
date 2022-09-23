@@ -335,15 +335,11 @@ const H5D_layout_ops_t H5D_LOPS_CHUNK[1] = {{
     H5D__chunk_io_init,        /* io_init */
     H5D__chunk_read,           /* ser_read */
     H5D__chunk_write,          /* ser_write */
-#ifdef H5_HAVE_PARALLEL
-    H5D__collective_read,  /* par_read */
-    H5D__collective_write, /* par_write */
-#endif
-    NULL,               /* readvv */
-    NULL,               /* writevv */
-    H5D__chunk_flush,   /* flush */
-    H5D__chunk_io_term, /* io_term */
-    H5D__chunk_dest     /* dest */
+    NULL,                      /* readvv */
+    NULL,                      /* writevv */
+    H5D__chunk_flush,          /* flush */
+    H5D__chunk_io_term,        /* io_term */
+    H5D__chunk_dest            /* dest */
 }};
 
 /*******************/
@@ -351,11 +347,8 @@ const H5D_layout_ops_t H5D_LOPS_CHUNK[1] = {{
 /*******************/
 
 /* "nonexistent" storage layout I/O ops */
-const H5D_layout_ops_t H5D_LOPS_NONEXISTENT[1] = {{NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-#ifdef H5_HAVE_PARALLEL
-                                                   NULL, NULL,
-#endif /* H5_HAVE_PARALLEL */
-                                                   H5D__nonexistent_readvv, NULL, NULL, NULL, NULL}};
+const H5D_layout_ops_t H5D_LOPS_NONEXISTENT[1] = {
+    {NULL, NULL, NULL, NULL, NULL, NULL, NULL, H5D__nonexistent_readvv, NULL, NULL, NULL, NULL}};
 
 /* Declare a free list to manage the H5F_rdcc_ent_ptr_t sequence information */
 H5FL_SEQ_DEFINE_STATIC(H5D_rdcc_ent_ptr_t);

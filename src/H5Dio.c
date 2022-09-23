@@ -28,7 +28,6 @@
 #include "H5Iprivate.h"  /* IDs                                      */
 #include "H5MMprivate.h" /* Memory management                        */
 #include "H5Sprivate.h"  /* Dataspace                                */
-#include "H5VLprivate.h" /* Virtual Object Layer                     */ /*!FIXME -NAF */
 
 #include "H5VLnative_private.h" /* Native VOL connector                     */
 
@@ -1162,8 +1161,8 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info)
              * handle collective I/O */
             /* Check for selection/vector support in file driver? -NAF */
             if (!io_info->use_select_io) {
-                io_info->md_io_ops.multi_read_md   = dset0->shared->layout.ops->par_read;
-                io_info->md_io_ops.multi_write_md  = dset0->shared->layout.ops->par_write;
+                io_info->md_io_ops.multi_read_md   = H5D__collective_read;
+                io_info->md_io_ops.multi_write_md  = H5D__collective_write;
                 io_info->md_io_ops.single_read_md  = H5D__mpio_select_read;
                 io_info->md_io_ops.single_write_md = H5D__mpio_select_write;
             } /* end if */
@@ -1186,29 +1185,38 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info)
              * with multiple ranks involved; otherwise, there will be metadata
              * inconsistencies in the file.
              */
-            if (io_info->op_type == H5D_IO_OP_WRITE &&
-                io_info->dsets_info[0].dset->shared->dcpl_cache.pline.nused > 0) { /*!FIXME -NAF */
-                int comm_size = 0;
+            if (io_info->op_type == H5D_IO_OP_WRITE) {
+                size_t i;
 
-                /* Retrieve size of MPI communicator used for file */
-                if ((comm_size = H5F_shared_mpi_get_size(io_info->f_sh)) < 0)
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get MPI communicator size")
+                /* Check all datasets for filters */
+                for (i = 0; i < io_info->count; i++)
+                    if (io_info->dsets_info[i].dset->shared->dcpl_cache.pline.nused > 0)
+                        break;
 
-                if (comm_size > 1) {
-                    char local_no_coll_cause_string[512];
-                    char global_no_coll_cause_string[512];
+                /* If the above loop didn't complete at least one dataset has a filter */
+                if (i < io_info->count) {
+                    int comm_size = 0;
 
-                    if (H5D__mpio_get_no_coll_cause_strings(local_no_coll_cause_string, 512,
-                                                            global_no_coll_cause_string, 512) < 0)
-                        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
-                                    "can't get reasons for breaking collective I/O")
+                    /* Retrieve size of MPI communicator used for file */
+                    if ((comm_size = H5F_shared_mpi_get_size(io_info->f_sh)) < 0)
+                        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get MPI communicator size")
 
-                    HGOTO_ERROR(H5E_IO, H5E_NO_INDEPENDENT, FAIL,
-                                "Can't perform independent write with filters in pipeline.\n"
-                                "    The following caused a break from collective I/O:\n"
-                                "        Local causes: %s\n"
-                                "        Global causes: %s",
-                                local_no_coll_cause_string, global_no_coll_cause_string);
+                    if (comm_size > 1) {
+                        char local_no_coll_cause_string[512];
+                        char global_no_coll_cause_string[512];
+
+                        if (H5D__mpio_get_no_coll_cause_strings(local_no_coll_cause_string, 512,
+                                                                global_no_coll_cause_string, 512) < 0)
+                            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
+                                        "can't get reasons for breaking collective I/O")
+
+                        HGOTO_ERROR(H5E_IO, H5E_NO_INDEPENDENT, FAIL,
+                                    "Can't perform independent write with filters in pipeline.\n"
+                                    "    The following caused a break from collective I/O:\n"
+                                    "        Local causes: %s\n"
+                                    "        Global causes: %s",
+                                    local_no_coll_cause_string, global_no_coll_cause_string);
+                    }
                 }
             }
 
