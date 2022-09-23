@@ -60,7 +60,8 @@
 #define MDSET_FLAG_TCONV      0x20u
 #define MDSET_FLAG_FILTER     0x40u
 #define MDSET_ALL_FLAGS                                                                                      \
-    (MDSET_FLAG_CHUNK | MDSET_FLAG_MLAYOUT | MDSET_FLAG_SHAPESAME | MDSET_FLAG_MDSET | MDSET_FLAG_COLLECTIVE | MDSET_FLAG_TCONV | MDSET_FLAG_FILTER)
+    (MDSET_FLAG_CHUNK | MDSET_FLAG_MLAYOUT | MDSET_FLAG_SHAPESAME | MDSET_FLAG_MDSET |                       \
+     MDSET_FLAG_COLLECTIVE | MDSET_FLAG_TCONV | MDSET_FLAG_FILTER)
 
 /* MPI variables */
 int mpi_size;
@@ -76,7 +77,7 @@ unsigned seed;
 int nerrors = 0;
 
 /* Whether these filters are available */
-htri_t deflate_avail = FALSE;
+htri_t deflate_avail    = FALSE;
 htri_t fletcher32_avail = FALSE;
 
 /*-------------------------------------------------------------------------
@@ -263,7 +264,9 @@ test_pmdset(size_t niter, unsigned flags)
 
     for (i = 0; i < niter; i++) {
         /* Determine number of datasets */
-        ndsets = (flags & MDSET_FLAG_MLAYOUT) ? 3 : (flags & MDSET_FLAG_MDSET) ? (size_t)((size_t)HDrandom() % max_dsets) + 1 : 1;
+        ndsets = (flags & MDSET_FLAG_MLAYOUT) ? 3
+                 : (flags & MDSET_FLAG_MDSET) ? (size_t)((size_t)HDrandom() % max_dsets) + 1
+                                              : 1;
 
         /* Create file */
         if ((file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
@@ -271,13 +274,13 @@ test_pmdset(size_t niter, unsigned flags)
 
         /* Create datasets */
         for (j = 0; j < ndsets; j++) {
-            hbool_t use_chunk = (flags & MDSET_FLAG_CHUNK) || ((flags & MDSET_FLAG_MLAYOUT) && (j == 1 || j == 2));
+            hbool_t use_chunk =
+                (flags & MDSET_FLAG_CHUNK) || ((flags & MDSET_FLAG_MLAYOUT) && (j == 1 || j == 2));
 
             /* Generate file dataspace */
             dset_dims[j][0] = (hsize_t)((HDrandom() % MAX_DSET_X) + 1);
             dset_dims[j][1] = (hsize_t)((HDrandom() % MAX_DSET_Y) + 1);
-            if ((file_space_ids[j] =
-                     H5Screate_simple(2, dset_dims[j], use_chunk ? max_dims : NULL)) < 0)
+            if ((file_space_ids[j] = H5Screate_simple(2, dset_dims[j], use_chunk ? max_dims : NULL)) < 0)
                 T_PMD_ERROR
 
             /* Generate chunk if called for by configuration (multi layout uses chunked for datasets
@@ -292,10 +295,10 @@ test_pmdset(size_t niter, unsigned flags)
             /* Create dataset */
             /* If MDSET_FLAG_TCONV is set, use a different datatype with 50% probability, so
              * some datasets require type conversion and others do not */
-            if ((dset_ids[j] =
-                     H5Dcreate2(file_id, dset_name[j],
-                                (flags & MDSET_FLAG_TCONV && HDrandom() % 2) ? H5T_NATIVE_LONG : H5T_NATIVE_UINT,
-                                file_space_ids[j], H5P_DEFAULT, dcpl_id[j], H5P_DEFAULT)) < 0)
+            if ((dset_ids[j] = H5Dcreate2(file_id, dset_name[j],
+                                          (flags & MDSET_FLAG_TCONV && HDrandom() % 2) ? H5T_NATIVE_LONG
+                                                                                       : H5T_NATIVE_UINT,
+                                          file_space_ids[j], H5P_DEFAULT, dcpl_id[j], H5P_DEFAULT)) < 0)
                 T_PMD_ERROR
         } /* end for */
 
@@ -682,24 +685,28 @@ main(int argc, char *argv[])
 
     for (i = 0; i <= MDSET_ALL_FLAGS; i++) {
         /* Skip incomaptible flag combinations */
-        if (((i & MDSET_FLAG_MLAYOUT) && (i & MDSET_FLAG_CHUNK))
-                || ((i & MDSET_FLAG_MLAYOUT) && !(i & MDSET_FLAG_MDSET))
-                || ((i & MDSET_FLAG_MLAYOUT) && !(i & MDSET_FLAG_COLLECTIVE))
-                || ((i & MDSET_FLAG_MLAYOUT) && (i & MDSET_FLAG_TCONV))
-                || ((i & MDSET_FLAG_FILTER) && !(i & MDSET_FLAG_CHUNK))
-                || ((i & MDSET_FLAG_FILTER) && !(i & MDSET_FLAG_COLLECTIVE))
-                || ((i & MDSET_FLAG_FILTER) && (i & MDSET_FLAG_TCONV)))
+        if (((i & MDSET_FLAG_MLAYOUT) && (i & MDSET_FLAG_CHUNK)) ||
+            ((i & MDSET_FLAG_MLAYOUT) && !(i & MDSET_FLAG_MDSET)) ||
+            ((i & MDSET_FLAG_MLAYOUT) && !(i & MDSET_FLAG_COLLECTIVE)) ||
+            ((i & MDSET_FLAG_MLAYOUT) && (i & MDSET_FLAG_TCONV)) ||
+            ((i & MDSET_FLAG_FILTER) && !(i & MDSET_FLAG_CHUNK)) ||
+            ((i & MDSET_FLAG_FILTER) && !(i & MDSET_FLAG_COLLECTIVE)) ||
+            ((i & MDSET_FLAG_FILTER) && (i & MDSET_FLAG_TCONV)))
             continue;
 
         /* Print flag configuration */
         if (MAINPROCESS) {
             puts("\nConfiguration:");
-            printf("  Layout:          %s\n", (i & MDSET_FLAG_MLAYOUT) ? "Multi" : (i & MDSET_FLAG_CHUNK) ? "Chunked" : "Contiguous");
+            printf("  Layout:          %s\n", (i & MDSET_FLAG_MLAYOUT) ? "Multi"
+                                              : (i & MDSET_FLAG_CHUNK) ? "Chunked"
+                                                                       : "Contiguous");
             printf("  Shape same:      %s\n", (i & MDSET_FLAG_SHAPESAME) ? "Yes" : "No");
             printf("  I/O type:        %s\n", (i & MDSET_FLAG_MDSET) ? "Multi" : "Single");
             printf("  MPI I/O type:    %s\n", (i & MDSET_FLAG_COLLECTIVE) ? "Collective" : "Independent");
             printf("  Type conversion: %s\n", (i & MDSET_FLAG_TCONV) ? "Yes" : "No");
-            printf("  Data filter:     %s\n", (i & MDSET_FLAG_MLAYOUT) ? "Mixed" : (i & MDSET_FLAG_FILTER) ? "Yes" : "No");
+            printf("  Data filter:     %s\n", (i & MDSET_FLAG_MLAYOUT)  ? "Mixed"
+                                              : (i & MDSET_FLAG_FILTER) ? "Yes"
+                                                                        : "No");
         } /* end if */
 
         test_pmdset(10, i);

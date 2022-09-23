@@ -89,11 +89,11 @@ const H5D_layout_ops_t H5D_LOPS_EFL[1] = {{
     H5D__efl_io_init,        /* io_init */
     H5D__contig_read,        /* ser_read */
     H5D__contig_write,       /* ser_write */
-    H5D__efl_readvv,  /* readvv */
-    H5D__efl_writevv, /* writevv */
-    NULL,             /* flush */
-    NULL,             /* io_term */
-    NULL              /* dest */
+    H5D__efl_readvv,         /* readvv */
+    H5D__efl_writevv,        /* writevv */
+    NULL,                    /* flush */
+    NULL,                    /* io_term */
+    NULL                     /* dest */
 }};
 
 /*******************/

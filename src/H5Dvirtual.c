@@ -123,11 +123,11 @@ const H5D_layout_ops_t H5D_LOPS_VIRTUAL[1] = {{
     H5D__virtual_io_init,        /* io_init */
     H5D__virtual_read,           /* ser_read */
     H5D__virtual_write,          /* ser_write */
-    NULL,               /* readvv */
-    NULL,               /* writevv */
-    H5D__virtual_flush, /* flush */
-    NULL,               /* io_term */
-    NULL                /* dest */
+    NULL,                        /* readvv */
+    NULL,                        /* writevv */
+    H5D__virtual_flush,          /* flush */
+    NULL,                        /* io_term */
+    NULL                         /* dest */
 }};
 
 /*******************/

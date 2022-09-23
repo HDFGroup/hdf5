@@ -158,11 +158,11 @@ typedef struct H5D_layout_ops_t {
     H5D_layout_io_init_func_t io_init;   /* I/O initialization routine */
     H5D_layout_read_func_t    ser_read;  /* High-level I/O routine for reading data in serial */
     H5D_layout_write_func_t   ser_write; /* High-level I/O routine for writing data in serial */
-    H5D_layout_readvv_func_t  readvv;     /* Low-level I/O routine for reading data */
-    H5D_layout_writevv_func_t writevv;    /* Low-level I/O routine for writing data */
-    H5D_layout_flush_func_t   flush;      /* Low-level I/O routine for flushing raw data */
-    H5D_layout_io_term_func_t io_term;    /* I/O shutdown routine for multi-dset */
-    H5D_layout_dest_func_t    dest;       /* Destroy layout info */
+    H5D_layout_readvv_func_t  readvv;    /* Low-level I/O routine for reading data */
+    H5D_layout_writevv_func_t writevv;   /* Low-level I/O routine for writing data */
+    H5D_layout_flush_func_t   flush;     /* Low-level I/O routine for flushing raw data */
+    H5D_layout_io_term_func_t io_term;   /* I/O shutdown routine for multi-dset */
+    H5D_layout_dest_func_t    dest;      /* Destroy layout info */
 } H5D_layout_ops_t;
 
 /* Function pointers for either multiple or single block I/O access */
