@@ -87,6 +87,7 @@ const H5D_layout_ops_t H5D_LOPS_EFL[1] = {{
     H5D__efl_is_space_alloc, /* is_space_alloc */
     NULL,                    /* is_data_cached */
     H5D__efl_io_init,        /* io_init */
+    NULL,                    /* mdio_init */
     H5D__contig_read,        /* ser_read */
     H5D__contig_write,       /* ser_write */
     H5D__efl_readvv,         /* readvv */

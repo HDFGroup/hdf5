@@ -121,6 +121,7 @@ const H5D_layout_ops_t H5D_LOPS_VIRTUAL[1] = {{
     H5D__virtual_is_space_alloc, /* is_space_alloc */
     H5D__virtual_is_data_cached, /* is_data_cached */
     H5D__virtual_io_init,        /* io_init */
+    NULL,                        /* mdio_init */
     H5D__virtual_read,           /* ser_read */
     H5D__virtual_write,          /* ser_write */
     NULL,                        /* readvv */

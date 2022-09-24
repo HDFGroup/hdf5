@@ -147,7 +147,7 @@ test_pmdset(size_t niter, unsigned flags)
         TESTING("random I/O");
 
     /* Skipped configurations */
-    if (flags & MDSET_FLAG_COLLECTIVE_OPT) {
+    if (!(flags & MDSET_FLAG_COLLECTIVE_OPT)) {
         if (mpi_rank == 0)
             SKIPPED();
         return;
@@ -708,7 +708,7 @@ main(int argc, char *argv[])
             ((i & MDSET_FLAG_FILTER) && !(i & MDSET_FLAG_CHUNK)) ||
             ((i & MDSET_FLAG_FILTER) && !(i & MDSET_FLAG_COLLECTIVE)) ||
             ((i & MDSET_FLAG_FILTER) && (i & MDSET_FLAG_TCONV)) ||
-            ((i & MDSET_FLAG_COLLECTIVE_OPT) && !(i & MDSET_FLAG_COLLECTIVE)))
+            (!(i & MDSET_FLAG_COLLECTIVE_OPT) && !(i & MDSET_FLAG_COLLECTIVE)))
             continue;
 
         /* Print flag configuration */
