@@ -1868,13 +1868,6 @@ H5D_close(H5D_t *dataset)
         /* Free cached information for each kind of dataset */
         switch (dataset->shared->layout.type) {
             case H5D_CONTIGUOUS:
-                /* Check for skip list for iterating over pieces during I/O to close */
-                if (dataset->shared->cache.sel_pieces) {
-                    HDassert(H5SL_count(dataset->shared->cache.sel_pieces) == 0);
-                    H5SL_close(dataset->shared->cache.sel_pieces);
-                    dataset->shared->cache.sel_pieces = NULL;
-                } /* end if */
-
                 /* Free the data sieve buffer, if it's been allocated */
                 if (dataset->shared->cache.contig.sieve_buf)
                     dataset->shared->cache.contig.sieve_buf =
@@ -1887,13 +1880,6 @@ H5D_close(H5D_t *dataset)
                     HDassert(H5SL_count(dataset->shared->cache.chunk.sel_chunks) == 0);
                     H5SL_close(dataset->shared->cache.chunk.sel_chunks);
                     dataset->shared->cache.chunk.sel_chunks = NULL;
-                } /* end if */
-
-                /* Check for skip list for iterating over pieces during I/O to close */
-                if (dataset->shared->cache.sel_pieces) {
-                    HDassert(H5SL_count(dataset->shared->cache.sel_pieces) == 0);
-                    H5SL_close(dataset->shared->cache.sel_pieces);
-                    dataset->shared->cache.sel_pieces = NULL;
                 } /* end if */
 
                 /* Check for cached single chunk dataspace */

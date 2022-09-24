@@ -121,7 +121,6 @@ typedef enum H5D_fill_value_t {
 } H5D_fill_value_t;
 //! <!-- [H5D_fill_value_t_snip] -->
 
-/* Values for VDS bounds option */
 //! <!-- [H5D_vds_view_t_snip] -->
 /**
  * Values for VDS bounds option

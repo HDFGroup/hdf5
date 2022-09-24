@@ -92,6 +92,7 @@ typedef struct H5D_contig_writevv_ud_t {
 static herr_t  H5D__contig_construct(H5F_t *f, H5D_t *dset);
 static herr_t  H5D__contig_init(H5F_t *f, const H5D_t *dset, hid_t dapl_id);
 static herr_t  H5D__contig_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo);
+static herr_t  H5D__contig_mdio_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo);
 static ssize_t H5D__contig_readvv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dinfo,
                                   size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_len_arr[],
                                   hsize_t dset_offset_arr[], size_t mem_max_nseq, size_t *mem_curr_seq,
@@ -120,6 +121,7 @@ const H5D_layout_ops_t H5D_LOPS_CONTIG[1] = {{
     H5D__contig_is_space_alloc, /* is_space_alloc */
     H5D__contig_is_data_cached, /* is_data_cached */
     H5D__contig_io_init,        /* io_init */
+    H5D__contig_mdio_init,      /* mdio_init */
     H5D__contig_read,           /* ser_read */
     H5D__contig_write,          /* ser_write */
     H5D__contig_readvv,         /* readvv */
@@ -612,25 +614,6 @@ H5D__contig_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
     if ((file_space_normalized = H5S_hyper_normalize_offset(dinfo->file_space, old_offset)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_BADSELECT, FAIL, "unable to normalize dataspace by offset")
 
-    /* Only need single skip list point over multiple read/write IO
-     * and multiple dsets until H5D_close. Thus check both
-     * since io_info->sel_pieces only lives single write/read IO,
-     * even cache.sel_pieces lives until Dclose */
-    if (NULL == dataset->shared->cache.sel_pieces && NULL == io_info->sel_pieces) {
-        if (NULL == (dataset->shared->cache.sel_pieces = H5SL_create(H5SL_TYPE_HADDR, NULL)))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create skip list for piece selections")
-
-        /* keep the skip list in cache, so do not need to recreate until close */
-        io_info->sel_pieces = dataset->shared->cache.sel_pieces;
-    } /* end if */
-
-    /* this is need when multiple write/read occurs on the same dsets,
-     * just pass the previously created pointer */
-    if (NULL == io_info->sel_pieces)
-        io_info->sel_pieces = dataset->shared->cache.sel_pieces;
-
-    HDassert(io_info->sel_pieces);
-
     /* if selected elements exist */
     if (dinfo->nelmts) {
         int               u;
@@ -688,14 +671,9 @@ H5D__contig_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
          * operation */
         dinfo->layout_io_info.contig_piece_info = new_piece_info;
 
-        /* insert piece info */
-        if (H5SL_insert(io_info->sel_pieces, new_piece_info, &new_piece_info->faddr) < 0) {
-            /* mimic H5D__free_piece_info */
-            H5S_select_all(new_piece_info->fspace, TRUE);
-            H5FL_FREE(H5D_piece_info_t, new_piece_info);
-            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't insert chunk into skip list")
-        } /* end if */
-    }     /* end if */
+        /* Add piece to piece_count */
+        io_info->piece_count++;
+    } /* end if */
 
     /* Check if we're performing selection I/O if it hasn't been disabled
      * already */
@@ -719,6 +697,36 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__contig_io_init() */
+
+/*-------------------------------------------------------------------------
+ * Function:   H5D__contig_mdio_init
+ *
+ * Purpose:    Performs second phase of initialization for multi-dataset
+ *             I/O.  Currently just adds data block to sel_pieces.
+ *
+ * Return:     Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__contig_mdio_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
+{
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* Add piece if it exists */
+    if (dinfo->layout_io_info.contig_piece_info) {
+        HDassert(io_info->sel_pieces);
+        HDassert(io_info->pieces_added < io_info->piece_count);
+
+        /* Add contiguous data block to sel_pieces */
+        io_info->sel_pieces[io_info->pieces_added] = dinfo->layout_io_info.contig_piece_info;
+
+        /* Update pieces_added */
+        io_info->pieces_added++;
+    }
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5D__contig_mdio_init() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5D__contig_may_use_select_io
@@ -819,6 +827,24 @@ H5D__contig_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
                                        &(dinfo->buf.vp)) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "contiguous selection read failed")
         }
+        else {
+            if (dinfo->layout_io_info.contig_piece_info) {
+                /* Add to mdset selection I/O arrays */
+                HDassert(io_info->mem_spaces);
+                HDassert(io_info->file_spaces);
+                HDassert(io_info->addrs);
+                HDassert(io_info->element_sizes);
+                HDassert(io_info->rbufs);
+                HDassert(io_info->pieces_added < io_info->piece_count);
+
+                io_info->mem_spaces[io_info->pieces_added]    = dinfo->mem_space;
+                io_info->file_spaces[io_info->pieces_added]   = dinfo->file_space;
+                io_info->addrs[io_info->pieces_added]         = dinfo->store->contig.dset_addr;
+                io_info->element_sizes[io_info->pieces_added] = dinfo->type_info.src_type_size;
+                io_info->rbufs[io_info->pieces_added]         = dinfo->buf.vp;
+                io_info->pieces_added++;
+            }
+        }
     } /* end if */
     else
         /* Read data through legacy (non-selection I/O) pathway */
@@ -870,6 +896,24 @@ H5D__contig_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
                                         &(dinfo->store->contig.dset_addr), &dst_type_size,
                                         &(dinfo->buf.cvp)) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "contiguous selection write failed")
+        }
+        else {
+            if (dinfo->layout_io_info.contig_piece_info) {
+                /* Add to mdset selection I/O arrays */
+                HDassert(io_info->mem_spaces);
+                HDassert(io_info->file_spaces);
+                HDassert(io_info->addrs);
+                HDassert(io_info->element_sizes);
+                HDassert(io_info->wbufs);
+                HDassert(io_info->pieces_added < io_info->piece_count);
+
+                io_info->mem_spaces[io_info->pieces_added]    = dinfo->mem_space;
+                io_info->file_spaces[io_info->pieces_added]   = dinfo->file_space;
+                io_info->addrs[io_info->pieces_added]         = dinfo->store->contig.dset_addr;
+                io_info->element_sizes[io_info->pieces_added] = dinfo->type_info.dst_type_size;
+                io_info->wbufs[io_info->pieces_added]         = dinfo->buf.cvp;
+                io_info->pieces_added++;
+            }
         }
     } /* end if */
     else
