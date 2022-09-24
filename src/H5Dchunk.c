@@ -2431,8 +2431,8 @@ done:
 static herr_t
 H5D__chunk_mdio_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
 {
-    H5SL_node_t     *piece_node; /* Current node in chunk skip list */
-    herr_t           ret_value = SUCCEED;      /* Return value        */
+    H5SL_node_t *piece_node;          /* Current node in chunk skip list */
+    herr_t       ret_value = SUCCEED; /* Return value        */
 
     FUNC_ENTER_PACKAGE
 
@@ -2446,7 +2446,8 @@ H5D__chunk_mdio_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
         HDassert(io_info->pieces_added < io_info->piece_count);
 
         /* Get piece info and add to sel_pieces */
-        if (NULL == (io_info->sel_pieces[io_info->pieces_added] = (H5D_piece_info_t *)H5D_CHUNK_GET_NODE_INFO(dinfo, piece_node)))
+        if (NULL == (io_info->sel_pieces[io_info->pieces_added] =
+                         (H5D_piece_info_t *)H5D_CHUNK_GET_NODE_INFO(dinfo, piece_node)))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "couldn't get piece info from skip list")
 
         /* Update pieces_added */
@@ -2763,14 +2764,14 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
                     HDassert(io_info->rbufs);
                     HDassert(io_info->pieces_added < io_info->piece_count);
 
-                    io_info->mem_spaces[io_info->pieces_added] = chunk_info->mspace;
-                    io_info->file_spaces[io_info->pieces_added] = chunk_info->fspace;
-                    io_info->addrs[io_info->pieces_added] = udata.chunk_block.offset;
+                    io_info->mem_spaces[io_info->pieces_added]    = chunk_info->mspace;
+                    io_info->file_spaces[io_info->pieces_added]   = chunk_info->fspace;
+                    io_info->addrs[io_info->pieces_added]         = udata.chunk_block.offset;
                     io_info->element_sizes[io_info->pieces_added] = element_sizes[0];
-                    io_info->rbufs[io_info->pieces_added] = bufs[0];
+                    io_info->rbufs[io_info->pieces_added]         = bufs[0];
                     io_info->pieces_added++;
                 }
-            }     /* end if */
+            } /* end if */
             else if (!skip_missing_chunks) {
                 /* Perform the actual read operation from the nonexistent chunk
                  */
@@ -3153,14 +3154,14 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
                     HDassert(io_info->wbufs);
                     HDassert(io_info->pieces_added < io_info->piece_count);
 
-                    io_info->mem_spaces[io_info->pieces_added] = chunk_info->mspace;
-                    io_info->file_spaces[io_info->pieces_added] = chunk_info->fspace;
-                    io_info->addrs[io_info->pieces_added] = udata.chunk_block.offset;
+                    io_info->mem_spaces[io_info->pieces_added]    = chunk_info->mspace;
+                    io_info->file_spaces[io_info->pieces_added]   = chunk_info->fspace;
+                    io_info->addrs[io_info->pieces_added]         = udata.chunk_block.offset;
                     io_info->element_sizes[io_info->pieces_added] = element_sizes[0];
-                    io_info->wbufs[io_info->pieces_added] = bufs[0];
+                    io_info->wbufs[io_info->pieces_added]         = bufs[0];
                     io_info->pieces_added++;
                 }
-            }     /* end else */
+            } /* end else */
 
             /* Advance to next chunk in list */
             chunk_node = H5D_CHUNK_GET_NEXT_NODE(dset_info, chunk_node);

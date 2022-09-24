@@ -127,7 +127,8 @@ typedef herr_t (*H5D_layout_init_func_t)(H5F_t *f, const H5D_t *dset, hid_t dapl
 typedef hbool_t (*H5D_layout_is_space_alloc_func_t)(const H5O_storage_t *storage);
 typedef hbool_t (*H5D_layout_is_data_cached_func_t)(const H5D_shared_t *shared_dset);
 typedef herr_t (*H5D_layout_io_init_func_t)(struct H5D_io_info_t *io_info, struct H5D_dset_io_info_t *dinfo);
-typedef herr_t (*H5D_layout_mdio_init_func_t)(struct H5D_io_info_t *io_info, struct H5D_dset_io_info_t *dinfo);
+typedef herr_t (*H5D_layout_mdio_init_func_t)(struct H5D_io_info_t      *io_info,
+                                              struct H5D_dset_io_info_t *dinfo);
 typedef herr_t (*H5D_layout_read_func_t)(struct H5D_io_info_t *io_info, struct H5D_dset_io_info_t *dinfo);
 typedef herr_t (*H5D_layout_write_func_t)(struct H5D_io_info_t *io_info, struct H5D_dset_io_info_t *dinfo);
 typedef herr_t (*H5D_layout_read_md_func_t)(struct H5D_io_info_t *io_info);
@@ -156,15 +157,16 @@ typedef struct H5D_layout_ops_t {
     H5D_layout_is_data_cached_func_t
         is_data_cached; /* Query routine to determine if any raw data is cached.  If routine is not present
                            then the layout type never caches raw data. */
-    H5D_layout_io_init_func_t io_init;   /* I/O initialization routine */
-    H5D_layout_mdio_init_func_t mdio_init; /* Multi Dataset I/O initialization routine - called after all datasets have done io_init and sel_pieces has been allocated */
-    H5D_layout_read_func_t    ser_read;  /* High-level I/O routine for reading data in serial */
-    H5D_layout_write_func_t   ser_write; /* High-level I/O routine for writing data in serial */
-    H5D_layout_readvv_func_t  readvv;    /* Low-level I/O routine for reading data */
-    H5D_layout_writevv_func_t writevv;   /* Low-level I/O routine for writing data */
-    H5D_layout_flush_func_t   flush;     /* Low-level I/O routine for flushing raw data */
-    H5D_layout_io_term_func_t io_term;   /* I/O shutdown routine for multi-dset */
-    H5D_layout_dest_func_t    dest;      /* Destroy layout info */
+    H5D_layout_io_init_func_t   io_init;   /* I/O initialization routine */
+    H5D_layout_mdio_init_func_t mdio_init; /* Multi Dataset I/O initialization routine - called after all
+                                              datasets have done io_init and sel_pieces has been allocated */
+    H5D_layout_read_func_t    ser_read;    /* High-level I/O routine for reading data in serial */
+    H5D_layout_write_func_t   ser_write;   /* High-level I/O routine for writing data in serial */
+    H5D_layout_readvv_func_t  readvv;      /* Low-level I/O routine for reading data */
+    H5D_layout_writevv_func_t writevv;     /* Low-level I/O routine for writing data */
+    H5D_layout_flush_func_t   flush;       /* Low-level I/O routine for flushing raw data */
+    H5D_layout_io_term_func_t io_term;     /* I/O shutdown routine for multi-dset */
+    H5D_layout_dest_func_t    dest;        /* Destroy layout info */
 } H5D_layout_ops_t;
 
 /* Function pointers for either multiple or single block I/O access */
@@ -275,12 +277,12 @@ typedef struct H5D_io_info_t {
     size_t                  piece_count;   /* Number of pieces in I/O request */
     size_t                  pieces_added;  /* Number of pieces added so far to arrays */
     H5D_piece_info_t      **sel_pieces;    /* Array of info struct for all pieces in I/O */
-    H5S_t           **mem_spaces; /* Array of chunk memory spaces */
-    H5S_t           **file_spaces; /* Array of chunk file spaces */
-    haddr_t          *addrs; /* Array of chunk addresses */
-    size_t           *element_sizes; /* Array of element sizes */
-    void            **rbufs; /* Array of read buffers */
-    const void      **wbufs; /* Array of write buffers */
+    H5S_t                 **mem_spaces;    /* Array of chunk memory spaces */
+    H5S_t                 **file_spaces;   /* Array of chunk file spaces */
+    haddr_t                *addrs;         /* Array of chunk addresses */
+    size_t                 *element_sizes; /* Array of element sizes */
+    void                  **rbufs;         /* Array of read buffers */
+    const void            **wbufs;         /* Array of write buffers */
     haddr_t                 store_faddr;   /* lowest file addr for read/write */
     H5_flexible_const_ptr_t base_maddr;    /* starting mem address */
     hbool_t                 use_select_io; /* Whether to use selection I/O */
