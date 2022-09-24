@@ -429,13 +429,15 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
             HDassert(io_info.pieces_added == 0);
 
             /* Allocate sel_pieces array */
-            if (NULL == (io_info.sel_pieces = H5MM_malloc(io_info.piece_count * sizeof(io_info.sel_pieces[0]))))
+            if (NULL ==
+                (io_info.sel_pieces = H5MM_malloc(io_info.piece_count * sizeof(io_info.sel_pieces[0]))))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "unable to allocate array of selected pieces")
         }
 
         /* MDIO-specific second phase initialization */
         for (i = 0; i < count; i++)
-            if (dset_info[i].layout_ops.mdio_init && (dset_info[i].layout_ops.mdio_init)(&io_info, &(dset_info[i])))
+            if (dset_info[i].layout_ops.mdio_init &&
+                (dset_info[i].layout_ops.mdio_init)(&io_info, &(dset_info[i])))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't populate array of selected pieces")
 
         /* Make sure we added all pieces */
@@ -448,17 +450,21 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
     else {
         haddr_t prev_tag = HADDR_UNDEF;
 
-        if (!H5D_LAYOUT_CB_PERFORM_IO(&io_info) && io_info.piece_count >0) {
+        if (!H5D_LAYOUT_CB_PERFORM_IO(&io_info) && io_info.piece_count > 0) {
             if (NULL == (io_info.mem_spaces = H5MM_malloc(io_info.piece_count * sizeof(H5S_t *))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for memory space list")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                            "memory allocation failed for memory space list")
             if (NULL == (io_info.file_spaces = H5MM_malloc(io_info.piece_count * sizeof(H5S_t *))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for file space list")
             if (NULL == (io_info.addrs = H5MM_malloc(io_info.piece_count * sizeof(haddr_t))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for piece address list")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                            "memory allocation failed for piece address list")
             if (NULL == (io_info.element_sizes = H5MM_malloc(io_info.piece_count * sizeof(size_t))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for element size list")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                            "memory allocation failed for element size list")
             if (NULL == (io_info.rbufs = H5MM_malloc(io_info.piece_count * sizeof(void *))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for read buffer list")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                            "memory allocation failed for read buffer list")
         }
 
         /* Loop with serial & single-dset read IO path */
@@ -479,9 +485,9 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
          * actual I/O */
         H5_CHECK_OVERFLOW(io_info.piece_count, size_t, uint32_t)
         if (!H5D_LAYOUT_CB_PERFORM_IO(&io_info))
-            if (H5F_shared_select_read(io_info.f_sh, H5FD_MEM_DRAW,
-                                   (uint32_t)io_info.piece_count, io_info.mem_spaces, io_info.file_spaces, io_info.addrs, io_info.element_sizes,
-                                   io_info.rbufs) < 0)
+            if (H5F_shared_select_read(io_info.f_sh, H5FD_MEM_DRAW, (uint32_t)io_info.piece_count,
+                                       io_info.mem_spaces, io_info.file_spaces, io_info.addrs,
+                                       io_info.element_sizes, io_info.rbufs) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "selection read failed")
     }
 
@@ -780,13 +786,15 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
             HDassert(io_info.pieces_added == 0);
 
             /* Allocate sel_pieces array */
-            if (NULL == (io_info.sel_pieces = H5MM_malloc(io_info.piece_count * sizeof(io_info.sel_pieces[0]))))
+            if (NULL ==
+                (io_info.sel_pieces = H5MM_malloc(io_info.piece_count * sizeof(io_info.sel_pieces[0]))))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "unable to allocate array of selected pieces")
         }
 
         /* MDIO-specific second phase initialization */
         for (i = 0; i < count; i++)
-            if (dset_info[i].layout_ops.mdio_init && (dset_info[i].layout_ops.mdio_init)(&io_info, &(dset_info[i])))
+            if (dset_info[i].layout_ops.mdio_init &&
+                (dset_info[i].layout_ops.mdio_init)(&io_info, &(dset_info[i])))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't populate array of selected pieces")
 
         /* Make sure we added all pieces */
@@ -799,17 +807,21 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
     else {
         haddr_t prev_tag = HADDR_UNDEF;
 
-        if (!H5D_LAYOUT_CB_PERFORM_IO(&io_info) && io_info.piece_count >0) {
+        if (!H5D_LAYOUT_CB_PERFORM_IO(&io_info) && io_info.piece_count > 0) {
             if (NULL == (io_info.mem_spaces = H5MM_malloc(io_info.piece_count * sizeof(H5S_t *))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for memory space list")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                            "memory allocation failed for memory space list")
             if (NULL == (io_info.file_spaces = H5MM_malloc(io_info.piece_count * sizeof(H5S_t *))))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for file space list")
             if (NULL == (io_info.addrs = H5MM_malloc(io_info.piece_count * sizeof(haddr_t))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for piece address list")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                            "memory allocation failed for piece address list")
             if (NULL == (io_info.element_sizes = H5MM_malloc(io_info.piece_count * sizeof(size_t))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for element size list")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                            "memory allocation failed for element size list")
             if (NULL == (io_info.wbufs = H5MM_malloc(io_info.piece_count * sizeof(const void *))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for read buffer list")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                            "memory allocation failed for read buffer list")
         }
 
         /* loop with serial & single-dset write IO path */
@@ -830,9 +842,9 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
          * actual I/O */
         H5_CHECK_OVERFLOW(io_info.piece_count, size_t, uint32_t)
         if (!H5D_LAYOUT_CB_PERFORM_IO(&io_info))
-            if (H5F_shared_select_write(io_info.f_sh, H5FD_MEM_DRAW,
-                                   (uint32_t)io_info.piece_count, io_info.mem_spaces, io_info.file_spaces, io_info.addrs, io_info.element_sizes,
-                                   io_info.wbufs) < 0)
+            if (H5F_shared_select_write(io_info.f_sh, H5FD_MEM_DRAW, (uint32_t)io_info.piece_count,
+                                        io_info.mem_spaces, io_info.file_spaces, io_info.addrs,
+                                        io_info.element_sizes, io_info.wbufs) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "selection write failed")
     }
 
@@ -915,8 +927,8 @@ H5D__ioinfo_init(size_t count, H5D_dset_io_info_t *dset_info, H5D_io_info_t *io_
     HDmemset(io_info, 0, sizeof(*io_info));
 
     /* Set up simple fields */
-    io_info->f_sh           = count > 0 ? H5F_SHARED(dset_info[0].dset->oloc.file) : NULL;
-    io_info->count          = count;
+    io_info->f_sh  = count > 0 ? H5F_SHARED(dset_info[0].dset->oloc.file) : NULL;
+    io_info->count = count;
 
     /* Start without multi-dataset I/O ops. If we're not using the collective
      * I/O path then we will call the single dataset callbacks in a loop. */

@@ -673,7 +673,7 @@ H5D__contig_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
 
         /* Add piece to piece_count */
         io_info->piece_count++;
-    }     /* end if */
+    } /* end if */
 
     /* Check if we're performing selection I/O if it hasn't been disabled
      * already */
@@ -837,11 +837,11 @@ H5D__contig_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
                 HDassert(io_info->rbufs);
                 HDassert(io_info->pieces_added < io_info->piece_count);
 
-                io_info->mem_spaces[io_info->pieces_added] = dinfo->mem_space;
-                io_info->file_spaces[io_info->pieces_added] = dinfo->file_space;
-                io_info->addrs[io_info->pieces_added] = dinfo->store->contig.dset_addr;
+                io_info->mem_spaces[io_info->pieces_added]    = dinfo->mem_space;
+                io_info->file_spaces[io_info->pieces_added]   = dinfo->file_space;
+                io_info->addrs[io_info->pieces_added]         = dinfo->store->contig.dset_addr;
                 io_info->element_sizes[io_info->pieces_added] = dinfo->type_info.src_type_size;
-                io_info->rbufs[io_info->pieces_added] = dinfo->buf.vp;
+                io_info->rbufs[io_info->pieces_added]         = dinfo->buf.vp;
                 io_info->pieces_added++;
             }
         }
@@ -907,11 +907,11 @@ H5D__contig_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
                 HDassert(io_info->wbufs);
                 HDassert(io_info->pieces_added < io_info->piece_count);
 
-                io_info->mem_spaces[io_info->pieces_added] = dinfo->mem_space;
-                io_info->file_spaces[io_info->pieces_added] = dinfo->file_space;
-                io_info->addrs[io_info->pieces_added] = dinfo->store->contig.dset_addr;
+                io_info->mem_spaces[io_info->pieces_added]    = dinfo->mem_space;
+                io_info->file_spaces[io_info->pieces_added]   = dinfo->file_space;
+                io_info->addrs[io_info->pieces_added]         = dinfo->store->contig.dset_addr;
                 io_info->element_sizes[io_info->pieces_added] = dinfo->type_info.dst_type_size;
-                io_info->wbufs[io_info->pieces_added] = dinfo->buf.cvp;
+                io_info->wbufs[io_info->pieces_added]         = dinfo->buf.cvp;
                 io_info->pieces_added++;
             }
         }

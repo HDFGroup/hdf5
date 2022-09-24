@@ -1420,8 +1420,8 @@ H5D__link_piece_collective_io(H5D_io_info_t *io_info, int mpi_rank)
     int  mpi_code;                     /* MPI return code */
     H5D_mpio_actual_chunk_opt_mode_t actual_chunk_opt_mode = H5D_MPIO_LINK_CHUNK;
     H5D_mpio_actual_io_mode_t        actual_io_mode        = 0;
-    size_t        i; /* Local index vairable */
-    herr_t                           ret_value             = SUCCEED;
+    size_t                           i; /* Local index vairable */
+    herr_t                           ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
@@ -1484,7 +1484,8 @@ H5D__link_piece_collective_io(H5D_io_info_t *io_info, int mpi_rank)
 
             /* Sort sel_pieces if necessary */
             if (need_sort)
-                HDqsort(io_info->sel_pieces, io_info->piece_count, sizeof(io_info->sel_pieces[0]), H5D__cmp_piece_addr);
+                HDqsort(io_info->sel_pieces, io_info->piece_count, sizeof(io_info->sel_pieces[0]),
+                        H5D__cmp_piece_addr);
 
             /* Allocate chunking information */
             if (NULL == (chunk_mtype = (MPI_Datatype *)H5MM_malloc(num_chunk * sizeof(MPI_Datatype))))
@@ -2636,8 +2637,8 @@ H5D__cmp_piece_addr(const void *piece_info1, const void *piece_info2)
 
     FUNC_ENTER_PACKAGE_NOERR
 
-    addr1 = (*((const H5D_piece_info_t * const *)piece_info1))->faddr;
-    addr2 = (*((const H5D_piece_info_t * const *)piece_info2))->faddr;
+    addr1 = (*((const H5D_piece_info_t *const *)piece_info1))->faddr;
+    addr2 = (*((const H5D_piece_info_t *const *)piece_info2))->faddr;
 
     FUNC_LEAVE_NOAPI(H5F_addr_cmp(addr1, addr2))
 } /* end H5D__cmp_chunk_addr() */
