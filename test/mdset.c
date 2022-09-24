@@ -333,7 +333,8 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
                 sel_type = HDrandom() % 3;
                 if (sel_type == 0) {
                     /* Hyperslab */
-                    size_t nhs = (size_t)1;//((HDrandom() % MAX_HS) + 1); /* Number of hyperslabs */ /*!FIXME -NAF */
+                    size_t nhs =
+                        (size_t)1; //((HDrandom() % MAX_HS) + 1); /* Number of hyperslabs */ /*!FIXME -NAF */
                     size_t max_hs_x = (MAX_HS_X <= dset_dims[k][0])
                                           ? MAX_HS_X
                                           : dset_dims[k][0]; /* Determine maximum hyperslab size in X */
@@ -423,8 +424,7 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
                     start[1] = 0;
                     count[0] = dset_dims[k][0];
                     count[1] = dset_dims[k][1];
-                    if (H5Sselect_hyperslab(mem_space_ids[k], H5S_SELECT_SET, start, NULL, count, NULL) <
-                            0)
+                    if (H5Sselect_hyperslab(mem_space_ids[k], H5S_SELECT_SET, start, NULL, count, NULL) < 0)
                         TEST_ERROR;
 
                     /* Update expected buffers */
@@ -438,7 +438,7 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
                             for (n = 0; n < dset_dims[k][1]; n++)
                                 efbufi[k][m][n] = wbufi[k][m][n];
                 }
-            }     /* end for */
+            } /* end for */
 
             /* Perform I/O */
             if (do_read) {
