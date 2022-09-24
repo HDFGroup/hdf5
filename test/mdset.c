@@ -321,17 +321,19 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
 
             /* Loop over datasets */
             for (k = 0; k < ndsets; k++) {
+                int sel_type;
+
                 /* Reset selection */
                 if (H5Sselect_none(mem_space_ids[k]) < 0)
                     TEST_ERROR;
                 if (H5Sselect_none(file_space_ids[k]) < 0)
                     TEST_ERROR;
 
-                /* Decide whether to do a hyperslab or point selection */
-                if (HDrandom() % 2) {
+                /* Decide whether to do a hyperslab, point, or all selection */
+                sel_type = HDrandom() % 3;
+                if (sel_type == 0) {
                     /* Hyperslab */
-                    size_t nhs =
-                        1; //(size_t)((HDrandom() % MAX_HS) + 1); /* Number of hyperslabs */ /*!FIXME -NAF */
+                    size_t nhs = (size_t)1;//((HDrandom() % MAX_HS) + 1); /* Number of hyperslabs */ /*!FIXME -NAF */
                     size_t max_hs_x = (MAX_HS_X <= dset_dims[k][0])
                                           ? MAX_HS_X
                                           : dset_dims[k][0]; /* Determine maximum hyperslab size in X */
@@ -370,7 +372,7 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
                                     efbufi[k][m][n] = wbufi[k][m][n];
                     } /* end for */
                 }     /* end if */
-                else {
+                else if (sel_type == 1) {
                     /* Point selection */
                     size_t npoints = (size_t)(((size_t)HDrandom() % MAX_POINTS) + 1); /* Number of points */
 
@@ -410,6 +412,32 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
                     if (H5Sselect_elements(mem_space_ids[k], H5S_SELECT_APPEND, npoints, points) < 0)
                         TEST_ERROR;
                 } /* end else */
+                else {
+                    /* All selection */
+                    /* Select entire dataset in file */
+                    if (H5Sselect_all(file_space_ids[k]) < 0)
+                        TEST_ERROR;
+
+                    /* Select entire dataset in memory using hyperslab */
+                    start[0] = 0;
+                    start[1] = 0;
+                    count[0] = dset_dims[k][0];
+                    count[1] = dset_dims[k][1];
+                    if (H5Sselect_hyperslab(mem_space_ids[k], H5S_SELECT_SET, start, NULL, count, NULL) <
+                            0)
+                        TEST_ERROR;
+
+                    /* Update expected buffers */
+                    if (do_read) {
+                        for (m = 0; m < dset_dims[k][0]; m++)
+                            for (n = 0; n < dset_dims[k][1]; n++)
+                                erbufi[k][m][n] = efbufi[k][m][n];
+                    } /* end if */
+                    else
+                        for (m = 0; m < dset_dims[k][0]; m++)
+                            for (n = 0; n < dset_dims[k][1]; n++)
+                                efbufi[k][m][n] = wbufi[k][m][n];
+                }
             }     /* end for */
 
             /* Perform I/O */

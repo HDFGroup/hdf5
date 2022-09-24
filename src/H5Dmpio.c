@@ -1252,7 +1252,7 @@ H5D__piece_io(H5D_io_info_t *io_info)
                                 recalc_io_option = TRUE;
 
                                 if (H5D__multi_chunk_collective_io(io_info, &io_info->dsets_info[i], mpi_rank,
-                                                                   mpi_size) < 0) /*!FIXME try removing, HDassert(0); */
+                                                                   mpi_size) < 0)
                                     HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL,
                                                 "couldn't finish optimized multiple chunk MPI-IO")
                             }
