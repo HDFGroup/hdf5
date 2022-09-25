@@ -1,42 +1,5 @@
 /** \page RM HDF5 Reference Manual
 
-The functions provided by the HDF5 API are grouped into the following
-\Emph{modules}:
-
-<table>
-<tr><th>Modules</th></tr>
-<tr valign="top">
-<td>
-<table>
-<tr valign="top"><td style="border: none;">
-\include{doc} core_menu.md
-</td>
-</tr>
-<tr valign="top"><td style="border: none;">
-<!--  High-level library -->
-\include{doc} high_level_menu.md
-</td>
-</tr>
-<tr valign="top"><td style="border: none;">
-<!--  Fortran library -->
-\include{doc} fortran_menu.md
-</td>
-</tr>
-<tr valign="top"><td style="border: none;">
-<!--  Java library -->
-\include{doc} java_menu.md
-</td>
-</tr>
-<tr>
-<td><a href="./deprecated.html">Deprecated functions</a></td>
-<td>Functions with \ref ASYNC</td>
-<td>\ref api-compat-macros</td>
-</tr>
-</table>
-
-</td></tr>
-<tr><th>Mind the gap</th></tr>
-<tr><td>
 Follow these simple rules and stay out of trouble:
 
 \li \Bold{Handle discipline:} The HDF5 C-API is rife with handles or
@@ -59,8 +22,37 @@ Follow these simple rules and stay out of trouble:
     for the name!
 
 Break a leg!
+
+The functions provided by the HDF5 API are grouped into \Emph{modules}, typically named
+after the object type or primitive they manage. Certain convenience functions and
+use cases are provided in a \Emph{high-level library.} They are implemented using
+the functions provided in the \Emph{core library.}
+
+The HDF Group maintains a set of language bindings for Fortran and Java
+for most modules. Furthermore, the HDF community maintains bindings and independent
+implementations for many other languages and environments.
+
+<table>
+<tr><th>Modules</th></tr>
+<tr valign="top">
+<td>
+<table>
+<tr valign="top">
+<td style="border: none;">
+<!--  Core library -->
+\include{doc} core_menu.md
+<!--  Miscellaneous -->
+\include{doc} miscellaneous.md
+</td>
+<td style="border: none;">
+<!--  High-level library -->
+\include{doc} high_level_menu.md
+<!--  Java-specific -->
+\include{doc} java_menu.md
 </td>
 </tr>
+</table>
+</td></tr>
 </table>
 
 \cpp_c_api_note
