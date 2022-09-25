@@ -3290,13 +3290,13 @@ test_h5s_bug2(void)
 
     /* Add hyperslab in space containing last element */
     start[1] = 4;
-    ret = H5Sselect_hyperslab(space, H5S_SELECT_OR, start, NULL, count, NULL);
+    ret      = H5Sselect_hyperslab(space, H5S_SELECT_OR, start, NULL, count, NULL);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     /* Add hyperslab in space containing the first 3 elements */
     start[1] = 0;
     count[1] = 3;
-    ret = H5Sselect_hyperslab(space, H5S_SELECT_OR, start, NULL, count, NULL);
+    ret      = H5Sselect_hyperslab(space, H5S_SELECT_OR, start, NULL, count, NULL);
     CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
     /* Check that space's selection is valid */
