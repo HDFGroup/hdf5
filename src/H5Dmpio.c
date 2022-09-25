@@ -1420,7 +1420,7 @@ H5D__link_piece_collective_io(H5D_io_info_t *io_info, int mpi_rank)
     int  mpi_code;                     /* MPI return code */
     H5D_mpio_actual_chunk_opt_mode_t actual_chunk_opt_mode = H5D_MPIO_LINK_CHUNK;
     H5D_mpio_actual_io_mode_t        actual_io_mode        = 0;
-    size_t                           i; /* Local index vairable */
+    size_t                           i; /* Local index variable */
     herr_t                           ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
