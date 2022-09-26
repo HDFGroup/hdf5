@@ -55,11 +55,11 @@ The functions provided by the HDF5 API are grouped into the following
 </td>
 </tr>
 <tr>
-<th>Links (H5L)</th><td>@ref H5L "C"</td><td>@ref H5::H5Location "C++"</td><td>@ref FH5L "Fortran"</td><td>@ref JH5L "Java"</td><td>Manage HDF5 links and link types.
+<th>Links (H5L)</th><td>@ref H5L "C"</td><td>"C++"</td><td>@ref FH5L "Fortran"</td><td>@ref JH5L "Java"</td><td>Manage HDF5 links and link types.
 </td>
 </tr>
 <tr>
-<th>Objects (H5O)</th><td>@ref H5O "C"</td><td>@ref H5::H5Object "C++"</td><td>@ref FH5O "Fortran"</td><td>@ref JH5O "Java"</td><td>Manage HDF5 objects (groups, datasets, datatype objects).
+<th>Objects (H5O)</th><td>@ref H5O "C"</td><td>"C++"</td><td>@ref FH5O "Fortran"</td><td>@ref JH5O "Java"</td><td>Manage HDF5 objects (groups, datasets, datatype objects).
 </td>
 </tr>
 <tr>
