@@ -162,7 +162,7 @@ CONTAINS
           ", min =", stats%min, ", max =", stats%max, ", std =", stats%std
 
      OPEN(12, file=prefix(1:6)//"_"//coll//".dgnu", FORM='FORMATTED')
-     IF(it.EQ.1.AND.ik.EQ.1) WRITE(12,'("#nd",T10,"MD.T_W",T27,"MD.T_W",T44,"MD.T_R",T61,"MD.F_R")')
+     IF(it.EQ.1.AND.ik.EQ.1) WRITE(12,'("#nd",T10,"MD.T_W",T27,"MD.T_R",T44,"MD.F_W",T61,"MD.F_R")')
      IF(ik.EQ.4)THEN
         WRITE(12,"(3X,E14.7)") stats%mean
      ELSE IF(ik.EQ.1)THEN
