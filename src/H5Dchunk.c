@@ -2431,8 +2431,9 @@ done:
 static herr_t
 H5D__chunk_mdio_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
 {
-    H5SL_node_t *piece_node;          /* Current node in chunk skip list */
-    herr_t       ret_value = SUCCEED; /* Return value        */
+    H5SL_node_t      *piece_node;          /* Current node in chunk skip list */
+    H5D_piece_info_t *piece_info;          /* Piece information for current piece */
+    herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -2442,16 +2443,18 @@ H5D__chunk_mdio_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
 
     /* Iterate over skip list */
     while (piece_node) {
-        HDassert(io_info->sel_pieces);
-        HDassert(io_info->pieces_added < io_info->piece_count);
+        /* Get piece info */
+        if (NULL == (piece_info = (H5D_piece_info_t *)H5D_CHUNK_GET_NODE_INFO(dinfo, piece_node)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "couldn't get piece info from list")
 
-        /* Get piece info and add to sel_pieces */
-        if (NULL == (io_info->sel_pieces[io_info->pieces_added] =
-                         (H5D_piece_info_t *)H5D_CHUNK_GET_NODE_INFO(dinfo, piece_node)))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "couldn't get piece info from skip list")
+        /* Add piece to MDIO operation if it has a file address */
+        if (H5F_addr_defined(piece_info->faddr)) {
+            HDassert(io_info->sel_pieces);
+            HDassert(io_info->pieces_added < io_info->piece_count);
 
-        /* Update pieces_added */
-        io_info->pieces_added++;
+            /* Add to sel_pieces and update pieces_added */
+            io_info->sel_pieces[io_info->pieces_added++] = piece_info;
+        }
 
         /* Advance to next skip list node */
         piece_node = H5D_CHUNK_GET_NEXT_NODE(dinfo, piece_node);
