@@ -9,7 +9,7 @@ The functions provided by the HDF5 API are grouped into the following
 <td>
 <table>
 <caption>Core Reference Manual Modules</caption>
-<tr><th>Module</th><th>C</th><th>C++</th><th>Fortran</th><th>Java</th><th>Description</th></tr>
+<tr><th>Module</th><th colspan="4">Language</th><th>Description</th></tr>
 <tr>
 <th>Attributes (H5A)</th><td>@ref H5A "C"</td><td>"C++"</td><td>@ref FH5A "Fortran"</td><td>@ref JH5A "Java"</td><td>HDF5 attribute is a small metadata object describing the nature and/or intended usage of a primary data object.
 </td>
@@ -81,7 +81,7 @@ The functions provided by the HDF5 API are grouped into the following
 </table>
 <table>
 <caption>High-level Reference Manual Modules</caption>
-<tr><th>Module</th><th>C</th><th>C++</th><th>Fortran</th><th>Java</th><th>Description</th></tr>
+<tr><th>Module</th><th colspan="4"></th>Language<th>Description</th></tr>
 <tr>
 <th>HDF5 Lite APIs (H5LT,H5LD)</th><td>@ref H5LT "C"</td><td>"C++"</td><td>@ref FH5LT "Fortran"</td><td>"Java"</td><td>Functions to simplify creating and manipulating datasets, attributes and other features.
 </td>
@@ -113,7 +113,7 @@ The functions provided by the HDF5 API are grouped into the following
 </table>
 </td>
 </tr>
-<tr>
+<tr><td>
 <table>
 <caption>Additional Java Reference Manual Modules</caption>
 <tr>
@@ -136,9 +136,9 @@ The functions provided by the HDF5 API are grouped into the following
 </td>
 </tr>
 <tr>
-<td><a href="./deprecated.html">Deprecated functions</a></td>
-<td>Functions with \ref ASYNC</td>
-<td>\ref api-compat-macros</td>
+<td><a href="./deprecated.html">Deprecated functions</a><br />
+Functions with \ref ASYNC<br />
+\ref api-compat-macros</td>
 </tr>
 </table>
 
