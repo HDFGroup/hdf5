@@ -136,9 +136,12 @@ The functions provided by the HDF5 API are grouped into the following
 </td>
 </tr>
 <tr>
-<td><a href="./deprecated.html">Deprecated functions</a><br />
+<td>
+\ref predefined_datatypes_tables<br />
+<a href="./deprecated.html">Deprecated functions</a><br />
 Functions with \ref ASYNC<br />
-\ref api-compat-macros</td>
+\ref api-compat-macros
+</td>
 </tr>
 </table>
 
