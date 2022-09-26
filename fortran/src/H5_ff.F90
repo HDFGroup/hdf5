@@ -9,6 +9,18 @@
 !!
 !! @brief This module provides fortran specific helper functions for the HDF library.
 !
+! PURPOSE
+!  This module is used to pass C stubs for H5 Fortran APIs. The C stubs are
+!  packed into arrays in H5_f.c and these arrays are then passed to Fortran.
+!  This module then uses EQUIVALENCE to assign elements of the arrays to
+!  Fortran equivalent C stubs.
+!
+! NOTES
+!  The size of the C arrays in H5_f.c has to match the values of the variables
+!  declared as PARAMETER, hence if the size of an array in H5_f.c is changed
+!  then the PARAMETER of that corresponding array in Fortran must also be changed.
+!
+!
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
