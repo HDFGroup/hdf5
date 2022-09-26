@@ -7088,7 +7088,7 @@ test_refresh_concur(hid_t H5_ATTR_UNUSED in_fapl, hbool_t new_format)
     return 0;
 } /* test_refresh_concur() */
 
-#else /* !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID)) */
+#else  /* !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID)) */
 
 static int
 test_refresh_concur(hid_t in_fapl, hbool_t new_format)
