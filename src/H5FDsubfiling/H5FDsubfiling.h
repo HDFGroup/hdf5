@@ -359,6 +359,16 @@ H5_DLL herr_t H5Pset_fapl_subfiling(hid_t fapl_id, const H5FD_subfiling_config_t
  *          the default values and then calling H5Pset_fapl_subfiling() with the configured
  *          H5FD_subfiling_config_t structure.
  *
+ * \note H5Pget_fapl_subfiling() returns the #H5FD_SUBFILING driver properties as they
+ *       were initially set for the File Access Property List using H5Pset_fapl_subfiling().
+ *       Alternatively, the driver properties can be modified at runtime according to values
+ *       set for the #H5FD_SUBFILING_STRIPE_SIZE, #H5FD_SUBFILING_IOC_PER_NODE and
+ *       #H5FD_SUBFILING_IOC_SELECTION_CRITERIA environment variables. However, driver
+ *       properties set through environment variables will not be reflected in what is
+ *       returned by H5Pget_fapl_subfiling(), so an application may need to check those
+ *       environment variables to get accurate values for the #H5FD_SUBFILING driver
+ *       properties.
+ *
  * \since 1.13.2
  *
  */
