@@ -628,9 +628,7 @@ H5_DLL herr_t  H5D__refresh(H5D_t *dataset, hid_t dset_id);
 H5_DLL herr_t H5D__format_convert(H5D_t *dataset);
 
 /* Internal I/O routines */
-H5_DLL herr_t H5D__pre_read(size_t count, H5D_dset_io_info_t *dset_info);
 H5_DLL herr_t H5D__read(size_t count, H5D_dset_io_info_t *dset_info);
-H5_DLL herr_t H5D__pre_write(size_t count, H5D_dset_io_info_t *dset_info);
 H5_DLL herr_t H5D__write(size_t count, H5D_dset_io_info_t *dset_info);
 
 /* Functions that perform direct serial I/O operations */
