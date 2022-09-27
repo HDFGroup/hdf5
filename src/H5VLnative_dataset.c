@@ -357,11 +357,7 @@ H5VL__native_dataset_read(size_t count, void *obj[], hid_t mem_type_id[], hid_t 
     H5CX_set_dxpl(dxpl_id);
 
     /* Read raw data.  Call H5D__read directly in single dset case. */
-    if (count > 1) {
-        if (H5D__pre_read(count, dinfo) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
-    }
-    else if (H5D__read(1, dinfo) < 0)
+    if (H5D__read(count, dinfo) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
 
 done:
@@ -408,11 +404,7 @@ H5VL__native_dataset_write(size_t count, void *obj[], hid_t mem_type_id[], hid_t
     H5CX_set_dxpl(dxpl_id);
 
     /* Write raw data.  Call H5D__write directly in single dset case. */
-    if (count > 1) {
-        if (H5D__pre_write(count, dinfo) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
-    }
-    else if (H5D__write(1, dinfo) < 0)
+    if (H5D__write(count, dinfo) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
 
 done:
