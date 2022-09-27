@@ -136,6 +136,8 @@ CONTAINS
 !! \param acpl_id  Attribute creation property list identifier
 !! \param aapl_id  Attribute access property list identifier
 !!
+!! See C API: @ref hid_t H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id, hid_t acpl_id, hid_t aapl_id);
+!!
   SUBROUTINE h5acreate_f(loc_id, name, type_id, space_id, attr_id, &
        hdferr, acpl_id, aapl_id )
     IMPLICIT NONE
@@ -191,6 +193,8 @@ CONTAINS
 !! \param attr_id Attribute identifier
 !! \param hdferr  \fortran_error
 !!
+!! See C API: @ref hid_t H5Aopen_name(hid_t loc_id, const char *name);
+!!
   SUBROUTINE H5Aopen_name_f(obj_id, name, attr_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: obj_id
@@ -228,6 +232,8 @@ CONTAINS
 !! \param attr_id Attribute identifier
 !! \param hdferr  \fortran_error
 !!
+!! See C API: @ref hid_t H5Aopen_idx(hid_t loc_id, unsigned idx);
+!!
   SUBROUTINE H5Aopen_idx_f(obj_id, index, attr_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: obj_id
@@ -258,6 +264,8 @@ CONTAINS
 !! \param space_id Attribite dataspace identifier
 !! \param hdferr   \fortran_error
 !!
+!! See C API: @ref hid_t H5Aget_space(hid_t attr_id);
+!!
   SUBROUTINE H5Aget_space_f(attr_id, space_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id
@@ -285,6 +293,8 @@ CONTAINS
 !! \param attr_id Attribute identifier
 !! \param type_id Attribute datatype identifier
 !! \param hdferr  \fortran_error
+!!
+!! See C API: @ref hid_t H5Aget_type(hid_t attr_id);
 !!
   SUBROUTINE H5Aget_type_f(attr_id, type_id, hdferr)
     IMPLICIT NONE
@@ -314,6 +324,8 @@ CONTAINS
 !! \param size    Size of a buffer to read name in
 !! \param buf     Buffer to read name in
 !! \param hdferr  \fortran_error
+!!
+!! See C API: @ref ssize_t H5Aget_name(hid_t attr_id, size_t buf_size, char *buf);
 !!
   SUBROUTINE h5aget_name_f(attr_id, size, buf, hdferr)
     IMPLICIT NONE
@@ -359,6 +371,8 @@ CONTAINS
 !!
 !! \param size     Size, in bytes, of attribute name
 !! \param lapl_id  Link access property list
+!!
+!! See C API: @ref ssize_t H5Aget_name_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_iter_order_t order, hsize_t n, char *name, size_t size, hid_t lapl_id);
 !!
   SUBROUTINE h5aget_name_by_idx_f(loc_id, obj_name, idx_type, order, &
        n, name, hdferr, size, lapl_id)
@@ -420,6 +434,8 @@ CONTAINS
 !! \param attr_num Number of attributes attached to the object
 !! \param hdferr   \fortran_error
 !!
+!! See C API: @ref int H5Aget_num_attrs(hid_t loc_id);
+!!
   SUBROUTINE h5aget_num_attrs_f(obj_id, attr_num, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: obj_id
@@ -446,6 +462,8 @@ CONTAINS
 !! \param name   Attribute name
 !!
 !! \param hdferr \fortran_error
+!!
+!! See C API: @ref herr_t H5Adelete(hid_t loc_id, const char *attr_name);
 !!
   SUBROUTINE H5Adelete_f(obj_id, name, hdferr)
     IMPLICIT NONE
@@ -476,6 +494,8 @@ CONTAINS
 !! \param attr_id Attribute identifier
 !! \param  hdferr \fortran_error
 !!
+!! See C API: @ref herr_t H5Aclose(hid_t attr_id);
+!!
   SUBROUTINE H5Aclose_f(attr_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id
@@ -499,6 +519,8 @@ CONTAINS
 !! \param attr_id Attribute identifier
 !! \param size    Attribute storage size
 !! \param hdferr  \fortran_error
+!!
+!! See C API: @ref hsize_t H5Aget_storage_size(hid_t attr_id);
 !!
   SUBROUTINE H5Aget_storage_size_f(attr_id, size, hdferr)
     IMPLICIT NONE
@@ -528,6 +550,8 @@ CONTAINS
 !! \param attr_id          Identifier of the attribute
 !! \param creation_prop_id Identifier for the attribute’s creation property
 !! \param hdferr           \fortran_error
+!!
+!! See C API: @ref hid_t H5Aget_create_plist(hid_t attr_id);
 !!
   SUBROUTINE H5Aget_create_plist_f(attr_id, creation_prop_id, hdferr)
     IMPLICIT NONE
@@ -559,6 +583,8 @@ CONTAINS
 !! \param new_attr_name New attribute name
 !! \param lapl_id       Link access property list identifier
 !! \param hdferr        \fortran_error
+!!
+!! See C API: @ref herr_t H5Arename_by_name_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id, const char *obj_name, const char *old_attr_name, const char *new_attr_name, hid_t lapl_id, hid_t es_id);
 !!
   SUBROUTINE H5Arename_by_name_f(loc_id, obj_name, old_attr_name, new_attr_name, &
         hdferr, lapl_id)
@@ -619,6 +645,8 @@ CONTAINS
 !! \param hdferr    \fortran_error
 !! \param aapl_id   Attribute access property list
 !!
+!! See C API: @ref hid_t H5Aopen(hid_t obj_id, const char *attr_name, hid_t aapl_id);
+!!
   SUBROUTINE H5Aopen_f(obj_id, attr_name, attr_id, hdferr, aapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: obj_id
@@ -676,6 +704,8 @@ CONTAINS
 !! \param hdferr   \fortran_error
 !! \param lapl_id  Link access property list
 !!
+!! See C API: @ref herr_t H5Adelete_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_iter_order_t order, hsize_t n, hid_t lapl_id);
+!!
   SUBROUTINE H5Adelete_by_idx_f(loc_id, obj_name, idx_type, order, n, hdferr, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id
@@ -722,6 +752,8 @@ CONTAINS
 !! \param attr_name Attribute access property list
 !! \param lapl_id   Link access property list
 !! \param hdferr    \fortran_error
+!!
+!! See C API: @ref herr_t H5Adelete_by_name(hid_t loc_id, const char *obj_name, const char *attr_name, hid_t lapl_id);
 !!
   SUBROUTINE H5Adelete_by_name_f(loc_id, obj_name, attr_name, hdferr, lapl_id)
     IMPLICIT NONE
@@ -784,6 +816,8 @@ CONTAINS
 !! \param aapl_id  Attribute access property list.
 !! \param lapl_id  Link access property list.
 !!
+!! See C API: @ref hid_t H5Aopen_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_iter_order_t order, hsize_t n, hid_t aapl_id, hid_t lapl_id);
+!!
   SUBROUTINE H5Aopen_by_idx_f(loc_id, obj_name, idx_type, order, n, attr_id, hdferr, aapl_id, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id
@@ -843,6 +877,8 @@ CONTAINS
 !! \param data_size      Indicates the size, in the number of characters, of the attribute.
 !! \param hdferr         \fortran_error
 !!
+!! See C API: @ref herr_t H5Aget_info(hid_t attr_id, H5A_info_t *ainfo );
+!!
   SUBROUTINE H5Aget_info_f(attr_id, f_corder_valid, corder, cset, data_size, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id
@@ -890,6 +926,8 @@ CONTAINS
 !! \param data_size      Indicates the size, in the number of characters, of the attribute
 !! \param hdferr         \fortran_error
 !! \param lapl_id        Link access property list
+!!
+!! See C API: @ref herr_t H5Aget_info_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_iter_order_t order, hsize_t n, H5A_info_t *ainfo, hid_t lapl_id);
 !!
   SUBROUTINE H5Aget_info_by_idx_f(loc_id, obj_name, idx_type, order, n, &
        f_corder_valid, corder, cset, data_size, hdferr, lapl_id)
@@ -962,6 +1000,8 @@ CONTAINS
 !! \param hdferr         \fortran_error
 !! \param lapl_id        Link access property list
 !!
+!! See C API: @ref herr_t H5Aget_info_by_name(hid_t loc_id, const char *obj_name, const char *attr_name, H5A_info_t *ainfo, hid_t lapl_id);
+!!
   SUBROUTINE H5Aget_info_by_name_f(loc_id, obj_name, attr_name, &
        f_corder_valid, corder, cset, data_size, hdferr, lapl_id)
     IMPLICIT NONE
@@ -1031,6 +1071,8 @@ CONTAINS
 !! \param aapl_id   Attribute access property list identifier (Currently not used.)
 !! \param lapl_id   Link access property list
 !!
+!! See C API: @ref hid_t H5Acreate_by_name(hid_t loc_id, const char *obj_name, const char *attr_name, hid_t type_id, hid_t space_id, hid_t acpl_id, hid_t aapl_id, hid_t lapl_id);
+!!
   SUBROUTINE H5Acreate_by_name_f(loc_id, obj_name, attr_name, type_id, space_id, attr, hdferr, &
        acpl_id, aapl_id, lapl_id)
     IMPLICIT NONE
@@ -1099,6 +1141,8 @@ CONTAINS
 !! \param attr_exists Attribute exists status
 !! \param hdferr      \fortran_error
 !!
+!! See C API: @ref htri_t H5Aexists(hid_t obj_id, const char *attr_name);
+!!
   SUBROUTINE H5Aexists_f(obj_id, attr_name, attr_exists, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: obj_id
@@ -1140,6 +1184,8 @@ CONTAINS
 !! \param attr_exists Attribute exists status
 !! \param hdferr      \fortran_error
 !! \param lapl_id     Link access property list identifier
+!!
+!! See C API: @ref htri_t H5Aexists_by_name(hid_t obj_id, const char *obj_name, const char *attr_name, hid_t lapl_id);
 !!
   SUBROUTINE H5Aexists_by_name_f(loc_id, obj_name, attr_name, attr_exists, hdferr, lapl_id)
     IMPLICIT NONE
@@ -1196,6 +1242,8 @@ CONTAINS
 !! \param aapl_id   Attribute access property list (Currently unused; should be passed in as H5P_DEFAULT.)
 !! \param lapl_id   Link access property list identifier
 !!
+!! See C API: @ref hid_t H5Aopen_by_name(hid_t loc_id, const char *obj_name, const char *attr_name, hid_t aapl_id, hid_t lapl_id);
+!!
   SUBROUTINE H5Aopen_by_name_f(loc_id, obj_name, attr_name, attr_id, hdferr, aapl_id, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id
@@ -1251,6 +1299,8 @@ CONTAINS
 !! \param new_attr_name New attribute name
 !! \param hdferr        \fortran_error
 !!
+!! See C API: @ref herr_t H5Arename(hid_t loc_id, const char *old_name, const char *new_name);
+!!
   SUBROUTINE H5Arename_f(loc_id, old_attr_name, new_attr_name, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id
@@ -1297,6 +1347,8 @@ CONTAINS
 !! \param buf	      Data to be written.
 !! \param hdferr      \fortran_error
 !!
+!! See C API: @ref herr_t H5Awrite(hid_t attr_id, hid_t type_id, const void *buf);
+!!
   SUBROUTINE h5awrite_f(attr_id, memtype_id, buf, hdferr)
     INTEGER(HID_T)  , INTENT(IN)  :: attr_id
     INTEGER(HID_T)  , INTENT(IN)  :: memtype_id
@@ -1318,6 +1370,8 @@ CONTAINS
 !!                    dim(k) has value of the k-th dimension of buffer buf; values are ignored if buf is a scalar.
 !! \param hdferr      \fortran_error
 !!
+!! See C API: @ref herr_t H5Awrite(hid_t attr_id, hid_t type_id, const void *buf);
+!!
   SUBROUTINE h5awrite_f(attr_id, memtype_id, buf, dims, hdferr)
     INTEGER(HID_T)  , INTENT(IN)               :: attr_id
     INTEGER(HID_T)  , INTENT(IN)               :: memtype_id
@@ -1336,6 +1390,8 @@ CONTAINS
 !! \param memtype_id  Identifier of the attribute datatype (in memory).
 !! \param buf	      Buffer for data to be read.
 !! \param hdferr      \fortran_error
+!!
+!! See C API: @ref herr_t H5Aread(hid_t attr_id, hid_t type_id, void *buf);
 !!
   SUBROUTINE h5aread_f(attr_id, memtype_id, buf, hdferr)
     INTEGER(HID_T), INTENT(IN)    :: attr_id
@@ -1357,6 +1413,8 @@ CONTAINS
 !! \param dims        Array to hold corresponding dimension sizes of data buffer buf;
 !!                    dim(k) has value of the k-th dimension of buffer buf; values are ignored if buf is a scalar.
 !! \param hdferr      \fortran_error
+!!
+!! See C API: @ref herr_t H5Aread(hid_t attr_id, hid_t type_id, void *buf);
 !!
   SUBROUTINE h5aread_f(attr_id, memtype_id, buf, dims, hdferr)
     INTEGER(HID_T)  , INTENT(IN)               :: attr_id
