@@ -80,6 +80,8 @@ CONTAINS
 !! \param lcpl_id     Link creation property list identifier.
 !! \param lapl_id     Link access property list identifier.
 !!
+!! See C API: @ref herr_t H5Lcopy(hid_t src_loc, const char *src_name, hid_t dst_loc, const char *dst_name, hid_t lcpl_id, hid_t lapl_id);
+!!
   SUBROUTINE h5lcopy_f(src_loc_id, src_name, dest_loc_id, dest_name, hdferr, &
        lcpl_id, lapl_id)
     IMPLICIT NONE
@@ -139,6 +141,8 @@ CONTAINS
 !! \param hdferr  \fortran_error
 !! \param lapl_id Link access property list identifier.
 !!
+!! See C API: @ref herr_t H5Ldelete(hid_t loc_id, const char *name, hid_t lapl_id);
+!!
   SUBROUTINE h5ldelete_f(loc_id, name, hdferr, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id
@@ -180,6 +184,8 @@ CONTAINS
 !! \param hdferr      \fortran_error
 !! \param lcpl_id     Link creation property list identifier.
 !! \param lapl_id     Link access property list identifier.
+!!
+!! See C API: @ref herr_t H5Lcreate_soft(const char *link_target, hid_t link_loc_id, const char *link_name, hid_t lcpl_id, hid_t lapl_id);
 !!
   SUBROUTINE h5lcreate_soft_f(target_path, link_loc_id, link_name, hdferr, lcpl_id, lapl_id)
     IMPLICIT NONE
@@ -240,6 +246,8 @@ CONTAINS
 !! \param lcpl_id     Link creation property list identifier.
 !! \param lapl_id     Link access property list identifier.
 !!
+!! See C API: @ref herr_t H5Lcreate_hard(hid_t cur_loc, const char *cur_name, hid_t dst_loc, const char *dst_name, hid_t lcpl_id, hid_t lapl_id);
+!!
   SUBROUTINE h5lcreate_hard_f(obj_loc_id, obj_name, link_loc_id, link_name, hdferr, lcpl_id, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: obj_loc_id
@@ -299,6 +307,8 @@ CONTAINS
 !! \param hdferr      \fortran_error
 !! \param lcpl_id     Link creation property list identifier.
 !! \param lapl_id     Link access property list identifier.
+!!
+!! See C API: @ref herr_t H5Lcreate_external(const char *file_name, const char *obj_name, hid_t link_loc_id, const char *link_name, hid_t lcpl_id, hid_t lapl_id);
 !!
   SUBROUTINE h5lcreate_external_f(file_name, obj_name, link_loc_id, link_name, hdferr, lcpl_id, lapl_id)
     IMPLICIT NONE
@@ -372,6 +382,8 @@ CONTAINS
 !! \param hdferr      \fortran_error
 !! \param lapl_id     Link access property list.
 !!
+!! See C API: @ref herr_t H5Ldelete_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_iter_order_t order, hsize_t n, hid_t lapl_id);
+!!
   SUBROUTINE h5ldelete_by_idx_f(loc_id, group_name, index_field, order, n, hdferr, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id
@@ -418,6 +430,8 @@ CONTAINS
 !! \param link_exists Link exists status (.TRUE.,.FALSE.).
 !! \param hdferr      \fortran_error
 !! \param lapl_id     Link access property list identifier.
+!!
+!! See C API: @ref htri_t H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id);
 !!
   SUBROUTINE h5lexists_f(loc_id, name, link_exists, hdferr, lapl_id)
     IMPLICIT NONE
@@ -478,6 +492,8 @@ CONTAINS
 !!                     the length of the name of the pointed-to object with a null terminator.
 !! \param hdferr       \fortran_error
 !! \param lapl_id      Link access property list.
+!!
+!! See C API: @ref herr_t H5Lget_info2(hid_t loc_id, const char *name, H5L_info2_t *linfo, hid_t lapl_id);
 !!
   SUBROUTINE h5lget_info_f(link_loc_id, link_name, &
        cset, corder, f_corder_valid, link_type, token, val_size, &
@@ -567,6 +583,8 @@ CONTAINS
 !!
 !! \param lapl_id        Link access property list.
 !!
+!! See C API: @ref herr_t H5Lget_info_by_idx2(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_iter_order_t order, hsize_t n, H5L_info2_t *linfo, hid_t lapl_id);
+!!
   SUBROUTINE h5lget_info_by_idx_f(loc_id, group_name, index_field, order, n, &
        link_type, f_corder_valid, corder, cset, token, val_size, hdferr, lapl_id)
     IMPLICIT NONE
@@ -634,6 +652,8 @@ CONTAINS
 !! \param registered  .TRUE. if the link class has been registered.
 !! \param hdferr      \fortran_error
 !!
+!! See C API: @ref htri_t H5Lis_registered(H5L_type_t id);
+!!
   SUBROUTINE h5lis_registered_f(link_cls_id, registered, hdferr)
     IMPLICIT NONE
     INTEGER, INTENT(IN) :: link_cls_id
@@ -668,6 +688,8 @@ CONTAINS
 !! \param hdferr      \fortran_error
 !! \param lcpl_id     Link creation property list identifier to be associated WITH the NEW link.
 !! \param lapl_id     Link access property list identifier to be associated WITH the NEW link.
+!!
+!! See C API: @ref herr_t H5Lmove(hid_t src_loc, const char *src_name, hid_t dst_loc, const char *dst_name, hid_t lcpl_id, hid_t lapl_id);
 !!
   SUBROUTINE h5lmove_f(src_loc_id, src_name, dest_loc_id, dest_name, hdferr, lcpl_id, lapl_id)
     IMPLICIT NONE
@@ -740,6 +762,8 @@ CONTAINS
 !! \param hdferr      \fortran_error
 !! \param lapl_id     List access property list identifier.
 !! \param size        Maximum number of characters of link value to be returned.
+!!
+!! See C API: @ref ssize_t H5Lget_name_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_iter_order_t order, hsize_t n, char *name, size_t size, hid_t lapl_id);
 !!
   SUBROUTINE h5lget_name_by_idx_f(loc_id, group_name, index_field, order, n, &
         name, hdferr, size, lapl_id)
@@ -936,6 +960,8 @@ CONTAINS
 !!                               library, or the negative value returned by one of the operators.
 !! \param hdferr        \fortran_error
 !!
+!! See C API: @ref herr_t H5Literate2(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx, H5L_iterate2_t op, void *op_data);
+!!
   SUBROUTINE h5literate_f(group_id, index_type, order, idx, op, op_data, return_value, hdferr)
     USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_FUNPTR
     IMPLICIT NONE
@@ -997,6 +1023,8 @@ CONTAINS
 !!                               library, or the negative value returned by one of the operators.
 !! \param hdferr       \fortran_error
 !! \param lapl_id      Link access property list
+!!
+!! See C API: @ref herr_t H5Literate_by_name2(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx, H5L_iterate2_t op, void *op_data, hid_t lapl_id);
 !!
   SUBROUTINE h5literate_by_name_f(loc_id, group_name, index_type, order, &
        idx, op, op_data, return_value, hdferr, lapl_id)

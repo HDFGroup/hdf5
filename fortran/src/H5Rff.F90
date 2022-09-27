@@ -72,7 +72,7 @@ MODULE H5R
 
 !> @brief hdset_reg_ref_t_f03 C compatible reference
   TYPE :: hdset_reg_ref_t_f03
-     INTEGER(C_SIGNED_CHAR), DIMENSION(1:H5R_DSET_REG_REF_BUF_SIZE_F) :: ref 
+     INTEGER(C_SIGNED_CHAR), DIMENSION(1:H5R_DSET_REG_REF_BUF_SIZE_F) :: ref
   END TYPE hdset_reg_ref_t_f03
 
   INTERFACE h5rget_object_type_f
@@ -258,8 +258,10 @@ CONTAINS
 !! \param space_id Dataspace identifier.
 !! \param hdferr   \fortran_error
 !!
+!! See C API: @ref hid_t H5Rget_region(hid_t dataset, H5R_type_t ref_type, const void *ref);
+!!
 #ifdef H5_DOXYGEN_FORTRAN
-  SUBROUTINE h5rget_region_f(& 
+  SUBROUTINE h5rget_region_f(&
 #else
   SUBROUTINE h5rget_region_ptr_f(&
 #endif
@@ -289,6 +291,8 @@ CONTAINS
 !! \param name   Name of the object at the specified location.
 !! \param ref    Reference to the specified object.
 !! \param hdferr \fortran_error
+!!
+!! See C API: @ref herr_t H5Rcreate_object(hid_t loc_id, const char *name, hid_t oapl_id, H5R_ref_t *ref_ptr);
 !!
   SUBROUTINE h5rcreate_object_f(loc_id, name, ref, hdferr)
     USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
@@ -320,6 +324,8 @@ CONTAINS
 !! \param space_id Dataspace identifier that describes selected region.
 !! \param ref      Reference to the dataset region.
 !! \param hdferr   \fortran_error
+!!
+!! See C API: @ref herr_t H5Rcreate_region(hid_t loc_id, const char *name, hid_t space_id, hid_t oapl_id, H5R_ref_t *ref_ptr);
 !!
   SUBROUTINE h5rcreate_region_f(loc_id, name, space_id, ref, hdferr)
     IMPLICIT NONE
@@ -368,6 +374,8 @@ CONTAINS
 !! \param space_id Dataspace identifier that describes selected region.
 !!
 #ifdef H5_DOXYGEN_FORTRAN
+!! See C API: @ref herr_t H5Rcreate_object(hid_t loc_id, const char *name, hid_t oapl_id, H5R_ref_t *ref_ptr);
+!!
   SUBROUTINE h5rcreate_f(&
 #else
   SUBROUTINE h5rcreate_ptr_f(&
@@ -559,6 +567,8 @@ CONTAINS
 !!
 
 #ifdef H5_DOXYGEN_FORTRAN
+!! See C API: @ref ssize_t H5Rget_name(hid_t loc_id, H5R_type_t ref_type, const void *ref, char *name, size_t size);
+!!
   SUBROUTINE h5rget_name_f(&
 #else
   SUBROUTINE h5rget_name_ptr_f(&
@@ -601,6 +611,8 @@ CONTAINS
 !!             \li H H5G_DATASET_F
 !!             \li H H5G_TYPE_F
 !!  hdferr   - \fortran_error
+!!
+!! See C API: @ref herr_t H5Rget_obj_type3(H5R_ref_t *ref_ptr, hid_t rapl_id, H5O_type_t *obj_type);
 !!
   SUBROUTINE h5rget_obj_type_f(loc_id, ref_type, ref, obj_type, hdferr)
 
