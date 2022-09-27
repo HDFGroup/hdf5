@@ -313,6 +313,9 @@
 /* Define to 1 if you have the <stdlib.h> header file. */
 #cmakedefine H5_HAVE_STDLIB_H @H5_HAVE_STDLIB_H@
 
+/* Define to 1 if you have the `strcasestr' function. */
+#cmakedefine H5_HAVE_STRCASESTR @H5_HAVE_STRCASESTR@
+
 /* Define to 1 if you have the `strdup' function. */
 #cmakedefine H5_HAVE_STRDUP @H5_HAVE_STRDUP@
 

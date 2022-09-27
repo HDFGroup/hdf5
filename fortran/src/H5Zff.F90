@@ -83,6 +83,8 @@ CONTAINS
 !! \param status  Flag; .TRUE. if filter is available, .FALSE. otherwise.
 !! \param hdferr  \fortran_error
 !!
+!! See C API: @ref htri_t H5Zfilter_avail(H5Z_filter_t id);
+!!
   SUBROUTINE h5zfilter_avail_f(filter, status, hdferr)
     IMPLICIT NONE
     INTEGER, INTENT(IN)  :: filter
@@ -120,6 +122,8 @@ CONTAINS
 !!                     \li H5Z_FILTER_ENCODE_ENABLED_F
 !!                     \li H5Z_FILTER_DECODE_ENABLED_F
 !! \param hdferr       \fortran_error
+!!
+!! See C API: @ref herr_t H5Zget_filter_info(H5Z_filter_t filter, unsigned int *filter_config_flags);
 !!
   SUBROUTINE h5zget_filter_info_f(filter, config_flags, hdferr)
     IMPLICIT NONE

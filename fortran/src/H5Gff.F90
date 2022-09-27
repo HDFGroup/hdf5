@@ -58,6 +58,8 @@ CONTAINS
 !! \param gcpl_id   Property list for group creation.
 !! \param gapl_id   Property list for group access.
 !!
+!! See C API: @ref hid_t H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id);
+!!
   SUBROUTINE h5gcreate_f(loc_id, name, grp_id, hdferr, size_hint, lcpl_id, gcpl_id, gapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id
@@ -119,6 +121,8 @@ CONTAINS
 !! \param hdferr  \fortran_error
 !! \param gapl_id Group access property list identifier.
 !!
+!! See C API: @ref hid_t H5Gopen2(hid_t loc_id, const char *name, hid_t gapl_id);
+!!
   SUBROUTINE h5gopen_f(loc_id, name, grp_id, hdferr, gapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id
@@ -156,6 +160,8 @@ CONTAINS
 !!
 !! \param grp_id Group identifier.
 !! \param hdferr \fortran_error
+!!
+!! See C API: @ref herr_t H5Gclose(hid_t group_id);
 !!
   SUBROUTINE h5gclose_f(grp_id, hdferr)
     IMPLICIT NONE
@@ -266,6 +272,8 @@ CONTAINS
 !! \param new_name     New name for the object.
 !! \param hdferr       \fortran_error
 !!
+!! See C API: @ref herr_t H5Glink(hid_t cur_loc_id, H5G_link_t type, const char *cur_name, const char *new_name);
+!!
   SUBROUTINE h5glink_f(loc_id, link_type, current_name, &
        new_name, hdferr)
     IMPLICIT NONE
@@ -316,6 +324,8 @@ CONTAINS
 !! \param new_name   New name for the object.
 !! \param hdferr     \fortran_error
 !!
+!! See C API: @ref herr_t H5Glink2(hid_t cur_loc_id, const char *cur_name, H5G_link_t type, hid_t new_loc_id, const char *new_name);
+!!
   SUBROUTINE h5glink2_f(cur_loc_id, cur_name, link_type, new_loc_id, &
        new_name, hdferr)
     IMPLICIT NONE
@@ -362,6 +372,8 @@ CONTAINS
 !! \param name   Name of the object to unlink.
 !! \param hdferr \fortran_error
 !!
+!! See C API: @ref herr_t H5Gunlink(hid_t loc_id, const char *name);
+!!
   SUBROUTINE h5gunlink_f(loc_id, name, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id
@@ -392,6 +404,8 @@ CONTAINS
 !! \param name     Object&apos;s name at specified location.
 !! \param new_name Object&apos;s new name.
 !! \param hdferr   \fortran_error
+!!
+!! See C API: @ref herr_t H5Gmove(hid_t src_loc_id, const char *src_name, const char *dst_name);
 !!
   SUBROUTINE h5gmove_f(loc_id, name, new_name, hdferr)
     IMPLICIT NONE
@@ -428,6 +442,8 @@ CONTAINS
 !! \param dst_loc_id Original location identifier.
 !! \param dst_name   Object&apos;s new name.
 !! \param hdferr     \fortran_error
+!!
+!! See C API: @ref herr_t H5Gmove2(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, const char *dst_name);
 !!
   SUBROUTINE h5gmove2_f(src_loc_id, src_name, dst_loc_id, dst_name, hdferr)
     IMPLICIT NONE
@@ -468,6 +484,8 @@ CONTAINS
 !! \param buffer A buffer to hold the name of the object being sought.
 !! \param hdferr \fortran_error
 !!
+!! See C API: @ref herr_t H5Gget_linkval(hid_t loc_id, const char *name, size_t size, char *buf );
+!!
   SUBROUTINE h5gget_linkval_f(loc_id, name, size, buffer, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id
@@ -502,6 +520,8 @@ CONTAINS
 !! \param name    Name of the object.
 !! \param comment Comment to set for the object.
 !! \param hdferr  \fortran_error
+!!
+!! See C API: @ref herr_t H5Gset_comment(hid_t loc_id, const char *name, const char *comment);
 !!
   SUBROUTINE h5gset_comment_f(loc_id, name, comment, hdferr)
     IMPLICIT NONE
@@ -540,6 +560,8 @@ CONTAINS
 !! \param buffer Buffer to hold object&apos;s comment.
 !! \param hdferr \fortran_error
 !!
+!! See C API: @ref int H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize, char *buf);
+!!
   SUBROUTINE h5gget_comment_f(loc_id, name, size, buffer, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id
@@ -575,6 +597,8 @@ CONTAINS
 !! \param hdferr  \fortran_error
 !! \param gcpl_id Group creation property list identifier.
 !! \param gapl_id Group access property list identifier.
+!!
+!! See C API: @ref hid_t H5Gcreate_anon(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id);
 !!
   SUBROUTINE h5Gcreate_anon_f(loc_id, grp_id, hdferr, gcpl_id, gapl_id)
     IMPLICIT NONE
@@ -615,6 +639,8 @@ CONTAINS
 !! \param gcpl_id Group creation property list identifier.
 !! \param hdferr  \fortran_error
 !!
+!! See C API: @ref hid_t H5Gget_create_plist(hid_t group_id);
+!!
   SUBROUTINE h5gget_create_plist_f(grp_id, gcpl_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN)  :: grp_id
@@ -646,6 +672,8 @@ CONTAINS
 !! \param max_corder   Current maximum creation order value for group.
 !! \param hdferr       \fortran_error
 !! \param mounted      Whether group has a file mounted on it.
+!!
+!! See C API: @ref herr_t H5Gget_info(hid_t loc_id, H5G_info_t *ginfo);
 !!
   SUBROUTINE h5gget_info_f(group_id, storage_type, nlinks, max_corder, hdferr, mounted)
     IMPLICIT NONE
@@ -700,6 +728,8 @@ CONTAINS
 !! \param hdferr       \fortran_error
 !! \param lapl_id      Link access property list.
 !! \param mounted      Whether group has a file mounted on it.
+!!
+!! See C API: @ref herr_t H5Gget_info_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_iter_order_t order, hsize_t n, H5G_info_t *ginfo, hid_t lapl_id);
 !!
   SUBROUTINE h5gget_info_by_idx_f(loc_id, group_name, index_type, order, n, &
        storage_type, nlinks, max_corder, hdferr, lapl_id, mounted)
@@ -775,6 +805,8 @@ CONTAINS
 !! \param hdferr       \fortran_error
 !! \param lapl_id      Link access property list.
 !! \param mounted      Whether group has a file mounted on it.
+!!
+!! See C API: @ref herr_t H5Gget_info_by_name(hid_t loc_id, const char *name, H5G_info_t *ginfo, hid_t lapl_id);
 !!
   SUBROUTINE h5gget_info_by_name_f(loc_id, group_name, &
        storage_type, nlinks, max_corder, hdferr, lapl_id, mounted)
