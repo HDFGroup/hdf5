@@ -888,7 +888,6 @@ CONTAINS
 !! \param lapl_id     Link access property list. (Not currently used.).
 !! \param fields      Flags specifying the fields to include in object_info.
 !!
-!! Fortran2003 Interface:
 !! See C API: @ref herr_t H5Oget_info_by_idx3(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_iter_order_t order, hsize_t n, H5O_info2_t *oinfo, unsigned fields, hid_t lapl_id);
 !!
   SUBROUTINE h5oget_info_by_idx_f(loc_id, group_name, index_field, order, n, &

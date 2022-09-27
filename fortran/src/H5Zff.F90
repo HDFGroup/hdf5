@@ -56,6 +56,8 @@ CONTAINS
 !!               \li H5Z_FILTER_FLETCHER32_F
 !! \param hdferr \fortran_error
 !!
+!! See C API: @ref herr_t H5Zunregister(H5Z_filter_t id);
+!!
   SUBROUTINE h5zunregister_f(filter, hdferr)
     IMPLICIT NONE
     INTEGER, INTENT(IN)  :: filter
