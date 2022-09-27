@@ -8,29 +8,140 @@ The functions provided by the HDF5 API are grouped into the following
 <tr valign="top">
 <td>
 <table>
-<tr valign="top"><td style="border: none;">
-\include{doc} core_menu.md
-</td>
-</tr>
-<tr valign="top"><td style="border: none;">
-<!--  High-level library -->
-\include{doc} high_level_menu.md
-</td>
-</tr>
-<tr valign="top"><td style="border: none;">
-<!--  Fortran library -->
-\include{doc} fortran_menu.md
-</td>
-</tr>
-<tr valign="top"><td style="border: none;">
-<!--  Java library -->
-\include{doc} java_menu.md
+<caption>Core Reference Manual Modules</caption>
+<tr><th>Module</th><th colspan="4">Language</th><th>Description</th></tr>
+<tr>
+<th>Attributes (H5A)</th><td>@ref H5A "C"</td><td>@ref H5::Attribute "C++"</td><td>@ref FH5A "Fortran"</td><td>@ref JH5A "Java"</td><td>HDF5 attribute is a small metadata object describing the nature and/or intended usage of a primary data object.
 </td>
 </tr>
 <tr>
-<td><a href="./deprecated.html">Deprecated functions</a></td>
-<td>Functions with \ref ASYNC</td>
-<td>\ref api-compat-macros</td>
+<th>Datasets (H5D)</th><td>@ref H5D "C"</td><td>@ref H5::DataSet "C++"</td><td>@ref FH5D "Fortran"</td><td>@ref JH5D "Java"</td><td>Manage HDF5 datasets, including the transfer of data between memory and disk and the description of dataset properties.
+</td>
+</tr>
+<tr>
+<th>Dataspaces (H5S)</th><td>@ref H5S "C"</td><td>@ref H5::DataSpace "C++"</td><td>@ref FH5S "Fortran"</td><td>@ref JH5S "Java"</td><td>HDF5 dataspaces describe the shape of datasets in memory or in HDF5 files.
+</td>
+</tr>
+<tr>
+<th>Datatypes (H5T)</th><td>@ref H5T "C"</td><td>@ref H5::DataType "C++"</td><td>@ref FH5T "Fortran"</td><td>@ref JH5T "Java"</td><td>HDF5 datatypes describe the element type of HDF5 datasets and attributes.
+</td>
+</tr>
+<tr>
+<th>Error Handling (H5E)</th><td>@ref H5E "C"</td><td>@ref H5::Exception "C++"</td><td>@ref FH5E "Fortran"</td><td>@ref JH5E "Java"</td><td>HDF5 library error reporting.
+</td>
+</tr>
+<tr>
+<th>Event Set (H5ES)</th><td>@ref H5ES "C"</td><td>"C++"</td><td>"Fortran"</td><td>"Java"</td><td>HDF5 event set life cycle used with HDF5 VOL connectors that enable the asynchronous feature in HDF5.
+</td>
+</tr>
+<tr>
+<th>Files (H5F)</th><td>@ref H5F "C"</td><td>@ref H5::H5File "C++"</td><td>@ref FH5F "Fortran"</td><td>@ref JH5F "Java"</td><td>Manage HDF5 files.
+</td>
+</tr>
+<tr>
+<th>Filters (H5Z)</th><td>@ref H5Z "C"</td><td>"C++"</td><td>@ref FH5Z "Fortran"</td><td>@ref JH5Z "Java"</td><td>Manage HDF5 user-defined filters
+</td>
+</tr>
+<tr>
+<th>Groups (H5G)</th><td>@ref H5G "C"</td><td>@ref H5::Group "C++"</td><td>@ref FH5G "Fortran"</td><td>@ref JH5G "Java"</td><td>Manage HDF5 groups.
+</td>
+</tr>
+<tr>
+<th>Identifiers (H5I)</th><td>@ref H5I "C"</td><td>@ref H5::IdComponent "C++"</td><td>@ref FH5I "Fortran"</td><td>@ref JH5I "Java"</td><td>Manage identifiers defined by the HDF5 library.
+</td>
+</tr>
+<tr>
+<th>Library General (%H5)</th><td>@ref H5 "C"</td><td>@ref H5::H5Library "C++"</td><td>@ref FH5 "Fortran"</td><td>@ref JH5 "Java"</td><td>Manage the life cycle of HDF5 library instances.
+</td>
+</tr>
+<tr>
+<th>Links (H5L)</th><td>@ref H5L "C"</td><td>"C++"</td><td>@ref FH5L "Fortran"</td><td>@ref JH5L "Java"</td><td>Manage HDF5 links and link types.
+</td>
+</tr>
+<tr>
+<th>Objects (H5O)</th><td>@ref H5O "C"</td><td>"C++"</td><td>@ref FH5O "Fortran"</td><td>@ref JH5O "Java"</td><td>Manage HDF5 objects (groups, datasets, datatype objects).
+</td>
+</tr>
+<tr>
+<th>Property Lists (H5P)</th><td>@ref H5P "C"</td><td>@ref H5::PropList "C++"</td><td>@ref FH5P "Fortran"</td><td>@ref JH5P "Java"</td><td>HDF5 property lists are the main vehicle to configure the behavior of HDF5 API functions.
+</td>
+</tr>
+<tr>
+<th>Dynamically-loaded Plugins (H5PL)</th><td>@ref H5PL "C"</td><td>"C++"</td><td>"Fortran"</td><td>@ref JH5PL "Java"</td><td>Manage the loading behavior of HDF5 plugins.
+</td>
+</tr>
+<tr>
+<th>References (H5R)</th><td>@ref H5R "C"</td><td>"C++"</td><td>@ref FH5R "Fortran"</td><td>@ref JH5R "Java"</td><td>Manage HDF5 references (HDF5 objects, attributes, and selections on datasets a.k.a. dataset regions).
+</td>
+</tr>
+<tr>
+<th>VOL Connector (H5VL)</th><td>@ref H5VL "C"</td><td>"C++"</td><td>@ref FH5VL "Fortran"</td><td>@ref JH5VL "Java"</td><td>Manage HDF5 VOL connector plugins.
+</td>
+</tr>
+</table>
+<table>
+<caption>High-level Reference Manual Modules</caption>
+<tr><th>Module</th><th colspan="4"></th>Language<th>Description</th></tr>
+<tr>
+<th>HDF5 Lite APIs (H5LT,H5LD)</th><td>@ref H5LT "C"</td><td>"C++"</td><td>@ref FH5LT "Fortran"</td><td>"Java"</td><td>Functions to simplify creating and manipulating datasets, attributes and other features.
+</td>
+</tr>
+<tr>
+<th>HDF5 Images API (H5IM)</th><td>@ref H5IM "C"</td><td>"C++"</td><td>@ref FH5IM "Fortran"</td><td>"Java"</td><td>Creating and manipulating HDF5 datasets intended to be interpreted as images.
+</td>
+</tr>
+<tr>
+<th>HDF5 Table APIs (H5TB)</th><td>@ref H5TB "C"</td><td>"C++"</td><td>@ref FH5TB "Fortran"</td><td>"Java"</td><td>Creating and manipulating HDF5 datasets intended to be interpreted as tables.
+</td>
+</tr>
+<tr>
+<th>HDF5 Packet Table APIs (H5PT)</th><td>@ref H5PT "C"</td><td>"C++"</td><td>"Fortran"</td><td>"Java"</td><td>Creating and manipulating HDF5 datasets to support append- and read-only operations on table data.
+</td>
+</tr>
+<tr>
+<th>HDF5 Dimension Scales APIs (H5DS)</th><td>@ref H5DS "C"</td><td>"C++"</td><td>@ref FH5DS "Fortran"</td><td>"Java"</td><td>Creating and manipulating HDF5 datasets that are associated with the dimension of another HDF5 dataset.
+</td>
+</tr>
+<tr>
+<th>HDF5 Optimizations APIs (H5DO)</th><td>@ref H5DO "C"</td><td>"C++"</td><td>"Fortran"</td><td>"Java"</td><td>Bypassing default HDF5 behavior in order to optimize for specific use cases.
+</td>
+</tr>
+<tr>
+<th>Extensions (H5LR, H5LT)</th><td>@ref H5LR "C"</td><td>"C++"</td><td>"Fortran"</td><td>"Java"</td><td>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+<tr><td>
+<table>
+<caption>Additional Java Reference Manual Modules</caption>
+<tr>
+<td>@ref HDF5CONST</td><td>This class contains C constants and enumerated types of HDF5 library.
+</td>
+</tr>
+<tr>
+<td>@ref HDFNATIVE</td><td>This class encapsulates native methods to deal with arrays of numbers, converting from numbers to bytes and bytes to numbers.
+</td>
+</tr>
+<tr>
+<td>@ref HDFARRAY</td><td>This is a class for handling multidimensional arrays for HDF.
+</td>
+</tr>
+<tr>
+<td>@ref ERRORS</td><td>The class HDF5Exception returns errors from the Java HDF5 Interface.
+</td>
+</tr>
+</table>
+</td>
+</tr>
+<tr>
+<td>
+\ref predefined_datatypes_tables<br />
+<a href="./deprecated.html">Deprecated functions</a><br />
+Functions with \ref ASYNC<br />
+\ref api-compat-macros
+</td>
 </tr>
 </table>
 
