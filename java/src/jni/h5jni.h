@@ -259,15 +259,15 @@
     } while (0)
 /*
  * Above String macros may be incorrect, suggested code for getting a cstr from java
- * int jstr_to_cstr(JNIEnv *jenv, jstring jstr, char *cstr, size_t cstr_len)
+ * int jstr_to_cstr(JNIEnv *jenv, jstring j_str, char *c_str, size_t cstr_len)
  * {
- *     int32_t jlen, clen;
+ *     int32_t j_len, c_len;
  *
- *     clen = (*jenv)->GetStringUTFLength(jenv, jstr);
- *     if (clen > (int32_t)cstr_len)
+ *     c_len = (*jenv)->GetStringUTFLength(jenv, j_str);
+ *     if (c_len > (int32_t)cstr_len)
  *         return -ENAMETOOLONG;
- *     jlen = (*jenv)->GetStringLength(jenv, jstr);
- *     (*jenv)->GetStringUTFRegion(jenv, jstr, 0, jlen, cstr);
+ *     j_len = (*jenv)->GetStringLength(jenv, j_str);
+ *     (*jenv)->GetStringUTFRegion(jenv, j_str, 0, j_len, c_str);
  *     if ((*jenv)->ExceptionCheck(jenv))
  *         return -EIO;
  *     return 0;
