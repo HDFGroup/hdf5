@@ -146,6 +146,8 @@ CONTAINS
   !! \param buf       Buffer with data to be written to the dataset.
   !! \param errcode   \fortran_error
   !!
+  !! See C API: @ref herr_t H5LTmake_dataset(hid_t loc_id, const char *dset_name, int rank, const hsize_t *dims, hid_t type_id, const void *buffer);
+  !!
   SUBROUTINE h5ltmake_dataset_f(&
 #else
   SUBROUTINE h5ltmake_dataset_f_ptr( &
@@ -192,6 +194,8 @@ CONTAINS
   !! \param type_id   Identifier of the datatype to use when creating the dataset.
   !! \param buf       Buffer with data to be written to the dataset.
   !! \param errcode   \fortran_error
+  !!
+  !! See C API: @ref herr_t H5LTmake_dataset(hid_t loc_id, const char *dset_name, int rank, const hsize_t *dims, hid_t type_id, const void *buffer);
   !!
    SUBROUTINE h5ltmake_dataset_f(&
 #else
@@ -385,6 +389,8 @@ CONTAINS
   !! \param buf       Buffer with data to be written to the dataset.
   !! \param errcode   \fortran_error
   !!
+  !! See C API: @ref herr_t H5LTread_dataset(hid_t loc_id, const char *dset_name, hid_t type_id, void *buffer);
+  !!
   SUBROUTINE h5ltread_dataset_f(&
 #else
   SUBROUTINE h5ltread_dataset_f_ptr(&
@@ -425,6 +431,8 @@ CONTAINS
   !! \param buf       Buffer with data to be written to the dataset.
   !! \param dims      An array of the size of each dimension. Limited to seven dimensions.
   !! \param errcode   \fortran_error
+  !!
+  !! See C API: @ref herr_t H5LTread_dataset(hid_t loc_id, const char *dset_name, hid_t type_id, void *buffer);
   !!
    SUBROUTINE h5ltread_dataset_f(&
 #else
@@ -1109,6 +1117,8 @@ CONTAINS
   !!                  This value is used by H5Screate_simple() to create the dataspace.
   !! \param errcode   \fortran_error
   !!
+  !! See C API: @ref herr_t H5LTset_attribute_int(hid_t loc_id, const char *obj_name, const char *attr_name, const int *buffer, size_t size);
+  !!
   SUBROUTINE h5ltset_attribute_int_f(loc_id,&
        obj_name,&
        attr_name,&
@@ -1158,6 +1168,8 @@ CONTAINS
   !!                  This value is used by H5Screate_simple() to create the dataspace.
   !! \param errcode   \fortran_error
   !!
+  !! See C API: @ref herr_t H5LTset_attribute_float(hid_t loc_id, const char *obj_name, const char *attr_name, const float *buffer, size_t size);
+  !!
   SUBROUTINE h5ltset_attribute_float_f(loc_id,&
        obj_name,&
        attr_name,&
@@ -1206,6 +1218,8 @@ CONTAINS
   !!                  This value is used by H5Screate_simple() to create the dataspace.
   !! \param errcode   \fortran_error
   !!
+  !! See C API: @ref herr_t H5LTset_attribute_double(hid_t loc_id, const char *obj_name, const char *attr_name, const double *buffer, size_t size);
+  !!
   SUBROUTINE h5ltset_attribute_double_f(loc_id,&
        obj_name,&
        attr_name,&
@@ -1252,6 +1266,8 @@ CONTAINS
   !! \param attr_name The attribute name.
   !! \param buf       Buffer with data to be written to the attribute.
   !! \param errcode   \fortran_error
+  !!
+  !! See C API: @ref herr_t H5LTset_attribute_string(hid_t loc_id, const char *obj_name, const char *attr_name, const char *attr_data);
   !!
   SUBROUTINE h5ltset_attribute_string_f(loc_id,&
        obj_name,&
@@ -1302,6 +1318,8 @@ CONTAINS
   !! \param SizeOf_buf_type Size of \p buf&apos;s data type, in bytes.
   !! \param errcode         \fortran_error
   !!
+  !! See C API: @ref herr_t H5LTget_attribute(hid_t loc_id, const char *obj_name, const char *attr_name, hid_t mem_type_id, void *data);
+  !!
   SUBROUTINE h5ltget_attribute_f(loc_id,&
        obj_name,&
        attr_name,&
@@ -1349,6 +1367,8 @@ CONTAINS
   !! \param buf       Buffer with data to be written to the attribute.
   !! \param errcode   \fortran_error
   !!
+  !! See C API: @ref herr_t H5LTget_attribute_int(hid_t loc_id, const char *obj_name, const char *attr_name, int *data);
+  !!
   SUBROUTINE h5ltget_attribute_int_f(loc_id,&
        obj_name,&
        attr_name,&
@@ -1392,6 +1412,8 @@ CONTAINS
   !! \param buf       Buffer with data to be written to the attribute.
   !! \param errcode   \fortran_error
   !!
+  !! See C API: @ref herr_t H5LTget_attribute_float(hid_t loc_id, const char *obj_name, const char *attr_name, float *data);
+  !!
   SUBROUTINE h5ltget_attribute_float_f(loc_id,&
        obj_name,&
        attr_name,&
@@ -1433,6 +1455,8 @@ CONTAINS
   !! \param attr_name The attribute name.
   !! \param buf       Buffer with data to be written to the attribute.
   !! \param errcode   \fortran_error
+  !!
+  !! See C API: @ref herr_t H5LTget_attribute_double(hid_t loc_id, const char *obj_name, const char *attr_name, double *data);
   !!
   SUBROUTINE h5ltget_attribute_double_f(loc_id,&
        obj_name,&
@@ -1476,6 +1500,8 @@ CONTAINS
   !! \param attr_name The attribute name.
   !! \param buf       Buffer with data to be written to the attribute.
   !! \param errcode   \fortran_error
+  !!
+  !! See C API: @ref herr_t H5LTget_attribute_string(hid_t loc_id, const char *obj_name, const char *attr_name, char *data);
   !!
   SUBROUTINE h5ltget_attribute_string_f(loc_id,&
        obj_name,&
@@ -1531,6 +1557,8 @@ CONTAINS
   !! \param rank      The dimensionality of the dataset.
   !! \param errcode   \fortran_error
   !!
+  !! See C API: @ref herr_t H5LTget_dataset_ndims(hid_t loc_id, const char *dset_name, int *rank);
+  !!
   SUBROUTINE h5ltget_dataset_ndims_f(loc_id,&
        dset_name,&
        rank,&
@@ -1571,8 +1599,9 @@ CONTAINS
   !!
   !! \result Returns zero (false), a positive (true) or a negative (failure) value.
   !!
-  INTEGER FUNCTION h5ltfind_dataset_f(loc_id,&
-       dset_name)
+  !! See C API: @ref herr_t H5LTfind_dataset(hid_t loc_id, const char *name);
+  !!
+  INTEGER FUNCTION h5ltfind_dataset_f(loc_id, dset_name)
 
     IMPLICIT NONE
     INTEGER(hid_t),   INTENT(in) :: loc_id
@@ -1609,6 +1638,8 @@ CONTAINS
   !! \param type_class The class identifier. See H5Tget_class_f() for a list of class types.
   !! \param type_size  The size of the datatype in bytes.
   !! \param errcode    \fortran_error
+  !!
+  !! See C API: @ref herr_t H5LTget_dataset_info(hid_t loc_id, const char *dset_name, hsize_t *dims, H5T_class_t *type_class, size_t *type_size);
   !!
   SUBROUTINE h5ltget_dataset_info_f(loc_id,&
        dset_name,&
@@ -1662,6 +1693,8 @@ CONTAINS
   !! \param rank       The dimensionality of the attribute.
   !! \param errcode    \fortran_error
   !!
+  !! See C API: @ref herr_t H5LTget_attribute_ndims(hid_t loc_id, const char *obj_name, const char *attr_name, int *rank);
+  !!
   SUBROUTINE h5ltget_attribute_ndims_f(loc_id,&
        obj_name,&
        attr_name,&
@@ -1710,6 +1743,8 @@ CONTAINS
   !! \param type_class The class identifier. For a list of valid class types see: H5Tget_class_f().
   !! \param type_size  The size of the datatype in bytes.
   !! \param errcode    \fortran_error
+  !!
+  !! See C API: @ref herr_t H5LTget_attribute_info(hid_t loc_id, const char *obj_name, const char *attr_name, hsize_t *dims, H5T_class_t *type_class, size_t *type_size);
   !!
   SUBROUTINE h5ltget_attribute_info_f(loc_id,&
        obj_name,&
@@ -1763,6 +1798,8 @@ CONTAINS
   !! \param check_object_valid	Indicates whether to check if the final component of the path resolves to a valid object.
   !! \param path_valid          Object status.
   !! \param errcode             \fortran_error
+  !!
+  !! See C API: @ref htri_t H5LTpath_valid(hid_t loc_id, const char *path, hbool_t check_object_valid);
   !!
   SUBROUTINE h5ltpath_valid_f(loc_id, path, check_object_valid, path_valid, errcode)
 

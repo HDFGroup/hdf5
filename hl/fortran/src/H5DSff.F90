@@ -50,6 +50,8 @@ CONTAINS
 !! \param errcode \fortran_error
 !! \param dimname The dimension name
 !!
+!! See C API: @ref herr_t H5DSset_scale(hid_t dsid, const char *dimname);
+!!
   SUBROUTINE H5DSset_scale_f( dsid, errcode, dimname)
 
     IMPLICIT NONE
@@ -91,6 +93,8 @@ CONTAINS
 !! \param idx     The dimension of \p did that \p dsid is associated with.
 !! \param errcode \fortran_error
 !!
+!! See C API: @ref herr_t H5DSattach_scale(hid_t did, hid_t dsid, unsigned int idx);
+!!
   SUBROUTINE H5DSattach_scale_f( did, dsid, idx, errcode)
 
     IMPLICIT NONE
@@ -129,6 +133,8 @@ CONTAINS
 !! \param errcode \fortran_error
 !!
 
+!! See C API: @ref herr_t H5DSdetach_scale(hid_t did, hid_t dsid, unsigned int idx);
+!!
   SUBROUTINE H5DSdetach_scale_f( did, dsid, idx, errcode)
 
     IMPLICIT NONE
@@ -166,6 +172,8 @@ CONTAINS
 !! \param idx         The dimension of \p did that \p dsid is associated with.
 !! \param is_attached If dimension scale \p dsid is currently attached to dimension \p idx of dataset \p did.
 !! \param errcode     \fortran_error
+!!
+!! See C API: @ref  htri_t H5DSis_attached(hid_t did, hid_t dsid, unsigned int idx);
 !!
   SUBROUTINE H5DSis_attached_f( did, dsid, idx, is_attached, errcode)
 
@@ -216,6 +224,8 @@ CONTAINS
 !! \param is_scale    If is a Dimension Scale.
 !! \param errcode     \fortran_error
 !!
+!! See C API: @ref  htri_t H5DSis_scale(hid_t did);
+!!
   SUBROUTINE H5DSis_scale_f( did, is_scale, errcode)
 
     IMPLICIT NONE
@@ -255,6 +265,8 @@ CONTAINS
 !! \param idx     The dimension.
 !! \param label   The label.
 !! \param errcode \fortran_error
+!!
+!! See C API: @ref herr_t H5DSset_label(hid_t did, unsigned int idx, const char *label);
 !!
   SUBROUTINE H5DSset_label_f( did, idx, label, errcode)
 
@@ -299,6 +311,8 @@ CONTAINS
 !! \param size    The length of the \p label buffer.
 !! \param errcode \fortran_error
 !!
+!! See C API: @ref ssize_t H5DSget_label(hid_t did, unsigned int idx, char *label, size_t size);
+!!
   SUBROUTINE H5DSget_label_f( did, idx, label, size, errcode)
 
     IMPLICIT NONE
@@ -339,6 +353,8 @@ CONTAINS
 !! \param size    Size in bytes, of the name buffer.
 !! \param errcode \fortran_error
 !!
+!! See C API: @ref ssize_t H5DSget_scale_name(hid_t did, char *name, size_t size);
+!!
   SUBROUTINE H5DSget_scale_name_f(did, name, size, errcode)
 
     IMPLICIT NONE
@@ -373,6 +389,8 @@ CONTAINS
 !! \param idx        The dimension of \p did to query.
 !! \param num_scales Number of Dimension Scales associated with \p did.
 !! \param errcode    \fortran_error
+!!
+!! See C API: @ref int H5DSget_num_scales(hid_t did, unsigned int idx);
 !!
   SUBROUTINE H5DSget_num_scales_f( did, idx, num_scales, errcode)
 

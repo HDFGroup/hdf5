@@ -897,61 +897,58 @@ CONTAINS
     DEALLOCATE(def_stride)
 
   END SUBROUTINE h5sselect_hyperslab_f
-!  !$!
-!>
-!!  !$!
-!!  !$! NAME
-!!  !$!            h5scombine_hyperslab_f
-!!  !$!
-!!  !$! PURPOSE
-!!  !$!      Combine a hyperslab selection with the current
-!!  !$!               selection for a dataspace
-!!  !$!
-!!  !$! INPUTS
-!!  !$!            space_id      - dataspace of selection to use
-!!  !$!            operator      - flag, valid values are:
-!!  !$!                          H5S_SELECT_NOOP_F
-!!  !$!                          H5S_SELECT_SET_F
-!!  !$!                          H5S_SELECT_OR_F
-!!  !$!                          H5S_SELECT_AND_F
-!!  !$!                          H5S_SELECT_XOR_F
-!!  !$!                          H5S_SELECT_NOTB_F
-!!  !$!                          H5S_SELECT_NOTA_F
-!!  !$!                          H5S_SELECT_APPEND_F
-!!  !$!                          H5S_SELECT_PREPEND_F
-!!  !$!            start            - array with hyperslab offsets
-!!  !$!            count            - number of blocks included in the
-!!  !$!                          hyperslab
-!!  !$! OUTPUTS
-!!  !$!               hyper_id        - identifier for the new hyperslab
-!!  !$!            hdferr:            - error code
-!!  !$!                               Success:  0
-!!  !$!                               Failure: -1
-!!  !$! OPTIONAL PARAMETERS
-!!  !$!            stride            - array with hyperslab strides
-!!  !$!            block            - array with hyperslab block sizes
-!!  !$!
-!!  !$! AUTHOR
-!!  !$!      Elena Pourmal
-!!  !$!            October 7, 2002
-!!  !$!
-!!  !$! HISTORY
-!!  !$!
-!!  !$!
-!!  !$! NOTES
-!!  !$! Commented out until 1.6 ? 10/08/2002
-!!  !$!
-!!  !$! SOURCE
+!
+! NAME
+!      h5scombine_hyperslab_f
+!
+! PURPOSE
+!      Combine a hyperslab selection with the current
+!               selection for a dataspace
+!
+! INPUTS
+!            space_id      - dataspace of selection to use
+!            operator      - flag, valid values are:
+!                          H5S_SELECT_NOOP_F
+!                          H5S_SELECT_SET_F
+!                          H5S_SELECT_OR_F
+!                          H5S_SELECT_AND_F
+!                          H5S_SELECT_XOR_F
+!                          H5S_SELECT_NOTB_F
+!                          H5S_SELECT_NOTA_F
+!                          H5S_SELECT_APPEND_F
+!                          H5S_SELECT_PREPEND_F
+!            start            - array with hyperslab offsets
+!            count            - number of blocks included in the
+!                          hyperslab
+! OUTPUTS
+!               hyper_id        - identifier for the new hyperslab
+!            hdferr:            - error code
+!                               Success:  0
+!                               Failure: -1
+! OPTIONAL PARAMETERS
+!            stride            - array with hyperslab strides
+!            block            - array with hyperslab block sizes
+!
+! AUTHOR
+!      Elena Pourmal
+!            October 7, 2002
+!
+! HISTORY
+!
+!
+! NOTES
+! Commented out until 1.6 ? 10/08/2002
+!
+! SOURCE
 !  SUBROUTINE h5scombine_hyperslab_f(space_id, operator, start, count, &
 !  hyper_id,  hdferr, stride, block)
 !  IMPLICIT NONE
-
-                                    !  H5S_SELECT_AND_F
-                                    !  H5S_SELECT_XOR_F
-                                    !  H5S_SELECT_NOTB_F
-                                    !  H5S_SELECT_NOTA_F
-                                    !  H5S_SELECT_APPEND_F
-                                    !  H5S_SELECT_PREPEND_F
+   !  H5S_SELECT_AND_F
+   !  H5S_SELECT_XOR_F
+   !  H5S_SELECT_NOTB_F
+   !  H5S_SELECT_NOTA_F
+   !  H5S_SELECT_APPEND_F
+   !  H5S_SELECT_PREPEND_F
                                                 !
 
 !  INTEGER :: rank
@@ -1019,49 +1016,46 @@ CONTAINS
 
 !  END SUBROUTINE h5scombine_hyperslab_f
 
-!  !$!
-!>
-!!  !$!
-!!  !$! NAME
-!!  !$!            h5scombine_select_f
-!!  !$!
-!!  !$! PURPOSE
-!!  !$!      Combine two hyperslab selections with an operation
-!!  !$!               and return a dataspace with resulting selection.
-!!  !$!
-!!  !$! INPUTS
-!!  !$!            space1_id      - dataspace of selection to use
-!!  !$!            operator      - flag, valid values are:
-!!  !$!                          H5S_SELECT_NOOP_F
-!!  !$!                          H5S_SELECT_SET_F
-!!  !$!                          H5S_SELECT_OR_F
-!!  !$!                          H5S_SELECT_AND_F
-!!  !$!                          H5S_SELECT_XOR_F
-!!  !$!                          H5S_SELECT_NOTB_F
-!!  !$!                          H5S_SELECT_NOTA_F
-!!  !$!                          H5S_SELECT_APPEND_F
-!!  !$!                          H5S_SELECT_PREPEND_F
-!!  !$!            space2_id      - dataspace of selection to use
-!!  !$! OUTPUTS
-!!  !$!               ds_id           - idataspace identifier with the new selection
-!!  !$!            hdferr:            - error code
-!!  !$!                               Success:  0
-!!  !$!                               Failure: -1
-!!  !$! OPTIONAL PARAMETERS            - NONE
-!!  !$!
-!!  !$! AUTHOR
-!!  !$!      Elena Pourmal
-!!  !$!            October 7, 2002
-!!  !$!
-!!  !$! HISTORY
-!!  !$!
-!!  !$!
-!!  !$! NOTES commented out until 1.6 release(?) 10/08/2002
-!!  !$!
 !
-!!  ! SOURCE
-!  !$          SUBROUTINE h5scombine_select_f(space1_id, operator, space2_id, &
-!  ds_id,  hdferr)
+! NAME
+!   h5scombine_select_f
+!
+! PURPOSE
+!      Combine two hyperslab selections with an operation
+!               and return a dataspace with resulting selection.
+!
+! INPUTS
+!            space1_id      - dataspace of selection to use
+!            operator      - flag, valid values are:
+!                          H5S_SELECT_NOOP_F
+!                          H5S_SELECT_SET_F
+!                          H5S_SELECT_OR_F
+!                          H5S_SELECT_AND_F
+!                          H5S_SELECT_XOR_F
+!                          H5S_SELECT_NOTB_F
+!                          H5S_SELECT_NOTA_F
+!                          H5S_SELECT_APPEND_F
+!                          H5S_SELECT_PREPEND_F
+!            space2_id      - dataspace of selection to use
+! OUTPUTS
+!               ds_id           - idataspace identifier with the new selection
+!            hdferr:            - error code
+!                               Success:  0
+!                               Failure: -1
+! OPTIONAL PARAMETERS            - NONE
+!
+! AUTHOR
+!      Elena Pourmal
+!            October 7, 2002
+!
+! HISTORY
+!
+!
+! NOTES commented out until 1.6 release(?) 10/08/2002
+!
+!
+! SOURCE
+!  SUBROUTINE h5scombine_select_f(space1_id, operator, space2_id, s_id,  hdferr)
 !  IMPLICIT NONE
 
                                     !  H5S_SELECT_AND_F
@@ -1085,47 +1079,45 @@ CONTAINS
 
 !  END SUBROUTINE h5scombine_select_f
 
-!  !$!
-!>
-!!  !$!
-!!  !$! NAME
-!!  !$!            h5smodify_select_f
-!!  !$!
-!!  !$! PURPOSE
-!!  !$!      Refine a hyperslab selection with an operation
-!!  !$!               using second hyperslab
-!!  !$!
-!!  !$! INPUTS
-!!  !$!            space1_id      - dataspace of selection  to modify
-!!  !$!            operator      - flag, valid values are:
-!!  !$!                          H5S_SELECT_NOOP_F
-!!  !$!                          H5S_SELECT_SET_F
-!!  !$!                          H5S_SELECT_OR_F
-!!  !$!                          H5S_SELECT_AND_F
-!!  !$!                          H5S_SELECT_XOR_F
-!!  !$!                          H5S_SELECT_NOTB_F
-!!  !$!                          H5S_SELECT_NOTA_F
-!!  !$!                          H5S_SELECT_APPEND_F
-!!  !$!                          H5S_SELECT_PREPEND_F
-!!  !$!            space2_id      - dataspace of selection to use
-!!  !$!
-!!  !$! OUTPUTS
-!!  !$!            hdferr:            - error code
-!!  !$!                               Success:  0
-!!  !$!                               Failure: -1
-!!  !$! OPTIONAL PARAMETERS            - NONE
-!!  !$!
-!!  !$! AUTHOR
-!!  !$!      Elena Pourmal
-!!  !$!            October 7, 2002
-!!  !$!
-!!  !$! HISTORY
-!!  !$!
-!!  !$!
-!!  !$! NOTESCommented out until 1.6 release(?) 10/08/2002 EIP
-!!  !$!
 !
-!!  ! SOURCE
+! NAME
+!            h5smodify_select_f
+!
+! PURPOSE
+!      Refine a hyperslab selection with an operation
+!               using second hyperslab
+!
+! INPUTS
+!            space1_id      - dataspace of selection  to modify
+!            operator      - flag, valid values are:
+!                          H5S_SELECT_NOOP_F
+!                          H5S_SELECT_SET_F
+!                          H5S_SELECT_OR_F
+!                          H5S_SELECT_AND_F
+!                          H5S_SELECT_XOR_F
+!                          H5S_SELECT_NOTB_F
+!                          H5S_SELECT_NOTA_F
+!                          H5S_SELECT_APPEND_F
+!                          H5S_SELECT_PREPEND_F
+!            space2_id      - dataspace of selection to use
+!
+! OUTPUTS
+!            hdferr:            - error code
+!                               Success:  0
+!                               Failure: -1
+! OPTIONAL PARAMETERS            - NONE
+!
+! AUTHOR
+!      Elena Pourmal
+!            October 7, 2002
+!
+! HISTORY
+!
+!
+! NOTESCommented out until 1.6 release(?) 10/08/2002 EIP
+!
+!
+! SOURCE
 !  SUBROUTINE h5smodify_select_f(space1_id, operator, space2_id, &
 !  hdferr)
 !  IMPLICIT NONE
@@ -1136,7 +1128,7 @@ CONTAINS
                                     !  H5S_SELECT_NOTA_F
                                     !  H5S_SELECT_APPEND_F
                                     !  H5S_SELECT_PREPEND_F
-                                                !
+ !
 
 
 !  space2_id)

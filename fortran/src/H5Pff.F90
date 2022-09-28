@@ -392,7 +392,7 @@ CONTAINS
 !! \param dims   Array with dimension sizes for each chunk.
 !! \param hdferr \fortran_error
 !!
-!! See C API: @ref herr_t H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/]);
+!! See C API: @ref herr_t H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[]);
 !!
   SUBROUTINE h5pset_chunk_f(prp_id, ndims, dims, hdferr)
     IMPLICIT NONE
@@ -492,7 +492,7 @@ CONTAINS
 !! \param shhdr    Shared object header version number.
 !! \param hdferr   \fortran_error
 !!
-!! See C API: @ref herr_t H5Pget_version(hid_t plist_id, unsigned *boot , unsigned *freelist /*out*/, unsigned *stab, unsigned *shhdr /*out*/);
+!! See C API: @ref herr_t H5Pget_version(hid_t plist_id, unsigned *boot , unsigned *freelist, unsigned *stab, unsigned *shhdr);
 !!
   SUBROUTINE h5pget_version_f(prp_id, boot, freelist, &
        stab, shhdr, hdferr)
@@ -530,7 +530,9 @@ CONTAINS
 !! \param size   Size of the user-block in bytes.
 !! \param hdferr \fortran_error
 !!
-  SUBROUTINE h5pset_userblock_f (prp_id, size, hdferr)
+!! See C API: @ref herr_t H5Pset_userblock(hid_t plist_id, hsize_t size);
+!!
+  SUBROUTINE h5pset_userblock_f(prp_id, size, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id
     INTEGER(HSIZE_T), INTENT(IN) :: size
@@ -586,7 +588,9 @@ CONTAINS
 !! \param sizeof_size Size of an object length in bytes.
 !! \param hdferr      \fortran_error
 !!
-  SUBROUTINE h5pset_sizes_f (prp_id, sizeof_addr, sizeof_size, hdferr)
+!! See C API: @ref herr_t H5Pset_sizes(hid_t plist_id, size_t sizeof_addr, size_t sizeof_size);
+!!
+  SUBROUTINE h5pset_sizes_f(prp_id, sizeof_addr, sizeof_size, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id
     INTEGER(SIZE_T), INTENT(IN) :: sizeof_addr
@@ -616,7 +620,7 @@ CONTAINS
 !! \param sizeof_size Size of an object length in bytes.
 !! \param hdferr      \fortran_error
 !!
-!! See C API: @ref herr_t H5Pget_sizes(hid_t plist_id, size_t *sizeof_addr , size_t *sizeof_size /*out*/);
+!! See C API: @ref herr_t H5Pget_sizes(hid_t plist_id, size_t *sizeof_addr , size_t *sizeof_size);
 !!
   SUBROUTINE h5pget_sizes_f(prp_id, sizeof_addr, sizeof_size, hdferr)
     IMPLICIT NONE
@@ -648,7 +652,9 @@ CONTAINS
 !! \param lk      Symbol table node size.
 !! \param hdferr  \fortran_error
 !!
-  SUBROUTINE h5pset_sym_k_f (prp_id, ik, lk, hdferr)
+!! See C API: @ref herr_t H5Pset_sym_k(hid_t plist_id, unsigned ik, unsigned lk);
+!!
+  SUBROUTINE h5pset_sym_k_f(prp_id, ik, lk, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id
     INTEGER, INTENT(IN) :: ik
@@ -677,7 +683,7 @@ CONTAINS
 !! \param lk     Symbol table node 1/2 size.
 !! \param hdferr \fortran_error
 !!
-!! See C API: @ref herr_t H5Pget_sym_k(hid_t plist_id, unsigned *ik , unsigned *lk /*out*/);
+!! See C API: @ref herr_t H5Pget_sym_k(hid_t plist_id, unsigned *ik, unsigned *lk);
 !!
   SUBROUTINE h5pget_sym_k_f(prp_id, ik, lk, hdferr)
     IMPLICIT NONE
@@ -707,7 +713,9 @@ CONTAINS
 !! \param ik      1/2 rank of chunked storage B-tree
 !! \param hdferr  \fortran_error
 !!
-  SUBROUTINE h5pset_istore_k_f (prp_id, ik, hdferr)
+!! See C API: @ref herr_t H5Pset_istore_k(hid_t plist_id, unsigned ik);
+!!
+  SUBROUTINE h5pset_istore_k_f(prp_id, ik, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id
     INTEGER, INTENT(IN) :: ik
@@ -791,7 +799,9 @@ CONTAINS
 !! \param prp_id File access property list identifier.
 !! \param hdferr \fortran_error
 !!
-  SUBROUTINE h5pset_fapl_stdio_f (prp_id, hdferr)
+!! See C API: @ref herr_t H5Pset_fapl_stdio(hid_t fapl_id);
+!!
+  SUBROUTINE h5pset_fapl_stdio_f(prp_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id
     INTEGER, INTENT(OUT) :: hdferr
@@ -815,7 +825,9 @@ CONTAINS
 !! \param prp_id File access property list identifier.
 !! \param hdferr \fortran_error
 !!
-  SUBROUTINE h5pset_fapl_sec2_f (prp_id, hdferr)
+!! See C API: @ref herr_t H5Pset_fapl_sec2(hid_t fapl_id);
+!!
+  SUBROUTINE h5pset_fapl_sec2_f(prp_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id
     INTEGER, INTENT(OUT) :: hdferr
@@ -873,7 +885,7 @@ CONTAINS
 !! \param alignment Alignment value.
 !! \param hdferr    \fortran_error
 !!
-!! See C API: @ref herr_t H5Pget_alignment(hid_t fapl_id, hsize_t *threshold , hsize_t *alignment /*out*/);
+!! See C API: @ref herr_t H5Pget_alignment(hid_t fapl_id, hsize_t *threshold, hsize_t *alignment);
 !!
   SUBROUTINE h5pget_alignment_f(prp_id, threshold,  alignment, hdferr)
     IMPLICIT NONE
@@ -904,6 +916,8 @@ CONTAINS
 !! \param increment     Size, in bytes, of memory increments.
 !! \param backing_store Boolean flag indicating whether to write the file contents to disk when the file is closed.
 !! \param hdferr        \fortran_error
+!!
+!! See C API: @ref herr_t H5Pget_fapl_core(hid_t fapl_id, size_t *increment, hbool_t *backing_store);
 !!
   SUBROUTINE h5pset_fapl_core_f(prp_id, increment, backing_store, hdferr)
     IMPLICIT NONE
@@ -936,6 +950,8 @@ CONTAINS
 !! \param increment     Size, in bytes, of memory increments.
 !! \param backing_store Boolean flag indicating whether to write the file contents to disk when the file is closed.
 !! \param hdferr        \fortran_error
+!!
+!! See C API: @ref herr_t H5Pget_fapl_core(hid_t fapl_id, size_t *increment, hbool_t *backing_store);
 !!
   SUBROUTINE h5pget_fapl_core_f(prp_id, increment, backing_store, hdferr)
     IMPLICIT NONE
@@ -971,6 +987,8 @@ CONTAINS
 !! \param memb_plist Identifier of the file access property list to be used for each family member
 !! \param hdferr     \fortran_error
 !!
+!! See C API: @ref herr_t H5Pset_fapl_family(hid_t fapl_id, hsize_t memb_size, hid_t memb_fapl_id);
+!!
   SUBROUTINE h5pset_fapl_family_f(prp_id, memb_size, memb_plist , hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id
@@ -1000,6 +1018,8 @@ CONTAINS
 !! \param memb_size  Size in bytes of each file member.
 !! \param memb_plist Identifier of the file access property list to be used for each family member
 !! \param hdferr     \fortran_error
+!!
+!! See C API: @ref herr_t H5Pget_fapl_family(hid_t fapl_id, hsize_t *memb_size, hid_t *memb_fapl_id);
 !!
   SUBROUTINE h5pget_fapl_family_f(prp_id, memb_size, memb_plist , hdferr)
     IMPLICIT NONE
@@ -1071,7 +1091,7 @@ CONTAINS
 !! \param rdcc_w0     Preemption policy (0 or 1).
 !! \param hdferr      \fortran_error
 !!
-!! See C API: @ref herr_t H5Pget_cache(hid_t plist_id, int *mdc_nelmts, /* out */ size_t *rdcc_nslots, size_t *rdcc_nbytes /*out*/, double *rdcc_w0);
+!! See C API: @ref herr_t H5Pget_cache(hid_t plist_id, int *mdc_nelmts, size_t *rdcc_nslots, size_t *rdcc_nbytes, double *rdcc_w0);
 !!
   SUBROUTINE h5pget_cache_f(prp_id, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, rdcc_w0, hdferr)
     IMPLICIT NONE
@@ -1108,6 +1128,8 @@ CONTAINS
 !! \param raw_ext    Name extension for the raw file filename.
 !! \param raw_plist  Identifier of the raw file access property list.
 !! \param hdferr     \fortran_error
+!!
+!! See C API: herr_t H5Pset_fapl_split(hid_t fapl, const char *meta_ext, hid_t meta_plist_id, const char *raw_ext, hid_t raw_plist_id);
 !!
   SUBROUTINE h5pset_fapl_split_f(prp_id, meta_ext, meta_plist, raw_ext, raw_plist, hdferr)
     IMPLICIT NONE
@@ -1147,7 +1169,9 @@ CONTAINS
 !! \param gc_reference Flag for setting garbage collection on and off (1 or 0).
 !! \param hdferr       \fortran_error
 !!
-  SUBROUTINE h5pset_gc_references_f (prp_id, gc_reference, hdferr)
+!! See C API: herr_t H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref);
+!!
+  SUBROUTINE h5pset_gc_references_f(prp_id, gc_reference, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id
     INTEGER, INTENT(IN) :: gc_reference
@@ -1207,7 +1231,9 @@ CONTAINS
 !!               \li H5D_CHUNKED_F
 !! \param hdferr \fortran_error
 !!
-  SUBROUTINE h5pset_layout_f (prp_id, layout, hdferr)
+!! See C API: @ref herr_t H5Pset_layout(hid_t plist_id, H5D_layout_t layout);
+!!
+  SUBROUTINE h5pset_layout_f(prp_id, layout, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id
     INTEGER, INTENT(IN) :: layout
@@ -1238,7 +1264,9 @@ CONTAINS
 !!               \li H5D_CHUNKED_F
 !! \param hdferr \fortran_error
 !!
-  SUBROUTINE h5pget_layout_f (prp_id, layout, hdferr)
+!! See C API: @ref H5D_layout_t H5Pget_layout(hid_t plist_id);
+!!
+  SUBROUTINE h5pget_layout_f(prp_id, layout, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id
     INTEGER, INTENT(OUT) :: layout
@@ -1304,7 +1332,7 @@ CONTAINS
 !! \param nfilters Number of filters in the pipeline.
 !! \param hdferr   \fortran_error
 !!
-  SUBROUTINE h5pget_nfilters_f (prp_id, nfilters, hdferr)
+  SUBROUTINE h5pget_nfilters_f(prp_id, nfilters, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id
     INTEGER, INTENT(OUT) :: nfilters
@@ -1337,7 +1365,7 @@ CONTAINS
 !! \param name          Buffer to retrieve filter name.
 !! \param hdferr        \fortran_error
 !!
-!! See C API: @ref H5Z_filter_t H5Pget_filter2(hid_t plist_id, unsigned idx, unsigned int *flags , size_t *cd_nelmts, unsigned cd_values[] /*out*/, size_t namelen, char name[], unsigned *filter_config);
+!! See C API: @ref H5Z_filter_t H5Pget_filter2(hid_t plist_id, unsigned idx, unsigned int *flags , size_t *cd_nelmts, unsigned cd_values[], size_t namelen, char name[], unsigned *filter_config);
 !!
   SUBROUTINE h5pget_filter_f(prp_id, filter_number, flags, cd_nelmts, cd_values, namelen, name, filter_id, hdferr)
     IMPLICIT NONE
@@ -1425,7 +1453,9 @@ CONTAINS
 !! \param count  Number of external files for the specified dataset.
 !! \param hdferr \fortran_error
 !!
-  SUBROUTINE h5pget_external_count_f (prp_id, count, hdferr)
+!! See C API: int H5Pget_external_count(hid_t plist_id);
+!!
+  SUBROUTINE h5pget_external_count_f(prp_id, count, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id
     INTEGER, INTENT(OUT) :: count
@@ -1456,7 +1486,7 @@ CONTAINS
 !! \param bytes     Size of the external file data.
 !! \param hdferr    \fortran_error
 !!
-!! See C API: @ref herr_t H5Pget_external(hid_t plist_id, unsigned idx, size_t name_size, char *name , off_t *offset, hsize_t *size /*out*/);
+!! See C API: @ref herr_t H5Pget_external(hid_t plist_id, unsigned idx, size_t name_size, char *name , off_t *offset, hsize_t *size);
 !!
   SUBROUTINE h5pget_external_f(prp_id, idx, name_size, name, offset,bytes, hdferr)
     IMPLICIT NONE
@@ -1531,7 +1561,7 @@ CONTAINS
 !! \param right  The B-tree split ratio for right-most nodes.
 !! \param hdferr \fortran_error
 !!
-!! See C API: @ref herr_t H5Pget_btree_ratios(hid_t plist_id, double *left , double *middle /*out*/, double *right);
+!! See C API: @ref herr_t H5Pget_btree_ratios(hid_t plist_id, double *left , double *middle, double *right);
 !!
   SUBROUTINE h5pget_btree_ratios_f(prp_id, left, middle, right, hdferr)
     IMPLICIT NONE
@@ -1698,7 +1728,7 @@ CONTAINS
 !! \param size     Buffer size.
 !! \param hdferr   \fortran_error
 !!
-!! See C API: @ref size_t H5Pget_buffer(hid_t plist_id, void **tconv , void **bkg /*out*/);
+!! See C API: @ref size_t H5Pget_buffer(hid_t plist_id, void **tconv, void **bkg);
 !!
   SUBROUTINE h5pget_buffer_f(plist_id, size, hdferr)
     IMPLICIT NONE
@@ -2238,7 +2268,7 @@ CONTAINS
 !!                      truncated to fit into provided user buffer.
 !! \param hdferr \fortran_error
 !!
-!! See C API: @ref char *H5Pget_class_name(hid_t pclass_id);
+!! See C API: @ref char* H5Pget_class_name(hid_t pclass_id);
 !!
   SUBROUTINE h5pget_class_name_f(prp_id, name, size, hdferr)
     IMPLICIT NONE
@@ -2855,7 +2885,7 @@ CONTAINS
 !! \param name      Buffer to retrieve filter name.
 !! \param hdferr    \fortran_error
 !!
-!! See C API: @ref herr_t H5Pget_filter_by_id2(hid_t plist_id, H5Z_filter_t filter_id, unsigned int *flags , size_t *cd_nelmts, unsigned cd_values[] /*out*/, size_t namelen, char name[], unsigned *filter_config /*out*/);
+!! See C API: @ref herr_t H5Pget_filter_by_id2(hid_t plist_id, H5Z_filter_t filter_id, unsigned int *flags, size_t *cd_nelmts, unsigned cd_values[], size_t namelen, char name[], unsigned *filter_config);
 !!
   SUBROUTINE h5pget_filter_by_id_f(prp_id, filter_id, flags, cd_nelmts, cd_values, namelen, name, hdferr)
     IMPLICIT NONE
@@ -2900,7 +2930,7 @@ CONTAINS
 !! \param cd_values Auxiliary data for the filter.
 !! \param hdferr    \fortran_error
 !!
-!! See C API: @ref herr_t H5Pmodify_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[/*cd_nelmts*/]);
+!! See C API: @ref herr_t H5Pmodify_filter(hid_t plist_id, H5Z_filter_t filter, unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[]);
 !!
   SUBROUTINE h5pmodify_filter_f(prp_id, filter, flags, cd_nelmts, cd_values,  hdferr)
     IMPLICIT NONE
@@ -3351,6 +3381,8 @@ CONTAINS
 !! \param crt_intermed_group Specifies whether to create intermediate groups upon the creation of an object.
 !! \param hdferr             \fortran_error
 !!
+!! See C API: @ref herr_t H5Pget_create_intermediate_group(hid_t plist_id, unsigned *crt_intmd);
+!!
   SUBROUTINE h5pset_create_inter_group_f(lcpl_id, crt_intermed_group, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: lcpl_id
@@ -3379,7 +3411,7 @@ CONTAINS
 !! \param crt_order_flags Creation order flag(s).
 !! \param hdferr          \fortran_error
 !!
-!! See C API: @ref herr_t H5Pget_link_creation_order(hid_t plist_id, unsigned *crt_order_flags /* out */);
+!! See C API: @ref herr_t H5Pget_link_creation_order(hid_t plist_id, unsigned *crt_order_flags);
 !!
   SUBROUTINE h5pget_link_creation_order_f(gcpl_id, crt_order_flags, hdferr)
     IMPLICIT NONE
@@ -3649,7 +3681,7 @@ SUBROUTINE h5pget_data_transform_f(plist_id, expression, hdferr, size)
 !! \param est_name_len    Estimated average length of link names.
 !! \param hdferr          \fortran_error
 !!
-!! See C API: @ref herr_t H5Pget_est_link_info(hid_t plist_id, unsigned *est_num_entries /* out */, unsigned *est_name_len /* out */);
+!! See C API: @ref herr_t H5Pget_est_link_info(hid_t plist_id, unsigned *est_num_entries, unsigned *est_name_len);
 !!
   SUBROUTINE h5pget_est_link_info_f(gcpl_id, est_num_entries, est_name_len, hdferr)
     IMPLICIT NONE
@@ -3778,6 +3810,8 @@ SUBROUTINE h5pset_link_phase_change_f(gcpl_id, max_compact, min_dense, hdferr)
 !! \param cbuf_size  Copy buffer size.
 !! \param hdferr     \fortran_error
 !!
+!! See C API: @ref herr_t H5Pset_fapl_direct(hid_t fapl_id, size_t alignment, size_t block_size, size_t cbuf_size);
+!!
 SUBROUTINE h5pset_fapl_direct_f(fapl_id, alignment, block_size, cbuf_size, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: fapl_id
@@ -3810,6 +3844,8 @@ SUBROUTINE h5pset_fapl_direct_f(fapl_id, alignment, block_size, cbuf_size, hdfer
 !! \param block_size File system block size.
 !! \param cbuf_size  Copy buffer size.
 !! \param hdferr     \fortran_error
+!!
+!! See C API: @ref H5Pget_fapl_direct(hid_t fapl_id, size_t *boundary, size_t *block_size, size_t *cbuf_size);
 !!
   SUBROUTINE h5pget_fapl_direct_f(fapl_id, alignment, block_size, cbuf_size, hdferr)
     IMPLICIT NONE
@@ -4001,6 +4037,8 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !! \param crt_intermed_group Specifying whether to create intermediate groups upon the creation of an object.
 !! \param hdferr             \fortran_error
 !!
+!! See C API: @ref herr_t H5Pget_create_intermediate_group(hid_t plist_id, unsigned *crt_intmd);
+!!
   SUBROUTINE h5pget_create_inter_group_f(lcpl_id, crt_intermed_group, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: lcpl_id
@@ -4083,7 +4121,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !! \param rdcc_w0     Preemption policy.
 !! \param hdferr      \fortran_error
 !!
-!! See C API: @ref herr_t H5Pget_chunk_cache(hid_t dapl_id, size_t *rdcc_nslots , size_t *rdcc_nbytes /*out*/, double *rdcc_w0);
+!! See C API: @ref herr_t H5Pget_chunk_cache(hid_t dapl_id, size_t *rdcc_nslots , size_t *rdcc_nbytes, double *rdcc_w0);
 !!
   SUBROUTINE h5pget_chunk_cache_f(dapl_id, rdcc_nslots, rdcc_nbytes, rdcc_w0, hdferr)
     IMPLICIT NONE
@@ -4321,7 +4359,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !! \param value Pointer to value to set the property to.
 !! \param hdferr \fortran_error
 !!
-!! See C API: @ref herr_t H5Pregister2(hid_t cls_id, const char *name, size_t size, void *def_value, H5P_prp_create_func_t create, H5P_prp_set_func_t set, H5P_prp_get_func_t get, H5P_prp_delete_func_t prp_del, H5P_prp_copy_func_t copy,
+!! See C API: @ref herr_t H5Pregister2(hid_t cls_id, const char *name, size_t size, void *def_value, H5P_prp_create_func_t create, H5P_prp_set_func_t set, H5P_prp_get_func_t get, H5P_prp_delete_func_t prp_del, H5P_prp_copy_func_t copy, H5P_prp_compare_func_t compare, H5P_prp_close_func_t close);
 !!
   SUBROUTINE h5pregister_f(class, name, size, value, hdferr)
     INTEGER(HID_T)  , INTENT(IN)  :: class
@@ -4347,7 +4385,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !!              \li CHARACTER(LEN=*)
 !! \param hdferr \fortran_error
 !!
-!! See C API: @ref herr_t H5Pregister2(hid_t cls_id, const char *name, size_t size, void *def_value, H5P_prp_create_func_t create, H5P_prp_set_func_t set, H5P_prp_get_func_t get, H5P_prp_delete_func_t prp_del, H5P_prp_copy_func_t copy,
+!! See C API: @ref herr_t H5Pregister2(hid_t cls_id, const char *name, size_t size, void *def_value, H5P_prp_create_func_t create, H5P_prp_set_func_t set, H5P_prp_get_func_t get, H5P_prp_delete_func_t prp_del, H5P_prp_copy_func_t copy, H5P_prp_compare_func_t compare, H5P_prp_close_func_t close);
 !!
   SUBROUTINE h5pregister_f(class, name, size, value, hdferr)
     INTEGER(HID_T)  , INTENT(IN)  :: class
@@ -4498,7 +4536,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN)  :: prp_id
     INTEGER(HID_T), INTENT(IN)  :: type_id
-    TYPE(C_PTR)                 :: fillvalue ! Fillvalue
+    TYPE(C_PTR)                 :: fillvalue
     INTEGER       , INTENT(OUT) :: hdferr
 
     hdferr = h5pget_fill_value_c(prp_id, type_id, fillvalue)
@@ -4522,8 +4560,6 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 
   END SUBROUTINE h5pset_integer
 
-!! See C API: @ref herr_t H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/]);
-!!
   SUBROUTINE h5pset_char(prp_id, name, value, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id
@@ -4559,20 +4595,18 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     DEALLOCATE(chr)
 
   END SUBROUTINE h5pset_char
-!>
-!! \ingroup FH5P
-!!
-!! \brief Queries the value of a property.
-!!
-!! \param prp_id Property list identifier to modify.
-!! \param name   Name of property to get.
-!! \param value  Property value, supported types are:
-!!               \li INTEGER
-!!               \li REAL
-!!               \li DOUBLE PRECISION
-!!               \li CHARACTER(LEN=*)
-!! \param hdferr \fortran_error
-!!
+
+! \brief Queries the value of a property.
+!
+! \param prp_id Property list identifier to modify.
+! \param name   Name of property to get.
+! \param value  Property value, supported types are:
+!               \li INTEGER
+!               \li REAL
+!               \li DOUBLE PRECISION
+!               \li CHARACTER(LEN=*)
+! \param hdferr \fortran_error
+!
   SUBROUTINE h5pget_integer(prp_id, name, value, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id
@@ -4589,8 +4623,6 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 
   END SUBROUTINE h5pget_integer
 
-!! See C API: @ref int H5Pget_chunk(hid_t plist_id, int max_ndims, hsize_t dim[] );
-!!
   SUBROUTINE h5pget_char(prp_id, name, value, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id
@@ -4623,18 +4655,13 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 
   END SUBROUTINE h5pget_char
 
-!>
-!! \ingroup FH5P
-!!
-!! \brief Sets a property list value
-!!
-!! \param prp_id Property list identifier to modify.
-!! \param name   Name of property to modify.
-!! \param value  Pointer to value to set the property to.
-!! \param hdferr \fortran_error
-!!
-!! See C API: @ref herr_t H5Pset_page_buffer_size(hid_t plist_id, size_t buf_size, unsigned min_meta_per, unsigned min_raw_per);
-!!
+! \brief Sets a property list value
+!
+! \param prp_id Property list identifier to modify.
+! \param name   Name of property to modify.
+! \param value  Pointer to value to set the property to.
+! \param hdferr \fortran_error
+!
   SUBROUTINE h5pset_ptr(prp_id, name, value, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id
@@ -4647,18 +4674,14 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     hdferr = h5pset_c(prp_id, name, name_len, value)
 
   END SUBROUTINE h5pset_ptr
-!>
-!! \ingroup FH5P
-!!
-!! \brief Queries the value of a property.
-!!
-!! \param prp_id Property list identifier to modify.
-!! \param name   Name of property to get.
-!! \param value  Pointer to a location to which to copy the value of of the property.
-!! \param hdferr \fortran_error
-!!
-!! See C API: @ref herr_t H5Pget_page_buffer_size(hid_t plist_id, size_t *buf_size, unsigned *min_meta_perc, unsigned *min_raw_perc);
-!!
+
+! \brief Queries the value of a property.
+!
+! \param prp_id Property list identifier to modify.
+! \param name   Name of property to get.
+! \param value  Pointer to a location to which to copy the value of of the property.
+! \param hdferr \fortran_error
+!
   SUBROUTINE h5pget_ptr(prp_id, name, value, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id
@@ -4963,6 +4986,8 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !! \param info   MPI-2 info object.
 !! \param hdferr \fortran_error
 !!
+!! See C API: @ref herr_t H5Pset_fapl_mpio(hid_t fapl_id, MPI_Comm comm, MPI_Info info);
+!!
   SUBROUTINE h5pset_fapl_mpio_f(prp_id, comm, info, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id
@@ -4993,6 +5018,8 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !! \param comm   MPI-2 communicator.
 !! \param info   MPI-2 info object.
 !! \param hdferr \fortran_error
+!!
+!! See C API: @ref herr_t H5Pget_fapl_mpio(hid_t fapl_id, MPI_Comm *comm, MPI_Info *info);
 !!
   SUBROUTINE h5pget_fapl_mpio_f(prp_id, comm, info, hdferr)
     IMPLICIT NONE
@@ -5026,6 +5053,8 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !!                       \li H5FD_MPIO_COLLECTIVE_F
 !! \param hdferr         \fortran_error
 !!
+!! See C API: @ref herr_t H5Pset_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t xfer_mode);
+!!
   SUBROUTINE h5pset_dxpl_mpio_f(prp_id, data_xfer_mode, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id
@@ -5054,6 +5083,8 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !!                       \li H5FD_MPIO_INDEPENDENT_F
 !!                       \li H5FD_MPIO_COLLECTIVE_F
 !! \param hdferr         \fortran_error
+!!
+!! See C API: @ref herr_t H5Pget_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t *xfer_mode);
 !!
   SUBROUTINE h5pget_dxpl_mpio_f(prp_id, data_xfer_mode, hdferr)
     IMPLICIT NONE

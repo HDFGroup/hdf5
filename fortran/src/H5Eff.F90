@@ -122,7 +122,7 @@ CONTAINS
 !! \param namelen  Number of characters in the name buffer.
 !! \param hdferr   \fortran_error
 !!
-!! See C API: @ref char *H5Eget_major(H5E_major_t maj);
+!! See C API: @ref char* H5Eget_major(H5E_major_t maj);
 !!
   SUBROUTINE h5eget_major_f(error_no, name, namelen, hdferr)
     INTEGER, INTENT(IN) :: error_no
@@ -151,7 +151,7 @@ CONTAINS
 !! \param name     Character string describing the error.
 !! \param hdferr   \fortran_error
 !!
-!! See C API: @ref char *H5Eget_minor(H5E_minor_t min);
+!! See C API: @ref char* H5Eget_minor(H5E_minor_t min);
 !!
   SUBROUTINE h5eget_minor_f(error_no, name, hdferr)
     INTEGER, INTENT(IN) :: error_no
