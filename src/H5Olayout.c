@@ -167,6 +167,8 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
             p += ndims * 4; /* Skip over dimension sizes (32-bit quantities) */
         }                   /* end if */
         else {
+            if (ndims < 2)
+                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "bad dimensions for chunked storage")
             mesg->u.chunk.ndims = ndims;
             for (u = 0; u < ndims; u++)
                 UINT32DECODE(p, mesg->u.chunk.dim[u]);
@@ -240,6 +242,8 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                     mesg->u.chunk.ndims = *p++;
                     if (mesg->u.chunk.ndims > H5O_LAYOUT_NDIMS)
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "dimensionality is too large")
+                    if (mesg->u.chunk.ndims < 2)
+                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "bad dimensions for chunked storage")
 
                     /* B-tree address */
                     H5F_addr_decode(f, &p, &(mesg->storage.u.chunk.idx_addr));
