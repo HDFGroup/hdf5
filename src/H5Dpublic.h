@@ -866,7 +866,7 @@ H5_DLL herr_t H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_
  *
  * \return \herr_t
  *
- * \details H5Dread_multi() reads data from multiple datasets, whose identifiers
+ * \details H5Dread_multi() reads data from \p count datasets, whose identifiers
  *          are listed in the \p dset_id array, from the file into multiple
  *          application memory buffers listed in the \p buf array. Data transfer
  *          properties are defined by the argument \p dxpl_id. The memory
@@ -874,7 +874,7 @@ H5_DLL herr_t H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_
  *          mem_type_id array. The parts of each dataset to read are listed by
  *          identifier in the \p file_space_id array, and the parts of each
  *          application memory buffer to read to are listed by identifier in the
- *          \p mem_space_id array.
+ *          \p mem_space_id array. All array parameters have length \p count.
  *
  *          This function will produce the same results as \p count calls to
  *          H5Dread(). Information listed in that function about the specifics
@@ -1046,7 +1046,7 @@ H5_DLL herr_t H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid
  *
  * \return \herr_t
  *
- * \details H5Dwrite_multi() writes data to multiple datasets, whose identifiers
+ * \details H5Dwrite_multi() writes data to \p count datasets, whose identifiers
  *          are listed in the \p dset_id array, from multiple application memory
  *          buffers listed in the \p buf array. Data transfer properties are
  *          defined by the argument \p dxpl_id. The memory datatypes of each
@@ -1054,6 +1054,7 @@ H5_DLL herr_t H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid
  *          parts of each dataset to write are listed by identifier in the \p
  *          file_space_id array, and the parts of each application memory buffer
  *          to write from are listed by identifier in the \p mem_space_id array.
+ *          All array parameters have length \p count.
  *
  *          This function will produce the same results as \p count calls to
  *          H5Dwrite(). Information listed in that function's documentation
