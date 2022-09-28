@@ -149,8 +149,18 @@ Bug Fixes since HDF5-1.13.3 release
 ===================================
     Library
     -------
-    -
- 
+    - Fix CVE-2018-14031 / GHSA-2xc7-724c-r36j
+
+      Parent of enum datatype message must have the same size as the
+      enum datatype message itself.
+      Functions accessing the enumeration values use the size of the
+      enumeration datatype to determine the size of each element and
+      how much data to copy.
+      Thus the size of the enumeration and its parent need to match.
+      Check in H5O_dtype_decode_helper()  to avoid unpleasant surprises
+      later.
+
+      (EFE - 2022/09/28 GH-2236)
 
     Java Library
     ------------
