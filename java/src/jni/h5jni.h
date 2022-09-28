@@ -257,6 +257,23 @@
     do {                                                                                                     \
         (*envptr)->ReleaseStringUTFChars(envptr, pinnedString, stringToRelease);                             \
     } while (0)
+/*
+ * Above String macros may be incorrect, suggested code for getting a cstr from java
+ * int jstr_to_cstr(JNIEnv *jenv, jstring jstr, char *cstr, size_t cstr_len)
+ * {
+ *     int32_t jlen, clen;
+ *
+ *     clen = (*jenv)->GetStringUTFLength(jenv, jstr);
+ *     if (clen > (int32_t)cstr_len)
+ *         return -ENAMETOOLONG;
+ *     jlen = (*jenv)->GetStringLength(jenv, jstr);
+ *     (*jenv)->GetStringUTFRegion(jenv, jstr, 0, jlen, cstr);
+ *     if ((*jenv)->ExceptionCheck(jenv))
+ *         return -EIO;
+ *     return 0;
+ * }
+ *
+ */
 
 #ifdef __cplusplus
 extern "C" {
