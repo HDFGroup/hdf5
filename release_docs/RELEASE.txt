@@ -172,6 +172,18 @@ Bug Fixes since HDF5-1.13.3 release
 ===================================
     Library
     -------
+    - Fix CVE-2021-46242 / GHSA-x9pw-hh7v-wjpf
+
+      When evicting driver info block, NULL the corresponding entry.
+
+      Since H5C_expunge_entry() called (from H5AC_expunge_entry()) sets the  flag
+      H5C__FLUSH_INVALIDATE_FLAG, the driver info block will be freed. NULLing
+      the pointer in f->shared->drvinfo will prevent use-after-free  when it is
+      used in other functions (like  H5F__dest()) - as other places will check
+      whether the pointer is initialized before using its value.
+
+      (EFE - 2022/09/29 GH-2254)
+
     - Fix CVE-2018-13867 / GHSA-j8jr-chrh-qfrf
  
       Validate location (offset) of the accumulated metadata when comparing.
