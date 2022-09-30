@@ -73,7 +73,9 @@ herr_t
 H5FD__subfiling__truncate_sub_files(hid_t context_id, int64_t logical_file_eof, MPI_Comm comm)
 {
     subfiling_context_t *sf_context = NULL;
+    MPI_Request         *recv_reqs  = NULL;
     int64_t              msg[3]     = {0};
+    int64_t             *recv_msgs  = NULL;
     int                  mpi_size;
     int                  mpi_code;
     herr_t               ret_value = SUCCEED;
@@ -93,13 +95,35 @@ H5FD__subfiling__truncate_sub_files(hid_t context_id, int64_t logical_file_eof, 
         int64_t num_full_stripes;
         int64_t num_leftover_stripes;
         int64_t partial_stripe_len;
+        int     num_subfiles_owned;
 
         num_full_stripes     = logical_file_eof / sf_context->sf_blocksize_per_stripe;
         partial_stripe_len   = logical_file_eof % sf_context->sf_blocksize_per_stripe;
         num_leftover_stripes = partial_stripe_len / sf_context->sf_stripe_size;
 
+        num_subfiles_owned = sf_context->sf_num_fids;
+
+        if (NULL == (recv_reqs = HDmalloc((size_t)num_subfiles_owned * sizeof(*recv_reqs))))
+            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                    "can't allocate receive requests array");
+        if (NULL == (recv_msgs = HDmalloc((size_t)num_subfiles_owned * 3 * sizeof(*recv_msgs))))
+            H5_SUBFILING_GOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate message array");
+
+        /*
+         * Post early receives for messages from the IOC main
+         * thread that will signal completion of the truncate
+         * operation
+         */
+        for (int i = 0; i < num_subfiles_owned; i++) {
+            if (MPI_SUCCESS !=
+                (mpi_code = MPI_Irecv(&recv_msgs[3 * i], 1, H5_subfiling_rpc_msg_type,
+                                      sf_context->topology->io_concentrators[sf_context->topology->ioc_idx],
+                                      TRUNC_COMPLETED, sf_context->sf_eof_comm, &recv_reqs[i])))
+                H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Irecv failed", mpi_code);
+        }
+
         /* Compute the EOF for each subfile this IOC owns */
-        for (int i = 0; i < sf_context->sf_num_fids; i++) {
+        for (int i = 0; i < num_subfiles_owned; i++) {
             int64_t subfile_eof = num_full_stripes * sf_context->sf_stripe_size;
             int64_t global_subfile_idx;
 
@@ -125,14 +149,18 @@ H5FD__subfiling__truncate_sub_files(hid_t context_id, int64_t logical_file_eof, 
                 H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Send failed", mpi_code);
         }
 
-        /* sanity check -- compute the file eof using the same mechanism used to
-         * compute the subfile eof.  Assert that the computed value and the
-         * actual value match.
-         *
-         * Do this only for debug builds -- probably delete this before release.
-         *
-         *                                           JRM -- 12/15/21
-         */
+        /* Wait for truncate operations to complete */
+        if (MPI_SUCCESS != (mpi_code = MPI_Waitall(num_subfiles_owned, recv_reqs, MPI_STATUSES_IGNORE)))
+            H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Waitall", mpi_code);
+
+            /* sanity check -- compute the file eof using the same mechanism used to
+             * compute the subfile eof.  Assert that the computed value and the
+             * actual value match.
+             *
+             * Do this only for debug builds -- probably delete this before release.
+             *
+             *                                           JRM -- 12/15/21
+             */
 
 #ifndef NDEBUG
         {
@@ -160,6 +188,8 @@ H5FD__subfiling__truncate_sub_files(hid_t context_id, int64_t logical_file_eof, 
             H5_SUBFILING_MPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code);
 
 done:
+    HDfree(recv_msgs);
+    HDfree(recv_reqs);
 
     H5_SUBFILING_FUNC_LEAVE;
 } /* H5FD__subfiling__truncate_sub_files() */
