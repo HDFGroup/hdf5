@@ -1,3 +1,6 @@
+! PURPOSE
+!
+! This module contains Fortran datatypes and flags.
 !
 ! USES
 !  H5FORTRAN_TYPES - H5FORTRAN_TYPES is generated at run time by H5match_types.c
