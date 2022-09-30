@@ -1,9 +1,3 @@
-!> @defgroup FH5GLOBAL Fortran global constants.
-!!
-
-!> @ingroup FH5GLOBAL
-!!
-!! @brief This module contains Fortran datatypes and flags.
 !
 ! USES
 !  H5FORTRAN_TYPES - H5FORTRAN_TYPES is generated at run time by H5match_types.c
@@ -36,7 +30,17 @@ MODULE H5GLOBAL
   ENUM, BIND(C)
     ENUMERATOR :: enum_dtype
   END ENUM
+
+!> \addtogroup FH5
+!> @{
   INTEGER, PARAMETER :: ENUM_T = KIND(enum_dtype)  !< Enumerate data type that is interoperable with C.
+
+  ! Parameters used in the function 'h5kind_to_type' located in H5_ff.F90.
+  ! The flag is used to tell the function whether the kind input variable
+  ! is for a REAL or INTEGER data type.
+  INTEGER, PARAMETER :: H5_REAL_KIND = 1    !< Used in the function h5kind_to_type()
+  INTEGER, PARAMETER :: H5_INTEGER_KIND = 0 !< Used in the function h5kind_to_type()
+!> @}
 
   ! Definitions for reference datatypes.
   ! If you change the value of these parameters, do not forget to change corresponding
@@ -44,13 +48,8 @@ MODULE H5GLOBAL
   INTEGER, PARAMETER :: REF_REG_BUF_LEN = 3
   INTEGER, PARAMETER :: H5O_TOKEN_BUF_LEN = 16 ! Matches C defined value in H5public.h
 
-  ! Parameters used in the function 'h5kind_to_type' located in H5_ff.F90.
-  ! The flag is used to tell the function whether the kind input variable
-  ! is for a REAL or INTEGER data type.
-
-  INTEGER, PARAMETER :: H5_REAL_KIND = 1    !< Used in the function h5kind_to_type()
-  INTEGER, PARAMETER :: H5_INTEGER_KIND = 0 !< Used in the function h5kind_to_type()
-
+!> \addtogroup FH5R
+!> @{
 !> @brief hobj_ref_t_f derived type
   TYPE :: hobj_ref_t_f
      INTEGER(HADDR_T) ref
@@ -60,11 +59,7 @@ MODULE H5GLOBAL
   TYPE :: hdset_reg_ref_t_f
      INTEGER, DIMENSION(1:REF_REG_BUF_LEN) :: ref
   END TYPE hdset_reg_ref_t_f
-
-!> @brief h5o_token_t_f derived type
-  TYPE, BIND(C) :: h5o_token_t_f
-     INTEGER(C_INT8_T), DIMENSION(1:H5O_TOKEN_BUF_LEN) :: token
-  END TYPE h5o_token_t_f
+!> @}
 
   ! Do not forget to change these values when new predefined
   ! datatypes are added
@@ -127,7 +122,8 @@ MODULE H5GLOBAL
   !DEC$ATTRIBUTES DLLEXPORT :: H5T_NATIVE_INTEGER_KIND
   !DEC$ATTRIBUTES DLLEXPORT :: H5T_NATIVE_FLOAT_128
   !DEC$endif
-
+!> \addtogroup FH5T
+!> @{
   INTEGER(HID_T) :: H5T_NATIVE_REAL_C_FLOAT       !< H5T_NATIVE_REAL_C_FLOAT
   INTEGER(HID_T) :: H5T_NATIVE_REAL_C_DOUBLE      !< H5T_NATIVE_REAL_C_DOUBLE
   INTEGER(HID_T) :: H5T_NATIVE_REAL_C_LONG_DOUBLE !< H5T_NATIVE_REAL_C_LONG_DOUBLE
@@ -173,11 +169,14 @@ MODULE H5GLOBAL
   INTEGER(HID_T) :: H5T_FORTRAN_S1  !< H5T_FORTRAN_S1
   INTEGER(HID_T) :: H5T_C_S1     !< H5T_C_S1
 
+#ifndef H5_DOXYGEN_FORTRAN
   INTEGER, PARAMETER :: NUM_NATIVE_INTEGER_KIND = 5
   ! INTEGER*1, INTEGER*2, INTEGER*4, INTEGER*8, INTEGER*16
   INTEGER(HID_T), DIMENSION(1:NUM_NATIVE_INTEGER_KIND) :: H5T_NATIVE_INTEGER_KIND
+#endif
   ! NEED IFDEF -MSB-
   INTEGER(HID_T) :: H5T_NATIVE_FLOAT_128 !< Quadruple-precision floating-point
+!> @}
   !
   ! H5generic flags declaration
   !
@@ -193,7 +192,8 @@ MODULE H5GLOBAL
   !DEC$ATTRIBUTES DLLEXPORT :: H5_ITER_N_F
   !DEC$ATTRIBUTES DLLEXPORT :: HADDR_UNDEF_F
   !DEC$endif
-
+!> \addtogroup FH5
+!> @{
   INTEGER :: H5_INDEX_UNKNOWN_F   !< H5_INDEX_UNKNOWN
   INTEGER :: H5_INDEX_NAME_F      !< H5_INDEX_NAME
   INTEGER :: H5_INDEX_CRT_ORDER_F !< H5_INDEX_CRT_ORDER
@@ -205,6 +205,7 @@ MODULE H5GLOBAL
   INTEGER :: H5_ITER_N_F          !< H5_ITER_N
 
   INTEGER(HADDR_T) :: HADDR_UNDEF_F  !< HADDR_UNDEF
+!> @}
   !
   ! H5F flags declaration
   !
@@ -235,7 +236,8 @@ MODULE H5GLOBAL
   !DEC$ATTRIBUTES DLLEXPORT :: H5F_LIBVER_V112_F
   !DEC$ATTRIBUTES DLLEXPORT :: H5F_LIBVER_V114_F
   !DEC$endif
-
+!> \addtogroup FH5F
+!> @{
   INTEGER :: H5F_ACC_RDWR_F        !< H5F_ACC_RDWR
   INTEGER :: H5F_ACC_RDONLY_F      !< H5F_ACC_RDONLY
   INTEGER :: H5F_ACC_TRUNC_F       !< H5F_ACC_TRUNC
@@ -261,6 +263,7 @@ MODULE H5GLOBAL
   INTEGER :: H5F_LIBVER_V110_F     !< H5F_LIBVER_V110
   INTEGER :: H5F_LIBVER_V112_F     !< H5F_LIBVER_V112
   INTEGER :: H5F_LIBVER_V114_F     !< H5F_LIBVER_V114
+!> @}
   !
   ! H5G flags declaration
   !
@@ -280,7 +283,8 @@ MODULE H5GLOBAL
   !DEC$ATTRIBUTES DLLEXPORT :: H5G_STORAGE_TYPE_COMPACT_F
   !DEC$ATTRIBUTES DLLEXPORT :: H5G_STORAGE_TYPE_DENSE_F
   !DEC$endif
-
+!> \addtogroup FH5G
+!> @{
   INTEGER :: H5G_UNKNOWN_F      !< H5G_UNKNOWN
   INTEGER :: H5G_GROUP_F        !< H5G_GROUP
   INTEGER :: H5G_DATASET_F      !< H5G_DATASET
@@ -295,6 +299,7 @@ MODULE H5GLOBAL
   INTEGER :: H5G_STORAGE_TYPE_SYMBOL_TABLE_F !< H5G_STORAGE_TYPE_SYMBOL_TABLE
   INTEGER :: H5G_STORAGE_TYPE_COMPACT_F      !< H5G_STORAGE_TYPE_COMPACT
   INTEGER :: H5G_STORAGE_TYPE_DENSE_F        !< H5G_STORAGE_TYPE_DENSE
+!> @}
   !
   ! H5D flags declaration
   !
@@ -331,7 +336,8 @@ MODULE H5GLOBAL
   !DEC$ATTRIBUTES DLLEXPORT :: H5D_VDS_LAST_AVAILABLE_F
   !DEC$ATTRIBUTES DLLEXPORT :: H5D_VIRTUAL_F
   !DEC$endif
-
+!> \addtogroup FH5D
+!> @{
   INTEGER :: H5D_COMPACT_F  !< H5D_COMPACT
   INTEGER :: H5D_CONTIGUOUS_F  !< H5D_CONTIGUOUS
   INTEGER :: H5D_CHUNKED_F  !< H5D_CHUNKED
@@ -374,6 +380,7 @@ MODULE H5GLOBAL
   INTEGER :: H5D_VDS_FIRST_MISSING_F      !< H5D_VDS_FIRST_MISSING
   INTEGER :: H5D_VDS_LAST_AVAILABLE_F     !< H5D_VDS_LAST_AVAILABLE
   INTEGER :: H5D_VIRTUAL_F                !< H5D_VIRTUAL
+!> @}
   !
   ! H5E flags declaration
   !
@@ -384,12 +391,14 @@ MODULE H5GLOBAL
   !DEC$ATTRIBUTES DLLEXPORT :: H5E_WALK_UPWARD_F
   !DEC$ATTRIBUTES DLLEXPORT :: H5E_WALK_DOWNWARD_F
   !DEC$endif
-
+!> \addtogroup FH5E
+!> @{
   INTEGER(HID_T) :: H5E_DEFAULT_F !< H5E_DEFAULT
   INTEGER :: H5E_MAJOR_F          !< H5E_MAJOR
   INTEGER :: H5E_MINOR_F          !< H5E_MINOR
   INTEGER :: H5E_WALK_UPWARD_F    !< H5E_WALK_UPWARD
   INTEGER :: H5E_WALK_DOWNWARD_F  !< H5E_WALK_DOWNWARD
+!> @}
   !
   ! H5FD file drivers flags declaration
   !
@@ -454,7 +463,8 @@ MODULE H5GLOBAL
   !DEC$ATTRIBUTES DLLEXPORT :: H5I_NTYPES_F
   !DEC$ATTRIBUTES DLLEXPORT :: H5I_INVALID_HID_F
   !DEC$endif
-
+!> \addtogroup FH5I
+!> @{
   INTEGER :: H5I_FILE_F  !< H5I_FILE
   INTEGER :: H5I_GROUP_F  !< H5I_GROUP
   INTEGER :: H5I_DATATYPE_F  !< H5I_DATATYPE
@@ -472,6 +482,7 @@ MODULE H5GLOBAL
   INTEGER :: H5I_ERROR_STACK_F  !< H5I_ERROR_STACK
   INTEGER :: H5I_NTYPES_F  !< H5I_NTYPES
   INTEGER :: H5I_INVALID_HID_F  !< H5I_INVALID_HID
+!> @}
 
   !
   ! H5L flags declaration
@@ -484,13 +495,15 @@ MODULE H5GLOBAL
   !DEC$ATTRIBUTES DLLEXPORT :: H5L_SAME_LOC_F
   !DEC$ATTRIBUTES DLLEXPORT :: H5L_LINK_CLASS_T_VERS_F
   !DEC$endif
-
+!> \addtogroup FH5L
+!> @{
   INTEGER :: H5L_TYPE_ERROR_F  !< H5L_TYPE_ERROR
   INTEGER :: H5L_TYPE_HARD_F  !< H5L_TYPE_HARD
   INTEGER :: H5L_TYPE_SOFT_F  !< H5L_TYPE_SOFT
   INTEGER :: H5L_TYPE_EXTERNAL_F  !< H5L_TYPE_EXTERNAL
   INTEGER :: H5L_SAME_LOC_F  !< H5L_SAME_LOC
   INTEGER :: H5L_LINK_CLASS_T_VERS_F  !< H5L_LINK_CLASS_T_VERS
+!> @}
   !
   ! H5O flags declaration
   !
@@ -530,6 +543,14 @@ MODULE H5GLOBAL
   !DEC$ATTRIBUTES DLLEXPORT :: H5O_INFO_META_SIZE_F
   !
   !DEC$endif
+
+!> \addtogroup FH5O
+!> @{
+!> @brief h5o_token_t_f derived type
+  TYPE, BIND(C) :: h5o_token_t_f
+     INTEGER(C_INT8_T), DIMENSION(1:H5O_TOKEN_BUF_LEN) :: token
+  END TYPE h5o_token_t_f
+
   ! *** THESE VARIABLES DO NOT MATCH THE C VARIABLE IN ORDER TO STAY UNDER THE 31 Character Limit (F95) ***
   INTEGER :: H5O_COPY_SHALLOW_HIERARCHY_F !< H5O_COPY_SHALLOW_HIERARCHY_FLAG
   INTEGER :: H5O_COPY_EXPAND_SOFT_LINK_F  !< H5O_COPY_EXPAND_SOFT_LINK_FLAG
@@ -565,6 +586,7 @@ MODULE H5GLOBAL
   INTEGER :: H5O_INFO_NUM_ATTRS_F  !< H5O_INFO_NUM_ATTRS
   INTEGER :: H5O_INFO_HDR_F  !< H5O_INFO_HDR
   INTEGER :: H5O_INFO_META_SIZE_F  !< H5O_INFO_META_SIZE
+!> @}
   !
   ! H5P flags declaration
   !
@@ -590,7 +612,8 @@ MODULE H5GLOBAL
   !DEC$ATTRIBUTES DLLEXPORT :: H5P_CRT_ORDER_INDEXED_F
   !DEC$ATTRIBUTES DLLEXPORT :: H5P_CRT_ORDER_TRACKED_F
   !DEC$endif
-
+!> \addtogroup FH5P
+!> @{
   INTEGER(HID_T) :: H5P_FILE_CREATE_F  !< H5P_FILE_CREATE
   INTEGER(HID_T) :: H5P_FILE_ACCESS_F  !< H5P_FILE_ACCESS
   INTEGER(HID_T) :: H5P_DATASET_CREATE_F  !< H5P_DATASET_CREATE
@@ -612,6 +635,7 @@ MODULE H5GLOBAL
 
   INTEGER :: H5P_CRT_ORDER_INDEXED_F  !< H5P_CRT_ORDER_INDEXED
   INTEGER :: H5P_CRT_ORDER_TRACKED_F  !< H5P_CRT_ORDER_TRACKED
+!> @}
   !
   ! H5R flags declaration
   !
@@ -619,9 +643,11 @@ MODULE H5GLOBAL
   !DEC$ATTRIBUTES DLLEXPORT :: H5R_OBJECT_F
   !DEC$ATTRIBUTES DLLEXPORT :: H5R_DATASET_REGION_F
   !DEC$endif
-
+!> \addtogroup FH5R
+!> @{
   INTEGER :: H5R_OBJECT_F  !< H5R_OBJECT
   INTEGER :: H5R_DATASET_REGION_F  !< H5R_DATASET_REGION
+!> @}
   !
   ! H5S flags declaration
   !
@@ -647,7 +673,8 @@ MODULE H5GLOBAL
   !DEC$ATTRIBUTES DLLEXPORT :: H5S_SEL_HYPERSLABS_F
   !DEC$ATTRIBUTES DLLEXPORT :: H5S_SEL_ALL_F
   !DEC$endif
-
+!> \addtogroup FH5S
+!> @{
   INTEGER(HSIZE_T) :: H5S_UNLIMITED_F  !< H5S_UNLIMITED
 
   INTEGER(HID_T) :: H5S_ALL_F  !< H5S_ALL
@@ -672,6 +699,7 @@ MODULE H5GLOBAL
   INTEGER :: H5S_SEL_POINTS_F  !< H5S_SEL_POINTS
   INTEGER :: H5S_SEL_HYPERSLABS_F  !< H5S_SEL_HYPERSLABS
   INTEGER :: H5S_SEL_ALL_F  !< H5S_SEL_ALL
+!> @}
   !
   ! H5T flags declaration
   !
@@ -712,7 +740,8 @@ MODULE H5GLOBAL
   !DEC$ATTRIBUTES DLLEXPORT :: H5T_DIR_ASCEND_F
   !DEC$ATTRIBUTES DLLEXPORT :: H5T_DIR_DESCEND_F
   !DEC$endif
-
+!> \addtogroup FH5T
+!> @{
   INTEGER :: H5T_NO_CLASS_F  !< H5T_NO_CLASS
   INTEGER :: H5T_INTEGER_F  !< H5T_INTEGER
   INTEGER :: H5T_FLOAT_F  !< H5T_FLOAT
@@ -748,6 +777,7 @@ MODULE H5GLOBAL
   INTEGER :: H5T_STR_ERROR_F  !< H5T_STR_ERROR
   INTEGER :: H5T_DIR_ASCEND_F  !< H5T_DIR_ASCEND
   INTEGER :: H5T_DIR_DESCEND_F  !< H5T_DIR_DESCEND
+!> @}
   !
   ! H5Z flags declaration
   !
@@ -773,7 +803,8 @@ MODULE H5GLOBAL
   !DEC$ATTRIBUTES DLLEXPORT :: H5Z_SO_INT_F
   !DEC$ATTRIBUTES DLLEXPORT :: H5Z_SO_INT_MINBITS_DEFAULT_F
   !DEC$endif
-
+!> \addtogroup FH5Z
+!> @{
   INTEGER :: H5Z_FILTER_ERROR_F  !< H5Z_FILTER_ERROR
   INTEGER :: H5Z_FILTER_NONE_F  !< H5Z_FILTER_NONE
   INTEGER :: H5Z_FILTER_ALL_F  !< H5Z_FILTER_ALL
@@ -794,6 +825,7 @@ MODULE H5GLOBAL
   INTEGER :: H5Z_SO_FLOAT_ESCALE_F  !< H5Z_SO_FLOAT_ESCALE
   INTEGER :: H5Z_SO_INT_F  !< H5Z_SO_INT
   INTEGER :: H5Z_SO_INT_MINBITS_DEFAULT_F  !< H5Z_SO_INT_MINBITS_DEFAULT
+!> @}
   !
   ! H5 Library flags declaration
   !
@@ -801,9 +833,11 @@ MODULE H5GLOBAL
   !DEC$ATTRIBUTES DLLEXPORT :: H5_SZIP_EC_OM_F
   !DEC$ATTRIBUTES DLLEXPORT :: H5_SZIP_NN_OM_F
   !DEC$endif
-
+!> \addtogroup FH5
+!> @{
   INTEGER :: H5_SZIP_EC_OM_F  !< H5_SZIP_EC_OM
   INTEGER :: H5_SZIP_NN_OM_F  !< H5_SZIP_NN_OM
+!> @}
 
 END MODULE H5GLOBAL
 
