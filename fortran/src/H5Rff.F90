@@ -167,7 +167,7 @@ CONTAINS
 !!
 !! \brief Retrieves the type of object that an object reference points to.
 !!
-!! \note  \fortran_obsolete
+!! \attention  \fortran_obsolete
 !!
 !! \param dset_id  Identifier of the dataset containing reference to the objects.
 !! \param ref      Reference to open.
@@ -215,7 +215,7 @@ CONTAINS
 !!
 !! \brief Retrieves a dataspace with the specified region selected.
 !!
-!! \note  \fortran_obsolete
+!! \attention  \fortran_obsolete
 !!
 !! \param dset_id  Identifier of the dataset containing reference to the regions.
 !! \param ref      Reference to open.
@@ -251,7 +251,7 @@ CONTAINS
 !!
 !! \brief Retrieves a dataspace with the specified region selected using pointer.
 !!
-!! \note  \fortran_approved
+!! \attention  \fortran_approved
 !!
 !! \param dset_id  Identifier of the dataset containing reference to the regions.
 !! \param ref      Reference to open.
@@ -285,7 +285,7 @@ CONTAINS
 !!
 !! \brief Creates reference to the object.
 !!
-!! \note  \fortran_obsolete
+!! \attention  \fortran_obsolete
 !!
 !! \param loc_id Location identifier.
 !! \param name   Name of the object at the specified location.
@@ -317,7 +317,7 @@ CONTAINS
 !!
 !! \brief Creates reference to the dataset region
 !!
-!! \note  \fortran_obsolete
+!! \attention  \fortran_obsolete
 !!
 !! \param loc_id   Location identifier.
 !! \param name     Name of the dataset at the specified location.
@@ -362,7 +362,7 @@ CONTAINS
 !!
 !! \brief Creates a reference.
 !!
-!! \note  \fortran_approved
+!! \attention  \fortran_approved
 !!
 !! \param loc_id   Location identifier.
 !! \param name     Name of the dataset at the specified location.
@@ -407,7 +407,7 @@ CONTAINS
 !!
 !! \brief Opens the HDF5 object referenced
 !!
-!! \note  \fortran_obsolete
+!! \attention  \fortran_obsolete
 !!
 !! \param obj_id     Identifier of the dataset containing reference.
 !! \param ref        Reference to open.
@@ -433,7 +433,7 @@ CONTAINS
 !!
 !! \brief Opens the dataset region
 !!
-!! \note  \fortran_obsolete
+!! \attention  \fortran_obsolete
 !!
 !! \param obj_id     Object identifier.
 !! \param ref        Reference to open.
@@ -459,7 +459,7 @@ CONTAINS
 !!
 !! \brief Opens the HDF5 object referenced.
 !!
-!! \note  \fortran_approved
+!! \attention  \fortran_approved
 !!
 !! \param obj_id     Valid identifier for the file containing the referenced object or any object in that file.
 !! \param ref_type   The reference type of ref.
@@ -485,7 +485,7 @@ CONTAINS
 !!
 !! \brief Retrieves a name of a referenced object.
 !!
-!! \note  \fortran_obsolete
+!! \attention  \fortran_obsolete
 !!
 !! \param loc_id Identifier for the file containing the reference or for any object in that file.
 !! \param ref    An object or dataset region reference.
@@ -521,7 +521,7 @@ CONTAINS
 !!
 !! \brief Retrieves a name of a dataset region.
 !!
-!! \note  \fortran_obsolete
+!! \attention  \fortran_obsolete
 !!
 !! \param loc_id Identifier for the file containing the reference or for any object in that file.
 !! \param ref    An object or dataset region reference.
@@ -556,7 +556,7 @@ CONTAINS
 !!
 !! \brief Retrieves a name of a referenced object.
 !!
-!! \note  \fortran_approved
+!! \attention  \fortran_approved
 !!
 !! \param loc_id   Identifier for the file containing the reference or for any object in that file.
 !! \param ref_type Type of reference.

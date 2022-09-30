@@ -1098,7 +1098,7 @@ CONTAINS
 !!
 !! \brief Writes raw data from a dataset into a buffer.
 !!
-!! \note  \fortran_approved
+!! \attention  \fortran_approved
 !!
 !! \param dset_id       Identifier of the dataset to write to.
 !! \param mem_type_id   Identifier of the memory datatype.
@@ -1126,7 +1126,7 @@ CONTAINS
 !!
 !! \brief Reads raw data from a dataset into a buffer (Passes Pointer).
 !!
-!! \note  \fortran_approved
+!! \attention  \fortran_approved
 !!
 !! \param dset_id       Identifier of the dataset read from.
 !! \param mem_type_id   Identifier of the memory datatype.
@@ -1158,7 +1158,7 @@ CONTAINS
 !!        \li h5dwrite_f Purpose: Writes data other than variable-length data.
 !!        \li h5dwrite_vl_f Purpose: Writes variable-length data.
 !!
-!! \note  \fortran_obsolete
+!! \attention  \fortran_obsolete
 !!
 !! \param dset_id       Identifier of the dataset to write to.
 !! \param mem_type_id   Identifier of the memory datatype.
@@ -1189,7 +1189,7 @@ CONTAINS
 !!        \li h5dread_f    Purpose: Reads data other than variable-length data, uses DIMENSION argument and buf is not a pointer.
 !!        \li h5dread_vl_f Purpose: Reads variable-length data.
 !!
-!! \note  \fortran_obsolete
+!! \attention  \fortran_obsolete
 !!
 !! \param dset_id       Identifier of the dataset read from.
 !! \param mem_type_id   Identifier of the memory datatype.
