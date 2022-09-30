@@ -1,6 +1,3 @@
-! PURPOSE
-!
-! This module contains Fortran datatypes and flags.
 !
 ! USES
 !  H5FORTRAN_TYPES - H5FORTRAN_TYPES is generated at run time by H5match_types.c
@@ -383,6 +380,7 @@ MODULE H5GLOBAL
   INTEGER :: H5D_VDS_FIRST_MISSING_F      !< H5D_VDS_FIRST_MISSING
   INTEGER :: H5D_VDS_LAST_AVAILABLE_F     !< H5D_VDS_LAST_AVAILABLE
   INTEGER :: H5D_VIRTUAL_F                !< H5D_VIRTUAL
+!> @}
   !
   ! H5E flags declaration
   !
