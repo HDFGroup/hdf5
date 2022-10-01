@@ -29,7 +29,7 @@ Some tips that may be useful:
   configure option. Some developers build with this all the time, as the
   memory recyclilng can hide problems like use-after-free.
 * You can enable developer warnings via `--enable-developer-warnings`. These
-  warnings generate a lot of noise, but the output can occasinally be useful.
+  warnings generate a lot of noise, but the output can occasionally be useful.
   I probably wouldn't turn them on all the time, though, as they can make it
   harder to spot warnings that we care about.
 * You can set warnings as errors. We have an older scheme that does this for
@@ -137,7 +137,7 @@ a few things available.
 * A development version of szip is necessary for szip compression
 * An MPI-3 compatible MPI library must be installed for parallel HDF5 development
 * clang-format is handy for formatting your code before submission to GitHub. The formatter will automatically update your PR if it's mis-formatted, though, so this isn't strictly necessary.
-* codespell is useful to identify spelling issues before submission to GitHub. The codespell action won't automatically correct your code, but it will point out speling errors, so this also isn't strictly necessary.
+* codespell is useful to identify spelling issues before submission to GitHub. The codespell action won't automatically correct your code, but it will point out spelling errors, so this also isn't strictly necessary.
 
 These are the requirements for working on the develop branch. Maintenance
 branches may relax the required versions somewhat. For example, HDF5 1.12 and
@@ -250,7 +250,7 @@ and its subdirectories.
 HDF5 API calls have a uniform structure imposed by our function enter/leave and
 error handling schemes. We currently stick to this boilerplate for ALL
 functions, though this may change in the future. The general boilerplate varies
-slightly between intenal and public API calls.
+slightly between internal and public API calls.
 
 Here's an example of an internal API call:
 
@@ -465,7 +465,7 @@ values for it: `SUCCEED` and `FAIL`, which are defined to 0 and -1, respectively
 in `H5private.h`. We do not export these values, so public API calls just note
 that `herr_t` values will be negative on failure and non-negative on success.
 
-Most of the error handling is peformed using macros. The only extra setup you
+Most of the error handling is performed using macros. The only extra setup you
 will have to do is:
 
 1. Create a variable named `ret_value` with the same type
@@ -555,7 +555,7 @@ checks turned off by default in all build modes. You can turn them back on via
 configure/CMake options, but it's normally easier to use external tools like
 valgrind or the compiler's memory debugging options.
 
-`H5FL` provides memory pools (*F*ree *L*ists) that create a set of fixed-size allocations
+`H5FL` provides memory pools (*Free Lists*) that create a set of fixed-size allocations
 of a certain type that the library will re-use as needed. They use `H5MM` calls
 under the hood and can be useful when the library creates and frees a lot of
 objects of that type. It's difficult to give a good guideline as to when to use
