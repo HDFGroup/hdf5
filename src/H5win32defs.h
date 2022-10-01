@@ -82,6 +82,7 @@ struct timezone {
 #define HDsleep(S)            Sleep(S * 1000)
 #define HDstat(S, B)          _stati64(S, B)
 #define HDstrcasecmp(A, B)    _stricmp(A, B)
+#define HDstrcasestr(A, B)    StrStrIA(A, B)
 #define HDstrndup(S, N)       H5_strndup(S, N)
 #define HDstrtok_r(X, Y, Z)   strtok_s(X, Y, Z)
 #define HDtzset()             _tzset()

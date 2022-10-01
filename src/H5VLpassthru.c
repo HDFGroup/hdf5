@@ -207,7 +207,7 @@ static herr_t H5VL_pass_through_object_optional(void *obj, const H5VL_loc_params
 /* Container/connector introspection callbacks */
 static herr_t H5VL_pass_through_introspect_get_conn_cls(void *obj, H5VL_get_conn_lvl_t lvl,
                                                         const H5VL_class_t **conn_cls);
-static herr_t H5VL_pass_through_introspect_get_cap_flags(const void *info, unsigned *cap_flags);
+static herr_t H5VL_pass_through_introspect_get_cap_flags(const void *info, uint64_t *cap_flags);
 static herr_t H5VL_pass_through_introspect_opt_query(void *obj, H5VL_subclass_t cls, int opt_type,
                                                      uint64_t *flags);
 
@@ -2553,7 +2553,7 @@ H5VL_pass_through_introspect_get_conn_cls(void *obj, H5VL_get_conn_lvl_t lvl, co
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_pass_through_introspect_get_cap_flags(const void *_info, unsigned *cap_flags)
+H5VL_pass_through_introspect_get_cap_flags(const void *_info, uint64_t *cap_flags)
 {
     const H5VL_pass_through_info_t *info = (const H5VL_pass_through_info_t *)_info;
     herr_t                          ret_value;

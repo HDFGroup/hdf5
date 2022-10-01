@@ -305,8 +305,6 @@ H5_FCDLL int_f h5tget_strpad_c(hid_t_f *type_id, int_f *strpad);
 H5_FCDLL int_f h5tset_strpad_c(hid_t_f *type_id, int_f *strpad);
 H5_FCDLL int_f h5tget_nmembers_c(hid_t_f *type_id, int_f *num_members);
 H5_FCDLL int_f h5tget_member_name_c(hid_t_f *type_id, int_f *idx, _fcd member_name, int_f *namelen);
-H5_FCDLL int_f h5tget_member_dims_c(hid_t_f *type_id, int_f *field_idx, int_f *dims, size_t_f *field_dims,
-                                    int_f *perm);
 H5_FCDLL int_f h5tget_member_offset_c(hid_t_f *type_id, int_f *member_no, size_t_f *offset);
 H5_FCDLL int_f h5tget_member_type_c(hid_t_f *type_id, int_f *field_idx, hid_t_f *datatype);
 H5_FCDLL int_f h5tget_member_index_c(hid_t_f *type_id, _fcd name, int_f *namelen, int_f *idx);

@@ -49,9 +49,7 @@ endif ()
 
 if (TEST_ENV_VAR)
   set (ENV{${TEST_ENV_VAR}} "${TEST_ENV_VALUE}")
-  if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-    message (TRACE "ENV:${TEST_ENV_VAR}=$ENV{${TEST_ENV_VAR}}")
-  endif ()
+  message (TRACE "ENV:${TEST_ENV_VAR}=$ENV{${TEST_ENV_VAR}}")
 endif ()
 
 # run the test program, capture the stdout/stderr and the result var
@@ -112,7 +110,7 @@ if (TEST_ERRREF)
         if (NOT TEST_SORT_COMPARE)
           # now compare the output with the reference
           execute_process (
-              COMMAND ${CMAKE_COMMAND} -E compare_files ${CMAKE_IGNORE_EOL} ${TEST_FOLDER}/${TEST_OUTPUT} ${TEST_FOLDER}/${TEST_REFERENCE}
+              COMMAND ${CMAKE_COMMAND} -E compare_files --ignore-eol ${TEST_FOLDER}/${TEST_OUTPUT} ${TEST_FOLDER}/${TEST_REFERENCE}
               RESULT_VARIABLE TEST_COMPARE_RESULT
           )
         else ()

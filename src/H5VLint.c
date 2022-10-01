@@ -2854,7 +2854,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_get_cap_flags(const H5VL_connector_prop_t *connector_prop, unsigned *cap_flags)
+H5VL_get_cap_flags(const H5VL_connector_prop_t *connector_prop, uint64_t *cap_flags)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 

@@ -47,6 +47,14 @@ New Features
 
     Configuration:
     -------------
+    - Update CMake minimum version to 3.18
+
+      Updated CMake minimum version from 3.12 to 3.18 and removed version checks
+      which were added for Windows features not yet available in version 3.12. Also
+      removed configure macros and code checks for old style code compile checks.
+
+      (ADB - 2022/08/29, HDFFV-11329)
+
     -
 
 
@@ -97,7 +105,11 @@ New Features
 
     Documentation:
     --------------
-    -
+    - Doxygen User Guide documentation is available when configured and generated.
+      The resulting documentation files will be in the share/html subdirectory
+      of the HDF5 install directory.
+
+        (ADB - 2022/08/09)
 
 
 Support for new platforms, languages and compilers
@@ -109,6 +121,13 @@ Bug Fixes since HDF5-1.13.2 release
 ===================================
     Library
     -------
+    - Fixed an issue with hyperslab selections
+
+      Previously, when combining hyperslab selections, it was possible for the
+      library to produce an incorrect combined selection.
+
+      (NAF - 2022/09/25)
+
     - Fixed an issue with attribute type conversion with compound datatypes
 
       Previously, when performing type conversion for attribute I/O with a

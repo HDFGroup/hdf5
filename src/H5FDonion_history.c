@@ -107,7 +107,7 @@ H5FD__onion_write_history(H5FD_onion_history_t *history, H5FD_t *file, haddr_t o
 
     if (NULL == (buf = H5MM_malloc(H5FD_ONION_ENCODED_SIZE_HISTORY +
                                    (H5FD_ONION_ENCODED_SIZE_RECORD_POINTER * history->n_revisions))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, 0, "can't allocate buffer for updated history")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, 0, "can't allocate buffer for updated history")
 
     if (0 == (size = H5FD__onion_history_encode(history, buf, &_sum)))
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, 0, "problem encoding updated history")

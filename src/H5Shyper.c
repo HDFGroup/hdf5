@@ -8796,14 +8796,14 @@ H5S__hyper_update_diminfo(H5S_t *space, H5S_seloper_t op, const H5S_hyper_dim_t 
                 }     /* end if */
                 else {
                     /* Check if block values are the same */
-                    if (tmp_diminfo[curr_dim].block != new_hyper_diminfo[curr_dim].block) {
+                    if (tmp_diminfo[curr_dim].block != high_block) {
                         space->select.sel_info.hslab->diminfo_valid = H5S_DIMINFO_VALID_NO;
                         break;
                     } /* end if */
 
                     /* Check phase of strides */
                     if ((tmp_diminfo[curr_dim].start % tmp_diminfo[curr_dim].stride) !=
-                        (new_hyper_diminfo[curr_dim].start % tmp_diminfo[curr_dim].stride)) {
+                        (high_start % tmp_diminfo[curr_dim].stride)) {
                         space->select.sel_info.hslab->diminfo_valid = H5S_DIMINFO_VALID_NO;
                         break;
                     } /* end if */

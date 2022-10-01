@@ -20,9 +20,9 @@ The following code is placed at the beginning of H5private.h:
 </blockquote>
 
 <p>
-<code>H5_HAVE_THREADSAFE</code> is defined when the HDF-5 library is
+<code>H5_HAVE_THREADSAFE</code> is defined when the HDF5 library is
 compiled with the --enable-threadsafe configuration option. In general,
-code for the non-threadsafe version of HDF-5 library are placed within
+code for the non-threadsafe version of HDF5 library are placed within
 the <code>#else</code> part of the conditional compilation. The exception
 to this rule are the changes to the <code>FUNC_ENTER</code> (in
 H5private.h), <code>HRETURN</code> and <code>HRETURN_ERROR</code> (in
@@ -438,7 +438,7 @@ described in Appendix D and may be found in <code>H5TS.c</code>.
 
 <p>
 Except where stated, all tests involve 16 simultaneous threads that make
-use of HDF-5 API calls without any explicit synchronization typically
+use of HDF5 API calls without any explicit synchronization typically
 required in a non-threadsafe environment.
 </p>
 
@@ -453,7 +453,7 @@ dataset's named value.
 
 <p>
 The main thread would join with all 16 threads and attempt to match the
-resulting HDF-5 file with expected results - that each dataset contains
+resulting HDF5 file with expected results - that each dataset contains
 the correct value (0 for <i>zero</i>, 1 for <i>one</i> etc ...) and all
 datasets were correctly created.
 </p>
@@ -473,7 +473,7 @@ name.
 
 <p>
 The error stack implementation runs correctly if it reports 15 instances
-of the dataset name conflict error and finally generates a correct HDF-5
+of the dataset name conflict error and finally generates a correct HDF5
 containing that single dataset. Each thread should report its own stack
 of errors with a thread number associated with it.
 </p>

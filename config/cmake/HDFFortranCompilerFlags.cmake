@@ -10,9 +10,7 @@
 # help@hdfgroup.org.
 #
 
-if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-  message (VERBOSE "Warnings Configuration: default Fortran: ${CMAKE_Fortran_FLAGS}")
-endif ()
+message (VERBOSE "Warnings Configuration: default Fortran: ${CMAKE_Fortran_FLAGS}")
 
 #-----------------------------------------------------------------------------
 # Option to allow the user to disable compiler warnings
@@ -75,9 +73,7 @@ if (NOT MSVC AND NOT MINGW)
   elseif (CMAKE_Fortran_COMPILER_ID STREQUAL "PGI")
     list (APPEND HDF5_CMAKE_Fortran_FLAGS "-Mfreeform" "-Mdclchk" "-Mstandard" "-Mallocatable=03")
   endif ()
-  if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-    message (VERBOSE "HDF5_CMAKE_Fortran_FLAGS=${HDF5_CMAKE_Fortran_FLAGS}")
-  endif ()
+  message (VERBOSE "HDF5_CMAKE_Fortran_FLAGS=${HDF5_CMAKE_Fortran_FLAGS}")
 
   if (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
     # Append more extra warning flags that only gcc 4.8+ knows about

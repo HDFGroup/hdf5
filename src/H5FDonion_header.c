@@ -49,7 +49,7 @@ H5FD__onion_ingest_header(H5FD_onion_header_t *hdr_out, H5FD_t *raw_file, haddr_
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "header indicates history beyond EOF")
 
     if (NULL == (buf = H5MM_malloc(sizeof(char) * size)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer space")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "can't allocate buffer space")
 
     if (H5FD_set_eoa(raw_file, H5FD_MEM_DRAW, (addr + size)) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "can't modify EOA")

@@ -9,42 +9,31 @@
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+
+/* A simple test program to see if a function "works" */
 #define SIMPLE_TEST(x) int main(){ x; return 0; }
 
 
 #ifdef HAVE_ATTRIBUTE
 
-#if 0
-static void test int __attribute((unused)) var)
-{
-  int __attribute__((unused)) x = var;
-}
-
-int main(void)
-{
-  test(19);
-}
-
-#else
 int
 main ()
 {
-int __attribute__((unused)) x
-  ;
-  return 0;
-}
-#endif
+    int __attribute__((unused)) x;
 
+    return 0;
+}
 
 #endif /* HAVE_ATTRIBUTE */
 
 #ifdef HAVE_TIMEZONE
 
 #ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
+#   include <sys/time.h>
 #endif
 #include <time.h>
-SIMPLE_TEST(timezone=0);
+SIMPLE_TEST(timezone = 0);
 
 #endif /* HAVE_TIMEZONE */
 
@@ -58,8 +47,8 @@ int main(void)
     int ret;
 
     pthread_attr_init(&attribute);
-    ret=pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM);
-    if (ret==0)
+    ret = pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM);
+    if (ret == 0)
         return 0;
     return 1;
 }
@@ -71,13 +60,13 @@ int main(void)
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef HAVE_UNISTD_H
-#include <unistd.h>
+#   include <unistd.h>
 #endif
 #ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
+#   include <sys/types.h>
 #endif
 #ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
+#   include <sys/socket.h>
 #endif
 
 SIMPLE_TEST(socklen_t foo);
@@ -92,35 +81,41 @@ SIMPLE_TEST(socklen_t foo);
 
 int main ()
 {
-  dev_t d1, d2;
-  if(d1==d2)
-    return 0;
-  return 1;
+    dev_t d1, d2;
+    if (d1 == d2)
+        return 0;
+    return 1;
 }
 
 #endif /* DEV_T_IS_SCALAR */
 
 #ifdef HAVE_OFF64_T
+
 #include <sys/types.h>
+
 int main()
 {
-  off64_t n = 0;
-  return (int)n;
+    off64_t n = 0;
+    return (int)n;
 }
 #endif
 
 #ifdef TEST_DIRECT_VFD_WORKS
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+
 int main(void)
 {
-   int fid;
-   if((fid=open("tst_file", O_CREAT | O_TRUNC | O_DIRECT, 0755))<0)
-       return 1;
-   close(fid);
-   remove("tst_file");
-   return 0;
+    int fid;
+
+    if ((fid = open("tst_file", O_CREAT | O_TRUNC | O_DIRECT, 0755)) < 0)
+        return 1;
+    close(fid);
+    remove("tst_file");
+
+    return 0;
 }
 #endif
 
@@ -129,49 +124,54 @@ int main(void)
 #endif
 
 #ifdef HAVE_DEFAULT_SOURCE
-/* check default source */
+/* Check default source */
 #include <features.h>
 
 int
 main(void)
 {
 #ifdef __GLIBC_PREREQ
-  return __GLIBC_PREREQ(2,19);
+    return __GLIBC_PREREQ(2,19);
 #else
-  return 0;
-#endif /* defined(__GLIBC_PREREQ) */
+    return 0;
+#endif
 }
 #endif
 
 #ifdef TEST_LFS_WORKS
+
 /* Return 0 when LFS is available and 1 otherwise.  */
+
 #define _LARGEFILE_SOURCE
 #define _LARGEFILE64_SOURCE
 #define _LARGE_FILES
 #define _FILE_OFFSET_BITS 64
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <assert.h>
 #include <stdio.h>
 
+#define OFF_T_64 (((off_t) 1 << 62) - 1 + ((off_t) 1 << 62))
+
 int main(int argc, char **argv)
 {
-  /* check that off_t can hold 2^63 - 1 and perform basic operations... */
-#define OFF_T_64 (((off_t) 1 << 62) - 1 + ((off_t) 1 << 62))
-  if (OFF_T_64 % 2147483647 != 1)
-    return 1;
 
-  /* stat breaks on SCO OpenServer */
-  struct stat buf;
-  stat( argv[0], &buf );
-  if (!S_ISREG(buf.st_mode))
-    return 2;
+    /* Check that off_t can hold 2^63 - 1 and perform basic operations... */
+    if (OFF_T_64 % 2147483647 != 1)
+        return 1;
 
-  FILE *file = fopen( argv[0], "r" );
-  off_t offset = ftello( file );
-  fseek( file, offset, SEEK_CUR );
-  fclose( file );
-  return 0;
+    /* stat breaks on SCO OpenServer */
+    struct stat buf;
+    stat(argv[0], &buf);
+    if (!S_ISREG(buf.st_mode))
+        return 2;
+
+    FILE *file = fopen(argv[0], "r");
+    off_t offset = ftello(file);
+    fseek(file, offset, SEEK_CUR);
+    fclose(file);
+    return 0;
 }
 #endif
 
@@ -182,15 +182,19 @@ int main(int argc, char **argv)
 #endif
 int main(void)
 {
- struct timeval tv;
- struct timezone tz;
- tz.tz_minuteswest = 7777;  /* Initialize to an unreasonable number */
- tz.tz_dsttime = 7;
- gettimeofday(&tv, &tz);
+    struct timeval tv;
+    struct timezone tz;
+
+    tz.tz_minuteswest = 7777;  /* Initialize to an unreasonable number */
+    tz.tz_dsttime = 7;
+
+    gettimeofday(&tv, &tz);
+
     /* Check whether the function returned any value at all */
- if(tz.tz_minuteswest == 7777 && tz.tz_dsttime == 7)
-     return 1;
- else return 0;
+    if (tz.tz_minuteswest == 7777 && tz.tz_dsttime == 7)
+        return 1;
+    else
+        return 0;
 }
 #endif
 
@@ -201,10 +205,10 @@ typedef void (WINAPI *PGNSI)(LPSYSTEM_INFO);
 int main ()
 {
     PGNSI pGNSI;
-    pGNSI = (PGNSI) GetProcAddress(
-      GetModuleHandle(TEXT("kernel32.dll")),
-      "InitOnceExecuteOnce");
-    if(NULL == pGNSI)
+
+    pGNSI = (PGNSI) GetProcAddress(GetModuleHandle(TEXT("kernel32.dll")), "InitOnceExecuteOnce");
+
+    if (NULL == pGNSI)
         return 1;
     else
         return 0;
