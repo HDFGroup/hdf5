@@ -250,7 +250,7 @@ and its subdirectories.
 HDF5 API calls have a uniform structure imposed by our function enter/leave and
 error handling schemes. We currently stick to this boilerplate for ALL
 functions, though this may change in the future. The general boilerplate varies
-slightly between private and public API calls.
+slightly between intenal and public API calls.
 
 Here's an example of an internal API call:
 
@@ -259,23 +259,23 @@ Here's an example of an internal API call:
  * Function comments of dubious value
  */
 herr_t
-H5X_do_stuff(<parameters>)
+H5X_do_stuff(/*parameters*/)
 {
-	<variables>
+	/* variables go here */
 	void *foo = NULL;
 	herr_t ret_value = SUCCEED;
 
 	FUNC_ENTER_NOAPI(FAIL)
 
-	HDassert(<parameter check>);
+	HDassert(/*parameter check*/);
 
 	if (H5X_other_call() < 0)
 		HGOTO_ERROR(H5E_MAJ, H5E_MIN, FAIL, "badness")
 
 done:
 	if (ret_value < 0)
-		<do error cleanup>
-	<do cleanup stuff>
+		/* do error cleanup */
+	/* do regular cleanup stuff */
 
 	FUNC_LEAVE_NOAPI(ret_value);
 }
@@ -286,7 +286,7 @@ There are a couple of things to note here.
 * Each function call has a header comment block. The information you'll find in
   most function comments is not particularly helpful. We're going to improve the
   format of this. 
-* Most functions will return `herr_t` or a `hid_t` ID. We try to avoid other
+* Most functions will return `herr_t` or `hid_t` ID. We try to avoid other
   return types and instead use out parameters to return things to the user.
 * The name will be of the form `H5X_do_something()` with one or two underscores
   after the `H5X`. The naming scheme will be explained later.
@@ -320,26 +320,26 @@ And here's an example of a public API call:
  * Doxygen stuff goes here
  */
 herr_t
-H5Xdo_api_stuff(<parameters>)
+H5Xdo_api_stuff(/*parameters*/)
 {
-	<variables>
+	/* variables go here */
 	herr_t ret_value = SUCCEED;
 
 	FUNC_ENTER_API(FAIL)
-	H5TRACE3(<stuff>)
+	H5TRACE3(/*stuff*/)
 
-	if (<parameter check)
+	if (/*parameter check*/)
 		HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "badness")
 
-	<VOL setup>
+	/* VOL setup */
 
 	if (H5VL_call() < 0)
 		HGOTO_ERROR(H5E_FOO, H5E_BAR, FAIL, "badness")
 
 done:
 	if (ret_value < 0)
-		<do error cleanup>
-	<do cleanup stuff>
+		/* do error cleanup */
+	/* do regular cleanup stuff */
 
 	FUNC_LEAVE_API(ret_value);
 }
@@ -387,7 +387,7 @@ least visible, these are:
 header files. API calls are of the form `H5Xfoo()`, with no underscores between
 the package name and the rest of the function name.
 
-**Private** things are for use across the HDF5 library, outside the packages
+**Private** things are for use across the HDF5 library, and can be used outside the packages
 that contain them. They collectively make up the "internal library API". API
 calls are of the form `H5X_foo()` with one underscore between the package
 name and the rest of the function name.
@@ -395,7 +395,7 @@ name and the rest of the function name.
 **Package** things are for use inside the package and the compiler will
 complain if you include them outside of the package they belong to. They
 collectively make up the "internal package API". API calls are of the form
-`H5X__foo()` with two underscores between the package name and the rest of the
+`H5X__foo()` with *two* underscores between the package name and the rest of the
 function name. The concept of "friend" packages exists and you can declare this
 by defining `<package>_FRIEND` in a file. This will let you include the package
 header from a package in a file that it is not a member of. Doing this is
@@ -403,7 +403,7 @@ strongly discouraged, though. Test functions are often declared in package
 headers as they expose package internals and test programs can include
 multiple package headers so they can check on internal package state.
 
-Note that these underscore schemes are primarily for API calls and do not extend
+Note that the underscore scheme is primarily for API calls and does not extend
 to things like types and symbols. Another thing to keep in mind is that the
 difference between package and private API calls can be somewhat arbitrary.
 We're hoping to improve the coherence of the internal APIs via refactoring.
@@ -419,10 +419,11 @@ mark up.
 
 The various combinations you are most likely to encounter:
 
-`FUNC_ENTER_API`
-`FUNC_ENTER_NOAPI`
-`FUNC_ENTER_PACKAGE`
-
+|Macro|Use|
+|-----|---|
+|`FUNC_ENTER_API`|Used when entering a public API call|
+|`FUNC_ENTER_NOAPI`|Used when entering a private API call|
+|`FUNC_ENTER_PACKAGE`|Used when entering a package API call|
 
 There are also `_NO_INIT` flavors of some of these macros. These are usually
 small utility functions that don't initialize the library, like
@@ -454,10 +455,10 @@ cannot fail. Instead, return an `herr_t` value and always return `SUCCEED`.
 |`haddr_t`|`HADDR_UNDEF`|
 |pointer|`NULL`|
 
-We've been trying to move away from using anything other than `herr_t` or `'hid_t`
+We've been trying to move away from using anything other than `herr_t` or `hid_t`
 to return errors, as eliminating half of a variable's potential values just so
 we can return a 'bad' value on errors seems unwise in a library that is
-designed to scale.a
+designed to scale.
 
 `herr_t` is a typedef'd signed integer. In the library, we only define two
 values for it: `SUCCEED` and `FAIL`, which are defined to 0 and -1, respectively,
@@ -469,7 +470,7 @@ will have to do is:
 
 1. Create a variable named `ret_value` with the same type
 as the return value for the function. If the type is `herr_t` it is frequently
-set to `SUCCEED` and will be set to the `FAIL` on errors. In most other cases,
+set to `SUCCEED` and will be set to `FAIL` on errors. In most other cases,
 the value is initialized to the 'bad' value and the function's code will set
 `ret_value` to a 'good' value at some point, with errors setting it back to
 the 'bad' value.
@@ -491,20 +492,20 @@ then jumps to the `done:` target.
 
 Major and minor codes are a frequent cause of confusion. A full list of them
 can be found in `H5err.txt`, which is processed into the actual error header
-files at configure time. The original intent was for major and minor error
+files at configure time by the `bin/make_err` script. The original intent was for major and minor error
 codes to be strongly associated. i.e., a given minor code would *only* be used
 with its associated major code. Unfortunately, this has not been the case in
-practice, and the associated minor code text can appear nonsensical in error
+practice, and the emitted text can appear nonsensical in error
 stack dumps. Even worse, the major and minor error codes are used inconsitently
 throughout the library, making interpreting them almost impossible for
 external users. We hope to address this deficiency in the near future.
 
 In the meantime, the following guidelines can be helpful:
 
-1. Use `H5E_ARGS` as the major error category when parsing function parameters
-2. Use the same major code throughout the source file. There is almost a 1-1 correspondence between packages and major error codes.
+1. Use `H5E_ARGS` as the major error category when parsing function parameters. The minor code will usually be `H5E_BADVALUE`, `H5E_BADRANGE`, or `H5E_BADTYPE`.
+2. Otherwise use the same major code throughout the source file. There is almost a 1-1 correspondence between packages and major error codes.
 3. Pick the minor code that seems to match the API call. You can grep through the library to find similar uses.
-4. The string at the end of the `HGOTO_ERROR` macro is much more important, so focus on that
+4. The string at the end of the `HGOTO_ERROR` macro is much more important, so make sure that is helpful
 
 You will still sometimes see the major error code match the package of a failing
 function call. We're trying to fix those as we come across them.
@@ -536,14 +537,14 @@ in `src`). `bin/trace` is a Perl script, so you'll need to have that available.
 In the C library itself, we use `H5MM` and `H5FL` calls to allocate and free
 memory instead of directly using the standard C library calls.
 
-The `H5MM` was originally designed so that it would be easy to swap in a
+The `H5MM` package was originally designed so that it would be easy to swap in a
 memory allocator of the developer's choosing. In practice, this has rarely
 been a useful feature, and we are thinking about removing this scheme. In
 the meantime, almost all memory allocations in the C library will use the
 `H5MM` (or `H5FL`) package.
 
 In the past, we added memory allocation sanity checking to the `H5MM` calls
-that added heap canaries to memory allocation and performed sanity checking
+which added heap canaries to memory allocations and performed sanity checking
 and gathered statistics. These were turned on by default in debug builds
 for many years. Unfortunately, there is interplay between library-allocated
 and externally-allocated memory in the filter pipeline where the heap canaries
@@ -554,7 +555,7 @@ checks turned off by default in all build modes. You can turn them back on via
 configure/CMake options, but it's normally easier to use external tools like
 valgrind or the compiler's memory debugging options.
 
-`H5FL` provides memory pools (*F*ree *L*ists) that create a set of allocations
+`H5FL` provides memory pools (*F*ree *L*ists) that create a set of fixed-size allocations
 of a certain type that the library will re-use as needed. They use `H5MM` calls
 under the hood and can be useful when the library creates and frees a lot of
 objects of that type. It's difficult to give a good guideline as to when to use
@@ -603,7 +604,7 @@ directory. There are a few schemes in use:
 - Everything else. These are self-contained test programs that are built and run independently by the test harness.
 
 
-The test programs do not use a standard test library like cppunit, but instead
+The test programs do not use a standard test framework like cppunit, but instead
 use HDF5-specific macros to set up the tests and report errors. There are two
 sets of macros, one in `testhdf5.h` and another in `h5test.h`.
 Originally, the `testhdf5` programs used the macros in `testhdf5.h` and everything
@@ -620,8 +621,7 @@ accidentally create tests that fail but do not register the failure.
 We are aware that our testing scheme needs some work and we'll be working to
 improve it over the next year or so.
 
-The command-line tools and language wrappers are tested using different schemes
-and are discussed elsewhere.
+The command-line tools are tested using a different scheme and are discussed elsewhere.
 
 ### `testhdf5.h`
 
@@ -772,6 +772,10 @@ Don't forget that you'll need to add your test program or script to the lists in
 both the CMake and Autotools test files (`CMakeLists.txt` and `Makefile.am` in
 `test/` respectively). For simple tests, you just need to add your new test to
 the list of tests.
+
+All new tests **MUST** run under both the Autotools and CMake. Ideally, they
+should also work on Windows, but we're willing to overlook this for things
+that are unlikely to be useful on that platform.
 
 ## Documentation
 
