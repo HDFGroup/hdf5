@@ -249,6 +249,7 @@ H5D__compact_io_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
     FUNC_ENTER_PACKAGE_NOERR
 
     dinfo->store->compact.buf   = dinfo->dset->shared->layout.storage.u.compact.buf;
+    dinfo->store->compact.size  = dinfo->dset->shared->layout.storage.u.compact.size;
     dinfo->store->compact.dirty = &dinfo->dset->shared->layout.storage.u.compact.dirty;
 
     /* Disable selection I/O */
@@ -329,6 +330,9 @@ H5D__compact_readvv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset
 
     HDassert(io_info);
     HDassert(dset_info);
+    if (dset_info->store->compact.size <
+        *(dset_offset_arr + dset_max_nseq - 1) + *(dset_size_arr + dset_max_nseq - 1))
+        HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "source size less than requested data")
 
     /* Check if file driver wishes to do its own memory management */
     if (H5F_SHARED_HAS_FEATURE(io_info->f_sh, H5FD_FEAT_MEMMANAGE)) {
@@ -390,6 +394,9 @@ H5D__compact_writevv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dse
 
     HDassert(io_info);
     HDassert(dset_info);
+    if (dset_info->store->compact.size <
+        *(dset_offset_arr + dset_max_nseq - 1) + *(dset_size_arr + dset_max_nseq - 1))
+        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "source size less than requested data")
 
     /* Check if file driver wishes to do its own memory management */
     if (H5F_SHARED_HAS_FEATURE(io_info->f_sh, H5FD_FEAT_MEMMANAGE)) {

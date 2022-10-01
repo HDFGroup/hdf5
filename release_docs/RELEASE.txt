@@ -172,6 +172,18 @@ Bug Fixes since HDF5-1.13.3 release
 ===================================
     Library
     -------
+    - Fix CVE-2018-11205 / GHSA-8rc4-w39h-mcmg
+
+      Pass compact chunk size info to ensure requested elements are within bounds
+
+      A selection in a malformed hdf5 file may reference data that does not lie
+      within the dataset.
+      To avoid out of bounds reads/writes of elements of a compact chunk, pass
+      size info to the read and write functions and check whether all elements
+      are within size before attempting to read/write them.
+
+      (EFE - 2022/10/01 HDFFV-10479, GH-2250)
+
     - Fix CVE-2018-13867 / GHSA-j8jr-chrh-qfrf
  
       Validate location (offset) of the accumulated metadata when comparing.

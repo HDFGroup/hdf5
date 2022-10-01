@@ -190,6 +190,7 @@ typedef struct {
 typedef struct {
     void    *buf;   /* Buffer for compact dataset */
     hbool_t *dirty; /* Pointer to dirty flag to mark */
+    size_t   size;  /* Buffer size for compact dataset */
 } H5D_compact_storage_t;
 
 typedef union H5D_storage_t {
