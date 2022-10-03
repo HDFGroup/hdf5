@@ -1340,7 +1340,7 @@ CONTAINS
 !!
 !! \brief Writes data to an attribute.
 !!
-!! \note  \fortran_approved
+!! \attention  \fortran_approved
 !!
 !! \param attr_id     Identifier of an attribute to write.
 !! \param memtype_id  Identifier of the attribute datatype (in memory).
@@ -1361,7 +1361,7 @@ CONTAINS
 !!
 !! \brief Writes data to an attribute.
 !!
-!! \note  \fortran_obsolete
+!! \attention  \fortran_obsolete
 !!
 !! \param attr_id     Identifier of an attribute to write.
 !! \param memtype_id  Identifier of the attribute datatype (in memory).
@@ -1384,7 +1384,7 @@ CONTAINS
 !!
 !! \brief Reads an attribute.
 !!
-!! \note  \fortran_approved
+!! \attention  \fortran_approved
 !!
 !! \param attr_id     Identifier of an attribute to read.
 !! \param memtype_id  Identifier of the attribute datatype (in memory).
@@ -1405,7 +1405,7 @@ CONTAINS
 !!
 !! \brief Reads an attribute.
 !!
-!! \note  \fortran_obsolete
+!! \attention  \fortran_obsolete
 !!
 !! \param attr_id     Identifier of an attribute to read.
 !! \param memtype_id  Identifier of the attribute datatype (in memory).

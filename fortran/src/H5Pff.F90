@@ -4152,7 +4152,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !!
 !! \brief Sets fill value for a dataset creation property list
 !!
-!! \note  \fortran_approved
+!! \attention  \fortran_approved
 !!
 !! \param prp_id    Property list identifier.
 !! \param type_id   Datatype identifier of fill value datatype (in memory).
@@ -4173,7 +4173,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !!
 !! \brief Gets fill value for a dataset creation property list
 !!
-!! \note  \fortran_approved
+!! \attention  \fortran_approved
 !!
 !! \param prp_id    Property list identifier.
 !! \param type_id   Datatype identifier of fill value datatype (in memory).
@@ -4194,7 +4194,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !!
 !! \brief Sets fill value for a dataset creation property list
 !!
-!! \note  \fortran_obsolete
+!! \attention  \fortran_obsolete
 !!
 !! \param prp_id    Property list identifier.
 !! \param type_id   Datatype identifier of fill value datatype (in memory).
@@ -4215,7 +4215,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !!
 !! \brief Gets fill value for a dataset creation property list.
 !!
-!! \note  \fortran_obsolete
+!! \attention  \fortran_obsolete
 !!
 !! \param prp_id    Property list identifier.
 !! \param type_id   Datatype identifier of fill value datatype (in memory).
@@ -4236,7 +4236,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !!
 !! \brief Sets a property list value.
 !!
-!! \note  \fortran_approved
+!! \attention  \fortran_approved
 !!
 !! \param prp_id Property list identifier to modify.
 !! \param name   Name of property to modify.
@@ -4257,7 +4257,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !!
 !! \brief Sets a property list value.
 !!
-!! \note  \fortran_obsolete
+!! \attention  \fortran_obsolete
 !!
 !! \param prp_id Property list identifier to modify.
 !! \param name   Name of property to modify.
@@ -4282,7 +4282,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !!
 !! \brief Sets a property list value.
 !!
-!! \note  \fortran_obsolete
+!! \attention  \fortran_obsolete
 !!
 !! \param prp_id Property list identifier to modify.
 !! \param name   Name of property to modify.
@@ -4306,7 +4306,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !!
 !! \brief Queries the value of a property.
 !!
-!! \note  \fortran_approved
+!! \attention  \fortran_approved
 !!
 !! \param prp_id Property list identifier to modify.
 !! \param name   Name of property to get.
@@ -4327,7 +4327,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !!
 !! \brief Queries the value of a property.
 !!
-!! \note  \fortran_obsolete
+!! \attention  \fortran_obsolete
 !!
 !! \param prp_id Property list identifier to modify.
 !! \param name   Name of property to get.
@@ -4351,7 +4351,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !!
 !! \brief Registers a permanent property with a property list class.
 !!
-!! \note  \fortran_approved
+!! \attention  \fortran_approved
 !!
 !! \param class Property list class identifier.
 !! \param name  Name of property to register.
@@ -4373,7 +4373,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !!
 !! \brief Registers a permanent property with a property list class.
 !!
-!! \note  \fortran_obsolete
+!! \attention  \fortran_obsolete
 !!
 !! \param class Property list class identifier.
 !! \param name  Name of property to register.
@@ -4400,7 +4400,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !!
 !! \brief Registers a temporary property with a property list class.
 !!
-!! \note  \fortran_approved
+!! \attention  \fortran_approved
 !!
 !! \param plist  Property list class identifier.
 !! \param name   Name of property to insert.
@@ -4423,7 +4423,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !!
 !! \brief Registers a temporary property with a property list class.
 !!
-!! \note  \fortran_obsolete
+!! \attention  \fortran_obsolete
 !!
 !! \param plist  Property list class identifier.
 !! \param name   Name of property to insert.

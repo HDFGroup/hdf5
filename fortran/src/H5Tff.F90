@@ -2081,7 +2081,7 @@ CONTAINS
 !!
 !! \brief Inserts a new enumeration datatype member.
 !!
-!! \note \fortran_approved
+!! \attention \fortran_approved
 !!
 !! \param type_id Datatype identifier for the enumeration datatype.
 !! \param name    Datatype identifier.
@@ -2129,7 +2129,7 @@ CONTAINS
 !!
 !! \brief Inserts a new enumeration datatype member.
 !!
-!! \note  \fortran_obsolete
+!! \attention  \fortran_obsolete
 !!
 !! \param type_id Datatype identifier for the enumeration datatype.
 !! \param name    Datatype identifier.
