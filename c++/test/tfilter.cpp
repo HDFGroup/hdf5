@@ -195,9 +195,9 @@ test_szip_filter(H5File &file1)
             }
 
             // Write to the dataset then read back the values
-            dataset.write(static_cast<void *>points, PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL,
+            dataset.write(static_cast<void *> points, PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL,
                           xfer);
-            dataset.read(static_cast<void *>check, PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL,
+            dataset.read(static_cast<void *> check, PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL,
                          xfer);
 
             // Check that the values read are the same as the values written
