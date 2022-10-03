@@ -1084,7 +1084,7 @@ Java_hdf_hdf5lib_H5_H5AreadVL(JNIEnv *env, jclass clss, jlong attr_id, jlong mem
         /* Get size of data array */
         if ((n = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0) {
             CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-            H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Aread: readBuf length < 0");
+            H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5AreadVL: readBuf length < 0");
         }
 
         dims[0] = (hsize_t)n;
@@ -1095,12 +1095,12 @@ Java_hdf_hdf5lib_H5_H5AreadVL(JNIEnv *env, jclass clss, jlong attr_id, jlong mem
     if ((type_class = H5Tget_class((hid_t)mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
     if (type_class == H5T_VLEN) {
-        size_t      typeSize;
-        hid_t       memb = H5I_INVALID_HID;
-        H5T_class_t vlClass;
-        size_t      vlSize;
-        void       *rawBuf = NULL;
-        jobject    *jList  = NULL;
+        size_t       typeSize;
+        hid_t        memb = H5I_INVALID_HID;
+        H5T_class_t  vlClass;
+        size_t       vlSize;
+        void        *rawBuf = NULL;
+        jobjectArray jList  = NULL;
 
         size_t i, j, x;
 
@@ -1234,7 +1234,7 @@ Java_hdf_hdf5lib_H5_H5AreadVL(JNIEnv *env, jclass clss, jlong attr_id, jlong mem
                                 }
 
                                 jobj = ENVPTR->CallStaticObjectMethod(ENVONLY, cFloat, floatValueMid,
-                                                                      floatValue);
+                                                                      (double)floatValue);
                                 CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
                                 break;
                             }
@@ -1321,7 +1321,7 @@ Java_hdf_hdf5lib_H5_H5AwriteVL(JNIEnv *env, jclass clss, jlong attr_id, jlong me
     htri_t      vl_data_class;
     herr_t      status = FAIL;
     jboolean    writeBufIsCopy;
-    jbyteArray *writeBuf = NULL;
+    jbyteArray  writeBuf = NULL;
 
     UNUSED(clss);
 
@@ -1344,12 +1344,12 @@ Java_hdf_hdf5lib_H5_H5AwriteVL(JNIEnv *env, jclass clss, jlong attr_id, jlong me
     if ((type_class = H5Tget_class((hid_t)mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
     if (type_class == H5T_VLEN) {
-        size_t      typeSize;
-        hid_t       memb = H5I_INVALID_HID;
-        H5T_class_t vlClass;
-        size_t      vlSize;
-        void       *rawBuf = NULL;
-        jobject    *jList  = NULL;
+        size_t       typeSize;
+        hid_t        memb = H5I_INVALID_HID;
+        H5T_class_t  vlClass;
+        size_t       vlSize;
+        void        *rawBuf = NULL;
+        jobjectArray jList  = NULL;
 
         size_t i, j, x;
 
