@@ -30,7 +30,7 @@
 #include "testpar.h"
 
 #define T_PMD_ERROR                                                                                          \
-    do {                                                                                                        \
+    do {                                                                                                     \
         nerrors++;                                                                                           \
         H5_FAILED();                                                                                         \
         AT();                                                                                                \

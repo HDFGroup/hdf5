@@ -46,7 +46,9 @@
 #define MDSET_FLAG_MDSET     0x08u
 #define MDSET_FLAG_TCONV     0x10u
 #define MDSET_FLAG_FILTER    0x20u
-#define MDSET_ALL_FLAGS      (MDSET_FLAG_CHUNK | MDSET_FLAG_MLAYOUT | MDSET_FLAG_SHAPESAME | MDSET_FLAG_MDSET | MDSET_FLAG_TCONV | MDSET_FLAG_FILTER)
+#define MDSET_ALL_FLAGS                                                                                      \
+    (MDSET_FLAG_CHUNK | MDSET_FLAG_MLAYOUT | MDSET_FLAG_SHAPESAME | MDSET_FLAG_MDSET | MDSET_FLAG_TCONV |    \
+     MDSET_FLAG_FILTER)
 
 const char *FILENAME[] = {"mdset", "mdset1", "mdset2", NULL};
 
@@ -54,7 +56,7 @@ const char *FILENAME[] = {"mdset", "mdset1", "mdset2", NULL};
 char dset_name[MAX_DSETS][DSET_MAX_NAME_LEN];
 
 /* Whether these filters are available */
-htri_t deflate_avail = FALSE;
+htri_t deflate_avail    = FALSE;
 htri_t fletcher32_avail = FALSE;
 
 static int
@@ -316,7 +318,9 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
 
     for (i = 0; i < niter; i++) {
         /* Determine number of datasets */
-        ndsets = (flags & MDSET_FLAG_MLAYOUT) ? 6 : (flags & MDSET_FLAG_MDSET) ? (size_t)((size_t)HDrandom() % max_dsets) + 1 : 1;
+        ndsets = (flags & MDSET_FLAG_MLAYOUT) ? 6
+                 : (flags & MDSET_FLAG_MDSET) ? (size_t)((size_t)HDrandom() % max_dsets) + 1
+                                              : 1;
 
         /* Create file */
         if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
@@ -326,13 +330,13 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
         for (j = 0; j < ndsets; j++) {
             hid_t source_dset;
 
-            hbool_t use_chunk = (flags & MDSET_FLAG_CHUNK) || ((flags & MDSET_FLAG_MLAYOUT) && (j == 1 || j == 2));
+            hbool_t use_chunk =
+                (flags & MDSET_FLAG_CHUNK) || ((flags & MDSET_FLAG_MLAYOUT) && (j == 1 || j == 2));
 
             /* Generate file dataspace */
             dset_dims[j][0] = (hsize_t)((HDrandom() % MAX_DSET_X) + 1);
             dset_dims[j][1] = (hsize_t)((HDrandom() % MAX_DSET_Y) + 1);
-            if ((file_space_ids[j] =
-                     H5Screate_simple(2, dset_dims[j], use_chunk ? max_dims : NULL)) < 0)
+            if ((file_space_ids[j] = H5Screate_simple(2, dset_dims[j], use_chunk ? max_dims : NULL)) < 0)
                 TEST_ERROR;
 
             /* Generate chunk if called for by configuration (multi layout uses chunked for datasets
@@ -357,16 +361,19 @@ test_mdset(size_t niter, unsigned flags, hid_t fapl_id)
             /* Create dataset */
             /* If MDSET_FLAG_TCONV is set, use a different datatype with 50% probability, so
              * some datasets require type conversion and others do not */
-            if ((dset_ids[j] =
-                     H5Dcreate2(file_id, dset_name[j],
-                                (flags & MDSET_FLAG_TCONV && HDrandom() % 2) ? H5T_NATIVE_LONG : H5T_NATIVE_UINT,
-                                file_space_ids[j], H5P_DEFAULT, dcpl_id[j], H5P_DEFAULT)) < 0)
+            if ((dset_ids[j] = H5Dcreate2(file_id, dset_name[j],
+                                          (flags & MDSET_FLAG_TCONV && HDrandom() % 2) ? H5T_NATIVE_LONG
+                                                                                       : H5T_NATIVE_UINT,
+                                          file_space_ids[j], H5P_DEFAULT, dcpl_id[j], H5P_DEFAULT)) < 0)
                 TEST_ERROR;
 
             /* Create virtual source dataset if necessary.  Use dcpl_id[0] for a contiguous dataset
              */
             if ((flags & MDSET_FLAG_MLAYOUT) && (j == 6)) {
-                if ((source_dset = H5Dcreate2(file_id, SOURCE_DS_NAME, (flags & MDSET_FLAG_TCONV && HDrandom() % 2) ? H5T_NATIVE_LONG : H5T_NATIVE_UINT, file_space_ids[j], H5P_DEFAULT, dcpl_id[0], H5P_DEFAULT)) < 0)
+                if ((source_dset = H5Dcreate2(file_id, SOURCE_DS_NAME,
+                                              (flags & MDSET_FLAG_TCONV && HDrandom() % 2) ? H5T_NATIVE_LONG
+                                                                                           : H5T_NATIVE_UINT,
+                                              file_space_ids[j], H5P_DEFAULT, dcpl_id[0], H5P_DEFAULT)) < 0)
                     TEST_ERROR;
                 if (H5Dclose(source_dset) < 0)
                     TEST_ERROR;
@@ -669,22 +676,22 @@ main(void)
 
     for (i = 0; i <= MDSET_ALL_FLAGS; i++) {
         /* Skip incomaptible flag combinations */
-        if (((i & MDSET_FLAG_MLAYOUT) && (i & MDSET_FLAG_CHUNK))
-                || ((i & MDSET_FLAG_MLAYOUT) && !(i & MDSET_FLAG_MDSET))
-                || ((i & MDSET_FLAG_FILTER) && !(i & MDSET_FLAG_CHUNK)))
+        if (((i & MDSET_FLAG_MLAYOUT) && (i & MDSET_FLAG_CHUNK)) ||
+            ((i & MDSET_FLAG_MLAYOUT) && !(i & MDSET_FLAG_MDSET)) ||
+            ((i & MDSET_FLAG_FILTER) && !(i & MDSET_FLAG_CHUNK)))
             continue;
 
         /* Print flag configuration */
         puts("\nConfiguration:");
         printf("  Layout:          %s\n", (i & MDSET_FLAG_MLAYOUT) ? "Multi"
-                                           : (i & MDSET_FLAG_CHUNK) ? "Chunked"
-                                                                    : "Contiguous");
+                                          : (i & MDSET_FLAG_CHUNK) ? "Chunked"
+                                                                   : "Contiguous");
         printf("  Shape same:      %s\n", (i & MDSET_FLAG_SHAPESAME) ? "Yes" : "No");
         printf("  I/O type:        %s\n", (i & MDSET_FLAG_MDSET) ? "Multi" : "Single");
         printf("  Type conversion: %s\n", (i & MDSET_FLAG_TCONV) ? "Yes" : "No");
         printf("  Data filter:     %s\n", (i & MDSET_FLAG_MLAYOUT)  ? "Mixed"
-                                           : (i & MDSET_FLAG_FILTER) ? "Yes"
-                                                                     : "No");
+                                          : (i & MDSET_FLAG_FILTER) ? "Yes"
+                                                                    : "No");
 
         nerrors += test_mdset(50, i, fapl_id);
     }
