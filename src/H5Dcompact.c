@@ -416,7 +416,7 @@ H5D__compact_writevv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dse
     }
 
     /* Mark the compact dataset's buffer as dirty */
-    *io_info->dsets_info[0].store->compact.dirty = TRUE;
+    *dset_info->store->compact.dirty = TRUE;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
