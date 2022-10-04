@@ -242,7 +242,7 @@ PROGRAM subfiling_test
   ! Testing creating a file with subfiling, modified settings
   ! *********************************************************
 
-  ! Testing modifing defaults for subfiling FD
+  ! Testing modifying defaults for subfiling FD
 
   vfd_config%magic = H5FD_SUBFILING_FAPL_MAGIC_F
   vfd_config%version = H5FD_SUBFILING_CURR_FAPL_VERSION_F
