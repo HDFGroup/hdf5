@@ -29,7 +29,6 @@ SUBROUTINE hyper(length,do_collective,do_chunk, mpi_size, mpi_rank, nerrors)
   INTEGER, INTENT(in) :: mpi_size                   ! number of processes in the group of communicator
   INTEGER, INTENT(in) :: mpi_rank                   ! rank of the calling process in the communicator
   INTEGER, INTENT(inout) :: nerrors                 ! number of errors
-  INTEGER :: mpierror                               ! MPI hdferror flag
   INTEGER :: hdferror                               ! HDF hdferror flag
   INTEGER(hsize_t), DIMENSION(1) :: dims            ! dataset dimensions
   INTEGER(hsize_t), DIMENSION(1) :: cdims           ! chunk dimensions
@@ -285,33 +284,33 @@ SUBROUTINE hyper(length,do_collective,do_chunk, mpi_size, mpi_rank, nerrors)
   CALL check("h5pcreate_f", hdferror, nerrors)
 
   CALL h5pset_fapl_mpio_f(fapl_id, MPI_COMM_WORLD, MPI_INFO_NULL, hdferror)
-  CALL check("h5pcreate_f", hdferror, nerrors)
+  CALL check("h5pset_fapl_mpio_f", hdferror, nerrors)
 
   CALL h5fopen_f(filename, H5F_ACC_RDWR_F, file_id, hdferror, access_prp = fapl_id)
-  CALL check("h5pcreate_f", hdferror, nerrors)
+  CALL check("h5fopen_f", hdferror, nerrors)
 
   CALL h5screate_simple_f(1, dims, fspace_id, hdferror)
-  CALL check("h5pcreate_f", hdferror, nerrors)
+  CALL check("h5screate_simple_f", hdferror, nerrors)
 
   CALL h5screate_simple_f(1, dims, mspace_id, hdferror)
-  CALL check("h5pcreate_f", hdferror, nerrors)
+  CALL check(" h5screate_simple_f", hdferror, nerrors)
 
   CALL h5dopen_f(file_id, "dset", dset_id, hdferror)
-  CALL check("h5pcreate_f", hdferror, nerrors)
+  CALL check("h5dopen_f", hdferror, nerrors)
 
   !
   ! select hyperslab in memory
   !
 
   CALL h5sselect_hyperslab_f(mspace_id, H5S_SELECT_SET_F, start, counti, hdferror)
-  CALL check("h5pcreate_f", hdferror, nerrors)
+  CALL check("h5sselect_hyperslab_f", hdferror, nerrors)
 
   !
   ! select hyperslab in the file
   !
 
   CALL h5sselect_hyperslab_f(fspace_id, H5S_SELECT_SET_F, start, counti, hdferror)
-  CALL check("h5pcreate_f", hdferror, nerrors)
+  CALL check("h5sselect_hyperslab_f", hdferror, nerrors)
 
   !
   ! create a property list for collective dataset read
@@ -322,7 +321,7 @@ SUBROUTINE hyper(length,do_collective,do_chunk, mpi_size, mpi_rank, nerrors)
 
   IF (do_collective) THEN
      CALL h5pset_dxpl_mpio_f(dxpl_id, H5FD_MPIO_COLLECTIVE_F, hdferror)
-     CALL check("h5pcreate_f", hdferror, nerrors)
+     CALL check("h5pset_dxpl_mpio_f", hdferror, nerrors)
   ENDIF
 
   !
@@ -330,29 +329,29 @@ SUBROUTINE hyper(length,do_collective,do_chunk, mpi_size, mpi_rank, nerrors)
   !
 
   CALL h5dread_f(dset_id,H5T_NATIVE_INTEGER,rbuf,dims,hdferror,file_space_id=fspace_id,mem_space_id=mspace_id,xfer_prp=dxpl_id)
-  CALL check("h5pcreate_f", hdferror, nerrors)
+  CALL check("h5dread_f", hdferror, nerrors)
 
   !
   ! close HDF5 I/O
   !
 
   CALL h5pclose_f(fapl_id, hdferror)
-  CALL check("h5pcreate_f", hdferror, nerrors)
+  CALL check("h5pclose_f", hdferror, nerrors)
 
   CALL h5pclose_f(dxpl_id, hdferror)
-  CALL check("h5pcreate_f", hdferror, nerrors)
+  CALL check("h5pclose_f", hdferror, nerrors)
 
   CALL h5sclose_f(fspace_id, hdferror)
-  CALL check("h5pcreate_f", hdferror, nerrors)
+  CALL check("h5sclose_f", hdferror, nerrors)
 
   CALL h5sclose_f(mspace_id, hdferror)
-  CALL check("h5pcreate_f", hdferror, nerrors)
+  CALL check("h5sclose_f", hdferror, nerrors)
 
   CALL h5dclose_f(dset_id, hdferror)
-  CALL check("h5pcreate_f", hdferror, nerrors)
+  CALL check("h5dclose_f", hdferror, nerrors)
 
   CALL h5fclose_f(file_id, hdferror)
-  CALL check("h5pcreate_f", hdferror, nerrors)
+  CALL check("h5fclose_f", hdferror, nerrors)
 
   !
   ! compare read and write data. each process compares a subset of the array

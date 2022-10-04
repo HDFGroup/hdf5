@@ -182,6 +182,37 @@ MODULE H5P
 
 #endif
 
+#ifdef H5_HAVE_PARALLEL
+#ifdef H5_HAVE_SUBFILING_VFD
+!> \addtogroup FH5P
+!> @{
+
+  !> @brief H5FD_subfiling_params_t derived type used in the subfiling VFD.
+  TYPE, BIND(C) :: H5FD_subfiling_params_t
+    INTEGER(ENUM_T)    :: ioc_selection !< Method to select I/O concentrators
+    INTEGER(C_INT64_T) :: stripe_size   !< Size (in bytes) of data stripes in subfiles
+    INTEGER(C_INT32_T) :: stripe_count  !< Target number of subfiles to use
+  END TYPE H5FD_subfiling_params_t
+
+  !> @brief H5FD_subfiling_config_t derived type used in the subfiling VFD.
+  TYPE, BIND(C) :: H5FD_subfiling_config_t
+    INTEGER(C_INT32_T) :: magic                  !< Set to H5FD_SUBFILING_FAPL_MAGIC_F
+    INTEGER(C_INT32_T) :: version                !< Set to H5FD_CURR_SUBFILING_FAPL_VERSION_F
+    INTEGER(HID_T)     :: ioc_fapl_id            !< The FAPL setup with the stacked VFD to use for I/O concentrators
+    LOGICAL(C_BOOL)    :: require_ioc            !< Whether to use the IOC VFD (currently must always be TRUE)
+    TYPE(H5FD_subfiling_params_t) :: shared_cfg  !< Subfiling/IOC parameters (stripe size, stripe count, etc.)
+  END TYPE H5FD_subfiling_config_t
+
+  !> @brief H5FD_ioc_config_t derived type used in the IOC VFD (SUBFILING).
+  TYPE, BIND(C) :: H5FD_ioc_config_t
+    INTEGER(C_INT32_T) :: magic            !< Must be set to H5FD_IOC_FAPL_MAGIC_F
+    INTEGER(C_INT32_T) :: version          !< Must be set to H5FD_IOC_CURR_FAPL_VERSION_F
+    INTEGER(C_INT32_T) :: thread_pool_size !< Number of I/O concentrator worker threads to use
+  END TYPE H5FD_ioc_config_t
+!> @}
+#endif
+#endif
+
 CONTAINS
 
 !>
@@ -5041,6 +5072,218 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
     hdferr = h5pget_fapl_mpio_c(prp_id, comm, info)
 
   END SUBROUTINE h5pget_fapl_mpio_f
+
+#ifdef H5_HAVE_SUBFILING_VFD
+!>
+!! \ingroup FH5P
+!!
+!! \brief Modifies the specified File Access Property List to use the #H5FD_SUBFILING driver.
+!!
+!! \param prp_id     File access property list identifier.
+!! \param hdferr     \fortran_error
+!! \param vfd_config #H5FD_SUBFILING driver configuration derived type.
+!!
+!! See C API: @ref herr_t H5Pset_fapl_subfiling(hid_t fapl_id, const H5FD_subfiling_config_t *vfd_config);
+!!
+ SUBROUTINE h5pset_fapl_subfiling_f(prp_id, hdferr, vfd_config)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: prp_id
+    INTEGER, INTENT(OUT) :: hdferr
+    TYPE(H5FD_subfiling_config_t), OPTIONAL, TARGET :: vfd_config
+    TYPE(C_PTR) :: f_ptr
+
+    INTERFACE
+       INTEGER FUNCTION H5Pset_fapl_subfiling(prp_id, vfd_config) &
+            BIND(C,NAME='H5Pset_fapl_subfiling')
+         IMPORT :: HID_T, C_PTR
+         IMPLICIT NONE
+         INTEGER(HID_T), VALUE :: prp_id
+         TYPE(C_PTR)   , VALUE :: vfd_config
+       END FUNCTION h5pset_fapl_subfiling
+    END INTERFACE
+
+    IF(PRESENT(vfd_config))THEN
+       f_ptr = C_LOC(vfd_config)
+    ELSE
+       f_ptr = C_NULL_PTR
+    ENDIF
+
+    hdferr = h5pset_fapl_subfiling(prp_id, f_ptr)
+
+  END SUBROUTINE h5pset_fapl_subfiling_f
+
+!>
+!! \ingroup FH5P
+!!
+!! \brief Queries a File Access Property List for #H5FD_SUBFILING file driver properties.
+!!
+!! \param prp_id     File access property list identifier.
+!! \param vfd_config #H5FD_SUBFILING driver configuration derived type.
+!! \param hdferr     \fortran_error
+!!
+!! See C API: @ref herr_t H5Pget_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *config_out);
+!!
+  SUBROUTINE h5pget_fapl_subfiling_f(prp_id, vfd_config, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: prp_id
+    TYPE(H5FD_subfiling_config_t), TARGET :: vfd_config
+    INTEGER, INTENT(OUT) :: hdferr
+    TYPE(C_PTR) :: f_ptr
+
+    INTERFACE
+       INTEGER FUNCTION H5Pget_fapl_subfiling(prp_id, vfd_config) &
+            BIND(C,NAME='H5Pget_fapl_subfiling')
+         IMPORT :: HID_T, C_PTR
+         IMPLICIT NONE
+         INTEGER(HID_T), VALUE :: prp_id
+         TYPE(C_PTR)   , VALUE :: vfd_config
+       END FUNCTION H5Pget_fapl_subfiling
+    END INTERFACE
+
+    f_ptr = C_LOC(vfd_config)
+    hdferr = h5pget_fapl_subfiling(prp_id, f_ptr)
+
+  END SUBROUTINE h5pget_fapl_subfiling_f
+
+!>
+!! \ingroup FH5P
+!!
+!! \brief Modifies the specified File Access Property List to use the #H5FD_IOC driver.
+!!
+!! \param prp_id     File access property list identifier.
+!! \param hdferr     \fortran_error
+!! \param vfd_config #H5FD_IOC driver configuration derived type.
+!!
+!! See C API: @ref herr_t H5Pset_fapl_ioc(hid_t fapl_id, const H5FD_ioc_config_t *vfd_config);
+!!
+ SUBROUTINE h5pset_fapl_ioc_f(prp_id, hdferr, vfd_config)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: prp_id
+    TYPE(H5FD_ioc_config_t), OPTIONAL, TARGET :: vfd_config
+    INTEGER, INTENT(OUT) :: hdferr
+    TYPE(C_PTR) :: f_ptr
+
+    INTERFACE
+       INTEGER FUNCTION H5Pset_fapl_ioc(prp_id, vfd_config) &
+            BIND(C,NAME='H5Pset_fapl_ioc')
+         IMPORT :: HID_T, C_PTR
+         IMPLICIT NONE
+         INTEGER(HID_T), VALUE :: prp_id
+         TYPE(C_PTR)   , VALUE :: vfd_config
+       END FUNCTION h5pset_fapl_ioc
+    END INTERFACE
+
+    IF(PRESENT(vfd_config))THEN
+       f_ptr = C_LOC(vfd_config)
+    ELSE
+       f_ptr = C_NULL_PTR
+    ENDIF
+
+    hdferr = h5pset_fapl_ioc(prp_id, f_ptr)
+
+  END SUBROUTINE h5pset_fapl_ioc_f
+
+!>
+!! \ingroup FH5P
+!!
+!! \brief Queries a File Access Property List for #H5FD_IOC file driver properties.
+!!
+!! \param prp_id     File access property list identifier.
+!! \param vfd_config #H5FD_IOC driver configuration derived type.
+!! \param hdferr     \fortran_error
+!!
+!! See C API: @ref herr_t H5Pget_fapl_ioc(hid_t fapl_id, H5FD_ioc_config_t *config_out);
+!!
+  SUBROUTINE h5pget_fapl_ioc_f(prp_id, vfd_config, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: prp_id
+    TYPE(H5FD_ioc_config_t), TARGET :: vfd_config
+    INTEGER, INTENT(OUT) :: hdferr
+    TYPE(C_PTR) :: f_ptr
+
+    INTERFACE
+       INTEGER FUNCTION H5Pget_fapl_ioc(prp_id, vfd_config) &
+            BIND(C,NAME='H5Pget_fapl_ioc')
+         IMPORT :: HID_T, C_PTR
+         IMPLICIT NONE
+         INTEGER(HID_T), VALUE :: prp_id
+         TYPE(C_PTR)   , VALUE :: vfd_config
+       END FUNCTION H5Pget_fapl_ioc
+    END INTERFACE
+
+    f_ptr = C_LOC(vfd_config)
+    hdferr = h5pget_fapl_ioc(prp_id, f_ptr)
+
+  END SUBROUTINE h5pget_fapl_ioc_f
+#endif
+
+!>
+!! \ingroup FH5P
+!!
+!! \brief Set the MPI communicator and info.
+!!
+!! \param prp_id File access property list identifier.
+!! \param comm   The MPI communicator.
+!! \param info   The MPI info object.
+!! \param hdferr \fortran_error
+!!
+!! See C API: @ref herr_t H5Pset_mpi_params(hid_t plist_id, MPI_Comm comm, MPI_Info info);
+!!
+  SUBROUTINE H5Pset_mpi_params_f(prp_id, comm, info, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN)  :: prp_id
+    INTEGER       , INTENT(IN)  :: comm
+    INTEGER       , INTENT(IN)  :: info
+    INTEGER       , INTENT(OUT) :: hdferr
+
+    INTERFACE
+       INTEGER FUNCTION h5pset_mpi_params_c(prp_id, comm, info) &
+            BIND(C,NAME='h5pset_mpi_params_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         INTEGER(HID_T) :: prp_id
+         INTEGER :: comm
+         INTEGER :: info
+       END FUNCTION H5pset_mpi_params_c
+    END INTERFACE
+
+    hdferr = H5Pset_mpi_params_c(prp_id, comm, info)
+
+  END SUBROUTINE H5Pset_mpi_params_f
+
+!>
+!! \ingroup FH5P
+!!
+!! \brief Get the MPI communicator and info.
+!!
+!! \param prp_id File access property list identifier.
+!! \param comm   The MPI communicator.
+!! \param info   The MPI info object.
+!! \param hdferr \fortran_error
+!!
+!! See C API: @ref herr_t H5Pget_mpi_params(hid_t fapl_id, MPI_Comm *comm, MPI_Info *info);
+!!
+  SUBROUTINE H5Pget_mpi_params_f(prp_id, comm, info, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN)  :: prp_id
+    INTEGER       , INTENT(OUT) :: comm
+    INTEGER       , INTENT(OUT) :: info
+    INTEGER       , INTENT(OUT) :: hdferr
+
+    INTERFACE
+       INTEGER FUNCTION h5pget_mpi_params_c(prp_id, comm, info) &
+            BIND(C,NAME='h5pget_mpi_params_c')
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         INTEGER(HID_T) :: prp_id
+         INTEGER        :: comm
+         INTEGER        :: info
+       END FUNCTION H5pget_mpi_params_c
+    END INTERFACE
+
+    hdferr = H5Pget_mpi_params_c(prp_id, comm, info)
+
+  END SUBROUTINE H5Pget_mpi_params_f
 
 !>
 !! \ingroup FH5P
