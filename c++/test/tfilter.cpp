@@ -190,14 +190,14 @@ test_szip_filter(H5File &file1)
             hsize_t i, j, n;
             for (i = n = 0; i < size[0]; i++) {
                 for (j = 0; j < size[1]; j++) {
-                    points[i][j] = static_cast<int> (n++);
+                    points[i][j] = static_cast<int>(n++);
                 }
             }
 
             // Write to the dataset then read back the values
-            dataset.write(static_cast<void *> (points), PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL,
+            dataset.write(static_cast<void *>(points), PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL,
                           xfer);
-            dataset.read(static_cast<void *> (check), PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL,
+            dataset.read(static_cast<void *>(check), PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL,
                          xfer);
 
             // Check that the values read are the same as the values written
