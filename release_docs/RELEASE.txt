@@ -149,8 +149,19 @@ Bug Fixes since HDF5-1.13.3 release
 ===================================
     Library
     -------
-    -
- 
+    - Fix CVE-2021-45830 / GHSA-5h2h-fjjr-x9m2
+
+      Make H5O__fsinfo_decode() more resilient to out-of-bound reads.
+
+      When decoding a file space info message in H5O__fsinfo_decode()  make
+      sure each element to be decoded is still within the message. Malformed
+      hdf5 files may have trunkated content which does not match the
+      expected size. Checking this will prevent attempting to decode
+      unrelated data and heap overflows. So far, only free space manager
+      address data was checked before decoding.
+
+      (EFE - 2022/10/05 GH-2228)
+
 
     Java Library
     ------------
