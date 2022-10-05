@@ -1380,7 +1380,7 @@ H5F__dest(H5F_t *f, hbool_t flush)
          */
         if (H5AC_prep_for_file_close(f) < 0)
             /* Push error, but keep going */
-            HDONE_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "metadata cache prep for close failed")
+            HDONE_ERROR(H5E_FILE, H5E_CANTFLUSH, ret_value, "metadata cache prep for close failed")
 
         /* Flush at this point since the file will be closed (phase 2).
          * Only try to flush the file if it was opened with write access, and if
