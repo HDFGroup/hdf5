@@ -104,14 +104,11 @@ typedef struct H5D_type_info_t {
     /* Computed/derived values */
     size_t                   src_type_size;  /* Size of source type */
     size_t                   dst_type_size;  /* Size of destination type */
-    size_t                   max_type_size;  /* Size of largest source/destination type */
     hbool_t                  is_conv_noop;   /* Whether the type conversion is a NOOP */
     hbool_t                  is_xform_noop;  /* Whether the data transform is a NOOP */
     const H5T_subset_info_t *cmpd_subset;    /* Info related to the compound subset conversion functions */
     H5T_bkg_t                need_bkg;       /* Type of background buf needed */
     size_t                   request_nelmts; /* Requested strip mine */
-    uint8_t                 *tconv_buf;      /* Datatype conv buffer */
-    hbool_t                  tconv_buf_allocated; /* Whether the type conversion buffer was allocated */
     uint8_t                 *bkg_buf;             /* Background buffer */
     hbool_t                  bkg_buf_allocated;   /* Whether the background buffer was allocated */
 } H5D_type_info_t;
@@ -286,6 +283,9 @@ typedef struct H5D_io_info_t {
     haddr_t                 store_faddr;   /* lowest file addr for read/write */
     H5_flexible_const_ptr_t base_maddr;    /* starting mem address */
     hbool_t                 use_select_io; /* Whether to use selection I/O */
+    uint8_t                *tconv_buf;     /* Datatype conv buffer */
+    hbool_t                 tconv_buf_allocated; /* Whether the type conversion buffer was allocated */
+    size_t                  max_type_size; /* Largest of all source and destination type sizes */
 } H5D_io_info_t;
 
 /* Created to pass both at once for callback func */

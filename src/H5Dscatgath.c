@@ -44,8 +44,8 @@ static herr_t H5D__scatter_file(const H5D_io_info_t *io_info, const H5D_dset_io_
 static size_t H5D__gather_file(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info,
                                H5S_sel_iter_t *file_iter, size_t nelmts, void *buf);
 static herr_t H5D__compound_opt_read(size_t nelmts, H5S_sel_iter_t *iter, const H5D_type_info_t *type_info,
-                                     void *user_buf /*out*/);
-static herr_t H5D__compound_opt_write(size_t nelmts, const H5D_type_info_t *type_info);
+                                     uint8_t *tconv_buf, void *user_buf /*out*/);
+static herr_t H5D__compound_opt_write(size_t nelmts, const H5D_type_info_t *type_info, uint8_t *tconv_buf);
 
 /*********************/
 /* Package Variables */
@@ -515,7 +515,7 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_
          * Gather data
          */
         n = H5D__gather_file(io_info, dset_info, file_iter, smine_nelmts,
-                             dset_info->type_info.tconv_buf /*out*/);
+                             io_info->tconv_buf /*out*/);
         if (n != smine_nelmts)
             HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file gather failed")
 
@@ -525,7 +525,7 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_
          */
         if (dset_info->type_info.cmpd_subset &&
             H5T_SUBSET_FALSE != dset_info->type_info.cmpd_subset->subset) {
-            if (H5D__compound_opt_read(smine_nelmts, mem_iter, &dset_info->type_info, buf /*out*/) < 0)
+            if (H5D__compound_opt_read(smine_nelmts, mem_iter, &dset_info->type_info, io_info->tconv_buf, buf /*out*/) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "datatype conversion failed")
         } /* end if */
         else {
@@ -540,7 +540,7 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_
              */
             if (H5T_convert(dset_info->type_info.tpath, dset_info->type_info.src_type_id,
                             dset_info->type_info.dst_type_id, smine_nelmts, (size_t)0, (size_t)0,
-                            dset_info->type_info.tconv_buf, dset_info->type_info.bkg_buf) < 0)
+                            io_info->tconv_buf, dset_info->type_info.bkg_buf) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "datatype conversion failed")
 
             /* Do the data transform after the conversion (since we're using type mem_type) */
@@ -551,13 +551,13 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_
                 if (H5CX_get_data_transform(&data_transform) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get data transform info")
 
-                if (H5Z_xform_eval(data_transform, dset_info->type_info.tconv_buf, smine_nelmts,
+                if (H5Z_xform_eval(data_transform, io_info->tconv_buf, smine_nelmts,
                                    dset_info->type_info.mem_type) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "Error performing data transform")
             }
 
             /* Scatter the data into memory */
-            if (H5D__scatter_mem(dset_info->type_info.tconv_buf, mem_iter, smine_nelmts, buf /*out*/) < 0)
+            if (H5D__scatter_mem(io_info->tconv_buf, mem_iter, smine_nelmts, buf /*out*/) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "scatter failed")
         } /* end else */
     }     /* end for */
@@ -656,7 +656,7 @@ H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset
          * buffer. Also gather data from the file into the background buffer
          * if necessary.
          */
-        n = H5D__gather_mem(buf, mem_iter, smine_nelmts, dset_info->type_info.tconv_buf /*out*/);
+        n = H5D__gather_mem(buf, mem_iter, smine_nelmts, io_info->tconv_buf /*out*/);
         if (n != smine_nelmts)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "mem gather failed")
 
@@ -668,7 +668,7 @@ H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset
          */
         if (dset_info->type_info.cmpd_subset && H5T_SUBSET_DST == dset_info->type_info.cmpd_subset->subset &&
             dset_info->type_info.dst_type_size == dset_info->type_info.cmpd_subset->copy_size) {
-            if (H5D__compound_opt_write(smine_nelmts, &dset_info->type_info) < 0)
+            if (H5D__compound_opt_write(smine_nelmts, &dset_info->type_info, io_info->tconv_buf) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "datatype conversion failed")
         } /* end if */
         else {
@@ -688,7 +688,7 @@ H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset
                 if (H5CX_get_data_transform(&data_transform) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get data transform info")
 
-                if (H5Z_xform_eval(data_transform, dset_info->type_info.tconv_buf, smine_nelmts,
+                if (H5Z_xform_eval(data_transform, io_info->tconv_buf, smine_nelmts,
                                    dset_info->type_info.mem_type) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "Error performing data transform")
             }
@@ -698,14 +698,14 @@ H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset
              */
             if (H5T_convert(dset_info->type_info.tpath, dset_info->type_info.src_type_id,
                             dset_info->type_info.dst_type_id, smine_nelmts, (size_t)0, (size_t)0,
-                            dset_info->type_info.tconv_buf, dset_info->type_info.bkg_buf) < 0)
+                            io_info->tconv_buf, dset_info->type_info.bkg_buf) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "datatype conversion failed")
         } /* end else */
 
         /*
          * Scatter the data out to the file.
          */
-        if (H5D__scatter_file(io_info, dset_info, file_iter, smine_nelmts, dset_info->type_info.tconv_buf) <
+        if (H5D__scatter_file(io_info, dset_info, file_iter, smine_nelmts, io_info->tconv_buf) <
             0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "scatter failed")
     } /* end for */
@@ -762,7 +762,7 @@ done:
  */
 static herr_t
 H5D__compound_opt_read(size_t nelmts, H5S_sel_iter_t *iter, const H5D_type_info_t *type_info,
-                       void *user_buf /*out*/)
+                       uint8_t *tconv_buf, void *user_buf /*out*/)
 {
     uint8_t *ubuf = (uint8_t *)user_buf; /* Cast for pointer arithmetic	*/
     uint8_t *xdbuf;                      /* Pointer into dataset buffer */
@@ -806,7 +806,7 @@ H5D__compound_opt_read(size_t nelmts, H5S_sel_iter_t *iter, const H5D_type_info_
     copy_size = type_info->cmpd_subset->copy_size;
 
     /* Loop until all elements are written */
-    xdbuf = type_info->tconv_buf;
+    xdbuf = tconv_buf;
     while (nelmts > 0) {
         size_t nseq;     /* Number of sequences generated */
         size_t curr_seq; /* Current sequence being processed */
@@ -891,7 +891,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__compound_opt_write(size_t nelmts, const H5D_type_info_t *type_info)
+H5D__compound_opt_write(size_t nelmts, const H5D_type_info_t *type_info, uint8_t *tconv_buf)
 {
     uint8_t *xsbuf, *xdbuf;          /* Source & destination pointers into dataset buffer */
     size_t   src_stride, dst_stride; /* Strides through source & destination datatypes */
@@ -908,8 +908,8 @@ H5D__compound_opt_write(size_t nelmts, const H5D_type_info_t *type_info)
     dst_stride = type_info->dst_type_size;
 
     /* Loop until all elements are written */
-    xsbuf = (uint8_t *)type_info->tconv_buf;
-    xdbuf = (uint8_t *)type_info->tconv_buf;
+    xsbuf = tconv_buf;
+    xdbuf = tconv_buf;
     for (i = 0; i < nelmts; i++) {
         HDmemmove(xdbuf, xsbuf, dst_stride);
 

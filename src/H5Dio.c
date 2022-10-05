@@ -46,12 +46,12 @@
 /* Setup/teardown routines */
 static herr_t H5D__ioinfo_init(size_t count, H5D_dset_io_info_t *dset_info, H5D_io_info_t *io_info);
 static herr_t H5D__dset_ioinfo_init(H5D_t *dset, H5D_dset_io_info_t *dset_info, H5D_storage_t *store);
-static herr_t H5D__typeinfo_init(const H5D_t *dset, hid_t mem_type_id, hbool_t do_write,
-                                 H5D_type_info_t *type_info);
+static herr_t H5D__typeinfo_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info, hid_t mem_type_id);
+static herr_t H5D__typeinfo_init_phase2(H5D_io_info_t *io_info);
 #ifdef H5_HAVE_PARALLEL
 static herr_t H5D__ioinfo_adjust(H5D_io_info_t *io_info);
 #endif /* H5_HAVE_PARALLEL */
-static herr_t H5D__typeinfo_term(const H5D_type_info_t *type_info);
+static herr_t H5D__typeinfo_term(H5D_io_info_t *io_info);
 
 /*********************/
 /* Package Variables */
@@ -145,8 +145,7 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
         H5AC_tag(dset_info[i].dset->oloc.addr, &prev_tag);
 
         /* Set up datatype info for operation */
-        if (H5D__typeinfo_init(dset_info[i].dset, dset_info[i].mem_type_id, FALSE,
-                               &(dset_info[i].type_info)) < 0)
+        if (H5D__typeinfo_init(&io_info, &(dset_info[i]), dset_info[i].mem_type_id) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info")
         type_info_init++;
 
@@ -284,6 +283,10 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
     HDassert(type_info_init == count);
     HDassert(io_op_init == count);
 
+    /* Perform second phase of type info initialization */
+    if (H5D__typeinfo_init_phase2(&io_info) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info (second phase)")
+
 #ifdef H5_HAVE_PARALLEL
     /* Adjust I/O info for any parallel I/O */
     if (H5D__ioinfo_adjust(&io_info) < 0)
@@ -369,9 +372,8 @@ done:
             HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down I/O op info")
 
     /* Shut down datatype info for operation */
-    for (i = 0; i < type_info_init; i++)
-        if (H5D__typeinfo_term(&(dset_info[i].type_info)) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down type info")
+    if (H5D__typeinfo_term(&io_info) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down type info")
 
     /* Discard projected mem spaces and restore originals */
     if (orig_mem_space) {
@@ -485,8 +487,7 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "no write intent on file")
 
         /* Set up datatype info for operation */
-        if (H5D__typeinfo_init(dset_info[i].dset, dset_info[i].mem_type_id, TRUE, &(dset_info[i].type_info)) <
-            0)
+        if (H5D__typeinfo_init(&io_info, &(dset_info[i]), dset_info[i].mem_type_id) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info")
         type_info_init++;
 
@@ -641,6 +642,10 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
     HDassert(type_info_init == count);
     HDassert(io_op_init == count);
 
+    /* Perform second phase of type info initialization */
+    if (H5D__typeinfo_init_phase2(&io_info) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info (second phase)")
+
 #ifdef H5_HAVE_PARALLEL
     /* Adjust I/O info for any parallel I/O */
     if (H5D__ioinfo_adjust(&io_info) < 0)
@@ -744,9 +749,8 @@ done:
             HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down I/O op info")
 
     /* Shut down datatype info for operation */
-    for (i = 0; i < type_info_init; i++)
-        if (H5D__typeinfo_term(&(dset_info[i].type_info)) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down type info")
+    if (H5D__typeinfo_term(&io_info) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down type info")
 
     /* Discard projected mem spaces and restore originals */
     if (orig_mem_space) {
@@ -884,8 +888,10 @@ H5D__dset_ioinfo_init(H5D_t *dset, H5D_dset_io_info_t *dset_info, H5D_storage_t 
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__typeinfo_init(const H5D_t *dset, hid_t mem_type_id, hbool_t do_write, H5D_type_info_t *type_info)
+H5D__typeinfo_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info, hid_t mem_type_id)
 {
+    H5D_type_info_t  *type_info;
+    const H5D_t      *dset;
     const H5T_t      *src_type;            /* Source datatype */
     const H5T_t      *dst_type;            /* Destination datatype */
     H5Z_data_xform_t *data_transform;      /* Data transform info */
@@ -894,7 +900,12 @@ H5D__typeinfo_init(const H5D_t *dset, hid_t mem_type_id, hbool_t do_write, H5D_t
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(type_info);
+    HDassert(io_info);
+    HDassert(dset_info);
+
+    /* Set convenience pointers */
+    type_info = &dset_info->type_info;
+    dset = dset_info->dset;
     HDassert(dset);
 
     /* Patch the top level file pointer for dt->shared->u.vlen.f if needed */
@@ -909,7 +920,7 @@ H5D__typeinfo_init(const H5D_t *dset, hid_t mem_type_id, hbool_t do_write, H5D_t
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
     type_info->dset_type = dset->shared->type;
 
-    if (do_write) {
+    if (io_info->op_type == H5D_IO_OP_WRITE) {
         src_type               = type_info->mem_type;
         dst_type               = dset->shared->type;
         type_info->src_type_id = mem_type_id;
@@ -939,7 +950,6 @@ H5D__typeinfo_init(const H5D_t *dset, hid_t mem_type_id, hbool_t do_write, H5D_t
     /* Precompute some useful information */
     type_info->src_type_size = H5T_get_size(src_type);
     type_info->dst_type_size = H5T_get_size(dst_type);
-    type_info->max_type_size = MAX(type_info->src_type_size, type_info->dst_type_size);
     type_info->is_conv_noop  = H5T_path_noop(type_info->tpath);
     type_info->is_xform_noop = H5Z_xform_noop(data_transform);
     if (type_info->is_xform_noop && type_info->is_conv_noop) {
@@ -947,27 +957,20 @@ H5D__typeinfo_init(const H5D_t *dset, hid_t mem_type_id, hbool_t do_write, H5D_t
         type_info->need_bkg    = H5T_BKG_NO;
     } /* end if */
     else {
-        void     *tconv_buf;     /* Temporary conversion buffer pointer */
-        void     *bkgr_buf;      /* Background conversion buffer pointer */
-        size_t    max_temp_buf;  /* Maximum temporary buffer size */
         H5T_bkg_t bkgr_buf_type; /* Background buffer type */
-        size_t    target_size;   /* Desired buffer size	*/
 
         /* Get info from API context */
-        if (H5CX_get_max_temp_buf(&max_temp_buf) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve max. temp. buf size")
-        if (H5CX_get_tconv_buf(&tconv_buf) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve temp. conversion buffer pointer")
-        if (H5CX_get_bkgr_buf(&bkgr_buf) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve background conversion buffer pointer")
         if (H5CX_get_bkgr_buf_type(&bkgr_buf_type) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve background buffer type")
 
         /* Check if the datatypes are compound subsets of one another */
         type_info->cmpd_subset = H5T_path_compound_subset(type_info->tpath);
 
+        /* Update io_info->max_type_size */
+        io_info->max_type_size = MAX3(io_info->max_type_size, type_info->src_type_size, type_info->dst_type_size);
+
         /* Check if we need a background buffer */
-        if (do_write && H5T_detect_class(dset->shared->type, H5T_VLEN, FALSE))
+        if ((io_info->op_type == H5D_IO_OP_WRITE) && H5T_detect_class(dset->shared->type, H5T_VLEN, FALSE))
             type_info->need_bkg = H5T_BKG_YES;
         else {
             H5T_bkg_t path_bkg; /* Type conversion's background info */
@@ -980,13 +983,53 @@ H5D__typeinfo_init(const H5D_t *dset, hid_t mem_type_id, hbool_t do_write, H5D_t
             else
                 type_info->need_bkg = H5T_BKG_NO; /*never needed even if app says yes*/
         }                                         /* end else */
+    }     /* end else */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__typeinfo_init() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__typeinfo_init_phase2
+ *
+ * Purpose:     Finish initializing type info for all datasets after
+ *              calculating the max type size across all datasets.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__typeinfo_init_phase2(H5D_io_info_t *io_info)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* check args */
+    HDassert(io_info);
+
+    /* Check if we need to allocate a shared type conversion buffer */
+    if (io_info->max_type_size) {
+        void  *tconv_buf; /* Temporary conversion buffer pointer */
+        void     *bkgr_buf;      /* Background conversion buffer pointer */
+        size_t    max_temp_buf;  /* Maximum temporary buffer size */
+        size_t    target_size;   /* Desired buffer size	*/
+        size_t i; /* Local index variable */
+
+        /* Get info from API context */
+        if (H5CX_get_max_temp_buf(&max_temp_buf) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve max. temp. buf size")
+        if (H5CX_get_tconv_buf(&tconv_buf) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve temp. conversion buffer pointer")
+        if (H5CX_get_bkgr_buf(&bkgr_buf) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve background conversion buffer pointer")
 
         /* Set up datatype conversion/background buffers */
-
         target_size = max_temp_buf;
 
-        /* If the buffer is too small to hold even one element, try to make it bigger */
-        if (target_size < type_info->max_type_size) {
+        /* If the buffer is too small to hold even one element (in the dataset with the largest , try to make it bigger */
+        if (target_size < io_info->max_type_size) {
             hbool_t default_buffer_info; /* Whether the buffer information are the defaults */
 
             /* Detect if we have all default settings for buffers */
@@ -996,50 +1039,63 @@ H5D__typeinfo_init(const H5D_t *dset, hid_t mem_type_id, hbool_t do_write, H5D_t
             /* Check if we are using the default buffer info */
             if (default_buffer_info)
                 /* OK to get bigger for library default settings */
-                target_size = type_info->max_type_size;
+                target_size = io_info->max_type_size;
             else
                 /* Don't get bigger than the application has requested */
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "temporary buffer max size is too small")
         } /* end if */
 
-        /* Compute the number of elements that will fit into buffer */
-        type_info->request_nelmts = target_size / type_info->max_type_size;
-
-        /* Sanity check elements in temporary buffer */
-        if (type_info->request_nelmts == 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "temporary buffer max size is too small")
-
         /* Get a temporary buffer for type conversion unless the app has already
          * supplied one through the xfer properties. Instead of allocating a
-         * buffer which is the exact size, we allocate the target size.
-         */
-        if (NULL == (type_info->tconv_buf = (uint8_t *)tconv_buf)) {
+         * buffer which is the exact size, we allocate the target size. This
+         * buffer is shared among all datasets in the operation, unlike for the
+         * background buffer, where each dataset gets its own. */
+        if (NULL == (io_info->tconv_buf = (uint8_t *)tconv_buf)) {
             /* Allocate temporary buffer */
-            if (NULL == (type_info->tconv_buf = H5FL_BLK_CALLOC(type_conv, target_size)))
+            if (NULL == (io_info->tconv_buf = H5FL_BLK_MALLOC(type_conv, target_size)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion")
-            type_info->tconv_buf_allocated = TRUE;
+            io_info->tconv_buf_allocated = TRUE;
         } /* end if */
-        if (type_info->need_bkg && NULL == (type_info->bkg_buf = (uint8_t *)bkgr_buf)) {
-            size_t bkg_size; /* Desired background buffer size	*/
 
-            /* Compute the background buffer size */
-            /* (don't try to use buffers smaller than the default size) */
-            bkg_size = type_info->request_nelmts * type_info->dst_type_size;
-            if (bkg_size < max_temp_buf)
-                bkg_size = max_temp_buf;
+        /* Don't use API provided background buffer if there's more than one dataset, since each
+         * dataset needs its own */
+        if (io_info->count > 1)
+            bkgr_buf = NULL;
 
-            /* Allocate background buffer */
-            /* (Need calloc()-like call since memory needs to be initialized) */
-            if (NULL == (type_info->bkg_buf = H5FL_BLK_CALLOC(type_conv, bkg_size)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
-                            "memory allocation failed for background conversion")
-            type_info->bkg_buf_allocated = TRUE;
-        } /* end if */
-    }     /* end else */
+        /* Iterate over datasets */
+        for (i = 0; i < io_info->count; i++) {
+            H5D_type_info_t *type_info = &io_info->dsets_info[i].type_info;
+
+            /* Compute the number of elements that will fit into buffer */
+            type_info->request_nelmts = target_size / MAX(type_info->src_type_size, type_info->dst_type_size);;
+
+            /* Sanity check elements in temporary buffer */
+            if (type_info->request_nelmts == 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "temporary buffer max size is too small")
+
+            /* Allocate background buffer if necessary */
+            if (type_info->need_bkg && NULL == (type_info->bkg_buf = (uint8_t *)bkgr_buf)) {
+                size_t bkg_size; /* Desired background buffer size	*/
+
+                /* Compute the background buffer size */
+                /* (don't try to use buffers smaller than the default size) */
+                bkg_size = type_info->request_nelmts * type_info->dst_type_size;
+                if (bkg_size < max_temp_buf)
+                    bkg_size = max_temp_buf;
+
+                /* Allocate background buffer */
+                /* (Need calloc()-like call since memory needs to be initialized) */
+                if (NULL == (type_info->bkg_buf = H5FL_BLK_CALLOC(type_conv, bkg_size)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                                "memory allocation failed for background conversion")
+                type_info->bkg_buf_allocated = TRUE;
+            } /* end if */
+        }
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__typeinfo_init() */
+} /* end H5D__typeinfo_init_phase2() */
 
 #ifdef H5_HAVE_PARALLEL
 
@@ -1191,19 +1247,22 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__typeinfo_term(const H5D_type_info_t *type_info)
+H5D__typeinfo_term(H5D_io_info_t *io_info)
 {
+    size_t i;
+
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check for releasing datatype conversion & background buffers */
-    if (type_info->tconv_buf_allocated) {
-        HDassert(type_info->tconv_buf);
-        (void)H5FL_BLK_FREE(type_conv, type_info->tconv_buf);
+    if (io_info->tconv_buf_allocated) {
+        HDassert(io_info->tconv_buf);
+        (void)H5FL_BLK_FREE(type_conv, io_info->tconv_buf);
     } /* end if */
-    if (type_info->bkg_buf_allocated) {
-        HDassert(type_info->bkg_buf);
-        (void)H5FL_BLK_FREE(type_conv, type_info->bkg_buf);
-    } /* end if */
+    for (i = 0; i < io_info->count; i++)
+        if (io_info->dsets_info[i].type_info.bkg_buf_allocated) {
+            HDassert(io_info->dsets_info[i].type_info.bkg_buf);
+            (void)H5FL_BLK_FREE(type_conv, io_info->dsets_info[i].type_info.bkg_buf);
+        } /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D__typeinfo_term() */
