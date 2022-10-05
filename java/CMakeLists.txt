@@ -15,7 +15,7 @@ endif ()
 find_package (JNI)
 if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
   message (VERBOSE "JNI_LIBRARIES=${JNI_LIBRARIES}")
-  message (VERBOSE "optionJNI_INCLUDE_DIRS=${JNI_INCLUDE_DIRS}")
+  message (VERBOSE "JNI_INCLUDE_DIRS=${JNI_INCLUDE_DIRS}")
 endif ()
 
 
