@@ -449,6 +449,7 @@ public class TestH5Ocreate {
             ((idata)((H5O_iter_data)iter_data).iterdata.get(3)).link_name.compareToIgnoreCase("G1/DS2") == 0);
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void testH5Ocomment()
     {
@@ -479,6 +480,7 @@ public class TestH5Ocreate {
         assertTrue("H5Oget_comment: ", obj_comment.compareTo("Test Comment") == 0);
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void testH5Ocomment_clear()
     {
@@ -525,6 +527,7 @@ public class TestH5Ocreate {
         assertTrue("H5Oget_comment: ", obj_comment == null);
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void testH5Ocomment_by_name()
     {
@@ -548,6 +551,7 @@ public class TestH5Ocreate {
         assertTrue("H5Oget_comment_by_name: ", obj_comment.compareTo("Test Comment") == 0);
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void testH5Ocomment_by_name_clear()
     {
