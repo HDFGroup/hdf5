@@ -332,6 +332,12 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
                     H5MM_xfree(dt->shared->u.compnd.memb);
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "unable to decode member type")
                 } /* end if */
+                if (temp_type->shared->size == 0) {
+                    for (j = 0; j <= i; j++)
+                        H5MM_xfree(dt->shared->u.compnd.memb[j].name);
+                    H5MM_xfree(dt->shared->u.compnd.memb);
+                    HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "invalid field size in member type")
+                }
 
                 /* Upgrade the version if we can and it is necessary */
                 if (can_upgrade && temp_type->shared->version > version) {

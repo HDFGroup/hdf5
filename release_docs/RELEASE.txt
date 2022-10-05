@@ -142,14 +142,23 @@ New Features
 
 Support for new platforms, languages and compilers
 ==================================================
-    -
+    -  CVE-2021-46244 / GHSA-vrxh-5gxg-rmhm
 
+       Compound datatypes may not have members of size 0
+ 
+       A member size of 0 may lead to an FPE later on as reported in
+       CVE-2021-46244. To avoid this, check for this as soon as the
+       member is decoded.
+       This should probably be done in H5O_dtype_decode_helper() already,
+       however it is not clear whether all sizes are expected to be != 0.
+
+       (EFE - 2022/10/05 GEH-2242)
 
 Bug Fixes since HDF5-1.13.3 release
 ===================================
     Library
     -------
-    -
+
  
 
     Java Library
