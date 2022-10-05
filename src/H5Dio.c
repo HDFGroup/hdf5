@@ -905,7 +905,7 @@ H5D__typeinfo_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info, hid_t 
 
     /* Set convenience pointers */
     type_info = &dset_info->type_info;
-    dset = dset_info->dset;
+    dset      = dset_info->dset;
     HDassert(dset);
 
     /* Patch the top level file pointer for dt->shared->u.vlen.f if needed */
@@ -967,7 +967,8 @@ H5D__typeinfo_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info, hid_t 
         type_info->cmpd_subset = H5T_path_compound_subset(type_info->tpath);
 
         /* Update io_info->max_type_size */
-        io_info->max_type_size = MAX3(io_info->max_type_size, type_info->src_type_size, type_info->dst_type_size);
+        io_info->max_type_size =
+            MAX3(io_info->max_type_size, type_info->src_type_size, type_info->dst_type_size);
 
         /* Check if we need a background buffer */
         if ((io_info->op_type == H5D_IO_OP_WRITE) && H5T_detect_class(dset->shared->type, H5T_VLEN, FALSE))
@@ -983,7 +984,7 @@ H5D__typeinfo_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info, hid_t 
             else
                 type_info->need_bkg = H5T_BKG_NO; /*never needed even if app says yes*/
         }                                         /* end else */
-    }     /* end else */
+    }                                             /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1011,11 +1012,11 @@ H5D__typeinfo_init_phase2(H5D_io_info_t *io_info)
 
     /* Check if we need to allocate a shared type conversion buffer */
     if (io_info->max_type_size) {
-        void  *tconv_buf; /* Temporary conversion buffer pointer */
-        void     *bkgr_buf;      /* Background conversion buffer pointer */
-        size_t    max_temp_buf;  /* Maximum temporary buffer size */
-        size_t    target_size;   /* Desired buffer size	*/
-        size_t i; /* Local index variable */
+        void  *tconv_buf;    /* Temporary conversion buffer pointer */
+        void  *bkgr_buf;     /* Background conversion buffer pointer */
+        size_t max_temp_buf; /* Maximum temporary buffer size */
+        size_t target_size;  /* Desired buffer size	*/
+        size_t i;            /* Local index variable */
 
         /* Get info from API context */
         if (H5CX_get_max_temp_buf(&max_temp_buf) < 0)
@@ -1028,7 +1029,8 @@ H5D__typeinfo_init_phase2(H5D_io_info_t *io_info)
         /* Set up datatype conversion/background buffers */
         target_size = max_temp_buf;
 
-        /* If the buffer is too small to hold even one element (in the dataset with the largest , try to make it bigger */
+        /* If the buffer is too small to hold even one element (in the dataset with the largest , try to make
+         * it bigger */
         if (target_size < io_info->max_type_size) {
             hbool_t default_buffer_info; /* Whether the buffer information are the defaults */
 
@@ -1067,7 +1069,8 @@ H5D__typeinfo_init_phase2(H5D_io_info_t *io_info)
             H5D_type_info_t *type_info = &io_info->dsets_info[i].type_info;
 
             /* Compute the number of elements that will fit into buffer */
-            type_info->request_nelmts = target_size / MAX(type_info->src_type_size, type_info->dst_type_size);;
+            type_info->request_nelmts = target_size / MAX(type_info->src_type_size, type_info->dst_type_size);
+            ;
 
             /* Sanity check elements in temporary buffer */
             if (type_info->request_nelmts == 0)

@@ -102,15 +102,15 @@ typedef struct H5D_type_info_t {
     hid_t        dst_type_id; /* Destination datatype ID */
 
     /* Computed/derived values */
-    size_t                   src_type_size;  /* Size of source type */
-    size_t                   dst_type_size;  /* Size of destination type */
-    hbool_t                  is_conv_noop;   /* Whether the type conversion is a NOOP */
-    hbool_t                  is_xform_noop;  /* Whether the data transform is a NOOP */
-    const H5T_subset_info_t *cmpd_subset;    /* Info related to the compound subset conversion functions */
-    H5T_bkg_t                need_bkg;       /* Type of background buf needed */
-    size_t                   request_nelmts; /* Requested strip mine */
-    uint8_t                 *bkg_buf;             /* Background buffer */
-    hbool_t                  bkg_buf_allocated;   /* Whether the background buffer was allocated */
+    size_t                   src_type_size;     /* Size of source type */
+    size_t                   dst_type_size;     /* Size of destination type */
+    hbool_t                  is_conv_noop;      /* Whether the type conversion is a NOOP */
+    hbool_t                  is_xform_noop;     /* Whether the data transform is a NOOP */
+    const H5T_subset_info_t *cmpd_subset;       /* Info related to the compound subset conversion functions */
+    H5T_bkg_t                need_bkg;          /* Type of background buf needed */
+    size_t                   request_nelmts;    /* Requested strip mine */
+    uint8_t                 *bkg_buf;           /* Background buffer */
+    hbool_t                  bkg_buf_allocated; /* Whether the background buffer was allocated */
 } H5D_type_info_t;
 
 /* Forward declaration of structs used below */
@@ -269,23 +269,23 @@ typedef struct H5D_io_info_t {
 #endif                                 /* H5_HAVE_PARALLEL */
     H5D_md_io_ops_t         md_io_ops; /* Multi dataset I/O operation function pointers */
     H5D_io_op_type_t        op_type;
-    size_t                  count;         /* Number of datasets in I/O request */
-    H5D_dset_io_info_t     *dsets_info;    /* dsets info where I/O is done to/from */
-    size_t                  piece_count;   /* Number of pieces in I/O request */
-    size_t                  pieces_added;  /* Number of pieces added so far to arrays */
-    H5D_piece_info_t      **sel_pieces;    /* Array of info struct for all pieces in I/O */
-    H5S_t                 **mem_spaces;    /* Array of chunk memory spaces */
-    H5S_t                 **file_spaces;   /* Array of chunk file spaces */
-    haddr_t                *addrs;         /* Array of chunk addresses */
-    size_t                 *element_sizes; /* Array of element sizes */
-    void                  **rbufs;         /* Array of read buffers */
-    const void            **wbufs;         /* Array of write buffers */
-    haddr_t                 store_faddr;   /* lowest file addr for read/write */
-    H5_flexible_const_ptr_t base_maddr;    /* starting mem address */
-    hbool_t                 use_select_io; /* Whether to use selection I/O */
-    uint8_t                *tconv_buf;     /* Datatype conv buffer */
+    size_t                  count;               /* Number of datasets in I/O request */
+    H5D_dset_io_info_t     *dsets_info;          /* dsets info where I/O is done to/from */
+    size_t                  piece_count;         /* Number of pieces in I/O request */
+    size_t                  pieces_added;        /* Number of pieces added so far to arrays */
+    H5D_piece_info_t      **sel_pieces;          /* Array of info struct for all pieces in I/O */
+    H5S_t                 **mem_spaces;          /* Array of chunk memory spaces */
+    H5S_t                 **file_spaces;         /* Array of chunk file spaces */
+    haddr_t                *addrs;               /* Array of chunk addresses */
+    size_t                 *element_sizes;       /* Array of element sizes */
+    void                  **rbufs;               /* Array of read buffers */
+    const void            **wbufs;               /* Array of write buffers */
+    haddr_t                 store_faddr;         /* lowest file addr for read/write */
+    H5_flexible_const_ptr_t base_maddr;          /* starting mem address */
+    hbool_t                 use_select_io;       /* Whether to use selection I/O */
+    uint8_t                *tconv_buf;           /* Datatype conv buffer */
     hbool_t                 tconv_buf_allocated; /* Whether the type conversion buffer was allocated */
-    size_t                  max_type_size; /* Largest of all source and destination type sizes */
+    size_t                  max_type_size;       /* Largest of all source and destination type sizes */
 } H5D_io_info_t;
 
 /* Created to pass both at once for callback func */
