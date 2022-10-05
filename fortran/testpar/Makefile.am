@@ -37,7 +37,7 @@ TEST_PROG_PARA=parallel_test subfiling_test
 check_PROGRAMS=$(TEST_PROG_PARA)
 
 # Temporary files
-CHECK_CLEANFILES+=parf[12].h5
+CHECK_CLEANFILES+=parf[12].h5 subf.h5*
 
 # Test source files
 parallel_test_SOURCES=ptest.F90 hyper.F90 mdset.F90
