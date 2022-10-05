@@ -2677,9 +2677,9 @@ h5str_dump_simple_dset(JNIEnv *env, FILE *stream, hid_t dset, int binary_order)
                 /* Calculate the hyperslab size */
                 if (sndims > 0) {
                     for (i = 0, hs_nelmts = 1; i < (size_t)sndims; i++) {
-                        hs_size[i] = (((total_size[i] - hs_offset[i]) < (sm_size[i]))
-                                          ? (total_size[i] - hs_offset[i])
-                                          : (sm_size[i]));
+                        hs_size[i] =
+                            (((total_size[i] - hs_offset[i]) < (sm_size[i])) ? (total_size[i] - hs_offset[i])
+                                                                             : (sm_size[i]));
                         hs_nelmts *= hs_size[i];
                     }
 
