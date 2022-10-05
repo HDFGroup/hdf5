@@ -51,7 +51,7 @@ static herr_t H5D__typeinfo_init_phase2(H5D_io_info_t *io_info);
 #ifdef H5_HAVE_PARALLEL
 static herr_t H5D__ioinfo_adjust(H5D_io_info_t *io_info);
 #endif /* H5_HAVE_PARALLEL */
-static herr_t H5D__typeinfo_term(H5D_io_info_t *io_info);
+static herr_t H5D__typeinfo_term(H5D_io_info_t *io_info, size_t type_info_init);
 
 /*********************/
 /* Package Variables */
@@ -372,7 +372,7 @@ done:
             HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down I/O op info")
 
     /* Shut down datatype info for operation */
-    if (H5D__typeinfo_term(&io_info) < 0)
+    if (H5D__typeinfo_term(&io_info, type_info_init) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down type info")
 
     /* Discard projected mem spaces and restore originals */
@@ -749,7 +749,7 @@ done:
             HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down I/O op info")
 
     /* Shut down datatype info for operation */
-    if (H5D__typeinfo_term(&io_info) < 0)
+    if (H5D__typeinfo_term(&io_info, type_info_init) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down type info")
 
     /* Discard projected mem spaces and restore originals */
@@ -1250,7 +1250,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__typeinfo_term(H5D_io_info_t *io_info)
+H5D__typeinfo_term(H5D_io_info_t *io_info, size_t type_info_init)
 {
     size_t i;
 
@@ -1261,7 +1261,7 @@ H5D__typeinfo_term(H5D_io_info_t *io_info)
         HDassert(io_info->tconv_buf);
         (void)H5FL_BLK_FREE(type_conv, io_info->tconv_buf);
     } /* end if */
-    for (i = 0; i < io_info->count; i++)
+    for (i = 0; i < type_info_init; i++)
         if (io_info->dsets_info[i].type_info.bkg_buf_allocated) {
             HDassert(io_info->dsets_info[i].type_info.bkg_buf);
             (void)H5FL_BLK_FREE(type_conv, io_info->dsets_info[i].type_info.bkg_buf);
