@@ -163,6 +163,13 @@ Bug Fixes since HDF5-1.10.9 release
 ===================================
     Library
     -------
+    - Fixed an issue with hyperslab selections
+
+      Previously, when combining hyperslab selections, it was possible for the
+      library to produce an incorrect combined selection.
+
+      (NAF - 2022/09/25)
+
     - Fixed an issue with attribute type conversion with compound datatypes
 
       Previously, when performing type conversion for attribute I/O with a
