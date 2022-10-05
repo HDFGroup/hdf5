@@ -1098,12 +1098,12 @@ Java_hdf_hdf5lib_H5_H5DreadVL(JNIEnv *env, jclass clss, jlong dataset_id, jlong 
     if ((type_class = H5Tget_class((hid_t)mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
     if (type_class == H5T_VLEN) {
-        size_t      typeSize;
-        hid_t       memb = H5I_INVALID_HID;
-        H5T_class_t vlClass;
-        size_t      vlSize;
-        void       *rawBuf = NULL;
-        jobject    *jList  = NULL;
+        size_t       typeSize;
+        hid_t        memb = H5I_INVALID_HID;
+        H5T_class_t  vlClass;
+        size_t       vlSize;
+        void        *rawBuf = NULL;
+        jobjectArray jList  = NULL;
 
         size_t i, j, x;
 
@@ -1238,7 +1238,7 @@ Java_hdf_hdf5lib_H5_H5DreadVL(JNIEnv *env, jclass clss, jlong dataset_id, jlong 
                                 }
 
                                 jobj = ENVPTR->CallStaticObjectMethod(ENVONLY, cFloat, floatValueMid,
-                                                                      floatValue);
+                                                                      (double)floatValue);
                                 CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
                                 break;
                             }
@@ -1322,7 +1322,7 @@ Java_hdf_hdf5lib_H5_H5DwriteVL(JNIEnv *env, jclass clss, jlong dataset_id, jlong
     htri_t      vl_data_class;
     herr_t      status = FAIL;
     jboolean    writeBufIsCopy;
-    jbyteArray *writeBuf = NULL;
+    jbyteArray  writeBuf = NULL;
 
     UNUSED(clss);
 
@@ -1341,12 +1341,12 @@ Java_hdf_hdf5lib_H5_H5DwriteVL(JNIEnv *env, jclass clss, jlong dataset_id, jlong
     if ((type_class = H5Tget_class((hid_t)mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
     if (type_class == H5T_VLEN) {
-        size_t      typeSize;
-        hid_t       memb = H5I_INVALID_HID;
-        H5T_class_t vlClass;
-        size_t      vlSize;
-        void       *rawBuf = NULL;
-        jobject    *jList  = NULL;
+        size_t       typeSize;
+        hid_t        memb = H5I_INVALID_HID;
+        H5T_class_t  vlClass;
+        size_t       vlSize;
+        void        *rawBuf = NULL;
+        jobjectArray jList  = NULL;
 
         size_t i, j, x;
 
