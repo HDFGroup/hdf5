@@ -188,6 +188,7 @@ typedef enum {
     SELECT_IOC_WITH_CONFIG,      /* NOT IMPLEMENTED: Read-from-file      */
     SELECT_IOC_TOTAL,            /* Starting at rank 0, mpi_size / total */
     ioc_selection_options        /* Sentinel value                       */
+    /* NOTE: Add to the Fortran constants (H5f90global.F90)  when adding new entries */
 } H5FD_subfiling_ioc_select_t;
 
 /**
