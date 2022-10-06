@@ -18,6 +18,7 @@
 #include <H5config_f.inc>
 
 PROGRAM subfiling_test
+  USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_INT64_T
   USE HDF5
   USE MPI
   USE TH5_MISC
@@ -42,13 +43,14 @@ PROGRAM subfiling_test
   INTEGER :: comm, comm_ret
   INTEGER :: info, info_ret
   CHARACTER(LEN=3) :: info_val
+  CHARACTER(LEN=180) :: subfname
+  INTEGER :: i, sum
+  INTEGER(C_INT64_T) inode
   TYPE(H5FD_subfiling_config_t) :: vfd_config
   TYPE(H5FD_ioc_config_t)       :: vfd_config_ioc
   LOGICAL :: flag
 
-  INTEGER, DIMENSION(1:1) :: nerrors_vec
   INTEGER :: nerrors = 0
-  INTEGER :: ios, nbytes
 
   INTEGER(HID_T) :: driver_id
 
@@ -59,17 +61,28 @@ PROGRAM subfiling_test
   CALL mpi_init_thread(required, provided, mpierror)
   IF (mpierror .NE. MPI_SUCCESS) THEN
      WRITE(*,*) "MPI_INIT_THREAD  *FAILED*"
+     nerrors = nerrors + 1
   ENDIF
   IF (provided .NE. required) THEN
      WRITE(*,*) "MPI doesn't support MPI_Init_thread with MPI_THREAD_MULTIPLE *FAILED*"
+     nerrors = nerrors + 1
   ENDIF
   CALL mpi_comm_rank( MPI_COMM_WORLD, mpi_rank, mpierror )
   IF (mpierror .NE. MPI_SUCCESS) THEN
      WRITE(*,*) "MPI_COMM_RANK  *FAILED* Process = ", mpi_rank
+     nerrors = nerrors + 1
   ENDIF
   CALL mpi_comm_size( MPI_COMM_WORLD, mpi_size, mpierror )
   IF (mpierror .NE. MPI_SUCCESS) THEN
      WRITE(*,*) "MPI_COMM_SIZE  *FAILED* Process = ", mpi_rank
+     nerrors = nerrors + 1
+  ENDIF
+
+  IF(nerrors.NE.0)THEN
+     IF(mpi_rank==0) CALL write_test_status(sum, &
+          'Testing Initializing mpi_init_thread', total_error)
+     CALL MPI_Barrier(MPI_COMM_WORLD, mpierror)
+     CALL mpi_abort(MPI_COMM_WORLD, 1, mpierror)
   ENDIF
 
   !
@@ -77,9 +90,10 @@ PROGRAM subfiling_test
   !
   CALL h5open_f(hdferror)
 
-  ! **********************
-  ! Test H5Pset_mpi_params
-  ! **********************
+  ! ***********************************
+  ! Test H5Pset/get_mpi_params_f APIs
+  ! ***********************************
+  nerrors = 0
   IF(mpi_size.GT.2)THEN
 
      IF (mpi_rank.LE.1)THEN
@@ -130,11 +144,8 @@ PROGRAM subfiling_test
 
   ENDIF
 
-  nerrors_vec(1) = nerrors
-  CALL mpi_allreduce(MPI_IN_PLACE,nerrors_vec,1,MPI_INTEGER,MPI_SUM, MPI_COMM_WORLD, mpierror)
-  nerrors = nerrors_vec(1)
-
-  IF(mpi_rank==0) CALL write_test_status(nerrors, &
+  CALL MPI_REDUCE(nerrors, sum, 1, MPI_INTEGER, MPI_SUM, 0, MPI_COMM_WORLD, mpierror)
+  IF(mpi_rank==0) CALL write_test_status(sum, &
        'Testing H5Pset/get_mpi_params_f', total_error)
 
   ! *********************************************************
@@ -150,6 +161,7 @@ PROGRAM subfiling_test
 
   CALL H5Pget_mpi_params_f(fapl_id, comm, info, hdferror)
   CALL check("H5Pset_mpi_params_f", hdferror, nerrors)
+
   CALL mpi_comm_size(comm, mpi_size_ret, mpierror)
   IF(mpi_size_ret.NE.mpi_size)THEN
      IF(mpi_rank.EQ.0) &
@@ -159,6 +171,16 @@ PROGRAM subfiling_test
 
   IF(mpi_rank==0) CALL write_test_status(nerrors, &
        'Testing H5Pset/get_mpi_params_f with defaults ', total_error)
+
+  ! Verify no new enum parameters have been added in C and not updated in Fortran
+  IF( IOC_SELECTION_OPTIONS_F .NE. 4)THEN
+     IF(mpi_rank.EQ.0) &
+          WRITE(*,*) "Mismatch between Fortran and C H5FD_subfiling_ioc_select_t definitions"
+     nerrors = nerrors + 1
+  ENDIF
+
+  IF(mpi_rank==0) CALL write_test_status(nerrors, &
+       'Testing Subfiling FD is registered', total_error)
 
   ! *********************************************************
   ! Check the default subfiling parameters
@@ -171,23 +193,14 @@ PROGRAM subfiling_test
   CALL check("h5pget_driver_f", hdferror, nerrors)
 
   IF( driver_id .NE. H5FD_SUBFILING_F) THEN
-     WRITE(*,*) "Wrong driver information returned"
+     WRITE(*,*) "Wrong file driver type returned"
      nerrors = nerrors + 1
   ENDIF
 
-  IF( IOC_SELECTION_OPTIONS_F .NE. 4)THEN
-     IF(mpi_rank.EQ.0) &
-          WRITE(*,*) "Mismatch between Fortran and C H5FD_subfiling_ioc_select_t definitions"
-     nerrors = nerrors + 1
-  ENDIF
-
-  IF(mpi_rank==0) CALL write_test_status(nerrors, &
-       'Testing Subfiling FD is registered', total_error)
-
   ! *********************************************************
-  ! Check the default parameters
+  ! Check the default parameters for subfiling and ioc
   ! *********************************************************
-  nerrors = 0
+
   CALL h5pget_fapl_subfiling_f(fapl_id, vfd_config, hdferror)
   CALL check("h5pget_fapl_subfiling_f", hdferror, nerrors)
 
@@ -236,7 +249,7 @@ PROGRAM subfiling_test
   CALL check("h5fclose_f", hdferror, nerrors)
 
   IF(mpi_rank==0) CALL write_test_status(nerrors, &
-       'Testing H5Fcreate with subfiling', total_error)
+       'Testing H5Fcreate with subfiling with default settings', total_error)
 
   ! *********************************************************
   ! Testing creating a file with subfiling, modified settings
@@ -295,45 +308,61 @@ PROGRAM subfiling_test
   IF(mpi_rank==0) CALL write_test_status(nerrors, &
        'Testing H5Pset/get_fapl_ioc_f with custom settings', total_error)
 
+  ! *********************************************************
+  ! Testing creating a file with subfiling, custom settings
+  ! *********************************************************
+
   CALL h5fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, hdferror, access_prp = fapl_id)
   CALL check("h5pcreate_f", hdferror, nerrors)
 
   CALL h5fclose_f(file_id, hdferror)
   CALL check("h5fclose_f", hdferror, nerrors)
 
-  INQUIRE(FILE=filename, EXIST=file_exists)
+  IF(mpi_rank.EQ.0)THEN
+     INQUIRE(FILE=filename, EXIST=file_exists)
+     IF(.NOT.file_exists)THEN
+        WRITE(*,"(A,A)") "Failed to find the stub subfile ",TRIM(filename)
+        nerrors = nerrors + 1
+     ENDIF
 
-  IF(file_exists)THEN
-     OPEN(10,FILE=filename, ACCESS='stream', STATUS='old', POSITION='append', iostat=ios)
-     IF(ios.EQ.0)THEN ! if file was successfully opened
-        INQUIRE(unit=10,POS=nbytes)   ! get number of bytes in file plus one
-        IF(nbytes.GT.200)THEN         ! verify the stub file does not contain all the data
-           IF(mpi_rank.EQ.0) &
-                WRITE(*,*) "Corrupted stub .h5 subfile"
+     CALL EXECUTE_COMMAND_LINE("stat --format='%i' "//filename//" >> tmp_inode", EXITSTAT=i)
+     IF(i.ne.0)THEN
+        WRITE(*,"(A,A)") "Failed to stat the stub  subfile ",TRIM(filename)
+        nerrors = nerrors + 1
+     ENDIF
+
+     OPEN(11,FILE="tmp_inode")
+     READ(11,*) inode
+     CLOSE(11,STATUS="delete")
+
+     DO i = 1, vfd_config%shared_cfg%stripe_count
+        WRITE(subfname,'(A,".subfile_",I0,"_",I0,"_of_",I0)') filename,inode,i,vfd_config%shared_cfg%stripe_count
+        INQUIRE(FILE=subfname, EXIST=file_exists)
+        IF(.NOT.file_exists)THEN
+           WRITE(*,"(A,A)") "Failed to create the subfile ",TRIM(subfname)
            nerrors = nerrors + 1
         ENDIF
-     ENDIF
-  ELSE
-     IF(mpi_rank.EQ.0) &
-          WRITE(*,*) "Failed creating the stub .h5 subfile"
-     nerrors = nerrors + 1
+     ENDDO
+
   ENDIF
 
   CALL h5pclose_f(fapl_id, hdferror)
   CALL check("h5pclose_f", hdferror, nerrors)
 
   IF(mpi_rank==0) CALL write_test_status(nerrors, &
-       'Testing H5Fcreate', total_error)
+       'Testing H5Fcreate with subfiling with custom settings', total_error)
 
   !
   ! close HDF5 interface
   !
   CALL h5close_f(hdferror)
 
+  CALL MPI_ALLREDUCE(total_error, sum, 1, MPI_INTEGER, MPI_SUM, MPI_COMM_WORLD, mpierror)
+
   !
   ! close MPI
   !
-  IF (total_error == 0) THEN
+  IF (sum == 0) THEN
      CALL mpi_finalize(mpierror)
      IF (mpierror .NE. MPI_SUCCESS) THEN
         WRITE(*,*) "MPI_FINALIZE  *FAILED* Process = ", mpi_rank

@@ -29,7 +29,7 @@ PROGRAM parallel_test
   INTEGER :: mpi_size                             ! number of processes in the group of communicator
   INTEGER :: mpi_rank                             ! rank of the calling process in the communicator
   INTEGER :: length = 12000                       ! length of array
-  INTEGER :: i,j
+  INTEGER :: i,j, sum
   ! use collective MPI I/O
   LOGICAL, DIMENSION(1:2) :: do_collective = (/.FALSE.,.TRUE./)
   CHARACTER(LEN=11), DIMENSION(1:2) :: chr_collective =(/"independent", "collective "/)
@@ -81,6 +81,8 @@ PROGRAM parallel_test
   ! close HDF5 interface
   !
   CALL h5close_f(hdferror)
+
+  CALL MPI_ALLREDUCE(total_error, sum, 1, MPI_INTEGER, MPI_SUM, MPI_COMM_WORLD, mpierror)
 
   !
   ! close MPI
