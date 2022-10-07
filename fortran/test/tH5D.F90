@@ -673,6 +673,18 @@ CONTAINS
     INTEGER :: error
     TYPE(C_PTR) :: f_ptr1, f_ptr2
 
+!!$
+!!$    CHARACTER(LEN=6), PARAMETER :: filename = "dsetfill"
+!!$    CHARACTER(LEN=80) :: fix_filename
+!!$
+!!$    INTEGER(hid_t) :: file, fcpl, dataset, space
+!!$    INTEGER :: i, j, n, ios
+!!$    INTEGER(hsize_t), DIMENSION(1:2) :: dims
+!!$    INTEGER(haddr_t) :: offset
+!!$    INTEGER, DIMENSION(1:dset_dim1,1:dset_dim2), TARGET :: rdata, data_in
+!!$    INTEGER :: error
+!!!    TYPE(C_PTR) :: f_ptr
+
     ! Initialize memory buffer
     data_i1  = -2
     data_i4  = -2
