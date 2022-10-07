@@ -11,8 +11,6 @@
 
 cd @HDF5_BINARY_DIR@
 echo "Run command. Test output will be in build/ctestS.out"
-ctest . -E MPI_TEST_ -C Release -j 32 -T test >& ctestS.out
+ctest_test (BUILD "@HDF5_BINARY_DIR@" APPEND EXCLUDE "MPI_TEST_" PARALLEL_LEVEL 32 RETURN_VALUE res) >& ctestS.out
 
-##$CMD  >& ctestS.out
 echo "Done running command."
-

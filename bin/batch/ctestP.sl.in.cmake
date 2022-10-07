@@ -8,7 +8,7 @@
 #SBATCH --job-name=h5_ctestP
 
 cd @HDF5_BINARY_DIR@
-ctest . -R MPI_TEST_ -C Release -T test >& ctestP.out
+echo "Run parallel test command. Test output will be in build/ctestP.out"
+ctest_test (BUILD "@HDF5_BINARY_DIR@" APPEND INCLUDE "MPI_TEST_"  RETURN_VALUE res) >& ctestP.out
 
-echo "Done running ctestP.sl"
-
+echo "Done running ctest parallel command."

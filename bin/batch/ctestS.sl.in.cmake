@@ -8,8 +8,7 @@
 #SBATCH --job-name=h5_ctestS
 
 cd @HDF5_BINARY_DIR@
-CMD="ctest . -E MPI_TEST_ -C Release -j 32 -T test"
+echo "Run command. Test output will be in build/ctestS.out"
+ctest_test (BUILD "@HDF5_BINARY_DIR@" APPEND EXCLUDE "MPI_TEST_" PARALLEL_LEVEL 32 RETURN_VALUE res) >& ctestS.out
 
-echo "Run $CMD. Test output will be in build/ctestS.out"
-$CMD  >& ctestS.out
-echo "Done running $CMD"
+echo "Done running command."
