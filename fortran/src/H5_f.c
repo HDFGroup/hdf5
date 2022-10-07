@@ -574,14 +574,14 @@ h5init_flags_c(int_f *h5d_flags, size_t_f *h5d_size_flags, int_f *h5e_flags, hid
     int mpi_code;
 
     if (MPI_SUCCESS == (mpi_code = MPI_Initialized(&mpi_initialized))) {
-      if (mpi_initialized) {
-        /* If MPI is initialized, validate that it was initialized with MPI_THREAD_MULTIPLE */
-        if (MPI_SUCCESS == (mpi_code = MPI_Query_thread(&provided))) {
-          if (provided == MPI_THREAD_MULTIPLE) {
-            h5fd_hid_flags[7] = (hid_t_f)H5FD_SUBFILING;
-          }
+        if (mpi_initialized) {
+            /* If MPI is initialized, validate that it was initialized with MPI_THREAD_MULTIPLE */
+            if (MPI_SUCCESS == (mpi_code = MPI_Query_thread(&provided))) {
+                if (provided == MPI_THREAD_MULTIPLE) {
+                    h5fd_hid_flags[7] = (hid_t_f)H5FD_SUBFILING;
+                }
+            }
         }
-      }
     }
 #endif
 #ifdef H5_HAVE_SUBFILING_VFD
