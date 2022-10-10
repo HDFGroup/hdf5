@@ -1,0 +1,4 @@
+ctest_test (BUILD "@HDF5_BINARY_DIR@" APPEND INCLUDE MPI_TEST_ RETURN_VALUE res)
+if (${res} LESS 0 OR ${res} GREATER 0)
+      file (APPEND ${CTEST_SCRIPT_DIRECTORY}/FailedCTest.txt "Failed Tests: ${res}\n")
+      endif ()
