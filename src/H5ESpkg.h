@@ -40,7 +40,7 @@
 
 /* Typedef for event nodes */
 typedef struct H5ES_event_t {
-    H5VL_object_t *      request;     /* Request token for event */
+    H5VL_object_t       *request;     /* Request token for event */
     struct H5ES_event_t *prev, *next; /* Previous and next event nodes */
 
     H5ES_op_info_t op_info; /* Useful info about operation */
@@ -56,9 +56,9 @@ typedef struct H5ES_event_list_t {
 struct H5ES_t {
     uint64_t                   op_counter; /* Count of operations inserted into this set */
     H5ES_event_insert_func_t   ins_func;   /* Callback to invoke for operation inserts */
-    void *                     ins_ctx;    /* Context for callback to invoke for operation inserts */
+    void                      *ins_ctx;    /* Context for callback to invoke for operation inserts */
     H5ES_event_complete_func_t comp_func;  /* Callback to invoke for operation completions */
-    void *                     comp_ctx;   /* Context for callback to invoke for operation inserts */
+    void                      *comp_ctx;   /* Context for callback to invoke for operation inserts */
 
     /* Active events */
     H5ES_event_list_t active; /* List of active events in set */

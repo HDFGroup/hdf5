@@ -1064,7 +1064,7 @@ H5IMis_image(hid_t loc_id, const char *dset_name)
     htri_t  has_class;
     hid_t   atid;
     hid_t   aid = -1;
-    char *  attr_data;    /* Name of attribute */
+    char   *attr_data;    /* Name of attribute */
     hsize_t storage_size; /* Size of storage for attribute */
     herr_t  ret;
 
@@ -1165,7 +1165,7 @@ H5IMis_palette(hid_t loc_id, const char *dset_name)
     htri_t  has_class;
     hid_t   atid;
     hid_t   aid = -1;
-    char *  attr_data;    /* Name of attribute */
+    char   *attr_data;    /* Name of attribute */
     hsize_t storage_size; /* Size of storage for attribute */
     herr_t  ret;
 

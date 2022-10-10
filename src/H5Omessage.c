@@ -50,11 +50,11 @@
 
 /* User data for iteration while removing a message */
 typedef struct {
-    H5F_t *        f;        /* Pointer to file for insertion */
+    H5F_t         *f;        /* Pointer to file for insertion */
     int            sequence; /* Sequence # to search for */
     unsigned       nfailed;  /* # of failed message removals */
     H5O_operator_t op;       /* Callback routine for removal operations */
-    void *         op_data;  /* Callback data for removal operations */
+    void          *op_data;  /* Callback data for removal operations */
     hbool_t        adj_link; /* Whether to adjust links when removing messages */
 } H5O_iter_rm_t;
 
@@ -237,7 +237,7 @@ done:
 herr_t
 H5O_msg_write(const H5O_loc_t *loc, unsigned type_id, unsigned mesg_flags, unsigned update_flags, void *mesg)
 {
-    H5O_t *                oh = NULL;           /* Object header to use */
+    H5O_t                 *oh = NULL;           /* Object header to use */
     const H5O_msg_class_t *type;                /* Actual H5O class type for the ID */
     herr_t                 ret_value = SUCCEED; /* Return value */
 
@@ -437,7 +437,7 @@ void *
 H5O_msg_read(const H5O_loc_t *loc, unsigned type_id, void *mesg)
 {
     H5O_t *oh        = NULL; /* Object header to use */
-    void * ret_value = NULL; /* Return value */
+    void  *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(loc->addr, NULL)
 
@@ -489,7 +489,7 @@ H5O_msg_read_oh(H5F_t *f, H5O_t *oh, unsigned type_id, void *mesg)
 {
     const H5O_msg_class_t *type; /* Actual H5O class type for the ID */
     unsigned               idx;  /* Message's index in object header */
-    void *                 ret_value = NULL;
+    void                  *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -616,7 +616,7 @@ void *
 H5O_msg_free(unsigned type_id, void *mesg)
 {
     const H5O_msg_class_t *type;             /* Actual H5O class type for the ID */
-    void *                 ret_value = NULL; /* Return value */
+    void                  *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -693,7 +693,7 @@ H5O_msg_free_real(const H5O_msg_class_t *type, void *msg_native)
 /*-------------------------------------------------------------------------
  * Function:	H5O_msg_copy
  *
- * Purpose:	Copies a message.  If MESG is is the null pointer then a null
+ * Purpose:	Copies a message.  If MESG is the null pointer then a null
  *		pointer is returned with no error.
  *
  * Return:	Success:	Ptr to the new message
@@ -709,7 +709,7 @@ void *
 H5O_msg_copy(unsigned type_id, const void *mesg, void *dst)
 {
     const H5O_msg_class_t *type;             /* Actual H5O class type for the ID */
-    void *                 ret_value = NULL; /* Return value */
+    void                  *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -745,7 +745,7 @@ done:
 int
 H5O_msg_count(const H5O_loc_t *loc, unsigned type_id)
 {
-    H5O_t *                oh = NULL;        /* Object header to operate on */
+    H5O_t                 *oh = NULL;        /* Object header to operate on */
     const H5O_msg_class_t *type;             /* Actual H5O class type for the ID */
     unsigned               msg_count;        /* Message count */
     int                    ret_value = FAIL; /* Return value */
@@ -918,7 +918,7 @@ done:
 herr_t
 H5O_msg_remove(const H5O_loc_t *loc, unsigned type_id, int sequence, hbool_t adj_link)
 {
-    H5O_t *                oh = NULL;        /* Pointer to actual object header */
+    H5O_t                 *oh = NULL;        /* Pointer to actual object header */
     const H5O_msg_class_t *type;             /* Actual H5O class type for the ID */
     herr_t                 ret_value = FAIL; /* Return value */
 
@@ -968,7 +968,7 @@ herr_t
 H5O_msg_remove_op(const H5O_loc_t *loc, unsigned type_id, int sequence, H5O_operator_t op, void *op_data,
                   hbool_t adj_link)
 {
-    H5O_t *                oh = NULL;        /* Pointer to actual object header */
+    H5O_t                 *oh = NULL;        /* Pointer to actual object header */
     const H5O_msg_class_t *type;             /* Actual H5O class type for the ID */
     herr_t                 ret_value = FAIL; /* Return value */
 
@@ -1151,7 +1151,7 @@ done:
 herr_t
 H5O_msg_iterate(const H5O_loc_t *loc, unsigned type_id, const H5O_mesg_operator_t *op, void *op_data)
 {
-    H5O_t *                oh = NULL;        /* Pointer to actual object header */
+    H5O_t                 *oh = NULL;        /* Pointer to actual object header */
     const H5O_msg_class_t *type;             /* Actual H5O class type for the ID */
     herr_t                 ret_value = FAIL; /* Return value */
 
@@ -1336,7 +1336,7 @@ size_t
 H5O_msg_size_f(const H5F_t *f, hid_t ocpl_id, unsigned type_id, const void *mesg, size_t extra_raw)
 {
     const H5O_msg_class_t *type;          /* Actual H5O class type for the ID */
-    H5P_genplist_t *       ocpl;          /* Object Creation Property list */
+    H5P_genplist_t        *ocpl;          /* Object Creation Property list */
     uint8_t                oh_flags;      /* Object header status flags */
     size_t                 ret_value = 0; /* Return value */
 
@@ -1731,7 +1731,7 @@ H5O_msg_decode(H5F_t *f, H5O_t *open_oh, unsigned type_id, size_t buf_size, cons
 {
     const H5O_msg_class_t *type;             /* Actual H5O class type for the ID */
     unsigned               ioflags   = 0;    /* Flags for decode routine */
-    void *                 ret_value = NULL; /* Return value */
+    void                  *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -1752,7 +1752,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5O__msg_copy_file
  *
- * Purpose:     Copies a message to file.  If MESG is is the null pointer then a null
+ * Purpose:     Copies a message to file.  If MESG is the null pointer then a null
  *              pointer is returned with no error.
  *
  *              Attempts to share the message in the destination and sets
@@ -1878,7 +1878,7 @@ H5O__copy_mesg(H5F_t *f, H5O_t *oh, size_t idx, const H5O_msg_class_t *type, con
                unsigned mesg_flags, unsigned update_flags)
 {
     H5O_chunk_proxy_t *chk_proxy   = NULL;           /* Chunk that message is in */
-    H5O_mesg_t *       idx_msg     = &oh->mesg[idx]; /* Pointer to message to modify */
+    H5O_mesg_t        *idx_msg     = &oh->mesg[idx]; /* Pointer to message to modify */
     hbool_t            chk_dirtied = FALSE;          /* Flag for unprotecting chunk */
     herr_t             ret_value   = SUCCEED;        /* Return value */
 
@@ -2170,9 +2170,9 @@ done:
 herr_t
 H5O_msg_get_flags(const H5O_loc_t *loc, unsigned type_id, uint8_t *flags)
 {
-    H5O_t *                oh = NULL;           /* Object header to use */
+    H5O_t                 *oh = NULL;           /* Object header to use */
     const H5O_msg_class_t *type;                /* Actual H5O class type for the ID */
-    H5O_mesg_t *           idx_msg;             /* Pointer to message to modify */
+    H5O_mesg_t            *idx_msg;             /* Pointer to message to modify */
     unsigned               idx;                 /* Index of message to modify */
     herr_t                 ret_value = SUCCEED; /* Return value */
 

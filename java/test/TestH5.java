@@ -107,7 +107,7 @@ public class TestH5 {
     {
         try {
             H5fid  = H5.H5Fcreate(H5_FILE, HDF5Constants.H5F_ACC_TRUNC, HDF5Constants.H5P_DEFAULT,
-                                 HDF5Constants.H5P_DEFAULT);
+                                  HDF5Constants.H5P_DEFAULT);
             H5dsid = H5.H5Screate_simple(2, H5dims, null);
             H5did  = _createDataset(H5fid, H5dsid, "dset", HDF5Constants.H5P_DEFAULT);
         }
@@ -313,7 +313,7 @@ public class TestH5 {
     @Test
     public void testH5get_libversion()
     {
-        int libversion[] = {1, 13, 2};
+        int libversion[] = {1, 13, 3};
 
         try {
             H5.H5get_libversion(libversion);
@@ -354,7 +354,7 @@ public class TestH5 {
     @Test
     public void testH5check_version()
     {
-        int majnum = 1, minnum = 13, relnum = 2;
+        int majnum = 1, minnum = 13, relnum = 3;
 
         try {
             H5.H5check_version(majnum, minnum, relnum);

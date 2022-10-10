@@ -140,8 +140,8 @@ typedef struct H5FD_mirror_t {
 
 /* Prototypes */
 static herr_t  H5FD__mirror_term(void);
-static void *  H5FD__mirror_fapl_get(H5FD_t *_file);
-static void *  H5FD__mirror_fapl_copy(const void *_old_fa);
+static void   *H5FD__mirror_fapl_get(H5FD_t *_file);
+static void   *H5FD__mirror_fapl_copy(const void *_old_fa);
 static herr_t  H5FD__mirror_fapl_free(void *_fa);
 static haddr_t H5FD__mirror_get_eoa(const H5FD_t *_file, H5FD_mem_t type);
 static herr_t  H5FD__mirror_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr);
@@ -321,9 +321,9 @@ H5FD__mirror_xmit_decode_uint32(uint32_t *out, const unsigned char *_buf)
 /* ---------------------------------------------------------------------------
  * Function:    is_host_little_endian
  *
- * Purpose:     Determine whether the host machine is is little-endian.
+ * Purpose:     Determine whether the host machine is little-endian.
  *
- *              Store an intger with a known value, re-map the memory to a
+ *              Store an integer with a known value, re-map the memory to a
  *              character array, and inspect the array's contents.
  *
  * Return:      The number of bytes written to the buffer (8).
@@ -1106,7 +1106,7 @@ H5FD_mirror_xmit_is_xmit(const H5FD_mirror_xmit_t *xmit)
 static herr_t
 H5FD__mirror_verify_reply(H5FD_mirror_t *file)
 {
-    unsigned char *                 xmit_buf = NULL;
+    unsigned char                  *xmit_buf = NULL;
     struct H5FD_mirror_xmit_reply_t reply;
     ssize_t                         read_ret  = 0;
     herr_t                          ret_value = SUCCEED;
@@ -1162,9 +1162,9 @@ done:
 static void *
 H5FD__mirror_fapl_get(H5FD_t *_file)
 {
-    H5FD_mirror_t *     file      = (H5FD_mirror_t *)_file;
+    H5FD_mirror_t      *file      = (H5FD_mirror_t *)_file;
     H5FD_mirror_fapl_t *fa        = NULL;
-    void *              ret_value = NULL;
+    void               *ret_value = NULL;
 
     FUNC_ENTER_PACKAGE
 
@@ -1199,8 +1199,8 @@ static void *
 H5FD__mirror_fapl_copy(const void *_old_fa)
 {
     const H5FD_mirror_fapl_t *old_fa    = (const H5FD_mirror_fapl_t *)_old_fa;
-    H5FD_mirror_fapl_t *      new_fa    = NULL;
-    void *                    ret_value = NULL;
+    H5FD_mirror_fapl_t       *new_fa    = NULL;
+    void                     *ret_value = NULL;
 
     FUNC_ENTER_PACKAGE
 
@@ -1261,7 +1261,7 @@ herr_t
 H5Pget_fapl_mirror(hid_t fapl_id, H5FD_mirror_fapl_t *fa_dst /*out*/)
 {
     const H5FD_mirror_fapl_t *fa_src    = NULL;
-    H5P_genplist_t *          plist     = NULL;
+    H5P_genplist_t           *plist     = NULL;
     herr_t                    ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
@@ -1346,11 +1346,11 @@ H5FD__mirror_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxad
     int                      live_socket = -1;
     struct sockaddr_in       target_addr;
     socklen_t                addr_size;
-    unsigned char *          xmit_buf = NULL;
+    unsigned char           *xmit_buf = NULL;
     H5FD_mirror_fapl_t       fa;
-    H5FD_mirror_t *          file      = NULL;
+    H5FD_mirror_t           *file      = NULL;
     H5FD_mirror_xmit_open_t *open_xmit = NULL;
-    H5FD_t *                 ret_value = NULL;
+    H5FD_t                  *ret_value = NULL;
 
     FUNC_ENTER_PACKAGE
 
@@ -1554,7 +1554,7 @@ H5FD__mirror_query(const H5FD_t H5_ATTR_UNUSED *_file, unsigned long *flags)
     LOG_OP_CALL(__func__);
 
     /* Notice: the Mirror VFD Writer currently uses only the Sec2 driver as
-     * the underying driver -- as such, the Mirror VFD implementation copies
+     * the underlying driver -- as such, the Mirror VFD implementation copies
      * the Sec2 feature flags as its own.
      *
      * File pointer is always NULL/unused -- the H5FD_FEAT_IGNORE_DRVRINFO flag
@@ -1609,8 +1609,8 @@ static herr_t
 H5FD__mirror_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr)
 {
     H5FD_mirror_xmit_eoa_t xmit_eoa;
-    unsigned char *        xmit_buf  = NULL;
-    H5FD_mirror_t *        file      = (H5FD_mirror_t *)_file;
+    unsigned char         *xmit_buf  = NULL;
+    H5FD_mirror_t         *file      = (H5FD_mirror_t *)_file;
     herr_t                 ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
@@ -1718,8 +1718,8 @@ H5FD__mirror_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id,
                    const void *buf)
 {
     H5FD_mirror_xmit_write_t xmit_write;
-    unsigned char *          xmit_buf  = NULL;
-    H5FD_mirror_t *          file      = (H5FD_mirror_t *)_file;
+    unsigned char           *xmit_buf  = NULL;
+    H5FD_mirror_t           *file      = (H5FD_mirror_t *)_file;
     herr_t                   ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
@@ -1829,8 +1829,8 @@ static herr_t
 H5FD__mirror_lock(H5FD_t *_file, hbool_t rw)
 {
     H5FD_mirror_xmit_lock_t xmit_lock;
-    unsigned char *         xmit_buf  = NULL;
-    H5FD_mirror_t *         file      = (H5FD_mirror_t *)_file;
+    unsigned char          *xmit_buf  = NULL;
+    H5FD_mirror_t          *file      = (H5FD_mirror_t *)_file;
     herr_t                  ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE

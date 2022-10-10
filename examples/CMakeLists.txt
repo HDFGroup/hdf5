@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.12)
+cmake_minimum_required (VERSION 3.18)
 project (HDF5_EXAMPLES C)
 
 #-----------------------------------------------------------------------------
@@ -48,11 +48,15 @@ if (H5_HAVE_PARALLEL)
     ph5_filtered_writes
     ph5_filtered_writes_no_sel
   )
+
+  if (HDF5_ENABLE_SUBFILING_VFD)
+    list (APPEND parallel_examples ph5_subfiling)
+  endif ()
 endif ()
 
 foreach (example ${examples})
   add_executable (${example} ${HDF5_EXAMPLES_SOURCE_DIR}/${example}.c)
-  target_include_directories (${example} PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  target_include_directories (${example} PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   if (NOT BUILD_SHARED_LIBS)
     TARGET_C_PROPERTIES (${example} STATIC)
     target_link_libraries (${example} PRIVATE ${HDF5_LIB_TARGET})
@@ -73,7 +77,7 @@ endforeach ()
 if (H5_HAVE_PARALLEL)
   foreach (parallel_example ${parallel_examples})
     add_executable (${parallel_example} ${HDF5_EXAMPLES_SOURCE_DIR}/${parallel_example}.c)
-    target_include_directories (${parallel_example} PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+    target_include_directories (${parallel_example} PRIVATE "${HDF5_SRC_INCLUDE_DIRS};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
     if (NOT BUILD_SHARED_LIBS)
       TARGET_C_PROPERTIES (${parallel_example} STATIC)
       target_link_libraries (${parallel_example} PRIVATE ${HDF5_LIB_TARGET} ${MPI_C_LIBRARIES})

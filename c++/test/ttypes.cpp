@@ -28,12 +28,6 @@ using namespace H5;
 #include "h5cpputil.h" // C++ utilility header file
 
 /*
- * Offset from aligned memory returned by malloc().  This can be used to test
- * that type conversions handle non-aligned buffers correctly.
- */
-#define ALIGNMENT 1
-
-/*
  * Define if you want to test alignment code on a machine that doesn't
  * normally require alignment. When set, all native datatypes must be aligned
  * on a byte boundary equal to the data size.
@@ -51,14 +45,8 @@ using namespace H5;
 /* #include "H5Tpkg.h"
  */
 
-const char *FILENAME[] = {"dtypes1.h5", "dtypes2.h5", "dtypes3.h5", "dtypes4.h5", NULL};
-
-/*
- * Count up or down depending on whether the machine is big endian or little
- * endian.  If local variable `endian' is H5T_ORDER_BE then the result will
- * be I, otherwise the result will be Z-(I+1).
- */
-#define ENDIAN(Z, I) (H5T_ORDER_BE == endian ? (I) : (Z) - ((I) + 1))
+const char *FILENAME[] = {"dtypes1.h5",       "dtypes2.h5",           "dtypes3.h5", "dtypes4.h5",
+                          "encode_decode.h5", "h5_type_operators.h5", NULL};
 
 typedef enum flt_t { FLT_FLOAT, FLT_DOUBLE, FLT_LDOUBLE, FLT_OTHER } flt_t;
 
@@ -254,7 +242,7 @@ test_detect_type_class()
          */
 
         // Create an array datatype with an atomic base type
-        unsigned  rank    = 2;      // Rank for array datatype
+        int       rank    = 2;      // Rank for array datatype
         hsize_t   dims[2] = {3, 3}; // Dimensions for array datatype
         ArrayType atom_arr(PredType::STD_REF_OBJ, rank, dims);
 
@@ -570,7 +558,6 @@ test_query()
  *              January, 2007
  *-------------------------------------------------------------------------
  */
-const char *filename1 = "dtypes1.h5";
 
 static void
 test_transient()
@@ -581,7 +568,7 @@ test_transient()
     try {
 
         // Create the file and the dataspace.
-        H5File    file(filename1, H5F_ACC_TRUNC);
+        H5File    file(FILENAME[0], H5F_ACC_TRUNC);
         DataSpace space(2, ds_size, ds_size);
 
         // Copying a predefined type results in a modifiable copy
@@ -650,19 +637,18 @@ test_transient()
  *              January, 2007
  *-------------------------------------------------------------------------
  */
-const H5std_string filename2("dtypes2.h5");
 
 static void
 test_named()
 {
     static hsize_t ds_size[2] = {10, 20};
     unsigned       attr_data[10][20];
-    DataType *     ds_type = NULL;
+    DataType      *ds_type = NULL;
 
     SUBTEST("Named datatypes");
     try {
         // Create the file.
-        H5File file(filename2, H5F_ACC_TRUNC);
+        H5File file(FILENAME[1], H5F_ACC_TRUNC);
 
         // Create a simple dataspace.
         DataSpace space(2, ds_size, ds_size);
@@ -818,9 +804,8 @@ test_named()
  *              August, 2017
  *-------------------------------------------------------------------------
  */
-const H5std_string filename3("encode_decode.h5");
-const int          ARRAY1_RANK = 1;
-const int          ARRAY1_DIM  = 10;
+const int ARRAY1_RANK = 1;
+const int ARRAY1_DIM  = 10;
 
 static void
 test_encode_decode()
@@ -830,7 +815,7 @@ test_encode_decode()
     SUBTEST("DataType::encode() and DataType::decode()");
     try {
         // Create the file.
-        H5File file(filename3, H5F_ACC_TRUNC);
+        H5File file(FILENAME[4], H5F_ACC_TRUNC);
 
         //
         // Test with CompType
@@ -987,7 +972,7 @@ test_encode_decode()
         verify_val(inttyp.hasBinaryDesc(), true, "DataType::encode", __LINE__, __FILE__);
 
         // Create an IntType instance from the decoded pointer and verify it
-        IntType *  decoded_int_ptr(static_cast<IntType *>(inttyp.decode()));
+        IntType   *decoded_int_ptr(static_cast<IntType *>(inttyp.decode()));
         H5T_sign_t int_sign = decoded_int_ptr->getSign();
         verify_val(static_cast<long>(int_sign), static_cast<long>(H5T_SGN_NONE), "DataType::decode", __LINE__,
                    __FILE__);
@@ -1039,7 +1024,6 @@ test_encode_decode()
  *              August, 2017
  *-------------------------------------------------------------------------
  */
-const H5std_string filename4("h5_type_operators.h5");
 
 static void
 test_operators()
@@ -1049,7 +1033,7 @@ test_operators()
     SUBTEST("DataType::operator== and DataType::operator!=");
     try {
         // Create the file.
-        H5File file(filename4, H5F_ACC_TRUNC);
+        H5File file(FILENAME[5], H5F_ACC_TRUNC);
 
         //
         // Test with CompType
@@ -1153,6 +1137,6 @@ test_types()
 extern "C" void
 cleanup_types()
 {
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < 6; i++)
         HDremove(FILENAME[i]);
 } // cleanup_types

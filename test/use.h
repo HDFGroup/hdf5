@@ -49,7 +49,7 @@ typedef struct options_t {
     hsize_t     dims[UC_RANK];      /* dataset initial dims */
     hsize_t     max_dims[UC_RANK];  /* dataset max dims */
     hsize_t     nplanes;            /* number of planes to write, default proportional to chunksize */
-    char *      filename;           /* use case data filename               */
+    char       *filename;           /* use case data filename               */
     part_t      launch;             /* launch writer, reader or both        */
     hbool_t     use_swmr;           /* use swmr open (1) or not             */
     int         iterations;         /* iterations, default 1                */

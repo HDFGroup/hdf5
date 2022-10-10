@@ -241,7 +241,7 @@ done:
 herr_t
 H5Fset_mpi_atomicity(hid_t file_id, hbool_t flag)
 {
-    H5VL_object_t *                  vol_obj;             /* File info */
+    H5VL_object_t                   *vol_obj;             /* File info */
     H5VL_optional_args_t             vol_cb_args;         /* Arguments to VOL callback */
     H5VL_native_file_optional_args_t file_opt_args;       /* Arguments for optional operation */
     herr_t                           ret_value = SUCCEED; /* Return value */
@@ -315,7 +315,7 @@ done:
 herr_t
 H5Fget_mpi_atomicity(hid_t file_id, hbool_t *flag /*out*/)
 {
-    H5VL_object_t *                  vol_obj;             /* File info */
+    H5VL_object_t                   *vol_obj;             /* File info */
     H5VL_optional_args_t             vol_cb_args;         /* Arguments to VOL callback */
     H5VL_native_file_optional_args_t file_opt_args;       /* Arguments for optional operation */
     herr_t                           ret_value = SUCCEED; /* Return value */
@@ -373,7 +373,7 @@ H5F_mpi_retrieve_comm(hid_t loc_id, hid_t acspl_id, MPI_Comm *mpi_comm)
        attached to the loc_id */
     if (H5I_INVALID_HID != loc_id) {
         H5G_loc_t loc;
-        H5F_t *   f = NULL;
+        H5F_t    *f = NULL;
 
         /* Retrieve the file structure */
         if (H5G_loc(loc_id, &loc) < 0)
@@ -390,12 +390,24 @@ H5F_mpi_retrieve_comm(hid_t loc_id, hid_t acspl_id, MPI_Comm *mpi_comm)
     }
     /* otherwise, this is from H5Fopen or H5Fcreate and has to be collective */
     else {
-        H5P_genplist_t *plist; /* Property list pointer */
+        H5FD_driver_prop_t driver_prop; /* Property for driver ID & info */
+        H5P_genplist_t    *plist;       /* Property list pointer */
+        unsigned long      driver_feat_flags;
+        H5FD_class_t      *driver_class = NULL;
 
         if (NULL == (plist = H5P_object_verify(acspl_id, H5P_FILE_ACCESS)))
             HGOTO_ERROR(H5E_FILE, H5E_BADTYPE, FAIL, "not a file access list")
 
-        if (H5FD_MPIO == H5P_peek_driver(plist))
+        if (H5P_peek(plist, H5F_ACS_FILE_DRV_NAME, &driver_prop) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get driver ID & info")
+
+        if (NULL == (driver_class = H5FD_get_class(driver_prop.driver_id)))
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get driver class structure")
+
+        if (H5FD_driver_query(driver_class, &driver_feat_flags) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get driver feature flags")
+
+        if (driver_feat_flags & H5FD_FEAT_HAS_MPI)
             if (H5P_peek(plist, H5F_ACS_MPI_PARAMS_COMM_NAME, mpi_comm) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get MPI communicator")
     }
@@ -587,5 +599,4 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_mpi_get_file_block_type() */
-
 #endif /* H5_HAVE_PARALLEL */

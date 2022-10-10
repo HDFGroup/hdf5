@@ -646,7 +646,7 @@ test_copy_attach_attributes(hid_t loc_id, hid_t type_id)
         goto done;
 
     for (u = 0; u < num_attributes_g; u++) {
-        HDsprintf(attr_name, "%u attr", u);
+        HDsnprintf(attr_name, sizeof(attr_name), "%u attr", u);
 
         /* Set attribute data */
         attr_data[0] = (int)(100 * u);
@@ -715,7 +715,7 @@ test_copy_attach_paired_attributes(hid_t loc_id, hid_t loc_id2, hid_t type_id)
         goto done;
 
     for (u = 0; u < num_attributes_g; u++) {
-        HDsprintf(attr_name, "%u attr", u);
+        HDsnprintf(attr_name, sizeof(attr_name), "%u attr", u);
 
         /* Set attribute data */
         attr_data[0] = (int)(100 * u);
@@ -787,8 +787,8 @@ compare_attribute(hid_t aid, hid_t aid2, hid_t pid, const void *wbuf, hid_t obj_
     H5A_info_t ainfo;               /* Attribute info */
     H5A_info_t ainfo2;              /* Attribute info */
     hssize_t   nelmts;              /* # of elements in dataspace */
-    void *     rbuf  = NULL;        /* Buffer for reading raw data */
-    void *     rbuf2 = NULL;        /* Buffer for reading raw data */
+    void      *rbuf  = NULL;        /* Buffer for reading raw data */
+    void      *rbuf2 = NULL;        /* Buffer for reading raw data */
 
     /* Check the character sets are equal */
     if (H5Aget_info(aid, &ainfo) < 0)
@@ -1358,8 +1358,8 @@ compare_datasets(hid_t did, hid_t did2, hid_t pid, const void *wbuf)
     htri_t             is_committed2;         /* If the datatype is committed */
     int                nfilters;              /* Number of filters applied to dataset */
     hssize_t           nelmts;                /* # of elements in dataspace */
-    void *             rbuf  = NULL;          /* Buffer for reading raw data */
-    void *             rbuf2 = NULL;          /* Buffer for reading raw data */
+    void              *rbuf  = NULL;          /* Buffer for reading raw data */
+    void              *rbuf2 = NULL;          /* Buffer for reading raw data */
     H5D_space_status_t space_status;          /* Dataset's raw dataspace status */
     H5D_space_status_t space_status2;         /* Dataset's raw dataspace status */
 
@@ -1678,11 +1678,17 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
                     case H5O_TYPE_MAP:
                         HDassert(0 && "maps not supported in native VOL connector");
 
+                        /* clang complains about implicit fallthrough here and
+                         * our usual attributes and fall-through comments don't
+                         * quiet the compiler.
+                         */
+                        H5_CLANG_DIAG_OFF("implicit-fallthrough")
                     case H5O_TYPE_UNKNOWN:
                     case H5O_TYPE_NTYPES:
                     default:
                         HDassert(0 && "Unknown type of object");
                         break;
+                        H5_CLANG_DIAG_ON("implicit-fallthrough")
                 } /* end switch */
 
                 /* Close objects */
@@ -2466,7 +2472,7 @@ test_copy_dataset_versionbounds(hid_t fcpl_src, hid_t fapl_src)
     H5F_libver_t low, high;                   /* File format bounds */
     unsigned     srcdset_layoutversion;       /* Layout version of source dataset */
     int          i, j;                        /* Local index variables */
-    H5D_t *      dsetp = NULL;                /* Pointer to internal dset structure */
+    H5D_t       *dsetp = NULL;                /* Pointer to internal dset structure */
     herr_t       ret;                         /* Generic return value */
 
     TESTING("H5Ocopy(): simple dataset with version bounds");
@@ -3992,7 +3998,7 @@ test_copy_dataset_chunked_empty(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, 
     if ((did = H5Dopen2(fid_src, NAME_DATASET_CHUNKED3, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
-    /* open the copied dataset NAME_DATASET_CHUNKED3 at destinaion */
+    /* open the copied dataset NAME_DATASET_CHUNKED3 at destination */
     if ((did2 = H5Dopen2(fid_dst, NAME_DATASET_CHUNKED3, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
@@ -5995,7 +6001,7 @@ test_copy_dataset_multi_ohdr_chunks(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fa
     else
         /* open the group for copy */
         if ((gid = H5Gopen2(fid_src, NAME_GROUP_TOP, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR;
+            FAIL_STACK_ERROR;
 
     /* open the destination group */
     if ((gid2 = H5Gopen2(fid_dst, NAME_GROUP_TOP, H5P_DEFAULT)) < 0)
@@ -7933,17 +7939,17 @@ test_copy_group_deep(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_f
 
     /* create nested sub-groups & datasets */
     for (i = 0; i < NUM_SUB_GROUPS; i++) {
-        HDsprintf(objname, "Group #%d", i);
+        HDsnprintf(objname, sizeof(objname), "Group #%d", i);
         if ((gid_sub = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR;
 
         for (j = 0; j < NUM_SUB_GROUPS; j++) {
-            HDsprintf(objname, "Group #%d", j);
+            HDsnprintf(objname, sizeof(objname), "Group #%d", j);
             if ((gid_sub2 = H5Gcreate2(gid_sub, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
                 TEST_ERROR;
 
             for (k = 0; k < NUM_DATASETS; k++) {
-                HDsprintf(objname, "Dataset #%d", k);
+                HDsnprintf(objname, sizeof(objname), "Dataset #%d", k);
 
                 /* add a dataset to the group */
                 if ((did = H5Dcreate2(gid_sub2, objname, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT,
@@ -8222,12 +8228,12 @@ test_copy_group_wide_loop(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t 
 
     /* create wide sub-group hierarchy, with multiple links to higher groups */
     for (u = 0; u < NUM_WIDE_LOOP_GROUPS; u++) {
-        HDsprintf(objname, "%s-%u", NAME_GROUP_SUB, u);
+        HDsnprintf(objname, sizeof(objname), "%s-%u", NAME_GROUP_SUB, u);
         if ((gid_sub = H5Gcreate2(gid, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR;
 
         for (v = 0; v < NUM_WIDE_LOOP_GROUPS; v++) {
-            HDsprintf(objname, "%s-%u", NAME_GROUP_SUB_SUB2, v);
+            HDsnprintf(objname, sizeof(objname), "%s-%u", NAME_GROUP_SUB_SUB2, v);
             if ((gid_sub2 = H5Gcreate2(gid_sub, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
                 FAIL_STACK_ERROR;
 
@@ -10233,7 +10239,7 @@ test_copy_dataset_compact_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, 
     unsigned int i, j, k;                    /* Local index variables */
     hsize_t      dim1d[1];                   /* Dataset dimensions */
     hvl_t        buf[DIM_SIZE_1];            /* Buffer for writing data */
-    hvl_t *      tvl;                        /* Temporary pointer to VL information */
+    hvl_t       *tvl;                        /* Temporary pointer to VL information */
     char         src_filename[NAME_BUF_SIZE];
     char         dst_filename[NAME_BUF_SIZE];
 
@@ -10429,7 +10435,7 @@ test_copy_dataset_contig_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, h
     unsigned int i, j, k;                    /* Local index variables */
     hsize_t      dim1d[1];                   /* Dataset dimensions */
     hvl_t        buf[DIM_SIZE_1];            /* Buffer for writing data */
-    hvl_t *      tvl;                        /* Temporary pointer to VL information */
+    hvl_t       *tvl;                        /* Temporary pointer to VL information */
     char         src_filename[NAME_BUF_SIZE];
     char         dst_filename[NAME_BUF_SIZE];
 
@@ -10628,7 +10634,7 @@ test_copy_dataset_chunked_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, 
     unsigned int i, j, k;                         /* Local index variables */
     hsize_t      dim1d[1];                        /* Dataset dimensions */
     hvl_t        buf[DIM_SIZE_1];                 /* Buffer for writing data */
-    hvl_t *      tvl;                             /* Temporary pointer to VL information */
+    hvl_t       *tvl;                             /* Temporary pointer to VL information */
     hsize_t      chunk_dim1d[1] = {CHUNK_SIZE_1}; /* Chunk dimensions */
     char         src_filename[NAME_BUF_SIZE];
     char         dst_filename[NAME_BUF_SIZE];
@@ -10867,7 +10873,7 @@ test_copy_dataset_compressed_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fap
     unsigned int i, j, k;                         /* Local index variables */
     hsize_t      dim1d[1];                        /* Dataset dimensions */
     hvl_t        buf[DIM_SIZE_1];                 /* Buffer for writing data */
-    hvl_t *      tvl;                             /* Temporary pointer to VL information */
+    hvl_t       *tvl;                             /* Temporary pointer to VL information */
     hsize_t      chunk_dim1d[1] = {CHUNK_SIZE_1}; /* Chunk dimensions */
     char         src_filename[NAME_BUF_SIZE];
     char         dst_filename[NAME_BUF_SIZE];
@@ -11063,7 +11069,7 @@ typedef struct cmpd_vl_t {
  *              Failure:        number of errors
  *
  * Programmer:  Neil Fortner
- *              Tuseday, September 29, 2009
+ *              Tuesday, September 29, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -17313,6 +17319,7 @@ main(void)
     int         ExpressMode;
     const char *env_h5_drvr; /* File Driver value from environment */
     hbool_t     same_file;   /* Whether to run tests that only use one file */
+    hbool_t     driver_is_default_compatible;
 
     env_h5_drvr = HDgetenv(HDF5_DRIVER);
     if (env_h5_drvr == NULL)
@@ -17321,6 +17328,9 @@ main(void)
     /* Setup */
     h5_reset();
     fapl = h5_fileaccess();
+
+    if (h5_driver_is_default_vfd_compatible(fapl, &driver_is_default_compatible) < 0)
+        TEST_ERROR;
 
     ExpressMode = GetTestExpress();
     if (ExpressMode > 1)
@@ -17558,10 +17568,7 @@ main(void)
 
             nerrors += test_copy_same_file_named_datatype(fcpl_src, src_fapl);
 
-            /* Check if current driver might modify the filename. Skip these tests
-             * if so, since the file is pre-generated.
-             */
-            if (!h5_driver_uses_modified_filename()) {
+            if (driver_is_default_compatible) {
                 /* Test with dataset opened in the file or not */
                 nerrors += test_copy_old_layout(fcpl_dst, dst_fapl, FALSE);
                 nerrors += test_copy_old_layout(fcpl_dst, dst_fapl, TRUE);

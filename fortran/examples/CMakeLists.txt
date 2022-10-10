@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.12)
+cmake_minimum_required (VERSION 3.18)
 project (HDF5_F90_EXAMPLES C Fortran)
 # --------------------------------------------------------------------
 # Notes: When creating examples they should be prefixed
@@ -45,7 +45,7 @@ foreach (example ${examples})
     target_include_directories (f90_ex_${example}
         PRIVATE
             "${CMAKE_Fortran_MODULE_DIRECTORY}/static"
-            "${HDF5_SRC_DIR}"
+            "${HDF5_SRC_INCLUDE_DIRS}"
             "${HDF5_SRC_BINARY_DIR}"
             "${HDF5_F90_BINARY_DIR}"
             "${HDF5_F90_BINARY_DIR}/static"
@@ -60,7 +60,7 @@ foreach (example ${examples})
     target_include_directories (f90_ex_${example}
         PRIVATE
             "${CMAKE_Fortran_MODULE_DIRECTORY}/shared"
-            "${HDF5_SRC_DIR}"
+            "${HDF5_SRC_INCLUDE_DIRS}"
             "${HDF5_SRC_BINARY_DIR}"
             "${HDF5_F90_BINARY_DIR}"
             "${HDF5_F90_BINARY_DIR}/shared"
@@ -86,7 +86,7 @@ foreach (example ${F2003_examples})
     target_include_directories (f03_ex_${example}
         PRIVATE
             "${CMAKE_Fortran_MODULE_DIRECTORY}/static"
-            "${HDF5_SRC_DIR}"
+            "${HDF5_SRC_INCLUDE_DIRS}"
             "${HDF5_SRC_BINARY_DIR}"
             "${HDF5_F90_BINARY_DIR}"
             "${HDF5_F90_BINARY_DIR}/static"
@@ -101,7 +101,7 @@ foreach (example ${F2003_examples})
     target_include_directories (f03_ex_${example}
         PRIVATE
             "${CMAKE_Fortran_MODULE_DIRECTORY}/shared"
-            "${HDF5_SRC_DIR}"
+            "${HDF5_SRC_INCLUDE_DIRS}"
             "${HDF5_SRC_BINARY_DIR}"
             "${HDF5_F90_BINARY_DIR}"
             "${HDF5_F90_BINARY_DIR}/shared"
@@ -127,7 +127,7 @@ if (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
     target_include_directories (f90_ex_ph5example
         PRIVATE
             "${CMAKE_Fortran_MODULE_DIRECTORY}/static"
-            "${HDF5_SRC_DIR}"
+            "${HDF5_SRC_INCLUDE_DIRS}"
             "${HDF5_SRC_BINARY_DIR}"
             "${HDF5_F90_BINARY_DIR}"
             "${HDF5_F90_BINARY_DIR}/static"
@@ -148,7 +148,7 @@ if (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
     target_include_directories (f90_ex_ph5example
         PRIVATE
             "${CMAKE_Fortran_MODULE_DIRECTORY}/shared"
-            "${HDF5_SRC_DIR}"
+            "${HDF5_SRC_INCLUDE_DIRS}"
             "${HDF5_SRC_BINARY_DIR}"
             "${HDF5_F90_BINARY_DIR}"
             "${HDF5_F90_BINARY_DIR}/shared"

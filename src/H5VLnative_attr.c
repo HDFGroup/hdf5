@@ -79,10 +79,10 @@ H5VL__native_attr_create(void *obj, const H5VL_loc_params_t *loc_params, const c
     H5G_loc_t loc;     /* Object location */
     H5G_loc_t obj_loc; /* Location used to open group */
     hbool_t   loc_found = FALSE;
-    H5T_t *   type, *dt; /* Datatype to use for attribute */
-    H5S_t *   space;     /* Dataspace to use for attribute */
-    H5A_t *   attr      = NULL;
-    void *    ret_value = NULL;
+    H5T_t    *type, *dt; /* Datatype to use for attribute */
+    H5S_t    *space;     /* Dataspace to use for attribute */
+    H5A_t    *attr      = NULL;
+    void     *ret_value = NULL;
 
     FUNC_ENTER_PACKAGE
 
@@ -139,8 +139,8 @@ H5VL__native_attr_open(void *obj, const H5VL_loc_params_t *loc_params, const cha
                        hid_t H5_ATTR_UNUSED aapl_id, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
 {
     H5G_loc_t loc;         /* Object location */
-    H5A_t *   attr = NULL; /* Attribute opened */
-    void *    ret_value;
+    H5A_t    *attr = NULL; /* Attribute opened */
+    void     *ret_value;
 
     FUNC_ENTER_PACKAGE
 
@@ -292,7 +292,7 @@ H5VL__native_attr_get(void *obj, H5VL_attr_get_args_t *args, hid_t H5_ATTR_UNUSE
             }
             else if (H5VL_OBJECT_BY_IDX == get_name_args->loc_params.type) {
                 H5G_loc_t loc;
-                H5A_t *   attr;
+                H5A_t    *attr;
 
                 /* check arguments */
                 if (H5G_loc_real(obj, get_name_args->loc_params.obj_type, &loc) < 0)
@@ -329,7 +329,7 @@ H5VL__native_attr_get(void *obj, H5VL_attr_get_args_t *args, hid_t H5_ATTR_UNUSE
         /* H5Aget_info */
         case H5VL_ATTR_GET_INFO: {
             H5VL_attr_get_info_args_t *get_info_args = &args->args.get_info;
-            H5A_t *                    attr          = NULL;
+            H5A_t                     *attr          = NULL;
 
             if (H5VL_OBJECT_BY_SELF == get_info_args->loc_params.type) {
                 attr = (H5A_t *)obj;
@@ -478,8 +478,8 @@ H5VL__native_attr_specific(void *obj, const H5VL_loc_params_t *loc_params, H5VL_
         /* H5Aiterate/iterate_by_name */
         case H5VL_ATTR_ITER: {
             H5VL_attr_iterate_args_t *iter_args = &args->args.iterate; /* Arguments to iterate operation */
-            static const char *       self_name = ".";                 /* Name for 'self' location */
-            const char *              loc_name;                        /* Location name */
+            static const char        *self_name = ".";                 /* Name for 'self' location */
+            const char               *loc_name;                        /* Location name */
 
             /* Set correct name, for type of location */
             if (loc_params->type == H5VL_OBJECT_BY_SELF) /* H5Aiterate2 */

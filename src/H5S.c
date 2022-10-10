@@ -741,7 +741,7 @@ H5S_get_simple_extent_npoints(const H5S_t *ds)
 hssize_t
 H5Sget_simple_extent_npoints(hid_t space_id)
 {
-    H5S_t *  ds;
+    H5S_t   *ds;
     hssize_t ret_value;
 
     FUNC_ENTER_API(FAIL)
@@ -1492,7 +1492,7 @@ done:
 herr_t
 H5S_encode(H5S_t *obj, unsigned char **p, size_t *nalloc)
 {
-    H5F_t *  f = NULL;            /* Fake file structure*/
+    H5F_t   *f = NULL;            /* Fake file structure*/
     size_t   extent_size;         /* Size of serialized dataspace extent */
     hssize_t sselect_size;        /* Signed size of serialized dataspace selection */
     size_t   select_size;         /* Size of serialized dataspace selection */
@@ -1607,13 +1607,13 @@ done:
 H5S_t *
 H5S_decode(const unsigned char **p)
 {
-    H5F_t *              f = NULL;         /* Fake file structure*/
-    H5S_t *              ds;               /* Decoded dataspace */
-    H5S_extent_t *       extent;           /* Entent of decoded dataspace */
+    H5F_t               *f = NULL;         /* Fake file structure*/
+    H5S_t               *ds;               /* Decoded dataspace */
+    H5S_extent_t        *extent;           /* Entent of decoded dataspace */
     const unsigned char *pp = (*p);        /* Local pointer for decoding */
     size_t               extent_size;      /* size of the extent message*/
     uint8_t              sizeof_size;      /* 'Size of sizes' for file */
-    H5S_t *              ret_value = NULL; /* Return value */
+    H5S_t               *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1720,7 +1720,7 @@ H5S_get_simple_extent_type(const H5S_t *space)
 H5S_class_t
 H5Sget_simple_extent_type(hid_t sid)
 {
-    H5S_t *     space;
+    H5S_t      *space;
     H5S_class_t ret_value; /* Return value */
 
     FUNC_ENTER_API(H5S_NO_CLASS)
@@ -1943,7 +1943,7 @@ done:
     htri_t H5S_extent_equal(ds1, ds2)
         H5S_t *ds1, *ds2;            IN: Dataspace objects to compare
  RETURNS
-     TRUE if equal, FALSE if unequal on succeess/Negative on failure
+     TRUE if equal, FALSE if unequal on success/Negative on failure
  DESCRIPTION
     Compare two dataspaces if their extents are identical.
 --------------------------------------------------------------------------*/

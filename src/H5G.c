@@ -145,8 +145,8 @@ static hid_t
 H5G__create_api_common(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id,
                        void **token_ptr, H5VL_object_t **_vol_obj_ptr)
 {
-    void *          grp         = NULL; /* Structure for new group */
-    H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
+    void           *grp         = NULL; /* Structure for new group */
+    H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
     H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
@@ -250,8 +250,8 @@ H5Gcreate_async(const char *app_file, const char *app_func, unsigned app_line, h
                 hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id, hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
-    void *         token     = NULL;            /* Request token for async operation        */
-    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    void          *token     = NULL;            /* Request token for async operation        */
+    void         **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
     hid_t          ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -317,19 +317,24 @@ done:
 hid_t
 H5Gcreate_anon(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id)
 {
-    void *            grp     = NULL;              /* Structure for new group */
-    H5VL_object_t *   vol_obj = NULL;              /* Object for loc_id */
+    void             *grp     = NULL;              /* Structure for new group */
+    H5VL_object_t    *vol_obj = NULL;              /* Object for loc_id */
     H5VL_loc_params_t loc_params;                  /* Location parameters for object access */
     hid_t             ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE3("i", "iii", loc_id, gcpl_id, gapl_id);
 
-    /* Check group creation property list */
+    /* Check group property list */
     if (H5P_DEFAULT == gcpl_id)
         gcpl_id = H5P_GROUP_CREATE_DEFAULT;
     else if (TRUE != H5P_isa_class(gcpl_id, H5P_GROUP_CREATE))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not group create property list")
+
+    if (H5P_DEFAULT == gapl_id)
+        gapl_id = H5P_GROUP_ACCESS_DEFAULT;
+    else if (TRUE != H5P_isa_class(gapl_id, H5P_GROUP_ACCESS))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not group access property list")
 
     /* Verify access property list and set up collective metadata if appropriate */
     if (H5CX_set_apl(&gapl_id, H5P_CLS_GACC, loc_id, TRUE) < 0)
@@ -375,8 +380,8 @@ static hid_t
 H5G__open_api_common(hid_t loc_id, const char *name, hid_t gapl_id, void **token_ptr,
                      H5VL_object_t **_vol_obj_ptr)
 {
-    void *          grp         = NULL; /* Group opened */
-    H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
+    void           *grp         = NULL; /* Group opened */
+    H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
     H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
@@ -456,8 +461,8 @@ H5Gopen_async(const char *app_file, const char *app_func, unsigned app_line, hid
               hid_t gapl_id, hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
-    void *         token     = NULL;            /* Request token for async operation        */
-    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    void          *token     = NULL;            /* Request token for async operation        */
+    void         **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
     hid_t          ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -502,7 +507,7 @@ done:
 hid_t
 H5Gget_create_plist(hid_t group_id)
 {
-    H5VL_object_t *       vol_obj;     /* Object for loc_id */
+    H5VL_object_t        *vol_obj;     /* Object for loc_id */
     H5VL_group_get_args_t vol_cb_args; /* Arguments to VOL callback */
     hid_t                 ret_value = H5I_INVALID_HID;
 
@@ -542,7 +547,7 @@ static herr_t
 H5G__get_info_api_common(hid_t loc_id, H5G_info_t *group_info /*out*/, void **token_ptr,
                          H5VL_object_t **_vol_obj_ptr)
 {
-    H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
+    H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
     H5VL_group_get_args_t vol_cb_args;                /* Arguments to VOL callback */
@@ -611,8 +616,8 @@ H5Gget_info_async(const char *app_file, const char *app_func, unsigned app_line,
                   H5G_info_t *group_info /*out*/, hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
-    void *         token     = NULL;            /* Request token for async operation        */
-    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    void          *token     = NULL;            /* Request token for async operation        */
+    void         **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
     herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -652,7 +657,7 @@ static herr_t
 H5G__get_info_by_name_api_common(hid_t loc_id, const char *name, H5G_info_t *group_info /*out*/,
                                  hid_t lapl_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr)
 {
-    H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
+    H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
     H5VL_group_get_args_t vol_cb_args;                /* Arguments to VOL callback */
@@ -719,8 +724,8 @@ H5Gget_info_by_name_async(const char *app_file, const char *app_func, unsigned a
                           const char *name, H5G_info_t *group_info /*out*/, hid_t lapl_id, hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
-    void *         token     = NULL;            /* Request token for async operation        */
-    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    void          *token     = NULL;            /* Request token for async operation        */
+    void         **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
     herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -761,7 +766,7 @@ H5G__get_info_by_idx_api_common(hid_t loc_id, const char *group_name, H5_index_t
                                 H5_iter_order_t order, hsize_t n, H5G_info_t *group_info /*out*/,
                                 hid_t lapl_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr)
 {
-    H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
+    H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
     H5VL_group_get_args_t vol_cb_args;                /* Arguments to VOL callback */
@@ -831,8 +836,8 @@ H5Gget_info_by_idx_async(const char *app_file, const char *app_func, unsigned ap
                          H5G_info_t *group_info /*out*/, hid_t lapl_id, hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
-    void *         token     = NULL;            /* Request token for async operation        */
-    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    void          *token     = NULL;            /* Request token for async operation        */
+    void         **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
     herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -905,9 +910,9 @@ herr_t
 H5Gclose_async(const char *app_file, const char *app_func, unsigned app_line, hid_t group_id, hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
-    H5VL_t *       connector = NULL;            /* VOL connector */
-    void *         token     = NULL;            /* Request token for async operation        */
-    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    H5VL_t        *connector = NULL;            /* VOL connector */
+    void          *token     = NULL;            /* Request token for async operation        */
+    void         **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
     herr_t         ret_value = SUCCEED;         /* Return value                     */
 
     FUNC_ENTER_API(FAIL)
@@ -968,7 +973,7 @@ done:
 herr_t
 H5Gflush(hid_t group_id)
 {
-    H5VL_object_t *            vol_obj;             /* Object of loc_id */
+    H5VL_object_t             *vol_obj;             /* Object of loc_id */
     H5VL_group_specific_args_t vol_cb_args;         /* Arguments to VOL callback */
     herr_t                     ret_value = SUCCEED; /* Return value                 */
 
@@ -1010,7 +1015,7 @@ done:
 herr_t
 H5Grefresh(hid_t group_id)
 {
-    H5VL_object_t *            vol_obj;             /* Object of loc_id */
+    H5VL_object_t             *vol_obj;             /* Object of loc_id */
     H5VL_group_specific_args_t vol_cb_args;         /* Arguments to VOL callback */
     herr_t                     ret_value = SUCCEED; /* Return value                 */
 

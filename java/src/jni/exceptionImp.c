@@ -33,7 +33,7 @@ extern "C" {
 #include "exceptionImp.h"
 
 extern H5E_auto2_t efunc;
-extern void *      edata;
+extern void       *edata;
 
 /*******************/
 /* Local Variables */
@@ -153,12 +153,12 @@ Java_hdf_hdf5lib_H5_H5error_1on(JNIEnv *env, jclass clss)
  * Method:    printStackTrace0
  * Signature: (Ljava/lang/Object;)V
  *
- *  Call the HDF-5 library to print the HDF-5 error stack to 'file_name'.
+ *  Call the HDF5 library to print the HDF5 error stack to 'file_name'.
  */
 JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_exceptions_HDF5LibraryException_printStackTrace0(JNIEnv *env, jobject obj, jstring file_name)
 {
-    FILE *      stream = NULL;
+    FILE       *stream = NULL;
     const char *file   = NULL;
 
     UNUSED(obj);
@@ -187,7 +187,7 @@ done:
  * Method:    _getMajorErrorNumber
  * Signature: ()J
  *
- *  Extract the HDF-5 major error number from the HDF-5 error stack.
+ *  Extract the HDF5 major error number from the HDF5 error stack.
  */
 JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_exceptions_HDF5LibraryException__1getMajorErrorNumber(JNIEnv *env, jobject obj)
@@ -211,7 +211,7 @@ Java_hdf_hdf5lib_exceptions_HDF5LibraryException__1getMajorErrorNumber(JNIEnv *e
  * Method:    _getMinorErrorNumber
  * Signature: ()J
  *
- *  Extract the HDF-5 minor error number from the HDF-5 error stack.
+ *  Extract the HDF5 minor error number from the HDF5 error stack.
  */
 JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_exceptions_HDF5LibraryException__1getMinorErrorNumber(JNIEnv *env, jobject obj)
@@ -237,7 +237,7 @@ static jboolean
 H5JNIErrorClass(JNIEnv *env, const char *message, const char *className)
 {
     jstring  str;
-    char *   args[2];
+    char    *args[2];
     jboolean retVal = JNI_FALSE;
 
     if (NULL == (str = ENVPTR->NewStringUTF(ENVONLY, message)))
@@ -350,10 +350,10 @@ h5raiseException(JNIEnv *env, const char *message, const char *exception)
 } /* end h5raiseException() */
 
 /*
- *  h5libraryError()   determines the HDF-5 major error code
+ *  h5libraryError()   determines the HDF5 major error code
  *  and creates and throws the appropriate sub-class of
  *  HDF5LibraryException().  This routine should be called
- *  whenever a call to the HDF-5 library fails, i.e., when
+ *  whenever a call to the HDF5 library fails, i.e., when
  *  the return is -1.
  *
  *  Note:  This routine never returns from the 'throw',
@@ -371,8 +371,8 @@ h5libraryError(JNIEnv *env)
     hid_t       min_num;
     hid_t       maj_num;
     hid_t       stk_id = H5I_INVALID_HID;
-    char *      args[2];
-    char *      msg_str = NULL;
+    char       *args[2];
+    char       *msg_str = NULL;
     jboolean    retVal  = JNI_FALSE;
 
     exceptionNumbers.maj_num = 0;
@@ -436,7 +436,7 @@ done:
 
 /*
  *  defineHDF5LibraryException()  returns the name of the sub-class
- *  which goes with an HDF-5 error code.
+ *  which goes with an HDF5 error code.
  */
 static const char *
 defineHDF5LibraryException(hid_t maj_num)

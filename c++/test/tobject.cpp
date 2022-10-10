@@ -761,4 +761,7 @@ extern "C" void
 cleanup_object()
 {
     HDremove(FILE_OBJECTS.c_str());
+    HDremove(FILE_OBJHDR.c_str());
+    HDremove(FILE_OBJINFO.c_str());
+    HDremove(FILE_INTERGRPS.c_str());
 } // cleanup_objects

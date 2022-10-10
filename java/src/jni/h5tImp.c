@@ -361,7 +361,7 @@ JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5Tget_1pad(JNIEnv *env, jclass clss, jlong type_id, jintArray pad)
 {
     jboolean isCopy;
-    jint *   P      = NULL;
+    jint    *P      = NULL;
     herr_t   status = FAIL;
 
     UNUSED(clss);
@@ -448,7 +448,7 @@ Java_hdf_hdf5lib_H5_H5Tget_1fields_1int(JNIEnv *env, jclass clss, jlong type_id,
 {
     jboolean isCopy;
     jsize    arrLen;
-    jint *   P      = NULL;
+    jint    *P      = NULL;
     herr_t   status = FAIL;
 
     UNUSED(clss);
@@ -485,7 +485,7 @@ JNIEXPORT void JNICALL
 Java_hdf_hdf5lib_H5_H5Tget_1fields(JNIEnv *env, jclass clss, jlong type_id, jlongArray fields)
 {
     jboolean isCopy;
-    jlong *  fieldsArray = NULL;
+    jlong   *fieldsArray = NULL;
     jsize    arrLen;
     herr_t   status = FAIL;
 
@@ -792,7 +792,7 @@ done:
 JNIEXPORT jstring JNICALL
 Java_hdf_hdf5lib_H5_H5Tget_1member_1name(JNIEnv *env, jclass clss, jlong type_id, jint field_idx)
 {
-    char *  member_name = NULL;
+    char   *member_name = NULL;
     jstring str         = NULL;
 
     UNUSED(clss);
@@ -949,7 +949,7 @@ Java_hdf_hdf5lib_H5_H5Treclaim(JNIEnv *env, jclass clss, jlong type_id, jlong sp
                                jbyteArray buf)
 {
     jboolean bufIsCopy;
-    jbyte *  pinBuf = NULL;
+    jbyte   *pinBuf = NULL;
     herr_t   status = FAIL;
 
     UNUSED(clss);
@@ -1042,7 +1042,7 @@ JNIEXPORT jstring JNICALL
 Java_hdf_hdf5lib_H5_H5Tget_1tag(JNIEnv *env, jclass clss, jlong type)
 {
     jstring str = NULL;
-    char *  tag = NULL;
+    char   *tag = NULL;
 
     UNUSED(clss);
 
@@ -1108,7 +1108,7 @@ Java_hdf_hdf5lib_H5_H5Tenum_1insert_1int(JNIEnv *env, jclass clss, jlong type_id
 {
     const char *memberName = NULL;
     jboolean    isCopy;
-    jint *      intBuf = NULL;
+    jint       *intBuf = NULL;
     herr_t      status = FAIL;
 
     UNUSED(clss);
@@ -1144,7 +1144,7 @@ Java_hdf_hdf5lib_H5_H5Tenum_1insert(JNIEnv *env, jclass clss, jlong type_id, jst
 {
     const char *memberName = NULL;
     jboolean    isCopy;
-    jbyte *     memberBuf = NULL;
+    jbyte      *memberBuf = NULL;
     herr_t      status    = FAIL;
 
     UNUSED(clss);
@@ -1179,8 +1179,8 @@ Java_hdf_hdf5lib_H5_H5Tenum_1nameof_1int(JNIEnv *env, jclass clss, jlong type_id
 {
     jboolean isCopy;
     jstring  str;
-    jint *   intP   = NULL;
-    char *   nameP  = NULL;
+    jint    *intP   = NULL;
+    char    *nameP  = NULL;
     herr_t   status = FAIL;
 
     UNUSED(clss);
@@ -1224,8 +1224,8 @@ Java_hdf_hdf5lib_H5_H5Tenum_1nameof(JNIEnv *env, jclass clss, jlong type_id, jby
 {
     jboolean isCopy;
     jstring  str    = NULL;
-    jbyte *  byteP  = NULL;
-    char *   nameP  = NULL;
+    jbyte   *byteP  = NULL;
+    char    *nameP  = NULL;
     herr_t   status = FAIL;
 
     UNUSED(clss);
@@ -1267,7 +1267,7 @@ Java_hdf_hdf5lib_H5_H5Tenum_1valueof_1int(JNIEnv *env, jclass clss, jlong type_i
 {
     const char *enumValue = NULL;
     jboolean    isCopy;
-    jint *      enumValueBuf = NULL;
+    jint       *enumValueBuf = NULL;
     herr_t      status       = FAIL;
 
     UNUSED(clss);
@@ -1303,7 +1303,7 @@ Java_hdf_hdf5lib_H5_H5Tenum_1valueof(JNIEnv *env, jclass clss, jlong type_id, js
 {
     const char *enumValue = NULL;
     jboolean    isCopy;
-    jbyte *     enumValueBuf = NULL;
+    jbyte      *enumValueBuf = NULL;
     herr_t      status       = FAIL;
 
     UNUSED(clss);
@@ -1337,7 +1337,7 @@ Java_hdf_hdf5lib_H5_H5Tget_1member_1value_1int(JNIEnv *env, jclass clss, jlong t
                                                jintArray value)
 {
     jboolean isCopy;
-    jint *   intP   = NULL;
+    jint    *intP   = NULL;
     herr_t   status = FAIL;
 
     UNUSED(clss);
@@ -1367,7 +1367,7 @@ Java_hdf_hdf5lib_H5_H5Tget_1member_1value(JNIEnv *env, jclass clss, jlong type_i
                                           jbyteArray value)
 {
     jboolean isCopy;
-    jbyte *  byteP  = NULL;
+    jbyte   *byteP  = NULL;
     herr_t   status = FAIL;
 
     UNUSED(clss);
@@ -1417,7 +1417,7 @@ Java_hdf_hdf5lib_H5_H5Tget_1array_1dims(JNIEnv *env, jclass clss, jlong type_id,
     hsize_t *cdims = NULL;
     size_t   i;
     jsize    dlen;
-    jint *   dimsP = NULL;
+    jint    *dimsP = NULL;
     int      ndims = -1;
 
     UNUSED(clss);
@@ -1552,7 +1552,7 @@ Java_hdf_hdf5lib_H5__1H5Tarray_1create2(JNIEnv *env, jclass clss, jlong base_id,
     jboolean isCopy;
     hsize_t *cdims = NULL;
     size_t   i;
-    jlong *  dimsP = NULL;
+    jlong   *dimsP = NULL;
     jsize    dlen;
     hid_t    retVal = H5I_INVALID_HID;
 
@@ -1603,7 +1603,7 @@ Java_hdf_hdf5lib_H5_H5Tget_1array_1dims2(JNIEnv *env, jclass clss, jlong type_id
     jboolean isCopy;
     hsize_t *cdims = NULL;
     size_t   i;
-    jlong *  dimsP = NULL;
+    jlong   *dimsP = NULL;
     jsize    dlen;
     int      ndims = -1;
 
@@ -1648,8 +1648,8 @@ Java_hdf_hdf5lib_H5_H5Tconvert(JNIEnv *env, jclass clss, jlong src_id, jlong dst
                                jbyteArray buf, jbyteArray background, jlong plist_id)
 {
     jboolean isCopy;
-    jbyte *  bufP   = NULL;
-    jbyte *  bgP    = NULL;
+    jbyte   *bufP   = NULL;
+    jbyte   *bgP    = NULL;
     herr_t   status = FAIL;
 
     UNUSED(clss);

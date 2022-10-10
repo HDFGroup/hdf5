@@ -84,7 +84,7 @@
 
 typedef struct H5FD_vsrt_tmp_t {
     haddr_t addr;
-    int     index;
+    size_t  index;
 } H5FD_vsrt_tmp_t;
 
 /* Information needed for iterating over the registered VFD hid_t IDs.
@@ -756,14 +756,14 @@ H5FD__read_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uin
     hbool_t         extend_bufs  = FALSE;
     uint32_t        i;
     size_t          element_size;
-    void *          buf;
+    void           *buf;
     hbool_t         use_vector = FALSE;
     haddr_t         addrs_local[H5FD_LOCAL_VECTOR_LEN];
-    haddr_t *       addrs = addrs_local;
+    haddr_t        *addrs = addrs_local;
     size_t          sizes_local[H5FD_LOCAL_VECTOR_LEN];
-    size_t *        sizes = sizes_local;
-    void *          vec_bufs_local[H5FD_LOCAL_VECTOR_LEN];
-    void **         vec_bufs = vec_bufs_local;
+    size_t         *sizes = sizes_local;
+    void           *vec_bufs_local[H5FD_LOCAL_VECTOR_LEN];
+    void          **vec_bufs = vec_bufs_local;
     hsize_t         file_off[H5FD_SEQ_LIST_LEN];
     size_t          file_len[H5FD_SEQ_LIST_LEN];
     hsize_t         mem_off[H5FD_SEQ_LIST_LEN];
@@ -790,25 +790,27 @@ H5FD__read_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uin
     /* Sanity checks */
     HDassert(file);
     HDassert(file->cls);
-    HDassert(mem_spaces);
-    HDassert(file_spaces);
-    HDassert(offsets);
-    HDassert(element_sizes);
-    HDassert(bufs);
-
-    /* Verify that the first elements of the element_sizes and bufs arrays are
-     * valid. */
-    HDassert(element_sizes[0] != 0);
-    HDassert(bufs[0] != NULL);
+    HDassert((mem_spaces) || (count == 0));
+    HDassert((file_spaces) || (count == 0));
+    HDassert((offsets) || (count == 0));
+    HDassert((element_sizes) || (count == 0));
+    HDassert((bufs) || (count == 0));
 
     /* Check if we're using vector I/O */
     use_vector = file->cls->read_vector != NULL;
 
-    /* Allocate sequence lists for memory and file spaces */
-    if (NULL == (file_iter = H5FL_MALLOC(H5S_sel_iter_t)))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate file selection iterator")
-    if (NULL == (mem_iter = H5FL_MALLOC(H5S_sel_iter_t)))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate memory selection iterator")
+    if (count > 0) {
+        /* Verify that the first elements of the element_sizes and bufs arrays are
+         * valid. */
+        HDassert(element_sizes[0] != 0);
+        HDassert(bufs[0] != NULL);
+
+        /* Allocate sequence lists for memory and file spaces */
+        if (NULL == (file_iter = H5FL_MALLOC(H5S_sel_iter_t)))
+            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate file selection iterator")
+        if (NULL == (mem_iter = H5FL_MALLOC(H5S_sel_iter_t)))
+            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate memory selection iterator")
+    }
 
     /* Loop over dataspaces */
     for (i = 0; i < count; i++) {
@@ -957,7 +959,7 @@ H5FD__read_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uin
                 /* Issue scalar read call */
                 if ((file->cls->read)(file, type, dxpl_id, offsets[i] + file_off[file_seq_i], io_len,
                                       (void *)((uint8_t *)buf + mem_off[mem_seq_i])) < 0)
-                HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read request failed")
+                    HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read request failed")
 
             /* Update file sequence */
             if (io_len == file_len[file_seq_i])
@@ -1075,9 +1077,9 @@ H5FD_read_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_s
 {
     hbool_t  offsets_cooked = FALSE;
     hid_t    mem_space_ids_local[H5FD_LOCAL_SEL_ARR_LEN];
-    hid_t *  mem_space_ids = mem_space_ids_local;
+    hid_t   *mem_space_ids = mem_space_ids_local;
     hid_t    file_space_ids_local[H5FD_LOCAL_SEL_ARR_LEN];
-    hid_t *  file_space_ids = file_space_ids_local;
+    hid_t   *file_space_ids = file_space_ids_local;
     uint32_t num_spaces     = 0;
     hid_t    dxpl_id        = H5I_INVALID_HID; /* DXPL for operation */
     uint32_t i;
@@ -1168,8 +1170,8 @@ H5FD_read_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_s
 
             if ((file_space_ids[num_spaces] = H5I_register(H5I_DATASPACE, file_spaces[num_spaces], TRUE)) <
                 0) {
-                if (H5I_dec_app_ref(mem_space_ids[num_spaces]) < 0)
-                    HDONE_ERROR(H5E_VFL, H5E_CANTDEC, FAIL, "problem freeing id")
+                if (NULL == H5I_remove(mem_space_ids[num_spaces]))
+                    HDONE_ERROR(H5E_VFL, H5E_CANTREMOVE, FAIL, "problem removing id")
                 HGOTO_ERROR(H5E_VFL, H5E_CANTREGISTER, FAIL, "unable to register dataspace ID")
             }
         }
@@ -1184,7 +1186,7 @@ H5FD_read_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_s
          */
         if (H5FD__read_selection_translate(file, type, dxpl_id, count, mem_spaces, file_spaces, offsets,
                                            element_sizes, bufs) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "translation to vector or scalar read failed")
+            HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "translation to vector or scalar read failed")
 
 done:
     /* undo the base addr offset to the offsets array if necessary */
@@ -1198,12 +1200,14 @@ done:
         }
     }
 
-    /* Cleanup dataspace arrays */
+    /* Cleanup dataspace arrays.  Use H5I_remove() so we only close the IDs and
+     * not the underlying dataspaces, which were not created by this function.
+     */
     for (i = 0; i < num_spaces; i++) {
-        if (H5I_dec_app_ref(mem_space_ids[i]) < 0)
-            HDONE_ERROR(H5E_VFL, H5E_CANTDEC, FAIL, "problem freeing id")
-        if (H5I_dec_app_ref(file_space_ids[i]) < 0)
-            HDONE_ERROR(H5E_VFL, H5E_CANTDEC, FAIL, "problem freeing id")
+        if (NULL == H5I_remove(mem_space_ids[i]))
+            HDONE_ERROR(H5E_VFL, H5E_CANTREMOVE, FAIL, "problem removing id")
+        if (NULL == H5I_remove(file_space_ids[i]))
+            HDONE_ERROR(H5E_VFL, H5E_CANTREMOVE, FAIL, "problem removing id")
     }
     if (mem_space_ids != mem_space_ids_local)
         mem_space_ids = H5MM_xfree(mem_space_ids);
@@ -1239,10 +1243,10 @@ H5FD_read_selection_id(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem_
                        void *bufs[] /* out */)
 {
     hbool_t  offsets_cooked = FALSE;
-    H5S_t *  mem_spaces_local[H5FD_LOCAL_SEL_ARR_LEN];
-    H5S_t ** mem_spaces = mem_spaces_local;
-    H5S_t *  file_spaces_local[H5FD_LOCAL_SEL_ARR_LEN];
-    H5S_t ** file_spaces = file_spaces_local;
+    H5S_t   *mem_spaces_local[H5FD_LOCAL_SEL_ARR_LEN];
+    H5S_t  **mem_spaces = mem_spaces_local;
+    H5S_t   *file_spaces_local[H5FD_LOCAL_SEL_ARR_LEN];
+    H5S_t  **file_spaces = file_spaces_local;
     hid_t    dxpl_id     = H5I_INVALID_HID; /* DXPL for operation */
     uint32_t i;
     herr_t   ret_value = SUCCEED; /* Return value */
@@ -1397,14 +1401,14 @@ H5FD__write_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, ui
     hbool_t         extend_bufs  = FALSE;
     uint32_t        i;
     size_t          element_size;
-    const void *    buf;
+    const void     *buf;
     hbool_t         use_vector = FALSE;
     haddr_t         addrs_local[H5FD_LOCAL_VECTOR_LEN];
-    haddr_t *       addrs = addrs_local;
+    haddr_t        *addrs = addrs_local;
     size_t          sizes_local[H5FD_LOCAL_VECTOR_LEN];
-    size_t *        sizes = sizes_local;
-    const void *    vec_bufs_local[H5FD_LOCAL_VECTOR_LEN];
-    const void **   vec_bufs = vec_bufs_local;
+    size_t         *sizes = sizes_local;
+    const void     *vec_bufs_local[H5FD_LOCAL_VECTOR_LEN];
+    const void    **vec_bufs = vec_bufs_local;
     hsize_t         file_off[H5FD_SEQ_LIST_LEN];
     size_t          file_len[H5FD_SEQ_LIST_LEN];
     hsize_t         mem_off[H5FD_SEQ_LIST_LEN];
@@ -1431,25 +1435,27 @@ H5FD__write_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, ui
     /* Sanity checks */
     HDassert(file);
     HDassert(file->cls);
-    HDassert(mem_spaces);
-    HDassert(file_spaces);
-    HDassert(offsets);
-    HDassert(element_sizes);
-    HDassert(bufs);
-
-    /* Verify that the first elements of the element_sizes and bufs arrays are
-     * valid. */
-    HDassert(element_sizes[0] != 0);
-    HDassert(bufs[0] != NULL);
+    HDassert((mem_spaces) || (count == 0));
+    HDassert((file_spaces) || (count == 0));
+    HDassert((offsets) || (count == 0));
+    HDassert((element_sizes) || (count == 0));
+    HDassert((bufs) || (count == 0));
 
     /* Check if we're using vector I/O */
     use_vector = file->cls->write_vector != NULL;
 
-    /* Allocate sequence lists for memory and file spaces */
-    if (NULL == (file_iter = H5FL_MALLOC(H5S_sel_iter_t)))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate file selection iterator")
-    if (NULL == (mem_iter = H5FL_MALLOC(H5S_sel_iter_t)))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate memory selection iterator")
+    if (count > 0) {
+        /* Verify that the first elements of the element_sizes and bufs arrays are
+         * valid. */
+        HDassert(element_sizes[0] != 0);
+        HDassert(bufs[0] != NULL);
+
+        /* Allocate sequence lists for memory and file spaces */
+        if (NULL == (file_iter = H5FL_MALLOC(H5S_sel_iter_t)))
+            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate file selection iterator")
+        if (NULL == (mem_iter = H5FL_MALLOC(H5S_sel_iter_t)))
+            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "couldn't allocate memory selection iterator")
+    }
 
     /* Loop over dataspaces */
     for (i = 0; i < count; i++) {
@@ -1598,7 +1604,7 @@ H5FD__write_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, ui
                 /* Issue scalar write call */
                 if ((file->cls->write)(file, type, dxpl_id, offsets[i] + file_off[file_seq_i], io_len,
                                        (const void *)((const uint8_t *)buf + mem_off[mem_seq_i])) < 0)
-                HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write request failed")
+                    HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write request failed")
 
             /* Update file sequence */
             if (io_len == file_len[file_seq_i])
@@ -1714,9 +1720,9 @@ H5FD_write_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_
 {
     hbool_t  offsets_cooked = FALSE;
     hid_t    mem_space_ids_local[H5FD_LOCAL_SEL_ARR_LEN];
-    hid_t *  mem_space_ids = mem_space_ids_local;
+    hid_t   *mem_space_ids = mem_space_ids_local;
     hid_t    file_space_ids_local[H5FD_LOCAL_SEL_ARR_LEN];
-    hid_t *  file_space_ids = file_space_ids_local;
+    hid_t   *file_space_ids = file_space_ids_local;
     uint32_t num_spaces     = 0;
     hid_t    dxpl_id        = H5I_INVALID_HID; /* DXPL for operation */
     uint32_t i;
@@ -1801,8 +1807,8 @@ H5FD_write_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_
 
             if ((file_space_ids[num_spaces] = H5I_register(H5I_DATASPACE, file_spaces[num_spaces], TRUE)) <
                 0) {
-                if (H5I_dec_app_ref(mem_space_ids[num_spaces]) < 0)
-                    HDONE_ERROR(H5E_VFL, H5E_CANTDEC, FAIL, "problem freeing id")
+                if (NULL == H5I_remove(mem_space_ids[num_spaces]))
+                    HDONE_ERROR(H5E_VFL, H5E_CANTREMOVE, FAIL, "problem removing id")
                 HGOTO_ERROR(H5E_VFL, H5E_CANTREGISTER, FAIL, "unable to register dataspace ID")
             }
         }
@@ -1817,7 +1823,7 @@ H5FD_write_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_
          */
         if (H5FD__write_selection_translate(file, type, dxpl_id, count, mem_spaces, file_spaces, offsets,
                                             element_sizes, bufs) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "translation to vector or scalar write failed")
+            HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "translation to vector or scalar write failed")
 
 done:
     /* undo the base addr offset to the offsets array if necessary */
@@ -1831,12 +1837,14 @@ done:
         }
     }
 
-    /* Cleanup dataspace arrays */
+    /* Cleanup dataspace arrays.  Use H5I_remove() so we only close the IDs and
+     * not the underlying dataspaces, which were not created by this function.
+     */
     for (i = 0; i < num_spaces; i++) {
-        if (H5I_dec_app_ref(mem_space_ids[i]) < 0)
-            HDONE_ERROR(H5E_VFL, H5E_CANTDEC, FAIL, "problem freeing id")
-        if (H5I_dec_app_ref(file_space_ids[i]) < 0)
-            HDONE_ERROR(H5E_VFL, H5E_CANTDEC, FAIL, "problem freeing id")
+        if (NULL == H5I_remove(mem_space_ids[i]))
+            HDONE_ERROR(H5E_VFL, H5E_CANTREMOVE, FAIL, "problem removing id")
+        if (NULL == H5I_remove(file_space_ids[i]))
+            HDONE_ERROR(H5E_VFL, H5E_CANTREMOVE, FAIL, "problem removing id")
     }
     if (mem_space_ids != mem_space_ids_local)
         mem_space_ids = H5MM_xfree(mem_space_ids);
@@ -1869,10 +1877,10 @@ H5FD_write_selection_id(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem
                         hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[], const void *bufs[])
 {
     hbool_t  offsets_cooked = FALSE;
-    H5S_t *  mem_spaces_local[H5FD_LOCAL_SEL_ARR_LEN];
-    H5S_t ** mem_spaces = mem_spaces_local;
-    H5S_t *  file_spaces_local[H5FD_LOCAL_SEL_ARR_LEN];
-    H5S_t ** file_spaces = file_spaces_local;
+    H5S_t   *mem_spaces_local[H5FD_LOCAL_SEL_ARR_LEN];
+    H5S_t  **mem_spaces = mem_spaces_local;
+    H5S_t   *file_spaces_local[H5FD_LOCAL_SEL_ARR_LEN];
+    H5S_t  **file_spaces = file_spaces_local;
     hid_t    dxpl_id     = H5I_INVALID_HID; /* DXPL for operation */
     uint32_t i;
     herr_t   ret_value = SUCCEED; /* Return value */
@@ -2256,7 +2264,7 @@ H5FD_sort_vector_io_req(hbool_t *vector_was_sorted, uint32_t _count, H5FD_mem_t 
          * arrays and populate them using the mapping provided by
          * the sorted array of H5FD_vsrt_tmp_t.
          */
-        int    j;
+        size_t j;
         size_t fixed_size_index = count;
         size_t fixed_type_index = count;
         size_t srt_tmp_size;
@@ -2268,10 +2276,8 @@ H5FD_sort_vector_io_req(hbool_t *vector_was_sorted, uint32_t _count, H5FD_mem_t 
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't alloc srt_tmp")
 
         for (i = 0; i < count; i++) {
-            HDassert(i == (size_t)((int)i));
-
             srt_tmp[i].addr  = addrs[i];
-            srt_tmp[i].index = (int)i;
+            srt_tmp[i].index = i;
         }
 
         /* sort the srt_tmp array */
@@ -2315,15 +2321,17 @@ H5FD_sort_vector_io_req(hbool_t *vector_was_sorted, uint32_t _count, H5FD_mem_t 
         HDassert(fixed_size_index <= count);
         HDassert(fixed_type_index <= count);
 
-        /* populate the sorted vectors */
+        /* Populate the sorted vectors.  Note that the index stored in srt_tmp
+         * refers to the index in the unsorted array, while the position of
+         * srt_tmp within the sorted array is the index in the sorted arrays */
         for (i = 0; i < count; i++) {
 
             j = srt_tmp[i].index;
 
-            (*s_types_ptr)[j] = types[MIN(i, fixed_type_index)];
-            (*s_addrs_ptr)[j] = addrs[i];
-            (*s_sizes_ptr)[j] = sizes[MIN(i, fixed_size_index)];
-            (*s_bufs_ptr)[j]  = bufs[i];
+            (*s_types_ptr)[i] = types[MIN(j, fixed_type_index)];
+            (*s_addrs_ptr)[i] = addrs[j];
+            (*s_sizes_ptr)[i] = sizes[MIN(j, fixed_size_index)];
+            (*s_bufs_ptr)[i]  = bufs[j];
         }
     }
 
@@ -2384,9 +2392,9 @@ done:
 herr_t
 H5FD_delete(const char *filename, hid_t fapl_id)
 {
-    H5FD_class_t *     driver;              /* VFD for file */
+    H5FD_class_t      *driver;              /* VFD for file */
     H5FD_driver_prop_t driver_prop;         /* Property for driver ID & info */
-    H5P_genplist_t *   plist;               /* Property list pointer */
+    H5P_genplist_t    *plist;               /* Property list pointer */
     herr_t             ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -2479,7 +2487,7 @@ static int
 H5FD__get_driver_cb(void *obj, hid_t id, void *_op_data)
 {
     H5FD_get_driver_ud_t *op_data   = (H5FD_get_driver_ud_t *)_op_data; /* User data for callback */
-    H5FD_class_t *        cls       = (H5FD_class_t *)obj;
+    H5FD_class_t         *cls       = (H5FD_class_t *)obj;
     int                   ret_value = H5_ITER_CONT; /* Callback return value */
 
     FUNC_ENTER_PACKAGE_NOERR

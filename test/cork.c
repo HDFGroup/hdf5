@@ -101,8 +101,8 @@ verify_old_dset_cork(void)
     hsize_t     dims[2]       = {100, 20};            /* Dataset dimension sizes */
     hsize_t     max_dims[2]   = {100, H5S_UNLIMITED}; /* Dataset maximum dimension sizes */
     hsize_t     chunk_dims[2] = {2, 5};               /* Dataset chunked dimension sizes */
-    int **      buf           = NULL;                 /* Data buffer (pointers to fake 2D array) */
-    int *       buf_data      = NULL;                 /* Data buffer (actual data) */
+    int       **buf           = NULL;                 /* Data buffer (pointers to fake 2D array) */
+    int        *buf_data      = NULL;                 /* Data buffer (actual data) */
     int         i = 0, j = 0;                         /* Local index variables */
     H5O_info2_t oinfo, oinfo2, oinfo3;                /* Object metadata information */
     hsize_t     dims2[2] = {8, 16};                   /* Dataset dimension sizes */
@@ -396,7 +396,7 @@ verify_obj_dset_cork(hbool_t swmr)
 
     /* Attach 8 attributes to the dataset */
     for (i = 0; i < 8; i++) {
-        HDsprintf(attrname, "attr %d", i);
+        HDsnprintf(attrname, sizeof(attrname), "attr %d", i);
         if ((aid = H5Acreate2(did2, attrname, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR;
         if (H5Awrite(aid, H5T_NATIVE_INT, &i) < 0)
@@ -513,8 +513,8 @@ verify_dset_cork(hbool_t swmr, hbool_t new_format)
     hsize_t     dims[2]       = {100, 20};            /* Dataset dimension sizes */
     hsize_t     max_dims[2]   = {100, H5S_UNLIMITED}; /* Dataset maximum dimension sizes */
     hsize_t     chunk_dims[2] = {2, 5};               /* Dataset chunked dimension sizes */
-    int **      buf           = NULL;                 /* Data buffer (pointers to fake 2D array) */
-    int *       buf_data      = NULL;                 /* Data buffer (actual data) */
+    int       **buf           = NULL;                 /* Data buffer (pointers to fake 2D array) */
+    int        *buf_data      = NULL;                 /* Data buffer (actual data) */
     int         i = 0, j = 0;                         /* Local index variables */
     H5O_info2_t oinfo, oinfo2, oinfo3;                /* Object metadata information */
     unsigned    flags;                                /* File access flags */
@@ -864,7 +864,7 @@ verify_group_cork(hbool_t swmr)
 
     /* Attach 8 attributes to the third group: GRP3 */
     for (i = 0; i < 8; i++) {
-        HDsprintf(attrname, "attr %d", i);
+        HDsnprintf(attrname, sizeof(attrname), "attr %d", i);
         if ((aid = H5Acreate2(gid3, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR;
         if (H5Awrite(aid, H5T_NATIVE_UINT, &i) < 0)
@@ -1081,7 +1081,7 @@ verify_named_cork(hbool_t swmr)
 
     /* Attach 8 attributes to datatype: DT3 */
     for (i = 0; i < 8; i++) {
-        HDsprintf(attrname, "attr %d", i);
+        HDsnprintf(attrname, sizeof(attrname), "attr %d", i);
         if ((aid = H5Acreate2(tid3, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR;
         if (H5Awrite(aid, H5T_NATIVE_UINT, &i) < 0)
@@ -1897,9 +1897,9 @@ test_dset_cork(hbool_t swmr, hbool_t new_format)
     hsize_t  cdims[RANK] = {2, 2};                           /* Chunk dimensions */
     int      fillval     = 0;                                /* Fill value */
     int      i, j, k = 0;                                    /* Local index variables */
-    int **   wbuf      = NULL; /* Data buffer for writes (pointers to fake 2D array) */
-    int *    wbuf_data = NULL; /* Data buffer for writes (real data) */
-    int *    rbuf_data = NULL; /* Data buffer for reads (real data) */
+    int    **wbuf      = NULL; /* Data buffer for writes (pointers to fake 2D array) */
+    int     *wbuf_data = NULL; /* Data buffer for writes (real data) */
+    int     *rbuf_data = NULL; /* Data buffer for reads (real data) */
     hbool_t  corked;           /* Cork status of an object */
     unsigned flags;            /* File access flags */
 

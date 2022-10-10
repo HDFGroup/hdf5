@@ -1,0 +1,629 @@
+/** Predefined Datatypes List
+ *
+//! [predefined_ieee_datatypes_table]
+<table>
+<caption>Predefined IEEE Floating Point Datatypes</caption>
+<tr>
+<th>Datatype</th>
+<th>Description</th>
+</tr>
+<tr>
+<td>#H5T_IEEE_F32BE</td>
+<td>32-bit big-endian IEEE floating point</td>
+</tr>
+<tr>
+<td>#H5T_IEEE_F32LE</td>
+<td>32-bit little-endian IEEE floating point</td>
+</tr>
+<tr>
+<td>#H5T_IEEE_F64BE</td>
+<td>64-bit big-endian IEEE floating point</td>
+</tr>
+<tr>
+<td>#H5T_IEEE_F64LE</td>
+<td>64-bit little-endian IEEE floating point</td>
+</tr>
+</table>
+//! [predefined_ieee_datatypes_table]
+ *
+ *
+//! [predefined_std_datatypes_table]
+<table>
+<caption>Predefined Standard Datatypes</caption>
+<tr>
+<th>Datatype</th>
+<th>Description</th>
+</tr>
+<tr>
+<td>#H5T_STD_I8BE</td>
+<td>8-bit big-endian signed integer (2's complement)</td>
+</tr>
+<tr>
+<td>#H5T_STD_I8LE</td>
+<td>8-bit little-endian signed integer (2's complement)</td>
+</tr>
+<tr>
+<td>#H5T_STD_I16BE</td>
+<td>16-bit big-endian signed integer (2's complement)</td>
+</tr>
+<tr>
+<td>#H5T_STD_I16LE</td>
+<td>16-bit little-endian signed integer (2's complement)</td>
+</tr>
+<tr>
+<td>#H5T_STD_I32BE</td>
+<td>32-bit big-endian signed integer (2's complement)</td>
+</tr>
+<tr>
+<td>#H5T_STD_I32LE</td>
+<td>32-bit little-endian signed integer (2's complement)</td>
+</tr>
+<tr>
+<td>#H5T_STD_I64BE</td>
+<td>64-bit big-endian signed integer (2's complement)</td>
+</tr>
+<tr>
+<td>#H5T_STD_I64LE</td>
+<td>64-bit little-endian signed integer (2's complement)</td>
+</tr>
+<tr>
+<td>#H5T_STD_U8BE</td>
+<td>8-bit big-endian unsigned integer</td>
+</tr>
+<tr>
+<td>#H5T_STD_U8LE</td>
+<td>8-bit little-endian unsigned integer</td>
+</tr>
+<tr>
+<td>#H5T_STD_U16BE</td>
+<td>16-bit big-endian unsigned integer</td>
+</tr>
+<tr>
+<td>#H5T_STD_U16LE</td>
+<td>16-bit little-endian unsigned integer</td>
+</tr>
+<tr>
+<td>#H5T_STD_U32BE</td>
+<td>32-bit big-endian unsigned integer</td>
+</tr>
+<tr>
+<td>#H5T_STD_U32LE</td>
+<td>32-bit little-endian unsigned integer</td>
+</tr>
+<tr>
+<td>#H5T_STD_U64BE</td>
+<td>64-bit big-endian unsigned integer</td>
+</tr>
+<tr>
+<td>#H5T_STD_U64LE</td>
+<td>64-bit little-endian unsigned integer</td>
+</tr>
+<tr>
+<td>#H5T_STD_B8BE</td>
+<td>8-bit big-endian bitfield</td>
+</tr>
+<tr>
+<td>#H5T_STD_B8LE</td>
+<td>8-bit little-endian bitfield</td>
+</tr>
+<tr>
+<td>#H5T_STD_B16BE</td>
+<td>16-bit big-endian bitfield</td>
+</tr>
+<tr>
+<td>#H5T_STD_B16LE</td>
+<td>16-bit little-endian bitfield</td>
+</tr>
+<tr>
+<td>#H5T_STD_B32BE</td>
+<td>32-bit big-endian bitfield</td>
+</tr>
+<tr>
+<td>#H5T_STD_B32LE</td>
+<td>32-bit little-endian bitfield</td>
+</tr>
+<tr>
+<td>#H5T_STD_B64BE</td>
+<td>64-bit big-endian bitfield</td>
+</tr>
+<tr>
+<td>#H5T_STD_B64LE</td>
+<td>64-bit little-endian bitfield</td>
+</tr>
+<tr>
+<td>#H5T_STD_REF_OBJ</td>
+<td>Object reference</td>
+</tr>
+<tr>
+<td>#H5T_STD_REF_DSETREG</td>
+<td>Dataset region reference</td>
+</tr>
+<tr>
+<td>#H5T_STD_REF</td>
+<td>Generic reference</td>
+</tr>
+</table>
+//! [predefined_std_datatypes_table]
+ *
+ *
+//! [predefined_unix_datatypes_table]
+<table>
+<caption>Predefined UNIX-specific Datatypes</caption>
+<tr>
+<th>Datatype</th>
+<th>Description</th>
+</tr>
+<tr>
+<td>#H5T_UNIX_D32BE</td>
+<td>32-bit big-endian</td>
+</tr>
+<tr>
+<td>#H5T_UNIX_D32LE</td>
+<td>32-bit little-endian</td>
+</tr>
+<tr>
+<td>#H5T_UNIX_D64BE</td>
+<td>64-bit big-endian</td>
+</tr>
+<tr>
+<td>#H5T_UNIX_D64LE</td>
+<td>64-bit little-endian</td>
+</tr>
+</table>
+//! [predefined_unix_datatypes_table]
+ *
+ *
+//! [predefined_string_datatypes_table]
+<table>
+<caption>Predefined String Datatypes</caption>
+<tr>
+<th>Datatype</th>
+<th>Description</th>
+</tr>
+<tr>
+<td>#H5T_C_S1</td>
+<td>String datatype in C (size defined in bytes rather than in bits)</td>
+</tr>
+</tr>
+<tr>
+<td>#H5T_FORTRAN_S1</td>
+<td>String datatype in Fortran (as defined for the HDF5 C library)</td>
+</tr>
+</table>
+//! [predefined_string_datatypes_table]
+ *
+ *
+//! [predefined_intel_datatypes_table]
+<table>
+<caption>Predefined Intel-specific Datatypes</caption>
+<tr>
+<th>Datatype</th>
+<th>Description</th>
+</tr>
+<tr>
+<td>#H5T_INTEL_I8</td>
+<td>8-bit little-endian signed integer (2's complement)</td>
+</tr>
+<tr>
+<td>#H5T_INTEL_I16</td>
+<td>16-bit little-endian signed integer (2's complement)</td>
+</tr>
+<tr>
+<td>#H5T_INTEL_I32</td>
+<td>32-bit little-endian signed integer (2's complement)</td>
+</tr>
+<tr>
+<td>#H5T_INTEL_I64</td>
+<td>64-bit little-endian signed integer (2's complement)</td>
+</tr>
+<tr>
+<td>#H5T_INTEL_U8</td>
+<td>8-bit little-endian unsigned integer</td>
+</tr>
+<tr>
+<td>#H5T_INTEL_U16</td>
+<td>16-bit little-endian unsigned integer</td>
+</tr>
+<tr>
+<td>#H5T_INTEL_U32</td>
+<td>32-bit little-endian unsigned integer</td>
+</tr>
+<tr>
+<td>#H5T_INTEL_U64</td>
+<td>64-bit little-endian unsigned integer</td>
+</tr>
+<tr>
+<td>#H5T_INTEL_B8</td>
+<td>8-bit little-endian bitfield</td>
+</tr>
+<tr>
+<td>#H5T_INTEL_B16</td>
+<td>16-bit little-endian bitfield</td>
+</tr>
+<tr>
+<td>#H5T_INTEL_B32</td>
+<td>32-bit little-endian bitfield</td>
+</tr>
+<tr>
+<td>#H5T_INTEL_B64</td>
+<td>64-bit little-endian bitfield</td>
+</tr>
+<tr>
+<td>#H5T_INTEL_F32</td>
+<td>32-bit little-endian IEEE floating point</td>
+</tr>
+<tr>
+<td>#H5T_INTEL_F64</td>
+<td>64-bit little-endian IEEE floating point</td>
+</tr>
+</table>
+//! [predefined_intel_datatypes_table]
+ *
+ *
+//! [predefined_dec_datatypes_table]
+<table>
+<caption>Predefined DEC Alpha-specific Datatypes</caption>
+<tr>
+<th>Datatype</th>
+<th>Description</th>
+</tr>
+<tr>
+<td>#H5T_ALPHA_I8</td>
+<td>8-bit little-endian signed integer (2's complement)</td>
+</tr>
+<tr>
+<td>#H5T_ALPHA_I16</td>
+<td>16-bit little-endian signed integer (2's complement)</td>
+</tr>
+<tr>
+<td>#H5T_ALPHA_I32</td>
+<td>32-bit little-endian signed integer (2's complement)</td>
+</tr>
+<tr>
+<td>#H5T_ALPHA_I64</td>
+<td>64-bit little-endian signed integer (2's complement)</td>
+</tr>
+<tr>
+<td>#H5T_ALPHA_U8</td>
+<td>8-bit little-endian unsigned integer</td>
+</tr>
+<tr>
+<td>#H5T_ALPHA_U16</td>
+<td>16-bit little-endian unsigned integer</td>
+</tr>
+<tr>
+<td>#H5T_ALPHA_U32</td>
+<td>32-bit little-endian unsigned integer</td>
+</tr>
+<tr>
+<td>#H5T_ALPHA_U64</td>
+<td>64-bit little-endian unsigned integer</td>
+</tr>
+<tr>
+<td>#H5T_ALPHA_B8</td>
+<td>8-bit little-endian bitfield</td>
+</tr>
+<tr>
+<td>#H5T_ALPHA_B16</td>
+<td>16-bit little-endian bitfield</td>
+</tr>
+<tr>
+<td>#H5T_ALPHA_B32</td>
+<td>32-bit little-endian bitfield</td>
+</tr>
+<tr>
+<td>#H5T_ALPHA_B64</td>
+<td>64-bit little-endian bitfield</td>
+</tr>
+<tr>
+<td>#H5T_ALPHA_F32</td>
+<td>32-bit little-endian IEEE floating point</td>
+</tr>
+<tr>
+<td>#H5T_ALPHA_F64</td>
+<td>64-bit little-endian IEEE floating point</td>
+</tr>
+</table>
+//! [predefined_dec_datatypes_table]
+ *
+ *
+//! [predefined_openvms_datatypes_table]
+<table>
+<caption>Predefined OpenVMS DEC Alpha-specific Datatypes</caption>
+<tr>
+<th>Datatype</th>
+<th>Description</th>
+</tr>
+<tr>
+<td>#H5T_VAX_F32</td>
+<td>32-bit floating point (Corresponds to F_Floating type)</td>
+</tr>
+<tr>
+<td>#H5T_VAX_F64</td>
+<td>64-bit floating point (Corresponds to G_Floating type)</td>
+</tr>
+</table>
+//! [predefined_openvms_datatypes_table]
+ *
+ *
+//! [predefined_mips_datatypes_table]
+<table>
+<caption>Predefined MIPS-specific Datatypes</caption>
+<tr>
+<th>Datatype</th>
+<th>Description</th>
+</tr>
+<tr>
+<td>#H5T_MIPS_I8</td>
+<td>8-bit big-endian signed integer (2's complement)</td>
+</tr>
+<tr>
+<td>#H5T_MIPS_I16</td>
+<td>16-bit big-endian signed integer (2's complement)</td>
+</tr>
+<tr>
+<td>#H5T_MIPS_I32</td>
+<td>32-bit big-endian signed integer (2's complement)</td>
+</tr>
+<tr>
+<td>#H5T_MIPS_I64</td>
+<td>64-bit big-endian signed integer (2's complement)</td>
+</tr>
+<tr>
+<td>#H5T_MIPS_U8</td>
+<td>8-bit big-endian unsigned integer</td>
+</tr>
+<tr>
+<td>#H5T_MIPS_U16</td>
+<td>16-bit big-endian unsigned integer</td>
+</tr>
+<tr>
+<td>#H5T_MIPS_U32</td>
+<td>32-bit big-endian unsigned integer</td>
+</tr>
+<tr>
+<td>#H5T_MIPS_U64</td>
+<td>64-bit big-endian unsigned integer</td>
+</tr>
+<tr>
+<td>#H5T_MIPS_B8</td>
+<td>8-bit big-endian bitfield</td>
+</tr>
+<tr>
+<td>#H5T_MIPS_B16</td>
+<td>16-bit big-endian bitfield</td>
+</tr>
+<tr>
+<td>#H5T_MIPS_B32</td>
+<td>32-bit big-endian bitfield</td>
+</tr>
+<tr>
+<td>#H5T_MIPS_B64</td>
+<td>64-bit big-endian bitfield</td>
+</tr>
+<tr>
+<td>#H5T_MIPS_F32</td>
+<td>32-bit big-endian IEEE floating point</td>
+</tr>
+<tr>
+<td>#H5T_MIPS_F64</td>
+<td>64-bit big-endian IEEE floating point</td>
+</tr>
+</table>
+//! [predefined_mips_datatypes_table]
+ *
+ *
+//! [predefined_native_datatypes_table]
+<table>
+<caption>Predefined Native Datatypes</caption>
+<tr>
+<th>Datatype</th>
+<th>Description</th>
+</tr>
+<tr>
+<td>#H5T_NATIVE_CHAR</td>
+<td>C-style char</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_SCHAR</td>
+<td>C-style signed char</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_UCHAR</td>
+<td>C-style unsigned signed char</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_SHORT</td>
+<td>C-style short</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_USHORT</td>
+<td>C-style unsigned short</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_INT</td>
+<td>C-style int</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_UINT</td>
+<td>C-style unsigned int</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_LONG</td>
+<td>C-style long</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_ULONG</td>
+<td>C-style unsigned long</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_LLONG</td>
+<td>C-style long long</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_ULLONG</td>
+<td>C-style unsigned long long</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_FLOAT</td>
+<td>C-style float</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_DOUBLE</td>
+<td>C-style double</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_LDOUBLE</td>
+<td>C-style long double</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_B8</td>
+<td>8-bit bitfield based on native types</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_B16</td>
+<td>16-bit bitfield based on native types</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_B32</td>
+<td>32-bit bitfield based on native types</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_B64</td>
+<td>64-bit bitfield based on native types</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_OPAQUE</td>
+<td>opaque unit based on native types</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_HADDR</td>
+<td>address type based on native types</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_HSIZE</td>
+<td>size type based on native types</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_HSSIZE</td>
+<td>signed size type based on native types</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_HERR</td>
+<td>error code type based on native types</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_HBOOL</td>
+<td>Boolean type based on native types</td>
+</tr>
+</table>
+//! [predefined_native_datatypes_table]
+ *
+ *
+//! [predefined_c9x_datatypes_table]
+<table>
+<caption>Predefined ANSI C9x-specific Native Integer Datatypes</caption>
+<tr>
+<th>Datatype</th>
+<th>Description</th>
+</tr>
+<tr>
+<td>#H5T_NATIVE_INT8</td>
+<td>8-bit signed integer (2's complement)</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_UINT8</td>
+<td>8-bit unsigned integer</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_INT_LEAST8</td>
+<td>8-bit signed integer (2's complement) with storage to use least amount of space</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_UINT_LEAST8</td>
+<td>8-bit unsigned integer with storage to use least amount of space</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_INT_FAST8</td>
+<td>8-bit signed integer (2's complement) with storage to maximize performance</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_UINT_FAST8</td>
+<td>8-bit unsigned integer with storage to maximize performance</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_INT16</td>
+<td>16-bit signed integer (2's complement)</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_UINT16</td>
+<td>16-bit unsigned integer</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_INT_LEAST16</td>
+<td>16-bit signed integer (2's complement) with storage to use least amount of space</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_UINT_LEAST16</td>
+<td>16-bit unsigned integer with storage to use least amount of space</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_INT_FAST16</td>
+<td>16-bit signed integer (2's complement) with storage to maximize performance</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_UINT_FAST16</td>
+<td>16-bit unsigned integer with storage to maximize performance</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_INT32</td>
+<td>32-bit signed integer (2's complement)</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_UINT32</td>
+<td>32-bit unsigned integer</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_INT_LEAST32</td>
+<td>32-bit signed integer (2's complement) with storage to use least amount of space</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_UINT_LEAST32</td>
+<td>32-bit unsigned integer with storage to use least amount of space</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_INT_FAST32</td>
+<td>32-bit signed integer (2's complement) with storage to maximize performance</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_UINT_FAST32</td>
+<td>32-bit unsigned integer with storage to maximize performance</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_INT64</td>
+<td>64-bit signed integer (2's complement)</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_UINT64</td>
+<td>64-bit unsigned integer</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_INT_LEAST64</td>
+<td>64-bit signed integer (2's complement) with storage to use least amount of space</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_UINT_LEAST64</td>
+<td>64-bit unsigned integer with storage to use least amount of space</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_INT_FAST64</td>
+<td>64-bit signed integer (2's complement) with storage to maximize performance</td>
+</tr>
+<tr>
+<td>#H5T_NATIVE_UINT_FAST64</td>
+<td>64-bit unsigned integer with storage to maximize performance</td>
+</tr>
+</table>
+//! [predefined_c9x_datatypes_table]
+ *
+ */

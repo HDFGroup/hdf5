@@ -1,0 +1,165 @@
+#!/usr/bin/env bash
+#
+# Copyright by The HDF Group.                                              
+# All rights reserved.                                                     
+#                                                                          
+# This file is part of HDF5. The full HDF5 copyright notice, including     
+# terms governing use, modification, and redistribution, is contained in   
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://www.hdfgroup.org/licenses.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+#
+BLD='\033[1m'
+GRN='\033[0;32m'
+RED='\033[0;31m'
+PUR='\033[0;35m'
+NC='\033[0m' # No Color
+
+############################################################
+# Usage                                                    #
+############################################################
+function usage() {
+   echo ""
+   # Display usage
+   echo "Purpose: Combine subfiles into a single HDF5 file. Requires the subfiling
+         configuration file either as a command-line argument, or the script will
+         search for the *.config file in the current directory."
+   echo ""
+   echo "usage: h5fuse.sh [-h] [-f filename]"
+   echo "-h            Print this help."
+   echo "-f filename   Subfile configuration file."
+   echo ""
+}
+
+############################################################
+############################################################
+# Main program                                             #
+############################################################
+############################################################
+
+############################################################
+# Process the input options. Add options as needed.        #
+############################################################
+# Get the options
+file_config=""
+
+while getopts ":h:f:" option; do
+   case $option in
+      h) # display Help
+         usage
+         exit;;
+      f) # subfiling configuration file
+         file_config=$OPTARG;;
+     \?) # Invalid option
+         echo -e "$RED ERROR: Invalid option ${BLD}-${OPTARG}${RED} $NC"
+         usage
+         exit 1;;
+     * ) usage
+         exit 1;;
+   esac
+done
+
+FAILED=1
+nfiles=1
+############################################################
+# Configure file checks                                    #
+############################################################
+if [ -z "$file_config" ]; then
+    nfiles=$(find . -maxdepth 1 -type f -iname "*.config" -printf '.' | wc -m)
+    if [[ "$nfiles" != "1" ]]; then
+      if [[ "$nfiles" == "0" ]]; then
+         echo -e "$RED Failed to find .config file in current directory. $NC"
+         usage
+         exit $FAILED
+      else
+         echo -e "$RED More than one .config file found in current directory. $NC"
+         usage
+         exit $FAILED
+      fi
+    fi
+    file_config=$(find . -maxdepth 1 -type f -iname "*.config")
+fi
+
+if [ ! -f "$file_config" ]; then
+    echo -e "${RED} configuration file ${BLD}$file_config${NC} ${RED}does not exist. $NC"
+    exit $FAILED
+fi
+
+stripe_size=$(grep "stripe_size=" "$file_config"  | cut -d "=" -f2)
+if test -z "$stripe_size"; then
+    echo -e "$RED failed to find stripe_size in $file_config $NC"
+    exit $FAILED
+fi
+
+hdf5_file="$(grep "hdf5_file=" "$file_config"  | cut -d "=" -f2)"
+if test -z "$hdf5_file"; then
+    echo -e "$RED failed to find hdf5 output file in $file_config $NC"
+    exit $FAILED
+fi
+
+subfile_dir="$(grep "subfile_dir=" "$file_config"  | cut -d "=" -f2)"
+if test -z "$subfile_dir"; then
+    echo -e "$RED failed to find subfile directory in $file_config $NC"
+    exit $FAILED
+fi
+
+subfiles=( $( sed -e '1,/subfile_dir=/d' "$file_config" ) )
+#for i in "${subfiles[@]}"; do
+#      echo "$i"
+#done
+if [ ${#subfiles[@]} -eq 0 ]; then
+    echo -e "$RED failed to find subfiles list in $file_config $NC"
+    exit $FAILED
+fi
+
+rm -f "$hdf5_file"
+
+## COMBINE SUBFILES INTO AN HDF5 FILE ##
+
+skip=0
+status=$nfiles
+START="$(date +%s%N)"
+while [ "$status" -gt 0 ]; do
+  icnt=0
+  for i in "${subfiles[@]}"; do
+      subfile="${subfile_dir}/${i}"
+      # Verify the file exists
+      if [ ! -f "${subfile}" ]; then
+          echo -e "$RED ERROR: file \"${subfile}\" does not exist. $NC"
+          exit $FAILED
+      fi
+
+      # Verify the file is not being accessed by a process
+      t_max=60
+      t_sleep=1
+      t_elapsed=0
+
+      while fuser -s "${subfile}"; do
+          if [[ $((t_elapsed % 5)) -eq 0 ]]; then
+              echo -e "$GRN waiting for process to finish accessing file \"${subfile}\" ... [${t_elapsed}s/${t_max}s] $NC"
+          fi
+          sleep $t_sleep
+          t_elapsed=$((t_elapsed+t_sleep))
+          if [[ $t_elapsed -ge $t_max ]]; then
+              echo -e "$RED ERROR: file \"${subfile}\" still has process accessing it after ${t_elapsed}s $NC"
+              exit $FAILED
+          fi
+      done
+
+      fsize=$(wc -c "${subfile}" | awk '{print $1}')
+      if [ $((skip*stripe_size)) -le "$fsize" ]; then
+          EXEC="dd count=1 bs=$stripe_size if=$subfile of=$hdf5_file skip=$skip oflag=append conv=notrunc"
+          echo -e "$GRN $EXEC $NC"
+          err="$( $EXEC 2>&1 > /dev/null &)"
+          icnt=$((icnt+1))
+      else
+          subfiles=("${subfiles[@]:0:icnt}" "${subfiles[@]:$((icnt+1))}")
+          status=${#subfiles[@]}
+      fi
+  done; wait
+  skip=$((skip+1))
+done
+END=$(( $(date +%s%N) - START ))
+DURATION_SEC=$(awk -vp="$END" -vq=0.000000001 'BEGIN{printf "%.4f" ,p * q}')
+echo -e "$PUR COMPLETION TIME = $DURATION_SEC s $NC"

@@ -56,30 +56,30 @@
 
 /* Callback info for sieve buffer readvv operation */
 typedef struct H5D_contig_readvv_sieve_ud_t {
-    H5F_shared_t *              f_sh;         /* Shared file for dataset */
-    H5D_rdcdc_t *               dset_contig;  /* Cached information about contiguous data */
+    H5F_shared_t               *f_sh;         /* Shared file for dataset */
+    H5D_rdcdc_t                *dset_contig;  /* Cached information about contiguous data */
     const H5D_contig_storage_t *store_contig; /* Contiguous storage info for this I/O operation */
-    unsigned char *             rbuf;         /* Pointer to buffer to fill */
+    unsigned char              *rbuf;         /* Pointer to buffer to fill */
 } H5D_contig_readvv_sieve_ud_t;
 
 /* Callback info for [plain] readvv operation */
 typedef struct H5D_contig_readvv_ud_t {
-    H5F_shared_t * f_sh;      /* Shared file for dataset */
+    H5F_shared_t  *f_sh;      /* Shared file for dataset */
     haddr_t        dset_addr; /* Address of dataset */
     unsigned char *rbuf;      /* Pointer to buffer to fill */
 } H5D_contig_readvv_ud_t;
 
 /* Callback info for sieve buffer writevv operation */
 typedef struct H5D_contig_writevv_sieve_ud_t {
-    H5F_shared_t *              f_sh;         /* Shared file for dataset */
-    H5D_rdcdc_t *               dset_contig;  /* Cached information about contiguous data */
+    H5F_shared_t               *f_sh;         /* Shared file for dataset */
+    H5D_rdcdc_t                *dset_contig;  /* Cached information about contiguous data */
     const H5D_contig_storage_t *store_contig; /* Contiguous storage info for this I/O operation */
-    const unsigned char *       wbuf;         /* Pointer to buffer to write */
+    const unsigned char        *wbuf;         /* Pointer to buffer to write */
 } H5D_contig_writevv_sieve_ud_t;
 
 /* Callback info for [plain] writevv operation */
 typedef struct H5D_contig_writevv_ud_t {
-    H5F_shared_t *       f_sh;      /* Shared file for dataset */
+    H5F_shared_t        *f_sh;      /* Shared file for dataset */
     haddr_t              dset_addr; /* Address of dataset */
     const unsigned char *wbuf;      /* Pointer to buffer to write */
 } H5D_contig_writevv_ud_t;
@@ -185,7 +185,7 @@ done:
 herr_t
 H5D__contig_fill(const H5D_io_info_t *io_info)
 {
-    const H5D_t * dset = io_info->dset; /* the dataset pointer */
+    const H5D_t  *dset = io_info->dset; /* the dataset pointer */
     H5D_io_info_t ioinfo;               /* Dataset I/O info */
     H5D_storage_t store;                /* Union of storage info for dataset */
     hssize_t      snpoints;             /* Number of points in space (for error checking) */
@@ -540,7 +540,7 @@ H5D__contig_is_space_alloc(const H5O_storage_t *storage)
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Neil Fortner
- *              Wednessday, March 6, 2016
+ *              Wednesday, March 6, 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -685,7 +685,7 @@ H5D__contig_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize
     else
         /* Read data through legacy (non-selection I/O) pathway */
         if ((io_info->io_ops.single_read)(io_info, type_info, nelmts, file_space, mem_space) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "contiguous read failed")
+            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "contiguous read failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -732,7 +732,7 @@ H5D__contig_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsiz
     else
         /* Write data through legacy (non-selection I/O) pathway */
         if ((io_info->io_ops.single_write)(io_info, type_info, nelmts, file_space, mem_space) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "contiguous write failed")
+            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "contiguous write failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -793,7 +793,7 @@ H5D__contig_readvv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len, void *
     H5D_contig_readvv_sieve_ud_t *udata =
         (H5D_contig_readvv_sieve_ud_t *)_udata;     /* User data for H5VM_opvv() operator */
     H5F_shared_t *f_sh        = udata->f_sh;        /* Shared file for dataset */
-    H5D_rdcdc_t * dset_contig = udata->dset_contig; /* Cached information about contiguous data */
+    H5D_rdcdc_t  *dset_contig = udata->dset_contig; /* Cached information about contiguous data */
     const H5D_contig_storage_t *store_contig =
         udata->store_contig; /* Contiguous storage info for this I/O operation */
     unsigned char *buf;      /* Pointer to buffer to fill */
@@ -1060,7 +1060,7 @@ H5D__contig_writevv_sieve_cb(hsize_t dst_off, hsize_t src_off, size_t len, void 
     H5D_contig_writevv_sieve_ud_t *udata =
         (H5D_contig_writevv_sieve_ud_t *)_udata;    /* User data for H5VM_opvv() operator */
     H5F_shared_t *f_sh        = udata->f_sh;        /* Shared file for dataset */
-    H5D_rdcdc_t * dset_contig = udata->dset_contig; /* Cached information about contiguous data */
+    H5D_rdcdc_t  *dset_contig = udata->dset_contig; /* Cached information about contiguous data */
     const H5D_contig_storage_t *store_contig =
         udata->store_contig;   /* Contiguous storage info for this I/O operation */
     const unsigned char *buf;  /* Pointer to buffer to fill */
@@ -1408,9 +1408,9 @@ H5D__contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src, H5F_t *f
 {
     haddr_t       addr_src;                                    /* File offset in source dataset */
     haddr_t       addr_dst;                                    /* File offset in destination dataset */
-    H5T_path_t *  tpath_src_mem = NULL, *tpath_mem_dst = NULL; /* Datatype conversion paths */
-    H5T_t *       dt_dst      = NULL;                          /* Destination datatype */
-    H5T_t *       dt_mem      = NULL;                          /* Memory datatype */
+    H5T_path_t   *tpath_src_mem = NULL, *tpath_mem_dst = NULL; /* Datatype conversion paths */
+    H5T_t        *dt_dst      = NULL;                          /* Destination datatype */
+    H5T_t        *dt_mem      = NULL;                          /* Memory datatype */
     hid_t         tid_src     = -1;                            /* Datatype ID for source datatype */
     hid_t         tid_dst     = -1;                            /* Datatype ID for destination datatype */
     hid_t         tid_mem     = -1;                            /* Datatype ID for memory datatype */
@@ -1424,10 +1424,10 @@ H5D__contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src, H5F_t *f
     size_t        dst_nbytes;                                  /* Number of bytes to write to destination */
     hsize_t       total_src_nbytes;                            /* Total number of bytes to copy */
     size_t        buf_size;                                    /* Size of copy buffer */
-    void *        buf         = NULL;                          /* Buffer for copying data */
-    void *        bkg         = NULL;                          /* Temporary buffer for copying data */
-    void *        reclaim_buf = NULL;                          /* Buffer for reclaiming data */
-    H5S_t *       buf_space   = NULL;                          /* Dataspace describing buffer */
+    void         *buf         = NULL;                          /* Buffer for copying data */
+    void         *bkg         = NULL;                          /* Temporary buffer for copying data */
+    void         *reclaim_buf = NULL;                          /* Buffer for reclaiming data */
+    H5S_t        *buf_space   = NULL;                          /* Dataspace describing buffer */
     hid_t         buf_sid     = -1;                            /* ID for buffer dataspace */
     hsize_t       buf_dim[1]  = {0};                           /* Dimension for buffer */
     hbool_t       is_vlen     = FALSE; /* Flag to indicate that VL type conversion should occur */
@@ -1474,7 +1474,7 @@ H5D__contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src, H5F_t *f
             HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register memory datatype")
         } /* end if */
 
-        /* create variable-length datatype at the destinaton file */
+        /* create variable-length datatype at the destination file */
         if (NULL == (dt_dst = H5T_copy(dt_src, H5T_COPY_TRANSIENT)))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to copy")
         if (H5T_set_loc(dt_dst, H5F_VOL_OBJ(f_dst), H5T_LOC_DISK) < 0) {
@@ -1603,7 +1603,7 @@ H5D__contig_copy(H5F_t *f_src, const H5O_storage_contig_t *storage_src, H5F_t *f
         else
             /* Read raw data from source file */
             if (H5F_block_read(f_src, H5FD_MEM_DRAW, addr_src, src_nbytes, buf) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "unable to read raw data")
+                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "unable to read raw data")
 
         /* Perform datatype conversion, if necessary */
         if (is_vlen) {

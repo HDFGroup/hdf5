@@ -276,7 +276,7 @@ Java_hdf_hdf5lib_H5_H5Gget_1info_1by_1idx(JNIEnv *env, jclass clss, jlong loc_id
     H5_iter_order_t corder      = (H5_iter_order_t)order;
     H5_index_t      cindex_type = (H5_index_t)index_type;
     H5G_info_t      group_info;
-    const char *    grpName = NULL;
+    const char     *grpName = NULL;
     jobject         obj     = NULL;
     herr_t          ret_val = FAIL;
 

@@ -97,10 +97,10 @@ static herr_t
 H5T__commit_api_common(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id,
                        hid_t tapl_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr)
 {
-    void *          data        = NULL; /* VOL-managed datatype data */
-    H5VL_object_t * new_obj     = NULL; /* VOL object that holds the datatype object and the VOL info */
-    H5T_t *         dt          = NULL; /* High level datatype object that wraps the VOL object */
-    H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
+    void           *data        = NULL; /* VOL-managed datatype data */
+    H5VL_object_t  *new_obj     = NULL; /* VOL object that holds the datatype object and the VOL info */
+    H5T_t          *dt          = NULL; /* High level datatype object that wraps the VOL object */
+    H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
     H5VL_loc_params_t loc_params;                     /* Location parameters */
@@ -197,8 +197,8 @@ H5Tcommit_async(const char *app_file, const char *app_func, unsigned app_line, h
                 hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
-    void *         token     = NULL;            /* Request token for async operation        */
-    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    void          *token     = NULL;            /* Request token for async operation        */
+    void         **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
     herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -327,10 +327,10 @@ done:
 herr_t
 H5Tcommit_anon(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
 {
-    void *            dt      = NULL; /* datatype object created by VOL connector */
-    H5VL_object_t *   new_obj = NULL; /* VOL object that holds the datatype object and the VOL info */
-    H5T_t *           type    = NULL; /* Datatype created */
-    H5VL_object_t *   vol_obj = NULL; /* object of loc_id */
+    void             *dt      = NULL; /* datatype object created by VOL connector */
+    H5VL_object_t    *new_obj = NULL; /* VOL object that holds the datatype object and the VOL info */
+    H5T_t            *type    = NULL; /* Datatype created */
+    H5VL_object_t    *vol_obj = NULL; /* object of loc_id */
     H5VL_loc_params_t loc_params;
     herr_t            ret_value = SUCCEED; /* Return value */
 
@@ -348,6 +348,11 @@ H5Tcommit_anon(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
         tcpl_id = H5P_DATATYPE_CREATE_DEFAULT;
     else if (TRUE != H5P_isa_class(tcpl_id, H5P_DATATYPE_CREATE))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not datatype creation property list")
+
+    if (H5P_DEFAULT == tapl_id)
+        tapl_id = H5P_DATATYPE_ACCESS_DEFAULT;
+    else if (TRUE != H5P_isa_class(tapl_id, H5P_DATATYPE_ACCESS))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not datatype access property list")
 
     /* Verify access property list and set up collective metadata if appropriate */
     if (H5CX_set_apl(&tapl_id, H5P_CLS_TACC, loc_id, TRUE) < 0)
@@ -622,8 +627,8 @@ static hid_t
 H5T__open_api_common(hid_t loc_id, const char *name, hid_t tapl_id, void **token_ptr,
                      H5VL_object_t **_vol_obj_ptr)
 {
-    void *          dt          = NULL; /* datatype object created by VOL connector */
-    H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
+    void           *dt          = NULL; /* datatype object created by VOL connector */
+    H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
     H5VL_loc_params_t loc_params;
@@ -706,8 +711,8 @@ H5Topen_async(const char *app_file, const char *app_func, unsigned app_line, hid
               hid_t tapl_id, hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
-    void *         token     = NULL;            /* Request token for async operation */
-    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation */
+    void          *token     = NULL;            /* Request token for async operation */
+    void         **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation */
     hid_t          ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -790,7 +795,7 @@ H5Tget_create_plist(hid_t dtype_id)
     } /* end if */
     /* If the datatype is committed, retrieve further information */
     else {
-        H5VL_object_t *          vol_obj = type->vol_obj;
+        H5VL_object_t           *vol_obj = type->vol_obj;
         H5VL_datatype_get_args_t vol_cb_args; /* Arguments to VOL callback */
 
         /* Set up VOL callback arguments */
@@ -977,13 +982,13 @@ done:
 H5T_t *
 H5T__open_name(const H5G_loc_t *loc, const char *name)
 {
-    H5T_t *    dt = NULL;         /* Datatype opened in file */
+    H5T_t     *dt = NULL;         /* Datatype opened in file */
     H5G_name_t path;              /* Datatype group hier. path */
     H5O_loc_t  oloc;              /* Datatype object location */
     H5G_loc_t  type_loc;          /* Group object for datatype */
     H5O_type_t obj_type;          /* Type of object at location */
     hbool_t    obj_found = FALSE; /* Object at 'name' found */
-    H5T_t *    ret_value = NULL;  /* Return value */
+    H5T_t     *ret_value = NULL;  /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1044,8 +1049,8 @@ H5T_t *
 H5T_open(const H5G_loc_t *loc)
 {
     H5T_shared_t *shared_fo = NULL;
-    H5T_t *       dt        = NULL;
-    H5T_t *       ret_value = NULL; /* Return value */
+    H5T_t        *dt        = NULL;
+    H5T_t        *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -1241,11 +1246,11 @@ H5T_update_shared(H5T_t *dt)
 H5T_t *
 H5T_construct_datatype(H5VL_object_t *vol_obj)
 {
-    H5T_t *                  dt = NULL;        /* Datatype object from VOL connector */
+    H5T_t                   *dt = NULL;        /* Datatype object from VOL connector */
     H5VL_datatype_get_args_t vol_cb_args;      /* Arguments to VOL callback */
     size_t                   nalloc    = 0;    /* Size required to store serialized form of datatype */
-    void *                   buf       = NULL; /* Buffer to store serialized datatype */
-    H5T_t *                  ret_value = NULL;
+    void                    *buf       = NULL; /* Buffer to store serialized datatype */
+    H5T_t                   *ret_value = NULL;
 
     FUNC_ENTER_NOAPI(NULL)
 

@@ -85,10 +85,10 @@ test_properties(void)
 {
     hid_t  fapl_1 = -1;
     hid_t  fapl_2 = -1;
-    char * buffer = 0;
+    char  *buffer = 0;
     int    count  = 10;
-    void * temp   = 0;
-    char * temp2  = 0;
+    void  *temp   = 0;
+    char  *temp2  = 0;
     int    i;
     size_t size;
     size_t temp_size;
@@ -339,9 +339,9 @@ test_callbacks(void)
     H5FD_file_image_callbacks_t callbacks;
     hid_t                       fapl_1;
     hid_t                       fapl_2;
-    udata_t *                   udata      = NULL;
-    char *                      file_image = NULL;
-    char *                      temp_file_image;
+    udata_t                    *udata      = NULL;
+    char                       *file_image = NULL;
+    char                       *temp_file_image;
     int                         count = 10;
     int                         i;
     size_t                      size;
@@ -556,11 +556,11 @@ test_core(void)
     hid_t                       file;
     hid_t                       dset;
     hid_t                       space;
-    udata_t *                   udata;
-    unsigned char *             file_image;
+    udata_t                    *udata;
+    unsigned char              *file_image;
     char                        filename[1024];
     char                        copied_filename[1024];
-    const char *                tmp = NULL;
+    const char                 *tmp = NULL;
     size_t                      size;
     hsize_t                     dims[2];
     int                         fd;
@@ -610,7 +610,7 @@ test_core(void)
     VERIFY((udata->used_callbacks == MALLOC) || (udata->used_callbacks == (MALLOC | UDATA_COPY | UDATA_FREE)),
            "opening a core file used the wrong callbacks");
     VERIFY(udata->malloc_src == H5FD_FILE_IMAGE_OP_FILE_OPEN,
-           "Malloc callback came from wrong sourc in core open");
+           "Malloc callback came from wrong source in core open");
 
     /* Close file */
     reset_udata(udata);
@@ -618,7 +618,7 @@ test_core(void)
     VERIFY(ret >= 0, "H5Fclose failed");
     VERIFY(udata->used_callbacks == FREE, "Closing a core file used the wrong callbacks");
     VERIFY(udata->free_src == H5FD_FILE_IMAGE_OP_FILE_CLOSE,
-           "Free callback came from wrong sourc in core close");
+           "Free callback came from wrong source in core close");
 
     /* Reopen file */
     file = H5Fopen(copied_filename, H5F_ACC_RDWR, fapl);
@@ -654,7 +654,7 @@ test_core(void)
     VERIFY(ret >= 0, "H5Fclose failed");
     VERIFY(udata->used_callbacks == (FREE), "Closing a core file used the wrong callbacks");
     VERIFY(udata->free_src == H5FD_FILE_IMAGE_OP_FILE_CLOSE,
-           "Free callback came from wrong sourc in core close");
+           "Free callback came from wrong source in core close");
 
     /* Create file image buffer */
     fd = HDopen(copied_filename, O_RDONLY);
@@ -717,9 +717,9 @@ static int
 test_get_file_image(const char *test_banner, const int file_name_num, hid_t fapl, hbool_t user)
 {
     char      file_name[1024] = "\0";
-    void *    insertion_ptr   = NULL;
-    void *    image_ptr       = NULL;
-    void *    file_image_ptr  = NULL;
+    void     *insertion_ptr   = NULL;
+    void     *image_ptr       = NULL;
+    void     *file_image_ptr  = NULL;
     hbool_t   is_family_file  = FALSE;
     hbool_t   identical;
     int       data[100];
@@ -996,7 +996,7 @@ test_get_file_image_error_rejection(void)
 {
     const char *memb_name[H5FD_MEM_NTYPES];
     char        file_name[1024] = "\0";
-    void *      image_ptr       = NULL;
+    void       *image_ptr       = NULL;
     int         data[100];
     int         i;
     hid_t       fapl_id  = -1;
@@ -1353,6 +1353,7 @@ main(void)
 {
     int      errors = 0;
     hid_t    fapl;
+    hbool_t  driver_is_default_compatible;
     unsigned user;
 
     h5_reset();
@@ -1362,7 +1363,9 @@ main(void)
     errors += test_properties();
     errors += test_callbacks();
 
-    if (!h5_driver_uses_modified_filename()) {
+    if (h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &driver_is_default_compatible) < 0)
+        errors++;
+    else if (driver_is_default_compatible) {
         errors += test_core();
     }
 

@@ -112,7 +112,7 @@ H5_DLLVAR hid_t H5E_ERR_CLS_g;
 #define H5E_BEGIN_TRY                                                                                        \
     {                                                                                                        \
         H5E_auto2_t saved_efunc;                                                                             \
-        void *      H5E_saved_edata;                                                                         \
+        void       *H5E_saved_edata;                                                                         \
                                                                                                              \
         (void)H5Eget_auto2(H5E_DEFAULT, &saved_efunc, &H5E_saved_edata);                                     \
         (void)H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
@@ -899,8 +899,8 @@ H5_DLL herr_t H5Ewalk1(H5E_direction_t direction, H5E_walk1_t func, void *client
  *
  * \deprecated 1.8.0 Function deprecated in this release.
  *
- * \details Given a major error number, H5Eget_major() returns a constant
- *          character string that describes the error.
+ * \details H5Eget_major() returns a constant
+ *          character string that describes the error, given a major error number.
  *
  * \attention This function returns a dynamically allocated string (\c char
  *            array). An application calling this function must free the memory
@@ -920,8 +920,8 @@ H5_DLL char *H5Eget_major(H5E_major_t maj);
  *
  * \deprecated 1.8.0 Function deprecated and return type changed in this release.
  *
- * \details Given a minor error number, H5Eget_minor() returns a constant
- *          character string that describes the error.
+ * \details H5Eget_minor() returns a constant
+ *          character string that describes the error, given a minor error number.
  *
  * \attention In the Release 1.8.x series, H5Eget_minor() returns a string of
  *            dynamic allocated \c char array. An application calling this

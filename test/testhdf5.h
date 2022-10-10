@@ -56,7 +56,7 @@
     {                                                                                                        \
         if (VERBOSE_HI) {                                                                                    \
             print_func("   Call to routine: %15s at line %4d in %s returned %p\n", (where), (int)__LINE__,   \
-                       __FILE__, (ret));                                                                     \
+                       __FILE__, ((const void *)ret));                                                       \
         }                                                                                                    \
         if (!(ret)) {                                                                                        \
             TestErrPrintf("*** UNEXPECTED RETURN from %s is NULL line %4d in %s\n", (where), (int)__LINE__,  \
@@ -70,7 +70,7 @@
     {                                                                                                        \
         if (VERBOSE_HI) {                                                                                    \
             print_func("   Call to routine: %15s at line %4d in %s returned %p\n", (where), (int)__LINE__,   \
-                       __FILE__, (ret));                                                                     \
+                       __FILE__, ((const void *)ret));                                                       \
         }                                                                                                    \
         if (ret) {                                                                                           \
             TestErrPrintf("*** UNEXPECTED RETURN from %s is not NULL line %4d in %s\n", (where),             \
@@ -221,6 +221,7 @@ void test_iterate(void);
 void test_array(void);
 void test_genprop(void);
 void test_configure(void);
+void test_h5_system(void);
 void test_misc(void);
 void test_ids(void);
 void test_skiplist(void);
@@ -245,6 +246,7 @@ void cleanup_iterate(void);
 void cleanup_array(void);
 void cleanup_genprop(void);
 void cleanup_configure(void);
+void cleanup_h5_system(void);
 void cleanup_sohm(void);
 void cleanup_misc(void);
 void cleanup_unicode(void);

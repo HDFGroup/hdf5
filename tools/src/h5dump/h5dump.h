@@ -39,9 +39,9 @@ typedef struct dump_functions_t {
 typedef struct h5dump_table_items_t {
     unsigned long fileno;      /* File number that these tables refer to */
     hid_t         oid;         /* ID of an object in this file, held open so fileno is consistent */
-    table_t *     group_table; /* Table of groups */
-    table_t *     dset_table;  /* Table of datasets */
-    table_t *     type_table;  /* Table of datatypes */
+    table_t      *group_table; /* Table of groups */
+    table_t      *dset_table;  /* Table of datasets */
+    table_t      *type_table;  /* Table of datatypes */
 } h5dump_table_items_t;
 
 typedef struct h5dump_table_list_t {
@@ -51,13 +51,13 @@ typedef struct h5dump_table_list_t {
 } h5dump_table_list_t;
 
 h5dump_table_list_t table_list  = {0, 0, NULL};
-table_t *           group_table = NULL, *dset_table = NULL, *type_table = NULL;
+table_t            *group_table = NULL, *dset_table = NULL, *type_table = NULL;
 
 unsigned    dump_indent = 0;     /* how far in to indent the line */
 int         unamedtype  = 0;     /* shared datatype with no name */
 hbool_t     hit_elink   = FALSE; /* whether we have traversed an external link */
 size_t      prefix_len  = 1024;
-char *      prefix      = NULL;
+char       *prefix      = NULL;
 const char *fp_format   = NULL;
 
 /* things to display or which are set via command line parameters */

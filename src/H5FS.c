@@ -175,9 +175,9 @@ H5FS_t *
 H5FS_open(H5F_t *f, haddr_t fs_addr, uint16_t nclasses, const H5FS_section_class_t *classes[],
           void *cls_init_udata, hsize_t alignment, hsize_t threshold)
 {
-    H5FS_t *            fspace = NULL;    /* New free space structure */
+    H5FS_t             *fspace = NULL;    /* New free space structure */
     H5FS_hdr_cache_ud_t cache_udata;      /* User-data for metadata cache callback */
-    H5FS_t *            ret_value = NULL; /* Return value */
+    H5FS_t             *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 #ifdef H5FS_DEBUG
@@ -243,7 +243,7 @@ done:
 herr_t
 H5FS_delete(H5F_t *f, haddr_t fs_addr)
 {
-    H5FS_t *            fspace = NULL;       /* Free space header loaded from file */
+    H5FS_t             *fspace = NULL;       /* Free space header loaded from file */
     H5FS_hdr_cache_ud_t cache_udata;         /* User-data for metadata cache callback */
     herr_t              ret_value = SUCCEED; /* Return value */
 
@@ -1072,7 +1072,7 @@ static herr_t
 H5FS__sinfo_free_sect_cb(void *_sect, void H5_ATTR_UNUSED *key, void *op_data)
 {
     H5FS_section_info_t *sect  = (H5FS_section_info_t *)_sect;  /* Section to free */
-    const H5FS_sinfo_t * sinfo = (const H5FS_sinfo_t *)op_data; /* Free space manager for section */
+    const H5FS_sinfo_t  *sinfo = (const H5FS_sinfo_t *)op_data; /* Free space manager for section */
 
     FUNC_ENTER_PACKAGE_NOERR
 

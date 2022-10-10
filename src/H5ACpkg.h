@@ -51,7 +51,7 @@ H5FL_EXTERN(H5AC_aux_t);
 /* Package Private Macros */
 /**************************/
 
-#define H5AC_DEBUG_DIRTY_BYTES_CREATION 0
+/* #define H5AC_DEBUG_DIRTY_BYTES_CREATION */
 
 #ifdef H5_HAVE_PARALLEL
 
@@ -124,7 +124,7 @@ H5FL_EXTERN(H5AC_aux_t);
  * Maintaining this count is easy for all processes not on process 0 --
  * all that is necessary is to add the size of the entry to the total
  * whenever there is an insertion, a move of a previously clean entry,
- * or whever a previously clean entry is marked dirty in an unprotect.
+ * or wherever a previously clean entry is marked dirty in an unprotect.
  *
  * On process 0, we have to be careful not to count dirty bytes twice.
  * If an entry is marked dirty, flushed, and marked dirty again, all
@@ -293,12 +293,12 @@ H5FL_EXTERN(H5AC_aux_t);
  *		   dirtied flag set and the entry does not already appear
  *		   in the dirty entry list.
  *
- *		Entries are added to the dirty entry list whever they cause
+ *		Entries are added to the dirty entry list wherever they cause
  *		the dirty bytes count to be increased.  They are removed
  *		when they appear in a clean entries broadcast.  Note that
  *		moves must be reflected in the dirty entry list.
  *
- *		To reitterate, this field is only used on process 0 -- it
+ *		To reiterate, this field is only used on process 0 -- it
  *		should be NULL on all other processes.
  *
  * c_slist_ptr: Pointer to an instance of H5SL_t used to maintain a list
@@ -373,7 +373,7 @@ typedef struct H5AC_aux_t {
 
     int32_t metadata_write_strategy;
 
-#if H5AC_DEBUG_DIRTY_BYTES_CREATION
+#ifdef H5AC_DEBUG_DIRTY_BYTES_CREATION
 
     unsigned dirty_bytes_propagations;
 

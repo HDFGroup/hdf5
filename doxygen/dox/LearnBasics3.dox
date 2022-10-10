@@ -1,0 +1,1015 @@
+/** @page LBPropsList Property Lists Basics
+Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
+<hr>
+
+\section secLBPList What is a Property (or Property List)?
+In HDF5, a property or property list is a characteristic or feature associated with an HDF5 object.
+There are default properties which handle the most common needs. These default properties are
+specified by passing in #H5P_DEFAULT for the Property List parameter of a function. Default properties
+can be modified by use of the \ref H5P interface and function parameters.
+
+The \ref H5P API allows a user to take advantage of the more powerful features in HDF5. It typically
+supports unusual cases when creating or accessing HDF5 objects. There is a programming model for
+working with Property Lists in HDF5 (see below).
+
+For examples of modifying a property list, see these tutorial topics:
+\li \see \ref LBDsetLayout
+\li \see \ref LBExtDset
+\li \see \ref LBComDset
+
+There are many Property Lists associated with creating and accessing objects in HDF5. See the
+\ref H5P Interface documentation in the HDF5 \ref RM for a list of the different
+properties associated with HDF5 interfaces.
+
+In summary:
+\li Properties are features of HDF5 objects, that can be changed by use of the Property List API and function parameters.
+\li Property lists provide a mechanism for adding functionality to HDF5 calls without increasing the number of arguments used for a given call.
+\li The Property List API supports unusual cases when creating and accessing HDF5 objects.
+
+\section secLBPListProg Programming Model
+Default properties are specified by simply passing in #H5P_DEFAULT (C) / H5P_DEFAULT_F (F90) for
+the property list parameter in those functions for which properties can be changed.
+
+The programming model for changing a property list is as follows:
+\li Create a copy or "instance" of the desired pre-defined property type, using the #H5Pcreate call. This
+will return a property list identifier. Please see the \ref RM entry for #H5Pcreate, for a comprehensive
+list of the property types.
+\li With the property list identifier, modify the property, using the \ref H5P APIs.
+\li Modify the object feature, by passing the property list identifier into the corresponding HDF5 object function.
+\li Close the property list when done, using #H5Pclose.
+
+<hr>
+Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
+
+@page LBDsetLayout Dataset Storage Layout
+Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
+<hr>
+
+\section secLBDsetLayoutDesc Description of a Dataset
+
+\section secLBDsetLayout Dataset Storage Layout
+The storage information, or storage layout, defines how the raw data values in the dataset are
+physically stored on disk. There are three ways that a dataset can be stored:
+\li contiguous
+\li chunked
+\li compact
+
+See the #H5Pset_layout/#H5Pget_layout APIs for details.
+
+\subsection subsecLBDsetLayoutCont Contiguous
+If the storage layout is contiguous, then the raw data values will be stored physically adjacent
+to each other in the HDF5 file (in one contiguous block). This is the default layout for a dataset.
+In other words, if you do not explicitly change the storage layout for the dataset, then it will
+be stored contiguously.
+<table>
+<tr>
+<td>
+\image html tutr-locons.png
+</td>
+</tr>
+</table>
+
+\subsection subsecLBDsetLayoutChunk Chunked
+With a chunked storage layout the data is stored in equal-sized blocks or chunks of
+a pre-defined size. The HDF5 library always writes and reads the entire chunk:
+<table>
+<tr>
+<td>
+\image html tutr-lochk.png
+</td>
+</tr>
+</table>
+
+Each chunk is stored as a separate contiguous block in the HDF5 file. There is a chunk index
+which keeps track of the chunks associated with a dataset:
+<table>
+<tr>
+<td>
+\image html tutr-lochks.png
+</td>
+</tr>
+</table>
+
+
+\subsubsection susubsecLBDsetLayoutChunkWhy Why Chunking ?
+Chunking is required for enabling compression and other filters, as well as for creating extendible
+or unlimited dimension datasets.
+
+It is also commonly used when subsetting very large datasets. Using the chunking layout can
+greatly improve performance when subsetting large datasets, because only the chunks required
+will need to be accessed. However, it is easy to use chunking without considering the consequences
+of the chunk size, which can lead to strikingly poor performance.
+
+Note that a chunk always has the same rank as the dataset and the chunk's dimensions do not need
+to be factors of the dataset dimensions.
+
+Writing or reading a chunked dataset is transparent to the application. You would use the same
+set of operations that you would use for a contiguous dataset. For example:
+\code
+   H5Dopen (...);
+   H5Sselect_hyperslab (...);
+   H5Dread (...);
+\endcode
+
+\subsubsection susubsecLBDsetLayoutChunkProb Problems Using Chunking
+Issues that can cause performance problems with chunking include:
+\li Chunks are too small.
+If a very small chunk size is specified for a dataset it can cause the dataset to be excessively
+large and it can result in degraded performance when accessing the dataset. The smaller the chunk
+size the more chunks that HDF5 has to keep track of, and the more time it will take to search for a chunk.
+\li Chunks are too large.
+An entire chunk has to be read and uncompressed before performing an operation. There can be a
+performance penalty for reading a small subset, if the chunk size is substantially larger than
+the subset. Also, a dataset may be larger than expected if there are chunks that only contain a
+small amount of data.
+\li A chunk does not fit in the Chunk Cache.
+Every chunked dataset has a chunk cache associated with it that has a default size of 1 MB. The
+purpose of the chunk cache is to improve performance by keeping chunks that are accessed frequently
+in memory so that they do not have to be accessed from disk. If a chunk is too large to fit in the
+chunk cache, it can significantly degrade performance. However, the size of the chunk cache can be
+increased by calling #H5Pset_chunk_cache.
+
+It is a good idea to:
+\li Avoid very small chunk sizes, and be aware of the 1 MB chunk cache size default.
+\li Test the data with different chunk sizes to determine the optimal chunk size to use.
+\li Consider the chunk size in terms of the most common access patterns that will be used once the dataset has been created.
+
+\subsection subsecLBDsetLayoutCom Compact
+A compact dataset is one in which the raw data is stored in the object header of the dataset.
+This layout is for very small datasets that can easily fit in the object header.
+
+The compact layout can improve storage and access performance for files that have many very tiny
+datasets. With one I/O access both the header and data values can be read. The compact layout reduces
+the size of a file, as the data is stored with the header which will always be allocated for a dataset.
+However, the object header is 64 KB in size, so this layout can only be used for very small datasets.
+
+\section secLBDsetLayoutProg Programming Model to Modify the Storage Layout
+To modify the storage layout, the following steps must be done:
+\li Create a Dataset Creation Property list. (See #H5Pcreate)
+\li Modify the property list.
+To use chunked storage layout, call: #H5Pset_chunk
+To use the compact storage layout, call: #H5Pset_layout
+\li Create a dataset with the modified property list. (See #H5Dcreate)
+\li Close the property list. (See #H5Pclose)
+For example code, see the \ref HDF5Examples page.
+Specifically look at the <a href="https://portal.hdfgroup.org/display/HDF5/Examples+by+API">Examples by API</a>.
+There are examples for different languages.
+
+The C example to create a chunked dataset is:
+<a href="https://support.hdfgroup.org/ftp/HDF5/examples/examples-by-api/hdf5-examples/1_8/C/H5D/h5ex_d_chunk.c">h5ex_d_chunk.c</a>
+The C example to create a compact dataset is:
+<a href="https://support.hdfgroup.org/ftp/HDF5/examples/examples-by-api/hdf5-examples/1_8/C/H5D/h5ex_d_compact.c">h5ex_d_compact.c</a>
+
+\section secLBDsetLayoutChange Changing the Layout after Dataset Creation
+The dataset layout is a Dataset Creation Property List. This means that once the dataset has been
+created the dataset layout cannot be changed. The h5repack utility can be used to write a file
+to a new with a new layout.
+
+\section secLBDsetLayoutSource Sources of Information
+<a href="https://confluence.hdfgroup.org/display/HDF5/Chunking+in+HDF5">Chunking in HDF5</a>
+(See the documentation on <a href="https://confluence.hdfgroup.org/display/HDF5/Advanced+Topics+in+HDF5">Advanced Topics in HDF5</a>)
+\see \ref sec_plist in the HDF5 \ref UG.
+
+<hr>
+Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
+
+
+@page LBExtDset Extendible Datasets
+Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
+<hr>
+
+\section secLBExtDsetCreate Creating an Extendible Dataset
+An extendible dataset is one whose dimensions can grow. HDF5 allows you to define a dataset to have
+certain initial dimensions, then to later increase the size of any of the initial dimensions.
+
+HDF5 requires you to use chunking to define extendible datasets. This makes it possible to extend
+datasets efficiently without having to excessively reorganize storage. (To use chunking efficiently,
+be sure to see the advanced topic, <a href="https://confluence.hdfgroup.org/display/HDF5/Chunking+in+HDF5">Chunking in HDF5</a>.)
+
+The following operations are required in order to extend a dataset:
+\li Declare the dataspace of the dataset to have unlimited dimensions for all dimensions that might eventually be extended.
+\li Set dataset creation properties to enable chunking.
+\li Create the dataset.
+\li Extend the size of the dataset.
+
+\section secLBExtDsetProg Programming Example
+
+\subsection subsecLBExtDsetProgDesc Description
+See \ref LBExamples for the examples used in the \ref LearnBasics tutorial.
+
+The example shows how to create a 3 x 3 extendible dataset, write to that dataset, extend the dataset
+to 10x3, and write to the dataset again.
+
+For details on compiling an HDF5 application:
+[ \ref LBCompiling ]
+
+\subsection subsecLBExtDsetProgRem Remarks
+\li An unlimited dimension dataspace is specified with the #H5Screate_simple call, by passing in
+#H5S_UNLIMITED as an element of the maxdims array.
+\li The #H5Pcreate call creates a new property as an instance of a property list class. For creating
+an extendible array dataset, pass in #H5P_DATASET_CREATE for the property list class.
+\li The #H5Pset_chunk call modifies a Dataset Creation Property List instance to store a chunked
+layout dataset and sets the size of the chunks used.
+\li To extend an unlimited dimension dataset use the the #H5Dset_extent call. Please be aware that
+after this call, the dataset's dataspace must be refreshed with #H5Dget_space before more data can be accessed.
+\li The #H5Pget_chunk call retrieves the size of chunks for the raw data of a chunked layout dataset.
+\li Once there is no longer a need for a Property List instance, it should be closed with the #H5Pclose call.
+
+<hr>
+Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
+
+@page LBComDset Compressed Datasets
+Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
+<hr>
+
+\section secLBComDsetCreate Creating a Compressed Dataset
+HDF5 requires you to use chunking to create a compressed dataset. (To use chunking efficiently,
+be sure to see the advanced topic, <a href="https://confluence.hdfgroup.org/display/HDF5/Chunking+in+HDF5">Chunking in HDF5</a>.)
+
+The following operations are required in order to create a compressed dataset:
+\li Create a dataset creation property list.
+\li Modify the dataset creation property list instance to enable chunking and to enable compression.
+\li Create the dataset.
+\li Close the dataset creation property list and dataset.
+
+For more information on compression, see the FAQ question on <a href="https://confluence.hdfgroup.org/display/HDF5/Using+Compression+in+HDF5">Using Compression in HDF5</a>.
+
+\section secLBComDsetProg Programming Example
+
+\subsection subsecLBComDsetProgDesc Description
+See \ref LBExamples for the examples used in the \ref LearnBasics tutorial.
+
+The example creates a chunked and ZLIB compressed dataset. It also includes comments for what needs
+to be done to create an SZIP compressed dataset. The example then reopens the dataset, prints the
+filter information, and reads the dataset.
+
+For details on compiling an HDF5 application:
+[ \ref LBCompiling ]
+
+\subsection subsecLBComDsetProgRem Remarks
+\li The #H5Pset_chunk call modifies a Dataset Creation Property List instance to store a chunked layout
+dataset and sets the size of the chunks used.
+\li The #H5Pset_deflate call modifies the Dataset Creation Property List instance to use ZLIB or DEFLATE
+compression. The #H5Pset_szip call modifies it to use SZIP compression. There are different compression
+parameters required for each compression method.
+\li SZIP compression can only be used with atomic datatypes that are integer, float, or char. It cannot be
+applied to compound, array, variable-length, enumerations, or other user-defined datatypes. The call
+to #H5Dcreate will fail if attempting to create an SZIP compressed dataset with a non-allowed datatype.
+The conflict can only be detected when the property list is used.
+
+<hr>
+Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
+
+@page LBContents Discovering the Contents of an HDF5 File
+Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
+<hr>
+
+\section secLBContents Discovering what is in an HDF5 file
+HDFView and h5dump are standalone tools which cannot be called within an application, and using
+#H5Dopen and #H5Dread require that you know the name of the HDF5 dataset. How would an application
+that has no prior knowledge of an HDF5 file be able to determine or discover the contents of it,
+much like HDFView and h5dump?
+
+The answer is that there are ways to discover the contents of an HDF5 file, by using the
+\ref H5G, \ref H5L and \ref H5O APIs:
+\li The \ref H5G interface (covered earlier) consists of routines for working with groups. A group is
+a structure that can be used to organize zero or more HDF5 objects, not unlike a Unix directory.
+\li The \ref H5L interface consists of link routines. A link is a path between groups. The \ref H5L interface
+allows objects to be accessed by use of these links.
+\li The \ref H5O interface consists of routines for working with objects. Datasets, groups, and committed
+datatypes are all objects in HDF5.
+
+Interface routines that simplify the process:
+\li #H5Literate traverses the links in a specified group, in the order of the specified index, using a
+user-defined callback routine. (A callback function is one that will be called when a certain condition
+is met, at a certain point in the future.)
+\li #H5Ovisit / #H5Lvisit recursively visit all objects/links accessible from a specified object/group.
+
+
+\section secLBContentsProg Programming Example
+
+\subsection subsecLBContentsProgUsing Using #H5Literate, #H5Lvisit and #H5Ovisit
+For example code, see the \ref HDF5Examples page.
+Specifically look at the <a href="https://portal.hdfgroup.org/display/HDF5/Examples+by+API">Examples by API</a>.
+There are examples for different languages, where examples of using #H5Literate and #H5Ovisit/#H5Lvisit are included.
+
+The h5ex_g_traverse example traverses a file using H5Literate:
+\li C: <a href="https://support.hdfgroup.org/ftp/HDF5/examples/examples-by-api/hdf5-examples/1_8/C/H5G/h5ex_g_traverse.c">h5ex_g_traverse.c</a>
+\li F90: <a href="https://support.hdfgroup.org/ftp/HDF5/examples/examples-by-api/hdf5-examples/1_8/FORTRAN/H5G/h5ex_g_traverse_F03.f90">h5ex_g_traverse_F03.f90</a>
+
+The h5ex_g_visit example traverses a file using H5Ovisit and H5Lvisit:
+\li C: <a href="https://support.hdfgroup.org/ftp/HDF5/examples/examples-by-api/hdf5-examples/1_8/C/H5G/h5ex_g_visit.c">h5ex_g_visit.c</a>
+\li F90:  <a href="https://support.hdfgroup.org/ftp/HDF5/examples/examples-by-api/hdf5-examples/1_8/FORTRAN/H5G/h5ex_g_visit_F03.f90">h5ex_g_visit_F03.f90</a>
+
+<hr>
+Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
+
+@page LBQuiz Learning the basics QUIZ
+Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
+<hr>
+
+\ref LBFileOrg
+<ol>
+<li>Name and describe the two primary objects that can be stored in an HDF5 file.
+</li>
+<li>What is an attribute?
+</li>
+<li>Give the path name for an object called <code style="background-color:whitesmoke;">harry</code> that is a member of a group called <code style="background-color:whitesmoke;">dick</code>, which, in turn, is a member of the root group.
+</li>
+</ol>
+
+\ref LBAPI
+<ol>
+<li>Describe the purpose of each of the following HDF5 APIs:
+\code
+       H5A, H5D, H5E, H5F, H5G, H5T, H5Z 
+\endcode
+</li>
+</ol>
+
+\ref LBFileCreate
+<ol>
+<li>What two HDF5 routines must be called to create an HDF5 file?
+</li>
+<li>What include file must be included in any file that uses the HDF5 library?
+</li>
+<li>An HDF5 file is never completely empty because as soon as it is created, it automatically contains a certain primary object. What is that object?
+</li>
+</ol>
+
+\ref LBDsetCreate
+<ol>
+<li>Name and describe two major datatype categories.
+</li>
+<li>List the HDF5 atomic datatypes. Give an example of a predefined datatype. How would you create a string dataset?
+</li>
+<li>What does the dataspace describe? What are the major characteristics of the simple dataspace?
+</li>
+<li>What information needs to be passed to the #H5Dcreate function, i.e., what information is needed to describe a dataset at creation time?
+</li>
+</ol>
+
+
+\ref LBDsetRW
+<ol>
+<li>What are six pieces of information which need to be specified for reading and writing a dataset?
+</li>
+<li>Why are both the memory dataspace and file dataspace needed for read/write operations, while only the memory datatype is required?
+</li>
+<li>In Figure 6.1, what does this line mean?
+\code
+DATASPACE { SIMPLE (4 , 6 ) / ( 4 , 6 ) }
+\endcode
+</li>
+</ol>
+
+
+\ref LBAttrCreate
+<ol>
+<li>What is an attribute?
+</li>
+<li>Can partial I/O operations be performed on attributes?
+</li>
+</ol>
+
+
+\ref LBGrpCreate
+<ol>
+<li>What are the two primary objects that can be included in a group?
+</li>
+</ol>
+
+
+\ref LBGrpCreateNames
+<ol>
+<li>Group names can be specified in two ways. What are these two types of group names?
+</li>
+<li>You have a dataset named <code style="background-color:whitesmoke;">moo</code> in the group <code style="background-color:whitesmoke;">boo</code>, which is in the group <code style="background-color:whitesmoke;">foo</code>, which, in turn,
+is in the <code style="background-color:whitesmoke;">root</code> group. How would you specify an absolute name to access this dataset?
+</li>
+</ol>
+
+
+\ref LBGrpDset
+<ol>
+<li>Describe a way to access the dataset moo described in the previous section
+(question 2) using a relative name. Describe a way to access the same dataset using an absolute name.
+</li>
+</ol>
+
+<hr>
+Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
+
+@page LBQuizAnswers Learning the basics QUIZ with Answers
+Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
+<hr>
+
+\ref LBFileOrg
+<ol>
+<li>Name and describe the two primary objects that can be stored in an HDF5 file.
+<table>
+<tr>
+<th><strong>Answer</strong>
+</th>
+<td>Group: A grouping structure containing zero or more HDF5 objects, together with supporting metadata.<br />
+Dataset: A multidimensional array of data elements, together with supporting metadata.
+</td>
+</tr>
+</table>
+</li>
+<li>What is an attribute?
+<table>
+<tr>
+<th><strong>Answer</strong>
+</th>
+<td>An HDF5 attribute is a user-defined HDF5 structure that provides extra information about an HDF5 object.
+</td>
+</tr>
+</table>
+</li>
+<li>Give the path name for an object called <code style="background-color:whitesmoke;">harry</code> that is a member of a group called <code style="background-color:whitesmoke;">dick</code>, which, in turn, is a member of the root group.
+<table>
+<tr>
+<th><strong>Answer</strong>
+</th>
+<td>/dick/harry
+</td>
+</tr>
+</table>
+</li>
+</ol>
+
+\ref LBAPI
+<ol>
+<li>Describe the purpose of each of the following HDF5 APIs:
+\code
+       H5A, H5D, H5E, H5F, H5G, H5T, H5Z 
+\endcode
+<table>
+<tr>
+<th><strong>Answer</strong>
+</th>
+<td>H5A: Attribute access and manipulation routines
+<br />
+H5D: Dataset access and manipulation routines
+<br />
+H5E: Error handling routines H5F: File access routines
+<br />
+H5G: Routines for creating and operating on groups
+<br />
+H5T: Routines for creating and manipulating the datatypes of dataset elements
+<br />
+H5Z: Data compression routines
+</td>
+</tr>
+</table>
+</li>
+</ol>
+
+\ref LBFileCreate
+<ol>
+<li>What two HDF5 routines must be called to create an HDF5 file?
+<table>
+<tr>
+<th><strong>Answer</strong>
+</th>
+<td>#H5Fcreate and #H5Fclose.
+</td>
+</tr>
+</table>
+</li>
+<li>What include file must be included in any file that uses the HDF5 library?
+<table>
+<tr>
+<th><strong>Answer</strong>
+</th>
+<td>hdf5.h must be included because it contains definitions and declarations used by the library.
+</td>
+</tr>
+</table>
+</li>
+<li>An HDF5 file is never completely empty because as soon as it is created, it automatically contains a certain primary object. What is that object?
+<table>
+<tr>
+<th><strong>Answer</strong>
+</th>
+<td>The root group.
+</td>
+</tr>
+</table>
+</li>
+</ol>
+
+\ref LBDsetCreate
+<ol>
+<li>Name and describe two major datatype categories.
+<table>
+<tr>
+<th><strong>Answer</strong>
+</th>
+<td>Atomic datatype: An atomic datatype cannot be decomposed into smaller units at the API level.
+<br />
+Compound datatype: A compound datatype is a collection of atomic and compound datatypes, or small arrays of such types.
+</td>
+</tr>
+</table>
+</li>
+<li>List the HDF5 atomic datatypes. Give an example of a predefined datatype. How would you create a string dataset?
+<table>
+<tr>
+<th><strong>Answer</strong>
+</th>
+<td>There are six HDF5 atomic datatypes: integer, floating point, date and time, character string, bit field, and opaque.
+<br />
+Examples of predefined datatypes include the following:<br />
+\li #H5T_IEEE_F32LE - 4-byte little-endian, IEEE floating point
+\li #H5T_NATIVE_INT - native integer
+
+You would create a string dataset with the #H5T_C_S1 datatype, and set the size of the string with the #H5Tset_size call.
+</td>
+</tr>
+</table>
+</li>
+<li>What does the dataspace describe? What are the major characteristics of the simple dataspace?
+<table>
+<tr>
+<th><strong>Answer</strong>
+</th>
+<td>The dataspace describes the dimensionality of the dataset. A simple dataspace is characterized by its rank and dimension sizes.
+</td>
+</tr>
+</table>
+</li>
+<li>What information needs to be passed to the #H5Dcreate function, i.e., what information is needed to describe a dataset at creation time?
+<table>
+<tr>
+<th><strong>Answer</strong>
+</th>
+<td>The dataset location, name, dataspace, datatype, and dataset creation property list.
+</td>
+</tr>
+</table>
+</li>
+</ol>
+
+
+\ref LBDsetRW
+<ol>
+<li>What are six pieces of information which need to be specified for reading and writing a dataset?
+<table>
+<tr>
+<th><strong>Answer</strong>
+</th>
+<td>The dataset identifier, the dataset's datatype and dataspace in memory, the dataspace in the file,
+the dataset transfer property list, and a data buffer.
+</td>
+</tr>
+</table>
+</li>
+<li>Why are both the memory dataspace and file dataspace needed for read/write operations, while only the memory datatype is required?
+<table>
+<tr>
+<th><strong>Answer</strong>
+</th>
+<td>A dataset's file datatype is not required for a read/write operation because the file datatype is specified
+when the dataset is created and cannot be changed. Both file and memory dataspaces are required for dataset
+subsetting and for performing partial I/O operations.
+</td>
+</tr>
+</table>
+</li>
+<li>In Figure 6.1, what does this line mean?
+\code
+DATASPACE { SIMPLE (4 , 6 ) / ( 4 , 6 ) }
+\endcode
+<table>
+<tr>
+<th><strong>Answer</strong>
+</th>
+<td>It means that the dataset dset has a simple dataspace with the current dimensions (4,6) and the maximum size of the dimensions (4,6).
+</td>
+</tr>
+</table>
+</li>
+</ol>
+
+
+\ref LBAttrCreate
+<ol>
+<li>What is an attribute?
+<table>
+<tr>
+<th><strong>Answer</strong>
+</th>
+<td>An attribute is a dataset attached to an object. It describes the nature and/or the intended usage of the object.
+</td>
+</tr>
+</table>
+</li>
+<li>Can partial I/O operations be performed on attributes?
+<table>
+<tr>
+<th><strong>Answer</strong>
+</th>
+<td>No.
+</td>
+</tr>
+</table>
+</li>
+</ol>
+
+
+\ref LBGrpCreate
+<ol>
+<li>What are the two primary objects that can be included in a group?
+<table>
+<tr>
+<th><strong>Answer</strong>
+</th>
+<td>A group and a dataset.
+</td>
+</tr>
+</table>
+</li>
+</ol>
+
+
+\ref LBGrpCreateNames
+<ol>
+<li>Group names can be specified in two ways. What are these two types of group names?
+<table>
+<tr>
+<th><strong>Answer</strong>
+</th>
+<td>Relative and absolute.
+</td>
+</tr>
+</table>
+</li>
+<li>You have a dataset named <code style="background-color:whitesmoke;">moo</code> in the group <code style="background-color:whitesmoke;">boo</code>, which is in the group <code style="background-color:whitesmoke;">foo</code>, which, in turn,
+is in the <code style="background-color:whitesmoke;">root</code> group. How would you specify an absolute name to access this dataset?
+<table>
+<tr>
+<th><strong>Answer</strong>
+</th>
+<td>/foo/boo/moo
+</td>
+</tr>
+</table>
+</li>
+</ol>
+
+
+\ref LBGrpDset
+<ol>
+<li>Describe a way to access the dataset moo described in the previous section
+(question 2) using a relative name. Describe a way to access the same dataset using an absolute name.
+<table>
+<tr>
+<th><strong>Answer</strong>
+</th>
+<td>Access the group /foo and get the group ID. Access the group boo using the group ID obtained in Step 1.
+Access the dataset moo using the group ID obtained in Step 2.
+\code
+gid = H5Gopen (file_id, "/foo", 0); /* absolute path */ 
+gid1 = H5Gopen (gid, "boo", 0); /* relative path */ 
+did = H5Dopen (gid1, "moo"); /* relative path */ 
+\endcode
+Access the group /foo and get the group ID. Access the dataset boo/moo with the group ID just obtained.
+\code
+gid = H5Gopen (file_id, "/foo", 0); /* absolute path */ 
+did = H5Dopen (gid, "boo/moo"); /* relative path */ 
+\endcode
+Access the dataset with an absolute path.
+\code
+did = H5Dopen (file_id, "/foo/boo/moo"); /* absolute path */
+\endcode
+</td>
+</tr>
+</table>
+</li>
+</ol>
+
+<hr>
+Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
+
+@page LBCompiling Compiling HDF5 Applications
+Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
+<hr>
+
+\section secLBCompiling Tools and Instructions on Compiling
+Compiling applications to use the HDF5 Library can be as simple as executing:
+\code
+h5cc -o myprog myprog.c
+\endcode
+
+As an application's file base evolves, there are better solutions using autotools and makefiles or
+CMake and CMakeLists.txt files. Many tutorials and references can be found with a simple search.
+
+This tutorial section will discuss the use of compile scripts on Linux.
+See the \ref secLBCompilingVS section for compiling with Visual Studio.
+
+\section secLBCompilingLinux Compile Scripts
+When the library is built, the following compile scripts are included:
+\li h5cc:  compile script for HDF5 C programs
+\li h5fc:  compile script for HDF5 F90 programs
+\li h5c++: compile script for HDF5 C++ programs
+
+These scripts are easilye used to compile single file applications, such as those included in the tutorial.
+<table>
+<tr>
+<th><strong>Warning</strong>
+</th>
+<td>The h5cc/h5fc/h5c++ compile scripts are included when building with configure. Versions of
+these compile scripts have also been added to CMake for Linux ONLY. The CMake versions rely on pkgconfig files.
+</td>
+</tr>
+</table>
+
+<h4>Examples of Using the Unix Compile Scripts:</h4>
+Following are examples of compiling and running an application with the Unix compile scripts:
+\code
+   h5fc myprog.f90
+   ./a.out
+
+   h5cc -o myprog myprog.c
+   ./myprog 
+\endcode
+
+To see how the libraries linked in with a compile script were configured and built, use the
+-showconfig option. For example, if using h5cc type:
+\code
+   h5cc -showconfig
+\endcode
+
+<h4>Detailed Description of Unix Compile Scripts:</h4>
+The h5cc, h5c++, and h5fc compile scripts come with the HDF5 binary distributions (include files,
+libraries, and utilities) for the platforms we support. The h5c++ and h5fc utilities are ONLY present
+if the library was built with C++ and Fortran.
+
+\section secLBCompilingVS Using Visual Studio
+
+   1. If you are building on 64-bit Windows, find the "Platform" dropdown
+      and select "x64". Also select the correct Configuration (Debug, Release, RelWithDebInfo, etc)
+
+   2. Set up path for external headers
+
+      The HDF5 install path settings will need to be in the project property sheets per project.
+      Go to "Project" and select "Properties", find "Configuration Properties",
+      and then "C/C++".
+
+      2.1 Add the header path to the "Additional Include Directories" setting. Under "C/C++"
+          find "General" and select "Additional Include Directories". Select "Edit" from the dropdown
+          and add the HDF5 install/include path to the list.
+          (Ex: "C:\Program Files\HDF_Group\HDF5\1.10.9\include")
+
+      2.2 Building applications with the dynamic/shared hdf5 libraries requires
+          that the "H5_BUILT_AS_DYNAMIC_LIB" compile definition be used. Under "C/C++"
+          find "Preprocessor" and select "Preprocessor Definitions". Select "Edit" from the dropdown
+          and add "H5_BUILT_AS_DYNAMIC_LIB" to the list.
+
+   3. Set up path for external libraries
+
+      The HDF5 install path/lib settings will need to be in the project property sheets per project.
+      Go to "Project" and select "Properties", find "Configuration Properties",
+      and then "Linker".
+
+      3.1 Add the libraries to the "Additional Dependencies" setting. Under "Linker"
+          find "Input" and select "Additional Dependencies". Select "Edit" from the dropdown
+          and add the required HDF5 install/lib path to the list.
+          (Ex: "C:\Program Files\HDF_Group\HDF5\1.10.9\lib\hdf5.lib")
+
+      3.2 For static builds, the external libraries should be added.
+          For example, to compile a C++ application, enter:
+          libhdf5_cpp.lib libhdf5.lib libz.lib libszaec.lib libaec.lib
+
+\section secLBCompilingLibs HDF5 Libraries
+Following are the libraries included with HDF5. Whether you are using the Unix compile scripts or
+Makefiles, or are compiling on Windows, these libraries are or may need to be specified. The order
+they are specified is important on Linux:
+
+<table>
+<caption>HDF5 Static Libraries</caption>
+<tr>
+<th>Library</th>
+<th>Linux Name</th>
+<th>Mac Name</th>
+<th>Windows Name</th>
+</tr>
+<tr>
+<td>
+\code
+HDF5 High Level C++ APIs 
+HDF5 C++ Library  
+HDF5 High Level Fortran APIs
+HDF5 Fortran Library
+HDF5 High Level C APIs
+HDF5 C Library
+\endcode
+</td>
+<td>
+\code
+libhdf5_hl_cpp.a
+libhdf5_cpp.a
+libhdf5hl_fortran.a
+libhdf5_fortran.a
+libhdf5_hl.a
+libhdf5.a
+\endcode
+</td>
+<td>
+\code
+libhdf5_hl_cpp.a
+libhdf5_cpp.a
+libhdf5hl_fortran.a
+libhdf5_fortran.a
+libhdf5_hl.a
+libhdf5.a
+\endcode
+</td>
+<td>
+<em>Windows</em>
+\code
+libhdf5_hl_cpp.lib
+libhdf5_cpp.lib
+libhdf5hl_fortran.lib
+libhdf5_fortran.lib
+libhdf5_hl.lib
+libhdf5.lib
+\endcode
+</tr>
+</table>
+
+<table>
+<caption>HDF5 Shared Libraries</caption>
+<tr>
+<th>Library</th>
+<th>Linux Name</th>
+<th>Mac Name</th>
+<th>Windows Name</th>
+</tr>
+<tr>
+<td>
+\code
+HDF5 High Level C++ APIs 
+HDF5 C++ Library  
+HDF5 High Level Fortran APIs
+HDF5 Fortran Library
+HDF5 High Level C APIs
+HDF5 C Library
+\endcode
+</td>
+<td>
+\code
+libhdf5_hl_cpp.so
+libhdf5_cpp.so
+libhdf5hl_fortran.so
+libhdf5_fortran.so
+libhdf5_hl.so
+libhdf5.so
+\endcode
+</td>
+<td>
+\code
+libhdf5_hl_cpp.dylib
+libhdf5_cpp.dylib
+libhdf5hl_fortran.dylib
+libhdf5_fortran.dylib
+libhdf5_hl.dylib
+libhdf5.dylib
+\endcode
+</td>
+<td>
+\code
+hdf5_hl_cpp.lib
+hdf5_cpp.lib
+hdf5hl_fortran.lib
+hdf5_fortran.lib
+hdf5_hl.lib
+hdf5.lib
+\endcode
+</tr>
+</table>
+
+<table>
+<caption>External Libraries</caption>
+<tr>
+<th>Library</th>
+<th>Linux Name</th>
+<th>Mac Name</th>
+<th>Windows Name</th>
+</tr>
+<tr>
+<td>
+\code
+SZIP Compression Library
+SZIP Compression Library
+ZLIB or DEFLATE Compression Library
+\endcode
+</td>
+<td>
+\code
+libszaec.a
+libaec.a
+libz.a
+\endcode
+</td>
+<td>
+\code
+libszaec.a
+libaec.a
+libz.a
+\endcode
+</td>
+<td>
+\code
+libszaec.lib
+libaec.lib
+libz.lib
+\endcode
+</td>
+</tr>
+</table>
+
+The pre-compiled binaries, in particular, are built (if at all possible) with these libraries as well as with
+SZIP and ZLIB. If using shared libraries you may need to add the path to the library to LD_LIBRARY_PATH on Linux
+or on WINDOWS you may need to add the path to the bin folder to PATH.
+
+\section secLBCompilingCMake Compiling an Application with CMake
+
+\subsection subsecLBCompilingCMakeScripts CMake Scripts for Building Applications
+Simple scripts are provided for building applications with different languages and options.
+See <a href="https://confluence.hdfgroup.org/display/support/CMake+Scripts+for+Building+Applications">CMake Scripts for Building Applications</a>.
+
+For a more complete script (and to help resolve issues) see the script provided with the HDF5 Examples project.
+
+\subsection subsecLBCompilingCMakeExamples HDF5 Examples
+The installed HDF5 can be verified by compiling the HDF5 Examples project, included with the CMake built HDF5 binaries
+in the share folder or you can go to the <a href="https://github.com/HDFGroup/hdf5_examples">HDF5 Examples</a> github repository.
+
+Go into the share directory and follow the instructions in USING_CMake_examples.txt to build the examples.
+
+In general, users must first set the HDF5_ROOT environment variable to the installed location of the CMake
+configuration files for HDF5. For example, on Windows the following path might be set:
+
+\code
+   HDF5_ROOT=C:/Program Files/HDF_Group/HDF5/1.N.N
+\endcode
+
+\subsection subsecLBCompilingCMakeTroubless Troubleshooting CMake
+<h4>How do you use find_package with HDF5?</h4>
+To use find_package you will first need to make sure that HDF5_ROOT is set correctly. For setting this
+environment variable see the Preconditions in the USING_HDF5_CMake.txt file in the share directory.
+
+See the CMakeLists.txt file provided with these examples for how to use find_package with HDF5.
+
+Please note that the find_package invocation changed to require "shared" or "static":
+\code
+      FIND_PACKAGE(HDF5 COMPONENTS C HL NO_MODULE REQUIRED shared)
+      FIND_PACKAGE(HDF5 COMPONENTS C HL NO_MODULE REQUIRED static)  
+\endcode
+
+Previously, the find_package invocation was: 
+\code
+      FIND_PACKAGE(HDF5 COMPONENTS C HL NO_MODULE REQUIRED)
+\endcode
+
+<h4>My platform/compiler is not included. Can I still use the configuration files?</h4>
+Yes, you can but you will have to edit the HDF5_Examples.cmake file and update the variable:
+\code
+   CTEST_CMAKE_GENERATOR  
+\endcode
+
+The generators for your platform can be seen by typing:
+\code
+   cmake --help
+\endcode
+
+<h4>What do I do if the build fails?</h4>
+I received an error during the build and the application binary is not in the
+build directory as I expected. How do I determine what the problem is?
+
+If the error is not clear, then the first thing you may want to do is replace the -V (Dash Uppercase Vee)
+option for ctest in the build script to -VV (Dash Uppercase Vee Uppercase Vee). Then remove the build
+directory and re-run the build script. The output should be more verbose.
+
+If the error is still not clear, then check the log files. You will find those in the build directory.
+For example, on Unix the log files will be in:
+\code
+   build/Testing/Temporary/  
+\endcode
+There are log files for the configure, test, and build. 
+
+<hr>
+Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
+
+@page LBTraining Training Videos
+Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
+<hr>
+
+<a href="https://confluence.hdfgroup.org/display/HDF5/Training+Videos">Training Videos</a>
+
+<hr>
+Navigate back: \ref index "Main" / \ref GettingStarted / \ref LearnBasics
+
+*/

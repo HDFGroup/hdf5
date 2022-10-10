@@ -87,8 +87,9 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, H5S_t *mem_space, H5S_t *file_space
     H5D_chunk_map_t *fm = NULL;                   /* Chunk file<->memory mapping */
     H5D_io_info_t    io_info;                     /* Dataset I/O info     */
     H5D_type_info_t  type_info;                   /* Datatype info for operation */
+    H5D_layout_t     layout_type;                 /* Dataset's layout type (contig, chunked, compact, etc.) */
     hbool_t          type_info_init      = FALSE; /* Whether the datatype info has been initialized */
-    H5S_t *          projected_mem_space = NULL;  /* If not NULL, ptr to dataspace containing a     */
+    H5S_t           *projected_mem_space = NULL;  /* If not NULL, ptr to dataspace containing a     */
                                                   /* projection of the supplied mem_space to a new  */
                                                   /* dataspace with rank equal to that of           */
                                                   /* file_space.                                    */
@@ -113,6 +114,8 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, H5S_t *mem_space, H5S_t *file_space
     HDassert(dataset && dataset->oloc.file);
     HDassert(file_space);
     HDassert(mem_space);
+
+    layout_type = dataset->shared->layout.type;
 
     /* Set up datatype info for operation */
     if (H5D__typeinfo_init(dataset, mem_type_id, FALSE, &type_info) < 0)
@@ -239,11 +242,13 @@ H5D__read(H5D_t *dataset, hid_t mem_type_id, H5S_t *mem_space, H5S_t *file_space
         HDassert((*dataset->shared->layout.ops->is_space_alloc)(&dataset->shared->layout.storage) ||
                  (dataset->shared->layout.ops->is_data_cached &&
                   (*dataset->shared->layout.ops->is_data_cached)(dataset->shared)) ||
-                 dataset->shared->dcpl_cache.efl.nused > 0 || dataset->shared->layout.type == H5D_COMPACT);
+                 dataset->shared->dcpl_cache.efl.nused > 0 || layout_type == H5D_COMPACT);
 
     /* Allocate the chunk map */
-    if (NULL == (fm = H5FL_CALLOC(H5D_chunk_map_t)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate chunk map")
+    if (H5D_CONTIGUOUS != layout_type && H5D_COMPACT != layout_type) {
+        if (NULL == (fm = H5FL_CALLOC(H5D_chunk_map_t)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate chunk map")
+    }
 
     /* Call storage method's I/O initialization routine */
     if (io_info.layout_ops.io_init &&
@@ -299,9 +304,10 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, H5S_t *mem_space, H5S_t *file_spac
     H5D_chunk_map_t *fm = NULL;                   /* Chunk file<->memory mapping */
     H5D_io_info_t    io_info;                     /* Dataset I/O info     */
     H5D_type_info_t  type_info;                   /* Datatype info for operation */
+    H5D_layout_t     layout_type;                 /* Dataset's layout type (contig, chunked, compact, etc.) */
     hbool_t          type_info_init      = FALSE; /* Whether the datatype info has been initialized */
     hbool_t          should_alloc_space  = FALSE; /* Whether or not to initialize dataset's storage */
-    H5S_t *          projected_mem_space = NULL;  /* If not NULL, ptr to dataspace containing a     */
+    H5S_t           *projected_mem_space = NULL;  /* If not NULL, ptr to dataspace containing a     */
                                                   /* projection of the supplied mem_space to a new  */
                                                   /* dataspace with rank equal to that of           */
                                                   /* file_space.                                    */
@@ -326,6 +332,8 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, H5S_t *mem_space, H5S_t *file_spac
     HDassert(dataset && dataset->oloc.file);
     HDassert(file_space);
     HDassert(mem_space);
+
+    layout_type = dataset->shared->layout.type;
 
     /* All filters in the DCPL must have encoding enabled. */
     if (!dataset->shared->checked_filters) {
@@ -466,8 +474,10 @@ H5D__write(H5D_t *dataset, hid_t mem_type_id, H5S_t *mem_space, H5S_t *file_spac
     } /* end if */
 
     /* Allocate the chunk map */
-    if (NULL == (fm = H5FL_CALLOC(H5D_chunk_map_t)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate chunk map")
+    if (H5D_CONTIGUOUS != layout_type && H5D_COMPACT != layout_type) {
+        if (NULL == (fm = H5FL_CALLOC(H5D_chunk_map_t)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate chunk map")
+    }
 
     /* Call storage method's I/O initialization routine */
     if (io_info.layout_ops.io_init &&
@@ -604,8 +614,8 @@ H5D__ioinfo_init(H5D_t *dset, const H5D_type_info_t *type_info, H5D_storage_t *s
 static herr_t
 H5D__typeinfo_init(const H5D_t *dset, hid_t mem_type_id, hbool_t do_write, H5D_type_info_t *type_info)
 {
-    const H5T_t *     src_type;            /* Source datatype */
-    const H5T_t *     dst_type;            /* Destination datatype */
+    const H5T_t      *src_type;            /* Source datatype */
+    const H5T_t      *dst_type;            /* Destination datatype */
     H5Z_data_xform_t *data_transform;      /* Data transform info */
     herr_t            ret_value = SUCCEED; /* Return value	*/
 
@@ -665,8 +675,8 @@ H5D__typeinfo_init(const H5D_t *dset, hid_t mem_type_id, hbool_t do_write, H5D_t
         type_info->need_bkg    = H5T_BKG_NO;
     } /* end if */
     else {
-        void *    tconv_buf;     /* Temporary conversion buffer pointer */
-        void *    bkgr_buf;      /* Background conversion buffer pointer */
+        void     *tconv_buf;     /* Temporary conversion buffer pointer */
+        void     *bkgr_buf;      /* Background conversion buffer pointer */
         size_t    max_temp_buf;  /* Maximum temporary buffer size */
         H5T_bkg_t bkgr_buf_type; /* Background buffer type */
         size_t    target_size;   /* Desired buffer size	*/
@@ -830,6 +840,18 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset, const H5S_t *file_
             } /* end if */
         }     /* end if */
         else {
+            /* Fail when file sync is required, since it requires collective write */
+            if (io_info->op_type == H5D_IO_OP_WRITE) {
+                hbool_t mpi_file_sync_required = FALSE;
+                if (H5F_shared_get_mpi_file_sync_required(io_info->f_sh, &mpi_file_sync_required) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get MPI file_sync_required flag")
+
+                if (mpi_file_sync_required)
+                    HGOTO_ERROR(
+                        H5E_DATASET, H5E_NO_INDEPENDENT, FAIL,
+                        "Can't perform independent write when MPI_File_sync is required by ROMIO driver.")
+            }
+
             /* Check if there are any filters in the pipeline. If there are,
              * we cannot break to independent I/O if this is a write operation
              * with multiple ranks involved; otherwise, there will be metadata

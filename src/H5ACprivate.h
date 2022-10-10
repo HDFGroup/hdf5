@@ -125,7 +125,7 @@ typedef enum {
 #define H5AC__DEFAULT_MIN_CLEAN_SIZE H5C__DEFAULT_MIN_CLEAN_SIZE
 
 /* Check if we are sanity checking tagging */
-#if H5C_DO_TAGGING_SANITY_CHECKS
+#ifdef H5C_DO_TAGGING_SANITY_CHECKS
 #define H5AC_DO_TAGGING_SANITY_CHECKS 1
 #else
 #define H5AC_DO_TAGGING_SANITY_CHECKS 0
@@ -388,7 +388,7 @@ H5_DLL herr_t H5AC_prep_for_file_close(H5F_t *f);
 H5_DLL herr_t H5AC_prep_for_file_flush(H5F_t *f);
 H5_DLL herr_t H5AC_secure_from_file_flush(H5F_t *f);
 H5_DLL herr_t H5AC_create_flush_dependency(void *parent_thing, void *child_thing);
-H5_DLL void * H5AC_protect(H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *udata, unsigned flags);
+H5_DLL void  *H5AC_protect(H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *udata, unsigned flags);
 H5_DLL herr_t H5AC_resize_entry(void *thing, size_t new_size);
 H5_DLL herr_t H5AC_unpin_entry(void *thing);
 H5_DLL herr_t H5AC_destroy_flush_dependency(void *parent_thing, void *child_thing);

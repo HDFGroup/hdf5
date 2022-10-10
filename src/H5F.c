@@ -112,7 +112,7 @@ H5FL_EXTERN(H5VL_object_t);
 hid_t
 H5Fget_create_plist(hid_t file_id)
 {
-    H5VL_object_t *      vol_obj;                     /* File for file_id */
+    H5VL_object_t       *vol_obj;                     /* File for file_id */
     H5VL_file_get_args_t vol_cb_args;                 /* Arguments to VOL callback */
     hid_t                ret_value = H5I_INVALID_HID; /* Return value */
 
@@ -159,7 +159,7 @@ done:
 hid_t
 H5Fget_access_plist(hid_t file_id)
 {
-    H5VL_object_t *      vol_obj;                     /* File for file_id */
+    H5VL_object_t       *vol_obj;                     /* File for file_id */
     H5VL_file_get_args_t vol_cb_args;                 /* Arguments to VOL callback */
     hid_t                ret_value = H5I_INVALID_HID; /* Return value */
 
@@ -238,7 +238,7 @@ H5Fget_obj_count(hid_t file_id, unsigned types)
      * count the IDs in the file.
      */
     if (file_id != (hid_t)H5F_OBJ_ALL) {
-        H5VL_object_t *      vol_obj;     /* File for file_id */
+        H5VL_object_t       *vol_obj;     /* File for file_id */
         size_t               count = 0;   /* Object count */
         H5VL_file_get_args_t vol_cb_args; /* Arguments to VOL callback */
 
@@ -358,7 +358,7 @@ H5Fget_obj_ids(hid_t file_id, unsigned types, size_t max_objs, hid_t *oid_list /
      * get the IDs from the file.
      */
     if (file_id != (hid_t)H5F_OBJ_ALL) {
-        H5VL_object_t *      vol_obj;     /* File for file_id */
+        H5VL_object_t       *vol_obj;     /* File for file_id */
         size_t               count = 0;   /* Object count */
         H5VL_file_get_args_t vol_cb_args; /* Arguments to VOL callback */
 
@@ -432,7 +432,7 @@ done:
 herr_t
 H5Fget_vfd_handle(hid_t file_id, hid_t fapl_id, void **file_handle /*out*/)
 {
-    H5VL_object_t *                  vol_obj;             /* File info */
+    H5VL_object_t                   *vol_obj;             /* File info */
     H5VL_optional_args_t             vol_cb_args;         /* Arguments to VOL callback */
     H5VL_native_file_optional_args_t file_opt_args;       /* Arguments for optional operation */
     herr_t                           ret_value = SUCCEED; /* Return value */
@@ -558,8 +558,8 @@ done:
 static hid_t
 H5F__create_api_common(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id, void **token_ptr)
 {
-    void *                new_file = NULL;             /* File struct for new file                 */
-    H5P_genplist_t *      plist;                       /* Property list pointer                    */
+    void                 *new_file = NULL;             /* File struct for new file                 */
+    H5P_genplist_t       *plist;                       /* Property list pointer                    */
     H5VL_connector_prop_t connector_prop;              /* Property for VOL connector ID & info     */
     hid_t                 ret_value = H5I_INVALID_HID; /* Return value                             */
 
@@ -688,8 +688,8 @@ H5Fcreate_async(const char *app_file, const char *app_func, unsigned app_line, c
                 unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* File object */
-    void *         token     = NULL;            /* Request token for async operation        */
-    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    void          *token     = NULL;            /* Request token for async operation        */
+    void         **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
     hid_t          ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -752,8 +752,8 @@ done:
 static hid_t
 H5F__open_api_common(const char *filename, unsigned flags, hid_t fapl_id, void **token_ptr)
 {
-    void *                new_file = NULL;             /* File struct for new file                 */
-    H5P_genplist_t *      plist;                       /* Property list pointer                    */
+    void                 *new_file = NULL;             /* File struct for new file                 */
+    H5P_genplist_t       *plist;                       /* Property list pointer                    */
     H5VL_connector_prop_t connector_prop;              /* Property for VOL connector ID & info     */
     hid_t                 ret_value = H5I_INVALID_HID; /* Return value                             */
 
@@ -865,8 +865,8 @@ H5Fopen_async(const char *app_file, const char *app_func, unsigned app_line, con
               unsigned flags, hid_t fapl_id, hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* File object */
-    void *         token     = NULL;            /* Request token for async operation        */
-    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    void          *token     = NULL;            /* Request token for async operation        */
+    void         **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
     hid_t          ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -927,7 +927,7 @@ done:
 static herr_t
 H5F__flush_api_common(hid_t object_id, H5F_scope_t scope, void **token_ptr, H5VL_object_t **_vol_obj_ptr)
 {
-    H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
+    H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
     H5I_type_t                obj_type;               /* Type of object to use */
@@ -1001,8 +1001,8 @@ H5Fflush_async(const char *app_file, const char *app_func, unsigned app_line, hi
                H5F_scope_t scope, hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
-    void *         token     = NULL;            /* Request token for async operation        */
-    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    void          *token     = NULL;            /* Request token for async operation        */
+    void         **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
     herr_t         ret_value = SUCCEED;         /* Return value     */
 
     FUNC_ENTER_API(FAIL)
@@ -1077,9 +1077,9 @@ herr_t
 H5Fclose_async(const char *app_file, const char *app_func, unsigned app_line, hid_t file_id, hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
-    H5VL_t *       connector = NULL;            /* VOL connector */
-    void *         token     = NULL;            /* Request token for async operation        */
-    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    H5VL_t        *connector = NULL;            /* VOL connector */
+    void          *token     = NULL;            /* Request token for async operation        */
+    void         **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
     herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1137,7 +1137,7 @@ done:
 herr_t
 H5Fdelete(const char *filename, hid_t fapl_id)
 {
-    H5P_genplist_t *          plist;                 /* Property list pointer */
+    H5P_genplist_t           *plist;                 /* Property list pointer */
     H5VL_connector_prop_t     connector_prop;        /* Property for VOL connector ID & info */
     H5VL_file_specific_args_t vol_cb_args;           /* Arguments to VOL callback */
     hbool_t                   is_accessible = FALSE; /* Whether file is accessible */
@@ -1204,10 +1204,10 @@ done:
 herr_t
 H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
 {
-    H5VL_object_t *            loc_vol_obj   = NULL; /* Parent object        */
-    H5VL_object_t *            child_vol_obj = NULL; /* Child object         */
+    H5VL_object_t             *loc_vol_obj   = NULL; /* Parent object        */
+    H5VL_object_t             *child_vol_obj = NULL; /* Child object         */
     H5VL_group_specific_args_t vol_cb_args;          /* Arguments to VOL callback */
-    void *                     grp = NULL;           /* Root group opened */
+    void                      *grp = NULL;           /* Root group opened */
     H5I_type_t                 loc_type;             /* ID type of location  */
     int                        same_connector = 0; /* Whether parent and child files use the same connector */
     herr_t                     ret_value      = SUCCEED; /* Return value         */
@@ -1239,7 +1239,7 @@ H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
      *  'loc_id', because the 'mount' operation is a group specific operation.
      */
     if (H5I_FILE == loc_type) {
-        H5VL_object_t *   vol_obj;    /* Object for loc_id (file) */
+        H5VL_object_t    *vol_obj;    /* Object for loc_id (file) */
         H5VL_loc_params_t loc_params; /* Location parameters for object access */
 
         /* Get the location object */
@@ -1322,9 +1322,9 @@ done:
 herr_t
 H5Funmount(hid_t loc_id, const char *name)
 {
-    H5VL_object_t *            loc_vol_obj = NULL;  /* Parent object        */
+    H5VL_object_t             *loc_vol_obj = NULL;  /* Parent object        */
     H5VL_group_specific_args_t vol_cb_args;         /* Arguments to VOL callback */
-    void *                     grp = NULL;          /* Root group opened */
+    void                      *grp = NULL;          /* Root group opened */
     H5I_type_t                 loc_type;            /* ID type of location  */
     herr_t                     ret_value = SUCCEED; /* Return value         */
 
@@ -1349,7 +1349,7 @@ H5Funmount(hid_t loc_id, const char *name)
      *  'loc_id', because the 'mount' operation is a group specific operation.
      */
     if (H5I_FILE == loc_type) {
-        H5VL_object_t *   vol_obj;    /* Object for loc_id (file) */
+        H5VL_object_t    *vol_obj;    /* Object for loc_id (file) */
         H5VL_loc_params_t loc_params; /* Location parameters for object access */
 
         /* Get the location object */
@@ -1413,9 +1413,9 @@ done:
 static hid_t
 H5F__reopen_api_common(hid_t file_id, void **token_ptr)
 {
-    H5VL_object_t *           vol_obj = NULL;                /* Object for loc_id */
+    H5VL_object_t            *vol_obj = NULL;                /* Object for loc_id */
     H5VL_file_specific_args_t vol_cb_args;                   /* Arguments to VOL callback */
-    void *                    reopen_file = NULL;            /* Pointer to the re-opened file object */
+    void                     *reopen_file = NULL;            /* Pointer to the re-opened file object */
     hid_t                     ret_value   = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1501,8 +1501,8 @@ hid_t
 H5Freopen_async(const char *app_file, const char *app_func, unsigned app_line, hid_t file_id, hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
-    void *         token     = NULL;            /* Request token for async operation        */
-    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    void          *token     = NULL;            /* Request token for async operation        */
+    void         **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
     hid_t          ret_value;                   /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -1571,7 +1571,7 @@ H5Fget_intent(hid_t file_id, unsigned *intent_flags /*out*/)
 
     /* If no intent flags were passed in, exit quietly */
     if (intent_flags) {
-        H5VL_object_t *      vol_obj;     /* File for file_id */
+        H5VL_object_t       *vol_obj;     /* File for file_id */
         H5VL_file_get_args_t vol_cb_args; /* Arguments to VOL callback */
 
         /* Get the internal file structure */
@@ -1611,7 +1611,7 @@ H5Fget_fileno(hid_t file_id, unsigned long *fnumber /*out*/)
 
     /* If no fnumber pointer was passed in, exit quietly */
     if (fnumber) {
-        H5VL_object_t *      vol_obj;     /* File for file_id */
+        H5VL_object_t       *vol_obj;     /* File for file_id */
         H5VL_file_get_args_t vol_cb_args; /* Arguments to VOL callback */
 
         /* Get the internal file structure */
@@ -1643,7 +1643,7 @@ done:
 hssize_t
 H5Fget_freespace(hid_t file_id)
 {
-    H5VL_object_t *                  vol_obj = NULL;
+    H5VL_object_t                   *vol_obj = NULL;
     H5VL_optional_args_t             vol_cb_args;        /* Arguments to VOL callback */
     H5VL_native_file_optional_args_t file_opt_args;      /* Arguments for optional operation */
     hsize_t                          file_freespace = 0; /* Size of freespace in the file */
@@ -1686,7 +1686,7 @@ done:
 herr_t
 H5Fget_filesize(hid_t file_id, hsize_t *size /*out*/)
 {
-    H5VL_object_t *                  vol_obj;             /* File info */
+    H5VL_object_t                   *vol_obj;             /* File info */
     H5VL_optional_args_t             vol_cb_args;         /* Arguments to VOL callback */
     H5VL_native_file_optional_args_t file_opt_args;       /* Arguments for optional operation */
     herr_t                           ret_value = SUCCEED; /* Return value */
@@ -1753,7 +1753,7 @@ done:
 ssize_t
 H5Fget_file_image(hid_t file_id, void *buf /*out*/, size_t buf_len)
 {
-    H5VL_object_t *                  vol_obj;       /* File object for file ID  */
+    H5VL_object_t                   *vol_obj;       /* File object for file ID  */
     H5VL_optional_args_t             vol_cb_args;   /* Arguments to VOL callback */
     H5VL_native_file_optional_args_t file_opt_args; /* Arguments for optional operation */
     size_t                           image_len = 0; /* Size of image buffer */
@@ -1801,7 +1801,7 @@ done:
 herr_t
 H5Fget_mdc_config(hid_t file_id, H5AC_cache_config_t *config /*out*/)
 {
-    H5VL_object_t *                  vol_obj = NULL;
+    H5VL_object_t                   *vol_obj = NULL;
     H5VL_optional_args_t             vol_cb_args;         /* Arguments to VOL callback */
     H5VL_native_file_optional_args_t file_opt_args;       /* Arguments for optional operation */
     herr_t                           ret_value = SUCCEED; /* Return value */
@@ -1844,7 +1844,7 @@ done:
 herr_t
 H5Fset_mdc_config(hid_t file_id, const H5AC_cache_config_t *config_ptr)
 {
-    H5VL_object_t *                  vol_obj = NULL;
+    H5VL_object_t                   *vol_obj = NULL;
     H5VL_optional_args_t             vol_cb_args;         /* Arguments to VOL callback */
     H5VL_native_file_optional_args_t file_opt_args;       /* Arguments for optional operation */
     herr_t                           ret_value = SUCCEED; /* Return value */
@@ -1884,7 +1884,7 @@ done:
 herr_t
 H5Fget_mdc_hit_rate(hid_t file_id, double *hit_rate /*out*/)
 {
-    H5VL_object_t *                  vol_obj;
+    H5VL_object_t                   *vol_obj;
     H5VL_optional_args_t             vol_cb_args;         /* Arguments to VOL callback */
     H5VL_native_file_optional_args_t file_opt_args;       /* Arguments for optional operation */
     herr_t                           ret_value = SUCCEED; /* Return value */
@@ -1928,7 +1928,7 @@ herr_t
 H5Fget_mdc_size(hid_t file_id, size_t *max_size /*out*/, size_t *min_clean_size /*out*/,
                 size_t *cur_size /*out*/, int *cur_num_entries /*out*/)
 {
-    H5VL_object_t *                  vol_obj;
+    H5VL_object_t                   *vol_obj;
     H5VL_optional_args_t             vol_cb_args;         /* Arguments to VOL callback */
     H5VL_native_file_optional_args_t file_opt_args;       /* Arguments for optional operation */
     uint32_t                         index_len = 0;       /* Size of cache index */
@@ -1980,7 +1980,7 @@ done:
 herr_t
 H5Freset_mdc_hit_rate_stats(hid_t file_id)
 {
-    H5VL_object_t *      vol_obj = NULL;
+    H5VL_object_t       *vol_obj = NULL;
     H5VL_optional_args_t vol_cb_args;         /* Arguments to VOL callback */
     herr_t               ret_value = SUCCEED; /* Return value */
 
@@ -2025,7 +2025,7 @@ done:
 ssize_t
 H5Fget_name(hid_t obj_id, char *name /*out*/, size_t size)
 {
-    H5VL_object_t *      vol_obj;     /* File for file_id */
+    H5VL_object_t       *vol_obj;     /* File for file_id */
     H5VL_file_get_args_t vol_cb_args; /* Arguments to VOL callback */
     H5I_type_t           type;
     size_t               file_name_len = 0;  /* Length of file name */
@@ -2078,7 +2078,7 @@ done:
 herr_t
 H5Fget_info2(hid_t obj_id, H5F_info2_t *finfo /*out*/)
 {
-    H5VL_object_t *                  vol_obj = NULL;
+    H5VL_object_t                   *vol_obj = NULL;
     H5VL_optional_args_t             vol_cb_args;   /* Arguments to VOL callback */
     H5VL_native_file_optional_args_t file_opt_args; /* Arguments for optional operation */
     H5I_type_t                       type;
@@ -2128,7 +2128,7 @@ done:
 herr_t
 H5Fget_metadata_read_retry_info(hid_t file_id, H5F_retry_info_t *info /*out*/)
 {
-    H5VL_object_t *                  vol_obj = NULL;      /* File object for file ID */
+    H5VL_object_t                   *vol_obj = NULL;      /* File object for file ID */
     H5VL_optional_args_t             vol_cb_args;         /* Arguments to VOL callback */
     H5VL_native_file_optional_args_t file_opt_args;       /* Arguments for optional operation */
     herr_t                           ret_value = SUCCEED; /* Return value */
@@ -2172,7 +2172,7 @@ done:
 ssize_t
 H5Fget_free_sections(hid_t file_id, H5F_mem_t type, size_t nsects, H5F_sect_info_t *sect_info /*out*/)
 {
-    H5VL_object_t *                  vol_obj = NULL;
+    H5VL_object_t                   *vol_obj = NULL;
     H5VL_optional_args_t             vol_cb_args;     /* Arguments to VOL callback */
     H5VL_native_file_optional_args_t file_opt_args;   /* Arguments for optional operation */
     size_t                           sect_count = 0;  /* Number of sections */
@@ -2220,7 +2220,7 @@ done:
 herr_t
 H5Fclear_elink_file_cache(hid_t file_id)
 {
-    H5VL_object_t *      vol_obj;             /* File */
+    H5VL_object_t       *vol_obj;             /* File */
     H5VL_optional_args_t vol_cb_args;         /* Arguments to VOL callback */
     herr_t               ret_value = SUCCEED; /* Return value */
 
@@ -2280,7 +2280,7 @@ done:
 herr_t
 H5Fstart_swmr_write(hid_t file_id)
 {
-    H5VL_object_t *      vol_obj = NULL;      /* File info */
+    H5VL_object_t       *vol_obj = NULL;      /* File info */
     H5VL_optional_args_t vol_cb_args;         /* Arguments to VOL callback */
     herr_t               ret_value = SUCCEED; /* Return value */
 
@@ -2320,7 +2320,7 @@ done:
 herr_t
 H5Fstart_mdc_logging(hid_t file_id)
 {
-    H5VL_object_t *      vol_obj;             /* File info */
+    H5VL_object_t       *vol_obj;             /* File info */
     H5VL_optional_args_t vol_cb_args;         /* Arguments to VOL callback */
     herr_t               ret_value = SUCCEED; /* Return value */
 
@@ -2357,7 +2357,7 @@ done:
 herr_t
 H5Fstop_mdc_logging(hid_t file_id)
 {
-    H5VL_object_t *      vol_obj;             /* File info */
+    H5VL_object_t       *vol_obj;             /* File info */
     H5VL_optional_args_t vol_cb_args;         /* Arguments to VOL callback */
     herr_t               ret_value = SUCCEED; /* Return value */
 
@@ -2394,7 +2394,7 @@ done:
 herr_t
 H5Fget_mdc_logging_status(hid_t file_id, hbool_t *is_enabled /*out*/, hbool_t *is_currently_logging /*out*/)
 {
-    H5VL_object_t *                  vol_obj;             /* File info */
+    H5VL_object_t                   *vol_obj;             /* File info */
     H5VL_optional_args_t             vol_cb_args;         /* Arguments to VOL callback */
     H5VL_native_file_optional_args_t file_opt_args;       /* Arguments for optional operation */
     herr_t                           ret_value = SUCCEED; /* Return value */
@@ -2435,7 +2435,7 @@ done:
 herr_t
 H5Fset_libver_bounds(hid_t file_id, H5F_libver_t low, H5F_libver_t high)
 {
-    H5VL_object_t *                  vol_obj;             /* File as VOL object           */
+    H5VL_object_t                   *vol_obj;             /* File as VOL object           */
     H5VL_optional_args_t             vol_cb_args;         /* Arguments to VOL callback */
     H5VL_native_file_optional_args_t file_opt_args;       /* Arguments for optional operation */
     herr_t                           ret_value = SUCCEED; /* Return value 				*/
@@ -2479,7 +2479,7 @@ done:
 herr_t
 H5Fformat_convert(hid_t file_id)
 {
-    H5VL_object_t *      vol_obj = NULL;      /* File */
+    H5VL_object_t       *vol_obj = NULL;      /* File */
     H5VL_optional_args_t vol_cb_args;         /* Arguments to VOL callback */
     herr_t               ret_value = SUCCEED; /* Return value */
 
@@ -2518,7 +2518,7 @@ done:
 herr_t
 H5Freset_page_buffering_stats(hid_t file_id)
 {
-    H5VL_object_t *      vol_obj;             /* File to reset stats on */
+    H5VL_object_t       *vol_obj;             /* File to reset stats on */
     H5VL_optional_args_t vol_cb_args;         /* Arguments to VOL callback */
     herr_t               ret_value = SUCCEED; /* Return value */
 
@@ -2555,7 +2555,7 @@ H5Fget_page_buffering_stats(hid_t file_id, unsigned accesses[2] /*out*/, unsigne
                             unsigned misses[2] /*out*/, unsigned evictions[2] /*out*/,
                             unsigned bypasses[2] /*out*/)
 {
-    H5VL_object_t *                  vol_obj;             /* File object */
+    H5VL_object_t                   *vol_obj;             /* File object */
     H5VL_optional_args_t             vol_cb_args;         /* Arguments to VOL callback */
     H5VL_native_file_optional_args_t file_opt_args;       /* Arguments for optional operation */
     herr_t                           ret_value = SUCCEED; /* Return value */
@@ -2602,7 +2602,7 @@ done:
 herr_t
 H5Fget_mdc_image_info(hid_t file_id, haddr_t *image_addr /*out*/, hsize_t *image_len /*out*/)
 {
-    H5VL_object_t *                  vol_obj;             /* File info */
+    H5VL_object_t                   *vol_obj;             /* File info */
     H5VL_optional_args_t             vol_cb_args;         /* Arguments to VOL callback */
     H5VL_native_file_optional_args_t file_opt_args;       /* Arguments for optional operation */
     herr_t                           ret_value = SUCCEED; /* Return value */
@@ -2683,7 +2683,7 @@ done:
 herr_t
 H5Fincrement_filesize(hid_t file_id, hsize_t increment)
 {
-    H5VL_object_t *                  vol_obj;             /* File info */
+    H5VL_object_t                   *vol_obj;             /* File info */
     H5VL_optional_args_t             vol_cb_args;         /* Arguments to VOL callback */
     H5VL_native_file_optional_args_t file_opt_args;       /* Arguments for optional operation */
     herr_t                           ret_value = SUCCEED; /* Return value */
@@ -2721,7 +2721,7 @@ done:
 herr_t
 H5Fget_dset_no_attrs_hint(hid_t file_id, hbool_t *minimize /*out*/)
 {
-    H5VL_object_t *                  vol_obj;             /* File info */
+    H5VL_object_t                   *vol_obj;             /* File info */
     H5VL_optional_args_t             vol_cb_args;         /* Arguments to VOL callback */
     H5VL_native_file_optional_args_t file_opt_args;       /* Arguments for optional operation */
     herr_t                           ret_value = SUCCEED; /* Return value */
@@ -2761,7 +2761,7 @@ done:
 herr_t
 H5Fset_dset_no_attrs_hint(hid_t file_id, hbool_t minimize)
 {
-    H5VL_object_t *                  vol_obj;             /* File info */
+    H5VL_object_t                   *vol_obj;             /* File info */
     H5VL_optional_args_t             vol_cb_args;         /* Arguments to VOL callback */
     H5VL_native_file_optional_args_t file_opt_args;       /* Arguments for optional operation */
     herr_t                           ret_value = SUCCEED; /* Return value */

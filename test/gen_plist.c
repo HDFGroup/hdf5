@@ -45,7 +45,7 @@ main(void)
     double                    w0     = 0.5;
     unsigned                  max_compact;
     unsigned                  min_dense;
-    const char *              c_to_f = "x+32";
+    const char               *c_to_f = "x+32";
     int                       little_endian;
     int                       word_length;
     H5AC_cache_config_t       my_cache_config       = {H5AC__CURR_CACHE_CONFIG_VERSION,
@@ -84,7 +84,7 @@ main(void)
     /* check endianness */
     {
         short int word = 0x0001;
-        char *    byte = (char *)&word;
+        char     *byte = (char *)&word;
 
         if (byte[0] == 1)
             /* little endian */
@@ -164,7 +164,7 @@ main(void)
     if ((ret = encode_plist(dxpl1, little_endian, word_length, "testfiles/plist_files/def_dxpl_")) < 0)
         assert(ret > 0);
 
-    if ((ret = H5Pset_btree_ratios(dxpl1, 0.2f, 0.6f, 0.2f)) < 0)
+    if ((ret = H5Pset_btree_ratios(dxpl1, 0.2, 0.6, 0.2)) < 0)
         assert(ret > 0);
     if ((ret = H5Pset_hyper_vector_size(dxpl1, 5)) < 0)
         assert(ret > 0);
@@ -336,7 +336,7 @@ main(void)
         assert(ret > 0);
     if ((ret = H5Pset_alignment(fapl1, 2, 1024)) < 0)
         assert(ret > 0);
-    if ((ret = H5Pset_cache(fapl1, 1024, 128, 10485760, 0.3f)) < 0)
+    if ((ret = H5Pset_cache(fapl1, 1024, 128, 10485760, 0.3)) < 0)
         assert(ret > 0);
     if ((ret = H5Pset_elink_file_cache_size(fapl1, 10485760)) < 0)
         assert(ret > 0);
@@ -445,7 +445,7 @@ encode_plist(hid_t plist_id, int little_endian, int word_length, const char *fil
 {
     int                           fd        = 0; /* file descriptor */
     herr_t                        ret       = 0;
-    void *                        temp_buf  = NULL;
+    void                         *temp_buf  = NULL;
     size_t                        temp_size = 0;
     ssize_t H5_ATTR_NDEBUG_UNUSED write_size;
     char                          filename[1024];

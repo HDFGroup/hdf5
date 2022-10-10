@@ -27,10 +27,12 @@ class H5_DLLCPP H5File : public Group {
     // Creates or opens an HDF5 file.
     H5File(const char *name, unsigned int flags,
            const FileCreatPropList &create_plist = FileCreatPropList::DEFAULT,
-           const FileAccPropList &  access_plist = FileAccPropList::DEFAULT);
+           const FileAccPropList   &access_plist = FileAccPropList::DEFAULT);
     H5File(const H5std_string &name, unsigned int flags,
            const FileCreatPropList &create_plist = FileCreatPropList::DEFAULT,
-           const FileAccPropList &  access_plist = FileAccPropList::DEFAULT);
+           const FileAccPropList   &access_plist = FileAccPropList::DEFAULT);
+    H5File(const char *name, unsigned int flags, const FileAccPropList &access_plist);
+    H5File(const H5std_string &name, unsigned int flags, const FileAccPropList &access_plist);
 
     // Open the file
     void openFile(const H5std_string &name, unsigned int flags,
@@ -77,9 +79,9 @@ class H5_DLLCPP H5File : public Group {
     static bool isHdf5(const H5std_string &name);
 
     // Determines if a file, specified by its name, can be accessed as HDF5
-    static bool isAccessible(const char *           name,
+    static bool isAccessible(const char            *name,
                              const FileAccPropList &access_plist = FileAccPropList::DEFAULT);
-    static bool isAccessible(const H5std_string &   name,
+    static bool isAccessible(const H5std_string    &name,
                              const FileAccPropList &access_plist = FileAccPropList::DEFAULT);
 
     // Reopens this file.

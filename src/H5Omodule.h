@@ -28,7 +28,12 @@
 #define H5_MY_PKG     H5O
 #define H5_MY_PKG_ERR H5E_OHDR
 
-/**\defgroup H5O H5O
+/** \page H5O_UG The HDF5 Objects
+ * @todo Under Construction
+ */
+
+/**
+ * \defgroup H5O Objects (H5O)
  *
  * Use the functions in this module to manage HDF5 objects.
  *

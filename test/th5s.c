@@ -125,7 +125,8 @@ test_h5s_basic(void)
     hsize_t  max2[] = {SPACE2_MAX1, SPACE2_MAX2, SPACE2_MAX3, SPACE2_MAX4};
     hsize_t  tdims[4]; /* Dimension array to test with */
     hsize_t  tmax[4];
-    hssize_t n;   /* Number of dataspace elements */
+    hssize_t n; /* Number of dataspace elements */
+    hbool_t  driver_is_default_compatible;
     herr_t   ret; /* Generic return value        */
 
     /* Output message about test being performed */
@@ -194,7 +195,10 @@ test_h5s_basic(void)
      * If this test fails and the H5S_MAX_RANK variable has changed, follow
      * the instructions in space_overflow.c for regenerating the th5s.h5 file.
      */
-    if (!h5_driver_uses_modified_filename()) {
+    ret = h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &driver_is_default_compatible);
+    CHECK_I(ret, "h5_driver_is_default_vfd_compatible");
+
+    if (driver_is_default_compatible) {
         const char *testfile = H5_get_srcdir_filename(TESTFILE); /* Corrected test file name */
 
         fid1 = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
@@ -1104,7 +1108,7 @@ test_h5s_zero_dim(void)
         dset1 = H5Dopen2(fid1, BASICDATASET1, H5P_DEFAULT);
         CHECK(dset1, FAIL, "H5Dopen2");
 
-        /* Get the space of the dataset and querry it */
+        /* Get the space of the dataset and query it */
         sid1 = H5Dget_space(dset1);
         CHECK(sid1, FAIL, "H5Dget_space");
 
@@ -1597,7 +1601,7 @@ static herr_t
 test_h5s_check_encoding(hid_t in_fapl, hid_t in_sid, uint32_t expected_version, uint8_t expected_enc_size,
                         hbool_t expected_to_fail)
 {
-    char *  buf = NULL; /* Pointer to the encoded buffer */
+    char   *buf = NULL; /* Pointer to the encoded buffer */
     size_t  buf_size;   /* Size of the encoded buffer */
     hid_t   d_sid = -1; /* The decoded dataspace ID */
     htri_t  check;
@@ -2496,9 +2500,9 @@ test_h5s_chunk(void)
     hsize_t  dims[2];
     hsize_t  csize[2];
     double **chunk_data_dbl      = NULL;
-    double * chunk_data_dbl_data = NULL;
-    float ** chunk_data_flt      = NULL;
-    float *  chunk_data_flt_data = NULL;
+    double  *chunk_data_dbl_data = NULL;
+    float  **chunk_data_flt      = NULL;
+    float   *chunk_data_flt_data = NULL;
     int      i, j;
 
     /* Allocate memory */
@@ -3259,6 +3263,57 @@ test_h5s_bug1(void)
     CHECK(ret, FAIL, "H5Sclose");
 } /* test_h5s_bug1() */
 
+/****************************************************************
+**
+**  test_h5s_bug2(): Test combining hyperslabs in a way that used
+**                   to trip up H5S__hyper_update_diminfo()
+**
+****************************************************************/
+static void
+test_h5s_bug2(void)
+{
+    hid_t    space;             /* Dataspace to copy extent to */
+    hsize_t  dims[2]  = {1, 5}; /* Dimensions */
+    hsize_t  start[2] = {0, 0}; /* Hyperslab start */
+    hsize_t  count[2] = {1, 1}; /* Hyperslab start */
+    htri_t   select_valid;      /* Whether the dataspace selection is valid */
+    hssize_t elements_selected; /* Number of elements selected */
+    herr_t   ret;               /* Generic error return */
+
+    /* Create dataspace */
+    space = H5Screate_simple(2, dims, NULL);
+    CHECK(space, FAIL, "H5Screate");
+
+    /* Select hyperslab in space containing first element */
+    ret = H5Sselect_hyperslab(space, H5S_SELECT_SET, start, NULL, count, NULL);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Add hyperslab in space containing last element */
+    start[1] = 4;
+    ret      = H5Sselect_hyperslab(space, H5S_SELECT_OR, start, NULL, count, NULL);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Add hyperslab in space containing the first 3 elements */
+    start[1] = 0;
+    count[1] = 3;
+    ret      = H5Sselect_hyperslab(space, H5S_SELECT_OR, start, NULL, count, NULL);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Check that space's selection is valid */
+    select_valid = H5Sselect_valid(space);
+    CHECK(select_valid, FAIL, "H5Sselect_valid");
+    VERIFY(select_valid, TRUE, "H5Sselect_valid result");
+
+    /* Check that 4 elements are selected */
+    elements_selected = H5Sget_select_npoints(space);
+    CHECK(elements_selected, FAIL, "H5Sselect_valid");
+    VERIFY(elements_selected, 4, "H5Sselect_valid result");
+
+    /* Close dataspaces */
+    ret = H5Sclose(space);
+    CHECK(ret, FAIL, "H5Sclose");
+} /* test_h5s_bug2() */
+
 /*-------------------------------------------------------------------------
  * Function:    test_versionbounds
  *
@@ -3287,7 +3342,7 @@ test_versionbounds(void)
     hid_t        dset_space = -1; /* Retrieved dataset's dataspace ID */
     hsize_t      dim[1];          /* Dataset dimensions */
     H5F_libver_t low, high;       /* File format bounds */
-    H5S_t *      spacep = NULL;   /* Pointer to internal dataspace */
+    H5S_t       *spacep = NULL;   /* Pointer to internal dataspace */
     herr_t       ret    = 0;      /* Generic return value */
 
     /* Output message about test being performed */
@@ -3431,6 +3486,7 @@ test_h5s(void)
     test_h5s_extent_equal(); /* Test extent comparison code */
     test_h5s_extent_copy();  /* Test extent copy code */
     test_h5s_bug1();         /* Test bug in offset initialization */
+    test_h5s_bug2();         /* Test bug found in H5S__hyper_update_diminfo() */
     test_versionbounds();    /* Test version bounds with dataspace */
 } /* test_h5s() */
 

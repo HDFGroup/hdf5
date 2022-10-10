@@ -60,7 +60,7 @@ static herr_t H5O__cache_get_initial_load_size(void *udata, size_t *image_len);
 static herr_t H5O__cache_get_final_load_size(const void *image_ptr, size_t image_len, void *udata,
                                              size_t *actual_len);
 static htri_t H5O__cache_verify_chksum(const void *image_ptr, size_t len, void *udata_ptr);
-static void * H5O__cache_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty);
+static void  *H5O__cache_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty);
 static herr_t H5O__cache_image_len(const void *thing, size_t *image_len);
 static herr_t H5O__cache_serialize(const H5F_t *f, void *image, size_t len, void *thing);
 static herr_t H5O__cache_notify(H5AC_notify_action_t action, void *_thing);
@@ -68,7 +68,7 @@ static herr_t H5O__cache_free_icr(void *thing);
 
 static herr_t H5O__cache_chk_get_initial_load_size(void *udata, size_t *image_len);
 static htri_t H5O__cache_chk_verify_chksum(const void *image_ptr, size_t len, void *udata_ptr);
-static void * H5O__cache_chk_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty);
+static void  *H5O__cache_chk_deserialize(const void *image, size_t len, void *udata, hbool_t *dirty);
 static herr_t H5O__cache_chk_image_len(const void *thing, size_t *image_len);
 static herr_t H5O__cache_chk_serialize(const H5F_t *f, void *image, size_t len, void *thing);
 static herr_t H5O__cache_chk_notify(H5AC_notify_action_t action, void *_thing);
@@ -229,7 +229,7 @@ done:
 static htri_t
 H5O__cache_verify_chksum(const void *_image, size_t len, void *_udata)
 {
-    const uint8_t * image     = (const uint8_t *)_image;  /* Pointer into raw data buffer */
+    const uint8_t  *image     = (const uint8_t *)_image;  /* Pointer into raw data buffer */
     H5O_cache_ud_t *udata     = (H5O_cache_ud_t *)_udata; /* User data for callback */
     htri_t          ret_value = TRUE;                     /* Return value */
 
@@ -289,9 +289,9 @@ H5O__cache_verify_chksum(const void *_image, size_t len, void *_udata)
 static void *
 H5O__cache_deserialize(const void *image, size_t len, void *_udata, hbool_t *dirty)
 {
-    H5O_t *         oh        = NULL;                     /* Object header read in */
+    H5O_t          *oh        = NULL;                     /* Object header read in */
     H5O_cache_ud_t *udata     = (H5O_cache_ud_t *)_udata; /* User data for callback */
-    void *          ret_value = NULL;                     /* Return value */
+    void           *ret_value = NULL;                     /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -403,7 +403,7 @@ H5O__cache_image_len(const void *_thing, size_t *image_len)
 static herr_t
 H5O__cache_serialize(const H5F_t *f, void *image, size_t len, void *_thing)
 {
-    H5O_t *  oh = (H5O_t *)_thing; /* Object header to encode */
+    H5O_t   *oh = (H5O_t *)_thing; /* Object header to encode */
     uint8_t *chunk_image;          /* Pointer to object header prefix buffer */
     herr_t   ret_value = SUCCEED;  /* Return value */
 
@@ -696,7 +696,7 @@ H5O__cache_chk_get_initial_load_size(void *_udata, size_t *image_len)
 static htri_t
 H5O__cache_chk_verify_chksum(const void *_image, size_t len, void *_udata)
 {
-    const uint8_t *     image     = (const uint8_t *)_image;      /* Pointer into raw data buffer */
+    const uint8_t      *image     = (const uint8_t *)_image;      /* Pointer into raw data buffer */
     H5O_chk_cache_ud_t *udata     = (H5O_chk_cache_ud_t *)_udata; /* User data for callback */
     htri_t              ret_value = TRUE;                         /* Return value */
 
@@ -738,9 +738,9 @@ H5O__cache_chk_verify_chksum(const void *_image, size_t len, void *_udata)
 static void *
 H5O__cache_chk_deserialize(const void *image, size_t len, void *_udata, hbool_t *dirty)
 {
-    H5O_chunk_proxy_t * chk_proxy = NULL;                         /* Chunk proxy object */
+    H5O_chunk_proxy_t  *chk_proxy = NULL;                         /* Chunk proxy object */
     H5O_chk_cache_ud_t *udata     = (H5O_chk_cache_ud_t *)_udata; /* User data for callback */
-    void *              ret_value = NULL;                         /* Return value */
+    void               *ret_value = NULL;                         /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1107,7 +1107,7 @@ static herr_t
 H5O__prefix_deserialize(const uint8_t *_image, H5O_cache_ud_t *udata)
 {
     const uint8_t *image     = (const uint8_t *)_image; /* Pointer into raw data buffer */
-    H5O_t *        oh        = NULL;                    /* Object header read in */
+    H5O_t         *oh        = NULL;                    /* Object header read in */
     herr_t         ret_value = SUCCEED;                 /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1279,7 +1279,7 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t chunk_size, const uint8_t
                        H5O_common_cache_ud_t *udata, hbool_t *dirty)
 {
     const uint8_t *chunk_image;          /* Pointer into buffer to decode */
-    uint8_t *      eom_ptr;              /* Pointer to end of messages for a chunk */
+    uint8_t       *eom_ptr;              /* Pointer to end of messages for a chunk */
     unsigned       merged_null_msgs = 0; /* Number of null messages merged together */
     unsigned       chunkno;              /* Current chunk's index */
 #ifndef NDEBUG
@@ -1430,11 +1430,13 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t chunk_size, const uint8_t
             oh->nmesgs++;
 
             /* Initialize information about message */
-            mesg->dirty    = FALSE;
-            mesg->flags    = flags;
-            mesg->crt_idx  = crt_idx;
-            mesg->native   = NULL;
-            mesg->raw      = (uint8_t *)chunk_image; /* Casting away const OK - QAK */
+            mesg->dirty   = FALSE;
+            mesg->flags   = flags;
+            mesg->crt_idx = crt_idx;
+            mesg->native  = NULL;
+            H5_GCC_CLANG_DIAG_OFF("cast-qual")
+            mesg->raw = (uint8_t *)chunk_image;
+            H5_GCC_CLANG_DIAG_ON("cast-qual")
             mesg->raw_size = mesg_size;
             mesg->chunkno  = chunkno;
 
@@ -1637,10 +1639,12 @@ H5O__chunk_serialize(const H5F_t *f, H5O_t *oh, unsigned chunkno)
 
     /* Encode any dirty messages in this chunk */
     for (u = 0, curr_msg = &oh->mesg[0]; u < oh->nmesgs; u++, curr_msg++)
-        if (curr_msg->dirty && curr_msg->chunkno == chunkno)
-            /* Casting away const OK -QAK */
+        if (curr_msg->dirty && curr_msg->chunkno == chunkno) {
+            H5_GCC_CLANG_DIAG_OFF("cast-qual")
             if (H5O_msg_flush((H5F_t *)f, oh, curr_msg) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "unable to encode object header message")
+            H5_GCC_CLANG_DIAG_ON("cast-qual")
+        }
 
     /* Sanity checks */
     if (oh->version > H5O_VERSION_1)

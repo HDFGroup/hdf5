@@ -44,14 +44,14 @@
 /* Callback info for readvv operation */
 typedef struct H5D_efl_readvv_ud_t {
     const H5O_efl_t *efl;  /* Pointer to efl info */
-    const H5D_t *    dset; /* The dataset */
-    unsigned char *  rbuf; /* Read buffer */
+    const H5D_t     *dset; /* The dataset */
+    unsigned char   *rbuf; /* Read buffer */
 } H5D_efl_readvv_ud_t;
 
 /* Callback info for writevv operation */
 typedef struct H5D_efl_writevv_ud_t {
-    const H5O_efl_t *    efl;  /* Pointer to efl info */
-    const H5D_t *        dset; /* The dataset */
+    const H5O_efl_t     *efl;  /* Pointer to efl info */
+    const H5D_t         *dset; /* The dataset */
     const unsigned char *wbuf; /* Write buffer */
 } H5D_efl_writevv_ud_t;
 
@@ -247,7 +247,7 @@ H5D__efl_read(const H5O_efl_t *efl, const H5D_t *dset, haddr_t addr, size_t size
     haddr_t cur;
     ssize_t n;
     size_t  u;                   /* Local index variable */
-    char *  full_name = NULL;    /* File name with prefix */
+    char   *full_name = NULL;    /* File name with prefix */
     herr_t  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -255,7 +255,7 @@ H5D__efl_read(const H5O_efl_t *efl, const H5D_t *dset, haddr_t addr, size_t size
     /* Check args */
     HDassert(efl && efl->nused > 0);
     HDassert(H5F_addr_defined(addr));
-    HDassert(size < SIZET_MAX);
+    HDassert(size < SIZE_MAX);
     HDassert(buf || 0 == size);
 
     /* Find the first efl member from which to read */
@@ -335,7 +335,7 @@ H5D__efl_write(const H5O_efl_t *efl, const H5D_t *dset, haddr_t addr, size_t siz
     haddr_t cur;
     hsize_t skip = 0;
     size_t  u;                   /* Local index variable */
-    char *  full_name = NULL;    /* File name with prefix */
+    char   *full_name = NULL;    /* File name with prefix */
     herr_t  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -343,7 +343,7 @@ H5D__efl_write(const H5O_efl_t *efl, const H5D_t *dset, haddr_t addr, size_t siz
     /* Check args */
     HDassert(efl && efl->nused > 0);
     HDassert(H5F_addr_defined(addr));
-    HDassert(size < SIZET_MAX);
+    HDassert(size < SIZE_MAX);
     HDassert(buf || 0 == size);
 
     /* Find the first efl member in which to write */

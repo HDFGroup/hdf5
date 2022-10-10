@@ -50,13 +50,13 @@ static herr_t reg_opt_datatype_get(void *obj, H5VL_datatype_get_args_t *args, hi
 #define REG_OPT_VOL_NAME  "reg_opt"
 #define REG_OPT_VOL_VALUE ((H5VL_class_value_t)502)
 static const H5VL_class_t reg_opt_vol_g = {
-    H5VL_VERSION,      /* VOL class struct version */
-    REG_OPT_VOL_VALUE, /* value        */
-    REG_OPT_VOL_NAME,  /* name         */
-    0,                 /* version      */
-    0,                 /* capability flags */
-    NULL,              /* initialize   */
-    NULL,              /* terminate    */
+    H5VL_VERSION,       /* VOL class struct version */
+    REG_OPT_VOL_VALUE,  /* value        */
+    REG_OPT_VOL_NAME,   /* name         */
+    0,                  /* version      */
+    H5VL_CAP_FLAG_NONE, /* capability flags */
+    NULL,               /* initialize   */
+    NULL,               /* terminate    */
     {
         /* info_cls */
         (size_t)0, /* size    */
@@ -178,13 +178,13 @@ static const H5VL_class_t reg_opt_vol_g = {
  * functionality.
  */
 static const H5VL_class_t fake_vol_g = {
-    H5VL_VERSION,   /* VOL class struct version */
-    FAKE_VOL_VALUE, /* value        */
-    FAKE_VOL_NAME,  /* name         */
-    0,              /* connector version */
-    0,              /* capability flags */
-    NULL,           /* initialize   */
-    NULL,           /* terminate    */
+    H5VL_VERSION,       /* VOL class struct version */
+    FAKE_VOL_VALUE,     /* value        */
+    FAKE_VOL_NAME,      /* name         */
+    0,                  /* connector version */
+    H5VL_CAP_FLAG_NONE, /* capability flags */
+    NULL,               /* initialize   */
+    NULL,               /* terminate    */
     {
         /* info_cls */
         (size_t)0, /* size    */
@@ -299,7 +299,7 @@ static const H5VL_class_t fake_vol_g = {
     NULL /* optional     */
 };
 
-static herr_t fake_async_get_cap_flags(const void *info, unsigned *cap_flags);
+static herr_t fake_async_get_cap_flags(const void *info, uint64_t *cap_flags);
 
 #define FAKE_ASYNC_VOL_NAME  "fake_async"
 #define FAKE_ASYNC_VOL_VALUE ((H5VL_class_value_t)503)
@@ -562,7 +562,7 @@ reg_opt_datatype_get(void H5_ATTR_UNUSED *obj, H5VL_datatype_get_args_t *args, h
  *-------------------------------------------------------------------------
  */
 static herr_t
-fake_async_get_cap_flags(const void H5_ATTR_UNUSED *info, unsigned *cap_flags)
+fake_async_get_cap_flags(const void H5_ATTR_UNUSED *info, uint64_t *cap_flags)
 {
     *cap_flags = fake_async_vol_g.cap_flags;
 
@@ -772,7 +772,7 @@ test_basic_file_operation(const char *env_h5_drvr)
     hid_t       obj_id_list[1];
     hsize_t     file_size;
     unsigned    intent;
-    void *      os_file_handle = NULL;
+    void       *os_file_handle = NULL;
     H5F_info2_t finfo;
     char        name[32];
 
@@ -948,7 +948,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_basic_group_operation(const char *env_h5_drvr)
+test_basic_group_operation(void)
 {
     hid_t      fid     = H5I_INVALID_HID;
     hid_t      fapl_id = H5I_INVALID_HID;
@@ -957,6 +957,7 @@ test_basic_group_operation(const char *env_h5_drvr)
     hid_t      gcpl_id = H5I_INVALID_HID;
     char       filename[1024];
     H5G_info_t info;
+    hbool_t    driver_is_parallel;
 
     TESTING("Basic VOL group operations");
 
@@ -991,8 +992,10 @@ test_basic_group_operation(const char *env_h5_drvr)
     if (H5Gget_info_by_idx(fid, "/", H5_INDEX_NAME, H5_ITER_NATIVE, 0, &info, H5P_DEFAULT) < 0)
         TEST_ERROR;
 
-    /* H5Gflush - skip for MPIO file driver as flush calls cause assertions in the library */
-    if (HDstrcmp(env_h5_drvr, "mpio") != 0)
+    /* H5Gflush - skip for parallel file drivers as flush calls cause assertions in the library */
+    if (h5_using_parallel_driver(fapl_id, &driver_is_parallel) < 0)
+        TEST_ERROR;
+    if (!driver_is_parallel)
         if (H5Gflush(gid) < 0)
             TEST_ERROR;
 
@@ -1052,7 +1055,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_basic_dataset_operation(const char *env_h5_drvr)
+test_basic_dataset_operation(void)
 {
     hid_t fid     = H5I_INVALID_HID;
     hid_t fapl_id = H5I_INVALID_HID;
@@ -1071,6 +1074,8 @@ test_basic_dataset_operation(const char *env_h5_drvr)
     hsize_t            storage_size;
     haddr_t            offset;
     H5D_space_status_t status;
+
+    hbool_t driver_is_parallel;
 
     int in_buf[N_ELEMENTS];
     int out_buf[N_ELEMENTS];
@@ -1117,8 +1122,10 @@ test_basic_dataset_operation(const char *env_h5_drvr)
     if (H5Dset_extent(did, &curr_dims) < 0)
         TEST_ERROR;
 
-    /* H5Dflush - skip for MPIO file driver as flush calls cause assertions in the library */
-    if (HDstrcmp(env_h5_drvr, "mpio") != 0)
+    /* H5Dflush - skip for parallel file drivers as flush calls cause assertions in the library */
+    if (h5_using_parallel_driver(fapl_id, &driver_is_parallel) < 0)
+        TEST_ERROR;
+    if (!driver_is_parallel)
         if (H5Dflush(did) < 0)
             TEST_ERROR;
 
@@ -1508,14 +1515,15 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_basic_datatype_operation(const char *env_h5_drvr)
+test_basic_datatype_operation(void)
 {
-    hid_t fid      = H5I_INVALID_HID;
-    hid_t fapl_id  = H5I_INVALID_HID;
-    hid_t tid      = H5I_INVALID_HID;
-    hid_t tid_anon = H5I_INVALID_HID;
-    hid_t tcpl_id  = H5I_INVALID_HID;
-    char  filename[1024];
+    hid_t   fid      = H5I_INVALID_HID;
+    hid_t   fapl_id  = H5I_INVALID_HID;
+    hid_t   tid      = H5I_INVALID_HID;
+    hid_t   tid_anon = H5I_INVALID_HID;
+    hid_t   tcpl_id  = H5I_INVALID_HID;
+    char    filename[1024];
+    hbool_t driver_is_parallel;
 
     TESTING("Basic VOL datatype operations");
 
@@ -1532,8 +1540,10 @@ test_basic_datatype_operation(const char *env_h5_drvr)
     if (H5Tcommit2(fid, NATIVE_VOL_TEST_DATATYPE_NAME, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
         TEST_ERROR;
 
-    /* H5Tflush - skip for MPIO file driver as flush calls cause assertions in the library */
-    if (HDstrcmp(env_h5_drvr, "mpio") != 0)
+    /* H5Tflush - skip for parallel file drivers as flush calls cause assertions in the library */
+    if (h5_using_parallel_driver(fapl_id, &driver_is_parallel) < 0)
+        TEST_ERROR;
+    if (!driver_is_parallel)
         if (H5Tflush(tid) < 0)
             TEST_ERROR;
 
@@ -1617,7 +1627,7 @@ exercise_reg_opt_oper(hid_t fake_vol_id, hid_t reg_opt_vol_id, H5VL_subclass_t s
 {
     char                 op_name[256]; /* Operation name to register */
     hid_t                obj_id = H5I_INVALID_HID;
-    H5VL_object_t *      vol_obj;
+    H5VL_object_t       *vol_obj;
     H5VL_optional_args_t vol_cb_args;
     int                  fake_obj, fake_arg;
     int                  op_val = -1, op_val2 = -1;
@@ -1821,7 +1831,7 @@ test_register_opt_operation(void)
     hid_t reg_opt_vol_id = H5I_INVALID_HID;
     struct {
         H5VL_subclass_t subcls;
-        const char *    subcls_name;
+        const char     *subcls_name;
         H5I_type_t      id_type;
         reg_opt_oper_t  reg_opt_op;
     } test_params[] = {{H5VL_SUBCLS_ATTR, "attr", H5I_ATTR, {.obj_op = H5VLattr_optional_op}},
@@ -1969,8 +1979,8 @@ test_async_vol_props(void)
     hid_t                    fapl_id = H5I_INVALID_HID;
     hid_t                    vol_id  = H5I_INVALID_HID;
     H5VL_pass_through_info_t passthru_info;
-    unsigned                 cap_flags    = 0;
-    char *                   conn_env_str = NULL;
+    uint64_t                 cap_flags    = H5VL_CAP_FLAG_NONE;
+    char                    *conn_env_str = NULL;
 
     TESTING("Async VOL props");
 
@@ -1992,7 +2002,7 @@ test_async_vol_props(void)
             TEST_ERROR;
         if (H5VL__reparse_def_vol_conn_variable_test() < 0)
             TEST_ERROR;
-    } /* end if */
+    }
 
     /* Test query w/default VOL, which should indicate no async, since native connector
      * doesn't support async.
@@ -2022,7 +2032,7 @@ test_async_vol_props(void)
     fapl_id = h5_fileaccess();
 
     /* Test query w/fake async VOL, which should succeed */
-    cap_flags = 0;
+    cap_flags = H5VL_CAP_FLAG_NONE;
     if (H5Pget_vol_cap_flags(fapl_id, &cap_flags) < 0)
         FAIL_STACK_ERROR;
     if ((cap_flags & H5VL_CAP_FLAG_ASYNC) == 0)
@@ -2048,7 +2058,7 @@ test_async_vol_props(void)
         FAIL_STACK_ERROR;
 
     /* Test query w/fake async VOL, which should succeed */
-    cap_flags = 0;
+    cap_flags = H5VL_CAP_FLAG_NONE;
     if (H5Pget_vol_cap_flags(fapl_id, &cap_flags) < 0)
         FAIL_STACK_ERROR;
     if ((cap_flags & H5VL_CAP_FLAG_ASYNC) == 0)
@@ -2063,7 +2073,7 @@ test_async_vol_props(void)
         FAIL_STACK_ERROR;
 
     /* Test query w/passthru -> fake async VOL, which should succeed */
-    cap_flags = 0;
+    cap_flags = H5VL_CAP_FLAG_NONE;
     if (H5Pget_vol_cap_flags(fapl_id, &cap_flags) < 0)
         FAIL_STACK_ERROR;
     if ((cap_flags & H5VL_CAP_FLAG_ASYNC) == 0)
@@ -2087,7 +2097,7 @@ test_async_vol_props(void)
 
         if (H5VL__reparse_def_vol_conn_variable_test() < 0)
             TEST_ERROR;
-    } /* end if */
+    }
 
     PASSED();
 
@@ -2133,12 +2143,12 @@ main(void)
     nerrors += test_register_opt_operation() < 0 ? 1 : 0;
     nerrors += test_native_vol_init() < 0 ? 1 : 0;
     nerrors += test_basic_file_operation(env_h5_drvr) < 0 ? 1 : 0;
-    nerrors += test_basic_group_operation(env_h5_drvr) < 0 ? 1 : 0;
-    nerrors += test_basic_dataset_operation(env_h5_drvr) < 0 ? 1 : 0;
+    nerrors += test_basic_group_operation() < 0 ? 1 : 0;
+    nerrors += test_basic_dataset_operation() < 0 ? 1 : 0;
     nerrors += test_basic_attribute_operation() < 0 ? 1 : 0;
     nerrors += test_basic_object_operation() < 0 ? 1 : 0;
     nerrors += test_basic_link_operation() < 0 ? 1 : 0;
-    nerrors += test_basic_datatype_operation(env_h5_drvr) < 0 ? 1 : 0;
+    nerrors += test_basic_datatype_operation() < 0 ? 1 : 0;
     nerrors += test_async_vol_props() < 0 ? 1 : 0;
 
     if (nerrors) {

@@ -27,7 +27,6 @@ const char *FILENAME[3] = {"bigio_test.h5", "single_rank_independent_io.h5", NUL
 #define DXFER_COLLECTIVE_IO  0x1 /* Collective IO*/
 #define DXFER_INDEPENDENT_IO 0x2 /* Independent IO collectively */
 #define DXFER_BIGCOUNT       (1 < 29)
-#define LARGE_DIM            1610612736
 
 #define HYPER 1
 #define POINT 2
@@ -467,7 +466,7 @@ dataset_big_write(void)
     hsize_t     start[RANK];               /* for hyperslab setting */
     hsize_t     count[RANK], stride[RANK]; /* for hyperslab setting */
     hsize_t     block[RANK];               /* for hyperslab setting */
-    hsize_t *   coords = NULL;
+    hsize_t    *coords = NULL;
     herr_t      ret;     /* Generic return value */
     hid_t       fid;     /* HDF5 file ID */
     hid_t       acc_tpl; /* File access templates */
@@ -776,7 +775,7 @@ dataset_big_read(void)
     hsize_t     count[RANK], stride[RANK]; /* for hyperslab setting */
     hsize_t     block[RANK];               /* for hyperslab setting */
     size_t      num_points;
-    hsize_t *   coords = NULL;
+    hsize_t    *coords = NULL;
     herr_t      ret; /* Generic return value */
 
     /* allocate memory for data buffer */
@@ -1107,14 +1106,13 @@ single_rank_independent_io(void)
         HDprintf("\nSingle Rank Independent I/O\n");
 
     if (MAIN_PROCESS) {
-        hsize_t  dims[]    = {LARGE_DIM};
+        hsize_t  dims[1];
         hid_t    file_id   = -1;
         hid_t    fapl_id   = -1;
         hid_t    dset_id   = -1;
         hid_t    fspace_id = -1;
-        hid_t    mspace_id = -1;
         herr_t   ret;
-        int *    data = NULL;
+        int     *data = NULL;
         uint64_t i;
 
         fapl_id = H5Pcreate(H5P_FILE_ACCESS);
@@ -1123,6 +1121,12 @@ single_rank_independent_io(void)
         H5Pset_fapl_mpio(fapl_id, MPI_COMM_SELF, MPI_INFO_NULL);
         file_id = H5Fcreate(FILENAME[1], H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
         VRFY_G((file_id >= 0), "H5Dcreate2 succeeded");
+
+        /*
+         * Calculate the number of elements needed to exceed
+         * MPI's INT_MAX limitation
+         */
+        dims[0] = (INT_MAX / sizeof(int)) + 10;
 
         fspace_id = H5Screate_simple(1, dims, NULL);
         VRFY_G((fspace_id >= 0), "H5Screate_simple fspace_id succeeded");
@@ -1135,47 +1139,35 @@ single_rank_independent_io(void)
 
         VRFY_G((dset_id >= 0), "H5Dcreate2 succeeded");
 
-        data = malloc(LARGE_DIM * sizeof(int));
+        data = malloc(dims[0] * sizeof(int));
 
         /* Initialize data */
-        for (i = 0; i < LARGE_DIM; i++)
+        for (i = 0; i < dims[0]; i++)
             data[i] = (int)(i % (uint64_t)DXFER_BIGCOUNT);
 
-        if (mpi_rank_g == 0)
-            H5Sselect_all(fspace_id);
-        else
-            H5Sselect_none(fspace_id);
-
-        dims[0]   = LARGE_DIM;
-        mspace_id = H5Screate_simple(1, dims, NULL);
-        VRFY_G((mspace_id >= 0), "H5Screate_simple mspace_id succeeded");
-
         /* Write data */
-        ret = H5Dwrite(dset_id, H5T_NATIVE_INT, mspace_id, fspace_id, H5P_DEFAULT, data);
+        ret = H5Dwrite(dset_id, H5T_NATIVE_INT, H5S_BLOCK, fspace_id, H5P_DEFAULT, data);
         VRFY_G((ret >= 0), "H5Dwrite succeeded");
 
         /* Wipe buffer */
-        HDmemset(data, 0, LARGE_DIM * sizeof(int));
+        HDmemset(data, 0, dims[0] * sizeof(int));
 
         /* Read data back */
-        ret = H5Dread(dset_id, H5T_NATIVE_INT, mspace_id, fspace_id, H5P_DEFAULT, data);
+        ret = H5Dread(dset_id, H5T_NATIVE_INT, H5S_BLOCK, fspace_id, H5P_DEFAULT, data);
         VRFY_G((ret >= 0), "H5Dread succeeded");
 
         /* Verify data */
-        for (i = 0; i < LARGE_DIM; i++)
+        for (i = 0; i < dims[0]; i++)
             if (data[i] != (int)(i % (uint64_t)DXFER_BIGCOUNT)) {
                 HDfprintf(stderr, "verify failed\n");
                 exit(1);
             }
 
         free(data);
-        H5Sclose(mspace_id);
         H5Sclose(fspace_id);
         H5Pclose(fapl_id);
         H5Dclose(dset_id);
         H5Fclose(file_id);
-
-        HDremove(FILENAME[1]);
     }
     MPI_Barrier(MPI_COMM_WORLD);
 }
@@ -1250,7 +1242,7 @@ create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type)
  */
 
 /* ------------------------------------------------------------------------
- *  Descriptions for the selection: One big singluar selection inside one chunk
+ *  Descriptions for the selection: One big singular selection inside one chunk
  *  Two dimensions,
  *
  *  dim1       = space_dim1(5760)*mpi_size
@@ -1418,8 +1410,8 @@ coll_chunktest(const char *filename, int chunk_factor, int select_factor, int ap
     hid_t acc_plist, xfer_plist, crp_plist;
 
     hsize_t dims[RANK], chunk_dims[RANK];
-    int *   data_array1  = NULL;
-    int *   data_origin1 = NULL;
+    int    *data_array1  = NULL;
+    int    *data_origin1 = NULL;
 
     hsize_t start[RANK], count[RANK], stride[RANK], block[RANK];
 
@@ -1898,13 +1890,32 @@ main(int argc, char **argv)
     MPI_Barrier(MPI_COMM_WORLD);
     coll_chunk3();
     MPI_Barrier(MPI_COMM_WORLD);
+
+    /*
+     * Reset big count for the next test, as it
+     * doesn't use the functionality in the same
+     * way as the previous tests.
+     */
+    H5_mpi_set_bigio_count(oldsize);
     single_rank_independent_io();
 
     /* turn off alarm */
     TestAlarmOff();
 
-    if (mpi_rank_g == 0)
-        HDremove(FILENAME[0]);
+    if (mpi_rank_g == 0) {
+        hid_t fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+
+        H5Pset_fapl_mpio(fapl_id, MPI_COMM_SELF, MPI_INFO_NULL);
+
+        H5E_BEGIN_TRY
+        {
+            H5Fdelete(FILENAME[0], fapl_id);
+            H5Fdelete(FILENAME[1], fapl_id);
+        }
+        H5E_END_TRY;
+
+        H5Pclose(fapl_id);
+    }
 
     /* close HDF5 library */
     H5close();

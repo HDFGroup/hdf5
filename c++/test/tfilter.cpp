@@ -27,8 +27,10 @@ using namespace H5;
 #include "h5test.h"
 #include "h5cpputil.h" // C++ utilility header file
 
-#define DSET_DIM1         100
-#define DSET_DIM2         200
+#ifdef H5_HAVE_FILTER_SZIP
+#define DSET_DIM1 100
+#define DSET_DIM2 200
+#endif
 #define FILTER_CHUNK_DIM1 2
 #define FILTER_CHUNK_DIM2 25
 
@@ -188,13 +190,15 @@ test_szip_filter(H5File &file1)
             hsize_t i, j, n;
             for (i = n = 0; i < size[0]; i++) {
                 for (j = 0; j < size[1]; j++) {
-                    points[i][j] = (int)n++;
+                    points[i][j] = static_cast<int>(n++);
                 }
             }
 
             // Write to the dataset then read back the values
-            dataset.write((void *)points, PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
-            dataset.read((void *)check, PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL, xfer);
+            dataset.write(static_cast<void *>(points), PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL,
+                          xfer);
+            dataset.read(static_cast<void *>(check), PredType::NATIVE_INT, DataSpace::ALL, DataSpace::ALL,
+                         xfer);
 
             // Check that the values read are the same as the values written
             for (i = 0; i < size[0]; i++)

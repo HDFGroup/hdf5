@@ -583,7 +583,7 @@ test_compound_1(void)
     H5T_str_t   strpad;
     H5T_order_t order;
     H5T_sign_t  sign;
-    char *      tag = NULL;
+    char       *tag = NULL;
     int         offset;
     herr_t      ret;
     int         retval = 1;
@@ -1161,8 +1161,8 @@ test_compound_5(void)
     src_type_t src[2] = {{"one", 102, {104, 105, 106, 107}}, {"two", 202, {204, 205, 206, 207}}};
 
     dst_type_t *dst;
-    void *      buf    = HDcalloc((size_t)2, sizeof(dst_type_t));
-    void *      bkg    = HDcalloc((size_t)2, sizeof(dst_type_t));
+    void       *buf    = HDcalloc((size_t)2, sizeof(dst_type_t));
+    void       *bkg    = HDcalloc((size_t)2, sizeof(dst_type_t));
     int         retval = 1;
 
     TESTING("optimized struct converter");
@@ -2042,7 +2042,7 @@ test_compound_10(void)
     hid_t       dset_id;
     hsize_t     arr_dim[1] = {ARRAY_DIM}; /* Array dimensions */
     hsize_t     dim1[1];
-    void *      t1, *t2;
+    void       *t1, *t2;
     char        filename[1024];
     size_t      len;
     int         i;
@@ -2244,7 +2244,7 @@ test_compound_11(void)
     typedef struct {
         double d1;
         int    i1;
-        char * s1;
+        char  *s1;
         int    i2;
         double d2;
         double d3;
@@ -2253,7 +2253,7 @@ test_compound_11(void)
     typedef struct {
         double d1;
         int    i1;
-        char * s1;
+        char  *s1;
     } little_t;
 
     hid_t   var_string_tid;             /* Datatype IDs for type conversion */
@@ -2262,9 +2262,9 @@ test_compound_11(void)
     hid_t   opaq_src_tid, opaq_dst_tid; /* Datatype IDs for type conversion */
     hid_t   space_id;                   /* Dataspace for buffer elements */
     hsize_t dim[1];                     /* Dimensions for dataspace */
-    void *  buf      = NULL;            /* Conversion buffer */
-    void *  buf_orig = NULL;            /* Copy of original conversion buffer */
-    void *  bkg      = NULL;            /* Background buffer */
+    void   *buf      = NULL;            /* Conversion buffer */
+    void   *buf_orig = NULL;            /* Copy of original conversion buffer */
+    void   *bkg      = NULL;            /* Background buffer */
     size_t  u;                          /* Local index variable */
     int     retval = 1;
 
@@ -2322,7 +2322,7 @@ test_compound_11(void)
         ((big_t *)buf)[u].s1 = (char *)HDmalloc((size_t)32);
         if (!((big_t *)buf)[u].s1)
             TEST_ERROR;
-        HDsprintf(((big_t *)buf)[u].s1, "%u", (unsigned)u);
+        HDsnprintf(((big_t *)buf)[u].s1, 32, "%u", (unsigned)u);
     } /* end for */
 
     /* Make copy of buffer before conversion */
@@ -3365,6 +3365,136 @@ error:
 } /* end test_compound_15() */
 
 /*-------------------------------------------------------------------------
+ * Function:    test_compound_15_attr
+ *
+ * Purpose:     Tests that conversion occurs correctly when the source is
+ *              subset of the destination, but there is extra space at the
+ *              end of the source type. This one tests on attribute while
+ *              test_compound_15() tests on dataset.  That's the only
+ *              difference.
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        number of errors
+ *
+ * Programmer:  Ray Lu
+ *              14 July 2022
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_compound_15_attr(void)
+{
+    typedef struct cmpd_struct {
+        int i1;
+        int i2;
+    } cmpd_struct;
+
+    cmpd_struct wdata1 = {1254, 5471};
+    cmpd_struct rdata;
+    int         wdata2[2]  = {1, 2};
+    hid_t       file       = H5I_INVALID_HID;
+    hid_t       cmpd_m_tid = H5I_INVALID_HID;
+    hid_t       cmpd_f_tid = H5I_INVALID_HID;
+    hid_t       space_id   = H5I_INVALID_HID;
+    hid_t       attr_id    = H5I_INVALID_HID;
+    hsize_t     dim1[1];
+    char        filename[1024];
+
+    TESTING("compound subset conversion with extra space in source for attribute");
+
+    /* Create File */
+    h5_fixname(FILENAME[3], H5P_DEFAULT, filename, sizeof(filename));
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        FAIL_PUTS_ERROR("Can't create file!\n");
+
+    /* Create file compound datatype */
+    if ((cmpd_f_tid = H5Tcreate(H5T_COMPOUND, sizeof(struct cmpd_struct))) < 0)
+        FAIL_PUTS_ERROR("Can't create datatype!\n");
+
+    if (H5Tinsert(cmpd_f_tid, "i1", HOFFSET(struct cmpd_struct, i1), H5T_NATIVE_INT) < 0)
+        FAIL_PUTS_ERROR("Can't insert field 'i1'\n");
+
+    if (H5Tinsert(cmpd_f_tid, "i2", HOFFSET(struct cmpd_struct, i2), H5T_NATIVE_INT) < 0)
+        FAIL_PUTS_ERROR("Can't insert field 'i2'\n");
+
+    /* Create memory compound datatype */
+    if ((cmpd_m_tid = H5Tcreate(H5T_COMPOUND, sizeof(struct cmpd_struct))) < 0)
+        FAIL_PUTS_ERROR("Can't create datatype!\n");
+
+    if (H5Tinsert(cmpd_m_tid, "i1", (size_t)0, H5T_NATIVE_INT) < 0)
+        FAIL_PUTS_ERROR("Can't insert field 'i1'\n");
+
+    /* Create space, dataset, write wdata1 */
+    dim1[0] = 1;
+    if ((space_id = H5Screate_simple(1, dim1, NULL)) < 0)
+        FAIL_PUTS_ERROR("Can't create space\n");
+
+    if ((attr_id = H5Acreate_by_name(file, ".", "attr_cmpd", cmpd_f_tid, space_id, H5P_DEFAULT, H5P_DEFAULT,
+                                     H5P_DEFAULT)) < 0)
+        FAIL_PUTS_ERROR("Can't create attribute\n");
+
+    if (H5Awrite(attr_id, cmpd_f_tid, &wdata1) < 0)
+        FAIL_PUTS_ERROR("Can't write data\n");
+
+    /* Write wdata2.  The use of cmpd_m_tid here should cause only the first
+     * element of wdata2 to be written. */
+    if (H5Awrite(attr_id, cmpd_m_tid, &wdata2) < 0)
+        FAIL_PUTS_ERROR("Can't write data\n");
+
+    /* Read data */
+    if (H5Aread(attr_id, cmpd_f_tid, &rdata) < 0)
+        FAIL_PUTS_ERROR("Can't read data\n");
+
+    /* Check for correctness of read data */
+    if (rdata.i1 != wdata2[0] || rdata.i2 != wdata1.i2)
+        FAIL_PUTS_ERROR("incorrect read data\n");
+
+    /* Now try reading only the i1 field, verify it does not overwrite i2 in the
+     * read buffer */
+    rdata.i1 = wdata1.i1;
+    rdata.i2 = wdata2[1];
+
+    /* Read data */
+    if (H5Aread(attr_id, cmpd_m_tid, &rdata) < 0)
+        FAIL_PUTS_ERROR("Can't read data\n");
+
+    /* Check for correctness of read data */
+    if (rdata.i1 != wdata2[0] || rdata.i2 != wdata2[1])
+        FAIL_PUTS_ERROR("incorrect read data\n");
+
+    /* Close */
+    if (H5Aclose(attr_id) < 0)
+        goto error;
+    if (H5Tclose(cmpd_f_tid) < 0)
+        goto error;
+    if (H5Tclose(cmpd_m_tid) < 0)
+        goto error;
+    if (H5Sclose(space_id) < 0)
+        goto error;
+    if (H5Fclose(file) < 0)
+        goto error;
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Aclose(attr_id);
+        H5Tclose(cmpd_f_tid);
+        H5Tclose(cmpd_m_tid);
+        H5Sclose(space_id);
+        H5Fclose(file);
+    }
+    H5E_END_TRY;
+
+    return 1;
+} /* end test_compound_15_attr() */
+
+/*-------------------------------------------------------------------------
  * Function:    test_compound_16
  *
  * Purpose:     Tests that committed types that can be registered during
@@ -3661,6 +3791,7 @@ test_compound_18(void)
     hsize_t     dim      = 1;
     const char *testfile = H5_get_srcdir_filename(TESTFILE); /* Corrected test file name */
     char        filename[1024];
+    hbool_t     driver_is_default_compatible;
     herr_t      ret;
 
     TESTING("accessing objects with compound datatypes that have no fields");
@@ -3725,7 +3856,10 @@ test_compound_18(void)
     if (H5Fclose(file) < 0)
         FAIL_STACK_ERROR;
 
-    if (!h5_driver_uses_modified_filename()) {
+    if (h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &driver_is_default_compatible) < 0)
+        FAIL_PUTS_ERROR("can't check if VFD is default VFD compatible");
+
+    if (driver_is_default_compatible) {
         /* Open Generated File */
         /* (generated with gen_bad_compound.c) */
         if ((file = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
@@ -4946,7 +5080,7 @@ error:
 static int
 test_conv_str_2(void)
 {
-    char *       buf    = NULL, s[80];
+    char        *buf    = NULL, s[80];
     hid_t        c_type = -1;
     hid_t        f_type = -1;
     const size_t nelmts = NTESTELEM;
@@ -5018,7 +5152,7 @@ error:
 static int
 test_conv_str_3(void)
 {
-    char *       buf    = NULL;
+    char        *buf    = NULL;
     hid_t        type   = -1;
     hid_t        super  = -1;
     const size_t nelmts = NTESTELEM;
@@ -5027,7 +5161,7 @@ test_conv_str_3(void)
     size_t       size;
     H5T_pad_t    inpad;
     H5T_sign_t   sign;
-    char *       tag = NULL;
+    char        *tag = NULL;
     herr_t       ret;
 
     TESTING("some type functions for string");
@@ -5237,7 +5371,7 @@ static int
 test_conv_enum_2(void)
 {
     hid_t       srctype = -1, dsttype = -1, oddsize = -1;
-    int *       data = NULL, i, nerrors = 0;
+    int        *data = NULL, i, nerrors = 0;
     const char *mname[] = {"RED", "GREEN", "BLUE", "YELLOW", "PINK", "PURPLE", "ORANGE", "WHITE"};
 
     TESTING("non-native enumeration type conversion");
@@ -5410,7 +5544,7 @@ test_bitfield_funcs(void)
 {
     hid_t      type = -1, ntype = -1, super = -1;
     size_t     size;
-    char *     tag = 0;
+    char      *tag = 0;
     H5T_pad_t  inpad;
     H5T_cset_t cset;
     H5T_str_t  strpad;
@@ -5694,7 +5828,7 @@ error:
 static int
 opaque_long(void)
 {
-    char * long_tag = NULL;
+    char  *long_tag = NULL;
     hid_t  dt       = -1;
     herr_t ret;
 
@@ -6689,7 +6823,7 @@ test_int_float_except(void)
                                (float)4.5F};
     int    buf_int[CONVERT_SIZE]   = {INT_MIN, INT_MAX, INT_MAX - 127, 4};
     float  buf_float[CONVERT_SIZE] = {(float)INT_MIN, (float)INT_MAX + 1.0F, (float)INT_MAX - 127.0F, 4};
-    int *  intp; /* Pointer to buffer, as integers */
+    int   *intp; /* Pointer to buffer, as integers */
     int    buf2[CONVERT_SIZE]       = {INT_MIN, INT_MAX, INT_MAX - 72, 0};
     float  buf2_float[CONVERT_SIZE] = {(float)INT_MIN, (float)INT_MAX, (float)INT_MAX - 127.0F, (float)0.0F};
     int    buf2_int[CONVERT_SIZE]   = {INT_MIN, INT_MAX, INT_MAX - 127, 0};
@@ -7251,8 +7385,8 @@ test_named_indirect_reopen(hid_t fapl)
     static hsize_t dims[1] = {3};
     size_t         dt_size;
     int            enum_value;
-    const char *   tag     = "opaque_tag";
-    char *         tag_ret = NULL;
+    const char    *tag     = "opaque_tag";
+    char          *tag_ret = NULL;
     char           filename[1024];
 
     TESTING("indirectly reopening committed datatypes");
@@ -8118,9 +8252,9 @@ test_utf_ascii_conv(void)
     hid_t       ascii_tid  = -1;
     hid_t       sid        = -1;
     const char *utf8_w     = "foo!";
-    char *      ascii_r    = NULL;
+    char       *ascii_r    = NULL;
     const char *ascii_w    = "bar!";
-    char *      utf8_r     = NULL;
+    char       *utf8_r     = NULL;
     char        filename[1024];
     char        ascii2[4], utf8_2[4];
     herr_t      status;
@@ -8376,7 +8510,7 @@ verify_version(hid_t dtype, H5F_libver_t low, unsigned *highest_version)
 {
     hid_t       base_dtype = -1;
     hid_t       mem_dtype  = -1;
-    H5T_t *     dtypep     = NULL;         /* Internal structure of a datatype */
+    H5T_t      *dtypep     = NULL;         /* Internal structure of a datatype */
     H5T_class_t type_cls   = H5T_NO_CLASS; /* Temporary var for datatype class */
     int         nmembers   = 0;
     unsigned    i;
@@ -8558,8 +8692,8 @@ test_versionbounds(void)
     hid_t        simple_cmp_type = -1;          /* Simple cmpd dtype, contains no other cmpd */
     hid_t        outer_arr_type  = -1;          /* Outermost array datatype */
     hid_t        inner_arr_type  = -1;          /* Inner array datatype */
-    H5F_t *      filep           = NULL;        /* Pointer to internal structure of a file */
-    H5T_t *      dtypep          = NULL;        /* Pointer to internal structure of a datatype */
+    H5F_t       *filep           = NULL;        /* Pointer to internal structure of a file */
+    H5T_t       *dtypep          = NULL;        /* Pointer to internal structure of a datatype */
     hsize_t      arr_dim[]       = {ARRAY_LEN}; /* Length of the array */
     int          low, high;                     /* Indices for iterating over versions */
     H5F_libver_t versions[]     = {H5F_LIBVER_EARLIEST, H5F_LIBVER_V18, H5F_LIBVER_V110, H5F_LIBVER_V112,
@@ -8782,14 +8916,20 @@ error:
 int
 main(void)
 {
-    long  nerrors = 0;
-    hid_t fapl    = H5I_INVALID_HID;
+    hbool_t driver_is_parallel;
+    long    nerrors = 0;
+    hid_t   fapl    = H5I_INVALID_HID;
 
     /* Set the random # seed */
     HDsrandom((unsigned)HDtime(NULL));
 
     reset_hdf5();
     fapl = h5_fileaccess();
+
+    if (h5_using_parallel_driver(fapl, &driver_is_parallel) < 0) {
+        HDprintf("Can't check if driver is parallel-enabled\n");
+        HDexit(EXIT_FAILURE);
+    }
 
     if (ALIGNMENT)
         HDprintf("Testing non-aligned conversions (ALIGNMENT=%d)....\n", ALIGNMENT);
@@ -8827,13 +8967,22 @@ main(void)
     nerrors += test_compound_6();
     nerrors += test_compound_7();
     nerrors += test_compound_8();
-    nerrors += test_compound_9();
-    nerrors += test_compound_10();
+
+    if (!driver_is_parallel) {
+        nerrors += test_compound_9();
+        nerrors += test_compound_10();
+    }
+
     nerrors += test_compound_11();
     nerrors += test_compound_12();
     nerrors += test_compound_13();
-    nerrors += test_compound_14();
+
+    if (!driver_is_parallel) {
+        nerrors += test_compound_14();
+    }
+
     nerrors += test_compound_15();
+    nerrors += test_compound_15_attr();
     nerrors += test_compound_16();
     nerrors += test_compound_17();
     nerrors += test_compound_18();
@@ -8843,7 +8992,11 @@ main(void)
     nerrors += test_bitfield_funcs();
     nerrors += test_opaque();
     nerrors += test_set_order();
-    nerrors += test_utf_ascii_conv();
+
+    if (!driver_is_parallel) {
+        nerrors += test_utf_ascii_conv();
+    }
+
     nerrors += test_versionbounds();
 
     if (nerrors) {

@@ -214,7 +214,7 @@ function(target_code_coverage TARGET_NAME)
     # Add code coverage instrumentation to the target's linker command
     if(CMAKE_C_COMPILER_ID MATCHES "[Cc]lang" OR CMAKE_CXX_COMPILER_ID MATCHES "[Cc]lang")
       target_compile_options(${TARGET_NAME} PRIVATE -fprofile-instr-generate
-                                                    -fcoverage-mapping)
+                                                    -fcoverage-mapping --coverage)
       set_property(
         TARGET ${TARGET_NAME}
         APPEND_STRING
@@ -225,7 +225,7 @@ function(target_code_coverage TARGET_NAME)
         PROPERTY LINK_FLAGS "-fcoverage-mapping ")
     elseif(CMAKE_C_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
       target_compile_options(${TARGET_NAME} PRIVATE -fprofile-arcs
-                                                    -ftest-coverage)
+                                                    -ftest-coverage --coverage)
       target_link_libraries(${TARGET_NAME} PRIVATE gcov)
     endif()
 
@@ -413,10 +413,10 @@ endfunction()
 # use `target_code_coverage`.
 function(add_code_coverage)
   if(CMAKE_C_COMPILER_ID MATCHES "[Cc]lang" OR CMAKE_CXX_COMPILER_ID MATCHES "[Cc]lang")
-    add_compile_options(-fprofile-instr-generate -fcoverage-mapping)
-    add_link_options(-fprofile-instr-generate -fcoverage-mapping)
+    add_compile_options(-fprofile-instr-generate -fcoverage-mapping --coverage)
+    add_link_options(-fprofile-instr-generate -fcoverage-mapping --coverage)
   elseif(CMAKE_C_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-    add_compile_options(-fprofile-arcs -ftest-coverage)
+    add_compile_options(-fprofile-arcs -ftest-coverage --coverage)
     link_libraries(gcov)
   endif()
 endfunction()

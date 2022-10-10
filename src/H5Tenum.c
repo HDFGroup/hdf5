@@ -25,7 +25,7 @@
 #include "H5Tpkg.h"      /*data-type functions			  */
 
 /* Static local functions */
-static char * H5T__enum_nameof(const H5T_t *dt, const void *value, char *name /*out*/, size_t size);
+static char  *H5T__enum_nameof(const H5T_t *dt, const void *value, char *name /*out*/, size_t size);
 static herr_t H5T__enum_valueof(const H5T_t *dt, const char *name, void *value /*out*/);
 
 /*-------------------------------------------------------------------------
@@ -193,7 +193,7 @@ H5T__enum_insert(const H5T_t *dt, const char *name, const void *value)
 
     /* Increase table sizes */
     if (dt->shared->u.enumer.nmembs >= dt->shared->u.enumer.nalloc) {
-        char **  names;
+        char   **names;
         uint8_t *values;
         unsigned n = MAX(32, 2 * dt->shared->u.enumer.nalloc);
 
@@ -357,11 +357,11 @@ done:
 static char *
 H5T__enum_nameof(const H5T_t *dt, const void *value, char *name /*out*/, size_t size)
 {
-    H5T_t *  copied_dt = NULL;   /* Do sorting in copied datatype */
+    H5T_t   *copied_dt = NULL;   /* Do sorting in copied datatype */
     unsigned lt, md = 0, rt;     /* Indices for binary search	*/
     int      cmp        = (-1);  /* Comparison result		*/
     hbool_t  alloc_name = FALSE; /* Whether name has been allocated */
-    char *   ret_value  = NULL;  /* Return value */
+    char    *ret_value  = NULL;  /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -490,7 +490,7 @@ H5T__enum_valueof(const H5T_t *dt, const char *name, void *value /*out*/)
 {
     unsigned lt, md = 0, rt;      /*indices for binary search	*/
     int      cmp       = (-1);    /*comparison result		*/
-    H5T_t *  copied_dt = NULL;    /*do sorting in copied datatype */
+    H5T_t   *copied_dt = NULL;    /*do sorting in copied datatype */
     herr_t   ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE

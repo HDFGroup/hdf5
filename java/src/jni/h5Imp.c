@@ -106,7 +106,7 @@ JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5get_1libversion(JNIEnv *env, jclass clss, jintArray libversion)
 {
     jboolean libversionArrayIsCopy;
-    int *    libversionArray = NULL;
+    int     *libversionArray = NULL;
     herr_t   status          = FAIL;
 
     UNUSED(clss);

@@ -41,7 +41,7 @@ const char *FILENAME[NFILENAME] = {"CacheTestDummy", NULL};
 #ifndef PATH_MAX
 #define PATH_MAX 512
 #endif /* !PATH_MAX */
-char *  filenames[NFILENAME];
+char   *filenames[NFILENAME];
 hid_t   fapl;                      /* file access property list */
 haddr_t max_addr = 0;              /* used to store the end of
                                     * the address space used by
@@ -248,7 +248,7 @@ int *data_index = NULL;
  * in which no acks are sent after writes.  Instead, the metadata cache is
  * provided with a callback function to call after each sequence of writes.
  * This callback simply causes the client to send the server process a
- * "sync" message and and await an ack in reply.
+ * "sync" message and await an ack in reply.
  *
  * Strangely, at least on Phoenix, the first solution runs faster by a
  * rather large margin.  However, I can imagine this changing with
@@ -2313,7 +2313,7 @@ datum_serialize(const H5F_t *f, void H5_ATTR_NDEBUG_UNUSED *image_ptr, size_t le
 {
     herr_t             ret_value = SUCCEED;
     int                idx;
-    struct datum *     entry_ptr;
+    struct datum      *entry_ptr;
     struct H5AC_aux_t *aux_ptr;
 
     HDassert(thing_ptr);
@@ -2383,7 +2383,7 @@ datum_notify(H5C_notify_action_t action, void *thing)
 {
     hbool_t            was_dirty = FALSE;
     herr_t             ret_value = SUCCEED;
-    struct datum *     entry_ptr;
+    struct datum      *entry_ptr;
     struct H5AC_aux_t *aux_ptr;
     struct mssg_t      mssg;
     int                idx;
@@ -3260,7 +3260,7 @@ lock_and_unlock_random_entry(H5F_t *file_ptr, int min_idx, int max_idx)
 static void
 lock_entry(H5F_t *file_ptr, int32_t idx)
 {
-    struct datum *     entry_ptr;
+    struct datum      *entry_ptr;
     H5C_cache_entry_t *cache_entry_ptr;
 
     if (nerrors == 0) {
@@ -3749,8 +3749,8 @@ setup_cache_for_test(hid_t *fid_ptr, H5F_t **file_ptr_ptr, H5C_t **cache_ptr_ptr
     hid_t               fid            = -1;
     H5AC_cache_config_t config;
     H5AC_cache_config_t test_config;
-    H5F_t *             file_ptr  = NULL;
-    H5C_t *             cache_ptr = NULL;
+    H5F_t              *file_ptr  = NULL;
+    H5C_t              *cache_ptr = NULL;
     haddr_t             actual_base_addr;
 
     HDassert(fid_ptr != NULL);
@@ -5119,8 +5119,8 @@ smoke_check_1(int metadata_write_strategy)
     int           i;
     int           max_nerrors;
     hid_t         fid       = -1;
-    H5F_t *       file_ptr  = NULL;
-    H5C_t *       cache_ptr = NULL;
+    H5F_t        *file_ptr  = NULL;
+    H5C_t        *cache_ptr = NULL;
     struct mssg_t mssg;
 
     switch (metadata_write_strategy) {
@@ -5283,8 +5283,8 @@ smoke_check_2(int metadata_write_strategy)
     int           i;
     int           max_nerrors;
     hid_t         fid       = -1;
-    H5F_t *       file_ptr  = NULL;
-    H5C_t *       cache_ptr = NULL;
+    H5F_t        *file_ptr  = NULL;
+    H5C_t        *cache_ptr = NULL;
     struct mssg_t mssg;
 
     switch (metadata_write_strategy) {
@@ -5488,8 +5488,8 @@ smoke_check_3(int metadata_write_strategy)
     int           min_idx;
     int           max_idx;
     hid_t         fid       = -1;
-    H5F_t *       file_ptr  = NULL;
-    H5C_t *       cache_ptr = NULL;
+    H5F_t        *file_ptr  = NULL;
+    H5C_t        *cache_ptr = NULL;
     struct mssg_t mssg;
 
     switch (metadata_write_strategy) {
@@ -5773,8 +5773,8 @@ smoke_check_4(int metadata_write_strategy)
     int           min_idx;
     int           max_idx;
     hid_t         fid       = -1;
-    H5F_t *       file_ptr  = NULL;
-    H5C_t *       cache_ptr = NULL;
+    H5F_t        *file_ptr  = NULL;
+    H5C_t        *cache_ptr = NULL;
     struct mssg_t mssg;
 
     switch (metadata_write_strategy) {
@@ -6048,8 +6048,8 @@ smoke_check_5(int metadata_write_strategy)
     int           i;
     int           max_nerrors;
     hid_t         fid       = -1;
-    H5F_t *       file_ptr  = NULL;
-    H5C_t *       cache_ptr = NULL;
+    H5F_t        *file_ptr  = NULL;
+    H5C_t        *cache_ptr = NULL;
     struct mssg_t mssg;
 
     switch (metadata_write_strategy) {
@@ -6262,7 +6262,7 @@ trace_file_check(int metadata_write_strategy)
     hbool_t success = TRUE;
 
     const char *((*expected_output)[])      = NULL;
-    const char *        expected_output_0[] = {"### HDF5 metadata cache trace file version 1 ###\n",
+    const char         *expected_output_0[] = {"### HDF5 metadata cache trace file version 1 ###\n",
                                        "H5AC_set_cache_auto_resize_config",
                                        "H5AC_insert_entry",
                                        "H5AC_insert_entry",
@@ -6288,7 +6288,7 @@ trace_file_check(int metadata_write_strategy)
                                        "H5AC_flush",
                                        "H5AC_flush",
                                        NULL};
-    const char *        expected_output_1[] = {"### HDF5 metadata cache trace file version 1 ###\n",
+    const char         *expected_output_1[] = {"### HDF5 metadata cache trace file version 1 ###\n",
                                        "H5AC_set_cache_auto_resize_config",
                                        "H5AC_insert_entry",
                                        "H5AC_insert_entry",
@@ -6322,9 +6322,9 @@ trace_file_check(int metadata_write_strategy)
     size_t              expected_line_len;
     size_t              actual_line_len;
     hid_t               fid            = -1;
-    H5F_t *             file_ptr       = NULL;
-    H5C_t *             cache_ptr      = NULL;
-    FILE *              trace_file_ptr = NULL;
+    H5F_t              *file_ptr       = NULL;
+    H5C_t              *cache_ptr      = NULL;
+    FILE               *trace_file_ptr = NULL;
     H5AC_cache_config_t config;
     struct mssg_t       mssg;
 
@@ -6640,8 +6640,8 @@ smoke_check_6(int metadata_write_strategy)
     int                     i;
     int                     max_nerrors;
     hid_t                   fid       = -1;
-    H5F_t *                 file_ptr  = NULL;
-    H5C_t *                 cache_ptr = NULL;
+    H5F_t                  *file_ptr  = NULL;
+    H5C_t                  *cache_ptr = NULL;
     struct mssg_t           mssg;
 
     switch (metadata_write_strategy) {

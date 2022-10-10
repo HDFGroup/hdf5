@@ -226,10 +226,10 @@ typedef herr_t (*H5D_gather_func_t)(const void *dst_buf, size_t dst_buf_bytes_us
 /**
  * \brief Callback for H5Dchunk_iter()
  *
- * \param[in]     offset      Array of starting logical coordinates of chunk.
- * \param[in]     filter_mask Filter mask of chunk.
- * \param[in]     addr        Offset in file of chunk data.
- * \param[in]     nbytes      Size in bytes of chunk data in file.
+ * \param[in]     offset      Logical position of the chunk’s first element in units of dataset elements
+ * \param[in]     filter_mask Bitmask indicating the filters used when the chunk was written
+ * \param[in]     addr        Chunk address in the file
+ * \param[in]     size        Chunk size in bytes, 0 if the chunk does not exist
  * \param[in,out] op_data     Pointer to any user-defined data associated with
  *                            the operation.
  * \returns \li Zero (#H5_ITER_CONT) causes the iterator to continue, returning
@@ -239,7 +239,7 @@ typedef herr_t (*H5D_gather_func_t)(const void *dst_buf, size_t dst_buf_bytes_us
  *          \li A negative (#H5_ITER_ERROR) causes the iterator to immediately
  *              return that value, indicating failure.
  */
-typedef int (*H5D_chunk_iter_op_t)(const hsize_t *offset, uint32_t filter_mask, haddr_t addr, uint32_t nbytes,
+typedef int (*H5D_chunk_iter_op_t)(const hsize_t *offset, uint32_t filter_mask, haddr_t addr, uint32_t size,
                                    void *op_data);
 //! <!-- [H5D_chunk_iter_op_t_snip] -->
 
@@ -369,7 +369,7 @@ H5_DLL hid_t H5Dcreate_anon(hid_t loc_id, hid_t type_id, hid_t space_id, hid_t d
  * --------------------------------------------------------------------------
  * \ingroup H5D
  *
- * \brief Creates a new dataset and links it into the file
+ * \brief Opens an existing dataset
  *
  * \fgdta_loc_id
  * \param[in] name      Name of the dataset to open
@@ -634,10 +634,10 @@ H5_DLL herr_t H5Dget_num_chunks(hid_t dset_id, hid_t fspace_id, hsize_t *nchunks
  * \brief Retrieves information about a chunk specified by its coordinates
  *
  * \dset_id
- * \param[in]  offset      Logical position of the chunk’s first element
- * \param[out] filter_mask Indicating filters used with the chunk when written
+ * \param[in]  offset      Logical position of the chunk’s first element in units of dataset elements
+ * \param[out] filter_mask Bitmask indicating the filters used when the chunk was written
  * \param[out] addr        Chunk address in the file
- * \param[out] size        Chunk size in bytes, 0 if chunk doesn’t exist
+ * \param[out] size        Chunk size in bytes, 0 if the chunk does not exist
  *
  * \return \herr_t
  *
@@ -666,13 +666,13 @@ H5_DLL herr_t H5Dget_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset, u
  * \brief Iterate over all chunks of a chunked dataset
  *
  * \dset_id
- * \param[in] dxpl_id       Identifier of a transfer property list
+ * \param[in]  dxpl_id  Identifier of a transfer property list
  * \param[in]  cb       User callback function, called for every chunk.
  * \param[in]  op_data  User-defined pointer to data required by op
  *
  * \return \herr_t
  *
- * \details H5Dget_chunk_iter iterates over all chunks in the dataset, calling the
+ * \details H5Dchunk_iter iterates over all chunks in the dataset, calling the
  *          user supplied callback with the details of the chunk and the supplied
  *          context \p op_data.
  *
@@ -696,10 +696,10 @@ H5_DLL herr_t H5Dchunk_iter(hid_t dset_id, hid_t dxpl_id, H5D_chunk_iter_op_t cb
  * \dset_id
  * \param[in]  fspace_id File dataspace selection identifier (See Note below)
  * \param[in]  chk_idx   Index of the chunk
- * \param[out] offset    Logical position of the chunk’s first element
- * \param[out] filter_mask Indicating filters used with the chunk when written
+ * \param[out] offset    Logical position of the chunk’s first element in units of dataset elements
+ * \param[out] filter_mask Bitmask indicating the filters used when the chunk was written
  * \param[out] addr      Chunk address in the file
- * \param[out] size      Chunk size in bytes, 0 if chunk doesn’t exist
+ * \param[out] size      Chunk size in bytes, 0 if the chunk does not exist
  *
  * \return \herr_t
  *

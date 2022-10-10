@@ -70,7 +70,7 @@ main(void)
     hsize_t start[RANK];  /* starting point for hyperslab             */
     hsize_t extent[RANK]; /* dataset extents                          */
 
-    int *   buffer   = NULL; /* data buffer                              */
+    int    *buffer   = NULL; /* data buffer                              */
     int     value    = -1;   /* value written to datasets                */
     hsize_t count    = 0;    /* number of elements in a plane            */
     int     n_planes = -1;   /* number of planes to write                */

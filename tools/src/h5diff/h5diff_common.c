@@ -25,7 +25,7 @@ static int check_d_input(const char *);
  * Command-line options: The user can specify short or long-named
  * parameters.
  */
-static const char *           s_opts   = "hVrv*qn:d:p:NcelxE:A:S*";
+static const char            *s_opts   = "hVrv*qn:d:p:NcelxE:A:S*";
 static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},
                                           {"version", no_arg, 'V'},
                                           {"report", no_arg, 'r'},
@@ -55,6 +55,28 @@ static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},
                                           {"vfd-name-2", require_arg, 'Y'},
                                           {"vfd-info-2", require_arg, 'Z'},
                                           {NULL, 0, '\0'}};
+
+static H5FD_onion_fapl_info_t onion_fa_g_1 = {
+    H5FD_ONION_FAPL_INFO_VERSION_CURR,
+    H5P_DEFAULT,                   /* backing_fapl_id                */
+    32,                            /* page_size                      */
+    H5FD_ONION_STORE_TARGET_ONION, /* store_target                   */
+    H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST,
+    0,                  /* force_write_open               */
+    0,                  /* creation_flags                 */
+    "first input file", /* comment                        */
+};
+
+static H5FD_onion_fapl_info_t onion_fa_g_2 = {
+    H5FD_ONION_FAPL_INFO_VERSION_CURR,
+    H5P_DEFAULT,                   /* backing_fapl_id                */
+    32,                            /* page_size                      */
+    H5FD_ONION_STORE_TARGET_ONION, /* store_target                   */
+    H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST,
+    0,                   /* force_write_open               */
+    0,                   /* creation_flags                 */
+    "second input file", /* comment                        */
+};
 
 /*-------------------------------------------------------------------------
  * Function: check_options
@@ -100,8 +122,8 @@ check_options(diff_opt_t *opts)
 static void
 parse_hsize_list(const char *h_list, subset_d *d)
 {
-    hsize_t *    p_list;
-    const char * ptr;
+    hsize_t     *p_list;
+    const char  *ptr;
     unsigned int size_count = 0;
     unsigned int i          = 0;
     unsigned int last_digit = 0;
@@ -160,7 +182,7 @@ static struct subset_t *
 parse_subset_params(const char *dset)
 {
     struct subset_t *s = NULL;
-    char *           brace;
+    char            *brace;
 
     H5TOOLS_START_DEBUG(" - dset:%s", dset);
     if ((brace = HDstrrchr(dset, '[')) != NULL) {
@@ -451,7 +473,7 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
             case '8':
                 opts->vfd_info[0].type   = VFD_BY_NAME;
                 opts->vfd_info[0].u.name = H5_optarg;
-                opts->custom_vol[0]      = TRUE;
+                opts->custom_vfd[0]      = TRUE;
                 break;
 
             case '9':
@@ -474,6 +496,40 @@ parse_command_line(int argc, const char *const *argv, const char **fname1, const
                 opts->vfd_info[1].info = (const void *)H5_optarg;
                 break;
         }
+    }
+
+    /* If file 1 uses the onion VFD, get the revision number */
+    if (opts->vfd_info[0].u.name && !HDstrcmp(opts->vfd_info[0].u.name, "onion")) {
+        if (opts->vfd_info[0].info) {
+            errno                     = 0;
+            onion_fa_g_1.revision_num = HDstrtoull(opts->vfd_info[0].info, NULL, 10);
+            if (errno == ERANGE) {
+                HDprintf("Invalid onion revision specified for file 1\n");
+                usage();
+                h5diff_exit(EXIT_FAILURE);
+            }
+        }
+        else
+            onion_fa_g_1.revision_num = 0;
+
+        opts->vfd_info[0].info = &onion_fa_g_1;
+    }
+
+    /* If file 2 uses the onion VFD, get the revision number */
+    if (opts->vfd_info[1].u.name && !HDstrcmp(opts->vfd_info[1].u.name, "onion")) {
+        if (opts->vfd_info[1].info) {
+            errno                     = 0;
+            onion_fa_g_2.revision_num = HDstrtoull(opts->vfd_info[1].info, NULL, 10);
+            if (errno == ERANGE) {
+                HDprintf("Invalid onion revision specified for file 2\n");
+                usage();
+                h5diff_exit(EXIT_FAILURE);
+            }
+        }
+        else
+            onion_fa_g_2.revision_num = 0;
+
+        opts->vfd_info[1].info = &onion_fa_g_2;
     }
 
     /* check options */
