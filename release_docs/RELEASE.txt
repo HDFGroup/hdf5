@@ -137,6 +137,19 @@ Bug Fixes since HDF5-1.13.2 release
 
       (NAF - 2022/08/22, GitHub #2016)
 
+    - Memory leak 
+    
+      A memory leak was observed with variable-length fill value in 
+      H5O_fill_convert() function in H5Ofill.c. The leak is
+      manifested by running valgrind on test/set_extent.c.
+
+      Previously, fill->buf is used for datatype conversion 
+      if it is large enough and the variable-length information 
+      is therefore lost.  A buffer is now allocated regardless 
+      so that the element in fill->buf can later be reclaimed.
+
+      (VC - 2022/10/10, HDFFV-10840)
+ 
 
     Java Library
     ------------
