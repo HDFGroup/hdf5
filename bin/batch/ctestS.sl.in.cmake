@@ -12,3 +12,4 @@ echo "Run command. Test output will be in build/ctestS.out"
 ctest -S ctest_serial.cmake >& ctestS.out
 
 echo "Done running command."
+touch ctestS.done

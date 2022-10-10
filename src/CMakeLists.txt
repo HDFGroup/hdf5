@@ -1056,12 +1056,14 @@ if (LOCAL_BATCH_TEST)
   if (LOCAL_BATCH_SCRIPT_NAME)
     configure_file (
         ${HDF5_SOURCE_DIR}/bin/batch/${LOCAL_BATCH_SCRIPT_NAME}.in.cmake
+        ${HDF5_SOURCE_DIR}/bin/batch/cmake_serial.in.cmake
         ${HDF5_BINARY_DIR}/${LOCAL_BATCH_SCRIPT_NAME} ESCAPE_QUOTES @ONLY
     )
   endif ()
   if (LOCAL_BATCH_SCRIPT_PARALLEL_NAME)
     configure_file (
         ${HDF5_SOURCE_DIR}/bin/batch/${LOCAL_BATCH_SCRIPT_PARALLEL_NAME}.in.cmake
+        ${HDF5_SOURCE_DIR}/bin/batch/cmake_parallel.in.cmake
         ${HDF5_BINARY_DIR}/${LOCAL_BATCH_SCRIPT_PARALLEL_NAME} ESCAPE_QUOTES @ONLY
     )
   endif ()
