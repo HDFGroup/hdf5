@@ -1049,7 +1049,7 @@ endif ()
 if (LOCAL_BATCH_TEST)
     configure_file (
       ${HDF5_SOURCE_DIR}/bin/batch/ctest_serial.cmake.in
-      ${HDF5_BINARyyY_DIR}/ctest_serial.cmake ESCAPE_QUOTES @ONLY
+      ${HDF5_BINARY_DIR}/ctest_serial.cmake ESCAPE_QUOTES @ONLY
     )
     configure_file (
       ${HDF5_SOURCE_DIR}/bin/batch/ctest_parallel.cmake.in
