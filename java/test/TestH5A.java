@@ -1415,7 +1415,7 @@ public class TestH5A {
                                            HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
                 assertTrue("testH5AVLwr: ", attr_int_id >= 0);
 
-                H5.H5AwriteVL(attr_int_id, atype_int_id, vl_int_data);
+                H5.H5Awrite(attr_int_id, atype_int_id, vl_int_data);
             }
             catch (Exception err) {
                 if (attr_int_id > 0)
@@ -1472,7 +1472,7 @@ public class TestH5A {
                                            HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
                 assertTrue("testH5AVLwr: ", attr_dbl_id >= 0);
 
-                H5.H5AwriteVL(attr_dbl_id, atype_dbl_id, vl_dbl_data);
+                H5.H5Awrite(attr_dbl_id, atype_dbl_id, vl_dbl_data);
             }
             catch (Exception err) {
                 if (attr_dbl_id > 0)
@@ -1511,7 +1511,7 @@ public class TestH5A {
                 vl_readbuf[j] = new ArrayList<Integer>();
 
             try {
-                H5.H5AreadVL(attr_int_id, atype_int_id, vl_readbuf);
+                H5.H5Aread(attr_int_id, atype_int_id, vl_readbuf);
             }
             catch (Exception ex) {
                 ex.printStackTrace();
@@ -1531,7 +1531,7 @@ public class TestH5A {
                 vl_readbuf[j] = new ArrayList<Double>();
 
             try {
-                H5.H5AreadVL(attr_dbl_id, atype_dbl_id, vl_readbuf);
+                H5.H5Aread(attr_dbl_id, atype_dbl_id, vl_readbuf);
             }
             catch (Exception ex) {
                 ex.printStackTrace();

@@ -1064,7 +1064,7 @@ public class TestH5D {
                                  HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
                 assertTrue("testH5DVLwr: ", dset_int_id >= 0);
 
-                H5.H5DwriteVL(dset_int_id, dtype_int_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                H5.H5Dwrite(dset_int_id, dtype_int_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
                               HDF5Constants.H5P_DEFAULT, vl_int_data);
             }
             catch (Exception err) {
@@ -1123,7 +1123,7 @@ public class TestH5D {
                                  HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
                 assertTrue("testH5DVLwr: ", dset_dbl_id >= 0);
 
-                H5.H5DwriteVL(dset_dbl_id, dtype_dbl_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                H5.H5Dwrite(dset_dbl_id, dtype_dbl_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
                               HDF5Constants.H5P_DEFAULT, vl_dbl_data);
             }
             catch (Exception err) {
@@ -1163,7 +1163,7 @@ public class TestH5D {
                 vl_readbuf[j] = new ArrayList<Integer>();
 
             try {
-                H5.H5DreadVL(dset_int_id, dtype_int_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                H5.H5Dread(dset_int_id, dtype_int_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
                              HDF5Constants.H5P_DEFAULT, vl_readbuf);
             }
             catch (Exception ex) {
@@ -1184,7 +1184,7 @@ public class TestH5D {
                 vl_readbuf[j] = new ArrayList<Double>();
 
             try {
-                H5.H5DreadVL(dset_dbl_id, dtype_dbl_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                H5.H5Dread(dset_dbl_id, dtype_dbl_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
                              HDF5Constants.H5P_DEFAULT, vl_readbuf);
             }
             catch (Exception ex) {

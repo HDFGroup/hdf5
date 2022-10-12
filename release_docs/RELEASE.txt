@@ -144,7 +144,14 @@ Bug Fixes since HDF5-1.13.2 release
 
     Java Library
     ------------
-    -
+    - Improve variable-length datatype handling in JNI.
+
+      The existing JNI read-write functions could handle variable-length datatypes
+      that were simple variable-length datatype with an atomic sub-datatype. More
+      complex combinations could not be handled. Reworked the JNI read-write functions
+      to recursively inspect datatypes for variable-length sub-datatypes.
+
+      (ADB - 2022/10/12, HDFFV-8701,10375)
 
 
     Configuration
