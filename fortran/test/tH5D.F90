@@ -649,6 +649,8 @@ CONTAINS
     INTEGER(KIND=int_kind_4) , TARGET :: data0_i4 = 4
     INTEGER(KIND=int_kind_8) , TARGET :: data0_i8 = 4
     INTEGER(KIND=int_kind_16), TARGET :: data0_i16 = 4
+    INTEGER, DIMENSION(1:DIM0) :: data_int
+    INTEGER, TARGET :: data0_int = 4
 #if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
     INTEGER, PARAMETER :: int_kind_32 = SELECTED_INT_KIND(36) !should map to INTEGER*16 on most modern processors
     INTEGER(KIND=int_kind_32), DIMENSION(1:DIM0), TARGET :: data_i32
@@ -678,6 +680,7 @@ CONTAINS
     data_i4  = -2
     data_i8  = -2
     data_i16 = -2
+    data_int = -2
 #if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
     data_i32 = -2
 #endif
@@ -699,21 +702,21 @@ CONTAINS
     ! TEST LEGACY H5Dfill_f APIs
     !*********************************************************
 
-    CALL h5dfill_f(data0_i8, space_id, data_i8, error)
+    CALL h5dfill_f(data0_int, space_id, data_int, error)
     CALL check("h5dfill_f", error, total_error)
 
     DO i = 1, DIM0
        IF(i.LE. DIM0/2)THEN
-          CALL VERIFY("h5dfill_f", data0_i8, data_i8(i), total_error)
+          CALL VERIFY("h5dfill_f", data0_int, data_int(i), total_error)
           IF(total_error.NE.0)THEN
-             WRITE(*,'(A)')    "    Incorrect h5dfill value (I4)."
+             WRITE(*,'(A)')    "    Incorrect h5dfill value (INT)."
              WRITE(*,'(A,I0)') "    At index ",i
              RETURN
           ENDIF
        ELSE
-          CALL VERIFY("h5dfill_f", -2_int_kind_8, data_i8(i), total_error)
+          CALL VERIFY("h5dfill_f", -2, data_int(i), total_error)
           IF(total_error.NE.0)THEN
-             WRITE(*,'(A)')    "    Incorrect h5dfill value (I4)."
+             WRITE(*,'(A)')    "    Incorrect h5dfill value (INT)."
              WRITE(*,'(A,I0)') "    At index ",i
              RETURN
           ENDIF
