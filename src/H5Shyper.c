@@ -117,7 +117,7 @@ static H5S_hyper_span_info_t *H5S__hyper_copy_span_helper(H5S_hyper_span_info_t 
 static H5S_hyper_span_info_t *H5S__hyper_copy_span(H5S_hyper_span_info_t *spans, unsigned rank);
 static hbool_t                H5S__hyper_cmp_spans(const H5S_hyper_span_info_t *span_info1,
                                                    const H5S_hyper_span_info_t *span_info2);
-static void                   H5S__hyper_free_span_info(H5S_hyper_span_info_t *span_info);
+static herr_t                 H5S__hyper_free_span_info(H5S_hyper_span_info_t *span_info);
 static void                   H5S__hyper_free_span(H5S_hyper_span_t *span);
 static herr_t H5S__hyper_span_blocklist(const H5S_hyper_span_info_t *spans, hsize_t start[], hsize_t end[],
                                         hsize_t rank, hsize_t *startblock, hsize_t *numblocks, hsize_t **buf);
@@ -3098,7 +3098,7 @@ done:
     void H5S__hyper_free_span_info(span_info)
         H5S_hyper_span_info_t *span_info;      IN: Span info node to free
  RETURNS
-    None
+    SUCCEED/FAIL
  DESCRIPTION
     Free a hyperslab span info node, along with all the span nodes and the
     'down spans' from the nodes, if reducing their reference count to zero
@@ -3108,13 +3108,16 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static void
+static herr_t
 H5S__hyper_free_span_info(H5S_hyper_span_info_t *span_info)
 {
-    FUNC_ENTER_PACKAGE_NOERR
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-    HDassert(span_info);
+    if (!span_info)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "span_info pointer was NULL")
 
     /* Decrement the span tree's reference count */
     span_info->count--;
@@ -3140,9 +3143,10 @@ H5S__hyper_free_span_info(H5S_hyper_span_info_t *span_info)
 
         /* Free this span info */
         span_info = (H5S_hyper_span_info_t *)H5FL_ARR_FREE(hbounds_t, span_info);
-    } /* end if */
+    }
 
-    FUNC_LEAVE_NOAPI_VOID
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_free_span_info() */
 
 /*--------------------------------------------------------------------------
