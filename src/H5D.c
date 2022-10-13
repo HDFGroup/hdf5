@@ -1140,7 +1140,7 @@ H5Dread_multi(size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t mem_spac
     FUNC_ENTER_API(FAIL)
     H5TRACE7("e", "z*i*i*i*iix", count, dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf);
 
-    if (count <= 0)
+    if (count == 0)
         HGOTO_DONE(SUCCEED)
 
     /* Read the data */
@@ -1462,7 +1462,7 @@ H5Dwrite_multi(size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t mem_spa
     FUNC_ENTER_API(FAIL)
     H5TRACE7("e", "z*i*i*i*ii**x", count, dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf);
 
-    if (count <= 0)
+    if (count == 0)
         HGOTO_DONE(SUCCEED)
 
     /* Write the data */

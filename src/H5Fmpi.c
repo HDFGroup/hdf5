@@ -82,9 +82,6 @@
  * Programmer:  Quincey Koziol
  *              Friday, January 30, 2004
  *
- * Programmer:  Jonathan Kim
- *              June 5, 2013
- *
  * Modifications:
  *-------------------------------------------------------------------------
  */
