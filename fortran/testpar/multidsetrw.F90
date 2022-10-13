@@ -57,6 +57,7 @@ SUBROUTINE pmultiple_dset_hyper_rw(do_collective, do_chunk, mpi_size, mpi_rank, 
   INTEGER(HID_T), DIMENSION(1:ndsets) :: file_space_id
   TYPE(C_PTR), DIMENSION(1:ndsets) :: buf_md
   INTEGER(SIZE_T) :: obj_count
+  INTEGER :: data_xfer_mode
 
   dimsf(1) = 5_hsize_t
   dimsf(2) = INT(mpi_size, hsize_t)*8_hsize_t
@@ -97,7 +98,7 @@ SUBROUTINE pmultiple_dset_hyper_rw(do_collective, do_chunk, mpi_size, mpi_rank, 
 
   CALL h5pcreate_f(H5P_DATASET_CREATE_F, dcpl_id, error)
   CALL check("h5pcreate_f", error, nerrors)
-  
+
   IF (do_chunk) THEN
      cdims(1) = dimsf(1)
      cdims(2) = dimsf(2)/mpi_size/2
@@ -151,19 +152,38 @@ SUBROUTINE pmultiple_dset_hyper_rw(do_collective, do_chunk, mpi_size, mpi_rank, 
      CALL h5dcreate_f(file_id, dsetname, H5T_NATIVE_INTEGER, filespace, dset_id(ii), error, dcpl_id)
      CALL check("h5dcreate_f", error, nerrors)
   ENDDO
+
   !
   ! Write the dataset collectively. 
   !  
-  CALL h5dwrite_multi_f(ndsets, dset_id, mem_type_id, mem_space_id, file_space_id, buf_md, error)
+  CALL h5dwrite_multi_f(ndsets, dset_id, mem_type_id, mem_space_id, file_space_id, buf_md, error, plist_id)
   CALL check("h5dwrite_multi_f", error, nerrors)
+
+  CALL h5pget_dxpl_mpio_f(plist_id, data_xfer_mode, error)
+  CALL check("h5pget_dxpl_mpio_f", error, nerrors)
+
+  IF(do_collective)THEN
+     IF(data_xfer_mode.NE.H5FD_MPIO_COLLECTIVE_F)THEN
+        nerrors = nerrors + 1
+     ENDIF
+  ENDIF
 
   DO i = 1, ndsets
      ! Point to the read buffer
      buf_md(i) = C_LOC(rdata(1,1,i))
   ENDDO
 
-  CALL H5Dread_multi_f(ndsets, dset_id, mem_type_id, mem_space_id, file_space_id, buf_md, error)
+  CALL H5Dread_multi_f(ndsets, dset_id, mem_type_id, mem_space_id, file_space_id, buf_md, error, plist_id)
   CALL check("h5dread_multi_f", error, nerrors)
+
+  CALL h5pget_dxpl_mpio_f(plist_id, data_xfer_mode, error)
+  CALL check("h5pget_dxpl_mpio_f", error, nerrors)
+
+  IF(do_collective)THEN
+     IF(data_xfer_mode.NE.H5FD_MPIO_COLLECTIVE_F)THEN
+        nerrors = nerrors + 1
+     ENDIF
+  ENDIF
 
   DO i = 1, ndsets
      ! Close all the datasets
