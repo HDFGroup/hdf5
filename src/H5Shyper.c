@@ -7657,7 +7657,7 @@ H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
 
                             /* Release the down span tree generated */
                             if (H5S__hyper_free_span_info(down_a_and_b) < 0)
-                                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info")
+                                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info")
                         }
 
                         /* Check for additions to the b_not_a list */
