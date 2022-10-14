@@ -269,7 +269,7 @@ jobs:
                 cmake: "Debug"
                 autotools: "debug"
 
-          - name: "Ubuntu gcc Autotools -Werror (build only)"
+          - name: "Ubuntu gcc Autotools -Werror (build only) DBG"
             os: ubuntu-latest
             cpp: enable
             fortran: disable
@@ -291,7 +291,7 @@ jobs:
                 cmake: "Debug"
                 autotools: "debug"
 
-          - name: "Ubuntu gcc Autotools -Werror (build only)"
+          - name: "Ubuntu gcc Autotools -Werror (build only) REL"
             os: ubuntu-latest
             cpp: enable
             fortran: disable
