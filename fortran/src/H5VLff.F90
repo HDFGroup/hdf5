@@ -49,7 +49,7 @@ CONTAINS
 ! H5VLregister_connector
 
 !>
-!! \ingroup FH5V
+!! \ingroup FH5VL
 !!
 !! \brief Registers a new VOL connector as a member of the virtual object layer class by name.
 !!
@@ -90,7 +90,7 @@ CONTAINS
 
   END SUBROUTINE H5VLregister_connector_by_name_f
 !>
-!! \ingroup FH5V
+!! \ingroup FH5VL
 !!
 !! \brief Registers a new VOL connector by value.
 !!
@@ -130,7 +130,7 @@ CONTAINS
   END SUBROUTINE H5VLregister_connector_by_value_f
 
 !>
-!! \ingroup FH5V
+!! \ingroup FH5VL
 !!
 !! \brief Determines whether a VOL class has been registered or not ccording to a specified connector name.
 !!
@@ -167,7 +167,7 @@ CONTAINS
   END SUBROUTINE H5VLis_connector_registered_by_name_f
 
 !>
-!! \ingroup FH5V
+!! \ingroup FH5VL
 !!
 !! \brief Determines whether a VOL class has been registered or not according to a specified connector value (ID).
 !!
@@ -201,7 +201,7 @@ CONTAINS
   END SUBROUTINE H5VLis_connector_registered_by_value_f
 
 !>
-!! \ingroup FH5V
+!! \ingroup FH5VL
 !!
 !! \brief Retrieves the ID for a registered VOL connector.
 !!
@@ -234,7 +234,7 @@ CONTAINS
   END SUBROUTINE H5VLget_connector_id_f
 
 !>
-!! \ingroup FH5V
+!! \ingroup FH5VL
 !!
 !! \brief Retrieves the ID for a registered VOL connector.
 !!
@@ -271,7 +271,7 @@ CONTAINS
   END SUBROUTINE H5VLget_connector_id_by_name_f
 
 !>
-!! \ingroup FH5V
+!! \ingroup FH5VL
 !!
 !! \brief Retrieves the ID for a registered VOL connector.
 !!
@@ -304,7 +304,7 @@ CONTAINS
 
   END SUBROUTINE H5VLget_connector_id_by_value_f
 !>
-!! \ingroup FH5V
+!! \ingroup FH5VL
 !!
 !! \brief Retrieves a connector name for a VOL.
 !!
@@ -351,7 +351,7 @@ CONTAINS
   END SUBROUTINE H5VLget_connector_name_f
 
 !>
-!! \ingroup FH5V
+!! \ingroup FH5VL
 !!
 !! \brief Closes a VOL connector ID.
 !!
@@ -377,7 +377,7 @@ CONTAINS
   END SUBROUTINE H5VLclose_f
 
 !>
-!! \ingroup FH5V
+!! \ingroup FH5VL
 !!
 !! \brief Removes a VOL connector ID from the library.
 !!

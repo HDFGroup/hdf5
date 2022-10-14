@@ -17,6 +17,9 @@
 ! Define if we have parallel support
 #undef HAVE_PARALLEL
 
+! Define if we have subfiling support
+#undef HAVE_SUBFILING_VFD
+
 ! Define if the intrinsic function STORAGE_SIZE exists
 #undef FORTRAN_HAVE_STORAGE_SIZE
 

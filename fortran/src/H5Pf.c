@@ -5473,6 +5473,87 @@ h5pget_fapl_mpio_c(hid_t_f *prp_id, int_f *comm, int_f *info)
     ret_value = 0;
     return ret_value;
 }
+
+/****if* H5Pf/h5pset_mpi_params_c
+ * NAME
+ *  h5pset_mpi_params_c
+ * PURPOSE
+ *  Set the MPI communicator and info.
+ * INPUTS
+ *  prp_id - property list identifier
+ *  comm   - MPI communicator
+ *  info   - MPI info object
+ * RETURNS
+ *  0 on success, -1 on failure
+ * AUTHOR
+ *  M.S. Breitenfeld
+ *  October 2022
+ *
+ * SOURCE
+ */
+int_f
+h5pset_mpi_params_c(hid_t_f *prp_id, int_f *comm, int_f *info)
+/******/
+{
+    int      ret_value = -1;
+    hid_t    c_prp_id;
+    herr_t   ret;
+    MPI_Comm c_comm;
+    MPI_Info c_info;
+    c_comm = MPI_Comm_f2c(*comm);
+    c_info = MPI_Info_f2c(*info);
+
+    /*
+     * Call H5Pset_mpi_params.
+     */
+    c_prp_id = *prp_id;
+    ret      = H5Pset_mpi_params(c_prp_id, c_comm, c_info);
+    if (ret < 0)
+        return ret_value;
+    ret_value = 0;
+    return ret_value;
+}
+
+/****if* H5Pf/h5pget_mpi_params_c
+ * NAME
+ *  h5pget_mpi_params_c
+ * PURPOSE
+ *  Get the MPI communicator and info.
+ * INPUTS
+ *  prp_id - property list identifier
+ *  comm   - MPI communicator
+ *  info   - MPI info object
+ * RETURNS
+ *  0 on success, -1 on failure
+ * AUTHOR
+ *  M.S. Breitenfeld
+ *  October 2022
+ *
+ * SOURCE
+ */
+int_f
+h5pget_mpi_params_c(hid_t_f *prp_id, int_f *comm, int_f *info)
+/******/
+{
+    int      ret_value = -1;
+    hid_t    c_prp_id;
+    herr_t   ret;
+    MPI_Comm c_comm;
+    MPI_Info c_info;
+
+    /*
+     * Call H5Pget_mpi_params function.
+     */
+    c_prp_id = *prp_id;
+    ret      = H5Pget_mpi_params(c_prp_id, &c_comm, &c_info);
+    if (ret < 0)
+        return ret_value;
+    *comm     = (int_f)MPI_Comm_c2f(c_comm);
+    *info     = (int_f)MPI_Info_c2f(c_info);
+    ret_value = 0;
+    return ret_value;
+}
+
 /****if* H5Pf/h5pset_dxpl_mpio_c
  * NAME
  *  h5pset_dxpl_mpio_c

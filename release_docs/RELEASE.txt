@@ -70,8 +70,12 @@ New Features
 
     Fortran Library:
     ----------------
-    -
+    - Added pointer based H5Dfill_f API
 
+      Added Fortran H5Dfill_f, which is fully equivalent to the C API. It accepts pointers,
+      fill value datatype and datatype of dataspace elements.
+
+      (MSB - 2022/10/10, HDFFV-10734.)
 
     C++ Library:
     ------------
@@ -161,7 +165,6 @@ Bug Fixes since HDF5-1.13.2 release
     Fortran API
     -----------
     -
-
 
     High-Level Library
     ------------------

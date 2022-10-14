@@ -93,7 +93,7 @@ MODULE H5D
   PRIVATE h5dwrite_vl_integer, h5dwrite_vl_real, h5dwrite_vl_string
   PRIVATE h5dwrite_reference_obj, h5dwrite_reference_dsetreg, h5dwrite_char_scalar, h5dwrite_ptr
   PRIVATE h5dread_reference_obj, h5dread_reference_dsetreg, h5dread_char_scalar, h5dread_ptr
-  PRIVATE h5dfill_integer, h5dfill_c_float, h5dfill_c_double, h5dfill_char
+  PRIVATE h5dfill_integer, h5dfill_c_float, h5dfill_c_double, h5dfill_char, h5dfill_ptr
 #if H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE!=0
   PRIVATE h5dfill_c_long_double
 #endif
@@ -183,6 +183,7 @@ MODULE H5D
      MODULE PROCEDURE h5dfill_c_long_double
 #endif
      MODULE PROCEDURE h5dfill_char
+     MODULE PROCEDURE h5dfill_ptr
   END INTERFACE
 
 !  Interface for the function used to pass the C pointer of the buffer
@@ -1098,7 +1099,7 @@ CONTAINS
 !!
 !! \brief Writes raw data from a buffer to a dataset.
 !!
-!! \note  \fortran_approved
+!! \attention  \fortran_approved
 !!
 !! \param dset_id       Identifier of the dataset to write to.
 !! \param mem_type_id   Identifier of the memory datatype.
@@ -1126,7 +1127,7 @@ CONTAINS
 !!
 !! \brief Reads raw data from a dataset into a buffer (Passes Pointer).
 !!
-!! \note  \fortran_approved
+!! \attention  \fortran_approved
 !!
 !! \param dset_id       Identifier of the dataset read from.
 !! \param mem_type_id   Identifier of the memory datatype.
@@ -1158,7 +1159,7 @@ CONTAINS
 !!        \li h5dwrite_f Purpose: Writes data other than variable-length data.
 !!        \li h5dwrite_vl_f Purpose: Writes variable-length data.
 !!
-!! \note  \fortran_obsolete
+!! \attention  \fortran_obsolete
 !!
 !! \param dset_id       Identifier of the dataset to write to.
 !! \param mem_type_id   Identifier of the memory datatype.
@@ -1189,7 +1190,7 @@ CONTAINS
 !!        \li h5dread_f    Purpose: Reads data other than variable-length data, uses DIMENSION argument and buf is not a pointer.
 !!        \li h5dread_vl_f Purpose: Reads variable-length data.
 !!
-!! \note  \fortran_obsolete
+!! \attention  \fortran_obsolete
 !!
 !! \param dset_id       Identifier of the dataset read from.
 !! \param mem_type_id   Identifier of the memory datatype.
@@ -1220,6 +1221,8 @@ CONTAINS
 !!  Only INTEGER, CHARACTER, REAL and DOUBLE PRECISION datatypes of the fillvalues and buffers are supported.
 !!  Buffer and fillvalue are assumed to have the same datatype. Only one-dimesional buffers are supported.
 !!
+!! \attention  \fortran_obsolete
+!!
 !! \param fill_value Fill value.
 !! \param space_id   Identifier of the memory datatype.
 !! \param buf        Buffer to receive data read from file.
@@ -1232,6 +1235,31 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: space_id
     TYPE(TYPE), INTENT(OUT), DIMENSION(*) :: buf
     INTEGER, INTENT(OUT) :: hdferr
+  END SUBROUTINE h5dfill_f
+!>
+!! \ingroup FH5D
+!!
+!! \brief Fills dataspace elements with a fill value in a memory buffer.
+!!
+!! \attention  \fortran_approved
+!!
+!! \param fill_value   Pointer to the fill value to be used.
+!! \param fill_type_id Fill value datatype identifier,
+!! \param buf          Pointer to the memory buffer containing the selection to be filled.
+!! \param buf_type_id  Datatype of dataspace elements to be filled.
+!! \param space_id     Dataspace identifier.
+!! \param hdferr       \fortran_error
+!!
+!! See C API: @ref herr_t H5Dfill(const void *fill, hid_t fill_type_id, void *buf, hid_t buf_type_id, hid_t space_id);
+!!
+  SUBROUTINE h5dfill_f(fill_value, fill_type_id, buf, buf_type_id, space_id, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
+    IMPLICIT NONE
+    TYPE(C_PTR)                :: fill_value
+    INTEGER(HID_T), INTENT(IN) :: fill_type_id
+    TYPE(C_PTR)                :: buf
+    INTEGER(HID_T), INTENT(IN) :: buf_type_id
+    INTEGER(HID_T), INTENT(IN) :: space_id
   END SUBROUTINE h5dfill_f
 
 #else
@@ -1587,12 +1615,39 @@ CONTAINS
 
   END SUBROUTINE h5dread_ptr
 
+ SUBROUTINE h5dfill_ptr(fill_value, fill_type_id, buf, buf_type_id, space_id, hdferr)
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
+    IMPLICIT NONE
+    TYPE(C_PTR)                :: fill_value
+    INTEGER(HID_T), INTENT(IN) :: fill_type_id
+    TYPE(C_PTR)                :: buf
+    INTEGER(HID_T), INTENT(IN) :: buf_type_id
+    INTEGER(HID_T), INTENT(IN) :: space_id
+    INTEGER, INTENT(OUT) :: hdferr
+
+    INTERFACE
+       INTEGER FUNCTION h5dfill(fill_value, fill_type_id, buf, buf_type_id, space_id) &
+            BIND(C,NAME='H5Dfill')
+         IMPORT :: HID_T, C_PTR
+         IMPLICIT NONE
+         TYPE(C_PTR)   , VALUE :: fill_value
+         INTEGER(HID_T), VALUE :: fill_type_id
+         TYPE(C_PTR)   , VALUE :: buf
+         INTEGER(HID_T), VALUE :: buf_type_id
+         INTEGER(HID_T), VALUE :: space_id
+       END FUNCTION h5dfill
+    END INTERFACE
+
+    hdferr = INT(h5dfill(fill_value, fill_type_id, buf, buf_type_id, space_id))
+
+  END SUBROUTINE h5dfill_ptr
+
   SUBROUTINE h5dfill_integer(fill_value, space_id, buf,  hdferr)
     USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     INTEGER, INTENT(IN), TARGET :: fill_value  ! Fill value
     INTEGER(HID_T), INTENT(IN) :: space_id ! Memory dataspace selection identifier
-    INTEGER, INTENT(IN), DIMENSION(*), TARGET :: buf ! Memory buffer to fill in
+    INTEGER, INTENT(OUT), DIMENSION(*), TARGET :: buf ! Memory buffer to fill in
     INTEGER, INTENT(OUT) :: hdferr      ! Error code
 
     INTEGER(HID_T) :: fill_type_id ! Fill value datatype identifier
@@ -1607,15 +1662,14 @@ CONTAINS
     fill_type_id = H5T_NATIVE_INTEGER
     mem_type_id  = H5T_NATIVE_INTEGER
 
-    hdferr = h5dfill_c(f_ptr_fill_value, fill_type_id, space_id, &
-         f_ptr_buf, mem_type_id)
+    CALL h5dfill_ptr(f_ptr_fill_value, fill_type_id, f_ptr_buf, mem_type_id, space_id, hdferr)
 
   END SUBROUTINE h5dfill_integer
 
-  SUBROUTINE h5dfill_c_float(fill_valuer, space_id, buf,  hdferr)
+  SUBROUTINE h5dfill_c_float(fill_value, space_id, buf,  hdferr)
     USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
-    REAL(KIND=C_FLOAT), INTENT(IN), TARGET :: fill_valuer
+    REAL(KIND=C_FLOAT), INTENT(IN), TARGET :: fill_value
     INTEGER(HID_T), INTENT(IN) :: space_id
     REAL(KIND=C_FLOAT), INTENT(OUT), DIMENSION(*), TARGET :: buf
     INTEGER, INTENT(OUT) :: hdferr
@@ -1623,17 +1677,16 @@ CONTAINS
     INTEGER(HID_T) :: fill_type_id ! Fill value datatype identifier
     INTEGER(HID_T) :: mem_type_id !  Buffer dadtype identifier
 
-    TYPE(C_PTR) :: f_ptr_fill_valuer ! C pointer to fill_value
+    TYPE(C_PTR) :: f_ptr_fill_value ! C pointer to fill_value
     TYPE(C_PTR) :: f_ptr_buf ! C pointer to buf
 
-    f_ptr_fill_valuer = C_LOC(fill_valuer)
+    f_ptr_fill_value = C_LOC(fill_value)
     f_ptr_buf = C_LOC(buf(1))
 
     fill_type_id = H5T_NATIVE_REAL
     mem_type_id  = H5T_NATIVE_REAL
 
-    hdferr = h5dfill_c(f_ptr_fill_valuer, fill_type_id, space_id, &
-         f_ptr_buf, mem_type_id)
+    CALL h5dfill_ptr(f_ptr_fill_value, fill_type_id, f_ptr_buf, mem_type_id, space_id, hdferr)
 
   END SUBROUTINE h5dfill_c_float
 
@@ -1647,17 +1700,16 @@ CONTAINS
     INTEGER(HID_T) :: fill_type_id ! Fill value datatype identifier
     INTEGER(HID_T) :: mem_type_id !  Buffer dadtype identifier
 
-    TYPE(C_PTR) :: f_ptr_fill_valuer ! C pointer to fill_value
+    TYPE(C_PTR) :: f_ptr_fill_value ! C pointer to fill_value
     TYPE(C_PTR) :: f_ptr_buf ! C pointer to buf
 
-    f_ptr_fill_valuer = C_LOC(fill_value)
+    f_ptr_fill_value = C_LOC(fill_value)
     f_ptr_buf = C_LOC(buf(1))
 
     fill_type_id = H5T_NATIVE_DOUBLE
     mem_type_id  = H5T_NATIVE_DOUBLE
 
-    hdferr = h5dfill_c(f_ptr_fill_valuer, fill_type_id, space_id, &
-         f_ptr_buf, mem_type_id)
+    CALL h5dfill_ptr(f_ptr_fill_value, fill_type_id, f_ptr_buf, mem_type_id, space_id, hdferr)
 
   END SUBROUTINE h5dfill_c_double
 
@@ -1672,22 +1724,21 @@ CONTAINS
     INTEGER(HID_T) :: fill_type_id ! Fill value datatype identifier
     INTEGER(HID_T) :: mem_type_id !  Buffer dadtype identifier
 
-    TYPE(C_PTR) :: f_ptr_fill_valuer ! C pointer to fill_value
+    TYPE(C_PTR) :: f_ptr_fill_value ! C pointer to fill_value
     TYPE(C_PTR) :: f_ptr_buf ! C pointer to buf
 
-    f_ptr_fill_valuer = C_LOC(fill_value)
+    f_ptr_fill_value = C_LOC(fill_value)
     f_ptr_buf = C_LOC(buf(1))
 
     fill_type_id = H5T_NATIVE_DOUBLE
     mem_type_id  = H5T_NATIVE_DOUBLE
 
-    hdferr = h5dfill_c(f_ptr_fill_valuer, fill_type_id, space_id, &
-         f_ptr_buf, mem_type_id)
+    CALL h5dfill_ptr(f_ptr_fill_value, fill_type_id, f_ptr_buf, mem_type_id, space_id, hdferr)
 
   END SUBROUTINE h5dfill_c_long_double
 #endif
 
-  SUBROUTINE h5dfill_char(fill_value, space_id, buf,  hdferr)
+  SUBROUTINE h5dfill_char(fill_value, space_id, buf, hdferr)
     USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     CHARACTER, INTENT(IN), TARGET :: fill_value
@@ -1704,8 +1755,10 @@ CONTAINS
     f_ptr_fill_value = C_LOC(fill_value)
     f_ptr_buf = C_LOC(buf(1))
 
-    hdferr = h5dfill_c(f_ptr_fill_value, fill_type_id, space_id, &
-         f_ptr_buf, mem_type_id)
+    fill_type_id = H5T_NATIVE_CHARACTER
+    mem_type_id  = H5T_NATIVE_CHARACTER
+
+    CALL h5dfill_ptr(f_ptr_fill_value, fill_type_id, f_ptr_buf, mem_type_id, space_id, hdferr)
 
   END SUBROUTINE h5dfill_char
 !>

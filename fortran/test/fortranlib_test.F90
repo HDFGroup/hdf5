@@ -106,8 +106,14 @@ PROGRAM fortranlibtest
   CALL extenddsettest(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Extendible dataset test', total_error)
 
+  ret_total_error = 0
   CALL test_userblock_offset(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Dataset offset with user block', total_error)
+
+  ! Test filling dataspace elements
+  ret_total_error = 0
+  CALL test_dset_fill(cleanup, ret_total_error)
+  CALL write_test_status(ret_total_error, ' Filling dataspace elements', total_error)
 
 !
 !      '========================================='
