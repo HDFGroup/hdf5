@@ -88,6 +88,7 @@ MODULE H5D
 
   USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_CHAR
   USE H5GLOBAL
+  USE H5LIB, ONLY : h5kind_to_type
 
   PRIVATE h5dread_vl_integer, h5dread_vl_real, h5dread_vl_string
   PRIVATE h5dwrite_vl_integer, h5dwrite_vl_real, h5dwrite_vl_string
@@ -1659,8 +1660,8 @@ CONTAINS
     f_ptr_fill_value = C_LOC(fill_value)
     f_ptr_buf = C_LOC(buf(1))
 
-    fill_type_id = H5T_NATIVE_INTEGER
-    mem_type_id  = H5T_NATIVE_INTEGER
+    fill_type_id = h5kind_to_type(KIND(fill_value), H5_INTEGER_KIND)
+    mem_type_id  = fill_type_id
 
     CALL h5dfill_ptr(f_ptr_fill_value, fill_type_id, f_ptr_buf, mem_type_id, space_id, hdferr)
 
@@ -1683,8 +1684,8 @@ CONTAINS
     f_ptr_fill_value = C_LOC(fill_value)
     f_ptr_buf = C_LOC(buf(1))
 
-    fill_type_id = H5T_NATIVE_REAL
-    mem_type_id  = H5T_NATIVE_REAL
+    fill_type_id = h5kind_to_type(KIND(fill_value), H5_REAL_KIND)
+    mem_type_id  = fill_type_id
 
     CALL h5dfill_ptr(f_ptr_fill_value, fill_type_id, f_ptr_buf, mem_type_id, space_id, hdferr)
 
@@ -1706,8 +1707,8 @@ CONTAINS
     f_ptr_fill_value = C_LOC(fill_value)
     f_ptr_buf = C_LOC(buf(1))
 
-    fill_type_id = H5T_NATIVE_DOUBLE
-    mem_type_id  = H5T_NATIVE_DOUBLE
+    fill_type_id = h5kind_to_type(KIND(fill_value), H5_REAL_KIND)
+    mem_type_id  = fill_type_id
 
     CALL h5dfill_ptr(f_ptr_fill_value, fill_type_id, f_ptr_buf, mem_type_id, space_id, hdferr)
 
@@ -1730,8 +1731,8 @@ CONTAINS
     f_ptr_fill_value = C_LOC(fill_value)
     f_ptr_buf = C_LOC(buf(1))
 
-    fill_type_id = H5T_NATIVE_DOUBLE
-    mem_type_id  = H5T_NATIVE_DOUBLE
+    fill_type_id = h5kind_to_type(KIND(fill_value), H5_REAL_KIND)
+    mem_type_id  = fill_type_id
 
     CALL h5dfill_ptr(f_ptr_fill_value, fill_type_id, f_ptr_buf, mem_type_id, space_id, hdferr)
 
