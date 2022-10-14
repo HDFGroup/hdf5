@@ -31,6 +31,8 @@
 !
 !*****
 
+#include <H5config_f.inc>
+
 !
 MODULE TH5D
 
@@ -647,21 +649,25 @@ CONTAINS
     INTEGER(KIND=int_kind_16), DIMENSION(1:DIM0), TARGET :: data_i16
     INTEGER(KIND=int_kind_1) , TARGET :: data0_i1 = 4
     INTEGER(KIND=int_kind_4) , TARGET :: data0_i4 = 4
-    INTEGER(KIND=int_kind_8) , TARGET :: data0_i8 = 4
     INTEGER(KIND=int_kind_16), TARGET :: data0_i16 = 4
     INTEGER, DIMENSION(1:DIM0) :: data_int
     INTEGER, TARGET :: data0_int = 4
 #if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
     INTEGER, PARAMETER :: int_kind_32 = SELECTED_INT_KIND(36) !should map to INTEGER*16 on most modern processors
     INTEGER(KIND=int_kind_32), DIMENSION(1:DIM0), TARGET :: data_i32
-    INTEGER(KIND=int_kind_16), TARGET :: data0_i32 = 4
+    INTEGER(KIND=int_kind_32), TARGET :: data0_i32 = 4
 #endif
-    INTEGER, PARAMETER :: real_kind_7  = C_FLOAT   !should map to REAL*4 on most modern processors
-    INTEGER, PARAMETER :: real_kind_15 = C_DOUBLE  !should map to REAL*8 on most modern processors
-    REAL(KIND=real_kind_7) , DIMENSION(1:DIM0), TARGET :: data_r7
-    REAL(KIND=real_kind_15), DIMENSION(1:DIM0), TARGET :: data_r15
-    REAL(KIND=real_kind_7) , TARGET :: data0_r7 = 4.0
-    REAL(KIND=real_kind_15), TARGET :: data0_r15 = 4.0
+    INTEGER, PARAMETER :: real_kind_4  = C_FLOAT
+    INTEGER, PARAMETER :: real_kind_8 = C_DOUBLE
+    REAL(KIND=real_kind_4) , DIMENSION(1:DIM0), TARGET :: data_r4
+    REAL(KIND=real_kind_8), DIMENSION(1:DIM0), TARGET :: data_r8
+    REAL(KIND=real_kind_4) , TARGET :: data0_r4 = 4.0
+    REAL(KIND=real_kind_8), TARGET :: data0_r8 = 4.0
+#if H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE!=0
+    INTEGER, PARAMETER :: real_kind_16 = C_LONG_DOUBLE
+    REAL(KIND=real_kind_16) , DIMENSION(1:DIM0), TARGET :: data_r16
+    REAL(KIND=real_kind_16) , TARGET :: data0_r16 = 4.0
+#endif
 
     INTEGER :: i
     CHARACTER       , DIMENSION(1:DIM0), TARGET :: data_chr
@@ -684,8 +690,11 @@ CONTAINS
 #if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
     data_i32 = -2
 #endif
-    data_r7  = -2.0_real_kind_7
-    data_r15 = -2.0_real_kind_15
+    data_r4  = -2.0_real_kind_4
+    data_r8 = -2.0_real_kind_8
+#if H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE!=0
+    data_r16 = -2.0_real_kind_16
+#endif
     data_chr = "H"
 
     dims(1) = DIM0
@@ -708,60 +717,45 @@ CONTAINS
     DO i = 1, DIM0
        IF(i.LE. DIM0/2)THEN
           CALL VERIFY("h5dfill_f", data0_int, data_int(i), total_error)
-          IF(total_error.NE.0)THEN
-             WRITE(*,'(A)')    "    Incorrect h5dfill value (INT)."
-             WRITE(*,'(A,I0)') "    At index ",i
-             RETURN
-          ENDIF
        ELSE
           CALL VERIFY("h5dfill_f", -2, data_int(i), total_error)
-          IF(total_error.NE.0)THEN
-             WRITE(*,'(A)')    "    Incorrect h5dfill value (INT)."
-             WRITE(*,'(A,I0)') "    At index ",i
-             RETURN
-          ENDIF
+       ENDIF
+       IF(total_error.NE.0)THEN
+          WRITE(*,'(A)')    "    Incorrect h5dfill value (INT)."
+          WRITE(*,'(A,I0)') "    At index ",i
+          RETURN
        ENDIF
     ENDDO
 
-    CALL h5dfill_f(data0_r7, space_id, data_r7, error)
+    CALL h5dfill_f(data0_r4, space_id, data_r4, error)
     CALL check("h5dfill_f", error, total_error)
 
     DO i = 1, DIM0
        IF(i.LE. DIM0/2)THEN
-          CALL VERIFY("h5dfill_f", data0_r7, data_r7(i), total_error)
-          IF(total_error.NE.0)THEN
-             WRITE(*,'(A)')    "    Incorrect h5dfill value (R4)."
-             WRITE(*,'(A,I0)') "    At index ",i
-             RETURN
-          ENDIF
+          CALL VERIFY("h5dfill_f", data0_r4, data_r4(i), total_error)
        ELSE
-          CALL VERIFY("h5dfill_f", -2.0_real_kind_7, data_r7(i), total_error)
-          IF(total_error.NE.0)THEN
-             WRITE(*,'(A)')    "    Incorrect h5dfill value (R4)."
-             WRITE(*,'(A,I0)') "    At index ",i
-             RETURN
-          ENDIF
+          CALL VERIFY("h5dfill_f", -2.0_real_kind_4, data_r4(i), total_error)
+       ENDIF
+       IF(total_error.NE.0)THEN
+          WRITE(*,'(A)')    "    Incorrect h5dfill value (R4)."
+          WRITE(*,'(A,I0)') "    At index ",i
+          RETURN
        ENDIF
     ENDDO
 
-    CALL h5dfill_f(data0_r15, space_id, data_r15, error)
+    CALL h5dfill_f(data0_r8, space_id, data_r8, error)
     CALL check("h5dfill_f", error, total_error)
 
     DO i = 1, DIM0
        IF(i.LE. DIM0/2)THEN
-          CALL VERIFY("h5dfill_f", data0_r15, data_r15(i), total_error)
-          IF(total_error.NE.0)THEN
-             WRITE(*,'(A)')    "    Incorrect h5dfill value (R4)."
-             WRITE(*,'(A,I0)') "    At index ",i
-             RETURN
-          ENDIF
+          CALL VERIFY("h5dfill_f", data0_r8, data_r8(i), total_error)
        ELSE
-          CALL VERIFY("h5dfill_f", -2.0_real_kind_15, data_r15(i), total_error)
-          IF(total_error.NE.0)THEN
-             WRITE(*,'(A)')    "    Incorrect h5dfill value (R4)."
-             WRITE(*,'(A,I0)') "    At index ",i
-             RETURN
-          ENDIF
+          CALL VERIFY("h5dfill_f", -2.0_real_kind_8, data_r8(i), total_error)
+       ENDIF
+       IF(total_error.NE.0)THEN
+          WRITE(*,'(A)')    "    Incorrect h5dfill value (R4)."
+          WRITE(*,'(A,I0)') "    At index ",i
+          RETURN
        ENDIF
     ENDDO
 
@@ -771,40 +765,29 @@ CONTAINS
     DO i = 1, DIM0
        IF(i.LE. DIM0/2)THEN
           CALL VERIFY("h5dfill_f", data0_chr, data_chr(i), total_error)
-          IF(total_error.NE.0)THEN
-             WRITE(*,'(A)')    "    Incorrect h5dfill value (CHR)."
-             WRITE(*,'(A,I0)') "    At index ",i
-             RETURN
-          ENDIF
        ELSE
           CALL VERIFY("h5dfill_f", "H", data_chr(i), total_error)
-          IF(total_error.NE.0)THEN
-             WRITE(*,'(A)')    "    Incorrect h5dfill value (CHR)."
-             WRITE(*,'(A,I0)') "    At index ",i
-             RETURN
-          ENDIF
+       ENDIF
+       IF(total_error.NE.0)THEN
+          WRITE(*,'(A)')    "    Incorrect h5dfill value (CHR)."
+          WRITE(*,'(A,I0)') "    At index ",i
+          RETURN
        ENDIF
     ENDDO
 
 #if H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE!=0
-    CALL h5dfill_f(data0_i32, space_id, data_i32, error)
+    CALL h5dfill_f(data0_r16, space_id, data_r16, error)
     CALL check("h5dfill_f", error, total_error)
-
     DO i = 1, DIM0
        IF(i.LE. DIM0/2)THEN
-          CALL VERIFY("h5dfill_f", data0_i32, data_i32(i), total_error)
-          IF(total_error.NE.0)THEN
-             WRITE(*,'(A)')    "    Incorrect h5dfill value (I32)."
-             WRITE(*,'(A,I0)') "    At index ",i
-             RETURN
-          ENDIF
+          CALL VERIFY("h5dfill_f", data0_r16, data_r16(i), total_error)
        ELSE
-          CALL VERIFY("h5dfill_f", -2_int_kind_32, data_i32(i), total_error)
-          IF(total_error.NE.0)THEN
-             WRITE(*,'(A)')    "    Incorrect h5dfill value (I32)."
-             WRITE(*,'(A,I0)') "    At index ",i
-             RETURN
-          ENDIF
+          CALL VERIFY("h5dfill_f", -2.0_real_kind_16, data_r16(i), total_error)
+       ENDIF
+       IF(total_error.NE.0)THEN
+          WRITE(*,'(A)')    "    Incorrect h5dfill value (R16)."
+          WRITE(*,'(A,I0)') "    At index ",i
+          RETURN
        ENDIF
     ENDDO
 #endif
@@ -821,8 +804,8 @@ CONTAINS
 #if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
     data_i32 = -2
 #endif
-    data_r7  = -2.0_real_kind_7
-    data_r15 = -2.0_real_kind_15
+    data_r4  = -2.0_real_kind_4
+    data_r8 = -2.0_real_kind_8
     data_chr = "H"
 
     ! Test spectrum of datatype types
@@ -839,18 +822,13 @@ CONTAINS
     DO i = 1, DIM0
        IF(i.LE. DIM0/2)THEN
           CALL VERIFY("h5dfill_f", data0_i1, data_i1(i), total_error)
-          IF(total_error.NE.0)THEN
-             WRITE(*,'(A)')    "    Incorrect h5dfill value (I1)."
-             WRITE(*,'(A,I0)') "    At index ",i
-             RETURN
-          ENDIF
        ELSE
           CALL VERIFY("h5dfill_f", -2_int_kind_1, data_i1(i), total_error)
-          IF(total_error.NE.0)THEN
-             WRITE(*,'(A)')    "    Incorrect h5dfill value (I1)."
-             WRITE(*,'(A,I0)') "    At index ",i
-             RETURN
-          ENDIF
+       ENDIF
+       IF(total_error.NE.0)THEN
+          WRITE(*,'(A)')    "    Incorrect h5dfill value (I1)."
+          WRITE(*,'(A,I0)') "    At index ",i
+          RETURN
        ENDIF
     ENDDO
 
@@ -866,18 +844,13 @@ CONTAINS
     DO i = 1, DIM0
        IF(i.LE. DIM0/2)THEN
           CALL VERIFY("h5dfill_f", data0_i4, data_i4(i), total_error)
-          IF(total_error.NE.0)THEN
-             WRITE(*,'(A)')    "    Incorrect h5dfill value (I4)."
-             WRITE(*,'(A,I0)') "    At index ",i
-             RETURN
-          ENDIF
        ELSE
           CALL VERIFY("h5dfill_f", -2_int_kind_4, data_i4(i), total_error)
-          IF(total_error.NE.0)THEN
-             WRITE(*,'(A)')    "    Incorrect h5dfill value (I4)."
-             WRITE(*,'(A,I0)') "    At index ",i
-             RETURN
-          ENDIF
+       ENDIF
+       IF(total_error.NE.0)THEN
+          WRITE(*,'(A)')    "    Incorrect h5dfill value (I4)."
+          WRITE(*,'(A,I0)') "    At index ",i
+          RETURN
        ENDIF
     ENDDO
 
@@ -893,20 +866,108 @@ CONTAINS
     DO i = 1, DIM0
        IF(i.LE. DIM0/2)THEN
           CALL VERIFY("h5dfill_f", data0_i16, data_i16(i), total_error)
-          IF(total_error.NE.0)THEN
-             WRITE(*,'(A)')    "    Incorrect h5dfill value (I16)."
-             WRITE(*,'(A,I0)') "    At index ",i
-             RETURN
-          ENDIF
        ELSE
           CALL VERIFY("h5dfill_f", -2_int_kind_16, data_i16(i), total_error)
-          IF(total_error.NE.0)THEN
-             WRITE(*,'(A)')    "    Incorrect h5dfill value (I16)."
-             WRITE(*,'(A,I0)') "    At index ",i
-             RETURN
-          ENDIF
+       ENDIF
+       IF(total_error.NE.0)THEN
+          WRITE(*,'(A)')    "    Incorrect h5dfill value (I16)."
+          WRITE(*,'(A,I0)') "    At index ",i
+          RETURN
        ENDIF
     ENDDO
+
+#if H5_HAVE_Fortran_INTEGER_SIZEOF_16!=0
+
+    f_ptr1 = C_LOC(data0_i32)
+    f_ptr2 = C_LOC(data_i32(1))
+
+    fill_type_id = h5kind_to_type(KIND(data0_i32), H5_INTEGER_KIND)
+    buf_type_id  = fill_type_id
+
+    CALL h5dfill_f(f_ptr1, fill_type_id, f_ptr2, buf_type_id, space_id, error)
+    CALL check("h5dfill_f", error, total_error)
+
+    DO i = 1, DIM0
+       IF(i.LE. DIM0/2)THEN
+          CALL VERIFY("h5dfill_f", data0_i32, data_i32(i), total_error)
+       ELSE
+          CALL VERIFY("h5dfill_f", -2_int_kind_32, data_i32(i), total_error)
+       ENDIF
+       IF(total_error.NE.0)THEN
+          WRITE(*,'(A)')    "    Incorrect h5dfill value (I32)."
+          WRITE(*,'(A,I0)') "    At index ",i
+          RETURN
+       ENDIF
+    ENDDO
+#endif
+
+    f_ptr1 = C_LOC(data0_r4)
+    f_ptr2 = C_LOC(data_r4(1))
+
+    fill_type_id = h5kind_to_type(KIND(data0_r4), H5_REAL_KIND)
+    buf_type_id  = fill_type_id
+
+    CALL h5dfill_f(f_ptr1, fill_type_id, f_ptr2, buf_type_id, space_id, error)
+    CALL check("h5dfill_f", error, total_error)
+
+    DO i = 1, DIM0
+       IF(i.LE. DIM0/2)THEN
+          CALL VERIFY("h5dfill_f", data0_r4, data_r4(i), total_error)
+       ELSE
+          CALL VERIFY("h5dfill_f", -2.0_real_kind_4, data_r4(i), total_error)
+       ENDIF
+       IF(total_error.NE.0)THEN
+          WRITE(*,'(A)')    "    Incorrect h5dfill value (R4)."
+          WRITE(*,'(A,I0)') "    At index ",i
+          RETURN
+       ENDIF
+    ENDDO
+
+    f_ptr1 = C_LOC(data0_r8)
+    f_ptr2 = C_LOC(data_r8(1))
+
+    fill_type_id = h5kind_to_type(KIND(data0_r8), H5_REAL_KIND)
+    buf_type_id  = fill_type_id
+
+    CALL h5dfill_f(f_ptr1, fill_type_id, f_ptr2, buf_type_id, space_id, error)
+    CALL check("h5dfill_f", error, total_error)
+
+    DO i = 1, DIM0
+       IF(i.LE. DIM0/2)THEN
+          CALL VERIFY("h5dfill_f", data0_r8, data_r8(i), total_error)
+       ELSE
+          CALL VERIFY("h5dfill_f", -2.0_real_kind_8, data_r8(i), total_error)
+       ENDIF
+       IF(total_error.NE.0)THEN
+          WRITE(*,'(A)')    "    Incorrect h5dfill value (R8)."
+          WRITE(*,'(A,I0)') "    At index ",i
+          RETURN
+       ENDIF
+    ENDDO
+
+#if H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE!=0
+    f_ptr1 = C_LOC(data0_r16)
+    f_ptr2 = C_LOC(data_r16(1))
+
+    fill_type_id = h5kind_to_type(KIND(data0_r16), H5_REAL_KIND)
+    buf_type_id  = fill_type_id
+
+    CALL h5dfill_f(f_ptr1, fill_type_id, f_ptr2, buf_type_id, space_id, error)
+    CALL check("h5dfill_f", error, total_error)
+
+    DO i = 1, DIM0
+       IF(i.LE. DIM0/2)THEN
+          CALL VERIFY("h5dfill_f", data0_r16, data_r16(i), total_error)
+       ELSE
+          CALL VERIFY("h5dfill_f", -2.0_real_kind_16, data_r16(i), total_error)
+       ENDIF
+       IF(total_error.NE.0)THEN
+          WRITE(*,'(A)')    "    Incorrect h5dfill value (R16)."
+          WRITE(*,'(A,I0)') "    At index ",i
+          RETURN
+       ENDIF
+    ENDDO
+#endif
 
     f_ptr1 = C_LOC(data0_chr)
     f_ptr2 = C_LOC(data_chr(1))
@@ -920,18 +981,13 @@ CONTAINS
     DO i = 1, DIM0
        IF(i.LE. DIM0/2)THEN
           CALL VERIFY("h5dfill_f", data0_chr, data_chr(i), total_error)
-          IF(total_error.NE.0)THEN
-             WRITE(*,'(A)')    "    Incorrect h5dfill value (CHR)."
-             WRITE(*,'(A,I0)') "    At index ",i
-             RETURN
-          ENDIF
        ELSE
           CALL VERIFY("h5dfill_f", "H", data_chr(i), total_error)
-          IF(total_error.NE.0)THEN
-             WRITE(*,'(A)')    "    Incorrect h5dfill value (CHR)."
-             WRITE(*,'(A,I0)') "    At index ",i
-             RETURN
-          ENDIF
+       ENDIF
+       IF(total_error.NE.0)THEN
+          WRITE(*,'(A)')    "    Incorrect h5dfill value (CHR)."
+          WRITE(*,'(A,I0)') "    At index ",i
+          RETURN
        ENDIF
     ENDDO
 
