@@ -1433,8 +1433,9 @@ H5S__hyper_iter_get_seq_list_gen(H5S_sel_iter_t *iter, size_t maxseq, size_t max
     unsigned           fast_dim;          /* Rank of the fastest changing dimension for the dataspace */
     int                curr_dim;          /* Current dimension being operated on */
     unsigned           u;                 /* Index variable */
+    herr_t             ret_value = SUCCEED;
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(iter);
@@ -1710,7 +1711,8 @@ H5S__hyper_iter_get_seq_list_gen(H5S_sel_iter_t *iter, size_t maxseq, size_t max
         /* Check if we are done */
         if (io_elmts_left == 0 || curr_seq >= maxseq) {
             /* Sanity checks */
-            HDassert(curr_span);
+            if (!curr_span)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "curr_span pointer was NULL")
 
             /* Update absolute position */
             abs_arr[fast_dim] = curr_span->low + span_elmts;
@@ -1840,7 +1842,8 @@ H5S__hyper_iter_get_seq_list_gen(H5S_sel_iter_t *iter, size_t maxseq, size_t max
     /* Set the number of elements used */
     *nelem = io_used;
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_iter_get_seq_list_gen() */
 
 /*--------------------------------------------------------------------------
