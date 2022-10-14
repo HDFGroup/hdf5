@@ -118,7 +118,7 @@ static H5S_hyper_span_info_t *H5S__hyper_copy_span(H5S_hyper_span_info_t *spans,
 static hbool_t                H5S__hyper_cmp_spans(const H5S_hyper_span_info_t *span_info1,
                                                    const H5S_hyper_span_info_t *span_info2);
 static herr_t                 H5S__hyper_free_span_info(H5S_hyper_span_info_t *span_info);
-static void                   H5S__hyper_free_span(H5S_hyper_span_t *span);
+static herr_t                 H5S__hyper_free_span(H5S_hyper_span_t *span);
 static herr_t H5S__hyper_span_blocklist(const H5S_hyper_span_info_t *spans, hsize_t start[], hsize_t end[],
                                         hsize_t rank, hsize_t *startblock, hsize_t *numblocks, hsize_t **buf);
 static herr_t H5S__get_select_hyper_blocklist(H5S_t *space, hsize_t startblock, hsize_t numblocks,
@@ -2757,16 +2757,20 @@ H5S__hyper_iter_get_seq_list(H5S_sel_iter_t *iter, size_t maxseq, size_t maxelem
 static herr_t
 H5S__hyper_iter_release(H5S_sel_iter_t *iter)
 {
-    FUNC_ENTER_PACKAGE_NOERR
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(iter);
 
     /* Free the copy of the hyperslab selection span tree */
     if (iter->u.hyp.spans != NULL)
-        H5S__hyper_free_span_info(iter->u.hyp.spans);
+        if (H5S__hyper_free_span_info(iter->u.hyp.spans) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info")
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_iter_release() */
 
 /*--------------------------------------------------------------------------
@@ -3139,7 +3143,7 @@ H5S__hyper_free_span_info(H5S_hyper_span_info_t *span_info)
 
             /* Advance to next span */
             span = next_span;
-        } /* end while */
+        }
 
         /* Free this span info */
         span_info = (H5S_hyper_span_info_t *)H5FL_ARR_FREE(hbounds_t, span_info);
@@ -3158,7 +3162,7 @@ done:
     void H5S__hyper_free_span(span)
         H5S_hyper_span_t *span;      IN: Span node to free
  RETURNS
-    None
+    SUCCEED/FAIL
  DESCRIPTION
     Free a hyperslab span node, along with the 'down spans' from the node,
     if reducing their reference count to zero indicates it is appropriate to
@@ -3168,22 +3172,26 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static void
+static herr_t
 H5S__hyper_free_span(H5S_hyper_span_t *span)
 {
-    FUNC_ENTER_PACKAGE_NOERR
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(span);
 
     /* Decrement the reference count of the 'down spans', freeing them if appropriate */
     if (span->down != NULL)
-        H5S__hyper_free_span_info(span->down);
+        if (H5S__hyper_free_span_info(span->down) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info")
 
     /* Free this span */
     span = H5FL_FREE(H5S_hyper_span_t, span);
 
-    FUNC_LEAVE_NOAPI_VOID
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_free_span() */
 
 /*--------------------------------------------------------------------------
@@ -5741,7 +5749,9 @@ done:
 static herr_t
 H5S__hyper_release(H5S_t *space)
 {
-    FUNC_ENTER_PACKAGE_NOERR
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(space && H5S_SEL_HYPERSLABS == H5S_GET_SELECT_TYPE(space));
@@ -5752,13 +5762,15 @@ H5S__hyper_release(H5S_t *space)
     /* Release irregular hyperslab information */
     if (space->select.sel_info.hslab) {
         if (space->select.sel_info.hslab->span_lst != NULL)
-            H5S__hyper_free_span_info(space->select.sel_info.hslab->span_lst);
+            if (H5S__hyper_free_span_info(space->select.sel_info.hslab->span_lst) < 0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "unable to free span info")
 
         /* Release space for the hyperslab selection information */
         space->select.sel_info.hslab = H5FL_FREE(H5S_hyper_sel_t, space->select.sel_info.hslab);
-    } /* end if */
+    }
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_release() */
 
 /*--------------------------------------------------------------------------
@@ -5818,7 +5830,8 @@ H5S__hyper_coord_to_span(unsigned rank, const hsize_t *coords)
 
 done:
     if (ret_value == NULL && down != NULL)
-        H5S__hyper_free_span_info(down);
+        if (H5S__hyper_free_span_info(down) < 0)
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, NULL, "unable to free span info")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_coord_to_span() */
@@ -5997,7 +6010,8 @@ H5S__hyper_add_span_element_helper(H5S_hyper_span_info_t *span_tree, unsigned ra
                     /* (If it has a "down tree") */
                     else if (stop_span->down) {
                         /* Release "down tree" information */
-                        H5S__hyper_free_span_info(stop_span->down);
+                        if (H5S__hyper_free_span_info(stop_span->down) < 0)
+                            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info")
 
                         /* Point at earlier span's "down tree" */
                         stop_span->down = tmp_span->down;
@@ -6159,7 +6173,8 @@ H5S_hyper_add_span_element(H5S_t *space, unsigned rank, const hsize_t *coords)
 done:
     if (ret_value < 0)
         if (head)
-            H5S__hyper_free_span_info(head);
+            if (H5S__hyper_free_span_info(head) < 0)
+                HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_hyper_add_span_element() */
@@ -7508,8 +7523,9 @@ H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
                                             "can't allocate hyperslab span")
 
                             /* Release the down span tree generated */
-                            H5S__hyper_free_span_info(down_a_not_b);
-                        } /* end if */
+                            if (H5S__hyper_free_span_info(down_a_not_b) < 0)
+                                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info")
+                        }
 
                         /* Check for additions to the a_and_b list */
                         if (down_a_and_b) {
@@ -7522,8 +7538,9 @@ H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
                                             "can't allocate hyperslab span")
 
                             /* Release the down span tree generated */
-                            H5S__hyper_free_span_info(down_a_and_b);
-                        } /* end if */
+                            if (H5S__hyper_free_span_info(down_a_and_b) < 0)
+                                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info")
+                        }
 
                         /* Check for additions to the b_not_a list */
                         if (down_b_not_a) {
@@ -7536,9 +7553,10 @@ H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
                                             "can't allocate hyperslab span")
 
                             /* Release the down span tree generated */
-                            H5S__hyper_free_span_info(down_b_not_a);
-                        } /* end if */
-                    }     /* end else */
+                            if (H5S__hyper_free_span_info(down_b_not_a) < 0)
+                                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info")
+                        }
+                    } /* end else */
 
                     /* Split off upper part of span 'b' at upper span of span 'a' */
 
@@ -7615,8 +7633,9 @@ H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
                                             "can't allocate hyperslab span")
 
                             /* Release the down span tree generated */
-                            H5S__hyper_free_span_info(down_a_not_b);
-                        } /* end if */
+                            if (H5S__hyper_free_span_info(down_a_not_b) < 0)
+                                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info")
+                        }
 
                         /* Check for additions to the a_and_b list */
                         if (down_a_and_b) {
@@ -7629,8 +7648,9 @@ H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
                                             "can't allocate hyperslab span")
 
                             /* Release the down span tree generated */
-                            H5S__hyper_free_span_info(down_a_and_b);
-                        } /* end if */
+                            if (H5S__hyper_free_span_info(down_a_and_b) < 0)
+                                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info")
+                        }
 
                         /* Check for additions to the b_not_a list */
                         if (down_b_not_a) {
@@ -7643,9 +7663,10 @@ H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
                                             "can't allocate hyperslab span")
 
                             /* Release the down span tree generated */
-                            H5S__hyper_free_span_info(down_b_not_a);
-                        } /* end if */
-                    }     /* end else */
+                            if (H5S__hyper_free_span_info(down_b_not_a) < 0)
+                                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info")
+                        }
+                    } /* end else */
 
                     /* Split off upper part of span 'a' at upper span of span 'b' */
 
@@ -7719,8 +7740,9 @@ H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
                                             "can't allocate hyperslab span")
 
                             /* Release the down span tree generated */
-                            H5S__hyper_free_span_info(down_a_not_b);
-                        } /* end if */
+                            if (H5S__hyper_free_span_info(down_a_not_b) < 0)
+                                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info")
+                        }
 
                         /* Check for additions to the a_and_b list */
                         if (down_a_and_b) {
@@ -7733,8 +7755,9 @@ H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
                                             "can't allocate hyperslab span")
 
                             /* Release the down span tree generated */
-                            H5S__hyper_free_span_info(down_a_and_b);
-                        } /* end if */
+                            if (H5S__hyper_free_span_info(down_a_and_b) < 0)
+                                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info")
+                        }
 
                         /* Check for additions to the b_not_a list */
                         if (down_b_not_a) {
@@ -7747,9 +7770,10 @@ H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
                                             "can't allocate hyperslab span")
 
                             /* Release the down span tree generated */
-                            H5S__hyper_free_span_info(down_b_not_a);
-                        } /* end if */
-                    }     /* end else */
+                            if (H5S__hyper_free_span_info(down_b_not_a) < 0)
+                                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info")
+                        }
+                    } /* end else */
 
                     /* Check if there is actually an upper part of span 'b' to split off */
                     if (span_a->high < span_b->high) {
@@ -7833,8 +7857,9 @@ H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
                                             "can't allocate hyperslab span")
 
                             /* Release the down span tree generated */
-                            H5S__hyper_free_span_info(down_a_not_b);
-                        } /* end if */
+                            if (H5S__hyper_free_span_info(down_a_not_b) < 0)
+                                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info")
+                        }
 
                         /* Check for additions to the a_and_b list */
                         if (down_a_and_b) {
@@ -7847,8 +7872,9 @@ H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
                                             "can't allocate hyperslab span")
 
                             /* Release the down span tree generated */
-                            H5S__hyper_free_span_info(down_a_and_b);
-                        } /* end if */
+                            if (H5S__hyper_free_span_info(down_a_and_b) < 0)
+                                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info")
+                        }
 
                         /* Check for additions to the b_not_a list */
                         if (down_b_not_a) {
@@ -7861,9 +7887,10 @@ H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
                                             "can't allocate hyperslab span")
 
                             /* Release the down span tree generated */
-                            H5S__hyper_free_span_info(down_b_not_a);
-                        } /* end if */
-                    }     /* end else */
+                            if (H5S__hyper_free_span_info(down_b_not_a) < 0)
+                                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info")
+                        }
+                    } /* end else */
 
                     /* Split off upper part of span 'a' at upper span of span 'b' */
 
@@ -8047,7 +8074,7 @@ H5S__hyper_merge_spans_helper(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_inf
                     if (H5S__hyper_append_span(&merged_spans, ndims, span_a->low, span_a->high,
                                                span_a->down) < 0)
                         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, NULL, "can't allocate hyperslab span")
-                } /* end if */
+                }
                 else {
                     /* Merge/add lower part of span 'a' with/to merged spans */
                     if (H5S__hyper_append_span(&merged_spans, ndims, span_a->low, span_b->low - 1,
@@ -8063,8 +8090,9 @@ H5S__hyper_merge_spans_helper(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_inf
                         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, NULL, "can't allocate hyperslab span")
 
                     /* Release merged span tree for overlapped section */
-                    H5S__hyper_free_span_info(tmp_spans);
-                } /* end else */
+                    if (H5S__hyper_free_span_info(tmp_spans) < 0)
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, NULL, "unable to free span info")
+                }
 
                 /* Check if there is an upper part of span 'b' */
                 if (span_a->high < span_b->high) {
@@ -8100,7 +8128,7 @@ H5S__hyper_merge_spans_helper(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_inf
                     if (H5S__hyper_append_span(&merged_spans, ndims, span_a->low, span_b->high,
                                                span_a->down) < 0)
                         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, NULL, "can't allocate hyperslab span")
-                } /* end if */
+                }
                 else {
                     /* Merge/add lower part of span 'a' to merged spans */
                     if (H5S__hyper_append_span(&merged_spans, ndims, span_a->low, span_b->low - 1,
@@ -8116,8 +8144,9 @@ H5S__hyper_merge_spans_helper(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_inf
                         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, NULL, "can't allocate hyperslab span")
 
                     /* Release merged span tree for overlapped section */
-                    H5S__hyper_free_span_info(tmp_spans);
-                } /* end else */
+                    if (H5S__hyper_free_span_info(tmp_spans) < 0)
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, NULL, "unable to free span info")
+                }
 
                 /* Copy upper part of span 'a' as new span 'a' (remember to free) */
 
@@ -8144,7 +8173,7 @@ H5S__hyper_merge_spans_helper(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_inf
                     if (H5S__hyper_append_span(&merged_spans, ndims, span_b->low, span_a->high,
                                                span_a->down) < 0)
                         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, NULL, "can't allocate hyperslab span")
-                } /* end if */
+                }
                 else {
                     /* Check if there is a lower part of span 'b' */
                     if (span_a->low > span_b->low) {
@@ -8166,8 +8195,9 @@ H5S__hyper_merge_spans_helper(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_inf
                         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, NULL, "can't allocate hyperslab span")
 
                     /* Release merged span tree for overlapped section */
-                    H5S__hyper_free_span_info(tmp_spans);
-                } /* end else */
+                    if (H5S__hyper_free_span_info(tmp_spans) < 0)
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, NULL, "unable to free span info")
+                }
 
                 /* Check if there is an upper part of span 'b' */
                 if (span_a->high < span_b->high) {
@@ -8204,7 +8234,7 @@ H5S__hyper_merge_spans_helper(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_inf
                     if (H5S__hyper_append_span(&merged_spans, ndims, span_b->low, span_b->high,
                                                span_b->down) < 0)
                         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, NULL, "can't allocate hyperslab span")
-                } /* end if */
+                }
                 else {
                     /* Check if there is a lower part of span 'b' */
                     if (span_a->low > span_b->low) {
@@ -8226,8 +8256,9 @@ H5S__hyper_merge_spans_helper(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_inf
                         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, NULL, "can't allocate hyperslab span")
 
                     /* Release merged span tree for overlapped section */
-                    H5S__hyper_free_span_info(tmp_spans);
-                } /* end else */
+                    if (H5S__hyper_free_span_info(tmp_spans) < 0)
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, NULL, "unable to free span info")
+                }
 
                 /* Copy upper part of span 'a' as new span 'a' */
 
@@ -8288,7 +8319,8 @@ H5S__hyper_merge_spans_helper(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_inf
 done:
     if (ret_value == NULL)
         if (merged_spans)
-            H5S__hyper_free_span_info(merged_spans);
+            if (H5S__hyper_free_span_info(merged_spans) < 0)
+                HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, NULL, "unable to free span info")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_merge_spans_helper() */
@@ -8338,7 +8370,8 @@ H5S__hyper_merge_spans(H5S_t *space, H5S_hyper_span_info_t *new_spans)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTMERGE, FAIL, "can't merge hyperslab spans")
 
         /* Free the previous spans */
-        H5S__hyper_free_span_info(space->select.sel_info.hslab->span_lst);
+        if (H5S__hyper_free_span_info(space->select.sel_info.hslab->span_lst) < 0)
+            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info")
 
         /* Point to the new merged spans */
         space->select.sel_info.hslab->span_lst = merged_spans;
@@ -8500,7 +8533,8 @@ H5S__hyper_add_disjoint_spans(H5S_t *space, H5S_hyper_span_info_t *new_spans)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't merge hyperslabs")
 
     /* Free the memory space for new spans */
-    H5S__hyper_free_span_info(new_spans);
+    if (H5S__hyper_free_span_info(new_spans) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -9284,9 +9318,10 @@ H5S__fill_in_new_space(H5S_t *space1, H5S_seloper_t op, H5S_hyper_span_info_t *s
                     HDassert(space1 == *result);
 
                     /* Free the current selection */
-                    H5S__hyper_free_span_info(space1->select.sel_info.hslab->span_lst);
+                    if (H5S__hyper_free_span_info(space1->select.sel_info.hslab->span_lst) < 0)
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info")
                     space1->select.sel_info.hslab->span_lst = NULL;
-                } /* end if */
+                }
 
                 /* Copy space2's spans to *result */
                 if (!can_own_span2)
@@ -9295,7 +9330,7 @@ H5S__fill_in_new_space(H5S_t *space1, H5S_seloper_t op, H5S_hyper_span_info_t *s
                 else {
                     (*result)->select.sel_info.hslab->span_lst = space2_span_lst;
                     *span2_owned                               = TRUE;
-                } /* end else */
+                }
 
                 /* Reset the number of items in selection */
                 (*result)->select.num_elem = H5S__hyper_spans_nelem(space2_span_lst);
@@ -9366,9 +9401,10 @@ H5S__fill_in_new_space(H5S_t *space1, H5S_seloper_t op, H5S_hyper_span_info_t *s
                     HDassert(space1 == *result);
 
                     /* Free the current selection */
-                    H5S__hyper_free_span_info(space1->select.sel_info.hslab->span_lst);
+                    if (H5S__hyper_free_span_info(space1->select.sel_info.hslab->span_lst) < 0)
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info")
                     space1->select.sel_info.hslab->span_lst = NULL;
-                } /* end if */
+                }
 
                 /* Reset the number of items in selection */
                 /* (Will be set below) */
@@ -9455,17 +9491,20 @@ H5S__fill_in_new_space(H5S_t *space1, H5S_seloper_t op, H5S_hyper_span_info_t *s
             /* Convert *result to "none" selection */
             if (H5S_select_none(*result) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSELECT, FAIL, "can't convert selection")
-        } /* end else */
-    }     /* end if */
+        }
+    }
 
 done:
     /* Free resources */
     if (a_not_b)
-        H5S__hyper_free_span_info(a_not_b);
+        if (H5S__hyper_free_span_info(a_not_b) < 0)
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info")
     if (a_and_b)
-        H5S__hyper_free_span_info(a_and_b);
+        if (H5S__hyper_free_span_info(a_and_b) < 0)
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info")
     if (b_not_a)
-        H5S__hyper_free_span_info(b_not_a);
+        if (H5S__hyper_free_span_info(b_not_a) < 0)
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__fill_in_new_space() */
@@ -9507,7 +9546,8 @@ H5S__generate_hyperslab(H5S_t *space, H5S_seloper_t op, const hsize_t start[], c
     if (op == H5S_SELECT_SET) {
         /* Free current selection */
         if (NULL != space->select.sel_info.hslab->span_lst)
-            H5S__hyper_free_span_info(space->select.sel_info.hslab->span_lst);
+            if (H5S__hyper_free_span_info(space->select.sel_info.hslab->span_lst) < 0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info")
 
         /* Set the hyperslab selection to the new span tree */
         space->select.sel_info.hslab->span_lst = new_spans;
@@ -9517,7 +9557,7 @@ H5S__generate_hyperslab(H5S_t *space, H5S_seloper_t op, const hsize_t start[], c
 
         /* Indicate that the new_spans are owned */
         new_spans = NULL;
-    } /* end if */
+    }
     else {
         hbool_t new_spans_owned = FALSE;
         hbool_t updated_spans   = FALSE;
@@ -9550,11 +9590,12 @@ H5S__generate_hyperslab(H5S_t *space, H5S_seloper_t op, const hsize_t start[], c
         /* Indicate that the new_spans are owned, there's no need to free */
         if (new_spans_owned)
             new_spans = NULL;
-    } /* end else */
+    }
 
 done:
     if (new_spans)
-        H5S__hyper_free_span_info(new_spans);
+        if (H5S__hyper_free_span_info(new_spans) < 0)
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__generate_hyperslab() */
@@ -10968,15 +11009,16 @@ H5S__hyper_proj_int_build_proj(H5S_hyper_project_intersect_ud_t *udata)
                             udata->ds_low[udata->depth - 1], udata->ds_low[udata->depth - 1],
                             udata->ps_span_info[udata->depth]) < 0)
                         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, FAIL, "can't allocate hyperslab span")
-                    H5S__hyper_free_span_info(udata->ps_span_info[udata->depth]);
+                    if (H5S__hyper_free_span_info(udata->ps_span_info[udata->depth]) < 0)
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info")
                     udata->ps_span_info[udata->depth] = NULL;
-                } /* end if */
+                }
 
                 /* Ran out of spans, move up one dimension */
                 udata->depth--;
                 HDassert(udata->ds_span[udata->depth]);
                 udata->ds_low[udata->depth]++;
-            } /* end if */
+            }
             else
                 HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL,
                             "insufficient elements in destination selection")
@@ -11065,7 +11107,7 @@ H5S__hyper_proj_int_build_proj(H5S_hyper_project_intersect_ud_t *udata)
                                     udata->ds_span[udata->depth]->down) < 0)
                                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, FAIL,
                                             "can't allocate hyperslab span")
-                        } /* end if */
+                        }
                         else {
                             /* If we're not sharing the destination space's
                              * spans, we must copy it first (then release it
@@ -11084,9 +11126,10 @@ H5S__hyper_proj_int_build_proj(H5S_hyper_project_intersect_ud_t *udata)
                                     copied_span_info) < 0)
                                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, FAIL,
                                             "can't allocate hyperslab span")
-                            H5S__hyper_free_span_info(copied_span_info);
+                            if (H5S__hyper_free_span_info(copied_span_info) < 0)
+                                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info")
                             copied_span_info = NULL;
-                        } /* end else */
+                        }
                         udata->ds_low[udata->depth] +=
                             udata->nelem / udata->ds_span[udata->depth]->down->op_info[0].u.nelmts;
                         udata->nelem %= udata->ds_span[udata->depth]->down->op_info[0].u.nelmts;
@@ -11101,7 +11144,7 @@ H5S__hyper_proj_int_build_proj(H5S_hyper_project_intersect_ud_t *udata)
                                                udata->ds_span[udata->depth]->high,
                                                udata->ds_span[udata->depth]->down) < 0)
                         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, FAIL, "can't allocate hyperslab span")
-                } /* end if */
+                }
                 else {
                     /* If we're not sharing the destination space's
                      * spans, we must copy it first (then release it
@@ -11114,9 +11157,10 @@ H5S__hyper_proj_int_build_proj(H5S_hyper_project_intersect_ud_t *udata)
                                                udata->ds_rank - udata->depth, udata->ds_low[udata->depth],
                                                udata->ds_span[udata->depth]->high, copied_span_info) < 0)
                         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, FAIL, "can't allocate hyperslab span")
-                    H5S__hyper_free_span_info(copied_span_info);
+                    if (H5S__hyper_free_span_info(copied_span_info) < 0)
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info")
                     copied_span_info = NULL;
-                } /* end else */
+                }
                 udata->nelem -= udata->ds_span[udata->depth]->down->op_info[0].u.nelmts *
                                 (udata->ds_span[udata->depth]->high - udata->ds_low[udata->depth] + 1);
             } /* end if */
@@ -11156,7 +11200,8 @@ H5S__hyper_proj_int_build_proj(H5S_hyper_project_intersect_ud_t *udata)
                                        udata->ds_low[udata->depth - 1],
                                        udata->ps_span_info[udata->depth]) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, FAIL, "can't allocate hyperslab span")
-            H5S__hyper_free_span_info(udata->ps_span_info[udata->depth]);
+            if (H5S__hyper_free_span_info(udata->ps_span_info[udata->depth]) < 0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info")
             udata->ps_span_info[udata->depth] = NULL;
 
             /* Ran out of spans, move up one dimension */
@@ -11203,7 +11248,7 @@ H5S__hyper_proj_int_build_proj(H5S_hyper_project_intersect_ud_t *udata)
                                     udata->ds_span[udata->depth]->down) < 0)
                                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, FAIL,
                                             "can't allocate hyperslab span")
-                        } /* end if */
+                        }
                         else {
                             /* If we're not sharing the destination space's
                              * spans, we must copy it first (then release it
@@ -11222,9 +11267,10 @@ H5S__hyper_proj_int_build_proj(H5S_hyper_project_intersect_ud_t *udata)
                                     copied_span_info) < 0)
                                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, FAIL,
                                             "can't allocate hyperslab span")
-                            H5S__hyper_free_span_info(copied_span_info);
+                            if (H5S__hyper_free_span_info(copied_span_info) < 0)
+                                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info")
                             copied_span_info = NULL;
-                        } /* end else */
+                        }
                         udata->ds_low[udata->depth] +=
                             udata->nelem / udata->ds_span[udata->depth]->down->op_info[0].u.nelmts;
                         udata->nelem %= udata->ds_span[udata->depth]->down->op_info[0].u.nelmts;
@@ -11239,7 +11285,7 @@ H5S__hyper_proj_int_build_proj(H5S_hyper_project_intersect_ud_t *udata)
                                                udata->ds_span[udata->depth]->high,
                                                udata->ds_span[udata->depth]->down) < 0)
                         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, FAIL, "can't allocate hyperslab span")
-                } /* end if */
+                }
                 else {
                     /* If we're not sharing the destination space's
                      * spans, we must copy it first (then release it
@@ -11252,9 +11298,10 @@ H5S__hyper_proj_int_build_proj(H5S_hyper_project_intersect_ud_t *udata)
                                                udata->ds_rank - udata->depth, udata->ds_low[udata->depth],
                                                udata->ds_span[udata->depth]->high, copied_span_info) < 0)
                         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, FAIL, "can't allocate hyperslab span")
-                    H5S__hyper_free_span_info(copied_span_info);
+                    if (H5S__hyper_free_span_info(copied_span_info) < 0)
+                        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info")
                     copied_span_info = NULL;
-                } /* end else */
+                }
                 udata->nelem -= udata->ds_span[udata->depth]->down->op_info[0].u.nelmts *
                                 (udata->ds_span[udata->depth]->high - udata->ds_low[udata->depth] + 1);
 
@@ -11304,9 +11351,10 @@ done:
     /* Cleanup on failure */
     if (copied_span_info) {
         HDassert(ret_value < 0);
-        H5S__hyper_free_span_info(copied_span_info);
+        if (H5S__hyper_free_span_info(copied_span_info) < 0)
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info")
         copied_span_info = NULL;
-    } /* end if */
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_proj_int_build_proj() */
@@ -11568,10 +11616,11 @@ H5S__hyper_proj_int_iterate(H5S_hyper_span_info_t *ss_span_info, const H5S_hyper
                                            udata->ds_low[u - 1], udata->ds_low[u - 1],
                                            udata->ps_span_info[u]) < 0)
                     HGOTO_ERROR(H5E_DATASPACE, H5E_CANTAPPEND, FAIL, "can't allocate hyperslab span")
-                H5S__hyper_free_span_info(udata->ps_span_info[u]);
+                if (H5S__hyper_free_span_info(udata->ps_span_info[u]) < 0)
+                    HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info")
                 udata->ps_span_info[u] = NULL;
-            } /* end if */
-    }         /* end if */
+            }
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -11728,15 +11777,17 @@ H5S__hyper_project_intersection(H5S_t *src_space, H5S_t *dst_space, H5S_t *src_i
 done:
     /* Free ss_span_info_buf */
     if (ss_span_info_buf) {
-        H5S__hyper_free_span_info(ss_span_info_buf);
+        if (H5S__hyper_free_span_info(ss_span_info_buf) < 0)
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info")
         ss_span_info_buf = NULL;
-    } /* end if */
+    }
 
     /* Free ds_span_info_buf */
     if (ds_span_info_buf) {
-        H5S__hyper_free_span_info(ds_span_info_buf);
+        if (H5S__hyper_free_span_info(ds_span_info_buf) < 0)
+            HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info")
         ds_span_info_buf = NULL;
-    } /* end if */
+    }
 
     /* Cleanup on error */
     if (ret_value < 0) {
@@ -11745,10 +11796,11 @@ done:
         /* Free span trees */
         for (u = 0; u < udata.ds_rank; u++)
             if (udata.ps_span_info[u]) {
-                H5S__hyper_free_span_info(udata.ps_span_info[u]);
+                if (H5S__hyper_free_span_info(udata.ps_span_info[u]) < 0)
+                    HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span info")
                 udata.ps_span_info[u] = NULL;
-            } /* end if */
-    }         /* end if */
+            }
+    }
 
 #ifndef NDEBUG
     /* Verify there are no more span trees */
@@ -11757,7 +11809,7 @@ done:
 
         for (u = 0; u < H5S_MAX_RANK; u++)
             HDassert(!udata.ps_span_info[u]);
-    }  /* end block */
+    }
 #endif /* NDEBUG */
 
     FUNC_LEAVE_NOAPI(ret_value)
