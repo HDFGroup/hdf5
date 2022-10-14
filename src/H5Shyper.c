@@ -54,7 +54,7 @@
         if (recover) {                                                                                       \
             H5S__hyper_free_span(curr_span);                                                                 \
             (recover) = FALSE;                                                                               \
-        } /* end if */                                                                                       \
+        }                                                                                                    \
                                                                                                              \
         /* Set the current span to saved next span */                                                        \
         (curr_span) = saved_next_span;                                                                       \
@@ -3099,7 +3099,7 @@ done:
  PURPOSE
     Free a hyperslab span info node
  USAGE
-    void H5S__hyper_free_span_info(span_info)
+    herr_t H5S__hyper_free_span_info(span_info)
         H5S_hyper_span_info_t *span_info;      IN: Span info node to free
  RETURNS
     SUCCEED/FAIL
@@ -3139,7 +3139,8 @@ H5S__hyper_free_span_info(H5S_hyper_span_info_t *span_info)
             next_span = span->next;
 
             /* Free the current span */
-            H5S__hyper_free_span(span);
+            if (H5S__hyper_free_span(span) < 0)
+                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span")
 
             /* Advance to next span */
             span = next_span;
@@ -3159,7 +3160,7 @@ done:
  PURPOSE
     Free a hyperslab span node
  USAGE
-    void H5S__hyper_free_span(span)
+    herr_t H5S__hyper_free_span(span)
         H5S_hyper_span_t *span;      IN: Span node to free
  RETURNS
     SUCCEED/FAIL
@@ -6004,8 +6005,9 @@ H5S__hyper_add_span_element_helper(H5S_hyper_span_info_t *span_tree, unsigned ra
                         } /* end else */
 
                         /* Release last span created */
-                        H5S__hyper_free_span(stop_span);
-                    } /* end if */
+                        if (H5S__hyper_free_span(stop_span) < 0)
+                            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span")
+                    }
                     /* Span is disjoint, but has the same "down tree" selection */
                     /* (If it has a "down tree") */
                     else if (stop_span->down) {
@@ -6702,9 +6704,9 @@ H5S__hyper_project_simple_higher(const H5S_t *base_space, H5S_t *new_space)
         /* Allocate a new span_info node */
         if (NULL == (new_span_info = H5S__hyper_new_span_info(new_space->extent.rank))) {
             if (prev_span)
-                H5S__hyper_free_span(prev_span);
+                (void)H5S__hyper_free_span(prev_span);
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTALLOC, FAIL, "can't allocate hyperslab span info")
-        } /* end if */
+        }
 
         /* Check for linking into higher span */
         if (prev_span)
@@ -6756,11 +6758,12 @@ H5S__hyper_project_simple_higher(const H5S_t *base_space, H5S_t *new_space)
 done:
     if (ret_value < 0 && new_space->select.sel_info.hslab->span_lst) {
         if (new_space->select.sel_info.hslab->span_lst->head)
-            H5S__hyper_free_span(new_space->select.sel_info.hslab->span_lst->head);
+            if (H5S__hyper_free_span(new_space->select.sel_info.hslab->span_lst->head) < 0)
+                HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span")
 
         new_space->select.sel_info.hslab->span_lst =
             (H5S_hyper_span_info_t *)H5FL_ARR_FREE(hbounds_t, new_space->select.sel_info.hslab->span_lst);
-    } /* end if */
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_project_simple_higher() */
@@ -7318,7 +7321,8 @@ H5S__hyper_append_span(H5S_hyper_span_info_t **span_tree, unsigned ndims, hsize_
 done:
     if (ret_value < 0)
         if (new_span)
-            H5S__hyper_free_span(new_span);
+            if (H5S__hyper_free_span(new_span) < 0)
+                HDONE_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__hyper_append_span() */
@@ -7948,7 +7952,8 @@ H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
                 else {
                     /* Free the span, if it's generated */
                     if (recover_a)
-                        H5S__hyper_free_span(span_a);
+                        if (H5S__hyper_free_span(span_a) < 0)
+                            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span")
                 } /* end else */
             }     /* end if */
             /* Clean up 'b' spans which haven't been covered yet */
@@ -7975,7 +7980,8 @@ H5S__hyper_clip_spans(H5S_hyper_span_info_t *a_spans, H5S_hyper_span_info_t *b_s
                 else {
                     /* Free the span, if it's generated */
                     if (recover_b)
-                        H5S__hyper_free_span(span_b);
+                        if (H5S__hyper_free_span(span_b) < 0)
+                            HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "unable to free span")
                 } /* end else */
             }     /* end if */
             else
