@@ -501,13 +501,13 @@ char *
 H5MM_strndup(const char *s, size_t n)
 {
     size_t len;
-    char *ret_value = NULL;
+    char  *ret_value = NULL;
 
     FUNC_ENTER_NOAPI(NULL)
 
     if (!s)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "NULL string not allowed")
-        
+
     for (len = 0; len < n && s[len] != '\0'; len++)
         ;
 
