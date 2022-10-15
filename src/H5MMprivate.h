@@ -38,8 +38,8 @@
 /*
  * Library prototypes...
  */
-H5_DLL char  *H5MM_xstrdup(const char *s);
-H5_DLL void  *H5MM_xfree(void *mem);
-H5_DLL void  *H5MM_xfree_const(const void *mem);
+H5_DLL char *H5MM_xstrdup(const char *s);
+H5_DLL void *H5MM_xfree(void *mem);
+H5_DLL void *H5MM_xfree_const(const void *mem);
 
 #endif /* H5MMprivate_H */
