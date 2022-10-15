@@ -55,13 +55,29 @@ New Features
 
       (ADB - 2022/08/29, HDFFV-11329)
 
-    -
+    - Removed the --enable-memory-alloc-sanity-check Autotools configure option
+      and the HDF5_MEMORY_ALLOC_SANITY_CHECK CMake option
+
+      The memory allocation sanity checks have been removed from the library.
+
+      (DER - 2022/10/15)
 
 
     Library:
     --------
-    -
+    - Removed the memory allocation sanity checks from the library
 
+      This feature added heap canaries to memory allocated inside the library
+      that were checked on library close. Although potentially helpful, other
+      methods for investigating memory leaks exist (valgrind, -fsanitize, etc.)
+      and the heap canaries caused problems with filters and API calls that
+      return library-allocated memory.
+
+      As a part of this change, the H5get_alloc_stats() API call has been
+      removed from the library. The Autotools and CMake features that
+      enabled this feature have also been removed (see above).
+
+      (DER - 2022/10/15)
 
     Parallel Library:
     -----------------
@@ -75,7 +91,7 @@ New Features
       Added Fortran H5Dfill_f, which is fully equivalent to the C API. It accepts pointers,
       fill value datatype and datatype of dataspace elements.
 
-      (MSB - 2022/10/10, HDFFV-10734.)
+      (MSB - 2022/10/10, HDFFV-10734)
 
     C++ Library:
     ------------
