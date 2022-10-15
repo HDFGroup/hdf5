@@ -27,19 +27,19 @@
 /* Private headers needed by this file */
 #include "H5private.h"
 
-#define H5MM_free(Z) HDfree(Z)
+#define H5MM_malloc(size)        HDmalloc(size)
+#define H5MM_calloc(size)        HDcalloc(1, size)
+#define H5MM_realloc(ptr, size)  HDrealloc(ptr, size)
+#define H5MM_free(ptr)           HDfree(ptr)
+#define H5MM_strdup(s)           HDstrdup(s)
+#define H5MM_strndup(s, n)       HDstrndup(s, n)
+#define H5MM_memcpy(dst, src, n) HDmemcpy(dst, src, n)
 
 /*
  * Library prototypes...
  */
-H5_DLL void  *H5MM_malloc(size_t size) H5_ATTR_MALLOC;
-H5_DLL void  *H5MM_calloc(size_t size) H5_ATTR_MALLOC;
-H5_DLL void  *H5MM_realloc(void *mem, size_t size);
 H5_DLL char  *H5MM_xstrdup(const char *s);
-H5_DLL char  *H5MM_strdup(const char *s);
-H5_DLL char  *H5MM_strndup(const char *s, size_t n);
 H5_DLL void  *H5MM_xfree(void *mem);
 H5_DLL void  *H5MM_xfree_const(const void *mem);
-H5_DLL void  *H5MM_memcpy(void *dest, const void *src, size_t n);
 
 #endif /* H5MMprivate_H */

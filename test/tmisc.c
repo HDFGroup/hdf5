@@ -5809,64 +5809,6 @@ test_misc33(void)
 
 /****************************************************************
 **
-**  test_misc34(): Ensure zero-size memory allocations work
-**
-****************************************************************/
-static void
-test_misc34(void)
-{
-    void  *mem = NULL; /* allocated buffer     */
-    char  *dup = NULL; /* 'duplicated' string  */
-    size_t sz  = 0;    /* buffer size          */
-
-    /* Output message about test being performed */
-    MESSAGE(5, ("Testing O and NULL behavior in H5MM API calls"));
-
-    /* H5MM_xfree(): Ensure that passing NULL is allowed and returns NULL */
-    mem = H5MM_xfree(mem);
-    CHECK_PTR_NULL(mem, "H5MM_xfree");
-
-    /* H5MM_malloc(): Ensure that size 0 returns NULL */
-    mem = H5MM_malloc(sz);
-    CHECK_PTR_NULL(mem, "H5MM_malloc");
-    mem = H5MM_xfree(mem);
-
-    /* H5MM_calloc(): Ensure that size 0 returns NULL */
-    mem = H5MM_calloc(sz);
-    CHECK_PTR_NULL(mem, "H5MM_calloc");
-    mem = H5MM_xfree(mem);
-
-    /* H5MM_realloc(): Check behavior:
-     *
-     *  H5MM_realloc(NULL, size)    <==> H5MM_malloc(size)
-     *  H5MM_realloc(ptr, 0)        <==> H5MM_xfree(ptr)
-     *  H5MM_realloc(NULL, 0)       <==> NULL
-     */
-    mem = H5MM_xfree(mem);
-
-    sz  = 1024;
-    mem = H5MM_realloc(mem, sz);
-    CHECK_PTR(mem, "H5MM_realloc (case 1)");
-    /* Don't free mem here! */
-
-    sz  = 0;
-    mem = H5MM_realloc(mem, sz);
-    CHECK_PTR_NULL(mem, "H5MM_realloc (case 2)");
-    mem = H5MM_xfree(mem);
-
-    mem = H5MM_realloc(mem, sz);
-    CHECK_PTR_NULL(mem, "H5MM_realloc (case 3)");
-    mem = H5MM_xfree(mem);
-
-    /* H5MM_xstrdup(): Ensure NULL returns NULL */
-    dup = H5MM_xstrdup((const char *)mem);
-    CHECK_PTR_NULL(dup, "H5MM_xstrdup");
-    dup = (char *)H5MM_xfree((void *)dup);
-
-} /* end test_misc34() */
-
-/****************************************************************
-**
 **  test_misc35(): Check operation of free-list routines
 **
 ****************************************************************/
@@ -6119,7 +6061,6 @@ test_misc(void)
 
     test_misc32(); /* Test filter memory allocation functions */
     test_misc33(); /* Test to verify that H5HL_offset_into() returns error if offset exceeds heap block */
-    test_misc34(); /* Test behavior of 0 and NULL in H5MM API calls */
     test_misc35(); /* Test behavior of free-list & allocation statistics API calls */
     test_misc36(); /* Exercise H5atclose and H5is_library_terminating */
 

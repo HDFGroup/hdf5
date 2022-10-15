@@ -56,110 +56,6 @@
 /*******************/
 
 /*-------------------------------------------------------------------------
- * Function:    H5MM_malloc
- *
- * Purpose:     Similar to the C89 version of malloc().
- *
- *              On size of 0, we return a NULL pointer instead of the
- *              standard-allowed 'special' pointer since that's more
- *              difficult to check as a return value. This is still
- *              considered an error condition since allocations of zero
- *              bytes usually indicate problems.
- *
- * Return:      Success:    Pointer to new memory
- *              Failure:    NULL
- *-------------------------------------------------------------------------
- */
-void *
-H5MM_malloc(size_t size)
-{
-    void *ret_value = NULL;
-
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    if (size)
-        ret_value = HDmalloc(size);
-    else
-        ret_value = NULL;
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5MM_malloc() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5MM_calloc
- *
- * Purpose:     Similar to the C89 version of calloc(), except this
- *              routine just takes a 'size' parameter.
- *
- *              On size of 0, we return a NULL pointer instead of the
- *              standard-allowed 'special' pointer since that's more
- *              difficult to check as a return value. This is still
- *              considered an error condition since allocations of zero
- *              bytes usually indicate problems.
- *
- *
- * Return:      Success:    Pointer to new memory
- *              Failure:    NULL
- *-------------------------------------------------------------------------
- */
-void *
-H5MM_calloc(size_t size)
-{
-    void *ret_value = NULL;
-
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    if (size)
-        ret_value = HDcalloc((size_t)1, size);
-    else
-        ret_value = NULL;
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5MM_calloc() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5MM_realloc
- *
- * Purpose:     Similar semantics as C89's realloc(). Specifically, the
- *              following calls are equivalent:
- *
- *              H5MM_realloc(NULL, size)    <==> H5MM_malloc(size)
- *              H5MM_realloc(ptr, 0)        <==> H5MM_xfree(ptr)
- *              H5MM_realloc(NULL, 0)       <==> NULL
- *
- *              Note that the (NULL, 0) combination is undefined behavior
- *              in the C standard.
- *
- * Return:      Success:    Ptr to new memory if size > 0
- *                          NULL if size is zero
- *              Failure:    NULL (input buffer is unchanged on failure)
- *-------------------------------------------------------------------------
- */
-void *
-H5MM_realloc(void *mem, size_t size)
-{
-    void *ret_value = NULL;
-
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    if (NULL == mem && 0 == size)
-        /* Not defined in the standard, return NULL */
-        ret_value = NULL;
-    else {
-        ret_value = HDrealloc(mem, size);
-
-        /* Some platforms do not return NULL if size is zero. */
-        if (0 == size)
-            ret_value = NULL;
-    }
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5MM_realloc() */
-
-/*-------------------------------------------------------------------------
  * Function:    H5MM_xstrdup
  *
  * Purpose:     Duplicates a string, including memory allocation.
@@ -185,75 +81,12 @@ done:
 } /* end H5MM_xstrdup() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5MM_strdup
- *
- * Purpose:     Duplicates a string, including memory allocation.
- *              NULL is NOT an acceptable value for the input string.
- *
- *              If the string to be duplicated is the NULL pointer, then
- *              an error will be raised.
- *
- * Return:      Success:    Pointer to a new string
- *              Failure:    NULL
- *-------------------------------------------------------------------------
- */
-char *
-H5MM_strdup(const char *s)
-{
-    char *ret_value = NULL;
-
-    FUNC_ENTER_NOAPI(NULL)
-
-    if (!s)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "NULL string not allowed")
-    if (NULL == (ret_value = HDstrdup(s)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "string duplication failed")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5MM_strdup() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5MM_strndup
- *
- * Purpose:     Duplicates a string, including memory allocation, but only
- *              copies at most `n` bytes from the string to be duplicated.
- *              If the string to be duplicated is longer than `n`, only `n`
- *              bytes are copied and a terminating null byte is added.
- *              NULL is NOT an acceptable value for the input string.
- *
- *              If the string to be duplicated is the NULL pointer, then
- *              an error will be raised.
- *
- * Return:      Success:    Pointer to a new string
- *              Failure:    NULL
- *-------------------------------------------------------------------------
- */
-char *
-H5MM_strndup(const char *s, size_t n)
-{
-    char *ret_value = NULL;
-
-    FUNC_ENTER_NOAPI(NULL)
-
-    if (!s)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "NULL string not allowed")
-
-    if (NULL == (ret_value = HDstrndup(s, n)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "string duplication failed")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5MM_strndup() */
-
-/*-------------------------------------------------------------------------
  * Function:    H5MM_xfree
  *
- * Purpose:     Just like free(3) except null pointers are allowed as
- *              arguments, and the return value (always NULL) can be
- *              assigned to the pointer whose memory was just freed:
+ * Purpose:     Just like free(3) except the return value (always NULL) can
+ *              be assigned to the pointer whose memory was just freed:
  *
- *              thing = H5MM_xfree (thing);
+ *              thing = H5MM_xfree(thing);
  *
  * Return:      Success:    NULL
  *              Failure:    never fails
@@ -293,33 +126,3 @@ H5MM_xfree_const(const void *mem)
 
     FUNC_LEAVE_NOAPI(NULL)
 } /* end H5MM_xfree_const() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5MM_memcpy
- *
- * Purpose:     Like memcpy(3) but with sanity checks on the parameters,
- *              particularly buffer overlap.
- *
- * Return:      Success:    pointer to dest
- *              Failure:    NULL
- *-------------------------------------------------------------------------
- */
-void *
-H5MM_memcpy(void *dest, const void *src, size_t n)
-{
-    void *ret = NULL;
-
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    HDassert(dest);
-    HDassert(src);
-
-    /* Check for buffer overlap */
-    HDassert((char *)dest >= (const char *)src + n || (const char *)src >= (char *)dest + n);
-
-    /* Copy */
-    ret = HDmemcpy(dest, src, n);
-
-    FUNC_LEAVE_NOAPI(ret)
-} /* end H5MM_memcpy() */
