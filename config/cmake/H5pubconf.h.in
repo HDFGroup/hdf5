@@ -439,9 +439,6 @@
 /* Define to the sub-directory where libtool stores uninstalled libraries. */
 #cmakedefine H5_LT_OBJDIR @H5_LT_OBJDIR@
 
-/* Define to enable internal memory allocation sanity checking. */
-#cmakedefine H5_MEMORY_ALLOC_SANITY_CHECK @H5_MEMORY_ALLOC_SANITY_CHECK@
-
 /* Define if deprecated public API symbols are disabled */
 #cmakedefine H5_NO_DEPRECATED_SYMBOLS @H5_NO_DEPRECATED_SYMBOLS@
 

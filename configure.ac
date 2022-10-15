@@ -2689,50 +2689,6 @@ case "X-$USINGMEMCHECKER" in
     ;;
 esac
 
-## ----------------------------------------------------------------------
-## Check if they would like to enable the internal memory allocation sanity
-##     checking code.
-##
-AC_MSG_CHECKING([whether internal memory allocation sanity checking is used])
-AC_ARG_ENABLE([memory-alloc-sanity-check],
-              [AS_HELP_STRING([--enable-memory-alloc-sanity-check],
-                              [Enable this option to turn on internal memory
-                              allocation sanity checking.  This could cause
-                              more memory use and somewhat slower allocation.
-                              This option may also cause issues with HDF5
-                              filter plugins, so should not be enabled if
-                              filters are to be used.  This option is orthogonal
-                              to the --enable-using-memchecker option.
-                               [default=no]
-                              ])],
-              [MEMORYALLOCSANITYCHECK=$enableval])
-
-## Allow this variable to be substituted in
-## other files (src/libhdf5.settings.in, etc.)
-AC_SUBST([MEMORYALLOCSANITYCHECK])
-
-## Set default
-if test "X-$MEMORYALLOCSANITYCHECK" = X- ; then
-# Should consider enabling this option by default for
-# 'developer' builds if that build mode is added in
-# the future
-  MEMORYALLOCSANITYCHECK=no
-fi
-
-case "X-$MEMORYALLOCSANITYCHECK" in
-  X-yes)
-      AC_DEFINE([MEMORY_ALLOC_SANITY_CHECK], [1],
-                [Define to enable internal memory allocation sanity checking.])
-      AC_MSG_RESULT([yes])
-    ;;
-  X-no)
-      AC_MSG_RESULT([no])
-    ;;
-  *)
-      AC_MSG_ERROR([Unrecognized value: $MEMORYALLOCSANITYCHECK])
-    ;;
-esac
-
 ## Checkpoint the cache
 AC_CACHE_SAVE
 

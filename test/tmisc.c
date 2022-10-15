@@ -5886,7 +5886,6 @@ test_misc35(void)
     size_t           arr_size_final; /* Final amount of array memory allocated */
     size_t           blk_size_final; /* Final amount of block memory allocated */
     size_t           fac_size_final; /* Final amount of factory memory allocated */
-    H5_alloc_stats_t alloc_stats;    /* Memory stats */
     herr_t           ret;            /* Return value */
 
     /* Output message about test being performed */
@@ -5915,13 +5914,13 @@ test_misc35(void)
     CHECK(arr_size_start, 0, "H5get_free_list_sizes");
     CHECK(blk_size_start, 0, "H5get_free_list_sizes");
     CHECK(fac_size_start, 0, "H5get_free_list_sizes");
-#else  /* H5_MEMORY_ALLOC_SANITY_CHECK */
+#else
     /* All the values should be == 0 */
     VERIFY(reg_size_start, 0, "H5get_free_list_sizes");
     VERIFY(arr_size_start, 0, "H5get_free_list_sizes");
     VERIFY(blk_size_start, 0, "H5get_free_list_sizes");
     VERIFY(fac_size_start, 0, "H5get_free_list_sizes");
-#endif /* H5_MEMORY_ALLOC_SANITY_CHECK */
+#endif
 
     /* Garbage collect the free lists */
     ret = H5garbage_collect();
@@ -5940,30 +5939,6 @@ test_misc35(void)
         ERROR("blk_size_final > blk_size_start");
     if (fac_size_final > fac_size_start)
         ERROR("fac_size_final > fac_size_start");
-
-    /* Retrieve memory allocation statistics */
-    ret = H5get_alloc_stats(&alloc_stats);
-    CHECK(ret, FAIL, "H5get_alloc_stats");
-
-#if defined H5_MEMORY_ALLOC_SANITY_CHECK
-    /* All the values should be >0 */
-    CHECK(alloc_stats.total_alloc_bytes, 0, "H5get_alloc_stats");
-    CHECK(alloc_stats.curr_alloc_bytes, 0, "H5get_alloc_stats");
-    CHECK(alloc_stats.peak_alloc_bytes, 0, "H5get_alloc_stats");
-    CHECK(alloc_stats.max_block_size, 0, "H5get_alloc_stats");
-    CHECK(alloc_stats.total_alloc_blocks_count, 0, "H5get_alloc_stats");
-    CHECK(alloc_stats.curr_alloc_blocks_count, 0, "H5get_alloc_stats");
-    CHECK(alloc_stats.peak_alloc_blocks_count, 0, "H5get_alloc_stats");
-#else  /* H5_MEMORY_ALLOC_SANITY_CHECK */
-    /* All the values should be == 0 */
-    VERIFY(alloc_stats.total_alloc_bytes, 0, "H5get_alloc_stats");
-    VERIFY(alloc_stats.curr_alloc_bytes, 0, "H5get_alloc_stats");
-    VERIFY(alloc_stats.peak_alloc_bytes, 0, "H5get_alloc_stats");
-    VERIFY(alloc_stats.max_block_size, 0, "H5get_alloc_stats");
-    VERIFY(alloc_stats.total_alloc_blocks_count, 0, "H5get_alloc_stats");
-    VERIFY(alloc_stats.curr_alloc_blocks_count, 0, "H5get_alloc_stats");
-    VERIFY(alloc_stats.peak_alloc_blocks_count, 0, "H5get_alloc_stats");
-#endif /* H5_MEMORY_ALLOC_SANITY_CHECK */
 
 } /* end test_misc35() */
 
