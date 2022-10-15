@@ -1177,10 +1177,12 @@ H5allocate_memory(size_t size, hbool_t clear)
     FUNC_ENTER_API_NOINIT
     H5TRACE2("*x", "zb", size, clear);
 
-    if (clear)
-        ret_value = H5MM_calloc(size);
-    else
-        ret_value = H5MM_malloc(size);
+    if (size != 0) {
+        if (clear)
+            ret_value = H5MM_calloc(size);
+        else
+            ret_value = H5MM_malloc(size);
+    }
 
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5allocate_memory() */
@@ -1217,7 +1219,10 @@ H5resize_memory(void *mem, size_t size)
     FUNC_ENTER_API_NOINIT
     H5TRACE2("*x", "*xz", mem, size);
 
-    ret_value = H5MM_realloc(mem, size);
+    if (size != 0)
+        ret_value = H5MM_realloc(mem, size);
+    else if (mem)
+        ret_value = H5MM_xfree(mem);
 
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5resize_memory() */
