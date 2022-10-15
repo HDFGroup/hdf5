@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # Copyright by The HDF Group.                                              
 # All rights reserved.                                                     
@@ -49,7 +49,7 @@ while getopts ":h:f:" option; do
       h) # display Help
          usage
          exit;;
-      f) # subfiling configureation file
+      f) # subfiling configuration file
          file_config=$OPTARG;;
      \?) # Invalid option
          echo -e "$RED ERROR: Invalid option ${BLD}-${OPTARG}${RED} $NC"

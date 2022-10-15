@@ -2890,7 +2890,7 @@ H5FD__mpio_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR
          * call.
          *
          * In practice, most (all?) truncate calls will come after a barrier
-         * and with no interviening writes to the file (with the possible
+         * and with no intervening writes to the file (with the possible
          * exception of sueprblock / superblock extension message updates).
          *
          * Check the "MPI file closing" flag in the API context to determine

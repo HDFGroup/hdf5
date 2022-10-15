@@ -443,22 +443,6 @@ H5_get_win32_times(H5_timevals_t *tvs /*in,out*/)
 } /* end H5_get_win32_times() */
 #endif
 
-#define WloginBuffer_count 256
-static char Wlogin_buffer[WloginBuffer_count];
-
-char *
-Wgetlogin(void)
-{
-
-#ifdef H5_HAVE_WIN32_API
-    DWORD bufferCount = WloginBuffer_count;
-    if (GetUserName(Wlogin_buffer, &bufferCount) != 0)
-        return (Wlogin_buffer);
-    else
-#endif
-        return NULL;
-}
-
 /*-------------------------------------------------------------------------
  * Function:    Wflock
  *
@@ -935,7 +919,273 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5_expand_windows_env_vars() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5_strndup
+ *
+ * Purpose:     Similar to strndup() for use on Windows. Allocates a new
+ *              string and copies at most `n` bytes from the original
+ *              string into the new string. If the original string is
+ *              longer than `n`, only `n` bytes are copied from the
+ *              original string. In either case, the string being returned
+ *              is guaranteed to be terminated with a null byte.
+ *
+ *              The returned pointer is allocated by H5MM_malloc in this
+ *              routine and must be freed by the caller with H5MM_free or
+ *              H5MM_xfree.
+ *
+ * Return:      Pointer to copied string on success
+ *              NULL on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+char *
+H5_strndup(const char *s, size_t n)
+{
+    size_t len;
+    char  *ret_value = NULL;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if (!s)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "string cannot be NULL")
+
+    for (len = 0; len < n && s[len] != '\0'; len++)
+        ;
+
+    if (NULL == (ret_value = H5MM_malloc(len + 1)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate buffer for string")
+
+    H5MM_memcpy(ret_value, s, len);
+    ret_value[len] = '\0';
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
 #endif /* H5_HAVE_WIN32_API */
+
+/* dirname() and basename() are not easily ported to Windows and basename
+ * behavior varies depending on if you get POSIX vs. GNU. As a more
+ * platform-indpendent work-around, we've implemented H5_ versions of
+ * dirname() and basename().
+ *
+ * - The input string is never modified.
+ *
+ * - The out parameter is a new string that was allocated with H5MM routines
+ *   and must be freed by the caller via H5MM_free()/H5MM_xfree().
+ *
+ * - NULL pointers are errors.
+ *
+ * - On errors, FAIL will be returned and the output parameter will be
+ *   undefined.
+ *
+ * - Assumes the file separator is \ on Win32 and / everywhere else,
+ *   including Cygwin.
+ */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5_dirname
+ *
+ * Purpose:     Similar to dirname(3) but more portable across platforms.
+ *              Returns a pointer to the directory component of a specified
+ *              pathname. The returned pointer is allocated by this routine
+ *              and must be freed by the caller with H5MM_free or
+ *              H5MM_xfree.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5_dirname(const char *path, char **dirname)
+{
+    char  *sep;
+    char  *out       = NULL;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if (!path)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "path can't be NULL")
+    if (!dirname)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dirname can't be NULL")
+
+    if (NULL == (sep = HDstrrchr(path, H5_DIR_SEPC))) {
+        /* Pathname with no file separator characters */
+        out = H5MM_strdup(".");
+    }
+    else if (sep == path) {
+        /* Pathname of form "/" or "/filename" */
+        out = H5MM_strdup(H5_DIR_SEPS);
+    }
+    else {
+        if (sep[1] == '\0') {
+            /*
+             * Last file separator character is last character in
+             * pathname. Skip this and any other preceding trailing
+             * file separator characters
+             */
+            while (sep != path && sep[-1] == H5_DIR_SEPC)
+                sep--;
+
+            if (sep == path) {
+                /* Contrived case: "//", "///" and similar */
+                out = H5MM_strdup(H5_DIR_SEPS);
+                sep = NULL;
+            }
+            else {
+                /*
+                 * Must have found the filename component. Search
+                 * backwards to a previous file separator character,
+                 * if any.
+                 */
+                while (sep != path && sep[-1] != H5_DIR_SEPC)
+                    sep--;
+
+                if (sep == path) {
+                    /* No directory component found, just return "." */
+                    out = H5MM_strdup(".");
+                    sep = NULL;
+                }
+            }
+        }
+
+        if (sep) {
+            ptrdiff_t len;
+
+            /* Skip a possible run of duplicate file separator characters */
+            while (sep != path && sep[-1] == H5_DIR_SEPC)
+                sep--;
+
+            if (sep == path)
+                /* Pathname of form "/usr/" */
+                out = H5MM_strdup(H5_DIR_SEPS);
+            else {
+                /* Pathname of form "dir/filename" */
+                len = sep - path;
+                HDassert(len >= 0);
+
+                out = H5MM_strndup(path, (size_t)len);
+            }
+        }
+    }
+
+    if (NULL == out)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer for dirname");
+
+    *dirname = out;
+
+done:
+    if (FAIL == ret_value) {
+        H5MM_free(out);
+        if (dirname)
+            *dirname = NULL;
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5_dirname() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5_basename
+ *
+ * Purpose:     Similar to basename(3) but more portable across platforms.
+ *              Returns a pointer to the filename component of a specified
+ *              pathname. The returned pointer is allocated by this routine
+ *              and must be freed by the caller with H5MM_free or
+ *              H5MM_xfree.
+ *
+ *              NOTE: This routine follows the POSIX semantics for
+ *              basename(3). That is, passing the path string "/" ("\" on
+ *              Windows) returns the string "/" (again, "\" on Windows) and
+ *              passing a path string with trailing file separator
+ *              characters returns the filename component with the trailing
+ *              file separator characters being ignored.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5_basename(const char *path, char **basename)
+{
+    const char *sep;
+    char       *out       = NULL;
+    herr_t      ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    if (!path)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "path can't be NULL")
+    if (!basename)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "basename can't be NULL")
+
+    if (NULL == (sep = HDstrrchr(path, H5_DIR_SEPC))) {
+        if (*path == '\0')
+            /* Empty pathname */
+            out = H5MM_strdup(".");
+        else
+            /* Pathname with no file separator characters */
+            out = H5MM_strdup(path);
+    }
+    else if (sep == path) {
+        if (sep[1] == '\0')
+            /* Pathname of form "/" */
+            out = H5MM_strdup(H5_DIR_SEPS);
+        else
+            /* Pathname of form "/filename" */
+            out = H5MM_strdup(sep + 1);
+    }
+    else {
+        if (sep[1] != '\0')
+            /* Pathname of form "dir/filename" */
+            out = H5MM_strdup(sep + 1);
+        else {
+            /* Pathname of form "filename/", "/dir/filename/", etc. */
+
+            /*
+             * Last file separator character is last character in
+             * pathname. Skip this and any other preceding trailing
+             * file separator characters
+             */
+            while (sep != path && sep[-1] == H5_DIR_SEPC)
+                sep--;
+
+            if (sep == path)
+                /* Contrived case: "//", "///" and similar */
+                out = H5MM_strdup(H5_DIR_SEPS);
+            else {
+                const char *c_ptr = sep;
+                ptrdiff_t   len;
+
+                /*
+                 * Skip back to a previous file separator character,
+                 * if any, and form final filename component
+                 */
+                while (c_ptr != path && c_ptr[-1] != H5_DIR_SEPC)
+                    c_ptr--;
+
+                len = sep - c_ptr;
+                HDassert(len >= 0);
+
+                out = H5MM_strndup(c_ptr, (size_t)len);
+            }
+        }
+    }
+
+    if (NULL == out)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer for basename");
+
+    *basename = out;
+
+done:
+    if (FAIL == ret_value) {
+        H5MM_free(out);
+        if (basename)
+            *basename = NULL;
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5_basename() */
 
 /* Global variables */
 int         H5_opterr = 1; /* Get_option prints errors if this is on */
@@ -1100,3 +1350,42 @@ H5_get_option(int argc, const char *const *argv, const char *opts, const struct 
     /* return the current flag character found */
     return optchar;
 }
+
+/*-------------------------------------------------------------------------
+ * Function:    H5_strcasestr
+ *
+ * Purpose:     Find the first occurrence of the substring needle in the
+ *              string haystack ignoring case.
+ *
+ * Return:      Success:  Pointer to the beginning of the located substring
+ *
+ *              Failure:  NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+char *
+H5_strcasestr(const char *haystack, const char *needle)
+{
+    /* Check arguments. */
+    HDassert(haystack);
+    HDassert(needle);
+
+    /* begin once from each character of haystack, until needle is found */
+    do {
+        const char *h = haystack;
+        const char *n = needle;
+        /* loop while lowercase strings match, or needle ends */
+        while (HDtolower(*h) == HDtolower(*n) && *n) {
+            h++;
+            n++;
+        }
+        /* if all characters in needle matched we found it */
+        if (*n == 0) {
+            /* must discard const qualifier here, so turn off the warning */
+            H5_GCC_CLANG_DIAG_OFF("cast-qual")
+            return (char *)haystack;
+            H5_GCC_CLANG_DIAG_ON("cast-qual")
+        }
+    } while (*haystack++);
+    return 0;
+} /* end H5_strcasestr() */

@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.12)
+cmake_minimum_required (VERSION 3.18)
 project (HDF5_F90_SRC C Fortran)
 
 #-----------------------------------------------------------------------------
@@ -10,6 +10,9 @@ if (WIN32)
         set (H5_NOPAREXP ";")
       endif ()
       set (H5_F03EXP ";")
+      if (NOT H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE)
+        set (H5_DBL_NOT_UNIQUE_EXP ";")
+      endif ()
       configure_file (${HDF5_F90_SRC_SOURCE_DIR}/hdf5_fortrandll.def.in ${HDF5_F90_SRC_BINARY_DIR}/hdf5_fortrandll.def @ONLY)
     endif ()
   endif ()

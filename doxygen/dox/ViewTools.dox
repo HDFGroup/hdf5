@@ -1,0 +1,1198 @@
+/** @page ViewTools Tools for Viewing and Editing HDF5 Files
+
+Navigate back: \ref index "Main" / \ref GettingStarted
+<hr>
+
+\section secToolsBasic Basic Facts about HDF5
+The following are basic facts about HDF5 files to keep in mind while completing these tutorial topics:
+\li All HDF5 files contain a root group "/".
+\li There are two primary objects in HDF5, a group and a dataset:<br />
+    Groups allow objects to be organized into a group structure, such as a tree.<br />
+    Datasets contain raw data values.
+\li Additional information about an HDF5 object may optionally be stored in attributes attached to the object.
+
+\section secToolsTopics Tutorial Topics
+<table>
+<tr>
+<th>Tutorial Topic</th>
+<th>Description</th>
+</tr>
+<tr>
+<td>
+@ref LearnHDFView
+</td>
+<td>Use HDFView to create, edit and view files.
+</td>
+</tr>
+<tr>
+<td>
+@ref ViewToolsCommand
+</td>
+<td>Use the HDF5 command-line tools for viewing, editing, and comparing HDF5 files.
+</td>
+</tr>
+<tr>
+<td>@ref ViewToolsJPSS
+</td>
+<td>Use HDF5 tools to examine and work with JPSS NPP files.
+</td>
+</tr>
+</table>
+
+<hr>
+Navigate back: \ref index "Main" / \ref GettingStarted
+
+@page ViewToolsCommand Command-line Tools
+Navigate back: \ref index "Main" / \ref GettingStarted
+<hr>
+
+\section secViewToolsCommandObtain Obtain Tools and Files (Optional)
+Pre-built binaries for Linux and Windows are distributed within the respective HDF5 binary release
+packages, which can be obtained from the <a href="https://portal.hdfgroup.org/display/support/Download+HDF5">Download HDF5</a> page.
+
+HDF5 files can be obtained from various places such as \ref HDF5Examples and <a href="http://www.hdfeos.org/">HDF-EOS and Tools and
+Information Center</a>. Specifically, the following examples are used in this tutorial topic:
+\li HDF5 Files created from compiling the \ref LBExamples
+\li HDF5 Files on the <a href="https://portal.hdfgroup.org/display/HDF5/Examples+by+API">Examples by API</a> page
+\li NPP JPSS files, <a href="https://support.hdfgroup.org/ftp/HDF5/examples/files/tutorial/SVM01_npp_d20130524_t1255132_e1256374_b08146_c20130524192048864992_noaa_ops.h5.gz">SVM01_npp.. (gzipped)</a>
+and <a href="https://support.hdfgroup.org/ftp/HDF5/examples/files/tutorial/SVM09_npp_d20120229_t0849107_e0854511_b01759_c20120229145452682127_noaa_ops.h5.gz">SVM09_npp.. (gzipped)</a>
+\li HDF-EOS <a href="https://support.hdfgroup.org/ftp/HDF5/examples/files/tutorial/OMI-Aura.he5">OMI-Aura file</a>
+
+\section secViewToolsCommandTutor Tutorial Topics
+A variety of command-line tools are included in the HDF5 binary distribution. There are tools to view,
+edit, convert and compare HDF5 files. This tutorial discusses the tools by their functionality. It
+does not cover all of the HDF5 tools.
+
+<table>
+<tr>
+<th>Tool Category</th>
+<th>Topic</th>
+<th>Tools Used</th>
+</tr>
+<tr>
+<td><strong>@ref ViewToolsView</strong></td>
+<td>@ref secViewToolsViewContent</td>
+<td>h5dump and h5ls
+</td>
+</tr>
+<tr>
+<td></td>
+<td>@ref secViewToolsViewDset</td>
+<td>h5dump and h5ls
+</td>
+</tr>
+<tr>
+<td></td>
+<td>@ref secViewToolsViewGrps</td>
+<td>h5dump and h5ls
+</td>
+</tr>
+<tr>
+<td></td>
+<td>@ref secViewToolsViewAttr</td>
+<td>h5dump
+</td>
+</tr>
+<tr>
+<td></td>
+<td>@ref secViewToolsViewSub</td>
+<td>h5dump
+</td>
+</tr>
+<tr>
+<td></td>
+<td>@ref secViewToolsViewDtypes</td>
+<td>h5dump
+</td>
+</tr>
+<tr>
+<td>@ref ViewToolsEdit</td>
+<td>@ref secViewToolsEditRemove</td>
+<td>h5repack
+</td>
+</tr>
+<tr>
+<td></td>
+<td>@ref secViewToolsEditChange</td>
+<td>h5repack
+</td>
+</tr>
+<tr>
+<td></td>
+<td>@ref secViewToolsEditApply</td>
+<td>h5repack
+</td>
+</tr>
+<tr>
+<td></td>
+<td>@ref secViewToolsEditCopy</td>
+<td>h5copy
+</td>
+</tr>
+<tr>
+<td></td>
+<td>@ref secViewToolsEditAdd</td>
+<td>h5jam and h5unjam
+</td>
+</tr>
+<tr>
+<td>@ref ViewToolsConvert</td>
+<td>@ref secViewToolsConvertASCII</td>
+<td>h5dump
+</td>
+</tr>
+<tr>
+<td></td>
+<td>@ref secViewToolsConvertBinary</a></td>
+<td>h5dump
+</td>
+</tr>
+<tr>
+<td></td>
+<td>@ref secViewToolsConvertExport</td>
+<td>h5dump and h5import
+</td>
+</tr>
+</table>
+
+<hr>
+Navigate back: \ref index "Main" / \ref GettingStarted
+
+@page ViewToolsView Command-line Tools For Viewing HDF5 Files
+Navigate back: \ref index "Main" / \ref GettingStarted / \ref ViewToolsCommand
+<hr>
+
+\section secViewToolsViewTOC Contents
+<ul>
+<li>\ref secViewToolsViewContent</li>
+<li>\ref secViewToolsViewDset</li>
+<li>\ref secViewToolsViewGrps</li>
+<li>\ref secViewToolsViewAttr</li>
+<li>\ref secViewToolsViewSub</li>
+<li>\ref secViewToolsViewDtypes</li>
+</ul>
+
+\section secViewToolsViewContent File Content and Structure
+The h5dump and h5ls tools can both be used to view the contents of an HDF5 file. The tools are discussed below:
+<ul>
+<li>\ref subsecViewToolsViewContent_h5dump</li>
+<li>\ref subsecViewToolsViewContent_h5ls</li>
+</ul>
+
+\subsection subsecViewToolsViewContent_h5dump h5dump
+The h5dump tool dumps or displays the contents of an HDF5 file (textually). By default if you specify no options,
+h5dump will display the entire contents of a file. There are many h5dump options for examining specific details
+of a file. To see all of the available h5dump options, specify the <code style="background-color:whitesmoke;">-h</code>
+or <code style="background-color:whitesmoke;">--help</code> option: 
+\code
+h5dump -h
+\endcode
+
+The following h5dump options can be helpful in viewing the content and structure of a file:
+<table>
+<tr>
+<th>Option</th>
+<th>Description</th>
+<th>Comment</th>
+</tr>
+<tr>
+<td>-n, --contents
+</td>
+<td>Displays a list of the objects in a file
+</td>
+<td>See @ref subsubsecViewToolsViewContent_h5dumpEx1
+</td>
+</tr>
+<tr>
+<td>-n 1, --contents=1
+</td>
+<td>Displays a list of the objects and attributes in a file
+</td>
+<td>See @ref subsubsecViewToolsViewAttr_h5dumpEx6
+</td>
+</tr>
+<tr>
+<td>-H, --header
+</td>
+<td>Displays header information only (no data)
+</td>
+<td>See @ref subsubsecViewToolsViewContent_h5dumpEx2
+</td>
+</tr>
+<tr>
+<td>-A 0, --onlyattr=0
+</td>
+<td>Suppresses the display of attributes
+</td>
+<td>See @ref subsubsecViewToolsViewContent_h5dumpEx2
+</td>
+</tr>
+<tr>
+<td>-N P, --any_path=P
+</td>
+<td>Displays any object or attribute that matches path P
+</td>
+<td>See @ref subsubsecViewToolsViewAttr_h5dumpEx6
+</td>
+</tr>
+</table>
+
+\subsubsection subsubsecViewToolsViewContent_h5dumpEx1 Example 1
+The following command displays a list of the objects in the file OMI-Aura.he5 (an HDF-EOS5 file):
+\code
+h5dump -n OMI-Aura.he5
+\endcode
+
+As shown in the output below, the objects (groups, datasets) are listed to the left, followed by their
+names. You can see that this file contains two root groups, HDFEOS and HDFEOS INFORMATION:
+\code
+HDF5 "OMI-Aura.he5" {
+FILE_CONTENTS {
+ group      /
+ group      /HDFEOS
+ group      /HDFEOS/ADDITIONAL
+ group      /HDFEOS/ADDITIONAL/FILE_ATTRIBUTES
+ group      /HDFEOS/GRIDS
+ group      /HDFEOS/GRIDS/OMI Column Amount O3
+ group      /HDFEOS/GRIDS/OMI Column Amount O3/Data Fields
+ dataset    /HDFEOS/GRIDS/OMI Column Amount O3/Data Fields/ColumnAmountO3
+ dataset    /HDFEOS/GRIDS/OMI Column Amount O3/Data Fields/RadiativeCloudFraction
+ dataset    /HDFEOS/GRIDS/OMI Column Amount O3/Data Fields/SolarZenithAngle
+ dataset    /HDFEOS/GRIDS/OMI Column Amount O3/Data Fields/ViewingZenithAngle
+ group      /HDFEOS INFORMATION
+ dataset    /HDFEOS INFORMATION/StructMetadata.0
+ }
+}
+\endcode
+
+\subsubsection subsubsecViewToolsViewContent_h5dumpEx2 Example 2
+The file structure of the OMI-Aura.he5 file can be seen with the following command. The -A 0 option suppresses the display of attributes:
+\code
+h5dump -H -A 0 OMI-Aura.he5
+\endcode
+
+Output of this command is shown below:
+\code
+HDF5 "OMI-Aura.he5" {
+GROUP "/" {
+   GROUP "HDFEOS" {
+      GROUP "ADDITIONAL" {
+         GROUP "FILE_ATTRIBUTES" {
+         }
+      }
+      GROUP "GRIDS" {
+         GROUP "OMI Column Amount O3" {
+            GROUP "Data Fields" {
+               DATASET "ColumnAmountO3" {
+                  DATATYPE  H5T_IEEE_F32LE
+                  DATASPACE  SIMPLE { ( 720, 1440 ) / ( 720, 1440 ) }
+               }
+               DATASET "RadiativeCloudFraction" {
+                  DATATYPE  H5T_IEEE_F32LE
+                  DATASPACE  SIMPLE { ( 720, 1440 ) / ( 720, 1440 ) }
+               }
+               DATASET "SolarZenithAngle" {
+                  DATATYPE  H5T_IEEE_F32LE
+                  DATASPACE  SIMPLE { ( 720, 1440 ) / ( 720, 1440 ) }
+               }
+               DATASET "ViewingZenithAngle" {
+                  DATATYPE  H5T_IEEE_F32LE
+                  DATASPACE  SIMPLE { ( 720, 1440 ) / ( 720, 1440 ) }
+               }
+            }
+         }
+      }
+   }
+   GROUP "HDFEOS INFORMATION" {
+      DATASET "StructMetadata.0" {
+         DATATYPE  H5T_STRING {
+            STRSIZE 32000;
+            STRPAD H5T_STR_NULLTERM;
+            CSET H5T_CSET_ASCII;
+            CTYPE H5T_C_S1;
+         }
+         DATASPACE  SCALAR
+      }
+   }
+}
+}
+\endcode
+
+\subsection subsecViewToolsViewContent_h5ls h5ls
+The h5ls tool by default just displays the objects in the root group. It will not display
+items in groups beneath the root group unless specified. Useful h5ls options for viewing
+file content and structure are:
+<table>
+<tr>
+<th>Option</th>
+<th>Description</th>
+<th>Comment</th>
+</tr>
+<tr>
+<td>-r
+</td>
+<td>Lists all groups and objects recursively
+</td>
+<td>See @ref subsubsecViewToolsViewContent_h5lsEx3
+</td>
+</tr>
+<tr>
+<td>-v
+</td>
+<td>Generates verbose output (lists dataset properties, attributes 
+and attribute values, but no dataset values)
+</td>
+<td>
+</td>
+</tr>
+</table>
+
+\subsubsection subsubsecViewToolsViewContent_h5lsEx3 Example 3
+The following command shows the contents of the HDF-EOS5 file OMI-Aura.he5. The output is similar to h5dump, except that h5ls also shows dataspace information for each dataset:
+\code
+h5ls -r OMI-Aura.he5
+\endcode
+
+The output is shown below:
+\code
+/                        Group
+/HDFEOS                  Group
+/HDFEOS/ADDITIONAL       Group
+/HDFEOS/ADDITIONAL/FILE_ATTRIBUTES Group
+/HDFEOS/GRIDS            Group
+/HDFEOS/GRIDS/OMI\ Column\ Amount\ O3 Group
+/HDFEOS/GRIDS/OMI\ Column\ Amount\ O3/Data\ Fields Group
+/HDFEOS/GRIDS/OMI\ Column\ Amount\ O3/Data\ Fields/ColumnAmountO3 Dataset {720, 1440}
+/HDFEOS/GRIDS/OMI\ Column\ Amount\ O3/Data\ Fields/RadiativeCloudFraction Dataset {720, 1440}
+/HDFEOS/GRIDS/OMI\ Column\ Amount\ O3/Data\ Fields/SolarZenithAngle Dataset {720, 1440}
+/HDFEOS/GRIDS/OMI\ Column\ Amount\ O3/Data\ Fields/ViewingZenithAngle Dataset {720, 1440}
+/HDFEOS\ INFORMATION     Group
+/HDFEOS\ INFORMATION/StructMetadata.0 Dataset {SCALAR}
+\endcode
+
+\section secViewToolsViewDset Datasets and Dataset Properties
+Both h5dump and h5ls can be used to view specific datasets.
+<ul>
+<li>\ref subsecViewToolsViewDset_h5dump</li>
+<li>\ref subsecViewToolsViewDset_h5ls</li>
+</ul>
+
+\subsection subsecViewToolsViewDset_h5dump h5dump
+Useful h5dump options for examining specific datasets include:
+<table>
+<tr>
+<th>Option</th>
+<th>Description</th>
+<th>Comment</th>
+</tr>
+<tr>
+<td>-d D, --dataset=D
+</td>
+<td>Displays dataset D
+</td>
+<td>See @ref subsubsecViewToolsViewDset_h5dumpEx4
+</td>
+</tr>
+<tr>
+<td> -H, --header
+</td>
+<td>Displays header information only
+</td>
+<td>See @ref subsubsecViewToolsViewDset_h5dumpEx4
+</td>
+</tr>
+<tr>
+<td>-p, --properties
+</td>
+<td>Displays dataset filters, storage layout, and fill value properties
+</td>
+<td>See @ref subsubsecViewToolsViewDset_h5dumpEx5
+</td>
+</tr>
+<tr>
+<td>-A 0, --onlyattr=0
+</td>
+<td>Suppresses the display of attributes
+</td>
+<td>See @ref subsubsecViewToolsViewContent_h5dumpEx2
+</td>
+</tr>
+<tr>
+<td>-N P, --any_path=P
+</td>
+<td>Displays any object or attribute that matches path P
+</td>
+<td>See @ref subsubsecViewToolsViewAttr_h5dumpEx6
+</td>
+</tr>
+</table>
+
+\subsubsection subsubsecViewToolsViewDset_h5dumpEx4 Example 4
+A specific dataset can be viewed with <code style="background-color:whitesmoke;">h5dump</code> using the <code style="background-color:whitesmoke;">-d D</code> option and specifying the entire
+path and name of the dataset for <code style="background-color:whitesmoke;">D</code>. The path is important in identifying the correct dataset,
+as there can be multiple datasets with the same name. The path can be determined by looking at
+the objects in the file with <code style="background-color:whitesmoke;">h5dump -n</code>.
+
+The following example uses the <code style="background-color:whitesmoke;">groups.h5</code> file that is created by the
+\ref LBExamples
+example <code style="background-color:whitesmoke;">h5_crtgrpar.c</code>. To display <code style="background-color:whitesmoke;">dset1</code> in the <code style="background-color:whitesmoke;">groups.h5</code> file below, specify dataset
+<code style="background-color:whitesmoke;">/MyGroup/dset1</code>. The <code style="background-color:whitesmoke;">-H</code> option is used to suppress printing of the data values:
+
+<em>Contents of groups.h5</em>
+\code
+   $ h5dump -n groups.h5
+   HDF5 "groups.h5" {
+   FILE_CONTENTS {
+    group      /
+    group      /MyGroup
+    group      /MyGroup/Group_A
+    dataset    /MyGroup/Group_A/dset2
+    group      /MyGroup/Group_B
+    dataset    /MyGroup/dset1
+    }
+   }
+\endcode
+
+<em>Display dataset "dset1"</em>
+\code
+   $ h5dump -d "/MyGroup/dset1" -H groups.h5
+   HDF5 "groups.h5" {
+   DATASET "/MyGroup/dset1" {
+      DATATYPE  H5T_STD_I32BE
+      DATASPACE  SIMPLE { ( 3, 3 ) / ( 3, 3 ) }
+   }
+   }
+\endcode
+
+\subsubsection subsubsecViewToolsViewDset_h5dumpEx5 Example 5
+The <code style="background-color:whitesmoke;">-p</code> option is used to examine the the dataset filters, storage layout, and fill value properties of a dataset.
+
+This option can be useful for checking how well compression works, or even for analyzing performance
+and dataset size issues related to chunking. (The smaller the chunk size, the more chunks that HDF5
+has to keep track of, which increases the size of the file and potentially affects performance.)
+
+In the file shown below the dataset <code style="background-color:whitesmoke;">/DS1</code> is both chunked and compressed:
+\code
+   $ h5dump -H -p -d "/DS1" h5ex_d_gzip.h5
+   HDF5 "h5ex_d_gzip.h5" {
+   DATASET "/DS1" {
+      DATATYPE  H5T_STD_I32LE
+      DATASPACE  SIMPLE { ( 32, 64 ) / ( 32, 64 ) }
+      STORAGE_LAYOUT {
+         CHUNKED ( 4, 8 )
+         SIZE 5278 (1.552:1 COMPRESSION)
+      }
+      FILTERS {
+         COMPRESSION DEFLATE { LEVEL 9 }
+      }
+      FILLVALUE {
+         FILL_TIME H5D_FILL_TIME_IFSET
+         VALUE  0
+      }
+      ALLOCATION_TIME {
+         H5D_ALLOC_TIME_INCR
+      }
+   }
+   }
+\endcode
+
+You can obtain the <code style="background-color:whitesmoke;">h5ex_d_gzip.c</code> program that created this file, as well as the file created,
+from the <a href="https://portal.hdfgroup.org/display/HDF5/Examples+by+API">Examples by API</a> page.
+
+\subsection subsecViewToolsViewDset_h5ls h5ls
+Specific datasets can be specified with <code style="background-color:whitesmoke;">h5ls</code> by simply adding the dataset path and dataset after the
+file name. As an example, this command displays dataset <code style="background-color:whitesmoke;">dset2</code> in the <code style="background-color:whitesmoke;">groups.h5</code>
+file used in @ref subsubsecViewToolsViewDset_h5dumpEx4 :
+\code
+h5ls groups.h5/MyGroup/Group_A/dset2
+\endcode
+
+Just the dataspace information gets displayed:
+\code
+dset2 Dataset {2, 10}
+\endcode
+
+The following options can be used to see detailed information about a dataset.
+<table>
+<tr>
+<th>Option</th>
+<th>Description</th>
+</tr>
+<tr>
+<td>-v, --verbose
+</td>
+<td>Generates verbose output (lists dataset properties, attributes 
+and attribute values, but no dataset values)
+</td>
+</tr>
+<tr>
+<td>-d, --data
+</td>
+<td>Displays dataset values
+</td>
+</tr>
+</table>
+
+The output of using <code style="background-color:whitesmoke;">-v</code> is shown below:
+\code
+   $ h5ls -v groups.h5/MyGroup/Group_A/dset2
+   Opened "groups.h5" with sec2 driver.
+   dset2                    Dataset {2/2, 10/10}
+       Location:  1:3840
+       Links:     1
+       Storage:   80 logical bytes, 80 allocated bytes, 100.00% utilization
+       Type:      32-bit big-endian integer
+\endcode
+
+The output of using <code style="background-color:whitesmoke;">-d</code> is shown below:
+\code
+   $ h5ls -d groups.h5/MyGroup/Group_A/dset2
+   dset2                    Dataset {2, 10}
+       Data:
+           (0,0) 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+\endcode
+
+\section secViewToolsViewGrps Groups
+Both h5dump and h5ls can be used to view specific groups in a file.
+<ul>
+<li>\ref subsecViewToolsViewGrps_h5dump</li>
+<li>\ref subsecViewToolsViewGrps_h5ls</li>
+</ul>
+
+\subsection subsecViewToolsViewGrps_h5dump h5dump
+The <code style="background-color:whitesmoke;">h5dump</code> options that are useful for examining groups are:
+<table>
+<tr>
+<th>Option</th>
+<th>Description</th>
+</tr>
+<tr>
+<td>-g G, --group=G
+</td>
+<td>Displays group G and its members
+</td>
+</tr>
+<tr>
+<td>-H, --header
+</td>
+<td>Displays header information only
+</td>
+</tr>
+<tr>
+<td>-A 0, --onlyattr=0
+</td>
+<td>Suppresses the display of attributes
+</td>
+</tr>
+</table>
+
+To view the contents of the <code style="background-color:whitesmoke;">HDFEOS</code> group in the OMI file mentioned previously, you can specify the path and name of the group as follows:
+\code
+h5dump -g "/HDFEOS" -H -A 0 OMI-Aura.he5
+\endcode
+
+The <code style="background-color:whitesmoke;">-A 0</code> option suppresses attributes and <code style="background-color:whitesmoke;">-H</code> suppresses printing of data values:
+\code
+   HDF5 "OMI-Aura.he5" {
+   GROUP "/HDFEOS" {
+      GROUP "ADDITIONAL" {
+         GROUP "FILE_ATTRIBUTES" {
+         }
+      }
+      GROUP "GRIDS" {
+         GROUP "OMI Column Amount O3" {
+            GROUP "Data Fields" {
+               DATASET "ColumnAmountO3" {
+                  DATATYPE  H5T_IEEE_F32LE
+                  DATASPACE  SIMPLE { ( 720, 1440 ) / ( 720, 1440 ) }
+               }
+               DATASET "RadiativeCloudFraction" {
+                  DATATYPE  H5T_IEEE_F32LE
+                  DATASPACE  SIMPLE { ( 720, 1440 ) / ( 720, 1440 ) }
+               }
+               DATASET "SolarZenithAngle" {
+                  DATATYPE  H5T_IEEE_F32LE
+                  DATASPACE  SIMPLE { ( 720, 1440 ) / ( 720, 1440 ) }
+               }
+               DATASET "ViewingZenithAngle" {
+                  DATATYPE  H5T_IEEE_F32LE
+                  DATASPACE  SIMPLE { ( 720, 1440 ) / ( 720, 1440 ) }
+               }
+            }
+         }
+      }
+   }
+   }
+\endcode
+
+\subsection subsecViewToolsViewGrps_h5ls h5ls
+You can view the contents of a group with <code style="background-color:whitesmoke;">h5ls</code>/ by specifying the group after the file name.
+To use <code style="background-color:whitesmoke;">h5ls</code> to view the contents of the <code style="background-color:whitesmoke;">/HDFEOS</code> group in the <code style="background-color:whitesmoke;">OMI-Aura.he5</code> file, type:
+\code
+h5ls -r OMI-Aura.he5/HDFEOS
+\endcode
+
+The output of this command is:
+\code
+   /ADDITIONAL              Group
+   /ADDITIONAL/FILE_ATTRIBUTES Group
+   /GRIDS                   Group
+   /GRIDS/OMI\ Column\ Amount\ O3 Group
+   /GRIDS/OMI\ Column\ Amount\ O3/Data\ Fields Group
+   /GRIDS/OMI\ Column\ Amount\ O3/Data\ Fields/ColumnAmountO3 Dataset {720, 1440}
+   /GRIDS/OMI\ Column\ Amount\ O3/Data\ Fields/RadiativeCloudFraction Dataset {720, 1440}
+   /GRIDS/OMI\ Column\ Amount\ O3/Data\ Fields/SolarZenithAngle Dataset {720, 1440}
+   /GRIDS/OMI\ Column\ Amount\ O3/Data\ Fields/ViewingZenithAngle Dataset {720, 1440}
+\endcode
+
+If you specify the <code style="background-color:whitesmoke;">-v</code> option, you can also see the attributes and properties of the datasets.
+
+\section secViewToolsViewAttr Attributes
+
+\subsection subsecViewToolsViewAttr_h5dump h5dump
+Attributes are displayed by default if using <code style="background-color:whitesmoke;">h5dump</code>. Some files contain many attributes, which
+can make it difficult to examine the objects in the file. Shown below are options that can help
+when using <code style="background-color:whitesmoke;">h5dump</code> to work with files that have attributes.
+
+\subsubsection subsubsecViewToolsViewAttr_h5dumpEx6 Example 6
+The <code style="background-color:whitesmoke;">-a</code> A option will display an attribute. However, the path to the attribute must be included
+when specifying this option. For example, to see the <code style="background-color:whitesmoke;">ScaleFactor</code> attribute in the <code style="background-color:whitesmoke;">OMI-Aura.he5</code> file, type:
+\code
+h5dump -a "/HDFEOS/GRIDS/OMI Column Amount O3/Data Fields/SolarZenithAngle/ScaleFactor" OMI-Aura.he5
+\endcode
+
+This command displays:
+\code
+   HDF5 "OMI-Aura.he5" {
+   ATTRIBUTE "ScaleFactor" {
+      DATATYPE  H5T_IEEE_F64LE
+      DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+      DATA {
+      (0): 1
+      }
+   }
+   }
+\endcode
+
+How can you determine the path to the attribute? This can be done by looking at the file contents with the <code style="background-color:whitesmoke;">-n 1</code> option:
+\code
+h5dump -n 1 OMI-Aura.he5
+\endcode
+
+Below is a portion of the output for this command:
+\code
+   HDF5 "OMI-Aura.he5" {
+   FILE_CONTENTS {
+    group      /
+    group      /HDFEOS
+    group      /HDFEOS/ADDITIONAL
+    group      /HDFEOS/ADDITIONAL/FILE_ATTRIBUTES
+    attribute  /HDFEOS/ADDITIONAL/FILE_ATTRIBUTES/EndUTC
+    attribute  /HDFEOS/ADDITIONAL/FILE_ATTRIBUTES/GranuleDay
+    attribute  /HDFEOS/ADDITIONAL/FILE_ATTRIBUTES/GranuleDayOfYear
+    attribute  /HDFEOS/ADDITIONAL/FILE_ATTRIBUTES/GranuleMonth
+    attribute  /HDFEOS/ADDITIONAL/FILE_ATTRIBUTES/GranuleYear
+    attribute  /HDFEOS/ADDITIONAL/FILE_ATTRIBUTES/InstrumentName
+    attribute  /HDFEOS/ADDITIONAL/FILE_ATTRIBUTES/OrbitNumber
+    attribute  /HDFEOS/ADDITIONAL/FILE_ATTRIBUTES/OrbitPeriod
+    attribute  /HDFEOS/ADDITIONAL/FILE_ATTRIBUTES/PGEVersion
+    attribute  /HDFEOS/ADDITIONAL/FILE_ATTRIBUTES/Period
+    attribute  /HDFEOS/ADDITIONAL/FILE_ATTRIBUTES/ProcessLevel
+    attribute  /HDFEOS/ADDITIONAL/FILE_ATTRIBUTES/StartUTC
+    attribute  /HDFEOS/ADDITIONAL/FILE_ATTRIBUTES/TAI93At0zOfGranule
+
+    ...
+\endcode
+
+There can be multiple objects or attributes with the same name in a file. How can you make sure
+you are finding the correct object or attribute? You can first determine how many attributes
+there are with a specified name, and then examine the paths to them.
+
+The <code style="background-color:whitesmoke;">-N</code> option can be used to display all objects or attributes with a given name.
+For example, there are four attributes with the name <code style="background-color:whitesmoke;">ScaleFactor</code> in the <code style="background-color:whitesmoke;">OMI-Aura.he5</code> file,
+as can be seen below with the <code style="background-color:whitesmoke;">-N</code> option:
+\code
+h5dump -N ScaleFactor OMI-Aura.he5
+\endcode
+
+It outputs:
+\code
+HDF5 "OMI-Aura.he5" {
+ATTRIBUTE "ScaleFactor" {
+   DATATYPE  H5T_IEEE_F64LE
+   DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+   DATA {
+   (0): 1
+   }
+}
+ATTRIBUTE "ScaleFactor" {
+   DATATYPE  H5T_IEEE_F64LE
+   DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+   DATA {
+   (0): 1
+   }
+}
+ATTRIBUTE "ScaleFactor" {
+   DATATYPE  H5T_IEEE_F64LE
+   DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+   DATA {
+   (0): 1
+   }
+}
+ATTRIBUTE "ScaleFactor" {
+   DATATYPE  H5T_IEEE_F64LE
+   DATASPACE  SIMPLE { ( 1 ) / ( 1 ) }
+   DATA {
+   (0): 1
+   }
+}
+}
+\endcode
+
+\subsection subsecViewToolsViewAttr_h5ls h5ls
+If you include the <code style="background-color:whitesmoke;">-v</code> (verbose) option for <code style="background-color:whitesmoke;">h5ls</code>, you will see all of the attributes for the
+specified file, dataset or group. You cannot display individual attributes.
+
+\section secViewToolsViewSub Dataset Subset
+
+\subsection subsecViewToolsViewSub_h5dump h5dump
+If you have a very large dataset, you may wish to subset or see just a portion of the dataset.
+This can be done with the following <code style="background-color:whitesmoke;">h5dump</code> options.
+<table>
+<tr>
+<th>Option</th>
+<th>Description</th>
+</tr>
+<tr>
+<td>-d D, --dataset=D
+</td>
+<td>Dataset D
+</td>
+</tr>
+<tr>
+<td>-s START, --start=START
+</td>
+<td>Offset or start of subsetting selection
+</td>
+</tr>
+<tr>
+<td>-S STRIDE, --stride=STRIDE
+</td>
+<td>Stride (sampling along a dimension). The default (unspecified, or 1) selects 
+every element along a dimension, a value of 2 selects every other element,
+a value of 3 selects every third element, ...
+</td>
+</tr>
+<tr>
+<td>-c COUNT, --count=COUNT
+</td>
+<td>Number of blocks to include in the selection
+</td>
+</tr>
+<tr>
+<td>-k BLOCK, --block=BLOCK
+</td>
+<td>Size of the block in a hyperslab. The default (unspecified, or 1) is for 
+the block size to be the size of a single element.
+</td>
+</tr>
+</table>
+
+The <code style="background-color:whitesmoke;">START (s)</code>, <code style="background-color:whitesmoke;">STRIDE (S)</code>, <code style="background-color:whitesmoke;">COUNT (c)</code>, and <code style="background-color:whitesmoke;">BLOCK (k)</code> options
+define the shape and size of the selection. They are arrays with the same number of dimensions as the rank
+of the dataset's dataspace, and they all work together to define the selection. A change to one of
+these arrays can affect the others.
+
+When specifying these h5dump options, a comma is used as the delimiter for each dimension in the
+option value. For example, with a 2-dimensional dataset, the option value is specified as "H,W",
+where H is the height and W is the width. If the offset is 0 for both dimensions, then
+<code style="background-color:whitesmoke;">START</code> would be specified as follows:
+\code
+-s "0,0"
+\endcode
+
+There is also a shorthand way to specify these options with brackets at the end of the dataset name:
+\code
+-d DATASETNAME[s;S;c;k]
+\endcode
+
+Multiple dimensions are separated by commas. For example, a subset for a 2-dimensional dataset would be specified as follows:
+\code
+-d DATASETNAME[s,s;S,S;c,c;k,k]
+\endcode
+
+For a detailed understanding of how selections works, see the #H5Sselect_hyperslab API in the \ref RM.
+
+The dataset SolarZenithAngle in the OMI-Aura.he5 file can be used to illustrate these options. This
+dataset is a 2-dimensional dataset of size 720 (height) x 1440 (width). Too much data will be displayed
+by simply viewing the specified dataset with the <code style="background-color:whitesmoke;">-d</code> option:
+\code
+h5dump -d "HDFEOS/GRIDS/OMI Column Amount O3/Data Fields/SolarZenithAngle" OMI-Aura.he5
+\endcode
+Subsetting narrows down the output that is displayed. In the following example, the first
+15x10 elements (-c "15,10") are specified, beginning with position (0,0) (-s "0,0"):
+\code
+    h5dump -A 0 -d "HDFEOS/GRIDS/OMI Column Amount O3/Data Fields/SolarZenithAngle" -s "0,0" -c "15,10" -w 0 OMI-Aura.he5
+\endcode
+
+If using the shorthand method, specify:
+\code
+    h5dump -A 0 -d "HDFEOS/GRIDS/OMI Column Amount O3/Data Fields/SolarZenithAngle[0,0;;15,10;]" -w 0 OMI-Aura.he5
+\endcode
+
+Where,
+\par The <code style="background-color:whitesmoke;">-d</code> option must be specified
+
+before
+\par subsetting options (if not using the shorthand method).
+
+The <code style="background-color:whitesmoke;">-A 0</code> option suppresses the printing of attributes.
+
+The <code style="background-color:whitesmoke;">-w 0</code> option sets the number of columns of output to the maximum allowed value (65535).
+This ensures that there are enough columns specified for displaying the data.
+
+Either command displays:
+\code
+   HDF5 "OMI-Aura.he5" {
+   DATASET "HDFEOS/GRIDS/OMI Column Amount O3/Data Fields/SolarZenithAngle" {
+      DATATYPE  H5T_IEEE_F32LE
+      DATASPACE  SIMPLE { ( 720, 1440 ) / ( 720, 1440 ) }
+      SUBSET {
+         START ( 0, 0 );
+         STRIDE ( 1, 1 );
+         COUNT ( 15, 10 );
+         BLOCK ( 1, 1 );
+         DATA {
+         (0,0): 79.403, 79.403, 79.403, 79.403, 79.403, 79.403, 79.403, 79.403, 79.403, 79.403,
+         (1,0): 79.071, 79.071, 79.071, 79.071, 79.071, 79.071, 79.071, 79.071, 79.071, 79.071,
+         (2,0): 78.867, 78.867, 78.867, 78.867, 78.867, 78.867, 78.867, 78.867, 78.867, 78.867,
+         (3,0): 78.632, 78.632, 78.632, 78.632, 78.632, 78.632, 78.632, 78.632, 78.632, 78.632,
+         (4,0): 78.429, 78.429, 78.429, 78.429, 78.429, 78.429, 78.429, 78.429, 78.429, 78.429,
+         (5,0): 78.225, 78.225, 78.225, 78.225, 78.225, 78.225, 78.225, 78.225, 78.225, 78.225,
+         (6,0): 78.021, 78.021, 78.021, 78.021, 78.021, 78.021, 78.021, 78.021, 78.021, 78.021,
+         (7,0): 77.715, 77.715, 77.715, 77.715, 77.715, 77.715, 77.715, 77.715, 77.715, 77.715,
+         (8,0): 77.511, 77.511, 77.511, 77.511, 77.511, 77.511, 77.511, 77.511, 77.511, 77.511,
+         (9,0): 77.658, 77.658, 77.658, 77.307, 77.307, 77.307, 77.307, 77.307, 77.307, 77.307,
+         (10,0): 77.556, 77.556, 77.556, 77.556, 77.556, 77.556, 77.556, 77.556, 77.102, 77.102,
+         (11,0): 78.408, 78.408, 78.408, 78.408, 78.408, 78.408, 78.408, 78.408, 77.102, 77.102,
+         (12,0): 76.34, 78.413, 78.413, 78.413, 78.413, 78.413, 78.413, 78.413, 78.413, 78.413,
+         (13,0): 78.107, 78.107, 78.107, 78.107, 78.107, 78.107, 78.107, 78.107, 78.107, 77.195,
+         (14,0): 78.005, 78.005, 78.005, 78.005, 78.005, 78.005, 76.991, 76.991, 76.991, 76.991
+         }
+      }
+   }
+   }
+\endcode
+
+What if we wish to read three rows of three elements at a time (-c "3,3"), where each element
+is a 2 x 3 block (-k "2,3") and we wish to begin reading from the second row (-s "1,0")?
+
+You can do that with the following command:
+\code
+ h5dump -A 0 -d "HDFEOS/GRIDS/OMI Column Amount O3/Data Fields/SolarZenithAngle" 
+        -s "1,0" -S "2,3" -c "3,3" -k "2,3" -w 0 OMI-Aura.he5
+\endcode
+
+In this case, the stride must be specified as 2 by 3 (or larger) to accommodate the reading of 2 by 3 blocks.
+If it is smaller, the command will fail with the error,
+\code
+h5dump error: wrong subset selection; blocks overlap.
+\endcode
+
+The output of the above command is shown below:
+\code
+   HDF5 "OMI-Aura.he5" {
+   DATASET "HDFEOS/GRIDS/OMI Column Amount O3/Data Fields/SolarZenithAngle" {
+      DATATYPE  H5T_IEEE_F32LE
+      DATASPACE  SIMPLE { ( 720, 1440 ) / ( 720, 1440 ) }
+      SUBSET {
+         START ( 1, 0 );
+         STRIDE ( 2, 3 );
+         COUNT ( 3, 3 );
+         BLOCK ( 2, 3 );
+         DATA {
+          (1,0): 79.071, 79.071, 79.071, 79.071, 79.071, 79.071, 79.071, 79.071, 79.071,
+          (2,0): 78.867, 78.867, 78.867, 78.867, 78.867, 78.867, 78.867, 78.867, 78.867,
+          (3,0): 78.632, 78.632, 78.632, 78.632, 78.632, 78.632, 78.632, 78.632, 78.632,
+          (4,0): 78.429, 78.429, 78.429, 78.429, 78.429, 78.429, 78.429, 78.429, 78.429,
+          (5,0): 78.225, 78.225, 78.225, 78.225, 78.225, 78.225, 78.225, 78.225, 78.225,
+          (6,0): 78.021, 78.021, 78.021, 78.021, 78.021, 78.021, 78.021, 78.021, 78.021
+         }
+      }
+   }
+   }
+\endcode
+
+\section secViewToolsViewDtypes Datatypes
+
+\subsection subsecViewToolsViewDtypes_h5dump h5dump
+The following datatypes are discussed, using the output of <code style="background-color:whitesmoke;">h5dump</code> with HDF5 files from the
+<a href="https://portal.hdfgroup.org/display/HDF5/Examples+by+API">Examples by API</a> page:
+<ul>
+<li>@ref subsubsecViewToolsViewDtypes_array</li>
+<li>@ref subsubsecViewToolsViewDtypes_objref</li>
+<li>@ref subsubsecViewToolsViewDtypes_regref</li>
+<li>@ref subsubsecViewToolsViewDtypes_string</li>
+</ul>
+
+\subsubsection subsubsecViewToolsViewDtypes_array Array
+Users have been confused by the difference between an Array datatype (#H5T_ARRAY) and a dataset that
+(has a dataspace that) is an array.
+
+Typically, these users want a dataset that has a simple datatype (like integer or float) that is an
+array, like the following dataset <code style="background-color:whitesmoke;">/DS1</code>. It has a datatype of #H5T_STD_I32LE (32-bit Little-Endian Integer)
+and is a 4 by 7 array:
+\code
+$ h5dump h5ex_d_rdwr.h5
+HDF5 "h5ex_d_rdwr.h5" {
+GROUP "/" {
+   DATASET "DS1" {
+      DATATYPE  H5T_STD_I32LE
+      DATASPACE  SIMPLE { ( 4, 7 ) / ( 4, 7 ) }
+      DATA {
+      (0,0): 0, -1, -2, -3, -4, -5, -6,
+      (1,0): 0, 0, 0, 0, 0, 0, 0,
+      (2,0): 0, 1, 2, 3, 4, 5, 6,
+      (3,0): 0, 2, 4, 6, 8, 10, 12
+      }
+   }
+}
+} 
+\endcode
+
+Contrast that with the following dataset that has both an Array datatype and is an array:
+\code
+$ h5dump h5ex_t_array.h5
+HDF5 "h5ex_t_array.h5" {
+GROUP "/" {
+   DATASET "DS1" {
+      DATATYPE  H5T_ARRAY { [3][5] H5T_STD_I64LE }
+      DATASPACE  SIMPLE { ( 4 ) / ( 4 ) }
+      DATA {
+      (0): [ 0, 0, 0, 0, 0,
+            0, -1, -2, -3, -4,
+            0, -2, -4, -6, -8 ],
+      (1): [ 0, 1, 2, 3, 4,
+            1, 1, 1, 1, 1,
+            2, 1, 0, -1, -2 ],
+      (2): [ 0, 2, 4, 6, 8,
+            2, 3, 4, 5, 6,
+            4, 4, 4, 4, 4 ],
+      (3): [ 0, 3, 6, 9, 12,
+            3, 5, 7, 9, 11,
+            6, 7, 8, 9, 10 ]
+      }
+   }
+}
+}
+\endcode
+
+In this file, dataset <code style="background-color:whitesmoke;">/DS1</code> has a datatype of
+\code
+H5T_ARRAY { [3][5] H5T_STD_I64LE }
+\endcode
+and it also has a dataspace of
+\code
+SIMPLE { ( 4 ) / ( 4 ) }
+\endcode
+In other words, it is an array of four elements, in which each element is a 3 by 5 array of #H5T_STD_I64LE.
+
+This dataset is much more complex. Also note that subsetting cannot be done on Array datatypes.
+
+See this <a href="https://portal.hdfgroup.org/display/knowledge/H5T_ARRAY+Datatype">FAQ</a> for more information on the Array datatype.
+
+\subsubsection subsubsecViewToolsViewDtypes_objref Object Reference
+An Object Reference is a reference to an entire object (dataset, group, or named datatype).
+A dataset with an Object Reference datatype consists of one or more Object References.
+An Object Reference dataset can be used as an index to an HDF5 file.
+
+The <code style="background-color:whitesmoke;">/DS1</code> dataset in the following file (<code style="background-color:whitesmoke;">h5ex_t_objref.h5</code>) is an Object Reference dataset.
+It contains two references, one to group <code style="background-color:whitesmoke;">/G1</code> and the other to dataset <code style="background-color:whitesmoke;">/DS2</code>:
+\code
+$ h5dump h5ex_t_objref.h5
+HDF5 "h5ex_t_objref.h5" {
+GROUP "/" {
+   DATASET "DS1" {
+      DATATYPE  H5T_REFERENCE { H5T_STD_REF_OBJECT }
+      DATASPACE  SIMPLE { ( 2 ) / ( 2 ) }
+      DATA {
+      (0): GROUP 1400 /G1 , DATASET 800 /DS2
+      }
+   }
+   DATASET "DS2" {
+      DATATYPE  H5T_STD_I32LE
+      DATASPACE  NULL
+      DATA {
+      }
+   }
+   GROUP "G1" {
+   }
+}
+}
+\endcode
+
+\subsubsection subsubsecViewToolsViewDtypes_regref Region Reference
+A Region Reference is a reference to a selection within a dataset. A selection can be either
+individual elements or a hyperslab. In <code style="background-color:whitesmoke;">h5dump</code> you will see the name of the dataset along with
+the elements or slab that is selected. A dataset with a Region Reference datatype consists of
+one or more Region References.
+
+An example of a Region Reference dataset (<code style="background-color:whitesmoke;">h5ex_t_regref.h5</code>) can be found on the
+<a href="https://portal.hdfgroup.org/display/HDF5/Examples+by+API">Examples by API</a> page,
+under Datatypes. If you examine this dataset with <code style="background-color:whitesmoke;">h5dump</code> you will see that <code style="background-color:whitesmoke;">/DS1</code> is a
+Region Reference dataset as indicated by its datatype, highlighted in bold below:
+\code
+$ h5dump  h5ex_t_regref.h5
+HDF5 "h5ex_t_regref.h5" {
+GROUP "/" {
+   DATASET "DS1" {
+          DATATYPE  H5T_REFERENCE { H5T_STD_REF_DSETREG }
+      DATASPACE  SIMPLE { ( 2 ) / ( 2 ) }
+      DATA {
+         DATASET /DS2 {(0,1), (2,11), (1,0), (2,4)},
+         DATASET /DS2 {(0,0)-(0,2), (0,11)-(0,13), (2,0)-(2,2), (2,11)-(2,13)}
+      }
+   }
+   DATASET "DS2" {
+      DATATYPE  H5T_STD_I8LE
+      DATASPACE  SIMPLE { ( 3, 16 ) / ( 3, 16 ) }
+      DATA {
+      (0,0): 84, 104, 101, 32, 113, 117, 105, 99, 107, 32, 98, 114, 111, 119,
+      (0,14): 110, 0,
+      (1,0): 102, 111, 120, 32, 106, 117, 109, 112, 115, 32, 111, 118, 101,
+      (1,13): 114, 32, 0,
+      (2,0): 116, 104, 101, 32, 53, 32, 108, 97, 122, 121, 32, 100, 111, 103,
+      (2,14): 115, 0
+      }
+   }
+}
+}
+\endcode
+
+It contains two Region References:
+\li A selection of four individual elements in dataset <code style="background-color:whitesmoke;">/DS2 : (0,1), (2,11), (1,0), (2,4)</code>
+See the #H5Sselect_elements API in the \ref UG for information on selecting individual elements.
+\li A selection of these blocks in dataset <code style="background-color:whitesmoke;">/DS2 : (0,0)-(0,2), (0,11)-(0,13), (2,0)-(2,2), (2,11)-(2,13)</code>
+See the #H5Sselect_hyperslab API in the \ref UG for how to do hyperslab selection.
+ 
+
+If you look at the code that creates the dataset (<code style="background-color:whitesmoke;">h5ex_t_regref.c</code>) you will see that the
+first reference is created with these calls:
+\code
+  status = H5Sselect_elements (space, H5S_SELECT_SET, 4, coords[0]);
+  status = H5Rcreate (&wdata[0], file, DATASET2, H5R_DATASET_REGION, space);
+\endcode
+
+where the buffer containing the coordinates to select is:
+\code
+   coords[4][2] = { {0,  1},
+                    {2, 11},
+                    {1,  0},
+                    {2,  4} },
+\endcode
+
+The second reference is created by calling,
+\code
+  status = H5Sselect_hyperslab (space, H5S_SELECT_SET, start, stride, count, block);
+  status = H5Rcreate (&wdata[1], file, DATASET2, H5R_DATASET_REGION, space);
+\endcode
+where start, stride, count, and block have these values:
+\code
+     start[2] =  {0, 0},
+     stride[2] = {2, 11},
+     count[2] =  {2, 2},
+     block[2] =  {1, 3};
+\endcode
+
+These start, stride, count, and block values will select the elements shown in bold in the dataset:
+\code
+84 104 101 32 113 117 105  99 107  32  98 114 111 119 110 0
+102 111 120 32 106 117 109 112 115  32 111 118 101 114  32 0
+116 104 101 32  53  32 108  97 122 121  32 100 111 103 115 0
+\endcode
+
+If you use <code style="background-color:whitesmoke;">h5dump</code> to select a subset of dataset
+<code style="background-color:whitesmoke;">/DS2</code> with these start, stride, count, and block values, you will see that the same elements are selected:
+\code
+$ h5dump -d "/DS2" -s "0,0" -S "2,11" -c "2,2" -k "1,3" h5ex_t_regref.h5
+HDF5 "h5ex_t_regref.h5" {
+DATASET "/DS2" {
+   DATATYPE  H5T_STD_I8LE
+   DATASPACE  SIMPLE { ( 3, 16 ) / ( 3, 16 ) }
+   SUBSET {
+      START ( 0, 0 );
+      STRIDE ( 2, 11 );
+      COUNT ( 2, 2 );
+      BLOCK ( 1, 3 );
+      DATA {
+      (0,0): 84, 104, 101, 114, 111, 119,
+      (2,0): 116, 104, 101, 100, 111, 103
+      }
+   }
+}
+}
+\endcode
+
+For more information on selections, see the tutorial topic on
+@ref LBDsetSubRW. Also see the
+\ref secViewToolsViewSub tutorial topic on using <code style="background-color:whitesmoke;">h5dump</code> to view a subset.
+
+\subsubsection subsubsecViewToolsViewDtypes_string String
+There are two types of string data, fixed length strings and variable length strings.
+
+Below is the <code style="background-color:whitesmoke;">h5dump</code> output for two files that have the same strings written to them. In one file,
+the strings are fixed in length, and in the other, the strings have different sizes (and are variable in size).
+
+<em>Dataset of Fixed Length Strings</em>
+\code
+HDF5 "h5ex_t_string.h5" {
+GROUP "/" {
+   DATASET "DS1" {
+      DATATYPE  H5T_STRING {
+         STRSIZE 7;
+         STRPAD H5T_STR_SPACEPAD;
+         CSET H5T_CSET_ASCII;
+         CTYPE H5T_C_S1;
+      }
+      DATASPACE  SIMPLE { ( 4 ) / ( 4 ) }
+      DATA {
+      (0): "Parting", "is such", "sweet  ", "sorrow."
+      }
+   }
+}
+}
+\endcode
+
+<em>Dataset of Variable Length Strings</em>
+\code
+HDF5 "h5ex_t_vlstring.h5" {
+GROUP "/" {
+   DATASET "DS1" {
+      DATATYPE  H5T_STRING {
+         STRSIZE H5T_VARIABLE;
+         STRPAD H5T_STR_SPACEPAD;
+         CSET H5T_CSET_ASCII;
+         CTYPE H5T_C_S1;
+      }
+      DATASPACE  SIMPLE { ( 4 ) / ( 4 ) }
+      DATA {
+      (0): "Parting", "is such", "sweet", "sorrow."
+      }
+   }
+}
+}
+\endcode
+
+You might wonder which to use. Some comments to consider are included below.
+\li In general, a variable length string dataset is more complex than a fixed length string. If you don't
+specifically need a variable length type, then just use the fixed length string.
+\li A variable length dataset consists of pointers to heaps in different locations in the file. For this
+reason, a variable length dataset cannot be compressed. (Basically, the pointers get compressed and
+not the actual data!) If compression is needed, then do not use variable length types.
+\li If you need to create an array of of different length strings, you can either use fixed length strings
+along with compression, or use a variable length string.
+
+<hr>
+Navigate back: \ref index "Main" / \ref GettingStarted / \ref ViewToolsCommand
+
+*/

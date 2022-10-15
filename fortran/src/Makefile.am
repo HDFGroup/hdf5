@@ -22,7 +22,7 @@ include $(top_srcdir)/config/lt_vers.am
 # Include src directory in both Fortran and C flags (C compiler is used
 # for linking).
 AM_CPPFLAGS+=-I$(top_srcdir)/src
-AM_FCFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/fortran/src $(F9XMODFLAG)$(fmoddir)
+AM_FCFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/fortran/src
 
 AM_FCLIBS=$(LIBHDF5)
 
@@ -41,8 +41,8 @@ else
 endif
 
 # Source files for the library.
-libhdf5_fortran_la_SOURCES=H5f90global.F90 \
-          H5fortran_types.F90 H5_ff.F90 H5Aff.F90 H5Dff.F90 H5Eff.F90    \
+libhdf5_fortran_la_SOURCES=H5fortran_types.F90 H5f90global.F90 \
+	  H5_ff.F90 H5Aff.F90 H5Dff.F90 H5Eff.F90    \
           H5Fff.F90 H5Gff.F90 H5Iff.F90 H5Lff.F90 H5Off.F90 H5Pff.F90 H5Rff.F90 H5Sff.F90    \
           H5Tff.F90 H5VLff.F90 H5Zff.F90 H5_gen.F90 H5fortkit.F90 \
           H5f90kit.c H5_f.c H5Af.c H5Df.c H5Ef.c H5Ff.c H5Gf.c           \
@@ -144,7 +144,7 @@ H5f90global.lo:      $(srcdir)/H5f90global.F90 H5fortran_types.lo
 H5_buildiface.lo:    $(srcdir)/H5_buildiface.F90
 H5_ff.lo:            $(srcdir)/H5_ff.F90 H5Fff.lo H5f90global.lo
 H5Aff.lo:            $(srcdir)/H5Aff.F90 H5f90global.lo
-H5Dff.lo:            $(srcdir)/H5Dff.F90 H5f90global.lo
+H5Dff.lo:            $(srcdir)/H5Dff.F90 H5f90global.lo H5_ff.lo
 H5Eff.lo:            $(srcdir)/H5Eff.F90 H5f90global.lo
 H5Fff.lo:            $(srcdir)/H5Fff.F90 H5f90global.lo
 H5Gff.lo:            $(srcdir)/H5Gff.F90 H5f90global.lo

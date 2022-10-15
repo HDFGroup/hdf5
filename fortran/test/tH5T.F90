@@ -862,7 +862,7 @@ CONTAINS
     CALL h5fcreate_f(fix_filename,H5F_ACC_TRUNC_F,file_id,error)
     CALL check("h5fcreate_f", error, total_error)
     !
-    ! Create enumeration datatype with tow values
+    ! Create enumeration datatype with two values
     !
     CALL h5tenum_create_f(H5T_NATIVE_INTEGER,dtype_id,error)
     CALL check("h5tenum_create_f", error, total_error)
@@ -871,7 +871,7 @@ CONTAINS
     CALL h5tenum_insert_f(dtype_id,false,DATA(2),error)
     CALL check("h5tenum_insert_f", error, total_error)
     !
-    ! Create write  and close a dataset with enum datatype
+    ! Create write and close a dataset with enum datatype
     !
     CALL h5screate_simple_f(1,dsize,dspace_id,error)
     CALL check("h5screate_simple_f", error, total_error)

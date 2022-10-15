@@ -1446,4 +1446,5 @@ extern "C" void
 cleanup_dsets()
 {
     HDremove(FILE1.c_str());
+    HDremove(FILE_ACCPLIST.c_str());
 } // cleanup_dsets

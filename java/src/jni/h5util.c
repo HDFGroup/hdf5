@@ -436,7 +436,7 @@ h5str_convert(JNIEnv *env, char **in_str, hid_t container, hid_t tid, void *out_
             break;
 
         case H5T_ENUM: {
-            void *value;
+            void *value = NULL;
 
             token = HDstrtok(this_str, delimiter);
 
@@ -652,10 +652,8 @@ done:
 int
 h5str_sprint_old_reference(JNIEnv *env, h5str_t *out_str, hid_t region_obj, void *ref_buf)
 {
-    hid_t region = H5I_INVALID_HID;
-    char  ref_name[1024];
-
-    int ret_value = FAIL;
+    char ref_name[1024];
+    int  ret_value = FAIL;
 
     if ((H5Rget_name(region_obj, H5R_DATASET_REGION, ref_buf, (char *)ref_name, 1024)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -663,8 +661,8 @@ h5str_sprint_old_reference(JNIEnv *env, h5str_t *out_str, hid_t region_obj, void
         H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
 
     ret_value = SUCCEED;
-done:
 
+done:
     return ret_value;
 } /* h5str_sprint_reference */
 
@@ -686,9 +684,9 @@ h5str_sprint_reference(JNIEnv *env, h5str_t *out_str, void *ref_p)
     int ret_value = FAIL;
 
     buf_size = H5Rget_file_name(ref_vp, NULL, 0);
-    if (buf_size) {
+    if (buf_size > 0) {
         ref_name = (char *)HDmalloc(sizeof(char) * (size_t)buf_size + 1);
-        if (H5Rget_file_name(ref_vp, ref_name, buf_size + 1) >= 0) {
+        if (H5Rget_file_name(ref_vp, ref_name, (size_t)buf_size + 1) >= 0) {
             ref_name[buf_size] = '\0';
             if (!h5str_append(out_str, ref_name))
                 H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
@@ -698,9 +696,9 @@ h5str_sprint_reference(JNIEnv *env, h5str_t *out_str, void *ref_p)
     }
 
     buf_size = H5Rget_obj_name(ref_vp, H5P_DEFAULT, NULL, 0);
-    if (buf_size) {
+    if (buf_size > 0) {
         ref_name = (char *)HDmalloc(sizeof(char) * (size_t)buf_size + 1);
-        if (H5Rget_obj_name(ref_vp, H5P_DEFAULT, ref_name, buf_size + 1) >= 0) {
+        if (H5Rget_obj_name(ref_vp, H5P_DEFAULT, ref_name, (size_t)buf_size + 1) >= 0) {
             ref_name[buf_size] = '\0';
             if (!h5str_append(out_str, ref_name))
                 H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
@@ -711,9 +709,9 @@ h5str_sprint_reference(JNIEnv *env, h5str_t *out_str, void *ref_p)
 
     if (H5Rget_type(ref_vp) == H5R_ATTR) {
         buf_size = H5Rget_attr_name(ref_vp, NULL, 0);
-        if (buf_size) {
+        if (buf_size > 0) {
             ref_name = (char *)HDmalloc(sizeof(char) * (size_t)buf_size + 1);
-            if (H5Rget_attr_name(ref_vp, ref_name, buf_size + 1) >= 0) {
+            if (H5Rget_attr_name(ref_vp, ref_name, (size_t)buf_size + 1) >= 0) {
                 ref_name[buf_size] = '\0';
                 if (!h5str_append(out_str, ref_name))
                     H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
@@ -867,7 +865,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                     if (NULL == (this_str = (char *)HDmalloc(this_len)))
                         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
 
-                    if (HDsnprintf(this_str, this_len, "%g", tmp_float) < 0)
+                    if (HDsnprintf(this_str, this_len, "%g", (double)tmp_float) < 0)
                         H5_JNI_FATAL_ERROR(ENVONLY, "h5str_sprintf: HDsnprintf failure");
 
                     break;
@@ -1240,16 +1238,18 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                 H5O_type_t obj_type   = -1; /* Object type */
                 H5R_type_t ref_type;        /* Reference type */
 
-                H5R_ref_t *ref_vp = (H5R_ref_t *)cptr;
+                H5R_ref_t loc_ref;
 
-                ref_type = H5Rget_type(ref_vp);
-                if (!h5str_is_zero(ref_vp, H5Tget_size(H5T_STD_REF))) {
+                HDmemcpy(&loc_ref, cptr, sizeof(H5R_ref_t));
+
+                ref_type = H5Rget_type(&loc_ref);
+                if (!h5str_is_zero(&loc_ref, H5Tget_size(H5T_STD_REF))) {
                     switch (ref_type) {
                         case H5R_OBJECT1:
-                            if (H5Rget_obj_type3(ref_vp, H5P_DEFAULT, &obj_type) >= 0) {
+                            if (H5Rget_obj_type3(&loc_ref, H5P_DEFAULT, &obj_type) >= 0) {
                                 switch (obj_type) {
                                     case H5O_TYPE_DATASET:
-                                        if (h5str_region_dataset(ENVONLY, out_str, ref_vp, expand_data) < 0)
+                                        if (h5str_region_dataset(ENVONLY, out_str, &loc_ref, expand_data) < 0)
                                             CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
                                         break;
 
@@ -1263,8 +1263,8 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                                          * OID of the referenced object. */
                                         H5O_info2_t oi;
                                         char       *obj_tok_str = NULL;
-                                        if ((new_obj_id = H5Ropen_object(ref_vp, H5P_DEFAULT, H5P_DEFAULT)) >=
-                                            0) {
+                                        if ((new_obj_id =
+                                                 H5Ropen_object(&loc_ref, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                                             H5Oget_info3(new_obj_id, &oi, H5O_INFO_BASIC);
                                             H5Otoken_to_str(new_obj_id, &oi.token, &obj_tok_str);
                                             if (H5Dclose(new_obj_id) < 0)
@@ -1337,17 +1337,17 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                                 H5_LIBRARY_ERROR(ENVONLY);
                             break;
                         case H5R_DATASET_REGION1:
-                            if (h5str_region_dataset(ENVONLY, out_str, ref_vp, expand_data) < 0)
+                            if (h5str_region_dataset(ENVONLY, out_str, &loc_ref, expand_data) < 0)
                                 CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
                             break;
                         case H5R_OBJECT2:
-                            if (H5Rget_obj_type3(ref_vp, H5P_DEFAULT, &obj_type) >= 0) {
+                            if (H5Rget_obj_type3(&loc_ref, H5P_DEFAULT, &obj_type) >= 0) {
                                 switch (obj_type) {
                                     case H5O_TYPE_GROUP:
                                         break;
 
                                     case H5O_TYPE_DATASET:
-                                        if (h5str_region_dataset(ENVONLY, out_str, ref_vp, expand_data) < 0)
+                                        if (h5str_region_dataset(ENVONLY, out_str, &loc_ref, expand_data) < 0)
                                             CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
                                         break;
 
@@ -1365,11 +1365,11 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                                 H5_ASSERTION_ERROR(ENVONLY, "h5str_sprintf: H5R_OBJECT2 failed");
                             break;
                         case H5R_DATASET_REGION2:
-                            if (h5str_region_dataset(ENVONLY, out_str, ref_vp, expand_data) < 0)
+                            if (h5str_region_dataset(ENVONLY, out_str, &loc_ref, expand_data) < 0)
                                 CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
                             break;
                         case H5R_ATTR:
-                            if ((new_obj_id = H5Ropen_attr(ref_vp, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                            if ((new_obj_id = H5Ropen_attr(&loc_ref, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                                 if (h5str_dump_region_attribute(ENVONLY, out_str, new_obj_id) < 0)
                                     CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
                                 if (H5Aclose(new_obj_id) < 0)
@@ -1383,7 +1383,7 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
                     } /* end switch */
                 }
 
-                if (H5Rdestroy(ref_vp) < 0)
+                if (H5Rdestroy(&loc_ref) < 0)
                     H5_LIBRARY_ERROR(ENVONLY);
             }
 
@@ -2273,10 +2273,10 @@ h5str_render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem, hs
         }
 
         case H5T_STRING: {
-            unsigned char tempuchar;
             unsigned int  i;
             H5T_str_t     pad;
-            char         *s;
+            char         *s = NULL;
+            unsigned char tempuchar;
 
             if ((pad = H5Tget_strpad(tid)) < 0) {
                 ret_value = FAIL;
@@ -2287,7 +2287,7 @@ h5str_render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem, hs
                 mem = ((unsigned char *)_mem) + block_index * size;
 
                 if (H5Tis_variable_str(tid)) {
-                    s = *(char **)mem;
+                    s = *(char **)((void *)mem);
                     if (s != NULL)
                         size = HDstrlen(s);
                 }
@@ -2395,14 +2395,15 @@ h5str_render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem, hs
             }
 
             for (block_index = 0; block_index < block_nelmts; block_index++) {
-                mem = ((unsigned char *)_mem) + block_index * size;
+                hvl_t vl_elem;
+
+                HDmemcpy(&vl_elem, ((unsigned char *)_mem) + block_index * size, sizeof(hvl_t));
 
                 /* Get the number of sequence elements */
-                nelmts = ((hvl_t *)mem)->len;
+                nelmts = vl_elem.len;
 
                 /* dump the array element */
-                if (h5str_render_bin_output(stream, container, memb, ((char *)(((hvl_t *)mem)->p)), nelmts) <
-                    0) {
+                if (h5str_render_bin_output(stream, container, memb, ((char *)(vl_elem.p)), nelmts) < 0) {
                     ret_value = FAIL;
                     break;
                 }
@@ -2420,11 +2421,14 @@ h5str_render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem, hs
 
             /* Region data */
             for (block_index = 0; block_index < block_nelmts; block_index++) {
-                mem = ((unsigned char *)_mem) + block_index * size;
-                if ((region_id = H5Ropen_object((H5R_ref_t *)mem, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+                H5R_ref_t loc_ref;
+
+                HDmemcpy(&loc_ref, ((unsigned char *)_mem) + block_index * size, sizeof(H5R_ref_t));
+
+                if ((region_id = H5Ropen_object(&loc_ref, H5P_DEFAULT, H5P_DEFAULT)) < 0)
                     continue;
-                if ((region_space = H5Ropen_region((H5R_ref_t *)mem, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
-                    if (!h5str_is_zero(mem, H5Tget_size(H5T_STD_REF))) {
+                if ((region_space = H5Ropen_region(&loc_ref, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                    if (!h5str_is_zero(&loc_ref, H5Tget_size(H5T_STD_REF))) {
                         region_type = H5Sget_select_type(region_space);
                         if (region_type == H5S_SEL_POINTS)
                             ret_value =
@@ -2849,7 +2853,7 @@ h5str_dump_region_attribute(JNIEnv *env, h5str_t *str, hid_t region_id)
     H5Sget_simple_extent_dims(region_space, total_size, NULL);
     p_nelmts = 1;
 
-    for (i = 0; i < sndims; i++)
+    for (i = 0; i < (size_t)sndims; i++)
         p_nelmts *= total_size[i];
 
     if ((atype = H5Aget_type(region_id)) < 0) {
@@ -2915,24 +2919,20 @@ done:
 int
 h5str_dump_simple_dset(JNIEnv *env, FILE *stream, hid_t dset, int binary_order)
 {
+    hid_t   f_space = H5I_INVALID_HID; /* file data space */
     hsize_t elmtno;                    /* counter  */
+    size_t  i = 0;                     /* counter  */
+    int     sndims;                    /* rank of dataspace */
+    int     carry;                     /* counter carry value */
     hsize_t zero[8];                   /* vector of zeros */
     hsize_t total_size[H5S_MAX_RANK];  /* total size of dataset*/
-    size_t  i;                         /* counter  */
-    hid_t   f_space = H5I_INVALID_HID; /* file data space */
-    int     ndims;
-    int     carry; /* counter carry value */
-
-    /* Print info */
-    hsize_t p_nelmts;      /* total selected elmts */
-    size_t  p_type_nbytes; /* size of memory type */
 
     /* Stripmine info */
-    void   *sm_buf = NULL;              /* buffer for raw data */
-    hsize_t sm_size[H5S_MAX_RANK];      /* stripmine size */
-    hsize_t sm_nbytes;                  /* bytes per stripmine */
-    hsize_t sm_nelmts;                  /* elements per stripmine */
-    hid_t   sm_space = H5I_INVALID_HID; /* stripmine data space */
+    hsize_t        sm_size[H5S_MAX_RANK];      /* stripmine size */
+    hsize_t        sm_nbytes;                  /* bytes per stripmine */
+    hsize_t        sm_nelmts;                  /* elements per stripmine */
+    unsigned char *sm_buf   = NULL;            /* buffer for raw data */
+    hid_t          sm_space = H5I_INVALID_HID; /* stripmine data space */
 
     /* Hyperslab info */
     hsize_t hs_offset[H5S_MAX_RANK]; /* starting offset */
@@ -2940,11 +2940,11 @@ h5str_dump_simple_dset(JNIEnv *env, FILE *stream, hid_t dset, int binary_order)
     hsize_t hs_nelmts;               /* elements in request */
 
     /* VL data special information */
-    unsigned int vl_data = 0; /* contains VL datatypes */
-    hid_t        p_type  = H5I_INVALID_HID;
-    hid_t        f_type  = H5I_INVALID_HID;
+    unsigned int vl_data   = 0; /* contains VL datatypes */
+    int          ret_value = FAIL;
 
-    int ret_value = FAIL;
+    hid_t p_type = H5I_INVALID_HID;
+    hid_t f_type = H5I_INVALID_HID;
 
     if (dset < 0)
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "h5str_dump_simple_dset: dset ID < 0");
@@ -2955,16 +2955,21 @@ h5str_dump_simple_dset(JNIEnv *env, FILE *stream, hid_t dset, int binary_order)
     if ((f_space = H5Dget_space(dset)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
-    if ((ndims = H5Sget_simple_extent_ndims(f_space)) < 0)
+    if ((sndims = H5Sget_simple_extent_ndims(f_space)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
+    /* Assume entire data space to be printed */
     if (H5Sget_simple_extent_dims(f_space, total_size, NULL) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
     if (H5Tequal(f_type, H5T_STD_REF_DSETREG)) {
-        p_nelmts = H5Sget_simple_extent_npoints(f_space);
+        hssize_t p_nelmts; /* total selected elmts */
+
+        if ((p_nelmts = H5Sget_simple_extent_npoints(f_space)) < 0)
+            H5_LIBRARY_ERROR(ENVONLY);
+
         if (NULL ==
-            (sm_buf = (H5R_ref_t *)HDcalloc(MAX(sizeof(unsigned), sizeof(H5R_ref_t)), (size_t)p_nelmts)))
+            (sm_buf = (unsigned char *)HDcalloc(MAX(sizeof(unsigned), sizeof(H5R_ref_t)), (size_t)p_nelmts)))
             H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_dump_simple_mem: failed to allocate sm_buf");
 
         /* Read the data */
@@ -2972,15 +2977,19 @@ h5str_dump_simple_dset(JNIEnv *env, FILE *stream, hid_t dset, int binary_order)
             H5_LIBRARY_ERROR(ENVONLY);
 
         if (binary_order == 99) {
-            if (h5str_dump_simple_data(ENVONLY, stream, dset, H5T_STD_REF, sm_buf, p_nelmts) < 0)
+            if (h5str_dump_simple_data(ENVONLY, stream, dset, H5T_STD_REF, sm_buf, (size_t)p_nelmts) < 0)
                 CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
         }
         else {
-            if (h5str_render_bin_output(stream, dset, H5T_STD_REF, sm_buf, p_nelmts) < 0)
+            if (h5str_render_bin_output(stream, dset, H5T_STD_REF, sm_buf, (size_t)p_nelmts) < 0)
                 CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
         }
     }
     else {
+        /* Print info */
+        size_t  p_type_nbytes; /* size of memory type */
+        hsize_t p_nelmts;      /* total selected elmts */
+
         switch (binary_order) {
             case 1: {
                 if ((p_type = h5str_get_native_type(f_type)) < 0)
@@ -3011,109 +3020,102 @@ h5str_dump_simple_dset(JNIEnv *env, FILE *stream, hid_t dset, int binary_order)
             }
         }
 
-        if ((size_t)ndims <= (sizeof(sm_size) / sizeof(sm_size[0]))) {
-            if (H5Sget_simple_extent_dims(f_space, total_size, NULL) < 0)
+        /* Calculate the number of elements we're going to print */
+        p_nelmts = 1;
+
+        if (sndims > 0) {
+            for (i = 0; i < (size_t)sndims; i++)
+                p_nelmts *= total_size[i];
+        } /* end if */
+
+        if (p_nelmts > 0) {
+            /* Check if we have VL data in the dataset's datatype */
+            if (h5str_detect_vlen(p_type) != 0)
+                vl_data = 1;
+
+            /*
+             * Determine the strip mine size and allocate a buffer. The strip mine is
+             * a hyperslab whose size is manageable.
+             */
+            if (!(sm_nbytes = p_type_nbytes = H5Tget_size(p_type)))
                 H5_LIBRARY_ERROR(ENVONLY);
 
-            /* Calculate the number of elements we're going to print */
-            p_nelmts = 1;
+            if (sndims > 0) {
+                for (i = (size_t)sndims; i > 0; --i) {
+                    hsize_t size = H5TOOLS_BUFSIZE / sm_nbytes;
+                    if (size == 0) /* datum size > H5TOOLS_BUFSIZE */
+                        size = 1;
+                    sm_size[i - 1] = (((total_size[i - 1]) < (size)) ? (total_size[i - 1]) : (size));
+                    sm_nbytes *= sm_size[i - 1];
+                }
+            }
 
-            if (ndims > 0) {
-                for (i = 0; i < (size_t)ndims; i++)
-                    p_nelmts *= total_size[i];
-            } /* end if */
+            if (sm_nbytes > 0) {
+                if (NULL == (sm_buf = (unsigned char *)HDmalloc((size_t)sm_nbytes)))
+                    H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_dump_simple_dset: failed to allocate sm_buf");
 
-            if (p_nelmts > 0) {
-                /* Check if we have VL data in the dataset's datatype */
-                if (h5str_detect_vlen(p_type) != 0)
-                    vl_data = 1;
+                sm_nelmts = sm_nbytes / p_type_nbytes;
 
-                /*
-                 * Determine the strip mine size and allocate a buffer. The strip mine is
-                 * a hyperslab whose size is manageable.
-                 */
-                if (!(sm_nbytes = p_type_nbytes = H5Tget_size(p_type)))
+                if ((sm_space = H5Screate_simple(1, &sm_nelmts, NULL)) < 0)
                     H5_LIBRARY_ERROR(ENVONLY);
 
-                if (ndims > 0) {
-                    for (i = (size_t)ndims; i > 0; --i) {
-                        hsize_t size = H5TOOLS_BUFSIZE / sm_nbytes;
-                        if (size == 0) /* datum size > H5TOOLS_BUFSIZE */
-                            size = 1;
-                        sm_size[i - 1] = (((total_size[i - 1]) < (size)) ? (total_size[i - 1]) : (size));
-                        sm_nbytes *= sm_size[i - 1];
-                    }
-                }
+                /* The stripmine loop */
+                HDmemset(hs_offset, 0, sizeof hs_offset);
+                HDmemset(zero, 0, sizeof zero);
 
-                if (sm_nbytes > 0) {
-                    if (NULL == (sm_buf = (unsigned char *)HDmalloc((size_t)sm_nbytes)))
-                        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_dump_simple_dset: failed to allocate sm_buf");
-
-                    sm_nelmts = sm_nbytes / p_type_nbytes;
-
-                    if ((sm_space = H5Screate_simple(1, &sm_nelmts, NULL)) < 0)
-                        H5_LIBRARY_ERROR(ENVONLY);
-
-                    /* The stripmine loop */
-                    HDmemset(hs_offset, 0, sizeof hs_offset);
-                    HDmemset(zero, 0, sizeof zero);
-
-                    for (elmtno = 0; elmtno < p_nelmts; elmtno += hs_nelmts) {
-                        /* Calculate the hyperslab size */
-                        if (ndims > 0) {
-                            for (i = 0, hs_nelmts = 1; i < (size_t)ndims; i++) {
-                                hs_size[i] = (((total_size[i] - hs_offset[i]) < (sm_size[i]))
-                                                  ? (total_size[i] - hs_offset[i])
-                                                  : (sm_size[i]));
-                                hs_nelmts *= hs_size[i];
-                            }
-
-                            if (H5Sselect_hyperslab(f_space, H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL) <
-                                0)
-                                H5_LIBRARY_ERROR(ENVONLY);
-
-                            if (H5Sselect_hyperslab(sm_space, H5S_SELECT_SET, zero, NULL, &hs_nelmts, NULL) <
-                                0)
-                                H5_LIBRARY_ERROR(ENVONLY);
-                        }
-                        else {
-                            if (H5Sselect_all(f_space) < 0)
-                                H5_LIBRARY_ERROR(ENVONLY);
-
-                            if (H5Sselect_all(sm_space) < 0)
-                                H5_LIBRARY_ERROR(ENVONLY);
-
-                            hs_nelmts = 1;
+                for (elmtno = 0; elmtno < (hsize_t)p_nelmts; elmtno += hs_nelmts) {
+                    /* Calculate the hyperslab size */
+                    if (sndims > 0) {
+                        for (i = 0, hs_nelmts = 1; i < (size_t)sndims; i++) {
+                            hs_size[i] = (((total_size[i] - hs_offset[i]) < (sm_size[i]))
+                                              ? (total_size[i] - hs_offset[i])
+                                              : (sm_size[i]));
+                            hs_nelmts *= hs_size[i];
                         }
 
-                        /* Read the data */
-                        if (H5Dread(dset, p_type, sm_space, f_space, H5P_DEFAULT, sm_buf) < 0)
+                        if (H5Sselect_hyperslab(f_space, H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL) < 0)
                             H5_LIBRARY_ERROR(ENVONLY);
 
-                        if (binary_order == 99) {
-                            if (h5str_dump_simple_data(ENVONLY, stream, dset, p_type, sm_buf, hs_nelmts) < 0)
-                                CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-                        }
-                        else {
-                            if (h5str_render_bin_output(stream, dset, p_type, sm_buf, hs_nelmts) < 0)
-                                CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-                        }
+                        if (H5Sselect_hyperslab(sm_space, H5S_SELECT_SET, zero, NULL, &hs_nelmts, NULL) < 0)
+                            H5_LIBRARY_ERROR(ENVONLY);
+                    }
+                    else {
+                        if (H5Sselect_all(f_space) < 0)
+                            H5_LIBRARY_ERROR(ENVONLY);
 
-                        /* Reclaim any VL memory, if necessary */
-                        if (vl_data) {
-                            if (H5Treclaim(p_type, sm_space, H5P_DEFAULT, sm_buf) < 0)
-                                H5_LIBRARY_ERROR(ENVONLY);
-                        }
+                        if (H5Sselect_all(sm_space) < 0)
+                            H5_LIBRARY_ERROR(ENVONLY);
 
-                        /* Calculate the next hyperslab offset */
-                        for (i = (size_t)ndims, carry = 1; i > 0 && carry; --i) {
-                            hs_offset[i - 1] += hs_size[i - 1];
+                        hs_nelmts = 1;
+                    }
 
-                            if (hs_offset[i - 1] == total_size[i - 1])
-                                hs_offset[i - 1] = 0;
-                            else
-                                carry = 0;
-                        }
+                    /* Read the data */
+                    if (H5Dread(dset, p_type, sm_space, f_space, H5P_DEFAULT, sm_buf) < 0)
+                        H5_LIBRARY_ERROR(ENVONLY);
+
+                    if (binary_order == 99) {
+                        if (h5str_dump_simple_data(ENVONLY, stream, dset, p_type, sm_buf, hs_nelmts) < 0)
+                            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                    }
+                    else {
+                        if (h5str_render_bin_output(stream, dset, p_type, sm_buf, hs_nelmts) < 0)
+                            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+                    }
+
+                    /* Reclaim any VL memory, if necessary */
+                    if (vl_data) {
+                        if (H5Treclaim(p_type, sm_space, H5P_DEFAULT, sm_buf) < 0)
+                            H5_LIBRARY_ERROR(ENVONLY);
+                    }
+
+                    /* Calculate the next hyperslab offset */
+                    for (i = (size_t)sndims, carry = 1; i > 0 && carry; --i) {
+                        hs_offset[i - 1] += hs_size[i - 1];
+
+                        if (hs_offset[i - 1] == total_size[i - 1])
+                            hs_offset[i - 1] = 0;
+                        else
+                            carry = 0;
                     }
                 }
             }
@@ -3142,15 +3144,12 @@ h5str_dump_simple_mem(JNIEnv *env, FILE *stream, hid_t attr_id, int binary_order
 {
     hid_t    f_space = H5I_INVALID_HID; /* file data space */
     hsize_t  alloc_size;
-    int      ndims;                    /* rank of dataspace */
-    unsigned i;                        /* counters  */
-    hsize_t  total_size[H5S_MAX_RANK]; /* total size of dataset*/
-    hsize_t  p_nelmts;                 /* total selected elmts */
+    int      sndims;                   /* rank of dataspace */
+    unsigned i;                        /* counters */
+    hsize_t  total_size[H5S_MAX_RANK]; /* total size of dataset */
+    int      ret_value = 0;
 
-    void   *sm_buf = NULL;         /* buffer for raw data */
-    hsize_t sm_size[H5S_MAX_RANK]; /* stripmine size */
-
-    int ret_value = 0;
+    unsigned char *sm_buf = NULL; /* buffer for raw data */
 
     /* VL data special information */
     unsigned int vl_data = 0; /* contains VL datatypes */
@@ -3166,16 +3165,20 @@ h5str_dump_simple_mem(JNIEnv *env, FILE *stream, hid_t attr_id, int binary_order
     if (H5I_INVALID_HID == (f_space = H5Aget_space(attr_id)))
         H5_LIBRARY_ERROR(ENVONLY);
 
-    if ((ndims = H5Sget_simple_extent_ndims(f_space)) < 0)
+    if ((sndims = H5Sget_simple_extent_ndims(f_space)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
     if (H5Sget_simple_extent_dims(f_space, total_size, NULL) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
     if (H5Tequal(f_type, H5T_STD_REF_DSETREG)) {
-        p_nelmts = H5Sget_simple_extent_npoints(f_space);
+        hssize_t p_nelmts; /* total selected elmts */
+
+        if ((p_nelmts = H5Sget_simple_extent_npoints(f_space)) < 0)
+            H5_LIBRARY_ERROR(ENVONLY);
+
         if (NULL ==
-            (sm_buf = (H5R_ref_t *)HDcalloc(MAX(sizeof(unsigned), sizeof(H5R_ref_t)), (size_t)p_nelmts)))
+            (sm_buf = (unsigned char *)HDcalloc(MAX(sizeof(unsigned), sizeof(H5R_ref_t)), (size_t)p_nelmts)))
             H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_dump_simple_mem: failed to allocate sm_buf");
 
         /* Read the data */
@@ -3183,15 +3186,17 @@ h5str_dump_simple_mem(JNIEnv *env, FILE *stream, hid_t attr_id, int binary_order
             H5_LIBRARY_ERROR(ENVONLY);
 
         if (binary_order == 99) {
-            if (h5str_dump_simple_data(ENVONLY, stream, attr_id, H5T_STD_REF, sm_buf, p_nelmts) < 0)
+            if (h5str_dump_simple_data(ENVONLY, stream, attr_id, H5T_STD_REF, sm_buf, (size_t)p_nelmts) < 0)
                 CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
         }
         else {
-            if (h5str_render_bin_output(stream, attr_id, H5T_STD_REF, sm_buf, p_nelmts) < 0)
+            if (h5str_render_bin_output(stream, attr_id, H5T_STD_REF, sm_buf, (size_t)p_nelmts) < 0)
                 CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
         }
     }
     else {
+        hsize_t p_nelmts; /* total selected elmts */
+
         switch (binary_order) {
             case 1: {
                 if ((p_type = h5str_get_native_type(f_type)) < 0)
@@ -3222,44 +3227,40 @@ h5str_dump_simple_mem(JNIEnv *env, FILE *stream, hid_t attr_id, int binary_order
             }
         }
 
-        if ((size_t)ndims <= (sizeof(sm_size) / sizeof(sm_size[0]))) {
-            if (H5Sget_simple_extent_dims(f_space, total_size, NULL) < 0)
+        /* Calculate the number of elements we're going to print */
+        p_nelmts = 1;
+
+        if (sndims > 0) {
+            for (i = 0; i < (size_t)sndims; i++)
+                p_nelmts *= total_size[i];
+        } /* end if */
+
+        if (p_nelmts > 0) {
+            /* Check if we have VL data in the dataset's datatype */
+            if (h5str_detect_vlen(p_type) != 0)
+                vl_data = 1;
+
+            alloc_size = (size_t)p_nelmts * H5Tget_size(p_type);
+            if (NULL == (sm_buf = (unsigned char *)HDmalloc((size_t)alloc_size)))
+                H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_dump_simple_mem: failed to allocate sm_buf");
+
+            /* Read the data */
+            if (H5Aread(attr_id, p_type, sm_buf) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
-            /* Calculate the number of elements we're going to print */
-            p_nelmts = 1;
 
-            if (ndims > 0) {
-                for (i = 0; i < (size_t)ndims; i++)
-                    p_nelmts *= total_size[i];
-            } /* end if */
+            if (binary_order == 99) {
+                if (h5str_dump_simple_data(ENVONLY, stream, attr_id, p_type, sm_buf, (size_t)p_nelmts) < 0)
+                    CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+            }
+            else {
+                if (h5str_render_bin_output(stream, attr_id, p_type, sm_buf, (size_t)p_nelmts) < 0)
+                    CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+            }
 
-            if (p_nelmts > 0) {
-                /* Check if we have VL data in the dataset's datatype */
-                if (h5str_detect_vlen(p_type) != 0)
-                    vl_data = 1;
-
-                alloc_size = p_nelmts * H5Tget_size(p_type);
-                if (NULL == (sm_buf = (unsigned char *)HDmalloc((size_t)alloc_size)))
-                    H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_dump_simple_mem: failed to allocate sm_buf");
-
-                /* Read the data */
-                if (H5Aread(attr_id, p_type, sm_buf) < 0)
+            /* Reclaim any VL memory, if necessary */
+            if (vl_data) {
+                if (H5Treclaim(p_type, f_space, H5P_DEFAULT, sm_buf) < 0)
                     H5_LIBRARY_ERROR(ENVONLY);
-
-                if (binary_order == 99) {
-                    if (h5str_dump_simple_data(ENVONLY, stream, attr_id, p_type, sm_buf, p_nelmts) < 0)
-                        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-                }
-                else {
-                    if (h5str_render_bin_output(stream, attr_id, p_type, sm_buf, p_nelmts) < 0)
-                        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-                }
-
-                /* Reclaim any VL memory, if necessary */
-                if (vl_data) {
-                    if (H5Treclaim(p_type, f_space, H5P_DEFAULT, sm_buf) < 0)
-                        H5_LIBRARY_ERROR(ENVONLY);
-                }
             }
         }
     }

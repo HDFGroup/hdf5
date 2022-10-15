@@ -15,7 +15,7 @@
 ### ctest -S HDF5config.cmake,BUILD_GENERATOR=VS201764 -C Release -VV -O hdf5.log         ###
 #############################################################################################
 
-cmake_minimum_required (VERSION 3.12)
+cmake_minimum_required (VERSION 3.18)
 ############################################################################
 # Usage:
 #     ctest -S HDF5config.cmake,OPTION=VALUE -C Release -VV -O test.log
@@ -37,7 +37,7 @@ cmake_minimum_required (VERSION 3.12)
 #     CTEST_SOURCE_NAME  -  source folder
 ##############################################################################
 
-set (CTEST_SOURCE_VERSION "1.13.2")
+set (CTEST_SOURCE_VERSION "1.13.3")
 set (CTEST_SOURCE_VERSEXT "-1")
 
 ##############################################################################

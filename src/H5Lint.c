@@ -1703,7 +1703,7 @@ H5L__exists_inter_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_ATT
     if (lnk != NULL) {
         /* Check for more components to the path */
         if (udata->sep) {
-            H5G_traverse_t cb_func; /* Callback function for tranversal */
+            H5G_traverse_t cb_func; /* Callback function for traversal */
             char          *next;    /* Pointer to next component name */
 
             /* Look for another separator */
@@ -1754,7 +1754,7 @@ herr_t
 H5L_exists_tolerant(const H5G_loc_t *loc, const char *name, hbool_t *exists)
 {
     H5L_trav_le_t  udata;               /* User data for traversal */
-    H5G_traverse_t cb_func;             /* Callback function for tranversal */
+    H5G_traverse_t cb_func;             /* Callback function for traversal */
     char          *name_copy = NULL;    /* Duplicate of name */
     char          *name_trav;           /* Name to traverse */
     herr_t         ret_value = SUCCEED; /* Return value */

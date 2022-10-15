@@ -12,7 +12,7 @@
 
 /*
  * Purpose:     The Virtual Object Layer as described in documentation.
- *              The pupose is to provide an abstraction on how to access the
+ *              The purpose is to provide an abstraction on how to access the
  *              underlying HDF5 container, whether in a local file with
  *              a specific file format, or remotely on other machines, etc...
  */
@@ -2854,7 +2854,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_get_cap_flags(const H5VL_connector_prop_t *connector_prop, unsigned *cap_flags)
+H5VL_get_cap_flags(const H5VL_connector_prop_t *connector_prop, uint64_t *cap_flags)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 

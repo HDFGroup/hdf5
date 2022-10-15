@@ -483,6 +483,53 @@ done:
 #endif /* H5_MEMORY_ALLOC_SANITY_CHECK */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5MM_strndup
+ *
+ * Purpose:     Duplicates a string, including memory allocation, but only
+ *              copies at most `n` bytes from the string to be duplicated.
+ *              If the string to be duplicated is longer than `n`, only `n`
+ *              bytes are copied and a terminating null byte is added.
+ *              NULL is NOT an acceptable value for the input string.
+ *
+ *              If the string to be duplicated is the NULL pointer, then
+ *              an error will be raised.
+ *
+ * Return:      Success:    Pointer to a new string
+ *              Failure:    NULL
+ *-------------------------------------------------------------------------
+ */
+char *
+H5MM_strndup(const char *s, size_t n)
+{
+#if defined H5_MEMORY_ALLOC_SANITY_CHECK
+    size_t len;
+#endif
+    char *ret_value = NULL;
+
+    FUNC_ENTER_NOAPI(NULL)
+
+    if (!s)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "NULL string not allowed")
+
+#if defined H5_MEMORY_ALLOC_SANITY_CHECK
+    for (len = 0; len < n && s[len] != '\0'; len++)
+        ;
+
+    if (NULL == (ret_value = H5MM_malloc(len + 1)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+    H5MM_memcpy(ret_value, s, len);
+    ret_value[len] = '\0';
+#else
+    if (NULL == (ret_value = HDstrndup(s, n)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "string duplication failed")
+#endif
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5MM_strndup() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5MM_xfree
  *
  * Purpose:     Just like free(3) except null pointers are allowed as

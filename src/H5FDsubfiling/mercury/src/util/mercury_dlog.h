@@ -175,7 +175,7 @@ HG_UTIL_PUBLIC void hg_dlog_mkcount64(struct hg_dlog *d, hg_atomic_int64_t **cpt
 /**
  * attempt to add a log record to a dlog.  the id and msg should point
  * to static strings that are valid throughout the life of the program
- * (not something that is is on the stack).
+ * (not something that is on the stack).
  *
  * \param d [IN]                the dlog to add the log record to
  * \param file [IN]             file entry

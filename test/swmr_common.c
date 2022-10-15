@@ -190,7 +190,7 @@ generate_name(char *name_buf, size_t name_buf_length, unsigned level, unsigned c
 /*-------------------------------------------------------------------------
  * Function:    generate_symbols
  *
- * Purpose:     Initializes the global dataset infomration arrays.
+ * Purpose:     Initializes the global dataset information arrays.
  *
  * Parameters:  N/A
  *

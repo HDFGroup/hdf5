@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.12)
+cmake_minimum_required (VERSION 3.18)
 project (HDFJAVA_EXAMPLES_DATATYPES Java)
 
 set (CMAKE_VERBOSE_MAKEFILE 1)
@@ -65,12 +65,13 @@ endforeach ()
 
 if (BUILD_TESTING AND HDF5_TEST_EXAMPLES AND HDF5_TEST_SERIAL)
   get_property (target_name TARGET ${HDF5_JAVA_JNI_LIB_TARGET} PROPERTY OUTPUT_NAME)
-  set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=${target_name}$<$<CONFIG:Debug>:${CMAKE_DEBUG_POSTFIX}>;")
+  set (CMD_ARGS "-Dhdf.hdf5lib.H5.loadLibraryName=${target_name}$<$<OR:$<CONFIG:Debug>,$<CONFIG:Developer>>:${CMAKE_DEBUG_POSTFIX}>;")
 
   foreach (example ${HDF_JAVA_EXAMPLES})
     add_test (
         NAME JAVA_datatypes-${example}-clear-objects
-        COMMAND ${CMAKE_COMMAND} -E remove ${HDFJAVA_EXAMPLES_BINARY_DIR}/${example}.h5
+        COMMAND ${CMAKE_COMMAND} -E remove
+            ${HDFJAVA_EXAMPLES_BINARY_DIR}/${example}.h5
     )
 
     add_test (
@@ -96,6 +97,15 @@ if (BUILD_TESTING AND HDF5_TEST_EXAMPLES AND HDF5_TEST_SERIAL)
     )
     set_tests_properties (JAVA_datatypes-${example} PROPERTIES
         DEPENDS JAVA_datatypes-${example}-copy-objects
+    )
+
+    add_test (
+        NAME JAVA_datatypes-${example}-clean-objects
+        COMMAND ${CMAKE_COMMAND} -E remove
+            ${HDFJAVA_EXAMPLES_BINARY_DIR}/${example}.h5
+    )
+    set_tests_properties (JAVA_datatypes-${example}-clean-objects PROPERTIES
+        DEPENDS JAVA_datatypes-${example}
     )
   endforeach ()
 endif ()

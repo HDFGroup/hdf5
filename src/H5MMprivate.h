@@ -46,6 +46,7 @@ H5_DLL void *H5MM_malloc(size_t size) H5_ATTR_MALLOC;
 H5_DLL void *H5MM_calloc(size_t size) H5_ATTR_MALLOC;
 H5_DLL void *H5MM_realloc(void *mem, size_t size);
 H5_DLL char *H5MM_strdup(const char *s);
+H5_DLL char *H5MM_strndup(const char *s, size_t n);
 H5_DLL void *H5MM_memcpy(void *dest, const void *src, size_t n);
 H5_DLL void  H5MM_sanity_check_all(void);
 H5_DLL void  H5MM_final_sanity_check(void);
@@ -57,6 +58,7 @@ H5_DLL void  H5MM_final_sanity_check(void);
 #define H5MM_realloc(ptr, size)  HDrealloc(ptr, size)
 #define H5MM_free(ptr)           HDfree(ptr)
 #define H5MM_strdup(s)           HDstrdup(s)
+#define H5MM_strndup(s, n)       HDstrndup(s, n)
 #define H5MM_memcpy(dst, src, n) HDmemcpy(dst, src, n)
 
 #endif

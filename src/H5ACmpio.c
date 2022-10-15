@@ -763,7 +763,7 @@ H5AC__log_dirtied_entry(const H5AC_info_t *entry_ptr)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTINSERT, FAIL, "can't insert entry into dirty entry slist.")
 
             aux_ptr->dirty_bytes += entry_ptr->size;
-#if H5AC_DEBUG_DIRTY_BYTES_CREATION
+#ifdef H5AC_DEBUG_DIRTY_BYTES_CREATION
             aux_ptr->unprotect_dirty_bytes += entry_ptr->size;
             aux_ptr->unprotect_dirty_bytes_updates += 1;
 #endif    /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
@@ -778,7 +778,7 @@ H5AC__log_dirtied_entry(const H5AC_info_t *entry_ptr)
     } /* end if */
     else {
         aux_ptr->dirty_bytes += entry_ptr->size;
-#if H5AC_DEBUG_DIRTY_BYTES_CREATION
+#ifdef H5AC_DEBUG_DIRTY_BYTES_CREATION
         aux_ptr->unprotect_dirty_bytes += entry_ptr->size;
         aux_ptr->unprotect_dirty_bytes_updates += 1;
 #endif /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
@@ -976,7 +976,7 @@ H5AC__log_inserted_entry(const H5AC_info_t *entry_ptr)
 
     aux_ptr->dirty_bytes += entry_ptr->size;
 
-#if H5AC_DEBUG_DIRTY_BYTES_CREATION
+#ifdef H5AC_DEBUG_DIRTY_BYTES_CREATION
     aux_ptr->insert_dirty_bytes += entry_ptr->size;
     aux_ptr->insert_dirty_bytes_updates += 1;
 #endif /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
@@ -1093,7 +1093,7 @@ H5AC__log_moved_entry(const H5F_t *f, haddr_t old_addr, haddr_t new_addr)
 
             aux_ptr->dirty_bytes += entry_size;
 
-#if H5AC_DEBUG_DIRTY_BYTES_CREATION
+#ifdef H5AC_DEBUG_DIRTY_BYTES_CREATION
             aux_ptr->move_dirty_bytes += entry_size;
             aux_ptr->move_dirty_bytes_updates += 1;
 #endif    /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
@@ -1106,7 +1106,7 @@ H5AC__log_moved_entry(const H5F_t *f, haddr_t old_addr, haddr_t new_addr)
     else if (!entry_dirty) {
         aux_ptr->dirty_bytes += entry_size;
 
-#if H5AC_DEBUG_DIRTY_BYTES_CREATION
+#ifdef H5AC_DEBUG_DIRTY_BYTES_CREATION
         aux_ptr->move_dirty_bytes += entry_size;
         aux_ptr->move_dirty_bytes_updates += 1;
 #endif /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
@@ -2117,7 +2117,7 @@ H5AC__run_sync_point(H5F_t *f, int sync_point_op)
     HDassert((sync_point_op == H5AC_SYNC_POINT_OP__FLUSH_TO_MIN_CLEAN) ||
              (sync_point_op == H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED));
 
-#if H5AC_DEBUG_DIRTY_BYTES_CREATION
+#ifdef H5AC_DEBUG_DIRTY_BYTES_CREATION
     HDfprintf(stdout, "%d:H5AC_propagate...:%u: (u/uu/i/iu/m/mu) = %zu/%u/%zu/%u/%zu/%u\n", aux_ptr->mpi_rank,
               aux_ptr->dirty_bytes_propagations, aux_ptr->unprotect_dirty_bytes,
               aux_ptr->unprotect_dirty_bytes_updates, aux_ptr->insert_dirty_bytes,
@@ -2180,7 +2180,7 @@ H5AC__run_sync_point(H5F_t *f, int sync_point_op)
     /* reset the dirty bytes count */
     aux_ptr->dirty_bytes = 0;
 
-#if H5AC_DEBUG_DIRTY_BYTES_CREATION
+#ifdef H5AC_DEBUG_DIRTY_BYTES_CREATION
     aux_ptr->dirty_bytes_propagations += 1;
     aux_ptr->unprotect_dirty_bytes         = 0;
     aux_ptr->unprotect_dirty_bytes_updates = 0;

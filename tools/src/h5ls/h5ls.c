@@ -1928,7 +1928,7 @@ dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
                 if (vmaps) {
                     size_t next;
 
-                    h5tools_str_append(&buffer, "    %-10s {%ld} Source {\n", "Maps:", vmaps);
+                    h5tools_str_append(&buffer, "    %-10s {%zu} Source {\n", "Maps:", vmaps);
                     for (next = 0; next < (unsigned)vmaps; next++) {
                         H5Pget_virtual_filename(dcpl, next, f_name, sizeof(f_name));
                         H5Pget_virtual_dsetname(dcpl, next, dset_name, sizeof(dset_name));

@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.12)
+cmake_minimum_required (VERSION 3.18)
 project (HDF5_EXAMPLES C)
 
 #-----------------------------------------------------------------------------
@@ -48,6 +48,10 @@ if (H5_HAVE_PARALLEL)
     ph5_filtered_writes
     ph5_filtered_writes_no_sel
   )
+
+  if (HDF5_ENABLE_SUBFILING_VFD)
+    list (APPEND parallel_examples ph5_subfiling)
+  endif ()
 endif ()
 
 foreach (example ${examples})

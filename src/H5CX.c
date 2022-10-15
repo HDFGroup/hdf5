@@ -237,7 +237,7 @@ typedef struct H5CX_t {
     H5FD_mpio_chunk_opt_t
              mpio_chunk_opt_mode;        /* Collective chunk option (H5D_XFER_MPIO_CHUNK_OPT_HARD_NAME) */
     hbool_t  mpio_chunk_opt_mode_valid;  /* Whether collective chunk option is valid */
-    unsigned mpio_chunk_opt_num;         /* Collective chunk thrreshold (H5D_XFER_MPIO_CHUNK_OPT_NUM_NAME) */
+    unsigned mpio_chunk_opt_num;         /* Collective chunk threshold (H5D_XFER_MPIO_CHUNK_OPT_NUM_NAME) */
     hbool_t  mpio_chunk_opt_num_valid;   /* Whether collective chunk threshold is valid */
     unsigned mpio_chunk_opt_ratio;       /* Collective chunk ratio (H5D_XFER_MPIO_CHUNK_OPT_RATIO_NAME) */
     hbool_t  mpio_chunk_opt_ratio_valid; /* Whether collective chunk ratio is valid */
@@ -371,7 +371,7 @@ typedef struct H5CX_dxpl_cache_t {
                                                  (H5D_MPIO_GLOBAL_NO_COLLECTIVE_CAUSE_NAME) */
     H5FD_mpio_chunk_opt_t
              mpio_chunk_opt_mode;         /* Collective chunk option (H5D_XFER_MPIO_CHUNK_OPT_HARD_NAME) */
-    unsigned mpio_chunk_opt_num;          /* Collective chunk thrreshold (H5D_XFER_MPIO_CHUNK_OPT_NUM_NAME) */
+    unsigned mpio_chunk_opt_num;          /* Collective chunk threshold (H5D_XFER_MPIO_CHUNK_OPT_NUM_NAME) */
     unsigned mpio_chunk_opt_ratio;        /* Collective chunk ratio (H5D_XFER_MPIO_CHUNK_OPT_RATIO_NAME) */
 #endif                                    /* H5_HAVE_PARALLEL */
     H5Z_EDC_t             err_detect;     /* Error detection info (H5D_XFER_EDC_NAME) */

@@ -749,7 +749,7 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
     oh_dst   = NULL;
     inserted = TRUE;
 
-    /* Reset metadat tag */
+    /* Reset metadata tag */
     H5_END_TAG
 
     /* Set obj_type and udata, if requested */

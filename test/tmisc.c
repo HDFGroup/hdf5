@@ -3978,7 +3978,7 @@ test_misc22(void)
                 if ((prec[j] + offsets[k]) > (H5Tget_size(idts[i]) * 8))
                     continue;
 
-                MESSAGE(5, ("  Testing datatypes size=%d precision=%u offset=%d\n", H5Tget_size(idts[i]),
+                MESSAGE(5, ("  Testing datatypes size=%zu precision=%u offset=%d\n", H5Tget_size(idts[i]),
                             (unsigned)prec[j], (unsigned)offsets[k]));
 
                 /* Create the DCPL */
@@ -5914,7 +5914,7 @@ test_misc35(void)
     ret = H5get_free_list_sizes(&reg_size_start, &arr_size_start, &blk_size_start, &fac_size_start);
     CHECK(ret, FAIL, "H5get_free_list_sizes");
 
-#if !defined H5_USING_MEMCHECKER
+#if !defined H5_NO_FREE_LISTS && !defined H5_USING_MEMCHECKER
     /* All the free list values should be >0 */
     CHECK(reg_size_start, 0, "H5get_free_list_sizes");
     CHECK(arr_size_start, 0, "H5get_free_list_sizes");

@@ -126,7 +126,7 @@ This section contains a brief explanation of the symbols used in the DDL.
 
 <reference> ::= H5T_REFERENCE { <ref_type> }
 
-<ref_type> ::= H5T_STD_REF_OBJECT | H5T_STD_REF_DSETREG | H5T_STD_REF | UNDEFINED
+<ref_type> ::= H5T_STD_REF_OBJECT | H5T_STD_REF_DSETREG
 
 <compound_type> ::= H5T_COMPOUND {
                         <member_type_def>+

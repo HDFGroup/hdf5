@@ -76,6 +76,17 @@ static struct h5_long_options l_opts[] = {{"alignment", require_arg, 'a'},
                                           {"dst-vfd-info", require_arg, 'Z'},
                                           {NULL, 0, '\0'}};
 
+static H5FD_onion_fapl_info_t onion_fa_in_g = {
+    H5FD_ONION_FAPL_INFO_VERSION_CURR,
+    H5P_DEFAULT,                   /* backing_fapl_id                */
+    32,                            /* page_size                      */
+    H5FD_ONION_STORE_TARGET_ONION, /* store_target                   */
+    H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST,
+    0,            /* force_write_open               */
+    0,            /* creation_flags                 */
+    "input file", /* comment                        */
+};
+
 /*-------------------------------------------------------------------------
  * Function: usage
  *
@@ -873,6 +884,23 @@ parse_command_line(int argc, const char *const *argv, pack_opt_t *options)
         usage(h5tools_getprogname());
         h5tools_setstatus(EXIT_FAILURE);
         ret_value = -1;
+    }
+
+    /* If the input file uses the onion VFD, get the revision number */
+    if (in_vfd_info.u.name && !HDstrcmp(in_vfd_info.u.name, "onion")) {
+        if (in_vfd_info.info) {
+            errno                      = 0;
+            onion_fa_in_g.revision_num = HDstrtoull(in_vfd_info.info, NULL, 10);
+            if (errno == ERANGE) {
+                HDprintf("Invalid onion revision specified for the input file\n");
+                usage(h5tools_getprogname());
+                exit(EXIT_FAILURE);
+            }
+        }
+        else
+            onion_fa_in_g.revision_num = 0;
+
+        in_vfd_info.info = &onion_fa_in_g;
     }
 
     /* Setup FAPL for input and output file accesses */

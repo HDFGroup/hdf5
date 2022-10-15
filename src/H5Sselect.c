@@ -2476,7 +2476,7 @@ H5S_select_fill(const void *fill, size_t fill_size, H5S_t *space, void *_buf)
     /* Loop, while elements left in selection */
     while (max_elem > 0) {
         size_t nseq;     /* Number of sequences generated */
-        size_t curr_seq; /* Current sequnce being worked on */
+        size_t curr_seq; /* Current sequence being worked on */
         size_t nelem;    /* Number of elements used in sequences */
 
         /* Get the sequences of bytes */

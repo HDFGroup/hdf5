@@ -1,13 +1,13 @@
-!****h* ROBODoc/H5I
-!
-! NAME
-!  MODULE H5I
-!
-!  FILE
-!  fortran/src/H5Iff.F90
-!
-! PURPOSE
-!  This file contains Fortran interfaces for H5I functions.
+!> @defgroup FH5I Fortran Identifier (H5I) Interface
+!!
+!! @see H5I, C-API
+!!
+!! @see @ref H5I_UG, User Guide
+!!
+
+!> @ingroup FH5I
+!!
+!! @brief This module contains Fortran interfaces for H5I functions.
 !
 ! COPYRIGHT
 !  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -35,7 +35,6 @@
 !  Windows dll file 'hdf5_fortrandll.def.in' in the fortran/src directory.
 !  This is needed for Windows based operating systems.
 !
-!*****
 
 MODULE H5I
 
@@ -44,53 +43,29 @@ MODULE H5I
 
 CONTAINS
 
-!****s* H5I/h5iget_type_f
-!
-! NAME
-!  h5iget_type_f
-!
-! PURPOSE
-!  Retrieves the type of an object.
-!
-! INPUTS
-!  obj_id   - object identifier
-! OUTPUTS
-!  type     - type of the object, possible values:
-!              H5I_FILE_F
-!              H5I_GROUP_F
-!              H5I_DATATYPE_F
-!              H5I_DATASPACE_F
-!              H5I_DATASET_F
-!              H5I_ATTR_F
-!              H5I_BADID_F
-!  hdferr:  - error code
-!              Success:  0
-!              Failure: -1
-!
-! AUTHOR
-!  Elena Pourmal
-!  August 12, 1999
-!
-! HISTORY
-!  Explicit Fortran interfaces were added for
-!  called C functions (it is needed for Windows
-!  port).  March 5, 2001
-!
-! SOURCE
+!>
+!! \ingroup FH5I
+!!
+!! \brief Retrieves the type of an object.
+!!
+!! \param obj_id Object identifier.
+!! \param type   Type of the object, possible values:
+!!               \li H5I_FILE_F
+!!               \li H5I_GROUP_F
+!!               \li H5I_DATATYPE_F
+!!               \li H5I_DATASPACE_F
+!!               \li H5I_DATASET_F
+!!               \li H5I_ATTR_F
+!!               \li H5I_BADID_F
+!! \param hdferr \fortran_error
+!!
+!! See C API: @ref H5I_type_t H5Iget_type(hid_t id);
+!!
   SUBROUTINE h5iget_type_f(obj_id, TYPE, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: obj_id  ! Object identifier
-    INTEGER, INTENT(OUT) :: TYPE ! type of an object.
-                                 ! possible values are:
-                                 !   H5I_FILE_F
-                                 !   H5I_GROUP_F
-                                 !   H5I_DATATYPE_F
-                                 !   H5I_DATASPACE_F
-                                 !   H5I_DATASET_F
-                                 !   H5I_ATTR_F
-                                 !   H5I_BADID_F
-    INTEGER, INTENT(OUT) :: hdferr  ! Error code
-!*****
+    INTEGER(HID_T), INTENT(IN) :: obj_id
+    INTEGER, INTENT(OUT) :: TYPE
+    INTEGER, INTENT(OUT) :: hdferr
     INTERFACE
        INTEGER FUNCTION h5iget_type_c(obj_id, TYPE) BIND(C, NAME='h5iget_type_c')
          IMPORT :: HID_T
@@ -102,39 +77,26 @@ CONTAINS
     hdferr = h5iget_type_c(obj_id, TYPE)
   END SUBROUTINE h5iget_type_f
 
-!****s* H5I/h5iget_name_f
-!
-! NAME
-!  h5iget_name_f
-!
-! PURPOSE
-!  Gets a name of an object specified by its idetifier.
-!
-! INPUTS
-!  obj_id    - attribute identifier
-!  buf_size  - size of a buffer to read name in
-! OUTPUTS
-!  buf 	     - buffer to read name in, name will be truncated if
-!              buffer is not big enough
-!  name_size - name size
-!  hdferr:   - error code
-!               Success:  0
-!               Failure: -1
-!
-! AUTHOR
-!  Elena Pourmal
-!  March 12, 2003
-! SOURCE
+!>
+!! \ingroup FH5I
+!!
+!! \brief Gets a name of an object specified by its identifier.
+!!
+!! \param obj_id    Attribute identifier.
+!! \param buf_size  Size of a buffer to read name in.
+!! \param buf       Buffer to read name in, name will be truncated if buffer is not big enough.
+!! \param name_size Name size.
+!! \param hdferr    \fortran_error
+!!
+!! See C API: @ref ssize_t H5Iget_name(hid_t id, char *name , size_t size);
+!!
   SUBROUTINE h5iget_name_f(obj_id, buf, buf_size, name_size, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: obj_id      ! Object identifier
-    INTEGER(SIZE_T), INTENT(IN) :: buf_size   ! Buffer size
-    CHARACTER(LEN=*), INTENT(OUT) :: buf      ! Buffer to hold object name
-    INTEGER(SIZE_T), INTENT(OUT) :: name_size ! Actual name size
-    INTEGER, INTENT(OUT) :: hdferr            ! Error code:
-                                              !   0 if successful,
-                                              !   -1 if fail
-!*****
+    INTEGER(HID_T), INTENT(IN) :: obj_id
+    INTEGER(SIZE_T), INTENT(IN) :: buf_size
+    CHARACTER(LEN=*), INTENT(OUT) :: buf
+    INTEGER(SIZE_T), INTENT(OUT) :: name_size
+    INTEGER, INTENT(OUT) :: hdferr
     INTERFACE
        INTEGER FUNCTION h5iget_name_c(obj_id, buf, buf_size, name_size) BIND(C, NAME='h5iget_name_c')
          IMPORT :: C_CHAR
@@ -150,32 +112,22 @@ CONTAINS
     hdferr = h5iget_name_c(obj_id, buf, buf_size, name_size)
   END SUBROUTINE h5iget_name_f
 
-!****s* H5I/h5iinc_ref_f
-!
-! NAME
-!  h5iinc_ref_f
-!
-! PURPOSE
-!  Increments the reference count of an ID
-!
-! INPUTS
-!  obj_id 	 - object identifier
-! OUTPUTS
-!  ref_count 	 - Current reference count of the ID
-!  hdferr:		- error code
-!  Success:  0
-!  Failure: -1
-! AUTHOR
-!  Quincey Koziol
-!  December  9, 2003
-!
-! SOURCE
+!>
+!! \ingroup FH5I
+!!
+!! \brief Increments the reference count of an ID.
+!!
+!! \param obj_id    Object identifier.
+!! \param ref_count Current reference count of the ID.
+!! \param hdferr    \fortran_error
+!!
+!! See C API: @ref int H5Iinc_ref(hid_t id);
+!!
   SUBROUTINE h5iinc_ref_f(obj_id, ref_count, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: obj_id ! Object identifier
-    INTEGER, INTENT(OUT) :: ref_count    ! Current reference count of ID
-    INTEGER, INTENT(OUT) :: hdferr       ! Error code
-!*****
+    INTEGER(HID_T), INTENT(IN) :: obj_id
+    INTEGER, INTENT(OUT) :: ref_count
+    INTEGER, INTENT(OUT) :: hdferr
     INTERFACE
        INTEGER FUNCTION h5iinc_ref_c(obj_id, ref_count) BIND(C, NAME='h5iinc_ref_c')
          IMPORT :: HID_T
@@ -187,32 +139,22 @@ CONTAINS
     hdferr = h5iinc_ref_c(obj_id, ref_count)
   END SUBROUTINE h5iinc_ref_f
 
-!****s* H5I/h5idec_ref_f
-!
-! NAME
-!  h5idec_ref_f
-!
-! PURPOSE
-!  Decrements the reference count of an ID
-!
-! INPUTS
-!  obj_id 	 - Object identifier
-! OUTPUTS
-!  ref_count 	 - Current reference count of the ID
-!  hdferr:	 - Error code
-!                   Success:  0
-!                   Failure: -1
-! AUTHOR
-!  Quincey Koziol
-!  December  9, 2003
-!
-! SOURCE
+!>
+!! \ingroup FH5I
+!!
+!! \brief Decrements the reference count of an ID.
+!!
+!! \param obj_id    Object identifier.
+!! \param ref_count Current reference count of the ID.
+!! \param hdferr    \fortran_error
+!!
+!! See C API: @ref int H5Idec_ref(hid_t id);
+!!
   SUBROUTINE h5idec_ref_f(obj_id, ref_count, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: obj_id ! Object identifier
-    INTEGER, INTENT(OUT) :: ref_count    ! Current reference count of ID
-    INTEGER, INTENT(OUT) :: hdferr       ! Error code
-!*****
+    INTEGER(HID_T), INTENT(IN) :: obj_id
+    INTEGER, INTENT(OUT) :: ref_count
+    INTEGER, INTENT(OUT) :: hdferr
     INTERFACE
        INTEGER FUNCTION h5idec_ref_c(obj_id, ref_count) BIND(C, NAME='h5idec_ref_c')
          IMPORT :: HID_T
@@ -224,32 +166,22 @@ CONTAINS
     hdferr = h5idec_ref_c(obj_id, ref_count)
   END SUBROUTINE h5idec_ref_f
 
-!****s* H5I/h5iget_ref_f
-! NAME
-!  h5iget_ref_f
-!
-! PURPOSE
-!  Retrieves the reference count of an ID
-!
-! INPUTS
-!  obj_id 	 - object identifier
-!
-! OUTPUTS
-!  ref_count 	 - Current reference count of the ID
-!  hdferr:	   - error code
-!  Success:  0
-!  Failure: -1
-! AUTHOR
-!  Quincey Koziol
-!  December  9, 2003
-!
-! SOURCE
+!>
+!! \ingroup FH5I
+!!
+!! \brief Retrieves the reference count of an ID.
+!!
+!! \param obj_id    Object identifier.
+!! \param ref_count Current reference count of the ID.
+!! \param hdferr     \fortran_error
+!!
+!! See C API: @ref int H5Iget_ref(hid_t id);
+!!
   SUBROUTINE h5iget_ref_f(obj_id, ref_count, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: obj_id ! Object identifier
-    INTEGER, INTENT(OUT) :: ref_count    ! Current reference count of ID
-    INTEGER, INTENT(OUT) :: hdferr       ! Error code
-!*****
+    INTEGER(HID_T), INTENT(IN) :: obj_id
+    INTEGER, INTENT(OUT) :: ref_count
+    INTEGER, INTENT(OUT) :: hdferr
     INTERFACE
        INTEGER FUNCTION h5iget_ref_c(obj_id, ref_count) BIND(C, NAME='h5iget_ref_c')
          IMPORT :: HID_T
@@ -260,32 +192,22 @@ CONTAINS
     END INTERFACE
     hdferr = h5iget_ref_c(obj_id, ref_count)
   END SUBROUTINE h5iget_ref_f
-!
-!****s* H5I/h5iget_file_id_f
-! NAME
-!  h5iget_file_id_f
-!
-! PURPOSE
-!  Obtains file identifier from the object identifier
-!
-! INPUTS
-!  obj_id 	 - object identifier
-! OUTPUTS
-!  file_id 	 - file identifier
-!  hdferr:       - error code
-!                    Success:  0
-!                    Failure: -1
-!
-! AUTHOR
-!  Elena Pourmal
-!  August 23, 2004
-! SOURCE
+!>
+!! \ingroup FH5I
+!!
+!! \brief Obtains file identifier from the object identifier.
+!!
+!! \param obj_id  Object identifier.
+!! \param file_id File identifier.
+!! \param hdferr  \fortran_error
+!!
+!! See C API: @ref hid_t H5Iget_file_id(hid_t id);
+!!
   SUBROUTINE h5iget_file_id_f(obj_id, file_id, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN)  :: obj_id   ! Object identifier
-    INTEGER(HID_T), INTENT(OUT) :: file_id  ! File identifier
-    INTEGER, INTENT(OUT) :: hdferr          ! Error code
-!*****
+    INTEGER(HID_T), INTENT(IN)  :: obj_id
+    INTEGER(HID_T), INTENT(OUT) :: file_id
+    INTEGER, INTENT(OUT) :: hdferr
     INTERFACE
        INTEGER FUNCTION h5iget_file_id_c(obj_id, file_id) BIND(C, NAME='h5iget_file_id_c')
          IMPORT :: HID_T
@@ -296,39 +218,29 @@ CONTAINS
     END INTERFACE
     hdferr = h5iget_file_id_c(obj_id, file_id)
   END SUBROUTINE h5iget_file_id_f
-!
-!****s* H5I/h5iis_valid_f
-! NAME
-!  h5iget_file_id_f
-!
-! PURPOSE
-!  Check if an ID is valid without producing an error message
-!
-! INPUTS
-!  id		- identifier
-! OUTPUTS
-!  valid        - status of id as a valid identifier
-!  hdferr:	- error code
-!		   Success:  0
-!		   Failure: -1
-!
-! AUTHOR
-!  M. Scot Breitenfeld
-!  April 13, 2009
-! SOURCE
+!>
+!! \ingroup FH5I
+!!
+!! \brief Check if an ID is valid without producing an error message.
+!!
+!! \param id      Identifier.
+!! \param valid   Status of id as a valid identifier.
+!! \param hdferr  \fortran_error
+!!
+!! See C API: @ref htri_t H5Iis_valid(hid_t id);
+!!
   SUBROUTINE h5iis_valid_f(id, valid, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN)  :: id ! Identifier
-    LOGICAL, INTENT(OUT) :: valid     ! Status of id as a valid identifier
-    INTEGER, INTENT(OUT) :: hdferr    ! Error code
-!*****
+    INTEGER(HID_T), INTENT(IN)  :: id
+    LOGICAL, INTENT(OUT) :: valid
+    INTEGER, INTENT(OUT) :: hdferr
     INTEGER  :: c_valid ! 0 = .false, 1 = .true.
 
     INTERFACE
        INTEGER FUNCTION h5iis_valid_c(id, c_valid) BIND(C, NAME='h5iis_valid_c')
          IMPORT :: HID_T
          IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN)  :: id   ! Identifier
+         INTEGER(HID_T), INTENT(IN)  :: id
          INTEGER  :: c_valid
        END FUNCTION h5iis_valid_c
     END INTERFACE

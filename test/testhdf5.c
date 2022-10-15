@@ -43,6 +43,7 @@ main(int argc, char *argv[])
 
     /* Tests are generally arranged from least to most complexity... */
     AddTest("config", test_configure, cleanup_configure, "Configure definitions", NULL);
+    AddTest("h5system", test_h5_system, cleanup_h5_system, "H5system routines", NULL);
     AddTest("metadata", test_metadata, cleanup_metadata, "Encoding/decoding metadata", NULL);
     AddTest("checksum", test_checksum, cleanup_checksum, "Checksum algorithm", NULL);
     AddTest("skiplist", test_skiplist, NULL, "Skip Lists", NULL);

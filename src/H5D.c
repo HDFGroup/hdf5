@@ -285,6 +285,11 @@ H5Dcreate_anon(hid_t loc_id, hid_t type_id, hid_t space_id, hid_t dcpl_id, hid_t
     else if (TRUE != H5P_isa_class(dcpl_id, H5P_DATASET_CREATE))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not dataset create property list ID")
 
+    if (H5P_DEFAULT == dapl_id)
+        dapl_id = H5P_DATASET_ACCESS_DEFAULT;
+    else if (TRUE != H5P_isa_class(dapl_id, H5P_DATASET_ACCESS))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not dataset access property list ID")
+
     /* Set the DCPL for the API context */
     H5CX_set_dcpl(dcpl_id);
 

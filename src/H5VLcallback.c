@@ -12,7 +12,7 @@
 
 /*
  * Purpose:     The Virtual Object Layer as described in documentation.
- *              The pupose is to provide an abstraction on how to access the
+ *              The purpose is to provide an abstraction on how to access the
  *              underlying HDF5 container, whether in a local file with
  *              a specific file format, or remotely on other machines, etc...
  */
@@ -276,7 +276,7 @@ done:
  *---------------------------------------------------------------------------
  */
 herr_t
-H5VLget_cap_flags(hid_t connector_id, unsigned *cap_flags /*out*/)
+H5VLget_cap_flags(hid_t connector_id, uint64_t *cap_flags /*out*/)
 {
     H5VL_class_t *cls;                 /* VOL connector's class struct */
     herr_t        ret_value = SUCCEED; /* Return value */
@@ -485,7 +485,7 @@ H5VL_cmp_connector_info(const H5VL_class_t *connector, int *cmp_value, const voi
     } /* end if */
 
     /* Use the class's info comparison routine to compare the info objects,
-     * if there is a a callback, otherwise just compare the info objects as
+     * if there is a callback, otherwise just compare the info objects as
      * memory buffers
      */
     if (connector->info_cls.cmp) {
@@ -6247,7 +6247,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_introspect_get_cap_flags(const void *info, const H5VL_class_t *cls, unsigned *cap_flags)
+H5VL_introspect_get_cap_flags(const void *info, const H5VL_class_t *cls, uint64_t *cap_flags)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -6281,7 +6281,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLintrospect_get_cap_flags(const void *info, hid_t connector_id, unsigned *cap_flags /*out*/)
+H5VLintrospect_get_cap_flags(const void *info, hid_t connector_id, uint64_t *cap_flags /*out*/)
 {
     H5VL_class_t *cls;                 /* VOL connector's class struct */
     herr_t        ret_value = SUCCEED; /* Return value */

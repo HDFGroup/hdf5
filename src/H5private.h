@@ -60,7 +60,7 @@
 
 /*
  * The `struct stat' data type for stat() and fstat(). This is a POSIX file
- * but often apears on non-POSIX systems also.  The `struct stat' is required
+ * but often appears on non-POSIX systems also.  The `struct stat' is required
  * for HDF5 to compile, although only a few fields are actually used.
  */
 #ifdef H5_HAVE_SYS_STAT_H
@@ -289,6 +289,18 @@
 #       define H5_ATTR_MALLOC /*void*/
 #  endif
 
+/* Turns off optimizations for a function. Goes after the return type.
+ * Not generally needed in the library, but ancient versions of clang
+ * (7.3.3, possibly others) have trouble with some of the onion VFD decode
+ * functions and need the optimizer turned off. This macro can go away when
+ * we figure out what's going on and can engineer another solution.
+ */
+#  if defined(__clang__)
+#       define H5_ATTR_NO_OPTIMIZE __attribute__((optnone))
+#  else
+#       define H5_ATTR_NO_OPTIMIZE /*void*/
+#  endif
+
 #else
 #   define H5_ATTR_FORMAT(X, Y, Z) /*void*/
 #   define H5_ATTR_UNUSED          /*void*/
@@ -302,6 +314,7 @@
 #   define H5_ATTR_PURE            /*void*/
 #   define H5_ATTR_FALLTHROUGH     /*void*/
 #   define H5_ATTR_MALLOC          /*void*/
+#   define H5_ATTR_NO_OPTIMIZE     /*void*/
 #endif
 /* clang-format on */
 
@@ -580,6 +593,7 @@ H5_DLL herr_t   H5_timer_stop(H5_timer_t *timer /*in,out*/);
 H5_DLL herr_t   H5_timer_get_times(H5_timer_t timer, H5_timevals_t *times /*in,out*/);
 H5_DLL herr_t   H5_timer_get_total_times(H5_timer_t timer, H5_timevals_t *times /*in,out*/);
 H5_DLL char    *H5_timer_get_time_string(double seconds);
+H5_DLL char    *H5_strcasestr(const char *haystack, const char *needle);
 
 /* Depth of object copy */
 typedef enum {
@@ -948,9 +962,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDgethostname
 #define HDgethostname(N, L) gethostname(N, L)
 #endif
-#ifndef HDgetlogin
-#define HDgetlogin() getlogin()
-#endif
 #ifndef HDgetpgrp
 #define HDgetpgrp() getpgrp()
 #endif
@@ -1070,6 +1081,9 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #endif
 #ifndef HDlog
 #define HDlog(X) log(X)
+#endif
+#ifndef HDlog2
+#define HDlog2(X) log2(X)
 #endif
 #ifndef HDlog10
 #define HDlog10(X) log10(X)
@@ -1372,6 +1386,13 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDstrcat
 #define HDstrcat(X, Y) strcat(X, Y)
 #endif
+#ifndef HDstrcasestr
+#if defined(H5_HAVE_STRCASESTR)
+#define HDstrcasestr(X, Y) strcasestr(X, Y)
+#else
+#define HDstrcasestr(X, Y) H5_strcasestr(X, Y)
+#endif
+#endif
 #ifndef HDstrchr
 #define HDstrchr(S, C) strchr(S, C)
 #endif
@@ -1410,6 +1431,9 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #endif
 #ifndef HDstrncpy
 #define HDstrncpy(X, Y, Z) strncpy(X, Y, Z)
+#endif
+#ifndef HDstrndup
+#define HDstrndup(S, N) strndup(S, N)
 #endif
 #ifndef HDstrpbrk
 #define HDstrpbrk(X, Y) strpbrk(X, Y)
@@ -2544,6 +2568,8 @@ H5_DLL double H5_get_time(void);
 /* Functions for building paths, etc. */
 H5_DLL herr_t H5_build_extpath(const char *name, char **extpath /*out*/);
 H5_DLL herr_t H5_combine_path(const char *path1, const char *path2, char **full_name /*out*/);
+H5_DLL herr_t H5_dirname(const char *path, char **dirname /*out*/);
+H5_DLL herr_t H5_basename(const char *path, char **basename /*out*/);
 
 /* getopt(3) equivalent that papers over the lack of long options on BSD
  * and lack of Windows support.
