@@ -480,7 +480,6 @@ H5MM_strdup(const char *s)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MM_strdup() */
-#endif /* H5_MEMORY_ALLOC_SANITY_CHECK */
 
 /*-------------------------------------------------------------------------
  * Function:    H5MM_strndup
@@ -501,17 +500,14 @@ done:
 char *
 H5MM_strndup(const char *s, size_t n)
 {
-#if defined H5_MEMORY_ALLOC_SANITY_CHECK
     size_t len;
-#endif
     char *ret_value = NULL;
 
     FUNC_ENTER_NOAPI(NULL)
 
     if (!s)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "NULL string not allowed")
-
-#if defined H5_MEMORY_ALLOC_SANITY_CHECK
+        
     for (len = 0; len < n && s[len] != '\0'; len++)
         ;
 
@@ -520,14 +516,11 @@ H5MM_strndup(const char *s, size_t n)
 
     H5MM_memcpy(ret_value, s, len);
     ret_value[len] = '\0';
-#else
-    if (NULL == (ret_value = HDstrndup(s, n)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "string duplication failed")
-#endif
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MM_strndup() */
+#endif /* H5_MEMORY_ALLOC_SANITY_CHECK */
 
 /*-------------------------------------------------------------------------
  * Function:    H5MM_xfree
