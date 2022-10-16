@@ -131,7 +131,8 @@
  * matter. The VOL is a fundamental part of the library and cannot be disabled, so any build will do.
  *
  * On Windows, it’s probably best to use the same debug vs release configuration for the application and
- * all libraries in order to avoid C runtime (CRT) issues. Pre-2015 versions of Visual Studio are not supported.
+ * all libraries in order to avoid C runtime (CRT) issues. Pre-2015 versions of Visual Studio are not
+ * supported.
  *
  * When working with a debug HDF5 library, it’s probably also wise to build with the ”memory sanity checking”
  * feature disabled to avoid accidentally clobbering our memory tracking infrastructure when dealing with
@@ -165,11 +166,10 @@
  * calls that are not supported by the VOL connector. In this case, no application
  * modification will be necessary.
  *
- * \subsubsection subsubsec_vol_quick_plugin If Using A Plugin: Make Sure The VOL Connector Is In The Search Path
- * The default location for all HDF5 plugins is set at configure time when building
- * the HDF5 library. This is true for both CMake and the Autotools. The default
- * locations for the plugins on both Windows and POSIX systems is listed further
- * on in this document.
+ * \subsubsection subsubsec_vol_quick_plugin If Using A Plugin: Make Sure The VOL Connector Is In The Search
+ * Path The default location for all HDF5 plugins is set at configure time when building the HDF5 library.
+ * This is true for both CMake and the Autotools. The default locations for the plugins on both Windows and
+ * POSIX systems is listed further on in this document.
  *
  * \subsubsection subsubsec_vol_quick_opt Optional: Set The VOL Connector Via The Environment Variable
  * In place of modifying the source code of your application, you may be able
