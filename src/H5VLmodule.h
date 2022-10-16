@@ -138,7 +138,7 @@
  * buffers obtained from the HDF5 library. This feature should be disabled by default in HDF5 1.13.X.
  *
  * \subsubsection subsubsec_vol_quick_set Determine How You Will Set The VOL Connector
- * Fundamentally, setting a VOL connector involves modifying the file access propertly list (fapl) that will
+ * Fundamentally, setting a VOL connector involves modifying the file access property list (fapl) that will
  * be used to open or create the file.
  *
  * There are essentially three ways to do this:
@@ -569,7 +569,7 @@
  * </ul>
  *
  * Additionally, h5fis_hdf5_f was updated to use \ref H5Fis_accessible internally,
- * though with the same caveat as the C++ implentation: the default fapl is
+ * though with the same caveat as the C++ implementation: the default fapl is
  * always passed in so arbitrary VOL connectors will only work if the default VOL
  * connector is changed via the environment variable.
  *
