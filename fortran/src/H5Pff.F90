@@ -948,7 +948,7 @@ CONTAINS
 !! \param backing_store Boolean flag indicating whether to write the file contents to disk when the file is closed.
 !! \param hdferr        \fortran_error
 !!
-!! See C API: @ref H5Pget_fapl_core()
+!! See C API: @ref H5Pset_fapl_core()
 !!
   SUBROUTINE h5pset_fapl_core_f(prp_id, increment, backing_store, hdferr)
     IMPLICIT NONE
