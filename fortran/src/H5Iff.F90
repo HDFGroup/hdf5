@@ -59,7 +59,7 @@ CONTAINS
 !!               \li H5I_BADID_F
 !! \param hdferr \fortran_error
 !!
-!! See C API: @ref H5I_type_t H5Iget_type(hid_t id);
+!! See C API: @ref H5Iget_type()
 !!
   SUBROUTINE h5iget_type_f(obj_id, TYPE, hdferr)
     IMPLICIT NONE
@@ -88,7 +88,7 @@ CONTAINS
 !! \param name_size Name size.
 !! \param hdferr    \fortran_error
 !!
-!! See C API: @ref ssize_t H5Iget_name(hid_t id, char *name , size_t size);
+!! See C API: @ref H5Iget_name()
 !!
   SUBROUTINE h5iget_name_f(obj_id, buf, buf_size, name_size, hdferr)
     IMPLICIT NONE
@@ -121,7 +121,7 @@ CONTAINS
 !! \param ref_count Current reference count of the ID.
 !! \param hdferr    \fortran_error
 !!
-!! See C API: @ref int H5Iinc_ref(hid_t id);
+!! See C API: @ref H5Iinc_ref()
 !!
   SUBROUTINE h5iinc_ref_f(obj_id, ref_count, hdferr)
     IMPLICIT NONE
@@ -148,7 +148,7 @@ CONTAINS
 !! \param ref_count Current reference count of the ID.
 !! \param hdferr    \fortran_error
 !!
-!! See C API: @ref int H5Idec_ref(hid_t id);
+!! See C API: @ref H5Idec_ref()
 !!
   SUBROUTINE h5idec_ref_f(obj_id, ref_count, hdferr)
     IMPLICIT NONE
@@ -175,7 +175,7 @@ CONTAINS
 !! \param ref_count Current reference count of the ID.
 !! \param hdferr     \fortran_error
 !!
-!! See C API: @ref int H5Iget_ref(hid_t id);
+!! See C API: @ref H5Iget_ref()
 !!
   SUBROUTINE h5iget_ref_f(obj_id, ref_count, hdferr)
     IMPLICIT NONE
@@ -201,7 +201,7 @@ CONTAINS
 !! \param file_id File identifier.
 !! \param hdferr  \fortran_error
 !!
-!! See C API: @ref hid_t H5Iget_file_id(hid_t id);
+!! See C API: @ref H5Iget_file_id()
 !!
   SUBROUTINE h5iget_file_id_f(obj_id, file_id, hdferr)
     IMPLICIT NONE
@@ -227,7 +227,7 @@ CONTAINS
 !! \param valid   Status of id as a valid identifier.
 !! \param hdferr  \fortran_error
 !!
-!! See C API: @ref htri_t H5Iis_valid(hid_t id);
+!! See C API: @ref H5Iis_valid()
 !!
   SUBROUTINE h5iis_valid_f(id, valid, hdferr)
     IMPLICIT NONE
