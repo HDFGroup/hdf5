@@ -612,6 +612,11 @@ H5D__mpio_opt_possible(H5D_io_info_t *io_info)
         local_cause[0] |= H5D_MPIO_SET_INDEPENDENT;
 
     for (i = 0; i < io_info->count; i++) {
+        /* Check for skipped I/O */
+        if (io_info->dsets_info[i].skip_io)
+            continue;
+
+        /* Set convenience pointers */
         dset       = io_info->dsets_info[i].dset;
         file_space = io_info->dsets_info[i].file_space;
         mem_space  = io_info->dsets_info[i].mem_space;

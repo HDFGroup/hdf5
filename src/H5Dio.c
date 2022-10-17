@@ -99,6 +99,7 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
     H5D_storage_t  store_local;               /* Local buffer for store */
     H5D_storage_t *store      = &store_local; /* Union of EFL and chunk pointer in file space */
     size_t         io_op_init = 0;            /* Number I/O ops that have been initialized */
+    size_t         io_skipped = 0;            /* Number I/O ops that have been skipped (due to the dataset not being allocated) */
     size_t         i;                         /* Local index variable */
     char           fake_char;                 /* Temporary variable for NULL buffer pointers */
     herr_t         ret_value = SUCCEED;       /* Return value	*/
@@ -246,42 +247,48 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
                             "read failed: dataset doesn't exist, no data can be read")
 
             /* If we're never going to fill this dataset, just leave the junk in the user's buffer */
-            if (dset_info[i].dset->shared->dcpl_cache.fill.fill_time == H5D_FILL_TIME_NEVER)
-                HGOTO_DONE(SUCCEED)
+            if (dset_info[i].dset->shared->dcpl_cache.fill.fill_time != H5D_FILL_TIME_NEVER)
+                /* Go fill the user's selection with the dataset's fill value */
+                if (H5D__fill(dset_info[i].dset->shared->dcpl_cache.fill.buf, dset_info[i].dset->shared->type,
+                              dset_info[i].buf.vp, dset_info[i].type_info.mem_type, dset_info[i].mem_space) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "filling buf failed")
 
-            /* Go fill the user's selection with the dataset's fill value */
-            if (H5D__fill(dset_info[i].dset->shared->dcpl_cache.fill.buf, dset_info[i].dset->shared->type,
-                          dset_info[i].buf.vp, dset_info[i].type_info.mem_type, dset_info[i].mem_space) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "filling buf failed")
-            else
-                HGOTO_DONE(SUCCEED)
+            /* No need to perform any more I/O for this dataset */
+            dset_info[i].skip_io = TRUE;
+            io_skipped++;
         } /* end if */
+        else {
+            /* Set up I/O operation */
+            if (H5D__dset_ioinfo_init(dset_info[i].dset, &(dset_info[i]), &(store[i])) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to set up I/O operation")
 
-        /* Set up I/O operation */
-        if (H5D__dset_ioinfo_init(dset_info[i].dset, &(dset_info[i]), &(store[i])) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to set up I/O operation")
+            /* Sanity check that space is allocated, if there are elements */
+            if (dset_info[i].nelmts > 0)
+                HDassert((*dset_info[i].dset->shared->layout.ops->is_space_alloc)(
+                             &dset_info[i].dset->shared->layout.storage) ||
+                         (dset_info[i].dset->shared->layout.ops->is_data_cached &&
+                          (*dset_info[i].dset->shared->layout.ops->is_data_cached)(dset_info[i].dset->shared)) ||
+                         dset_info[i].dset->shared->dcpl_cache.efl.nused > 0 ||
+                         dset_info[i].dset->shared->layout.type == H5D_COMPACT);
 
-        /* Sanity check that space is allocated, if there are elements */
-        if (dset_info[i].nelmts > 0)
-            HDassert((*dset_info[i].dset->shared->layout.ops->is_space_alloc)(
-                         &dset_info[i].dset->shared->layout.storage) ||
-                     (dset_info[i].dset->shared->layout.ops->is_data_cached &&
-                      (*dset_info[i].dset->shared->layout.ops->is_data_cached)(dset_info[i].dset->shared)) ||
-                     dset_info[i].dset->shared->dcpl_cache.efl.nused > 0 ||
-                     dset_info[i].dset->shared->layout.type == H5D_COMPACT);
+            /* Call storage method's I/O initialization routine */
+            if (dset_info[i].layout_ops.io_init &&
+                (dset_info[i].layout_ops.io_init)(&io_info, &(dset_info[i])) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize I/O info")
+            dset_info[i].skip_io = FALSE;
+            io_op_init++;
 
-        /* Call storage method's I/O initialization routine */
-        if (dset_info[i].layout_ops.io_init &&
-            (dset_info[i].layout_ops.io_init)(&io_info, &(dset_info[i])) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize I/O info")
-        io_op_init++;
-
-        /* Reset metadata tagging */
-        H5AC_tag(prev_tag, NULL);
+            /* Reset metadata tagging */
+            H5AC_tag(prev_tag, NULL);
+        }
     } /* end of for loop */
 
     HDassert(type_info_init == count);
-    HDassert(io_op_init == count);
+    HDassert(io_op_init + io_skipped == count);
+
+    /* If no datasets have I/O, we're done */
+    if (io_op_init == 0)
+        HGOTO_DONE(SUCCEED)
 
     /* Perform second phase of type info initialization */
     if (H5D__typeinfo_init_phase2(&io_info) < 0)
@@ -310,7 +317,7 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
         /* MDIO-specific second phase initialization */
         for (i = 0; i < count; i++)
             if (dset_info[i].layout_ops.mdio_init &&
-                (dset_info[i].layout_ops.mdio_init)(&io_info, &(dset_info[i])))
+                (dset_info[i].layout_ops.mdio_init)(&io_info, &(dset_info[i])) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't populate array of selected pieces")
 
         /* Make sure we added all pieces */
@@ -342,6 +349,10 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
 
         /* Loop with serial & single-dset read IO path */
         for (i = 0; i < count; i++) {
+            /* Check for skipped I/O */
+            if (dset_info[i].skip_io)
+                continue;
+
             /* set metadata tagging with dset oheader addr */
             H5AC_tag(dset_info[i].dset->oloc.addr, &prev_tag);
 
@@ -367,7 +378,7 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
 done:
     /* Shut down the I/O op information */
     for (i = 0; i < io_op_init; i++)
-        if (dset_info[i].layout_ops.io_term &&
+        if (!dset_info[i].skip_io && dset_info[i].layout_ops.io_term &&
             (*dset_info[i].layout_ops.io_term)(&io_info, &(dset_info[i])) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down I/O op info")
 
@@ -633,6 +644,7 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
         if (dset_info[i].layout_ops.io_init &&
             (*dset_info[i].layout_ops.io_init)(&io_info, &(dset_info[i])) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize I/O info")
+        dset_info[i].skip_io = FALSE;
         io_op_init++;
 
         /* Reset metadata tagging */
@@ -669,7 +681,7 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
         /* MDIO-specific second phase initialization */
         for (i = 0; i < count; i++)
             if (dset_info[i].layout_ops.mdio_init &&
-                (dset_info[i].layout_ops.mdio_init)(&io_info, &(dset_info[i])))
+                (dset_info[i].layout_ops.mdio_init)(&io_info, &(dset_info[i])) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't populate array of selected pieces")
 
         /* Make sure we added all pieces */
@@ -701,6 +713,8 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
 
         /* loop with serial & single-dset write IO path */
         for (i = 0; i < count; i++) {
+            HDassert(!dset_info[i].skip_io);
+
             /* set metadata tagging with dset oheader addr */
             H5AC_tag(dset_info->dset->oloc.addr, &prev_tag);
 
@@ -743,10 +757,12 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
 
 done:
     /* Shut down the I/O op information */
-    for (i = 0; i < io_op_init; i++)
+    for (i = 0; i < io_op_init; i++) {
+        HDassert(!dset_info[i].skip_io);
         if (dset_info[i].layout_ops.io_term &&
             (*dset_info[i].layout_ops.io_term)(&io_info, &(dset_info[i])) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down I/O op info")
+    }
 
     /* Shut down datatype info for operation */
     if (H5D__typeinfo_term(&io_info, type_info_init) < 0)
