@@ -241,7 +241,7 @@ typedef struct H5D_dset_io_info_t {
 
     hid_t           mem_type_id; /* memory datatype ID */
     H5D_type_info_t type_info;
-    hbool_t         type_info_init;
+    hbool_t         skip_io; /* Whether to skip I/O for this dataset */
 } H5D_dset_io_info_t;
 
 /* I/O info for entire I/O operation */

@@ -536,7 +536,7 @@ H5D__efl_writevv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_in
     HDassert(io_info);
     HDassert(dset_info);
     HDassert(dset_info->store->efl.nused > 0);
-    HDassert(dset_info->buf.vp);
+    HDassert(dset_info->buf.cvp);
     HDassert(dset_info->dset);
     HDassert(dset_info->dset->shared);
     HDassert(dset_curr_seq);
