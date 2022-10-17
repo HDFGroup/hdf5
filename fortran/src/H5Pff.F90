@@ -3412,7 +3412,7 @@ CONTAINS
 !! \param crt_intermed_group Specifies whether to create intermediate groups upon the creation of an object.
 !! \param hdferr             \fortran_error
 !!
-!! See C API: @ref H5Pget_create_intermediate_group()
+!! See C API: @ref H5Pset_create_intermediate_group()
 !!
   SUBROUTINE h5pset_create_inter_group_f(lcpl_id, crt_intermed_group, hdferr)
     IMPLICIT NONE
