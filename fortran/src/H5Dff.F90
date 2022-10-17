@@ -222,7 +222,7 @@ CONTAINS
 !! \param lcpl_id  Link creation property list
 !! \param dapl_id  Dataset access property list
 !!
-!! See C API: @ref hid_t H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id, hid_t lcpl_id, hid_t dcpl_id, hid_t dapl_id);
+!! See C API: @ref H5Dcreate2()
 !!
   SUBROUTINE h5dcreate_f(loc_id, name, type_id, space_id, dset_id, &
        hdferr, dcpl_id, lcpl_id, dapl_id)
@@ -289,7 +289,7 @@ CONTAINS
 !! \param hdferr  \fortran_error
 !! \param dapl_id Dataset access property list
 !!
-!! See C API: @ref hid_t H5Dopen2(hid_t loc_id, const char *name, hid_t dapl_id);
+!! See C API: @ref H5Dopen2()
 !!
   SUBROUTINE h5dopen_f(loc_id, name, dset_id, hdferr, dapl_id)
     IMPLICIT NONE
@@ -332,7 +332,7 @@ CONTAINS
 !! \param dset_id Dataset identifier
 !! \param hdferr  \fortran_error
 !!
-!! See C API: @ref herr_t H5Dclose(hid_t dset_id);
+!! See C API: @ref H5Dclose()
 !!
   SUBROUTINE h5dclose_f(dset_id, hdferr)
     IMPLICIT NONE
@@ -361,7 +361,7 @@ CONTAINS
 !! \param datatype_id Dataspace identifier
 !! \param hdferr      \fortran_error
 !!
-!! See C API: @ref hid_t H5Dget_type(hid_t dset_id);
+!! See C API: @ref H5Dget_type()
 !!
   SUBROUTINE h5dget_type_f(dataset_id, datatype_id, hdferr)
     IMPLICIT NONE
@@ -390,7 +390,7 @@ CONTAINS
 !! \param size       Array containing the new magnitude of each dimension
 !! \param hdferr     \fortran_error
 !!
-!! See C API: @ref herr_t H5Dset_extent(hid_t dset_id, const hsize_t size[]);
+!! See C API: @ref H5Dset_extent()
 !!
   SUBROUTINE h5dset_extent_f(dataset_id, size, hdferr)
     IMPLICIT NONE
@@ -419,7 +419,7 @@ CONTAINS
 !! \param plist_id   Creation property list identifier
 !! \param hdferr     \fortran_error
 !!
-!! See C API: @ref hid_t H5Dget_create_plist(hid_t dset_id);
+!! See C API: @ref H5Dget_create_plist()
 !!
   SUBROUTINE h5dget_create_plist_f(dataset_id, plist_id, hdferr)
     IMPLICIT NONE
@@ -447,7 +447,7 @@ CONTAINS
 !! \param size       Datastorage size
 !! \param hdferr     \fortran_error
 !!
-!! See C API: @ref hsize_t H5Dget_storage_size(hid_t dset_id);
+!! See C API: @ref H5Dget_storage_size()
 !!
   SUBROUTINE h5dget_storage_size_f(dataset_id, size, hdferr)
     IMPLICIT NONE
@@ -511,7 +511,7 @@ CONTAINS
 !!                \li H5D_SPACE_STS_ALLOCATED_F
 !! \param hdferr  \fortran_error
 !!
-!! See C API: @ref herr_t H5Dget_space_status(hid_t dset_id, H5D_space_status_t *allocation);
+!! See C API: @ref H5Dget_space_status()
 !!
   SUBROUTINE h5dget_space_status_f(dset_id, flag, hdferr)
     IMPLICIT NONE
@@ -543,7 +543,7 @@ CONTAINS
 !! \param dcpl_id  Dataset creation property list identifier.
 !! \param dapl_id  Dataset access property list identifier.
 !!
-!! See C API: @ref hid_t H5Dcreate_anon(hid_t loc_id, hid_t type_id, hid_t space_id, hid_t dcpl_id, hid_t dapl_id);
+!! See C API: @ref H5Dcreate_anon()
 !!
   SUBROUTINE h5dcreate_anon_f(loc_id, type_id, space_id, dset_id, hdferr, dcpl_id, dapl_id)
     IMPLICIT NONE
@@ -978,7 +978,7 @@ CONTAINS
 !! \param offset  The offset in bytes.
 !! \param hdferr  \fortran_error
 !!
-!! See C API: @ref haddr_t H5Dget_offset(hid_t dset_id);
+!! See C API: @ref H5Dget_offset()
 !!
   SUBROUTINE h5dget_offset_f(dset_id, offset, hdferr)
     IMPLICIT NONE
@@ -1009,7 +1009,7 @@ CONTAINS
 !! \param dataspace_id Dataspace identifier.
 !! \param hdferr       \fortran_error
 !!
-!! See C API: @ref hid_t H5Dget_space(hid_t dset_id);
+!! See C API: @ref H5Dget_space()
 !!
   SUBROUTINE h5dget_space_f(dataset_id, dataspace_id, hdferr)
     IMPLICIT NONE
@@ -1037,7 +1037,7 @@ CONTAINS
 !! \param plist_id Dataset access property list identifier.
 !! \param hdferr   \fortran_error
 !!
-!! See C API: @ref hid_t H5Dget_access_plist(hid_t dset_id);
+!! See C API: @ref H5Dget_access_plist()
 !!
   SUBROUTINE h5dget_access_plist_f(dset_id, plist_id, hdferr)
     IMPLICIT NONE
@@ -1068,7 +1068,7 @@ CONTAINS
 !! \param buf      Pointer to the buffer to be reclaimed.
 !! \param hdferr   \fortran_error
 !!
-!! See C API: @ref herr_t H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t dxpl_id, void *buf);
+!! See C API: @ref H5Dvlen_reclaim()
 !!
   SUBROUTINE h5dvlen_reclaim_f(type_id, space_id, plist_id, buf, hdferr)
     IMPLICIT NONE
@@ -1110,7 +1110,7 @@ CONTAINS
 !! \param file_space_id Identifier of the dataset&apos;s dataspace in the file.
 !! \param xfer_prp      Identifier of a transfer property list for this I/O operation.
 !!
-!! See C API: @ref herr_t H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id, const void *buf);
+!! See C API: @ref H5Dwrite()
 !!
   SUBROUTINE h5dwrite_f(dset_id, mem_type_id, buf, hdferr, mem_space_id, file_space_id, xfer_prp)
     USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
@@ -1138,7 +1138,7 @@ CONTAINS
 !! \param file_space_id Identifier of dataset&apos;s dataspace in the file. (Default: H5S_ALL_F)
 !! \param xfer_prp      Identifier of a transfer property list for this I/O operation.
 !!
-!! See C API: @ref herr_t H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id, void *buf);
+!! See C API: @ref H5Dread()
 !!
  SUBROUTINE h5dread_f(dset_id, mem_type_id, buf, hdferr, mem_space_id, file_space_id, xfer_prp)
     USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
@@ -1229,7 +1229,7 @@ CONTAINS
 !! \param buf        Buffer to receive data read from file.
 !! \param hdferr     \fortran_error
 !!
-!! See C API: @ref herr_t H5Dfill(const void *fill, hid_t fill_type_id, void *buf, hid_t buf_type_id, hid_t space_id);
+!! See C API: @ref H5Dfill()
 !!
   SUBROUTINE h5dfill_f(fill_value, space_id, buf,  hdferr)
     TYPE(TYPE), INTENT(IN) :: fill_value
@@ -1251,7 +1251,7 @@ CONTAINS
 !! \param space_id     Dataspace identifier.
 !! \param hdferr       \fortran_error
 !!
-!! See C API: @ref herr_t H5Dfill(const void *fill, hid_t fill_type_id, void *buf, hid_t buf_type_id, hid_t space_id);
+!! See C API: @ref H5Dfill()
 !!
   SUBROUTINE h5dfill_f(fill_value, fill_type_id, buf, buf_type_id, space_id, hdferr)
     USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
