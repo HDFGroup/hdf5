@@ -584,7 +584,7 @@ CONTAINS
 !! \param lapl_id       Link access property list identifier
 !! \param hdferr        \fortran_error
 !!
-!! See C API: @ref H5Arename_by_name_async()
+!! See C API: @ref H5Arename_by_name()
 !!
   SUBROUTINE H5Arename_by_name_f(loc_id, obj_name, old_attr_name, new_attr_name, &
         hdferr, lapl_id)
