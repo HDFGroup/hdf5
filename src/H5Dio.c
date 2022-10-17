@@ -99,10 +99,11 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
     H5D_storage_t  store_local;               /* Local buffer for store */
     H5D_storage_t *store      = &store_local; /* Union of EFL and chunk pointer in file space */
     size_t         io_op_init = 0;            /* Number I/O ops that have been initialized */
-    size_t         io_skipped = 0;            /* Number I/O ops that have been skipped (due to the dataset not being allocated) */
-    size_t         i;                         /* Local index variable */
-    char           fake_char;                 /* Temporary variable for NULL buffer pointers */
-    herr_t         ret_value = SUCCEED;       /* Return value	*/
+    size_t         io_skipped =
+        0;            /* Number I/O ops that have been skipped (due to the dataset not being allocated) */
+    size_t i;         /* Local index variable */
+    char   fake_char; /* Temporary variable for NULL buffer pointers */
+    herr_t ret_value = SUCCEED; /* Return value	*/
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -250,7 +251,8 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
             if (dset_info[i].dset->shared->dcpl_cache.fill.fill_time != H5D_FILL_TIME_NEVER)
                 /* Go fill the user's selection with the dataset's fill value */
                 if (H5D__fill(dset_info[i].dset->shared->dcpl_cache.fill.buf, dset_info[i].dset->shared->type,
-                              dset_info[i].buf.vp, dset_info[i].type_info.mem_type, dset_info[i].mem_space) < 0)
+                              dset_info[i].buf.vp, dset_info[i].type_info.mem_type,
+                              dset_info[i].mem_space) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "filling buf failed")
 
             /* No need to perform any more I/O for this dataset */
@@ -264,12 +266,13 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
 
             /* Sanity check that space is allocated, if there are elements */
             if (dset_info[i].nelmts > 0)
-                HDassert((*dset_info[i].dset->shared->layout.ops->is_space_alloc)(
-                             &dset_info[i].dset->shared->layout.storage) ||
-                         (dset_info[i].dset->shared->layout.ops->is_data_cached &&
-                          (*dset_info[i].dset->shared->layout.ops->is_data_cached)(dset_info[i].dset->shared)) ||
-                         dset_info[i].dset->shared->dcpl_cache.efl.nused > 0 ||
-                         dset_info[i].dset->shared->layout.type == H5D_COMPACT);
+                HDassert(
+                    (*dset_info[i].dset->shared->layout.ops->is_space_alloc)(
+                        &dset_info[i].dset->shared->layout.storage) ||
+                    (dset_info[i].dset->shared->layout.ops->is_data_cached &&
+                     (*dset_info[i].dset->shared->layout.ops->is_data_cached)(dset_info[i].dset->shared)) ||
+                    dset_info[i].dset->shared->dcpl_cache.efl.nused > 0 ||
+                    dset_info[i].dset->shared->layout.type == H5D_COMPACT);
 
             /* Call storage method's I/O initialization routine */
             if (dset_info[i].layout_ops.io_init &&
