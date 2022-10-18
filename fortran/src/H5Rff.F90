@@ -258,7 +258,7 @@ CONTAINS
 !! \param space_id Dataspace identifier.
 !! \param hdferr   \fortran_error
 !!
-!! See C API: @ref hid_t H5Rget_region(hid_t dataset, H5R_type_t ref_type, const void *ref);
+!! See C API: @ref H5Rget_region()
 !!
 #ifdef H5_DOXYGEN_FORTRAN
   SUBROUTINE h5rget_region_f(&
@@ -292,7 +292,7 @@ CONTAINS
 !! \param ref    Reference to the specified object.
 !! \param hdferr \fortran_error
 !!
-!! See C API: @ref herr_t H5Rcreate_object(hid_t loc_id, const char *name, hid_t oapl_id, H5R_ref_t *ref_ptr);
+!! See C API: @ref H5Rcreate_object()
 !!
   SUBROUTINE h5rcreate_object_f(loc_id, name, ref, hdferr)
     USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
@@ -325,7 +325,7 @@ CONTAINS
 !! \param ref      Reference to the dataset region.
 !! \param hdferr   \fortran_error
 !!
-!! See C API: @ref herr_t H5Rcreate_region(hid_t loc_id, const char *name, hid_t space_id, hid_t oapl_id, H5R_ref_t *ref_ptr);
+!! See C API: @ref H5Rcreate_region()
 !!
   SUBROUTINE h5rcreate_region_f(loc_id, name, space_id, ref, hdferr)
     IMPLICIT NONE
@@ -374,7 +374,7 @@ CONTAINS
 !! \param space_id Dataspace identifier that describes selected region.
 !!
 #ifdef H5_DOXYGEN_FORTRAN
-!! See C API: @ref herr_t H5Rcreate_object(hid_t loc_id, const char *name, hid_t oapl_id, H5R_ref_t *ref_ptr);
+!! See C API: @ref H5Rcreate_object()
 !!
   SUBROUTINE h5rcreate_f(&
 #else
@@ -567,7 +567,7 @@ CONTAINS
 !!
 
 #ifdef H5_DOXYGEN_FORTRAN
-!! See C API: @ref ssize_t H5Rget_name(hid_t loc_id, H5R_type_t ref_type, const void *ref, char *name, size_t size);
+!! See C API: @ref H5Rget_name()
 !!
   SUBROUTINE h5rget_name_f(&
 #else
@@ -612,7 +612,7 @@ CONTAINS
 !!             \li H H5G_TYPE_F
 !!  hdferr   - \fortran_error
 !!
-!! See C API: @ref herr_t H5Rget_obj_type3(H5R_ref_t *ref_ptr, hid_t rapl_id, H5O_type_t *obj_type);
+!! See C API: @ref H5Rget_obj_type3()
 !!
   SUBROUTINE h5rget_obj_type_f(loc_id, ref_type, ref, obj_type, hdferr)
 

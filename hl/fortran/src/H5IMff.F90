@@ -51,7 +51,7 @@ CONTAINS
 !! \param buf       Buffer with data to be written to the dataset
 !! \param errcode   \fortran_error
 !!
-!! See C API: @ref herr_t H5IMmake_image_8bit(hid_t loc_id, const char *dset_name, hsize_t width, hsize_t height, const unsigned char *buffer);
+!! See C API: @ref H5IMmake_image_8bit()
 !!
   SUBROUTINE h5immake_image_8bit_f(loc_id,&
        dset_name,&
@@ -100,7 +100,7 @@ CONTAINS
 !! \param buf       Buffer with data to store the image.
 !! \param errcode   \fortran_error
 !!
-!! See C API: @ref herr_t H5IMread_image(hid_t loc_id, const char *dset_name, unsigned char *buffer);
+!! See C API: @ref H5IMread_image()
 !!
   SUBROUTINE h5imread_image_f(loc_id,&
        dset_name,&
@@ -146,7 +146,7 @@ CONTAINS
 !! \param buf       Buffer with data to be written to the dataset.
 !! \param errcode   \fortran_error
 !!
-!! See C API: @ref herr_t H5IMmake_image_24bit(hid_t loc_id, const char *dset_name, hsize_t width, hsize_t height, const char *interlace, const unsigned char *buffer);
+!! See C API: @ref H5IMmake_image_24bit()
 !!
   SUBROUTINE h5immake_image_24bit_f(loc_id, dset_name, width, height, il, buf, errcode)
 
@@ -200,7 +200,7 @@ CONTAINS
 !! \param npals     The number of palettes associated to the image.
 !! \param errcode   \fortran_error
 !!
-!! See C API: @ref herr_t H5IMget_image_info(hid_t loc_id, const char *dset_name, hsize_t *width, hsize_t *height, hsize_t *planes, char *interlace, hssize_t *npals);
+!! See C API: @ref H5IMget_image_info()
 !!
   SUBROUTINE h5imget_image_info_f(loc_id,&
        dset_name,&
@@ -256,7 +256,7 @@ CONTAINS
 !! \param loc_id    Location identifier. The identifier may be that of a file or group.
 !! \param dset_name The name of the dataset.
 !!
-!! See C API: @ref herr_t H5IMis_image(hid_t loc_id, const char *dset_name);
+!! See C API: @ref H5IMis_image()
 !!
   INTEGER FUNCTION h5imis_image_f(loc_id, dset_name)
 
@@ -296,7 +296,7 @@ CONTAINS
 !! \param pal_data Buffer with data to be written to the dataset.
 !! \param errcode  \fortran_error
 !!
-!! See C API: @ref herr_t H5IMmake_palette(hid_t loc_id, const char *pal_name, const hsize_t *pal_dims, const unsigned char *pal_data);
+!! See C API: @ref H5IMmake_palette()
 !!
   SUBROUTINE h5immake_palette_f(loc_id,&
        pal_name,&
@@ -342,7 +342,7 @@ CONTAINS
 !! \param pal_name   The name of the palette.
 !! \param errcode    \fortran_error
 !!
-!! See C API: @ref herr_t H5IMlink_palette(hid_t loc_id, const char *image_name, const char *pal_name);
+!! See C API: @ref H5IMlink_palette()
 !!
   SUBROUTINE h5imlink_palette_f(loc_id,&
        image_name,&
@@ -388,7 +388,7 @@ CONTAINS
 !! \param pal_name   The name of the palette.
 !! \param errcode    \fortran_error
 !!
-!! See C API: @ref herr_t H5IMunlink_palette(hid_t loc_id, const char *image_name, const char *pal_name);
+!! See C API: @ref H5IMunlink_palette()
 !!
   SUBROUTINE h5imunlink_palette_f(loc_id,&
        image_name,&
@@ -434,7 +434,7 @@ CONTAINS
 !! \param npals      The number of palettes.
 !! \param errcode    \fortran_error
 !!
-!! See C API: @ref herr_t H5IMget_npalettes(hid_t loc_id, const char *image_name, hssize_t *npals);
+!! See C API: @ref H5IMget_npalettes()
 !!
   SUBROUTINE h5imget_npalettes_f(loc_id,&
        image_name,&
@@ -478,7 +478,7 @@ CONTAINS
 !! \param pal_dims   The dimensions of the palette dataset.
 !! \param  errcode   \fortran_error
 !!
-!! See C API: @ref herr_t H5IMget_palette_info(hid_t loc_id, const char *image_name, int pal_number, hsize_t *pal_dims);
+!! See C API: @ref H5IMget_palette_info()
 !!
   SUBROUTINE h5imget_palette_info_f(loc_id,&
        image_name,&
@@ -525,7 +525,7 @@ CONTAINS
 !! \param pal_data   The palette dataset.
 !! \param errcode    \fortran_error
 !!
-!! See C API: @ref herr_t H5IMget_palette_info(hid_t loc_id, const char *image_name, int pal_number, hsize_t *pal_dims);
+!! See C API: @ref H5IMget_palette_info()
 !!
   SUBROUTINE h5imget_palette_f(loc_id,&
        image_name,&
@@ -569,7 +569,7 @@ CONTAINS
 !! \param loc_id    Location identifier. The identifier may be that of a file or group.
 !! \param dset_name The name of the dataset.
 !!
-!! See C API: @ref herr_t H5IMis_palette(hid_t loc_id, const char *dset_name);
+!! See C API: @ref H5IMis_palette()
 !!
   INTEGER FUNCTION h5imis_palette_f(loc_id, dset_name)
 
