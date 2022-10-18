@@ -319,12 +319,19 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
 
         /* MDIO-specific second phase initialization */
         for (i = 0; i < count; i++)
-            if (dset_info[i].layout_ops.mdio_init &&
-                (dset_info[i].layout_ops.mdio_init)(&io_info, &(dset_info[i])) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't populate array of selected pieces")
+            if (dset_info[i].layout_ops.mdio_init) {
+                haddr_t prev_tag = HADDR_UNDEF;
 
-        /* Make sure we added all pieces */
-        HDassert(io_info.pieces_added == io_info.piece_count);
+                /* set metadata tagging with dset oheader addr */
+                H5AC_tag(dset_info[i].dset->oloc.addr, &prev_tag);
+
+                /* Make second phase IO init call */
+                if ((dset_info[i].layout_ops.mdio_init)(&io_info, &(dset_info[i])) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't populate array of selected pieces")
+
+                /* Reset metadata tagging */
+                H5AC_tag(prev_tag, NULL);
+            }
 
         /* Invoke correct "high level" I/O routine */
         if ((*io_info.md_io_ops.multi_read_md)(&io_info) < 0)
@@ -683,12 +690,19 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
 
         /* MDIO-specific second phase initialization */
         for (i = 0; i < count; i++)
-            if (dset_info[i].layout_ops.mdio_init &&
-                (dset_info[i].layout_ops.mdio_init)(&io_info, &(dset_info[i])) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't populate array of selected pieces")
+            if (dset_info[i].layout_ops.mdio_init) {
+                haddr_t prev_tag = HADDR_UNDEF;
 
-        /* Make sure we added all pieces */
-        HDassert(io_info.pieces_added == io_info.piece_count);
+                /* set metadata tagging with dset oheader addr */
+                H5AC_tag(dset_info[i].dset->oloc.addr, &prev_tag);
+
+                /* Make second phase IO init call */
+                if ((dset_info[i].layout_ops.mdio_init)(&io_info, &(dset_info[i])) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't populate array of selected pieces")
+
+                /* Reset metadata tagging */
+                H5AC_tag(prev_tag, NULL);
+            }
 
         /* Invoke correct "high level" I/O routine */
         if ((*io_info.md_io_ops.multi_write_md)(&io_info) < 0)
@@ -734,7 +748,7 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
          * actual I/O */
         H5_CHECK_OVERFLOW(io_info.piece_count, size_t, uint32_t)
         if (!H5D_LAYOUT_CB_PERFORM_IO(&io_info))
-            if (H5F_shared_select_write(io_info.f_sh, H5FD_MEM_DRAW, (uint32_t)io_info.piece_count,
+            if (H5F_shared_select_write(io_info.f_sh, H5FD_MEM_DRAW, (uint32_t)io_info.pieces_added,
                                         io_info.mem_spaces, io_info.file_spaces, io_info.addrs,
                                         io_info.element_sizes, io_info.wbufs) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "selection write failed")
