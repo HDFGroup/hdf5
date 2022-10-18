@@ -1898,7 +1898,7 @@ H5D__create_piece_file_map_hyper(H5D_dset_io_info_t *dinfo, H5D_io_info_t *io_in
             new_piece_info->dset_info = dinfo;
 
             /* Add piece to global piece_count */
-                    io_info->piece_count++;
+            io_info->piece_count++;
 
             /* Insert the new piece into the skip list */
             if (H5SL_insert(fm->dset_sel_pieces, new_piece_info, &new_piece_info->index) < 0) {
