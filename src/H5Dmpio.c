@@ -977,7 +977,7 @@ H5D__mpio_get_sum_chunk(const H5D_io_info_t *io_info, int *sum_chunkf)
 
     /* Get the number of chunks to perform I/O on */
     num_chunkf     = 0;
-    ori_num_chunkf = io_info->piece_count;
+    ori_num_chunkf = io_info->pieces_added;
     H5_CHECKED_ASSIGN(num_chunkf, int, ori_num_chunkf, size_t);
 
     /* Determine the summation of number of chunks for all processes */
@@ -1465,7 +1465,7 @@ H5D__link_piece_collective_io(H5D_io_info_t *io_info, int mpi_rank)
         base_buf_addr.cvp = NULL;
 
         /* Get the number of chunks with a selection */
-        num_chunk = io_info->piece_count;
+        num_chunk = io_info->pieces_added;
         H5_CHECK_OVERFLOW(num_chunk, size_t, int);
 
 #ifdef H5Dmpio_DEBUG
@@ -1489,7 +1489,7 @@ H5D__link_piece_collective_io(H5D_io_info_t *io_info, int mpi_rank)
 
             /* Sort sel_pieces if necessary */
             if (need_sort)
-                HDqsort(io_info->sel_pieces, io_info->piece_count, sizeof(io_info->sel_pieces[0]),
+                HDqsort(io_info->sel_pieces, io_info->pieces_added, sizeof(io_info->sel_pieces[0]),
                         H5D__cmp_piece_addr);
 
             /* Allocate chunking information */

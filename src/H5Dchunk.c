@@ -1518,7 +1518,6 @@ H5D__create_piece_map_single(H5D_dset_io_info_t *di, H5D_io_info_t *io_info)
     hsize_t           sel_start[H5O_LAYOUT_NDIMS]; /* Offset of low bound of file selection */
     hsize_t           sel_end[H5O_LAYOUT_NDIMS];   /* Offset of high bound of file selection */
     unsigned          u;                           /* Local index variable */
-    H5D_chunk_ud_t    udata;                       /* User data for querying piece info */
     herr_t            ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -1576,14 +1575,8 @@ H5D__create_piece_map_single(H5D_dset_io_info_t *di, H5D_io_info_t *io_info)
     /* make connection to related dset info from this piece_info */
     piece_info->dset_info = di;
 
-    /* get piece file address */
-    if (H5D__chunk_lookup(piece_info->dset_info->dset, piece_info->scaled, &udata) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "error looking up chunk address")
-    piece_info->faddr = udata.chunk_block.offset;
-
-    /* Add piece to global piece_count, if it exists on disk */
-    if (H5F_addr_defined(udata.chunk_block.offset))
-        io_info->piece_count++;
+    /* Add piece to global piece_count */
+    io_info->piece_count++;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1672,7 +1665,6 @@ H5D__create_piece_file_map_all(H5D_dset_io_info_t *di, H5D_io_info_t *io_info)
 
     /* Iterate through each chunk in the dataset */
     while (sel_points) {
-        H5D_chunk_ud_t    udata;          /* User data for querying chunk info */
         H5D_piece_info_t *new_piece_info; /* Piece information to insert into skip list */
         hsize_t           chunk_points;   /* Number of elements in chunk selection */
 
@@ -1715,14 +1707,8 @@ H5D__create_piece_file_map_all(H5D_dset_io_info_t *di, H5D_io_info_t *io_info)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't insert chunk into skip list")
         } /* end if */
 
-        /* get chunk file address */
-        if (H5D__chunk_lookup(di->dset, new_piece_info->scaled, &udata) < 0)
-            HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL, "couldn't get chunk info from skip list")
-        new_piece_info->faddr = udata.chunk_block.offset;
-
-        /* Add piece to global piece_count, if it exists on disk */
-        if (H5F_addr_defined(udata.chunk_block.offset))
-            io_info->piece_count++;
+        /* Add piece to global piece_count*/
+        io_info->piece_count++;
 
         /* Get number of elements selected in chunk */
         chunk_points                 = H5S_GET_SELECT_NPOINTS(new_piece_info->fspace);
@@ -1863,8 +1849,6 @@ H5D__create_piece_file_map_hyper(H5D_dset_io_info_t *dinfo, H5D_io_info_t *io_in
 
     /* Iterate through each chunk in the dataset */
     while (sel_points) {
-        H5D_chunk_ud_t udata; /* User data for querying chunk info */
-
         /* Check for intersection of current chunk and file selection */
         if (TRUE == H5S_SELECT_INTERSECT_BLOCK(dinfo->file_space, coords, end)) {
             H5D_piece_info_t *new_piece_info; /* chunk information to insert into skip list */
@@ -1913,14 +1897,8 @@ H5D__create_piece_file_map_hyper(H5D_dset_io_info_t *dinfo, H5D_io_info_t *io_in
             /* make connection to related dset info from this piece_info */
             new_piece_info->dset_info = dinfo;
 
-            /* get chunk file address */
-            if (H5D__chunk_lookup(dinfo->dset, new_piece_info->scaled, &udata) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "error looking up chunk address")
-            new_piece_info->faddr = udata.chunk_block.offset;
-
-            /* Add piece to global piece_count, if it exists on disk */
-            if (H5F_addr_defined(udata.chunk_block.offset))
-                io_info->piece_count++;
+            /* Add piece to global piece_count */
+                    io_info->piece_count++;
 
             /* Insert the new piece into the skip list */
             if (H5SL_insert(fm->dset_sel_pieces, new_piece_info, &new_piece_info->index) < 0) {
@@ -2251,8 +2229,6 @@ H5D__piece_file_cb(void H5_ATTR_UNUSED *elem, const H5T_t H5_ATTR_UNUSED *type, 
         piece_info = fm->last_piece_info;
     } /* end if */
     else {
-        H5D_chunk_ud_t udata; /* User data for querying piece info */
-
         /* If the chunk index is not the same as the last chunk index we used,
          * find the chunk in the skip list.  If we do not find it, create
          * a new node. */
@@ -2305,14 +2281,8 @@ H5D__piece_file_cb(void H5_ATTR_UNUSED *elem, const H5T_t H5_ATTR_UNUSED *type, 
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINSERT, FAIL, "can't insert chunk into dataset skip list")
             } /* end if */
 
-            /* Get chunk file address */
-            if (H5D__chunk_lookup(dinfo->dset, piece_info->scaled, &udata) < 0)
-                HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL, "couldn't get chunk info from skip list")
-            piece_info->faddr = udata.chunk_block.offset;
-
-            /* Add piece to global piece_count, if it exists on disk */
-            if (H5F_addr_defined(udata.chunk_block.offset))
-                io_info->piece_count++;
+            /* Add piece to global piece_count */
+            io_info->piece_count++;
         } /* end if */
 
         /* Update the "last chunk seen" information */
@@ -2422,7 +2392,8 @@ done:
  * Function:   H5D__chunk_mdio_init
  *
  * Purpose:    Performs second phase of initialization for multi-dataset
- *             I/O.  Currently just adds chunks to sel_pieces.
+ *             I/O.  Currently looks up chunk addresses and adds chunks to
+ *             sel_pieces.
  *
  * Return:     Non-negative on success/Negative on failure
  *
@@ -2433,6 +2404,7 @@ H5D__chunk_mdio_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
 {
     H5SL_node_t      *piece_node;          /* Current node in chunk skip list */
     H5D_piece_info_t *piece_info;          /* Piece information for current piece */
+    H5D_chunk_ud_t    udata;               /* Chunk data from index */
     herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -2446,6 +2418,13 @@ H5D__chunk_mdio_init(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
         /* Get piece info */
         if (NULL == (piece_info = (H5D_piece_info_t *)H5D_CHUNK_GET_NODE_INFO(dinfo, piece_node)))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "couldn't get piece info from list")
+
+        /* Get the info for the chunk in the file */
+        if (H5D__chunk_lookup(dinfo->dset, piece_info->scaled, &udata) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "error looking up chunk address")
+
+        /* Save chunk file address */
+        piece_info->faddr = udata.chunk_block.offset;
 
         /* Add piece to MDIO operation if it has a file address */
         if (H5F_addr_defined(piece_info->faddr)) {
