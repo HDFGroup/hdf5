@@ -73,7 +73,7 @@ CONTAINS
 !! \param creation_prp File creation property list identifier.
 !! \param access_prp   File access property list identifier.
 !!
-!! See C API: @ref hid_t H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
+!! See C API: @ref H5Fcreate()
 !!
   SUBROUTINE h5fcreate_f(name, access_flags, file_id, hdferr, &
        creation_prp, access_prp)
@@ -123,7 +123,7 @@ CONTAINS
 !!                     \li H5F_SCOPE_LOCAL_F
 !! \param hdferr       \fortran_error
 !!
-!! See C API: @ref herr_t H5Fflush(hid_t object_id, H5F_scope_t scope);
+!! See C API: @ref H5Fflush()
 !!
   SUBROUTINE h5fflush_f(object_id, scope, hdferr)
     IMPLICIT NONE
@@ -154,7 +154,7 @@ CONTAINS
 !! \param hdferr     \fortran_error
 !! \param access_prp The identifier of the property list to be used.
 !!
-!! See C API: @ref herr_t H5Fmount(hid_t loc, const char *name, hid_t child, hid_t plist);
+!! See C API: @ref H5Fmount()
 !!
   SUBROUTINE h5fmount_f(loc_id, name, child_id, hdferr, access_prp)
     IMPLICIT NONE
@@ -196,7 +196,7 @@ CONTAINS
 !! \param name   The name of the mount point.
 !! \param hdferr \fortran_error
 !!
-!! See C API: @ref herr_t H5Funmount(hid_t loc, const char *name);
+!! See C API: @ref H5Funmount()
 !!
   SUBROUTINE h5funmount_f(loc_id, name, hdferr)
     IMPLICIT NONE
@@ -233,7 +233,7 @@ CONTAINS
 !! \param hdferr       \fortran_error
 !! \param access_prp   File access property list identifier.
 !!
-!! See C API: @ref hid_t H5Fopen(const char *filename, unsigned flags, hid_t fapl_id);
+!! See C API: @ref H5Fopen()
 !!
   SUBROUTINE h5fopen_f(name, access_flags, file_id, hdferr, access_prp)
     IMPLICIT NONE
@@ -274,7 +274,7 @@ CONTAINS
 !! \param ret_file_id New file identifier.
 !! \param hdferr      \fortran_error
 !!
-!! See C API: @ref hid_t H5Freopen(hid_t file_id);
+!! See C API: @ref H5Freopen()
 !!
   SUBROUTINE h5freopen_f(file_id, ret_file_id, hdferr)
     IMPLICIT NONE
@@ -302,7 +302,7 @@ CONTAINS
 !! \param prop_id Creation property list identifier.
 !! \param hdferr  \fortran_error
 !!
-!! See C API: @ref hid_t H5Fget_create_plist(hid_t file_id);
+!! See C API: @ref H5Fget_create_plist()
 !!
   SUBROUTINE h5fget_create_plist_f(file_id, prop_id, hdferr)
     IMPLICIT NONE
@@ -330,7 +330,7 @@ CONTAINS
 !! \param access_id Access property list identifier.
 !! \param hdferr    \fortran_error
 !!
-!! See C API: @ref hid_t H5Fget_access_plist(hid_t file_id);
+!! See C API: @ref H5Fget_access_plist()
 !!
   SUBROUTINE h5fget_access_plist_f(file_id, access_id, hdferr)
     IMPLICIT NONE
@@ -360,7 +360,7 @@ CONTAINS
 !! \param hdferr     \fortran_error
 !! \param access_prp File access property list identifier.
 !!
-!! See C API: @ref htri_t H5Fis_accessible(const char *container_name, hid_t fapl_id);
+!! See C API: @ref H5Fis_accessible()
 !!
   SUBROUTINE h5fis_accessible_f(name, status, hdferr, access_prp)
     IMPLICIT NONE
@@ -400,7 +400,7 @@ CONTAINS
 !! \param status Indicates if file is and HDF5 file.
 !! \param hdferr \fortran_error
 !!
-!! See C API: @ref htri_t H5Fis_hdf5(const char *file_name);
+!! See C API: @ref H5Fis_hdf5()
 !!
   SUBROUTINE h5fis_hdf5_f(name, status, hdferr)
     IMPLICIT NONE
@@ -431,7 +431,7 @@ CONTAINS
 !! \param file_id File identifier.
 !! \param hdferr  \fortran_error
 !!
-!! See C API: @ref herr_t H5Fclose(hid_t file_id);
+!! See C API: @ref H5Fclose()
 !!
   SUBROUTINE h5fclose_f(file_id, hdferr)
     IMPLICIT NONE
@@ -464,7 +464,7 @@ CONTAINS
 !! \param obj_count Number of open objects.
 !! \param hdferr    \fortran_error
 !!
-!! See C API: @ref ssize_t H5Fget_obj_count(hid_t file_id, unsigned types);
+!! See C API: @ref H5Fget_obj_count()
 !!
   SUBROUTINE h5fget_obj_count_f(file_id, obj_type, obj_count, hdferr)
     IMPLICIT NONE
@@ -508,7 +508,7 @@ CONTAINS
 !! \param hdferr   \fortran_error
 !! \param num_objs Number of open objects.
 !!
-!! See C API: @ref ssize_t H5Fget_obj_ids(hid_t file_id, unsigned types, size_t max_objs, hid_t *obj_id_list);
+!! See C API: @ref H5Fget_obj_ids()
 !!
   SUBROUTINE h5fget_obj_ids_f(file_id, obj_type, max_objs, obj_ids, hdferr, num_objs)
     IMPLICIT NONE
@@ -547,7 +547,7 @@ CONTAINS
 !! \param free_space Amount of free space in file.
 !! \param hdferr     \fortran_error
 !!
-!! See C API: @ref hssize_t H5Fget_freespace(hid_t file_id);
+!! See C API: @ref H5Fget_freespace()
 !!
   SUBROUTINE h5fget_freespace_f(file_id, free_space, hdferr)
     IMPLICIT NONE
@@ -577,7 +577,7 @@ CONTAINS
 !! \param size   Actual size of the name.
 !! \param hdferr \fortran_error
 !!
-!! See C API: @ref ssize_t H5Fget_name(hid_t obj_id, char *name, size_t size);
+!! See C API: @ref H5Fget_name()
 !!
   SUBROUTINE h5fget_name_f(obj_id, buf, size, hdferr)
     IMPLICIT NONE
@@ -611,7 +611,7 @@ CONTAINS
 !! \param size    File size.
 !! \param hdferr  \fortran_error
 !!
-!! See C API: @ref herr_t H5Fget_filesize(hid_t file_id, hsize_t *size);
+!! See C API: @ref H5Fget_filesize()
 !!
   SUBROUTINE h5fget_filesize_f(file_id, size, hdferr)
     IMPLICIT NONE
@@ -639,7 +639,7 @@ CONTAINS
 !! \param fileno  File number.
 !! \param hdferr  \fortran_error
 !!
-!! See C API: @ref herr_t H5Fget_fileno(hid_t file_id, unsigned long *fileno);
+!! See C API: @ref H5Fget_fileno()
 !!
   SUBROUTINE h5fget_fileno_f(file_id, fileno, hdferr)
     IMPLICIT NONE
@@ -669,7 +669,7 @@ CONTAINS
 !! \param hdferr   \fortran_error
 !! \param buf_size Returns the size in bytes of the buffer required to store the file image, no data will be copied.
 !!
-!! See C API: @ref ssize_t H5Fget_file_image(hid_t file_id, void *buf_ptr, size_t buf_len);
+!! See C API: @ref H5Fget_file_image()
 !!
   SUBROUTINE h5fget_file_image_f(file_id, buf_ptr, buf_len, hdferr, buf_size)
     IMPLICIT NONE
@@ -715,7 +715,7 @@ CONTAINS
 !! \param minimize Value of the setting.
 !! \param hdferr   \fortran_error
 !!
-!! See C API: @ref herr_t H5Fget_dset_no_attrs_hint(hid_t file_id, hbool_t *minimize);
+!! See C API: @ref H5Fget_dset_no_attrs_hint()
 !!
   SUBROUTINE h5fget_dset_no_attrs_hint_f(file_id, minimize, hdferr)
     IMPLICIT NONE
@@ -750,7 +750,7 @@ CONTAINS
 !! \param minimize Value of the setting.
 !! \param hdferr   \fortran_error
 !!
-!! See C API: @ref herr_t H5Fset_dset_no_attrs_hint(hid_t file_id, hbool_t minimize);
+!! See C API: @ref H5Fset_dset_no_attrs_hint()
 !!
   SUBROUTINE h5fset_dset_no_attrs_hint_f(file_id, minimize, hdferr)
     IMPLICIT NONE
