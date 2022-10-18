@@ -377,9 +377,9 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
         /* Make final multi dataset selection I/O call if we are using both
          * features - in this case the multi_read callbacks did not perform the
          * actual I/O */
-        H5_CHECK_OVERFLOW(io_info.piece_count, size_t, uint32_t)
+        H5_CHECK_OVERFLOW(io_info.pieces_added, size_t, uint32_t)
         if (!H5D_LAYOUT_CB_PERFORM_IO(&io_info))
-            if (H5F_shared_select_read(io_info.f_sh, H5FD_MEM_DRAW, (uint32_t)io_info.piece_count,
+            if (H5F_shared_select_read(io_info.f_sh, H5FD_MEM_DRAW, (uint32_t)io_info.pieces_added,
                                        io_info.mem_spaces, io_info.file_spaces, io_info.addrs,
                                        io_info.element_sizes, io_info.rbufs) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "selection read failed")
@@ -746,7 +746,7 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
         /* Make final multi dataset selection I/O call if we are using both
          * features - in this case the multi_write callbacks did not perform the
          * actual I/O */
-        H5_CHECK_OVERFLOW(io_info.piece_count, size_t, uint32_t)
+        H5_CHECK_OVERFLOW(io_info.pieces_added, size_t, uint32_t)
         if (!H5D_LAYOUT_CB_PERFORM_IO(&io_info))
             if (H5F_shared_select_write(io_info.f_sh, H5FD_MEM_DRAW, (uint32_t)io_info.pieces_added,
                                         io_info.mem_spaces, io_info.file_spaces, io_info.addrs,
