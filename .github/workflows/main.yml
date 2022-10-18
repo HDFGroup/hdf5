@@ -269,7 +269,7 @@ jobs:
                 cmake: "Debug"
                 autotools: "debug"
 
-          - name: "Ubuntu gcc Autotools -Werror (build only)"
+          - name: "Ubuntu gcc Autotools -Werror (build only) DBG"
             os: ubuntu-latest
             cpp: enable
             fortran: disable
@@ -290,6 +290,28 @@ jobs:
               - text: "DBG"
                 cmake: "Debug"
                 autotools: "debug"
+
+          - name: "Ubuntu gcc Autotools -Werror (build only) REL"
+            os: ubuntu-latest
+            cpp: enable
+            fortran: disable
+            java: disable
+            parallel: disable
+            mirror_vfd: enable
+            direct_vfd: enable
+            deprec_sym: enable
+            default_api: v114
+            toolchain: ""
+            generator: "autogen"
+            flags: "CFLAGS=-Werror"
+            run_tests: false
+            thread_safety:
+              - enabled: false
+                text: ""
+            build_mode:
+              - text: "REL"
+                cmake: "Release"
+                autotools: "production"
 
     # Sets the job's name from the properties
     name: "${{ matrix.name }}${{ matrix.build_mode.text }}${{ matrix.thread_safety.text }}"

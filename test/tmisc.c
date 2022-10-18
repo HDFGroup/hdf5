@@ -3978,7 +3978,7 @@ test_misc22(void)
                 if ((prec[j] + offsets[k]) > (H5Tget_size(idts[i]) * 8))
                     continue;
 
-                MESSAGE(5, ("  Testing datatypes size=%d precision=%u offset=%d\n", H5Tget_size(idts[i]),
+                MESSAGE(5, ("  Testing datatypes size=%zu precision=%u offset=%d\n", H5Tget_size(idts[i]),
                             (unsigned)prec[j], (unsigned)offsets[k]));
 
                 /* Create the DCPL */

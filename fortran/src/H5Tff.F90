@@ -1089,7 +1089,7 @@ CONTAINS
 !! \param namelen     Name length.
 !! \param hdferr      \fortran_error
 !!
-!! See C API: @ref char *H5Tget_member_name(hid_t type_id, unsigned membno);
+!! See C API: @ref char* H5Tget_member_name(hid_t type_id, unsigned membno);
 !!
   SUBROUTINE h5tget_member_name_f(type_id, index, member_name,  namelen, hdferr)
     IMPLICIT NONE
@@ -1178,40 +1178,6 @@ CONTAINS
     namelen = LEN(name)
     hdferr = h5tget_member_index_c(type_id, name, namelen, index)
   END SUBROUTINE h5tget_member_index_f
-
-
-!  !$!
-!>
-!!  !$!
-!!  !$! NAME
-!!  !$!            h5tget_member_dim_f
-!!  !$!
-!!  !$! PURPOSE
-!!  !$!       This function is not supported in hdf5-1.4.*
-!!  !$!
-!!  !$! INPUTS
-!!  !$! OUTPUTS
-!!  !$!            hdferr:            - error code
-!!  !$!                               Success:  0
-!!  !$!                               Failure: -1
-!!  !$!
-!!  !$! AUTHOR
-!!  !$!      Elena Pourmal
-!!  !$!            August 12, 1999
-!!  !$!
-!!  !$! HISTORY
-!!  !$!       Explicit Fortran interfaces were added for
-!!  !$!                  called C functions (it is needed for Windows
-!!  !$!                  port).  March 7, 2001
-!!  !$!
-!!  !$! SOURCE
-!  !$!  SUBROUTINE h5tget_member_dims_f(type_id, field_idx,dims, field_dims, perm, hdferr)
-!  !$!
-!  !$!            IMPLICIT NONE
-
-!  !$!
-!  !$!          END SUBROUTINE h5tget_member_dims_f
-
 
 !>
 !! \ingroup FH5T
@@ -1431,33 +1397,31 @@ CONTAINS
     hdferr = h5tpack_c(type_id)
   END SUBROUTINE h5tpack_f
 
-!  !$!
-!>
-!!  !$!
-!!  !$! NAME
-!!  !$!            h5tinsert_array_f
-!!  !$!
-!!  !$! PURPOSE
-!!  !$!       This function is not available on hdf5-1.4.*
-!!  !$!
-!!  !$! INPUTS
-!!  !$! OUTPUTS
-!!  !$!            hdferr:            - error code
-!!  !$!                               Success:  0
-!!  !$!                               Failure: -1
-!!  !$!
-!!  !$! AUTHOR
-!!  !$!      Elena Pourmal
-!!  !$!            August 12, 1999
-!!  !$!
-!!  !$! HISTORY
-!!  !$!       Explicit Fortran interfaces were added for
-!!  !$!                  called C functions (it is needed for Windows
-!!  !$!                  port).  March 7, 2001
-!!  !$! SOURCE
+!
+! NAME
+!  h5tinsert_array_f
+!
+! PURPOSE
+!  This function is not available on hdf5-1.4.*
+!
+! INPUTS
+! OUTPUTS
+!            hdferr:            - error code
+!                               Success:  0
+!                               Failure: -1
+!
+! AUTHOR
+!      Elena Pourmal
+!            August 12, 1999
+!
+! HISTORY
+!       Explicit Fortran interfaces were added for
+!                  called C functions (it is needed for Windows
+!                  port).  March 7, 2001
+! SOURCE
 !  SUBROUTINE h5tinsert_array_f(parent_id,name,offset, ndims, dims, member_id, hdferr, perm)
 !  IMPLICIT NONE
-
+!
 !  INTEGER, EXTERNAL :: h5tinsert_array_c,  h5tinsert_array_c2
 !  namelen = LEN(name)
 !  if (present(perm)) then
@@ -1679,7 +1643,7 @@ CONTAINS
 !! \param taglen  Length of tag.
 !! \param hdferr  \fortran_error
 !!
-!! See C API: @ref char *H5Tget_tag(hid_t type);
+!! See C API: @ref char* H5Tget_tag(hid_t type);
 !!
   SUBROUTINE h5tget_tag_f(type_id, tag,taglen, hdferr)
     IMPLICIT NONE
@@ -1998,6 +1962,8 @@ CONTAINS
 !! \param flag   .TRUE. for compiler conversion, .FALSE. for library conversion.
 !! \param hdferr \fortran_error
 !!
+!! See C API: @ref htri_t H5Tcompiler_conv(hid_t src_id, hid_t dst_id);
+!!
   SUBROUTINE h5tcompiler_conv_f(src_id, dst_id, flag, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: src_id
@@ -2115,7 +2081,7 @@ CONTAINS
 !!
 !! \brief Inserts a new enumeration datatype member.
 !!
-!! \note \fortran_approved
+!! \attention \fortran_approved
 !!
 !! \param type_id Datatype identifier for the enumeration datatype.
 !! \param name    Datatype identifier.
@@ -2163,7 +2129,7 @@ CONTAINS
 !!
 !! \brief Inserts a new enumeration datatype member.
 !!
-!! \note  \fortran_obsolete
+!! \attention  \fortran_obsolete
 !!
 !! \param type_id Datatype identifier for the enumeration datatype.
 !! \param name    Datatype identifier.
