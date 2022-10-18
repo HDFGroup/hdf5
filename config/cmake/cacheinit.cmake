@@ -181,3 +181,14 @@ set (ZFP_TGZ_NAME "zfp.tar.gz" CACHE STRING "Use ZFP from compressed file" FORCE
 
 set (ZFP_PACKAGE_NAME "zfp" CACHE STRING "Name of ZFP package" FORCE)
 
+######
+# zstd
+######
+
+set (ZSTD_GIT_URL "https://github.com/facebook/zstd" CACHE STRING "Use ZSTD from repository" FORCE)
+set (ZSTD_GIT_BRANCH "dev" CACHE STRING "" FORCE)
+
+set (ZSTD_TGZ_NAME "zstd.tar.gz" CACHE STRING "Use ZSTD from compressed file" FORCE)
+
+set (ZSTD_PACKAGE_NAME "zstd" CACHE STRING "Name of ZSTD package" FORCE)
+
