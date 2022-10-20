@@ -4152,7 +4152,8 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
                                     for (x = 0; x < vlSize; x++) {
                                         ((char *)&intValue)[x] = ((char *)vl_elem.p)[j * vlSize + x];
                                     }
-                                    jobj = ENVPTR->CallStaticObjectMethod(ENVONLY, cInt, intValueMid, intValue);
+                                    jobj =
+                                        ENVPTR->CallStaticObjectMethod(ENVONLY, cInt, intValueMid, intValue);
                                     CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
                                     break;
                                 }
@@ -4177,7 +4178,7 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
                                         ((char *)&floatValue)[x] = ((char *)vl_elem.p)[j * vlSize + x];
                                     }
                                     jobj = ENVPTR->CallStaticObjectMethod(ENVONLY, cFloat, floatValueMid,
-                                                                          (double) floatValue);
+                                                                          (double)floatValue);
                                     CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
                                     break;
                                 }
@@ -4197,7 +4198,7 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
                         case H5T_REFERENCE: {
                             jboolean bb;
                             jbyte   *barray        = NULL;
-                            jsize    byteArraySize = (jsize) vlSize;
+                            jsize    byteArraySize = (jsize)vlSize;
 
                             if (vlSize != (size_t) byteArraySize)
                                 H5_JNI_FATAL_ERROR(ENVONLY, "translate_rbuf: overflow of byteArraySize");
