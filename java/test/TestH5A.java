@@ -1580,13 +1580,13 @@ public class TestH5A {
     @Test
     public void testH5AVLwrVL()
     {
-        String attr_int_name = "VLIntdata";
-        long attr_int_id     = HDF5Constants.H5I_INVALID_HID;
-        long atype_int_id    = HDF5Constants.H5I_INVALID_HID;
-        long base_atype_int_id    = HDF5Constants.H5I_INVALID_HID;
-        long aspace_id       = HDF5Constants.H5I_INVALID_HID;
-        long[] dims          = {4};
-        long lsize           = 1;
+        String attr_int_name   = "VLIntdata";
+        long attr_int_id       = HDF5Constants.H5I_INVALID_HID;
+        long atype_int_id      = HDF5Constants.H5I_INVALID_HID;
+        long base_atype_int_id = HDF5Constants.H5I_INVALID_HID;
+        long aspace_id         = HDF5Constants.H5I_INVALID_HID;
+        long[] dims            = {4};
+        long lsize             = 1;
 
         ArrayList[] base_vl_int_data = new ArrayList[4];
         ArrayList[] vl_int_data      = new ArrayList[4];
