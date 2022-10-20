@@ -1131,10 +1131,10 @@ JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5DreadVL(JNIEnv *env, jclass clss, jlong dataset_id, jlong mem_type_id,
                               jlong mem_space_id, jlong file_space_id, jlong xfer_plist_id, jobjectArray buf)
 {
-    herr_t      status  = FAIL;
+    herr_t status = FAIL;
 
-    status = Java_hdf_hdf5lib_H5_H5Dread(env, clss, dataset_id, mem_type_id, mem_space_id,
-                                         file_space_id, xfer_plist_id, (jbyteArray)buf, JNI_TRUE);
+    status = Java_hdf_hdf5lib_H5_H5Dread(env, clss, dataset_id, mem_type_id, mem_space_id, file_space_id,
+                                         xfer_plist_id, (jbyteArray)buf, JNI_TRUE);
 
     return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5DreadVL */
@@ -1148,10 +1148,10 @@ JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5DwriteVL(JNIEnv *env, jclass clss, jlong dataset_id, jlong mem_type_id,
                                jlong mem_space_id, jlong file_space_id, jlong xfer_plist_id, jobjectArray buf)
 {
-    herr_t      status = FAIL;
+    herr_t status = FAIL;
 
-    status = Java_hdf_hdf5lib_H5_H5Dwrite(env, clss, dataset_id, mem_type_id, mem_space_id,
-                                          file_space_id, xfer_plist_id, (jbyteArray)buf, JNI_TRUE);
+    status = Java_hdf_hdf5lib_H5_H5Dwrite(env, clss, dataset_id, mem_type_id, mem_space_id, file_space_id,
+                                          xfer_plist_id, (jbyteArray)buf, JNI_TRUE);
 
     return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5DwriteVL */

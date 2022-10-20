@@ -832,7 +832,7 @@ public class TestH5R {
                 assertTrue("testH5RVLdset_ref: ", dset_obj_id >= 0);
 
                 H5.H5Dwrite(dset_obj_id, dtype_obj_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                              HDF5Constants.H5P_DEFAULT, vl_obj_data);
+                            HDF5Constants.H5P_DEFAULT, vl_obj_data);
             }
             catch (Exception err) {
                 if (dset_obj_id > 0)
@@ -891,7 +891,7 @@ public class TestH5R {
                 assertTrue("testH5RVLdset_ref: ", dset_reg_id >= 0);
 
                 H5.H5Dwrite(dset_reg_id, dtype_reg_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                              HDF5Constants.H5P_DEFAULT, vl_reg_data);
+                            HDF5Constants.H5P_DEFAULT, vl_reg_data);
             }
             catch (Exception err) {
                 if (dset_reg_id > 0)
@@ -931,7 +931,7 @@ public class TestH5R {
 
             try {
                 H5.H5Dread(dset_obj_id, dtype_obj_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                             HDF5Constants.H5P_DEFAULT, vl_readbuf);
+                           HDF5Constants.H5P_DEFAULT, vl_readbuf);
             }
             catch (Exception ex) {
                 ex.printStackTrace();
@@ -952,7 +952,7 @@ public class TestH5R {
 
             try {
                 H5.H5Dread(dset_reg_id, dtype_reg_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                             HDF5Constants.H5P_DEFAULT, vl_readbuf);
+                           HDF5Constants.H5P_DEFAULT, vl_readbuf);
             }
             catch (Exception ex) {
                 ex.printStackTrace();

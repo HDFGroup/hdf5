@@ -1106,7 +1106,7 @@ done:
 JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5AreadVL(JNIEnv *env, jclass clss, jlong attr_id, jlong mem_type_id, jobjectArray buf)
 {
-    herr_t      status  = FAIL;
+    herr_t status  = FAIL;
 
     status = Java_hdf_hdf5lib_H5_H5Aread(env, clss, attr_id, mem_type_id, (jbyteArray)buf, JNI_TRUE);
 
@@ -1121,7 +1121,7 @@ Java_hdf_hdf5lib_H5_H5AreadVL(JNIEnv *env, jclass clss, jlong attr_id, jlong mem
 JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5AwriteVL(JNIEnv *env, jclass clss, jlong attr_id, jlong mem_type_id, jobjectArray buf)
 {
-    herr_t      status = FAIL;
+    herr_t status = FAIL;
 
     status = Java_hdf_hdf5lib_H5_H5Awrite(env, clss, attr_id, mem_type_id, (jbyteArray)buf, JNI_TRUE);
 

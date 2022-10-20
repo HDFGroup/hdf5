@@ -1576,4 +1576,157 @@ public class TestH5A {
                 }
         }
     }
+
+    @Test
+    public void testH5AVLwrVL()
+    {
+        String attr_int_name = "VLIntdata";
+        long attr_int_id     = HDF5Constants.H5I_INVALID_HID;
+        long atype_int_id    = HDF5Constants.H5I_INVALID_HID;
+        long base_atype_int_id    = HDF5Constants.H5I_INVALID_HID;
+        long aspace_id       = HDF5Constants.H5I_INVALID_HID;
+        long[] dims          = {4};
+        long lsize           = 1;
+
+        ArrayList[] base_vl_int_data = new ArrayList[4];
+        ArrayList[] vl_int_data      = new ArrayList[4];
+        try {
+            // Write Integer data
+            vl_int_data[0]  = new ArrayList<Integer>(Arrays.asList(1));
+            vl_int_data[1]  = new ArrayList<Integer>(Arrays.asList(2, 3));
+            vl_int_data[2]  = new ArrayList<Integer>(Arrays.asList(4, 5, 6));
+            vl_int_data[3]  = new ArrayList<Integer>(Arrays.asList(7, 8, 9, 10));
+            Class dataClass = vl_int_data.getClass();
+            assertTrue("testH5AVLwrVL.getClass: " + dataClass, dataClass.isArray());
+
+            // Write VL data
+            base_vl_int_data[0] = new ArrayList<ArrayList<Integer>>();
+            base_vl_int_data[0].add(vl_int_data[0]);
+            base_vl_int_data[1] = new ArrayList<ArrayList<Integer>>();
+            base_vl_int_data[1].add(vl_int_data[0]);
+            base_vl_int_data[1].add(vl_int_data[1]);
+            base_vl_int_data[2] = new ArrayList<ArrayList<Integer>>();
+            base_vl_int_data[2].add(vl_int_data[0]);
+            base_vl_int_data[2].add(vl_int_data[1]);
+            base_vl_int_data[2].add(vl_int_data[2]);
+            base_vl_int_data[3] = new ArrayList<ArrayList<Integer>>();
+            base_vl_int_data[3].add(vl_int_data[0]);
+            base_vl_int_data[3].add(vl_int_data[1]);
+            base_vl_int_data[3].add(vl_int_data[2]);
+            base_vl_int_data[3].add(vl_int_data[3]);
+
+            try {
+                atype_int_id = H5.H5Tvlen_create(HDF5Constants.H5T_STD_U32LE);
+                assertTrue("testH5AVLwr.H5Tvlen_create: ", atype_int_id >= 0);
+                base_atype_int_id = H5.H5Tvlen_create(atype_int_id);
+                assertTrue("testH5AVLwrVL.H5Tvlen_create: ", base_atype_int_id >= 0);
+            }
+            catch (Exception err) {
+                if (base_atype_int_id > 0)
+                    try {
+                        H5.H5Tclose(base_atype_int_id);
+                    }
+                    catch (Exception ex) {
+                    }
+                err.printStackTrace();
+                fail("H5.testH5AVLwrVL: " + err);
+            }
+
+            try {
+                aspace_id = H5.H5Screate_simple(1, dims, null);
+                assertTrue(aspace_id > 0);
+                attr_int_id = H5.H5Acreate(H5did, attr_int_name, base_atype_int_id, aspace_id,
+                                           HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                assertTrue("testH5AVLwrVL: ", attr_int_id >= 0);
+
+                H5.H5Awrite(attr_int_id, base_atype_int_id, base_vl_int_data);
+            }
+            catch (Exception err) {
+                if (attr_int_id > 0)
+                    try {
+                        H5.H5Aclose(attr_int_id);
+                    }
+                    catch (Exception ex) {
+                    }
+                if (atype_int_id > 0)
+                    try {
+                        H5.H5Tclose(atype_int_id);
+                    }
+                    catch (Exception ex) {
+                    }
+                err.printStackTrace();
+                fail("H5.testH5AVLwrVL: " + err);
+            }
+            finally {
+                if (aspace_id > 0)
+                    try {
+                        H5.H5Sclose(aspace_id);
+                    }
+                    catch (Exception ex) {
+                    }
+            }
+
+            H5.H5Fflush(H5fid, HDF5Constants.H5F_SCOPE_LOCAL);
+
+            for (int j = 0; j < dims.length; j++)
+                lsize *= dims[j];
+
+            // Read Integer data
+            ArrayList[] base_vl_readbuf = new ArrayList[4];
+            for (int j = 0; j < lsize; j++)
+                base_vl_readbuf[j] = new ArrayList<ArrayList<Integer>>();
+
+            try {
+                H5.H5Aread(attr_int_id, base_atype_int_id, base_vl_readbuf);
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
+            ArrayList vl_readbuf = (ArrayList)base_vl_readbuf[0];
+            assertTrue("vl_readbuf exists", vl_readbuf != null);
+            assertTrue("vl_readbuf has size " + vl_readbuf.size(), vl_readbuf.size() > 0);
+            ArrayList vl_readbuf_int = (ArrayList)vl_readbuf.get(0);
+            assertTrue("testH5AVLwrVL:" + vl_readbuf_int.get(0),
+                       vl_int_data[0].get(0).equals(vl_readbuf_int.get(0)));
+
+            vl_readbuf     = (ArrayList)base_vl_readbuf[1];
+            vl_readbuf_int = (ArrayList)vl_readbuf.get(1);
+            assertTrue("testH5AVLwrVL:" + vl_readbuf_int.get(0),
+                       vl_int_data[1].get(0).equals(vl_readbuf_int.get(0)));
+
+            vl_readbuf     = (ArrayList)base_vl_readbuf[2];
+            vl_readbuf_int = (ArrayList)vl_readbuf.get(2);
+            assertTrue("testH5AVLwrVL:" + vl_readbuf_int.get(0),
+                       vl_int_data[2].get(0).equals(vl_readbuf_int.get(0)));
+
+            vl_readbuf     = (ArrayList)base_vl_readbuf[3];
+            vl_readbuf_int = (ArrayList)vl_readbuf.get(3);
+            assertTrue("testH5AVLwrVL:" + vl_readbuf_int.get(0),
+                       vl_int_data[3].get(0).equals(vl_readbuf_int.get(0)));
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("H5.testH5AVLwrVL: " + err);
+        }
+        finally {
+            if (attr_int_id > 0)
+                try {
+                    H5.H5Aclose(attr_int_id);
+                }
+                catch (Exception ex) {
+                }
+            if (atype_int_id > 0)
+                try {
+                    H5.H5Tclose(atype_int_id);
+                }
+                catch (Exception ex) {
+                }
+            if (base_atype_int_id > 0)
+                try {
+                    H5.H5Tclose(base_atype_int_id);
+                }
+                catch (Exception ex) {
+                }
+        }
+    }
 }
