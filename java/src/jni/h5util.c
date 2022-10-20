@@ -4043,7 +4043,6 @@ done:
         H5Aclose(attr_id);
 } /* end Java_hdf_hdf5lib_H5_H5export_1attribute */
 
-
 herr_t
 translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t type_class, jsize count,
                jobjectArray raw_buf)
@@ -4200,7 +4199,7 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
                             jbyte   *barray        = NULL;
                             jsize    byteArraySize = (jsize)vlSize;
 
-                            if (vlSize != (size_t) byteArraySize)
+                            if (vlSize != (size_t)byteArraySize)
                                 H5_JNI_FATAL_ERROR(ENVONLY, "translate_rbuf: overflow of byteArraySize");
 
                             if (NULL == (jobj = ENVPTR->NewByteArray(ENVONLY, byteArraySize)))
