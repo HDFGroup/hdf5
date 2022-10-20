@@ -209,7 +209,7 @@ Java_hdf_hdf5lib_H5_H5Aread(JNIEnv *env, jclass clss, jlong attr_id, jlong mem_t
         H5_LIBRARY_ERROR(ENVONLY);
 
     if (vl_data_class)
-        translate_rbuf(env, buf, mem_type_id, type_class, n, (jsize)typeSize, (jobjectArray)readBuf);
+        translate_rbuf(env, buf, mem_type_id, type_class, n, (jobjectArray)readBuf);
 
 done:
     if (readBuf) {
@@ -292,7 +292,7 @@ Java_hdf_hdf5lib_H5_H5Awrite(JNIEnv *env, jclass clss, jlong attr_id, jlong mem_
     }
 
     if (vl_data_class)
-        translate_wbuf(ENVONLY, buf, mem_type_id, type_class, n, (jsize)typeSize, (jobjectArray)writeBuf);
+        translate_wbuf(ENVONLY, buf, mem_type_id, type_class, n, (jobjectArray)writeBuf);
 
     if ((status = H5Awrite((hid_t)attr_id, (hid_t)mem_type_id, writeBuf)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
