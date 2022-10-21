@@ -351,9 +351,8 @@ H5_DLL hid_t H5Ropen_object(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id);
 H5_DLL hid_t H5Ropen_object_async(
 #ifndef H5_DOXYGEN
                                   const char *app_file, const char *app_func, unsigned app_line,
-#else
-    H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id, hid_t es_id);
 #endif
+    H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id, hid_t es_id);
 /**
  * --------------------------------------------------------------------------
  * \ingroup H5R
@@ -395,9 +394,8 @@ H5_DLL hid_t H5Ropen_region(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id);
 H5_DLL hid_t H5Ropen_region_async(
 #ifndef H5_DOXYGEN
                                   const char *app_file, const char *app_func, unsigned app_line,
-#else
-    H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id, hid_t es_id);
 #endif
+    H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id, hid_t es_id);
 /**
  * --------------------------------------------------------------------------
  * \ingroup H5R
@@ -436,9 +434,8 @@ H5_DLL hid_t H5Ropen_attr(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t aapl_id);
 H5_DLL hid_t H5Ropen_attr_async(
 #ifndef H5_DOXYGEN
                                 const char *app_file, const char *app_func, unsigned app_line,
-#else
-    H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t aapl_id, hid_t es_id);
 #endif
+    H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t aapl_id, hid_t es_id);
 /* Get type */
 
 /**
