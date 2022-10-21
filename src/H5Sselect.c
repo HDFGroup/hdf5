@@ -400,7 +400,7 @@ done:
  PURPOSE
     Get the number of elements in current selection
  USAGE
-    hssize_t H5Sget_select_npoints(space)
+    hsize_t H5Sget_select_npoints(space)
         H5S_t *space;             IN: Dataspace of selection to query
  RETURNS
     The number of elements in selection on success, 0 on failure

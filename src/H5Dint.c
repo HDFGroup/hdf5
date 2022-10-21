@@ -61,7 +61,7 @@ typedef struct {
 /* Internal data structure for computing variable-length dataset's total size */
 /* (Used for generic 'get vlen buf size' operation) */
 typedef struct {
-    H5VL_object_t            *dset_vol_obj; /* VOL object for the dataset */
+    const H5VL_object_t      *dset_vol_obj; /* VOL object for the dataset */
     hid_t                     fspace_id;    /* Dataset dataspace ID of the dataset we are working on */
     H5S_t                    *fspace;       /* Dataset's dataspace for operation */
     hid_t                     mspace_id;    /* Memory dataspace ID of the dataset we are working on */
@@ -81,7 +81,7 @@ static herr_t        H5D__init_space(H5F_t *file, const H5D_t *dset, const H5S_t
 static herr_t        H5D__update_oh_info(H5F_t *file, H5D_t *dset, hid_t dapl_id);
 static herr_t H5D__build_file_prefix(const H5D_t *dset, H5F_prefix_open_t prefix_type, char **file_prefix);
 static herr_t H5D__open_oid(H5D_t *dataset, hid_t dapl_id);
-static herr_t H5D__init_storage(const H5D_io_info_t *io_info, hbool_t full_overwrite, hsize_t old_dim[]);
+static herr_t H5D__init_storage(H5D_t *dset, hbool_t full_overwrite, hsize_t old_dim[]);
 static herr_t H5D__append_flush_setup(H5D_t *dset, hid_t dapl_id);
 static herr_t H5D__close_cb(H5VL_object_t *dset_vol_obj, void **request);
 static herr_t H5D__use_minimized_dset_headers(H5F_t *file, hbool_t *minimize);
@@ -119,8 +119,8 @@ H5FL_DEFINE_STATIC(H5D_shared_t);
 /* Declare the external PQ free list for the sieve buffer information */
 H5FL_BLK_EXTERN(sieve_buf);
 
-/* Declare the external free list to manage the H5D_chunk_info_t struct */
-H5FL_EXTERN(H5D_chunk_info_t);
+/* Declare the external free list to manage the H5D_piece_info_t struct */
+H5FL_EXTERN(H5D_piece_info_t);
 
 /* Declare extern the free list to manage blocks of type conversion data */
 H5FL_BLK_EXTERN(type_conv);
@@ -1793,14 +1793,9 @@ H5D__open_oid(H5D_t *dataset, hid_t dapl_id)
      */
     if ((H5F_INTENT(dataset->oloc.file) & H5F_ACC_RDWR) &&
         !(*dataset->shared->layout.ops->is_space_alloc)(&dataset->shared->layout.storage) &&
-        H5F_HAS_FEATURE(dataset->oloc.file, H5FD_FEAT_ALLOCATE_EARLY)) {
-        H5D_io_info_t io_info;
-
-        io_info.dset = dataset;
-
-        if (H5D__alloc_storage(&io_info, H5D_ALLOC_OPEN, FALSE, NULL) < 0)
+        H5F_HAS_FEATURE(dataset->oloc.file, H5FD_FEAT_ALLOCATE_EARLY))
+        if (H5D__alloc_storage(dataset, H5D_ALLOC_OPEN, FALSE, NULL) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize file storage")
-    } /* end if */
 
 done:
     if (ret_value < 0) {
@@ -1894,10 +1889,10 @@ H5D_close(H5D_t *dataset)
                 } /* end if */
 
                 /* Check for cached single element chunk info */
-                if (dataset->shared->cache.chunk.single_chunk_info) {
-                    dataset->shared->cache.chunk.single_chunk_info =
-                        H5FL_FREE(H5D_chunk_info_t, dataset->shared->cache.chunk.single_chunk_info);
-                    dataset->shared->cache.chunk.single_chunk_info = NULL;
+                if (dataset->shared->cache.chunk.single_piece_info) {
+                    dataset->shared->cache.chunk.single_piece_info =
+                        H5FL_FREE(H5D_piece_info_t, dataset->shared->cache.chunk.single_piece_info);
+                    dataset->shared->cache.chunk.single_piece_info = NULL;
                 } /* end if */
                 break;
 
@@ -2088,10 +2083,10 @@ H5D_mult_refresh_close(hid_t dset_id)
                 } /* end if */
 
                 /* Check for cached single element chunk info */
-                if (dataset->shared->cache.chunk.single_chunk_info) {
-                    dataset->shared->cache.chunk.single_chunk_info =
-                        H5FL_FREE(H5D_chunk_info_t, dataset->shared->cache.chunk.single_chunk_info);
-                    dataset->shared->cache.chunk.single_chunk_info = NULL;
+                if (dataset->shared->cache.chunk.single_piece_info) {
+                    dataset->shared->cache.chunk.single_piece_info =
+                        H5FL_FREE(H5D_piece_info_t, dataset->shared->cache.chunk.single_piece_info);
+                    dataset->shared->cache.chunk.single_piece_info = NULL;
                 } /* end if */
                 break;
 
@@ -2209,11 +2204,9 @@ H5D_nameof(H5D_t *dataset)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__alloc_storage(const H5D_io_info_t *io_info, H5D_time_alloc_t time_alloc, hbool_t full_overwrite,
-                   hsize_t old_dim[])
+H5D__alloc_storage(H5D_t *dset, H5D_time_alloc_t time_alloc, hbool_t full_overwrite, hsize_t old_dim[])
 {
-    const H5D_t  *dset = io_info->dset;      /* The dataset object */
-    H5F_t        *f    = dset->oloc.file;    /* The dataset's file pointer */
+    H5F_t        *f;                         /* The dataset's file pointer */
     H5O_layout_t *layout;                    /* The dataset's layout information */
     hbool_t       must_init_space = FALSE;   /* Flag to indicate that space should be initialized */
     hbool_t       addr_set        = FALSE;   /* Flag to indicate that the dataset's storage address was set */
@@ -2223,6 +2216,7 @@ H5D__alloc_storage(const H5D_io_info_t *io_info, H5D_time_alloc_t time_alloc, hb
 
     /* check args */
     HDassert(dset);
+    f = dset->oloc.file;
     HDassert(f);
 
     /* If the data is stored in external files, don't set an address for the layout
@@ -2333,7 +2327,7 @@ H5D__alloc_storage(const H5D_io_info_t *io_info, H5D_time_alloc_t time_alloc, hb
                  */
                 if (!(dset->shared->dcpl_cache.fill.alloc_time == H5D_ALLOC_TIME_INCR &&
                       time_alloc == H5D_ALLOC_WRITE))
-                    if (H5D__init_storage(io_info, full_overwrite, old_dim) < 0)
+                    if (H5D__init_storage(dset, full_overwrite, old_dim) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
                                     "unable to initialize dataset with fill value")
             } /* end if */
@@ -2349,7 +2343,7 @@ H5D__alloc_storage(const H5D_io_info_t *io_info, H5D_time_alloc_t time_alloc, hb
                 if (dset->shared->dcpl_cache.fill.fill_time == H5D_FILL_TIME_ALLOC ||
                     (dset->shared->dcpl_cache.fill.fill_time == H5D_FILL_TIME_IFSET &&
                      fill_status == H5D_FILL_VALUE_USER_DEFINED))
-                    if (H5D__init_storage(io_info, full_overwrite, old_dim) < 0)
+                    if (H5D__init_storage(dset, full_overwrite, old_dim) < 0)
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
                                     "unable to initialize dataset with fill value")
             } /* end else */
@@ -2383,10 +2377,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__init_storage(const H5D_io_info_t *io_info, hbool_t full_overwrite, hsize_t old_dim[])
+H5D__init_storage(H5D_t *dset, hbool_t full_overwrite, hsize_t old_dim[])
 {
-    const H5D_t *dset      = io_info->dset; /* dataset pointer */
-    herr_t       ret_value = SUCCEED;       /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -2408,7 +2401,7 @@ H5D__init_storage(const H5D_io_info_t *io_info, hbool_t full_overwrite, hsize_t 
             /* If we will be immediately overwriting the values, don't bother to clear them */
             if ((dset->shared->dcpl_cache.efl.nused == 0 || dset->shared->dcpl_cache.fill.buf) &&
                 !full_overwrite)
-                if (H5D__contig_fill(io_info) < 0)
+                if (H5D__contig_fill(dset) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to allocate all chunks of dataset")
             break;
 
@@ -2424,7 +2417,7 @@ H5D__init_storage(const H5D_io_info_t *io_info, hbool_t full_overwrite, hsize_t 
                 if (old_dim == NULL)
                     old_dim = zero_dim;
 
-                if (H5D__chunk_allocate(io_info, full_overwrite, old_dim) < 0)
+                if (H5D__chunk_allocate(dset, full_overwrite, old_dim) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to allocate all chunks of dataset")
                 break;
             } /* end block */
@@ -2599,7 +2592,8 @@ H5D__vlen_get_buf_size_cb(void H5_ATTR_UNUSED *elem, hid_t type_id, unsigned H5_
                           const hsize_t *point, void *op_data)
 {
     H5D_vlen_bufsize_native_t *vlen_bufsize = (H5D_vlen_bufsize_native_t *)op_data;
-    herr_t                     ret_value    = H5_ITER_CONT; /* Return value */
+    H5D_dset_io_info_t         dset_info;                /* Internal multi-dataset info placeholder */
+    herr_t                     ret_value = H5_ITER_CONT; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -2612,10 +2606,17 @@ H5D__vlen_get_buf_size_cb(void H5_ATTR_UNUSED *elem, hid_t type_id, unsigned H5_
     if (H5S_select_elements(vlen_bufsize->fspace, H5S_SELECT_SET, (size_t)1, point) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, H5_ITER_ERROR, "can't select point")
 
-    /* Read in the point (with the custom VL memory allocator) */
-    if (H5D__read(vlen_bufsize->dset, type_id, vlen_bufsize->mspace, vlen_bufsize->fspace,
-                  vlen_bufsize->common.fl_tbuf) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, H5_ITER_ERROR, "can't read point")
+    {
+        dset_info.dset        = vlen_bufsize->dset;
+        dset_info.mem_space   = vlen_bufsize->mspace;
+        dset_info.file_space  = vlen_bufsize->fspace;
+        dset_info.buf.vp      = vlen_bufsize->common.fl_tbuf;
+        dset_info.mem_type_id = type_id;
+
+        /* Read in the point (with the custom VL memory allocator) */
+        if (H5D__read(1, &dset_info) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2767,8 +2768,8 @@ H5D__vlen_get_buf_size_gen_cb(void H5_ATTR_UNUSED *elem, hid_t type_id, unsigned
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't select point")
 
     /* Read in the point (with the custom VL memory allocator) */
-    if (H5VL_dataset_read(vlen_bufsize->dset_vol_obj, type_id, vlen_bufsize->mspace_id,
-                          vlen_bufsize->fspace_id, vlen_bufsize->dxpl_id, vlen_bufsize->common.fl_tbuf,
+    if (H5VL_dataset_read(1, &vlen_bufsize->dset_vol_obj, &type_id, &vlen_bufsize->mspace_id,
+                          &vlen_bufsize->fspace_id, vlen_bufsize->dxpl_id, &vlen_bufsize->common.fl_tbuf,
                           H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read point")
 
@@ -2814,7 +2815,7 @@ H5D__vlen_get_buf_size_gen(H5VL_object_t *vol_obj, hid_t type_id, hid_t space_id
         HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "dataspace does not have extent set")
 
     /* Save the dataset */
-    vlen_bufsize.dset_vol_obj = vol_obj;
+    vlen_bufsize.dset_vol_obj = (const H5VL_object_t *)vol_obj;
 
     /* Set up VOL callback arguments */
     vol_cb_args.op_type                 = H5VL_DATASET_GET_SPACE;
@@ -3095,14 +3096,10 @@ H5D__set_extent(H5D_t *dset, const hsize_t *size)
         } /* end if */
 
         /* Allocate space for the new parts of the dataset, if appropriate */
-        if (expand && dset->shared->dcpl_cache.fill.alloc_time == H5D_ALLOC_TIME_EARLY) {
-            H5D_io_info_t io_info;
-
-            io_info.dset = dset;
-
-            if (H5D__alloc_storage(&io_info, H5D_ALLOC_EXTEND, FALSE, curr_dims) < 0)
+        if (expand && dset->shared->dcpl_cache.fill.alloc_time == H5D_ALLOC_TIME_EARLY)
+            if (H5D__alloc_storage(dset, H5D_ALLOC_EXTEND, FALSE, curr_dims) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to extend dataset storage")
-        }
+
         /*-------------------------------------------------------------------------
          * Remove chunk information in the case of chunked datasets
          * This removal takes place only in case we are shrinking the dataset

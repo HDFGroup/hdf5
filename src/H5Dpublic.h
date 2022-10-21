@@ -861,6 +861,52 @@ H5_DLL herr_t H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_
 
 /**
  * --------------------------------------------------------------------------
+ * \ingroup H5D
+ *
+ * \brief Reads raw data from a set of datasets into the provided buffers
+ *
+ * \param[in] count         Number of datasets to read from
+ * \param[in] dset_id       Identifiers of the datasets to read from
+ * \param[in] mem_type_id   Identifiers of the memory datatypes
+ * \param[in] mem_space_id  Identifiers of the memory dataspaces
+ * \param[in] file_space_id Identifiers of the datasets' dataspaces in the file
+ * \param[in] dxpl_id       Identifier of a transfer property list
+ * \param[out] buf          Buffers to receive data read from file
+ *
+ * \return \herr_t
+ *
+ * \details H5Dread_multi() reads data from \p count datasets, whose identifiers
+ *          are listed in the \p dset_id array, from the file into multiple
+ *          application memory buffers listed in the \p buf array. Data transfer
+ *          properties are defined by the argument \p dxpl_id. The memory
+ *          datatypes of each dataset are listed by identifier in the \p
+ *          mem_type_id array. The parts of each dataset to read are listed by
+ *          identifier in the \p file_space_id array, and the parts of each
+ *          application memory buffer to read to are listed by identifier in the
+ *          \p mem_space_id array. All array parameters have length \p count.
+ *
+ *          This function will produce the same results as \p count calls to
+ *          H5Dread(). Information listed in that function about the specifics
+ *          of its behaviour also apply to H5Dread_multi(). By calling
+ *          H5Dread_multi() instead of multiple calls to H5Dread(), however, the
+ *          library can in some cases pass information about the entire I/O
+ *          operation to the file driver, which can improve performance.
+ *
+ *          All datasets must be in the same HDF5 file, and each unique dataset
+ *          may only be listed once. If this function is called collectively in
+ *          parallel, each rank must pass exactly the same list of datasets in
+ *          \p dset_id , though the other parameters may differ.
+ *
+ * \since 1.13.3
+ *
+ * \see H5Dread()
+ *
+ */
+H5_DLL herr_t H5Dread_multi(size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t mem_space_id[],
+                            hid_t file_space_id[], hid_t dxpl_id, void *buf[] /*out*/);
+
+/**
+ * --------------------------------------------------------------------------
  * \ingroup ASYNC
  * \async_variant_of{H5Dread}
  */
@@ -871,6 +917,15 @@ H5_DLL herr_t H5Dread_async(
     hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id,
     void *buf /*out*/, hid_t es_id);
 #endif
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup ASYNC
+ * \async_variant_of{H5Dread_multi}
+ */
+H5_DLL herr_t H5Dread_multi_async(const char *app_file, const char *app_func, unsigned app_line, size_t count,
+                                  hid_t dset_id[], hid_t mem_type_id[], hid_t mem_space_id[],
+                                  hid_t file_space_id[], hid_t dxpl_id, void *buf[] /*out*/, hid_t es_id);
+
 /**
  * --------------------------------------------------------------------------
  * \ingroup H5D
@@ -989,6 +1044,53 @@ H5_DLL herr_t H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid
 
 /**
  * --------------------------------------------------------------------------
+ * \ingroup H5D
+ *
+ * \brief Writes raw data from a set buffers to a set of datasets
+ *
+ * \param[in] count         Number of datasets to write to
+ * \param[in] dset_id       Identifiers of the datasets to write to
+ * \param[in] mem_type_id   Identifiers of the memory datatypes
+ * \param[in] mem_space_id  Identifiers of the memory dataspaces
+ * \param[in] file_space_id Identifiers of the datasets' dataspaces in the file
+ * \param[in] dxpl_id       Identifier of a transfer property list
+ * \param[in] buf           Buffers with data to be written to the file
+ *
+ * \return \herr_t
+ *
+ * \details H5Dwrite_multi() writes data to \p count datasets, whose identifiers
+ *          are listed in the \p dset_id array, from multiple application memory
+ *          buffers listed in the \p buf array. Data transfer properties are
+ *          defined by the argument \p dxpl_id. The memory datatypes of each
+ *          dataset are listed by identifier in the \p mem_type_id array. The
+ *          parts of each dataset to write are listed by identifier in the \p
+ *          file_space_id array, and the parts of each application memory buffer
+ *          to write from are listed by identifier in the \p mem_space_id array.
+ *          All array parameters have length \p count.
+ *
+ *          This function will produce the same results as \p count calls to
+ *          H5Dwrite(). Information listed in that function's documentation
+ *          about the specifics of its behaviour also apply to H5Dwrite_multi().
+ *          By calling H5Dwrite_multi() instead of multiple calls to H5Dwrite(),
+ *          however, the library can in some cases pass information about the
+ *          entire I/O operation to the file driver, which can improve
+ *          performance.
+ *
+ *          All datasets must be in the same HDF5 file, and each unique dataset
+ *          may only be listed once. If this function is called collectively in
+ *          parallel, each rank must pass exactly the same list of datasets in
+ *          \p dset_id , though the other parameters may differ.
+ *
+ * \since 1.13.3
+ *
+ * \see H5Dwrite()
+ *
+ */
+H5_DLL herr_t H5Dwrite_multi(size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t mem_space_id[],
+                             hid_t file_space_id[], hid_t dxpl_id, const void *buf[]);
+
+/**
+ * --------------------------------------------------------------------------
  * \ingroup ASYNC
  * \async_variant_of{H5Dwrite}
  */
@@ -999,6 +1101,15 @@ H5_DLL herr_t H5Dwrite_async(
     hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id, const void *buf,
     hid_t es_id);
 #endif
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup ASYNC
+ * \async_variant_of{H5Dwrite_multi}
+ */
+H5_DLL herr_t H5Dwrite_multi_async(const char *app_file, const char *app_func, unsigned app_line,
+                                   size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t mem_space_id[],
+                                   hid_t file_space_id[], hid_t dxpl_id, const void *buf[], hid_t es_id);
+
 /**
  * --------------------------------------------------------------------------
  * \ingroup H5D
