@@ -844,6 +844,10 @@ NOTE:
   flag is not available on windows and some modern linux systems will
   ignore the flag.
 
+NOTE:
+  The HDF5_USE_GNU_DIRS option is usually recommended for linux platforms, but may
+  be useful on other platforms. See the CMake documentation for more details.
+
   ---------------- Unsupported Library Options ---------------------
     The threadsafe, C++ and Java interfaces are not compatible
     with the HDF5_ENABLE_PARALLEL option.
