@@ -177,7 +177,7 @@ static herr_t fake_get_cap_flags(const void *info, uint64_t *cap_flags);
 #define FAKE_VOL_NAME  "fake"
 #define FAKE_VOL_VALUE ((H5VL_class_value_t)501)
 #define H5VL_FAKE_CAP_FLAGS                                                                                  \
-     (H5VL_CAP_FLAG_DATASET_BASIC | H5VL_CAP_FLAG_GROUP_BASIC | H5VL_CAP_FLAG_FILE_BASIC)
+    (H5VL_CAP_FLAG_DATASET_BASIC | H5VL_CAP_FLAG_GROUP_BASIC | H5VL_CAP_FLAG_FILE_BASIC)
 
 /* A VOL class struct that describes a VOL class with no
  * functionality.
@@ -275,9 +275,9 @@ static const H5VL_class_t fake_vol_g = {
     },
     {
         /* introspect_cls */
-        NULL, /* get_conn_cls */
+        NULL,               /* get_conn_cls */
         fake_get_cap_flags, /* get_cap_flags */
-        NULL, /* opt_query    */
+        NULL,               /* opt_query    */
     },
     {
         /* request_cls */
