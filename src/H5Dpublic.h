@@ -322,7 +322,7 @@ H5_DLL hid_t H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id, hid_t spa
  */
 H5_DLL hid_t H5Dcreate_async(
 #ifndef H5_DOXYGEN
-                             const char *app_file, const char *app_func, unsigned app_line,
+    const char *app_file, const char *app_func, unsigned app_line,
 #endif
     hid_t loc_id, const char *name, hid_t type_id, hid_t space_id, hid_t lcpl_id, hid_t dcpl_id,
     hid_t dapl_id, hid_t es_id);
@@ -402,7 +402,7 @@ H5_DLL hid_t H5Dopen2(hid_t loc_id, const char *name, hid_t dapl_id);
  */
 H5_DLL hid_t H5Dopen_async(
 #ifndef H5_DOXYGEN
-                           const char *app_file, const char *app_func, unsigned app_line,
+    const char *app_file, const char *app_func, unsigned app_line,
 #endif
     hid_t loc_id, const char *name, hid_t dapl_id, hid_t es_id);
 /**
@@ -438,7 +438,7 @@ H5_DLL hid_t H5Dget_space(hid_t dset_id);
  */
 H5_DLL hid_t H5Dget_space_async(
 #ifndef H5_DOXYGEN
-                                const char *app_file, const char *app_func, unsigned app_line,
+    const char *app_file, const char *app_func, unsigned app_line,
 #endif
     hid_t dset_id, hid_t es_id);
 /**
@@ -909,7 +909,7 @@ H5_DLL herr_t H5Dread_multi(size_t count, hid_t dset_id[], hid_t mem_type_id[], 
  */
 H5_DLL herr_t H5Dread_async(
 #ifndef H5_DOXYGEN
-                            const char *app_file, const char *app_func, unsigned app_line,
+    const char *app_file, const char *app_func, unsigned app_line,
 #endif
     hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id,
     void *buf /*out*/, hid_t es_id);
@@ -920,10 +920,10 @@ H5_DLL herr_t H5Dread_async(
  */
 H5_DLL herr_t H5Dread_multi_async(
 #ifndef H5_DOXYGEN
-                                  const char *app_file, const char *app_func, unsigned app_line,
+    const char *app_file, const char *app_func, unsigned app_line,
 #endif
-                                  size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t mem_space_id[],
-                                  hid_t file_space_id[], hid_t dxpl_id, void *buf[] /*out*/, hid_t es_id);
+    size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t mem_space_id[], hid_t file_space_id[],
+    hid_t dxpl_id, void *buf[] /*out*/, hid_t es_id);
 
 /**
  * --------------------------------------------------------------------------
@@ -1095,7 +1095,7 @@ H5_DLL herr_t H5Dwrite_multi(size_t count, hid_t dset_id[], hid_t mem_type_id[],
  */
 H5_DLL herr_t H5Dwrite_async(
 #ifndef H5_DOXYGEN
-                             const char *app_file, const char *app_func, unsigned app_line,
+    const char *app_file, const char *app_func, unsigned app_line,
 #endif
     hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id, const void *buf,
     hid_t es_id);
@@ -1106,10 +1106,10 @@ H5_DLL herr_t H5Dwrite_async(
  */
 H5_DLL herr_t H5Dwrite_multi_async(
 #ifndef H5_DOXYGEN
-                                   const char *app_file, const char *app_func, unsigned app_line,
+    const char *app_file, const char *app_func, unsigned app_line,
 #endif
-                                   size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t mem_space_id[],
-                                   hid_t file_space_id[], hid_t dxpl_id, const void *buf[], hid_t es_id);
+    size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t mem_space_id[], hid_t file_space_id[],
+    hid_t dxpl_id, const void *buf[], hid_t es_id);
 
 /**
  * --------------------------------------------------------------------------
@@ -1397,7 +1397,7 @@ H5_DLL herr_t H5Dset_extent(hid_t dset_id, const hsize_t size[]);
  */
 H5_DLL herr_t H5Dset_extent_async(
 #ifndef H5_DOXYGEN
-                                  const char *app_file, const char *app_func, unsigned app_line,
+    const char *app_file, const char *app_func, unsigned app_line,
 #endif
     hid_t dset_id, const hsize_t size[], hid_t es_id);
 /**
@@ -1578,7 +1578,7 @@ H5_DLL herr_t H5Dclose(hid_t dset_id);
  */
 H5_DLL herr_t H5Dclose_async(
 #ifndef H5_DOXYGEN
-                             const char *app_file, const char *app_func, unsigned app_line,
+    const char *app_file, const char *app_func, unsigned app_line,
 #endif
     hid_t dset_id, hid_t es_id);
 /// \cond DEV

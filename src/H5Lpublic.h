@@ -296,7 +296,7 @@ H5_DLL herr_t H5Lcreate_hard(hid_t cur_loc, const char *cur_name, hid_t dst_loc,
  */
 H5_DLL herr_t H5Lcreate_hard_async(
 #ifndef H5_DOXYGEN
-                                   const char *app_file, const char *app_func, unsigned app_line,
+    const char *app_file, const char *app_func, unsigned app_line,
 #endif
     hid_t cur_loc_id, const char *cur_name, hid_t new_loc_id, const char *new_name, hid_t lcpl_id,
     hid_t lapl_id, hid_t es_id);
@@ -371,7 +371,7 @@ H5_DLL herr_t H5Lcreate_soft(const char *link_target, hid_t link_loc_id, const c
  */
 H5_DLL herr_t H5Lcreate_soft_async(
 #ifndef H5_DOXYGEN
-                                   const char *app_file, const char *app_func, unsigned app_line,
+    const char *app_file, const char *app_func, unsigned app_line,
 #endif
     const char *link_target, hid_t link_loc_id, const char *link_name, hid_t lcpl_id, hid_t lapl_id,
     hid_t es_id);
@@ -419,7 +419,7 @@ H5_DLL herr_t H5Ldelete(hid_t loc_id, const char *name, hid_t lapl_id);
  */
 H5_DLL herr_t H5Ldelete_async(
 #ifndef H5_DOXYGEN
-                              const char *app_file, const char *app_func, unsigned app_line,
+    const char *app_file, const char *app_func, unsigned app_line,
 #endif
     hid_t loc_id, const char *name, hid_t lapl_id, hid_t es_id);
 /**
@@ -457,7 +457,7 @@ H5_DLL herr_t H5Ldelete_by_idx(hid_t loc_id, const char *group_name, H5_index_t 
  */
 H5_DLL herr_t H5Ldelete_by_idx_async(
 #ifndef H5_DOXYGEN
-                                     const char *app_file, const char *app_func, unsigned app_line,
+    const char *app_file, const char *app_func, unsigned app_line,
 #endif
     hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
     hid_t lapl_id, hid_t es_id);
@@ -666,7 +666,7 @@ H5_DLL htri_t H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id);
  */
 H5_DLL herr_t H5Lexists_async(
 #ifndef H5_DOXYGEN
-                              const char *app_file, const char *app_func, unsigned app_line,
+    const char *app_file, const char *app_func, unsigned app_line,
 #endif
     hid_t loc_id, const char *name, hbool_t *exists, hid_t lapl_id, hid_t es_id);
 /**
@@ -920,7 +920,7 @@ H5_DLL herr_t H5Literate2(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t ord
  */
 H5_DLL herr_t H5Literate_async(
 #ifndef H5_DOXYGEN
-                               const char *app_file, const char *app_func, unsigned app_line,
+    const char *app_file, const char *app_func, unsigned app_line,
 #endif
     hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx_p, H5L_iterate2_t op,
     void *op_data, hid_t es_id);
