@@ -79,7 +79,7 @@ MODULE H5R
      MODULE PROCEDURE h5rget_object_type_obj_f
   END INTERFACE
 
-#ifndef H5_DOXYGEN_FORTRAN
+#ifndef H5_DOXYGEN
 
   INTERFACE h5rget_region_f
      MODULE PROCEDURE h5rget_region_ptr_f    ! F2003
@@ -178,7 +178,7 @@ CONTAINS
 !!                 \li H5G_TYPE_F
 !! \param hdferr   \fortran_error
 !!
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
   SUBROUTINE h5rget_object_type_f(&
 #else
   SUBROUTINE h5rget_object_type_obj_f(&
@@ -204,7 +204,7 @@ CONTAINS
     ref_f = ref%ref
     hdferr = h5rget_object_type_obj_c(dset_id, ref_f, obj_type )
 
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
   END SUBROUTINE h5rget_object_type_f
 #else
   END SUBROUTINE h5rget_object_type_obj_f
@@ -260,7 +260,7 @@ CONTAINS
 !!
 !! See C API: @ref H5Rget_region()
 !!
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
   SUBROUTINE h5rget_region_f(&
 #else
   SUBROUTINE h5rget_region_ptr_f(&
@@ -274,7 +274,7 @@ CONTAINS
 
     hdferr = h5rget_region_ptr_c(dset_id, ref, space_id)
 
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
   END SUBROUTINE h5rget_region_f
 #else
   END SUBROUTINE h5rget_region_ptr_f
@@ -373,7 +373,7 @@ CONTAINS
 !! \param hdferr   \fortran_error
 !! \param space_id Dataspace identifier that describes selected region.
 !!
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
 !! See C API: @ref H5Rcreate_object()
 !!
   SUBROUTINE h5rcreate_f(&
@@ -397,7 +397,7 @@ CONTAINS
     IF(PRESENT(space_id)) space_id_c =  space_id
     hdferr = h5rcreate_ptr_c(ref, loc_id, name, namelen, ref_type, space_id_c)
 
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
   END SUBROUTINE h5rcreate_f
 #else
   END SUBROUTINE h5rcreate_ptr_f
@@ -566,7 +566,7 @@ CONTAINS
 !!\param  size     The size of the name buffer, returning 0 (zero) if no name is associated with the identifier.
 !!
 
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
 !! See C API: @ref H5Rget_name()
 !!
   SUBROUTINE h5rget_name_f(&
@@ -591,7 +591,7 @@ CONTAINS
 
     IF(PRESENT(size)) size = size_default
 
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
   END SUBROUTINE h5rget_name_f
 #else
   END SUBROUTINE h5rget_name_ptr_f
