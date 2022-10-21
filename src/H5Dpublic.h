@@ -324,9 +324,8 @@ H5_DLL hid_t H5Dcreate_async(
 #ifndef H5_DOXYGEN
                              const char *app_file, const char *app_func, unsigned app_line,
 #else
-                             hid_t loc_id,
-                             const char *name, hid_t type_id, hid_t space_id, hid_t lcpl_id, hid_t dcpl_id,
-                             hid_t dapl_id, hid_t es_id);
+    hid_t loc_id, const char *name, hid_t type_id, hid_t space_id, hid_t lcpl_id, hid_t dcpl_id,
+    hid_t dapl_id, hid_t es_id);
 #endif
 /**
  * --------------------------------------------------------------------------
@@ -406,7 +405,7 @@ H5_DLL hid_t H5Dopen_async(
 #ifndef H5_DOXYGEN
                            const char *app_file, const char *app_func, unsigned app_line,
 #else
-                           hid_t loc_id, const char *name, hid_t dapl_id, hid_t es_id);
+    hid_t loc_id, const char *name, hid_t dapl_id, hid_t es_id);
 #endif
 /**
  * --------------------------------------------------------------------------
@@ -443,7 +442,7 @@ H5_DLL hid_t H5Dget_space_async(
 #ifndef H5_DOXYGEN
                                 const char *app_file, const char *app_func, unsigned app_line,
 #else
-                                hid_t dset_id, hid_t es_id);
+    hid_t dset_id, hid_t es_id);
 #endif
 /**
  * --------------------------------------------------------------------------
@@ -869,9 +868,8 @@ H5_DLL herr_t H5Dread_async(
 #ifndef H5_DOXYGEN
                             const char *app_file, const char *app_func, unsigned app_line,
 #else
-                            hid_t dset_id,
-                            hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id,
-                            void *buf /*out*/, hid_t es_id);
+    hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id,
+    void *buf /*out*/, hid_t es_id);
 #endif
 /**
  * --------------------------------------------------------------------------
@@ -998,9 +996,8 @@ H5_DLL herr_t H5Dwrite_async(
 #ifndef H5_DOXYGEN
                              const char *app_file, const char *app_func, unsigned app_line,
 #else
-                             hid_t dset_id,
-                             hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id,
-                             const void *buf, hid_t es_id);
+    hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id, const void *buf,
+    hid_t es_id);
 #endif
 /**
  * --------------------------------------------------------------------------
@@ -1290,7 +1287,7 @@ H5_DLL herr_t H5Dset_extent_async(
 #ifndef H5_DOXYGEN
                                   const char *app_file, const char *app_func, unsigned app_line,
 #else
-                                  hid_t dset_id, const hsize_t size[], hid_t es_id);
+    hid_t dset_id, const hsize_t size[], hid_t es_id);
 #endif
 /**
  * --------------------------------------------------------------------------
@@ -1472,7 +1469,7 @@ H5_DLL herr_t H5Dclose_async(
 #ifndef H5_DOXYGEN
                              const char *app_file, const char *app_func, unsigned app_line,
 #else
-                             hid_t dset_id, hid_t es_id);
+    hid_t dset_id, hid_t es_id);
 #endif
 /// \cond DEV
 /* Internal API routines */

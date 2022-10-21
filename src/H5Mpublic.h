@@ -230,8 +230,8 @@ H5_DLL hid_t H5Mcreate_async(
 #ifndef H5_DOXYGEN
                              const char *app_file, const char *app_func, unsigned app_line,
 #else
-                             hid_t loc_id, const char *name, hid_t key_type_id, hid_t val_type_id, hid_t lcpl_id,
-                             hid_t mcpl_id, hid_t mapl_id, hid_t es_id);
+    hid_t loc_id, const char *name, hid_t key_type_id, hid_t val_type_id, hid_t lcpl_id, hid_t mcpl_id,
+    hid_t mapl_id, hid_t es_id);
 #endif
 /**
  * \ingroup H5M
@@ -273,7 +273,7 @@ H5_DLL hid_t H5Mopen_async(
 #ifndef H5_DOXYGEN
                            const char *app_file, const char *app_func, unsigned app_line,
 #else
-                           hid_t loc_id, const char *name, hid_t mapl_id, hid_t es_id);
+    hid_t loc_id, const char *name, hid_t mapl_id, hid_t es_id);
 #endif
 /**
  * \ingroup H5M
@@ -302,7 +302,7 @@ H5_DLL herr_t H5Mclose_async(
 #ifndef H5_DOXYGEN
                              const char *app_file, const char *app_func, unsigned app_line,
 #else
-                             hid_t map_id,hid_t es_id);
+    hid_t map_id, hid_t es_id);
 #endif
 /**
  * \ingroup H5M
@@ -427,9 +427,8 @@ H5_DLL herr_t H5Mput_async(
 #ifndef H5_DOXYGEN
                            const char *app_file, const char *app_func, unsigned app_line,
 #else
-                           hid_t map_id,
-                           hid_t key_mem_type_id, const void *key, hid_t val_mem_type_id, const void *value,
-                           hid_t dxpl_id, hid_t es_id);
+    hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_type_id, const void *value,
+    hid_t dxpl_id, hid_t es_id);
 #endif
 /**
  * \ingroup H5M
@@ -472,8 +471,8 @@ H5_DLL herr_t H5Mget_async(
 #ifndef H5_DOXYGEN
                            const char *app_file, const char *app_func, unsigned app_line,
 #else
-                           hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_type_id, void *value,
-                           hid_t dxpl_id, hid_t es_id);
+    hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_type_id, void *value, hid_t dxpl_id,
+    hid_t es_id);
 #endif
 /**
  * \ingroup H5M
