@@ -1047,51 +1047,6 @@ DONE:
     return ret_value;
 }
 
-/****if* H5Df/h5dfill_c
- * NAME
- *  h5dfill_c
- * PURPOSE
- *  Call H5Dfill to fill memory buffer with a fill value
- * INPUTS
- *  fill_value   - fill value
- *  fill_type_id - fill value datatype identifier
- *  space_id     - memory space selection identifier
- *  buf          - memory buffer to fill
- *  mem_type_id  - memory buffer dtatype identifier
- * RETURNS
- *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Wednesday, March 12, 2003
- * HISTORY
- *
- * SOURCE
- */
-int_f
-h5dfill_c(void *fill_value, hid_t_f *fill_type_id, hid_t_f *space_id, void *buf, hid_t_f *mem_type_id)
-/******/
-{
-    int    ret_value = -1;
-    herr_t ret;
-    hid_t  c_fill_type_id;
-    hid_t  c_mem_type_id;
-    hid_t  c_space_id;
-
-    c_fill_type_id = (hid_t)*fill_type_id;
-    c_mem_type_id  = (hid_t)*mem_type_id;
-    c_space_id     = (hid_t)*space_id;
-
-    /*
-     * Call H5Dfill function.
-     */
-    ret = H5Dfill(fill_value, c_fill_type_id, buf, c_mem_type_id, c_space_id);
-
-    if (ret < 0)
-        return ret_value;
-    ret_value = 0;
-    return ret_value;
-}
-
 /****if* H5Df/h5dget_space_status_c
  * NAME
  *  h5dget_space_status_c

@@ -339,6 +339,7 @@ set (H5_TESTS
     dsets
     chunk_info # compression lib link
     cmpd_dset
+    mdset
     filter_fail
     extend
     direct_chunk # compression lib link
