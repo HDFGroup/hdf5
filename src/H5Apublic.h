@@ -90,15 +90,8 @@ extern "C" {
  */
 H5_DLL herr_t H5Aclose(hid_t attr_id);
 /*--------------------------------------------------------------------------*/
-/**
- * \ingroup ASYNC
- * \async_variant_of{H5Aclose}
- */
-H5_DLL herr_t H5Aclose_async(
-#ifndef H5_DOXYGEN
-    const char *app_file, const char *app_func, unsigned app_line,
-#endif
-    hid_t attr_id, hid_t es_id);
+H5_DLL herr_t H5Aclose_async(const char *app_file, const char *app_func, unsigned app_line,
+                             hid_t attr_id, hid_t es_id);
 /* --------------------------------------------------------------------------*/
 /**
  * \ingroup H5A
@@ -141,14 +134,7 @@ H5_DLL herr_t H5Aclose_async(
 H5_DLL hid_t H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id, hid_t acpl_id,
                         hid_t aapl_id);
 /*--------------------------------------------------------------------------*/
-/**
- * \ingroup ASYNC
- * \async_variant_of{H5Acreate}
- */
-H5_DLL hid_t H5Acreate_async(
-#ifndef H5_DOXYGEN
-    const char *app_file, const char *app_func, unsigned app_line,
-#endif
+H5_DLL hid_t H5Acreate_async(const char *app_file, const char *app_func, unsigned app_line,
     hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id, hid_t acpl_id, hid_t aapl_id,
     hid_t es_id);
 /*--------------------------------------------------------------------------*/
@@ -1006,6 +992,21 @@ H5_DLL herr_t H5Awrite_async(
  */
 H5_DLL herr_t H5Arename_by_name(hid_t loc_id, const char *obj_name, const char *old_attr_name,
                                 const char *new_attr_name, hid_t lapl_id);
+
+#ifdef H5_DOXYGEN
+/**
+ * \ingroup ASYNC
+ * \async_variant_of{H5Aclose}
+ */
+H5_DLL herr_t H5Aclose_async(hid_t attr_id, hid_t es_id);
+/**
+ * \ingroup ASYNC
+ * \async_variant_of{H5Acreate}
+ */
+H5_DLL hid_t H5Acreate_async(
+    hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id, hid_t acpl_id, hid_t aapl_id,
+    hid_t es_id);
+#endif
 
 /// \cond DEV
 /* API Wrappers for async routines */
