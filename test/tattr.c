@@ -11412,8 +11412,9 @@ test_attr(void)
                  * attributes being larger than 64K */
                 test_attr_bug8(my_fcpl,
                                my_fapl); /* Test attribute expanding object header with undecoded messages */
-                test_attr_bug9(my_fcpl, my_fapl); /* Test large attributes converting to dense storage */
-                test_attr_bug10(my_fcpl, my_fapl); /* Test writing an attribute after opening and closing through a different file handle */
+                test_attr_bug9(my_fcpl, my_fapl);  /* Test large attributes converting to dense storage */
+                test_attr_bug10(my_fcpl, my_fapl); /* Test writing an attribute after opening and closing
+                                                      through a different file handle */
 
                 /* tests specific to the "new format" */
                 if (new_format == TRUE) {
