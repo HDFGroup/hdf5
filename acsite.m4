@@ -2,7 +2,6 @@ dnl -------------------------------------------------------------------------
 dnl -------------------------------------------------------------------------
 dnl
 dnl Copyright by The HDF Group.
-dnl Copyright by the Board of Trustees of the University of Illinois.
 dnl All rights reserved.
 dnl
 dnl This file is part of HDF5.  The full HDF5 copyright notice, including
