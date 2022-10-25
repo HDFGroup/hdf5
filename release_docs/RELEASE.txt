@@ -47,6 +47,16 @@ New Features
 
     Configuration:
     -------------
+    - Add new CMake configuration variable HDF5_USE_GNU_DIRS
+
+      HDF5_USE_GNU_DIRS (default OFF) selects the use of GNU Coding Standard install
+      directory variables by including the CMake module, GNUInstallDirs(see CMake
+      documentation for details). The HDF_DIR_PATHS macro in the HDFMacros.cmake file
+      sets various PATH variables for use during the build, test and install processes.
+      By default, the historical settings for these variables will be used.
+
+      (ADB - 2022/10/21, GH-2175, GH-1716)
+
     - Update CMake minimum version to 3.18
 
       Updated CMake minimum version from 3.12 to 3.18 and removed version checks
@@ -54,8 +64,6 @@ New Features
       removed configure macros and code checks for old style code compile checks.
 
       (ADB - 2022/08/29, HDFFV-11329)
-
-    -
 
 
     Library:
