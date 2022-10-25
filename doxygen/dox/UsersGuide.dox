@@ -270,8 +270,44 @@ HDF5 Release 1.14
 \ref sec_vol
 \li \ref subsec_vol_intro
 \li \ref subsec_vol_abstract_layer
+\li \ref subsec_vol_quickstart
+    <ul>
+        <li> \ref subsubsec_vol_quick_read
+        <li> \ref subsubsec_vol_quick_use
+        <li> \ref subsubsec_vol_quick_set
+        <li> \ref subsubsec_vol_quick_update
+        <li> \ref subsubsec_vol_quick_plugin
+        <li> \ref subsubsec_vol_quick_opt
+    </ul>
 \li \ref subsec_vol_connect
-\li \ref subsec_vol_use
+    <ul>
+        <li> \ref subsubsec_vol_connect_register
+        <li> \ref subsubsec_vol_connect_version
+        <li> \ref subsubsec_vol_connect_reg_calls
+        <li> \ref subsubsec_vol_connect_set_vol
+        <li> \ref subsubsec_vol_connect_search
+        <li> \ref subsubsec_vol_connect_param
+        <li> \ref subsubsec_vol_connect_env
+    </ul>
+\li \ref subsec_vol_adapt
+    <ul>
+        <li> \ref subsubsec_vol_adapt_token
+        <li> \ref subsubsec_vol_adapt_api
+        <li> \ref subsubsec_vol_adapt_native
+    </ul>
+\li \ref subsec_vol_lang
+    <ul>
+        <li> \ref subsubsec_vol_lang_c
+        <li> \ref subsubsec_vol_lang_fort
+        <li> \ref subsubsec_vol_lang_java
+    </ul>
+\li \ref subsec_vol_cl
+\li \ref subsec_vol_compat
+    <ul>
+        <li> \ref subsubsec_vol_compat_native
+        <li> \ref subsubsec_vol_compat_indep
+        <li> \ref subsubsec_vol_compat_opt
+    </ul>
 
 \ref sec_async
 \li \ref subsec_async_intro
