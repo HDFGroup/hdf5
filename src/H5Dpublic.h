@@ -320,12 +320,16 @@ H5_DLL hid_t H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id, hid_t spa
  * \ingroup ASYNC
  * \async_variant_of{H5Dcreate}
  */
-H5_DLL hid_t H5Dcreate_async(
 #ifndef H5_DOXYGEN
-    const char *app_file, const char *app_func, unsigned app_line,
+H5_DLL hid_t H5Dcreate_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
+                             const char *name, hid_t type_id, hid_t space_id, hid_t lcpl_id, hid_t dcpl_id,
+                             hid_t dapl_id, hid_t es_id);
+#else
+H5_DLL hid_t H5Dcreate_async(hid_t loc_id,
+                             const char *name, hid_t type_id, hid_t space_id, hid_t lcpl_id, hid_t dcpl_id,
+                             hid_t dapl_id, hid_t es_id);
 #endif
-    hid_t loc_id, const char *name, hid_t type_id, hid_t space_id, hid_t lcpl_id, hid_t dcpl_id,
-    hid_t dapl_id, hid_t es_id);
+
 /**
  * --------------------------------------------------------------------------
  * \ingroup H5D
@@ -400,11 +404,13 @@ H5_DLL hid_t H5Dopen2(hid_t loc_id, const char *name, hid_t dapl_id);
  * \ingroup ASYNC
  * \async_variant_of{H5Dopen}
  */
-H5_DLL hid_t H5Dopen_async(
 #ifndef H5_DOXYGEN
-    const char *app_file, const char *app_func, unsigned app_line,
+H5_DLL hid_t H5Dopen_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
+                           const char *name, hid_t dapl_id, hid_t es_id);
+#else
+H5_DLL hid_t H5Dopen_async(hid_t loc_id, const char *name, hid_t dapl_id, hid_t es_id);
 #endif
-    hid_t loc_id, const char *name, hid_t dapl_id, hid_t es_id);
+
 /**
  * --------------------------------------------------------------------------
  *\ingroup H5D
@@ -436,11 +442,13 @@ H5_DLL hid_t H5Dget_space(hid_t dset_id);
  * \ingroup ASYNC
  * \async_variant_of{H5Dget_space}
  */
-H5_DLL hid_t H5Dget_space_async(
 #ifndef H5_DOXYGEN
-    const char *app_file, const char *app_func, unsigned app_line,
+H5_DLL hid_t H5Dget_space_async(const char *app_file, const char *app_func, unsigned app_line, hid_t dset_id,
+                                hid_t es_id);
+#else
+H5_DLL hid_t H5Dget_space_async(hid_t dset_id,hid_t es_id);
 #endif
-    hid_t dset_id, hid_t es_id);
+
 /**
  * --------------------------------------------------------------------------
  * \ingroup H5D
@@ -907,23 +915,30 @@ H5_DLL herr_t H5Dread_multi(size_t count, hid_t dset_id[], hid_t mem_type_id[], 
  * \ingroup ASYNC
  * \async_variant_of{H5Dread}
  */
-H5_DLL herr_t H5Dread_async(
 #ifndef H5_DOXYGEN
-    const char *app_file, const char *app_func, unsigned app_line,
+H5_DLL herr_t H5Dread_async(const char *app_file, const char *app_func, unsigned app_line, hid_t dset_id,
+                            hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id,
+                            void *buf /*out*/, hid_t es_id);
+#else
+H5_DLL herr_t H5Dread_async(hid_t dset_id,
+                            hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id,
+                            void *buf /*out*/, hid_t es_id);
 #endif
-    hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id,
-    void *buf /*out*/, hid_t es_id);
+
 /**
  * --------------------------------------------------------------------------
  * \ingroup ASYNC
  * \async_variant_of{H5Dread_multi}
  */
-H5_DLL herr_t H5Dread_multi_async(
 #ifndef H5_DOXYGEN
-    const char *app_file, const char *app_func, unsigned app_line,
+H5_DLL herr_t H5Dread_multi_async(const char *app_file, const char *app_func, unsigned app_line, size_t count,
+                                  hid_t dset_id[], hid_t mem_type_id[], hid_t mem_space_id[],
+                                  hid_t file_space_id[], hid_t dxpl_id, void *buf[] /*out*/, hid_t es_id);
+#else
+H5_DLL herr_t H5Dread_multi_async(size_t count,
+                                  hid_t dset_id[], hid_t mem_type_id[], hid_t mem_space_id[],
+                                  hid_t file_space_id[], hid_t dxpl_id, void *buf[] /*out*/, hid_t es_id);
 #endif
-    size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t mem_space_id[], hid_t file_space_id[],
-    hid_t dxpl_id, void *buf[] /*out*/, hid_t es_id);
 
 /**
  * --------------------------------------------------------------------------
@@ -1093,23 +1108,29 @@ H5_DLL herr_t H5Dwrite_multi(size_t count, hid_t dset_id[], hid_t mem_type_id[],
  * \ingroup ASYNC
  * \async_variant_of{H5Dwrite}
  */
-H5_DLL herr_t H5Dwrite_async(
 #ifndef H5_DOXYGEN
-    const char *app_file, const char *app_func, unsigned app_line,
+H5_DLL herr_t H5Dwrite_async(const char *app_file, const char *app_func, unsigned app_line, hid_t dset_id,
+                             hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id,
+                             const void *buf, hid_t es_id);
+#else
+H5_DLL herr_t H5Dwrite_async(hid_t dset_id,
+                             hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id,
+                             const void *buf, hid_t es_id);
 #endif
-    hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id, const void *buf,
-    hid_t es_id);
+
 /**
  * --------------------------------------------------------------------------
  * \ingroup ASYNC
  * \async_variant_of{H5Dwrite_multi}
  */
-H5_DLL herr_t H5Dwrite_multi_async(
 #ifndef H5_DOXYGEN
-    const char *app_file, const char *app_func, unsigned app_line,
+H5_DLL herr_t H5Dwrite_multi_async(const char *app_file, const char *app_func, unsigned app_line,
+                                   size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t mem_space_id[],
+                                   hid_t file_space_id[], hid_t dxpl_id, const void *buf[], hid_t es_id);
+#else
+H5_DLL herr_t H5Dwrite_multi_async(size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t mem_space_id[],
+                                   hid_t file_space_id[], hid_t dxpl_id, const void *buf[], hid_t es_id);
 #endif
-    size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t mem_space_id[], hid_t file_space_id[],
-    hid_t dxpl_id, const void *buf[], hid_t es_id);
 
 /**
  * --------------------------------------------------------------------------
@@ -1395,11 +1416,13 @@ H5_DLL herr_t H5Dset_extent(hid_t dset_id, const hsize_t size[]);
  * \ingroup ASYNC
  * \async_variant_of{H5Dset_extent}
  */
-H5_DLL herr_t H5Dset_extent_async(
 #ifndef H5_DOXYGEN
-    const char *app_file, const char *app_func, unsigned app_line,
+H5_DLL herr_t H5Dset_extent_async(const char *app_file, const char *app_func, unsigned app_line,
+                                  hid_t dset_id, const hsize_t size[], hid_t es_id);
+#else
+H5_DLL herr_t H5Dset_extent_async(hid_t dset_id, const hsize_t size[], hid_t es_id);
 #endif
-    hid_t dset_id, const hsize_t size[], hid_t es_id);
+
 /**
  * --------------------------------------------------------------------------
  * \ingroup H5D
@@ -1576,11 +1599,12 @@ H5_DLL herr_t H5Dclose(hid_t dset_id);
  * \ingroup ASYNC
  * \async_variant_of{H5Dclose}
  */
-H5_DLL herr_t H5Dclose_async(
 #ifndef H5_DOXYGEN
-    const char *app_file, const char *app_func, unsigned app_line,
+H5_DLL herr_t H5Dclose_async(const char *app_file, const char *app_func, unsigned app_line, hid_t dset_id,
+                             hid_t es_id);
+#else
+H5_DLL herr_t H5Dclose_async(hid_t dset_id, hid_t es_id);
 #endif
-    hid_t dset_id, hid_t es_id);
 /// \cond DEV
 /* Internal API routines */
 H5_DLL herr_t H5Ddebug(hid_t dset_id);
@@ -1593,28 +1617,26 @@ H5_DLL herr_t H5Dget_chunk_index_type(hid_t did, H5D_chunk_index_t *idx_type);
 /* (Must be defined _after_ the function prototype) */
 /* (And must only defined when included in application code, not the library) */
 #ifndef H5D_MODULE
-#define H5Dcreate_async(...)      H5Dcreate_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
-#define H5Dopen_async(...)        H5Dopen_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
-#define H5Dget_space_async(...)   H5Dget_space_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
-#define H5Dread_async(...)        H5Dread_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Dcreate_async(...)     H5Dcreate_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Dopen_async(...)       H5Dopen_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Dget_space_async(...)  H5Dget_space_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Dread_async(...)       H5Dread_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
 #define H5Dread_multi_async(...)  H5Dread_multi_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
-#define H5Dwrite_async(...)       H5Dwrite_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Dwrite_async(...)      H5Dwrite_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
 #define H5Dwrite_multi_async(...) H5Dwrite_multi_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
-#define H5Dset_extent_async(...)  H5Dset_extent_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
-#define H5Dclose_async(...)       H5Dclose_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Dset_extent_async(...) H5Dset_extent_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Dclose_async(...)      H5Dclose_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
 
 /* Define "wrapper" versions of function calls, to allow compile-time values to
  *      be passed in by language wrapper or library layer on top of HDF5.
  */
-#define H5Dcreate_async_wrap      H5_NO_EXPAND(H5Dcreate_async)
-#define H5Dopen_async_wrap        H5_NO_EXPAND(H5Dopen_async)
-#define H5Dget_space_async_wrap   H5_NO_EXPAND(H5Dget_space_async)
-#define H5Dread_async_wrap        H5_NO_EXPAND(H5Dread_async)
-#define H5Dread_multi_async_wrap  H5_NO_EXPAND(5Dread_multi_async)
-#define H5Dwrite_async_wrap       H5_NO_EXPAND(H5Dwrite_async)
-#define H5Dwrite_multi_async_wrap H5_NO_EXPAND(H5Dwrite_multi_async)
-#define H5Dset_extent_async_wrap  H5_NO_EXPAND(H5Dset_extent_async)
-#define H5Dclose_async_wrap       H5_NO_EXPAND(H5Dclose_async)
+#define H5Dcreate_async_wrap     H5_NO_EXPAND(H5Dcreate_async)
+#define H5Dopen_async_wrap       H5_NO_EXPAND(H5Dopen_async)
+#define H5Dget_space_async_wrap  H5_NO_EXPAND(H5Dget_space_async)
+#define H5Dread_async_wrap       H5_NO_EXPAND(H5Dread_async)
+#define H5Dwrite_async_wrap      H5_NO_EXPAND(H5Dwrite_async)
+#define H5Dset_extent_async_wrap H5_NO_EXPAND(H5Dset_extent_async)
+#define H5Dclose_async_wrap      H5_NO_EXPAND(H5Dclose_async)
 #endif /* H5D_MODULE */
 /// \endcond
 

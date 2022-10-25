@@ -357,11 +357,12 @@ H5_DLL hid_t H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_
  * \ingroup ASYNC
  * \async_variant_of{H5Fcreate}
  */
-H5_DLL hid_t H5Fcreate_async(
 #ifndef H5_DOXYGEN
-    const char *app_file, const char *app_func, unsigned app_line,
+H5_DLL hid_t H5Fcreate_async(const char *app_file, const char *app_func, unsigned app_line,
+                             const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t es_id);
+#else
+H5_DLL hid_t H5Fcreate_async(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t es_id);
 #endif
-    const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t es_id);
 /**
  * \ingroup H5F
  *
@@ -460,11 +461,12 @@ H5_DLL hid_t H5Fopen(const char *filename, unsigned flags, hid_t fapl_id);
  * \ingroup ASYNC
  * \async_variant_of{H5Fopen}
  */
-H5_DLL hid_t H5Fopen_async(
 #ifndef H5_DOXYGEN
-    const char *app_file, const char *app_func, unsigned app_line,
+H5_DLL hid_t H5Fopen_async(const char *app_file, const char *app_func, unsigned app_line,
+                           const char *filename, unsigned flags, hid_t access_plist, hid_t es_id);
+#else
+H5_DLL hid_t H5Fopen_async(const char *filename, unsigned flags, hid_t access_plist, hid_t es_id);
 #endif
-    const char *filename, unsigned flags, hid_t access_plist, hid_t es_id);
 /**
  * \ingroup H5F
  *
@@ -496,11 +498,12 @@ H5_DLL hid_t H5Freopen(hid_t file_id);
  * \ingroup ASYNC
  * \async_variant_of{H5Freopen}
  */
-H5_DLL hid_t H5Freopen_async(
 #ifndef H5_DOXYGEN
-    const char *app_file, const char *app_func, unsigned app_line,
+H5_DLL hid_t H5Freopen_async(const char *app_file, const char *app_func, unsigned app_line, hid_t file_id,
+                             hid_t es_id);
+#else
+H5_DLL hid_t H5Freopen_async(hid_t file_id, hid_t es_id);
 #endif
-    hid_t file_id, hid_t es_id);
 /**
  * \ingroup H5F
  *
@@ -539,11 +542,12 @@ H5_DLL herr_t H5Fflush(hid_t object_id, H5F_scope_t scope);
  * \ingroup ASYNC
  * \async_variant_of{H5Fflush}
  */
-H5_DLL herr_t H5Fflush_async(
 #ifndef H5_DOXYGEN
-    const char *app_file, const char *app_func, unsigned app_line,
+H5_DLL herr_t H5Fflush_async(const char *app_file, const char *app_func, unsigned app_line, hid_t object_id,
+                             H5F_scope_t scope, hid_t es_id);
+#else
+H5_DLL herr_t H5Fflush_async(hid_t object_id, H5F_scope_t scope, hid_t es_id);
 #endif
-    hid_t object_id, H5F_scope_t scope, hid_t es_id);
 /**
  * \ingroup H5F
  *
@@ -593,11 +597,12 @@ H5_DLL herr_t H5Fclose(hid_t file_id);
  * \ingroup ASYNC
  * \async_variant_of{H5Fclose}
  */
-H5_DLL herr_t H5Fclose_async(
 #ifndef H5_DOXYGEN
-    const char *app_file, const char *app_func, unsigned app_line,
+H5_DLL herr_t H5Fclose_async(const char *app_file, const char *app_func, unsigned app_line, hid_t file_id,
+                             hid_t es_id);
+#else
+H5_DLL herr_t H5Fclose_async(hid_t file_id, hid_t es_id);
 #endif
-    hid_t file_id, hid_t es_id);
 /**
  * \ingroup H5F
  *
