@@ -4045,7 +4045,7 @@ done:
 
 herr_t
 translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t type_class, jsize count,
-               jobjectArray raw_buf)
+               jbyte *raw_buf)
 {
     herr_t       status = FAIL;
     hid_t        memb   = H5I_INVALID_HID;
@@ -4067,7 +4067,7 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
     jclass cLong   = ENVPTR->FindClass(ENVONLY, "java/lang/Long");
     jclass cFloat  = ENVPTR->FindClass(ENVONLY, "java/lang/Float");
     jclass cDouble = ENVPTR->FindClass(ENVONLY, "java/lang/Double");
-    /*
+    /*jobjectArray
      jmethodID boolValueMid =
      ENVPTR->GetStaticMethodID(ENVONLY, cBool, "valueOf", "(Z)Ljava/lang/Boolean;");
      */
@@ -4416,7 +4416,7 @@ done:
 
 herr_t
 translate_wbuf(JNIEnv *env, jobjectArray in_buf, jlong mem_type_id, H5T_class_t type_class, jsize count,
-               jobjectArray raw_buf)
+               jbyte *raw_buf)
 {
     herr_t       status = FAIL;
     hid_t        memb   = H5I_INVALID_HID;
