@@ -33,7 +33,7 @@
 !  This is needed for Windows based operating systems.
 !
 #include "H5config_f.inc"
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
    MODULE H5TB
 #else
    MODULE H5TB_CONST
@@ -44,7 +44,7 @@
   USE hdf5
 
   INTERFACE h5tbwrite_field_name_f
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
      MODULE PROCEDURE h5tbwrite_field_name_f
 #else
      MODULE PROCEDURE h5tbwrite_field_name_f_int
@@ -53,7 +53,7 @@
   END INTERFACE
 
   INTERFACE h5tbread_field_name_f
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
      MODULE PROCEDURE h5tbread_field_name_f
 #else
      MODULE PROCEDURE h5tbread_field_name_f_int
@@ -62,7 +62,7 @@
   END INTERFACE
 
   INTERFACE h5tbwrite_field_index_f
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
      MODULE PROCEDURE h5tbwrite_field_index_f
 #else
      MODULE PROCEDURE h5tbwrite_field_index_f_int
@@ -71,7 +71,7 @@
   END INTERFACE
 
   INTERFACE h5tbread_field_index_f
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
      MODULE PROCEDURE h5tbread_field_index_f
 #else
      MODULE PROCEDURE h5tbread_field_index_f_int
@@ -80,7 +80,7 @@
   END INTERFACE
 
   INTERFACE h5tbinsert_field_f
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
      MODULE PROCEDURE h5tbinsert_field_f
 #else
      MODULE PROCEDURE h5tbinsert_field_f_int
@@ -89,7 +89,7 @@
   END INTERFACE
 
 
-#ifndef H5_DOXYGEN_FORTRAN
+#ifndef H5_DOXYGEN
 
   INTERFACE h5tbmake_table_f
      MODULE PROCEDURE h5tbmake_table_f90
@@ -218,7 +218,7 @@ CONTAINS
 !!
 !! See C API: @ref H5TBmake_table()
 !!
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
   SUBROUTINE h5tbmake_table_f(&
 #else
   SUBROUTINE h5tbmake_table_f90(&
@@ -307,7 +307,7 @@ CONTAINS
          type_size, field_offset, field_types, chunk_size, compress, char_len_field_names, &
          max_char_size_field_names, field_names)
 
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
   END SUBROUTINE h5tbmake_table_f
 #else
   END SUBROUTINE h5tbmake_table_f90
@@ -337,7 +337,7 @@ CONTAINS
 !!
 !! See C API: @ref H5TBmake_table()
 !!
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
   SUBROUTINE h5tbmake_table_f(&
 #else
   SUBROUTINE h5tbmake_table_ptr_f(&
@@ -435,7 +435,7 @@ CONTAINS
          type_size, field_offset, field_types, chunk_size, fill_data, compress, char_len_field_names, &
          max_char_size_field_names, field_names, data)
 
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
    END SUBROUTINE h5tbmake_table_f
 #else
    END SUBROUTINE h5tbmake_table_ptr_f
@@ -510,7 +510,7 @@ CONTAINS
 
   END SUBROUTINE h5tbread_table_f
 
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
 !>
 !! \ingroup FH5TB
 !!
@@ -547,7 +547,7 @@ CONTAINS
     INTEGER(hsize_t), INTENT(in) :: start
     INTEGER(hsize_t), INTENT(in) :: nrecords
     INTEGER(size_t),  INTENT(in) :: type_size
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
     TYPE(TYPE), INTENT(in), DIMENSION(*) :: buf
 #else
     INTEGER, INTENT(in), DIMENSION(*), TARGET :: buf
@@ -563,7 +563,7 @@ CONTAINS
 
     errcode = h5tbwrite_field_name_c(loc_id,namelen,dset_name,namelen1,field_name,&
          start,nrecords,type_size,f_ptr)
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
   END SUBROUTINE h5tbwrite_field_name_f
 #else
   END SUBROUTINE h5tbwrite_field_name_f_int
@@ -602,7 +602,7 @@ CONTAINS
   END SUBROUTINE h5tbwrite_field_name_f_string
 #endif
 
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
 !>
 !! \ingroup FH5TB
 !!
@@ -640,7 +640,7 @@ CONTAINS
     INTEGER(hsize_t), INTENT(in) :: start
     INTEGER(hsize_t), INTENT(in) :: nrecords
     INTEGER(size_t),  INTENT(in) :: type_size
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
     TYPE(TYPE), INTENT(INOUT), DIMENSION(*):: buf
 #else
     INTEGER, INTENT(INOUT), DIMENSION(*), TARGET :: buf
@@ -658,7 +658,7 @@ CONTAINS
     errcode = h5tbread_field_name_c(loc_id,namelen,dset_name,namelen1,field_name,&
          start,nrecords,type_size,f_ptr)
 
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
   END SUBROUTINE h5tbread_field_name_f
 #else
   END SUBROUTINE h5tbread_field_name_f_int
@@ -696,7 +696,7 @@ CONTAINS
   END SUBROUTINE h5tbread_field_name_f_string
 #endif
 
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
 !>
 !! \ingroup FH5TB
 !!
@@ -733,7 +733,7 @@ CONTAINS
     INTEGER(hsize_t), INTENT(in) :: start
     INTEGER(hsize_t), INTENT(in) :: nrecords
     INTEGER(size_t),  INTENT(in) :: type_size
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
     INTEGER, INTENT(in), DIMENSION(*) :: buf
 #else
     INTEGER, INTENT(in), DIMENSION(*), TARGET :: buf
@@ -749,7 +749,7 @@ CONTAINS
     errcode = h5tbwrite_field_index_c(loc_id,namelen,dset_name,field_index,&
          start,nrecords,type_size,f_ptr)
 
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
   END SUBROUTINE h5tbwrite_field_index_f
 #else
   END SUBROUTINE h5tbwrite_field_index_f_int
@@ -784,7 +784,7 @@ CONTAINS
   END SUBROUTINE h5tbwrite_field_index_f_string
 #endif
 
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
 !>
 !! \ingroup FH5TB
 !!
@@ -821,7 +821,7 @@ CONTAINS
     INTEGER(hsize_t), INTENT(in) :: start
     INTEGER(hsize_t), INTENT(in) :: nrecords
     INTEGER(size_t),  INTENT(in) :: type_size
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
     TYPE(TYPE), INTENT(INOUT), DIMENSION(*) :: buf
 #else
     INTEGER, INTENT(INOUT), DIMENSION(*), TARGET :: buf
@@ -835,7 +835,7 @@ CONTAINS
 
     errcode = h5tbread_field_index_c(loc_id,namelen,dset_name,field_index,&
          start,nrecords,type_size,f_ptr)
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
   END SUBROUTINE h5tbread_field_index_f
 #else
   END SUBROUTINE h5tbread_field_index_f_int
@@ -870,7 +870,7 @@ CONTAINS
   END SUBROUTINE h5tbread_field_index_f_string
 #endif
 
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
 !>
 !! \ingroup FH5TB
 !!
@@ -903,7 +903,7 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(in) :: field_name
     INTEGER(hid_t), INTENT(in)   :: field_type
     INTEGER, INTENT(in) :: position
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
     TYPE(TYPE), INTENT(in), DIMENSION(*) :: buf
 #else
     INTEGER, INTENT(in), DIMENSION(*), TARGET :: buf
@@ -922,7 +922,7 @@ CONTAINS
     errcode = h5tbinsert_field_c(loc_id,namelen,dset_name,namelen1,field_name,&
          field_type,position,f_ptr)
 
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
   END SUBROUTINE h5tbinsert_field_f
 #else
   END SUBROUTINE h5tbinsert_field_f_int
@@ -1128,7 +1128,7 @@ CONTAINS
 
   END SUBROUTINE h5tbget_field_info_f
 
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
 END MODULE H5TB
 #else
 END MODULE H5TB_CONST

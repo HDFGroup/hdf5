@@ -636,7 +636,9 @@
  * \todo Describe the VOL plugin life cycle.
  *
  * \defgroup ASYNC Asynchronous Functions
- * \brief Asynchronous Functions
+ * \brief List of the asynchronous functions.
+ * \note The argument \p es_id associated with the asynchronous APIs is the \Emph{event set id}. See H5ES for
+ *context.
  *
  * \defgroup H5VLDEF Definitions
  * \ingroup H5VL

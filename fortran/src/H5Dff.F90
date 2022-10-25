@@ -103,7 +103,7 @@ MODULE H5D
      MODULE PROCEDURE h5dset_extent_f
   END INTERFACE
 
-#ifndef H5_DOXYGEN_FORTRAN
+#ifndef H5_DOXYGEN
 
   INTERFACE h5dwrite_f
      MODULE PROCEDURE h5dwrite_reference_obj
@@ -584,7 +584,7 @@ CONTAINS
 
   END SUBROUTINE h5dcreate_anon_f
 
-#if H5_DOXYGEN_FORTRAN
+#if H5_DOXYGEN
   !>
   !! \ingroup FH5D
   !!
@@ -1094,7 +1094,7 @@ CONTAINS
 
   END SUBROUTINE H5Dvlen_reclaim_f
 
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
 !>
 !! \ingroup FH5D
 !!
