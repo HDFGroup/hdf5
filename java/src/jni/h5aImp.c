@@ -181,17 +181,9 @@ Java_hdf_hdf5lib_H5_H5Aread(JNIEnv *env, jclass clss, jlong attr_id, jlong mem_t
             H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Aread: readBuf length < 0");
         }
 
-        dims[0] = (hsize_t)vl_array_len;
-        if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
+        if (!(typeSize = H5Tget_size(mem_type_id)))
             H5_LIBRARY_ERROR(ENVONLY);
-    }
 
-    if (!(typeSize = H5Tget_size(mem_type_id)))
-        H5_LIBRARY_ERROR(ENVONLY);
-
-    if ((type_class = H5Tget_class((hid_t)mem_type_id)) < 0)
-        H5_LIBRARY_ERROR(ENVONLY);
-    if (vl_data_class) {
         if (NULL == (readBuf = HDcalloc((size_t)vl_array_len, typeSize)))
             H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Aread: failed to allocate raw VL read buffer");
     }
@@ -208,13 +200,22 @@ Java_hdf_hdf5lib_H5_H5Aread(JNIEnv *env, jclass clss, jlong attr_id, jlong mem_t
     if ((status = H5Aread((hid_t)attr_id, (hid_t)mem_type_id, (void *)readBuf)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
-    if (vl_data_class)
+    if (vl_data_class) {
+        if ((type_class = H5Tget_class((hid_t)mem_type_id)) < 0)
+            H5_LIBRARY_ERROR(ENVONLY);
+
         translate_rbuf(env, buf, mem_type_id, type_class, vl_array_len, readBuf);
+    }
 
 done:
     if (readBuf) {
         if ((status >= 0) && vl_data_class) {
+            dims[0] = (hsize_t)vl_array_len;
+            if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
+                H5_LIBRARY_ERROR(ENVONLY);
+                
             H5Treclaim(attr_id, sid, H5P_DEFAULT, readBuf);
+            
             if (sid >= 0)
                 H5Sclose(sid);
         }
