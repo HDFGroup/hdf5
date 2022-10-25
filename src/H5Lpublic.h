@@ -931,9 +931,8 @@ H5_DLL herr_t H5Literate_async(const char *app_file, const char *app_func, unsig
                                H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx_p, H5L_iterate2_t op,
                                void *op_data, hid_t es_id);
 #else
-H5_DLL herr_t H5Literate_async(hid_t group_id,
-                               H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx_p, H5L_iterate2_t op,
-                               void *op_data, hid_t es_id);
+H5_DLL herr_t H5Literate_async(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx_p,
+                               H5L_iterate2_t op, void *op_data, hid_t es_id);
 #endif
 /**
  * \ingroup TRAV

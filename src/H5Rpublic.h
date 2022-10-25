@@ -352,8 +352,8 @@ H5_DLL hid_t H5Ropen_object(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id);
 H5_DLL hid_t H5Ropen_object_async(const char *app_file, const char *app_func, unsigned app_line,
                                   H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id, hid_t es_id);
 #else
-H5_DLL hid_t H5Ropen_object_async(unsigned app_line,
-                                  H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id, hid_t es_id);
+H5_DLL hid_t H5Ropen_object_async(unsigned app_line, H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id,
+                                  hid_t es_id);
 #endif
 
 /**
