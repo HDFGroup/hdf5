@@ -213,9 +213,9 @@ done:
             dims[0] = (hsize_t)vl_array_len;
             if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
                 H5_LIBRARY_ERROR(ENVONLY);
-                
+
             H5Treclaim(attr_id, sid, H5P_DEFAULT, readBuf);
-            
+
             if (sid >= 0)
                 H5Sclose(sid);
         }
