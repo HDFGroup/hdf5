@@ -70,7 +70,7 @@ New Features
     --------
     - Added multi dataset I/O feature
 
-      Added H5Dread_multi, H5Dread_multi_asyc, H5Dwrite_multi, and
+      Added H5Dread_multi, H5Dread_multi_async, H5Dwrite_multi, and
       H5Dwrite_multi_async API routines to allow I/O on multiple datasets with a
       single API call. Added H5Dread_multi_f and H5Dwrite_multi_f Fortran
       wrappers. Updated VOL callbacks for dataset I/O to support multi dataset
