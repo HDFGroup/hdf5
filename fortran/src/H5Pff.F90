@@ -2794,7 +2794,7 @@ CONTAINS
     INTEGER(HID_T), DIMENSION(*), INTENT(OUT) :: memb_fapl
     CHARACTER(LEN=*), DIMENSION(*), INTENT(OUT) :: memb_name
     REAL, DIMENSION(*), INTENT(OUT) :: memb_addr
-    INTEGER, OPTIONAL, INTENT(OUT) :: maxlen_out
+    INTEGER, INTENT(OUT), OPTIONAL :: maxlen_out
     LOGICAL, INTENT(OUT) :: relax
     INTEGER, INTENT(OUT) :: hdferr
 

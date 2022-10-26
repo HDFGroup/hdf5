@@ -66,10 +66,10 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(IN) :: name
     INTEGER(HID_T), INTENT(OUT) :: grp_id
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(SIZE_T), OPTIONAL, INTENT(IN) :: size_hint
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lcpl_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: gcpl_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: gapl_id
+    INTEGER(SIZE_T), INTENT(IN), OPTIONAL :: size_hint
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lcpl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: gcpl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: gapl_id
 
     INTEGER(HID_T) :: lcpl_id_default
     INTEGER(HID_T) :: gcpl_id_default
@@ -129,7 +129,7 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(IN) :: name
     INTEGER(HID_T), INTENT(OUT) :: grp_id
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: gapl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: gapl_id
     INTEGER(HID_T) :: gapl_id_default
     INTEGER :: namelen ! Length of the name character string
 
@@ -605,8 +605,8 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: loc_id
     INTEGER(HID_T), INTENT(OUT) :: grp_id
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: gcpl_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: gapl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: gcpl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: gapl_id
     INTEGER(HID_T) :: gcpl_id_default
     INTEGER(HID_T) :: gapl_id_default
 
@@ -744,7 +744,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: nlinks
     INTEGER, INTENT(OUT) :: max_corder
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
     LOGICAL, INTENT(OUT), OPTIONAL :: mounted
     INTEGER :: mounted_c
     INTEGER(HID_T) :: lapl_id_default
@@ -818,7 +818,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: nlinks
     INTEGER, INTENT(OUT) :: max_corder
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
     LOGICAL, INTENT(OUT), OPTIONAL :: mounted
     INTEGER :: mounted_c
     INTEGER(HID_T) :: lapl_id_default

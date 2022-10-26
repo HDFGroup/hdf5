@@ -91,8 +91,8 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(IN) :: dest_name
 
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lcpl_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lcpl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
     INTEGER(HID_T) :: lcpl_id_default
     INTEGER(HID_T) :: lapl_id_default
 
@@ -148,7 +148,7 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: loc_id
     CHARACTER(LEN=*), INTENT(IN) :: name
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
     INTEGER(HID_T) :: lapl_id_default
     INTEGER(SIZE_T) :: namelen
 
@@ -193,8 +193,8 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: link_loc_id
     CHARACTER(LEN=*), INTENT(IN) :: link_name
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lcpl_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lcpl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
     INTEGER(HID_T) :: lcpl_id_default
     INTEGER(HID_T) :: lapl_id_default
     INTEGER(SIZE_T) :: target_path_len
@@ -257,8 +257,8 @@ CONTAINS
 
     INTEGER, INTENT(OUT) :: hdferr
 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) ::   lcpl_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) ::   lapl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL ::   lcpl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL ::   lapl_id
     INTEGER(HID_T) :: lcpl_id_default
     INTEGER(HID_T) :: lapl_id_default
 
@@ -319,8 +319,8 @@ CONTAINS
 
     INTEGER, INTENT(OUT) :: hdferr
 
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lcpl_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lcpl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
 
     INTEGER(HID_T) :: lcpl_id_default
     INTEGER(HID_T) :: lapl_id_default
@@ -392,7 +392,7 @@ CONTAINS
     INTEGER, INTENT(IN) :: order
     INTEGER(HSIZE_T), INTENT(IN) :: n
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
     INTEGER(HID_T) :: lapl_id_default
     INTEGER(SIZE_T) :: group_namelen
 
@@ -439,7 +439,7 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(IN) :: name
     LOGICAL, INTENT(OUT) :: link_exists
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
     INTEGER :: link_exists_c
     INTEGER(HID_T)  :: lapl_id_default
     INTEGER(SIZE_T) :: namelen
@@ -510,7 +510,7 @@ CONTAINS
     TYPE(H5O_TOKEN_T_F), INTENT(OUT), TARGET :: token
     INTEGER(SIZE_T), INTENT(OUT) :: val_size
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
     INTEGER(SIZE_T) :: link_namelen
     INTEGER(HID_T) :: lapl_id_default
     INTEGER :: corder_valid
@@ -600,7 +600,7 @@ CONTAINS
     TYPE(H5O_TOKEN_T_F), INTENT(OUT), TARGET :: token
     INTEGER(SIZE_T), INTENT(OUT) :: val_size
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
     INTEGER :: corder_valid
     INTEGER(SIZE_T)  :: group_namelen
     INTEGER(HID_T) :: lapl_id_default
@@ -698,8 +698,8 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: dest_loc_id
     CHARACTER(LEN=*), INTENT(IN) :: dest_name
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lcpl_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lcpl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
     INTEGER(SIZE_T) :: src_namelen
     INTEGER(SIZE_T) :: dest_namelen
 
@@ -776,9 +776,9 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(OUT) :: name
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER(SIZE_T)  :: group_namelen
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
     INTEGER(HID_T) :: lapl_id_default
-    INTEGER(SIZE_T), OPTIONAL, INTENT(OUT) :: size
+    INTEGER(SIZE_T), INTENT(OUT), OPTIONAL :: size
     INTEGER(SIZE_T) :: size_default
 
     INTERFACE

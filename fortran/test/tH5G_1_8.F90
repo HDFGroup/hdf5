@@ -1126,9 +1126,11 @@ SUBROUTINE lifecycle(cleanup, fapl2, total_error)
 
 
   CALL H5Lexists_f(file,"d1",Lexists, error)
+  CALL check("H5Lexists_f", error, total_error)
   CALL verify("H5Lexists", Lexists,.TRUE.,total_error)
 
   CALL H5Lexists_f(file,"grp1/hard",Lexists, error)
+  CALL check("H5Lexists_f", error, total_error)
   CALL verify("H5Lexists", Lexists,.TRUE.,total_error)
 
   !  Cleanup

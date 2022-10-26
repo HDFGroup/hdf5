@@ -65,7 +65,7 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(IN) :: name
     INTEGER(HID_T), INTENT(OUT) :: vol_id
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: vipl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: vipl_id
     CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
     INTEGER(HID_T) :: vipl_id_default
 
@@ -106,7 +106,7 @@ CONTAINS
     INTEGER, INTENT(IN) :: connector_value
     INTEGER(HID_T), INTENT(OUT) :: vol_id
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: vipl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: vipl_id
     INTEGER(HID_T) :: vipl_id_default
 
     INTERFACE

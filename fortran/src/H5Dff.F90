@@ -233,9 +233,9 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: space_id
     INTEGER(HID_T), INTENT(OUT) :: dset_id
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: dcpl_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lcpl_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: dapl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: dcpl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lcpl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: dapl_id
 
     INTEGER(HID_T) :: lcpl_id_default
     INTEGER(HID_T) :: dcpl_id_default
@@ -297,7 +297,7 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(IN) :: name
     INTEGER(HID_T), INTENT(OUT) :: dset_id
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: dapl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: dapl_id
     INTEGER :: namelen                     ! Name length
 
     INTEGER(HID_T) :: dapl_id_default
@@ -552,8 +552,8 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: space_id
     INTEGER(HID_T), INTENT(OUT) :: dset_id
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: dcpl_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: dapl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: dcpl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: dapl_id
     INTEGER(HID_T) :: dcpl_id_default
     INTEGER(HID_T) :: dapl_id_default
 
@@ -612,9 +612,9 @@ CONTAINS
     INTEGER(HSIZE_T), INTENT(IN), DIMENSION(2)  :: dims
     INTEGER(SIZE_T), INTENT(INOUT), DIMENSION(*)  :: len
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: mem_space_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: file_space_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: xfer_prp
   END SUBROUTINE h5dread_vl_f
   !>
   !! \ingroup FH5D
@@ -642,9 +642,9 @@ CONTAINS
     INTEGER(HSIZE_T), INTENT(IN), DIMENSION(2)  :: dims
     INTEGER(SIZE_T), INTENT(IN), DIMENSION(*)  :: len
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: mem_space_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: file_space_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: xfer_prp
   END SUBROUTINE h5dwrite_vl_f
 
 #else
@@ -658,9 +658,9 @@ CONTAINS
     INTEGER(SIZE_T), INTENT(IN), DIMENSION(*) :: len
     INTEGER, INTENT(IN), DIMENSION(dims(1),dims(2)), TARGET :: buf
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: mem_space_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: file_space_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: xfer_prp
     INTEGER(HID_T) :: xfer_prp_default
     INTEGER(HID_T) :: mem_space_id_default
     INTEGER(HID_T) :: file_space_id_default
@@ -708,9 +708,9 @@ CONTAINS
     INTEGER(SIZE_T), INTENT(INOUT), DIMENSION(*) :: len
     INTEGER, INTENT(INOUT), DIMENSION(dims(1),dims(2)), TARGET :: buf
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: mem_space_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: file_space_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: xfer_prp
     INTEGER(HID_T) :: xfer_prp_default
     INTEGER(HID_T)  :: mem_space_id_default
     INTEGER(HID_T) :: file_space_id_default
@@ -762,9 +762,9 @@ CONTAINS
     REAL, INTENT(IN), &
          DIMENSION(dims(1),dims(2)) :: buf ! Data buffer
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: mem_space_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: file_space_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: xfer_prp
 
     INTEGER(HID_T) :: xfer_prp_default
     INTEGER(HID_T) :: mem_space_id_default
@@ -816,9 +816,9 @@ CONTAINS
     REAL, INTENT(INOUT), &
          DIMENSION(dims(1),dims(2)) :: buf ! Data buffer
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: mem_space_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: file_space_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: xfer_prp
 
     INTEGER(HID_T) :: xfer_prp_default
     INTEGER(HID_T)  :: mem_space_id_default
@@ -872,9 +872,9 @@ CONTAINS
     INTEGER(SIZE_T), INTENT(IN), DIMENSION(*) :: str_len
     CHARACTER(LEN=*), INTENT(IN), DIMENSION(dims(2)) :: buf
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: mem_space_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: file_space_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: xfer_prp
 
     INTEGER(HID_T) :: xfer_prp_default
     INTEGER(HID_T)  :: mem_space_id_default
@@ -926,9 +926,9 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(OUT), &
          DIMENSION(dims(2)) :: buf      ! Data buffer
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: mem_space_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: file_space_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: xfer_prp
 
     INTEGER(HID_T) :: xfer_prp_default
     INTEGER(HID_T)  :: mem_space_id_default
@@ -1119,9 +1119,9 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: mem_type_id
     TYPE(C_PTR), INTENT(IN) :: buf
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: mem_space_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: file_space_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: xfer_prp
   END SUBROUTINE h5dwrite
 !>
 !! \ingroup FH5D
@@ -1147,9 +1147,9 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: mem_type_id
     TYPE(C_PTR), INTENT(INOUT) :: buf
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: mem_space_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: file_space_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: xfer_prp
   END SUBROUTINE h5dread_f
 
 !>
@@ -1178,9 +1178,9 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: mem_type_id
     TYPE(TYPE), INTENT(IN) :: buf
     DIMENSION(*), INTEGER(HSIZE_T), INTENT(IN)  :: dims
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: mem_space_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: file_space_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: xfer_prp
   END SUBROUTINE h5dwrite_f___F90_VERSION
 
 !>
@@ -1210,9 +1210,9 @@ CONTAINS
     INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
     TYPE(TYPE), INTENT(INOUT) :: buf
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: mem_space_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: file_space_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: xfer_prp
   END SUBROUTINE h5dread_f___F90_VERSION
 
 !>
@@ -1274,9 +1274,9 @@ CONTAINS
     INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: dims
     TYPE(hobj_ref_t_f), DIMENSION(dims(1)), INTENT(IN), TARGET :: buf
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: mem_space_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: file_space_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: xfer_prp
 
     INTEGER(HID_T) :: xfer_prp_default
     INTEGER(HID_T) :: mem_space_id_default
@@ -1306,9 +1306,9 @@ CONTAINS
     INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: dims
     TYPE(hdset_reg_ref_t_f), DIMENSION(dims(1)), INTENT(IN), TARGET :: buf
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: mem_space_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: file_space_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: xfer_prp
 
     INTEGER(HID_T) :: xfer_prp_default
     INTEGER(HID_T) :: mem_space_id_default
@@ -1368,9 +1368,9 @@ CONTAINS
     INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
     CHARACTER(*), INTENT(IN), TARGET :: buf
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: mem_space_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: file_space_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: xfer_prp
 
     CALL h5dwrite_char_scalar_fix(dset_id, mem_type_id, buf, LEN(buf), dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
@@ -1387,9 +1387,9 @@ CONTAINS
     INTEGER, INTENT(IN) :: buf_len
     CHARACTER(LEN=buf_len), INTENT(IN), TARGET :: buf
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: mem_space_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: file_space_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: xfer_prp
     INTEGER(HID_T) :: xfer_prp_default
     INTEGER(HID_T) :: mem_space_id_default
     INTEGER(HID_T) :: file_space_id_default
@@ -1420,9 +1420,9 @@ CONTAINS
     TYPE(hobj_ref_t_f), INTENT(INOUT) , &
          DIMENSION(dims(1)), TARGET :: buf
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: mem_space_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: file_space_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: xfer_prp
 
     INTEGER(HID_T) :: xfer_prp_default
     INTEGER(HID_T) :: mem_space_id_default
@@ -1452,9 +1452,9 @@ CONTAINS
     TYPE(hdset_reg_ref_t_f), INTENT(INOUT), &
          DIMENSION(dims(1)), TARGET :: buf
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: mem_space_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: file_space_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: xfer_prp
     INTEGER(HID_T) :: xfer_prp_default
     INTEGER(HID_T) :: mem_space_id_default
     INTEGER(HID_T) :: file_space_id_default
@@ -1515,9 +1515,9 @@ CONTAINS
 
     CHARACTER(LEN=*), INTENT(INOUT) :: buf
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: mem_space_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: file_space_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: xfer_prp
 
     INTEGER(HID_T) :: xfer_prp_default
     INTEGER(HID_T) :: mem_space_id_default
@@ -1545,9 +1545,9 @@ CONTAINS
     INTEGER, INTENT(IN)  :: buf_len
     CHARACTER(LEN=buf_len), INTENT(INOUT), TARGET :: buf
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: mem_space_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: file_space_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: xfer_prp
 
     TYPE(C_PTR) :: f_ptr
 
@@ -1566,9 +1566,9 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: mem_type_id
     TYPE(C_PTR), INTENT(IN) :: buf
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: mem_space_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: file_space_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: xfer_prp
 
     INTEGER(HID_T) :: xfer_prp_default
     INTEGER(HID_T) :: mem_space_id_default
@@ -1595,9 +1595,9 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: mem_type_id
     TYPE(C_PTR), INTENT(INOUT) :: buf
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: mem_space_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: file_space_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: xfer_prp
 
     INTEGER(HID_T) :: xfer_prp_default
     INTEGER(HID_T) :: mem_space_id_default

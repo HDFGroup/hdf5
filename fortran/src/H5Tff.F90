@@ -81,7 +81,7 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(IN) :: name
     INTEGER(HID_T), INTENT(OUT) :: type_id
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: tapl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: tapl_id
     INTEGER :: namelen                  ! Name length
     INTEGER(HID_T) :: tapl_id_default
 
@@ -127,9 +127,9 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(IN) :: name
     INTEGER(HID_T), INTENT(IN) :: type_id
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lcpl_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: tcpl_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: tapl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lcpl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: tcpl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: tapl_id
 
     INTEGER :: namelen          ! Name length
 
@@ -1794,8 +1794,8 @@ CONTAINS
     INTEGER(HID_T), INTENT(IN) :: loc_id
     INTEGER(HID_T), INTENT(IN) :: dtype_id
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: tcpl_id
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: tapl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: tcpl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: tapl_id
     INTEGER(HID_T) :: tcpl_id_default
     INTEGER(HID_T) :: tapl_id_default
 

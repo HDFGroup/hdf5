@@ -82,8 +82,8 @@ CONTAINS
     INTEGER, INTENT(IN) :: access_flags
     INTEGER(HID_T), INTENT(OUT) :: file_id
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: creation_prp
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: access_prp
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: creation_prp
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: access_prp
     INTEGER(HID_T) :: creation_prp_default
     INTEGER(HID_T) :: access_prp_default
     INTEGER :: namelen ! Length of the name character string
@@ -162,7 +162,7 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(IN) :: name
     INTEGER(HID_T), INTENT(IN) :: child_id
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: access_prp
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: access_prp
     INTEGER(HID_T) :: access_prp_default
     INTEGER :: namelen ! Length of the name character string
 
@@ -241,7 +241,7 @@ CONTAINS
     INTEGER, INTENT(IN) :: access_flags
     INTEGER(HID_T), INTENT(OUT) :: file_id
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: access_prp
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: access_prp
     INTEGER(HID_T) :: access_prp_default
     INTEGER :: namelen ! Length of the name character string
 
@@ -367,7 +367,7 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(IN) :: name
     LOGICAL, INTENT(OUT) :: status
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HID_T), OPTIONAL, INTENT(IN) :: access_prp
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: access_prp
 
     INTEGER(HID_T) :: access_prp_default
     CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
