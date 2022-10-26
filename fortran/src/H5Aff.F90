@@ -897,6 +897,73 @@ CONTAINS
 !>
 !! \ingroup FH5A
 !!
+!! \brief Asynchronously opens an attribute for an object specified by object identifier and attribute name.
+!!
+!! \param obj_id    Identifier for object to which attribute is attached
+!! \param attr_name Name of attribute to open
+!! \param attr_id   Attribute identifier
+!! \param es_id     \es_id
+!! \param hdferr    \fortran_error
+!! \param aapl_id   Attribute access property list
+!! \param file      \fortran_file
+!! \param func      \fortran_func
+!! \param line      \fortran_line
+!!
+!! See C API: @ref H5Aopen_async()
+!!
+  SUBROUTINE H5Aopen_async_f(obj_id, attr_name, attr_id, es_id, hdferr, aapl_id, file, func, line)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: obj_id
+    CHARACTER(LEN=*), INTENT(IN) :: attr_name
+    INTEGER(HID_T), INTENT(OUT) :: attr_id
+    INTEGER(HID_T), INTENT(IN) :: es_id
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: aapl_id
+    CHARACTER(LEN=*), INTENT(IN) , OPTIONAL :: file
+    CHARACTER(LEN=*), INTENT(IN) , OPTIONAL :: func
+    INTEGER         , INTENT(IN) , OPTIONAL :: line
+
+    INTEGER(HID_T) :: aapl_id_default
+    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) :: file_default = C_NULL_CHAR
+    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) :: func_default = C_NULL_CHAR
+    INTEGER(KIND=C_INT) :: line_default = 0
+    CHARACTER(LEN=LEN_TRIM(attr_name)+1,KIND=C_CHAR) :: c_attr_name
+
+    INTERFACE
+       INTEGER(HID_T) FUNCTION H5Aopen_async(file, func, line, &
+            obj_id, attr_name, aapl_id_default, es_id) BIND(C,NAME='H5Aopen_async')
+         IMPORT :: C_CHAR, C_INT
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: file
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: func
+         INTEGER(C_INT), VALUE :: line
+         INTEGER(HID_T), VALUE :: obj_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: attr_name
+         INTEGER(HID_T), VALUE :: aapl_id_default
+         INTEGER(HID_T), VALUE :: es_id
+       END FUNCTION H5Aopen_async
+    END INTERFACE
+
+    c_attr_name = TRIM(attr_name)//C_NULL_CHAR
+
+    aapl_id_default = H5P_DEFAULT_F
+    IF(PRESENT(aapl_id)) aapl_id_default = aapl_id
+    IF(PRESENT(file)) file_default = TRIM(file)//C_NULL_CHAR
+    IF(PRESENT(func)) func_default = TRIM(func)//C_NULL_CHAR
+    IF(PRESENT(line)) line_default = INT(line, C_INT)
+
+    attr_id = INT(H5Aopen_async(file_default, func_default, line_default, &
+         obj_id, c_attr_name, aapl_id_default, es_id), HID_T)
+
+    hdferr = 0
+    IF(attr_id.LT.0) hdferr = -1
+
+  END SUBROUTINE H5Aopen_async_f
+
+!>
+!! \ingroup FH5A
+!!
 !! \brief Deletes an attribute from an object according to index order
 !!
 !! \param loc_id   Location or object identifier; may be dataset or group
@@ -1160,9 +1227,9 @@ CONTAINS
     IF(PRESENT(aapl_id)) aapl_id_default = aapl_id
     lapl_id_default = H5P_DEFAULT_F
     IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
-    IF (PRESENT(file)) file_default = TRIM(file)//C_NULL_CHAR
-    IF (PRESENT(func)) func_default = TRIM(func)//C_NULL_CHAR
-    IF (PRESENT(line)) line_default = INT(line, C_INT)
+    IF(PRESENT(file)) file_default = TRIM(file)//C_NULL_CHAR
+    IF(PRESENT(func)) func_default = TRIM(func)//C_NULL_CHAR
+    IF(PRESENT(line)) line_default = INT(line, C_INT)
 
     attr_id = INT(H5Aopen_by_idx_async(file_default, func_default, line_default, &
          loc_id, c_obj_name, INT(idx_type, C_INT), INT(order, C_INT), n, &
