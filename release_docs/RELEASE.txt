@@ -1,4 +1,4 @@
-HDF5 version 1.13.3-1 currently under development
+HDF5 version 1.13.3 currently under development
 ================================================================================
 
 
@@ -260,12 +260,6 @@ Platforms Tested
     (crusher)                            GCC 11.2.0
                                      (cmake)
 
-    Linux 5.3.18-24-cray_shasta_c    cray-mpich/8.1.12
-    #1 SMP x86_64 GNU/Linux              Cray clang 13.0.0
-    (spock)                              AMD clang 13.0.0
-                                         GCC 8.2.0, 11.2.0
-                                     (cmake)
-
     Linux 4.14.0-115.35.1.1chaos     openmpi 4.0.5
     #1 SMP aarch64 GNU/Linux             GCC 9.2.0 (ARM-build-5)
     (stria)                              GCC 7.2.0 (Spack GCC)
@@ -278,15 +272,16 @@ Platforms Tested
                                      (cmake)
 
     Linux-4.14.0-115.21.2            spectrum-mpi/rolling-release
-    #1 SMP ppc64le GNU/Linux             clang 8.0.1, 11.0.1
-    (lassen)                             GCC 7.3.1
-                                         XL 16.1.1.2
+    #1 SMP ppc64le GNU/Linux             clang 12.0.1, 14.0.5
+    (lassen)                             GCC 8.3.1
+                                         XL 16.1.1.2, 2021,09.22, 2022.08.05
                                      (cmake)
 
-    Linux-4.12.14-150.75-default     cray-mpich/7.7.10
-    #1 SMP x86_64 GNU/Linux              GCC 7.3.0, 8.2.0
-    (cori)                               Intel (R) Version 19.0.3.199
-                                     (cmake)
+    Linux-4.12.14-197.99-default     cray-mpich/7.7.14
+    #1 SMP x86_64 GNU/Linux              cce 12.0.3
+    (theta)                              GCC 11.2.0
+                                         llvm 9.0
+                                         Intel 19.1.2
 
     Linux 3.10.0-1160.36.2.el7.ppc64 gcc (GCC) 4.8.5 20150623 (Red Hat 4.8.5-39)
     #1 SMP ppc64be GNU/Linux         g++ (GCC) 4.8.5 20150623 (Red Hat 4.8.5-39)
@@ -313,10 +308,10 @@ Platforms Tested
                                          Version 19.10-0
                                      (autotools and cmake)
 
-    Linux-3.10.0-1127.0.0.1chaos     openmpi-4.0.0
+    Linux-3.10.0-1160.0.0.1chaos     openmpi-4.1.2
     #1 SMP x86_64 GNU/Linux              clang 6.0.0, 11.0.1
     (quartz)                             GCC 7.3.0, 8.1.0
-                                         Intel 16.0.4, 18.0.2, 19.0.4
+                                         Intel 19.0.4, 2022.2, oneapi.2022.2
 
     Linux-3.10.0-1160.71.1.1chaos    openmpi/4.1
     #1 SMP x86_64 GNU/Linux              GCC 7.2.0
