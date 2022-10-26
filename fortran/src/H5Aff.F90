@@ -78,7 +78,7 @@ MODULE H5A
   PRIVATE h5awrite_char_scalar, h5awrite_ptr
   PRIVATE h5aread_char_scalar, h5aread_ptr
 
-#ifndef H5_DOXYGEN_FORTRAN
+#ifndef H5_DOXYGEN
   INTERFACE h5awrite_f
      MODULE PROCEDURE h5awrite_char_scalar
      ! This is the preferred way to call h5awrite
@@ -1332,7 +1332,7 @@ CONTAINS
 
   END SUBROUTINE H5Arename_f
 
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
 
 
 !>

@@ -51,7 +51,7 @@ MODULE H5T
      TYPE(C_PTR)     :: p   !< Pointer to VL data
   END TYPE hvl_t
 
-#ifndef H5_DOXYGEN_FORTRAN
+#ifndef H5_DOXYGEN
 
   INTERFACE h5tenum_insert_f
      MODULE PROCEDURE h5tenum_insert_f03
@@ -2088,7 +2088,7 @@ CONTAINS
 !! \param value   Pointer to the value of the new member.
 !! \param hdferr  \fortran_error
 !!
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
 !! See C API: @ref H5Tenum_insert()
 !!
   SUBROUTINE h5tenum_insert_f(&
@@ -2118,7 +2118,7 @@ CONTAINS
 
     namelen = LEN(name)
     hdferr = h5tenum_insert_ptr_c(type_id, name, namelen, value)
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
   END SUBROUTINE h5tenum_insert_f
 #else
   END SUBROUTINE h5tenum_insert_f03
@@ -2136,7 +2136,7 @@ CONTAINS
 !! \param value   Value of the new member.
 !! \param hdferr  \fortran_error
 !!
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
 !! See C API: @ref H5Tenum_insert()
 !!
   SUBROUTINE h5tenum_insert_f(type_id,  name, value, hdferr)
@@ -2163,7 +2163,7 @@ CONTAINS
 
     namelen = LEN(name)
     hdferr = h5tenum_insert_c(type_id, name, namelen, value)
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
   END SUBROUTINE h5tenum_insert_f
 #else
   END SUBROUTINE h5tenum_insert_f90

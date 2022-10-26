@@ -35,7 +35,7 @@
 
 #include <H5config_f.inc>
 
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
 MODULE H5LT
 #else
 MODULE H5LT_CONST
@@ -45,7 +45,7 @@ MODULE H5LT_CONST
   USE h5fortran_types
   USE hdf5
 
-#ifndef H5_DOXYGEN_FORTRAN
+#ifndef H5_DOXYGEN
 
   INTERFACE h5ltmake_dataset_f
      MODULE PROCEDURE h5ltmake_dataset_f_ptr
@@ -130,7 +130,7 @@ CONTAINS
   ! Make/Read dataset functions
   !-------------------------------------------------------------------------
 
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
   !>
   !! \ingroup FH5LT
   !!
@@ -173,13 +173,13 @@ CONTAINS
     namelen = LEN(dset_name)
     errcode = h5ltmake_dataset_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
 
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
   END SUBROUTINE h5ltmake_dataset_f
 #else
   END SUBROUTINE h5ltmake_dataset_f_ptr
 #endif
 
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
   !>
   !! \ingroup FH5LT
   !!
@@ -215,7 +215,7 @@ CONTAINS
     INTEGER,          INTENT(in) :: rank
     INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims
     INTEGER(hid_t),   INTENT(in) :: type_id
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
     TYPE(TYPE), INTENT(in), DIMENSION(*,*,...) :: buf
 #else
     INTEGER, INTENT(in), DIMENSION(*), TARGET :: buf
@@ -227,7 +227,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1))
     namelen = LEN(dset_name)
     errcode = h5ltmake_dataset_c(loc_id,namelen,dset_name,rank,dims,type_id,f_ptr)
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
   END SUBROUTINE h5ltmake_dataset_f
 #else
   END SUBROUTINE h5ltmake_dataset_f_int1
@@ -375,7 +375,7 @@ CONTAINS
   END SUBROUTINE h5ltmake_dataset_f_int7
 #endif
 
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
   !>
   !! \ingroup FH5LT
   !!
@@ -411,13 +411,13 @@ CONTAINS
 
     namelen = LEN(dset_name)
     errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id, buf)
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
   END SUBROUTINE h5ltread_dataset_f
 #else
   END SUBROUTINE h5ltread_dataset_f_ptr
 #endif
 
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
   !>
   !! \ingroup FH5LT
   !!
@@ -450,7 +450,7 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(in) :: dset_name
     INTEGER(hid_t),   INTENT(in) :: type_id
     INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
     TYPE(TYPE), INTENT(inout), DIMENSION(*,*,...) :: buf
 #else
     INTEGER, INTENT(inout), DIMENSION(*), TARGET :: buf
@@ -464,7 +464,7 @@ CONTAINS
     namelen = LEN(dset_name)
     errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr)
 
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
   END SUBROUTINE h5ltread_dataset_f
 #else
   END SUBROUTINE h5ltread_dataset_f_int1
@@ -1845,7 +1845,7 @@ CONTAINS
 
   END SUBROUTINE h5ltpath_valid_f
 
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
 END MODULE H5LT
 #else
 END MODULE H5LT_CONST

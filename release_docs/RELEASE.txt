@@ -47,6 +47,16 @@ New Features
 
     Configuration:
     -------------
+    - Add new CMake configuration variable HDF5_USE_GNU_DIRS
+
+      HDF5_USE_GNU_DIRS (default OFF) selects the use of GNU Coding Standard install
+      directory variables by including the CMake module, GNUInstallDirs(see CMake
+      documentation for details). The HDF_DIR_PATHS macro in the HDFMacros.cmake file
+      sets various PATH variables for use during the build, test and install processes.
+      By default, the historical settings for these variables will be used.
+
+      (ADB - 2022/10/21, GH-2175, GH-1716)
+
     - Update CMake minimum version to 3.18
 
       Updated CMake minimum version from 3.12 to 3.18 and removed version checks
@@ -55,12 +65,18 @@ New Features
 
       (ADB - 2022/08/29, HDFFV-11329)
 
-    -
-
 
     Library:
     --------
-    -
+    - Added multi dataset I/O feature
+
+      Added H5Dread_multi, H5Dread_multi_async, H5Dwrite_multi, and
+      H5Dwrite_multi_async API routines to allow I/O on multiple datasets with a
+      single API call. Added H5Dread_multi_f and H5Dwrite_multi_f Fortran
+      wrappers. Updated VOL callbacks for dataset I/O to support multi dataset
+      I/O.
+
+      (NAF - 2022/10/19)
 
 
     Parallel Library:
@@ -125,6 +141,16 @@ Bug Fixes since HDF5-1.13.2 release
 ===================================
     Library
     -------
+    - Fixed an issue with variable length attributes
+
+      Previously, if a variable length attribute was held open while its file
+      was opened through another handle, the same attribute was opened through
+      the second file handle, and the second file and attribute handles were
+      closed, attempting to write to the attribute through the first handle
+      would cause an error.
+
+      (NAF - 2022/10/24)
+
     - Fixed an issue with hyperslab selections
 
       Previously, when combining hyperslab selections, it was possible for the
@@ -157,7 +183,14 @@ Bug Fixes since HDF5-1.13.2 release
 
     Java Library
     ------------
-    -
+    - Improve variable-length datatype handling in JNI.
+
+      The existing JNI read-write functions could handle variable-length datatypes
+      that were simple variable-length datatype with an atomic sub-datatype. More
+      complex combinations could not be handled. Reworked the JNI read-write functions
+      to recursively inspect datatypes for variable-length sub-datatypes.
+
+      (ADB - 2022/10/12, HDFFV-8701,10375)
 
 
     Configuration

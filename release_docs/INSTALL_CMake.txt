@@ -753,8 +753,20 @@ if (MSVC)
   HDF5_INSTALL_DATA_DIR   "."
 else ()
   HDF5_INSTALL_DATA_DIR   "share"
+HDF5_INSTALL_DOC_DIR      "HDF5_INSTALL_DATA_DIR"
+
+Defaults as defined by the `GNU Coding Standards`
+HDF5_INSTALL_BIN_DIR      "bin"
+HDF5_INSTALL_LIB_DIR      "lib"
+HDF5_INSTALL_INCLUDE_DIR  "include"
+HDF5_INSTALL_MODULE_DIR   "HDF5_INSTALL_INCLUDE_DIR/mod"
+HDF5_INSTALL_CMAKE_DIR    "HDF5_INSTALL_LIB_DIR/cmake"
+HDF5_INSTALL_DATA_DIR     "share"
+HDF5_INSTALL_DOC_DIR      "HDF5_INSTALL_DATA_DIR/doc/hdf5"
 
 ---------------- HDF5 Advanced Options ---------------------
+HDF5_USE_GNU_DIRS              "TRUE to use GNU Coding Standard install directory variables,
+                                FALSE to use historical settings"                             FALSE
 ONLY_SHARED_LIBS               "Only Build Shared Libraries"                                  OFF
 ALLOW_UNSUPPORTED              "Allow unsupported combinations of configure options"          OFF
 HDF5_EXTERNAL_LIB_PREFIX       "Use prefix for custom library naming."                        ""
@@ -831,6 +843,10 @@ NOTE:
   on some unix operating systems. It adds the "-static" flag to cflags. This
   flag is not available on windows and some modern linux systems will
   ignore the flag.
+
+NOTE:
+  The HDF5_USE_GNU_DIRS option is usually recommended for linux platforms, but may
+  be useful on other platforms. See the CMake documentation for more details.
 
   ---------------- Unsupported Library Options ---------------------
     The threadsafe, C++ and Java interfaces are not compatible

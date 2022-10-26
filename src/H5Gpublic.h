@@ -130,8 +130,13 @@ H5_DLL hid_t H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcp
  * \ingroup ASYNC
  * \async_variant_of{H5Gcreate}
  */
+#ifndef H5_DOXYGEN
 H5_DLL hid_t H5Gcreate_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
                              const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id, hid_t es_id);
+#else
+H5_DLL hid_t  H5Gcreate_async(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id,
+                              hid_t es_id);
+#endif
 
 /**
  *-------------------------------------------------------------------------
@@ -217,8 +222,12 @@ H5_DLL hid_t H5Gopen2(hid_t loc_id, const char *name, hid_t gapl_id);
  * \ingroup ASYNC
  * \async_variant_of{H5Gopen}
  */
+#ifndef H5_DOXYGEN
 H5_DLL hid_t H5Gopen_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
                            const char *name, hid_t gapl_id, hid_t es_id);
+#else
+H5_DLL hid_t  H5Gopen_async(hid_t loc_id, const char *name, hid_t gapl_id, hid_t es_id);
+#endif
 
 /**
  *-------------------------------------------------------------------------
@@ -276,8 +285,12 @@ H5_DLL herr_t H5Gget_info(hid_t loc_id, H5G_info_t *ginfo);
  * \ingroup ASYNC
  * \async_variant_of{H5Gget_info}
  */
+#ifndef H5_DOXYGEN
 H5_DLL herr_t H5Gget_info_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
                                 H5G_info_t *ginfo /*out*/, hid_t es_id);
+#else
+H5_DLL herr_t H5Gget_info_async(hid_t loc_id, H5G_info_t *ginfo /*out*/, hid_t es_id);
+#endif
 
 /**
  *-------------------------------------------------------------------------
@@ -318,9 +331,14 @@ H5_DLL herr_t H5Gget_info_by_name(hid_t loc_id, const char *name, H5G_info_t *gi
  * \ingroup ASYNC
  * \async_variant_of{H5Gget_info_by_name}
  */
+#ifndef H5_DOXYGEN
 H5_DLL herr_t H5Gget_info_by_name_async(const char *app_file, const char *app_func, unsigned app_line,
                                         hid_t loc_id, const char *name, H5G_info_t *ginfo /*out*/,
                                         hid_t lapl_id, hid_t es_id);
+#else
+H5_DLL herr_t H5Gget_info_by_name_async(hid_t loc_id, const char *name, H5G_info_t *ginfo /*out*/,
+                                        hid_t lapl_id, hid_t es_id);
+#endif
 
 /**
  *-------------------------------------------------------------------------
@@ -375,10 +393,16 @@ H5_DLL herr_t H5Gget_info_by_idx(hid_t loc_id, const char *group_name, H5_index_
  * \ingroup ASYNC
  * \async_variant_of{H5Gget_info_by_idx}
  */
+#ifndef H5_DOXYGEN
 H5_DLL herr_t H5Gget_info_by_idx_async(const char *app_file, const char *app_func, unsigned app_line,
                                        hid_t loc_id, const char *group_name, H5_index_t idx_type,
                                        H5_iter_order_t order, hsize_t n, H5G_info_t *ginfo /*out*/,
                                        hid_t lapl_id, hid_t es_id);
+#else
+H5_DLL herr_t H5Gget_info_by_idx_async(hid_t loc_id, const char *group_name, H5_index_t idx_type,
+                                       H5_iter_order_t order, hsize_t n, H5G_info_t *ginfo /*out*/,
+                                       hid_t lapl_id, hid_t es_id);
+#endif
 
 /**
  *-------------------------------------------------------------------------
@@ -464,8 +488,12 @@ H5_DLL herr_t H5Gclose(hid_t group_id);
  * \ingroup ASYNC
  * \async_variant_of{H5Gclose}
  */
+#ifndef H5_DOXYGEN
 H5_DLL herr_t H5Gclose_async(const char *app_file, const char *app_func, unsigned app_line, hid_t group_id,
                              hid_t es_id);
+#else
+H5_DLL herr_t H5Gclose_async(hid_t group_id, hid_t es_id);
+#endif
 
 /// \cond DEV
 /* API Wrappers for async routines */
