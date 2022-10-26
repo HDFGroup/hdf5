@@ -8,7 +8,7 @@ jobs:
     name: Check for spelling errors
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: codespell-project/actions-codespell@master
         with:
           skip: ./bin/trace,./hl/tools/h5watch/h5watch.c,./tools/test/h5jam/tellub.c,./config/sanitizer/LICENSE,./tools/test/h5repack/testfiles/*.dat
