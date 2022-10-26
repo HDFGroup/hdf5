@@ -1688,7 +1688,7 @@ Java_hdf_hdf5lib_H5_H5Tflush(JNIEnv *env, jclass clss, jlong loc_id)
 
 done:
     return;
-}
+} /* end Java_hdf_hdf5lib_H5_H5Tflush */
 
 /*
  * Class:     hdf_hdf5lib_H5
@@ -1705,7 +1705,7 @@ Java_hdf_hdf5lib_H5_H5Trefresh(JNIEnv *env, jclass clss, jlong loc_id)
 
 done:
     return;
-}
+} /* end Java_hdf_hdf5lib_H5_H5Trefresh */
 
 #ifdef __cplusplus
 } /* end extern "C" */
