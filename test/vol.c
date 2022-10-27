@@ -40,6 +40,7 @@ const char *FILENAME[] = {"native_vol_test", NULL};
 #define NATIVE_VOL_TEST_DATATYPE_NAME  "test_datatype"
 
 #define N_ELEMENTS 10
+#define NAME_LEN   512
 
 /* A VOL class struct to verify registering optional operations */
 static int    reg_opt_curr_op_val;
@@ -2217,6 +2218,63 @@ error:
 } /* end test_vol_cap_flags() */
 
 /*-------------------------------------------------------------------------
+ * Function:    test_get_vol_name()
+ *
+ * Purpose:     Tests getting VOL name using H5VLget_connector_name
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_get_vol_name(void)
+{
+    hid_t fapl_id       = H5I_INVALID_HID;
+    hid_t file_id       = H5I_INVALID_HID;
+    char  filename[NAME_LEN];
+    char  vol_name[NAME_LEN];
+
+    TESTING("getting connector name");
+
+    /* Retrieve the file access property for testing */
+    fapl_id = h5_fileaccess();
+
+    h5_fixname(FILENAME[0], fapl_id, filename, sizeof filename);
+
+    if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
+        TEST_ERROR;
+
+    if (H5VLget_connector_name(file_id, vol_name, NAME_LEN) < 0)
+        TEST_ERROR;
+
+    if (HDstrcmp(vol_name, "native"))
+        TEST_ERROR;
+
+    if (H5Fclose(file_id) < 0)
+        TEST_ERROR;
+
+    h5_delete_test_file(FILENAME[0], fapl_id);
+
+    if (H5Pclose(fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file_id);
+        H5Pclose(fapl_id);
+    }
+    H5E_END_TRY;
+
+    return FAIL;
+} /* end test_vol_cap_flags() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    main
  *
  * Purpose:     Tests the virtual object layer interface (H5VL)
@@ -2252,6 +2310,7 @@ main(void)
     nerrors += test_basic_datatype_operation() < 0 ? 1 : 0;
     nerrors += test_async_vol_props() < 0 ? 1 : 0;
     nerrors += test_vol_cap_flags() < 0 ? 1 : 0;
+    nerrors += test_get_vol_name() < 0 ? 1 : 0;
 
     if (nerrors) {
         HDprintf("***** %d Virtual Object Layer TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
