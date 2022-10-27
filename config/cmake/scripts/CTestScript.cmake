@@ -269,7 +269,7 @@ endif ()
   ## -- LOCAL_MEMCHECK_TEST executes the Valgrind testing
   ## -- LOCAL_COVERAGE_TEST executes code coverage process
   ## --------------------------
-  ctest_start (${MODEL} TRACK ${MODEL})
+  ctest_start (${MODEL} GROUP ${MODEL})
   if (LOCAL_UPDATE)
     ctest_update (SOURCE "${CTEST_SOURCE_DIRECTORY}")
   endif ()
