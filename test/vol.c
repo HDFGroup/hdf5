@@ -2229,8 +2229,8 @@ error:
 static herr_t
 test_get_vol_name(void)
 {
-    hid_t fapl_id       = H5I_INVALID_HID;
-    hid_t file_id       = H5I_INVALID_HID;
+    hid_t fapl_id = H5I_INVALID_HID;
+    hid_t file_id = H5I_INVALID_HID;
     char  filename[NAME_LEN];
     char  vol_name[NAME_LEN];
 
@@ -2272,7 +2272,6 @@ error:
 
     return FAIL;
 } /* end test_vol_cap_flags() */
-
 
 /*-------------------------------------------------------------------------
  * Function:    main
