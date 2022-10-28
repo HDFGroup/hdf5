@@ -36,7 +36,7 @@ CONTENTS
 
 - New Features
 - Support for new platforms and languages
-- Bug Fixes since HDF5-1.13.2
+- Bug Fixes since HDF5-1.13.3
 - Platforms Tested
 - Known Problems
 - CMake vs. Autotools installations
@@ -47,36 +47,12 @@ New Features
 
     Configuration:
     -------------
-    - Add new CMake configuration variable HDF5_USE_GNU_DIRS
-
-      HDF5_USE_GNU_DIRS (default OFF) selects the use of GNU Coding Standard install
-      directory variables by including the CMake module, GNUInstallDirs(see CMake
-      documentation for details). The HDF_DIR_PATHS macro in the HDFMacros.cmake file
-      sets various PATH variables for use during the build, test and install processes.
-      By default, the historical settings for these variables will be used.
-
-      (ADB - 2022/10/21, GH-2175, GH-1716)
-
-    - Update CMake minimum version to 3.18
-
-      Updated CMake minimum version from 3.12 to 3.18 and removed version checks
-      which were added for Windows features not yet available in version 3.12. Also
-      removed configure macros and code checks for old style code compile checks.
-
-      (ADB - 2022/08/29, HDFFV-11329)
+    -
 
 
     Library:
     --------
-    - Added multi dataset I/O feature
-
-      Added H5Dread_multi, H5Dread_multi_async, H5Dwrite_multi, and
-      H5Dwrite_multi_async API routines to allow I/O on multiple datasets with a
-      single API call. Added H5Dread_multi_f and H5Dwrite_multi_f Fortran
-      wrappers. Updated VOL callbacks for dataset I/O to support multi dataset
-      I/O.
-
-      (NAF - 2022/10/19)
+    -
 
 
     Parallel Library:
@@ -86,12 +62,8 @@ New Features
 
     Fortran Library:
     ----------------
-    - Added pointer based H5Dfill_f API
+    -
 
-      Added Fortran H5Dfill_f, which is fully equivalent to the C API. It accepts pointers,
-      fill value datatype and datatype of dataspace elements.
-
-      (MSB - 2022/10/10, HDFFV-10734.)
 
     C++ Library:
     ------------
@@ -110,7 +82,7 @@ New Features
 
     High-Level APIs:
     ----------------
-    - 
+    -
 
 
     C Packet Table API:
@@ -125,11 +97,7 @@ New Features
 
     Documentation:
     --------------
-    - Doxygen User Guide documentation is available when configured and generated.
-      The resulting documentation files will be in the share/html subdirectory
-      of the HDF5 install directory.
-
-        (ADB - 2022/08/09)
+    -
 
 
 Support for new platforms, languages and compilers
@@ -137,60 +105,16 @@ Support for new platforms, languages and compilers
     -
 
 
-Bug Fixes since HDF5-1.13.2 release
+Bug Fixes since HDF5-1.13.3 release
 ===================================
     Library
     -------
-    - Fixed an issue with variable length attributes
-
-      Previously, if a variable length attribute was held open while its file
-      was opened through another handle, the same attribute was opened through
-      the second file handle, and the second file and attribute handles were
-      closed, attempting to write to the attribute through the first handle
-      would cause an error.
-
-      (NAF - 2022/10/24)
-
-    - Fixed an issue with hyperslab selections
-
-      Previously, when combining hyperslab selections, it was possible for the
-      library to produce an incorrect combined selection.
-
-      (NAF - 2022/09/25)
-
-    - Fixed an issue with attribute type conversion with compound datatypes
-
-      Previously, when performing type conversion for attribute I/O with a
-      compound datatype, the library would not fill the background buffer with
-      the contents of the destination, potentially causing data to be lost when
-      only writing to a subset of the compound fields.
-
-      (NAF - 2022/08/22, GitHub #2016)
-
-    - Memory leak 
-    
-      A memory leak was observed with variable-length fill value in 
-      H5O_fill_convert() function in H5Ofill.c. The leak is
-      manifested by running valgrind on test/set_extent.c.
-
-      Previously, fill->buf is used for datatype conversion 
-      if it is large enough and the variable-length information 
-      is therefore lost.  A buffer is now allocated regardless 
-      so that the element in fill->buf can later be reclaimed.
-
-      (VC - 2022/10/10, HDFFV-10840)
+    -
  
 
     Java Library
     ------------
-    - Improve variable-length datatype handling in JNI.
-
-      The existing JNI read-write functions could handle variable-length datatypes
-      that were simple variable-length datatype with an atomic sub-datatype. More
-      complex combinations could not be handled. Reworked the JNI read-write functions
-      to recursively inspect datatypes for variable-length sub-datatypes.
-
-      (ADB - 2022/10/12, HDFFV-8701,10375)
+    -
 
 
     Configuration
@@ -260,12 +184,6 @@ Platforms Tested
     (crusher)                            GCC 11.2.0
                                      (cmake)
 
-    Linux 5.3.18-24-cray_shasta_c    cray-mpich/8.1.12
-    #1 SMP x86_64 GNU/Linux              Cray clang 13.0.0
-    (spock)                              AMD clang 13.0.0
-                                         GCC 8.2.0, 11.2.0
-                                     (cmake)
-
     Linux 4.14.0-115.35.1.1chaos     openmpi 4.0.5
     #1 SMP aarch64 GNU/Linux             GCC 9.2.0 (ARM-build-5)
     (stria)                              GCC 7.2.0 (Spack GCC)
@@ -278,15 +196,16 @@ Platforms Tested
                                      (cmake)
 
     Linux-4.14.0-115.21.2            spectrum-mpi/rolling-release
-    #1 SMP ppc64le GNU/Linux             clang 8.0.1, 11.0.1
-    (lassen)                             GCC 7.3.1
-                                         XL 16.1.1.2
+    #1 SMP ppc64le GNU/Linux             clang 12.0.1, 14.0.5
+    (lassen)                             GCC 8.3.1
+                                         XL 16.1.1.2, 2021,09.22, 2022.08.05
                                      (cmake)
 
-    Linux-4.12.14-150.75-default     cray-mpich/7.7.10
-    #1 SMP x86_64 GNU/Linux              GCC 7.3.0, 8.2.0
-    (cori)                               Intel (R) Version 19.0.3.199
-                                     (cmake)
+    Linux-4.12.14-197.99-default     cray-mpich/7.7.14
+    #1 SMP x86_64 GNU/Linux              cce 12.0.3
+    (theta)                              GCC 11.2.0
+                                         llvm 9.0
+                                         Intel 19.1.2
 
     Linux 3.10.0-1160.36.2.el7.ppc64 gcc (GCC) 4.8.5 20150623 (Red Hat 4.8.5-39)
     #1 SMP ppc64be GNU/Linux         g++ (GCC) 4.8.5 20150623 (Red Hat 4.8.5-39)
@@ -313,10 +232,10 @@ Platforms Tested
                                          Version 19.10-0
                                      (autotools and cmake)
 
-    Linux-3.10.0-1127.0.0.1chaos     openmpi-4.0.0
+    Linux-3.10.0-1160.0.0.1chaos     openmpi-4.1.2
     #1 SMP x86_64 GNU/Linux              clang 6.0.0, 11.0.1
     (quartz)                             GCC 7.3.0, 8.1.0
-                                         Intel 16.0.4, 18.0.2, 19.0.4
+                                         Intel 19.0.4, 2022.2, oneapi.2022.2
 
     Linux-3.10.0-1160.71.1.1chaos    openmpi/4.1
     #1 SMP x86_64 GNU/Linux              GCC 7.2.0
@@ -372,10 +291,6 @@ Platforms Tested
 
 Known Problems
 ==============
-    Setting a variable-length dataset fill value will leak the memory allocated
-    for the p field of the hvl_t struct. A fix is in progress for this.
-    HDFFV-10840
-
     CMake files do not behave correctly with paths containing spaces.
     Do not use spaces in paths because the required escaping for handling spaces
     results in very complex and fragile build files.
