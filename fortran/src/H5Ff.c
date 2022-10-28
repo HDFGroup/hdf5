@@ -92,47 +92,6 @@ h5fcreate_c(_fcd name, int_f *namelen, int_f *access_flags, hid_t_f *crt_prp, hi
     return ret_value;
 }
 
-/****if* H5Ff/h5fflush_c
- * NAME
- *  h5fflush_c
- * PURPOSE
- *  Call H5Fflush to flush the object
- * INPUTS
- *  object_id - identifier of either a file, a dataset,
- *  a group, an attribute or a named data type
- *  scope - integer to specify the flushing action, either
- *                      H5F_SCOPE_GLOBAL or H5F_SCOPE_LOCAL
- * RETURNS
- *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Friday, November 5, 1999
- * SOURCE
- */
-int_f
-h5fflush_c(hid_t_f *object_id, int_f *scope)
-/******/
-{
-    int         ret_value = -1;
-    hid_t       c_file_id;
-    H5F_scope_t c_scope;
-    htri_t      status;
-    c_scope = (H5F_scope_t)*scope;
-
-    /*
-     * Call H5Fflush function.
-     */
-
-    c_file_id = *object_id;
-
-    status = H5Fflush(c_file_id, c_scope);
-
-    if (status >= 0)
-        ret_value = 0;
-
-    return ret_value;
-}
-
 /****if* H5Ff/h5fmount_c
  * NAME
  *  h5fmount_c
@@ -241,103 +200,6 @@ h5funmount_c(hid_t_f *loc_id, _fcd dsetname, int_f *namelen)
     return ret_value;
 }
 
-/****if* H5Ff/h5fopen_c
- * NAME
- *  h5fopen_c
- * PURPOSE
- *  Call H5Fopen to open the file
- * INPUTS
- *  name - name of the file
- *  namelen - name length
- *  access_flags - file access  flags
- *  acc_prp - identifier of access property list
- * OUTPUTS
- *  file_id - file identifier
- * RETURNS
- *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Tuesday, August 3, 1999
- * SOURCE
- */
-int_f
-h5fopen_c(_fcd name, int_f *namelen, int_f *access_flags, hid_t_f *acc_prp, hid_t_f *file_id)
-/******/
-{
-    int      ret_value = -1;
-    char    *c_name;
-    int_f    c_namelen;
-    hid_t    c_file_id;
-    unsigned c_access_flags;
-    hid_t    c_acc_prp;
-    c_acc_prp = (hid_t)*acc_prp;
-
-    /*
-     * Define access flags
-     */
-    c_access_flags = (unsigned)*access_flags;
-
-    /*
-     * Define access property
-     */
-    c_acc_prp = *acc_prp;
-
-    /*
-     * Convert FORTRAN name to C name
-     */
-    c_namelen = *namelen;
-    c_name    = (char *)HD5f2cstring(name, (size_t)c_namelen);
-    if (c_name == NULL)
-        return ret_value;
-
-    /*
-     * Call H5Fopen function.
-     */
-    c_file_id = H5Fopen(c_name, c_access_flags, c_acc_prp);
-
-    if (c_file_id >= 0) {
-        ret_value = 0;
-        *file_id  = (hid_t_f)c_file_id;
-    } /* end if */
-
-    HDfree(c_name);
-    return ret_value;
-}
-
-/****if* H5Ff/h5freopen_c
- * NAME
- *  h5freopen_c
- * PURPOSE
- *  Call H5Freopen to open the file
- * INPUTS
- *  file_id1 - file identifier
- * OUTPUTS
- *  file_id2 - file identifier
- * RETURNS
- *  0 on success, -1 on failure
- * AUTHOR
- *  Xiangyang Su
- *  Wednesday, November 3, 1999
- * SOURCE
- */
-int_f
-h5freopen_c(hid_t_f *file_id1, hid_t_f *file_id2)
-/******/
-{
-    int   ret_value = -1;
-    hid_t c_file_id1, c_file_id2;
-
-    c_file_id1 = *file_id1;
-    c_file_id2 = H5Freopen(c_file_id1);
-
-    if (c_file_id2 < 0)
-        return ret_value;
-    *file_id2 = (hid_t_f)c_file_id2;
-
-    ret_value = 0;
-    return ret_value;
-}
-
 /****if* H5Ff/h5fget_create_plist_c
  * NAME
  *  h5fget_create_plist_c
@@ -408,35 +270,6 @@ h5fget_access_plist_c(hid_t_f *file_id, hid_t_f *access_id)
     return ret_value;
 }
 
-/****if* H5Ff/h5fclose_c
- * NAME
- *  h5fclose_c
- * PURPOSE
- *  Call H5Fclose to close the file
- * INPUTS
- *  file_id - identifier of the file to be closed
- * RETURNS
- *  0 on success, -1 on failure
- * AUTHOR
- *  Elena Pourmal
- *  Monday, July 26, 1999
- * HISTORY
- *
- * SOURCE
- */
-
-int_f
-h5fclose_c(hid_t_f *file_id)
-/******/
-{
-    int   ret_value = 0;
-    hid_t c_file_id;
-
-    c_file_id = (hid_t)*file_id;
-    if (H5Fclose(c_file_id) < 0)
-        ret_value = -1;
-    return ret_value;
-}
 /****if* H5Ff/h5fget_obj_count_c
  * NAME
  *  h5fget_obj_count_c

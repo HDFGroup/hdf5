@@ -360,9 +360,9 @@ CONTAINS
     IF(PRESENT(func)) func_default = TRIM(func)//C_NULL_CHAR
     IF(PRESENT(line)) line_default = INT(line, C_INT)
 
-    dset_id = INT(h5dcreate_async(file_default, func_default, line_default, &
+    dset_id = h5dcreate_async(file_default, func_default, line_default, &
          loc_id, c_name, type_id, space_id, &
-         lcpl_id_default, dcpl_id_default, dapl_id_default, es_id), HID_T)
+         lcpl_id_default, dcpl_id_default, dapl_id_default, es_id)
 
     hdferr = 0
     IF(dset_id.LT.0) hdferr = -1
@@ -476,8 +476,8 @@ CONTAINS
     IF(PRESENT(func)) func_default = TRIM(func)//C_NULL_CHAR
     IF(PRESENT(line)) line_default = INT(line, C_INT)
 
-    dset_id = INT(H5Dopen_async(file_default, func_default, line_default, &
-         loc_id, c_name, dapl_id_default, es_id), HID_T)
+    dset_id = H5Dopen_async(file_default, func_default, line_default, &
+         loc_id, c_name, dapl_id_default, es_id)
 
     hdferr = 0
     IF(dset_id.LT.0) hdferr = -1
