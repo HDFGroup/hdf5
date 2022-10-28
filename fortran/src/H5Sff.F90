@@ -59,10 +59,10 @@ CONTAINS
 
     IMPLICIT NONE
     INTEGER, INTENT(IN) :: rank
-    INTEGER(HSIZE_T), INTENT(IN) :: dims(rank)
+    INTEGER(HSIZE_T), INTENT(IN), DIMENSION(1:rank) :: dims
     INTEGER(HID_T), INTENT(OUT) :: space_id
     INTEGER, INTENT(OUT) :: hdferr
-    INTEGER(HSIZE_T), INTENT(IN), OPTIONAL :: maxdims(rank)
+    INTEGER(HSIZE_T), INTENT(IN), OPTIONAL, DIMENSION(1:rank) :: maxdims
     INTEGER(HSIZE_T), ALLOCATABLE, DIMENSION(:) :: f_maxdims
 
     INTERFACE
@@ -82,9 +82,9 @@ CONTAINS
        RETURN
     ENDIF
     IF (PRESENT(maxdims)) THEN
-       f_maxdims = maxdims
+       f_maxdims(1:rank) = maxdims(1:rank)
     ELSE
-       f_maxdims = dims
+       f_maxdims(1:rank) = dims(1:rank)
     ENDIF
     hdferr = h5screate_simple_c(rank, dims, f_maxdims, space_id)
     DEALLOCATE(f_maxdims)

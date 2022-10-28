@@ -77,8 +77,8 @@ MODULE H5A
 
   PRIVATE h5awrite_char_scalar, h5awrite_ptr
   PRIVATE h5aread_char_scalar, h5aread_ptr
-  PRIVATE CHR_MAX
 
+  PRIVATE CHR_MAX
   INTEGER, PARAMETER :: CHR_MAX=256      ! longest file name allowed on linux, 63 for func names
 
 #ifndef H5_DOXYGEN

@@ -525,15 +525,13 @@ CONTAINS
 !!
 !! See C API: @ref H5Pget_version()
 !!
-  SUBROUTINE h5pget_version_f(prp_id, boot, freelist, &
-       stab, shhdr, hdferr)
+  SUBROUTINE h5pget_version_f(prp_id, boot, freelist, stab, shhdr, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: prp_id
-    INTEGER, DIMENSION(:), INTENT(OUT) :: boot
-    INTEGER, DIMENSION(:), INTENT(OUT) :: freelist
-
-    INTEGER, DIMENSION(:), INTENT(OUT) :: stab
-    INTEGER, DIMENSION(:), INTENT(OUT) :: shhdr
+    INTEGER, DIMENSION(*), INTENT(OUT) :: boot
+    INTEGER, DIMENSION(*), INTENT(OUT) :: freelist
+    INTEGER, DIMENSION(*), INTENT(OUT) :: stab
+    INTEGER, DIMENSION(*), INTENT(OUT) :: shhdr
     INTEGER, INTENT(OUT) :: hdferr
 
     INTERFACE

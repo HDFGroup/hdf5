@@ -89,6 +89,7 @@ MODULE H5D
   USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_CHAR
   USE H5GLOBAL
   USE H5LIB, ONLY : h5kind_to_type
+  USE H5S, ONLY : H5Sget_simple_extent_ndims_f, H5Sclose_f
 
   PRIVATE h5dread_vl_integer, h5dread_vl_real, h5dread_vl_string
   PRIVATE h5dwrite_vl_integer, h5dwrite_vl_real, h5dwrite_vl_string
@@ -98,6 +99,8 @@ MODULE H5D
 #if H5_FORTRAN_C_LONG_DOUBLE_IS_UNIQUE!=0
   PRIVATE h5dfill_c_long_double
 #endif
+  PRIVATE CHR_MAX
+  INTEGER, PARAMETER :: CHR_MAX=256      ! longest file name allowed on linux, 63 for func names
 
   INTERFACE h5dextend_f
      MODULE PROCEDURE h5dset_extent_f
@@ -240,29 +243,26 @@ CONTAINS
     INTEGER(HID_T) :: lcpl_id_default
     INTEGER(HID_T) :: dcpl_id_default
     INTEGER(HID_T) :: dapl_id_default
-
-    INTEGER :: namelen ! Name length
+    CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
 
     INTERFACE
-       INTEGER FUNCTION h5dcreate_c(loc_id, name, namelen, type_id, &
-            space_id, lcpl_id_default, dcpl_id_default, dapl_id_default, dset_id) &
-            BIND(C,NAME='h5dcreate_c')
+       INTEGER(HID_T) FUNCTION H5Dcreate2(loc_id, name, type_id, &
+            space_id, lcpl_id_default, dcpl_id_default, dapl_id_default) &
+            BIND(C,NAME='H5Dcreate2')
          IMPORT :: C_CHAR
          IMPORT :: HID_T
          IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN) :: loc_id
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
-         INTEGER :: namelen
-         INTEGER(HID_T), INTENT(IN) :: type_id
-         INTEGER(HID_T), INTENT(IN) :: space_id
-
-         INTEGER(HID_T) :: lcpl_id_default
-         INTEGER(HID_T) :: dcpl_id_default
-         INTEGER(HID_T) :: dapl_id_default
-
-         INTEGER(HID_T), INTENT(OUT) :: dset_id
-       END FUNCTION h5dcreate_c
+         INTEGER(HID_T), VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
+         INTEGER(HID_T), VALUE :: type_id
+         INTEGER(HID_T), VALUE :: space_id
+         INTEGER(HID_T), VALUE :: lcpl_id_default
+         INTEGER(HID_T), VALUE :: dcpl_id_default
+         INTEGER(HID_T), VALUE :: dapl_id_default
+       END FUNCTION H5Dcreate2
     END INTERFACE
+
+    c_name  = TRIM(name)//C_NULL_CHAR
 
     lcpl_id_default = H5P_DEFAULT_F
     dcpl_id_default = H5P_DEFAULT_F
@@ -272,11 +272,102 @@ CONTAINS
     IF(PRESENT(dcpl_id)) dcpl_id_default = dcpl_id
     IF(PRESENT(dapl_id)) dapl_id_default = dapl_id
 
-    namelen = LEN(name)
-    hdferr = h5dcreate_c(loc_id, name, namelen, type_id, space_id, &
-         lcpl_id_default, dcpl_id_default, dapl_id_default, dset_id)
+    dset_id = INT(h5dcreate2(loc_id, c_name, type_id, space_id, &
+         lcpl_id_default, dcpl_id_default, dapl_id_default), HID_T)
+
+    hdferr = 0
+    IF(dset_id.LT.0) hdferr = -1
 
   END SUBROUTINE h5dcreate_f
+
+!>
+!! \ingroup FH5D
+!!
+!! \brief Asynchronously creates a dataset at the specified location.
+!!
+!! \param loc_id   File or group identifier
+!! \param name     Dataset name
+!! \param type_id  Dataset datatype identifier
+!! \param space_id Dataset dataspace identifier
+!! \param dset_id  Dataset identifier
+!! \param es_id    \es_id
+!! \param hdferr   \fortran_error
+!! \param dcpl_id  Dataset creation property list
+!! \param lcpl_id  Link creation property list
+!! \param dapl_id  Dataset access property list
+!! \param file     \fortran_file
+!! \param func     \fortran_func
+!! \param line     \fortran_line
+!!
+!! See C API: @ref H5Dcreate_async()
+!!
+  SUBROUTINE h5dcreate_async_f(loc_id, name, type_id, space_id, dset_id, es_id, &
+       hdferr, dcpl_id, lcpl_id, dapl_id, file, func, line)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: name
+    INTEGER(HID_T), INTENT(IN) :: type_id
+    INTEGER(HID_T), INTENT(IN) :: space_id
+    INTEGER(HID_T), INTENT(OUT) :: dset_id
+    INTEGER(HID_T), INTENT(IN)  :: es_id
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: dcpl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lcpl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: dapl_id
+    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: file
+    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: func
+    INTEGER         , INTENT(IN), OPTIONAL :: line
+
+    INTEGER(HID_T) :: lcpl_id_default
+    INTEGER(HID_T) :: dcpl_id_default
+    INTEGER(HID_T) :: dapl_id_default
+    CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
+    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  file_default = C_NULL_CHAR
+    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  func_default = C_NULL_CHAR
+    INTEGER(KIND=C_INT) :: line_default = 0
+
+    INTERFACE
+       INTEGER(HID_T) FUNCTION H5Dcreate_async(file, func, line, loc_id, name, type_id, &
+            space_id, lcpl_id_default, dcpl_id_default, dapl_id_default, es_id) &
+            BIND(C,NAME='H5Dcreate_async')
+         IMPORT :: C_CHAR, C_INT
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: file
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: func
+         INTEGER(C_INT), VALUE :: line
+         INTEGER(HID_T), VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
+         INTEGER(HID_T), VALUE :: type_id
+         INTEGER(HID_T), VALUE :: space_id
+         INTEGER(HID_T), VALUE :: lcpl_id_default
+         INTEGER(HID_T), VALUE :: dcpl_id_default
+         INTEGER(HID_T), VALUE :: dapl_id_default
+         INTEGER(HID_T), VALUE :: es_id
+       END FUNCTION H5Dcreate_async
+    END INTERFACE
+
+    c_name  = TRIM(name)//C_NULL_CHAR
+
+    lcpl_id_default = H5P_DEFAULT_F
+    dcpl_id_default = H5P_DEFAULT_F
+    dapl_id_default = H5P_DEFAULT_F
+
+    IF(PRESENT(lcpl_id)) lcpl_id_default = lcpl_id
+    IF(PRESENT(dcpl_id)) dcpl_id_default = dcpl_id
+    IF(PRESENT(dapl_id)) dapl_id_default = dapl_id
+    IF(PRESENT(file)) file_default = TRIM(file)//C_NULL_CHAR
+    IF(PRESENT(func)) func_default = TRIM(func)//C_NULL_CHAR
+    IF(PRESENT(line)) line_default = INT(line, C_INT)
+
+    dset_id = INT(h5dcreate_async(file_default, func_default, line_default, &
+         loc_id, c_name, type_id, space_id, &
+         lcpl_id_default, dcpl_id_default, dapl_id_default, es_id), HID_T)
+
+    hdferr = 0
+    IF(dset_id.LT.0) hdferr = -1
+
+  END SUBROUTINE h5dcreate_async_f
 
 !>
 !! \ingroup FH5D
@@ -298,31 +389,100 @@ CONTAINS
     INTEGER(HID_T), INTENT(OUT) :: dset_id
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: dapl_id
-    INTEGER :: namelen                     ! Name length
 
     INTEGER(HID_T) :: dapl_id_default
+    CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
 
     INTERFACE
-       INTEGER FUNCTION h5dopen_c(loc_id, name, namelen, dapl_id_default, dset_id) &
-            BIND(C,NAME='h5dopen_c')
+       INTEGER(HID_T) FUNCTION H5Dopen2(loc_id, name, dapl_id_default) &
+            BIND(C,NAME='H5Dopen2')
          IMPORT :: C_CHAR
          IMPORT :: HID_T
          IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN) :: loc_id
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
-         INTEGER :: namelen
-         INTEGER(HID_T), INTENT(IN) :: dapl_id_default
-         INTEGER(HID_T), INTENT(OUT) :: dset_id
-       END FUNCTION h5dopen_c
+         INTEGER(HID_T), VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
+         INTEGER(HID_T),VALUE :: dapl_id_default
+       END FUNCTION H5Dopen2
     END INTERFACE
+
+    c_name  = TRIM(name)//C_NULL_CHAR
 
     dapl_id_default = H5P_DEFAULT_F
     IF(PRESENT(dapl_id)) dapl_id_default = dapl_id
 
-    namelen = LEN(name)
-    hdferr = h5dopen_c(loc_id, name, namelen, dapl_id_default, dset_id)
+    dset_id = INT(H5Dopen2(loc_id, c_name, dapl_id_default), HID_T)
+
+    hdferr = 0
+    IF(dset_id.LT.0) hdferr = -1
 
   END SUBROUTINE h5dopen_f
+
+!>
+!! \ingroup FH5D
+!!
+!! \brief Asynchronously opens an existing dataset.
+!!
+!! \param loc_id  File or group identifier
+!! \param name    Dataset name
+!! \param dset_id Dataset identifier
+!! \param es_id   \es_id
+!! \param hdferr  \fortran_error
+!! \param dapl_id Dataset access property list
+!! \param file    \fortran_file
+!! \param func    \fortran_func
+!! \param line    \fortran_line
+!!
+!! See C API: @ref H5Dopen_async()
+!!
+  SUBROUTINE h5dopen_async_f(loc_id, name, dset_id, es_id, hdferr, dapl_id, file, func, line)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: name
+    INTEGER(HID_T), INTENT(OUT) :: dset_id
+    INTEGER(HID_T), INTENT(IN)  :: es_id
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: dapl_id
+    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: file
+    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: func
+    INTEGER         , INTENT(IN), OPTIONAL :: line
+
+    INTEGER(HID_T) :: dapl_id_default
+    CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
+    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  file_default = C_NULL_CHAR
+    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  func_default = C_NULL_CHAR
+    INTEGER(KIND=C_INT) :: line_default = 0
+
+    INTERFACE
+       INTEGER(HID_T) FUNCTION H5Dopen_async(file, func, line, loc_id, name, dapl_id_default, es_id) &
+            BIND(C,NAME='H5Dopen_async')
+         IMPORT :: C_CHAR, C_INT
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: file
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: func
+         INTEGER(C_INT), VALUE :: line
+         INTEGER(HID_T), VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
+         INTEGER(HID_T), VALUE :: dapl_id_default
+         INTEGER(HID_T), VALUE :: es_id
+       END FUNCTION H5Dopen_async
+    END INTERFACE
+
+    c_name  = TRIM(name)//C_NULL_CHAR
+
+    dapl_id_default = H5P_DEFAULT_F
+    IF(PRESENT(dapl_id)) dapl_id_default = dapl_id
+    IF(PRESENT(file)) file_default = TRIM(file)//C_NULL_CHAR
+    IF(PRESENT(func)) func_default = TRIM(func)//C_NULL_CHAR
+    IF(PRESENT(line)) line_default = INT(line, C_INT)
+
+    dset_id = INT(H5Dopen_async(file_default, func_default, line_default, &
+         loc_id, c_name, dapl_id_default, es_id), HID_T)
+
+    hdferr = 0
+    IF(dset_id.LT.0) hdferr = -1
+
+  END SUBROUTINE h5dopen_async_f
 
 !>
 !! \ingroup FH5D
@@ -338,18 +498,67 @@ CONTAINS
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id
     INTEGER, INTENT(OUT) :: hdferr
+
     INTERFACE
-       INTEGER FUNCTION h5dclose_c(dset_id) &
-            BIND(C,NAME='h5dclose_c')
+       INTEGER(C_INT) FUNCTION H5Dclose(dset_id) BIND(C,NAME='H5Dclose')
+         IMPORT :: C_INT
          IMPORT :: HID_T
          IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN) :: dset_id
-       END FUNCTION h5dclose_c
+         INTEGER(HID_T), VALUE :: dset_id
+       END FUNCTION h5dclose
     END INTERFACE
 
-    hdferr = h5dclose_c(dset_id)
+    hdferr = INT(H5Dclose(dset_id))
 
   END SUBROUTINE h5dclose_f
+
+!>
+!! \ingroup FH5D
+!!
+!! \brief Asynchronously closes a dataset.
+!!
+!! \param dset_id Dataset identifier
+!! \param es_id   \es_id
+!! \param hdferr  \fortran_error
+!! \param file    \fortran_file
+!! \param func    \fortran_func
+!! \param line    \fortran_line
+!!
+!! See C API: @ref H5Dclose_async()
+!!
+  SUBROUTINE h5dclose_async_f(dset_id, es_id, hdferr, file, func, line)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: dset_id
+    INTEGER(HID_T), INTENT(IN)  :: es_id
+    INTEGER, INTENT(OUT) :: hdferr
+    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: file
+    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: func
+    INTEGER         , INTENT(IN), OPTIONAL :: line
+
+    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  file_default = C_NULL_CHAR
+    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  func_default = C_NULL_CHAR
+    INTEGER(KIND=C_INT) :: line_default = 0
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Dclose_async(file, func, line, dset_id, es_id) BIND(C,NAME='H5Dclose_async')
+         IMPORT ::  C_CHAR, C_INT
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: file
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: func
+         INTEGER(C_INT), VALUE :: line
+         INTEGER(HID_T), VALUE :: dset_id
+         INTEGER(HID_T), VALUE :: es_id
+       END FUNCTION H5Dclose_async
+    END INTERFACE
+
+    IF(PRESENT(file)) file_default = TRIM(file)//C_NULL_CHAR
+    IF(PRESENT(func)) func_default = TRIM(func)//C_NULL_CHAR
+    IF(PRESENT(line)) line_default = INT(line, C_INT)
+
+    hdferr = INT(H5Dclose_async(file_default, func_default, line_default, dset_id, es_id))
+
+  END SUBROUTINE h5dclose_async_f
 
 !>
 !! \ingroup FH5D
@@ -387,28 +596,148 @@ CONTAINS
 !! \brief Extends a dataset with unlimited dimension.
 !!
 !! \param dataset_id Dataset identifier
-!! \param size       Array containing the new magnitude of each dimension
+!! \param fsize      Array containing the new magnitude of each dimension
 !! \param hdferr     \fortran_error
 !!
 !! See C API: @ref H5Dset_extent()
 !!
-  SUBROUTINE h5dset_extent_f(dataset_id, size, hdferr)
+  SUBROUTINE h5dset_extent_f(dataset_id, fsize, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dataset_id
-    INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN)  :: size
+    INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: fsize
     INTEGER, INTENT(OUT) :: hdferr
+
+    INTEGER(HSIZE_T), DIMENSION(:), ALLOCATABLE :: csize
+    INTEGER(HID_T) :: space_id
+    INTEGER :: rank
+    INTEGER :: i
+
     INTERFACE
-       INTEGER FUNCTION h5dset_extent_c(dataset_id, size) &
-            BIND(C,NAME='h5dset_extent_c')
+       INTEGER(C_INT) FUNCTION H5Dset_extent(dataset_id, size) &
+            BIND(C,NAME='H5Dset_extent')
+         IMPORT :: C_INT
          IMPORT :: HID_T, HSIZE_T
          IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN) :: dataset_id
-         INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN)  :: size
-       END FUNCTION h5dset_extent_c
+         INTEGER(HID_T), VALUE :: dataset_id
+         INTEGER(HSIZE_T), DIMENSION(*) :: size
+       END FUNCTION H5Dset_extent
     END INTERFACE
 
-    hdferr = H5Dset_extent_c(dataset_id, size)
+    CALL H5Dget_space_f(dataset_id, space_id, hdferr)
+    IF(hdferr.LT.0) RETURN
+
+    CALL H5Sget_simple_extent_ndims_f(space_id, rank, hdferr)
+    IF( hdferr.LT.0 .OR. rank.LT.0 )THEN
+       CALL H5Sclose_f(space_id, hdferr)
+       hdferr = -1
+       RETURN
+    ENDIF
+    CALL H5Sclose_f(space_id, hdferr)
+    IF(hdferr.LT.0) RETURN
+
+    ALLOCATE(csize(rank), STAT=hdferr)
+    IF (hdferr .NE. 0 ) THEN
+       hdferr = -1
+       RETURN
+    ENDIF
+
+    !
+    ! Reverse dimensions due to C-FORTRAN storage order.
+    !
+    DO i = 1, rank
+       csize(i) = fsize(rank - i + 1)
+    ENDDO
+
+    hdferr = INT(H5Dset_extent(dataset_id, csize))
+
+    DEALLOCATE(csize)
+
   END SUBROUTINE h5dset_extent_f
+
+
+!>
+!! \ingroup FH5D
+!!
+!! \brief Asynchronously  extends a dataset with unlimited dimension.
+!!
+!! \param dataset_id Dataset identifier
+!! \param fsize      Array containing the new magnitude of each dimension
+!! \param es_id      \es_id
+!! \param hdferr     \fortran_error
+!! \param file       \fortran_file
+!! \param func       \fortran_func
+!! \param line       \fortran_line
+!!
+!! See C API: @ref H5Dset_extent_async()
+!!
+  SUBROUTINE h5dset_extent_async_f(dataset_id, fsize, es_id, hdferr, file, func, line)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: dataset_id
+    INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: fsize
+    INTEGER(HID_T), INTENT(IN)  :: es_id
+    INTEGER, INTENT(OUT) :: hdferr
+    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: file
+    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: func
+    INTEGER         , INTENT(IN), OPTIONAL :: line
+
+    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  file_default = C_NULL_CHAR
+    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  func_default = C_NULL_CHAR
+    INTEGER(KIND=C_INT) :: line_default = 0
+    INTEGER(HSIZE_T), DIMENSION(:), ALLOCATABLE :: csize
+    INTEGER(HID_T) :: space_id
+    INTEGER :: rank
+    INTEGER :: i
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Dset_extent_async(file, func, line, dataset_id, size, es_id) &
+            BIND(C,NAME='H5Dset_extent_async')
+         IMPORT :: C_CHAR, C_INT
+         IMPORT :: HID_T, HSIZE_T
+         IMPLICIT NONE
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: file
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: func
+         INTEGER(C_INT), VALUE :: line
+         INTEGER(HID_T), VALUE :: dataset_id
+         INTEGER(HSIZE_T), DIMENSION(*) :: size
+         INTEGER(HID_T), VALUE :: es_id
+       END FUNCTION H5Dset_extent_async
+    END INTERFACE
+
+    IF(PRESENT(file)) file_default = TRIM(file)//C_NULL_CHAR
+    IF(PRESENT(func)) func_default = TRIM(func)//C_NULL_CHAR
+    IF(PRESENT(line)) line_default = INT(line, C_INT)
+
+    CALL H5Dget_space_async_f(dataset_id, space_id, es_id, hdferr)
+    IF(hdferr.LT.0) RETURN
+
+    CALL H5Sget_simple_extent_ndims_f(space_id, rank, hdferr)
+    IF( hdferr.LT.0 .OR. rank.LT.0 )THEN
+       CALL H5Sclose_f(space_id, hdferr)
+       hdferr = -1
+       RETURN
+    ENDIF
+    CALL H5Sclose_f(space_id, hdferr)
+    IF(hdferr.LT.0) RETURN
+
+    ALLOCATE(csize(rank), STAT=hdferr)
+    IF (hdferr .NE. 0 ) THEN
+       hdferr = -1
+       RETURN
+    ENDIF
+
+    !
+    ! Reverse dimensions due to C-FORTRAN storage order.
+    !
+    DO i = 1, rank
+       csize(i) = fsize(rank - i + 1)
+    ENDDO
+
+    hdferr = INT(H5Dset_extent_async(file_default, func_default, line_default, &
+         dataset_id, csize, es_id))
+
+    DEALLOCATE(csize)
+
+  END SUBROUTINE h5dset_extent_async_f
 
 !>
 !! \ingroup FH5D
@@ -619,7 +948,7 @@ CONTAINS
   !>
   !! \ingroup FH5D
   !!
-  !! \brief Writes variable-length data. F2003 API h5dwritef should be used instead.
+  !! \brief Writes variable-length data. F2003 API h5dwrite_f should be used instead.
   !!
   !! \param dset_id       Dataset identifier.
   !! \param mem_type_id   Memory datatype identifier.
@@ -1002,8 +1331,7 @@ CONTAINS
 !>
 !! \ingroup FH5D
 !!
-!! \brief Returns an identifier for a copy of the dataspace for a
-!!       dataset.
+!! \brief Returns an identifier for a copy of the dataspace for a dataset.
 !!
 !! \param dataset_id   Dataset identifier.
 !! \param dataspace_id Dataspace identifier.
@@ -1017,16 +1345,74 @@ CONTAINS
     INTEGER(HID_T), INTENT(OUT) :: dataspace_id
     INTEGER, INTENT(OUT) :: hdferr
     INTERFACE
-       INTEGER FUNCTION h5dget_space_c(dataset_id, dataspace_id) BIND(C,NAME='h5dget_space_c')
+       INTEGER(HID_T) FUNCTION H5Dget_space(dataset_id) BIND(C,NAME='H5Dget_space')
          IMPORT :: HID_T
          IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN) :: dataset_id
-         INTEGER(HID_T), INTENT(OUT) :: dataspace_id
-       END FUNCTION h5dget_space_c
+         INTEGER(HID_T), VALUE :: dataset_id
+       END FUNCTION H5Dget_space
     END INTERFACE
 
-    hdferr = h5dget_space_c(dataset_id, dataspace_id)
+    dataspace_id = h5dget_space(dataset_id)
+
+    hdferr = 0
+    IF(dataspace_id.LT.0) hdferr = -1
+
   END SUBROUTINE h5dget_space_f
+
+!>
+!! \ingroup FH5D
+!!
+!! \brief Asynchronously returns an identifier for a copy of the dataspace for a dataset.
+!!
+!! \param dataset_id   Dataset identifier.
+!! \param dataspace_id Dataspace identifier.
+!! \param es_id        \es_id
+!! \param hdferr       \fortran_error
+!! \param file         \fortran_file
+!! \param func         \fortran_func
+!! \param line         \fortran_line
+!!
+!! See C API: @ref H5Dget_space_async()
+!!
+  SUBROUTINE h5dget_space_async_f(dataset_id, dataspace_id, es_id, hdferr, file, func, line)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: dataset_id
+    INTEGER(HID_T), INTENT(OUT) :: dataspace_id
+    INTEGER(HID_T), INTENT(IN)  :: es_id
+    INTEGER, INTENT(OUT) :: hdferr
+    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: file
+    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: func
+    INTEGER         , INTENT(IN), OPTIONAL :: line
+
+    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  file_default = C_NULL_CHAR
+    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  func_default = C_NULL_CHAR
+    INTEGER(KIND=C_INT) :: line_default = 0
+
+    INTERFACE
+       INTEGER(HID_T) FUNCTION H5Dget_space_async(file, func, line, dataset_id, es_id) &
+            BIND(C,NAME='H5Dget_space_async')
+         IMPORT :: C_CHAR, C_INT
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: file
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: func
+         INTEGER(C_INT), VALUE :: line
+         INTEGER(HID_T), VALUE :: dataset_id
+         INTEGER(HID_T), VALUE :: es_id
+       END FUNCTION H5Dget_space_async
+    END INTERFACE
+
+    IF(PRESENT(file)) file_default = TRIM(file)//C_NULL_CHAR
+    IF(PRESENT(func)) func_default = TRIM(func)//C_NULL_CHAR
+    IF(PRESENT(line)) line_default = INT(line, C_INT)
+
+    dataspace_id = H5Dget_space_async(file_default, func_default, line_default, &
+         dataset_id, es_id)
+
+    hdferr = 0
+    IF(dataspace_id.LT.0) hdferr = -1
+
+  END SUBROUTINE h5dget_space_async_f
 
 !>
 !! \ingroup FH5D
@@ -1093,6 +1479,140 @@ CONTAINS
     hdferr = H5Dvlen_reclaim_c(type_id, space_id, plist_id, buf)
 
   END SUBROUTINE H5Dvlen_reclaim_f
+
+!>
+!! \ingroup FH5D
+!!
+!! \brief Asynchronously reads raw data from a dataset into a buffer.
+!!
+!! \param dset_id       Identifier of the dataset read from.
+!! \param mem_type_id   Identifier of the memory datatype.
+!! \param buf           Buffer to receive data read from file.
+!! \param es_id         \es_id
+!! \param hdferr        \fortran_error
+!! \param mem_space_id  Identifier of the memory dataspace.
+!! \param file_space_id Identifier of dataset&apos;s dataspace in the file. (Default: H5S_ALL_F)
+!! \param xfer_prp      Identifier of a transfer property list for this I/O operation.
+!! \param file          \fortran_file
+!! \param func          \fortran_func
+!! \param line          \fortran_line
+!!
+!! See C API: @ref H5Dread_async()
+!!
+ SUBROUTINE h5dread_async_f(dset_id, mem_type_id, buf, es_id, hdferr, &
+      mem_space_id, file_space_id, xfer_prp, file, func, line)
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: dset_id
+    INTEGER(HID_T), INTENT(IN) :: mem_type_id
+    TYPE(C_PTR), INTENT(INOUT) :: buf
+    INTEGER(HID_T), INTENT(IN) :: es_id
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: mem_space_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: file_space_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: xfer_prp
+    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: file
+    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: func
+    INTEGER         , INTENT(IN), OPTIONAL :: line
+
+    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) :: file_default = C_NULL_CHAR
+    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) :: func_default = C_NULL_CHAR
+    INTEGER(KIND=C_INT) :: line_default = 0
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Dread_async(file, func, line, dset_id, mem_type_id, &
+            mem_space_id, file_space_id, xfer_prp, buf, es_id) BIND(C,NAME='H5Dread_async')
+         IMPORT :: C_CHAR, C_INT, C_PTR
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: file
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: func
+         INTEGER(C_INT), VALUE :: line
+         INTEGER(HID_T), VALUE :: dset_id
+         INTEGER(HID_T), VALUE :: mem_type_id
+         INTEGER(HID_T), VALUE :: mem_space_id
+         INTEGER(HID_T), VALUE :: file_space_id
+         INTEGER(HID_T), VALUE :: xfer_prp
+         TYPE(C_PTR)   , VALUE :: buf
+         INTEGER(HID_T), VALUE :: es_id
+       END FUNCTION H5Dread_async
+    END INTERFACE
+
+    IF (PRESENT(file)) file_default = TRIM(file)//C_NULL_CHAR
+    IF (PRESENT(func)) func_default = TRIM(func)//C_NULL_CHAR
+    IF (PRESENT(line)) line_default = INT(line, C_INT)
+
+    hdferr = H5Dread_async(file_default, func_default, line_default, &
+         dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, es_id )
+
+  END SUBROUTINE h5dread_async_f
+
+!>
+!! \ingroup FH5D
+!!
+!! \brief Asynchronously writes raw data from a buffer to a dataset.
+!!
+!! \param dset_id       Identifier of the dataset to write to.
+!! \param mem_type_id   Identifier of the memory datatype.
+!! \param buf           Buffer with data to be written to the file.
+!! \param es_id         \es_id
+!! \param hdferr        \fortran_error
+!! \param mem_space_id  Identifier of the memory dataspace.
+!! \param file_space_id Identifier of the dataset&apos;s dataspace in the file.
+!! \param xfer_prp      Identifier of a transfer property list for this I/O operation.
+!! \param file          \fortran_file
+!! \param func          \fortran_func
+!! \param line          \fortran_line
+!!
+!! See C API: @ref H5Dwrite_async()
+!!
+ SUBROUTINE h5dwrite_async_f(dset_id, mem_type_id, buf, es_id, hdferr, &
+      mem_space_id, file_space_id, xfer_prp, file, func, line)
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: dset_id
+    INTEGER(HID_T), INTENT(IN) :: mem_type_id
+    TYPE(C_PTR), INTENT(IN) :: buf
+    INTEGER(HID_T), INTENT(IN) :: es_id
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: mem_space_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: file_space_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: xfer_prp
+    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: file
+    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: func
+    INTEGER         , INTENT(IN), OPTIONAL :: line
+
+    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) :: file_default = C_NULL_CHAR
+    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) :: func_default = C_NULL_CHAR
+    INTEGER(KIND=C_INT) :: line_default = 0
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Dwrite_async(file, func, line, dset_id, mem_type_id, &
+            mem_space_id, file_space_id, xfer_prp, buf, es_id) BIND(C,NAME='H5Dwrite_async')
+         IMPORT :: C_CHAR, C_INT, C_PTR
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: file
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: func
+         INTEGER(C_INT), VALUE :: line
+         INTEGER(HID_T), VALUE :: dset_id
+         INTEGER(HID_T), VALUE :: mem_type_id
+         INTEGER(HID_T), VALUE :: mem_space_id
+         INTEGER(HID_T), VALUE :: file_space_id
+         INTEGER(HID_T), VALUE :: xfer_prp
+         TYPE(C_PTR)   , VALUE :: buf
+         INTEGER(HID_T), VALUE :: es_id
+       END FUNCTION H5Dwrite_async
+    END INTERFACE
+
+    IF (PRESENT(file)) file_default = TRIM(file)//C_NULL_CHAR
+    IF (PRESENT(func)) func_default = TRIM(func)//C_NULL_CHAR
+    IF (PRESENT(line)) line_default = INT(line, C_INT)
+
+    hdferr = H5Dwrite_async(file_default, func_default, line_default, &
+         dset_id, mem_type_id, mem_space_id, file_space_id, xfer_prp, buf, es_id)
+
+  END SUBROUTINE h5dwrite_async_f
 
 #ifdef H5_DOXYGEN
 !>
