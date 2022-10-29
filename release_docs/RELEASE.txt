@@ -1,4 +1,4 @@
-HDF5 version 1.13.3 currently under development
+HDF5 version 1.13.3 released on 2022-10-28
 ================================================================================
 
 
@@ -40,6 +40,9 @@ CONTENTS
 - Platforms Tested
 - Known Problems
 - CMake vs. Autotools installations
+
+New features and bug fixes previously added in 1.13.0 - 1.13.2 releases can be 
+found in release_docs/HISTORY-1_13.txt in the HDF5 source code.
 
 
 New Features
@@ -151,6 +154,19 @@ Bug Fixes since HDF5-1.13.2 release
 
       (NAF - 2022/10/24)
 
+    - Memory leak 
+    
+      A memory leak was observed with variable-length fill value in 
+      H5O_fill_convert() function in H5Ofill.c. The leak is
+      manifested by running valgrind on test/set_extent.c.
+
+      Previously, fill->buf is used for datatype conversion 
+      if it is large enough and the variable-length information 
+      is therefore lost.  A buffer is now allocated regardless 
+      so that the element in fill->buf can later be reclaimed.
+
+      (VC - 2022/10/10, HDFFV-10840)
+ 
     - Fixed an issue with hyperslab selections
 
       Previously, when combining hyperslab selections, it was possible for the
@@ -167,19 +183,6 @@ Bug Fixes since HDF5-1.13.2 release
 
       (NAF - 2022/08/22, GitHub #2016)
 
-    - Memory leak 
-    
-      A memory leak was observed with variable-length fill value in 
-      H5O_fill_convert() function in H5Ofill.c. The leak is
-      manifested by running valgrind on test/set_extent.c.
-
-      Previously, fill->buf is used for datatype conversion 
-      if it is large enough and the variable-length information 
-      is therefore lost.  A buffer is now allocated regardless 
-      so that the element in fill->buf can later be reclaimed.
-
-      (VC - 2022/10/10, HDFFV-10840)
- 
 
     Java Library
     ------------
@@ -367,9 +370,26 @@ Platforms Tested
 
 Known Problems
 ==============
-    Setting a variable-length dataset fill value will leak the memory allocated
-    for the p field of the hvl_t struct. A fix is in progress for this.
-    HDFFV-10840
+
+    ************************************************************
+    *                                  _                       *
+    *                                 (_)                      *
+    *        __      ____ _ _ __ _ __  _ _ __   __ _           *
+    *        \ \ /\ / / _` | '__| '_ \| | '_ \ / _` |          *
+    *         \ V  V / (_| | |  | | | | | | | | (_| |          *
+    *          \_/\_/ \__,_|_|  |_| |_|_|_| |_|\__, |          *
+    *                                           __/ |          *
+    *                                          |___/           *
+    *                                                          *
+    *  Please refrain from running any program (including      *
+    *  HDF5 tests) which uses the subfiling VFD on Perlmutter  *
+    *  at the National Energy Research Scientific Computing    *
+    *  Center, NERSC.                                          *
+    *  Doing so may cause a system disruption due to subfiling *
+    *  crashing Lustre. The sytem's Lustre bug is expected     *
+    *  to be resolved by 2023.                                 *
+    *                                                          *
+    ************************************************************
 
     CMake files do not behave correctly with paths containing spaces.
     Do not use spaces in paths because the required escaping for handling spaces
