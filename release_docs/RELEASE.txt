@@ -1,4 +1,4 @@
-HDF5 version 1.13.3 currently under development
+HDF5 version 1.13.3 released on 2022-10-28
 ================================================================================
 
 
