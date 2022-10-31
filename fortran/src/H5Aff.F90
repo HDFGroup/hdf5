@@ -121,11 +121,22 @@ MODULE H5A
        TYPE(C_PTR), VALUE :: buf
      END FUNCTION h5aread_f_c
   END INTERFACE
+
+  INTERFACE
+     INTEGER(HID_T) FUNCTION H5Aopen(obj_id, attr_name, aapl_id_default) &
+          BIND(C,NAME='H5Aopen')
+       IMPORT :: C_CHAR
+       IMPORT :: HID_T
+       IMPLICIT NONE
+       INTEGER(HID_T), VALUE :: obj_id
+       CHARACTER(KIND=C_CHAR), DIMENSION(*) :: attr_name
+       INTEGER(HID_T), VALUE :: aapl_id_default
+     END FUNCTION H5Aopen
+  END INTERFACE
+
 #endif
 
 CONTAINS
-
-
 
 !>
 !! \ingroup FH5A
@@ -293,18 +304,6 @@ CONTAINS
 
     CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
 
-! H5Aopen_name is deprecated
-    INTERFACE
-       INTEGER(HID_T) FUNCTION H5Aopen(obj_id, name, aapl_id) BIND(C,NAME='H5Aopen')
-         IMPORT :: C_CHAR
-         IMPORT :: HID_T
-         IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN), VALUE :: obj_id
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
-         INTEGER(HID_T), INTENT(IN), VALUE :: aapl_id
-       END FUNCTION H5Aopen
-    END INTERFACE
-
     c_name = TRIM(name)//C_NULL_CHAR
     attr_id = H5Aopen(obj_id, c_name, H5P_DEFAULT_F)
 
@@ -331,16 +330,16 @@ CONTAINS
     INTEGER(HID_T), INTENT(OUT) :: attr_id
     INTEGER, INTENT(OUT) :: hdferr
     INTERFACE
-       INTEGER(HID_T) FUNCTION H5Aopen_by_idx(obj_id, index) BIND(C,NAME='H5Aopen_by_idx')
+       INTEGER(HID_T) FUNCTION H5Aopen_idx(obj_id, index) BIND(C,NAME='H5Aopen_idx')
          IMPORT :: HID_T
          IMPORT :: C_INT
          IMPLICIT NONE
          INTEGER(HID_T), VALUE :: obj_id
          INTEGER(C_INT), VALUE :: index
-       END FUNCTION H5Aopen_by_idx
+       END FUNCTION H5Aopen_idx
     END INTERFACE
 
-    attr_id = H5Aopen_by_idx(obj_id, INT(index, C_INT))
+    attr_id = H5Aopen_idx(obj_id, INT(index, C_INT))
 
     hdferr = 0
     IF(attr_id.LT.0) hdferr = -1
@@ -869,18 +868,6 @@ CONTAINS
 
     INTEGER(HID_T) :: aapl_id_default
     CHARACTER(LEN=LEN_TRIM(attr_name)+1,KIND=C_CHAR) :: c_attr_name
-
-    INTERFACE
-       INTEGER(HID_T) FUNCTION H5Aopen(obj_id, attr_name, aapl_id_default) &
-            BIND(C,NAME='H5Aopen')
-         IMPORT :: C_CHAR
-         IMPORT :: HID_T
-         IMPLICIT NONE
-         INTEGER(HID_T), VALUE :: obj_id
-         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: attr_name
-         INTEGER(HID_T), VALUE :: aapl_id_default
-       END FUNCTION H5Aopen
-    END INTERFACE
 
     c_attr_name = TRIM(attr_name)//C_NULL_CHAR
 

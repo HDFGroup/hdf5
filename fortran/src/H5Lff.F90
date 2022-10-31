@@ -49,7 +49,7 @@ MODULE H5L
   END TYPE union_t
 
 !
-! @brief Fortran2003 Derived Type for h5l_info_t
+! @brief Fortran2003 Derived Type for @ref H5L_info_t
 !
   TYPE, bind(c) :: h5l_info_t
      INTEGER(c_int) :: type !< Specifies the link class. Valid values include the following:
