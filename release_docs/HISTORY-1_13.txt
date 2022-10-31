@@ -7,6 +7,7 @@ the develop branch
 01.      Release Information for hdf5-1.13.0
 02.      Release Information for hdf5-1.13.1
 03.      Release Information for hdf5-1.13.2
+04.      Release Information for hdf5-1.13.3
 
 [Search on the string '%%%%' for section breaks of each release.]
 
@@ -2671,6 +2672,474 @@ Known Problems
         MPI_TEST-t_bigio fails with spectrum-mpi on ppc64le platforms.
 
         MPI_TEST-t_subfiling_vfd and MPI_TEST_EXAMPLES-ph5_subfiling fail with 
+        cray-mpich on theta and with XL compilers on ppc64le platforms.
+
+        MPI_TEST_testphdf5_tldsc fails with cray-mpich 7.7 on cori and theta.
+
+    Known problems in previous releases can be found in the HISTORY*.txt files
+    in the HDF5 source. Please report any new problems found to
+    help@hdfgroup.org.
+
+
+CMake vs. Autotools installations
+=================================
+While both build systems produce similar results, there are differences.
+Each system produces the same set of folders on linux (only CMake works
+on standard Windows); bin, include, lib and share. Autotools places the
+COPYING and RELEASE.txt file in the root folder, CMake places them in
+the share folder.
+
+The bin folder contains the tools and the build scripts. Additionally, CMake
+creates dynamic versions of the tools with the suffix "-shared". Autotools
+installs one set of tools depending on the "--enable-shared" configuration
+option.
+  build scripts
+  -------------
+  Autotools: h5c++, h5cc, h5fc
+  CMake: h5c++, h5cc, h5hlc++, h5hlcc
+
+The include folder holds the header files and the fortran mod files. CMake
+places the fortran mod files into separate shared and static subfolders,
+while Autotools places one set of mod files into the include folder. Because
+CMake produces a tools library, the header files for tools will appear in
+the include folder.
+
+The lib folder contains the library files, and CMake adds the pkgconfig
+subfolder with the hdf5*.pc files used by the bin/build scripts created by
+the CMake build. CMake separates the C interface code from the fortran code by
+creating C-stub libraries for each Fortran library. In addition, only CMake
+installs the tools library. The names of the szip libraries are different
+between the build systems.
+
+The share folder will have the most differences because CMake builds include
+a number of CMake specific files for support of CMake's find_package and support
+for the HDF5 Examples CMake project.
+
+The issues with the gif tool are:
+    HDFFV-10592 CVE-2018-17433
+    HDFFV-10593 CVE-2018-17436
+    HDFFV-11048 CVE-2020-10809
+These CVE issues have not yet been addressed and can be avoided by not building
+the gif tool. Disable building the High-Level tools with these options:
+    autotools:   --disable-hltools
+    cmake:       HDF5_BUILD_HL_TOOLS=OFF
+
+
+%%%%1.13.3%%%%
+
+HDF5 version 1.13.3 released on 2022-10-28
+================================================================================
+
+
+INTRODUCTION
+============
+
+This document describes the differences between this release and the previous
+HDF5 release. It contains information on the platforms tested and known
+problems in this release. For more details check the HISTORY*.txt files in the
+HDF5 source.
+
+Note that documentation in the links below will be updated at the time of each
+final release.
+
+Links to HDF5 documentation can be found on The HDF5 web page:
+
+     https://portal.hdfgroup.org/display/HDF5/HDF5
+
+The official HDF5 releases can be obtained from:
+
+     https://www.hdfgroup.org/downloads/hdf5/
+
+Changes from Release to Release and New Features in the HDF5-1.13.x release series
+can be found at:
+
+     https://portal.hdfgroup.org/display/HDF5/HDF5+Application+Developer%27s+Guide
+
+If you have any questions or comments, please send them to the HDF Help Desk:
+
+     help@hdfgroup.org
+
+
+CONTENTS
+========
+
+- New Features
+- Support for new platforms and languages
+- Bug Fixes since HDF5-1.13.2
+- Platforms Tested
+- Known Problems
+- CMake vs. Autotools installations
+
+New features and bug fixes previously added in 1.13.0 - 1.13.2 releases can be 
+found in release_docs/HISTORY-1_13.txt in the HDF5 source code.
+
+
+New Features
+============
+
+    Configuration:
+    -------------
+    - Add new CMake configuration variable HDF5_USE_GNU_DIRS
+
+      HDF5_USE_GNU_DIRS (default OFF) selects the use of GNU Coding Standard install
+      directory variables by including the CMake module, GNUInstallDirs(see CMake
+      documentation for details). The HDF_DIR_PATHS macro in the HDFMacros.cmake file
+      sets various PATH variables for use during the build, test and install processes.
+      By default, the historical settings for these variables will be used.
+
+      (ADB - 2022/10/21, GH-2175, GH-1716)
+
+    - Update CMake minimum version to 3.18
+
+      Updated CMake minimum version from 3.12 to 3.18 and removed version checks
+      which were added for Windows features not yet available in version 3.12. Also
+      removed configure macros and code checks for old style code compile checks.
+
+      (ADB - 2022/08/29, HDFFV-11329)
+
+
+    Library:
+    --------
+    - Added multi dataset I/O feature
+
+      Added H5Dread_multi, H5Dread_multi_async, H5Dwrite_multi, and
+      H5Dwrite_multi_async API routines to allow I/O on multiple datasets with a
+      single API call. Added H5Dread_multi_f and H5Dwrite_multi_f Fortran
+      wrappers. Updated VOL callbacks for dataset I/O to support multi dataset
+      I/O.
+
+      (NAF - 2022/10/19)
+
+
+    Parallel Library:
+    -----------------
+    -
+
+
+    Fortran Library:
+    ----------------
+    - Added pointer based H5Dfill_f API
+
+      Added Fortran H5Dfill_f, which is fully equivalent to the C API. It accepts pointers,
+      fill value datatype and datatype of dataspace elements.
+
+      (MSB - 2022/10/10, HDFFV-10734.)
+
+    C++ Library:
+    ------------
+    -
+
+
+    Java Library:
+    -------------
+    -
+
+
+    Tools:
+    ------
+    -
+
+
+    High-Level APIs:
+    ----------------
+    - 
+
+
+    C Packet Table API:
+    -------------------
+    -
+
+
+    Internal header file:
+    ---------------------
+    -
+
+
+    Documentation:
+    --------------
+    - Doxygen User Guide documentation is available when configured and generated.
+      The resulting documentation files will be in the share/html subdirectory
+      of the HDF5 install directory.
+
+        (ADB - 2022/08/09)
+
+
+Support for new platforms, languages and compilers
+==================================================
+    -
+
+
+Bug Fixes since HDF5-1.13.2 release
+===================================
+    Library
+    -------
+    - Fixed an issue with variable length attributes
+
+      Previously, if a variable length attribute was held open while its file
+      was opened through another handle, the same attribute was opened through
+      the second file handle, and the second file and attribute handles were
+      closed, attempting to write to the attribute through the first handle
+      would cause an error.
+
+      (NAF - 2022/10/24)
+
+    - Memory leak 
+    
+      A memory leak was observed with variable-length fill value in 
+      H5O_fill_convert() function in H5Ofill.c. The leak is
+      manifested by running valgrind on test/set_extent.c.
+
+      Previously, fill->buf is used for datatype conversion 
+      if it is large enough and the variable-length information 
+      is therefore lost.  A buffer is now allocated regardless 
+      so that the element in fill->buf can later be reclaimed.
+
+      (VC - 2022/10/10, HDFFV-10840)
+ 
+    - Fixed an issue with hyperslab selections
+
+      Previously, when combining hyperslab selections, it was possible for the
+      library to produce an incorrect combined selection.
+
+      (NAF - 2022/09/25)
+
+    - Fixed an issue with attribute type conversion with compound datatypes
+
+      Previously, when performing type conversion for attribute I/O with a
+      compound datatype, the library would not fill the background buffer with
+      the contents of the destination, potentially causing data to be lost when
+      only writing to a subset of the compound fields.
+
+      (NAF - 2022/08/22, GitHub #2016)
+
+
+    Java Library
+    ------------
+    - Improve variable-length datatype handling in JNI.
+
+      The existing JNI read-write functions could handle variable-length datatypes
+      that were simple variable-length datatype with an atomic sub-datatype. More
+      complex combinations could not be handled. Reworked the JNI read-write functions
+      to recursively inspect datatypes for variable-length sub-datatypes.
+
+      (ADB - 2022/10/12, HDFFV-8701,10375)
+
+
+    Configuration
+    -------------
+    -
+
+
+    Tools
+    -----
+    -
+
+
+    Performance
+    -------------
+    -
+
+
+    Fortran API
+    -----------
+    -
+
+    High-Level Library
+    ------------------
+    -
+
+
+    Fortran High-Level APIs
+    -----------------------
+    -
+
+
+    Documentation
+    -------------
+    -
+
+
+    F90 APIs
+    --------
+    -
+
+
+    C++ APIs
+    --------
+    - 
+
+
+    Testing
+    -------
+    -
+
+
+Platforms Tested
+===================
+
+    Linux 5.16.14-200.fc35           GNU gcc (GCC) 11.2.1 20220127 (Red Hat 11.2.1-9)
+    #1 SMP x86_64  GNU/Linux         GNU Fortran (GCC) 11.2.1 20220127 (Red Hat 11.2.1-9)
+    Fedora35                         clang version 13.0.0 (Fedora 13.0.0-3.fc35)
+                                     (cmake and autotools)
+
+    Linux 5.11.0-34-generic          GNU gcc (GCC) 9.3.0-17ubuntu1
+    #36-Ubuntu SMP x86_64 GNU/Linux  GNU Fortran (GCC) 9.3.0-17ubuntu1
+    Ubuntu 20.04                     Ubuntu clang version 10.0.0-4
+                                     (cmake and autotools)
+
+    Linux 5.3.18-150300-cray_shasta_c cray-mpich/8.1.16
+    #1 SMP x86_64 GNU/Linux              Cray clang 14.0.0
+    (crusher)                            GCC 11.2.0
+                                     (cmake)
+
+    Linux 4.14.0-115.35.1.1chaos     openmpi 4.0.5
+    #1 SMP aarch64 GNU/Linux             GCC 9.2.0 (ARM-build-5)
+    (stria)                              GCC 7.2.0 (Spack GCC)
+                                     (cmake)
+
+    Linux 4.14.0-115.35.1.3chaos     spectrum-mpi/rolling-release
+    #1 SMP ppc64le GNU/Linux             clang 12.0.1
+    (vortex)                             GCC 8.3.1
+                                         XL 16.1.1
+                                     (cmake)
+
+    Linux-4.14.0-115.21.2            spectrum-mpi/rolling-release
+    #1 SMP ppc64le GNU/Linux             clang 12.0.1, 14.0.5
+    (lassen)                             GCC 8.3.1
+                                         XL 16.1.1.2, 2021,09.22, 2022.08.05
+                                     (cmake)
+
+    Linux-4.12.14-197.99-default     cray-mpich/7.7.14
+    #1 SMP x86_64 GNU/Linux              cce 12.0.3
+    (theta)                              GCC 11.2.0
+                                         llvm 9.0
+                                         Intel 19.1.2
+
+    Linux 3.10.0-1160.36.2.el7.ppc64 gcc (GCC) 4.8.5 20150623 (Red Hat 4.8.5-39)
+    #1 SMP ppc64be GNU/Linux         g++ (GCC) 4.8.5 20150623 (Red Hat 4.8.5-39)
+    Power8 (echidna)                 GNU Fortran (GCC) 4.8.5 20150623 (Red Hat 4.8.5-39)
+
+    Linux 3.10.0-1160.24.1.el7       GNU C (gcc), Fortran (gfortran), C++ (g++)
+    #1 SMP x86_64 GNU/Linux          compilers:
+    Centos7                              Version 4.8.5 20150623 (Red Hat 4.8.5-4)
+    (jelly/kituo/moohan)                 Version 4.9.3, Version 5.3.0, Version 6.3.0,
+                                         Version 7.2.0, Version 8.3.0, Version 9.1.0
+                                     Intel(R) C (icc), C++ (icpc), Fortran (icc)
+                                     compilers:
+                                         Version 17.0.0.098 Build 20160721
+                                     GNU C (gcc) and C++ (g++) 4.8.5 compilers
+                                         with NAG Fortran Compiler Release 6.1(Tozai)
+                                     Intel(R) C (icc) and C++ (icpc) 17.0.0.098 compilers
+                                         with NAG Fortran Compiler Release 6.1(Tozai)
+                                     MPICH 3.1.4 compiled with GCC 4.9.3
+                                     MPICH 3.3 compiled with GCC 7.2.0
+                                     OpenMPI 2.1.6 compiled with icc 18.0.1
+                                     OpenMPI 3.1.3 and 4.0.0 compiled with GCC 7.2.0
+                                     PGI C, Fortran, C++ for 64-bit target on
+                                     x86_64;
+                                         Version 19.10-0
+                                     (autotools and cmake)
+
+    Linux-3.10.0-1160.0.0.1chaos     openmpi-4.1.2
+    #1 SMP x86_64 GNU/Linux              clang 6.0.0, 11.0.1
+    (quartz)                             GCC 7.3.0, 8.1.0
+                                         Intel 19.0.4, 2022.2, oneapi.2022.2
+
+    Linux-3.10.0-1160.71.1.1chaos    openmpi/4.1
+    #1 SMP x86_64 GNU/Linux              GCC 7.2.0
+    (skybridge)                          Intel/19.1
+                                     (cmake)
+
+    Linux-3.10.0-1160.66.1.1chaos    openmpi/4.1
+    #1 SMP x86_64 GNU/Linux              GCC 7.2.0
+    (attaway)                            Intel/19.1
+                                     (cmake)
+
+    Linux-3.10.0-1160.59.1.1chaos    openmpi/4.1
+    #1 SMP x86_64 GNU/Linux              Intel/19.1
+    (chama)                          (cmake)
+
+    macOS Apple M1 11.6              Apple clang version 12.0.5 (clang-1205.0.22.11)
+    Darwin 20.6.0 arm64              gfortran GNU Fortran (Homebrew GCC 11.2.0) 11.1.0
+    (macmini-m1)                     Intel icc/icpc/ifort version 2021.3.0 202106092021.3.0 20210609
+
+    macOS Big Sur 11.3.1             Apple clang version 12.0.5 (clang-1205.0.22.9)
+    Darwin 20.4.0 x86_64             gfortran GNU Fortran (Homebrew GCC 10.2.0_3) 10.2.0
+    (bigsur-1)                       Intel icc/icpc/ifort version 2021.2.0 20210228
+
+    macOS High Sierra 10.13.6        Apple LLVM version 10.0.0 (clang-1000.10.44.4)
+    64-bit                           gfortran GNU Fortran (GCC) 6.3.0
+    (bear)                           Intel icc/icpc/ifort version 19.0.4.233 20190416
+
+    macOS Sierra 10.12.6             Apple LLVM version 9.0.0 (clang-900.39.2)
+    64-bit                           gfortran GNU Fortran (GCC) 7.4.0
+    (kite)                           Intel icc/icpc/ifort version 17.0.2
+
+    Mac OS X El Capitan 10.11.6      Apple clang version 7.3.0 from Xcode 7.3
+    64-bit                           gfortran GNU Fortran (GCC) 5.2.0
+    (osx1011test)                    Intel icc/icpc/ifort version 16.0.2
+
+
+    Linux 2.6.32-573.22.1.el6        GNU C (gcc), Fortran (gfortran), C++ (g++)
+    #1 SMP x86_64 GNU/Linux          compilers:
+    Centos6                              Version 4.4.7 20120313
+    (platypus)                           Version 4.9.3, 5.3.0, 6.2.0
+                                     MPICH 3.1.4 compiled with GCC 4.9.3
+                                     PGI C, Fortran, C++ for 64-bit target on
+                                     x86_64;
+                                         Version 19.10-0
+
+    Windows 10 x64                  Visual Studio 2015 w/ Intel C/C++/Fortran 18 (cmake)
+                                    Visual Studio 2017 w/ Intel C/C++/Fortran 19 (cmake)
+                                    Visual Studio 2019 w/ clang 12.0.0
+                                        with MSVC-like command-line (C/C++ only - cmake)
+                                    Visual Studio 2019 w/ Intel C/C++/Fortran oneAPI 2021 (cmake)
+                                    Visual Studio 2019 w/ MSMPI 10.1 (C only - cmake)
+
+
+Known Problems
+==============
+
+    ************************************************************
+    *                                  _                       *
+    *                                 (_)                      *
+    *        __      ____ _ _ __ _ __  _ _ __   __ _           *
+    *        \ \ /\ / / _` | '__| '_ \| | '_ \ / _` |          *
+    *         \ V  V / (_| | |  | | | | | | | | (_| |          *
+    *          \_/\_/ \__,_|_|  |_| |_|_|_| |_|\__, |          *
+    *                                           __/ |          *
+    *                                          |___/           *
+    *                                                          *
+    *  Please refrain from running any program (including      *
+    *  HDF5 tests) which uses the subfiling VFD on Perlmutter  *
+    *  at the National Energy Research Scientific Computing    *
+    *  Center, NERSC.                                          *
+    *  Doing so may cause a system disruption due to subfiling *
+    *  crashing Lustre. The sytem's Lustre bug is expected     *
+    *  to be resolved by 2023.                                 *
+    *                                                          *
+    ************************************************************
+
+    CMake files do not behave correctly with paths containing spaces.
+    Do not use spaces in paths because the required escaping for handling spaces
+    results in very complex and fragile build files.
+    ADB - 2019/05/07
+
+    At present, metadata cache images may not be generated by parallel
+    applications.  Parallel applications can read files with metadata cache
+    images, but since this is a collective operation, a deadlock is possible
+    if one or more processes do not participate.
+
+    CPP ptable test fails on both VS2017 and VS2019 with Intel compiler, JIRA
+    issue: HDFFV-10628.  This test will pass with VS2015 with Intel compiler.
+
+    The subsetting option in ph5diff currently will fail and should be avoided.
+    The subsetting option works correctly in serial h5diff.
+
+    Several tests currently fail on certain platforms:
+        MPI_TEST-t_bigio fails with spectrum-mpi on ppc64le platforms.
+
+        MPI_TEST-t_subfiling_vfd and MPI_TEST_EXAMPLES-ph5_subfiling fail with
         cray-mpich on theta and with XL compilers on ppc64le platforms.
 
         MPI_TEST_testphdf5_tldsc fails with cray-mpich 7.7 on cori and theta.
