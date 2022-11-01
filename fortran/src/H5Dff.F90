@@ -1881,7 +1881,6 @@ CONTAINS
 
   SUBROUTINE h5dwrite_char_scalar(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id
     INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -1899,7 +1898,6 @@ CONTAINS
 
   SUBROUTINE h5dwrite_char_scalar_fix(dset_id, mem_type_id, buf, buf_len, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id
     INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -1932,7 +1930,6 @@ CONTAINS
 
   SUBROUTINE h5dread_reference_obj(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id
     INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -2027,7 +2024,6 @@ CONTAINS
 
   SUBROUTINE h5dread_char_scalar(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id
     INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -2058,7 +2054,6 @@ CONTAINS
 
   SUBROUTINE h5dread_char_scalar_fix(dset_id, mem_type_id, buf, buf_len, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id
     INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -2080,7 +2075,6 @@ CONTAINS
 
   SUBROUTINE h5dwrite_ptr(dset_id, mem_type_id, buf, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id
     INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -2109,7 +2103,6 @@ CONTAINS
 
   SUBROUTINE h5dread_ptr(dset_id, mem_type_id, buf, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id
     INTEGER(HID_T), INTENT(IN) :: mem_type_id
@@ -2137,7 +2130,6 @@ CONTAINS
   END SUBROUTINE h5dread_ptr
 
  SUBROUTINE h5dfill_ptr(fill_value, fill_type_id, buf, buf_type_id, space_id, hdferr)
-    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     TYPE(C_PTR)                :: fill_value
     INTEGER(HID_T), INTENT(IN) :: fill_type_id
@@ -2164,7 +2156,6 @@ CONTAINS
   END SUBROUTINE h5dfill_ptr
 
   SUBROUTINE h5dfill_integer(fill_value, space_id, buf,  hdferr)
-    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     INTEGER, INTENT(IN), TARGET :: fill_value  ! Fill value
     INTEGER(HID_T), INTENT(IN) :: space_id ! Memory dataspace selection identifier
@@ -2188,7 +2179,6 @@ CONTAINS
   END SUBROUTINE h5dfill_integer
 
   SUBROUTINE h5dfill_c_float(fill_value, space_id, buf,  hdferr)
-    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     REAL(KIND=C_FLOAT), INTENT(IN), TARGET :: fill_value
     INTEGER(HID_T), INTENT(IN) :: space_id
@@ -2260,7 +2250,6 @@ CONTAINS
 #endif
 
   SUBROUTINE h5dfill_char(fill_value, space_id, buf, hdferr)
-    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     CHARACTER, INTENT(IN), TARGET :: fill_value
     INTEGER(HID_T), INTENT(IN) :: space_id

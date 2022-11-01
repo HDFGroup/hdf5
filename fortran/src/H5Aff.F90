@@ -222,15 +222,13 @@ CONTAINS
   SUBROUTINE h5acreate_async_f(loc_id, name, type_id, space_id, attr_id, es_id, &
        hdferr, acpl_id, aapl_id, file, func, line)
     IMPLICIT NONE
-
     INTEGER(HID_T), INTENT(IN) :: loc_id
     CHARACTER(LEN=*), INTENT(IN) :: name
     INTEGER(HID_T), INTENT(IN) :: type_id
     INTEGER(HID_T), INTENT(IN) :: space_id
-    INTEGER(HID_T), INTENT(IN) :: es_id
     INTEGER(HID_T), INTENT(OUT) :: attr_id
+    INTEGER(HID_T), INTENT(IN) :: es_id
     INTEGER, INTENT(OUT) :: hdferr
-
     INTEGER(HID_T)  , INTENT(IN), OPTIONAL :: acpl_id
     INTEGER(HID_T)  , INTENT(IN), OPTIONAL :: aapl_id
     CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: file

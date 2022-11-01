@@ -43,6 +43,9 @@ MODULE H5L
 
   IMPLICIT NONE
 
+  PRIVATE CHR_MAX
+  INTEGER, PARAMETER :: CHR_MAX=256      ! longest file name allowed on linux, 63 for func names
+
   TYPE, bind(c) :: union_t
      TYPE(H5O_TOKEN_T_F) :: token !< Type for object tokens
      INTEGER(size_t)  :: val_size !< Size of a soft link or user-defined link value
@@ -149,29 +152,91 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(IN) :: name
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
+
     INTEGER(HID_T) :: lapl_id_default
-    INTEGER(SIZE_T) :: namelen
+    CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
 
     INTERFACE
-       INTEGER FUNCTION h5ldelete_c(loc_id, name, namelen, lapl_id_default) BIND(C,name='h5ldelete_c')
-         IMPORT :: c_char
+       INTEGER(C_INT) FUNCTION H5Ldelete(loc_id, name, lapl_id_default) BIND(C,name='H5Ldelete')
+         IMPORT :: C_CHAR, C_INT
          IMPORT :: HID_T, SIZE_T
          IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN) :: loc_id
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
-         INTEGER(HID_T) :: lapl_id_default
-         INTEGER(SIZE_T) :: namelen
-       END FUNCTION h5ldelete_c
+         INTEGER(HID_T), VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
+         INTEGER(HID_T), VALUE :: lapl_id_default
+       END FUNCTION h5ldelete
     END INTERFACE
 
-    namelen = LEN(name)
+    c_name  = TRIM(name)//C_NULL_CHAR
 
     lapl_id_default = H5P_DEFAULT_F
     IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
 
-    hdferr = h5ldelete_c(loc_id, name, namelen, lapl_id_default)
+    hdferr = INT(H5Ldelete(loc_id, c_name, lapl_id_default))
 
   END SUBROUTINE h5ldelete_f
+
+!>
+!! \ingroup FH5L
+!!
+!! \brief Asynchronously removes a link from a group.
+!!
+!! \param loc_id  Identifier of the file or group containing the object.
+!! \param name    Name of the link to delete.
+!! \param es_id   \es_id
+!! \param hdferr  \fortran_error
+!! \param lapl_id Link access property list identifier.
+!! \param file    \fortran_file
+!! \param func    \fortran_func
+!! \param line    \fortran_line
+!!
+!! See C API: @ref H5Ldelete_async()
+!!
+  SUBROUTINE h5ldelete_async_f(loc_id, name, es_id, hdferr, lapl_id, file, func, line)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: name
+    INTEGER(HID_T), INTENT(IN)  :: es_id
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
+    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: file
+    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: func
+    INTEGER         , INTENT(IN), OPTIONAL :: line
+
+    INTEGER(HID_T) :: lapl_id_default
+    CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
+    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  file_default = C_NULL_CHAR
+    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  func_default = C_NULL_CHAR
+    INTEGER(KIND=C_INT) :: line_default = 0
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Ldelete_async(file, func, line, loc_id, name, lapl_id_default, es_id) &
+            BIND(C,name='H5Ldelete_async')
+         IMPORT :: C_CHAR, C_INT
+         IMPORT :: HID_T, SIZE_T
+         IMPLICIT NONE
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: file
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: func
+         INTEGER(C_INT), VALUE :: line
+         INTEGER(HID_T), VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
+         INTEGER(HID_T), VALUE :: lapl_id_default
+         INTEGER(HID_T), VALUE :: es_id
+       END FUNCTION H5Ldelete_async
+    END INTERFACE
+
+    c_name  = TRIM(name)//C_NULL_CHAR
+
+    lapl_id_default = H5P_DEFAULT_F
+    IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
+    IF(PRESENT(file)) file_default = TRIM(file)//C_NULL_CHAR
+    IF(PRESENT(func)) func_default = TRIM(func)//C_NULL_CHAR
+    IF(PRESENT(line)) line_default = INT(line, C_INT)
+
+    hdferr = INT(H5Ldelete_async(file_default, func_default, line_default, &
+         loc_id, c_name, lapl_id_default, es_id))
+
+  END SUBROUTINE h5ldelete_async_f
 
 !>
 !! \ingroup FH5L
@@ -195,44 +260,113 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: lcpl_id
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
+
     INTEGER(HID_T) :: lcpl_id_default
     INTEGER(HID_T) :: lapl_id_default
-    INTEGER(SIZE_T) :: target_path_len
-    INTEGER(SIZE_T) :: link_name_len
+    CHARACTER(LEN=LEN_TRIM(target_path) +1,KIND=C_CHAR) :: c_target_path
+    CHARACTER(LEN=LEN_TRIM(link_name)+1,KIND=C_CHAR) :: c_link_name
 
     INTERFACE
-       INTEGER FUNCTION h5lcreate_soft_c(target_path, target_path_len, &
-            link_loc_id, &
-            link_name,link_name_len, &
-            lcpl_id_default, lapl_id_default ) BIND(C,NAME='h5lcreate_soft_c')
-         IMPORT :: c_char
-         IMPORT :: HID_T, SIZE_T
+       INTEGER(C_INT) FUNCTION H5Lcreate_soft(target_path, link_loc_id, link_name, &
+            lcpl_id_default, lapl_id_default ) BIND(C,NAME='H5Lcreate_soft')
+         IMPORT :: C_CHAR, C_INT
+         IMPORT :: HID_T
          IMPLICIT NONE
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: target_path
-         INTEGER(SIZE_T) :: target_path_len
-         INTEGER(HID_T), INTENT(IN) ::   link_loc_id
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: link_name
-         INTEGER(SIZE_T) :: link_name_len
-         INTEGER(HID_T) :: lcpl_id_default
-         INTEGER(HID_T) :: lapl_id_default
-       END FUNCTION h5lcreate_soft_c
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: target_path
+         INTEGER(HID_T), VALUE ::   link_loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: link_name
+         INTEGER(HID_T), VALUE :: lcpl_id_default
+         INTEGER(HID_T), VALUE :: lapl_id_default
+       END FUNCTION H5Lcreate_soft
     END INTERFACE
 
-    target_path_len = LEN(target_path)
-    link_name_len = LEN(link_name)
+    c_target_path  = TRIM(target_path)//C_NULL_CHAR
+    c_link_name = TRIM(link_name)//C_NULL_CHAR
 
     lcpl_id_default = H5P_DEFAULT_F
-    IF(PRESENT(lcpl_id)) lcpl_id_default = lcpl_id
     lapl_id_default = H5P_DEFAULT_F
+    IF(PRESENT(lcpl_id)) lcpl_id_default = lcpl_id
     IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
 
-    hdferr = h5lcreate_soft_c(target_path, target_path_len,&
-         link_loc_id, &
-         link_name, link_name_len, &
-         lcpl_id_default, lapl_id_default )
+    hdferr = INT(H5Lcreate_soft(c_target_path, link_loc_id, c_link_name, &
+         lcpl_id_default, lapl_id_default))
 
   END SUBROUTINE h5lcreate_soft_f
 
+!>
+!! \ingroup FH5L
+!!
+!! \brief Asynchronously creates a soft link to an object.
+!!
+!! \param target_path Path to the target object, which is not required to exist.
+!! \param link_loc_id The file or group identifier for the new link.
+!! \param link_name   The name of the new link.
+!! \param es_id       \es_id
+!! \param hdferr      \fortran_error
+!! \param lcpl_id     Link creation property list identifier.
+!! \param lapl_id     Link access property list identifier.
+!! \param file        \fortran_file
+!! \param func        \fortran_func
+!! \param line        \fortran_line
+!!
+!! See C API: @ref H5Lcreate_soft_async()
+!!
+  SUBROUTINE h5lcreate_soft_async_f(target_path, link_loc_id, link_name, es_id, hdferr,&
+       lcpl_id, lapl_id, file, func, line)
+    IMPLICIT NONE
+    CHARACTER(LEN=*), INTENT(IN) :: target_path
+    INTEGER(HID_T), INTENT(IN) :: link_loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: link_name
+    INTEGER(HID_T), INTENT(IN)    :: es_id
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lcpl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
+    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: file
+    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: func
+    INTEGER         , INTENT(IN), OPTIONAL :: line
+
+    INTEGER(HID_T) :: lcpl_id_default
+    INTEGER(HID_T) :: lapl_id_default
+    CHARACTER(LEN=LEN_TRIM(target_path) +1,KIND=C_CHAR) :: c_target_path
+    CHARACTER(LEN=LEN_TRIM(link_name)+1,KIND=C_CHAR) :: c_link_name
+    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) :: file_default = C_NULL_CHAR
+    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) :: func_default = C_NULL_CHAR
+    INTEGER(KIND=C_INT) :: line_default = 0
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Lcreate_soft_async(file, func, line, target_path, link_loc_id, link_name, &
+            lcpl_id_default, lapl_id_default, es_id) BIND(C,NAME='H5Lcreate_soft_async')
+         IMPORT :: C_CHAR, C_INT
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: file
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: func
+         INTEGER(C_INT), VALUE :: line
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: target_path
+         INTEGER(HID_T), VALUE ::   link_loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: link_name
+         INTEGER(HID_T), VALUE :: lcpl_id_default
+         INTEGER(HID_T), VALUE :: lapl_id_default
+         INTEGER(HID_T), VALUE :: es_id
+       END FUNCTION H5Lcreate_soft_async
+    END INTERFACE
+
+    c_target_path  = TRIM(target_path)//C_NULL_CHAR
+    c_link_name = TRIM(link_name)//C_NULL_CHAR
+
+    lcpl_id_default = H5P_DEFAULT_F
+    lapl_id_default = H5P_DEFAULT_F
+    IF(PRESENT(lcpl_id)) lcpl_id_default = lcpl_id
+    IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
+
+    IF(PRESENT(file)) file_default = TRIM(file)//C_NULL_CHAR
+    IF(PRESENT(func)) func_default = TRIM(func)//C_NULL_CHAR
+    IF(PRESENT(line)) line_default = INT(line, C_INT)
+
+    hdferr = INT(H5Lcreate_soft_async(file_default, func_default, line_default,&
+         c_target_path, link_loc_id, c_link_name, lcpl_id_default, lapl_id_default, es_id))
+
+  END SUBROUTINE h5lcreate_soft_async_f
 !>
 !! \ingroup FH5L
 !!
@@ -248,51 +382,124 @@ CONTAINS
 !!
 !! See C API: @ref H5Lcreate_hard()
 !!
-  SUBROUTINE h5lcreate_hard_f(obj_loc_id, obj_name, link_loc_id, link_name, hdferr, lcpl_id, lapl_id)
+  SUBROUTINE h5lcreate_hard_f(obj_loc_id, obj_name, link_loc_id, link_name, hdferr, &
+       lcpl_id, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: obj_loc_id
     CHARACTER(LEN=*), INTENT(IN) :: obj_name
     INTEGER(HID_T), INTENT(IN) :: link_loc_id
     CHARACTER(LEN=*), INTENT(IN) :: link_name
-
     INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lcpl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
 
-    INTEGER(HID_T), INTENT(IN), OPTIONAL ::   lcpl_id
-    INTEGER(HID_T), INTENT(IN), OPTIONAL ::   lapl_id
     INTEGER(HID_T) :: lcpl_id_default
     INTEGER(HID_T) :: lapl_id_default
-
-    INTEGER(SIZE_T) :: obj_namelen
-    INTEGER(SIZE_T) :: link_namelen
-
+    CHARACTER(LEN=LEN_TRIM(obj_name) +1,KIND=C_CHAR) :: c_obj_name
+    CHARACTER(LEN=LEN_TRIM(link_name)+1,KIND=C_CHAR) :: c_link_name
     INTERFACE
-       INTEGER FUNCTION h5lcreate_hard_c(obj_loc_id, obj_name, obj_namelen, &
-            link_loc_id, link_name, link_namelen, lcpl_id_default, lapl_id_default) BIND(C,NAME='h5lcreate_hard_c')
-         IMPORT :: c_char
-         IMPORT :: HID_T, SIZE_T
+       INTEGER(C_INT) FUNCTION H5Lcreate_hard(obj_loc_id, obj_name, &
+            link_loc_id, link_name, lcpl_id_default, lapl_id_default) BIND(C,NAME='H5Lcreate_hard')
+         IMPORT :: C_CHAR, C_INT
+         IMPORT :: HID_T
          IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN) :: obj_loc_id
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: obj_name
-         INTEGER(HID_T), INTENT(IN) :: link_loc_id
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: link_name
-         INTEGER(SIZE_T) :: obj_namelen
-         INTEGER(SIZE_T) :: link_namelen
-         INTEGER(HID_T) :: lcpl_id_default
-         INTEGER(HID_T) :: lapl_id_default
-       END FUNCTION h5lcreate_hard_c
+         INTEGER(HID_T), VALUE :: obj_loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: obj_name
+         INTEGER(HID_T), VALUE :: link_loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: link_name
+         INTEGER(HID_T), VALUE :: lcpl_id_default
+         INTEGER(HID_T), VALUE :: lapl_id_default
+       END FUNCTION H5Lcreate_hard
     END INTERFACE
-    obj_namelen = LEN(obj_name)
-    link_namelen = LEN(link_name)
+
+    c_obj_name  = TRIM(obj_name)//C_NULL_CHAR
+    c_link_name = TRIM(link_name)//C_NULL_CHAR
 
     lcpl_id_default = H5P_DEFAULT_F
-    IF(PRESENT(lcpl_id)) lcpl_id_default = lcpl_id
     lapl_id_default = H5P_DEFAULT_F
+    IF(PRESENT(lcpl_id)) lcpl_id_default = lcpl_id
     IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
 
-    hdferr = h5lcreate_hard_c(obj_loc_id, obj_name, obj_namelen, &
-            link_loc_id, link_name, link_namelen, lcpl_id_default, lapl_id_default)
+    hdferr = INT(H5Lcreate_hard(obj_loc_id, c_obj_name, &
+         link_loc_id, c_link_name, lcpl_id_default, lapl_id_default))
 
   END SUBROUTINE h5lcreate_hard_f
+!>
+!! \ingroup FH5L
+!!
+!! \brief Asynchronously creates a hard link to an object.
+!!
+!! \param obj_loc_id  The file or group identifier for the target object.
+!! \param obj_name    Name of the target object, which must already exist.
+!! \param link_loc_id The file or group identifier for the new link.
+!! \param link_name   The name of the new link.
+!! \param es_id       \es_id
+!! \param hdferr      \fortran_error
+!! \param lcpl_id     Link creation property list identifier.
+!! \param lapl_id     Link access property list identifier.
+!! \param file        \fortran_file
+!! \param func        \fortran_func
+!! \param line        \fortran_line
+!!
+!! See C API: @ref H5Lcreate_hard_async()
+!!
+  SUBROUTINE h5lcreate_hard_async_f(obj_loc_id, obj_name, link_loc_id, link_name, es_id, hdferr, &
+       lcpl_id, lapl_id, file, func, line)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: obj_loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: obj_name
+    INTEGER(HID_T), INTENT(IN) :: link_loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: link_name
+    INTEGER(HID_T), INTENT(IN) :: es_id
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lcpl_id
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
+    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: file
+    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: func
+    INTEGER         , INTENT(IN), OPTIONAL :: line
+
+    INTEGER(HID_T) :: lcpl_id_default
+    INTEGER(HID_T) :: lapl_id_default
+    CHARACTER(LEN=LEN_TRIM(obj_name) +1,KIND=C_CHAR) :: c_obj_name
+    CHARACTER(LEN=LEN_TRIM(link_name)+1,KIND=C_CHAR) :: c_link_name
+    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) :: file_default = C_NULL_CHAR
+    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) :: func_default = C_NULL_CHAR
+    INTEGER(KIND=C_INT) :: line_default = 0
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Lcreate_hard_async(file, func, line, obj_loc_id, obj_name, &
+            link_loc_id, link_name, lcpl_id_default, lapl_id_default, es_id) BIND(C,NAME='H5Lcreate_hard_async')
+         IMPORT :: C_CHAR, C_INT
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: file
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: func
+         INTEGER(C_INT), VALUE :: line
+         INTEGER(HID_T), VALUE :: obj_loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: obj_name
+         INTEGER(HID_T), VALUE :: link_loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: link_name
+         INTEGER(HID_T), VALUE :: lcpl_id_default
+         INTEGER(HID_T), VALUE :: lapl_id_default
+         INTEGER(HID_T), VALUE :: es_id
+       END FUNCTION H5Lcreate_hard_async
+    END INTERFACE
+
+    c_obj_name  = TRIM(obj_name)//C_NULL_CHAR
+    c_link_name = TRIM(link_name)//C_NULL_CHAR
+
+    lcpl_id_default = H5P_DEFAULT_F
+    lapl_id_default = H5P_DEFAULT_F
+    IF(PRESENT(lcpl_id)) lcpl_id_default = lcpl_id
+    IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
+    IF (PRESENT(file)) file_default = TRIM(file)//C_NULL_CHAR
+    IF (PRESENT(func)) func_default = TRIM(func)//C_NULL_CHAR
+    IF (PRESENT(line)) line_default = INT(line, C_INT)
+
+    hdferr = INT(H5Lcreate_hard_async(file_default, func_default, line_default, obj_loc_id, c_obj_name, &
+         link_loc_id, c_link_name, lcpl_id_default, lapl_id_default, es_id))
+
+  END SUBROUTINE h5lcreate_hard_async_f
 
 !>
 !! \ingroup FH5L
@@ -393,32 +600,114 @@ CONTAINS
     INTEGER(HSIZE_T), INTENT(IN) :: n
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
+
     INTEGER(HID_T) :: lapl_id_default
-    INTEGER(SIZE_T) :: group_namelen
+    CHARACTER(LEN=LEN_TRIM(group_name)+1,KIND=C_CHAR) :: c_group_name
 
     INTERFACE
-       INTEGER FUNCTION h5ldelete_by_idx_c(loc_id, group_name, group_namelen, index_field, order, n, lapl_id_default) &
-            BIND(C,NAME='h5ldelete_by_idx_c')
-         IMPORT :: c_char
-         IMPORT :: HID_T, SIZE_T, HSIZE_T
+       INTEGER(C_INT) FUNCTION H5Ldelete_by_idx(loc_id, group_name, index_field, order, n, lapl_id_default) &
+            BIND(C,NAME='H5Ldelete_by_idx')
+         IMPORT :: C_CHAR, C_INT
+         IMPORT :: HID_T, HSIZE_T, ENUM_T
          IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN) :: loc_id
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: group_name
-         INTEGER, INTENT(IN) :: index_field
-         INTEGER, INTENT(IN) :: order
-         INTEGER(HSIZE_T), INTENT(IN) :: n
-         INTEGER(HID_T) :: lapl_id_default
-         INTEGER(SIZE_T) :: group_namelen
-       END FUNCTION h5ldelete_by_idx_c
+         INTEGER(HID_T), VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: group_name
+         INTEGER(ENUM_T), VALUE :: index_field
+         INTEGER(ENUM_T), VALUE :: order
+         INTEGER(HSIZE_T), VALUE :: n
+         INTEGER(HID_T), VALUE :: lapl_id_default
+       END FUNCTION H5Ldelete_by_idx
     END INTERFACE
+
+    c_group_name  = TRIM(group_name)//C_NULL_CHAR
 
     lapl_id_default = H5P_DEFAULT_F
     IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
 
-    group_namelen = LEN(group_name)
-    hdferr = h5ldelete_by_idx_c(loc_id, group_name, group_namelen, index_field, order, n, lapl_id_default)
+    hdferr = INT(H5Ldelete_by_idx(loc_id, c_group_name, INT(index_field,ENUM_T), INT(order, ENUM_T), n, lapl_id_default))
 
   END SUBROUTINE h5ldelete_by_idx_f
+
+!>
+!! \ingroup FH5L
+!!
+!! \brief Asynchronously removes the nth link in a group.
+!!
+!! \param loc_id      File or group identifier specifying location of subject group.
+!! \param group_name  Name of subject group.
+!! \param index_field Type of index; Possible values are:
+!!                    \li H5_INDEX_UNKNOWN_F = -1 - Unknown index type
+!!                    \li H5_INDEX_NAME_F         - Index on names
+!!                    \li H5_INDEX_CRT_ORDER_F    - Index on creation order
+!!                    \li H5_INDEX_N_F            - Number of indices defined
+!! \param order       Order within field or index; Possible values are:
+!!                    \li H5_ITER_UNKNOWN_F - Unknown order
+!!                    \li H5_ITER_INC_F     - Increasing order
+!!                    \li H5_ITER_DEC_F     - Decreasing order
+!!                    \li H5_ITER_NATIVE_F  - No particular order, whatever is fastest
+!!                    \li H5_ITER_N_F       - Number of iteration orders
+!! \param n           Link for which to retrieve information.
+!! \param es_id       \es_id
+!! \param hdferr      \fortran_error
+!! \param lapl_id     Link access property list.
+!! \param file        \fortran_file
+!! \param func        \fortran_func
+!! \param line        \fortran_line
+!!
+!! See C API: @ref H5Ldelete_by_idx_async()
+!!
+  SUBROUTINE h5ldelete_by_idx_async_f(loc_id, group_name, index_field, order, n, es_id, hdferr, &
+       lapl_id, file, func, line)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: group_name
+    INTEGER, INTENT(IN) :: index_field
+    INTEGER, INTENT(IN) :: order
+    INTEGER(HSIZE_T), INTENT(IN) :: n
+    INTEGER(HID_T), INTENT(IN) :: es_id
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
+    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: file
+    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: func
+    INTEGER         , INTENT(IN), OPTIONAL :: line
+
+    INTEGER(HID_T) :: lapl_id_default
+    CHARACTER(LEN=LEN_TRIM(group_name)+1,KIND=C_CHAR) :: c_group_name
+    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) :: file_default = C_NULL_CHAR
+    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) :: func_default = C_NULL_CHAR
+    INTEGER(KIND=C_INT) :: line_default = 0
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Ldelete_by_idx_async(file, func, line, loc_id, group_name, index_field, order, n, &
+            lapl_id_default, es_id) BIND(C,NAME='H5Ldelete_by_idx_async')
+         IMPORT :: C_CHAR, C_INT
+         IMPORT :: HID_T, HSIZE_T, ENUM_T
+         IMPLICIT NONE
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: file
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: func
+         INTEGER(C_INT), VALUE :: line
+         INTEGER(HID_T), VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: group_name
+         INTEGER(ENUM_T), VALUE :: index_field
+         INTEGER(ENUM_T), VALUE :: order
+         INTEGER(HSIZE_T), VALUE :: n
+         INTEGER(HID_T), VALUE :: lapl_id_default
+         INTEGER(HID_T), VALUE :: es_id
+       END FUNCTION H5Ldelete_by_idx_async
+    END INTERFACE
+
+    c_group_name  = TRIM(group_name)//C_NULL_CHAR
+
+    lapl_id_default = H5P_DEFAULT_F
+    IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
+    IF(PRESENT(file)) file_default = TRIM(file)//C_NULL_CHAR
+    IF(PRESENT(func)) func_default = TRIM(func)//C_NULL_CHAR
+    IF(PRESENT(line)) line_default = INT(line, C_INT)
+
+    hdferr = INT(H5Ldelete_by_idx_async(file_default, func_default, line_default, &
+         loc_id, c_group_name, INT(index_field,ENUM_T), INT(order, ENUM_T), n, lapl_id_default, es_id))
+
+  END SUBROUTINE h5ldelete_by_idx_async_f
 
 !>
 !! \ingroup FH5L
@@ -440,36 +729,108 @@ CONTAINS
     LOGICAL, INTENT(OUT) :: link_exists
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
-    INTEGER :: link_exists_c
+
+    INTEGER(C_INT) :: link_exists_c
     INTEGER(HID_T)  :: lapl_id_default
-    INTEGER(SIZE_T) :: namelen
+    CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
 
     INTERFACE
-       INTEGER FUNCTION h5lexists_c(loc_id, name, namelen, lapl_id_default, link_exists_c) &
-            BIND(C,NAME='h5lexists_c')
-         IMPORT :: c_char
-         IMPORT :: HID_T, SIZE_T
+       INTEGER(C_INT) FUNCTION H5Lexists(loc_id, name, lapl_id_default) BIND(C,NAME='H5Lexists')
+         IMPORT :: C_CHAR, C_INT
+         IMPORT :: HID_T
          IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN) :: loc_id
-         CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
-         INTEGER(SIZE_T), INTENT(IN) :: namelen
-         INTEGER, INTENT(OUT) :: link_exists_c
-         INTEGER(HID_T) :: lapl_id_default
+         INTEGER(HID_T), VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
+         INTEGER(HID_T), VALUE :: lapl_id_default
 
-       END FUNCTION h5lexists_c
+       END FUNCTION H5Lexists
     END INTERFACE
 
-    namelen = LEN(name)
+    c_name = TRIM(name)//C_NULL_CHAR
 
     lapl_id_default = H5P_DEFAULT_F
     IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
 
-    hdferr = h5lexists_c(loc_id, name, namelen, lapl_id_default, link_exists_c)
+    link_exists_c = H5Lexists(loc_id, c_name, lapl_id_default)
 
     link_exists = .FALSE.
     IF(link_exists_c.GT.0) link_exists = .TRUE.
 
+    hdferr = 0
+    IF(link_exists_c.LT.0) hdferr = -1
+
   END SUBROUTINE h5lexists_f
+
+!>
+!! \ingroup FH5L
+!!
+!! \brief Asynchronously checks if a link with a particular name exists in a group.
+!!
+!! \param loc_id      Identifier of the file or group to query.
+!! \param name        Link name to check.
+!! \param link_exists Link exists status (.TRUE.,.FALSE.).
+!! \param es_id       \es_id
+!! \param hdferr      \fortran_error
+!! \param lapl_id     Link access property list identifier.
+!! \param file        \fortran_file
+!! \param func        \fortran_func
+!! \param line        \fortran_line
+!!
+!! See C API: @ref H5Lexists_async()
+!!
+  SUBROUTINE h5lexists_async_f(loc_id, name, link_exists, es_id, hdferr, lapl_id, file, func, line)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: name
+    LOGICAL, INTENT(OUT) :: link_exists
+    INTEGER(HID_T), INTENT(IN)  :: es_id
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
+    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: file
+    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: func
+    INTEGER         , INTENT(IN), OPTIONAL :: line
+
+    INTEGER(C_INT) :: link_exists_c
+    INTEGER(HID_T)  :: lapl_id_default
+    CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
+    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  file_default = C_NULL_CHAR
+    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  func_default = C_NULL_CHAR
+    INTEGER(KIND=C_INT) :: line_default = 0
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Lexists_async(file, func, line, &
+            loc_id, name, lapl_id_default, es_id) BIND(C,NAME='H5Lexists_async')
+         IMPORT :: C_CHAR, C_INT
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: file
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: func
+         INTEGER(C_INT), VALUE :: line
+         INTEGER(HID_T), VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
+         INTEGER(HID_T), VALUE :: lapl_id_default
+         INTEGER(HID_T), VALUE :: es_id
+       END FUNCTION H5Lexists_async
+    END INTERFACE
+
+    c_name = TRIM(name)//C_NULL_CHAR
+
+    lapl_id_default = H5P_DEFAULT_F
+    IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
+    IF(PRESENT(file)) file_default = TRIM(file)//C_NULL_CHAR
+    IF(PRESENT(func)) func_default = TRIM(func)//C_NULL_CHAR
+    IF(PRESENT(line)) line_default = INT(line, C_INT)
+
+    link_exists_c = H5Lexists_async(file_default, func_default, line_default, &
+         loc_id, c_name, lapl_id_default, es_id)
+
+    link_exists = .FALSE.
+    IF(link_exists_c.GT.0) link_exists = .TRUE.
+
+    hdferr = 0
+    IF(link_exists_c.LT.0) hdferr = -1
+
+  END SUBROUTINE h5lexists_async_f
 
 !>
 !! \ingroup FH5L
@@ -941,54 +1302,54 @@ CONTAINS
 !!
 !! \brief Iterates through links in a group.
 !!
-!! \param group_id      Identifier specifying subject group.
-!! \param index_type    Type of index which determines the order:
+!! \param group_id     Identifier specifying subject group.
+!! \param idx_type     Type of index which determines the order:
 !!                      \li H5_INDEX_NAME_F      - Alphanumeric index on name
 !!                      \li H5_INDEX_CRT_ORDER_F - Index on creation order
-!! \param order         Order within index:
+!! \param order        Order within index:
 !!                      \li H5_ITER_INC_F    - Increasing order
 !!                      \li H5_ITER_DEC_F    - Decreasing order
 !!                      \li H5_ITER_NATIVE_F - Fastest available order
 !! \param idx          Iteration position at which to start, or <br />
 !!                     Position at which an interrupted iteration may be restarted
-!! \param op            Callback function passing data regarding the link to the calling application.
-!! \param op_data       User-defined pointer to data required by the application for its processing of the link.
-!! \param return_value  Return context:
+!! \param op           Callback function passing data regarding the link to the calling application.
+!! \param op_data      User-defined pointer to data required by the application for its processing of the link.
+!! \param return_value Return context:
 !!                      \li Success: The return value of the first operator that
 !!                               returns non-zero, or zero if all members were processed with no operator returning non-zero.
 !!                      \li Failure: Negative if something goes wrong within the
 !!                               library, or the negative value returned by one of the operators.
-!! \param hdferr        \fortran_error
+!! \param hdferr       \fortran_error
 !!
 !! See C API: @ref H5Literate2()
 !!
-  SUBROUTINE h5literate_f(group_id, index_type, order, idx, op, op_data, return_value, hdferr)
-    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_FUNPTR
+  SUBROUTINE h5literate_f(group_id, idx_type, order, idx, op, op_data, return_value, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T)  , INTENT(IN)    :: group_id
-    INTEGER         , INTENT(IN)    :: index_type
+    INTEGER         , INTENT(IN)    :: idx_type
     INTEGER         , INTENT(IN)    :: order
     INTEGER(HSIZE_T), INTENT(INOUT) :: idx
     TYPE(C_FUNPTR)  , INTENT(IN)    :: op
     TYPE(C_PTR)     , INTENT(IN)    :: op_data
     INTEGER         , INTENT(OUT)   :: return_value
     INTEGER         , INTENT(OUT)   :: hdferr
+
     INTERFACE
-       INTEGER FUNCTION h5literate_c(group_id, index_type, order, idx, op, op_data) &
-            BIND(C, NAME='h5literate_c')
-         IMPORT :: c_ptr, c_funptr
-         IMPORT :: HID_T, HSIZE_T
+       INTEGER(C_INT) FUNCTION H5Literate2(group_id, idx_type, order, idx, op, op_data) &
+            BIND(C, NAME='H5Literate2')
+         IMPORT :: C_INT, C_PTR, C_FUNPTR
+         IMPORT :: HID_T, HSIZE_T, ENUM_T
          IMPLICIT NONE
-         INTEGER(HID_T), INTENT(IN) :: group_id
-         INTEGER, INTENT(IN) :: index_type
-         INTEGER, INTENT(IN) :: order
-         INTEGER(HSIZE_T), INTENT(INOUT) :: idx
-         TYPE(C_FUNPTR), VALUE :: op
-         TYPE(C_PTR), VALUE :: op_data
-       END FUNCTION h5literate_c
+         INTEGER(HID_T)  , VALUE :: group_id
+         INTEGER(ENUM_T) , VALUE :: idx_type
+         INTEGER(ENUM_T) , VALUE :: order
+         INTEGER(HSIZE_T)        :: idx
+         TYPE(C_FUNPTR)  , VALUE :: op
+         TYPE(C_PTR)     , VALUE :: op_data
+       END FUNCTION H5Literate2
     END INTERFACE
 
-    return_value = h5literate_c(group_id, index_type, order, idx, op, op_data)
+    return_value = INT(H5Literate2(group_id, INT(idx_type, ENUM_T), INT(order, ENUM_T), idx, op, op_data))
 
     IF(return_value.GE.0)THEN
        hdferr = 0
@@ -997,6 +1358,87 @@ CONTAINS
     END IF
 
   END SUBROUTINE h5literate_f
+
+!>
+!! \ingroup FH5L
+!!
+!! \brief Asynchronously iterates through links in a group.
+!!
+!! \param group_id    Identifier specifying subject group.
+!! \param idx_type    Type of index which determines the order:
+!!                      \li H5_INDEX_NAME_F      - Alphanumeric index on name
+!!                      \li H5_INDEX_CRT_ORDER_F - Index on creation order
+!! \param order         Order within index:
+!!                      \li H5_ITER_INC_F    - Increasing order
+!!                      \li H5_ITER_DEC_F    - Decreasing order
+!!                      \li H5_ITER_NATIVE_F - Fastest available order
+!! \param idx          Iteration position at which to start, or <br />
+!!                     Position at which an interrupted iteration may be restarted
+!! \param op           Callback function passing data regarding the link to the calling application.
+!! \param op_data      User-defined pointer to data required by the application for its processing of the link.
+!! \param return_value Return context:
+!!                      \li Success: The return value of the first operator that
+!!                               returns non-zero, or zero if all members were processed with no operator returning non-zero.
+!!                      \li Failure: Negative if something goes wrong within the
+!!                               library, or the negative value returned by one of the operators.
+!! \param es_id        \es_id
+!! \param hdferr       \fortran_error
+!!
+!! See C API: @ref H5Literate_async()
+!!
+  SUBROUTINE h5literate_async_f(group_id, idx_type, order, idx, op, op_data, return_value, es_id, hdferr, &
+       file, func, line)
+    IMPLICIT NONE
+    INTEGER(HID_T)  , INTENT(IN)    :: group_id
+    INTEGER         , INTENT(IN)    :: idx_type
+    INTEGER         , INTENT(IN)    :: order
+    INTEGER(HSIZE_T), INTENT(INOUT) :: idx
+    TYPE(C_FUNPTR)  , INTENT(IN)    :: op
+    TYPE(C_PTR)     , INTENT(IN)    :: op_data
+    INTEGER         , INTENT(OUT)   :: return_value
+    INTEGER(HID_T)  , INTENT(IN)    :: es_id
+    INTEGER         , INTENT(OUT)   :: hdferr
+    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: file
+    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: func
+    INTEGER         , INTENT(IN), OPTIONAL :: line
+
+    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  file_default = C_NULL_CHAR
+    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  func_default = C_NULL_CHAR
+    INTEGER(KIND=C_INT) :: line_default = 0
+
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Literate_async(file, func, line, &
+            group_id, idx_type, order, idx, op, op_data, es_id) BIND(C, NAME='H5Literate_async')
+         IMPORT :: C_CHAR, C_INT, C_PTR, C_FUNPTR
+         IMPORT :: HID_T, HSIZE_T, ENUM_T
+         IMPLICIT NONE
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: file
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: func
+         INTEGER(C_INT), VALUE :: line
+         INTEGER(HID_T)  , VALUE :: group_id
+         INTEGER(ENUM_T) , VALUE :: idx_type
+         INTEGER(ENUM_T) , VALUE :: order
+         INTEGER(HSIZE_T)        :: idx
+         TYPE(C_FUNPTR)  , VALUE :: op
+         TYPE(C_PTR)     , VALUE :: op_data
+         INTEGER(HID_T)  , VALUE :: es_id
+       END FUNCTION H5Literate_async
+    END INTERFACE
+
+    IF(PRESENT(file)) file_default = TRIM(file)//C_NULL_CHAR
+    IF(PRESENT(func)) func_default = TRIM(func)//C_NULL_CHAR
+    IF(PRESENT(line)) line_default = INT(line, C_INT)
+
+    return_value = INT(H5Literate_async(file_default, func_default, line_default, &
+         group_id, INT(idx_type, ENUM_T), INT(order, ENUM_T), idx, op, op_data, es_id))
+
+    IF(return_value.GE.0)THEN
+       hdferr = 0
+    ELSE
+       hdferr = -1
+    END IF
+
+  END SUBROUTINE h5literate_async_f
 
 !>
 !! \ingroup FH5L

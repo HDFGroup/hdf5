@@ -309,6 +309,7 @@ CONTAINS
             BIND(C,NAME='H5Gcreate_async')
          IMPORT :: C_CHAR, C_INT
          IMPORT :: HID_T
+         IMPLICIT NONE
          CHARACTER(KIND=C_CHAR), DIMENSION(*) :: file
          CHARACTER(KIND=C_CHAR), DIMENSION(*) :: func
          INTEGER(C_INT), VALUE :: line
