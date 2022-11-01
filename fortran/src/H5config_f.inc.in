@@ -74,3 +74,6 @@
 ! Fortran compiler name
 #undef Fortran_COMPILER_ID
 
+! Define if deprecated public API symbols are disabled
+#undef NO_DEPRECATED_SYMBOLS
+

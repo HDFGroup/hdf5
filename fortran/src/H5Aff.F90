@@ -311,10 +311,14 @@ CONTAINS
     IF(attr_id.LT.0) hdferr = -1
 
   END SUBROUTINE H5Aopen_name_f
+
+#ifndef H5_NO_DEPRECATED_SYMBOLS
 !>
 !! \ingroup FH5A
 !!
 !! \brief Opens the attribute specified by its index.
+!!
+!! \deprecation_note{H5Aopen_by_idx_f()}
 !!
 !! \param obj_id  Identifier of a group, dataset, or named datatype an attribute to be attached to
 !! \param index   Index of the attribute to open (zero-based)
@@ -345,6 +349,8 @@ CONTAINS
     IF(attr_id.LT.0) hdferr = -1
 
   END SUBROUTINE H5Aopen_idx_f
+#endif
+
 !>
 !! \ingroup FH5A
 !!
