@@ -185,6 +185,15 @@ PROGRAM fortranlibtest_F03
   CALL test_vds(ret_total_error)
   CALL write_test_status(ret_total_error, ' Testing vds ', total_error)
 
+!     write(*,*)
+!     write(*,*) '========================================='
+!     write(*,*) 'Testing ASYNC                            '
+!     write(*,*) '========================================='
+
+!  ret_total_error = 0
+!  CALL test_async(ret_total_error)
+!  CALL write_test_status(ret_total_error, ' Testing async ', total_error)
+
   WRITE(*,*)
 
   WRITE(*,*) '                  ============================================  '
