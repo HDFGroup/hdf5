@@ -24,7 +24,7 @@ The official HDF5 releases can be obtained from:
 Changes from Release to Release and New Features in the HDF5-1.13.x release series
 can be found at:
 
-     https://portal.hdfgroup.org/display/HDF5/HDF5+Application+Developer%27s+Guide
+     https://portal.hdfgroup.org/display/HDF5/Release+Specific+Information
 
 If you have any questions or comments, please send them to the HDF Help Desk:
 
@@ -119,7 +119,13 @@ Bug Fixes since HDF5-1.13.3 release
 
     Configuration
     -------------
-    -
+    - Move MPI libraries link from PRIVATE to PUBLIC
+
+      The install dependencies were not including the need for MPI libraries when
+      an application or library was built with the C library. Also updated the
+      CMake target link command to use the newer style MPI::MPI_C link variable.
+
+      (ADB - 2022/20/27)
 
 
     Tools

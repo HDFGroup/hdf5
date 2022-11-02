@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -346,7 +345,7 @@ H5_DLL hid_t H5Ropen_object(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id);
 /**
  * --------------------------------------------------------------------------
  * \ingroup ASYNC
- * \async_variant_of{H5Ropen}
+ * \async_variant_of{H5Ropen_object}
  */
 #ifndef H5_DOXYGEN
 H5_DLL hid_t H5Ropen_object_async(const char *app_file, const char *app_func, unsigned app_line,
