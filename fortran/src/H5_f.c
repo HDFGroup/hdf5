@@ -5,7 +5,6 @@
  * COPYRIGHT
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -561,7 +560,29 @@ h5init_flags_c(int_f *h5d_flags, size_t_f *h5d_size_flags, int_f *h5e_flags, hid
     h5fd_hid_flags[4] = (hid_t_f)H5FD_MULTI;
     h5fd_hid_flags[5] = (hid_t_f)H5FD_SEC2;
     h5fd_hid_flags[6] = (hid_t_f)H5FD_STDIO;
-    h5fd_hid_flags[7] = (hid_t_f)H5FD_SUBFILING;
+
+    /* Calling H5FD_subfiling_init here requires the
+       subfiling requirements to be met.  Only set the
+       subfiling if it meets the below conditions */
+
+    h5fd_hid_flags[7] = (hid_t_f)H5I_INVALID_HID;
+
+#ifdef H5_HAVE_PARALLEL
+    int mpi_initialized = 0;
+    int provided        = 0;
+    int mpi_code;
+
+    if (MPI_SUCCESS == (mpi_code = MPI_Initialized(&mpi_initialized))) {
+        if (mpi_initialized) {
+            /* If MPI is initialized, validate that it was initialized with MPI_THREAD_MULTIPLE */
+            if (MPI_SUCCESS == (mpi_code = MPI_Query_thread(&provided))) {
+                if (provided == MPI_THREAD_MULTIPLE) {
+                    h5fd_hid_flags[7] = (hid_t_f)H5FD_SUBFILING;
+                }
+            }
+        }
+    }
+#endif
 #ifdef H5_HAVE_SUBFILING_VFD
     h5fd_hid_flags[8] = (hid_t_f)H5FD_SUBFILING_DEFAULT_STRIPE_SIZE;
 #else

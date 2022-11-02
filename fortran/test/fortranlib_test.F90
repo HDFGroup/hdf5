@@ -9,7 +9,6 @@
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
-!   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -106,8 +105,14 @@ PROGRAM fortranlibtest
   CALL extenddsettest(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Extendible dataset test', total_error)
 
+  ret_total_error = 0
   CALL test_userblock_offset(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Dataset offset with user block', total_error)
+
+  ! Test filling dataspace elements
+  ret_total_error = 0
+  CALL test_dset_fill(cleanup, ret_total_error)
+  CALL write_test_status(ret_total_error, ' Filling dataspace elements', total_error)
 
 !
 !      '========================================='

@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -84,7 +83,7 @@
 /**
  * For tweaks, bug-fixes, or development
  */
-#define H5_VERS_RELEASE 3
+#define H5_VERS_RELEASE 4
 /**
  * For pre-releases like \c snap0. Empty string for official releases.
  */
@@ -92,7 +91,7 @@
 /**
  * Full version string
  */
-#define H5_VERS_INFO "HDF5 library version: 1.13.3-1"
+#define H5_VERS_INFO "HDF5 library version: 1.13.4-1"
 
 #define H5check() H5check_version(H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE)
 

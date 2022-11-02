@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -175,8 +174,6 @@ H5_FCDLL int_f h5dget_create_plist_c(hid_t_f *dset_id, hid_t_f *plist_id);
 H5_FCDLL int_f h5dset_extent_c(hid_t_f *dset_id, hsize_t_f *dims);
 H5_FCDLL int_f h5dvlen_get_max_len_c(hid_t_f *dataset_id, hid_t_f *type_id, hid_t_f *space_id, size_t_f *len);
 H5_FCDLL int_f h5dget_storage_size_c(hid_t_f *dataset_id, hsize_t_f *size);
-H5_FCDLL int_f h5dfill_c(void *fill_value, hid_t_f *fill_type_id, hid_t_f *space_id, void *buf,
-                         hid_t_f *mem_type_id);
 H5_FCDLL int_f h5dget_space_status_c(hid_t_f *dset_id, int_f *flag);
 H5_FCDLL int_f h5dcreate_anon_c(hid_t_f *loc_id, hid_t_f *type_id, hid_t_f *space_id, hid_t_f *dcpl_id,
                                 hid_t_f *dapl_id, hid_t_f *dset_id);

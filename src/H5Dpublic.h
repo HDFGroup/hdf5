@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -320,9 +319,14 @@ H5_DLL hid_t H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id, hid_t spa
  * \ingroup ASYNC
  * \async_variant_of{H5Dcreate}
  */
+#ifndef H5_DOXYGEN
 H5_DLL hid_t H5Dcreate_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
                              const char *name, hid_t type_id, hid_t space_id, hid_t lcpl_id, hid_t dcpl_id,
                              hid_t dapl_id, hid_t es_id);
+#else
+H5_DLL hid_t  H5Dcreate_async(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id, hid_t lcpl_id,
+                              hid_t dcpl_id, hid_t dapl_id, hid_t es_id);
+#endif
 
 /**
  * --------------------------------------------------------------------------
@@ -398,8 +402,12 @@ H5_DLL hid_t H5Dopen2(hid_t loc_id, const char *name, hid_t dapl_id);
  * \ingroup ASYNC
  * \async_variant_of{H5Dopen}
  */
+#ifndef H5_DOXYGEN
 H5_DLL hid_t H5Dopen_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
                            const char *name, hid_t dapl_id, hid_t es_id);
+#else
+H5_DLL hid_t  H5Dopen_async(hid_t loc_id, const char *name, hid_t dapl_id, hid_t es_id);
+#endif
 
 /**
  * --------------------------------------------------------------------------
@@ -432,8 +440,12 @@ H5_DLL hid_t H5Dget_space(hid_t dset_id);
  * \ingroup ASYNC
  * \async_variant_of{H5Dget_space}
  */
+#ifndef H5_DOXYGEN
 H5_DLL hid_t H5Dget_space_async(const char *app_file, const char *app_func, unsigned app_line, hid_t dset_id,
                                 hid_t es_id);
+#else
+H5_DLL hid_t  H5Dget_space_async(hid_t dset_id, hid_t es_id);
+#endif
 
 /**
  * --------------------------------------------------------------------------
@@ -852,12 +864,77 @@ H5_DLL herr_t H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_
 
 /**
  * --------------------------------------------------------------------------
+ * \ingroup H5D
+ *
+ * \brief Reads raw data from a set of datasets into the provided buffers
+ *
+ * \param[in] count         Number of datasets to read from
+ * \param[in] dset_id       Identifiers of the datasets to read from
+ * \param[in] mem_type_id   Identifiers of the memory datatypes
+ * \param[in] mem_space_id  Identifiers of the memory dataspaces
+ * \param[in] file_space_id Identifiers of the datasets' dataspaces in the file
+ * \param[in] dxpl_id       Identifier of a transfer property list
+ * \param[out] buf          Buffers to receive data read from file
+ *
+ * \return \herr_t
+ *
+ * \details H5Dread_multi() reads data from \p count datasets, whose identifiers
+ *          are listed in the \p dset_id array, from the file into multiple
+ *          application memory buffers listed in the \p buf array. Data transfer
+ *          properties are defined by the argument \p dxpl_id. The memory
+ *          datatypes of each dataset are listed by identifier in the \p
+ *          mem_type_id array. The parts of each dataset to read are listed by
+ *          identifier in the \p file_space_id array, and the parts of each
+ *          application memory buffer to read to are listed by identifier in the
+ *          \p mem_space_id array. All array parameters have length \p count.
+ *
+ *          This function will produce the same results as \p count calls to
+ *          H5Dread(). Information listed in that function about the specifics
+ *          of its behaviour also apply to H5Dread_multi(). By calling
+ *          H5Dread_multi() instead of multiple calls to H5Dread(), however, the
+ *          library can in some cases pass information about the entire I/O
+ *          operation to the file driver, which can improve performance.
+ *
+ *          All datasets must be in the same HDF5 file, and each unique dataset
+ *          may only be listed once. If this function is called collectively in
+ *          parallel, each rank must pass exactly the same list of datasets in
+ *          \p dset_id , though the other parameters may differ.
+ *
+ * \since 1.13.3
+ *
+ * \see H5Dread()
+ *
+ */
+H5_DLL herr_t H5Dread_multi(size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t mem_space_id[],
+                            hid_t file_space_id[], hid_t dxpl_id, void *buf[] /*out*/);
+
+/**
+ * --------------------------------------------------------------------------
  * \ingroup ASYNC
  * \async_variant_of{H5Dread}
  */
+#ifndef H5_DOXYGEN
 H5_DLL herr_t H5Dread_async(const char *app_file, const char *app_func, unsigned app_line, hid_t dset_id,
                             hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id,
                             void *buf /*out*/, hid_t es_id);
+#else
+H5_DLL herr_t H5Dread_async(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id,
+                            hid_t dxpl_id, void *buf /*out*/, hid_t es_id);
+#endif
+
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup ASYNC
+ * \async_variant_of{H5Dread_multi}
+ */
+#ifndef H5_DOXYGEN
+H5_DLL herr_t H5Dread_multi_async(const char *app_file, const char *app_func, unsigned app_line, size_t count,
+                                  hid_t dset_id[], hid_t mem_type_id[], hid_t mem_space_id[],
+                                  hid_t file_space_id[], hid_t dxpl_id, void *buf[] /*out*/, hid_t es_id);
+#else
+H5_DLL herr_t H5Dread_multi_async(size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t mem_space_id[],
+                                  hid_t file_space_id[], hid_t dxpl_id, void *buf[] /*out*/, hid_t es_id);
+#endif
 
 /**
  * --------------------------------------------------------------------------
@@ -977,12 +1054,78 @@ H5_DLL herr_t H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid
 
 /**
  * --------------------------------------------------------------------------
+ * \ingroup H5D
+ *
+ * \brief Writes raw data from a set buffers to a set of datasets
+ *
+ * \param[in] count         Number of datasets to write to
+ * \param[in] dset_id       Identifiers of the datasets to write to
+ * \param[in] mem_type_id   Identifiers of the memory datatypes
+ * \param[in] mem_space_id  Identifiers of the memory dataspaces
+ * \param[in] file_space_id Identifiers of the datasets' dataspaces in the file
+ * \param[in] dxpl_id       Identifier of a transfer property list
+ * \param[in] buf           Buffers with data to be written to the file
+ *
+ * \return \herr_t
+ *
+ * \details H5Dwrite_multi() writes data to \p count datasets, whose identifiers
+ *          are listed in the \p dset_id array, from multiple application memory
+ *          buffers listed in the \p buf array. Data transfer properties are
+ *          defined by the argument \p dxpl_id. The memory datatypes of each
+ *          dataset are listed by identifier in the \p mem_type_id array. The
+ *          parts of each dataset to write are listed by identifier in the \p
+ *          file_space_id array, and the parts of each application memory buffer
+ *          to write from are listed by identifier in the \p mem_space_id array.
+ *          All array parameters have length \p count.
+ *
+ *          This function will produce the same results as \p count calls to
+ *          H5Dwrite(). Information listed in that function's documentation
+ *          about the specifics of its behaviour also apply to H5Dwrite_multi().
+ *          By calling H5Dwrite_multi() instead of multiple calls to H5Dwrite(),
+ *          however, the library can in some cases pass information about the
+ *          entire I/O operation to the file driver, which can improve
+ *          performance.
+ *
+ *          All datasets must be in the same HDF5 file, and each unique dataset
+ *          may only be listed once. If this function is called collectively in
+ *          parallel, each rank must pass exactly the same list of datasets in
+ *          \p dset_id , though the other parameters may differ.
+ *
+ * \since 1.13.3
+ *
+ * \see H5Dwrite()
+ *
+ */
+H5_DLL herr_t H5Dwrite_multi(size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t mem_space_id[],
+                             hid_t file_space_id[], hid_t dxpl_id, const void *buf[]);
+
+/**
+ * --------------------------------------------------------------------------
  * \ingroup ASYNC
  * \async_variant_of{H5Dwrite}
  */
+#ifndef H5_DOXYGEN
 H5_DLL herr_t H5Dwrite_async(const char *app_file, const char *app_func, unsigned app_line, hid_t dset_id,
                              hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id,
                              const void *buf, hid_t es_id);
+#else
+H5_DLL herr_t H5Dwrite_async(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id,
+                             hid_t dxpl_id, const void *buf, hid_t es_id);
+#endif
+
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup ASYNC
+ * \async_variant_of{H5Dwrite_multi}
+ */
+#ifndef H5_DOXYGEN
+H5_DLL herr_t H5Dwrite_multi_async(const char *app_file, const char *app_func, unsigned app_line,
+                                   size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t mem_space_id[],
+                                   hid_t file_space_id[], hid_t dxpl_id, const void *buf[], hid_t es_id);
+#else
+H5_DLL herr_t H5Dwrite_multi_async(size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t mem_space_id[],
+                                   hid_t file_space_id[], hid_t dxpl_id, const void *buf[], hid_t es_id);
+#endif
 
 /**
  * --------------------------------------------------------------------------
@@ -1268,8 +1411,12 @@ H5_DLL herr_t H5Dset_extent(hid_t dset_id, const hsize_t size[]);
  * \ingroup ASYNC
  * \async_variant_of{H5Dset_extent}
  */
+#ifndef H5_DOXYGEN
 H5_DLL herr_t H5Dset_extent_async(const char *app_file, const char *app_func, unsigned app_line,
                                   hid_t dset_id, const hsize_t size[], hid_t es_id);
+#else
+H5_DLL herr_t H5Dset_extent_async(hid_t dset_id, const hsize_t size[], hid_t es_id);
+#endif
 
 /**
  * --------------------------------------------------------------------------
@@ -1447,8 +1594,12 @@ H5_DLL herr_t H5Dclose(hid_t dset_id);
  * \ingroup ASYNC
  * \async_variant_of{H5Dclose}
  */
+#ifndef H5_DOXYGEN
 H5_DLL herr_t H5Dclose_async(const char *app_file, const char *app_func, unsigned app_line, hid_t dset_id,
                              hid_t es_id);
+#else
+H5_DLL herr_t H5Dclose_async(hid_t dset_id, hid_t es_id);
+#endif
 /// \cond DEV
 /* Internal API routines */
 H5_DLL herr_t H5Ddebug(hid_t dset_id);
@@ -1461,13 +1612,15 @@ H5_DLL herr_t H5Dget_chunk_index_type(hid_t did, H5D_chunk_index_t *idx_type);
 /* (Must be defined _after_ the function prototype) */
 /* (And must only defined when included in application code, not the library) */
 #ifndef H5D_MODULE
-#define H5Dcreate_async(...)     H5Dcreate_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
-#define H5Dopen_async(...)       H5Dopen_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
-#define H5Dget_space_async(...)  H5Dget_space_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
-#define H5Dread_async(...)       H5Dread_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
-#define H5Dwrite_async(...)      H5Dwrite_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
-#define H5Dset_extent_async(...) H5Dset_extent_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
-#define H5Dclose_async(...)      H5Dclose_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Dcreate_async(...)      H5Dcreate_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Dopen_async(...)        H5Dopen_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Dget_space_async(...)   H5Dget_space_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Dread_async(...)        H5Dread_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Dread_multi_async(...)  H5Dread_multi_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Dwrite_async(...)       H5Dwrite_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Dwrite_multi_async(...) H5Dwrite_multi_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Dset_extent_async(...)  H5Dset_extent_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Dclose_async(...)       H5Dclose_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
 
 /* Define "wrapper" versions of function calls, to allow compile-time values to
  *      be passed in by language wrapper or library layer on top of HDF5.

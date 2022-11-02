@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -489,14 +488,9 @@ H5D__layout_oh_create(H5F_t *file, H5O_t *oh, H5D_t *dset, hid_t dapl_id)
      * Allocate storage if space allocate time is early; otherwise delay
      * allocation until later.
      */
-    if (fill_prop->alloc_time == H5D_ALLOC_TIME_EARLY) {
-        H5D_io_info_t io_info;
-
-        io_info.dset = dset;
-
-        if (H5D__alloc_storage(&io_info, H5D_ALLOC_CREATE, FALSE, NULL) < 0)
+    if (fill_prop->alloc_time == H5D_ALLOC_TIME_EARLY)
+        if (H5D__alloc_storage(dset, H5D_ALLOC_CREATE, FALSE, NULL) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize storage")
-    }
 
     /* Update external storage message, if it's used */
     if (dset->shared->dcpl_cache.efl.nused > 0) {

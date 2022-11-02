@@ -61,10 +61,10 @@ H5_DLL void  *H5VL__native_dataset_create(void *obj, const H5VL_loc_params_t *lo
                                           hid_t dapl_id, hid_t dxpl_id, void **req);
 H5_DLL void  *H5VL__native_dataset_open(void *obj, const H5VL_loc_params_t *loc_params, const char *name,
                                         hid_t dapl_id, hid_t dxpl_id, void **req);
-H5_DLL herr_t H5VL__native_dataset_read(void *dset, hid_t mem_type_id, hid_t mem_space_id,
-                                        hid_t file_space_id, hid_t plist_id, void *buf, void **req);
-H5_DLL herr_t H5VL__native_dataset_write(void *dset, hid_t mem_type_id, hid_t mem_space_id,
-                                         hid_t file_space_id, hid_t plist_id, const void *buf, void **req);
+H5_DLL herr_t H5VL__native_dataset_read(size_t count, void *obj[], hid_t mem_type_id[], hid_t mem_space_id[],
+                                        hid_t file_space_id[], hid_t dxpl_id, void *buf[], void **req);
+H5_DLL herr_t H5VL__native_dataset_write(size_t count, void *obj[], hid_t mem_type_id[], hid_t mem_space_id[],
+                                         hid_t file_space_id[], hid_t dxpl_id, const void *buf[], void **req);
 H5_DLL herr_t H5VL__native_dataset_get(void *dset, H5VL_dataset_get_args_t *args, hid_t dxpl_id, void **req);
 H5_DLL herr_t H5VL__native_dataset_specific(void *dset, H5VL_dataset_specific_args_t *args, hid_t dxpl_id,
                                             void **req);

@@ -1,6 +1,5 @@
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
-!   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -53,6 +52,8 @@ PROGRAM subfiling_test
   INTEGER :: nerrors = 0
 
   INTEGER(HID_T) :: driver_id
+
+  CHARACTER(len=8) :: hex1, hex2
 
   !
   ! initialize MPI
@@ -210,9 +211,12 @@ PROGRAM subfiling_test
   CALL h5pget_fapl_ioc_f(vfd_config%ioc_fapl_id, vfd_config_ioc, hdferror)
   CALL check("h5pget_fapl_ioc_f", hdferror, nerrors)
 
-  IF(vfd_config%magic .NE. H5FD_SUBFILING_FAPL_MAGIC_F .OR. &
+  WRITE(hex1,'(z8)') H5FD_SUBFILING_FAPL_MAGIC_F
+  WRITE(hex2,'(z8)') vfd_config%magic
+
+  IF(hex1 .NE. hex2 .OR. &
      vfd_config%version .NE. H5FD_SUBFILING_CURR_FAPL_VERSION_F .OR. &
-     vfd_config%require_ioc .NEQV. .TRUE. .OR. &
+     .NOT.vfd_config%require_ioc .OR. &
      vfd_config%shared_cfg%ioc_selection .NE. SELECT_IOC_ONE_PER_NODE_F .OR. &
      vfd_config%shared_cfg%stripe_size .NE. H5FD_SUBFILING_DEFAULT_STRIPE_SIZE_F .OR. &
      vfd_config%shared_cfg%stripe_count .NE. H5FD_SUBFILING_DEFAULT_STRIPE_COUNT_F &
@@ -225,8 +229,11 @@ PROGRAM subfiling_test
   IF(mpi_rank==0) CALL write_test_status(nerrors, &
        'Testing H5Pset/get_fapl_subfiling_f with defaults', total_error)
 
+  WRITE(hex1,'(z8)') H5FD_IOC_FAPL_MAGIC_F
+  WRITE(hex2,'(z8)') vfd_config_ioc%magic
+
   nerrors = 0
-  IF(vfd_config_ioc%magic.NE. H5FD_IOC_FAPL_MAGIC_F .OR. &
+  IF(hex1 .NE. hex2 .OR. &
      vfd_config_ioc%version .NE. H5FD_IOC_CURR_FAPL_VERSION_F .OR. &
      vfd_config_ioc%thread_pool_size .NE. H5FD_IOC_DEFAULT_THREAD_POOL_SIZE_F &
      )THEN
@@ -271,9 +278,12 @@ PROGRAM subfiling_test
   CALL h5pget_fapl_subfiling_f(fapl_id, vfd_config, hdferror)
   CALL check("h5pget_fapl_ioc_f", hdferror, nerrors)
 
-  IF(vfd_config%magic .NE. H5FD_SUBFILING_FAPL_MAGIC_F .OR. &
+  WRITE(hex1,'(z8)') H5FD_SUBFILING_FAPL_MAGIC_F
+  WRITE(hex2,'(z8)') vfd_config%magic
+
+  IF(hex1 .NE. hex2 .OR. &
      vfd_config%version .NE. H5FD_SUBFILING_CURR_FAPL_VERSION_F .OR. &
-     vfd_config%require_ioc .NEQV. .TRUE. .OR. &
+     .NOT.vfd_config%require_ioc .OR. &
      vfd_config%shared_cfg%ioc_selection .NE. SELECT_IOC_ONE_PER_NODE_F .OR. &
      vfd_config%shared_cfg%stripe_size .NE. 16*1024*1024 .OR. &
      vfd_config%shared_cfg%stripe_count .NE. 3 &
@@ -297,7 +307,7 @@ PROGRAM subfiling_test
   CALL h5pget_fapl_ioc_f(vfd_config%ioc_fapl_id, vfd_config_ioc, hdferror)
   CALL check("h5pget_fapl_ioc_f", hdferror, nerrors)
 
-  IF(vfd_config_ioc%magic .NE. H5FD_IOC_FAPL_MAGIC_F .OR. &
+  IF(& !vfd_config_ioc%magic .NE. H5FD_IOC_FAPL_MAGIC_F .OR. &
      vfd_config_ioc%version .NE. H5FD_IOC_CURR_FAPL_VERSION_F .OR. &
      vfd_config_ioc%thread_pool_size .NE. 2 &
      )THEN

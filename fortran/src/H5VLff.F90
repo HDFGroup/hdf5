@@ -12,7 +12,6 @@
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
-!   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -58,7 +57,7 @@ CONTAINS
 !! \param hdferr  \fortran_error
 !! \param vipl_id VOL initialization property list identifier.
 !!
-!! See C API: @ref hid_t H5VLregister_connector_by_name(const char *connector_name, hid_t vipl_id);
+!! See C API: @ref H5VLregister_connector_by_name()
 !!
   SUBROUTINE H5VLregister_connector_by_name_f(name, vol_id, hdferr, vipl_id)
     IMPLICIT NONE
@@ -99,7 +98,7 @@ CONTAINS
 !! \param hdferr          \fortran_error
 !! \param vipl_id         VOL initialization property list identifier.
 !!
-!! See C API: @ref hid_t H5VLregister_connector_by_value(H5VL_class_value_t connector_value, hid_t vipl_id);
+!! See C API: @ref H5VLregister_connector_by_value()
 !!
   SUBROUTINE H5VLregister_connector_by_value_f(connector_value, vol_id, hdferr, vipl_id)
     IMPLICIT NONE
@@ -138,7 +137,7 @@ CONTAINS
 !! \param registered State of VOL class registration.
 !! \param hdferr     \fortran_error
 !!
-!! See C API: @ref htri_t H5VLis_connector_registered_by_name(const char *name);
+!! See C API: @ref H5VLis_connector_registered_by_name()
 !!
   SUBROUTINE H5VLis_connector_registered_by_name_f(name, registered,  hdferr)
     IMPLICIT NONE
@@ -175,7 +174,7 @@ CONTAINS
 !! \param registered State of VOL class registration.
 !! \param hdferr Retu\fortran_error
 !!
-!! See C API: @ref htri_t H5VLis_connector_registered_by_value(H5VL_class_value_t connector_value);
+!! See C API: @ref H5VLis_connector_registered_by_value()
 !!
   SUBROUTINE H5VLis_connector_registered_by_value_f(value, registered,  hdferr)
     IMPLICIT NONE
@@ -209,7 +208,7 @@ CONTAINS
 !! \param vol_id Connector id.
 !! \param hdferr \fortran_error
 !!
-!! See C API: @ref hid_t H5VLget_connector_id(hid_t obj_id);
+!! See C API: @ref H5VLget_connector_id()
 !!
   SUBROUTINE H5VLget_connector_id_f(obj_id, vol_id, hdferr)
     IMPLICIT NONE
@@ -242,7 +241,7 @@ CONTAINS
 !! \param vol_id Connector id.
 !! \param hdferr \fortran_error
 !!
-!! See C API: @ref hid_t H5VLget_connector_id_by_name(const char *name);
+!! See C API: @ref H5VLget_connector_id_by_name()
 !!
   SUBROUTINE H5VLget_connector_id_by_name_f(name, vol_id, hdferr)
     IMPLICIT NONE
@@ -279,7 +278,7 @@ CONTAINS
 !! \param vol_id Connector id.
 !! \param hdferr \fortran_error
 !!
-!! See C API: @ref hid_t H5VLget_connector_id_by_value(H5VL_class_value_t connector_value);
+!! See C API: @ref H5VLget_connector_id_by_value()
 !!
   SUBROUTINE H5VLget_connector_id_by_value_f(value, vol_id, hdferr)
     IMPLICIT NONE
@@ -313,7 +312,7 @@ CONTAINS
 !! \param hdferr   \fortran_error
 !! \param name_len Maximum length of the name to retrieve.
 !!
-!! See C API: @ref ssize_t H5VLget_connector_name(hid_t id, char *name , size_t size);
+!! See C API: @ref H5VLget_connector_name()
 !!
   SUBROUTINE H5VLget_connector_name_f(obj_id, name, hdferr, name_len)
     IMPLICIT NONE
@@ -358,7 +357,7 @@ CONTAINS
 !! \param vol_id A valid identifier of the connectory to unregister.
 !! \param hdferr \fortran_error
 !!
-!! See C API: @ref herr_t H5VLclose(hid_t connector_id);
+!! See C API: @ref H5VLclose()
 !!
   SUBROUTINE H5VLclose_f(vol_id, hdferr)
     IMPLICIT NONE
@@ -384,7 +383,7 @@ CONTAINS
 !! \param plugin_id A valid identifier of the connector to unregister..
 !! \param hdferr Ret\fortran_error
 !!
-!! See C API: @ref herr_t H5VLunregister_connector(hid_t connector_id);
+!! See C API: @ref H5VLunregister_connector()
 !!
   SUBROUTINE H5VLunregister_connector_f(plugin_id, hdferr)
     IMPLICIT NONE

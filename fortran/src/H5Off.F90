@@ -12,7 +12,6 @@
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
-!   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -151,7 +150,7 @@ CONTAINS
 !! \param lcpl_id       Link creation property list identifier.
 !! \param lapl_id       Link access property list identifier.
 !!
-!! See C API: @ref herr_t H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id, hid_t lapl_id);
+!! See C API: @ref H5Olink()
 !!
   SUBROUTINE h5olink_f(object_id, new_loc_id, new_link_name, hdferr, lcpl_id, lapl_id)
     IMPLICIT NONE
@@ -204,7 +203,7 @@ CONTAINS
 !! \param hdferr  \fortran_error
 !! \param lapl_id Access property list identifier for the link pointing to the object.
 !!
-!! See C API: @ref hid_t H5Oopen(hid_t loc_id, const char *name, hid_t lapl_id);
+!! See C API: @ref H5Oopen()
 !!
   SUBROUTINE h5oopen_f(loc_id, name, obj_id, hdferr, lapl_id)
     IMPLICIT NONE
@@ -245,7 +244,7 @@ CONTAINS
 !! \param object_id Object identifier.
 !! \param hdferr    \fortran_error
 !!
-!! See C API: @ref herr_t H5Oclose(hid_t object_id);
+!! See C API: @ref H5Oclose()
 !!
   SUBROUTINE h5oclose_f(object_id, hdferr)
     IMPLICIT NONE
@@ -272,7 +271,7 @@ CONTAINS
 !! \param obj_id Object identifier for the opened object.
 !! \param hdferr \fortran_error
 !!
-!! See C API: @ref hid_t H5Oopen_by_token(hid_t loc_id, H5O_token_t token);
+!! See C API: @ref H5Oopen_by_token()
 !!
   SUBROUTINE h5oopen_by_token_f(loc_id, token, obj_id, hdferr)
     IMPLICIT NONE
@@ -307,7 +306,7 @@ CONTAINS
 !! \param lcpl_id    Link creation property list for the new hard link.
 !! \param hdferr     \fortran_error
 !!
-!! See C API: @ref herr_t H5Ocopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id);
+!! See C API: @ref H5Ocopy()
 !!
   SUBROUTINE h5ocopy_f(src_loc_id, src_name, dst_loc_id, dst_name, hdferr, ocpypl_id, lcpl_id)
     IMPLICIT NONE
@@ -361,7 +360,7 @@ CONTAINS
 !! \param object_id Object identifier.
 !! \param hdferr    \fortran_error
 !!
-!! See C API: @ref herr_t H5Odecr_refcount(hid_t object_id);
+!! See C API: @ref H5Odecr_refcount()
 !!
   SUBROUTINE h5odecr_refcount_f(object_id, hdferr)
     IMPLICIT NONE
@@ -393,7 +392,7 @@ CONTAINS
 !! \param link_exists Existing link resolves to an object.
 !! \param hdferr      \fortran_error
 !!
-!! See C API: @ref htri_t H5Oexists_by_name(hid_t loc_id, const char *name, hid_t lapl_id);
+!! See C API: @ref H5Oexists_by_name()
 !!
   SUBROUTINE h5oexists_by_name_f(loc_id, name, link_exists, hdferr, lapl_id)
     IMPLICIT NONE
@@ -450,7 +449,7 @@ CONTAINS
 !! \param comment The comment.
 !! \param hdferr  \fortran_error
 !!
-!! See C API: @ref ssize_t H5Oget_comment(hid_t obj_id, char *comment, size_t bufsize);
+!! See C API: @ref H5Oget_comment()
 !!
   SUBROUTINE h5oget_comment_f(obj_id, comment, hdferr, bufsize)
     IMPLICIT NONE
@@ -495,7 +494,7 @@ CONTAINS
 !! \param bufsize Size of the comment buffer.
 !! \param lapl_id File access property list identifier.
 !!
-!! See C API: @ref ssize_t H5Oget_comment_by_name(hid_t loc_id, const char *name, char *comment, size_t bufsize, hid_t lapl_id);
+!! See C API: @ref H5Oget_comment_by_name()
 !!
   SUBROUTINE h5oget_comment_by_name_f(loc_id, name, comment, hdferr, bufsize, lapl_id)
     IMPLICIT NONE
@@ -547,7 +546,7 @@ CONTAINS
 !! \param obj_id Object identifier.
 !! \param hdferr \fortran_error
 !!
-!! See C API: @ref herr_t H5Oincr_refcount(hid_t object_id);
+!! See C API: @ref H5Oincr_refcount()
 !!
   SUBROUTINE h5oincr_refcount_f(obj_id, hdferr)
     IMPLICIT NONE
@@ -581,7 +580,7 @@ CONTAINS
 !!
 !! \param lapl_id    Link access property list.
 !!
-!! See C API: @ref hid_t H5Oopen_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_iter_order_t order, hsize_t n, hid_t lapl_id);
+!! See C API: @ref H5Oopen_by_idx()
 !!
   SUBROUTINE h5oopen_by_idx_f(loc_id, group_name, index_type, order, n, obj_id, &
        hdferr, lapl_id)
@@ -633,7 +632,7 @@ CONTAINS
 !! \param comment The new comment.
 !! \param hdferr  \fortran_error
 !!
-!! See C API: @ref herr_t H5Oset_comment(hid_t obj_id, const char *comment);
+!! See C API: @ref H5Oset_comment()
 !!
   SUBROUTINE h5oset_comment_f(obj_id, comment, hdferr)
     IMPLICIT NONE
@@ -671,7 +670,7 @@ CONTAINS
 !! \param hdferr  \fortran_error
 !! \param lapl_id Link access property list identifier.
 !!
-!! See C API: @ref herr_t H5Oset_comment_by_name(hid_t loc_id, const char *name, const char *comment, hid_t lapl_id);
+!! See C API: @ref H5Oset_comment_by_name()
 !!
   SUBROUTINE h5oset_comment_by_name_f(loc_id, name, comment, hdferr, lapl_id)
     IMPLICIT NONE
@@ -729,7 +728,7 @@ CONTAINS
 !! \param hdferr       \fortran_error
 !! \param fields       Flags specifying the fields to include in object_info.
 !!
-!! See C API: @ref herr_t H5Ovisit3(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order, H5O_iterate2_t op, void *op_data, unsigned fields);
+!! See C API: @ref H5Ovisit3()
 !!
   SUBROUTINE h5ovisit_f(object_id, index_type, order, op, op_data, return_value, hdferr, fields)
     IMPLICIT NONE
@@ -784,7 +783,7 @@ CONTAINS
 !! \param lapl_id     Link access property list.
 !! \param fields      Flags specifying the fields to include in object_info.
 !!
-!! See C API: @ref herr_t H5Oget_info_by_name3(hid_t loc_id, const char *name, H5O_info2_t *oinfo, unsigned fields, hid_t lapl_id);
+!! See C API: @ref H5Oget_info_by_name3()
 !!
   SUBROUTINE h5oget_info_by_name_f(loc_id, name, object_info, hdferr, lapl_id, fields)
     IMPLICIT NONE
@@ -839,7 +838,7 @@ CONTAINS
 !! \param hdferr      \fortran_error
 !! \param fields      Flags specifying the fields to include in object_info.
 !!
-!! See C API: @ref herr_t H5Oget_info3(hid_t loc_id, H5O_info2_t *oinfo, unsigned fields);
+!! See C API: @ref H5Oget_info3()
 !!
   SUBROUTINE h5oget_info_f(object_id, object_info, hdferr, fields)
 
@@ -888,7 +887,7 @@ CONTAINS
 !! \param lapl_id     Link access property list. (Not currently used.).
 !! \param fields      Flags specifying the fields to include in object_info.
 !!
-!! See C API: @ref herr_t H5Oget_info_by_idx3(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_iter_order_t order, hsize_t n, H5O_info2_t *oinfo, unsigned fields, hid_t lapl_id);
+!! See C API: @ref H5Oget_info_by_idx3()
 !!
   SUBROUTINE h5oget_info_by_idx_f(loc_id, group_name, index_field, order, n, &
        object_info, hdferr, lapl_id, fields)
@@ -962,7 +961,7 @@ CONTAINS
 !! \param lapl_id      Link access property list identifier.
 !! \param fields       Flags specifying the fields to include in object_info.
 !!
-!! See C API: @ref herr_t H5Ovisit_by_name3(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_iter_order_t order, H5O_iterate2_t op, void *op_data, unsigned fields, hid_t lapl_id);
+!! See C API: @ref H5Ovisit_by_name3()
 !!
   SUBROUTINE h5ovisit_by_name_f(loc_id, object_name, index_type, order, op, op_data, &
        return_value, hdferr, lapl_id, fields)
@@ -1031,7 +1030,7 @@ CONTAINS
 !! \param cmp_value Returns 0 if tokens are equal, non-zero for unequal tokens.
 !! \param hdferr    \fortran_error
 !!
-!! See C API: @ref herr_t H5Otoken_cmp(hid_t loc_id, const H5O_token_t *token1, const H5O_token_t *token2, int *cmp_value);
+!! See C API: @ref H5Otoken_cmp()
 !!
   SUBROUTINE h5otoken_cmp_f(loc_id, token1, token2, cmp_value, hdferr)
     IMPLICIT NONE

@@ -21,7 +21,6 @@
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
-!   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -79,7 +78,7 @@ MODULE H5R
      MODULE PROCEDURE h5rget_object_type_obj_f
   END INTERFACE
 
-#ifndef H5_DOXYGEN_FORTRAN
+#ifndef H5_DOXYGEN
 
   INTERFACE h5rget_region_f
      MODULE PROCEDURE h5rget_region_ptr_f    ! F2003
@@ -178,7 +177,7 @@ CONTAINS
 !!                 \li H5G_TYPE_F
 !! \param hdferr   \fortran_error
 !!
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
   SUBROUTINE h5rget_object_type_f(&
 #else
   SUBROUTINE h5rget_object_type_obj_f(&
@@ -204,7 +203,7 @@ CONTAINS
     ref_f = ref%ref
     hdferr = h5rget_object_type_obj_c(dset_id, ref_f, obj_type )
 
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
   END SUBROUTINE h5rget_object_type_f
 #else
   END SUBROUTINE h5rget_object_type_obj_f
@@ -258,9 +257,9 @@ CONTAINS
 !! \param space_id Dataspace identifier.
 !! \param hdferr   \fortran_error
 !!
-!! See C API: @ref hid_t H5Rget_region(hid_t dataset, H5R_type_t ref_type, const void *ref);
+!! See C API: @ref H5Rget_region()
 !!
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
   SUBROUTINE h5rget_region_f(&
 #else
   SUBROUTINE h5rget_region_ptr_f(&
@@ -274,7 +273,7 @@ CONTAINS
 
     hdferr = h5rget_region_ptr_c(dset_id, ref, space_id)
 
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
   END SUBROUTINE h5rget_region_f
 #else
   END SUBROUTINE h5rget_region_ptr_f
@@ -292,7 +291,7 @@ CONTAINS
 !! \param ref    Reference to the specified object.
 !! \param hdferr \fortran_error
 !!
-!! See C API: @ref herr_t H5Rcreate_object(hid_t loc_id, const char *name, hid_t oapl_id, H5R_ref_t *ref_ptr);
+!! See C API: @ref H5Rcreate_object()
 !!
   SUBROUTINE h5rcreate_object_f(loc_id, name, ref, hdferr)
     USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
@@ -325,7 +324,7 @@ CONTAINS
 !! \param ref      Reference to the dataset region.
 !! \param hdferr   \fortran_error
 !!
-!! See C API: @ref herr_t H5Rcreate_region(hid_t loc_id, const char *name, hid_t space_id, hid_t oapl_id, H5R_ref_t *ref_ptr);
+!! See C API: @ref H5Rcreate_region()
 !!
   SUBROUTINE h5rcreate_region_f(loc_id, name, space_id, ref, hdferr)
     IMPLICIT NONE
@@ -373,8 +372,8 @@ CONTAINS
 !! \param hdferr   \fortran_error
 !! \param space_id Dataspace identifier that describes selected region.
 !!
-#ifdef H5_DOXYGEN_FORTRAN
-!! See C API: @ref herr_t H5Rcreate_object(hid_t loc_id, const char *name, hid_t oapl_id, H5R_ref_t *ref_ptr);
+#ifdef H5_DOXYGEN
+!! See C API: @ref H5Rcreate_object()
 !!
   SUBROUTINE h5rcreate_f(&
 #else
@@ -397,7 +396,7 @@ CONTAINS
     IF(PRESENT(space_id)) space_id_c =  space_id
     hdferr = h5rcreate_ptr_c(ref, loc_id, name, namelen, ref_type, space_id_c)
 
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
   END SUBROUTINE h5rcreate_f
 #else
   END SUBROUTINE h5rcreate_ptr_f
@@ -566,8 +565,8 @@ CONTAINS
 !!\param  size     The size of the name buffer, returning 0 (zero) if no name is associated with the identifier.
 !!
 
-#ifdef H5_DOXYGEN_FORTRAN
-!! See C API: @ref ssize_t H5Rget_name(hid_t loc_id, H5R_type_t ref_type, const void *ref, char *name, size_t size);
+#ifdef H5_DOXYGEN
+!! See C API: @ref H5Rget_name()
 !!
   SUBROUTINE h5rget_name_f(&
 #else
@@ -591,7 +590,7 @@ CONTAINS
 
     IF(PRESENT(size)) size = size_default
 
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
   END SUBROUTINE h5rget_name_f
 #else
   END SUBROUTINE h5rget_name_ptr_f
@@ -612,7 +611,7 @@ CONTAINS
 !!             \li H H5G_TYPE_F
 !!  hdferr   - \fortran_error
 !!
-!! See C API: @ref herr_t H5Rget_obj_type3(H5R_ref_t *ref_ptr, hid_t rapl_id, H5O_type_t *obj_type);
+!! See C API: @ref H5Rget_obj_type3()
 !!
   SUBROUTINE h5rget_obj_type_f(loc_id, ref_type, ref, obj_type, hdferr)
 

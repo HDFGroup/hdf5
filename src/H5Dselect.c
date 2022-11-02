@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -44,8 +43,8 @@
 /* Local Prototypes */
 /********************/
 
-static herr_t H5D__select_io(const H5D_io_info_t *io_info, size_t elmt_size, size_t nelmts, H5S_t *file_space,
-                             H5S_t *mem_space);
+static herr_t H5D__select_io(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info,
+                             size_t elmt_size);
 
 /*********************/
 /* Package Variables */
@@ -77,8 +76,7 @@ H5FL_EXTERN(H5S_sel_iter_t);
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__select_io(const H5D_io_info_t *io_info, size_t elmt_size, size_t nelmts, H5S_t *file_space,
-               H5S_t *mem_space)
+H5D__select_io(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info, size_t elmt_size)
 {
     H5S_sel_iter_t *mem_iter       = NULL;  /* Memory selection iteration info */
     hbool_t         mem_iter_init  = FALSE; /* Memory selection iteration info has been initialized */
@@ -95,18 +93,22 @@ H5D__select_io(const H5D_io_info_t *io_info, size_t elmt_size, size_t nelmts, H5
     size_t          dxpl_vec_size;          /* Vector length from API context's DXPL */
     size_t          vec_size;               /* Vector length */
     ssize_t         tmp_file_len;           /* Temporary number of bytes in file sequence */
+    size_t          nelmts;                 /* Number of elements to process */
     herr_t          ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(io_info);
-    HDassert(io_info->dset);
-    HDassert(io_info->store);
-    HDassert(io_info->u.rbuf);
+    HDassert(dset_info->dset);
+    HDassert(dset_info->store);
+    HDassert(dset_info->buf.vp);
 
     if (elmt_size == 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "invalid elmt_size of 0")
+
+    /* Initialize nelmts */
+    nelmts = dset_info->nelmts;
 
     /* Check for only one element in selection */
     if (nelmts == 1) {
@@ -116,9 +118,9 @@ H5D__select_io(const H5D_io_info_t *io_info, size_t elmt_size, size_t nelmts, H5
         size_t  single_file_len; /* Length in the file */
 
         /* Get offset of first element in selections */
-        if (H5S_SELECT_OFFSET(file_space, &single_file_off) < 0)
+        if (H5S_SELECT_OFFSET(dset_info->file_space, &single_file_off) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "can't retrieve file selection offset")
-        if (H5S_SELECT_OFFSET(mem_space, &single_mem_off) < 0)
+        if (H5S_SELECT_OFFSET(dset_info->mem_space, &single_mem_off) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "can't retrieve memory selection offset")
 
         /* Set up necessary information for I/O operation */
@@ -130,16 +132,16 @@ H5D__select_io(const H5D_io_info_t *io_info, size_t elmt_size, size_t nelmts, H5
 
         /* Perform I/O on memory and file sequences */
         if (io_info->op_type == H5D_IO_OP_READ) {
-            if ((tmp_file_len = (*io_info->layout_ops.readvv)(
-                     io_info, file_nseq, &curr_file_seq, &single_file_len, &single_file_off, mem_nseq,
-                     &curr_mem_seq, &single_mem_len, &single_mem_off)) < 0)
+            if ((tmp_file_len = (*dset_info->layout_ops.readvv)(
+                     io_info, dset_info, file_nseq, &curr_file_seq, &single_file_len, &single_file_off,
+                     mem_nseq, &curr_mem_seq, &single_mem_len, &single_mem_off)) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_READERROR, FAIL, "read error")
         } /* end if */
         else {
             HDassert(io_info->op_type == H5D_IO_OP_WRITE);
-            if ((tmp_file_len = (*io_info->layout_ops.writevv)(
-                     io_info, file_nseq, &curr_file_seq, &single_file_len, &single_file_off, mem_nseq,
-                     &curr_mem_seq, &single_mem_len, &single_mem_off)) < 0)
+            if ((tmp_file_len = (*dset_info->layout_ops.writevv)(
+                     io_info, dset_info, file_nseq, &curr_file_seq, &single_file_len, &single_file_off,
+                     mem_nseq, &curr_mem_seq, &single_mem_len, &single_mem_off)) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_WRITEERROR, FAIL, "write error")
         } /* end else */
 
@@ -175,12 +177,13 @@ H5D__select_io(const H5D_io_info_t *io_info, size_t elmt_size, size_t nelmts, H5
             HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate file iterator")
 
         /* Initialize file iterator */
-        if (H5S_select_iter_init(file_iter, file_space, elmt_size, H5S_SEL_ITER_GET_SEQ_LIST_SORTED) < 0)
+        if (H5S_select_iter_init(file_iter, dset_info->file_space, elmt_size,
+                                 H5S_SEL_ITER_GET_SEQ_LIST_SORTED) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator")
         file_iter_init = 1; /* File selection iteration info has been initialized */
 
         /* Initialize memory iterator */
-        if (H5S_select_iter_init(mem_iter, mem_space, elmt_size, 0) < 0)
+        if (H5S_select_iter_init(mem_iter, dset_info->mem_space, elmt_size, 0) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator")
         mem_iter_init = 1; /* Memory selection iteration info has been initialized */
 
@@ -214,16 +217,16 @@ H5D__select_io(const H5D_io_info_t *io_info, size_t elmt_size, size_t nelmts, H5
 
             /* Perform I/O on memory and file sequences */
             if (io_info->op_type == H5D_IO_OP_READ) {
-                if ((tmp_file_len =
-                         (*io_info->layout_ops.readvv)(io_info, file_nseq, &curr_file_seq, file_len, file_off,
-                                                       mem_nseq, &curr_mem_seq, mem_len, mem_off)) < 0)
+                if ((tmp_file_len = (*dset_info->layout_ops.readvv)(
+                         io_info, dset_info, file_nseq, &curr_file_seq, file_len, file_off, mem_nseq,
+                         &curr_mem_seq, mem_len, mem_off)) < 0)
                     HGOTO_ERROR(H5E_DATASPACE, H5E_READERROR, FAIL, "read error")
             } /* end if */
             else {
                 HDassert(io_info->op_type == H5D_IO_OP_WRITE);
-                if ((tmp_file_len = (*io_info->layout_ops.writevv)(io_info, file_nseq, &curr_file_seq,
-                                                                   file_len, file_off, mem_nseq,
-                                                                   &curr_mem_seq, mem_len, mem_off)) < 0)
+                if ((tmp_file_len = (*dset_info->layout_ops.writevv)(
+                         io_info, dset_info, file_nseq, &curr_file_seq, file_len, file_off, mem_nseq,
+                         &curr_mem_seq, mem_len, mem_off)) < 0)
                     HGOTO_ERROR(H5E_DATASPACE, H5E_WRITEERROR, FAIL, "write error")
             } /* end else */
 
@@ -452,16 +455,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__select_read(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
-                 H5S_t *file_space, H5S_t *mem_space)
+H5D__select_read(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Call generic selection operation */
-    H5_CHECK_OVERFLOW(nelmts, hsize_t, size_t);
-    if (H5D__select_io(io_info, type_info->src_type_size, (size_t)nelmts, file_space, mem_space) < 0)
+    if (H5D__select_io(io_info, dset_info, dset_info->type_info.src_type_size) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_READERROR, FAIL, "read error")
 
 done:
@@ -481,16 +482,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__select_write(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
-                  H5S_t *file_space, H5S_t *mem_space)
+H5D__select_write(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Call generic selection operation */
-    H5_CHECK_OVERFLOW(nelmts, hsize_t, size_t);
-    if (H5D__select_io(io_info, type_info->dst_type_size, (size_t)nelmts, file_space, mem_space) < 0)
+    if (H5D__select_io(io_info, dset_info, dset_info->type_info.dst_type_size) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_WRITEERROR, FAIL, "write error")
 
 done:

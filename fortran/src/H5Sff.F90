@@ -12,7 +12,6 @@
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
-!   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -53,7 +52,7 @@ CONTAINS
 !! \param hdferr   \fortran_error
 !! \param maxdims  An array of the maximum size of each dimension.
 !!
-!! See C API: @ref hid_t H5Screate_simple(int rank, const hsize_t dims[], const hsize_t maxdims[]);
+!! See C API: @ref H5Screate_simple()
 !!
   SUBROUTINE h5screate_simple_f(rank, dims, space_id, hdferr, maxdims)
 
@@ -99,7 +98,7 @@ CONTAINS
 !! \param space_id Identifier of dataspace to release.
 !! \param hdferr   \fortran_error
 !!
-!! See C API: @ref herr_t H5Sclose(hid_t space_id);
+!! See C API: @ref H5Sclose()
 !!
   SUBROUTINE h5sclose_f(space_id, hdferr)
     IMPLICIT NONE
@@ -129,7 +128,7 @@ CONTAINS
 !! \param space_id  Dataspace identifier.
 !! \param hdferr    \fortran_error
 !!
-!! See C API: @ref hid_t H5Screate(H5S_class_t type);
+!! See C API: @ref H5Screate()
 !!
   SUBROUTINE h5screate_f(classtype, space_id, hdferr)
     IMPLICIT NONE
@@ -158,7 +157,7 @@ CONTAINS
 !! \param new_space_id Identifier of dataspace&apos;s copy.
 !! \param hdferr       \fortran_error
 !!
-!! See C API: @ref hid_t H5Scopy(hid_t space_id);
+!! See C API: @ref H5Scopy()
 !!
   SUBROUTINE h5scopy_f(space_id, new_space_id, hdferr)
     IMPLICIT NONE
@@ -187,7 +186,7 @@ CONTAINS
 !! \param num_blocks Number of hyperslab blocks in the current hyperslab selection.
 !! \param hdferr     \fortran_error
 !!
-!! See C API: @ref hssize_t H5Sget_select_hyper_nblocks(hid_t spaceid);
+!! See C API: @ref H5Sget_select_hyper_nblocks()
 !!
   SUBROUTINE h5sget_select_hyper_nblocks_f(space_id, num_blocks, hdferr)
     IMPLICIT NONE
@@ -219,7 +218,7 @@ CONTAINS
 !! \param buf        Buffer to hold block list.
 !! \param hdferr     \fortran_error
 !!
-!! See C API: @ref herr_t H5Sget_select_hyper_blocklist(hid_t spaceid, hsize_t startblock, hsize_t numblocks, hsize_t buf[]);
+!! See C API: @ref H5Sget_select_hyper_blocklist()
 !!
   SUBROUTINE h5sget_select_hyper_blocklist_f(space_id, startblock, &
                                                     num_blocks, buf, hdferr)
@@ -255,7 +254,7 @@ CONTAINS
 !! \param end      Ending coordinates of bounding box, i.e., the coordinates of the diagonally opposite corner.
 !! \param hdferr   \fortran_error
 !!
-!! See C API: @ref herr_t H5Sget_select_bounds(hid_t spaceid, hsize_t start[], hsize_t end[]);
+!! See C API: @ref H5Sget_select_bounds()
 !!
   SUBROUTINE  h5sget_select_bounds_f(space_id, start, END, hdferr)
     IMPLICIT NONE
@@ -287,7 +286,7 @@ CONTAINS
 !! \param num_points Number of element points in the current dataspace selection
 !! \param hdferr     \fortran_error
 !!
-!! See C API: @ref hssize_t H5Sget_select_elem_npoints(hid_t spaceid);
+!! See C API: @ref H5Sget_select_elem_npoints()
 !!
   SUBROUTINE h5sget_select_elem_npoints_f(space_id, num_points, hdferr)
     IMPLICIT NONE
@@ -317,7 +316,7 @@ CONTAINS
 !! \param buf        Buffer with element points selected.
 !! \param hdferr     \fortran_error
 !!
-!! See C API: @ref herr_t H5Sget_select_elem_pointlist(hid_t spaceid, hsize_t startpoint, hsize_t numpoints, hsize_t buf[]);
+!! See C API: @ref H5Sget_select_elem_pointlist()
 !!
   SUBROUTINE h5sget_select_elem_pointlist_f(space_id, startpoint, &
        num_points, buf, hdferr)
@@ -360,7 +359,7 @@ CONTAINS
 !!                     array is stored in 2D as (num_element x rank).
 !! \param hdferr       \fortran_error
 !!
-!! See C API: @ref herr_t H5Sselect_elements(hid_t space_id, H5S_seloper_t op, size_t num_elem, const hsize_t *coord);
+!! See C API: @ref H5Sselect_elements()
 !!
   SUBROUTINE h5sselect_elements_f(space_id, OPERATOR, rank, &
        num_elements, coord, hdferr)
@@ -418,7 +417,7 @@ CONTAINS
 !! \param space_id Identifier for the dataspace in which selection being made.
 !! \param hdferr   \fortran_error
 !!
-!! See C API: @ref herr_t H5Sselect_all(hid_t spaceid);
+!! See C API: @ref H5Sselect_all()
 !!
   SUBROUTINE h5sselect_all_f(space_id, hdferr)
     IMPLICIT NONE
@@ -444,7 +443,7 @@ CONTAINS
 !! \param space_id The identifier for the dataspace in which the selection is being reset.
 !! \param hdferr   \fortran_error
 !!
-!! See C API: @ref herr_t H5Sselect_none(hid_t spaceid);
+!! See C API: @ref H5Sselect_none()
 !!
   SUBROUTINE h5sselect_none_f(space_id, hdferr)
     IMPLICIT NONE
@@ -471,7 +470,7 @@ CONTAINS
 !! \param status   TRUE if the selection is contained within the extent, FALSE otherwise.
 !! \param hdferr   \fortran_error
 !!
-!! See C API: @ref htri_t H5Sselect_valid(hid_t spaceid);
+!! See C API: @ref H5Sselect_valid()
 !!
   SUBROUTINE h5sselect_valid_f(space_id, status, hdferr)
     IMPLICIT NONE
@@ -504,7 +503,7 @@ CONTAINS
 !! \param npoints  Number of elements in the dataspace.
 !! \param hdferr   \fortran_error
 !!
-!! See C API: @ref hssize_t H5Sget_simple_extent_npoints(hid_t space_id);
+!! See C API: @ref H5Sget_simple_extent_npoints()
 !!
   SUBROUTINE h5sget_simple_extent_npoints_f(space_id, npoints, hdferr)
     IMPLICIT NONE
@@ -533,7 +532,7 @@ CONTAINS
 !! \param npoints  Number of points in the dataspace selection.
 !! \param hdferr   \fortran_error
 !!
-!! See C API: @ref hssize_t H5Sget_select_npoints(hid_t spaceid);
+!! See C API: @ref H5Sget_select_npoints()
 !!
   SUBROUTINE h5sget_select_npoints_f(space_id, npoints, hdferr)
     IMPLICIT NONE
@@ -562,7 +561,7 @@ CONTAINS
 !! \param rank     Number of dataspace dimensions.
 !! \param hdferr   \fortran_error
 !!
-!! See C API: @ref int H5Sget_simple_extent_ndims(hid_t space_id);
+!! See C API: @ref H5Sget_simple_extent_ndims()
 !!
   SUBROUTINE h5sget_simple_extent_ndims_f(space_id, rank, hdferr)
     IMPLICIT NONE
@@ -591,7 +590,7 @@ CONTAINS
 !! \param maxdims  Array to store maximum size of each dimension.
 !! \param hdferr   \fortran_error
 !!
-!! See C API: @ref int H5Sget_simple_extent_dims(hid_t space_id, hsize_t dims[], hsize_t maxdims[]);
+!! See C API: @ref H5Sget_simple_extent_dims()
 !!
   SUBROUTINE h5sget_simple_extent_dims_f(space_id, dims, maxdims, hdferr)
     IMPLICIT NONE
@@ -626,7 +625,7 @@ CONTAINS
 !!                  \li H5S_NULL_F
 !! \param hdferr    \fortran_error
 !!
-!! See C API: @ref H5S_class_t H5Sget_simple_extent_type(hid_t space_id);
+!! See C API: @ref H5Sget_simple_extent_type()
 !!
   SUBROUTINE h5sget_simple_extent_type_f(space_id, classtype, hdferr)
     IMPLICIT NONE
@@ -657,7 +656,7 @@ CONTAINS
 !! \param maximum_size Array with the new maximum sizes of dimensions.
 !! \param hdferr       \fortran_error
 !!
-!! See C API: @ref herr_t H5Sset_extent_simple(hid_t space_id, int rank, const hsize_t dims[], const hsize_t max[]);
+!! See C API: @ref H5Sset_extent_simple()
 !!
   SUBROUTINE h5sset_extent_simple_f(space_id, rank, current_size, &
        maximum_size, hdferr)
@@ -691,7 +690,7 @@ CONTAINS
 !! \param status   Flag to indicate if dataspace is simple or not (TRUE or FALSE).
 !! \param hdferr   \fortran_error
 !!
-!! See C API: @ref htri_t H5Sis_simple(hid_t space_id);
+!! See C API: @ref H5Sis_simple()
 !!
   SUBROUTINE h5sis_simple_f(space_id, status, hdferr)
     IMPLICIT NONE
@@ -724,7 +723,7 @@ CONTAINS
 !! \param offset   The offset at which to position the selection.
 !! \param hdferr   \fortran_error
 !!
-!! See C API: @ref herr_t H5Soffset_simple(hid_t space_id, const hssize_t *offset);
+!! See C API: @ref H5Soffset_simple()
 !!
   SUBROUTINE h5soffset_simple_f(space_id, offset, hdferr)
     IMPLICIT NONE
@@ -753,7 +752,7 @@ CONTAINS
 !! \param source_space_id The identifier for the dataspace from which the extent is copied.
 !! \param hdferr          \fortran_error
 !!
-!! See C API: @ref herr_t H5Sextent_copy(hid_t dst_id, hid_t src_id);
+!! See C API: @ref H5Sextent_copy()
 !!
   SUBROUTINE h5sextent_copy_f(dest_space_id, source_space_id, hdferr)
     IMPLICIT NONE
@@ -781,7 +780,7 @@ CONTAINS
 !! \param space_id Dataspace identifier.
 !! \param hdferr   \fortran_error
 !!
-!! See C API: @ref herr_t H5Sset_extent_none(hid_t space_id);
+!! See C API: @ref H5Sset_extent_none()
 !!
   SUBROUTINE h5sset_extent_none_f(space_id, hdferr)
     IMPLICIT NONE
@@ -814,7 +813,7 @@ CONTAINS
 !! \param stride   Array with hyperslab strides.
 !! \param block    Array with hyperslab block sizes.
 !!
-!! See C API: @ref herr_t H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op, const hsize_t start[], const hsize_t stride[], const hsize_t count[], const hsize_t block[]);
+!! See C API: @ref H5Sselect_hyperslab()
 !!
   SUBROUTINE h5sselect_hyperslab_f(space_id, OPERATOR, start, count, &
        hdferr, stride, BLOCK)
@@ -1157,7 +1156,7 @@ CONTAINS
 !!                 \li H5S_SEL_ALL_F
 !! \param hdferr   \fortran_error
 !!
-!! See C API: @ref H5S_sel_type H5Sget_select_type(hid_t spaceid);
+!! See C API: @ref H5Sget_select_type()
 !!
   SUBROUTINE h5sget_select_type_f(space_id, TYPE, hdferr)
     IMPLICIT NONE
@@ -1187,7 +1186,7 @@ CONTAINS
 !! \param obj_id Object ID.
 !! \param hdferr \fortran_error
 !!
-!! See C API: @ref hid_t H5Sdecode(const void *buf);
+!! See C API: @ref H5Sdecode()
 !!
   SUBROUTINE h5sdecode_f(buf, obj_id, hdferr)
     IMPLICIT NONE
@@ -1218,7 +1217,7 @@ CONTAINS
 !! \param hdferr  \fortran_error
 !! \param fapl_id File access property list identifier.
 !!
-!! See C API: @ref herr_t H5Sencode2(hid_t obj_id, void *buf, size_t *nalloc, hid_t fapl);
+!! See C API: @ref H5Sencode2()
 !!
   SUBROUTINE h5sencode_f(obj_id, buf, nalloc, hdferr, fapl_id)
     IMPLICIT NONE
@@ -1258,7 +1257,7 @@ CONTAINS
 !! \param Equal     .TRUE. if equal, .FALSE. if unequal.
 !! \param hdferr    \fortran_error
 !!
-!! See C API: @ref htri_t H5Sextent_equal(hid_t space1_id, hid_t space2_id);
+!! See C API: @ref H5Sextent_equal()
 !!
   SUBROUTINE h5sextent_equal_f(space1_id, space2_id, equal, hdferr)
     IMPLICIT NONE
@@ -1296,7 +1295,7 @@ CONTAINS
 !! \param block    Size of a block in the regular hyperslab.
 !! \param hdferr   \fortran_error
 !!
-!! See C API: @ref htri_t H5Sget_regular_hyperslab(hid_t spaceid, hsize_t start[], hsize_t stride[], hsize_t count[], hsize_t block[]);
+!! See C API: @ref H5Sget_regular_hyperslab()
 !!
   SUBROUTINE h5sget_regular_hyperslab_f(space_id, start, stride, count, block, hdferr)
 
@@ -1352,7 +1351,7 @@ CONTAINS
 !! \param IsRegular TRUE or FALSE for hyperslab selection if successful.
 !! \param hdferr    \fortran_error
 !!
-!! See C API: @ref htri_t H5Sis_regular_hyperslab(hid_t spaceid);
+!! See C API: @ref H5Sis_regular_hyperslab()
 !!
   SUBROUTINE h5sis_regular_hyperslab_f(space_id, IsRegular, hdferr)
     IMPLICIT NONE

@@ -9,7 +9,6 @@
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
-!   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -88,7 +87,7 @@ CONTAINS
        error_string = skip
     ENDIF
 
-    WRITE(*, fmt = '(A, T80, A)') test_title, error_string
+    WRITE(*, fmt = '(A, T88, A)') test_title, error_string
 
     IF(test_result.GT.0) total_error = total_error + test_result
 

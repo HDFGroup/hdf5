@@ -8,7 +8,6 @@
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
-!   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -172,7 +171,7 @@ MODULE H5GLOBAL
   INTEGER(HID_T) :: H5T_FORTRAN_S1  !< H5T_FORTRAN_S1
   INTEGER(HID_T) :: H5T_C_S1     !< H5T_C_S1
 
-#ifndef H5_DOXYGEN_FORTRAN
+#ifndef H5_DOXYGEN
   INTEGER, PARAMETER :: NUM_NATIVE_INTEGER_KIND = 5
   ! INTEGER*1, INTEGER*2, INTEGER*4, INTEGER*8, INTEGER*16
   INTEGER(HID_T), DIMENSION(1:NUM_NATIVE_INTEGER_KIND) :: H5T_NATIVE_INTEGER_KIND

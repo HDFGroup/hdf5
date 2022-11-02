@@ -12,7 +12,6 @@
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
-!   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -54,7 +53,7 @@ CONTAINS
 !! \param hdferr    \fortran_error
 !! \param estack_id Error Stack id
 !!
-!! See C API: @ref herr_t H5Eclear2(hid_t err_stack);
+!! See C API: @ref H5Eclear2()
 !!
   SUBROUTINE h5eclear_f(hdferr, estack_id)
     IMPLICIT NONE
@@ -84,7 +83,7 @@ CONTAINS
 !! \param hdferr \fortran_error
 !! \param name   Name of the file that contains print output
 !!
-!! See C API: @ref herr_t H5Eprint2(hid_t err_stack, FILE *stream);
+!! See C API: @ref H5Eprint2()
 !!
   SUBROUTINE h5eprint_f(hdferr, name)
     CHARACTER(LEN=*), OPTIONAL, INTENT(IN) :: name
@@ -122,7 +121,7 @@ CONTAINS
 !! \param namelen  Number of characters in the name buffer.
 !! \param hdferr   \fortran_error
 !!
-!! See C API: @ref char* H5Eget_major(H5E_major_t maj);
+!! See C API: @ref H5Eget_major()
 !!
   SUBROUTINE h5eget_major_f(error_no, name, namelen, hdferr)
     INTEGER, INTENT(IN) :: error_no
@@ -151,7 +150,7 @@ CONTAINS
 !! \param name     Character string describing the error.
 !! \param hdferr   \fortran_error
 !!
-!! See C API: @ref char* H5Eget_minor(H5E_minor_t min);
+!! See C API: @ref H5Eget_minor()
 !!
   SUBROUTINE h5eget_minor_f(error_no, name, hdferr)
     INTEGER, INTENT(IN) :: error_no
@@ -181,7 +180,7 @@ CONTAINS
 !! \param client_data Data passed to the error function.
 !! \param hdferr      \fortran_error
 !!
-!! See C API: @ref herr_t H5Eset_auto2(hid_t estack_id, H5E_auto2_t func, void *client_data);
+!! See C API: @ref H5Eset_auto2()
 !!
   SUBROUTINE h5eset_auto_f(printflag, hdferr, estack_id, func, client_data)
     USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_FUNPTR

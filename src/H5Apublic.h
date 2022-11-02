@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -94,8 +93,12 @@ H5_DLL herr_t H5Aclose(hid_t attr_id);
  * \ingroup ASYNC
  * \async_variant_of{H5Aclose}
  */
+#ifndef H5_DOXYGEN
 H5_DLL herr_t H5Aclose_async(const char *app_file, const char *app_func, unsigned app_line, hid_t attr_id,
                              hid_t es_id);
+#else
+H5_DLL herr_t H5Aclose_async(hid_t attr_id, hid_t es_id);
+#endif
 /* --------------------------------------------------------------------------*/
 /**
  * \ingroup H5A
@@ -142,9 +145,15 @@ H5_DLL hid_t H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id, hid_
  * \ingroup ASYNC
  * \async_variant_of{H5Acreate}
  */
+#ifndef H5_DOXYGEN
 H5_DLL hid_t H5Acreate_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
                              const char *attr_name, hid_t type_id, hid_t space_id, hid_t acpl_id,
                              hid_t aapl_id, hid_t es_id);
+#else
+H5_DLL hid_t  H5Acreate_async(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
+                              hid_t acpl_id, hid_t aapl_id, hid_t es_id);
+#endif
+
 /*--------------------------------------------------------------------------*/
 /**
  * \ingroup H5A
@@ -190,10 +199,17 @@ H5_DLL hid_t H5Acreate_by_name(hid_t loc_id, const char *obj_name, const char *a
  * \ingroup ASYNC
  * \async_variant_of{H5Acreate_by_name}
  */
+#ifndef H5_DOXYGEN
 H5_DLL hid_t H5Acreate_by_name_async(const char *app_file, const char *app_func, unsigned app_line,
                                      hid_t loc_id, const char *obj_name, const char *attr_name, hid_t type_id,
                                      hid_t space_id, hid_t acpl_id, hid_t aapl_id, hid_t lapl_id,
                                      hid_t es_id);
+#else
+H5_DLL hid_t H5Acreate_by_name_async(hid_t loc_id, const char *obj_name, const char *attr_name, hid_t type_id,
+                                     hid_t space_id, hid_t acpl_id, hid_t aapl_id, hid_t lapl_id,
+                                     hid_t es_id);
+#endif
+
 /*-------------------------------------------------------------------------*/
 /**
  * \ingroup H5A
@@ -310,8 +326,13 @@ H5_DLL htri_t H5Aexists(hid_t obj_id, const char *attr_name);
  * \ingroup ASYNC
  * \async_variant_of{H5Aexists}
  */
+#ifndef H5_DOXYGEN
 H5_DLL herr_t H5Aexists_async(const char *app_file, const char *app_func, unsigned app_line, hid_t obj_id,
                               const char *attr_name, hbool_t *exists, hid_t es_id);
+#else
+H5_DLL herr_t H5Aexists_async(hid_t obj_id, const char *attr_name, hbool_t *exists, hid_t es_id);
+#endif
+
 /*-------------------------------------------------------------------------*/
 /**
  * \ingroup H5A
@@ -348,9 +369,15 @@ H5_DLL htri_t H5Aexists_by_name(hid_t obj_id, const char *obj_name, const char *
  * \ingroup ASYNC
  * \async_variant_of{H5Aexists_by_name}
  */
+#ifndef H5_DOXYGEN
 H5_DLL herr_t H5Aexists_by_name_async(const char *app_file, const char *app_func, unsigned app_line,
                                       hid_t loc_id, const char *obj_name, const char *attr_name,
                                       hbool_t *exists, hid_t lapl_id, hid_t es_id);
+#else
+H5_DLL herr_t H5Aexists_by_name_async(hid_t loc_id, const char *obj_name, const char *attr_name,
+                                      hbool_t *exists, hid_t lapl_id, hid_t es_id);
+#endif
+
 /*-------------------------------------------------------------------------*/
 /**
  * \ingroup H5A
@@ -735,8 +762,12 @@ H5_DLL hid_t H5Aopen(hid_t obj_id, const char *attr_name, hid_t aapl_id);
  * \ingroup ASYNC
  * \async_variant_of{H5Aopen}
  */
+#ifndef H5_DOXYGEN
 H5_DLL hid_t H5Aopen_async(const char *app_file, const char *app_func, unsigned app_line, hid_t obj_id,
                            const char *attr_name, hid_t aapl_id, hid_t es_id);
+#else
+H5_DLL hid_t  H5Aopen_async(hid_t obj_id, const char *attr_name, hid_t aapl_id, hid_t es_id);
+#endif
 /*--------------------------------------------------------------------------*/
 /**
  * \ingroup H5A
@@ -785,9 +816,15 @@ H5_DLL hid_t H5Aopen_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_t
  * \ingroup ASYNC
  * \async_variant_of{H5Aopen_by_idx}
  */
+#ifndef H5_DOXYGEN
 H5_DLL hid_t H5Aopen_by_idx_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
                                   const char *obj_name, H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
                                   hid_t aapl_id, hid_t lapl_id, hid_t es_id);
+#else
+H5_DLL hid_t  H5Aopen_by_idx_async(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
+                                   H5_iter_order_t order, hsize_t n, hid_t aapl_id, hid_t lapl_id,
+                                   hid_t es_id);
+#endif
 /*--------------------------------------------------------------------------*/
 /**
  * \ingroup H5A
@@ -834,9 +871,15 @@ H5_DLL hid_t H5Aopen_by_name(hid_t loc_id, const char *obj_name, const char *att
  * \ingroup ASYNC
  * \async_variant_of{H5Aopen_by_name}
  */
+#ifndef H5_DOXYGEN
 H5_DLL hid_t H5Aopen_by_name_async(const char *app_file, const char *app_func, unsigned app_line,
                                    hid_t loc_id, const char *obj_name, const char *attr_name, hid_t aapl_id,
                                    hid_t lapl_id, hid_t es_id);
+#else
+H5_DLL hid_t  H5Aopen_by_name_async(hid_t loc_id, const char *obj_name, const char *attr_name, hid_t aapl_id,
+                                    hid_t lapl_id, hid_t es_id);
+#endif
+
 /*-------------------------------------------------------------------------- */
 /**
  * \ingroup H5A
@@ -873,8 +916,12 @@ H5_DLL herr_t H5Aread(hid_t attr_id, hid_t type_id, void *buf);
  * \ingroup ASYNC
  * \async_variant_of{H5Aread}
  */
+#ifndef H5_DOXYGEN
 H5_DLL herr_t H5Aread_async(const char *app_file, const char *app_func, unsigned app_line, hid_t attr_id,
                             hid_t dtype_id, void *buf, hid_t es_id);
+#else
+H5_DLL herr_t H5Aread_async(chid_t attr_id, hid_t dtype_id, void *buf, hid_t es_id);
+#endif
 /*-------------------------------------------------------------------------*/
 /**
  * \ingroup H5A
@@ -902,16 +949,25 @@ H5_DLL herr_t H5Arename(hid_t loc_id, const char *old_name, const char *new_name
  * \ingroup ASYNC
  * \async_variant_of{H5Arename}
  */
+#ifndef H5_DOXYGEN
 H5_DLL herr_t H5Arename_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
                               const char *old_name, const char *new_name, hid_t es_id);
+#else
+H5_DLL herr_t H5Arename_async(hid_t loc_id, const char *old_name, const char *new_name, hid_t es_id);
+#endif
 /*--------------------------------------------------------------------------*/
 /**
  * \ingroup ASYNC
  * \async_variant_of{H5Arename_by_name}
  */
+#ifndef H5_DOXYGEN
 H5_DLL herr_t H5Arename_by_name_async(const char *app_file, const char *app_func, unsigned app_line,
                                       hid_t loc_id, const char *obj_name, const char *old_attr_name,
                                       const char *new_attr_name, hid_t lapl_id, hid_t es_id);
+#else
+H5_DLL herr_t H5Arename_by_name_async(hid_t loc_id, const char *obj_name, const char *old_attr_name,
+                                      const char *new_attr_name, hid_t lapl_id, hid_t es_id);
+#endif
 /*--------------------------------------------------------------------------*/
 /**
  * \ingroup H5A
@@ -946,8 +1002,12 @@ H5_DLL herr_t H5Awrite(hid_t attr_id, hid_t type_id, const void *buf);
  * \ingroup ASYNC
  * \async_variant_of{H5Awrite}
  */
+#ifndef H5_DOXYGEN
 H5_DLL herr_t H5Awrite_async(const char *app_file, const char *app_func, unsigned app_line, hid_t attr_id,
                              hid_t type_id, const void *buf, hid_t es_id);
+#else
+H5_DLL herr_t H5Awrite_async(hid_t attr_id, hid_t type_id, const void *buf, hid_t es_id);
+#endif
 /*-------------------------------------------------------------------------*/
 /**
  * \ingroup H5A

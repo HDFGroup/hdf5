@@ -2,7 +2,7 @@
  * Copyright by The HDF Group.                                               *
  * All rights reserved.                                                      *
  *                                                                           *
- * This file is part of HDF5. The full HDF5 copyright notice, including      *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
@@ -178,6 +178,23 @@ H5_DLL hid_t H5EScreate(void);
  *
  */
 H5_DLL herr_t H5ESwait(hid_t es_id, uint64_t timeout, size_t *num_in_progress, hbool_t *err_occurred);
+
+/**
+ * \ingroup H5ES
+ *
+ * \brief Attempt to cancel operations in an event set
+ *
+ * \es_id
+ * \param[out] count The number of events not canceled
+ * \param[out] err_occurred Status indicating if error is present in the event set
+ * \returns \herr_t
+ *
+ * \details H5ESget_count() attempts to cancel operations in an event set specified
+ *          by \p es_id. H5ES_NONE is a valid value for \p es_id, but functions as a no-op.
+ *
+ * \since 1.13.0
+ *
+ */
 H5_DLL herr_t H5EScancel(hid_t es_id, size_t *num_not_canceled, hbool_t *err_occurred);
 
 /**

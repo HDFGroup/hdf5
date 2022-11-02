@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -51,6 +50,11 @@ extern int    h5str_dump_simple_dset(JNIEnv *env, FILE *stream, hid_t dset, int 
 extern int    h5str_dump_simple_mem(JNIEnv *env, FILE *stream, hid_t attr, int binary_order);
 
 extern htri_t H5Tdetect_variable_str(hid_t tid);
+
+extern herr_t translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t type_class,
+                             jsize count, jbyte *raw_buf);
+extern herr_t translate_wbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t type_class,
+                             jsize count, jbyte *raw_buf);
 
 /*
  * Symbols used to format the output of h5str_sprintf and

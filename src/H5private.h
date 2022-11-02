@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -2512,7 +2511,9 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
 
 /* Union for const/non-const pointer for use by functions that manipulate
  * pointers but do not write to their targets or return pointers to const
- * specified locations.  This helps us avoid compiler warnings. */
+ * specified locations.  Also used for I/O functions that work for read and
+ * write - these functions are expected to never write to these locations in the
+ * write case.  This helps us avoid compiler warnings. */
 typedef union {
     void       *vp;
     const void *cvp;
