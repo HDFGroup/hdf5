@@ -239,23 +239,25 @@ done:
  * SOURCE
  */
 int_f
-h5oget_info_by_name_c(hid_t_f *loc_id, char *name, hid_t_f *lapl_id,
-                      H5O_info_t_f *object_info, int_f *fields, hid_t_f *es_id, char *file, char *func, int_f *line )
+h5oget_info_by_name_c(hid_t_f *loc_id, char *name, hid_t_f *lapl_id, H5O_info_t_f *object_info, int_f *fields,
+                      hid_t_f *es_id, char *file, char *func, int_f *line)
 /******/
 {
-    int_f       ret_value = 0;    /* Return value */
+    int_f       ret_value = 0; /* Return value */
     H5O_info2_t Oinfo;
 
     /*
      * Call H5Oinfo_by_name function.
      */
 
-    if((hid_t)*es_id != -1) {
-      if (H5Oget_info_by_name3((hid_t)*loc_id, name, &Oinfo, (unsigned)*fields, (hid_t)*lapl_id) < 0)
-        HGOTO_DONE(FAIL);
-    } else {
-      if (H5Oget_info_by_name_async_wrap(file, func, (unsigned)*line, (hid_t)*loc_id, name, &Oinfo, (unsigned)*fields, (hid_t)*lapl_id, (hid_t)*es_id) < 0)
-        HGOTO_DONE(FAIL);
+    if ((hid_t)*es_id != -1) {
+        if (H5Oget_info_by_name3((hid_t)*loc_id, name, &Oinfo, (unsigned)*fields, (hid_t)*lapl_id) < 0)
+            HGOTO_DONE(FAIL);
+    }
+    else {
+        if (H5Oget_info_by_name_async_wrap(file, func, (unsigned)*line, (hid_t)*loc_id, name, &Oinfo,
+                                           (unsigned)*fields, (hid_t)*lapl_id, (hid_t)*es_id) < 0)
+            HGOTO_DONE(FAIL);
     }
 
     ret_value = fill_h5o_info_t_f(Oinfo, object_info);
