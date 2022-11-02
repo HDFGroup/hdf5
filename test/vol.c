@@ -2229,11 +2229,11 @@ error:
 static herr_t
 test_get_vol_name(void)
 {
-    hid_t fapl_id = H5I_INVALID_HID;
-    hid_t file_id = H5I_INVALID_HID;
-    char  filename[NAME_LEN];
-    char  vol_name[NAME_LEN];
-    const char  *conn_env_str = NULL;
+    hid_t       fapl_id = H5I_INVALID_HID;
+    hid_t       file_id = H5I_INVALID_HID;
+    char        filename[NAME_LEN];
+    char        vol_name[NAME_LEN];
+    const char *conn_env_str = NULL;
 
     TESTING("getting connector name");
 
@@ -2242,7 +2242,8 @@ test_get_vol_name(void)
         conn_env_str = "native";
 
     /* Skip the connectors other than the native and pass_through connector */
-    if (HDstrcmp(conn_env_str, "native") && HDstrncmp(conn_env_str, "pass_through", HDstrlen("pass_through"))) {
+    if (HDstrcmp(conn_env_str, "native") &&
+        HDstrncmp(conn_env_str, "pass_through", HDstrlen("pass_through"))) {
         SKIPPED();
         HDprintf("    only test the native or pass_through connector\n");
         return SUCCEED;
@@ -2261,7 +2262,8 @@ test_get_vol_name(void)
 
     /* When comparing the pass_through connector, ignore the rest information (under_vol=0;under_info={}) */
     if ((!HDstrcmp(conn_env_str, "native") && HDstrcmp(vol_name, "native")) ||
-        (!HDstrncmp(conn_env_str, "pass_through", HDstrlen("pass_through")) && HDstrcmp(vol_name, "pass_through")))
+        (!HDstrncmp(conn_env_str, "pass_through", HDstrlen("pass_through")) &&
+         HDstrcmp(vol_name, "pass_through")))
         TEST_ERROR;
 
     if (H5Fclose(file_id) < 0)
