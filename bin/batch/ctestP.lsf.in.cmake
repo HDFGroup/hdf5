@@ -14,6 +14,7 @@
 
 cd @HDF5_BINARY_DIR@
 echo "Run parallel test command. Test output will be in build/ctestP.out"
-ctest_test (BUILD "@HDF5_BINARY_DIR@" APPEND INCLUDE "MPI_TEST_"  RETURN_VALUE res) >& ctestP.out
+ctest -S ctest_parallel.cmake >& ctestP.out
 
 echo "Done running ctest parallel command."
+touch ctestP.done
