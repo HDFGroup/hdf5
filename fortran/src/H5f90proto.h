@@ -354,8 +354,8 @@ H5_FCDLL int_f h5oget_info_c(hid_t_f *object_id, H5O_info_t_f *object_info, int_
 H5_FCDLL int_f h5oget_info_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *namelen, int_f *index_field,
                                     int_f *order, hsize_t_f *n, hid_t_f *lapl_id, H5O_info_t_f *object_info,
                                     int_f *fields);
-H5_FCDLL int_f h5oget_info_by_name_c(hid_t_f *loc_id, _fcd name, size_t_f *namelen, hid_t_f *lapl_id,
-                                     H5O_info_t_f *object_info, int_f *fields);
+H5_FCDLL int_f h5oget_info_by_name_c(hid_t_f *loc_id, char *name, hid_t_f *lapl_id,
+                                     H5O_info_t_f *object_info, int_f *fields, hid_t_f *es_id, char *file, char *func, int_f *line);
 H5_FCDLL int_f h5ocopy_c(hid_t_f *src_loc_id, _fcd src_name, size_t_f *src_name_len, hid_t_f *dst_loc_id,
                          _fcd dst_name, size_t_f *dst_name_len, hid_t_f *ocpypl_id, hid_t_f *lcpl_id);
 H5_FCDLL int_f h5odecr_refcount_c(hid_t_f *object_id);

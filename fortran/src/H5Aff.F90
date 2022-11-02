@@ -185,12 +185,13 @@ CONTAINS
        END FUNCTION H5Acreate2
     END INTERFACE
 
+    c_name = TRIM(name)//C_NULL_CHAR
+
     acpl_id_default = H5P_DEFAULT_F
     aapl_id_default = H5P_DEFAULT_F
     IF (PRESENT(acpl_id)) acpl_id_default = acpl_id
     IF (PRESENT(aapl_id)) aapl_id_default = aapl_id
 
-    c_name = TRIM(name)//C_NULL_CHAR
     attr_id = h5acreate2(loc_id, c_name, type_id, space_id, &
          acpl_id_default, aapl_id_default)
 
