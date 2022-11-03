@@ -48,11 +48,21 @@ MODULE H5ES
 
 CONTAINS
 
+!>
+!! \ingroup FH5ES
+!!
+!! \brief Creates an event set.
+!!
+!! \param es_id  \es_id
+!! \param hdferr \fortran_error
+!!
+!! See C API: @ref H5EScreate()
+!!
   SUBROUTINE H5EScreate_f(es_id, hdferr)
     IMPLICIT NONE
 
-    INTEGER(HID_T) :: es_id
-    INTEGER        :: hdferr
+    INTEGER(HID_T), INTENT(OUT) :: es_id
+    INTEGER       , INTENT(OUT) :: hdferr
 
     INTERFACE
        INTEGER(HID_T) FUNCTION H5EScreate() BIND(C,NAME='H5EScreate')
@@ -66,168 +76,216 @@ CONTAINS
     IF(es_id.LT.0) hdferr = -1
 
   END SUBROUTINE H5EScreate_f
-
-  SUBROUTINE H5ESinsert_request_f(es_id, connector_id, request, hdferr)
-    IMPLICIT NONE
-
-    INTEGER(HID_T) :: es_id
-    INTEGER(HID_T) :: connector_id
-    TYPE(C_PTR)    :: request
-    INTEGER        :: hdferr
-
-    INTERFACE
-       INTEGER FUNCTION H5ESinsert_request(es_id, connector_id, request) BIND(C,NAME='H5ESinsert_request')
-         IMPORT :: HID_T, C_PTR
-         INTEGER(HID_T), VALUE :: es_id
-         INTEGER(HID_T), VALUE :: connector_id
-         TYPE(C_PTR)   , VALUE :: request
-       END FUNCTION H5ESinsert_request
-    END INTERFACE
-
-    hdferr = H5ESinsert_request(es_id, connector_id, request)
-
-  END SUBROUTINE H5ESinsert_request_f
-
+!>
+!! \ingroup FH5ES
+!!
+!! \brief Retrieves number of events in an event set.
+!!
+!! \param es_id  \es_id
+!! \param count  The number of events in the event set
+!! \param hdferr \fortran_error
+!!
+!! See C API: @ref H5ESget_count()
+!!
   SUBROUTINE H5ESget_count_f(es_id, count, hdferr)
     IMPLICIT NONE
 
-    INTEGER(hid_t)  :: es_id
-    INTEGER(size_t) :: count
-    INTEGER         :: hdferr
+    INTEGER(hid_t),  INTENT(IN)  :: es_id
+    INTEGER(size_t), INTENT(OUT) :: count
+    INTEGER,         INTENT(OUT) :: hdferr
 
     INTERFACE
-       INTEGER FUNCTION H5ESget_count(es_id, count) BIND(C,NAME='H5ESget_count')
+       INTEGER(C_INT) FUNCTION H5ESget_count(es_id, count) BIND(C,NAME='H5ESget_count')
+         IMPORT :: C_INT
          IMPORT :: HID_T, SIZE_T
          INTEGER(HID_T), VALUE  :: es_id
          INTEGER(SIZE_T), VALUE :: count
        END FUNCTION H5ESget_count
     END INTERFACE
 
-    hdferr = H5ESget_count(es_id, count)
+    hdferr = INT(H5ESget_count(es_id, count))
 
   END SUBROUTINE H5ESget_count_f
-
-  SUBROUTINE H5ESget_op_counter_f(es_id, op_counter, hdferr)
+!>
+!! \ingroup FH5ES
+!!
+!! \brief Retrieves the next operation counter to be assigned in an event set.
+!!
+!! \param es_id   \es_id
+!! \param counter The number of events in the event set
+!! \param hdferr  \fortran_error
+!!
+!! See C API: @ref H5ESget_op_counter()
+!!
+  SUBROUTINE H5ESget_op_counter_f(es_id, counter, hdferr)
 
     IMPLICIT NONE
 
-    INTEGER(HID_T)     :: es_id
-    INTEGER(C_INT64_T) :: op_counter
-    INTEGER            :: hdferr
+    INTEGER(HID_T)    , INTENT(IN)  :: es_id
+    INTEGER(C_INT64_T), INTENT(OUT) :: counter
+    INTEGER           , INTENT(OUT) :: hdferr
 
     INTERFACE
-       INTEGER FUNCTION H5ESget_op_counter(es_id, op_counter) BIND(C,NAME='H5ESget_op_counter')
+       INTEGER(C_INT) FUNCTION H5ESget_op_counter(es_id, counter) BIND(C,NAME='H5ESget_op_counter')
+         IMPORT :: C_INT
          IMPORT :: HID_T, C_INT64_T
          INTEGER(HID_T),     VALUE :: es_id
-         INTEGER(C_INT64_T), VALUE :: op_counter
+         INTEGER(C_INT64_T), VALUE :: counter
        END FUNCTION H5ESget_op_counter
     END INTERFACE
 
-    hdferr = H5ESget_op_counter(es_id, op_counter)
+    hdferr = INT(H5ESget_op_counter(es_id, counter))
 
   END SUBROUTINE H5ESget_op_counter_f
-
-  SUBROUTINE H5ESwait_f(es_id, timeout, num_in_progress, op_failed, hdferr)
+!>
+!! \ingroup FH5ES
+!!
+!! \brief Waits for operations in event set to complete.
+!!
+!! \param es_id           \es_id
+!! \param timeout         The number of events in the event set
+!! \param num_in_progress The number of operations still in progress
+!! \param err_occurred    Flag if an operation in the event set failed
+!! \param hdferr          \fortran_error
+!!
+!! See C API: @ref H5ESwait()
+!!
+  SUBROUTINE H5ESwait_f(es_id, timeout, num_in_progress, err_occurred, hdferr)
 
     IMPLICIT NONE
 
-    INTEGER(HID_T)     :: es_id
-    INTEGER(C_INT64_T) :: timeout
-    INTEGER(SIZE_T)    :: num_in_progress
-    LOGICAL            :: op_failed
-    INTEGER            :: hdferr
+    INTEGER(HID_T)    , INTENT(IN)  :: es_id
+    INTEGER(C_INT64_T), INTENT(IN)  :: timeout
+    INTEGER(SIZE_T)   , INTENT(OUT) :: num_in_progress
+    LOGICAL           , INTENT(OUT) :: err_occurred
+    INTEGER           , INTENT(OUT) :: hdferr
 
-    LOGICAL(C_BOOL)    :: op_failed_c = .FALSE.
+    LOGICAL(C_BOOL)    :: err_occurred_c = .FALSE.
 
     INTERFACE
-       INTEGER FUNCTION H5ESwait(es_id, timeout, num_in_progress, op_failed) BIND(C,NAME='H5ESwait')
+       INTEGER(C_INT) FUNCTION H5ESwait(es_id, timeout, num_in_progress, err_occurred) BIND(C,NAME='H5ESwait')
+         IMPORT :: C_INT
          IMPORT :: HID_T, C_INT64_T, SIZE_T, C_BOOL
          INTEGER(HID_T)    , VALUE :: es_id
          INTEGER(C_INT64_T), VALUE :: timeout
          INTEGER(SIZE_T)   , VALUE :: num_in_progress
-         LOGICAL(C_BOOL)   , VALUE :: op_failed
+         LOGICAL(C_BOOL)   , VALUE :: err_occurred
        END FUNCTION H5ESwait
     END INTERFACE
 
-    hdferr = H5ESwait(es_id, timeout, num_in_progress, op_failed_c)
+    hdferr = INT(H5ESwait(es_id, timeout, num_in_progress, err_occurred_c))
 
     ! Transfer value of C c_bool type to Fortran LOGICAL
-    op_failed = op_failed_c
+    err_occurred = err_occurred_c
 
   END SUBROUTINE H5ESwait_f
-
-  SUBROUTINE H5EScancel_f(es_id, num_not_canceled, op_failed, hdferr)
+!>
+!! \ingroup FH5ES
+!!
+!! \brief Attempt to cancel operations in an event set.
+!!
+!! \param es_id            \es_id
+!! \param num_not_canceled The number of events not canceled
+!! \param err_occurred     Status indicating if error is present in the event set
+!! \param hdferr           \fortran_error
+!!
+!! See C API: @ref H5EScancel()
+!!
+  SUBROUTINE H5EScancel_f(es_id, num_not_canceled, err_occurred, hdferr)
 
     IMPLICIT NONE
 
     INTEGER(hid_t)  :: es_id
     INTEGER(size_t) :: num_not_canceled
-    LOGICAL         :: op_failed
+    LOGICAL         :: err_occurred
     INTEGER         :: hdferr
 
-    LOGICAL(C_BOOL) :: op_failed_c = .FALSE.
+    LOGICAL(C_BOOL) :: err_occurred_c = .FALSE.
 
     INTERFACE
-       INTEGER FUNCTION H5EScancel(es_id, num_not_canceled, op_failed) BIND(C,NAME='H5EScancel')
+       INTEGER(C_INT) FUNCTION H5EScancel(es_id, num_not_canceled, err_occurred) BIND(C,NAME='H5EScancel')
+         IMPORT :: C_INT
          IMPORT :: HID_T, SIZE_T, C_BOOL
          INTEGER(HID_T)    , VALUE :: es_id
          INTEGER(SIZE_T)   , VALUE :: num_not_canceled
-         LOGICAL(C_BOOL)   , VALUE :: op_failed
+         LOGICAL(C_BOOL)   , VALUE :: err_occurred
        END FUNCTION H5EScancel
     END INTERFACE
 
-    hdferr = H5EScancel(es_id, num_not_canceled, op_failed_c)
+    hdferr = INT(H5EScancel(es_id, num_not_canceled, err_occurred_c))
 
     ! Transfer value of C c_bool type to Fortran LOGICAL
-    op_failed = op_failed_c
+    err_occurred = err_occurred_c
 
   END SUBROUTINE H5EScancel_f
-
-
-  SUBROUTINE H5ESget_err_status_f(es_id, err_status, hdferr)
+!>
+!! \ingroup FH5ES
+!!
+!! \brief Attempt to cancel operations in an event set.
+!!
+!! \param es_id        \es_id
+!! \param err_occurred Status indicating if error is present in the event set
+!! \param hdferr       \fortran_error
+!!
+!! See C API: @ref H5ESget_err_status()
+!!
+  SUBROUTINE H5ESget_err_status_f(es_id, err_occurred, hdferr)
 
     IMPLICIT NONE
 
-    INTEGER(hid_t) :: es_id
-    LOGICAL        :: err_status
-    INTEGER        :: hdferr
+    INTEGER(hid_t), INTENT(IN)  :: es_id
+    LOGICAL       , INTENT(OUT) :: err_occurred
+    INTEGER       , INTENT(OUT) :: hdferr
 
-    LOGICAL(C_BOOL) :: err_status_c = .FALSE.
+    LOGICAL(C_BOOL) :: err_occurred_c = .FALSE.
 
     INTERFACE
-       INTEGER FUNCTION H5ESget_err_status(es_id, err_status) BIND(C,NAME='H5ESget_err_status')
+       INTEGER(C_INT) FUNCTION H5ESget_err_status(es_id, err_occurred) BIND(C,NAME='H5ESget_err_status')
+         IMPORT :: C_INT
          IMPORT :: HID_T, C_BOOL
          INTEGER(HID_T) , VALUE :: es_id
-         LOGICAL(C_BOOL), VALUE :: err_status
+         LOGICAL(C_BOOL), VALUE :: err_occurred
        END FUNCTION H5ESget_err_status
     END INTERFACE
 
-    hdferr = H5ESget_err_status(es_id, err_status_c)
+    hdferr = INT(H5ESget_err_status(es_id, err_occurred_c))
 
     ! Transfer value of C c_bool type to Fortran LOGICAL
-    err_status = err_status_c
+    err_occurred = err_occurred_c
 
   END SUBROUTINE H5ESget_err_status_f
-
+!>
+!! \ingroup FH5ES
+!!
+!! \brief Retrieves the number of failed operations.
+!!
+!! \param es_id    \es_id
+!! \param num_errs Number of errors
+!! \param hdferr   \fortran_error
+!!
+!! See C API: @ref H5ESget_err_count()
+!!
   SUBROUTINE H5ESget_err_count_f(es_id, num_errs, hdferr)
 
     IMPLICIT NONE
 
-    INTEGER(HID_T)  :: es_id
-    INTEGER(SIZE_T) :: num_errs
-    INTEGER         :: hdferr
+    INTEGER(HID_T) , INTENT(IN)  :: es_id
+    INTEGER(SIZE_T), INTENT(OUT) :: num_errs
+    INTEGER        , INTENT(OUT) :: hdferr
 
     INTERFACE
-       INTEGER FUNCTION H5ESget_err_count(es_id, num_errs) BIND(C,NAME='H5ESget_err_count')
+       INTEGER(C_INT) FUNCTION H5ESget_err_count(es_id, num_errs) BIND(C,NAME='H5ESget_err_count')
+         IMPORT :: C_INT
          IMPORT :: HID_T, SIZE_T
          INTEGER(HID_T) , VALUE :: es_id
          INTEGER(SIZE_T), VALUE :: num_errs
        END FUNCTION H5ESget_err_count
     END INTERFACE
 
-    hdferr = H5ESget_err_count(es_id, num_errs)
+    hdferr = INT(H5ESget_err_count(es_id, num_errs))
 
   END SUBROUTINE H5ESget_err_count_f
+
 #if 0
   SUBROUTINE H5ESget_err_info_f(es_id, num_err_info, err_info, num_cleared, hdferr)
 
@@ -240,7 +298,8 @@ CONTAINS
     INTEGER               :: hdferr
 
     INTERFACE
-       INTEGER FUNCTION H5ESget_err_info(es_id, num_err_info, err_info, num_cleared) BIND(C,NAME='H5ESget_err_info')
+       INTEGER(C_INT) FUNCTION H5ESget_err_info(es_id, num_err_info, err_info, num_cleared) BIND(C,NAME='H5ESget_err_info')
+         IMPORT :: C_INT
          IMPORT :: HID_T, SIZE_T, H5ES_err_info_t
          INTEGER(HID_T)       , VALUE :: es_id
          INTEGER(SIZE_T)      , VALUE :: num_err_info
@@ -254,21 +313,31 @@ CONTAINS
   END SUBROUTINE H5ESget_err_info_f
 #endif
 
+!>
+!! \ingroup FH5ES
+!!
+!! \brief Terminates access to an event set.
+!!
+!! \param es_id       \es_id
+!! \param hdferr      \fortran_error
+!!
+!! See C API: @ref H5ESclose()
+!!
   SUBROUTINE H5ESclose_f(es_id, hdferr)
 
     IMPLICIT NONE
-
-    INTEGER(HID_T) :: es_id
-    INTEGER        :: hdferr
+    INTEGER(HID_T), INTENT(IN)  :: es_id
+    INTEGER       , INTENT(OUT) :: hdferr
 
     INTERFACE
-       INTEGER FUNCTION H5ESclose(es_id) BIND(C,NAME='H5ESclose')
+       INTEGER(C_INT) FUNCTION H5ESclose(es_id) BIND(C,NAME='H5ESclose')
+         IMPORT :: C_INT
          IMPORT :: HID_T
          INTEGER(HID_T) :: es_id
        END FUNCTION H5ESclose
     END INTERFACE
 
-    hdferr = H5ESclose(es_id)
+    hdferr = INT(H5ESclose(es_id))
 
   END SUBROUTINE H5ESclose_f
 

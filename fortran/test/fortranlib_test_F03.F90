@@ -189,9 +189,13 @@ PROGRAM fortranlibtest_F03
 !     write(*,*) 'Testing ASYNC                            '
 !     write(*,*) '========================================='
 
-!  ret_total_error = 0
-!  CALL test_async(ret_total_error)
-!  CALL write_test_status(ret_total_error, ' Testing async ', total_error)
+  ret_total_error = 0
+  CALL test_eventset(ret_total_error)
+  CALL write_test_status(ret_total_error, ' Testing event set ', total_error)
+
+  ret_total_error = 0
+  CALL test_async(ret_total_error)
+  CALL write_test_status(ret_total_error, ' Testing async ', total_error)
 
   WRITE(*,*)
 
