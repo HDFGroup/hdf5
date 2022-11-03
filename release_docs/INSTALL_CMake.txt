@@ -785,7 +785,6 @@ HDF5_ENABLE_USING_MEMCHECKER   "Indicate that a memory checker is used"         
 HDF5_GENERATE_HEADERS          "Rebuild Generated Files"                                      ON
 HDF5_BUILD_GENERATORS          "Build Test Generators"                                        OFF
 HDF5_JAVA_PACK_JRE             "Package a JRE installer directory"                            OFF
-HDF5_MEMORY_ALLOC_SANITY_CHECK "Indicate that internal memory allocation sanity checks are enabled" OFF
 HDF5_NO_PACKAGES               "Do not include CPack Packaging"                               OFF
 HDF5_PACK_EXAMPLES             "Package the HDF5 Library Examples Compressed File"            OFF
 HDF5_PACK_MACOSX_FRAMEWORK     "Package the HDF5 Library in a Frameworks"                     OFF

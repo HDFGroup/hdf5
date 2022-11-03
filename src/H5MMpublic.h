@@ -13,8 +13,6 @@
 /*-------------------------------------------------------------------------
  *
  * Created:             H5MMpublic.h
- *                      Jul 10 1997
- *                      Robb Matzke
  *
  * Purpose:             Public declarations for the H5MM (memory management)
  *                      package.
@@ -36,11 +34,4 @@ typedef void *(*H5MM_allocate_t)(size_t size, void *alloc_info);
 typedef void (*H5MM_free_t)(void *mem, void *free_info);
 //! <!-- [H5MM_free_t_snip] -->
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#ifdef __cplusplus
-}
-#endif
 #endif /* H5MMpublic_H */

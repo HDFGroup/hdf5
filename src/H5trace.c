@@ -1543,18 +1543,6 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                 case 'H':
                     switch (type[1]) {
-                        case 'a': /* H5_alloc_stats_t */
-                        {
-                            H5_alloc_stats_t stats = HDva_arg(ap, H5_alloc_stats_t);
-
-                            H5RS_asprintf_cat(rs, "{%llu, %zu, %zu, %zu, %zu, %zu, %zu}",
-                                              stats.total_alloc_bytes, stats.curr_alloc_bytes,
-                                              stats.peak_alloc_bytes, stats.max_block_size,
-                                              stats.total_alloc_blocks_count, stats.curr_alloc_blocks_count,
-                                              stats.peak_alloc_blocks_count);
-                        } /* end block */
-                        break;
-
                         case 'c': /* H5_atclose_func_t */
                         {
                             H5_atclose_func_t cfunc = (H5_atclose_func_t)HDva_arg(ap, H5_atclose_func_t);

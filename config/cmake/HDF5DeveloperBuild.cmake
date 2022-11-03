@@ -194,10 +194,3 @@ endif ()
 
 # Enable strict checking of the file format
 list (APPEND HDF5_DEVELOPER_DEFS H5_STRICT_FORMAT_CHECKS)
-
-# Enable printing of library memory stats
-option (HDF5_ENABLE_MEMORY_STATS "Enable printing of library memory stats" OFF)
-mark_as_advanced (HDF5_ENABLE_MEMORY_STATS)
-if (HDF5_ENABLE_MEMORY_STATS)
-  list (APPEND HDF5_DEVELOPER_DEFS H5MM_PRINT_MEMORY_STATS)
-endif ()
