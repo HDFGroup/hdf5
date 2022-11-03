@@ -5877,15 +5877,15 @@ test_misc35(void)
     hsize_t coord[MISC35_NPOINTS][MISC35_SPACE_RANK] = /* Coordinates for point selection */
         {{0, 10, 5}, {1, 2, 7},  {2, 4, 9}, {0, 6, 11}, {1, 8, 13},
          {2, 12, 0}, {0, 14, 2}, {1, 0, 4}, {2, 1, 6},  {0, 3, 8}};
-    size_t           reg_size_start; /* Initial amount of regular memory allocated */
-    size_t           arr_size_start; /* Initial amount of array memory allocated */
-    size_t           blk_size_start; /* Initial amount of block memory allocated */
-    size_t           fac_size_start; /* Initial amount of factory memory allocated */
-    size_t           reg_size_final; /* Final amount of regular memory allocated */
-    size_t           arr_size_final; /* Final amount of array memory allocated */
-    size_t           blk_size_final; /* Final amount of block memory allocated */
-    size_t           fac_size_final; /* Final amount of factory memory allocated */
-    herr_t           ret;            /* Return value */
+    size_t reg_size_start; /* Initial amount of regular memory allocated */
+    size_t arr_size_start; /* Initial amount of array memory allocated */
+    size_t blk_size_start; /* Initial amount of block memory allocated */
+    size_t fac_size_start; /* Initial amount of factory memory allocated */
+    size_t reg_size_final; /* Final amount of regular memory allocated */
+    size_t arr_size_final; /* Final amount of array memory allocated */
+    size_t blk_size_final; /* Final amount of block memory allocated */
+    size_t fac_size_final; /* Final amount of factory memory allocated */
+    herr_t ret;            /* Return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Free-list API calls"));
