@@ -224,3 +224,6 @@ $(top_builddir)/config.status:
 
 # Don't include conclude.am in root Makefile; tests target needs to
 # recurse into reguar subdirs.
+#
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = hdf5.pc
