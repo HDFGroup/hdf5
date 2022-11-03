@@ -208,7 +208,13 @@ Bug Fixes since HDF5-1.12.1 release
 
     Configuration
     -------------
-    -
+    - Move MPI libraries link from PRIVATE to PUBLIC
+
+      The install dependencies were not including the need for MPI libraries when
+      an application or library was built with the C library. Also updated the
+      CMake target link command to use the newer style MPI::MPI_C link variable.
+
+      (ADB - 2022/20/27)
 
 
     Tools
