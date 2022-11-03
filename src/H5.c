@@ -1177,7 +1177,7 @@ H5allocate_memory(size_t size, hbool_t clear)
     FUNC_ENTER_API_NOINIT
     H5TRACE2("*x", "zb", size, clear);
 
-    if(0 == size)
+    if (0 == size)
         return NULL;
 
     if (clear)
