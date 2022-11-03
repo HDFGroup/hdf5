@@ -185,7 +185,7 @@ H5_DLL herr_t H5ESwait(hid_t es_id, uint64_t timeout, size_t *num_in_progress, h
  * \brief Attempt to cancel operations in an event set
  *
  * \es_id
- * \param[out] count The number of events not canceled
+ * \param[out] num_not_canceled The number of events not canceled
  * \param[out] err_occurred Status indicating if error is present in the event set
  * \returns \herr_t
  *
