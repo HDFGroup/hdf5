@@ -77,10 +77,7 @@ H5MM_malloc(size_t size)
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if (size)
-        ret_value = HDmalloc(size);
-    else
-        ret_value = NULL;
+    ret_value = HDmalloc(size);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MM_malloc() */
@@ -109,10 +106,7 @@ H5MM_calloc(size_t size)
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if (size)
-        ret_value = HDcalloc((size_t)1, size);
-    else
-        ret_value = NULL;
+    ret_value = HDcalloc(1, size);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MM_calloc() */
@@ -246,11 +240,10 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5MM_xfree
  *
- * Purpose:     Just like free(3) except null pointers are allowed as
- *              arguments, and the return value (always NULL) can be
- *              assigned to the pointer whose memory was just freed:
+ * Purpose:     Just like free(3) except the return value (always NULL) can
+ *              be assigned to the pointer whose memory was just freed:
  *
- *              thing = H5MM_xfree (thing);
+ *                  thing = H5MM_xfree(thing);
  *
  * Return:      Success:    NULL
  *              Failure:    never fails

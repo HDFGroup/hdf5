@@ -5825,16 +5825,6 @@ test_misc34(void)
     mem = H5MM_xfree(mem);
     CHECK_PTR_NULL(mem, "H5MM_xfree");
 
-    /* H5MM_malloc(): Ensure that size 0 returns NULL */
-    mem = H5MM_malloc(sz);
-    CHECK_PTR_NULL(mem, "H5MM_malloc");
-    mem = H5MM_xfree(mem);
-
-    /* H5MM_calloc(): Ensure that size 0 returns NULL */
-    mem = H5MM_calloc(sz);
-    CHECK_PTR_NULL(mem, "H5MM_calloc");
-    mem = H5MM_xfree(mem);
-
     /* H5MM_realloc(): Check behavior:
      *
      *  H5MM_realloc(NULL, size)    <==> H5MM_malloc(size)
