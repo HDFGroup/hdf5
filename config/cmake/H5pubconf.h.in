@@ -228,9 +228,6 @@
 /* Define if the map API (H5M) should be compiled */
 #cmakedefine H5_HAVE_MAP_API @H5_HAVE_MAP_API@
 
-/* Define to 1 if you have the <memory.h> header file. */
-#cmakedefine H5_HAVE_MEMORY_H @H5_HAVE_MEMORY_H@
-
 /* Define whether the Mirror virtual file driver (VFD) will be compiled */
 #cmakedefine H5_HAVE_MIRROR_VFD @H5_HAVE_MIRROR_VFD@
 
@@ -438,9 +435,6 @@
 
 /* Define to the sub-directory where libtool stores uninstalled libraries. */
 #cmakedefine H5_LT_OBJDIR @H5_LT_OBJDIR@
-
-/* Define to enable internal memory allocation sanity checking. */
-#cmakedefine H5_MEMORY_ALLOC_SANITY_CHECK @H5_MEMORY_ALLOC_SANITY_CHECK@
 
 /* Define if deprecated public API symbols are disabled */
 #cmakedefine H5_NO_DEPRECATED_SYMBOLS @H5_NO_DEPRECATED_SYMBOLS@

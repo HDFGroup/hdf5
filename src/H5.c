@@ -540,11 +540,6 @@ H5_term_library(void)
         (void)H5MM_free(tmp_open_stream);
     } /* end while */
 
-#if defined H5_MEMORY_ALLOC_SANITY_CHECK
-    /* Sanity check memory allocations */
-    H5MM_final_sanity_check();
-#endif /* H5_MEMORY_ALLOC_SANITY_CHECK */
-
     /* Reset flag indicating that the library is being shut down */
     H5_TERM_GLOBAL = FALSE;
 
@@ -714,46 +709,6 @@ H5get_free_list_sizes(size_t *reg_size /*out*/, size_t *arr_size /*out*/, size_t
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5get_free_list_sizes() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5get_alloc_stats
- *
- * Purpose:    Gets the memory allocation statistics for the library, if the
- *    --enable-memory-alloc-sanity-check option was given when building the
- *      library.  Applications can check whether this option was enabled by
- *    detecting if the 'H5_MEMORY_ALLOC_SANITY_CHECK' macro is defined.  This
- *    option is enabled by default for debug builds of the library and
- *    disabled by default for non-debug builds.  If the option is not enabled,
- *    all the values returned with be 0.  These statistics are global for the
- *    entire library, but don't include allocations from chunked dataset I/O
- *    filters or non-native VOL connectors.
- *
- * Parameters:
- *  H5_alloc_stats_t *stats;            OUT: Memory allocation statistics
- *
- * Return:    Success:    non-negative
- *        Failure:    negative
- *
- * Programmer:  Quincey Koziol
- *              Saturday, March 7, 2020
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5get_alloc_stats(H5_alloc_stats_t *stats /*out*/)
-{
-    herr_t ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "x", stats);
-
-    /* Call the internal allocation stat routine to get the values */
-    if (H5MM_get_alloc_stats(stats) < 0)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't get allocation stats")
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5get_alloc_stats() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5__debug_mask

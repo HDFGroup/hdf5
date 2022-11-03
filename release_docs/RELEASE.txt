@@ -47,13 +47,40 @@ New Features
 
     Configuration:
     -------------
-    -
+    - Removal of memory allocation sanity checks configure options
 
+      With the removal of the memory allocation sanity checks feature, the
+      following configure options are no longer necessary and have been
+      removed:
+
+      Autotools:
+          --enable-memory-alloc-sanity-check
+
+      CMake:
+          HDF5_MEMORY_ALLOC_SANITY_CHECK
+          HDF5_ENABLE_MEMORY_STATS
+
+      (DER - 2022/11/03)
 
     Library:
     --------
-    -
+    - Removal of memory allocation sanity checks feature
 
+      This feature added heap canaries and statistics tracking for internal
+      library memory operations. Unfortunately, the heap canaries caused
+      problems when library memory operations were mixed with standard C
+      library memory operations (such as in the filter pipeline, where
+      buffers may have to be reallocated). Since any platform with a C
+      compiler also usually has much more sophisticated memory sanity
+      checking tools than the HDF5 library provided (e.g., valgrind), we
+      have decided to to remove the feature entirely.
+
+      In addition to the configure changes described above, this also removes
+      the following from the public API:
+          H5get_alloc_stats()
+          H5_alloc_stats_t
+
+      (DER - 2022/11/03)
 
     Parallel Library:
     -----------------
@@ -125,7 +152,7 @@ Bug Fixes since HDF5-1.13.3 release
       an application or library was built with the C library. Also updated the
       CMake target link command to use the newer style MPI::MPI_C link variable.
 
-      (ADB - 2022/20/27)
+      (ADB - 2022/10/27)
 
 
     Tools

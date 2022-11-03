@@ -561,14 +561,6 @@ if (HDF5_ENABLE_USING_MEMCHECKER)
 endif ()
 
 #-----------------------------------------------------------------------------
-# Option to indicate internal memory allocation sanity checks are enabled
-#-----------------------------------------------------------------------------
-option (HDF5_MEMORY_ALLOC_SANITY_CHECK "Indicate that internal memory allocation sanity checks are enabled" OFF)
-if (HDF5_MEMORY_ALLOC_SANITY_CHECK)
-  set (H5_MEMORY_ALLOC_SANITY_CHECK 1)
-endif ()
-
-#-----------------------------------------------------------------------------
 # Option to enable/disable using pread/pwrite for VFDs
 #-----------------------------------------------------------------------------
 option (HDF5_ENABLE_PREADWRITE "Use pread/pwrite in sec2/log/core VFDs in place of read/write (when available)" ON)
