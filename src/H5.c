@@ -1162,9 +1162,10 @@ H5close(void)
  *
  * Return:
  *
- *      Success:    A pointer to the allocated buffer.
+ *      Success:    A pointer to the allocated buffer or NULL if the size
+ *                  parameter is zero.
  *
- *      Failure:    NULL
+ *      Failure:    NULL (but may also be NULL w/ size 0!)
  *
  *-------------------------------------------------------------------------
  */
@@ -1175,6 +1176,9 @@ H5allocate_memory(size_t size, hbool_t clear)
 
     FUNC_ENTER_API_NOINIT
     H5TRACE2("*x", "zb", size, clear);
+
+    if(0 == size)
+        return NULL;
 
     if (clear)
         ret_value = H5MM_calloc(size);
