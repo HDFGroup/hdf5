@@ -54,7 +54,7 @@ else ()
 endif ()
 
 #-----------------------------------------------------------------------------
-# MAC machines need special option
+# MacOS machines need special options
 #-----------------------------------------------------------------------------
 if (APPLE)
   # Compiler choice
