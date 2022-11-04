@@ -722,7 +722,7 @@ H5A__write(H5A_t *attr, const H5T_t *mem_type, const void *buf)
     HDassert(buf);
 
     /* Patch the top level file pointer in attr->shared->dt->shared->u.vlen.f if needed */
-    if (H5T_patch_vlen_file(attr->shared->dt, H5F_VOL_OBJ(attr->oloc.file)) < 0)
+    if (H5T_patch_vlen_file(attr->shared->dt, attr->oloc.file) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't patch VL datatype file pointer")
 
     /* Get # of elements for attribute's dataspace */
