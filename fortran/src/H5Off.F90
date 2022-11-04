@@ -1161,7 +1161,8 @@ CONTAINS
 
     ptr = C_LOC(object_info)
 
-    hdferr = H5Oget_info_by_name_c(loc_id, c_name, lapl_id_default, ptr, fields_c, es_id, file, func, line)
+    hdferr = H5Oget_info_by_name_c(loc_id, c_name, lapl_id_default, ptr, fields_c, &
+         es_id, file_default, func_default, line_default)
 
   END SUBROUTINE H5oget_info_by_name_async_f
 

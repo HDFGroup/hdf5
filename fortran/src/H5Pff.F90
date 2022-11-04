@@ -2779,7 +2779,8 @@ CONTAINS
 !! \param memb_map   Mapping array.
 !! \param memb_fapl  Property list for each memory usage type.
 !! \param memb_name  Names of member file.
-!! \param memb_addr  Offsets within the virtual address space, from 0 (zero) to HADDR_MAX_F, at which each type of data storage begins.
+!! \param memb_addr  Offsets within the virtual address space, from 0 (zero) to HADDR_MAX_F, at which
+!!                   each type of data storage begins.
 !! \param relax      Flag.
 !! \param hdferr     \fortran_error
 !! \param maxlen_out Maximum length for memb_name array element.
@@ -5659,8 +5660,10 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !!
 !! \brief Sets the mapping between virtual and source datasets.
 !!
-!! \param dcpl_id       The identifier of the dataset creation property list that will be used when creating the virtual dataset.
-!! \param vspace_id     The dataspace identifier with the selection within the virtual dataset applied, possibly an unlimited selection.
+!! \param dcpl_id       The identifier of the dataset creation property list that will be used when creating the
+!!                      virtual dataset.
+!! \param vspace_id     The dataspace identifier with the selection within the virtual dataset applied, possibly an
+!!                      unlimited selection.
 !! \param src_file_name The name of the HDF5 file where the source dataset is located.
 !! \param src_dset_name The path to the HDF5 dataset in the file specified by src_file_name.
 !! \param src_space_id  The source dataset’s dataspace identifier with a selection applied, possibly an unlimited selection.
@@ -6074,7 +6077,8 @@ END SUBROUTINE h5pget_virtual_dsetname_f
     LOGICAL(C_BOOL) :: c_ignore_flag
 
     INTERFACE
-       INTEGER FUNCTION h5pget_file_locking(fapl_id, use_file_locking, ignore_disabled_locks) BIND(C, NAME='H5Pget_file_locking')
+       INTEGER FUNCTION h5pget_file_locking(fapl_id, use_file_locking, ignore_disabled_locks) &
+            BIND(C, NAME='H5Pget_file_locking')
          IMPORT :: HID_T, C_BOOL
          IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN), VALUE :: fapl_id
@@ -6113,7 +6117,8 @@ END SUBROUTINE h5pget_virtual_dsetname_f
     LOGICAL(C_BOOL) :: c_ignore_flag
 
     INTERFACE
-       INTEGER FUNCTION h5pset_file_locking(fapl_id, use_file_locking, ignore_disabled_locks) BIND(C, NAME='H5Pset_file_locking')
+       INTEGER FUNCTION h5pset_file_locking(fapl_id, use_file_locking, ignore_disabled_locks) &
+            BIND(C, NAME='H5Pset_file_locking')
          IMPORT :: HID_T, C_BOOL
          IMPLICIT NONE
          INTEGER(HID_T), INTENT(IN), VALUE :: fapl_id
