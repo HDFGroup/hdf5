@@ -96,6 +96,7 @@ endif()
 #############################################################################################
 ### disable test program builds
 
+#If using CTestScript.cmake file be sure to uncomment set (LOCAL_SKIP_TEST "TRUE")
 #set (ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DBUILD_TESTING:BOOL=OFF")
 
 #############################################################################################
