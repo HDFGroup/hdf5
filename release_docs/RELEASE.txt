@@ -163,6 +163,16 @@ Bug Fixes since HDF5-1.10.9 release
 ===================================
     Library
     -------
+    - Fixed an issue with variable length attributes
+
+      Previously, if a variable length attribute was held open while its file
+      was opened through another handle, the same attribute was opened through
+      the second file handle, and the second file and attribute handles were
+      closed, attempting to write to the attribute through the first handle
+      would cause an error.
+
+      (NAF - 2022/10/24)
+
     - Fixed an issue with hyperslab selections
 
       Previously, when combining hyperslab selections, it was possible for the
