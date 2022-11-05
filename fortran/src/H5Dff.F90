@@ -1835,7 +1835,6 @@ CONTAINS
     INTEGER, ALLOCATABLE, DIMENSION(:) :: ref_buf
     INTEGER :: i
     INTEGER(HSIZE_T) :: j
-    TYPE(C_PTR) :: f_ptr
     INTERFACE
        INTEGER FUNCTION h5dwrite_ref_reg_c(dset_id, mem_type_id,&
             mem_space_id_default, &
@@ -1859,7 +1858,6 @@ CONTAINS
     IF(PRESENT(xfer_prp)) xfer_prp_default = xfer_prp
     IF(PRESENT(mem_space_id))  mem_space_id_default = mem_space_id
     IF(PRESENT(file_space_id)) file_space_id_default = file_space_id
-    f_ptr = C_LOC(buf(1))
 
     ALLOCATE(ref_buf(REF_REG_BUF_LEN*dims(1)), stat=hdferr)
     IF (hdferr .NE. 0 ) THEN

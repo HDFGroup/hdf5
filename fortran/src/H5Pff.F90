@@ -2696,7 +2696,8 @@ CONTAINS
 !! \param memb_map  Mapping array.
 !! \param memb_fapl Property list for each memory usage type.
 !! \param memb_name Names of member file.
-!! \param memb_addr Offsets within the virtual address space, from 0 (zero) to HADDR_MAX_F, at which each type of data storage begins.
+!! \param memb_addr Offsets within the virtual address space, from 0 (zero) to HADDR_MAX_F,
+!!                  at which each type of data storage begins.
 !! \param relax     Flag.
 !! \param hdferr    \fortran_error
 !!

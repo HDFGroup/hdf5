@@ -391,6 +391,10 @@ CONTAINS
        END FUNCTION H5Oclose_async
     END INTERFACE
 
+    IF(PRESENT(file)) file_default = TRIM(file)//C_NULL_CHAR
+    IF(PRESENT(func)) func_default = TRIM(func)//C_NULL_CHAR
+    IF(PRESENT(line)) line_default = INT(line, C_INT)
+
     hdferr = INT(H5Oclose_async(file_default, func_default, line_default, object_id, es_id))
 
   END SUBROUTINE h5oclose_async_f

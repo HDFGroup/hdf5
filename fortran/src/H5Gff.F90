@@ -1176,7 +1176,7 @@ CONTAINS
     ptr = C_LOC(ginfo)
 
     hdferr = H5Gget_info_by_idx(loc_id, c_group_name, &
-         idx_type, order, n, ptr, lapl_id_default )
+         INT(idx_type,ENUM_T), INT(order, ENUM_T), n, ptr, lapl_id_default )
 
 #ifdef H5_DOXYGEN
   END SUBROUTINE h5gget_info_by_idx_f
@@ -1243,7 +1243,7 @@ CONTAINS
 
 
     hdferr = H5Gget_info_by_idx(loc_id, c_group_name, &
-         idx_type, order, n, ptr, lapl_id_default )
+         INT(idx_type,ENUM_T), INT(order, ENUM_T), n, ptr, lapl_id_default )
 
     storage_type = INT(ginfo%storage_type)
     nlinks       = INT(ginfo%nlinks)

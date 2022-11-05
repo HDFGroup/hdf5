@@ -1961,6 +1961,9 @@ CONTAINS
     lapl_id_default = H5P_DEFAULT_F
     IF(PRESENT(aapl_id)) aapl_id_default = aapl_id
     IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
+    IF(PRESENT(file)) file_default = TRIM(file)//C_NULL_CHAR
+    IF(PRESENT(func)) func_default = TRIM(func)//C_NULL_CHAR
+    IF(PRESENT(line)) line_default = INT(line, C_INT)
 
     attr_id = INT(H5Aopen_by_name_async(file_default, func_default, line_default, &
          loc_id, c_obj_name, c_attr_name, aapl_id_default, lapl_id_default, es_id), HID_T)
