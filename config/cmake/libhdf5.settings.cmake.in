@@ -87,7 +87,6 @@ Dimension scales w/ new references: @DIMENSION_SCALES_WITH_NEW_REF@
     Packages w/ extra debug output: @INTERNAL_DEBUG_OUTPUT@
                        API Tracing: @HDF5_ENABLE_TRACE@
               Using memory checker: @HDF5_ENABLE_USING_MEMCHECKER@
-   Memory allocation sanity checks: @HDF5_MEMORY_ALLOC_SANITY_CHECK@
             Function Stack Tracing: @HDF5_ENABLE_CODESTACK@
                   Use file locking: @HDF5_FILE_LOCKING_SETTING@
          Strict File Format Checks: @HDF5_STRICT_FORMAT_CHECKS@

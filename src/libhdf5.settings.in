@@ -90,7 +90,6 @@ Dimension scales w/ new references: @DIMENSION_SCALES_WITH_NEW_REF@
     Packages w/ extra debug output: @INTERNAL_DEBUG_OUTPUT@
                        API tracing: @TRACE_API@
               Using memory checker: @USINGMEMCHECKER@
-   Memory allocation sanity checks: @MEMORYALLOCSANITYCHECK@
             Function stack tracing: @CODESTACK@
                   Use file locking: @DESIRED_FILE_LOCKING@
          Strict file format checks: @STRICT_FORMAT_CHECKS@
