@@ -10874,11 +10874,11 @@ test_attr(void)
                                my_fapl); /* Test creating and deleting large attributes in ohdr chunk 0 */
                 test_attr_bug8(my_fcpl,
                                my_fapl); /* Test attribute expanding object header with undecoded messages */
-                test_attr_bug9(my_fcpl, my_fapl); /* Test large attributes converting to dense storage */
+                test_attr_bug9(my_fcpl, my_fapl);  /* Test large attributes converting to dense storage */
                 test_attr_bug10(my_fcpl, my_fapl); /* Test writing an attribute after opening and closing
                                                       through a different file handle */
-            }                                     /* end for */
-        }                                         /* end if */
+            }                                      /* end for */
+        }                                          /* end if */
         else {
             /* General attribute tests */
             test_attr_big(fcpl, my_fapl);              /* Test storing big attribute */
@@ -10907,11 +10907,11 @@ test_attr(void)
              * to the attributes being larger than 64K */
             test_attr_bug8(fcpl,
                            my_fapl); /* Test attribute expanding object header with undecoded messages */
-            test_attr_bug9(fcpl, my_fapl); /* Test large attributes converting to dense storage */
+            test_attr_bug9(fcpl, my_fapl);     /* Test large attributes converting to dense storage */
             test_attr_bug10(my_fcpl, my_fapl); /* Test writing an attribute after opening and closing
                                                   through a different file handle */
-        }                                  /* end else */
-    }                                      /* end for */
+        }                                      /* end else */
+    }                                          /* end for */
 
     /* Close  FCPLs */
     ret = H5Pclose(fcpl);
