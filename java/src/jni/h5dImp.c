@@ -1140,7 +1140,7 @@ Java_hdf_hdf5lib_H5_H5DreadVL(JNIEnv *env, jclass clss, jlong dataset_id, jlong 
     H5T_class_t type_class;
     jsize       vl_array_len;
     htri_t      vl_data_class;
-    herr_t status = FAIL;
+    herr_t      status = FAIL;
 
     UNUSED(clss);
 
@@ -1194,7 +1194,7 @@ Java_hdf_hdf5lib_H5_H5DwriteVL(JNIEnv *env, jclass clss, jlong dataset_id, jlong
     H5T_class_t type_class;
     jsize       vl_array_len; // Only used by vl_data_class types
     htri_t      vl_data_class;
-    herr_t status = FAIL;
+    herr_t      status = FAIL;
 
     UNUSED(clss);
 

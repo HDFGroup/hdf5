@@ -1693,28 +1693,35 @@ public class TestH5A {
             /*
              * System.out.println(); System.out.println("vl_readbuf: " + vl_readbuf);
              * System.out.println("vl_readbuf_int: " + vl_readbuf_int);
-             */            assertTrue("testHADVLwrVL:" + vl_readbuf_int.get(0),
+             */
+            assertTrue("testHADVLwrVL:" + vl_readbuf_int.get(0),
                        vl_int_data[0].get(0).equals(vl_readbuf_int.get(0)));
 
             vl_readbuf     = (ArrayList<ArrayList<Integer>>)base_vl_readbuf[1];
             vl_readbuf_int = (ArrayList<Integer>)(vl_readbuf.get(1));
             /*
-             * System.out.println("vl_readbuf: " + vl_readbuf); System.out.println("vl_readbuf_int: " + vl_readbuf_int);
-             */            assertTrue("testH5AVLwrVL:" + vl_readbuf_int.get(1),
+             * System.out.println("vl_readbuf: " + vl_readbuf); System.out.println("vl_readbuf_int: " +
+             * vl_readbuf_int);
+             */
+            assertTrue("testH5AVLwrVL:" + vl_readbuf_int.get(1),
                        vl_int_data[1].get(1).equals(vl_readbuf_int.get(1)));
 
             vl_readbuf     = (ArrayList<ArrayList<Integer>>)base_vl_readbuf[2];
             vl_readbuf_int = (ArrayList<Integer>)(vl_readbuf.get(2));
             /*
-             * System.out.println("vl_readbuf: " + vl_readbuf); System.out.println("vl_readbuf_int: " + vl_readbuf_int);
-             */            assertTrue("testH5AVLwrVL:" + vl_readbuf_int.get(2),
+             * System.out.println("vl_readbuf: " + vl_readbuf); System.out.println("vl_readbuf_int: " +
+             * vl_readbuf_int);
+             */
+            assertTrue("testH5AVLwrVL:" + vl_readbuf_int.get(2),
                        vl_int_data[2].get(2).equals(vl_readbuf_int.get(2)));
 
             vl_readbuf     = (ArrayList<ArrayList<Integer>>)base_vl_readbuf[3];
             vl_readbuf_int = (ArrayList<Integer>)(vl_readbuf.get(3));
             /*
-             * System.out.println("vl_readbuf: " + vl_readbuf); System.out.println("vl_readbuf_int: " + vl_readbuf_int);
-             */            assertTrue("testH5AVLwrVL:" + vl_readbuf_int.get(3),
+             * System.out.println("vl_readbuf: " + vl_readbuf); System.out.println("vl_readbuf_int: " +
+             * vl_readbuf_int);
+             */
+            assertTrue("testH5AVLwrVL:" + vl_readbuf_int.get(3),
                        vl_int_data[3].get(3).equals(vl_readbuf_int.get(3)));
         }
         catch (Throwable err) {
@@ -1747,19 +1754,19 @@ public class TestH5A {
     public void testH5AArraywr()
     {
         String att_int_name = "ArrayIntdata";
-        long att_int_id      = HDF5Constants.H5I_INVALID_HID;
-        long atype_int_id    = HDF5Constants.H5I_INVALID_HID;
-        long aspace_id       = HDF5Constants.H5I_INVALID_HID;
-        long[] dims          = {4};
-        long lsize           = 1;
+        long att_int_id     = HDF5Constants.H5I_INVALID_HID;
+        long atype_int_id   = HDF5Constants.H5I_INVALID_HID;
+        long aspace_id      = HDF5Constants.H5I_INVALID_HID;
+        long[] dims         = {4};
+        long lsize          = 1;
 
         ArrayList[] arr_int_data = new ArrayList[4];
         try {
             // Write Integer data
-            arr_int_data[0]  = new ArrayList<Integer>(Arrays.asList(1, 2, 3, 4));
-            arr_int_data[1]  = new ArrayList<Integer>(Arrays.asList(2, 3, 4, 5));
-            arr_int_data[2]  = new ArrayList<Integer>(Arrays.asList(4, 5, 6, 7));
-            arr_int_data[3]  = new ArrayList<Integer>(Arrays.asList(7, 8, 9, 10));
+            arr_int_data[0] = new ArrayList<Integer>(Arrays.asList(1, 2, 3, 4));
+            arr_int_data[1] = new ArrayList<Integer>(Arrays.asList(2, 3, 4, 5));
+            arr_int_data[2] = new ArrayList<Integer>(Arrays.asList(4, 5, 6, 7));
+            arr_int_data[3] = new ArrayList<Integer>(Arrays.asList(7, 8, 9, 10));
             Class dataClass = arr_int_data.getClass();
             assertTrue("testH5AArraywr.getClass: " + dataClass, dataClass.isArray());
 
@@ -1829,13 +1836,13 @@ public class TestH5A {
                 ex.printStackTrace();
             }
             assertTrue("testH5AVLwr:" + arr_readbuf[0].get(0),
-                    arr_int_data[0].get(0).equals(arr_readbuf[0].get(0)));
+                       arr_int_data[0].get(0).equals(arr_readbuf[0].get(0)));
             assertTrue("testH5AVLwr:" + arr_readbuf[1].get(0),
-                    arr_int_data[1].get(0).equals(arr_readbuf[1].get(0)));
+                       arr_int_data[1].get(0).equals(arr_readbuf[1].get(0)));
             assertTrue("testH5AVLwr:" + arr_readbuf[2].get(0),
-                    arr_int_data[2].get(0).equals(arr_readbuf[2].get(0)));
+                       arr_int_data[2].get(0).equals(arr_readbuf[2].get(0)));
             assertTrue("testH5AVLwr:" + arr_readbuf[3].get(0),
-                    arr_int_data[3].get(0).equals(arr_readbuf[3].get(0)));
+                       arr_int_data[3].get(0).equals(arr_readbuf[3].get(0)));
         }
         catch (Throwable err) {
             err.printStackTrace();
