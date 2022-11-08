@@ -10632,6 +10632,81 @@ test_attr_bug9(hid_t fcpl, hid_t fapl)
 
 /****************************************************************
 **
+**  test_attr_bug10(): Test basic H5A (attribute) code.
+**      Attempts to trigger a bug which would result in a
+**      segfault.  Create a vlen attribute through a file
+**      handle, then open the same file through a different
+**      handle, open the same attribute through the second file
+**      handle, then close the second file and attribute
+**      handles, then write to the attribute through the first
+**      handle.
+**
+****************************************************************/
+static void
+test_attr_bug10(hid_t fcpl, hid_t fapl)
+{
+    hid_t       fid1, fid2;        /* File IDs */
+    hid_t       aid1, aid2;        /* Attribute IDs */
+    hid_t       sid;               /* Dataspace ID */
+    hid_t       tid;               /* Datatype ID */
+    hsize_t     dims[1] = {1};     /* Attribute dimensions */
+    const char *wbuf[1] = {"foo"}; /* Write buffer */
+    herr_t      ret;               /* Generic return status */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing that vlen attributes can be written to after a second file handle is closed\n"));
+
+    /* Create dataspace */
+    sid = H5Screate_simple(1, dims, NULL);
+    CHECK(sid, FAIL, "H5Screate_simple");
+
+    /* Create VL string datatype */
+    tid = H5Tcopy(H5T_C_S1);
+    CHECK(tid, FAIL, "H5Tcreate");
+    ret = H5Tset_size(tid, H5T_VARIABLE);
+    CHECK(ret, FAIL, "H5Tset_size");
+
+    /* Create file */
+    fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl);
+    CHECK(fid1, FAIL, "H5Fcreate");
+
+    /* Create attribute on root group */
+    aid1 = H5Acreate2(fid1, "attr", tid, sid, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(aid1, FAIL, "H5Acreate2");
+
+    /* Open the same file again */
+    fid2 = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl);
+    CHECK(fid2, FAIL, "H5Fcreate");
+
+    /* Open the same attribute through the second file handle */
+    aid2 = H5Aopen(fid2, "attr", H5P_DEFAULT);
+    CHECK(aid2, FAIL, "H5Aopen");
+
+    /* Close the second attribute and file handles */
+    ret = H5Aclose(aid2);
+    CHECK(ret, FAIL, "H5Aclose");
+    ret = H5Fclose(fid2);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Write to the attribute through the first handle */
+    ret = H5Awrite(aid1, tid, wbuf);
+
+    /* Close IDs */
+    ret = H5Aclose(aid1);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    ret = H5Fclose(fid1);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    ret = H5Tclose(tid);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+} /* test_attr_bug10() */
+
+/****************************************************************
+**
 **  test_attr(): Main H5A (attribute) testing routine.
 **
 ****************************************************************/
@@ -10799,9 +10874,11 @@ test_attr(void)
                                my_fapl); /* Test creating and deleting large attributes in ohdr chunk 0 */
                 test_attr_bug8(my_fcpl,
                                my_fapl); /* Test attribute expanding object header with undecoded messages */
-                test_attr_bug9(my_fcpl, my_fapl); /* Test large attributes converting to dense storage */
-            }                                     /* end for */
-        }                                         /* end if */
+                test_attr_bug9(my_fcpl, my_fapl);  /* Test large attributes converting to dense storage */
+                test_attr_bug10(my_fcpl, my_fapl); /* Test writing an attribute after opening and closing
+                                                      through a different file handle */
+            }                                      /* end for */
+        }                                          /* end if */
         else {
             /* General attribute tests */
             test_attr_big(fcpl, my_fapl);              /* Test storing big attribute */
@@ -10830,9 +10907,11 @@ test_attr(void)
              * to the attributes being larger than 64K */
             test_attr_bug8(fcpl,
                            my_fapl); /* Test attribute expanding object header with undecoded messages */
-            test_attr_bug9(fcpl, my_fapl); /* Test large attributes converting to dense storage */
-        }                                  /* end else */
-    }                                      /* end for */
+            test_attr_bug9(fcpl, my_fapl);  /* Test large attributes converting to dense storage */
+            test_attr_bug10(fcpl, my_fapl); /* Test writing an attribute after opening and closing
+                                               through a different file handle */
+        }                                   /* end else */
+    }                                       /* end for */
 
     /* Close  FCPLs */
     ret = H5Pclose(fcpl);
