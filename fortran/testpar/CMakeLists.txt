@@ -21,6 +21,7 @@ add_executable (parallel_test
     hyper.F90
     mdset.F90
     multidsetrw.F90
+    async.F90
 )
 target_include_directories (parallel_test
     PRIVATE ${TESTPAR_INCLUDES}

@@ -18,6 +18,7 @@ PROGRAM parallel_test
   USE HDF5
   USE MPI
   USE TH5_MISC
+  USE TH5_ASYNC
 
   IMPLICIT NONE
 
@@ -87,6 +88,13 @@ PROGRAM parallel_test
              //TRIM(chr_collective(j))//" MPI I/O)", total_error)
      ENDDO
   ENDDO
+  !
+  ! test async APIs
+  !
+  ret_total_error = 0
+  CALL test_async(ret_total_error)
+  IF(mpi_rank==0) CALL write_test_status(ret_total_error, 'Testing async', total_error)
+
   !
   ! close HDF5 interface
   !

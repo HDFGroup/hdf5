@@ -39,7 +39,7 @@ check_PROGRAMS=$(TEST_PROG_PARA)
 CHECK_CLEANFILES+=parf[12].h5 subf.h5*
 
 # Test source files
-parallel_test_SOURCES=ptest.F90 hyper.F90 mdset.F90 multidsetrw.F90
+parallel_test_SOURCES=ptest.F90 hyper.F90 mdset.F90 multidsetrw.F90 async.F90
 subfiling_test_SOURCES=subfiling.F90
 
 # The tests depend on several libraries.

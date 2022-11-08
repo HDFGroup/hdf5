@@ -290,7 +290,6 @@ add_executable (fortranlib_test_F03
     tH5O_F03.F90
     tH5P_F03.F90
     tH5T_F03.F90
-    tH5ASYNC.F90
     tHDF5_F03.F90
 )
 target_compile_options(fortranlib_test_F03
