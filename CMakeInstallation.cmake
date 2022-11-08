@@ -238,7 +238,7 @@ if (NOT HDF5_EXTERNALLY_CONFIGURED)
     endif ()
     install (
         FILES ${release_files}
-        DESTINATION ${HDF5_INSTALL_DATA_DIR}
+        DESTINATION ${HDF5_INSTALL_DOC_DIR}
         COMPONENT hdfdocuments
     )
   endif ()
