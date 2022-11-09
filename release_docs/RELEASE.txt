@@ -47,6 +47,19 @@ New Features
 
     Configuration:
     -------------
+    - Removal of dmalloc support
+
+      The ability to build with dmalloc support has been removed along with
+      the following configure options:
+
+      Autotools:
+          --with-dmalloc=
+
+      CMake:
+          HDF5_ENABLE_USING_DMALLOC
+
+      (DER - 2022/11/08)
+      
     - Removal of memory allocation sanity checks configure options
 
       With the removal of the memory allocation sanity checks feature, the
