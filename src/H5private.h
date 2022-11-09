@@ -2023,8 +2023,7 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
     H5_API_LOCK
 
 /* Local variables for API routines */
-#define FUNC_ENTER_API_VARS                                                                                  \
-    H5TRACE_DECL
+#define FUNC_ENTER_API_VARS H5TRACE_DECL
 
 #define FUNC_ENTER_API_COMMON                                                                                \
     FUNC_ENTER_API_VARS                                                                                      \
@@ -2298,8 +2297,7 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
     H5_API_UNLOCK                                                                                            \
     H5_API_SET_CANCEL
 
-#define FUNC_LEAVE_API_COMMON(ret_value)                                                                     \
-    H5TRACE_RETURN(ret_value);
+#define FUNC_LEAVE_API_COMMON(ret_value) H5TRACE_RETURN(ret_value);
 
 #define FUNC_LEAVE_API(ret_value)                                                                            \
     ;                                                                                                        \
