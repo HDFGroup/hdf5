@@ -544,15 +544,6 @@ if (HDF5_ENABLE_COVERAGE)
 endif ()
 
 #-----------------------------------------------------------------------------
-# Option to indicate using dmalloc
-#-----------------------------------------------------------------------------
-# option (HDF5_ENABLE_USING_DMALLOC "Indicate that dmalloc is used" OFF)
-# if (HDF5_ENABLE_USING_DMALLOC)
-#   find_package (DMALLOC)
-#   set (H5_HAVE_DMALLOC DMALLOC_FOUND)
-# endif ()
-
-#-----------------------------------------------------------------------------
 # Option to indicate using a memory checker
 #-----------------------------------------------------------------------------
 option (HDF5_ENABLE_USING_MEMCHECKER "Indicate that a memory checker is used" OFF)
