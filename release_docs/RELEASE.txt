@@ -47,7 +47,19 @@ New Features
 
     Configuration:
     -------------
-    - Removal of dmalloc support
+    - Removal of MPE support
+
+      The ability to build with MPE instrumentation has been removed along with
+      the following configure options:
+
+      Autotools:
+          --with-mpe=
+
+      CMake has never supported building with MPE support.
+
+      (DER - 2022/11/08)
+
+     - Removal of dmalloc support
 
       The ability to build with dmalloc support has been removed along with
       the following configure options:
