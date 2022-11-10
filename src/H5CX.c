@@ -1621,12 +1621,17 @@ H5CX_get_vol_wrap_ctx(void **vol_wrap_ctx)
     H5CX_node_t **head      = NULL;    /* Pointer to head of API context list */
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     HDassert(vol_wrap_ctx);
     head = H5CX_get_my_context(); /* Get the pointer to the head of the API context, for this thread */
-    HDassert(head && *head);
+
+    /* No error is expected at this point.  But in case an application calls H5VLwrap_register
+     * which doesn't reset the API context and there is no context, returns an relevant error here
+     */
+    if (!head || !(*head))
+        HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "the API context isn't available, e.g. when an application calls H5VLwrap_register")
 
     /* Check for value that was set */
     if ((*head)->ctx.vol_wrap_ctx_valid)
@@ -1635,6 +1640,7 @@ H5CX_get_vol_wrap_ctx(void **vol_wrap_ctx)
     else
         *vol_wrap_ctx = NULL;
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX_get_vol_wrap_ctx() */
 
