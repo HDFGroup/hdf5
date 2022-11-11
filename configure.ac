@@ -1537,83 +1537,6 @@ AC_ARG_WITH([fnord],
   ])
 
 ## ----------------------------------------------------------------------
-## Is dmalloc (debug malloc library) requested? It has a header file
-## `dmalloc.h' and a library `-ldmalloc' and their locations might be
-## specified with the `--with-dmalloc' command-line switch. The value
-## is an include path and/or a library path. If the library path is
-## specified then it must be preceded by a comma.
-##
-AC_SUBST([HAVE_DMALLOC])
-
-## Default is not present
-HAVE_DMALLOC=no
-
-AC_ARG_WITH([dmalloc],
-            [AS_HELP_STRING([--with-dmalloc=DIR],
-                            [Use dmalloc memory debugging aid [default=no]])],,
-            [withval=no])
-
-case "X-$withval" in
-  X-yes)
-    HAVE_DMALLOC="yes"
-    AC_CHECK_HEADERS([dmalloc.h],, [unset HAVE_DMALLOC])
-    if test "x$HAVE_DMALLOC" = "xyes"; then
-      AC_CHECK_LIB([dmalloc], [dmalloc_shutdown],, [unset HAVE_DMALLOC])
-    fi
-    if test -z "$HAVE_DMALLOC" -a -n "$HDF5_CONFIG_ABORT"; then
-      AC_MSG_ERROR([couldn't find dmalloc library])
-    fi
-    ;;
-  X-|X-no|X-none)
-    HAVE_DMALLOC="no"
-    AC_MSG_CHECKING([for dmalloc library])
-    AC_MSG_RESULT([suppressed])
-    ;;
-  *)
-    HAVE_DMALLOC="yes"
-    case "$withval" in
-      *,*)
-        dmalloc_inc="`echo $withval |cut -f1 -d,`"
-        dmalloc_lib="`echo $withval |cut -f2 -d, -s`"
-        ;;
-      *)
-        if test -n "$withval"; then
-          dmalloc_inc="$withval/include"
-          dmalloc_lib="$withval/lib"
-        fi
-        ;;
-    esac
-
-    saved_CPPFLAGS="$CPPFLAGS"
-    saved_AM_CPPFLAGS="$AM_CPPFLAGS"
-    saved_LDFLAGS="$LDFLAGS"
-    saved_AM_LDFLAGS="$AM_LDFLAGS"
-
-    if test -n "$dmalloc_inc"; then
-      CPPFLAGS="$CPPFLAGS -I$dmalloc_inc"
-      AM_CPPFLAGS="$AM_CPPFLAGS -I$dmalloc_inc"
-    fi
-
-    AC_CHECK_HEADERS([dmalloc.h],,[CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"] [unset HAVE_DMALLOC])
-
-    if test "x$HAVE_DMALLOC" = "xyes"; then
-      if test -n "$dmalloc_lib"; then
-        LDFLAGS="$LDFLAGS -L$dmalloc_lib"
-        AM_LDFLAGS="$AM_LDFLAGS -L$dmalloc_lib"
-      fi
-
-      AC_CHECK_LIB([dmalloc], [dmalloc_shutdown],, [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_DMALLOC])
-    fi
-
-    if test -z "$HAVE_DMALLOC" -a -n "$HDF5_CONFIG_ABORT"; then
-      AC_MSG_ERROR([couldn't find dmalloc library])
-    fi
-    ;;
-esac
-
-
-
-## ----------------------------------------------------------------------
 ## Make the external filters list available to *.in files
 ## At this point it's unset (no external filters by default) but it
 ## will be filled in during the deflate (zlib) and szip processing
@@ -2759,7 +2682,6 @@ esac
 ## build also needs to have values defined.
 ##
 AC_SUBST([ADD_PARALLEL_FILES]) ADD_PARALLEL_FILES="no"
-AC_SUBST([MPE]) MPE=no
 AC_SUBST([INSTRUMENT_LIBRARY]) INSTRUMENT_LIBRARY=no
 AC_SUBST([PARALLEL_FILTERED_WRITES])
 AC_SUBST([LARGE_PARALLEL_IO])
@@ -2857,69 +2779,6 @@ if test -n "$PARALLEL"; then
       AC_MSG_ERROR([Unrecognized value: $INSTRUMENT_LIBRARY])
       ;;
   esac
-
-  ## --------------------------------------------------------------------
-  ## Do we want MPE instrumentation feature on?
-  ##
-  ## This must be done after enable-parallel is checked since it depends
-  ## on a mpich compiler.
-  ##
-  MPE=yes
-  AC_ARG_WITH([mpe],
-              [AS_HELP_STRING([--with-mpe=DIR],
-                              [Use MPE instrumentation [default=no]])],,
-              [withval=no])
-
-  case "X-$withval" in
-    X-|X-no|X-none)
-      AC_MSG_CHECKING([for MPE])
-      AC_MSG_RESULT([suppressed])
-      unset MPE
-      ;;
-    X-yes)
-      AC_CHECK_HEADERS([mpe.h],, [unset MPE])
-      AC_CHECK_LIB([mpe], [MPE_Init_log],, [unset MPE])
-      ;;
-    *)
-      case "$withval" in
-        *,*)
-          mpe_inc="`echo $withval | cut -f1 -d,`"
-          mpe_lib="`echo $withval | cut -f2 -d, -s`"
-          ;;
-        *)
-          if test -n "$withval"; then
-            mpe_inc="$withval/include"
-            mpe_lib="$withval/lib"
-          fi
-          ;;
-      esac
-
-      if test -n "$mpe_inc"; then
-        saved_CPPFLAGS="$CPPFLAGS"
-        saved_AM_CPPFLAGS="$AM_CPPFLAGS"
-        CPPFLAGS="$CPPFLAGS -I$mpe_inc"
-        AM_CPPFLAGS="$AM_CPPFLAGS -I$mpe_inc"
-        AC_CHECK_HEADERS([mpe.h],, [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"; unset MPE])
-      else
-        AC_CHECK_HEADERS([mpe.h],, [unset MPE])
-      fi
-
-      if test -n "$mpe_lib"; then
-        saved_LDFLAGS="$LDFLAGS"
-        saved_AM_LDFLAGS="$AM_LDFLAGS"
-        LDFLAGS="$LDFLAGS -L$mpe_lib"
-        AM_LDFLAGS="$AM_LDFLAGS -L$mpe_lib"
-        AC_CHECK_LIB([mpe], [MPE_Init_log],,
-                     [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset MPE])
-      else
-        AC_CHECK_LIB([mpe], [MPE_Init_log],, [unset MPE])
-      fi
-      ;;
-  esac
-
-  if test "X-$MPE" = "X-yes"; then
-    AC_DEFINE([HAVE_MPE], [1], [Define if we have MPE support])
-  fi
 
   ## ----------------------------------------------------------------------
   ## Check for the MPI functions necessary for the Parallel Compression
