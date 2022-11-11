@@ -750,24 +750,26 @@ if (HDF5_ENABLE_MIRROR_VFD)
 endif()
 
 #-----------------------------------------------------------------------------
-# Check if C has __float128 extension
+# Check if C has __float128 extension (used for Fortran only)
 #-----------------------------------------------------------------------------
 
-HDF_CHECK_TYPE_SIZE(__float128 _SIZEOF___FLOAT128)
-if (${_SIZEOF___FLOAT128})
-  set (${HDF_PREFIX}_HAVE_FLOAT128 1)
-  set (${HDF_PREFIX}_SIZEOF___FLOAT128 ${_SIZEOF___FLOAT128})
-else ()
-  set (${HDF_PREFIX}_HAVE_FLOAT128 0)
-  set (${HDF_PREFIX}_SIZEOF___FLOAT128 0)
-endif ()
+if (HDF5_BUILD_FORTRAN)
+  HDF_CHECK_TYPE_SIZE(__float128 _SIZEOF___FLOAT128)
+  if (${_SIZEOF___FLOAT128})
+    set (${HDF_PREFIX}_HAVE_FLOAT128 1)
+    set (${HDF_PREFIX}_SIZEOF___FLOAT128 ${_SIZEOF___FLOAT128})
+  else ()
+    set (${HDF_PREFIX}_HAVE_FLOAT128 0)
+    set (${HDF_PREFIX}_SIZEOF___FLOAT128 0)
+  endif ()
 
-HDF_CHECK_TYPE_SIZE(_Quad _SIZEOF__QUAD)
-if (NOT ${_SIZEOF__QUAD})
-  set (${HDF_PREFIX}_SIZEOF__QUAD 0)
-else ()
-  set (${HDF_PREFIX}_SIZEOF__QUAD ${_SIZEOF__QUAD})
-endif ()
+  HDF_CHECK_TYPE_SIZE(_Quad _SIZEOF__QUAD)
+  if (NOT ${_SIZEOF__QUAD})
+    set (${HDF_PREFIX}_SIZEOF__QUAD 0)
+  else ()
+    set (${HDF_PREFIX}_SIZEOF__QUAD ${_SIZEOF__QUAD})
+  endif ()
+endif()
 
 #-----------------------------------------------------------------------------
 # The provided CMake C macros don't provide a general compile/run function
