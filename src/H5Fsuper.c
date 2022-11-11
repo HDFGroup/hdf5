@@ -1060,6 +1060,7 @@ done:
             /* Evict the superblock from the cache */
             if (H5AC_expunge_entry(f, H5AC_SUPERBLOCK, (haddr_t)0, H5AC__NO_FLAGS_SET) < 0)
                 HDONE_ERROR(H5E_FILE, H5E_CANTEXPUNGE, FAIL, "unable to expunge superblock")
+            f->shared->sblock = NULL;
         } /* end if */
     }     /* end if */
 
