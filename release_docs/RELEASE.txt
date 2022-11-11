@@ -47,7 +47,19 @@ New Features
 
     Configuration:
     -------------
-    - Removal of dmalloc support
+    - Removal of MPE support
+
+      The ability to build with MPE instrumentation has been removed along with
+      the following configure options:
+
+      Autotools:
+          --with-mpe=
+
+      CMake has never supported building with MPE support.
+
+      (DER - 2022/11/08)
+
+     - Removal of dmalloc support
 
       The ability to build with dmalloc support has been removed along with
       the following configure options:
@@ -77,6 +89,17 @@ New Features
 
     Library:
     --------
+    - Fix for CVE-2019-8396
+
+      Malformed HDF5 files may have truncated content which does not match
+      the expected size. When H5O__pline_decode() attempts to decode these it
+      may read past the end of the allocated space leading to heap overflows
+      as bounds checking is incomplete.
+
+      The fix ensures each element is within bounds before reading.
+
+      (2022/11/09 - HDFFV-10712, CVE-2019-8396, GitHub #2209)
+
     - Removal of memory allocation sanity checks feature
 
       This feature added heap canaries and statistics tracking for internal
@@ -161,6 +184,18 @@ Bug Fixes since HDF5-1.13.3 release
       address data was checked before decoding.
 
       (EFE - 2022/10/05 GH-2228)
+
+    - Fix CVE-2018-17439 / GHSA-vcxv-vp43-rch7
+
+      H5IMget_image_info(): Make sure to not exceed local array size
+
+      Malformed hdf5 files may provide more dimensions than the array dim[] in
+      H5IMget_image_info() is able to hold. Check number of elements first by calling
+      H5Sget_simple_extent_dims() with NULL for both 'dims' and 'maxdims' arguments.
+      This will cause the function to return only the number of dimensions.
+      The fix addresses a stack overflow on write.
+
+      (EFE - 2022/09/27 HDFFV-10589, GH-2226)
 
 
     Java Library
