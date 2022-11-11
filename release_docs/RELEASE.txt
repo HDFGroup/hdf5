@@ -172,19 +172,6 @@ Bug Fixes since HDF5-1.13.3 release
 ===================================
     Library
     -------
-    -  Fix CVE-2018-16438 / GHSA-9xmm-cpf8-rgmx
-
-       Make sure info block for external links has at least 3 bytes.
-    
-       According to the specification, the information block for external links
-       contains 1 byte of version/flag information and two 0 terminated strings
-       for the object linked to and the full path.
-       Although not very useful, the minimum string length for each (with
-       terminating 0) would be one byte.
-       Checking this helps to avoid SEGVs triggered by bogus files.
-
-       (EFE - 2022/10/09 GH-2233)
-
     - Fix CVE-2018-13867 / GHSA-j8jr-chrh-qfrf
  
       Validate location (offset) of the accumulated metadata when comparing.
@@ -199,6 +186,19 @@ Bug Fixes since HDF5-1.13.3 release
       member in the same structure is true the location is valid.
 
       (EFE - 2022/10/10 GH-2230)
+      
+    - Fix CVE-2018-16438 / GHSA-9xmm-cpf8-rgmx
+
+      Make sure info block for external links has at least 3 bytes.
+    
+      According to the specification, the information block for external links
+      contains 1 byte of version/flag information and two 0 terminated strings
+      for the object linked to and the full path.
+      Although not very useful, the minimum string length for each (with
+      terminating 0) would be one byte.
+      Checking this helps to avoid SEGVs triggered by bogus files.
+
+      (EFE - 2022/10/09 GH-2233)
 
     - Fix CVE-2021-45830 / GHSA-5h2h-fjjr-x9m2
 
@@ -212,6 +212,19 @@ Bug Fixes since HDF5-1.13.3 release
       address data was checked before decoding.
 
       (EFE - 2022/10/05 GH-2228)
+
+    - Fix CVE-2018-14031 / GHSA-2xc7-724c-r36j
+
+      Parent of enum datatype message must have the same size as the
+      enum datatype message itself.
+      Functions accessing the enumeration values use the size of the
+      enumeration datatype to determine the size of each element and
+      how much data to copy.
+      Thus the size of the enumeration and its parent need to match.
+      Check in H5O_dtype_decode_helper()  to avoid unpleasant surprises
+      later.
+
+      (EFE - 2022/09/28 GH-2236)
 
     - Fix CVE-2018-17439 / GHSA-vcxv-vp43-rch7
 
