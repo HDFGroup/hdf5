@@ -172,8 +172,18 @@ Bug Fixes since HDF5-1.13.3 release
 ===================================
     Library
     -------
-    -
- 
+
+    - Fix CVE-2018-17439 / GHSA-vcxv-vp43-rch7
+
+      H5IMget_image_info(): Make sure to not exceed local array size
+
+      Malformed hdf5 files may provide more dimensions than the array dim[] in
+      H5IMget_image_info() is able to hold. Check number of elements first by calling
+      H5Sget_simple_extent_dims() with NULL for both 'dims' and 'maxdims' arguments.
+      This will cause the function to return only the number of dimensions.
+      The fix addresses a stack overflow on write.
+
+      (EFE - 2022/09/27 HDFFV-10589, GH-2226)
 
     Java Library
     ------------
