@@ -172,6 +172,21 @@ Bug Fixes since HDF5-1.13.3 release
 ===================================
     Library
     -------
+    - Fix CVE-2018-13867 / GHSA-j8jr-chrh-qfrf
+ 
+      Validate location (offset) of the accumulated metadata when comparing.
+
+      Initially, the accumulated metadata location is initialized to HADDR_UNDEF
+      - the highest available address. Bogus input files may provide a location
+      or size matching this value. Comparing this address against such bogus
+      values may provide false positives. Thus make sure, the value has been
+      initialized or fail the comparison early and let other parts of the
+      code deal with the bogus address/size.
+      Note: To avoid unnecessary checks, it is assumed that if the 'dirty'
+      member in the same structure is true the location is valid.
+
+      (EFE - 2022/10/10 GH-2230)
+
     - Fix CVE-2021-45830 / GHSA-5h2h-fjjr-x9m2
 
       Make H5O__fsinfo_decode() more resilient to out-of-bound reads.
