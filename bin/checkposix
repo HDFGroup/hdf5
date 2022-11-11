@@ -143,7 +143,7 @@ foreach $arg (@ARGV) {
             next if $name =~ /^(_beginthread|(Initialize|Enter|Leave)CriticalSection|TlsAlloc)$/;
 
             # These are MPI function calls. Ignore them.
-            next if $name =~ /^(MPI_|MPE_)/;
+            next if $name =~ /^(MPI_)/;
 
             # These are POSIX threads function calls. Ignore them.
             next if $name =~ /^pthread_/;

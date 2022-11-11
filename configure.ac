@@ -623,7 +623,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
     [fmoddir=$withval],
     [fmoddir="\${includedir}"])
   AC_SUBST([fmoddir], [$fmoddir])
-￼
+
   ## Change to the Fortran 90 language
   AC_LANG_PUSH(Fortran)
 
@@ -2682,7 +2682,6 @@ esac
 ## build also needs to have values defined.
 ##
 AC_SUBST([ADD_PARALLEL_FILES]) ADD_PARALLEL_FILES="no"
-AC_SUBST([MPE]) MPE=no
 AC_SUBST([INSTRUMENT_LIBRARY]) INSTRUMENT_LIBRARY=no
 AC_SUBST([PARALLEL_FILTERED_WRITES])
 AC_SUBST([LARGE_PARALLEL_IO])
@@ -2780,69 +2779,6 @@ if test -n "$PARALLEL"; then
       AC_MSG_ERROR([Unrecognized value: $INSTRUMENT_LIBRARY])
       ;;
   esac
-
-  ## --------------------------------------------------------------------
-  ## Do we want MPE instrumentation feature on?
-  ##
-  ## This must be done after enable-parallel is checked since it depends
-  ## on a mpich compiler.
-  ##
-  MPE=yes
-  AC_ARG_WITH([mpe],
-              [AS_HELP_STRING([--with-mpe=DIR],
-                              [Use MPE instrumentation [default=no]])],,
-              [withval=no])
-
-  case "X-$withval" in
-    X-|X-no|X-none)
-      AC_MSG_CHECKING([for MPE])
-      AC_MSG_RESULT([suppressed])
-      unset MPE
-      ;;
-    X-yes)
-      AC_CHECK_HEADERS([mpe.h],, [unset MPE])
-      AC_CHECK_LIB([mpe], [MPE_Init_log],, [unset MPE])
-      ;;
-    *)
-      case "$withval" in
-        *,*)
-          mpe_inc="`echo $withval | cut -f1 -d,`"
-          mpe_lib="`echo $withval | cut -f2 -d, -s`"
-          ;;
-        *)
-          if test -n "$withval"; then
-            mpe_inc="$withval/include"
-            mpe_lib="$withval/lib"
-          fi
-          ;;
-      esac
-
-      if test -n "$mpe_inc"; then
-        saved_CPPFLAGS="$CPPFLAGS"
-        saved_AM_CPPFLAGS="$AM_CPPFLAGS"
-        CPPFLAGS="$CPPFLAGS -I$mpe_inc"
-        AM_CPPFLAGS="$AM_CPPFLAGS -I$mpe_inc"
-        AC_CHECK_HEADERS([mpe.h],, [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"; unset MPE])
-      else
-        AC_CHECK_HEADERS([mpe.h],, [unset MPE])
-      fi
-
-      if test -n "$mpe_lib"; then
-        saved_LDFLAGS="$LDFLAGS"
-        saved_AM_LDFLAGS="$AM_LDFLAGS"
-        LDFLAGS="$LDFLAGS -L$mpe_lib"
-        AM_LDFLAGS="$AM_LDFLAGS -L$mpe_lib"
-        AC_CHECK_LIB([mpe], [MPE_Init_log],,
-                     [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset MPE])
-      else
-        AC_CHECK_LIB([mpe], [MPE_Init_log],, [unset MPE])
-      fi
-      ;;
-  esac
-
-  if test "X-$MPE" = "X-yes"; then
-    AC_DEFINE([HAVE_MPE], [1], [Define if we have MPE support])
-  fi
 
   ## ----------------------------------------------------------------------
   ## Check for the MPI functions necessary for the Parallel Compression
