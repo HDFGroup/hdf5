@@ -172,6 +172,19 @@ Bug Fixes since HDF5-1.13.3 release
 ===================================
     Library
     -------
+    -  Fix CVE-2018-16438 / GHSA-9xmm-cpf8-rgmx
+
+       Make sure info block for external links has at least 3 bytes.
+    
+       According to the specification, the information block for external links
+       contains 1 byte of version/flag information and two 0 terminated strings
+       for the object linked to and the full path.
+       Although not very useful, the minimum string length for each (with
+       terminating 0) would be one byte.
+       Checking this helps to avoid SEGVs triggered by bogus files.
+
+       (EFE - 2022/10/09 GH-2233)
+
     - Fix CVE-2018-13867 / GHSA-j8jr-chrh-qfrf
  
       Validate location (offset) of the accumulated metadata when comparing.
