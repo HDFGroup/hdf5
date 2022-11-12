@@ -1631,7 +1631,8 @@ H5CX_get_vol_wrap_ctx(void **vol_wrap_ctx)
      * which doesn't reset the API context and there is no context, returns an relevant error here
      */
     if (!head || !(*head))
-        HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "the API context isn't available, e.g. when an application calls H5VLwrap_register")
+        HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL,
+                    "the API context isn't available, e.g. when an application calls H5VLwrap_register")
 
     /* Check for value that was set */
     if ((*head)->ctx.vol_wrap_ctx_valid)

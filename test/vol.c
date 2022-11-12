@@ -2301,12 +2301,12 @@ error:
 static herr_t
 test_wrap_register(void)
 {
-    hid_t       fapl_id = H5I_INVALID_HID;
-    hid_t       file_id = H5I_INVALID_HID;
-    hid_t       group_id = H5I_INVALID_HID;
-    hid_t       wrap_id = H5I_INVALID_HID;
-    char        filename[NAME_LEN];
-    void       *vol_obj;
+    hid_t fapl_id = H5I_INVALID_HID;
+    hid_t file_id = H5I_INVALID_HID;
+    hid_t group_id = H5I_INVALID_HID;
+    hid_t wrap_id = H5I_INVALID_HID;
+    char  filename[NAME_LEN];
+    void *vol_obj;
 
     TESTING("failure of calling H5VLwrap_register");
 
@@ -2328,9 +2328,11 @@ test_wrap_register(void)
     /* Try to register a second ID for the group.  It should fail because this routine is mainly
      * targeted toward wrapping objects for iteration routine callbacks, not for application use
      */
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         wrap_id = H5VLwrap_register(vol_obj, H5I_GROUP);
-    } H5E_END_TRY;
+    }
+    H5E_END_TRY;
 
     if (H5I_INVALID_HID != wrap_id)
         FAIL_PUTS_ERROR("should not be able to call H5VLwrap_register in an application");
