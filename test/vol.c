@@ -2301,10 +2301,10 @@ error:
 static herr_t
 test_wrap_register(void)
 {
-    hid_t fapl_id = H5I_INVALID_HID;
-    hid_t file_id = H5I_INVALID_HID;
+    hid_t fapl_id  = H5I_INVALID_HID;
+    hid_t file_id  = H5I_INVALID_HID;
     hid_t group_id = H5I_INVALID_HID;
-    hid_t wrap_id = H5I_INVALID_HID;
+    hid_t wrap_id  = H5I_INVALID_HID;
     char  filename[NAME_LEN];
     void *vol_obj;
 
