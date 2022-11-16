@@ -139,7 +139,7 @@ jobs:
           # We could also build with the Autotools via brew installing them,
           # but that seems unnecessary
           - name: "MacOS Clang CMake"
-            os: macos-latest
+            os: macos-11
             cpp: ON
             fortran: OFF
             java: ON
@@ -358,7 +358,7 @@ jobs:
 
       - name: Install Dependencies (macOS)
         run: brew install ninja
-        if: matrix.os == 'macos-latest'
+        if: matrix.os == 'macos-11'
 
       - name: Set environment for MSVC (Windows)
         run: |
