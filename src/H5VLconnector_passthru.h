@@ -76,7 +76,8 @@ H5_DLL herr_t H5VLcmp_connector_cls(int *cmp, hid_t connector_id1, hid_t connect
  * \note This routine is mainly targeted toward wrapping objects for
  *       iteration routine callbacks (i.e. the callbacks from H5Aiterate*,
  *       H5Literate* / H5Lvisit*, and H5Ovisit* ). Using it in an application
- *       will return an error.
+ *       will return an error indicating the API context isn't available or
+ *       can't be retrieved.
  *
  */
 H5_DLL hid_t  H5VLwrap_register(void *obj, H5I_type_t type);
