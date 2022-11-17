@@ -1628,7 +1628,7 @@ H5CX_get_vol_wrap_ctx(void **vol_wrap_ctx)
     head = H5CX_get_my_context(); /* Get the pointer to the head of the API context, for this thread */
 
     /* No error is expected at this point.  But in case an application calls H5VLwrap_register
-     * which doesn't reset the API context and there is no context, returns an relevant error here
+     * which doesn't reset the API context and there is no context, returns a relevant error here
      */
     if (!head)
         HGOTO_ERROR(H5E_CONTEXT, H5E_UNINITIALIZED, FAIL, "the API context isn't available")
