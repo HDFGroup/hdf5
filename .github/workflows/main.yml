@@ -120,7 +120,7 @@ jobs:
           # so we catch most issues in daily testing. What we have here is just
           # a compile check to make sure nothing obvious is broken.
           - name: "Ubuntu gcc Autotools parallel (build only)"
-            os: ubuntu-latest
+            os: ubuntu-20.04
             cpp: disable
             fortran: enable
             java: disable
@@ -381,7 +381,6 @@ jobs:
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
           ${{ matrix.flags }} $GITHUB_WORKSPACE/configure --enable-build-mode=${{ matrix.build_mode.autotools }} --${{ matrix.deprec_sym }}-deprecated-symbols --with-default-api-version=${{ matrix.default_api }} --enable-shared --${{ matrix.parallel }}-parallel --${{ matrix.cpp }}-cxx --${{ matrix.fortran }}-fortran --${{ matrix.java }}-java --${{ matrix.mirror_vfd }}-mirror-vfd --${{ matrix.direct_vfd }}-direct-vfd
-          cat config.log
         shell: bash
         if: (matrix.generator == 'autogen') && (! matrix.thread_safe.enabled)
 
@@ -391,15 +390,8 @@ jobs:
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
           ${{ matrix.flags }} $GITHUB_WORKSPACE/configure --enable-build-mode=${{ matrix.build_mode.autotools }} --enable-shared --enable-threadsafe --disable-hl --${{ matrix.parallel }}-parallel --${{ matrix.mirror_vfd }}-mirror-vfd --${{ matrix.direct_vfd }}-direct-vfd
-          cat config.log
         shell: bash
         if: (matrix.generator == 'autogen') && (matrix.thread_safe.enabled)
-
-      - name: Config.log output
-        run: cat config.log
-        working-directory: ${{ runner.workspace }}/build
-        shell: bash
-        if: (matrix.generator == 'autogen')
 
       #
       # CMAKE CONFIGURE
