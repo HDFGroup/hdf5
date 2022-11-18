@@ -395,11 +395,12 @@ jobs:
         shell: bash
         if: (matrix.generator == 'autogen') && (matrix.thread_safe.enabled)
 
-        name: Autotools config.log output
+      - name: Config.log output
         run: |
+          cd "${{ runner.workspace }}/build"
           cat config.log
         shell: bash
-        if: always()
+        if: ${{ always() }}
 
       #
       # CMAKE CONFIGURE
