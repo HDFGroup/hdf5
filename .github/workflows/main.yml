@@ -399,7 +399,7 @@ jobs:
         run: cat config.log
         working-directory: ${{ runner.workspace }}/build
         shell: bash
-        if: ${{ always() }}
+        if: (matrix.generator == 'autogen') && ${{ always() }}
 
       #
       # CMAKE CONFIGURE
