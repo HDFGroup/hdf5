@@ -396,9 +396,8 @@ jobs:
         if: (matrix.generator == 'autogen') && (matrix.thread_safe.enabled)
 
       - name: Config.log output
-        run: |
-          cd "${{ runner.workspace }}/build"
-          cat config.log
+        run: cat config.log
+        working-directory: ${{ runner.workspace }}/build
         shell: bash
         if: ${{ always() }}
 
