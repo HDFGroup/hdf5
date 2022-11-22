@@ -536,31 +536,7 @@ AC_CHECK_SIZEOF([double])
 AC_CHECK_SIZEOF([long double])
 
 ## ----------------------------------------------------------------------
-## Check for non-standard extension __FLOAT128
-##
-HAVE_FLOAT128=0
-HAVE_QUADMATH=0
-FLT128_DIG=0
-LDBL_DIG=0
-
-AC_CHECK_SIZEOF([__float128])
-AC_CHECK_SIZEOF([_Quad])
-AC_CHECK_HEADERS([quadmath.h], [HAVE_QUADMATH=1], [])
-PAC_FC_LDBL_DIG
-
-AC_SUBST([PAC_C_MAX_REAL_PRECISION])
-
-if test "$ac_cv_sizeof___float128" != 0 && test "$FLT128_DIG" != 0 ; then
-  AC_DEFINE([HAVE_FLOAT128], [1], [Determine if __float128 is available])
-  PAC_C_MAX_REAL_PRECISION=$FLT128_DIG
-else
-  PAC_C_MAX_REAL_PRECISION=$LDBL_DIG
-fi
-AC_DEFINE_UNQUOTED([PAC_C_MAX_REAL_PRECISION], $PAC_C_MAX_REAL_PRECISION, [Determine the maximum decimal precision in C])
-AC_MSG_RESULT([$PAC_C_MAX_REAL_PRECISION])
-
-## ----------------------------------------------------------------------
-## Check if they would like the Fortran interface compiled
+## Check if the Fortran interface should be enabled
 ##
 
 ## This needs to be exposed for the library info file even if Fortran is disabled.
@@ -579,6 +555,30 @@ AC_ARG_ENABLE([fortran],
 AC_MSG_RESULT([$HDF_FORTRAN])
 
 if test "X$HDF_FORTRAN" = "Xyes"; then
+
+## ----------------------------------------------------------------------
+## Check for non-standard extension __FLOAT128
+##
+  HAVE_FLOAT128=0
+  HAVE_QUADMATH=0
+  FLT128_DIG=0
+  LDBL_DIG=0
+
+  AC_CHECK_SIZEOF([__float128])
+  AC_CHECK_SIZEOF([_Quad])
+  AC_CHECK_HEADERS([quadmath.h], [HAVE_QUADMATH=1], [])
+  PAC_FC_LDBL_DIG
+
+  AC_SUBST([PAC_C_MAX_REAL_PRECISION])
+
+  if test "$ac_cv_sizeof___float128" != 0 && test "$FLT128_DIG" != 0 ; then
+    AC_DEFINE([HAVE_FLOAT128], [1], [Determine if __float128 is available])
+    PAC_C_MAX_REAL_PRECISION=$FLT128_DIG
+  else
+    PAC_C_MAX_REAL_PRECISION=$LDBL_DIG
+  fi
+  AC_DEFINE_UNQUOTED([PAC_C_MAX_REAL_PRECISION], $PAC_C_MAX_REAL_PRECISION, [Determine the maximum decimal precision in C])
+  AC_MSG_RESULT([$PAC_C_MAX_REAL_PRECISION])
 
 ## We will output an include file for Fortran, H5config_f.inc which
 ## contains various configure definitions used by the Fortran Library.
@@ -623,7 +623,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
     [fmoddir=$withval],
     [fmoddir="\${includedir}"])
   AC_SUBST([fmoddir], [$fmoddir])
-￼
+
   ## Change to the Fortran 90 language
   AC_LANG_PUSH(Fortran)
 
@@ -1737,10 +1737,7 @@ if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
                 #include "szlib.h"
             ],[[
                 /* SZ_encoder_enabled returns 1 if encoder is present */
-                if(SZ_encoder_enabled() == 1)
-                    exit(0);
-                else
-                    exit(1);
+                return SZ_encoder_enabled() != 1;
             ]])]
         , [hdf5_cv_szlib_can_encode=yes], [hdf5_cv_szlib_can_encode=no],)]
    )
@@ -2682,7 +2679,6 @@ esac
 ## build also needs to have values defined.
 ##
 AC_SUBST([ADD_PARALLEL_FILES]) ADD_PARALLEL_FILES="no"
-AC_SUBST([MPE]) MPE=no
 AC_SUBST([INSTRUMENT_LIBRARY]) INSTRUMENT_LIBRARY=no
 AC_SUBST([PARALLEL_FILTERED_WRITES])
 AC_SUBST([LARGE_PARALLEL_IO])
@@ -2780,69 +2776,6 @@ if test -n "$PARALLEL"; then
       AC_MSG_ERROR([Unrecognized value: $INSTRUMENT_LIBRARY])
       ;;
   esac
-
-  ## --------------------------------------------------------------------
-  ## Do we want MPE instrumentation feature on?
-  ##
-  ## This must be done after enable-parallel is checked since it depends
-  ## on a mpich compiler.
-  ##
-  MPE=yes
-  AC_ARG_WITH([mpe],
-              [AS_HELP_STRING([--with-mpe=DIR],
-                              [Use MPE instrumentation [default=no]])],,
-              [withval=no])
-
-  case "X-$withval" in
-    X-|X-no|X-none)
-      AC_MSG_CHECKING([for MPE])
-      AC_MSG_RESULT([suppressed])
-      unset MPE
-      ;;
-    X-yes)
-      AC_CHECK_HEADERS([mpe.h],, [unset MPE])
-      AC_CHECK_LIB([mpe], [MPE_Init_log],, [unset MPE])
-      ;;
-    *)
-      case "$withval" in
-        *,*)
-          mpe_inc="`echo $withval | cut -f1 -d,`"
-          mpe_lib="`echo $withval | cut -f2 -d, -s`"
-          ;;
-        *)
-          if test -n "$withval"; then
-            mpe_inc="$withval/include"
-            mpe_lib="$withval/lib"
-          fi
-          ;;
-      esac
-
-      if test -n "$mpe_inc"; then
-        saved_CPPFLAGS="$CPPFLAGS"
-        saved_AM_CPPFLAGS="$AM_CPPFLAGS"
-        CPPFLAGS="$CPPFLAGS -I$mpe_inc"
-        AM_CPPFLAGS="$AM_CPPFLAGS -I$mpe_inc"
-        AC_CHECK_HEADERS([mpe.h],, [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"; unset MPE])
-      else
-        AC_CHECK_HEADERS([mpe.h],, [unset MPE])
-      fi
-
-      if test -n "$mpe_lib"; then
-        saved_LDFLAGS="$LDFLAGS"
-        saved_AM_LDFLAGS="$AM_LDFLAGS"
-        LDFLAGS="$LDFLAGS -L$mpe_lib"
-        AM_LDFLAGS="$AM_LDFLAGS -L$mpe_lib"
-        AC_CHECK_LIB([mpe], [MPE_Init_log],,
-                     [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset MPE])
-      else
-        AC_CHECK_LIB([mpe], [MPE_Init_log],, [unset MPE])
-      fi
-      ;;
-  esac
-
-  if test "X-$MPE" = "X-yes"; then
-    AC_DEFINE([HAVE_MPE], [1], [Define if we have MPE support])
-  fi
 
   ## ----------------------------------------------------------------------
   ## Check for the MPI functions necessary for the Parallel Compression
