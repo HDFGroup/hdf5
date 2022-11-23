@@ -425,11 +425,11 @@ h5close_types_c(hid_t_f *types, int_f *lentypes, hid_t_f *floatingtypes, int_f *
  */
 int_f
 h5init_flags_c(int_f *h5d_flags, size_t_f *h5d_size_flags, int_f *h5e_flags, hid_t_f *h5e_hid_flags,
-               H5ES_status_t *h5es_flags, hid_t_f *h5es_hid_flags,
-               int_f *h5f_flags, int_f *h5fd_flags, hid_t_f *h5fd_hid_flags, int_f *h5g_flags,
-               int_f *h5i_flags, int_f *h5l_flags, int_f *h5o_flags, hid_t_f *h5p_flags, int_f *h5p_flags_int,
-               int_f *h5r_flags, int_f *h5s_flags, hid_t_f *h5s_hid_flags, hsize_t_f *h5s_hsize_flags,
-               int_f *h5t_flags, int_f *h5z_flags, int_f *h5_generic_flags, haddr_t_f *h5_haddr_generic_flags)
+               H5ES_status_t *h5es_flags, hid_t_f *h5es_hid_flags, int_f *h5f_flags, int_f *h5fd_flags,
+               hid_t_f *h5fd_hid_flags, int_f *h5g_flags, int_f *h5i_flags, int_f *h5l_flags,
+               int_f *h5o_flags, hid_t_f *h5p_flags, int_f *h5p_flags_int, int_f *h5r_flags, int_f *h5s_flags,
+               hid_t_f *h5s_hid_flags, hsize_t_f *h5s_hsize_flags, int_f *h5t_flags, int_f *h5z_flags,
+               int_f *h5_generic_flags, haddr_t_f *h5_haddr_generic_flags)
 /******/
 {
     /*
