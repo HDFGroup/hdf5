@@ -120,7 +120,7 @@ jobs:
           # so we catch most issues in daily testing. What we have here is just
           # a compile check to make sure nothing obvious is broken.
           - name: "Ubuntu gcc Autotools parallel (build only)"
-            os: ubuntu-20.04
+            os: ubuntu-latest
             cpp: disable
             fortran: enable
             java: disable
@@ -347,7 +347,7 @@ jobs:
         run: |
            sudo apt update
            sudo apt install automake autoconf libtool libtool-bin
-           sudo apt install openmpi-bin openmpi-common
+           sudo apt install openmpi-bin openmpi-common libopenmpi-dev
            echo "CC=mpicc" >> $GITHUB_ENV
            echo "FC=mpif90" >> $GITHUB_ENV
         if: (matrix.generator == 'autogen') && (matrix.parallel == 'enable')
