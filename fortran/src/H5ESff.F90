@@ -99,7 +99,7 @@ CONTAINS
          IMPORT :: C_INT
          IMPORT :: HID_T, SIZE_T
          INTEGER(HID_T), VALUE  :: es_id
-         INTEGER(SIZE_T), VALUE :: count
+         INTEGER(SIZE_T)        :: count
        END FUNCTION H5ESget_count
     END INTERFACE
 
@@ -129,8 +129,8 @@ CONTAINS
        INTEGER(C_INT) FUNCTION H5ESget_op_counter(es_id, counter) BIND(C,NAME='H5ESget_op_counter')
          IMPORT :: C_INT
          IMPORT :: HID_T, C_INT64_T
-         INTEGER(HID_T),     VALUE :: es_id
-         INTEGER(C_INT64_T), VALUE :: counter
+         INTEGER(HID_T)    , VALUE :: es_id
+         INTEGER(C_INT64_T)        :: counter
        END FUNCTION H5ESget_op_counter
     END INTERFACE
 
@@ -168,8 +168,8 @@ CONTAINS
          IMPORT :: HID_T, C_INT64_T, SIZE_T, C_BOOL
          INTEGER(HID_T)    , VALUE :: es_id
          INTEGER(C_INT64_T), VALUE :: timeout
-         INTEGER(SIZE_T)   , VALUE :: num_in_progress
-         LOGICAL(C_BOOL)   , VALUE :: err_occurred
+         INTEGER(SIZE_T)           :: num_in_progress
+         LOGICAL(C_BOOL)           :: err_occurred
        END FUNCTION H5ESwait
     END INTERFACE
 
@@ -195,10 +195,10 @@ CONTAINS
 
     IMPLICIT NONE
 
-    INTEGER(hid_t)  :: es_id
-    INTEGER(size_t) :: num_not_canceled
-    LOGICAL         :: err_occurred
-    INTEGER         :: hdferr
+    INTEGER(hid_t) , INTENT(IN)  :: es_id
+    INTEGER(size_t), INTENT(OUT) :: num_not_canceled
+    LOGICAL        , INTENT(OUT) :: err_occurred
+    INTEGER        , INTENT(OUT) :: hdferr
 
     LOGICAL(C_BOOL) :: err_occurred_c = .FALSE.
 
@@ -206,9 +206,9 @@ CONTAINS
        INTEGER(C_INT) FUNCTION H5EScancel(es_id, num_not_canceled, err_occurred) BIND(C,NAME='H5EScancel')
          IMPORT :: C_INT
          IMPORT :: HID_T, SIZE_T, C_BOOL
-         INTEGER(HID_T)    , VALUE :: es_id
-         INTEGER(SIZE_T)   , VALUE :: num_not_canceled
-         LOGICAL(C_BOOL)   , VALUE :: err_occurred
+         INTEGER(HID_T) , VALUE :: es_id
+         INTEGER(SIZE_T)        :: num_not_canceled
+         LOGICAL(C_BOOL)        :: err_occurred
        END FUNCTION H5EScancel
     END INTERFACE
 
@@ -221,7 +221,7 @@ CONTAINS
 !>
 !! \ingroup FH5ES
 !!
-!! \brief Attempt to cancel operations in an event set.
+!! \brief Checks for failed operations.
 !!
 !! \param es_id        \es_id
 !! \param err_occurred Status indicating if error is present in the event set
@@ -244,7 +244,7 @@ CONTAINS
          IMPORT :: C_INT
          IMPORT :: HID_T, C_BOOL
          INTEGER(HID_T) , VALUE :: es_id
-         LOGICAL(C_BOOL), VALUE :: err_occurred
+         LOGICAL(C_BOOL)        :: err_occurred
        END FUNCTION H5ESget_err_status
     END INTERFACE
 
@@ -278,7 +278,7 @@ CONTAINS
          IMPORT :: C_INT
          IMPORT :: HID_T, SIZE_T
          INTEGER(HID_T) , VALUE :: es_id
-         INTEGER(SIZE_T), VALUE :: num_errs
+         INTEGER(SIZE_T)        :: num_errs
        END FUNCTION H5ESget_err_count
     END INTERFACE
 
@@ -291,11 +291,11 @@ CONTAINS
 
     IMPLICIT NONE
 
-    INTEGER(HID_T)        :: es_id
-    INTEGER(SIZE_T)       :: num_err_info
-    TYPE(H5ES_err_info_t) :: err_info
-    INTEGER(SIZE_T)       :: num_cleared
-    INTEGER               :: hdferr
+    INTEGER(HID_T)       , INTENT(IN)  :: es_id
+    INTEGER(SIZE_T)      , INTENT(IN)  :: num_err_info
+    TYPE(H5ES_err_info_t), INTENT(OUT) :: err_info
+    INTEGER(SIZE_T)      , INTENT(OUT) :: err_cleared num_cleared
+    INTEGER              , INTENT(OUT) :: hdferr
 
     INTERFACE
        INTEGER(C_INT) FUNCTION H5ESget_err_info(es_id, num_err_info, err_info, num_cleared) BIND(C,NAME='H5ESget_err_info')
@@ -303,12 +303,12 @@ CONTAINS
          IMPORT :: HID_T, SIZE_T, H5ES_err_info_t
          INTEGER(HID_T)       , VALUE :: es_id
          INTEGER(SIZE_T)      , VALUE :: num_err_info
-         TYPE(H5ES_err_info_t), VALUE :: err_info
-         INTEGER(SIZE_T)      , VALUE :: num_cleared
+         TYPE(H5ES_err_info_t)        :: err_info
+         INTEGER(SIZE_T)              :: err_cleared num_cleared
        END FUNCTION H5ESget_err_info
     END INTERFACE
 
-    hdferr = H5ESget_err_info(es_id, num_err_info, err_info, num_cleared)
+    hdferr = H5ESget_err_info(es_id, num_err_info, err_info, err_cleared)
 
   END SUBROUTINE H5ESget_err_info_f
 #endif
@@ -333,7 +333,7 @@ CONTAINS
        INTEGER(C_INT) FUNCTION H5ESclose(es_id) BIND(C,NAME='H5ESclose')
          IMPORT :: C_INT
          IMPORT :: HID_T
-         INTEGER(HID_T) :: es_id
+         INTEGER(HID_T), VALUE :: es_id
        END FUNCTION H5ESclose
     END INTERFACE
 
