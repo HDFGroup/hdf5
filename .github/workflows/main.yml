@@ -347,7 +347,7 @@ jobs:
         run: |
            sudo apt update
            sudo apt install automake autoconf libtool libtool-bin
-           sudo apt install openmpi-bin openmpi-common libopenmpi-dev
+           sudo apt install openmpi-bin openmpi-common mpi-default-dev
            echo "CC=mpicc" >> $GITHUB_ENV
            echo "FC=mpif90" >> $GITHUB_ENV
         if: (matrix.generator == 'autogen') && (matrix.parallel == 'enable')
