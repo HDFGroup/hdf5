@@ -4314,10 +4314,20 @@ translate_atomic_rbuf(JNIEnv *env, jobject ret_buf, jlong mem_type_id, H5T_class
                 H5_LIBRARY_ERROR(ENVONLY);
 
             /* Convert each element */
-            if (NULL == (jobj = ENVPTR->NewStringUTF(ENVONLY, ((char *)raw_buf)))) {
-                CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-                H5_OUT_OF_MEMORY_ERROR(
-                    ENVONLY, "translate_atomic_rbuf: out of memory - unable to construct string from UTF characters");
+            if(is_variable) {
+                char **new_buf = (char *)raw_buf;
+                if (NULL == (jobj = ENVPTR->NewStringUTF(ENVONLY, ((char *)*new_buf)))) {
+                    CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+                    H5_OUT_OF_MEMORY_ERROR(
+                        ENVONLY, "translate_atomic_rbuf: out of memory - unable to construct string from UTF characters");
+                }
+            }
+            else {
+                if (NULL == (jobj = ENVPTR->NewStringUTF(ENVONLY, ((char *)raw_buf)))) {
+                    CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+                    H5_OUT_OF_MEMORY_ERROR(
+                        ENVONLY, "translate_atomic_rbuf: out of memory - unable to construct string from UTF characters");
+                }
             }
 
             if (jobj) {
@@ -4529,8 +4539,14 @@ translate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class_
                 PIN_JAVA_STRING(ENVONLY, in_obj, utf8, NULL, "translate_atomic_wbuf jobj not pinned");
                 length = ENVPTR->GetStringUTFLength(ENVONLY, in_obj);
                 CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-                HDmemcpy(((char *)raw_buf), utf8, length);
-
+                if(is_variable) {
+                    char *new_buf = (char *)HDcalloc((size_t)1, length + 1);
+                    HDmemcpy(((char *)new_buf), utf8, length);
+                    HDmemcpy(((char *)raw_buf), &new_buf, typeSize);
+                }
+                else {
+                    HDmemcpy(((char *)raw_buf), utf8, length);
+                }
                 UNPIN_JAVA_STRING(ENVONLY, in_obj, utf8);
                 utf8 = NULL;
             }

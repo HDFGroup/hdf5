@@ -1622,7 +1622,7 @@ public class TestH5D {
         }
     }
 
-    @Ignore
+    @Test
     public void testH5DArray_string_buffer() throws Throwable
     {
         String dset_str_name = "ArrayStringdata";

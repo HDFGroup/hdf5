@@ -16,11 +16,12 @@ JUnit version 4.11
 .testH5Diterate
 .testH5Dget_access_plist
 .testH5Dget_space_closed
+.testH5DArray_string_buffer
 .testH5Dget_space_status
 .testH5Dget_space
 .testH5Dget_type_closed
 
 Time:  XXXX
 
-OK (20 tests)
+OK (21 tests)
 

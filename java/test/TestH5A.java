@@ -1871,7 +1871,7 @@ public class TestH5A {
         }
     }
 
-    @Ignore
+    @Test
     public void testH5AArray_string_buffer() throws Throwable
     {
         String att_str_name = "ArrayStringdata";
@@ -1991,10 +1991,6 @@ public class TestH5A {
                 catch (Exception ex) {
                 }
         }
-System.err.println("arr_readbuf="+arr_readbuf);
-System.err.println("arr_str_data="+arr_str_data);
-System.err.println("arr_readbuf[0]="+arr_readbuf[0]);
-System.err.println("arr_str_data[0]="+arr_str_data[0]);
         assertTrue("testH5AArray_string_buffer:" + arr_readbuf[0].get(0),
                 arr_str_data[0].get(0).equals(arr_readbuf[0].get(0)));
         assertTrue("testH5AArray_string_buffer:" + arr_readbuf[1].get(0),
