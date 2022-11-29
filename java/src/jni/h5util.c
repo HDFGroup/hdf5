@@ -4307,7 +4307,6 @@ translate_atomic_rbuf(JNIEnv *env, jobject ret_buf, jlong mem_type_id, H5T_class
         } /* H5T_REFERENCE */
         case H5T_STRING: {
             jobject jobj        = NULL;
-            char   *cstr        = raw_buf;
             htri_t  is_variable = 0;
 
             if ((is_variable = H5Tis_variable_str(mem_type_id)) < 0)
@@ -4404,7 +4403,7 @@ translate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class_
 
             translate_wbuf(ENVONLY, (jobjectArray)in_obj, memb, vlClass, (jsize)jnelmts, vl_elem.p);
 
-            HDmemcpy((char *)raw_buf + sizeof(hvl_t), &vl_elem, sizeof(hvl_t));
+            HDmemcpy((char *)raw_buf, &vl_elem, sizeof(hvl_t));
             break;
         } /* H5T_VLEN */
         case H5T_COMPOUND: {
@@ -4469,7 +4468,7 @@ translate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class_
 
             translate_wbuf(ENVONLY, array, memb, vlClass, (jsize)jnelmts, objBuf);
 
-            HDmemcpy((char *)raw_buf + vlSize * jnelmts, (char *)objBuf, vlSize * jnelmts);
+            HDmemcpy((char *)raw_buf, (char *)objBuf, vlSize * jnelmts);
             break;
         } /* H5T_ARRAY */
         case H5T_ENUM:
@@ -4681,8 +4680,9 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
                         H5_LIBRARY_ERROR(ENVONLY);
 
                     translate_atomic_rbuf(ENVONLY, jList, memb, memb_vlClass, ((char *)raw_buf) + i * typeSize + memb_offset);
+
+                    H5Tclose(memb);
                 }
-                H5Tclose(memb);
                 if (found_jList == JNI_FALSE)
                     ENVPTR->CallBooleanMethod(ENVONLY, ret_buf, arrAddMethod, jList);
                 else
@@ -4924,16 +4924,7 @@ translate_wbuf(JNIEnv *env, jobjectArray in_buf, jlong mem_type_id, H5T_class_t 
         case H5T_OPAQUE:
         case H5T_INTEGER:
         case H5T_FLOAT:
-        case H5T_REFERENCE: {
-            /* Convert each list to an array element */
-            for (i = 0; i < (size_t)count; i++) {
-                if (NULL == (jobj = ENVPTR->GetObjectArrayElement(ENVONLY, (jobjectArray)in_buf, (jsize)i)))
-                    CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-                translate_atomic_wbuf(ENVONLY, jobj, mem_type_id, type_class, ((char *)raw_buf) + i * typeSize);
-                ENVPTR->DeleteLocalRef(ENVONLY, jobj);
-            }
-            break;
-        }
+        case H5T_REFERENCE:
         case H5T_STRING: {
             /* Convert each list to an array element */
             for (i = 0; i < (size_t)count; i++) {
