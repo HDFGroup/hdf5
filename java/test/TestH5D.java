@@ -158,7 +158,7 @@ public class TestH5D {
         assertTrue("TestH5D._createDataset.H5Dcreate: ", H5did >= 0);
     }
 
-    private final void _createVLDataset(long fid, long dsid, String name, long dapl)
+    private final void _createVLStrDataset(String name, long dapl)
     {
         try {
             H5dtid = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
@@ -167,24 +167,24 @@ public class TestH5D {
             err.printStackTrace();
             fail("H5.H5Tcopy: " + err);
         }
-        assertTrue("TestH5D._createVLDataset.H5Tcopy: ", H5dtid >= 0);
+        assertTrue("TestH5D._createVLStrDataset.H5Tcopy: ", H5dtid >= 0);
         try {
             H5.H5Tset_size(H5dtid, HDF5Constants.H5T_VARIABLE);
-            assertTrue("TestH5D._createVLDataset.H5Tis_variable_str", H5.H5Tis_variable_str(H5dtid));
+            assertTrue("TestH5D._createVLStrDataset.H5Tis_variable_str", H5.H5Tis_variable_str(H5dtid));
         }
         catch (Throwable err) {
             err.printStackTrace();
             fail("H5.H5Tset_size: " + err);
         }
         try {
-            H5did = H5.H5Dcreate(fid, name, H5dtid, dsid, HDF5Constants.H5P_DEFAULT,
+            H5did = H5.H5Dcreate(H5fid, name, H5dtid, H5dsid, HDF5Constants.H5P_DEFAULT,
                                  HDF5Constants.H5P_DEFAULT, dapl);
         }
         catch (Throwable err) {
             err.printStackTrace();
             fail("H5.H5Dcreate: " + err);
         }
-        assertTrue("TestH5D._createVLDataset.H5Dcreate: ", H5did >= 0);
+        assertTrue("TestH5D._createVLStrDataset.H5Dcreate: ", H5did >= 0);
     }
 
     private final void _closeH5file() throws HDF5LibraryException
@@ -946,7 +946,7 @@ public class TestH5D {
         for (int idx = 0; idx < str_data.length; idx++)
             str_data_bytes += str_data[idx].length() + 1; // Account for terminating null
 
-        _createVLDataset(H5fid, H5dsid, "dset", HDF5Constants.H5P_DEFAULT);
+        _createVLStrDataset("dset", HDF5Constants.H5P_DEFAULT);
 
         try {
             if ((H5did >= 0) && (H5dtid >= 0))
@@ -1083,7 +1083,7 @@ public class TestH5D {
                 vl_str_data[3].get(0).equals(vl_readbuf[3].get(0)));
     }
 
-    @Ignore
+    @Test
     public void testH5Dvlen_write_read()
     {
         String[] str_wdata = {"Parting", "is such", "sweet", "sorrow.", "Testing",  "one", "two",   "three.",
@@ -1091,12 +1091,12 @@ public class TestH5D {
                               "S A",     "T U R",   "D A Y", "night",   "That's",   "all", "folks", "!!!"};
         String[] str_rdata = new String[DIM_X * DIM_Y];
 
-        _createVLDataset(H5fid, H5dsid, "dset", HDF5Constants.H5P_DEFAULT);
+        _createVLStrDataset("dset", HDF5Constants.H5P_DEFAULT);
 
         try {
             if ((H5did >= 0) && (H5dtid >= 0))
                 H5.H5DwriteVL(H5did, H5dtid, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                                      HDF5Constants.H5P_DEFAULT, (Object[])str_wdata);
+                                      HDF5Constants.H5P_DEFAULT, str_wdata);
         }
         catch (Exception e) {
             e.printStackTrace();

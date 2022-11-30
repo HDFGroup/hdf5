@@ -1079,7 +1079,7 @@ public class TestH5A {
                                    HDF5Constants.H5P_DEFAULT);
             assertTrue("testH5Awrite_readVL: ", attr_id >= 0);
 
-            H5.H5Awrite_VLStrings(attr_id, atype_id, str_data);
+            H5.H5AwriteVL(attr_id, atype_id, str_data);
 
             H5.H5Fflush(H5fid, HDF5Constants.H5F_SCOPE_LOCAL);
 
@@ -1091,7 +1091,7 @@ public class TestH5A {
                 strs[j] = "";
             }
             try {
-                H5.H5Aread_VLStrings(attr_id, atype_id, strs);
+                H5.H5AreadVL(attr_id, atype_id, strs);
             }
             catch (Exception ex) {
                 ex.printStackTrace();

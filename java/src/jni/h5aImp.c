@@ -1116,6 +1116,7 @@ Java_hdf_hdf5lib_H5_H5AreadVL(JNIEnv *env, jclass clss, jlong attr_id, jlong mem
     jsize       vl_array_len;
     htri_t      vl_data_class;
     herr_t      status = FAIL;
+    htri_t      is_variable = 0;
 
     UNUSED(clss);
 
@@ -1124,10 +1125,11 @@ Java_hdf_hdf5lib_H5_H5AreadVL(JNIEnv *env, jclass clss, jlong attr_id, jlong mem
 
     if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
-
     /* Get size of data array */
     if ((vl_array_len = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0)
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Aread: readBuf length < 0");
+    if ((is_variable = H5Tis_variable_str(mem_type_id)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
 
     if (!(typeSize = H5Tget_size(mem_type_id)))
         H5_LIBRARY_ERROR(ENVONLY);
@@ -1154,7 +1156,10 @@ done:
             if (sid >= 0)
                 H5Sclose(sid);
         }
-
+        if(is_variable) {
+            for (size_t i = 0; i < (size_t)vl_array_len; i++)
+                HDfree(((char**)readBuf)[i]);
+        }
         HDfree(readBuf);
     }
 
@@ -1178,6 +1183,7 @@ Java_hdf_hdf5lib_H5_H5AwriteVL(JNIEnv *env, jclass clss, jlong attr_id, jlong me
     jsize       vl_array_len;
     htri_t      vl_data_class;
     herr_t      status = FAIL;
+    htri_t      is_variable = 0;
 
     UNUSED(clss);
 
@@ -1192,6 +1198,8 @@ Java_hdf_hdf5lib_H5_H5AwriteVL(JNIEnv *env, jclass clss, jlong attr_id, jlong me
         CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Awrite: write buffer length < 0");
     }
+    if ((is_variable = H5Tis_variable_str(mem_type_id)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
 
     if (!(typeSize = H5Tget_size(mem_type_id)))
         H5_LIBRARY_ERROR(ENVONLY);
@@ -1215,6 +1223,10 @@ done:
                 H5_LIBRARY_ERROR(ENVONLY);
 
             H5Treclaim(attr_id, sid, H5P_DEFAULT, writeBuf);
+        }
+        if(is_variable) {
+            for (size_t i = 0; i < (size_t)vl_array_len; i++)
+                HDfree(((char**)writeBuf)[i]);
         }
 
         HDfree(writeBuf);
