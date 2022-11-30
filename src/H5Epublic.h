@@ -64,7 +64,6 @@ typedef struct H5E_error2_t {
  * can miss the symbol at linking time (for instance with Visual Studio)
  *
  */
-
 #ifdef __cplusplus
 extern "C" {
 #endif
