@@ -59,11 +59,7 @@ typedef struct H5E_error2_t {
 #endif /* H5private_H */
 
 /* HDF5 error class */
-/* 
- * If this extern "C" block is not added, filter plugins compiled with C++ (ex. SZ3)
- * can miss the symbol at linking time (for instance with Visual Studio)
- *
- */
+/* Extern "C" block needed to compile C++ filter plugins with some compilers */
 #ifdef __cplusplus
 extern "C" {
 #endif
