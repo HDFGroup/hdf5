@@ -74,7 +74,8 @@
  */
 void *
 H5VL__native_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
-                         hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED * obj_wrap_ctx, void H5_ATTR_UNUSED **req)
+                         hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED *obj_wrap_ctx,
+                         void H5_ATTR_UNUSED **req)
 {
     H5F_t *new_file  = NULL;
     void  *ret_value = NULL;
@@ -116,7 +117,7 @@ done:
  */
 void *
 H5VL__native_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t H5_ATTR_UNUSED dxpl_id,
-                       void H5_ATTR_UNUSED * obj_wrap_ctx, void H5_ATTR_UNUSED **req)
+                       void H5_ATTR_UNUSED *obj_wrap_ctx, void H5_ATTR_UNUSED **req)
 {
     H5F_t *new_file  = NULL;
     void  *ret_value = NULL;
