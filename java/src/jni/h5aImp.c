@@ -1115,7 +1115,7 @@ Java_hdf_hdf5lib_H5_H5AreadVL(JNIEnv *env, jclass clss, jlong attr_id, jlong mem
     H5T_class_t type_class;
     jsize       vl_array_len;
     htri_t      vl_data_class;
-    herr_t      status = FAIL;
+    herr_t      status      = FAIL;
     htri_t      is_variable = 0;
 
     UNUSED(clss);
@@ -1156,9 +1156,9 @@ done:
             if (sid >= 0)
                 H5Sclose(sid);
         }
-        if(is_variable) {
+        if (is_variable) {
             for (size_t i = 0; i < (size_t)vl_array_len; i++)
-                HDfree(((char**)readBuf)[i]);
+                HDfree(((char **)readBuf)[i]);
         }
         HDfree(readBuf);
     }
@@ -1182,7 +1182,7 @@ Java_hdf_hdf5lib_H5_H5AwriteVL(JNIEnv *env, jclass clss, jlong attr_id, jlong me
     H5T_class_t type_class;
     jsize       vl_array_len;
     htri_t      vl_data_class;
-    herr_t      status = FAIL;
+    herr_t      status      = FAIL;
     htri_t      is_variable = 0;
 
     UNUSED(clss);
@@ -1224,9 +1224,9 @@ done:
 
             H5Treclaim(attr_id, sid, H5P_DEFAULT, writeBuf);
         }
-        if(is_variable) {
+        if (is_variable) {
             for (size_t i = 0; i < (size_t)vl_array_len; i++)
-                HDfree(((char**)writeBuf)[i]);
+                HDfree(((char **)writeBuf)[i]);
         }
 
         HDfree(writeBuf);

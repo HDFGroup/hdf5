@@ -75,7 +75,7 @@ public class H5Ex_T_Commit {
 
         String[] memberNames       = {"Serial number", "Location", "Temperature (F)", "Pressure (inHg)"};
         long[] memberFileTypes     = {HDF5Constants.H5T_STD_I32BE, HDF5Constants.H5T_C_S1,
-                                  HDF5Constants.H5T_IEEE_F64BE, HDF5Constants.H5T_IEEE_F64BE};
+                                      HDF5Constants.H5T_IEEE_F64BE, HDF5Constants.H5T_IEEE_F64BE};
         static int[] memberStorage = {INTEGERSIZE, MAXSTRINGSIZE, DOUBLESIZE, DOUBLESIZE};
 
         // Data size is the storage size for the members not the object.

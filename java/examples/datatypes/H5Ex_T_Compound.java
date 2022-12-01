@@ -23,7 +23,6 @@ package examples.datatypes;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -46,7 +45,7 @@ public class H5Ex_T_Compound {
 
         static String[] memberNames   = {"Serial number", "Location", "Temperature (F)", "Pressure (inHg)"};
         static long[] memberMemTypes  = {HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5T_C_S1,
-                                        HDF5Constants.H5T_NATIVE_DOUBLE, HDF5Constants.H5T_NATIVE_DOUBLE};
+                                         HDF5Constants.H5T_NATIVE_DOUBLE, HDF5Constants.H5T_NATIVE_DOUBLE};
         static long[] memberFileTypes = {HDF5Constants.H5T_STD_I32BE, HDF5Constants.H5T_C_S1,
                                          HDF5Constants.H5T_IEEE_F64BE, HDF5Constants.H5T_IEEE_F64BE};
         static int[] memberStorage    = {INTEGERSIZE, MAXSTRINGSIZE, DOUBLESIZE, DOUBLESIZE};
@@ -157,21 +156,21 @@ public class H5Ex_T_Compound {
 
     private static void CreateDataset()
     {
-        long file_id         = HDF5Constants.H5I_INVALID_HID;
-        long strtype_id      = HDF5Constants.H5I_INVALID_HID;
-        long memtype_id      = HDF5Constants.H5I_INVALID_HID;
-        long filetype_id     = HDF5Constants.H5I_INVALID_HID;
-        long dataspace_id    = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id      = HDF5Constants.H5I_INVALID_HID;
-        long[] dims          = {DIM0};
+        long file_id            = HDF5Constants.H5I_INVALID_HID;
+        long strtype_id         = HDF5Constants.H5I_INVALID_HID;
+        long memtype_id         = HDF5Constants.H5I_INVALID_HID;
+        long filetype_id        = HDF5Constants.H5I_INVALID_HID;
+        long dataspace_id       = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id         = HDF5Constants.H5I_INVALID_HID;
+        long[] dims             = {DIM0};
         ArrayList[] object_data = new ArrayList[DIM0];
-        byte[] dset_data     = null;
+        byte[] dset_data        = null;
 
         // Initialize data.
-        object_data[0] = (ArrayList)new Sensor(1153, new String("Exterior (static)"), 53.23, 24.57).get();
-        object_data[1] = (ArrayList)new Sensor(1184, new String("Intake"), 55.12, 22.95).get();
-        object_data[2] = (ArrayList)new Sensor(1027, new String("Intake manifold"), 103.55, 31.23).get();
-        object_data[3] = (ArrayList)new Sensor(1313, new String("Exhaust manifold"), 1252.89, 84.11).get();
+        object_data[0] = (ArrayList) new Sensor(1153, new String("Exterior (static)"), 53.23, 24.57).get();
+        object_data[1] = (ArrayList) new Sensor(1184, new String("Intake"), 55.12, 22.95).get();
+        object_data[2] = (ArrayList) new Sensor(1027, new String("Intake manifold"), 103.55, 31.23).get();
+        object_data[3] = (ArrayList) new Sensor(1313, new String("Exhaust manifold"), 1252.89, 84.11).get();
 
         // Create a new file using default properties.
         try {
@@ -253,7 +252,7 @@ public class H5Ex_T_Compound {
         try {
             if ((dataset_id >= 0) && (memtype_id >= 0))
                 H5.H5DwriteVL(dataset_id, memtype_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                            HDF5Constants.H5P_DEFAULT, (Object[])object_data);
+                              HDF5Constants.H5P_DEFAULT, (Object[])object_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -315,12 +314,12 @@ public class H5Ex_T_Compound {
 
     private static void ReadDataset()
     {
-        long file_id      = HDF5Constants.H5I_INVALID_HID;
-        long strtype_id   = HDF5Constants.H5I_INVALID_HID;
-        long memtype_id   = HDF5Constants.H5I_INVALID_HID;
-        long dataspace_id = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id   = HDF5Constants.H5I_INVALID_HID;
-        long[] dims       = {DIM0};
+        long file_id          = HDF5Constants.H5I_INVALID_HID;
+        long strtype_id       = HDF5Constants.H5I_INVALID_HID;
+        long memtype_id       = HDF5Constants.H5I_INVALID_HID;
+        long dataspace_id     = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id       = HDF5Constants.H5I_INVALID_HID;
+        long[] dims           = {DIM0};
         Sensor[] object_data2 = new Sensor[(int)dims[0]];
 
         // Open an existing file.
@@ -390,7 +389,7 @@ public class H5Ex_T_Compound {
         try {
             if ((dataset_id >= 0) && (memtype_id >= 0))
                 H5.H5DreadVL(dataset_id, memtype_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                           HDF5Constants.H5P_DEFAULT, (Object[])object_data);
+                             HDF5Constants.H5P_DEFAULT, (Object[])object_data);
 
             for (int indx = 0; indx < (int)dims[0]; indx++) {
                 object_data2[indx] = new Sensor(object_data[indx]);

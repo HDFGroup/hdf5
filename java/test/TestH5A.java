@@ -1875,27 +1875,27 @@ public class TestH5A {
     public void testH5AArray_string_buffer() throws Throwable
     {
         String att_str_name = "ArrayStringdata";
-        long att_str_id      = HDF5Constants.H5I_INVALID_HID;
-        long atype_str_id    = HDF5Constants.H5I_INVALID_HID;
-        long aspace_id       = HDF5Constants.H5I_INVALID_HID;
-        long[] strdims       = {4};
-        long[] dims          = {6};
-        long lsize           = 1;
+        long att_str_id     = HDF5Constants.H5I_INVALID_HID;
+        long atype_str_id   = HDF5Constants.H5I_INVALID_HID;
+        long aspace_id      = HDF5Constants.H5I_INVALID_HID;
+        long[] strdims      = {4};
+        long[] dims         = {6};
+        long lsize          = 1;
 
         String[] str_data0 = {"Parting", "is such", "sweet", "sorrow."};
-        String[] str_data1 = {"Testing",  "one", "two",   "three."};
-        String[] str_data2 = {"Dog,",    "man's",   "best",  "friend."};
-        String[] str_data3 = {"Diamonds", "are", "a",     "girls!"};
-        String[] str_data4 = {"S A",     "T U R",   "D A Y", "night"};
-        String[] str_data5 = {"That's",   "all", "folks", "!!!"};
-        
+        String[] str_data1 = {"Testing", "one", "two", "three."};
+        String[] str_data2 = {"Dog,", "man's", "best", "friend."};
+        String[] str_data3 = {"Diamonds", "are", "a", "girls!"};
+        String[] str_data4 = {"S A", "T U R", "D A Y", "night"};
+        String[] str_data5 = {"That's", "all", "folks", "!!!"};
+
         ArrayList[] arr_str_data = new ArrayList[6];
-        arr_str_data[0] = new ArrayList<String>(Arrays.asList(str_data0));
-        arr_str_data[1] = new ArrayList<String>(Arrays.asList(str_data1));
-        arr_str_data[2] = new ArrayList<String>(Arrays.asList(str_data2));
-        arr_str_data[3] = new ArrayList<String>(Arrays.asList(str_data3));
-        arr_str_data[4] = new ArrayList<String>(Arrays.asList(str_data4));
-        arr_str_data[5] = new ArrayList<String>(Arrays.asList(str_data5));
+        arr_str_data[0]          = new ArrayList<String>(Arrays.asList(str_data0));
+        arr_str_data[1]          = new ArrayList<String>(Arrays.asList(str_data1));
+        arr_str_data[2]          = new ArrayList<String>(Arrays.asList(str_data2));
+        arr_str_data[3]          = new ArrayList<String>(Arrays.asList(str_data3));
+        arr_str_data[4]          = new ArrayList<String>(Arrays.asList(str_data4));
+        arr_str_data[5]          = new ArrayList<String>(Arrays.asList(str_data5));
 
         try {
             H5atid = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
@@ -1931,8 +1931,8 @@ public class TestH5A {
         try {
             aspace_id = H5.H5Screate_simple(1, dims, null);
             assertTrue(aspace_id > 0);
-            att_str_id = H5.H5Acreate(H5did, att_str_name, atype_str_id, aspace_id,
-                                      HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+            att_str_id = H5.H5Acreate(H5did, att_str_name, atype_str_id, aspace_id, HDF5Constants.H5P_DEFAULT,
+                                      HDF5Constants.H5P_DEFAULT);
             assertTrue("testH5AArray_string_buffer: ", att_str_id >= 0);
 
             H5.H5AwriteVL(att_str_id, atype_str_id, arr_str_data);
@@ -1992,12 +1992,12 @@ public class TestH5A {
                 }
         }
         assertTrue("testH5AArray_string_buffer:" + arr_readbuf[0].get(0),
-                arr_str_data[0].get(0).equals(arr_readbuf[0].get(0)));
+                   arr_str_data[0].get(0).equals(arr_readbuf[0].get(0)));
         assertTrue("testH5AArray_string_buffer:" + arr_readbuf[1].get(0),
-                arr_str_data[1].get(0).equals(arr_readbuf[1].get(0)));
+                   arr_str_data[1].get(0).equals(arr_readbuf[1].get(0)));
         assertTrue("testH5AArray_string_buffer:" + arr_readbuf[2].get(0),
-                arr_str_data[2].get(0).equals(arr_readbuf[2].get(0)));
+                   arr_str_data[2].get(0).equals(arr_readbuf[2].get(0)));
         assertTrue("testH5AArray_string_buffer:" + arr_readbuf[3].get(0),
-                arr_str_data[3].get(0).equals(arr_readbuf[3].get(0)));
+                   arr_str_data[3].get(0).equals(arr_readbuf[3].get(0)));
     }
 }

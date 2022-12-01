@@ -75,7 +75,7 @@ public class H5Ex_T_VLString {
         try {
             if (dataset_id >= 0)
                 H5.H5DwriteVL(dataset_id, type_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                                      HDF5Constants.H5P_DEFAULT, str_data);
+                              HDF5Constants.H5P_DEFAULT, str_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -110,7 +110,7 @@ public class H5Ex_T_VLString {
             dataset_id = H5.H5Dopen(file_id, DATASETNAME, HDF5Constants.H5P_DEFAULT);
             type_id    = H5.H5Dget_type(dataset_id);
             H5.H5DreadVL(dataset_id, type_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                                 HDF5Constants.H5P_DEFAULT, str_data);
+                         HDF5Constants.H5P_DEFAULT, str_data);
         }
         catch (Exception e) {
             e.printStackTrace();

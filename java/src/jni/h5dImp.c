@@ -1140,7 +1140,7 @@ Java_hdf_hdf5lib_H5_H5DreadVL(JNIEnv *env, jclass clss, jlong dataset_id, jlong 
     H5T_class_t type_class;
     jsize       vl_array_len;
     htri_t      vl_data_class;
-    herr_t      status = FAIL;
+    herr_t      status      = FAIL;
     htri_t      is_variable = 0;
 
     UNUSED(clss);
@@ -1176,9 +1176,9 @@ done:
     if (readBuf) {
         if ((status >= 0) && vl_data_class)
             H5Treclaim(dataset_id, mem_space_id, H5P_DEFAULT, readBuf);
-        if(is_variable) {
+        if (is_variable) {
             for (size_t i = 0; i < (size_t)vl_array_len; i++)
-                HDfree(((char**)readBuf)[i]);
+                HDfree(((char **)readBuf)[i]);
         }
         HDfree(readBuf);
     }
@@ -1201,7 +1201,7 @@ Java_hdf_hdf5lib_H5_H5DwriteVL(JNIEnv *env, jclass clss, jlong dataset_id, jlong
     H5T_class_t type_class;
     jsize       vl_array_len; // Only used by vl_data_class types
     htri_t      vl_data_class;
-    herr_t      status = FAIL;
+    herr_t      status      = FAIL;
     htri_t      is_variable = 0;
 
     UNUSED(clss);
@@ -1239,9 +1239,9 @@ done:
     if (writeBuf) {
         if ((status >= 0) && vl_data_class)
             H5Treclaim(dataset_id, mem_space_id, H5P_DEFAULT, writeBuf);
-        if(is_variable) {
+        if (is_variable) {
             for (size_t i = 0; i < (size_t)vl_array_len; i++)
-                HDfree(((char**)writeBuf)[i]);
+                HDfree(((char **)writeBuf)[i]);
         }
 
         HDfree(writeBuf);
