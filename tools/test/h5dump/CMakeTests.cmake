@@ -1312,7 +1312,7 @@
   ADD_H5ERR_MASK_TEST (torderlinks2 0 "unable to open external file, external link file name = 'fname'" --enable-error-stack --sort_by=name --sort_order=descending tfcontents1.h5)
 
   # tests for floating point user defined printf format
-  ADD_H5_TEST (tfpformat 0 --enable-error-stack -m %.7f tfpformat.h5)
+  ADD_H5_TEST (tfpformat 0 --enable-error-stack --format=%.7f tfpformat.h5)
 
   # tests for traversal of external links
   ADD_H5ERR_MASK_TEST (textlinksrc 0 "Too many soft links in path" --enable-error-stack textlinksrc.h5)
