@@ -4621,11 +4621,20 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
 
             /* Convert each compound element to a list */
             for (i = 0; i < (size_t)count; i++) {
+                found_jList = JNI_TRUE;
+                jList = NULL;
+
                 /* The list we're going to return: */
-                if (NULL ==
-                    (jList = (jobjectArray)ENVPTR->NewObject(ENVONLY, arrCList, arrListMethod, 0)))
-                    H5_OUT_OF_MEMORY_ERROR(ENVONLY,
-                                           "translate_rbuf: failed to allocate list read buffer");
+                if (i < ret_buflen) {
+                    jList = ENVPTR->GetObjectArrayElement(ENVONLY, (jobjectArray)ret_buf, (jsize)i);
+                }
+                if (NULL == jList) {
+                    found_jList = JNI_FALSE;
+                    if (NULL ==
+                        (jList = (jobjectArray)ENVPTR->NewObject(ENVONLY, arrCList, arrListMethod, 0)))
+                        H5_OUT_OF_MEMORY_ERROR(ENVONLY,
+                                               "translate_rbuf: failed to allocate list read buffer");
+                }
                 int    nmembs = H5Tget_nmembers(mem_type_id);
                 /* Convert each element to a list */
                 for (x = 0; x < (size_t)nmembs; x++) {
@@ -4645,7 +4654,7 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
 
                     jobj = translate_atomic_rbuf(ENVONLY, jList, memb, memb_vlClass, ((char *)raw_buf) + i * typeSize + memb_offset);
                     if (jobj) {
-                        if (ret_buflen == 0)
+                        if (found_jList == JNI_FALSE)
                             ENVPTR->CallBooleanMethod(ENVONLY, jList, arrAddMethod, (jobject)jobj);
                         else
                             ENVPTR->SetObjectArrayElement(ENVONLY, jList, i, (jobject)jobj);
@@ -4655,7 +4664,7 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
 
                     H5Tclose(memb);
                 }
-                if (found_jList == JNI_FALSE)
+                if (ret_buflen == 0)
                     ENVPTR->CallBooleanMethod(ENVONLY, ret_buf, arrAddMethod, jList);
                 else
                     ENVPTR->SetObjectArrayElement(ENVONLY, ret_buf, i, jList);
