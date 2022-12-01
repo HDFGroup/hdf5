@@ -281,6 +281,8 @@ H5IMget_image_info(hid_t loc_id, const char *dset_name, hsize_t *width, hsize_t 
     if ((sid = H5Dget_space(did)) < 0)
         goto out;
 
+    if (H5Sget_simple_extent_dims(sid, NULL, NULL) > IMAGE24_RANK)
+        goto out;
     /* Get dimensions */
     if (H5Sget_simple_extent_dims(sid, dims, NULL) < 0)
         goto out;
