@@ -114,9 +114,9 @@ static herr_t H5VL__datatype_optional(void *obj, const H5VL_class_t *cls, H5VL_o
                                       hid_t dxpl_id, void **req);
 static herr_t H5VL__datatype_close(void *obj, const H5VL_class_t *cls, hid_t dxpl_id, void **req);
 static void  *H5VL__file_create(const H5VL_class_t *cls, const char *name, unsigned flags, hid_t fcpl_id,
-                                hid_t fapl_id, hid_t dxpl_id, void **req);
+                                hid_t fapl_id, hid_t dxpl_id, void *obj_wrap_ctx, void **req);
 static void  *H5VL__file_open(const H5VL_class_t *cls, const char *name, unsigned flags, hid_t fapl_id,
-                              hid_t dxpl_id, void **req);
+                              hid_t dxpl_id, void *obj_wrap_ctx, void **req);
 static herr_t H5VL__file_open_find_connector_cb(H5PL_type_t plugin_type, const void *plugin_info,
                                                 void *op_data);
 static herr_t H5VL__file_get(void *obj, const H5VL_class_t *cls, H5VL_file_get_args_t *args, hid_t dxpl_id,
@@ -768,6 +768,8 @@ H5VLget_wrap_ctx(void *obj, hid_t connector_id, void **wrap_ctx /*out*/)
     /* Check args and get class pointer */
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
+    if (NULL == wrap_ctx)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "wrap_ctx parameter is NULL")
 
     /* Get the VOL connector's object wrapper */
     if (H5VL_get_wrap_ctx(cls, obj, wrap_ctx) < 0)
@@ -776,6 +778,89 @@ H5VLget_wrap_ctx(void *obj, hid_t connector_id, void **wrap_ctx /*out*/)
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* H5VLget_wrap_ctx() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_get_wrap_ctx_pre_open
+ *
+ * Purpose:     Retrieve the VOL object wrapping context for a connector
+ *              before file open
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_get_wrap_ctx_pre_open(const H5VL_class_t *cls, const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id, void **wrap_ctx)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(cls);
+    HDassert(wrap_ctx);
+
+    /* Allow the connector to copy or do it ourselves */
+    if (cls->wrap_cls.get_wrap_ctx_pre_open) {
+        /* Sanity check */
+        HDassert(cls->wrap_cls.free_wrap_ctx);
+
+        /* Invoke connector's callback */
+        if ((cls->wrap_cls.get_wrap_ctx_pre_open)(name, flags, fcpl_id, fapl_id, dxpl_id, wrap_ctx) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "connector wrap context callback failed")
+    } /* end if */
+    else
+        *wrap_ctx = NULL;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_get_wrap_ctx_pre_open() */
+
+/*---------------------------------------------------------------------------
+ * Function:    H5VLget_wrap_ctx_pre_open
+ *
+ * Purpose:     Get a VOL connector's object wrapping context before file
+ *              open
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *---------------------------------------------------------------------------
+ */
+herr_t
+H5VLget_wrap_ctx_pre_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id, void **wrap_ctx /*out*/)
+{
+    H5P_genplist_t       *plist;            /* Property list pointer */
+    H5VL_connector_prop_t connector_prop;   /* Property for VOL connector ID & info */
+    H5VL_class_t         *cls;              /* VOL connector's class struct */
+    herr_t        ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API_NOINIT
+    H5TRACE6("e", "*sIuiiix", name, flags, fcpl_id, fapl_id, dxpl_id, wrap_ctx);
+
+    /* Check args */
+    if (NULL == wrap_ctx)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "wrap_ctx parameter is NULL")
+
+    /* Get the VOL info from the fapl */
+    if (NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
+    if (H5P_peek(plist, H5F_ACS_VOL_CONN_NAME, &connector_prop) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get VOL connector info")
+
+    /* Get class pointer */
+    if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_prop.connector_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
+
+
+    /* Get the VOL connector's object wrapper */
+    if (H5VL_get_wrap_ctx_pre_open(cls, name, flags, fcpl_id, fapl_id, dxpl_id, wrap_ctx) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "unable to retrieve VOL connector object wrap context")
+
+done:
+    FUNC_LEAVE_API_NOINIT(ret_value)
+} /* H5VLget_wrap_ctx_pre_open() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5VL_wrap_object
@@ -3556,7 +3641,7 @@ done:
  */
 static void *
 H5VL__file_create(const H5VL_class_t *cls, const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
-                  hid_t dxpl_id, void **req)
+                  hid_t dxpl_id, void *obj_wrap_ctx, void **req)
 {
     void *ret_value = NULL; /* Return value */
 
@@ -3567,7 +3652,7 @@ H5VL__file_create(const H5VL_class_t *cls, const char *name, unsigned flags, hid
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "VOL connector has no 'file create' method")
 
     /* Call the corresponding VOL callback */
-    if (NULL == (ret_value = (cls->file_cls.create)(name, flags, fcpl_id, fapl_id, dxpl_id, req)))
+    if (NULL == (ret_value = (cls->file_cls.create)(name, flags, fcpl_id, fapl_id, dxpl_id, obj_wrap_ctx, req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, NULL, "file create failed")
 
 done:
@@ -3588,10 +3673,12 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VL_file_create(const H5VL_connector_prop_t *connector_prop, const char *name, unsigned flags, hid_t fcpl_id,
+H5VL_file_create(H5VL_t **connector, const H5VL_connector_prop_t *connector_prop, const char *name, unsigned flags, hid_t fcpl_id,
                  hid_t fapl_id, hid_t dxpl_id, void **req)
 {
     H5VL_class_t *cls;              /* VOL Class structure for callback info    */
+    void *obj_wrap_ctx = NULL; /* Object wrapping context */
+    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
     void         *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
@@ -3600,11 +3687,32 @@ H5VL_file_create(const H5VL_connector_prop_t *connector_prop, const char *name, 
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_prop->connector_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a VOL connector ID")
 
+    /* Create connector for file */
+    if (NULL == (*connector = H5VL_new_connector(connector_prop->connector_id)))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't create VOL connector")
+
+    /* Set wrapper info in API context */
+    if (H5VL_set_vol_wrapper_pre_open(*connector, name, flags, fcpl_id, fapl_id, dxpl_id, &obj_wrap_ctx) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, NULL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
+
     /* Call the corresponding internal VOL routine */
-    if (NULL == (ret_value = H5VL__file_create(cls, name, flags, fcpl_id, fapl_id, dxpl_id, req)))
+    if (NULL == (ret_value = H5VL__file_create(cls, name, flags, fcpl_id, fapl_id, dxpl_id, obj_wrap_ctx, req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, NULL, "file create failed")
 
 done:
+    /* Reset object wrapping info in API context */
+    if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, NULL, "can't reset VOL wrapper info")
+
+    /* Clean up on error */
+    if (ret_value == NULL) {
+        /* Release newly created connector and do not return it */
+        if (*connector && H5VL_conn_dec_rc(*connector) < 0)
+            HDONE_ERROR(H5E_FILE, H5E_CANTDEC, NULL, "unable to decrement ref count on VOL connector")
+        *connector = NULL;
+    }
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_file_create() */
 
@@ -3641,7 +3749,7 @@ H5VLfile_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, 
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a VOL connector ID")
 
     /* Call the corresponding internal VOL routine */
-    if (NULL == (ret_value = H5VL__file_create(cls, name, flags, fcpl_id, fapl_id, dxpl_id, req)))
+    if (NULL == (ret_value = H5VL__file_create(cls, name, flags, fcpl_id, fapl_id, dxpl_id, NULL, req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, NULL, "unable to create file")
 
 done:
@@ -3660,7 +3768,7 @@ done:
  */
 static void *
 H5VL__file_open(const H5VL_class_t *cls, const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_id,
-                void **req)
+                void *obj_wrap_ctx, void **req)
 {
     void *ret_value = NULL; /* Return value */
 
@@ -3671,7 +3779,7 @@ H5VL__file_open(const H5VL_class_t *cls, const char *name, unsigned flags, hid_t
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "VOL connector has no 'file open' method")
 
     /* Call the corresponding VOL callback */
-    if (NULL == (ret_value = (cls->file_cls.open)(name, flags, fapl_id, dxpl_id, req)))
+    if (NULL == (ret_value = (cls->file_cls.open)(name, flags, fapl_id, dxpl_id, obj_wrap_ctx, req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "open failed")
 
 done:
@@ -3807,10 +3915,12 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VL_file_open(H5VL_connector_prop_t *connector_prop, const char *name, unsigned flags, hid_t fapl_id,
+H5VL_file_open(H5VL_t **connector, H5VL_connector_prop_t *connector_prop, const char *name, unsigned flags, hid_t fapl_id,
                hid_t dxpl_id, void **req)
 {
     H5VL_class_t *cls;              /* VOL Class structure for callback info    */
+    void *obj_wrap_ctx = NULL; /* Object wrapping context */
+    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
     void         *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
@@ -3819,8 +3929,17 @@ H5VL_file_open(H5VL_connector_prop_t *connector_prop, const char *name, unsigned
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_prop->connector_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a VOL connector ID")
 
+    /* Create connector for file */
+    if (NULL == (*connector = H5VL_new_connector(connector_prop->connector_id)))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't create VOL connector")
+
+    /* Set wrapper info in API context */
+    if (H5VL_set_vol_wrapper_pre_open(*connector, name, flags, H5I_INVALID_HID, fapl_id, dxpl_id, &obj_wrap_ctx) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, NULL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
+
     /* Call the corresponding internal VOL routine */
-    if (NULL == (ret_value = H5VL__file_open(cls, name, flags, fapl_id, dxpl_id, req))) {
+    if (NULL == (ret_value = H5VL__file_open(cls, name, flags, fapl_id, dxpl_id, obj_wrap_ctx, req))) {
         hbool_t is_default_conn = TRUE;
 
         /* Opening the file failed - Determine whether we should search
@@ -3853,8 +3972,29 @@ H5VL_file_open(H5VL_connector_prop_t *connector_prop, const char *name, unsigned
                  */
                 H5E_clear_stack(NULL);
 
+                /* Reset object wrapping info in API context */
+                HDassert(vol_wrapper_set);
+                if (H5VL_reset_vol_wrapper() < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTRESET, NULL, "can't reset VOL wrapper info")
+                vol_wrapper_set = FALSE;
+
+                /* Release previously created connector */
+                HDassert(*connector);
+                if (H5VL_conn_dec_rc(*connector) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, NULL, "unable to decrement ref count on VOL connector")
+                *connector = NULL;
+
+                /* Create new connector for file */
+                if (NULL == (*connector = H5VL_new_connector(connector_prop->connector_id)))
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't create VOL connector")
+
+                /* Set new wrapper info in API context */
+                if (H5VL_set_vol_wrapper_pre_open(*connector, name, flags, H5I_INVALID_HID, fapl_id, dxpl_id, &obj_wrap_ctx) < 0)
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTSET, NULL, "can't set VOL wrapper info")
+                vol_wrapper_set = TRUE;
+
                 if (NULL == (ret_value = H5VL__file_open(find_connector_ud.cls, name, flags,
-                                                         find_connector_ud.fapl_id, dxpl_id, req)))
+                                                         find_connector_ud.fapl_id, dxpl_id, obj_wrap_ctx, req)))
                     HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL,
                                 "can't open file '%s' with VOL connector '%s'", name,
                                 find_connector_ud.cls->name)
@@ -3867,6 +4007,18 @@ H5VL_file_open(H5VL_connector_prop_t *connector_prop, const char *name, unsigned
     } /* end if */
 
 done:
+    /* Reset object wrapping info in API context */
+    if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, NULL, "can't reset VOL wrapper info")
+
+    /* Clean up on error */
+    if (ret_value == NULL) {
+        /* Release newly created connector and do not return it */
+        if (*connector && H5VL_conn_dec_rc(*connector) < 0)
+            HDONE_ERROR(H5E_FILE, H5E_CANTDEC, NULL, "unable to decrement ref count on VOL connector")
+        *connector = NULL;
+    }
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_file_open() */
 
@@ -3902,7 +4054,7 @@ H5VLfile_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_id, vo
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a VOL connector ID")
 
     /* Call the corresponding internal VOL routine */
-    if (NULL == (ret_value = H5VL__file_open(cls, name, flags, fapl_id, dxpl_id, req)))
+    if (NULL == (ret_value = H5VL__file_open(cls, name, flags, fapl_id, dxpl_id, NULL, req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "unable to open file")
 
 done:

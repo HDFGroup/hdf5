@@ -781,6 +781,7 @@ H5VL_new_connector(hid_t connector_id)
     if (NULL == (connector = H5FL_CALLOC(H5VL_t)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, NULL, "can't allocate VOL connector struct")
     connector->cls = cls;
+    connector->nrefs = 1;
     connector->id  = connector_id;
     if (H5I_inc_ref(connector->id, FALSE) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINC, NULL, "unable to increment ref count on VOL connector")
@@ -833,12 +834,10 @@ H5VL_register_using_vol_id(H5I_type_t type, void *obj, hid_t connector_id, hbool
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register object handle")
 
 done:
-    /* Clean up on error */
-    if (H5I_INVALID_HID == ret_value)
-        /* Release newly created connector */
-        if (connector && H5VL_conn_dec_rc(connector) < 0)
-            HDONE_ERROR(H5E_VOL, H5E_CANTDEC, H5I_INVALID_HID,
-                        "unable to decrement ref count on VOL connector")
+    /* Release our reference to the newly created connector (the ID, if created, keeps another reference) */
+    if (connector && H5VL_conn_dec_rc(connector) < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTDEC, H5I_INVALID_HID,
+                    "unable to decrement ref count on VOL connector")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_register_using_vol_id() */
@@ -2310,7 +2309,7 @@ H5VL_set_vol_wrapper(const H5VL_object_t *vol_obj)
         vol_wrap_ctx->obj_wrap_ctx = obj_wrap_ctx;
     } /* end if */
     else
-        /* Incremeent ref count on existing wrapper context */
+        /* Increment ref count on existing wrapper context */
         vol_wrap_ctx->rc++;
 
     /* Save the wrapper context */
@@ -2324,6 +2323,78 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_set_vol_wrapper() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_set_vol_wrapper_pre_open
+ *
+ * Purpose:     Set up object wrapping context for current VOL connector
+ *              before file open
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_set_vol_wrapper_pre_open(H5VL_t *connector, const char *name, unsigned flags, hid_t fcpl_id,
+                 hid_t fapl_id, hid_t dxpl_id, void **obj_wrap_ctx_out)
+{
+    H5VL_wrap_ctx_t *vol_wrap_ctx = NULL;    /* Object wrapping context */
+    herr_t           ret_value    = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(connector);
+
+    /* Retrieve the VOL object wrap context */
+    if (H5CX_get_vol_wrap_ctx((void **)&vol_wrap_ctx) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get VOL object wrap context")
+
+    /* Check for existing wrapping context */
+    if (NULL == vol_wrap_ctx) {
+        void *obj_wrap_ctx = NULL; /* VOL connector's wrapping context */
+
+        /* Check if the connector can create a wrap context */
+        if (connector->cls->wrap_cls.get_wrap_ctx_pre_open) {
+            /* Sanity check */
+            HDassert(connector->cls->wrap_cls.free_wrap_ctx);
+
+            /* Get the wrap context from the connector */
+            if ((connector->cls->wrap_cls.get_wrap_ctx_pre_open)(name, flags, fcpl_id, fapl_id, dxpl_id, &obj_wrap_ctx) < 0)
+                HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't retrieve VOL connector's object wrap context")
+        } /* end if */
+
+        /* Allocate VOL object wrapper context */
+        if (NULL == (vol_wrap_ctx = H5FL_MALLOC(H5VL_wrap_ctx_t)))
+            HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, FAIL, "can't allocate VOL wrap context")
+
+        /* Increment the outstanding objects that are using the connector */
+        H5VL_conn_inc_rc(connector);
+
+        /* Set up VOL object wrapper context */
+        vol_wrap_ctx->rc           = 1;
+        vol_wrap_ctx->connector    = connector;
+        vol_wrap_ctx->obj_wrap_ctx = obj_wrap_ctx;
+    } /* end if */
+    else
+        /* Increment ref count on existing wrapper context */
+        vol_wrap_ctx->rc++;
+
+    /* Return obj_wrap_ctx */
+    HDassert(vol_wrap_ctx);
+    *obj_wrap_ctx_out = vol_wrap_ctx->obj_wrap_ctx;
+
+    /* Save the wrapper context */
+    if (H5CX_set_vol_wrap_ctx(vol_wrap_ctx) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL object wrap context")
+
+done:
+    if (ret_value < 0 && vol_wrap_ctx)
+        /* Release object wrapping context */
+        H5FL_FREE(H5VL_wrap_ctx_t, vol_wrap_ctx);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_set_vol_wrapper_pre_open() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5VL_inc_vol_wrapper

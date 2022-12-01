@@ -74,7 +74,7 @@
  */
 void *
 H5VL__native_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
-                         hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
+                         hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED * obj_wrap_ctx, void H5_ATTR_UNUSED **req)
 {
     H5F_t *new_file  = NULL;
     void  *ret_value = NULL;
@@ -116,7 +116,7 @@ done:
  */
 void *
 H5VL__native_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t H5_ATTR_UNUSED dxpl_id,
-                       void H5_ATTR_UNUSED **req)
+                       void H5_ATTR_UNUSED * obj_wrap_ctx, void H5_ATTR_UNUSED **req)
 {
     H5F_t *new_file  = NULL;
     void  *ret_value = NULL;
@@ -715,14 +715,6 @@ H5VL__native_file_optional(void *obj, H5VL_optional_args_t *args, hid_t H5_ATTR_
             break;
         }
 #endif /* H5_HAVE_PARALLEL */
-
-        /* Finalize H5Fopen */
-        case H5VL_NATIVE_FILE_POST_OPEN: {
-            /* Call package routine */
-            if (H5F__post_open(f) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't finish opening file")
-            break;
-        }
 
         default:
             HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "invalid optional operation")

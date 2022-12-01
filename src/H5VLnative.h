@@ -209,7 +209,6 @@ typedef union H5VL_native_dataset_optional_args_t {
 #define H5VL_NATIVE_FILE_GET_MPI_ATOMICITY 26 /* H5Fget_mpi_atomicity                 */
 #define H5VL_NATIVE_FILE_SET_MPI_ATOMICITY 27 /* H5Fset_mpi_atomicity                 */
 #endif
-#define H5VL_NATIVE_FILE_POST_OPEN 28 /* Adjust file after open, with wrapping context */
 /* NOTE: If values over 1023 are added, the H5VL_RESERVED_NATIVE_OPTIONAL macro
  *      must be updated.
  */
@@ -390,9 +389,6 @@ typedef union H5VL_native_file_optional_args_t {
         hbool_t flag; /* Flag whether to set MPI atomicity for files */
     } set_mpi_atomicity;
 #endif /* H5_HAVE_PARALLEL */
-
-    /* H5VL_NATIVE_FILE_POST_OPEN */
-    /* No args */
 } H5VL_native_file_optional_args_t;
 
 /* Values for native VOL connector group optional VOL operations */

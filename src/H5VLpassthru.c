@@ -94,6 +94,7 @@ static herr_t H5VL_pass_through_str_to_info(const char *str, void **info);
 /* VOL object wrap / retrieval callbacks */
 static void  *H5VL_pass_through_get_object(const void *obj);
 static herr_t H5VL_pass_through_get_wrap_ctx(const void *obj, void **wrap_ctx);
+static herr_t H5VL_pass_through_get_wrap_ctx_pre_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id, void **wrap_ctx);
 static void  *H5VL_pass_through_wrap_object(void *obj, H5I_type_t obj_type, void *wrap_ctx);
 static void  *H5VL_pass_through_unwrap_object(void *obj);
 static herr_t H5VL_pass_through_free_wrap_ctx(void *obj);
@@ -151,9 +152,9 @@ static herr_t H5VL_pass_through_datatype_close(void *dt, hid_t dxpl_id, void **r
 
 /* File callbacks */
 static void  *H5VL_pass_through_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
-                                            hid_t dxpl_id, void **req);
+                                            hid_t dxpl_id, void *obj_wrap_ctx, void **req);
 static void  *H5VL_pass_through_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_id,
-                                          void **req);
+                                          void *obj_wrap_ctx, void **req);
 static herr_t H5VL_pass_through_file_get(void *file, H5VL_file_get_args_t *args, hid_t dxpl_id, void **req);
 static herr_t H5VL_pass_through_file_specific(void *file, H5VL_file_specific_args_t *args, hid_t dxpl_id,
                                               void **req);
@@ -263,6 +264,7 @@ static const H5VL_class_t H5VL_pass_through_g = {
         /* wrap_cls */
         H5VL_pass_through_get_object,    /* get_object   */
         H5VL_pass_through_get_wrap_ctx,  /* get_wrap_ctx */
+        H5VL_pass_through_get_wrap_ctx_pre_open, /* get_wrap_ctx_pre_open */
         H5VL_pass_through_wrap_object,   /* wrap_object  */
         H5VL_pass_through_unwrap_object, /* unwrap_object */
         H5VL_pass_through_free_wrap_ctx  /* free_wrap_ctx */
@@ -761,6 +763,60 @@ H5VL_pass_through_get_wrap_ctx(const void *obj, void **wrap_ctx)
 
     return 0;
 } /* end H5VL_pass_through_get_wrap_ctx() */
+
+/*---------------------------------------------------------------------------
+ * Function:    H5VL_pass_through_get_wrap_ctx_pre_open
+ *
+ * Purpose:     Retrieve a "wrapper context" for an object before file open
+ *
+ * Return:      Success:    0
+ *              Failure:    -1
+ *
+ *---------------------------------------------------------------------------
+ */
+static herr_t
+H5VL_pass_through_get_wrap_ctx_pre_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id, void **wrap_ctx)
+{
+    H5VL_pass_through_info_t *info;
+    hid_t                     under_fapl_id;
+    H5VL_pass_through_wrap_ctx_t *new_wrap_ctx;
+
+#ifdef ENABLE_PASSTHRU_LOGGING
+    printf("------- PASS THROUGH VOL WRAP CTX Get From FAPL\n");
+#endif
+
+    /* Get copy of our VOL info from FAPL */
+    H5Pget_vol_info(fapl_id, (void **)&info);
+
+    /* Make sure we have info about the underlying VOL to be used */
+    if (!info)
+        return -1;
+
+    /* Copy the FAPL */
+    under_fapl_id = H5Pcopy(fapl_id);
+
+    /* Set the VOL ID and info for the underlying FAPL */
+    H5Pset_vol(under_fapl_id, info->under_vol_id, info->under_vol_info);
+
+    /* Allocate new VOL object wrapping context for the pass through connector */
+    new_wrap_ctx = (H5VL_pass_through_wrap_ctx_t *)calloc(1, sizeof(H5VL_pass_through_wrap_ctx_t));
+
+    /* Increment reference count on underlying VOL ID, and copy the VOL info */
+    new_wrap_ctx->under_vol_id = info->under_vol_id;
+    H5Iinc_ref(new_wrap_ctx->under_vol_id);
+    H5VLget_wrap_ctx_pre_open(name, flags, fcpl_id, under_fapl_id, dxpl_id, &new_wrap_ctx->under_wrap_ctx);
+
+    /* Close underlying FAPL */
+    H5Pclose(under_fapl_id);
+
+    /* Release copy of our VOL info */
+    H5VL_pass_through_info_free(info);
+
+    /* Set wrap context to return */
+    *wrap_ctx = new_wrap_ctx;
+
+    return 0;
+} /* end H5VL_pass_through_get_wrap_ctx_pre_open() */
 
 /*---------------------------------------------------------------------------
  * Function:    H5VL_pass_through_wrap_object
@@ -1631,7 +1687,7 @@ H5VL_pass_through_datatype_close(void *dt, hid_t dxpl_id, void **req)
  */
 static void *
 H5VL_pass_through_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id,
-                              void **req)
+                              void *obj_wrap_ctx, void **req)
 {
     H5VL_pass_through_info_t *info;
     H5VL_pass_through_t      *file;
@@ -1641,6 +1697,9 @@ H5VL_pass_through_file_create(const char *name, unsigned flags, hid_t fcpl_id, h
 #ifdef ENABLE_PASSTHRU_LOGGING
     printf("------- PASS THROUGH VOL FILE Create\n");
 #endif
+
+    /* Shut compiler up about unused parameter */
+    (void)obj_wrap_ctx;
 
     /* Get copy of our VOL info from FAPL */
     H5Pget_vol_info(fapl_id, (void **)&info);
@@ -1687,7 +1746,7 @@ H5VL_pass_through_file_create(const char *name, unsigned flags, hid_t fcpl_id, h
  *-------------------------------------------------------------------------
  */
 static void *
-H5VL_pass_through_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_id, void **req)
+H5VL_pass_through_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_id, void *obj_wrap_ctx, void **req)
 {
     H5VL_pass_through_info_t *info;
     H5VL_pass_through_t      *file;
@@ -1697,6 +1756,9 @@ H5VL_pass_through_file_open(const char *name, unsigned flags, hid_t fapl_id, hid
 #ifdef ENABLE_PASSTHRU_LOGGING
     printf("------- PASS THROUGH VOL FILE Open\n");
 #endif
+
+    /* Shut compiler up about unused parameter */
+    (void)obj_wrap_ctx;
 
     /* Get copy of our VOL info from FAPL */
     H5Pget_vol_info(fapl_id, (void **)&info);

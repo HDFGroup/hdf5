@@ -1306,6 +1306,10 @@ H5F__new(H5F_shared_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5F
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to append to list of open files")
     } /* end else */
 
+    /* Create VOL object for file */
+    if (NULL == (f->vol_obj = H5VL_create_object_using_vol_id(H5I_FILE, f, f->shared->vol_id)))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't create VOL object")
+
     f->shared->nrefs++;
 
     /* Create the file's "top open object" information */
@@ -2086,34 +2090,6 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_open() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5F__post_open
- *
- * Purpose:     Finishes file open after wrapper context for file has been
- *              set.
- *
- * Return:      SUCCEED/FAIL
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5F__post_open(H5F_t *f)
-{
-    herr_t ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_PACKAGE
-
-    /* Sanity check arguments */
-    HDassert(f);
-
-    /* Store a vol object in the file struct */
-    if (NULL == (f->vol_obj = H5VL_create_object_using_vol_id(H5I_FILE, f, f->shared->vol_id)))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't create VOL object")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F__post_open() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5F_flush_phase1

@@ -851,6 +851,9 @@ typedef struct H5VL_wrap_class_t {
     herr_t (*get_wrap_ctx)(
         const void *obj,
         void      **wrap_ctx); /* Callback to retrieve the object wrapping context for the connector */
+    herr_t (*get_wrap_ctx_pre_open)(
+        const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id,
+        void      **wrap_ctx); /* Callback to retrieve the object wrapping context for the connector before file create/open */
     void *(*wrap_object)(void *obj, H5I_type_t obj_type,
                          void *wrap_ctx); /* Callback to wrap a library object */
     void *(*unwrap_object)(void *obj);    /* Callback to unwrap a library object */
@@ -904,8 +907,8 @@ typedef struct H5VL_datatype_class_t {
 /* H5F routines */
 typedef struct H5VL_file_class_t {
     void *(*create)(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id,
-                    void **req);
-    void *(*open)(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_id, void **req);
+                    void *wrap_ctx, void **req);
+    void *(*open)(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_id, void *wrap_ctx, void **req);
     herr_t (*get)(void *obj, H5VL_file_get_args_t *args, hid_t dxpl_id, void **req);
     herr_t (*specific)(void *obj, H5VL_file_specific_args_t *args, hid_t dxpl_id, void **req);
     herr_t (*optional)(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req);

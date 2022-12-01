@@ -68,7 +68,6 @@ static int H5F__get_all_count_cb(void H5_ATTR_UNUSED *obj_ptr, hid_t H5_ATTR_UNU
 static int H5F__get_all_ids_cb(void H5_ATTR_UNUSED *obj_ptr, hid_t obj_id, void *key);
 
 /* Helper routines for sync/async API calls */
-static herr_t H5F__post_open_api_common(H5VL_object_t *vol_obj, void **token_ptr);
 static hid_t  H5F__create_api_common(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
                                      void **token_ptr);
 static hid_t  H5F__open_api_common(const char *filename, unsigned flags, hid_t fapl_id, void **token_ptr);
@@ -509,43 +508,6 @@ done:
 } /* end H5Fis_accessible() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5F__post_open_api_common
- *
- * Purpose:     This is the common function for 'post open' operations
- *
- * Return:      SUCCEED/FAIL
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5F__post_open_api_common(H5VL_object_t *vol_obj, void **token_ptr)
-{
-    uint64_t supported;           /* Whether 'post open' operation is supported by VOL connector */
-    herr_t   ret_value = SUCCEED; /* Return value     */
-
-    FUNC_ENTER_PACKAGE
-
-    /* Check for 'post open' callback */
-    supported = 0;
-    if (H5VL_introspect_opt_query(vol_obj, H5VL_SUBCLS_FILE, H5VL_NATIVE_FILE_POST_OPEN, &supported) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't check for 'post open' operation")
-    if (supported & H5VL_OPT_QUERY_SUPPORTED) {
-        H5VL_optional_args_t vol_cb_args; /* Arguments to VOL callback */
-
-        /* Set up VOL callback arguments */
-        vol_cb_args.op_type = H5VL_NATIVE_FILE_POST_OPEN;
-        vol_cb_args.args    = NULL;
-
-        /* Make the 'post open' callback */
-        if (H5VL_file_optional(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, token_ptr) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to make file 'post open' callback")
-    } /* end if */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F__post_open_api_common() */
-
-/*-------------------------------------------------------------------------
  * Function:    H5F__create_api_common
  *
  * Purpose:     This is the common function for creating new  HDF5 files.
@@ -560,6 +522,7 @@ H5F__create_api_common(const char *filename, unsigned flags, hid_t fcpl_id, hid_
     void                 *new_file = NULL;             /* File struct for new file                 */
     H5P_genplist_t       *plist;                       /* Property list pointer                    */
     H5VL_connector_prop_t connector_prop;              /* Property for VOL connector ID & info     */
+    H5VL_t               *connector = NULL;            /* VOL connector struct                     */
     hid_t                 ret_value = H5I_INVALID_HID; /* Return value                             */
 
     FUNC_ENTER_PACKAGE
@@ -609,15 +572,19 @@ H5F__create_api_common(const char *filename, unsigned flags, hid_t fcpl_id, hid_
     flags |= H5F_ACC_RDWR | H5F_ACC_CREAT;
 
     /* Create a new file or truncate an existing file through the VOL */
-    if (NULL == (new_file = H5VL_file_create(&connector_prop, filename, flags, fcpl_id, fapl_id,
+    if (NULL == (new_file = H5VL_file_create(&connector, &connector_prop, filename, flags, fcpl_id, fapl_id,
                                              H5P_DATASET_XFER_DEFAULT, token_ptr)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID, "unable to create file")
 
     /* Get an ID for the file */
-    if ((ret_value = H5VL_register_using_vol_id(H5I_FILE, new_file, connector_prop.connector_id, TRUE)) < 0)
+    if ((ret_value = H5VL_register(H5I_FILE, new_file, connector, TRUE)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register file handle")
 
 done:
+    /* Release our reference to the newly created connector (the ID, if created, keeps another reference) */
+    if (connector && H5VL_conn_dec_rc(connector) < 0)
+        HDONE_ERROR(H5E_FILE, H5E_CANTDEC, H5I_INVALID_HID, "unable to decrement ref count on VOL connector")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__create_api_common() */
 
@@ -649,7 +616,6 @@ done:
 hid_t
 H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
-    H5VL_object_t *vol_obj   = NULL;            /* File object */
     hid_t          ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -658,14 +624,6 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     /* Create the file synchronously */
     if ((ret_value = H5F__create_api_common(filename, flags, fcpl_id, fapl_id, NULL)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, H5I_INVALID_HID, "unable to synchronously create file")
-
-    /* Get the file object */
-    if (NULL == (vol_obj = H5VL_vol_object(ret_value)))
-        HGOTO_ERROR(H5E_FILE, H5E_BADTYPE, H5I_INVALID_HID, "invalid object identifier")
-
-    /* Perform 'post open' operation */
-    if (H5F__post_open_api_common(vol_obj, NULL) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "'post open' operation failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -717,22 +675,6 @@ H5Fcreate_async(const char *app_file, const char *app_func, unsigned app_line, c
             HGOTO_ERROR(H5E_FILE, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
         } /* end if */
 
-    /* Reset token for 'post open' operation */
-    /* (Unnecessary if create operation didn't change it, but not worth checking -QAK) */
-    token = NULL;
-
-    /* Perform 'post open' operation */
-    if (H5F__post_open_api_common(vol_obj, token_ptr) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "'post open' operation failed")
-
-    /* If a token was created, add the token to the event set */
-    if (NULL != token)
-        /* clang-format off */
-        if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE8(__func__, "*s*sIu*sIuiii", app_file, app_func, app_line, filename, flags, fcpl_id, fapl_id, es_id)) < 0)
-            /* clang-format on */
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
-
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fcreate_async() */
@@ -754,6 +696,7 @@ H5F__open_api_common(const char *filename, unsigned flags, hid_t fapl_id, void *
     void                 *new_file = NULL;             /* File struct for new file                 */
     H5P_genplist_t       *plist;                       /* Property list pointer                    */
     H5VL_connector_prop_t connector_prop;              /* Property for VOL connector ID & info     */
+    H5VL_t               *connector = NULL;            /* VOL connector struct                     */
     hid_t                 ret_value = H5I_INVALID_HID; /* Return value                             */
 
     FUNC_ENTER_PACKAGE
@@ -791,15 +734,19 @@ H5F__open_api_common(const char *filename, unsigned flags, hid_t fapl_id, void *
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set VOL connector info in API context")
 
     /* Open the file through the VOL layer */
-    if (NULL == (new_file = H5VL_file_open(&connector_prop, filename, flags, fapl_id,
+    if (NULL == (new_file = H5VL_file_open(&connector, &connector_prop, filename, flags, fapl_id,
                                            H5P_DATASET_XFER_DEFAULT, token_ptr)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID, "unable to open file")
 
     /* Get an ID for the file */
-    if ((ret_value = H5VL_register_using_vol_id(H5I_FILE, new_file, connector_prop.connector_id, TRUE)) < 0)
+    if ((ret_value = H5VL_register(H5I_FILE, new_file, connector, TRUE)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register file handle")
 
 done:
+    /* Release our reference to the newly created connector (the ID, if created, keeps another reference) */
+    if (connector && H5VL_conn_dec_rc(connector) < 0)
+        HDONE_ERROR(H5E_FILE, H5E_CANTDEC, H5I_INVALID_HID, "unable to decrement ref count on VOL connector")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__open_api_common() */
 
@@ -825,7 +772,6 @@ done:
 hid_t
 H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
 {
-    H5VL_object_t *vol_obj   = NULL;            /* File object */
     hid_t          ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -834,14 +780,6 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
     /* Open the file synchronously */
     if ((ret_value = H5F__open_api_common(filename, flags, fapl_id, NULL)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID, "unable to synchronously open file")
-
-    /* Get the file object */
-    if (NULL == (vol_obj = H5VL_vol_object(ret_value)))
-        HGOTO_ERROR(H5E_FILE, H5E_BADTYPE, H5I_INVALID_HID, "invalid object identifier")
-
-    /* Perform 'post open' operation */
-    if (H5F__post_open_api_common(vol_obj, NULL) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "'post open' operation failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -893,22 +831,6 @@ H5Fopen_async(const char *app_file, const char *app_func, unsigned app_line, con
                 HDONE_ERROR(H5E_FILE, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on file ID")
             HGOTO_ERROR(H5E_FILE, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
         } /* end if */
-
-    /* Reset token for 'post open' operation */
-    /* (Unnecessary if create operation didn't change it, but not worth checking -QAK) */
-    token = NULL;
-
-    /* Perform 'post open' operation */
-    if (H5F__post_open_api_common(vol_obj, token_ptr) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "'post open' operation failed")
-
-    /* If a token was created, add the token to the event set */
-    if (NULL != token)
-        /* clang-format off */
-        if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE7(__func__, "*s*sIu*sIuii", app_file, app_func, app_line, filename, flags, fapl_id, es_id)) < 0)
-            /* clang-format on */
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1461,7 +1383,6 @@ done:
 hid_t
 H5Freopen(hid_t file_id)
 {
-    H5VL_object_t *vol_obj   = NULL;            /* File object */
     hid_t          ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -1470,14 +1391,6 @@ H5Freopen(hid_t file_id)
     /* Reopen the file synchronously */
     if ((ret_value = H5F__reopen_api_common(file_id, NULL)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID, "unable to synchronously reopen file")
-
-    /* Get the file object */
-    if (NULL == (vol_obj = H5VL_vol_object(ret_value)))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "can't get handle for re-opened file")
-
-    /* Perform 'post open' operation */
-    if (H5F__post_open_api_common(vol_obj, NULL) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "'post open' operation failed")
 
 done:
     /* XXX (VOL MERGE): If registration fails, file will not be closed */
@@ -1529,22 +1442,6 @@ H5Freopen_async(const char *app_file, const char *app_func, unsigned app_line, h
                 HDONE_ERROR(H5E_FILE, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on file ID")
             HGOTO_ERROR(H5E_FILE, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
         } /* end if */
-
-    /* Reset token for 'post open' operation */
-    /* (Unnecessary if create operation didn't change it, but not worth checking -QAK) */
-    token = NULL;
-
-    /* Perform 'post open' operation */
-    if (H5F__post_open_api_common(vol_obj, token_ptr) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "'post open' operation failed")
-
-    /* If a token was created, add the token to the event set */
-    if (NULL != token)
-        /* clang-format off */
-        if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE5(__func__, "*s*sIuii", app_file, app_func, app_line, file_id, es_id)) < 0)
-            /* clang-format on */
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
 
 done:
     FUNC_LEAVE_API(ret_value)

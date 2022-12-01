@@ -175,10 +175,6 @@ H5F__efc_open(H5F_t *parent, const char *name, unsigned flags, hid_t fcpl_id, hi
         if (NULL == (ret_value = H5F_open(name, flags, fcpl_id, fapl_id)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open file")
 
-        /* Make file post open call */
-        if (H5F__post_open(ret_value) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't finish opening file")
-
         /* Increment the number of open objects to prevent the file from being
          * closed out from under us - "simulate" having an open file id.  Note
          * that this behaviour replaces the calls to H5F_incr_nopen_objs() and
@@ -252,10 +248,6 @@ H5F__efc_open(H5F_t *parent, const char *name, unsigned flags, hid_t fcpl_id, hi
                 if (NULL == (ret_value = H5F_open(name, flags, fcpl_id, fapl_id)))
                     HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open file")
 
-                /* Make file post open call */
-                if (H5F__post_open(ret_value) < 0)
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't finish opening file")
-
                 /* Increment the number of open objects to prevent the file from
                  * being closed out from under us - "simulate" having an open
                  * file id */
@@ -277,10 +269,6 @@ H5F__efc_open(H5F_t *parent, const char *name, unsigned flags, hid_t fcpl_id, hi
         if (NULL == (ent->file = H5F_open(name, flags, fcpl_id, fapl_id)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open file")
         open_file = TRUE;
-
-        /* Make file post open call */
-        if (H5F__post_open(ent->file) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't finish opening file")
 
         /* Increment the number of open objects to prevent the file from being
          * closed out from under us - "simulate" having an open file id */

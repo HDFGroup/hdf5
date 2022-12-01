@@ -106,10 +106,13 @@ H5_DLL herr_t         H5VL_file_is_same(const H5VL_object_t *vol_obj1, const H5V
 
 /* Functions that wrap / unwrap VOL objects */
 H5_DLL herr_t H5VL_get_wrap_ctx(const H5VL_class_t *connector, void *obj, void **wrap_ctx);
+H5_DLL herr_t H5VL_get_wrap_ctx_pre_open(const H5VL_class_t *cls, const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id, void **wrap_ctx);
 H5_DLL void  *H5VL_wrap_object(const H5VL_class_t *connector, void *wrap_ctx, void *obj, H5I_type_t obj_type);
 H5_DLL void  *H5VL_unwrap_object(const H5VL_class_t *connector, void *obj);
 H5_DLL herr_t H5VL_free_wrap_ctx(const H5VL_class_t *connector, void *wrap_ctx);
 H5_DLL herr_t H5VL_set_vol_wrapper(const H5VL_object_t *vol_obj);
+H5_DLL herr_t H5VL_set_vol_wrapper_pre_open(H5VL_t *connector, const char *name, unsigned flags, hid_t fcpl_id,
+                 hid_t fapl_id, hid_t dxpl_id, void **obj_wrap_ctx_out);
 H5_DLL herr_t H5VL_inc_vol_wrapper(void *vol_wrap_ctx);
 H5_DLL herr_t H5VL_dec_vol_wrapper(void *vol_wrap_ctx);
 H5_DLL herr_t H5VL_reset_vol_wrapper(void);
@@ -214,9 +217,9 @@ H5_DLL herr_t H5VL_datatype_optional_op(H5VL_object_t *vol_obj, H5VL_optional_ar
 H5_DLL herr_t H5VL_datatype_close(const H5VL_object_t *vol_obj, hid_t dxpl_id, void **req);
 
 /* File functions */
-H5_DLL void  *H5VL_file_create(const H5VL_connector_prop_t *connector_prop, const char *name, unsigned flags,
+H5_DLL void  *H5VL_file_create(H5VL_t **connector, const H5VL_connector_prop_t *connector_prop, const char *name, unsigned flags,
                                hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id, void **req);
-H5_DLL void  *H5VL_file_open(H5VL_connector_prop_t *connector_prop, const char *name, unsigned flags,
+H5_DLL void  *H5VL_file_open(H5VL_t **connector, H5VL_connector_prop_t *connector_prop, const char *name, unsigned flags,
                              hid_t fapl_id, hid_t dxpl_id, void **req);
 H5_DLL herr_t H5VL_file_get(const H5VL_object_t *vol_obj, H5VL_file_get_args_t *args, hid_t dxpl_id,
                             void **req);

@@ -143,11 +143,9 @@ H5ESinsert_request(hid_t es_id, hid_t connector_id, void *request)
         HGOTO_ERROR(H5E_EVENTSET, H5E_CANTINSERT, FAIL, "can't insert request into event set")
 
 done:
-    /* Clean up on error */
-    if (ret_value < 0)
-        /* Release newly created connector */
-        if (connector && H5VL_conn_dec_rc(connector) < 0)
-            HDONE_ERROR(H5E_EVENTSET, H5E_CANTDEC, FAIL, "unable to decrement ref count on VOL connector")
+    /* Release our reference to the newly created connector (the request, if created, keeps another reference) */
+    if (connector && H5VL_conn_dec_rc(connector) < 0)
+        HDONE_ERROR(H5E_EVENTSET, H5E_CANTDEC, FAIL, "unable to decrement ref count on VOL connector")
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5ESinsert_request() */
