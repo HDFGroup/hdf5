@@ -1074,6 +1074,47 @@ CONTAINS
 !>
 !! \ingroup FH5G
 !!
+!! \brief Asynchronously retrieves information about a group
+!!
+!! \param loc_id Location identifier. The identifier may be that of a file, group, dataset, named datatype, or attribute.
+!! \param ginfo  Derived type in which group information is returned
+!! \param es_id  \es_id
+!! \param hdferr \fortran_error
+!! \param file   \fortran_file
+!! \param func   \fortran_func
+!! \param line   \fortran_line
+!!
+!! See C API: @ref H5Gget_info_async()
+!!
+  SUBROUTINE h5gget_info_async_f(loc_id, ginfo, es_id, hdferr, file, func, line)
+
+    IMPLICIT NONE
+
+    INTEGER(HID_T)  , INTENT(IN)           :: loc_id
+    TYPE(H5G_info_t), INTENT(OUT), TARGET  :: ginfo
+    INTEGER(HID_T)  , INTENT(IN)           :: es_id
+    INTEGER         , INTENT(OUT)          :: hdferr
+    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: file
+    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: func
+    INTEGER         , INTENT(IN), OPTIONAL :: line
+
+    TYPE(C_PTR) :: ptr
+    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  file_default = C_NULL_CHAR
+    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  func_default = C_NULL_CHAR
+    INTEGER(KIND=C_INT) :: line_default = 0
+
+    IF(PRESENT(file)) file_default = TRIM(file)//C_NULL_CHAR
+    IF(PRESENT(func)) func_default = TRIM(func)//C_NULL_CHAR
+    IF(PRESENT(line)) line_default = INT(line, C_INT)
+    ptr = C_LOC(ginfo)
+
+    hdferr = INT(H5Gget_info_async(file_default, func_default, line_default, loc_id, ptr, es_id))
+
+  END SUBROUTINE h5gget_info_async_f
+
+!>
+!! \ingroup FH5G
+!!
 !! \brief Retrieves information about a group.
 !!
 !! \attention  \fortran_obsolete. Both nlinks and max_corder can overflow.
@@ -1151,8 +1192,8 @@ CONTAINS
   SUBROUTINE h5gget_info_by_idx_f(&
 #else
   SUBROUTINE h5gget_info_by_idx_f03(&
-       loc_id, group_name, idx_type, order, n, ginfo, hdferr, lapl_id)
 #endif
+       loc_id, group_name, idx_type, order, n, ginfo, hdferr, lapl_id)
 
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id
@@ -1187,13 +1228,72 @@ CONTAINS
 !>
 !! \ingroup FH5G
 !!
+!! \brief Asynchronously retrieves information about a group, according to the group’s position within an index.
+!!
+!! \param loc_id     Location identifier. The identifier may be that of a file, group, dataset, named datatype, or attribute.
+!! \param group_name Name of group containing group for which information is to be retrieved.
+!! \param idx_type   Index type.
+!! \param order      Order of the count in the index.
+!! \param n          Position in the index of the group for which information is retrieved.
+!! \param ginfo      Derived type in which group information is returned
+!! \param es_id      \es_id
+!! \param hdferr     \fortran_error
+!! \param lapl_id    Link access property list.
+!! \param file       \fortran_file
+!! \param func       \fortran_func
+!! \param line       \fortran_line
+!!
+!! See C API: @ref H5Gget_info_by_idx_async()
+!!
+  SUBROUTINE h5gget_info_by_idx_async_f(loc_id, group_name, idx_type, order, n, ginfo, es_id, hdferr, &
+       lapl_id, file, func, line)
+
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: group_name
+    INTEGER, INTENT(IN) :: idx_type
+    INTEGER, INTENT(IN) :: order
+    INTEGER(HSIZE_T), INTENT(IN) :: n
+    TYPE(H5G_info_t), INTENT(OUT), TARGET :: ginfo
+    INTEGER(HID_T), INTENT(IN)  :: es_id
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
+    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: file
+    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: func
+    INTEGER         , INTENT(IN), OPTIONAL :: line
+
+    INTEGER(HID_T) :: lapl_id_default
+    CHARACTER(LEN=LEN_TRIM(group_name)+1,KIND=C_CHAR) :: c_group_name
+    TYPE(C_PTR) :: ptr
+    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  file_default = C_NULL_CHAR
+    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  func_default = C_NULL_CHAR
+    INTEGER(KIND=C_INT) :: line_default = 0
+
+    c_group_name  = TRIM(group_name)//C_NULL_CHAR
+
+    lapl_id_default = H5P_DEFAULT_F
+    IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
+    IF(PRESENT(file)) file_default = TRIM(file)//C_NULL_CHAR
+    IF(PRESENT(func)) func_default = TRIM(func)//C_NULL_CHAR
+    IF(PRESENT(line)) line_default = INT(line, C_INT)
+
+    ptr = C_LOC(ginfo)
+
+    hdferr = H5Gget_info_by_idx_async(file_default, func_default, line_default, loc_id, c_group_name, &
+         INT(idx_type,ENUM_T), INT(order, ENUM_T), n, ptr, lapl_id_default, es_id )
+
+  END SUBROUTINE h5gget_info_by_idx_async_f
+
+!>
+!! \ingroup FH5G
+!!
 !! \brief Retrieves information about a group, according to the group’s position within an index.
 !!
 !! \attention  \fortran_obsolete. Both nlinks and max_corder can overflow.
 !!
 !! \param loc_id       File or group identifier.
 !! \param group_name   Name of group containing group for which information is to be retrieved.
-!! \param idx_type   Index type.
+!! \param idx_type     Index type.
 !! \param order        Order of the count in the index.
 !! \param n            Position in the index of the group for which information is retrieved.
 !! \param storage_type Type of storage for links in group:
@@ -1307,6 +1407,55 @@ CONTAINS
 #else
   END SUBROUTINE h5gget_info_by_name_f03
 #endif
+
+!>
+!! \ingroup FH5G
+!!
+!! \brief Asynchronously retrieves information about a group by its name.
+!!
+!! \param loc_id  File or group identifier
+!! \param name    Name of group containing group for which information is to be retrieved
+!! \param ginfo   Derived type in which group information is returned
+!! \param es_id   \es_id
+!! \param hdferr  \fortran_error
+!! \param lapl_id Link access property list.
+!!
+!! See C API: @ref H5Gget_info_by_name_async()
+!!
+  SUBROUTINE h5gget_info_by_name_async_f(loc_id, name, ginfo, es_id, hdferr, &
+       lapl_id, file, func, line)
+
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: loc_id
+    CHARACTER(LEN=*), INTENT(IN) :: name
+    TYPE(H5G_info_t), INTENT(OUT), TARGET :: ginfo
+    INTEGER(HID_T), INTENT(IN)  :: es_id
+    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
+    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: file
+    CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: func
+    INTEGER         , INTENT(IN), OPTIONAL :: line
+
+    INTEGER(HID_T) :: lapl_id_default
+    CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
+    TYPE(C_PTR) :: ptr
+    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  file_default = C_NULL_CHAR
+    CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  func_default = C_NULL_CHAR
+    INTEGER(KIND=C_INT) :: line_default = 0
+
+    c_name = TRIM(name)//C_NULL_CHAR
+    ptr    = C_LOC(ginfo)
+
+    lapl_id_default = H5P_DEFAULT_F
+    IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
+    IF(PRESENT(file)) file_default = TRIM(file)//C_NULL_CHAR
+    IF(PRESENT(func)) func_default = TRIM(func)//C_NULL_CHAR
+    IF(PRESENT(line)) line_default = INT(line, C_INT)
+
+    hdferr = INT(h5gget_info_by_name_async(file_default, func_default, line_default, &
+         loc_id, c_name, ptr, lapl_id_default, es_id))
+
+  END SUBROUTINE h5gget_info_by_name_async_f
 
 !>
 !! \ingroup FH5G
