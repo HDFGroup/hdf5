@@ -213,6 +213,20 @@ Bug Fixes since HDF5-1.13.3 release
 
       (EFE - 2022/10/05 GH-2228)
 
+    - Fix CVE-2021-45833 / GHSA-x57p-jwp6-4v79
+
+      Report error if dimensions of chunked storage in data layout < 2
+    
+      For Data Layout Messages version 1 & 2 the specification state
+      that the value stored in the data field is 1 greater than the
+      number of dimensions in the dataspace. For version 3 this is
+      not explicitly stated but the implementation suggests it to be
+      the case.
+      Thus the set value needs to be at least 2. For dimensionality
+      < 2 an out-of-bounds access occurs.
+ 
+      (EFE - 2022/09/28 GH-2240)
+      
     - Fix CVE-2018-14031 / GHSA-2xc7-724c-r36j
 
       Parent of enum datatype message must have the same size as the
@@ -237,7 +251,6 @@ Bug Fixes since HDF5-1.13.3 release
       The fix addresses a stack overflow on write.
 
       (EFE - 2022/09/27 HDFFV-10589, GH-2226)
-
 
     Java Library
     ------------
