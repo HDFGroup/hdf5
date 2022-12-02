@@ -50,11 +50,12 @@ static const H5VL_class_t fake_wait_vol_g = {
     },
     {
         /* wrap_cls */
-        NULL, /* get_object   */
-        NULL, /* get_wrap_ctx */
-        NULL, /* wrap_object  */
-        NULL, /* unwrap_object */
-        NULL, /* free_wrap_ctx */
+        NULL, /* get_object            */
+        NULL, /* get_wrap_ctx          */
+        NULL, /* get_wrap_ctx_pre_open */
+        NULL, /* wrap_object           */
+        NULL, /* unwrap_object         */
+        NULL, /* free_wrap_ctx         */
     },
     {
         /* attribute_cls */
