@@ -213,7 +213,12 @@ Bug Fixes since HDF5-1.12.1 release
 
     Tools
     -----
-    -
+    - Fix h5repack to only print output when verbose option is selected
+
+      When timing option was added to h5repack, the check for verbose was
+      incorrectly implemented.
+
+      (ADB -  2022/12/02, GH #2270)
 
 
     Performance
