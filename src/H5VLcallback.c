@@ -791,7 +791,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_get_wrap_ctx_pre_open(const H5VL_class_t *cls, const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id, void **wrap_ctx)
+H5VL_get_wrap_ctx_pre_open(const H5VL_class_t *cls, const char *name, unsigned flags, hid_t fcpl_id,
+                           hid_t fapl_id, hid_t dxpl_id, void **wrap_ctx)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -829,12 +830,13 @@ done:
  *---------------------------------------------------------------------------
  */
 herr_t
-H5VLget_wrap_ctx_pre_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id, void **wrap_ctx /*out*/)
+H5VLget_wrap_ctx_pre_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id,
+                          void **wrap_ctx /*out*/)
 {
-    H5P_genplist_t       *plist;            /* Property list pointer */
-    H5VL_connector_prop_t connector_prop;   /* Property for VOL connector ID & info */
-    H5VL_class_t         *cls;              /* VOL connector's class struct */
-    herr_t        ret_value = SUCCEED; /* Return value */
+    H5P_genplist_t       *plist;               /* Property list pointer */
+    H5VL_connector_prop_t connector_prop;      /* Property for VOL connector ID & info */
+    H5VL_class_t         *cls;                 /* VOL connector's class struct */
+    herr_t                ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
     H5TRACE6("e", "*sIuiiix", name, flags, fcpl_id, fapl_id, dxpl_id, wrap_ctx);
@@ -852,7 +854,6 @@ H5VLget_wrap_ctx_pre_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t
     /* Get class pointer */
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_prop.connector_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
-
 
     /* Get the VOL connector's object wrapper */
     if (H5VL_get_wrap_ctx_pre_open(cls, name, flags, fcpl_id, fapl_id, dxpl_id, wrap_ctx) < 0)
@@ -3652,7 +3653,8 @@ H5VL__file_create(const H5VL_class_t *cls, const char *name, unsigned flags, hid
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "VOL connector has no 'file create' method")
 
     /* Call the corresponding VOL callback */
-    if (NULL == (ret_value = (cls->file_cls.create)(name, flags, fcpl_id, fapl_id, dxpl_id, obj_wrap_ctx, req)))
+    if (NULL ==
+        (ret_value = (cls->file_cls.create)(name, flags, fcpl_id, fapl_id, dxpl_id, obj_wrap_ctx, req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, NULL, "file create failed")
 
 done:
@@ -3673,13 +3675,13 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VL_file_create(H5VL_t **connector, const H5VL_connector_prop_t *connector_prop, const char *name, unsigned flags, hid_t fcpl_id,
-                 hid_t fapl_id, hid_t dxpl_id, void **req)
+H5VL_file_create(H5VL_t **connector, const H5VL_connector_prop_t *connector_prop, const char *name,
+                 unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id, void **req)
 {
-    H5VL_class_t *cls;              /* VOL Class structure for callback info    */
-    void *obj_wrap_ctx = NULL; /* Object wrapping context */
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
-    void         *ret_value = NULL; /* Return value */
+    H5VL_class_t *cls;                     /* VOL Class structure for callback info    */
+    void         *obj_wrap_ctx    = NULL;  /* Object wrapping context */
+    hbool_t       vol_wrapper_set = FALSE; /* Whether the VOL object wrapping context was set up */
+    void         *ret_value       = NULL;  /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -3697,7 +3699,8 @@ H5VL_file_create(H5VL_t **connector, const H5VL_connector_prop_t *connector_prop
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    if (NULL == (ret_value = H5VL__file_create(cls, name, flags, fcpl_id, fapl_id, dxpl_id, obj_wrap_ctx, req)))
+    if (NULL ==
+        (ret_value = H5VL__file_create(cls, name, flags, fcpl_id, fapl_id, dxpl_id, obj_wrap_ctx, req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, NULL, "file create failed")
 
 done:
@@ -3915,13 +3918,13 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VL_file_open(H5VL_t **connector, H5VL_connector_prop_t *connector_prop, const char *name, unsigned flags, hid_t fapl_id,
-               hid_t dxpl_id, void **req)
+H5VL_file_open(H5VL_t **connector, H5VL_connector_prop_t *connector_prop, const char *name, unsigned flags,
+               hid_t fapl_id, hid_t dxpl_id, void **req)
 {
-    H5VL_class_t *cls;              /* VOL Class structure for callback info    */
-    void *obj_wrap_ctx = NULL; /* Object wrapping context */
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
-    void         *ret_value = NULL; /* Return value */
+    H5VL_class_t *cls;                     /* VOL Class structure for callback info    */
+    void         *obj_wrap_ctx    = NULL;  /* Object wrapping context */
+    hbool_t       vol_wrapper_set = FALSE; /* Whether the VOL object wrapping context was set up */
+    void         *ret_value       = NULL;  /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -3934,7 +3937,8 @@ H5VL_file_open(H5VL_t **connector, H5VL_connector_prop_t *connector_prop, const 
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't create VOL connector")
 
     /* Set wrapper info in API context */
-    if (H5VL_set_vol_wrapper_pre_open(*connector, name, flags, H5I_INVALID_HID, fapl_id, dxpl_id, &obj_wrap_ctx) < 0)
+    if (H5VL_set_vol_wrapper_pre_open(*connector, name, flags, H5I_INVALID_HID, fapl_id, dxpl_id,
+                                      &obj_wrap_ctx) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, NULL, "can't set VOL wrapper info")
     vol_wrapper_set = TRUE;
 
@@ -3989,12 +3993,14 @@ H5VL_file_open(H5VL_t **connector, H5VL_connector_prop_t *connector_prop, const 
                     HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't create VOL connector")
 
                 /* Set new wrapper info in API context */
-                if (H5VL_set_vol_wrapper_pre_open(*connector, name, flags, H5I_INVALID_HID, fapl_id, dxpl_id, &obj_wrap_ctx) < 0)
+                if (H5VL_set_vol_wrapper_pre_open(*connector, name, flags, H5I_INVALID_HID, fapl_id, dxpl_id,
+                                                  &obj_wrap_ctx) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTSET, NULL, "can't set VOL wrapper info")
                 vol_wrapper_set = TRUE;
 
-                if (NULL == (ret_value = H5VL__file_open(find_connector_ud.cls, name, flags,
-                                                         find_connector_ud.fapl_id, dxpl_id, obj_wrap_ctx, req)))
+                if (NULL ==
+                    (ret_value = H5VL__file_open(find_connector_ud.cls, name, flags,
+                                                 find_connector_ud.fapl_id, dxpl_id, obj_wrap_ctx, req)))
                     HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL,
                                 "can't open file '%s' with VOL connector '%s'", name,
                                 find_connector_ud.cls->name)

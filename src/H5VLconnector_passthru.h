@@ -90,7 +90,8 @@ H5_DLL herr_t H5VLfree_lib_state(void *state);
 /* Pass-through callbacks */
 H5_DLL void  *H5VLget_object(void *obj, hid_t connector_id);
 H5_DLL herr_t H5VLget_wrap_ctx(void *obj, hid_t connector_id, void **wrap_ctx);
-H5_DLL herr_t H5VLget_wrap_ctx_pre_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id, void **wrap_ctx);
+H5_DLL herr_t H5VLget_wrap_ctx_pre_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
+                                        hid_t dxpl_id, void **wrap_ctx);
 H5_DLL void  *H5VLwrap_object(void *obj, H5I_type_t obj_type, hid_t connector_id, void *wrap_ctx);
 H5_DLL void  *H5VLunwrap_object(void *obj, hid_t connector_id);
 H5_DLL herr_t H5VLfree_wrap_ctx(void *wrap_ctx, hid_t connector_id);

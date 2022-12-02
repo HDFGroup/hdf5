@@ -851,9 +851,10 @@ typedef struct H5VL_wrap_class_t {
     herr_t (*get_wrap_ctx)(
         const void *obj,
         void      **wrap_ctx); /* Callback to retrieve the object wrapping context for the connector */
-    herr_t (*get_wrap_ctx_pre_open)(
-        const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id,
-        void      **wrap_ctx); /* Callback to retrieve the object wrapping context for the connector before file create/open */
+    herr_t (*get_wrap_ctx_pre_open)(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
+                                    hid_t  dxpl_id,
+                                    void **wrap_ctx); /* Callback to retrieve the object wrapping context for
+                                                         the connector before file create/open */
     void *(*wrap_object)(void *obj, H5I_type_t obj_type,
                          void *wrap_ctx); /* Callback to wrap a library object */
     void *(*unwrap_object)(void *obj);    /* Callback to unwrap a library object */

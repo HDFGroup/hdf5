@@ -459,9 +459,9 @@ H5R__get_loc_id(const H5R_ref_priv_t *ref)
 hid_t
 H5R__reopen_file(H5R_ref_priv_t *ref, hid_t fapl_id)
 {
-    H5P_genplist_t       *plist;           /* Property list for FAPL */
-    void                 *new_file = NULL; /* File object opened */
-    H5VL_connector_prop_t connector_prop;  /* Property for VOL connector ID & info     */
+    H5P_genplist_t       *plist;            /* Property list for FAPL */
+    void                 *new_file = NULL;  /* File object opened */
+    H5VL_connector_prop_t connector_prop;   /* Property for VOL connector ID & info     */
     H5VL_t               *connector = NULL; /* VOL connector struct */
     hid_t                 ret_value = H5I_INVALID_HID;
 
@@ -488,8 +488,8 @@ H5R__reopen_file(H5R_ref_priv_t *ref, hid_t fapl_id)
 
     /* Open the file */
     /* (Must open file read-write to allow for object modifications) */
-    if (NULL == (new_file = H5VL_file_open(&connector, &connector_prop, H5R_REF_FILENAME(ref), H5F_ACC_RDWR, fapl_id,
-                                           H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
+    if (NULL == (new_file = H5VL_file_open(&connector, &connector_prop, H5R_REF_FILENAME(ref), H5F_ACC_RDWR,
+                                           fapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTOPENFILE, H5I_INVALID_HID, "unable to open file")
 
     /* Get an ID for the file */
@@ -504,7 +504,8 @@ H5R__reopen_file(H5R_ref_priv_t *ref, hid_t fapl_id)
     }
 
 done:
-    /* Release our reference to the newly created connector (the file ID, if created, keeps another reference) */
+    /* Release our reference to the newly created connector (the file ID, if created, keeps another reference)
+     */
     if (connector && H5VL_conn_dec_rc(connector) < 0)
         HDONE_ERROR(H5E_FILE, H5E_CANTDEC, H5I_INVALID_HID, "unable to decrement ref count on VOL connector")
 

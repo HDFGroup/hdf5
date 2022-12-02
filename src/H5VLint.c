@@ -780,9 +780,9 @@ H5VL_new_connector(hid_t connector_id)
     /* Setup VOL info struct */
     if (NULL == (connector = H5FL_CALLOC(H5VL_t)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, NULL, "can't allocate VOL connector struct")
-    connector->cls = cls;
+    connector->cls   = cls;
     connector->nrefs = 1;
-    connector->id  = connector_id;
+    connector->id    = connector_id;
     if (H5I_inc_ref(connector->id, FALSE) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINC, NULL, "unable to increment ref count on VOL connector")
     conn_id_incr = TRUE;
@@ -836,8 +836,7 @@ H5VL_register_using_vol_id(H5I_type_t type, void *obj, hid_t connector_id, hbool
 done:
     /* Release our reference to the newly created connector (the ID, if created, keeps another reference) */
     if (connector && H5VL_conn_dec_rc(connector) < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTDEC, H5I_INVALID_HID,
-                    "unable to decrement ref count on VOL connector")
+        HDONE_ERROR(H5E_VOL, H5E_CANTDEC, H5I_INVALID_HID, "unable to decrement ref count on VOL connector")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_register_using_vol_id() */
@@ -2336,7 +2335,7 @@ done:
  */
 herr_t
 H5VL_set_vol_wrapper_pre_open(H5VL_t *connector, const char *name, unsigned flags, hid_t fcpl_id,
-                 hid_t fapl_id, hid_t dxpl_id, void **obj_wrap_ctx_out)
+                              hid_t fapl_id, hid_t dxpl_id, void **obj_wrap_ctx_out)
 {
     H5VL_wrap_ctx_t *vol_wrap_ctx = NULL;    /* Object wrapping context */
     herr_t           ret_value    = SUCCEED; /* Return value */
@@ -2360,7 +2359,8 @@ H5VL_set_vol_wrapper_pre_open(H5VL_t *connector, const char *name, unsigned flag
             HDassert(connector->cls->wrap_cls.free_wrap_ctx);
 
             /* Get the wrap context from the connector */
-            if ((connector->cls->wrap_cls.get_wrap_ctx_pre_open)(name, flags, fcpl_id, fapl_id, dxpl_id, &obj_wrap_ctx) < 0)
+            if ((connector->cls->wrap_cls.get_wrap_ctx_pre_open)(name, flags, fcpl_id, fapl_id, dxpl_id,
+                                                                 &obj_wrap_ctx) < 0)
                 HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't retrieve VOL connector's object wrap context")
         } /* end if */
 

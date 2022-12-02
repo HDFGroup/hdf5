@@ -616,7 +616,7 @@ done:
 hid_t
 H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
-    hid_t          ret_value = H5I_INVALID_HID; /* Return value */
+    hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE4("i", "*sIuii", filename, flags, fcpl_id, fapl_id);
@@ -772,7 +772,7 @@ done:
 hid_t
 H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
 {
-    hid_t          ret_value = H5I_INVALID_HID; /* Return value */
+    hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE3("i", "*sIui", filename, flags, fapl_id);
@@ -1383,7 +1383,7 @@ done:
 hid_t
 H5Freopen(hid_t file_id)
 {
-    hid_t          ret_value = H5I_INVALID_HID; /* Return value */
+    hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE1("i", "i", file_id);
