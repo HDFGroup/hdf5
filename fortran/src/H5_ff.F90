@@ -9,10 +9,21 @@
 !!
 !! @brief This module provides fortran specific helper functions for the HDF library.
 !
+! PURPOSE
+!  This module is used to pass C stubs for H5 Fortran APIs. The C stubs are
+!  packed into arrays in H5_f.c and these arrays are then passed to Fortran.
+!  This module then uses EQUIVALENCE to assign elements of the arrays to
+!  Fortran equivalent C stubs.
+!
+! NOTES
+!  The size of the C arrays in H5_f.c has to match the values of the variables
+!  declared as PARAMETER, hence if the size of an array in H5_f.c is changed
+!  then the PARAMETER of that corresponding array in Fortran must also be changed.
+!
+!
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
-!   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -80,12 +91,12 @@ MODULE H5LIB
   !
   ! H5FD flags declaration
   !
-  INTEGER, PARAMETER :: H5FD_FLAGS_LEN = 11
+  INTEGER, PARAMETER :: H5FD_FLAGS_LEN = 22
   INTEGER, DIMENSION(1:H5FD_FLAGS_LEN) :: H5FD_flags
   !
   ! H5FD file drivers flags declaration
   !
-  INTEGER, PARAMETER :: H5FD_HID_FLAGS_LEN = 7
+  INTEGER, PARAMETER :: H5FD_HID_FLAGS_LEN = 9
   INTEGER(HID_T), DIMENSION(1:H5FD_HID_FLAGS_LEN) :: H5FD_hid_flags
   !
   ! H5I flags declaration
@@ -424,16 +435,30 @@ CONTAINS
     H5FD_MEM_LHEAP_F        = H5FD_flags(9)
     H5FD_MEM_OHDR_F         = H5FD_flags(10)
     H5FD_MEM_NTYPES_F       = H5FD_flags(11)
+    H5FD_SUBFILING_CURR_FAPL_VERSION_F    = H5FD_flags(12)
+    H5FD_SUBFILING_FAPL_MAGIC_F           = H5FD_flags(13)
+    H5FD_SUBFILING_DEFAULT_STRIPE_COUNT_F = H5FD_flags(14)
+    H5FD_IOC_FAPL_MAGIC_F                 = H5FD_flags(15)
+    H5FD_IOC_CURR_FAPL_VERSION_F          = H5FD_flags(16)
+    H5FD_IOC_DEFAULT_THREAD_POOL_SIZE_F   = H5FD_flags(17)
+    SELECT_IOC_ONE_PER_NODE_F    = H5FD_flags(18)
+    SELECT_IOC_EVERY_NTH_RANK_F  = H5FD_flags(19)
+    SELECT_IOC_WITH_CONFIG_F     = H5FD_flags(20)
+    SELECT_IOC_TOTAL_F           = H5FD_flags(21)
+    IOC_SELECTION_OPTIONS_F      = H5FD_flags(22)
+
     !
     ! H5FD file driver flags
     !
-    H5FD_CORE_F   = H5FD_hid_flags(1)
-    H5FD_FAMILY_F = H5FD_hid_flags(2)
-    H5FD_LOG_F    = H5FD_hid_flags(3)
-    H5FD_MPIO_F   = H5FD_hid_flags(4)
-    H5FD_MULTI_F  = H5FD_hid_flags(5)
-    H5FD_SEC2_F   = H5FD_hid_flags(6)
-    H5FD_STDIO_F  = H5FD_hid_flags(7)
+    H5FD_CORE_F      = H5FD_hid_flags(1)
+    H5FD_FAMILY_F    = H5FD_hid_flags(2)
+    H5FD_LOG_F       = H5FD_hid_flags(3)
+    H5FD_MPIO_F      = H5FD_hid_flags(4)
+    H5FD_MULTI_F     = H5FD_hid_flags(5)
+    H5FD_SEC2_F      = H5FD_hid_flags(6)
+    H5FD_STDIO_F     = H5FD_hid_flags(7)
+    H5FD_SUBFILING_F = H5FD_hid_flags(8)
+    H5FD_SUBFILING_DEFAULT_STRIPE_SIZE_F = H5FD_hid_flags(9)
     !
     ! H5I flags declaration
     !
@@ -762,7 +787,7 @@ CONTAINS
 !!
 !! \brief Converts the KIND to the correct HDF type
 !!
-!! \param ikind Fortran KIND parameter.
+!! \param ikind Fortran KIND parameter
 !! \param flag Whether KIND is of type INTEGER or REAL:
 !!             \li H5_INTEGER_KIND - integer
 !!             \li H5_REAL_KIND    - real
@@ -814,8 +839,8 @@ CONTAINS
 !!
 !! \brief Computes the offset in memory
 !!
-!! \param start  Starting pointer address.
-!! \param end    Ending pointer address.
+!! \param start  Starting pointer address
+!! \param end    Ending pointer address
 !!
 !! \result offset Offset of a member within the derived type.
 !!
@@ -836,7 +861,7 @@ CONTAINS
 !!
 !! \brief Convert time_t structure (C) to Fortran DATE AND TIME storage format.
 !!
-!! \param stdtime_t Object of type time_t that contains a time value.
+!! \param stdtime_t Object of type time_t that contains a time value
 !! \result datetime  A date/time array using Fortran conventions:
 !!                  \li datetime(1) = year
 !!                  \li datetime(2) = month

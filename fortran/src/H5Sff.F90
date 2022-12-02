@@ -12,7 +12,6 @@
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
-!   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -52,6 +51,8 @@ CONTAINS
 !! \param space_id Dataspace identifier.
 !! \param hdferr   \fortran_error
 !! \param maxdims  An array of the maximum size of each dimension.
+!!
+!! See C API: @ref H5Screate_simple()
 !!
   SUBROUTINE h5screate_simple_f(rank, dims, space_id, hdferr, maxdims)
 
@@ -97,6 +98,8 @@ CONTAINS
 !! \param space_id Identifier of dataspace to release.
 !! \param hdferr   \fortran_error
 !!
+!! See C API: @ref H5Sclose()
+!!
   SUBROUTINE h5sclose_f(space_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: space_id
@@ -125,6 +128,8 @@ CONTAINS
 !! \param space_id  Dataspace identifier.
 !! \param hdferr    \fortran_error
 !!
+!! See C API: @ref H5Screate()
+!!
   SUBROUTINE h5screate_f(classtype, space_id, hdferr)
     IMPLICIT NONE
     INTEGER, INTENT(IN) :: classtype
@@ -152,6 +157,8 @@ CONTAINS
 !! \param new_space_id Identifier of dataspace&apos;s copy.
 !! \param hdferr       \fortran_error
 !!
+!! See C API: @ref H5Scopy()
+!!
   SUBROUTINE h5scopy_f(space_id, new_space_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: space_id
@@ -178,6 +185,8 @@ CONTAINS
 !! \param space_id   Dataspace identifier.
 !! \param num_blocks Number of hyperslab blocks in the current hyperslab selection.
 !! \param hdferr     \fortran_error
+!!
+!! See C API: @ref H5Sget_select_hyper_nblocks()
 !!
   SUBROUTINE h5sget_select_hyper_nblocks_f(space_id, num_blocks, hdferr)
     IMPLICIT NONE
@@ -208,6 +217,8 @@ CONTAINS
 !! \param num_blocks Number of blocks to get.
 !! \param buf        Buffer to hold block list.
 !! \param hdferr     \fortran_error
+!!
+!! See C API: @ref H5Sget_select_hyper_blocklist()
 !!
   SUBROUTINE h5sget_select_hyper_blocklist_f(space_id, startblock, &
                                                     num_blocks, buf, hdferr)
@@ -243,6 +254,8 @@ CONTAINS
 !! \param end      Ending coordinates of bounding box, i.e., the coordinates of the diagonally opposite corner.
 !! \param hdferr   \fortran_error
 !!
+!! See C API: @ref H5Sget_select_bounds()
+!!
   SUBROUTINE  h5sget_select_bounds_f(space_id, start, END, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: space_id
@@ -270,8 +283,10 @@ CONTAINS
 !! \brief Gets the number of element points in the current selection
 !!
 !! \param space_id   Dataspace identifier.
-!! \param num_points Number of element points in the current dataspace selection.
+!! \param num_points Number of element points in the current dataspace selection
 !! \param hdferr     \fortran_error
+!!
+!! See C API: @ref H5Sget_select_elem_npoints()
 !!
   SUBROUTINE h5sget_select_elem_npoints_f(space_id, num_points, hdferr)
     IMPLICIT NONE
@@ -300,6 +315,8 @@ CONTAINS
 !! \param num_points Number of element points to get.
 !! \param buf        Buffer with element points selected.
 !! \param hdferr     \fortran_error
+!!
+!! See C API: @ref H5Sget_select_elem_pointlist()
 !!
   SUBROUTINE h5sget_select_elem_pointlist_f(space_id, startpoint, &
        num_points, buf, hdferr)
@@ -341,6 +358,8 @@ CONTAINS
 !! \param coord        2D (rank x num_elements) array with the elements coordinates ( 1-based); in C the
 !!                     array is stored in 2D as (num_element x rank).
 !! \param hdferr       \fortran_error
+!!
+!! See C API: @ref H5Sselect_elements()
 !!
   SUBROUTINE h5sselect_elements_f(space_id, OPERATOR, rank, &
        num_elements, coord, hdferr)
@@ -398,6 +417,8 @@ CONTAINS
 !! \param space_id Identifier for the dataspace in which selection being made.
 !! \param hdferr   \fortran_error
 !!
+!! See C API: @ref H5Sselect_all()
+!!
   SUBROUTINE h5sselect_all_f(space_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: space_id
@@ -422,6 +443,8 @@ CONTAINS
 !! \param space_id The identifier for the dataspace in which the selection is being reset.
 !! \param hdferr   \fortran_error
 !!
+!! See C API: @ref H5Sselect_none()
+!!
   SUBROUTINE h5sselect_none_f(space_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: space_id
@@ -443,9 +466,11 @@ CONTAINS
 !!
 !! \brief Verifies that the selection is within the extent of the dataspace.
 !!
-!! \param space_id Identifier for the dataspace for whichselection is verified.
+!! \param space_id Identifier for the dataspace for which selection is verified
 !! \param status   TRUE if the selection is contained within the extent, FALSE otherwise.
 !! \param hdferr   \fortran_error
+!!
+!! See C API: @ref H5Sselect_valid()
 !!
   SUBROUTINE h5sselect_valid_f(space_id, status, hdferr)
     IMPLICIT NONE
@@ -478,6 +503,8 @@ CONTAINS
 !! \param npoints  Number of elements in the dataspace.
 !! \param hdferr   \fortran_error
 !!
+!! See C API: @ref H5Sget_simple_extent_npoints()
+!!
   SUBROUTINE h5sget_simple_extent_npoints_f(space_id, npoints, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: space_id
@@ -504,6 +531,8 @@ CONTAINS
 !! \param space_id Dataspace identifier.
 !! \param npoints  Number of points in the dataspace selection.
 !! \param hdferr   \fortran_error
+!!
+!! See C API: @ref H5Sget_select_npoints()
 !!
   SUBROUTINE h5sget_select_npoints_f(space_id, npoints, hdferr)
     IMPLICIT NONE
@@ -532,6 +561,8 @@ CONTAINS
 !! \param rank     Number of dataspace dimensions.
 !! \param hdferr   \fortran_error
 !!
+!! See C API: @ref H5Sget_simple_extent_ndims()
+!!
   SUBROUTINE h5sget_simple_extent_ndims_f(space_id, rank, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: space_id
@@ -558,6 +589,8 @@ CONTAINS
 !! \param dims     Array to store size of each dimension.
 !! \param maxdims  Array to store maximum size of each dimension.
 !! \param hdferr   \fortran_error
+!!
+!! See C API: @ref H5Sget_simple_extent_dims()
 !!
   SUBROUTINE h5sget_simple_extent_dims_f(space_id, dims, maxdims, hdferr)
     IMPLICIT NONE
@@ -592,6 +625,8 @@ CONTAINS
 !!                  \li H5S_NULL_F
 !! \param hdferr    \fortran_error
 !!
+!! See C API: @ref H5Sget_simple_extent_type()
+!!
   SUBROUTINE h5sget_simple_extent_type_f(space_id, classtype, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: space_id
@@ -620,6 +655,8 @@ CONTAINS
 !! \param current_size Array with the new sizes of dimensions.
 !! \param maximum_size Array with the new maximum sizes of dimensions.
 !! \param hdferr       \fortran_error
+!!
+!! See C API: @ref H5Sset_extent_simple()
 !!
   SUBROUTINE h5sset_extent_simple_f(space_id, rank, current_size, &
        maximum_size, hdferr)
@@ -653,6 +690,8 @@ CONTAINS
 !! \param status   Flag to indicate if dataspace is simple or not (TRUE or FALSE).
 !! \param hdferr   \fortran_error
 !!
+!! See C API: @ref H5Sis_simple()
+!!
   SUBROUTINE h5sis_simple_f(space_id, status, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: space_id
@@ -684,6 +723,8 @@ CONTAINS
 !! \param offset   The offset at which to position the selection.
 !! \param hdferr   \fortran_error
 !!
+!! See C API: @ref H5Soffset_simple()
+!!
   SUBROUTINE h5soffset_simple_f(space_id, offset, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: space_id
@@ -711,6 +752,8 @@ CONTAINS
 !! \param source_space_id The identifier for the dataspace from which the extent is copied.
 !! \param hdferr          \fortran_error
 !!
+!! See C API: @ref H5Sextent_copy()
+!!
   SUBROUTINE h5sextent_copy_f(dest_space_id, source_space_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dest_space_id
@@ -736,6 +779,8 @@ CONTAINS
 !!
 !! \param space_id Dataspace identifier.
 !! \param hdferr   \fortran_error
+!!
+!! See C API: @ref H5Sset_extent_none()
 !!
   SUBROUTINE h5sset_extent_none_f(space_id, hdferr)
     IMPLICIT NONE
@@ -767,6 +812,8 @@ CONTAINS
 !! \param hdferr   \fortran_error
 !! \param stride   Array with hyperslab strides.
 !! \param block    Array with hyperslab block sizes.
+!!
+!! See C API: @ref H5Sselect_hyperslab()
 !!
   SUBROUTINE h5sselect_hyperslab_f(space_id, OPERATOR, start, count, &
        hdferr, stride, BLOCK)
@@ -849,61 +896,58 @@ CONTAINS
     DEALLOCATE(def_stride)
 
   END SUBROUTINE h5sselect_hyperslab_f
-!  !$!
-!>
-!!  !$!
-!!  !$! NAME
-!!  !$!            h5scombine_hyperslab_f
-!!  !$!
-!!  !$! PURPOSE
-!!  !$!      Combine a hyperslab selection with the current
-!!  !$!               selection for a dataspace
-!!  !$!
-!!  !$! INPUTS
-!!  !$!            space_id      - dataspace of selection to use
-!!  !$!            operator      - flag, valid values are:
-!!  !$!                          H5S_SELECT_NOOP_F
-!!  !$!                          H5S_SELECT_SET_F
-!!  !$!                          H5S_SELECT_OR_F
-!!  !$!                          H5S_SELECT_AND_F
-!!  !$!                          H5S_SELECT_XOR_F
-!!  !$!                          H5S_SELECT_NOTB_F
-!!  !$!                          H5S_SELECT_NOTA_F
-!!  !$!                          H5S_SELECT_APPEND_F
-!!  !$!                          H5S_SELECT_PREPEND_F
-!!  !$!            start            - array with hyperslab offsets
-!!  !$!            count            - number of blocks included in the
-!!  !$!                          hyperslab
-!!  !$! OUTPUTS
-!!  !$!               hyper_id        - identifier for the new hyperslab
-!!  !$!            hdferr:            - error code
-!!  !$!                               Success:  0
-!!  !$!                               Failure: -1
-!!  !$! OPTIONAL PARAMETERS
-!!  !$!            stride            - array with hyperslab strides
-!!  !$!            block            - array with hyperslab block sizes
-!!  !$!
-!!  !$! AUTHOR
-!!  !$!      Elena Pourmal
-!!  !$!            October 7, 2002
-!!  !$!
-!!  !$! HISTORY
-!!  !$!
-!!  !$!
-!!  !$! NOTES
-!!  !$! Commented out until 1.6 ? 10/08/2002
-!!  !$!
-!!  !$! SOURCE
+!
+! NAME
+!      h5scombine_hyperslab_f
+!
+! PURPOSE
+!      Combine a hyperslab selection with the current
+!               selection for a dataspace
+!
+! INPUTS
+!            space_id      - dataspace of selection to use
+!            operator      - flag, valid values are:
+!                          H5S_SELECT_NOOP_F
+!                          H5S_SELECT_SET_F
+!                          H5S_SELECT_OR_F
+!                          H5S_SELECT_AND_F
+!                          H5S_SELECT_XOR_F
+!                          H5S_SELECT_NOTB_F
+!                          H5S_SELECT_NOTA_F
+!                          H5S_SELECT_APPEND_F
+!                          H5S_SELECT_PREPEND_F
+!            start            - array with hyperslab offsets
+!            count            - number of blocks included in the
+!                          hyperslab
+! OUTPUTS
+!               hyper_id        - identifier for the new hyperslab
+!            hdferr:            - error code
+!                               Success:  0
+!                               Failure: -1
+! OPTIONAL PARAMETERS
+!            stride            - array with hyperslab strides
+!            block            - array with hyperslab block sizes
+!
+! AUTHOR
+!      Elena Pourmal
+!            October 7, 2002
+!
+! HISTORY
+!
+!
+! NOTES
+! Commented out until 1.6 ? 10/08/2002
+!
+! SOURCE
 !  SUBROUTINE h5scombine_hyperslab_f(space_id, operator, start, count, &
 !  hyper_id,  hdferr, stride, block)
 !  IMPLICIT NONE
-
-                                    !  H5S_SELECT_AND_F
-                                    !  H5S_SELECT_XOR_F
-                                    !  H5S_SELECT_NOTB_F
-                                    !  H5S_SELECT_NOTA_F
-                                    !  H5S_SELECT_APPEND_F
-                                    !  H5S_SELECT_PREPEND_F
+   !  H5S_SELECT_AND_F
+   !  H5S_SELECT_XOR_F
+   !  H5S_SELECT_NOTB_F
+   !  H5S_SELECT_NOTA_F
+   !  H5S_SELECT_APPEND_F
+   !  H5S_SELECT_PREPEND_F
                                                 !
 
 !  INTEGER :: rank
@@ -971,49 +1015,46 @@ CONTAINS
 
 !  END SUBROUTINE h5scombine_hyperslab_f
 
-!  !$!
-!>
-!!  !$!
-!!  !$! NAME
-!!  !$!            h5scombine_select_f
-!!  !$!
-!!  !$! PURPOSE
-!!  !$!      Combine two hyperslab selections with an operation
-!!  !$!               and return a dataspace with resulting selection.
-!!  !$!
-!!  !$! INPUTS
-!!  !$!            space1_id      - dataspace of selection to use
-!!  !$!            operator      - flag, valid values are:
-!!  !$!                          H5S_SELECT_NOOP_F
-!!  !$!                          H5S_SELECT_SET_F
-!!  !$!                          H5S_SELECT_OR_F
-!!  !$!                          H5S_SELECT_AND_F
-!!  !$!                          H5S_SELECT_XOR_F
-!!  !$!                          H5S_SELECT_NOTB_F
-!!  !$!                          H5S_SELECT_NOTA_F
-!!  !$!                          H5S_SELECT_APPEND_F
-!!  !$!                          H5S_SELECT_PREPEND_F
-!!  !$!            space2_id      - dataspace of selection to use
-!!  !$! OUTPUTS
-!!  !$!               ds_id           - idataspace identifier with the new selection
-!!  !$!            hdferr:            - error code
-!!  !$!                               Success:  0
-!!  !$!                               Failure: -1
-!!  !$! OPTIONAL PARAMETERS            - NONE
-!!  !$!
-!!  !$! AUTHOR
-!!  !$!      Elena Pourmal
-!!  !$!            October 7, 2002
-!!  !$!
-!!  !$! HISTORY
-!!  !$!
-!!  !$!
-!!  !$! NOTES commented out until 1.6 release(?) 10/08/2002
-!!  !$!
 !
-!!  ! SOURCE
-!  !$          SUBROUTINE h5scombine_select_f(space1_id, operator, space2_id, &
-!  ds_id,  hdferr)
+! NAME
+!   h5scombine_select_f
+!
+! PURPOSE
+!      Combine two hyperslab selections with an operation
+!               and return a dataspace with resulting selection.
+!
+! INPUTS
+!            space1_id      - dataspace of selection to use
+!            operator      - flag, valid values are:
+!                          H5S_SELECT_NOOP_F
+!                          H5S_SELECT_SET_F
+!                          H5S_SELECT_OR_F
+!                          H5S_SELECT_AND_F
+!                          H5S_SELECT_XOR_F
+!                          H5S_SELECT_NOTB_F
+!                          H5S_SELECT_NOTA_F
+!                          H5S_SELECT_APPEND_F
+!                          H5S_SELECT_PREPEND_F
+!            space2_id      - dataspace of selection to use
+! OUTPUTS
+!               ds_id           - idataspace identifier with the new selection
+!            hdferr:            - error code
+!                               Success:  0
+!                               Failure: -1
+! OPTIONAL PARAMETERS            - NONE
+!
+! AUTHOR
+!      Elena Pourmal
+!            October 7, 2002
+!
+! HISTORY
+!
+!
+! NOTES commented out until 1.6 release(?) 10/08/2002
+!
+!
+! SOURCE
+!  SUBROUTINE h5scombine_select_f(space1_id, operator, space2_id, s_id,  hdferr)
 !  IMPLICIT NONE
 
                                     !  H5S_SELECT_AND_F
@@ -1037,47 +1078,45 @@ CONTAINS
 
 !  END SUBROUTINE h5scombine_select_f
 
-!  !$!
-!>
-!!  !$!
-!!  !$! NAME
-!!  !$!            h5smodify_select_f
-!!  !$!
-!!  !$! PURPOSE
-!!  !$!      Refine a hyperslab selection with an operation
-!!  !$!               using second hyperslab
-!!  !$!
-!!  !$! INPUTS
-!!  !$!            space1_id      - dataspace of selection  to modify
-!!  !$!            operator      - flag, valid values are:
-!!  !$!                          H5S_SELECT_NOOP_F
-!!  !$!                          H5S_SELECT_SET_F
-!!  !$!                          H5S_SELECT_OR_F
-!!  !$!                          H5S_SELECT_AND_F
-!!  !$!                          H5S_SELECT_XOR_F
-!!  !$!                          H5S_SELECT_NOTB_F
-!!  !$!                          H5S_SELECT_NOTA_F
-!!  !$!                          H5S_SELECT_APPEND_F
-!!  !$!                          H5S_SELECT_PREPEND_F
-!!  !$!            space2_id      - dataspace of selection to use
-!!  !$!
-!!  !$! OUTPUTS
-!!  !$!            hdferr:            - error code
-!!  !$!                               Success:  0
-!!  !$!                               Failure: -1
-!!  !$! OPTIONAL PARAMETERS            - NONE
-!!  !$!
-!!  !$! AUTHOR
-!!  !$!      Elena Pourmal
-!!  !$!            October 7, 2002
-!!  !$!
-!!  !$! HISTORY
-!!  !$!
-!!  !$!
-!!  !$! NOTESCommented out until 1.6 release(?) 10/08/2002 EIP
-!!  !$!
 !
-!!  ! SOURCE
+! NAME
+!            h5smodify_select_f
+!
+! PURPOSE
+!      Refine a hyperslab selection with an operation
+!               using second hyperslab
+!
+! INPUTS
+!            space1_id      - dataspace of selection  to modify
+!            operator      - flag, valid values are:
+!                          H5S_SELECT_NOOP_F
+!                          H5S_SELECT_SET_F
+!                          H5S_SELECT_OR_F
+!                          H5S_SELECT_AND_F
+!                          H5S_SELECT_XOR_F
+!                          H5S_SELECT_NOTB_F
+!                          H5S_SELECT_NOTA_F
+!                          H5S_SELECT_APPEND_F
+!                          H5S_SELECT_PREPEND_F
+!            space2_id      - dataspace of selection to use
+!
+! OUTPUTS
+!            hdferr:            - error code
+!                               Success:  0
+!                               Failure: -1
+! OPTIONAL PARAMETERS            - NONE
+!
+! AUTHOR
+!      Elena Pourmal
+!            October 7, 2002
+!
+! HISTORY
+!
+!
+! NOTESCommented out until 1.6 release(?) 10/08/2002 EIP
+!
+!
+! SOURCE
 !  SUBROUTINE h5smodify_select_f(space1_id, operator, space2_id, &
 !  hdferr)
 !  IMPLICIT NONE
@@ -1088,7 +1127,7 @@ CONTAINS
                                     !  H5S_SELECT_NOTA_F
                                     !  H5S_SELECT_APPEND_F
                                     !  H5S_SELECT_PREPEND_F
-                                                !
+ !
 
 
 !  space2_id)
@@ -1116,6 +1155,8 @@ CONTAINS
 !!                 \li H5S_SEL_HYPERSLABS_F
 !!                 \li H5S_SEL_ALL_F
 !! \param hdferr   \fortran_error
+!!
+!! See C API: @ref H5Sget_select_type()
 !!
   SUBROUTINE h5sget_select_type_f(space_id, TYPE, hdferr)
     IMPLICIT NONE
@@ -1145,6 +1186,8 @@ CONTAINS
 !! \param obj_id Object ID.
 !! \param hdferr \fortran_error
 !!
+!! See C API: @ref H5Sdecode()
+!!
   SUBROUTINE h5sdecode_f(buf, obj_id, hdferr)
     IMPLICIT NONE
     CHARACTER(LEN=*), INTENT(IN) :: buf
@@ -1173,6 +1216,8 @@ CONTAINS
 !! \param nalloc  The size of the buffer needed.
 !! \param hdferr  \fortran_error
 !! \param fapl_id File access property list identifier.
+!!
+!! See C API: @ref H5Sencode2()
 !!
   SUBROUTINE h5sencode_f(obj_id, buf, nalloc, hdferr, fapl_id)
     IMPLICIT NONE
@@ -1212,6 +1257,8 @@ CONTAINS
 !! \param Equal     .TRUE. if equal, .FALSE. if unequal.
 !! \param hdferr    \fortran_error
 !!
+!! See C API: @ref H5Sextent_equal()
+!!
   SUBROUTINE h5sextent_equal_f(space1_id, space2_id, equal, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: space1_id
@@ -1247,6 +1294,8 @@ CONTAINS
 !! \param count    Number of blocks in the regular hyperslab.
 !! \param block    Size of a block in the regular hyperslab.
 !! \param hdferr   \fortran_error
+!!
+!! See C API: @ref H5Sget_regular_hyperslab()
 !!
   SUBROUTINE h5sget_regular_hyperslab_f(space_id, start, stride, count, block, hdferr)
 
@@ -1301,6 +1350,8 @@ CONTAINS
 !! \param space_id  The identifier of the dataspace.
 !! \param IsRegular TRUE or FALSE for hyperslab selection if successful.
 !! \param hdferr    \fortran_error
+!!
+!! See C API: @ref H5Sis_regular_hyperslab()
 !!
   SUBROUTINE h5sis_regular_hyperslab_f(space_id, IsRegular, hdferr)
     IMPLICIT NONE

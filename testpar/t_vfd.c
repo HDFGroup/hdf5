@@ -327,7 +327,7 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
 #ifdef H5_HAVE_SUBFILING_VFD
         else if (HDstrcmp(vfd_name, H5FD_SUBFILING_NAME) == 0) {
 
-            H5FD_subfiling_shared_config_t shared_conf = {
+            H5FD_subfiling_params_t shared_conf = {
                 /* ioc_selection = */ SELECT_IOC_ONE_PER_NODE,
                 /* stripe_size   = */ (INTS_PER_RANK / 2),
                 /* stripe_count  = */ 0, /* will over write */
@@ -342,9 +342,7 @@ setup_vfd_test_file(int file_name_id, char *file_name, int mpi_size, H5FD_mpio_x
             H5FD_ioc_config_t ioc_config = {
                 /* magic            = */ H5FD_IOC_FAPL_MAGIC,
                 /* version          = */ H5FD_IOC_CURR_FAPL_VERSION,
-                /* under_fapl_id    = */ H5P_DEFAULT,
                 /* thread_pool_size = */ H5FD_IOC_DEFAULT_THREAD_POOL_SIZE,
-                /* subf_config      = */ shared_conf,
             };
             hid_t ioc_fapl = H5I_INVALID_HID;
 

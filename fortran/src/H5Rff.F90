@@ -21,7 +21,6 @@
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
-!   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -72,14 +71,14 @@ MODULE H5R
 
 !> @brief hdset_reg_ref_t_f03 C compatible reference
   TYPE :: hdset_reg_ref_t_f03
-     INTEGER(C_SIGNED_CHAR), DIMENSION(1:H5R_DSET_REG_REF_BUF_SIZE_F) :: ref 
+     INTEGER(C_SIGNED_CHAR), DIMENSION(1:H5R_DSET_REG_REF_BUF_SIZE_F) :: ref
   END TYPE hdset_reg_ref_t_f03
 
   INTERFACE h5rget_object_type_f
      MODULE PROCEDURE h5rget_object_type_obj_f
   END INTERFACE
 
-#ifndef H5_DOXYGEN_FORTRAN
+#ifndef H5_DOXYGEN
 
   INTERFACE h5rget_region_f
      MODULE PROCEDURE h5rget_region_ptr_f    ! F2003
@@ -167,7 +166,7 @@ CONTAINS
 !!
 !! \brief Retrieves the type of object that an object reference points to.
 !!
-!! \note  \fortran_obsolete
+!! \attention  \fortran_obsolete
 !!
 !! \param dset_id  Identifier of the dataset containing reference to the objects.
 !! \param ref      Reference to open.
@@ -178,7 +177,7 @@ CONTAINS
 !!                 \li H5G_TYPE_F
 !! \param hdferr   \fortran_error
 !!
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
   SUBROUTINE h5rget_object_type_f(&
 #else
   SUBROUTINE h5rget_object_type_obj_f(&
@@ -204,7 +203,7 @@ CONTAINS
     ref_f = ref%ref
     hdferr = h5rget_object_type_obj_c(dset_id, ref_f, obj_type )
 
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
   END SUBROUTINE h5rget_object_type_f
 #else
   END SUBROUTINE h5rget_object_type_obj_f
@@ -215,15 +214,14 @@ CONTAINS
 !!
 !! \brief Retrieves a dataspace with the specified region selected.
 !!
-!! \note  \fortran_obsolete
+!! \attention  \fortran_obsolete
 !!
 !! \param dset_id  Identifier of the dataset containing reference to the regions.
 !! \param ref      Reference to open.
 !! \param space_id Dataspace identifier.
 !! \param hdferr   \fortran_error
 !!
-SUBROUTINE h5rget_region_region_f(dset_id, ref, space_id, hdferr)
-
+  SUBROUTINE h5rget_region_region_f(dset_id, ref, space_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id
     TYPE(hdset_reg_ref_t_f), INTENT(IN) :: ref
@@ -246,20 +244,23 @@ SUBROUTINE h5rget_region_region_f(dset_id, ref, space_id, hdferr)
     hdferr = h5rget_region_region_c(dset_id, ref_f, space_id )
 
   END SUBROUTINE h5rget_region_region_f
+
 !>
 !! \ingroup FH5R
 !!
 !! \brief Retrieves a dataspace with the specified region selected using pointer.
 !!
-!! \note  \fortran_approved
+!! \attention  \fortran_approved
 !!
 !! \param dset_id  Identifier of the dataset containing reference to the regions.
 !! \param ref      Reference to open.
 !! \param space_id Dataspace identifier.
 !! \param hdferr   \fortran_error
 !!
-#ifdef H5_DOXYGEN_FORTRAN
-  SUBROUTINE h5rget_region_f(& 
+!! See C API: @ref H5Rget_region()
+!!
+#ifdef H5_DOXYGEN
+  SUBROUTINE h5rget_region_f(&
 #else
   SUBROUTINE h5rget_region_ptr_f(&
 #endif
@@ -272,7 +273,7 @@ SUBROUTINE h5rget_region_region_f(dset_id, ref, space_id, hdferr)
 
     hdferr = h5rget_region_ptr_c(dset_id, ref, space_id)
 
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
   END SUBROUTINE h5rget_region_f
 #else
   END SUBROUTINE h5rget_region_ptr_f
@@ -283,12 +284,14 @@ SUBROUTINE h5rget_region_region_f(dset_id, ref, space_id, hdferr)
 !!
 !! \brief Creates reference to the object.
 !!
-!! \note  \fortran_obsolete
+!! \attention  \fortran_obsolete
 !!
 !! \param loc_id Location identifier.
 !! \param name   Name of the object at the specified location.
 !! \param ref    Reference to the specified object.
 !! \param hdferr \fortran_error
+!!
+!! See C API: @ref H5Rcreate_object()
 !!
   SUBROUTINE h5rcreate_object_f(loc_id, name, ref, hdferr)
     USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
@@ -307,18 +310,21 @@ SUBROUTINE h5rget_region_region_f(dset_id, ref, space_id, hdferr)
     hdferr = h5rcreate_ptr_c(f_ptr, loc_id, name, namelen, INT(0), INT(-1,HID_T))
 
   END SUBROUTINE h5rcreate_object_f
+
 !>
 !! \ingroup FH5R
 !!
 !! \brief Creates reference to the dataset region
 !!
-!! \note  \fortran_obsolete
+!! \attention  \fortran_obsolete
 !!
 !! \param loc_id   Location identifier.
 !! \param name     Name of the dataset at the specified location.
 !! \param space_id Dataspace identifier that describes selected region.
 !! \param ref      Reference to the dataset region.
 !! \param hdferr   \fortran_error
+!!
+!! See C API: @ref H5Rcreate_region()
 !!
   SUBROUTINE h5rcreate_region_f(loc_id, name, space_id, ref, hdferr)
     IMPLICIT NONE
@@ -355,7 +361,7 @@ SUBROUTINE h5rget_region_region_f(dset_id, ref, space_id, hdferr)
 !!
 !! \brief Creates a reference.
 !!
-!! \note  \fortran_approved
+!! \attention  \fortran_approved
 !!
 !! \param loc_id   Location identifier.
 !! \param name     Name of the dataset at the specified location.
@@ -366,7 +372,9 @@ SUBROUTINE h5rget_region_region_f(dset_id, ref, space_id, hdferr)
 !! \param hdferr   \fortran_error
 !! \param space_id Dataspace identifier that describes selected region.
 !!
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
+!! See C API: @ref H5Rcreate_object()
+!!
   SUBROUTINE h5rcreate_f(&
 #else
   SUBROUTINE h5rcreate_ptr_f(&
@@ -388,7 +396,7 @@ SUBROUTINE h5rget_region_region_f(dset_id, ref, space_id, hdferr)
     IF(PRESENT(space_id)) space_id_c =  space_id
     hdferr = h5rcreate_ptr_c(ref, loc_id, name, namelen, ref_type, space_id_c)
 
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
   END SUBROUTINE h5rcreate_f
 #else
   END SUBROUTINE h5rcreate_ptr_f
@@ -396,9 +404,9 @@ SUBROUTINE h5rget_region_region_f(dset_id, ref, space_id, hdferr)
 !>
 !! \ingroup FH5R
 !!
-!! \brief Opens the HDF5 object referenced.
+!! \brief Opens the HDF5 object referenced
 !!
-!! \note  \fortran_obsolete
+!! \attention  \fortran_obsolete
 !!
 !! \param obj_id     Identifier of the dataset containing reference.
 !! \param ref        Reference to open.
@@ -422,9 +430,9 @@ SUBROUTINE h5rget_region_region_f(dset_id, ref, space_id, hdferr)
 !>
 !! \ingroup FH5R
 !!
-!! \brief Opens the dataset region.
+!! \brief Opens the dataset region
 !!
-!! \note  \fortran_obsolete
+!! \attention  \fortran_obsolete
 !!
 !! \param obj_id     Object identifier.
 !! \param ref        Reference to open.
@@ -450,7 +458,7 @@ SUBROUTINE h5rget_region_region_f(dset_id, ref, space_id, hdferr)
 !!
 !! \brief Opens the HDF5 object referenced.
 !!
-!! \note  \fortran_approved
+!! \attention  \fortran_approved
 !!
 !! \param obj_id     Valid identifier for the file containing the referenced object or any object in that file.
 !! \param ref_type   The reference type of ref.
@@ -476,7 +484,7 @@ SUBROUTINE h5rget_region_region_f(dset_id, ref, space_id, hdferr)
 !!
 !! \brief Retrieves a name of a referenced object.
 !!
-!! \note  \fortran_obsolete
+!! \attention  \fortran_obsolete
 !!
 !! \param loc_id Identifier for the file containing the reference or for any object in that file.
 !! \param ref    An object or dataset region reference.
@@ -512,7 +520,7 @@ SUBROUTINE h5rget_region_region_f(dset_id, ref, space_id, hdferr)
 !!
 !! \brief Retrieves a name of a dataset region.
 !!
-!! \note  \fortran_obsolete
+!! \attention  \fortran_obsolete
 !!
 !! \param loc_id Identifier for the file containing the reference or for any object in that file.
 !! \param ref    An object or dataset region reference.
@@ -547,7 +555,7 @@ SUBROUTINE h5rget_region_region_f(dset_id, ref, space_id, hdferr)
 !!
 !! \brief Retrieves a name of a referenced object.
 !!
-!! \note  \fortran_approved
+!! \attention  \fortran_approved
 !!
 !! \param loc_id   Identifier for the file containing the reference or for any object in that file.
 !! \param ref_type Type of reference.
@@ -557,7 +565,9 @@ SUBROUTINE h5rget_region_region_f(dset_id, ref, space_id, hdferr)
 !!\param  size     The size of the name buffer, returning 0 (zero) if no name is associated with the identifier.
 !!
 
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
+!! See C API: @ref H5Rget_name()
+!!
   SUBROUTINE h5rget_name_f(&
 #else
   SUBROUTINE h5rget_name_ptr_f(&
@@ -580,7 +590,7 @@ SUBROUTINE h5rget_region_region_f(dset_id, ref, space_id, hdferr)
 
     IF(PRESENT(size)) size = size_default
 
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
   END SUBROUTINE h5rget_name_f
 #else
   END SUBROUTINE h5rget_name_ptr_f
@@ -600,6 +610,8 @@ SUBROUTINE h5rget_region_region_f(dset_id, ref, space_id, hdferr)
 !!             \li H H5G_DATASET_F
 !!             \li H H5G_TYPE_F
 !!  hdferr   - \fortran_error
+!!
+!! See C API: @ref H5Rget_obj_type3()
 !!
   SUBROUTINE h5rget_obj_type_f(loc_id, ref_type, ref, obj_type, hdferr)
 

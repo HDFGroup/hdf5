@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -18,7 +17,11 @@
 extern "C" {
 #endif
 
-/**\defgroup H5DO Optimizations
+/** \page H5DO_UG The HDF5 High Level Optimizations
+ * @todo Under Construction
+ */
+
+/**\defgroup H5DO HDF5 Optimizations APIs (H5DO)
  *
  * <em>Bypassing default HDF5 behavior in order to optimize for specific
  * use cases (H5DO)</em>

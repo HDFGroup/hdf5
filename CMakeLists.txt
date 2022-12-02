@@ -12,6 +12,11 @@ if (POLICY CMP0083)
   cmake_policy (SET CMP0083 NEW)
 endif ()
 
+# Avoid warning about DOWNLOAD_EXTRACT_TIMESTAMP in CMake 3.24:
+if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.24.0")
+    cmake_policy(SET CMP0135 NEW)
+endif()
+
 #-----------------------------------------------------------------------------
 # Instructions for use : Normal Build
 #
@@ -539,28 +544,11 @@ if (HDF5_ENABLE_COVERAGE)
 endif ()
 
 #-----------------------------------------------------------------------------
-# Option to indicate using dmalloc
-#-----------------------------------------------------------------------------
-# option (HDF5_ENABLE_USING_DMALLOC "Indicate that dmalloc is used" OFF)
-# if (HDF5_ENABLE_USING_DMALLOC)
-#   find_package (DMALLOC)
-#   set (H5_HAVE_DMALLOC DMALLOC_FOUND)
-# endif ()
-
-#-----------------------------------------------------------------------------
 # Option to indicate using a memory checker
 #-----------------------------------------------------------------------------
 option (HDF5_ENABLE_USING_MEMCHECKER "Indicate that a memory checker is used" OFF)
 if (HDF5_ENABLE_USING_MEMCHECKER)
   set (H5_USING_MEMCHECKER 1)
-endif ()
-
-#-----------------------------------------------------------------------------
-# Option to indicate internal memory allocation sanity checks are enabled
-#-----------------------------------------------------------------------------
-option (HDF5_MEMORY_ALLOC_SANITY_CHECK "Indicate that internal memory allocation sanity checks are enabled" OFF)
-if (HDF5_MEMORY_ALLOC_SANITY_CHECK)
-  set (H5_MEMORY_ALLOC_SANITY_CHECK 1)
 endif ()
 
 #-----------------------------------------------------------------------------
@@ -735,6 +723,12 @@ option (HDF5_ENABLE_SUBFILING_VFD "Build Parallel HDF5 Subfiling VFD" OFF)
 if (HDF5_ENABLE_SUBFILING_VFD)
   if (NOT HDF5_ENABLE_PARALLEL)
     message (FATAL_ERROR "Subfiling VFD requires a parallel HDF5 build")
+  else ()
+    # Check for MPI_Comm_split_type
+    CHECK_SYMBOL_EXISTS (MPI_Comm_split_type "mpi.h" H5_HAVE_MPI_Comm_split_type)
+    if (NOT H5_HAVE_MPI_Comm_split_type)
+      message (FATAL_ERROR "Subfiling VFD requires MPI-3 support for MPI_Comm_split_type")
+    endif ()
   endif()
 
   if (NOT DEFINED Threads_FOUND)
@@ -1122,6 +1116,7 @@ if (EXISTS "${HDF5_SOURCE_DIR}/fortran" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/for
 
     # Parallel IO usage requires MPI to be Linked and Included
     if (H5_HAVE_PARALLEL)
+      find_package(MPI REQUIRED COMPONENTS Fortran)
       set (LINK_Fortran_LIBS ${LINK_Fortran_LIBS} ${MPI_Fortran_LIBRARIES})
       if (MPI_Fortran_LINK_FLAGS)
         set (CMAKE_Fortran_EXE_LINKER_FLAGS "${MPI_Fortran_LINK_FLAGS} ${CMAKE_EXE_LINKER_FLAGS}")

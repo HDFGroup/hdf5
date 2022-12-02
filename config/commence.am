@@ -2,7 +2,6 @@
 ## (Use double hashes for copyright notice so that automake treats it as
 ## comments and does not pass it to Makefile.in)
 ## Copyright by The HDF Group.
-## Copyright by the Board of Trustees of the University of Illinois.
 ## All rights reserved.
 ##
 ## This file is part of HDF5.  The full HDF5 copyright notice, including
@@ -88,8 +87,7 @@ F9XMODFLAG=@F9XMODFLAG@
 
 # .chkexe files are used to mark tests that have run successfully.
 # .chklog files are output from those tests.
-# *.clog and *.clog2 are from the MPE option.
-CHECK_CLEANFILES=*.chkexe *.chklog *.clog *.clog2
+CHECK_CLEANFILES=*.chkexe *.chklog
 
 # List all build rules defined by HDF5 Makefiles as "PHONY" targets here.
 # This tells the Makefiles that these targets are not files to be built but

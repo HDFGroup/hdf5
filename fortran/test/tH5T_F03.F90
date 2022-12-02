@@ -10,7 +10,6 @@
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
-!   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -3406,5 +3405,259 @@ SUBROUTINE t_enum_conv(total_error)
   CALL check("H5Fclose_f", error, total_error)
 
 END SUBROUTINE t_enum_conv
+
+! Tests the reading and writing of multiple datasets using H5Dread_multi and
+! H5Dwrite_multi
+	 
+SUBROUTINE multiple_dset_rw(total_error)
+	 
+!-------------------------------------------------------------------------
+! Subroutine: multiple_dset_rw
+!
+! Purpose:  Tests the reading and writing of multiple datasets 
+!           using H5Dread_multi and H5Dwrite_multi
+!
+! Return: Success:      0
+!         Failure:      number of errors
+!
+! Programmer:  M. Scot Breitenfeld
+!              April 2, 2014
+!
+!-------------------------------------------------------------------------
+!
+  USE iso_c_binding
+  USE hdf5
+  IMPLICIT NONE
+  
+  INTEGER, INTENT(INOUT) :: total_error   ! number of errors
+  INTEGER :: error                        ! HDF hdferror flag
+  
+  INTEGER(SIZE_T), PARAMETER :: ndset = 5 ! Number of data sets
+  INTEGER(HID_T), DIMENSION(:), ALLOCATABLE :: dset_id
+  INTEGER(HID_T), DIMENSION(:), ALLOCATABLE :: mem_type_id
+  INTEGER(HID_T), DIMENSION(:), ALLOCATABLE :: mem_space_id
+  INTEGER(HID_T), DIMENSION(:), ALLOCATABLE :: file_space_id
+
+  INTEGER, PARAMETER :: idim=10, idim2=5, idim3=3 ! size of integer array
+  INTEGER, PARAMETER :: rdim=5  ! size of real array
+  INTEGER, PARAMETER :: cdim=3  ! size of character array
+  INTEGER, PARAMETER :: sdim=2  ! length of character string
+  INTEGER, PARAMETER :: ddim=2  ! size of derived type array
+  INTEGER  :: i,j,k
+  
+  TYPE(C_PTR), ALLOCATABLE, DIMENSION(:) :: buf_md ! array to hold the multi-datasets
+  
+  INTEGER, DIMENSION(1:idim), TARGET :: wbuf_int             ! integer write buffer
+  INTEGER, DIMENSION(1:idim,idim2,idim3), TARGET :: wbuf_intmd
+  REAL, DIMENSION(1:rdim), TARGET :: wbuf_real               ! real write buffer
+  CHARACTER(LEN=sdim), DIMENSION(1:cdim), TARGET :: wbuf_chr ! character write buffer
+  INTEGER, DIMENSION(1:idim), TARGET :: rbuf_int             ! integer read buffer
+  INTEGER, DIMENSION(1:idim,idim2,idim3), TARGET :: rbuf_intmd ! integer read buffer
+  REAL, DIMENSION(1:rdim), TARGET :: rbuf_real               ! real read buffer
+  CHARACTER(LEN=sdim), DIMENSION(1:cdim), TARGET :: rbuf_chr ! character read buffer
+
+  TYPE derived
+     REAL :: r
+     INTEGER :: i
+     CHARACTER(LEN=sdim) :: c
+  END TYPE derived
+
+  TYPE(derived), DIMENSION(1:ddim), TARGET :: wbuf_derived ! derived type write buffer
+  TYPE(derived), DIMENSION(1:ddim), TARGET :: rbuf_derived ! derived type read buffer
+  INTEGER(HSIZE_T), DIMENSION(1:1) :: dims ! dimension of the spaces
+  INTEGER(HSIZE_T), DIMENSION(1:3) :: dimsmd ! dimension of the spaces
+  INTEGER(HID_T) :: file_id, strtype ! handles
+  INTEGER(SIZE_T) :: obj_count
+
+  ALLOCATE(buf_md(1:ndset),stat=error)
+  IF (error .NE. 0) THEN
+     WRITE(*,*) 'allocate error'
+     total_error = total_error + 1
+     RETURN
+  ENDIF
+  ALLOCATE(dset_id(1:ndset),stat=error)
+  IF (error .NE. 0) THEN
+     WRITE(*,*) 'allocate error'
+     total_error = total_error + 1
+     RETURN
+  ENDIF
+  ALLOCATE(mem_type_id(1:ndset),stat=error)
+  IF (error .NE. 0) THEN
+     WRITE(*,*) 'allocate error'
+     total_error = total_error + 1
+     RETURN
+  ENDIF
+  ALLOCATE(mem_space_id(1:ndset),stat=error)
+  IF (error .NE. 0) THEN
+     WRITE(*,*) 'allocate error'
+     total_error = total_error + 1
+     RETURN
+  ENDIF
+  ALLOCATE(file_space_id(1:ndset),stat=error)
+  IF (error .NE. 0) THEN
+     WRITE(*,*) 'allocate error'
+     total_error = total_error + 1
+     RETURN
+  ENDIF
+
+  CALL h5fcreate_f("multidset_rw.h5", H5F_ACC_TRUNC_F, file_id, error)
+  CALL check("h5fcreate_f", error, total_error)
+  !
+  ! Create real dataset
+  !
+  wbuf_real(1:rdim) = (/(i,i=1,rdim)/)
+  dims(1) = rdim
+  buf_md(1) = C_LOC(wbuf_real(1))
+  mem_type_id(1) = H5T_NATIVE_REAL
+  CALL h5screate_simple_f(1, dims, file_space_id(1), error)
+  CALL check("h5screate_simple_f", error, total_error)
+  CALL h5dcreate_f(file_id, "ds real", mem_type_id(1), file_space_id(1), dset_id(1), error)
+  CALL check("h5dcreate_f", error, total_error)
+  mem_space_id(1) = file_space_id(1)
+
+  ! Create integer dataset (1D)
+  wbuf_int(1:idim) = (/(i,i=1,idim)/)
+  dims(1) = idim
+  buf_md(2) = C_LOC(wbuf_int(1))
+  mem_type_id(2) = H5T_NATIVE_INTEGER
+  CALL h5screate_simple_f(1, dims, file_space_id(2), error)
+  CALL check("h5screate_simple_f", error, total_error)
+  CALL h5dcreate_f(file_id, "ds int", mem_type_id(2), file_space_id(2), dset_id(2), error)
+  CALL check("h5dcreate_f", error, total_error)
+  mem_space_id(2) = file_space_id(2)
+
+  ! Create character dataset
+  wbuf_chr(1:cdim) = (/'ab','cd','ef'/)
+  dims(1) = cdim
+  buf_md(3) = C_LOC(wbuf_chr(1)(1:1))
+  CALL H5Tcopy_f(H5T_FORTRAN_S1, mem_type_id(3), error)
+  CALL check("H5Tcopy_f", error, total_error)
+  CALL H5Tset_size_f(mem_type_id(3), INT(sdim,SIZE_T), error)
+  CALL check("H5Tset_size_f", error, total_error)
+  CALL h5screate_simple_f(1, dims, file_space_id(3), error)
+  CALL check("h5screate_simple_f", error, total_error)
+  CALL h5dcreate_f(file_id, "ds chr", mem_type_id(3), file_space_id(3), dset_id(3), error)
+  CALL check("h5dcreate_f", error, total_error)
+  mem_space_id(3) = file_space_id(3)
+
+  ! Create derived type dataset
+  wbuf_derived(1:ddim)%r = (/10.,20./)
+  wbuf_derived(1:ddim)%i = (/30,40/)
+  wbuf_derived(1:ddim)%c = (/'wx','yz'/)
+  buf_md(4) = C_LOC(wbuf_derived(1)%r)
+  CALL h5tcreate_f(H5T_COMPOUND_F, H5OFFSETOF(C_LOC(wbuf_derived(1)), C_LOC(wbuf_derived(2))), mem_type_id(4), error)
+  CALL check("h5tcreate_f", error, total_error)
+  CALL h5tinsert_f(mem_type_id(4), "real", &
+       H5OFFSETOF(C_LOC(wbuf_derived(1)),C_LOC(wbuf_derived(1)%r)), H5T_NATIVE_REAL, error)
+  CALL check("h5tinsert_f", error, total_error)
+  CALL h5tinsert_f(mem_type_id(4), "int", &
+       H5OFFSETOF(C_LOC(wbuf_derived(1)),C_LOC(wbuf_derived(1)%i)), H5T_NATIVE_INTEGER, error)
+  CALL check("h5tinsert_f", error, total_error)
+  CALL h5tcopy_f(H5T_NATIVE_CHARACTER, strtype, error)
+  CALL check("h5tcopy_f", error, total_error)
+  CALL h5tset_size_f(strtype, INT(sdim,size_t), error)  
+  CALL check("h5tset_size_f", error, total_error)
+  CALL h5tinsert_f(mem_type_id(4), "chr", &
+       H5OFFSETOF(C_LOC(wbuf_derived(1)),C_LOC(wbuf_derived(1)%c(1:1))), strtype, error)
+  CALL check("h5tinsert_f", error, total_error)
+
+  dims(1) = ddim
+  CALL h5screate_simple_f(1, dims, file_space_id(4), error)
+  CALL check("h5screate_simple_f", error, total_error)
+  CALL h5dcreate_f(file_id, "ds derived", mem_type_id(4), file_space_id(4), dset_id(4), error)
+  CALL check("h5dcreate_f", error, total_error)
+  mem_space_id(4) = file_space_id(4)
+
+
+  ! Create integer dataset (3D)
+
+  DO i = 1, idim
+     DO j = 1, idim2
+        DO k = 1, idim3
+           wbuf_intmd(i,j,k) = i*j
+        ENDDO
+     ENDDO
+  ENDDO
+
+  dimsmd(1:3) = (/idim,idim2,idim3/)
+  buf_md(5) = C_LOC(wbuf_intmd(1,1,1))
+  mem_type_id(5) = H5T_NATIVE_INTEGER
+  CALL h5screate_simple_f(3, dimsmd, file_space_id(5), error)
+  CALL check("h5screate_simple_f", error, total_error)
+  CALL h5dcreate_f(file_id, "ds int 3d", mem_type_id(5), file_space_id(5), dset_id(5), error)
+  CALL check("h5dcreate_f", error, total_error)
+  mem_space_id(5) = file_space_id(5)
+
+  ! write all the datasets
+  CALL h5dwrite_multi_f(ndset, dset_id, mem_type_id, mem_space_id, file_space_id, buf_md, error)
+  CALL check("h5dwrite_multi_f", error, total_error)
+
+  ! point to read buffers
+
+  buf_md(1) = C_LOC(rbuf_real(1))
+  buf_md(2) = C_LOC(rbuf_int(1))
+  buf_md(3) = C_LOC(rbuf_chr(1)(1:1))
+  buf_md(4) = C_LOC(rbuf_derived(1)%r)
+  buf_md(5) = C_LOC(rbuf_intmd(1,1,1))
+
+  ! read all the datasets
+  CALL h5dread_multi_f(ndset, dset_id, mem_type_id, mem_space_id, file_space_id, buf_md, error)
+  CALL check("h5dread_multi_f", error, total_error)
+
+  ! check the written and read in values
+  DO i = 1, rdim
+     IF(rbuf_real(i).NE.wbuf_real(i))THEN
+        total_error = total_error + 1
+     END IF
+  END DO
+  DO i = 1, idim
+     IF(rbuf_int(i).NE.wbuf_int(i))THEN
+        total_error = total_error + 1
+     END IF
+  END DO
+  DO i = 1, cdim
+     IF(rbuf_chr(i).NE.wbuf_chr(i))THEN
+        total_error = total_error + 1
+     END IF
+  END DO
+  DO i = 1, ddim
+     IF(rbuf_derived(i)%r.NE.wbuf_derived(i)%r)THEN
+        total_error = total_error + 1
+     END IF
+     IF(rbuf_derived(i)%i.NE.wbuf_derived(i)%i)THEN
+        total_error = total_error + 1
+     END IF
+     IF(rbuf_derived(i)%c.NE.wbuf_derived(i)%c)THEN
+        total_error = total_error + 1
+     END IF
+  END DO
+  DO i = 1, idim
+     DO j = 1, idim2
+        DO k = 1, idim3
+           IF(rbuf_intmd(i,j,k).NE.wbuf_intmd(i,j,k))THEN
+              total_error = total_error + 1
+           END IF
+        END DO
+     ENDDO
+  ENDDO
+
+  DO i = 1, ndset
+     CALL H5Dclose_f(dset_id(i), error)
+     CALL check("H5Dclose_f", error, total_error)
+     CALL H5Sclose_f(file_space_id(i), error)
+     CALL check("H5Sclose_f", error, total_error)
+  ENDDO
+  CALL H5Tclose_f(mem_type_id(4), error)
+  CALL check("H5Tclose_f", error, total_error)
+
+  CALL h5fget_obj_count_f(file_id, H5F_OBJ_ALL_F, obj_count, error)
+  IF(obj_count.NE.1)THEN
+     total_error = total_error + 1
+  END IF
+
+  CALL H5Fclose_f(file_id, error)
+
+END SUBROUTINE multiple_dset_rw
+
 
 END MODULE TH5T_F03

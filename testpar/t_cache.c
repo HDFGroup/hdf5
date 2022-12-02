@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -210,10 +209,6 @@ struct datum *data = NULL;
 
 #define STD_VIRT_NUM_DATA_ENTRIES     NUM_DATA_ENTRIES
 #define EXPRESS_VIRT_NUM_DATA_ENTRIES (NUM_DATA_ENTRIES / 10)
-/* Use a smaller test size to avoid creating huge MPE logfiles. */
-#ifdef H5_HAVE_MPE
-#define MPE_VIRT_NUM_DATA_ENTIES (NUM_DATA_ENTRIES / 100)
-#endif
 
 int virt_num_data_entries = NUM_DATA_ENTRIES;
 
@@ -6919,12 +6914,6 @@ main(int argc, char **argv)
         virt_num_data_entries = EXPRESS_VIRT_NUM_DATA_ENTRIES;
     else
         virt_num_data_entries = STD_VIRT_NUM_DATA_ENTRIES;
-
-#ifdef H5_HAVE_MPE
-    if (MAINPROCESS)
-        HDprintf("    Tests compiled for MPE.\n");
-    virt_num_data_entries = MPE_VIRT_NUM_DATA_ENTIES;
-#endif /* H5_HAVE_MPE */
 
     if (MAINPROCESS) {
         HDprintf("===================================\n");

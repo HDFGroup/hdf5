@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -175,8 +174,6 @@ H5_FCDLL int_f h5dget_create_plist_c(hid_t_f *dset_id, hid_t_f *plist_id);
 H5_FCDLL int_f h5dset_extent_c(hid_t_f *dset_id, hsize_t_f *dims);
 H5_FCDLL int_f h5dvlen_get_max_len_c(hid_t_f *dataset_id, hid_t_f *type_id, hid_t_f *space_id, size_t_f *len);
 H5_FCDLL int_f h5dget_storage_size_c(hid_t_f *dataset_id, hsize_t_f *size);
-H5_FCDLL int_f h5dfill_c(void *fill_value, hid_t_f *fill_type_id, hid_t_f *space_id, void *buf,
-                         hid_t_f *mem_type_id);
 H5_FCDLL int_f h5dget_space_status_c(hid_t_f *dset_id, int_f *flag);
 H5_FCDLL int_f h5dcreate_anon_c(hid_t_f *loc_id, hid_t_f *type_id, hid_t_f *space_id, hid_t_f *dcpl_id,
                                 hid_t_f *dapl_id, hid_t_f *dset_id);
@@ -305,8 +302,6 @@ H5_FCDLL int_f h5tget_strpad_c(hid_t_f *type_id, int_f *strpad);
 H5_FCDLL int_f h5tset_strpad_c(hid_t_f *type_id, int_f *strpad);
 H5_FCDLL int_f h5tget_nmembers_c(hid_t_f *type_id, int_f *num_members);
 H5_FCDLL int_f h5tget_member_name_c(hid_t_f *type_id, int_f *idx, _fcd member_name, int_f *namelen);
-H5_FCDLL int_f h5tget_member_dims_c(hid_t_f *type_id, int_f *field_idx, int_f *dims, size_t_f *field_dims,
-                                    int_f *perm);
 H5_FCDLL int_f h5tget_member_offset_c(hid_t_f *type_id, int_f *member_no, size_t_f *offset);
 H5_FCDLL int_f h5tget_member_type_c(hid_t_f *type_id, int_f *field_idx, hid_t_f *datatype);
 H5_FCDLL int_f h5tget_member_index_c(hid_t_f *type_id, _fcd name, int_f *namelen, int_f *idx);
@@ -536,6 +531,8 @@ H5_FCDLL int_f h5pget_chunk_cache_c(hid_t_f *dapl_id, size_t_f *rdcc_nslots, siz
 H5_FCDLL int_f h5pget_mpio_actual_io_mode_c(hid_t_f *dxpl_id, int_f *actual_io_mode);
 H5_FCDLL int_f h5pget_fapl_mpio_c(hid_t_f *prp_id, int_f *comm, int_f *info);
 H5_FCDLL int_f h5pset_fapl_mpio_c(hid_t_f *prp_id, int_f *comm, int_f *info);
+H5_FCDLL int_f h5pget_mpi_params_c(hid_t_f *prp_id, int_f *comm, int_f *info);
+H5_FCDLL int_f h5pset_mpi_params_c(hid_t_f *prp_id, int_f *comm, int_f *info);
 H5_FCDLL int_f h5pget_dxpl_mpio_c(hid_t_f *prp_id, int_f *data_xfer_mode);
 H5_FCDLL int_f h5pset_dxpl_mpio_c(hid_t_f *prp_id, int_f *data_xfer_mode);
 #endif

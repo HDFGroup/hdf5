@@ -1,6 +1,5 @@
 #
 # Copyright by The HDF Group.
-# Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
@@ -33,14 +32,15 @@ else
 endif
 
 # These are our main targets
-TEST_PROG_PARA=parallel_test
+TEST_PROG_PARA=parallel_test subfiling_test
 check_PROGRAMS=$(TEST_PROG_PARA)
 
 # Temporary files
-CHECK_CLEANFILES+=parf[12].h5
+CHECK_CLEANFILES+=parf[12].h5 subf.h5*
 
 # Test source files
-parallel_test_SOURCES=ptest.F90 hyper.F90 mdset.F90
+parallel_test_SOURCES=ptest.F90 hyper.F90 mdset.F90 multidsetrw.F90
+subfiling_test_SOURCES=subfiling.F90
 
 # The tests depend on several libraries.
 LDADD=$(LIBH5FTEST) $(LIBH5TEST) $(LIBH5F) $(LIBHDF5)

@@ -40,6 +40,7 @@ const char *FILENAME[] = {"native_vol_test", NULL};
 #define NATIVE_VOL_TEST_DATATYPE_NAME  "test_datatype"
 
 #define N_ELEMENTS 10
+#define NAME_LEN   512
 
 /* A VOL class struct to verify registering optional operations */
 static int    reg_opt_curr_op_val;
@@ -47,16 +48,17 @@ static herr_t reg_opt_op_optional(void *obj, H5VL_optional_args_t *args, hid_t d
 static herr_t reg_opt_link_optional(void *obj, const H5VL_loc_params_t *loc_params,
                                     H5VL_optional_args_t *args, hid_t dxpl_id, void **req);
 static herr_t reg_opt_datatype_get(void *obj, H5VL_datatype_get_args_t *args, hid_t dxpl_id, void **req);
+
 #define REG_OPT_VOL_NAME  "reg_opt"
 #define REG_OPT_VOL_VALUE ((H5VL_class_value_t)502)
 static const H5VL_class_t reg_opt_vol_g = {
-    H5VL_VERSION,      /* VOL class struct version */
-    REG_OPT_VOL_VALUE, /* value        */
-    REG_OPT_VOL_NAME,  /* name         */
-    0,                 /* version      */
-    0,                 /* capability flags */
-    NULL,              /* initialize   */
-    NULL,              /* terminate    */
+    H5VL_VERSION,       /* VOL class struct version */
+    REG_OPT_VOL_VALUE,  /* value        */
+    REG_OPT_VOL_NAME,   /* name         */
+    0,                  /* version      */
+    H5VL_CAP_FLAG_NONE, /* capability flags */
+    NULL,               /* initialize   */
+    NULL,               /* terminate    */
     {
         /* info_cls */
         (size_t)0, /* size    */
@@ -171,20 +173,24 @@ static const H5VL_class_t reg_opt_vol_g = {
     NULL /* optional     */
 };
 
+static herr_t fake_get_cap_flags(const void *info, uint64_t *cap_flags);
+
 #define FAKE_VOL_NAME  "fake"
 #define FAKE_VOL_VALUE ((H5VL_class_value_t)501)
+#define H5VL_FAKE_CAP_FLAGS                                                                                  \
+    (H5VL_CAP_FLAG_DATASET_BASIC | H5VL_CAP_FLAG_GROUP_BASIC | H5VL_CAP_FLAG_FILE_BASIC)
 
 /* A VOL class struct that describes a VOL class with no
  * functionality.
  */
 static const H5VL_class_t fake_vol_g = {
-    H5VL_VERSION,   /* VOL class struct version */
-    FAKE_VOL_VALUE, /* value        */
-    FAKE_VOL_NAME,  /* name         */
-    0,              /* connector version */
-    0,              /* capability flags */
-    NULL,           /* initialize   */
-    NULL,           /* terminate    */
+    H5VL_VERSION,        /* VOL class struct version */
+    FAKE_VOL_VALUE,      /* value        */
+    FAKE_VOL_NAME,       /* name         */
+    0,                   /* connector version */
+    H5VL_FAKE_CAP_FLAGS, /* capability flags */
+    NULL,                /* initialize   */
+    NULL,                /* terminate    */
     {
         /* info_cls */
         (size_t)0, /* size    */
@@ -270,9 +276,9 @@ static const H5VL_class_t fake_vol_g = {
     },
     {
         /* introspect_cls */
-        NULL, /* get_conn_cls */
-        NULL, /* get_cap_flags */
-        NULL, /* opt_query    */
+        NULL,               /* get_conn_cls */
+        fake_get_cap_flags, /* get_cap_flags */
+        NULL,               /* opt_query    */
     },
     {
         /* request_cls */
@@ -299,7 +305,7 @@ static const H5VL_class_t fake_vol_g = {
     NULL /* optional     */
 };
 
-static herr_t fake_async_get_cap_flags(const void *info, unsigned *cap_flags);
+static herr_t fake_async_get_cap_flags(const void *info, uint64_t *cap_flags);
 
 #define FAKE_ASYNC_VOL_NAME  "fake_async"
 #define FAKE_ASYNC_VOL_VALUE ((H5VL_class_value_t)503)
@@ -553,6 +559,23 @@ reg_opt_datatype_get(void H5_ATTR_UNUSED *obj, H5VL_datatype_get_args_t *args, h
 } /* end reg_opt_datatype_get() */
 
 /*-------------------------------------------------------------------------
+ * Function:    fake_get_cap_flags
+ *
+ * Purpose:     Return the capability flags for the 'fake' connector
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+fake_get_cap_flags(const void H5_ATTR_UNUSED *info, uint64_t *cap_flags)
+{
+    *cap_flags = fake_vol_g.cap_flags;
+
+    return SUCCEED;
+} /* end fake_get_cap_flags() */
+
+/*-------------------------------------------------------------------------
  * Function:    fake_async_get_cap_flags
  *
  * Purpose:     Return the capability flags for the 'fake async' connector
@@ -562,7 +585,7 @@ reg_opt_datatype_get(void H5_ATTR_UNUSED *obj, H5VL_datatype_get_args_t *args, h
  *-------------------------------------------------------------------------
  */
 static herr_t
-fake_async_get_cap_flags(const void H5_ATTR_UNUSED *info, unsigned *cap_flags)
+fake_async_get_cap_flags(const void H5_ATTR_UNUSED *info, uint64_t *cap_flags)
 {
     *cap_flags = fake_async_vol_g.cap_flags;
 
@@ -1979,7 +2002,7 @@ test_async_vol_props(void)
     hid_t                    fapl_id = H5I_INVALID_HID;
     hid_t                    vol_id  = H5I_INVALID_HID;
     H5VL_pass_through_info_t passthru_info;
-    unsigned                 cap_flags    = 0;
+    uint64_t                 cap_flags    = H5VL_CAP_FLAG_NONE;
     char                    *conn_env_str = NULL;
 
     TESTING("Async VOL props");
@@ -2002,7 +2025,7 @@ test_async_vol_props(void)
             TEST_ERROR;
         if (H5VL__reparse_def_vol_conn_variable_test() < 0)
             TEST_ERROR;
-    } /* end if */
+    }
 
     /* Test query w/default VOL, which should indicate no async, since native connector
      * doesn't support async.
@@ -2032,7 +2055,7 @@ test_async_vol_props(void)
     fapl_id = h5_fileaccess();
 
     /* Test query w/fake async VOL, which should succeed */
-    cap_flags = 0;
+    cap_flags = H5VL_CAP_FLAG_NONE;
     if (H5Pget_vol_cap_flags(fapl_id, &cap_flags) < 0)
         FAIL_STACK_ERROR;
     if ((cap_flags & H5VL_CAP_FLAG_ASYNC) == 0)
@@ -2058,7 +2081,7 @@ test_async_vol_props(void)
         FAIL_STACK_ERROR;
 
     /* Test query w/fake async VOL, which should succeed */
-    cap_flags = 0;
+    cap_flags = H5VL_CAP_FLAG_NONE;
     if (H5Pget_vol_cap_flags(fapl_id, &cap_flags) < 0)
         FAIL_STACK_ERROR;
     if ((cap_flags & H5VL_CAP_FLAG_ASYNC) == 0)
@@ -2073,7 +2096,7 @@ test_async_vol_props(void)
         FAIL_STACK_ERROR;
 
     /* Test query w/passthru -> fake async VOL, which should succeed */
-    cap_flags = 0;
+    cap_flags = H5VL_CAP_FLAG_NONE;
     if (H5Pget_vol_cap_flags(fapl_id, &cap_flags) < 0)
         FAIL_STACK_ERROR;
     if ((cap_flags & H5VL_CAP_FLAG_ASYNC) == 0)
@@ -2097,7 +2120,7 @@ test_async_vol_props(void)
 
         if (H5VL__reparse_def_vol_conn_variable_test() < 0)
             TEST_ERROR;
-    } /* end if */
+    }
 
     PASSED();
 
@@ -2114,6 +2137,232 @@ error:
 
     return FAIL;
 } /* end test_async_vol_props() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_vol_cap_flags()
+ *
+ * Purpose:     Tests the VOL cap flags
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_vol_cap_flags(void)
+{
+    hid_t                    fapl_id       = H5I_INVALID_HID;
+    hid_t                    vol_id        = H5I_INVALID_HID;
+    uint64_t                 vol_cap_flags = H5VL_CAP_FLAG_NONE;
+    H5VL_pass_through_info_t passthru_info;
+
+    TESTING("VOL capacity flags");
+
+    /* Register a fake VOL */
+    if ((vol_id = H5VLregister_connector(&fake_vol_g, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR;
+
+    if (H5Pset_vol(fapl_id, vol_id, NULL) < 0)
+        TEST_ERROR;
+
+    /* Verify the correctness of the VOL capacity flags */
+    if (H5Pget_vol_cap_flags(fapl_id, &vol_cap_flags) < 0)
+        TEST_ERROR;
+
+    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC))
+        TEST_ERROR;
+
+    if (vol_cap_flags & H5VL_CAP_FLAG_ATTR_BASIC)
+        TEST_ERROR;
+
+    /* Stack the [internal] passthrough VOL connector on top of the fake connector */
+    passthru_info.under_vol_id   = vol_id;
+    passthru_info.under_vol_info = NULL;
+
+    if (H5Pset_vol(fapl_id, H5VL_PASSTHRU, &passthru_info) < 0)
+        FAIL_STACK_ERROR;
+
+    /* Verify the correctness of the VOL capacity flags */
+    vol_cap_flags = H5VL_CAP_FLAG_NONE;
+
+    if (H5Pget_vol_cap_flags(fapl_id, &vol_cap_flags) < 0)
+        TEST_ERROR;
+
+    if (!(vol_cap_flags & H5VL_CAP_FLAG_FILE_BASIC))
+        TEST_ERROR;
+
+    if (vol_cap_flags & H5VL_CAP_FLAG_ATTR_BASIC)
+        TEST_ERROR;
+
+    if (H5Pclose(fapl_id) < 0)
+        TEST_ERROR;
+
+    /* Unregister the fake VOL ID */
+    if (H5VLunregister_connector(vol_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5VLunregister_connector(vol_id);
+        H5Pclose(fapl_id);
+    }
+    H5E_END_TRY;
+
+    return FAIL;
+} /* end test_vol_cap_flags() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_get_vol_name()
+ *
+ * Purpose:     Tests getting VOL name using H5VLget_connector_name
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_get_vol_name(void)
+{
+    hid_t       fapl_id = H5I_INVALID_HID;
+    hid_t       file_id = H5I_INVALID_HID;
+    char        filename[NAME_LEN];
+    char        vol_name[NAME_LEN];
+    const char *conn_env_str = NULL;
+
+    TESTING("getting connector name");
+
+    conn_env_str = HDgetenv(HDF5_VOL_CONNECTOR);
+    if (NULL == (conn_env_str = HDgetenv("HDF5_VOL_CONNECTOR")))
+        conn_env_str = "native";
+
+    /* Skip the connectors other than the native and pass_through connector */
+    if (HDstrcmp(conn_env_str, "native") &&
+        HDstrncmp(conn_env_str, "pass_through", HDstrlen("pass_through"))) {
+        SKIPPED();
+        HDprintf("    only test the native or pass_through connector\n");
+        return SUCCEED;
+    }
+
+    /* Retrieve the file access property for testing */
+    fapl_id = h5_fileaccess();
+
+    h5_fixname(FILENAME[0], fapl_id, filename, sizeof filename);
+
+    if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
+        TEST_ERROR;
+
+    if (H5VLget_connector_name(file_id, vol_name, NAME_LEN) < 0)
+        TEST_ERROR;
+
+    /* When comparing the pass_through connector, ignore the rest information (under_vol=0;under_info={}) */
+    if ((!HDstrcmp(conn_env_str, "native") && HDstrcmp(vol_name, "native")) ||
+        (!HDstrncmp(conn_env_str, "pass_through", HDstrlen("pass_through")) &&
+         HDstrcmp(vol_name, "pass_through")))
+        TEST_ERROR;
+
+    if (H5Fclose(file_id) < 0)
+        TEST_ERROR;
+
+    h5_delete_test_file(FILENAME[0], fapl_id);
+
+    if (H5Pclose(fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file_id);
+        H5Pclose(fapl_id);
+    }
+    H5E_END_TRY;
+
+    return FAIL;
+} /* end test_vol_cap_flags() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_wrap_register()
+ *
+ * Purpose:     Tests the failure of calling H5VLwrap_register in application
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_wrap_register(void)
+{
+    hid_t fapl_id  = H5I_INVALID_HID;
+    hid_t file_id  = H5I_INVALID_HID;
+    hid_t group_id = H5I_INVALID_HID;
+    hid_t wrap_id  = H5I_INVALID_HID;
+    char  filename[NAME_LEN];
+    void *vol_obj;
+
+    TESTING("failure of calling H5VLwrap_register");
+
+    /* Retrieve the file access property for testing */
+    fapl_id = h5_fileaccess();
+
+    h5_fixname(FILENAME[0], fapl_id, filename, sizeof filename);
+
+    if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
+        TEST_ERROR;
+
+    if ((group_id = H5Gcreate2(file_id, "test", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Retrieve the VOL object for the group */
+    if (!(vol_obj = H5VLobject(group_id)))
+        TEST_ERROR;
+
+    /* Try to register a second ID for the group.  It should fail because this routine is mainly
+     * targeted toward wrapping objects for iteration routine callbacks, not for application use
+     */
+    H5E_BEGIN_TRY
+    {
+        wrap_id = H5VLwrap_register(vol_obj, H5I_GROUP);
+    }
+    H5E_END_TRY;
+
+    if (H5I_INVALID_HID != wrap_id)
+        FAIL_PUTS_ERROR("should not be able to call H5VLwrap_register in an application");
+
+    if (H5Gclose(group_id) < 0)
+        TEST_ERROR;
+
+    if (H5Fclose(file_id) < 0)
+        TEST_ERROR;
+
+    h5_delete_test_file(FILENAME[0], fapl_id);
+
+    if (H5Pclose(fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Gclose(group_id);
+        H5Fclose(file_id);
+        H5Pclose(fapl_id);
+    }
+    H5E_END_TRY;
+
+    return FAIL;
+} /* end test_wrap_register() */
 
 /*-------------------------------------------------------------------------
  * Function:    main
@@ -2150,6 +2399,9 @@ main(void)
     nerrors += test_basic_link_operation() < 0 ? 1 : 0;
     nerrors += test_basic_datatype_operation() < 0 ? 1 : 0;
     nerrors += test_async_vol_props() < 0 ? 1 : 0;
+    nerrors += test_vol_cap_flags() < 0 ? 1 : 0;
+    nerrors += test_get_vol_name() < 0 ? 1 : 0;
+    nerrors += test_wrap_register() < 0 ? 1 : 0;
 
     if (nerrors) {
         HDprintf("***** %d Virtual Object Layer TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");

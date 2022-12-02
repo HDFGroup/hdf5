@@ -101,7 +101,6 @@ set (HDF5_JAVADOC_HDF_HDF5_STRUCTS_SOURCES
 set (HDF5_JAVA_HDF_HDF5_SOURCES
     HDFArray.java
     HDF5Constants.java
-    HDF5GroupInfo.java
     HDFNativeData.java
     H5.java
 )
@@ -142,7 +141,7 @@ create_javadoc(hdf5_java_doc
     CLASSPATH ${CMAKE_JAVA_INCLUDE_PATH}
     WINDOWTITLE "HDF5 Java"
     DOCTITLE "<h1>HDF5 Java Wrapper</h1>"
-    INSTALLPATH ${HDF5_INSTALL_DATA_DIR}
+    INSTALLPATH ${HDF5_INSTALL_DOC_DIR}
     AUTHOR TRUE
     USE TRUE
     VERSION TRUE

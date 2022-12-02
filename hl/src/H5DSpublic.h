@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -31,7 +30,11 @@ typedef herr_t (*H5DS_iterate_t)(hid_t dset, unsigned dim, hid_t scale, void *vi
 extern "C" {
 #endif
 
-/**\defgroup H5DS Dimension Scales
+/** \page H5DS_UG The HDF5 High Level Dimension Scales
+ * @todo Under Construction
+ */
+
+/**\defgroup H5DS HDF5 Dimension Scales APIs (H5DS)
  *
  * <em>Creating and manipulating HDF5 datasets that are associated with
  * the dimension of another HDF5 dataset (H5DS)</em>
@@ -77,21 +80,21 @@ extern "C" {
 
 /* THIS IS A NEW ROUTINE NOT ON OLD PORTAL */
 /**
- * --------------------------------------------------------------------------
- * \ingroup H5DS
+ *  --------------------------------------------------------------------------
+ *  \ingroup H5DS
  *
- * \brief Determines if new references are used with dimension scales.
+ *  \brief Determines if new references are used with dimension scales.
  *
- * \param[in] obj_id        Object identifier
- * \param[out] with_new_ref New references are used or not
+ *  \param[in] obj_id        Object identifier
+ *  \param[out] with_new_ref New references are used or not
  *
- * \return \herr_t
+ *  \return \herr_t
  *
- * \details H5DSwith_new_ref() takes any object identifier and checks
- *          if new references are used for dimension scales. Currently,
- *          new references are used when non-native VOL connector is
- *          used or when H5_DIMENSION_SCALES_WITH_NEW_REF is set up
- *          via configure option.
+ *  \details H5DSwith_new_ref() takes any object identifier and checks
+ *           if new references are used for dimension scales. Currently,
+ *           new references are used when non-native VOL connector is
+ *           used or when H5_DIMENSION_SCALES_WITH_NEW_REF is set up
+ *           via configure option.
  *
  */
 H5_HLDLL herr_t H5DSwith_new_ref(hid_t obj_id, hbool_t *with_new_ref);

@@ -1,6 +1,5 @@
 #
 # Copyright by The HDF Group.
-# Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
@@ -34,7 +33,7 @@ check_SCRIPTS = $(TEST_SCRIPT_PARA)
 
 # Test programs.  These are our main targets.
 #
-TEST_PROG_PARA=t_mpi t_bigio testphdf5 t_cache t_cache_image t_pread t_pshutdown t_prestart t_init_term t_shapesame t_filters_parallel t_2Gio t_vfd
+TEST_PROG_PARA=t_mpi t_bigio testphdf5 t_cache t_cache_image t_pread t_pshutdown t_prestart t_init_term t_pmulti_dset t_shapesame t_filters_parallel t_2Gio t_vfd
 
 if SUBFILING_VFD_CONDITIONAL
     TEST_PROG_PARA += t_subfiling_vfd
@@ -59,6 +58,6 @@ LDADD = $(LIBH5TEST) $(LIBHDF5)
 # after_mpi_fin.h5 is from t_init_term
 # go is used for debugging. See testphdf5.c.
 CHECK_CLEANFILES+=MPItest.h5 Para*.h5 bigio_test.h5 CacheTestDummy.h5 \
-		  ShapeSameTest.h5 shutdown.h5  after_mpi_fin.h5 go
+		  ShapeSameTest.h5 shutdown.h5 pmulti_dset.h5 after_mpi_fin.h5 go
 
 include $(top_srcdir)/config/conclude.am

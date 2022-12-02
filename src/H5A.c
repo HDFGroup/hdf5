@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -2419,7 +2418,7 @@ H5Aexists(hid_t obj_id, const char *attr_name)
     /* Synchronously check if an attribute exists */
     exists = FALSE;
     if (H5A__exists_api_common(obj_id, attr_name, &exists, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't synchronously rename attribute")
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't synchronously check if attribute exists")
 
     /* Set return value */
     ret_value = (htri_t)exists;
@@ -2454,7 +2453,7 @@ H5Aexists_async(const char *app_file, const char *app_func, unsigned app_line, h
 
     /* Asynchronously check if an attribute exists */
     if (H5A__exists_api_common(obj_id, attr_name, attr_exists, token_ptr, &vol_obj) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't asynchronously check if attribute exists")
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't asynchronously check if attribute exists")
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)

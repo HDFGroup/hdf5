@@ -1,6 +1,5 @@
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
-!   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -29,7 +28,6 @@ SUBROUTINE multiple_dset_write(length, do_collective, do_chunk, mpi_size, mpi_ra
   INTEGER, INTENT(in) :: mpi_size                   ! number of processes in the group of communicator
   INTEGER, INTENT(in) :: mpi_rank                   ! rank of the calling process in the communicator
   INTEGER, INTENT(inout) :: nerrors                 ! number of errors
-  INTEGER :: mpierror                               ! MPI hdferror flag
   INTEGER :: hdferror                               ! HDF hdferror flag
   INTEGER(hsize_t), DIMENSION(1) :: dims            ! dataset dimensions
   INTEGER(hsize_t), DIMENSION(1) :: cdims           ! chunk dimensions

@@ -18,6 +18,8 @@ package hdf.hdf5lib.callbacks;
  */
 public interface H5P_prp_delete_func_cb extends Callbacks {
     /**
+     * @ingroup JCALL
+     *
      *  application callback for each property list
      *
      *  @param prop_id   the ID of the property list the property is deleted from

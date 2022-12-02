@@ -1,19 +1,25 @@
+!> @defgroup FH5Z Fortran Filter (H5Z) Interface
+!!
+!! @see H5Z, C-API
+!!
+!! @see @ref H5Z_UG, User Guide
+!!
+
 !> @ingroup FH5Z
 !!
 !! @brief This module contains Fortran interfaces for H5Z functions.
 !
 ! COPYRIGHT
 !  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-!  Copyright by The HDF Group.                                                 *
-!  Copyright by the Board of Trustees of the University of Illinois.           *
-!  All rights reserved.                                                        *
-!                                                                              *
-!  This file is part of HDF5.  The full HDF5 copyright notice, including       *
-!  terms governing use, modification, and redistribution, is contained in      *
-!  the COPYING file, which can be found at the root of the source code         *
-!  distribution tree, or in https://www.hdfgroup.org/licenses.                 *
-!  If you do not have access to either file, you may request a copy from       *
-!  help@hdfgroup.org.                                                          *
+!   Copyright by The HDF Group.                                               *
+!   All rights reserved.                                                      *
+!                                                                             *
+!   This file is part of HDF5.  The full HDF5 copyright notice, including     *
+!   terms governing use, modification, and redistribution, is contained in    *
+!   the COPYING file, which can be found at the root of the source code       *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
+!   If you do not have access to either file, you may request a copy from     *
+!   help@hdfgroup.org.                                                        *
 !  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 ! NOTES!
@@ -49,6 +55,8 @@ CONTAINS
 !!               \li H5Z_FILTER_FLETCHER32_F
 !! \param hdferr \fortran_error
 !!
+!! See C API: @ref H5Zunregister()
+!!
   SUBROUTINE h5zunregister_f(filter, hdferr)
     IMPLICIT NONE
     INTEGER, INTENT(IN)  :: filter
@@ -75,6 +83,8 @@ CONTAINS
 !!                \li H5Z_FILTER_FLETCHER32_F
 !! \param status  Flag; .TRUE. if filter is available, .FALSE. otherwise.
 !! \param hdferr  \fortran_error
+!!
+!! See C API: @ref H5Zfilter_avail()
 !!
   SUBROUTINE h5zfilter_avail_f(filter, status, hdferr)
     IMPLICIT NONE
@@ -113,6 +123,8 @@ CONTAINS
 !!                     \li H5Z_FILTER_ENCODE_ENABLED_F
 !!                     \li H5Z_FILTER_DECODE_ENABLED_F
 !! \param hdferr       \fortran_error
+!!
+!! See C API: @ref H5Zget_filter_info()
 !!
   SUBROUTINE h5zget_filter_info_f(filter, config_flags, hdferr)
     IMPLICIT NONE

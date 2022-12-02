@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -742,7 +741,7 @@ Java_hdf_hdf5lib_H5_H5Fset_1dset_1no_1attrs_1hint(JNIEnv *env, jclass clss, jlon
 
 done:
     return;
-}
+} /* end Java_hdf_hdf5lib_H5_H5Fset_1dset_1no_1attrs_1hint */
 
 /*
  * Class:     hdf_hdf5lib_H5
@@ -765,7 +764,7 @@ Java_hdf_hdf5lib_H5_H5Fget_1dset_1no_1attrs_1hint(JNIEnv *env, jclass clss, jlon
 
 done:
     return bval;
-}
+} /* end Java_hdf_hdf5lib_H5_H5Fget_1dset_1no_1attrs_1hint */
 
 /*
  * Class:     hdf_hdf5lib_H5

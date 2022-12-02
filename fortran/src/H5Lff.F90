@@ -12,7 +12,6 @@
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
-!   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -80,6 +79,8 @@ CONTAINS
 !! \param lcpl_id     Link creation property list identifier.
 !! \param lapl_id     Link access property list identifier.
 !!
+!! See C API: @ref H5Lcopy()
+!!
   SUBROUTINE h5lcopy_f(src_loc_id, src_name, dest_loc_id, dest_name, hdferr, &
        lcpl_id, lapl_id)
     IMPLICIT NONE
@@ -139,6 +140,8 @@ CONTAINS
 !! \param hdferr  \fortran_error
 !! \param lapl_id Link access property list identifier.
 !!
+!! See C API: @ref H5Ldelete()
+!!
   SUBROUTINE h5ldelete_f(loc_id, name, hdferr, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id
@@ -180,6 +183,8 @@ CONTAINS
 !! \param hdferr      \fortran_error
 !! \param lcpl_id     Link creation property list identifier.
 !! \param lapl_id     Link access property list identifier.
+!!
+!! See C API: @ref H5Lcreate_soft()
 !!
   SUBROUTINE h5lcreate_soft_f(target_path, link_loc_id, link_name, hdferr, lcpl_id, lapl_id)
     IMPLICIT NONE
@@ -240,6 +245,8 @@ CONTAINS
 !! \param lcpl_id     Link creation property list identifier.
 !! \param lapl_id     Link access property list identifier.
 !!
+!! See C API: @ref H5Lcreate_hard()
+!!
   SUBROUTINE h5lcreate_hard_f(obj_loc_id, obj_name, link_loc_id, link_name, hdferr, lcpl_id, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: obj_loc_id
@@ -299,6 +306,8 @@ CONTAINS
 !! \param hdferr      \fortran_error
 !! \param lcpl_id     Link creation property list identifier.
 !! \param lapl_id     Link access property list identifier.
+!!
+!! See C API: @ref H5Lcreate_external()
 !!
   SUBROUTINE h5lcreate_external_f(file_name, obj_name, link_loc_id, link_name, hdferr, lcpl_id, lapl_id)
     IMPLICIT NONE
@@ -372,6 +381,8 @@ CONTAINS
 !! \param hdferr      \fortran_error
 !! \param lapl_id     Link access property list.
 !!
+!! See C API: @ref H5Ldelete_by_idx()
+!!
   SUBROUTINE h5ldelete_by_idx_f(loc_id, group_name, index_field, order, n, hdferr, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id
@@ -418,6 +429,8 @@ CONTAINS
 !! \param link_exists Link exists status (.TRUE.,.FALSE.).
 !! \param hdferr      \fortran_error
 !! \param lapl_id     Link access property list identifier.
+!!
+!! See C API: @ref H5Lexists()
 !!
   SUBROUTINE h5lexists_f(loc_id, name, link_exists, hdferr, lapl_id)
     IMPLICIT NONE
@@ -478,6 +491,8 @@ CONTAINS
 !!                     the length of the name of the pointed-to object with a null terminator.
 !! \param hdferr       \fortran_error
 !! \param lapl_id      Link access property list.
+!!
+!! See C API: @ref H5Lget_info2()
 !!
   SUBROUTINE h5lget_info_f(link_loc_id, link_name, &
        cset, corder, f_corder_valid, link_type, token, val_size, &
@@ -567,6 +582,8 @@ CONTAINS
 !!
 !! \param lapl_id        Link access property list.
 !!
+!! See C API: @ref H5Lget_info_by_idx2()
+!!
   SUBROUTINE h5lget_info_by_idx_f(loc_id, group_name, index_field, order, n, &
        link_type, f_corder_valid, corder, cset, token, val_size, hdferr, lapl_id)
     IMPLICIT NONE
@@ -634,6 +651,8 @@ CONTAINS
 !! \param registered  .TRUE. if the link class has been registered.
 !! \param hdferr      \fortran_error
 !!
+!! See C API: @ref H5Lis_registered()
+!!
   SUBROUTINE h5lis_registered_f(link_cls_id, registered, hdferr)
     IMPLICIT NONE
     INTEGER, INTENT(IN) :: link_cls_id
@@ -668,6 +687,8 @@ CONTAINS
 !! \param hdferr      \fortran_error
 !! \param lcpl_id     Link creation property list identifier to be associated WITH the NEW link.
 !! \param lapl_id     Link access property list identifier to be associated WITH the NEW link.
+!!
+!! See C API: @ref H5Lmove()
 !!
   SUBROUTINE h5lmove_f(src_loc_id, src_name, dest_loc_id, dest_name, hdferr, lcpl_id, lapl_id)
     IMPLICIT NONE
@@ -740,6 +761,8 @@ CONTAINS
 !! \param hdferr      \fortran_error
 !! \param lapl_id     List access property list identifier.
 !! \param size        Maximum number of characters of link value to be returned.
+!!
+!! See C API: @ref H5Lget_name_by_idx()
 !!
   SUBROUTINE h5lget_name_by_idx_f(loc_id, group_name, index_field, order, n, &
         name, hdferr, size, lapl_id)
@@ -925,16 +948,18 @@ CONTAINS
 !!                      \li H5_ITER_INC_F    - Increasing order
 !!                      \li H5_ITER_DEC_F    - Decreasing order
 !!                      \li H5_ITER_NATIVE_F - Fastest available order
-!! \param idx           Iteration position at which to start.
+!! \param idx          Iteration position at which to start, or <br />
+!!                     Position at which an interrupted iteration may be restarted
 !! \param op            Callback function passing data regarding the link to the calling application.
 !! \param op_data       User-defined pointer to data required by the application for its processing of the link.
-!! \param idx           Position at which an interrupted iteration may be restarted.
 !! \param return_value  Return context:
 !!                      \li Success: The return value of the first operator that
 !!                               returns non-zero, or zero if all members were processed with no operator returning non-zero.
 !!                      \li Failure: Negative if something goes wrong within the
 !!                               library, or the negative value returned by one of the operators.
 !! \param hdferr        \fortran_error
+!!
+!! See C API: @ref H5Literate2()
 !!
   SUBROUTINE h5literate_f(group_id, index_type, order, idx, op, op_data, return_value, hdferr)
     USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_FUNPTR
@@ -983,10 +1008,11 @@ CONTAINS
 !!                      \li H5_INDEX_NAME_F      - Alphanumeric index on name
 !!                      \li H5_INDEX_CRT_ORDER_F - Index on creation order
 !! \param order        Order within index:
-!!                      \li H5_ITER_INC_F    - Increasing order
-!!                      \li H5_ITER_DEC_F    - Decreasing order
-!!                      \li H5_ITER_NATIVE_F - Fastest available order
-!! \param idx          Position at which an interrupted iteration may be restarted.
+!!                     \li H5_ITER_INC_F    - Increasing order
+!!                     \li H5_ITER_DEC_F    - Decreasing order
+!!                     \li H5_ITER_NATIVE_F - Fastest available order
+!! \param idx          Iteration position at which to start, or <br />
+!!                     Position at which an interrupted iteration may be restarted
 !! \param op           Callback function passing data regarding the link to the calling application.
 !! \param op_data      User-defined pointer to data required by the application for its processing of the link.
 !! \param return_value Return context:
@@ -995,7 +1021,9 @@ CONTAINS
 !!                      \li Failure: Negative if something goes wrong within the
 !!                               library, or the negative value returned by one of the operators.
 !! \param hdferr       \fortran_error
-!! \param lapl_id      Link access property list.
+!! \param lapl_id      Link access property list
+!!
+!! See C API: @ref H5Literate_by_name2()
 !!
   SUBROUTINE h5literate_by_name_f(loc_id, group_name, index_type, order, &
        idx, op, op_data, return_value, hdferr, lapl_id)

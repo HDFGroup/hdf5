@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -274,8 +273,12 @@ H5_DLL hid_t H5Oopen(hid_t loc_id, const char *name, hid_t lapl_id);
  * \ingroup ASYNC
  * \async_variant_of{H5Oopen}
  */
+#ifndef H5_DOXYGEN
 H5_DLL hid_t H5Oopen_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
                            const char *name, hid_t lapl_id, hid_t es_id);
+#else
+H5_DLL hid_t  H5Oopen_async(hid_t loc_id, const char *name, hid_t lapl_id, hid_t es_id);
+#endif
 
 /**
  *-------------------------------------------------------------------------
@@ -311,7 +314,7 @@ H5_DLL hid_t H5Oopen_by_token(hid_t loc_id, H5O_token_t token);
  *
  * \return \hid_tv{object}
  *
- * \details H5Open_by_idx() opens the nth object in the group specified by \p loc_id
+ * \details H5Oopen_by_idx() opens the nth object in the group specified by \p loc_id
  *          and \p group_name.
  *
  *          \p loc_id specifies a location identifier.
@@ -358,9 +361,14 @@ H5_DLL hid_t H5Oopen_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx
  * \ingroup ASYNC
  * \async_variant_of{H5Oopen_by_idx}
  */
+#ifndef H5_DOXYGEN
 H5_DLL hid_t H5Oopen_by_idx_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
                                   const char *group_name, H5_index_t idx_type, H5_iter_order_t order,
                                   hsize_t n, hid_t lapl_id, hid_t es_id);
+#else
+H5_DLL hid_t  H5Oopen_by_idx_async(hid_t loc_id, const char *group_name, H5_index_t idx_type,
+                                   H5_iter_order_t order, hsize_t n, hid_t lapl_id, hid_t es_id);
+#endif
 
 /**
  *-------------------------------------------------------------------------
@@ -540,9 +548,14 @@ H5_DLL herr_t H5Oget_info_by_name3(hid_t loc_id, const char *name, H5O_info2_t *
  * \ingroup ASYNC
  * \async_variant_of{H5Oget_info_by_name}
  */
+#ifndef H5_DOXYGEN
 H5_DLL herr_t H5Oget_info_by_name_async(const char *app_file, const char *app_func, unsigned app_line,
                                         hid_t loc_id, const char *name, H5O_info2_t *oinfo /*out*/,
                                         unsigned fields, hid_t lapl_id, hid_t es_id);
+#else
+H5_DLL herr_t H5Oget_info_by_name_async(hid_t loc_id, const char *name, H5O_info2_t *oinfo /*out*/,
+                                        unsigned fields, hid_t lapl_id, hid_t es_id);
+#endif
 
 /**
  *-------------------------------------------------------------------------
@@ -778,7 +791,7 @@ H5_DLL herr_t H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_
  *
  *          An object’s reference count is the number of hard links in the
  *          file that point to that object. See the “Programming Model”
- *          section of the HDF5 Groups chapter in the -- <em>HDF5 User’s Guide</em>
+ *          section of the HDF5 Groups chapter in the -- <em>\ref UG</em>
  *          for a more complete discussion of reference counts.
  *
  *          If a user application needs to determine an object’s reference
@@ -813,7 +826,7 @@ H5_DLL herr_t H5Oincr_refcount(hid_t object_id);
  *
  *          An object’s reference count is the number of hard links in the
  *          file that point to that object. See the “Programming Model”
- *          section of the HDF5 Groups chapter in the <em>HDF5 User’s Guide</em>
+ *          section of the HDF5 Groups chapter in the <em>\ref UG</em>
  *          for a more complete discussion of reference counts.
  *
  *          If a user application needs to determine an object’s reference
@@ -927,9 +940,14 @@ H5_DLL herr_t H5Ocopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, 
  * \ingroup ASYNC
  * \async_variant_of{H5Ocopy}
  */
+#ifndef H5_DOXYGEN
 H5_DLL herr_t H5Ocopy_async(const char *app_file, const char *app_func, unsigned app_line, hid_t src_loc_id,
                             const char *src_name, hid_t dst_loc_id, const char *dst_name, hid_t ocpypl_id,
                             hid_t lcpl_id, hid_t es_id);
+#else
+H5_DLL herr_t H5Ocopy_async(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, const char *dst_name,
+                            hid_t ocpypl_id, hid_t lcpl_id, hid_t es_id);
+#endif
 
 /**
  *-------------------------------------------------------------------------
@@ -1335,8 +1353,12 @@ H5_DLL herr_t H5Oclose(hid_t object_id);
  * \ingroup ASYNC
  * \async_variant_of{H5Oclose}
  */
+#ifndef H5_DOXYGEN
 H5_DLL herr_t H5Oclose_async(const char *app_file, const char *app_func, unsigned app_line, hid_t object_id,
                              hid_t es_id);
+#else
+H5_DLL herr_t H5Oclose_async(hid_t object_id, hid_t es_id);
+#endif
 
 /**
  *-------------------------------------------------------------------------
@@ -1375,8 +1397,12 @@ H5_DLL herr_t H5Oflush(hid_t obj_id);
  * \ingroup ASYNC
  * \async_variant_of{H5Oflush}
  */
+#ifndef H5_DOXYGEN
 H5_DLL herr_t H5Oflush_async(const char *app_file, const char *app_func, unsigned app_line, hid_t obj_id,
                              hid_t es_id);
+#else
+H5_DLL herr_t H5Oflush_async(hid_t obj_id, hid_t es_id);
+#endif
 /**
  *-------------------------------------------------------------------------
  * \ingroup H5O
@@ -1407,8 +1433,12 @@ H5_DLL herr_t H5Orefresh(hid_t oid);
  * \ingroup ASYNC
  * \async_variant_of{H5Orefresh}
  */
+#ifndef H5_DOXYGEN
 H5_DLL herr_t H5Orefresh_async(const char *app_file, const char *app_func, unsigned app_line, hid_t oid,
                                hid_t es_id);
+#else
+H5_DLL herr_t H5Orefresh_async(hid_t oid, hid_t es_id);
+#endif
 
 /**
  *-------------------------------------------------------------------------

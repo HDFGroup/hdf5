@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -39,13 +38,13 @@
 /********************/
 /* Local Prototypes */
 /********************/
-static herr_t H5D__scatter_file(const H5D_io_info_t *io_info, H5S_sel_iter_t *file_iter, size_t nelmts,
-                                const void *buf);
-static size_t H5D__gather_file(const H5D_io_info_t *io_info, H5S_sel_iter_t *file_iter, size_t nelmts,
-                               void *buf);
+static herr_t H5D__scatter_file(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info,
+                                H5S_sel_iter_t *file_iter, size_t nelmts, const void *buf);
+static size_t H5D__gather_file(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info,
+                               H5S_sel_iter_t *file_iter, size_t nelmts, void *buf);
 static herr_t H5D__compound_opt_read(size_t nelmts, H5S_sel_iter_t *iter, const H5D_type_info_t *type_info,
-                                     void *user_buf /*out*/);
-static herr_t H5D__compound_opt_write(size_t nelmts, const H5D_type_info_t *type_info);
+                                     uint8_t *tconv_buf, void *user_buf /*out*/);
+static herr_t H5D__compound_opt_write(size_t nelmts, const H5D_type_info_t *type_info, uint8_t *tconv_buf);
 
 /*********************/
 /* Package Variables */
@@ -81,33 +80,40 @@ H5FL_SEQ_EXTERN(hsize_t);
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__scatter_file(const H5D_io_info_t *_io_info, H5S_sel_iter_t *iter, size_t nelmts, const void *_buf)
+H5D__scatter_file(const H5D_io_info_t *_io_info, const H5D_dset_io_info_t *_dset_info, H5S_sel_iter_t *iter,
+                  size_t nelmts, const void *_buf)
 {
-    H5D_io_info_t tmp_io_info;           /* Temporary I/O info object */
-    hsize_t      *off = NULL;            /* Pointer to sequence offsets */
-    hsize_t       mem_off;               /* Offset in memory */
-    size_t        mem_curr_seq;          /* "Current sequence" in memory */
-    size_t        dset_curr_seq;         /* "Current sequence" in dataset */
-    size_t       *len = NULL;            /* Array to store sequence lengths */
-    size_t        orig_mem_len, mem_len; /* Length of sequence in memory */
-    size_t        nseq;                  /* Number of sequences generated */
-    size_t        nelem;                 /* Number of elements used in sequences */
-    size_t        dxpl_vec_size;         /* Vector length from API context's DXPL */
-    size_t        vec_size;              /* Vector length */
-    herr_t        ret_value = SUCCEED;   /* Return value */
+    H5D_io_info_t      tmp_io_info;           /* Temporary I/O info object */
+    H5D_dset_io_info_t tmp_dset_info;         /* Temporary I/O info object */
+    hsize_t           *off = NULL;            /* Pointer to sequence offsets */
+    hsize_t            mem_off;               /* Offset in memory */
+    size_t             mem_curr_seq;          /* "Current sequence" in memory */
+    size_t             dset_curr_seq;         /* "Current sequence" in dataset */
+    size_t            *len = NULL;            /* Array to store sequence lengths */
+    size_t             orig_mem_len, mem_len; /* Length of sequence in memory */
+    size_t             nseq;                  /* Number of sequences generated */
+    size_t             nelem;                 /* Number of elements used in sequences */
+    size_t             dxpl_vec_size;         /* Vector length from API context's DXPL */
+    size_t             vec_size;              /* Vector length */
+    herr_t             ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(_io_info);
+    HDassert(_dset_info);
+    HDassert(_dset_info->dset);
+    HDassert(_dset_info->store);
     HDassert(iter);
     HDassert(nelmts > 0);
     HDassert(_buf);
 
     /* Set up temporary I/O info object */
     H5MM_memcpy(&tmp_io_info, _io_info, sizeof(*_io_info));
-    tmp_io_info.op_type = H5D_IO_OP_WRITE;
-    tmp_io_info.u.wbuf  = _buf;
+    HDmemcpy(&tmp_dset_info, _dset_info, sizeof(*_dset_info));
+    tmp_io_info.op_type    = H5D_IO_OP_WRITE;
+    tmp_dset_info.buf.cvp  = _buf;
+    tmp_io_info.dsets_info = &tmp_dset_info;
 
     /* Get info from API context */
     if (H5CX_get_vec_size(&dxpl_vec_size) < 0)
@@ -135,12 +141,12 @@ H5D__scatter_file(const H5D_io_info_t *_io_info, H5S_sel_iter_t *iter, size_t ne
         mem_off                = 0;
 
         /* Write sequence list out */
-        if ((*tmp_io_info.layout_ops.writevv)(&tmp_io_info, nseq, &dset_curr_seq, len, off, (size_t)1,
-                                              &mem_curr_seq, &mem_len, &mem_off) < 0)
+        if ((*tmp_dset_info.layout_ops.writevv)(&tmp_io_info, &tmp_dset_info, nseq, &dset_curr_seq, len, off,
+                                                (size_t)1, &mem_curr_seq, &mem_len, &mem_off) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_WRITEERROR, FAIL, "write error")
 
         /* Update buffer */
-        tmp_io_info.u.wbuf = (const uint8_t *)tmp_io_info.u.wbuf + orig_mem_len;
+        tmp_dset_info.buf.cvp = (const uint8_t *)tmp_dset_info.buf.cvp + orig_mem_len;
 
         /* Decrement number of elements left to process */
         nelmts -= nelem;
@@ -178,35 +184,40 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5D__gather_file(const H5D_io_info_t *_io_info, H5S_sel_iter_t *iter, size_t nelmts, void *_buf /*out*/)
+H5D__gather_file(const H5D_io_info_t *_io_info, const H5D_dset_io_info_t *_dset_info, H5S_sel_iter_t *iter,
+                 size_t nelmts, void *_buf /*out*/)
 {
-    H5D_io_info_t tmp_io_info;           /* Temporary I/O info object */
-    hsize_t      *off = NULL;            /* Pointer to sequence offsets */
-    hsize_t       mem_off;               /* Offset in memory */
-    size_t        mem_curr_seq;          /* "Current sequence" in memory */
-    size_t        dset_curr_seq;         /* "Current sequence" in dataset */
-    size_t       *len = NULL;            /* Pointer to sequence lengths */
-    size_t        orig_mem_len, mem_len; /* Length of sequence in memory */
-    size_t        nseq;                  /* Number of sequences generated */
-    size_t        nelem;                 /* Number of elements used in sequences */
-    size_t        dxpl_vec_size;         /* Vector length from API context's DXPL */
-    size_t        vec_size;              /* Vector length */
-    size_t        ret_value = nelmts;    /* Return value */
+    H5D_io_info_t      tmp_io_info;           /* Temporary I/O info object */
+    H5D_dset_io_info_t tmp_dset_info;         /* Temporary I/O info object */
+    hsize_t           *off = NULL;            /* Pointer to sequence offsets */
+    hsize_t            mem_off;               /* Offset in memory */
+    size_t             mem_curr_seq;          /* "Current sequence" in memory */
+    size_t             dset_curr_seq;         /* "Current sequence" in dataset */
+    size_t            *len = NULL;            /* Pointer to sequence lengths */
+    size_t             orig_mem_len, mem_len; /* Length of sequence in memory */
+    size_t             nseq;                  /* Number of sequences generated */
+    size_t             nelem;                 /* Number of elements used in sequences */
+    size_t             dxpl_vec_size;         /* Vector length from API context's DXPL */
+    size_t             vec_size;              /* Vector length */
+    size_t             ret_value = nelmts;    /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(_io_info);
-    HDassert(_io_info->dset);
-    HDassert(_io_info->store);
+    HDassert(_dset_info);
+    HDassert(_dset_info->dset);
+    HDassert(_dset_info->store);
     HDassert(iter);
     HDassert(nelmts > 0);
     HDassert(_buf);
 
     /* Set up temporary I/O info object */
     H5MM_memcpy(&tmp_io_info, _io_info, sizeof(*_io_info));
-    tmp_io_info.op_type = H5D_IO_OP_READ;
-    tmp_io_info.u.rbuf  = _buf;
+    HDmemcpy(&tmp_dset_info, _dset_info, sizeof(*_dset_info));
+    tmp_io_info.op_type    = H5D_IO_OP_READ;
+    tmp_dset_info.buf.vp   = _buf;
+    tmp_io_info.dsets_info = &tmp_dset_info;
 
     /* Get info from API context */
     if (H5CX_get_vec_size(&dxpl_vec_size) < 0)
@@ -234,12 +245,12 @@ H5D__gather_file(const H5D_io_info_t *_io_info, H5S_sel_iter_t *iter, size_t nel
         mem_off                = 0;
 
         /* Read sequence list in */
-        if ((*tmp_io_info.layout_ops.readvv)(&tmp_io_info, nseq, &dset_curr_seq, len, off, (size_t)1,
-                                             &mem_curr_seq, &mem_len, &mem_off) < 0)
+        if ((*tmp_dset_info.layout_ops.readvv)(&tmp_io_info, &tmp_dset_info, nseq, &dset_curr_seq, len, off,
+                                               (size_t)1, &mem_curr_seq, &mem_len, &mem_off) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_READERROR, 0, "read error")
 
         /* Update buffer */
-        tmp_io_info.u.rbuf = (uint8_t *)tmp_io_info.u.rbuf + orig_mem_len;
+        tmp_dset_info.buf.vp = (uint8_t *)tmp_dset_info.buf.vp + orig_mem_len;
 
         /* Decrement number of elements left to process */
         nelmts -= nelem;
@@ -436,11 +447,10 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
-                   H5S_t *file_space, H5S_t *mem_space)
+H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info)
 {
-    void           *buf            = io_info->u.rbuf; /* Local pointer to application buffer */
-    H5S_sel_iter_t *mem_iter       = NULL;            /* Memory selection iteration info*/
+    void           *buf;                    /* Local pointer to application buffer */
+    H5S_sel_iter_t *mem_iter       = NULL;  /* Memory selection iteration info*/
     hbool_t         mem_iter_init  = FALSE; /* Memory selection iteration info has been initialized */
     H5S_sel_iter_t *bkg_iter       = NULL;  /* Background iteration info*/
     hbool_t         bkg_iter_init  = FALSE; /* Background iteration info has been initialized */
@@ -454,13 +464,16 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
 
     /* Sanity check */
     HDassert(io_info);
-    HDassert(type_info);
-    HDassert(mem_space);
-    HDassert(file_space);
-    HDassert(buf);
+    HDassert(dset_info);
+    HDassert(dset_info->mem_space);
+    HDassert(dset_info->file_space);
+    HDassert(dset_info->buf.vp);
+
+    /* Set buf pointer */
+    buf = dset_info->buf.vp;
 
     /* Check for NOOP read */
-    if (nelmts == 0)
+    if (dset_info->nelmts == 0)
         HGOTO_DONE(SUCCEED)
 
     /* Allocate the iterators */
@@ -472,24 +485,24 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate file iterator")
 
     /* Figure out the strip mine size. */
-    if (H5S_select_iter_init(file_iter, file_space, type_info->src_type_size,
+    if (H5S_select_iter_init(file_iter, dset_info->file_space, dset_info->type_info.src_type_size,
                              H5S_SEL_ITER_GET_SEQ_LIST_SORTED) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize file selection information")
     file_iter_init = TRUE; /*file selection iteration info has been initialized */
-    if (H5S_select_iter_init(mem_iter, mem_space, type_info->dst_type_size, 0) < 0)
+    if (H5S_select_iter_init(mem_iter, dset_info->mem_space, dset_info->type_info.dst_type_size, 0) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize memory selection information")
     mem_iter_init = TRUE; /*file selection iteration info has been initialized */
-    if (H5S_select_iter_init(bkg_iter, mem_space, type_info->dst_type_size, 0) < 0)
+    if (H5S_select_iter_init(bkg_iter, dset_info->mem_space, dset_info->type_info.dst_type_size, 0) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize background selection information")
     bkg_iter_init = TRUE; /*file selection iteration info has been initialized */
 
     /* Start strip mining... */
-    for (smine_start = 0; smine_start < nelmts; smine_start += smine_nelmts) {
+    for (smine_start = 0; smine_start < dset_info->nelmts; smine_start += smine_nelmts) {
         size_t n; /* Elements operated on */
 
         /* Go figure out how many elements to read from the file */
-        HDassert(H5S_SELECT_ITER_NELMTS(file_iter) == (nelmts - smine_start));
-        smine_nelmts = (size_t)MIN(type_info->request_nelmts, (nelmts - smine_start));
+        HDassert(H5S_SELECT_ITER_NELMTS(file_iter) == (dset_info->nelmts - smine_start));
+        smine_nelmts = (size_t)MIN(dset_info->type_info.request_nelmts, (dset_info->nelmts - smine_start));
 
         /*
          * Gather the data from disk into the datatype conversion
@@ -500,7 +513,7 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
         /*
          * Gather data
          */
-        n = H5D__gather_file(io_info, file_iter, smine_nelmts, type_info->tconv_buf /*out*/);
+        n = H5D__gather_file(io_info, dset_info, file_iter, smine_nelmts, io_info->tconv_buf /*out*/);
         if (n != smine_nelmts)
             HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file gather failed")
 
@@ -508,13 +521,15 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
          * and no conversion is needed, copy the data directly into user's buffer and
          * bypass the rest of steps.
          */
-        if (type_info->cmpd_subset && H5T_SUBSET_FALSE != type_info->cmpd_subset->subset) {
-            if (H5D__compound_opt_read(smine_nelmts, mem_iter, type_info, buf /*out*/) < 0)
+        if (dset_info->type_info.cmpd_subset &&
+            H5T_SUBSET_FALSE != dset_info->type_info.cmpd_subset->subset) {
+            if (H5D__compound_opt_read(smine_nelmts, mem_iter, &dset_info->type_info, io_info->tconv_buf,
+                                       buf /*out*/) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "datatype conversion failed")
         } /* end if */
         else {
-            if (H5T_BKG_YES == type_info->need_bkg) {
-                n = H5D__gather_mem(buf, bkg_iter, smine_nelmts, type_info->bkg_buf /*out*/);
+            if (H5T_BKG_YES == dset_info->type_info.need_bkg) {
+                n = H5D__gather_mem(buf, bkg_iter, smine_nelmts, dset_info->type_info.bkg_buf /*out*/);
                 if (n != smine_nelmts)
                     HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "mem gather failed")
             } /* end if */
@@ -522,25 +537,26 @@ H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
             /*
              * Perform datatype conversion.
              */
-            if (H5T_convert(type_info->tpath, type_info->src_type_id, type_info->dst_type_id, smine_nelmts,
-                            (size_t)0, (size_t)0, type_info->tconv_buf, type_info->bkg_buf) < 0)
+            if (H5T_convert(dset_info->type_info.tpath, dset_info->type_info.src_type_id,
+                            dset_info->type_info.dst_type_id, smine_nelmts, (size_t)0, (size_t)0,
+                            io_info->tconv_buf, dset_info->type_info.bkg_buf) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "datatype conversion failed")
 
             /* Do the data transform after the conversion (since we're using type mem_type) */
-            if (!type_info->is_xform_noop) {
+            if (!dset_info->type_info.is_xform_noop) {
                 H5Z_data_xform_t *data_transform; /* Data transform info */
 
                 /* Retrieve info from API context */
                 if (H5CX_get_data_transform(&data_transform) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get data transform info")
 
-                if (H5Z_xform_eval(data_transform, type_info->tconv_buf, smine_nelmts, type_info->mem_type) <
-                    0)
+                if (H5Z_xform_eval(data_transform, io_info->tconv_buf, smine_nelmts,
+                                   dset_info->type_info.mem_type) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "Error performing data transform")
             }
 
             /* Scatter the data into memory */
-            if (H5D__scatter_mem(type_info->tconv_buf, mem_iter, smine_nelmts, buf /*out*/) < 0)
+            if (H5D__scatter_mem(io_info->tconv_buf, mem_iter, smine_nelmts, buf /*out*/) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "scatter failed")
         } /* end else */
     }     /* end for */
@@ -576,11 +592,10 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
-                    H5S_t *file_space, H5S_t *mem_space)
+H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info)
 {
-    const void     *buf            = io_info->u.wbuf; /* Local pointer to application buffer */
-    H5S_sel_iter_t *mem_iter       = NULL;            /* Memory selection iteration info*/
+    const void     *buf;                    /* Local pointer to application buffer */
+    H5S_sel_iter_t *mem_iter       = NULL;  /* Memory selection iteration info*/
     hbool_t         mem_iter_init  = FALSE; /* Memory selection iteration info has been initialized */
     H5S_sel_iter_t *bkg_iter       = NULL;  /* Background iteration info*/
     hbool_t         bkg_iter_init  = FALSE; /* Background iteration info has been initialized */
@@ -594,13 +609,16 @@ H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_type_info_t *type_in
 
     /* Sanity check */
     HDassert(io_info);
-    HDassert(type_info);
-    HDassert(mem_space);
-    HDassert(file_space);
-    HDassert(buf);
+    HDassert(dset_info);
+    HDassert(dset_info->mem_space);
+    HDassert(dset_info->file_space);
+    HDassert(dset_info->buf.vp);
+
+    /* Set buf pointer */
+    buf = dset_info->buf.cvp;
 
     /* Check for NOOP write */
-    if (nelmts == 0)
+    if (dset_info->nelmts == 0)
         HGOTO_DONE(SUCCEED)
 
     /* Allocate the iterators */
@@ -612,32 +630,32 @@ H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_type_info_t *type_in
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate file iterator")
 
     /* Figure out the strip mine size. */
-    if (H5S_select_iter_init(file_iter, file_space, type_info->dst_type_size,
+    if (H5S_select_iter_init(file_iter, dset_info->file_space, dset_info->type_info.dst_type_size,
                              H5S_SEL_ITER_GET_SEQ_LIST_SORTED) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize file selection information")
     file_iter_init = TRUE; /*file selection iteration info has been initialized */
-    if (H5S_select_iter_init(mem_iter, mem_space, type_info->src_type_size, 0) < 0)
+    if (H5S_select_iter_init(mem_iter, dset_info->mem_space, dset_info->type_info.src_type_size, 0) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize memory selection information")
     mem_iter_init = TRUE; /*file selection iteration info has been initialized */
-    if (H5S_select_iter_init(bkg_iter, file_space, type_info->dst_type_size,
+    if (H5S_select_iter_init(bkg_iter, dset_info->file_space, dset_info->type_info.dst_type_size,
                              H5S_SEL_ITER_GET_SEQ_LIST_SORTED) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize background selection information")
     bkg_iter_init = TRUE; /*file selection iteration info has been initialized */
 
     /* Start strip mining... */
-    for (smine_start = 0; smine_start < nelmts; smine_start += smine_nelmts) {
+    for (smine_start = 0; smine_start < dset_info->nelmts; smine_start += smine_nelmts) {
         size_t n; /* Elements operated on */
 
         /* Go figure out how many elements to read from the file */
-        HDassert(H5S_SELECT_ITER_NELMTS(file_iter) == (nelmts - smine_start));
-        smine_nelmts = (size_t)MIN(type_info->request_nelmts, (nelmts - smine_start));
+        HDassert(H5S_SELECT_ITER_NELMTS(file_iter) == (dset_info->nelmts - smine_start));
+        smine_nelmts = (size_t)MIN(dset_info->type_info.request_nelmts, (dset_info->nelmts - smine_start));
 
         /*
          * Gather data from application buffer into the datatype conversion
          * buffer. Also gather data from the file into the background buffer
          * if necessary.
          */
-        n = H5D__gather_mem(buf, mem_iter, smine_nelmts, type_info->tconv_buf /*out*/);
+        n = H5D__gather_mem(buf, mem_iter, smine_nelmts, io_info->tconv_buf /*out*/);
         if (n != smine_nelmts)
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "mem gather failed")
 
@@ -647,44 +665,46 @@ H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_type_info_t *type_in
          * is a subset of the destination, the optimization is done in conversion
          * function H5T_conv_struct_opt to protect the background data.
          */
-        if (type_info->cmpd_subset && H5T_SUBSET_DST == type_info->cmpd_subset->subset &&
-            type_info->dst_type_size == type_info->cmpd_subset->copy_size) {
-            if (H5D__compound_opt_write(smine_nelmts, type_info) < 0)
+        if (dset_info->type_info.cmpd_subset && H5T_SUBSET_DST == dset_info->type_info.cmpd_subset->subset &&
+            dset_info->type_info.dst_type_size == dset_info->type_info.cmpd_subset->copy_size) {
+            if (H5D__compound_opt_write(smine_nelmts, &dset_info->type_info, io_info->tconv_buf) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "datatype conversion failed")
         } /* end if */
         else {
-            if (H5T_BKG_YES == type_info->need_bkg) {
-                n = H5D__gather_file(io_info, bkg_iter, smine_nelmts, type_info->bkg_buf /*out*/);
+            if (H5T_BKG_YES == dset_info->type_info.need_bkg) {
+                n = H5D__gather_file(io_info, dset_info, bkg_iter, smine_nelmts,
+                                     dset_info->type_info.bkg_buf /*out*/);
                 if (n != smine_nelmts)
                     HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file gather failed")
             } /* end if */
 
             /* Do the data transform before the type conversion (since
              * transforms must be done in the memory type). */
-            if (!type_info->is_xform_noop) {
+            if (!dset_info->type_info.is_xform_noop) {
                 H5Z_data_xform_t *data_transform; /* Data transform info */
 
                 /* Retrieve info from API context */
                 if (H5CX_get_data_transform(&data_transform) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get data transform info")
 
-                if (H5Z_xform_eval(data_transform, type_info->tconv_buf, smine_nelmts, type_info->mem_type) <
-                    0)
+                if (H5Z_xform_eval(data_transform, io_info->tconv_buf, smine_nelmts,
+                                   dset_info->type_info.mem_type) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "Error performing data transform")
             }
 
             /*
              * Perform datatype conversion.
              */
-            if (H5T_convert(type_info->tpath, type_info->src_type_id, type_info->dst_type_id, smine_nelmts,
-                            (size_t)0, (size_t)0, type_info->tconv_buf, type_info->bkg_buf) < 0)
+            if (H5T_convert(dset_info->type_info.tpath, dset_info->type_info.src_type_id,
+                            dset_info->type_info.dst_type_id, smine_nelmts, (size_t)0, (size_t)0,
+                            io_info->tconv_buf, dset_info->type_info.bkg_buf) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "datatype conversion failed")
         } /* end else */
 
         /*
          * Scatter the data out to the file.
          */
-        if (H5D__scatter_file(io_info, file_iter, smine_nelmts, type_info->tconv_buf) < 0)
+        if (H5D__scatter_file(io_info, dset_info, file_iter, smine_nelmts, io_info->tconv_buf) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "scatter failed")
     } /* end for */
 
@@ -740,7 +760,7 @@ done:
  */
 static herr_t
 H5D__compound_opt_read(size_t nelmts, H5S_sel_iter_t *iter, const H5D_type_info_t *type_info,
-                       void *user_buf /*out*/)
+                       uint8_t *tconv_buf, void *user_buf /*out*/)
 {
     uint8_t *ubuf = (uint8_t *)user_buf; /* Cast for pointer arithmetic	*/
     uint8_t *xdbuf;                      /* Pointer into dataset buffer */
@@ -784,7 +804,7 @@ H5D__compound_opt_read(size_t nelmts, H5S_sel_iter_t *iter, const H5D_type_info_
     copy_size = type_info->cmpd_subset->copy_size;
 
     /* Loop until all elements are written */
-    xdbuf = type_info->tconv_buf;
+    xdbuf = tconv_buf;
     while (nelmts > 0) {
         size_t nseq;     /* Number of sequences generated */
         size_t curr_seq; /* Current sequence being processed */
@@ -869,7 +889,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__compound_opt_write(size_t nelmts, const H5D_type_info_t *type_info)
+H5D__compound_opt_write(size_t nelmts, const H5D_type_info_t *type_info, uint8_t *tconv_buf)
 {
     uint8_t *xsbuf, *xdbuf;          /* Source & destination pointers into dataset buffer */
     size_t   src_stride, dst_stride; /* Strides through source & destination datatypes */
@@ -886,8 +906,8 @@ H5D__compound_opt_write(size_t nelmts, const H5D_type_info_t *type_info)
     dst_stride = type_info->dst_type_size;
 
     /* Loop until all elements are written */
-    xsbuf = (uint8_t *)type_info->tconv_buf;
-    xdbuf = (uint8_t *)type_info->tconv_buf;
+    xsbuf = tconv_buf;
+    xdbuf = tconv_buf;
     for (i = 0; i < nelmts; i++) {
         HDmemmove(xdbuf, xsbuf, dst_stride);
 

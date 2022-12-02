@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -126,8 +125,9 @@ H5F__accum_read(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t si
             HDassert(!accum->buf || (accum->alloc_size >= accum->size));
 
             /* Current read adjoins or overlaps with metadata accumulator */
-            if (H5F_addr_overlap(addr, size, accum->loc, accum->size) || ((addr + size) == accum->loc) ||
-                (accum->loc + accum->size) == addr) {
+            if (H5F_addr_defined(accum->loc) &&
+                (H5F_addr_overlap(addr, size, accum->loc, accum->size) || ((addr + size) == accum->loc) ||
+                 (accum->loc + accum->size) == addr)) {
                 size_t  amount_before; /* Amount to read before current accumulator */
                 haddr_t new_addr;      /* New address of the accumulator buffer */
                 size_t  new_size;      /* New size of the accumulator buffer */
@@ -439,7 +439,7 @@ H5F__accum_write(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t s
             /* Check if there is already metadata in the accumulator */
             if (accum->size > 0) {
                 /* Check if the new metadata adjoins the beginning of the current accumulator */
-                if ((addr + size) == accum->loc) {
+                if (H5F_addr_defined(accum->loc) && (addr + size) == accum->loc) {
                     /* Check if we need to adjust accumulator size */
                     if (H5F__accum_adjust(accum, file, H5F_ACCUM_PREPEND, size) < 0)
                         HGOTO_ERROR(H5E_IO, H5E_CANTRESIZE, FAIL, "can't adjust metadata accumulator")
@@ -464,7 +464,7 @@ H5F__accum_write(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t s
                     accum->dirty_off = 0;
                 } /* end if */
                 /* Check if the new metadata adjoins the end of the current accumulator */
-                else if (addr == (accum->loc + accum->size)) {
+                else if (H5F_addr_defined(accum->loc) && addr == (accum->loc + accum->size)) {
                     /* Check if we need to adjust accumulator size */
                     if (H5F__accum_adjust(accum, file, H5F_ACCUM_APPEND, size) < 0)
                         HGOTO_ERROR(H5E_IO, H5E_CANTRESIZE, FAIL, "can't adjust metadata accumulator")
@@ -485,7 +485,8 @@ H5F__accum_write(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t s
                     accum->size += size;
                 } /* end if */
                 /* Check if the piece of metadata being written overlaps the metadata accumulator */
-                else if (H5F_addr_overlap(addr, size, accum->loc, accum->size)) {
+                else if (H5F_addr_defined(accum->loc) &&
+                         H5F_addr_overlap(addr, size, accum->loc, accum->size)) {
                     size_t add_size; /* New size of the accumulator buffer */
 
                     /* Check if the new metadata is entirely within the current accumulator */
@@ -745,7 +746,7 @@ H5F__accum_write(H5F_shared_t *f_sh, H5FD_mem_t map_type, haddr_t addr, size_t s
             /* (Note that this could be improved by updating the accumulator
              *  with [some of] the information just read in. -QAK)
              */
-            if (H5F_addr_overlap(addr, size, accum->loc, accum->size)) {
+            if (H5F_addr_defined(accum->loc) && H5F_addr_overlap(addr, size, accum->loc, accum->size)) {
                 /* Check for write starting before beginning of accumulator */
                 if (H5F_addr_le(addr, accum->loc)) {
                     /* Check for write ending within accumulator */
@@ -867,7 +868,7 @@ H5F__accum_free(H5F_shared_t *f_sh, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr
     file = f_sh->lf;
 
     /* Adjust the metadata accumulator to remove the freed block, if it overlaps */
-    if ((f_sh->feature_flags & H5FD_FEAT_ACCUMULATE_METADATA) &&
+    if ((f_sh->feature_flags & H5FD_FEAT_ACCUMULATE_METADATA) && H5F_addr_defined(accum->loc) &&
         H5F_addr_overlap(addr, size, accum->loc, accum->size)) {
         size_t overlap_size; /* Size of overlap with accumulator */
 

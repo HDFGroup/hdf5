@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -17,14 +16,16 @@ import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 
 /**
- * <p>
+ * @page ERRORSLIB HDF5 Library Errors and Exceptions
  * The class HDF5LibraryException returns errors raised by the HDF5 library.
- * <p>
- * Each major error code from the HDF-5 Library is represented by a sub-class of
+ *
+ * Each major error code from the HDF5 Library is represented by a sub-class of
  * this class, and by default the 'detailedMessage' is set according to the
- * minor error code from the HDF-5 Library.
+ * minor error code from the HDF5 Library.
  * <p>
- * For major and minor error codes, see <b>H5Epublic.h</b> in the HDF-5 library.
+ * For major and minor error codes, @see <b>@ref H5E</b> in the HDF5 library.
+ *
+ * @defgroup JERRLIB HDF5 Library JNI Exception Interface
  *
  */
 
@@ -36,6 +37,8 @@ public class HDF5LibraryException extends HDF5Exception {
     private final long minorErrorNumber;
 
     /**
+     * @ingroup JERRLIB
+     *
      * Constructs an <code>HDF5LibraryException</code> with no specified detail
      * message.
      */
@@ -43,7 +46,7 @@ public class HDF5LibraryException extends HDF5Exception {
     {
         super();
 
-        // this code forces the loading of the HDF-5 library
+        // this code forces the loading of the HDF5 library
         // to assure that the native methods are available
         try {
             H5.H5open();
@@ -57,6 +60,8 @@ public class HDF5LibraryException extends HDF5Exception {
     }
 
     /**
+     * @ingroup JERRLIB
+     *
      * Constructs an <code>HDF5LibraryException</code> with the specified detail
      * message.
      *
@@ -66,7 +71,7 @@ public class HDF5LibraryException extends HDF5Exception {
     public HDF5LibraryException(String s)
     {
         super(s);
-        // this code forces the loading of the HDF-5 library
+        // this code forces the loading of the HDF5 library
         // to assure that the native methods are available
         try {
             H5.H5open();
@@ -78,6 +83,8 @@ public class HDF5LibraryException extends HDF5Exception {
     }
 
     /**
+     * @ingroup JERRLIB
+     *
      * Get the major error number of the first error on the HDF5 library error
      * stack.
      *
@@ -87,6 +94,8 @@ public class HDF5LibraryException extends HDF5Exception {
     private native long _getMajorErrorNumber();
 
     /**
+     * @ingroup JERRLIB
+     *
      * Get the minor error number of the first error on the HDF5 library error
      * stack.
      *
@@ -96,9 +105,11 @@ public class HDF5LibraryException extends HDF5Exception {
     private native long _getMinorErrorNumber();
 
     /**
-     * Return a error message for the minor error number.
-     * <p>
-     * These messages come from <b>H5Epublic.h</b>.
+     * @ingroup JERRLIB
+     *
+     * Return an error message for the minor error number.
+     *
+     * These messages come from <b>@ref H5E</b>.
      *
      * @param err_code
      *            the error code
@@ -349,20 +360,24 @@ public class HDF5LibraryException extends HDF5Exception {
     }
 
     /**
-     * Prints this <code>HDF5LibraryException</code>, the HDF-5 Library error
-     * stack, and the Java stack trace to the standard error stream.
+     * @ingroup JERRLIB
+     *
+     * Prints this <code>HDF5LibraryException</code>, the HDF5 Library error
+     * stack, and and the Java stack trace to the standard error stream.
      */
     @Override
     public void printStackTrace()
     {
         System.err.println(this);
-        printStackTrace0(null);  // the HDF-5 Library error stack
+        printStackTrace0(null);  // the HDF5 Library error stack
         super.printStackTrace(); // the Java stack trace
     }
 
     /**
-     * Prints this <code>HDF5LibraryException</code> the HDF-5 Library error
-     * stack, and the Java stack trace to the specified print stream.
+     * @ingroup JERRLIB
+     *
+     * Prints this <code>HDF5LibraryException</code> the HDF5 Library error
+     * stack, and and the Java stack trace to the specified print stream.
      *
      * @param f
      *            the file print stream.
@@ -382,14 +397,14 @@ public class HDF5LibraryException extends HDF5Exception {
             catch (Exception ex) {
                 System.err.println(this);
             };
-            // the HDF-5 Library error stack
+            // the HDF5 Library error stack
             printStackTrace0(f.getPath());
             super.printStackTrace(); // the Java stack trace
         }
     }
 
     /*
-     * This private method calls the HDF-5 library to extract the error codes
+     * This private method calls the HDF5 library to extract the error codes
      * and error stack.
      */
     private native void printStackTrace0(String s);

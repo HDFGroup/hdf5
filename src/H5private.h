@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -148,74 +147,6 @@
 #define uthash_free(ptr, sz) H5MM_free(ptr) /* Ignoring sz is intentional */
 #define HASH_NONFATAL_OOM    1              /* Don't abort() on out-of-memory */
 #include "uthash.h"
-
-/*
- * MPE Instrumentation support
- */
-#ifdef H5_HAVE_MPE
-/*------------------------------------------------------------------------
- * Purpose:    Begin to collect MPE log information for a function. It should
- *             be ahead of the actual function's process.
- *
- * Programmer: Long Wang
- *
- *------------------------------------------------------------------------
- */
-#include "mpe.h"
-/*
- * #define eventa(func_name)   h5_mpe_ ## func_name ## _a
- * #define eventb(func_name)   h5_mpe_ ## func_name ## _b
- */
-#define eventa(func_name) h5_mpe_eventa
-#define eventb(func_name) h5_mpe_eventb
-#define MPE_LOG_VARS                                                                                         \
-    static int eventa(__func__) = -1;                                                                        \
-    static int eventb(__func__) = -1;                                                                        \
-    char       p_event_start[128];
-
-/* Hardwire the color to "red", since that's what all the routines are using
- * now.  In the future, if we want to change that color for a given routine,
- * we should define a "FUNC_ENTER_API_COLOR" macro which takes an extra 'color'
- * parameter and then make additional FUNC_ENTER_<foo>_COLOR macros to get that
- * color information down to the BEGIN_MPE_LOG macro (which should have a new
- * BEGIN_MPE_LOG_COLOR variant). -QAK
- */
-#define BEGIN_MPE_LOG                                                                                        \
-    if (H5_MPEinit_g) {                                                                                      \
-        snprintf(p_event_start, sizeof(p_event_start), "start %s", __func__);                                \
-        if (eventa(__func__) == -1 && eventb(__func__) == -1) {                                              \
-            const char *p_color = "red";                                                                     \
-            eventa(__func__)    = MPE_Log_get_event_number();                                                \
-            eventb(__func__)    = MPE_Log_get_event_number();                                                \
-            MPE_Describe_state(eventa(__func__), eventb(__func__), __func__, p_color);                       \
-        }                                                                                                    \
-        MPE_Log_event(eventa(__func__), 0, p_event_start);                                                   \
-    }
-
-/*------------------------------------------------------------------------
- * Purpose:   Finish the collection of MPE log information for a function.
- *            It should be after the actual function's process.
- *
- * Programmer: Long Wang
- */
-#define FINISH_MPE_LOG                                                                                       \
-    if (H5_MPEinit_g) {                                                                                      \
-        MPE_Log_event(eventb(__func__), 0, __func__);                                                        \
-    }
-
-#else                  /* H5_HAVE_MPE */
-#define MPE_LOG_VARS   /* void */
-#define BEGIN_MPE_LOG  /* void */
-#define FINISH_MPE_LOG /* void */
-
-#endif /* H5_HAVE_MPE */
-
-/*
- * dmalloc (debugging malloc) support
- */
-#ifdef H5_HAVE_DMALLOC_H
-#include "dmalloc.h"
-#endif /* H5_HAVE_DMALLOC_H */
 
 /*
  * NT doesn't define SIGBUS, but since NT only runs on processors
@@ -593,6 +524,7 @@ H5_DLL herr_t   H5_timer_stop(H5_timer_t *timer /*in,out*/);
 H5_DLL herr_t   H5_timer_get_times(H5_timer_t timer, H5_timevals_t *times /*in,out*/);
 H5_DLL herr_t   H5_timer_get_total_times(H5_timer_t timer, H5_timevals_t *times /*in,out*/);
 H5_DLL char    *H5_timer_get_time_string(double seconds);
+H5_DLL char    *H5_strcasestr(const char *haystack, const char *needle);
 
 /* Depth of object copy */
 typedef enum {
@@ -1385,6 +1317,13 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDstrcat
 #define HDstrcat(X, Y) strcat(X, Y)
 #endif
+#ifndef HDstrcasestr
+#if defined(H5_HAVE_STRCASESTR)
+#define HDstrcasestr(X, Y) strcasestr(X, Y)
+#else
+#define HDstrcasestr(X, Y) H5_strcasestr(X, Y)
+#endif
+#endif
 #ifndef HDstrchr
 #define HDstrchr(S, C) strchr(S, C)
 #endif
@@ -1414,6 +1353,9 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #endif
 #ifndef HDstrlen
 #define HDstrlen(S) strlen(S)
+#endif
+#ifndef HDstrnlen
+#define HDstrnlen(S, L) strnlen(S, L)
 #endif
 #ifndef HDstrncat
 #define HDstrncat(X, Y, Z) strncat(X, Y, Z)
@@ -2043,10 +1985,6 @@ H5_DLLVAR hbool_t H5_use_selection_io_g;
 #define H5_POP_FUNC  /* void */
 #endif               /* H5_HAVE_CODESTACK */
 
-#ifdef H5_HAVE_MPE
-extern hbool_t H5_MPEinit_g; /* Has the MPE Library been initialized? */
-#endif
-
 /* Forward declaration of H5CXpush() / H5CXpop() */
 /* (Including H5CXprivate.h creates bad circular dependencies - QAK, 3/18/2018) */
 H5_DLL herr_t H5CX_push(void);
@@ -2088,9 +2026,7 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
     H5_API_LOCK
 
 /* Local variables for API routines */
-#define FUNC_ENTER_API_VARS                                                                                  \
-    MPE_LOG_VARS                                                                                             \
-    H5TRACE_DECL
+#define FUNC_ENTER_API_VARS H5TRACE_DECL
 
 #define FUNC_ENTER_API_COMMON                                                                                \
     FUNC_ENTER_API_VARS                                                                                      \
@@ -2112,9 +2048,7 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
     if (H5CX_push() < 0)                                                                                     \
         HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err, "can't set API context")                                     \
     else                                                                                                     \
-        api_ctx_pushed = TRUE;                                                                               \
-                                                                                                             \
-    BEGIN_MPE_LOG
+        api_ctx_pushed = TRUE;
 
 /* Use this macro for all "normal" API functions */
 #define FUNC_ENTER_API(err)                                                                                  \
@@ -2156,7 +2090,6 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
             {                                                                                                \
                 FUNC_ENTER_API_COMMON                                                                        \
                 H5_PUSH_FUNC                                                                                 \
-                BEGIN_MPE_LOG                                                                                \
                 {
 
 /*
@@ -2174,13 +2107,12 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
                     FUNC_ENTER_API_VARS                                                                      \
                     FUNC_ENTER_COMMON_NOERR(H5_IS_API(__func__));                                            \
                     FUNC_ENTER_API_THREADSAFE;                                                               \
-                    BEGIN_MPE_LOG                                                                            \
                     {
 
 /*
  * Use this macro for API functions that should only perform initialization
  *      of the library or an interface, but not push any state (API context,
- *      function name, start MPE logging, etc) examples are: H5open.
+ *      function name, etc.) examples are: H5open.
  *
  */
 #define FUNC_ENTER_API_NOPUSH(err)                                                                           \
@@ -2368,9 +2300,7 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
     H5_API_UNLOCK                                                                                            \
     H5_API_SET_CANCEL
 
-#define FUNC_LEAVE_API_COMMON(ret_value)                                                                     \
-    FINISH_MPE_LOG                                                                                           \
-    H5TRACE_RETURN(ret_value);
+#define FUNC_LEAVE_API_COMMON(ret_value) H5TRACE_RETURN(ret_value);
 
 #define FUNC_LEAVE_API(ret_value)                                                                            \
     ;                                                                                                        \
@@ -2504,7 +2434,9 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
 
 /* Union for const/non-const pointer for use by functions that manipulate
  * pointers but do not write to their targets or return pointers to const
- * specified locations.  This helps us avoid compiler warnings. */
+ * specified locations.  Also used for I/O functions that work for read and
+ * write - these functions are expected to never write to these locations in the
+ * write case.  This helps us avoid compiler warnings. */
 typedef union {
     void       *vp;
     const void *cvp;

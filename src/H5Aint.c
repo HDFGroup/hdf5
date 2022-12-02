@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -835,6 +834,10 @@ H5A__write(H5A_t *attr, const H5T_t *mem_type, const void *buf)
     HDassert(attr);
     HDassert(mem_type);
     HDassert(buf);
+
+    /* Patch the top level file pointer in attr->shared->dt->shared->u.vlen.f if needed */
+    if (H5T_patch_vlen_file(attr->shared->dt, H5F_VOL_OBJ(attr->oloc.file)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't patch VL datatype file pointer")
 
     /* Get # of elements for attribute's dataspace */
     if ((snelmts = H5S_GET_EXTENT_NPOINTS(attr->shared->ds)) < 0)

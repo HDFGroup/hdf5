@@ -1,7 +1,6 @@
 ## Process this file with autoconf to produce configure.
 ##
 ## Copyright by The HDF Group.
-## Copyright by the Board of Trustees of the University of Illinois.
 ## All rights reserved.
 ##
 ## This file is part of HDF5.  The full HDF5 copyright notice, including
@@ -23,7 +22,7 @@ AC_PREREQ([2.69])
 ## NOTE: Do not forget to change the version number here when we do a
 ## release!!!
 ##
-AC_INIT([HDF5], [1.13.3-1], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.13.4-1], [help@hdfgroup.org])
 
 AC_CONFIG_SRCDIR([src/H5.c])
 AC_CONFIG_HEADERS([src/H5config.h])
@@ -537,31 +536,7 @@ AC_CHECK_SIZEOF([double])
 AC_CHECK_SIZEOF([long double])
 
 ## ----------------------------------------------------------------------
-## Check for non-standard extension __FLOAT128
-##
-HAVE_FLOAT128=0
-HAVE_QUADMATH=0
-FLT128_DIG=0
-LDBL_DIG=0
-
-AC_CHECK_SIZEOF([__float128])
-AC_CHECK_SIZEOF([_Quad])
-AC_CHECK_HEADERS([quadmath.h], [HAVE_QUADMATH=1], [])
-PAC_FC_LDBL_DIG
-
-AC_SUBST([PAC_C_MAX_REAL_PRECISION])
-
-if test "$ac_cv_sizeof___float128" != 0 && test "$FLT128_DIG" != 0 ; then
-  AC_DEFINE([HAVE_FLOAT128], [1], [Determine if __float128 is available])
-  PAC_C_MAX_REAL_PRECISION=$FLT128_DIG
-else
-  PAC_C_MAX_REAL_PRECISION=$LDBL_DIG
-fi
-AC_DEFINE_UNQUOTED([PAC_C_MAX_REAL_PRECISION], $PAC_C_MAX_REAL_PRECISION, [Determine the maximum decimal precision in C])
-AC_MSG_RESULT([$PAC_C_MAX_REAL_PRECISION])
-
-## ----------------------------------------------------------------------
-## Check if they would like the Fortran interface compiled
+## Check if the Fortran interface should be enabled
 ##
 
 ## This needs to be exposed for the library info file even if Fortran is disabled.
@@ -580,6 +555,30 @@ AC_ARG_ENABLE([fortran],
 AC_MSG_RESULT([$HDF_FORTRAN])
 
 if test "X$HDF_FORTRAN" = "Xyes"; then
+
+## ----------------------------------------------------------------------
+## Check for non-standard extension __FLOAT128
+##
+  HAVE_FLOAT128=0
+  HAVE_QUADMATH=0
+  FLT128_DIG=0
+  LDBL_DIG=0
+
+  AC_CHECK_SIZEOF([__float128])
+  AC_CHECK_SIZEOF([_Quad])
+  AC_CHECK_HEADERS([quadmath.h], [HAVE_QUADMATH=1], [])
+  PAC_FC_LDBL_DIG
+
+  AC_SUBST([PAC_C_MAX_REAL_PRECISION])
+
+  if test "$ac_cv_sizeof___float128" != 0 && test "$FLT128_DIG" != 0 ; then
+    AC_DEFINE([HAVE_FLOAT128], [1], [Determine if __float128 is available])
+    PAC_C_MAX_REAL_PRECISION=$FLT128_DIG
+  else
+    PAC_C_MAX_REAL_PRECISION=$LDBL_DIG
+  fi
+  AC_DEFINE_UNQUOTED([PAC_C_MAX_REAL_PRECISION], $PAC_C_MAX_REAL_PRECISION, [Determine the maximum decimal precision in C])
+  AC_MSG_RESULT([$PAC_C_MAX_REAL_PRECISION])
 
 ## We will output an include file for Fortran, H5config_f.inc which
 ## contains various configure definitions used by the Fortran Library.
@@ -624,7 +623,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
     [fmoddir=$withval],
     [fmoddir="\${includedir}"])
   AC_SUBST([fmoddir], [$fmoddir])
-￼
+
   ## Change to the Fortran 90 language
   AC_LANG_PUSH(Fortran)
 
@@ -1213,6 +1212,7 @@ if test "X$HDF5_DOXYGEN" = "Xyes"; then
 
   AC_SUBST([DOXYGEN_PACKAGE])
   AC_SUBST([DOXYGEN_VERSION_STRING])
+  AC_SUBST([DOXYGEN_DIR])
   AC_SUBST([DOXYGEN_INCLUDE_ALIASES])
   AC_SUBST([DOXYGEN_PROJECT_LOGO])
   AC_SUBST([DOXYGEN_PROJECT_BRIEF])
@@ -1237,9 +1237,12 @@ if test "X$HDF5_DOXYGEN" = "Xyes"; then
 # SRCDIR Environment variables used inside doxygen macro for the source location:
   DOXYGEN_PACKAGE=${PACKAGE_NAME}
   DOXYGEN_VERSION_STRING=${PACKAGE_VERSION}
+  DOXYGEN_DIR='$(SRCDIR)/doxygen'
+  DOXYGEN_INCLUDE_ALIASES_PATH='$(SRCDIR)/doxygen'
   DOXYGEN_INCLUDE_ALIASES='$(SRCDIR)/doxygen/aliases'
+  DOXYGEN_VERBATIM_VARS='DOXYGEN_INCLUDE_ALIASES'
   DOXYGEN_PROJECT_LOGO='$(SRCDIR)/doxygen/img/HDFG-logo.png'
-  DOXYGEN_PROJECT_BRIEF=''
+  DOXYGEN_PROJECT_BRIEF='API Reference'
   DOXYGEN_INPUT_DIRECTORY='$(SRCDIR) $(SRCDIR)/doxygen/dox'
   DOXYGEN_OPTIMIZE_OUTPUT_FOR_C=YES
   DOXYGEN_MACRO_EXPANSION=YES
@@ -1249,14 +1252,14 @@ if test "X$HDF5_DOXYGEN" = "Xyes"; then
   DOXYGEN_HTML_HEADER='$(SRCDIR)/doxygen/hdf5_header.html'
   DOXYGEN_HTML_FOOTER='$(SRCDIR)/doxygen/hdf5_footer.html'
   DOXYGEN_HTML_EXTRA_STYLESHEET='$(SRCDIR)/doxygen/hdf5doxy.css'
-  DOXYGEN_HTML_EXTRA_FILES='$(SRCDIR)/doxygen/hdf5_navtree_hacks.js $(SRCDIR)/doxygen/img/FF-IH_FileGroup.gif $(SRCDIR)/doxygen/img/FF-IH_FileObject.gif $(SRCDIR)/doxygen/img/FileFormatSpecChunkDiagram.jpg $(SRCDIR)/doxygen/img/ftv2node.png $(SRCDIR)/doxygen/img/ftv2pnode.png $(SRCDIR)/doxygen/img/HDFG-logo.png $(SRCDIR)/doxygen/img/IOFlow2.gif $(SRCDIR)/doxygen/img/IOFlow3.gif $(SRCDIR)/doxygen/img/IOFlow.gif $(SRCDIR)/doxygen/img/PaletteExample1.gif $(SRCDIR)/doxygen/img/Palettes.fm.anc.gif'
+  DOXYGEN_HTML_EXTRA_FILES='$(SRCDIR)/doxygen/hdf5_navtree_hacks.js'
   DOXYGEN_TAG_FILE=hdf5.tag
   DOXYGEN_SERVER_BASED_SEARCH=NO
   DOXYGEN_EXTERNAL_SEARCH=NO
   DOXYGEN_SEARCHENGINE_URL=
   DOXYGEN_STRIP_FROM_PATH='$(SRCDIR)'
   DOXYGEN_STRIP_FROM_INC_PATH='$(SRCDIR)'
-  DOXYGEN_PREDEFINED='H5_HAVE_DIRECT H5_HAVE_LIBHDFS H5_HAVE_MAP_API H5_HAVE_PARALLEL H5_HAVE_ROS3_VFD'
+  DOXYGEN_PREDEFINED='H5_HAVE_DIRECT H5_HAVE_LIBHDFS H5_HAVE_MAP_API H5_HAVE_PARALLEL H5_HAVE_ROS3_VFD H5_DOXYGEN H5_HAVE_SUBFILING_VFD H5_HAVE_IOC_VFD'
 
   DX_INIT_DOXYGEN([HDF5], [./doxygen/Doxyfile], [hdf5lib_docs])
 fi
@@ -1534,83 +1537,6 @@ AC_ARG_WITH([fnord],
   ])
 
 ## ----------------------------------------------------------------------
-## Is dmalloc (debug malloc library) requested? It has a header file
-## `dmalloc.h' and a library `-ldmalloc' and their locations might be
-## specified with the `--with-dmalloc' command-line switch. The value
-## is an include path and/or a library path. If the library path is
-## specified then it must be preceded by a comma.
-##
-AC_SUBST([HAVE_DMALLOC])
-
-## Default is not present
-HAVE_DMALLOC=no
-
-AC_ARG_WITH([dmalloc],
-            [AS_HELP_STRING([--with-dmalloc=DIR],
-                            [Use dmalloc memory debugging aid [default=no]])],,
-            [withval=no])
-
-case "X-$withval" in
-  X-yes)
-    HAVE_DMALLOC="yes"
-    AC_CHECK_HEADERS([dmalloc.h],, [unset HAVE_DMALLOC])
-    if test "x$HAVE_DMALLOC" = "xyes"; then
-      AC_CHECK_LIB([dmalloc], [dmalloc_shutdown],, [unset HAVE_DMALLOC])
-    fi
-    if test -z "$HAVE_DMALLOC" -a -n "$HDF5_CONFIG_ABORT"; then
-      AC_MSG_ERROR([couldn't find dmalloc library])
-    fi
-    ;;
-  X-|X-no|X-none)
-    HAVE_DMALLOC="no"
-    AC_MSG_CHECKING([for dmalloc library])
-    AC_MSG_RESULT([suppressed])
-    ;;
-  *)
-    HAVE_DMALLOC="yes"
-    case "$withval" in
-      *,*)
-        dmalloc_inc="`echo $withval |cut -f1 -d,`"
-        dmalloc_lib="`echo $withval |cut -f2 -d, -s`"
-        ;;
-      *)
-        if test -n "$withval"; then
-          dmalloc_inc="$withval/include"
-          dmalloc_lib="$withval/lib"
-        fi
-        ;;
-    esac
-
-    saved_CPPFLAGS="$CPPFLAGS"
-    saved_AM_CPPFLAGS="$AM_CPPFLAGS"
-    saved_LDFLAGS="$LDFLAGS"
-    saved_AM_LDFLAGS="$AM_LDFLAGS"
-
-    if test -n "$dmalloc_inc"; then
-      CPPFLAGS="$CPPFLAGS -I$dmalloc_inc"
-      AM_CPPFLAGS="$AM_CPPFLAGS -I$dmalloc_inc"
-    fi
-
-    AC_CHECK_HEADERS([dmalloc.h],,[CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"] [unset HAVE_DMALLOC])
-
-    if test "x$HAVE_DMALLOC" = "xyes"; then
-      if test -n "$dmalloc_lib"; then
-        LDFLAGS="$LDFLAGS -L$dmalloc_lib"
-        AM_LDFLAGS="$AM_LDFLAGS -L$dmalloc_lib"
-      fi
-
-      AC_CHECK_LIB([dmalloc], [dmalloc_shutdown],, [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_DMALLOC])
-    fi
-
-    if test -z "$HAVE_DMALLOC" -a -n "$HDF5_CONFIG_ABORT"; then
-      AC_MSG_ERROR([couldn't find dmalloc library])
-    fi
-    ;;
-esac
-
-
-
-## ----------------------------------------------------------------------
 ## Make the external filters list available to *.in files
 ## At this point it's unset (no external filters by default) but it
 ## will be filled in during the deflate (zlib) and szip processing
@@ -1811,10 +1737,7 @@ if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
                 #include "szlib.h"
             ],[[
                 /* SZ_encoder_enabled returns 1 if encoder is present */
-                if(SZ_encoder_enabled() == 1)
-                    exit(0);
-                else
-                    exit(1);
+                return SZ_encoder_enabled() != 1;
             ]])]
         , [hdf5_cv_szlib_can_encode=yes], [hdf5_cv_szlib_can_encode=no],)]
    )
@@ -2135,7 +2058,7 @@ AC_CHECK_FUNCS([alarm asprintf clock_gettime fcntl flock fork])
 AC_CHECK_FUNCS([gethostname getrusage gettimeofday])
 AC_CHECK_FUNCS([lstat rand_r random setsysinfo])
 AC_CHECK_FUNCS([siglongjmp sigsetjmp sigprocmask])
-AC_CHECK_FUNCS([srandom strdup symlink])
+AC_CHECK_FUNCS([srandom strcasestr strdup symlink])
 AC_CHECK_FUNCS([tmpfile vasprintf waitpid])
 
 ## ----------------------------------------------------------------------
@@ -2654,8 +2577,6 @@ AC_ARG_ENABLE([using-memchecker],
                               library.  Enabling this causes the library to be
                               more picky about its memory operations and also
                               disables the library's free space manager code.
-                              This option is orthogonal to the
-                              --enable-memory-alloc-sanity-check option.
                               [default=no]
                               ])],
               [USINGMEMCHECKER=$enableval])
@@ -2682,50 +2603,6 @@ case "X-$USINGMEMCHECKER" in
     ;;
   *)
       AC_MSG_ERROR([Unrecognized value: $USINGMEMCHECKER])
-    ;;
-esac
-
-## ----------------------------------------------------------------------
-## Check if they would like to enable the internal memory allocation sanity
-##     checking code.
-##
-AC_MSG_CHECKING([whether internal memory allocation sanity checking is used])
-AC_ARG_ENABLE([memory-alloc-sanity-check],
-              [AS_HELP_STRING([--enable-memory-alloc-sanity-check],
-                              [Enable this option to turn on internal memory
-                              allocation sanity checking.  This could cause
-                              more memory use and somewhat slower allocation.
-                              This option may also cause issues with HDF5
-                              filter plugins, so should not be enabled if
-                              filters are to be used.  This option is orthogonal
-                              to the --enable-using-memchecker option.
-                               [default=no]
-                              ])],
-              [MEMORYALLOCSANITYCHECK=$enableval])
-
-## Allow this variable to be substituted in
-## other files (src/libhdf5.settings.in, etc.)
-AC_SUBST([MEMORYALLOCSANITYCHECK])
-
-## Set default
-if test "X-$MEMORYALLOCSANITYCHECK" = X- ; then
-# Should consider enabling this option by default for
-# 'developer' builds if that build mode is added in
-# the future
-  MEMORYALLOCSANITYCHECK=no
-fi
-
-case "X-$MEMORYALLOCSANITYCHECK" in
-  X-yes)
-      AC_DEFINE([MEMORY_ALLOC_SANITY_CHECK], [1],
-                [Define to enable internal memory allocation sanity checking.])
-      AC_MSG_RESULT([yes])
-    ;;
-  X-no)
-      AC_MSG_RESULT([no])
-    ;;
-  *)
-      AC_MSG_ERROR([Unrecognized value: $MEMORYALLOCSANITYCHECK])
     ;;
 esac
 
@@ -2802,7 +2679,6 @@ esac
 ## build also needs to have values defined.
 ##
 AC_SUBST([ADD_PARALLEL_FILES]) ADD_PARALLEL_FILES="no"
-AC_SUBST([MPE]) MPE=no
 AC_SUBST([INSTRUMENT_LIBRARY]) INSTRUMENT_LIBRARY=no
 AC_SUBST([PARALLEL_FILTERED_WRITES])
 AC_SUBST([LARGE_PARALLEL_IO])
@@ -2900,69 +2776,6 @@ if test -n "$PARALLEL"; then
       AC_MSG_ERROR([Unrecognized value: $INSTRUMENT_LIBRARY])
       ;;
   esac
-
-  ## --------------------------------------------------------------------
-  ## Do we want MPE instrumentation feature on?
-  ##
-  ## This must be done after enable-parallel is checked since it depends
-  ## on a mpich compiler.
-  ##
-  MPE=yes
-  AC_ARG_WITH([mpe],
-              [AS_HELP_STRING([--with-mpe=DIR],
-                              [Use MPE instrumentation [default=no]])],,
-              [withval=no])
-
-  case "X-$withval" in
-    X-|X-no|X-none)
-      AC_MSG_CHECKING([for MPE])
-      AC_MSG_RESULT([suppressed])
-      unset MPE
-      ;;
-    X-yes)
-      AC_CHECK_HEADERS([mpe.h],, [unset MPE])
-      AC_CHECK_LIB([mpe], [MPE_Init_log],, [unset MPE])
-      ;;
-    *)
-      case "$withval" in
-        *,*)
-          mpe_inc="`echo $withval | cut -f1 -d,`"
-          mpe_lib="`echo $withval | cut -f2 -d, -s`"
-          ;;
-        *)
-          if test -n "$withval"; then
-            mpe_inc="$withval/include"
-            mpe_lib="$withval/lib"
-          fi
-          ;;
-      esac
-
-      if test -n "$mpe_inc"; then
-        saved_CPPFLAGS="$CPPFLAGS"
-        saved_AM_CPPFLAGS="$AM_CPPFLAGS"
-        CPPFLAGS="$CPPFLAGS -I$mpe_inc"
-        AM_CPPFLAGS="$AM_CPPFLAGS -I$mpe_inc"
-        AC_CHECK_HEADERS([mpe.h],, [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"; unset MPE])
-      else
-        AC_CHECK_HEADERS([mpe.h],, [unset MPE])
-      fi
-
-      if test -n "$mpe_lib"; then
-        saved_LDFLAGS="$LDFLAGS"
-        saved_AM_LDFLAGS="$AM_LDFLAGS"
-        LDFLAGS="$LDFLAGS -L$mpe_lib"
-        AM_LDFLAGS="$AM_LDFLAGS -L$mpe_lib"
-        AC_CHECK_LIB([mpe], [MPE_Init_log],,
-                     [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset MPE])
-      else
-        AC_CHECK_LIB([mpe], [MPE_Init_log],, [unset MPE])
-      fi
-      ;;
-  esac
-
-  if test "X-$MPE" = "X-yes"; then
-    AC_DEFINE([HAVE_MPE], [1], [Define if we have MPE support])
-  fi
 
   ## ----------------------------------------------------------------------
   ## Check for the MPI functions necessary for the Parallel Compression
@@ -3211,6 +3024,32 @@ if test "X$SUBFILING_VFD" = "Xyes"; then
     AC_DEFINE([HAVE_IOC_VFD], [1],
             [Define if the I/O Concentrator virtual file driver (VFD) should be compiled])
 
+    if test "X${PARALLEL}" != "Xyes"; then
+      AC_MSG_ERROR([--enable-parallel is required for --enable-subfiling-vfd])
+    fi
+
+    ## ----------------------------------------------------------------------
+    ## Check for MPI_Comm_split_type availability
+    ##
+    AC_MSG_CHECKING([for MPI_Comm_split_type function])
+
+    AC_LINK_IFELSE(
+      [AC_LANG_PROGRAM(
+          [[
+              #include <mpi.h>
+          ]],
+          [[
+              MPI_Comm intra_comm;
+              MPI_Init(0, (void *) 0);
+              MPI_Comm_split_type(MPI_COMM_WORLD, MPI_COMM_TYPE_SHARED, 0, MPI_INFO_NULL, &intra_comm);
+          ]]
+      )],
+      [AC_MSG_RESULT([yes])],
+      [AC_MSG_RESULT([no])
+       AC_MSG_ERROR([unable to link MPI program that uses MPI_Comm_split_type])
+       ]
+    )
+
     # Set-up mercury
     HAVE_MERCURY="yes"
     mercury_dir="$ac_abs_confdir/src/H5FDsubfiling/mercury"
@@ -3219,17 +3058,13 @@ if test "X$SUBFILING_VFD" = "Xyes"; then
     CPPFLAGS="$CPPFLAGS -I$mercury_inc"
     AM_CPPFLAGS="$AM_CPPFLAGS -I$mercury_inc"
 
-    if test "X${PARALLEL}" != "Xyes"; then
-      AC_MSG_ERROR([--enable-parallel is required for --enable-subfiling-vfd])
-    fi
-
     HAVE_STDATOMIC_H="yes"
     AC_CHECK_HEADERS([stdatomic.h],,[HAVE_STDATOMIC_H="no"])
     if test "x$HAVE_STDATOMIC_H" = "xno"; then
       AC_MSG_ERROR([Subfiling VFD requires atomic operations support. C11 stdatomic.h NOT available.])
     fi
 
-# Checks for libraries.
+    # Checks for libraries.
     AC_SEARCH_LIBS([shm_open], [rt])
     AC_CHECK_LIB([pthread], [pthread_self],[], [echo "Error: Required library pthread not found." && exit 1])
 

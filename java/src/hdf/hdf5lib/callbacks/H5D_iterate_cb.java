@@ -18,6 +18,8 @@ package hdf.hdf5lib.callbacks;
  */
 public interface H5D_iterate_cb extends Callbacks {
     /**
+     * @ingroup JCALL
+     *
      *  application callback for each dataset element
      *
      *  @param elem      the pointer to the element in memory containing the current point

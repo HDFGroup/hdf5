@@ -77,17 +77,14 @@ Dimension scales w/ new references: @DIMENSION_SCALES_WITH_NEW_REF@
                Default API mapping: @DEFAULT_API_VERSION@
     With deprecated public symbols: @HDF5_ENABLE_DEPRECATED_SYMBOLS@
             I/O filters (external): @EXTERNAL_FILTERS@
-                               MPE: @H5_HAVE_LIBLMPE@
                         Direct VFD: @H5_HAVE_DIRECT@
                         Mirror VFD: @H5_HAVE_MIRROR_VFD@
                      Subfiling VFD: @H5_HAVE_SUBFILING_VFD@
                 (Read-Only) S3 VFD: @H5_HAVE_ROS3_VFD@
               (Read-Only) HDFS VFD: @H5_HAVE_LIBHDFS@
-                           dmalloc: @H5_HAVE_LIBDMALLOC@
     Packages w/ extra debug output: @INTERNAL_DEBUG_OUTPUT@
                        API Tracing: @HDF5_ENABLE_TRACE@
               Using memory checker: @HDF5_ENABLE_USING_MEMCHECKER@
-   Memory allocation sanity checks: @HDF5_MEMORY_ALLOC_SANITY_CHECK@
             Function Stack Tracing: @HDF5_ENABLE_CODESTACK@
                   Use file locking: @HDF5_FILE_LOCKING_SETTING@
          Strict File Format Checks: @HDF5_STRICT_FORMAT_CHECKS@

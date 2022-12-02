@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -6255,12 +6254,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_vol_cap_flags(hid_t plist_id, unsigned *cap_flags)
+H5Pget_vol_cap_flags(hid_t plist_id, uint64_t *cap_flags)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*Iu", plist_id, cap_flags);
+    H5TRACE2("e", "i*UL", plist_id, cap_flags);
 
     /* Get the 'cap_flags' from the connector */
     if (cap_flags) {
@@ -6279,10 +6278,10 @@ H5Pget_vol_cap_flags(hid_t plist_id, unsigned *cap_flags)
             /* Query the capability flags */
             if (H5VL_get_cap_flags(&connector_prop, cap_flags) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get VOL connector capability flags")
-        } /* end if */
+        }
         else
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
-    } /* end if */
+    }
 
 done:
     FUNC_LEAVE_API(ret_value)

@@ -1,7 +1,6 @@
 #!/usr/bin/env perl
 ##
 # Copyright by The HDF Group.
-# Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
@@ -77,7 +76,6 @@ $Source = "";
                "H5G_obj_t"                  => "Go",
                "H5G_stat_t"                 => "Gs",
                "hsize_t"                    => "h",
-               "H5_alloc_stats_t"           => "Ha",
                "H5_atclose_func_t"          => "Hc",
                "hssize_t"                   => "Hs",
                "H5E_major_t"                => "i",     # H5E_major_t is typedef'd to hid_t

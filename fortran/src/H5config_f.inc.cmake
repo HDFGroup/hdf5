@@ -11,10 +11,16 @@
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 ! fortran/src/H5config_f.inc. Generated from fortran/src/H5config_f.inc.in by configure
 
-! Define if we have parallel support
+! Define if there is parallel support
 #cmakedefine01 H5_HAVE_PARALLEL
 #if H5_HAVE_PARALLEL == 0
 #undef H5_HAVE_PARALLEL
+#endif
+
+! Define if there is subfiling support
+#cmakedefine01 H5_HAVE_SUBFILING_VFD
+#if H5_HAVE_SUBFILING_VFD == 0
+#undef H5_HAVE_SUBFILING_VFD
 #endif
 
 ! Define if the intrinsic function STORAGE_SIZE exists

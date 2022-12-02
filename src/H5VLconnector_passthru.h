@@ -56,6 +56,30 @@ extern "C" {
 
 /* Helper routines for VOL connector authors */
 H5_DLL herr_t H5VLcmp_connector_cls(int *cmp, hid_t connector_id1, hid_t connector_id2);
+/**
+ * \ingroup H5VL
+ *
+ * \brief Wrap an internal object with a "wrap context" and register an
+ *        hid_t for the resulting object.
+ *
+ * \param[in] obj  VOL object.
+ * \param[in] type VOL-managed object class. Allowable values are:
+ *                 - #H5I_FILE
+ *                 - #H5I_GROUP
+ *                 - #H5I_DATATYPE
+ *                 - #H5I_DATASET
+ *                 - #H5I_MAP
+ *                 - #H5I_ATTR
+ *
+ * \return \hid_t
+ *
+ * \note This routine is mainly targeted toward wrapping objects for
+ *       iteration routine callbacks (i.e. the callbacks from H5Aiterate*,
+ *       H5Literate* / H5Lvisit*, and H5Ovisit* ). Using it in an application
+ *       will return an error indicating the API context isn't available or
+ *       can't be retrieved.
+ *
+ */
 H5_DLL hid_t  H5VLwrap_register(void *obj, H5I_type_t type);
 H5_DLL herr_t H5VLretrieve_lib_state(void **state);
 H5_DLL herr_t H5VLstart_lib_state(void);
@@ -73,7 +97,7 @@ H5_DLL herr_t H5VLfree_wrap_ctx(void *wrap_ctx, hid_t connector_id);
 /* Public wrappers for generic callbacks */
 H5_DLL herr_t H5VLinitialize(hid_t connector_id, hid_t vipl_id);
 H5_DLL herr_t H5VLterminate(hid_t connector_id);
-H5_DLL herr_t H5VLget_cap_flags(hid_t connector_id, unsigned *cap_flags);
+H5_DLL herr_t H5VLget_cap_flags(hid_t connector_id, uint64_t *cap_flags);
 H5_DLL herr_t H5VLget_value(hid_t connector_id, H5VL_class_value_t *conn_value);
 
 /* Public wrappers for info fields and callbacks */
@@ -107,10 +131,12 @@ H5_DLL void  *H5VLdataset_create(void *obj, const H5VL_loc_params_t *loc_params,
                                  hid_t dapl_id, hid_t dxpl_id, void **req);
 H5_DLL void  *H5VLdataset_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
                                const char *name, hid_t dapl_id, hid_t dxpl_id, void **req);
-H5_DLL herr_t H5VLdataset_read(void *dset, hid_t connector_id, hid_t mem_type_id, hid_t mem_space_id,
-                               hid_t file_space_id, hid_t plist_id, void *buf, void **req);
-H5_DLL herr_t H5VLdataset_write(void *dset, hid_t connector_id, hid_t mem_type_id, hid_t mem_space_id,
-                                hid_t file_space_id, hid_t plist_id, const void *buf, void **req);
+H5_DLL herr_t H5VLdataset_read(size_t count, void *dset[], hid_t connector_id, hid_t mem_type_id[],
+                               hid_t mem_space_id[], hid_t file_space_id[], hid_t plist_id, void *buf[],
+                               void **req);
+H5_DLL herr_t H5VLdataset_write(size_t count, void *dset[], hid_t connector_id, hid_t mem_type_id[],
+                                hid_t mem_space_id[], hid_t file_space_id[], hid_t plist_id,
+                                const void *buf[], void **req);
 H5_DLL herr_t H5VLdataset_get(void *dset, hid_t connector_id, H5VL_dataset_get_args_t *args, hid_t dxpl_id,
                               void **req);
 H5_DLL herr_t H5VLdataset_specific(void *obj, hid_t connector_id, H5VL_dataset_specific_args_t *args,
@@ -191,7 +217,7 @@ H5_DLL herr_t H5VLobject_optional(void *obj, const H5VL_loc_params_t *loc_params
 /* Public wrappers for connector/container introspection callbacks */
 H5_DLL herr_t H5VLintrospect_get_conn_cls(void *obj, hid_t connector_id, H5VL_get_conn_lvl_t lvl,
                                           const H5VL_class_t **conn_cls);
-H5_DLL herr_t H5VLintrospect_get_cap_flags(const void *info, hid_t connector_id, unsigned *cap_flags);
+H5_DLL herr_t H5VLintrospect_get_cap_flags(const void *info, hid_t connector_id, uint64_t *cap_flags);
 H5_DLL herr_t H5VLintrospect_opt_query(void *obj, hid_t connector_id, H5VL_subclass_t subcls, int opt_type,
                                        uint64_t *flags);
 

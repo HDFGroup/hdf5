@@ -4,7 +4,6 @@ use warnings;
 
 #
 # Copyright by The HDF Group.
-# Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
@@ -144,7 +143,7 @@ foreach $arg (@ARGV) {
             next if $name =~ /^(_beginthread|(Initialize|Enter|Leave)CriticalSection|TlsAlloc)$/;
 
             # These are MPI function calls. Ignore them.
-            next if $name =~ /^(MPI_|MPE_)/;
+            next if $name =~ /^(MPI_)/;
 
             # These are POSIX threads function calls. Ignore them.
             next if $name =~ /^pthread_/;

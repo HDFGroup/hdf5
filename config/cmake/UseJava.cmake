@@ -1448,6 +1448,7 @@ function(create_javadoc _target)
 
     add_custom_target(${_target}_javadoc ALL
         COMMAND ${Java_JAVADOC_EXECUTABLE}
+                -Xdoclint:none
                 ${_javadoc_options}
                 ${_javadoc_files}
                 ${_javadoc_packages}

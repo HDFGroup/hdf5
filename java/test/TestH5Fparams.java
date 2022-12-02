@@ -77,6 +77,7 @@ public class TestH5Fparams {
         H5.H5Funmount(-1, null);
     }
 
+    @SuppressWarnings("deprecation")
     @Ignore
     public void testH5Fis_hdf5_text()
     {

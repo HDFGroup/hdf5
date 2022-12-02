@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -16,17 +15,21 @@ package hdf.hdf5lib.exceptions;
 /**
  * The class HDF5LibraryException returns errors raised by the HDF5 library.
  * <p>
- * This sub-class represents HDF-5 major error code <b>H5E_SYM</b>
+ * This sub-class represents HDF5 major error code <b>H5E_SYM</b>
  */
 
 public class HDF5SymbolTableException extends HDF5LibraryException {
     /**
+     * @ingroup JERRLIB
+     *
      * Constructs an <code>HDF5SymbolTableException</code> with no specified
      * detail message.
      */
     public HDF5SymbolTableException() { super(); }
 
     /**
+     * @ingroup JERRLIB
+     *
      * Constructs an <code>HDF5SymbolTableException</code> with the specified
      * detail message.
      *

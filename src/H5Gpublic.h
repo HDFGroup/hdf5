@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -130,8 +129,13 @@ H5_DLL hid_t H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcp
  * \ingroup ASYNC
  * \async_variant_of{H5Gcreate}
  */
+#ifndef H5_DOXYGEN
 H5_DLL hid_t H5Gcreate_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
                              const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id, hid_t es_id);
+#else
+H5_DLL hid_t  H5Gcreate_async(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id,
+                              hid_t es_id);
+#endif
 
 /**
  *-------------------------------------------------------------------------
@@ -175,7 +179,7 @@ H5_DLL hid_t H5Gcreate_async(const char *app_file, const char *app_func, unsigne
  *          H5Gclose() when the group is no longer needed so that resource
  *          leaks will not develop.
  *
- * \see H5Olink(), H5Dcreate(), Using Identifiers
+ * \see H5Olink(), H5Gcreate()
  *
  * \since 1.8.0
  *
@@ -217,8 +221,12 @@ H5_DLL hid_t H5Gopen2(hid_t loc_id, const char *name, hid_t gapl_id);
  * \ingroup ASYNC
  * \async_variant_of{H5Gopen}
  */
+#ifndef H5_DOXYGEN
 H5_DLL hid_t H5Gopen_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
                            const char *name, hid_t gapl_id, hid_t es_id);
+#else
+H5_DLL hid_t  H5Gopen_async(hid_t loc_id, const char *name, hid_t gapl_id, hid_t es_id);
+#endif
 
 /**
  *-------------------------------------------------------------------------
@@ -276,8 +284,12 @@ H5_DLL herr_t H5Gget_info(hid_t loc_id, H5G_info_t *ginfo);
  * \ingroup ASYNC
  * \async_variant_of{H5Gget_info}
  */
+#ifndef H5_DOXYGEN
 H5_DLL herr_t H5Gget_info_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
                                 H5G_info_t *ginfo /*out*/, hid_t es_id);
+#else
+H5_DLL herr_t H5Gget_info_async(hid_t loc_id, H5G_info_t *ginfo /*out*/, hid_t es_id);
+#endif
 
 /**
  *-------------------------------------------------------------------------
@@ -318,9 +330,14 @@ H5_DLL herr_t H5Gget_info_by_name(hid_t loc_id, const char *name, H5G_info_t *gi
  * \ingroup ASYNC
  * \async_variant_of{H5Gget_info_by_name}
  */
+#ifndef H5_DOXYGEN
 H5_DLL herr_t H5Gget_info_by_name_async(const char *app_file, const char *app_func, unsigned app_line,
                                         hid_t loc_id, const char *name, H5G_info_t *ginfo /*out*/,
                                         hid_t lapl_id, hid_t es_id);
+#else
+H5_DLL herr_t H5Gget_info_by_name_async(hid_t loc_id, const char *name, H5G_info_t *ginfo /*out*/,
+                                        hid_t lapl_id, hid_t es_id);
+#endif
 
 /**
  *-------------------------------------------------------------------------
@@ -375,10 +392,16 @@ H5_DLL herr_t H5Gget_info_by_idx(hid_t loc_id, const char *group_name, H5_index_
  * \ingroup ASYNC
  * \async_variant_of{H5Gget_info_by_idx}
  */
+#ifndef H5_DOXYGEN
 H5_DLL herr_t H5Gget_info_by_idx_async(const char *app_file, const char *app_func, unsigned app_line,
                                        hid_t loc_id, const char *group_name, H5_index_t idx_type,
                                        H5_iter_order_t order, hsize_t n, H5G_info_t *ginfo /*out*/,
                                        hid_t lapl_id, hid_t es_id);
+#else
+H5_DLL herr_t H5Gget_info_by_idx_async(hid_t loc_id, const char *group_name, H5_index_t idx_type,
+                                       H5_iter_order_t order, hsize_t n, H5G_info_t *ginfo /*out*/,
+                                       hid_t lapl_id, hid_t es_id);
+#endif
 
 /**
  *-------------------------------------------------------------------------
@@ -464,8 +487,12 @@ H5_DLL herr_t H5Gclose(hid_t group_id);
  * \ingroup ASYNC
  * \async_variant_of{H5Gclose}
  */
+#ifndef H5_DOXYGEN
 H5_DLL herr_t H5Gclose_async(const char *app_file, const char *app_func, unsigned app_line, hid_t group_id,
                              hid_t es_id);
+#else
+H5_DLL herr_t H5Gclose_async(hid_t group_id, hid_t es_id);
+#endif
 
 /// \cond DEV
 /* API Wrappers for async routines */
@@ -735,7 +762,7 @@ H5_DLL herr_t H5Glink2(hid_t cur_loc_id, const char *cur_name, H5G_link_t type, 
  *
  * \attention Exercise care in moving groups as it is possible to render data in
  *            a file inaccessible with H5Gmove(). See The Group Interface in the
- *            HDF5 User's Guide.
+ *            \ref UG.
  *
  * \version 1.8.0 Function deprecated in this release.
  *
@@ -766,7 +793,7 @@ H5_DLL herr_t H5Gmove(hid_t src_loc_id, const char *src_name, const char *dst_na
  *
  * \attention Exercise care in moving groups as it is possible to render data in
  *            a file inaccessible with H5Gmove2(). See The Group Interface in the
- *            HDF5 User's Guide.
+ *            \ref UG.
  *
  * \version 1.8.0 Function deprecated in this release.
  *
@@ -803,11 +830,11 @@ H5_DLL herr_t H5Gmove2(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
  *          Note that space identified as freespace is available for re-use only
  *          as long as the file remains open; once a file has been closed, the
  *          HDF5 library loses track of freespace. See “Freespace Management” in
- *          the HDF5 User's Guide for further details.
+ *          the \ref UG for further details.
  *
  * \attention Exercise care in moving groups as it is possible to render data in
  *            a file inaccessible with H5Gunlink(). See The Group Interface in the
- *            HDF5 User's Guide.
+ *            \ref UG.
  *
  * \version 1.8.0 Function deprecated in this release.
  *

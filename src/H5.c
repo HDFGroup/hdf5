@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -71,8 +70,8 @@ static int H5__mpi_delete_cb(MPI_Comm comm, int keyval, void *attr_val, int *fla
 /*****************************/
 
 /* Library incompatible release versions, develop releases are incompatible by design */
-const unsigned VERS_RELEASE_EXCEPTIONS[]    = {0, 1, 2, 3};
-const unsigned VERS_RELEASE_EXCEPTIONS_SIZE = 4;
+const unsigned VERS_RELEASE_EXCEPTIONS[]    = {0, 1, 2, 3, 4};
+const unsigned VERS_RELEASE_EXCEPTIONS_SIZE = 5;
 
 /* statically initialize block for pthread_once call used in initializing */
 /* the first global mutex                                                 */
@@ -84,10 +83,6 @@ hbool_t H5_libterm_g = FALSE; /* Library isn't being shutdown */
 #endif
 
 hbool_t H5_use_selection_io_g = FALSE;
-
-#ifdef H5_HAVE_MPE
-hbool_t H5_MPEinit_g = FALSE; /* MPE Library hasn't been initialized */
-#endif
 
 char           H5_lib_vers_info_g[] = H5_VERS_INFO;
 static hbool_t H5_dont_atexit_g     = FALSE;
@@ -168,18 +163,6 @@ H5_init_library(void)
 
         MPI_Initialized(&mpi_initialized);
         MPI_Finalized(&mpi_finalized);
-
-#ifdef H5_HAVE_MPE
-        /* Initialize MPE instrumentation library. */
-        if (!H5_MPEinit_g) {
-            int mpe_code;
-            if (mpi_initialized && !mpi_finalized) {
-                mpe_code = MPE_Init_log();
-                HDassert(mpe_code >= 0);
-                H5_MPEinit_g = TRUE;
-            }
-        }
-#endif /*H5_HAVE_MPE*/
 
         /* add an attribute on MPI_COMM_SELF to call H5_term_library
            when it is destroyed, i.e. on MPI_Finalize */
@@ -511,26 +494,6 @@ H5_term_library(void)
         } /* end if */
     }     /* end if */
 
-#ifdef H5_HAVE_MPE
-    /* Close MPE instrumentation library.  May need to move this
-     * down if any of the below code involves using the instrumentation code.
-     */
-    if (H5_MPEinit_g) {
-        int mpi_initialized;
-        int mpi_finalized;
-        int mpe_code;
-
-        MPI_Initialized(&mpi_initialized);
-        MPI_Finalized(&mpi_finalized);
-
-        if (mpi_initialized && !mpi_finalized) {
-            mpe_code = MPE_Finish_log("h5log");
-            HDassert(mpe_code >= 0);
-        }                     /* end if */
-        H5_MPEinit_g = FALSE; /* turn it off no matter what */
-    }                         /* end if */
-#endif
-
     /* Free open debugging streams */
     while (H5_debug_g.open_stream) {
         H5_debug_open_stream_t *tmp_open_stream;
@@ -540,11 +503,6 @@ H5_term_library(void)
         H5_debug_g.open_stream = H5_debug_g.open_stream->next;
         (void)H5MM_free(tmp_open_stream);
     } /* end while */
-
-#if defined H5_MEMORY_ALLOC_SANITY_CHECK
-    /* Sanity check memory allocations */
-    H5MM_final_sanity_check();
-#endif /* H5_MEMORY_ALLOC_SANITY_CHECK */
 
     /* Reset flag indicating that the library is being shut down */
     H5_TERM_GLOBAL = FALSE;
@@ -715,46 +673,6 @@ H5get_free_list_sizes(size_t *reg_size /*out*/, size_t *arr_size /*out*/, size_t
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5get_free_list_sizes() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5get_alloc_stats
- *
- * Purpose:    Gets the memory allocation statistics for the library, if the
- *    --enable-memory-alloc-sanity-check option was given when building the
- *      library.  Applications can check whether this option was enabled by
- *    detecting if the 'H5_MEMORY_ALLOC_SANITY_CHECK' macro is defined.  This
- *    option is enabled by default for debug builds of the library and
- *    disabled by default for non-debug builds.  If the option is not enabled,
- *    all the values returned with be 0.  These statistics are global for the
- *    entire library, but don't include allocations from chunked dataset I/O
- *    filters or non-native VOL connectors.
- *
- * Parameters:
- *  H5_alloc_stats_t *stats;            OUT: Memory allocation statistics
- *
- * Return:    Success:    non-negative
- *        Failure:    negative
- *
- * Programmer:  Quincey Koziol
- *              Saturday, March 7, 2020
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5get_alloc_stats(H5_alloc_stats_t *stats /*out*/)
-{
-    herr_t ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "x", stats);
-
-    /* Call the internal allocation stat routine to get the values */
-    if (H5MM_get_alloc_stats(stats) < 0)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't get allocation stats")
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5get_alloc_stats() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5__debug_mask
@@ -1208,9 +1126,10 @@ H5close(void)
  *
  * Return:
  *
- *      Success:    A pointer to the allocated buffer.
+ *      Success:    A pointer to the allocated buffer or NULL if the size
+ *                  parameter is zero.
  *
- *      Failure:    NULL
+ *      Failure:    NULL (but may also be NULL w/ size 0!)
  *
  *-------------------------------------------------------------------------
  */
@@ -1221,6 +1140,9 @@ H5allocate_memory(size_t size, hbool_t clear)
 
     FUNC_ENTER_API_NOINIT
     H5TRACE2("*x", "zb", size, clear);
+
+    if (0 == size)
+        return NULL;
 
     if (clear)
         ret_value = H5MM_calloc(size);

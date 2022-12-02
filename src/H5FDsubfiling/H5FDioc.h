@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -84,11 +84,6 @@
  *          Property List. A pointer to an instance of this structure is
  *          a parameter to H5Pset_fapl_ioc() and H5Pget_fapl_ioc().
  *
- *          The #H5FD_IOC driver shares much of its configuration with the
- *          #H5FD_SUBFILING driver and so its configuration structure
- *          contains an instance of a H5FD_subfiling_shared_config_t
- *          configuration structure.
- *
  * \var uint32_t H5FD_ioc_config_t::magic
  *      A somewhat unique number which distinguishes the #H5FD_IOC driver
  *      from other drivers. Used in combination with a version number, it
@@ -101,31 +96,17 @@
  *      number or an error will be raised. Currently, this field should be set
  *      to #H5FD_IOC_CURR_FAPL_VERSION.
  *
- * \var hid_t H5FD_ioc_config_t::under_fapl_id
- *      The File Access Property List which is setup with the file driver
- *      to use for I/O to the HDF5 stub file. The stub file looks like a
- *      typical HDF5 file, but currently only contains the superblock metadata
- *      for compatibility with legacy HDF5 applications. The default driver used
- *      is currently the #H5FD_MPIO driver.
- *
  * \var int32_t H5FD_ioc_config_t::thread_pool_size
  *      The number of I/O concentrator worker threads to use.
  *
  *      This value can also be set or adjusted with the #H5FD_IOC_THREAD_POOL_SIZE
  *      environment variable.
  *
- * \var H5FD_subfiling_shared_config_t H5FD_ioc_config_t::subf_config
- *      Subfiling configuration data for the parent #H5FD_SUBFILING driver. This
- *      includes the sub-file stripe size, number of I/O concentrators, IOC
- *      selection method, etc.
- *
  */
 typedef struct H5FD_ioc_config_t {
     uint32_t magic;            /* Must be set to H5FD_IOC_FAPL_MAGIC */
     uint32_t version;          /* Must be set to H5FD_IOC_CURR_FAPL_VERSION */
-    hid_t    under_fapl_id;    /* FAPL setup with the VFD to use for I/O to the HDF5 stub file */
     int32_t  thread_pool_size; /* Number of I/O concentrator worker threads to use */
-    H5FD_subfiling_shared_config_t subf_config; /* Subfiling driver configuration */
 } H5FD_ioc_config_t;
 //! <!-- [H5FD_ioc_config_t_snip] -->
 
@@ -152,7 +133,7 @@ H5_DLL hid_t H5FD_ioc_init(void);
  *
  *          The #H5FD_IOC driver is a reference implementation of an "I/O concentrator"
  *          file driver that works in conjunction with the #H5FD_SUBFILING driver and
- *          provides the I/O backend for servicing I/O requests to sub-files.
+ *          provides the I/O backend for servicing I/O requests to subfiles.
  *
  *          Typically, an HDF5 application won't need to call this routine directly.
  *          The #H5FD_IOC driver is usually set up as a side effect of an HDF5 application

@@ -2,10 +2,10 @@
  * Copyright by The HDF Group.                                               *
  * All rights reserved.                                                      *
  *                                                                           *
- * This file is part of HDF5. The full HDF5 copyright notice, including      *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -352,15 +352,6 @@ extern "C" {
  *          via dlls that can vary with Visual Studio version and debug vs
  *          release builds. Static links to the MSVC CRT can also introduce
  *          new memory allocator state.
- *
- *          Note that the HDF5 library enabled memory sanity checks by default
- *          in debug builds for many years. The heap canaries introduced to
- *          buffers by this mechanism would cause problems when filters
- *          attempted to reallocate these buffers. The sanity checks are no
- *          longer enabled by default in any configuration. When in doubt,
- *          memory sanity checking can be disabled explicitly by configuring
- *          with `--disable-memory-alloc-sanity-check` in the Autotools or
- *          setting `HDF5_MEMORY_ALLOC_SANITY_CHECK` to `OFF` in CMake.
  *
  *          The library does provide H5allocate_memory() and H5free_memory()
  *          functions that will use the library's allocation and free functions,

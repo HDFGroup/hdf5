@@ -50,7 +50,7 @@ HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
   #001: (file name) line (number) in H5D__read_api_common(): can't read data
     major: Dataset
     minor: Read failed
-  #002: (file name) line (number) in H5VL_dataset_read(): dataset read failed
+  #002: (file name) line (number) in H5VL_dataset_read_direct(): dataset read failed
     major: Virtual Object Layer
     minor: Read failed
   #003: (file name) line (number) in H5VL__dataset_read(): dataset read failed

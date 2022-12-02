@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -17,11 +16,12 @@ import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.hdf5lib.exceptions.HDF5JavaException;
 
 /**
+ * @page HDFNATIVE Native Arrays of Numbers
  * This class encapsulates native methods to deal with arrays of numbers,
  * converting from numbers to bytes and bytes to numbers.
  * <p>
- * These routines are used by class <b>HDFArray</b> to pass data to and from the
- * HDF-5 library.
+ * These routines are used by class @ref HDFARRAY to pass data to and from the
+ * HDF5 library.
  * <p>
  * Methods xxxToByte() convert a Java array of primitive numbers (int, short,
  * ...) to a Java array of bytes. Methods byteToXxx() convert from a Java array
@@ -30,7 +30,7 @@ import hdf.hdf5lib.exceptions.HDF5JavaException;
  * Variant interfaces convert a section of an array, and also can convert to
  * sub-classes of Java <b>Number</b>.
  * <P>
- * <b>See also:</b> hdf.hdf5lib.HDFArray.
+ * @see @ref HDFARRAY.
  */
 
 public class HDFNativeData {

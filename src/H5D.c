@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -50,10 +49,11 @@ static hid_t  H5D__create_api_common(hid_t loc_id, const char *name, hid_t type_
 static hid_t  H5D__open_api_common(hid_t loc_id, const char *name, hid_t dapl_id, void **token_ptr,
                                    H5VL_object_t **_vol_obj_ptr);
 static hid_t  H5D__get_space_api_common(hid_t dset_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr);
-static herr_t H5D__read_api_common(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id,
-                                   hid_t dxpl_id, void *buf, void **token_ptr, H5VL_object_t **_vol_obj_ptr);
-static herr_t H5D__write_api_common(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id,
-                                    hid_t dxpl_id, const void *buf, void **token_ptr,
+static herr_t H5D__read_api_common(size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t mem_space_id[],
+                                   hid_t file_space_id[], hid_t dxpl_id, void *buf[], void **token_ptr,
+                                   H5VL_object_t **_vol_obj_ptr);
+static herr_t H5D__write_api_common(size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t mem_space_id[],
+                                    hid_t file_space_id[], hid_t dxpl_id, const void *buf[], void **token_ptr,
                                     H5VL_object_t **_vol_obj_ptr);
 static herr_t H5D__set_extent_api_common(hid_t dset_id, const hsize_t size[], void **token_ptr,
                                          H5VL_object_t **_vol_obj_ptr);
@@ -943,25 +943,63 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__read_api_common(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id,
-                     void *buf, void **token_ptr, H5VL_object_t **_vol_obj_ptr)
+H5D__read_api_common(size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t mem_space_id[],
+                     hid_t file_space_id[], hid_t dxpl_id, void *buf[], void **token_ptr,
+                     H5VL_object_t **_vol_obj_ptr)
 {
     H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
-    herr_t ret_value = SUCCEED;                       /* Return value */
+    void   *obj_local;                                /* Local buffer for obj */
+    void  **obj = &obj_local;                         /* Array of object pointers */
+    H5VL_t *connector;                                /* VOL connector pointer */
+    size_t  i;                                        /* Local index variable */
+    herr_t  ret_value = SUCCEED;                      /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    if (mem_space_id < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid memory dataspace ID")
-    if (file_space_id < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file dataspace ID")
+    if (count == 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "count must be greater than 0")
+    if (!dset_id)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dset_id array not provided")
+    if (!mem_type_id)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "mem_type_id array not provided")
+    if (!mem_space_id)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "mem_space_id array not provided")
+    if (!file_space_id)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file_space_id array not provided")
+    if (!buf)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "buf array not provided")
 
-    /* Get dataset pointer */
-    if (NULL == (*vol_obj_ptr = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+    /* Allocate obj array if necessary */
+    if (count > 1)
+        if (NULL == (obj = (void **)H5MM_malloc(count * sizeof(void *))))
+            HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, FAIL, "can't allocate space for object array")
+
+    /* Get vol_obj_ptr (return just the first dataset to caller if requested) */
+    if (NULL == (*vol_obj_ptr = (H5VL_object_t *)H5I_object_verify(dset_id[0], H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dset_id is not a dataset ID")
+
+    /* Save the connector of the first dataset.  Unpack the connector and call
+     * the "direct" read function here to avoid allocating an array of count
+     * H5VL_object_ts. */
+    connector = (*vol_obj_ptr)->connector;
+
+    /* Build obj array */
+    obj[0] = (*vol_obj_ptr)->data;
+    for (i = 1; i < count; i++) {
+        /* Get the object */
+        if (NULL == (tmp_vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id[i], H5I_DATASET)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dset_id is not a dataset ID")
+        obj[i] = tmp_vol_obj->data;
+
+        /* Make sure the class matches */
+        if (tmp_vol_obj->connector->cls->value != connector->cls->value)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+                        "datasets are accessed through different VOL connectors and can't be used in the "
+                        "same I/O call")
+    }
 
     /* Get the default dataset transfer property list if the user didn't provide one */
     if (H5P_DEFAULT == dxpl_id)
@@ -970,11 +1008,15 @@ H5D__read_api_common(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
 
     /* Read the data */
-    if (H5VL_dataset_read(*vol_obj_ptr, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf, token_ptr) <
-        0)
+    if (H5VL_dataset_read_direct(count, obj, connector, mem_type_id, mem_space_id, file_space_id, dxpl_id,
+                                 buf, token_ptr) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
 
 done:
+    /* Free memory */
+    if (obj != &obj_local)
+        H5MM_free(obj);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__read_api_common() */
 
@@ -1022,7 +1064,8 @@ H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_i
     H5TRACE6("e", "iiiiix", dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf);
 
     /* Read the data */
-    if (H5D__read_api_common(dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf, NULL, NULL) < 0)
+    if (H5D__read_api_common(1, &dset_id, &mem_type_id, &mem_space_id, &file_space_id, dxpl_id, &buf, NULL,
+                             NULL) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't synchronously read data")
 
 done:
@@ -1059,8 +1102,8 @@ H5Dread_async(const char *app_file, const char *app_func, unsigned app_line, hid
         token_ptr = &token; /* Point at token for VOL connector to set up */
 
     /* Read the data */
-    if (H5D__read_api_common(dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf, token_ptr,
-                             &vol_obj) < 0)
+    if (H5D__read_api_common(1, &dset_id, &mem_type_id, &mem_space_id, &file_space_id, dxpl_id, &buf,
+                             token_ptr, &vol_obj) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't asynchronously read data")
 
     /* If a token was created, add the token to the event set */
@@ -1074,6 +1117,84 @@ H5Dread_async(const char *app_file, const char *app_func, unsigned app_line, hid
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dread_async() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Dread_multi
+ *
+ * Purpose:	Multi-version of H5Dread(), which reads selections from
+ *              multiple datasets from a file into application memory BUFS.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Jonathan Kim Nov, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Dread_multi(size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t mem_space_id[], hid_t file_space_id[],
+              hid_t dxpl_id, void *buf[] /*out*/)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE7("e", "z*i*i*i*iix", count, dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf);
+
+    if (count == 0)
+        HGOTO_DONE(SUCCEED)
+
+    /* Read the data */
+    if (H5D__read_api_common(count, dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf, NULL,
+                             NULL) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't synchronously read data")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Dread_multi() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Dread_multi_async
+ *
+ * Purpose:     Asynchronously read dataset elements from multiple
+ *              datasets.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Dread_multi_async(const char *app_file, const char *app_func, unsigned app_line, size_t count,
+                    hid_t dset_id[], hid_t mem_type_id[], hid_t mem_space_id[], hid_t file_space_id[],
+                    hid_t dxpl_id, void *buf[] /*out*/, hid_t es_id)
+{
+    H5VL_object_t *vol_obj   = NULL;            /* Dataset VOL object */
+    void          *token     = NULL;            /* Request token for async operation        */
+    void         **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    herr_t         ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE11("e", "*s*sIuz*i*i*i*iixi", app_file, app_func, app_line, count, dset_id, mem_type_id,
+              mem_space_id, file_space_id, dxpl_id, buf, es_id);
+
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token; /* Point at token for VOL connector to set up */
+
+    /* Read the data */
+    if (H5D__read_api_common(count, dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf,
+                             token_ptr, &vol_obj) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't asynchronously read data")
+
+    /* If a token was created, add the token to the event set */
+    if (NULL != token)
+        /* clang-format off */
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                        H5ARG_TRACE11(__func__, "*s*sIuz*i*i*i*iixi", app_file, app_func, app_line, count, dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf, es_id)) < 0)
+            /* clang-format on */
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Dread_multi_async() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Dread_chunk
@@ -1142,25 +1263,63 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__write_api_common(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id,
-                      hid_t dxpl_id, const void *buf, void **token_ptr, H5VL_object_t **_vol_obj_ptr)
+H5D__write_api_common(size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t mem_space_id[],
+                      hid_t file_space_id[], hid_t dxpl_id, const void *buf[], void **token_ptr,
+                      H5VL_object_t **_vol_obj_ptr)
 {
     H5VL_object_t  *tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
-    herr_t ret_value = SUCCEED;                       /* Return value */
+    void   *obj_local;                                /* Local buffer for obj */
+    void  **obj = &obj_local;                         /* Array of object pointers */
+    H5VL_t *connector;                                /* VOL connector pointer */
+    size_t  i;                                        /* Local index variable */
+    herr_t  ret_value = SUCCEED;                      /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
-    if (mem_space_id < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid memory dataspace ID")
-    if (file_space_id < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file dataspace ID")
+    if (count == 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "count must be greater than 0")
+    if (!dset_id)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dset_id array not provided")
+    if (!mem_type_id)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "mem_type_id array not provided")
+    if (!mem_space_id)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "mem_space_id array not provided")
+    if (!file_space_id)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file_space_id array not provided")
+    if (!buf)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "buf array not provided")
 
-    /* Get dataset pointer */
-    if (NULL == (*vol_obj_ptr = (H5VL_object_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+    /* Allocate obj array if necessary */
+    if (count > 1)
+        if (NULL == (obj = (void **)H5MM_malloc(count * sizeof(void *))))
+            HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, FAIL, "can't allocate space for object array")
+
+    /* Get vol_obj_ptr (return just the first dataset to caller if requested) */
+    if (NULL == (*vol_obj_ptr = (H5VL_object_t *)H5I_object_verify(dset_id[0], H5I_DATASET)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dset_id is not a dataset ID")
+
+    /* Save the connector of the first dataset.  Unpack the connector and call
+     * the "direct" write function here to avoid allocating an array of count
+     * H5VL_object_ts. */
+    connector = (*vol_obj_ptr)->connector;
+
+    /* Build obj array */
+    obj[0] = (*vol_obj_ptr)->data;
+    for (i = 1; i < count; i++) {
+        /* Get the object */
+        if (NULL == (tmp_vol_obj = (H5VL_object_t *)H5I_object_verify(dset_id[i], H5I_DATASET)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dset_id is not a dataset ID")
+        obj[i] = tmp_vol_obj->data;
+
+        /* Make sure the class matches */
+        if (tmp_vol_obj->connector->cls->value != connector->cls->value)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL,
+                        "datasets are accessed through different VOL connectors and can't be used in the "
+                        "same I/O call")
+    }
 
     /* Get the default dataset transfer property list if the user didn't provide one */
     if (H5P_DEFAULT == dxpl_id)
@@ -1169,11 +1328,15 @@ H5D__write_api_common(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
 
     /* Write the data */
-    if (H5VL_dataset_write(*vol_obj_ptr, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf, token_ptr) <
-        0)
+    if (H5VL_dataset_write_direct(count, obj, connector, mem_type_id, mem_space_id, file_space_id, dxpl_id,
+                                  buf, token_ptr) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
 
 done:
+    /* Free memory */
+    if (obj != &obj_local)
+        H5MM_free(obj);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__write_api_common() */
 
@@ -1222,8 +1385,8 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_
     H5TRACE6("e", "iiiii*x", dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf);
 
     /* Write the data */
-    if (H5D__write_api_common(dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf, NULL, NULL) <
-        0)
+    if (H5D__write_api_common(1, &dset_id, &mem_type_id, &mem_space_id, &file_space_id, dxpl_id, &buf, NULL,
+                              NULL) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't synchronously write data")
 
 done:
@@ -1261,8 +1424,8 @@ H5Dwrite_async(const char *app_file, const char *app_func, unsigned app_line, hi
         token_ptr = &token; /* Point at token for VOL connector to set up */
 
     /* Write the data */
-    if (H5D__write_api_common(dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf, token_ptr,
-                              &vol_obj) < 0)
+    if (H5D__write_api_common(1, &dset_id, &mem_type_id, &mem_space_id, &file_space_id, dxpl_id, &buf,
+                              token_ptr, &vol_obj) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't asynchronously write data")
 
     /* If a token was created, add the token to the event set */
@@ -1276,6 +1439,84 @@ H5Dwrite_async(const char *app_file, const char *app_func, unsigned app_line, hi
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dwrite_async() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Dwrite_multi
+ *
+ * Purpose:	Multi-version of H5Dwrite(), which writes selections from
+ *              application memory BUFs into multiple datasets in a file.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Jonathan Kim  Nov, 2013
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Dwrite_multi(size_t count, hid_t dset_id[], hid_t mem_type_id[], hid_t mem_space_id[],
+               hid_t file_space_id[], hid_t dxpl_id, const void *buf[])
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE7("e", "z*i*i*i*ii**x", count, dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf);
+
+    if (count == 0)
+        HGOTO_DONE(SUCCEED)
+
+    /* Write the data */
+    if (H5D__write_api_common(count, dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf, NULL,
+                              NULL) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't synchronously write data")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Dwrite_multi() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Dwrite_multi_async
+ *
+ * Purpose:     Asynchronously write dataset elements to multiple
+ *              datasets.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Dwrite_multi_async(const char *app_file, const char *app_func, unsigned app_line, size_t count,
+                     hid_t dset_id[], hid_t mem_type_id[], hid_t mem_space_id[], hid_t file_space_id[],
+                     hid_t dxpl_id, const void *buf[], hid_t es_id)
+{
+    H5VL_object_t *vol_obj   = NULL;            /* Dataset VOL object */
+    void          *token     = NULL;            /* Request token for async operation        */
+    void         **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    herr_t         ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE11("e", "*s*sIuz*i*i*i*ii**xi", app_file, app_func, app_line, count, dset_id, mem_type_id,
+              mem_space_id, file_space_id, dxpl_id, buf, es_id);
+
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token; /* Point at token for VOL connector to set up */
+
+    /* Write the data */
+    if (H5D__write_api_common(count, dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf,
+                              token_ptr, &vol_obj) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't asynchronously write data")
+
+    /* If a token was created, add the token to the event set */
+    if (NULL != token)
+        /* clang-format off */
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                        H5ARG_TRACE11(__func__, "*s*sIuz*i*i*i*ii**xi", app_file, app_func, app_line, count, dset_id, mem_type_id, mem_space_id, file_space_id, dxpl_id, buf, es_id)) < 0)
+            /* clang-format on */
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Dwrite_multi_async() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Dwrite_chunk

@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -82,6 +81,7 @@ struct timezone {
 #define HDsleep(S)            Sleep(S * 1000)
 #define HDstat(S, B)          _stati64(S, B)
 #define HDstrcasecmp(A, B)    _stricmp(A, B)
+#define HDstrcasestr(A, B)    StrStrIA(A, B)
 #define HDstrndup(S, N)       H5_strndup(S, N)
 #define HDstrtok_r(X, Y, Z)   strtok_s(X, Y, Z)
 #define HDtzset()             _tzset()

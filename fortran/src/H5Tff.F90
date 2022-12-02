@@ -12,7 +12,6 @@
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
-!   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -51,7 +50,7 @@ MODULE H5T
      TYPE(C_PTR)     :: p   !< Pointer to VL data
   END TYPE hvl_t
 
-#ifndef H5_DOXYGEN_FORTRAN
+#ifndef H5_DOXYGEN
 
   INTERFACE h5tenum_insert_f
      MODULE PROCEDURE h5tenum_insert_f03
@@ -72,6 +71,8 @@ CONTAINS
 !! \param type_id Datatype identifier.
 !! \param hdferr  \fortran_error
 !! \param tapl_id Datatype access property list identifier.
+!!
+!! See C API: @ref H5Topen2()
 !!
   SUBROUTINE h5topen_f(loc_id, name, type_id, hdferr, tapl_id)
     IMPLICIT NONE
@@ -109,12 +110,14 @@ CONTAINS
 !! \brief Commits a transient datatype to a file, creating a new named datatype.
 !!
 !! \param loc_id  Location identifier.
-!! \param name    Name of the datatype to be stored at the specified location.
+!! \param name    Name of the datatype to be stored at the specified location
 !! \param type_id Identifier of a datatype to be stored.
 !! \param hdferr  \fortran_error
 !! \param lcpl_id Link creation property list.
 !! \param tcpl_id Datatype creation property list.
 !! \param tapl_id Datatype access property list.
+!!
+!! See C API: @ref H5Tcommit2()
 !!
   SUBROUTINE h5tcommit_f(loc_id, name, type_id, hdferr, &
        lcpl_id, tcpl_id, tapl_id  )
@@ -172,6 +175,8 @@ CONTAINS
 !! \param new_type_id Identifier of datatype&apos;s copy.
 !! \param hdferr      \fortran_error
 !!
+!! See C API: @ref H5Tcopy()
+!!
   SUBROUTINE h5tcopy_f(type_id, new_type_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: type_id
@@ -196,6 +201,8 @@ CONTAINS
 !! \param type2_id Datatype identifier.
 !! \param flag     TRUE/FALSE flag to indicate if two datatypes are equal.
 !! \param hdferr   \fortran_error
+!!
+!! See C API: @ref H5Tequal()
 !!
   SUBROUTINE h5tequal_f(type1_id, type2_id, flag, hdferr)
     IMPLICIT NONE
@@ -225,6 +232,8 @@ CONTAINS
 !!
 !! \param type_id Datatype identifier.
 !! \param hdferr  \fortran_error
+!!
+!! See C API: @ref H5Tclose()
 !!
   SUBROUTINE h5tclose_f(type_id, hdferr)
     IMPLICIT NONE
@@ -261,6 +270,8 @@ CONTAINS
 !!                \li H5T_ARRAY_F
 !! \param hdferr  \fortran_error
 !!
+!! See C API: @ref H5Tget_class()
+!!
   SUBROUTINE h5tget_class_f(type_id, class, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: type_id
@@ -285,6 +296,8 @@ CONTAINS
 !! \param type_id Datatype identifier.
 !! \param size    Datatype size.
 !! \param hdferr  \fortran_error
+!!
+!! See C API: @ref H5Tget_size()
 !!
   SUBROUTINE h5tget_size_f(type_id, size, hdferr)
     IMPLICIT NONE
@@ -311,6 +324,8 @@ CONTAINS
 !! \param type_id Datatype identifier.
 !! \param size    Size of the datatype.
 !! \param hdferr  \fortran_error
+!!
+!! See C API: @ref H5Tset_size()
 !!
   SUBROUTINE h5tset_size_f(type_id, size, hdferr)
     IMPLICIT NONE
@@ -341,6 +356,8 @@ CONTAINS
 !!                \li H5T_ORDER_VAX_F (not implemented yet)
 !! \param hdferr  \fortran_error
 !!
+!! See C API: @ref H5Tget_order()
+!!
   SUBROUTINE h5tget_order_f(type_id, order, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: type_id
@@ -370,6 +387,8 @@ CONTAINS
 !!                \li H5T_ORDER_VAX_F (not implemented yet)
 !! \param hdferr  \fortran_error
 !!
+!! See C API: @ref H5Tset_order()
+!!
   SUBROUTINE h5tset_order_f(type_id, order, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: type_id
@@ -397,6 +416,8 @@ CONTAINS
 !! \param precision Precision of the datatype.
 !! \param hdferr    \fortran_error
 !!
+!! See C API: @ref H5Tget_precision()
+!!
   SUBROUTINE h5tget_precision_f(type_id, PRECISION, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: type_id
@@ -422,6 +443,8 @@ CONTAINS
 !! \param type_id   Datatype identifier.
 !! \param precision Datatype precision.
 !! \param hdferr    \fortran_error
+!!
+!! See C API: @ref H5Tset_precision()
 !!
   SUBROUTINE h5tset_precision_f(type_id, PRECISION, hdferr)
     IMPLICIT NONE
@@ -449,6 +472,8 @@ CONTAINS
 !! \param offset  Offset value.
 !! \param hdferr  \fortran_error
 !!
+!! See C API: @ref H5Tget_offset()
+!!
   SUBROUTINE h5tget_offset_f(type_id, offset, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: type_id
@@ -474,6 +499,8 @@ CONTAINS
 !! \param type_id Datatype identifier.
 !! \param offset  Offset value.
 !! \param hdferr  \fortran_error
+!!
+!! See C API: @ref H5Tset_offset()
 !!
   SUBROUTINE h5tset_offset_f(type_id, offset, hdferr)
     IMPLICIT NONE
@@ -506,6 +533,8 @@ CONTAINS
 !!                \li H5T_PAD_BACKGROUND_F
 !!                \li H5T_PAD_NPAD_F
 !! \param hdferr  \fortran_error
+!!
+!! See C API: @ref H5Tget_pad()
 !!
   SUBROUTINE h5tget_pad_f(type_id, lsbpad, msbpad, hdferr)
     IMPLICIT NONE
@@ -541,6 +570,8 @@ CONTAINS
 !!                \li H5T_PAD_NPAD_F
 !! \param hdferr  \fortran_error
 !!
+!! See C API: @ref H5Tset_pad()
+!!
   SUBROUTINE h5tset_pad_f(type_id, lsbpad, msbpad, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: type_id
@@ -575,6 +606,8 @@ CONTAINS
 !!                     H5T_SGN_ERROR_F = -1
 !! \param hdferr   \fortran_error
 !!
+!! See C API: @ref H5Tget_sign()
+!!
   SUBROUTINE h5tget_sign_f(type_id, sign, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: type_id
@@ -608,6 +641,8 @@ CONTAINS
 !!                     H5T_SGN_ERROR_F = -1
 !! \param hdferr   \fortran_error
 !!
+!! See C API: @ref H5Tset_sign()
+!!
   SUBROUTINE h5tset_sign_f(type_id, sign, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: type_id
@@ -637,6 +672,8 @@ CONTAINS
 !! \param mpos    Mantissa position.
 !! \param msize   Size of mantissa in bits.
 !! \param hdferr  \fortran_error
+!!
+!! See C API: @ref H5Tget_fields()
 !!
   SUBROUTINE h5tget_fields_f(type_id, spos, epos, esize, mpos, msize, hdferr)
     IMPLICIT NONE
@@ -678,6 +715,8 @@ CONTAINS
 !! \param msize   Size of mantissa in bits.
 !! \param hdferr  \fortran_error
 !!
+!! See C API: @ref H5Tset_fields()
+!!
   SUBROUTINE h5tset_fields_f(type_id, spos, epos, esize, mpos, msize, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: type_id
@@ -714,6 +753,8 @@ CONTAINS
 !! \param ebias   Datatype exponent bias.
 !! \param hdferr  \fortran_error
 !!
+!! See C API: @ref H5Tget_ebias()
+!!
   SUBROUTINE h5tget_ebias_f(type_id, ebias, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: type_id
@@ -740,6 +781,8 @@ CONTAINS
 !! \param type_id Datatype identifier.
 !! \param ebias   Datatype exponent bias.
 !! \param hdferr  \fortran_error
+!!
+!! See C API: @ref H5Tset_ebias()
 !!
   SUBROUTINE h5tset_ebias_f(type_id, ebias, hdferr)
     IMPLICIT NONE
@@ -769,6 +812,8 @@ CONTAINS
 !!                \li H5T_NORM_MSBSET_F
 !!                \li H5T_NORM_NONE_F
 !! \param hdferr  \fortran_error
+!!
+!! See C API: @ref H5Tget_norm()
 !!
   SUBROUTINE h5tget_norm_f(type_id, norm, hdferr)
     IMPLICIT NONE
@@ -800,6 +845,8 @@ CONTAINS
 !!                \li H5T_NORM_NONE_F
 !! \param hdferr  \fortran_error
 !!
+!! See C API: @ref H5Tset_norm()
+!!
   SUBROUTINE h5tset_norm_f(type_id, norm, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: type_id
@@ -828,6 +875,8 @@ CONTAINS
 !!                \li H5T_PAD_ONE_F
 !!                \li H5T_PAD_BACKGROUND_F
 !! \param hdferr  \fortran_error
+!!
+!! See C API: @ref H5Tget_inpad()
 !!
   SUBROUTINE h5tget_inpad_f(type_id, padtype, hdferr)
     IMPLICIT NONE
@@ -858,6 +907,8 @@ CONTAINS
 !!                \li H5T_PAD_BACKGROUND_F
 !! \param hdferr  \fortran_error
 !!
+!! See C API: @ref H5Tset_inpad()
+!!
   SUBROUTINE h5tset_inpad_f(type_id, padtype, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: type_id
@@ -885,6 +936,8 @@ CONTAINS
 !!                \li H5T_CSET_ASCII_F
 !!                \li H5T_CSET_UTF8_F
 !! \param hdferr  \fortran_error
+!!
+!! See C API: @ref H5Tget_cset()
 !!
   SUBROUTINE h5tget_cset_f(type_id, cset, hdferr)
     IMPLICIT NONE
@@ -914,6 +967,8 @@ CONTAINS
 !!                \li H5T_CSET_UTF8_F
 !! \param hdferr  \fortran_error
 !!
+!! See C API: @ref H5Tset_cset()
+!!
   SUBROUTINE h5tset_cset_f(type_id, cset, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: type_id
@@ -942,6 +997,8 @@ CONTAINS
 !!                \li H5T_STR_SPACEPAD_F
 !!                \li H5T_STR_ERROR_F
 !! \param hdferr  \fortran_error
+!!
+!! See C API: @ref H5Tget_strpad()
 !!
   SUBROUTINE h5tget_strpad_f(type_id, strpad, hdferr)
     IMPLICIT NONE
@@ -973,6 +1030,8 @@ CONTAINS
 !!                \li H5T_STR_ERROR_F
 !! \param hdferr  \fortran_error
 !!
+!! See C API: @ref H5Tset_strpad()
+!!
   SUBROUTINE h5tset_strpad_f(type_id, strpad, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: type_id
@@ -998,6 +1057,8 @@ CONTAINS
 !! \param type_id     Datatype identifier.
 !! \param num_members Number of members.
 !! \param hdferr      \fortran_error
+!!
+!! See C API: @ref H5Tget_nmembers()
 !!
   SUBROUTINE h5tget_nmembers_f(type_id, num_members, hdferr)
     IMPLICIT NONE
@@ -1026,6 +1087,8 @@ CONTAINS
 !! \param member_name Buffer to hold member&apos;s name.
 !! \param namelen     Name length.
 !! \param hdferr      \fortran_error
+!!
+!! See C API: @ref H5Tget_member_name()
 !!
   SUBROUTINE h5tget_member_name_f(type_id, index, member_name,  namelen, hdferr)
     IMPLICIT NONE
@@ -1059,6 +1122,8 @@ CONTAINS
 !! \param offset    Byte offset of the requested field.
 !! \param hdferr    \fortran_error
 !!
+!! See C API: @ref H5Tget_member_offset()
+!!
   SUBROUTINE h5tget_member_offset_f(type_id, member_no, offset, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: type_id
@@ -1087,6 +1152,8 @@ CONTAINS
 !! \param index   Based index of the filed or member (0 to N-1).
 !! \param hdferr  \fortran_error
 !!
+!! See C API: @ref H5Tget_member_index()
+!!
   SUBROUTINE h5tget_member_index_f(type_id, name, index, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: type_id
@@ -1111,40 +1178,6 @@ CONTAINS
     hdferr = h5tget_member_index_c(type_id, name, namelen, index)
   END SUBROUTINE h5tget_member_index_f
 
-
-!  !$!
-!>
-!!  !$!
-!!  !$! NAME
-!!  !$!            h5tget_member_dim_f
-!!  !$!
-!!  !$! PURPOSE
-!!  !$!       This function is not supported in hdf5-1.4.*
-!!  !$!
-!!  !$! INPUTS
-!!  !$! OUTPUTS
-!!  !$!            hdferr:            - error code
-!!  !$!                               Success:  0
-!!  !$!                               Failure: -1
-!!  !$!
-!!  !$! AUTHOR
-!!  !$!      Elena Pourmal
-!!  !$!            August 12, 1999
-!!  !$!
-!!  !$! HISTORY
-!!  !$!       Explicit Fortran interfaces were added for
-!!  !$!                  called C functions (it is needed for Windows
-!!  !$!                  port).  March 7, 2001
-!!  !$!
-!!  !$! SOURCE
-!  !$!  SUBROUTINE h5tget_member_dims_f(type_id, field_idx,dims, field_dims, perm, hdferr)
-!  !$!
-!  !$!            IMPLICIT NONE
-
-!  !$!
-!  !$!          END SUBROUTINE h5tget_member_dims_f
-
-
 !>
 !! \ingroup FH5T
 !!
@@ -1153,6 +1186,8 @@ CONTAINS
 !! \param type_id Array datatype identifier.
 !! \param dims    Buffer to store array datatype dimensions.
 !! \param hdferr  \fortran_error
+!!
+!! See C API: @ref H5Tget_array_dims2()
 !!
   SUBROUTINE h5tget_array_dims_f(type_id, dims, hdferr)
     IMPLICIT NONE
@@ -1181,6 +1216,8 @@ CONTAINS
 !! \param ndims   Number of array dimensions.
 !! \param hdferr  \fortran_error
 !!
+!! See C API: @ref H5Tget_array_ndims()
+!!
   SUBROUTINE h5tget_array_ndims_f(type_id, ndims, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: type_id
@@ -1207,6 +1244,8 @@ CONTAINS
 !! \param type_id      Datatype identifier.
 !! \param base_type_id Identifier of the base type.
 !! \param hdferr       \fortran_error
+!!
+!! See C API: @ref H5Tget_super()
 !!
   SUBROUTINE h5tget_super_f(type_id, base_type_id, hdferr)
     IMPLICIT NONE
@@ -1235,6 +1274,8 @@ CONTAINS
 !! \param field_idx Field index (0-based).
 !! \param datatype  Identifier of the member&apos;s datatype.
 !! \param hdferr    \fortran_error
+!!
+!! See C API: @ref H5Tget_member_type()
 !!
   SUBROUTINE h5tget_member_type_f(type_id,  field_idx, datatype, hdferr)
     IMPLICIT NONE
@@ -1270,6 +1311,8 @@ CONTAINS
 !! \param type_id Datatype identifier.
 !! \param hdferr  \fortran_error
 !!
+!! See C API: @ref H5Tcreate()
+!!
   SUBROUTINE h5tcreate_f(class, size, type_id, hdferr)
     IMPLICIT NONE
     INTEGER        , INTENT(IN)  :: class
@@ -1299,6 +1342,8 @@ CONTAINS
 !! \param offset   Start of the member in an instance of the compound datatype.
 !! \param field_id Datatype identifier of the field to insert.
 !! \param hdferr   \fortran_error
+!!
+!! See C API: @ref H5Tinsert()
 !!
   SUBROUTINE h5tinsert_f(type_id,  name, offset, field_id, hdferr)
     IMPLICIT NONE
@@ -1334,6 +1379,8 @@ CONTAINS
 !! \param type_id Compound datatype identifier.
 !! \param hdferr  \fortran_error
 !!
+!! See C API: @ref H5Tpack()
+!!
   SUBROUTINE h5tpack_f(type_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: type_id
@@ -1349,33 +1396,31 @@ CONTAINS
     hdferr = h5tpack_c(type_id)
   END SUBROUTINE h5tpack_f
 
-!  !$!
-!>
-!!  !$!
-!!  !$! NAME
-!!  !$!            h5tinsert_array_f
-!!  !$!
-!!  !$! PURPOSE
-!!  !$!       This function is not available on hdf5-1.4.*
-!!  !$!
-!!  !$! INPUTS
-!!  !$! OUTPUTS
-!!  !$!            hdferr:            - error code
-!!  !$!                               Success:  0
-!!  !$!                               Failure: -1
-!!  !$!
-!!  !$! AUTHOR
-!!  !$!      Elena Pourmal
-!!  !$!            August 12, 1999
-!!  !$!
-!!  !$! HISTORY
-!!  !$!       Explicit Fortran interfaces were added for
-!!  !$!                  called C functions (it is needed for Windows
-!!  !$!                  port).  March 7, 2001
-!!  !$! SOURCE
+!
+! NAME
+!  h5tinsert_array_f
+!
+! PURPOSE
+!  This function is not available on hdf5-1.4.*
+!
+! INPUTS
+! OUTPUTS
+!            hdferr:            - error code
+!                               Success:  0
+!                               Failure: -1
+!
+! AUTHOR
+!      Elena Pourmal
+!            August 12, 1999
+!
+! HISTORY
+!       Explicit Fortran interfaces were added for
+!                  called C functions (it is needed for Windows
+!                  port).  March 7, 2001
+! SOURCE
 !  SUBROUTINE h5tinsert_array_f(parent_id,name,offset, ndims, dims, member_id, hdferr, perm)
 !  IMPLICIT NONE
-
+!
 !  INTEGER, EXTERNAL :: h5tinsert_array_c,  h5tinsert_array_c2
 !  namelen = LEN(name)
 !  if (present(perm)) then
@@ -1391,11 +1436,13 @@ CONTAINS
 !!
 !! \brief Creates an array datatype object.
 !!
-!! \param base_id Datatype identifier for the array base datatype.
+!! \param base_id Datatype identifier for the array base datatype
 !! \param rank    Rank of the array.
 !! \param dims    Array dimension sizes.
 !! \param type_id Array datatype identifier.
 !! \param hdferr  \fortran_error
+!!
+!! See C API: @ref H5Tarray_create2()
 !!
   SUBROUTINE h5tarray_create_f(base_id, rank, dims, type_id, hdferr)
     IMPLICIT NONE
@@ -1428,6 +1475,8 @@ CONTAINS
 !! \param new_type_id Datatype identifier for the enumeration datatype.
 !! \param hdferr      \fortran_error
 !!
+!! See C API: @ref H5Tenum_create()
+!!
   SUBROUTINE h5tenum_create_f(parent_id, new_type_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: parent_id
@@ -1455,6 +1504,8 @@ CONTAINS
 !! \param namelen Name buffer size.
 !! \param name    Buffer to hold symbol name.
 !! \param hdferr  \fortran_error
+!!
+!! See C API: @ref H5Tenum_nameof()
 !!
   SUBROUTINE h5tenum_nameof_f(type_id,  value, namelen, name, hdferr)
     IMPLICIT NONE
@@ -1488,6 +1539,8 @@ CONTAINS
 !! \param name    Symbol name.
 !! \param value   Value of the enumeration datatype.
 !! \param hdferr  \fortran_error
+!!
+!! See C API: @ref H5Tenum_valueof()
 !!
   SUBROUTINE h5tenum_valueof_f(type_id,  name, value, hdferr)
     IMPLICIT NONE
@@ -1524,6 +1577,8 @@ CONTAINS
 !! \param value     Value of the enumeration datatype.
 !! \param hdferr    \fortran_error
 !!
+!! See C API: @ref H5Tget_member_value()
+!!
   SUBROUTINE h5tget_member_value_f(type_id,  member_no, value, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: type_id
@@ -1552,6 +1607,8 @@ CONTAINS
 !! \param type_id Identifier for opaque datatype.
 !! \param tag     Unique ASCII string with which the opaque datatype is to be tagged.
 !! \param hdferr  \fortran_error
+!!
+!! See C API: @ref H5Tset_tag()
 !!
   SUBROUTINE h5tset_tag_f(type_id, tag, hdferr)
     IMPLICIT NONE
@@ -1584,6 +1641,8 @@ CONTAINS
 !! \param tag     Unique ASCII string associated with opaque datatype.
 !! \param taglen  Length of tag.
 !! \param hdferr  \fortran_error
+!!
+!! See C API: @ref H5Tget_tag()
 !!
   SUBROUTINE h5tget_tag_f(type_id, tag,taglen, hdferr)
     IMPLICIT NONE
@@ -1618,6 +1677,8 @@ CONTAINS
 !! \param vltype_id Identifier for VL datatype.
 !! \param hdferr    \fortran_error
 !!
+!! See C API: @ref H5Tvlen_create()
+!!
   SUBROUTINE h5tvlen_create_f(type_id, vltype_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN)  :: type_id
@@ -1643,6 +1704,8 @@ CONTAINS
 !! \param type_id Datartpe identifier.
 !! \param status  Flag to indicate if datatype is a variable string ( TRUE or FALSE).
 !! \param hdferr  \fortran_error
+!!
+!! See C API: @ref H5Tis_variable_str()
 !!
   SUBROUTINE h5tis_variable_str_f(type_id, status, hdferr)
     IMPLICIT NONE
@@ -1689,6 +1752,8 @@ CONTAINS
 !!                  \li H5T_ARRAY_F
 !! \param hdferr    \fortran_error
 !!
+!! See C API: @ref H5Tget_member_class()
+!!
   SUBROUTINE h5tget_member_class_f(type_id, member_no, class, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: type_id
@@ -1720,6 +1785,8 @@ CONTAINS
 !! \param hdferr   \fortran_error
 !! \param tcpl_id  A datatype creation property list identifier (H5P_DEFAULT_F for the default property list.)
 !! \param tapl_id  A datatype access property list identifier should always be passed as the value H5P_DEFAULT_F.
+!!
+!! See C API: @ref H5Tcommit_anon()
 !!
   SUBROUTINE h5tcommit_anon_f(loc_id, dtype_id, hdferr, tcpl_id, tapl_id)
     IMPLICIT NONE
@@ -1763,6 +1830,8 @@ CONTAINS
 !! \param committed .TRUE. if the datatype has been committed, and .FALSE. if the datatype has not been committed.
 !! \param hdferr    \fortran_error
 !!
+!! See C API: @ref H5Tcommitted()
+!!
   SUBROUTINE h5tcommitted_f(dtype_id, committed, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dtype_id
@@ -1799,6 +1868,8 @@ CONTAINS
 !! \param obj_id Object ID.
 !! \param hdferr \fortran_error
 !!
+!! See C API: @ref H5Tdecode()
+!!
   SUBROUTINE h5tdecode_f(buf, obj_id, hdferr)
     IMPLICIT NONE
     CHARACTER(LEN=*), INTENT(IN) :: buf
@@ -1827,6 +1898,8 @@ CONTAINS
 !! \param buf    Buffer for the object to be encoded into.
 !! \param nalloc If set to zero, returns the size of the buffer needed. Otherwise, it sets the size of \p buf allocated.
 !! \param hdferr \fortran_error
+!!
+!! See C API: @ref H5Tencode()
 !!
   SUBROUTINE h5tencode_f(obj_id, buf, nalloc, hdferr)
     IMPLICIT NONE
@@ -1859,6 +1932,8 @@ CONTAINS
 !! \param dtpl_id  Datatype property list identifier.
 !! \param hdferr   \fortran_error
 !!
+!! See C API: @ref H5Tget_create_plist()
+!!
   SUBROUTINE h5tget_create_plist_f(dtype_id, dtpl_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dtype_id
@@ -1885,6 +1960,8 @@ CONTAINS
 !! \param dst_id Identifier for the destination datatype.
 !! \param flag   .TRUE. for compiler conversion, .FALSE. for library conversion.
 !! \param hdferr \fortran_error
+!!
+!! See C API: @ref H5Tcompiler_conv()
 !!
   SUBROUTINE h5tcompiler_conv_f(src_id, dst_id, flag, hdferr)
     IMPLICIT NONE
@@ -1925,6 +2002,8 @@ CONTAINS
 !! \param native_dtype_id The native datatype identifier for the specified dataset datatype.
 !! \param hdferr          \fortran_error
 !!
+!! See C API: @ref H5Tget_native_type()
+!!
   SUBROUTINE h5tget_native_type_f(dtype_id, direction, native_dtype_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dtype_id
@@ -1956,6 +2035,8 @@ CONTAINS
 !! \param hdferr     \fortran_error
 !! \param background Background buffer.
 !! \param plist_id   Dataset transfer property list identifier.
+!!
+!! See C API: @ref H5Tconvert()
 !!
   SUBROUTINE h5tconvert_f(src_id, dst_id, nelmts, buf, hdferr, background, plist_id)
     IMPLICIT NONE
@@ -1999,14 +2080,16 @@ CONTAINS
 !!
 !! \brief Inserts a new enumeration datatype member.
 !!
-!! \note \fortran_approved
+!! \attention \fortran_approved
 !!
 !! \param type_id Datatype identifier for the enumeration datatype.
 !! \param name    Datatype identifier.
 !! \param value   Pointer to the value of the new member.
 !! \param hdferr  \fortran_error
 !!
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
+!! See C API: @ref H5Tenum_insert()
+!!
   SUBROUTINE h5tenum_insert_f(&
 #else
   SUBROUTINE h5tenum_insert_f03(&
@@ -2034,7 +2117,7 @@ CONTAINS
 
     namelen = LEN(name)
     hdferr = h5tenum_insert_ptr_c(type_id, name, namelen, value)
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
   END SUBROUTINE h5tenum_insert_f
 #else
   END SUBROUTINE h5tenum_insert_f03
@@ -2045,14 +2128,16 @@ CONTAINS
 !!
 !! \brief Inserts a new enumeration datatype member.
 !!
-!! \note  \fortran_obsolete
+!! \attention  \fortran_obsolete
 !!
 !! \param type_id Datatype identifier for the enumeration datatype.
 !! \param name    Datatype identifier.
 !! \param value   Value of the new member.
 !! \param hdferr  \fortran_error
 !!
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
+!! See C API: @ref H5Tenum_insert()
+!!
   SUBROUTINE h5tenum_insert_f(type_id,  name, value, hdferr)
 #else
   SUBROUTINE h5tenum_insert_f90(type_id,  name, value, hdferr)
@@ -2077,7 +2162,7 @@ CONTAINS
 
     namelen = LEN(name)
     hdferr = h5tenum_insert_c(type_id, name, namelen, value)
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
   END SUBROUTINE h5tenum_insert_f
 #else
   END SUBROUTINE h5tenum_insert_f90

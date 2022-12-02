@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -1209,6 +1208,11 @@ JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_HDF5Constants_H5ES_1STATUS_1FAIL(JNIEnv *env, jclass cls)
 {
     return H5ES_STATUS_FAIL;
+}
+JNIEXPORT jlong JNICALL
+Java_hdf_hdf5lib_HDF5Constants_H5ES_1STATUS_1CANCELED(JNIEnv *env, jclass cls)
+{
+    return H5ES_STATUS_CANCELED;
 }
 
 /* Java does not have unsigned native types */

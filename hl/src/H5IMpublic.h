@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -18,7 +17,11 @@
 extern "C" {
 #endif
 
-/**\defgroup H5IM Images
+/** \page H5IM_UG The HDF5 High Level Images
+ * @todo Under Construction
+ */
+
+/**\defgroup H5IM HDF5 Images API (H5IM)
  *
  * <em>Creating and manipulating HDF5 datasets intended to be
  * interpreted as images (H5IM)</em>
@@ -27,7 +30,7 @@ extern "C" {
  * document: \ref IMG
  * This version of the API is primarily concerned with two dimensional raster
  * data similar to HDF4 Raster Images.
- * The HDF5 Images API uses the \ref H5LT HDF5 API.
+ * The HDF5 Images API uses the \ref H5LT.
  *
  * \note \Bold{Programming hints:}
  * \note To use any of these functions or subroutines,

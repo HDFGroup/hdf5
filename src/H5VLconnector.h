@@ -33,12 +33,6 @@
 /* Public Macros */
 /*****************/
 
-/* Capability flags for connector */
-#define H5VL_CAP_FLAG_NONE         0    /* No special connector capabilities */
-#define H5VL_CAP_FLAG_THREADSAFE   0x01 /* Connector is threadsafe */
-#define H5VL_CAP_FLAG_ASYNC        0x02 /* Connector performs operations asynchronously*/
-#define H5VL_CAP_FLAG_NATIVE_FILES 0x04 /* Connector produces native file format */
-
 /* Container info version */
 #define H5VL_CONTAINER_INFO_VERSION 0x01 /* Container info struct version */
 
@@ -885,10 +879,10 @@ typedef struct H5VL_dataset_class_t {
                     hid_t type_id, hid_t space_id, hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id, void **req);
     void *(*open)(void *obj, const H5VL_loc_params_t *loc_params, const char *name, hid_t dapl_id,
                   hid_t dxpl_id, void **req);
-    herr_t (*read)(void *dset, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id,
-                   void *buf, void **req);
-    herr_t (*write)(void *dset, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id,
-                    const void *buf, void **req);
+    herr_t (*read)(size_t count, void *dset[], hid_t mem_type_id[], hid_t mem_space_id[],
+                   hid_t file_space_id[], hid_t dxpl_id, void *buf[], void **req);
+    herr_t (*write)(size_t count, void *dset[], hid_t mem_type_id[], hid_t mem_space_id[],
+                    hid_t file_space_id[], hid_t dxpl_id, const void *buf[], void **req);
     herr_t (*get)(void *obj, H5VL_dataset_get_args_t *args, hid_t dxpl_id, void **req);
     herr_t (*specific)(void *obj, H5VL_dataset_specific_args_t *args, hid_t dxpl_id, void **req);
     herr_t (*optional)(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req);
@@ -980,7 +974,7 @@ struct H5VL_class_t;
 /* Container/connector introspection routines */
 typedef struct H5VL_introspect_class_t {
     herr_t (*get_conn_cls)(void *obj, H5VL_get_conn_lvl_t lvl, const struct H5VL_class_t **conn_cls);
-    herr_t (*get_cap_flags)(const void *info, unsigned *cap_flags);
+    herr_t (*get_cap_flags)(const void *info, uint64_t *cap_flags);
     herr_t (*opt_query)(void *obj, H5VL_subclass_t cls, int opt_type, uint64_t *flags);
 } H5VL_introspect_class_t;
 
@@ -1020,7 +1014,7 @@ typedef struct H5VL_class_t {
     H5VL_class_value_t value;            /**< Value to identify connector              */
     const char        *name;             /**< Connector name (MUST be unique!)         */
     unsigned           conn_version;     /**< Version # of connector                   */
-    unsigned           cap_flags;        /**< Capability flags for connector           */
+    uint64_t           cap_flags;        /**< Capability flags for connector           */
     herr_t (*initialize)(hid_t vipl_id); /**< Connector initialization callback        */
     herr_t (*terminate)(void);           /**< Connector termination callback           */
 

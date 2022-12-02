@@ -1,6 +1,6 @@
-!> @defgroup FH5LT Fortran High-level H5LT Interface
+!> @defgroup FH5LT Fortran High Level Lite (H5LT) Interface
 !!
-!! @see H5LT, C-API
+!! @see H5LT, C-HL API
 !!
 !! @see @ref H5LT_UG, User Guide
 !!
@@ -11,7 +11,6 @@
 !
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !   Copyright by The HDF Group.                                               *
-!   Copyright by the Board of Trustees of the University of Illinois.         *
 !   All rights reserved.                                                      *
 !                                                                             *
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -35,7 +34,7 @@
 
 #include <H5config_f.inc>
 
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
 MODULE H5LT
 #else
 MODULE H5LT_CONST
@@ -45,7 +44,7 @@ MODULE H5LT_CONST
   USE h5fortran_types
   USE hdf5
 
-#ifndef H5_DOXYGEN_FORTRAN
+#ifndef H5_DOXYGEN
 
   INTERFACE h5ltmake_dataset_f
      MODULE PROCEDURE h5ltmake_dataset_f_ptr
@@ -98,7 +97,7 @@ MODULE H5LT_CONST
        CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: attr_name ! name of the attribute
        INTEGER(size_t),  INTENT(in) :: size                          ! size of attribute array
        TYPE(C_PTR), VALUE :: buf                                     ! data buffer
-       CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dtype     ! flag indicating the datatype of the the buffer:
+       CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dtype     ! flag indicating the datatype of the buffer:
                                                                      ! R=Real, D=DOUBLE, I=Integer, C=Character
        INTEGER(size_t) :: SizeOf_buf                                 ! Sizeof the buf datatype
      END FUNCTION h5ltset_attribute_c
@@ -116,7 +115,7 @@ MODULE H5LT_CONST
        CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name ! name of the dataset
        CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: attr_name ! name of the attribute
        TYPE(C_PTR), VALUE :: buf                                     ! data buffer
-       CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dtype     ! flag indicating the datatype of the the buffer:
+       CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dtype     ! flag indicating the datatype of the buffer:
                                                                      ! R=Real, D=DOUBLE, I=Integer
        INTEGER(size_t), INTENT(in) :: SizeOf_buf                     ! Sizeof the buf data type
      END FUNCTION h5ltget_attribute_c
@@ -130,13 +129,13 @@ CONTAINS
   ! Make/Read dataset functions
   !-------------------------------------------------------------------------
 
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
   !>
   !! \ingroup FH5LT
   !!
   !! \brief Creates and writes a dataset of a type \p type_id.
   !!
-  !! \note  \fortran_approved
+  !! \attention  \fortran_approved
   !!
   !! \param loc_id    Location identifier. The identifier may be that of a file or group.
   !! \param dset_name The name of the dataset to create.
@@ -145,6 +144,8 @@ CONTAINS
   !! \param type_id   Identifier of the datatype to use when creating the dataset.
   !! \param buf       Buffer with data to be written to the dataset.
   !! \param errcode   \fortran_error
+  !!
+  !! See C API: @ref H5LTmake_dataset()
   !!
   SUBROUTINE h5ltmake_dataset_f(&
 #else
@@ -171,19 +172,19 @@ CONTAINS
     namelen = LEN(dset_name)
     errcode = h5ltmake_dataset_c(loc_id,namelen,dset_name,rank,dims,type_id,buf)
 
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
   END SUBROUTINE h5ltmake_dataset_f
 #else
   END SUBROUTINE h5ltmake_dataset_f_ptr
 #endif
 
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
   !>
   !! \ingroup FH5LT
   !!
   !! \brief Creates and writes a dataset of a type \p type_id.
   !!
-  !! \note \fortran_obsolete
+  !! \attention \fortran_obsolete
   !!
   !! \param loc_id    Location identifier. The identifier may be that of a file or group.
   !! \param dset_name The name of the dataset to create.
@@ -192,6 +193,8 @@ CONTAINS
   !! \param type_id   Identifier of the datatype to use when creating the dataset.
   !! \param buf       Buffer with data to be written to the dataset.
   !! \param errcode   \fortran_error
+  !!
+  !! See C API: @ref H5LTmake_dataset()
   !!
    SUBROUTINE h5ltmake_dataset_f(&
 #else
@@ -211,7 +214,7 @@ CONTAINS
     INTEGER,          INTENT(in) :: rank
     INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims
     INTEGER(hid_t),   INTENT(in) :: type_id
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
     TYPE(TYPE), INTENT(in), DIMENSION(*,*,...) :: buf
 #else
     INTEGER, INTENT(in), DIMENSION(*), TARGET :: buf
@@ -223,7 +226,7 @@ CONTAINS
     f_ptr = C_LOC(buf(1))
     namelen = LEN(dset_name)
     errcode = h5ltmake_dataset_c(loc_id,namelen,dset_name,rank,dims,type_id,f_ptr)
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
   END SUBROUTINE h5ltmake_dataset_f
 #else
   END SUBROUTINE h5ltmake_dataset_f_int1
@@ -291,7 +294,7 @@ CONTAINS
     INTEGER,          INTENT(in) :: rank
     INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims
     INTEGER(hid_t),   INTENT(in) :: type_id
-    INTEGER :: errcode 
+    INTEGER :: errcode
     INTEGER(size_t) :: namelen ! name length
     INTEGER, INTENT(in), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4)), TARGET :: buf ! data buffer
@@ -335,7 +338,7 @@ CONTAINS
     INTEGER,          INTENT(in) :: rank
     INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims
     INTEGER(hid_t),   INTENT(in) :: type_id
-    INTEGER :: errcode 
+    INTEGER :: errcode
     INTEGER(size_t) :: namelen ! name length
     INTEGER, INTENT(in), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)), TARGET :: buf ! data buffer
@@ -371,19 +374,21 @@ CONTAINS
   END SUBROUTINE h5ltmake_dataset_f_int7
 #endif
 
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
   !>
   !! \ingroup FH5LT
   !!
   !! \brief Reads a dataset of a type \p type_id.
   !!
-  !! \note \fortran_approved 
+  !! \attention \fortran_approved
   !!
   !! \param loc_id    Location identifier. The identifier may be that of a file or group.
   !! \param dset_name The name of the dataset to create.
   !! \param type_id   Identifier of the datatype to use when creating the dataset.
   !! \param buf       Buffer with data to be written to the dataset.
   !! \param errcode   \fortran_error
+  !!
+  !! See C API: @ref H5LTread_dataset()
   !!
   SUBROUTINE h5ltread_dataset_f(&
 #else
@@ -405,19 +410,19 @@ CONTAINS
 
     namelen = LEN(dset_name)
     errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id, buf)
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
   END SUBROUTINE h5ltread_dataset_f
 #else
   END SUBROUTINE h5ltread_dataset_f_ptr
 #endif
 
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
   !>
   !! \ingroup FH5LT
   !!
   !! \brief Reads a dataset of a type \p type_id.
   !!
-  !! \note \fortran_obsolete
+  !! \attention \fortran_obsolete
   !!
   !! \param loc_id    Location identifier. The identifier may be that of a file or group.
   !! \param dset_name The name of the dataset to create.
@@ -425,6 +430,8 @@ CONTAINS
   !! \param buf       Buffer with data to be written to the dataset.
   !! \param dims      An array of the size of each dimension. Limited to seven dimensions.
   !! \param errcode   \fortran_error
+  !!
+  !! See C API: @ref H5LTread_dataset()
   !!
    SUBROUTINE h5ltread_dataset_f(&
 #else
@@ -442,7 +449,7 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(in) :: dset_name
     INTEGER(hid_t),   INTENT(in) :: type_id
     INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
     TYPE(TYPE), INTENT(inout), DIMENSION(*,*,...) :: buf
 #else
     INTEGER, INTENT(inout), DIMENSION(*), TARGET :: buf
@@ -456,7 +463,7 @@ CONTAINS
     namelen = LEN(dset_name)
     errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id,f_ptr)
 
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
   END SUBROUTINE h5ltread_dataset_f
 #else
   END SUBROUTINE h5ltread_dataset_f_int1
@@ -881,7 +888,7 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: loc_id
     CHARACTER(LEN=*), INTENT(in) :: dset_name
     INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims
-    INTEGER :: errcode 
+    INTEGER :: errcode
     INTEGER(size_t) :: namelen ! name length
     INTEGER, INTENT(inout), &
          DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)), TARGET :: buf
@@ -1039,10 +1046,10 @@ CONTAINS
   !>
   !! \ingroup FH5LT
   !!
-  !! \brief Creates and writes an attribute and is a generic replacement for data type specific 
+  !! \brief Creates and writes an attribute and is a generic replacement for data type specific
   !!        Fortran h5ltset_attribute_*_f APIs. There is no C equivalent API.
   !!
-  !! \note  \fortran_approved
+  !! \attention  \fortran_approved
   !!
   !! \param loc_id          Location identifier. The identifier may be that of a file or group.
   !! \param dset_name       The name of the dataset to create.
@@ -1099,15 +1106,17 @@ CONTAINS
   !!
   !! \brief Creates and writes an attribute.
   !!
-  !! \note  \fortran_obsolete
+  !! \attention  \fortran_obsolete
   !!
   !! \param loc_id    Identifier of the object (dataset or group) to create the attribute within
   !! \param obj_name  The name of the object to attach the attribute.
   !! \param attr_name The attribute name.
   !! \param buf       Buffer with data to be written to the attribute.
-  !! \param size      The size of the 1D array (one in the case of a scalar attribute). 
+  !! \param size      The size of the 1D array (one in the case of a scalar attribute).
   !!                  This value is used by H5Screate_simple() to create the dataspace.
   !! \param errcode   \fortran_error
+  !!
+  !! See C API: @ref H5LTset_attribute_int()
   !!
   SUBROUTINE h5ltset_attribute_int_f(loc_id,&
        obj_name,&
@@ -1148,15 +1157,17 @@ CONTAINS
   !!
   !! \brief Creates and writes an attribute.
   !!
-  !! \note  \fortran_obsolete
+  !! \attention  \fortran_obsolete
   !!
   !! \param loc_id    Identifier of the object (dataset or group) to create the attribute within
   !! \param obj_name  The name of the object to attach the attribute.
   !! \param attr_name The attribute name.
   !! \param buf       Buffer with data to be written to the attribute.
-  !! \param size      The size of the 1D array (one in the case of a scalar attribute). 
+  !! \param size      The size of the 1D array (one in the case of a scalar attribute).
   !!                  This value is used by H5Screate_simple() to create the dataspace.
   !! \param errcode   \fortran_error
+  !!
+  !! See C API: @ref H5LTset_attribute_float()
   !!
   SUBROUTINE h5ltset_attribute_float_f(loc_id,&
        obj_name,&
@@ -1196,15 +1207,17 @@ CONTAINS
   !!
   !! \brief Creates and writes an attribute.
   !!
-  !! \note  \fortran_obsolete
+  !! \attention  \fortran_obsolete
   !!
   !! \param loc_id    Identifier of the object (dataset or group) to create the attribute within
   !! \param obj_name  The name of the object to attach the attribute.
   !! \param attr_name The attribute name.
   !! \param buf       Buffer with data to be written to the attribute.
-  !! \param size      The size of the 1D array (one in the case of a scalar attribute). 
+  !! \param size      The size of the 1D array (one in the case of a scalar attribute).
   !!                  This value is used by H5Screate_simple() to create the dataspace.
   !! \param errcode   \fortran_error
+  !!
+  !! See C API: @ref H5LTset_attribute_double()
   !!
   SUBROUTINE h5ltset_attribute_double_f(loc_id,&
        obj_name,&
@@ -1245,13 +1258,15 @@ CONTAINS
   !!
   !! \brief Creates and writes an attribute.
   !!
-  !! \note  \fortran_obsolete
+  !! \attention  \fortran_obsolete
   !!
   !! \param loc_id    Identifier of the object (dataset or group) to create the attribute within
   !! \param obj_name  The name of the object to attach the attribute.
   !! \param attr_name The attribute name.
   !! \param buf       Buffer with data to be written to the attribute.
   !! \param errcode   \fortran_error
+  !!
+  !! See C API: @ref H5LTset_attribute_string()
   !!
   SUBROUTINE h5ltset_attribute_string_f(loc_id,&
        obj_name,&
@@ -1291,7 +1306,7 @@ CONTAINS
   !!
   !! \brief Reads an attribute from disk.
   !!
-  !! \note  \fortran_approved
+  !! \attention  \fortran_approved
   !!
   !! \param loc_id          Location identifier. The identifier may be that of a file or group.
   !! \param obj_name        The name of the object that the attribute is attached to.
@@ -1301,6 +1316,8 @@ CONTAINS
   !!                        NOTE: only the first character matters and is case insensitive.
   !! \param SizeOf_buf_type Size of \p buf&apos;s data type, in bytes.
   !! \param errcode         \fortran_error
+  !!
+  !! See C API: @ref H5LTget_attribute()
   !!
   SUBROUTINE h5ltget_attribute_f(loc_id,&
        obj_name,&
@@ -1341,13 +1358,15 @@ CONTAINS
   !!
   !! \brief Reads an attribute from disk.
   !!
-  !! \note  \fortran_obsolete
+  !! \attention  \fortran_obsolete
   !!
   !! \param loc_id    Identifier of the object (dataset or group) to create the attribute within
   !! \param obj_name  The name of the object that the attribute is attached to.
   !! \param attr_name The attribute name.
   !! \param buf       Buffer with data to be written to the attribute.
   !! \param errcode   \fortran_error
+  !!
+  !! See C API: @ref H5LTget_attribute_int()
   !!
   SUBROUTINE h5ltget_attribute_int_f(loc_id,&
        obj_name,&
@@ -1384,13 +1403,15 @@ CONTAINS
   !!
   !! \brief Reads an attribute from disk.
   !!
-  !! \note  \fortran_obsolete
+  !! \attention  \fortran_obsolete
   !!
   !! \param loc_id    Identifier of the object (dataset or group) to create the attribute within
   !! \param obj_name  The name of the object that the attribute is attached to.
   !! \param attr_name The attribute name.
   !! \param buf       Buffer with data to be written to the attribute.
   !! \param errcode   \fortran_error
+  !!
+  !! See C API: @ref H5LTget_attribute_float()
   !!
   SUBROUTINE h5ltget_attribute_float_f(loc_id,&
        obj_name,&
@@ -1426,13 +1447,15 @@ CONTAINS
   !!
   !! \brief Reads an attribute from disk.
   !!
-  !! \note  \fortran_obsolete
+  !! \attention  \fortran_obsolete
   !!
   !! \param loc_id    Identifier of the object (dataset or group) to create the attribute within
   !! \param obj_name  The name of the object that the attribute is attached to.
   !! \param attr_name The attribute name.
   !! \param buf       Buffer with data to be written to the attribute.
   !! \param errcode   \fortran_error
+  !!
+  !! See C API: @ref H5LTget_attribute_double()
   !!
   SUBROUTINE h5ltget_attribute_double_f(loc_id,&
        obj_name,&
@@ -1469,13 +1492,15 @@ CONTAINS
   !!
   !! \brief Reads an attribute from disk.
   !!
-  !! \note  \fortran_obsolete
+  !! \attention  \fortran_obsolete
   !!
   !! \param loc_id    Identifier of the object (dataset or group) to create the attribute within
   !! \param obj_name  The name of the object that the attribute is attached to.
   !! \param attr_name The attribute name.
   !! \param buf       Buffer with data to be written to the attribute.
   !! \param errcode   \fortran_error
+  !!
+  !! See C API: @ref H5LTget_attribute_string()
   !!
   SUBROUTINE h5ltget_attribute_string_f(loc_id,&
        obj_name,&
@@ -1531,6 +1556,8 @@ CONTAINS
   !! \param rank      The dimensionality of the dataset.
   !! \param errcode   \fortran_error
   !!
+  !! See C API: @ref H5LTget_dataset_ndims()
+  !!
   SUBROUTINE h5ltget_dataset_ndims_f(loc_id,&
        dset_name,&
        rank,&
@@ -1571,8 +1598,9 @@ CONTAINS
   !!
   !! \result Returns zero (false), a positive (true) or a negative (failure) value.
   !!
-  INTEGER FUNCTION h5ltfind_dataset_f(loc_id,&
-       dset_name)
+  !! See C API: @ref H5LTfind_dataset()
+  !!
+  INTEGER FUNCTION h5ltfind_dataset_f(loc_id, dset_name)
 
     IMPLICIT NONE
     INTEGER(hid_t),   INTENT(in) :: loc_id
@@ -1601,7 +1629,7 @@ CONTAINS
   !>
   !! \ingroup FH5LT
   !!
-  !! \brief Retrieves information about a dataset. 
+  !! \brief Retrieves information about a dataset.
   !!
   !! \param loc_id     Identifier of the object to locate the dataset within.
   !! \param dset_name  The dataset name.
@@ -1609,6 +1637,8 @@ CONTAINS
   !! \param type_class The class identifier. See H5Tget_class_f() for a list of class types.
   !! \param type_size  The size of the datatype in bytes.
   !! \param errcode    \fortran_error
+  !!
+  !! See C API: @ref H5LTget_dataset_info()
   !!
   SUBROUTINE h5ltget_dataset_info_f(loc_id,&
        dset_name,&
@@ -1633,7 +1663,7 @@ CONTAINS
          IMPORT :: HID_T, SIZE_T, HSIZE_T
          IMPLICIT NONE
          INTEGER(hid_t),   INTENT(in) :: loc_id
-         INTEGER(size_t) :: namelen 
+         INTEGER(size_t) :: namelen
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name
          INTEGER(hsize_t),DIMENSION(*),INTENT(inout):: dims
          INTEGER, INTENT(inout)         :: type_class
@@ -1661,6 +1691,8 @@ CONTAINS
   !! \param attr_name  The attribute name.
   !! \param rank       The dimensionality of the attribute.
   !! \param errcode    \fortran_error
+  !!
+  !! See C API: @ref H5LTget_attribute_ndims()
   !!
   SUBROUTINE h5ltget_attribute_ndims_f(loc_id,&
        obj_name,&
@@ -1711,6 +1743,8 @@ CONTAINS
   !! \param type_size  The size of the datatype in bytes.
   !! \param errcode    \fortran_error
   !!
+  !! See C API: @ref H5LTget_attribute_info()
+  !!
   SUBROUTINE h5ltget_attribute_info_f(loc_id,&
        obj_name,&
        attr_name,&
@@ -1759,10 +1793,12 @@ CONTAINS
   !! \brief Determines whether an HDF5 path is valid and, optionally, whether the path resolves to an HDF5 object.
   !!
   !! \param loc_id              Identifier of an object in the file.
-  !! \param path                The path to the object to check; links in path may be of any type. 
+  !! \param path                The path to the object to check; links in path may be of any type.
   !! \param check_object_valid	Indicates whether to check if the final component of the path resolves to a valid object.
   !! \param path_valid          Object status.
   !! \param errcode             \fortran_error
+  !!
+  !! See C API: @ref H5LTpath_valid()
   !!
   SUBROUTINE h5ltpath_valid_f(loc_id, path, check_object_valid, path_valid, errcode)
 
@@ -1808,7 +1844,7 @@ CONTAINS
 
   END SUBROUTINE h5ltpath_valid_f
 
-#ifdef H5_DOXYGEN_FORTRAN
+#ifdef H5_DOXYGEN
 END MODULE H5LT
 #else
 END MODULE H5LT_CONST

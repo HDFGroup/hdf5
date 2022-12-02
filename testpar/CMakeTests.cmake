@@ -98,6 +98,14 @@ set (test_par_CLEANFILES
     t_filters_parallel.h5
     MPItest.h5
     ShapeSameTest.h5
+    test_subfiling_basic_create.h5
+    test_subfiling_config_file.h5
+    test_subfiling_stripe_sizes.h5
+    test_subfiling_read_different_stripe_sizes.h5
+    test_subfiling_precreate_rank_0.h5
+    test_subfiling_write_many_read_one.h5
+    test_subfiling_write_many_read_few.h5
+    test_subfiling_h5fuse.h5
 )
 
 # Remove any output file left over from previous test run

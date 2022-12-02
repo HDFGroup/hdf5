@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -240,6 +239,8 @@ H5O__link_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSE
 
             /* A UD link.  Get the user-supplied data */
             UINT16DECODE(p, len)
+            if (lnk->type == H5L_TYPE_EXTERNAL && len < 3)
+                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "external link information length < 3")
             lnk->u.ud.size = len;
             if (len > 0) {
                 /* Make sure that length doesn't exceed buffer size, which could

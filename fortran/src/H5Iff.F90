@@ -11,12 +11,11 @@
 !
 ! COPYRIGHT
 !  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-!  Copyright by The HDF Group.                                               *
-!  Copyright by the Board of Trustees of the University of Illinois.         *
-!  All rights reserved.                                                      *
-!  *
-!  This file is part of HDF5.  The full HDF5 copyright notice, including     *
-!  terms governing use, modification, and redistribution, is contained in    *
+!   Copyright by The HDF Group.                                               *
+!   All rights reserved.                                                      *
+!                                                                             *
+!   This file is part of HDF5.  The full HDF5 copyright notice, including     *
+!   terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
 !   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
@@ -59,6 +58,8 @@ CONTAINS
 !!               \li H5I_BADID_F
 !! \param hdferr \fortran_error
 !!
+!! See C API: @ref H5Iget_type()
+!!
   SUBROUTINE h5iget_type_f(obj_id, TYPE, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: obj_id
@@ -85,6 +86,8 @@ CONTAINS
 !! \param buf       Buffer to read name in, name will be truncated if buffer is not big enough.
 !! \param name_size Name size.
 !! \param hdferr    \fortran_error
+!!
+!! See C API: @ref H5Iget_name()
 !!
   SUBROUTINE h5iget_name_f(obj_id, buf, buf_size, name_size, hdferr)
     IMPLICIT NONE
@@ -117,6 +120,8 @@ CONTAINS
 !! \param ref_count Current reference count of the ID.
 !! \param hdferr    \fortran_error
 !!
+!! See C API: @ref H5Iinc_ref()
+!!
   SUBROUTINE h5iinc_ref_f(obj_id, ref_count, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: obj_id
@@ -141,6 +146,8 @@ CONTAINS
 !! \param obj_id    Object identifier.
 !! \param ref_count Current reference count of the ID.
 !! \param hdferr    \fortran_error
+!!
+!! See C API: @ref H5Idec_ref()
 !!
   SUBROUTINE h5idec_ref_f(obj_id, ref_count, hdferr)
     IMPLICIT NONE
@@ -167,6 +174,8 @@ CONTAINS
 !! \param ref_count Current reference count of the ID.
 !! \param hdferr     \fortran_error
 !!
+!! See C API: @ref H5Iget_ref()
+!!
   SUBROUTINE h5iget_ref_f(obj_id, ref_count, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: obj_id
@@ -191,6 +200,8 @@ CONTAINS
 !! \param file_id File identifier.
 !! \param hdferr  \fortran_error
 !!
+!! See C API: @ref H5Iget_file_id()
+!!
   SUBROUTINE h5iget_file_id_f(obj_id, file_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN)  :: obj_id
@@ -214,6 +225,8 @@ CONTAINS
 !! \param id      Identifier.
 !! \param valid   Status of id as a valid identifier.
 !! \param hdferr  \fortran_error
+!!
+!! See C API: @ref H5Iis_valid()
 !!
   SUBROUTINE h5iis_valid_f(id, valid, hdferr)
     IMPLICIT NONE

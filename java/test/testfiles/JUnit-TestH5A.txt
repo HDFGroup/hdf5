@@ -11,6 +11,7 @@ JUnit version 4.11
 .testH5Aget_info_by_name
 .testH5Aget_create_plist
 .testH5Adelete_by_name
+.testH5AVLwrVL
 .testH5Aopen_by_name
 .testH5Aget_info
 .testH5Aget_name
@@ -22,6 +23,7 @@ JUnit version 4.11
 .testH5Adelete_by_idx_order
 .testH5Arename_by_name
 .testH5Acreate2_invalidobject
+.testH5AArraywr
 .testH5Acreate2
 .testH5Aiterate_by_name
 .testH5Adelete_by_idx_null
@@ -31,5 +33,5 @@ JUnit version 4.11
 
 Time:  XXXX
 
-OK (29 tests)
+OK (31 tests)
 

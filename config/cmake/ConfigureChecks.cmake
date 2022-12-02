@@ -125,11 +125,13 @@ CHECK_INCLUDE_FILE_CONCAT ("srbclient.h"     ${HDF_PREFIX}_HAVE_SRBCLIENT_H)
 CHECK_INCLUDE_FILE_CONCAT ("string.h"        ${HDF_PREFIX}_HAVE_STRING_H)
 CHECK_INCLUDE_FILE_CONCAT ("strings.h"       ${HDF_PREFIX}_HAVE_STRINGS_H)
 CHECK_INCLUDE_FILE_CONCAT ("stdlib.h"        ${HDF_PREFIX}_HAVE_STDLIB_H)
-CHECK_INCLUDE_FILE_CONCAT ("memory.h"        ${HDF_PREFIX}_HAVE_MEMORY_H)
 CHECK_INCLUDE_FILE_CONCAT ("dlfcn.h"         ${HDF_PREFIX}_HAVE_DLFCN_H)
 CHECK_INCLUDE_FILE_CONCAT ("netinet/in.h"    ${HDF_PREFIX}_HAVE_NETINET_IN_H)
 CHECK_INCLUDE_FILE_CONCAT ("netdb.h"         ${HDF_PREFIX}_HAVE_NETDB_H)
 CHECK_INCLUDE_FILE_CONCAT ("arpa/inet.h"     ${HDF_PREFIX}_HAVE_ARPA_INET_H)
+if (WINDOWS)
+  CHECK_INCLUDE_FILE_CONCAT ("shlwapi.h"         ${HDF_PREFIX}_HAVE_SHLWAPI_H)
+endif ()
 
 ## Check for non-standard extension quadmath.h
 
@@ -152,6 +154,10 @@ if (MINGW OR NOT WINDOWS)
   CHECK_LIBRARY_EXISTS_CONCAT ("dl" dlopen     ${HDF_PREFIX}_HAVE_LIBDL)
   CHECK_LIBRARY_EXISTS_CONCAT ("ws2_32" WSAStartup  ${HDF_PREFIX}_HAVE_LIBWS2_32)
   CHECK_LIBRARY_EXISTS_CONCAT ("wsock32" gethostbyname ${HDF_PREFIX}_HAVE_LIBWSOCK32)
+endif ()
+
+if (WINDOWS)
+  CHECK_LIBRARY_EXISTS_CONCAT ("shlwapi" StrStrIA ${HDF_PREFIX}_HAVE_SHLWAPI)
 endif ()
 
 # UCB (BSD) compatibility library
@@ -455,6 +461,7 @@ CHECK_FUNCTION_EXISTS (sigsetjmp         ${HDF_PREFIX}_HAVE_SIGSETJMP)
 CHECK_FUNCTION_EXISTS (sigprocmask       ${HDF_PREFIX}_HAVE_SIGPROCMASK)
 
 CHECK_FUNCTION_EXISTS (srandom           ${HDF_PREFIX}_HAVE_SRANDOM)
+CHECK_FUNCTION_EXISTS (strcasestr        ${HDF_PREFIX}_HAVE_STRCASESTR)
 CHECK_FUNCTION_EXISTS (strdup            ${HDF_PREFIX}_HAVE_STRDUP)
 CHECK_FUNCTION_EXISTS (symlink           ${HDF_PREFIX}_HAVE_SYMLINK)
 
@@ -743,75 +750,76 @@ if (HDF5_ENABLE_MIRROR_VFD)
 endif()
 
 #-----------------------------------------------------------------------------
-# Check if C has __float128 extension
+# Check if C has __float128 extension (used for Fortran only)
 #-----------------------------------------------------------------------------
 
-HDF_CHECK_TYPE_SIZE(__float128 _SIZEOF___FLOAT128)
-if (${_SIZEOF___FLOAT128})
-  set (${HDF_PREFIX}_HAVE_FLOAT128 1)
-  set (${HDF_PREFIX}_SIZEOF___FLOAT128 ${_SIZEOF___FLOAT128})
-else ()
-  set (${HDF_PREFIX}_HAVE_FLOAT128 0)
-  set (${HDF_PREFIX}_SIZEOF___FLOAT128 0)
-endif ()
+if (HDF5_BUILD_FORTRAN)
+  HDF_CHECK_TYPE_SIZE(__float128 _SIZEOF___FLOAT128)
+  if (${_SIZEOF___FLOAT128})
+    set (${HDF_PREFIX}_HAVE_FLOAT128 1)
+    set (${HDF_PREFIX}_SIZEOF___FLOAT128 ${_SIZEOF___FLOAT128})
+  else ()
+    set (${HDF_PREFIX}_HAVE_FLOAT128 0)
+    set (${HDF_PREFIX}_SIZEOF___FLOAT128 0)
+  endif ()
 
-HDF_CHECK_TYPE_SIZE(_Quad _SIZEOF__QUAD)
-if (NOT ${_SIZEOF__QUAD})
-  set (${HDF_PREFIX}_SIZEOF__QUAD 0)
-else ()
-  set (${HDF_PREFIX}_SIZEOF__QUAD ${_SIZEOF__QUAD})
-endif ()
+  HDF_CHECK_TYPE_SIZE(_Quad _SIZEOF__QUAD)
+  if (NOT ${_SIZEOF__QUAD})
+    set (${HDF_PREFIX}_SIZEOF__QUAD 0)
+  else ()
+    set (${HDF_PREFIX}_SIZEOF__QUAD ${_SIZEOF__QUAD})
+  endif ()
 
 #-----------------------------------------------------------------------------
 # The provided CMake C macros don't provide a general compile/run function
 # so this one is used.
 #-----------------------------------------------------------------------------
-set (RUN_OUTPUT_PATH_DEFAULT ${CMAKE_BINARY_DIR})
-macro (C_RUN FUNCTION_NAME SOURCE_CODE RETURN_VAR RETURN_OUTPUT_VAR)
-    message (VERBOSE "Detecting C ${FUNCTION_NAME}")
-    file (WRITE
-        ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCCompiler1.c
-        ${SOURCE_CODE}
-    )
-    TRY_RUN (RUN_RESULT_VAR COMPILE_RESULT_VAR
-        ${CMAKE_BINARY_DIR}
-        ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCCompiler1.c
-        COMPILE_DEFINITIONS "-D_SIZEOF___FLOAT128=${H5_SIZEOF___FLOAT128};-D_HAVE_QUADMATH_H=${H5_HAVE_QUADMATH_H}"
-        COMPILE_OUTPUT_VARIABLE COMPILEOUT
-        RUN_OUTPUT_VARIABLE OUTPUT_VAR
-    )
+  set (RUN_OUTPUT_PATH_DEFAULT ${CMAKE_BINARY_DIR})
+  macro (C_RUN FUNCTION_NAME SOURCE_CODE RETURN_VAR RETURN_OUTPUT_VAR)
+      message (VERBOSE "Detecting C ${FUNCTION_NAME}")
+      file (WRITE
+          ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCCompiler1.c
+          ${SOURCE_CODE}
+      )
+      TRY_RUN (RUN_RESULT_VAR COMPILE_RESULT_VAR
+          ${CMAKE_BINARY_DIR}
+          ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCCompiler1.c
+          COMPILE_DEFINITIONS "-D_SIZEOF___FLOAT128=${H5_SIZEOF___FLOAT128};-D_HAVE_QUADMATH_H=${H5_HAVE_QUADMATH_H}"
+          COMPILE_OUTPUT_VARIABLE COMPILEOUT
+          RUN_OUTPUT_VARIABLE OUTPUT_VAR
+      )
 
-    set (${RETURN_OUTPUT_VAR} ${OUTPUT_VAR})
+      set (${RETURN_OUTPUT_VAR} ${OUTPUT_VAR})
 
-    message (VERBOSE "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
-    message (VERBOSE "Test COMPILE_RESULT_VAR ${COMPILE_RESULT_VAR} ")
-    message (VERBOSE "Test COMPILE_OUTPUT ${COMPILEOUT} ")
-    message (VERBOSE "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
-    message (VERBOSE "Test RUN_RESULT_VAR ${RUN_RESULT_VAR} ")
-    message (VERBOSE "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
+      message (VERBOSE "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
+      message (VERBOSE "Test COMPILE_RESULT_VAR ${COMPILE_RESULT_VAR} ")
+      message (VERBOSE "Test COMPILE_OUTPUT ${COMPILEOUT} ")
+      message (VERBOSE "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
+      message (VERBOSE "Test RUN_RESULT_VAR ${RUN_RESULT_VAR} ")
+      message (VERBOSE "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
 
-    if (COMPILE_RESULT_VAR)
-      if (RUN_RESULT_VAR EQUAL "0")
-        set (${RETURN_VAR} 1 CACHE INTERNAL "Have C function ${FUNCTION_NAME}")
-        message (VERBOSE "Testing C ${FUNCTION_NAME} - OK")
-        file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-            "Determining if the C ${FUNCTION_NAME} exists passed with the following output:\n"
-            "${OUTPUT_VAR}\n\n"
-        )
+      if (COMPILE_RESULT_VAR)
+        if (RUN_RESULT_VAR EQUAL "0")
+          set (${RETURN_VAR} 1 CACHE INTERNAL "Have C function ${FUNCTION_NAME}")
+          message (VERBOSE "Testing C ${FUNCTION_NAME} - OK")
+          file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+              "Determining if the C ${FUNCTION_NAME} exists passed with the following output:\n"
+              "${OUTPUT_VAR}\n\n"
+          )
+        else ()
+          message (VERBOSE "Testing C ${FUNCTION_NAME} - Fail")
+          set (${RETURN_VAR} 0 CACHE INTERNAL "Have C function ${FUNCTION_NAME}")
+          file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+              "Determining if the C ${FUNCTION_NAME} exists failed with the following output:\n"
+              "${OUTPUT_VAR}\n\n")
+        endif ()
       else ()
-        message (VERBOSE "Testing C ${FUNCTION_NAME} - Fail")
-        set (${RETURN_VAR} 0 CACHE INTERNAL "Have C function ${FUNCTION_NAME}")
-        file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-            "Determining if the C ${FUNCTION_NAME} exists failed with the following output:\n"
-            "${OUTPUT_VAR}\n\n")
+          message (FATAL_ERROR "Compilation of C ${FUNCTION_NAME} - Failed")
       endif ()
-    else ()
-        message (FATAL_ERROR "Compilation of C ${FUNCTION_NAME} - Failed")
-    endif ()
-endmacro ()
+  endmacro ()
 
-set (PROG_SRC
-    "
+  set (PROG_SRC
+      "
 #include <float.h>\n\
 #include <stdio.h>\n\
 #define CHECK_FLOAT128 _SIZEOF___FLOAT128\n\
@@ -832,31 +840,33 @@ set (PROG_SRC
 #else\n\
 #define C_LDBL_DIG LDBL_DIG\n\
 #endif\n\nint main() {\nprintf(\"\\%d\\\;\\%d\\\;\", C_LDBL_DIG, C_FLT128_DIG)\\\;\n\nreturn 0\\\;\n}\n
-     "
-)
+       "
+  )
 
-C_RUN ("maximum decimal precision for C" ${PROG_SRC} PROG_RES PROG_OUTPUT4)
-message (STATUS "Testing maximum decimal precision for C - ${PROG_OUTPUT4}")
+  C_RUN ("maximum decimal precision for C" ${PROG_SRC} PROG_RES PROG_OUTPUT4)
+  message (STATUS "Testing maximum decimal precision for C - ${PROG_OUTPUT4}")
 
-# dnl The output from the above program will be:
-# dnl  -- long double decimal precision  --  __float128 decimal precision
+  # dnl The output from the above program will be:
+  # dnl  -- long double decimal precision  --  __float128 decimal precision
 
-list (GET PROG_OUTPUT4 0 H5_LDBL_DIG)
-list (GET PROG_OUTPUT4 1 H5_FLT128_DIG)
+  list (GET PROG_OUTPUT4 0 H5_LDBL_DIG)
+  list (GET PROG_OUTPUT4 1 H5_FLT128_DIG)
 
-if (${HDF_PREFIX}_SIZEOF___FLOAT128 EQUAL "0" OR FLT128_DIG EQUAL "0")
-  set (${HDF_PREFIX}_HAVE_FLOAT128 0)
-  set (${HDF_PREFIX}_SIZEOF___FLOAT128 0)
-  set (_PAC_C_MAX_REAL_PRECISION ${H5_LDBL_DIG})
-else ()
-  set (_PAC_C_MAX_REAL_PRECISION ${H5_FLT128_DIG})
-endif ()
-if (NOT ${_PAC_C_MAX_REAL_PRECISION})
-  set (${HDF_PREFIX}_PAC_C_MAX_REAL_PRECISION 0)
-else ()
-  set (${HDF_PREFIX}_PAC_C_MAX_REAL_PRECISION ${_PAC_C_MAX_REAL_PRECISION})
-endif ()
-message (STATUS "maximum decimal precision for C var - ${${HDF_PREFIX}_PAC_C_MAX_REAL_PRECISION}")
+  if (${HDF_PREFIX}_SIZEOF___FLOAT128 EQUAL "0" OR FLT128_DIG EQUAL "0")
+    set (${HDF_PREFIX}_HAVE_FLOAT128 0)
+    set (${HDF_PREFIX}_SIZEOF___FLOAT128 0)
+    set (_PAC_C_MAX_REAL_PRECISION ${H5_LDBL_DIG})
+  else ()
+    set (_PAC_C_MAX_REAL_PRECISION ${H5_FLT128_DIG})
+  endif ()
+  if (NOT ${_PAC_C_MAX_REAL_PRECISION})
+    set (${HDF_PREFIX}_PAC_C_MAX_REAL_PRECISION 0)
+  else ()
+    set (${HDF_PREFIX}_PAC_C_MAX_REAL_PRECISION ${_PAC_C_MAX_REAL_PRECISION})
+  endif ()
+  message (STATUS "maximum decimal precision for C var - ${${HDF_PREFIX}_PAC_C_MAX_REAL_PRECISION}")
+
+endif()
 
 #-----------------------------------------------------------------------------
 # Macro to determine the various conversion capabilities

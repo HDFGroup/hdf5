@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -3978,7 +3977,7 @@ test_misc22(void)
                 if ((prec[j] + offsets[k]) > (H5Tget_size(idts[i]) * 8))
                     continue;
 
-                MESSAGE(5, ("  Testing datatypes size=%d precision=%u offset=%d\n", H5Tget_size(idts[i]),
+                MESSAGE(5, ("  Testing datatypes size=%zu precision=%u offset=%d\n", H5Tget_size(idts[i]),
                             (unsigned)prec[j], (unsigned)offsets[k]));
 
                 /* Create the DCPL */
@@ -5826,16 +5825,6 @@ test_misc34(void)
     mem = H5MM_xfree(mem);
     CHECK_PTR_NULL(mem, "H5MM_xfree");
 
-    /* H5MM_malloc(): Ensure that size 0 returns NULL */
-    mem = H5MM_malloc(sz);
-    CHECK_PTR_NULL(mem, "H5MM_malloc");
-    mem = H5MM_xfree(mem);
-
-    /* H5MM_calloc(): Ensure that size 0 returns NULL */
-    mem = H5MM_calloc(sz);
-    CHECK_PTR_NULL(mem, "H5MM_calloc");
-    mem = H5MM_xfree(mem);
-
     /* H5MM_realloc(): Check behavior:
      *
      *  H5MM_realloc(NULL, size)    <==> H5MM_malloc(size)
@@ -5878,16 +5867,15 @@ test_misc35(void)
     hsize_t coord[MISC35_NPOINTS][MISC35_SPACE_RANK] = /* Coordinates for point selection */
         {{0, 10, 5}, {1, 2, 7},  {2, 4, 9}, {0, 6, 11}, {1, 8, 13},
          {2, 12, 0}, {0, 14, 2}, {1, 0, 4}, {2, 1, 6},  {0, 3, 8}};
-    size_t           reg_size_start; /* Initial amount of regular memory allocated */
-    size_t           arr_size_start; /* Initial amount of array memory allocated */
-    size_t           blk_size_start; /* Initial amount of block memory allocated */
-    size_t           fac_size_start; /* Initial amount of factory memory allocated */
-    size_t           reg_size_final; /* Final amount of regular memory allocated */
-    size_t           arr_size_final; /* Final amount of array memory allocated */
-    size_t           blk_size_final; /* Final amount of block memory allocated */
-    size_t           fac_size_final; /* Final amount of factory memory allocated */
-    H5_alloc_stats_t alloc_stats;    /* Memory stats */
-    herr_t           ret;            /* Return value */
+    size_t reg_size_start; /* Initial amount of regular memory allocated */
+    size_t arr_size_start; /* Initial amount of array memory allocated */
+    size_t blk_size_start; /* Initial amount of block memory allocated */
+    size_t fac_size_start; /* Initial amount of factory memory allocated */
+    size_t reg_size_final; /* Final amount of regular memory allocated */
+    size_t arr_size_final; /* Final amount of array memory allocated */
+    size_t blk_size_final; /* Final amount of block memory allocated */
+    size_t fac_size_final; /* Final amount of factory memory allocated */
+    herr_t ret;            /* Return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Free-list API calls"));
@@ -5915,13 +5903,13 @@ test_misc35(void)
     CHECK(arr_size_start, 0, "H5get_free_list_sizes");
     CHECK(blk_size_start, 0, "H5get_free_list_sizes");
     CHECK(fac_size_start, 0, "H5get_free_list_sizes");
-#else  /* H5_MEMORY_ALLOC_SANITY_CHECK */
+#else
     /* All the values should be == 0 */
     VERIFY(reg_size_start, 0, "H5get_free_list_sizes");
     VERIFY(arr_size_start, 0, "H5get_free_list_sizes");
     VERIFY(blk_size_start, 0, "H5get_free_list_sizes");
     VERIFY(fac_size_start, 0, "H5get_free_list_sizes");
-#endif /* H5_MEMORY_ALLOC_SANITY_CHECK */
+#endif
 
     /* Garbage collect the free lists */
     ret = H5garbage_collect();
@@ -5940,30 +5928,6 @@ test_misc35(void)
         ERROR("blk_size_final > blk_size_start");
     if (fac_size_final > fac_size_start)
         ERROR("fac_size_final > fac_size_start");
-
-    /* Retrieve memory allocation statistics */
-    ret = H5get_alloc_stats(&alloc_stats);
-    CHECK(ret, FAIL, "H5get_alloc_stats");
-
-#if defined H5_MEMORY_ALLOC_SANITY_CHECK
-    /* All the values should be >0 */
-    CHECK(alloc_stats.total_alloc_bytes, 0, "H5get_alloc_stats");
-    CHECK(alloc_stats.curr_alloc_bytes, 0, "H5get_alloc_stats");
-    CHECK(alloc_stats.peak_alloc_bytes, 0, "H5get_alloc_stats");
-    CHECK(alloc_stats.max_block_size, 0, "H5get_alloc_stats");
-    CHECK(alloc_stats.total_alloc_blocks_count, 0, "H5get_alloc_stats");
-    CHECK(alloc_stats.curr_alloc_blocks_count, 0, "H5get_alloc_stats");
-    CHECK(alloc_stats.peak_alloc_blocks_count, 0, "H5get_alloc_stats");
-#else  /* H5_MEMORY_ALLOC_SANITY_CHECK */
-    /* All the values should be == 0 */
-    VERIFY(alloc_stats.total_alloc_bytes, 0, "H5get_alloc_stats");
-    VERIFY(alloc_stats.curr_alloc_bytes, 0, "H5get_alloc_stats");
-    VERIFY(alloc_stats.peak_alloc_bytes, 0, "H5get_alloc_stats");
-    VERIFY(alloc_stats.max_block_size, 0, "H5get_alloc_stats");
-    VERIFY(alloc_stats.total_alloc_blocks_count, 0, "H5get_alloc_stats");
-    VERIFY(alloc_stats.curr_alloc_blocks_count, 0, "H5get_alloc_stats");
-    VERIFY(alloc_stats.peak_alloc_blocks_count, 0, "H5get_alloc_stats");
-#endif /* H5_MEMORY_ALLOC_SANITY_CHECK */
 
 } /* end test_misc35() */
 
