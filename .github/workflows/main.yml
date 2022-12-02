@@ -6,12 +6,13 @@ on:
   push:
     branches: [ develop, hdf5_1_12, hdf5_1_10, hdf5_1_8 ]
     paths-ignore:
-    - '.github/**'
-    - 'doc/**'
-    - 'release_docs/**'
-    - 'ACKNOWLEDGEMENTS'
-    - 'COPYING**'
-    - '**.md'
+      - '.github/CODEOWNERS'
+      - '.github/FUNDING.yml'
+      - 'doc/**'
+      - 'release_docs/**'
+      - 'ACKNOWLEDGEMENTS'
+      - 'COPYING**'
+      - '**.md'
     
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -48,7 +49,7 @@ jobs:
             generator: "-G Ninja"
           - name: "macOS Latest Clang"
             artifact: "macOS.tar.xz"
-            os: macos-latest
+            os: macos-11
             build_type: "Release"
             cpp: ON
             fortran: OFF
@@ -109,7 +110,7 @@ jobs:
             generator: "-G Ninja"
           - name: "macOS TS Clang"
             artifact: "macOSTS.tar.xz"
-            os: macos-latest
+            os: macos-11
             build_type: "Release"
             cpp: OFF
             fortran: OFF
@@ -171,7 +172,7 @@ jobs:
       if: matrix.os == 'windows-latest'
     - name: Install Dependencies (macOS)
       run: brew install ninja
-      if: matrix.os == 'macos-latest'
+      if: matrix.os == 'macos-11'
     - name: Set environment for MSVC (Windows)
       if:  matrix.os == 'windows-latest'
       run: |
