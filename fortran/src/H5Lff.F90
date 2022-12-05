@@ -607,12 +607,12 @@ CONTAINS
        INTEGER(C_INT) FUNCTION H5Ldelete_by_idx(loc_id, group_name, index_field, order, n, lapl_id_default) &
             BIND(C,NAME='H5Ldelete_by_idx')
          IMPORT :: C_CHAR, C_INT
-         IMPORT :: HID_T, HSIZE_T, ENUM_T
+         IMPORT :: HID_T, HSIZE_T
          IMPLICIT NONE
          INTEGER(HID_T), VALUE :: loc_id
          CHARACTER(KIND=C_CHAR), DIMENSION(*) :: group_name
-         INTEGER(ENUM_T), VALUE :: index_field
-         INTEGER(ENUM_T), VALUE :: order
+         INTEGER(C_INT), VALUE :: index_field
+         INTEGER(C_INT), VALUE :: order
          INTEGER(HSIZE_T), VALUE :: n
          INTEGER(HID_T), VALUE :: lapl_id_default
        END FUNCTION H5Ldelete_by_idx
@@ -623,7 +623,7 @@ CONTAINS
     lapl_id_default = H5P_DEFAULT_F
     IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
 
-    hdferr = INT(H5Ldelete_by_idx(loc_id, c_group_name, INT(index_field,ENUM_T), INT(order, ENUM_T), n, lapl_id_default))
+    hdferr = INT(H5Ldelete_by_idx(loc_id, c_group_name, INT(index_field,C_INT), INT(order, C_INT), n, lapl_id_default))
 
   END SUBROUTINE h5ldelete_by_idx_f
 
@@ -680,15 +680,15 @@ CONTAINS
        INTEGER(C_INT) FUNCTION H5Ldelete_by_idx_async(file, func, line, loc_id, group_name, index_field, order, n, &
             lapl_id_default, es_id) BIND(C,NAME='H5Ldelete_by_idx_async')
          IMPORT :: C_CHAR, C_INT
-         IMPORT :: HID_T, HSIZE_T, ENUM_T
+         IMPORT :: HID_T, HSIZE_T
          IMPLICIT NONE
          CHARACTER(KIND=C_CHAR), DIMENSION(*) :: file
          CHARACTER(KIND=C_CHAR), DIMENSION(*) :: func
          INTEGER(C_INT), VALUE :: line
          INTEGER(HID_T), VALUE :: loc_id
          CHARACTER(KIND=C_CHAR), DIMENSION(*) :: group_name
-         INTEGER(ENUM_T), VALUE :: index_field
-         INTEGER(ENUM_T), VALUE :: order
+         INTEGER(C_INT), VALUE :: index_field
+         INTEGER(C_INT), VALUE :: order
          INTEGER(HSIZE_T), VALUE :: n
          INTEGER(HID_T), VALUE :: lapl_id_default
          INTEGER(HID_T), VALUE :: es_id
@@ -704,7 +704,7 @@ CONTAINS
     IF(PRESENT(line)) line_default = INT(line, C_INT)
 
     hdferr = INT(H5Ldelete_by_idx_async(file_default, func_default, line_default, &
-         loc_id, c_group_name, INT(index_field,ENUM_T), INT(order, ENUM_T), n, lapl_id_default, es_id))
+         loc_id, c_group_name, INT(index_field,C_INT), INT(order, C_INT), n, lapl_id_default, es_id))
 
   END SUBROUTINE h5ldelete_by_idx_async_f
 
@@ -1337,18 +1337,18 @@ CONTAINS
        INTEGER(C_INT) FUNCTION H5Literate2(group_id, idx_type, order, idx, op, op_data) &
             BIND(C, NAME='H5Literate2')
          IMPORT :: C_INT, C_PTR, C_FUNPTR
-         IMPORT :: HID_T, HSIZE_T, ENUM_T
+         IMPORT :: HID_T, HSIZE_T
          IMPLICIT NONE
          INTEGER(HID_T)  , VALUE :: group_id
-         INTEGER(ENUM_T) , VALUE :: idx_type
-         INTEGER(ENUM_T) , VALUE :: order
+         INTEGER(C_INT) , VALUE :: idx_type
+         INTEGER(C_INT) , VALUE :: order
          INTEGER(HSIZE_T)        :: idx
          TYPE(C_FUNPTR)  , VALUE :: op
          TYPE(C_PTR)     , VALUE :: op_data
        END FUNCTION H5Literate2
     END INTERFACE
 
-    return_value = INT(H5Literate2(group_id, INT(idx_type, ENUM_T), INT(order, ENUM_T), idx, op, op_data))
+    return_value = INT(H5Literate2(group_id, INT(idx_type, C_INT), INT(order, C_INT), idx, op, op_data))
 
     IF(return_value.GE.0)THEN
        hdferr = 0
@@ -1409,14 +1409,14 @@ CONTAINS
        INTEGER(C_INT) FUNCTION H5Literate_async(file, func, line, &
             group_id, idx_type, order, idx, op, op_data, es_id) BIND(C, NAME='H5Literate_async')
          IMPORT :: C_CHAR, C_INT, C_PTR, C_FUNPTR
-         IMPORT :: HID_T, HSIZE_T, ENUM_T
+         IMPORT :: HID_T, HSIZE_T
          IMPLICIT NONE
          CHARACTER(KIND=C_CHAR), DIMENSION(*) :: file
          CHARACTER(KIND=C_CHAR), DIMENSION(*) :: func
          INTEGER(C_INT), VALUE :: line
          INTEGER(HID_T)  , VALUE :: group_id
-         INTEGER(ENUM_T) , VALUE :: idx_type
-         INTEGER(ENUM_T) , VALUE :: order
+         INTEGER(C_INT) , VALUE :: idx_type
+         INTEGER(C_INT) , VALUE :: order
          INTEGER(HSIZE_T)        :: idx
          TYPE(C_FUNPTR)  , VALUE :: op
          TYPE(C_PTR)     , VALUE :: op_data
@@ -1429,7 +1429,7 @@ CONTAINS
     IF(PRESENT(line)) line_default = INT(line, C_INT)
 
     return_value = INT(H5Literate_async(file_default, func_default, line_default, &
-         group_id, INT(idx_type, ENUM_T), INT(order, ENUM_T), idx, op, op_data, es_id))
+         group_id, INT(idx_type, C_INT), INT(order, C_INT), idx, op, op_data, es_id))
 
     IF(return_value.GE.0)THEN
        hdferr = 0

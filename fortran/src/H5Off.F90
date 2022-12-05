@@ -380,7 +380,7 @@ CONTAINS
 
     INTERFACE
        INTEGER(C_INT) FUNCTION H5Oclose_async(file, func, line, object_id, es_id) BIND(C,NAME='H5Oclose_async')
-         IMPORT :: c_CHAR, C_INT
+         IMPORT :: C_CHAR, C_INT
          IMPORT :: HID_T
          IMPLICIT NONE
          CHARACTER(KIND=C_CHAR), DIMENSION(*) :: file
@@ -812,13 +812,13 @@ CONTAINS
     INTERFACE
        INTEGER(HID_T) FUNCTION H5Oopen_by_idx(loc_id, group_name, index_type, order, n, lapl_id_default) &
             BIND(C,NAME='H5Oopen_by_idx')
-         IMPORT :: C_CHAR
-         IMPORT :: HID_T, HSIZE_T, ENUM_T
+         IMPORT :: C_CHAR, C_INT
+         IMPORT :: HID_T, HSIZE_T
          IMPLICIT NONE
          INTEGER(HID_T)  , VALUE :: loc_id
          CHARACTER(KIND=C_CHAR), DIMENSION(*)  :: group_name
-         INTEGER(ENUM_T) , VALUE :: index_type
-         INTEGER(ENUM_T) , VALUE :: order
+         INTEGER(C_INT) , VALUE :: index_type
+         INTEGER(C_INT) , VALUE :: order
          INTEGER(HSIZE_T), VALUE :: n
          INTEGER(HID_T)  , VALUE :: lapl_id_default
        END FUNCTION H5Oopen_by_idx
@@ -829,7 +829,7 @@ CONTAINS
     lapl_id_default = H5P_DEFAULT_F
     IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
 
-    obj_id = H5Oopen_by_idx(loc_id, c_group_name, INT(index_type, ENUM_T), INT(order, ENUM_T), n, lapl_id_default)
+    obj_id = H5Oopen_by_idx(loc_id, c_group_name, INT(index_type, C_INT), INT(order, C_INT), n, lapl_id_default)
 
     hdferr = 0
     IF(obj_id.LT.0) hdferr = -1
@@ -884,15 +884,15 @@ CONTAINS
             loc_id, group_name, index_type, order, n, lapl_id_default, es_id) &
             BIND(C,NAME='H5Oopen_by_idx_async')
          IMPORT :: C_CHAR, C_INT
-         IMPORT :: HID_T, HSIZE_T, ENUM_T
+         IMPORT :: HID_T, HSIZE_T
          IMPLICIT NONE
          CHARACTER(KIND=C_CHAR), DIMENSION(*) :: file
          CHARACTER(KIND=C_CHAR), DIMENSION(*) :: func
          INTEGER(C_INT)  , VALUE :: line
          INTEGER(HID_T)  , VALUE :: loc_id
          CHARACTER(KIND=C_CHAR), DIMENSION(*)  :: group_name
-         INTEGER(ENUM_T) , VALUE :: index_type
-         INTEGER(ENUM_T) , VALUE :: order
+         INTEGER(C_INT) , VALUE :: index_type
+         INTEGER(C_INT) , VALUE :: order
          INTEGER(HSIZE_T), VALUE :: n
          INTEGER(HID_T)  , VALUE :: lapl_id_default
          INTEGER(HID_T)  , VALUE :: es_id
@@ -908,7 +908,7 @@ CONTAINS
     IF(PRESENT(line)) line_default = INT(line, C_INT)
 
     obj_id = H5Oopen_by_idx_async(file_default, func_default, line_default, &
-         loc_id, c_group_name, INT(index_type, ENUM_T), INT(order, ENUM_T), n, lapl_id_default, es_id)
+         loc_id, c_group_name, INT(index_type, C_INT), INT(order, C_INT), n, lapl_id_default, es_id)
 
     hdferr = 0
     IF(obj_id.LT.0) hdferr = -1

@@ -28,15 +28,8 @@ MODULE H5GLOBAL
 
   IMPLICIT NONE
 
-  ! Enumerate data type that is interoperable with C.
-  ENUM, BIND(C)
-    ENUMERATOR :: enum_dtype
-  END ENUM
-
 !> \addtogroup FH5
 !> @{
-  INTEGER, PARAMETER :: ENUM_T = KIND(enum_dtype)  !< Enumerate data type that is interoperable with C.
-
   ! Parameters used in the function 'h5kind_to_type' located in H5_ff.F90.
   ! The flag is used to tell the function whether the kind input variable
   ! is for a REAL or INTEGER data type.

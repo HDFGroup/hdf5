@@ -47,7 +47,7 @@ MODULE H5G
 ! @brief Fortran2003 Derived Type for @ref H5G_info_t
 !
   TYPE, BIND(C) :: H5G_info_t
-     INTEGER(ENUM_T)    :: storage_type !< Type of storage for links in group:
+     INTEGER(C_INT )    :: storage_type !< Type of storage for links in group:
                                         !< \li H5G_STORAGE_TYPE_COMPACT_F: Compact storage
                                         !< \li H5G_STORAGE_TYPE_DENSE_F:     Indexed storage
                                         !< \li H5G_STORAGE_TYPE_SYMBOL_TABLE_F: Symbol tables, the original HDF5 structure
@@ -99,11 +99,11 @@ MODULE H5G
      INTEGER(C_INT) FUNCTION H5Gget_info_by_idx(loc_id, group_name, idx_type, order, n, ginfo, lapl_id) &
           BIND(C,NAME='H5Gget_info_by_idx')
        IMPORT :: C_CHAR, C_INT, C_PTR
-       IMPORT :: HID_T, ENUM_T, HSIZE_T
+       IMPORT :: HID_T, HSIZE_T
        INTEGER(HID_T), VALUE :: loc_id
        CHARACTER(KIND=C_CHAR), DIMENSION(*) :: group_name
-       INTEGER(ENUM_T) , VALUE :: idx_type
-       INTEGER(ENUM_T) , VALUE :: order
+       INTEGER(C_INT) , VALUE :: idx_type
+       INTEGER(C_INT) , VALUE :: order
        INTEGER(HSIZE_T), VALUE :: n
        TYPE(C_PTR)     , VALUE :: ginfo
        INTEGER(HID_T)  , VALUE :: lapl_id
@@ -115,14 +115,14 @@ MODULE H5G
           group_name, idx_type, order, n, ginfo, lapl_id, es_id) &
           BIND(C,NAME='H5Gget_info_by_idx_async')
        IMPORT :: C_CHAR, C_INT, C_PTR
-       IMPORT :: HID_T, ENUM_T, HSIZE_T
+       IMPORT :: HID_T, HSIZE_T
        CHARACTER(KIND=C_CHAR), DIMENSION(*) :: file
        CHARACTER(KIND=C_CHAR), DIMENSION(*) :: func
        INTEGER(C_INT), VALUE :: line
        INTEGER(HID_T), VALUE :: loc_id
        CHARACTER(KIND=C_CHAR), DIMENSION(*) :: group_name
-       INTEGER(ENUM_T) , VALUE :: idx_type
-       INTEGER(ENUM_T) , VALUE :: order
+       INTEGER(C_INT) , VALUE :: idx_type
+       INTEGER(C_INT) , VALUE :: order
        INTEGER(HSIZE_T), VALUE :: n
        TYPE(C_PTR)     , VALUE :: ginfo
        INTEGER(HID_T)  , VALUE :: lapl_id
@@ -1217,7 +1217,7 @@ CONTAINS
     ptr = C_LOC(ginfo)
 
     hdferr = H5Gget_info_by_idx(loc_id, c_group_name, &
-         INT(idx_type,ENUM_T), INT(order, ENUM_T), n, ptr, lapl_id_default )
+         INT(idx_type,C_INT), INT(order, C_INT), n, ptr, lapl_id_default )
 
 #ifdef H5_DOXYGEN
   END SUBROUTINE h5gget_info_by_idx_f
@@ -1280,7 +1280,7 @@ CONTAINS
     ptr = C_LOC(ginfo)
 
     hdferr = H5Gget_info_by_idx_async(file_default, func_default, line_default, loc_id, c_group_name, &
-         INT(idx_type,ENUM_T), INT(order, ENUM_T), n, ptr, lapl_id_default, es_id )
+         INT(idx_type,C_INT), INT(order, C_INT), n, ptr, lapl_id_default, es_id )
 
   END SUBROUTINE h5gget_info_by_idx_async_f
 
@@ -1343,7 +1343,7 @@ CONTAINS
 
 
     hdferr = H5Gget_info_by_idx(loc_id, c_group_name, &
-         INT(idx_type,ENUM_T), INT(order, ENUM_T), n, ptr, lapl_id_default )
+         INT(idx_type,C_INT), INT(order, C_INT), n, ptr, lapl_id_default )
 
     storage_type = INT(ginfo%storage_type)
     nlinks       = INT(ginfo%nlinks)
