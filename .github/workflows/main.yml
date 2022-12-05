@@ -139,7 +139,7 @@ jobs:
           # We could also build with the Autotools via brew installing them,
           # but that seems unnecessary
           - name: "MacOS Clang CMake"
-            os: macos-latest
+            os: macos-11
             cpp: ON
             fortran: OFF
             java: ON
@@ -347,7 +347,7 @@ jobs:
         run: |
            sudo apt update
            sudo apt install automake autoconf libtool libtool-bin
-           sudo apt install openmpi-bin openmpi-common
+           sudo apt install openmpi-bin openmpi-common mpi-default-dev
            echo "CC=mpicc" >> $GITHUB_ENV
            echo "FC=mpif90" >> $GITHUB_ENV
         if: (matrix.generator == 'autogen') && (matrix.parallel == 'enable')
@@ -358,7 +358,7 @@ jobs:
 
       - name: Install Dependencies (macOS)
         run: brew install ninja
-        if: matrix.os == 'macos-latest'
+        if: matrix.os == 'macos-11'
 
       - name: Set environment for MSVC (Windows)
         run: |
