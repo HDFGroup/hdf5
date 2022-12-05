@@ -536,31 +536,7 @@ AC_CHECK_SIZEOF([double])
 AC_CHECK_SIZEOF([long double])
 
 ## ----------------------------------------------------------------------
-## Check for non-standard extension __FLOAT128
-##
-HAVE_FLOAT128=0
-HAVE_QUADMATH=0
-FLT128_DIG=0
-LDBL_DIG=0
-
-AC_CHECK_SIZEOF([__float128])
-AC_CHECK_SIZEOF([_Quad])
-AC_CHECK_HEADERS([quadmath.h], [HAVE_QUADMATH=1], [])
-PAC_FC_LDBL_DIG
-
-AC_SUBST([PAC_C_MAX_REAL_PRECISION])
-
-if test "$ac_cv_sizeof___float128" != 0 && test "$FLT128_DIG" != 0 ; then
-  AC_DEFINE([HAVE_FLOAT128], [1], [Determine if __float128 is available])
-  PAC_C_MAX_REAL_PRECISION=$FLT128_DIG
-else
-  PAC_C_MAX_REAL_PRECISION=$LDBL_DIG
-fi
-AC_DEFINE_UNQUOTED([PAC_C_MAX_REAL_PRECISION], $PAC_C_MAX_REAL_PRECISION, [Determine the maximum decimal precision in C])
-AC_MSG_RESULT([$PAC_C_MAX_REAL_PRECISION])
-
-## ----------------------------------------------------------------------
-## Check if they would like the Fortran interface compiled
+## Check if the Fortran interface should be enabled
 ##
 
 ## This needs to be exposed for the library info file even if Fortran is disabled.
@@ -579,6 +555,30 @@ AC_ARG_ENABLE([fortran],
 AC_MSG_RESULT([$HDF_FORTRAN])
 
 if test "X$HDF_FORTRAN" = "Xyes"; then
+
+## ----------------------------------------------------------------------
+## Check for non-standard extension __FLOAT128
+##
+  HAVE_FLOAT128=0
+  HAVE_QUADMATH=0
+  FLT128_DIG=0
+  LDBL_DIG=0
+
+  AC_CHECK_SIZEOF([__float128])
+  AC_CHECK_SIZEOF([_Quad])
+  AC_CHECK_HEADERS([quadmath.h], [HAVE_QUADMATH=1], [])
+  PAC_FC_LDBL_DIG
+
+  AC_SUBST([PAC_C_MAX_REAL_PRECISION])
+
+  if test "$ac_cv_sizeof___float128" != 0 && test "$FLT128_DIG" != 0 ; then
+    AC_DEFINE([HAVE_FLOAT128], [1], [Determine if __float128 is available])
+    PAC_C_MAX_REAL_PRECISION=$FLT128_DIG
+  else
+    PAC_C_MAX_REAL_PRECISION=$LDBL_DIG
+  fi
+  AC_DEFINE_UNQUOTED([PAC_C_MAX_REAL_PRECISION], $PAC_C_MAX_REAL_PRECISION, [Determine the maximum decimal precision in C])
+  AC_MSG_RESULT([$PAC_C_MAX_REAL_PRECISION])
 
 ## We will output an include file for Fortran, H5config_f.inc which
 ## contains various configure definitions used by the Fortran Library.
@@ -623,7 +623,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
     [fmoddir=$withval],
     [fmoddir="\${includedir}"])
   AC_SUBST([fmoddir], [$fmoddir])
-￼
+
   ## Change to the Fortran 90 language
   AC_LANG_PUSH(Fortran)
 
@@ -1737,10 +1737,7 @@ if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
                 #include "szlib.h"
             ],[[
                 /* SZ_encoder_enabled returns 1 if encoder is present */
-                if(SZ_encoder_enabled() == 1)
-                    exit(0);
-                else
-                    exit(1);
+                return SZ_encoder_enabled() != 1;
             ]])]
         , [hdf5_cv_szlib_can_encode=yes], [hdf5_cv_szlib_can_encode=no],)]
    )

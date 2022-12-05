@@ -209,7 +209,14 @@ $(TEST_SCRIPT_CHKSH) $(TEST_SCRIPT_PARA_CHKSH) dummysh.chkexe_:
 	   chkname=`basename $(@:.chkexe_=.chkexe)`;\
 	   log=`basename $(@:.chkexe_=.chklog)`; \
 	   echo "============================"; \
-	   if [ $${chkname} -nt $$cmd ] && [ $${chkname} -nt $(SCRIPT_DEPEND) ]; then \
+	   newer=true; \
+	   for i in $${cmd} $(SCRIPT_DEPEND); do \
+              if [ $${chkname} -ot $$i ]; then \
+		 newer=false; \
+		 break; \
+	      fi; \
+           done; \
+	   if $${newer}; then \
 	      echo "No need to test $${tname} again."; \
 	   else \
 	      echo "============================" > $${log}; \
