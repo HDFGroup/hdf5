@@ -1683,7 +1683,7 @@ CONTAINS
          INTEGER(C_INT), VALUE :: line
          INTEGER(HID_T), VALUE :: obj_id
          CHARACTER(KIND=C_CHAR), DIMENSION(*) :: attr_name
-         LOGICAL(C_BOOL), VALUE :: exists
+         LOGICAL(C_BOOL) :: exists
          INTEGER(HID_T), VALUE :: es_id
        END FUNCTION H5Aexists_async
     END INTERFACE
@@ -1693,7 +1693,7 @@ CONTAINS
     IF(PRESENT(func)) func_default = TRIM(func)//C_NULL_CHAR
     IF(PRESENT(line)) line_default = INT(line, C_INT)
 
-    hdferr = H5Aexists_async(file_default, func_default, line_default, obj_id, c_attr_name, attr_exists_c, es_id)
+    hdferr = INT(H5Aexists_async(file_default, func_default, line_default, obj_id, c_attr_name, attr_exists_c, es_id))
 
     attr_exists = .FALSE.
     IF(attr_exists_c) attr_exists = .TRUE.
@@ -1788,7 +1788,7 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(IN) , OPTIONAL :: func
     INTEGER         , INTENT(IN) , OPTIONAL :: line
 
-    INTEGER(C_INT) :: attr_exists_c
+    LOGICAL(C_BOOL) :: attr_exists_c = .FALSE.
     INTEGER(HID_T) :: lapl_id_default
     CHARACTER(LEN=LEN_TRIM(obj_name)+1,KIND=C_CHAR) :: c_obj_name
     CHARACTER(LEN=LEN_TRIM(attr_name)+1,KIND=C_CHAR) :: c_attr_name
@@ -1798,9 +1798,9 @@ CONTAINS
 
     INTERFACE
        INTEGER(C_INT) FUNCTION H5Aexists_by_name_async(file, func, line, &
-            loc_id, obj_name, attr_name, lapl_id_default, es_id) &
+            loc_id, obj_name, attr_name, exists, lapl_id_default, es_id) &
             BIND(C,NAME='H5Aexists_by_name_async')
-         IMPORT :: C_CHAR, C_INT
+         IMPORT :: C_CHAR, C_BOOL, C_INT
          IMPORT :: HID_T
          IMPLICIT NONE
          CHARACTER(KIND=C_CHAR), DIMENSION(*) :: file
@@ -1809,6 +1809,7 @@ CONTAINS
          INTEGER(HID_T), VALUE :: loc_id
          CHARACTER(KIND=C_CHAR), DIMENSION(*) :: obj_name
          CHARACTER(KIND=C_CHAR), DIMENSION(*) :: attr_name
+         LOGICAL(C_BOOL) :: exists
          INTEGER(HID_T), VALUE :: lapl_id_default
          INTEGER(HID_T), VALUE :: es_id
        END FUNCTION H5Aexists_by_name_async
@@ -1823,14 +1824,11 @@ CONTAINS
     IF(PRESENT(func)) func_default = TRIM(func)//C_NULL_CHAR
     IF(PRESENT(line)) line_default = INT(line, C_INT)
 
-    attr_exists_c = H5Aexists_by_name_async(file_default, func_default, line_default, &
-         loc_id, c_obj_name, c_attr_name, lapl_id_default, es_id)
+    hdferr = INT(H5Aexists_by_name_async(file_default, func_default, line_default, &
+         loc_id, c_obj_name, c_attr_name, attr_exists_c, lapl_id_default, es_id))
 
     attr_exists = .FALSE.
-    IF(attr_exists_c.GT.0) attr_exists = .TRUE.
-
-    hdferr = 0
-    IF(attr_exists_c.LT.0) hdferr = -1
+    IF(attr_exists_c) attr_exists = .TRUE.
 
   END SUBROUTINE H5Aexists_by_name_async_f
 
