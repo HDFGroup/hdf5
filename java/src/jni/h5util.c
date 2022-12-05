@@ -4057,7 +4057,7 @@ translate_atomic_rbuf(JNIEnv *env, jobject ret_buf, jlong mem_type_id, H5T_class
     size_t       i, x;
     size_t       typeSize;
     // raw_buf is normally bytes except when used for variable length strings
-    char        *char_buf = (char *)raw_buf;
+    char *char_buf = (char *)raw_buf;
 
     /* retrieve the java.util.ArrayList interface class */
     jclass    arrCList      = ENVPTR->FindClass(ENVONLY, "java/util/ArrayList");
@@ -4318,7 +4318,7 @@ translate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class_
     size_t      i, x;
     size_t      typeSize;
     // raw_buf is normally bytes except when used for variable length strings
-    char        *char_buf = (char *)raw_buf;
+    char *char_buf = (char *)raw_buf;
 
     /* retrieve the java.util.ArrayList interface class */
     jclass arrCList = ENVPTR->FindClass(ENVONLY, "java/util/ArrayList");
@@ -4540,7 +4540,7 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
     size_t       i, x;
     size_t       typeSize;
     // raw_buf is normally bytes except when used for variable length strings
-    char        *char_buf = (char *)raw_buf;
+    char *char_buf = (char *)raw_buf;
 
     /* retrieve the java.util.ArrayList interface class */
     jclass    arrCList      = ENVPTR->FindClass(ENVONLY, "java/util/ArrayList");
@@ -4739,8 +4739,8 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
         case H5T_STRING: {
             /* Convert each element to a list */
             for (i = 0; i < (size_t)count; i++) {
-                jobj = translate_atomic_rbuf(ENVONLY, ret_buf, mem_type_id, type_class,
-                                             char_buf + i * typeSize);
+                jobj =
+                    translate_atomic_rbuf(ENVONLY, ret_buf, mem_type_id, type_class, char_buf + i * typeSize);
                 if (jobj) {
                     if (ret_buflen == 0)
                         ENVPTR->CallBooleanMethod(ENVONLY, ret_buf, arrAddMethod, (jobject)jobj);
@@ -4774,7 +4774,7 @@ translate_wbuf(JNIEnv *env, jobjectArray in_buf, jlong mem_type_id, H5T_class_t 
     size_t       i, x;
     size_t       typeSize;
     // raw_buf is normally bytes except when used for variable length strings
-    char        *char_buf = (char *)raw_buf;
+    char *char_buf = (char *)raw_buf;
 
     /* retrieve the java.util.ArrayList interface class */
     jclass arrCList = ENVPTR->FindClass(ENVONLY, "java/util/ArrayList");
@@ -4928,8 +4928,7 @@ translate_wbuf(JNIEnv *env, jobjectArray in_buf, jlong mem_type_id, H5T_class_t 
             for (i = 0; i < (size_t)count; i++) {
                 if (NULL == (jobj = ENVPTR->GetObjectArrayElement(ENVONLY, (jobjectArray)in_buf, (jsize)i)))
                     CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
-                translate_atomic_wbuf(ENVONLY, jobj, mem_type_id, type_class,
-                                      char_buf + i * typeSize);
+                translate_atomic_wbuf(ENVONLY, jobj, mem_type_id, type_class, char_buf + i * typeSize);
                 ENVPTR->DeleteLocalRef(ENVONLY, jobj);
             }
             break;

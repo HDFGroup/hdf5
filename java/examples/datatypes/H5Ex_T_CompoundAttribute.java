@@ -46,7 +46,7 @@ public class H5Ex_T_CompoundAttribute {
 
         static String[] memberNames   = {"Serial number", "Location", "Temperature (F)", "Pressure (inHg)"};
         static long[] memberMemTypes  = {HDF5Constants.H5T_NATIVE_INT, HDF5Constants.H5T_C_S1,
-                                         HDF5Constants.H5T_NATIVE_DOUBLE, HDF5Constants.H5T_NATIVE_DOUBLE};
+                                        HDF5Constants.H5T_NATIVE_DOUBLE, HDF5Constants.H5T_NATIVE_DOUBLE};
         static long[] memberFileTypes = {HDF5Constants.H5T_STD_I32BE, HDF5Constants.H5T_C_S1,
                                          HDF5Constants.H5T_IEEE_F64BE, HDF5Constants.H5T_IEEE_F64BE};
         static int[] memberStorage    = {INTEGERSIZE, MAXSTRINGSIZE, DOUBLESIZE, DOUBLESIZE};
