@@ -172,6 +172,15 @@ Bug Fixes since HDF5-1.13.3 release
 ===================================
     Library
     -------
+    - Change data array parameter type in H5FDwrite_selection()
+
+      The data array type of H5FDwrite_selection() and related was changed from
+      `const void *` to `const void * const` which is safer and probably what
+      was intended. This also affects the write_selection callback in the
+      H5FD_class_t struct.
+
+      (DER - 2022/12/06)
+
     - Fix CVE-2021-46242 / GHSA-x9pw-hh7v-wjpf
 
       When evicting driver info block, NULL the corresponding entry.

@@ -1785,7 +1785,7 @@ done:
  */
 herr_t
 H5FDwrite_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t mem_space_ids[],
-                    hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[], const void *bufs[])
+                    hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[], const void * const bufs[])
 {
     herr_t ret_value = SUCCEED; /* Return value             */
 
