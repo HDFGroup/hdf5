@@ -5007,7 +5007,7 @@ test_selection_io_write(H5FD_t *lf, H5FD_mem_t type, uint32_t count, hid_t mem_s
 
     /* Issue write call */
     if (H5FDwrite_selection(lf, type, H5P_DEFAULT, count, mem_spaces, file_spaces, offsets, element_sizes,
-                            (const void * const *)wbufs) < 0)
+                            (const void *const *)wbufs) < 0)
         TEST_ERROR;
 
     return 0;

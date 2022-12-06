@@ -113,7 +113,7 @@ static herr_t H5FD__read_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_
                                              size_t element_sizes[], void *bufs[] /* out */);
 static herr_t H5FD__write_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count,
                                               H5S_t **mem_spaces, H5S_t **file_spaces, haddr_t offsets[],
-                                              size_t element_sizes[], const void * const bufs[]);
+                                              size_t element_sizes[], const void *const bufs[]);
 
 /*********************/
 /* Package Variables */
@@ -1394,7 +1394,7 @@ done:
 static herr_t
 H5FD__write_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count,
                                 H5S_t **mem_spaces, H5S_t **file_spaces, haddr_t offsets[],
-                                size_t element_sizes[], const void * const bufs[])
+                                size_t element_sizes[], const void *const bufs[])
 {
     hbool_t         extend_sizes = FALSE;
     hbool_t         extend_bufs  = FALSE;
@@ -1715,7 +1715,7 @@ done:
  */
 herr_t
 H5FD_write_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t **mem_spaces, H5S_t **file_spaces,
-                     haddr_t offsets[], size_t element_sizes[], const void * const bufs[])
+                     haddr_t offsets[], size_t element_sizes[], const void *const bufs[])
 {
     hbool_t  offsets_cooked = FALSE;
     hid_t    mem_space_ids_local[H5FD_LOCAL_SEL_ARR_LEN];
@@ -1873,7 +1873,8 @@ done:
  */
 herr_t
 H5FD_write_selection_id(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem_space_ids[],
-                        hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[], const void * const bufs[])
+                        hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[],
+                        const void *const bufs[])
 {
     hbool_t  offsets_cooked = FALSE;
     H5S_t   *mem_spaces_local[H5FD_LOCAL_SEL_ARR_LEN];

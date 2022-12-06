@@ -929,7 +929,7 @@ H5_DLL herr_t H5F_shared_select_read(H5F_shared_t *f_sh, H5FD_mem_t type, uint32
                                      size_t element_sizes[], void *bufs[] /* out */);
 H5_DLL herr_t H5F_shared_select_write(H5F_shared_t *f_sh, H5FD_mem_t type, uint32_t count,
                                       struct H5S_t **mem_spaces, struct H5S_t **file_spaces,
-                                      haddr_t offsets[], size_t element_sizes[], const void * const bufs[]);
+                                      haddr_t offsets[], size_t element_sizes[], const void *const bufs[]);
 
 /* Functions that operate on I/O vectors */
 H5_DLL herr_t H5F_shared_vector_read(H5F_shared_t *f_sh, uint32_t count, H5FD_mem_t types[], haddr_t addrs[],
