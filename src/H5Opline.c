@@ -165,7 +165,8 @@ H5O__pline_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
         /* Filter ID */
         if (p + 6 - 1 > p_end) /* 6 bytes minimum */
             HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL,
-                        "ran off the end of the buffer: current p = %p, p_end = %p", (const void *)(p + 6), (const void *)p_end)
+                        "ran off the end of the buffer: current p = %p, p_end = %p", (const void *)(p + 6),
+                        (const void *)p_end)
         UINT16DECODE(p, filter->id);
 
         /* Length of filter name */
@@ -177,7 +178,8 @@ H5O__pline_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
                 HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, NULL, "filter name length is not a multiple of eight")
             if (p + 4 - 1 > p_end) /* with name_length 4 bytes to go */
                 HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL,
-                            "ran off the end of the buffer: current p = %p, p_end = %p", (const void *)(p + 4), (const void *)p_end)
+                            "ran off the end of the buffer: current p = %p, p_end = %p",
+                            (const void *)(p + 4), (const void *)p_end)
         } /* end if */
 
         /* Filter flags */
