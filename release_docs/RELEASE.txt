@@ -277,7 +277,7 @@ Bug Fixes since HDF5-1.13.3 release
       settings. Changing the set to use 'lib-name = version' instead 'lib-name-version'
       fixes the issue
 
-      (ADB - 2022/12/06)
+      (ADB - 2022/12/06 HDFFV-11355)
 
     - Move MPI libraries link from PRIVATE to PUBLIC
 
