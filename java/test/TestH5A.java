@@ -46,6 +46,7 @@ public class TestH5A {
     private static final int DIM_Y      = 6;
     long H5fid                          = HDF5Constants.H5I_INVALID_HID;
     long H5dsid                         = HDF5Constants.H5I_INVALID_HID;
+    long H5atid                         = HDF5Constants.H5I_INVALID_HID;
     long H5did                          = HDF5Constants.H5I_INVALID_HID;
     long[] H5dims                       = {DIM_X, DIM_Y};
     long type_id                        = HDF5Constants.H5I_INVALID_HID;
@@ -136,8 +137,12 @@ public class TestH5A {
             }
             catch (Exception ex) {
             }
-
-        _deleteFile(H5_FILE);
+        if (H5atid > 0)
+            try {
+                H5.H5Tclose(H5atid);
+            }
+            catch (Exception ex) {
+            }
 
         if (type_id > 0)
             try {
@@ -163,6 +168,8 @@ public class TestH5A {
             }
             catch (Exception ex) {
             }
+
+        _deleteFile(H5_FILE);
         System.out.println();
     }
 
@@ -1072,7 +1079,7 @@ public class TestH5A {
                                    HDF5Constants.H5P_DEFAULT);
             assertTrue("testH5Awrite_readVL: ", attr_id >= 0);
 
-            H5.H5Awrite_VLStrings(attr_id, atype_id, str_data);
+            H5.H5AwriteVL(attr_id, atype_id, str_data);
 
             H5.H5Fflush(H5fid, HDF5Constants.H5F_SCOPE_LOCAL);
 
@@ -1084,7 +1091,7 @@ public class TestH5A {
                 strs[j] = "";
             }
             try {
-                H5.H5Aread_VLStrings(attr_id, atype_id, strs);
+                H5.H5AreadVL(attr_id, atype_id, strs);
             }
             catch (Exception ex) {
                 ex.printStackTrace();
@@ -1862,5 +1869,135 @@ public class TestH5A {
                 catch (Exception ex) {
                 }
         }
+    }
+
+    @Test
+    public void testH5AArray_string_buffer() throws Throwable
+    {
+        String att_str_name = "ArrayStringdata";
+        long att_str_id     = HDF5Constants.H5I_INVALID_HID;
+        long atype_str_id   = HDF5Constants.H5I_INVALID_HID;
+        long aspace_id      = HDF5Constants.H5I_INVALID_HID;
+        long[] strdims      = {4};
+        long[] dims         = {6};
+        long lsize          = 1;
+
+        String[] str_data0 = {"Parting", "is such", "sweet", "sorrow."};
+        String[] str_data1 = {"Testing", "one", "two", "three."};
+        String[] str_data2 = {"Dog,", "man's", "best", "friend."};
+        String[] str_data3 = {"Diamonds", "are", "a", "girls!"};
+        String[] str_data4 = {"S A", "T U R", "D A Y", "night"};
+        String[] str_data5 = {"That's", "all", "folks", "!!!"};
+
+        ArrayList[] arr_str_data = new ArrayList[6];
+        arr_str_data[0]          = new ArrayList<String>(Arrays.asList(str_data0));
+        arr_str_data[1]          = new ArrayList<String>(Arrays.asList(str_data1));
+        arr_str_data[2]          = new ArrayList<String>(Arrays.asList(str_data2));
+        arr_str_data[3]          = new ArrayList<String>(Arrays.asList(str_data3));
+        arr_str_data[4]          = new ArrayList<String>(Arrays.asList(str_data4));
+        arr_str_data[5]          = new ArrayList<String>(Arrays.asList(str_data5));
+
+        try {
+            H5atid = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("testH5AArray_string_buffer.H5.H5Tcopy: " + err);
+        }
+        assertTrue("testH5AArray_string_buffer.H5Tcopy: ", H5atid >= 0);
+        try {
+            H5.H5Tset_size(H5atid, HDF5Constants.H5T_VARIABLE);
+            assertTrue("testH5AArray_string_buffer.H5Tis_variable_str", H5.H5Tis_variable_str(H5atid));
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("testH5DArray_string_buffer.H5Tset_size: " + err);
+        }
+        try {
+            atype_str_id = H5.H5Tarray_create(H5atid, 1, strdims);
+            assertTrue("testH5AArray_string_buffer.H5Tarray_create: ", atype_str_id >= 0);
+        }
+        catch (Exception err) {
+            if (atype_str_id > 0)
+                try {
+                    H5.H5Tclose(atype_str_id);
+                }
+                catch (Exception ex) {
+                }
+            err.printStackTrace();
+            fail("testH5AArray_string_buffer: " + err);
+        }
+
+        try {
+            aspace_id = H5.H5Screate_simple(1, dims, null);
+            assertTrue(aspace_id > 0);
+            att_str_id = H5.H5Acreate(H5did, att_str_name, atype_str_id, aspace_id, HDF5Constants.H5P_DEFAULT,
+                                      HDF5Constants.H5P_DEFAULT);
+            assertTrue("testH5AArray_string_buffer: ", att_str_id >= 0);
+
+            H5.H5AwriteVL(att_str_id, atype_str_id, arr_str_data);
+        }
+        catch (Exception err) {
+            if (att_str_id > 0)
+                try {
+                    H5.H5Dclose(att_str_id);
+                }
+                catch (Exception ex) {
+                }
+            if (atype_str_id > 0)
+                try {
+                    H5.H5Tclose(atype_str_id);
+                }
+                catch (Exception ex) {
+                }
+            err.printStackTrace();
+            fail("testH5AArray_string_buffer: " + err);
+        }
+        finally {
+            if (aspace_id > 0)
+                try {
+                    H5.H5Sclose(aspace_id);
+                }
+                catch (Exception ex) {
+                }
+        }
+
+        H5.H5Fflush(H5fid, HDF5Constants.H5F_SCOPE_LOCAL);
+
+        for (int j = 0; j < dims.length; j++)
+            lsize *= dims[j];
+
+        ArrayList[] arr_readbuf = new ArrayList[6];
+        for (int j = 0; j < lsize; j++)
+            arr_readbuf[j] = new ArrayList<String>();
+
+        try {
+            H5.H5AreadVL(att_str_id, atype_str_id, arr_readbuf);
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        finally {
+            if (att_str_id > 0)
+                try {
+                    H5.H5Aclose(att_str_id);
+                }
+                catch (Exception ex) {
+                }
+            if (atype_str_id > 0)
+                try {
+                    H5.H5Tclose(atype_str_id);
+                }
+                catch (Exception ex) {
+                }
+        }
+        assertTrue("testH5AArray_string_buffer:" + arr_readbuf[0].get(0),
+                   arr_str_data[0].get(0).equals(arr_readbuf[0].get(0)));
+        assertTrue("testH5AArray_string_buffer:" + arr_readbuf[1].get(0),
+                   arr_str_data[1].get(0).equals(arr_readbuf[1].get(0)));
+        assertTrue("testH5AArray_string_buffer:" + arr_readbuf[2].get(0),
+                   arr_str_data[2].get(0).equals(arr_readbuf[2].get(0)));
+        assertTrue("testH5AArray_string_buffer:" + arr_readbuf[3].get(0),
+                   arr_str_data[3].get(0).equals(arr_readbuf[3].get(0)));
     }
 }
