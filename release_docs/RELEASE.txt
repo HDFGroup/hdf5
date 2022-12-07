@@ -166,24 +166,11 @@ New Features
 Support for new platforms, languages and compilers
 ==================================================
     -
-
-
+    
 Bug Fixes since HDF5-1.13.3 release
 ===================================
     Library
     -------
-    - Fix CVE-2021-46242 / GHSA-x9pw-hh7v-wjpf
-
-      When evicting driver info block, NULL the corresponding entry.
-
-      Since H5C_expunge_entry() called (from H5AC_expunge_entry()) sets the  flag
-      H5C__FLUSH_INVALIDATE_FLAG, the driver info block will be freed. NULLing
-      the pointer in f->shared->drvinfo will prevent use-after-free  when it is
-      used in other functions (like  H5F__dest()) - as other places will check
-      whether the pointer is initialized before using its value.
-
-      (EFE - 2022/09/29 GH-2254)
-
     - Fix CVE-2018-13867 / GHSA-j8jr-chrh-qfrf
  
       Validate location (offset) of the accumulated metadata when comparing.
@@ -212,6 +199,17 @@ Bug Fixes since HDF5-1.13.3 release
 
       (EFE - 2022/10/09 GH-2233)
 
+    - CVE-2021-46244 / GHSA-vrxh-5gxg-rmhm
+
+      Compound datatypes may not have members of size 0
+ 
+      A member size of 0 may lead to an FPE later on as reported in
+      CVE-2021-46244. To avoid this, check for this as soon as the
+      member is decoded.
+
+      (EFE - 2022/10/05 GEH-2242)
+
+
     - Fix CVE-2021-45830 / GHSA-5h2h-fjjr-x9m2
 
       Make H5O__fsinfo_decode() more resilient to out-of-bound reads.
@@ -224,6 +222,18 @@ Bug Fixes since HDF5-1.13.3 release
       address data was checked before decoding.
 
       (EFE - 2022/10/05 GH-2228)
+
+    - Fix CVE-2021-46242 / GHSA-x9pw-hh7v-wjpf
+
+      When evicting driver info block, NULL the corresponding entry.
+
+      Since H5C_expunge_entry() called (from H5AC_expunge_entry()) sets the  flag
+      H5C__FLUSH_INVALIDATE_FLAG, the driver info block will be freed. NULLing
+      the pointer in f->shared->drvinfo will prevent use-after-free  when it is
+      used in other functions (like  H5F__dest()) - as other places will check
+      whether the pointer is initialized before using its value.
+
+      (EFE - 2022/09/29 GH-2254)
 
     - Fix CVE-2021-45833 / GHSA-x57p-jwp6-4v79
 
@@ -263,6 +273,7 @@ Bug Fixes since HDF5-1.13.3 release
       The fix addresses a stack overflow on write.
 
       (EFE - 2022/09/27 HDFFV-10589, GH-2226)
+
 
     Java Library
     ------------
