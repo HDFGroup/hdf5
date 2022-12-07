@@ -2290,6 +2290,81 @@ error:
 } /* end test_vol_cap_flags() */
 
 /*-------------------------------------------------------------------------
+ * Function:    test_wrap_register()
+ *
+ * Purpose:     Tests the failure of calling H5VLwrap_register in application
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_wrap_register(void)
+{
+    hid_t fapl_id  = H5I_INVALID_HID;
+    hid_t file_id  = H5I_INVALID_HID;
+    hid_t group_id = H5I_INVALID_HID;
+    hid_t wrap_id  = H5I_INVALID_HID;
+    char  filename[NAME_LEN];
+    void *vol_obj;
+
+    TESTING("failure of calling H5VLwrap_register");
+
+    /* Retrieve the file access property for testing */
+    fapl_id = h5_fileaccess();
+
+    h5_fixname(FILENAME[0], fapl_id, filename, sizeof filename);
+
+    if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
+        TEST_ERROR;
+
+    if ((group_id = H5Gcreate2(file_id, "test", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Retrieve the VOL object for the group */
+    if (!(vol_obj = H5VLobject(group_id)))
+        TEST_ERROR;
+
+    /* Try to register a second ID for the group.  It should fail because this routine is mainly
+     * targeted toward wrapping objects for iteration routine callbacks, not for application use
+     */
+    H5E_BEGIN_TRY
+    {
+        wrap_id = H5VLwrap_register(vol_obj, H5I_GROUP);
+    }
+    H5E_END_TRY;
+
+    if (H5I_INVALID_HID != wrap_id)
+        FAIL_PUTS_ERROR("should not be able to call H5VLwrap_register in an application");
+
+    if (H5Gclose(group_id) < 0)
+        TEST_ERROR;
+
+    if (H5Fclose(file_id) < 0)
+        TEST_ERROR;
+
+    h5_delete_test_file(FILENAME[0], fapl_id);
+
+    if (H5Pclose(fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Gclose(group_id);
+        H5Fclose(file_id);
+        H5Pclose(fapl_id);
+    }
+    H5E_END_TRY;
+
+    return FAIL;
+} /* end test_wrap_register() */
+
+/*-------------------------------------------------------------------------
  * Function:    main
  *
  * Purpose:     Tests the virtual object layer interface (H5VL)
@@ -2326,6 +2401,7 @@ main(void)
     nerrors += test_async_vol_props() < 0 ? 1 : 0;
     nerrors += test_vol_cap_flags() < 0 ? 1 : 0;
     nerrors += test_get_vol_name() < 0 ? 1 : 0;
+    nerrors += test_wrap_register() < 0 ? 1 : 0;
 
     if (nerrors) {
         HDprintf("***** %d Virtual Object Layer TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");

@@ -31,6 +31,7 @@ import hdf.hdf5lib.exceptions.HDF5LibraryException;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
@@ -157,7 +158,7 @@ public class TestH5D {
         assertTrue("TestH5D._createDataset.H5Dcreate: ", H5did >= 0);
     }
 
-    private final void _createVLDataset(long fid, long dsid, String name, long dapl)
+    private final void _createVLStrDataset(String name, long dapl)
     {
         try {
             H5dtid = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
@@ -166,24 +167,24 @@ public class TestH5D {
             err.printStackTrace();
             fail("H5.H5Tcopy: " + err);
         }
-        assertTrue("TestH5D._createVLDataset.H5Tcopy: ", H5dtid >= 0);
+        assertTrue("TestH5D._createVLStrDataset.H5Tcopy: ", H5dtid >= 0);
         try {
             H5.H5Tset_size(H5dtid, HDF5Constants.H5T_VARIABLE);
-            assertTrue("TestH5D._createVLDataset.H5Tis_variable_str", H5.H5Tis_variable_str(H5dtid));
+            assertTrue("TestH5D._createVLStrDataset.H5Tis_variable_str", H5.H5Tis_variable_str(H5dtid));
         }
         catch (Throwable err) {
             err.printStackTrace();
             fail("H5.H5Tset_size: " + err);
         }
         try {
-            H5did = H5.H5Dcreate(fid, name, H5dtid, dsid, HDF5Constants.H5P_DEFAULT,
+            H5did = H5.H5Dcreate(H5fid, name, H5dtid, H5dsid, HDF5Constants.H5P_DEFAULT,
                                  HDF5Constants.H5P_DEFAULT, dapl);
         }
         catch (Throwable err) {
             err.printStackTrace();
             fail("H5.H5Dcreate: " + err);
         }
-        assertTrue("TestH5D._createVLDataset.H5Dcreate: ", H5did >= 0);
+        assertTrue("TestH5D._createVLStrDataset.H5Dcreate: ", H5did >= 0);
     }
 
     private final void _closeH5file() throws HDF5LibraryException
@@ -934,7 +935,7 @@ public class TestH5D {
                            buf_data[(indx * DIM_Y) + jndx] == 126);
     }
 
-    @Test
+    @Ignore
     public void testH5Dvlen_get_buf_size()
     {
         String[] str_data   = {"Parting", "is such", "sweet", "sorrow.", "Testing",  "one", "two",   "three.",
@@ -945,12 +946,12 @@ public class TestH5D {
         for (int idx = 0; idx < str_data.length; idx++)
             str_data_bytes += str_data[idx].length() + 1; // Account for terminating null
 
-        _createVLDataset(H5fid, H5dsid, "dset", HDF5Constants.H5P_DEFAULT);
+        _createVLStrDataset("dset", HDF5Constants.H5P_DEFAULT);
 
         try {
             if ((H5did >= 0) && (H5dtid >= 0))
-                H5.H5Dwrite_VLStrings(H5did, H5dtid, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                                      HDF5Constants.H5P_DEFAULT, str_data);
+                H5.H5DwriteVL(H5did, H5dtid, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                              HDF5Constants.H5P_DEFAULT, str_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -964,26 +965,122 @@ public class TestH5D {
         assertTrue("H5Dvlen_get_buf_size " + vl_size + " == " + str_data_bytes, vl_size == str_data_bytes);
     }
 
-    @Test
-    public void testH5Dvlen_read_default_buffer() throws Throwable
+    @Ignore
+    public void testH5Dvlen_string_buffer() throws Throwable
     {
-        String[] str_data = {"Parting", "is such", "sweet", "sorrow.", "Testing",  "one", "two",   "three.",
-                             "Dog,",    "man's",   "best",  "friend.", "Diamonds", "are", "a",     "girls!",
-                             "S A",     "T U R",   "D A Y", "night",   "That's",   "all", "folks", "!!!"};
-        byte[] read_data  = new byte[512];
+        String dset_str_name = "VLStringdata";
+        long dset_str_id     = HDF5Constants.H5I_INVALID_HID;
+        long dtype_str_id    = HDF5Constants.H5I_INVALID_HID;
+        long dspace_id       = HDF5Constants.H5I_INVALID_HID;
+        long[] dims          = {64};
+        long lsize           = 1;
 
-        _createVLDataset(H5fid, H5dsid, "dset", HDF5Constants.H5P_DEFAULT);
+        String[] str_data0 = {"Parting", "is such", "sweet", "sorrow."};
+        String[] str_data1 = {"Testing", "one", "two", "three."};
+        String[] str_data2 = {"Dog,", "man's", "best", "friend."};
+        String[] str_data3 = {"Diamonds", "are", "a", "girls!"};
+        String[] str_data4 = {"S A", "T U R", "D A Y", "night"};
+        String[] str_data5 = {"That's", "all", "folks", "!!!"};
+
+        ArrayList[] vl_str_data = new ArrayList[6];
+        vl_str_data[0]          = new ArrayList<String>(Arrays.asList(str_data0));
+        vl_str_data[1]          = new ArrayList<String>(Arrays.asList(str_data1));
+        vl_str_data[2]          = new ArrayList<String>(Arrays.asList(str_data2));
+        vl_str_data[3]          = new ArrayList<String>(Arrays.asList(str_data3));
+        vl_str_data[4]          = new ArrayList<String>(Arrays.asList(str_data4));
+        vl_str_data[5]          = new ArrayList<String>(Arrays.asList(str_data5));
 
         try {
-            H5.H5Dwrite_VLStrings(H5did, H5dtid, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                                  HDF5Constants.H5P_DEFAULT, str_data);
+            H5dtid = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
         }
-        catch (Exception e) {
-            e.printStackTrace();
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("testH5Dvlen_string_buffer.H5.H5Tcopy: " + err);
+        }
+        assertTrue("testH5Dvlen_string_buffer.H5Tcopy: ", H5dtid >= 0);
+        try {
+            H5.H5Tset_size(H5dtid, HDF5Constants.H5T_VARIABLE);
+            assertTrue("testH5Dvlen_string_buffer.H5Tis_variable_str", H5.H5Tis_variable_str(H5dtid));
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("testH5Dvlen_string_buffer.H5Tset_size: " + err);
+        }
+        try {
+            dtype_str_id = H5.H5Tvlen_create(H5dtid);
+            assertTrue("testH5Dvlen_string_buffer.H5Tvlen_create: ", dtype_str_id >= 0);
+        }
+        catch (Exception err) {
+            if (dtype_str_id > 0)
+                try {
+                    H5.H5Tclose(dtype_str_id);
+                }
+                catch (Exception ex) {
+                }
+            err.printStackTrace();
+            fail("testH5Dvlen_string_buffer: " + err);
         }
 
-        H5.H5Dread(H5did, H5dtid, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL, HDF5Constants.H5P_DEFAULT,
-                   read_data);
+        try {
+            dspace_id = H5.H5Screate_simple(1, dims, null);
+            assertTrue(dspace_id > 0);
+            dset_str_id =
+                H5.H5Dcreate(H5fid, dset_str_name, dtype_str_id, dspace_id, HDF5Constants.H5P_DEFAULT,
+                             HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+            assertTrue("testH5Dvlen_string_buffer: ", dset_str_id >= 0);
+
+            H5.H5DwriteVL(dset_str_id, dtype_str_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                          HDF5Constants.H5P_DEFAULT, vl_str_data);
+        }
+        catch (Exception err) {
+            if (dset_str_id > 0)
+                try {
+                    H5.H5Dclose(dset_str_id);
+                }
+                catch (Exception ex) {
+                }
+            if (dtype_str_id > 0)
+                try {
+                    H5.H5Tclose(dtype_str_id);
+                }
+                catch (Exception ex) {
+                }
+            err.printStackTrace();
+            fail("testH5Dvlen_string_buffer: " + err);
+        }
+        finally {
+            if (dspace_id > 0)
+                try {
+                    H5.H5Sclose(dspace_id);
+                }
+                catch (Exception ex) {
+                }
+        }
+
+        H5.H5Fflush(H5fid, HDF5Constants.H5F_SCOPE_LOCAL);
+
+        for (int j = 0; j < dims.length; j++)
+            lsize *= dims[j];
+
+        ArrayList[] vl_readbuf = new ArrayList[4];
+        for (int j = 0; j < lsize; j++)
+            vl_readbuf[j] = new ArrayList<String>();
+
+        try {
+            H5.H5DreadVL(dset_str_id, dtype_str_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                         HDF5Constants.H5P_DEFAULT, vl_readbuf);
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        assertTrue("testH5Dvlen_string_buffer:" + vl_readbuf[0].get(0),
+                   vl_str_data[0].get(0).equals(vl_readbuf[0].get(0)));
+        assertTrue("testH5Dvlen_string_buffer:" + vl_readbuf[1].get(0),
+                   vl_str_data[1].get(0).equals(vl_readbuf[1].get(0)));
+        assertTrue("testH5Dvlen_string_buffer:" + vl_readbuf[2].get(0),
+                   vl_str_data[2].get(0).equals(vl_readbuf[2].get(0)));
+        assertTrue("testH5Dvlen_string_buffer:" + vl_readbuf[3].get(0),
+                   vl_str_data[3].get(0).equals(vl_readbuf[3].get(0)));
     }
 
     @Test
@@ -994,20 +1091,21 @@ public class TestH5D {
                               "S A",     "T U R",   "D A Y", "night",   "That's",   "all", "folks", "!!!"};
         String[] str_rdata = new String[DIM_X * DIM_Y];
 
-        _createVLDataset(H5fid, H5dsid, "dset", HDF5Constants.H5P_DEFAULT);
+        _createVLStrDataset("dset", HDF5Constants.H5P_DEFAULT);
 
         try {
             if ((H5did >= 0) && (H5dtid >= 0))
-                H5.H5Dwrite_VLStrings(H5did, H5dtid, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                                      HDF5Constants.H5P_DEFAULT, str_wdata);
+                H5.H5DwriteVL(H5did, H5dtid, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                              HDF5Constants.H5P_DEFAULT, str_wdata);
         }
         catch (Exception e) {
             e.printStackTrace();
         }
+
         try {
             if ((H5did >= 0) && (H5dtid >= 0))
-                H5.H5Dread_VLStrings(H5did, H5dtid, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                                     HDF5Constants.H5P_DEFAULT, str_rdata);
+                H5.H5DreadVL(H5did, H5dtid, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                             HDF5Constants.H5P_DEFAULT, str_rdata);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -1064,8 +1162,8 @@ public class TestH5D {
                                  HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
                 assertTrue("testH5DVLwr: ", dset_int_id >= 0);
 
-                H5.H5Dwrite(dset_int_id, dtype_int_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                            HDF5Constants.H5P_DEFAULT, vl_int_data);
+                H5.H5DwriteVL(dset_int_id, dtype_int_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                              HDF5Constants.H5P_DEFAULT, vl_int_data);
             }
             catch (Exception err) {
                 if (dset_int_id > 0)
@@ -1123,8 +1221,8 @@ public class TestH5D {
                                  HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
                 assertTrue("testH5DVLwr: ", dset_dbl_id >= 0);
 
-                H5.H5Dwrite(dset_dbl_id, dtype_dbl_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                            HDF5Constants.H5P_DEFAULT, vl_dbl_data);
+                H5.H5DwriteVL(dset_dbl_id, dtype_dbl_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                              HDF5Constants.H5P_DEFAULT, vl_dbl_data);
             }
             catch (Exception err) {
                 if (dset_dbl_id > 0)
@@ -1157,46 +1255,46 @@ public class TestH5D {
                 lsize *= dims[j];
 
             // Read Integer data
-            ArrayList[] vl_readbuf = new ArrayList[4];
+            ArrayList[] vl_int_readbuf = new ArrayList[4];
             for (int j = 0; j < lsize; j++)
-                vl_readbuf[j] = new ArrayList<Integer>();
+                vl_int_readbuf[j] = new ArrayList<Integer>();
 
             try {
-                H5.H5Dread(dset_int_id, dtype_int_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                           HDF5Constants.H5P_DEFAULT, vl_readbuf);
+                H5.H5DreadVL(dset_int_id, dtype_int_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                             HDF5Constants.H5P_DEFAULT, vl_int_readbuf);
             }
             catch (Exception ex) {
                 ex.printStackTrace();
             }
-            assertTrue("testH5DVLwr:" + vl_readbuf[0].get(0),
-                       vl_int_data[0].get(0).equals(vl_readbuf[0].get(0)));
-            assertTrue("testH5DVLwr:" + vl_readbuf[1].get(0),
-                       vl_int_data[1].get(0).equals(vl_readbuf[1].get(0)));
-            assertTrue("testH5DVLwr:" + vl_readbuf[2].get(0),
-                       vl_int_data[2].get(0).equals(vl_readbuf[2].get(0)));
-            assertTrue("testH5DVLwr:" + vl_readbuf[3].get(0),
-                       vl_int_data[3].get(0).equals(vl_readbuf[3].get(0)));
+            assertTrue("testH5DVLwr:" + vl_int_readbuf[0].get(0),
+                       vl_int_data[0].get(0).equals(vl_int_readbuf[0].get(0)));
+            assertTrue("testH5DVLwr:" + vl_int_readbuf[1].get(0),
+                       vl_int_data[1].get(0).equals(vl_int_readbuf[1].get(0)));
+            assertTrue("testH5DVLwr:" + vl_int_readbuf[2].get(0),
+                       vl_int_data[2].get(0).equals(vl_int_readbuf[2].get(0)));
+            assertTrue("testH5DVLwr:" + vl_int_readbuf[3].get(0),
+                       vl_int_data[3].get(0).equals(vl_int_readbuf[3].get(0)));
 
             // Read Double data
-            vl_readbuf = new ArrayList[4];
+            ArrayList[] vl_dbl_readbuf = new ArrayList[4];
             for (int j = 0; j < lsize; j++)
-                vl_readbuf[j] = new ArrayList<Double>();
+                vl_dbl_readbuf[j] = new ArrayList<Double>();
 
             try {
-                H5.H5Dread(dset_dbl_id, dtype_dbl_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                           HDF5Constants.H5P_DEFAULT, vl_readbuf);
+                H5.H5DreadVL(dset_dbl_id, dtype_dbl_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                             HDF5Constants.H5P_DEFAULT, vl_dbl_readbuf);
             }
             catch (Exception ex) {
                 ex.printStackTrace();
             }
-            assertTrue("testH5DVLwr:" + vl_readbuf[0].get(0),
-                       vl_dbl_data[0].get(0).equals(vl_readbuf[0].get(0)));
-            assertTrue("testH5DVLwr:" + vl_readbuf[1].get(0),
-                       vl_dbl_data[1].get(0).equals(vl_readbuf[1].get(0)));
-            assertTrue("testH5DVLwr:" + vl_readbuf[2].get(0),
-                       vl_dbl_data[2].get(0).equals(vl_readbuf[2].get(0)));
-            assertTrue("testH5DVLwr:" + vl_readbuf[3].get(0),
-                       vl_dbl_data[3].get(0).equals(vl_readbuf[3].get(0)));
+            assertTrue("testH5DVLwr:" + vl_dbl_readbuf[0].get(0),
+                       vl_dbl_data[0].get(0).equals(vl_dbl_readbuf[0].get(0)));
+            assertTrue("testH5DVLwr:" + vl_dbl_readbuf[1].get(0),
+                       vl_dbl_data[1].get(0).equals(vl_dbl_readbuf[1].get(0)));
+            assertTrue("testH5DVLwr:" + vl_dbl_readbuf[2].get(0),
+                       vl_dbl_data[2].get(0).equals(vl_dbl_readbuf[2].get(0)));
+            assertTrue("testH5DVLwr:" + vl_dbl_readbuf[3].get(0),
+                       vl_dbl_data[3].get(0).equals(vl_dbl_readbuf[3].get(0)));
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -1299,8 +1397,8 @@ public class TestH5D {
                                            HDF5Constants.H5P_DEFAULT);
                 assertTrue("testH5DVLwrVL: ", dset_int_id >= 0);
 
-                H5.H5Dwrite(dset_int_id, base_dtype_int_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                            HDF5Constants.H5P_DEFAULT, base_vl_int_data);
+                H5.H5DwriteVL(dset_int_id, base_dtype_int_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                              HDF5Constants.H5P_DEFAULT, base_vl_int_data);
             }
             catch (Exception err) {
                 if (dset_int_id > 0)
@@ -1338,33 +1436,48 @@ public class TestH5D {
                 base_vl_readbuf[j] = new ArrayList<ArrayList<Integer>>();
 
             try {
-                H5.H5Dread(dset_int_id, base_dtype_int_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                           HDF5Constants.H5P_DEFAULT, base_vl_readbuf);
+                H5.H5DreadVL(dset_int_id, base_dtype_int_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                             HDF5Constants.H5P_DEFAULT, base_vl_readbuf);
             }
             catch (Exception ex) {
                 ex.printStackTrace();
             }
-            ArrayList vl_readbuf = (ArrayList)base_vl_readbuf[0];
-            assertTrue("vl_readbuf exists", vl_readbuf != null);
-            assertTrue("vl_readbuf has size " + vl_readbuf.size(), vl_readbuf.size() > 0);
-            ArrayList vl_readbuf_int = (ArrayList)vl_readbuf.get(0);
+            ArrayList<ArrayList<Integer>> vl_readbuf = (ArrayList<ArrayList<Integer>>)base_vl_readbuf[0];
+            assertTrue("vl_readbuf 0 exists", vl_readbuf != null);
+            ArrayList<Integer> vl_readbuf_int = (ArrayList<Integer>)(vl_readbuf.get(0));
+            /*
+             * System.out.println(); System.out.println("vl_readbuf: " + vl_readbuf);
+             * System.out.println("vl_readbuf_int: " + vl_readbuf_int);
+             */
             assertTrue("testH5DVLwrVL:" + vl_readbuf_int.get(0),
                        vl_int_data[0].get(0).equals(vl_readbuf_int.get(0)));
 
-            vl_readbuf     = (ArrayList)base_vl_readbuf[1];
-            vl_readbuf_int = (ArrayList)vl_readbuf.get(1);
-            assertTrue("testH5DVLwrVL:" + vl_readbuf_int.get(0),
-                       vl_int_data[1].get(0).equals(vl_readbuf_int.get(0)));
+            vl_readbuf     = (ArrayList<ArrayList<Integer>>)base_vl_readbuf[1];
+            vl_readbuf_int = (ArrayList<Integer>)(vl_readbuf.get(1));
+            /*
+             * System.out.println("vl_readbuf: " + vl_readbuf); System.out.println("vl_readbuf_int: " +
+             * vl_readbuf_int);
+             */
+            assertTrue("testH5DVLwrVL:" + vl_readbuf_int.get(1),
+                       vl_int_data[1].get(1).equals(vl_readbuf_int.get(1)));
 
-            vl_readbuf     = (ArrayList)base_vl_readbuf[2];
-            vl_readbuf_int = (ArrayList)vl_readbuf.get(2);
-            assertTrue("testH5DVLwrVL:" + vl_readbuf_int.get(0),
-                       vl_int_data[2].get(0).equals(vl_readbuf_int.get(0)));
+            vl_readbuf     = (ArrayList<ArrayList<Integer>>)base_vl_readbuf[2];
+            vl_readbuf_int = (ArrayList<Integer>)(vl_readbuf.get(2));
+            /*
+             * System.out.println("vl_readbuf: " + vl_readbuf); System.out.println("vl_readbuf_int: " +
+             * vl_readbuf_int);
+             */
+            assertTrue("testH5DVLwrVL:" + vl_readbuf_int.get(2),
+                       vl_int_data[2].get(2).equals(vl_readbuf_int.get(2)));
 
-            vl_readbuf     = (ArrayList)base_vl_readbuf[3];
-            vl_readbuf_int = (ArrayList)vl_readbuf.get(3);
-            assertTrue("testH5DVLwrVL:" + vl_readbuf_int.get(0),
-                       vl_int_data[3].get(0).equals(vl_readbuf_int.get(0)));
+            vl_readbuf     = (ArrayList<ArrayList<Integer>>)base_vl_readbuf[3];
+            vl_readbuf_int = (ArrayList<Integer>)(vl_readbuf.get(3));
+            /*
+             * System.out.println("vl_readbuf: " + vl_readbuf); System.out.println("vl_readbuf_int: " +
+             * vl_readbuf_int);
+             */
+            assertTrue("testH5DVLwrVL:" + vl_readbuf_int.get(3),
+                       vl_int_data[3].get(3).equals(vl_readbuf_int.get(3)));
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -1386,6 +1499,449 @@ public class TestH5D {
             if (base_dtype_int_id > 0)
                 try {
                     H5.H5Tclose(base_dtype_int_id);
+                }
+                catch (Exception ex) {
+                }
+        }
+    }
+
+    @Test
+    public void testH5DArraywr()
+    {
+        String dset_int_name = "ArrayIntdata";
+        long dset_int_id     = HDF5Constants.H5I_INVALID_HID;
+        long dtype_int_id    = HDF5Constants.H5I_INVALID_HID;
+        long dspace_id       = HDF5Constants.H5I_INVALID_HID;
+        long[] dims          = {4};
+        long lsize           = 1;
+
+        ArrayList[] arr_int_data = new ArrayList[4];
+        try {
+            // Write Integer data
+            arr_int_data[0] = new ArrayList<Integer>(Arrays.asList(1, 2, 3, 4));
+            arr_int_data[1] = new ArrayList<Integer>(Arrays.asList(2, 3, 4, 5));
+            arr_int_data[2] = new ArrayList<Integer>(Arrays.asList(4, 5, 6, 7));
+            arr_int_data[3] = new ArrayList<Integer>(Arrays.asList(7, 8, 9, 10));
+            Class dataClass = arr_int_data.getClass();
+            assertTrue("testH5DArraywr.getClass: " + dataClass, dataClass.isArray());
+
+            try {
+                dtype_int_id = H5.H5Tarray_create(HDF5Constants.H5T_STD_U32LE, 1, dims);
+                assertTrue("testH5DArraywr.H5Tarray_create: ", dtype_int_id >= 0);
+            }
+            catch (Exception err) {
+                if (dtype_int_id > 0)
+                    try {
+                        H5.H5Tclose(dtype_int_id);
+                    }
+                    catch (Exception ex) {
+                    }
+                err.printStackTrace();
+                fail("H5.testH5DArraywr: " + err);
+            }
+
+            try {
+                dspace_id = H5.H5Screate_simple(1, dims, null);
+                assertTrue(dspace_id > 0);
+                dset_int_id =
+                    H5.H5Dcreate(H5fid, dset_int_name, dtype_int_id, dspace_id, HDF5Constants.H5P_DEFAULT,
+                                 HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                assertTrue("testH5DVLwr: ", dset_int_id >= 0);
+
+                H5.H5DwriteVL(dset_int_id, dtype_int_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                              HDF5Constants.H5P_DEFAULT, arr_int_data);
+            }
+            catch (Exception err) {
+                if (dset_int_id > 0)
+                    try {
+                        H5.H5Dclose(dset_int_id);
+                    }
+                    catch (Exception ex) {
+                    }
+                if (dtype_int_id > 0)
+                    try {
+                        H5.H5Tclose(dtype_int_id);
+                    }
+                    catch (Exception ex) {
+                    }
+                err.printStackTrace();
+                fail("H5.testH5DVLwr: " + err);
+            }
+            finally {
+                if (dspace_id > 0)
+                    try {
+                        H5.H5Sclose(dspace_id);
+                    }
+                    catch (Exception ex) {
+                    }
+            }
+
+            H5.H5Fflush(H5fid, HDF5Constants.H5F_SCOPE_LOCAL);
+
+            for (int j = 0; j < dims.length; j++)
+                lsize *= dims[j];
+
+            // Read Integer data
+            ArrayList[] arr_readbuf = new ArrayList[4];
+            for (int j = 0; j < lsize; j++)
+                arr_readbuf[j] = new ArrayList<Integer>();
+
+            try {
+                H5.H5DreadVL(dset_int_id, dtype_int_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                             HDF5Constants.H5P_DEFAULT, arr_readbuf);
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
+            assertTrue("testH5DVLwr:" + arr_readbuf[0].get(0),
+                       arr_int_data[0].get(0).equals(arr_readbuf[0].get(0)));
+            assertTrue("testH5DVLwr:" + arr_readbuf[1].get(0),
+                       arr_int_data[1].get(0).equals(arr_readbuf[1].get(0)));
+            assertTrue("testH5DVLwr:" + arr_readbuf[2].get(0),
+                       arr_int_data[2].get(0).equals(arr_readbuf[2].get(0)));
+            assertTrue("testH5DVLwr:" + arr_readbuf[3].get(0),
+                       arr_int_data[3].get(0).equals(arr_readbuf[3].get(0)));
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("H5.testH5DArraywr: " + err);
+        }
+        finally {
+            if (dset_int_id > 0)
+                try {
+                    H5.H5Dclose(dset_int_id);
+                }
+                catch (Exception ex) {
+                }
+            if (dtype_int_id > 0)
+                try {
+                    H5.H5Tclose(dtype_int_id);
+                }
+                catch (Exception ex) {
+                }
+        }
+    }
+
+    @Test
+    public void testH5DArray_string_buffer() throws Throwable
+    {
+        String dset_str_name = "ArrayStringdata";
+        long dset_str_id     = HDF5Constants.H5I_INVALID_HID;
+        long dtype_str_id    = HDF5Constants.H5I_INVALID_HID;
+        long dspace_id       = HDF5Constants.H5I_INVALID_HID;
+        long[] strdims       = {4};
+        long[] dims          = {6};
+        long lsize           = 1;
+
+        String[] str_data0 = {"Parting", "is such", "sweet", "sorrow."};
+        String[] str_data1 = {"Testing", "one", "two", "three."};
+        String[] str_data2 = {"Dog,", "man's", "best", "friend."};
+        String[] str_data3 = {"Diamonds", "are", "a", "girls!"};
+        String[] str_data4 = {"S A", "T U R", "D A Y", "night"};
+        String[] str_data5 = {"That's", "all", "folks", "!!!"};
+
+        ArrayList[] arr_str_data = new ArrayList[6];
+        arr_str_data[0]          = new ArrayList<String>(Arrays.asList(str_data0));
+        arr_str_data[1]          = new ArrayList<String>(Arrays.asList(str_data1));
+        arr_str_data[2]          = new ArrayList<String>(Arrays.asList(str_data2));
+        arr_str_data[3]          = new ArrayList<String>(Arrays.asList(str_data3));
+        arr_str_data[4]          = new ArrayList<String>(Arrays.asList(str_data4));
+        arr_str_data[5]          = new ArrayList<String>(Arrays.asList(str_data5));
+
+        try {
+            H5dtid = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("testH5DArray_string_buffer.H5.H5Tcopy: " + err);
+        }
+        assertTrue("testH5DArray_string_buffer.H5Tcopy: ", H5dtid >= 0);
+        try {
+            H5.H5Tset_size(H5dtid, HDF5Constants.H5T_VARIABLE);
+            assertTrue("testH5DArray_string_buffer.H5Tis_variable_str", H5.H5Tis_variable_str(H5dtid));
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("testH5DArray_string_buffer.H5Tset_size: " + err);
+        }
+        try {
+            dtype_str_id = H5.H5Tarray_create(H5dtid, 1, strdims);
+            assertTrue("testH5DArray_string_buffer.H5Tarray_create: ", dtype_str_id >= 0);
+        }
+        catch (Exception err) {
+            if (dtype_str_id > 0)
+                try {
+                    H5.H5Tclose(dtype_str_id);
+                }
+                catch (Exception ex) {
+                }
+            err.printStackTrace();
+            fail("testH5DArray_string_buffer: " + err);
+        }
+
+        try {
+            dspace_id = H5.H5Screate_simple(1, dims, null);
+            assertTrue(dspace_id > 0);
+            dset_str_id =
+                H5.H5Dcreate(H5fid, dset_str_name, dtype_str_id, dspace_id, HDF5Constants.H5P_DEFAULT,
+                             HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+            assertTrue("testH5DArray_string_buffer: ", dset_str_id >= 0);
+
+            H5.H5DwriteVL(dset_str_id, dtype_str_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                          HDF5Constants.H5P_DEFAULT, arr_str_data);
+        }
+        catch (Exception err) {
+            if (dset_str_id > 0)
+                try {
+                    H5.H5Dclose(dset_str_id);
+                }
+                catch (Exception ex) {
+                }
+            if (dtype_str_id > 0)
+                try {
+                    H5.H5Tclose(dtype_str_id);
+                }
+                catch (Exception ex) {
+                }
+            err.printStackTrace();
+            fail("testH5DArray_string_buffer: " + err);
+        }
+        finally {
+            if (dspace_id > 0)
+                try {
+                    H5.H5Sclose(dspace_id);
+                }
+                catch (Exception ex) {
+                }
+        }
+
+        H5.H5Fflush(H5fid, HDF5Constants.H5F_SCOPE_LOCAL);
+
+        for (int j = 0; j < dims.length; j++)
+            lsize *= dims[j];
+
+        ArrayList[] arr_readbuf = new ArrayList[6];
+        for (int j = 0; j < lsize; j++)
+            arr_readbuf[j] = new ArrayList<String>();
+
+        try {
+            H5.H5DreadVL(dset_str_id, dtype_str_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                         HDF5Constants.H5P_DEFAULT, arr_readbuf);
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        finally {
+            if (dset_str_id > 0)
+                try {
+                    H5.H5Dclose(dset_str_id);
+                }
+                catch (Exception ex) {
+                }
+            if (dtype_str_id > 0)
+                try {
+                    H5.H5Tclose(dtype_str_id);
+                }
+                catch (Exception ex) {
+                }
+        }
+        assertTrue("testH5DArray_string_buffer:" + arr_readbuf[0].get(0),
+                   arr_str_data[0].get(0).equals(arr_readbuf[0].get(0)));
+        assertTrue("testH5DArray_string_buffer:" + arr_readbuf[1].get(0),
+                   arr_str_data[1].get(0).equals(arr_readbuf[1].get(0)));
+        assertTrue("testH5DArray_string_buffer:" + arr_readbuf[2].get(0),
+                   arr_str_data[2].get(0).equals(arr_readbuf[2].get(0)));
+        assertTrue("testH5DArray_string_buffer:" + arr_readbuf[3].get(0),
+                   arr_str_data[3].get(0).equals(arr_readbuf[3].get(0)));
+    }
+
+    @Test
+    public void testH5DArrayenum_rw()
+    {
+        String dset_enum_name  = "ArrayEnumdata";
+        long dset_enum_id      = HDF5Constants.H5I_INVALID_HID;
+        long dtype_enum_id     = HDF5Constants.H5I_INVALID_HID;
+        long dtype_arr_enum_id = HDF5Constants.H5I_INVALID_HID;
+        long dspace_id         = HDF5Constants.H5I_INVALID_HID;
+        long[] dims            = {4};
+        long lsize             = 1;
+        String enum_type       = "Enum_type";
+        byte[] enum_val        = new byte[1];
+        String enum_name       = null;
+
+        // Create a enumerate datatype
+        try {
+            dtype_enum_id = H5.H5Tcreate(HDF5Constants.H5T_ENUM, (long)1);
+            assertTrue("testH5DArrayenum_wr.H5Tarray_create: ", dtype_enum_id >= 0);
+        }
+        catch (Throwable err) {
+            if (dtype_enum_id > 0)
+                try {
+                    H5.H5Tclose(dtype_enum_id);
+                }
+                catch (Exception ex) {
+                }
+            err.printStackTrace();
+            fail("testH5DArrayenum_rw:H5Tcreate " + err);
+        }
+
+        try {
+            enum_val[0] = 10;
+            H5.H5Tenum_insert(dtype_enum_id, "RED", enum_val);
+            enum_val[0] = 11;
+            H5.H5Tenum_insert(dtype_enum_id, "GREEN", enum_val);
+            enum_val[0] = 12;
+            H5.H5Tenum_insert(dtype_enum_id, "BLUE", enum_val);
+            enum_val[0] = 13;
+            H5.H5Tenum_insert(dtype_enum_id, "ORANGE", enum_val);
+            enum_val[0] = 14;
+            H5.H5Tenum_insert(dtype_enum_id, "YELLOW", enum_val);
+
+            // Query member number and member index by member name, for enumeration type.
+            assertTrue("Can't get member number", H5.H5Tget_nmembers(dtype_enum_id) == 5);
+            assertTrue("Can't get correct index number",
+                       H5.H5Tget_member_index(dtype_enum_id, "ORANGE") == 3);
+
+            // Commit enumeration datatype and close it */
+            H5.H5Tcommit(H5fid, enum_type, dtype_enum_id, HDF5Constants.H5P_DEFAULT,
+                         HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+
+            H5.H5Tclose(dtype_enum_id);
+
+            // Open the dataytpe for query
+            dtype_enum_id = H5.H5Topen(H5fid, enum_type, HDF5Constants.H5P_DEFAULT);
+            assertTrue("testH5DArrayenum_rw:H5Tcreate", dtype_enum_id >= 0);
+
+            // Query member number and member index by member name, for enumeration type
+            assertTrue("Can't get member number", H5.H5Tget_nmembers(dtype_enum_id) == 5);
+            assertTrue("Can't get correct index number",
+                       H5.H5Tget_member_index(dtype_enum_id, "ORANGE") == 3);
+
+            // Query member value by member name, for enumeration type
+            H5.H5Tenum_valueof(dtype_enum_id, "ORANGE", enum_val);
+            assertTrue("Incorrect value for enum member", enum_val[0] == 13);
+
+            // Query member value by member index, for enumeration type
+            H5.H5Tget_member_value(dtype_enum_id, 2, enum_val);
+            assertTrue("Incorrect value for enum member", enum_val[0] == 12);
+
+            // Query member name by member value, for enumeration type
+            enum_val[0] = 14;
+            enum_name   = H5.H5Tenum_nameof(dtype_enum_id, enum_val, 16);
+            assertTrue("Incorrect name for enum member", enum_name.compareTo("YELLOW") == 0);
+
+            ArrayList[] arr_enum_data = new ArrayList[4];
+            try {
+                // Write Integer data
+                arr_enum_data[0] = new ArrayList<Integer>(Arrays.asList(10, 11, 12, 13));
+                arr_enum_data[1] = new ArrayList<Integer>(Arrays.asList(11, 12, 13, 14));
+                arr_enum_data[2] = new ArrayList<Integer>(Arrays.asList(12, 13, 14, 10));
+                arr_enum_data[3] = new ArrayList<Integer>(Arrays.asList(13, 14, 10, 11));
+                Class dataClass  = arr_enum_data.getClass();
+                assertTrue("testH5DArrayenum_wr.getClass: " + dataClass, dataClass.isArray());
+
+                try {
+                    dtype_arr_enum_id = H5.H5Tarray_create(HDF5Constants.H5T_STD_U32LE, 1, dims);
+                    assertTrue("testH5DArrayenum_wr.H5Tarray_create: ", dtype_arr_enum_id >= 0);
+                }
+                catch (Exception err) {
+                    if (dtype_arr_enum_id > 0)
+                        try {
+                            H5.H5Tclose(dtype_arr_enum_id);
+                        }
+                        catch (Exception ex) {
+                        }
+                    err.printStackTrace();
+                    fail("H5.testH5DArrayenum_wr: " + err);
+                }
+
+                dspace_id = H5.H5Screate_simple(1, dims, null);
+                assertTrue(dspace_id > 0);
+                dset_enum_id = H5.H5Dcreate(H5fid, dset_enum_name, dtype_arr_enum_id, dspace_id,
+                                            HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT,
+                                            HDF5Constants.H5P_DEFAULT);
+                assertTrue("testH5DVLwr: ", dset_enum_id >= 0);
+
+                H5.H5DwriteVL(dset_enum_id, dtype_arr_enum_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                              HDF5Constants.H5P_DEFAULT, arr_enum_data);
+            }
+            catch (Throwable err) {
+                if (dset_enum_id > 0)
+                    try {
+                        H5.H5Dclose(dset_enum_id);
+                    }
+                    catch (Exception ex) {
+                    }
+                if (dtype_enum_id > 0)
+                    try {
+                        H5.H5Tclose(dtype_enum_id);
+                    }
+                    catch (Exception ex) {
+                    }
+                if (dtype_arr_enum_id > 0)
+                    try {
+                        H5.H5Tclose(dtype_arr_enum_id);
+                    }
+                    catch (Exception ex) {
+                    }
+                err.printStackTrace();
+                fail("testH5DArrayenum_rw:query " + err);
+            }
+            finally {
+                if (dspace_id > 0)
+                    try {
+                        H5.H5Sclose(dspace_id);
+                    }
+                    catch (Exception ex) {
+                    }
+            }
+
+            H5.H5Fflush(H5fid, HDF5Constants.H5F_SCOPE_LOCAL);
+
+            for (int j = 0; j < dims.length; j++)
+                lsize *= dims[j];
+
+            // Read Integer data
+            ArrayList[] arr_readbuf = new ArrayList[4];
+            for (int j = 0; j < lsize; j++)
+                arr_readbuf[j] = new ArrayList<Integer>();
+
+            try {
+                H5.H5DreadVL(dset_enum_id, dtype_arr_enum_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                             HDF5Constants.H5P_DEFAULT, arr_readbuf);
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
+            assertTrue("testH5DVLArrayenum_wr:" + arr_readbuf[0].get(0),
+                       arr_enum_data[0].get(0).equals(arr_readbuf[0].get(0)));
+            assertTrue("testH5DVLArrayenum_wr:" + arr_readbuf[1].get(0),
+                       arr_enum_data[1].get(0).equals(arr_readbuf[1].get(0)));
+            assertTrue("testH5DVLArrayenum_wr:" + arr_readbuf[2].get(0),
+                       arr_enum_data[2].get(0).equals(arr_readbuf[2].get(0)));
+            assertTrue("testH5DVLArrayenum_wr:" + arr_readbuf[3].get(0),
+                       arr_enum_data[3].get(0).equals(arr_readbuf[3].get(0)));
+        }
+        catch (Throwable err) {
+            err.printStackTrace();
+            fail("H5.testH5DArrayenum_wr: " + err);
+        }
+        finally {
+            if (dset_enum_id > 0)
+                try {
+                    H5.H5Dclose(dset_enum_id);
+                }
+                catch (Exception ex) {
+                }
+            if (dtype_enum_id > 0)
+                try {
+                    H5.H5Tclose(dtype_enum_id);
+                }
+                catch (Exception ex) {
+                }
+            if (dtype_arr_enum_id > 0)
+                try {
+                    H5.H5Tclose(dtype_arr_enum_id);
                 }
                 catch (Exception ex) {
                 }

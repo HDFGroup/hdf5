@@ -56,6 +56,30 @@ extern "C" {
 
 /* Helper routines for VOL connector authors */
 H5_DLL herr_t H5VLcmp_connector_cls(int *cmp, hid_t connector_id1, hid_t connector_id2);
+/**
+ * \ingroup H5VL
+ *
+ * \brief Wrap an internal object with a "wrap context" and register an
+ *        hid_t for the resulting object.
+ *
+ * \param[in] obj  VOL object.
+ * \param[in] type VOL-managed object class. Allowable values are:
+ *                 - #H5I_FILE
+ *                 - #H5I_GROUP
+ *                 - #H5I_DATATYPE
+ *                 - #H5I_DATASET
+ *                 - #H5I_MAP
+ *                 - #H5I_ATTR
+ *
+ * \return \hid_t
+ *
+ * \note This routine is mainly targeted toward wrapping objects for
+ *       iteration routine callbacks (i.e. the callbacks from H5Aiterate*,
+ *       H5Literate* / H5Lvisit*, and H5Ovisit* ). Using it in an application
+ *       will return an error indicating the API context isn't available or
+ *       can't be retrieved.
+ *
+ */
 H5_DLL hid_t  H5VLwrap_register(void *obj, H5I_type_t type);
 H5_DLL herr_t H5VLretrieve_lib_state(void **state);
 H5_DLL herr_t H5VLstart_lib_state(void);

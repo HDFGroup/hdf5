@@ -23,14 +23,16 @@ JUnit version 4.11
 .testH5Adelete_by_idx_order
 .testH5Arename_by_name
 .testH5Acreate2_invalidobject
+.testH5AArraywr
 .testH5Acreate2
 .testH5Aiterate_by_name
 .testH5Adelete_by_idx_null
 .testH5Adelete_by_idx_invalidobject
 .testH5Awrite_readVL
+.testH5AArray_string_buffer
 .testH5Aget_info1
 
 Time:  XXXX
 
-OK (30 tests)
+OK (32 tests)
 

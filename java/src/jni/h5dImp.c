@@ -1134,10 +1134,54 @@ JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5DreadVL(JNIEnv *env, jclass clss, jlong dataset_id, jlong mem_type_id,
                               jlong mem_space_id, jlong file_space_id, jlong xfer_plist_id, jobjectArray buf)
 {
-    herr_t status = FAIL;
+    jboolean    readBufIsCopy;
+    jbyte      *readBuf = NULL;
+    size_t      typeSize;
+    H5T_class_t type_class;
+    jsize       vl_array_len;
+    htri_t      vl_data_class;
+    herr_t      status      = FAIL;
+    htri_t      is_variable = 0;
 
-    status = Java_hdf_hdf5lib_H5_H5Dread(env, clss, dataset_id, mem_type_id, mem_space_id, file_space_id,
-                                         xfer_plist_id, (jbyteArray)buf, JNI_TRUE);
+    UNUSED(clss);
+
+    if (NULL == buf)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5DreadVL: read buffer is NULL");
+
+    if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+    /* Get size of data array */
+    if ((vl_array_len = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0) {
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5DreadVL: readBuf length < 0");
+    }
+    if ((is_variable = H5Tis_variable_str(mem_type_id)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+    if (!(typeSize = H5Tget_size(mem_type_id)))
+        H5_LIBRARY_ERROR(ENVONLY);
+
+    if (NULL == (readBuf = HDcalloc((size_t)vl_array_len, typeSize)))
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5DreadVL: failed to allocate raw VL read buffer");
+
+    if ((status = H5Dread((hid_t)dataset_id, (hid_t)mem_type_id, (hid_t)mem_space_id, (hid_t)file_space_id,
+                          (hid_t)xfer_plist_id, (void *)readBuf)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+    if ((type_class = H5Tget_class((hid_t)mem_type_id)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+    translate_rbuf(env, buf, mem_type_id, type_class, vl_array_len, readBuf);
+
+done:
+    if (readBuf) {
+        if ((status >= 0) && vl_data_class)
+            H5Treclaim(dataset_id, mem_space_id, H5P_DEFAULT, readBuf);
+        if (is_variable) {
+            for (size_t i = 0; i < (size_t)vl_array_len; i++)
+                HDfree(((char **)readBuf)[i]);
+        }
+        HDfree(readBuf);
+    }
 
     return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5DreadVL */
@@ -1151,10 +1195,57 @@ JNIEXPORT jint JNICALL
 Java_hdf_hdf5lib_H5_H5DwriteVL(JNIEnv *env, jclass clss, jlong dataset_id, jlong mem_type_id,
                                jlong mem_space_id, jlong file_space_id, jlong xfer_plist_id, jobjectArray buf)
 {
-    herr_t status = FAIL;
+    jboolean    writeBufIsCopy;
+    jbyte      *writeBuf = NULL;
+    size_t      typeSize;
+    H5T_class_t type_class;
+    jsize       vl_array_len; // Only used by vl_data_class types
+    htri_t      vl_data_class;
+    herr_t      status      = FAIL;
+    htri_t      is_variable = 0;
 
-    status = Java_hdf_hdf5lib_H5_H5Dwrite(env, clss, dataset_id, mem_type_id, mem_space_id, file_space_id,
-                                          xfer_plist_id, (jbyteArray)buf, JNI_TRUE);
+    UNUSED(clss);
+
+    if (NULL == buf)
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5DwriteVL: write buffer is NULL");
+
+    if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+    /* Get size of data array */
+    if ((vl_array_len = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0) {
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5DwriteVL: write buffer length < 0");
+    }
+    if ((is_variable = H5Tis_variable_str(mem_type_id)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+    if (!(typeSize = H5Tget_size(mem_type_id)))
+        H5_LIBRARY_ERROR(ENVONLY);
+
+    if (NULL == (writeBuf = HDcalloc((size_t)vl_array_len, typeSize)))
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5DwriteVL: failed to allocate raw VL write buffer");
+
+    if ((type_class = H5Tget_class((hid_t)mem_type_id)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+    translate_wbuf(ENVONLY, buf, mem_type_id, type_class, vl_array_len, writeBuf);
+
+    if ((status = H5Dwrite((hid_t)dataset_id, (hid_t)mem_type_id, (hid_t)mem_space_id, (hid_t)file_space_id,
+                           (hid_t)xfer_plist_id, writeBuf)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+    if (writeBuf) {
+        if ((status >= 0) && vl_data_class)
+            H5Treclaim(dataset_id, mem_space_id, H5P_DEFAULT, writeBuf);
+        if (is_variable) {
+            for (size_t i = 0; i < (size_t)vl_array_len; i++)
+                HDfree(((char **)writeBuf)[i]);
+        }
+
+        HDfree(writeBuf);
+    }
 
     return (jint)status;
 } /* end Java_hdf_hdf5lib_H5_H5DwriteVL */
