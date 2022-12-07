@@ -265,13 +265,15 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
             nmembs = flags & 0xffff;
             if (nmembs == 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADVALUE, FAIL, "invalid number of members: %u", nmembs)
-            if (NULL == (dt->shared->u.compnd.memb = (H5T_cmemb_t *)H5MM_calloc(nmembs * sizeof(H5T_cmemb_t))))
+            if (NULL ==
+                (dt->shared->u.compnd.memb = (H5T_cmemb_t *)H5MM_calloc(nmembs * sizeof(H5T_cmemb_t))))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "memory allocation failed")
             dt->shared->u.compnd.nalloc = nmembs;
 
             HDassert(dt->shared->u.compnd.memb_size == 0);
 
-            for (dt->shared->u.compnd.nmembs = 0; dt->shared->u.compnd.nmembs < nmembs; dt->shared->u.compnd.nmembs++) {
+            for (dt->shared->u.compnd.nmembs = 0; dt->shared->u.compnd.nmembs < nmembs;
+                 dt->shared->u.compnd.nmembs++) {
                 unsigned ndims = 0;             /* Number of dimensions of the array field */
                 htri_t   can_upgrade;           /* Whether we can upgrade this type's version */
                 hsize_t  dim[H5O_LAYOUT_NDIMS]; /* Dimensions of the array */
@@ -279,8 +281,10 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
                 H5T_t   *temp_type;             /* Temporary pointer to the field's datatype */
 
                 /* Decode the field name */
-                if (NULL == (dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].name = H5MM_xstrdup((const char *)*pp)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCOPY, FAIL, "can't duplicate compound member name string")
+                if (NULL == (dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].name =
+                                 H5MM_xstrdup((const char *)*pp)))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCOPY, FAIL,
+                                "can't duplicate compound member name string")
 
                 /* Version 3 of the datatype message eliminated the padding to multiple of 8 bytes */
                 if (version >= H5O_DTYPE_VERSION_3)
@@ -293,7 +297,8 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
                 /* Decode the field offset */
                 /* (starting with version 3 of the datatype message, use the minimum # of bytes required) */
                 if (version >= H5O_DTYPE_VERSION_3)
-                    UINT32DECODE_VAR(*pp, dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].offset, offset_nbytes)
+                    UINT32DECODE_VAR(*pp, dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].offset,
+                                     offset_nbytes)
                 else
                     UINT32DECODE(*pp, dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].offset)
 
@@ -306,7 +311,8 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
 
                     /* Check that ndims is valid */
                     if (ndims > 4) {
-                        dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].name = H5MM_xfree(dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].name);
+                        dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].name =
+                            H5MM_xfree(dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].name);
                         HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "invalid number of dimensions for array")
                     }
 
@@ -325,13 +331,15 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
 
                 /* Allocate space for the field's datatype */
                 if (NULL == (temp_type = H5T__alloc())) {
-                    dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].name = H5MM_xfree(dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].name);
+                    dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].name =
+                        H5MM_xfree(dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].name);
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
                 }
 
                 /* Decode the field's datatype information */
                 if ((can_upgrade = H5O__dtype_decode_helper(ioflags, pp, temp_type)) < 0) {
-                    dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].name = H5MM_xfree(dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].name);
+                    dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].name =
+                        H5MM_xfree(dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].name);
                     if (H5T_close_real(temp_type) < 0)
                         HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "can't release datatype info")
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "unable to decode member type")
@@ -339,7 +347,8 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
 
                 /* Check for invalid member size */
                 if (temp_type->shared->size == 0) {
-                    dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].name = H5MM_xfree(dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].name);
+                    dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].name =
+                        H5MM_xfree(dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].name);
                     if (H5T_close_real(temp_type) < 0)
                         HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "can't release datatype info")
                     HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "invalid field size in member type")
@@ -359,16 +368,19 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
                     if (ndims > 0) {
                         /* Create the array datatype for the field */
                         if ((array_dt = H5T__array_create(temp_type, ndims, dim)) == NULL) {
-                            dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].name = H5MM_xfree(dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].name);
+                            dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].name =
+                                H5MM_xfree(dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].name);
                             if (H5T_close_real(temp_type) < 0)
-                                HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "can't release datatype info")
+                                HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL,
+                                            "can't release datatype info")
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL,
                                         "unable to create array datatype")
                         } /* end if */
 
                         /* Close the base type for the array */
                         if (H5T_close_real(temp_type) < 0) {
-                            dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].name = H5MM_xfree(dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].name);
+                            dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].name =
+                                H5MM_xfree(dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].name);
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "can't release datatype info")
                         }
 
@@ -410,20 +422,26 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
 
                 /* Check if this field overlaps with a prior field */
                 /* (probably indicates that the file is corrupt) */
-                if (dt->shared->u.compnd.nmembs > 0 && dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].offset < max_memb_pos) {
+                if (dt->shared->u.compnd.nmembs > 0 &&
+                    dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].offset < max_memb_pos) {
                     for (i = 0; i < dt->shared->u.compnd.nmembs; i++)
-                        if ((dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].offset >= dt->shared->u.compnd.memb[i].offset &&
-                            dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].offset <
-                                (dt->shared->u.compnd.memb[i].offset + dt->shared->u.compnd.memb[i].size)) ||
-                            (dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].offset < dt->shared->u.compnd.memb[i].offset &&
-                            (dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].offset + dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].size) > dt->shared->u.compnd.memb[i].offset))
+                        if ((dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].offset >=
+                                 dt->shared->u.compnd.memb[i].offset &&
+                             dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].offset <
+                                 (dt->shared->u.compnd.memb[i].offset + dt->shared->u.compnd.memb[i].size)) ||
+                            (dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].offset <
+                                 dt->shared->u.compnd.memb[i].offset &&
+                             (dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].offset +
+                              dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].size) >
+                                 dt->shared->u.compnd.memb[i].offset))
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL,
                                         "member overlaps with previous member")
                 } /* end if */
 
                 /* Update the maximum member position covered */
-                max_memb_pos = MAX(max_memb_pos,
-                                   (dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].offset + dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].size));
+                max_memb_pos =
+                    MAX(max_memb_pos, (dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].offset +
+                                       dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].size));
             } /* end for */
 
             /* Check if the compound type is packed */
@@ -497,16 +515,17 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
             H5O_DTYPE_CHECK_VERSION(dt, version, dt->shared->parent->shared->version, ioflags, "enum", FAIL)
 
             /* Allocate name and value arrays */
-            if (NULL == (dt->shared->u.enumer.name =
-                             (char **)H5MM_calloc(nmembs * sizeof(char *))) ||
-                NULL == (dt->shared->u.enumer.value = (uint8_t *)H5MM_calloc(
-                             nmembs * dt->shared->parent->shared->size)))
+            if (NULL == (dt->shared->u.enumer.name = (char **)H5MM_calloc(nmembs * sizeof(char *))) ||
+                NULL == (dt->shared->u.enumer.value =
+                             (uint8_t *)H5MM_calloc(nmembs * dt->shared->parent->shared->size)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed")
             dt->shared->u.enumer.nalloc = nmembs;
 
             /* Names */
-            for (dt->shared->u.enumer.nmembs = 0; dt->shared->u.enumer.nmembs < nmembs; dt->shared->u.enumer.nmembs++) {
-                if (NULL == (dt->shared->u.enumer.name[dt->shared->u.enumer.nmembs] = H5MM_xstrdup((const char *)*pp)))
+            for (dt->shared->u.enumer.nmembs = 0; dt->shared->u.enumer.nmembs < nmembs;
+                 dt->shared->u.enumer.nmembs++) {
+                if (NULL == (dt->shared->u.enumer.name[dt->shared->u.enumer.nmembs] =
+                                 H5MM_xstrdup((const char *)*pp)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCOPY, FAIL, "can't duplicate enum name string")
 
                 /* Version 3 of the datatype message eliminated the padding to multiple of 8 bytes */
