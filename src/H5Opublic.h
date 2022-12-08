@@ -1376,6 +1376,9 @@ H5_DLL herr_t H5Oclose_async(hid_t object_id, hid_t es_id);
  *          The object associated with \p object_id can be any named object in an
  *          HDF5 file including a dataset, a group, or a committed datatype.
  *
+ * \warning H5Oflush doesn't work correctly with parallel. It causes an assertion
+ *          failure in metadata cache during H5Fclose().
+ *
  * \note HDF5 does not possess full control over buffering. H5Oflush()
  *       flushes the internal HDF5 buffers and then asks the operating
  *       system (the OS) to flush the system buffers for the open
