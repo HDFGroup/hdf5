@@ -51,6 +51,7 @@ H5_USE_18_API_DEFAULT=`grep '#define H5_USE_18_API_DEFAULT ' ../src/H5pubconf.h`
 H5_USE_110_API_DEFAULT=`grep '#define H5_USE_110_API_DEFAULT ' ../src/H5pubconf.h`
 H5_USE_112_API_DEFAULT=`grep '#define H5_USE_112_API_DEFAULT ' ../src/H5pubconf.h`
 H5_USE_114_API_DEFAULT=`grep '#define H5_USE_114_API_DEFAULT ' ../src/H5pubconf.h`
+H5_USE_116_API_DEFAULT=`grep '#define H5_USE_116_API_DEFAULT ' ../src/H5pubconf.h`
 
 # setup my machine information.
 myos=`uname -s`
@@ -415,6 +416,8 @@ elif [ -n "$H5_USE_112_API_DEFAULT" ]; then
     echo "H5_USE_112_API_DEFAULT is defined."
 elif [ -n "$H5_USE_114_API_DEFAULT" ]; then
     echo "H5_USE_114_API_DEFAULT is defined."
+elif [ -n "$H5_USE_116_API_DEFAULT" ]; then
+    echo "H5_USE_116_API_DEFAULT is defined."
 else
     echo "No H5 API_DEFAULT is defined."
 fi
@@ -447,15 +450,24 @@ elif [ -n "$H5_USE_112_API_DEFAULT" ]; then
     TOOLTEST -DH5_USE_18_API_DEFAULT $v18main
     TOOLTEST -DH5_USE_110_API_DEFAULT $v110main
     TOOLTEST $v112main
-else
+elif [ -n "$H5_USE_114_API_DEFAULT" ]; then
     echo "Testing HDF5  with 114_API_DEFAULT"
     TOOLTEST -DH5_USE_16_API_DEFAULT $v16main
     TOOLTEST -DH5_USE_18_API_DEFAULT $v18main
     TOOLTEST -DH5_USE_110_API_DEFAULT $v110main
     TOOLTEST -DH5_USE_112_API_DEFAULT $v112main
+    TOOLTEST $v114main
+else
+    echo "Testing HDF5  with 116_API_DEFAULT"
+    TOOLTEST -DH5_USE_16_API_DEFAULT $v16main
+    TOOLTEST -DH5_USE_18_API_DEFAULT $v18main
+    TOOLTEST -DH5_USE_110_API_DEFAULT $v110main
+    TOOLTEST -DH5_USE_112_API_DEFAULT $v112main
+    TOOLTEST -DH5_USE_114_API_DEFAULT $v114main
     TOOLTEST $v18main
     TOOLTEST $v110main
     TOOLTEST $v112main
+    TOOLTEST $v114main
 fi
 
 ##############################################################################

@@ -22,7 +22,7 @@ AC_PREREQ([2.69])
 ## NOTE: Do not forget to change the version number here when we do a
 ## release!!!
 ##
-AC_INIT([HDF5], [1.13.4-1], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.15.0], [help@hdfgroup.org])
 
 AC_CONFIG_SRCDIR([src/H5.c])
 AC_CONFIG_HEADERS([src/H5config.h])
@@ -3773,6 +3773,11 @@ elif test "X$withval" = "Xv114"; then
     DEFAULT_API_VERSION=v114
     AC_DEFINE([USE_114_API_DEFAULT], [1],
               [Define using v1.14 public API symbols by default])
+elif test "X$withval" = "Xv116"; then
+    AC_MSG_RESULT([v116])
+    DEFAULT_API_VERSION=v116
+    AC_DEFINE([USE_116_API_DEFAULT], [1],
+              [Define using v1.16 public API symbols by default])
 else
     AC_MSG_ERROR([invalid version of public symbols given])
 fi
