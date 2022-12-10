@@ -60,7 +60,7 @@ SUBROUTINE test_h5o_link(total_error)
   INTEGER, INTENT(INOUT) :: total_error
 
   INTEGER(HID_T) :: file_id
-  INTEGER(HID_T) :: group_id
+  INTEGER(HID_T) :: group_id, group_id1, group_id2, group_id3
   INTEGER(HID_T) :: space_id
   INTEGER(HID_T) :: dset_id
   INTEGER(HID_T) :: type_id
@@ -256,11 +256,11 @@ SUBROUTINE test_h5o_link(total_error)
   !
   ! Create intermediate groups
   !
-  CALL h5gcreate_f(file_id,"/G1",group_id,error)
+  CALL h5gcreate_f(file_id,"/G1",group_id1,error)
   CALL check("h5gcreate_f", error, total_error)
-  CALL h5gcreate_f(file_id,"/G1/G2",group_id,error)
+  CALL h5gcreate_f(file_id,"/G1/G2",group_id2,error)
   CALL check("h5gcreate_f", error, total_error)
-  CALL h5gcreate_f(file_id,"/G1/G2/G3",group_id,error)
+  CALL h5gcreate_f(file_id,"/G1/G2/G3",group_id3,error)
   CALL check("h5gcreate_f", error, total_error)
 
   ! Try putting a comment on the group /G1/G2/G3 by name
@@ -299,7 +299,7 @@ SUBROUTINE test_h5o_link(total_error)
   !
   ! Create the dataset
   !
-  CALL h5dcreate_f(group_id, dataset, H5T_STD_I32LE, space_id, dset_id, error)
+  CALL h5dcreate_f(group_id3, dataset, H5T_STD_I32LE, space_id, dset_id, error)
   CALL check("h5dcreate_f", error, total_error)
 
   ! Putting a comment on the dataset
@@ -477,7 +477,11 @@ SUBROUTINE test_h5o_link(total_error)
   CALL check(" h5dclose_f", error, total_error)
   CALL h5sclose_f(space_id, error)
   CALL check("h5sclose_f", error, total_error)
-  CALL h5gclose_f(group_id, error)
+  CALL h5gclose_f(group_id1, error)
+  CALL check("h5gclose_f", error, total_error)
+  CALL h5gclose_f(group_id2, error)
+  CALL check("h5gclose_f", error, total_error)
+  CALL h5gclose_f(group_id3, error)
   CALL check("h5gclose_f", error, total_error)
 
   ! Test opening an object by index, note
