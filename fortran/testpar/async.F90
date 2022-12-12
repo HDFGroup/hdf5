@@ -106,8 +106,7 @@ CONTAINS
     CALL H5ESclose_f(es_id, hdferror)
     CALL check("H5ESclose_f", hdferror, nerrors)
 
-   END SUBROUTINE H5ES_tests
-
+  END SUBROUTINE H5ES_tests
 
   SUBROUTINE H5A_async_tests(cleanup, total_error)
     !
@@ -125,92 +124,175 @@ CONTAINS
     INTEGER(SIZE_T) :: num_in_progress
     LOGICAL         :: err_occurred
 
-     CHARACTER(LEN=4), PARAMETER  :: attr_name = "ATTR"
-     INTEGER, TARGET :: attr_data = 99
-     INTEGER, TARGET :: attr_data1 = 100
-     INTEGER(HID_T) :: space_id
-     INTEGER(HID_T) :: attr_id, attr_id1
-     LOGICAL :: exists, exists1, exists2, exists3
-     TYPE(C_PTR) :: f_ptr
+    CHARACTER(LEN=4), PARAMETER  :: attr_name = "ATTR"
+    INTEGER, TARGET :: attr_data0 = 100
+    INTEGER, TARGET :: attr_data1 = 101
+    INTEGER, TARGET :: attr_data2 = 101
+    INTEGER, TARGET :: attr_rdata0
+    INTEGER, TARGET :: attr_rdata1
+    INTEGER, TARGET :: attr_rdata2
+    INTEGER(HID_T) :: space_id
+    INTEGER(HID_T) :: attr_id0, attr_id1, attr_id2
+    LOGICAL :: exists
+    LOGICAL(C_BOOL), TARGET :: exists0 = .FALSE., exists1 = .FALSE., exists2 = .FALSE., exists3 = .FALSE.
+    TYPE(C_PTR) :: f_ptr
 
-     CALL H5EScreate_f(es_id, hdferror)
-     CALL check("H5EScreate_f", hdferror, total_error)
-     !
-     ! Create the file.
-     !
-     CALL h5pcreate_f(H5P_FILE_ACCESS_F, fapl_id, hdferror)
-     CALL check("h5pcreate_f", hdferror, total_error)
+    CALL H5EScreate_f(es_id, hdferror)
+    CALL check("H5EScreate_f", hdferror, total_error)
+    !
+    ! Create the file.
+    !
+    CALL h5pcreate_f(H5P_FILE_ACCESS_F, fapl_id, hdferror)
+    CALL check("h5pcreate_f", hdferror, total_error)
 
-     CALL h5pset_fapl_mpio_f(fapl_id, MPI_COMM_WORLD, MPI_INFO_NULL, hdferror)
-     CALL check("h5pset_fapl_mpio_f", hdferror, total_error)
+    CALL h5pset_fapl_mpio_f(fapl_id, MPI_COMM_WORLD, MPI_INFO_NULL, hdferror)
+    CALL check("h5pset_fapl_mpio_f", hdferror, total_error)
 
-     CALL h5fcreate_async_f(filename, H5F_ACC_TRUNC_F, file_id, es_id, hdferror, access_prp = fapl_id )
-     CALL check("h5fcreate_f",hdferror, total_error)
+    CALL h5fcreate_async_f(filename, H5F_ACC_TRUNC_F, file_id, es_id, hdferror, access_prp = fapl_id )
+    CALL check("h5fcreate_f",hdferror, total_error)
 
-     CALL H5Screate_f(H5S_SCALAR_F, space_id, hdferror)
-     CALL check("H5Screate_f", hdferror, total_error)
+    CALL H5Screate_f(H5S_SCALAR_F, space_id, hdferror)
+    CALL check("H5Screate_f", hdferror, total_error)
 
-     CALL h5acreate_async_f(file_id, attr_name, H5T_NATIVE_INTEGER, space_id, attr_id, es_id, hdferror)
-     CALL check("h5acreate_f",hdferror,total_error)
+    CALL h5acreate_async_f(file_id, attr_name, H5T_NATIVE_INTEGER, space_id, attr_id0, es_id, hdferror)
+    CALL check("h5acreate_f",hdferror,total_error)
 
-     f_ptr = C_LOC(attr_data)
-     CALL H5Awrite_async_f(attr_id, H5T_NATIVE_INTEGER, f_ptr, es_id, hdferror)
-     CALL check("H5Awrite_async_f",hdferror,total_error)
+    f_ptr = C_LOC(attr_data0)
+    CALL H5Awrite_async_f(attr_id0, H5T_NATIVE_INTEGER, f_ptr, es_id, hdferror)
+    CALL check("H5Awrite_async_f",hdferror,total_error)
 
-     CALL H5Aclose_async_f(attr_id, es_id, hdferror)
-     CALL check("H5Aclose_async_f",hdferror,total_error)
+    CALL H5Aclose_async_f(attr_id0, es_id, hdferror)
+    CALL check("H5Aclose_async_f",hdferror,total_error)
+    
+    CALL h5acreate_by_name_async_f(file_id, "/", TRIM(attr_name)//"00", &
+         H5T_NATIVE_INTEGER, space_id, attr_id1, es_id, hdferror)
+    CALL check("h5acreate_by_name_async_f",hdferror,total_error)
 
-     CALL h5acreate_by_name_async_f(file_id, "/", TRIM(attr_name)//"00", &
-          H5T_NATIVE_INTEGER, space_id, attr_id1, es_id, hdferror)
-     CALL check("h5acreate_by_name_async_f",hdferror,total_error)
+    CALL h5acreate_by_name_async_f(file_id, "/", TRIM(attr_name)//"01", &
+         H5T_NATIVE_INTEGER, space_id, attr_id2, es_id, hdferror)
+    CALL check("h5acreate_by_name_async_f",hdferror,total_error)
 
-     f_ptr = C_LOC(attr_data1)
-     CALL H5Awrite_async_f(attr_id1, H5T_NATIVE_INTEGER, f_ptr, es_id, hdferror)
-     CALL check("H5Awrite_async_f",hdferror,total_error)
+    f_ptr = C_LOC(attr_data1)
+    CALL H5Awrite_async_f(attr_id1, H5T_NATIVE_INTEGER, f_ptr, es_id, hdferror)
+    CALL check("H5Awrite_async_f",hdferror,total_error)
 
-     CALL H5Aclose_async_f(attr_id1, es_id, hdferror)
-     CALL check("H5Aclose_async_f",hdferror,total_error)
+    CALL H5Aclose_async_f(attr_id1, es_id, hdferror)
+    CALL check("H5Aclose_async_f",hdferror,total_error)
 
-     CALL H5Sclose_f(space_id, hdferror)
-     CALL check("H5Sclose_f",hdferror,total_error)
-     CALL H5Fclose_async_f(file_id, es_id, hdferror)
-     CALL check("H5Fclose_async_f",hdferror,total_error)
+    f_ptr = C_LOC(attr_data2)
+    CALL H5Awrite_async_f(attr_id2, H5T_NATIVE_INTEGER, f_ptr, es_id, hdferror)
+    CALL check("H5Awrite_async_f",hdferror,total_error)
 
-     CALL H5ESwait_f(es_id, H5ES_WAIT_FOREVER_F, num_in_progress, err_occurred, hdferror)
-     CALL check("H5ESwait_f", hdferror, total_error)
-     CALL VERIFY("H5ESwait_f", err_occurred, .FALSE., total_error)
+    CALL H5Aclose_async_f(attr_id2, es_id, hdferror)
+    CALL check("H5Aclose_async_f",hdferror,total_error)
 
-     CALL h5fopen_async_f(filename, H5F_ACC_RDWR_F, file_id, es_id, hdferror, access_prp = fapl_id )
-     CALL check("h5fopen_async_f",hdferror,total_error)
+    CALL H5Sclose_f(space_id, hdferror)
+    CALL check("H5Sclose_f",hdferror,total_error)
+    CALL H5Fclose_async_f(file_id, es_id, hdferror)
+    CALL check("H5Fclose_async_f",hdferror, total_error)
 
-     CALL H5Aexists_async_f(file_id, attr_name, exists, es_id, hdferror)
-     CALL check("H5Aexists_async_f",hdferror,total_error)
-     !CALL H5Aexists_async_f(file_id, TRIM(attr_name)//"00", exists1, es_id, hdferror)
-     !CALL check("H5Aexists_async_f",hdferror,total_error)
+    CALL H5ESwait_f(es_id, H5ES_WAIT_FOREVER_F, num_in_progress, err_occurred, hdferror)
+    CALL check("H5ESwait_f", hdferror, total_error)
+    CALL VERIFY("H5ESwait_f", err_occurred, .FALSE., total_error)
 
-     CALL H5Aexists_by_name_async_f(file_id, "/", attr_name, exists2, es_id, hdferror)
-     CALL check("H5Aexists_by_name_async_f",hdferror,total_error)
-   !  PRINT*,exists2
+    CALL h5fopen_async_f(filename, H5F_ACC_RDWR_F, file_id, es_id, hdferror, access_prp = fapl_id )
+    CALL check("h5fopen_async_f",hdferror, total_error)
 
-     !CALL H5Aexists_by_name_async_f(file_id, "/", TRIM(attr_name)//"00", exists3, es_id, hdferror)
-     !CALL check("H5Aexists_by_name_async_f",hdferror,total_error)
+    f_ptr = C_LOC(exists0)
+    CALL H5Aexists_async_f(file_id, attr_name, f_ptr, es_id, hdferror)
+    CALL check("H5Aexists_async_f",hdferror, total_error)
 
-     CALL H5Fclose_async_f(file_id, es_id, hdferror)
-     CALL check("H5Fclose_async_f",hdferror,total_error)
+    f_ptr = C_LOC(exists1)
+    CALL H5Aexists_async_f(file_id, TRIM(attr_name)//"00", f_ptr, es_id, hdferror)
+    CALL check("H5Aexists_async_f",hdferror, total_error)
 
-     CALL H5ESwait_f(es_id, H5ES_WAIT_FOREVER_F, num_in_progress, err_occurred, hdferror)
-     CALL check("H5ESwait_f", hdferror, total_error)
-     CALL VERIFY("H5ESwait_f", err_occurred, .FALSE., total_error)
+    f_ptr = C_LOC(exists2)
+    CALL H5Aexists_by_name_async_f(file_id, "/", attr_name, f_ptr, es_id, hdferror)
+    CALL check("H5Aexists_by_name_async_f",hdferror, total_error)
 
-     !CALL VERIFY("H5Aexists_async_f", exists, .TRUE., total_error)
-     !CALL VERIFY("H5Aexists_async_f", exists1, .TRUE., total_error)
-     !CALL VERIFY("H5Aexists_by_name_async_f", exists2, .TRUE., total_error)
+    f_ptr = C_LOC(exists3)
+    CALL H5Aexists_by_name_async_f(file_id, "/", TRIM(attr_name)//"00", f_ptr, es_id, hdferror)
+    CALL check("H5Aexists_by_name_async_f",hdferror, total_error)
 
-     CALL H5Pclose_f(fapl_id, hdferror)
-     CALL check(" H5Pclose_f",hdferror, total_error)
+    CALL H5Aopen_async_f(file_id, attr_name, attr_id0, es_id, hdferror)
+    CALL check("H5Aopen_async_f", hdferror, total_error)
 
-     CALL H5ESclose_f(es_id, hdferror)
-     CALL check("H5ESclose_f", hdferror, total_error)
+    f_ptr = C_LOC(attr_rdata0)
+    CALL H5Aread_async_f(attr_id0, H5T_NATIVE_INTEGER, f_ptr, es_id, hdferror)
+    CALL check("H5Aread_async_f", hdferror, total_error)
+
+    CALL H5Aclose_async_f(attr_id0, es_id, hdferror)
+    CALL check("H5Aclose_async_f",hdferror,total_error)
+
+    CALL H5Aopen_by_name_async_f(file_id, "/", TRIM(attr_name)//"00", attr_id1, es_id, hdferror)
+    CALL check("H5Aopen_by_name_async_f", hdferror, total_error)
+
+    f_ptr = C_LOC(attr_rdata1)
+    CALL H5Aread_async_f(attr_id1, H5T_NATIVE_INTEGER, f_ptr, es_id, hdferror)
+    CALL check("H5Aread_async_f", hdferror, total_error)
+
+    CALL H5Aclose_async_f(attr_id1, es_id, hdferror)
+    CALL check("H5Aclose_async_f",hdferror,total_error)
+
+    CALL H5Aopen_by_idx_async_f(file_id, ".", H5_INDEX_CRT_ORDER_F, H5_ITER_INC_F, INT(2,HSIZE_T), attr_id2, es_id, hdferror)
+    CALL check("H5Aopen_by_idx_async_f", hdferror, total_error)
+
+    f_ptr = C_LOC(attr_rdata2)
+    CALL H5Aread_async_f(attr_id2, H5T_NATIVE_INTEGER, f_ptr, es_id, hdferror)
+    CALL check("H5Aread_async_f", hdferror, total_error)
+
+    CALL H5Aclose_async_f(attr_id2, es_id, hdferror)
+    CALL check("H5Aclose_async_f",hdferror,total_error)
+
+    CALL H5Arename_async_f(file_id, TRIM(attr_name)//"00", TRIM(attr_name)//"05", es_id, hdferror)
+    CALL check("H5Arename_async_f",hdferror,total_error)
+
+    CALL H5Arename_by_name_async_f(file_id, ".", TRIM(attr_name)//"01", TRIM(attr_name)//"06", es_id, hdferror)
+    CALL check("H5Arename_by_name_async_f",hdferror,total_error)
+
+    CALL H5Fclose_async_f(file_id, es_id, hdferror)
+    CALL check("H5Fclose_async_f",hdferror,total_error)
+
+    CALL H5ESwait_f(es_id, H5ES_WAIT_FOREVER_F, num_in_progress, err_occurred, hdferror)
+    CALL check("H5ESwait_f", hdferror, total_error)
+    CALL VERIFY("H5ESwait_f", err_occurred, .FALSE., total_error)
+
+    CALL VERIFY("H5Aexists_async_f", LOGICAL(exists0), .TRUE., total_error)
+    CALL VERIFY("H5Aexists_async_f", LOGICAL(exists1), .TRUE., total_error)
+    CALL VERIFY("H5Aexists_by_name_async_f", LOGICAL(exists2), .TRUE., total_error)
+    CALL VERIFY("H5Aexists_by_name_async_f", LOGICAL(exists3), .TRUE., total_error)
+
+    CALL VERIFY("H5Aread_async_f", attr_rdata0, attr_data0, total_error)
+    CALL VERIFY("H5Aread_async_f", attr_rdata1, attr_data1, total_error)
+    CALL VERIFY("H5Aread_async_f", attr_rdata2, attr_data2, total_error)
+
+    CALL h5fopen_f(filename, H5F_ACC_RDWR_F, file_id, hdferror, access_prp = fapl_id )
+    CALL check("h5fopen_f",hdferror, total_error)
+
+    CALL H5Aexists_f(file_id, TRIM(attr_name)//"05", exists, hdferror)
+    CALL check("H5Aexist_f",hdferror, total_error)
+    CALL VERIFY("H5Arename_async_f", exists, .TRUE., total_error)
+
+    CALL H5Aexists_f(file_id, TRIM(attr_name)//"06", exists, hdferror)
+    CALL check("H5Aexist_f",hdferror, total_error)
+    CALL VERIFY("H5Arename_by_name_async_f", exists, .TRUE., total_error)
+
+    CALL H5Aexists_f(file_id, TRIM(attr_name)//"01", exists, hdferror)
+    CALL check("H5Aexist_f",hdferror, total_error)
+    CALL VERIFY("H5Arename_async_f", exists, .FALSE., total_error)
+
+    CALL H5Aexists_f(file_id, TRIM(attr_name)//"02", exists, hdferror)
+    CALL check("H5Aexist_f",hdferror, total_error)
+    CALL VERIFY("H5Arename_by_name_async_f", exists, .FALSE., total_error)
+
+    CALL H5Fclose_f(file_id, hdferror)
+    CALL check("H5Fclose_f",hdferror,total_error)
+
+    CALL H5Pclose_f(fapl_id, hdferror)
+    CALL check(" H5Pclose_f",hdferror, total_error)
+
+    CALL H5ESclose_f(es_id, hdferror)
+    CALL check("H5ESclose_f", hdferror, total_error)
 
   END SUBROUTINE H5A_async_tests
 
@@ -346,7 +428,7 @@ CONTAINS
     CALL VERIFY("H5ESwait_f", err_occurred, .FALSE., total_error)
     CALL VERIFY("H5ESwait_f", num_in_progress, 0_size_t , total_error)
 
-    CALL h5fopen_async_f(filename, H5F_ACC_RDWR_F, file_id, es_id, hdferror, access_prp = fapl_id )
+    CALL h5fopen_async_f(filename, H5F_ACC_RDWR_F, file_id, es_id, hdferror, access_prp = fapl_id)
     CALL check("h5fopen_async_f",hdferror,total_error)
 
     CALL h5dopen_async_f(file_id, dsetname, dset_id, es_id, hdferror)
@@ -423,7 +505,7 @@ CONTAINS
     CALL h5fclose_f(file_id, hdferror)
     CALL check("h5fclose_f",hdferror,total_error)
 
-   END SUBROUTINE H5D_async_tests
+  END SUBROUTINE H5D_async_tests
 
 
   SUBROUTINE H5G_async_tests(cleanup, total_error)
@@ -444,121 +526,121 @@ CONTAINS
 
     CHARACTER(LEN=6), PARAMETER:: grpname="group1"
 
-     INTEGER(HID_T) :: group_id, group_id1
-     INTEGER(HID_T) :: gcpl_id
-     CHARACTER(LEN=2) :: chr2
-     CHARACTER(LEN=7) :: objname !  Object name
-     INTEGER :: v, i
+    INTEGER(HID_T) :: group_id, group_id1
+    INTEGER(HID_T) :: gcpl_id
+    CHARACTER(LEN=2) :: chr2
+    CHARACTER(LEN=7) :: objname !  Object name
+    INTEGER :: v, i
 
-     TYPE(H5G_info_t), DIMENSION(1:3) :: ginfo
+    TYPE(H5G_info_t), DIMENSION(1:3) :: ginfo
 
-     INTEGER :: error
-     INTEGER :: mpierror       ! MPI error flag
-     INTEGER :: comm, info
-     INTEGER :: mpi_size, mpi_rank
+    INTEGER :: error
+    INTEGER :: mpierror       ! MPI error flag
+    INTEGER :: comm, info
+    INTEGER :: mpi_size, mpi_rank
 
-     comm = MPI_COMM_WORLD
-     info = MPI_INFO_NULL
+    comm = MPI_COMM_WORLD
+    info = MPI_INFO_NULL
 
-     CALL MPI_COMM_SIZE(comm, mpi_size, mpierror)
-     CALL MPI_COMM_RANK(comm, mpi_rank, mpierror)
+    CALL MPI_COMM_SIZE(comm, mpi_size, mpierror)
+    CALL MPI_COMM_RANK(comm, mpi_rank, mpierror)
 
-     CALL H5EScreate_f(es_id, hdferror)
-     CALL check("H5EScreate_f", hdferror, total_error)
-     !
-     ! Create the file.
-     !
-     CALL h5pcreate_f(H5P_FILE_ACCESS_F, fapl_id, hdferror)
-     CALL check("h5pcreate_f", hdferror, total_error)
+    CALL H5EScreate_f(es_id, hdferror)
+    CALL check("H5EScreate_f", hdferror, total_error)
+    !
+    ! Create the file.
+    !
+    CALL h5pcreate_f(H5P_FILE_ACCESS_F, fapl_id, hdferror)
+    CALL check("h5pcreate_f", hdferror, total_error)
 
-     CALL h5pset_fapl_mpio_f(fapl_id, MPI_COMM_WORLD, MPI_INFO_NULL, hdferror)
-     CALL check("h5pset_fapl_mpio_f", hdferror, total_error)
+    CALL h5pset_fapl_mpio_f(fapl_id, MPI_COMM_WORLD, MPI_INFO_NULL, hdferror)
+    CALL check("h5pset_fapl_mpio_f", hdferror, total_error)
 
-     CALL h5fcreate_async_f(filename, H5F_ACC_TRUNC_F, file_id, es_id, error, access_prp = fapl_id )
-     CALL check("h5fcreate_f",hdferror, total_error)
+    CALL h5fcreate_async_f(filename, H5F_ACC_TRUNC_F, file_id, es_id, error, access_prp = fapl_id )
+    CALL check("h5fcreate_f",hdferror, total_error)
 
-     ! Test group API
-     CALL H5Pcreate_f(H5P_GROUP_CREATE_F, gcpl_id, hdferror )
-     CALL check("H5Pcreate_f", hdferror, total_error)
+    ! Test group API
+    CALL H5Pcreate_f(H5P_GROUP_CREATE_F, gcpl_id, hdferror )
+    CALL check("H5Pcreate_f", hdferror, total_error)
 
-     CALL H5Pset_link_creation_order_f(gcpl_id, IOR(H5P_CRT_ORDER_TRACKED_F, H5P_CRT_ORDER_INDEXED_F), hdferror)
-     CALL check("H5Pset_link_creation_order_f", hdferror, total_error)
+    CALL H5Pset_link_creation_order_f(gcpl_id, IOR(H5P_CRT_ORDER_TRACKED_F, H5P_CRT_ORDER_INDEXED_F), hdferror)
+    CALL check("H5Pset_link_creation_order_f", hdferror, total_error)
 
-     CALL H5Gcreate_async_f (file_id, grpname, group_id, es_id, hdferror, gcpl_id=gcpl_id)
-     CALL check("H5Gcreate_async_f", hdferror, total_error)
+    CALL H5Gcreate_async_f (file_id, grpname, group_id, es_id, hdferror, gcpl_id=gcpl_id)
+    CALL check("H5Gcreate_async_f", hdferror, total_error)
 
-     !  Create objects in new group created
-     DO v = 0, 2
-        !  Make name for link
-        WRITE(chr2,'(I2.2)') v
-        objname = 'fill '//chr2
+    !  Create objects in new group created
+    DO v = 0, 2
+       !  Make name for link
+       WRITE(chr2,'(I2.2)') v
+       objname = 'fill '//chr2
 
-        !  Create hard link, with group object
-        CALL H5Gcreate_async_f(group_id, objname, group_id1, es_id, hdferror, gcpl_id=gcpl_id)
-        CALL check("H5Gcreate_async_f", hdferror, total_error)
+       !  Create hard link, with group object
+       CALL H5Gcreate_async_f(group_id, objname, group_id1, es_id, hdferror, gcpl_id=gcpl_id)
+       CALL check("H5Gcreate_async_f", hdferror, total_error)
 
-        !  Close group created
-        CALL H5Gclose_async_f(group_id1, es_id, hdferror)
-        CALL check("H5Gclose_async_f", hdferror, total_error)
-     ENDDO
+       !  Close group created
+       CALL H5Gclose_async_f(group_id1, es_id, hdferror)
+       CALL check("H5Gclose_async_f", hdferror, total_error)
+    ENDDO
 
-     CALL H5Pclose_f(gcpl_id, hdferror)
-     CALL check("H5Pclose_f", hdferror, total_error)
+    CALL H5Pclose_f(gcpl_id, hdferror)
+    CALL check("H5Pclose_f", hdferror, total_error)
 
-     CALL H5Gclose_async_f(group_id, es_id, hdferror)
-     CALL check("H5Gclose_async_f", hdferror, total_error)
+    CALL H5Gclose_async_f(group_id, es_id, hdferror)
+    CALL check("H5Gclose_async_f", hdferror, total_error)
 
-     !
-     ! Close the file.
-     !
-     CALL h5fclose_async_f(file_id, es_id, hdferror)
-     CALL check("h5fclose_async_f",hdferror,total_error)
+    !
+    ! Close the file.
+    !
+    CALL h5fclose_async_f(file_id, es_id, hdferror)
+    CALL check("h5fclose_async_f",hdferror,total_error)
 
-     ! Complete the operations
-     CALL H5ESwait_f(es_id, H5ES_WAIT_FOREVER_F, num_in_progress, err_occurred, hdferror);
-     CALL check("H5ESwait_f", hdferror, total_error)
-     CALL VERIFY("H5ESwait_f", err_occurred, .FALSE., total_error)
-     CALL VERIFY("H5ESwait_f", num_in_progress, 0_size_t , total_error)
+    ! Complete the operations
+    CALL H5ESwait_f(es_id, H5ES_WAIT_FOREVER_F, num_in_progress, err_occurred, hdferror);
+    CALL check("H5ESwait_f", hdferror, total_error)
+    CALL VERIFY("H5ESwait_f", err_occurred, .FALSE., total_error)
+    CALL VERIFY("H5ESwait_f", num_in_progress, 0_size_t , total_error)
 
-     CALL h5fopen_async_f(filename, H5F_ACC_RDWR_F, file_id, es_id, hdferror, access_prp = fapl_id )
-     CALL check("h5fopen_async_f",hdferror,total_error)
+    CALL h5fopen_async_f(filename, H5F_ACC_RDWR_F, file_id, es_id, hdferror, access_prp = fapl_id )
+    CALL check("h5fopen_async_f",hdferror,total_error)
 
-     CALL h5gopen_async_f(file_id, grpname, group_id, es_id, hdferror)
-     CALL check("h5gopen_async_f",hdferror,total_error)
+    CALL h5gopen_async_f(file_id, grpname, group_id, es_id, hdferror)
+    CALL check("h5gopen_async_f",hdferror,total_error)
 
-     CALL h5gget_info_async_f(group_id, ginfo(1), es_id, hdferror)
-     CALL check("H5Gget_info_async_f", hdferror, total_error)
+    CALL h5gget_info_async_f(group_id, ginfo(1), es_id, hdferror)
+    CALL check("H5Gget_info_async_f", hdferror, total_error)
 
-     CALL H5Gget_info_by_name_async_f(group_id, ".", ginfo(2), es_id, hdferror)
-     CALL check("H5Gget_info_by_name_async_f", hdferror, total_error)
+    CALL H5Gget_info_by_name_async_f(group_id, ".", ginfo(2), es_id, hdferror)
+    CALL check("H5Gget_info_by_name_async_f", hdferror, total_error)
 
-     CALL H5Gget_info_by_idx_async_f(group_id, ".", H5_INDEX_CRT_ORDER_F, H5_ITER_INC_F, &
-          INT(0,HSIZE_T), ginfo(3), es_id, error)
-     CALL check("H5Gget_info_by_idx_async_f", hdferror, total_error)
+    CALL H5Gget_info_by_idx_async_f(group_id, ".", H5_INDEX_CRT_ORDER_F, H5_ITER_INC_F, &
+         INT(0,HSIZE_T), ginfo(3), es_id, error)
+    CALL check("H5Gget_info_by_idx_async_f", hdferror, total_error)
 
-     CALL H5Gclose_async_f(group_id, es_id, hdferror)
-     CALL check("H5Gclose_async_f", hdferror, total_error)
+    CALL H5Gclose_async_f(group_id, es_id, hdferror)
+    CALL check("H5Gclose_async_f", hdferror, total_error)
 
-     CALL h5fclose_async_f(file_id, es_id, hdferror)
-     CALL check("h5fclose_async_f",hdferror,total_error)
+    CALL h5fclose_async_f(file_id, es_id, hdferror)
+    CALL check("h5fclose_async_f",hdferror,total_error)
 
-     CALL H5ESwait_f(es_id, H5ES_WAIT_FOREVER_F, num_in_progress, err_occurred, hdferror)
-     CALL check("H5ESwait_f", hdferror, total_error)
-     CALL VERIFY("H5ESwait_f", err_occurred, .FALSE., total_error)
+    CALL H5ESwait_f(es_id, H5ES_WAIT_FOREVER_F, num_in_progress, err_occurred, hdferror)
+    CALL check("H5ESwait_f", hdferror, total_error)
+    CALL VERIFY("H5ESwait_f", err_occurred, .FALSE., total_error)
 
-     ! Verify the group APIs
-     DO i = 1, 2
-        CALL VERIFY("H5Gget_info_by_name_f.storage_type", &
-             ginfo(i)%storage_type, INT(H5G_STORAGE_TYPE_COMPACT_F, C_INT), total_error)
-        CALL VERIFY("H5Gget_info_by_name_f.max_corder", ginfo(i)%max_corder, 3_C_INT64_T, total_error)
-        CALL VERIFY("H5Gget_info_by_name_f.nlinks", ginfo(i)%nlinks, 3_HSIZE_T, total_error)
-        CALL VERIFY("H5Gget_info_f.mounted", LOGICAL(ginfo(i)%mounted),.FALSE.,total_error)
-     ENDDO
-     CALL VERIFY("H5Gget_info_by_name_f.storage_type", &
-          ginfo(3)%storage_type, INT(H5G_STORAGE_TYPE_COMPACT_F, C_INT), total_error)
-     CALL VERIFY("H5Gget_info_by_name_f.max_corder", ginfo(3)%max_corder, 0_C_INT64_T, total_error)
-     CALL VERIFY("H5Gget_info_by_name_f.nlinks", ginfo(3)%nlinks, 0_HSIZE_T, total_error)
-     CALL VERIFY("H5Gget_info_f.mounted", LOGICAL(ginfo(3)%mounted),.FALSE.,total_error)
+    ! Verify the group APIs
+    DO i = 1, 2
+       CALL VERIFY("H5Gget_info_by_name_f.storage_type", &
+            ginfo(i)%storage_type, INT(H5G_STORAGE_TYPE_COMPACT_F, C_INT), total_error)
+       CALL VERIFY("H5Gget_info_by_name_f.max_corder", ginfo(i)%max_corder, 3_C_INT64_T, total_error)
+       CALL VERIFY("H5Gget_info_by_name_f.nlinks", ginfo(i)%nlinks, 3_HSIZE_T, total_error)
+       CALL VERIFY("H5Gget_info_f.mounted", LOGICAL(ginfo(i)%mounted),.FALSE.,total_error)
+    ENDDO
+    CALL VERIFY("H5Gget_info_by_name_f.storage_type", &
+         ginfo(3)%storage_type, INT(H5G_STORAGE_TYPE_COMPACT_F, C_INT), total_error)
+    CALL VERIFY("H5Gget_info_by_name_f.max_corder", ginfo(3)%max_corder, 0_C_INT64_T, total_error)
+    CALL VERIFY("H5Gget_info_by_name_f.nlinks", ginfo(3)%nlinks, 0_HSIZE_T, total_error)
+    CALL VERIFY("H5Gget_info_f.mounted", LOGICAL(ginfo(3)%mounted),.FALSE.,total_error)
 
   END SUBROUTINE H5G_async_tests
 
@@ -579,146 +661,6 @@ CONTAINS
     LOGICAL         :: err_occurred
 
     INTEGER(HID_T) :: ret_file_id
-
-    INTEGER :: error  ! Error flags
-    INTEGER :: mpierror       ! MPI error flag
-    INTEGER :: comm, info
-    INTEGER :: mpi_size, mpi_rank
-
-    comm = MPI_COMM_WORLD
-    info = MPI_INFO_NULL
-
-     CALL MPI_COMM_SIZE(comm, mpi_size, mpierror)
-     CALL MPI_COMM_RANK(comm, mpi_rank, mpierror)
-
-     CALL H5EScreate_f(es_id, hdferror)
-     CALL check("H5EScreate_f", hdferror, total_error)
-     !
-     ! Create the file.
-     !
-     CALL h5pcreate_f(H5P_FILE_ACCESS_F, fapl_id, hdferror)
-     CALL check("h5pcreate_f", hdferror, total_error)
-
-     CALL h5pset_fapl_mpio_f(fapl_id, MPI_COMM_WORLD, MPI_INFO_NULL, hdferror)
-     CALL check("h5pset_fapl_mpio_f", hdferror, total_error)
-
-     CALL h5fcreate_async_f(filename, H5F_ACC_TRUNC_F, file_id, es_id, error, access_prp = fapl_id )
-     CALL check("h5fcreate_f",hdferror, total_error)
-
-     !
-     ! Close the file.
-     !
-     CALL h5fclose_async_f(file_id, es_id, hdferror)
-     CALL check("h5fclose_async_f",hdferror,total_error)
-
-     ! Complete the operations
-     CALL H5ESwait_f(es_id, H5ES_WAIT_FOREVER_F, num_in_progress, err_occurred, hdferror);
-     CALL check("H5ESwait_f", hdferror, total_error)
-     CALL VERIFY("H5ESwait_f", err_occurred, .FALSE., total_error)
-     CALL VERIFY("H5ESwait_f", num_in_progress, 0_size_t , total_error)
-
-     CALL H5Fopen_async_f(filename, H5F_ACC_RDWR_F, file_id, es_id, hdferror, access_prp = fapl_id )
-     CALL check("h5fopen_async_f",hdferror,total_error)
-
-     CALL H5Freopen_async_f(file_id, ret_file_id, es_id, hdferror)
-     CALL check("H5Freopen_async_f", hdferror, total_error)
-
-     CALL H5Fclose_async_f(ret_file_id, es_id, hdferror)
-     CALL check("h5fclose_async_f",hdferror,total_error)
-
-     CALL H5Fflush_async_f(file_id, H5F_SCOPE_GLOBAL_F, es_id, hdferror)
-     CALL check("h5fflush_async_f",hdferror, total_error)
-
-     CALL H5Fclose_async_f(file_id, es_id, hdferror)
-     CALL check("h5fclose_async_f",hdferror,total_error)
-
-     CALL H5ESwait_f(es_id, H5ES_WAIT_FOREVER_F, num_in_progress, err_occurred, hdferror)
-     CALL check("H5ESwait_f", hdferror, total_error)
-     CALL VERIFY("H5ESwait_f", err_occurred, .FALSE., total_error)
-
-  END SUBROUTINE H5F_async_tests
-
-  SUBROUTINE H5L_async_tests(cleanup, total_error)
-    !
-    ! Test H5ES routines
-    !
-    IMPLICIT NONE
-    LOGICAL, INTENT(IN)  :: cleanup
-    INTEGER, INTENT(INOUT) :: total_error
-
-    INTEGER(HID_T) :: fapl_id
-    INTEGER(HID_T) :: file_id
-    CHARACTER(len=80) :: filename = "h5f_tests.h5"
-    INTEGER :: hdferror
-    INTEGER(HID_T)  :: es_id
-    INTEGER(SIZE_T) :: num_in_progress
-    LOGICAL         :: err_occurred
-
-    INTEGER :: error  ! Error flags
-    INTEGER :: mpierror       ! MPI error flag
-    INTEGER :: comm, info
-    INTEGER :: mpi_size, mpi_rank
-
-    comm = MPI_COMM_WORLD
-    info = MPI_INFO_NULL
-
-     CALL MPI_COMM_SIZE(comm, mpi_size, mpierror)
-     CALL MPI_COMM_RANK(comm, mpi_rank, mpierror)
-
-     CALL H5EScreate_f(es_id, hdferror)
-     CALL check("H5EScreate_f", hdferror, total_error)
-     !
-     ! Create the file.
-     !
-     CALL h5pcreate_f(H5P_FILE_ACCESS_F, fapl_id, hdferror)
-     CALL check("h5pcreate_f", hdferror, total_error)
-
-     CALL h5pset_fapl_mpio_f(fapl_id, MPI_COMM_WORLD, MPI_INFO_NULL, hdferror)
-     CALL check("h5pset_fapl_mpio_f", hdferror, total_error)
-
-     CALL h5fcreate_async_f(filename, H5F_ACC_TRUNC_F, file_id, es_id, error, access_prp = fapl_id )
-     CALL check("h5fcreate_f",hdferror, total_error)
-
-     !
-     ! Close the file.
-     !
-     CALL h5fclose_async_f(file_id, es_id, hdferror)
-     CALL check("h5fclose_async_f",hdferror,total_error)
-
-     ! Complete the operations
-     CALL H5ESwait_f(es_id, H5ES_WAIT_FOREVER_F, num_in_progress, err_occurred, hdferror);
-     CALL check("H5ESwait_f", hdferror, total_error)
-     CALL VERIFY("H5ESwait_f", err_occurred, .FALSE., total_error)
-     CALL VERIFY("H5ESwait_f", num_in_progress, 0_size_t , total_error)
-
-     CALL H5Fopen_async_f(filename, H5F_ACC_RDWR_F, file_id, es_id, hdferror, access_prp = fapl_id )
-     CALL check("h5fopen_async_f",hdferror,total_error)
-
-     CALL H5Fclose_async_f(file_id, es_id, hdferror)
-     CALL check("h5fclose_async_f",hdferror,total_error)
-
-     CALL H5ESwait_f(es_id, H5ES_WAIT_FOREVER_F, num_in_progress, err_occurred, hdferror)
-     CALL check("H5ESwait_f", hdferror, total_error)
-     CALL VERIFY("H5ESwait_f", err_occurred, .FALSE., total_error)
-
-  END SUBROUTINE H5L_async_tests
-
-
-  SUBROUTINE H5O_async_tests(cleanup, total_error)
-    !
-    ! Test H5ES routines
-    !
-    IMPLICIT NONE
-    LOGICAL, INTENT(IN)  :: cleanup
-    INTEGER, INTENT(INOUT) :: total_error
-
-    INTEGER(HID_T) :: fapl_id
-    INTEGER(HID_T) :: file_id
-    CHARACTER(len=80) :: filename = "h5f_tests.h5"
-    INTEGER :: hdferror
-    INTEGER(HID_T)  :: es_id
-    INTEGER(SIZE_T) :: num_in_progress
-    LOGICAL         :: err_occurred
 
     INTEGER :: error  ! Error flags
     INTEGER :: mpierror       ! MPI error flag
@@ -760,12 +702,399 @@ CONTAINS
     CALL H5Fopen_async_f(filename, H5F_ACC_RDWR_F, file_id, es_id, hdferror, access_prp = fapl_id )
     CALL check("h5fopen_async_f",hdferror,total_error)
 
+    CALL H5Freopen_async_f(file_id, ret_file_id, es_id, hdferror)
+    CALL check("H5Freopen_async_f", hdferror, total_error)
+
+    CALL H5Fclose_async_f(ret_file_id, es_id, hdferror)
+    CALL check("h5fclose_async_f",hdferror,total_error)
+
+    CALL H5Fflush_async_f(file_id, H5F_SCOPE_GLOBAL_F, es_id, hdferror)
+    CALL check("h5fflush_async_f",hdferror, total_error)
+
     CALL H5Fclose_async_f(file_id, es_id, hdferror)
     CALL check("h5fclose_async_f",hdferror,total_error)
 
     CALL H5ESwait_f(es_id, H5ES_WAIT_FOREVER_F, num_in_progress, err_occurred, hdferror)
     CALL check("H5ESwait_f", hdferror, total_error)
     CALL VERIFY("H5ESwait_f", err_occurred, .FALSE., total_error)
+
+  END SUBROUTINE H5F_async_tests
+
+  SUBROUTINE H5L_async_tests(cleanup, total_error)
+    !
+    ! Test H5ES routines
+    !
+    IMPLICIT NONE
+    LOGICAL, INTENT(IN)  :: cleanup
+    INTEGER, INTENT(INOUT) :: total_error
+
+    INTEGER(HID_T) :: fapl_id
+    INTEGER(HID_T) :: file_id
+    CHARACTER(len=80) :: filename = "h5l_tests.h5"
+    INTEGER :: hdferror
+    INTEGER(HID_T)  :: es_id
+    INTEGER(SIZE_T) :: num_in_progress
+    LOGICAL         :: err_occurred
+
+    INTEGER(hid_t)  :: gid = -1, gid2 = -1, gid3 = -1  ! Group IDs
+    INTEGER(hid_t)  :: aid = -1, aid2 = -1, aid3 = -1 ! Attribute ID
+    INTEGER(hid_t)  :: sid = -1  ! Dataspace ID
+    INTEGER(hid_t)  :: gcpl_id
+    CHARACTER(LEN=12), PARAMETER :: CORDER_GROUP_NAME = "corder_group"
+    LOGICAL(C_BOOL), TARGET :: exists1, exists2
+    LOGICAL :: exists
+    TYPE(C_PTR) :: f_ptr
+
+    INTEGER :: error  ! Error flags
+    INTEGER :: mpierror       ! MPI error flag
+    INTEGER :: comm, info
+    INTEGER :: mpi_size, mpi_rank
+
+    comm = MPI_COMM_WORLD
+    info = MPI_INFO_NULL
+
+    CALL MPI_COMM_SIZE(comm, mpi_size, mpierror)
+    CALL MPI_COMM_RANK(comm, mpi_rank, mpierror)
+
+    CALL H5EScreate_f(es_id, hdferror)
+    CALL check("H5EScreate_f", hdferror, total_error)
+    !
+    ! Create the file.
+    !
+    CALL h5pcreate_f(H5P_FILE_ACCESS_F, fapl_id, hdferror)
+    CALL check("h5pcreate_f", hdferror, total_error)
+
+    CALL h5pset_fapl_mpio_f(fapl_id, MPI_COMM_WORLD, MPI_INFO_NULL, hdferror)
+    CALL check("h5pset_fapl_mpio_f", hdferror, total_error)
+
+    CALL h5fcreate_async_f(filename, H5F_ACC_TRUNC_F, file_id, es_id, error, access_prp = fapl_id )
+    CALL check("h5fcreate_f",hdferror, total_error)
+
+    CALL H5Pcreate_f(H5P_GROUP_CREATE_F, gcpl_id, hdferror )
+    CALL check("H5Pcreate_f", hdferror, total_error)
+
+    CALL H5Pset_link_creation_order_f(gcpl_id, IOR(H5P_CRT_ORDER_TRACKED_F, H5P_CRT_ORDER_INDEXED_F), hdferror)
+    CALL check("H5Pset_link_creation_order_f", hdferror, total_error)
+
+    !  Create group with creation order tracking on
+    CALL H5Gcreate_async_f(file_id, CORDER_GROUP_NAME, gid3, es_id, hdferror, gcpl_id=gcpl_id)
+    CALL check("H5Gcreate_f", hdferror, total_error)
+
+    ! Create group
+    CALL H5Gcreate_async_f(file_id, "/Group1", gid, es_id, hdferror)
+    CALL check("H5Gcreate_async_f",hdferror, total_error)
+
+    ! Create nested group
+    CALL H5Gcreate_async_f(gid, "Group2", gid2, es_id, hdferror)
+    CALL check("H5Gcreate_async_f",hdferror, total_error)
+
+    CALL H5Screate_f(H5S_SCALAR_F, sid, hdferror)
+    CALL check("H5Screate_f",hdferror, total_error)
+    CALL H5Acreate_async_f(gid2, "Attr1", H5T_NATIVE_INTEGER, sid, aid, es_id, hdferror)
+    CALL check("H5Acreate_async_f",hdferror, total_error)
+    CALL H5Acreate_async_f(gid2, "Attr2", H5T_NATIVE_INTEGER, sid, aid2, es_id, hdferror)
+    CALL check("H5Acreate_async_f",hdferror, total_error)
+    CALL H5Acreate_async_f(gid2, "Attr3", H5T_NATIVE_INTEGER, sid, aid3, es_id, hdferror)
+    CALL check("H5Acreate_async_f",hdferror, total_error)
+    CALL H5Aclose_async_f(aid, es_id, hdferror)
+    CALL check("H5Aclose_async_f",hdferror, total_error)
+    CALL H5Aclose_async_f(aid2, es_id, hdferror)
+    CALL check("H5Aclose_async_f",hdferror, total_error)
+    CALL H5Aclose_async_f(aid3, es_id, hdferror)
+    CALL check("H5Aclose_async_f",hdferror, total_error)
+    CALL H5Sclose_f(sid,hdferror)
+    CALL check("H5Sclose_f",hdferror, total_error)
+
+    ! Close groups
+    CALL h5gclose_async_f(gid2, es_id, hdferror)
+    CALL check("h5gclose_async_f",hdferror, total_error)
+    CALL h5gclose_async_f(gid, es_id, hdferror)
+    CALL check("h5gclose_async_f",hdferror, total_error)
+    CALL h5gclose_async_f(gid3, es_id, hdferror)
+    CALL check("h5gclose_async_f",hdferror, total_error)
+
+    ! Close the group creation property list
+    CALL H5Pclose_f(gcpl_id, hdferror)
+    CALL check("H5Pclose_f", hdferror, total_error)
+
+    ! Create soft links to groups created
+    CALL H5Lcreate_soft_async_f("/Group1", file_id, "/soft_one", es_id, hdferror)
+    CALL H5Lcreate_soft_async_f("/Group1/Group2", file_id, "/soft_two", es_id, hdferror)
+
+    ! Create hard links to all groups
+    CALL H5Lcreate_hard_async_f(file_id, "/", file_id, "hard_zero", es_id, hdferror)
+    CALL check("H5Lcreate_hard_async_f",hdferror, total_error)
+    CALL H5Lcreate_hard_async_f(file_id, "/Group1", file_id, "hard_one", es_id, hdferror)
+    CALL check("H5Lcreate_hard_async_f",hdferror, total_error)
+    CALL H5Lcreate_hard_async_f(file_id, "/Group1/Group2", file_id, "hard_two", es_id, hdferror)
+    CALL check("H5Lcreate_hard_async_f",hdferror, total_error)
+
+    !
+    ! Close the file.
+    !
+    CALL h5fclose_async_f(file_id, es_id, hdferror)
+    CALL check("h5fclose_async_f",hdferror,total_error)
+
+    ! Complete the operations
+    CALL H5ESwait_f(es_id, H5ES_WAIT_FOREVER_F, num_in_progress, err_occurred, hdferror);
+    CALL check("H5ESwait_f", hdferror, total_error)
+    CALL VERIFY("H5ESwait_f", err_occurred, .FALSE., total_error)
+    CALL VERIFY("H5ESwait_f", num_in_progress, 0_size_t , total_error)
+
+    CALL H5Fopen_async_f(filename, H5F_ACC_RDWR_F, file_id, es_id, hdferror, access_prp = fapl_id )
+    CALL check("h5fopen_async_f",hdferror,total_error)
+
+    exists1 = .FALSE.
+    f_ptr = C_LOC(exists1)
+    CALL H5Lexists_async_f(file_id, "hard_zero", f_ptr, es_id, hdferror)
+    CALL check("H5Lexists_async_f",hdferror,total_error)
+
+    exists2 = .FALSE.
+    f_ptr = C_LOC(exists2)
+    CALL H5Lexists_async_f(file_id, "hard_two", f_ptr, es_id, hdferror)
+    CALL check("H5Lexists_async_f",hdferror,total_error)
+
+!    CALL H5Literate_async_f(, H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx_p, H5L_iterate2_t op, void *op_data, hid_t es_id)
+
+    CALL H5Ldelete_async_f(file_id, "hard_two", es_id, hdferror)
+    CALL check("H5Ldelete_async_f",hdferror,total_error)
+
+!    CALL H5Ldelete_by_idx_async_f(file_id, ".", &
+!         H5_INDEX_CRT_ORDER_F, H5_ITER_INC_F, INT(0,HSIZE_T), es_id, hdferror)
+!    CALL check("H5Ldelete_by_idx_async_f",hdferror,total_error)
+
+    CALL H5Fclose_async_f(file_id, es_id, hdferror)
+    CALL check("h5fclose_async_f",hdferror,total_error)
+
+    CALL H5ESwait_f(es_id, H5ES_WAIT_FOREVER_F, num_in_progress, err_occurred, hdferror)
+    CALL check("H5ESwait_f", hdferror, total_error)
+    CALL VERIFY("H5ESwait_f", err_occurred, .FALSE., total_error)
+
+    CALL VERIFY("H5Lexists_async_f", LOGICAL(exists1), .TRUE., total_error)
+    CALL VERIFY("H5Lexists_async_f", LOGICAL(exists2), .TRUE., total_error)
+
+    CALL h5fopen_f(filename, H5F_ACC_RDWR_F, file_id, hdferror, access_prp = fapl_id )
+    CALL check("h5fopen_f",hdferror, total_error)
+
+    ! Verify the link was deleted
+    CALL H5Lexists_f(file_id, "hard_two", exists, hdferror)
+    CALL check("H5Lexist_f",hdferror, total_error)
+    CALL VERIFY("H5Ldelete_async_f", exists, .FALSE., total_error)
+
+    CALL h5gopen_f(file_id, CORDER_GROUP_NAME, gid3, hdferror)
+
+  !  CALL H5Gopen_f(file_id, "/Group1/Group2", gid, hdferror)
+
+  !  CALL H5Ldelete_by_idx_f(gid3, ".", &
+  !       H5_INDEX_CRT_ORDER_F, H5_ITER_INC_F, INT(0,HSIZE_T), hdferror)
+  !  CALL check("H5Ldelete_by_idx_async_f",hdferror,total_error)
+
+
+    CALL h5gclose_f(gid3, error)
+    CALL check("h5gclose_f",error,total_error)
+
+   ! CALL H5Lexists_f(file_id, "hard_one", exists, hdferror)
+   ! CALL check("H5Lexist_f",hdferror, total_error)
+   ! CALL VERIFY("H5Ldelete_by_idx_async_f", exists, .FALSE., total_error)
+
+    CALL H5Fclose_f(file_id, hdferror)
+    CALL check("H5Fclose_f",hdferror,total_error)
+
+    CALL H5Pclose_f(fapl_id, hdferror)
+    CALL check(" H5Pclose_f",hdferror, total_error)
+
+    CALL H5ESclose_f(es_id, hdferror)
+    CALL check("H5ESclose_f", hdferror, total_error)
+
+
+  END SUBROUTINE H5L_async_tests
+
+  SUBROUTINE H5O_async_tests(cleanup, total_error)
+    !
+    ! Test H5ES routines
+    !
+    IMPLICIT NONE
+    LOGICAL, INTENT(IN)  :: cleanup
+    INTEGER, INTENT(INOUT) :: total_error
+    INTEGER(HID_T) :: file_id
+    INTEGER(HID_T) :: group_id, group_id1, group_id2, group_id3
+    INTEGER(HID_T) :: space_id
+    INTEGER(HID_T) :: attr_id
+    INTEGER(HID_T) :: dset_id
+    INTEGER(HID_T) :: fapl_id
+    INTEGER(HID_T) :: lcpl_id
+    INTEGER(HID_T) :: ocpypl_id
+    TYPE(C_H5O_INFO_T), TARGET :: oinfo_f
+    TYPE(C_PTR) :: f_ptr
+    CHARACTER(len=80) :: filename = "h5a_tests.h5"
+
+    INTEGER, PARAMETER :: TRUE = 1
+
+    INTEGER ::  hdferror  !  Value returned from API calls
+
+    ! Data for tested h5ocopy_f
+    CHARACTER(LEN=3) , PARAMETER :: dataset = "DS1"
+    INTEGER          , PARAMETER :: dim0     = 4
+
+    INTEGER(HSIZE_T), DIMENSION(1:1)    :: dims2 = (/dim0/) ! size read/write buffer
+    INTEGER(C_INT), DIMENSION(1:8) :: atime, btime, ctime, mtime
+
+    INTEGER(HID_T)  :: es_id
+    INTEGER(SIZE_T) :: num_in_progress
+    LOGICAL         :: err_occurred
+
+    ! Make a FAPL that uses the "use the latest version of the format" bounds
+    CALL H5Pcreate_f(H5P_FILE_ACCESS_F,fapl_id,hdferror)
+    CALL check("h5Pcreate_f",hdferror,total_error)
+
+    !  Set the "use the latest version of the format" bounds for creating objects in the file
+    CALL H5Pset_libver_bounds_f(fapl_id, H5F_LIBVER_LATEST_F, H5F_LIBVER_LATEST_F, hdferror)
+    CALL check("H5Pset_libver_bounds_f",hdferror, total_error)
+
+    CALL h5pset_fapl_mpio_f(fapl_id, MPI_COMM_WORLD, MPI_INFO_NULL, hdferror)
+
+    CALL H5EScreate_f(es_id, hdferror)
+    CALL check("H5EScreate_f", hdferror, total_error)
+
+    !  Create a new HDF5 file
+    CALL H5Fcreate_async_f(filename, H5F_ACC_TRUNC_F, file_id, es_id, hdferror, H5P_DEFAULT_F, fapl_id)
+    CALL check("H5Fcreate_f", hdferror, total_error)
+
+    !  Close the FAPL
+    CALL h5pclose_f(fapl_id, hdferror)
+    CALL check("h5pclose_f",hdferror,total_error)
+
+    !
+    ! Create dataspace.  Setting size to be the current size.
+    !
+    CALL h5screate_simple_f(1, dims2, space_id, hdferror)
+    CALL check("h5screate_simple_f", hdferror, total_error)
+    !
+    ! Create intermediate groups
+    !
+    CALL h5gcreate_async_f(file_id,"/G1",group_id1,es_id,hdferror)
+    CALL check("h5gcreate_f", hdferror, total_error)
+    CALL h5gcreate_async_f(file_id,"/G1/G2",group_id2,es_id,hdferror)
+    CALL check("h5gcreate_f", hdferror, total_error)
+    CALL h5gcreate_async_f(file_id,"/G1/G2/G3",group_id3,es_id,hdferror)
+    CALL check("h5gcreate_f", hdferror, total_error)
+
+    !
+    ! Create the dataset
+    !
+    CALL h5dcreate_async_f(group_id3, dataset, H5T_STD_I32LE, space_id, dset_id, es_id, hdferror)
+    CALL check("h5dcreate_f", hdferror, total_error)
+
+    ! Create a soft link to /G1
+    CALL h5lcreate_soft_async_f("/G1", file_id, "/G1_LINK", es_id, hdferror)
+    CALL check("h5lcreate_soft_f", hdferror, total_error)
+
+    ! Create a soft link to /G1000, does not exist
+    CALL h5lcreate_soft_async_f("/G1000", file_id, "/G1_FALSE", es_id, hdferror)
+    CALL check("h5lcreate_soft_f", hdferror, total_error)
+
+    ! Create a soft link to /G1_LINK
+    CALL h5lcreate_soft_async_f("/G1_FALSE", file_id, "/G2_FALSE", es_id, hdferror)
+    CALL check("h5lcreate_soft_f", hdferror, total_error)
+    !
+    ! Close and release resources.
+    !
+    CALL h5dclose_async_f(dset_id, es_id, hdferror)
+    CALL check(" h5dclose_f", hdferror, total_error)
+    CALL h5sclose_f(space_id, hdferror)
+    CALL check("h5sclose_f", hdferror, total_error)
+    CALL h5gclose_async_f(group_id1, es_id, hdferror)
+    CALL check("h5gclose_async_f", hdferror, total_error)
+    CALL h5gclose_async_f(group_id2, es_id, hdferror)
+    CALL check("h5gclose_async_f", hdferror, total_error)
+    CALL h5gclose_async_f(group_id3, es_id, hdferror)
+    CALL check("h5gclose_async_f", hdferror, total_error)
+
+    ! Test opening an object by index
+    CALL h5oopen_by_idx_async_f(file_id, "/G1/G2/G3", H5_INDEX_NAME_F, H5_ITER_INC_F, 0_hsize_t, group_id, es_id, hdferror)
+    CALL check("h5oopen_by_idx_f", hdferror, total_error)
+
+    CALL h5oclose_async_f(group_id, es_id, hdferror)
+    CALL check("h5gclose_f", hdferror, total_error)
+
+    ! Test opening an object
+    CALL h5oopen_async_f(file_id, "/G1/G2/G3", group_id, es_id, hdferror)
+    CALL check("h5oopen_by_idx_f", hdferror, total_error)
+
+    CALL H5Screate_f(H5S_SCALAR_F, space_id, hdferror)
+    CALL check("H5Screate_f", hdferror, total_error)
+
+    CALL h5acreate_async_f(group_id, "ATTR", H5T_NATIVE_INTEGER, space_id, attr_id, es_id, hdferror)
+    CALL check("h5acreate_f",hdferror,total_error)
+
+    CALL H5Aclose_async_f(attr_id, es_id, hdferror)
+    CALL check("H5Aclose_async_f",hdferror,total_error)
+
+    CALL h5oclose_async_f(group_id, es_id, hdferror)
+    CALL check("h5gclose_f", hdferror, total_error)
+
+    f_ptr = C_LOC(oinfo_f)
+    CALL H5Oget_info_by_name_async_f(file_id, "/G1/G2/G3", f_ptr, es_id, hdferror, fields=H5O_INFO_ALL_F)
+    CALL check("H5Oget_info_by_name_async_f", hdferror, total_error)
+    !
+    ! create property to pass copy options
+    !
+    CALL h5pcreate_f(H5P_LINK_CREATE_F, lcpl_id, hdferror)
+    CALL check("h5Pcreate_f", hdferror, total_error)
+
+    CALL h5pset_create_inter_group_f(lcpl_id, TRUE, hdferror)
+    CALL check("H5Pset_create_inter_group_f", hdferror, total_error)
+    !
+    ! Check optional parameter lcpl_id, this would fail if lcpl_id was not specified
+    !
+    CALL h5ocopy_async_f(file_id, "/G1/G2/G3/DS1", file_id, "/G1/G_cp1/DS2", es_id, hdferror, lcpl_id=lcpl_id)
+    CALL check("h5ocopy_f -- W/ OPTION: lcpl_id", hdferror ,total_error)
+
+    CALL h5pclose_f(lcpl_id, hdferror)
+    CALL check("h5pclose_f",hdferror,total_error)
+
+    CALL h5pcreate_f(H5P_OBJECT_COPY_F, ocpypl_id, hdferror)
+    CALL check("h5Pcreate_f",hdferror,total_error)
+
+    CALL h5pset_copy_object_f(ocpypl_id, H5O_COPY_SHALLOW_HIERARCHY_F, hdferror)
+    CALL check("H5Pset_copy_object_f",hdferror,total_error)
+
+    CALL h5ocopy_async_f(file_id, "/G1/G2", file_id, "/G1/G_cp2", es_id, hdferror, ocpypl_id=ocpypl_id)
+    CALL check("h5ocopy_f",hdferror,total_error)
+
+    CALL h5pclose_f(ocpypl_id, hdferror)
+    CALL check("h5pclose_f",hdferror,total_error)
+
+    CALL h5fclose_async_f(file_id, es_id, hdferror)
+    CALL check("h5fclose_f",hdferror,total_error)
+
+    CALL H5ESwait_f(es_id, H5ES_WAIT_FOREVER_F, num_in_progress, err_occurred, hdferror)
+    CALL check("H5ESwait_f", hdferror, total_error)
+    CALL VERIFY("H5ESwait_f", err_occurred, .FALSE., total_error)
+
+    IF( oinfo_f%fileno.LE.0 )THEN
+       hdferror = -1
+       CALL check("H5Oget_info_by_name_async_f", hdferror, total_error)
+    ENDIF
+
+    atime(1:8) = h5gmtime(oinfo_f%atime)
+    btime(1:8) = h5gmtime(oinfo_f%btime)
+    ctime(1:8) = h5gmtime(oinfo_f%ctime)
+    mtime(1:8) = h5gmtime(oinfo_f%mtime)
+
+    IF( atime(1) .LT. 2021 .OR. &
+         btime(1).LT. 2021  .OR. &
+         ctime(1) .LT. 2021 .OR. &
+         mtime(1) .LT. 2021 )THEN
+       hdferror = -1
+    ENDIF
+    CALL check("H5Oget_info_by_name_async_f", hdferror, total_error)
+
+    CALL VERIFY("H5Oget_info_by_name_async_f", oinfo_f%num_attrs, 1_HSIZE_T, total_error)
+    CALL VERIFY("H5Oget_info_by_name_async_f", oinfo_f%type, INT(H5G_GROUP_F, C_INT), total_error)
+
+    CALL H5ESclose_f(es_id, hdferror)
+    CALL check("H5ESclose_f", hdferror, total_error)
 
   END SUBROUTINE H5O_async_tests
 

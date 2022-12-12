@@ -1119,7 +1119,7 @@ CONTAINS
 !!
 !! \param loc_id      File or group identifier specifying location of group in which object is located.
 !! \param name        Name of group, relative to loc_id.
-!! \param object_info Buffer in which to return object information.
+!! \param object_info Pointer to return object information, points to varaible of datatype TYPE(C_H5O_INFO_T).
 !! \param es_id       \es_id
 !! \param hdferr      \fortran_error
 !! \param lapl_id     Link access property list.
@@ -1135,7 +1135,7 @@ CONTAINS
     IMPLICIT NONE
     INTEGER(HID_T)  , INTENT(IN)            :: loc_id
     CHARACTER(LEN=*), INTENT(IN)            :: name
-    TYPE(h5o_info_t), INTENT(OUT), TARGET   :: object_info
+    TYPE(C_PTR)     , INTENT(INOUT)         :: object_info
     INTEGER(HID_T)  , INTENT(IN)            :: es_id
     INTEGER         , INTENT(OUT)           :: hdferr
     INTEGER(HID_T)  , INTENT(IN) , OPTIONAL :: lapl_id
@@ -1149,11 +1149,28 @@ CONTAINS
     CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  file_default = C_NULL_CHAR
     CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  func_default = C_NULL_CHAR
     INTEGER(KIND=C_INT) :: line_default = 0
-    TYPE(C_PTR)     :: ptr
-    INTEGER :: fields_c
+    INTEGER(C_INT) :: fields_c
 
-    fields_c = H5O_INFO_ALL_F
-    IF(PRESENT(fields)) fields_c = fields
+    INTERFACE
+       INTEGER(C_INT) FUNCTION H5Oget_info_by_name_async(file, func, line, &
+            loc_id, name, object_info, fields, lapl_id_default, es_id) BIND(C,NAME='H5Oget_info_by_name_async')
+         IMPORT :: C_CHAR, C_INT, C_PTR
+         IMPORT :: HID_T
+         IMPLICIT NONE
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: file
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: func
+         INTEGER(C_INT), VALUE :: line
+         INTEGER(HID_T), VALUE :: loc_id
+         CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
+         TYPE(C_PTR), VALUE :: object_info
+         INTEGER(C_INT), VALUE :: fields
+         INTEGER(HID_T), VALUE :: lapl_id_default
+         INTEGER(HID_T), VALUE :: es_id
+       END FUNCTION H5Oget_info_by_name_async
+    END INTERFACE
+
+    fields_c = INT(H5O_INFO_ALL_F, C_INT)
+    IF(PRESENT(fields)) fields_c = INT(fields, C_INT)
     IF(PRESENT(file)) file_default = TRIM(file)//C_NULL_CHAR
     IF(PRESENT(func)) func_default = TRIM(func)//C_NULL_CHAR
     IF(PRESENT(line)) line_default = INT(line, C_INT)
@@ -1163,10 +1180,8 @@ CONTAINS
     lapl_id_default = H5P_DEFAULT_F
     IF(PRESENT(lapl_id)) lapl_id_default = lapl_id
 
-    ptr = C_LOC(object_info)
-
-    hdferr = H5Oget_info_by_name_c(loc_id, c_name, lapl_id_default, ptr, fields_c, &
-         es_id, file_default, func_default, line_default)
+    hdferr = H5Oget_info_by_name_async(file_default, func_default, line_default, &
+         loc_id, c_name, object_info, fields_c, lapl_id_default, es_id)
 
   END SUBROUTINE H5oget_info_by_name_async_f
 

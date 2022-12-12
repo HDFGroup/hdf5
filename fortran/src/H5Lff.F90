@@ -721,7 +721,7 @@ CONTAINS
 !!
 !! See C API: @ref H5Lexists()
 !!
-  SUBROUTINE h5lexists_f(loc_id, name, link_exists, hdferr, lapl_id)
+  SUBROUTINE H5Lexists_f(loc_id, name, link_exists, hdferr, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id
     CHARACTER(LEN=*), INTENT(IN) :: name
@@ -758,7 +758,7 @@ CONTAINS
     hdferr = 0
     IF(link_exists_c.LT.0) hdferr = -1
 
-  END SUBROUTINE h5lexists_f
+  END SUBROUTINE H5Lexists_f
 
 !>
 !! \ingroup FH5L
@@ -767,7 +767,7 @@ CONTAINS
 !!
 !! \param loc_id      Identifier of the file or group to query.
 !! \param name        Link name to check.
-!! \param link_exists Link exists status (.TRUE.,.FALSE.).
+!! \param link_exists Pointer to Link exists status, must be of type LOGICAL(C_BOOL) and initialize to .FALSE.
 !! \param es_id       \es_id
 !! \param hdferr      \fortran_error
 !! \param lapl_id     Link access property list identifier.
@@ -781,7 +781,7 @@ CONTAINS
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id
     CHARACTER(LEN=*), INTENT(IN) :: name
-    LOGICAL, INTENT(OUT) :: link_exists
+    TYPE(C_PTR)     , INTENT(INOUT) :: link_exists
     INTEGER(HID_T), INTENT(IN)  :: es_id
     INTEGER, INTENT(OUT) :: hdferr
     INTEGER(HID_T), INTENT(IN), OPTIONAL :: lapl_id
@@ -789,7 +789,6 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: func
     INTEGER         , INTENT(IN), OPTIONAL :: line
 
-    INTEGER(C_INT) :: link_exists_c
     INTEGER(HID_T)  :: lapl_id_default
     CHARACTER(LEN=LEN_TRIM(name)+1,KIND=C_CHAR) :: c_name
     CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  file_default = C_NULL_CHAR
@@ -798,8 +797,8 @@ CONTAINS
 
     INTERFACE
        INTEGER(C_INT) FUNCTION H5Lexists_async(file, func, line, &
-            loc_id, name, lapl_id_default, es_id) BIND(C,NAME='H5Lexists_async')
-         IMPORT :: C_CHAR, C_INT
+            loc_id, name, exists, lapl_id_default, es_id) BIND(C,NAME='H5Lexists_async')
+         IMPORT :: C_CHAR, C_INT, C_PTR
          IMPORT :: HID_T
          IMPLICIT NONE
          CHARACTER(KIND=C_CHAR), DIMENSION(*) :: file
@@ -807,6 +806,7 @@ CONTAINS
          INTEGER(C_INT), VALUE :: line
          INTEGER(HID_T), VALUE :: loc_id
          CHARACTER(KIND=C_CHAR), DIMENSION(*) :: name
+         TYPE(C_PTR)   , VALUE :: exists
          INTEGER(HID_T), VALUE :: lapl_id_default
          INTEGER(HID_T), VALUE :: es_id
        END FUNCTION H5Lexists_async
@@ -820,14 +820,8 @@ CONTAINS
     IF(PRESENT(func)) func_default = TRIM(func)//C_NULL_CHAR
     IF(PRESENT(line)) line_default = INT(line, C_INT)
 
-    link_exists_c = H5Lexists_async(file_default, func_default, line_default, &
-         loc_id, c_name, lapl_id_default, es_id)
-
-    link_exists = .FALSE.
-    IF(link_exists_c.GT.0) link_exists = .TRUE.
-
-    hdferr = 0
-    IF(link_exists_c.LT.0) hdferr = -1
+    hdferr = INT(H5Lexists_async(file_default, func_default, line_default, loc_id, c_name, &
+         link_exists, lapl_id_default, es_id))
 
   END SUBROUTINE h5lexists_async_f
 

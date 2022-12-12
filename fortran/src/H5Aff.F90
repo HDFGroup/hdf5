@@ -1646,7 +1646,7 @@ CONTAINS
 !!
 !! \param obj_id      Object identifier
 !! \param attr_name   Attribute name
-!! \param attr_exists Attribute exists status
+!! \param attr_exists Pointer to attribute exists status, must be of type LOGICAL(C_BOOL) and initialize to .FALSE.
 !! \param es_id       \es_id
 !! \param hdferr      \fortran_error
 !! \param file        \fortran_file
@@ -1657,17 +1657,16 @@ CONTAINS
 !!
   SUBROUTINE H5Aexists_async_f(obj_id, attr_name, attr_exists, es_id, hdferr, file, func, line)
     IMPLICIT NONE
-    INTEGER(HID_T)  , INTENT(IN) :: obj_id
-    CHARACTER(LEN=*), INTENT(IN) :: attr_name
-    LOGICAL, INTENT(OUT) :: attr_exists
-    INTEGER(HID_T)  , INTENT(IN) :: es_id
-    INTEGER, INTENT(OUT) :: hdferr
+    INTEGER(HID_T)  , INTENT(IN)  :: obj_id
+    CHARACTER(LEN=*), INTENT(IN)  :: attr_name
+    TYPE(C_PTR)     , INTENT(INOUT) :: attr_exists
+    INTEGER(HID_T)  , INTENT(IN)  :: es_id
+    INTEGER         , INTENT(OUT) :: hdferr
     CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: file
     CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: func
     INTEGER         , INTENT(IN), OPTIONAL :: line
 
     CHARACTER(LEN=LEN_TRIM(attr_name)+1,KIND=C_CHAR) :: c_attr_name
-    LOGICAL(C_BOOL) :: attr_exists_c = .FALSE.
     CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  file_default = C_NULL_CHAR
     CHARACTER(LEN=CHR_MAX,KIND=C_CHAR) ::  func_default = C_NULL_CHAR
     INTEGER(KIND=C_INT) :: line_default = 0
@@ -1675,7 +1674,7 @@ CONTAINS
     INTERFACE
        INTEGER(C_INT) FUNCTION H5Aexists_async(file, func, line, &
             obj_id, attr_name, exists, es_id) BIND(C,NAME='H5Aexists_async')
-         IMPORT :: C_CHAR, C_INT, C_BOOL
+         IMPORT :: C_CHAR, C_INT, C_PTR
          IMPORT :: HID_T
          IMPLICIT NONE
          CHARACTER(KIND=C_CHAR), DIMENSION(*) :: file
@@ -1683,7 +1682,7 @@ CONTAINS
          INTEGER(C_INT), VALUE :: line
          INTEGER(HID_T), VALUE :: obj_id
          CHARACTER(KIND=C_CHAR), DIMENSION(*) :: attr_name
-         LOGICAL(C_BOOL) :: exists
+         TYPE(C_PTR)   , VALUE :: exists
          INTEGER(HID_T), VALUE :: es_id
        END FUNCTION H5Aexists_async
     END INTERFACE
@@ -1693,10 +1692,7 @@ CONTAINS
     IF(PRESENT(func)) func_default = TRIM(func)//C_NULL_CHAR
     IF(PRESENT(line)) line_default = INT(line, C_INT)
 
-    hdferr = INT(H5Aexists_async(file_default, func_default, line_default, obj_id, c_attr_name, attr_exists_c, es_id))
-
-    attr_exists = .FALSE.
-    IF(attr_exists_c) attr_exists = .TRUE.
+    hdferr = INT(H5Aexists_async(file_default, func_default, line_default, obj_id, c_attr_name, attr_exists, es_id))
 
   END SUBROUTINE H5Aexists_async_f
 
@@ -1765,7 +1761,7 @@ CONTAINS
 !! \param loc_id      Location identifier
 !! \param obj_name    Object name either relative to loc_id, absolute from the file’s root group, or &apos;. &apos;(a dot)
 !! \param attr_name   Attribute name
-!! \param attr_exists Attribute exists status
+!! \param attr_exists Pointer to attribute exists status, must be of type LOGICAL(C_BOOL) and initialize to .FALSE.
 !! \param es_id       \es_id
 !! \param hdferr      \fortran_error
 !! \param lapl_id     Link access property list identifier
@@ -1780,7 +1776,7 @@ CONTAINS
     INTEGER  (HID_T), INTENT(IN)            :: loc_id
     CHARACTER(LEN=*), INTENT(IN)            :: obj_name
     CHARACTER(LEN=*), INTENT(IN)            :: attr_name
-    LOGICAL         , INTENT(OUT)           :: attr_exists
+    TYPE(C_PTR)     , INTENT(INOUT)         :: attr_exists
     INTEGER  (HID_T), INTENT(IN)            :: es_id
     INTEGER         , INTENT(OUT)           :: hdferr
     INTEGER  (HID_T), INTENT(IN) , OPTIONAL :: lapl_id
@@ -1788,7 +1784,6 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(IN) , OPTIONAL :: func
     INTEGER         , INTENT(IN) , OPTIONAL :: line
 
-    LOGICAL(C_BOOL) :: attr_exists_c = .FALSE.
     INTEGER(HID_T) :: lapl_id_default
     CHARACTER(LEN=LEN_TRIM(obj_name)+1,KIND=C_CHAR) :: c_obj_name
     CHARACTER(LEN=LEN_TRIM(attr_name)+1,KIND=C_CHAR) :: c_attr_name
@@ -1800,7 +1795,7 @@ CONTAINS
        INTEGER(C_INT) FUNCTION H5Aexists_by_name_async(file, func, line, &
             loc_id, obj_name, attr_name, exists, lapl_id_default, es_id) &
             BIND(C,NAME='H5Aexists_by_name_async')
-         IMPORT :: C_CHAR, C_BOOL, C_INT
+         IMPORT :: C_CHAR, C_PTR, C_INT
          IMPORT :: HID_T
          IMPLICIT NONE
          CHARACTER(KIND=C_CHAR), DIMENSION(*) :: file
@@ -1809,7 +1804,7 @@ CONTAINS
          INTEGER(HID_T), VALUE :: loc_id
          CHARACTER(KIND=C_CHAR), DIMENSION(*) :: obj_name
          CHARACTER(KIND=C_CHAR), DIMENSION(*) :: attr_name
-         LOGICAL(C_BOOL) :: exists
+         TYPE(C_PTR)   , VALUE :: exists
          INTEGER(HID_T), VALUE :: lapl_id_default
          INTEGER(HID_T), VALUE :: es_id
        END FUNCTION H5Aexists_by_name_async
@@ -1825,10 +1820,7 @@ CONTAINS
     IF(PRESENT(line)) line_default = INT(line, C_INT)
 
     hdferr = INT(H5Aexists_by_name_async(file_default, func_default, line_default, &
-         loc_id, c_obj_name, c_attr_name, attr_exists_c, lapl_id_default, es_id))
-
-    attr_exists = .FALSE.
-    IF(attr_exists_c) attr_exists = .TRUE.
+         loc_id, c_obj_name, c_attr_name, attr_exists, lapl_id_default, es_id))
 
   END SUBROUTINE H5Aexists_by_name_async_f
 
@@ -2096,7 +2088,7 @@ CONTAINS
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN)    :: attr_id
     INTEGER(HID_T), INTENT(IN)    :: mem_type_id
-    TYPE(C_PTR)   , INTENT(INOUT) :: buf
+    TYPE(C_PTR)   , INTENT(OUT) :: buf
     INTEGER(HID_T), INTENT(IN)    :: es_id
     INTEGER       , INTENT(OUT)   :: hdferr
     CHARACTER(LEN=*), INTENT(IN), OPTIONAL :: file
