@@ -6,12 +6,13 @@ on:
   push:
     branches: [ develop, hdf5_1_12, hdf5_1_10, hdf5_1_8 ]
     paths-ignore:
-    - '.github/**'
-    - 'doc/**'
-    - 'release_docs/**'
-    - 'ACKNOWLEDGEMENTS'
-    - 'COPYING**'
-    - '**.md'
+      - '.github/CODEOWNERS'
+      - '.github/FUNDING.yml'
+      - 'doc/**'
+      - 'release_docs/**'
+      - 'ACKNOWLEDGEMENTS'
+      - 'COPYING**'
+      - '**.md'
     
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
