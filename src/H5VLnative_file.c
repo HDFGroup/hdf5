@@ -755,7 +755,7 @@ H5VL__native_file_close(void *file, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_U
     /* This routine should only be called when a file ID's ref count drops to zero */
     HDassert(f->shared == NULL || H5F_ID_EXISTS(f));
 
-    if(f->shared == NULL)
+    if (f->shared == NULL)
         f = H5FL_FREE(H5F_t, f);
 
     else {
@@ -781,7 +781,6 @@ H5VL__native_file_close(void *file, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_U
         /* Close the file */
         if (H5F__close(f) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't close file")
-
     }
 
 done:

@@ -1616,7 +1616,7 @@ H5F__dest(H5F_t *f, hbool_t flush)
         HDONE_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "problems closing file")
     f->shared = NULL;
 
-    if(ret_value >= 0)
+    if (ret_value >= 0)
         f = H5FL_FREE(H5F_t, f);
 
     FUNC_LEAVE_NOAPI(ret_value)
