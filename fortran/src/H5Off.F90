@@ -1119,7 +1119,7 @@ CONTAINS
 !!
 !! \param loc_id      File or group identifier specifying location of group in which object is located.
 !! \param name        Name of group, relative to loc_id.
-!! \param object_info Pointer to return object information, points to varaible of datatype TYPE(C_H5O_INFO_T).
+!! \param object_info Pointer to buffer returning object information, points to variable of datatype TYPE(C_H5O_INFO_T).
 !! \param es_id       \es_id
 !! \param hdferr      \fortran_error
 !! \param lapl_id     Link access property list.
