@@ -148,6 +148,10 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
     /* Size */
     UINT32DECODE(*pp, dt->shared->size);
 
+    /* Check for invalid datatype size */
+    if (dt->shared->size == 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "invalid datatype size")
+
     switch (dt->shared->type) {
         case H5T_INTEGER:
             /*
@@ -344,15 +348,7 @@ H5O__dtype_decode_helper(unsigned *ioflags /*in,out*/, const uint8_t **pp, H5T_t
                         HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "can't release datatype info")
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "unable to decode member type")
                 } /* end if */
-
-                /* Check for invalid member size */
-                if (temp_type->shared->size == 0) {
-                    dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].name =
-                        H5MM_xfree(dt->shared->u.compnd.memb[dt->shared->u.compnd.nmembs].name);
-                    if (H5T_close_real(temp_type) < 0)
-                        HDONE_ERROR(H5E_DATATYPE, H5E_CANTRELEASE, FAIL, "can't release datatype info")
-                    HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "invalid field size in member type")
-                }
+                HDassert(temp_type->shared->size > 0);
 
                 /* Upgrade the version if we can and it is necessary */
                 if (can_upgrade && temp_type->shared->version > version) {
