@@ -189,7 +189,7 @@ H5_DLL herr_t H5ESwait(hid_t es_id, uint64_t timeout, size_t *num_in_progress, h
  * \param[out] err_occurred Status indicating if error is present in the event set
  * \returns \herr_t
  *
- * \details H5ESget_count() attempts to cancel operations in an event set specified
+ * \details H5EScancel() attempts to cancel operations in an event set specified
  *          by \p es_id. H5ES_NONE is a valid value for \p es_id, but functions as a no-op.
  *
  * \since 1.13.0
@@ -217,14 +217,14 @@ H5_DLL herr_t H5ESget_count(hid_t es_id, size_t *count);
 /**
  * \ingroup H5ES
  *
- * \brief Retrieves the next operation counter to be assigned in an event set
+ * \brief Retrieves the accumulative operation counter for an event set
  *
  * \es_id
- * \param[out] counter The next counter value to be assigned to an event
+ * \param[out] counter The accumulative counter value for an event set
  * \returns \herr_t
  *
- * \details H5ESget_op_counter() retrieves the \p counter that will be assigned
- *          to the next operation inserted into the event set \p es_id.
+ * \details H5ESget_op_counter() retrieves the current accumulative count of
+ *          event set operations since the event set creation of \p es_id.
  *
  * \note This is designed for wrapper libraries mainly, to use as a mechanism
  *       for matching operations inserted into the event set with possible
