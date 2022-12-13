@@ -1466,7 +1466,9 @@ H5F__dest(H5F_t *f, hbool_t flush)
     if (H5FO_top_dest(f) < 0)
         HDONE_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "problems closing file")
     f->shared = NULL;
-    f         = H5FL_FREE(H5F_t, f);
+
+    if (ret_value >= 0)
+        f = H5FL_FREE(H5F_t, f);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__dest() */
@@ -2193,35 +2195,42 @@ H5F__close_cb(H5F_t *f)
 
     /* Sanity check */
     HDassert(f);
-    HDassert(f->file_id >
+    HDassert(f->shared == NULL || f->file_id >
              0); /* This routine should only be called when a file ID's ref count drops to zero */
 
-    /* Perform checks for "semi" file close degree here, since closing the
-     * file is not allowed if there are objects still open.
-     */
-    if (f->shared->fc_degree == H5F_CLOSE_SEMI) {
-        unsigned nopen_files = 0; /* Number of open files in file/mount hierarchy */
-        unsigned nopen_objs  = 0; /* Number of open objects in file/mount hierarchy */
+    if (f->shared == NULL)
+        f = H5FL_FREE(H5F_t, f);
 
-        /* Get the number of open objects and open files on this file/mount hierarchy */
-        if (H5F__mount_count_ids(f, &nopen_files, &nopen_objs) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_MOUNT, FAIL, "problem checking mount hierarchy")
+    else {
 
-        /* If there are no other file IDs open on this file/mount hier., but
-         * there are still open objects, issue an error and bail out now,
-         * without decrementing the file ID's reference count and triggering
-         * a "real" attempt at closing the file.
+        /* Perform checks for "semi" file close degree here, since closing the
+         * file is not allowed if there are objects still open.
          */
-        if (nopen_files == 1 && nopen_objs > 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file, there are objects still open")
+        if (f->shared->fc_degree == H5F_CLOSE_SEMI) {
+            unsigned nopen_files = 0; /* Number of open files in file/mount hierarchy */
+            unsigned nopen_objs  = 0; /* Number of open objects in file/mount hierarchy */
+
+            /* Get the number of open objects and open files on this file/mount hierarchy */
+            if (H5F__mount_count_ids(f, &nopen_files, &nopen_objs) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_MOUNT, FAIL, "problem checking mount hierarchy")
+
+            /* If there are no other file IDs open on this file/mount hier., but
+             * there are still open objects, issue an error and bail out now,
+             * without decrementing the file ID's reference count and triggering
+             * a "real" attempt at closing the file.
+             */
+            if (nopen_files == 1 && nopen_objs > 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file, there are objects still open")
+        }
+
+        /* Reset the file ID for this file */
+        f->file_id = H5I_INVALID_HID;
+
+        /* Attempt to close the file/mount hierarchy */
+        if (H5F_try_close(f, NULL) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file")
+
     }
-
-    /* Reset the file ID for this file */
-    f->file_id = H5I_INVALID_HID;
-
-    /* Attempt to close the file/mount hierarchy */
-    if (H5F_try_close(f, NULL) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close file")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
