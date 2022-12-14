@@ -2456,8 +2456,8 @@ done:
  *-------------------------------------------------------------------------
  */
 htri_t
-H5D__chunk_cacheable(const H5D_io_info_t H5_ATTR_PARALLEL_USED *io_info, H5D_dset_io_info_t *dset_info, haddr_t caddr,
-                     hbool_t write_op)
+H5D__chunk_cacheable(const H5D_io_info_t H5_ATTR_PARALLEL_USED *io_info, H5D_dset_io_info_t *dset_info,
+                     haddr_t caddr, hbool_t write_op)
 {
     const H5D_t *dataset     = NULL;  /* Local pointer to dataset info */
     hbool_t      has_filters = FALSE; /* Whether there are filters on the chunk or not */
