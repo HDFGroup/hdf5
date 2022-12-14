@@ -393,7 +393,7 @@ if ($TESTH5_JAVA) {
   my $version_string1 = sprintf("%d, %d, %d", @newver[0,1,2]);
   my $version_string2 = sprintf("int majnum = %d, minnum = %d, relnum = %d", @newver[0,1,2]);
 
-  $data =~ s/        int libversion\[\] = \{ .* \};/        int libversion\[\] = \{ $version_string1 \};/;
+  $data =~ s/        int libversion\[\] = \{.*\};/        int libversion\[\] = \{$version_string1\};/;
   $data =~ s/        int majnum = \d*, minnum = \d*, relnum = \d*;/        $version_string2;/;
 
   write_file($TESTH5_JAVA, $data);
