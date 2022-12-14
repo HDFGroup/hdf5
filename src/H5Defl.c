@@ -441,7 +441,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static ssize_t
-H5D__efl_readvv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info, size_t dset_max_nseq,
+H5D__efl_readvv(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_dset_io_info_t *dset_info, size_t dset_max_nseq,
                 size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_off_arr[], size_t mem_max_nseq,
                 size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_off_arr[])
 {
@@ -522,7 +522,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static ssize_t
-H5D__efl_writevv(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info, size_t dset_max_nseq,
+H5D__efl_writevv(const H5D_io_info_t H5_ATTR_NDEBUG_UNUSED *io_info, const H5D_dset_io_info_t *dset_info, size_t dset_max_nseq,
                  size_t *dset_curr_seq, size_t dset_len_arr[], hsize_t dset_off_arr[], size_t mem_max_nseq,
                  size_t *mem_curr_seq, size_t mem_len_arr[], hsize_t mem_off_arr[])
 {
