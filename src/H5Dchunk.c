@@ -2456,7 +2456,7 @@ done:
  *-------------------------------------------------------------------------
  */
 htri_t
-H5D__chunk_cacheable(const H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info, haddr_t caddr,
+H5D__chunk_cacheable(const H5D_io_info_t H5_ATTR_PARALLEL_USED *io_info, H5D_dset_io_info_t *dset_info, haddr_t caddr,
                      hbool_t write_op)
 {
     const H5D_t *dataset     = NULL;  /* Local pointer to dataset info */
@@ -2466,13 +2466,6 @@ H5D__chunk_cacheable(const H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info
     FUNC_ENTER_PACKAGE
 
     /* Sanity check */
-#ifdef H5_HAVE_PARALLEL
-    HDassert(io_info);
-#else
-    /* clang-format off */
-    (void)io_info;
-    /* clang-format on */
-#endif
     HDassert(dset_info);
     dataset = dset_info->dset;
     HDassert(dataset);
