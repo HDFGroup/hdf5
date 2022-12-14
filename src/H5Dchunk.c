@@ -2469,7 +2469,7 @@ H5D__chunk_cacheable(const H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info
 #ifdef H5_HAVE_PARALLEL
     HDassert(io_info);
 #else
-    /* clang-format off */
+        /* clang-format off */
     (void)io_info;
     /* clang-format on */
 #endif
