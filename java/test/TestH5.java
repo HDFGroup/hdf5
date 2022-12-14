@@ -322,7 +322,7 @@ public class TestH5 {
             fail("H5.H5get_libversion: " + err);
         }
 
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < 2; i++)
             assertEquals(H5.LIB_VERSION[i], libversion[i]);
 
         for (int i = 0; i < 2; i++)
