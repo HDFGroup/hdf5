@@ -126,6 +126,7 @@ set (HDF5_REFERENCE_TEST_FILES
     btree_idx_1_6.h5
     btree_idx_1_8.h5
     corrupt_stab_msg.h5
+    cve_2020_10812.h5
     deflate.h5
     family_v16-000000.h5
     family_v16-000001.h5
