@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
   push:
   pull_request:
-    branches: [ develop, hdf5_1_12, hdf5_1_10, hdf5_1_8 ]
+    branches: [ develop, hdf5_1_14, hdf5_1_12, hdf5_1_10, hdf5_1_8 ]
     paths-ignore:
       - '.github/CODEOWNERS'
       - '.github/FUNDING.yml'
@@ -177,7 +177,7 @@ jobs:
               - enabled: false
                 text: ""
             build_mode:
-              - text: "DBG"
+              - text: " DBG"
                 cmake: "Debug"
                 autotools: "debug"
 
@@ -199,7 +199,7 @@ jobs:
               - enabled: false
                 text: ""
             build_mode:
-              - text: "DBG"
+              - text: " DBG"
                 cmake: "Debug"
                 autotools: "debug"
 
@@ -221,7 +221,7 @@ jobs:
               - enabled: false
                 text: ""
             build_mode:
-              - text: "DBG"
+              - text: " DBG"
                 cmake: "Debug"
                 autotools: "debug"
 
@@ -243,7 +243,7 @@ jobs:
               - enabled: false
                 text: ""
             build_mode:
-              - text: "DBG"
+              - text: " DBG"
                 cmake: "Debug"
                 autotools: "debug"
 
@@ -265,7 +265,7 @@ jobs:
               - enabled: false
                 text: ""
             build_mode:
-              - text: "DBG"
+              - text: " DBG"
                 cmake: "Debug"
                 autotools: "debug"
 
@@ -287,7 +287,7 @@ jobs:
               - enabled: false
                 text: ""
             build_mode:
-              - text: "DBG"
+              - text: " DBG"
                 cmake: "Debug"
                 autotools: "debug"
 
@@ -309,7 +309,7 @@ jobs:
               - enabled: false
                 text: ""
             build_mode:
-              - text: "REL"
+              - text: " REL"
                 cmake: "Release"
                 autotools: "production"
 

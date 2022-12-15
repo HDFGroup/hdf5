@@ -23,6 +23,9 @@ package examples.datatypes;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
@@ -87,6 +90,14 @@ public class H5Ex_T_Compound {
             this.pressure    = pressure;
         }
 
+        Sensor(List data)
+        {
+            this.serial_no   = (int)data.get(0);
+            this.location    = (String)data.get(1);
+            this.temperature = (double)data.get(2);
+            this.pressure    = (double)data.get(3);
+        }
+
         Sensor(ByteBuffer databuf, int dbposition) { readBuffer(databuf, dbposition); }
 
         void writeBuffer(ByteBuffer databuf, int dbposition)
@@ -115,6 +126,24 @@ public class H5Ex_T_Compound {
             this.pressure    = databuf.getDouble(dbposition + Sensor_Datatype.getOffset(3));
         }
 
+        List get()
+        {
+            List data = new ArrayList<>();
+            data.add(this.serial_no);
+            data.add(this.location);
+            data.add(this.temperature);
+            data.add(this.pressure);
+            return data;
+        }
+
+        void put(List data)
+        {
+            this.serial_no   = (int)data.get(0);
+            this.location    = (String)data.get(1);
+            this.temperature = (double)data.get(2);
+            this.pressure    = (double)data.get(3);
+        }
+
         @Override
         public String toString()
         {
@@ -127,21 +156,21 @@ public class H5Ex_T_Compound {
 
     private static void CreateDataset()
     {
-        long file_id         = HDF5Constants.H5I_INVALID_HID;
-        long strtype_id      = HDF5Constants.H5I_INVALID_HID;
-        long memtype_id      = HDF5Constants.H5I_INVALID_HID;
-        long filetype_id     = HDF5Constants.H5I_INVALID_HID;
-        long dataspace_id    = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id      = HDF5Constants.H5I_INVALID_HID;
-        long[] dims          = {DIM0};
-        Sensor[] object_data = new Sensor[DIM0];
-        byte[] dset_data     = null;
+        long file_id            = HDF5Constants.H5I_INVALID_HID;
+        long strtype_id         = HDF5Constants.H5I_INVALID_HID;
+        long memtype_id         = HDF5Constants.H5I_INVALID_HID;
+        long filetype_id        = HDF5Constants.H5I_INVALID_HID;
+        long dataspace_id       = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id         = HDF5Constants.H5I_INVALID_HID;
+        long[] dims             = {DIM0};
+        ArrayList[] object_data = new ArrayList[DIM0];
+        byte[] dset_data        = null;
 
         // Initialize data.
-        object_data[0] = new Sensor(1153, new String("Exterior (static)"), 53.23, 24.57);
-        object_data[1] = new Sensor(1184, new String("Intake"), 55.12, 22.95);
-        object_data[2] = new Sensor(1027, new String("Intake manifold"), 103.55, 31.23);
-        object_data[3] = new Sensor(1313, new String("Exhaust manifold"), 1252.89, 84.11);
+        object_data[0] = (ArrayList) new Sensor(1153, new String("Exterior (static)"), 53.23, 24.57).get();
+        object_data[1] = (ArrayList) new Sensor(1184, new String("Intake"), 55.12, 22.95).get();
+        object_data[2] = (ArrayList) new Sensor(1027, new String("Intake manifold"), 103.55, 31.23).get();
+        object_data[3] = (ArrayList) new Sensor(1313, new String("Exhaust manifold"), 1252.89, 84.11).get();
 
         // Create a new file using default properties.
         try {
@@ -220,17 +249,10 @@ public class H5Ex_T_Compound {
         }
 
         // Write the compound data to the dataset.
-        // allocate memory for read buffer.
-        dset_data         = new byte[(int)dims[0] * (int)Sensor_Datatype.getDataSize()];
-        ByteBuffer outBuf = ByteBuffer.wrap(dset_data);
-        outBuf.order(ByteOrder.nativeOrder());
-        for (int indx = 0; indx < (int)dims[0]; indx++) {
-            object_data[indx].writeBuffer(outBuf, indx * (int)Sensor_Datatype.getDataSize());
-        }
         try {
             if ((dataset_id >= 0) && (memtype_id >= 0))
-                H5.H5Dwrite(dataset_id, memtype_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                            HDF5Constants.H5P_DEFAULT, dset_data);
+                H5.H5DwriteVL(dataset_id, memtype_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                              HDF5Constants.H5P_DEFAULT, (Object[])object_data);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -292,14 +314,13 @@ public class H5Ex_T_Compound {
 
     private static void ReadDataset()
     {
-        long file_id      = HDF5Constants.H5I_INVALID_HID;
-        long strtype_id   = HDF5Constants.H5I_INVALID_HID;
-        long memtype_id   = HDF5Constants.H5I_INVALID_HID;
-        long dataspace_id = HDF5Constants.H5I_INVALID_HID;
-        long dataset_id   = HDF5Constants.H5I_INVALID_HID;
-        long[] dims       = {DIM0};
-        Sensor[] object_data2;
-        byte[] dset_data;
+        long file_id          = HDF5Constants.H5I_INVALID_HID;
+        long strtype_id       = HDF5Constants.H5I_INVALID_HID;
+        long memtype_id       = HDF5Constants.H5I_INVALID_HID;
+        long dataspace_id     = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id       = HDF5Constants.H5I_INVALID_HID;
+        long[] dims           = {DIM0};
+        Sensor[] object_data2 = new Sensor[(int)dims[0]];
 
         // Open an existing file.
         try {
@@ -362,21 +383,16 @@ public class H5Ex_T_Compound {
             e.printStackTrace();
         }
 
-        // allocate memory for read buffer.
-        dset_data = new byte[(int)dims[0] * (int)Sensor_Datatype.getDataSize()];
-
-        object_data2 = new Sensor[(int)dims[0]];
+        ArrayList[] object_data = new ArrayList[(int)dims[0]];
 
         // Read data.
         try {
             if ((dataset_id >= 0) && (memtype_id >= 0))
-                H5.H5Dread(dataset_id, memtype_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
-                           HDF5Constants.H5P_DEFAULT, dset_data);
+                H5.H5DreadVL(dataset_id, memtype_id, HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                             HDF5Constants.H5P_DEFAULT, (Object[])object_data);
 
-            ByteBuffer inBuf = ByteBuffer.wrap(dset_data);
-            inBuf.order(ByteOrder.nativeOrder());
             for (int indx = 0; indx < (int)dims[0]; indx++) {
-                object_data2[indx] = new Sensor(inBuf, indx * (int)Sensor_Datatype.getDataSize());
+                object_data2[indx] = new Sensor(object_data[indx]);
             }
         }
         catch (Exception e) {

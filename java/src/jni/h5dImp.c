@@ -1140,26 +1140,29 @@ Java_hdf_hdf5lib_H5_H5DreadVL(JNIEnv *env, jclass clss, jlong dataset_id, jlong 
     H5T_class_t type_class;
     jsize       vl_array_len;
     htri_t      vl_data_class;
-    herr_t      status = FAIL;
+    herr_t      status      = FAIL;
+    htri_t      is_variable = 0;
 
     UNUSED(clss);
 
     if (NULL == buf)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Dread: read buffer is NULL");
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5DreadVL: read buffer is NULL");
 
     if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
     /* Get size of data array */
     if ((vl_array_len = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0) {
         CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Dread: readBuf length < 0");
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5DreadVL: readBuf length < 0");
     }
+    if ((is_variable = H5Tis_variable_str(mem_type_id)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
 
     if (!(typeSize = H5Tget_size(mem_type_id)))
         H5_LIBRARY_ERROR(ENVONLY);
 
     if (NULL == (readBuf = HDcalloc((size_t)vl_array_len, typeSize)))
-        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Dread: failed to allocate raw VL read buffer");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5DreadVL: failed to allocate raw VL read buffer");
 
     if ((status = H5Dread((hid_t)dataset_id, (hid_t)mem_type_id, (hid_t)mem_space_id, (hid_t)file_space_id,
                           (hid_t)xfer_plist_id, (void *)readBuf)) < 0)
@@ -1173,6 +1176,10 @@ done:
     if (readBuf) {
         if ((status >= 0) && vl_data_class)
             H5Treclaim(dataset_id, mem_space_id, H5P_DEFAULT, readBuf);
+        if (is_variable) {
+            for (size_t i = 0; i < (size_t)vl_array_len; i++)
+                HDfree(((char **)readBuf)[i]);
+        }
         HDfree(readBuf);
     }
 
@@ -1194,12 +1201,13 @@ Java_hdf_hdf5lib_H5_H5DwriteVL(JNIEnv *env, jclass clss, jlong dataset_id, jlong
     H5T_class_t type_class;
     jsize       vl_array_len; // Only used by vl_data_class types
     htri_t      vl_data_class;
-    herr_t      status = FAIL;
+    herr_t      status      = FAIL;
+    htri_t      is_variable = 0;
 
     UNUSED(clss);
 
     if (NULL == buf)
-        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Dwrite: write buffer is NULL");
+        H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5DwriteVL: write buffer is NULL");
 
     if ((vl_data_class = h5str_detect_vlen(mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -1207,14 +1215,16 @@ Java_hdf_hdf5lib_H5_H5DwriteVL(JNIEnv *env, jclass clss, jlong dataset_id, jlong
     /* Get size of data array */
     if ((vl_array_len = ENVPTR->GetArrayLength(ENVONLY, buf)) < 0) {
         CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Dwrite: write buffer length < 0");
+        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5DwriteVL: write buffer length < 0");
     }
+    if ((is_variable = H5Tis_variable_str(mem_type_id)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
 
     if (!(typeSize = H5Tget_size(mem_type_id)))
         H5_LIBRARY_ERROR(ENVONLY);
 
     if (NULL == (writeBuf = HDcalloc((size_t)vl_array_len, typeSize)))
-        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Dwrite: failed to allocate raw VL write buffer");
+        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5DwriteVL: failed to allocate raw VL write buffer");
 
     if ((type_class = H5Tget_class((hid_t)mem_type_id)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -1229,6 +1239,10 @@ done:
     if (writeBuf) {
         if ((status >= 0) && vl_data_class)
             H5Treclaim(dataset_id, mem_space_id, H5P_DEFAULT, writeBuf);
+        if (is_variable) {
+            for (size_t i = 0; i < (size_t)vl_array_len; i++)
+                HDfree(((char **)writeBuf)[i]);
+        }
 
         HDfree(writeBuf);
     }

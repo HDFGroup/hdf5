@@ -2534,7 +2534,7 @@ H5Aexists_by_name(hid_t loc_id, const char *obj_name, const char *attr_name, hid
     /* Synchronously check if an attribute exists */
     exists = FALSE;
     if (H5A__exists_by_name_api_common(loc_id, obj_name, attr_name, &exists, lapl_id, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't synchronously rename attribute")
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't synchronously determine if attribute exists by name")
 
     /* Set return value */
     ret_value = (htri_t)exists;
@@ -2572,7 +2572,7 @@ H5Aexists_by_name_async(const char *app_file, const char *app_func, unsigned app
     /* Asynchronously check if an attribute exists */
     if (H5A__exists_by_name_api_common(loc_id, obj_name, attr_name, attr_exists, lapl_id, token_ptr,
                                        &vol_obj) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't asynchronously rename attribute")
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't asynchronously determine if attribute exists by name")
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)

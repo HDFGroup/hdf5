@@ -923,6 +923,11 @@ H5_DLL herr_t H5Literate2(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t ord
 /**
  * --------------------------------------------------------------------------
  * \ingroup ASYNC
+ *
+ * \warning The returned value of the callback routine op will not be set
+ *          in the return value for H5Literate_async(), so the \p herr_t value
+ *          should not be used for determining the return state of the callback routine.
+ *
  * \async_variant_of{H5Literate}
  */
 #ifndef H5_DOXYGEN
