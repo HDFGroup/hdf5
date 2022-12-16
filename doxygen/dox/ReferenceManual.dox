@@ -147,7 +147,7 @@ Functions with \ref ASYNC<br />
 
 Follow these simple rules and stay out of trouble:
 
-\li \Bold{Handle discipline:} The HDF5 API are rife with handles or
+\li \Bold{Handle discipline:} The HDF5 API is rife with handles or
     identifiers, which you typically obtain by creating new HDF5 items, copying
     items, or retrieving facets of items. Consequently, \Bold{and most importantly}, you are 
     responsible for releasing the underlying
