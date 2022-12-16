@@ -6076,7 +6076,7 @@ test_misc37(void)
         return;
     }
 
-    fid   = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
+    fid = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fopen");
 
     /* This should fail due to the illegal file size.
