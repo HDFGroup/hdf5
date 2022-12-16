@@ -306,6 +306,8 @@ Bug Fixes since HDF5-1.13.3 release
       The gif2hdf5 and hdf2gif high-level tools are deprecated and will be removed
       in a future release. The default build setting for them have been changed from enabled
       to disabled. A user can enable the build of these tools if needed.
+          autotools:   --enable-hlgiftools
+          cmake:       HDF5_BUILD_HL_GIF_TOOLS=ON
 
       (ADB - 2022/12/16)
 
