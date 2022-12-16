@@ -275,7 +275,7 @@ jobs:
             fortran: disable
             java: disable
             parallel: disable
-            mirror_vfd: enable
+            mirror_vfd: disable
             direct_vfd: enable
             deprec_sym: enable
             default_api: v114
@@ -297,7 +297,7 @@ jobs:
             fortran: disable
             java: disable
             parallel: disable
-            mirror_vfd: enable
+            mirror_vfd: disable
             direct_vfd: enable
             deprec_sym: enable
             default_api: v114
