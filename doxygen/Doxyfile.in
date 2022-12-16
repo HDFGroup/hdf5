@@ -901,6 +901,7 @@ EXCLUDE_PATTERNS       = */fortran/test/*
 EXCLUDE_PATTERNS      += */fortran/testpar/*
 EXCLUDE_PATTERNS      += */fortran/examples/*
 EXCLUDE_PATTERNS      += */fortran/src/*.c
+EXCLUDE_PATTERNS      += */fortran/src/*.h
 EXCLUDE_PATTERNS      += */hl/fortran/examples/*
 EXCLUDE_PATTERNS      += */hl/fortran/test/*
 EXCLUDE_PATTERNS      += */hl/fortran/src/*.c
