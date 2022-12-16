@@ -303,9 +303,9 @@ Bug Fixes since HDF5-1.13.3 release
     -------------
     - Change the default for building the high-level tools
 
-      The gif2hdf5 high-level tools are deprecated and will be removed in a future release.
-      The default build setting for them have been changed from enabled to disabled. A user
-      can enable the build of these tools if needed.
+      The gif2hdf5, hdf2gif and h5watch high-level tools are deprecated and will be removed
+      in a future release. The default build setting for them have been changed from enabled
+      to disabled. A user can enable the build of these tools if needed.
 
       (ADB - 2022/12/16)
 
