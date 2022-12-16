@@ -284,9 +284,11 @@ Bug Fixes since HDF5-1.13.3 release
     -------------
     - Change the default for building the high-level tools
 
-      The gif2hdf5, hdf2gif and h5watch high-level tools are deprecated and will be removed
+      The gif2hdf5 and hdf2gif high-level tools are deprecated and will be removed
       in a future release. The default build setting for them have been changed from enabled
       to disabled. A user can enable the build of these tools if needed.
+          autotools:   --enable-hlgiftools
+          cmake:       HDF5_BUILD_HL_GIF_TOOLS=ON
 
       (ADB - 2022/12/16)
 
@@ -574,5 +576,5 @@ The issues with the gif tool are:
     HDFFV-11048 CVE-2020-10809
 These CVE issues have not yet been addressed and are avoided by not building
 the gif tool by default. Enable building the High-Level tools with these options:
-    autotools:   --enable-hltools
-    cmake:       HDF5_BUILD_HL_TOOLS=ON
+    autotools:   --enable-hlgiftools
+    cmake:       HDF5_BUILD_HL_GIF_TOOLS=ON
