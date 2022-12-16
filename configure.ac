@@ -833,13 +833,16 @@ AC_LANG_POP(C++)
 ## library is disabled.
 AC_SUBST([HDF5_HL])
 AC_SUBST([HDF5_HL_TOOLS])
+AC_SUBST([HDF5_HL_GIF_TOOLS])
 
-## The high-level library are enabled unless the build mode
+## The high-level library and high-level tools are enabled unless the build mode
 ## is clean.
 if test "X-$BUILD_MODE" = "X-clean" ; then
   HDF5_HL=no
+  HDF5_HL_TOOLS=no
 else
   HDF5_HL=yes
+  HDF5_HL_TOOLS=yes
 fi
 
 ## high-level library directories (set when needed, blank until then)
@@ -875,13 +878,28 @@ AC_MSG_CHECKING([if the high-level tools are enabled])
 AC_ARG_ENABLE([hltools],
      [AS_HELP_STRING([--enable-hltools],
                      [Enable the high-level tools.
-                     [default=no]
+                     [default=yes]
                      ])],
      [HDF5_HL_TOOLS=$enableval])
 
 if test "X${HDF5_HL}" = "Xyes" -a "X-$HDF5_HL_TOOLS" = "X-yes"; then
  AC_MSG_RESULT([yes])
  HL_TOOLS="tools"
+else
+  AC_MSG_RESULT([no])
+fi
+
+AC_MSG_CHECKING([if the high-level GIF tools are enabled])
+AC_ARG_ENABLE([hltools],
+     [AS_HELP_STRING([--enable-hlgiftools],
+                     [Enable the high-level GIF tools.
+                     [default=no]
+                     ])],
+     [HDF5_HL_GIF_TOOLS=$enableval])
+
+if test "X${HDF5_GIF_HL}" = "Xyes" -a "X-$HDF5_HL_TOOLS" = "X-yes" -a "X-$HDF5_HL_GIF_TOOLS" = "X-yes"; then
+ AC_MSG_RESULT([yes])
+ HL_GIF_TOOLS="tools"
 else
   AC_MSG_RESULT([no])
 fi
