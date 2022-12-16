@@ -37,69 +37,19 @@ jobs:
 
       matrix:
 
-        name:
-          - "Windows MSVC CMake"
-          - "Ubuntu gcc CMake"
-          - "Ubuntu gcc Autotools"
-          - "Ubuntu gcc Autotools parallel (build only)"
-          - "MacOS Clang CMake"
-
-        thread_safety:
-          - enabled: true
-            text: " TS"
-          - enabled: false
-            text: ""
-
-        build_mode:
-          - text: " REL"
-            cmake: "Release"
-            autotools: "production"
-          - text: " DBG"
-            cmake: "Debug"
-            autotools: "debug"
-
         # This is where we list the bulk of the options for each configuration.
         # The key-value pair values are usually appropriate for being CMake or
         # Autotools configure values, so be aware of that.
 
         include:
 
-          # Windows w/ MSVC + CMake
           #
-          # No Fortran, parallel, or VFDs that rely on POSIX things
-          - name: "Windows MSVC CMake"
-            os: windows-2022
-            toolchain: ""
-            cpp: ON
-            fortran: OFF
-            java: ON
-            parallel: OFF
-            mirror_vfd: OFF
-            direct_vfd: OFF
-            generator: "-G \"Visual Studio 17 2022\" -A x64"
-            run_tests: true
+          # SPECIAL AUTOTOOLS BUILDS
+          #
+          # These are added here instead of being added to the matrix in main.yml
+          # because we had problems with the build mode being set.
 
-          # Linux (Ubuntu) w/ gcc + CMake
-          #
-          # We might think about adding Clang, but MacOS already tests that
-          # so it's not critical
-          - name: "Ubuntu gcc CMake"
-            os: ubuntu-latest
-            cpp: ON
-            fortran: ON
-            java: ON
-            parallel: OFF
-            mirror_vfd: ON
-            direct_vfd: ON
-            toolchain: "config/toolchain/GCC.cmake"
-            generator: "-G Ninja"
-            run_tests: true
-
-          # Linux (Ubuntu) w/ gcc + Autotools
-          #
-          # Keep this identical to the CMake configs. Note the difference in
-          # the values.
-          - name: "Ubuntu gcc Autotools"
+          - name: "Ubuntu gcc Autotools v1.6 default API (build only)"
             os: ubuntu-latest
             cpp: enable
             fortran: enable
@@ -108,47 +58,150 @@ jobs:
             mirror_vfd: enable
             direct_vfd: enable
             deprec_sym: enable
+            default_api: v16
+            toolchain: ""
+            generator: "autogen"
+            flags: ""
+            run_tests: false
+            thread_safety:
+              - enabled: false
+                text: ""
+            build_mode:
+              - text: " DBG"
+                cmake: "Debug"
+                autotools: "debug"
+
+          - name: "Ubuntu gcc Autotools v1.8 default API (build only)"
+            os: ubuntu-latest
+            cpp: enable
+            fortran: enable
+            java: enable
+            parallel: disable
+            mirror_vfd: enable
+            direct_vfd: enable
+            deprec_sym: enable
+            default_api: v18
+            toolchain: ""
+            generator: "autogen"
+            flags: ""
+            run_tests: false
+            thread_safety:
+              - enabled: false
+                text: ""
+            build_mode:
+              - text: " DBG"
+                cmake: "Debug"
+                autotools: "debug"
+
+          - name: "Ubuntu gcc Autotools v1.10 default API (build only)"
+            os: ubuntu-latest
+            cpp: enable
+            fortran: enable
+            java: enable
+            parallel: disable
+            mirror_vfd: enable
+            direct_vfd: enable
+            deprec_sym: enable
+            default_api: v110
+            toolchain: ""
+            generator: "autogen"
+            flags: ""
+            run_tests: false
+            thread_safety:
+              - enabled: false
+                text: ""
+            build_mode:
+              - text: " DBG"
+                cmake: "Debug"
+                autotools: "debug"
+
+          - name: "Ubuntu gcc Autotools v1.12 default API (build only)"
+            os: ubuntu-latest
+            cpp: enable
+            fortran: enable
+            java: enable
+            parallel: disable
+            mirror_vfd: enable
+            direct_vfd: enable
+            deprec_sym: enable
+            default_api: v112
+            toolchain: ""
+            generator: "autogen"
+            flags: ""
+            run_tests: false
+            thread_safety:
+              - enabled: false
+                text: ""
+            build_mode:
+              - text: " DBG"
+                cmake: "Debug"
+                autotools: "debug"
+
+          - name: "Ubuntu gcc Autotools no deprecated symbols (build only)"
+            os: ubuntu-latest
+            cpp: enable
+            fortran: enable
+            java: enable
+            parallel: disable
+            mirror_vfd: enable
+            direct_vfd: enable
+            deprec_sym: disable
             default_api: v114
             toolchain: ""
             generator: "autogen"
             flags: ""
-            run_tests: true
+            run_tests: false
+            thread_safety:
+              - enabled: false
+                text: ""
+            build_mode:
+              - text: " DBG"
+                cmake: "Debug"
+                autotools: "debug"
 
-          # Parallel Linux (Ubuntu) w/ gcc + Autotools
-          #
-          # The GitHub runners are inadequate for running parallel HDF5 tests,
-          # so we catch most issues in daily testing. What we have here is just
-          # a compile check to make sure nothing obvious is broken.
-          - name: "Ubuntu gcc Autotools parallel (build only)"
+          - name: "Ubuntu gcc Autotools -Werror (build only) DBG"
             os: ubuntu-latest
-            cpp: disable
-            fortran: enable
+            cpp: enable
+            fortran: disable
             java: disable
-            parallel: enable
-            mirror_vfd: disable
-            direct_vfd: disable
+            parallel: disable
+            mirror_vfd: enable
+            direct_vfd: enable
             deprec_sym: enable
             default_api: v114
             toolchain: ""
             generator: "autogen"
-            flags: "CC=mpicc"
+            flags: "CFLAGS=-Werror"
             run_tests: false
+            thread_safety:
+              - enabled: false
+                text: ""
+            build_mode:
+              - text: " DBG"
+                cmake: "Debug"
+                autotools: "debug"
 
-          # MacOS w/ Clang + CMake
-          #
-          # We could also build with the Autotools via brew installing them,
-          # but that seems unnecessary
-          - name: "MacOS Clang CMake"
-            os: macos-11
-            cpp: ON
-            fortran: OFF
-            java: ON
-            parallel: OFF
-            mirror_vfd: ON
-            direct_vfd: OFF
-            toolchain: "config/toolchain/clang.cmake"
-            generator: "-G Ninja"
-            run_tests: true
+          - name: "Ubuntu gcc Autotools -Werror (build only) REL"
+            os: ubuntu-latest
+            cpp: enable
+            fortran: disable
+            java: disable
+            parallel: disable
+            mirror_vfd: enable
+            direct_vfd: enable
+            deprec_sym: enable
+            default_api: v114
+            toolchain: ""
+            generator: "autogen"
+            flags: "CFLAGS=-Werror"
+            run_tests: false
+            thread_safety:
+              - enabled: false
+                text: ""
+            build_mode:
+              - text: " REL"
+                cmake: "Release"
+                autotools: "production"
 
     # Sets the job's name from the properties
     name: "${{ matrix.name }}${{ matrix.build_mode.text }}${{ matrix.thread_safety.text }}"
