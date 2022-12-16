@@ -1595,7 +1595,7 @@ _create_chunking_ids(hid_t file_id, unsigned min_dset, unsigned max_dset, hsize_
         }
 
         dataset_ids[m] =
-            H5Dcreate(file_id, dset_name, H5T_STD_I32BE, dataspace_ids[m], H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
+            H5Dcreate2(file_id, dset_name, H5T_STD_I32BE, dataspace_ids[m], H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
         if (dataset_ids[m] < 0) {
             HDsnprintf(mesg, MIRR_MESG_SIZE, "unable to create dset ID %d\n", m);
             FAIL_PUTS_ERROR(mesg);
