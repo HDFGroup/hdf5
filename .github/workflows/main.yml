@@ -329,6 +329,10 @@ jobs:
       # SETUP
       #
 
+      #Useful for debugging
+      - name: Dump matrix context
+        run: echo '${{ toJSON(matrix) }}'
+
       - name: Install CMake Dependencies (Linux)
         run: sudo apt-get install ninja-build
         if: matrix.os == 'ubuntu-latest'
