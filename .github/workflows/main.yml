@@ -174,12 +174,12 @@ jobs:
             flags: ""
             run_tests: false
             thread_safety:
-              - enabled: false
-                text: ""
+              enabled: false
+              text: ""
             build_mode:
-              - text: " DBG"
-                cmake: "Debug"
-                autotools: "debug"
+              text: " DBG"
+              cmake: "Debug"
+              autotools: "debug"
 
           - name: "Ubuntu gcc Autotools v1.8 default API (build only)"
             os: ubuntu-latest
@@ -196,12 +196,12 @@ jobs:
             flags: ""
             run_tests: false
             thread_safety:
-              - enabled: false
-                text: ""
+              enabled: false
+              text: ""
             build_mode:
-              - text: " DBG"
-                cmake: "Debug"
-                autotools: "debug"
+              text: " DBG"
+              cmake: "Debug"
+              autotools: "debug"
 
           - name: "Ubuntu gcc Autotools v1.10 default API (build only)"
             os: ubuntu-latest
@@ -218,12 +218,12 @@ jobs:
             flags: ""
             run_tests: false
             thread_safety:
-              - enabled: false
-                text: ""
+              enabled: false
+              text: ""
             build_mode:
-              - text: " DBG"
-                cmake: "Debug"
-                autotools: "debug"
+              text: " DBG"
+              cmake: "Debug"
+              autotools: "debug"
 
           - name: "Ubuntu gcc Autotools v1.12 default API (build only)"
             os: ubuntu-latest
@@ -240,12 +240,12 @@ jobs:
             flags: ""
             run_tests: false
             thread_safety:
-              - enabled: false
-                text: ""
+              enabled: false
+              text: ""
             build_mode:
-              - text: " DBG"
-                cmake: "Debug"
-                autotools: "debug"
+              text: " DBG"
+              cmake: "Debug"
+              autotools: "debug"
 
           - name: "Ubuntu gcc Autotools no deprecated symbols (build only)"
             os: ubuntu-latest
@@ -262,12 +262,12 @@ jobs:
             flags: ""
             run_tests: false
             thread_safety:
-              - enabled: false
-                text: ""
+              enabled: false
+              text: ""
             build_mode:
-              - text: " DBG"
-                cmake: "Debug"
-                autotools: "debug"
+              text: " DBG"
+              cmake: "Debug"
+              autotools: "debug"
 
           - name: "Ubuntu gcc Autotools -Werror (build only) DBG"
             os: ubuntu-latest
@@ -284,12 +284,12 @@ jobs:
             flags: "CFLAGS=-Werror"
             run_tests: false
             thread_safety:
-              - enabled: false
-                text: ""
+              enabled: false
+              text: ""
             build_mode:
-              - text: " DBG"
-                cmake: "Debug"
-                autotools: "debug"
+              text: " DBG"
+              cmake: "Debug"
+              autotools: "debug"
 
           - name: "Ubuntu gcc Autotools -Werror (build only) REL"
             os: ubuntu-latest
@@ -306,12 +306,12 @@ jobs:
             flags: "CFLAGS=-Werror"
             run_tests: false
             thread_safety:
-              - enabled: false
-                text: ""
+              enabled: false
+              text: ""
             build_mode:
-              - text: " REL"
-                cmake: "Release"
-                autotools: "production"
+              text: " REL"
+              cmake: "Release"
+              autotools: "production"
 
     # Sets the job's name from the properties
     name: "${{ matrix.name }}${{ matrix.build_mode.text }}${{ matrix.thread_safety.text }}"
