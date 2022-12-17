@@ -741,6 +741,7 @@ HDF5_BUILD_JAVA     "Build JAVA support"             OFF
 HDF5_BUILD_HL_LIB   "Build HIGH Level HDF5 Library"  ON
 HDF5_BUILD_TOOLS    "Build HDF5 Tools"               ON
 HDF5_BUILD_HL_TOOLS "Build HIGH Level HDF5 Tools"    ON
+HDF5_BUILD_HL_GIF_TOOLS "Build HIGH Level HDF5 GIF Tools"    OFF
 
 ---------------- HDF5 Folder Build Options ---------------------
 Defaults relative to $<INSTALL_PREFIX>
