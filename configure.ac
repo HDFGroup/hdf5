@@ -833,6 +833,7 @@ AC_LANG_POP(C++)
 ## library is disabled.
 AC_SUBST([HDF5_HL])
 AC_SUBST([HDF5_HL_TOOLS])
+AC_SUBST([HDF5_HL_GIF_TOOLS])
 
 ## The high-level library and high-level tools are enabled unless the build mode
 ## is clean.
@@ -884,6 +885,21 @@ AC_ARG_ENABLE([hltools],
 if test "X${HDF5_HL}" = "Xyes" -a "X-$HDF5_HL_TOOLS" = "X-yes"; then
  AC_MSG_RESULT([yes])
  HL_TOOLS="tools"
+else
+  AC_MSG_RESULT([no])
+fi
+
+AC_MSG_CHECKING([if the high-level GIF tools are enabled])
+AC_ARG_ENABLE([hltools],
+     [AS_HELP_STRING([--enable-hlgiftools],
+                     [Enable the high-level GIF tools.
+                     [default=no]
+                     ])],
+     [HDF5_HL_GIF_TOOLS=$enableval])
+
+if test "X${HDF5_GIF_HL}" = "Xyes" -a "X-$HDF5_HL_TOOLS" = "X-yes" -a "X-$HDF5_HL_GIF_TOOLS" = "X-yes"; then
+ AC_MSG_RESULT([yes])
+ HL_GIF_TOOLS="tools"
 else
   AC_MSG_RESULT([no])
 fi
@@ -3912,6 +3928,7 @@ AM_CONDITIONAL([BUILD_TESTS_CONDITIONAL], [test "X$HDF5_TESTS" = "Xyes"])
 AM_CONDITIONAL([BUILD_TESTS_PARALLEL_CONDITIONAL], [test -n "$TESTPARALLEL"])
 AM_CONDITIONAL([BUILD_TOOLS_CONDITIONAL], [test "X$HDF5_TOOLS" = "Xyes"])
 AM_CONDITIONAL([BUILD_TOOLS_HL_CONDITIONAL], [test "X$HDF5_HL_TOOLS" = "Xyes"])
+AM_CONDITIONAL([BUILD_TOOLS_HL_GIF_CONDITIONAL], [test "X$HDF5_HL_GIF_TOOLS" = "Xyes"])
 AM_CONDITIONAL([BUILD_DOXYGEN_CONDITIONAL], [test "X$HDF5_DOXYGEN" = "Xyes"])
 
 ## ----------------------------------------------------------------------
