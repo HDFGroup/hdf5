@@ -284,7 +284,7 @@ Bug Fixes since HDF5-1.13.3 release
     -------------
     - Remove Javadoc generation
 
-      The use of doxygen now supercedes the requirement to build javadocs. We do not
+      The use of doxygen now supersedes the requirement to build javadocs. We do not
       have the resources to continue to support two documentation methods and have
       chosen doxygen as our standard.
 
