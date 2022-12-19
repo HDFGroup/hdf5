@@ -1668,33 +1668,36 @@ error:
 
 typedef struct chunk_iter_info_t {
     hsize_t  offset[2];
-    uint32_t filter_mask;
+    unsigned filter_mask;
     haddr_t  addr;
-    uint32_t nbytes;
+    hsize_t  size;
 } chunk_iter_info_t;
 
+typedef struct chunk_iter_udata_t {
+    chunk_iter_info_t *chunk_info;
+    int                last_index;
+} chunk_iter_udata_t;
+
 static int
-iter_cb(const hsize_t *offset, uint32_t filter_mask, haddr_t addr, uint32_t nbytes, void *op_data)
+iter_cb(const hsize_t *offset, unsigned filter_mask, haddr_t addr, hsize_t size, void *op_data)
 {
-    chunk_iter_info_t **chunk_info = (chunk_iter_info_t **)op_data;
+    chunk_iter_udata_t *cidata = (chunk_iter_udata_t *)op_data;
+    int                 idx    = cidata->last_index + 1;
 
-    (*chunk_info)->offset[0]   = offset[0];
-    (*chunk_info)->offset[1]   = offset[1];
-    (*chunk_info)->filter_mask = filter_mask;
-    (*chunk_info)->addr        = addr;
-    (*chunk_info)->nbytes      = nbytes;
+    cidata->chunk_info[idx].offset[0]   = offset[0];
+    cidata->chunk_info[idx].offset[1]   = offset[1];
+    cidata->chunk_info[idx].filter_mask = filter_mask;
+    cidata->chunk_info[idx].addr        = addr;
+    cidata->chunk_info[idx].size        = size;
 
-    /* printf("offset: [%lld, %lld], addr: %ld, size: %d, filter mask: %d\n", offset[0], offset[1], addr,
-     * nbytes, filter_mask); */
-
-    *chunk_info += 1;
+    cidata->last_index++;
 
     return H5_ITER_CONT;
 }
 
 static int
-iter_cb_stop(const hsize_t H5_ATTR_UNUSED *offset, uint32_t H5_ATTR_UNUSED filter_mask,
-             haddr_t H5_ATTR_UNUSED addr, uint32_t H5_ATTR_UNUSED nbytes, void *op_data)
+iter_cb_stop(const hsize_t H5_ATTR_UNUSED *offset, unsigned H5_ATTR_UNUSED filter_mask,
+             haddr_t H5_ATTR_UNUSED addr, hsize_t H5_ATTR_UNUSED size, void *op_data)
 {
     chunk_iter_info_t **chunk_info = (chunk_iter_info_t **)op_data;
     *chunk_info += 1;
@@ -1702,8 +1705,8 @@ iter_cb_stop(const hsize_t H5_ATTR_UNUSED *offset, uint32_t H5_ATTR_UNUSED filte
 }
 
 static int
-iter_cb_fail(const hsize_t H5_ATTR_UNUSED *offset, uint32_t H5_ATTR_UNUSED filter_mask,
-             haddr_t H5_ATTR_UNUSED addr, uint32_t H5_ATTR_UNUSED nbytes, void *op_data)
+iter_cb_fail(const hsize_t H5_ATTR_UNUSED *offset, unsigned H5_ATTR_UNUSED filter_mask,
+             haddr_t H5_ATTR_UNUSED addr, hsize_t H5_ATTR_UNUSED size, void *op_data)
 {
     chunk_iter_info_t **chunk_info = (chunk_iter_info_t **)op_data;
     *chunk_info += 1;
