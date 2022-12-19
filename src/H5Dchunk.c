@@ -7688,8 +7688,8 @@ H5D__chunk_iter_cb(const H5D_chunk_rec_t *chunk_rec, void *udata)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check for callback failure and pass along return value */
-    if ((ret_value = (data->op)(offset, chunk_rec->filter_mask, chunk_rec->chunk_addr, chunk_rec->nbytes,
-                                data->op_data)) < 0)
+    if ((ret_value = (data->op)(offset, (unsigned)chunk_rec->filter_mask, chunk_rec->chunk_addr,
+                                (hsize_t)chunk_rec->nbytes, data->op_data)) < 0)
         HERROR(H5E_DATASET, H5E_CANTNEXT, "iteration operator failed");
 
     FUNC_LEAVE_NOAPI(ret_value)
