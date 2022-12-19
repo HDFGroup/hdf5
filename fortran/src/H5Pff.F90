@@ -4300,7 +4300,7 @@ SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
 !!
 !! See C API: @ref H5Pset()
 !!
-  SUBROUTINE h5pset_f(prp_id, name, value, hdferr)
+  SUBROUTINE h5pset(prp_id, name, value, hdferr)
     INTEGER(HID_T)  , INTENT(IN)  :: prp_id
     CHARACTER(LEN=*), INTENT(IN)  :: name
     INTEGER         , INTENT(IN)  :: value
