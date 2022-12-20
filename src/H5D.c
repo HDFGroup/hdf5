@@ -2515,18 +2515,18 @@ done:
  *
  *        typedef int (*H5D_chunk_iter_op_t)(
  *            const hsize_t *offset,
- *            uint32_t filter_mask,
+ *            unsigned filter_mask,
  *            haddr_t addr,
- *            uint32_t nbytes,
+ *            hsize_t size,
  *            void *op_data);
  *
  *      H5D_chunk_iter_op_t parameters:
- *          hsize_t *offset;        IN/OUT: Array of starting logical coordinates of chunk.
- *          uint32_t filter_mask;   IN: Filter mask of chunk.
- *          haddr_t addr;           IN: Offset in file of chunk data.
- *          uint32_t nbytes;        IN: Size in number of bytes of chunk data in file.
- *          void *op_data;          IN/OUT: Pointer to any user-defined data
- *                                  associated with the operation.
+ *          hsize_t *offset;        IN/OUT: Logical position of the chunk’s first element in units of dataset
+ *                                          elements
+ *          unsigned filter_mask;   IN: Bitmask indicating the filters used when the chunk was written haddr_t
+ *          addr;                   IN: Chunk address in the file
+ *          hsize_t;                IN: Chunk size in bytes, 0 if the chunk does not exist
+ *          void *op_data;          IN/OUT: Pointer to any user-defined data associated with the operation.
  *
  *      The return values from an operator are:
  *          Zero (H5_ITER_CONT) causes the iterator to continue, returning zero when all

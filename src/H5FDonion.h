@@ -142,11 +142,11 @@ H5_DLL hid_t H5FD_onion_init(void);
 
 /**
  * --------------------------------------------------------------------------
- * \ingroup H5P
+ * \ingroup FAPL
  *
  * \brief get the onion info from the file access property list
  *
- * \param[in] fapl_id The ID of the file access property list
+ * \fapl_id
  * \param[out] fa_out The pointer to the structure H5FD_onion_fapl_info_t
  *
  * \return \herr_t
@@ -159,11 +159,11 @@ H5_DLL herr_t H5Pget_fapl_onion(hid_t fapl_id, H5FD_onion_fapl_info_t *fa_out);
 
 /**
  * --------------------------------------------------------------------------
- * \ingroup H5P
+ * \ingroup FAPL
  *
  * \brief set the onion info for the file access property list
  *
- * \param[in] fapl_id The ID of the file access property list
+ * \fapl_id
  * \param[in] fa The pointer to the structure H5FD_onion_fapl_info_t
  *
  * \return \herr_t
