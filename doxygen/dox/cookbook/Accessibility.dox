@@ -1,6 +1,6 @@
 /** \page Accessibility
 
-\section Accessibility
+\section secAccessibility Accessibility
 
 \subsection CB_MaintainCompat Maintaining Compatibility with other HDF5 Library Versions
 
