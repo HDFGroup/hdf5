@@ -247,7 +247,7 @@ main(void)
 
             /******* ENCODE/DECODE DCPLS *****/
             TESTING("DCPL Encoding/Decoding for virtual layout");
-            if(high < H5F_LIBVER_V110)
+            if (high < H5F_LIBVER_V110)
                 HDprintf(" SKIPPED: virtual layout not supported yet\n");
 
             else {
