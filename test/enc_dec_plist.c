@@ -28,7 +28,6 @@ test_encode_decode(hid_t orig_pl, H5F_libver_t low, H5F_libver_t high)
     hid_t  fapl      = -1;   /* File access property list */
     void  *temp_buf  = NULL; /* Pointer to encoding buffer */
     size_t temp_size = 0;    /* Size of encoding buffer */
-    herr_t ret;              /* Return value */
 
     /* Create file access property list */
     if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -38,13 +37,8 @@ test_encode_decode(hid_t orig_pl, H5F_libver_t low, H5F_libver_t high)
     if (H5Pset_libver_bounds(fapl, low, high) < 0)
         TEST_ERROR;
 
-    H5E_BEGIN_TRY
-    {
-        ret = H5Pencode2(orig_pl, NULL, &temp_size, fapl);
-    }
-    H5E_END_TRY;
-
-    VERIFY(ret, SUCCEED, "H5Pencode2");
+    if (H5Pencode2(orig_pl, NULL, &temp_size, fapl) < 0)
+        TEST_ERROR;
 
     /* Allocate the buffer for encoding */
     if (NULL == (temp_buf = (void *)HDmalloc(temp_size)))
