@@ -1035,7 +1035,7 @@ H5_DLLVAR hid_t H5T_NATIVE_UINT_FAST64_g;
  *          When creating a fixed-length string datatype, \p size will
  *          be the length of the string in bytes. The length of the
  *          string in characters will depend on i the encoding used; see
- *          H5Pset_char_encoding().
+ *          #H5Pset_char_encoding.
  *
  *          ENUMs created with this function have a signed native integer
  *          base datatype.  Use H5Tenum_create() if a different integer base
