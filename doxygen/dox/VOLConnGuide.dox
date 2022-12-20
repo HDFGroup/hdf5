@@ -17,7 +17,7 @@ architectural design document.
 
 \subsection subsecVOLOverview Overview
 Creating a new VOL connector can be a complicated process. You will need to map your storage system
-to the HDF5 data model through the lens of the VOL and this may involve some impedence mismatch that
+to the HDF5 data model through the lens of the VOL and this may involve some impedance mismatch that
 you will have to work around. The good news is that the HDF5 library has been re-engineered to handle
 arbitrary, connector-specific data structures via the VOL callbacks, so no knowledge of the library internals
 is necessary to write a VOL connector.
@@ -3009,7 +3009,7 @@ returns an <em>herr_t</em> indicating success or failure.
 <tr>
 <td>
 \code
-  obj        (IN): A ontainer or  object where he operation needs to happen.
+  obj        (IN): A container or object where he operation needs to happen.
   loc_params (IN): Pointer to the location parameters for the destination object as explained in "Mapping the API to the Callbacks".
   args   (IN/OUT): A pointer to the arguments struct.
   dxpl_id    (IN): The data transfer property list.
@@ -3662,7 +3662,7 @@ The <em>optional</em> callback has the following definition.  It returns an <em>
 <tr>
 <td>
 \code
-  obj      (IN): A ontainer or  object where he operation needs to happen.
+  obj      (IN): A container or object where he operation needs to happen.
   args (IN/OUT): A pointer to the arguments struct.
   dxpl_id  (IN): The data transfer property list.
   req   IN/OUT): A pointer to the asynchronous request of the operation created by the connector.
