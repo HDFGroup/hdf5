@@ -45,7 +45,7 @@ const char *FILENAME[] = {"tchunk_info_18", "tchunk_info_110", "chunk_info", NUL
 /* From original test */
 #define DATASETNAME "2d"
 
-#define BASIC_FILE      "basic_query"
+#define BASIC_FILE "basic_query"
 
 /* Parameters for testing chunk querying */
 #define RANK                 2
@@ -86,11 +86,11 @@ void reinit_vars(unsigned *read_flt_msk, haddr_t *addr, hsize_t *size);
 
 /* Helper function containing common code that verifies indexing type
    and number of chunks */
-static int         verify_get_chunk_info(hid_t dset, hid_t dspace, hsize_t chk_index, hsize_t exp_chk_size,
-                                         const hsize_t *exp_offset, unsigned exp_flt_msk);
-static int         verify_get_chunk_info_by_coord(hid_t dset, hsize_t *offset, hsize_t exp_chk_size,
-                                                  unsigned exp_flt_msk);
-static int         verify_empty_chunk_info(hid_t dset, hsize_t *offset);
+static int verify_get_chunk_info(hid_t dset, hid_t dspace, hsize_t chk_index, hsize_t exp_chk_size,
+                                 const hsize_t *exp_offset, unsigned exp_flt_msk);
+static int verify_get_chunk_info_by_coord(hid_t dset, hsize_t *offset, hsize_t exp_chk_size,
+                                          unsigned exp_flt_msk);
+static int verify_empty_chunk_info(hid_t dset, hsize_t *offset);
 
 /*-------------------------------------------------------------------------
  * Function:    read_each_chunk (helper function)
@@ -1916,8 +1916,8 @@ test_basic_query(hid_t fapl)
         TEST_ERROR;
 
     /* Create a new dataset using cparms creation properties */
-    dset = H5Dcreate2(basicfile, DSET_SIMPLE_CHUNKED, H5T_NATIVE_INT, dspace, H5P_DEFAULT, cparms,
-                      H5P_DEFAULT);
+    dset =
+        H5Dcreate2(basicfile, DSET_SIMPLE_CHUNKED, H5T_NATIVE_INT, dspace, H5P_DEFAULT, cparms, H5P_DEFAULT);
     if (dset < 0)
         TEST_ERROR;
 
