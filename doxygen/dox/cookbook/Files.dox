@@ -1,6 +1,6 @@
 /** \page Files
 
-\section Files
+\section secFiles Files
 
 \subsection CB_FreeSpace Tracking Free Space in HDF5 Files
 

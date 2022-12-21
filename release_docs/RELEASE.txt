@@ -301,6 +301,14 @@ Bug Fixes since HDF5-1.13.3 release
 
     Configuration
     -------------
+    - Remove Javadoc generation
+
+      The use of doxygen now supersedes the requirement to build javadocs. We do not
+      have the resources to continue to support two documentation methods and have
+      chosen doxygen as our standard.
+
+      (ADB - 2022/12/19)
+
     - Change the default for building the high-level tools
 
       The gif2hdf5 and hdf2gif high-level tools are deprecated and will be removed
