@@ -63,21 +63,22 @@
 /*
  * Capability flags for VOL connectors
  */
-#define H5VL_CAP_FLAG_NONE             0x0000000000000000 /**< No special connector capabilities */
-#define H5VL_CAP_FLAG_THREADSAFE       0x0000000000000001 /**< Connector is threadsafe */
-#define H5VL_CAP_FLAG_ASYNC            0x0000000000000002 /**< Connector performs operations asynchronously*/
-#define H5VL_CAP_FLAG_NATIVE_FILES     0x0000000000000004 /**< Connector produces native file format */
-#define H5VL_CAP_FLAG_ATTR_BASIC       0x0000000000000008 /**< H5A create/delete/exists/open/close/read/write */
-#define H5VL_CAP_FLAG_ATTR_MORE        0x0000000000000010 /**< All other H5A API calls */
-#define H5VL_CAP_FLAG_DATASET_BASIC    0x0000000000000020 /**< H5D create/open/close/read/write */
-#define H5VL_CAP_FLAG_DATASET_MORE     0x0000000000000040 /**< All other H5D API calls */
-#define H5VL_CAP_FLAG_FILE_BASIC       0x0000000000000080 /**< H5F create/open/close/read/write */
-#define H5VL_CAP_FLAG_FILE_MORE        0x0000000000000100 /**< All other H5F API calls */
-#define H5VL_CAP_FLAG_GROUP_BASIC      0x0000000000000200 /**< H5G create/open/close */
-#define H5VL_CAP_FLAG_GROUP_MORE       0x0000000000000400 /**< All other H5G API calls*/
-#define H5VL_CAP_FLAG_LINK_BASIC       0x0000000000000800 /**< H5L exists/delete */
-#define H5VL_CAP_FLAG_LINK_MORE        0x0000000000001000 /**< All other H5L API calls */
-#define H5VL_CAP_FLAG_MAP_BASIC        0x0000000000002000 /**< H5M create/open/close/get*type/get_count/put/get/exists/delete */
+#define H5VL_CAP_FLAG_NONE          0x0000000000000000 /**< No special connector capabilities */
+#define H5VL_CAP_FLAG_THREADSAFE    0x0000000000000001 /**< Connector is threadsafe */
+#define H5VL_CAP_FLAG_ASYNC         0x0000000000000002 /**< Connector performs operations asynchronously*/
+#define H5VL_CAP_FLAG_NATIVE_FILES  0x0000000000000004 /**< Connector produces native file format */
+#define H5VL_CAP_FLAG_ATTR_BASIC    0x0000000000000008 /**< H5A create/delete/exists/open/close/read/write */
+#define H5VL_CAP_FLAG_ATTR_MORE     0x0000000000000010 /**< All other H5A API calls */
+#define H5VL_CAP_FLAG_DATASET_BASIC 0x0000000000000020 /**< H5D create/open/close/read/write */
+#define H5VL_CAP_FLAG_DATASET_MORE  0x0000000000000040 /**< All other H5D API calls */
+#define H5VL_CAP_FLAG_FILE_BASIC    0x0000000000000080 /**< H5F create/open/close/read/write */
+#define H5VL_CAP_FLAG_FILE_MORE     0x0000000000000100 /**< All other H5F API calls */
+#define H5VL_CAP_FLAG_GROUP_BASIC   0x0000000000000200 /**< H5G create/open/close */
+#define H5VL_CAP_FLAG_GROUP_MORE    0x0000000000000400 /**< All other H5G API calls*/
+#define H5VL_CAP_FLAG_LINK_BASIC    0x0000000000000800 /**< H5L exists/delete */
+#define H5VL_CAP_FLAG_LINK_MORE     0x0000000000001000 /**< All other H5L API calls */
+#define H5VL_CAP_FLAG_MAP_BASIC                                                                              \
+    0x0000000000002000 /**< H5M create/open/close/get*type/get_count/put/get/exists/delete */
 #define H5VL_CAP_FLAG_MAP_MORE         0x0000000000004000 /**< All other H5M API calls */
 #define H5VL_CAP_FLAG_OBJECT_BASIC     0x0000000000008000 /**< H5O open/close/exists */
 #define H5VL_CAP_FLAG_OBJECT_MORE      0x0000000000010000 /**< All other H5O API calls */
@@ -91,16 +92,17 @@
 #define H5VL_CAP_FLAG_ITERATE          0x0000000001000000 /**< Connector supports iteration functions */
 #define H5VL_CAP_FLAG_STORAGE_SIZE     0x0000000002000000 /**< Connector can return a meaningful storage size */
 #define H5VL_CAP_FLAG_BY_IDX           0x0000000004000000 /**< "by index" API calls are supported */
-#define H5VL_CAP_FLAG_GET_PLIST        0x0000000008000000 /**< Connector can return the property lists used to create an object */
-#define H5VL_CAP_FLAG_FLUSH_REFRESH    0x0000000010000000 /**< flush/refresh calls are supported */
-#define H5VL_CAP_FLAG_EXTERNAL_LINKS   0x0000000020000000 /**< External links are supported */
-#define H5VL_CAP_FLAG_HARD_LINKS       0x0000000040000000 /**< Hard links are supported */
-#define H5VL_CAP_FLAG_SOFT_LINKS       0x0000000080000000 /**< Soft links are supported */
-#define H5VL_CAP_FLAG_UD_LINKS         0x0000000100000000 /**< User-defined links are supported */
-#define H5VL_CAP_FLAG_TRACK_TIMES      0x0000000200000000 /**< Connector tracks creation, etc. times */
-#define H5VL_CAP_FLAG_MOUNT            0x0000000400000000 /**< H5Fmount/unmount supported */
-#define H5VL_CAP_FLAG_FILTERS          0x0000000800000000 /**< Connector implements a filter pipeline */
-#define H5VL_CAP_FLAG_FILL_VALUES      0x0000001000000000 /**< Connector allows fill values to be set */
+#define H5VL_CAP_FLAG_GET_PLIST                                                                              \
+    0x0000000008000000 /**< Connector can return the property lists used to create an object */
+#define H5VL_CAP_FLAG_FLUSH_REFRESH  0x0000000010000000 /**< flush/refresh calls are supported */
+#define H5VL_CAP_FLAG_EXTERNAL_LINKS 0x0000000020000000 /**< External links are supported */
+#define H5VL_CAP_FLAG_HARD_LINKS     0x0000000040000000 /**< Hard links are supported */
+#define H5VL_CAP_FLAG_SOFT_LINKS     0x0000000080000000 /**< Soft links are supported */
+#define H5VL_CAP_FLAG_UD_LINKS       0x0000000100000000 /**< User-defined links are supported */
+#define H5VL_CAP_FLAG_TRACK_TIMES    0x0000000200000000 /**< Connector tracks creation, etc. times */
+#define H5VL_CAP_FLAG_MOUNT          0x0000000400000000 /**< H5Fmount/unmount supported */
+#define H5VL_CAP_FLAG_FILTERS        0x0000000800000000 /**< Connector implements a filter pipeline */
+#define H5VL_CAP_FLAG_FILL_VALUES    0x0000001000000000 /**< Connector allows fill values to be set */
 
 /**
  * \ingroup H5VLDEF
