@@ -21,66 +21,81 @@
 #define H5FD_ONION       (H5FDperform_init(H5FD_onion_init))
 #define H5FD_ONION_VALUE H5_VFD_ONION
 
-/* Current version of the fapl info struct */
+/**
+ *  Current version of the onion VFD fapl info struct.
+ */
 #define H5FD_ONION_FAPL_INFO_VERSION_CURR 1
 
-/* Flag to open a file that has a locked header (after crashes, for example) */
-#define H5FD_ONION_FAPL_INFO_FLAG_FORCE_OPEN 1
+#define H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT (0x0001u) /**<
+ * Onion history metadata will align to page_size.
+ * Partial pages of unused space will occur in the file,
+ * but may improve read performance from the backing store
+ * on some systems.
+ * If disabled (0), padding will not be inserted to align
+ * to page boundaries.
+ */
 
-/* Flag to enable opening older revisions in write mode, creating a tree */
-#define H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_DIVERGENT_HISTORY 0x1
-
-/* Flag to require page alignment of onion revision data */
-#define H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT 0x2
-
-/* Max length of a comment
- * The buffer is defined to be this size + 1 to handle the NUL
+/** 
+ * Max length of a comment.
+ * The buffer is defined to be this size + 1 to handle the NUL.
  */
 #define H5FD_ONION_FAPL_INFO_COMMENT_MAX_LEN 255
 
-/* Indicates that you want the latest revision */
+/**
+ * Indicates that you want the latest revision.
+ */
 #define H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST UINT64_MAX
 
+/**
+ * Indicates how the new onion data will be stored.
+ */
 typedef enum H5FD_onion_target_file_constant_t {
-    H5FD_ONION_STORE_TARGET_H5,    /* Onion history as part of HDF5 file */
-    H5FD_ONION_STORE_TARGET_ONION, /* Separate, single "onion" file */
+    H5FD_ONION_STORE_TARGET_ONION, /**<
+ * Onion history is stored in a single, separate "onion
+ * file". Shares filename and path as hdf5 file (if any),
+ * with only a different filename extension.
+ */
 } H5FD_onion_target_file_constant_t;
 
 /*-----------------------------------------------------------------------------
- * Structure    H5FD_onion_fapl_info_t
+ * store_target:
+ * creation_flags:
+*
+*
+ *              + <Remaining bits reserved>
  *
- * Purpose:     Encapsulate info for the Onion driver FAPL entry.
- *
- * version:     Future-proofing identifier. Informs struct membership.
- *              Must equal H5FD_ONION_FAPL_VERSION_CURR to be considered valid.
- *
- * backing_fapl_id:
- *              Backing or 'child' FAPL ID to handle I/O with the
- *              underlying backing store. If the onion data is stored as a
- *              separate file, it must use the same backing driver as the
- *              original file.
- *
+ *-----------------------------------------------------------------------------
+ */
+/**
+ * Stores fapl information for creating onion VFD files.
+ */ 
+typedef struct H5FD_onion_fapl_info_t {
+    uint8_t                           version; /**<
+ * Future-proofing identifier. Informs struct membership.
+ * Must equal H5FD_ONION_FAPL_VERSION_CURR to be considered valid.
+ */
+    hid_t                             backing_fapl_id; /**<
+ * Backing or 'child' FAPL ID to handle I/O with the
+ * underlying backing store. It must use the same backing driver as the
+ * original file.
+ */
+    uint32_t                          page_size; /**<
  * page_size:   Size of the amended data pages. If opening an existing file,
  *              must equal the existing page size or zero. If creating a new
  *              file or an initial revision of an existing file, must be a
  *              power of 2.
  *
- * store_target:
- *              Enumerated/defined value identifying where the history data is
- *              stored, either in the same file (appended to HDF5 data) or a
- *              separate file. Other options may be added in later versions.
- *
- *              + H5FD_ONION_FAPL_STORE_MODE_SEPARATE_SINGLE (1)
- *                      Onion history is stored in a single, separate "onion
- *                      file". Shares filename and path as hdf5 file (if any),
- *                      with only a different filename extension.
- *
- * revision_num: Which revision to open. Must be 0 (the original file) or the
+    */
+    H5FD_onion_target_file_constant_t store_target; /**<
+ * Identifies where the history data is stored.
+ */
+    uint64_t                          revision_num; /**<
+ * Which revision to open. Valid values are 0 (the original file) or the
  *              revision number of an existing revision.
- *              Revision ID -1 is reserved to open the most recently-created
- *              revision in history.
- *
- * force_write_open:
+ *              H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST refers to the most
+ *              recently-created revision in the history.
+    */
+    uint8_t                           force_write_open; /**<
  *              Flag to ignore the write-lock flag in the onion data
  *              and attempt to open the file write-only anyway.
  *              This may be relevant if, for example, the library crashed
@@ -88,50 +103,18 @@ typedef enum H5FD_onion_target_file_constant_t {
  *              flag was not cleared.
  *              Must equal H5FD_ONION_FAPL_FLAG_FORCE_OPEN to enable.
  *
- * creation_flags:
- *              Flag used only when instantiating an Onion file.
- *              If the relevant bit is set to a nonzero value, its feature
- *              will be enabled.
- *
- *              + H5FD_ONION_FAPL_CREATE_FLAG_ENABLE_DIVERGENT_HISTORY
- *                (1, bit 1)
- *                      User will be allowed to open arbitrary revisions
- *                      in write mode.
- *                      If disabled (0), only the most recent revision may be
- *                      opened for amendment.
- *
- *              + H5FD_ONION_FAPL_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT (2, bit 2)
- *                      Onion history metadata will align to page_size.
- *                      Partial pages of unused space will occur in the file,
- *                      but may improve read performance from the backing store
- *                      on some systems.
- *                      If disabled (0), padding will not be inserted to align
- *                      to page boundaries.
- *
- *              + <Remaining bits reserved>
- *
- * comment:     User-supplied NULL-terminated comment for a revision to be
- *              written.
- *              Cannot be longer than H5FD_ONION_FAPL_COMMENT_MAX_LEN.
- *              Ignored if part of a FAPL used to open in read mode.
- *
- *              The comment for a revision may be modified prior to committing
- *              to the revision (closing the file and writing the record)
- *              with a call to H5FDfctl().
- *              This H5FDfctl overwrite may be used to exceed constraints of
- *              maximum string length and the NULL-terminator requirement.
- *
- *-----------------------------------------------------------------------------
+    */
+    uint8_t                           creation_flags; /**<
+ * Flag used only when instantiating an onion file.
+ * If the relevant bit is set to a nonzero value, its feature
+ * will be enabled.
  */
-typedef struct H5FD_onion_fapl_info_t {
-    uint8_t                           version;
-    hid_t                             backing_fapl_id;
-    uint32_t                          page_size;
-    H5FD_onion_target_file_constant_t store_target;
-    uint64_t                          revision_num;
-    uint8_t                           force_write_open;
-    uint8_t                           creation_flags;
-    char                              comment[H5FD_ONION_FAPL_INFO_COMMENT_MAX_LEN + 1];
+     char                              comment[H5FD_ONION_FAPL_INFO_COMMENT_MAX_LEN + 1]; /**<
+ * User-supplied NULL-terminated comment for a revision to be
+ * written.
+ * Cannot be longer than H5FD_ONION_FAPL_COMMENT_MAX_LEN.
+ * Ignored if part of a FAPL used to open in read mode.
+ */
 } H5FD_onion_fapl_info_t;
 
 #ifdef __cplusplus
