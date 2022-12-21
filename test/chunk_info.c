@@ -1961,8 +1961,11 @@ test_basic_query(hid_t fapl)
         ret = H5Dget_chunk_info(dset, dspace, chk_index, out_offset, &read_flt_msk, &addr, &size);
     }
     H5E_END_TRY;
-    //if (ret != FAIL)
-    //    TEST_ERROR;
+    /* In HDF5 1.10 this will not fail. It will fail in 1.12 and older. */
+    /*
+    if (ret != FAIL)
+        TEST_ERROR;
+    */
 
     /* Write the chunk of data to another location */
     offset[0] = 0;
