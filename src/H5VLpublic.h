@@ -60,7 +60,10 @@
  */
 #define H5_VOL_MAX 65535
 
-/* Capability flags for connector */
+/**
+ * \ingroup H5VLDEF
+ * Capability flags for VOL connectors
+ */
 #define H5VL_CAP_FLAG_NONE             0x0000000000000000 /* No special connector capabilities */
 #define H5VL_CAP_FLAG_THREADSAFE       0x0000000000000001 /* Connector is threadsafe */
 #define H5VL_CAP_FLAG_ASYNC            0x0000000000000002 /* Connector performs operations asynchronously*/
@@ -100,24 +103,28 @@
 #define H5VL_CAP_FLAG_FILTERS          0x0000000800000000
 #define H5VL_CAP_FLAG_FILL_VALUES      0x0000001000000000
 
-/* Flags to return from H5VLquery_optional API and 'opt_query' callbacks */
-/* Note: Operations which access multiple objects' data or metadata in a
- *      container should be registered as file-level optional operations.
- *      (e.g. "H5Dwrite_multi" takes a list of datasets to write data to, so
- *      a VOL connector that implemented it should register it as an optional
- *      file operation, and pass-through VOL connectors that are stacked above
- *      the connector that registered it should assume that dataset elements
- *      for _any_ dataset in the file could be written to)
+/** 
+ * \ingroup H5VLDEF
+ *
+ * Flags to return from H5VLquery_optional API and 'opt_query' callbacks
+ * 
+ * \details Operations which access multiple objects' data or metadata in a
+ *          container should be registered as file-level optional operations.
+ *          (e.g. "H5Dwrite_multi" takes a list of datasets to write data to, so
+ *          a VOL connector that implemented it should register it as an optional
+ *          file operation, and pass-through VOL connectors that are stacked above
+ *          the connector that registered it should assume that dataset elements
+ *          for _any_ dataset in the file could be written to)
  */
-#define H5VL_OPT_QUERY_SUPPORTED       0x0001 /* VOL connector supports this operation */
-#define H5VL_OPT_QUERY_READ_DATA       0x0002 /* Operation reads data for object */
-#define H5VL_OPT_QUERY_WRITE_DATA      0x0004 /* Operation writes data for object */
-#define H5VL_OPT_QUERY_QUERY_METADATA  0x0008 /* Operation reads metadata for object */
-#define H5VL_OPT_QUERY_MODIFY_METADATA 0x0010 /* Operation modifies metadata for object */
+#define H5VL_OPT_QUERY_SUPPORTED       0x0001 /**< VOL connector supports this operation */
+#define H5VL_OPT_QUERY_READ_DATA       0x0002 /**< Operation reads data for object */
+#define H5VL_OPT_QUERY_WRITE_DATA      0x0004 /**< Operation writes data for object */
+#define H5VL_OPT_QUERY_QUERY_METADATA  0x0008 /**< Operation reads metadata for object */
+#define H5VL_OPT_QUERY_MODIFY_METADATA 0x0010 /**< Operation modifies metadata for object */
 #define H5VL_OPT_QUERY_COLLECTIVE                                                                            \
-    0x0020 /* Operation is collective (operations without this flag are assumed to be independent) */
-#define H5VL_OPT_QUERY_NO_ASYNC  0x0040 /* Operation may NOT be executed asynchronously */
-#define H5VL_OPT_QUERY_MULTI_OBJ 0x0080 /* Operation involves multiple objects */
+    0x0020 /**< Operation is collective (operations without this flag are assumed to be independent) */
+#define H5VL_OPT_QUERY_NO_ASYNC  0x0040 /**< Operation may NOT be executed asynchronously */
+#define H5VL_OPT_QUERY_MULTI_OBJ 0x0080 /**< Operation involves multiple objects */
 
 /*******************/
 /* Public Typedefs */
