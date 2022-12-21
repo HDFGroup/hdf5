@@ -19,6 +19,7 @@
  *
  * Test structure:
  *          main()
+ *              test_basic_query()
  *              test_get_chunk_info_highest18()
  *              test_get_chunk_info_110()
  *                  test_chunk_info_single_chunk()
@@ -26,6 +27,10 @@
  *                  test_chunk_info_fixed_array()
  *                  test_chunk_info_extensible_array()
  *                  test_chunk_info_version2_btrees()
+ * Helper functions:
+ *          verify_get_chunk_info()
+ *          verify_get_chunk_info_by_coord()
+ *          verify_empty_chunk_info()
  *
  */
 #define H5D_FRIEND
@@ -39,6 +44,8 @@ const char *FILENAME[] = {"tchunk_info_18", "tchunk_info_110", "chunk_info", NUL
 
 /* From original test */
 #define DATASETNAME "2d"
+
+#define BASIC_FILE      "basic_query"
 
 /* Parameters for testing chunk querying */
 #define RANK                 2
@@ -57,14 +64,33 @@ const char *FILENAME[] = {"tchunk_info_18", "tchunk_info_110", "chunk_info", NUL
 #define CHUNK_NY             4
 #define SINGLE_CHUNK_SIZE    (NX * NY * sizeof(int))
 #define CHUNK_SIZE           96
+#define EMPTY_CHK_SIZE       0
 #define NUM_CHUNKS           16
-#define NUM_CHUNKS_WRITTEN   4
+
+/* Number of chunks that have been written */
+#define NUM_CHUNKS_WRITTEN 4
+#define ONE_CHUNK_WRITTEN  1
+#define TWO_CHUNKS_WRITTEN 2
+#define NO_CHUNK_WRITTEN   0
+
+/* For testing invalid arguments */
+#define NONEXIST_CHK_INDEX   3
+#define OUTOFRANGE_CHK_INDEX 5
+#define INVALID_CHK_INDEX    5
 
 /* Artifact of original file, maybe removed */
 /* #define PRINT_DATA */
 
 /* Utility function to initialize arguments */
 void reinit_vars(unsigned *read_flt_msk, haddr_t *addr, hsize_t *size);
+
+/* Helper function containing common code that verifies indexing type
+   and number of chunks */
+static int         verify_get_chunk_info(hid_t dset, hid_t dspace, hsize_t chk_index, hsize_t exp_chk_size,
+                                         const hsize_t *exp_offset, unsigned exp_flt_msk);
+static int         verify_get_chunk_info_by_coord(hid_t dset, hsize_t *offset, hsize_t exp_chk_size,
+                                                  unsigned exp_flt_msk);
+static int         verify_empty_chunk_info(hid_t dset, hsize_t *offset);
 
 /*-------------------------------------------------------------------------
  * Function:    read_each_chunk (helper function)
@@ -128,6 +154,120 @@ reinit_vars(unsigned *read_flt_msk, haddr_t *addr, hsize_t *size)
         *addr = 0;
     if (size)
         *size = 0;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    verify_get_chunk_info (helper function)
+ *
+ * Purpose:     Verifies that H5Dget_chunk_info returns correct
+ *              values for a chunk.
+ *
+ * Return:      Success:    SUCCEED
+ *              Failure:    FAIL
+ *
+ * Date:        August 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+verify_get_chunk_info(hid_t dset, hid_t dspace, hsize_t chk_index, hsize_t exp_chk_size,
+                      const hsize_t *exp_offset, unsigned exp_flt_msk)
+{
+    unsigned read_flt_msk  = 0;      /* Read filter mask */
+    hsize_t  out_offset[2] = {0, 0}; /* Buffer to get offset coordinates */
+    hsize_t  size          = 0;      /* Size of an allocated/written chunk */
+    haddr_t  addr          = 0;      /* Address of an allocated/written chunk */
+
+    if (H5Dget_chunk_info(dset, dspace, chk_index, out_offset, &read_flt_msk, &addr, &size) < 0)
+        TEST_ERROR;
+
+    if (HADDR_UNDEF == addr)
+        FAIL_PUTS_ERROR("address cannot be HADDR_UNDEF");
+    if (size != exp_chk_size)
+        FAIL_PUTS_ERROR("unexpected chunk size");
+    if (read_flt_msk != exp_flt_msk)
+        FAIL_PUTS_ERROR("unexpected filter mask");
+    if (out_offset[0] != exp_offset[0])
+        FAIL_PUTS_ERROR("unexpected offset[0]");
+    if (out_offset[1] != exp_offset[1])
+        FAIL_PUTS_ERROR("unexpected offset[1]");
+
+    return SUCCEED;
+
+error:
+    return FAIL;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    verify_get_chunk_info_by_coord (helper function)
+ *
+ * Purpose:     Verifies that H5Dget_chunk_info_by_coord returns correct
+ *              values for a chunk.
+ *
+ * Return:      Success:    SUCCEED
+ *              Failure:    FAIL
+ *
+ * Date:        August 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+verify_get_chunk_info_by_coord(hid_t dset, hsize_t *offset, hsize_t exp_chk_size, unsigned exp_flt_msk)
+{
+    unsigned read_flt_msk = 0; /* Read filter mask */
+    hsize_t  size         = 0; /* Size of an allocated/written chunk */
+    haddr_t  addr         = 0; /* Address of an allocated/written chunk */
+
+    /* Get info of the chunk at logical coordinates specified by offset */
+    if (H5Dget_chunk_info_by_coord(dset, offset, &read_flt_msk, &addr, &size) < 0)
+        TEST_ERROR;
+
+    if (HADDR_UNDEF == addr)
+        FAIL_PUTS_ERROR("address cannot be HADDR_UNDEF");
+    if (size != exp_chk_size)
+        FAIL_PUTS_ERROR("unexpected chunk size");
+    if (read_flt_msk != exp_flt_msk)
+        FAIL_PUTS_ERROR("unexpected filter mask");
+
+    return SUCCEED;
+
+error:
+    return FAIL;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    verify_empty_chunk_info (helper function)
+ *
+ * Purpose:     Verifies that H5Dget_chunk_info_by_coord returns correct
+ *              values for an empty chunk.
+ *
+ * Return:      Success:    SUCCEED
+ *              Failure:    FAIL
+ *
+ * Date:        August 2018
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+verify_empty_chunk_info(hid_t dset, hsize_t *offset)
+{
+    unsigned read_flt_msk = 0; /* Read filter mask */
+    hsize_t  size         = 0; /* Size of an allocated/written chunk */
+    haddr_t  addr         = 0; /* Address of an allocated/written chunk */
+
+    /* Get info of the chunk at logical coordinates specified by offset */
+    if (H5Dget_chunk_info_by_coord(dset, offset, &read_flt_msk, &addr, &size) < 0)
+        TEST_ERROR;
+
+    if (HADDR_UNDEF != addr)
+        FAIL_PUTS_ERROR("address was not HADDR_UNDEF");
+    if (EMPTY_CHK_SIZE != size)
+        FAIL_PUTS_ERROR("size was not EMPTY_CHK_SIZE");
+
+    return SUCCEED;
+
+error:
+    return FAIL;
 }
 
 /*-------------------------------------------------------------------------
@@ -1714,6 +1854,230 @@ iter_cb_fail(const hsize_t H5_ATTR_UNUSED *offset, unsigned H5_ATTR_UNUSED filte
 }
 
 /*-------------------------------------------------------------------------
+ * Function:    test_basic_query
+ *
+ * Purpose:     Tests basic operations to ensure the chunk query functions
+ *              work properly.
+ *
+ * Return:      Success:    SUCCEED
+ *              Failure:    FAIL
+ *
+ * Note:        Note that the dataspace argument in these new functions are
+ *              currently not used.  The functionality involved the dataspace
+ *              will be implemented in the next version.
+ *
+ * Date:        August 2019
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_basic_query(hid_t fapl)
+{
+    char               filename[FILENAME_BUF_SIZE];          /* File name */
+    hid_t              basicfile     = H5I_INVALID_HID;      /* File ID */
+    hid_t              dspace        = H5I_INVALID_HID;      /* Dataspace ID */
+    hid_t              dset          = H5I_INVALID_HID;      /* Dataset ID */
+    hid_t              cparms        = H5I_INVALID_HID;      /* Creation plist */
+    hsize_t            dims[2]       = {NX, NY};             /* Dataset dimensions */
+    hsize_t            chunk_dims[2] = {CHUNK_NX, CHUNK_NY}; /* Chunk dimensions */
+    int                direct_buf[CHUNK_NX][CHUNK_NY];       /* Data in chunks */
+    unsigned           flt_msk      = 0;                     /* Filter mask */
+    unsigned           read_flt_msk = 0;                     /* Filter mask after direct read */
+    hsize_t            offset[2];                            /* Offset coordinates of a chunk */
+    hsize_t            out_offset[2] = {0, 0};               /* Buffer to get offset coordinates */
+    hsize_t            size          = 0;                    /* Size of an allocated/written chunk */
+    hsize_t            nchunks       = 0;                    /* Number of chunks */
+    haddr_t            addr          = 0;                    /* Address of an allocated/written chunk */
+    hsize_t            chk_index     = 0;                    /* Index of a chunk */
+    hsize_t            ii, jj;                               /* Array indices */
+    chunk_iter_info_t  chunk_infos[2];                       /* Chunk infos filled up by iterator */
+    chunk_iter_info_t *cptr;                                 /* Pointer to array of chunks */
+    chunk_iter_udata_t udata;                                /* udata for iteration */
+    herr_t             ret; /* Temporary returned value for verifying failure */
+
+    TESTING("basic operations");
+
+    /* Create the file */
+    h5_fixname(BASIC_FILE, fapl, filename, sizeof filename);
+
+    /* Create a new file. */
+    if ((basicfile = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Create dataspace */
+    if ((dspace = H5Screate_simple(RANK, dims, NULL)) < 0)
+        TEST_ERROR;
+
+    /* Enable chunking */
+    if ((cparms = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+
+    if (H5Pset_chunk(cparms, RANK, chunk_dims) < 0)
+        TEST_ERROR;
+
+    /* Create a new dataset using cparms creation properties */
+    dset = H5Dcreate2(basicfile, DSET_SIMPLE_CHUNKED, H5T_NATIVE_INT, dspace, H5P_DEFAULT, cparms,
+                      H5P_DEFAULT);
+    if (dset < 0)
+        TEST_ERROR;
+
+    /* Get the number of chunks and verify that no chunk has been written */
+    if (H5Dget_num_chunks(dset, dspace, &nchunks) < 0)
+        TEST_ERROR;
+    if (NO_CHUNK_WRITTEN != nchunks)
+        FAIL_PUTS_ERROR("unexpected number of chunks");
+
+    /* Initialize the array of chunk data for the single chunk */
+    for (ii = 0; ii < CHUNK_NX; ii++)
+        for (jj = 0; jj < CHUNK_NY; jj++)
+            direct_buf[ii][jj] = (int)(ii * jj);
+
+    /* Write the chunk of data */
+    offset[0] = CHUNK_NX;
+    offset[1] = CHUNK_NY;
+    if (H5Dwrite_chunk(dset, H5P_DEFAULT, flt_msk, offset, CHUNK_SIZE, direct_buf) < 0)
+        TEST_ERROR;
+
+    /* Get and verify that one chunk had been written */
+    if (H5Dget_num_chunks(dset, dspace, &nchunks) < 0)
+        TEST_ERROR;
+    if (ONE_CHUNK_WRITTEN != nchunks)
+        FAIL_PUTS_ERROR("unexpected number of chunks");
+
+    /* Get and verify info of the first and only chunk */
+    if (verify_get_chunk_info(dset, dspace, 0, CHUNK_SIZE, offset, flt_msk) == FAIL)
+        FAIL_PUTS_ERROR("Verification H5Dget_chunk_info failed\n");
+
+    /* Get and verify info of the chunk at the offset (CHUNK_NX,CHUNK_NY) */
+    if (verify_get_chunk_info_by_coord(dset, offset, CHUNK_SIZE, flt_msk) == FAIL)
+        FAIL_PUTS_ERROR("Verification of H5Dget_chunk_info_by_coord failed\n");
+
+    /* Attempt to get chunk info given an invalid chunk index and verify
+     * that failure occurs */
+    chk_index = INVALID_CHK_INDEX;
+    reinit_vars(&read_flt_msk, &addr, &size);
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dget_chunk_info(dset, dspace, chk_index, out_offset, &read_flt_msk, &addr, &size);
+    }
+    H5E_END_TRY;
+    //if (ret != FAIL)
+    //    TEST_ERROR;
+
+    /* Write the chunk of data to another location */
+    offset[0] = 0;
+    offset[1] = 0;
+    if (H5Dwrite_chunk(dset, H5P_DEFAULT, flt_msk, offset, CHUNK_SIZE, direct_buf) < 0)
+        TEST_ERROR;
+
+    /* Get and verify that two chunks had been written */
+    if (H5Dget_num_chunks(dset, dspace, &nchunks) < 0)
+        TEST_ERROR;
+    if (TWO_CHUNKS_WRITTEN != nchunks)
+        FAIL_PUTS_ERROR("unexpected number of chunks");
+
+    /* Get and verify info of the first written chunk in the dataset, its
+       offset should be (0,0) */
+    if (verify_get_chunk_info(dset, dspace, 0, CHUNK_SIZE, offset, flt_msk) == FAIL)
+        FAIL_PUTS_ERROR("Verification H5Dget_chunk_info failed\n");
+
+    /* Get and verify info of the chunk at the offset (0,0) */
+    if (verify_get_chunk_info_by_coord(dset, offset, CHUNK_SIZE, flt_msk) == FAIL)
+        FAIL_PUTS_ERROR("Verification of H5Dget_chunk_info_by_coord failed\n");
+
+    /* Get and verify info of the second written chunk in the dataset, its
+       offset should be (CHUNK_NX, CHUNK_NY) */
+    offset[0] = CHUNK_NX;
+    offset[1] = CHUNK_NY;
+    if (verify_get_chunk_info(dset, dspace, 1, CHUNK_SIZE, offset, flt_msk) == FAIL)
+        FAIL_PUTS_ERROR("Verification H5Dget_chunk_info failed\n");
+
+    /* Get and verify info of the chunk at the offset (CHUNK_NX, CHUNK_NY) */
+    if (verify_get_chunk_info_by_coord(dset, offset, CHUNK_SIZE, flt_msk) == FAIL)
+        FAIL_PUTS_ERROR("Verification of H5Dget_chunk_info_by_coord failed\n");
+
+    /* Get and verify info of an empty chunk, at offset
+       (2*CHUNK_NX, 2*CHUNK_NY) */
+    offset[0] = 2 * CHUNK_NX;
+    offset[1] = 2 * CHUNK_NY;
+    /* Get and verify info of the chunk at the offset (CHUNK_NX, CHUNK_NY) */
+    if (verify_empty_chunk_info(dset, offset) == FAIL)
+        FAIL_PUTS_ERROR("Verification of H5Dget_chunk_info_by_coord on empty chunk failed\n");
+
+    /* Iterate over all chunks */
+    udata.chunk_info = chunk_infos;
+    udata.last_index = -1;
+    if (H5Dchunk_iter(dset, H5P_DEFAULT, &iter_cb, &udata) < 0)
+        TEST_ERROR;
+
+    printf("\nchunk_infos 1 offset 0: %lld\n", chunk_infos[1].offset[0]);
+
+    if (udata.last_index != 1)
+        FAIL_PUTS_ERROR("Iterator did not iterate over all chunks");
+    if (chunk_infos[0].offset[0] != 0)
+        FAIL_PUTS_ERROR("offset[0] mismatch");
+    if (chunk_infos[0].offset[1] != 0)
+        FAIL_PUTS_ERROR("offset[1] mismatch");
+    if (chunk_infos[0].filter_mask != 0)
+        FAIL_PUTS_ERROR("filter mask mismatch");
+    if (chunk_infos[0].size != 96)
+        FAIL_PUTS_ERROR("size mismatch");
+
+    if (chunk_infos[1].offset[0] != CHUNK_NX)
+        FAIL_PUTS_ERROR("offset[0] mismatch");
+    if (chunk_infos[1].offset[1] != CHUNK_NY)
+        FAIL_PUTS_ERROR("offset[1] mismatch");
+
+    /* Iterate and stop after one iteration */
+    cptr = &(chunk_infos[0]);
+    if (H5Dchunk_iter(dset, H5P_DEFAULT, &iter_cb_stop, &cptr) < 0)
+        TEST_ERROR;
+    if (cptr != &(chunk_infos[1]))
+        FAIL_PUTS_ERROR("Verification of halted iterator failed");
+
+    /* Iterate and fail after one iteration */
+    cptr = &(chunk_infos[0]);
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dchunk_iter(dset, H5P_DEFAULT, &iter_cb_fail, &cptr);
+    }
+    H5E_END_TRY;
+    if (ret >= 0)
+        TEST_ERROR;
+    if (cptr != &(chunk_infos[1]))
+        FAIL_PUTS_ERROR("Verification of halted iterator failed");
+
+    /* Release resource */
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR;
+    if (H5Sclose(dspace) < 0)
+        TEST_ERROR;
+    if (H5Pclose(cparms) < 0)
+        TEST_ERROR;
+    if (H5Fclose(basicfile) < 0)
+        TEST_ERROR;
+
+    /* Remove the test file */
+    HDremove(filename);
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(dset);
+        H5Sclose(dspace);
+        H5Pclose(cparms);
+        H5Fclose(basicfile);
+    }
+    H5E_END_TRY;
+
+    H5_FAILED();
+    return FAIL;
+} /* test_basic_query() */
+
+/*-------------------------------------------------------------------------
  * Function:    test_get_chunk_info_110
  *
  * Purpose:     Test getting various chunk information in version 1.10.
@@ -1959,6 +2323,9 @@ main(void)
     /* Create a copy of file access property list */
     if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         TEST_ERROR
+
+    /* Test basic operations on the chunk query functions */
+    nerrors += test_basic_query(fapl) < 0 ? 1 : 0;
 
     /* Tests getting chunk information of version 1.8 and prior */
     nerrors += test_get_chunk_info_highest18(fapl) < 0 ? 1 : 0;
