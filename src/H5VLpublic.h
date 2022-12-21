@@ -103,11 +103,11 @@
 #define H5VL_CAP_FLAG_FILTERS          0x0000000800000000
 #define H5VL_CAP_FLAG_FILL_VALUES      0x0000001000000000
 
-/** 
+/**
  * \ingroup H5VLDEF
  *
  * Flags to return from H5VLquery_optional API and 'opt_query' callbacks
- * 
+ *
  * \details Operations which access multiple objects' data or metadata in a
  *          container should be registered as file-level optional operations.
  *          (e.g. "H5Dwrite_multi" takes a list of datasets to write data to, so
