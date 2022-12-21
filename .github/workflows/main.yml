@@ -247,6 +247,28 @@ jobs:
               cmake: "Debug"
               autotools: "debug"
 
+          - name: "Ubuntu gcc Autotools v1.14 default API (build only)"
+            os: ubuntu-latest
+            cpp: enable
+            fortran: enable
+            java: enable
+            parallel: disable
+            mirror_vfd: enable
+            direct_vfd: enable
+            deprec_sym: enable
+            default_api: v114
+            toolchain: ""
+            generator: "autogen"
+            flags: ""
+            run_tests: false
+            thread_safety:
+              - enabled: false
+                text: ""
+            build_mode:
+              - text: "DBG"
+                cmake: "Debug"
+                autotools: "debug"
+
           - name: "Ubuntu gcc Autotools no deprecated symbols (build only)"
             os: ubuntu-latest
             cpp: enable
@@ -256,7 +278,7 @@ jobs:
             mirror_vfd: enable
             direct_vfd: enable
             deprec_sym: disable
-            default_api: v114
+            default_api: v116
             toolchain: ""
             generator: "autogen"
             flags: ""
