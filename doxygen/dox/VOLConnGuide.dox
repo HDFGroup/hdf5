@@ -6,7 +6,7 @@ Navigate back: \ref index "Main"
 \section secVOLIntro Introduction
 The Virtual Object Layer (VOL) is an abstraction layer in the HDF5 library which intercepts all API
 calls that could potentially access objects in an HDF5 container and forwards those calls to object drivers
-referred to as <em>VOL connectors</em>. The architecture of this feature is described in the VOL User Guide
+referred to as <em>VOL connectors</em>. The architecture of this feature is described in the \ref H5VL_UG
 and VOL Architecture and Internals Documentation and will not be duplicated here.
 
 This guide is for people who are interested in developing their own VOL connector for the HDF5 library.
@@ -55,8 +55,7 @@ and, although it is nearing its final form, may change further before the stable
 for 2022.
 
 \subsection subsecVOLRelated VOL-Related HDF5 Header Files
-Use of the VOL, including topics such as registration and loading VOL plugins, is described in the VOL
-User Guide.
+Use of the VOL, including topics such as registration and loading VOL plugins, is described in the \ref H5VL_UG.
 
 Public header Files you will need to be familiar with include:
 <table>
@@ -110,7 +109,7 @@ have to be built and linked against it.
 You can also build your connector as a dynamically loaded plugin. The mechanism for this is the same
 mechanism used to dynamically load HDF5 filter plugins. This can allow use of your connector via the
 VOL environment variable, without modifying the application, but requires your plugin to be discoverable
-at runtime. See the VOL User Guide for more information about using HDF5 plugins.
+at runtime. See the \ref H5VL_UG for more information about using HDF5 plugins.
 
 To build your connector as a plugin, you will have to include <b>H5PLextern.h</b>
 (a public header distributed with  the  library) and  implement the #H5PLget_plugin_type
@@ -184,7 +183,7 @@ In HDF5 1.13.0, the <em>version</em> field will be 2, indicating the connector t
 develop branch of the HDF5 git repository. Version 0 is used in the deprecated HDF5 1.12.x branch.
 
 Every connector needs a <em>name</em> and <em>value</em>. The library will use these when loading and registering the
-connector (as described in the VOL User Guide), so they should be unique in your ecosystem.
+connector (as described in the \ref H5VL_UG), so they should be unique in your ecosystem.
 
 VOL connector values are integers, with a maximum value of 65535. Values from 0 to 255 are reserved
 for internal use by The HDF Group. The native VOL connector has a value of 0. Values of 256 to 511
@@ -3707,7 +3706,7 @@ The API calls in this header are for VOL management and general use (i.e., not l
 Registers a VOL connector with the HDF5 library given the name of the connector and returns an identifier
 for it (#H5I_INVALID_HID on errors). If the connector is already registered, the library will create a new
 identifier for it and returns it to the user; otherwise the library will search the plugin path for a connector
-of that name, loading and registering it, returning an ID for it, if found. See the VOL User Guide for more
+of that name, loading and registering it, returning an ID for it, if found. See the \ref H5VL_UG for more
 information on loading plugins and the search paths.
 
 \subsubsection subsubsecVOLNewPubregval H5VLregister_connector_by_value

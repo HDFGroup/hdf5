@@ -71,7 +71,7 @@ New Features
           HDF5_ENABLE_USING_DMALLOC
 
       (DER - 2022/11/08)
-      
+
     - Removal of memory allocation sanity checks configure options
 
       With the removal of the memory allocation sanity checks feature, the
@@ -160,7 +160,11 @@ New Features
 
     Documentation:
     --------------
-    -
+    - Ported the existing VOL Connector Author Guide document to doxygen.
+
+      Added new dox file, VOLConnGuide.dox.
+
+      (ADB - 2022/12/20)
 
 
 Support for new platforms, languages and compilers
