@@ -729,7 +729,7 @@ H5_DLL herr_t H5Lexists_async(hid_t loc_id, const char *name, hbool_t *exists, h
  *          \p cset specifies the character set in which the link name is
  *          encoded. Valid values include the following:
  *          \csets
- *          This value is set with H5Pset_char_encoding().
+ *          This value is set with #H5Pset_char_encoding.
  *
  *          \c token is the location that a hard link points to, and
  *          \c val_size is the size of a soft link or user defined link value.
@@ -1525,7 +1525,7 @@ typedef herr_t (*H5L_iterate1_t)(hid_t group, const char *name, const H5L_info1_
  *          \c cset specifies the character set in which the link name is
  *          encoded. Valid values include the following:
  *          \csets
- *          This value is set with H5Pset_char_encoding().
+ *          This value is set with #H5Pset_char_encoding.
  *
  *          \c address and \c val_size are returned for hard and symbolic
  *          links, respectively. Symbolic links include soft and external links
