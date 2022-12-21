@@ -196,12 +196,12 @@ static const H5VL_class_t fake_vol_g = {
     NULL,                /* terminate    */
     {
         /* info_cls */
-        (size_t)0, /* size    */
-        NULL,      /* copy    */
-        NULL,      /* compare */
-        fake_vol_free_info,        /* free    */
-        fake_vol_info_to_str,      /* to_str  */
-        fake_vol_str_to_info,      /* from_str */
+        (size_t)0,            /* size    */
+        NULL,                 /* copy    */
+        NULL,                 /* compare */
+        fake_vol_free_info,   /* free    */
+        fake_vol_info_to_str, /* to_str  */
+        fake_vol_str_to_info, /* from_str */
     },
     {
         /* wrap_cls */
@@ -2441,11 +2441,11 @@ error:
 static herr_t
 test_info_to_str(void)
 {
-    hid_t                    fapl_id       = H5I_INVALID_HID;
-    hid_t                    vol_id        = H5I_INVALID_HID;
-    int                      info          = 7;
-    char                     *ret_str      = NULL;
-    int                      *ret_info     = NULL;
+    hid_t fapl_id  = H5I_INVALID_HID;
+    hid_t vol_id   = H5I_INVALID_HID;
+    int   info     = 7;
+    char *ret_str  = NULL;
+    int  *ret_info = NULL;
 
     TESTING("conversion between a VOL info and a string");
 
