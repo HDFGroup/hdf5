@@ -171,6 +171,25 @@ Bug Fixes since HDF5-1.13.3 release
 ===================================
     Library
     -------
+    - Seg fault on file close
+
+      h5debug fails at file close with core dump on a file that has an
+      illegal file size in its cache image.  In H5F_dest(), the library
+      performs all the closing operations for the file and keeps track of
+      the error encountered when reading the file cache image.  
+      At the end of the routine, it frees the file's file structure and 
+      returns error.  Due to the error return, the file object is not removed 
+      from the ID node table.  This eventually causes assertion failure in 
+      H5VL__native_file_close() when the library finally exits and tries to 
+      access that file object in the table for closing.
+
+      The closing routine, H5F_dest(), will not free the file structure if
+      there is error, keeping a valid file structure in the ID node table.
+      It will be freed later in H5VL__native_file_close() when the
+      library exits and terminates the file package.
+
+      (VC - 2022/12/14, HDFFV-11052, CVE-2020-10812)
+
     - Fix CVE-2018-13867 / GHSA-j8jr-chrh-qfrf
  
       Validate location (offset) of the accumulated metadata when comparing.
@@ -289,6 +308,16 @@ Bug Fixes since HDF5-1.13.3 release
       chosen doxygen as our standard.
 
       (ADB - 2022/12/19)
+
+    - Change the default for building the high-level tools
+
+      The gif2hdf5 and hdf2gif high-level tools are deprecated and will be removed
+      in a future release. The default build setting for them have been changed from enabled
+      to disabled. A user can enable the build of these tools if needed.
+          autotools:   --enable-hlgiftools
+          cmake:       HDF5_BUILD_HL_GIF_TOOLS=ON
+
+      (ADB - 2022/12/16)
 
     - Change the settings of the *pc files to use the correct format
 
@@ -572,7 +601,7 @@ The issues with the gif tool are:
     HDFFV-10592 CVE-2018-17433
     HDFFV-10593 CVE-2018-17436
     HDFFV-11048 CVE-2020-10809
-These CVE issues have not yet been addressed and can be avoided by not building
-the gif tool. Disable building the High-Level tools with these options:
-    autotools:   --disable-hltools
-    cmake:       HDF5_BUILD_HL_TOOLS=OFF
+These CVE issues have not yet been addressed and are avoided by not building
+the gif tool by default. Enable building the High-Level tools with these options:
+    autotools:   --enable-hlgiftools
+    cmake:       HDF5_BUILD_HL_GIF_TOOLS=ON
