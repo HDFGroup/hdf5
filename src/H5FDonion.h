@@ -58,15 +58,6 @@ typedef enum H5FD_onion_target_file_constant_t {
                                     */
 } H5FD_onion_target_file_constant_t;
 
-/*-----------------------------------------------------------------------------
- * store_target:
- * creation_flags:
- *
- *
- *              + <Remaining bits reserved>
- *
- *-----------------------------------------------------------------------------
- */
 /**
  * Stores fapl information for creating onion VFD files.
  */
@@ -139,6 +130,8 @@ H5_DLL hid_t H5FD_onion_init(void);
  * \details H5Pget_fapl_onion() retrieves the structure H5FD_onion_fapl_info_t
  *          from the file access property list that is set for the onion VFD
  *          driver.
+ *
+ * \since 1.14.0
  */
 H5_DLL herr_t H5Pget_fapl_onion(hid_t fapl_id, H5FD_onion_fapl_info_t *fa_out);
 
@@ -156,6 +149,8 @@ H5_DLL herr_t H5Pget_fapl_onion(hid_t fapl_id, H5FD_onion_fapl_info_t *fa_out);
  * \details H5Pset_fapl_onion() sets the structure H5FD_onion_fapl_info_t
  *          for the file access property list that is set for the onion VFD
  *          driver.
+ *
+ * \since 1.14.0
  */
 H5_DLL herr_t H5Pset_fapl_onion(hid_t fapl_id, const H5FD_onion_fapl_info_t *fa);
 
@@ -175,6 +170,8 @@ H5_DLL herr_t H5Pset_fapl_onion(hid_t fapl_id, const H5FD_onion_fapl_info_t *fa)
  *          for an onion file. It takes the file name and file access property
  *          list that is set for the onion VFD driver.
  *
+ *
+ * \since 1.14.0
  */
 H5_DLL herr_t H5FDonion_get_revision_count(const char *filename, hid_t fapl_id, uint64_t *revision_count);
 
