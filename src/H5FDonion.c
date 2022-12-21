@@ -577,8 +577,6 @@ H5FD__onion_close(H5FD_t *_file)
                 HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "Can't write updated header to backing store")
         }
     }
-    else if (H5FD_ONION_STORE_TARGET_H5 == file->fa.store_target)
-        HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, FAIL, "hdf5 store-target not supported")
     else
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "invalid history target")
 
@@ -704,8 +702,6 @@ H5FD__onion_create_truncate_onion(H5FD_onion_t *file, const char *filename, cons
     rec     = &file->curr_rev_record;
 
     hdr->flags = H5FD_ONION_HEADER_FLAG_WRITE_LOCK;
-    if (H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_DIVERGENT_HISTORY & file->fa.creation_flags)
-        hdr->flags |= H5FD_ONION_HEADER_FLAG_DIVERGENT_HISTORY;
     if (H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT & file->fa.creation_flags)
         hdr->flags |= H5FD_ONION_HEADER_FLAG_PAGE_ALIGNMENT;
 
@@ -955,9 +951,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
     }
 
     /* Check for unsupported target values */
-    if (H5FD_ONION_STORE_TARGET_H5 == fa->store_target)
-        HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, NULL, "same-file storage not implemented")
-    else if (H5FD_ONION_STORE_TARGET_ONION != fa->store_target)
+    if (H5FD_ONION_STORE_TARGET_ONION != fa->store_target)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid store target")
 
     /* Allocate space for the file struct */
@@ -1056,8 +1050,6 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
 
                 new_open = true;
 
-                if (H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_DIVERGENT_HISTORY & file->fa.creation_flags)
-                    hdr->flags |= H5FD_ONION_HEADER_FLAG_DIVERGENT_HISTORY;
                 if (H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT & file->fa.creation_flags) {
                     hdr->flags |= H5FD_ONION_HEADER_FLAG_PAGE_ALIGNMENT;
                     file->align_history_on_pages = TRUE;
