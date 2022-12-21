@@ -923,7 +923,7 @@
  *                containing thousands to millions of members. Links are stored in
  *                a fractal heap and indexed with an improved B-tree.
  *          \li The new implementation also enables the use of link names consisting of
- *              non-ASCII character sets (see H5Pset_char_encoding()) and is
+ *              non-ASCII character sets (see #H5Pset_char_encoding) and is
  *              required for all link types other than hard or soft links, e.g.,
  *              external and user-defined links (see the \ref H5L APIs).
  *

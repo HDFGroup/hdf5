@@ -1,6 +1,6 @@
 /** \page Performance
 
-\section Performance
+\section secPerformance Performance
 
 \subsection CB_MDCPerf Assessing HDF5 Metadata Cache Performance
 

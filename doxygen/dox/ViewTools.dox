@@ -829,6 +829,7 @@ by simply viewing the specified dataset with the <code style="background-color:w
 \code
 h5dump -d "HDFEOS/GRIDS/OMI Column Amount O3/Data Fields/SolarZenithAngle" OMI-Aura.he5
 \endcode
+
 Subsetting narrows down the output that is displayed. In the following example, the first
 15x10 elements (-c "15,10") are specified, beginning with position (0,0) (-s "0,0"):
 \code
@@ -840,11 +841,8 @@ If using the shorthand method, specify:
     h5dump -A 0 -d "HDFEOS/GRIDS/OMI Column Amount O3/Data Fields/SolarZenithAngle[0,0;;15,10;]" -w 0 OMI-Aura.he5
 \endcode
 
-Where,
-\par The <code style="background-color:whitesmoke;">-d</code> option must be specified
-
-before
-\par subsetting options (if not using the shorthand method).
+Where, the <code style="background-color:whitesmoke;">-d</code> option must be specified
+before subsetting options (if not using the shorthand method).
 
 The <code style="background-color:whitesmoke;">-A 0</code> option suppresses the printing of attributes.
 

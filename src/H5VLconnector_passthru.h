@@ -71,7 +71,7 @@ H5_DLL herr_t H5VLcmp_connector_cls(int *cmp, hid_t connector_id1, hid_t connect
  *                 - #H5I_MAP
  *                 - #H5I_ATTR
  *
- * \return \hid_t
+ * \return \hid_t{VOL connector}
  *
  * \note This routine is mainly targeted toward wrapping objects for
  *       iteration routine callbacks (i.e. the callbacks from H5Aiterate*,
