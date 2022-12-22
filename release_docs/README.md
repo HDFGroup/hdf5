@@ -53,7 +53,7 @@ the history files from those releases and compare them by hand.
 * Create the new maintenance branch
 
 In develop:
-* Create the new HISTORY-\[v1\]-\[v2\].txt file
+* Create the new HISTORY-\[VERSION 1\]-\[VERSION 2\].txt file
     * If there is an experimental HISTORY file, concatenate RELEASE.txt onto it and use that
     * Otherwise, start with RELEASE.txt
     * Add the boilerplate like in the other HISTORY files
@@ -61,10 +61,11 @@ In develop:
 * Clear out RELEASE.txt
 
 Note that we're KEEPING any experimental release history information in the
-HISTORY-\[v1\]-\[v2\].txt file, so do NOT use the merged file in the above steps!
+HISTORY-\[VERSION 1\]-\[VERSION 2\].txt file, so do NOT use the merged file in
+the above steps!
 
 In the new maintenance branch:
-* Create the new HISTORY-\[v\].txt file
+* Create the new HISTORY-\[VERSION\].txt file
     * If there is an experimental HISTORY file use the combined file you created earlier
     * Otherwise, start with RELEASE.txt
     * Add the boilerplate like in the other HISTORY files
@@ -81,12 +82,12 @@ In the new release branch:
 * Create the release branch
 
 In the maintenance branch:
-* Concatenate RELEASE.txt onto the end of HISTORY-\[v\].txt
+* Concatenate RELEASE.txt onto the end of HISTORY-\[VERSION\].txt
 * Clear out RELEASE.txt
 
 ### EXPERIMENTAL release
 
-* Concatenate RELEASE.txt onto the end of HISTORY-\[v\].txt
+* Concatenate RELEASE.txt onto the end of HISTORY-\[VERSION\].txt
 * Clear out RELEASE.txt
 
 ## INSTALL files
