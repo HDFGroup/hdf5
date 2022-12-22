@@ -52,7 +52,7 @@ for compressing the resulting tar archive (if none are given then
                    information is available in the README_HPC file.
     doc         -- produce the latest doc tree in addition to the archive.
 
-An sha256 checksum is produced for each archive created and stored in the sha256 file.
+A sha256 checksum is produced for each archive created and stored in the sha256 file.
 
 Examples:
 
@@ -537,37 +537,37 @@ for comp in $methods; do
     case $comp in
         tar)
             cp -p $tmpdir/$HDF5_VERS.tar $DEST/$HDF5_VERS.tar
-            (cd $DEST; sha256 $HDF5_VERS.tar >> $SHA256)
+            (cd $DEST; sha256sum $HDF5_VERS.tar >> $SHA256)
             ;;
         gzip)
             test "$verbose" && echo "   Running gzip..." 1>&2
             gzip -9 <$tmpdir/$HDF5_VERS.tar >$DEST/$HDF5_VERS.tar.gz
-            (cd $DEST; sha256 $HDF5_VERS.tar.gz >> $SHA256)
+            (cd $DEST; sha256sum $HDF5_VERS.tar.gz >> $SHA256)
             ;;
         cmake-tgz)
             test "$verbose" && echo "   Creating CMake tar.gz file..." 1>&2
             tar2cmaketgz $HDF5_VERS $tmpdir/$HDF5_VERS.tar $DEST/CMake-$HDF5_VERS.tar.gz 1>&2
-            (cd $DEST; sha256 CMake-$HDF5_VERS.tar.gz >> $SHA256)
+            (cd $DEST; sha256sum CMake-$HDF5_VERS.tar.gz >> $SHA256)
             ;;
         hpc-cmake-tgz)
             test "$verbose" && echo "   Creating HPC-CMake tar.gz file..." 1>&2
             tar2hpccmaketgz $HDF5_VERS $tmpdir/$HDF5_VERS.tar $DEST/HPC-CMake-$HDF5_VERS.tar.gz 1>&2
-            (cd $DEST; sha256 HPC-CMake-$HDF5_VERS.tar.gz >> $SHA256)
+            (cd $DEST; sha256sum HPC-CMake-$HDF5_VERS.tar.gz >> $SHA256)
             ;;
         bzip2)
             test "$verbose" && echo "   Running bzip2..." 1>&2
             bzip2 -9 <$tmpdir/$HDF5_VERS.tar >$DEST/$HDF5_VERS.tar.bz2
-            (cd $DEST; sha256 $HDF5_VERS.tar.bz2 >> $SHA256)
+            (cd $DEST; sha256sum $HDF5_VERS.tar.bz2 >> $SHA256)
             ;;
         zip)
             test "$verbose" && echo "   Creating zip ball..." 1>&2
             tar2zip $HDF5_VERS $tmpdir/$HDF5_VERS.tar $DEST/$HDF5_VERS.zip 1>&2
-            (cd $DEST; sha256 $HDF5_VERS.zip >> $SHA256)
+            (cd $DEST; sha256sum $HDF5_VERS.zip >> $SHA256)
             ;;
         cmake-zip)
             test "$verbose" && echo "   Creating CMake-zip ball..." 1>&2
             tar2cmakezip $HDF5_VERS $tmpdir/$HDF5_VERS.tar $DEST/CMake-$HDF5_VERS.zip 1>&2
-            (cd $DEST; sha256 CMake-$HDF5_VERS.zip >> $SHA256)
+            (cd $DEST; sha256sum CMake-$HDF5_VERS.zip >> $SHA256)
             ;;
         doc)
             if [ "${DOCVERSION}" = "" ]; then
