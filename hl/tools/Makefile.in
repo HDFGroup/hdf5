@@ -572,6 +572,7 @@ HAVE_MERCURY = @HAVE_MERCURY@
 HAVE_PTHREAD = @HAVE_PTHREAD@
 HDF5_DOXYGEN = @HDF5_DOXYGEN@
 HDF5_HL = @HDF5_HL@
+HDF5_HL_GIF_TOOLS = @HDF5_HL_GIF_TOOLS@
 HDF5_HL_TOOLS = @HDF5_HL_TOOLS@
 HDF5_INTERFACES = @HDF5_INTERFACES@
 HDF5_TESTS = @HDF5_TESTS@
@@ -804,9 +805,11 @@ TRACE = perl $(top_srcdir)/bin/trace
 # .chkexe files are used to mark tests that have run successfully.
 # .chklog files are output from those tests.
 CHECK_CLEANFILES = *.chkexe *.chklog
+@BUILD_TOOLS_HL_GIF_CONDITIONAL_FALSE@TOOLS_GIF_DIR = 
+@BUILD_TOOLS_HL_GIF_CONDITIONAL_TRUE@TOOLS_GIF_DIR = gif2h5
 
 # All subdirectories
-SUBDIRS = gif2h5 h5watch
+SUBDIRS = $(TOOLS_DIR) h5watch
 
 # Automake needs to be taught how to build lib, progs and tests targets.
 # These will be filled in automatically for the most part (e.g.,

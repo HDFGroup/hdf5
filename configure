@@ -646,6 +646,8 @@ STATIC_SHARED
 SEARCH
 BUILD_DOXYGEN_CONDITIONAL_FALSE
 BUILD_DOXYGEN_CONDITIONAL_TRUE
+BUILD_TOOLS_HL_GIF_CONDITIONAL_FALSE
+BUILD_TOOLS_HL_GIF_CONDITIONAL_TRUE
 BUILD_TOOLS_HL_CONDITIONAL_FALSE
 BUILD_TOOLS_HL_CONDITIONAL_TRUE
 BUILD_TOOLS_CONDITIONAL_FALSE
@@ -853,6 +855,7 @@ DIMENSION_SCALES_WITH_NEW_REF
 HL_TOOLS
 HL_FOR
 HL
+HDF5_HL_GIF_TOOLS
 HDF5_HL_TOOLS
 HDF5_HL
 CXXCPP
@@ -1774,6 +1777,7 @@ Optional Features:
   --enable-hl             Enable the high-level library. [default=yes (unless
                           build mode = clean)]
   --enable-hltools        Enable the high-level tools. [default=yes]
+  --enable-hlgiftools     Enable the high-level GIF tools. [default=no]
   --enable-dimension-scales-with-new-ref
                           Use new references when creating dimension scales.
                           [default=no]
@@ -9295,6 +9299,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
+
 ## The high-level library and high-level tools are enabled unless the build mode
 ## is clean.
 if test "X-$BUILD_MODE" = "X-clean" ; then
@@ -9349,6 +9354,23 @@ if test "X${HDF5_HL}" = "Xyes" -a "X-$HDF5_HL_TOOLS" = "X-yes"; then
  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
  HL_TOOLS="tools"
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking if the high-level GIF tools are enabled" >&5
+$as_echo_n "checking if the high-level GIF tools are enabled... " >&6; }
+# Check whether --enable-hltools was given.
+if test "${enable_hltools+set}" = set; then :
+  enableval=$enable_hltools; HDF5_HL_GIF_TOOLS=$enableval
+fi
+
+
+if test "X${HDF5_GIF_HL}" = "Xyes" -a "X-$HDF5_HL_TOOLS" = "X-yes" -a "X-$HDF5_HL_GIF_TOOLS" = "X-yes"; then
+ { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+ HL_GIF_TOOLS="tools"
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
@@ -9750,7 +9772,7 @@ else
 JAVA_TEST=Test.java
 CLASS_TEST=Test.class
 cat << \EOF > $JAVA_TEST
-/* #line 9753 "configure" */
+/* #line 9775 "configure" */
 public class Test {
 }
 EOF
@@ -9966,7 +9988,7 @@ else
 JAVA_TEST=Test.java
 CLASS_TEST=Test.class
 cat << \EOF > $JAVA_TEST
-/* #line 9969 "configure" */
+/* #line 9991 "configure" */
 public class Test {
 }
 EOF
@@ -10000,7 +10022,7 @@ JAVA_TEST=Test.java
 CLASS_TEST=Test.class
 TEST=Test
 cat << \EOF > $JAVA_TEST
-/* [#]line 10003 "configure" */
+/* [#]line 10025 "configure" */
 public class Test {
 public static void main (String args[]) {
         System.exit (0);
@@ -10395,7 +10417,7 @@ else
 
 
 cat << \EOF > Test.java
-/* #line 10398 "configure" */
+/* #line 10420 "configure" */
 import junit.textui.TestRunner;
 public class Test {
 
@@ -33402,6 +33424,14 @@ else
   BUILD_TOOLS_HL_CONDITIONAL_FALSE=
 fi
 
+ if test "X$HDF5_HL_GIF_TOOLS" = "Xyes"; then
+  BUILD_TOOLS_HL_GIF_CONDITIONAL_TRUE=
+  BUILD_TOOLS_HL_GIF_CONDITIONAL_FALSE='#'
+else
+  BUILD_TOOLS_HL_GIF_CONDITIONAL_TRUE='#'
+  BUILD_TOOLS_HL_GIF_CONDITIONAL_FALSE=
+fi
+
  if test "X$HDF5_DOXYGEN" = "Xyes"; then
   BUILD_DOXYGEN_CONDITIONAL_TRUE=
   BUILD_DOXYGEN_CONDITIONAL_FALSE='#'
@@ -35543,6 +35573,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${BUILD_TOOLS_HL_CONDITIONAL_TRUE}" && test -z "${BUILD_TOOLS_HL_CONDITIONAL_FALSE}"; then
   as_fn_error $? "conditional \"BUILD_TOOLS_HL_CONDITIONAL\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${BUILD_TOOLS_HL_GIF_CONDITIONAL_TRUE}" && test -z "${BUILD_TOOLS_HL_GIF_CONDITIONAL_FALSE}"; then
+  as_fn_error $? "conditional \"BUILD_TOOLS_HL_GIF_CONDITIONAL\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${BUILD_DOXYGEN_CONDITIONAL_TRUE}" && test -z "${BUILD_DOXYGEN_CONDITIONAL_FALSE}"; then
