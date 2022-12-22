@@ -401,6 +401,7 @@ HAVE_MERCURY = @HAVE_MERCURY@
 HAVE_PTHREAD = @HAVE_PTHREAD@
 HDF5_DOXYGEN = @HDF5_DOXYGEN@
 HDF5_HL = @HDF5_HL@
+HDF5_HL_GIF_TOOLS = @HDF5_HL_GIF_TOOLS@
 HDF5_HL_TOOLS = @HDF5_HL_TOOLS@
 HDF5_INTERFACES = @HDF5_INTERFACES@
 HDF5_TESTS = @HDF5_TESTS@
@@ -1101,18 +1102,14 @@ help:
 classes:
 	test -d $(@D)/$(JAVAROOT) || $(MKDIR_P) $(@D)/$(JAVAROOT)
 
-$(jarfile): classhdf5_java.stamp classes docs
+$(jarfile): classhdf5_java.stamp classes
 	$(JAR) cvf $@ -C $(JAVAROOT)/ $(pkgpath)
 
-.PHONY: docs classes
-
-docs:
-	$(JAVADOC) -sourcepath $(srcdir) -d javadoc -Xdoclint:none -use -splitIndex -windowtitle $(WINDOWTITLE) -doctitle $(DOCTITLE) -J-Xmx180m -verbose -overview $(top_srcdir)/java/src/hdf/overview.html -classpath $(CLASSPATH_ENV) hdf.hdf5lib
+.PHONY: classes
 
 clean:
 	rm -rf $(JAVAROOT)/*
 	rm -f $(jarfile)
-	rm -rf javadoc
 	rm -f classhdf5_java.stamp
 
 # Clean examples when check-clean is invoked
