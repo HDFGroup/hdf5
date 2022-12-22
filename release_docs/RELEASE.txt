@@ -21,7 +21,7 @@ The official HDF5 releases can be obtained from:
 
      https://www.hdfgroup.org/downloads/hdf5/
 
-Changes from Release to Release and New Features in the HDF5-1.13.x release series
+Changes from Release to Release and New Features in the HDF5-1.15.x release series
 can be found at:
 
      https://portal.hdfgroup.org/display/HDF5/Release+Specific+Information
@@ -36,7 +36,7 @@ CONTENTS
 
 - New Features
 - Support for new platforms and languages
-- Bug Fixes since HDF5-1.13.3
+- Bug Fixes since HDF5-1.14.0
 - Platforms Tested
 - Known Problems
 - CMake vs. Autotools installations
@@ -47,121 +47,47 @@ New Features
 
     Configuration:
     -------------
-    - Removal of MPE support
-
-      The ability to build with MPE instrumentation has been removed along with
-      the following configure options:
-
-      Autotools:
-          --with-mpe=
-
-      CMake has never supported building with MPE support.
-
-      (DER - 2022/11/08)
-
-     - Removal of dmalloc support
-
-      The ability to build with dmalloc support has been removed along with
-      the following configure options:
-
-      Autotools:
-          --with-dmalloc=
-
-      CMake:
-          HDF5_ENABLE_USING_DMALLOC
-
-      (DER - 2022/11/08)
-      
-    - Removal of memory allocation sanity checks configure options
-
-      With the removal of the memory allocation sanity checks feature, the
-      following configure options are no longer necessary and have been
-      removed:
-
-      Autotools:
-          --enable-memory-alloc-sanity-check
-
-      CMake:
-          HDF5_MEMORY_ALLOC_SANITY_CHECK
-          HDF5_ENABLE_MEMORY_STATS
-
-      (DER - 2022/11/03)
+    -
 
     Library:
     --------
-    - Fix for CVE-2019-8396
-
-      Malformed HDF5 files may have truncated content which does not match
-      the expected size. When H5O__pline_decode() attempts to decode these it
-      may read past the end of the allocated space leading to heap overflows
-      as bounds checking is incomplete.
-
-      The fix ensures each element is within bounds before reading.
-
-      (2022/11/09 - HDFFV-10712, CVE-2019-8396, GitHub #2209)
-
-    - Removal of memory allocation sanity checks feature
-
-      This feature added heap canaries and statistics tracking for internal
-      library memory operations. Unfortunately, the heap canaries caused
-      problems when library memory operations were mixed with standard C
-      library memory operations (such as in the filter pipeline, where
-      buffers may have to be reallocated). Since any platform with a C
-      compiler also usually has much more sophisticated memory sanity
-      checking tools than the HDF5 library provided (e.g., valgrind), we
-      have decided to to remove the feature entirely.
-
-      In addition to the configure changes described above, this also removes
-      the following from the public API:
-          H5get_alloc_stats()
-          H5_alloc_stats_t
-
-      (DER - 2022/11/03)
+    -
 
     Parallel Library:
     -----------------
     -
 
-
     Fortran Library:
     ----------------
     -
-
 
     C++ Library:
     ------------
     -
 
-
     Java Library:
     -------------
     -
-
 
     Tools:
     ------
     -
 
-
     High-Level APIs:
     ----------------
     -
-
 
     C Packet Table API:
     -------------------
     -
 
-
     Internal header file:
     ---------------------
     -
 
-
     Documentation:
     --------------
     -
-
 
 Support for new platforms, languages and compilers
 ==================================================
@@ -171,185 +97,23 @@ Bug Fixes since HDF5-1.13.3 release
 ===================================
     Library
     -------
-    - Seg fault on file close
-
-      h5debug fails at file close with core dump on a file that has an
-      illegal file size in its cache image.  In H5F_dest(), the library
-      performs all the closing operations for the file and keeps track of
-      the error encountered when reading the file cache image.  
-      At the end of the routine, it frees the file's file structure and 
-      returns error.  Due to the error return, the file object is not removed 
-      from the ID node table.  This eventually causes assertion failure in 
-      H5VL__native_file_close() when the library finally exits and tries to 
-      access that file object in the table for closing.
-
-      The closing routine, H5F_dest(), will not free the file structure if
-      there is error, keeping a valid file structure in the ID node table.
-      It will be freed later in H5VL__native_file_close() when the
-      library exits and terminates the file package.
-
-      (VC - 2022/12/14, HDFFV-11052, CVE-2020-10812)
-
-    - Fix CVE-2018-13867 / GHSA-j8jr-chrh-qfrf
- 
-      Validate location (offset) of the accumulated metadata when comparing.
-
-      Initially, the accumulated metadata location is initialized to HADDR_UNDEF
-      - the highest available address. Bogus input files may provide a location
-      or size matching this value. Comparing this address against such bogus
-      values may provide false positives. Thus make sure, the value has been
-      initialized or fail the comparison early and let other parts of the
-      code deal with the bogus address/size.
-      Note: To avoid unnecessary checks, it is assumed that if the 'dirty'
-      member in the same structure is true the location is valid.
-
-      (EFE - 2022/10/10 GH-2230)
-      
-    - Fix CVE-2018-16438 / GHSA-9xmm-cpf8-rgmx
-
-      Make sure info block for external links has at least 3 bytes.
-    
-      According to the specification, the information block for external links
-      contains 1 byte of version/flag information and two 0 terminated strings
-      for the object linked to and the full path.
-      Although not very useful, the minimum string length for each (with
-      terminating 0) would be one byte.
-      Checking this helps to avoid SEGVs triggered by bogus files.
-
-      (EFE - 2022/10/09 GH-2233)
-
-    - CVE-2021-46244 / GHSA-vrxh-5gxg-rmhm
-
-      Compound datatypes may not have members of size 0
- 
-      A member size of 0 may lead to an FPE later on as reported in
-      CVE-2021-46244. To avoid this, check for this as soon as the
-      member is decoded.
-
-      (EFE - 2022/10/05 GEH-2242)
-
-
-    - Fix CVE-2021-45830 / GHSA-5h2h-fjjr-x9m2
-
-      Make H5O__fsinfo_decode() more resilient to out-of-bound reads.
-
-      When decoding a file space info message in H5O__fsinfo_decode()  make
-      sure each element to be decoded is still within the message. Malformed
-      hdf5 files may have trunkated content which does not match the
-      expected size. Checking this will prevent attempting to decode
-      unrelated data and heap overflows. So far, only free space manager
-      address data was checked before decoding.
-
-      (EFE - 2022/10/05 GH-2228)
-
-    - Fix CVE-2021-46242 / GHSA-x9pw-hh7v-wjpf
-
-      When evicting driver info block, NULL the corresponding entry.
-
-      Since H5C_expunge_entry() called (from H5AC_expunge_entry()) sets the  flag
-      H5C__FLUSH_INVALIDATE_FLAG, the driver info block will be freed. NULLing
-      the pointer in f->shared->drvinfo will prevent use-after-free  when it is
-      used in other functions (like  H5F__dest()) - as other places will check
-      whether the pointer is initialized before using its value.
-
-      (EFE - 2022/09/29 GH-2254)
-
-    - Fix CVE-2021-45833 / GHSA-x57p-jwp6-4v79
-
-      Report error if dimensions of chunked storage in data layout < 2
-    
-      For Data Layout Messages version 1 & 2 the specification state
-      that the value stored in the data field is 1 greater than the
-      number of dimensions in the dataspace. For version 3 this is
-      not explicitly stated but the implementation suggests it to be
-      the case.
-      Thus the set value needs to be at least 2. For dimensionality
-      < 2 an out-of-bounds access occurs.
- 
-      (EFE - 2022/09/28 GH-2240)
-      
-    - Fix CVE-2018-14031 / GHSA-2xc7-724c-r36j
-
-      Parent of enum datatype message must have the same size as the
-      enum datatype message itself.
-      Functions accessing the enumeration values use the size of the
-      enumeration datatype to determine the size of each element and
-      how much data to copy.
-      Thus the size of the enumeration and its parent need to match.
-      Check in H5O_dtype_decode_helper()  to avoid unpleasant surprises
-      later.
-
-      (EFE - 2022/09/28 GH-2236)
-
-    - Fix CVE-2018-17439 / GHSA-vcxv-vp43-rch7
-
-      H5IMget_image_info(): Make sure to not exceed local array size
-
-      Malformed hdf5 files may provide more dimensions than the array dim[] in
-      H5IMget_image_info() is able to hold. Check number of elements first by calling
-      H5Sget_simple_extent_dims() with NULL for both 'dims' and 'maxdims' arguments.
-      This will cause the function to return only the number of dimensions.
-      The fix addresses a stack overflow on write.
-
-      (EFE - 2022/09/27 HDFFV-10589, GH-2226)
-
+    -
 
     Java Library
     ------------
     -
 
-
     Configuration
     -------------
-    - Remove Javadoc generation
-
-      The use of doxygen now supersedes the requirement to build javadocs. We do not
-      have the resources to continue to support two documentation methods and have
-      chosen doxygen as our standard.
-
-      (ADB - 2022/12/19)
-
-    - Change the default for building the high-level tools
-
-      The gif2hdf5 and hdf2gif high-level tools are deprecated and will be removed
-      in a future release. The default build setting for them have been changed from enabled
-      to disabled. A user can enable the build of these tools if needed.
-          autotools:   --enable-hlgiftools
-          cmake:       HDF5_BUILD_HL_GIF_TOOLS=ON
-
-      (ADB - 2022/12/16)
-
-    - Change the settings of the *pc files to use the correct format
-
-      The pkg-config files generated by CMake uses incorrect syntax for the 'Requires'
-      settings. Changing the set to use 'lib-name = version' instead 'lib-name-version'
-      fixes the issue
-
-      (ADB - 2022/12/06 HDFFV-11355)
-
-    - Move MPI libraries link from PRIVATE to PUBLIC
-
-      The install dependencies were not including the need for MPI libraries when
-      an application or library was built with the C library. Also updated the
-      CMake target link command to use the newer style MPI::MPI_C link variable.
-
-      (ADB - 2022/10/27)
-
+    -
 
     Tools
     -----
-    - Fix h5repack to only print output when verbose option is selected
-
-      When timing option was added to h5repack, the check for verbose was
-      incorrectly implemented.
-
-      (ADB -  2022/12/02, GH #2270)
-
+    -
 
     Performance
     -------------
     -
-
 
     Fortran API
     -----------
@@ -359,31 +123,25 @@ Bug Fixes since HDF5-1.13.3 release
     ------------------
     -
 
-
     Fortran High-Level APIs
     -----------------------
     -
-
 
     Documentation
     -------------
     -
 
-
     F90 APIs
     --------
     -
-
 
     C++ APIs
     --------
     - 
 
-
     Testing
     -------
     -
-
 
 Platforms Tested
 ===================
