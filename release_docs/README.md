@@ -10,12 +10,12 @@ well as the HDF5 history files.
 The HISTORY files contain the history of this branch of HDF5. They fall into
 three categories.
 
-### HISTORY-<VERSION 1>-<VERSION 2>.txt
+### HISTORY-\<VERSION 1>-\<VERSION 2>.txt
 
 These files are created when we release a new major version and include all
 the changes that were made to develop while creating a major release.
 
-### HISTORY-<VERSION>.txt
+### HISTORY-\<VERSION>.txt
 
 This file contains the changes that were made to a maintenance branch since
 it split off from `develop`. It will also be found in the `develop` branch
@@ -53,7 +53,7 @@ the history files from those releases and compare them by hand.
 * Create the new maintenance branch
 
 In develop:
-* Create the new HISTORY-<v1>-<v2>.txt file
+* Create the new HISTORY-\<v1>-\<v2>.txt file
     * If there is an experimental HISTORY file, concatenate RELEASE.txt onto it and use that
     * Otherwise, start with RELEASE.txt
     * Add the boilerplate like in the other HISTORY files
@@ -61,10 +61,10 @@ In develop:
 * Clear out RELEASE.txt
 
 Note that we're KEEPING any experimental release history information in the
-HISTORY-<v1>-<v2>.txt file, so do NOT use the merged file in the above steps!
+HISTORY-\<v1>-\<v2>.txt file, so do NOT use the merged file in the above steps!
 
 In the new maintenance branch:
-* Create the new HISTORY-<v>.txt file
+* Create the new HISTORY-\<v>.txt file
     * If there is an experimental HISTORY file use the combined file you created earlier
     * Otherwise, start with RELEASE.txt
     * Add the boilerplate like in the other HISTORY files
@@ -81,12 +81,12 @@ In the new release branch:
 * Create the release branch
 
 In the maintenance branch:
-* Concatenate RELEASE.txt onto the end of HISTORY-<v>.txt
+* Concatenate RELEASE.txt onto the end of HISTORY-\<v>.txt
 * Clear out RELEASE.txt
 
 ### EXPERIMENTAL release
 
-* Concatenate RELEASE.txt onto the end of HISTORY-<v>.txt
+* Concatenate RELEASE.txt onto the end of HISTORY-\<v>.txt
 * Clear out RELEASE.txt
 
 ## INSTALL files
