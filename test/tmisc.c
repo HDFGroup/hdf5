@@ -6060,15 +6060,23 @@ test_misc36(void)
 static void
 test_misc37(void)
 {
-    const char *fname;
+    const char *testfile = H5_get_srcdir_filename(CVE_2020_10812_FILENAME);
+    hbool_t     driver_is_default_compatible;
     hid_t       fid;
     herr_t      ret;
 
     /* Output message about test being performed */
     MESSAGE(5, ("Fix for HDFFV-11052/CVE-2020-10812"));
 
-    fname = H5_get_srcdir_filename(CVE_2020_10812_FILENAME);
-    fid   = H5Fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT);
+    ret = h5_driver_is_default_vfd_compatible(H5P_DEFAULT, &driver_is_default_compatible);
+    CHECK(ret, FAIL, "h5_driver_is_default_vfd_compatible");
+
+    if (!driver_is_default_compatible) {
+        HDprintf("-- SKIPPED --\n");
+        return;
+    }
+
+    fid = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fopen");
 
     /* This should fail due to the illegal file size.

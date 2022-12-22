@@ -174,12 +174,12 @@ jobs:
             flags: ""
             run_tests: false
             thread_safety:
-              - enabled: false
-                text: ""
+              enabled: false
+              text: ""
             build_mode:
-              - text: " DBG"
-                cmake: "Debug"
-                autotools: "debug"
+              text: " DBG"
+              cmake: "Debug"
+              autotools: "debug"
 
           - name: "Ubuntu gcc Autotools v1.8 default API (build only)"
             os: ubuntu-latest
@@ -196,12 +196,12 @@ jobs:
             flags: ""
             run_tests: false
             thread_safety:
-              - enabled: false
-                text: ""
+              enabled: false
+              text: ""
             build_mode:
-              - text: " DBG"
-                cmake: "Debug"
-                autotools: "debug"
+              text: " DBG"
+              cmake: "Debug"
+              autotools: "debug"
 
           - name: "Ubuntu gcc Autotools v1.10 default API (build only)"
             os: ubuntu-latest
@@ -218,12 +218,12 @@ jobs:
             flags: ""
             run_tests: false
             thread_safety:
-              - enabled: false
-                text: ""
+              enabled: false
+              text: ""
             build_mode:
-              - text: " DBG"
-                cmake: "Debug"
-                autotools: "debug"
+              text: " DBG"
+              cmake: "Debug"
+              autotools: "debug"
 
           - name: "Ubuntu gcc Autotools v1.12 default API (build only)"
             os: ubuntu-latest
@@ -240,10 +240,32 @@ jobs:
             flags: ""
             run_tests: false
             thread_safety:
+              enabled: false
+              text: ""
+            build_mode:
+              text: " DBG"
+              cmake: "Debug"
+              autotools: "debug"
+
+          - name: "Ubuntu gcc Autotools v1.14 default API (build only)"
+            os: ubuntu-latest
+            cpp: enable
+            fortran: enable
+            java: enable
+            parallel: disable
+            mirror_vfd: enable
+            direct_vfd: enable
+            deprec_sym: enable
+            default_api: v114
+            toolchain: ""
+            generator: "autogen"
+            flags: ""
+            run_tests: false
+            thread_safety:
               - enabled: false
                 text: ""
             build_mode:
-              - text: " DBG"
+              - text: "DBG"
                 cmake: "Debug"
                 autotools: "debug"
 
@@ -256,26 +278,26 @@ jobs:
             mirror_vfd: enable
             direct_vfd: enable
             deprec_sym: disable
-            default_api: v114
+            default_api: v116
             toolchain: ""
             generator: "autogen"
             flags: ""
             run_tests: false
             thread_safety:
-              - enabled: false
-                text: ""
+              enabled: false
+              text: ""
             build_mode:
-              - text: " DBG"
-                cmake: "Debug"
-                autotools: "debug"
+              text: " DBG"
+              cmake: "Debug"
+              autotools: "debug"
 
-          - name: "Ubuntu gcc Autotools -Werror (build only) DBG"
+          - name: "Ubuntu gcc Autotools -Werror (build only)"
             os: ubuntu-latest
             cpp: enable
             fortran: disable
             java: disable
             parallel: disable
-            mirror_vfd: enable
+            mirror_vfd: disable
             direct_vfd: enable
             deprec_sym: enable
             default_api: v114
@@ -284,20 +306,20 @@ jobs:
             flags: "CFLAGS=-Werror"
             run_tests: false
             thread_safety:
-              - enabled: false
-                text: ""
+              enabled: false
+              text: ""
             build_mode:
-              - text: " DBG"
-                cmake: "Debug"
-                autotools: "debug"
+              text: " DBG"
+              cmake: "Debug"
+              autotools: "debug"
 
-          - name: "Ubuntu gcc Autotools -Werror (build only) REL"
+          - name: "Ubuntu gcc Autotools -Werror (build only)"
             os: ubuntu-latest
             cpp: enable
             fortran: disable
             java: disable
             parallel: disable
-            mirror_vfd: enable
+            mirror_vfd: disable
             direct_vfd: enable
             deprec_sym: enable
             default_api: v114
@@ -306,12 +328,12 @@ jobs:
             flags: "CFLAGS=-Werror"
             run_tests: false
             thread_safety:
-              - enabled: false
-                text: ""
+              enabled: false
+              text: ""
             build_mode:
-              - text: " REL"
-                cmake: "Release"
-                autotools: "production"
+              text: " REL"
+              cmake: "Release"
+              autotools: "production"
 
     # Sets the job's name from the properties
     name: "${{ matrix.name }}${{ matrix.build_mode.text }}${{ matrix.thread_safety.text }}"
@@ -328,6 +350,10 @@ jobs:
       #
       # SETUP
       #
+
+      #Useful for debugging
+      - name: Dump matrix context
+        run: echo '${{ toJSON(matrix) }}'
 
       - name: Install CMake Dependencies (Linux)
         run: sudo apt-get install ninja-build
