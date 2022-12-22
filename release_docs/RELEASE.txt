@@ -554,85 +554,6 @@ New Features
 
       (ADB - 2020/03/24, TRILAB-192)
 
-    - Added test script for file size compare
-
-      If CMake minimum version is at least 3.14, the fileCompareTest.cmake
-      script will compare file sizes.
-
-      (ADB - 2020/02/24, HDFFV-11036)
-
-    - Update CMake minimum version to 3.12
-
-      Updated CMake minimum version to 3.12 and added version checks
-      for Windows features.
-
-      (ADB - 2020/02/05, TRILABS-142)
-
-    - Fixed CMake include properties for Fortran libraries
-
-      Corrected the library properties for Fortran to use the
-      correct path for the Fortran module files.
-
-      (ADB - 2020/02/04, HDFFV-11012)
-
-    - Added common warnings files for gnu and intel
-
-      Added warnings files to use one common set of flags
-      during configure for both autotools and CMake build
-      systems. The initial implementation only affects a
-      general set of flags for gnu and intel compilers.
-
-      (ADB - 2020/01/17)
-
-    - Added new options to CMake for control of testing
-
-      Added CMake options (default ON);
-        HDF5_TEST_SERIAL AND/OR HDF5_TEST_PARALLEL
-        combined with:
-          HDF5_TEST_TOOLS
-          HDF5_TEST_EXAMPLES
-          HDF5_TEST_SWMR
-          HDF5_TEST_FORTRAN
-          HDF5_TEST_CPP
-          HDF5_TEST_JAVA
-
-      (ADB - 2020/01/15, HDFFV-11001)
-
-    - Added Clang sanitizers to CMake for analyzer support if compiler is clang.
-
-      Added CMake code and files to execute the Clang sanitizers if
-      HDF5_ENABLE_SANITIZERS is enabled and the USE_SANITIZER option
-      is set to one of the following:
-        Address
-        Memory
-        MemoryWithOrigins
-        Undefined
-        Thread
-        Leak
-        'Address;Undefined'
-
-      (ADB - 2019/12/12, TRILAB-135)
-
-    - Update CMake for VS2019 support
-
-      CMake added support for VS2019 in version 3.15. Changes to the CMake
-      generator setting required changes to scripts. Also updated version
-      references in CMake files as necessary.
-
-      (ADB - 2019/11/18, HDFFV-10962)
-
-    - Update CMake options to match new autotools options
-
-      Add configure options (autotools - CMake):
-        enable-asserts       HDF5_ENABLE_ASSERTS
-        enable-symbols       HDF5_ENABLE_SYMBOLS
-        enable-profiling     HDF5_ENABLE_PROFILING
-        enable-optimization  HDF5_ENABLE_OPTIMIZATION
-      In addition NDEBUG is no longer forced defined and relies on the CMake
-      process.
-
-      (ADB - 2019/10/07, HDFFV-100901, HDFFV-10637, TRILAB-97)
-
 
     Library:
     --------
@@ -1010,75 +931,6 @@ New Features
 
       (JOS - 2020/03/13, TBD)
 
-    - Refactored public exposure of haddr_t type in favor of "object tokens"
-
-      To better accommodate HDF5 VOL connectors where "object addresses in a file"
-      may not make much sense, the following changes were made to the library:
-
-      * Introduced new H5O_token_t "object token" type, which represents a
-        unique and permanent identifier for referencing an HDF5 object within
-        a container; these "object tokens" are meant to replace object addresses.
-        Along with the new type, a new H5Oopen_by_token API call was introduced
-        to open an object by a token, similar to how object addresses were
-        previously used with H5Oopen_by_addr.
-
-      * Introduced new H5Lget_info2, H5Lget_info_by_idx2, H5Literate2, H5Literate_by_name2,
-        H5Lvisit2 and H5Lvisit_by_name2 API calls, along with their associated H5L_info2_t
-        struct and H5L_iterate2_t callback function, which work with the newly-introduced
-        object tokens, instead of object addresses. The original functions have been
-        renamed to version 1 functions and are deprecated in favor of the new version 2
-        functions. The H5L_info_t and H5L_iterate_t types have been renamed to version 1
-        types and are now deprecated in favor of their version 2 counterparts. For each of
-        the functions and types, compatibility macros take place of the original symbols.
-
-      * Introduced new H5Oget_info3, H5Oget_info_by_name3, H5Oget_info_by_idx3,
-        H5Ovisit3 and H5Ovisit_by_name3 API calls, along with their associated H5O_info2_t
-        struct and H5O_iterate2_t callback function, which work with the newly-introduced
-        object tokens, instead of object addresses. The version 2 functions are now
-        deprecated in favor of the version 3 functions. The H5O_info_t and H5O_iterate_t
-        types have been renamed to version 1 types and are now deprecated in favor of their
-        version 2 counterparts. For each, compatibility macros take place of the original
-        symbols.
-
-      * Introduced new H5Oget_native_info, H5Oget_native_info_by_name and
-        H5Oget_native_info_by_idx API calls, along with their associated H5O_native_info_t
-        struct, which are used to retrieve the native HDF5 file format-specific information
-        about an object. This information (such as object header info and B-tree/heap info)
-        has been removed from the new H5O_info2_t struct so that the more generic
-        H5Oget_info(_by_name/_by_idx)3 routines will not try to retrieve it for non-native
-        VOL connectors.
-
-      * Added new H5Otoken_cmp, H5Otoken_to_str and H5Otoken_from_str routines to compare
-        two object tokens, convert an object token into a nicely-readable string format and
-        to convert an object token string back into a real object token, respectively.
-
-      (DER, QAK, JTH - 2020/01/16)
-
-    - Add new public function H5Sselect_adjust.
-
-      This function shifts a dataspace selection by a specified logical offset
-      within the dataspace extent.  This can be useful for VOL developers to
-      implement chunked datasets.
-
-      (NAF - 2019/11/18)
-
-    - Add new public function H5Sselect_project_intersection.
-
-      This function computes the intersection between two dataspace selections
-      and projects that intersection into a third selection.  This can be useful
-      for VOL developers to implement chunked or virtual datasets.
-
-      (NAF - 2019/11/13, ID-148)
-
-    - Add new public function H5VLget_file_type.
-
-      This function returns a datatype equivalent to the supplied datatype but
-      with the location set to be in the file.  This datatype can then be used
-      with H5Tconvert to convert data between file and in-memory representation.
-      This function is intended for use only by VOL connector developers.
-
-      (NAF - 2019/11/08, ID-127)
-
 
     Parallel Library:
     -----------------
@@ -1242,20 +1094,6 @@ New Features
 
       (DER - 2020/07/30, HDFFV-11092)
 
-    - Added ability to test java library with VOLs.
-
-      Created a new CMake script that combines the java and vol test scripts.
-
-      (ADB - 2020/02/03, HDFFV-10996)
-
-    - Tests fail for non-English locales.
-
-      In the JUnit tests with a non-English locale, only the part before
-      the decimal comma is replaced by XXXX and this leads to a comparison
-      error. Changed the regex for the Time substitution.
-
-      (ADB - 2020/01/09, HDFFV-10995)
-
 
     Tools:
     ------
@@ -1371,22 +1209,6 @@ New Features
       code block.
 
        (KY -2020/02/07, HDFFV-11014)
-
-    - h5diff was updated to use the new reference APIs.
-
-       h5diff uses the new reference APIs to compare references.
-       Attribute references can also be compared.
-
-      (ADB - 2019/12/19, HDFFV-10980)
-
-    - h5dump and h5ls were updated to use the new reference APIs.
-
-      The tools library now use the new reference APIs to inspect a
-      file. Also the DDL spec was updated to reflect the format
-      changes produced with the new APIs. The export API and support
-      functions in the JNI were updated to match.
-
-      (ADB - 2019/12/06, HDFFV-10876 and HDFFV-10877)
 
 
     High-Level APIs:
@@ -1914,20 +1736,6 @@ Bug Fixes since HDF5-1.12.0 release
 
       (PGT,ADB - 2020/12/13, HDFFV-10865)
 
-    - Added ability to test java library with VOLs.
-
-      Created a new CMake script that combines the java and vol test scripts.
-
-      (ADB - 2020/02/03, HDFFV-10996)
-
-    - Tests fail for non-English locales.
-
-      In the JUnit tests with a non-English locale, only the part before
-      the decimal comma is replaced by XXXX and this leads to a comparison
-      error. Changed the regex for the Time substitution.
-
-      (ADB - 2020/01/09, HDFFV-10995)
-
 
     Configuration
     -------------
@@ -2141,33 +1949,6 @@ Bug Fixes since HDF5-1.12.0 release
 
       (ADB - 2020/07/20, HDFFV-1005)
 
-    - h5repack was fixed to repack the reference attributes properly.
-
-      The code line that checks if the update of reference inside a compound
-      datatype is misplaced outside the code block loop that carries out the
-      check. In consequence, the next attribute that is not the reference
-      type was repacked again as the reference type and caused the failure of
-      repacking. The fix is to move the corresponding code line to the correct
-      code block.
-
-      (KY -2020/02/10, HDFFV-11014)
-
-    - h5diff was updated to use the new reference APIs.
-
-      h5diff uses the new reference APIs to compare references.
-      Attribute references can also be compared.
-
-      (ADB - 2019/12/19, HDFFV-10980)
-
-    - h5dump and h5ls were updated to use the new reference APIs.
-
-      The tools library now use the new reference APIs to inspect a
-      file. Also the DDL spec was updated to reflect the format
-      changes produced with the new APIs. The export API and support
-      functions in the JNI were updated to match.
-
-      (ADB - 2019/12/06, HDFFV-10876 and HDFFV-10877)
-
 
     Performance
     -------------
@@ -2181,10 +1962,6 @@ Bug Fixes since HDF5-1.12.0 release
      * Fixed an issue with open objects remaining after h5close_f was called.
      * Added additional tests.
        (MSB, 2022/04/19, HDFFV-11306)
-
-    - Corrected INTERFACE INTENT(IN) to INTENT(OUT) for buf_size in h5fget_file_image_f.
-
-      (MSB - 2020/02/18, HDFFV-11029)
 
 
     High-Level Library
