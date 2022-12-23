@@ -54,7 +54,7 @@ the history files from those releases and compare them by hand.
 
 In develop:
 * Create the new HISTORY-\[VERSION 1\]-\[VERSION 2\].txt file
-    * If there is an experimental HISTORY file, concatenate RELEASE.txt onto it and use that
+    * If there is an experimental HISTORY file, add RELEASE.txt to the beginning of it and use that
     * Otherwise, start with RELEASE.txt
     * Add the introduction boilerplate like in the other HISTORY files (TOC, etc.)
 * Delete any experimental HISTORY file
@@ -83,12 +83,12 @@ In the new release branch:
 * Create the release branch
 
 In the maintenance branch:
-* Concatenate RELEASE.txt onto the end of HISTORY-\[VERSION\].txt
+* Add the contents of RELEASE.txt to the beginnnig of HISTORY-\[VERSION\].txt
 * Clear out RELEASE.txt
 
 ### EXPERIMENTAL release
 
-* Concatenate RELEASE.txt onto the end of HISTORY-\[VERSION\].txt
+* Add the contents of RELEASE.txt to the beginnnig of HISTORY-\[VERSION\].txt
 * Clear out RELEASE.txt
 
 ## INSTALL files
