@@ -56,7 +56,7 @@ In develop:
 * Create the new HISTORY-\[VERSION 1\]-\[VERSION 2\].txt file
     * If there is an experimental HISTORY file, concatenate RELEASE.txt onto it and use that
     * Otherwise, start with RELEASE.txt
-    * Add the boilerplate like in the other HISTORY files
+    * Add the introduction boilerplate like in the other HISTORY files (TOC, etc.)
 * Delete any experimental HISTORY file
 * Clear out RELEASE.txt
 
@@ -68,7 +68,7 @@ In the new maintenance branch:
 * Create the new HISTORY-\[VERSION\].txt file
     * If there is an experimental HISTORY file use the combined file you created earlier
     * Otherwise, start with RELEASE.txt
-    * Add the boilerplate like in the other HISTORY files
+    * Add the introduction boilerplate like in the other HISTORY files (TOC, etc.)
 * Delete any experimental HISTORY file
 * Clear out RELEASE.txt
 
@@ -76,6 +76,7 @@ In the new maintenance branch:
 
 In the new release branch:
 * If there were experimental releases, use the combined file you created earlier as RELEASE.txt
+* Otherwise the RELEASE.txt will be used as-is
 
 ### MINOR release
 
