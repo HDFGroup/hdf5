@@ -2158,6 +2158,25 @@ Known Problems
        *                                                          *
        ************************************************************
 
+    There is a bug in OpenMPI 4.1.0-4.1.4 that can result in incorrect
+    results from MPI I/O requests unless one of the following parameters
+    is passed to mpirun:
+
+        --mca io ^ompio
+
+        --mca fbtl_posix_read_data_sieving 0
+
+    This bug has been fixed in later versions of OpenMPI.
+
+    Further discussion can be found here:
+
+    https://www.hdfgroup.org/2022/11/workarounds-for-openmpi-bug-exposed-by-make-check-in-hdf5-1-13-3/
+
+    There is a bug in MPICH 4.0.0-4.0.3 where using device=ch4:ofi (the default)
+    can cause failures in the testphdf5 test program. Using ch4:ucx or ch3
+    allows the test to pass. The bug appears to be fixed in the upcoming 4.1
+    release.
+
     The accum test fails on MacOS 12.6.2 (Monterey) with clang 14.0.0. The
     reason for this failure and its impact are unknown.
 
