@@ -4,9 +4,8 @@ HDF5  HISTORY
 
 INTRODUCTION
 
-This document describes the differences between the HDF5-1.10.0 and
-HDF5 1.12.0 releases. For more details check the HISTORY*.txt files in the
-HDF5 source.
+This document describes the changes that were made while preparing the HDF5
+1.12.0 release.
 
 Information about supported and tested platforms is provided for historical
 reasons only and may not be accurate.
@@ -425,12 +424,6 @@ Bug Fixes since HDF5-1.12.0-alpha1 release
         functions in the JNI were updated to match.
 
         (ADB - 2019/12/06, HDFFV-10876 and HDFFV-10877)
-
-
-Major Bug Fixes since HDF5-1.10.0 release
-=========================================
-
-    - For major bug fixes please see HISTORY-1_10_0-1_12_0.txt file
 
 
 Supported Platforms

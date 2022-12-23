@@ -4,8 +4,8 @@ HDF5  HISTORY
 
 INTRODUCTION
 
-This document describes the development history between the HDF5-1.8.0 and
-HDF5 1.10.0 releases. For more information see the SVN log.
+This document describes the changes that were made while preparing the HDF5
+1.10.0 release.
 
 Information about supported and tested platforms is provided for historical
 reasons only and may not be accurate.
