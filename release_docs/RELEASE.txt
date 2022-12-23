@@ -2158,6 +2158,12 @@ Known Problems
        *                                                          *
        ************************************************************
 
+    The accum test fails on MacOS 12.6.2 (Monterey) with clang 14.0.0. The
+    reason for this failure and its impact are unknown.
+
+    The onion test has failures on Windows when built using Intel OneAPI
+    2022.3. The cause of these failures is under investigation.
+
     CMake files do not behave correctly with paths containing spaces.
     Do not use spaces in paths because the required escaping for handling spaces
     results in very complex and fragile build files.
