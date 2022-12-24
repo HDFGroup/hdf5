@@ -25,6 +25,6 @@ else
 endif
 
 # All subdirectories
-SUBDIRS=$(TOOLS_DIR) h5watch
+SUBDIRS=h5watch $(TOOLS_GIF_DIR)
 
 include $(top_srcdir)/config/conclude.am
