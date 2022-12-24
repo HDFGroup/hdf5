@@ -208,20 +208,6 @@ New Features
 
       (DCY - 2021/09/29)
 
-    - Added new option to control the build of High-Level tools
-      that default ON/enabled.
-
-      Add configure options (autotools - CMake):
-            --enable-hltools       HDF5_BUILD_HL_TOOLS
-
-      Disabling this option prevents building the gif tool which
-      contains the following CVEs:
-          HDFFV-10592 CVE-2018-17433
-          HDFFV-10593 CVE-2018-17436
-          HDFFV-11048 CVE-2020-10809
-
-      (ADB - 2021/09/16, HDFFV-11266)
-
     - Adds C++ Autotools configuration file for Intel
 
       * Checks for icpc as the compiler
@@ -1747,13 +1733,21 @@ Bug Fixes since HDF5-1.12.0 release
 
       (ADB - 2022/12/19)
 
-    - Change the default for building the high-level tools
+    - Change the default for building the high-level GIF tools
 
-      The gif2hdf5 and hdf2gif high-level tools are deprecated and will be removed
-      in a future release. The default build setting for them have been changed from enabled
-      to disabled. A user can enable the build of these tools if needed.
+      The gif2h5 and h52gif high-level tools are deprecated and will be removed
+      in a future release. The default build setting for them has been changed
+      from enabled to disabled. A user can enable the build of these tools if
+      needed.
+
           autotools:   --enable-hlgiftools
           cmake:       HDF5_BUILD_HL_GIF_TOOLS=ON
+
+      Disabling the GIF tools eliminates the following CVEs:
+
+          HDFFV-10592 CVE-2018-17433
+          HDFFV-10593 CVE-2018-17436
+          HDFFV-11048 CVE-2020-10809
 
       (ADB - 2022/12/16)
 
