@@ -3751,8 +3751,8 @@ AC_MSG_CHECKING([which version of public symbols to use by default])
 AC_ARG_WITH([default-api-version],
             [AS_HELP_STRING([--with-default-api-version=(v16|v18|v110|v112|v114)],
                             [Specify default release version of public symbols
-                             [default=v114]])],,
-            [withval=v114])
+                             [default=v116]])],,
+            [withval=v116])
 
 if test "X$withval" = "Xv16"; then
     AC_MSG_RESULT([v16])
