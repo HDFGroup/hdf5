@@ -203,9 +203,6 @@
 /* Define if the map API (H5M) should be compiled */
 #undef HAVE_MAP_API
 
-/* Define to 1 if you have the <memory.h> header file. */
-#undef HAVE_MEMORY_H
-
 /* Define to 1 if you have the <mfu.h> header file. */
 #undef HAVE_MFU_H
 
@@ -284,6 +281,9 @@
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
+
+/* Define to 1 if you have the <stdio.h> header file. */
+#undef HAVE_STDIO_H
 
 /* Define to 1 if you have the <stdlib.h> header file. */
 #undef HAVE_STDLIB_H
@@ -553,7 +553,9 @@
 /* The size of `__float128', as computed by sizeof. */
 #undef SIZEOF___FLOAT128
 
-/* Define to 1 if you have the ANSI C header files. */
+/* Define to 1 if all of the C90 standard headers exist (not just the ones
+   required in a freestanding environment). This macro is provided for
+   backward compatibility; new code need not use it. */
 #undef STDC_HEADERS
 
 /* Define if strict file format checks are enabled */
