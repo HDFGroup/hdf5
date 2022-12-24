@@ -3749,11 +3749,13 @@ esac
 AC_SUBST([DEFAULT_API_VERSION])
 AC_MSG_CHECKING([which version of public symbols to use by default])
 AC_ARG_WITH([default-api-version],
-            [AS_HELP_STRING([--with-default-api-version=(v16|v18|v110|v112|v114)],
+            [AS_HELP_STRING([--with-default-api-version=(default|v16|v18|v110|v112|v114|v116)],
                             [Specify default release version of public symbols
-                             [default=v114]])],,
-            [withval=v114])
+                             [default=v116]])],,
+            [withval=v116])
 
+## Allowing "default" allows the GitHub CI to check that we didn't forget
+## to change the defaults when creating a new major version
 if test "X$withval" = "Xv16"; then
     AC_MSG_RESULT([v16])
     DEFAULT_API_VERSION=v16
@@ -3779,7 +3781,7 @@ elif test "X$withval" = "Xv114"; then
     DEFAULT_API_VERSION=v114
     AC_DEFINE([USE_114_API_DEFAULT], [1],
               [Define using v1.14 public API symbols by default])
-elif test "X$withval" = "Xv116"; then
+elif test "X$withval" = "Xv116" -o "X$withval" = "Xdefault"; then
     AC_MSG_RESULT([v116])
     DEFAULT_API_VERSION=v116
     AC_DEFINE([USE_116_API_DEFAULT], [1],
