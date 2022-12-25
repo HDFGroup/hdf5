@@ -261,13 +261,12 @@ jobs:
             generator: "autogen"
             flags: ""
             run_tests: false
-            thread_safety:
-              - enabled: false
-                text: ""
+              enabled: false
+              text: ""
             build_mode:
-              - text: "DBG"
-                cmake: "Debug"
-                autotools: "debug"
+              text: " DBG"
+              cmake: "Debug"
+              autotools: "debug"
 
           - name: "Ubuntu gcc Autotools no deprecated symbols (build only)"
             os: ubuntu-latest
@@ -278,7 +277,7 @@ jobs:
             mirror_vfd: enable
             direct_vfd: enable
             deprec_sym: disable
-            default_api: v116
+            default_api: default
             toolchain: ""
             generator: "autogen"
             flags: ""

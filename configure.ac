@@ -874,37 +874,6 @@ else
   AC_MSG_RESULT([no])
 fi
 
-AC_MSG_CHECKING([if the high-level tools are enabled])
-AC_ARG_ENABLE([hltools],
-     [AS_HELP_STRING([--enable-hltools],
-                     [Enable the high-level tools.
-                     [default=yes]
-                     ])],
-     [HDF5_HL_TOOLS=$enableval])
-
-if test "X${HDF5_HL}" = "Xyes" -a "X-$HDF5_HL_TOOLS" = "X-yes"; then
- AC_MSG_RESULT([yes])
- HL_TOOLS="tools"
-else
-  AC_MSG_RESULT([no])
-fi
-
-AC_MSG_CHECKING([if the high-level GIF tools are enabled])
-AC_ARG_ENABLE([hltools],
-     [AS_HELP_STRING([--enable-hlgiftools],
-                     [Enable the high-level GIF tools.
-                     [default=no]
-                     ])],
-     [HDF5_HL_GIF_TOOLS=$enableval])
-
-if test "X${HDF5_GIF_HL}" = "Xyes" -a "X-$HDF5_HL_TOOLS" = "X-yes" -a "X-$HDF5_HL_GIF_TOOLS" = "X-yes"; then
- AC_MSG_RESULT([yes])
- HL_GIF_TOOLS="tools"
-else
-  AC_MSG_RESULT([no])
-fi
-
-
 ## ----------------------------------------------------------------------
 ## Enable new references for dimension scales
 ##
@@ -1194,6 +1163,27 @@ AC_ARG_ENABLE([tools],
               [HDF5_TOOLS=$enableval])
 
 AC_MSG_RESULT([$HDF5_TOOLS])
+
+## ----------------------------------------------------------------------
+## Check if they would like to disable building the high-level GIF
+## tools (they have unfixed CVE issues)
+##
+
+AC_MSG_CHECKING([if the high-level GIF tools are enabled])
+AC_ARG_ENABLE([hlgiftools],
+     [AS_HELP_STRING([--enable-hlgiftools],
+                     [Enable the high-level GIF tools. NOTE: These have unfixed CVE issues!
+                     [default=no]
+                     ])],
+     [HDF5_HL_GIF_TOOLS=$enableval])
+
+if test "X-$HDF5_TOOLS" = "X-yes" -a "X-$HDF5_HL" = "X-yes" -a "X-$HDF5_HL_GIF_TOOLS" = "X-yes"; then
+  AC_MSG_RESULT([yes])
+else
+  AC_MSG_RESULT([no])
+  HDF5_HL_GIF_TOOLS="no"
+fi
+
 
 ## ----------------------------------------------------------------------
 ## Check if they would like to enable building doxygen files
@@ -3759,11 +3749,13 @@ esac
 AC_SUBST([DEFAULT_API_VERSION])
 AC_MSG_CHECKING([which version of public symbols to use by default])
 AC_ARG_WITH([default-api-version],
-            [AS_HELP_STRING([--with-default-api-version=(v16|v18|v110|v112|v114)],
+            [AS_HELP_STRING([--with-default-api-version=(default|v16|v18|v110|v112|v114|v116)],
                             [Specify default release version of public symbols
-                             [default=v114]])],,
-            [withval=v114])
+                             [default=v116]])],,
+            [withval=v116])
 
+## Allowing "default" allows the GitHub CI to check that we didn't forget
+## to change the defaults when creating a new major version
 if test "X$withval" = "Xv16"; then
     AC_MSG_RESULT([v16])
     DEFAULT_API_VERSION=v16
@@ -3789,7 +3781,7 @@ elif test "X$withval" = "Xv114"; then
     DEFAULT_API_VERSION=v114
     AC_DEFINE([USE_114_API_DEFAULT], [1],
               [Define using v1.14 public API symbols by default])
-elif test "X$withval" = "Xv116"; then
+elif test "X$withval" = "Xv116" -o "X$withval" = "Xdefault"; then
     AC_MSG_RESULT([v116])
     DEFAULT_API_VERSION=v116
     AC_DEFINE([USE_116_API_DEFAULT], [1],
@@ -3927,7 +3919,6 @@ AM_CONDITIONAL([BUILD_HDF5_HL_CONDITIONAL], [test "X$HDF5_HL" = "Xyes"])
 AM_CONDITIONAL([BUILD_TESTS_CONDITIONAL], [test "X$HDF5_TESTS" = "Xyes"])
 AM_CONDITIONAL([BUILD_TESTS_PARALLEL_CONDITIONAL], [test -n "$TESTPARALLEL"])
 AM_CONDITIONAL([BUILD_TOOLS_CONDITIONAL], [test "X$HDF5_TOOLS" = "Xyes"])
-AM_CONDITIONAL([BUILD_TOOLS_HL_CONDITIONAL], [test "X$HDF5_HL_TOOLS" = "Xyes"])
 AM_CONDITIONAL([BUILD_TOOLS_HL_GIF_CONDITIONAL], [test "X$HDF5_HL_GIF_TOOLS" = "Xyes"])
 AM_CONDITIONAL([BUILD_DOXYGEN_CONDITIONAL], [test "X$HDF5_DOXYGEN" = "Xyes"])
 
