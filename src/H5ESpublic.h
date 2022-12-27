@@ -40,7 +40,7 @@
 /* Public Typedefs */
 /*******************/
 
-/** 
+/**
  * Asynchronous operation status
  */
 typedef enum H5ES_status_t {
@@ -50,7 +50,7 @@ typedef enum H5ES_status_t {
     H5ES_STATUS_FAIL         /**< An operation has completed, but failed      */
 } H5ES_status_t;
 
-/** 
+/**
  * Information about operations in an event set
  */
 typedef struct H5ES_op_info_t {
