@@ -336,7 +336,7 @@ H5_DLL hid_t H5FD_subfiling_init(void);
  *       H5FD_subfiling_config_t documentation for information about configuration
  *       for the #H5FD_SUBFILING driver.
  *
- * \since 1.13.2
+ * \since 1.14.0
  *
  */
 H5_DLL herr_t H5Pset_fapl_subfiling(hid_t fapl_id, const H5FD_subfiling_config_t *vfd_config);
@@ -370,7 +370,7 @@ H5_DLL herr_t H5Pset_fapl_subfiling(hid_t fapl_id, const H5FD_subfiling_config_t
  *       environment variables to get accurate values for the #H5FD_SUBFILING driver
  *       properties.
  *
- * \since 1.13.2
+ * \since 1.14.0
  *
  */
 H5_DLL herr_t H5Pget_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *config_out);
