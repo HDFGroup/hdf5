@@ -2166,6 +2166,11 @@ Known Problems
 
     https://www.hdfgroup.org/2022/11/workarounds-for-openmpi-bug-exposed-by-make-check-in-hdf5-1-13-3/
 
+    When using the subfiling feature with OpenMPI it is often necessary to
+    increase the maximum number of threads:
+
+    --mca common_pami_max_threads 4096
+
     There is a bug in MPICH 4.0.0-4.0.3 where using device=ch4:ofi (the default)
     can cause failures in the testphdf5 test program. Using ch4:ucx or ch3
     allows the test to pass. The bug appears to be fixed in the upcoming 4.1
