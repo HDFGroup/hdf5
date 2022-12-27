@@ -152,7 +152,7 @@ extern "C" {
  * \details H5EScreate() creates a new event set and returns a corresponding
  *          event set identifier.
  *
- * \since 1.13.0
+ * \since 1.14.0
  *
  */
 H5_DLL hid_t H5EScreate(void);
@@ -185,7 +185,7 @@ H5_DLL hid_t H5EScreate(void);
  *          immediately if an operation fails. If a failure occurs, the value
  *          returned for the number of operations in progress may be inaccurate.
  *
- * \since 1.13.0
+ * \since 1.14.0
  *
  */
 H5_DLL herr_t H5ESwait(hid_t es_id, uint64_t timeout, size_t *num_in_progress, hbool_t *err_occurred);
@@ -203,7 +203,7 @@ H5_DLL herr_t H5ESwait(hid_t es_id, uint64_t timeout, size_t *num_in_progress, h
  * \details H5EScancel() attempts to cancel operations in an event set specified
  *          by \p es_id. H5ES_NONE is a valid value for \p es_id, but functions as a no-op.
  *
- * \since 1.13.0
+ * \since 1.14.0
  *
  */
 H5_DLL herr_t H5EScancel(hid_t es_id, size_t *num_not_canceled, hbool_t *err_occurred);
@@ -220,7 +220,7 @@ H5_DLL herr_t H5EScancel(hid_t es_id, size_t *num_not_canceled, hbool_t *err_occ
  * \details H5ESget_count() retrieves number of events in an event set specified
  *          by \p es_id.
  *
- * \since 1.13.0
+ * \since 1.14.0
  *
  */
 H5_DLL herr_t H5ESget_count(hid_t es_id, size_t *count);
@@ -241,7 +241,7 @@ H5_DLL herr_t H5ESget_count(hid_t es_id, size_t *count);
  *       for matching operations inserted into the event set with possible
  *       errors that occur.
  *
- * \since 1.13.0
+ * \since 1.14.0
  *
  */
 H5_DLL herr_t H5ESget_op_counter(hid_t es_id, uint64_t *counter);
@@ -259,7 +259,7 @@ H5_DLL herr_t H5ESget_op_counter(hid_t es_id, uint64_t *counter);
  * \details H5ESget_err_status() checks if event set specified by es_id has
  *          failed operations.
  *
- * \since 1.13.0
+ * \since 1.14.0
  *
  */
 H5_DLL herr_t H5ESget_err_status(hid_t es_id, hbool_t *err_occurred);
@@ -279,7 +279,7 @@ H5_DLL herr_t H5ESget_err_status(hid_t es_id, hbool_t *err_occurred);
  *          The function does not wait for active operations to complete, so
  *          count may not include all failures.
  *
- * \since 1.13.0
+ * \since 1.14.0
  *
  */
 H5_DLL herr_t H5ESget_err_count(hid_t es_id, size_t *num_errs);
@@ -303,7 +303,7 @@ H5_DLL herr_t H5ESget_err_count(hid_t es_id, size_t *num_errs);
  *          \snippet this H5ES_err_info_t_snip
  *          \click4more
  *
- * \since 1.13.0
+ * \since 1.14.0
  *
  */
 H5_DLL herr_t H5ESget_err_info(hid_t es_id, size_t num_err_info, H5ES_err_info_t err_info[],
@@ -317,7 +317,7 @@ H5_DLL herr_t H5ESget_err_info(hid_t es_id, size_t num_err_info, H5ES_err_info_t
  * \param[in] err_info Array of structures
  * \returns \herr_t
  *
- * \since 1.13.0
+ * \since 1.14.0
  *
  */
 H5_DLL herr_t H5ESfree_err_info(size_t num_err_info, H5ES_err_info_t err_info[]);
@@ -337,7 +337,7 @@ H5_DLL herr_t H5ESfree_err_info(size_t num_err_info, H5ES_err_info_t err_info[])
  *          Registering a new callback will replace the existing one.
  *          H5ES_NONE is a valid value for 'es_id', but functions as a no-op
  *
- * \since 1.13.0
+ * \since 1.14.0
  *
  */
 H5_DLL herr_t H5ESregister_insert_func(hid_t es_id, H5ES_event_insert_func_t func, void *ctx);
@@ -357,7 +357,7 @@ H5_DLL herr_t H5ESregister_insert_func(hid_t es_id, H5ES_event_insert_func_t fun
  *          Registering a new callback will replace the existing one.
  *          H5ES_NONE is a valid value for 'es_id', but functions as a no-op
  *
- * \since 1.13.0
+ * \since 1.14.0
  *
  */
 H5_DLL herr_t H5ESregister_complete_func(hid_t es_id, H5ES_event_complete_func_t func, void *ctx);
@@ -372,7 +372,7 @@ H5_DLL herr_t H5ESregister_complete_func(hid_t es_id, H5ES_event_complete_func_t
  *
  * \details H5ESclose() terminates access to an event set specified by \p es_id.
  *
- * \since 1.13.0
+ * \since 1.14.0
  *
  */
 H5_DLL herr_t H5ESclose(hid_t es_id);

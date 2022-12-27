@@ -414,7 +414,7 @@ H5_DLL herr_t H5VLquery_optional(hid_t obj_id, H5VL_subclass_t subcls, int opt_t
  *            VOL connector object
  * \return \herr_t
  *
- * \since 1.13.0
+ * \since 1.14.0
  */
 H5_DLL herr_t H5VLobject_is_native(hid_t obj_id, hbool_t *is_native);
 

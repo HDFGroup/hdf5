@@ -39,7 +39,7 @@
  * while the application is performing other tasks.
  *
  * To support AIO capabilities for the HDF5 VOL connectors, the AIO versions for the functions
- * listed in the table below were added to HDF5 library version 1.13.0 and later. The async version
+ * listed in the table below were added to HDF5 library version 1.14.0 and later. The async version
  * of the function has “_async” suffix added to the function name. For example, the async version
  * for H5Fcreate is H5Fcreate_async.
  *
