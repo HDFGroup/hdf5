@@ -2147,7 +2147,7 @@ Known Problems
        *  at the National Energy Research Scientific Computing    *
        *  Center, NERSC.                                          *
        *  Doing so may cause a system disruption due to subfiling *
-       *  crashing Lustre. The sytem's Lustre bug is expected     *
+       *  crashing Lustre. The system's Lustre bug is expected    *
        *  to be resolved by 2023.                                 *
        *                                                          *
        ************************************************************
@@ -2170,6 +2170,11 @@ Known Problems
     can cause failures in the testphdf5 test program. Using ch4:ucx or ch3
     allows the test to pass. The bug appears to be fixed in the upcoming 4.1
     release.
+
+    These MPI implementation bugs may also be present in implementations derived
+    from OpenMPI or MPICH. The workarounds listed above may need to be adjusted
+    to match the derived implementation, or in some cases, there may be no
+    workaround.
 
     The accum test fails on MacOS 12.6.2 (Monterey) with clang 14.0.0. The
     reason for this failure and its impact are unknown.
