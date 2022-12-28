@@ -261,6 +261,7 @@ jobs:
             generator: "autogen"
             flags: ""
             run_tests: false
+            thread_safety:
               enabled: false
               text: ""
             build_mode:
