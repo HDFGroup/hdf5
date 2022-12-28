@@ -403,7 +403,7 @@ extern "C" {
  *
  * \brief Allows querying a VFD ID for features before the file is opened
  *
- * \driver_id
+ * \param[in] driver_id Virtual File Driver (VFD) ID
  * \param[out] flags VFD flags supported
  *
  * \return \herr_t
