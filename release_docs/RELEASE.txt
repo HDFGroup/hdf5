@@ -543,6 +543,38 @@ New Features
 
     Library:
     --------
+    - Overhauled the Virtual Object Layer (VOL)
+
+      The virtual object layer (VOL) was added in HDF5 1.12.0 but the initial
+      implementation required API-breaking changes to better support optional
+      operations and pass-through VOL connectors. The original VOL API is
+      now considered deprecated and VOL users and connector authors should
+      target the 1.14 VOL API.
+
+      The specific changes are too extensive to document in a release note, so
+      VOL users and connector authors should consult the updated VOL connector
+      author's guide and the 1.12-1.14 VOL migration guide.
+
+      (DER - 2022/12/28)
+
+    - H5VLquery_optional() signature change
+
+      The last parameter of this API call has changed from a pointer to hbool_t
+      to a pointer to uint64_t. Due to the changes in how optional operations
+      are handled in the 1.14 VOL API, we cannot make the old API call work
+      with the new scheme, so there is no API compatibility macro for it.
+
+      (DER - 2022/12/28)
+
+    - H5I_free_t callback signature change
+
+      In order to support asynchronous operations and future IDs, the signature
+      of the H5I_free_t callback has been modified to take a second 'request'
+      parameter. Due to the nature of the internal library changes, no API
+      compatibility macro is available for this change.
+
+      (DER - 2022/12/28)
+
     - Fix for CVE-2019-8396
 
       Malformed HDF5 files may have truncated content which does not match
