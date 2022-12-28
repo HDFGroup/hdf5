@@ -409,9 +409,8 @@ H5_DLL herr_t H5VLquery_optional(hid_t obj_id, H5VL_subclass_t subcls, int opt_t
  * \brief Determines whether an object ID represents a native
  *        VOL connector object.
  *
- * \param[in] obj_id Object identifier
- * \param[in] is_native Boolean determining whether object is a native
- *            VOL connector object
+ * \obj_id
+ * \param[out] is_native Boolean determining whether object is a native VOL connector object
  * \return \herr_t
  *
  * \since 1.14.0
