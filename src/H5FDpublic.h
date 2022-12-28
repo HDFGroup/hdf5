@@ -397,7 +397,27 @@ extern "C" {
 #endif
 
 /* Function prototypes */
-/* Allows querying a VFD ID for features before the file is opened */
+
+/**
+ * \ingroup H5FD
+ *
+ * \brief Allows querying a VFD ID for features before the file is opened
+ *
+ * \driver_id
+ * \param[out] flags VFD flags supported
+ *
+ * \return \herr_t
+ *
+ * \details Queries a virtual file driver (VFD) for feature flags. Takes a
+ *          VFD hid_t so it can be used before the file is opened. For example,
+ *          this could be used to check if a VFD supports SWMR.
+ *
+ * \note The flags obtained here are just those of the base driver and
+ *       do not take any configuration options (e.g., set via a fapl
+ *       call) into consideration.
+ *
+ * \since 1.10.2
+ */
 H5_DLL herr_t H5FDdriver_query(hid_t driver_id, unsigned long *flags /*out*/);
 
 #ifdef __cplusplus
