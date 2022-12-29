@@ -401,7 +401,7 @@ H5_DLL herr_t H5VLunregister_connector(hid_t connector_id);
  * \param[out] flags Operation flags
  * \return \herr_t
  *
- * \since 1.12.0
+ * \since 1.12.1
  */
 H5_DLL herr_t H5VLquery_optional(hid_t obj_id, H5VL_subclass_t subcls, int opt_type, uint64_t *flags);
 /**
@@ -413,7 +413,7 @@ H5_DLL herr_t H5VLquery_optional(hid_t obj_id, H5VL_subclass_t subcls, int opt_t
  * \param[out] is_native Boolean determining whether object is a native VOL connector object
  * \return \herr_t
  *
- * \since 1.14.0
+ * \since 1.12.2
  */
 H5_DLL herr_t H5VLobject_is_native(hid_t obj_id, hbool_t *is_native);
 
