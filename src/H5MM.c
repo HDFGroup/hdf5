@@ -225,34 +225,3 @@ H5MM_xfree_const(const void *mem)
 
     FUNC_LEAVE_NOAPI(NULL)
 } /* end H5MM_xfree_const() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5MM_memcpy
- *
- * Purpose:     Like memcpy(3) but with sanity checks on the parameters,
- *              particularly buffer overlap.
- *
- * Return:      Success:    pointer to dest
- *              Failure:    NULL
- *-------------------------------------------------------------------------
- */
-void *
-H5MM_memcpy(void *dest, const void *src, size_t n)
-{
-    void *ret = NULL;
-
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    HDassert(dest);
-    HDassert(src);
-
-    /* Check for buffer overlap */
-    HDassert((char *)dest >= (const char *)src + n || (const char *)src >= (char *)dest + n);
-
-    /* Copy */
-    ret = HDmemcpy(dest, src, n);
-
-    FUNC_LEAVE_NOAPI(ret)
-
-} /* end H5MM_memcpy() */
