@@ -12,7 +12,7 @@
 
 
 /* A simple test program to see if a function "works" */
-#define SIMPLE_TEST(x) int main(){ x; return 0; }
+#define SIMPLE_TEST(x) int main(void){ x; return 0; }
 
 
 #ifdef HAVE_ATTRIBUTE
@@ -93,7 +93,7 @@ int main ()
 
 #include <sys/types.h>
 
-int main()
+int main(void)
 {
     off64_t n = 0;
     return (int)n;
