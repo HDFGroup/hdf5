@@ -914,7 +914,8 @@ test_header_encode_decode(void)
 
     hdr.version    = H5FD_ONION_HEADER_VERSION_CURR;
     hdr.flags      = 12;
-    hdr.origin_eof = 8589934609ull, hdr.page_size = 4096;
+    hdr.origin_eof = 8589934609ull;
+    hdr.page_size = 4096;
     hdr.history_addr = 123456;
     hdr.history_size = 88;
 

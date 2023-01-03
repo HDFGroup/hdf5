@@ -462,11 +462,16 @@ test_query()
         // Create a enumerate datatype
         EnumType tid2(sizeof(short));
 
-        tid2.insert("RED", (enum_val = 0, &enum_val));
-        tid2.insert("GREEN", (enum_val = 1, &enum_val));
-        tid2.insert("BLUE", (enum_val = 2, &enum_val));
-        tid2.insert("ORANGE", (enum_val = 3, &enum_val));
-        tid2.insert("YELLOW", (enum_val = 4, &enum_val));
+        enum_val = 0;
+        tid2.insert("RED", &enum_val);
+        enum_val = 1;
+        tid2.insert("GREEN", &enum_val);
+        enum_val = 2;
+        tid2.insert("BLUE", &enum_val);
+        enum_val = 3;
+        tid2.insert("ORANGE", &enum_val);
+        enum_val = 4;
+        tid2.insert("YELLOW", &enum_val);
 
         // Query member number and member index by name, for compound type
         int nmembs = tid1.getNmembers();
@@ -859,11 +864,16 @@ test_encode_decode()
         // Create a enumerate datatype
         EnumType enumtyp(sizeof(short));
 
-        enumtyp.insert("RED", (enum_val = 0, &enum_val));
-        enumtyp.insert("GREEN", (enum_val = 1, &enum_val));
-        enumtyp.insert("BLUE", (enum_val = 2, &enum_val));
-        enumtyp.insert("ORANGE", (enum_val = 3, &enum_val));
-        enumtyp.insert("YELLOW", (enum_val = 4, &enum_val));
+        enum_val = 0;
+        enumtyp.insert("RED", &enum_val);
+        enum_val = 1;
+        enumtyp.insert("GREEN", &enum_val);
+        enum_val = 2;
+        enumtyp.insert("BLUE", &enum_val);
+        enum_val = 3;
+        enumtyp.insert("ORANGE", &enum_val);
+        enum_val = 4;
+        enumtyp.insert("YELLOW", &enum_val);
 
         // Encode compound type in a buffer
         enumtyp.encode();
@@ -1060,9 +1070,12 @@ test_operators()
         // Create an enumerate datatype
         EnumType enumtyp(sizeof(short));
 
-        enumtyp.insert("RED", (enum_val = 0, &enum_val));
-        enumtyp.insert("GREEN", (enum_val = 1, &enum_val));
-        enumtyp.insert("BLUE", (enum_val = 2, &enum_val));
+        enum_val = 0;
+        enumtyp.insert("RED", &enum_val);
+        enum_val = 1;
+        enumtyp.insert("GREEN", &enum_val);
+        enum_val = 2;
+        enumtyp.insert("BLUE", &enum_val);
 
         // Verify that operator== and operator!= work properly
         verify_val(cmptyp == enumtyp, false, "DataType::operator==", __LINE__, __FILE__);
