@@ -874,7 +874,7 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval, H5D_f
     unsigned           u;
     comp_datatype      rd_c, fill_c, should_be_c;
     comp_datatype     *buf_c = NULL;
-    H5D_space_status_t allocation;
+    H5D_space_status_t allocation = H5D_SPACE_STATUS_ERROR;
 
     fill_c.a = 0;
     fill_c.x = 0;

@@ -3024,7 +3024,7 @@ mark_entry_dirty(int32_t type, int32_t idx)
 void
 move_entry(H5C_t *cache_ptr, int32_t type, int32_t idx, hbool_t main_addr)
 {
-    herr_t        result;
+    herr_t        result = 0;
     hbool_t       done     = TRUE; /* will set to FALSE if we have work to do */
     haddr_t       old_addr = HADDR_UNDEF;
     haddr_t       new_addr = HADDR_UNDEF;
@@ -4946,7 +4946,7 @@ check_and_validate_cache_hit_rate(hid_t file_id, double *hit_rate_ptr, hbool_t d
     int64_t cache_hits     = 0;
     int64_t cache_accesses = 0;
     double  expected_hit_rate;
-    double  hit_rate;
+    double  hit_rate = 0.0;
     H5F_t  *file_ptr  = NULL;
     H5C_t  *cache_ptr = NULL;
 
@@ -5059,13 +5059,13 @@ check_and_validate_cache_size(hid_t file_id, size_t *max_size_ptr, size_t *min_c
 {
     herr_t   result;
     size_t   expected_max_size;
-    size_t   max_size;
+    size_t   max_size = 0;
     size_t   expected_min_clean_size;
-    size_t   min_clean_size;
+    size_t   min_clean_size = 0;
     size_t   expected_cur_size;
-    size_t   cur_size;
+    size_t   cur_size = 0;
     uint32_t expected_cur_num_entries;
-    int      cur_num_entries;
+    int      cur_num_entries = 0;
     H5F_t   *file_ptr  = NULL;
     H5C_t   *cache_ptr = NULL;
 

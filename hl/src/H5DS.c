@@ -152,14 +152,14 @@ H5DSattach_scale(hid_t did, hid_t dsid, unsigned int idx)
     ds_list_t *dsbuf = NULL; /* array of attribute data in the DS pointing to the dataset */
     ds_list_t *dsbuf_w =
         NULL; /* array of "REFERENCE_LIST" attribute data to write when adding new reference to a dataset */
-    hobj_ref_t ref_to_ds; /* reference to the DS */
+    hobj_ref_t ref_to_ds = HADDR_UNDEF; /* reference to the DS */
     hobj_ref_t ref_j;     /* iterator reference */
 
     /* Variables to be used when new references are used */
     nds_list_t  ndsl;
     nds_list_t *ndsbuf   = NULL;
     nds_list_t *ndsbuf_w = NULL;
-    H5R_ref_t   nref_to_ds;
+    H5R_ref_t   nref_to_ds = {0};
     H5R_ref_t   nref_j;
     hbool_t     is_new_ref;
 

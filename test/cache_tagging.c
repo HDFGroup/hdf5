@@ -551,7 +551,7 @@ check_file_open_tags(hid_t fcpl, int type)
 #endif                   /* NDEBUG */
     hid_t   fapl = -1;   /* File access prop list */
     haddr_t root_tag;    /* Root Group Tag */
-    haddr_t sbe_tag;     /* Sblock Extension Tag */
+    haddr_t sbe_tag = HADDR_UNDEF; /* Sblock Extension Tag */
 
     /* Testing Macro */
     TESTING("tag application during file open");

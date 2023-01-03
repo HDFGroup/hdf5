@@ -4542,7 +4542,7 @@ test_attr_corder_create_compact(hid_t fcpl, hid_t fapl)
 {
     hid_t    fid;                     /* HDF5 File ID            */
     hid_t    dset1, dset2, dset3;     /* Dataset IDs            */
-    hid_t    my_dataset;              /* Current dataset ID        */
+    hid_t    my_dataset = H5I_INVALID_HID;          /* Current dataset ID        */
     hid_t    sid;                     /* Dataspace ID            */
     hid_t    attr;                    /* Attribute ID            */
     hid_t    dcpl;                    /* Dataset creation property list ID */
@@ -4744,7 +4744,7 @@ test_attr_corder_create_dense(hid_t fcpl, hid_t fapl)
 {
     hid_t    fid;                     /* HDF5 File ID            */
     hid_t    dset1, dset2, dset3;     /* Dataset IDs            */
-    hid_t    my_dataset;              /* Current dataset ID        */
+    hid_t    my_dataset = H5I_INVALID_HID;          /* Current dataset ID        */
     hid_t    sid;                     /* Dataspace ID            */
     hid_t    attr;                    /* Attribute ID            */
     hid_t    dcpl;                    /* Dataset creation property list ID */
@@ -5081,7 +5081,7 @@ test_attr_corder_transition(hid_t fcpl, hid_t fapl)
 {
     hid_t    fid;                     /* HDF5 File ID            */
     hid_t    dset1, dset2, dset3;     /* Dataset IDs            */
-    hid_t    my_dataset;              /* Current dataset ID        */
+    hid_t    my_dataset = H5I_INVALID_HID;          /* Current dataset ID        */
     hid_t    sid;                     /* Dataspace ID            */
     hid_t    attr;                    /* Attribute ID            */
     hid_t    dcpl;                    /* Dataset creation property list ID */
@@ -5490,7 +5490,7 @@ test_attr_corder_delete(hid_t fcpl, hid_t fapl)
 {
     hid_t    fid;                     /* HDF5 File ID            */
     hid_t    dset1, dset2, dset3;     /* Dataset IDs            */
-    hid_t    my_dataset;              /* Current dataset ID        */
+    hid_t    my_dataset = H5I_INVALID_HID;          /* Current dataset ID        */
     hid_t    sid;                     /* Dataspace ID            */
     hid_t    attr;                    /* Attribute ID            */
     hid_t    dcpl;                    /* Dataset creation property list ID */
@@ -5812,7 +5812,7 @@ test_attr_info_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
 {
     hid_t      fid;                     /* HDF5 File ID            */
     hid_t      dset1, dset2, dset3;     /* Dataset IDs            */
-    hid_t      my_dataset;              /* Current dataset ID        */
+    hid_t      my_dataset = H5I_INVALID_HID;          /* Current dataset ID        */
     hid_t      sid;                     /* Dataspace ID            */
     hid_t      attr;                    /* Attribute ID            */
     hid_t      dcpl;                    /* Dataset creation property list ID */
@@ -6294,7 +6294,7 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
 {
     hid_t           fid;                     /* HDF5 File ID            */
     hid_t           dset1, dset2, dset3;     /* Dataset IDs            */
-    hid_t           my_dataset;              /* Current dataset ID        */
+    hid_t           my_dataset = H5I_INVALID_HID;          /* Current dataset ID        */
     hid_t           sid;                     /* Dataspace ID            */
     hid_t           attr;                    /* Attribute ID            */
     hid_t           dcpl;                    /* Dataset creation property list ID */
@@ -7275,7 +7275,7 @@ test_attr_iterate2(hbool_t new_format, hid_t fcpl, hid_t fapl)
 {
     hid_t            fid;                     /* HDF5 File ID            */
     hid_t            dset1, dset2, dset3;     /* Dataset IDs            */
-    hid_t            my_dataset;              /* Current dataset ID        */
+    hid_t            my_dataset = H5I_INVALID_HID;          /* Current dataset ID        */
     hid_t            sid;                     /* Dataspace ID            */
     hid_t            attr;                    /* Attribute ID            */
     hid_t            dcpl;                    /* Dataset creation property list ID */
@@ -7682,7 +7682,7 @@ test_attr_open_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
 {
     hid_t           fid;                     /* HDF5 File ID            */
     hid_t           dset1, dset2, dset3;     /* Dataset IDs            */
-    hid_t           my_dataset;              /* Current dataset ID        */
+    hid_t           my_dataset = H5I_INVALID_HID;          /* Current dataset ID        */
     hid_t           sid;                     /* Dataspace ID            */
     hid_t           attr;                    /* Attribute ID            */
     hid_t           dcpl;                    /* Dataset creation property list ID */
@@ -8056,7 +8056,7 @@ test_attr_open_by_name(hbool_t new_format, hid_t fcpl, hid_t fapl)
 {
     hid_t       fid;                     /* HDF5 File ID            */
     hid_t       dset1, dset2, dset3;     /* Dataset IDs            */
-    hid_t       my_dataset;              /* Current dataset ID        */
+    hid_t       my_dataset = H5I_INVALID_HID;          /* Current dataset ID        */
     hid_t       sid;                     /* Dataspace ID            */
     hid_t       attr;                    /* Attribute ID            */
     hid_t       dcpl;                    /* Dataset creation property list ID */
@@ -8352,7 +8352,7 @@ test_attr_create_by_name(hbool_t new_format, hid_t fcpl, hid_t fapl)
 {
     hid_t       fid;                     /* HDF5 File ID            */
     hid_t       dset1, dset2, dset3;     /* Dataset IDs            */
-    hid_t       my_dataset;              /* Current dataset ID        */
+    hid_t       my_dataset = H5I_INVALID_HID;          /* Current dataset ID        */
     hid_t       sid;                     /* Dataspace ID            */
     hid_t       attr;                    /* Attribute ID            */
     hid_t       dcpl;                    /* Dataset creation property list ID */
