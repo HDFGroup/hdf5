@@ -76,24 +76,24 @@
 #define ATTR1_NAME "Attr1"
 #define ATTR1_RANK 1
 #define ATTR1_DIM1 3
-int attr_data1[ATTR1_DIM1] = {512, -234, 98123}; /* Test data for 1st attribute */
+static int attr_data1[ATTR1_DIM1] = {512, -234, 98123}; /* Test data for 1st attribute */
 
 /* rank & dimensions for another attribute */
 #define ATTR1A_NAME "Attr1_a"
-int attr_data1a[ATTR1_DIM1] = {256, 11945, -22107};
+static int attr_data1a[ATTR1_DIM1] = {256, 11945, -22107};
 
 #define ATTR2_NAME "Attr2"
 #define ATTR2_RANK 2
 #define ATTR2_DIM1 2
 #define ATTR2_DIM2 2
-int attr_data2[ATTR2_DIM1][ATTR2_DIM2] = {{7614, -416}, {197814, -3}}; /* Test data for 2nd attribute */
+static int attr_data2[ATTR2_DIM1][ATTR2_DIM2] = {{7614, -416}, {197814, -3}}; /* Test data for 2nd attribute */
 
 #define ATTR3_NAME "Attr3"
 #define ATTR3_RANK 3
 #define ATTR3_DIM1 2
 #define ATTR3_DIM2 2
 #define ATTR3_DIM3 2
-double attr_data3[ATTR3_DIM1][ATTR3_DIM2][ATTR3_DIM3] = {
+static double attr_data3[ATTR3_DIM1][ATTR3_DIM2][ATTR3_DIM3] = {
     {{2.3, -26.1}, {0.123, -10.0}}, {{973.23, -0.91827}, {2.0, 23.0}}}; /* Test data for 3rd attribute */
 
 #define ATTR4_NAME       "Attr4"
@@ -103,10 +103,10 @@ double attr_data3[ATTR3_DIM1][ATTR3_DIM2][ATTR3_DIM3] = {
 #define ATTR4_FIELDNAME1 "i"
 #define ATTR4_FIELDNAME2 "d"
 #define ATTR4_FIELDNAME3 "c"
-size_t attr4_field1_off = 0;
-size_t attr4_field2_off = 0;
-size_t attr4_field3_off = 0;
-struct attr4_struct {
+static size_t attr4_field1_off = 0;
+static size_t attr4_field2_off = 0;
+static size_t attr4_field3_off = 0;
+static struct attr4_struct {
     int    i;
     double d;
     char   c;
@@ -116,7 +116,7 @@ struct attr4_struct {
 
 #define ATTR5_NAME "Attr5"
 #define ATTR5_RANK 0
-float attr_data5 = -5.123F; /* Test data for 5th attribute */
+static float attr_data5 = -5.123F; /* Test data for 5th attribute */
 
 #define ATTR6_RANK 3
 #define ATTR6_DIM1 100

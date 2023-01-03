@@ -56,7 +56,7 @@ static unsigned create_file(char *filename, hid_t fcpl, hid_t fapl);
 static unsigned open_file(char *filename, hid_t fapl, hsize_t page_size, size_t page_buffer_size);
 #endif /* H5_HAVE_PARALLEL */
 
-const char *FILENAME[] = {"filepaged", NULL};
+static const char *FILENAME[] = {"filepaged", NULL};
 
 #ifndef H5_HAVE_PARALLEL
 

@@ -25,7 +25,7 @@
  */
 /* #define NO_FILLING */
 
-const char *FILENAME[] = {"fillval_1", "fillval_2", "fillval_3", "fillval_4", "fillval_5",
+static const char *FILENAME[] = {"fillval_1", "fillval_2", "fillval_3", "fillval_4", "fillval_5",
                           "fillval_6", "fillval_7", "fillval_8", "fillval_9", NULL};
 
 /* Common type for compound datatype operations */

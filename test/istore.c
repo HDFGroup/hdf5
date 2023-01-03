@@ -28,7 +28,7 @@
 #include "H5Oprivate.h"
 #include "H5VMprivate.h"
 
-const char *FILENAME[] = {"istore", NULL};
+static const char *FILENAME[] = {"istore", NULL};
 
 #define TEST_SMALL  0x0001
 #define TEST_MEDIUM 0x0002

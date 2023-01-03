@@ -23,7 +23,7 @@
 #define H5F_TESTING
 #include "H5Fpkg.h" /* File access                          */
 
-const char *FILENAME[] = {"objcopy_ref_src",
+static const char *FILENAME[] = {"objcopy_ref_src",
                           "objcopy_ref_dst",
                           "objcopy_ref_ext",
                           "objcopy_ref_src2",

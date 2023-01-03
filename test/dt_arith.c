@@ -45,7 +45,7 @@
 #endif
 #define SET_ALIGNMENT(TYPE, VAL) H5T_NATIVE_##TYPE##_ALIGN_g = MAX(H5T_NATIVE_##TYPE##_ALIGN_g, VAL)
 
-const char *FILENAME[] = {"dt_arith1", "dt_arith2", NULL};
+static const char *FILENAME[] = {"dt_arith1", "dt_arith2", NULL};
 
 /*
  * Count up or down depending on whether the machine is big endian or little

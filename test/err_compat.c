@@ -27,15 +27,15 @@ main(void)
 }
 #else /* H5_NO_DEPRECATED_SYMBOLS */
 
-const char *FILENAME[] = {"errors_compat", NULL};
+static const char *FILENAME[] = {"errors_compat", NULL};
 
 #define DIM0 100
 #define DIM1 200
 
-int **ipoints2      = NULL;
-int **icheck2       = NULL;
-int  *ipoints2_data = NULL;
-int  *icheck2_data  = NULL;
+static int **ipoints2      = NULL;
+static int **icheck2       = NULL;
+static int  *ipoints2_data = NULL;
+static int  *icheck2_data  = NULL;
 
 #define DSET_NAME "a_dataset"
 

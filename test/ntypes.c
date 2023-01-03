@@ -19,7 +19,7 @@
 
 #include "h5test.h"
 
-const char *FILENAME[] = {"ntypes", NULL};
+static const char *FILENAME[] = {"ntypes", NULL};
 
 #define DIM0 100
 #define DIM1 200

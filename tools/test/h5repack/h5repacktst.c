@@ -82,7 +82,7 @@
 /* Files for testing file space paging */
 #define FSPACE_OUT "h5repack_fspace_OUT.h5"   /* The output file */
 #define NELMTS(X)  (sizeof(X) / sizeof(X[0])) /* # of elements */
-const char *H5REPACK_FSPACE_FNAMES[] = {
+static const char *H5REPACK_FSPACE_FNAMES[] = {
     "h5repack_latest.h5",             /* 0 */
     "h5repack_default.h5",            /* 1 */
     "h5repack_page_persist.h5",       /* 2 */
@@ -101,7 +101,7 @@ const char *H5REPACK_FSPACE_FNAMES[] = {
 /* obj and region references in attr of compound and vlen type */
 #define FNAME_ATTR_REF "h5repack_attr_refs.h5"
 
-const char *H5REPACK_FILENAMES[] = {"h5repack_big_out", NULL};
+static const char *H5REPACK_FILENAMES[] = {"h5repack_big_out", NULL};
 
 #define H5REPACK_EXTFILE "h5repack_ext.bin"
 

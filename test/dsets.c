@@ -55,7 +55,7 @@
 #include "szlib.h"
 #endif
 
-const char *FILENAME[] = {"dataset",             /* 0 */
+static const char *FILENAME[] = {"dataset",             /* 0 */
                           "compact_dataset",     /* 1 */
                           "dset_offset",         /* 2 */
                           "max_compact_dataset", /* 3 */

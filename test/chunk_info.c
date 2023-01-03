@@ -47,7 +47,7 @@
 #endif
 
 /* Test file names, using H5F_libver_t as indices */
-const char *FILENAME[] = {"tchunk_info_earliest",
+static const char *FILENAME[] = {"tchunk_info_earliest",
                           "tchunk_info_v18",
                           "tchunk_info_v110",
                           "tchunk_info_v112",

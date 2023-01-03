@@ -95,7 +95,7 @@ struct farray_test_param_t {
 };
 
 /* Local variables */
-const char *FILENAME[] = {"farray", "farray_tmp", NULL};
+static const char *FILENAME[] = {"farray", "farray_tmp", NULL};
 
 /* Filename to use for all tests */
 char filename_g[FARRAY_FILENAME_LEN];

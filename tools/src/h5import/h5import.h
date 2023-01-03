@@ -110,7 +110,7 @@ struct Options {
     int                  fcount;       /* number of input files */
 };
 
-char keytable[NUM_KEYS][30] = {"PATH",
+static char keytable[NUM_KEYS][30] = {"PATH",
                                "INPUT-CLASS",
                                "INPUT-SIZE",
                                "RANK",

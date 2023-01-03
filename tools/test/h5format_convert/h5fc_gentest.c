@@ -27,7 +27,7 @@
 #define EDGE_V3_FILE   "h5fc_edge_v3.h5"
 #define ERR_LEVEL_FILE "h5fc_err_level.h5"
 
-const char *FILENAME[] = {"h5fc_ext1_i.h5",   /* 0 */
+static const char *FILENAME[] = {"h5fc_ext1_i.h5",   /* 0 */
                           "h5fc_ext1_s.h5",   /* 1 */
                           "h5fc_ext1_f.h5",   /* 2 */
                           "h5fc_ext2_is.h5",  /* 3 */

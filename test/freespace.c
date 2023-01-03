@@ -58,7 +58,7 @@
 #define FSPACE_THRHD_DEF 1 /* Default: no alignment threshold */
 #define FSPACE_ALIGN_DEF 1 /* Default: no alignment */
 
-const char *FILENAME[] = {"frspace", NULL};
+static const char *FILENAME[] = {"frspace", NULL};
 
 typedef struct frspace_state_t {
     hsize_t tot_space;         /* Total amount of space tracked              */

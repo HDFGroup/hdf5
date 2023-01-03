@@ -19,7 +19,7 @@
 /* Convenience macro for inserting enum values */
 #define CPTR(VAR, CONST) ((VAR) = (CONST), &(VAR))
 
-const char *FILENAME[] = {"enum1", NULL};
+static const char *FILENAME[] = {"enum1", NULL};
 
 typedef enum { E1_RED, E1_GREEN, E1_BLUE, E1_WHITE, E1_BLACK } c_e1;
 

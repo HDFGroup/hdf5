@@ -91,18 +91,18 @@ static unsigned int flags_create_s = 0;
  */
 
 /* twenty-six four-character words beginning with 'a' -> 104 bytes */
-const unsigned char *a_list_s =
+static const unsigned char *a_list_s =
     (const unsigned char *)"abetableacedacesacheacidacneadzeafaragedagesaidsairsajarallyalum"
                            "amokantsapesarcsareaartsasksaspsavidaxes";
 uint64_t a_list_size_s = 104;
 
 /* fifty-three four-character words beginning with 'b' -> 212 bytes */
-const unsigned char *b_list_s =
+static const unsigned char *b_list_s =
     (const unsigned char *)"badebailbaitbalebanebarebaskbeambeanbearbeenbeerbeltbentbestbide"
                            "bikebilebindbirdbiteblipblueboarboatbobsbodyboilboldbollboltbond"
                            "boneboobboorboosbootbradbragbratbraybrewbritbrowbuckbudsbunkbunt"
                            "buoyburnburybustbuys";
-uint64_t b_list_size_s = 212;
+static uint64_t b_list_size_s = 212;
 
 /* Allocate and populate filepaths with h5_fixname'd strings as appropriate.
  * Should be released with onion_filepaths_destroy() when done.

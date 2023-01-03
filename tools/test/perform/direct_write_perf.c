@@ -45,7 +45,7 @@
 #include <unistd.h>
 #endif
 
-const char *FILENAME[] = {"direct_write", "unix.raw", NULL};
+static const char *FILENAME[] = {"direct_write", "unix.raw", NULL};
 
 /*
  * Print the current location on the standard output stream.

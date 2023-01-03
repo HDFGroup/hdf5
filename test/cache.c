@@ -53,7 +53,7 @@ hbool_t core_file_driver_failed = FALSE;
 
 /* global variable declarations: */
 
-const char *FILENAME[] = {"cache_test", NULL};
+static const char *FILENAME[] = {"cache_test", NULL};
 
 /* private typedef declarations: */
 

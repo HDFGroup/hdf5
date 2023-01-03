@@ -43,12 +43,12 @@
 
 #define USERBLOCK_SIZE 512
 
-const char *FILENAME[] = {"file_image_core_test", NULL};
+static const char *FILENAME[] = {"file_image_core_test", NULL};
 
 /* need a second file name array, as the first file name array contains
  * files we don't want to delete on cleanup.
  */
-const char *FILENAME2[] = {"sec2_get_file_image_test",
+static const char *FILENAME2[] = {"sec2_get_file_image_test",
                            "stdio_get_file_image_test",
                            "core_get_file_image_test",
                            "family_get_file_image_test",

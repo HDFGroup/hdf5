@@ -47,7 +47,7 @@
 #define DSET2_DIM  4
 #endif /* H5_HAVE_DIRECT */
 
-const char *FILENAME[] = {"sec2_file",            /*0*/
+static const char *FILENAME[] = {"sec2_file",            /*0*/
                           "core_file",            /*1*/
                           "family_file",          /*2*/
                           "new_family_v16",       /*3*/

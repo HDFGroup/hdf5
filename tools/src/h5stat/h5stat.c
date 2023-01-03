@@ -35,7 +35,7 @@
          to accommodate datasets without any filters */
 
 /* File space management strategies: see H5Fpublic.h for declarations */
-const char *FS_STRATEGY_NAME[] = {"H5F_FSPACE_STRATEGY_FSM_AGGR",
+static const char *FS_STRATEGY_NAME[] = {"H5F_FSPACE_STRATEGY_FSM_AGGR",
                                   "H5F_FSPACE_STRATEGY_PAGE",
                                   "H5F_FSPACE_STRATEGY_AGGR",
                                   "H5F_FSPACE_STRATEGY_NONE",

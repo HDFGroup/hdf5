@@ -763,7 +763,7 @@ error: /* An error has occurred.  Clean up and exit. */
  */
 #define ATTR_RANK 1
 #define ATTR_DIM  3
-int attr_data[ATTR_DIM] = {256, 11945, -22107}; /* values to be written to attr */
+static int attr_data[ATTR_DIM] = {256, 11945, -22107}; /* values to be written to attr */
 
 static int
 adding_attribute(hid_t fid, const char *table_name, const char *attr_name)

@@ -346,7 +346,7 @@ const H5D_layout_ops_t H5D_LOPS_CHUNK[1] = {{
 /*******************/
 
 /* "nonexistent" storage layout I/O ops */
-const H5D_layout_ops_t H5D_LOPS_NONEXISTENT[1] = {
+static const H5D_layout_ops_t H5D_LOPS_NONEXISTENT[1] = {
     {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, H5D__nonexistent_readvv, NULL, NULL, NULL, NULL}};
 
 /* Declare a free list to manage the H5F_rdcc_ent_ptr_t sequence information */

@@ -48,7 +48,7 @@
 #define H5O_TESTING
 #include "H5Opkg.h" /* Object headers            */
 
-const char *FILENAME[] = {"swmr0", /* 0 */
+static const char *FILENAME[] = {"swmr0", /* 0 */
                           "swmr1", /* 1 */
                           "swmr2", /* 2 */
                           NULL};

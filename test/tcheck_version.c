@@ -38,9 +38,9 @@ void parse(int ac, char **av);
 void abort_intercept(int H5_ATTR_UNUSED sig);
 
 /* global variables */
-unsigned major   = H5_VERS_MAJOR;
-unsigned minor   = H5_VERS_MINOR;
-unsigned release = H5_VERS_RELEASE;
+static unsigned major   = H5_VERS_MAJOR;
+static unsigned minor   = H5_VERS_MINOR;
+static unsigned release = H5_VERS_RELEASE;
 
 void
 showhelp(void)

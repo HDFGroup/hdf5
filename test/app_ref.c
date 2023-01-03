@@ -54,13 +54,13 @@ typedef enum {
     T_NUMCLASSES
 } id_class_t;
 
-const char *FILENAME[] = {"app_ref", NULL};
+static const char *FILENAME[] = {"app_ref", NULL};
 
-const char *IDNAME[T_NUMCLASSES] = {"File",        "Property List", "Property Class", "Datatype",
+static const char *IDNAME[T_NUMCLASSES] = {"File",        "Property List", "Property Class", "Datatype",
                                     "Dataspace",   "Dataset",       "Attribute",      "Group",
                                     "Error Class", "Error Message", "Error Stack"};
 
-int rc[T_NUMCLASSES];
+static int rc[T_NUMCLASSES];
 
 void Abrt_Handler(int sig);
 

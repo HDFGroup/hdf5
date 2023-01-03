@@ -25,7 +25,7 @@
 #define TMPDIR        "tmp_links_env/"
 #define NAME_BUF_SIZE 1024
 
-const char *FILENAME[] = {"extlinks_env0",        /* 0: main file */
+static const char *FILENAME[] = {"extlinks_env0",        /* 0: main file */
                           "extlinks_env1",        /* 1: target file */
                           TMPDIR "extlinks_env1", /* 2 */
                           NULL};

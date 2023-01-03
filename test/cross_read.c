@@ -21,7 +21,7 @@
 #include "h5test.h"
 #include "H5srcdir.h"
 
-const char *FILENAME[] = {"vms_data", "le_data", "be_data", NULL};
+static const char *FILENAME[] = {"vms_data", "le_data", "be_data", NULL};
 
 #define DATASETNAME   "Array_le"
 #define DATASETNAME1  "Array_be"

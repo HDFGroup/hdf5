@@ -98,7 +98,7 @@
 #define TEST_THRESHOLD10 10
 #define TEST_THRESHOLD3  3
 
-const char *FILENAME[] = {"mf", NULL};
+static const char *FILENAME[] = {"mf", NULL};
 
 typedef enum {
     TEST_NORMAL,     /* size of aggregator is >= alignment size */

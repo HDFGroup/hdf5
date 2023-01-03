@@ -76,7 +76,7 @@
         }                                                                                                    \
     } while (0)
 
-const char *FILENAME[] = {"dtypes0", "dtypes1", "dtypes2", "dtypes3", "dtypes4",  "dtypes5",
+static const char *FILENAME[] = {"dtypes0", "dtypes1", "dtypes2", "dtypes3", "dtypes4",  "dtypes5",
                           "dtypes6", "dtypes7", "dtypes8", "dtypes9", "dtypes10", NULL};
 
 #define TESTFILE "bad_compound.h5"

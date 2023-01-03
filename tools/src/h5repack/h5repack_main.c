@@ -23,8 +23,8 @@ static void leave(int ret) H5_ATTR_NORETURN;
 /* module-scoped variables */
 static int  has_i   = 0;
 static int  has_o   = 0;
-const char *infile  = NULL;
-const char *outfile = NULL;
+static const char *infile  = NULL;
+static const char *outfile = NULL;
 
 /*
  * Command-line options: The user can specify short or long-named

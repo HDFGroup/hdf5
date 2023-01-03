@@ -46,7 +46,7 @@
 #define SYMLINK1 TMPDIR "sym1.h5"
 #define SYMLINK2 TMPDIR2 "sym2.h5"
 
-const char *FILENAME[] = {"links0",
+static const char *FILENAME[] = {"links0",
                           "links1",
                           "links2",
                           "links3",

@@ -28,31 +28,31 @@ main(void)
 }
 #else /* H5_USE_16_API */
 
-const char *FILENAME[] = {"errors", NULL};
+static const char *FILENAME[] = {"errors", NULL};
 
 #define DATAFILE "filter_error"
 
 #define DIM0 100
 #define DIM1 200
 
-int **ipoints2      = NULL;
-int **icheck2       = NULL;
-int  *ipoints2_data = NULL;
-int  *icheck2_data  = NULL;
+static int **ipoints2      = NULL;
+static int **icheck2       = NULL;
+static int  *ipoints2_data = NULL;
+static int  *icheck2_data  = NULL;
 
-hid_t ERR_CLS;
-hid_t ERR_CLS2;
-hid_t ERR_STACK;
+static hid_t ERR_CLS;
+static hid_t ERR_CLS2;
+static hid_t ERR_STACK;
 
-hid_t ERR_MAJ_TEST;
-hid_t ERR_MAJ_IO;
-hid_t ERR_MAJ_API;
+static hid_t ERR_MAJ_TEST;
+static hid_t ERR_MAJ_IO;
+static hid_t ERR_MAJ_API;
 
-hid_t ERR_MIN_SUBROUTINE;
-hid_t ERR_MIN_ERRSTACK;
-hid_t ERR_MIN_CREATE;
-hid_t ERR_MIN_WRITE;
-hid_t ERR_MIN_GETNUM;
+static hid_t ERR_MIN_SUBROUTINE;
+static hid_t ERR_MIN_ERRSTACK;
+static hid_t ERR_MIN_CREATE;
+static hid_t ERR_MIN_WRITE;
+static hid_t ERR_MIN_GETNUM;
 
 #define DSET_NAME "a_dataset"
 #define FAKE_ID   (hid_t)0

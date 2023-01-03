@@ -161,7 +161,7 @@ typedef struct earray_test_t {
 /* Local prototypes */
 
 /* Local variables */
-const char *FILENAME[] = {"earray", "earray_tmp", NULL};
+static const char *FILENAME[] = {"earray", "earray_tmp", NULL};
 
 /* Filename to use for all tests */
 char filename_g[EARRAY_FILENAME_LEN];

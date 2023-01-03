@@ -66,7 +66,7 @@
    For errors occurring in the spawned process (from the test script), use
    the PROCESS_ERROR macro, which will send a signal to the main process so the
    main process can propagate errors correctly. */
-FILE *errorfile;
+static FILE *errorfile;
 #define ERRFILE "flushrefresh_ERROR"
 #define PROCESS_ERROR                                                                                        \
     {                                                                                                        \
