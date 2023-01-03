@@ -45,6 +45,16 @@
  */
 #define H5L_SAME_LOC 0 /* (hid_t) */
 
+/**
+ * \brief Version of external link format
+ */
+#define H5L_EXT_VERSION 0
+
+/**
+ * \brief Valid flags for external links
+ */
+#define H5L_EXT_FLAGS_ALL 0
+
 #ifdef __cplusplus
 extern "C" {
 #endif

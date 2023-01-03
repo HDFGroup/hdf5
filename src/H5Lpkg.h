@@ -34,12 +34,6 @@
 /* Package Private Macros */
 /**************************/
 
-/* Version of external link format */
-#define H5L_EXT_VERSION 0
-
-/* Valid flags for external links */
-#define H5L_EXT_FLAGS_ALL 0
-
 /****************************/
 /* Package Private Typedefs */
 /****************************/
