@@ -2376,9 +2376,9 @@ error:
 static herr_t
 test_external_link(void)
 {
-    hid_t                    file_a        = H5I_INVALID_HID;
-    hid_t                    file_b        = H5I_INVALID_HID;
-    hid_t                    fapl_id       = H5I_INVALID_HID;
+    hid_t                    file_a  = H5I_INVALID_HID;
+    hid_t                    file_b  = H5I_INVALID_HID;
+    hid_t                    fapl_id = H5I_INVALID_HID;
     H5VL_pass_through_info_t passthru_info;
     char                     filename_a[1028];
     char                     filename_b[1028];
@@ -2436,7 +2436,6 @@ error:
 
     return FAIL;
 } /* end test_external_link() */
-
 
 /*-------------------------------------------------------------------------
  * Function:    main
