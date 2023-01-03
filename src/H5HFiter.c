@@ -64,7 +64,7 @@
 /*******************/
 
 /* Declare a free list to manage the H5HF_block_loc_t struct */
-H5FL_DEFINE(H5HF_block_loc_t);
+H5FL_DEFINE_STATIC(H5HF_block_loc_t);
 
 /*-------------------------------------------------------------------------
  * Function:	H5HF__man_iter_init
