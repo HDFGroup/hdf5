@@ -1662,7 +1662,7 @@ H5_GCC_CLANG_DIAG_OFF("sign-conversion")
 JNIEXPORT jlong JNICALL
 Java_hdf_hdf5lib_HDF5Constants_H5FD_1MEM_1DEFAULT_1LHEAP_1SIZE(JNIEnv *env, jclass cls)
 {
-    /* XXX: BADNESS! - This value cannot fit into a jlong! 
+    /* XXX: BADNESS! - This value cannot fit into a jlong!
      *
      * For now, we're going to ignore these values since the multi VFD is
      * scheduled for removal in HDF5 2.0.

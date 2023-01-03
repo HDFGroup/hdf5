@@ -77,8 +77,7 @@ static int    render_bin_output_region_data_points(FILE *stream, hid_t region_sp
                                                    hsize_t *ptdata);
 static int    render_bin_output_region_points(FILE *stream, hid_t region_space, hid_t region_id,
                                               hid_t container);
-jobject       translate_atomic_rbuf(JNIEnv *env, jlong mem_type_id, H5T_class_t type_class,
-                                    void *raw_buf);
+jobject       translate_atomic_rbuf(JNIEnv *env, jlong mem_type_id, H5T_class_t type_class, void *raw_buf);
 void          translate_atomic_wbuf(JNIEnv *env, jobject in_obj, jlong mem_type_id, H5T_class_t type_class,
                                     void *raw_buf);
 
@@ -4047,9 +4046,9 @@ done:
 jobject
 translate_atomic_rbuf(JNIEnv *env, jlong mem_type_id, H5T_class_t type_class, void *raw_buf)
 {
-    jobject      jobj        = NULL;
-    hid_t        memb        = H5I_INVALID_HID;
-    jobjectArray jList       = NULL;
+    jobject      jobj  = NULL;
+    hid_t        memb  = H5I_INVALID_HID;
+    jobjectArray jList = NULL;
     H5T_class_t  vlClass;
     size_t       vlSize;
     size_t       i;
@@ -4114,7 +4113,7 @@ translate_atomic_rbuf(JNIEnv *env, jlong mem_type_id, H5T_class_t type_class, vo
             break;
         } /* H5T_VLEN */
         case H5T_COMPOUND: {
-            int   nmembs = H5Tget_nmembers(mem_type_id);
+            int nmembs = H5Tget_nmembers(mem_type_id);
 
             /* The list we're going to return: */
             if (NULL == (jList = (jobjectArray)ENVPTR->NewObject(ENVONLY, arrCList, arrListMethod, 0)))
@@ -4134,8 +4133,7 @@ translate_atomic_rbuf(JNIEnv *env, jlong mem_type_id, H5T_class_t type_class, vo
                 if (!(memb_vlSize = H5Tget_size(memb)))
                     H5_LIBRARY_ERROR(ENVONLY);
 
-                translate_atomic_rbuf(ENVONLY, memb, memb_vlClass,
-                                      char_buf + i * typeSize + memb_offset);
+                translate_atomic_rbuf(ENVONLY, memb, memb_vlClass, char_buf + i * typeSize + memb_offset);
                 H5Tclose(memb);
             }
             jobj = jList;
@@ -4712,8 +4710,7 @@ translate_rbuf(JNIEnv *env, jobjectArray ret_buf, jlong mem_type_id, H5T_class_t
         case H5T_STRING: {
             /* Convert each element to a list */
             for (i = 0; i < (size_t)count; i++) {
-                jobj =
-                    translate_atomic_rbuf(ENVONLY, mem_type_id, type_class, char_buf + i * typeSize);
+                jobj = translate_atomic_rbuf(ENVONLY, mem_type_id, type_class, char_buf + i * typeSize);
                 if (jobj) {
                     if (ret_buflen == 0)
                         ENVPTR->CallBooleanMethod(ENVONLY, ret_buf, arrAddMethod, (jobject)jobj);
