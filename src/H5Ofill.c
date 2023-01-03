@@ -947,6 +947,8 @@ H5O_fill_convert(H5O_fill_t *fill, H5T_t *dset_type, hbool_t *fill_changed, hid_
 
     /* Don't bother doing anything if there will be no actual conversion */
     if (!H5T_path_noop(tpath)) {
+        size_t fill_type_size;
+
         if ((src_id = H5I_register(H5I_DATATYPE, H5T_copy(fill->type, H5T_COPY_ALL), FALSE)) < 0 ||
             (dst_id = H5I_register(H5I_DATATYPE, H5T_copy(dset_type, H5T_COPY_ALL), FALSE)) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to copy/register data type")
@@ -955,13 +957,11 @@ H5O_fill_convert(H5O_fill_t *fill, H5T_t *dset_type, hbool_t *fill_changed, hid_
          * Datatype conversions are always done in place, so we need a buffer
          * that is large enough for both source and destination.
          */
-        if (H5T_get_size(fill->type) >= H5T_get_size(dset_type))
-            buf = fill->buf;
-        else {
-            if (NULL == (buf = H5MM_malloc(H5T_get_size(dset_type))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion")
-            HDmemcpy(buf, fill->buf, H5T_get_size(fill->type));
-        } /* end else */
+        fill_type_size = H5T_get_size(fill->type);
+
+        if (NULL == (buf = H5MM_malloc(MAX(fill_type_size, H5T_get_size(dset_type)))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion")
+        HDmemcpy(buf, fill->buf, H5T_get_size(fill->type));
 
         /* Use CALLOC here to clear the buffer in case later the library thinks there's
          * data in the background. */
@@ -973,11 +973,10 @@ H5O_fill_convert(H5O_fill_t *fill, H5T_t *dset_type, hbool_t *fill_changed, hid_
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "datatype conversion failed")
 
         /* Update the fill message */
-        if (buf != fill->buf) {
-            H5T_vlen_reclaim_elmt(fill->buf, fill->type, dxpl_id);
-            H5MM_xfree(fill->buf);
-            fill->buf = buf;
-        } /* end if */
+        H5T_vlen_reclaim_elmt(fill->buf, fill->type, dxpl_id);
+        H5MM_xfree(fill->buf);
+        fill->buf = buf;
+
         H5T_close(fill->type);
         fill->type = NULL;
         H5_CHECKED_ASSIGN(fill->size, ssize_t, H5T_get_size(dset_type), size_t);
@@ -991,8 +990,6 @@ done:
         HDONE_ERROR(H5E_OHDR, H5E_CANTDEC, FAIL, "unable to decrement ref count for temp ID")
     if (dst_id >= 0 && H5I_dec_ref(dst_id) < 0)
         HDONE_ERROR(H5E_OHDR, H5E_CANTDEC, FAIL, "unable to decrement ref count for temp ID")
-    if (buf != fill->buf)
-        H5MM_xfree(buf);
     if (bkg)
         H5MM_xfree(bkg);
 
