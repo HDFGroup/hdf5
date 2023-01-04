@@ -2,7 +2,7 @@ HDF5 version 1.15.0 currently under development
 
 ![HDF5 Logo](doxygen/img/HDF5.png)
 
-[![Build](https://img.shields.io/github/workflow/status/HDFGroup/hdf5/hdf5%20dev%20CI/develop)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Adevelop)
+[![Build](https://github.com/HDFGroup/hdf5/actions/workflows/main.yml/badge.svg?branch=develop)]
 [![BSD](https://img.shields.io/badge/License-BSD-blue.svg)](https://github.com/HDFGroup/hdf5/blob/develop/COPYING)
 
 *Please refer to the release_docs/INSTALL file for installation instructions.*
@@ -81,6 +81,9 @@ new features and bug fixes, though we try to have at least one release of each
 maintenance branch per year. Future HDF5 releases indicated on this schedule
 are tentative.
 
+**NOTE**: HDF5 1.12 is being retired early due to its incomplete and incompatible VOL
+layer.
+
 | Release | New Features |
 | ------- | ------------ |
 | 1.8.23 | last HDF5 1.8 release |
@@ -89,9 +92,6 @@ are tentative.
 | 1.14.1 | selection I/O with datatype conversion |
 | 2.0.0 | TBD |
 | TBD | VFD SWMR |
-
-**Note**: HDF5 1.12 is being retired early due to its incomplete and incompatible VOL
-layer.
 
 This list of feature release versions is also tentative, and the specific release
 in which a feature is introduced may change.
