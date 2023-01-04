@@ -68,7 +68,7 @@ H5FD__onion_ingest_header(H5FD_onion_header_t *hdr_out, H5FD_t *raw_file, haddr_
 done:
     H5MM_xfree(buf);
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__onion_ingest_header() */
 
 /*-------------------------------------------------------------------------
@@ -102,7 +102,7 @@ H5FD__onion_write_header(H5FD_onion_header_t *header, H5FD_t *file)
 done:
     H5MM_xfree(buf);
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__onion_write_header()*/
 
 /*-----------------------------------------------------------------------------
@@ -180,7 +180,7 @@ H5FD__onion_header_decode(unsigned char *buf, H5FD_onion_header_t *header)
     ret_value = (size_t)(ptr - buf);
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__onion_header_decode() */
 
 /*-----------------------------------------------------------------------------
@@ -228,5 +228,5 @@ H5FD__onion_header_encode(H5FD_onion_header_t *header, unsigned char *buf, uint3
     UINT32ENCODE(ptr, *checksum);
     ret_value = (size_t)(ptr - buf);
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__onion_header_encode() */

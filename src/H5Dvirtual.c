@@ -1117,7 +1117,7 @@ H5D__virtual_str_append(const char *src, size_t src_len, char **p, char **buf, s
     **p = '\0';
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__virtual_str_append() */
 
 /*-------------------------------------------------------------------------

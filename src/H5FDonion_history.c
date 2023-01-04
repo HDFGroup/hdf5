@@ -83,7 +83,7 @@ done:
     if (ret_value < 0)
         H5MM_xfree(history_out->record_locs);
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__onion_ingest_history() */
 
 /*-----------------------------------------------------------------------------
@@ -124,7 +124,7 @@ H5FD__onion_write_history(H5FD_onion_history_t *history, H5FD_t *file, haddr_t o
 done:
     H5MM_xfree(buf);
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__onion_write_history() */
 
 /*-----------------------------------------------------------------------------
@@ -239,7 +239,7 @@ H5FD__onion_history_decode(unsigned char *buf, H5FD_onion_history_t *history)
     ret_value = (size_t)(ptr - buf);
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__onion_history_decode() */
 
 /*-----------------------------------------------------------------------------
@@ -302,5 +302,5 @@ H5FD__onion_history_encode(H5FD_onion_history_t *history, unsigned char *buf, ui
     *checksum = H5_checksum_fletcher32(buf, (size_t)(ptr - buf));
     UINT32ENCODE(ptr, *checksum);
 
-    FUNC_LEAVE_NOAPI((size_t)(ptr - buf));
+    FUNC_LEAVE_NOAPI((size_t)(ptr - buf))
 } /* end H5FD__onion_history_encode() */

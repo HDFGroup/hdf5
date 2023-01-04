@@ -1071,7 +1071,7 @@ done:
      * location for the object */
     *own_loc = H5G_OWN_NONE;
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__get_objinfo_cb() */
 
 /*-------------------------------------------------------------------------
@@ -1144,7 +1144,7 @@ H5G__get_objinfo(const H5G_loc_t *loc, const char *name, hbool_t follow_link, H5
     }
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__get_objinfo() */
 
 /*-------------------------------------------------------------------------

@@ -540,7 +540,7 @@ H5S__hyper_get_op_gen(void)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    FUNC_LEAVE_NOAPI(H5S_hyper_op_gen_g++);
+    FUNC_LEAVE_NOAPI(H5S_hyper_op_gen_g++)
 } /* end H5S__hyper_op_gen() */
 
 /*-------------------------------------------------------------------------
@@ -5081,7 +5081,7 @@ H5S__hyper_unlim_dim(const H5S_t *space)
 {
     FUNC_ENTER_PACKAGE_NOERR
 
-    FUNC_LEAVE_NOAPI(space->select.sel_info.hslab->unlim_dim);
+    FUNC_LEAVE_NOAPI(space->select.sel_info.hslab->unlim_dim)
 } /* end H5S__hyper_unlim_dim() */
 
 /*--------------------------------------------------------------------------

@@ -1146,7 +1146,7 @@ done:
     if (xmit_buf)
         xmit_buf = H5FL_BLK_FREE(xmit, xmit_buf);
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__mirror_verify_reply() */
 
 /* -------------------------------------------------------------------------
@@ -1566,7 +1566,7 @@ H5FD__mirror_query(const H5FD_t H5_ATTR_UNUSED *_file, unsigned long *flags)
                  H5FD_FEAT_AGGREGATE_SMALLDATA | H5FD_FEAT_POSIX_COMPAT_HANDLE | H5FD_FEAT_SUPPORTS_SWMR_IO |
                  H5FD_FEAT_DEFAULT_VFD_COMPATIBLE;
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FD__mirror_query() */
 
 /*-------------------------------------------------------------------------
@@ -1862,7 +1862,7 @@ done:
     if (xmit_buf)
         xmit_buf = H5FL_BLK_FREE(xmit, xmit_buf);
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__mirror_lock */
 
 /*-------------------------------------------------------------------------
@@ -1906,7 +1906,7 @@ done:
     if (xmit_buf)
         xmit_buf = H5FL_BLK_FREE(xmit, xmit_buf);
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__mirror_unlock */
 
 #endif /* H5_HAVE_MIRROR_VFD */

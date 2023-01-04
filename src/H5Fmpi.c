@@ -221,7 +221,7 @@ H5F__set_mpi_atomicity(H5F_t *file, hbool_t flag)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set atomicity flag");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__set_mpi_atomicity() */
 
 /*-------------------------------------------------------------------------
@@ -295,7 +295,7 @@ H5F__get_mpi_atomicity(const H5F_t *file, hbool_t *flag)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get atomicity flag");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F__get_mpi_atomicity() */
 
 /*-------------------------------------------------------------------------

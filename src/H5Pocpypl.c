@@ -210,7 +210,7 @@ H5P__free_merge_comm_dtype_list(H5O_copy_dtype_merge_list_t *dt_list)
         dt_list = tmp_node;
     } /* end while */
 
-    FUNC_LEAVE_NOAPI(NULL);
+    FUNC_LEAVE_NOAPI(NULL)
 } /* H5P__free_merge_comm_dtype_list */
 
 /*--------------------------------------------------------------------------

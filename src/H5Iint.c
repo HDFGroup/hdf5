@@ -851,7 +851,7 @@ H5I_is_file_object(hid_t id)
         ret_value = FALSE;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5I_is_file_object() */
 
 /*-------------------------------------------------------------------------

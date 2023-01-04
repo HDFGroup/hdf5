@@ -990,7 +990,7 @@ done:
         if (H5CX_set_io_xfer_mode(orig_xfer_mode) < 0)
             HDONE_ERROR(H5E_CACHE, H5E_CANTSET, FAIL, "can't set MPI-I/O transfer mode")
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5C__collective_write() */
 
 /*-------------------------------------------------------------------------

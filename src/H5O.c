@@ -2093,7 +2093,7 @@ H5O__disable_mdc_flushes(H5O_loc_t *oloc)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCORK, FAIL, "unable to cork object");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O__disable_mdc_flushes() */
 
 /*-------------------------------------------------------------------------
@@ -2166,7 +2166,7 @@ H5O__enable_mdc_flushes(H5O_loc_t *oloc)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTUNCORK, FAIL, "unable to uncork object");
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O__enable_mdc_flushes() */
 
 /*-------------------------------------------------------------------------

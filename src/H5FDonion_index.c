@@ -162,7 +162,7 @@ done:
         H5MM_xfree(r_out->archival_index.list);
     }
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__onion_ingest_revision_record() */
 
 /*-----------------------------------------------------------------------------
@@ -200,7 +200,7 @@ H5FD__onion_archival_index_is_valid(const H5FD_onion_archival_index_t *aix)
                 HGOTO_DONE(FALSE)
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__onion_archival_index_is_valid() */
 
 /*-----------------------------------------------------------------------------
@@ -276,7 +276,7 @@ H5FD__onion_archival_index_find(const H5FD_onion_archival_index_t *aix, uint64_t
     }
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__onion_archival_index_find() */
 
 /*-----------------------------------------------------------------------------
@@ -315,7 +315,7 @@ H5FD__onion_revision_index_destroy(H5FD_onion_revision_index_t *rix)
     H5MM_xfree(rix->_hash_table);
     H5MM_xfree(rix);
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__onion_revision_index_destroy() */
 
 /*-----------------------------------------------------------------------------
@@ -364,7 +364,7 @@ done:
     if (NULL == ret_value)
         H5MM_xfree(rix);
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__onion_revision_index_init() */
 
 /*-----------------------------------------------------------------------------
@@ -428,7 +428,7 @@ H5FD__onion_revision_index_resize(H5FD_onion_revision_index_t *rix)
     rix->_hash_table                  = new_table;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__onion_revision_index_resize() */
 
 /*-----------------------------------------------------------------------------
@@ -502,7 +502,7 @@ H5FD__onion_revision_index_insert(H5FD_onion_revision_index_t *rix, const H5FD_o
     }
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__onion_revision_index_insert() */
 
 /*-----------------------------------------------------------------------------
@@ -547,7 +547,7 @@ H5FD__onion_revision_index_find(const H5FD_onion_revision_index_t *rix, uint64_t
         }
     }
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__onion_revision_index_find() */
 
 /*-----------------------------------------------------------------------------
@@ -723,7 +723,7 @@ H5FD__onion_revision_record_decode(unsigned char *buf, H5FD_onion_revision_recor
     ret_value = (size_t)(ptr - buf);
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__onion_revision_record_decode() */
 
 /*-----------------------------------------------------------------------------
@@ -805,7 +805,7 @@ H5FD__onion_revision_record_encode(H5FD_onion_revision_record_t *record, unsigne
     *checksum = H5_checksum_fletcher32(buf, (size_t)(ptr - buf));
     UINT32ENCODE(ptr, *checksum);
 
-    FUNC_LEAVE_NOAPI((size_t)(ptr - buf));
+    FUNC_LEAVE_NOAPI((size_t)(ptr - buf))
 } /* end H5FD__onion_revision_record_encode() */
 
 /*-----------------------------------------------------------------------------
@@ -932,5 +932,5 @@ done:
     H5MM_xfree(kept_list);
     H5MM_xfree(new_aix.list);
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__onion_merge_revision_index_into_archival_index() */

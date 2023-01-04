@@ -98,7 +98,7 @@ H5O__reset_info1(H5O_info1_t *oinfo)
     oinfo->type = H5O_TYPE_UNKNOWN;
     oinfo->addr = HADDR_UNDEF;
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__reset_info1() */
 
 /*-------------------------------------------------------------------------
@@ -201,7 +201,7 @@ H5O__iterate1_adapter(hid_t obj_id, const char *name, const H5O_info2_t *oinfo2,
     ret_value = (shim_data->real_op)(obj_id, name, &oinfo, shim_data->real_op_data);
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__iterate1_adapter() */
 
 /*-------------------------------------------------------------------------
