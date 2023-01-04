@@ -385,7 +385,7 @@ H5D__none_idx_copy_setup(const H5D_chk_idx_info_t H5_ATTR_NDEBUG_UNUSED *idx_inf
     HDassert(idx_info_dst->storage);
 
     /* Set copied metadata tag */
-    H5_BEGIN_TAG(H5AC__COPIED_TAG);
+    H5_BEGIN_TAG(H5AC__COPIED_TAG)
 
     /* Allocate dataset chunks in the dest. file */
     if (H5D__none_idx_create(idx_info_dst) < 0)

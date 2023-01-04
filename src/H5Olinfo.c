@@ -458,7 +458,7 @@ H5O__linfo_post_copy_file_cb(const H5O_link_t *src_lnk, void *_udata)
     dst_lnk_init = TRUE;
 
     /* Set metadata tag in API context */
-    H5_BEGIN_TAG(H5AC__COPIED_TAG);
+    H5_BEGIN_TAG(H5AC__COPIED_TAG)
 
     /* Insert the new object in the destination file's group */
     /* (Doesn't increment the link count - that's already been taken care of for hard links) */

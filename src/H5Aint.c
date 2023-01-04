@@ -2566,7 +2566,7 @@ H5A__dense_post_copy_file_cb(const H5A_t *attr_src, void *_udata)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to reset attribute sharing")
 
     /* Set COPIED tag for destination object's metadata */
-    H5_BEGIN_TAG(H5AC__COPIED_TAG);
+    H5_BEGIN_TAG(H5AC__COPIED_TAG)
 
     /* Insert attribute into dense storage */
     if (H5A__dense_insert(udata->file, udata->ainfo, attr_dst) < 0)

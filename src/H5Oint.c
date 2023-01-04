@@ -517,7 +517,7 @@ H5O_apply_ohdr(H5F_t *f, H5O_t *oh, hid_t ocpl_id, size_t size_hint, size_t init
     }
 
     /* Set metadata tag in API context */
-    H5_BEGIN_TAG(oh_addr);
+    H5_BEGIN_TAG(oh_addr)
 
     /* Cache object header */
     if (H5AC_insert_entry(f, H5AC_OHDR, oh_addr, oh, insert_flags) < 0)
