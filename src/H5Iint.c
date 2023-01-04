@@ -827,7 +827,7 @@ H5I_is_file_object(hid_t id)
     H5I_type_t type      = H5I_get_type(id);
     htri_t     ret_value = FAIL;
 
-    FUNC_ENTER_NOAPI(FAIL);
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Fail if the ID type is out of range */
     if (type < 1 || type >= H5I_NTYPES)
