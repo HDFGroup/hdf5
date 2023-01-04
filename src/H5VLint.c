@@ -425,7 +425,7 @@ H5VL__set_def_conn(void)
         }     /* end else */
 
         /* Was there any connector info specified in the environment variable? */
-        if (NULL != (tok = HDstrtok_r(NULL, " \t\n\r", &lasts)))
+        if (NULL != (tok = HDstrtok_r(NULL, "\n\r", &lasts)))
             if (H5VL__connector_str_to_info(tok, connector_id, &vol_info) < 0)
                 HGOTO_ERROR(H5E_VOL, H5E_CANTDECODE, FAIL, "can't deserialize connector info")
 
