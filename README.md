@@ -2,7 +2,11 @@ HDF5 version 1.15.0 currently under development
 
 ![HDF5 Logo](doxygen/img/HDF5.png)
 
-[![Build](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/main.yml?branch=develop&label=develop)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Adevelop)
+[![develop build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/main.yml?branch=develop&label=develop)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Adevelop)
+[![1.14 build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/main.yml?branch=hdf5_1_14&label=1.14)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Ahdf5_1_14)
+[![1.12 build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/main.yml?branch=hdf5_1_12&label=1.12)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Ahdf5_1_12)
+[![1.10 build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/main.yml?branch=hdf5_1_10&label=1.10)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Ahdf5_1_10)
+[![1.8 build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/main.yml?branch=hdf5_1_8&label=1.8)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Ahdf5_1_8)
 [![BSD](https://img.shields.io/badge/License-BSD-blue.svg)](https://github.com/HDFGroup/hdf5/blob/develop/COPYING)
 
 *Please refer to the release_docs/INSTALL file for installation instructions.*
