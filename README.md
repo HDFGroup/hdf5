@@ -2,7 +2,7 @@ HDF5 version 1.15.0 currently under development
 
 ![HDF5 Logo](doxygen/img/HDF5.png)
 
-![Build](https://github.com/HDFGroup/hdf5/actions/workflows/main.yml/badge.svg?branch=develop)
+[![Build](https://github.com/HDFGroup/hdf5/actions/workflows/main.yml/badge.svg?branch=develop)](https://github.com/HDFGroup/hdf5/actions)
 [![BSD](https://img.shields.io/badge/License-BSD-blue.svg)](https://github.com/HDFGroup/hdf5/blob/develop/COPYING)
 
 *Please refer to the release_docs/INSTALL file for installation instructions.*
