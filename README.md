@@ -4,7 +4,7 @@ HDF5 version 1.15.0 currently under development
 
 [![Build](https://github.com/HDFGroup/hdf5/actions/workflows/main.yml/badge.svg?branch=develop)](https://github.com/HDFGroup/hdf5/actions)
 [![Build](https://img.shields.io/github/workflow/status/HDFGroup/hdf5/hdf5%20dev%20CI/develop)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Adevelop)
-[![Build](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/hdf5%20dev%20CI?branch=develop)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Adevelop)
+[![Build](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/main.yml?branch=develop)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Adevelop)
 [![BSD](https://img.shields.io/badge/License-BSD-blue.svg)](https://github.com/HDFGroup/hdf5/blob/develop/COPYING)
 
 *Please refer to the release_docs/INSTALL file for installation instructions.*
