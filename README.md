@@ -79,13 +79,19 @@ RELEASE SCHEDULE
 HDF5 does not release on a regular schedule. Instead, releases are driven by
 new features and bug fixes, though we try to have at least one release of each
 maintenance branch per year. Future HDF5 releases indicated on this schedule
-are tentative. 
+are tentative.
 
 | Release | New Features |
 | ------- | ------------ |
-| 1.13.2 | Onion VFD, Selection I/O, Subfiling |
-| 1.13.3 | Multi-Dataset I/O |
+| 1.8.23 | last HDF5 1.8 release |
+| 1.10.10 | CVE fixes, performance improvements, H5Dchunk\_iter() |
+| 1.12.3 | CVE fixes, performance improvements, H5Dchunk\_iter(), last HDF5 1.12 release |
+| 1.14.1 | selection I/O with datatype conversion |
+| 2.0.0 | TBD |
 | TBD | VFD SWMR |
+
+**Note**: HDF5 1.12 is being retired early due to its incomplete and incompatible VOL
+layer.
 
 This list of feature release versions is also tentative, and the specific release
 in which a feature is introduced may change.
