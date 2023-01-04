@@ -823,7 +823,7 @@ test_table(hid_t fid, int do_write)
         nrecords = 3;
         if (H5TBdelete_record(fid, "table", start, nrecords) < 0)
             goto out;
-        ;
+
         /* Get table info */
         if (H5TBget_table_info(fid, "table", &nfields_out, &nrecords_out) < 0)
             goto out;

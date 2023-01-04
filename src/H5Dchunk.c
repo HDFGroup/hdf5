@@ -3824,7 +3824,6 @@ H5D__chunk_lookup(const H5D_t *dset, const hsize_t *scaled, H5D_chunk_ud_t *udat
         udata->idx_hint           = idx;
         udata->chunk_block.offset = ent->chunk_block.offset;
         udata->chunk_block.length = ent->chunk_block.length;
-        ;
         udata->chunk_idx = ent->chunk_idx;
     } /* end if */
     else {

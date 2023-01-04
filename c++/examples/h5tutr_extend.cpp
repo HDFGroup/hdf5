@@ -117,7 +117,6 @@ main(void)
         if (H5D_CHUNKED == prop.getLayout())
             rank_chunk = prop.getChunk(rank, chunk_dimsr);
         cout << "rank chunk = " << rank_chunk << endl;
-        ;
 
         memspace = new DataSpace(rank, dimsr, NULL);
         dataset->read(rdata, PredType::NATIVE_INT, *memspace, *filespace);

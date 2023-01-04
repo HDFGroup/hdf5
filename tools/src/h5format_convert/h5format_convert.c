@@ -162,7 +162,6 @@ parse_command_line(int argc, const char *const *argv)
 
 error:
     return -1;
-    ;
 } /* parse_command_line() */
 
 /*-------------------------------------------------------------------------

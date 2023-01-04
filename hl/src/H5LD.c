@@ -195,7 +195,6 @@ H5LD_construct_vector(char *fields, H5LD_memb_t *listv[] /*OUT*/, hid_t par_tid)
                 case '\0':           /* end of list */
                     if (gotmember) { /* getting something and end of "fields" */
                         *cur++ = '\0';
-                        ;
                         memb->names[++j] = NULL;
                     }    /* end if */
                     else /* getting nothing but end of list */
@@ -215,7 +214,6 @@ H5LD_construct_vector(char *fields, H5LD_memb_t *listv[] /*OUT*/, hid_t par_tid)
 
                 case '.': /* nested field separator */
                     *fields_ptr++ = *cur++ = '\0';
-                    ;
                     if (gotmember) {
                         memb->names[++j] = cur;
                         gotmember        = FALSE;
@@ -226,7 +224,6 @@ H5LD_construct_vector(char *fields, H5LD_memb_t *listv[] /*OUT*/, hid_t par_tid)
 
                 case ',': /* field separator */
                     *fields_ptr++ = *cur++ = '\0';
-                    ;
                     if (gotmember) {
                         memb->names[++j] = NULL;
                         gotmember        = FALSE;

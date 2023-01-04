@@ -8375,7 +8375,6 @@ test_random_chunks(hid_t fapl)
     nerrors += test_random_chunks_real("Write/read on randomly selected chunks w/implicit index", TRUE, fapl);
 
     return nerrors;
-    ;
 } /* end test_random_chunks() */
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
