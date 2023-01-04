@@ -122,21 +122,13 @@
  * specifying a name in the VOL plugin environment variable.
  *
  * \subsubsection subsubsec_vol_quick_use Use A VOL-Enabled HDF5 Library
- * The virtual object layer was introduced in HDF5 1.12.0, however that version of the VOL is deprecated.
- * VOL users should target HDF5 1.13.X, which is currently under development. The 1.13.X releases are
- * considered ”unstable” in the sense that API calls, interfaces, and the file format may change in the
- * 1.13.X release branches and we do not guarantee binary compatibility (”unstable” does NOT mean buggy).
- * The next stable version of the library will be HDF5 1.14.0 which will release in 2023. The particular
- * configuration of the library (serial vs parallel, thread-safe, debug vs production/release) does not
- * matter. The VOL is a fundamental part of the library and cannot be disabled, so any build will do.
+ * The virtual object layer was introduced in HDF5 1.12.0, however that version of the VOL is deprecated
+ * due to inadequate support for pass-through connectors. These deficiencies have been addressed
+ * in HDF5 1.14.0, so VOL users and connector authors should target the 1.14.0 VOL API.
  *
  * On Windows, it’s probably best to use the same debug vs release configuration for the application and
  * all libraries in order to avoid C runtime (CRT) issues. Pre-2015 versions of Visual Studio are not
  * supported.
- *
- * When working with a debug HDF5 library, it’s probably also wise to build with the ”memory sanity checking”
- * feature disabled to avoid accidentally clobbering our memory tracking infrastructure when dealing with
- * buffers obtained from the HDF5 library. This feature should be disabled by default in HDF5 1.13.X.
  *
  * \subsubsection subsubsec_vol_quick_set Determine How You Will Set The VOL Connector
  * Fundamentally, setting a VOL connector involves modifying the file access property list (fapl) that will
@@ -505,7 +497,7 @@
  * \endcode
  *
  * \subsubsection subsubsec_vol_adapt_native Protect Native-Only API Calls
- * In HDF5 1.13.0, a way to determine support for optional calls has been added.
+ * In HDF5 1.14.0, a way to determine support for optional calls has been added.
  * \code
  *     herr_t H5VLquery_optional(hid_t obj_id, H5VL_subclass_t subcls, int opt_type, uint64_t *flags)
  * \endcode
