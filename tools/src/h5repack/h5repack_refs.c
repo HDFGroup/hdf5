@@ -172,7 +172,7 @@ do_copy_refobjs(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                                              H5Rdereference2(dset_in, H5P_DEFAULT, H5R_OBJECT, &buf[u])) < 0)
                                         continue;
                                 }
-                                H5E_END_TRY;
+                                H5E_END_TRY
 
                                 /* get the name. a valid name could only occur
                                  * in the second traversal of the file
@@ -260,7 +260,7 @@ do_copy_refobjs(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                                                                      &buf[u])) < 0)
                                         continue;
                                 }
-                                H5E_END_TRY;
+                                H5E_END_TRY
 
                                 /* get the name. a valid name could only occur
                                  * in the second traversal of the file
@@ -408,7 +408,7 @@ done:
         H5Tclose(type_in);
         named_datatype_free(&named_dt_head, 1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return ret_value;
 }
@@ -795,7 +795,7 @@ done:
         H5Aclose(attr_id);
         H5Aclose(attr_out);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return ret_value;
 }
@@ -876,7 +876,7 @@ done:
         H5Sclose(space_id);
         H5Oclose(ref_obj_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return ret_value;
 }

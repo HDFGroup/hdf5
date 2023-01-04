@@ -1531,7 +1531,7 @@ test_main(hid_t file_id, hid_t fapl)
             if (H5Iget_name(type_id, name, NAME_BUF_SIZE) > 0)
                 TEST_ERROR;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         /* Get name for dataspace, it should fail */
         H5E_BEGIN_TRY
@@ -1539,7 +1539,7 @@ test_main(hid_t file_id, hid_t fapl)
             if (H5Iget_name(space_id, name, NAME_BUF_SIZE) > 0)
                 TEST_ERROR;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
 
     /* Close */
@@ -3080,7 +3080,7 @@ test_main(hid_t file_id, hid_t fapl)
         if ((size = H5Iget_name(dtype, NULL, 0)) >= 0)
             TEST_ERROR;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (H5Tcommit_anon(file2_id, dtype, H5P_DEFAULT, H5P_DEFAULT))
         TEST_ERROR;
@@ -3805,7 +3805,7 @@ error:
     {
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     HDputs("***** GET NAME TESTS FAILED *****");
 

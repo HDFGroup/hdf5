@@ -1344,7 +1344,7 @@ test_sohm_attrs(void)
         ret = H5Pclose(fcpl_id);
         CHECK_I(ret, "H5Pclose");
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* three shared message indices
      */

@@ -6088,7 +6088,7 @@ test_attr_info_null_info_pointer(hid_t fcpl, hid_t fapl)
     {
         err_ret = H5Aget_info(attr, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     CHECK(err_ret, SUCCEED, "H5Aget_info");
 
@@ -6096,7 +6096,7 @@ test_attr_info_null_info_pointer(hid_t fcpl, hid_t fapl)
     {
         err_ret = H5Aget_info_by_name(fid, ".", GET_INFO_NULL_POINTER_ATTR_NAME, NULL, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     CHECK(err_ret, SUCCEED, "H5Aget_info_by_name");
 
@@ -6104,7 +6104,7 @@ test_attr_info_null_info_pointer(hid_t fcpl, hid_t fapl)
     {
         err_ret = H5Aget_info_by_idx(fid, ".", H5_INDEX_NAME, H5_ITER_INC, 0, NULL, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     CHECK(err_ret, SUCCEED, "H5Aget_info_by_idx");
 
@@ -6152,7 +6152,7 @@ test_attr_rename_invalid_name(hid_t fcpl, hid_t fapl)
     {
         err_ret = H5Arename(fid, NULL, INVALID_RENAME_TEST_NEW_ATTR_NAME);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     CHECK(err_ret, SUCCEED, "H5Arename");
 
@@ -6160,7 +6160,7 @@ test_attr_rename_invalid_name(hid_t fcpl, hid_t fapl)
     {
         err_ret = H5Arename(fid, "", INVALID_RENAME_TEST_NEW_ATTR_NAME);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     CHECK(err_ret, SUCCEED, "H5Arename");
 
@@ -6168,7 +6168,7 @@ test_attr_rename_invalid_name(hid_t fcpl, hid_t fapl)
     {
         err_ret = H5Arename(fid, INVALID_RENAME_TEST_ATTR_NAME, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     CHECK(err_ret, SUCCEED, "H5Arename");
 
@@ -6176,7 +6176,7 @@ test_attr_rename_invalid_name(hid_t fcpl, hid_t fapl)
     {
         err_ret = H5Arename(fid, INVALID_RENAME_TEST_ATTR_NAME, "");
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     CHECK(err_ret, SUCCEED, "H5Arename");
 
@@ -6184,7 +6184,7 @@ test_attr_rename_invalid_name(hid_t fcpl, hid_t fapl)
     {
         err_ret = H5Arename_by_name(fid, ".", NULL, INVALID_RENAME_TEST_NEW_ATTR_NAME, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     CHECK(err_ret, SUCCEED, "H5Arename_by_name");
 
@@ -6192,7 +6192,7 @@ test_attr_rename_invalid_name(hid_t fcpl, hid_t fapl)
     {
         err_ret = H5Arename_by_name(fid, ".", "", INVALID_RENAME_TEST_NEW_ATTR_NAME, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     CHECK(err_ret, SUCCEED, "H5Arename_by_name");
 
@@ -6200,7 +6200,7 @@ test_attr_rename_invalid_name(hid_t fcpl, hid_t fapl)
     {
         err_ret = H5Arename_by_name(fid, ".", INVALID_RENAME_TEST_ATTR_NAME, NULL, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     CHECK(err_ret, SUCCEED, "H5Arename_by_name");
 
@@ -6208,7 +6208,7 @@ test_attr_rename_invalid_name(hid_t fcpl, hid_t fapl)
     {
         err_ret = H5Arename_by_name(fid, ".", INVALID_RENAME_TEST_ATTR_NAME, "", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     CHECK(err_ret, SUCCEED, "H5Arename_by_name");
 
@@ -6258,7 +6258,7 @@ test_attr_get_name_invalid_buf(hid_t fcpl, hid_t fapl)
     {
         err_ret = H5Aget_name(attr, 1, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     VERIFY(err_ret, FAIL, "H5Aget_name");
 
@@ -6266,7 +6266,7 @@ test_attr_get_name_invalid_buf(hid_t fcpl, hid_t fapl)
     {
         err_ret = H5Aget_name_by_idx(fid, ".", H5_INDEX_NAME, H5_ITER_INC, 0, NULL, 1, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     VERIFY(err_ret, FAIL, "H5Aget_name_by_idx");
 

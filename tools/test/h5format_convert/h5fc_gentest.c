@@ -293,7 +293,7 @@ error:
         H5Fclose(fcpl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
 } /* gen_non() */
 
@@ -373,7 +373,7 @@ error:
         H5Fclose(fid);
         H5Pclose(fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
 } /* gen_edge() */
 
@@ -518,7 +518,7 @@ error:
         H5Pclose(fapl);
         H5Pclose(fcpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
 } /* gen_err_level() */
 
@@ -774,7 +774,7 @@ error:
         H5Pclose(fapl);
         H5Pclose(fcpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
 } /* end gen_ext() */
 

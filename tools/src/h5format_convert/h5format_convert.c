@@ -333,7 +333,7 @@ error:
         H5Pclose(dcpl);
         H5Dclose(did);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 } /* convert() */

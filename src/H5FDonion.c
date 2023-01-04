@@ -1028,7 +1028,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
         {
             file->onion_file = H5FD_open(name_onion, flags, backing_fapl_id, maxaddr);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         /* If that didn't work, create a new onion file */
         /* TODO: Move to a new function */

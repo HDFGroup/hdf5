@@ -1654,7 +1654,7 @@ h5str_dump_region_blocks(JNIEnv *env, h5str_t *str, hid_t region_space, hid_t re
     {
         nblocks = H5Sget_select_hyper_nblocks(region_space);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (nblocks <= 0) {
         ret_value = SUCCEED;
@@ -1831,7 +1831,7 @@ h5str_dump_region_points(JNIEnv *env, h5str_t *str, hid_t region_space, hid_t re
     {
         npoints = H5Sget_select_elem_npoints(region_space);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (npoints <= 0) {
         ret_value = SUCCEED;

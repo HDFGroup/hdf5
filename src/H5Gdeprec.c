@@ -1128,7 +1128,7 @@ H5G__get_objinfo(const H5G_loc_t *loc, const char *name, hbool_t follow_link, H5
         {
             ret = H5L_get_info(loc, name, &linfo);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         if (ret >= 0 && linfo.type != H5L_TYPE_HARD) {
             statbuf->linklen = linfo.u.val_size;

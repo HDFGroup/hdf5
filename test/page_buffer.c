@@ -198,7 +198,7 @@ error:
         if (data)
             HDfree(data);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return (1);
 } /* create_file */
 
@@ -292,7 +292,7 @@ error:
         if (data)
             HDfree(data);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 #endif /* H5_HAVE_PARALLEL */
@@ -411,7 +411,7 @@ test_args(hid_t orig_fapl, const char *env_h5_drvr)
     {
         file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (file_id >= 0)
         TEST_ERROR;
@@ -432,7 +432,7 @@ test_args(hid_t orig_fapl, const char *env_h5_drvr)
     {
         file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (file_id >= 0)
         TEST_ERROR;
@@ -444,7 +444,7 @@ test_args(hid_t orig_fapl, const char *env_h5_drvr)
     {
         ret = H5Pset_page_buffer_size(fapl, 512, 50, 51);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (ret >= 0)
         TEST_ERROR;
@@ -535,7 +535,7 @@ error:
         H5Pclose(fapl);
         H5Pclose(fcpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_args */
 
@@ -800,7 +800,7 @@ error:
         if (data)
             HDfree(data);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_raw_data_handling */
 
@@ -1042,7 +1042,7 @@ error:
         if (data)
             HDfree(data);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* test_lru_processing */
 
@@ -1662,7 +1662,7 @@ error:
         if (data)
             HDfree(data);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 
@@ -1952,7 +1952,7 @@ error:
         if (data)
             HDfree(data);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 } /* test_stats_collection */
@@ -2013,7 +2013,7 @@ verify_page_buffering_disabled(hid_t orig_fapl, const char *env_h5_drvr)
     {
         file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (file_id >= 0)
         TEST_ERROR;
@@ -2045,7 +2045,7 @@ verify_page_buffering_disabled(hid_t orig_fapl, const char *env_h5_drvr)
     {
         file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (file_id >= 0)
         TEST_ERROR;
@@ -2068,7 +2068,7 @@ error:
         H5Pclose(fcpl);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 
@@ -2160,7 +2160,7 @@ error:
     {
         H5Pclose(fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (api_ctx_pushed)
         H5CX_pop(FALSE);

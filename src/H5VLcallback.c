@@ -3752,7 +3752,7 @@ H5VL__file_open_find_connector_cb(H5PL_type_t plugin_type, const void *plugin_in
     {
         status = H5VL_file_specific(NULL, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (status < 0) {
         ssize_t new_num_errors = 0;

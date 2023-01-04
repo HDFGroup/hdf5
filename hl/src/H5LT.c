@@ -535,7 +535,7 @@ out:
         H5Dclose(did);
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -772,7 +772,7 @@ out:
         H5Tclose(tid);
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -886,7 +886,7 @@ out:
     {
         H5Pclose(fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 } /* end H5LTopen_file_image() */
 
@@ -1121,7 +1121,7 @@ out:
         H5Dclose(did);
         H5Tclose(tid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -1177,7 +1177,7 @@ out:
         H5Dclose(did);
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -1254,7 +1254,7 @@ out:
         H5Sclose(sid);
         H5Dclose(did);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -3491,7 +3491,7 @@ out:
         H5Tclose(tid);
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 }
 

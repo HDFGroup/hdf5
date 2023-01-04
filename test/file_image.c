@@ -1069,7 +1069,7 @@ test_get_file_image_error_rejection(void)
     {
         bytes_read = H5Fget_file_image(file_id, image_ptr, (size_t)(image_size - 1));
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(bytes_read < 0, "H5Fget_file_image(2 -- test 1) succeeded.");
 
     /* Call H5Fget_file_image() with good buffer and buffer size,
@@ -1079,7 +1079,7 @@ test_get_file_image_error_rejection(void)
     {
         bytes_read = H5Fget_file_image((hid_t)0, image_ptr, (size_t)(image_size));
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(bytes_read < 0, "H5Fget_file_image(3 -- test 1) succeeded.");
 
     /* Call H5Fget_file_image() with good buffer and buffer size,
@@ -1089,7 +1089,7 @@ test_get_file_image_error_rejection(void)
     {
         bytes_read = H5Fget_file_image(dset_id, image_ptr, (size_t)(image_size));
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(bytes_read < 0, "H5Fget_file_image(4 -- test 1) succeeded.");
 
     /* Close dset and space */
@@ -1193,7 +1193,7 @@ test_get_file_image_error_rejection(void)
     {
         image_size = H5Fget_file_image(file_id, NULL, (size_t)0);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(image_size == -1, "H5Fget_file_image(5) succeeded.");
 
     /* Close dset and space */
@@ -1255,7 +1255,7 @@ test_get_file_image_error_rejection(void)
     {
         image_size = H5Fget_file_image(file_id, NULL, (size_t)0);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(image_size == -1, "H5Fget_file_image(6) succeeded.");
 
     /* Close dset and space */
@@ -1315,7 +1315,7 @@ test_get_file_image_error_rejection(void)
     {
         image_size = H5Fget_file_image(file_id, NULL, (size_t)0);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     VERIFY(image_size == -1, "H5Fget_file_image(7) succeeded.");
 
     /* Close dset and space */

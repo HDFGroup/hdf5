@@ -152,7 +152,7 @@ error:
     {
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (obj)
         HDfree(obj);
     return MAX(1, nerrors);
@@ -252,7 +252,7 @@ error:
     {
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (obj)
         HDfree(obj);
     return MAX(1, nerrors);
@@ -342,7 +342,7 @@ error:
     {
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (obj)
         HDfree(obj);
     return MAX(1, nerrors);
@@ -438,7 +438,7 @@ error:
     {
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (obj)
         HDfree(obj);
     return MAX(1, nerrors);
@@ -557,7 +557,7 @@ error:
     {
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (obj)
         HDfree(obj);
     return MAX(1, nerrors);
@@ -615,7 +615,7 @@ error:
     {
         H5Pclose(fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (api_ctx_pushed)
         H5CX_pop(FALSE);

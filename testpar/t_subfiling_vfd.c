@@ -210,7 +210,7 @@ test_create_and_close(void)
     {
         H5Fdelete(SUBF_FILENAME, fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
 
@@ -390,7 +390,7 @@ test_config_file(void)
     {
         H5Fdelete(SUBF_FILENAME, fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
 
@@ -603,7 +603,7 @@ test_stripe_sizes(void)
             {
                 H5Fdelete(SUBF_FILENAME, fapl_id);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
         }
@@ -781,7 +781,7 @@ test_stripe_sizes(void)
         {
             H5Fdelete(SUBF_FILENAME, fapl_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         HDfree(write_buf);
 
@@ -1193,7 +1193,7 @@ test_read_different_stripe_size(void)
     {
         H5Fdelete(SUBF_FILENAME, fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     VRFY((H5Pclose(dxpl_id) >= 0), "DXPL close succeeded");
     VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
@@ -1395,7 +1395,7 @@ test_subfiling_precreate_rank_0(void)
     {
         H5Fdelete(SUBF_FILENAME, fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
     VRFY((H5Pclose(dxpl_id) >= 0), "DXPL close succeeded");
@@ -1533,7 +1533,7 @@ test_subfiling_write_many_read_one(void)
         {
             H5Fdelete(SUBF_FILENAME, fapl_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
     }
@@ -1719,7 +1719,7 @@ test_subfiling_write_many_read_few(void)
         {
             H5Fdelete(SUBF_FILENAME, fapl_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
 
         VRFY((H5Pclose(fapl_id) >= 0), "FAPL close succeeded");
     }

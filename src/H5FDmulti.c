@@ -439,7 +439,7 @@ H5Pget_fapl_multi(hid_t fapl_id, H5FD_mem_t *memb_map /*out*/, hid_t *memb_fapl 
     {
         fa = (const H5FD_multi_fapl_t *)H5Pget_driver_info(fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (!fa || (H5P_FILE_ACCESS_DEFAULT == fapl_id)) {
         if (H5FD_multi_populate_config(NULL, NULL, NULL, NULL, TRUE, &default_fa) < 0)
             H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_CANTSET, "can't setup default driver configuration",
@@ -1147,7 +1147,7 @@ H5FD_multi_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
     {
         fa = (const H5FD_multi_fapl_t *)H5Pget_driver_info(fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (!fa || (H5P_FILE_ACCESS_DEFAULT == fapl_id) || (H5FD_MULTI != H5Pget_driver(fapl_id))) {
         char *env = getenv(HDF5_DRIVER);
 
@@ -1418,7 +1418,7 @@ H5FD_multi_get_eoa(const H5FD_t *_file, H5FD_mem_t type)
                 {
                     memb_eoa = H5FDget_eoa(file->memb[mt], mt);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
 
                 if (HADDR_UNDEF == memb_eoa)
                     H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "member file has unknown eoa",
@@ -1454,7 +1454,7 @@ H5FD_multi_get_eoa(const H5FD_t *_file, H5FD_mem_t type)
             {
                 eoa = H5FDget_eoa(file->memb[mmt], mmt);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (HADDR_UNDEF == eoa)
                 H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "member file has unknown eoa",
@@ -1535,7 +1535,7 @@ H5FD_multi_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t eoa)
     {
         status = H5FDset_eoa(file->memb[mmt], mmt, (eoa - file->fa.memb_addr[mmt]));
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status < 0)
         H5Epush_ret(func, H5E_ERR_CLS, H5E_FILE, H5E_BADVALUE, "member H5FDset_eoa failed", -1);
 
@@ -1579,7 +1579,7 @@ H5FD_multi_get_eof(const H5FD_t *_file, H5FD_mem_t type)
                 {
                     tmp_eof = H5FDget_eof(file->memb[mt], type);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
 
                 if (HADDR_UNDEF == tmp_eof)
                     H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "member file has unknown eof",
@@ -1615,7 +1615,7 @@ H5FD_multi_get_eof(const H5FD_t *_file, H5FD_mem_t type)
             {
                 eof = H5FDget_eof(file->memb[mmt], mmt);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (HADDR_UNDEF == eof)
                 H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "member file has unknown eof",
@@ -1916,7 +1916,7 @@ H5FD_multi_flush(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
                 if (H5FDflush(file->memb[mt], dxpl_id, closing) < 0)
                     nerrors++;
             }
-            H5E_END_TRY;
+            H5E_END_TRY
         }
     }
     if (nerrors)
@@ -1957,7 +1957,7 @@ H5FD_multi_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
                 if (H5FDtruncate(file->memb[mt], dxpl_id, closing) < 0)
                     nerrors++;
             }
-            H5E_END_TRY;
+            H5E_END_TRY
         }
     }
     if (nerrors)
@@ -2003,7 +2003,7 @@ H5FD_multi_lock(H5FD_t *_file, hbool_t rw)
                     break;
                 } /* end if */
             }
-            H5E_END_TRY;
+            H5E_END_TRY
         } /* end if */
     }
     END_MEMBERS
@@ -2018,7 +2018,7 @@ H5FD_multi_lock(H5FD_t *_file, hbool_t rw)
                 if (H5FDunlock(file->memb[k]) < 0)
                     nerrors++;
             }
-            H5E_END_TRY;
+            H5E_END_TRY
         } /* end for */
     }     /* end if */
 
@@ -2155,7 +2155,7 @@ open_members(H5FD_multi_t *file)
         {
             file->memb[mt] = H5FDopen(tmp, file->flags, file->fa.memb_fapl[mt], HADDR_UNDEF);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (!file->memb[mt]) {
             if (!file->fa.relax || (file->flags & H5F_ACC_RDWR))
                 nerrors++;
@@ -2198,7 +2198,7 @@ H5FD_multi_delete(const char *filename, hid_t fapl_id)
     {
         fa = (const H5FD_multi_fapl_t *)H5Pget_driver_info(fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (!fa) {
         char *env = getenv(HDF5_DRIVER);
 

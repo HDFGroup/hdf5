@@ -488,7 +488,7 @@ done:
         H5Fclose(fid_src);
         H5Fclose(fid_dst);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     leave(ret_value);
 }

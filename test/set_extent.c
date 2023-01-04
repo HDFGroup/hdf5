@@ -431,7 +431,7 @@ do_layouts(hid_t fapl)
             {
                 ret = H5Pset_libver_bounds(new_fapl, low, high);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
 
             if (ret < 0) /* Invalid low/high combinations */
             {
@@ -460,7 +460,7 @@ error:
     {
         H5Pclose(new_fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -792,7 +792,7 @@ error:
         H5Pclose(fcpl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 
 } /* end test_rank1() */
@@ -1287,7 +1287,7 @@ error:
         H5Pclose(fcpl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -1722,7 +1722,7 @@ error:
         H5Pclose(fcpl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -1983,7 +1983,7 @@ test_external(hid_t fapl)
             TEST_ERROR;
         }
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /*-------------------------------------------------------------------------
      * close property list
@@ -2012,7 +2012,7 @@ error:
         H5Pclose(dcpl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -2098,7 +2098,7 @@ test_layouts(H5D_layout_t layout, hid_t fapl)
     {
         ret = H5Dset_extent(did, dims_e);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (ret >= 0)
         TEST_ERROR;
@@ -2147,7 +2147,7 @@ test_layouts(H5D_layout_t layout, hid_t fapl)
     {
         ret = H5Dset_extent(did, dims_s);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (ret >= 0)
         TEST_ERROR;
@@ -2220,7 +2220,7 @@ error:
         H5Pclose(dcpl);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -2434,7 +2434,7 @@ error:
         H5Dclose(dset);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     HDfree(rbuf);
     HDfree(wbuf);
@@ -2729,7 +2729,7 @@ error:
         H5Tclose(type);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     HDfree(rbuf);
     HDfree(wbuf);

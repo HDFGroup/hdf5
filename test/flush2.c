@@ -100,7 +100,7 @@ error:
         H5Sclose(sid);
         H5Dclose(did);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     HDfree(data);
 
@@ -164,7 +164,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FALSE;
 } /* end file_ok() */
@@ -217,7 +217,7 @@ error:
         H5Pclose(new_fapl_id);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 } /* end clear_status_flags() */

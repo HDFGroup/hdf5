@@ -697,7 +697,7 @@ out:
         H5Tclose(ntid);
         H5Tclose(tid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 }
 
@@ -1198,7 +1198,7 @@ out:
             buf = NULL;
         }
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 }
 
@@ -1538,7 +1538,7 @@ out:
         H5Tclose(tid);
         H5Tclose(ntid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (buf) {
         HDfree(buf);
@@ -1700,7 +1700,7 @@ H5DSiterate_scales(hid_t did, unsigned int dim, int *ds_idx, H5DS_iterate_t visi
                         if ((scale_id = H5Ropen_object(&nref, H5P_DEFAULT, H5P_DEFAULT)) < 0)
                             goto out;
                     }
-                    H5E_END_TRY;
+                    H5E_END_TRY
                 }
                 else {
                     /* get the reference */
@@ -1713,7 +1713,7 @@ H5DSiterate_scales(hid_t did, unsigned int dim, int *ds_idx, H5DS_iterate_t visi
                         if ((scale_id = H5Rdereference2(did, H5P_DEFAULT, H5R_OBJECT, &ref)) < 0)
                             goto out;
                     }
-                    H5E_END_TRY;
+                    H5E_END_TRY
                 }
 
                 /* set the return IDX OUT value at current scale index */
@@ -1765,7 +1765,7 @@ out:
         H5Aclose(aid);
         H5Tclose(tid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 }
@@ -1965,7 +1965,7 @@ out:
         H5Aclose(aid);
         H5Tclose(tid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 }
 
@@ -2113,7 +2113,7 @@ out:
         H5Aclose(aid);
         H5Tclose(tid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 }
 
@@ -2231,7 +2231,7 @@ out:
         H5Tclose(tid);
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (buf)
         HDfree(buf);
     return FAIL;
@@ -2343,7 +2343,7 @@ out:
             H5Aclose(aid);
             H5Tclose(tid);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
     return is_ds;
 }
@@ -2460,7 +2460,7 @@ out:
         H5Aclose(aid);
         H5Tclose(tid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (buf)
         HDfree(buf);
@@ -2539,7 +2539,7 @@ error:
         H5Tclose(tid);
         H5Aclose(aid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     HDfree(buf);
 

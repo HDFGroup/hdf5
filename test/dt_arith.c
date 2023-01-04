@@ -760,7 +760,7 @@ error:
     {
         H5Pclose(dxpl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (buf1)
         HDfree(buf1);
     if (buf2)
@@ -1217,7 +1217,7 @@ error:
         H5Pclose(dxpl_id);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Restore the default error handler (set in h5_reset()) */
     h5_restore_err();
@@ -1529,7 +1529,7 @@ error:
         H5Pclose(dxpl_id);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Restore the default error handler (set in h5_reset()) */
     h5_restore_err();

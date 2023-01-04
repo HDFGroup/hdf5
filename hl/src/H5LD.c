@@ -305,7 +305,7 @@ done:
     {
         H5Sclose(sid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return (ret_value);
 } /* H5LD_get_dset_dims() */

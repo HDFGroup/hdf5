@@ -87,7 +87,7 @@ error:
     {
         H5Tclose(ret_value);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -140,7 +140,7 @@ error:
         H5Tclose(str_id);
         H5Tclose(ret_value);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 } /* end create_compound_vl_type() */
 
@@ -199,7 +199,7 @@ test_getset(void)
     {
         H5Pget_fill_value(dcpl, H5T_NATIVE_INT, &fill_i);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (fill_i != 0) {
         H5_FAILED();
         HDputs("    H5Pget_fill_value() should return default 0");
@@ -268,7 +268,7 @@ error:
         H5Tclose(type_si);
         H5Tclose(type_ss);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -384,7 +384,7 @@ error:
     H5E_BEGIN_TRY
     {
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_getset_vl() */
 
@@ -513,7 +513,7 @@ test_create(hid_t fapl, const char *base_name, H5D_layout_t layout)
             if (H5Dcreate2(file, "dset7", H5T_NATIVE_LONG, space, H5P_DEFAULT, dcpl, H5P_DEFAULT) != FAIL)
                 goto error;
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
 
     /* II. Test early space allocation cases */
@@ -566,7 +566,7 @@ test_create(hid_t fapl, const char *base_name, H5D_layout_t layout)
         if (H5Dcreate2(file, "dset7", H5T_NATIVE_LONG, space, H5P_DEFAULT, dcpl, H5P_DEFAULT) != FAIL)
             goto error;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Close everything */
     if (H5D_COMPACT != layout) {
@@ -842,7 +842,7 @@ error:
         H5Dclose(dset8);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -1178,7 +1178,7 @@ error:
         H5Sclose(fspace);
         H5Sclose(mspace);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -1377,7 +1377,7 @@ error:
         H5Tclose(ctype_id);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return nerrors;
 }
 
@@ -2027,7 +2027,7 @@ error:
         H5Sclose(fspace);
         H5Sclose(mspace);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 } /* end test_extend_cases() */
@@ -2177,7 +2177,7 @@ error:
         H5Pclose(dcpl);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 
 skip:
@@ -2189,7 +2189,7 @@ skip:
         H5Pclose(dcpl);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 0;
 } /* end test_extend() */
 
@@ -2343,7 +2343,7 @@ error:
         H5Dclose(dset2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -2466,7 +2466,7 @@ error:
         H5Sclose(fspace);
         H5Sclose(rspace);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return 1;
 }
@@ -2613,7 +2613,7 @@ error:
         H5Pclose(dcpl);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return nerrors;
 }
 

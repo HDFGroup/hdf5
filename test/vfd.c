@@ -292,7 +292,7 @@ error:
         H5Pclose(fapl_id_out);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 } /* end test_sec2() */
 
@@ -678,7 +678,7 @@ error:
         H5Pclose(fapl_id);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (data_w)
         HDfree(data_w);
@@ -749,7 +749,7 @@ test_direct(void)
     {
         file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (file < 0) {
         H5Pclose(fapl);
         SKIPPED();
@@ -905,7 +905,7 @@ error:
         H5Dclose(dset2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (proto_points)
         HDfree(proto_points);
@@ -952,7 +952,7 @@ test_family_opens(char *fname, hid_t fa_pl)
     {
         file = H5Fopen(first_name, H5F_ACC_RDWR, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (file >= 0)
         TEST_ERROR;
 
@@ -961,7 +961,7 @@ test_family_opens(char *fname, hid_t fa_pl)
     {
         file = H5Fopen(fname, H5F_ACC_RDWR, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (file >= 0)
         TEST_ERROR;
 
@@ -973,7 +973,7 @@ test_family_opens(char *fname, hid_t fa_pl)
     {
         file = H5Fopen(fname, H5F_ACC_RDWR, fa_pl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (file >= 0)
         TEST_ERROR;
 
@@ -992,7 +992,7 @@ test_family_opens(char *fname, hid_t fa_pl)
     {
         file = H5Fopen(wrong_name, H5F_ACC_RDWR, fa_pl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (file >= 0)
         TEST_ERROR;
 
@@ -1195,7 +1195,7 @@ error:
         H5Pclose(fapl2);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     HDfree(buf);
     HDfree(buf_data);
@@ -1309,7 +1309,7 @@ error:
         H5Fclose(file);
         H5Pclose(fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 } /* end test_family_compat() */
@@ -1426,7 +1426,7 @@ error:
         H5Pclose(fapl_id);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     HDfree(buf);
     HDfree(buf_data);
@@ -1469,7 +1469,7 @@ test_multi_opens(char *fname)
     {
         fid = H5Fopen(sf_name, H5F_ACC_RDWR, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return (fid >= 0 ? FAIL : SUCCEED);
 } /* end test_multi_opens() */
@@ -1718,7 +1718,7 @@ error:
         H5Fclose(file);
         H5Aclose(attr);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     HDfree(buf);
     HDfree(buf_data);
@@ -1910,7 +1910,7 @@ error:
         H5Pclose(fapl);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     HDfree(buf);
     HDfree(buf_data);
@@ -1956,7 +1956,7 @@ test_log(void)
     {
         ret = H5Pset_fapl_log(H5I_INVALID_HID, LOG_FILENAME, 0, 0);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (SUCCEED == ret)
         TEST_ERROR;
 
@@ -2040,7 +2040,7 @@ error:
         H5Pclose(fapl);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -2147,7 +2147,7 @@ error:
         H5Pclose(fapl);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 }
 
@@ -2270,7 +2270,7 @@ error:
         H5Pclose(fapl);
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 
 #endif /* H5_HAVE_WINDOWS */
@@ -2368,7 +2368,7 @@ error:
         H5Pclose(fapl_id_out);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 #endif /* H5_HAVE_ROS3_VFD */
 } /* end test_ros3() */
@@ -2617,7 +2617,7 @@ done:
             H5Pclose(fapl_id);
             H5Fclose(file_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
 
     if (logfile != NULL)
@@ -2671,7 +2671,7 @@ driver_is_splitter_compatible(hid_t fapl_id)
     {
         ret = H5Pset_fapl_splitter(split_fapl_id, vfd_config);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (SUCCEED == ret) {
         ret_value = -1;
     }
@@ -2690,7 +2690,7 @@ error:
     {
         H5Pclose(split_fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     HDfree(vfd_config);
 
@@ -2754,7 +2754,7 @@ splitter_RO_test(const struct splitter_dataset_def *data, hid_t child_fapl_id)
     {
         file_id = H5Fopen(filename_rw, H5F_ACC_RDONLY, fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (file_id >= 0) {
         SPLITTER_TEST_FAULT("R/O open on nonexistent files unexpectedly successful\n");
     }
@@ -2770,7 +2770,7 @@ splitter_RO_test(const struct splitter_dataset_def *data, hid_t child_fapl_id)
     {
         file_id = H5Fopen(filename_rw, H5F_ACC_RDONLY, fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (file_id >= 0) {
         SPLITTER_TEST_FAULT("R/O open with extant W/O file unexpectedly successful\n");
     }
@@ -2787,7 +2787,7 @@ splitter_RO_test(const struct splitter_dataset_def *data, hid_t child_fapl_id)
     {
         file_id = H5Fopen(filename_rw, H5F_ACC_RDONLY, fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (file_id >= 0) {
         SPLITTER_TEST_FAULT("R/O open with extant R/W file unexpectedly successful\n");
     }
@@ -2825,7 +2825,7 @@ done:
             H5Pclose(fapl_id);
             H5Fclose(file_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
 
     HDfree(vfd_config);
@@ -2964,7 +2964,7 @@ done:
             H5Sclose(space_id);
             H5Fclose(file_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     } /* end if error */
     return ret_value;
 } /* end splitter_create_single_file_at() */
@@ -3025,7 +3025,7 @@ done:
         {
             H5Dclose(dset_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
     return ret_value;
 } /* end splitter_compare_expected_data() */
@@ -3126,7 +3126,7 @@ splitter_tentative_open_test(hid_t child_fapl_id)
     {
         file_id = H5Fopen(filename_rw, H5F_ACC_RDWR, fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (file_id != H5I_INVALID_HID) {
         SPLITTER_TEST_FAULT("open with both nonexistent files unexpectedly succeeded\n");
     }
@@ -3150,7 +3150,7 @@ splitter_tentative_open_test(hid_t child_fapl_id)
     {
         file_id = H5Fopen(filename_rw, H5F_ACC_RDWR, fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (file_id != H5I_INVALID_HID) {
         SPLITTER_TEST_FAULT("open with nonexistent R/W file unexpectedly succeeded\n");
     }
@@ -3178,7 +3178,7 @@ splitter_tentative_open_test(hid_t child_fapl_id)
     {
         file_id = H5Fopen(filename_rw, H5F_ACC_RDWR, fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (file_id != H5I_INVALID_HID) {
         SPLITTER_TEST_FAULT("open with nonexistent W/O unexpectedly succeeded\n");
     }
@@ -3316,7 +3316,7 @@ done:
             H5Pclose(fapl_id);
             H5Fclose(file_id);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
 
     HDfree(vfd_config);
@@ -3347,7 +3347,7 @@ file_exists(const char *filename, hid_t fapl_id)
     {
         file_id = H5Fopen(filename, H5F_ACC_RDONLY, fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (file_id != H5I_INVALID_HID) {
         ret_value = 1;
         if (H5Fclose(file_id) < 0) {
@@ -3362,7 +3362,7 @@ error:
     {
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return ret_value;
 } /* end file_exists() */
 
@@ -3697,7 +3697,7 @@ run_ctl_test(uint64_t op_code, uint64_t flags, ctl_test_opc_type opc_type, hid_t
         {
             ctl_result = H5FDctl(file_drv_ptr, op_code, flags, NULL, NULL);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
     }
     else
         ctl_result = H5FDctl(file_drv_ptr, op_code, flags, NULL, NULL);
@@ -3724,7 +3724,7 @@ error:
     {
         H5FDclose(file_drv_ptr);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 }
@@ -4023,7 +4023,7 @@ error:
         H5Pclose(sub_fapl_id);
         H5Pclose(fapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return -1;
 }
@@ -4947,7 +4947,7 @@ error:
         H5Pclose(fapl_id);
         H5FDclose(lf);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 } /* end test_vector_io() */
 
@@ -5928,7 +5928,7 @@ error:
             H5Sclose(file_spaces[i]);
         }
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return -1;
 } /* end test_selection_io() */
 

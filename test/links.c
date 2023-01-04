@@ -535,13 +535,13 @@ new_links(hid_t fapl, hbool_t new_format)
         if (H5Lcreate_hard(H5L_SAME_LOC, "dataset1", H5L_SAME_LOC, "hard", H5P_DEFAULT, H5P_DEFAULT) != FAIL)
             TEST_ERROR;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     H5E_BEGIN_TRY
     {
         if (H5Lcreate_soft("dataset1", H5L_SAME_LOC, "soft", H5P_DEFAULT, H5P_DEFAULT) != FAIL)
             TEST_ERROR;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Create links across files with hard link.  Should fail. */
     H5E_BEGIN_TRY
@@ -549,7 +549,7 @@ new_links(hid_t fapl, hbool_t new_format)
         if (H5Lcreate_hard(file_a, "dataset1", file_b, "hard", H5P_DEFAULT, H5P_DEFAULT) != FAIL)
             TEST_ERROR;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Create hard link to test H5L_SAME_LOC */
     if (H5Lcreate_hard(grp1_a, "dataset2", H5L_SAME_LOC, "hard1", H5P_DEFAULT, H5P_DEFAULT) < 0)
@@ -595,7 +595,7 @@ error:
         H5Fclose(file_a);
         H5Fclose(file_b);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 }
 
@@ -667,7 +667,7 @@ cklinks(hid_t fapl, hbool_t new_format)
     {
         status = H5Lexists(file, "no_grp1/hard", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
         HDputs("    H5Lexists() should have failed for a path with missing components.");
@@ -677,7 +677,7 @@ cklinks(hid_t fapl, hbool_t new_format)
     {
         status = H5Lexists(file, "/no_grp1/hard", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
         HDputs("    H5Lexists() should have failed for a path with missing components.");
@@ -715,7 +715,7 @@ cklinks(hid_t fapl, hbool_t new_format)
     {
         status = H5Oget_info_by_name3(file, "grp1/dangle", &oinfo2, H5O_INFO_BASIC, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
         HDputs("    H5Oget_info_by_name() should have failed for a dangling link.");
@@ -746,7 +746,7 @@ cklinks(hid_t fapl, hbool_t new_format)
     {
         status = H5Oget_info_by_name3(file, "grp1/recursive", &oinfo2, H5O_INFO_BASIC, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
         HDputs("    H5Oget_info_by_name() should have failed for a recursive link.");
@@ -924,7 +924,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     HDfree(objname);
     return FAIL;
 }
@@ -1083,7 +1083,7 @@ toomany(hid_t fapl, hbool_t new_format)
     {
         gid = H5Gopen2(fid, "soft17", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (gid >= 0) {
         H5_FAILED();
         HDputs("    Should have failed for sequence of too many nested links.");
@@ -1124,7 +1124,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end toomany() */
 
@@ -1337,7 +1337,7 @@ error:
         H5Sclose(space_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_lcpl() */
 
@@ -1394,7 +1394,7 @@ test_move(hid_t fapl, hbool_t new_format)
             FAIL)
             TEST_ERROR;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Move a group across files.  Should fail. */
     H5E_BEGIN_TRY
@@ -1402,7 +1402,7 @@ test_move(hid_t fapl, hbool_t new_format)
         if (H5Lmove(grp_1, "group_move", file_b, "group_new_name", H5P_DEFAULT, H5P_DEFAULT) != FAIL)
             TEST_ERROR;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Move a soft link across files.  Should succeed. */
     if (H5Lmove(grp_2, "soft", file_b, "soft_new_name", H5P_DEFAULT, H5P_DEFAULT) < 0)
@@ -1431,7 +1431,7 @@ test_move(hid_t fapl, hbool_t new_format)
     {
         moved_grp = H5Gopen2(grp_1, "group_move", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (moved_grp >= 0) {
         H5_FAILED();
         HDputs("    Group still in original location?");
@@ -1482,7 +1482,7 @@ test_move(hid_t fapl, hbool_t new_format)
         if ((moved_grp = H5Gopen2(grp_1, "group_copy", H5P_DEFAULT)) >= 0)
             FAIL_STACK_ERROR;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     H5Gclose(grp_1);
     H5Gclose(grp_2);
@@ -1504,7 +1504,7 @@ error:
         H5Fclose(file_a);
         H5Fclose(file_b);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -1561,7 +1561,7 @@ test_copy(hid_t fapl, hbool_t new_format)
             FAIL)
             TEST_ERROR;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Copy a group across files.  Should fail. */
     H5E_BEGIN_TRY
@@ -1569,7 +1569,7 @@ test_copy(hid_t fapl, hbool_t new_format)
         if (H5Lcopy(grp_1, "group_copy", file_b, "group_new_name", H5P_DEFAULT, H5P_DEFAULT) != FAIL)
             TEST_ERROR;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Copy a soft link across files.  Should succeed. */
     if (H5Lcopy(grp_2, "soft", file_b, "soft_new_name", H5P_DEFAULT, H5P_DEFAULT) < 0)
@@ -1678,7 +1678,7 @@ error:
         H5Fclose(file_a);
         H5Fclose(file_b);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 }
 
@@ -1918,7 +1918,7 @@ error:
         H5Gclose(group_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_move_preserves() */
 
@@ -1989,7 +1989,7 @@ test_deprec(hid_t fapl, hbool_t new_format)
         if (H5Gget_objname_by_idx(group1_id, (hsize_t)1, tmpstr, sizeof(tmpstr)) >= 0)
             TEST_ERROR;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Test getting the type for objects */
     if ((obj_type = H5Gget_objtype_by_idx(group1_id, (hsize_t)0)) < 0)
@@ -2001,7 +2001,7 @@ test_deprec(hid_t fapl, hbool_t new_format)
         if (H5Gget_objtype_by_idx(group1_id, (hsize_t)1) >= 0)
             TEST_ERROR;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Test getting the number of objects in a group */
     if (H5Gget_num_objs(file_id, &num_objs) < 0)
@@ -2058,7 +2058,7 @@ test_deprec(hid_t fapl, hbool_t new_format)
         if (H5Gget_objinfo(file_id, "/group2/soft_link_no_exist", TRUE, NULL) >= 0)
             FAIL_STACK_ERROR;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Test the dangling soft link */
     if (H5Gget_objinfo(file_id, "/group2/dangle_soft_link", FALSE, &sb_soft2) < 0)
@@ -2105,7 +2105,7 @@ test_deprec(hid_t fapl, hbool_t new_format)
         if (H5Gopen2(file_id, "moved_group1/moved_group2", H5P_DEFAULT) >= 0)
             TEST_ERROR;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (H5Fclose(file_id) < 0)
         FAIL_STACK_ERROR;
@@ -2120,7 +2120,7 @@ error:
         H5Gclose(group1_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_deprec() */
 
@@ -2185,7 +2185,7 @@ cklinks_deprec(hid_t fapl, hbool_t new_format)
     {
         exists = H5Lexists(file, "no_grp1/hard", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (exists >= 0) {
         H5_FAILED();
         HDputs("    H5Lexists() should have failed for a path with missing components.");
@@ -2195,7 +2195,7 @@ cklinks_deprec(hid_t fapl, hbool_t new_format)
     {
         exists = H5Lexists(file, "/no_grp1/hard", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (exists >= 0) {
         H5_FAILED();
         HDputs("    H5Lexists() should have failed for a path with missing components.");
@@ -2231,7 +2231,7 @@ cklinks_deprec(hid_t fapl, hbool_t new_format)
     {
         status = H5Oget_info_by_name2(file, "grp1/dangle", &oinfo2, H5O_INFO_BASIC, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
         HDputs("    H5Oget_info_by_name() should have failed for a dangling link.");
@@ -2262,7 +2262,7 @@ cklinks_deprec(hid_t fapl, hbool_t new_format)
     {
         status = H5Oget_info_by_name2(file, "grp1/recursive", &oinfo2, H5O_INFO_BASIC, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
         HDputs("    H5Oget_info_by_name() should have failed for a recursive link.");
@@ -2510,7 +2510,7 @@ error:
         H5Sclose(space_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_lcpl_deprec() */
 
@@ -2751,7 +2751,7 @@ error:
         H5Gclose(group_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return 1;
 } /* end test_move_preserves_deprec() */
 
@@ -2969,7 +2969,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end external_link_root_deprec() */
 
@@ -3123,7 +3123,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end external_link_query_deprec() */
 
@@ -3438,7 +3438,7 @@ error:
         H5Fclose(fid2);
         H5Fclose(fid1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* external_link_closing_deprec() */
 
@@ -3761,7 +3761,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end ud_hard_links_deprec() */
 
@@ -3945,7 +3945,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end ud_link_reregister_deprec() */
 
@@ -4112,7 +4112,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end ud_callbacks_deprec() */
 
@@ -4258,7 +4258,7 @@ lapl_nlinks_deprec(hid_t fapl, hbool_t new_format)
     {
         gid = H5Oopen(fid, "soft5", plist);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (gid >= 0) {
         H5_FAILED();
         HDputs("    Should have failed for sequence of too many nested links.");
@@ -4420,7 +4420,7 @@ error:
         H5Pclose(plist);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end lapl_nlinks_deprec() */
 
@@ -4532,7 +4532,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end linkinfo_deprec() */
 
@@ -4674,7 +4674,7 @@ error:
         H5Gclose(group_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end corder_create_compact_deprec() */
 
@@ -4837,7 +4837,7 @@ error:
         H5Gclose(group_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end corder_create_dense_deprec() */
 
@@ -5126,7 +5126,7 @@ link_info_by_idx_deprec(hid_t fapl)
                 ret = H5Lget_info_by_idx1(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0, &linfo,
                                           H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             if (ret >= 0)
                 TEST_ERROR;
             H5E_BEGIN_TRY
@@ -5134,7 +5134,7 @@ link_info_by_idx_deprec(hid_t fapl)
                 name_len = H5Lget_name_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0,
                                               tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             if (name_len >= 0)
                 TEST_ERROR;
 
@@ -5178,7 +5178,7 @@ link_info_by_idx_deprec(hid_t fapl)
                 ret = H5Lget_info_by_idx1(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, &linfo,
                                           H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             if (ret >= 0)
                 TEST_ERROR;
             H5E_BEGIN_TRY
@@ -5186,7 +5186,7 @@ link_info_by_idx_deprec(hid_t fapl)
                 ret = H5Lget_info_by_idx1(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, (hsize_t)u, &linfo,
                                           H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             if (ret >= 0)
                 TEST_ERROR;
             H5E_BEGIN_TRY
@@ -5194,7 +5194,7 @@ link_info_by_idx_deprec(hid_t fapl)
                 name_len = H5Lget_name_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u,
                                               tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             if (name_len >= 0)
                 TEST_ERROR;
 
@@ -5238,7 +5238,7 @@ link_info_by_idx_deprec(hid_t fapl)
                 ret = H5Lget_info_by_idx1(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, &linfo,
                                           H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             if (ret >= 0)
                 TEST_ERROR;
             H5E_BEGIN_TRY
@@ -5246,7 +5246,7 @@ link_info_by_idx_deprec(hid_t fapl)
                 ret = H5Lget_info_by_idx1(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, (hsize_t)u, &linfo,
                                           H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             if (ret >= 0)
                 TEST_ERROR;
             H5E_BEGIN_TRY
@@ -5254,7 +5254,7 @@ link_info_by_idx_deprec(hid_t fapl)
                 name_len = H5Lget_name_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u,
                                               tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             if (name_len >= 0)
                 TEST_ERROR;
 
@@ -5283,7 +5283,7 @@ error:
         H5Gclose(group_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end link_info_by_idx_deprec() */
 
@@ -5454,7 +5454,7 @@ link_info_by_idx_old_deprec(hid_t fapl)
             ret = H5Lget_info_by_idx1(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, &linfo,
                                       H5P_DEFAULT);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ret >= 0)
             TEST_ERROR;
         H5E_BEGIN_TRY
@@ -5462,7 +5462,7 @@ link_info_by_idx_old_deprec(hid_t fapl)
             name_len = H5Lget_name_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, tmpname,
                                           (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (name_len >= 0)
             TEST_ERROR;
 
@@ -5489,7 +5489,7 @@ error:
         H5Gclose(group_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end link_info_by_idx_old_deprec() */
 
@@ -5596,7 +5596,7 @@ delete_by_idx_deprec(hid_t fapl)
                 {
                     ret = H5Ldelete_by_idx(group_id, ".", idx_type, order, (hsize_t)0, H5P_DEFAULT);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 if (ret >= 0)
                     TEST_ERROR;
 
@@ -5605,7 +5605,7 @@ delete_by_idx_deprec(hid_t fapl)
                 {
                     ret = H5Ldelete_by_idx(group_id, "None", idx_type, order, (hsize_t)0, H5P_DEFAULT);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 if (ret >= 0)
                     TEST_ERROR;
 
@@ -5637,7 +5637,7 @@ delete_by_idx_deprec(hid_t fapl)
                 {
                     ret = H5Ldelete_by_idx(group_id, ".", idx_type, order, (hsize_t)u, H5P_DEFAULT);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 if (ret >= 0)
                     TEST_ERROR;
 
@@ -5711,7 +5711,7 @@ delete_by_idx_deprec(hid_t fapl)
                 {
                     ret = H5Ldelete_by_idx(group_id, ".", idx_type, order, (hsize_t)u, H5P_DEFAULT);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 if (ret >= 0)
                     TEST_ERROR;
 
@@ -5763,7 +5763,7 @@ delete_by_idx_deprec(hid_t fapl)
                 {
                     ret = H5Ldelete_by_idx(group_id, ".", idx_type, order, (hsize_t)0, H5P_DEFAULT);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 if (ret >= 0)
                     TEST_ERROR;
 
@@ -5897,7 +5897,7 @@ error:
         H5Gclose(group_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end delete_by_idx_deprec() */
 
@@ -5951,7 +5951,7 @@ delete_by_idx_old_deprec(hid_t fapl)
         {
             ret = H5Ldelete_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)0, H5P_DEFAULT);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ret >= 0)
             TEST_ERROR;
 
@@ -5981,7 +5981,7 @@ delete_by_idx_old_deprec(hid_t fapl)
         {
             ret = H5Ldelete_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, order, (hsize_t)0, H5P_DEFAULT);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ret >= 0)
             TEST_ERROR;
 
@@ -5990,7 +5990,7 @@ delete_by_idx_old_deprec(hid_t fapl)
         {
             ret = H5Ldelete_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)u, H5P_DEFAULT);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ret >= 0)
             TEST_ERROR;
 
@@ -6037,7 +6037,7 @@ delete_by_idx_old_deprec(hid_t fapl)
         {
             ret = H5Ldelete_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)0, H5P_DEFAULT);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ret >= 0)
             TEST_ERROR;
 
@@ -6163,7 +6163,7 @@ error:
         H5Gclose(group_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 } /* end delete_by_idx_old_deprec() */
@@ -6427,7 +6427,7 @@ link_iterate_check_deprec(hid_t group_id, H5_index_t idx_type, H5_iter_order_t o
     {
         ret = H5Literate1(group_id, idx_type, order, &skip, link_iterate_fail_deprec_cb, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -6593,7 +6593,7 @@ link_iterate_deprec(hid_t fapl)
                 {
                     ret = H5Literate1(group_id, idx_type, order, &skip, link_iterate_deprec_cb, NULL);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 if (ret >= 0)
                     TEST_ERROR;
 
@@ -6626,7 +6626,7 @@ link_iterate_deprec(hid_t fapl)
                 {
                     ret = H5Literate1(group_id, idx_type, order, &skip, link_iterate_deprec_cb, NULL);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 if (ret >= 0)
                     TEST_ERROR;
 
@@ -6665,7 +6665,7 @@ error:
         H5Gclose(group_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (visited)
         HDfree(visited);
@@ -6910,7 +6910,7 @@ link_iterate_old_check_deprec(hid_t group_id, H5_iter_order_t order, unsigned ma
     {
         ret = H5Literate1(group_id, H5_INDEX_NAME, order, &skip, link_iterate_fail_deprec_cb, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -6920,7 +6920,7 @@ link_iterate_old_check_deprec(hid_t group_id, H5_iter_order_t order, unsigned ma
     {
         ret = H5Literate1((hid_t)(-1), H5_INDEX_NAME, order, &skip, link_iterate_fail_deprec_cb, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -6928,7 +6928,7 @@ link_iterate_old_check_deprec(hid_t group_id, H5_iter_order_t order, unsigned ma
     {
         ret = H5Giterate((hid_t)(-1), ".", &gskip, group_iterate_old_deprec_cb, iter_info);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -7023,7 +7023,7 @@ link_iterate_old_deprec(hid_t fapl)
         {
             ret = H5Literate1(group_id, H5_INDEX_NAME, order, &skip, link_iterate_old_deprec_cb, NULL);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ret >= 0)
             TEST_ERROR;
 
@@ -7034,7 +7034,7 @@ link_iterate_old_deprec(hid_t fapl)
         {
             ret = H5Literate1(group_id, H5_INDEX_CRT_ORDER, order, &skip, link_iterate_old_deprec_cb, NULL);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ret >= 0)
             TEST_ERROR;
 
@@ -7066,7 +7066,7 @@ error:
         H5Gclose(group_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (visited)
         HDfree(visited);
@@ -7289,7 +7289,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end external_link_root() */
 
@@ -7411,7 +7411,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end external_link_path() */
 
@@ -7610,7 +7610,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end external_link_mult() */
 
@@ -7791,7 +7791,7 @@ error:
         H5Pclose(lcpl_id);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end external_link_self() */
 
@@ -7935,7 +7935,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end external_link_pingpong() */
 
@@ -8061,7 +8061,7 @@ external_link_toomany(hid_t fapl, hbool_t new_format)
     {
         gid = H5Gopen2(fid, "link1", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (gid >= 0) {
         H5_FAILED();
         HDprintf("%d:    Should have failed for sequence of too many nested links.", __LINE__);
@@ -8104,7 +8104,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end external_link_toomany() */
 
@@ -8171,7 +8171,7 @@ external_link_dangling(hid_t fapl, hbool_t new_format)
     {
         gid = H5Gopen2(fid, "no_file", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (gid >= 0) {
         H5_FAILED();
         HDputs("    Should have failed for sequence of too many nested links.");
@@ -8183,7 +8183,7 @@ external_link_dangling(hid_t fapl, hbool_t new_format)
     {
         gid = H5Gopen2(fid, "no_object", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (gid >= 0) {
         H5_FAILED();
         HDputs("    Should have failed for sequence of too many nested links.");
@@ -8195,7 +8195,7 @@ external_link_dangling(hid_t fapl, hbool_t new_format)
     {
         status = H5Lget_name_by_idx(rid, "no_file", H5_INDEX_NAME, H5_ITER_INC, 0, NULL, 0, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (status >= 0) {
         H5_FAILED();
         HDputs(
@@ -8219,7 +8219,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end external_link_dangling() */
 
@@ -8294,7 +8294,7 @@ external_link_prefix(hid_t fapl, hbool_t new_format)
     {
         gid = H5Gopen2(fid, "ext_link", gapl_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* should be able to find the target file from pathnames set via H5Pset_elink_prefix() */
     if (gid < 0) {
@@ -8318,7 +8318,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end external_link_prefix() */
 
@@ -8391,7 +8391,7 @@ external_link_abs_mainpath(hid_t fapl, hbool_t new_format)
     {
         gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* should be able to find the target file from absolute path set for main file */
     if (gid < 0) {
@@ -8415,7 +8415,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end external_link_abs_mainpath() */
 
@@ -8479,7 +8479,7 @@ external_link_rel_mainpath(hid_t fapl, hbool_t new_format)
     {
         gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* should be able to find the target file from the main file's relative pathname */
     if (gid < 0) {
@@ -8503,7 +8503,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end external_link_rel_mainpath() */
 
@@ -8572,7 +8572,7 @@ external_link_cwd(hid_t fapl, hbool_t new_format)
     {
         gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* should be able to find the target file from the current working directory */
     if (gid < 0) {
@@ -8596,7 +8596,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end external_link_cwd() */
 
@@ -8670,7 +8670,7 @@ external_link_abstar(hid_t fapl, hbool_t new_format)
     {
         gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* should be able to find the target file with absolute path */
     if (gid < 0) {
@@ -8694,7 +8694,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end external_link_abstar() */
 
@@ -8768,7 +8768,7 @@ external_link_abstar_cur(hid_t fapl, hbool_t new_format)
     {
         gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* should be able to find the target file from main file's current working directory */
     if (gid < 0) {
@@ -8792,7 +8792,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end external_link_abstar_cur() */
 
@@ -8873,7 +8873,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end external_link_reltar() */
 
@@ -8943,7 +8943,7 @@ external_link_chdir(hid_t fapl, hbool_t new_format)
     {
         gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (HDchdir("..") < 0)
         TEST_ERROR;
@@ -8973,7 +8973,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end external_link_chdir() */
 
@@ -9187,7 +9187,7 @@ error:
         H5Oclose(oidB);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end external_set_elink_fapl1() */
 
@@ -9394,7 +9394,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     HDfree(points);
     HDfree(points_data);
@@ -9521,7 +9521,7 @@ error:
         H5Pclose(core_fapl);
         H5Pclose(stdio_fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end external_set_elink_fapl3() */
 
@@ -9578,7 +9578,7 @@ external_set_elink_acc_flags(const char *env_h5_drvr, hid_t fapl, hbool_t new_fo
     {
         group = H5Gcreate2(file1, "/ext_link/group", H5P_DEFAULT, H5P_DEFAULT, gapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (group != FAIL)
         TEST_ERROR;
 
@@ -9609,7 +9609,7 @@ external_set_elink_acc_flags(const char *env_h5_drvr, hid_t fapl, hbool_t new_fo
     {
         subgroup = H5Gcreate2(file1, "/ext_link/group/subgroup", H5P_DEFAULT, H5P_DEFAULT, gapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (subgroup != FAIL)
         TEST_ERROR;
 
@@ -9629,21 +9629,21 @@ external_set_elink_acc_flags(const char *env_h5_drvr, hid_t fapl, hbool_t new_fo
     {
         ret = H5Pset_elink_acc_flags(gapl, H5F_ACC_TRUNC);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret != FAIL)
         TEST_ERROR;
     H5E_BEGIN_TRY
     {
         ret = H5Pset_elink_acc_flags(gapl, H5F_ACC_EXCL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret != FAIL)
         TEST_ERROR;
     H5E_BEGIN_TRY
     {
         ret = H5Pset_elink_acc_flags(gapl, H5F_ACC_CREAT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret != FAIL)
         TEST_ERROR;
     /* SWMR reader with write access */
@@ -9651,7 +9651,7 @@ external_set_elink_acc_flags(const char *env_h5_drvr, hid_t fapl, hbool_t new_fo
     {
         ret = H5Pset_elink_acc_flags(gapl, H5F_ACC_RDWR | H5F_ACC_SWMR_READ);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret != FAIL)
         TEST_ERROR;
     /* SWMR writer with read-only access */
@@ -9659,7 +9659,7 @@ external_set_elink_acc_flags(const char *env_h5_drvr, hid_t fapl, hbool_t new_fo
     {
         ret = H5Pset_elink_acc_flags(gapl, H5F_ACC_RDONLY | H5F_ACC_SWMR_WRITE);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret != FAIL)
         TEST_ERROR;
 
@@ -9775,28 +9775,28 @@ external_set_elink_acc_flags(const char *env_h5_drvr, hid_t fapl, hbool_t new_fo
     {
         file1 = H5Fcreate(filename1, H5F_ACC_DEFAULT, H5P_DEFAULT, fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (file1 != FAIL)
         TEST_ERROR;
     H5E_BEGIN_TRY
     {
         file1 = H5Fcreate(filename1, H5F_ACC_TRUNC | H5F_ACC_DEFAULT, H5P_DEFAULT, fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (file1 != FAIL)
         TEST_ERROR;
     H5E_BEGIN_TRY
     {
         file1 = H5Fopen(filename1, H5F_ACC_DEFAULT, fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (file1 != FAIL)
         TEST_ERROR;
     H5E_BEGIN_TRY
     {
         file1 = H5Fopen(filename1, H5F_ACC_RDWR | H5F_ACC_DEFAULT, fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (file1 != FAIL)
         TEST_ERROR;
 
@@ -9816,7 +9816,7 @@ error:
         H5Fclose(file2);
         H5Pclose(gapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end external_set_elink_acc_flags() */
 
@@ -9981,7 +9981,7 @@ external_set_elink_cb(hid_t fapl, hbool_t new_format)
     {
         group = H5Gopen2(file1, "/group1/ext_link/group2", gapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (group != FAIL)
         TEST_ERROR;
 
@@ -9993,7 +9993,7 @@ external_set_elink_cb(hid_t fapl, hbool_t new_format)
     {
         group = H5Gopen2(file1, "/group1/ext_link/group2", gapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (group != FAIL)
         TEST_ERROR;
 
@@ -10016,7 +10016,7 @@ error:
         H5Pclose(ret_fapl);
         H5Pclose(fam_fapl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end external_set_elink_cb() */
 
@@ -10074,7 +10074,7 @@ external_reset_register(void)
     {
         H5Fdelete(filename, H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     PASSED();
     return SUCCEED;
@@ -10084,7 +10084,7 @@ error:
     {
         H5Fclose(file);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end external_reset_register() */
 
@@ -10156,7 +10156,7 @@ external_link_win1(hid_t fapl, hbool_t new_format)
     {
         gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* should be able to find the target file via main file's CWD*/
     if (gid < 0) {
@@ -10180,7 +10180,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end external_link_win1() */
 
@@ -10253,7 +10253,7 @@ external_link_win2(hid_t fapl, hbool_t new_format)
     {
         gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* should be able to find the target file directly */
     if (gid < 0) {
@@ -10277,7 +10277,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end external_link_win2() */
 
@@ -10347,7 +10347,7 @@ external_link_win3(hid_t fapl, hbool_t new_format)
     {
         gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* should be able to find the target file directly */
     if (gid < 0) {
@@ -10371,7 +10371,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end external_link_win3() */
 
@@ -10438,7 +10438,7 @@ external_link_win4(hid_t fapl, hbool_t new_format)
     {
         gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* should be able to find the target file via main file's absolute drive/relative path */
     if (gid < 0) {
@@ -10462,7 +10462,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end external_link_win4() */
 
@@ -10539,7 +10539,7 @@ external_link_win5(hid_t fapl, hbool_t new_format)
     {
         gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* should be able to find the target file via main file's rel drive/abs path */
     if (gid < 0) {
@@ -10563,7 +10563,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end external_link_win5() */
 
@@ -10637,7 +10637,7 @@ external_link_win6(hid_t fapl, hbool_t new_format)
     {
         gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* should be able to find the target file via target file's rel path in current drive */
     if (gid < 0) {
@@ -10661,7 +10661,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end external_link_win6() */
 
@@ -10732,7 +10732,7 @@ external_link_win7(hid_t fapl, hbool_t new_format)
     {
         gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* should be able to find the target file via main file's local host/main drive*/
     if (gid < 0) {
@@ -10756,7 +10756,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end external_link_win7() */
 
@@ -10832,7 +10832,7 @@ external_link_win8(hid_t fapl, hbool_t new_format)
     {
         gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* should be able to find the target file directly */
     if (gid < 0) {
@@ -10856,7 +10856,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end external_link_win8() */
 
@@ -10927,7 +10927,7 @@ external_link_win9(hid_t fapl, hbool_t new_format)
     {
         gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* should be able to find the target file via main file's local host/main drive*/
     if (gid < 0) {
@@ -10951,7 +10951,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end external_link_win9() */
 
@@ -11002,7 +11002,7 @@ external_link_recursive(hid_t fapl, hbool_t new_format)
     {
         gid = H5Gopen2(fid, "recursive", H5P_DEFAULT);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (gid >= 0) {
         H5_FAILED();
         HDputs("    Should have failed for recursive external links.");
@@ -11022,7 +11022,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end external_link_recursive() */
 
@@ -11176,7 +11176,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end external_link_query() */
 
@@ -11269,7 +11269,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end external_link_unlink_compact() */
 
@@ -11446,7 +11446,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end external_link_unlink_dense() */
 
@@ -11680,7 +11680,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end external_link_move() */
 
@@ -11912,7 +11912,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end external_link_ride() */
 
@@ -12227,7 +12227,7 @@ error:
         H5Fclose(fid2);
         H5Fclose(fid1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* external_link_closing() */
 
@@ -12313,7 +12313,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 }
 
@@ -12418,7 +12418,7 @@ error:
         H5Fclose(fid2);
         H5Fclose(fid1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end external_link_strong() */
 
@@ -12695,7 +12695,7 @@ error:
         H5Fclose(file2);
         H5Fclose(file1);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     HDfree(filename1);
     HDfree(filename2a);
@@ -14150,7 +14150,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end ud_hard_links() */
 
@@ -14362,7 +14362,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end ud_link_reregister() */
 
@@ -14673,7 +14673,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end ud_callbacks() */
 
@@ -14828,7 +14828,7 @@ error:
         H5Gclose(gid2);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end lapl_udata() */
 
@@ -15100,7 +15100,7 @@ ud_link_errors(hid_t fapl, hbool_t new_format)
         if (H5Lcreate_ud(fid, "/ud_link", (H5L_type_t)UD_CBFAIL_TYPE, NULL, 1, H5P_DEFAULT, H5P_DEFAULT) >= 0)
             TEST_ERROR;
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     /* Create a user-defined link to the group. */
     HDstrcpy(group_name, "/group");
@@ -15208,7 +15208,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end ud_link_errors() */
 
@@ -15354,7 +15354,7 @@ lapl_nlinks(hid_t fapl, hbool_t new_format)
     {
         gid = H5Oopen(fid, "soft5", plist);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (gid >= 0) {
         H5_FAILED();
         HDputs("    Should have failed for sequence of too many nested links.");
@@ -15516,7 +15516,7 @@ error:
         H5Pclose(plist);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end lapl_nlinks() */
 
@@ -15628,7 +15628,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end linkinfo() */
 
@@ -15680,7 +15680,7 @@ error:
     {
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end check_all_closed() */
 
@@ -15809,7 +15809,7 @@ error:
     {
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end build_visit_file() */
 
@@ -15912,7 +15912,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end link_visit() */
 
@@ -16000,7 +16000,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end link_visit_by_name() */
 
@@ -16107,7 +16107,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end obj_visit() */
 
@@ -16204,7 +16204,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end obj_visit_by_name() */
 
@@ -16287,7 +16287,7 @@ error:
     {
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end obj_visit_stop() */
 
@@ -16765,7 +16765,7 @@ error:
         H5Pclose(gcpl2);
         H5Pclose(fcpl);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end link_filters() */
 
@@ -17094,7 +17094,7 @@ error:
         H5Gclose(gid);
         H5Fclose(fid);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end obj_exists() */
 
@@ -17139,7 +17139,7 @@ corder_create_empty(hid_t fapl)
     {
         ret = H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_INDEXED);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret > 0) {
         H5_FAILED();
         HDputs(
@@ -17223,7 +17223,7 @@ error:
         H5Gclose(group_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end corder_create_empty() */
 
@@ -17365,7 +17365,7 @@ error:
         H5Gclose(group_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end corder_create_compact() */
 
@@ -17528,7 +17528,7 @@ error:
         H5Gclose(group_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end corder_create_dense() */
 
@@ -17824,7 +17824,7 @@ error:
         H5Gclose(group_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end corder_transition() */
 
@@ -17975,7 +17975,7 @@ error:
         H5Gclose(group_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end corder_delete() */
 
@@ -18259,7 +18259,7 @@ link_info_by_idx(hid_t fapl)
                 ret = H5Lget_info_by_idx2(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0, &linfo,
                                           H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             if (ret >= 0)
                 TEST_ERROR;
             H5E_BEGIN_TRY
@@ -18267,7 +18267,7 @@ link_info_by_idx(hid_t fapl)
                 name_len = H5Lget_name_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)0,
                                               tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             if (name_len >= 0)
                 TEST_ERROR;
 
@@ -18311,7 +18311,7 @@ link_info_by_idx(hid_t fapl)
                 ret = H5Lget_info_by_idx2(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, &linfo,
                                           H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             if (ret >= 0)
                 TEST_ERROR;
             H5E_BEGIN_TRY
@@ -18319,7 +18319,7 @@ link_info_by_idx(hid_t fapl)
                 ret = H5Lget_info_by_idx2(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, (hsize_t)u, &linfo,
                                           H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             if (ret >= 0)
                 TEST_ERROR;
             H5E_BEGIN_TRY
@@ -18327,7 +18327,7 @@ link_info_by_idx(hid_t fapl)
                 name_len = H5Lget_name_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u,
                                               tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             if (name_len >= 0)
                 TEST_ERROR;
 
@@ -18371,7 +18371,7 @@ link_info_by_idx(hid_t fapl)
                 ret = H5Lget_info_by_idx2(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, &linfo,
                                           H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             if (ret >= 0)
                 TEST_ERROR;
             H5E_BEGIN_TRY
@@ -18379,7 +18379,7 @@ link_info_by_idx(hid_t fapl)
                 ret = H5Lget_info_by_idx2(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, (hsize_t)u, &linfo,
                                           H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             if (ret >= 0)
                 TEST_ERROR;
             H5E_BEGIN_TRY
@@ -18387,7 +18387,7 @@ link_info_by_idx(hid_t fapl)
                 name_len = H5Lget_name_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u,
                                               tmpname, (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
             }
-            H5E_END_TRY;
+            H5E_END_TRY
             if (name_len >= 0)
                 TEST_ERROR;
 
@@ -18416,7 +18416,7 @@ error:
         H5Gclose(group_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end link_info_by_idx() */
 
@@ -18605,7 +18605,7 @@ link_info_by_idx_old(hid_t fapl)
             ret = H5Lget_info_by_idx2(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, &linfo,
                                       H5P_DEFAULT);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ret >= 0)
             TEST_ERROR;
         H5E_BEGIN_TRY
@@ -18613,7 +18613,7 @@ link_info_by_idx_old(hid_t fapl)
             name_len = H5Lget_name_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, tmpname,
                                           (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (name_len >= 0)
             TEST_ERROR;
 
@@ -18640,7 +18640,7 @@ error:
         H5Gclose(group_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end link_info_by_idx_old() */
 
@@ -18747,7 +18747,7 @@ delete_by_idx(hid_t fapl)
                 {
                     ret = H5Ldelete_by_idx(group_id, ".", idx_type, order, (hsize_t)0, H5P_DEFAULT);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 if (ret >= 0)
                     TEST_ERROR;
 
@@ -18756,7 +18756,7 @@ delete_by_idx(hid_t fapl)
                 {
                     ret = H5Ldelete_by_idx(group_id, "None", idx_type, order, (hsize_t)0, H5P_DEFAULT);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 if (ret >= 0)
                     TEST_ERROR;
 
@@ -18788,7 +18788,7 @@ delete_by_idx(hid_t fapl)
                 {
                     ret = H5Ldelete_by_idx(group_id, ".", idx_type, order, (hsize_t)u, H5P_DEFAULT);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 if (ret >= 0)
                     TEST_ERROR;
 
@@ -18862,7 +18862,7 @@ delete_by_idx(hid_t fapl)
                 {
                     ret = H5Ldelete_by_idx(group_id, ".", idx_type, order, (hsize_t)u, H5P_DEFAULT);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 if (ret >= 0)
                     TEST_ERROR;
 
@@ -18914,7 +18914,7 @@ delete_by_idx(hid_t fapl)
                 {
                     ret = H5Ldelete_by_idx(group_id, ".", idx_type, order, (hsize_t)0, H5P_DEFAULT);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 if (ret >= 0)
                     TEST_ERROR;
 
@@ -19048,7 +19048,7 @@ error:
         H5Gclose(group_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     return FAIL;
 } /* end delete_by_idx() */
 
@@ -19111,7 +19111,7 @@ delete_by_idx_old(hid_t fapl)
         {
             ret = H5Ldelete_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)0, H5P_DEFAULT);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ret >= 0)
             TEST_ERROR;
 
@@ -19142,7 +19142,7 @@ delete_by_idx_old(hid_t fapl)
         {
             ret = H5Ldelete_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, order, (hsize_t)0, H5P_DEFAULT);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ret >= 0)
             TEST_ERROR;
 
@@ -19151,7 +19151,7 @@ delete_by_idx_old(hid_t fapl)
         {
             ret = H5Ldelete_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)u, H5P_DEFAULT);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ret >= 0)
             TEST_ERROR;
 
@@ -19202,7 +19202,7 @@ delete_by_idx_old(hid_t fapl)
         {
             ret = H5Ldelete_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)0, H5P_DEFAULT);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ret >= 0)
             TEST_ERROR;
 
@@ -19337,7 +19337,7 @@ error:
         H5Gclose(group_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 } /* end delete_by_idx_old() */
@@ -19616,7 +19616,7 @@ link_iterate_check(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, u
     {
         ret = H5Literate2(group_id, idx_type, order, &skip, link_iterate_fail_cb, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -19782,7 +19782,7 @@ link_iterate(hid_t fapl)
                 {
                     ret = H5Literate2(group_id, idx_type, order, &skip, link_iterate_cb, NULL);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 if (ret >= 0)
                     TEST_ERROR;
 
@@ -19815,7 +19815,7 @@ link_iterate(hid_t fapl)
                 {
                     ret = H5Literate2(group_id, idx_type, order, &skip, link_iterate_cb, NULL);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 if (ret >= 0)
                     TEST_ERROR;
 
@@ -19854,7 +19854,7 @@ error:
         H5Gclose(group_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (visited)
         HDfree(visited);
@@ -20113,7 +20113,7 @@ link_iterate_old_check(hid_t group_id, H5_iter_order_t order, unsigned max_links
     {
         ret = H5Literate2(group_id, H5_INDEX_NAME, order, &skip, link_iterate_fail_cb, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -20123,7 +20123,7 @@ link_iterate_old_check(hid_t group_id, H5_iter_order_t order, unsigned max_links
     {
         ret = H5Literate2((hid_t)(-1), H5_INDEX_NAME, order, &skip, link_iterate_fail_cb, NULL);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
@@ -20132,7 +20132,7 @@ link_iterate_old_check(hid_t group_id, H5_iter_order_t order, unsigned max_links
     {
         ret = H5Giterate((hid_t)(-1), ".", &gskip, group_iterate_old_cb, iter_info);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
@@ -20225,7 +20225,7 @@ link_iterate_old(hid_t fapl)
         {
             ret = H5Literate2(group_id, H5_INDEX_NAME, order, &skip, link_iterate_old_cb, NULL);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ret >= 0)
             TEST_ERROR;
 
@@ -20236,7 +20236,7 @@ link_iterate_old(hid_t fapl)
         {
             ret = H5Literate2(group_id, H5_INDEX_CRT_ORDER, order, &skip, link_iterate_old_cb, NULL);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ret >= 0)
             TEST_ERROR;
 
@@ -20268,7 +20268,7 @@ error:
         H5Gclose(group_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (visited)
         HDfree(visited);
@@ -20518,7 +20518,7 @@ open_by_idx(hid_t fapl)
                 {
                     ret = H5Oopen_by_idx(group_id, ".", idx_type, order, (hsize_t)0, H5P_DEFAULT);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 if (ret >= 0)
                     TEST_ERROR;
 
@@ -20558,7 +20558,7 @@ open_by_idx(hid_t fapl)
                 {
                     ret = H5Oopen_by_idx(group_id, ".", idx_type, order, (hsize_t)u, H5P_DEFAULT);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 if (ret >= 0)
                     TEST_ERROR;
 
@@ -20602,7 +20602,7 @@ open_by_idx(hid_t fapl)
                 {
                     ret = H5Oopen_by_idx(group_id, ".", idx_type, order, (hsize_t)u, H5P_DEFAULT);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 if (ret >= 0)
                     TEST_ERROR;
 
@@ -20649,7 +20649,7 @@ error:
         H5Fclose(file_id);
         H5Fclose(mount_file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (objno)
         HDfree(objno);
@@ -20833,7 +20833,7 @@ open_by_idx_old(hid_t fapl)
         {
             ret = H5Oopen_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)0, H5P_DEFAULT);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ret >= 0)
             TEST_ERROR;
 
@@ -20872,7 +20872,7 @@ open_by_idx_old(hid_t fapl)
         {
             ret = H5Oopen_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)u, H5P_DEFAULT);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ret >= 0)
             TEST_ERROR;
 
@@ -20881,7 +20881,7 @@ open_by_idx_old(hid_t fapl)
         {
             ret = H5Oopen_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, order, (hsize_t)(u - 1), H5P_DEFAULT);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ret >= 0)
             TEST_ERROR;
 
@@ -20917,7 +20917,7 @@ error:
         H5Fclose(file_id);
         H5Fclose(mount_file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 } /* end open_by_idx_old() */
@@ -21141,7 +21141,7 @@ object_info(hid_t fapl)
                     ret = H5Oget_info_by_idx3(group_id, ".", H5_INDEX_NAME, order, (hsize_t)0, &oinfo,
                                               H5O_INFO_BASIC, H5P_DEFAULT);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 if (ret >= 0)
                     TEST_ERROR;
 
@@ -21198,7 +21198,7 @@ object_info(hid_t fapl)
                     ret = H5Oget_info_by_idx3(group_id, ".", H5_INDEX_NAME, order, (hsize_t)u, &oinfo,
                                               H5O_INFO_BASIC, H5P_DEFAULT);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 if (ret >= 0)
                     TEST_ERROR;
 
@@ -21259,7 +21259,7 @@ object_info(hid_t fapl)
                     ret = H5Oget_info_by_idx3(group_id, ".", H5_INDEX_NAME, order, (hsize_t)u, &oinfo,
                                               H5O_INFO_BASIC, H5P_DEFAULT);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 if (ret >= 0)
                     TEST_ERROR;
 
@@ -21302,7 +21302,7 @@ error:
         H5Gclose(soft_group_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     if (objno)
         HDfree(objno);
@@ -21459,7 +21459,7 @@ object_info_old(hid_t fapl)
             ret = H5Oget_info_by_idx3(group_id, ".", H5_INDEX_NAME, order, (hsize_t)0, &oinfo, H5O_INFO_BASIC,
                                       H5P_DEFAULT);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ret >= 0)
             TEST_ERROR;
 
@@ -21515,7 +21515,7 @@ object_info_old(hid_t fapl)
             ret = H5Oget_info_by_idx3(group_id, ".", H5_INDEX_NAME, order, (hsize_t)u, &oinfo, H5O_INFO_BASIC,
                                       H5P_DEFAULT);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ret >= 0)
             TEST_ERROR;
 
@@ -21525,7 +21525,7 @@ object_info_old(hid_t fapl)
             ret = H5Oget_info_by_idx3(group_id, ".", H5_INDEX_CRT_ORDER, order, (hsize_t)(u - 1), &oinfo,
                                       H5O_INFO_BASIC, H5P_DEFAULT);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ret >= 0)
             TEST_ERROR;
 
@@ -21561,7 +21561,7 @@ error:
         H5Gclose(soft_group_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 } /* end object_info_old() */
@@ -21692,7 +21692,7 @@ group_info(hid_t fapl)
                     ret = H5Gget_info_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)0, &grp_info,
                                              H5P_DEFAULT);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 if (ret >= 0)
                     TEST_ERROR;
 
@@ -21884,7 +21884,7 @@ group_info(hid_t fapl)
                     ret = H5Gget_info_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)u, &grp_info,
                                              H5P_DEFAULT);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 if (ret >= 0)
                     TEST_ERROR;
 
@@ -22076,7 +22076,7 @@ group_info(hid_t fapl)
                     ret = H5Gget_info_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)u, &grp_info,
                                              H5P_DEFAULT);
                 }
-                H5E_END_TRY;
+                H5E_END_TRY
                 if (ret >= 0)
                     TEST_ERROR;
 
@@ -22110,7 +22110,7 @@ error:
         H5Gclose(soft_group_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 } /* end group_info() */
@@ -22172,7 +22172,7 @@ group_info_old(hid_t fapl)
         {
             ret = H5Gget_info_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)0, &grp_info, H5P_DEFAULT);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ret >= 0)
             TEST_ERROR;
 
@@ -22362,7 +22362,7 @@ group_info_old(hid_t fapl)
         {
             ret = H5Gget_info_by_idx(group_id, ".", H5_INDEX_NAME, order, (hsize_t)u, &grp_info, H5P_DEFAULT);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ret >= 0)
             TEST_ERROR;
 
@@ -22372,7 +22372,7 @@ group_info_old(hid_t fapl)
             ret = H5Gget_info_by_idx(group_id, ".", H5_INDEX_CRT_ORDER, order, (hsize_t)0, &grp_info,
                                      H5P_DEFAULT);
         }
-        H5E_END_TRY;
+        H5E_END_TRY
         if (ret >= 0)
             TEST_ERROR;
 
@@ -22399,7 +22399,7 @@ error:
         H5Gclose(soft_group_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 } /* end group_info_old() */
@@ -22636,7 +22636,7 @@ error:
         H5Gclose(group_id);
         H5Fclose(file_id);
     }
-    H5E_END_TRY;
+    H5E_END_TRY
 
     return FAIL;
 } /* end timestamps() */
