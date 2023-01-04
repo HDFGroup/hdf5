@@ -5853,9 +5853,9 @@ test_attr_info_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
     for (use_index = FALSE; use_index <= TRUE; use_index++) {
         /* Output message about test being performed */
         if (use_index)
-            MESSAGE(5, ("Testing Querying Attribute Info By Index w/Creation Order Index\n"))
+            MESSAGE(5, ("Testing Querying Attribute Info By Index w/Creation Order Index\n"));
         else
-            MESSAGE(5, ("Testing Querying Attribute Info By Index w/o Creation Order Index\n"))
+            MESSAGE(5, ("Testing Querying Attribute Info By Index w/o Creation Order Index\n"));
 
         /* Create file */
         fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl);
@@ -6315,7 +6315,7 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
     unsigned        u;                       /* Local index variable */
     herr_t          ret;                     /* Generic return value        */
 
-    MESSAGE(5, ("Testing Deleting Attribute By Index\n"))
+    MESSAGE(5, ("Testing Deleting Attribute By Index\n"));
 
     /* Create dataspace for dataset & attributes */
     sid = H5Screate(H5S_SCALAR);
@@ -6346,36 +6346,36 @@ test_attr_delete_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                     if (order == H5_ITER_INC) {
                         if (use_index)
                             MESSAGE(5, ("Testing Deleting Attribute By Creation Order Index in Increasing "
-                                        "Order w/Creation Order Index\n"))
+                                        "Order w/Creation Order Index\n"));
                         else
                             MESSAGE(5, ("Testing Deleting Attribute By Creation Order Index in Increasing "
-                                        "Order w/o Creation Order Index\n"))
+                                        "Order w/o Creation Order Index\n"));
                     } /* end if */
                     else {
                         if (use_index)
                             MESSAGE(5, ("Testing Deleting Attribute By Creation Order Index in Decreasing "
-                                        "Order w/Creation Order Index\n"))
+                                        "Order w/Creation Order Index\n"));
                         else
                             MESSAGE(5, ("Testing Deleting Attribute By Creation Order Index in Decreasing "
-                                        "Order w/o Creation Order Index\n"))
+                                        "Order w/o Creation Order Index\n"));
                     } /* end else */
                 }     /* end if */
                 else {
                     if (order == H5_ITER_INC) {
                         if (use_index)
                             MESSAGE(5, ("Testing Deleting Attribute By Name Index in Increasing Order "
-                                        "w/Creation Order Index\n"))
+                                        "w/Creation Order Index\n"));
                         else
                             MESSAGE(5, ("Testing Deleting Attribute By Name Index in Increasing Order w/o "
-                                        "Creation Order Index\n"))
+                                        "Creation Order Index\n"));
                     } /* end if */
                     else {
                         if (use_index)
                             MESSAGE(5, ("Testing Deleting Attribute By Name Index in Decreasing Order "
-                                        "w/Creation Order Index\n"))
+                                        "w/Creation Order Index\n"));
                         else
                             MESSAGE(5, ("Testing Deleting Attribute By Name Index in Decreasing Order w/o "
-                                        "Creation Order Index\n"))
+                                        "Creation Order Index\n"));
                     } /* end else */
                 }     /* end else */
 
@@ -7333,36 +7333,36 @@ test_attr_iterate2(hbool_t new_format, hid_t fcpl, hid_t fapl)
                     if (order == H5_ITER_INC) {
                         if (use_index)
                             MESSAGE(5, ("Testing Iterating over Attributes By Creation Order Index in "
-                                        "Increasing Order w/Creation Order Index\n"))
+                                        "Increasing Order w/Creation Order Index\n"));
                         else
                             MESSAGE(5, ("Testing Iterating over Attributes By Creation Order Index in "
-                                        "Increasing Order w/o Creation Order Index\n"))
+                                        "Increasing Order w/o Creation Order Index\n"));
                     } /* end if */
                     else {
                         if (use_index)
                             MESSAGE(5, ("Testing Iterating over Attributes By Creation Order Index in "
-                                        "Decreasing Order w/Creation Order Index\n"))
+                                        "Decreasing Order w/Creation Order Index\n"));
                         else
                             MESSAGE(5, ("Testing Iterating over Attributes By Creation Order Index in "
-                                        "Decreasing Order w/o Creation Order Index\n"))
+                                        "Decreasing Order w/o Creation Order Index\n"));
                     } /* end else */
                 }     /* end if */
                 else {
                     if (order == H5_ITER_INC) {
                         if (use_index)
                             MESSAGE(5, ("Testing Iterating over Attributes By Name Index in Increasing Order "
-                                        "w/Creation Order Index\n"))
+                                        "w/Creation Order Index\n"));
                         else
                             MESSAGE(5, ("Testing Iterating over Attributes By Name Index in Increasing Order "
-                                        "w/o Creation Order Index\n"))
+                                        "w/o Creation Order Index\n"));
                     } /* end if */
                     else {
                         if (use_index)
                             MESSAGE(5, ("Testing Iterating over Attributes By Name Index in Decreasing Order "
-                                        "w/Creation Order Index\n"))
+                                        "w/Creation Order Index\n"));
                         else
                             MESSAGE(5, ("Testing Iterating over Attributes By Name Index in Decreasing Order "
-                                        "w/o Creation Order Index\n"))
+                                        "w/o Creation Order Index\n"));
                     } /* end else */
                 }     /* end else */
 
@@ -7731,36 +7731,36 @@ test_attr_open_by_idx(hbool_t new_format, hid_t fcpl, hid_t fapl)
                     if (order == H5_ITER_INC) {
                         if (use_index)
                             MESSAGE(5, ("Testing Opening Attributes By Creation Order Index in Increasing "
-                                        "Order w/Creation Order Index\n"))
+                                        "Order w/Creation Order Index\n"));
                         else
                             MESSAGE(5, ("Testing Opening Attributes By Creation Order Index in Increasing "
-                                        "Order w/o Creation Order Index\n"))
+                                        "Order w/o Creation Order Index\n"));
                     } /* end if */
                     else {
                         if (use_index)
                             MESSAGE(5, ("Testing Opening Attributes By Creation Order Index in Decreasing "
-                                        "Order w/Creation Order Index\n"))
+                                        "Order w/Creation Order Index\n"));
                         else
                             MESSAGE(5, ("Testing Opening Attributes By Creation Order Index in Decreasing "
-                                        "Order w/o Creation Order Index\n"))
+                                        "Order w/o Creation Order Index\n"));
                     } /* end else */
                 }     /* end if */
                 else {
                     if (order == H5_ITER_INC) {
                         if (use_index)
                             MESSAGE(5, ("Testing Opening Attributes By Name Index in Increasing Order "
-                                        "w/Creation Order Index\n"))
+                                        "w/Creation Order Index\n"));
                         else
                             MESSAGE(5, ("Testing Opening Attributes By Name Index in Increasing Order w/o "
-                                        "Creation Order Index\n"))
+                                        "Creation Order Index\n"));
                     } /* end if */
                     else {
                         if (use_index)
                             MESSAGE(5, ("Testing Opening Attributes By Name Index in Decreasing Order "
-                                        "w/Creation Order Index\n"))
+                                        "w/Creation Order Index\n"));
                         else
                             MESSAGE(5, ("Testing Opening Attributes By Name Index in Decreasing Order w/o "
-                                        "Creation Order Index\n"))
+                                        "Creation Order Index\n"));
                     } /* end else */
                 }     /* end else */
 
@@ -8097,9 +8097,9 @@ test_attr_open_by_name(hbool_t new_format, hid_t fcpl, hid_t fapl)
     for (use_index = FALSE; use_index <= TRUE; use_index++) {
         /* Print appropriate test message */
         if (use_index)
-            MESSAGE(5, ("Testing Opening Attributes By Name w/Creation Order Index\n"))
+            MESSAGE(5, ("Testing Opening Attributes By Name w/Creation Order Index\n"));
         else
-            MESSAGE(5, ("Testing Opening Attributes By Name w/o Creation Order Index\n"))
+            MESSAGE(5, ("Testing Opening Attributes By Name w/o Creation Order Index\n"));
 
         /* Create file */
         fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl);
@@ -8392,9 +8392,9 @@ test_attr_create_by_name(hbool_t new_format, hid_t fcpl, hid_t fapl)
     for (use_index = FALSE; use_index <= TRUE; use_index++) {
         /* Print appropriate test message */
         if (use_index)
-            MESSAGE(5, ("Testing Creating Attributes By Name w/Creation Order Index\n"))
+            MESSAGE(5, ("Testing Creating Attributes By Name w/Creation Order Index\n"));
         else
-            MESSAGE(5, ("Testing Creating Attributes By Name w/o Creation Order Index\n"))
+            MESSAGE(5, ("Testing Creating Attributes By Name w/o Creation Order Index\n"));
 
         /* Create file */
         fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl);

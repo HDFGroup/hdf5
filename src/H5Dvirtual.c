@@ -496,7 +496,7 @@ H5D__virtual_store_layout(H5F_t *f, H5O_layout_t *layout)
 
         /* Number of entries */
         tmp_nentries = (hsize_t)virt->list_nused;
-        H5F_ENCODE_LENGTH(f, heap_block_p, tmp_nentries)
+        H5F_ENCODE_LENGTH(f, heap_block_p, tmp_nentries);
 
         /* Encode each entry */
         for (i = 0; i < virt->list_nused; i++) {
@@ -520,7 +520,7 @@ H5D__virtual_store_layout(H5F_t *f, H5O_layout_t *layout)
 
         /* Checksum */
         chksum = H5_checksum_metadata(heap_block, block_size - (size_t)4, 0);
-        UINT32ENCODE(heap_block_p, chksum)
+        UINT32ENCODE(heap_block_p, chksum);
 
         /* Insert block into global heap */
         if (H5HG_insert(f, block_size, heap_block, &(virt->serial_list_hobjid)) < 0)

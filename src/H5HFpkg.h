@@ -154,9 +154,11 @@
 
 /* Decode a "managed" heap ID */
 #define H5HF_MAN_ID_DECODE(i, h, f, o, l)                                                                    \
-    f = *(uint8_t *)i++;                                                                                     \
-    UINT64DECODE_VAR((i), (o), (h)->heap_off_size);                                                          \
-    UINT64DECODE_VAR((i), (l), (h)->heap_len_size)
+    do {                                                                                                     \
+		f = *(uint8_t *)i++;                                                                                 \
+		UINT64DECODE_VAR((i), (o), (h)->heap_off_size);                                                      \
+		UINT64DECODE_VAR((i), (l), (h)->heap_len_size);                                                      \
+	} while(0)
 
 /* Free space section types for fractal heap */
 /* (values stored in free space data structures in file) */

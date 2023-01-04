@@ -78,12 +78,14 @@ const char *FILENAME[] = {"sec2_file",            /*0*/
  */
 static int __k;
 #define HEXPRINT(size, buf)                                                                                  \
-    for (__k = 0; __k < (size); __k++) {                                                                     \
-        if (__k % 16 == 0) {                                                                                 \
-            HDprintf("\n%04x", __k);                                                                         \
+    do {                                                                                                     \
+        for (__k = 0; __k < (size); __k++) {                                                                 \
+            if (__k % 16 == 0) {                                                                             \
+                HDprintf("\n%04x", __k);                                                                     \
+            }                                                                                                \
+            HDprintf((__k % 4 == 0) ? "  %02X" : " %02X", (unsigned char)(buf)[__k]);                        \
         }                                                                                                    \
-        HDprintf((__k % 4 == 0) ? "  %02X" : " %02X", (unsigned char)(buf)[__k]);                            \
-    } /* end #define HEXPRINT() */
+    } while(0) /* end #define HEXPRINT() */
 
 /* Macro SET_SIZE()
  *
@@ -2381,7 +2383,7 @@ error:
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  */
 #define SPLITTER_TEST_FAULT(mesg)                                                                            \
-    {                                                                                                        \
+    do {                                                                                                     \
         H5_FAILED();                                                                                         \
         AT();                                                                                                \
         HDfprintf(stderr, mesg);                                                                             \
@@ -2389,7 +2391,7 @@ error:
         HDfflush(stderr);                                                                                    \
         ret_value = -1;                                                                                      \
         goto done;                                                                                           \
-    }
+    } while(0)
 
 /*-------------------------------------------------------------------------
  * Function:    compare_splitter_config_info

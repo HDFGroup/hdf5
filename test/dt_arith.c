@@ -103,7 +103,7 @@ static int without_hardware_g = 0;
  * This algorithm is mainly to avoid any casting and comparison between source and destination types
  * for compiler, because we're testing conversions. */
 #define INIT_INTEGER(TYPE, SRC_MAX, SRC_MIN, SRC_SIZE, DST_SIZE, SRC_PREC, BUF, SAVED, NELMTS)               \
-    {                                                                                                        \
+    do {                                                                                                     \
         unsigned char *buf_p, *saved_p;                                                                      \
         unsigned int   n;                                                                                    \
         TYPE           value1 = 1;                                                                           \
@@ -157,13 +157,13 @@ static int without_hardware_g = 0;
             if (n < SRC_PREC - 1)                                                                            \
                 value2 = (TYPE)(value2 << 1);                                                                \
         }                                                                                                    \
-    }
+    } while(0)
 
 /* Change a buffer's byte order from big endian to little endian.  It's mainly for library's
  * bit operations which handle only little endian order.
  */
 #define CHANGE_ORDER(EBUF, EORDER, ESIZE)                                                                    \
-    {                                                                                                        \
+    do {                                                                                                     \
         unsigned int m;                                                                                      \
         if (H5T_ORDER_BE == EORDER) {                                                                        \
             unsigned char mediator;                                                                          \
@@ -187,14 +187,14 @@ static int without_hardware_g = 0;
                 EBUF[(ESIZE - 1) - m] = mediator2;                                                           \
             }                                                                                                \
         }                                                                                                    \
-    }
+    } while(0)
 
 /* Allocate buffer and initialize it with floating-point normalized values.
  * It's for conversion test of floating-point as the source.
  */
 #define INIT_FP_NORM(TYPE, SRC_MAX, SRC_MIN, SRC_MAX_10_EXP, SRC_MIN_10_EXP, SRC_SIZE, DST_SIZE, BUF, SAVED, \
                      NELMTS)                                                                                 \
-    {                                                                                                        \
+    do {                                                                                                     \
         unsigned char *buf_p, *saved_p;                                                                      \
         size_t         num_norm, factor, n;                                                                  \
         TYPE           value1, value2;                                                                       \
@@ -267,13 +267,13 @@ static int without_hardware_g = 0;
         HDmemcpy(saved_p, &value2, SRC_SIZE);                                                                \
         buf_p += SRC_SIZE;                                                                                   \
         saved_p += SRC_SIZE;                                                                                 \
-    }
+    } while(0)
 
 /* Allocate buffer and initialize it with floating-point denormalized values.
  * It's for conversion test of floating-point as the source.
  */
 #define INIT_FP_DENORM(TYPE, SRC_MANT_DIG, SRC_SIZE, SRC_PREC, SRC_ORDR, DST_SIZE, BUF, SAVED, NELMTS)       \
-    {                                                                                                        \
+    do {                                                                                                     \
         unsigned char *buf_p, *saved_p;                                                                      \
         unsigned char *tmp1, *tmp2;                                                                          \
         size_t         n;                                                                                    \
@@ -319,13 +319,13 @@ static int without_hardware_g = 0;
         }                                                                                                    \
         HDfree(tmp1);                                                                                        \
         HDfree(tmp2);                                                                                        \
-    }
+    } while(0)
 
 /* Allocate buffer and initialize it with floating-point special values, +/-0, +/-infinity,
  * +/-QNaN, +/-SNaN.  It's for conversion test of floating-point as the source.
  */
 #define INIT_FP_SPECIAL(SRC_SIZE, SRC_PREC, SRC_ORDR, SRC_MANT_DIG, DST_SIZE, BUF, SAVED, NELMTS)            \
-    {                                                                                                        \
+    do {                                                                                                     \
         unsigned char *buf_p;                                                                                \
         unsigned char *value;                                                                                \
         int            n;                                                                                    \
@@ -383,7 +383,7 @@ static int without_hardware_g = 0;
                                                                                                              \
         HDmemcpy(SAVED, BUF, NELMTS *MAX(SRC_SIZE, DST_SIZE));                                               \
         HDfree(value);                                                                                       \
-    }
+    } while(0)
 
 static hbool_t overflows(unsigned char *origin_bits, hid_t src_id, size_t dst_num_bits);
 static int     my_isnan(dtype_t type, void *val);

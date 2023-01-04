@@ -79,13 +79,14 @@
 
 /* Sanity check on chunk index types: commonly used by a lot of routines in this file */
 #define H5D_CHUNK_STORAGE_INDEX_CHK(storage)                                                                 \
-    HDassert((H5D_CHUNK_IDX_EARRAY == (storage)->idx_type && H5D_COPS_EARRAY == (storage)->ops) ||           \
-             (H5D_CHUNK_IDX_FARRAY == (storage)->idx_type && H5D_COPS_FARRAY == (storage)->ops) ||           \
-             (H5D_CHUNK_IDX_BT2 == (storage)->idx_type && H5D_COPS_BT2 == (storage)->ops) ||                 \
-             (H5D_CHUNK_IDX_BTREE == (storage)->idx_type && H5D_COPS_BTREE == (storage)->ops) ||             \
-             (H5D_CHUNK_IDX_SINGLE == (storage)->idx_type && H5D_COPS_SINGLE == (storage)->ops) ||           \
-             (H5D_CHUNK_IDX_NONE == (storage)->idx_type && H5D_COPS_NONE == (storage)->ops));
-
+    do {                                                                                                     \
+        HDassert((H5D_CHUNK_IDX_EARRAY == (storage)->idx_type && H5D_COPS_EARRAY == (storage)->ops) ||       \
+                 (H5D_CHUNK_IDX_FARRAY == (storage)->idx_type && H5D_COPS_FARRAY == (storage)->ops) ||       \
+                 (H5D_CHUNK_IDX_BT2 == (storage)->idx_type && H5D_COPS_BT2 == (storage)->ops) ||             \
+                 (H5D_CHUNK_IDX_BTREE == (storage)->idx_type && H5D_COPS_BTREE == (storage)->ops) ||         \
+                 (H5D_CHUNK_IDX_SINGLE == (storage)->idx_type && H5D_COPS_SINGLE == (storage)->ops) ||       \
+                 (H5D_CHUNK_IDX_NONE == (storage)->idx_type && H5D_COPS_NONE == (storage)->ops));            \
+    } while(0)
 /*
  * Feature: If this constant is defined then every cache preemption and load
  *        causes a character to be printed on the standard error stream:

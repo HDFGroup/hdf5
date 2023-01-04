@@ -2047,7 +2047,7 @@ H5O_msg_flush(H5F_t *f, H5O_t *oh, H5O_mesg_t *mesg)
 
     /* Encode the message prefix */
     if (oh->version == H5O_VERSION_1)
-        UINT16ENCODE(p, msg_id)
+        UINT16ENCODE(p, msg_id);
     else
         *p++ = (uint8_t)msg_id;
     HDassert(mesg->raw_size < H5O_MESG_MAX_SIZE);

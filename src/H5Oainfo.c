@@ -131,7 +131,7 @@ H5O__ainfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUS
     if (ainfo->track_corder) {
         if (H5_IS_BUFFER_OVERFLOW(p, 2, p_end))
             HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "ran off end of input buffer while decoding");
-        UINT16DECODE(p, ainfo->max_crt_idx)
+        UINT16DECODE(p, ainfo->max_crt_idx);
     }
     else
         ainfo->max_crt_idx = H5O_MAX_CRT_ORDER_IDX;

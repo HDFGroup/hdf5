@@ -96,7 +96,7 @@ static hbool_t not_comparable;
     }
 
 #define PER_UNSIGN(TYPE, A, B)                                                                               \
-    {                                                                                                        \
+    do {                                                                                                     \
         per            = -1;                                                                                 \
         not_comparable = FALSE;                                                                              \
         both_zero      = FALSE;                                                                              \
@@ -106,7 +106,7 @@ static hbool_t not_comparable;
             per = ABS((double)((TYPE)((B) - (A))) / (double)(A));                                            \
         else                                                                                                 \
             not_comparable = TRUE;                                                                           \
-    }
+    } while (0)
 
 #define PDIFF(a, b) (((b) > (a)) ? ((b) - (a)) : ((a) - (b)))
 

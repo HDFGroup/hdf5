@@ -1935,7 +1935,7 @@ H5A__attr_iterate_table(const H5A_attr_table_t *atable, hsize_t skip, hsize_t *l
         *last_attr = skip;
 
     /* Iterate over attribute messages */
-    H5_CHECKED_ASSIGN(u, size_t, skip, hsize_t)
+    H5_CHECKED_ASSIGN(u, size_t, skip, hsize_t);
     for (; u < atable->nattrs && !ret_value; u++) {
         /* Check which type of callback to make */
         switch (attr_op->op_type) {

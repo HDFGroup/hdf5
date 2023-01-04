@@ -38,7 +38,7 @@
     } while (0)
 
 #define CHECK_I(ret, where)                                                                                  \
-    {                                                                                                        \
+    do {                                                                                                     \
         if (VERBOSE_HI) {                                                                                    \
             print_func("   Call to routine: %15s at line %4d in %s returned %ld\n", (where), (int)__LINE__,  \
                        __FILE__, (long)(ret));                                                               \
@@ -48,11 +48,11 @@
                           (int)__LINE__, __FILE__);                                                          \
             H5Eprint2(H5E_DEFAULT, stdout);                                                                  \
         }                                                                                                    \
-    }
+    } while(0)
 
 /* Check that a pointer is valid (i.e.: not NULL) */
 #define CHECK_PTR(ret, where)                                                                                \
-    {                                                                                                        \
+    do {                                                                                                     \
         if (VERBOSE_HI) {                                                                                    \
             print_func("   Call to routine: %15s at line %4d in %s returned %p\n", (where), (int)__LINE__,   \
                        __FILE__, ((const void *)ret));                                                       \
@@ -62,11 +62,11 @@
                           __FILE__);                                                                         \
             H5Eprint2(H5E_DEFAULT, stdout);                                                                  \
         }                                                                                                    \
-    }
+    } while(0)
 
 /* Check that a pointer is NULL */
 #define CHECK_PTR_NULL(ret, where)                                                                           \
-    {                                                                                                        \
+    do {                                                                                                     \
         if (VERBOSE_HI) {                                                                                    \
             print_func("   Call to routine: %15s at line %4d in %s returned %p\n", (where), (int)__LINE__,   \
                        __FILE__, ((const void *)ret));                                                       \
@@ -76,11 +76,11 @@
                           (int)__LINE__, __FILE__);                                                          \
             H5Eprint2(H5E_DEFAULT, stdout);                                                                  \
         }                                                                                                    \
-    }
+    } while(0)
 
 /* Check that two pointers are equal */
 #define CHECK_PTR_EQ(ret, val, where)                                                                        \
-    {                                                                                                        \
+    do {                                                                                                     \
         if (VERBOSE_HI) {                                                                                    \
             print_func("   Call to routine: %15s at line %4d in %s returned %p\n", (where), (int)__LINE__,   \
                        __FILE__, (const void *)(ret));                                                       \
@@ -91,7 +91,7 @@
                 (where), (const void *)(ret), (const void *)(val), (int)__LINE__, __FILE__);                 \
             H5Eprint2(H5E_DEFAULT, stdout);                                                                  \
         }                                                                                                    \
-    }
+    } while(0)
 
 /* Used to make certain a return value _is_ a value */
 #define VERIFY(_x, _val, where)                                                                              \
@@ -164,19 +164,19 @@
 /* Used to document process through a test */
 #if defined(H5_HAVE_PARALLEL) && defined(H5_PARALLEL_TEST)
 #define MESSAGE(V, A)                                                                                        \
-    {                                                                                                        \
+    do {                                                                                                     \
         int mpi_rank;                                                                                        \
                                                                                                              \
         MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);                                                            \
         if (mpi_rank == 0 && HDGetTestVerbosity() > (V))                                                     \
             print_func A;                                                                                    \
-    }
+    } while(0)
 #else /* H5_HAVE_PARALLEL */
 #define MESSAGE(V, A)                                                                                        \
-    {                                                                                                        \
+    do {                                                                                                     \
         if (HDGetTestVerbosity() > (V))                                                                      \
             print_func A;                                                                                    \
-    }
+    } while(0)
 #endif /* H5_HAVE_PARALLEL */
 
 /* Used to indicate an error that is complex to check for */

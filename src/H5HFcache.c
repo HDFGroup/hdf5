@@ -1668,7 +1668,7 @@ H5HF__cache_dblock_verify_chksum(const void *_image, size_t len, void *_udata)
     computed_chksum = H5_checksum_metadata(read_buf, len, 0);
 
     /* Restore the checksum */
-    UINT32ENCODE(chk_p, stored_chksum)
+    UINT32ENCODE(chk_p, stored_chksum);
 
     /* Verify checksum */
     if (stored_chksum != computed_chksum)
