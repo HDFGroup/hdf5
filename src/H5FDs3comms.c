@@ -2203,7 +2203,7 @@ H5FD_s3comms_parse_url(const char *str, parsed_url_t **_purl)
     unsigned int  i         = 0;
     herr_t        ret_value = FAIL;
 
-    FUNC_ENTER_NOAPI_NOINIT;
+    FUNC_ENTER_NOAPI_NOINIT
 
 #if S3COMMS_DEBUG
     HDprintf("called H5FD_s3comms_parse_url.\n");
