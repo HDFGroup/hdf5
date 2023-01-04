@@ -245,7 +245,7 @@ H5Fset_mpi_atomicity(hid_t file_id, hbool_t flag)
     H5VL_native_file_optional_args_t file_opt_args;       /* Arguments for optional operation */
     herr_t                           ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(FAIL);
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ib", file_id, flag);
 
     /* Get the file object */
@@ -319,7 +319,7 @@ H5Fget_mpi_atomicity(hid_t file_id, hbool_t *flag /*out*/)
     H5VL_native_file_optional_args_t file_opt_args;       /* Arguments for optional operation */
     herr_t                           ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(FAIL);
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ix", file_id, flag);
 
     /* Get the file object */

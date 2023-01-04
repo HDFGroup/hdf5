@@ -955,7 +955,7 @@ H5Gget_objinfo(hid_t loc_id, const char *name, hbool_t follow_link, H5G_stat_t *
     H5VL_native_group_optional_args_t grp_opt_args;        /* Arguments for optional operation */
     herr_t                            ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(FAIL);
+    FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "i*sbx", loc_id, name, follow_link, statbuf);
 
     /* Check arguments */

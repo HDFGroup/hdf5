@@ -2118,7 +2118,7 @@ H5Odisable_mdc_flushes(hid_t object_id)
     H5VL_loc_params_t    loc_params;          /* Location parameters */
     herr_t               ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(FAIL);
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", object_id);
 
     /* Make sure the ID is a file object */
@@ -2191,7 +2191,7 @@ H5Oenable_mdc_flushes(hid_t object_id)
     H5VL_loc_params_t    loc_params;          /* Location parameters */
     herr_t               ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(FAIL);
+    FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", object_id);
 
     /* Make sure the ID is a file object */
@@ -2270,7 +2270,7 @@ H5Oare_mdc_flushes_disabled(hid_t object_id, hbool_t *are_disabled)
     H5VL_loc_params_t                  loc_params;          /* Location parameters */
     herr_t                             ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(FAIL);
+    FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*b", object_id, are_disabled);
 
     /* Sanity check */
