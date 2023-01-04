@@ -1096,7 +1096,7 @@ H5G__get_objinfo(const H5G_loc_t *loc, const char *name, hbool_t follow_link, H5
     H5G_trav_goi_t udata;               /* User data for callback */
     herr_t         ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_PACKAGE;
+    FUNC_ENTER_PACKAGE
 
     /* Sanity checks */
     HDassert(loc);

@@ -3085,7 +3085,7 @@ done:
 static herr_t
 H5O__reset_info2(H5O_info2_t *oinfo)
 {
-    FUNC_ENTER_PACKAGE_NOERR;
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Reset the passed-in info struct */
     HDmemset(oinfo, 0, sizeof(H5O_info2_t));

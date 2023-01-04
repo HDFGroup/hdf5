@@ -1549,7 +1549,7 @@ done:
 static herr_t
 H5FD__mirror_query(const H5FD_t H5_ATTR_UNUSED *_file, unsigned long *flags)
 {
-    FUNC_ENTER_PACKAGE_NOERR;
+    FUNC_ENTER_PACKAGE_NOERR
 
     LOG_OP_CALL(__func__);
 

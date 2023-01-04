@@ -43,7 +43,7 @@ H5FD__onion_ingest_history(H5FD_onion_history_t *history_out, H5FD_t *raw_file, 
     uint32_t       sum       = 0;
     herr_t         ret_value = SUCCEED;
 
-    FUNC_ENTER_PACKAGE;
+    FUNC_ENTER_PACKAGE
 
     HDassert(history_out);
     HDassert(raw_file);
@@ -104,7 +104,7 @@ H5FD__onion_write_history(H5FD_onion_history_t *history, H5FD_t *file, haddr_t o
     unsigned char *buf       = NULL;
     uint64_t       ret_value = 0;
 
-    FUNC_ENTER_PACKAGE;
+    FUNC_ENTER_PACKAGE
 
     if (NULL == (buf = H5MM_malloc(H5FD_ONION_ENCODED_SIZE_HISTORY +
                                    (H5FD_ONION_ENCODED_SIZE_RECORD_POINTER * history->n_revisions))))
@@ -166,7 +166,7 @@ H5FD__onion_history_decode(unsigned char *buf, H5FD_onion_history_t *history)
     unsigned char *ptr         = NULL;
     size_t         ret_value   = 0;
 
-    FUNC_ENTER_PACKAGE;
+    FUNC_ENTER_PACKAGE
 
     HDassert(buf != NULL);
     HDassert(history != NULL);
@@ -268,7 +268,7 @@ H5FD__onion_history_encode(H5FD_onion_history_t *history, unsigned char *buf, ui
     unsigned char *ptr      = buf;
     size_t         vers_u32 = (uint32_t)history->version; /* pad out unused bytes */
 
-    FUNC_ENTER_PACKAGE_NOERR;
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(history != NULL);
     HDassert(H5FD_ONION_HISTORY_VERSION_CURR == history->version);

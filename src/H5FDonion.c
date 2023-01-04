@@ -624,7 +624,7 @@ H5FD__onion_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 {
     const H5FD_onion_t *file = (const H5FD_onion_t *)_file;
 
-    FUNC_ENTER_PACKAGE_NOERR;
+    FUNC_ENTER_PACKAGE_NOERR
 
     FUNC_LEAVE_NOAPI(file->logical_eoa)
 } /* end H5FD__onion_get_eoa() */
@@ -642,7 +642,7 @@ H5FD__onion_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 {
     const H5FD_onion_t *file = (const H5FD_onion_t *)_file;
 
-    FUNC_ENTER_PACKAGE_NOERR;
+    FUNC_ENTER_PACKAGE_NOERR
 
     FUNC_LEAVE_NOAPI(file->logical_eof)
 } /* end H5FD__onion_get_eof() */
@@ -693,7 +693,7 @@ H5FD__onion_create_truncate_onion(H5FD_onion_t *file, const char *filename, cons
     size_t                        size            = 0;
     herr_t                        ret_value       = SUCCEED;
 
-    FUNC_ENTER_PACKAGE;
+    FUNC_ENTER_PACKAGE
 
     HDassert(file != NULL);
 
@@ -780,7 +780,7 @@ H5FD__onion_remove_unused_symbols(char *s)
 {
     char *d = s;
 
-    FUNC_ENTER_PACKAGE_NOERR;
+    FUNC_ENTER_PACKAGE_NOERR
 
     do {
         while (*d == '{' || *d == '}' || *d == ' ') {
@@ -797,7 +797,7 @@ H5FD__onion_parse_config_str(const char *config_str, H5FD_onion_fapl_info_t *fa)
     char  *config_str_copy = NULL;
     herr_t ret_value       = SUCCEED;
 
-    FUNC_ENTER_PACKAGE;
+    FUNC_ENTER_PACKAGE
 
     if (!HDstrcmp(config_str, ""))
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "configure string can't be empty")
@@ -1261,7 +1261,7 @@ H5FD__onion_open_rw(H5FD_onion_t *file, unsigned int flags, haddr_t maxaddr, boo
     uint32_t       checksum  = 0;
     herr_t         ret_value = SUCCEED;
 
-    FUNC_ENTER_PACKAGE;
+    FUNC_ENTER_PACKAGE
 
     /* Guard against simultaneous write-open.
      * TODO: support recovery open with force-write-open flag in FAPL info.
@@ -1440,7 +1440,7 @@ H5FD__onion_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr)
 {
     H5FD_onion_t *file = (H5FD_onion_t *)_file;
 
-    FUNC_ENTER_PACKAGE_NOERR;
+    FUNC_ENTER_PACKAGE_NOERR
 
     file->logical_eoa = addr;
 
@@ -1741,7 +1741,7 @@ H5FD__onion_write_final_history(H5FD_onion_t *file)
     size_t size      = 0;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_PACKAGE;
+    FUNC_ENTER_PACKAGE
 
     /* TODO: history EOF may not be correct (under what circumstances?) */
     if (0 == (size = H5FD__onion_write_history(&(file->history), file->onion_file, file->onion_eof,
