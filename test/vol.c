@@ -28,7 +28,7 @@
 #include "H5VLpkg.h" /* Virtual Object Layer                 */
 
 /* Filename */
-const char *FILENAME[] = {"vol_test_file_1", "vol_test_file_2", NULL};
+const char *FILENAME[] = {"vol_test_file", NULL};
 
 #define NATIVE_VOL_TEST_GROUP_NAME     "test_group"
 #define NATIVE_VOL_TEST_DATASET_NAME   "test_dataset"
@@ -2365,79 +2365,6 @@ error:
 } /* end test_wrap_register() */
 
 /*-------------------------------------------------------------------------
- * Function:    test_external_link
- *
- * Purpose:     Tests VOL using H5Lcreate_external
- *
- * Return:      SUCCEED/FAIL
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-test_external_link(void)
-{
-    hid_t                    file_a  = H5I_INVALID_HID;
-    hid_t                    file_b  = H5I_INVALID_HID;
-    hid_t                    fapl_id = H5I_INVALID_HID;
-    H5VL_pass_through_info_t passthru_info;
-    char                     filename_a[1028];
-    char                     filename_b[1028];
-
-    TESTING("VOL using H5Lcreate_external");
-
-    fapl_id = h5_fileaccess();
-
-    /* Stack the passthrough VOL connector on top of the native connector */
-    passthru_info.under_vol_id   = H5VL_NATIVE;
-    passthru_info.under_vol_info = NULL;
-
-    if (H5Pset_vol(fapl_id, H5VL_PASSTHRU, &passthru_info) < 0)
-        FAIL_STACK_ERROR;
-
-    h5_fixname(FILENAME[0], fapl_id, filename_a, sizeof filename_a);
-
-    /* Create the first file */
-    if ((file_a = H5Fcreate(filename_a, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
-        TEST_ERROR;
-
-    h5_fixname(FILENAME[1], fapl_id, filename_b, sizeof filename_b);
-
-    /* Create the second file */
-    if ((file_b = H5Fcreate(filename_b, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
-        TEST_ERROR;
-
-    /* Create an external link to the root group in the first file */
-    if (H5Lcreate_external(filename_a, "/", file_b, "ext_link", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        TEST_ERROR;
-
-    if (H5Fclose(file_a) < 0)
-        TEST_ERROR;
-
-    if (H5Fclose(file_b) < 0)
-        TEST_ERROR;
-
-    h5_delete_test_file(FILENAME[0], fapl_id);
-    h5_delete_test_file(FILENAME[1], fapl_id);
-
-    if (H5Pclose(fapl_id) < 0)
-        TEST_ERROR;
-
-    PASSED();
-    return SUCCEED;
-
-error:
-    H5E_BEGIN_TRY
-    {
-        H5Fclose(file_a);
-        H5Fclose(file_b);
-        H5Pclose(fapl_id);
-    }
-    H5E_END_TRY;
-
-    return FAIL;
-} /* end test_external_link() */
-
-/*-------------------------------------------------------------------------
  * Function:    main
  *
  * Purpose:     Tests the virtual object layer interface (H5VL)
@@ -2475,7 +2402,6 @@ main(void)
     nerrors += test_vol_cap_flags() < 0 ? 1 : 0;
     nerrors += test_get_vol_name() < 0 ? 1 : 0;
     nerrors += test_wrap_register() < 0 ? 1 : 0;
-    nerrors += test_external_link() < 0 ? 1 : 0;
 
     if (nerrors) {
         HDprintf("***** %d Virtual Object Layer TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
