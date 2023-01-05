@@ -13733,9 +13733,9 @@ external_link_public_macros(hid_t fapl, hbool_t new_format)
     char        objname[NAME_BUF_SIZE]; /* Object name */
     char        filename1[NAME_BUF_SIZE];
     char        filename2[NAME_BUF_SIZE];
-    unsigned   *flags = NULL;           /* External link flags, packed as a bitmap */
-    const char *file; /* File from external link */
-    const char *path; /* Path from external link */
+    unsigned   *flags = NULL; /* External link flags, packed as a bitmap */
+    const char *file;         /* File from external link */
+    const char *path;         /* Path from external link */
 
     if (new_format)
         TESTING("external link public macros (w/new group format)");
