@@ -574,10 +574,17 @@ static herr_t
 fake_vol_info_to_str(const void *info, char **str)
 {
     herr_t ret_value = SUCCEED; /* Return value */
+    const int val = *(const int *)info;
 
-    *str = (char *)malloc(8);
+    /* Verify the info is correct before continuing */
+    if (val != INT_MAX) {
+        HDprintf("The value of info (%d) is incorrect\n", val);
+        return FAIL;
+    }
 
-    sprintf(*str, "%d", *((const int *)info));
+    *str = (char *)malloc(16);
+
+    HDsnprintf(*str, 16, "%d", *((const int *)info));
 
     return ret_value;
 } /* end fake_vol_info_to_str() */
