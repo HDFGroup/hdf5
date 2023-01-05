@@ -12,7 +12,7 @@ set (mirror_server_SOURCES
         ${HDF5_UTILS_MIRRORVFD_SOURCE_DIR}/mirror_remote.h
 )
 add_executable (mirror_server ${mirror_server_SOURCES})
-target_include_directories (mirror_server PRIVATE "${HDF5_UITLS_DIR};${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+target_include_directories (mirror_server PRIVATE "${HDF5_UTILS_DIR};${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
 if (NOT BUILD_SHARED_LIBS)
   TARGET_C_PROPERTIES (mirror_server STATIC)
   target_link_libraries (mirror_server PRIVATE ${HDF5_LIB_TARGET})
@@ -37,7 +37,7 @@ endif ()
 
 set (mirror_server_stop_SOURCES ${HDF5_UTILS_MIRRORVFD_SOURCE_DIR}/mirror_server_stop.c)
 add_executable (mirror_server_stop ${mirror_server_stop_SOURCES})
-target_include_directories (mirror_server_stop PRIVATE "${HDF5_UITLS_DIR};${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+target_include_directories (mirror_server_stop PRIVATE "${HDF5_UTILS_DIR};${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
 if (NOT BUILD_SHARED_LIBS)
   TARGET_C_PROPERTIES (mirror_server_stop STATIC)
   target_link_libraries (mirror_server_stop PRIVATE ${HDF5_LIB_TARGET})

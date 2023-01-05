@@ -128,6 +128,7 @@ parse_args(int argc, char **argv, struct mshs_opts *opts)
 static int
 send_shutdown(struct mshs_opts *opts)
 {
+    char               mybuf[16];
     int                live_socket;
     struct sockaddr_in target_addr;
 
@@ -154,6 +155,16 @@ send_shutdown(struct mshs_opts *opts)
 
     if (HDwrite(live_socket, "SHUTDOWN", 9) == -1) {
         HDprintf("ERROR write() (%d)\n%s\n", errno, HDstrerror(errno));
+        return -1;
+    }
+
+    /* Read & verify response from port connection.  */
+    if (HDread(live_socket, &mybuf, sizeof(mybuf)) == -1) {
+        HDprintf("ERROR read() can't receive data\n");
+        return -1;
+    }
+    if (HDstrncmp("CLOSING", mybuf, 8)) {
+        HDprintf("ERROR read() didn't receive data from server\n");
         return -1;
     }
 
