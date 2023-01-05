@@ -26,25 +26,6 @@
 
 #include "H5public.h" /* Include Public Definitions    */
 
-/* include the pthread header */
-#ifdef H5_HAVE_THREADSAFE
-#ifdef H5_HAVE_WIN32_API
-#ifndef H5_HAVE_WIN_THREADS
-#ifdef H5_HAVE_PTHREAD_H
-#include <pthread.h>
-#endif /* H5_HAVE_PTHREAD_H */
-#endif /* H5_HAVE_WIN_THREADS */
-#else  /* H5_HAVE_WIN32_API */
-#ifdef H5_HAVE_PTHREAD_H
-#include <pthread.h>
-#endif /* H5_HAVE_PTHREAD_H */
-#endif /* H5_HAVE_WIN32_API */
-#endif /* H5_HAVE_THREADSAFE */
-
-/*
- * Include ANSI-C header files.
- */
-#ifdef H5_STDC_HEADERS
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
@@ -56,7 +37,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#endif
 
 /* POSIX headers */
 #ifdef H5_HAVE_SYS_TIME_H
@@ -80,6 +60,11 @@
 #ifdef H5_HAVE_STDINT_H
 #include <stdint.h>
 #endif
+#endif
+
+/* Include the Pthreads header, if necessary */
+#if defined(H5_HAVE_THREADSAFE) && defined(H5_HAVE_PTHREAD_H)
+#include <pthread.h>
 #endif
 
 /*
