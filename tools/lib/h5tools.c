@@ -817,9 +817,10 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-h5tools_get_vfd_name(hid_t fapl_id, char *drivername, size_t drivername_size)
+h5tools_get_vfd_name(hid_t fid, hid_t fapl_id, char *drivername, size_t drivername_size)
 {
     hid_t  fapl_vol_id = H5I_INVALID_HID;
+    hbool_t is_native = FALSE;
     herr_t ret_value   = SUCCEED;
 
     if (fapl_id < 0)
@@ -839,9 +840,11 @@ h5tools_get_vfd_name(hid_t fapl_id, char *drivername, size_t drivername_size)
     if (H5Pget_vol_id(fapl_id, &fapl_vol_id) < 0)
         H5TOOLS_ERROR(FAIL, "failed to retrieve VOL ID from FAPL");
 
-    /* TODO: For now, we have no way of determining if an arbitrary
-     * VOL connector is native-terminal. */
-    if (fapl_vol_id == H5VL_NATIVE || fapl_vol_id == H5VL_PASSTHRU) {
+    /* Query if the file ID is native-terminal */
+    if (H5VLobject_is_native(fid, &is_native) < 0)
+        H5TOOLS_ERROR(FAIL, "failed to determine if file ID is native-terminal");
+
+    if (is_native) {
         const char *driver_name;
         hid_t       driver_id;
 
@@ -1072,7 +1075,7 @@ h5tools_fopen(const char *fname, unsigned flags, hid_t fapl_id, hbool_t use_spec
 done:
     /* Save the driver name if using a native-terminal VOL connector */
     if (drivername && drivername_size && ret_value >= 0)
-        if (used_fapl_id >= 0 && h5tools_get_vfd_name(used_fapl_id, drivername, drivername_size) < 0)
+        if (used_fapl_id >= 0 && h5tools_get_vfd_name(ret_value, used_fapl_id, drivername, drivername_size) < 0)
             H5TOOLS_ERROR(H5I_INVALID_HID, "failed to retrieve name of VFD used to open file");
 
     if (tmp_fapl_id >= 0)
