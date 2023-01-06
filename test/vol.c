@@ -2377,11 +2377,11 @@ error:
 static herr_t
 test_query_optional(void)
 {
-    hid_t fapl_id  = H5I_INVALID_HID;
-    hid_t file_id  = H5I_INVALID_HID;
-    hid_t group_id = H5I_INVALID_HID;
-    hid_t dtype_id = H5I_INVALID_HID;
-    char  filename[NAME_LEN];
+    hid_t    fapl_id  = H5I_INVALID_HID;
+    hid_t    file_id  = H5I_INVALID_HID;
+    hid_t    group_id = H5I_INVALID_HID;
+    hid_t    dtype_id = H5I_INVALID_HID;
+    char     filename[NAME_LEN];
     uint64_t supported = 0;
 
     TESTING("H5VLquery_optional");
@@ -2442,7 +2442,6 @@ error:
 
     return FAIL;
 } /* end test_query_optional() */
-
 
 /*-------------------------------------------------------------------------
  * Function:    main
