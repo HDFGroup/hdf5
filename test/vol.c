@@ -2408,7 +2408,7 @@ test_query_optional(void)
     if (H5Tcommit(file_id, "test_dtype", dtype_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
         TEST_ERROR;
 
-    /* Test H5VLquery_optional with a committed datatype where the assertion failur happened in the past */
+    /* Test H5VLquery_optional with a committed datatype where the assertion failure happened in the past */
     if (H5VLquery_optional(dtype_id, H5VL_SUBCLS_OBJECT, H5VL_NATIVE_OBJECT_GET_COMMENT, &supported) < 0)
         TEST_ERROR;
 
