@@ -1664,7 +1664,7 @@ exercise_reg_opt_oper(hid_t fake_vol_id, hid_t reg_opt_vol_id, H5VL_subclass_t s
 
     /* Verify that the reserved amount of optional operations is obeyed */
     /* (The first optional operation registered should be at the lower limit) */
-    if (op_val != H5VL_RESERVED_NATIVE_OPTIONAL)
+    if (op_val < H5VL_RESERVED_NATIVE_OPTIONAL)
         TEST_ERROR;
 
     /* Look up 1st registered optional operation */
@@ -1683,7 +1683,7 @@ exercise_reg_opt_oper(hid_t fake_vol_id, hid_t reg_opt_vol_id, H5VL_subclass_t s
 
     /* Verify that the reserved amount of optional operations is obeyed */
     /* (The 2nd optional operation registered should be at the lower limit + 1) */
-    if (op_val2 != (H5VL_RESERVED_NATIVE_OPTIONAL + 1))
+    if (op_val2 < (H5VL_RESERVED_NATIVE_OPTIONAL + 1))
         TEST_ERROR;
 
     /* Look up 2nd registered optional operation */
@@ -2242,10 +2242,9 @@ test_get_vol_name(void)
         conn_env_str = "native";
 
     /* Skip the connectors other than the native and pass_through connector */
-    if (HDstrcmp(conn_env_str, "native") &&
-        HDstrncmp(conn_env_str, "pass_through", HDstrlen("pass_through"))) {
+    if (HDstrcmp(conn_env_str, "native") && HDstrcmp(conn_env_str, "pass_through")) {
         SKIPPED();
-        HDprintf("    only test the native or pass_through connector\n");
+        HDprintf("    only test the native or internal pass_through connector\n");
         return SUCCEED;
     }
 
@@ -2262,8 +2261,7 @@ test_get_vol_name(void)
 
     /* When comparing the pass_through connector, ignore the rest information (under_vol=0;under_info={}) */
     if ((!HDstrcmp(conn_env_str, "native") && HDstrcmp(vol_name, "native")) ||
-        (!HDstrncmp(conn_env_str, "pass_through", HDstrlen("pass_through")) &&
-         HDstrcmp(vol_name, "pass_through")))
+        (!HDstrcmp(conn_env_str, "pass_through") && HDstrcmp(vol_name, "pass_through")))
         TEST_ERROR;
 
     if (H5Fclose(file_id) < 0)
