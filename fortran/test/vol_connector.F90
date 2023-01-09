@@ -235,7 +235,7 @@ PROGRAM vol_connector
   INTEGER :: error
   INTEGER :: ret_total_error
   LOGICAL :: cleanup, status
-  CHARACTER(LEN=12) :: VOL_CONNECTOR_ENV
+  CHARACTER(LEN=32) :: VOL_CONNECTOR_ENV
   INTEGER :: LEN = 0
   INTEGER :: CONN_NAME_LEN
 
