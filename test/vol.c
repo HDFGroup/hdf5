@@ -2405,7 +2405,7 @@ test_query_optional(void)
         TEST_ERROR;
 
     /* Commit the datatype into the file */
-    if (H5Tcommit(file_id, "test_dtype", dtype_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
+    if (H5Tcommit2(file_id, "test_dtype", dtype_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
         TEST_ERROR;
 
     /* Test H5VLquery_optional with a committed datatype where the assertion failure happened in the past */
