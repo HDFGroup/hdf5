@@ -75,6 +75,7 @@ Features:
 Dimension scales w/ new references: @DIMENSION_SCALES_WITH_NEW_REF@
                   Build HDF5 Tests: @HDF5_TESTS@
                   Build HDF5 Tools: @HDF5_TOOLS@
+                   Build GIF Tools: @HDF5_HL_GIF_TOOLS@
                       Threadsafety: @THREADSAFE@
                Default API mapping: @DEFAULT_API_VERSION@
     With deprecated public symbols: @DEPRECATED_SYMBOLS@

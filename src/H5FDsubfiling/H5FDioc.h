@@ -146,7 +146,7 @@ H5_DLL hid_t H5FD_ioc_init(void);
  *       If the two drivers differ in configuration settings, application behavior
  *       may not be as expected.
  *
- * \since 1.13.2
+ * \since 1.14.0
  *
  */
 H5_DLL herr_t H5Pset_fapl_ioc(hid_t fapl_id, H5FD_ioc_config_t *vfd_config);
@@ -170,7 +170,7 @@ H5_DLL herr_t H5Pset_fapl_ioc(hid_t fapl_id, H5FD_ioc_config_t *vfd_config);
  *          values and then calling H5Pset_fapl_ioc() with the configured
  *          H5FD_ioc_config_t structure.
  *
- * \since 1.13.2
+ * \since 1.14.0
  *
  */
 H5_DLL herr_t H5Pget_fapl_ioc(hid_t fapl_id, H5FD_ioc_config_t *config_out);

@@ -238,7 +238,7 @@ typedef herr_t (*H5D_gather_func_t)(const void *dst_buf, size_t dst_buf_bytes_us
  *          \li A negative (#H5_ITER_ERROR) causes the iterator to immediately
  *              return that value, indicating failure.
  */
-typedef int (*H5D_chunk_iter_op_t)(const hsize_t *offset, uint32_t filter_mask, haddr_t addr, uint32_t size,
+typedef int (*H5D_chunk_iter_op_t)(const hsize_t *offset, unsigned filter_mask, haddr_t addr, hsize_t size,
                                    void *op_data);
 //! <!-- [H5D_chunk_iter_op_t_snip] -->
 
@@ -694,7 +694,7 @@ H5_DLL herr_t H5Dget_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset, u
  * Iterate over all chunked datasets and chunks in a file.
  * \snippet H5D_examples.c H5Ovisit_cb
  *
- * \since 1.13.0
+ * \since 1.14.0
  *
  */
 H5_DLL herr_t H5Dchunk_iter(hid_t dset_id, hid_t dxpl_id, H5D_chunk_iter_op_t cb, void *op_data);
@@ -900,7 +900,7 @@ H5_DLL herr_t H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_
  *          parallel, each rank must pass exactly the same list of datasets in
  *          \p dset_id , though the other parameters may differ.
  *
- * \since 1.13.3
+ * \since 1.14.0
  *
  * \see H5Dread()
  *
@@ -1091,7 +1091,7 @@ H5_DLL herr_t H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid
  *          parallel, each rank must pass exactly the same list of datasets in
  *          \p dset_id , though the other parameters may differ.
  *
- * \since 1.13.3
+ * \since 1.14.0
  *
  * \see H5Dwrite()
  *

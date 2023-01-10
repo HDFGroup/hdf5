@@ -40,30 +40,34 @@
 /* Public Typedefs */
 /*******************/
 
-/* Asynchronous operation status */
+/**
+ * Asynchronous operation status
+ */
 typedef enum H5ES_status_t {
-    H5ES_STATUS_IN_PROGRESS, /* Operation(s) have not yet completed         */
-    H5ES_STATUS_SUCCEED,     /* Operation(s) have completed, successfully   */
-    H5ES_STATUS_CANCELED,    /* Operation(s) has been canceled              */
-    H5ES_STATUS_FAIL         /* An operation has completed, but failed      */
+    H5ES_STATUS_IN_PROGRESS, /**< Operation(s) have not yet completed         */
+    H5ES_STATUS_SUCCEED,     /**< Operation(s) have completed, successfully   */
+    H5ES_STATUS_CANCELED,    /**< Operation(s) has been canceled              */
+    H5ES_STATUS_FAIL         /**< An operation has completed, but failed      */
 } H5ES_status_t;
 
-/* Information about operations in an event set */
+/**
+ * Information about operations in an event set
+ */
 typedef struct H5ES_op_info_t {
     /* API call info */
-    const char *api_name; /* Name of HDF5 API routine called */
-    char       *api_args; /* "Argument string" for arguments to HDF5 API routine called */
+    const char *api_name; /**< Name of HDF5 API routine called */
+    char       *api_args; /**< "Argument string" for arguments to HDF5 API routine called */
 
     /* Application info */
-    const char *app_file_name; /* Name of source file where the HDF5 API routine was called */
-    const char *app_func_name; /* Name of function where the HDF5 API routine was called */
-    unsigned    app_line_num;  /* Line # of source file where the HDF5 API routine was called */
+    const char *app_file_name; /**< Name of source file where the HDF5 API routine was called */
+    const char *app_func_name; /**< Name of function where the HDF5 API routine was called */
+    unsigned    app_line_num;  /**< Line # of source file where the HDF5 API routine was called */
 
     /* Operation info */
-    uint64_t op_ins_count; /* Counter of operation's insertion into event set */
-    uint64_t op_ins_ts;    /* Timestamp for when the operation was inserted into the event set */
-    uint64_t op_exec_ts;   /* Timestamp for when the operation began execution */
-    uint64_t op_exec_time; /* Execution time for operation (in ns) */
+    uint64_t op_ins_count; /**< Counter of operation's insertion into event set */
+    uint64_t op_ins_ts;    /**< Timestamp for when the operation was inserted into the event set */
+    uint64_t op_exec_ts;   /**< Timestamp for when the operation began execution */
+    uint64_t op_exec_time; /**< Execution time for operation (in ns) */
 } H5ES_op_info_t;
 
 //! <!-- [H5ES_err_info_t_snip] -->
@@ -115,7 +119,14 @@ How to Trace Async Operations?
 
 */
 
+/**
+ * Callback for H5ESregister_insert_func()
+ */
 typedef int (*H5ES_event_insert_func_t)(const H5ES_op_info_t *op_info, void *ctx);
+
+/**
+ * Callback for H5ESregister_complete_func()
+ */
 typedef int (*H5ES_event_complete_func_t)(const H5ES_op_info_t *op_info, H5ES_status_t status,
                                           hid_t err_stack, void *ctx);
 
@@ -136,12 +147,12 @@ extern "C" {
  *
  * \brief Creates an event set
  *
- * \returns \hid_ti{event set}
+ * \returns \hid_t{event set}
  *
  * \details H5EScreate() creates a new event set and returns a corresponding
  *          event set identifier.
  *
- * \since 1.13.0
+ * \since 1.14.0
  *
  */
 H5_DLL hid_t H5EScreate(void);
@@ -174,7 +185,7 @@ H5_DLL hid_t H5EScreate(void);
  *          immediately if an operation fails. If a failure occurs, the value
  *          returned for the number of operations in progress may be inaccurate.
  *
- * \since 1.13.0
+ * \since 1.14.0
  *
  */
 H5_DLL herr_t H5ESwait(hid_t es_id, uint64_t timeout, size_t *num_in_progress, hbool_t *err_occurred);
@@ -192,7 +203,7 @@ H5_DLL herr_t H5ESwait(hid_t es_id, uint64_t timeout, size_t *num_in_progress, h
  * \details H5EScancel() attempts to cancel operations in an event set specified
  *          by \p es_id. H5ES_NONE is a valid value for \p es_id, but functions as a no-op.
  *
- * \since 1.13.0
+ * \since 1.14.0
  *
  */
 H5_DLL herr_t H5EScancel(hid_t es_id, size_t *num_not_canceled, hbool_t *err_occurred);
@@ -209,7 +220,7 @@ H5_DLL herr_t H5EScancel(hid_t es_id, size_t *num_not_canceled, hbool_t *err_occ
  * \details H5ESget_count() retrieves number of events in an event set specified
  *          by \p es_id.
  *
- * \since 1.13.0
+ * \since 1.14.0
  *
  */
 H5_DLL herr_t H5ESget_count(hid_t es_id, size_t *count);
@@ -230,7 +241,7 @@ H5_DLL herr_t H5ESget_count(hid_t es_id, size_t *count);
  *       for matching operations inserted into the event set with possible
  *       errors that occur.
  *
- * \since 1.13.0
+ * \since 1.14.0
  *
  */
 H5_DLL herr_t H5ESget_op_counter(hid_t es_id, uint64_t *counter);
@@ -248,7 +259,7 @@ H5_DLL herr_t H5ESget_op_counter(hid_t es_id, uint64_t *counter);
  * \details H5ESget_err_status() checks if event set specified by es_id has
  *          failed operations.
  *
- * \since 1.13.0
+ * \since 1.14.0
  *
  */
 H5_DLL herr_t H5ESget_err_status(hid_t es_id, hbool_t *err_occurred);
@@ -268,7 +279,7 @@ H5_DLL herr_t H5ESget_err_status(hid_t es_id, hbool_t *err_occurred);
  *          The function does not wait for active operations to complete, so
  *          count may not include all failures.
  *
- * \since 1.13.0
+ * \since 1.14.0
  *
  */
 H5_DLL herr_t H5ESget_err_count(hid_t es_id, size_t *num_errs);
@@ -292,13 +303,63 @@ H5_DLL herr_t H5ESget_err_count(hid_t es_id, size_t *num_errs);
  *          \snippet this H5ES_err_info_t_snip
  *          \click4more
  *
- * \since 1.13.0
+ * \since 1.14.0
  *
  */
 H5_DLL herr_t H5ESget_err_info(hid_t es_id, size_t num_err_info, H5ES_err_info_t err_info[],
                                size_t *err_cleared);
+/**
+ * \ingroup H5ES
+ *
+ * \brief Convenience routine to free an array of H5ES_err_info_t structs
+ *
+ * \param[in] num_err_info The number of elements in \p err_info array
+ * \param[in] err_info Array of structures
+ * \returns \herr_t
+ *
+ * \since 1.14.0
+ *
+ */
 H5_DLL herr_t H5ESfree_err_info(size_t num_err_info, H5ES_err_info_t err_info[]);
+
+/**
+ * \ingroup H5ES
+ *
+ * \brief Registers a callback to invoke when a new operation is inserted into
+ *        an event set
+ *
+ * \es_id
+ * \param[in] func The insert function to register
+ * \param[in] ctx User-specified information (context) to pass to \p func
+ * \returns \herr_t
+ *
+ * \details Only one insert callback can be registered for each event set.
+ *          Registering a new callback will replace the existing one.
+ *          H5ES_NONE is a valid value for 'es_id', but functions as a no-op
+ *
+ * \since 1.14.0
+ *
+ */
 H5_DLL herr_t H5ESregister_insert_func(hid_t es_id, H5ES_event_insert_func_t func, void *ctx);
+
+/**
+ * \ingroup H5ES
+ *
+ * \brief Registers a callback to invoke when an operation completes within an
+ *        event set
+ *
+ * \es_id
+ * \param[in] func The completion function to register
+ * \param[in] ctx User-specified information (context) to pass to \p func
+ * \returns \herr_t
+ *
+ * \details Only one complete callback can be registered for each event set.
+ *          Registering a new callback will replace the existing one.
+ *          H5ES_NONE is a valid value for 'es_id', but functions as a no-op
+ *
+ * \since 1.14.0
+ *
+ */
 H5_DLL herr_t H5ESregister_complete_func(hid_t es_id, H5ES_event_complete_func_t func, void *ctx);
 
 /**
@@ -311,7 +372,7 @@ H5_DLL herr_t H5ESregister_complete_func(hid_t es_id, H5ES_event_complete_func_t
  *
  * \details H5ESclose() terminates access to an event set specified by \p es_id.
  *
- * \since 1.13.0
+ * \since 1.14.0
  *
  */
 H5_DLL herr_t H5ESclose(hid_t es_id);
