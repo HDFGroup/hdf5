@@ -746,7 +746,7 @@ H5A_get_space(H5A_t *attr)
 
     /* Copy the attribute's dataspace */
     if (NULL == (ret_value = H5S_copy(attr->shared->ds, FALSE, TRUE)))
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, H5I_INVALID_HID, "unable to copy dataspace")
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "unable to copy dataspace")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2076,7 +2076,7 @@ H5A_attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_si
             /* Allocate background memory */
             if (H5T_path_bkg(tpath_src_mem) || H5T_path_bkg(tpath_mem_dst)) {
                 if (NULL == (bkg_buf = H5FL_BLK_CALLOC(attr_buf, buf_size)))
-                    HGOTO_ERROR(H5E_ATTR, H5E_CANTALLOC, FAIL, "memory allocation failed")
+                    HGOTO_ERROR(H5E_ATTR, H5E_CANTALLOC, NULL, "memory allocation failed")
             }
 
             /* Convert from source file to memory */
