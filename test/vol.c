@@ -2448,7 +2448,7 @@ test_info_to_str(void)
 {
     hid_t fapl_id  = H5I_INVALID_HID;
     hid_t vol_id   = H5I_INVALID_HID;
-    int   info     = 7;
+    int   info     = INT_MAX;
     char *ret_str  = NULL;
     int  *ret_info = NULL;
 
