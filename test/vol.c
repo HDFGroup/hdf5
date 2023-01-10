@@ -573,8 +573,8 @@ reg_opt_datatype_get(void H5_ATTR_UNUSED *obj, H5VL_datatype_get_args_t *args, h
 static herr_t
 fake_vol_info_to_str(const void *info, char **str)
 {
-    herr_t ret_value = SUCCEED; /* Return value */
-    const int val = *(const int *)info;
+    herr_t    ret_value = SUCCEED; /* Return value */
+    const int val       = *(const int *)info;
 
     /* Verify the info is correct before continuing */
     if (val != INT_MAX) {
