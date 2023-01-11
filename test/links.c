@@ -13733,7 +13733,7 @@ external_link_public_macros(hid_t fapl, hbool_t new_format)
     char        objname[NAME_BUF_SIZE]; /* Object name */
     char        filename1[NAME_BUF_SIZE];
     char        filename2[NAME_BUF_SIZE];
-    unsigned   *flags = NULL; /* External link flags, packed as a bitmap */
+    unsigned    flags;        /* External link flags, packed as a bitmap */
     const char *file;         /* File from external link */
     const char *path;         /* Path from external link */
 
@@ -13776,7 +13776,7 @@ external_link_public_macros(hid_t fapl, hbool_t new_format)
     }
     if (H5Lget_val(fid, "ext_link", objname, sizeof(objname), H5P_DEFAULT) < 0)
         TEST_ERROR;
-    if (H5Lunpack_elink_val(objname, linfo.u.val_size, flags, &file, &path) < 0)
+    if (H5Lunpack_elink_val(objname, linfo.u.val_size, &flags, &file, &path) < 0)
         TEST_ERROR;
     if (HDstrcmp(file, filename1) != 0) {
         H5_FAILED();
@@ -13790,7 +13790,7 @@ external_link_public_macros(hid_t fapl, hbool_t new_format)
     }
 
     /* External link version & flags */
-    if (*flags != ((H5L_EXT_VERSION << 4) | H5L_EXT_FLAGS_ALL)) {
+    if (flags != ((H5L_EXT_VERSION << 4) | H5L_EXT_FLAGS_ALL)) {
         H5_FAILED();
         HDputs("    External link version or flags are incorrect");
         goto error;
