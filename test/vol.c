@@ -2491,6 +2491,7 @@ test_info_to_str(void)
         TEST_ERROR;
 
     PASSED();
+
     return SUCCEED;
 
 error:
@@ -2501,14 +2502,87 @@ error:
     }
     H5E_END_TRY;
 
-    if (ret_str)
-        HDfree(ret_str);
-
-    if (ret_info)
-        HDfree(ret_info);
-
     return FAIL;
 } /* end test_info_to_str() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_query_optional
+ *
+ * Purpose:     Tests the bug fix (HDFFV-11208) that a committed datatype
+ *              triggered an assertion failure in H5VLquery_optional
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_query_optional(void)
+{
+    hid_t    fapl_id  = H5I_INVALID_HID;
+    hid_t    file_id  = H5I_INVALID_HID;
+    hid_t    group_id = H5I_INVALID_HID;
+    hid_t    dtype_id = H5I_INVALID_HID;
+    char     filename[NAME_LEN];
+    uint64_t supported = 0;
+
+    TESTING("H5VLquery_optional");
+
+    /* Retrieve the file access property for testing */
+    fapl_id = h5_fileaccess();
+
+    h5_fixname(FILENAME[0], fapl_id, filename, sizeof filename);
+
+    if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
+        TEST_ERROR;
+
+    if ((group_id = H5Gcreate2(file_id, "test_group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Test H5VLquery_optional with a group */
+    if (H5VLquery_optional(group_id, H5VL_SUBCLS_OBJECT, H5VL_NATIVE_OBJECT_GET_COMMENT, &supported) < 0)
+        TEST_ERROR;
+
+    if ((dtype_id = H5Tcopy(H5T_NATIVE_INT)) < 0)
+        TEST_ERROR;
+
+    /* Commit the datatype into the file */
+    if (H5Tcommit2(file_id, "test_dtype", dtype_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    /* Test H5VLquery_optional with a committed datatype where the assertion failure happened in the past */
+    if (H5VLquery_optional(dtype_id, H5VL_SUBCLS_OBJECT, H5VL_NATIVE_OBJECT_GET_COMMENT, &supported) < 0)
+        TEST_ERROR;
+
+    if (H5Gclose(group_id) < 0)
+        TEST_ERROR;
+
+    if (H5Tclose(dtype_id) < 0)
+        TEST_ERROR;
+
+    if (H5Fclose(file_id) < 0)
+        TEST_ERROR;
+
+    h5_delete_test_file(FILENAME[0], fapl_id);
+
+    if (H5Pclose(fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Gclose(group_id);
+        H5Tclose(dtype_id);
+        H5Fclose(file_id);
+        H5Pclose(fapl_id);
+    }
+    H5E_END_TRY;
+
+    return FAIL;
+} /* end test_query_optional() */
 
 /*-------------------------------------------------------------------------
  * Function:    main
@@ -2549,6 +2623,7 @@ main(void)
     nerrors += test_get_vol_name() < 0 ? 1 : 0;
     nerrors += test_wrap_register() < 0 ? 1 : 0;
     nerrors += test_info_to_str() < 0 ? 1 : 0;
+    nerrors += test_query_optional() < 0 ? 1 : 0;
 
     if (nerrors) {
         HDprintf("***** %d Virtual Object Layer TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
