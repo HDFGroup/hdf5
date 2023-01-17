@@ -125,6 +125,7 @@
 #include <direct.h>   /* For _getcwd() */
 #include <io.h>       /* POSIX I/O */
 #include <winsock2.h> /* For GetUserName() */
+#include <shlwapi.h>  /* For StrStrIA */
 
 #ifdef H5_HAVE_THREADSAFE
 #include <process.h> /* For _beginthread() */
