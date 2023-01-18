@@ -61,6 +61,8 @@ if (${HDF5_PACKAGE_NAME}_ENABLE_PARALLEL)
     set (${HDF5_PACKAGE_NAME}_MPI_Fortran_INCLUDE_PATH "@MPI_Fortran_INCLUDE_DIRS@")
     set (${HDF5_PACKAGE_NAME}_MPI_Fortran_LIBRARIES    "@MPI_Fortran_LIBRARIES@")
   endif ()
+
+  find_package(MPI QUIET REQUIRED)
 endif ()
 
 #-----------------------------------------------------------------------------
