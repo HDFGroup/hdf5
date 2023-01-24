@@ -74,6 +74,9 @@ foreach (example ${examples})
   endif ()
 endforeach ()
 
+#-- Adding F2003 examples
+if (HDF5_ENABLE_F2003)
+
 foreach (example ${F2003_examples})
   add_executable (f03_ex_${example} ${HDF5_F90_EXAMPLES_SOURCE_DIR}/${example}.f90)
   target_compile_options(f03_ex_${example} PRIVATE $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>)
@@ -114,6 +117,8 @@ foreach (example ${F2003_examples})
     )
   endif ()
 endforeach ()
+
+endif ()
 
 if (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
   add_executable (f90_ex_ph5example ${HDF5_F90_EXAMPLES_SOURCE_DIR}/ph5example.f90)
