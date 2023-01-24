@@ -74,7 +74,7 @@ foreach (example ${examples})
   endif ()
 endforeach ()
 
-#-- Adding test for fortranlib_test_F03
+#-- Adding F2003 examples
 if (HDF5_ENABLE_F2003)
 
 foreach (example ${F2003_examples})
