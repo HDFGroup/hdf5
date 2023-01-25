@@ -70,7 +70,8 @@
 #define H5D_BT2_MERGE_PERC        40
 
 /* Macro to determine if the layout I/O callback should perform I/O */
-#define H5D_LAYOUT_CB_PERFORM_IO(IO_INFO) (!(IO_INFO)->use_select_io || (IO_INFO)->count == 1)
+#define H5D_LAYOUT_CB_PERFORM_IO(IO_INFO)                                                                    \
+    (!(IO_INFO)->use_select_io || ((IO_INFO)->count == 1 && !(IO_INFO)->tconv_buf))
 
 /****************************/
 /* Package Private Typedefs */
@@ -269,7 +270,10 @@ typedef struct H5D_io_info_t {
     hbool_t                 use_select_io;       /* Whether to use selection I/O */
     uint8_t                *tconv_buf;           /* Datatype conv buffer */
     hbool_t                 tconv_buf_allocated; /* Whether the type conversion buffer was allocated */
-    size_t                  max_type_size;       /* Largest of all source and destination type sizes */
+    size_t max_tconv_type_size; /* Largest of all source and destination type sizes involved in type
+                                   conversion */
+    hbool_t
+        must_fill_bkg; /* Whether any datasets need a background buffer filled with destination contents */
 } H5D_io_info_t;
 
 /* Created to pass both at once for callback func */
@@ -623,12 +627,14 @@ H5_DLL herr_t H5D__select_write(const H5D_io_info_t *io_info, const H5D_dset_io_
 H5_DLL herr_t H5D_select_io_mem(void *dst_buf, H5S_t *dst_space, const void *src_buf, H5S_t *src_space,
                                 size_t elmt_size, size_t nelmts);
 
-/* Functions that perform scatter-gather serial I/O operations */
+/* Functions that perform scatter-gather I/O operations */
 H5_DLL herr_t H5D__scatter_mem(const void *_tscat_buf, H5S_sel_iter_t *iter, size_t nelmts, void *_buf);
 H5_DLL size_t H5D__gather_mem(const void *_buf, H5S_sel_iter_t *iter, size_t nelmts,
                               void *_tgath_buf /*out*/);
 H5_DLL herr_t H5D__scatgath_read(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info);
 H5_DLL herr_t H5D__scatgath_write(const H5D_io_info_t *io_info, const H5D_dset_io_info_t *dset_info);
+H5_DLL herr_t H5D__scatgath_read_select(H5D_io_info_t *io_info);
+H5_DLL herr_t H5D__scatgath_write_select(H5D_io_info_t *io_info);
 
 /* Functions that operate on dataset's layout information */
 H5_DLL herr_t H5D__layout_set_io_ops(const H5D_t *dataset);

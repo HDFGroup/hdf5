@@ -626,13 +626,16 @@ H5D__mpio_opt_possible(H5D_io_info_t *io_info)
         if (!H5FD_mpi_opt_types_g)
             local_cause[0] |= H5D_MPIO_MPI_OPT_TYPES_ENV_VAR_DISABLED;
 
-        /* Don't allow collective operations if datatype conversions need to happen */
-        if (!type_info->is_conv_noop)
-            local_cause[0] |= H5D_MPIO_DATATYPE_CONVERSION;
+        /* Datatype conversions and transformations are allowed with selection I/O */
+        if (!io_info->use_select_io) {
+            /* Don't allow collective operations if datatype conversions need to happen */
+            if (!type_info->is_conv_noop)
+                local_cause[0] |= H5D_MPIO_DATATYPE_CONVERSION;
 
-        /* Don't allow collective operations if data transform operations should occur */
-        if (!type_info->is_xform_noop)
-            local_cause[0] |= H5D_MPIO_DATA_TRANSFORMS;
+            /* Don't allow collective operations if data transform operations should occur */
+            if (!type_info->is_xform_noop)
+                local_cause[0] |= H5D_MPIO_DATA_TRANSFORMS;
+        }
 
         /* Check whether these are both simple or scalar dataspaces */
         if (!((H5S_SIMPLE == H5S_GET_EXTENT_TYPE(mem_space) ||

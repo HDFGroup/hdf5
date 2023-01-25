@@ -757,18 +757,15 @@ H5D__contig_may_use_select_io(const H5D_io_info_t *io_info, const H5D_dset_io_in
 
     dataset = dset_info->dset;
 
-    /* Don't use selection I/O if it's globally disabled, if there is a type
-     * conversion, or if it's not a contiguous dataset, or if the sieve buffer
-     * exists (write) or is dirty (read) */
-    if (dset_info->io_ops.single_read != H5D__select_read ||
-        dset_info->layout_ops.readvv != H5D__contig_readvv ||
+    /* Don't use selection I/O if it's globally disabled, if it's not a contiguous dataset, or if the sieve
+     * buffer exists (write) or is dirty (read) */
+    if (dset_info->layout_ops.readvv != H5D__contig_readvv ||
         (op_type == H5D_IO_OP_READ && dataset->shared->cache.contig.sieve_dirty) ||
         (op_type == H5D_IO_OP_WRITE && dataset->shared->cache.contig.sieve_buf))
         ret_value = FALSE;
     else {
         hbool_t page_buf_enabled;
 
-        HDassert(dset_info->io_ops.single_write == H5D__select_write);
         HDassert(dset_info->layout_ops.writevv == H5D__contig_writevv);
 
         /* Check if the page buffer is enabled */
@@ -841,6 +838,8 @@ H5D__contig_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
                 io_info->addrs[io_info->pieces_added]         = dinfo->store->contig.dset_addr;
                 io_info->element_sizes[io_info->pieces_added] = dinfo->type_info.src_type_size;
                 io_info->rbufs[io_info->pieces_added]         = dinfo->buf.vp;
+                if (io_info->sel_pieces)
+                    io_info->sel_pieces[io_info->pieces_added] = dinfo->layout_io_info.contig_piece_info;
                 io_info->pieces_added++;
             }
         }
@@ -911,6 +910,8 @@ H5D__contig_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dinfo)
                 io_info->addrs[io_info->pieces_added]         = dinfo->store->contig.dset_addr;
                 io_info->element_sizes[io_info->pieces_added] = dinfo->type_info.dst_type_size;
                 io_info->wbufs[io_info->pieces_added]         = dinfo->buf.cvp;
+                if (io_info->sel_pieces)
+                    io_info->sel_pieces[io_info->pieces_added] = dinfo->layout_io_info.contig_piece_info;
                 io_info->pieces_added++;
             }
         }
