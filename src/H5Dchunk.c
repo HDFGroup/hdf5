@@ -2750,6 +2750,8 @@ H5D__chunk_read(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
                     io_info->addrs[io_info->pieces_added]         = udata.chunk_block.offset;
                     io_info->element_sizes[io_info->pieces_added] = element_sizes[0];
                     io_info->rbufs[io_info->pieces_added]         = bufs[0];
+                    if (io_info->sel_pieces)
+                        io_info->sel_pieces[io_info->pieces_added] = chunk_info;
                     io_info->pieces_added++;
                 }
             } /* end if */
@@ -3140,6 +3142,8 @@ H5D__chunk_write(H5D_io_info_t *io_info, H5D_dset_io_info_t *dset_info)
                     io_info->addrs[io_info->pieces_added]         = udata.chunk_block.offset;
                     io_info->element_sizes[io_info->pieces_added] = element_sizes[0];
                     io_info->wbufs[io_info->pieces_added]         = bufs[0];
+                    if (io_info->sel_pieces)
+                        io_info->sel_pieces[io_info->pieces_added] = chunk_info;
                     io_info->pieces_added++;
                 }
             } /* end else */
