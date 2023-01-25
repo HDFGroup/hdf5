@@ -768,7 +768,7 @@ H5D__scatgath_read_select(H5D_io_info_t *io_info)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate memory iterator")
 
     /* Allocate list of block memory spaces */
-    /*!FIXME delay doing this until we find the first mem space that is non-contiguous or doesnt' start at 0 */
+    /*!FIXME delay doing this until we find the first mem space that is non-contiguous or doesn't start at 0 */
     if (NULL == (tmp_mem_spaces = H5MM_malloc(io_info->pieces_added * sizeof(H5S_t *))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for temporary memory space list")
 
@@ -914,7 +914,7 @@ done:
     if (tmp_mem_spaces) {
         for (i = 0; i < io_info->pieces_added; i++)
             if (tmp_mem_spaces[i] != io_info->mem_spaces[i] && tmp_mem_spaces[i] && H5S_close(tmp_mem_spaces[i]) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "Can't clsoe dataspace")
+                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "Can't close dataspace")
         H5MM_free(tmp_mem_spaces);
         tmp_mem_spaces = NULL;
     }
@@ -971,7 +971,7 @@ H5D__scatgath_write_select(H5D_io_info_t *io_info)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate memory iterator")
 
     /* Allocate list of block memory spaces */
-    /*!FIXME delay doing this until we find the first mem space that is non-contiguous or doesnt' start at 0 */
+    /*!FIXME delay doing this until we find the first mem space that is non-contiguous or doesn't start at 0 */
     if (NULL == (write_mem_spaces = H5MM_malloc(io_info->pieces_added * sizeof(H5S_t *))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "memory allocation failed for temporary memory space list")
 
@@ -1050,7 +1050,7 @@ H5D__scatgath_write_select(H5D_io_info_t *io_info)
                 if (H5T_BKG_YES == dset_info->type_info.need_bkg) {
                     HDassert(io_info->must_fill_bkg);
 
-                    /* Allocate arryas of parameters for selection read to background buffer if necessary */
+                    /* Allocate arrays of parameters for selection read to background buffer if necessary */
                     if (!bkg_mem_spaces) {
                         HDassert(!bkg_file_spaces && !bkg_addrs && !bkg_element_sizes && !bkg_bufs);
                         if (NULL == (bkg_mem_spaces = H5MM_malloc(io_info->pieces_added * sizeof(H5S_t *))))
@@ -1123,7 +1123,7 @@ H5D__scatgath_write_select(H5D_io_info_t *io_info)
         if (H5F_shared_select_read(io_info->f_sh, H5FD_MEM_DRAW, (uint32_t)bkg_pieces,
                                    bkg_mem_spaces, bkg_file_spaces, bkg_addrs,
                                    bkg_element_sizes, bkg_bufs) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "selection read to backgroudn buffer failed")
+            HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "selection read to background buffer failed")
 
         /* Perform type conversion on pieces with background buffers that were just read */
         for (i = 0; i < io_info->pieces_added; i++) {
@@ -1189,7 +1189,7 @@ done:
         for (i = 0; i < spaces_added; i++) {
             HDassert(write_mem_spaces[i]);
             if (write_mem_spaces[i] != io_info->mem_spaces[i] && H5S_close(write_mem_spaces[i]) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "Can't clsoe dataspace")
+                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "Can't close dataspace")
         }
         H5MM_free(write_mem_spaces);
         write_mem_spaces = NULL;
