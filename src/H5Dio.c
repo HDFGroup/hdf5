@@ -356,7 +356,8 @@ H5D__read(size_t count, H5D_dset_io_info_t *dset_info)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                             "memory allocation failed for read buffer list")
             if (io_info.tconv_buf)
-                if (NULL == (io_info.sel_pieces = H5MM_malloc(io_info.piece_count * sizeof(io_info.sel_pieces[0]))))
+                if (NULL ==
+                    (io_info.sel_pieces = H5MM_malloc(io_info.piece_count * sizeof(io_info.sel_pieces[0]))))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                 "unable to allocate array of selected pieces")
         }
@@ -741,7 +742,8 @@ H5D__write(size_t count, H5D_dset_io_info_t *dset_info)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                             "memory allocation failed for write buffer list")
             if (io_info.tconv_buf)
-                if (NULL == (io_info.sel_pieces = H5MM_malloc(io_info.piece_count * sizeof(io_info.sel_pieces[0]))))
+                if (NULL ==
+                    (io_info.sel_pieces = H5MM_malloc(io_info.piece_count * sizeof(io_info.sel_pieces[0]))))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                 "unable to allocate array of selected pieces")
         }
@@ -1074,7 +1076,7 @@ H5D__typeinfo_init_phase2(H5D_io_info_t *io_info)
     /* Check if we need to allocate a shared type conversion buffer */
     if (io_info->max_tconv_type_size) {
         H5FD_mpio_xfer_t xfer_mode; /* Parallel transfer for this request */
-        size_t i; /* Local index variable */
+        size_t           i;         /* Local index variable */
 
         /* Get the original state of parallel I/O transfer mode */
         if (H5CX_get_io_xfer_mode(&xfer_mode) < 0)
@@ -1098,12 +1100,16 @@ H5D__typeinfo_init_phase2(H5D_io_info_t *io_info)
                 if (!type_info->is_conv_noop || !type_info->is_xform_noop) {
                     /* Calculate location and size of this dataset's portion of the global type
                      * conversion buffer */
-                    tconv_buf_size += io_info->dsets_info[i].nelmts * MAX(type_info->src_type_size, type_info->dst_type_size);
+                    tconv_buf_size += io_info->dsets_info[i].nelmts *
+                                      MAX(type_info->src_type_size, type_info->dst_type_size);
 
                     /* Allocate background buffer, if necessary */
                     if (type_info->need_bkg) {
-                        if (NULL == (type_info->bkg_buf = H5FL_BLK_CALLOC(type_conv, io_info->dsets_info[i].nelmts * type_info->dst_type_size)))
-                            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion")
+                        if (NULL ==
+                            (type_info->bkg_buf = H5FL_BLK_CALLOC(type_conv, io_info->dsets_info[i].nelmts *
+                                                                                 type_info->dst_type_size)))
+                            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                                        "memory allocation failed for type conversion")
                         type_info->bkg_buf_allocated = TRUE;
 
                         /* Check if we need to fill the background buffer with the destination contents */
@@ -1120,7 +1126,8 @@ H5D__typeinfo_init_phase2(H5D_io_info_t *io_info)
              * keeping track of which version of free() to call. -NAF */
             if (tconv_buf_size > 0) {
                 if (NULL == (io_info->tconv_buf = H5FL_BLK_MALLOC(type_conv, tconv_buf_size)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion")
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                                "memory allocation failed for type conversion")
                 io_info->tconv_buf_allocated = TRUE;
             }
         }
@@ -1142,19 +1149,20 @@ H5D__typeinfo_init_phase2(H5D_io_info_t *io_info)
             if (H5CX_get_tconv_buf(&tconv_buf) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve temp. conversion buffer pointer")
             if (H5CX_get_bkgr_buf(&bkgr_buf) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve background conversion buffer pointer")
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
+                            "can't retrieve background conversion buffer pointer")
 
             /* Set up datatype conversion/background buffers */
             target_size = max_temp_buf;
 
-            /* If the buffer is too small to hold even one element (in the dataset with the largest , try to make
-             * it bigger */
+            /* If the buffer is too small to hold even one element (in the dataset with the largest , try to
+             * make it bigger */
             if (target_size < io_info->max_tconv_type_size) {
                 hbool_t default_buffer_info; /* Whether the buffer information are the defaults */
 
                 /* Detect if we have all default settings for buffers */
-                default_buffer_info =
-                    (hbool_t)((H5D_TEMP_BUF_SIZE == max_temp_buf) && (NULL == tconv_buf) && (NULL == bkgr_buf));
+                default_buffer_info = (hbool_t)((H5D_TEMP_BUF_SIZE == max_temp_buf) && (NULL == tconv_buf) &&
+                                                (NULL == bkgr_buf));
 
                 /* Check if we are using the default buffer info */
                 if (default_buffer_info)
@@ -1173,7 +1181,8 @@ H5D__typeinfo_init_phase2(H5D_io_info_t *io_info)
             if (NULL == (io_info->tconv_buf = (uint8_t *)tconv_buf)) {
                 /* Allocate temporary buffer */
                 if (NULL == (io_info->tconv_buf = H5FL_BLK_MALLOC(type_conv, target_size)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for type conversion")
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL,
+                                "memory allocation failed for type conversion")
                 io_info->tconv_buf_allocated = TRUE;
             } /* end if */
 
@@ -1187,7 +1196,8 @@ H5D__typeinfo_init_phase2(H5D_io_info_t *io_info)
                 H5D_type_info_t *type_info = &io_info->dsets_info[i].type_info;
 
                 /* Compute the number of elements that will fit into buffer */
-                type_info->request_nelmts = target_size / MAX(type_info->src_type_size, type_info->dst_type_size);
+                type_info->request_nelmts =
+                    target_size / MAX(type_info->src_type_size, type_info->dst_type_size);
                 ;
 
                 /* Sanity check elements in temporary buffer */

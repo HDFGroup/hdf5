@@ -757,8 +757,8 @@ H5D__contig_may_use_select_io(const H5D_io_info_t *io_info, const H5D_dset_io_in
 
     dataset = dset_info->dset;
 
-    /* Don't use selection I/O if it's globally disabled, if it's not a contiguous dataset, or if the sieve buffer
-     * exists (write) or is dirty (read) */
+    /* Don't use selection I/O if it's globally disabled, if it's not a contiguous dataset, or if the sieve
+     * buffer exists (write) or is dirty (read) */
     if (dset_info->layout_ops.readvv != H5D__contig_readvv ||
         (op_type == H5D_IO_OP_READ && dataset->shared->cache.contig.sieve_dirty) ||
         (op_type == H5D_IO_OP_WRITE && dataset->shared->cache.contig.sieve_buf))

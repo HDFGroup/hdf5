@@ -70,7 +70,7 @@
 #define H5D_BT2_MERGE_PERC        40
 
 /* Macro to determine if the layout I/O callback should perform I/O */
-#define H5D_LAYOUT_CB_PERFORM_IO(IO_INFO) \
+#define H5D_LAYOUT_CB_PERFORM_IO(IO_INFO)                                                                    \
     (!(IO_INFO)->use_select_io || ((IO_INFO)->count == 1 && !(IO_INFO)->tconv_buf))
 
 /****************************/
@@ -270,8 +270,10 @@ typedef struct H5D_io_info_t {
     hbool_t                 use_select_io;       /* Whether to use selection I/O */
     uint8_t                *tconv_buf;           /* Datatype conv buffer */
     hbool_t                 tconv_buf_allocated; /* Whether the type conversion buffer was allocated */
-    size_t                  max_tconv_type_size; /* Largest of all source and destination type sizes involved in type conversion */
-    hbool_t                 must_fill_bkg;       /* Whether any datasets need a background buffer filled with destination contents */
+    size_t max_tconv_type_size; /* Largest of all source and destination type sizes involved in type
+                                   conversion */
+    hbool_t
+        must_fill_bkg; /* Whether any datasets need a background buffer filled with destination contents */
 } H5D_io_info_t;
 
 /* Created to pass both at once for callback func */
