@@ -93,8 +93,8 @@ if (H5_HAVE_PARALLEL AND HDF5_TEST_PARALLEL AND NOT WIN32)
         -D "TEST_ARGS:STRING="
         -D "TEST_EXPECT=0"
         -D "TEST_OUTPUT=ph5example.out"
-        -D "TEST_REFERENCE:STRING=PHDF5 tests finished with no errors"
-        -D "TEST_FILTER:STRING=PHDF5 tests finished with no errors"
+        -D "TEST_REFERENCE:STRING=PHDF5 example finished with no errors"
+        #-D "TEST_FILTER:STRING=PHDF5 tests finished with no errors"
         -D "TEST_FOLDER=${PROJECT_BINARY_DIR}"
         -P "${HDF_RESOURCES_EXT_DIR}/grepTest.cmake"
     )
