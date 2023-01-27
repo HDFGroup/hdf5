@@ -136,11 +136,11 @@ extern "C" {
 /**
  * For pre-releases like \c snap0. Empty string for official releases.
  */
-#define H5_VERS_SUBRELEASE "1"
+#define H5_VERS_SUBRELEASE ""
 /**
  * Full version string
  */
-#define H5_VERS_INFO "HDF5 library version: 1.8.23-1"
+#define H5_VERS_INFO "HDF5 library version: 1.8.23"
 
 #define H5check() H5check_version(H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE)
 
