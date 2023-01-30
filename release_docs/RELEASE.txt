@@ -35,7 +35,7 @@ CONTENTS
 ========
 
 - New Features
-- Support for New platforms and languages
+- Support for New Platforms and Languages
 - Bug Fixes since HDF5-1.8.22
 - Platforms Tested
 - Known Problems
@@ -111,32 +111,6 @@ New Features
 
       (barcode - 2021/03/22)
 
-    - On macOS, Universal Binaries can now be built, allowing native execution on
-      both Intel and Apple Silicon (ARM) based Macs.
-
-      To do so, set CMAKE_OSX_ARCHITECTURES="x86_64;arm64"
-
-      (SAM - 2021/02/07, https://github.com/HDFGroup/hdf5/issues/311)
-
-    - Added a configure-time option to control certain compiler warnings
-      diagnostics
-
-      A new configure-time option was added that allows some compiler warnings
-      diagnostics to have the default operation. This is mainly intended for
-      library developers and currently only works for gcc 10 and above. The
-      diagnostics flags apply to C, C++ and Fortran compilers and will appear
-      in "H5 C Flags", H5 C++ Flags" and H5 Fortran Flags, respectively. They
-      will NOT be exported to h5cc, etc.
-
-      The default is OFF, which will disable the warnings URL and color attributes
-      for the warnings output. ON will not add the flags and allow default behavior.
-
-      Autotools:    --enable-diags
-
-      CMake:        HDF5_ENABLE_BUILD_DIAGS
-
-      (ADB - 2021/02/05, HDFFV-11213)
-
     - FreeBSD Autotools configuration now defaults to 'cc' and 'c++' compilers
 
       On FreeBSD, the autotools defaulted to 'gcc' as the C compiler and did
@@ -185,6 +159,31 @@ New Features
       CMake:        HDF5_ENABLE_WARNINGS_AS_ERRORS
 
       (DER - 2021/02/16, HDFFV-11189)
+    - On macOS, Universal Binaries can now be built, allowing native execution on
+      both Intel and Apple Silicon (ARM) based Macs.
+
+      To do so, set CMAKE_OSX_ARCHITECTURES="x86_64;arm64"
+
+      (SAM - 2021/02/07, https://github.com/HDFGroup/hdf5/issues/311)
+
+    - Added a configure-time option to control certain compiler warnings
+      diagnostics
+
+      A new configure-time option was added that allows some compiler warnings
+      diagnostics to have the default operation. This is mainly intended for
+      library developers and currently only works for gcc 10 and above. The
+      diagnostics flags apply to C, C++ and Fortran compilers and will appear
+      in "H5 C Flags", H5 C++ Flags" and H5 Fortran Flags, respectively. They
+      will NOT be exported to h5cc, etc.
+
+      The default is OFF, which will disable the warnings URL and color attributes
+      for the warnings output. ON will not add the flags and allow default behavior.
+
+      Autotools:    --enable-diags
+
+      CMake:        HDF5_ENABLE_BUILD_DIAGS
+
+      (ADB - 2021/02/05, HDFFV-11213)
 
 
     Library:
@@ -206,16 +205,6 @@ New Features
       newly allocated buffers.
 
       (MSB - 2021/08/30, github-826,972)
-
-
-    C++ Library:
-    ------------
-    -
-
-
-    Parallel Library:
-    ----------------
-    - None
 
 
     Tools:
@@ -240,22 +229,6 @@ New Features
       (ADB - 2021/02/16, HDFFV-9984)
 
 
-    High-Level APIs:
-    ---------------
-    - None
-
-
-    Documentation
-    -------------
-    - None
-
-
-Support for New Platforms, Languages, and Compilers
-===================================================
-    - None
-
-
-
 Bug Fixes since HDF5-1.8.22
 ===========================
 
@@ -268,13 +241,14 @@ Bug Fixes since HDF5-1.8.22
       fixes the issue
 
       (ADB - 2022/12/06 HDFFV-11355)
+
     - Move MPI libraries link from PRIVATE to PUBLIC
 
       The install dependencies were not including the need for MPI libraries when
       an application or library was built with the C library. Also updated the
       CMake target link command to use the newer style MPI::MPI_C link variable.
 
-      (ADB - 2022/20/27)
+      (ADB - 2022/10/27)
 
     - Reworked corrected path searched by CMake find_package command
 
@@ -402,12 +376,6 @@ Bug Fixes since HDF5-1.8.22
       (ADB - 2022/03/11, #1438)
 
 
-
-    Performance
-    -----------
-    - None
-
-
     Tools
     -----
     - Changed how h5dump and h5ls identify long double.
@@ -479,31 +447,16 @@ Bug Fixes since HDF5-1.8.22
       (KY -2021/02/16, HDFFV-11014)
 
 
-    Fortran API
-    -----------
-    - None
-
-
-    C++ API
-    -------
-    - None
-
-
-    High-Level APIs:
-    ---------------
-    - None
-
-
     Packet Table APIs:
     ------------------
     - Fixed HL_test_packet, test for packet table vlen of vlen.
 
       Incorrect length assignment.
 
-        (ADB - 2021/10/14)
+      (ADB - 2021/10/14)
 
 
-Support for new platforms and languages
+Support for New Platforms and Languages
 =======================================
     - Added support for IBM Power 8 GNU/Linux 3.10.0 ppc64be with GCC 4.8.5,
           xlc/xlC 13.1 and xlf 15.1
@@ -511,13 +464,14 @@ Support for new platforms and languages
           clang 14.0.0
     - Added support for CentOS8 GNU/Linux 4.18.0-348.7.1.el8_5 with GCC 8.5.0,
           clang 12.0.1
-    - Added support for macOS Apple M1 11.6 with Apple clang 12.0.5, GNU Fortran 11.1.0,
-          Intel icc/icpc/ifort 2021.3.0
-    - Added support for macOS Big Sur 11.3.1 with Apple clang 12.0.5, GNU Fortran 10.2.0,
-          Intel icc/icpc/ifort version 2021.2.0
+    - Added support for macOS Apple M1 11.6 with Apple clang 12.0.5,
+          GNU Fortran 11.1.0, Intel icc/icpc/ifort 2021.3.0
+    - Added support for macOS Big Sur 11.3.1 with Apple clang 12.0.5,
+          GNU Fortran 10.2.0, Intel icc/icpc/ifort version 2021.2.0
     - Added support for Visual Studio 2022 w/ clang 15.0.1 
           with MSVC-like command-line (C/C++ only - cmake),
           Intel C/C++/Fortran oneAPI 2022 (cmake)
+
 
 Platforms Tested
 ================
@@ -615,16 +569,6 @@ Platforms Tested
 
 Known Problems
 ==============
-    HDF5-1.8.22 binaries can replace the previous HDF5 version to run with
-    applications compiled and linked with HDF5-1.8.21 and possibly HDF5 versions
-    as early as 1.8.15.  However, HDF5 checks versions in lib files against
-    versions in header files used to compile the application and will cause the
-    application to abort when they do not match.  An environment variable
-    HDF5_DISABLE_VERSION_CHECK can be set to 2 to skip the check, to 1 to warn
-    but not abort, or to 0 for the default behavior, aborting when the HDF5
-    version in the lib files does not match the version in the header files.
-    LRK - 2020/02/02
-
     CMake files do not behave correctly with paths containing spaces.
     Do not use spaces in paths because the required escaping for handling spaces
     results in very complex and fragile build files.
@@ -635,12 +579,6 @@ Known Problems
     With autotools on CYGWIN this results in build errors, and we have not
     found a solution that satisfies both.  Therefore the dynamically loaded
     plugin tests have been disabled on CYGWIN.
-
-    Mac OS X 10.13 added additional subdirectory structure in .libs for shared
-    libraries.  Consequently "make check" will fail testing java and dynamically
-    loaded plugin test libraries attempting to copy files from the previous
-    locations in .libs directories.  This will be addressed in the next release
-    when support for the Mac OS X 10.13 platform is added.
 
     CPP ptable test fails on both VS2017 and VS2019 with Intel compiler, JIRA
     issue: HDFFV-10628.  This test will pass with VS2015 with Intel compiler.
