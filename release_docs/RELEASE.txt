@@ -1,4 +1,4 @@
-HDF5 version 1.8.23-1 currently under development
+HDF5 version 1.8.24-1 currently under development
 ================================================================================
 
 
@@ -36,7 +36,7 @@ CONTENTS
 
 - New Features
 - Support for New Platforms and Languages
-- Bug Fixes since HDF5-1.8.22
+- Bug Fixes since HDF5-1.8.23
 - Supported Platforms
 - Supported Configuration Features Summary
 - More Tested Platforms
@@ -49,186 +49,22 @@ New Features
 
     Configuration:
     -------------
-    - Add new CMake configuration variable HDF5_USE_GNU_DIRS
-
-      HDF5_USE_GNU_DIRS (default OFF) selects the use of GNU Coding Standard install
-      directory variables by including the CMake module, GNUInstallDirs(see CMake
-      documentation for details). The HDF_DIR_PATHS macro in the HDFMacros.cmake file
-      sets various PATH variables for use during the build, test and install processes.
-      By default, the historical settings for these variables will be used.
-
-      (ADB - 2022/10/21, GH-2175, GH-1716)
-
-    - Correct the usage of CMAKE_Fortran_MODULE_DIRECTORY and where to
-      install Fortran mod files.
-
-      The Fortran modules files, ending in .mod are files describing a
-      Fortran 90 (and above) module API and ABI. These are not like C
-      header files describing an API, they are compiler dependent and
-      arch dependent, and not easily readable by a human being. They are
-      nevertheless searched for in the includes directories by gfortran
-      (in directories specified with -I).
-
-      Autotools configure uses the -fmoddir option to specify the folder.
-      CMake will use "mod" folder by default unless overridden by the CMake
-      variable; HDF5_INSTALL_MODULE_DIR.
-
-      (ADB - 2022/07/21)
-
-    - Added new option to the h5cc scripts produced by CMake.
-
-      Add -showconfig option to h5cc scripts to cat the 
-      libhdf5-settings to the standard output.
-
-      (ADB - 2022/03/11)
-
-    - Changed autotools and CMake configurations to derive both
-      compilation warnings-as-errors and warnings-only-warn configurations
-      from the same files, 'config/*/*error*'.  Removed redundant files
-      'config/*/*noerror*'.
-
-      (DCY - 2021/09/29)
-
-    - Added new option to control the build of High-Level tools
-      that default ON/enabled.
-
-      Add configure options (autotools - CMake):
-            enable-hltools       HDF5_BUILD_HL_TOOLS
-
-      (ADB - 2021/09/16, HDFFV-11266)
-
-    - CMake no longer builds the C++ library by default
-
-      HDF5_BUILD_CPP_LIB now defaults to OFF, which is in line with the
-      Autotools build defaults.
-
-      (DER - 2021/04/20)
-
-    - Add CMake variable HDF5_LIB_INFIX
-
-      This infix is added to all library names after 'hdf5'.
-      e.g. the infix '_openmpi' results in the library name 'libhdf5_openmpi.so'
-      This name is used in packages on debian based systems.
-      (see https://packages.debian.org/jessie/amd64/libhdf5-openmpi-8/filelist)
-
-      (barcode - 2021/03/22)
-
-    - FreeBSD Autotools configuration now defaults to 'cc' and 'c++' compilers
-
-      On FreeBSD, the autotools defaulted to 'gcc' as the C compiler and did
-      not process C++ options. Since FreeBSD 10, the default compiler has
-      been clang (via 'cc').
-
-      The default compilers have been set to 'cc' for C and 'c++' for C++,
-      which will pick up clang and clang++ respectively on FreeBSD 10+.
-      Additionally, clang options are now set correctly for both C and C++
-      and g++ options will now be set if that compiler is being used (an
-      omission from the former functionality).
-
-      (DER - 2021/02/16, HDFFV-11193)
-
-    - Fixed POSIX problems when building w/ gcc on Solaris
-
-      When building on Solaris using gcc, the POSIX symbols were not
-      being set correctly, which could lead to issues like clock_gettime()
-      not being found.
-
-      The standard is now set to gnu99 when building with gcc on Solaris,
-      which allows POSIX things to be #defined and linked correctly. This
-      differs slightly from the gcc norm, where we set the standard to c99
-      and manually set POSIX #define symbols.
-
-      (DER - 2021/02/16, HDFFV-11191)
-
-    - Added a configure-time option to consider certain compiler warnings
-      as errors
-
-      A new configure-time option was added that converts some compiler warnings
-      to errors. This is mainly intended for library developers and currently
-      only works for gcc and clang. The warnings that are considered errors
-      will appear in the generated libhdf5.settings file. These warnings apply
-      to C and C++ code and will appear in "H5 C Flags" and H5 C++ Flags",
-      respectively. They will NOT be exported to h5cc, etc.
-
-      The default is OFF. Building with this option may fail when compiling
-      on operating systems and with compiler versions not commonly used by
-      the library developers. Compilation may also fail when headers not
-      under the control of the library developers (e.g., mpi.h, hdfs.h) raise
-      warnings.
-
-      Autotools:    --enable-warnings-as-errors
-
-      CMake:        HDF5_ENABLE_WARNINGS_AS_ERRORS
-
-      (DER - 2021/02/16, HDFFV-11189)
-    - On macOS, Universal Binaries can now be built, allowing native execution on
-      both Intel and Apple Silicon (ARM) based Macs.
-
-      To do so, set CMAKE_OSX_ARCHITECTURES="x86_64;arm64"
-
-      (SAM - 2021/02/07, https://github.com/HDFGroup/hdf5/issues/311)
-
-    - Added a configure-time option to control certain compiler warnings
-      diagnostics
-
-      A new configure-time option was added that allows some compiler warnings
-      diagnostics to have the default operation. This is mainly intended for
-      library developers and currently only works for gcc 10 and above. The
-      diagnostics flags apply to C, C++ and Fortran compilers and will appear
-      in "H5 C Flags", H5 C++ Flags" and H5 Fortran Flags, respectively. They
-      will NOT be exported to h5cc, etc.
-
-      The default is OFF, which will disable the warnings URL and color attributes
-      for the warnings output. ON will not add the flags and allow default behavior.
-
-      Autotools:    --enable-diags
-
-      CMake:        HDF5_ENABLE_BUILD_DIAGS
-
-      (ADB - 2021/02/05, HDFFV-11213)
+    -
 
 
     Library:
     --------
-    - H5Epush_ret() now requires a trailing semi-colon
-
-        H5Epush_ret() is a function-like macro that has been changed to
-        contain a `do {} while(0)` loop. Consequently, a trailing semi-colon
-        is now required to end the `while` statement. Previously, a trailing
-        semi would work, but was not mandatory. This change was made to allow
-        clang-format to correctly format the source code.
-
-        (SAM - 2021/03/03)
+    - 
 
 
     Fortran Library:
     ----------------
-    - H5Fget_name_f fixed to handle correctly trailing whitespaces and
-      newly allocated buffers.
-
-      (MSB - 2021/08/30, github-826,972)
+    -
 
 
     Tools:
     ------
-    - h5repack added help text for user-defined filters.
-
-        Added help text line that states the valid values of the filter flag
-        for user-defined filters;
-            filter_flag: 1 is OPTIONAL or 0 is MANDATORY
-
-        (ADB - 2021/02/16, HDFFV-11099)
-
-    - h5repack added options to control how external links are handled.
-
-      Currently h5repack preserves external links and cannot copy and merge
-      data from the external files. Two options, merge and prune, were added to
-      control how to merge data from an external link into the resulting file.
-       --merge             Follow external soft link recursively and merge data.
-       --prune             Do not follow external soft links and remove link.
-       --merge --prune     Follow external link, merge data and remove dangling link.
-
-      (ADB - 2021/02/16, HDFFV-9984)
+    -
 
 
 Bug Fixes since HDF5-1.8.22
@@ -236,243 +72,31 @@ Bug Fixes since HDF5-1.8.22
 
     Configuration
     -------------
-    - Change the settings of the *pc files to use the correct format
-
-      The pkg-config files generated by CMake uses incorrect syntax for the 'Requires'
-      settings. Changing the set to use 'lib-name = version' instead 'lib-name-version'
-      fixes the issue
-
-      (ADB - 2022/12/06 HDFFV-11355)
-
-    - Move MPI libraries link from PRIVATE to PUBLIC
-
-      The install dependencies were not including the need for MPI libraries when
-      an application or library was built with the C library. Also updated the
-      CMake target link command to use the newer style MPI::MPI_C link variable.
-
-      (ADB - 2022/10/27)
-
-    - Reworked corrected path searched by CMake find_package command
-
-      The install path for cmake find_package files had been changed to use
-        "share/cmake"
-      for all platforms. However setting the HDF5_ROOT variable failed to locate
-      the configuration files. The build variable HDF5_INSTALL_CMAKE_DIR is now
-      set to the <INSTALL_DIR>/cmake folder. The location of the configuration 
-      files can still be specified by the "HDF5_DIR" variable.
-
-      (ADB - 2022/03/11)
-
-    - Corrected path searched by CMake find_package command
-
-      The install path for cmake find_package files had been changed to use
-        "share/cmake"
-      for all platforms. However the trailing "hdf5" directory was not removed.
-      This "hdf5" additional directory has been removed.
-
-      (ADB - 2021/09/27)
-
-    - Corrected pkg-config compile script
-
-      It was discovered that the position of the "$@" argument for the command
-      in the compile script may fail on some platforms and configurations. The
-      position of the "$@"command argument was moved before the pkg-config sub command.
-
-      (ADB - 2021/08/30)
-
-    - Fixed CMake C++ compiler flags
-
-      A recent refactoring of the C++ configure files accidently removed the
-      file that executed the enable_language command for C++ needed by the
-      HDFCXXCompilerFlags.cmake file. Also updated the intel warnings files,
-      including adding support for windows platforms.
-
-      (ADB - 2021/08/10)
-
-    - Remove arbitrary warning flag groups from CMake builds
-
-      The arbitrary groups were created to reduce the quantity of warnings being
-      reported that overwhelmed testing report systems. Considerable work has
-      been accomplished to reduce the warning count and these arbitrary groups
-      are no longer needed.
-      Also the default for all warnings, HDF5_ENABLE_ALL_WARNINGS, is now ON.
-
-      Visual Studio warnings C4100, C4706, and C4127 have been moved to
-      developer warnings, HDF5_ENABLE_DEV_WARNINGS, and are disabled for normal builds.
-
-      (ADB - 2021/03/22, HDFFV-11228)
-
-    - Reclassify CMake messages, to allow new modes and --log-level option
-
-      CMake message commands have a mode argument. By default, STATUS mode
-      was chosen for any non-error message. CMake version 3.15 added additional
-      modes, NOTICE, VERBOSE, DEBUG and TRACE. All message commands with a mode
-      of STATUS were reviewed and most were reclassified as VERBOSE. The new
-      mode was protected by a check for a CMake version of at least 3.15. If CMake
-      version 3.17 or above is used, the user can use the command line option
-      of "--log-level" to further restrict which message commands are displayed.
-
-      (ADB - 2021/02/16, HDFFV-11144)
-
-    - Fixes Autotools determination of the stat struct having an st_blocks field
-
-      A missing parenthesis in an autoconf macro prevented building the test
-      code used to determine if the stat struct contains the st_blocks field.
-      Now that the test functions correctly, the H5_HAVE_STAT_ST_BLOCKS #define
-      found in H5pubconf.h will be defined correctly on both the Autotools and
-      CMake. This #define is only used in the tests and does not affect the
-      HDF5 C library.
-
-      (DER - 2021/02/16, HDFFV-11201)
+    -
 
 
     Library
     -------
-    - Fixed an issue with variable length attributes
+    -
 
-      Previously, if a variable length attribute was held open while its file
-      was opened through another handle, the same attribute was opened through
-      the second file handle, and the second file and attribute handles were
-      closed, attempting to write to the attribute through the first handle
-      would cause an error.
 
-      (NAF - 2022/10/24)
-
-    - Memory leak 
-    
-      A memory leak was observed with variable-length fill value in 
-      H5O_fill_convert() function in H5Ofill.c. The leak is
-      manifested by running valgrind on test/set_extent.c.
-
-      Previously, fill->buf is used for datatype conversion 
-      if it is large enough and the variable-length information 
-      is therefore lost.  A buffer is now allocated regardless 
-      so that the element in fill->buf can later be reclaimed.
-
-      (VC - 2022/10/10, HDFFV-10840)
-
-    - Fixed an issue with attribute type conversion with compound datatypes
-
-      Previously, when performing type conversion for attribute I/O with a
-      compound datatype, the library would not fill the background buffer with
-      the contents of the destination, potentially causing data to be lost when
-      only writing to a subset of the compound fields.
-
-      (NAF - 2022/09/12, GitHub #2016)
-
-    - Issue #1436 identified a problem with the H5_VERS_RELEASE check in the
-      H5check_version function.
-
-      Investigating the original fix, #812, we discovered some inconsistencies
-      with a new block added to check H5_VERS_RELEASE for incompatibilities.
-      This new block was not using the new warning text dealing with the
-      H5_VERS_RELEASE check and would cause the warning to be duplicated.
-
-      By removing the H5_VERS_RELEASE argument in the first check for 
-      H5_VERS_MAJOR and H5_VERS_MINOR, the second check would only check
-      the H5_VERS_RELEASE for incompatible release versions. This adheres
-      to the statement that except for the develop branch, all release versions
-      in a major.minor maintenance branch should be compatible. The prerequisite
-      is that an application will not use any APIs not present in all release versions.
-
-      (ADB - 2022/03/11, #1438)
+    Fortran Library:
+    ----------------
+    -
 
 
     Tools
     -----
-    - Changed how h5dump and h5ls identify long double.
-
-        Long double support is not consistent across platforms. Tools will always
-        identify long double as 128-bit [little/big]-endian float nn-bit precision.
-        New test file created for datasets with attributes for float, double and
-        long double. In addition any unknown integer or float datatype will now
-        also show the number of bits for precision.
-        These files are also used in the java tests.
-
-        (ADB - 2021/03/24, HDFFV-11229)
-
-    - Fixed tools argument parsing.
-
-        Tools parsing used the length of the option from the long array to match
-        the option from the command line. This incorrectly matched a shorter long
-        name option that happened to be a subset of another long option.
-        Changed to match whole names.
-
-        (ADB - 2021/02/16, HDFFV-11106)
-
-    - The tools library was updated by standardizing the error stack process.
-
-      General sequence is:
-          h5tools_setprogname(PROGRAMNAME);
-          h5tools_setstatus(EXIT_SUCCESS);
-          h5tools_init();
-          ... process the command-line (check for error-stack enable) ...
-          h5tools_error_report();
-          ... (do work) ...
-          h5diff_exit(ret);
-
-      (ADB - 2021/02/16, HDFFV-11066)
-
-    - h5diff fixed a command line parsing error.
-
-      h5diff would ignore the argument to -d (delta) if it is smaller than DBL_EPSILON.
-      The macro H5_DBL_ABS_EQUAL was removed and a direct value comparision was used.
-
-      (ADB - 2021/02/16, HDFFV-10897)
-
-    - h5diff added a command line option to ignore attributes.
-
-      h5diff would ignore all objects with a supplied path if the exclude-path argument is used.
-      Adding the exclude-attribute argument will only eclude attributes, with the supplied path,
-      from comparision.
-
-      (ADB - 2021/02/16, HDFFV-5935)
-
-    - h5diff added another level to the verbose argument to print filenames.
-
-      Added verbose level 3 that is level 2 plus the filenames. The levels are:
-          0 : Identical to '-v' or '--verbose'
-          1 : All level 0 information plus one-line attribute status summary
-          2 : All level 1 information plus extended attribute status report
-          3 : All level 2 information plus file names
-
-      (ADB - 2021/02/16, HDFFV-10005)
-
-    - h5repack was fixed to repack the reference attributes properly.
-      The code line that checks if the update of reference inside a compound
-      datatype is misplaced outside the code block loop that carries out the
-      check. In consequence, the next attribute that is not the reference
-      type was repacked again as the reference type and caused the failure of
-      repacking. The fix is to move the corresponding code line to the correct
-      code block.
-
-      (KY -2021/02/16, HDFFV-11014)
+    -
 
 
     Packet Table APIs:
     ------------------
-    - Fixed HL_test_packet, test for packet table vlen of vlen.
-
-      Incorrect length assignment.
-
-      (ADB - 2021/10/14)
+    -
 
 
 Support for New Platforms and Languages
 =======================================
-    - Added support for IBM Power 8 GNU/Linux 3.10.0 ppc64be with GCC 4.8.5,
-          xlc/xlC 13.1 and xlf 15.1
-    - Added support for Ubuntu 22.04 GNU/Linux5.15.0-1026-aws with GCC 11.3.0,
-          clang 14.0.0
-    - Added support for CentOS8 GNU/Linux 4.18.0-348.7.1.el8_5 with GCC 8.5.0,
-          clang 12.0.1
-    - Added support for macOS Apple M1 11.6 with Apple clang 12.0.5,
-          GNU Fortran 11.1.0, Intel icc/icpc/ifort 2021.3.0
-    - Added support for macOS Big Sur 11.3.1 with Apple clang 12.0.5,
-          GNU Fortran 10.2.0, Intel icc/icpc/ifort version 2021.2.0
-    - Added support for Visual Studio 2022 w/ clang 15.0.1 
-          with MSVC-like command-line (C/C++ only - cmake),
-          Intel C/C++/Fortran oneAPI 2022 (cmake)
 
 
 Platforms Tested
@@ -513,149 +137,62 @@ Platforms Tested
                                   Intel(R) C (icc), C++ (icpc), Fortran (icc)
                                   compilers:
                                      Version 17.0.0.098 Build 20160721
-                                  MPICH 3.3 compiled with GCC 7.2.0
-                                  OpenMPI 4.0.0 compiled with GCC 7.2.0
+                                  MPICH 3.1.4 built with GCC 4.9.3, 3.3 built with GCC 7.2.0
+                                  OpenMPI 3.1.3, 4.0.0 compiled with GCC 7.2.0
                                   NAG Fortran Compiler Release 7.0(Yurakuchho) Build 7011
+                                  PGI C, Fortran, C++ for 64-bit target on
+                                      x86_64;
+                                         Version 19.10-0
+                                      (autotools and cmake)
 
-    SunOS 5.11 11.4.5.12.5.0      Sun C 5.15 SunOS_sparc 2017/05/30
-    32- and 64-bit                Studio 12.6 Fortran 95 8.8 SunOS_sparc 2017/05/30
-    (hedgehog)                    Sun C++ 5.15 SunOS_sparc 2017/05/30
+    Linux-3.10.0-1160.0.0.1chaos  openmpi-4.1.2
+    #1 SMP x86_64 GNU/Linux           clang 6.0.0, 11.0.1
+    (quartz)                          GCC 7.3.0, 8.1.0
+                                      Intel 19.0.4, 2022.2, oneapi.2022.2
 
-    Windows 10 x64                Visual Studio 2015 w/ Intel Fortran 18 (cmake)
-                                  Visual Studio 2017 w/ Intel Fortran 19 (cmake)
-                                  Visual Studio 2019 w/ Intel Fortran 19 (cmake)
-                                  Visual Studio 2019 w/ MSMPI 10.1 (cmake)
+    Linux-3.10.0-1160.59.1.1chaos     openmpi/4.1
+    #1 SMP x86_64 GNU/Linux              Intel/19.1, 21.3.0, 22.2.0
+    (chama)                           (cmake)
 
+    macOS Apple M1 11.6               Apple clang version 12.0.5 (clang-1205.0.22.11)
+    Darwin 20.6.0 arm64               gfortran GNU Fortran (Homebrew GCC 11.2.0) 11.1.0
+    (macmini-m1)                      Intel icc/icpc/ifort version 2021.3.0 202106092021.3.0 20210609
 
+    macOS Big Sur 11.3.1              Apple clang version 12.0.5 (clang-1205.0.22.9)
+    Darwin 20.4.0 x86_64              gfortran GNU Fortran (Homebrew GCC 10.2.0_3) 10.2.0
+    (bigsur-1)                        Intel icc/icpc/ifort version 2021.2.0 20210228
 
-Tested Configuration Features Summary
-=====================================
+    macOS High Sierra 10.13.6         Apple LLVM version 10.0.0 (clang-1000.10.44.4)
+    64-bit                            gfortran GNU Fortran (GCC) 6.3.0
+    (bear)                            Intel icc/icpc/ifort version 19.0.4.233 20190416
 
-    In the tables below
-          y   = tested
-          n   = not tested in this release
-          C   = Cluster
-          W   = Workstation
-          x   = not working in this release
-          dna = does not apply
-          ( ) = footnote appears below second table
-          <blank> = testing incomplete on this feature or platform
+    macOS Sierra 10.12.6              Apple LLVM version 9.0.0 (clang-900.39.2)
+    64-bit                            gfortran GNU Fortran (GCC) 7.4.0
+    (kite)                            Intel icc/icpc/ifort version 17.0.2
 
-Platform                              C         F90/   F90      C++  zlib  SZIP
-                                      parallel  F2003  parallel
-SunOS 5.11 32-bit                       n        y/y    n        y    y     y
-SunOS 5.11 64-bit                       n        y/y    n        y    y     y
-Windows 10                              y        y/y    n        y    y     y
-Windows 10 x64                          y        y/y    n        y    y     y
-Mac OS X El Capitan 10.11.6 64-bit      n        y/y    n        y    y     y
-Mac OS Sierra 10.12.6 64-bit            n        y/y    n        y    y     y
-Mac OS X High Sierra 10.13.6 64-bit     n        y/y    n        y    y     y
-Mac OS X Mojave 10.14.6 64-bit          n        y/y    n        y    y     y
-CentOS 7.2 Linux 2.10.0 x86_64 PGI      n        y/y    n        y    y     y
-CentOS 7.1 Linux 3.10.0 x86_64 GNU      y        y/y    y        y    y     y
-CentOS 7.1 Linux 3.10.0 x86_64 Intel    n        y/y    n        y    y     y
-Linux 2.6.32-573.18.1.el6.ppc64         n        y/n    n        y    y     y
-
-Platform                                 Shared  Shared    Shared    Thread-
-                                         C libs  F90 libs  C++ libs  safe
-SunOS 5.11 32-bit                          y       y         y         y
-SunOS 5.11 64-bit                          y       y         y         y
-Windows 10                                 y       y         y         y
-Windows 10 x64                             y       y         y         y
-Mac OS X El Capitan 10.11.6 64-bit         y       n         y         y
-Mac OS Sierra 10.12.6 64-bit               y       n         y         y
-Mac OS X High Sierra 10.13.6 64-bit        y       n         y         y
-Mac OS X Mojave 10.14.6 64-bit             y       n         y         y
-CentOS 7.2 Linux 3.10.0 x86_64 PGI         y       y         y         y
-CentOS 7.2 Linux 3.10.0 x86_64 GNU         y       y         y         y
-CentOS 7.2 Linux 3.10.0 x86_64 Intel       y       y         y         y
-Linux 2.6.32-573.18.1.el6.ppc64            y       y         y         y
-
-Compiler versions for each platform are listed in the preceding
-"Supported Platforms" table.
-
-
-More Tested Platforms
-=====================
-The following platforms are not supported but have been tested for this release.
+    Mac OS X El Capitan 10.11.6       Apple clang version 7.3.0 from Xcode 7.3
+    64-bit                            gfortran GNU Fortran (GCC) 5.2.0
+    (osx1011test)                     Intel icc/icpc/ifort version 16.0.2
 
     Linux 2.6.32-573.22.1.el6     GNU C (gcc), Fortran (gfortran), C++ (g++)
     #1 SMP x86_64 GNU/Linux       compilers:
     (platypus)                    Version 4.4.7 20120313
                                      Versions 4.9.3, 5.3.0, 6.2.0
+                                  MPICH 3.1.4 compiled with GCC 4.9.3
                                   PGI C, Fortran, C++ for 64-bit target on
                                   x86-64;
-                                      Version 16.10-0
-                                  Intel(R) C (icc), C++ (icpc), Fortran (icc)
-                                  compilers:
-                                     Version 17.0.0.196 Build 20160721
-                                  MPICH 3.1.4 compiled with GCC 4.9.3
-                                  OpenMPI 2.0.1 compiled with GCC 4.9.3
+                                      Version 19.10-0
 
-    Linux 2.6.32-573.18.1.el6     gcc (GCC) 4.4.7 20120313 (Red Hat 4.4.7-16)
-    #1 SMP ppc64 GNU/Linux        g++ (GCC) 4.4.7 20120313 (Red Hat 4.4.7-16)
-    (ostrich)                     GNU Fortran (GCC) 4.4.7 20120313 (Red Hat 4.4.7-16)
+    Windows 10 x64                Visual Studio 2015 w/ Intel C/C++/Fortran 18 (cmake)
+                                  Visual Studio 2017 w/ Intel C/C++/Fortran 19 (cmake)
+                                  Visual Studio 2019 w/ clang 12.0.0
+                                      with MSVC-like command-line (C/C++ only - cmake)
+                                  Visual Studio 2019 w/ Intel C/C++/Fortran oneAPI 2022 (cmake)
+                                  Visual Studio 2022 w/ clang 15.0.1
+                                      with MSVC-like command-line (C/C++ only - cmake)
+                                  Visual Studio 2022 w/ Intel C/C++/Fortran oneAPI 2022 (cmake)
+                                  Visual Studio 2019 w/ MSMPI 10.1 (C only - cmake)
 
-    Linux 3.10.0-327.18.2.el7     GNU C (gcc) and C++ (g++) compilers
-    #1 SMP x86_64 GNU/Linux          Version 4.8.5 20150623 (Red Hat 4.8.5-4)
-    (jelly)                       with NAG Fortran Compiler Release 6.1(Tozai)
-                                  GCC Version 7.1.0
-                                  OpenMPI 2.1.6-GCC-7.2.0-2.29,
-                                     3.1.3-GCC-7.2.0-2.29
-                                  Intel(R) C (icc) and C++ (icpc) compilers
-                                     Version 17.0.0.098 Build 20160721
-                                  with NAG Fortran Compiler Release 6.1(Tozai)
-
-    Linux 3.10.0-327.10.1.el7     MPICH 3.1.4 compiled with GCC 4.9.3
-    #1 SMP x86_64 GNU/Linux
-    (moohan)
-
-    Linux-3.10.0-1127.0.0.1chaos  openmpi-4.0.0
-    #1 SMP x86_64 GNU/Linux           clang/3.9.0, 8.0.1
-    (quartz)                          gcc/7.3.0, 8.1.0
-                                      intel/16.0.4
-
-    Linux-4.14.0-115.10.1.1       spectrum-mpi/rolling-release
-    #1 SMP ppc64le GNU/Linux          clang/coral-2018.08.08
-    (lassen)                          gcc/7.3.1
-                                      xl/2019.02.07
-
-    Linux-4.12.14-150.52-default  cray-mpich/7.7.10
-    #1 SMP x86_64 GNU/Linux           gcc/7.3.0, 8.2.0
-    (cori)                            intel/19.0.3
-
-    Linux-4.4.180-94.107-default  cray-mpich/7.7.6
-    # 1SMP x86_64 GNU/Linux           gcc/7.2.0, 8.2.0
-    (mutrino)                         intel/17.0.4, 18.0.2, 19.0.4
-
-    Fedora33 5.10.10-200.fc33.x86_64
-    #1 SMP x86_64  GNU/Linux         GNU gcc (GCC) 10.2.1 20201125 (Red Hat 10.2.1-9)
-                                     GNU Fortran (GCC) 10.2.1 20201125 (Red Hat 10.2.1-9)
-                                     clang version 11.0.0 (Fedora 11.0.0-2.fc33)
-                                     (cmake and autotools)
-
-    Ubuntu20.10 5.8.0-41-generic-x86_64
-    #46-Ubuntu SMP x86_64  GNU/Linux GNU gcc (GCC) 10.2.0-13ubuntu1
-                                     GNU Fortran (GCC) 10.2.0-13ubuntu1
-                                     (cmake and autotools)
-
-    SUSE15sp2 5.3.18-22-default
-    #1 SMP x86_64  GNU/Linux         GNU gcc (SUSE Linux) 7.5.0
-                                     GNU Fortran (SUSE Linux) 7.5.0
-                                     clang version 7.0.1 (tags/RELEASE_701/final 349238)
-                                     (cmake and autotools)
-
-    Mac OS X El Capitan 10.11.6   Apple LLVM version 7.3.0 (clang-703.0.29)
-    64-bit                        gfortran GNU Fortran (GCC) 5.2.0
-    (VM osx1011dev/osx1011test)   Intel icc/icpc/ifort version 16.0.2
-
-    Mac OS Sierra 10.12.6         Apple LLVM version 8.1 (clang-802.0.42)
-    64-bit                        gfortran GNU Fortran (GCC) 7.4.0
-    (kite)                        Intel icc/icpc/ifort version 17.0.2
-
-    SunOS 5.11 11.3               Sun C 5.15 SunOS_sparc
-    32- and 64-bit                Sun Fortran 95 8.8 SunOS_sparc
-    (emu)
 
 Known Problems
 ==============
