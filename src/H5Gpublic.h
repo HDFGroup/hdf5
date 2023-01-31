@@ -242,11 +242,11 @@ H5_DLL hid_t  H5Gopen_async(hid_t loc_id, const char *name, hid_t gapl_id, hid_t
  *          property list associated with the group specified by \p group_id.
  *
  *          The creation property list identifier should be released with
- *          H5Gclose() to prevent resource leaks.
+ *          H5Pclose() to prevent resource leaks.
  *
  * \since 1.8.0
  *
- * \see H5Gcreate2(), H5Gclose()
+ * \see H5Gcreate2(), H5Pclose()
  *
  */
 H5_DLL hid_t H5Gget_create_plist(hid_t group_id);
