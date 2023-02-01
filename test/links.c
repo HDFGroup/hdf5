@@ -13769,20 +13769,25 @@ external_link_public_macros(hid_t fapl, hbool_t new_format)
     /* Check information for external link */
     if (H5Lget_info2(fid, "ext_link", &linfo, H5P_DEFAULT) < 0)
         goto error;
+
     if (H5L_TYPE_EXTERNAL != linfo.type) {
         H5_FAILED();
         HDputs("    Unexpected object type - should have been an external link");
         goto error;
     }
+
     if (H5Lget_val(fid, "ext_link", objname, sizeof(objname), H5P_DEFAULT) < 0)
         TEST_ERROR;
+
     if (H5Lunpack_elink_val(objname, linfo.u.val_size, &flags, &file, &path) < 0)
         TEST_ERROR;
+
     if (HDstrcmp(file, filename1) != 0) {
         H5_FAILED();
         HDputs("    External link file name incorrect");
         goto error;
     }
+
     if (HDstrcmp(path, "/") != 0) {
         H5_FAILED();
         HDputs("    External link path incorrect");
