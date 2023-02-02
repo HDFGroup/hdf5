@@ -20,447 +20,663 @@
 #include "h5tools_utils.h"
 #include "h5test.h"
 
-/* Selector for which test cases to run */
-typedef enum vfd_tests_e { VFD_TESTS_COMMON, VFD_TESTS_ROS3, VFD_TESTS_HDFS } vfd_tests_e;
+#define UTIL_TEST_DEBUG 0
 
-/* Whether we pass in H5I_INVALID_HID, H5P_DEFAULT, or a created fapl */
-typedef enum fapl_choice_e { FAPL_CHOICE_INVALID, FAPL_CHOICE_DEFAULT, FAPL_CHOICE_CREATE } fapl_choice_e;
+#ifndef __js_test__
 
-/* Test case data */
-typedef struct fapl_testcase_t {
-    const char    error_message[88];
-    herr_t        expected_result;
-    fapl_choice_e fapl_choice;
-    const char    vfd_name[12];
-    void         *fa;
-} fapl_testcase_t;
+#define __js_test__ 1L
 
-/* Generic "incorrect" VFD struct */
-typedef struct other_fa_t {
-    int a;
-    int b;
-    int c;
-} other_fa_t;
-
-other_fa_t wrong_fa_g = {0x432, 0xf82, 0x9093};
-
-/******************************/
-/* Common test configurations */
-/******************************/
-
-fapl_testcase_t common_cases_g[] = {
-    {
-        "(common) H5I_INVALID_HID + NULL VFD struct (UNEXPECTED SUCCESS)",
-        FAIL,
-        FAPL_CHOICE_INVALID,
-        "",
-        NULL,
-    },
-    {
-        "(common) H5I_INVALID_HID + inappropriate VFD struct (UNEXPECTED SUCCESS)",
-        FAIL,
-        FAPL_CHOICE_INVALID,
-        "",
-        &wrong_fa_g,
-    },
-    {
-        "(common) H5P_DEFAULT + NULL VFD struct (FAILED)",
-        SUCCEED,
-        FAPL_CHOICE_DEFAULT,
-        "",
-        NULL,
-    },
-    {
-        "(common) H5P_DEFAULT + ignored VFD struct (FAILED)",
-        SUCCEED,
-        FAPL_CHOICE_DEFAULT,
-        "",
-        &wrong_fa_g,
-    },
-    {
-        "(common) H5Pcreate() + NULL VFD struct (FAILED)",
-        SUCCEED,
-        FAPL_CHOICE_CREATE,
-        "",
-        NULL,
-    },
-    {
-        "(common) H5Pcreate() + ignored VFD struct (FAILED)",
-        SUCCEED,
-        FAPL_CHOICE_CREATE,
-        "",
-        &wrong_fa_g,
-    },
-    {
-        "(common) H5P_DEFAULT + non-VFD name + NULL VFD struct (UNEXPECTED SUCCESS)",
-        FAIL,
-        FAPL_CHOICE_DEFAULT,
-        "unknown",
-        NULL,
-    }};
-
-#ifdef H5_HAVE_ROS3_VFD
-
-/****************************/
-/* ROS3 test configurations */
-/****************************/
-
-H5FD_ros3_fapl_t ros3_anon_fa_g = {1, FALSE, "", "", ""};
-
-fapl_testcase_t ros3_cases_g[] = {{
-                                      "(ROS3) H5I_INVALID_HID + NULL VFD struct (UNEXPECTED SUCCESS)",
-                                      FAIL,
-                                      FAPL_CHOICE_INVALID,
-                                      "ros3",
-                                      NULL,
-                                  },
-                                  {
-                                      "(ROS3) H5I_INVALID_HID + valid VFD struct (UNEXPECTED SUCCESS)",
-                                      FAIL,
-                                      FAPL_CHOICE_INVALID,
-                                      "ros3",
-                                      &ros3_anon_fa_g,
-                                  },
-                                  {
-                                      "(ROS3) H5Pcreate() + NULL VFD struct (UNEXPECTED SUCCESS)",
-                                      FAIL,
-                                      FAPL_CHOICE_CREATE,
-                                      "ros3",
-                                      NULL,
-                                  },
-                                  {
-                                      "(ROS3) H5Pcreate() + valid VFD struct (FAILED)",
-                                      SUCCEED,
-                                      FAPL_CHOICE_CREATE,
-                                      "ros3",
-                                      &ros3_anon_fa_g,
-                                  },
-                                  {
-                                      "(ROS3) H5P_DEFAULT + valid VFD struct (FAILED)",
-                                      SUCCEED,
-                                      FAPL_CHOICE_DEFAULT,
-                                      "ros3",
-                                      &ros3_anon_fa_g,
-                                  }};
-#endif /* H5_HAVE_ROS3_VFD */
-
-#ifdef H5_HAVE_LIBHDFS
-
-/****************************/
-/* HDFS test configurations */
-/****************************/
-
-H5FD_hdfs_fapl_t hdfs_fa_g = {
-    1,    /* fapl version          */
-    "",   /* namenode name         */
-    0,    /* namenode port         */
-    "",   /* kerberos ticket cache */
-    "",   /* user name             */
-    2048, /* stream buffer size    */
-};
-
-fapl_testcase_t hdfs_cases_g[] = {{
-                                      "(HDFS) H5I_INVALID_HID + NULL VFD struct (UNEXPECTED SUCCESS)",
-                                      FAIL,
-                                      FAPL_CHOICE_INVALID,
-                                      "hdfs",
-                                      NULL,
-                                  },
-                                  {
-                                      "(HDFS) H5I_INVALID_HID + valid VFD struct (UNEXPECTED SUCCESS)",
-                                      FAIL,
-                                      FAPL_CHOICE_INVALID,
-                                      "hdfs",
-                                      &hdfs_fa_g,
-                                  },
-                                  {
-                                      "(HDFS) H5Pcreate() + NULL VFD struct (UNEXPECTED SUCCESS)",
-                                      FAIL,
-                                      FAPL_CHOICE_CREATE,
-                                      "hdfs",
-                                      NULL,
-                                  },
-                                  {
-                                      "(HDFS) H5Pcreate() + valid VFD struct (FAILED)",
-                                      SUCCEED,
-                                      FAPL_CHOICE_CREATE,
-                                      "hdfs",
-                                      &hdfs_fa_g,
-                                  },
-                                  {
-                                      "(HDFS) H5P_DEFAULT + valid VFD struct (FAILED)",
-                                      SUCCEED,
-                                      FAPL_CHOICE_DEFAULT,
-                                      "hdfs",
-                                      &hdfs_fa_g,
-                                  }};
-#endif /* H5_HAVE_LIBHDFS */
-
-typedef struct tuple_testcase_t {
-    const char *test_msg;        /* info about test case */
-    const char *in_str;          /* input string */
-    int         sep;             /* separator "character" */
-    herr_t      expected_result; /* expected SUCCEED / FAIL */
-    unsigned    exp_nelems;      /* expected number of elements */
-                                 /* (no more than 7!)           */
-    const char *exp_elems[7];    /* list of elements (no more than 7!) */
-} tuple_testcase_t;
-
-tuple_testcase_t tuple_cases_g[] = {
-    {
-        "bad start",
-        "words(before)",
-        ';',
-        FAIL,
-        0,
-        {NULL},
-    },
-    {
-        "tuple not closed",
-        "(not ok",
-        ',',
-        FAIL,
-        0,
-        {NULL},
-    },
-    {
-        "empty tuple",
-        "()",
-        '-',
-        SUCCEED,
-        1,
-        {""},
-    },
-    {
-        "no separator",
-        "(stuff keeps on going)",
-        ',',
-        SUCCEED,
-        1,
-        {"stuff keeps on going"},
-    },
-    {
-        "4-ple, escaped seperator",
-        "(elem0,elem1,el\\,em2,elem3)", /* "el\,em" */
-        ',',
-        SUCCEED,
-        4,
-        {"elem0", "elem1", "el,em2", "elem3"},
-    },
-    {
-        "5-ple, escaped escaped separator",
-        "(elem0,elem1,el\\\\,em2,elem3)",
-        ',',
-        SUCCEED,
-        5,
-        {"elem0", "elem1", "el\\", "em2", "elem3"},
-    },
-    {
-        "escaped non-comma separator",
-        "(5-2-7-2\\-6-2)",
-        '-',
-        SUCCEED,
-        5,
-        {"5", "2", "7", "2-6", "2"},
-    },
-    {
-        "embedded close-paren",
-        "(be;fo)re)",
-        ';',
-        SUCCEED,
-        2,
-        {"be", "fo)re"},
-    },
-    {
-        "embedded non-escaping backslash",
-        "(be;fo\\re)",
-        ';',
-        SUCCEED,
-        2,
-        {"be", "fo\\re"},
-    },
-    {
-        "double close-paren at end",
-        "(be;fore))",
-        ';',
-        SUCCEED,
-        2,
-        {"be", "fore)"},
-    },
-    {
-        "empty elements",
-        "(;a1;;a4;)",
-        ';',
-        SUCCEED,
-        5,
-        {"", "a1", "", "a4", ""},
-    },
-    {
-        "nested tuples with different separators",
-        "((4,e,a);(6,2,a))",
-        ';',
-        SUCCEED,
-        2,
-        {"(4,e,a)", "(6,2,a)"},
-    },
-    {
-        "nested tuples with same separators",
-        "((4,e,a),(6,2,a))",
-        ',',
-        SUCCEED,
-        6,
-        {"(4", "e", "a)", "(6", "2", "a)"},
-    },
-    {
-        "real-world use case",
-        "(us-east-2,AKIAIMC3D3XLYXLN5COA,ugs5aVVnLFCErO/8uW14iWE3K5AgXMpsMlWneO/+)",
-        ',',
-        SUCCEED,
-        3,
-        {"us-east-2", "AKIAIMC3D3XLYXLN5COA", "ugs5aVVnLFCErO/8uW14iWE3K5AgXMpsMlWneO/+"},
-    }};
+/*****************************************************************************
+ *
+ * FILE-LOCAL TESTING MACROS
+ *
+ * Purpose:
+ *
+ *     1. Upon test failure, goto-jump to single-location teardown in test
+ *        function. E.g., `error:` (consistency with HDF corpus) or
+ *        `failed:` (reflects purpose).
+ *            >>> using "error", in part because `H5E_BEGIN_TRY` expects it.
+ *     2. Increase clarity and reduce overhead found with `TEST_ERROR`.
+ *        e.g., "if(somefunction(arg, arg2) < 0) TEST_ERROR:"
+ *        requires reading of entire line to know whether this if/call is
+ *        part of the test setup, test operation, or a test unto itself.
+ *     3. Provide testing macros with optional user-supplied failure message;
+ *        if not supplied (NULL), generate comparison output in the spirit of
+ *        test-driven development. E.g., "expected 5 but was -3"
+ *        User messages clarify test's purpose in code, encouraging description
+ *        without relying on comments.
+ *     4. Configurable expected-actual order in generated comparison strings.
+ *        Some prefer `VERIFY(expected, actual)`, others
+ *        `VERIFY(actual, expected)`. Provide preprocessor ifdef switch
+ *        to satifsy both parties, assuming one paradigm per test file.
+ *        (One could #undef and redefine the flag through the file as desired,
+ *         but _why_.)
+ *
+ *     Provided as courtesy, per consideration for inclusion in the library
+ *     proper.
+ *
+ *     Macros:
+ *
+ *         JSVERIFY_EXP_ACT - ifdef flag, configures comparison order
+ *         FAIL_IF()        - check condition
+ *         FAIL_UNLESS()    - check _not_ condition
+ *         JSVERIFY()       - long-int equality check; prints reason/comparison
+ *         JSVERIFY_NOT()   - long-int inequality check; prints
+ *         JSVERIFY_STR()   - string equality check; prints
+ *
+ * Programmer: Jacob Smith
+ *             2017-10-24
+ *
+ *****************************************************************************/
 
 /*----------------------------------------------------------------------------
  *
- * Function:    test_parse_tuple()
+ * ifdef flag: JSVERIFY_EXP_ACT
  *
- * Purpose:     Provide unit tests and specification for the `parse_tuple()`
- *              function.
- *
- * Return:      SUCCEED/FAIL
- *
- * Programmer:  Jacob Smith
- *              2017-11-11
+ * JSVERIFY macros accept arguments as (EXPECTED, ACTUAL[, reason])
+ * default, if this is undefined, is (ACTUAL, EXPECTED[, reason])
  *
  *----------------------------------------------------------------------------
  */
-static herr_t
+#define JSVERIFY_EXP_ACT 1L
+
+/*----------------------------------------------------------------------------
+ *
+ * Macro: JSFAILED_AT()
+ *
+ * Purpose:
+ *
+ *     Preface a test failure by printing "*FAILED*" and location to stdout
+ *     Similar to `H5_FAILED(); AT();` from h5test.h
+ *
+ *     *FAILED* at somefile.c:12 in function_name()...
+ *
+ * Programmer: Jacob Smith
+ *             2017-10-24
+ *
+ *----------------------------------------------------------------------------
+ */
+#define JSFAILED_AT()                                                                                        \
+    {                                                                                                        \
+        HDprintf("*FAILED* at %s:%d in %s()...\n", __FILE__, __LINE__, FUNC);                                \
+    }
+
+/*----------------------------------------------------------------------------
+ *
+ * Macro: FAIL_IF()
+ *
+ * Purpose:
+ *
+ *     Make tests more accessible and less cluttered than
+ *         `if (thing == otherthing()) TEST_ERROR`
+ *         paradigm.
+ *
+ *     The following lines are roughly equivalent:
+ *
+ *         `if (myfunc() < 0) TEST_ERROR;` (as seen elsewhere in HDF tests)
+ *         `FAIL_IF(myfunc() < 0)`
+ *
+ *     Prints a generic "FAILED AT" line to stdout and jumps to `error`,
+ *     similar to `TEST_ERROR` in h5test.h
+ *
+ * Programmer: Jacob Smith
+ *             2017-10-23
+ *
+ *----------------------------------------------------------------------------
+ */
+#define FAIL_IF(condition)                                                                                   \
+    if (condition) {                                                                                         \
+        JSFAILED_AT()                                                                                        \
+        goto error;                                                                                          \
+    }
+
+/*----------------------------------------------------------------------------
+ *
+ * Macro: FAIL_UNLESS()
+ *
+ * Purpose:
+ *
+ *     TEST_ERROR wrapper to reduce cognitive overhead from "negative tests",
+ *     e.g., "a != b".
+ *
+ *     Opposite of FAIL_IF; fails if the given condition is _not_ true.
+ *
+ *     `FAIL_IF( 5 != my_op() )`
+ *     is equivalent to
+ *     `FAIL_UNLESS( 5 == my_op() )`
+ *     However, `JSVERIFY(5, my_op(), "bad return")` may be even clearer.
+ *         (see JSVERIFY)
+ *
+ * Programmer: Jacob Smith
+ *             2017-10-24
+ *
+ *----------------------------------------------------------------------------
+ */
+#define FAIL_UNLESS(condition)                                                                               \
+    if (!(condition)) {                                                                                      \
+        JSFAILED_AT()                                                                                        \
+        goto error;                                                                                          \
+    }
+
+/*----------------------------------------------------------------------------
+ *
+ * Macro: JSERR_LONG()
+ *
+ * Purpose:
+ *
+ *     Print an failure message for long-int arguments.
+ *     ERROR-AT printed first.
+ *     If `reason` is given, it is printed on own line and newlined after
+ *     else, prints "expected/actual" aligned on own lines.
+ *
+ *     *FAILED* at myfile.c:488 in somefunc()...
+ *     forest must be made of trees.
+ *
+ *     or
+ *
+ *     *FAILED* at myfile.c:488 in somefunc()...
+ *       ! Expected 425
+ *       ! Actual   3
+ *
+ * Programmer: Jacob Smith
+ *             2017-10-24
+ *
+ *----------------------------------------------------------------------------
+ */
+#define JSERR_LONG(expected, actual, reason)                                                                 \
+    {                                                                                                        \
+        JSFAILED_AT()                                                                                        \
+        if (reason != NULL) {                                                                                \
+            HDprintf("%s\n", (reason));                                                                      \
+        }                                                                                                    \
+        else {                                                                                               \
+            HDprintf("  ! Expected %ld\n  ! Actual   %ld\n", (long)(expected), (long)(actual));              \
+        }                                                                                                    \
+    }
+
+/*----------------------------------------------------------------------------
+ *
+ * Macro: JSERR_STR()
+ *
+ * Purpose:
+ *
+ *     Print an failure message for string arguments.
+ *     ERROR-AT printed first.
+ *     If `reason` is given, it is printed on own line and newlined after
+ *     else, prints "expected/actual" aligned on own lines.
+ *
+ *     *FAILED*  at myfile.c:421 in myfunc()...
+ *     Blue and Red strings don't match!
+ *
+ *     or
+ *
+ *     *FAILED*  at myfile.c:421 in myfunc()...
+ *     !!! Expected:
+ *     this is my expected
+ *     string
+ *     !!! Actual:
+ *     not what I expected at all
+ *
+ * Programmer: Jacob Smith
+ *             2017-10-24
+ *
+ *----------------------------------------------------------------------------
+ */
+#define JSERR_STR(expected, actual, reason)                                                                  \
+    {                                                                                                        \
+        JSFAILED_AT()                                                                                        \
+        if ((reason) != NULL) {                                                                              \
+            HDprintf("%s\n", (reason));                                                                      \
+        }                                                                                                    \
+        else {                                                                                               \
+            HDprintf("!!! Expected:\n%s\n!!!Actual:\n%s\n", (expected), (actual));                           \
+        }                                                                                                    \
+    }
+
+#ifdef JSVERIFY_EXP_ACT
+
+/*----------------------------------------------------------------------------
+ *
+ * Macro: JSVERIFY()
+ *
+ * Purpose:
+ *
+ *     Verify that two long integers are equal.
+ *     If unequal, print failure message
+ *     (with `reason`, if not NULL; expected/actual if NULL)
+ *     and jump to `error` at end of function
+ *
+ * Programmer: Jacob Smith
+ *             2017-10-24
+ *
+ *----------------------------------------------------------------------------
+ */
+#define JSVERIFY(expected, actual, reason)                                                                   \
+    if ((long)(actual) != (long)(expected)) {                                                                \
+        JSERR_LONG((expected), (actual), (reason))                                                           \
+        goto error;                                                                                          \
+    } /* JSVERIFY */
+
+/*----------------------------------------------------------------------------
+ *
+ * Macro: JSVERIFY_NOT()
+ *
+ * Purpose:
+ *
+ *     Verify that two long integers are _not_ equal.
+ *     If equal, print failure message
+ *     (with `reason`, if not NULL; expected/actual if NULL)
+ *     and jump to `error` at end of function
+ *
+ * Programmer: Jacob Smith
+ *             2017-10-24
+ *
+ *----------------------------------------------------------------------------
+ */
+#define JSVERIFY_NOT(expected, actual, reason)                                                               \
+    if ((long)(actual) == (long)(expected)) {                                                                \
+        JSERR_LONG((expected), (actual), (reason))                                                           \
+        goto error;                                                                                          \
+    } /* JSVERIFY_NOT */
+
+/*----------------------------------------------------------------------------
+ *
+ * Macro: JSVERIFY_STR()
+ *
+ * Purpose:
+ *
+ *     Verify that two strings are equal.
+ *     If unequal, print failure message
+ *     (with `reason`, if not NULL; expected/actual if NULL)
+ *     and jump to `error` at end of function
+ *
+ * Programmer: Jacob Smith
+ *             2017-10-24
+ *
+ *----------------------------------------------------------------------------
+ */
+#define JSVERIFY_STR(expected, actual, reason)                                                               \
+    if (HDstrcmp((actual), (expected)) != 0) {                                                               \
+        JSERR_STR((expected), (actual), (reason));                                                           \
+        goto error;                                                                                          \
+    } /* JSVERIFY_STR */
+
+#else /* JSVERIFY_EXP_ACT not defined                                        */
+/* Repeats macros above, but with actual/expected parameters reversed. */
+
+/*----------------------------------------------------------------------------
+ * Macro: JSVERIFY()
+ * See: JSVERIFY documentation above.
+ * Programmer: Jacob Smith
+ *             2017-10-14
+ *----------------------------------------------------------------------------
+ */
+#define JSVERIFY(actual, expected, reason)                                                                   \
+    if ((long)(actual) != (long)(expected)) {                                                                \
+        JSERR_LONG((expected), (actual), (reason));                                                          \
+        goto error;                                                                                          \
+    } /* JSVERIFY */
+
+/*----------------------------------------------------------------------------
+ * Macro: JSVERIFY_NOT()
+ * See: JSVERIFY_NOT documentation above.
+ * Programmer: Jacob Smith
+ *             2017-10-14
+ *----------------------------------------------------------------------------
+ */
+#define JSVERIFY_NOT(actual, expected, reason)                                                               \
+    if ((long)(actual) == (long)(expected)) {                                                                \
+        JSERR_LONG((expected), (actual), (reason))                                                           \
+        goto error;                                                                                          \
+    } /* JSVERIFY_NOT */
+
+/*----------------------------------------------------------------------------
+ * Macro: JSVERIFY_STR()
+ * See: JSVERIFY_STR documentation above.
+ * Programmer: Jacob Smith
+ *             2017-10-14
+ *----------------------------------------------------------------------------
+ */
+#define JSVERIFY_STR(actual, expected, reason)                                                               \
+    if (HDstrcmp((actual), (expected)) != 0) {                                                               \
+        JSERR_STR((expected), (actual), (reason));                                                           \
+        goto error;                                                                                          \
+    } /* JSVERIFY_STR */
+
+#endif /* ifdef/else JSVERIFY_EXP_ACT */
+
+#endif /* __js_test__ */
+
+/* if > 0, be very verbose when performing tests */
+#define H5TOOLS_UTILS_TEST_DEBUG 0
+
+/******************/
+/* TEST FUNCTIONS */
+/******************/
+
+/*----------------------------------------------------------------------------
+ *
+ * Function: test_parse_tuple()
+ *
+ * Purpose:
+ *
+ *     Provide unit tests and specification for the `parse_tuple()` function.
+ *
+ * Return:
+ *
+ *     0   Tests passed.
+ *     1   Tests failed.
+ *
+ * Programmer: Jacob Smith
+ *             2017-11-11
+ *
+ * Changes: None.
+ *
+ *----------------------------------------------------------------------------
+ */
+static unsigned
 test_parse_tuple(void)
 {
-    tuple_testcase_t tc;
-    unsigned         n_tests = 14;
-    unsigned         u       = 0;
-    unsigned         count   = 0;
-    unsigned         elem_u  = 0;
-    char           **parsed  = NULL;
-    char            *cpy     = NULL;
-    herr_t           ret;
+    /*************************
+     * TEST-LOCAL STRUCTURES *
+     *************************/
+
+    struct testcase {
+        const char *test_msg;     /* info about test case */
+        const char *in_str;       /* input string */
+        int         sep;          /* separator "character" */
+        herr_t      exp_ret;      /* expected SUCCEED / FAIL */
+        unsigned    exp_nelems;   /* expected number of elements */
+                                  /* (no more than 7!)           */
+        const char *exp_elems[7]; /* list of elements (no more than 7!) */
+    };
+
+    /******************
+     * TEST VARIABLES *
+     ******************/
+
+    struct testcase cases[] = {
+        {
+            "bad start",
+            "words(before)",
+            ';',
+            FAIL,
+            0,
+            {NULL},
+        },
+        {
+            "tuple not closed",
+            "(not ok",
+            ',',
+            FAIL,
+            0,
+            {NULL},
+        },
+        {
+            "empty tuple",
+            "()",
+            '-',
+            SUCCEED,
+            1,
+            {""},
+        },
+        {
+            "no separator",
+            "(stuff keeps on going)",
+            ',',
+            SUCCEED,
+            1,
+            {"stuff keeps on going"},
+        },
+        {
+            "4-ple, escaped seperator",
+            "(elem0,elem1,el\\,em2,elem3)", /* "el\,em" */
+            ',',
+            SUCCEED,
+            4,
+            {"elem0", "elem1", "el,em2", "elem3"},
+        },
+        {
+            "5-ple, escaped escaped separator",
+            "(elem0,elem1,el\\\\,em2,elem3)",
+            ',',
+            SUCCEED,
+            5,
+            {"elem0", "elem1", "el\\", "em2", "elem3"},
+        },
+        {
+            "escaped non-comma separator",
+            "(5-2-7-2\\-6-2)",
+            '-',
+            SUCCEED,
+            5,
+            {"5", "2", "7", "2-6", "2"},
+        },
+        {
+            "embedded close-paren",
+            "(be;fo)re)",
+            ';',
+            SUCCEED,
+            2,
+            {"be", "fo)re"},
+        },
+        {
+            "embedded non-escaping backslash",
+            "(be;fo\\re)",
+            ';',
+            SUCCEED,
+            2,
+            {"be", "fo\\re"},
+        },
+        {
+            "double close-paren at end",
+            "(be;fore))",
+            ';',
+            SUCCEED,
+            2,
+            {"be", "fore)"},
+        },
+        {
+            "empty elements",
+            "(;a1;;a4;)",
+            ';',
+            SUCCEED,
+            5,
+            {"", "a1", "", "a4", ""},
+        },
+        {
+            "nested tuples with different separators",
+            "((4,e,a);(6,2,a))",
+            ';',
+            SUCCEED,
+            2,
+            {"(4,e,a)", "(6,2,a)"},
+        },
+        {
+            "nested tuples with same separators",
+            "((4,e,a),(6,2,a))",
+            ',',
+            SUCCEED,
+            6,
+            {"(4", "e", "a)", "(6", "2", "a)"},
+        },
+        {
+            "real-world use case",
+            "(us-east-2,AKIAIMC3D3XLYXLN5COA,ugs5aVVnLFCErO/8uW14iWE3K5AgXMpsMlWneO/+)",
+            ',',
+            SUCCEED,
+            3,
+            {"us-east-2", "AKIAIMC3D3XLYXLN5COA", "ugs5aVVnLFCErO/8uW14iWE3K5AgXMpsMlWneO/+"},
+        }};
+    struct testcase tc;
+    unsigned        n_tests       = 14;
+    unsigned        i             = 0;
+    unsigned        count         = 0;
+    unsigned        elem_i        = 0;
+    char          **parsed        = NULL;
+    char           *cpy           = NULL;
+    herr_t          success       = TRUE;
+    hbool_t         show_progress = FALSE;
 
     TESTING("arbitrary-count tuple parsing");
 
-    for (u = 0; u < n_tests; u++) {
+#if H5TOOLS_UTILS_TEST_DEBUG > 0
+    show_progress = TRUE;
+#endif /* H5TOOLS_UTILS_TEST_DEBUG */
 
-        tc = tuple_cases_g[u];
+    /*********
+     * TESTS *
+     *********/
 
-        ret = parse_tuple(tc.in_str, tc.sep, &cpy, &count, &parsed);
+    for (i = 0; i < n_tests; i++) {
 
-        if (tc.expected_result != ret)
-            FAIL_PUTS_ERROR("unexpected result from parse_tuple()")
-        if (tc.exp_nelems != count)
-            FAIL_PUTS_ERROR("incorrect number of elements returned from parse_tupble()")
+        /* SETUP
+         */
+        HDassert(parsed == NULL);
+        HDassert(cpy == NULL);
+        tc = cases[i];
+        if (show_progress == TRUE) {
+            HDprintf("testing %d: %s...\n", i, tc.test_msg);
+        }
 
-        if (ret == SUCCEED) {
-            /* Successful return case checks */
-            if (NULL == parsed)
-                FAIL_PUTS_ERROR("parsed pointer should not be NULL on success");
-            for (elem_u = 0; elem_u < count; elem_u++) {
-                if (HDstrcmp(tc.exp_elems[elem_u], parsed[elem_u]))
-                    FAIL_PUTS_ERROR("Bad elements detected")
+        /* VERIFY
+         */
+        success = parse_tuple(tc.in_str, tc.sep, &cpy, &count, &parsed);
+
+        JSVERIFY(tc.exp_ret, success, "function returned incorrect value")
+        JSVERIFY(tc.exp_nelems, count, NULL)
+        if (success == SUCCEED) {
+            FAIL_IF(parsed == NULL)
+            for (elem_i = 0; elem_i < count; elem_i++) {
+                JSVERIFY_STR(tc.exp_elems[elem_i], parsed[elem_i], NULL)
             }
+            /* TEARDOWN */
+            HDassert(parsed != NULL);
+            HDassert(cpy != NULL);
+            HDfree(parsed);
+            parsed = NULL;
+            HDfree(cpy);
+            cpy = NULL;
         }
         else {
-            /* Failed return case checks */
-            if (parsed != NULL)
-                FAIL_PUTS_ERROR("should not have returned elements on failure")
-        }
-
-        HDfree(cpy);
-        HDfree(parsed);
+            FAIL_IF(parsed != NULL)
+        } /* if parse_tuple() == SUCCEED or no */
 
     } /* for each testcase */
 
     PASSED();
-    return SUCCEED;
+    return 0;
 
 error:
-    HDfree(parsed);
-    HDfree(cpy);
+    /***********
+     * CLEANUP *
+     ***********/
 
-    return FAIL;
+    if (parsed != NULL)
+        HDfree(parsed);
+    if (cpy != NULL)
+        HDfree(cpy);
+
+    return 1;
 
 } /* test_parse_tuple */
 
 /*----------------------------------------------------------------------------
  *
- * Function:    test_populate_ros3_fa()
+ * Function:   test_populate_ros3_fa()
  *
- * Purpose:     Verify behavior of `populate_ros3_fa()`
+ * Purpose:    Verify behavior of `populate_ros3_fa()`
  *
- * Return:      SUCCEED/FAIL
+ * Return:     0 if test passes
+ *             1 if failure
  *
- * Programmer:  Jacob Smith
- *              2017-11-13
+ * Programmer: Jacob Smith
+ *             2017-11-13
+ *
+ * Changes:    None
  *
  *----------------------------------------------------------------------------
  */
-#ifdef H5_HAVE_ROS3_VFD
-static herr_t
+static unsigned
 test_populate_ros3_fa(void)
 {
-    int bad_version = 0xf87a; /* arbitrarily wrong version number */
+#ifdef H5_HAVE_ROS3_VFD
+    /*************************
+     * TEST-LOCAL STRUCTURES *
+     *************************/
 
-    TESTING("ros3 fapl population");
+    /************************
+     * TEST-LOCAL VARIABLES *
+     ************************/
+
+    hbool_t show_progress = FALSE;
+    int     bad_version   = 0xf87a; /* arbitrarily wrong version number */
+#endif                              /* H5_HAVE_ROS3_VFD */
+
+    TESTING("programmatic ros3 fapl population");
+
+#ifndef H5_HAVE_ROS3_VFD
+    HDputs(" -SKIP-");
+    HDputs("    Read-Only S3 VFD not enabled");
+    HDfflush(stdout);
+    return 0;
+#else
+#if H5TOOLS_UTILS_TEST_DEBUG > 0
+    show_progress = TRUE;
+#endif /* H5TOOLS_UTILS_TEST_DEBUG */
 
     HDassert(bad_version != H5FD_CURR_ROS3_FAPL_T_VERSION);
 
-    /* NULL fapl config pointer fails */
+    /*********
+     * TESTS *
+     *********/
+
+    /* NULL fapl config pointer fails
+     */
     {
         const char *values[] = {"x", "y", "z"};
 
-        /* Should FAIL */
-        if (SUCCEED == h5tools_populate_ros3_fapl(NULL, values))
-            TEST_ERROR
+        if (show_progress) {
+            HDprintf("NULL fapl pointer\n");
+        }
+
+        JSVERIFY(0, h5tools_populate_ros3_fapl(NULL, values), "fapl pointer cannot be null")
     }
 
-    /* NULL values pointer yields default fapl */
+    /* NULL values pointer yields default fapl
+     */
     {
         H5FD_ros3_fapl_t fa = {bad_version, TRUE, "u", "v", "w"};
 
-        /* Should PASS */
-        if (FAIL == h5tools_populate_ros3_fapl(&fa, NULL))
-            TEST_ERROR
+        if (show_progress) {
+            HDprintf("NULL values pointer\n");
+        }
 
-        if (fa.version != H5FD_CURR_ROS3_FAPL_T_VERSION)
-            TEST_ERROR
-        if (fa.authenticate != FALSE)
-            TEST_ERROR
-        if (HDstrcmp("", fa.aws_region))
-            TEST_ERROR
-        if (HDstrcmp("", fa.secret_id))
-            TEST_ERROR
-        if (HDstrcmp("", fa.secret_key))
-            TEST_ERROR
+        JSVERIFY(1, h5tools_populate_ros3_fapl(&fa, NULL), "NULL values pointer yields \"default\" fapl")
+        JSVERIFY(H5FD_CURR_ROS3_FAPL_T_VERSION, fa.version, NULL)
+        JSVERIFY(FALSE, fa.authenticate, NULL)
+        JSVERIFY_STR("", fa.aws_region, NULL)
+        JSVERIFY_STR("", fa.secret_id, NULL)
+        JSVERIFY_STR("", fa.secret_key, NULL)
     }
 
-    /* all-empty values yields default fapl */
+    /* all-empty values
+     * yields default fapl
+     */
     {
         H5FD_ros3_fapl_t fa       = {bad_version, TRUE, "u", "v", "w"};
         const char      *values[] = {"", "", ""};
 
-        /* Should PASS */
-        if (FAIL == h5tools_populate_ros3_fapl(&fa, values))
-            TEST_ERROR
+        if (show_progress) {
+            HDprintf("all empty values\n");
+        }
 
-        if (fa.version != H5FD_CURR_ROS3_FAPL_T_VERSION)
-            TEST_ERROR
-        if (fa.authenticate != FALSE)
-            TEST_ERROR
-        if (HDstrcmp("", fa.aws_region))
-            TEST_ERROR
-        if (HDstrcmp("", fa.secret_id))
-            TEST_ERROR
-        if (HDstrcmp("", fa.secret_key))
-            TEST_ERROR
+        JSVERIFY(1, h5tools_populate_ros3_fapl(&fa, values), "empty values yields \"default\" fapl")
+        JSVERIFY(H5FD_CURR_ROS3_FAPL_T_VERSION, fa.version, NULL)
+        JSVERIFY(FALSE, fa.authenticate, NULL)
+        JSVERIFY_STR("", fa.aws_region, NULL)
+        JSVERIFY_STR("", fa.secret_id, NULL)
+        JSVERIFY_STR("", fa.secret_key, NULL)
     }
 
     /* successfully set fapl with values
@@ -470,70 +686,58 @@ test_populate_ros3_fa(void)
         H5FD_ros3_fapl_t fa       = {bad_version, FALSE, "a", "b", "c"};
         const char      *values[] = {"x", "y", "z", "a"};
 
-        /* Should PASS */
-        if (FAIL == h5tools_populate_ros3_fapl(&fa, values))
-            TEST_ERROR
+        if (show_progress) {
+            HDprintf("successful full set\n");
+        }
 
-        if (fa.version != H5FD_CURR_ROS3_FAPL_T_VERSION)
-            TEST_ERROR
-        if (fa.authenticate != TRUE)
-            TEST_ERROR
-        if (HDstrcmp("x", fa.aws_region))
-            TEST_ERROR
-        if (HDstrcmp("y", fa.secret_id))
-            TEST_ERROR
-        if (HDstrcmp("z", fa.secret_key))
-            TEST_ERROR
+        JSVERIFY(1, h5tools_populate_ros3_fapl(&fa, values), "four values")
+        JSVERIFY(H5FD_CURR_ROS3_FAPL_T_VERSION, fa.version, NULL)
+        JSVERIFY(TRUE, fa.authenticate, NULL)
+        JSVERIFY_STR("x", fa.aws_region, NULL)
+        JSVERIFY_STR("y", fa.secret_id, NULL)
+        JSVERIFY_STR("z", fa.secret_key, NULL)
     }
 
     /* NULL region
-     * yields default fapl
+     * yeilds default fapl
      */
     {
         H5FD_ros3_fapl_t fa       = {bad_version, FALSE, "a", "b", "c"};
         const char      *values[] = {NULL, "y", "z", NULL};
 
-        /* Should FAIL */
-        if (SUCCEED == h5tools_populate_ros3_fapl(&fa, values))
-            TEST_ERROR
+        if (show_progress) {
+            HDprintf("NULL region\n");
+        }
 
-        if (fa.version != H5FD_CURR_ROS3_FAPL_T_VERSION)
-            TEST_ERROR
-        if (fa.authenticate != FALSE)
-            TEST_ERROR
-        if (HDstrcmp("", fa.aws_region))
-            TEST_ERROR
-        if (HDstrcmp("", fa.secret_id))
-            TEST_ERROR
-        if (HDstrcmp("", fa.secret_key))
-            TEST_ERROR
+        JSVERIFY(0, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
+        JSVERIFY(H5FD_CURR_ROS3_FAPL_T_VERSION, fa.version, NULL)
+        JSVERIFY(FALSE, fa.authenticate, NULL)
+        JSVERIFY_STR("", fa.aws_region, NULL)
+        JSVERIFY_STR("", fa.secret_id, NULL)
+        JSVERIFY_STR("", fa.secret_key, NULL)
     }
 
     /* empty region
-     * yields default fapl
+     * yeilds default fapl
      */
     {
         H5FD_ros3_fapl_t fa       = {bad_version, FALSE, "a", "b", "c"};
         const char      *values[] = {"", "y", "z", NULL};
 
-        /* Should FAIL */
-        if (SUCCEED == h5tools_populate_ros3_fapl(&fa, values))
-            TEST_ERROR
+        if (show_progress) {
+            HDprintf("empty region; non-empty id, key\n");
+        }
 
-        if (fa.version != H5FD_CURR_ROS3_FAPL_T_VERSION)
-            TEST_ERROR
-        if (fa.authenticate != FALSE)
-            TEST_ERROR
-        if (HDstrcmp("", fa.aws_region))
-            TEST_ERROR
-        if (HDstrcmp("", fa.secret_id))
-            TEST_ERROR
-        if (HDstrcmp("", fa.secret_key))
-            TEST_ERROR
+        JSVERIFY(0, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
+        JSVERIFY(H5FD_CURR_ROS3_FAPL_T_VERSION, fa.version, NULL)
+        JSVERIFY(FALSE, fa.authenticate, NULL)
+        JSVERIFY_STR("", fa.aws_region, NULL)
+        JSVERIFY_STR("", fa.secret_id, NULL)
+        JSVERIFY_STR("", fa.secret_key, NULL)
     }
 
     /* region overflow
-     * yields default fapl
+     * yeilds default fapl
      */
     {
         H5FD_ros3_fapl_t fa       = {bad_version, FALSE, "a", "b", "c"};
@@ -541,22 +745,18 @@ test_populate_ros3_fa(void)
                                      "there is another rainbow bounding some darkened sky",
                                 "y", "z"};
 
+        if (show_progress) {
+            HDprintf("region overflow\n");
+        }
+
         HDassert(HDstrlen(values[0]) > H5FD_ROS3_MAX_REGION_LEN);
 
-        /* Should FAIL */
-        if (SUCCEED == h5tools_populate_ros3_fapl(&fa, values))
-            TEST_ERROR
-
-        if (fa.version != H5FD_CURR_ROS3_FAPL_T_VERSION)
-            TEST_ERROR
-        if (fa.authenticate != FALSE)
-            TEST_ERROR
-        if (HDstrcmp("", fa.aws_region))
-            TEST_ERROR
-        if (HDstrcmp("", fa.secret_id))
-            TEST_ERROR
-        if (HDstrcmp("", fa.secret_key))
-            TEST_ERROR
+        JSVERIFY(0, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
+        JSVERIFY(H5FD_CURR_ROS3_FAPL_T_VERSION, fa.version, NULL)
+        JSVERIFY(FALSE, fa.authenticate, NULL)
+        JSVERIFY_STR("", fa.aws_region, NULL)
+        JSVERIFY_STR("", fa.secret_id, NULL)
+        JSVERIFY_STR("", fa.secret_key, NULL)
     }
 
     /* NULL id
@@ -566,43 +766,35 @@ test_populate_ros3_fa(void)
         H5FD_ros3_fapl_t fa       = {bad_version, FALSE, "a", "b", "c"};
         const char      *values[] = {"x", NULL, "z", NULL};
 
-        /* Should FAIL */
-        if (SUCCEED == h5tools_populate_ros3_fapl(&fa, values))
-            TEST_ERROR
+        if (show_progress) {
+            HDprintf("NULL id\n");
+        }
 
-        if (fa.version != H5FD_CURR_ROS3_FAPL_T_VERSION)
-            TEST_ERROR
-        if (fa.authenticate != FALSE)
-            TEST_ERROR
-        if (HDstrcmp("", fa.aws_region))
-            TEST_ERROR
-        if (HDstrcmp("", fa.secret_id))
-            TEST_ERROR
-        if (HDstrcmp("", fa.secret_key))
-            TEST_ERROR
+        JSVERIFY(0, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
+        JSVERIFY(H5FD_CURR_ROS3_FAPL_T_VERSION, fa.version, NULL)
+        JSVERIFY(FALSE, fa.authenticate, NULL)
+        JSVERIFY_STR("", fa.aws_region, NULL)
+        JSVERIFY_STR("", fa.secret_id, NULL)
+        JSVERIFY_STR("", fa.secret_key, NULL)
     }
 
     /* empty id (non-empty region, key)
-     * yields default fapl
+     * yeilds default fapl
      */
     {
         H5FD_ros3_fapl_t fa       = {bad_version, FALSE, "a", "b", "c"};
         const char      *values[] = {"x", "", "z", NULL};
 
-        /* Should FAIL */
-        if (SUCCEED == h5tools_populate_ros3_fapl(&fa, values))
-            TEST_ERROR
+        if (show_progress) {
+            HDprintf("empty id; non-empty region and key\n");
+        }
 
-        if (fa.version != H5FD_CURR_ROS3_FAPL_T_VERSION)
-            TEST_ERROR
-        if (fa.authenticate != FALSE)
-            TEST_ERROR
-        if (HDstrcmp("", fa.aws_region))
-            TEST_ERROR
-        if (HDstrcmp("", fa.secret_id))
-            TEST_ERROR
-        if (HDstrcmp("", fa.secret_key))
-            TEST_ERROR
+        JSVERIFY(0, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
+        JSVERIFY(H5FD_CURR_ROS3_FAPL_T_VERSION, fa.version, NULL)
+        JSVERIFY(FALSE, fa.authenticate, NULL)
+        JSVERIFY_STR("", fa.aws_region, NULL)
+        JSVERIFY_STR("", fa.secret_id, NULL)
+        JSVERIFY_STR("", fa.secret_key, NULL)
     }
 
     /* id overflow
@@ -623,22 +815,18 @@ test_populate_ros3_fa(void)
                                      "Can you separate the various parts of the problem?",
                                 "z"};
 
+        if (show_progress) {
+            HDprintf("id overflow\n");
+        }
+
         HDassert(HDstrlen(values[1]) > H5FD_ROS3_MAX_SECRET_ID_LEN);
 
-        /* Should FAIL */
-        if (SUCCEED == h5tools_populate_ros3_fapl(&fa, values))
-            TEST_ERROR
-
-        if (fa.version != H5FD_CURR_ROS3_FAPL_T_VERSION)
-            TEST_ERROR
-        if (fa.authenticate != FALSE)
-            TEST_ERROR
-        if (HDstrcmp("x", fa.aws_region))
-            TEST_ERROR
-        if (HDstrcmp("", fa.secret_id))
-            TEST_ERROR
-        if (HDstrcmp("", fa.secret_key))
-            TEST_ERROR
+        JSVERIFY(0, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
+        JSVERIFY(H5FD_CURR_ROS3_FAPL_T_VERSION, fa.version, NULL)
+        JSVERIFY(FALSE, fa.authenticate, NULL)
+        JSVERIFY_STR("x", fa.aws_region, NULL)
+        JSVERIFY_STR("", fa.secret_id, NULL)
+        JSVERIFY_STR("", fa.secret_key, NULL)
     }
 
     /* NULL key
@@ -648,89 +836,73 @@ test_populate_ros3_fa(void)
         H5FD_ros3_fapl_t fa       = {bad_version, FALSE, "a", "b", "c"};
         const char      *values[] = {"x", "y", NULL, NULL};
 
-        /* Should FAIL */
-        if (SUCCEED == h5tools_populate_ros3_fapl(&fa, values))
-            TEST_ERROR
+        if (show_progress) {
+            HDprintf("NULL key\n");
+        }
 
-        if (fa.version != H5FD_CURR_ROS3_FAPL_T_VERSION)
-            TEST_ERROR
-        if (fa.authenticate != FALSE)
-            TEST_ERROR
-        if (HDstrcmp("", fa.aws_region))
-            TEST_ERROR
-        if (HDstrcmp("", fa.secret_id))
-            TEST_ERROR
-        if (HDstrcmp("", fa.secret_key))
-            TEST_ERROR
+        JSVERIFY(0, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
+        JSVERIFY(H5FD_CURR_ROS3_FAPL_T_VERSION, fa.version, NULL)
+        JSVERIFY(FALSE, fa.authenticate, NULL)
+        JSVERIFY_STR("", fa.aws_region, NULL)
+        JSVERIFY_STR("", fa.secret_id, NULL)
+        JSVERIFY_STR("", fa.secret_key, NULL)
     }
 
     /* empty key (non-empty region, id)
-     * yields authenticating fapl
+     * yeilds authenticating fapl
      */
     {
         H5FD_ros3_fapl_t fa       = {bad_version, FALSE, "a", "b", "c"};
         const char      *values[] = {"x", "y", "", NULL};
 
-        /* Should PASS */
-        if (FAIL == h5tools_populate_ros3_fapl(&fa, values))
-            TEST_ERROR
+        if (show_progress) {
+            HDprintf("empty key; non-empty region and id\n");
+        }
 
-        if (fa.version != H5FD_CURR_ROS3_FAPL_T_VERSION)
-            TEST_ERROR
-        if (fa.authenticate != TRUE)
-            TEST_ERROR
-        if (HDstrcmp("x", fa.aws_region))
-            TEST_ERROR
-        if (HDstrcmp("y", fa.secret_id))
-            TEST_ERROR
-        if (HDstrcmp("", fa.secret_key))
-            TEST_ERROR
+        JSVERIFY(1, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
+        JSVERIFY(H5FD_CURR_ROS3_FAPL_T_VERSION, fa.version, NULL)
+        JSVERIFY(TRUE, fa.authenticate, NULL)
+        JSVERIFY_STR("x", fa.aws_region, NULL)
+        JSVERIFY_STR("y", fa.secret_id, NULL)
+        JSVERIFY_STR("", fa.secret_key, NULL)
     }
 
     /* empty key, region (non-empty id)
-     * yields default fapl
+     * yeilds default fapl
      */
     {
         H5FD_ros3_fapl_t fa       = {bad_version, FALSE, "a", "b", "c"};
         const char      *values[] = {"", "y", "", NULL};
 
-        /* Should FAIL */
-        if (SUCCEED == h5tools_populate_ros3_fapl(&fa, values))
-            TEST_ERROR
+        if (show_progress) {
+            HDprintf("empty key and region; non-empty id\n");
+        }
 
-        if (fa.version != H5FD_CURR_ROS3_FAPL_T_VERSION)
-            TEST_ERROR
-        if (fa.authenticate != FALSE)
-            TEST_ERROR
-        if (HDstrcmp("", fa.aws_region))
-            TEST_ERROR
-        if (HDstrcmp("", fa.secret_id))
-            TEST_ERROR
-        if (HDstrcmp("", fa.secret_key))
-            TEST_ERROR
+        JSVERIFY(0, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
+        JSVERIFY(H5FD_CURR_ROS3_FAPL_T_VERSION, fa.version, NULL)
+        JSVERIFY(FALSE, fa.authenticate, NULL)
+        JSVERIFY_STR("", fa.aws_region, NULL)
+        JSVERIFY_STR("", fa.secret_id, NULL)
+        JSVERIFY_STR("", fa.secret_key, NULL)
     }
 
     /* empty key, id (non-empty region)
-     * yields default fapl
+     * yeilds default fapl
      */
     {
         H5FD_ros3_fapl_t fa       = {bad_version, FALSE, "a", "b", "c"};
         const char      *values[] = {"x", "", "", NULL};
 
-        /* Should FAIL */
-        if (SUCCEED == h5tools_populate_ros3_fapl(&fa, values))
-            TEST_ERROR
+        if (show_progress) {
+            HDprintf("empty key and id; non-empty region\n");
+        }
 
-        if (fa.version != H5FD_CURR_ROS3_FAPL_T_VERSION)
-            TEST_ERROR
-        if (fa.authenticate != FALSE)
-            TEST_ERROR
-        if (HDstrcmp("", fa.aws_region))
-            TEST_ERROR
-        if (HDstrcmp("", fa.secret_id))
-            TEST_ERROR
-        if (HDstrcmp("", fa.secret_key))
-            TEST_ERROR
+        JSVERIFY(0, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
+        JSVERIFY(H5FD_CURR_ROS3_FAPL_T_VERSION, fa.version, NULL)
+        JSVERIFY(FALSE, fa.authenticate, NULL)
+        JSVERIFY_STR("", fa.aws_region, NULL)
+        JSVERIFY_STR("", fa.secret_id, NULL)
+        JSVERIFY_STR("", fa.secret_key, NULL)
     }
 
     /* key overflow
@@ -750,22 +922,18 @@ test_populate_ros3_fa(void)
                                      "What are the boundaries of the problem? "
                                      "Can you separate the various parts of the problem?"};
 
+        if (show_progress) {
+            HDprintf("key overflow\n");
+        }
+
         HDassert(HDstrlen(values[2]) > H5FD_ROS3_MAX_SECRET_KEY_LEN);
 
-        /* Should FAIL */
-        if (SUCCEED == h5tools_populate_ros3_fapl(&fa, values))
-            TEST_ERROR
-
-        if (fa.version != H5FD_CURR_ROS3_FAPL_T_VERSION)
-            TEST_ERROR
-        if (fa.authenticate != FALSE)
-            TEST_ERROR
-        if (HDstrcmp("x", fa.aws_region))
-            TEST_ERROR
-        if (HDstrcmp("y", fa.secret_id))
-            TEST_ERROR
-        if (HDstrcmp("", fa.secret_key))
-            TEST_ERROR
+        JSVERIFY(0, h5tools_populate_ros3_fapl(&fa, values), "could not fill fapl")
+        JSVERIFY(H5FD_CURR_ROS3_FAPL_T_VERSION, fa.version, NULL)
+        JSVERIFY(FALSE, fa.authenticate, NULL)
+        JSVERIFY_STR("x", fa.aws_region, NULL)
+        JSVERIFY_STR("y", fa.secret_id, NULL)
+        JSVERIFY_STR("", fa.secret_key, NULL)
     }
 
     /* use case
@@ -774,144 +942,351 @@ test_populate_ros3_fa(void)
         H5FD_ros3_fapl_t fa       = {0, 0, "", "", ""};
         const char      *values[] = {"us-east-2", "AKIAIMC3D3XLYXLN5COA",
                                 "ugs5aVVnLFCErO/8uW14iWE3K5AgXMpsMlWneO/+"};
-
-        /* Should PASS */
-        if (FAIL == h5tools_populate_ros3_fapl(&fa, values))
-            TEST_ERROR
-
-        if (fa.version != 1)
-            TEST_ERROR
-        if (fa.authenticate != TRUE)
-            TEST_ERROR
+        JSVERIFY(1, h5tools_populate_ros3_fapl(&fa, values), "unable to set use case")
+        JSVERIFY(1, fa.version, "version check")
+        JSVERIFY(1, fa.authenticate, "should authenticate")
     }
 
     PASSED();
-    return SUCCEED;
+    return 0;
 
 error:
+    /***********
+     * CLEANUP *
+     ***********/
 
-    return FAIL;
+    return 1;
+
+#endif /* H5_HAVE_ROS3_VFD */
 
 } /* test_populate_ros3_fa */
-#endif /* H5_HAVE_ROS3_VFD */
 
 /*----------------------------------------------------------------------------
  *
- * Function:    test_set_configured_fapl()
+ * Function:   test_set_configured_fapl()
  *
- * Purpose:     Verify `h5tools_get_fapl()` with ROS3 and HDFS VFDs
+ * Purpose:    Verify `h5tools_set_configured_fapl()` with ROS3 VFD
  *
- * Return:      SUCCEED/FAIL
+ * Return:     0 if test passes
+ *             1 if failure
  *
- * Programmer:  Jacob Smith
- *              2018-07-12
+ * Programmer: Jacob Smith
+ *             2018-07-12
+ *
+ * Changes:    None
  *
  *----------------------------------------------------------------------------
  */
-static herr_t
-test_set_configured_fapl(vfd_tests_e test_type, fapl_testcase_t cases[], unsigned n_cases)
+static unsigned
+test_set_configured_fapl(void)
 {
-    hid_t    in_fapl_id  = H5I_INVALID_HID;
-    hid_t    out_fapl_id = H5I_INVALID_HID;
-    unsigned u;
+#define UTIL_TEST_NOFAPL  1
+#define UTIL_TEST_DEFAULT 2
+#define UTIL_TEST_CREATE  3
 
-    if (VFD_TESTS_COMMON == test_type)
-        TESTING("set fapl vfd (common)")
-    else if (VFD_TESTS_ROS3 == test_type)
-        TESTING("set fapl vfd (ros3)")
-    else if (VFD_TESTS_HDFS == test_type)
-        TESTING("set fapl vfd (hdfs)")
+    /*************************
+     * TEST-LOCAL STRUCTURES *
+     *************************/
+    typedef struct testcase {
+        const char message[88];
+        int        expected;
+        int        fapl_choice;
+        const char vfdname[12];
+        void      *conf_fa;
+    } testcase;
 
-    /* Loop over all test cases */
-    for (u = 0; u < n_cases; u++) {
-        h5tools_vfd_info_t vfd_info;
-        fapl_testcase_t    tc = cases[u];
+    typedef struct other_fa_t {
+        int a;
+        int b;
+        int c;
+    } other_fa_t;
 
-        /* Setup */
-        if (tc.fapl_choice == FAPL_CHOICE_DEFAULT) {
-            in_fapl_id = H5P_DEFAULT;
+    /************************
+     * TEST-LOCAL VARIABLES *
+     ************************/
+
+    hid_t      fapl_id  = H5I_INVALID_HID;
+    other_fa_t wrong_fa = {0x432, 0xf82, 0x9093};
+#ifdef H5_HAVE_ROS3_VFD
+    H5FD_ros3_fapl_t ros3_anon_fa = {1, FALSE, "", "", ""};
+    H5FD_ros3_fapl_t ros3_auth_fa = {
+        1,                            /* fapl version           */
+        TRUE,                         /* authenticate           */
+        "us-east-1",                  /* aws region             */
+        "12345677890abcdef",          /* simulate access key ID */
+        "oiwnerwe9u0234nJw0-aoj+dsf", /* simulate secret key    */
+    };
+#endif /* H5_HAVE_ROS3_VFD */
+
+#ifdef H5_HAVE_LIBHDFS
+    H5FD_hdfs_fapl_t hdfs_fa = {
+        1,    /* fapl version          */
+        "",   /* namenode name         */
+        0,    /* namenode port         */
+        "",   /* kerberos ticket cache */
+        "",   /* user name             */
+        2048, /* stream buffer size    */
+    };
+#endif                    /* H5_HAVE_LIBHDFS */
+    unsigned n_cases = 7; /* number of common testcases */
+    testcase cases[] = {
+        {
+            "(common) should fail: no fapl id",
+            0,
+            UTIL_TEST_NOFAPL,
+            "",
+            NULL,
+        },
+        {
+            "(common) should fail: no fapl id (with struct)",
+            0,
+            UTIL_TEST_NOFAPL,
+            "",
+            &wrong_fa,
+        },
+        {
+            "(common) H5P_DEFAULT with no struct should succeed",
+            1,
+            UTIL_TEST_DEFAULT,
+            "",
+            NULL,
+        },
+        {
+            "(common) H5P_DEFAULT with (ignored) struct should succeed",
+            1,
+            UTIL_TEST_DEFAULT,
+            "",
+            &wrong_fa,
+        },
+        {
+            "(common) provided fapl entry should not fail",
+            1,
+            UTIL_TEST_CREATE,
+            "",
+            NULL,
+        },
+        {
+            "(common) provided fapl entry should not fail; ignores struct",
+            1,
+            UTIL_TEST_CREATE,
+            "",
+            &wrong_fa,
+        },
+        {
+            "(common) should fail: unrecoginzed vfd name",
+            0,
+            UTIL_TEST_DEFAULT,
+            "unknown",
+            NULL,
+        },
+
+#ifdef H5_HAVE_ROS3_VFD
+        /* WARNING: add number of ROS3 test cases after array definition
+         */
+        {
+            "(ROS3) should fail: no fapl id, no struct",
+            0,
+            UTIL_TEST_NOFAPL,
+            "ros3",
+            NULL,
+        },
+        {
+            "(ROS3) should fail: no fapl id",
+            0,
+            UTIL_TEST_NOFAPL,
+            "ros3",
+            &ros3_anon_fa,
+        },
+        {
+            "(ROS3) should fail: no struct",
+            0,
+            UTIL_TEST_CREATE,
+            "ros3",
+            NULL,
+        },
+        {
+            "(ROS3) successful set",
+            1,
+            UTIL_TEST_CREATE,
+            "ros3",
+            &ros3_anon_fa,
+        },
+        {
+            "(ROS3) should fail: attempt to set DEFAULT fapl",
+            0,
+            UTIL_TEST_DEFAULT,
+            "ros3",
+            &ros3_anon_fa,
+        },
+#endif /* H5_HAVE_ROS3_VFD */
+
+#ifdef H5_HAVE_LIBHDFS
+        /* WARNING: add number of HDFS test cases after array definition
+         */
+        {
+            "(HDFS) should fail: no fapl id, no struct",
+            0,
+            UTIL_TEST_NOFAPL,
+            "hdfs",
+            NULL,
+        },
+        {
+            "(HDFS) should fail: no fapl id",
+            0,
+            UTIL_TEST_NOFAPL,
+            "hdfs",
+            &hdfs_fa,
+        },
+        {
+            "(HDFS) should fail: no struct",
+            0,
+            UTIL_TEST_CREATE,
+            "hdfs",
+            NULL,
+        },
+        {
+            "(HDFS) successful set",
+            1,
+            UTIL_TEST_CREATE,
+            "hdfs",
+            &hdfs_fa,
+        },
+        {
+            "(HDFS) should fail: attempt to set DEFAULT fapl",
+            0,
+            UTIL_TEST_DEFAULT,
+            "hdfs",
+            &hdfs_fa,
+        },
+#endif /* H5_HAVE_LIBHDFS */
+
+    }; /* testcases `cases` array */
+    unsigned int i;
+
+#ifdef H5_HAVE_ROS3_VFD
+    n_cases += 5;
+#endif /* H5_HAVE_ROS3_VFD */
+
+#ifdef H5_HAVE_LIBHDFS
+    n_cases += 5;
+#endif /* H5_HAVE_LIBHDFS */
+
+    TESTING("programmatic fapl set");
+
+    for (i = 0; i < n_cases; i++) {
+        int      result;
+        testcase C = cases[i];
+
+        fapl_id = H5I_INVALID_HID;
+
+#if UTIL_TEST_DEBUG
+        HDfprintf(stderr, "setup test %d\t%s\n", i, C.message);
+        fflush(stderr);
+#endif /* UTIL_TEST_DEBUG */
+
+        /* per-test setup */
+        if (C.fapl_choice == UTIL_TEST_DEFAULT) {
+            fapl_id = H5P_DEFAULT;
         }
-        else if (tc.fapl_choice == FAPL_CHOICE_CREATE) {
-            if (H5I_INVALID_HID == (in_fapl_id = H5Pcreate(H5P_FILE_ACCESS)))
-                TEST_ERROR
-        }
-        else
-            in_fapl_id = H5I_INVALID_HID;
-
-        /* Test */
-        if (!HDstrcmp("", tc.vfd_name))
-            out_fapl_id = h5tools_get_fapl(in_fapl_id, NULL);
-        else {
-            vfd_info.info = tc.fa;
-            vfd_info.name = tc.vfd_name;
-            out_fapl_id   = h5tools_get_fapl(in_fapl_id, &vfd_info);
+        else if (C.fapl_choice == UTIL_TEST_CREATE) {
+            fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+            FAIL_IF(fapl_id < 0)
         }
 
-        /* Check */
-        if ((tc.expected_result == FAIL && H5I_INVALID_HID != out_fapl_id) ||
-            (tc.expected_result == SUCCEED && H5I_INVALID_HID == out_fapl_id))
-            FAIL_PUTS_ERROR(tc.error_message)
+#if UTIL_TEST_DEBUG
+        HDfprintf(stderr, "before test\n");
+        fflush(stderr);
+#endif /* UTIL_TEST_DEBUG */
 
-        /* Close */
-        if (tc.fapl_choice == FAPL_CHOICE_CREATE && H5Pclose(in_fapl_id) < 0)
-            TEST_ERROR
-        if (out_fapl_id != H5I_INVALID_HID && H5Pclose(out_fapl_id) < 0)
-            TEST_ERROR
+        /* test */
+        result = h5tools_set_configured_fapl(fapl_id, C.vfdname, C.conf_fa);
+        JSVERIFY(result, C.expected, C.message)
+
+#if UTIL_TEST_DEBUG
+        HDfprintf(stderr, "after test\n");
+        fflush(stderr);
+#endif /* UTIL_TEST_DEBUG */
+
+        /* per-test-teardown */
+        if (fapl_id > 0) {
+            FAIL_IF(FAIL == H5Pclose(fapl_id))
+        }
+        fapl_id = H5I_INVALID_HID;
+
+#if UTIL_TEST_DEBUG
+        HDfprintf(stderr, "after cleanup\n");
+        fflush(stderr);
+#endif /* UTIL_TEST_DEBUG */
     }
+
+#if UTIL_TEST_DEBUG
+    HDfprintf(stderr, "after loop\n");
+    fflush(stderr);
+#endif /* UTIL_TEST_DEBUG */
 
     PASSED();
-    return SUCCEED;
+    return 0;
 
 error:
-    H5E_BEGIN_TRY
-    {
-        H5Pclose(in_fapl_id);
-        H5Pclose(out_fapl_id);
-    }
-    H5E_END_TRY;
+    /***********
+     * CLEANUP *
+     ***********/
 
-    return FAIL;
+#if UTIL_TEST_DEBUG
+    HDfprintf(stderr, "ERROR\n");
+    fflush(stderr);
+#endif /* UTIL_TEST_DEBUG */
+
+    if (fapl_id > 0) {
+        (void)H5Pclose(fapl_id);
+    }
+
+    return 1;
+
+#undef UTIL_TEST_NOFAPL
+#undef UTIL_TEST_DEFAULT
+#undef UTIL_TEST_CREATE
 } /* test_set_configured_fapl */
 
 /*----------------------------------------------------------------------------
  *
- * Function:    main()
+ * Function:   main()
  *
- * Purpose:     Run all test functions
+ * Purpose:    Run all test functions.
  *
- * Return:      EXIT_FAILURE/EXIT_SUCCESS
+ * Return:     0 iff all test pass
+ *             1 iff any failures
  *
- * Programmer:  Jacob Smith
- *              2017-11-10
+ * Programmer: Jacob Smith
+ *             2017-11-10
+ *
+ * Changes:    None.
  *
  *----------------------------------------------------------------------------
  */
 int
 main(void)
 {
-    int nerrors = 0;
+    unsigned nerrors = 0;
 
-    h5_reset();
+#ifdef _H5TEST_
+    h5reset(); /* h5test? */
+#endif         /* _H5TEST_ */
 
-    HDprintf("Testing tools VFD functionality.\n");
+    HDfprintf(stdout, "Testing h5tools_utils corpus.\n");
 
-    nerrors += test_parse_tuple() < 0 ? 1 : 0;
-    nerrors += test_set_configured_fapl(VFD_TESTS_COMMON, common_cases_g, 7) < 0 ? 1 : 0;
-#ifdef H5_HAVE_ROS3_VFD
-    nerrors += test_populate_ros3_fa() < 0 ? 1 : 0;
-    nerrors += test_set_configured_fapl(VFD_TESTS_ROS3, ros3_cases_g, 5) < 0 ? 1 : 0;
-#endif
-#ifdef H5_HAVE_LIBHDFS
-    nerrors += test_set_configured_fapl(VFD_TESTS_HDFS, hdfs_cases_g, 5) < 0 ? 1 : 0;
-#endif
+    nerrors += test_parse_tuple();
+    nerrors += test_populate_ros3_fa();
+    nerrors += test_set_configured_fapl();
 
-    if (nerrors) {
-        HDprintf("***** %d tools VFD TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
-        return EXIT_FAILURE;
+    if (nerrors > 0) {
+        HDfprintf(stdout, "***** %d h5tools_utils TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
+        nerrors = 1;
+    }
+    else {
+        HDfprintf(stdout, "All h5tools_utils tests passed\n");
     }
 
-    HDprintf("All tools VFD tests passed.\n");
+    return (int)nerrors;
 
-    return EXIT_SUCCESS;
-
-} /* end main() */
+} /* main */
