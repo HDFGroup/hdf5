@@ -3,15 +3,11 @@
 
 set (CMAKE_COMPILER_VENDOR "intel")
 
-if (USE_SANITIZER)
-  set(CMAKE_C_COMPILER icl)
-  set(CMAKE_CXX_COMPILER icl++)
-  set(CMAKE_Fortran_COMPILER ifort)
-  set(INTEL_CLANG ON)
-elseif (USE_INTELX)
+if (USE_LLVM)
   set(CMAKE_C_COMPILER icx)
   set(CMAKE_CXX_COMPILER icpx)
   set(CMAKE_Fortran_COMPILER ifx)
+  set(INTEL_CLANG ON)
 else ()
   set(CMAKE_C_COMPILER icc)
   set(CMAKE_CXX_COMPILER icpc)
