@@ -17,7 +17,7 @@ Compiling Options:
                Compilation Mode: @CONFIG_MODE@
                      C Compiler: @CC_VERSION@
                         C Flags: @CFLAGS@
-                     H5 C Flags: @H5_CFLAGS@ @H5_ECFLAGS@
+                     H5 C Flags: @H5_CFLAGS@
                      AM C Flags: @AM_CFLAGS@
                        CPPFLAGS: @CPPFLAGS@
                     H5_CPPFLAGS: @H5_CPPFLAGS@
@@ -48,7 +48,7 @@ Languages:
                             C++: @HDF_CXX@
 @BUILD_CXX_CONDITIONAL_TRUE@                   C++ Compiler: @CXX_VERSION@
 @BUILD_CXX_CONDITIONAL_TRUE@                      C++ Flags: @CXXFLAGS@
-@BUILD_CXX_CONDITIONAL_TRUE@                   H5 C++ Flags: @H5_CXXFLAGS@ @H5_ECXXFLAGS@
+@BUILD_CXX_CONDITIONAL_TRUE@                   H5 C++ Flags: @H5_CXXFLAGS@
 @BUILD_CXX_CONDITIONAL_TRUE@                   AM C++ Flags: @AM_CXXFLAGS@
 @BUILD_CXX_CONDITIONAL_TRUE@             Shared C++ Library: @enable_shared@
 @BUILD_CXX_CONDITIONAL_TRUE@             Static C++ Library: @enable_static@
