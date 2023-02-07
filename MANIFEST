@@ -2530,6 +2530,7 @@
 ./config/toolchain/clang.cmake
 ./config/toolchain/crayle.cmake
 ./config/toolchain/gcc.cmake
+./config/toolchain/icc.cmake
 ./config/toolchain/intel.cmake
 ./config/toolchain/mingw64.cmake
 ./config/toolchain/pgi.cmake
