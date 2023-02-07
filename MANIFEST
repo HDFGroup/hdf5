@@ -2525,13 +2525,15 @@
 ./hl/c++/test/Makefile.in
 
 # CMake-specific Files
+./config/toolchain/aarch64.cmake
 ./config/toolchain/build32.cmake
 ./config/toolchain/clang.cmake
 ./config/toolchain/crayle.cmake
-./config/toolchain/GCC.cmake
+./config/toolchain/gcc.cmake
+./config/toolchain/icc.cmake
 ./config/toolchain/intel.cmake
 ./config/toolchain/mingw64.cmake
-./config/toolchain/PGI.cmake
+./config/toolchain/pgi.cmake
 
 ./config/cmake/cacheinit.cmake
 ./config/cmake/ConversionTests.c

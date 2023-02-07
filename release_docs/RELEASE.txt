@@ -1,4 +1,4 @@
-HDF5 version 1.8.23 released on 2023-01-30
+HDF5 version 1.8.23 released on 2023-02-07
 ================================================================================
 
 
@@ -569,6 +569,13 @@ Platforms Tested
 
 Known Problems
 ==============
+    MacOS using CMake to build HDF5 with ifort versions 2021.2.0 or 2021.3.0 has
+    a test failure that does not occur when using Autotools to build it.  All
+    tests also pass using CMake with ifort version 2021.8.0 on macOS13.  This
+    failure may not indicate any particular problem with the build.  It can
+    be avoided by building with clang and gfortran for CMake builds or by using
+    Autotools to build with ifort on macOS.
+
     CMake files do not behave correctly with paths containing spaces.
     Do not use spaces in paths because the required escaping for handling spaces
     results in very complex and fragile build files.
