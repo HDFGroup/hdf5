@@ -190,7 +190,7 @@ H5G__traverse_ud(const H5G_loc_t *grp_loc /*in,out*/, const H5O_link_t *lnk, H5G
         HGOTO_ERROR(H5E_SYM, H5E_CANTREGISTER, FAIL, "unable to register group")
 
     /* User-defined callback function */
-    /* (Backwardly compatible with v0 H5L_class_t traverssal callback) */
+    /* (Backwardly compatible with v0 H5L_class_t traversal callback) */
     if (link_class->version == H5L_LINK_CLASS_T_VERS_0)
         cb_return = (((const H5L_class_0_t *)link_class)->trav_func)(lnk->name, cur_grp, lnk->u.ud.udata,
                                                                      lnk->u.ud.size, H5CX_get_lapl());

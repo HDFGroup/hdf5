@@ -112,7 +112,7 @@ H5Acreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id, hid_t 
     FUNC_ENTER_API(FAIL)
     H5TRACE5("i", "i*siii", loc_id, name, type_id, space_id, acpl_id);
 
-    /* check arguments */
+    /* Check arguments */
     if (H5I_ATTR == H5I_get_type(loc_id))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
     if (H5G_loc(loc_id, &loc) < 0)
@@ -235,7 +235,7 @@ H5Aopen_idx(hid_t loc_id, unsigned idx)
     FUNC_ENTER_API(FAIL)
     H5TRACE2("i", "iIu", loc_id, idx);
 
-    /* check arguments */
+    /* Check arguments */
     if (H5I_ATTR == H5I_get_type(loc_id))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
     if (H5G_loc(loc_id, &loc) < 0)
@@ -350,7 +350,7 @@ done:
     last operator if it was non-zero, or zero if all attributes were processed.
 
  DESCRIPTION
-        This function interates over the attributes of dataset or group
+        This function iterates over the attributes of dataset or group
     specified with 'loc_id'.  For each attribute of the object, the
     'op_data' and some additional information (specified below) are passed
     to the 'op' function.  The iteration begins with the '*attr_number'

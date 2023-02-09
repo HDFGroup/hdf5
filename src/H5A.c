@@ -1193,7 +1193,7 @@ done:
     if all attributes were processed.
 
  DESCRIPTION
-        This function interates over the attributes of dataset or group
+        This function iterates over the attributes of dataset or group
     specified with 'loc_id' & 'obj_name'.  For each attribute of the object,
     the 'op_data' and some additional information (specified below) are passed
     to the 'op' function.  The iteration begins with the '*idx'
@@ -1222,7 +1222,7 @@ H5Aiterate2(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t order, hsize_t *i
     FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "iIiIo*hx*x", loc_id, idx_type, order, idx, op, op_data);
 
-    /* check arguments */
+    /* Check arguments */
     if (H5I_ATTR == H5I_get_type(loc_id))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
     if (idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
@@ -1261,7 +1261,7 @@ done:
     if all attributes were processed.
 
  DESCRIPTION
-        This function interates over the attributes of dataset or group
+        This function iterates over the attributes of dataset or group
     specified with 'loc_id' & 'obj_name'.  For each attribute of the object,
     the 'op_data' and some additional information (specified below) are passed
     to the 'op' function.  The iteration begins with the '*idx'

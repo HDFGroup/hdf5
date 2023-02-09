@@ -1140,7 +1140,7 @@ done:
  *
  *		While the list of candidate cache entries is prepared
  *		elsewhere, this function is the main routine for distributing
- *		and applying the list.  It must be run simultaniously on
+ *		and applying the list.  It must be run simultaneously on
  *		all processes that have the relevant file open.  To ensure
  *		proper synchronization, there is a barrier at the beginning
  *		of this function.
@@ -1319,7 +1319,7 @@ done:
  *
  *		This function is the main routine for handling this
  *		notification procedure.  It must be called
- *		simultaniously on all processes that have the relevant
+ *		simultaneously on all processes that have the relevant
  *		file open.  To this end, it is called only during a
  *		sync point, with a barrier prior to the call.
  *
@@ -1524,7 +1524,7 @@ H5AC__receive_and_apply_clean_list(H5F_t *f)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "can't receive clean list")
 
     if (num_entries > 0)
-        /* mark the indicated entries as clean */
+        /* Mark the indicated entries as clean */
         if (H5C_mark_entries_as_clean(f, num_entries, haddr_buf_ptr) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't mark entries clean.")
 

@@ -1324,7 +1324,7 @@ H5FD_get_fs_type_map(const H5FD_t *file, H5FD_mem_t *type_map)
     HDassert(file->cls);
     HDassert(type_map);
 
-    /* Check for VFD class providing a type map retrieval rouine */
+    /* Check for VFD class providing a type map retrieval routine */
     if (file->cls->get_type_map) {
         /* Retrieve type mapping for this file */
         if ((file->cls->get_type_map)(file, type_map) < 0)

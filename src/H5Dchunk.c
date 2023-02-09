@@ -966,7 +966,7 @@ H5D__chunk_init(H5F_t *f, const H5D_t *const dset, hid_t dapl_id)
             if (!(scaled_power2up = H5VM_power2up(rdcc->scaled_dims[u])))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get the next power of 2")
 
-            /* Inital 'power2up' values for scaled dimensions */
+            /* Initial 'power2up' values for scaled dimensions */
             rdcc->scaled_power2up[u] = scaled_power2up;
 
             /* Number of bits required to encode scaled dimension size */
@@ -1030,7 +1030,7 @@ H5D__chunk_is_space_alloc(const H5O_storage_t *storage)
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Neil Fortner
- *              Wednessday, March 6, 2016
+ *              Wednesday, March 6, 2016
  *
  *-------------------------------------------------------------------------
  */
@@ -1633,7 +1633,7 @@ H5D__create_chunk_file_map_all(H5D_chunk_map_t *fm, const H5D_io_info_t
         coords[u] = 0;
         end[u]    = fm->chunk_dim[u] - 1;
 
-        /* Iniitialize partial chunk dimension information */
+        /* Initialize partial chunk dimension information */
         partial_dim_size[u] = file_dims[u] % fm->chunk_dim[u];
         if (file_dims[u] < fm->chunk_dim[u]) {
             curr_partial_clip[u] = partial_dim_size[u];
@@ -3604,7 +3604,7 @@ H5D__chunk_cache_prune(const H5D_t *dset, size_t size)
      * traversing the list when pointer pN reaches wN percent of the original
      * list.  In other words, preemption method N gets to consider entries in
      * approximate least recently used order w0 percent before method N+1
-     * where 100% means tha method N will run to completion before method N+1
+     * where 100% means the method N will run to completion before method N+1
      * begins.  The pointers participating in the list traversal are each
      * given a chance at preemption before any of the pointers are advanced.
      */
@@ -6039,7 +6039,7 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
     size_t             buf_size = udata->buf_size; /* Size of chunk buffer */
     const H5O_pline_t *pline    = udata->pline;    /* I/O pipeline for applying filters */
 
-    /* needed for commpressed variable length data */
+    /* needed for compressed variable length data */
     hbool_t  must_filter = FALSE;      /* Whether chunk must be filtered during copy */
     size_t   nbytes;                   /* Size of chunk in file (in bytes) */
     H5Z_cb_t filter_cb;                /* Filter failure callback struct */
@@ -6383,7 +6383,7 @@ H5D__chunk_copy(H5F_t *f_src, H5O_storage_chunk_t *storage_src, H5O_layout_chunk
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register memory datatype")
         } /* end if */
 
-        /* create variable-length datatype at the destinaton file */
+        /* create variable-length datatype at the destination file */
         if (NULL == (dt_dst = H5T_copy(dt_src, H5T_COPY_TRANSIENT)))
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy")
         if (H5T_set_loc(dt_dst, f_dst, H5T_LOC_DISK) < 0) {

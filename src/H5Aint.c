@@ -852,7 +852,7 @@ H5A__get_name(H5A_t *attr, size_t buf_size, char *buf)
     nbytes = HDstrlen(attr->shared->name);
     HDassert((ssize_t)nbytes >= 0); /*overflow, pretty unlikely --rpm*/
 
-    /* compute the string length which will fit into the user's buffer */
+    /* Compute the string length which will fit into the user's buffer */
     copy_len = MIN(buf_size - 1, nbytes);
 
     /* Copy all/some of the name */
@@ -960,13 +960,10 @@ done:
  NAME
     H5A__get_create_plist
  PURPOSE
-    private version of H5Aget_create_plist
+    Private version of H5Aget_create_plist
  RETURNS
     This function returns the ID of a copy of the attribute's creation
     property list, or negative on failure.
-
- ERRORS
-
  DESCRIPTION
         This function returns a copy of the creation property list for
     an attribute.  The resulting ID must be closed with H5Pclose() or
@@ -2173,7 +2170,7 @@ H5A__attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_s
             if ((tid_mem = H5I_register(H5I_DATATYPE, dt_mem, FALSE)) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL, "unable to register memory datatype")
 
-            /* create variable-length datatype at the destinaton file */
+            /* create variable-length datatype at the destination file */
             if ((tid_dst = H5I_register(H5I_DATATYPE, attr_dst->shared->dt, FALSE)) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL,
                             "unable to register destination file datatype")
