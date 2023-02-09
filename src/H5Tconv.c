@@ -6990,7 +6990,7 @@ H5T__conv_uchar_double(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Raymond Lu
- *        Tuesday, Febuary 1, 2005
+ *        Tuesday, February 1, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -7110,7 +7110,7 @@ H5T__conv_ushort_double(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t n
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Raymond Lu
- *        Tuesday, Febuary 1, 2005
+ *        Tuesday, February 1, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -7230,7 +7230,7 @@ H5T__conv_uint_double(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nel
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Raymond Lu
- *        Tuesday, Febuary 1, 2005
+ *        Tuesday, February 1, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -7350,7 +7350,7 @@ H5T__conv_ulong_double(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Raymond Lu
- *        Tuesday, Febuary 1, 2005
+ *        Tuesday, February 1, 2005
  *
  *-------------------------------------------------------------------------
  */

@@ -225,19 +225,6 @@ done:
         This function encodes the native memory form of the simple
     dimensionality message in the "raw" disk form.
 
- MODIFICATIONS
-        Robb Matzke, 1998-04-09
-        The current and maximum dimensions are now H5F_SIZEOF_SIZET bytes
-        instead of just four bytes.
-
-        Robb Matzke, 1998-07-20
-        Added a version number and reformatted the message for aligment.
-
-        Raymond Lu
-        April 8, 2004
-        Added the type of dataspace into this header message using a reserved
-        byte.
-
 --------------------------------------------------------------------------*/
 static herr_t
 H5O_sdspace_encode(H5F_t *f, uint8_t *p, const void *_mesg)
