@@ -415,7 +415,7 @@ hs_dr_pio_test__setup(const int test_num, const int edge_size, const int checker
     /* setup selections for writing initial data to the small data set */
     ret = H5Sselect_hyperslab(tv_ptr->mem_small_ds_sid, H5S_SELECT_SET, tv_ptr->start, tv_ptr->stride,
                               tv_ptr->count, tv_ptr->block);
-    VRFY((ret >= 0), "H5Sselect_hyperslab(mem_small_ds_sid, set) suceeded");
+    VRFY((ret >= 0), "H5Sselect_hyperslab(mem_small_ds_sid, set) succeeded");
 
     ret = H5Sselect_hyperslab(tv_ptr->file_small_ds_sid_0, H5S_SELECT_SET, tv_ptr->start, tv_ptr->stride,
                               tv_ptr->count, tv_ptr->block);

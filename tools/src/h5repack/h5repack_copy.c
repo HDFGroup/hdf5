@@ -441,7 +441,7 @@ get_hyperslab(hid_t dcpl_id, int rank_dset, const hsize_t dims_dset[], size_t si
     hsize_t      dims_chunk[H5S_MAX_RANK];
     hsize_t      size_chunk = 1;
     hsize_t      nchunk_fit; /* number of chunks that fits in hyperslab buffer (H5TOOLS_BUFSIZE) */
-    hsize_t      ndatum_fit; /* number of dataum that fits in hyperslab buffer (H5TOOLS_BUFSIZE) */
+    hsize_t      ndatum_fit; /* number of datum that fits in hyperslab buffer (H5TOOLS_BUFSIZE) */
     hsize_t      chunk_dims_map[H5S_MAX_RANK]; /* mapped chunk dimensions */
     hsize_t      hs_dims_map[H5S_MAX_RANK];    /* mapped hyperslab dimensions */
     hsize_t      hslab_nbytes;                 /* size of hyperslab in byte */
@@ -1164,7 +1164,7 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                                 if (options->verbose > 0) {
                                     double ratio = 0;
 
-                                    /* only print the compression ration if there was a filter request */
+                                    /* only print the compression ratio if there was a filter request */
                                     if (apply_s && apply_f && req_filter) {
                                         /* get the storage size of the output dataset */
                                         dsize_out = H5Dget_storage_size(dset_out);
