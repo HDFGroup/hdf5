@@ -13,7 +13,6 @@
 /*
  *
  * Purpose:     Test selection I/O
- * (based on t_pmulti_dset.c)
  */
 
 #include "h5test.h"
@@ -1381,12 +1380,10 @@ main(int argc, char *argv[])
     if (MPI_Barrier(MPI_COMM_WORLD) != MPI_SUCCESS)
         P_TEST_ERROR;
 
-#ifdef OUT
     /* Delete file */
     if (MAINPROCESS) 
         if (MPI_File_delete(FILENAME, MPI_INFO_NULL) != MPI_SUCCESS)
             P_TEST_ERROR;
-#endif
 
     /* Gather errors from all processes */
     MPI_Allreduce(&nerrors, &ret, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
