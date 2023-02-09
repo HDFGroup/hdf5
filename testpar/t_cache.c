@@ -4793,7 +4793,7 @@ server_smoke_check(void)
 
         if (!server_main()) {
 
-            /* some error occured in the server -- report failure */
+            /* some error occurred in the server -- report failure */
             nerrors++;
             if (verbose) {
                 HDfprintf(stdout, "%d:%s: server_main() failed.\n", world_mpi_rank, FUNC);
@@ -5140,7 +5140,7 @@ smoke_check_1(int metadata_write_strategy)
 
         if (!server_main()) {
 
-            /* some error occured in the server -- report failure */
+            /* some error occurred in the server -- report failure */
             nerrors++;
             if (verbose) {
                 HDfprintf(stdout, "%d:%s: server_main() failed.\n", world_mpi_rank, FUNC);
@@ -5304,7 +5304,7 @@ smoke_check_2(int metadata_write_strategy)
 
         if (!server_main()) {
 
-            /* some error occured in the server -- report failure */
+            /* some error occurred in the server -- report failure */
             nerrors++;
             if (verbose) {
                 HDfprintf(stdout, "%d:%s: server_main() failed.\n", world_mpi_rank, FUNC);
@@ -5452,7 +5452,7 @@ smoke_check_2(int metadata_write_strategy)
  *
  * Purpose:    Third smoke check for the parallel cache.
  *
- *        Use random reads to vary the loads on the diffferent
+ *        Use random reads to vary the loads on the different
  *        processors.  Also force different cache size adjustments.
  *
  *        In this test, load process 0 heavily, and the other
@@ -5509,7 +5509,7 @@ smoke_check_3(int metadata_write_strategy)
 
         if (!server_main()) {
 
-            /* some error occured in the server -- report failure */
+            /* some error occurred in the server -- report failure */
             nerrors++;
             if (verbose) {
                 HDfprintf(stdout, "%d:%s: server_main() failed.\n", world_mpi_rank, FUNC);
@@ -5737,7 +5737,7 @@ smoke_check_3(int metadata_write_strategy)
  *
  * Purpose:    Fourth smoke check for the parallel cache.
  *
- *        Use random reads to vary the loads on the diffferent
+ *        Use random reads to vary the loads on the different
  *        processors.  Also force different cache size adjustments.
  *
  *        In this test, load process 0 lightly, and the other
@@ -5794,7 +5794,7 @@ smoke_check_4(int metadata_write_strategy)
 
         if (!server_main()) {
 
-            /* some error occured in the server -- report failure */
+            /* some error occurred in the server -- report failure */
             nerrors++;
             if (verbose) {
                 HDfprintf(stdout, "%d:%s: server_main() failed.\n", world_mpi_rank, FUNC);
@@ -6069,7 +6069,7 @@ smoke_check_5(int metadata_write_strategy)
 
         if (!server_main()) {
 
-            /* some error occured in the server -- report failure */
+            /* some error occurred in the server -- report failure */
             nerrors++;
             if (verbose) {
                 HDfprintf(stdout, "%d:%s: server_main() failed.\n", world_mpi_rank, FUNC);
@@ -6354,7 +6354,7 @@ trace_file_check(int metadata_write_strategy)
 
         if (!server_main()) {
 
-            /* some error occured in the server -- report failure */
+            /* some error occurred in the server -- report failure */
             nerrors++;
             if (verbose)
                 HDfprintf(stdout, "%d:%s: server_main() failed.\n", world_mpi_rank, FUNC);
@@ -6661,7 +6661,7 @@ smoke_check_6(int metadata_write_strategy)
 
         if (!server_main()) {
 
-            /* some error occured in the server -- report failure */
+            /* some error occurred in the server -- report failure */
             nerrors++;
             if (verbose) {
                 HDfprintf(stdout, "%d:%s: server_main() failed.\n", world_mpi_rank, FUNC);
@@ -6903,17 +6903,10 @@ main(int argc, char **argv)
     H5open();
 
     express_test = do_express_test();
-#if 0  /* JRM */
-    express_test = 0;
-#endif /* JRM */
-    if (express_test) {
-
+    if (express_test)
         virt_num_data_entries = EXPRESS_VIRT_NUM_DATA_ENTRIES;
-    }
-    else {
-
+    else
         virt_num_data_entries = STD_VIRT_NUM_DATA_ENTRIES;
-    }
 
 #ifdef H5_HAVE_MPE
     if (MAINPROCESS)
