@@ -109,6 +109,7 @@ jobs:
             direct_vfd: enable
             deprec_sym: enable
             default_api: v114
+            szip: yes
             toolchain: ""
             generator: "autogen"
             flags: ""
@@ -129,6 +130,7 @@ jobs:
             direct_vfd: disable
             deprec_sym: enable
             default_api: v114
+            szip: yes
             toolchain: ""
             generator: "autogen"
             flags: "CC=mpicc"
@@ -169,6 +171,7 @@ jobs:
             direct_vfd: enable
             deprec_sym: enable
             default_api: v16
+            szip: yes
             toolchain: ""
             generator: "autogen"
             flags: ""
@@ -191,6 +194,7 @@ jobs:
             direct_vfd: enable
             deprec_sym: enable
             default_api: v18
+            szip: yes
             toolchain: ""
             generator: "autogen"
             flags: ""
@@ -213,6 +217,7 @@ jobs:
             direct_vfd: enable
             deprec_sym: enable
             default_api: v110
+            szip: yes
             toolchain: ""
             generator: "autogen"
             flags: ""
@@ -235,6 +240,7 @@ jobs:
             direct_vfd: enable
             deprec_sym: enable
             default_api: v112
+            szip: yes
             toolchain: ""
             generator: "autogen"
             flags: ""
@@ -257,6 +263,7 @@ jobs:
             direct_vfd: enable
             deprec_sym: enable
             default_api: v114
+            szip: yes
             toolchain: ""
             generator: "autogen"
             flags: ""
@@ -279,6 +286,7 @@ jobs:
             direct_vfd: enable
             deprec_sym: disable
             default_api: default
+            szip: yes
             toolchain: ""
             generator: "autogen"
             flags: ""
@@ -301,6 +309,7 @@ jobs:
             direct_vfd: enable
             deprec_sym: enable
             default_api: v114
+            szip: yes
             toolchain: ""
             generator: "autogen"
             flags: "CFLAGS=-Werror"
@@ -323,6 +332,7 @@ jobs:
             direct_vfd: enable
             deprec_sym: enable
             default_api: v114
+            szip: yes
             toolchain: ""
             generator: "autogen"
             flags: "CFLAGS=-Werror"
@@ -367,6 +377,7 @@ jobs:
            echo "CC=gcc-11" >> $GITHUB_ENV
            echo "CXX=g++-11" >> $GITHUB_ENV
            echo "FC=gfortran-11" >> $GITHUB_ENV
+           sudo apt install libaec0 libaec-dev
         if: (matrix.generator == 'autogen') && (matrix.parallel != 'enable')
 
       - name: Install Autotools Dependencies (Linux, parallel)
@@ -376,6 +387,7 @@ jobs:
            sudo apt install openmpi-bin openmpi-common mpi-default-dev
            echo "CC=mpicc" >> $GITHUB_ENV
            echo "FC=mpif90" >> $GITHUB_ENV
+           sudo apt install libaec0 libaec-dev
         if: (matrix.generator == 'autogen') && (matrix.parallel == 'enable')
 
       - name: Install Dependencies (Windows)
@@ -406,7 +418,7 @@ jobs:
           sh ./autogen.sh
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
-          ${{ matrix.flags }} $GITHUB_WORKSPACE/configure --enable-build-mode=${{ matrix.build_mode.autotools }} --${{ matrix.deprec_sym }}-deprecated-symbols --with-default-api-version=${{ matrix.default_api }} --enable-shared --${{ matrix.parallel }}-parallel --${{ matrix.cpp }}-cxx --${{ matrix.fortran }}-fortran --${{ matrix.java }}-java --${{ matrix.mirror_vfd }}-mirror-vfd --${{ matrix.direct_vfd }}-direct-vfd
+          ${{ matrix.flags }} $GITHUB_WORKSPACE/configure --enable-build-mode=${{ matrix.build_mode.autotools }} --${{ matrix.deprec_sym }}-deprecated-symbols --with-default-api-version=${{ matrix.default_api }} --enable-shared --${{ matrix.parallel }}-parallel --${{ matrix.cpp }}-cxx --${{ matrix.fortran }}-fortran --${{ matrix.java }}-java --${{ matrix.mirror_vfd }}-mirror-vfd --${{ matrix.direct_vfd }}-direct-vfd --with-szlib=${{ matrix.szip }}
         shell: bash
         if: (matrix.generator == 'autogen') && (! matrix.thread_safe.enabled)
 
@@ -415,7 +427,7 @@ jobs:
           sh ./autogen.sh
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
-          ${{ matrix.flags }} $GITHUB_WORKSPACE/configure --enable-build-mode=${{ matrix.build_mode.autotools }} --enable-shared --enable-threadsafe --disable-hl --${{ matrix.parallel }}-parallel --${{ matrix.mirror_vfd }}-mirror-vfd --${{ matrix.direct_vfd }}-direct-vfd
+          ${{ matrix.flags }} $GITHUB_WORKSPACE/configure --enable-build-mode=${{ matrix.build_mode.autotools }} --enable-shared --enable-threadsafe --disable-hl --${{ matrix.parallel }}-parallel --${{ matrix.mirror_vfd }}-mirror-vfd --${{ matrix.direct_vfd }}-direct-vfd --with-szlib=${{ matrix.szip }}
         shell: bash
         if: (matrix.generator == 'autogen') && (matrix.thread_safe.enabled)
 
