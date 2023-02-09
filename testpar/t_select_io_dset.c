@@ -18,14 +18,14 @@
 #include "h5test.h"
 #include "testpar.h"
 
-#define FILENAME          "pselect_io.h5"
+#define FILENAME "pselect_io.h5"
 
 /* MPI variables */
 int mpi_size;
 int mpi_rank;
 
 /* Number of errors */
-int nerrors = 0;
+int nerrors      = 0;
 int curr_nerrors = 0;
 
 #define P_TEST_ERROR                                                                                         \
@@ -53,44 +53,43 @@ int curr_nerrors = 0;
  * Test configurations
  */
 typedef enum {
-    TEST_NO_TYPE_CONV,              /* no type conversion (null case) */
-    TEST_NO_SIZE_CHANGE_NO_BKG,     /* no size change, no bkg buffer */
-    TEST_LARGER_MEM_NO_BKG,         /* larger memory type, no bkg buffer */
-    TEST_SMALLER_MEM_NO_BKG,        /* smaller memory type, no bkg buffer */
-    TEST_CMPD_WITH_BKG,             /* compound types with bkg buffer */
-    TEST_TYPE_CONV_SEL_EMPTY,       /* some processes have null/empty selections and with type conversion */
+    TEST_NO_TYPE_CONV,          /* no type conversion (null case) */
+    TEST_NO_SIZE_CHANGE_NO_BKG, /* no size change, no bkg buffer */
+    TEST_LARGER_MEM_NO_BKG,     /* larger memory type, no bkg buffer */
+    TEST_SMALLER_MEM_NO_BKG,    /* smaller memory type, no bkg buffer */
+    TEST_CMPD_WITH_BKG,         /* compound types with bkg buffer */
+    TEST_TYPE_CONV_SEL_EMPTY,   /* some processes have null/empty selections and with type conversion */
     TEST_SELECT_NTESTS
 } test_select_config_t;
 
-#define DSET_SELECT_DIM         100
-#define DSET_SELECT_CHUNK_DIM   10
+#define DSET_SELECT_DIM       100
+#define DSET_SELECT_CHUNK_DIM 10
 
 #define DSET_CONTIG_NO_CONV_NTRANS "contig_no_conv_ntrans"
 #define DSET_CONTIG_NO_CONV_TRANS  "contig_no_conv_trans"
 #define DSET_CHK_NO_CONV_NTRANS    "chunked_no_conv_ntrans"
 #define DSET_CHK_NO_CONV_TRANS     "chunked_no_conv_trans"
 
-#define DSET_CONTIG_NO_SIZE_CHANGE_NO_BKG    "contig_no_size_change_no_bkg"
-#define DSET_CHUNKED_NO_SIZE_CHANGE_NO_BKG   "chunked_no_size_change_no_bkg"
+#define DSET_CONTIG_NO_SIZE_CHANGE_NO_BKG  "contig_no_size_change_no_bkg"
+#define DSET_CHUNKED_NO_SIZE_CHANGE_NO_BKG "chunked_no_size_change_no_bkg"
 
-#define DSET_CONTIG_LARGER_NO_BKG_NTRANS    "contig_larger_mem_no_bkg_ntrans"
-#define DSET_CONTIG_LARGER_NO_BKG_TRANS     "contig_larger_mem_no_bkg_trans"
-#define DSET_CHK_LARGER_NO_BKG_NTRANS       "chunked_larger_mem_no_bkg_ntrans"
-#define DSET_CHK_LARGER_NO_BKG_TRANS        "chunked_larger_mem_no_bkg_trans"
+#define DSET_CONTIG_LARGER_NO_BKG_NTRANS "contig_larger_mem_no_bkg_ntrans"
+#define DSET_CONTIG_LARGER_NO_BKG_TRANS  "contig_larger_mem_no_bkg_trans"
+#define DSET_CHK_LARGER_NO_BKG_NTRANS    "chunked_larger_mem_no_bkg_ntrans"
+#define DSET_CHK_LARGER_NO_BKG_TRANS     "chunked_larger_mem_no_bkg_trans"
 
-#define DSET_CONTIG_SMALLER_NO_BKG_NTRANS   "contig_smaller_mem_no_bkg_ntrans"
-#define DSET_CONTIG_SMALLER_NO_BKG_TRANS    "contig_smaller_mem_no_bkg_trans"
-#define DSET_CHK_SMALLER_NO_BKG_NTRANS      "chk_smaller_mem_no_bkg_ntrans"
-#define DSET_CHK_SMALLER_NO_BKG_TRANS       "chk_smaller_mem_no_bkg_trans"
+#define DSET_CONTIG_SMALLER_NO_BKG_NTRANS "contig_smaller_mem_no_bkg_ntrans"
+#define DSET_CONTIG_SMALLER_NO_BKG_TRANS  "contig_smaller_mem_no_bkg_trans"
+#define DSET_CHK_SMALLER_NO_BKG_NTRANS    "chk_smaller_mem_no_bkg_ntrans"
+#define DSET_CHK_SMALLER_NO_BKG_TRANS     "chk_smaller_mem_no_bkg_trans"
 
-#define DSET_CONTIG_CMPD_WITH_BKG    "contig_cmpd_with_bkg"
-#define DSET_CHUNKED_CMPD_WITH_BKG   "chunked_cmpd_with_bkg"
+#define DSET_CONTIG_CMPD_WITH_BKG  "contig_cmpd_with_bkg"
+#define DSET_CHUNKED_CMPD_WITH_BKG "chunked_cmpd_with_bkg"
 
-#define DSET_CONTIG_TCONV_SEL_EMPTY_NTRANS  "contig_tconv_sel_empty_ntrans"
-#define DSET_CONTIG_TCONV_SEL_EMPTY_TRANS   "contig_tconv_sel_empty_trans"
-#define DSET_CHK_TCONV_SEL_EMPTY_NTRANS     "chunked_tconv_sel_empty_ntrans"
-#define DSET_CHK_TCONV_SEL_EMPTY_TRANS      "chunked_tconv_sel_empty_trans"
-
+#define DSET_CONTIG_TCONV_SEL_EMPTY_NTRANS "contig_tconv_sel_empty_ntrans"
+#define DSET_CONTIG_TCONV_SEL_EMPTY_TRANS  "contig_tconv_sel_empty_trans"
+#define DSET_CHK_TCONV_SEL_EMPTY_NTRANS    "chunked_tconv_sel_empty_ntrans"
+#define DSET_CHK_TCONV_SEL_EMPTY_TRANS     "chunked_tconv_sel_empty_trans"
 
 /* Compound type */
 typedef struct s1_t {
@@ -100,16 +99,16 @@ typedef struct s1_t {
     int d;
 } s1_t;
 
-/* 
+/*
  * Variation of s1 with:
  * --no conversion for 2 member types
- * --1 larger mem type, 
- * --1 smaller mem type 
+ * --1 larger mem type,
+ * --1 smaller mem type
  */
 typedef struct s2_t {
-    int a;
-    long b;
-    int c;
+    int   a;
+    long  b;
+    int   c;
     short d;
 } s2_t;
 
@@ -118,7 +117,7 @@ typedef struct s2_t {
  */
 static void
 check_io_mode(hid_t dxpl, unsigned chunked, unsigned dtrans)
-{ 
+{
     H5D_mpio_actual_io_mode_t actual_io_mode;
 
     if (H5Pget_mpio_actual_io_mode(dxpl, &actual_io_mode) < 0)
@@ -129,14 +128,18 @@ check_io_mode(hid_t dxpl, unsigned chunked, unsigned dtrans)
     if (chunked) {
         if (actual_io_mode != H5D_MPIO_CHUNK_COLLECTIVE) {
             /* TEMPORARY: not counting nerrors when dtrans */
-            if (!dtrans) nerrors++;
-            if(MAINPROCESS)
-                HDprintf("\n     Failed: Incorrect I/O mode (chunked)...TEMPORARY didn't count as error     ");
+            if (!dtrans)
+                nerrors++;
+            if (MAINPROCESS)
+                HDprintf(
+                    "\n     Failed: Incorrect I/O mode (chunked)...TEMPORARY didn't count as error     ");
         }
-    } else if (actual_io_mode != H5D_MPIO_CONTIGUOUS_COLLECTIVE) {
+    }
+    else if (actual_io_mode != H5D_MPIO_CONTIGUOUS_COLLECTIVE) {
         /* TEMPORARY: not counting nerrors when dtrans */
-        if (!dtrans) nerrors++;
-        if(MAINPROCESS)
+        if (!dtrans)
+            nerrors++;
+        if (MAINPROCESS)
             HDprintf("\n     Failed: Incorrect I/O mode (contiguous)...TEMPORARY didn't count as error     ");
     }
 
@@ -148,20 +151,20 @@ check_io_mode(hid_t dxpl, unsigned chunked, unsigned dtrans)
 static void
 test_no_type_conv(hid_t fid, unsigned chunked, unsigned dtrans)
 {
-    int i;
-    hid_t did = H5I_INVALID_HID;
-    hid_t sid = H5I_INVALID_HID;
-    hid_t dcpl = H5I_INVALID_HID;
-    hid_t dxpl = H5I_INVALID_HID;
-    hid_t ntrans_dxpl = H5I_INVALID_HID;
-    hid_t fspace_id = H5I_INVALID_HID; 
-    hid_t mspace_id = H5I_INVALID_HID;
-    hsize_t dims[1];
-    hsize_t cdims[1];
-    hsize_t start[1], stride[1], count[1], block[1];
-    int wbuf[DSET_SELECT_DIM]; 
-    int trans_wbuf[DSET_SELECT_DIM]; 
-    int rbuf[DSET_SELECT_DIM];
+    int         i;
+    hid_t       did         = H5I_INVALID_HID;
+    hid_t       sid         = H5I_INVALID_HID;
+    hid_t       dcpl        = H5I_INVALID_HID;
+    hid_t       dxpl        = H5I_INVALID_HID;
+    hid_t       ntrans_dxpl = H5I_INVALID_HID;
+    hid_t       fspace_id   = H5I_INVALID_HID;
+    hid_t       mspace_id   = H5I_INVALID_HID;
+    hsize_t     dims[1];
+    hsize_t     cdims[1];
+    hsize_t     start[1], stride[1], count[1], block[1];
+    int         wbuf[DSET_SELECT_DIM];
+    int         trans_wbuf[DSET_SELECT_DIM];
+    int         rbuf[DSET_SELECT_DIM];
     const char *expr = "2*x";
 
     curr_nerrors = nerrors;
@@ -180,14 +183,15 @@ test_no_type_conv(hid_t fid, unsigned chunked, unsigned dtrans)
             P_TEST_ERROR;
 
         /* Create 1d chunked dataset with/without data tranform */
-        if ((did = H5Dcreate2(fid, dtrans ? DSET_CHK_NO_CONV_TRANS : DSET_CHK_NO_CONV_NTRANS, H5T_NATIVE_INT, 
+        if ((did = H5Dcreate2(fid, dtrans ? DSET_CHK_NO_CONV_TRANS : DSET_CHK_NO_CONV_NTRANS, H5T_NATIVE_INT,
                               sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
             P_TEST_ERROR;
-    } else {
+    }
+    else {
 
         /* Create 1d contiguous dataset with/without data transform */
-        if ((did = H5Dcreate2(fid, dtrans ? DSET_CONTIG_NO_CONV_TRANS : DSET_CONTIG_NO_CONV_NTRANS, H5T_NATIVE_INT, 
-                              sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        if ((did = H5Dcreate2(fid, dtrans ? DSET_CONTIG_NO_CONV_TRANS : DSET_CONTIG_NO_CONV_NTRANS,
+                              H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
             P_TEST_ERROR;
     }
 
@@ -199,7 +203,7 @@ test_no_type_conv(hid_t fid, unsigned chunked, unsigned dtrans)
 
     /* Initialize data */
     for (i = 0; i < (int)block[0]; i++) {
-        wbuf[i] = i + (int)start[0];
+        wbuf[i]       = i + (int)start[0];
         trans_wbuf[i] = 2 * wbuf[i];
     }
 
@@ -236,18 +240,18 @@ test_no_type_conv(hid_t fid, unsigned chunked, unsigned dtrans)
         P_TEST_ERROR;
 
     check_io_mode(dxpl, chunked, dtrans);
-                
+
     /* Read data from the dataset (if dtrans, without data transform set in dxpl) */
     if (H5Dread(did, H5T_NATIVE_INT, mspace_id, fspace_id, ntrans_dxpl, rbuf) < 0)
         P_TEST_ERROR;
 
     /* Verify data read (if dtrans, verify data is transformed) */
     for (i = 0; i < (int)block[0]; i++)
-        if (rbuf[i] != (dtrans ? trans_wbuf[i]: wbuf[i])) {
+        if (rbuf[i] != (dtrans ? trans_wbuf[i] : wbuf[i])) {
             nerrors++;
             HDprintf("\n     Error in first data verification:\n");
-            HDprintf("     At index %d: %d, %d\n", i+(int)start[0], 
-                     dtrans ? trans_wbuf[i] : wbuf[i], rbuf[i]);
+            HDprintf("     At index %d: %d, %d\n", i + (int)start[0], dtrans ? trans_wbuf[i] : wbuf[i],
+                     rbuf[i]);
             break;
         }
 
@@ -262,7 +266,7 @@ test_no_type_conv(hid_t fid, unsigned chunked, unsigned dtrans)
             if (rbuf[i] != (2 * trans_wbuf[i])) {
                 nerrors++;
                 HDprintf("\n     Error in second data verification:.\n");
-                HDprintf("     At index %d: %d, %d\n", i+(int)start[0], 2*trans_wbuf[i], rbuf[i]);
+                HDprintf("     At index %d: %d, %d\n", i + (int)start[0], 2 * trans_wbuf[i], rbuf[i]);
                 break;
             }
     }
@@ -290,18 +294,18 @@ test_no_type_conv(hid_t fid, unsigned chunked, unsigned dtrans)
 static void
 test_no_size_change_no_bkg(hid_t fid, unsigned chunked)
 {
-    int i;
-    hid_t did = H5I_INVALID_HID;
-    hid_t sid = H5I_INVALID_HID;
-    hid_t dcpl = H5I_INVALID_HID;
-    hid_t dxpl = H5I_INVALID_HID;
-    hid_t fspace_id = H5I_INVALID_HID;
-    hid_t mspace_id = H5I_INVALID_HID;
+    int     i;
+    hid_t   did       = H5I_INVALID_HID;
+    hid_t   sid       = H5I_INVALID_HID;
+    hid_t   dcpl      = H5I_INVALID_HID;
+    hid_t   dxpl      = H5I_INVALID_HID;
+    hid_t   fspace_id = H5I_INVALID_HID;
+    hid_t   mspace_id = H5I_INVALID_HID;
     hsize_t dims[1];
     hsize_t cdims[1];
     hsize_t start[1], stride[1], count[1], block[1];
-    char *wbuf = NULL;
-    char *rbuf = NULL;
+    char   *wbuf = NULL;
+    char   *rbuf = NULL;
 
     curr_nerrors = nerrors;
 
@@ -324,8 +328,9 @@ test_no_size_change_no_bkg(hid_t fid, unsigned chunked)
     }
 
     /* Create 1d dataset */
-    if ((did = H5Dcreate2(fid, chunked?DSET_CHUNKED_NO_SIZE_CHANGE_NO_BKG:DSET_CONTIG_NO_SIZE_CHANGE_NO_BKG, 
-                H5T_STD_I32BE, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+    if ((did =
+             H5Dcreate2(fid, chunked ? DSET_CHUNKED_NO_SIZE_CHANGE_NO_BKG : DSET_CONTIG_NO_SIZE_CHANGE_NO_BKG,
+                        H5T_STD_I32BE, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         P_TEST_ERROR;
 
     /* Each process takes x number of elements */
@@ -367,7 +372,7 @@ test_no_size_change_no_bkg(hid_t fid, unsigned chunked)
         P_TEST_ERROR;
 
     check_io_mode(dxpl, chunked, false);
-                
+
     /* Read the data from the dataset */
     if (H5Dread(did, H5T_STD_I32LE, mspace_id, fspace_id, dxpl, rbuf) < 0)
         P_TEST_ERROR;
@@ -378,19 +383,19 @@ test_no_size_change_no_bkg(hid_t fid, unsigned chunked)
             rbuf[4 * i + 2] != wbuf[4 * i + 1] || rbuf[4 * i + 3] != wbuf[4 * i + 0]) {
             nerrors++;
             HDprintf("\n     Error in data verification:\n");
-            HDprintf("     At index %d: %d, %d\n", i+(int)start[0], wbuf[i], rbuf[i]);
+            HDprintf("     At index %d: %d, %d\n", i + (int)start[0], wbuf[i], rbuf[i]);
             break;
         }
     }
 
-    if(H5Sclose(mspace_id) < 0)
+    if (H5Sclose(mspace_id) < 0)
         P_TEST_ERROR;
-    if(H5Sclose(fspace_id) < 0)
+    if (H5Sclose(fspace_id) < 0)
         P_TEST_ERROR;
 
-    if(H5Sclose(sid) < 0)
+    if (H5Sclose(sid) < 0)
         P_TEST_ERROR;
-    if(H5Dclose(did) < 0)
+    if (H5Dclose(did) < 0)
         P_TEST_ERROR;
 
     CHECK_PASSED();
@@ -398,27 +403,26 @@ test_no_size_change_no_bkg(hid_t fid, unsigned chunked)
     return;
 } /* test_no_size_change_no_bkg() */
 
-
 /*
  *  Case 3: single dataset read/write, larger mem type, no background buffer
  */
 static void
 test_larger_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
 {
-    int i;
-    hid_t did = H5I_INVALID_HID;
-    hid_t sid = H5I_INVALID_HID;
-    hid_t dcpl = H5I_INVALID_HID;
-    hid_t dxpl = H5I_INVALID_HID;
-    hid_t ntrans_dxpl = H5I_INVALID_HID;
-    hid_t fspace_id = H5I_INVALID_HID;
-    hid_t mspace_id = H5I_INVALID_HID;
-    hsize_t dims[1];
-    hsize_t cdims[1];
-    hsize_t start[1], stride[1], count[1], block[1];
-    int wbuf[DSET_SELECT_DIM]; 
-    int trans_wbuf[DSET_SELECT_DIM]; 
-    long rbuf[DSET_SELECT_DIM];
+    int         i;
+    hid_t       did         = H5I_INVALID_HID;
+    hid_t       sid         = H5I_INVALID_HID;
+    hid_t       dcpl        = H5I_INVALID_HID;
+    hid_t       dxpl        = H5I_INVALID_HID;
+    hid_t       ntrans_dxpl = H5I_INVALID_HID;
+    hid_t       fspace_id   = H5I_INVALID_HID;
+    hid_t       mspace_id   = H5I_INVALID_HID;
+    hsize_t     dims[1];
+    hsize_t     cdims[1];
+    hsize_t     start[1], stride[1], count[1], block[1];
+    int         wbuf[DSET_SELECT_DIM];
+    int         trans_wbuf[DSET_SELECT_DIM];
+    long        rbuf[DSET_SELECT_DIM];
     const char *expr = "100 - x";
 
     curr_nerrors = nerrors;
@@ -435,13 +439,15 @@ test_larger_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
         if (H5Pset_chunk(dcpl, 1, cdims) < 0)
             P_TEST_ERROR;
         /* Create 1d chunked dataset with/without data transform */
-        if ((did = H5Dcreate2(fid, dtrans ?DSET_CHK_LARGER_NO_BKG_TRANS : DSET_CHK_LARGER_NO_BKG_NTRANS, 
+        if ((did = H5Dcreate2(fid, dtrans ? DSET_CHK_LARGER_NO_BKG_TRANS : DSET_CHK_LARGER_NO_BKG_NTRANS,
                               H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
             P_TEST_ERROR;
-    } else {
+    }
+    else {
         /* Create 1d contiguous dataset with/without data transform */
-        if ((did = H5Dcreate2(fid, dtrans ? DSET_CONTIG_LARGER_NO_BKG_TRANS : DSET_CONTIG_LARGER_NO_BKG_NTRANS, 
-                              H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        if ((did =
+                 H5Dcreate2(fid, dtrans ? DSET_CONTIG_LARGER_NO_BKG_TRANS : DSET_CONTIG_LARGER_NO_BKG_NTRANS,
+                            H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
             P_TEST_ERROR;
     }
 
@@ -453,7 +459,7 @@ test_larger_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
 
     /* Initialize data */
     for (i = 0; i < (int)block[0]; i++) {
-        wbuf[i] = i + (int)start[0];
+        wbuf[i]       = i + (int)start[0];
         trans_wbuf[i] = 100 - wbuf[i];
     }
 
@@ -497,10 +503,11 @@ test_larger_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
 
     /* Verify data read (if dtrans, verify data is transformed) */
     for (i = 0; i < (int)block[0]; i++)
-        if (rbuf[i] != (long)(dtrans ? trans_wbuf[i]:wbuf[i])) {
+        if (rbuf[i] != (long)(dtrans ? trans_wbuf[i] : wbuf[i])) {
             nerrors++;
             HDprintf("\n     Error in first data verification:\n");
-            HDprintf("     At index %d: %d, %ld\n", i+(int)start[0], dtrans ? trans_wbuf[i]:wbuf[i], rbuf[i]);
+            HDprintf("     At index %d: %d, %ld\n", i + (int)start[0], dtrans ? trans_wbuf[i] : wbuf[i],
+                     rbuf[i]);
             break;
         }
 
@@ -512,22 +519,22 @@ test_larger_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
 
         /* Verify data read is transformed a second time */
         for (i = 0; i < (int)block[0]; i++)
-            if (rbuf[i] !=  (100 - trans_wbuf[i])) {
+            if (rbuf[i] != (100 - trans_wbuf[i])) {
                 nerrors++;
                 HDprintf("\n     Error in second data verification:.\n");
-                HDprintf("     At index %d: %d, %ld\n", i+(int)start[0], (100 - trans_wbuf[i]), rbuf[i]);
+                HDprintf("     At index %d: %d, %ld\n", i + (int)start[0], (100 - trans_wbuf[i]), rbuf[i]);
                 break;
             }
     }
-    if(H5Sclose(mspace_id) < 0)
+    if (H5Sclose(mspace_id) < 0)
         P_TEST_ERROR;
-    if(H5Sclose(fspace_id) < 0)
+    if (H5Sclose(fspace_id) < 0)
         P_TEST_ERROR;
-    if(H5Sclose(sid) < 0)
+    if (H5Sclose(sid) < 0)
         P_TEST_ERROR;
-    if(H5Dclose(did) < 0)
+    if (H5Dclose(did) < 0)
         P_TEST_ERROR;
-    if(H5Pclose(dxpl) < 0)
+    if (H5Pclose(dxpl) < 0)
         P_TEST_ERROR;
 
     CHECK_PASSED();
@@ -542,20 +549,20 @@ test_larger_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
 static void
 test_smaller_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
 {
-    int i;
-    hid_t did = H5I_INVALID_HID;
-    hid_t sid = H5I_INVALID_HID;
-    hid_t dcpl = H5I_INVALID_HID;
-    hid_t dxpl = H5I_INVALID_HID;
-    hid_t ntrans_dxpl = H5I_INVALID_HID;
-    hid_t fspace_id = H5I_INVALID_HID;
-    hid_t mspace_id = H5I_INVALID_HID;
-    hsize_t dims[1];
-    hsize_t cdims[1];
-    hsize_t start[1], stride[1], count[1], block[1];
-    int wbuf[DSET_SELECT_DIM]; 
-    int trans_wbuf[DSET_SELECT_DIM]; 
-    short rbuf[DSET_SELECT_DIM];
+    int         i;
+    hid_t       did         = H5I_INVALID_HID;
+    hid_t       sid         = H5I_INVALID_HID;
+    hid_t       dcpl        = H5I_INVALID_HID;
+    hid_t       dxpl        = H5I_INVALID_HID;
+    hid_t       ntrans_dxpl = H5I_INVALID_HID;
+    hid_t       fspace_id   = H5I_INVALID_HID;
+    hid_t       mspace_id   = H5I_INVALID_HID;
+    hsize_t     dims[1];
+    hsize_t     cdims[1];
+    hsize_t     start[1], stride[1], count[1], block[1];
+    int         wbuf[DSET_SELECT_DIM];
+    int         trans_wbuf[DSET_SELECT_DIM];
+    short       rbuf[DSET_SELECT_DIM];
     const char *expr = "2 * (10 + x)";
 
     curr_nerrors = nerrors;
@@ -573,13 +580,15 @@ test_smaller_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
             P_TEST_ERROR;
 
         /* Create 1d chunked dataset with/without data transform */
-        if ((did = H5Dcreate2(fid, dtrans ? DSET_CHK_SMALLER_NO_BKG_TRANS : DSET_CHK_SMALLER_NO_BKG_NTRANS, 
+        if ((did = H5Dcreate2(fid, dtrans ? DSET_CHK_SMALLER_NO_BKG_TRANS : DSET_CHK_SMALLER_NO_BKG_NTRANS,
                               H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
             P_TEST_ERROR;
-    } else {
+    }
+    else {
 
         /* Create 1d contiguous dataset with/without data transform */
-        if ((did = H5Dcreate2(fid, dtrans ? DSET_CONTIG_SMALLER_NO_BKG_TRANS : DSET_CONTIG_SMALLER_NO_BKG_NTRANS, 
+        if ((did = H5Dcreate2(fid,
+                              dtrans ? DSET_CONTIG_SMALLER_NO_BKG_TRANS : DSET_CONTIG_SMALLER_NO_BKG_NTRANS,
                               H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
             P_TEST_ERROR;
     }
@@ -592,8 +601,8 @@ test_smaller_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
 
     /* Initialize data */
     for (i = 0; i < (int)block[0]; i++) {
-        wbuf[i] = i + (int)start[0];
-        trans_wbuf[i] = 2 * (10 +  wbuf[i]);
+        wbuf[i]       = i + (int)start[0];
+        trans_wbuf[i] = 2 * (10 + wbuf[i]);
     }
 
     /* Create a memory dataspace */
@@ -625,23 +634,22 @@ test_smaller_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
             P_TEST_ERROR;
     }
 
-
     /* Write data to the dataset with/without data transform in dxpl */
     if (H5Dwrite(did, H5T_NATIVE_INT, mspace_id, fspace_id, dxpl, wbuf) < 0)
         P_TEST_ERROR;
 
     check_io_mode(dxpl, chunked, dtrans);
-                
+
     /* Read data from the dataset (if dtrans, without data transform set in dxpl) */
     if (H5Dread(did, H5T_NATIVE_SHORT, mspace_id, fspace_id, ntrans_dxpl, rbuf) < 0)
         P_TEST_ERROR;
 
     /* Verify data read (if dtrans, verify data is transformed) */
     for (i = 0; i < (int)block[0]; i++)
-        if (rbuf[i] != (short)(dtrans ? trans_wbuf[i]:wbuf[i])) {
+        if (rbuf[i] != (short)(dtrans ? trans_wbuf[i] : wbuf[i])) {
             nerrors++;
             HDprintf("\n     Error in first data verification:\n");
-            HDprintf("     At index %d: %d, %d\n", i+(int)start[0], wbuf[i], rbuf[i]);
+            HDprintf("     At index %d: %d, %d\n", i + (int)start[0], wbuf[i], rbuf[i]);
             break;
         }
 
@@ -653,24 +661,25 @@ test_smaller_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
 
         /* Verify data read is transformed a second time */
         for (i = 0; i < (int)block[0]; i++)
-            if (rbuf[i] != (short)(2 * (10 +  trans_wbuf[i]))) {
+            if (rbuf[i] != (short)(2 * (10 + trans_wbuf[i]))) {
                 nerrors++;
                 HDprintf("\n     Error in second data verification:.\n");
-                HDprintf("     At index %d: %d, %d\n", i+(int)start[0], (2 * (10 - trans_wbuf[i])), rbuf[i]);
+                HDprintf("     At index %d: %d, %d\n", i + (int)start[0], (2 * (10 - trans_wbuf[i])),
+                         rbuf[i]);
                 break;
             }
     }
 
-    if(H5Sclose(mspace_id) < 0)
+    if (H5Sclose(mspace_id) < 0)
         P_TEST_ERROR;
-    if(H5Sclose(fspace_id) < 0)
+    if (H5Sclose(fspace_id) < 0)
         P_TEST_ERROR;
 
-    if(H5Sclose(sid) < 0)
+    if (H5Sclose(sid) < 0)
         P_TEST_ERROR;
-    if(H5Dclose(did) < 0)
+    if (H5Dclose(did) < 0)
         P_TEST_ERROR;
-    if(H5Pclose(dxpl) < 0)
+    if (H5Pclose(dxpl) < 0)
         P_TEST_ERROR;
 
     CHECK_PASSED();
@@ -678,7 +687,6 @@ test_smaller_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
     return;
 
 } /* test_smaller_mem_type_no_bkg() */
-
 
 /*
  *  Case 5: single dataset reade/write, compound types with background buffer
@@ -703,24 +711,24 @@ test_smaller_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
 static void
 test_cmpd_with_bkg(hid_t fid, unsigned chunked)
 {
-    int i;
-    hid_t did = H5I_INVALID_HID;
-    hid_t sid = H5I_INVALID_HID;
-    hid_t dcpl = H5I_INVALID_HID;
-    hid_t dxpl = H5I_INVALID_HID;
-    hid_t s1_tid = H5I_INVALID_HID;
-    hid_t s2_tid = H5I_INVALID_HID;
-    hid_t ss_ac_tid = H5I_INVALID_HID;
-    hid_t ss_bc_tid = H5I_INVALID_HID;
-    hid_t fspace_id = H5I_INVALID_HID;
-    hid_t mspace_id = H5I_INVALID_HID;
-    hsize_t dims[1];
-    hsize_t cdims[1];
-    hsize_t start[1], stride[1], count[1], block[1];
-    s1_t *s1_wbuf = NULL;
-    s1_t *s1_rbuf = NULL;
-    s2_t *s2_wbuf = NULL;
-    s2_t *s2_rbuf = NULL;
+    int                       i;
+    hid_t                     did       = H5I_INVALID_HID;
+    hid_t                     sid       = H5I_INVALID_HID;
+    hid_t                     dcpl      = H5I_INVALID_HID;
+    hid_t                     dxpl      = H5I_INVALID_HID;
+    hid_t                     s1_tid    = H5I_INVALID_HID;
+    hid_t                     s2_tid    = H5I_INVALID_HID;
+    hid_t                     ss_ac_tid = H5I_INVALID_HID;
+    hid_t                     ss_bc_tid = H5I_INVALID_HID;
+    hid_t                     fspace_id = H5I_INVALID_HID;
+    hid_t                     mspace_id = H5I_INVALID_HID;
+    hsize_t                   dims[1];
+    hsize_t                   cdims[1];
+    hsize_t                   start[1], stride[1], count[1], block[1];
+    s1_t                     *s1_wbuf = NULL;
+    s1_t                     *s1_rbuf = NULL;
+    s2_t                     *s2_wbuf = NULL;
+    s2_t                     *s2_rbuf = NULL;
     H5D_mpio_actual_io_mode_t actual_io_mode;
 
     curr_nerrors = nerrors;
@@ -761,8 +769,8 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked)
     /* Case 5(a) */
 
     /* Create 1d dataset */
-    if ((did = H5Dcreate2(fid, chunked?DSET_CHUNKED_CMPD_WITH_BKG:DSET_CONTIG_CMPD_WITH_BKG, 
-                          s1_tid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+    if ((did = H5Dcreate2(fid, chunked ? DSET_CHUNKED_CMPD_WITH_BKG : DSET_CONTIG_CMPD_WITH_BKG, s1_tid, sid,
+                          H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         P_TEST_ERROR;
 
     /* Each process takes x number of elements */
@@ -773,10 +781,10 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked)
 
     /* Initialize data */
     for (i = 0; i < (int)block[0]; i++) {
-        s1_wbuf[i].a    = 4 * (i + (int)start[0]);
-        s1_wbuf[i].b    = 4 * (i + (int)start[0]) + 1;
-        s1_wbuf[i].c    = 4 * (i + (int)start[0]) + 2;
-        s1_wbuf[i].d    = 4 * (i + (int)start[0]) + 3;
+        s1_wbuf[i].a = 4 * (i + (int)start[0]);
+        s1_wbuf[i].b = 4 * (i + (int)start[0]) + 1;
+        s1_wbuf[i].c = 4 * (i + (int)start[0]) + 2;
+        s1_wbuf[i].d = 4 * (i + (int)start[0]) + 3;
     }
 
     /* Create a memory dataspace */
@@ -804,23 +812,20 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked)
         P_TEST_ERROR;
 
     check_io_mode(dxpl, chunked, false);
-                
+
     /* Read all the data from the dataset */
     if (H5Dread(did, s1_tid, mspace_id, fspace_id, dxpl, s1_rbuf) < 0)
         P_TEST_ERROR;
 
     /* Verfy data read */
     for (i = 0; i < (int)block[0]; i++)
-        if (s1_wbuf[i].a != s1_rbuf[i].a || s1_wbuf[i].b != s1_rbuf[i].b ||
-            s1_wbuf[i].c != s1_rbuf[i].c || s1_wbuf[i].d != s1_rbuf[i].d) {
+        if (s1_wbuf[i].a != s1_rbuf[i].a || s1_wbuf[i].b != s1_rbuf[i].b || s1_wbuf[i].c != s1_rbuf[i].c ||
+            s1_wbuf[i].d != s1_rbuf[i].d) {
             nerrors++;
             HDprintf("\n     Error in 1st data verification:\n");
-            HDprintf("     At index %d: %d/%d, %d/%d, %d/%d, %d/%d\n", 
-                     i + (int)start[0], 
-                     s1_wbuf[i].a,s1_rbuf[i].a,
-                     s1_wbuf[i].b,s1_rbuf[i].b,
-                     s1_wbuf[i].c,s1_rbuf[i].c,
-                     s1_wbuf[i].d,s1_rbuf[i].d);
+            HDprintf("     At index %d: %d/%d, %d/%d, %d/%d, %d/%d\n", i + (int)start[0], s1_wbuf[i].a,
+                     s1_rbuf[i].a, s1_wbuf[i].b, s1_rbuf[i].b, s1_wbuf[i].c, s1_rbuf[i].c, s1_wbuf[i].d,
+                     s1_rbuf[i].d);
             break;
         }
 
@@ -828,10 +833,10 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked)
 
     /* Update s1_wbuf with unique values */
     for (i = 0; i < (int)block[0]; i++) {
-        s1_wbuf[i].a    = 4 * (i + (int)start[0]) + DSET_SELECT_DIM;
-        s1_wbuf[i].b    = 4 * (i + (int)start[0]) + DSET_SELECT_DIM + 1;
-        s1_wbuf[i].c    = 4 * (i + (int)start[0]) + DSET_SELECT_DIM + 2;
-        s1_wbuf[i].d    = 4 * (i + (int)start[0]) + DSET_SELECT_DIM + 3;
+        s1_wbuf[i].a = 4 * (i + (int)start[0]) + DSET_SELECT_DIM;
+        s1_wbuf[i].b = 4 * (i + (int)start[0]) + DSET_SELECT_DIM + 1;
+        s1_wbuf[i].c = 4 * (i + (int)start[0]) + DSET_SELECT_DIM + 2;
+        s1_wbuf[i].d = 4 * (i + (int)start[0]) + DSET_SELECT_DIM + 3;
     }
 
     /* Create a compound type same size as s1_t */
@@ -854,26 +859,23 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked)
     /* Verfy the compound fields have the correct (old or new) values */
     for (i = 0; i < (int)block[0]; i++)
         if (s1_rbuf[i].a != s1_wbuf[i].a || s1_rbuf[i].b != (4 * (i + (int)start[0]) + 1) ||
-            s1_rbuf[i].c != s1_wbuf[i].c || s1_rbuf[i].d != (4 * (i + (int)start[0]) + 3) ) {
-                nerrors++;
-                HDprintf("\n     Error in 2nd data verification:\n");
-                HDprintf("     At index %d: %d/%d, %d/%d, %d/%d, %d/%d\n", 
-                         i + (int)start[0], 
-                         s1_wbuf[i].a, s1_rbuf[i].a,
-                         (4 * (i + (int)start[0]) + 1), s1_rbuf[i].b,
-                         s1_wbuf[i].c, s1_rbuf[i].c,
-                         (4 * (i + (int)start[0]) + 3), s1_rbuf[i].d);
-                break;
+            s1_rbuf[i].c != s1_wbuf[i].c || s1_rbuf[i].d != (4 * (i + (int)start[0]) + 3)) {
+            nerrors++;
+            HDprintf("\n     Error in 2nd data verification:\n");
+            HDprintf("     At index %d: %d/%d, %d/%d, %d/%d, %d/%d\n", i + (int)start[0], s1_wbuf[i].a,
+                     s1_rbuf[i].a, (4 * (i + (int)start[0]) + 1), s1_rbuf[i].b, s1_wbuf[i].c, s1_rbuf[i].c,
+                     (4 * (i + (int)start[0]) + 3), s1_rbuf[i].d);
+            break;
         }
 
     /* Case 5(c) */
 
     /* Update s1_rbuf with new unique values */
     for (i = 0; i < (int)block[0]; i++) {
-        s1_rbuf[i].a    = (4 * (i + (int)start[0])) + (2 * DSET_SELECT_DIM);
-        s1_rbuf[i].b    = (4 * (i + (int)start[0])) + (2 * DSET_SELECT_DIM) + 1;
-        s1_rbuf[i].c    = (4 * (i + (int)start[0])) + (2 * DSET_SELECT_DIM) + 2;
-        s1_rbuf[i].d    = (4 * (i + (int)start[0])) + (2 * DSET_SELECT_DIM) + 3;
+        s1_rbuf[i].a = (4 * (i + (int)start[0])) + (2 * DSET_SELECT_DIM);
+        s1_rbuf[i].b = (4 * (i + (int)start[0])) + (2 * DSET_SELECT_DIM) + 1;
+        s1_rbuf[i].c = (4 * (i + (int)start[0])) + (2 * DSET_SELECT_DIM) + 2;
+        s1_rbuf[i].d = (4 * (i + (int)start[0])) + (2 * DSET_SELECT_DIM) + 3;
     }
 
     /* Create a compound type same size as s1_t */
@@ -891,28 +893,26 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked)
 
     /* Verfy data read */
     for (i = 0; i < (int)block[0]; i++)
-        if (s1_rbuf[i].a != ((4 * (i + (int)start[0])) + (2 * DSET_SELECT_DIM)) || 
+        if (s1_rbuf[i].a != ((4 * (i + (int)start[0])) + (2 * DSET_SELECT_DIM)) ||
             s1_rbuf[i].b != (4 * (i + (int)start[0]) + 1) ||
             s1_rbuf[i].c != (4 * (i + (int)start[0]) + DSET_SELECT_DIM + 2) ||
             s1_rbuf[i].d != ((4 * (i + (int)start[0])) + (2 * DSET_SELECT_DIM) + 3)) {
-                nerrors++;
-                HDprintf("\n     Error in 3rd data verification:\n");
-                HDprintf("     At index %d: %d/%d, %d/%d, %d/%d, %d/%d\n", 
-                         i + (int)start[0], 
-                         ((4 * (i + (int)start[0])) + (2 * DSET_SELECT_DIM)), s1_rbuf[i].a,
-                         (4 * (i + (int)start[0]) + 1), s1_rbuf[i].b,
-                         (4 * (i + (int)start[0]) + DSET_SELECT_DIM + 2), s1_rbuf[i].c,
-                         ((4 * (i + (int)start[0])) + (2 * DSET_SELECT_DIM) + 3), s1_rbuf[i].d);
-                break;
+            nerrors++;
+            HDprintf("\n     Error in 3rd data verification:\n");
+            HDprintf("     At index %d: %d/%d, %d/%d, %d/%d, %d/%d\n", i + (int)start[0],
+                     ((4 * (i + (int)start[0])) + (2 * DSET_SELECT_DIM)), s1_rbuf[i].a,
+                     (4 * (i + (int)start[0]) + 1), s1_rbuf[i].b,
+                     (4 * (i + (int)start[0]) + DSET_SELECT_DIM + 2), s1_rbuf[i].c,
+                     ((4 * (i + (int)start[0])) + (2 * DSET_SELECT_DIM) + 3), s1_rbuf[i].d);
+            break;
         }
-
 
     /* Case 5(d) */
 
     /* Create s2_t compound type with:
-     * --no conversion for 2 member types, 
-     * --1 larger mem type 
-     * --1 smaller mem type 
+     * --no conversion for 2 member types,
+     * --1 larger mem type
+     * --1 smaller mem type
      */
     if ((s2_tid = H5Tcreate(H5T_COMPOUND, sizeof(s2_t))) < 0)
         P_TEST_ERROR;
@@ -925,10 +925,10 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked)
 
     /* Update s2_wbuf with unique values */
     for (i = 0; i < (int)block[0]; i++) {
-        s2_wbuf[i].a    = (8 * (i + (int)start[0]));
-        s2_wbuf[i].b    = (long)(8 * (i + (int)start[0]) + 1);
-        s2_wbuf[i].c    = (8 * (i + (int)start[0]) + 2);
-        s2_wbuf[i].d    = (short)(8 * (i + (int)start[0]) + 3);
+        s2_wbuf[i].a = (8 * (i + (int)start[0]));
+        s2_wbuf[i].b = (long)(8 * (i + (int)start[0]) + 1);
+        s2_wbuf[i].c = (8 * (i + (int)start[0]) + 2);
+        s2_wbuf[i].d = (short)(8 * (i + (int)start[0]) + 3);
     }
     if (H5Dwrite(did, s2_tid, mspace_id, fspace_id, dxpl, s2_wbuf) < 0)
         P_TEST_ERROR;
@@ -939,35 +939,32 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked)
 
     /* Verfy data read */
     for (i = 0; i < (int)block[0]; i++)
-        if (s2_wbuf[i].a != s2_rbuf[i].a || s2_wbuf[i].b != s2_rbuf[i].b ||
-            s2_wbuf[i].c != s2_rbuf[i].c || s2_wbuf[i].d != s2_rbuf[i].d) {
-                nerrors++;
-                HDprintf("\n     Error in 4th data verification:\n");
-                HDprintf("     At index %d: %d/%d, %ld/%ld, %d/%d, %d/%d\n", 
-                         i + (int)start[0], 
-                         s2_wbuf[i].a, s2_rbuf[i].a,
-                         s2_wbuf[i].b, s2_rbuf[i].b,
-                         s2_wbuf[i].c, s2_rbuf[i].c,
-                         s2_wbuf[i].d, s2_rbuf[i].d);
-                break;
+        if (s2_wbuf[i].a != s2_rbuf[i].a || s2_wbuf[i].b != s2_rbuf[i].b || s2_wbuf[i].c != s2_rbuf[i].c ||
+            s2_wbuf[i].d != s2_rbuf[i].d) {
+            nerrors++;
+            HDprintf("\n     Error in 4th data verification:\n");
+            HDprintf("     At index %d: %d/%d, %ld/%ld, %d/%d, %d/%d\n", i + (int)start[0], s2_wbuf[i].a,
+                     s2_rbuf[i].a, s2_wbuf[i].b, s2_rbuf[i].b, s2_wbuf[i].c, s2_rbuf[i].c, s2_wbuf[i].d,
+                     s2_rbuf[i].d);
+            break;
         }
 
-    if(H5Sclose(mspace_id) < 0)
+    if (H5Sclose(mspace_id) < 0)
         P_TEST_ERROR;
-    if(H5Sclose(fspace_id) < 0)
+    if (H5Sclose(fspace_id) < 0)
         P_TEST_ERROR;
 
-    if(H5Sclose(sid) < 0)
+    if (H5Sclose(sid) < 0)
         P_TEST_ERROR;
-    if(H5Tclose(s1_tid) < 0)
+    if (H5Tclose(s1_tid) < 0)
         P_TEST_ERROR;
-    if(H5Tclose(s2_tid) < 0)
+    if (H5Tclose(s2_tid) < 0)
         P_TEST_ERROR;
-    if(H5Tclose(ss_ac_tid) < 0)
+    if (H5Tclose(ss_ac_tid) < 0)
         P_TEST_ERROR;
-    if(H5Tclose(ss_bc_tid) < 0)
+    if (H5Tclose(ss_bc_tid) < 0)
         P_TEST_ERROR;
-    if(H5Dclose(did) < 0)
+    if (H5Dclose(did) < 0)
         P_TEST_ERROR;
 
     /* Release buffers */
@@ -988,22 +985,22 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked)
 static void
 test_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans)
 {
-    int i;
-    hid_t did = H5I_INVALID_HID;
-    hid_t sid = H5I_INVALID_HID;
-    hid_t dcpl = H5I_INVALID_HID;
-    hid_t dxpl = H5I_INVALID_HID;
-    hid_t ntrans_dxpl = H5I_INVALID_HID;
-    hid_t fspace_id = H5I_INVALID_HID;
-    hid_t mspace_id = H5I_INVALID_HID;
-    hsize_t dims[1];
-    hsize_t cdims[1];
-    hsize_t start[1], stride[1], count[1], block[1];
-    int wbuf[DSET_SELECT_DIM]; 
-    int trans_wbuf[DSET_SELECT_DIM];
-    long lrbuf[DSET_SELECT_DIM];
-    short srbuf[DSET_SELECT_DIM];
-    long long llrbuf[DSET_SELECT_DIM];
+    int         i;
+    hid_t       did         = H5I_INVALID_HID;
+    hid_t       sid         = H5I_INVALID_HID;
+    hid_t       dcpl        = H5I_INVALID_HID;
+    hid_t       dxpl        = H5I_INVALID_HID;
+    hid_t       ntrans_dxpl = H5I_INVALID_HID;
+    hid_t       fspace_id   = H5I_INVALID_HID;
+    hid_t       mspace_id   = H5I_INVALID_HID;
+    hsize_t     dims[1];
+    hsize_t     cdims[1];
+    hsize_t     start[1], stride[1], count[1], block[1];
+    int         wbuf[DSET_SELECT_DIM];
+    int         trans_wbuf[DSET_SELECT_DIM];
+    long        lrbuf[DSET_SELECT_DIM];
+    short       srbuf[DSET_SELECT_DIM];
+    long long   llrbuf[DSET_SELECT_DIM];
     const char *expr = "2*x";
 
     curr_nerrors = nerrors;
@@ -1020,12 +1017,14 @@ test_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans)
         if (H5Pset_chunk(dcpl, 1, cdims) < 0)
             P_TEST_ERROR;
         /* Create 1d chunked dataset with/without data transform */
-        if ((did = H5Dcreate2(fid, dtrans ? DSET_CHK_TCONV_SEL_EMPTY_TRANS : DSET_CHK_TCONV_SEL_EMPTY_NTRANS, 
+        if ((did = H5Dcreate2(fid, dtrans ? DSET_CHK_TCONV_SEL_EMPTY_TRANS : DSET_CHK_TCONV_SEL_EMPTY_NTRANS,
                               H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
             P_TEST_ERROR;
-    } else {
+    }
+    else {
         /* Create 1d contiguous dataset with/without data transform */
-        if ((did = H5Dcreate2(fid, dtrans ? DSET_CONTIG_TCONV_SEL_EMPTY_TRANS : DSET_CONTIG_TCONV_SEL_EMPTY_NTRANS, 
+        if ((did = H5Dcreate2(fid,
+                              dtrans ? DSET_CONTIG_TCONV_SEL_EMPTY_TRANS : DSET_CONTIG_TCONV_SEL_EMPTY_NTRANS,
                               H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
             P_TEST_ERROR;
     }
@@ -1056,7 +1055,7 @@ test_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans)
 
     /* Initialize data */
     for (i = 0; i < (int)block[0]; i++) {
-        wbuf[i] = i + (int)start[0];
+        wbuf[i]       = i + (int)start[0];
         trans_wbuf[i] = 2 * wbuf[i];
     }
 
@@ -1068,10 +1067,11 @@ test_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans)
     if (MAINPROCESS) {
         if (H5Sselect_hyperslab(fspace_id, H5S_SELECT_SET, start, stride, count, block) < 0)
             P_TEST_ERROR;
-    } else {
+    }
+    else {
         if (H5Sselect_none(fspace_id) < 0)
             P_TEST_ERROR;
-    } 
+    }
 
     /* Create a memory dataspace */
     if ((mspace_id = H5Screate_simple(1, block, NULL)) < 0)
@@ -1079,15 +1079,14 @@ test_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans)
     if (mpi_rank) {
         if (H5Sselect_none(mspace_id) < 0)
             P_TEST_ERROR;
-    } 
-
+    }
 
     /* Write data to the dataset with/without data transform in dxpl */
     if (H5Dwrite(did, H5T_NATIVE_INT, mspace_id, fspace_id, dxpl, wbuf) < 0)
         P_TEST_ERROR;
 
     check_io_mode(dxpl, chunked, dtrans);
-                
+
     /* Read the data from the dataset: type conversion int-->long */
     /* If dtrans, without data transform set in dxpl */
     if (H5Dread(did, H5T_NATIVE_LONG, mspace_id, fspace_id, ntrans_dxpl, lrbuf) < 0)
@@ -1095,20 +1094,18 @@ test_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans)
 
     if (MAINPROCESS) {
         for (i = 0; i < (int)block[0]; i++)
-            if (lrbuf[i] != (dtrans? (long)trans_wbuf[i]:(long)wbuf[i])) {
+            if (lrbuf[i] != (dtrans ? (long)trans_wbuf[i] : (long)wbuf[i])) {
                 nerrors++;
-                HDprintf("     FIRST:At index %d: %ld, %ld\n", 
-                         i+(int)start[0], 
+                HDprintf("     FIRST:At index %d: %ld, %ld\n", i + (int)start[0],
                          dtrans ? (long)trans_wbuf[i] : (long)wbuf[i], lrbuf[i]);
                 break;
             }
-    } 
+    }
 
-    if(H5Sclose(mspace_id) < 0)
+    if (H5Sclose(mspace_id) < 0)
         P_TEST_ERROR;
-    if(H5Sclose(fspace_id) < 0)
+    if (H5Sclose(fspace_id) < 0)
         P_TEST_ERROR;
-
 
     /* Case 6(b) process 0: get 0 row; other processes: hyperslab */
 
@@ -1148,16 +1145,15 @@ test_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans)
     if (mpi_rank) {
         for (i = 0; i < (int)block[0]; i++)
             if (srbuf[i] != (dtrans ? (short)trans_wbuf[i] : (short)wbuf[i])) {
-                HDprintf("     SECOND: At index %d: %d, %d\n", 
-                         i + (int)start[0], 
+                HDprintf("     SECOND: At index %d: %d, %d\n", i + (int)start[0],
                          dtrans ? (short)trans_wbuf[i] : (short)wbuf[i], srbuf[i]);
                 break;
             }
-    } 
+    }
 
-    if(H5Sclose(mspace_id) < 0)
+    if (H5Sclose(mspace_id) < 0)
         P_TEST_ERROR;
-    if(H5Sclose(fspace_id) < 0)
+    if (H5Sclose(fspace_id) < 0)
         P_TEST_ERROR;
 
     /* Case 6(c) process 0: select none; other processes: select all */
@@ -1165,7 +1161,7 @@ test_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans)
     /* Initialize data */
     block[0] = DSET_SELECT_DIM;
     for (i = 0; i < (int)block[0]; i++) {
-        wbuf[i] = (int)i + DSET_SELECT_DIM;
+        wbuf[i]       = (int)i + DSET_SELECT_DIM;
         trans_wbuf[i] = 2 * wbuf[i];
     }
 
@@ -1175,10 +1171,11 @@ test_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans)
     if (MAINPROCESS) {
         if (H5Sselect_none(fspace_id) < 0)
             P_TEST_ERROR;
-    } else {
+    }
+    else {
         if (H5Sselect_all(fspace_id) < 0)
             P_TEST_ERROR;
-    } 
+    }
 
     /* Create a memory dataspace */
     if ((mspace_id = H5Screate_simple(1, block, NULL)) < 0)
@@ -1202,23 +1199,22 @@ test_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans)
     if (mpi_rank) {
         for (i = 0; i < (int)block[0]; i++)
             if (llrbuf[i] != (dtrans ? (long long)trans_wbuf[i] : (long long)wbuf[i])) {
-                HDprintf("     THIRD: At index %d: %lld, %lld\n", i, 
+                HDprintf("     THIRD: At index %d: %lld, %lld\n", i,
                          dtrans ? (long long)trans_wbuf[i] : (long long)wbuf[i], llrbuf[i]);
                 break;
             }
-    } 
+    }
 
-    if(H5Sclose(mspace_id) < 0)
+    if (H5Sclose(mspace_id) < 0)
         P_TEST_ERROR;
-    if(H5Sclose(fspace_id) < 0)
+    if (H5Sclose(fspace_id) < 0)
         P_TEST_ERROR;
 
-
-    if(H5Sclose(sid) < 0)
+    if (H5Sclose(sid) < 0)
         P_TEST_ERROR;
-    if(H5Dclose(did) < 0)
+    if (H5Dclose(did) < 0)
         P_TEST_ERROR;
-    if(H5Pclose(dxpl) < 0)
+    if (H5Pclose(dxpl) < 0)
         P_TEST_ERROR;
 
     CHECK_PASSED();
@@ -1241,10 +1237,10 @@ test_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans)
 int
 main(int argc, char *argv[])
 {
-    int ret;
-    hid_t fapl = H5I_INVALID_HID;
-    hid_t fid = H5I_INVALID_HID;
-    int test_select_config;
+    int      ret;
+    hid_t    fapl = H5I_INVALID_HID;
+    hid_t    fid  = H5I_INVALID_HID;
+    int      test_select_config;
     unsigned chunked;
     unsigned dtrans;
 
@@ -1282,7 +1278,8 @@ main(int argc, char *argv[])
                         HDputs("\nTesting for selection I/O with chunked dataset and data transform\n");
                     else
                         HDputs("\nTesting for selection I/O with chunked dataset and no data transform\n");
-                 } else {
+                }
+                else {
                     if (dtrans)
                         HDputs("\nTesting for selection I/O with contiguous dataset and data transform\n");
                     else
@@ -1309,7 +1306,8 @@ main(int argc, char *argv[])
 
                         /* Data transforms does not apply to the dataset datatype for this test */
                         if (dtrans) {
-                            if (MAINPROCESS) SKIPPED();
+                            if (MAINPROCESS)
+                                SKIPPED();
                             continue;
                         }
 
@@ -1338,7 +1336,8 @@ main(int argc, char *argv[])
                             TESTING_2("Compound types with background buffer");
                         /* Data transforms does not apply to the dataset datatype for this test */
                         if (dtrans) {
-                            if (MAINPROCESS) SKIPPED();
+                            if (MAINPROCESS)
+                                SKIPPED();
                             continue;
                         }
 
@@ -1354,25 +1353,22 @@ main(int argc, char *argv[])
 
                         break;
 
-
                     case TEST_SELECT_NTESTS:
                     default:
                         P_TEST_ERROR;
                         break;
-                
+
                 } /* end switch */
 
             } /* end for test_select_config */
-        } /* end dtrans */
-    } /* end chunked */
-
+        }     /* end dtrans */
+    }         /* end chunked */
 
     if (H5Pclose(fapl) < 0)
         P_TEST_ERROR;
 
     if (H5Fclose(fid) < 0)
         P_TEST_ERROR;
-
 
     /* Barrier to make sure all ranks are done before deleting the file, and
      * also to clean up output (make sure PASSED is printed before any of the
@@ -1381,7 +1377,7 @@ main(int argc, char *argv[])
         P_TEST_ERROR;
 
     /* Delete file */
-    if (MAINPROCESS) 
+    if (MAINPROCESS)
         if (MPI_File_delete(FILENAME, MPI_INFO_NULL) != MPI_SUCCESS)
             P_TEST_ERROR;
 
