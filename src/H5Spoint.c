@@ -1037,7 +1037,7 @@ H5S__point_get_version_enc_size(const H5S_t *space, uint32_t *version, uint8_t *
     hbool_t  exceed = FALSE;
     hsize_t  bounds_start[H5S_MAX_RANK]; /* Starting coordinate of bounding box */
     hsize_t  bounds_end[H5S_MAX_RANK];   /* Opposite coordinate of bounding box */
-    unsigned u;                          /* Local index veriable */
+    unsigned u;                          /* Local index variable */
     herr_t   ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_STATIC
@@ -1350,7 +1350,7 @@ done:
     dataspace they are located within.  The list of points is formatted as
     follows: <coordinate> followed by the next coordinate, etc. until all the
     point information in the selection have been put into the user's buffer.
-        The points are returned in the order they will be interated through
+        The points are returned in the order they will be iterated through
     when a selection is read/written from/to disk.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
@@ -1424,7 +1424,7 @@ H5S__get_select_elem_pointlist(const H5S_t *space, hsize_t startpoint, hsize_t n
     dataspace they are located within.  The list of points is formatted as
     follows: <coordinate> followed by the next coordinate, etc. until all the
     point information in the selection have been put into the user's buffer.
-        The points are returned in the order they will be interated through
+        The points are returned in the order they will be iterated through
     when a selection is read/written from/to disk.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS

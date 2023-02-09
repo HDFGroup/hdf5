@@ -15,7 +15,7 @@
  *
  * Created:		H5SMcache.c
  *			Nov 13 2006
- *			James Laird <jlaird@hdfgroup.org>
+ *			James Laird
  *
  * Purpose:		Implement shared message metadata cache methods.
  *

@@ -85,7 +85,7 @@
  *      ref_type    IN: Type of reference to query
  *      ref         IN: Reference to query
  *
- * Return:      Success:	An object type (as defined in H5Gpublic.h)
+ * Return:      Success:    An object type (as defined in H5Gpublic.h)
  *              Failure:    H5G_UNKNOWN
  *
  *-------------------------------------------------------------------------

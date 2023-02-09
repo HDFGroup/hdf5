@@ -883,7 +883,7 @@ H5O__copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out*/, H5
     oh_dst   = NULL;
     inserted = TRUE;
 
-    /* Reset metadat tag */
+    /* Reset metadata tag */
     H5_END_TAG
 
     /* Set obj_type and udata, if requested */
@@ -1096,7 +1096,7 @@ H5O__copy_header(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */, hid_t 
     if (H5P_get(ocpy_plist, H5O_CPY_OPTION_NAME, &cpy_option) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get object copy flag")
 
-    /* Retrieve the marge committed datatype list */
+    /* Retrieve the merge committed datatype list */
     if (H5P_peek(ocpy_plist, H5O_CPY_MERGE_COMM_DT_LIST_NAME, &dt_list) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get merge committed datatype list")
 

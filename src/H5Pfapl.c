@@ -450,7 +450,7 @@ static const size_t   H5F_def_page_buf_size_g = H5F_ACS_PAGE_BUFFER_SIZE_DEF; /*
 static const unsigned H5F_def_page_buf_min_meta_perc_g =
     H5F_ACS_PAGE_BUFFER_MIN_META_PERC_DEF; /* Default page buffer minimum metadata size */
 static const unsigned H5F_def_page_buf_min_raw_perc_g =
-    H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_DEF; /* Default page buffer mininum raw data size */
+    H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_DEF; /* Default page buffer minimum raw data size */
 static const hbool_t H5F_def_use_file_locking_g =
     H5F_ACS_USE_FILE_LOCKING_DEF; /* Default use file locking flag */
 static const hbool_t H5F_def_ignore_disabled_file_locks_g =
@@ -888,7 +888,7 @@ done:
  *
  * Purpose:    Set the file driver (DRIVER_ID) for a file access
  *        property list (PLIST_ID) and supply an optional
- *        struct containing the driver-specific properites
+ *        struct containing the driver-specific properties
  *        (DRIVER_INFO).  The driver properties will be copied into the
  *        property list and the reference count on the driver will be
  *        incremented, allowing the caller to close the driver ID but
@@ -1095,7 +1095,7 @@ done:
  *
  * Note:        This is an "in-place" copy, since this routine gets called
  *              after the top-level copy has been performed and this routine
- *        finishes the "deep" part of the copy.
+ *              finishes the "deep" part of the copy.
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative
@@ -2299,7 +2299,7 @@ done:
  *
  *      Currently, the only two valid combinations for this routine are:
  *      LOW = H5F_FORMAT_EARLIEST and HIGH = H5F_FORMAT_LATEST (the default
- *      setting, which creates objects with the ealiest version possible for
+ *      setting, which creates objects with the earliest version possible for
  *      each object, but no upper limit on the version allowed to be created if
  *      a newer version of an object's format is required to support a feature
  *      requested with an HDF5 library API routine), and LOW = H5F_FORMAT_LATEST
@@ -2315,7 +2315,7 @@ done:
  * Note: Eventually we want to add more values to the H5F_libver_t
  *      enumerated type that indicate library release values where the file
  *      format was changed (like "H5F_FORMAT_1_2_0" for the file format changes
- *      in the 1.2.x release branch and possily even "H5F_FORMAT_1_4_2" for
+ *      in the 1.2.x release branch and possibly even "H5F_FORMAT_1_4_2" for
  *      a change mid-way through the 1.4.x release branch, etc).
  *
  *      Adding more values will allow applications to make settings like the
@@ -2538,7 +2538,7 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Jacob Gruber
- *              Thurday, August 11, 2011
+ *              Thursday, August 11, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -2635,7 +2635,7 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Jacob Gruber
- *              Thurday, August 11, 2011
+ *              Thursday, August 11, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -2710,7 +2710,7 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Jacob Gruber
- *              Thurday, August 11, 2011
+ *              Thursday, August 11, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -2764,7 +2764,7 @@ H5Pset_file_image_callbacks(hid_t fapl_id, H5FD_file_image_callbacks_t *callback
         HDassert(callbacks_ptr->udata_copy);
         HDassert(callbacks_ptr->udata_free);
         if ((info.callbacks.udata = callbacks_ptr->udata_copy(callbacks_ptr->udata)) == NULL)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't copy the suppplied udata")
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't copy the supplied udata")
     } /* end if */
 
     /* Set values */
@@ -2776,7 +2776,7 @@ done:
 } /* end H5Pset_file_image_callbacks() */
 
 /*-------------------------------------------------------------------------
- * Function: H5Pget_file_image_callbacks
+ * Function:    H5Pget_file_image_callbacks
  *
  * Purpose:     Sets the callbacks for file images. Some file drivers allow
  *              the use of user-defined callbacks for allocating, freeing and
@@ -2786,7 +2786,7 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Jacob Gruber
- *              Thurday, August 11, 2011
+ *              Thursday, August 11, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -3188,7 +3188,7 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Jacob Gruber
- *              Thurday, August 11, 2011
+ *              Thursday, August 11, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -3218,7 +3218,7 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Jacob Gruber
- *              Thurday, August 11, 2011
+ *              Thursday, August 11, 2011
  *
  *-------------------------------------------------------------------------
  */
@@ -3317,7 +3317,7 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Jacob Gruber
- *              Thurday, August 11, 2011
+ *              Thursday, August 11, 2011
  *
  *-------------------------------------------------------------------------
  */

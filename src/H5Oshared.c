@@ -621,7 +621,7 @@ done:
  * Function:    H5O__shared_post_copy_file
  *
  * Purpose:     Delete a shared message and replace with a new one.
- *              The function is needed at cases such as coping a shared reg_ref attribute.
+ *              The function is needed at cases such as copying a shared reg_ref attribute.
  *              When a shared reg_ref attribute is copied from one file to
  *              another, the values in file need to be replaced. The only way
  *              to complish that is to delete the old message and write the

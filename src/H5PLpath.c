@@ -2,7 +2,7 @@
  * Copyright by The HDF Group.                                               *
  * All rights reserved.                                                      *
  *                                                                           *
- * This file is part of HDF5. The full HDF5 copyright notice, including      *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
@@ -320,7 +320,7 @@ H5PL__close_path_table(void)
  * Purpose:     Gets the number of plugin paths that have been stored.
  *
  * Return:      Success:    The number of paths
- *              Failture:   Can't fail
+ *              Failure:   Can't fail
  *-------------------------------------------------------------------------
  */
 unsigned

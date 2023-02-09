@@ -60,7 +60,7 @@
 
 /*
  * The `struct stat' data type for stat() and fstat(). This is a POSIX file
- * but often apears on non-POSIX systems also.  The `struct stat' is required
+ * but often appears on non-POSIX systems also.  The `struct stat' is required
  * for HDF5 to compile, although only a few fields are actually used.
  */
 #ifdef H5_HAVE_SYS_STAT_H
