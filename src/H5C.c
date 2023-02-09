@@ -4883,7 +4883,7 @@ done:
 
             /* for now at least, don't bother to maintain the minimum clean size,
              * as the cache should now be less than its maximum size.  Due to
-             * the vaguries of the cache size reduction algorithim, we may not
+             * the vaguries of the cache size reduction algorithm, we may not
              * reduce the size of the cache.
              *
              * If we do, we will calculate a new minimum clean size, which will
@@ -8783,8 +8783,8 @@ done:
          * are serialized correctly, it doesn't matter if we have to go back
          * and serialize an entry a second time.
          *
-         * These possible actions result in the following modfications to
-         * tha basic algorithm:
+         * These possible actions result in the following modifications to
+         * the basic algorithm:
          *
          * 1) In the event of an entry expunge, eviction or removal, we must
          *    restart the scan as it is possible that the next entry in our
@@ -8834,7 +8834,7 @@ done:
          *    condition appears.
          *
          * Observe that either eviction or removal of entries as a result of
-         * a serialization is not a problem as long as the flush depencency
+         * a serialization is not a problem as long as the flush dependency
          * tree does not change beyond the removal of a leaf.
          */
         while (!done) {

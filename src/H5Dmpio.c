@@ -1329,9 +1329,9 @@ H5D__link_chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *typ
                               int sum_chunk, int mpi_rank, int mpi_size)
 {
     H5D_chunk_addr_info_t *chunk_addr_info_array = NULL;
-    MPI_Datatype           chunk_final_mtype; /* Final memory MPI datatype for all chunks with seletion */
+    MPI_Datatype           chunk_final_mtype; /* Final memory MPI datatype for all chunks with selection */
     hbool_t                chunk_final_mtype_is_derived = FALSE;
-    MPI_Datatype           chunk_final_ftype; /* Final file MPI datatype for all chunks with seletion */
+    MPI_Datatype           chunk_final_ftype; /* Final file MPI datatype for all chunks with selection */
     hbool_t                chunk_final_ftype_is_derived = FALSE;
     H5D_storage_t          ctg_store; /* Storage info for "fake" contiguous dataset */
     size_t                 total_chunks;
