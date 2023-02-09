@@ -240,7 +240,7 @@ tuple_testcase_t tuple_cases_g[] = {
         {"stuff keeps on going"},
     },
     {
-        "4-ple, escaped seperator",
+        "4-ple, escaped separator",
         "(elem0,elem1,el\\,em2,elem3)", /* "el\,em" */
         ',',
         SUCCEED,
