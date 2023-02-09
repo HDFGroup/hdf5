@@ -483,7 +483,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5Funmount
  *
- * Purpose:     Given a mount point, dissassociate the mount point's file
+ * Purpose:     Given a mount point, disassociate the mount point's file
  *              from the file mounted there. Do not close either file.
  *
  *              The mount point can either be the group in the parent or the

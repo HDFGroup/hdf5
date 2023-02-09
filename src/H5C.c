@@ -4883,7 +4883,7 @@ done:
 
             /* for now at least, don't bother to maintain the minimum clean size,
              * as the cache should now be less than its maximum size.  Due to
-             * the vaguries of the cache size reduction algorthim, we may not
+             * the vaguries of the cache size reduction algorithim, we may not
              * reduce the size of the cache.
              *
              * If we do, we will calculate a new minimum clean size, which will
@@ -5892,7 +5892,7 @@ done:
                          * If either of these happen, and one of the target
                          * or proxy entries happens to be the next entry in
                          * the hash bucket, we could either find ourselves
-                         * either scanning a non-existant entry, scanning
+                         * either scanning a non-existent entry, scanning
                          * through a different bucket, or skipping an entry.
                          *
                          * Neither of these are good, so restart the
@@ -8202,7 +8202,7 @@ done:
      *            To cork the object
      *            Return error if the object is already corked
      *        H5C__UNCORK:
-     *            To uncork the obejct
+     *            To uncork the object
      *            Return error if the object is not corked
      *         H5C__GET_CORKED:
      *            To retrieve the cork status of an object in
@@ -8627,7 +8627,7 @@ done:
          * each entry in the cache to zero before we start the serialization.
          * This allows us to detect the case in which any entry is serialized
          * more than once (a performance issues), and more importantly, the
-         * case is which any flush depencency parent is serializes more than
+         * case is which any flush dependency parent is serializes more than
          * once (a correctness issue).
          */
         {
