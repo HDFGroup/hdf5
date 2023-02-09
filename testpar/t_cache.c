@@ -6723,7 +6723,7 @@ smoke_check_6(int metadata_write_strategy)
             if (FALSE != entry_ptr->header.coll_access) {
                 nerrors++;
                 if (verbose) {
-                    HDfprintf(stdout, "%d:%s: Entry inserted indepedently marked as collective.\n",
+                    HDfprintf(stdout, "%d:%s: Entry inserted independently marked as collective.\n",
                               world_mpi_rank, FUNC);
                 }
             }
@@ -6779,7 +6779,7 @@ smoke_check_6(int metadata_write_strategy)
             if (FALSE != entry_ptr->header.coll_access) {
                 nerrors++;
                 if (verbose) {
-                    HDfprintf(stdout, "%d:%s: Entry inserted indepedently marked as collective.\n",
+                    HDfprintf(stdout, "%d:%s: Entry inserted independently marked as collective.\n",
                               world_mpi_rank, FUNC);
                 }
             }

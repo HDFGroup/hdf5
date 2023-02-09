@@ -208,7 +208,7 @@ main(int argc, char *argv[])
             PASSED();
     }
     else {
-        H5_FAILED()
+        H5_FAILED();
         goto error;
     }
 

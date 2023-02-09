@@ -215,6 +215,7 @@ error:
     HDfflush(stderr);
     HDprintf("*** ERROR ***\n");
     HDprintf("THERE WAS A REAL ERROR IN t_pflush1.\n");
+    HDfflush(stdout);
 
     if (data_g)
         HDfree(data_g);
