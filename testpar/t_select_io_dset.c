@@ -182,7 +182,7 @@ test_no_type_conv(hid_t fid, unsigned chunked, unsigned dtrans)
         if (H5Pset_chunk(dcpl, 1, cdims) < 0)
             P_TEST_ERROR;
 
-        /* Create 1d chunked dataset with/without data tranform */
+        /* Create 1d chunked dataset with/without data transform */
         if ((did = H5Dcreate2(fid, dtrans ? DSET_CHK_NO_CONV_TRANS : DSET_CHK_NO_CONV_NTRANS, H5T_NATIVE_INT,
                               sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
             P_TEST_ERROR;
@@ -817,7 +817,7 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked)
     if (H5Dread(did, s1_tid, mspace_id, fspace_id, dxpl, s1_rbuf) < 0)
         P_TEST_ERROR;
 
-    /* Verfy data read */
+    /* Verify data read */
     for (i = 0; i < (int)block[0]; i++)
         if (s1_wbuf[i].a != s1_rbuf[i].a || s1_wbuf[i].b != s1_rbuf[i].b || s1_wbuf[i].c != s1_rbuf[i].c ||
             s1_wbuf[i].d != s1_rbuf[i].d) {
@@ -856,7 +856,7 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked)
     if (H5Dread(did, ss_ac_tid, mspace_id, fspace_id, dxpl, s1_rbuf) < 0)
         P_TEST_ERROR;
 
-    /* Verfy the compound fields have the correct (old or new) values */
+    /* Verify the compound fields have the correct (old or new) values */
     for (i = 0; i < (int)block[0]; i++)
         if (s1_rbuf[i].a != s1_wbuf[i].a || s1_rbuf[i].b != (4 * (i + (int)start[0]) + 1) ||
             s1_rbuf[i].c != s1_wbuf[i].c || s1_rbuf[i].d != (4 * (i + (int)start[0]) + 3)) {
@@ -891,7 +891,7 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked)
     if (H5Dread(did, ss_bc_tid, mspace_id, fspace_id, dxpl, s1_rbuf) < 0)
         P_TEST_ERROR;
 
-    /* Verfy data read */
+    /* Verify data read */
     for (i = 0; i < (int)block[0]; i++)
         if (s1_rbuf[i].a != ((4 * (i + (int)start[0])) + (2 * DSET_SELECT_DIM)) ||
             s1_rbuf[i].b != (4 * (i + (int)start[0]) + 1) ||
@@ -937,7 +937,7 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked)
     if (H5Dread(did, s2_tid, mspace_id, fspace_id, dxpl, s2_rbuf) < 0)
         P_TEST_ERROR;
 
-    /* Verfy data read */
+    /* Verify data read */
     for (i = 0; i < (int)block[0]; i++)
         if (s2_wbuf[i].a != s2_rbuf[i].a || s2_wbuf[i].b != s2_rbuf[i].b || s2_wbuf[i].c != s2_rbuf[i].c ||
             s2_wbuf[i].d != s2_rbuf[i].d) {
