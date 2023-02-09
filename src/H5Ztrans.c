@@ -1787,7 +1787,7 @@ H5Z_xform_extract_xform_str(const H5Z_data_xform_t *data_xform_prop)
 
     /* There should be no way that this can be NULL since the function
      * that calls this one checks to make sure it isn't before
-     * pasing them */
+     * passing them */
     HDassert(data_xform_prop);
 
     FUNC_LEAVE_NOAPI(data_xform_prop->xform_exp)

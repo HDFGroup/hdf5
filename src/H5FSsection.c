@@ -2390,7 +2390,7 @@ done:
  *		next file open, we will read the self referential free space
  *		managers, float them and reduce the EOA to its value prior
  *		to allocation of file space for the self referential free
- *              space managers on the preceeding file close.  This EOA value
+ *              space managers on the preceding file close.  This EOA value
  *		is stored in the free space manager superblock extension
  *		message.
  *

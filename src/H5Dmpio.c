@@ -664,7 +664,7 @@ H5D__mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *file_space, co
     /* Check to see if the process is reading the entire dataset */
     if (H5S_GET_SELECT_TYPE(file_space) != H5S_SEL_ALL)
         local_cause[1] |= H5D_MPIO_RANK0_NOT_H5S_ALL;
-    /* Only perform this optimization for contigous datasets, currently */
+    /* Only perform this optimization for contiguous datasets, currently */
     else if (H5D_CONTIGUOUS != io_info->dset->shared->layout.type)
         /* Flag to do a MPI_Bcast of the data from one proc instead of
          * having all the processes involved in the collective I/O.
@@ -2895,7 +2895,7 @@ done:
  *
  *              1) Each process provides two piece of information for all chunks having selection
  *                 a) chunk index
- *                 b) wheather this chunk is regular(for MPI derived datatype not working case)
+ *                 b) whether this chunk is regular(for MPI derived datatype not working case)
  *
  *              2) Gather all the information to the root process
  *
