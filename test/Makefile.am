@@ -65,7 +65,7 @@ TEST_PROG= testhdf5 \
            accum hyperslab istore bittests dt_arith page_buffer \
            dtypes dsets chunk_info cmpd_dset mdset cmpd_dtransform filter_fail extend direct_chunk \
            external efc objcopy objcopy_ref links unlink twriteorder big mtime \
-           fillval mount \
+           fillval mount select_io_dset\
            flush1 flush2 app_ref enum set_extent ttsafe enc_dec_plist \
            enc_dec_plist_cross_platform getname vfd ros3 s3comms hdfs ntypes \
            dangle dtransform reserved cross_read freespace mf vds file_image \
