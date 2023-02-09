@@ -126,7 +126,7 @@ int total_writes = 0;
  *
  *    local_pinned:    Boolean flag that is set to true iff the entry
  *        has been pinned in the local cache, but probably not all
- *        caches.  Such pins will typically not be consistant across
+ *        caches.  Such pins will typically not be consistent across
  *        processes, and thus cannot be marked as dirty unless they
  *        happen to overlap some collective operation.
  *
@@ -205,7 +205,7 @@ struct datum *data = NULL;
  * even divisor of NUM_DATA_ENTRIES.  So far, all tests have been with
  * powers of 10 that meet these criteria.
  *
- * Further, this value must be consistant across all processes.
+ * Further, this value must be consistent across all processes.
  */
 
 #define STD_VIRT_NUM_DATA_ENTRIES     NUM_DATA_ENTRIES
@@ -248,11 +248,11 @@ int *data_index = NULL;
  * in which no acks are sent after writes.  Instead, the metadata cache is
  * provided with a callback function to call after each sequence of writes.
  * This callback simply causes the client to send the server process a
- * "sync" message and and await an ack in reply.
+ * "sync" message and await an ack in reply.
  *
  * Strangely, at least on Phoenix, the first solution runs faster by a
  * rather large margin.  However, I can imagine this changing with
- * different OS's and MPI implementatins.
+ * different OS's and MPI implementations.
  *
  * Thus I have left code supporting the second solution in place.
  *
@@ -1282,7 +1282,7 @@ reset_server_counters(void)
  * Function:    server_main()
  *
  * Purpose:    Main function for the server process.  This process exists
- *        to provide an independant view of the data array.
+ *        to provide an independent view of the data array.
  *
  *        The function handles request from the other processes in
  *        the test until the count of done messages received equals
@@ -3961,7 +3961,7 @@ setup_cache_for_test(hid_t *fid_ptr, H5F_t **file_ptr_ptr, H5C_t **cache_ptr_ptr
  * Purpose:    Verify that the indicated entries have been written exactly
  *        once each, and that the indicated total number of writes
  *        has been processed by the server process.  Flag an error if
- *        discrepency is noted.  Finally reset the counters maintained
+ *        discrepancy is noted.  Finally reset the counters maintained
  *        by the server process.
  *
  *        This function should only be called by the metadata cache
@@ -4049,7 +4049,7 @@ verify_writes(unsigned num_writes, haddr_t *written_entries_tbl)
 
     /* final barrier to ensure that all processes think that the server
      * counters have been reset before we leave the sync point.  This
-     * barrier is probaby not necessary at this point in time (5/9/10),
+     * barrier is probably not necessary at this point in time (5/9/10),
      * but I can think of at least one likely change to the metadata write
      * strategies that will require it -- hence its insertion now.
      */

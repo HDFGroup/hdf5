@@ -17,7 +17,7 @@ ENABLE_LANGUAGE (CXX)
 set (HDF_PREFIX "H5")
 
 #-------------------------------------------------------------------------------
-#  Fix CXX flags if we are compiling staticly on Windows using
+#  Fix CXX flags if we are compiling statically on Windows using
 #  Windows_MT.cmake from config/cmake/UserMacros
 #-------------------------------------------------------------------------------
 if (BUILD_STATIC_CRT_LIBS)
