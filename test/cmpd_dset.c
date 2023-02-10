@@ -713,7 +713,7 @@ test_compound(char *filename, hid_t fapl)
     /*
      *######################################################################
      * Step 12: Write an array into the middle third of the dataset
-     * initializeing only members `b' and `d' to -1.
+     * initializing only members `b' and `d' to -1.
      */
     TESTING("hyperslab part initialized write");
 

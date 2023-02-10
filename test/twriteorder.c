@@ -54,7 +54,7 @@
  *
  * If the system, in which the writer and reader processes run, the readers
  * will always get all chain-linked blocks correctly. If the order of write
- * is not maintained, some reader processes may found unexpect block data.
+ * is not maintained, some reader processes may found unexpected block data.
  *
  *************************************************************/
 
@@ -294,7 +294,7 @@ write_wo_file(void)
         return -1;
     }
 
-    /* all writes done. return succeess. */
+    /* all writes done. return success. */
 #ifdef DEBUG
     HDprintf("wrote %d blocks\n", nlinkedblock_g);
 #endif

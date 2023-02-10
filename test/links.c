@@ -3679,7 +3679,7 @@ external_link_abstar(hid_t fapl, hbool_t new_format)
     }
     H5E_END_TRY;
 
-    /* should be able to find the target file with abolute path */
+    /* should be able to find the target file with absolute path */
     if (gid < 0) {
         H5_FAILED();
         HDputs("    Should have found the file in tmp_links directory.");
@@ -17256,7 +17256,7 @@ main(void)
 
     for (minimize_dset_oh = 0; minimize_dset_oh <= 1; minimize_dset_oh++) {
         if (minimize_dset_oh) {
-            HDprintf("\n-Testing with minimzed dataset object headers-\n");
+            HDprintf("\n-Testing with minimized dataset object headers-\n");
             dcpl_g = H5Pcreate(H5P_DATASET_CREATE);
             if (0 > dcpl_g)
                 TEST_ERROR

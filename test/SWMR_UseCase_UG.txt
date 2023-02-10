@@ -2,7 +2,7 @@
      User Guide for SWMR Use Case Programs
 
 2. Purpose:
-     This is a User Guide of the SWMR Use Case programs. It descibes the use
+     This is a User Guide of the SWMR Use Case programs. It describes the use
     case program and explain how to run them.
 
 2.1. Author and Dates:
@@ -87,7 +87,7 @@
 
      It opens the HDF5 data file without the SWMR access mode (0 means
      off). This likely will result in error. This option is provided for
-     users to see the effect of the neede SWMR access mode for concurrent
+     users to see the effect of the needed SWMR access mode for concurrent
      access.
 
 3.4. Test Shell Script:
@@ -176,7 +176,7 @@
 
      It opens the HDF5 data file without the SWMR access mode (0 means
      off). This likely will result in error. This option is provided for
-     users to see the effect of the neede SWMR access mode for concurrent
+     users to see the effect of the needed SWMR access mode for concurrent
      access.
 
 4.4. Test Shell Script:

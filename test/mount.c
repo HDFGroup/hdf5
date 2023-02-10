@@ -726,7 +726,7 @@ test_move(hid_t fapl)
     H5E_END_TRY;
     if (status >= 0) {
         H5_FAILED();
-        HDputs("    Moving an object across files should't have been possible");
+        HDputs("    Moving an object across files shouldn't have been possible");
         TEST_ERROR
     } /* end if */
 

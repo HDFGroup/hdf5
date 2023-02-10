@@ -138,7 +138,7 @@ reinit_vars(unsigned *read_flt_msk, haddr_t *addr, hsize_t *size)
  * Return:      Success:    SUCCEED
  *              Failure:    FAIL
  *
- * Note:        Note that the dataspace argument in these new functions are
+ * Note:        Note that the dataspace argument in these new functions is
  *              currently not used.  The functionality involved the dataspace
  *              will be implemented in the next version.
  *
@@ -648,7 +648,7 @@ test_chunk_info_single_chunk(char *filename, hid_t fapl)
     if (size != SINGLE_CHUNK_SIZE)
         TEST_ERROR
 
-    /* Release resourse */
+    /* Release resource */
     if (H5Dclose(dset) < 0)
         TEST_ERROR
     if (H5Sclose(dspace) < 0)
@@ -906,7 +906,7 @@ test_chunk_info_implicit(char *filename, hid_t fapl)
             if (read_each_chunk(dset, i * CHUNK_NX, j * CHUNK_NY, (void *)direct_buf[n]) < 0)
                 TEST_ERROR
 
-    /* Release resourse */
+    /* Release resource */
     if (H5Dclose(dset) < 0)
         TEST_ERROR
     if (H5Sclose(dspace) < 0)
@@ -1153,7 +1153,7 @@ test_chunk_info_fixed_array(char *filename, hid_t fapl)
             if (read_each_chunk(dset, i * CHUNK_NX, j * CHUNK_NY, (void *)direct_buf[n]) < 0)
                 TEST_ERROR
 
-    /* Release resourse */
+    /* Release resource */
     if (H5Dclose(dset) < 0)
         TEST_ERROR
     if (H5Sclose(dspace) < 0)
@@ -1397,7 +1397,7 @@ test_chunk_info_extensible_array(char *filename, hid_t fapl)
             if (read_each_chunk(dset, i * CHUNK_NX, j * CHUNK_NY, (void *)direct_buf[n]) < 0)
                 TEST_ERROR
 
-    /* Release resourse */
+    /* Release resource */
     if (H5Dclose(dset) < 0)
         TEST_ERROR
     if (H5Sclose(dspace) < 0)
@@ -1641,7 +1641,7 @@ test_chunk_info_version2_btrees(char *filename, hid_t fapl)
             if (read_each_chunk(dset, i * CHUNK_NX, j * CHUNK_NY, (void *)direct_buf[n]) < 0)
                 TEST_ERROR
 
-    /* Release resourse */
+    /* Release resource */
     if (H5Dclose(dset) < 0)
         TEST_ERROR
     if (H5Sclose(dspace) < 0)

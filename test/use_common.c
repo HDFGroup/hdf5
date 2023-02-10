@@ -298,7 +298,7 @@ write_uc_file(hbool_t tosend, hid_t file_id, options_t *opts)
         return -1;
     }
 
-    /* verify chunk_dims against set paramenters */
+    /* verify chunk_dims against set parameters */
     if (chunk_dims[0] != opts->chunkdims[0] || chunk_dims[1] != cz || chunk_dims[2] != cz) {
         HDfprintf(stderr, "chunk size is not as expected. Got dims=(%llu,%llu,%llu)\n",
                   (unsigned long long)chunk_dims[0], (unsigned long long)chunk_dims[1],
@@ -533,7 +533,7 @@ read_uc_file(hbool_t towait, options_t *opts)
     /* quit when all nplanes  have been read */
     loops_waiting_for_plane = 0;
     while (nplanes_seen < opts->nplanes) {
-        /* print progress message according to if new planes are availalbe */
+        /* print progress message according to if new planes are available */
         if (nplanes_seen < dims[0]) {
             if (loops_waiting_for_plane) {
                 /* end the previous message */

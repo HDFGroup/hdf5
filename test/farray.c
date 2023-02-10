@@ -968,7 +968,7 @@ typedef struct fiter_fw_t {
 /*-------------------------------------------------------------------------
  * Function:	fiter_fw_init
  *
- * Purpose:	Initialize element interator (forward iteration)
+ * Purpose:	Initialize element iterator (forward iteration)
  *
  * Return:	Success:	Pointer to iteration status object
  *		Failure:	NULL
@@ -1020,7 +1020,7 @@ fiter_fw_next(void *_fiter)
 /*-------------------------------------------------------------------------
  * Function:	fiter_term
  *
- * Purpose:	Shut down element interator (simple iterators)
+ * Purpose:	Shut down element iterator (simple iterators)
  *
  * Return:	Success:	0
  *		Failure:	-1
@@ -1054,7 +1054,7 @@ typedef struct fiter_rv_t {
 /*-------------------------------------------------------------------------
  * Function:	fiter_rv_init
  *
- * Purpose:	Initialize element interator (reverse iteration)
+ * Purpose:	Initialize element iterator (reverse iteration)
  *
  * Return:	Success:	Pointer to iteration status object
  *		Failure:	NULL
@@ -1119,7 +1119,7 @@ typedef struct fiter_rnd_t {
 /*-------------------------------------------------------------------------
  * Function:	fiter_rnd_init
  *
- * Purpose:	Initialize element interator (random iteration)
+ * Purpose:	Initialize element iterator (random iteration)
  *
  * Return:	Success:	Pointer to iteration status object
  *		Failure:	NULL
@@ -1192,7 +1192,7 @@ fiter_rnd_next(void *_fiter)
 /*-------------------------------------------------------------------------
  * Function:	fiter_rnd_term
  *
- * Purpose:	Shut down element interator (random iteration)
+ * Purpose:	Shut down element iterator (random iteration)
  *
  * Return:	Success:	0
  *		Failure:	-1
@@ -1234,7 +1234,7 @@ typedef struct fiter_cyc_t {
 /*-------------------------------------------------------------------------
  * Function:	fiter_cyc_init
  *
- * Purpose:	Initialize element interator (cyclic iteration)
+ * Purpose:	Initialize element iterator (cyclic iteration)
  *
  * Return:	Success:	Pointer to iteration status object
  *		Failure:	NULL

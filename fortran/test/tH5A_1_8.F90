@@ -840,7 +840,7 @@ SUBROUTINE test_attr_info_by_idx(new_format, fcpl, fapl, total_error)
            my_dataset = dset3
         END SELECT
 
-        !  Check for query on non-existant attribute
+        !  Check for query on non-existent attribute
 
         n = 0
 
@@ -1497,7 +1497,7 @@ SUBROUTINE test_attr_delete_by_idx(new_format, fcpl, fapl, total_error)
               END SELECT
 
 
-              !  Check for deleting non-existant attribute
+              !  Check for deleting non-existent attribute
 !EP              CALL H5Adelete_by_idx_f(my_dataset, '.', idx_type, order, 0_HSIZE_T,error, lapl_id=H5P_DEFAULT_F)
               CALL H5Adelete_by_idx_f(my_dataset, '.', idx_type, order, hzero,error, lapl_id=H5P_DEFAULT_F)
               CALL verify("H5Adelete_by_idx_f",error,minusone,total_error)

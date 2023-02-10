@@ -686,7 +686,7 @@ filter_bogus1(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
     size_t buf_left = *buf_size;   /* Amount of data buffer left to process */
 
     if (flags & H5Z_FLAG_REVERSE) { /* read */
-        /* Substract the "add on" value to all the data values */
+        /* Subtract the "add on" value to all the data values */
         while (buf_left > 0) {
             *int_ptr++ -= (int)ADD_ON;
             buf_left -= sizeof(int);
@@ -722,7 +722,7 @@ filter_bogus2(unsigned int flags, size_t H5_ATTR_UNUSED cd_nelmts,
     size_t buf_left = *buf_size;   /* Amount of data buffer left to process */
 
     if (flags & H5Z_FLAG_REVERSE) { /* read */
-        /* Substract the "add on" value to all the data values */
+        /* Subtract the "add on" value to all the data values */
         while (buf_left > 0) {
             *int_ptr++ /= (int)FACTOR;
             buf_left -= sizeof(int);
@@ -1427,7 +1427,7 @@ error:
  * Function:    test_direct_chunk_read_no_cache
  *
  * Purpose:     Test the basic functionality of H5Dread_chunk with the
- *              chunk cache diabled.
+ *              chunk cache disabled.
  *
  * Return:      Success:        0
  *              Failure:        1
@@ -1963,7 +1963,7 @@ error:
  * Function:    test_read_unallocated_chunk
  *
  * Purpose:     Tests the H5Dread_chunk and H5Dget_chunk_storage_size with valid
- *              offets to chunks that have not been written to the dataset and are
+ *              offsets to chunks that have not been written to the dataset and are
  *              not allocated in the chunk storage on disk.
  *
  * Return:      Success:        0
@@ -2014,7 +2014,7 @@ test_read_unallocated_chunk(hid_t file)
     if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
         FAIL_STACK_ERROR;
 
-    /* Write a single chunk to intialize the chunk storage */
+    /* Write a single chunk to initialize the chunk storage */
     HDmemset(direct_buf, 0, CHUNK_NX * CHUNK_NY * sizeof(int));
     offset[0] = 0;
     offset[1] = 0;
@@ -2031,7 +2031,7 @@ test_read_unallocated_chunk(hid_t file)
             offset[0] = i * CHUNK_NX;
             offset[1] = j * CHUNK_NY;
 
-            /* Read a non-existant chunk using the direct read function. */
+            /* Read a non-existent chunk using the direct read function. */
             H5E_BEGIN_TRY
             {
                 status = H5Dread_chunk(dataset, dxpl, offset, &filter_mask, &direct_buf);
@@ -2042,7 +2042,7 @@ test_read_unallocated_chunk(hid_t file)
             if (status != -1)
                 TEST_ERROR
 
-            /* Query the size of the non-existant chunk */
+            /* Query the size of the non-existent chunk */
             direct_chunk_nbytes = ULONG_MAX;
             H5E_BEGIN_TRY
             {

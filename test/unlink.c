@@ -1096,7 +1096,7 @@ test_filespace(hid_t fapl)
 
     PASSED();
 
-    /* Create simple group hiearchy, remove it & verify file size */
+    /* Create simple group hierarchy, remove it & verify file size */
     TESTING("    simple group hierarchy");
 
     /* Create file */
@@ -1135,7 +1135,7 @@ test_filespace(hid_t fapl)
 
     PASSED();
 
-    /* Create complex group hiearchy, remove it & verify file size */
+    /* Create complex group hierarchy, remove it & verify file size */
     TESTING("    complex group hierarchy");
 
     /* Create file */

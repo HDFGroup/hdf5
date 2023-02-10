@@ -2,7 +2,7 @@
  * Copyright by The HDF Group.                                               *
  * All rights reserved.                                                      *
  *                                                                           *
- * This file is part of HDF5. The full HDF5 copyright notice, including      *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
@@ -79,7 +79,7 @@ add_sub_value(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_value
     value = (int)cd_values[0];
 
     if (flags & H5Z_FLAG_REVERSE) {
-        /* READ - Substract the given value from all the data values */
+        /* READ - Subtract the given value from all the data values */
         while (buf_left > 0) {
             *int_ptr++ -= value;
             buf_left -= sizeof(int);

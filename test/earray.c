@@ -1283,7 +1283,7 @@ typedef struct eiter_fw_t {
 /*-------------------------------------------------------------------------
  * Function:    eiter_fw_init
  *
- * Purpose:    Initialize element interator (forward iteration)
+ * Purpose:    Initialize element iterator (forward iteration)
  *
  * Return:    Success:    Pointer to iteration status object
  *        Failure:    NULL
@@ -1427,7 +1427,7 @@ eiter_fw_state(void *in_eiter, const H5EA_create_t *cparam, const earray_test_pa
 /*-------------------------------------------------------------------------
  * Function:    eiter_fw_term
  *
- * Purpose:    Shut down element interator (forward iteration)
+ * Purpose:    Shut down element iterator (forward iteration)
  *
  * Return:    Success:    0
  *        Failure:    -1
@@ -1471,7 +1471,7 @@ typedef struct eiter_rv_t {
 /*-------------------------------------------------------------------------
  * Function:    eiter_rv_init
  *
- * Purpose:    Initialize element interator (reverse iteration)
+ * Purpose:    Initialize element iterator (reverse iteration)
  *
  * Return:    Success:    Pointer to iteration status object
  *        Failure:    NULL
@@ -1652,7 +1652,7 @@ eiter_rv_state(void *in_eiter, const H5EA_create_t *cparam, const earray_test_pa
 /*-------------------------------------------------------------------------
  * Function:    eiter_rv_term
  *
- * Purpose:    Shut down element interator (reverse iteration)
+ * Purpose:    Shut down element iterator (reverse iteration)
  *
  * Return:    Success:    0
  *        Failure:    -1
@@ -1693,7 +1693,7 @@ typedef struct eiter_rnd_t {
 /*-------------------------------------------------------------------------
  * Function:    eiter_rnd_init
  *
- * Purpose:    Initialize element interator (random iteration)
+ * Purpose:    Initialize element iterator (random iteration)
  *
  * Return:    Success:    Pointer to iteration status object
  *        Failure:    NULL
@@ -1802,7 +1802,7 @@ eiter_rnd_max(const void *in_eiter)
 /*-------------------------------------------------------------------------
  * Function:    eiter_rnd_term
  *
- * Purpose:    Shut down element interator (random iteration)
+ * Purpose:    Shut down element iterator (random iteration)
  *
  * Return:    Success:    0
  *        Failure:    -1
@@ -1842,7 +1842,7 @@ static const earray_iter_t ea_iter_rnd = {
 /*-------------------------------------------------------------------------
  * Function:    eiter_rnd2_init
  *
- * Purpose:    Initialize element interator (random #2 iteration)
+ * Purpose:    Initialize element iterator (random #2 iteration)
  *
  * Return:    Success:    Pointer to iteration status object
  *        Failure:    NULL
@@ -1925,7 +1925,7 @@ typedef struct eiter_cyc_t {
 /*-------------------------------------------------------------------------
  * Function:    eiter_cyc_init
  *
- * Purpose:    Initialize element interator (cyclic iteration)
+ * Purpose:    Initialize element iterator (cyclic iteration)
  *
  * Return:    Success:    Pointer to iteration status object
  *        Failure:    NULL
@@ -2018,7 +2018,7 @@ eiter_cyc_max(const void *in_eiter)
 /*-------------------------------------------------------------------------
  * Function:    eiter_cyc_term
  *
- * Purpose:    Shut down element interator (cyclic iteration)
+ * Purpose:    Shut down element iterator (cyclic iteration)
  *
  * Return:    Success:    0
  *        Failure:    -1

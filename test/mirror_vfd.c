@@ -1496,7 +1496,7 @@ create_datasets(hid_t file_id, unsigned min_dset, unsigned max_dset)
                     }
                 }
 
-                /* select on disk hyperslab */
+                /* Select on disk hyperslab */
                 offset[0] = (hsize_t)i;
                 offset[1] = (hsize_t)j;
                 LOGPRINT(3, "    H5Sselect_hyperslab()\n");
