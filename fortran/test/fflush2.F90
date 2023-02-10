@@ -163,7 +163,7 @@ PROGRAM FFLUSH2EXAMPLE
   CALL check("h5fclose_f",error,total_error)
 
   !
-  !Close FORTRAN predifined datatypes
+  !Close FORTRAN predefined datatypes
   !
   CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
   CALL h5close_f(error)
