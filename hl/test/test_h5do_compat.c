@@ -31,7 +31,7 @@
  *
  * Purpose:        Test the basic functionality of H5DOwrite_chunk
  *
- * Return:        Success:    An identifer for the dataset used in the tests
+ * Return:        Success:    An identifier for the dataset used in the tests
  *                Failure:    H5I_INVALID_HID
  *
  *-------------------------------------------------------------------------

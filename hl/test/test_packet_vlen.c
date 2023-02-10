@@ -677,7 +677,7 @@ error: /* An error has occurred.  Clean up and exit. */
  *
  * Description:
  *    - Added a fixed-length packet table to the file for variety
- *    - Use the helper funtion verify_ptlengthtype to test H5PTis_varlen
+ *    - Use the helper function verify_ptlengthtype to test H5PTis_varlen
  *      on each packet table.
  *
  * 2016/01/27 -BMR
