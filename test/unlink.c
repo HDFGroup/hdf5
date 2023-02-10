@@ -614,7 +614,7 @@ test_filespace(hid_t fapl)
 
     /* Create common objects for datasets */
 
-    /* Create dataset creation property list for contigous storage */
+    /* Create dataset creation property list for contiguous storage */
     if ((contig_dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         TEST_ERROR
 

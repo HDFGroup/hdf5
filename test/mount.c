@@ -1808,7 +1808,7 @@ test_mount_after_unmount(hid_t fapl)
     if (HDstrcmp(objname, "/X/M/Y") != 0)
         TEST_ERROR
 
-    /* Rename object in file #3 that is "disconnected" from name hiearchy */
+    /* Rename object in file #3 that is "disconnected" from name hierarchy */
     /* (It is "disconnected" because it's parent file has been unmounted) */
     if (H5Lmove(gidAMX, "M/Y", gidAMX, "M/Z", H5P_DEFAULT, H5P_DEFAULT) < 0)
         TEST_ERROR
