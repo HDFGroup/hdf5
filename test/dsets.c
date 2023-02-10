@@ -14851,7 +14851,7 @@ error:
 /*-----------------------------------------------------------------------------
  * Function:   test_object_header_minimization_dcpl
  *
- * Purpose:    Test the "datset object header minimization" property as part of
+ * Purpose:    Test the "dataset object header minimization" property as part of
  *             the DCPL.
  *
  * Return:     Success/pass:   0

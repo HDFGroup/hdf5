@@ -16947,7 +16947,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     if (show_progress)
         HDfprintf(stderr, "check point %d\n", checkpoint++);
 
-    /* eigth epoch -- force the hit rate to 100% again -- should be steady
+    /* eight epoch -- force the hit rate to 100% again -- should be steady
      * state.
      */
     if (pass) {
@@ -25286,9 +25286,9 @@ check_auto_cache_resize_aux_fcns(unsigned paged)
     };
 
     if (paged)
-        TESTING("automatic cache resize auxilary functions (paged aggregation)")
+        TESTING("automatic cache resize auxiliary functions (paged aggregation)")
     else
-        TESTING("automatic cache resize auxilary functions")
+        TESTING("automatic cache resize auxiliary functions")
 
     pass = TRUE;
 

@@ -3206,7 +3206,7 @@ external_link_dangling(hid_t fapl, hbool_t new_format)
     if (status >= 0) {
         H5_FAILED();
         HDputs(
-            "    Retreiving name of object by index through dangling file external link should have failed.");
+            "    Retrieving name of object by index through dangling file external link should have failed.");
     } /* end if */
 
     /* Close root group */
@@ -11572,7 +11572,7 @@ link_filters(hid_t fapl, hbool_t new_format)
             TEST_ERROR
         filesize_unfiltered = h5_get_file_size(filename, fapl);
 
-        /* Set deflate fitler */
+        /* Set deflate filter */
         if (H5Pset_deflate(fcpl, 6) < 0)
             TEST_ERROR
 
