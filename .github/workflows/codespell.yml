@@ -13,5 +13,3 @@ jobs:
         with:
           skip: .github/workflows/codespell.yml,./bin/trace,./hl/tools/h5watch/h5watch.c,./tools/test/h5jam/tellub.c,./config/sanitizer/LICENSE,./tools/test/h5repack/testfiles/*.dat
           ignore_words_list: Ot,isnt,inout,nd,parms,parm,ba,offsetP,ser,ois,had,fiter,fo,clude,refere,minnum,offsetp,creat,eiter,lastr,ans,ifset,sur,trun,dne,tthe,hda,filname,te,htmp,minnum,ake,gord,numer,ro,oce
-    
-    
