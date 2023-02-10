@@ -3833,8 +3833,8 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
 
                     HDassert((!cache_ptr->slist_enabled) ||
                              (cache_ptr->slist_size == cache_ptr->dirty_index_size));
-                } /* end if */
-            }     /* end elsef */
+                }
+            }
 
             if (verbose)
                 HDfprintf(stdout, "\n");

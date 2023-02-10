@@ -8633,7 +8633,7 @@ test_copy_soft_link(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fa
     char    dst_filename[NAME_BUF_SIZE];
 
     if (test_open) {
-        TESTING("H5Ocopy(): openend object through soft link");
+        TESTING("H5Ocopy(): opened object through soft link");
     }
     else {
         TESTING("H5Ocopy(): object through soft link");
@@ -11009,7 +11009,7 @@ typedef struct cmpd_vl_t {
  *              Failure:        number of errors
  *
  * Programmer:  Neil Fortner
- *              Tuseday, September 29, 2009
+ *              Tuesday, September 29, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -13658,7 +13658,7 @@ test_copy_cdt_hier_merge(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t d
         TEST_ERROR
 
     /*
-     * Test 3: copy datsets in /g0 at SRC to DST group /uncopied
+     * Test 3: copy datasets in /g0 at SRC to DST group /uncopied
      */
     if (H5Ocopy(fid_src, NAME_GROUP_TOP "/" SRC_DSET1, fid_dst, NAME_GROUP_UNCOPIED "/" SRC_DSET1, ocpypl_id,
                 H5P_DEFAULT) < 0)

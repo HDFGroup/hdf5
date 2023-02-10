@@ -1933,7 +1933,7 @@ test_mf_fs_extend(hid_t fapl)
     if (check_stats(f, f->shared->fs_man[H5FD_MEM_SUPER], &state))
         TEST_ERROR
 
-    /* Remove section A from free-space manger */
+    /* Remove section A from free-space manager */
     if (H5MF__find_sect(f, H5FD_MEM_SUPER, (hsize_t)(TBLOCK_SIZE30 - 10), f->shared->fs_man[H5FD_MEM_SUPER],
                         &tmp) != TRUE)
         TEST_ERROR
@@ -5837,7 +5837,7 @@ error:
  *
  * Alignment = 4096     aggr->alloc_size = 2048
  *
- *    Allocate first block (30) from meta_aggr: (meta_aggr is emtpy)
+ *    Allocate first block (30) from meta_aggr: (meta_aggr is empty)
  *        request-size is > meta_aggr->size and < meta_aggr->alloc_size
  *    Result:
  *        A block of meta_aggr->alloc_size is allocated from file allocation
