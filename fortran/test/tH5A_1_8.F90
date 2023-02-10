@@ -64,7 +64,7 @@ SUBROUTINE attribute_test_1_8(cleanup, total_error)
   INTEGER :: ret_total_error
 
 ! ********************
-! test_attr equivelent
+! test_attr equivalent
 ! ********************
 
 !  WRITE(*,*) "TESTING ATTRIBUTES"
@@ -1111,7 +1111,7 @@ SUBROUTINE test_attr_shared_rename( fcpl, fapl, total_error)
 
   INTEGER :: test_shared
   INTEGER(HSIZE_T), DIMENSION(1) :: adims2 = (/1/) ! Attribute dimension
-  INTEGER     ::   arank = 1                      ! Attribure rank
+  INTEGER     ::   arank = 1                      ! Attribute rank
 
   !  Initialize "big" attribute data
 
@@ -1773,7 +1773,7 @@ SUBROUTINE test_attr_shared_delete(fcpl, fapl, total_error)
 
   INTEGER :: test_shared
   INTEGER(HSIZE_T), DIMENSION(1) :: adims2 = (/1/) ! Attribute dimension
-  INTEGER     ::   arank = 1                      ! Attribure rank
+  INTEGER     ::   arank = 1                      ! Attribute rank
 
   !  Output message about test being performed
 

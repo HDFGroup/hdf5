@@ -149,7 +149,7 @@ CONTAINS
     !
 
     !
-    !Initialize FORTRAN predifined datatypes
+    !Initialize FORTRAN predefined datatypes
     !
 !    CALL h5init_types_f(error)
 !    CALL check("h5init_types_f", error, total_error)
@@ -430,7 +430,7 @@ CONTAINS
     end do
 
     !
-    !Initialize FORTRAN predifined datatypes
+    !Initialize FORTRAN predefined datatypes
     !
 !    CALL h5init_types_f(error)
 !    CALL check("h5init_types_f", error, total_error)
@@ -912,7 +912,7 @@ CONTAINS
      !
      CALL h5sget_select_hyper_nblocks_f(dataspace, num_blocks, error)
      CALL check("h5sget_select_hyper_nblocks_f", error, total_error)
-     IF (num_blocks .NE. 4) write (*,*) "error occured with num_blocks"
+     IF (num_blocks .NE. 4) write (*,*) "error occurred with num_blocks"
      !write(*,*) num_blocks
      !result of num_blocks is 4
 
@@ -945,11 +945,11 @@ CONTAINS
      CALL h5sget_select_bounds_f(dataspace, startout, endout, error)
      CALL check("h5sget_select_bounds_f", error, total_error)
      IF ( (startout(1) .ne. 1) .or. (startout(2) .ne. 1) ) THEN
-        write(*,*) "error occured to select_bounds's start position"
+        write(*,*) "error occurred to select_bounds's start position"
      END IF
 
      IF ( (endout(1) .ne. 5) .or. (endout(2) .ne. 5) ) THEN
-        write(*,*) "error occured to select_bounds's end position"
+        write(*,*) "error occurred to select_bounds's end position"
      END IF
      !write(*,*) (startout(i), i = 1, RANK)
      !result of startout is 0, 0
@@ -978,7 +978,7 @@ CONTAINS
      !
      CALL h5sget_select_elem_npoints_f(dataspace, num_points, error)
      CALL check("h5sget_select_elem_npoints_f", error, total_error)
-     IF (num_points .NE. 10) write(*,*) "error occured with num_points"
+     IF (num_points .NE. 10) write(*,*) "error occurred with num_points"
      !write(*,*) num_points
      ! result of num_points is 10
 

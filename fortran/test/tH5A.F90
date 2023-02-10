@@ -81,7 +81,7 @@ CONTAINS
      INTEGER(HID_T) :: atype5_id      !Integer Attribute Datatype identifier
      INTEGER(HSIZE_T), DIMENSION(1) :: adims = (/2/) ! Attribute dimension
      INTEGER(HSIZE_T), DIMENSION(1) :: adims2 = (/1/) ! Attribute dimension
-     INTEGER     ::   arank = 1                      ! Attribure rank
+     INTEGER     ::   arank = 1                      ! Attribute rank
      INTEGER(SIZE_T) :: attrlen    ! Length of the attribute string
 
      INTEGER(HID_T) :: attr_space     !Returned String Attribute Space identifier
@@ -383,41 +383,41 @@ CONTAINS
      CALL h5dopen_f(file_id, dsetname, dset_id, error)
      CALL check("h5dopen_f",error,total_error)
      !
-     !open the String attrbute by name
+     !open the String attribute by name
      !
      CALL h5aopen_name_f(dset_id, aname, attr_id, error)
      CALL check("h5aopen_name_f",error,total_error)
 
      !
-     !open the CHARACTER attrbute by name
+     !open the CHARACTER attribute by name
      !
      CALL h5aopen_name_f(dset_id, aname2, attr2_id, error)
      CALL check("h5aopen_name_f",error,total_error)
       !
-     !open the DOUBLE attrbute by name
+     !open the DOUBLE attribute by name
      !
      CALL h5aopen_name_f(dset_id, aname3, attr3_id, error)
      CALL check("h5aopen_name_f",error,total_error)
      !
-     !open the REAL attrbute by name
+     !open the REAL attribute by name
      !
      CALL h5aopen_name_f(dset_id, aname4, attr4_id, error)
      CALL check("h5aopen_name_f",error,total_error)
 
      !
-     !open the INTEGER attrbute by name
+     !open the INTEGER attribute by name
      !
      CALL h5aopen_name_f(dset_id, aname5, attr5_id, error)
      CALL check("h5aopen_idx_f",error,total_error)
 
      !
-     !open the NULL attrbute by name
+     !open the NULL attribute by name
      !
      CALL h5aopen_name_f(dset_id, aname6, attr6_id, error)
      CALL check("h5aopen_idx_f",error,total_error)
 
      !
-     !get the attrbute name
+     !get the attribute name
      !
      CALL h5aget_name_f(attr5_id, name_size, attr_name, error)
      CALL check("h5aget_name_f",error,total_error)
@@ -429,44 +429,44 @@ CONTAINS
      END IF
 
      !
-     !get the STRING attrbute space
+     !get the STRING attribute space
      !
      CALL h5aget_space_f(attr_id, attr_space, error)
      CALL check("h5aget_space_f",error,total_error)
      !
-     !get other attrbute space
+     !get other attribute space
      !
      CALL h5aget_space_f(attr2_id, attr2_space, error)
      CALL check("h5aget_space_f",error,total_error)
      !
-     !get the string attrbute datatype
+     !get the string attribute datatype
      !
      CALL h5aget_type_f(attr_id, attr_type, error)
      CALL check("h5aget_type_f",error,total_error)
      !
-     !get the character attrbute datatype
+     !get the character attribute datatype
      !
      CALL h5aget_type_f(attr2_id, attr2_type, error)
      CALL check("h5aget_type_f",error,total_error)
      !
-     !get the double attrbute datatype
+     !get the double attribute datatype
      !
      CALL h5aget_type_f(attr3_id, attr3_type, error)
      CALL check("h5aget_type_f",error,total_error)
      !
-     !get the real attrbute datatype
+     !get the real attribute datatype
      !
      CALL h5aget_type_f(attr4_id, attr4_type, error)
      CALL check("h5aget_type_f",error,total_error)
 
      !
-     !get the integer attrbute datatype
+     !get the integer attribute datatype
      !
      CALL h5aget_type_f(attr5_id, attr5_type, error)
      CALL check("h5aget_type_f",error,total_error)
 
      !
-     !get the null attrbute datatype
+     !get the null attribute datatype
      !
      CALL h5aget_type_f(attr6_id, attr6_type, error)
      CALL check("h5aget_type_f",error,total_error)
@@ -497,7 +497,7 @@ CONTAINS
      CALL check("h5aread_f",error,total_error)
 
      IF ( (aread_data(1) .NE. attr_data(1)) .OR. (aread_data(2) .NE. attr_data(2)) ) THEN
-         WRITE(*,*) "Read back string attrbute is wrong", aread_data(1), aread_data(2)
+         WRITE(*,*) "Read back string attribute is wrong", aread_data(1), aread_data(2)
          total_error = total_error + 1
      END IF
 
@@ -507,7 +507,7 @@ CONTAINS
      CALL h5aread_f(attr2_id, H5T_NATIVE_CHARACTER, aread_character_data, data_dims, error)
      CALL check("h5aread_f",error,total_error)
      IF (aread_character_data .NE. 'A' ) THEN
-         WRITE(*,*) "Read back character attrbute is wrong ",aread_character_data
+         WRITE(*,*) "Read back character attribute is wrong ",aread_character_data
          total_error = total_error + 1
      END IF
      !
@@ -516,7 +516,7 @@ CONTAINS
      data_dims(1) = 1
      CALL h5aread_f(attr3_id, H5T_NATIVE_DOUBLE, aread_double_data, data_dims, error)
      CALL check("h5aread_f",error,total_error)
-     CALL VERIFY("Read back double attrbute is wrong", aread_double_data(1),3.459_Fortran_DOUBLE,total_error)
+     CALL VERIFY("Read back double attribute is wrong", aread_double_data(1),3.459_Fortran_DOUBLE,total_error)
 
      !
      !read the real attribute data back to memory
@@ -524,7 +524,7 @@ CONTAINS
      data_dims(1) = 1
      CALL h5aread_f(attr4_id, H5T_NATIVE_REAL, aread_real_data, data_dims, error)
      CALL check("h5aread_f",error,total_error)
-     CALL VERIFY("Read back real attrbute is wrong", aread_real_data(1),4.0,total_error)
+     CALL VERIFY("Read back real attribute is wrong", aread_real_data(1),4.0,total_error)
      !
      !read the Integer attribute data back to memory
      !
@@ -532,7 +532,7 @@ CONTAINS
      CALL h5aread_f(attr5_id, H5T_NATIVE_INTEGER, aread_integer_data, data_dims, error)
      CALL check("h5aread_f",error,total_error)
      IF (aread_integer_data(1) .NE. 5 ) THEN
-         WRITE(*,*) "Read back integer attrbute is wrong ", aread_integer_data
+         WRITE(*,*) "Read back integer attribute is wrong ", aread_integer_data
          total_error = total_error + 1
      END IF
      !
@@ -542,7 +542,7 @@ CONTAINS
      CALL h5aread_f(attr6_id, H5T_NATIVE_INTEGER, aread_null_data, data_dims, error)
      CALL check("h5aread_f",error,total_error)
      IF (aread_null_data(1) .NE. 7 ) THEN
-         WRITE(*,*) "Read back null attrbute is wrong ", aread_null_data
+         WRITE(*,*) "Read back null attribute is wrong ", aread_null_data
          total_error = total_error + 1
      END IF
 

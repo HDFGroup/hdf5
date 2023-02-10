@@ -14,7 +14,7 @@
 !
 ! NOTES
 !  This program uses the Fortran 2008 intrinsic function STORAGE_SIZE or SIZEOF
-!  depending on availablity.It generates code that makes use of
+!  depending on availability.It generates code that makes use of
 !  STORAGE_SIZE/SIZEOF in H5fortran_detect.f90. STORAGE_SIZE is standard
 !  compliant and should always be chosen over SIZEOF.
 !
@@ -34,7 +34,7 @@
 !  This file is part of HDF5.  The full HDF5 copyright notice, including       *
 !  terms governing use, modification, and redistribution, is contained in      *
 !  the COPYING file, which can be found at the root of the source code         *
-!  distribution tree, or in https://www.hdfgroup.org/licenses.    *
+!  distribution tree, or in https://www.hdfgroup.org/licenses.                 *
 !  If you do not have access to either file, you may request a copy from       *
 !  help@hdfgroup.org.                                                          *
 !  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
