@@ -501,6 +501,9 @@ H5_DLL hid_t H5Dget_type(hid_t dset_id);
  *          a copy of the dataset creation property list associated with
  *          the dataset specified by \p dset_id.
  *
+ *          The creation property list identifier should be released with
+ *          H5Pclose() to prevent resource leaks.
+ *
  */
 H5_DLL hid_t H5Dget_create_plist(hid_t dset_id);
 
