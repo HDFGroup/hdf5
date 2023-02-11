@@ -230,29 +230,6 @@ jobs:
               cmake: "Debug"
               autotools: "debug"
 
-          - name: "Ubuntu gcc Autotools no deprecated symbols (build only)"
-            os: ubuntu-latest
-            cpp: enable
-            fortran: enable
-            java: enable
-            parallel: disable
-            mirror_vfd: enable
-            direct_vfd: enable
-            deprec_sym: disable
-            default_api: default
-            szip: yes
-            toolchain: ""
-            generator: "autogen"
-            flags: ""
-            run_tests: false
-            thread_safety:
-              enabled: false
-              text: ""
-            build_mode:
-              text: " DBG"
-              cmake: "Debug"
-              autotools: "debug"
-
           # Add -Werror builds when warnings have been eliminated
 
     # Sets the job's name from the properties
