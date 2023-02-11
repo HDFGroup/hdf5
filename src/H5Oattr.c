@@ -221,10 +221,6 @@ H5O__attr_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags, u
     else
         p += attr->shared->ds_size;
 
-    /* Get the datatype's size */
-    if (0 == (dt_size = H5T_get_size(attr->shared->dt)))
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, NULL, "unable to get datatype size")
-
     /* Get the datatype & dataspace sizes */
     if (0 == (dt_size = H5T_get_size(attr->shared->dt)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, NULL, "unable to get datatype size")
