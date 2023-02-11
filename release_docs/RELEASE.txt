@@ -207,6 +207,19 @@ Bug Fixes since HDF5-1.13.3 release
 ===================================
     Library
     -------
+    - Fix CVE-2021-37501 / GHSA-rfgw-5vq3-wrjf
+
+      Check for overflow when calculating on-disk attribute data size.
+
+      A bogus hdf5 file may contain dataspace messages with sizes
+      which lead to the on-disk data sizes to exceed what is addressable.
+      When calculating the size, make sure, the multiplication does not
+      overflow.
+      The test case was crafted in a way that the overflow caused the
+      size to be 0.
+
+      (EFE - 2023/02/11 GH-2458)
+
     - Fixed an issue with collective metadata writes of global heap data
 
       New test failures in parallel netCDF started occurring with debug
