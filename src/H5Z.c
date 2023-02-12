@@ -104,9 +104,15 @@ H5Z__init_package(void)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register deflate filter")
 #endif /* H5_HAVE_FILTER_DEFLATE */
 #ifdef H5_HAVE_FILTER_SZIP
-    H5Z_SZIP->encoder_present = SZ_encoder_enabled();
-    if (H5Z_register(H5Z_SZIP) < 0)
-        HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register szip filter")
+    {
+        int encoder_enabled = SZ_encoder_enabled();
+        if (encoder_enabled < 0)
+            HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "check for szip encoder failed")
+
+        H5Z_SZIP->encoder_present = (unsigned)encoder_enabled;
+        if (H5Z_register(H5Z_SZIP) < 0)
+            HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register szip filter")
+    }
 #endif /* H5_HAVE_FILTER_SZIP */
 
 done:
