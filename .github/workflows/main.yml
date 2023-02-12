@@ -380,3 +380,17 @@ jobs:
         working-directory: ${{ runner.workspace }}/build
         # Skip Debug MSVC while we investigate H5L Java test timeouts
         if: (matrix.generator != 'autogen') && (matrix.run_tests) && ! ((matrix.name == 'Windows MSVC CMake') && (matrix.build_mode.cmake == 'Debug'))
+
+      #
+      # INSTALL (note that this runs even when we don't run the tests)
+      #
+
+      - name: Autotools Install
+        run: make install
+        working-directory: ${{ runner.workspace }}/build
+        if: (matrix.generator == 'autogen')
+
+      - name: Autotools Verify Install
+        run: make check-install
+        working-directory: ${{ runner.workspace }}/build
+        if: (matrix.generator == 'autogen')
