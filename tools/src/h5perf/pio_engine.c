@@ -512,7 +512,7 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nby
     size_t         nbytes_xfer_advance; /* Number of bytes transferred in a single I/O operation */
     size_t         nbytes_toxfer;       /* Number of bytes to transfer a particular time */
     char           dname[64];
-    off_t          dset_offset = 0;         /* Dataset offset in a file */
+    off_t          dset_offset    = 0;      /* Dataset offset in a file */
     off_t          bytes_begin[2] = {0, 0}; /* First elmt this process transfer */
     off_t          bytes_count;             /* Number of elmts this process transfer */
     off_t          snbytes = 0;             /* Size of a side of the dataset square */
@@ -1530,7 +1530,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nbyt
     size_t         nbytes_xfer_advance; /* Number of bytes transferred in a single I/O operation */
     size_t         nbytes_toxfer;       /* Number of bytes to transfer a particular time */
     char           dname[64];
-    off_t          dset_offset = 0;         /* Dataset offset in a file */
+    off_t          dset_offset    = 0;      /* Dataset offset in a file */
     off_t          bytes_begin[2] = {0, 0}; /* First elmt this process transfer */
     off_t          bytes_count;             /* Number of elmts this process transfer */
     off_t          snbytes = 0;             /* Size of a side of the dataset square */
