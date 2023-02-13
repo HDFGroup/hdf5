@@ -47,7 +47,7 @@ jobs:
             generator: "-G Ninja"
           - name: "macOS Latest Clang"
             artifact: "macOS.tar.xz"
-            os: macos-11
+            os: macos-latest
             build_type: "Release"
             cpp: ON
             fortran: OFF
@@ -108,7 +108,7 @@ jobs:
             generator: "-G Ninja"
           - name: "macOS TS Clang"
             artifact: "macOSTS.tar.xz"
-            os: macos-11
+            os: macos-latest
             build_type: "Release"
             cpp: OFF
             fortran: OFF
@@ -170,7 +170,7 @@ jobs:
       if: matrix.os == 'windows-latest'
     - name: Install Dependencies (macOS)
       run: brew install ninja
-      if: matrix.os == 'macos-11'
+      if: matrix.os == 'macos-latest'
     - name: Set environment for MSVC (Windows)
       if:  matrix.os == 'windows-latest'
       run: |
