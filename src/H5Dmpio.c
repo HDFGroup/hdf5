@@ -1404,7 +1404,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
+#ifdef H5Dmpio_DEBUG
 H5D__link_piece_collective_io(H5D_io_info_t *io_info, int mpi_rank)
+#else
+H5D__link_piece_collective_io(H5D_io_info_t *io_info, int H5_ATTR_UNUSED mpi_rank)
+#endif
 {
     MPI_Datatype  chunk_final_mtype; /* Final memory MPI datatype for all chunks with selection */
     hbool_t       chunk_final_mtype_is_derived = FALSE;
@@ -4697,8 +4701,10 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
 
             /* Find the chunk entry according to its chunk index */
             HASH_FIND(hh, chunk_hash_table, &chunk_idx, sizeof(hsize_t), chunk_entry);
-            HDassert(chunk_entry);
-            HDassert(mpi_rank == chunk_entry->new_owner);
+            if (chunk_entry == NULL)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTFIND, FAIL, "unable to find chunk entry")
+            if (mpi_rank != chunk_entry->new_owner)
+                HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "chunk owner set to incorrect MPI rank")
 
             /*
              * Only process the chunk if its data buffer is allocated.
