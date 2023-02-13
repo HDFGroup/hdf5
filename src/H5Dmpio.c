@@ -4701,8 +4701,10 @@ H5D__mpio_collective_filtered_chunk_update(H5D_filtered_collective_io_info_t *ch
 
             /* Find the chunk entry according to its chunk index */
             HASH_FIND(hh, chunk_hash_table, &chunk_idx, sizeof(hsize_t), chunk_entry);
-            if (chunk_entry == NULL || mpi_rank != chunk_entry->new_owner)
+            if (chunk_entry == NULL)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTFIND, FAIL, "unable to find chunk entry")
+            if (mpi_rank != chunk_entry->new_owner)
+                HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "chunk owner set to incorrect MPI rank")
 
             /*
              * Only process the chunk if its data buffer is allocated.
