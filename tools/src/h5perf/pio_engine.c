@@ -505,18 +505,18 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nby
          void *buffer)
 {
     int            ret_code = SUCCESS;
-    int            rc; /*routine return code                   */
+    int            rc; /* Return code */
     long           ndset;
     size_t         blk_size;            /* The block size to subdivide the xfer buffer into */
     off_t          nbytes_xfer;         /* Total number of bytes transferred so far */
     size_t         nbytes_xfer_advance; /* Number of bytes transferred in a single I/O operation */
     size_t         nbytes_toxfer;       /* Number of bytes to transfer a particular time */
     char           dname[64];
-    off_t          dset_offset = 0; /*dataset offset in a file              */
-    off_t          bytes_begin[2];  /*first elmt this process transfer      */
-    off_t          bytes_count;     /*number of elmts this process transfer */
-    off_t          snbytes = 0;     /*size of a side of the dataset square  */
-    unsigned char *buf_p;           /* Current buffer pointer               */
+    off_t          dset_offset = 0;         /* Dataset offset in a file */
+    off_t          bytes_begin[2] = {0, 0}; /* First elmt this process transfer */
+    off_t          bytes_count;             /* Number of elmts this process transfer */
+    off_t          snbytes = 0;             /* Size of a side of the dataset square */
+    unsigned char *buf_p;                   /* Current buffer pointer */
 
     /* POSIX variables */
     off_t file_offset;         /* File offset of the next transfer     */
@@ -1530,11 +1530,11 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets, off_t nbyt
     size_t         nbytes_xfer_advance; /* Number of bytes transferred in a single I/O operation */
     size_t         nbytes_toxfer;       /* Number of bytes to transfer a particular time */
     char           dname[64];
-    off_t          dset_offset = 0; /*dataset offset in a file              */
-    off_t          bytes_begin[2];  /*first elmt this process transfer      */
-    off_t          bytes_count;     /*number of elmts this process transfer */
-    off_t          snbytes = 0;     /*size of a side of the dataset square */
-    unsigned char *buf_p;           /* Current buffer pointer               */
+    off_t          dset_offset = 0;         /* Dataset offset in a file */
+    off_t          bytes_begin[2] = {0, 0}; /* First elmt this process transfer */
+    off_t          bytes_count;             /* Number of elmts this process transfer */
+    off_t          snbytes = 0;             /* Size of a side of the dataset square */
+    unsigned char *buf_p;                   /* Current buffer pointer */
 
     /* POSIX variables */
     off_t file_offset;         /* File offset of the next transfer    */
