@@ -345,6 +345,52 @@ jobs:
               cmake: "Release"
               autotools: "production"
 
+          # Parallel Debug -Werror
+          - name: "Ubuntu gcc Autotools parallel -Werror (build only)"
+            os: ubuntu-latest
+            cpp: disable
+            fortran: disable
+            java: disable
+            parallel: enable
+            mirror_vfd: disable
+            direct_vfd: enable
+            deprec_sym: enable
+            default_api: v114
+            toolchain: ""
+            generator: "autogen"
+            flags: "CFLAGS=-Werror"
+            run_tests: false
+            thread_safety:
+              enabled: false
+              text: ""
+            build_mode:
+              text: " DBG"
+              cmake: "Debug"
+              autotools: "debug"
+
+          # Parallel production/release -Werror
+          - name: "Ubuntu gcc Autotools parallel -Werror (build only)"
+            os: ubuntu-latest
+            cpp: disable
+            fortran: disable
+            java: disable
+            parallel: enable
+            mirror_vfd: disable
+            direct_vfd: enable
+            deprec_sym: enable
+            default_api: v114
+            toolchain: ""
+            generator: "autogen"
+            flags: "CFLAGS=-Werror"
+            run_tests: false
+            thread_safety:
+              enabled: false
+              text: ""
+            build_mode:
+              text: " REL"
+              cmake: "Release"
+              autotools: "production"
+
     # Sets the job's name from the properties
     name: "${{ matrix.name }}${{ matrix.build_mode.text }}${{ matrix.thread_safety.text }}"
 
