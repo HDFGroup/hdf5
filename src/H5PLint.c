@@ -259,6 +259,8 @@ H5PL_load(H5PL_type_t type, const H5PL_key_t *key)
     /* Set the return value we found the plugin */
     if (found)
         ret_value = plugin_info;
+    else
+        HGOTO_ERROR(H5E_PLUGIN, H5E_NOTFOUND, NULL, "unable to locate plugin")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

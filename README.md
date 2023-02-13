@@ -2,7 +2,11 @@ HDF5 version 1.15.0 currently under development
 
 ![HDF5 Logo](doxygen/img/HDF5.png)
 
-[![Build](https://img.shields.io/github/workflow/status/HDFGroup/hdf5/hdf5%20dev%20CI/develop)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Adevelop)
+[![develop build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/main.yml?branch=develop&label=develop)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Adevelop)
+[![1.14 build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/main.yml?branch=hdf5_1_14&label=1.14)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Ahdf5_1_14)
+[![1.12 build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/main.yml?branch=hdf5_1_12&label=1.12)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Ahdf5_1_12)
+[![1.10 build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/main.yml?branch=hdf5_1_10&label=1.10)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Ahdf5_1_10)
+[![1.8 build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/main.yml?branch=hdf5_1_8&label=1.8)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Ahdf5_1_8)
 [![BSD](https://img.shields.io/badge/License-BSD-blue.svg)](https://github.com/HDFGroup/hdf5/blob/develop/COPYING)
 
 *Please refer to the release_docs/INSTALL file for installation instructions.*
@@ -79,12 +83,18 @@ RELEASE SCHEDULE
 HDF5 does not release on a regular schedule. Instead, releases are driven by
 new features and bug fixes, though we try to have at least one release of each
 maintenance branch per year. Future HDF5 releases indicated on this schedule
-are tentative. 
+are tentative.
+
+**NOTE**: HDF5 1.12 is being retired early due to its incomplete and incompatible VOL
+layer.
 
 | Release | New Features |
 | ------- | ------------ |
-| 1.13.2 | Onion VFD, Selection I/O, Subfiling |
-| 1.13.3 | Multi-Dataset I/O |
+| 1.8.23 | last HDF5 1.8 release |
+| 1.10.10 | CVE fixes, performance improvements, H5Dchunk\_iter() |
+| 1.12.3 | CVE fixes, performance improvements, H5Dchunk\_iter(), last HDF5 1.12 release |
+| 1.14.1 | selection I/O with datatype conversion |
+| 2.0.0 | TBD |
 | TBD | VFD SWMR |
 
 This list of feature release versions is also tentative, and the specific release

@@ -967,7 +967,7 @@ H5VLquery_optional(hid_t obj_id, H5VL_subclass_t subcls, int opt_type, uint64_t 
     /* Check args */
     if (NULL == flags)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid 'flags' pointer")
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(obj_id)))
+    if (NULL == (vol_obj = H5VL_vol_object(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
     /* Query the connector */

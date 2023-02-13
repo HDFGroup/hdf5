@@ -392,6 +392,9 @@ H5_DLL herr_t H5Aexists_by_name_async(hid_t loc_id, const char *obj_name, const 
  *          creation property list associated with the attribute specified
  *          by \p attr_id.
  *
+ *          The creation property list identifier should be released with
+ *          H5Pclose() to prevent resource leaks.
+ *
  * \since 1.8.0
  *
  */
