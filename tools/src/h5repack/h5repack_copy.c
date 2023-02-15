@@ -666,15 +666,17 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
      *-------------------------------------------------------------------------
      */
 
-    if (options->verbose == 2) {
-        HDprintf("-----------------------------------------------------------------\n");
-        HDprintf(" Type     Filter (Compression)        Timing read/write    Name\n");
-        HDprintf("-----------------------------------------------------------------\n");
-    }
-    else {
-        HDprintf("-----------------------------------------\n");
-        HDprintf(" Type     Filter (Compression)     Name\n");
-        HDprintf("-----------------------------------------\n");
+    if (options->verbose > 0) {
+        if (options->verbose == 2) {
+            HDprintf("-----------------------------------------------------------------\n");
+            HDprintf(" Type     Filter (Compression)        Timing read/write    Name\n");
+            HDprintf("-----------------------------------------------------------------\n");
+        }
+        else {
+            HDprintf("-----------------------------------------\n");
+            HDprintf(" Type     Filter (Compression)     Name\n");
+            HDprintf("-----------------------------------------\n");
+        }
     }
 
     if (travt->objs) {
@@ -692,10 +694,12 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                      *-------------------------------------------------------------------------
                      */
                 case H5TRAV_TYPE_GROUP:
-                    if (options->verbose == 2)
-                        HDprintf(FORMAT_OBJ_NOTIME, "group", travt->objs[i].name);
-                    else
-                        HDprintf(FORMAT_OBJ, "group", travt->objs[i].name);
+                    if (options->verbose > 0) {
+                        if (options->verbose == 2)
+                            HDprintf(FORMAT_OBJ_NOTIME, "group", travt->objs[i].name);
+                        else
+                            HDprintf(FORMAT_OBJ, "group", travt->objs[i].name);
+                    }
 
                     /* open input group */
                     if ((grp_in = H5Gopen2(fidin, travt->objs[i].name, H5P_DEFAULT)) < 0)
@@ -1270,10 +1274,12 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                         if (H5Dclose(dset_out) < 0)
                             H5TOOLS_GOTO_ERROR((-1), "H5Dclose failed");
 
-                        if (options->verbose == 2)
-                            HDprintf(FORMAT_OBJ_TIME, "dset", 0.0, write_time, travt->objs[i].name);
-                        else
-                            HDprintf(FORMAT_OBJ, "dset", travt->objs[i].name);
+                        if (options->verbose > 0) {
+                            if (options->verbose == 2)
+                                HDprintf(FORMAT_OBJ_TIME, "dset", 0.0, write_time, travt->objs[i].name);
+                            else
+                                HDprintf(FORMAT_OBJ, "dset", travt->objs[i].name);
+                        }
 
                     } /* end whether we have request for filter/chunking */
 
@@ -1285,10 +1291,12 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                  *-------------------------------------------------------------------------
                  */
                 case H5TRAV_TYPE_NAMED_DATATYPE:
-                    if (options->verbose == 2)
-                        HDprintf(FORMAT_OBJ_NOTIME, "type", travt->objs[i].name);
-                    else
-                        HDprintf(FORMAT_OBJ, "type", travt->objs[i].name);
+                    if (options->verbose > 0) {
+                        if (options->verbose == 2)
+                            HDprintf(FORMAT_OBJ_NOTIME, "type", travt->objs[i].name);
+                        else
+                            HDprintf(FORMAT_OBJ, "type", travt->objs[i].name);
+                    }
 
                     if ((type_in = H5Topen2(fidin, travt->objs[i].name, H5P_DEFAULT)) < 0)
                         H5TOOLS_GOTO_ERROR((-1), "H5Topen2 failed");
@@ -1327,10 +1335,12 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                  */
                 case H5TRAV_TYPE_LINK:
                 case H5TRAV_TYPE_UDLINK:
-                    if (options->verbose == 2)
-                        HDprintf(FORMAT_OBJ_NOTIME, "link", travt->objs[i].name);
-                    else
-                        HDprintf(FORMAT_OBJ, "link", travt->objs[i].name);
+                    if (options->verbose > 0) {
+                        if (options->verbose == 2)
+                            HDprintf(FORMAT_OBJ_NOTIME, "link", travt->objs[i].name);
+                        else
+                            HDprintf(FORMAT_OBJ, "link", travt->objs[i].name);
+                    }
 
                     /* Check -X option. */
                     if (options->merge) {

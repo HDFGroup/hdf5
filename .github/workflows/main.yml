@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
   push:
   pull_request:
-    branches: [ develop, hdf5_1_14, hdf5_1_12, hdf5_1_10, hdf5_1_8 ]
+    branches: [ hdf5_1_10 ]
     paths-ignore:
       - '.github/CODEOWNERS'
       - '.github/FUNDING.yml'
@@ -109,6 +109,7 @@ jobs:
             direct_vfd: enable
             deprec_sym: enable
             default_api: v110
+            szip: yes
             toolchain: ""
             generator: "autogen"
             flags: ""
@@ -129,6 +130,7 @@ jobs:
             direct_vfd: disable
             deprec_sym: enable
             default_api: v110
+            szip: yes
             toolchain: ""
             generator: "autogen"
             flags: "CC=mpicc"
@@ -169,6 +171,7 @@ jobs:
             direct_vfd: enable
             deprec_sym: enable
             default_api: v16
+            szip: yes
             toolchain: ""
             generator: "autogen"
             flags: ""
@@ -191,6 +194,7 @@ jobs:
             direct_vfd: enable
             deprec_sym: enable
             default_api: v18
+            szip: yes
             toolchain: ""
             generator: "autogen"
             flags: ""
@@ -213,6 +217,7 @@ jobs:
             direct_vfd: enable
             deprec_sym: enable
             default_api: v110
+            szip: yes
             toolchain: ""
             generator: "autogen"
             flags: ""
@@ -235,6 +240,7 @@ jobs:
             direct_vfd: enable
             deprec_sym: disable
             default_api: v110
+            szip: yes
             toolchain: ""
             generator: "autogen"
             flags: ""
@@ -279,6 +285,7 @@ jobs:
            echo "CC=gcc-11" >> $GITHUB_ENV
            echo "CXX=g++-11" >> $GITHUB_ENV
            echo "FC=gfortran-11" >> $GITHUB_ENV
+           sudo apt install libaec0 libaec-dev
         if: (matrix.generator == 'autogen') && (matrix.parallel != 'enable')
 
       - name: Install Autotools Dependencies (Linux, parallel)
@@ -288,6 +295,7 @@ jobs:
            sudo apt install openmpi-bin openmpi-common mpi-default-dev
            echo "CC=mpicc" >> $GITHUB_ENV
            echo "FC=mpif90" >> $GITHUB_ENV
+           sudo apt install libaec0 libaec-dev
         if: (matrix.generator == 'autogen') && (matrix.parallel == 'enable')
 
       - name: Install Dependencies (Windows)
@@ -318,7 +326,7 @@ jobs:
           sh ./autogen.sh
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
-          ${{ matrix.flags }} $GITHUB_WORKSPACE/configure --enable-build-mode=${{ matrix.build_mode.autotools }} --${{ matrix.deprec_sym }}-deprecated-symbols --with-default-api-version=${{ matrix.default_api }} --enable-shared --${{ matrix.parallel }}-parallel --${{ matrix.cpp }}-cxx --${{ matrix.fortran }}-fortran --${{ matrix.java }}-java --${{ matrix.mirror_vfd }}-mirror-vfd --${{ matrix.direct_vfd }}-direct-vfd
+          ${{ matrix.flags }} $GITHUB_WORKSPACE/configure --enable-build-mode=${{ matrix.build_mode.autotools }} --${{ matrix.deprec_sym }}-deprecated-symbols --with-default-api-version=${{ matrix.default_api }} --enable-shared --${{ matrix.parallel }}-parallel --${{ matrix.cpp }}-cxx --${{ matrix.fortran }}-fortran --${{ matrix.java }}-java --${{ matrix.mirror_vfd }}-mirror-vfd --${{ matrix.direct_vfd }}-direct-vfd --with-szlib=${{ matrix.szip }}
         shell: bash
         if: (matrix.generator == 'autogen') && (! matrix.thread_safe.enabled)
 
@@ -327,7 +335,7 @@ jobs:
           sh ./autogen.sh
           mkdir "${{ runner.workspace }}/build"
           cd "${{ runner.workspace }}/build"
-          ${{ matrix.flags }} $GITHUB_WORKSPACE/configure --enable-build-mode=${{ matrix.build_mode.autotools }} --enable-shared --enable-threadsafe --disable-hl --${{ matrix.parallel }}-parallel --${{ matrix.mirror_vfd }}-mirror-vfd --${{ matrix.direct_vfd }}-direct-vfd
+          ${{ matrix.flags }} $GITHUB_WORKSPACE/configure --enable-build-mode=${{ matrix.build_mode.autotools }} --enable-shared --enable-threadsafe --disable-hl --${{ matrix.parallel }}-parallel --${{ matrix.mirror_vfd }}-mirror-vfd --${{ matrix.direct_vfd }}-direct-vfd --with-szlib=${{ matrix.szip }}
         shell: bash
         if: (matrix.generator == 'autogen') && (matrix.thread_safe.enabled)
 
@@ -380,3 +388,17 @@ jobs:
         working-directory: ${{ runner.workspace }}/build
         # Skip Debug MSVC while we investigate H5L Java test timeouts
         if: (matrix.generator != 'autogen') && (matrix.run_tests) && ! ((matrix.name == 'Windows MSVC CMake') && (matrix.build_mode.cmake == 'Debug'))
+
+      #
+      # INSTALL (note that this runs even when we don't run the tests)
+      #
+
+      - name: Autotools Install
+        run: make install
+        working-directory: ${{ runner.workspace }}/build
+        if: (matrix.generator == 'autogen')
+
+      - name: Autotools Verify Install
+        run: make check-install
+        working-directory: ${{ runner.workspace }}/build
+        if: (matrix.generator == 'autogen')

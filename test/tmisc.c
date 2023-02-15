@@ -3828,7 +3828,7 @@ test_misc22(void)
     unsigned int flags;
     size_t       cd_nelmts = 32;
     unsigned int cd_values[32];
-    unsigned     correct;
+    size_t       correct;
 
     if (h5_szip_can_encode() != 1)
         return;
@@ -3922,7 +3922,7 @@ test_misc22(void)
                                            NULL);
                 CHECK(ret, FAIL, "H5Pget_filter_by_id2");
 
-                VERIFY(cd_values[2], correct, "SZIP filter returned value for precision");
+                VERIFY(cd_values[2], (unsigned)correct, "SZIP filter returned value for precision");
 
                 ret = H5Dclose(dsid);
                 CHECK(ret, FAIL, "H5Dclose");
