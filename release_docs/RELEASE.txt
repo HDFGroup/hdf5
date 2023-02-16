@@ -207,6 +207,21 @@ Bug Fixes since HDF5-1.13.3 release
 ===================================
     Library
     -------
+    - Fixed an issue with collective metadata writes of global heap data
+
+      New test failures in parallel netCDF started occurring with debug
+      builds of HDF5 due to an assertion failure and this was reported in
+      GitHub issue #2433. The assertion failure began happening after the
+      collective metadata write pathway in the library was updated to use
+      vector I/O so that parallel-enabled HDF5 Virtual File Drivers (other
+      than the existing MPI I/O VFD) can support collective metadata writes.
+
+      The assertion failure was fixed by updating collective metadata writes
+      to treat global heap metadata as raw data, as done elsewhere in the
+      library. 
+
+      (JTH - 2023/02/16, GH #2433)
+
     - Seg fault on file close
 
       h5debug fails at file close with core dump on a file that has an
