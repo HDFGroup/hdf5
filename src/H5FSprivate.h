@@ -116,7 +116,7 @@ typedef struct H5FS_section_class_t {
         const struct H5FS_section_class_t *, const uint8_t *, haddr_t, hsize_t,
         unsigned *); /* Routine to deserialize a buffer into a "live" section */
     htri_t (*can_merge)(const H5FS_section_info_t *, const H5FS_section_info_t *,
-                        void *); /* Routine to determine if two nodes are mergable */
+                        void *); /* Routine to determine if two nodes are mergeable */
     herr_t (*merge)(H5FS_section_info_t **, H5FS_section_info_t *, void *); /* Routine to merge two nodes */
     htri_t (*can_shrink)(const H5FS_section_info_t *,
                          void *);                     /* Routine to determine if node can shrink container */

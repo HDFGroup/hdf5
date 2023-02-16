@@ -1588,14 +1588,14 @@ test_reference_sel_none(void)
     hid_t           sid     = H5I_INVALID_HID; /* Dataspace ID */
     hid_t           ref_sid = H5I_INVALID_HID; /* Dataspace ID for referenced */
     hid_t           did     = H5I_INVALID_HID; /* Dataset ID */
-    hsize_t         dims[1] = {SPACE1_DIM1};   /* Dimension siez ofr dataset */
+    hsize_t         dims[1] = {SPACE1_DIM1};   /* Dimension size of dataset */
     int             buf[SPACE1_DIM1];          /* Buffer for data */
     hdset_reg_ref_t ref[1];                    /* Buffer for reference */
     hssize_t        npoints;                   /* Number of points in selection */
     herr_t          status;                    /* Return status */
     int             i;                         /* Local index variable */
 
-    /* Iniitialize buffer */
+    /* Initialize buffer */
     for (i = 0; i < SPACE1_DIM1; i++)
         buf[i] = i;
 

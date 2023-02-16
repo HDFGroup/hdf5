@@ -3,7 +3,7 @@ POSIX Write Order Test Instructions
 
 Purpose
 -------
-This documents shows the requirments, implementaion design and instructions
+This documents shows the requirements, implementation design and instructions
 of building and running the POSIX Write Order test.  The name of the
 test is twriteorder and it resides in the test/ directory.
 
@@ -44,7 +44,7 @@ and they are ready for the reader processes to access.
 
 If the system, in which the writer and reader processes run, the readers
 will always get all chain-linked blocks correctly. If the order of write
-is not maintained, some reader processes may found unexpect block data.
+is not maintained, some reader processes may found unexpected block data.
 
 Building the Tests
 ------------------

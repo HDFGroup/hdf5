@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*keep this declaration near the top of this file -RPM*/
+/* Keep this declaration near the top of this file */
 static const char *FileHeader = "\n\
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\n\
  * Copyright by The HDF Group.                                               *\n\
@@ -101,7 +101,7 @@ insert_libhdf5_settings(FILE *flibinfo)
         HDexit(EXIT_FAILURE);
     }
 #else
-    /* print variable definition and an empty string */
+    /* Print variable definition and an empty string */
     /* Do not use const else AIX strings does not show it. */
     fprintf(flibinfo, "char H5libhdf5_settings[]=\"\";\n");
 #endif
@@ -120,7 +120,7 @@ insert_libhdf5_settings(FILE *flibinfo)
 static void
 make_libinfo(void)
 {
-    /* print variable definition and then the string as a macro. */
+    /* Print variable definition and then the string as a macro */
     insert_libhdf5_settings(rawoutstream);
 }
 

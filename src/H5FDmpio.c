@@ -1840,11 +1840,11 @@ done:
  *              easy for us to track the current EOF by extracting it from
  *              write calls.
  *
- *              Instead, we first check to see if the eoa has changed since
+ *              Instead, we first check to see if the EOA has changed since
  *              the last call to this function.  If it has, we call
  *              MPI_File_get_size() to determine the current EOF, and
  *              only call MPI_File_set_size() if this value disagrees
- *              with the current eoa.
+ *              with the current EOA.
  *
  * Return:      SUCCEED/FAIL
  *
@@ -1884,7 +1884,7 @@ H5FD__mpio_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR
          * call.
          *
          * In practice, most (all?) truncate calls will come after a barrier
-         * and with no interviening writes to the file (with the possible
+         * and with no intervening writes to the file (with the possible
          * exception of sueprblock / superblock extension message updates).
          *
          * Check the "MPI file closing" flag in the API context to determine
@@ -1911,7 +1911,7 @@ H5FD__mpio_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR
         if (H5FD_mpi_haddr_to_MPIOff(file->eoa, &needed_eof) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "cannot convert from haddr_t to MPI_Offset")
 
-        /* eoa != eof.  Set eof to eoa */
+        /* EOA != EOF.  Set EOF to EOA */
         if (size != needed_eof) {
             /* Extend the file's size */
             if (MPI_SUCCESS != (mpi_code = MPI_File_set_size(file->f, needed_eof)))

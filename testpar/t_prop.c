@@ -76,7 +76,7 @@ test_encode_decode(hid_t orig_pl, int mpi_rank, int recv_proc)
         HDfree(sbuf);
 
     MPI_Barrier(MPI_COMM_WORLD);
-    return (0);
+    return 0;
 }
 
 void

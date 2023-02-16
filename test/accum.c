@@ -1,4 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by The HDF Group.                                               *
  * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
@@ -1340,7 +1341,7 @@ test_accum_adjust(H5F_t *f)
     /* ==> Accumulator will try to resize, but see that it's getting too big */
     /* ==> Size of new block is less than than half maximum size of accumulator */
     /* ==> New block being appended to accumulator */
-    /* ==> We can slide the dirty region down, to accomodate the request */
+    /* ==> We can slide the dirty region down, to accommodate the request */
     /* ==> Max Buffer Size - (dirty offset + adjust size) >= 2 * size) */
     /* ==> Need to adjust location of accumulator while appending */
     /* ==> Accumulator will need to be reallocated */
@@ -1386,7 +1387,7 @@ test_accum_adjust(H5F_t *f)
     /* ==> Accumulator will try to resize, but see that it's getting too big */
     /* ==> Size of new block is less than than half maximum size of accumulator */
     /* ==> New block being appended to accumulator */
-    /* ==> We can slide the dirty region down, to accomodate the request */
+    /* ==> We can slide the dirty region down, to accommodate the request */
     /* ==> Max Buffer Size - (dirty offset + adjust size) < 2 * size) */
     /* ==> Need to adjust location of accumulator while appending */
     if (accum_write((1024 * 1024) - 5, 10, wbuf) < 0)

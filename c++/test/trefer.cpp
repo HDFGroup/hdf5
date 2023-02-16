@@ -446,7 +446,7 @@ test_reference_group()
         file1->close();
 
         /*
-         * Re-open the file and test deferencing group
+         * Re-open the file and test dereferencing group
          */
 
         // Re-open file

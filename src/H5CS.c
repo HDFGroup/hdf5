@@ -47,7 +47,7 @@ typedef struct H5CS_t {
  * each thread individually. The association of stacks to threads will
  * be handled by the pthread library.
  *
- * In order for this macro to work, H5CS_get_my_stack() must be preceeded
+ * In order for this macro to work, H5CS_get_my_stack() must be preceded
  * by "H5CS_t *fstack =".
  */
 static H5CS_t *H5CS__get_stack(void);
@@ -127,7 +127,7 @@ H5CS__get_stack(void)
 herr_t
 H5CS_print_stack(const H5CS_t *fstack, FILE *stream)
 {
-    const int indent = 2; /* Indention level */
+    const int indent = 2; /* Indentation level */
     int       i;          /* Local index ariable */
 
     /* Don't push this function on the function stack... :-) */

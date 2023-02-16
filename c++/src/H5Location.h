@@ -15,7 +15,7 @@
 #ifndef H5Location_H
 #define H5Location_H
 
-#include "H5Classes.h" // constains forward class declarations
+#include "H5Classes.h" // contains forward class declarations
 
 namespace H5 {
 

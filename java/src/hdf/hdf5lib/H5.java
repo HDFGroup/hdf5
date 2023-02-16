@@ -11171,7 +11171,7 @@ public class H5 implements java.io.Serializable {
      * <pre>
      *      version_info[0] = boot  // boot block version number
      *      version_info[1] = freelist  // global freelist version
-     *      version_info[2] = stab  // symbol tabl version number
+     *      version_info[2] = stab  // symbol table version number
      *      version_info[3] = shhdr  // shared object header version
      * </pre>
      * @return a non-negative value, with the values of version_info initialized, if successful
@@ -14385,7 +14385,7 @@ public class H5 implements java.io.Serializable {
     /**
      * @ingroup JH5T
      *
-     * H5Tset_sign sets the sign proprety for an integer type.
+     * H5Tset_sign sets the sign property for an integer type.
      *
      * @param type_id
      *            IN: Identifier of datatype to set.

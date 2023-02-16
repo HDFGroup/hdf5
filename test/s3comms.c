@@ -47,7 +47,7 @@
  *     4) Configurable expected-actual order in generated comparison strings.
  *        Some prefer `VERIFY(expected, actual)`, others
  *        `VERIFY(actual, expected)`. Provide preprocessor ifdef switch
- *        to satifsy both parties, assuming one paradigm per test file.
+ *        to satisfy both parties, assuming one paradigm per test file.
  *        (One could #undef and redefine the flag through the file as desired,
  *         but _why_.)
  *        Provided as courtesy, per consideration for inclusion in the library
@@ -232,7 +232,7 @@
     }
 
 #ifdef JSVERIFY_EXP_ACT
-/* VERIFY rountines with paramter order (<expected>, <actual> [, <msg> ])
+/* VERIFY routines with parameter order (<expected>, <actual> [, <msg> ])
  */
 
 /*----------------------------------------------------------------------------
@@ -423,7 +423,7 @@ error:
  *
  * Purpose:
  *
- *     Demonstrate the construction of a Canoncial Request (and Signed Headers)
+ *     Demonstrate the construction of a Canonical Request (and Signed Headers)
  *
  *     Elided / not yet implemented:
  *         Query strings
@@ -718,7 +718,7 @@ test_hrb_init_request(void)
             FALSE,
         },
         {
-            "null verb substitues to GET",
+            "null verb substitutes to GET",
             NULL,
             "/MYPATH/MYFILE.tiff",
             "/MYPATH/MYFILE.tiff",
@@ -1131,10 +1131,10 @@ test_hrb_node_set(void)
          *********/
 
         for (mock_i = 0; test->given[mock_i] != NULL; mock_i += 2) {
-            const char *name = test->given[mock_i];
-            const char *valu = test->given[mock_i + 1];
+            const char *name  = test->given[mock_i];
+            const char *value = test->given[mock_i + 1];
 
-            FAIL_IF(SUCCEED != H5FD_s3comms_hrb_node_set(&list, name, valu))
+            FAIL_IF(SUCCEED != H5FD_s3comms_hrb_node_set(&list, name, value))
         }
         /********
          * TEST *
@@ -1150,11 +1150,11 @@ test_hrb_node_set(void)
         node   = list;
         mock_i = 0;
         while (test->expected[mock_i] != NULL && node != NULL) {
-            const char *name = test->expected[mock_i];
-            const char *valu = test->expected[mock_i + 1];
+            const char *name  = test->expected[mock_i];
+            const char *value = test->expected[mock_i + 1];
 
             JSVERIFY_STR(name, node->name, NULL)
-            JSVERIFY_STR(valu, node->value, NULL)
+            JSVERIFY_STR(value, node->value, NULL)
 
             mock_i += 2;
             node = node->next;
@@ -1362,7 +1362,7 @@ test_nlowercase(void)
         HDfree(dest);
     } /* end for each testcase */
 
-    JSVERIFY(FAIL, H5FD_s3comms_nlowercase(NULL, cases[0].in, cases[0].len), "null distination should fail")
+    JSVERIFY(FAIL, H5FD_s3comms_nlowercase(NULL, cases[0].in, cases[0].len), "null destination should fail")
 
     PASSED();
     return 0;
@@ -1547,7 +1547,7 @@ test_parse_url(void)
                 NULL,
                 "a=b&d=b",
             },
-            "QUERY with implict PATH",
+            "QUERY with implicit PATH",
         },
         {
             "http://[5]/path?a=b&d=b",
@@ -2002,7 +2002,7 @@ error:
  *     H5FD_s3comms_s3r_read    << called by getsize(), multiple times working
  *     H5FD_s3comms_s3r_close
  *
- *     Shows most basic curl interation.
+ *     Shows most basic curl iteration.
  *
  * Programmer: Jacob Smith
  *             2017-10-06
@@ -2598,7 +2598,7 @@ main(void)
 
     bucket_url_env = HDgetenv("HDF5_ROS3_TEST_BUCKET_URL");
     if (bucket_url_env == NULL || bucket_url_env[0] == '\0') {
-        HDprintf("WARNING: S3 bucket url is not defined in enviornment "
+        HDprintf("WARNING: S3 bucket url is not defined in environment "
                  "variable 'HDF5_ROS3_TEST_BUCKET_URL'!\n");
     }
     else {
@@ -2606,7 +2606,7 @@ main(void)
         s3_test_bucket_defined = TRUE;
     }
 
-    /* tests ordered rougly by dependence */
+    /* tests ordered roughly by dependence */
     nerrors += test_macro_format_credential() < 0 ? 1 : 0;
     nerrors += test_trim() < 0 ? 1 : 0;
     nerrors += test_nlowercase() < 0 ? 1 : 0;

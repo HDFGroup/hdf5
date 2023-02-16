@@ -774,7 +774,7 @@ done:\n\
     fprintf(rawoutstream, "/* sigprocmask() support: no */\n");
 #endif
 
-    /* Print the statics of signal handlers called for debugging */
+    /* Print the statistics of signal handlers called for debugging */
     fprintf(rawoutstream, "\n"
                           "/******************************/\n"
                           "/* signal handlers statistics */\n"
@@ -1565,7 +1565,7 @@ verify_signal_handlers(int signum, void (*handler)(int))
         }
         else {
             if (val == signum) {
-                /* return from signum handler. Record a sucess. */
+                /* return from signum handler. Record a success. */
                 nsuccesses++;
             }
             else {

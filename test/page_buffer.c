@@ -74,7 +74,7 @@ const char *FILENAME[] = {"filepaged", NULL};
  *              Any data mis-matches or failures reported by the HDF5
  *              library result in test failure.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  unknown
@@ -214,7 +214,7 @@ error:
  *              Any data mis-matches or failures reported by the HDF5
  *              library result in test failure.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  unknown
@@ -369,12 +369,12 @@ error:
  *              1) verifying that API errors are caught.
  *
  *              2) verifying that the page buffer behaves more or less
- *                 as advertized.
+ *                 as advertised.
  *
  *              Any data mis-matches or unexpected failures or successes
  *              reported by the HDF5 library result in test failure.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  unknown
@@ -548,7 +548,7 @@ error:
  *              Any data mis-matches or failures reported by the HDF5
  *              library result in test failure.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  unknown
@@ -826,7 +826,7 @@ error:
  *              Any data mis-matches or failures reported by the HDF5
  *              library result in test failure.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  unknown
@@ -1080,7 +1080,7 @@ error:
  *              Any data mis-matches or failures reported by the HDF5
  *              library result in test failure.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  unknown
@@ -1501,7 +1501,7 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     if (f->shared->page_buf->raw_count != 2)
         TEST_ERROR;
 
-    /* adding more meta entires should replace meta entries since raw data
+    /* adding more meta entries should replace meta entries since raw data
      * is at its minimum
      */
     if (H5F_block_write(f, H5FD_MEM_SUPER, meta_addr + (sizeof(int) * 600), sizeof(int) * 100, data) < 0)
@@ -1516,7 +1516,7 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     if (f->shared->page_buf->raw_count != 2)
         TEST_ERROR;
 
-    /* bring existing raw entires up the LRU */
+    /* bring existing raw entries up the LRU */
     if (H5F_block_read(f, H5FD_MEM_DRAW, raw_addr + (sizeof(int) * 750), sizeof(int) * 100, data) < 0)
         FAIL_STACK_ERROR;
 
@@ -1532,7 +1532,7 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     if (f->shared->page_buf->raw_count != 3)
         TEST_ERROR;
 
-    /* adding 2 meta entries should replace 2 entires at the bottom of the LRU */
+    /* adding 2 meta entries should replace 2 entries at the bottom of the LRU */
     if (H5F_block_read(f, H5FD_MEM_SUPER, meta_addr + (sizeof(int) * 98), sizeof(int) * 100, data) < 0)
         FAIL_STACK_ERROR;
 
@@ -1715,7 +1715,7 @@ error:
  *              Any data mis-matches or failures reported by the HDF5
  *              library result in test failure.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  unknown
@@ -2018,7 +2018,7 @@ error:
  *              At present, page buffering should be disabled in parallel
  *              builds.  Verify this.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  John Mainzer
@@ -2133,7 +2133,7 @@ error:
  *
  * Purpose:     Main function for the page buffer tests.
  *
- * Return:      0 if test is sucessful
+ * Return:      0 if test is successful
  *              1 if test fails
  *
  * Programmer:  unknown

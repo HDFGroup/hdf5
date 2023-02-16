@@ -2059,7 +2059,7 @@ H5S__hyper_iter_get_seq_list_opt(H5S_sel_iter_t *iter, size_t maxseq, size_t max
             /* Increment the offset and count for the other dimensions */
             temp_dim = (int)fast_dim - 1;
             while (temp_dim >= 0) {
-                /* Move to the next row in the curent dimension */
+                /* Move to the next row in the current dimension */
                 offset[temp_dim]++;
                 tmp_block[temp_dim]++;
 
@@ -2170,7 +2170,7 @@ H5S__hyper_iter_get_seq_list_opt(H5S_sel_iter_t *iter, size_t maxseq, size_t max
         /* Increment the offset and count for the other dimensions */
         temp_dim = (int)fast_dim - 1;
         while (temp_dim >= 0) {
-            /* Move to the next row in the curent dimension */
+            /* Move to the next row in the current dimension */
             offset[temp_dim]++;
             tmp_block[temp_dim]++;
 
@@ -2484,7 +2484,7 @@ H5S__hyper_iter_get_seq_list_single(H5S_sel_iter_t *iter, size_t maxseq, size_t 
 
                     /* Increment the offset and count for the other dimensions */
                     while (temp_dim >= 0) {
-                        /* Move to the next row in the curent dimension */
+                        /* Move to the next row in the current dimension */
                         offset[temp_dim]++;
                         tmp_block[temp_dim]++;
 
@@ -3531,9 +3531,9 @@ H5S__hyper_get_version_enc_size(H5S_t *space, hsize_t block_count, uint32_t *ver
     hbool_t      bound_up_version = FALSE;   /* Whether high bounds exceed (2^32 - 1) */
     H5F_libver_t low_bound;                  /* The 'low' bound of library format versions */
     H5F_libver_t high_bound;                 /* The 'high' bound of library format versions */
-    unsigned     u;                          /* Local index veriable */
-    uint32_t     tmp_version;                /* Temporay version */
-    herr_t       ret_value = SUCCEED;        /* return value */
+    uint32_t     tmp_version;                /* Local temporary version */
+    unsigned     u;                          /* Local index variable */
+    herr_t       ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -3831,7 +3831,7 @@ H5S__hyper_serialize(H5S_t *space, uint8_t **p)
     pp = (*p);
     HDassert(pp);
 
-    /* Set some convienence values */
+    /* Set some convenience values */
     ndims   = space->extent.rank;
     diminfo = space->select.sel_info.hslab->diminfo.opt;
 
@@ -3896,7 +3896,7 @@ H5S__hyper_serialize(H5S_t *space, uint8_t **p)
         else {
             HDassert(version == H5S_HYPER_VERSION_1);
 
-            /* Set some convienence values */
+            /* Set some convenience values */
             fast_dim = ndims - 1;
 
             /* Encode number of hyperslabs */
@@ -4034,7 +4034,7 @@ H5S__hyper_deserialize(H5S_t **space, const uint8_t **p)
 {
     H5S_t *tmp_space = NULL;            /* Pointer to actual dataspace to use,
                                            either *space or a newly allocated one */
-    hsize_t        dims[H5S_MAX_RANK];  /* Dimenion sizes */
+    hsize_t        dims[H5S_MAX_RANK];  /* Dimension sizes */
     hsize_t        start[H5S_MAX_RANK]; /* hyperslab start information */
     hsize_t        block[H5S_MAX_RANK]; /* hyperslab block information */
     uint32_t       version;             /* Version number */
@@ -4396,7 +4396,7 @@ H5S__get_select_hyper_blocklist(H5S_t *space, hsize_t startblock, hsize_t numblo
         hbool_t                done;     /* Whether we are done with the iteration */
         unsigned               u;        /* Counter */
 
-        /* Set some convienence values */
+        /* Set some convenience values */
         ndims    = space->extent.rank;
         fast_dim = ndims - 1;
 
@@ -4890,7 +4890,7 @@ H5S__hyper_is_contiguous(const H5S_t *space)
         large_contiguous = TRUE;  /* assume true and reset if the dimensions don't match */
         small_contiguous = FALSE; /* assume false initially */
 
-        /* Check for a "large contigous" block */
+        /* Check for a "large contiguous" block */
         for (u = 0; u < space->extent.rank; u++) {
             if (diminfo[u].count > 1) {
                 large_contiguous = FALSE;
@@ -11295,7 +11295,7 @@ H5S__hyper_proj_int_iterate(H5S_hyper_span_info_t *ss_span_info, const H5S_hyper
                     udata->skip += (count - 1) * (udata->skip - old_skip);
                 } /* end if */
                 else {
-                    /* Third case: agorithm added skip and nelem (in that
+                    /* Third case: algorithm added skip and nelem (in that
                      * order).  Add the same skip and nelem once for each item
                      * remaining in count. */
                     hsize_t skip_add;

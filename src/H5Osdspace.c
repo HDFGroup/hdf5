@@ -61,7 +61,7 @@ const H5O_msg_class_t H5O_MSG_SDSPACE[1] = {{
     H5O_SDSPACE_ID,                            /* message id number		    	*/
     "dataspace",                               /* message name for debugging	   	*/
     sizeof(H5S_extent_t),                      /* native message size		    	*/
-    H5O_SHARE_IS_SHARABLE | H5O_SHARE_IN_OHDR, /* messages are sharable?       */
+    H5O_SHARE_IS_SHARABLE | H5O_SHARE_IN_OHDR, /* messages are shareable?       */
     H5O_sdspace_shared_decode,                 /* decode message			*/
     H5O_sdspace_shared_encode,                 /* encode message			*/
     H5O_sdspace_copy,                          /* copy the native value		*/
@@ -224,19 +224,6 @@ done:
  DESCRIPTION
         This function encodes the native memory form of the simple
     dimensionality message in the "raw" disk form.
-
- MODIFICATIONS
-        Robb Matzke, 1998-04-09
-        The current and maximum dimensions are now H5F_SIZEOF_SIZET bytes
-        instead of just four bytes.
-
-        Robb Matzke, 1998-07-20
-        Added a version number and reformatted the message for aligment.
-
-        Raymond Lu
-        April 8, 2004
-        Added the type of dataspace into this header message using a reserved
-        byte.
 
 --------------------------------------------------------------------------*/
 static herr_t

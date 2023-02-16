@@ -514,7 +514,7 @@ Bug Fixes since HDF5-1.10.7 release
         function. This improves the I/O performance. In the case of the parallel
         library, it also avoids breaking to independent I/O, which makes it
         possible to apply a filter when writing or reading data to or from
-        teh HDF5 file.
+        te HDF5 file.
 
         (JWSB - 2021/09/13)
 
@@ -542,7 +542,7 @@ Bug Fixes since HDF5-1.10.7 release
         dimension sizes.
 
         The problem was fixed by ensuring that decoding the dimension sizes
-        and max values will not go beyong the end of the buffer.
+        and max values will not go beyond the end of the buffer.
 
         (BMR - 2021/05/12, HDFFV-11223)
 
@@ -610,7 +610,7 @@ Bug Fixes since HDF5-1.10.7 release
 
     - Fixed CMake C++ compiler flags
 
-        A recent refactoring of the C++ configure files accidently removed the
+        A recent refactoring of the C++ configure files accidentally removed the
         file that executed the enable_language command for C++ needed by the
         HDFCXXCompilerFlags.cmake file. Also updated the intel warnings files,
         including adding support for windows platforms.
@@ -2382,7 +2382,7 @@ Known Problems
     e.g. within a single parallel test (testphdf5) the subtests (cdsetr, eidsetr)
     report data verification errors before eventually aborting.
     The most recent versions of OpenMPI (v3.1.3 or newer) have evidently
-    resolved these isses and parallel HDF5 testing does not currently report
+    resolved these issues and parallel HDF5 testing does not currently report
     errors though occasional hangs have been observed.
 
     Known problems in previous releases can be found in the HISTORY*.txt files
@@ -3085,7 +3085,7 @@ Known Problems
     e.g. within a single parallel test (testphdf5) the subtests (cdsetr, eidsetr)
     report data verification errors before eventually aborting.
     The most recent versions of OpenMPI (v3.1.3 or newer) have evidently
-    resolved these isses and parallel HDF5 testing does not currently report
+    resolved these issues and parallel HDF5 testing does not currently report
     errors though occasional hangs have been observed.
 
     Known problems in previous releases can be found in the HISTORY*.txt files

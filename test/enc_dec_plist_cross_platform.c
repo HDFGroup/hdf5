@@ -28,7 +28,7 @@ int
 main(void)
 {
     if (VERBOSE_MED)
-        HDprintf("Encode/Decode property list endianess\n");
+        HDprintf("Encode/Decode property list endianness\n");
 
     /******* ENCODE/DECODE DCPLS *****/
     TESTING("Default DCPL Encoding/Decoding");

@@ -850,7 +850,7 @@ tmpfile(void)
  * Purpose: Get symbolic link (soft, external) info and its target object type
             (dataset, group, named datatype) and path, if exist
  *
- * Patameters:
+ * Parameters:
  *  - [IN]  fileid : link file id
  *  - [IN]  linkpath : link path
  *  - [OUT] link_info: returning target object info (h5tool_link_info_t)

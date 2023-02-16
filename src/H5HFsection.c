@@ -2291,7 +2291,7 @@ H5HF_sect_indirect_for_row(H5HF_hdr_t *hdr, H5HF_indirect_t *iblock, H5HF_free_s
         (sect->u.indirect.dir_rows = (H5HF_free_section_t **)H5MM_malloc(sizeof(H5HF_free_section_t *))))
         HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, NULL, "allocation failed for row section pointer array")
 
-    /* Atatch the new row section to indirect section */
+    /* Attach the new row section to indirect section */
     sect->u.indirect.dir_rows[0] = row_sect;
     sect->u.indirect.rc          = 1;
 

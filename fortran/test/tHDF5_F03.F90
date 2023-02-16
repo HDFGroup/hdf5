@@ -7,7 +7,7 @@
 !  src/fortran/test/tHDF5_F03.f90
 !
 ! PURPOSE
-!  This is the test  module used for testing the Fortran2003 HDF
+!  This is the test module used for testing the Fortran2003 HDF
 !  library APIS.
 !
 ! COPYRIGHT

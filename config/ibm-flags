@@ -62,7 +62,7 @@ if test "XL" = "$cc_vendor"; then
     # concerning the portability of __inline__.
     H5_CFLAGS="-qlanglvl=stdc99 -qflag=w:w $H5_CFLAGS"
 
-    # Produciton
+    # Production
     PROD_CFLAGS=
 
     # Debug

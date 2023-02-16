@@ -1821,7 +1821,7 @@ filter_corrupt(unsigned int flags, size_t cd_nelmts, const unsigned int *cd_valu
         TEST_ERROR
     HDmemset(data, (int)value, (size_t)length);
 
-    if (flags & H5Z_FLAG_REVERSE) { /* Varify data is actually corrupted during read */
+    if (flags & H5Z_FLAG_REVERSE) { /* Verify data is actually corrupted during read */
         dst += offset;
         if (HDmemcmp(data, dst, (size_t)length) != 0)
             TEST_ERROR
@@ -2005,7 +2005,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
         if (status >= 0)
             TEST_ERROR;
 
-        /* Callback decides to continue inspite data is corrupted. */
+        /* Callback decides to continue in spite data is corrupted. */
         if (H5Pset_filter_callback(dxpl, filter_cb_cont, NULL) < 0)
             TEST_ERROR;
         if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check_data) < 0)
@@ -2072,7 +2072,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
         if (status >= 0)
             TEST_ERROR;
 
-        /* Callback decides to continue inspite data is corrupted. */
+        /* Callback decides to continue in spite data is corrupted. */
         if (H5Pset_filter_callback(dxpl, filter_cb_cont, NULL) < 0)
             TEST_ERROR;
         if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check_data) < 0)
@@ -2136,7 +2136,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
         if (status >= 0)
             TEST_ERROR;
 
-        /* Callback decides to continue inspite data is corrupted. */
+        /* Callback decides to continue in spite data is corrupted. */
         if (H5Pset_filter_callback(dxpl, filter_cb_cont, NULL) < 0)
             TEST_ERROR;
         if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check_data) < 0)
@@ -2203,7 +2203,7 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
         if (status >= 0)
             TEST_ERROR;
 
-        /* Callback decides to continue inspite data is corrupted. */
+        /* Callback decides to continue in spite data is corrupted. */
         if (H5Pset_filter_callback(dxpl, filter_cb_cont, NULL) < 0)
             TEST_ERROR;
         if (H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check_data) < 0)
@@ -3234,7 +3234,7 @@ test_nbit_int(hid_t file)
             power           = HDpow(2.0, (double)(precision - 1));
             orig_data[i][j] = (int)(((long long)HDrandom() % (long long)power) << offset);
 
-            /* even-numbered values are negtive */
+            /* even-numbered values are negative */
             if ((i * size[1] + j + 1) % 2 == 0)
                 orig_data[i][j] = -orig_data[i][j];
         }
@@ -3812,7 +3812,7 @@ test_nbit_compound(hid_t file)
             orig_data[i][j].s = (short)(((long long)HDrandom() % (long long)power) << offset[2]);
             orig_data[i][j].f = float_val[i][j];
 
-            /* some even-numbered integer values are negtive */
+            /* some even-numbered integer values are negative */
             if ((i * size[1] + j + 1) % 2 == 0) {
                 orig_data[i][j].i = -orig_data[i][j].i;
                 orig_data[i][j].s = (short)-orig_data[i][j].s;
@@ -4526,7 +4526,7 @@ test_nbit_int_size(hid_t file)
         goto error;
     }
 
-    /* Initiliaze data buffer with random data within correct range
+    /* Initialize data buffer with random data within correct range
      * corresponding to the memory datatype's precision and offset.
      */
     for (i = 0; i < DSET_DIM1; i++)
@@ -4739,7 +4739,7 @@ test_nbit_flt_size(hid_t file)
     } /* end if */
 
     /*
-     * Initiliaze data buffer with random data
+     * Initialize data buffer with random data
      */
     for (i = 0; i < DSET_DIM1; i++)
         for (j = 0; j < DSET_DIM2; j++)
@@ -4898,7 +4898,7 @@ test_scaleoffset_int(hid_t file)
         for (j = 0; j < (size_t)size[1]; j++) {
             orig_data[i][j] = HDrandom() % 10000;
 
-            /* even-numbered values are negtive */
+            /* even-numbered values are negative */
             if ((i * size[1] + j + 1) % 2 == 0)
                 orig_data[i][j] = -orig_data[i][j];
         }
@@ -5042,7 +5042,7 @@ test_scaleoffset_int_2(hid_t file)
     for (j = 0; j < (size_t)size[1]; j++) {
         orig_data[0][j] = (int)HDrandom() % 10000;
 
-        /* even-numbered values are negtive */
+        /* even-numbered values are negative */
         if ((j + 1) % 2 == 0)
             orig_data[0][j] = -orig_data[0][j];
     }
@@ -5164,7 +5164,7 @@ test_scaleoffset_float(hid_t file)
         for (j = 0; j < (size_t)size[1]; j++) {
             orig_data[i][j] = (float)(HDrandom() % 100000) / 1000.0F;
 
-            /* even-numbered values are negtive */
+            /* even-numbered values are negative */
             if ((i * size[1] + j + 1) % 2 == 0)
                 orig_data[i][j] = -orig_data[i][j];
         }
@@ -5310,7 +5310,7 @@ test_scaleoffset_float_2(hid_t file)
     for (j = 0; j < (size_t)size[1]; j++) {
         orig_data[0][j] = (float)(HDrandom() % 100000) / 1000.0F;
 
-        /* even-numbered values are negtive */
+        /* even-numbered values are negative */
         if ((j + 1) % 2 == 0)
             orig_data[0][j] = -orig_data[0][j];
     }
@@ -5431,7 +5431,7 @@ test_scaleoffset_double(hid_t file)
         for (j = 0; j < (size_t)size[1]; j++) {
             orig_data[i][j] = (float)(HDrandom() % 10000000) / 10000000.0F;
 
-            /* even-numbered values are negtive */
+            /* even-numbered values are negative */
             if ((i * size[1] + j + 1) % 2 == 0)
                 orig_data[i][j] = -orig_data[i][j];
         }
@@ -5577,7 +5577,7 @@ test_scaleoffset_double_2(hid_t file)
     for (j = 0; j < (size_t)size[1]; j++) {
         orig_data[0][j] = (float)(HDrandom() % 10000000) / 10000000.0F;
 
-        /* even-numbered values are negtive */
+        /* even-numbered values are negative */
         if ((j + 1) % 2 == 0)
             orig_data[0][j] = -orig_data[0][j];
     }
@@ -7712,7 +7712,7 @@ test_missing_chunk(hid_t file)
     if (H5Dread(did2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata2_bytes) < 0)
         TEST_ERROR;
 
-    /* Validata values read for the 1-D dataset */
+    /* Validate values read for the 1-D dataset */
     for (u = 0; u < MISSING_CHUNK_DIM; u++) {
         if ((u % 10) >= 5) {
             if (rdata[u] != 911) {
@@ -7729,7 +7729,7 @@ test_missing_chunk(hid_t file)
         }     /* end else */
     }         /* end for */
 
-    /* Validata values read for the 2-D dataset */
+    /* Validate values read for the 2-D dataset */
     for (i = 0; i < MISSING_CHUNK_DIM; i++) {
         for (j = 0; j < MISSING_CHUNK_DIM; j++) {
 
@@ -8835,7 +8835,7 @@ test_chunk_cache(hid_t fapl)
     if ((dsid = H5Dcreate2(fid, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, dapl1)) < 0)
         FAIL_STACK_ERROR
 
-    /* Retrieve dapl from dataset, verfiy cache values are the same as on fapl_local */
+    /* Retrieve dapl from dataset, verify cache values are the same as on fapl_local */
     if ((dapl2 = H5Dget_access_plist(dsid)) < 0)
         FAIL_STACK_ERROR
     if (H5Pget_chunk_cache(dapl2, &nslots_4, &nbytes_4, &w0_4) < 0)
@@ -8859,7 +8859,7 @@ test_chunk_cache(hid_t fapl)
     if ((dsid = H5Oopen(fid, "dset", dapl1)) < 0)
         FAIL_STACK_ERROR
 
-    /* Retrieve dapl from dataset, verfiy cache values are the same as on dapl1 */
+    /* Retrieve dapl from dataset, verify cache values are the same as on dapl1 */
     /* Note we rely on the knowledge that H5Pget_chunk_cache retrieves these
      * values directly from the dataset structure, and not from a copy of the
      * dapl used to open the dataset (which is not preserved).
@@ -8879,7 +8879,7 @@ test_chunk_cache(hid_t fapl)
     if ((dsid = H5Dopen2(fid, "dset", H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
 
-    /* Retrieve dapl from dataset, verfiy cache values are the same on fapl_local */
+    /* Retrieve dapl from dataset, verify cache values are the same on fapl_local */
     if ((dapl2 = H5Dget_access_plist(dsid)) < 0)
         FAIL_STACK_ERROR
     if (H5Pget_chunk_cache(dapl2, &nslots_4, &nbytes_4, &w0_4) < 0)
@@ -8889,7 +8889,7 @@ test_chunk_cache(hid_t fapl)
     if (H5Pclose(dapl2) < 0)
         FAIL_STACK_ERROR
 
-    /* Similary, test use of H5Dcreate2 with H5P_DEFAULT */
+    /* Similarly, test use of H5Dcreate2 with H5P_DEFAULT */
     if (H5Dclose(dsid) < 0)
         FAIL_STACK_ERROR
     if ((dsid = H5Dcreate2(fid, "dset2", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
@@ -11974,7 +11974,7 @@ error:
  * Purpose: Checks that a file created with either:
  *        (a) SWMR-write + non-latest-format
  *        (b) write + latest format
- *        will generate datset with latest chunk indexing type.
+ *        will generate dataset with latest chunk indexing type.
  *
  * Return:      Success: 0
  *              Failure: -1
@@ -14711,7 +14711,7 @@ test_versionbounds(void)
     hid_t        dcpl     = -1;  /* Dataset creation property list */
     hid_t        srcspace = -1;  /* Source dataspaces */
     hid_t        vspace   = -1;  /* Virtual dset dataspaces */
-    hid_t        srcdset  = -1;  /* Source datset */
+    hid_t        srcdset  = -1;  /* Source dataset */
     hid_t        vdset    = -1;  /* Virtual dataset */
     hsize_t      dims[1]  = {3}; /* Data space current size */
     char         srcfilename[FILENAME_BUF_SIZE];
@@ -14847,7 +14847,7 @@ error:
 /*-----------------------------------------------------------------------------
  * Function:   test_object_header_minimization_dcpl
  *
- * Purpose:    Test the "datset object header minimization" property as part of
+ * Purpose:    Test the "dataset object header minimization" property as part of
  *             the DCPL.
  *
  * Return:     Success/pass:   0
@@ -14889,15 +14889,13 @@ test_object_header_minimization_dcpl(void)
     /* TESTS */
     /*********/
 
-    /* default value (not set explicitly)
-     */
+    /* Default value (not set explicitly) */
     if (H5Pget_dset_no_attrs_hint(dcpl_id, &minimize) == FAIL)
         TEST_ERROR
     if (FALSE != minimize)
         TEST_ERROR
 
-    /* FALSE-set value
-     */
+    /* FALSE-set value */
     if (H5Pset_dset_no_attrs_hint(dcpl_id, FALSE) == FAIL)
         TEST_ERROR
     if (H5Pget_dset_no_attrs_hint(dcpl_id, &minimize) == FAIL)
@@ -14905,8 +14903,7 @@ test_object_header_minimization_dcpl(void)
     if (FALSE != minimize)
         TEST_ERROR
 
-    /* TRUE-set value
-     */
+    /* TRUE-set value */
     if (H5Pset_dset_no_attrs_hint(dcpl_id, TRUE) == FAIL)
         TEST_ERROR
     if (H5Pget_dset_no_attrs_hint(dcpl_id, &minimize) == FAIL)
@@ -15190,7 +15187,7 @@ main(void)
     double      rdcc_w0;
     int         nerrors = 0;
     const char *envval;
-    hbool_t     contig_addr_vfd; /* Whether VFD used has a contigous address space */
+    hbool_t     contig_addr_vfd; /* Whether VFD used has a contiguous address space */
     int         i;
 
     /* Don't run this test using certain file drivers */
@@ -15198,7 +15195,7 @@ main(void)
     if (envval == NULL)
         envval = "nomatch";
 
-    /* Current VFD that does not support contigous address space */
+    /* Current VFD that does not support contiguous address space */
     contig_addr_vfd = (hbool_t)(HDstrcmp(envval, "split") != 0 && HDstrcmp(envval, "multi") != 0);
 
     /* Set the random # seed */

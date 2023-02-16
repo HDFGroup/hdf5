@@ -110,7 +110,7 @@ H5_checksum_fletcher32(const void *_data, size_t _len)
     HDassert(_len > 0);
 
     /* Compute checksum for pairs of bytes */
-    /* (the magic "360" value is is the largest number of sums that can be
+    /* (the magic "360" value is the largest number of sums that can be
      *  performed without numeric overflow)
      */
     while (len) {

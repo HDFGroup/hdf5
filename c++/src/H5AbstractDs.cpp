@@ -302,7 +302,7 @@ AbstractDs::getStrType() const
 
 //--------------------------------------------------------------------------
 // Function:    AbstractDs::getVarLenType
-///\brief       Returns the floating-point datatype of this abstract dataset,
+///\brief       Returns the variable length datatype of this abstract dataset,
 ///             which can be a dataset or an attribute.
 ///\return      VarLenType instance
 ///\exception   H5::DataTypeIException

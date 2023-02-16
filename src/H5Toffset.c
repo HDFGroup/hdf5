@@ -70,7 +70,7 @@ H5Tget_offset(hid_t type_id)
 
     /* Get offset */
     if ((ret_value = H5T_get_offset(dt)) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "cant't get offset for specified datatype")
+        HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "can't get offset for specified datatype")
 
 done:
     FUNC_LEAVE_API(ret_value)

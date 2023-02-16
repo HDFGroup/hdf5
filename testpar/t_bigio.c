@@ -1170,7 +1170,7 @@ create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type)
  */
 
 /* ------------------------------------------------------------------------
- *  Descriptions for the selection: One big singluar selection inside one chunk
+ *  Descriptions for the selection: One big singular selection inside one chunk
  *  Two dimensions,
  *
  *  dim1       = space_dim1(5760)*mpi_size
@@ -1274,7 +1274,7 @@ coll_chunk2(void)
  */
 
 /* ------------------------------------------------------------------------
- *  Descriptions for the selection: one singular selection accross many chunks
+ *  Descriptions for the selection: one singular selection across many chunks
  *  Two dimensions, Num of chunks = 2* mpi_size
  *
  *  dim1       = space_dim1*mpi_size
@@ -1828,7 +1828,7 @@ main(int argc, char **argv)
     /* Set the bigio processing limit to be 'newsize' bytes */
     hsize_t oldsize = H5_mpi_set_bigio_count(newsize);
 
-    /* Having set the bigio handling to a size that is managable,
+    /* Having set the bigio handling to a size that is manageable,
      * we'll set our 'bigcount' variable to be 2X that limit so
      * that we try to ensure that our bigio handling is actually
      * envoked and tested.

@@ -423,7 +423,7 @@ H5Z__unget_token(H5Z_token *current)
  *              kept internal to the H5Z_token and handled by this and the
  *              unget_H5Z_token function.
  *
- * Return:      Succeess:       The passed in H5Z_token with a valid tok_type
+ * Return:      Success:        The passed in H5Z_token with a valid tok_type
  *                              field.
  *              Failure:        The passed in H5Z_token but with the tok_type
  *                              field set to ERROR.
@@ -1416,7 +1416,7 @@ H5Z__op_is_numbs2(H5Z_node *_tree)
  * Function:    H5Z__xform_reduce_tree
  *
  * Purpose:     Simplifies parse tree passed in by performing any obvious
- *              and trivial arithemtic calculations.
+ *              and trivial arithmetic calculations.
  *
  * Return:      None.
  *
@@ -1756,7 +1756,7 @@ H5Z_xform_noop(const H5Z_data_xform_t *data_xform_prop)
     if (data_xform_prop) {
         ret_value = FALSE;
 
-        /* Check for trivial data tranformation: expression = "x" */
+        /* Check for trivial data transformation: expression = "x" */
         if ((HDstrlen(data_xform_prop->xform_exp) == 1) && data_xform_prop->dat_val_pointers &&
             (data_xform_prop->dat_val_pointers->num_ptrs == 1)) {
             ret_value = TRUE;
@@ -1787,7 +1787,7 @@ H5Z_xform_extract_xform_str(const H5Z_data_xform_t *data_xform_prop)
 
     /* There should be no way that this can be NULL since the function
      * that calls this one checks to make sure it isn't before
-     * pasing them */
+     * passing them */
     HDassert(data_xform_prop);
 
     FUNC_LEAVE_NOAPI(data_xform_prop->xform_exp)

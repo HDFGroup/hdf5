@@ -1717,7 +1717,7 @@ done:
  *              Failure:        Negative
  *
  * Programmer:  Neil Fortner
- *              Thurday, Feb 26, 2015
+ *              Thursday, Feb 26, 2015
  *
  *--------------------------------------------------------------------------
  */
@@ -1951,7 +1951,7 @@ H5P__init_def_layout(void)
 
     FUNC_ENTER_STATIC_NOERR
 
-    /* Initialize the default layout info for non-contigous layouts */
+    /* Initialize the default layout info for non-contiguous layouts */
     H5D_def_layout_compact_g.storage.type      = H5D_COMPACT;
     H5D_def_layout_compact_g.storage.u.compact = def_store_compact;
     H5D_def_layout_chunk_g.u.chunk             = def_layout_chunk;

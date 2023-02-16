@@ -654,7 +654,7 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
      INTEGER(HID_T) :: file, scalar, grp, d1
      CHARACTER(LEN=12), PARAMETER :: filename ='TestLinks.h5'
      INTEGER(HSIZE_T), DIMENSION(1) :: adims2 = (/1/) ! Attribute dimension
-     INTEGER ::   arank = 1                      ! Attribure rank
+     INTEGER ::   arank = 1                      ! Attribute rank
      INTEGER :: error
 
      INTEGER :: cset ! Indicates the character set used for the link’s name.

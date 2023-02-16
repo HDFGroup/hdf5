@@ -136,7 +136,7 @@ tts_attr_vlen_thread(void H5_ATTR_UNUSED *client_data)
     gid = H5Gopen2(fid, "/", H5P_DEFAULT);
     CHECK(gid, H5I_INVALID_HID, "H5Gopen");
 
-    /* Open the attribte */
+    /* Open the attribute */
     aid = H5Aopen(gid, "root_attr", H5P_DEFAULT);
     CHECK(aid, H5I_INVALID_HID, "H5Aopen");
 

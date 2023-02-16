@@ -214,8 +214,8 @@ typedef int DATATYPE;
 
 /* Shape Same Tests Definitions */
 typedef enum {
-    IND_CONTIG,  /* Independent IO on contigous datasets */
-    COL_CONTIG,  /* Collective IO on contigous datasets */
+    IND_CONTIG,  /* Independent IO on contiguous datasets */
+    COL_CONTIG,  /* Collective IO on contiguous datasets */
     IND_CHUNKED, /* Independent IO on chunked datasets */
     COL_CHUNKED  /* Collective IO on chunked datasets */
 } ShapeSameTestMethods;

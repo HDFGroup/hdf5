@@ -58,7 +58,7 @@ test_vds_prefix_second(unsigned config, hid_t fapl)
     hid_t       srcspace[4]             = {-1, -1, -1, -1}; /* Source dataspaces */
     hid_t       vspace[4]               = {-1, -1, -1, -1}; /* Virtual dset dataspaces */
     hid_t       memspace                = -1;               /* Memory dataspace */
-    hid_t       srcdset[4]              = {-1, -1, -1, -1}; /* Source datsets */
+    hid_t       srcdset[4]              = {-1, -1, -1, -1}; /* Source datasets */
     hid_t       vdset                   = -1;               /* Virtual dataset */
     hsize_t     dims[4]                 = {10, 26, 0, 0};   /* Data space current size */
     int         buf[10][26];                                /* Write and expected read buffer */

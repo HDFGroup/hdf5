@@ -1,0 +1,12 @@
+if(NOT "$ENV{CI_SITE_NAME}" STREQUAL "")
+  set(CTEST_SITE "$ENV{CI_SITE_NAME}")
+endif()
+if(NOT "$ENV{CI_BUILD_NAME}" STREQUAL "")
+  set(CTEST_BUILD_NAME "$ENV{CI_BUILD_NAME}")
+endif()
+
+ctest_start ("$ENV{CI_MODEL}" "@HDF5_SOURCE_DIR@" "@HDF5_BINARY_DIR@" APPEND)
+ctest_test (BUILD "@HDF5_BINARY_DIR@" APPEND INCLUDE MPI_TEST_ RETURN_VALUE res)
+if (${res} LESS 0 OR ${res} GREATER 0)
+      file (APPEND ${CTEST_SCRIPT_DIRECTORY}/FailedCTest.txt "Failed Tests: ${res}\n")
+      endif ()

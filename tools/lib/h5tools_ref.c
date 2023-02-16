@@ -152,7 +152,7 @@ term_ref_path_table(void)
  * Purpose:     Looks up a table entry given a path name.
  *              Used during construction of the table.
  *
- * Return:      The table entre (pte) or NULL if not in the
+ * Return:      The table entry or NULL if not in the
  *              table.
  *
  * Programmer:  REMcG

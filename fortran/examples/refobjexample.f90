@@ -65,7 +65,7 @@
      !
      CALL h5gcreate_f(file_id, groupname1, grp1_id, error)
      !
-     ! Create a group inside the created gorup
+     ! Create a group inside the created group
      !
      CALL h5gcreate_f(grp1_id, groupname2, grp2_id, error)
      !

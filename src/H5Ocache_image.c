@@ -50,7 +50,7 @@ const H5O_msg_class_t H5O_MSG_MDCI[1] = {{
     H5O_MDCI_MSG_ID,    /* message id number              */
     "mdci",             /* message name for debugging     */
     sizeof(H5O_mdci_t), /* native message size            */
-    0,                  /* messages are sharable?         */
+    0,                  /* messages are shareable?         */
     H5O__mdci_decode,   /* decode message                 */
     H5O__mdci_encode,   /* encode message                 */
     H5O__mdci_copy,     /* copy method                    */
@@ -285,7 +285,7 @@ H5O__mdci_delete(H5F_t *f, H5O_t *open_oh, void *_mesg)
          * manager issue is in use, file space for the non-empty self
          * referential free space managers was also allocated from VFD
          * layer at the end of file.  Since these allocations directly
-         * preceeded the cache image allocation they should be directly
+         * preceded the cache image allocation they should be directly
          * adjacent to the cache image block at the end of file.
          *
          * In this case, just call H5MF_tidy_self_referential_fsm_hack().
@@ -302,7 +302,7 @@ H5O__mdci_delete(H5F_t *f, H5O_t *open_oh, void *_mesg)
          *
          * If the hack to work around the persistent self referential
          * free space manager issue is NOT in use, just call H5MF_xfree()
-         * to release the cache iamge.  In principle, we should be able
+         * to release the cache image.  In principle, we should be able
          * to just reduce the EOA to the base address of the cache
          * image block, as there shouldn't be any file space allocation
          * before the first metadata cache access.  However, given
