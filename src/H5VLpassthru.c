@@ -523,12 +523,14 @@ H5VL_pass_through_info_copy(const void *_info)
 
     /* Make sure the underneath VOL of this pass-through VOL is specified */
     if (!info) {
-        printf("\nH5VLpassthru.c line %d in %s: info for pass-through VOL can't be null\n", __LINE__, __func__);
+        printf("\nH5VLpassthru.c line %d in %s: info for pass-through VOL can't be null\n", __LINE__,
+               __func__);
         return NULL;
     }
 
     if (H5Iis_valid(info->under_vol_id) <= 0) {
-        printf("\nH5VLpassthru.c line %d in %s: not a valid underneath VOL ID for pass-through VOL\n", __LINE__, __func__);
+        printf("\nH5VLpassthru.c line %d in %s: not a valid underneath VOL ID for pass-through VOL\n",
+               __LINE__, __func__);
         return NULL;
     }
 
@@ -2623,12 +2625,14 @@ H5VL_pass_through_introspect_get_cap_flags(const void *_info, uint64_t *cap_flag
 
     /* Make sure the underneath VOL of this pass-through VOL is specified */
     if (!info) {
-        printf("\nH5VLpassthru.c line %d in %s: info for pass-through VOL can't be null\n", __LINE__, __func__);
+        printf("\nH5VLpassthru.c line %d in %s: info for pass-through VOL can't be null\n", __LINE__,
+               __func__);
         return -1;
     }
 
     if (H5Iis_valid(info->under_vol_id) <= 0) {
-        printf("\nH5VLpassthru.c line %d in %s: not a valid underneath VOL ID for pass-through VOL\n", __LINE__, __func__);
+        printf("\nH5VLpassthru.c line %d in %s: not a valid underneath VOL ID for pass-through VOL\n",
+               __LINE__, __func__);
         return -1;
     }
 
