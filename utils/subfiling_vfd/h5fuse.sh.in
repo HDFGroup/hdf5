@@ -27,11 +27,11 @@ function usage() {
          configuration file either as a command-line argument, or the script will
          search for the *.config file in the current directory."
    echo ""
-   echo "usage: h5fuse.sh [-h] [-f filename] [-v] [-q] [-b] [-o]"
+   echo "usage: h5fuse.sh [-h] [-f filename] [-v] [-q] [-i] [-o]"
    echo "-h            Print this help."
    echo "-v            Verbose output."
    echo "-q            Quiet all output."
-   echo "-b            Bypass missing subfiles."
+   echo "-i            Ignore missing subfiles. Useful for node local storage."
    echo "-o filename   HDF5 output file."
    echo "-f filename   Subfile configuration file."
    echo ""
@@ -50,9 +50,9 @@ function usage() {
 file_config=""
 verbose="false"
 quiet="false"
-bypass="false"
+ignore="false"
 hdf5_file=""
-while getopts "bhqvf:o:" option; do
+while getopts "ihqvf:o:" option; do
    case $option in
       h) # display Help
          usage
@@ -61,8 +61,8 @@ while getopts "bhqvf:o:" option; do
          file_config=$OPTARG;;
       q) # quiet all output
          quiet="true";;
-      b) # bypass missing subfiles
-         bypass="true";;
+      i) # ignore missing subfiles
+         ignore="true";;
       v) # verbose output
          verbose="true";;
       o) # HDF5 fused file
@@ -136,7 +136,6 @@ rm -f "$hdf5_file"
 ## COMBINE SUBFILES INTO AN HDF5 FILE ##
 
 skip=0
-status=$nfiles
 START="$(date +%s%N)"
 
 skip=0
@@ -147,7 +146,7 @@ for i in "${subfiles[@]}"; do
     fsize=0
     # Verify the file exists
     if [ ! -f "${subfile}" ]; then
-        if [ "${bypass}" == "false" ];then
+        if [ "${ignore}" == "false" ];then
             echo -e "$RED ERROR: file \"${subfile}\" does not exist. $NC"
             exit $FAILED
         fi
