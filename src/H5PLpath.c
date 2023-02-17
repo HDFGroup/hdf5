@@ -854,7 +854,7 @@ H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, hbool_t *fo
 
     /* Open the directory */
     if (!(dirp = HDopendir(dir)))
-        HGOTO_ERROR(H5E_PLUGIN, H5E_OPENERROR, FAIL, "can't open directory: %s", dir)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_OPENERROR, FAIL, "can't open directory (%s). Please verify its existence", dir)
 
     /* Iterate through all entries in the directory */
     while (NULL != (dp = HDreaddir(dirp))) {

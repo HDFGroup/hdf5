@@ -254,13 +254,13 @@ H5PL_load(H5PL_type_t type, const H5PL_key_t *key)
     /* If not found, try iterating through the path table to find an appropriate plugin */
     if (!found)
         if (H5PL__find_plugin_in_path_table(&search_params, &found, &plugin_info) < 0)
-            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, NULL, "search in path table failed")
+            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, NULL, "can't find plugin in the paths either set by HDF5_PLUGIN_PATH, or default location, or set by H5PLxxx functions")
 
     /* Set the return value we found the plugin */
     if (found)
         ret_value = plugin_info;
     else
-        HGOTO_ERROR(H5E_PLUGIN, H5E_NOTFOUND, NULL, "unable to locate plugin")
+        HGOTO_ERROR(H5E_PLUGIN, H5E_NOTFOUND, NULL, "can't find plugin. Check either HDF5_VOL_CONNECTOR, HDF5_PLUGIN_PATH, default location, or path set by H5PLxxx functions")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
