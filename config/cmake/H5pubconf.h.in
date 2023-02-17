@@ -119,9 +119,6 @@
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #cmakedefine H5_HAVE_DLFCN_H @H5_HAVE_DLFCN_H@
 
-/* Define to 1 if you have the <dmalloc.h> header file. */
-#cmakedefine H5_HAVE_DMALLOC_H @H5_HAVE_DMALLOC_H@
-
 /* Define if library information should be embedded in the executables */
 #cmakedefine H5_HAVE_EMBEDDED_LIBINFO @H5_HAVE_EMBEDDED_LIBINFO@
 
@@ -192,9 +189,6 @@
 /* Define to 1 if you have the `dl' library (-ldl). */
 #cmakedefine H5_HAVE_LIBDL @H5_HAVE_LIBDL@
 
-/* Define to 1 if you have the `dmalloc' library (-ldmalloc). */
-#cmakedefine H5_HAVE_LIBDMALLOC @H5_HAVE_LIBDMALLOC@
-
 /* Proceed to build with libhdfs */
 #cmakedefine H5_HAVE_LIBHDFS @H5_HAVE_LIBHDFS@
 
@@ -203,9 +197,6 @@
 
 /* Define to 1 if you have the `m' library (-lm). */
 #cmakedefine H5_HAVE_LIBM @H5_HAVE_LIBM@
-
-/* Define to 1 if you have the `mpe' library (-lmpe). */
-#cmakedefine H5_HAVE_LIBMPE @H5_HAVE_LIBMPE@
 
 /* Define to 1 if you have the `pthread' library (-lpthread). */
 #cmakedefine H5_HAVE_LIBPTHREAD @H5_HAVE_LIBPTHREAD@
@@ -230,12 +221,6 @@
 
 /* Define whether the Mirror virtual file driver (VFD) will be compiled */
 #cmakedefine H5_HAVE_MIRROR_VFD @H5_HAVE_MIRROR_VFD@
-
-/* Define if we have MPE support */
-#cmakedefine H5_HAVE_MPE @H5_HAVE_MPE@
-
-/* Define to 1 if you have the <mpe.h> header file. */
-#cmakedefine H5_HAVE_MPE_H @H5_HAVE_MPE_H@
 
 /* Define if MPI_Comm_c2f and MPI_Comm_f2c exist */
 #cmakedefine H5_HAVE_MPI_MULTI_LANG_Comm @H5_HAVE_MPI_MULTI_LANG_Comm@
@@ -646,6 +631,9 @@
 
 /* Define using v1.14 public API symbols by default */
 #cmakedefine H5_USE_114_API_DEFAULT @H5_USE_114_API_DEFAULT@
+
+/* Define using v1.16 public API symbols by default */
+#cmakedefine H5_USE_116_API_DEFAULT @H5_USE_116_API_DEFAULT@
 
 /* Define if the library will use file locking */
 #cmakedefine H5_USE_FILE_LOCKING @H5_USE_FILE_LOCKING@

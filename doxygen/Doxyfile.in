@@ -1,4 +1,4 @@
-# Doxyfile 1.8.18
+# Doxyfile
 
 # This file describes the settings to be used by the documentation system
 # doxygen (www.doxygen.org) for a project.
@@ -854,7 +854,7 @@ INPUT_ENCODING         = UTF-8
 # *.vhdl, *.ucf, *.qsf and *.ice.
 
 FILE_PATTERNS  = H5*public.h H5*module.h H5*develop.h H5FD*.h \
-                 H5VLconnector.h H5VLconnector_passthru.h H5VLnative.h \
+                 H5VLconnector.h H5VLconnector_passthru.h H5VLnative.h H5PLextern.h \
                  H5Zdevelop.h \
                  H5version.h \
                  H5*.java \
@@ -897,7 +897,15 @@ EXCLUDE_SYMLINKS       = NO
 # Note that the wildcards are matched against the file with absolute path, so to
 # exclude all test directories for example use the pattern */test/*
 
-EXCLUDE_PATTERNS       =
+EXCLUDE_PATTERNS       = */fortran/test/*
+EXCLUDE_PATTERNS      += */fortran/testpar/*
+EXCLUDE_PATTERNS      += */fortran/examples/*
+EXCLUDE_PATTERNS      += */fortran/src/*.c
+EXCLUDE_PATTERNS      += */fortran/src/*.h
+EXCLUDE_PATTERNS      += */hl/fortran/examples/*
+EXCLUDE_PATTERNS      += */hl/fortran/test/*
+EXCLUDE_PATTERNS      += */hl/fortran/src/*.c
+EXCLUDE_PATTERNS      += */hl/fortran/src/*.h
 
 # The EXCLUDE_SYMBOLS tag can be used to specify one or more symbol names
 # (namespaces, classes, functions, etc.) that should be excluded from the

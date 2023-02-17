@@ -1664,7 +1664,7 @@ exercise_reg_opt_oper(hid_t fake_vol_id, hid_t reg_opt_vol_id, H5VL_subclass_t s
 
     /* Verify that the reserved amount of optional operations is obeyed */
     /* (The first optional operation registered should be at the lower limit) */
-    if (op_val != H5VL_RESERVED_NATIVE_OPTIONAL)
+    if (op_val < H5VL_RESERVED_NATIVE_OPTIONAL)
         TEST_ERROR;
 
     /* Look up 1st registered optional operation */
@@ -1683,7 +1683,7 @@ exercise_reg_opt_oper(hid_t fake_vol_id, hid_t reg_opt_vol_id, H5VL_subclass_t s
 
     /* Verify that the reserved amount of optional operations is obeyed */
     /* (The 2nd optional operation registered should be at the lower limit + 1) */
-    if (op_val2 != (H5VL_RESERVED_NATIVE_OPTIONAL + 1))
+    if (op_val2 < (H5VL_RESERVED_NATIVE_OPTIONAL + 1))
         TEST_ERROR;
 
     /* Look up 2nd registered optional operation */
@@ -2242,10 +2242,9 @@ test_get_vol_name(void)
         conn_env_str = "native";
 
     /* Skip the connectors other than the native and pass_through connector */
-    if (HDstrcmp(conn_env_str, "native") &&
-        HDstrncmp(conn_env_str, "pass_through", HDstrlen("pass_through"))) {
+    if (HDstrcmp(conn_env_str, "native") && HDstrcmp(conn_env_str, "pass_through")) {
         SKIPPED();
-        HDprintf("    only test the native or pass_through connector\n");
+        HDprintf("    only test the native or internal pass_through connector\n");
         return SUCCEED;
     }
 
@@ -2262,8 +2261,7 @@ test_get_vol_name(void)
 
     /* When comparing the pass_through connector, ignore the rest information (under_vol=0;under_info={}) */
     if ((!HDstrcmp(conn_env_str, "native") && HDstrcmp(vol_name, "native")) ||
-        (!HDstrncmp(conn_env_str, "pass_through", HDstrlen("pass_through")) &&
-         HDstrcmp(vol_name, "pass_through")))
+        (!HDstrcmp(conn_env_str, "pass_through") && HDstrcmp(vol_name, "pass_through")))
         TEST_ERROR;
 
     if (H5Fclose(file_id) < 0)
@@ -2288,6 +2286,160 @@ error:
 
     return FAIL;
 } /* end test_vol_cap_flags() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_wrap_register()
+ *
+ * Purpose:     Tests the failure of calling H5VLwrap_register in application
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_wrap_register(void)
+{
+    hid_t fapl_id  = H5I_INVALID_HID;
+    hid_t file_id  = H5I_INVALID_HID;
+    hid_t group_id = H5I_INVALID_HID;
+    hid_t wrap_id  = H5I_INVALID_HID;
+    char  filename[NAME_LEN];
+    void *vol_obj;
+
+    TESTING("failure of calling H5VLwrap_register");
+
+    /* Retrieve the file access property for testing */
+    fapl_id = h5_fileaccess();
+
+    h5_fixname(FILENAME[0], fapl_id, filename, sizeof filename);
+
+    if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
+        TEST_ERROR;
+
+    if ((group_id = H5Gcreate2(file_id, "test", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Retrieve the VOL object for the group */
+    if (!(vol_obj = H5VLobject(group_id)))
+        TEST_ERROR;
+
+    /* Try to register a second ID for the group.  It should fail because this routine is mainly
+     * targeted toward wrapping objects for iteration routine callbacks, not for application use
+     */
+    H5E_BEGIN_TRY
+    {
+        wrap_id = H5VLwrap_register(vol_obj, H5I_GROUP);
+    }
+    H5E_END_TRY;
+
+    if (H5I_INVALID_HID != wrap_id)
+        FAIL_PUTS_ERROR("should not be able to call H5VLwrap_register in an application");
+
+    if (H5Gclose(group_id) < 0)
+        TEST_ERROR;
+
+    if (H5Fclose(file_id) < 0)
+        TEST_ERROR;
+
+    h5_delete_test_file(FILENAME[0], fapl_id);
+
+    if (H5Pclose(fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Gclose(group_id);
+        H5Fclose(file_id);
+        H5Pclose(fapl_id);
+    }
+    H5E_END_TRY;
+
+    return FAIL;
+} /* end test_wrap_register() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_query_optional
+ *
+ * Purpose:     Tests the bug fix (HDFFV-11208) that a committed datatype
+ *              triggered an assertion failure in H5VLquery_optional
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_query_optional(void)
+{
+    hid_t    fapl_id  = H5I_INVALID_HID;
+    hid_t    file_id  = H5I_INVALID_HID;
+    hid_t    group_id = H5I_INVALID_HID;
+    hid_t    dtype_id = H5I_INVALID_HID;
+    char     filename[NAME_LEN];
+    uint64_t supported = 0;
+
+    TESTING("H5VLquery_optional");
+
+    /* Retrieve the file access property for testing */
+    fapl_id = h5_fileaccess();
+
+    h5_fixname(FILENAME[0], fapl_id, filename, sizeof filename);
+
+    if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
+        TEST_ERROR;
+
+    if ((group_id = H5Gcreate2(file_id, "test_group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Test H5VLquery_optional with a group */
+    if (H5VLquery_optional(group_id, H5VL_SUBCLS_OBJECT, H5VL_NATIVE_OBJECT_GET_COMMENT, &supported) < 0)
+        TEST_ERROR;
+
+    if ((dtype_id = H5Tcopy(H5T_NATIVE_INT)) < 0)
+        TEST_ERROR;
+
+    /* Commit the datatype into the file */
+    if (H5Tcommit2(file_id, "test_dtype", dtype_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    /* Test H5VLquery_optional with a committed datatype where the assertion failure happened in the past */
+    if (H5VLquery_optional(dtype_id, H5VL_SUBCLS_OBJECT, H5VL_NATIVE_OBJECT_GET_COMMENT, &supported) < 0)
+        TEST_ERROR;
+
+    if (H5Gclose(group_id) < 0)
+        TEST_ERROR;
+
+    if (H5Tclose(dtype_id) < 0)
+        TEST_ERROR;
+
+    if (H5Fclose(file_id) < 0)
+        TEST_ERROR;
+
+    h5_delete_test_file(FILENAME[0], fapl_id);
+
+    if (H5Pclose(fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Gclose(group_id);
+        H5Tclose(dtype_id);
+        H5Fclose(file_id);
+        H5Pclose(fapl_id);
+    }
+    H5E_END_TRY;
+
+    return FAIL;
+} /* end test_query_optional() */
 
 /*-------------------------------------------------------------------------
  * Function:    main
@@ -2326,6 +2478,8 @@ main(void)
     nerrors += test_async_vol_props() < 0 ? 1 : 0;
     nerrors += test_vol_cap_flags() < 0 ? 1 : 0;
     nerrors += test_get_vol_name() < 0 ? 1 : 0;
+    nerrors += test_wrap_register() < 0 ? 1 : 0;
+    nerrors += test_query_optional() < 0 ? 1 : 0;
 
     if (nerrors) {
         HDprintf("***** %d Virtual Object Layer TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");

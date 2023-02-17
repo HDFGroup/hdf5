@@ -70,6 +70,7 @@ static const unsigned HDF5_superblock_ver_bounds[] = {
     HDF5_SUPERBLOCK_VERSION_2,     /* H5F_LIBVER_V18 */
     HDF5_SUPERBLOCK_VERSION_3,     /* H5F_LIBVER_V110 */
     HDF5_SUPERBLOCK_VERSION_3,     /* H5F_LIBVER_V112 */
+    HDF5_SUPERBLOCK_VERSION_3,     /* H5F_LIBVER_V114 */
     HDF5_SUPERBLOCK_VERSION_LATEST /* H5F_LIBVER_LATEST */
 };
 
@@ -1044,8 +1045,11 @@ done:
                 HDONE_ERROR(H5E_FILE, H5E_CANTUNPIN, FAIL, "unable to unpin driver info")
 
             /* Evict the driver info block from the cache */
-            if (sblock && H5AC_expunge_entry(f, H5AC_DRVRINFO, sblock->driver_addr, H5AC__NO_FLAGS_SET) < 0)
-                HDONE_ERROR(H5E_FILE, H5E_CANTEXPUNGE, FAIL, "unable to expunge driver info block")
+            if (sblock) {
+                if (H5AC_expunge_entry(f, H5AC_DRVRINFO, sblock->driver_addr, H5AC__NO_FLAGS_SET) < 0)
+                    HDONE_ERROR(H5E_FILE, H5E_CANTEXPUNGE, FAIL, "unable to expunge driver info block")
+                f->shared->drvinfo = NULL;
+            }
         } /* end if */
 
         /* Unpin & discard superblock */
@@ -1057,6 +1061,7 @@ done:
             /* Evict the superblock from the cache */
             if (H5AC_expunge_entry(f, H5AC_SUPERBLOCK, (haddr_t)0, H5AC__NO_FLAGS_SET) < 0)
                 HDONE_ERROR(H5E_FILE, H5E_CANTEXPUNGE, FAIL, "unable to expunge superblock")
+            f->shared->sblock = NULL;
         } /* end if */
     }     /* end if */
 

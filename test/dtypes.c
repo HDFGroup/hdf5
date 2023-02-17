@@ -8695,9 +8695,9 @@ test_versionbounds(void)
     H5T_t       *dtypep          = NULL;        /* Pointer to internal structure of a datatype */
     hsize_t      arr_dim[]       = {ARRAY_LEN}; /* Length of the array */
     int          low, high;                     /* Indices for iterating over versions */
-    H5F_libver_t versions[]     = {H5F_LIBVER_EARLIEST, H5F_LIBVER_V18, H5F_LIBVER_V110, H5F_LIBVER_V112,
-                               H5F_LIBVER_V114};
-    int          versions_count = 5; /* Number of version bounds in the array */
+    H5F_libver_t versions[]     = {H5F_LIBVER_EARLIEST, H5F_LIBVER_V18,  H5F_LIBVER_V110,
+                               H5F_LIBVER_V112,     H5F_LIBVER_V114, H5F_LIBVER_V114};
+    int          versions_count = 6; /* Number of version bounds in the array */
     unsigned     highest_version;    /* Highest version in nested datatypes */
     color_t      enum_val;           /* Enum type index */
     herr_t       ret = 0;            /* Generic return value */

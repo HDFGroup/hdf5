@@ -667,7 +667,7 @@ H5TOOLS_DLL int  h5tools_set_error_file(const char *fname, int is_bin);
 
 H5TOOLS_DLL hid_t   h5tools_get_fapl(hid_t prev_fapl_id, h5tools_vol_info_t *vol_info,
                                      h5tools_vfd_info_t *vfd_info);
-H5TOOLS_DLL herr_t  h5tools_get_vfd_name(hid_t fapl_id, char *drivername, size_t drivername_size);
+H5TOOLS_DLL herr_t  h5tools_get_vfd_name(hid_t fid, hid_t fapl_id, char *drivername, size_t drivername_size);
 H5TOOLS_DLL hid_t   h5tools_fopen(const char *fname, unsigned flags, hid_t fapl, hbool_t use_specific_driver,
                                   char *drivername, size_t drivername_size);
 H5TOOLS_DLL hid_t   h5tools_get_little_endian_type(hid_t type);

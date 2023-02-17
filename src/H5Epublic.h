@@ -59,8 +59,15 @@ typedef struct H5E_error2_t {
 #endif /* H5private_H */
 
 /* HDF5 error class */
+/* Extern "C" block needed to compile C++ filter plugins with some compilers */
+#ifdef __cplusplus
+extern "C" {
+#endif
 #define H5E_ERR_CLS (H5OPEN H5E_ERR_CLS_g)
 H5_DLLVAR hid_t H5E_ERR_CLS_g;
+#ifdef __cplusplus
+}
+#endif
 
 /* Include the automatically generated public header information */
 /* (This includes the list of major and minor error codes for the library) */
@@ -307,7 +314,7 @@ H5_DLL hid_t H5Eget_current_stack(void);
  *          If \p close_source_stack is \c TRUE, the source error stack
  *          will be closed.
  *
- * \since 1.13.0
+ * \since 1.14.0
  */
 H5_DLL herr_t H5Eappend_stack(hid_t dst_stack_id, hid_t src_stack_id, hbool_t close_source_stack);
 /**

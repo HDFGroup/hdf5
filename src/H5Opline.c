@@ -91,6 +91,7 @@ const unsigned H5O_pline_ver_bounds[] = {
     H5O_PLINE_VERSION_2,     /* H5F_LIBVER_V18 */
     H5O_PLINE_VERSION_2,     /* H5F_LIBVER_V110 */
     H5O_PLINE_VERSION_2,     /* H5F_LIBVER_V112 */
+    H5O_PLINE_VERSION_2,     /* H5F_LIBVER_V114 */
     H5O_PLINE_VERSION_LATEST /* H5F_LIBVER_LATEST */
 };
 
@@ -110,6 +111,7 @@ H5FL_DEFINE(H5O_pline_t);
  *
  *-------------------------------------------------------------------------
  */
+
 static void *
 H5O__pline_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
                   unsigned H5_ATTR_UNUSED *ioflags, size_t p_size, const uint8_t *p)
@@ -131,6 +133,9 @@ H5O__pline_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Version */
+    if (p + 4 - 1 > p_end) /* 4 byte is minimum for all versions */
+        HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL, "ran off the end of the buffer: current p = %p, p_end = %p",
+                    (const void *)(p + 4), (const void *)p_end)
     pline->version = *p++;
     if (pline->version < H5O_PLINE_VERSION_1 || pline->version > H5O_PLINE_VERSION_LATEST)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, NULL, "bad version number for filter pipeline message")
@@ -159,6 +164,10 @@ H5O__pline_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
     /* Decode filters */
     for (i = 0, filter = &pline->filter[0]; i < pline->nused; i++, filter++) {
         /* Filter ID */
+        if (p + 6 - 1 > p_end) /* 6 bytes minimum */
+            HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL,
+                        "ran off the end of the buffer: current p = %p, p_end = %p", (const void *)(p + 6),
+                        (const void *)p_end)
         UINT16DECODE(p, filter->id);
 
         /* Length of filter name */
@@ -168,6 +177,10 @@ H5O__pline_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
             UINT16DECODE(p, name_length);
             if (pline->version == H5O_PLINE_VERSION_1 && name_length % 8)
                 HGOTO_ERROR(H5E_PLINE, H5E_CANTLOAD, NULL, "filter name length is not a multiple of eight")
+            if (p + 4 - 1 > p_end) /* with name_length 4 bytes to go */
+                HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL,
+                            "ran off the end of the buffer: current p = %p, p_end = %p",
+                            (const void *)(p + 4), (const void *)p_end)
         } /* end if */
 
         /* Filter flags */
@@ -179,9 +192,12 @@ H5O__pline_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsign
         /* Filter name, if there is one */
         if (name_length) {
             size_t actual_name_length; /* Actual length of name */
-
+            size_t len = (size_t)(p_end - p + 1);
             /* Determine actual name length (without padding, but with null terminator) */
-            actual_name_length = HDstrlen((const char *)p) + 1;
+            actual_name_length = HDstrnlen((const char *)p, len);
+            if (actual_name_length == len)
+                HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL, "filter name not null terminated")
+            actual_name_length += 1; /* include \0 byte */
             HDassert(actual_name_length <= name_length);
 
             /* Allocate space for the filter name, or use the internal buffer */

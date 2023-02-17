@@ -70,8 +70,8 @@ static int H5__mpi_delete_cb(MPI_Comm comm, int keyval, void *attr_val, int *fla
 /*****************************/
 
 /* Library incompatible release versions, develop releases are incompatible by design */
-const unsigned VERS_RELEASE_EXCEPTIONS[]    = {0, 1, 2, 3, 4};
-const unsigned VERS_RELEASE_EXCEPTIONS_SIZE = 5;
+const unsigned VERS_RELEASE_EXCEPTIONS[]    = {0};
+const unsigned VERS_RELEASE_EXCEPTIONS_SIZE = 1;
 
 /* statically initialize block for pthread_once call used in initializing */
 /* the first global mutex                                                 */
@@ -83,10 +83,6 @@ hbool_t H5_libterm_g = FALSE; /* Library isn't being shutdown */
 #endif
 
 hbool_t H5_use_selection_io_g = FALSE;
-
-#ifdef H5_HAVE_MPE
-hbool_t H5_MPEinit_g = FALSE; /* MPE Library hasn't been initialized */
-#endif
 
 char           H5_lib_vers_info_g[] = H5_VERS_INFO;
 static hbool_t H5_dont_atexit_g     = FALSE;
@@ -167,18 +163,6 @@ H5_init_library(void)
 
         MPI_Initialized(&mpi_initialized);
         MPI_Finalized(&mpi_finalized);
-
-#ifdef H5_HAVE_MPE
-        /* Initialize MPE instrumentation library. */
-        if (!H5_MPEinit_g) {
-            int mpe_code;
-            if (mpi_initialized && !mpi_finalized) {
-                mpe_code = MPE_Init_log();
-                HDassert(mpe_code >= 0);
-                H5_MPEinit_g = TRUE;
-            }
-        }
-#endif /*H5_HAVE_MPE*/
 
         /* add an attribute on MPI_COMM_SELF to call H5_term_library
            when it is destroyed, i.e. on MPI_Finalize */
@@ -509,26 +493,6 @@ H5_term_library(void)
 #endif    /* NDEBUG */
         } /* end if */
     }     /* end if */
-
-#ifdef H5_HAVE_MPE
-    /* Close MPE instrumentation library.  May need to move this
-     * down if any of the below code involves using the instrumentation code.
-     */
-    if (H5_MPEinit_g) {
-        int mpi_initialized;
-        int mpi_finalized;
-        int mpe_code;
-
-        MPI_Initialized(&mpi_initialized);
-        MPI_Finalized(&mpi_finalized);
-
-        if (mpi_initialized && !mpi_finalized) {
-            mpe_code = MPE_Finish_log("h5log");
-            HDassert(mpe_code >= 0);
-        }                     /* end if */
-        H5_MPEinit_g = FALSE; /* turn it off no matter what */
-    }                         /* end if */
-#endif
 
     /* Free open debugging streams */
     while (H5_debug_g.open_stream) {
