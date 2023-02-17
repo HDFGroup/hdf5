@@ -3,9 +3,9 @@
 
 set(CMAKE_COMPILER_VENDOR "intel")
 
-set(CMAKE_C_COMPILER icx)
-set(CMAKE_CXX_COMPILER icpx)
-set(CMAKE_Fortran_COMPILER ifx)
+set(CMAKE_C_COMPILER icc)
+set(CMAKE_CXX_COMPILER icpc)
+set(CMAKE_Fortran_COMPILER ifort)
 
 # the following is used if cross-compiling
 set(CMAKE_CROSSCOMPILING_EMULATOR "")
