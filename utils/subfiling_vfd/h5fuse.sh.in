@@ -14,6 +14,7 @@ BLD='\033[1m'
 GRN='\033[0;32m'
 RED='\033[0;31m'
 PUR='\033[0;35m'
+CYN='\033[0;36m'
 NC='\033[0m' # No Color
 
 ############################################################
@@ -26,8 +27,10 @@ function usage() {
          configuration file either as a command-line argument, or the script will
          search for the *.config file in the current directory."
    echo ""
-   echo "usage: h5fuse.sh [-h] [-f filename]"
+   echo "usage: h5fuse.sh [-h] [-f filename] [-v] [-q]"
    echo "-h            Print this help."
+   echo "-v            Verbose output."
+   echo "-q            Quiet all output."
    echo "-f filename   Subfile configuration file."
    echo ""
 }
@@ -43,16 +46,20 @@ function usage() {
 ############################################################
 # Get the options
 file_config=""
-
-while getopts ":h:f:" option; do
+verbose="false"
+quiet="false"
+while getopts "hqvf:" option; do
    case $option in
       h) # display Help
          usage
          exit;;
       f) # subfiling configuration file
          file_config=$OPTARG;;
+      q) # quiet all output
+         quiet="true";;
+      v) # verbose output
+         verbose="true";;
      \?) # Invalid option
-         echo -e "$RED ERROR: Invalid option ${BLD}-${OPTARG}${RED} $NC"
          usage
          exit 1;;
      * ) usage
@@ -104,7 +111,11 @@ if test -z "$subfile_dir"; then
     exit $FAILED
 fi
 
-subfiles=( $( sed -e '1,/subfile_dir=/d' "$file_config" ) )
+# For bash 4.4+
+mapfile -t subfiles < <( sed -e '1,/subfile_dir=/d' "$file_config" )
+
+#subfiles=( $( sed -e '1,/subfile_dir=/d' "$file_config" ) )
+
 #for i in "${subfiles[@]}"; do
 #      echo "$i"
 #done
@@ -112,7 +123,7 @@ if [ ${#subfiles[@]} -eq 0 ]; then
     echo -e "$RED failed to find subfiles list in $file_config $NC"
     exit $FAILED
 fi
-
+nsubfiles=${#subfiles[@]}
 rm -f "$hdf5_file"
 
 ## COMBINE SUBFILES INTO AN HDF5 FILE ##
@@ -120,46 +131,65 @@ rm -f "$hdf5_file"
 skip=0
 status=$nfiles
 START="$(date +%s%N)"
-while [ "$status" -gt 0 ]; do
-  icnt=0
-  for i in "${subfiles[@]}"; do
-      subfile="${subfile_dir}/${i}"
+
+icnt=0
+skip=0
+seek=0
+seek_cnt=0
+for i in "${subfiles[@]}"; do
+    subfile="${subfile_dir}/${i}"
       # Verify the file exists
-      if [ ! -f "${subfile}" ]; then
-          echo -e "$RED ERROR: file \"${subfile}\" does not exist. $NC"
-          exit $FAILED
-      fi
+    if [ ! -f "${subfile}" ]; then
+        echo -e "$RED ERROR: file \"${subfile}\" does not exist. $NC"
+        exit $FAILED
+    fi
 
-      # Verify the file is not being accessed by a process
-      t_max=60
-      t_sleep=1
-      t_elapsed=0
+    # bs=BYTES read and write up to BYTES bytes at a time; overrides ibs and obs
+    # ibs=BYTES read up to BYTES bytes at a time
+    # obs=BYTES write BYTES bytes at a time
+    # seek=N skip N obs-sized blocks at start of output
+    # skip=N skip N ibs-sized blocks at start of input
 
-      while fuser -s "${subfile}"; do
-          if [[ $((t_elapsed % 5)) -eq 0 ]]; then
-              echo -e "$GRN waiting for process to finish accessing file \"${subfile}\" ... [${t_elapsed}s/${t_max}s] $NC"
-          fi
-          sleep $t_sleep
-          t_elapsed=$((t_elapsed+t_sleep))
-          if [[ $t_elapsed -ge $t_max ]]; then
-              echo -e "$RED ERROR: file \"${subfile}\" still has process accessing it after ${t_elapsed}s $NC"
-              exit $FAILED
-          fi
-      done
+    status=1
+    # Get the number of bytes of the file
+    fsize=$(wc -c "${subfile}" | awk '{print $1}')
 
-      fsize=$(wc -c "${subfile}" | awk '{print $1}')
-      if [ $((skip*stripe_size)) -le "$fsize" ]; then
-          EXEC="dd count=1 bs=$stripe_size if=$subfile of=$hdf5_file skip=$skip oflag=append conv=notrunc"
-          echo -e "$GRN $EXEC $NC"
-          err="$( $EXEC 2>&1 > /dev/null &)"
-          icnt=$((icnt+1))
-      else
-          subfiles=("${subfiles[@]:0:icnt}" "${subfiles[@]:$((icnt+1))}")
-          status=${#subfiles[@]}
-      fi
-  done; wait
-  skip=$((skip+1))
-done
+    # If the subfile is empty, skip fusing the remaining empty subfiles
+
+    if [ "$fsize" -ne 0 ]; then
+        records_left=$fsize
+        while [ "$status" -gt 0 ]; do
+            if [ $((skip*stripe_size)) -le "$fsize"  ] && [ "$records_left" -gt 0 ]; then
+                EXEC="dd count=1 bs=$stripe_size if=$subfile of=$hdf5_file skip=$skip seek=$seek conv=notrunc"
+                if [ "$quiet" == "false" ]; then
+                    echo -e "$GRN $EXEC $NC"
+                fi
+                err="$( $EXEC 2>&1 > /dev/null &)"
+                if [ "$verbose" == "true" ]; then
+                    echo -e "$CYN" $err "$NC"
+                fi
+                icnt=$((icnt+1))
+                records_left=$((records_left-stripe_size))
+                skip=$((skip+1))
+                seek=$((seek_cnt+skip*nsubfiles))
+            else
+                subfiles=("${subfiles[@]:0:icnt}" "${subfiles[@]:$((icnt+1))}")
+                status=0
+                skip=0
+            fi
+        done; wait
+        seek_cnt=$((seek_cnt+1))
+        seek=$seek_cnt
+
+    else
+
+        subfiles=()
+
+    fi
+done; wait
+
 END=$(( $(date +%s%N) - START ))
 DURATION_SEC=$(awk -vp="$END" -vq=0.000000001 'BEGIN{printf "%.4f" ,p * q}')
-echo -e "$PUR COMPLETION TIME = $DURATION_SEC s $NC"
+if [ "$quiet" == "false" ]; then
+    echo -e "$PUR COMPLETION TIME = $DURATION_SEC s $NC"
+fi
