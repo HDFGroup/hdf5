@@ -91,7 +91,7 @@ jobs:
             parallel: OFF
             mirror_vfd: ON
             direct_vfd: ON
-            toolchain: "config/toolchain/GCC.cmake"
+            toolchain: "config/toolchain/gcc.cmake"
             generator: "-G Ninja"
             run_tests: true
 
