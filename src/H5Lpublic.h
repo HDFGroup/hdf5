@@ -884,10 +884,12 @@ H5_DLL ssize_t H5Lget_name_by_idx(hid_t loc_id, const char *group_name, H5_index
  *          not been indexed by the index type, they will first be sorted by
  *          that index then the iteration will begin; if the links have been
  *          so indexed, the sorting step will be unnecessary, so the iteration
- *          may begin more quickly.
+ *          may begin more quickly. Valid values include the following:
+ *          \indexes
  *
  *          \p order specifies the order in which objects are to be inspected
- *          along the index \p idx_type.
+ *          along the index \p idx_type. Valid values include the following:
+ *          \orders
  *
  *          \p idx_p tracks the iteration and allows an iteration to be
  *          resumed if it was stopped before all members were processed. It is
@@ -1641,10 +1643,12 @@ H5_DLL herr_t H5Lget_info_by_idx1(hid_t loc_id, const char *group_name, H5_index
  *          not been indexed by the index type, they will first be sorted by
  *          that index then the iteration will begin; if the links have been
  *          so indexed, the sorting step will be unnecessary, so the iteration
- *          may begin more quickly.
+ *          may begin more quickly. Valid values include the following:
+ *          \indexes
  *
  *          \p order specifies the order in which objects are to be inspected
- *          along the index \p idx_type.
+ *          along the index \p idx_type. Valid values include the following:
+ *          \orders
  *
  *          \p idx_p tracks the iteration and allows an iteration to be
  *          resumed if it was stopped before all members were processed. It is

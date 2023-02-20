@@ -2,10 +2,10 @@
 # Each line is a file pattern followed by one or more owners.
 
 # These owners will be the default owners for everything in the repo.
-* @lrknox @derobins @byrnHDF @fortnern @jhendersonHDF @qkoziol @vchoi-hdfgroup @bmribler @raylu-hdf
+* @lrknox @derobins @byrnHDF @fortnern @jhendersonHDF @qkoziol @vchoi-hdfgroup @bmribler @raylu-hdf @mattjala @brtnfld
 
 # Order is important. The last matching pattern has the most precedence.
 # So if a pull request only touches javascript files, only these owners
 # will be requested to review.
-/fortran/         @brtnfld
+/fortran/         @brtnfld @derobins
 /java/            @jhendersonHDF @byrnHDF @derobins

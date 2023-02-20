@@ -388,6 +388,7 @@ H5VL_pass_through_new_obj(void *under_obj, hid_t under_vol_id)
     new_obj               = (H5VL_pass_through_t *)calloc(1, sizeof(H5VL_pass_through_t));
     new_obj->under_object = under_obj;
     new_obj->under_vol_id = under_vol_id;
+
     H5Iinc_ref(new_obj->under_vol_id);
 
     return new_obj;
@@ -520,12 +521,27 @@ H5VL_pass_through_info_copy(const void *_info)
     printf("------- PASS THROUGH VOL INFO Copy\n");
 #endif
 
+    /* Make sure the underneath VOL of this pass-through VOL is specified */
+    if (!info) {
+        printf("\nH5VLpassthru.c line %d in %s: info for pass-through VOL can't be null\n", __LINE__,
+               __func__);
+        return NULL;
+    }
+
+    if (H5Iis_valid(info->under_vol_id) <= 0) {
+        printf("\nH5VLpassthru.c line %d in %s: not a valid underneath VOL ID for pass-through VOL\n",
+               __LINE__, __func__);
+        return NULL;
+    }
+
     /* Allocate new VOL info struct for the pass through connector */
     new_info = (H5VL_pass_through_info_t *)calloc(1, sizeof(H5VL_pass_through_info_t));
 
     /* Increment reference count on underlying VOL ID, and copy the VOL info */
     new_info->under_vol_id = info->under_vol_id;
+
     H5Iinc_ref(new_info->under_vol_id);
+
     if (info->under_vol_info)
         H5VLcopy_connector_info(new_info->under_vol_id, &(new_info->under_vol_info), info->under_vol_info);
 
@@ -753,7 +769,9 @@ H5VL_pass_through_get_wrap_ctx(const void *obj, void **wrap_ctx)
 
     /* Increment reference count on underlying VOL ID, and copy the VOL info */
     new_wrap_ctx->under_vol_id = o->under_vol_id;
+
     H5Iinc_ref(new_wrap_ctx->under_vol_id);
+
     H5VLget_wrap_ctx(o->under_object, o->under_vol_id, &new_wrap_ctx->under_wrap_ctx);
 
     /* Set wrap context to return */
@@ -2604,6 +2622,19 @@ H5VL_pass_through_introspect_get_cap_flags(const void *_info, uint64_t *cap_flag
 #ifdef ENABLE_PASSTHRU_LOGGING
     printf("------- PASS THROUGH VOL INTROSPECT GetCapFlags\n");
 #endif
+
+    /* Make sure the underneath VOL of this pass-through VOL is specified */
+    if (!info) {
+        printf("\nH5VLpassthru.c line %d in %s: info for pass-through VOL can't be null\n", __LINE__,
+               __func__);
+        return -1;
+    }
+
+    if (H5Iis_valid(info->under_vol_id) <= 0) {
+        printf("\nH5VLpassthru.c line %d in %s: not a valid underneath VOL ID for pass-through VOL\n",
+               __LINE__, __func__);
+        return -1;
+    }
 
     /* Invoke the query on the underlying VOL connector */
     ret_value = H5VLintrospect_get_cap_flags(info->under_vol_info, info->under_vol_id, cap_flags);
