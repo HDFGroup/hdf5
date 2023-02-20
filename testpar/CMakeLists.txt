@@ -17,7 +17,7 @@ set (testphdf5_SOURCES
     ${HDF5_TEST_PAR_SOURCE_DIR}/t_chunk_alloc.c
     ${HDF5_TEST_PAR_SOURCE_DIR}/t_filter_read.c
     ${HDF5_TEST_PAR_SOURCE_DIR}/t_prop.c
-    ${HDF5_TEST_PAR_SOURCE_DIR}/t_coll_md_read.c
+    ${HDF5_TEST_PAR_SOURCE_DIR}/t_coll_md.c
     ${HDF5_TEST_PAR_SOURCE_DIR}/t_oflush.c
 )
 
