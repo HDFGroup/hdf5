@@ -2,17 +2,23 @@ HDF5 version 1.12.3-1 currently under development
 
 ![HDF5 Logo](doxygen/img/HDF5.png)
 
+[![develop build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/main.yml?branch=develop&label=develop)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Adevelop)
+[![1.14 build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/main.yml?branch=hdf5_1_14&label=1.14)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Ahdf5_1_14)
+[![1.12 build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/main.yml?branch=hdf5_1_12&label=1.12)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Ahdf5_1_12)
+[![1.10 build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/main.yml?branch=hdf5_1_10&label=1.10)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Ahdf5_1_10)
+[![1.8 build status](https://img.shields.io/github/actions/workflow/status/HDFGroup/hdf5/main.yml?branch=hdf5_1_8&label=1.8)](https://github.com/HDFGroup/hdf5/actions?query=branch%3Ahdf5_1_8)
+[![BSD](https://img.shields.io/badge/License-BSD-blue.svg)](https://github.com/HDFGroup/hdf5/blob/develop/COPYING)
+
 *Please refer to the release_docs/INSTALL file for installation instructions.*
 
-THE HDF GROUP
----------------
+This repository contains a high-performance library's source code and a file format
+specification that implement the HDF5® data model. The model has been adopted across
+many industries and this implementation has become a de facto data management standard
+in science, engineering, and research communities worldwide.
 
-The HDF Group is the developer of HDF5®, a high-performance software library and
-data format that has been adopted across multiple industries and has become a
-de facto standard in scientific and research communities.
-
-More information about The HDF Group, the HDF5 Community and the HDF5 software
-project, tools and services can be found at the Group's website.
+The HDF Group is the developer, maintainer, and steward of HDF5 software. Find more
+information about The HDF Group, the HDF5 Community, and other HDF5 software projects,
+tools, and services at The HDF Group's website.
     
    https://www.hdfgroup.org/
 
@@ -77,13 +83,19 @@ RELEASE SCHEDULE
 HDF5 does not release on a regular schedule. Instead, releases are driven by
 new features and bug fixes, though we try to have at least one release of each
 maintenance branch per year. Future HDF5 releases indicated on this schedule
-are tentative. 
+are tentative.
+
+**NOTE**: HDF5 1.12 is being retired early due to its incomplete and incompatible VOL
+layer.
 
 | Release | New Features |
 | ------- | ------------ |
-| 1.13.2 | VFD SWMR, Onion VFD, Selection I/O |
-| 1.13.3 | Multi-Dataset I/O |
-| 1.13.4 | Subfiling |
+| 1.8.23 | last HDF5 1.8 release |
+| 1.10.10 | CVE fixes, performance improvements, H5Dchunk\_iter() |
+| 1.12.3 | CVE fixes, performance improvements, H5Dchunk\_iter(), last HDF5 1.12 release |
+| 1.14.1 | selection I/O with datatype conversion |
+| 2.0.0 | TBD |
+| TBD | VFD SWMR |
 
 This list of feature release versions is also tentative, and the specific release
 in which a feature is introduced may change.
