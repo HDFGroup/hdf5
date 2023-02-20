@@ -293,6 +293,7 @@ void test_dense_attr(void);
 void test_partial_no_selection_coll_md_read(void);
 void test_multi_chunk_io_addrmap_issue(void);
 void test_link_chunk_io_sort_chunk_issue(void);
+void test_collective_global_heap_write(void);
 void test_oflush(void);
 
 /* commonly used prototypes */
