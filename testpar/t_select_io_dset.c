@@ -91,9 +91,9 @@ typedef enum {
 #define DSET_CHK_TCONV_SEL_EMPTY_NTRANS    "chunked_tconv_sel_ntrans"
 #define DSET_CHK_TCONV_SEL_EMPTY_TRANS     "chunked_tconv_sel_trans"
 
-#define MULTI_NUM_DSETS     4
-#define MULTI_MIN_DSETS     3
-#define DSET_NAME_LEN       30
+#define MULTI_NUM_DSETS 4
+#define MULTI_MIN_DSETS 3
+#define DSET_NAME_LEN   30
 
 /* Compound type */
 typedef struct s1_t {
@@ -110,10 +110,10 @@ typedef struct s1_t {
  * --1 smaller mem type
  */
 typedef struct s2_t {
-    int   a;
-    long long  b;
-    int   c;
-    short d;
+    int       a;
+    long long b;
+    int       c;
+    short     d;
 } s2_t;
 
 /*
@@ -131,8 +131,7 @@ check_io_mode(hid_t dxpl, unsigned chunked)
         if (actual_io_mode != H5D_MPIO_CHUNK_COLLECTIVE) {
             nerrors++;
             if (MAINPROCESS)
-                HDprintf(
-                    "\n     Failed: Incorrect I/O mode (chunked)     ");
+                HDprintf("\n     Failed: Incorrect I/O mode (chunked)     ");
         }
     }
     else if (actual_io_mode != H5D_MPIO_CONTIGUOUS_COLLECTIVE) {
@@ -264,9 +263,7 @@ test_no_type_conv(hid_t fid, unsigned chunked, unsigned dtrans)
             if (rbuf[i] != (2 * trans_wbuf[i])) {
                 nerrors++;
                 HDprintf("\n     Error in second data verification:.\n");
-                HDprintf("     At index %d: %d, %d\n", 
-                          i + (int)start[0], 
-                          2 * trans_wbuf[i], rbuf[i]);
+                HDprintf("     At index %d: %d, %d\n", i + (int)start[0], 2 * trans_wbuf[i], rbuf[i]);
                 break;
             }
     }
@@ -392,7 +389,6 @@ test_no_size_change_no_bkg(hid_t fid, unsigned chunked)
     if (H5Dread(did, H5T_STD_I32BE, mspace_id, fspace_id, dxpl, rbuf) < 0)
         P_TEST_ERROR;
 
-
     /* Verify data read */
     for (i = 0; i < (int)block[0]; i++) {
         if (rbuf[4 * i + 0] != wbuf[4 * i + 3] || rbuf[4 * i + 1] != wbuf[4 * i + 2] ||
@@ -414,10 +410,10 @@ test_no_size_change_no_bkg(hid_t fid, unsigned chunked)
     if (H5Dclose(did) < 0)
         P_TEST_ERROR;
 
-    if (wbuf) 
+    if (wbuf)
         HDfree(wbuf);
 
-    if (rbuf) 
+    if (rbuf)
         HDfree(rbuf);
 
     CHECK_PASSED();
@@ -528,9 +524,8 @@ test_larger_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
         if (rbuf[i] != (long long)(dtrans ? trans_wbuf[i] : wbuf[i])) {
             nerrors++;
             HDprintf("\n     Error in first data verification:\n");
-            HDprintf("     At index %d: %lld, %lld\n", 
-                      i + (int)start[0], 
-                      (long long)(dtrans ? trans_wbuf[i] : wbuf[i]), rbuf[i]);
+            HDprintf("     At index %d: %lld, %lld\n", i + (int)start[0],
+                     (long long)(dtrans ? trans_wbuf[i] : wbuf[i]), rbuf[i]);
             break;
         }
 
@@ -545,9 +540,8 @@ test_larger_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
             if (rbuf[i] != (long long)(100 - trans_wbuf[i])) {
                 nerrors++;
                 HDprintf("\n     Error in second data verification:.\n");
-                HDprintf("     At index %d: %lld, %lld\n", 
-                          i + (int)start[0], 
-                          (long long)(100 - trans_wbuf[i]), rbuf[i]);
+                HDprintf("     At index %d: %lld, %lld\n", i + (int)start[0],
+                         (long long)(100 - trans_wbuf[i]), rbuf[i]);
                 break;
             }
     }
@@ -737,24 +731,24 @@ test_smaller_mem_type_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
 static void
 test_cmpd_with_bkg(hid_t fid, unsigned chunked)
 {
-    int                       i;
-    hid_t                     did       = H5I_INVALID_HID;
-    hid_t                     sid       = H5I_INVALID_HID;
-    hid_t                     dcpl      = H5I_INVALID_HID;
-    hid_t                     dxpl      = H5I_INVALID_HID;
-    hid_t                     s1_tid    = H5I_INVALID_HID;
-    hid_t                     s2_tid    = H5I_INVALID_HID;
-    hid_t                     ss_ac_tid = H5I_INVALID_HID;
-    hid_t                     ss_bc_tid = H5I_INVALID_HID;
-    hid_t                     fspace_id = H5I_INVALID_HID;
-    hid_t                     mspace_id = H5I_INVALID_HID;
-    hsize_t                   dims[1];
-    hsize_t                   cdims[1];
-    hsize_t                   start[1], stride[1], count[1], block[1];
-    s1_t                     *s1_wbuf = NULL;
-    s1_t                     *s1_rbuf = NULL;
-    s2_t                     *s2_wbuf = NULL;
-    s2_t                     *s2_rbuf = NULL;
+    int     i;
+    hid_t   did       = H5I_INVALID_HID;
+    hid_t   sid       = H5I_INVALID_HID;
+    hid_t   dcpl      = H5I_INVALID_HID;
+    hid_t   dxpl      = H5I_INVALID_HID;
+    hid_t   s1_tid    = H5I_INVALID_HID;
+    hid_t   s2_tid    = H5I_INVALID_HID;
+    hid_t   ss_ac_tid = H5I_INVALID_HID;
+    hid_t   ss_bc_tid = H5I_INVALID_HID;
+    hid_t   fspace_id = H5I_INVALID_HID;
+    hid_t   mspace_id = H5I_INVALID_HID;
+    hsize_t dims[1];
+    hsize_t cdims[1];
+    hsize_t start[1], stride[1], count[1], block[1];
+    s1_t   *s1_wbuf = NULL;
+    s1_t   *s1_rbuf = NULL;
+    s2_t   *s2_wbuf = NULL;
+    s2_t   *s2_rbuf = NULL;
 
     curr_nerrors = nerrors;
 
@@ -844,18 +838,13 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked)
 
     /* Verify data read */
     for (i = 0; i < (int)block[0]; i++)
-        if (s1_wbuf[i].a != s1_rbuf[i].a || 
-            s1_wbuf[i].b != s1_rbuf[i].b || 
-            s1_wbuf[i].c != s1_rbuf[i].c ||
+        if (s1_wbuf[i].a != s1_rbuf[i].a || s1_wbuf[i].b != s1_rbuf[i].b || s1_wbuf[i].c != s1_rbuf[i].c ||
             s1_wbuf[i].d != s1_rbuf[i].d) {
             nerrors++;
             HDprintf("\n     Error in 1st data verification:\n");
-            HDprintf("     At index %d: %d/%d, %d/%d, %d/%d, %d/%d\n", 
-                      i + (int)start[0], 
-                      s1_wbuf[i].a, s1_rbuf[i].a, 
-                      s1_wbuf[i].b, s1_rbuf[i].b, 
-                      s1_wbuf[i].c, s1_rbuf[i].c, 
-                      s1_wbuf[i].d, s1_rbuf[i].d);
+            HDprintf("     At index %d: %d/%d, %d/%d, %d/%d, %d/%d\n", i + (int)start[0], s1_wbuf[i].a,
+                     s1_rbuf[i].a, s1_wbuf[i].b, s1_rbuf[i].b, s1_wbuf[i].c, s1_rbuf[i].c, s1_wbuf[i].d,
+                     s1_rbuf[i].d);
             break;
         }
 
@@ -892,12 +881,9 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked)
             s1_rbuf[i].c != s1_wbuf[i].c || s1_rbuf[i].d != (4 * (i + (int)start[0]) + 3)) {
             nerrors++;
             HDprintf("\n     Error in 2nd data verification:\n");
-            HDprintf("     At index %d: %d/%d, %d/%d, %d/%d, %d/%d\n", 
-                      i + (int)start[0], 
-                      s1_wbuf[i].a, s1_rbuf[i].a, 
-                      (4 * (i + (int)start[0]) + 1), s1_rbuf[i].b, 
-                      s1_wbuf[i].c, s1_rbuf[i].c, 
-                      (4 * (i + (int)start[0]) + 3), s1_rbuf[i].d);
+            HDprintf("     At index %d: %d/%d, %d/%d, %d/%d, %d/%d\n", i + (int)start[0], s1_wbuf[i].a,
+                     s1_rbuf[i].a, (4 * (i + (int)start[0]) + 1), s1_rbuf[i].b, s1_wbuf[i].c, s1_rbuf[i].c,
+                     (4 * (i + (int)start[0]) + 3), s1_rbuf[i].d);
             break;
         }
 
@@ -932,12 +918,11 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked)
             s1_rbuf[i].d != ((4 * (i + (int)start[0])) + (2 * DSET_SELECT_DIM) + 3)) {
             nerrors++;
             HDprintf("\n     Error in 3rd data verification:\n");
-            HDprintf("     At index %d: %d/%d, %d/%d, %d/%d, %d/%d\n", 
-                      i + (int)start[0],
-                      ((4 * (i + (int)start[0])) + (2 * DSET_SELECT_DIM)), s1_rbuf[i].a,
-                      (4 * (i + (int)start[0]) + 1), s1_rbuf[i].b,
-                      (4 * (i + (int)start[0]) + DSET_SELECT_DIM + 2), s1_rbuf[i].c,
-                      ((4 * (i + (int)start[0])) + (2 * DSET_SELECT_DIM) + 3), s1_rbuf[i].d);
+            HDprintf("     At index %d: %d/%d, %d/%d, %d/%d, %d/%d\n", i + (int)start[0],
+                     ((4 * (i + (int)start[0])) + (2 * DSET_SELECT_DIM)), s1_rbuf[i].a,
+                     (4 * (i + (int)start[0]) + 1), s1_rbuf[i].b,
+                     (4 * (i + (int)start[0]) + DSET_SELECT_DIM + 2), s1_rbuf[i].c,
+                     ((4 * (i + (int)start[0])) + (2 * DSET_SELECT_DIM) + 3), s1_rbuf[i].d);
             break;
         }
 
@@ -977,12 +962,9 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked)
             s2_wbuf[i].d != s2_rbuf[i].d) {
             nerrors++;
             HDprintf("\n     Error in 4th data verification:\n");
-            HDprintf("     At index %d: %d/%d, %lld/%lld, %d/%d, %d/%d\n", 
-                      i + (int)start[0], 
-                      s2_wbuf[i].a, s2_rbuf[i].a, 
-                      s2_wbuf[i].b, s2_rbuf[i].b, 
-                      s2_wbuf[i].c, s2_rbuf[i].c, 
-                      s2_wbuf[i].d, s2_rbuf[i].d);
+            HDprintf("     At index %d: %d/%d, %lld/%lld, %d/%d, %d/%d\n", i + (int)start[0], s2_wbuf[i].a,
+                     s2_rbuf[i].a, s2_wbuf[i].b, s2_rbuf[i].b, s2_wbuf[i].c, s2_rbuf[i].c, s2_wbuf[i].d,
+                     s2_rbuf[i].d);
             break;
         }
 
@@ -1022,25 +1004,25 @@ test_cmpd_with_bkg(hid_t fid, unsigned chunked)
 static void
 test_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans)
 {
-    int         i;
-    hid_t       did         = H5I_INVALID_HID;
-    hid_t       sid         = H5I_INVALID_HID;
-    hid_t       dcpl        = H5I_INVALID_HID;
-    hid_t       dxpl        = H5I_INVALID_HID;
-    hid_t       ntrans_dxpl = H5I_INVALID_HID;
-    hid_t       fspace_id   = H5I_INVALID_HID;
-    hid_t       mspace_id   = H5I_INVALID_HID;
-    hsize_t     dims[1];
-    hsize_t     cdims[1];
-    hsize_t     start[1], stride[1], count[1], block[1];
+    int     i;
+    hid_t   did         = H5I_INVALID_HID;
+    hid_t   sid         = H5I_INVALID_HID;
+    hid_t   dcpl        = H5I_INVALID_HID;
+    hid_t   dxpl        = H5I_INVALID_HID;
+    hid_t   ntrans_dxpl = H5I_INVALID_HID;
+    hid_t   fspace_id   = H5I_INVALID_HID;
+    hid_t   mspace_id   = H5I_INVALID_HID;
+    hsize_t dims[1];
+    hsize_t cdims[1];
+    hsize_t start[1], stride[1], count[1], block[1];
 
-    long        lwbuf[DSET_SELECT_DIM];
-    long        trans_lwbuf[DSET_SELECT_DIM];
-    long        lrbuf[DSET_SELECT_DIM];
-    short       srbuf[DSET_SELECT_DIM];
-    short       swbuf[DSET_SELECT_DIM];
-    short       trans_swbuf[DSET_SELECT_DIM];
-    long long   llrbuf[DSET_SELECT_DIM];
+    long      lwbuf[DSET_SELECT_DIM];
+    long      trans_lwbuf[DSET_SELECT_DIM];
+    long      lrbuf[DSET_SELECT_DIM];
+    short     srbuf[DSET_SELECT_DIM];
+    short     swbuf[DSET_SELECT_DIM];
+    short     trans_swbuf[DSET_SELECT_DIM];
+    long long llrbuf[DSET_SELECT_DIM];
 
     const char *expr = "2*x";
 
@@ -1138,9 +1120,8 @@ test_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans)
             if (lrbuf[i] != (dtrans ? trans_lwbuf[i] : lwbuf[i])) {
                 nerrors++;
                 HDprintf("\n     Error in first data verification:\n");
-                HDprintf("     At index %d: %ld, %ld\n", 
-                          i + (int)start[0],
-                          dtrans ? trans_lwbuf[i] : lwbuf[i], lrbuf[i]);
+                HDprintf("     At index %d: %ld, %ld\n", i + (int)start[0],
+                         dtrans ? trans_lwbuf[i] : lwbuf[i], lrbuf[i]);
                 break;
             }
     }
@@ -1187,9 +1168,8 @@ test_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans)
         for (i = 0; i < (int)block[0]; i++)
             if (srbuf[i] != (short)(dtrans ? trans_lwbuf[i] : lwbuf[i])) {
                 HDprintf("\n     Error in second data verification:\n");
-                HDprintf("     At index %d: %d, %d\n", 
-                          i + (int)start[0],
-                          (short)(dtrans ? trans_lwbuf[i] : lwbuf[i]), srbuf[i]);
+                HDprintf("     At index %d: %d, %d\n", i + (int)start[0],
+                         (short)(dtrans ? trans_lwbuf[i] : lwbuf[i]), srbuf[i]);
                 break;
             }
     }
@@ -1241,9 +1221,8 @@ test_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans)
         for (i = 0; i < (int)block[0]; i++)
             if (llrbuf[i] != (long long)(dtrans ? trans_swbuf[i] : swbuf[i])) {
                 HDprintf("\n     Error in third data verification:\n");
-                HDprintf("     At index %d: %lld, %lld\n",
-                          i + (int)start[0],
-                          (long long)(dtrans ? trans_swbuf[i] : swbuf[i]), llrbuf[i]);
+                HDprintf("     At index %d: %lld, %lld\n", i + (int)start[0],
+                         (long long)(dtrans ? trans_swbuf[i] : swbuf[i]), llrbuf[i]);
                 break;
             }
     }
@@ -1275,7 +1254,7 @@ test_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans)
  *
  *  Case a--setting for multi-write to ndsets:
  *    Datatype for all datasets: H5T_NATIVE_INT
- *    --this will not trigger type conversion for (a) but 
+ *    --this will not trigger type conversion for (a) but
  *      type conversion for (b) & (c)
  *
  *  Case b--setting for multi-read from ndsets:
@@ -1285,37 +1264,36 @@ test_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans)
 static void
 test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
 {
-    size_t      ndsets;
-    int         i, j;
-    hid_t       dcpl = H5I_INVALID_HID;
-    hid_t       dxpl = H5I_INVALID_HID;
-    hid_t       ntrans_dxpl = H5I_INVALID_HID;
-    hsize_t     dims[1];
-    hsize_t     cdims[1];
-    hsize_t     start[1], stride[1], count[1], block[1];
+    size_t  ndsets;
+    int     i, j;
+    hid_t   dcpl        = H5I_INVALID_HID;
+    hid_t   dxpl        = H5I_INVALID_HID;
+    hid_t   ntrans_dxpl = H5I_INVALID_HID;
+    hsize_t dims[1];
+    hsize_t cdims[1];
+    hsize_t start[1], stride[1], count[1], block[1];
 
-    hid_t       file_sids[MULTI_NUM_DSETS];
-    hid_t       mem_sids[MULTI_NUM_DSETS];
-    hid_t       mem_tids[MULTI_NUM_DSETS];
+    hid_t file_sids[MULTI_NUM_DSETS];
+    hid_t mem_sids[MULTI_NUM_DSETS];
+    hid_t mem_tids[MULTI_NUM_DSETS];
 
-    char        dset_names[MULTI_NUM_DSETS][DSET_NAME_LEN];
-    hid_t       dset_dids[MULTI_NUM_DSETS];
+    char  dset_names[MULTI_NUM_DSETS][DSET_NAME_LEN];
+    hid_t dset_dids[MULTI_NUM_DSETS];
 
+    size_t buf_size;
+    int   *total_wbuf       = NULL;
+    int   *total_trans_wbuf = NULL;
+    int   *total_rbuf       = NULL;
+    long  *total_lrbuf      = NULL;
 
-    size_t      buf_size;
-    int         *total_wbuf        = NULL;
-    int         *total_trans_wbuf  = NULL;
-    int         *total_rbuf        = NULL;
-    long        *total_lrbuf       = NULL;
+    int  *wbufi[MULTI_NUM_DSETS];
+    int  *trans_wbufi[MULTI_NUM_DSETS];
+    int  *rbufi[MULTI_NUM_DSETS];
+    long *l_rbufi[MULTI_NUM_DSETS];
 
-    int         *wbufi[MULTI_NUM_DSETS];
-    int         *trans_wbufi[MULTI_NUM_DSETS];
-    int         *rbufi[MULTI_NUM_DSETS];
-    long        *l_rbufi[MULTI_NUM_DSETS];
-
-    const void  *wbufs[MULTI_NUM_DSETS];
-    void        *rbufs[MULTI_NUM_DSETS];
-    const char  *expr = "2*x";
+    const void *wbufs[MULTI_NUM_DSETS];
+    void       *rbufs[MULTI_NUM_DSETS];
+    const char *expr = "2*x";
 
     curr_nerrors = nerrors;
 
@@ -1323,7 +1301,7 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
 
     dims[0] = DSET_SELECT_DIM;
 
-    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         P_TEST_ERROR;
 
     if (chunked) {
@@ -1349,31 +1327,32 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
         if (H5Pset_data_transform(dxpl, expr) < 0)
             P_TEST_ERROR;
 
-
     /* Set up file space ids and dataset ids */
     for (i = 0; i < (int)ndsets; i++) {
         if ((file_sids[i] = H5Screate_simple(1, dims, NULL)) < 0)
             P_TEST_ERROR;
 
         /* Create ith dataset */
-        if (chunked) { 
-            if (snprintf(dset_names[i], DSET_NAME_LEN, 
+        if (chunked) {
+            if (snprintf(dset_names[i], DSET_NAME_LEN,
                          dtrans ? "multi_chk_trans_dset%u" : "multi_chk_ntrans_dset%u", i) < 0)
                 P_TEST_ERROR;
-        } else {
-            if (snprintf(dset_names[i], DSET_NAME_LEN, 
+        }
+        else {
+            if (snprintf(dset_names[i], DSET_NAME_LEN,
                          dtrans ? "multi_contig_trans_dset%u" : "multi_contig_ntrans_dset%u", i) < 0)
                 P_TEST_ERROR;
         }
 
         if (i == 0) {
-            if ((dset_dids[i] = H5Dcreate2(fid, dset_names[i], H5T_NATIVE_INT, 
-                                           file_sids[i], H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+            if ((dset_dids[i] = H5Dcreate2(fid, dset_names[i], H5T_NATIVE_INT, file_sids[i], H5P_DEFAULT,
+                                           dcpl, H5P_DEFAULT)) < 0)
                 P_TEST_ERROR;
-        } else {
-            if ((dset_dids[i] = H5Dcreate2(fid, dset_names[i],
-                                           ((HDrandom() % 2) ? H5T_NATIVE_LLONG : H5T_NATIVE_SHORT),
-                                           file_sids[i], H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        }
+        else {
+            if ((dset_dids[i] =
+                     H5Dcreate2(fid, dset_names[i], ((HDrandom() % 2) ? H5T_NATIVE_LLONG : H5T_NATIVE_SHORT),
+                                file_sids[i], H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
                 P_TEST_ERROR;
         }
     }
@@ -1406,22 +1385,21 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
 
     /* Initialize buffer indices */
     for (i = 0; i < (int)ndsets; i++) {
-        wbufi[i] = total_wbuf + (i * DSET_SELECT_DIM);
-        rbufi[i] = total_rbuf + (i * DSET_SELECT_DIM);
+        wbufi[i]       = total_wbuf + (i * DSET_SELECT_DIM);
+        rbufi[i]       = total_rbuf + (i * DSET_SELECT_DIM);
         trans_wbufi[i] = total_trans_wbuf + (i * DSET_SELECT_DIM);
 
         wbufs[i] = wbufi[i];
         rbufs[i] = rbufi[i];
     }
 
-
-
     /* Case a */
 
     /* Initialize the buffer data */
     for (i = 0; i < (int)ndsets; i++)
         for (j = 0; j < (int)block[0]; j++) {
-            wbufi[i][j] = j + (int)start[0];;
+            wbufi[i][j] = j + (int)start[0];
+            ;
             trans_wbufi[i][j] = 2 * wbufi[i][j];
         }
 
@@ -1439,16 +1417,14 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
     if (H5Dread_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, ntrans_dxpl, rbufs) < 0)
         P_TEST_ERROR;
 
-
     /* Verify */
     for (i = 0; i < (int)ndsets; i++)
         for (j = 0; j < (int)block[0]; j++)
             if (rbufi[i][j] != (dtrans ? trans_wbufi[i][j] : wbufi[i][j])) {
                 nerrors++;
                 HDprintf("\n     Error in 1st data verification for dset %d:\n", i);
-                HDprintf("     At index %d: %d, %d\n", 
-                          j + (int)start[0], 
-                          dtrans ? trans_wbufi[i][j] : wbufi[i][j], rbufi[i][j]);
+                HDprintf("     At index %d: %d, %d\n", j + (int)start[0],
+                         dtrans ? trans_wbufi[i][j] : wbufi[i][j], rbufi[i][j]);
                 break;
             }
 
@@ -1464,20 +1440,18 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
                 if (rbufi[i][j] != (2 * trans_wbufi[i][j])) {
                     nerrors++;
                     HDprintf("\n     Error in 1st (with dtrans) data verification for dset %d:\n", i);
-                    HDprintf("     At index %d: %d, %d\n", 
-                              j + (int)start[0], 
-                              2 * trans_wbufi[i][j], rbufi[i][j]);
+                    HDprintf("     At index %d: %d, %d\n", j + (int)start[0], 2 * trans_wbufi[i][j],
+                             rbufi[i][j]);
                     break;
                 }
     }
-
 
     /* Case b */
 
     /* Initialize buffer indices */
     for (i = 0; i < (int)ndsets; i++) {
         l_rbufi[i] = total_lrbuf + (i * DSET_SELECT_DIM);
-        rbufs[i] = l_rbufi[i];
+        rbufs[i]   = l_rbufi[i];
     }
 
     /* Datatype setting for multi read */
@@ -1490,12 +1464,11 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
 
     for (i = 0; i < (int)ndsets; i++) {
         for (j = 0; j < (int)block[0]; j++) {
-            if (l_rbufi[i][j] != (long)(dtrans ? (2 *trans_wbufi[i][j]) : wbufi[i][j])) {
+            if (l_rbufi[i][j] != (long)(dtrans ? (2 * trans_wbufi[i][j]) : wbufi[i][j])) {
                 nerrors++;
                 HDprintf("\n     Error in 2nd data verification for dset %d:\n", i);
-                HDprintf("     At index %d: %ld/%ld\n",
-                          j + (int)start[0],
-                          (long)(dtrans ? (2 * trans_wbufi[i][j]) : wbufi[i][j]), l_rbufi[i][j]);
+                HDprintf("     At index %d: %ld/%ld\n", j + (int)start[0],
+                         (long)(dtrans ? (2 * trans_wbufi[i][j]) : wbufi[i][j]), l_rbufi[i][j]);
                 break;
             }
         }
@@ -1537,11 +1510,11 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
  *    Type conversions + some processes have null/empty selections in datasets
  *
  *  Case (a): dset0
- *    process 0: hyperslab; other processes: select none 
+ *    process 0: hyperslab; other processes: select none
  *  Case (b): randomized dset <mm>
- *    process 0: get 0 row; other processes: hyperslab 
+ *    process 0: get 0 row; other processes: hyperslab
  *  Case (c): randomized dset <ll>
- *    process 0: select none; other processes: select all 
+ *    process 0: select none; other processes: select all
  *
  *  Memory datatype for multi write to all datasets: H5T_NATIVE_INT
  *  --this will not trigger type conversion for case (a) but
@@ -1552,37 +1525,37 @@ test_multi_dsets_no_bkg(hid_t fid, unsigned chunked, unsigned dtrans)
 static void
 test_multi_dsets_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtrans)
 {
-    size_t      ndsets;
-    int         i, j;
-    hid_t       dcpl        = H5I_INVALID_HID;
-    hid_t       dxpl        = H5I_INVALID_HID;
-    hid_t       ntrans_dxpl = H5I_INVALID_HID;
+    size_t ndsets;
+    int    i, j;
+    hid_t  dcpl        = H5I_INVALID_HID;
+    hid_t  dxpl        = H5I_INVALID_HID;
+    hid_t  ntrans_dxpl = H5I_INVALID_HID;
 
-    hsize_t     dims[1];
-    hsize_t     cdims[1];
-    hsize_t     start[1], stride[1], count[1], block[1];
+    hsize_t dims[1];
+    hsize_t cdims[1];
+    hsize_t start[1], stride[1], count[1], block[1];
 
-    hid_t       file_sids[MULTI_NUM_DSETS];
-    hid_t       mem_sids[MULTI_NUM_DSETS];
-    hid_t       mem_tids[MULTI_NUM_DSETS];
+    hid_t file_sids[MULTI_NUM_DSETS];
+    hid_t mem_sids[MULTI_NUM_DSETS];
+    hid_t mem_tids[MULTI_NUM_DSETS];
 
-    char        dset_names[MULTI_NUM_DSETS][DSET_NAME_LEN];
-    hid_t       dset_dids[MULTI_NUM_DSETS];
+    char  dset_names[MULTI_NUM_DSETS][DSET_NAME_LEN];
+    hid_t dset_dids[MULTI_NUM_DSETS];
 
-    size_t      buf_size;
-    int         *total_wbuf = NULL;
-    int         *total_trans_wbuf  = NULL;
-    long        *total_lrbuf       = NULL;
+    size_t buf_size;
+    int   *total_wbuf       = NULL;
+    int   *total_trans_wbuf = NULL;
+    long  *total_lrbuf      = NULL;
 
-    int         *wbufi[MULTI_NUM_DSETS];
-    int         *trans_wbufi[MULTI_NUM_DSETS];
-    long        *l_rbufi[MULTI_NUM_DSETS];
+    int  *wbufi[MULTI_NUM_DSETS];
+    int  *trans_wbufi[MULTI_NUM_DSETS];
+    long *l_rbufi[MULTI_NUM_DSETS];
 
-    const void  *wbufs[MULTI_NUM_DSETS];
-    void        *rbufs[MULTI_NUM_DSETS];
+    const void *wbufs[MULTI_NUM_DSETS];
+    void       *rbufs[MULTI_NUM_DSETS];
 
-    int         save_block0;
-    int         mm, ll;                   
+    int save_block0;
+    int mm, ll;
 
     const char *expr = "2*x";
 
@@ -1593,7 +1566,7 @@ test_multi_dsets_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtran
     /* Create 1d data space */
     dims[0] = DSET_SELECT_DIM;
 
-    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         P_TEST_ERROR;
 
     if (chunked) {
@@ -1628,23 +1601,24 @@ test_multi_dsets_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtran
             if (snprintf(dset_names[i], DSET_NAME_LEN,
                          dtrans ? "multi_chk_trans_sel_dset%u" : "multi_chk_ntrans_sel_dset%u", i) < 0)
                 P_TEST_ERROR;
-        } else {
+        }
+        else {
             if (snprintf(dset_names[i], DSET_NAME_LEN,
                          dtrans ? "multi_contig_trans_sel_dset%u" : "multi_contig_ntrans_sel_dset%u", i) < 0)
                 P_TEST_ERROR;
         }
 
         if (i == 0) {
-            if ((dset_dids[i] = H5Dcreate2(fid, dset_names[i], H5T_NATIVE_INT,
-                                           file_sids[i], H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-                P_TEST_ERROR;
-        } else {
-            if ((dset_dids[i] = H5Dcreate2(fid, dset_names[i],
-                                           ((HDrandom() % 2) ? H5T_NATIVE_LLONG : H5T_NATIVE_SHORT),
-                                           file_sids[i], H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+            if ((dset_dids[i] = H5Dcreate2(fid, dset_names[i], H5T_NATIVE_INT, file_sids[i], H5P_DEFAULT,
+                                           dcpl, H5P_DEFAULT)) < 0)
                 P_TEST_ERROR;
         }
-
+        else {
+            if ((dset_dids[i] =
+                     H5Dcreate2(fid, dset_names[i], ((HDrandom() % 2) ? H5T_NATIVE_LLONG : H5T_NATIVE_SHORT),
+                                file_sids[i], H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+                P_TEST_ERROR;
+        }
     }
 
     buf_size = ndsets * DSET_SELECT_DIM * sizeof(int);
@@ -1659,24 +1633,23 @@ test_multi_dsets_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtran
 
     /* Initialize buffer indices */
     for (i = 0; i < (int)ndsets; i++) {
-        wbufi[i] = total_wbuf + (i * DSET_SELECT_DIM);
+        wbufi[i]       = total_wbuf + (i * DSET_SELECT_DIM);
         trans_wbufi[i] = total_trans_wbuf + (i * DSET_SELECT_DIM);
 
         wbufs[i] = wbufi[i];
     }
 
-
-    /* 
+    /*
      * Case (a): dset0
-     *   process 0: hyperslab; other processes: select none 
+     *   process 0: hyperslab; other processes: select none
      */
 
     /* Each process takes x number of elements */
-    block[0]  = dims[0] / (hsize_t)mpi_size;
+    block[0]    = dims[0] / (hsize_t)mpi_size;
     save_block0 = (int)block[0];
-    stride[0] = block[0];
-    count[0]  = 1;
-    start[0]  = (hsize_t)mpi_rank * block[0];
+    stride[0]   = block[0];
+    count[0]    = 1;
+    start[0]    = (hsize_t)mpi_rank * block[0];
 
     /* Get file dataspace */
     if ((file_sids[0] = H5Dget_space(dset_dids[0])) < 0)
@@ -1702,16 +1675,17 @@ test_multi_dsets_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtran
     /* Initialize data for wbufi[0] */
     for (j = 0; j < (int)block[0]; j++) {
         wbufi[0][j]       = j + (int)start[0];
-        trans_wbufi[0][j]  = 2 * wbufi[0][j];
+        trans_wbufi[0][j] = 2 * wbufi[0][j];
     }
 
-    /* 
+    /*
      * Case (b): choose a dataset -- dset <mm>
-     *   process 0: get 0 row; other processes: hyperslab 
+     *   process 0: get 0 row; other processes: hyperslab
      */
 
     mm = HDrandom() % (int)ndsets;
-    if(mm == 0) mm++;
+    if (mm == 0)
+        mm++;
 
     block[0]  = mpi_rank ? (dims[0] / (hsize_t)mpi_size) : 0;
     stride[0] = mpi_rank ? block[0] : 1;
@@ -1733,7 +1707,8 @@ test_multi_dsets_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtran
     if (MAINPROCESS) {
         if (H5Sselect_hyperslab(mem_sids[mm], H5S_SELECT_SET, start, stride, count, block) < 0)
             P_TEST_ERROR;
-    } else {
+    }
+    else {
         if (H5Sselect_all(mem_sids[mm]) < 0)
             P_TEST_ERROR;
     }
@@ -1741,17 +1716,16 @@ test_multi_dsets_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtran
     /* Initialize data for wbufi[1] */
     for (j = 0; j < (int)block[0]; j++) {
         wbufi[mm][j]       = j + (int)start[0];
-        trans_wbufi[mm][j]  = 2 * wbufi[mm][j];
+        trans_wbufi[mm][j] = 2 * wbufi[mm][j];
     }
 
-
-    /* 
+    /*
      * Case (c): choose a dataset -- dset <ll>
-     *   process 0: select none; other processes: select all 
+     *   process 0: select none; other processes: select all
      */
 
     ll = mm + 1;
-    if((ll % (int)ndsets) == 0)
+    if ((ll % (int)ndsets) == 0)
         ll = 1;
 
     /* Get file dataspace */
@@ -1772,10 +1746,10 @@ test_multi_dsets_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtran
     if (MAINPROCESS) {
         if (H5Sselect_none(mem_sids[ll]) < 0)
             P_TEST_ERROR;
-    } else
-        if (H5Sselect_all(mem_sids[ll]) < 0)
-            P_TEST_ERROR;
-        
+    }
+    else if (H5Sselect_all(mem_sids[ll]) < 0)
+        P_TEST_ERROR;
+
     /* Initialize data for wbufi[ll] */
     for (j = 0; j < (int)dims[0]; j++) {
         wbufi[ll][j]       = (int)j + DSET_SELECT_DIM;
@@ -1784,7 +1758,7 @@ test_multi_dsets_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtran
 
     /* Set up remaining dsets */
     for (i = 0; i < (int)ndsets; i++) {
-        if (i == 0 || i == mm || i == ll) 
+        if (i == 0 || i == mm || i == ll)
             continue;
         /* Get file dataspace */
         if ((file_sids[i] = H5Dget_space(dset_dids[i])) < 0)
@@ -1798,7 +1772,6 @@ test_multi_dsets_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtran
             P_TEST_ERROR;
     }
 
-
     /* Set up mem_tids[] for multi write */
     for (i = 0; i < (int)ndsets; i++)
         mem_tids[i] = H5T_NATIVE_INT;
@@ -1809,11 +1782,10 @@ test_multi_dsets_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtran
 
     check_io_mode(dxpl, chunked);
 
-
     /* Initialize buffer indices */
     for (i = 0; i < (int)ndsets; i++) {
         l_rbufi[i] = total_lrbuf + (i * DSET_SELECT_DIM);
-        rbufs[i] = l_rbufi[i];
+        rbufs[i]   = l_rbufi[i];
     }
 
     /* Set up mem_tids[] for multi read */
@@ -1839,19 +1811,17 @@ test_multi_dsets_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtran
         for (j = 0; j < (int)block[0]; j++)
             if (l_rbufi[mm][j] != (long)(dtrans ? trans_wbufi[mm][j] : wbufi[mm][j])) {
                 nerrors++;
-                HDprintf("     Verify dset %d at index %d: %ld, %ld\n", 
-                          mm, j + (int)start[0],
-                          (long)(dtrans ? trans_wbufi[mm][j] : wbufi[mm][j]), l_rbufi[mm][j]);
+                HDprintf("     Verify dset %d at index %d: %ld, %ld\n", mm, j + (int)start[0],
+                         (long)(dtrans ? trans_wbufi[mm][j] : wbufi[mm][j]), l_rbufi[mm][j]);
                 break;
             }
 
         /* Case c: verify dset <ll> */
         for (j = 0; j < (int)dims[0]; j++)
-            if (l_rbufi[ll][j] != (long)(dtrans ?trans_wbufi[ll][j] : wbufi[ll][j])) {
+            if (l_rbufi[ll][j] != (long)(dtrans ? trans_wbufi[ll][j] : wbufi[ll][j])) {
                 nerrors++;
-                HDprintf("     Verify dset %d at index %d: %ld, %ld\n", 
-                           ll, j,
-                           (long)(dtrans ? trans_wbufi[ll][j] : wbufi[ll][j]), l_rbufi[ll][j]);
+                HDprintf("     Verify dset %d at index %d: %ld, %ld\n", ll, j,
+                         (long)(dtrans ? trans_wbufi[ll][j] : wbufi[ll][j]), l_rbufi[ll][j]);
                 break;
             }
     }
@@ -1883,7 +1853,7 @@ test_multi_dsets_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtran
 /*
  * Test for multi-dataset:
  *   Datasets with compound types+background buffer
- *  
+ *
  *   Create datasets with the same compound type
  *   Case (a) Initialize compound buffer in memory with unique values
  *       All datasets:
@@ -1919,44 +1889,43 @@ test_multi_dsets_type_conv_sel_empty(hid_t fid, unsigned chunked, unsigned dtran
 static void
 test_multi_dsets_with_bkg(hid_t fid, unsigned chunked)
 {
-    size_t      ndsets;
-    int         i, j, mm;
-    hid_t       dcpl = H5I_INVALID_HID;
-    hid_t       dxpl = H5I_INVALID_HID;
-    hsize_t     dims[1];
-    hsize_t     cdims[1];
-    hsize_t     start[1], stride[1], count[1], block[1];
+    size_t  ndsets;
+    int     i, j, mm;
+    hid_t   dcpl = H5I_INVALID_HID;
+    hid_t   dxpl = H5I_INVALID_HID;
+    hsize_t dims[1];
+    hsize_t cdims[1];
+    hsize_t start[1], stride[1], count[1], block[1];
 
-    hid_t       file_sids[MULTI_NUM_DSETS];
-    hid_t       mem_sids[MULTI_NUM_DSETS];
-    hid_t       mem_tids[MULTI_NUM_DSETS];
+    hid_t file_sids[MULTI_NUM_DSETS];
+    hid_t mem_sids[MULTI_NUM_DSETS];
+    hid_t mem_tids[MULTI_NUM_DSETS];
 
-    hid_t       s1_tid    = H5I_INVALID_HID;
-    hid_t       ss_ac_tid = H5I_INVALID_HID;
-    hid_t       ss_bc_tid = H5I_INVALID_HID;
-    hid_t       s2_tid    = H5I_INVALID_HID;
+    hid_t s1_tid    = H5I_INVALID_HID;
+    hid_t ss_ac_tid = H5I_INVALID_HID;
+    hid_t ss_bc_tid = H5I_INVALID_HID;
+    hid_t s2_tid    = H5I_INVALID_HID;
 
-    char        dset_names[MULTI_NUM_DSETS][DSET_NAME_LEN];
-    hid_t       dset_dids[MULTI_NUM_DSETS];
+    char  dset_names[MULTI_NUM_DSETS][DSET_NAME_LEN];
+    hid_t dset_dids[MULTI_NUM_DSETS];
 
-    size_t      buf_size;
-    size_t      s2_buf_size;
+    size_t buf_size;
+    size_t s2_buf_size;
 
-    s1_t        *total_wbuf = NULL;
-    s1_t        *total_rbuf = NULL;
+    s1_t *total_wbuf = NULL;
+    s1_t *total_rbuf = NULL;
 
-    s2_t        *s2_total_wbuf = NULL;
-    s2_t        *s2_total_rbuf = NULL;
+    s2_t *s2_total_wbuf = NULL;
+    s2_t *s2_total_rbuf = NULL;
 
-    s1_t        *wbufi[MULTI_NUM_DSETS];
-    s1_t        *rbufi[MULTI_NUM_DSETS];
+    s1_t *wbufi[MULTI_NUM_DSETS];
+    s1_t *rbufi[MULTI_NUM_DSETS];
 
-    s2_t        *s2_wbufi[MULTI_NUM_DSETS];
-    s2_t        *s2_rbufi[MULTI_NUM_DSETS];
+    s2_t *s2_wbufi[MULTI_NUM_DSETS];
+    s2_t *s2_rbufi[MULTI_NUM_DSETS];
 
     const void *wbufs[MULTI_NUM_DSETS];
     void       *rbufs[MULTI_NUM_DSETS];
-
 
     curr_nerrors = nerrors;
 
@@ -2003,18 +1972,18 @@ test_multi_dsets_with_bkg(hid_t fid, unsigned chunked)
         if ((mem_sids[i] = H5Screate_simple(1, block, NULL)) < 0)
             P_TEST_ERROR;
 
-        if (snprintf(dset_names[i], DSET_NAME_LEN, 
-            chunked ? "multi_chk_cmpd_dset%u" : "multi_contig_cmpd_dset%u", i) < 0)
+        if (snprintf(dset_names[i], DSET_NAME_LEN,
+                     chunked ? "multi_chk_cmpd_dset%u" : "multi_contig_cmpd_dset%u", i) < 0)
             P_TEST_ERROR;
-        if ((dset_dids[i] = H5Dcreate2(fid, dset_names[i], s1_tid, file_sids[i], 
-                                          H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        if ((dset_dids[i] =
+                 H5Dcreate2(fid, dset_names[i], s1_tid, file_sids[i], H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
             P_TEST_ERROR;
 
         if (H5Sselect_hyperslab(file_sids[i], H5S_SELECT_SET, start, stride, count, block) < 0)
             P_TEST_ERROR;
     }
 
-    buf_size = ndsets * DSET_SELECT_DIM * sizeof(s1_t);
+    buf_size    = ndsets * DSET_SELECT_DIM * sizeof(s1_t);
     s2_buf_size = ndsets * DSET_SELECT_DIM * sizeof(s2_t);
 
     /* Allocate buffers for all datasets */
@@ -2037,7 +2006,6 @@ test_multi_dsets_with_bkg(hid_t fid, unsigned chunked)
         rbufs[i] = rbufi[i];
     }
 
-
     /* Case a */
 
     /* Initialize the buffer data for all the datasets */
@@ -2047,7 +2015,7 @@ test_multi_dsets_with_bkg(hid_t fid, unsigned chunked)
             wbufi[i][j].b = 4 * (j + (int)start[0]) + 1;
             wbufi[i][j].c = 4 * (j + (int)start[0]) + 2;
             wbufi[i][j].d = 4 * (j + (int)start[0]) + 3;
-    }
+        }
 
     /* Datatype setting for multi write */
     for (i = 0; i < (int)ndsets; i++)
@@ -2064,21 +2032,17 @@ test_multi_dsets_with_bkg(hid_t fid, unsigned chunked)
     /* Verify data read */
     for (i = 0; i < (int)ndsets; i++)
         for (j = 0; j < (int)block[0]; j++) {
-            if (wbufi[i][j].a != rbufi[i][j].a || wbufi[i][j].b != rbufi[i][j].b || 
+            if (wbufi[i][j].a != rbufi[i][j].a || wbufi[i][j].b != rbufi[i][j].b ||
                 wbufi[i][j].c != rbufi[i][j].c || wbufi[i][j].d != rbufi[i][j].d) {
                 nerrors++;
                 HDprintf("\n     Error in 1st data verification for dset %d:\n", i);
-                HDprintf("     At index %d: %d/%d, %d/%d, %d/%d, %d/%d\n", 
-                         j + (int)start[0], 
-                         wbufi[i][j].a, rbufi[i][j].a, 
-                         wbufi[i][j].b, rbufi[i][j].b, 
-                         wbufi[i][j].c, rbufi[i][j].c, 
+                HDprintf("     At index %d: %d/%d, %d/%d, %d/%d, %d/%d\n", j + (int)start[0], wbufi[i][j].a,
+                         rbufi[i][j].a, wbufi[i][j].b, rbufi[i][j].b, wbufi[i][j].c, rbufi[i][j].c,
                          wbufi[i][j].d, rbufi[i][j].d);
 
                 break;
             }
         }
-
 
     /* Case b */
 
@@ -2104,7 +2068,8 @@ test_multi_dsets_with_bkg(hid_t fid, unsigned chunked)
 
     /* Untouched memory and file spaces for other datasets */
     for (i = 0; i < (int)ndsets; i++) {
-        if (i == 0) continue;
+        if (i == 0)
+            continue;
 
         if (H5Sselect_none(mem_sids[i]) < 0)
             P_TEST_ERROR;
@@ -2122,41 +2087,36 @@ test_multi_dsets_with_bkg(hid_t fid, unsigned chunked)
     for (i = 0; i < (int)ndsets; i++)
         if (i == 0) { /* dset0 */
             for (j = 0; j < (int)block[0]; j++)
-                if (wbufi[i][j].a != rbufi[i][j].a || 
-                    (4 * (j + (int)start[0]) + 1) != rbufi[i][j].b || 
-                    wbufi[i][j].c != rbufi[i][j].c || 
-                    (4 * (j + (int)start[0]) + 3) != rbufi[i][j].d) {
-                        nerrors++;
-                        HDprintf("\n     Error in 2nd data verification for dset %d:\n", i);
-                        HDprintf("     At index %d: %d/%d, %d/%d, %d/%d, %d/%d\n",
-                                  j + (int)start[0],
-                                  wbufi[i][j].a, rbufi[i][j].a,
-                                  (4 * (j + (int)start[0]) + 1), rbufi[i][j].b,
-                                  wbufi[i][j].c, rbufi[i][j].c,
-                                  (4 * (j + (int)start[0]) + 3), rbufi[i][j].d);
-                        break;
+                if (wbufi[i][j].a != rbufi[i][j].a || (4 * (j + (int)start[0]) + 1) != rbufi[i][j].b ||
+                    wbufi[i][j].c != rbufi[i][j].c || (4 * (j + (int)start[0]) + 3) != rbufi[i][j].d) {
+                    nerrors++;
+                    HDprintf("\n     Error in 2nd data verification for dset %d:\n", i);
+                    HDprintf("     At index %d: %d/%d, %d/%d, %d/%d, %d/%d\n", j + (int)start[0],
+                             wbufi[i][j].a, rbufi[i][j].a, (4 * (j + (int)start[0]) + 1), rbufi[i][j].b,
+                             wbufi[i][j].c, rbufi[i][j].c, (4 * (j + (int)start[0]) + 3), rbufi[i][j].d);
+                    break;
                 }
-        } else { /* other datasets */
+        }
+        else { /* other datasets */
             for (j = 0; j < (int)block[0]; j++)
-                if ((4 * (j + (int)start[0])) != rbufi[i][j].a || 
-                    (4 * (j + (int)start[0]) + 1) != rbufi[i][j].b || 
-                    (4 * (j + (int)start[0]) + 2) != rbufi[i][j].c || 
+                if ((4 * (j + (int)start[0])) != rbufi[i][j].a ||
+                    (4 * (j + (int)start[0]) + 1) != rbufi[i][j].b ||
+                    (4 * (j + (int)start[0]) + 2) != rbufi[i][j].c ||
                     (4 * (j + (int)start[0]) + 3) != rbufi[i][j].d) {
-                        nerrors++;
-                        HDprintf("\n     Error in 2nd data verification for dset %d:\n", i);
-                        HDprintf("     At index %d: %d/%d, %d/%d, %d/%d, %d/%d\n",
-                                  j + (int)start[0],
-                                  (4 * (j + (int)start[0])) , rbufi[i][j].a,
-                                  (4 * (j + (int)start[0]) + 1), rbufi[i][j].b,
-                                  (4 * (j + (int)start[0]) + 2), rbufi[i][j].c,
-                                  (4 * (j + (int)start[0]) + 3), rbufi[i][j].d);
-                        break;
+                    nerrors++;
+                    HDprintf("\n     Error in 2nd data verification for dset %d:\n", i);
+                    HDprintf("     At index %d: %d/%d, %d/%d, %d/%d, %d/%d\n", j + (int)start[0],
+                             (4 * (j + (int)start[0])), rbufi[i][j].a, (4 * (j + (int)start[0]) + 1),
+                             rbufi[i][j].b, (4 * (j + (int)start[0]) + 2), rbufi[i][j].c,
+                             (4 * (j + (int)start[0]) + 3), rbufi[i][j].d);
+                    break;
                 }
         }
 
     /* Case c */
     mm = HDrandom() % (int)ndsets;
-    if(!mm) mm++;
+    if (!mm)
+        mm++;
 
     /* Update data in rbufi for <mm> dset with new unique values */
     for (j = 0; j < (int)block[0]; j++) {
@@ -2185,7 +2145,7 @@ test_multi_dsets_with_bkg(hid_t fid, unsigned chunked)
 
     /* Untouched memory and file space for other datasets */
     for (i = 0; i < (int)ndsets; i++) {
-        if (i == 0 || i == mm) 
+        if (i == 0 || i == mm)
             continue;
         if (H5Sselect_none(mem_sids[i]) < 0)
             P_TEST_ERROR;
@@ -2202,36 +2162,29 @@ test_multi_dsets_with_bkg(hid_t fid, unsigned chunked)
     /* Verify data read */
     /* dset0 */
     for (j = 0; j < (int)block[0]; j++)
-        if (wbufi[0][j].a != rbufi[0][j].a || 
-            ((4 * (j + (int)start[0])) + 1) != rbufi[0][j].b || 
-            wbufi[0][j].c != rbufi[0][j].c || 
-            ((4 * (j + (int)start[0])) + 3) != rbufi[0][j].d) {
-                nerrors++;
-                HDprintf("\n     Error in 3rd data verification for dset0:\n");
-                HDprintf("     At index %d: %d/%d, %d/%d, %d/%d, %d/%d\n",
-                          j + (int)start[0],
-                          wbufi[0][j].a, rbufi[0][j].a,
-                          (4 * (j + (int)start[0]) + 1), rbufi[0][j].b,
-                          wbufi[0][j].c, rbufi[0][j].c,
-                          (4 * (j + (int)start[0]) + 3), rbufi[0][j].d);
-                break;
+        if (wbufi[0][j].a != rbufi[0][j].a || ((4 * (j + (int)start[0])) + 1) != rbufi[0][j].b ||
+            wbufi[0][j].c != rbufi[0][j].c || ((4 * (j + (int)start[0])) + 3) != rbufi[0][j].d) {
+            nerrors++;
+            HDprintf("\n     Error in 3rd data verification for dset0:\n");
+            HDprintf("     At index %d: %d/%d, %d/%d, %d/%d, %d/%d\n", j + (int)start[0], wbufi[0][j].a,
+                     rbufi[0][j].a, (4 * (j + (int)start[0]) + 1), rbufi[0][j].b, wbufi[0][j].c,
+                     rbufi[0][j].c, (4 * (j + (int)start[0]) + 3), rbufi[0][j].d);
+            break;
         }
 
     /* <mm> dset */
     for (j = 0; j < (int)block[0]; j++)
-        if (rbufi[mm][j].a != ((4 * (j + (int)start[0])) + (2 * DSET_SELECT_DIM)) || 
-            rbufi[mm][j].b != ((4 * (j + (int)start[0])) + 1) || 
-            rbufi[mm][j].c != ((4 * (j + (int)start[0])) + 2) || 
+        if (rbufi[mm][j].a != ((4 * (j + (int)start[0])) + (2 * DSET_SELECT_DIM)) ||
+            rbufi[mm][j].b != ((4 * (j + (int)start[0])) + 1) ||
+            rbufi[mm][j].c != ((4 * (j + (int)start[0])) + 2) ||
             rbufi[mm][j].d != ((4 * (j + (int)start[0])) + (2 * DSET_SELECT_DIM) + 3)) {
-                nerrors++;
-                HDprintf("\n     Error in 3rd data verification for dset %d:\n", mm);
-                HDprintf("     At index %d: %d/%d, %d/%d, %d/%d, %d/%d\n",
-                          j + (int)start[0],
-                          ((4 * (j + (int)start[0])) + (2 * DSET_SELECT_DIM)), rbufi[mm][j].a,
-                          ((4 * (j + (int)start[0])) + 1), rbufi[mm][j].b,
-                          ((4 * (j + (int)start[0])) + 2), rbufi[mm][j].c,
-                          ((4 * (j + (int)start[0])) + (2 * DSET_SELECT_DIM) + 3), rbufi[mm][j].d);
-                break;
+            nerrors++;
+            HDprintf("\n     Error in 3rd data verification for dset %d:\n", mm);
+            HDprintf("     At index %d: %d/%d, %d/%d, %d/%d, %d/%d\n", j + (int)start[0],
+                     ((4 * (j + (int)start[0])) + (2 * DSET_SELECT_DIM)), rbufi[mm][j].a,
+                     ((4 * (j + (int)start[0])) + 1), rbufi[mm][j].b, ((4 * (j + (int)start[0])) + 2),
+                     rbufi[mm][j].c, ((4 * (j + (int)start[0])) + (2 * DSET_SELECT_DIM) + 3), rbufi[mm][j].d);
+            break;
         }
 
     /* other datasets */
@@ -2240,22 +2193,19 @@ test_multi_dsets_with_bkg(hid_t fid, unsigned chunked)
             continue;
 
         for (j = 0; j < (int)block[0]; j++)
-        if (rbufi[i][j].a != ((4 * (j + (int)start[0])))  || 
-            rbufi[i][j].b != ((4 * (j + (int)start[0])) + 1) || 
-            rbufi[i][j].c != ((4 * (j + (int)start[0])) + 2) || 
-            rbufi[i][j].d != ((4 * (j + (int)start[0])) + 3)) {
+            if (rbufi[i][j].a != ((4 * (j + (int)start[0]))) ||
+                rbufi[i][j].b != ((4 * (j + (int)start[0])) + 1) ||
+                rbufi[i][j].c != ((4 * (j + (int)start[0])) + 2) ||
+                rbufi[i][j].d != ((4 * (j + (int)start[0])) + 3)) {
                 nerrors++;
                 HDprintf("\n     Error in 3rd data verification for dset %d:\n", i);
-                HDprintf("     At index %d: %d/%d, %d/%d, %d/%d, %d/%d\n",
-                          j + (int)start[0],
-                          ((4 * (j + (int)start[0]))), rbufi[i][j].a,
-                          ((4 * (j + (int)start[0])) + 1), rbufi[i][j].b,
-                          ((4 * (j + (int)start[0])) + 2), rbufi[i][j].c,
-                          ((4 * (j + (int)start[0])) + 3), rbufi[i][j].d);
+                HDprintf("     At index %d: %d/%d, %d/%d, %d/%d, %d/%d\n", j + (int)start[0],
+                         ((4 * (j + (int)start[0]))), rbufi[i][j].a, ((4 * (j + (int)start[0])) + 1),
+                         rbufi[i][j].b, ((4 * (j + (int)start[0])) + 2), rbufi[i][j].c,
+                         ((4 * (j + (int)start[0])) + 3), rbufi[i][j].d);
                 break;
-        }
+            }
     }
-
 
     /* Case d */
 
@@ -2279,7 +2229,7 @@ test_multi_dsets_with_bkg(hid_t fid, unsigned chunked)
 
         wbufs[i] = s2_wbufi[i];
         rbufs[i] = s2_rbufi[i];
-    
+
         mem_tids[i] = s2_tid;
 
         if (H5Sselect_all(mem_sids[i]) < 0)
@@ -2297,7 +2247,7 @@ test_multi_dsets_with_bkg(hid_t fid, unsigned chunked)
             s2_wbufi[i][j].b = (long long)((8 * (j + (int)start[0])) + 1);
             s2_wbufi[i][j].c = (8 * (j + (int)start[0])) + 2;
             s2_wbufi[i][j].d = (short)((8 * (j + (int)start[0])) + 3);
-    }
+        }
 
     if (H5Dwrite_multi(ndsets, dset_dids, mem_tids, mem_sids, file_sids, H5P_DEFAULT, wbufs) < 0)
         P_TEST_ERROR;
@@ -2307,22 +2257,16 @@ test_multi_dsets_with_bkg(hid_t fid, unsigned chunked)
 
     for (i = 0; i < (int)ndsets; i++) {
         for (j = 0; j < (int)block[0]; j++)
-        if (s2_rbufi[i][j].a != s2_wbufi[i][j].a  || 
-            s2_rbufi[i][j].b != s2_wbufi[i][j].b || 
-            s2_rbufi[i][j].c != s2_wbufi[i][j].c || 
-            s2_rbufi[i][j].d != s2_wbufi[i][j].d) {
+            if (s2_rbufi[i][j].a != s2_wbufi[i][j].a || s2_rbufi[i][j].b != s2_wbufi[i][j].b ||
+                s2_rbufi[i][j].c != s2_wbufi[i][j].c || s2_rbufi[i][j].d != s2_wbufi[i][j].d) {
                 nerrors++;
                 HDprintf("\n     Error in 3rd data verification for dset %d:\n", i);
-                HDprintf("     At index %d: %d/%d, %lld/%lld, %d/%d, %d/%d\n",
-                          j + (int)start[0],
-                          s2_wbufi[i][j].a, s2_rbufi[i][j].a,
-                          s2_wbufi[i][j].b, s2_rbufi[i][j].b,
-                          s2_wbufi[i][j].c, s2_rbufi[i][j].c,
-                          s2_wbufi[i][j].d, s2_rbufi[i][j].d);
+                HDprintf("     At index %d: %d/%d, %lld/%lld, %d/%d, %d/%d\n", j + (int)start[0],
+                         s2_wbufi[i][j].a, s2_rbufi[i][j].a, s2_wbufi[i][j].b, s2_rbufi[i][j].b,
+                         s2_wbufi[i][j].c, s2_rbufi[i][j].c, s2_wbufi[i][j].d, s2_rbufi[i][j].d);
                 break;
-        }
+            }
     }
-
 
     if (H5Pclose(dcpl) < 0)
         P_TEST_ERROR;
@@ -2349,9 +2293,6 @@ test_multi_dsets_with_bkg(hid_t fid, unsigned chunked)
     return;
 
 } /* test_multi_dsets_with_bkg() */
-
-
-
 
 /*-------------------------------------------------------------------------
  * Function:    main
@@ -2500,7 +2441,6 @@ main(int argc, char *argv[])
                 TESTING_2("multi-datasets: empty selection + type conversion");
             test_multi_dsets_type_conv_sel_empty(fid, chunked, dtrans);
 
-
             if (MAINPROCESS)
                 TESTING_2("multi-datasets: type conversion + background buffer");
             /* Data transforms does not apply to the dataset datatype for this test */
@@ -2511,9 +2451,8 @@ main(int argc, char *argv[])
             }
             test_multi_dsets_with_bkg(fid, chunked);
 
-
-        }     /* end dtrans */
-    }         /* end chunked */
+        } /* end dtrans */
+    }     /* end chunked */
 
     if (H5Pclose(fapl) < 0)
         P_TEST_ERROR;
