@@ -479,7 +479,10 @@ macro (HDF_DIR_PATHS package_prefix)
         CACHE PATH "Install path prefix, prepended onto install directories." FORCE)
       set (CMAKE_GENERIC_PROGRAM_FILES)
     endif ()
+    set (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT 0 CACHE PATH "" FORCE)
   endif ()
+
+  include (FetchContent)
 endmacro ()
 
 macro (ADD_H5_FLAGS h5_flag_var infile)
