@@ -222,6 +222,27 @@ typedef herr_t (*H5D_scatter_func_t)(const void **src_buf /*out*/, size_t *src_b
 typedef herr_t (*H5D_gather_func_t)(const void *dst_buf, size_t dst_buf_bytes_used, void *op_data);
 //! <!-- [H5D_gather_func_t_snip] -->
 
+//! <!-- [H5D_chunk_iter_op_t_snip] -->
+/**
+ * \brief Callback for H5Dchunk_iter()
+ *
+ * \param[in]     offset      Logical position of the chunk’s first element in units of dataset elements
+ * \param[in]     filter_mask Bitmask indicating the filters used when the chunk was written
+ * \param[in]     addr        Chunk address in the file
+ * \param[in]     size        Chunk size in bytes, 0 if the chunk does not exist
+ * \param[in,out] op_data     Pointer to any user-defined data associated with
+ *                            the operation.
+ * \returns \li Zero (#H5_ITER_CONT) causes the iterator to continue, returning
+ *              zero when all elements have been processed.
+ *          \li A positive value (#H5_ITER_STOP) causes the iterator to
+ *              immediately return that value, indicating short-circuit success.
+ *          \li A negative (#H5_ITER_ERROR) causes the iterator to immediately
+ *              return that value, indicating failure.
+ */
+typedef int (*H5D_chunk_iter_op_t)(const hsize_t *offset, unsigned filter_mask, haddr_t addr, hsize_t size,
+                                   void *op_data);
+//! <!-- [H5D_chunk_iter_op_t_snip] -->
+
 /********************/
 /* Public Variables */
 /********************/
@@ -612,6 +633,34 @@ H5_DLL herr_t H5Dget_num_chunks(hid_t dset_id, hid_t fspace_id, hsize_t *nchunks
  */
 H5_DLL herr_t H5Dget_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset, unsigned *filter_mask,
                                          haddr_t *addr, hsize_t *size);
+
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup H5D
+ *
+ * \brief Iterate over all chunks of a chunked dataset
+ *
+ * \dset_id
+ * \param[in] dxpl_id       Identifier of a transfer property list
+ * \param[in]  cb       User callback function, called for every chunk.
+ * \param[in]  op_data  User-defined pointer to data required by op
+ *
+ * \return \herr_t
+ *
+ * \details H5Dchunk_iter iterates over all chunks in the dataset, calling the
+ *          user supplied callback with the details of the chunk and the supplied
+ *          context \p op_data.
+ *
+ * \par Example
+ * For each chunk, print the allocated chunk size (0 for un-allocated chunks).
+ * \snippet H5D_examples.c H5Dchunk_iter_cb
+ * Iterate over all chunked datasets and chunks in a file.
+ * \snippet H5D_examples.c H5Ovisit_cb
+ *
+ * \since 1.10.9, 1.13.0
+ *
+ */
+H5_DLL herr_t H5Dchunk_iter(hid_t dset_id, hid_t dxpl_id, H5D_chunk_iter_op_t cb, void *op_data);
 
 /**
  * --------------------------------------------------------------------------

@@ -1230,3 +1230,83 @@ H5Dget_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset, unsigned *filte
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dget_chunk_info_by_coord() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Dchunk_iter
+ *
+ * Purpose:     Iterates over all chunks in dataset with given callback and user data.
+ *
+ * Parameters:
+ *              hid_t dset_id;          IN: Chunked dataset ID
+ *              hid_t dxpl_id;          IN: Dataset transfer property list ID
+ *              H5D_chunk_iter_op_t cb  IN: User callback function, called for every chunk.
+ *              void *op_data           IN/OUT: Optional user data passed on to user callback.
+ *
+ * Callback information:
+ *      H5D_chunk_iter_op_t is defined as:
+ *
+ *        typedef int (*H5D_chunk_iter_op_t)(
+ *            const hsize_t *offset,
+ *            unsigned filter_mask,
+ *            haddr_t addr,
+ *            hsize_t size,
+ *            void *op_data);
+ *
+ *      H5D_chunk_iter_op_t parameters:
+ *          hsize_t *offset;        IN/OUT: Logical position of the chunk’s first element in units of dataset
+ *                                          elements
+ *          unsigned filter_mask;   IN: Bitmask indicating the filters used when the chunk was written haddr_t
+ *          addr;                   IN: Chunk address in the file
+ *          hsize_t;                IN: Chunk size in bytes, 0 if the chunk does not exist
+ *          void *op_data;          IN/OUT: Pointer to any user-defined data associated with the operation.
+ *
+ *      The return values from an operator are:
+ *          Zero (H5_ITER_CONT) causes the iterator to continue, returning zero when all
+ *              elements have been processed.
+ *          Positive (H5_ITER_STOP) causes the iterator to immediately return that positive
+ *              value, indicating short-circuit success.
+ *          Negative (H5_ITER_ERROR) causes the iterator to immediately return that value,
+ *              indicating failure.
+ *
+ * Return:      Non-negative on success, negative on failure
+ *
+ * Programmer:  Gaute Hope
+ *              August 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Dchunk_iter(hid_t dset_id, hid_t dxpl_id, H5D_chunk_iter_op_t op, void *op_data)
+{
+    H5D_t *dset      = NULL;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE4("e", "iix*x", dset_id, dxpl_id, op, op_data);
+
+    /* Check arguments */
+    if (NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid dataset identifier")
+    if (NULL == op)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid callback to chunk iteration")
+
+    /* Get the default dataset transfer property list if the user didn't provide one */
+    if (H5P_DEFAULT == dxpl_id)
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    else if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dxpl_id is not a dataset transfer property list ID")
+
+    /* Sanity check */
+    HDassert(dset->shared);
+
+    /* Make sure the dataset is chunked */
+    if (H5D_CHUNKED != dset->shared->layout.type)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a chunked dataset")
+
+    /* Call private function */
+    if ((ret_value = H5D__chunk_iter(dset, op, op_data)) < 0)
+        HERROR(H5E_DATASET, H5E_BADITER, "error iterating over dataset chunks");
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Dchunk_iter() */

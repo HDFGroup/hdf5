@@ -571,6 +571,7 @@ H5_DLL herr_t  H5D__get_chunk_info(const H5D_t *dset, const H5S_t *space, hsize_
                                    unsigned *filter_mask, haddr_t *offset, hsize_t *size);
 H5_DLL herr_t  H5D__get_chunk_info_by_coord(const H5D_t *dset, const hsize_t *coord, unsigned *filter_mask,
                                             haddr_t *addr, hsize_t *size);
+H5_DLL herr_t  H5D__chunk_iter(H5D_t *dset, H5D_chunk_iter_op_t cb, void *op_data);
 H5_DLL haddr_t H5D__get_offset(const H5D_t *dset);
 H5_DLL void   *H5D__vlen_get_buf_size_alloc(size_t size, void *info);
 H5_DLL herr_t  H5D__vlen_get_buf_size(void *elem, hid_t type_id, unsigned ndim, const hsize_t *point,
